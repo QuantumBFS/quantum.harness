@@ -17,13 +17,12 @@ First-touch intake for the harness. Get the user productive on a real problem wi
 
 1. **Check the install.** Verify Julia + ITensors are present (`julia --version`, `julia --project=julia-env -e 'using ITensors'`). If missing, run `make install julia` and `make install itensors`. Don't block the conversation on these — explain in one line and keep going.
 
-2. **Ask one question** at the research level, not the method level:
-   > "What are you working on? A specific model — Heisenberg, Hubbard, J1-J2, t-V, t-J, transverse-field Ising, Anderson impurity, multi-orbital Hubbard — or a question — criticality, frustration, spin liquid, Mott transition, Kondo effect?"
+2. **Ask one question** — open, short:
+   > "What problem are you trying to solve?"
 
-3. **Route to the matched skill.** If the user names a model or physics topic that maps to a skill, hand off and exit. The matched skill takes over the conversation.
+3. **Route to the matched skill.** Infer the model or physics topic from the answer and hand off. The matched skill takes over. If ambiguous, use `AskUserQuestion` with 2-3 candidate skills as options — don't list all 13.
 
-4. **If nothing fits**, be honest:
-   > "Not covered in the current harness. Scope is ground-state lattice problems (see README). Tell me more about what you want — I might handle it adjacently, or we can set up a custom workflow that lives outside the existing skills."
+4. **If nothing fits**, be honest in one line — "That's outside current scope (ground-state lattice problems). Want me to try an off-skill approach, or help you reframe?"
 
 ## What this skill does NOT do
 

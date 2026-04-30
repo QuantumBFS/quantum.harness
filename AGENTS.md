@@ -204,21 +204,25 @@ ion self --help                          # Manage the Ion install
 
 ## UI/UX
 
-### Interaction
+### Output norms — users' attention is expensive
 
-- One question at a time, conversational tone
-- Use `AskUserQuestion` for discrete choices; open-ended questions in natural language
-- Keep any single output under ~20 lines; paginate or ask before continuing
+- **Report results in ≤3 lines.** Energy, verification status, one-line interpretation. That's it. Details on request.
+- **Use `AskUserQuestion` for all choices.** User clicks a button, doesn't type. Options have short labels. Recommended option is first.
+- **Never dump checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. The agent runs verification internally; the user sees the result, not the process.
+- **Lead with the answer, qualify only if asked.** "E/N = -0.4341, converged, matches Bethe ansatz ✓" — not "I checked 5 things and here they are."
+- **Caveat-after, not caveat-first.** For contested regimes, state the consensus framing first ("doped Mott regime — strong correlations, metallic due to doping"), then qualify ("the contested question is X"). Never open with the hedge.
+- **One question at a time** when questions are needed; prefer `AskUserQuestion` with options over open-ended text.
+- **Keep any single output under 10 lines.** If more is needed, ask before continuing.
 
 ### Content Rendering
 
-- Use `tools/cli/render` to show formatted content (equations, diagrams) as HTML instead of dumping raw LaTeX or long explanations in the terminal
-- Prefer rendered HTML for anything involving math, diagrams, or structured explanations
+- Use `tools/cli/render` for equations, diagrams, or structured explanations — don't dump raw LaTeX in the terminal.
 
 ### Terminal Formatting
 
-- Prefer tables and short bullet lists over prose paragraphs
-- Use blockquotes for single confirmations or summaries
+- Short bullet lists over prose paragraphs.
+- Tables for comparisons.
+- Blockquotes for single confirmations.
 
 ## Agent guidelines
 
