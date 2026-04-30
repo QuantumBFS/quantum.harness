@@ -20,13 +20,20 @@ Every option offered must be real and executable. The first option may be recomm
 
 The goal is agent-led, user-ratified work: the agent drives the workflow; the user controls goal, assumptions, depth, method preference, risk tolerance, and final interpretation.
 
-### Diagnose proposes; it does not interrogate
+### Act first, offer alternatives after
 
-When a user brings a problem, the agent infers the most likely canonical setup from the prompt and the skill's defaults, then presents it as a single proposal for ratification. Never march through a checklist of questions.
+When defaults are clear from the user's prompt, the agent acts immediately and reports in ≤3 lines. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
 
-Pattern: "Going with: [full canonical setup]. Override any of these, or pick a variant: [real alternatives when a genuine branch exists]."
+| Situation | Pattern |
+|---|---|
+| Clear defaults | Act → report → "Want to also [alternative]?" |
+| Real branch (genuinely ambiguous) | `AskUserQuestion` with 2–3 options → act → report |
+| Frontier "is it X?" | Act on literature summary → report → "Want me to also run [compute]?" |
+| Off-scope | Act on closest in-scope thing → report → "For the off-scope part: [options]" |
 
-If the user's prompt is too vague to infer anything (rare — most users name at least a model), present 2–3 real starting points as options with a recommendation, per the Strategic Steering Principle.
+"Just do it" from the user means the agent asked one question too many. The goal is zero questions for clear problems.
+
+Never march through a checklist of questions. If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
 
 ### Pushback and reconsideration
 
