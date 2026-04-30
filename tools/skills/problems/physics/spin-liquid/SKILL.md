@@ -1,32 +1,64 @@
 ---
 name: spin-liquid
-description: Use when the user is asking about quantum spin liquids, absence of magnetic order, kagome/triangular/frustrated Heisenberg regimes, topological signatures, entanglement diagnostics, or distinguishing spin-liquid candidates from ordered phases.
+description: Use when the user is asking whether a candidate state is a quantum spin liquid, or wants to evaluate spin-liquid evidence for a specific model and regime.
 ---
 
 # Spin Liquid
 
-This skill turns a spin-liquid question into diagnostics and evidence. Do not label a state a spin liquid without checking competing explanations.
+Evaluate a spin-liquid hypothesis on a concrete model. Do not label a state a spin liquid without ruling out competing explanations.
 
-## Inputs to Fix
+## Diagnose
 
-Identify model, lattice, spin, coupling regime, geometry/size, boundary condition, candidate competing phases, and available observables or wave functions.
+Fix:
 
-## Steering Defaults
+- **Hypothesis under test** — gapped Z₂ spin liquid, gapless U(1) Dirac spin liquid, chiral spin liquid, valence-bond crystal candidate, or simply "no detectable order"?
+- **Model and regime** — which model skill drives the calculation? (Usually `heisenberg` or `j1-j2`.)
+- **Available data** — what ground states / wavefunctions / observables already exist?
+- **Geometry** — kagome, triangular, square J1-J2, etc. — and **sizes / cylinder widths** accessible.
+- **What would count as evidence?** — pin this with the user before running anything. Different SL types need different signatures.
 
-- Entry: rule out obvious magnetic order with correlations and structure factors.
-- Intermediate: examine gap behavior, entanglement diagnostics, topological indicators, finite-size/cylinder effects, and competing variational states.
+## Evidence to gather
 
-## Method Guidance
+For each item, the relevant model skill drives the calculation; this skill specifies *what to compute* and *what to look for*.
 
-- **ED:** useful for spectra, symmetry quantum numbers, and cluster structure factors.
-- **DMRG:** strong for kagome/triangular cylinders, but interpret with geometry and finite-width caution.
-- **VMC/NQS:** useful for comparing candidate spin-liquid and ordered wave functions.
-- **Tensor networks:** useful for topological/entanglement ansatz studies when bond dimension and symmetry choices are explicit.
+- **Magnetic order**: spin-spin correlations and structure factor `S(q)`. Look for the absence of a Bragg peak in the thermodynamic-limit extrapolation (or in cylinder scaling).
+- **Spin / singlet gap**: behavior with system size. Power-law decay → gapless candidate; exponential decay → gapped candidate.
+- **Entanglement entropy**: bipartite entanglement vs subsystem size. Topological entanglement entropy `γ` (subleading constant): `γ = log D` for topological order with quantum dimension `D`.
+- **Symmetry-protected long-range order proxies**: dimer-dimer correlations (rule out VBS), chiral order parameter (for chiral SL candidates).
+- **Ground-state degeneracy on torus**: e.g., 4-fold for Z₂ topological order. Hard to verify directly with DMRG but accessible via cylinder topology in some setups.
 
-## Outputs and Checks
+How to compute each: see the relevant model skill and method card (`knowledge-base/methods/dmrg.md` etc.).
 
-Return a diagnostic plan, observable table, code sketch, or interpretation. Check spin correlations, structure factor, gap estimates, entanglement signatures, boundary sensitivity, and whether the evidence only shows "no detected order" rather than a positive spin-liquid identification.
+## Cross-checks
 
-## Model Hooks
+| Competing explanation | Test that rules it out |
+|---|---|
+| Magnetic order | Structure factor's peak weight goes to zero with size (or with cylinder width), not to a finite value. |
+| Valence-bond crystal | Dimer-dimer correlations decay rather than ordering at a finite wavevector. |
+| Long-range entangled but trivial | Topological entanglement entropy ≈ 0 (vs `log 2` for Z₂). |
+| Insufficient sizes / bond dimension | Cylinder-width scan + ED cross-check on small clusters confirm trends. |
+| Conventional symmetry-broken state we missed | Check full symmetry-broken candidate order parameters (Néel, stripe, columnar VBS, plaquette, …). |
 
-Common callers: `heisenberg`, `j1-j2`, and `t-j`. Call `frustration` first if the source of degeneracy or competition is unclear.
+## Interpretation rules
+
+- **"No detected magnetic order at this size" ≠ "spin liquid."** It only constrains.
+- A **positive identification** requires at least one of:
+  - Topological entanglement signature consistent with a known SL.
+  - Ground-state degeneracy structure consistent with a known topological order.
+  - Fractionalized excitation signatures (e.g., spinon continuum in spectroscopy).
+- If only constraints are met (no order detected, gap unclear), report as **candidate spin liquid pending positive identification**, not as a confirmed SL.
+- For frontier problems (kagome Heisenberg, J1-J2 square at intermediate `J2/J1`), report the literature *range* of plausible identifications and your evidence's position within that range. Do not claim closure where the field has none.
+
+## Frontier flag
+
+The harness explicitly does not claim coverage of contested SL identifications. When the user is in a frontier regime (kagome, J1-J2 square `~0.5`, organic triangular salts), surface this and offer:
+
+1. The diagnostic plan above (recommended).
+2. A constraint-only report ("at this size, no Néel order; gap inconclusive") with no SL labelling.
+3. A pointer to the relevant literature range with citations from `knowledge-base/benchmark-numbers.md`.
+
+## Model hooks
+
+- `heisenberg` — drives the actual calculations.
+- `j1-j2` — frustrated NN+NNN, the canonical 2D SL candidate.
+- `frustration` — call first if the source of degeneracy or competition is unclear.

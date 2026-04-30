@@ -1,45 +1,73 @@
 ---
 name: heisenberg
-description: Use when the user is working on a Heisenberg spin model problem, including spin chains, square/triangular/kagome/pyrochlore lattices, magnetic phases, frustrated magnets, spin liquids, ground states, or benchmark calculations.
+description: Use when the user is working on a Heisenberg spin-model ground-state problem, including spin chains, square/triangular/kagome/pyrochlore lattices, frustrated regimes, ground states, gaps, or order parameters.
 ---
 
 # Heisenberg
 
-This skill solves Heisenberg spin-model problems. The lattice and coupling regime often determine the physics, so diagnose them before recommending a method.
+Solve Heisenberg-spin ground-state problems. Lattice geometry and coupling regime determine which method works.
 
-## Problem Form
+## Diagnose
 
-Base convention:
+Fix:
 
-```text
-H = J sum_<ij>,a sigma_i^a sigma_j^a
-```
+- **Spin** (`S = 1/2` default; ask if larger).
+- **Lattice and dimension** (chain, square, triangular, kagome, pyrochlore).
+- **Coupling sign** — antiferromagnetic (`J > 0`) or ferromagnetic (`J < 0`)?
+- **Anisotropy** — isotropic Heisenberg, XXZ, easy-axis/easy-plane, external field?
+- **Boundary condition** (OBC default for DMRG).
+- **System size** (or `L_y × L_x` for cylinders).
+- **Target observable** (`E/N`, gap, structure factor, two-point correlations, magnetization).
+- **Accuracy goal** and rough compute budget.
 
-Ask for spin size, lattice, coupling signs, anisotropy if any, boundary condition, system size, and target observable. If the user says only "Heisenberg", infer a simple baseline from context but state the assumption.
+If only "Heisenberg" is given, infer S=1/2, isotropic, NN, antiferromagnetic, OBC; state the assumption.
 
-## Steering Defaults
+Build the Hamiltonian per `knowledge-base/conventions.md` (S-operator convention; factor-of-4 difference vs Pauli notation).
 
-- Entry: small ED for clusters or DMRG/MPS for chains; compute energy, magnetization, two-point correlations, and simple structure factors.
-- Intermediate: choose method by geometry; add finite-size/cylinder checks, structure factor, order diagnostics, and variational accuracy estimates.
+## Workflow
 
-Do not collapse all lattices into one difficulty class. Chain, square, triangular, kagome, and pyrochlore Heisenberg problems require different expectations.
+1. Set up sites and Hamiltonian per conventions; pin sector via conservation laws (see `knowledge-base/symmetry-cheatsheet.md`).
+2. Pick method per the table below.
+3. Run a short, conservative first calculation; verify it ran cleanly and respected conservation laws.
+4. Sweep the convergence parameter (bond dim for DMRG, basis size for ED) until the target observable stops moving within the accuracy goal.
+5. Verify (next section).
+6. If the problem branches into a more specific physics question, hand off via the branch table.
 
-## Method Guidance
+## Method recommendations
 
-- **ED:** small clusters, exact spectra, spin quantum numbers, and debugging Hamiltonian conventions.
-- **DMRG/MPS:** strong default for chains and cylinders; good for energies, correlations, gaps, and quasi-1D frustrated studies.
-- **QMC:** excellent for unfrustrated sign-problem-free cases; avoid promising it for frustrated geometries without checking sign structure.
-- **VMC/NQS/tensor networks:** useful for frustrated 2D lattices and spin-liquid candidates where QMC is blocked and DMRG geometry is biased.
-- **PEPS/iPEPS:** plausible for 2D thermodynamic-state estimates, but setup is heavier; present as intermediate unless the user already wants it.
+| Regime | Method | Card |
+|---|---|---|
+| 1D chain (any N), quasi-1D ladder | DMRG | `knowledge-base/methods/dmrg.md` |
+| Small cluster (N ≲ 24 sites), exact spectrum, debugging | ED | `knowledge-base/methods/ed.md` |
+| Cylinder (square / triangular / kagome strips, `L_y` small) | DMRG | `knowledge-base/methods/dmrg.md` |
+| Imaginary-time route to ground state, gap probes | TEBD | `knowledge-base/methods/tebd.md` |
+| Frustrated 2D thermodynamic limit | Beyond current scope; surface uncertainty and report what cylinder DMRG / ED on small clusters can constrain. | — |
 
-## Software and Setup
+## Branch table
 
-For entry/intermediate Python work, prefer `quimb`, `cotengra`, `numpy`, `scipy`, and `matplotlib`; suggest `make install quimb` if missing. Use `quimb` for spin Hamiltonians, ED, MPS/DMRG sketches, and tensor-network examples. For Julia/ITensor-style requests, use the `julia` skill and verify available install targets before suggesting commands.
+| Condition | Action |
+|---|---|
+| Lattice is triangular, kagome, or pyrochlore (frustrated) | Continue here for setup; if the question is about absence of order or topology, also call `spin-liquid`; if about the source of frustration, call `frustration`. |
+| User asks about NN + NNN couplings | Switch to `j1-j2`. |
+| Question is about quantum critical behavior (e.g., XXZ at Δ=1, dimerization) | Call `criticality` after the calculation. |
+| User wants doped, fermionic correlated physics | Switch to `t-j` or `hubbard`. |
+| User asks about real-time dynamics or finite-T | Out of current scope; explain and offer to set up the ground-state calculation that's needed first. |
 
-## Outputs and Checks
+## Verification
 
-Produce a Hamiltonian definition, method recommendation, code skeleton, diagnostic checklist, or result interpretation. Include checks against known limits: chain versus 2D expectations, total spin/symmetry if relevant, energy per site conventions, boundary effects, and whether frustration invalidates simple QMC intuition.
+Default checks (always run):
 
-## Related Skills
+- **Limit checks** — confirm sign convention and trivial limits via `knowledge-base/limits.md`. Examples: at `Δ = 1` XXZ reduces to isotropic Heisenberg; ferromagnetic ground state is fully polarized; `J = 0` gives uncoupled spins.
+- **Symmetry** — total `S^z` conservation; expected ground-state sector (singlet for finite AFM); lattice point group respected (see `knowledge-base/symmetry-cheatsheet.md`).
+- **Convergence** — bond-dim or basis-size sweep produces a monotonic, asymptoting curve. Report the curve, not just the final value.
+- **Internal consistency** — energy variance is small relative to `E²` at the reported accuracy.
 
-Call `frustration` for triangular, kagome, pyrochlore, competing couplings, or hard variational regimes. Call `spin-liquid` for absence of magnetic order, long-range entanglement, or topological diagnostics. Use `knowledge-base/2302.04919-variational-benchmarks.md` for benchmark and V-score context.
+Optional check (when a published reference exists):
+
+- Compare to `knowledge-base/benchmark-numbers.md` for the lattice / coupling combination. Report the discrepancy honestly. If the published value is a *range* (e.g., kagome), report whether your value is consistent with the range, not whether it "matches."
+
+If no benchmark exists for the user's specific problem (which is common for non-canonical sizes / parameters), report the converged value with bond-dim trend, variance, and the satisfied limit + symmetry checks. Do not claim a "match" without a reference.
+
+## Related skills
+
+`frustration`, `spin-liquid`, `criticality`, `j1-j2`.

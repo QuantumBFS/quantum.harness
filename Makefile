@@ -1,6 +1,6 @@
 .PHONY: setup test clean help install $(addprefix install-,$(INSTALLABLE))
 
-INSTALLABLE := quarto quimb
+INSTALLABLE := quarto quimb julia itensors
 
 help: ## Show available targets and installable tools
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -34,11 +34,25 @@ install-quarto: ## Install Quarto + TinyTeX for content rendering
 	@command -v quarto >/dev/null && echo "Quarto already installed" || { echo "Install Quarto: https://quarto.org/docs/get-started/"; exit 1; }
 	@quarto install tinytex --no-prompt 2>/dev/null || true
 
-install-quimb: ## Install quimb + common numerical dependencies into .venv
+install-quimb: ## Install quimb + numerical deps into .venv (Python fallback stack)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv
 	@uv pip install quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
 	@echo "quimb environment ready in .venv"
+
+install-julia: ## Install Julia via juliaup (default harness language)
+	@command -v julia >/dev/null && { echo "Julia already installed: $$(julia --version)"; exit 0; } || true
+	@command -v juliaup >/dev/null 2>&1 && { juliaup add release; juliaup default release; } || \
+	  curl -fsSL https://install.julialang.org -o /tmp/juliaup-install.sh && \
+	  sh /tmp/juliaup-install.sh --yes
+	@echo "Julia installed. You may need to open a new shell for PATH changes."
+
+install-itensors: ## Install ITensors.jl + ITensorMPS.jl + KrylovKit.jl into julia-env/
+	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
+	@mkdir -p julia-env
+	@cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["ITensors", "ITensorMPS", "KrylovKit", "MPSKit"])'
+	@echo "Julia/ITensors environment ready in julia-env/"
+	@echo "Activate with: julia --project=julia-env"
 
 render: ## Render a markdown file to HTML. Usage: make render FILE=<path.md>
 	@if [ -z "$(FILE)" ]; then echo "Usage: make render FILE=<path.md>"; exit 1; fi
