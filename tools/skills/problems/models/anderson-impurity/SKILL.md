@@ -9,16 +9,13 @@ Solve Anderson impurity ground-state problems. The Hamiltonian decomposes into a
 
 ## Diagnose
 
-- **Impurity orbitals / spins** — single-orbital symmetric? multi-orbital (handoff to `multiorbital-hubbard`)?
-- **Local interaction** — `U`, level energy `ε_d`. Symmetric Anderson uses `ε_d = -U/2`.
-- **Bath** — finite or continuous? If continuous, what's the hybridization function `Δ(ω)`?
-- **Bath size** if finite (`L_bath`).
-- **Filling / chemical potential**.
-- **Symmetries** (particle-hole, spin SU(2)).
-- **Target observable**: impurity occupancy `⟨n_d⟩`, double occupancy, local moment `⟨(n_↑ - n_↓)²⟩`, impurity spin susceptibility, Kondo-scale estimate.
+Infer setup from the user's prompt and propose for ratification.
 
-Build per `knowledge-base/conventions.md`. Standard form:
-`H = ε_d Σ_σ n_dσ + U n_d↑ n_d↓ + Σ_kσ ε_k c†_kσ c_kσ + Σ_kσ V_k (d†_σ c_kσ + h.c.)`.
+**Canonical defaults:** single-orbital symmetric Anderson (ε_d = -U/2), U and Γ from the user's prompt, flat-band bath with L_bath=6, half-filling, target occupancy + local moment + T_K estimate.
+
+**Proposal pattern:** "Going with: single-orbital symmetric Anderson, U/Γ=[value], flat-band bath L_bath=6, half-filling. Target: ⟨n_d⟩, local moment, T_K estimate (Haldane formula + ED cross-check). Override any, or pick: multi-orbital (→ multiorbital-hubbard), asymmetric Anderson (ε_d ≠ -U/2), longer bath chain (DMRG)."
+
+If multi-orbital, hand off to `multiorbital-hubbard`. Build per `knowledge-base/conventions.md`.
 
 ## Workflow
 

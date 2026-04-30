@@ -9,10 +9,11 @@ Diagnose frustration in a specific model: identify its source, what it costs com
 
 ## Diagnose
 
-- **Source candidate** — geometric (triangular, kagome, pyrochlore), interaction-based (J1-J2 competition), fermionic (sign problem), or boundary-induced?
-- **Model and lattice**.
-- **Coupling regime** — at what parameter value does frustration become dominant?
-- **What the user wants** — classification, method choice, order-competition diagnosis, or "why is this so hard?"
+Infer the diagnostic framing from the user's prompt and propose it for ratification.
+
+**Canonical framing:** "You're asking about frustration in [model on lattice]. I'll classify the source (geometric / interaction / fermionic / boundary-induced), assess method constraints (sign problem, DMRG geometry bias), and recommend what's computable."
+
+Do not ask 4 questions. Propose the framing; let the user correct if wrong.
 
 ## Evidence to gather
 

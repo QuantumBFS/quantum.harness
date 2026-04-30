@@ -9,16 +9,13 @@ Solve Hubbard ground-state problems as correlated-electron tasks. Doping, extend
 
 ## Diagnose
 
-- **Lattice and dimension** (chain, square default for 2D).
-- **Filling** or sector `(N↑, N↓)`. Half-filled: `N↑ = N↓ = N/2`.
-- **`U/t` ratio**.
-- **Hopping range**: just nearest-neighbor or also `t'`, `t2`?
-- **Extended interactions**: `V_1`, `V_2` density-density terms, if any.
-- **Boundary condition / cylinder shape**.
-- **Target observable**: `E/N`, double occupancy `⟨n↑ n↓⟩`, spin/charge correlations, gap, magnetic order parameter.
+Infer setup from the user's prompt and propose for ratification.
 
-Build per `knowledge-base/conventions.md`:
-`H = -t Σ_<ij>,σ (c†_iσ c_jσ + h.c.) + U Σ_i n_i↑ n_i↓` (extend with `t'`, `V` as needed).
+**Canonical defaults:** 1D chain, half-filling (N↑=N↓=N/2), U/t from the user's prompt (if not given, default U/t=4 — moderate correlation), NN hopping only, OBC, N=20, target E/N + double occupancy.
+
+**Proposal pattern:** "Going with: 1D chain, half-filled, U/t=[value], NN hopping, OBC, N=20, target E/N + ⟨n↑n↓⟩. Override any, or pick: 2D square cylinder (Ly=4), doped system (specify filling), extended Hubbard (t', V terms)."
+
+Build per `knowledge-base/conventions.md`: `H = -t Σ (c†c + h.c.) + U Σ n↑n↓`.
 
 ## Workflow
 

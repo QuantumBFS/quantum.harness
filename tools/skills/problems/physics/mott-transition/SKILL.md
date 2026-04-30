@@ -9,12 +9,13 @@ Diagnose interaction-driven localization vs metallic behavior on a concrete mode
 
 ## Diagnose
 
-- **Hypothesis** — Mott insulator at the user's parameters? Mott metal-insulator crossover? Bandwidth-controlled transition?
-- **Model and lattice** — Hubbard, multi-orbital Hubbard, t-J on the boundary?
-- **Filling** — half-filled (canonical Mott setting) or doped?
-- **`U/t` (or `U/W`) value**.
-- **Available data** — what observables already computed?
-- **Ground-state vs finite-T context** — finite-T crossover and ground-state Mott phase boundary differ.
+Infer the diagnostic framing from the user's prompt and propose it for ratification.
+
+**Canonical framing:** "You're asking whether [model] at [U/t, filling] is in a Mott phase. I'll frame this as: compute charge gap + double occupancy + local moment, compare to the known Mott criteria (gap AND moment AND Heisenberg-like spin correlations), and flag whether this is the settled or contested regime."
+
+For doped cases, lead with the framing first: "At [filling] with [U/t], the consensus framing is 'doped Mott regime' — strong correlations from the Mott parent, but metallic due to doping. The contested question is [what's contested]." Then qualify.
+
+Do not ask 6 questions. Propose the framing; let the user correct if wrong.
 
 ## Evidence to gather
 

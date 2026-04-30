@@ -9,11 +9,11 @@ Diagnose local-moment formation and screening in impurity or lattice settings. I
 
 ## Diagnose
 
-- **Hypothesis** — local-moment regime at this temperature/parameters? Kondo-screened? Mixed-valent? Asking to estimate `T_K`?
-- **Model setting** — single-impurity Anderson, Kondo lattice, DMFT-derived impurity, multi-orbital impurity?
-- **Parameters** — `U/Γ` (where `Γ` is hybridization width), `ε_d / Γ`, filling.
-- **Available data** — finite-bath ED ground state? impurity-bath spin correlations?
-- **Target observable** — impurity spin susceptibility, Wilson ratio, screening cloud, Kondo temperature estimate.
+Infer the diagnostic framing from the user's prompt and propose it for ratification.
+
+**Canonical framing:** "You're asking about Kondo physics at [U/Γ]. At U/Γ = [value], the system is in the [local-moment / mixed-valent / empty-orbital] regime. I'll estimate T_K via Haldane formula, then recommend whether a finite-bath ED cross-check is needed."
+
+Do not ask 5 questions. Propose the framing — including the regime classification, since U/Γ usually pins it. Let the user correct if wrong.
 
 ## Evidence to gather
 

@@ -9,13 +9,13 @@ Evaluate a spin-liquid hypothesis on a concrete model. Do not label a state a sp
 
 ## Diagnose
 
-Fix:
+Infer the diagnostic framing from the user's prompt and propose it for ratification.
 
-- **Hypothesis under test** — gapped Z₂ spin liquid, gapless U(1) Dirac spin liquid, chiral spin liquid, valence-bond crystal candidate, or simply "no detectable order"?
-- **Model and regime** — which model skill drives the calculation? (Usually `heisenberg` or `j1-j2`.)
-- **Available data** — what ground states / wavefunctions / observables already exist?
-- **Geometry** — kagome, triangular, square J1-J2, etc. — and **sizes / cylinder widths** accessible.
-- **What would count as evidence?** — pin this with the user before running anything. Different SL types need different signatures.
+**Canonical framing:** "You're asking whether [model on lattice] is a spin liquid. I'll treat this as: rule out magnetic order first, then check for positive SL signatures (topological entanglement, gap structure, ground-state degeneracy). The model skill driving the calculation is `heisenberg` (or `j1-j2`). No data yet — I'll produce the phased plan below."
+
+If the user already has data, adjust: "You have [observables]. I'll evaluate those against the SL checklist below, then recommend what to compute next."
+
+Do not ask 5 questions. Propose the framing; let the user correct if wrong.
 
 ## Evidence to gather
 

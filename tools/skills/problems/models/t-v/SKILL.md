@@ -11,15 +11,13 @@ Distinguish from `t-J`: t-V has no spin index; t-J has projected spinful fermion
 
 ## Diagnose
 
-- **Lattice and dimension** (chain default).
-- **Particle number / filling** (e.g., `N_f = N/2` for half-filling).
-- **`V/t` ratio** — drives metallic vs CDW phases.
-- **Boundary condition** (OBC default for DMRG; PBC for ED).
-- **Hopping sign** convention.
-- **Target observable**: `E/N`, charge structure factor `N(q)`, density-density correlations, CDW order parameter, charge gap.
+Infer setup from the user's prompt and propose for ratification.
 
-Build the Hamiltonian per `knowledge-base/conventions.md`. Standard form:
-`H = -t Σ_<ij> (c†_i c_j + h.c.) + V Σ_<ij> n_i n_j` (spinless fermions).
+**Canonical defaults:** 1D chain, half-filling (N_f = N/2), V/t from the user's prompt (if not given, default V/t=2 — near CDW transition), OBC, N=20, target E/N + charge structure factor N(q).
+
+**Proposal pattern:** "Going with: 1D chain, spinless fermions, half-filling, V/t=[value], OBC, N=20, target E/N + N(q). Override any, or pick: V/t scan (CDW transition), 2D geometry."
+
+Build per `knowledge-base/conventions.md`: `H = -t Σ (c†c + h.c.) + V Σ n_i n_j`.
 
 ## Workflow
 

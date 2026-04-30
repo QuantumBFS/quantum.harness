@@ -9,15 +9,13 @@ Solve transverse-field Ising ground-state problems. Lattice and `Γ/J` ratio det
 
 ## Diagnose
 
-- **Lattice / dimension** (chain, ladder, square, triangular).
-- **Couplings**: `J` (Ising), `Γ` (transverse field). Sign of `J`: ferromagnetic vs antiferromagnetic.
-- **Boundary condition** (OBC default).
-- **System size** (or cylinder shape for 2D).
-- **Target observable**: ground-state energy, magnetization `⟨σ^z⟩`, gap, two-point correlations.
-- **Accuracy goal** and compute budget.
+Infer setup from the user's prompt and propose for ratification.
 
-Build the Hamiltonian per `knowledge-base/conventions.md`. Standard form:
-`H = -J Σ_<ij> σ^z_i σ^z_j - Γ Σ_i σ^x_i` (ferromagnetic by sign convention).
+**Canonical defaults:** 1D chain, ferromagnetic J=1, Γ=1 (critical point), OBC, N=20, target E/N + gap.
+
+**Proposal pattern:** "Going with: 1D chain, J=1, Γ=1 (critical), OBC, N=20, target E/N and gap. Override any, or pick: Γ/J scan (phase diagram), 2D square lattice."
+
+Build per `knowledge-base/conventions.md`: `H = -J Σ σ^z_i σ^z_j - Γ Σ σ^x_i`.
 
 ## Workflow
 

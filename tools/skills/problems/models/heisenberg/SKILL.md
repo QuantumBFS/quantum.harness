@@ -9,20 +9,13 @@ Solve Heisenberg-spin ground-state problems. Lattice geometry and coupling regim
 
 ## Diagnose
 
-Fix:
+Infer the canonical setup from the user's prompt and propose it for ratification. Do not ask 8 questions.
 
-- **Spin** (`S = 1/2` default; ask if larger).
-- **Lattice and dimension** (chain, square, triangular, kagome, pyrochlore).
-- **Coupling sign** — antiferromagnetic (`J > 0`) or ferromagnetic (`J < 0`)?
-- **Anisotropy** — isotropic Heisenberg, XXZ, easy-axis/easy-plane, external field?
-- **Boundary condition** (OBC default for DMRG).
-- **System size** (or `L_y × L_x` for cylinders).
-- **Target observable** (`E/N`, gap, structure factor, two-point correlations, magnetization).
-- **Accuracy goal** and rough compute budget.
+**Canonical defaults:** S=1/2, isotropic NN, antiferromagnetic (J > 0), OBC, target E/N. Lattice and system size inferred from the prompt — if only "Heisenberg" is given, default to 1D chain N=20.
 
-If only "Heisenberg" is given, infer S=1/2, isotropic, NN, antiferromagnetic, OBC; state the assumption.
+**Proposal pattern:** "Going with: 1D chain, S=1/2, J=1 AFM, OBC, N=20, target E/N. Override any, or pick a variant: square lattice (4×4 ED), triangular cylinder (Ly=4), kagome cylinder (Ly=4)."
 
-Build the Hamiltonian per `knowledge-base/conventions.md` (S-operator convention; factor-of-4 difference vs Pauli notation).
+Only surface a real choice when the prompt is genuinely ambiguous about the lattice family. Build the Hamiltonian per `knowledge-base/conventions.md`.
 
 ## Workflow
 

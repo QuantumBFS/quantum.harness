@@ -9,12 +9,13 @@ Diagnose quantum critical behavior on a concrete model. Produce evidence and a s
 
 ## Diagnose
 
-- **Hypothesis** — is the user claiming a continuous QPT, a first-order transition, a deconfined critical point, or asking to *find* one?
-- **Model and control parameter** — which knob is being tuned? (e.g., `Γ/J` for TFIM, `J2/J1` for J1-J2, `U/t` for Hubbard.)
-- **Candidate phases on either side**.
-- **Available data** — what observables are already computed? At what sizes?
-- **Sizes / cylinder widths accessible**.
-- **What would close the question** — exponent estimate? phase-boundary location? universality identification?
+Infer the diagnostic framing from the user's prompt and propose it for ratification.
+
+**Canonical framing:** "You're asking about criticality in [model] near [control parameter ≈ value]. I'll treat this as: locate the transition, check continuous vs first-order, estimate the critical exponent / universality class via finite-size scaling. The model skill driving the calculation is [model skill]."
+
+If the user already has data at multiple sizes, adjust: "You have [observables at sizes]. I'll run a finite-size scaling analysis on what you have, then recommend what to compute next."
+
+Do not ask 6 questions. Propose the framing; let the user correct if wrong.
 
 ## Evidence to gather
 

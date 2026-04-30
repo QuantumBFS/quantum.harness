@@ -9,15 +9,13 @@ Solve t-J ground-state problems. The no-double-occupancy projection makes the lo
 
 ## Diagnose
 
-- **Lattice and dimension** (square default for 2D doped problems).
-- **Hole / electron count** (or filling `n = N_e / N`).
-- **`J/t` ratio** — independent parameter at the t-J level, derived as `4t²/U` only when reducing from Hubbard.
-- **Boundary condition / cylinder shape**.
-- **Added terms**: three-site terms (sometimes included in faithful Hubbard reductions), bond-dependent J.
-- **Goal**: direct t-J physics, or comparison against Hubbard at large `U`?
+Infer setup from the user's prompt and propose for ratification.
 
-Build per `knowledge-base/conventions.md`:
-`H = -t Σ_<ij>,σ P (c†_iσ c_jσ + h.c.) P + J Σ_<ij> (S_i · S_j - n_i n_j / 4)` (with no-double-occupancy projector `P`).
+**Canonical defaults:** 1D chain, J/t=0.4 (corresponds to Hubbard U/t=10), filling from the user's prompt (if not given, default n=0.875 — 12.5% doping), OBC, N=20, target E/N + spin-charge correlations. No three-site terms unless specifically requested.
+
+**Proposal pattern:** "Going with: 1D chain, J/t=[value], n=[filling], OBC, N=20, no-double-occupancy projected, target E/N + spin-charge correlations. Override any, or pick: 2D square cylinder (Ly=4), comparison to Hubbard at large U, zero-doping limit (→ Heisenberg)."
+
+Build per `knowledge-base/conventions.md`: `H = -t P(c†c+h.c.)P + J Σ(S·S - nn/4)`.
 
 ## Workflow
 

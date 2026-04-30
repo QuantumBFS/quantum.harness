@@ -9,21 +9,13 @@ Solve multiorbital Hubbard / Kanamori-interaction ground-state problems. Local H
 
 ## Diagnose
 
-- **Number of orbitals `M`** (and degeneracy assumptions).
-- **Local Hilbert dimension** = `4^M` (no symmetry); `(M+1) choose 2` per spin sector if particle-conserving.
-- **Filling** (per orbital, total).
-- **Interaction convention**: density-density only, or full Kanamori (density-density + spin-flip + pair-hopping)?
-- **Local one-body terms**: crystal field, level splittings, orbital basis.
-- **`U`, `J_Hund`** — the Kanamori `U' = U - 2J`, `J_pair = J` relations need explicit statement.
-- **Spin-orbit coupling**? (Often broken into the one-body part.)
-- **Lattice or impurity context** — single impurity, embedded in DMFT, or genuine lattice problem.
-- **Target observable**: orbital occupancies, total spin, local moment, Hund-metal indicators.
+Infer setup from the user's prompt and propose for ratification.
 
-Build per `knowledge-base/conventions.md`. Density-density Kanamori:
-`H_int = U Σ_a n_{a↑} n_{a↓} + (U - 2J) Σ_{a<b,σ} n_{aσ} n_{bσ} + (U - 3J) Σ_{a<b,σ} n_{aσ} n_{b,-σ}`.
-Full Kanamori adds spin-flip `J Σ_{a≠b} c†_{a↑} c†_{b↓} c_{a↓} c_{b↑}` and pair-hopping `J Σ_{a≠b} c†_{a↑} c†_{a↓} c_{b↓} c_{b↑}`.
+**Canonical defaults:** 3-orbital, density-density Kanamori (no spin-flip/pair-hopping unless requested), impurity context (single site + bath), U and J_Hund from the user's prompt, half-filling per orbital, no spin-orbit, target orbital occupancies + total spin + local moment. Local Hilbert dimension 4^M — cost it out before committing.
 
-State explicitly which terms are kept.
+**Proposal pattern:** "Going with: 3-orbital Kanamori impurity, density-density only, U=[value], J_Hund=[value], L_bath=4, half-filling. Target: orbital occupancies, total spin, local moment. Override any, or pick: full Kanamori (+ spin-flip + pair-hopping), 2-orbital, lattice context (→ out of current scope for runtime), single-orbital (→ anderson-impurity)."
+
+Build per `knowledge-base/conventions.md`. State which Kanamori terms are kept.
 
 ## Workflow
 

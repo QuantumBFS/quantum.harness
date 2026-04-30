@@ -9,16 +9,13 @@ Solve J1-J2 spin-model ground-state problems. Competing nearest- and next-neares
 
 ## Diagnose
 
-- **Spin** (S=1/2 default).
-- **Lattice** (square default; triangular and other variants exist).
-- **`J2/J1` ratio** — drives the phase diagram entirely on the square lattice.
-- **Coupling signs** — J1 antiferromagnetic, J2 antiferromagnetic standard.
-- **Boundary condition / cylinder shape** — heavily affects DMRG results.
-- **System size** (cluster for ED; cylinder `L_y × L_x` for DMRG).
-- **Target observable**: `E/N`, structure factor, dimer correlations, spin gap.
+Infer setup from the user's prompt and propose for ratification.
 
-Build the Hamiltonian per `knowledge-base/conventions.md`. Standard form:
-`H = J1 Σ_<ij> S_i · S_j + J2 Σ_<<ij>> S_i · S_j` (NN and NNN).
+**Canonical defaults:** square lattice, S=1/2, J1=1 AFM, J2/J1 from the user's prompt (if not given, ask this one question — it defines the physics entirely). OBC cylinder Ly=4, target E/N + structure factor.
+
+**Proposal pattern:** "Going with: square lattice, S=1/2, J1=1, J2/J1=[value], cylinder Ly=4 Lx=12, target E/N + structure factor. Override any, or pick: small-cluster ED (N≤32), Néel-regime check (J2/J1<0.4), intermediate-regime diagnostic (J2/J1≈0.5 → routes to spin-liquid)."
+
+Build per `knowledge-base/conventions.md`: `H = J1 Σ S_i·S_j + J2 Σ S_i·S_j` (NN+NNN).
 
 ## Workflow
 
