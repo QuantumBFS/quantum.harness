@@ -123,6 +123,57 @@ For MPS wavefunctions, an alternative to the Markov chain is to represent `Tr(ρ
 
 The lift trades Markov-chain variance for tensor-network truncation error; convergence is governed by an additional bond dimension on the Pauli axis. It is the recommended runtime when (i) the MPS is already in hand, (ii) the target observable is a Pauli-MPS-friendly monotone (Bell magic, nullity), or (iii) volume-law magic with `n > 1` makes the Markov chain exponentially expensive even after the increment construction.
 
+## Experimental-protocol variant (stages)
+
+Per AGENTS.md "multi-stage orchestration lives in method cards", the experimental-protocol variant is declared as stages alongside the numerical variants. The chain machinery is the same; the wavefunction stage is replaced by hardware state preparation, and `Tr(ρP)` is replaced by a finite-shot Pauli-measurement estimate `P̄`.
+
+### Stage E0 — Hardware state preparation
+
+| Input | Output |
+|---|---|
+| Hamiltonian, target sector, circuit specification (variational ansatz, adiabatic schedule, or analog evolution), hardware backend | A reproducible state-preparation circuit + calibration data (qubit fidelities, gate errors, readout-correction matrix). |
+
+Driver: hardware-control stack (out of scope for this card). The harness consumes the prepared state as a black box that exposes Pauli-measurement capability. Document the preparation protocol in the run report — fidelity claims propagate to the SRE error budget downstream.
+
+### Stage E1 — Pauli-measurement scheduling
+
+| Input | Output |
+|---|---|
+| Stage E0 prepared state, current Pauli string `P` from the chain, shot budget `N_M` per Pauli | Measurement record `{m_k}_{k=1..N_M}` of `±1` outcomes for `P`; finite-shot estimate `P̄ = (1/N_M) Σ_k m_k`. |
+
+Driver: hardware-control stack with single-Pauli measurement primitive. For `d > 2` qudits, replace `±1` with the appropriate clock-eigenvalue distribution; the estimator structure is unchanged. Apply readout-error correction from the calibration matrix at this stage.
+
+The chain proposes `P → P'`; Stage E1 measures `P'` only when `P̄'` is needed (most chain steps reuse prior measurements via cached `P̄` lookups). Effective shots per chain step is therefore lower than `N_M` × chain length; cache size is a runtime knob.
+
+### Stage E2 — Markov-chain estimator on `P̄`
+
+| Input | Output |
+|---|---|
+| Stage E1 finite-shot estimates `P̄` over `N_S` Pauli strings, target distribution `Π = Ξ_P` (or `Π_{P,n}`) | Chain output `results/<run>/N=<N>/chain.h5` with samples, log-weights, autocorrelation diagnostics, finite-shot bias / variance decomposition. |
+
+Same Algorithm-1 Metropolis as Stage 1 of the numerical variant, but the target distribution evaluator now consumes `P̄` instead of exact `Tr(ρP)`. Acceptance probability uses `|P̄|^{2n}` directly; finite-`N_M` bias propagates through to the estimator.
+
+### Stage E3 — Bias / variance budget reconciliation
+
+| Input | Output |
+|---|---|
+| Stage E2 chain output, `(N_M, N_S)` knobs, target accuracy on `m_n` | Decomposed error budget: `δm_n^{shot} ~ 1/√N_M` (per-Pauli) + `δm_n^{chain} ~ 1/√(N_S/τ_int)` (chain) + `δm_n^{bias} ~ O(1/N_M)` (does *not* shrink with `N_S`). Recommended `(N_M, N_S)` adjustment if budget exceeded. |
+
+The finite-`N_M` *bias* (not variance) is the distinct feature of this variant: increasing `N_S` alone does not reduce the bias. Both `N_M` and `N_S` must be balanced; the standard diagnostic is a 2D scan over `(N_M, N_S)` via `/parameter-scan` paired with `/verify-convergence`.
+
+### Variant verification
+
+- **Limit check (zero shots)**: at `N_M → ∞`, the variant must reduce to the exact-`Tr(ρP)` chain estimator; cross-check on a small system.
+- **Limit check (shot-noise dominated)**: at `N_M ~ 1`, the bias dominates; the SRE estimate is biased low by an `O(1/N_M)` term independent of `N_S`. Verify the bias scaling explicitly via the `(N_M, N_S)` 2D scan.
+- **Cross-method check**: re-run the same prepared state via the numerical variant (Stage 0–3) at a small `N` where the wavefunction is constructible; the experimental and numerical estimators must agree once shot bias is accounted for.
+- **Benchmark anchor**: see `knowledge-base/magic-benchmarks.md` for the reference `(N_M, N_S)` regime where the experimental protocol has been demonstrated to reproduce the numerical SRE within budget.
+
+### When to use this variant
+
+- The user is in an experimental shot-budget question (Fig-10/11-class diagnostic).
+- The user is benchmarking a hardware platform's stabilizer-detection capability.
+- The user has measurement records on hand (no wavefunction available); this variant is the only path.
+
 ## Verification (per-method, complements skill-level verification)
 
 - **Single-qudit limit** — for product states of single qudits, the chain estimator must reproduce the analytic value (see `knowledge-base/magic-conventions.md` qudit examples).

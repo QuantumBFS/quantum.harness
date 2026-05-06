@@ -53,13 +53,13 @@ with `S^a` the spin-1 operators. Default sign-of-coupling matches the methodolog
 
 ## Verification
 
-Default checks:
+Default checks (all auto-run; results aggregated into the report's verification line):
 
 - **Limit checks** via `knowledge-base/limits.md`: at `Δ → ∞` the model is classical Ising-like in `S^z`; at `Δ = 0` it is XY (gapless free-fermion-like in spin-1/2; spin-1 case is more delicate but still computable); at `D → −∞` the ground state is Néel; at `D → +∞` the ground state is the large-`D` trivial product `Π |S^z_i = 0⟩`.
 - **Symmetry**: `S^z_total` conservation; lattice translation; reflection symmetry where applicable. Haldane phase is SPT — the entanglement spectrum is doubly degenerate on a periodic cut.
 - **Convergence**: bond-dim sweep gives monotonic, asymptoting energy. The Haldane phase has a finite gap → DMRG converges fast; the transition regions are slower (gap closing).
 - **Internal consistency**: energy variance small relative to `E²`; string order parameter saturates to a finite value in Haldane, vanishes in trivial phases.
-- **Cross-method validation** (when feasible) — DMRG ↔ ED on a small cluster (`L ≲ 14`); confirm agreement within both methods' accuracy budgets. See AGENTS.md "Verification practice".
+- **Cross-method validation (auto-paired at small `L`)** — when the user's `L ≤ 14`, the harness auto-pairs the primary DMRG calculation with an ED run at the same instance via `/cross-method-check`. For larger `L`, downscale to a small-`L` cross-check (e.g., `L = 12`) at the same parameter point. AGENTS.md "Verification practice §5" promoted from "when feasible" to *default whenever feasible*.
 
 Optional check:
 

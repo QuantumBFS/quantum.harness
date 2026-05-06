@@ -22,6 +22,7 @@ cross-method-check = { type = "local" }
 run-stage = { type = "local" }
 run-report = { type = "local" }
 slurm-grid = { type = "local" }
+reproduce-paper = { type = "local" }
 
 # Visualization & writing
 scientific-visualization = { source = "davila7/claude-code-templates/scientific-visualization" }

@@ -103,6 +103,30 @@ This stage is consumed by `methods/pauli-markov.md` Stage 1; the cost per call i
 | 2D wide cylinder, ground-state energy | DMRG cylinder | DMRG-cylinder lore is mature; TTN is competitive but less standardized. |
 | Bell magic / stabilizer nullity (Pauli-basis MPS) | MPS deterministic Pauli-basis lift (`methods/pauli-markov.md` variant) | The Pauli-basis lift is MPS-native. |
 
+### Numerical break-even for Pauli-string sampling
+
+For Pauli-string Markov-chain sampling, the per-update cost is the dominant cost factor (the chain takes `N_S ~ 10⁵–10⁷` updates per estimate). The three relevant cost formulas:
+
+| Algorithm | Per-update cost | Scaling driver |
+|---|---|---|
+| TTN Pauli-flip | `O(χ⁴ log N)` | Re-coarse-grain the `O(log N)` links from the modified site to the root. |
+| MPS DMRG sweep (ground-state) | `O(N χ³)` | Standard left-right sweep cost; one full sweep per energy update. |
+| MPS perfect-sampling (Pauli-MPS) | `O(N χ⁶)` | Bond dimension squared per site (Pauli index) times the standard `O(N χ³)` MPS contraction; limited to `χ ≲ 12` in practice. |
+
+**TTN-vs-MPS-perfect-sampling crossover** for Pauli-string Markov chains: TTN beats MPS perfect sampling when `χ⁴ log N ≲ N χ⁶`, i.e., when `N / log N ≳ χ⁻²`. Since `χ⁻² ≪ 1` for any practical bond dim, the crossover for sampling cost is essentially `N / log N ≳ 1` (TTN always cheaper at the per-update level). The *binding* constraint is that MPS perfect sampling at `χ ≳ 12` becomes prohibitive on its own (the `χ⁶` scaling), so TTN is the standard route at any `(N, χ)` where `χ ≳ 12` is required.
+
+**TTN-vs-MPS DMRG crossover** for the *ground-state stage* (independent of sampling): TTN wins when `χ log N ≲ N`, i.e., when `N / log N ≳ χ`. Worked points:
+
+| `N` | `log₂ N` | `N / log₂ N` | TTN wins for `χ ≲` |
+|---|---|---|---|
+| 16 | 4 | 4 | 4 (rarely useful) |
+| 32 | 5 | 6.4 | 6 |
+| 64 | 6 | 10.7 | 10 |
+| 128 | 7 | 18.3 | 18 |
+| 256 | 8 | 32 | 32 |
+
+**Practical guidance**: for `N ≳ 32` and `χ ≳ 30`, TTN is preferred for any Pauli-string-sampling workload (the sampling cost dominates and the TTN per-update advantage is decisive). For ground-state energy alone at `χ ≲ 30`, MPS-DMRG remains competitive; the TTN advantage is in the *sampling* phase that follows. The break-even is not a knife edge — both methods work in a wide overlapping band — but the asymptotic scaling makes TTN the clear default for entry-level magic-density work at the bond-dim range cited in `magic-benchmarks.md` (`χ ∈ {30, 36, 60}`).
+
 ## Verification (per-method, complements skill-level verification)
 
 - **Energy convergence as `χ` grows** — `E(χ)` monotonically decreasing and asymptoting; report the curve.

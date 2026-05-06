@@ -52,13 +52,13 @@ Only surface a real choice when the prompt is genuinely ambiguous about the latt
 
 ## Verification
 
-Default checks (always run):
+Default checks (all auto-run; results aggregated into the report's verification line):
 
 - **Limit checks** — confirm sign convention and trivial limits via `knowledge-base/limits.md`. Examples: at `Δ = 1` XXZ reduces to isotropic Heisenberg; ferromagnetic ground state is fully polarized; `J = 0` gives uncoupled spins.
 - **Symmetry** — total `S^z` conservation; expected ground-state sector (singlet for finite AFM); lattice point group respected (see `knowledge-base/symmetry-cheatsheet.md`).
 - **Convergence** — bond-dim or basis-size sweep produces a monotonic, asymptoting curve. Report the curve, not just the final value.
 - **Internal consistency** — energy variance is small relative to `E²` at the reported accuracy.
-- **Cross-method validation** (when feasible) — re-run on a small cluster with an independent method (DMRG ↔ ED, or DMRG ↔ TEBD imaginary-time) and confirm agreement. See AGENTS.md "Verification practice".
+- **Cross-method validation (auto-paired at small `N`)** — when the user's `N ≤ 20` (1D / quasi-1D) or the cluster has `≤ 16` sites (2D), the harness auto-pairs the primary DMRG calculation with an ED run at the same instance via `/cross-method-check`. For larger `N`, downscale to a small-`N` cross-check (e.g., `N = 12` for 1D) at the same parameter point. AGENTS.md "Verification practice §5" promoted from "when feasible" to *default whenever feasible*.
 
 Optional check (when a published reference exists):
 

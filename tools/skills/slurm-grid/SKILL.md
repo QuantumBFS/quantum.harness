@@ -27,8 +27,29 @@ This primitive therefore composes existing slurm-script-generation skills (when 
 
 - *Grid axes* — list of named axes with their value lists (e.g., `L: [16, 32, 64, 128]`, `h: [0.8, 0.9, 1.0, 1.1, 1.2]`).
 - *Per-cell pipeline* — a method-card-declared stage list (consumed by `/run-stage`), or a single executable command.
-- *Slurm config* — partition, time limit, memory, cpu/gpu count per cell. Defaults from the user's cluster profile (or `slurm-info-summary`-style discovery if available); the calling skill / user overrides.
+- *Slurm config* — partition, time limit, memory, cpu/gpu count per cell. Defaults consulted from the active cluster profile (`tools/cluster/active.md` symlink, or env var `HARNESS_CLUSTER_PROFILE=<name>` → `tools/cluster/<name>.md`); the calling skill / user overrides per-cell. See "Cluster profile" below for the convention.
 - *Run root* — `results/<run>/` (the grid root).
+
+## Cluster profile
+
+The skill itself is *cluster-agnostic*. Cluster-specific defaults (partition, time, sbatch idiom, status commands, module preamble) live in the active profile under `tools/cluster/`. The skill reads the profile at submission time and does not hard-code any cluster's specifics.
+
+Resolution order:
+
+1. Env var `HARNESS_CLUSTER_PROFILE=<name>` → read `tools/cluster/<name>.md`.
+2. Symlink `tools/cluster/active.md` → read its target.
+3. Neither present → emit a *minimal-Slurm* sbatch (single node, single task, 1-day wall, no module loads) and surface a one-line note recommending profile creation. See `tools/cluster/README.md` for the schema.
+
+What the skill reads from the profile:
+
+- **Default partition** (the row tagged `default-cpu`, or `default-gpu` if the calling pipeline requires GPU).
+- **Default time limit** (the profile's recommended starting wall-clock; the skill bumps if a method-card runtime estimate exceeds it).
+- **Sbatch idioms** — single-cell and array-job templates, including the env-var name for the array index (typically `$SLURM_ARRAY_TASK_ID`).
+- **Module-load preamble** — emitted at the top of every per-cell script.
+- **Status / queue commands** — used during the Monitor step.
+- **Filesystem notes** — whether `/scratch` exists, where results should land. The skill respects the profile's filesystem rules.
+
+If the user is on a non-Slurm cluster (PBS, LSF, local-only), the same orchestrator applies once a corresponding profile is authored; the schema in `tools/cluster/README.md` is workload-manager-agnostic but currently tested only against Slurm.
 
 ## Workflow
 
@@ -57,7 +78,7 @@ This primitive therefore composes existing slurm-script-generation skills (when 
 
 - Each cell calls `/run-stage` to walk the method-card-declared stage list. The per-cell pipeline is therefore generic over what the calculation is.
 - After completion, the `grid.csv` is the standard input to `/scaling-fit` for finite-size collapse.
-- For cluster discovery / sbatch script generation, this skill calls into the user's installed cluster-management skill if available; otherwise emits a minimal sbatch.
+- For cluster-specific defaults (partition, time, sbatch idiom, modules), the skill reads `tools/cluster/<active>.md`; for cluster discovery / sbatch script-generation skills installed via Ion, the active profile defers to whichever generator the user has if it is named in the profile.
 - Common follow-ups (offered via `AskUserQuestion`):
   - `/scaling-fit` (Recommended when the grid was a `(L, parameter)` collapse target).
   - `/run-report` — assemble the writeup.
@@ -67,6 +88,7 @@ This primitive therefore composes existing slurm-script-generation skills (when 
 ## Notes
 
 - This skill is *content-agnostic*: it does not know what an axis means physically. The calling skill (and the method card it cites) defines that.
+- This skill is also *cluster-agnostic*: HPC2 / lab-cluster / cloud-Slurm specifics live in `tools/cluster/<name>.md`, not here.
 - The manifest mechanism is shared with `/run-stage`; this skill does not invent a parallel format.
-- For non-Slurm clusters (PBS, LSF, local-only), the same orchestrator applies with a different submission backend; an extension lands when a real problem demands it.
+- For non-Slurm clusters (PBS, LSF, local-only), the same orchestrator applies once a corresponding cluster profile is authored.
 - The genericness gate (Phase-2): this primitive composes for any embarrassingly-parallel grid in the harness — energy vs `(U/t, doping)`, gap vs `(L_y, J2/J1)`, magic vs `(L, h)`, etc. It is not magic-paper-specific.

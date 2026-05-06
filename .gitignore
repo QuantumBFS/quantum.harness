@@ -1,6 +1,7 @@
 raw/
 .zulip/
 .DS_Store
+julia-env/
 knowledge-base/literature/**/.raw/
 knowledge-base/literature/**/.figures/
 

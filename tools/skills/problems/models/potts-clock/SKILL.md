@@ -54,17 +54,17 @@ with `X, Z` the qudit shift / clock operators (`X|k⟩ = |k+1 mod q⟩`, `Z|k⟩
 
 ## Verification
 
-Default checks:
+Default checks (all auto-run; results aggregated into the report's verification line):
 
 - **Limit checks** via `knowledge-base/limits.md` and analytic limits of the Clock Hamiltonian: `h = 0` ⇒ `q`-fold-degenerate ferromagnetic ground state with `E/N = −2` (sum over both `(X X† + X† X)` directions); `h → ∞` ⇒ paramagnetic, `E/N = −2 h` (clock-aligned along the field direction); `q = 2` ⇒ recovers TFIM exactly.
 - **Symmetry**: `Z_q` symmetry (`Π_i Z_i`) respected; ground state in the trivial sector for finite `L` with no symmetry-breaking field.
 - **Convergence**: bond-dim or basis-size sweep gives a monotonic, asymptoting energy curve. Auto-saved convergence plot per AGENTS.md output norm.
 - **Internal consistency**: energy variance small relative to `E²`.
-- **Cross-method validation** (when feasible) — DMRG ↔ ED on a small cluster (`N ≲ 16` for `q = 3`); confirm agreement within both methods' accuracy budgets. See AGENTS.md "Verification practice".
+- **Cross-method validation (auto-paired at small `N`)** — when the user's `N ≤ 16` for `q = 3` (or `N ≤ 12` for `q = 4`), the harness auto-pairs the primary DMRG / TTN calculation with an ED run at the same instance via `/cross-method-check`. For larger `N`, downscale to a small-`N` cross-check (e.g., `N = 12` for `q = 3`) at the same parameter point. AGENTS.md "Verification practice §5" promoted from "when feasible" to *default whenever feasible*.
 
 Optional check:
 
-- For `q = 3` 1D Clock at `h_c = 1`: the critical exponent `ν_Potts = 5/6` from CFT is the limit anchor (`knowledge-base/magic-benchmarks.md`). When extracting `ν` from a finite-size collapse, compare to the analytic value, not to a numerical extrapolation.
+- For `q = 3` 1D Clock at `h_c = 1`: the critical exponent `ν_Potts = 5/6` from CFT is the limit anchor (`knowledge-base/magic-benchmarks.md`). When extracting `ν` from a finite-size collapse, compare to the analytic value, not to a numerical extrapolation. Per AGENTS.md verification rule §6, compare against the literature *range* (`ν ∈ [0.83, 0.85]`), which brackets both the analytic value and the methodology reference's `ν ≈ 0.844`.
 
 ## Frontier flag
 

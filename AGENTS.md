@@ -168,7 +168,8 @@ Problem-solving primitives (generic; topic-agnostic, compose with the problem sk
 - **cross-method-check** — verify the same observable with an independent method or diagnostic.
 - **run-stage** — execute one stage of a multi-stage method-card pipeline; emits a manifest.
 - **run-report** — assemble consolidated script + structured run report from manifests.
-- **slurm-grid** — submit an embarrassingly-parallel grid; resume on partial completion.
+- **slurm-grid** — submit an embarrassingly-parallel grid; resume on partial completion. Reads cluster specifics from `tools/cluster/<active>.md`.
+- **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers.
 
 External/support skills:
 - **quimb-tensor-network** — quimb/QuTiP tensor network: MPS, PEPS, DMRG, TEBD
@@ -186,6 +187,7 @@ External/support skills:
 - CLI tools: `tools/cli/` — atomic shell scripts
 - MCP tools: `tools/mcp/` — Claude-callable wrappers
 - Skills: `tools/skills/` — conversational workflows (managed by Ion)
+- Cluster profiles: `tools/cluster/` — per-cluster defaults (partitions, sbatch idioms, modules) consulted by cluster-aware skills via `tools/cluster/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Skills stay cluster-agnostic; cluster specifics live in profile cards.
 
 ## Ion skill management
 
