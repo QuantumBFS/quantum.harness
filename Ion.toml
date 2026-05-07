@@ -23,7 +23,7 @@ run-stage = { type = "local" }
 run-report = { type = "local" }
 slurm-grid = { type = "local" }
 reproduce-paper = { type = "local" }
-verify-kb-anchors = { type = "local" }
+verify = { type = "local" }
 
 # Visualization & writing
 scientific-visualization = { source = "davila7/claude-code-templates/scientific-visualization" }

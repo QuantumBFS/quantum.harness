@@ -94,7 +94,7 @@ Current cards:
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
 
-**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `knowledge-base/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks. The `/verify-kb-anchors` primitive cross-checks each tag against its declared source — invoke it during `/reproduce-paper` before compute, and as a pre-commit gate after editing a KB card.
+**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `knowledge-base/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks. The `/verify` primitive (in `kb-card` mode) cross-checks each tag against its declared source — invoke it during `/reproduce-paper` before compute, and as a pre-commit gate after editing a KB card.
 
 ## Skill shapes
 
@@ -172,6 +172,7 @@ Problem-solving primitives (generic; topic-agnostic, compose with the problem sk
 - **run-report** — assemble consolidated script + structured run report from manifests.
 - **slurm-grid** — submit an embarrassingly-parallel grid; resume on partial completion. Reads cluster specifics from `tools/cluster/<active>.md`.
 - **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers.
+- **verify** — dispatch a high-effort (Opus, max-effort) review subagent to audit an artifact against its declared reference. Modes: `kb-card` (anchors vs literature), `script` (quantity / estimator / setup / regime vs paper methodology), `result` (numbers vs paper-reported values). Read-only; emits a structured diff report. Compose with `/reproduce-paper` (per figure) and as a pre-commit gate after editing important artifacts.
 
 External/support skills:
 - **quimb-tensor-network** — quimb/QuTiP tensor network: MPS, PEPS, DMRG, TEBD
