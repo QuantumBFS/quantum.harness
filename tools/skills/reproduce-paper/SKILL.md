@@ -5,7 +5,7 @@ description: Use when the user wants to reproduce the figures and main results o
 
 # reproduce-paper
 
-Plan and orchestrate a paper reproduction across multiple figures and main results. Generic over the paper. Composes existing primitives (`/finite-size-scan`, `/parameter-scan`, `/scaling-fit`, `/cross-method-check`, `/run-stage`, `/run-report`, and `/slurm-grid` on a cluster). The skill plans the figure dependency graph, surfaces methodology and verification figures alongside the substantive ones, and runs the assembled set as a coherent session rather than as disconnected one-shot calculations.
+Plan and orchestrate a paper reproduction across multiple figures and main results. Generic over the paper. Composes existing primitives (`/parameter-scan`, `/scaling-fit`, `/cross-method-check`, `/verify`, and `/slurm` for cluster compute). Plans the figure dependency graph, surfaces methodology and verification figures alongside the substantive ones, runs the assembled set as a coherent session, and closes with a consolidated runnable script + structured run report (the writeup-handoff per AGENTS.md, embedded here rather than delegated).
 
 ## When to activate
 
@@ -33,20 +33,32 @@ Plan and orchestrate a paper reproduction across multiple figures and main resul
 
 4. **Plan the orchestration.** For each figure:
    - Pick the model skill and method card from the paper's reported setup.
-   - Pick the primitive (`/finite-size-scan`, `/parameter-scan`, `/scaling-fit`, `/cross-method-check`) that runs the calculation.
-   - For multi-stage method-card pipelines (e.g., `methods/pauli-markov.md` Stages 0–3), schedule the stages via `/run-stage`.
-   - For embarrassingly-parallel `(L, parameter)` grids, route through `/slurm-grid` if a cluster profile is active (see `tools/cluster/`).
+   - Pick the primitive (`/parameter-scan`, `/scaling-fit`, `/cross-method-check`) that runs the calculation.
+   - For multi-stage method-card pipelines (e.g., `methods/pauli-markov.md` Stages 0–3), the per-cell compute script reads its method-card-declared stage list and writes a per-stage manifest into `results/<run>/cells/<cell_id>/<stage>.manifest.json`. Stage-execution is plain shell, not a separate skill — the method card declares what; the script does it.
+   - For embarrassingly-parallel grids on a cluster, `/parameter-scan` composes with `/slurm` (which submits the sbatch array, monitors, fetches). Cluster profile is `tools/cluster/<active>.md`.
 
 5. **Surface the methodology / verification / cross-check figs as default deliverables.** This is the discipline that distinguishes paper reproduction from a sequence of `solve` runs: the user gets the verification figures *automatically*, not on request. Without this, a Pragmatist persona running through the paper sees only the substantive figs and absorbs no methodology judgment. Concretely:
    - Verification figs always run (bond-dim convergence, autocorrelation, finite-size trend).
    - Methodology figs are emitted when they are derivable from the harness (schematics may not always be — fall back to citing the paper directly).
    - Cross-check figs run when the harness has the secondary diagnostic available; route via `/cross-method-check`.
 
-6. **Execute.** Walk the plan; each figure is one or more primitive calls. Use `/run-stage` for multi-stage pipelines, `/slurm-grid` for parallelizable grids. Each primitive emits a manifest into the same `results/<run>/` tree.
+6. **Execute.** Walk the plan; each figure is one or more primitive calls. `/parameter-scan` for sweeps (single- or multi-axis), `/scaling-fit` for collapses, `/cross-method-check` for verification, `/slurm` underneath for cluster compute. Each cell writes a manifest into `results/<run>/cells/<cell_id>/manifest.json`; each primitive writes its summary table into `results/<run>/`.
 
-7. **Assemble.** After execution completes, call `/run-report` to assemble the consolidated artifacts. The report has one section per figure (substantive, methodology, verification, cross-check), plus a top-level summary that maps each main result to its supporting figures and verification anchors.
+7. **/verify the figures.** Before claiming a figure reproduced, dispatch `/verify` in `script` mode (script vs paper methodology) and `result` mode (numbers vs paper-reported values). Catches estimator-class proxies and regime-gaps before they propagate into the writeup.
 
-8. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, models out of scope) are listed with the gap classification — not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
+8. **Assemble the close** (writeup handoff per AGENTS.md, embedded here):
+   - Walk the run directory: collect every cell manifest, every primitive's CSV / PNG, every script.
+   - Generate `results/<run>/consolidated.{jl,py}`: all parameters explicit, no environment-var defaults, reproducible from a fresh checkout against the harness's installed stack.
+   - Generate `results/<run>/run-report.md` with:
+     - **Setup** — model, lattice, sector, parameters per figure.
+     - **Settings** — method, convergence parameters, sample sizes; cite `knowledge-base/methods/<name>.md`.
+     - **Result per figure** — final observable value(s) with uncertainty; one-line interpretation.
+     - **Verification status** — limit / symmetry / convergence / cross-method status, plus the `/verify` report references. Cite `knowledge-base/...` for benchmarks compared against.
+     - **Residual uncertainty** — what is *not* settled (frontier-flag content, convergence at boundary parameters, contested regime).
+     - **Reproduction** — paths to the consolidated script + run command.
+   - Embed the auto-generated plots inline (markdown image links to `results/<run>/figs/*.png`).
+
+9. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, models out of scope) are listed with the gap classification — not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
 
 ## Categorization heuristics
 
@@ -70,27 +82,28 @@ Per AGENTS.md output norms, reports stay terse — but paper reproduction has a 
 | Verification figures the paper ran | `results/<run>/figs/verification-<id>.png` | Always (unless paper does not declare them). |
 | Cross-check figures (e.g., magic-vs-Binder) | `results/<run>/figs/cross-<id>.png` | When the secondary diagnostic is in the harness. |
 | Methodology figures (schematics) | `results/<run>/figs/method-<id>.png` | When derivable; otherwise paper-citation note. |
-| Per-figure manifest | `results/<run>/manifests/fig-<id>.json` | Always. |
-| Consolidated runnable script | `results/<run>/consolidated.{jl,py}` | Always (via `/run-report`). |
-| Run report mapping main results → figs → verification status | `results/<run>/run-report.md` | Always (via `/run-report`). |
+| Per-cell / per-figure manifest | `results/<run>/cells/<cell_id>/manifest.json`, `results/<run>/manifests/fig-<id>.json` | Always. |
+| `/verify` reports per figure | `results/<run>/verify_<figure>_<date>.md` | Always (script mode + result mode). |
+| Consolidated runnable script | `results/<run>/consolidated.{jl,py}` | Always (Step 8 close). |
+| Run report mapping main results → figs → verification status | `results/<run>/run-report.md` | Always (Step 8 close). |
 
 ## Composition
 
-This skill is *purely an orchestrator*. It does not run any calculation directly; every step is a delegation:
+This skill is *primarily an orchestrator* (with the close embedded in Step 8). Most steps delegate:
 
 - **Wavefunction stages** → model skill + method card (DMRG / TTN / ED / TEBD / VMC-NQS).
-- **Parameter sweeps** → `/parameter-scan` and `/finite-size-scan`.
+- **Parameter sweeps** (single- or multi-axis) → `/parameter-scan`.
 - **Critical scaling** → `/scaling-fit`.
 - **Cross-checks** → `/cross-method-check`.
-- **Multi-stage pipelines** → `/run-stage` walks the method card's stages.
-- **Cluster execution** → `/slurm-grid` for parallel grids; cluster profile picked from `tools/cluster/<active>.md`.
-- **Assembly** → `/run-report` produces the consolidated artifacts.
+- **Verification** (script / result against paper) → `/verify`.
+- **Multi-stage compute scripts** → method card declares stages; the per-cell compute script walks them and writes per-stage manifests. Plain shell, not a separate skill.
+- **Cluster execution** → `/slurm` (called by `/parameter-scan` for grid sweeps; can be called directly for single big runs). Cluster profile from `tools/cluster/<active>.md`.
 
-The orchestrator's value is in the *plan* (the dependency graph and the methodology / verification surfacing), not in the execution. If the user disagrees with the plan, they edit `reproduce-paper.plan.json` and re-run.
+The orchestrator's value is in the *plan* (the dependency graph + methodology/verification surfacing) and the *close* (consolidated script + run report), not in the per-cell execution. If the user disagrees with the plan, they edit `reproduce-paper.plan.json` and re-run.
 
 ## Resume semantics
 
-- The plan file is durable; re-running the skill on an existing `results/<run>/` reuses figures already produced (manifest-driven, same as `/slurm-grid`).
+- The plan file is durable; re-running the skill on an existing `results/<run>/` reuses figures already produced (manifest-driven, same as `/parameter-scan` and `/slurm`).
 - A failed figure is surfaced with its failure mode (transient / logic / OOM / convergence-out-of-budget) and offered for retry. Failed figs are *not* automatically retried.
 
 ## Notes
@@ -98,11 +111,11 @@ The orchestrator's value is in the *plan* (the dependency graph and the methodol
 - This skill is *paper-agnostic*: any paper with an `INDEX.md` and a recognizable model + method coverage can be run through it. It is not magic-paper-specific.
 - For papers covering models out of harness scope, the plan stage surfaces the gap and offers (a) a partial-coverage run, (b) escalation to `arxiv-search` for related papers in scope, or (c) cancellation.
 - Methodology absorption (the Pragmatist's blind spot) is the *purpose* of this skill — emitting verification and methodology figs alongside substantive ones is what distinguishes paper reproduction from a `solve`-loop chain. A user who asked for the "main result" gets the result *plus* the verification anchors that earn the result.
-- Per AGENTS.md "Writeup handoff", `/run-report` is offered after the figure set completes; the user can route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
+- Per AGENTS.md "Writeup handoff", the consolidated script + run report is the close of this skill (Step 8); the user can route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
 
 ## Related skills
 
 - `solve` — the single-problem interactive loop. `reproduce-paper` runs *atop* solve when the user wants the full paper rather than one calculation at a time.
 - `download-ref` — populates `knowledge-base/literature/<method>/` with the `INDEX.md` this skill consumes.
-- `/run-report`, `/run-stage`, `/slurm-grid`, `/finite-size-scan`, `/parameter-scan`, `/scaling-fit`, `/cross-method-check` — the primitives this skill orchestrates.
+- `/parameter-scan`, `/scaling-fit`, `/cross-method-check`, `/verify`, `/slurm` — the primitives this skill orchestrates.
 - `arxiv-search` — for frontier-regime literature framing when the paper is in a contested area.

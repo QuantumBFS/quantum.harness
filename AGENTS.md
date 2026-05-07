@@ -164,14 +164,11 @@ Local problem skills:
 - **physics:** criticality, frustration, spin-liquid, mott-transition, kondo-effect, magic, confinement
 
 Problem-solving primitives (generic; topic-agnostic, compose with the problem skills above):
-- **finite-size-scan** — sweep `L` for any observable; auto convergence check.
-- **parameter-scan** — sweep any axis (Hamiltonian or estimator parameter) for any observable.
+- **parameter-scan** — sweep one or more axes (Hamiltonian coupling, size `L`, estimator knob) for any observable. Subsumes the previous `finite-size-scan`. Composes with `/slurm` for cluster execution.
 - **scaling-fit** — finite-size collapse, exponent extraction with uncertainty.
 - **cross-method-check** — verify the same observable with an independent method or diagnostic.
-- **run-stage** — execute one stage of a multi-stage method-card pipeline; emits a manifest.
-- **run-report** — assemble consolidated script + structured run report from manifests.
-- **slurm-grid** — submit an embarrassingly-parallel grid; resume on partial completion. Reads cluster specifics from `tools/cluster/<active>.md`.
-- **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers.
+- **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `tools/cluster/<active>.md`. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
+- **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers. Absorbs the writeup-handoff close (consolidated script + run report).
 - **verify** — dispatch a high-effort (Opus, max-effort) review subagent to audit an artifact against its declared reference. Modes: `kb-card` (anchors vs literature), `script` (quantity / estimator / setup / regime vs paper methodology), `result` (numbers vs paper-reported values). Read-only; emits a structured diff report. Compose with `/reproduce-paper` (per figure) and as a pre-commit gate after editing important artifacts.
 
 External/support skills:

@@ -1,6 +1,6 @@
 # Cluster Profiles
 
-Per-cluster profile cards describing the resources, partitions, scheduling idioms, and environment-setup notes needed to drive `/slurm-grid` (and any other cluster-aware skill) without hard-coding cluster specifics into harness skills.
+Per-cluster profile cards describing the resources, partitions, scheduling idioms, and environment-setup notes needed to drive `/slurm` (and any other cluster-aware skill) without hard-coding cluster specifics into harness skills.
 
 The harness skills are *cluster-agnostic*: they read this folder when they need to pick a partition, a time limit, a sbatch idiom, or a status command. The HPC2-specific facts live in `hpc2.md`; another cluster (HPC3, internal-lab, AWS Slurm, …) lands its own card here. Skills consult the active profile via either:
 
@@ -35,7 +35,7 @@ The schema is *additive*: new fields land as new sections; skills that don't rea
 
 ## Using a profile from a skill
 
-Cluster-aware skills (currently `/slurm-grid`) read the active profile and consult these sections in order:
+Cluster-aware skills (currently `/slurm`) read the active profile and consult these sections in order:
 
 1. Default partition / time / cores / memory from the partition table.
 2. Sbatch idiom (single-cell vs array) — used to construct the submission script.
@@ -48,7 +48,7 @@ The skill *does not* hard-code anything about HPC2 or any other cluster; it only
 
 1. Probe the cluster (run `sinfo`, `squeue`, `scontrol show partition`, `sacctmgr show accounts`, etc.) to fill in the schema.
 2. Write `tools/cluster/<name>.md` following the section order above.
-3. Test by activating it (`ln -s <name>.md active.md` or set the env var) and running `/slurm-grid` on a tiny grid.
+3. Test by activating it (`ln -s <name>.md active.md` or set the env var) and running `/slurm` on a tiny grid.
 4. If the profile is general-interest, commit it; if it contains secrets, add to `.gitignore` and commit only the schema-shaped sections.
 
 ## Cards in this folder

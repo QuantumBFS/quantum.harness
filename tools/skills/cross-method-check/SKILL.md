@@ -62,7 +62,7 @@ The skill *surfaces* the disagreement; the calling skill (or `superpowers:system
 ## Composition
 
 - After this skill runs, common follow-ups (offered via `AskUserQuestion`):
-  - Acceptance: write up. (Route to `/run-report` and the writing skills.)
+  - Acceptance: write up. (Route to `/reproduce-paper` close or the writing skills.)
   - Disagreement: dispatch a debug pass. (Route to `superpowers:systematic-debugging`.)
   - Tighten budgets and re-run. (Bond-dim sweep, longer chains, larger basis.)
   - Done.

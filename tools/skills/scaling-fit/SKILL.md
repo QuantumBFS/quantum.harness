@@ -10,8 +10,7 @@ Fit a finite-size scaling form to a size-indexed (and optionally parameter-index
 ## When to activate
 
 - User has a `(L, observable)` or `(L, parameter, observable)` table and wants exponents.
-- `/finite-size-scan` flagged a critical-like trend.
-- `/parameter-scan` paired with `/finite-size-scan` produced a 2D grid asking for finite-size collapse.
+- `/parameter-scan` flagged a critical-like / extremum / crossing label and exponents are wanted.
 - A `physics/*` skill needs an exponent to compare against universality-class expectations (`physics/criticality`, `physics/magic`, `physics/confinement`).
 
 ## Inputs
@@ -47,7 +46,7 @@ Fit a finite-size scaling form to a size-indexed (and optionally parameter-index
 
 ## Composition
 
-- Pairs with `/finite-size-scan` and `/parameter-scan` (data inputs).
+- Pairs with `/parameter-scan` (data input — single- or multi-axis).
 - After this skill runs, common follow-ups (offered via `AskUserQuestion`):
   - `/cross-method-check` — verify the fitted exponent against an independent method or observable on the same data (Recommended when the result will be reported).
   - Extend the scan range — when the fit is poor at the boundary of the swept range.

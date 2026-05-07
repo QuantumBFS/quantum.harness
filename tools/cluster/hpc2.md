@@ -25,7 +25,7 @@ When running a skill that constructs a sbatch script, *do not* emit `#SBATCH --a
 | `i64m1tga800u` | 64 | 1 TB | 7 days | a800 ×8 | gpu | For workloads requiring NVIDIA A800; harness's ITensors.jl stack does not need this. |
 | `i64m1tga40u` | 64 | 1 TB | 7 days | a40 ×8 | gpu | NVIDIA A40 alternative. |
 
-The harness picks `i64m512u` for any CPU job by default. Override via the `partition:` field of a `/slurm-grid` invocation when the run profile demands more memory or cores.
+The harness picks `i64m512u` for any CPU job by default. Override via the `partition:` field of a `/slurm` invocation when the run profile demands more memory or cores.
 
 ## Sbatch idioms
 
@@ -68,7 +68,7 @@ CELL_ID=$(printf "%03d" $SLURM_ARRAY_TASK_ID)
 julia --project=julia-env scripts/run-cell.jl --cell $CELL_ID --plan results/<run>/grid.plan.json
 ```
 
-Array idiom: `#SBATCH --array=N-M` with `$SLURM_ARRAY_TASK_ID` as the cell index inside each task. The `/slurm-grid` skill emits exactly this shape.
+Array idiom: `#SBATCH --array=N-M` with `$SLURM_ARRAY_TASK_ID` as the cell index inside each task. The `/slurm` skill emits exactly this shape.
 
 ## Status / queue commands
 
@@ -123,5 +123,5 @@ The lack of `/scratch` means large run outputs (multi-GB tensor files, long Mark
 - ITensors.jl is *CPU only* in the harness's stack — no GPU partition needed for the magic-paper reproduction. Do not auto-route to the GPU partitions.
 - Group ownership: `jinguoliu_team`. Files created by harness skills inherit this group; no extra `chgrp` needed.
 - Network egress is generally available (e.g., `arxiv-search` and `download-ref` work from compute nodes), but compute nodes may not see public DNS for some hosts — fetch references on the login node before submitting if possible.
-- Default `--time=1-00:00:00` is conservative; the harness's `/slurm-grid` will bump if a method-card runtime estimate exceeds 1 day.
+- Default `--time=1-00:00:00` is conservative; the harness's `/slurm` will bump if a method-card runtime estimate exceeds 1 day.
 - HPC2-specific facts (account name, partition list, `spartition` alias, module versions, filesystem layout) live ONLY in this card. Skills consult `tools/cluster/active.md` (or the env var) and never bake HPC2 specifics into their workflow text.

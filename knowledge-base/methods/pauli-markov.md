@@ -54,7 +54,7 @@ Acceptance probability is the standard Metropolis ratio `min(1, Π_{P'}/Π_P)`.
 
 ## Stages (multi-stage orchestration)
 
-Per AGENTS.md "multi-stage orchestration lives in method cards", stages are declared explicitly. The generic `/run-stage` primitive executes a single stage; `/slurm-grid` parallelizes the parameter axis.
+Per AGENTS.md "multi-stage orchestration lives in method cards", stages are declared explicitly. The compute script reads its method-card-declared stage list, runs each stage, and writes a per-stage manifest (`results/<run>/cells/<cell_id>/<stage>.manifest.json`) — plain shell, not a separate skill. For embarrassingly-parallel grids on a cluster, `/parameter-scan` composes with `/slurm` to submit + monitor + fetch.
 
 ### Stage 0 — wavefunction prep (input to subsequent stages)
 

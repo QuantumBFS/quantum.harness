@@ -15,14 +15,11 @@ sympy = { source = "davila7/claude-code-templates/sympy" }
 download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)
-finite-size-scan = { type = "local" }
-parameter-scan = { type = "local" }
+parameter-scan = { type = "local" }     # multi-axis sweeps (subsumes finite-size-scan)
 scaling-fit = { type = "local" }
 cross-method-check = { type = "local" }
-run-stage = { type = "local" }
-run-report = { type = "local" }
-slurm-grid = { type = "local" }
-reproduce-paper = { type = "local" }
+slurm = { type = "local" }              # cluster mechanism (agent-does-ssh)
+reproduce-paper = { type = "local" }    # paper orchestrator (absorbs run-report close)
 verify = { type = "local" }
 
 # Visualization & writing
