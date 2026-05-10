@@ -65,7 +65,9 @@ end
     return idx
 end
 
-@inline function symmetry_allowed_index(idx0::Int, L::Int)
+@inline pauli_index_unrestricted(::Int, ::Int) = true
+
+@inline function tfim_fig4_index_sector(idx0::Int, L::Int)
     xparity = 0
     yparity = 0
     x = idx0
@@ -78,7 +80,7 @@ end
     return xparity == 0 && yparity == 0
 end
 
-function pauli_abs4_table(psi::Vector{Float64}, L::Int)
+function pauli_abs4_table(psi::Vector{Float64}, L::Int; value_filter=pauli_index_unrestricted)
     dim = 2^L
     table = zeros(Float64, 4^L)
     g = Vector{Float64}(undef, dim)
@@ -89,8 +91,7 @@ function pauli_abs4_table(psi::Vector{Float64}, L::Int)
         wht!(g)
         @inbounds for zmask in 0:(dim - 1)
             idx0 = pauli_index_from_masks(xmask, zmask, L)
-            code_y_parity = isodd(count_ones(xmask & zmask))
-            table[idx0 + 1] = code_y_parity ? 0.0 : g[zmask + 1]^4
+            table[idx0 + 1] = value_filter(idx0, L) ? g[zmask + 1]^4 : 0.0
         end
     end
     return table
@@ -123,10 +124,11 @@ function split_indices(idx0::Int, L::Int, split_mode::Symbol)
 end
 
 function exact_sector_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
-                            split_mode::Symbol=:contiguous)
+                            split_mode::Symbol=:contiguous,
+                            sector_filter=tfim_fig4_index_sector)
     Lh = L ÷ 2
     rows = []
-    for sector in (:all, :paper)
+    for sector in (:all, :filtered)
         Z = 0.0
         mean_num = 0.0
         second_num = 0.0
@@ -135,7 +137,7 @@ function exact_sector_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L:
         max_R = 0.0
         n = 0
         for idx0 in 0:(length(abs4_L) - 1)
-            sector == :paper && !symmetry_allowed_index(idx0, L) && continue
+            sector == :filtered && !sector_filter(idx0, L) && continue
             denom = abs4_L[idx0 + 1]
             denom == 0.0 && continue
             i1, i2 = split_indices(idx0, L, split_mode)
@@ -164,7 +166,8 @@ function exact_sector_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L:
 end
 
 function exact_dual_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
-                          split_mode::Symbol=:contiguous)
+                          split_mode::Symbol=:contiguous,
+                          sector_filter=tfim_fig4_index_sector)
     Lh = L ÷ 2
     Zq = 0.0
     mean_num = 0.0
@@ -172,7 +175,7 @@ function exact_dual_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::I
     max_R = 0.0
     support = 0
     for idx0 in 0:(length(abs4_L) - 1)
-        !symmetry_allowed_index(idx0, L) && continue
+        !sector_filter(idx0, L) && continue
         i1, i2 = split_indices(idx0, L, split_mode)
         num = abs4_H[i1 + 1] * abs4_H[i2 + 1]
         num == 0.0 && continue
@@ -192,7 +195,8 @@ function exact_dual_stats(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::I
             max_R=max_R)
 end
 
-function tolerance_sweep(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int)
+function tolerance_sweep(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
+                         sector_filter=tfim_fig4_index_sector)
     maxw = maximum(abs4_L)
     rows = []
     for exponent in (-28, -24, -20, -16, -12)
@@ -204,7 +208,7 @@ function tolerance_sweep(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::In
         dropped_num = 0.0
         support = 0
         for idx0 in 0:(length(abs4_L) - 1)
-            !symmetry_allowed_index(idx0, L) && continue
+            !sector_filter(idx0, L) && continue
             denom = abs4_L[idx0 + 1]
             i1, i2 = split_indices(idx0, L, :contiguous)
             num = abs4_H[i1 + 1] * abs4_H[i2 + 1]
@@ -231,9 +235,10 @@ end
 
 function chain_sector(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
                       n_steps=200_000, n_warmup=10_000, seed=0xBEEF,
-                      reject_odd_y=true, split_mode::Symbol=:contiguous,
-                      proposal::Symbol=:paper)
-    @assert proposal in (:paper, :group)
+                      apply_sector_filter=true, split_mode::Symbol=:contiguous,
+                      proposal::Symbol=:paper,
+                      sector_filter=tfim_fig4_index_sector)
+    @assert proposal in (:paper, :paper_generators, :group)
     Lh = L ÷ 2
     place = [4^i for i in 0:(L - 1)]
     rng = MersenneTwister(UInt32(seed))
@@ -244,12 +249,17 @@ function chain_sector(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
     n_R = 0
     n_acc = 0
     for step in 1:(n_warmup + n_steps)
-        if rand(rng) < 0.5
+        single_move = if proposal == :paper_generators
+            rand(rng) <= 2 / (L + 1)
+        else
+            rand(rng) < 0.5
+        end
+        if single_move
             i = rand(rng, 1:L)
             old = p[i]
             new = old ⊻ 3
             new_idx0 = idx0 + (new - old) * place[i]
-            if !reject_odd_y || symmetry_allowed_index(new_idx0, L)
+            if !apply_sector_filter || sector_filter(new_idx0, L)
                 new_w = abs4_L[new_idx0 + 1]
                 ratio = cur_w == 0 ? (new_w == 0 ? 0.0 : Inf) : new_w / cur_w
                 if rand(rng) < ratio
@@ -264,14 +274,14 @@ function chain_sector(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
             j = rand(rng, 1:(L - 1))
             j >= i && (j += 1)
             oi, oj = p[i], p[j]
-            if proposal == :paper
+            if proposal == :paper || proposal == :paper_generators
                 ni, nj = oi ⊻ 1, oj ⊻ 1
             else
                 ni = (oi == 1 || oi == 2) ? rand(rng, (0, 3)) : rand(rng, (1, 2))
                 nj = (oj == 1 || oj == 2) ? rand(rng, (0, 3)) : rand(rng, (1, 2))
             end
             new_idx0 = idx0 + (ni - oi) * place[i] + (nj - oj) * place[j]
-            if !reject_odd_y || symmetry_allowed_index(new_idx0, L)
+            if !apply_sector_filter || sector_filter(new_idx0, L)
                 new_w = abs4_L[new_idx0 + 1]
                 ratio = cur_w == 0 ? (new_w == 0 ? 0.0 : Inf) : new_w / cur_w
                 if rand(rng) < ratio
@@ -292,7 +302,187 @@ function chain_sector(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
     end
     mean_R = accum_R / n_R
     return (mean_R=mean_R, cL=-log(mean_R), accept=n_acc / (n_steps + n_warmup),
-            n_recorded=n_R, reject_odd_y=reject_odd_y)
+            n_recorded=n_R, apply_sector_filter=apply_sector_filter)
+end
+
+function exact_bridge_samples(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
+                              n_samples::Int=20_000, seed=0xA11CE,
+                              split_mode::Symbol=:contiguous)
+    q = similar(abs4_L)
+    @inbounds for idx0 in 0:(length(abs4_L) - 1)
+        i1, i2 = split_indices(idx0, L, split_mode)
+        q[idx0 + 1] = abs4_H[i1 + 1] * abs4_H[i2 + 1]
+    end
+    Zf = sum(abs4_L)
+    Zg = sum(q)
+    Zf > 0 && Zg > 0 || error("Bridge estimator needs nonzero normalizers")
+
+    rng = MersenneTwister(UInt32(seed))
+    cdf_f = cumsum(abs4_L ./ Zf)
+    cdf_g = cumsum(q ./ Zg)
+    cdf_f[end] = 1.0
+    cdf_g[end] = 1.0
+
+    f_on_f = Vector{Float64}(undef, n_samples)
+    g_on_f = Vector{Float64}(undef, n_samples)
+    f_on_g = Vector{Float64}(undef, n_samples)
+    g_on_g = Vector{Float64}(undef, n_samples)
+    for k in 1:n_samples
+        i = searchsortedfirst(cdf_f, rand(rng))
+        j = searchsortedfirst(cdf_g, rand(rng))
+        f_on_f[k] = abs4_L[i]
+        g_on_f[k] = q[i]
+        f_on_g[k] = abs4_L[j]
+        g_on_g[k] = q[j]
+    end
+
+    # Meng-Wong bridge update. This fixed-point form returns r = Z_f / Z_g,
+    # so c_L = log(r).
+    sp = 0.5
+    sg = 0.5
+    r = 1.0
+    for _ in 1:100
+        num = mean(f_on_g ./ (sp .* f_on_g .+ sg .* r .* g_on_g))
+        den = mean(g_on_f ./ (sp .* f_on_f .+ sg .* r .* g_on_f))
+        r_new = num / den
+        abs(log(r_new / r)) < 1e-10 && (r = r_new; break)
+        r = r_new
+    end
+    return (cL=log(r), exact_cL=log(Zf / Zg), ratio=Zf / Zg,
+            n_samples=n_samples, split_mode=split_mode)
+end
+
+function bridge_ratio_estimate(f_on_f::Vector{Float64}, g_on_f::Vector{Float64},
+                               f_on_g::Vector{Float64}, g_on_g::Vector{Float64};
+                               maxiter::Int=100, tol::Float64=1e-10)
+    sp = length(f_on_f) / (length(f_on_f) + length(f_on_g))
+    sg = 1.0 - sp
+    r = 1.0
+    for _ in 1:maxiter
+        num = mean(f_on_g ./ (sp .* f_on_g .+ sg .* r .* g_on_g))
+        den = mean(g_on_f ./ (sp .* f_on_f .+ sg .* r .* g_on_f))
+        r_new = num / den
+        abs(log(r_new / r)) < tol && return r_new
+        r = r_new
+    end
+    return r
+end
+
+function exact_bridge_markov(abs4_L::Vector{Float64}, abs4_H::Vector{Float64}, L::Int;
+                             n_steps=20_000, n_warmup=10_000, seed=0xB21D6E,
+                             proposal::Symbol=:paper,
+                             sector_filter=tfim_fig4_index_sector)
+    @assert proposal in (:paper, :group)
+    Lh = L ÷ 2
+    place = [4^i for i in 0:(L - 1)]
+    rng = MersenneTwister(UInt32(seed))
+
+    q = similar(abs4_L)
+    @inbounds for idx0 in 0:(length(abs4_L) - 1)
+        i1, i2 = split_indices(idx0, L, :contiguous)
+        q[idx0 + 1] = abs4_H[i1 + 1] * abs4_H[i2 + 1]
+    end
+    Zf = sum(abs4_L)
+    Zg = sum(q)
+
+    f_on_f = Float64[]
+    g_on_f = Float64[]
+    f_on_g = Float64[]
+    g_on_g = Float64[]
+    sizehint!(f_on_f, n_steps); sizehint!(g_on_f, n_steps)
+    sizehint!(f_on_g, n_steps); sizehint!(g_on_g, n_steps)
+
+    function propose!(p::Vector{Int}, idx0::Int, Lmove::Int, place_move)
+        if rand(rng) < 0.5
+            i = rand(rng, 1:Lmove)
+            old = p[i]
+            new = old ⊻ 3
+            return idx0 + (new - old) * place_move[i], i, new, 0, 0
+        end
+        i = rand(rng, 1:Lmove)
+        j = rand(rng, 1:(Lmove - 1))
+        j >= i && (j += 1)
+        oi, oj = p[i], p[j]
+        if proposal == :paper
+            ni, nj = oi ⊻ 1, oj ⊻ 1
+        else
+            ni = (oi == 1 || oi == 2) ? rand(rng, (0, 3)) : rand(rng, (1, 2))
+            nj = (oj == 1 || oj == 2) ? rand(rng, (0, 3)) : rand(rng, (1, 2))
+        end
+        return idx0 + (ni - oi) * place_move[i] + (nj - oj) * place_move[j], i, ni, j, nj
+    end
+
+    function accept_move!(p, i, ni, j, nj)
+        p[i] = ni
+        j != 0 && (p[j] = nj)
+    end
+
+    p = zeros(Int, L)
+    idx0 = 0
+    cur_f = abs4_L[1]
+    acc_f = 0
+    for step in 1:(n_warmup + n_steps)
+        new_idx, i, ni, j, nj = propose!(p, idx0, L, place)
+        if sector_filter(new_idx, L)
+            new_f = abs4_L[new_idx + 1]
+            ratio = cur_f == 0 ? (new_f == 0 ? 0.0 : Inf) : new_f / cur_f
+            if rand(rng) < ratio
+                accept_move!(p, i, ni, j, nj)
+                idx0 = new_idx
+                cur_f = new_f
+                acc_f += 1
+            end
+        end
+        if step > n_warmup
+            push!(f_on_f, cur_f)
+            push!(g_on_f, q[idx0 + 1])
+        end
+    end
+
+    p1 = zeros(Int, Lh)
+    p2 = zeros(Int, Lh)
+    idx1 = 0
+    idx2 = 0
+    place_h = [4^i for i in 0:(Lh - 1)]
+    cur_g = abs4_H[1] * abs4_H[1]
+    acc_g = 0
+    for step in 1:(n_warmup + n_steps)
+        if rand(rng) < 0.5
+            new_idx, i, ni, j, nj = propose!(p1, idx1, Lh, place_h)
+            if sector_filter(new_idx, Lh)
+                new_g = abs4_H[new_idx + 1] * abs4_H[idx2 + 1]
+                ratio = cur_g == 0 ? (new_g == 0 ? 0.0 : Inf) : new_g / cur_g
+                if rand(rng) < ratio
+                    accept_move!(p1, i, ni, j, nj)
+                    idx1 = new_idx
+                    cur_g = new_g
+                    acc_g += 1
+                end
+            end
+        else
+            new_idx, i, ni, j, nj = propose!(p2, idx2, Lh, place_h)
+            if sector_filter(new_idx, Lh)
+                new_g = abs4_H[idx1 + 1] * abs4_H[new_idx + 1]
+                ratio = cur_g == 0 ? (new_g == 0 ? 0.0 : Inf) : new_g / cur_g
+                if rand(rng) < ratio
+                    accept_move!(p2, i, ni, j, nj)
+                    idx2 = new_idx
+                    cur_g = new_g
+                    acc_g += 1
+                end
+            end
+        end
+        if step > n_warmup
+            idx_full = idx1 + (4^Lh) * idx2
+            push!(f_on_g, abs4_L[idx_full + 1])
+            push!(g_on_g, cur_g)
+        end
+    end
+
+    r = bridge_ratio_estimate(f_on_f, g_on_f, f_on_g, g_on_g)
+    return (cL=log(r), exact_cL=log(Zf / Zg), n_samples=n_steps,
+            accept_f=acc_f / (n_warmup + n_steps),
+            accept_g=acc_g / (n_warmup + n_steps))
 end
 
 function main()
@@ -301,10 +491,11 @@ function main()
     n_steps = parse(Int, get(ENV, "FIG4_DIAG_NSTEPS", "200000"))
     @assert iseven(L)
     @printf("[exact-sector] L=%d h=%.2f n_steps=%d\n", L, h, n_steps)
+    sector_filter = tfim_fig4_index_sector
     _, psiL = ed_groundstate(L, h; pbc=true)
     _, psiH = ed_groundstate(L ÷ 2, h; pbc=true)
-    abs4_L = pauli_abs4_table(psiL, L)
-    abs4_H = pauli_abs4_table(psiH, L ÷ 2)
+    abs4_L = pauli_abs4_table(psiL, L; value_filter=sector_filter)
+    abs4_H = pauli_abs4_table(psiH, L ÷ 2; value_filter=sector_filter)
     for split_mode in (:contiguous, :interleaved)
         for row in exact_sector_stats(abs4_L, abs4_H, L; split_mode=split_mode)
             @printf("  exact %-11s %-5s support=%6d c_L=%+.8f mean_R=%.8g sd_R=%.6g iid_se_cL@1e6=%.6f max_R=%.6g\n",
@@ -323,14 +514,33 @@ function main()
                 row.exponent, row.support, row.cL, row.iid_se_cL_1e6,
                 row.dropped_weight, row.dropped_num)
     end
+    for n_bridge in unique((1_000, 10_000, min(n_steps, 100_000)))
+        b = exact_bridge_samples(abs4_L, abs4_H, L; n_samples=n_bridge,
+                                 split_mode=:contiguous)
+        @printf("  bridge exact-categorical samples=%6d c_L=%+.8f exact=%+.8f diff=%+.3e\n",
+                b.n_samples, b.cL, b.exact_cL, b.cL - b.exact_cL)
+    end
+    bmarkov = exact_bridge_markov(abs4_L, abs4_H, L; n_steps=n_steps,
+                                  sector_filter=sector_filter)
+    @printf("  bridge exact-markov      samples=%6d c_L=%+.8f exact=%+.8f diff=%+.3e accept_f=%.4f accept_g=%.4f\n",
+            bmarkov.n_samples, bmarkov.cL, bmarkov.exact_cL, bmarkov.cL - bmarkov.exact_cL,
+            bmarkov.accept_f, bmarkov.accept_g)
     for reject in (false, true)
-        r = chain_sector(abs4_L, abs4_H, L; n_steps=n_steps, reject_odd_y=reject)
-        @printf("  chain paper reject_odd_y=%5s c_L=%+.8f mean_R=%.8g accept=%.4f recorded=%d\n",
+        r = chain_sector(abs4_L, abs4_H, L; n_steps=n_steps, apply_sector_filter=reject,
+                         sector_filter=sector_filter)
+        @printf("  chain paper apply_sector_filter=%5s c_L=%+.8f mean_R=%.8g accept=%.4f recorded=%d\n",
                 string(reject), r.cL, r.mean_R, r.accept, r.n_recorded)
     end
-    r = chain_sector(abs4_L, abs4_H, L; n_steps=n_steps, reject_odd_y=true, proposal=:group)
-    @printf("  chain group reject_odd_y= true c_L=%+.8f mean_R=%.8g accept=%.4f recorded=%d\n",
+    r = chain_sector(abs4_L, abs4_H, L; n_steps=n_steps, apply_sector_filter=true,
+                     proposal=:group, sector_filter=sector_filter)
+    @printf("  chain group apply_sector_filter= true c_L=%+.8f mean_R=%.8g accept=%.4f recorded=%d\n",
+            r.cL, r.mean_R, r.accept, r.n_recorded)
+    r = chain_sector(abs4_L, abs4_H, L; n_steps=n_steps, apply_sector_filter=true,
+                     proposal=:paper_generators, sector_filter=sector_filter)
+    @printf("  chain paper_generators apply_sector_filter= true c_L=%+.8f mean_R=%.8g accept=%.4f recorded=%d\n",
             r.cL, r.mean_R, r.accept, r.n_recorded)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

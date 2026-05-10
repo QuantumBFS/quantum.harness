@@ -82,6 +82,22 @@ kind = "freshness"
 gate = "assembly"
 claims = ["claim.example"]
 
+# Generic numeric comparisons declare selectors and tolerances as data. The
+# runner does not know what the selected quantity means.
+[[checks]]
+id = "trusted_reference_compare"
+kind = "numeric_compare"
+gate = "preflight"
+claims = ["claim.example"]
+runner = "tools/cli/harness_validate_numeric.jl"
+
+  [[checks.compare]]
+  name = "replace with reference check name"
+  actual = { path = "cells/<cell_id>/manifest.json", field = "observable" }
+  reference = { path = "references/reference.json", field = "observable_exact" }
+  uncertainty = { path = "cells/<cell_id>/manifest.json", field = "stderr" }
+  tolerance = { abs = 0.0, mode = "all" }
+
 # Domain-specific validation belongs behind command checks. The command should
 # produce machine-readable evidence, preferably JSON with status/pass/fail,
 # checked_claims, artifacts, and notes fields.

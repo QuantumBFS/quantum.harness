@@ -39,6 +39,24 @@ This primitive subsumes the previous `/finite-size-scan` (which is just `/parame
 7. **Feature detection** (auto labels — see below).
 8. **Hand back**: table + plot + feature label list to the calling skill (or `solve`).
 
+## Cell Spec Contract
+
+For cluster or resumable execution, `/parameter-scan` writes `results/<run>/run_spec.json` with opaque cells. The only reusable contract is `cell_id`, `params`, optional per-cell `settings`, shared `settings`, and shared `provenance`:
+
+```json
+{
+  "run_id": "example-run",
+  "run_dir": "results/example-run",
+  "settings": {"convergence_knob": 30, "sample_budget": 1000000},
+  "provenance": {"protocol_hash": "...", "sources": ["..."], "claims": ["..."]},
+  "cells": [
+    {"cell_id": "cell-0001", "params": {"axis_1": 16, "axis_2": 0.8}}
+  ]
+}
+```
+
+The primitive treats `params` and `settings` as data, not schema. It never knows whether a key is a Hamiltonian parameter, lattice size, sampler knob, algorithm choice, or something else. The model/method entrypoint maps those opaque values into domain code and writes `results/<run>/cells/<cell_id>/manifest.json`. Domain-shaped names such as `L`, `h`, `U/t`, `χ`, or `n_steps` are allowed in a specific run spec when the entrypoint expects them, but they are payload keys, not harness-level types.
+
 ## Feature detection (auto labels)
 
 The skill labels what it found on the data:

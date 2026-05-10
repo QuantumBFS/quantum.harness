@@ -20,8 +20,10 @@ For parameter sweeps that map onto an array of cells, compose with `/parameter-s
 
 - *Script* — path to an sbatch script (or a compute script + the array template `tools/cluster/<active>.md` provides).
 - *Cluster profile* — auto-resolved from `tools/cluster/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Profile provides ssh alias, default partition, modules, sbatch idiom, queue commands.
-- *Cell map* (optional) — for array jobs: `[{cell_id, params}, ...]`. The skill writes one config file per cell into `results/<run>/cells/<cell_id>/config.json`; the array script maps `$SLURM_ARRAY_TASK_ID` → cell_id.
+- *Cell map* (optional) — for array jobs: `results/<run>/run_spec.json` with `cells = [{cell_id, params}]`; the array script maps `$SLURM_ARRAY_TASK_ID` or `HARNESS_CELL_INDEX` → a cell.
 - *Ship strategy* (optional) — `git` (default; commit if dirty + push + remote pull) or `rsync` (bypass git for fast iteration).
+
+The array interface is generic: the submitted script receives `HARNESS_RUN_SPEC=<results/run/run_spec.json>` plus either `HARNESS_CELL_ID`, `HARNESS_CELL_INDEX`, or Slurm's `$SLURM_ARRAY_TASK_ID`. The script reads the selected cell's opaque `params` and writes `results/<run>/cells/<cell_id>/manifest.json`. `/slurm` must not parse or hardcode axis names such as `L`, `h`, `U`, `χ`, or `N_S`.
 
 ## Workflow
 
@@ -34,7 +36,7 @@ For parameter sweeps that map onto an array of cells, compose with `/parameter-s
 4. **Ship**:
    - `git`: stage and commit if working tree dirty (only with user authorization for this run); `git push origin <branch>`; `ssh <alias> "cd <repo> && git fetch && git checkout <branch> && git pull"`.
    - `rsync`: `rsync -avz --exclude='/results' --exclude='/.git' . <alias>:<repo>/`.
-5. **Submit**: `ssh <alias> "cd <repo> && sbatch <script>"` (with the partition picked in step 2). Capture job id. For array jobs, the cell map is rsynced to `results/<run>/cells/` first.
+5. **Submit**: `ssh <alias> "cd <repo> && sbatch <script>"` (with the partition picked in step 2). Capture job id. For array jobs, the run spec is rsynced first and `sbatch --array=1-N --export=ALL,HARNESS_RUN_SPEC=<path>,HARNESS_ENTRYPOINT=<script> ...` supplies the generic cell selector.
 6. **Monitor**: poll `ssh <alias> "squeue -j <jobid> -h -o '%T %M %R'"`. **Critical first check — settle-time within 1–3 min of submit**: tail at least one cell's log to confirm actual compute is happening, not just "RUNNING" status. Sbatch can start a cell, hit a startup error (wrong PATH, missing module, OOM-at-init, broken sbatch.sh), and exit within seconds — but the cell may briefly show RUNNING before flipping to FAILED/COMPLETED. Catching this early prevents a fire-and-forget failure across the whole grid. Per AGENTS.md "Monitor before declaring success". After the early settle, periodically poll for state transitions (PENDING → RUNNING → COMPLETED/FAILED) and tail one log every 30–60 min for multi-hour jobs.
 
    **Utilization check (thread-level, NOT process-level)**: when checking "is the job actually using its allocated cores", a single `top` snapshot showing `%CPU = 100` from the process row is **not** a utilization measurement — that's one thread's instantaneous CPU on one core, which a multi-threaded process can saturate even when 7/8 cores are idle. The right inspection on the compute node is:
@@ -67,7 +69,7 @@ Schema is declared in `tools/cluster/README.md`. This skill consults:
 - **Sbatch idioms** — single-cell and array-job templates.
 - **Status / queue commands** — `squeue` / `sacct` dialect.
 
-If no profile is found, the skill emits a *minimal-Slurm* sbatch (single node, single task, 1-day wall, no module loads) and surfaces a one-line note recommending `/onboard`'s cluster-setup stage to create one.
+If no profile is found, the skill emits the generic array wrapper without resource directives and surfaces a one-line note recommending `/onboard`'s cluster-setup stage to create one. Resource flags must then be supplied explicitly by the submitter; the skill does not invent partition, node, task, CPU, memory, or wall-clock defaults.
 
 ## Output
 

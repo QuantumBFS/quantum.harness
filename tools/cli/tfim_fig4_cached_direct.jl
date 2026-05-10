@@ -15,16 +15,19 @@ using Statistics
 
 include(joinpath(@__DIR__, "..", "..", "scripts", "tfim_fig4_paper_grade.jl"))
 
-const OUTDIR = joinpath(@__DIR__, "..", "..", "results", "tfim_fig4_cached_direct")
+const DEFAULT_OUTDIR = joinpath(@__DIR__, "..", "..", "results", "tfim_fig4_cached_direct")
+const DIRECT_SCRIPT_PATH = normpath(@__FILE__)
+const DIRECT_SCRIPT_HASH = bytes2hex(sha256(read(DIRECT_SCRIPT_PATH)))
 
 function pauli_markov_M2_direct_cached(cache::CachedMPSPauliExpectation, L::Int;
                                       n_steps=10^5, n_warmup=10^4,
                                       seed::UInt32=UInt32(0xC0FFEE),
                                       progress_every=max(1, n_steps ÷ 10),
-                                      proposal::Symbol=:group)
+                                      proposal::Symbol=:group,
+                                      sample_filter=tfim_fig4_pauli_sector)
     rng = MersenneTwister(seed)
     set_pauli_string!(cache, zeros(Int, L))
-    @assert time_reversal_allowed(cache.p)
+    @assert sample_filter(cache.p)
     @assert proposal in (:paper, :group)
 
     cur_v = cached_pauli_value(cache)
@@ -46,7 +49,7 @@ function pauli_markov_M2_direct_cached(cache::CachedMPSPauliExpectation, L::Int;
         if proposal_kind == :single
             i = rand(rng, 1:L)
             new_i = multiply_Z(cache.p[i])
-            allowed = time_reversal_allowed_after(cache.p, i, new_i)
+            allowed = pauli_sector_allows_after(sample_filter, cache.p, i, new_i)
             new_v = allowed ? cached_candidate_value(cache, i, new_i) : cur_v
         else
             i = rand(rng, 1:L)
@@ -59,7 +62,7 @@ function pauli_markov_M2_direct_cached(cache::CachedMPSPauliExpectation, L::Int;
                 new_i = group_two(cache.p[i])
                 new_j = group_two(cache.p[j])
             end
-            allowed = time_reversal_allowed_after(cache.p, i, new_i, j, new_j)
+            allowed = pauli_sector_allows_after(sample_filter, cache.p, i, new_i, j, new_j)
             new_v = allowed ? cached_candidate_value(cache, i, new_i, j, new_j) : cur_v
         end
 
@@ -109,7 +112,8 @@ end
 function compute_M2_cell(L::Int, h::Float64; chi=30, n_steps=10^5,
                          n_warmup=max(1_000, n_steps ÷ 10),
                          seed_offset::Int=0, pbc::Bool=true,
-                         proposal::Symbol=:group)
+                         proposal::Symbol=:group,
+                         pauli_sector_filter=tfim_fig4_pauli_sector)
     if L <= 8
         E, psi = ed_groundstate(L, h; pbc=pbc)
         expect = q -> ed_pauli_expectation(psi, q, L)
@@ -123,7 +127,8 @@ function compute_M2_cell(L::Int, h::Float64; chi=30, n_steps=10^5,
     seed = UInt32(0xD1CE0000) + UInt32(seed_offset & 0xffff)
     res = pauli_markov_M2_direct_cached(cache, L;
                                         n_steps=n_steps, n_warmup=n_warmup,
-                                        seed=seed, proposal=proposal)
+                                        seed=seed, proposal=proposal,
+                                        sample_filter=pauli_sector_filter)
     return (L=L, h=h, M2=res.M2, se=res.se, mean_v2=res.mean_v2,
             accept=res.accept, method=res.method, E=E,
             n_recorded=res.n_recorded, block_size=res.block_size)
@@ -145,11 +150,24 @@ function mode_grid()
 end
 
 function main()
-    isdir(OUTDIR) || mkpath(OUTDIR)
-    Ls, h_grid, n_steps = mode_grid()
-    chi = parse(Int, get(ENV, "FIG4_DIRECT_CHI", "30"))
-    proposal = Symbol(get(ENV, "FIG4_DIRECT_PROPOSAL", "group"))
-    pbc = true
+    cell_context = harness_cell_context(default_run_dir=DEFAULT_OUTDIR)
+    cell_params = cell_context["params"]
+    cell_settings = cell_context["settings"]
+    provenance = cell_context["provenance"]
+    cell_only = cell_context["spec_path"] !== nothing
+    outdir = string(cell_context["run_dir"])
+    isdir(outdir) || mkpath(outdir)
+
+    if cell_only
+        Ls = [harness_get_int(cell_params, "L", nothing)]
+        h_grid = [harness_get_float(cell_params, "h", nothing)]
+        n_steps = harness_get_int(cell_settings, "n_steps", parse(Int, get(ENV, "FIG4_DIRECT_NSTEPS", "1000000")))
+    else
+        Ls, h_grid, n_steps = mode_grid()
+    end
+    chi = harness_get_int(cell_settings, "chi", parse(Int, get(ENV, "FIG4_DIRECT_CHI", "30")))
+    proposal = Symbol(harness_get_string(cell_settings, "proposal", get(ENV, "FIG4_DIRECT_PROPOSAL", "group")))
+    pbc = harness_get_bool(cell_settings, "pbc", true)
     cells = Any[]
     M2 = Dict{Tuple{Int,Float64},Float64}()
     M2_err = Dict{Tuple{Int,Float64},Float64}()
@@ -166,22 +184,49 @@ function main()
         dt = time() - cell_t0
         M2[(L, h)] = res.M2
         M2_err[(L, h)] = res.se
+        manifest = if cell_only
+            cell_dir = joinpath(outdir, "cells", string(cell_context["cell_id"]))
+            isdir(cell_dir) || mkpath(cell_dir)
+            joinpath(cell_dir, "manifest.json")
+        else
+            joinpath(outdir, @sprintf("manifest_L%d_h%.2f.json", L, h))
+        end
         record = Dict("L"=>L, "h"=>h, "M2"=>res.M2, "m2"=>res.M2 / L,
-                      "se_M2"=>res.se, "se_m2"=>res.se / L,
+                      "cell_id"=>string(cell_context["cell_id"]),
+                      "params"=>Dict("L"=>L, "h"=>h),
+                      "settings"=>Dict("chi"=>chi, "n_steps"=>n_steps, "pbc"=>pbc,
+                                        "proposal"=>string(proposal)),
+                      "status"=>"success",
+                      "se_M2"=>res.se, "ci95_M2"=>1.96 * res.se,
+                      "se_m2"=>res.se / L, "ci95_m2"=>1.96 * res.se / L,
                       "mean_v2"=>res.mean_v2, "accept"=>res.accept,
                       "method"=>res.method, "E"=>res.E, "chi"=>chi,
                       "n_steps"=>n_steps, "n_recorded"=>res.n_recorded,
                       "block_size"=>res.block_size, "pbc"=>pbc,
-                      "proposal"=>proposal,
+                      "proposal"=>string(proposal),
+                      "protocol_hash"=>string(get(provenance, "protocol_hash", "")),
+                      "script_hash"=>DIRECT_SCRIPT_HASH,
+                      "script_path"=>DIRECT_SCRIPT_PATH,
+                      "sources"=>get(provenance, "sources", String[]),
+                      "claims"=>get(provenance, "claims", String[]),
+                      "deviations"=>get(provenance, "deviations", String[]),
+                      "artifacts"=>Dict("manifest"=>manifest, "script"=>DIRECT_SCRIPT_PATH),
                       "wall_seconds"=>dt)
-        push!(cells, record)
-        manifest = joinpath(OUTDIR, @sprintf("manifest_L%d_h%.2f.json", L, h))
-        open(manifest, "w") do io
-            JSON.print(io, record, 2)
+        for field in ("M2", "se_M2", "mean_v2", "accept")
+            record[field] isa Real && isfinite(record[field]) ||
+                error("Compute gate failed for $manifest: required numeric field '$field' is not finite")
         end
+        push!(cells, record)
+        harness_write_json(manifest, record)
         @printf("    M2=%.6f ± %.6f  m2=%.6f  accept=%.3f  %.1fs\n",
                 res.M2, res.se, res.M2 / L, res.accept, dt)
         flush(stdout)
+    end
+
+    if cell_only
+        @printf("Per-cell mode: manifest written under %s\n", joinpath(outdir, "cells", string(cell_context["cell_id"])))
+        flush(stdout)
+        return
     end
 
     cL = Dict{Tuple{Int,Float64},Float64}()
@@ -205,38 +250,46 @@ function main()
         "n_steps"=>n_steps,
         "proposal"=>string(proposal),
         "pbc"=>pbc,
+        "protocol_hash"=>string(get(provenance, "protocol_hash", "")),
+        "script_hash"=>DIRECT_SCRIPT_HASH,
+        "script_path"=>DIRECT_SCRIPT_PATH,
+        "sources"=>get(provenance, "sources", String[]),
+        "claims"=>get(provenance, "claims", String[]),
+        "deviations"=>get(provenance, "deviations", String[]),
         "cells"=>cells,
         "M_2"=>Dict(string(L)=>[M2[(L, h)] for h in h_grid] for L in Ls),
         "M_2_err"=>Dict(string(L)=>[M2_err[(L, h)] for h in h_grid] for L in Ls),
+        "M_2_ci95"=>Dict(string(L)=>[1.96 * M2_err[(L, h)] for h in h_grid] for L in Ls),
         "c_L"=>Dict(string(L)=>[cL[(L, h)] for h in h_grid] for L in Ls[2:end]),
         "c_L_err"=>Dict(string(L)=>[cL_err[(L, h)] for h in h_grid] for L in Ls[2:end]),
+        "c_L_ci95"=>Dict(string(L)=>[1.96 * cL_err[(L, h)] for h in h_grid] for L in Ls[2:end]),
         "wall_seconds_total"=>time() - t0,
     )
-    open(joinpath(OUTDIR, "data.json"), "w") do io
-        JSON.print(io, data, 2)
-    end
+    harness_write_json(joinpath(outdir, "data.json"), data)
 
     palette = [:seagreen, :steelblue, :deeppink, :orange, :gray30]
     pa = plot(xlabel="h", ylabel="c_L", title="Fig 4(a) cached MPS direct-M2 reconstruction",
               legend=:topright)
     for (k, L) in enumerate(Ls[2:end])
         plot!(pa, h_grid, [cL[(L, h)] for h in h_grid];
-              yerror=[cL_err[(L, h)] for h in h_grid],
+              yerror=[1.96 * cL_err[(L, h)] for h in h_grid],
               marker=:circle, label="L=$L", c=palette[k])
     end
-    savefig(pa, joinpath(OUTDIR, "panel_a_cL_vs_h.png"))
+    savefig(pa, joinpath(outdir, "panel_a_cL_vs_h.png"))
 
     pb = plot(xlabel="h", ylabel="m_2", title="Fig 4(b) cached MPS direct M2",
               legend=:topleft)
     for (k, L) in enumerate(Ls)
         plot!(pb, h_grid, [M2[(L, h)] / L for h in h_grid];
-              yerror=[M2_err[(L, h)] / L for h in h_grid],
+              yerror=[1.96 * M2_err[(L, h)] / L for h in h_grid],
               marker=:circle, label="L=$L", c=palette[k])
     end
-    savefig(pb, joinpath(OUTDIR, "panel_b_m2_vs_h.png"))
+    savefig(pb, joinpath(outdir, "panel_b_m2_vs_h.png"))
     savefig(plot(pa, pb; layout=(1, 2), size=(1200, 450)),
-            joinpath(OUTDIR, "fig4_combined.png"))
-    println("\nSaved -> $(joinpath(OUTDIR, "fig4_combined.png"))")
+            joinpath(outdir, "fig4_combined.png"))
+    println("\nSaved -> $(joinpath(outdir, "fig4_combined.png"))")
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

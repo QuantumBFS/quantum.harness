@@ -122,14 +122,12 @@ Use the juliaup-installed Julia (≥ 1.11) rather than `module load julia/1.10.9
 #SBATCH --cpus-per-task=8
 #SBATCH --output=results/<run>/cells/cell-%a/slurm-%A_%a.out
 
-export PATH="$HOME/.juliaup/bin:$PATH"
-cd $SLURM_SUBMIT_DIR
-
-CELL_ID=$(printf "%03d" $SLURM_ARRAY_TASK_ID)
-julia --project=julia-env scripts/<per-cell-script>.jl
+export HARNESS_RUN_SPEC=results/<run>/run_spec.json
+export HARNESS_ENTRYPOINT=scripts/<per-cell-script>.jl
+tools/cli/harness_array_sbatch.sh
 ```
 
-Array idiom: `#SBATCH --array=N-M` with `$SLURM_ARRAY_TASK_ID` as the cell index. The `/slurm` skill emits exactly this shape.
+Array idiom: `#SBATCH --array=N-M` with `$SLURM_ARRAY_TASK_ID` as the generic cell index. The entrypoint reads `HARNESS_RUN_SPEC`, selects the corresponding opaque cell, and writes `results/<run>/cells/<cell_id>/manifest.json`.
 
 ## Status / queue commands
 

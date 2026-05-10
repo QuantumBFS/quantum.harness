@@ -22,7 +22,7 @@ Plan and orchestrate a paper reproduction across multiple figures and main resul
 
 ## Protocol TOML
 
-The protocol is generic. It records what the paper claims, how each claim is sourced, and what evidence must exist before the harness may call the run a reproduction. `/reproduce-paper` treats claim names as opaque strings; it does not know domain concepts such as Hamiltonians, samplers, lattices, estimators, or symmetries. Domain-specific knowledge belongs in the source text, method cards, authored scripts, and command checks.
+The protocol is generic. It records what the paper claims, how each claim is sourced, and what evidence must exist before the harness may call the run a reproduction. `/reproduce-paper` treats claim names as opaque strings; it does not know domain concepts such as Hamiltonians, samplers, lattices, estimators, or symmetries. Domain-specific knowledge belongs in the source text, method cards, authored scripts, and command checks. Do not add hardcoded domain oracle types to the protocol; add a generic `command`, `verify`, or manifest check that points at a domain script instead.
 
 The authoring agent may draft the protocol, scripts, and checks, but cannot be the only verifier. Every protocol, important script/check command, aggregator, and final result report needs independent `/verify` or separate-agent review before it can advance the reproduction gate. This is separate from local smoke tests: smoke tests prove the artifact runs; independent review checks whether it is the right artifact.
 
@@ -42,9 +42,28 @@ Required sections:
 - `[[deviations]]` — deliberate differences from the paper method. A deviation is allowed only when it is explicit and has its own checks.
 - `[budgets]` — wall-clock, sample, grid, cluster, or approximation budgets expressed as data, not interpreted by this skill unless a check command consumes them.
 
+For `kind = "numeric_compare"`, the generic runner is `tools/cli/harness_validate_numeric.jl`. The check declares artifact selectors and tolerances as data; the runner does not know what the numbers mean. It can run against a standalone validation spec (either a single check object or `{ checks = [...] }`) or a full protocol TOML filtered by `--check-id`. Minimal protocol shape:
+
+```toml
+[[checks]]
+id = "trusted_reference_compare"
+kind = "numeric_compare"
+gate = "preflight"
+runner = "tools/cli/harness_validate_numeric.jl"
+
+  [[checks.compare]]
+  name = "small-scale reference"
+  actual = { path = "cells/cell-0001/manifest.json", field = "observable" }
+  reference = { path = "references/exact.json", field = "observable_exact" }
+  uncertainty = { path = "cells/cell-0001/manifest.json", field = "stderr" }
+  tolerance = { abs = 0.05, sigma = 5.0, mode = "any" }
+```
+
+Selectors may use `field = "nested.key"` for simple JSON/TOML paths or `pointer = "/nested/0/key"` for JSON Pointer. Names like `observable`, `observable_exact`, or `stderr` are example payload fields, not harness-level types.
+
 ## Workflow
 
-Steps 1–8 build and validate the complete protocol; steps 9–12 are the pre-compute discipline; steps 13–17 run paper-grade compute and close. The workflow only advances past a gate when every declared check for that gate passes or a deviation is explicitly recorded. Any material edit to the protocol, checks, scripts, aggregators, or final report invalidates downstream gates for that artifact; return to the relevant audit before advancing. Where a step puts a real choice in front of the user, invoke `Superpowers:brainstorming` to present 2–3 options with pros / cons and a recommendation. Other steps run silently with sensible defaults.
+Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-compute discipline; steps 14–18 run paper-grade compute and close. The workflow only advances past a gate when every declared check for that gate passes or a deviation is explicitly recorded. Any material edit to the protocol, checks, scripts, aggregators, or final report invalidates downstream gates for that artifact; return to the relevant audit before advancing. Where a step puts a real choice in front of the user, invoke `Superpowers:brainstorming` to present 2–3 options with pros / cons and a recommendation. Other steps run silently with sensible defaults.
 
 **Gate failure handling.** Any failed check kind (`source_audit`, `command`, `manifest_fields`, `manifest_consensus`, `numeric_compare`, `freshness`, or `verify`) stops the workflow. Surface the failing evidence, write or link the check output in the run directory, then present 2–3 real options via `Superpowers:brainstorming`: repair the artifact/check, narrow the scope, record a justified deviation/assumption when scientifically honest, or stop. Do not continue to expensive compute, assembly, or final reporting from a failed gate.
 
@@ -63,6 +82,7 @@ Steps 1–8 build and validate the complete protocol; steps 9–12 are the pre-c
 5. **Plan the orchestration.** For each figure:
    - Pick the model skill and method card from the paper's reported setup.
    - Pick the primitive (`/parameter-scan`, `/scaling-fit`, `/cross-method-check`) that runs the calculation.
+   - For scans or arrays, write `results/<run>/run_spec.json` using the generic cell contract: each cell has an opaque `cell_id`, a `params` object, optional `settings`, and shared `provenance`. `/reproduce-paper` does not define domain-specific parameter types; the model/method entrypoint interprets `params`.
    - For multi-stage method-card pipelines (e.g., `methods/pauli-markov.md` Stages 0–3), the per-cell compute script reads its method-card-declared stage list and writes a per-stage manifest into `results/<run>/cells/<cell_id>/<stage>.manifest.json`. Stage-execution is plain shell, not a separate skill — the method card declares what; the script does it.
    - For embarrassingly-parallel grids on a cluster, `/parameter-scan` composes with `/slurm` (which submits the sbatch array, monitors, fetches). Cluster profile is `tools/cluster/<active>.md`.
 
@@ -81,13 +101,15 @@ Steps 1–8 build and validate the complete protocol; steps 9–12 are the pre-c
 
 11. **Run the script at the trusted reference, compare.** Execute at the chosen reference parameter point — at whatever scale the reference requires (laptop, cluster, anywhere). Dispatch the declared check (`numeric_compare`, `command`, or `/verify result`) against the reference value. On ✓ continue silently. On ✗ stop.
 
-12. **Convergence at one point.** Vary the method's declared controlling knob at one parameter point. Confirm the answer asymptotes using the protocol's declared check. On drift, stop. (Defense layer against "converges to a stable but wrong value with small error bar"; step 11 is the primary catch.)
+12. **Estimator-validity gate.** For stochastic estimators, compare the estimator itself against a feasible exact or deterministic small-scale reference before trusting any production-scale error bar. The gate must exercise the same observable path, sampling distribution, proposal / sampler family, sector restrictions, and error-estimation code used in production, except for scale. Record the exact value, estimated value, multi-seed scatter or iid variance diagnostic when available, and the pass/fail tolerance in the protocol. A stable block error bar is not sufficient evidence if the exact/deterministic gate fails; stop and repair the estimator or record a new method deviation.
 
-13. **Paper-grade compute with compute-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Every produced manifest must include `protocol_hash`, source artifact paths, script hash or git hash when available, declared deviation ids, and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "compute"` before it is marked complete; a failed compute gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
+13. **Convergence at one point.** Vary the method's declared controlling knob at one parameter point. Confirm the answer asymptotes using the protocol's declared check. On drift, stop. (Defense layer against "converges to a stable but wrong value with small error bar"; steps 11–12 are the primary catch.)
 
-14. **Validate produced artifacts.** Run all `[[checks]]` whose `gate = "assembly"` or `gate = "report"`: freshness, manifest fields, manifest consensus, numeric comparisons, and `/verify result` reports. Plots and run reports are blocked until these pass or explicit deviations are recorded.
+14. **Paper-grade compute with compute-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Every produced manifest must include `protocol_hash`, source artifact paths, script hash or git hash when available, declared deviation ids, and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "compute"` before it is marked complete; a failed compute gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
 
-15. **Assemble the close** (writeup handoff per AGENTS.md, embedded here):
+15. **Validate produced artifacts.** Run all `[[checks]]` whose `gate = "assembly"` or `gate = "report"`: freshness, manifest fields, manifest consensus, numeric comparisons, and `/verify result` reports. Plots and run reports are blocked until these pass or explicit deviations are recorded.
+
+16. **Assemble the close** (writeup handoff per AGENTS.md, embedded here):
    - Walk the run directory: collect every cell manifest, every primitive's CSV / PNG, every script.
    - Generate `results/<run>/consolidated.{jl,py}`: all parameters explicit, no environment-var defaults, reproducible from a fresh checkout against the harness's installed stack.
    - Generate `results/<run>/run-report.md` with:
@@ -100,9 +122,9 @@ Steps 1–8 build and validate the complete protocol; steps 9–12 are the pre-c
      - **Reproduction** — paths to the consolidated script + run command.
    - Embed the auto-generated plots inline (markdown image links to `results/<run>/figs/*.png`).
 
-16. **Independently review the close.** Dispatch `/verify --mode close` or a separate review agent against the final `run-report.md`, consolidated script, protocol TOML, verification reports, and manifest set. The reviewer must be separate from the agent that assembled the close. This review checks that the report only claims what the protocol and artifacts support, and that assumptions/deviations/gaps are visible. The reproduction is not complete until this review passes.
+17. **Independently review the close.** Dispatch `/verify --mode close` or a separate review agent against the final `run-report.md`, consolidated script, protocol TOML, verification reports, and manifest set. The reviewer must be separate from the agent that assembled the close. This review checks that the report only claims what the protocol and artifacts support, and that assumptions/deviations/gaps are visible. The reproduction is not complete until this review passes.
 
-17. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, models out of scope) are listed with the gap classification — not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
+18. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, models out of scope) are listed with the gap classification — not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
 
 ## Categorization heuristics
 
@@ -129,12 +151,12 @@ Per AGENTS.md output norms, reports stay terse — but paper reproduction has a 
 | Protocol contract | `results/<run>/protocol.toml` | Always before compute. |
 | Per-cell / per-figure manifest | `results/<run>/cells/<cell_id>/manifest.json`, `results/<run>/manifests/fig-<id>.json` | Always. |
 | `/verify` reports for protocol / figures / close | `results/<run>/verify_<artifact>_<date>.md` | Always (protocol, script, result, and close modes as applicable). |
-| Consolidated runnable script | `results/<run>/consolidated.{jl,py}` | Always (Step 15 close). |
-| Run report mapping main results → figs → verification status | `results/<run>/run-report.md` | Always (Step 15 close, then Step 16 review). |
+| Consolidated runnable script | `results/<run>/consolidated.{jl,py}` | Always (Step 16 close). |
+| Run report mapping main results → figs → verification status | `results/<run>/run-report.md` | Always (Step 16 close, then Step 17 review). |
 
 ## Composition
 
-This skill is *primarily an orchestrator* (with the close embedded in Steps 15–16). Most steps delegate:
+This skill is *primarily an orchestrator* (with the close embedded in Steps 16–17). Most steps delegate:
 
 - **Wavefunction stages** → model skill + method card (DMRG / TTN / ED / TEBD / VMC-NQS).
 - **Parameter sweeps** (single- or multi-axis) → `/parameter-scan`.
@@ -158,7 +180,7 @@ The orchestrator's value is in the *plan* (the dependency graph + methodology/ve
 - This skill is *paper-agnostic*: any paper with an `INDEX.md` and a recognizable model + method coverage can be run through it. It is not magic-paper-specific.
 - For papers covering models out of harness scope, the plan stage surfaces the gap and offers (a) a partial-coverage run, (b) escalation to `arxiv-search` for related papers in scope, or (c) cancellation.
 - Methodology absorption (the Pragmatist's blind spot) is the *purpose* of this skill — emitting verification and methodology figs alongside substantive ones is what distinguishes paper reproduction from a `solve`-loop chain. A user who asked for the "main result" gets the result *plus* the verification anchors that earn the result.
-- Per AGENTS.md "Writeup handoff", the consolidated script + independently reviewed run report is the close of this skill (Steps 15–16); the user can route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
+- Per AGENTS.md "Writeup handoff", the consolidated script + independently reviewed run report is the close of this skill (Steps 16–17); the user can route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
 
 ## Related skills
 

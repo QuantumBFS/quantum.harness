@@ -41,18 +41,30 @@ function main()
     E5, psi5, sites5 = dmrg_groundstate(5, h, 16; nsweeps=12, pbc=true)
     expect10 = q -> mps_pauli_expectation(psi10, q, sites10)
     expect5 = q -> mps_pauli_expectation(psi5, q, sites5)
+    sector_filter = tfim_fig4_pauli_sector
     stateless = pauli_markov_cL_eq24(expect10, expect5, 10;
                                      n_steps=30, n_warmup=5, seed=UInt32(0x1234),
-                                     progress_every=10^9)
+                                     progress_every=10^9,
+                                     sample_filter=sector_filter,
+                                     factor_filter=sector_filter)
     cached = pauli_markov_cL_eq24_cached(CachedMPSPauliExpectation(psi10, sites10),
                                          expect5, 10;
                                          half_cache1=CachedMPSPauliExpectation(psi5, sites5),
                                          half_cache2=CachedMPSPauliExpectation(psi5, sites5),
                                          n_steps=30, n_warmup=5, seed=UInt32(0x1234),
-                                         progress_every=10^9)
+                                         progress_every=10^9,
+                                         sample_filter=sector_filter,
+                                         factor_filter=sector_filter)
     @assert cached.expectation_backend == "mps_cached_env"
     @assert isapprox(cached.mean_R, stateless.mean_R; atol=1e-10, rtol=1e-10)
     @assert isapprox(cached.cL, stateless.cL; atol=1e-10, rtol=1e-10)
+
+    norm_cell = compute_cL_cell(8, h; chi=16, n_steps=0, n_warmup=0,
+                                seed_offset=4, estimator=:pauli_mps_norm,
+                                pauli_chi=16, pauli_chi_check=32)
+    @assert norm_cell.expectation_backend == "pauli_mps_compressed_norm"
+    @assert isfinite(norm_cell.cL)
+    @assert norm_cell.se >= norm_cell.pauli_chi_error
 
     @printf("cached MPS Pauli regression passed at L=%d h=%.2f E=%.8f\n", L, h, E)
 end
