@@ -1,4 +1,5 @@
 using LinearAlgebra
+using Printf
 using Random
 using Statistics
 
@@ -149,13 +150,22 @@ end
 function pauli_mps_born_direct_logz4(Bs::Vector{Array{ComplexF64,3}};
                                      n_samples::Int=100_000,
                                      seed=0xD1EC7,
-                                     n_blocks::Int=20)
+                                     n_blocks::Int=20,
+                                     progress_label=nothing)
     sampler = PauliMPSBornSampler(Bs)
     rng = MersenneTwister(UInt32(seed))
     vals = Vector{Float64}(undef, n_samples)
+    progress_every = max(1, n_samples ÷ n_blocks)
     for k in 1:n_samples
         p = sample_pauli_string(sampler, rng)
         vals[k] = abs2(pauli_mps_amplitude(Bs, p))
+        if progress_label !== nothing && (k == n_samples || k % progress_every == 0)
+            running_mean = mean(@view vals[1:k])
+            running_logz4 = log(pauli_mps_born_norm(sampler)) + log(running_mean)
+            @printf("      [%s sample %d/%d] logZ4=%+.8f mean_abs2=%.6e\n",
+                    string(progress_label), k, n_samples, running_logz4, running_mean)
+            flush(stdout)
+        end
     end
     log_mean, se = log_mean_with_block_se(vals, n_blocks)
     return (
@@ -172,12 +182,17 @@ function pauli_mps_born_direct_cL(Bfull::Vector{Array{ComplexF64,3}},
                                   Bhalf::Vector{Array{ComplexF64,3}};
                                   n_samples::Int=100_000,
                                   seed=0xD1EC7,
-                                  n_blocks::Int=20)
+                                  n_blocks::Int=20,
+                                  progress_label=nothing)
+    full_label = progress_label === nothing ? nothing : "$(progress_label) full"
+    half_label = progress_label === nothing ? nothing : "$(progress_label) half"
     full = pauli_mps_born_direct_logz4(Bfull; n_samples=n_samples, seed=seed,
-                                       n_blocks=n_blocks)
+                                       n_blocks=n_blocks,
+                                       progress_label=full_label)
     half = pauli_mps_born_direct_logz4(Bhalf; n_samples=n_samples,
                                        seed=UInt32(seed) + UInt32(0x9E37),
-                                       n_blocks=n_blocks)
+                                       n_blocks=n_blocks,
+                                       progress_label=half_label)
     return (
         cL=full.logz4 - 2 * half.logz4,
         se=sqrt(full.se^2 + 4 * half.se^2),

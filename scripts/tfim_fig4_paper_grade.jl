@@ -1098,7 +1098,8 @@ function compute_cL_cell(L::Int, h::Float64; chi=30, n_steps=10^5, n_warmup=10^4
             B_H, trunc_H = compress_pauli_mps(raw_B_H, χP, 1e-12)
             res = pauli_mps_born_direct_cL(B_L, B_H; n_samples=n_steps,
                                            seed=seed,
-                                           n_blocks=sample_blocks)
+                                           n_blocks=sample_blocks,
+                                           progress_label=@sprintf("born-direct L=%d h=%.2f χP=%d", L, h, χP))
             return (cL=res.cL, se=res.se, trunc_L=trunc_L, trunc_H=trunc_H,
                     born_norm_full=res.born_norm_full, born_norm_half=res.born_norm_half,
                     mean_abs2_full=res.mean_abs2_full, mean_abs2_half=res.mean_abs2_half)
