@@ -30,33 +30,33 @@ include(joinpath(@__DIR__, "harness_manifest_evidence.jl"))
     @test_throws ErrorException harness_validate_evidence(missing; required_ids=["present", "missing"])
 
     declarations = Any[
-        Dict("id"=>"sector", "kind"=>"uniform_pauli_expectation",
-             "target"=>"full", "pauli_code"=>3, "expected_abs"=>1.0, "tolerance"=>1e-6),
+        Dict("id"=>"declared-constraint", "kind"=>"fixture_check",
+             "target"=>"primary", "check_code"=>3, "expected_abs"=>1.0, "tolerance"=>1e-6),
     ]
     bound = Any[
-        Dict("id"=>"sector", "kind"=>"uniform_pauli_expectation",
-             "target"=>"full", "pauli_code"=>3, "value"=>0.9999999,
+        Dict("id"=>"declared-constraint", "kind"=>"fixture_check",
+             "target"=>"primary", "check_code"=>3, "value"=>0.9999999,
              "expected_abs"=>1.0, "tolerance"=>1e-6, "status"=>"pass"),
     ]
     @test harness_validate_evidence_against_declarations(bound, declarations)
 
     wrong_binding = Any[
-        Dict("id"=>"sector", "kind"=>"uniform_pauli_expectation",
-             "target"=>"half", "pauli_code"=>3, "value"=>0.9999999,
+        Dict("id"=>"declared-constraint", "kind"=>"fixture_check",
+             "target"=>"secondary", "check_code"=>3, "value"=>0.9999999,
              "expected_abs"=>1.0, "tolerance"=>1e-6, "status"=>"pass"),
     ]
     @test_throws ErrorException harness_validate_evidence_against_declarations(wrong_binding, declarations)
 
     forged_target = Any[
-        Dict("id"=>"sector", "kind"=>"uniform_pauli_expectation",
-             "target"=>"full", "pauli_code"=>3, "value"=>0.5,
+        Dict("id"=>"declared-constraint", "kind"=>"fixture_check",
+             "target"=>"primary", "check_code"=>3, "value"=>0.5,
              "expected_abs"=>0.5, "tolerance"=>1e-6, "status"=>"pass"),
     ]
     @test_throws ErrorException harness_validate_evidence_against_declarations(forged_target, declarations)
 
     measured_only = Any[
-        Dict("id"=>"sector", "kind"=>"uniform_pauli_expectation",
-             "target"=>"full", "pauli_code"=>3, "value"=>0.9999999,
+        Dict("id"=>"declared-constraint", "kind"=>"fixture_check",
+             "target"=>"primary", "check_code"=>3, "value"=>0.9999999,
              "status"=>"pass"),
     ]
     @test harness_validate_evidence_against_declarations(measured_only, declarations)
@@ -66,7 +66,7 @@ include(joinpath(@__DIR__, "harness_manifest_evidence.jl"))
         "script_hash"=>"abc123",
         "sources"=>["paper"],
         "claims"=>["figure"],
-        "deviations"=>["alternate sampler"],
+        "deviations"=>["alternate route"],
         "result"=>Dict("value"=>1.02, "se"=>0.05, "budget"=>0.10),
         "checks"=>declarations,
         "evidence"=>bound,
@@ -75,7 +75,7 @@ include(joinpath(@__DIR__, "harness_manifest_evidence.jl"))
         "required_fields"=>["status", "script_hash", "result.value"],
         "nonempty_fields"=>["sources", "claims"],
         "equals"=>Any[Dict("field"=>"status", "value"=>"success")],
-        "list_contains"=>Any[Dict("field"=>"deviations", "value"=>"alternate sampler")],
+        "list_contains"=>Any[Dict("field"=>"deviations", "value"=>"alternate route")],
         "numeric_fields"=>["result.value", "result.se"],
         "optional_numeric_fields"=>["mean_R"],
         "numeric_bounds"=>Any[

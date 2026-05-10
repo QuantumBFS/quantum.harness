@@ -23,7 +23,7 @@ For parameter sweeps that map onto an array of cells, compose with `/parameter-s
 - *Cell map* (optional) — for array jobs: `results/<run>/run_spec.json` with `cells = [{cell_id, params}]`; the array script maps `$SLURM_ARRAY_TASK_ID` or `HARNESS_CELL_INDEX` → a cell.
 - *Ship strategy* (optional) — `git` (default; commit if dirty + push + remote pull) or `rsync` (bypass git for fast iteration).
 
-The array interface is generic: the submitted script receives `HARNESS_RUN_SPEC=<results/run/run_spec.json>` plus either `HARNESS_CELL_ID`, `HARNESS_CELL_INDEX`, or Slurm's `$SLURM_ARRAY_TASK_ID`. The script reads the selected cell's opaque `params` and writes `results/<run>/cells/<cell_id>/manifest.json`. `/slurm` must not parse or hardcode axis names such as `L`, `h`, `U`, `χ`, or `N_S`.
+The array interface is generic: the submitted script receives `HARNESS_RUN_SPEC=<results/run/run_spec.json>` plus either `HARNESS_CELL_ID`, `HARNESS_CELL_INDEX`, or Slurm's `$SLURM_ARRAY_TASK_ID`. The script reads the selected cell's opaque `params` and writes `results/<run>/cells/<cell_id>/manifest.json`. `/slurm` must not parse or hardcode axis names.
 
 ## Workflow
 
@@ -45,7 +45,7 @@ The array interface is generic: the submitted script receives `HARNESS_RUN_SPEC=
    - `top -H -b -n 1 -p <pid>` — live threads view; useful for spotting one runaway thread vs spread parallelism.
    - Aggregate `%CPU` from `top` (which can exceed 100%) is the right scalar: 234% = 2.34 cores worth of work, not 234% of one core.
 
-   For workloads with inherent serial bottlenecks (Markov chains, ED iterative solvers), 100% per-core utilization is unreachable; ~25-50% spread across N allocated cores is normal and is NOT a misconfiguration. Resist the impulse to cancel-and-resubmit based on a single `%CPU = 100` snapshot.
+   For workloads with inherent serial bottlenecks, 100% per-core utilization is unreachable; partial spread across allocated cores can be normal and is NOT automatically a misconfiguration. Resist the impulse to cancel-and-resubmit based on a single `%CPU = 100` snapshot.
 7. **Fetch**: when COMPLETED, `rsync -avz <alias>:<repo>/results/<run>/ results/<run>/`.
 8. **Diagnose**: classify exit per cell (success / OOM / walltime / logic / convergence-out-of-budget) using `sacct -j <jobid> --format=JobID,State,ExitCode,MaxRSS,Elapsed`. Surface failures with classification.
 9. **Hand back**: job record + local results path + per-cell status table.

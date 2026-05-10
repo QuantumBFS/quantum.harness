@@ -94,6 +94,8 @@ function aggregate_run_context()
             manifest_contract=DEFAULT_MANIFEST_CONTRACT,
             consensus_fields=DEFAULT_MANIFEST_CONSENSUS_FIELDS,
             expected_settings=nothing,
+            expected_provenance=nothing,
+            provenance_fields=nothing,
         )
     end
 
@@ -105,6 +107,9 @@ function aggregate_run_context()
     consensus_fields = get(assembly, "consensus_fields",
                            get(spec, "manifest_consensus_fields", DEFAULT_MANIFEST_CONSENSUS_FIELDS))
     consensus_fields isa Vector || error("Run-spec consensus_fields must be a list")
+    provenance_fields = get(assembly, "provenance_fields", get(spec, "manifest_provenance_fields", nothing))
+    provenance_fields === nothing || provenance_fields isa Vector ||
+        error("Run-spec provenance_fields must be a list")
     spec_cells = get(spec, "cells", Any[])
     spec_cells isa Vector || error("Run spec field 'cells' must be a list")
     expected = Set{Tuple{Int,Float64}}()
@@ -129,6 +134,8 @@ function aggregate_run_context()
         manifest_contract=merged_manifest_contract(extra_contract),
         consensus_fields=[string(x) for x in consensus_fields],
         expected_settings=harness_expected_cell_settings(spec),
+        expected_provenance=harness_expected_cell_provenance(spec),
+        provenance_fields=provenance_fields === nothing ? nothing : [string(x) for x in provenance_fields],
     )
 end
 
@@ -203,6 +210,17 @@ function validate_expected_settings!(cells, expected_settings)
     return true
 end
 
+function validate_expected_provenance!(cells, expected_provenance, provenance_fields)
+    expected_provenance === nothing && return true
+    for d in values(cells)
+        cell_id = string(d["cell_id"])
+        haskey(expected_provenance, cell_id) || error("No run-spec provenance found for manifest cell_id=$cell_id")
+        harness_validate_manifest_provenance(
+            d, expected_provenance[cell_id]; fields=provenance_fields, path="cell_id=$cell_id")
+    end
+    return true
+end
+
 function sorted_cell_records(cells)
     return sort(collect(values(cells)); by=d -> (Int(d["L"]), Float64(d["h"]), string(d["cell_id"])))
 end
@@ -253,10 +271,13 @@ function main()
     end
     validate_manifest_consensus!(cells, ctx.consensus_fields)
     validate_expected_settings!(cells, ctx.expected_settings)
+    validate_expected_provenance!(cells, ctx.expected_provenance, ctx.provenance_fields)
 
     L_min    = first(values(cells))["L_min"]
     cell_records = sorted_cell_records(cells)
     settings_summary = harness_summarize_manifest_settings(cell_records)
+    provenance_summary = harness_summarize_manifest_fields(
+        cell_records, ["protocol_hash", "script_hash", "sources", "claims", "deviations"])
     proposal = summary_report_value(settings_summary, "proposal", first(values(cells))["proposal"])
     proposal_kernel = summary_report_value(settings_summary, "proposal_kernel", first(values(cells))["proposal_kernel"])
     estimator = summary_report_value(settings_summary, "estimator", first(values(cells))["estimator"])
@@ -324,6 +345,7 @@ function main()
         "Ls_full"   => Ls_full,
         "h_grid"    => h_grid,
         "settings_summary" => settings_summary,
+        "provenance_summary" => provenance_summary,
         "cells" => cell_records,
         "initial_state" => summary_report_value(settings_summary, "initial_state", nothing),
         "symmetry_checks" => summary_report_value(settings_summary, "symmetry_checks", nothing),
@@ -332,12 +354,12 @@ function main()
         "proposal_kernel" => proposal_kernel,
         "estimator" => estimator,
         "expectation_backends" => backends,
-        "protocol_hash" => first(values(cells))["protocol_hash"],
-        "script_hash" => first(values(cells))["script_hash"],
+        "protocol_hash" => summary_report_value(provenance_summary, "protocol_hash", nothing),
+        "script_hash" => summary_report_value(provenance_summary, "script_hash", nothing),
         "run_spec" => ctx.spec_path,
-        "sources" => first(values(cells))["sources"],
-        "claims" => first(values(cells))["claims"],
-        "deviations" => first(values(cells))["deviations"],
+        "sources" => summary_report_value(provenance_summary, "sources", nothing),
+        "claims" => summary_report_value(provenance_summary, "claims", nothing),
+        "deviations" => summary_report_value(provenance_summary, "deviations", nothing),
         "M2_anchor" => Dict(string(h) => M2_anchor[h] for h in h_grid),
         "c_L"       => Dict(string(L) => [get(cL_data, (L, h), NaN)  for h in h_grid] for L in Ls_chain),
         "c_L_err"   => Dict(string(L) => [get(cL_err,  (L, h), NaN)  for h in h_grid] for L in Ls_chain),

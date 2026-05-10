@@ -48,6 +48,17 @@ function harness_merged_cell_settings(spec::AbstractDict, cell::AbstractDict)
     return settings
 end
 
+function harness_merged_cell_provenance(spec::AbstractDict, cell::AbstractDict)
+    provenance = Dict{String,Any}()
+    spec_provenance = get(spec, "provenance", Dict{String,Any}())
+    cell_provenance = get(cell, "provenance", Dict{String,Any}())
+    spec_provenance isa AbstractDict || error("Run spec provenance must be an object")
+    cell_provenance isa AbstractDict || error("Run-spec cell provenance must be an object")
+    merge!(provenance, Dict{String,Any}(string(k) => v for (k, v) in spec_provenance))
+    merge!(provenance, Dict{String,Any}(string(k) => v for (k, v) in cell_provenance))
+    return provenance
+end
+
 function harness_expected_cell_settings(spec::AbstractDict)
     cells = get(spec, "cells", Any[])
     cells isa Vector || error("Run spec field 'cells' must be a list")
@@ -62,6 +73,20 @@ function harness_expected_cell_settings(spec::AbstractDict)
     return out
 end
 
+function harness_expected_cell_provenance(spec::AbstractDict)
+    cells = get(spec, "cells", Any[])
+    cells isa Vector || error("Run spec field 'cells' must be a list")
+    out = Dict{String,Any}()
+    for cell in cells
+        cell isa AbstractDict || error("Every run-spec cell must be an object")
+        cell_id = string(get(cell, "cell_id", ""))
+        !isempty(cell_id) || error("Every run-spec cell must carry a nonempty cell_id")
+        haskey(out, cell_id) && error("Duplicate run-spec cell_id '$cell_id'")
+        out[cell_id] = harness_merged_cell_provenance(spec, cell)
+    end
+    return out
+end
+
 function harness_validate_manifest_settings(manifest::AbstractDict, expected::AbstractDict; path::AbstractString="manifest")
     settings = get(manifest, "settings", nothing)
     settings isa AbstractDict || error("Manifest settings must be an object: $path")
@@ -70,6 +95,19 @@ function harness_validate_manifest_settings(manifest::AbstractDict, expected::Ab
         haskey(settings_s, key) || error("Manifest settings missing declared key '$key': $path")
         settings_s[key] == value ||
             error("Manifest settings.$key=$(repr(settings_s[key])) does not match run-spec value $(repr(value)): $path")
+    end
+    return true
+end
+
+function harness_validate_manifest_provenance(manifest::AbstractDict, expected::AbstractDict;
+                                             fields=nothing,
+                                             path::AbstractString="manifest")
+    field_names = fields === nothing ? sort(collect(string(k) for k in keys(expected))) : [string(x) for x in fields]
+    for key in field_names
+        haskey(expected, key) || error("Expected provenance missing key '$key': $path")
+        haskey(manifest, key) || error("Manifest missing declared provenance key '$key': $path")
+        manifest[key] == expected[key] ||
+            error("Manifest provenance.$key=$(repr(manifest[key])) does not match run-spec value $(repr(expected[key])): $path")
     end
     return true
 end
@@ -122,6 +160,35 @@ function harness_summarize_manifest_settings(manifests)
     return Dict{String,Any}("constant" => constants, "varying" => varying)
 end
 
+function harness_summarize_manifest_fields(manifests, fields)
+    manifests isa AbstractVector || error("Manifests must be a list")
+    field_names = [string(field) for field in fields]
+    constants = Dict{String,Any}()
+    varying = Dict{String,Any}()
+    for field in field_names
+        values = Any[]
+        for manifest in manifests
+            manifest isa AbstractDict || error("Every manifest must be an object")
+            value = haskey(manifest, field) ? manifest[field] : nothing
+            harness_push_unique!(values, value)
+        end
+        if length(values) == 1
+            constants[field] = only(values)
+        else
+            entries = Any[]
+            for manifest in sort(manifests; by=item -> string(get(item, "cell_id", "")))
+                push!(entries, Dict{String,Any}(
+                    "cell_id" => string(get(manifest, "cell_id", "")),
+                    "params" => get(manifest, "params", Dict{String,Any}()),
+                    "value" => haskey(manifest, field) ? manifest[field] : nothing,
+                ))
+            end
+            varying[field] = entries
+        end
+    end
+    return Dict{String,Any}("constant" => constants, "varying" => varying)
+end
+
 function harness_cell_context(; default_run_dir::AbstractString="")
     loaded = harness_load_run_spec()
     if loaded === nothing
@@ -143,8 +210,7 @@ function harness_cell_context(; default_run_dir::AbstractString="")
 
     settings = harness_merged_cell_settings(spec, cell)
 
-    provenance = get(spec, "provenance", Dict{String,Any}())
-    provenance isa AbstractDict || error("Run spec provenance must be an object")
+    provenance = harness_merged_cell_provenance(spec, cell)
     run_dir = string(get(spec, "run_dir", default_run_dir))
     isempty(run_dir) && error("Run spec must provide run_dir or caller must pass default_run_dir")
 

@@ -5,7 +5,7 @@ description: Use when the user wants to reproduce the figures and main results o
 
 # reproduce-paper
 
-Plan and orchestrate a paper reproduction across multiple figures and main results. Generic over the paper. Composes existing primitives (`/parameter-scan`, `/scaling-fit`, `/cross-method-check`, `/verify`, and `/slurm` for cluster compute). Plans the figure dependency graph, surfaces methodology and verification figures alongside the substantive ones, runs the assembled set as a coherent session, and closes with a consolidated runnable script + structured run report (the writeup-handoff per AGENTS.md, embedded here rather than delegated).
+Plan and orchestrate a paper reproduction across multiple figures and main results. Generic over the paper. Composes existing primitives for scans, scaling, cross-checks, verification, and cluster compute. Plans the figure dependency graph, surfaces methodology and verification figures alongside the substantive ones, runs the assembled set as a coherent session, and closes with a consolidated runnable script + structured run report.
 
 ## When to activate
 
@@ -17,12 +17,12 @@ Plan and orchestrate a paper reproduction across multiple figures and main resul
 
 - A *paper identifier* — arXiv id, DOI, or a path under `knowledge-base/literature/<method>/` to a rendered methodology reference. The skill reads the paper's index card (`INDEX.md`) and figure list.
 - A *coverage scope* — full-paper, "main results only", or a user-specified figure subset. Default: full-paper.
-- A *budget* — wall-clock or compute envelope. Defaults from the model skill / cluster profile.
+- A *budget* - wall-clock or compute envelope. Defaults from the calling workflow / cluster profile.
 - An optional *protocol TOML* — an authored or prior generated contract. If absent, create `results/<run>/protocol.toml` from primary-source extraction before compute.
 
 ## Protocol TOML
 
-The protocol is generic. It records what the paper claims, how each claim is sourced, and what evidence must exist before the harness may call the run a reproduction. `/reproduce-paper` treats claim names as opaque strings; it does not know domain concepts such as Hamiltonians, samplers, lattices, estimators, or symmetries. Domain-specific knowledge belongs in the source text, method cards, authored scripts, and command checks. Do not add hardcoded domain oracle types to the protocol; add a generic `command`, `verify`, or manifest check that points at a domain script instead.
+The protocol is generic. It records what the paper claims, how each claim is sourced, and what evidence must exist before the harness may call the run a reproduction. `/reproduce-paper` treats claim names, parameter names, method names, and artifact fields as opaque strings. Domain-specific knowledge belongs in the source text, method cards, authored scripts, and command checks. Do not add hardcoded domain oracle types to the protocol; add a generic `command`, `verify`, or manifest check that points at a domain script instead.
 
 The authoring agent may draft the protocol, scripts, and checks, but cannot be the only verifier. Every protocol, important script/check command, aggregator, and final result report needs independent `/verify` or separate-agent review before it can advance the reproduction gate. This is separate from local smoke tests: smoke tests prove the artifact runs; independent review checks whether it is the right artifact.
 
@@ -40,7 +40,7 @@ Required sections:
   - `freshness` — require artifacts to be generated after the protocol/script hash they claim.
   - `verify` — dispatch `/verify` in a declared mode.
 - `[[deviations]]` — deliberate differences from the paper method. A deviation is allowed only when it is explicit and has its own checks.
-- `[budgets]` — wall-clock, sample, grid, cluster, or approximation budgets expressed as data, not interpreted by this skill unless a check command consumes them.
+- `[budgets]` - wall-clock, grid, compute, data-generation, or approximation budgets expressed as data, not interpreted by this skill unless a check command consumes them.
 
 For `kind = "numeric_compare"`, the generic runner is `tools/cli/harness_validate_numeric.jl`. The check declares artifact selectors and tolerances as data; the runner does not know what the numbers mean. It can run against a standalone validation spec (either a single check object or `{ checks = [...] }`) or a full protocol TOML filtered by `--check-id`. Minimal protocol shape:
 
@@ -61,7 +61,7 @@ runner = "tools/cli/harness_validate_numeric.jl"
 
 Selectors may use `field = "nested.key"` for simple JSON/TOML paths or `pointer = "/nested/0/key"` for JSON Pointer. Names like `observable`, `observable_exact`, or `stderr` are example payload fields, not harness-level types.
 
-For manifest assembly, a run spec may include `assembly.manifest_contract` with only generic clauses: `required_fields`, `nonempty_fields`, `equals`, `list_contains`, `numeric_fields`, `optional_numeric_fields`, `numeric_bounds`, and `evidence_sets`. These clauses refer to manifest field paths; they do not introduce domain types. If a run must declare a method difference, express it as payload data such as "list field contains declared deviation id"; do not add a Hamiltonian, sampler, boundary-condition, or paper-specific oracle type to the reusable contract.
+For manifest assembly, a run spec may include `assembly.manifest_contract` with only generic clauses: `required_fields`, `nonempty_fields`, `equals`, `list_contains`, `numeric_fields`, `optional_numeric_fields`, `numeric_bounds`, and `evidence_sets`. These clauses refer to manifest field paths; they do not introduce domain types. Run-level provenance such as `sources`, `claims`, and `deviations` is declared once in the protocol / run spec and mechanically compared against the manifest payload; do not repeat paper-specific deviation strings as reusable contract logic, and do not add domain-specific oracle types to the reusable contract.
 
 ## Workflow
 
@@ -74,28 +74,29 @@ Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-c
 2. **Extract the protocol.** From primary sources, extract the claims needed for the requested scope: target result, setup, method, parameters, approximations, uncertainty, and artifact requirements. Write or update `results/<run>/protocol.toml`. If a KB hint conflicts with a primary source, record the conflict in the run notes and follow the primary source.
 
 3. **Categorize each figure.** Tag every figure with one of:
-   - **Substantive** — a physics result the paper is built around (e.g., a phase diagram, a critical exponent, an order parameter).
-   - **Methodology** — illustrates how the calculation works (e.g., a partition schematic, a sampling-tree diagram, a noise-model cartoon).
-   - **Verification** — a convergence diagnostic the paper itself ran (e.g., bond-dim convergence, autocorrelation time, finite-size trend). These are *internal* to the paper's verification chain; reproducing them is also reproducing the paper's *trust*.
-   - **Cross-check** — a comparison to an independent method, estimator, or diagnostic for the same claim.
+   - **Substantive** - a result the paper is built around.
+   - **Methodology** - illustrates how the paper's procedure works.
+   - **Verification** - a diagnostic the paper itself ran to justify the result. These are *internal* to the paper's verification chain; reproducing them is also reproducing the paper's *trust*.
+   - **Cross-check** - a comparison to an independent route for the same claim.
 
 4. **Plan the figure dependency graph.** Identify which figures share generated artifacts, so the underlying calculation can be reused. Output: `results/<run>/reproduce-paper.plan.json` with figure ids, their categorizations, the artifact each requires, and the dependency edges.
 
 5. **Plan the orchestration.** For each figure:
-   - Pick the model skill and method card from the paper's reported setup.
+   - Pick the applicable domain workflow and method card from the paper's reported setup.
    - Pick the primitive (`/parameter-scan`, `/scaling-fit`, `/cross-method-check`) that runs the calculation.
    - For scans or arrays, write `results/<run>/run_spec.json` using the generic cell contract: each cell has an opaque `cell_id`, a `params` object, optional `settings`, and shared `provenance`. `/reproduce-paper` does not define domain-specific parameter types; the model/method entrypoint interprets `params`.
-   - For multi-stage method-card pipelines (e.g., `methods/pauli-markov.md` Stages 0–3), the per-cell compute script reads its method-card-declared stage list and writes a per-stage manifest into `results/<run>/cells/<cell_id>/<stage>.manifest.json`. Stage-execution is plain shell, not a separate skill — the method card declares what; the script does it.
+   - Manifest assembly validates that each cell echoed the merged run-spec provenance it was supposed to use. Cell-specific provenance overrides are allowed, but they are still data; the reusable layer only checks equality of declared payload fields.
+   - For multi-stage method-card pipelines, the per-cell compute script reads its method-card-declared stage list and writes a per-stage manifest into `results/<run>/cells/<cell_id>/<stage>.manifest.json`. Stage-execution is plain shell, not a separate skill; the method card declares what, and the script does it.
    - For embarrassingly-parallel grids on a cluster, `/parameter-scan` composes with `/slurm` (which submits the sbatch array, monitors, fetches). Cluster profile is `tools/cluster/<active>.md`.
 
-6. **Pick trusted references and record them in the protocol.** *Always a fork.* For each substantive figure, identify one parameter point where the same claim has a known-correct or independently checkable answer — analytic limit, independent method, published benchmark, or brute force on a smaller problem. The reference need not lie on the paper's grid; what matters is that the script's code path reaches it. Invoke `Superpowers:brainstorming` with 2–3 candidate references, then record the chosen reference as claim/check entries in the protocol.
+6. **Pick trusted references and record them in the protocol.** *Always a fork.* For each substantive figure, identify one point or reduced setting where the same claim has a known-correct or independently checkable answer: analytic limit, independent implementation, official benchmark, or exhaustive calculation on a smaller instance. The reference need not lie on the paper's grid; what matters is that the script's code path reaches it. Invoke `Superpowers:brainstorming` with 2-3 candidate references, then record the chosen reference as claim/check entries in the protocol.
 
 7. **Audit the complete protocol with an independent verifier.** Dispatch `/verify --mode protocol` against `results/<run>/protocol.toml` and the declared primary sources. The verifier must be a separate agent from the one that drafted or last materially edited the protocol. On ✓ continue. On ✗ or ⚠ stop and surface the audit report; user steers whether to correct the protocol, record an assumption, or narrow the scope. If any later step adds or changes claims/checks/deviations, return here before running the affected gate.
 
 8. **Run declared preflight checks.** Execute all `[[checks]]` whose `gate = "preflight"` or whose gate is omitted and cheap. `/reproduce-paper` only dispatches the mechanical check kind; domain-specific logic lives in the referenced command or `/verify` prompt. Do not run expensive compute until preflight passes.
 
-9. **Surface the methodology / verification / cross-check figs as default deliverables.** This is the discipline that distinguishes paper reproduction from a sequence of `solve` runs: the user gets the verification figures *automatically*, not on request. Without this, a Pragmatist persona running through the paper sees only the substantive figs and absorbs no methodology judgment. Concretely:
-   - Verification figs always run (bond-dim convergence, autocorrelation, finite-size trend).
+9. **Surface the methodology / verification / cross-check figs as default deliverables.** This is the discipline that distinguishes paper reproduction from a sequence of isolated runs: the user gets the verification figures *automatically*, not on request. Concretely:
+   - Verification figs always run when the paper declares them.
    - Methodology figs are emitted when they are derivable from the harness (schematics may not always be — fall back to citing the paper directly).
    - Cross-check figs run when the harness has the secondary diagnostic available; route via `/cross-method-check`.
 
@@ -103,11 +104,11 @@ Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-c
 
 11. **Run the script at the trusted reference, compare.** Execute at the chosen reference parameter point — at whatever scale the reference requires (laptop, cluster, anywhere). Dispatch the declared check (`numeric_compare`, `command`, or `/verify result`) against the reference value. On ✓ continue silently. On ✗ stop.
 
-12. **Estimator-validity check.** When a stochastic estimator is material to a claim, declare a check that compares the estimator against a feasible exact or deterministic small-scale reference before trusting any production-scale error bar. The check should exercise the same observable path, sampling distribution, proposal / sampler family, sector restrictions, and error-estimation code used in production, except for scale. Record the exact value, estimated value, multi-seed scatter or iid variance diagnostic when available, and the pass/fail tolerance in the protocol. A stable block error bar is not sufficient evidence if the exact/deterministic check fails; stop and repair the estimator or record a new method deviation.
+12. **Data-generation validity check.** When a generated estimate is material to a claim, declare a check that compares the production evidence path against a feasible trusted reference before trusting production-scale uncertainty. The check should exercise the same quantity path, data-generation family, constraints, and uncertainty code used in production, except for scale. Record the reference value, generated value, repeatability or variance diagnostic when available, and the pass/fail tolerance in the protocol. A stable internal error bar is not sufficient evidence if the trusted-reference check fails; stop and repair the method or record a new deviation.
 
-13. **Convergence at one point.** Vary the method's declared controlling knob at one parameter point. Confirm the answer asymptotes using the protocol's declared check. On drift, stop. (Defense layer against "converges to a stable but wrong value with small error bar"; steps 11–12 are the primary catch.)
+13. **Convergence at one point.** Vary the method's declared controlling setting at one point. Confirm the answer stabilizes using the protocol's declared check. On drift, stop. This is a defense layer against "stable but wrong"; steps 11-12 are the primary catch.
 
-14. **Paper-grade compute with compute-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Every produced manifest must include `protocol_hash`, source artifact paths, script hash or git hash when available, declared deviation ids, the method setup payload actually used (for example sector / initial state / constraints when present), and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "compute"` before it is marked complete; a failed compute gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
+14. **Paper-grade compute with compute-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Every produced manifest must include `protocol_hash`, source artifact paths, script hash or git hash when available, declared deviation ids, the setup payload actually used, and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "compute"` before it is marked complete; a failed compute gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
 
     If any cell overrides shared settings, the assembler must validate the manifest against the merged shared+cell settings and surface a constant/varying settings summary in the result artifact. Do not let a first completed cell define global provenance by accident.
 
@@ -117,27 +118,27 @@ Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-c
    - Walk the run directory: collect every cell manifest, every primitive's CSV / PNG, every script.
    - Generate `results/<run>/consolidated.{jl,py}`: all parameters explicit, no environment-var defaults, reproducible from a fresh checkout against the harness's installed stack.
    - Generate `results/<run>/run-report.md` with:
-     - **Setup** — model, lattice, sector, parameters per figure.
-     - **Settings** — method, convergence parameters, sample sizes; cite primary sources first and KB cards only as hints or secondary references.
-     - **Result per figure** — final observable value(s) with uncertainty; one-line interpretation.
-     - **Verification status** — limit / symmetry / convergence / cross-method status, plus the `/verify` report references. Cite `knowledge-base/...` for benchmarks compared against.
-     - **Protocol status** — path to `protocol.toml`, protocol hash, passed checks, assumptions, deviations, and source/KB conflicts.
-     - **Residual uncertainty** — what is *not* settled (frontier-flag content, convergence at boundary parameters, contested regime).
-     - **Reproduction** — paths to the consolidated script + run command.
+     - **Setup** - paper-defined setup payload per figure.
+     - **Settings** - method, controlling settings, budgets; cite primary sources first and KB cards only as hints or secondary references.
+     - **Result per figure** - final quantity value(s) with uncertainty; one-line interpretation.
+     - **Verification status** - trusted-reference / constraint / convergence / independent-check status, plus the `/verify` report references.
+     - **Protocol status** - path to `protocol.toml`, protocol hash, passed checks, assumptions, deviations, and source/KB conflicts.
+     - **Residual uncertainty** - what is *not* settled.
+     - **Reproduction** - paths to the consolidated script + run command.
    - Embed the auto-generated plots inline (markdown image links to `results/<run>/figs/*.png`).
 
 17. **Independently review the close.** Dispatch `/verify --mode close` or a separate review agent against the final `run-report.md`, consolidated script, protocol TOML, verification reports, and manifest set. The reviewer must be separate from the agent that assembled the close. This review checks that the report only claims what the protocol and artifacts support, and that assumptions/deviations/gaps are visible. The reproduction is not complete until this review passes.
 
-18. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, models out of scope) are listed with the gap classification — not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
+18. **Surface gaps honestly.** Figures the harness cannot reach (proprietary data, hardware experiments, or topics out of scope) are listed with the gap classification - not silently skipped. The user can then decide to fill the gap manually or accept the partial reproduction.
 
 ## Categorization heuristics
 
 The skill uses these heuristics when the paper's `INDEX.md` does not pre-tag the figures:
 
-- *Substantive*: caption mentions a phase, a transition, an exponent, an order parameter, a phase diagram, or a quantitative claim.
+- *Substantive*: caption states a quantitative or qualitative result that supports the paper's main claims.
 - *Methodology*: caption is a "schematic", "diagram", "cartoon", "illustration", or describes the algorithm itself.
-- *Verification*: caption mentions "convergence", "vs `χ`", "vs `N_S`", "autocorrelation", "finite-size", "Trotter", or any numerical-stability diagnostic.
-- *Cross-check*: caption compares two methods, estimators, or diagnostics on the same problem.
+- *Verification*: caption describes convergence, stability, sensitivity, repeatability, uncertainty, or any other diagnostic for trust.
+- *Cross-check*: caption compares two routes to the same claim.
 
 When ambiguous, ask the user via `AskUserQuestion` with the closest 2–3 categorizations.
 
@@ -162,7 +163,7 @@ Per AGENTS.md output norms, reports stay terse — but paper reproduction has a 
 
 This skill is *primarily an orchestrator* (with the close embedded in Steps 16–17). Most steps delegate:
 
-- **Wavefunction stages** → model skill + method card (DMRG / TTN / ED / TEBD / VMC-NQS).
+- **Domain stages** → applicable workflow + method card.
 - **Parameter sweeps** (single- or multi-axis) → `/parameter-scan`.
 - **Critical scaling** → `/scaling-fit`.
 - **Cross-checks** → `/cross-method-check`.
@@ -181,9 +182,9 @@ The orchestrator's value is in the *plan* (the dependency graph + methodology/ve
 
 ## Notes
 
-- This skill is *paper-agnostic*: any paper with an `INDEX.md` and recognizable model + method coverage can be run through it. It is not specific to any one paper, model, or diagnostic.
-- For papers covering models out of harness scope, the plan stage surfaces the gap and offers (a) a partial-coverage run, (b) escalation to `arxiv-search` for related papers in scope, or (c) cancellation.
-- Methodology absorption (the Pragmatist's blind spot) is the *purpose* of this skill — emitting verification and methodology figs alongside substantive ones is what distinguishes paper reproduction from a `solve`-loop chain. A user who asked for the "main result" gets the result *plus* the verification anchors that earn the result.
+- This skill is *paper-agnostic*: any paper with an `INDEX.md` and recognizable workflow + method coverage can be run through it. It is not specific to any one paper, topic, or diagnostic.
+- For papers covering topics out of harness scope, the plan stage surfaces the gap and offers (a) a partial-coverage run, (b) source search for related in-scope work, or (c) cancellation.
+- Methodology absorption is the *purpose* of this skill: emitting verification and methodology figs alongside substantive ones is what distinguishes paper reproduction from a chain of isolated runs. A user who asked for the "main result" gets the result plus the verification anchors that earn the result.
 - Per AGENTS.md "Writeup handoff", the consolidated script + independently reviewed run report is the close of this skill (Steps 16–17); the user can route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
 
 ## Related skills
