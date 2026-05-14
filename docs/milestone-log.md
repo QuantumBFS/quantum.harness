@@ -25,7 +25,35 @@ close — we wait until we have evidence rather than impression.
 
 ## Observations
 
-_(none yet)_
+### O1. Agents over-trust cached content (2026-05-14)
+
+**Source.** Brainstorming session for the `report-html` skill (a new generic primitive — figure-first interactive HTML reproduction reports). Surfaced when a v5 prototype confidently rendered a fabricated reference range (`paper c_L ∈ [−0.10, −0.05]`) as if it were sourced from the paper. Side-by-side comparison against the actual paper Fig 4(a) PNG (`knowledge-base/literature/magic/.figures/arxiv__2305.18541/2305.18541.pdf-8-0.png`) showed the paper's curves dip to ~−0.5 at h_c — the rendered claim was a hallucination, propagated unchallenged through three iterations of the prototype because the same agent kept re-reading its own prior turns as if they were primary sources.
+
+**Pattern.** Agents (this one included) treat *cached content* as *authority* instead of *evidence*. Cached content includes:
+- KB cards (cited as if primary; they are summaries with citation tags).
+- Existing code (trusted by name + comment; the code may have drifted).
+- Prior run results / data files (trusted because the file exists; may be from a partial / debug / superseded run).
+- Plans, milestones, design docs (treated as truth instead of intent).
+- **An agent's own prior turns** — the worst case, since there is no file to grep, no commit to inspect; the cached belief lives only in the conversation buffer and is invisibly re-asserted each turn.
+
+The harness already states the discipline for paper reproduction (CLAUDE.md *Paper reproduction evidence invariants* — "Written content is evidence, not authority. Primary sources control."). The gap: that rule is scoped to paper reproduction artifacts; iterating agents bypass it by classifying the work as "mockup" / "draft" / "demo" — and there is no mechanical gate that catches the bypass.
+
+**Candidate mechanisms.**
+1. *Cite-or-flag, universal.* Generalize the existing *Literal / Analytic / Harness anchor* tags from KB cards to every claim-bearing artifact (skills, plans, scripts, reports, even agent prose). Every external-fact claim must cite a primary source with `file:line` or be tagged as an explicit assumption. Agent's own prior turns are not a primary source.
+2. *Trust-by-trace, not trust-by-default.* Trust propagates through traces; a fact is trustworthy because the trace was recorded once and is auditable, not because the agent re-derived it.
+3. *Skeptic role for `/verify`.* When dispatching `/verify`, the brief is adversarial — "trust nothing in this artifact; trace every external claim; ✗ on unsourced." Different from a friendly "review and approve" stance. Already partially this way; worth making the *skeptic stance* explicit in the SKILL.md.
+4. *Mandatory verify gate on user-facing artifacts.* Any skill that produces a claim-bearing artifact for downstream consumption (report, brief, writeup, demo) bakes `/verify` in as a terminal step. The artifact ships only with a clean review or with `✗` claims explicitly accepted as declared assumptions in a contract.
+
+**Gate decision.** Both gates pass:
+- *User-style gate* — applies to every persona reading any agent-produced artifact, not magic-paper-specific.
+- *Primitive gate* — generalizes existing harness invariants (Paper reproduction evidence invariants, provenance discipline) from one workflow to all. Composes for any future skill producing claim-bearing artifacts.
+
+**Action.**
+- Land mechanism #4 immediately as part of the `report-html` skill design (its terminal step is `/verify` in `report` mode; report ships only on clean review).
+- Land mechanism #3 as a one-line edit to `tools/skills/verify/SKILL.md` once the report-mode is added — make the skeptic stance explicit so reviewers don't drift into approval mode.
+- Mechanism #1 (universal cite-or-flag) and #2 (trust-by-trace) elevated to AGENTS.md *only at milestone close* with evidence — the harness's reflective-log discipline. Watch for repeat occurrences across other skills before promoting.
+
+**Self-instance.** This observation is itself a meta-instance: the agent that produced the v5 hallucination is the same agent now authoring this entry. The observation should be considered tentative until corroborated by an independent reading of the session transcript.
 
 ## Phase 1 — Demand Map (2026-05-05)
 
