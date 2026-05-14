@@ -135,8 +135,9 @@ Axes:
 4. **Deviation visibility** — method/backend/estimator/sampling/boundary/budget/error-method differences are visible in the report and linked to protocol deviations.
 5. **Reproducibility** — consolidated script and run command are sufficient for a fresh checkout against the declared harness environment.
 6. **Execution summary boundedness** — `execution_summary.md` is treated as an index into manifests/checks, not as evidence by itself.
+7. **Audience-facing artifact compliance** — when the close target includes a rendered HTML report (e.g. `report_<run-id>_<date>.html` from `/report`), audit (a) every editorial sentence in `editorial.json` traces to its declared `sourced_by` evidence (re-grep the cited file:line and confirm the passage matches); (b) the rendered HTML conforms to `docs/DESIGN.md` — palette warm-only, typography Source Serif 4 / Inter / JetBrains Mono with system fallbacks, ring shadows not drop, mandatory components present (top-bar, side-by-side `panel-card`, status `chip` strip with at least one chip, `contract` panel, provenance footer), interactive plot via inline `<svg class="plot">` not a third-party library, hover-or-tap fallbacks per §13; (c) mobile rendering at 375×667 — viewport meta present, no horizontal overflow, every interactive element has a tap path, touch targets ≥ 44×44px (data-point hit area extended via 14px transparent stroke).
 
-Severity tags: `supported`, `unsupported-claim`, `hint-leak`, `stale-artifact`, `provenance-gap`, `open-gate`, `hidden-deviation`, `repro-gap`.
+Severity tags: `supported`, `unsupported-claim`, `hint-leak`, `stale-artifact`, `provenance-gap`, `open-gate`, `hidden-deviation`, `repro-gap`, `editorial-leak` (editorial sentence has no source or drifts from cited passage), `design-drift` (rendered component deviates from `docs/DESIGN.md` spec or violates a hard reject rule).
 
 ## Output
 
