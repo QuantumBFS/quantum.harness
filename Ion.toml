@@ -22,6 +22,7 @@ slurm = { type = "local" }              # cluster mechanism (agent-does-ssh)
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
 reproduce-paper = { type = "local" }    # paper orchestrator (absorbs run-report close)
 verify = { type = "local" }
+report = { type = "local" }             # render single-page interactive HTML report from a reproduction run
 
 # Visualization & writing
 scientific-visualization = { source = "davila7/claude-code-templates/scientific-visualization" }
