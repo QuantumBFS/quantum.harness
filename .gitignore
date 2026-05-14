@@ -22,4 +22,6 @@ CLAUDE.md
 /scripts/
 /results/
 __pycache__/
+target/
 .claude/skills/ion-cli
+.superpowers/

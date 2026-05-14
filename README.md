@@ -2,6 +2,8 @@
 
 Research assistant for quantum many-body physics. Handles ground-state calculations on lattice models — from setting up the Hamiltonian to picking a method, running the computation, verifying results, and generating plots.
 
+Long multi-agent, remote, and paper-reproduction runs are gate-managed by the core state-machine CLI `tools/cli/flow`.
+
 ## What it helps with
 
 - **Ground-state problems** across 8 model families: Heisenberg, transverse-field Ising, J1-J2, Hubbard, t-J, t-V, Anderson impurity, multiorbital Hubbard.

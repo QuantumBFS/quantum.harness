@@ -83,7 +83,7 @@ For `kind = "numeric_compare"`, the generic runner is `tools/cli/harness_validat
 [[checks]]
 id = "trusted_reference_compare"
 kind = "numeric_compare"
-gate = "preflight"
+gate = "trusted_check"
 runner = "tools/cli/harness_validate_numeric.jl"
 
   [[checks.compare]]
@@ -95,6 +95,8 @@ runner = "tools/cli/harness_validate_numeric.jl"
 ```
 
 Selectors may use `field = "nested.key"` for simple JSON/TOML paths or `pointer = "/nested/0/key"` for JSON Pointer. Names like `observable`, `observable_exact`, or `stderr` are example payload fields, not harness-level types.
+
+Check `gate` values use the same flow gates as the run ledger: `source`, `protocol`, `plan`, `script`, `trusted_check`, `production`, `assembly`, or `close`. Do not introduce separate stage names such as `preflight`, `compute`, or `report`; those are ordinary prose, not gate ids.
 
 For manifest assembly, a run spec may include `assembly.manifest_contract` with only generic clauses: `required_fields`, `nonempty_fields`, `equals`, `list_contains`, `numeric_fields`, `optional_numeric_fields`, `numeric_bounds`, and `evidence_sets`. These clauses refer to manifest field paths; they do not introduce domain types. Run-level provenance such as `sources`, `claims`, and `deviations` is declared once in the protocol / run spec and mechanically compared against the manifest payload; do not repeat paper-specific deviation strings as reusable contract logic, and do not add domain-specific oracle types to the reusable contract.
 
@@ -129,6 +131,8 @@ tools/cli/flow init results/<run> --template results/<run>/flow.toml
 `flow.toml` declares gates and invalidation edges. `progress/events.jsonl` is the append-only state source; `progress/state.toml` is the rebuilt human summary. Record each verifier, worker, local command, or remote job as an `attempt`; record important files as `artifact`s; use `require` before advancing gates. Re-adding an artifact with the same id and a different SHA-256 invalidates the producing gate and downstream gates. Remote jobs never write the event log directly: the main agent records the attempt only after fetching manifests/check outputs.
 
 Default gates are `source`, `protocol`, `plan`, `script`, `trusted_check`, `production`, `assembly`, and `close`. Split a gate only when a separate artifact can fail or be invalidated independently. Use the template in `tools/flow/README.md` as the starting point.
+
+For long sessions, pair the run with a `/goal` condition whose proof is `tools/cli/flow require results/<run> close`. The goal keeps the agent moving; the flow ledger decides whether the scientific run is actually closed. In Codex or Claude Code, the optional Stop hook documented in `tools/flow/README.md` can deterministically continue the session while `tools/cli/flow next results/<run>` has a runnable gate.
 
 `execution_summary.md` is the terse operational summary: what ran, where, what passed, what failed, and which artifacts support the next gate. It is not evidence by itself; it points to manifests, check outputs, and the flow state.
 
@@ -215,7 +219,7 @@ Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-c
 
 7. **Audit the complete protocol and execution plan with independent verifiers.** First dispatch `/verify --mode protocol` against `results/<run>/protocol.toml` and the declared primary sources. The verifier must be a separate agent from the one that drafted or last materially changed the protocol. It must reject hint-backed claims that are not explicitly marked as assumptions. After protocol pass, dispatch `/verify --mode plan` against `reproduce-plan.toml` and `run_spec.json`; by this point trusted references from Step 6 must already be recorded, so the plan audit can check trusted-reference reachability. On pass, continue. On fail or warning, stop and surface the audit report; user steers whether to correct the protocol/plan, record an assumption, or narrow the scope. If any later step adds or changes claims/checks/deviations/routes, return here before running the affected gate.
 
-8. **Run declared preflight checks.** Execute all `[[checks]]` whose `gate = "preflight"` or whose gate is omitted and cheap. `/reproduce-paper` only dispatches the mechanical check kind; domain-specific logic lives in the referenced command or `/verify` prompt. Do not run expensive compute until preflight passes.
+8. **Run declared cheap checks.** Execute all cheap `[[checks]]` attached to `source`, `protocol`, `plan`, or `script`. `/reproduce-paper` only dispatches the mechanical check kind; domain-specific logic lives in the referenced command or `/verify` prompt. Do not run expensive production compute until these gates pass.
 
 9. **Surface the methodology / verification / cross-check figs as default deliverables.** This is the discipline that distinguishes paper reproduction from a sequence of isolated runs: the user gets the verification figures *automatically*, not on request. Concretely:
    - Verification figs always run when the paper declares them.
@@ -230,11 +234,11 @@ Steps 1–8 build and validate the complete protocol; steps 9–13 are the pre-c
 
 13. **Convergence at one point.** Vary the method's declared controlling setting at one point. Confirm the answer stabilizes using the protocol's declared check. On drift, stop. This is a defense layer against "stable but wrong"; steps 11-12 are the primary catch.
 
-14. **Paper-grade compute with compute-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Remote execution is a cell runner only: `squeue`, ssh exit status, and a completed Slurm job are not evidence until fetched manifests and declared checks pass. Every produced manifest must include `evidence_class = "current_run"`, `protocol_hash`, source artifact paths, script hash or git hash when available, declared claim ids, declared deviation ids, stack/profile identity, the setup payload actually used, and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "compute"` before it is marked complete; a failed compute gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
+14. **Paper-grade compute with production-gate checks.** Dispatch the full requested run via `/parameter-scan` + `/slurm` or the declared primitive. Inherit the paper's settings by default. Invoke `Superpowers:brainstorming` only if the cluster offers a real budget choice. Remote execution is a cell runner only: `squeue`, ssh exit status, and a completed Slurm job are not evidence until fetched manifests and declared checks pass. Every produced manifest must include `evidence_class = "current_run"`, `protocol_hash`, source artifact paths, script hash or git hash when available, declared claim ids, declared deviation ids, stack/profile identity, the setup payload actually used, and the fields required by the protocol's manifest checks. Each cell/stage runs all `[[checks]]` whose `gate = "production"` before it is marked complete; a failed production gate blocks dependent cells, aggregation, plots, and reports until repaired or explicitly scoped/deviated.
 
     If any cell overrides shared settings, the assembler must validate the manifest against the merged shared+cell settings and surface a constant/varying settings summary in the result artifact. Do not let a first completed cell define global provenance by accident.
 
-15. **Validate produced artifacts.** Run all `[[checks]]` whose `gate = "assembly"` or `gate = "report"`: freshness, manifest fields, manifest consensus, numeric comparisons, and `/verify result` reports. Reject stale artifacts, old figures, and old data unless their hashes and provenance match the current protocol/script contract. Plots and run reports are blocked until these pass or explicit deviations are recorded.
+15. **Validate produced artifacts.** Run all `[[checks]]` whose `gate = "assembly"` or `gate = "close"`: freshness, manifest fields, manifest consensus, numeric comparisons, and `/verify result` reports. Reject stale artifacts, old figures, and old data unless their hashes and provenance match the current protocol/script contract. Plots and run reports are blocked until these pass or explicit deviations are recorded.
 
 16. **Assemble the close** (writeup handoff per AGENTS.md, embedded here):
    - Walk the run directory: collect every cell manifest, every primitive's CSV / PNG, every script.

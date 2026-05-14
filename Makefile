@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-.PHONY: setup test clean help install $(addprefix install-,$(INSTALLABLE))
+.PHONY: setup core-setup install-flow test test-flow clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
 INSTALLABLE := quarto quimb julia julia-ed itensors netket netket-gpu sse pepskit classical-repro
@@ -30,11 +30,33 @@ help: ## Show available targets and installable tools
 	@echo "Installable tools — run 'make install <name>':"
 	@for t in $(INSTALLABLE); do echo "  $$t"; done
 
-setup: ## Minimal bootstrap — Ion + skills only
-	@command -v ion >/dev/null 2>&1 || { echo "Ion not found. Install: curl -fsSL https://raw.githubusercontent.com/Roger-luo/Ion/main/install.sh | sh"; exit 1; }
+setup: ## Minimal bootstrap — Ion + skills + core CLI tools
+	@set -e; \
+	if ! command -v ion >/dev/null 2>&1; then \
+	  command -v curl >/dev/null 2>&1 || { echo "curl not found. Install Ion, then rerun: make setup"; exit 1; }; \
+	  echo "Ion not found. Installing Ion."; \
+	  curl -fsSL https://raw.githubusercontent.com/Roger-luo/Ion/main/install.sh | sh; \
+	  export PATH="$$HOME/.local/bin:$$PATH"; \
+	fi; \
 	ion add
+	$(MAKE) core-setup
 	@echo ""
 	@echo "Base setup complete. Run 'make domain-setup' to install the domain stack."
+
+core-setup: install-flow ## Build core harness CLI tools
+
+install-flow: ## Build the generic workflow gate ledger CLI
+	@set -e; \
+	. "$$HOME/.cargo/env" 2>/dev/null || true; \
+	if ! command -v cargo >/dev/null 2>&1; then \
+	  command -v curl >/dev/null 2>&1 || { echo "curl not found. Install Rust/Cargo, then rerun: make setup"; exit 1; }; \
+	  echo "Cargo not found. Installing Rust/Cargo via rustup."; \
+	  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+	  . "$$HOME/.cargo/env"; \
+	fi; \
+	cargo build --release --manifest-path tools/flow/Cargo.toml; \
+	tools/cli/flow help >/dev/null; \
+	echo "flow CLI ready: tools/cli/flow"
 
 # Stable KEY=VALUE contract for the zlp-harness plugin's zlp-onboard skill.
 # Adding new keys is additive; older skill versions ignore unknown lines.
@@ -148,6 +170,9 @@ install-classical-repro: ## Install Julia stacks for ED, DMRG, QMC/SSE, and CTMR
 render: ## Render a markdown file to HTML. Usage: make render FILE=<path.md>
 	@if [ -z "$(FILE)" ]; then echo "Usage: make render FILE=<path.md>"; exit 1; fi
 	tools/cli/render "$(FILE)"
+
+test-flow: ## Test the generic workflow gate ledger
+	cargo test --manifest-path tools/flow/Cargo.toml
 
 clean: ## Remove generated HTML artifacts
 	find . -name '*.html' -not -path './tools/templates/*' -delete

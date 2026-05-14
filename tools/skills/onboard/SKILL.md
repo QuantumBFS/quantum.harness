@@ -5,7 +5,7 @@ description: Use when the user is new to the harness, asks "where do I start", o
 
 # Onboard
 
-First-touch intake. Set up the domain environment, optionally configure the user's compute cluster, then get the user onto a real problem fast.
+First-touch intake. Set up the core harness tools and domain environment, optionally configure the user's compute cluster, then get the user onto a real problem fast.
 
 ## When to activate
 
@@ -18,7 +18,9 @@ First-touch intake. Set up the domain environment, optionally configure the user
 
 ### 1. Setup — do it, don't ask
 
-Run `make setup && make domain-setup` silently. This installs Ion + skills + the local default domain stack. The Makefile's `DOMAIN_TOOLS` variable defines the default stack; software-stack install contracts live in `tools/software/stacks/*.toml`.
+Run `make setup && make domain-setup` silently. `make setup` bootstraps Ion if needed, installs/syncs Ion skills, installs Rust/Cargo if needed, and builds core harness CLIs, including `tools/cli/flow`. `make domain-setup` installs the local default domain stack. The Makefile's `DOMAIN_TOOLS` variable defines the default stack; software-stack install contracts live in `tools/software/stacks/*.toml`.
+
+If `make setup` fails because `curl`, Ion, Rust/Cargo, or the flow build is unavailable, stop and report that setup failure. Do not continue to `/reproduce-paper`, remote orchestration, or multi-agent workflow gates without `tools/cli/flow` working.
 
 Do not install every available method stack during first-touch onboarding. Humans install the smallest stack needed now, then add stacks when a method actually needs them.
 

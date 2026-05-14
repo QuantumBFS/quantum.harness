@@ -103,6 +103,8 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 - No silent weakening. Any change in paper-declared setup, implementation route, data-generation route, constraints, budget, or uncertainty method must be recorded as a deviation before it can support a reproduction claim.
 - No first-cell provenance. Per-cell run-spec overrides are allowed, but assembly must validate each manifest against the merged shared+cell settings and provenance, then report settings as constant vs varying. Never summarize a correctness-affecting setting, budget, or uncertainty rule from the first completed manifest unless a manifest-consensus check has proved it is global.
 - Failed checks block claims. A failed protocol, script, command, manifest, freshness, consensus, numeric, or result check stops the workflow until repaired, scoped down, or recorded as a justified assumption/deviation.
+- Failed checks enter the correction loop: classify the mismatch, locate the earliest wrong layer, revise that layer, invalidate downstream artifacts, rerun affected gates, then re-verify.
+- Use artifact-scoped subagents, not permanent domain personas: source/protocol, plan/run-spec, script, result, mismatch, and close reviewers each receive the primary source context and exact artifact under review. KB-only review cannot close a scientific gate.
 - The agent that writes or materially edits a reproduction protocol, script, check command, aggregator, or result report cannot be the sole verifier of that artifact. Self-checks catch syntax and smoke failures; independent `/verify` or separate-agent review closes the verification loop.
 - Stale artifacts or artifacts missing required provenance cannot support conclusions. Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
 
@@ -182,7 +184,7 @@ Problem-solving primitives (generic; topic-agnostic, compose with the problem sk
 - **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `tools/cluster/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
 - **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
 - **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers. Absorbs the writeup-handoff close (consolidated script + run report).
-- **verify** — dispatch a high-effort independent review subagent to audit an artifact against its declared reference. Modes: `protocol` (TOML claims vs primary sources), `kb-card` (anchors vs literature), `script` (script vs protocol and paper methodology), `result` (produced artifacts vs declared references), `close` (final report / consolidated script / manifests vs protocol). Read-only; emits a structured diff report. Compose with `/reproduce-paper` (protocol, per figure, and final report) and as a pre-commit gate after editing important artifacts.
+- **verify** — dispatch a high-effort independent review subagent to audit an artifact against its declared reference. Modes: `protocol` (TOML claims vs primary sources), `plan` (plan/run-spec vs protocol), `kb-card` (anchors vs literature), `script` (script vs protocol and paper methodology), `result` (produced artifacts vs declared references), `mismatch` (failed gate triage), `close` (final report / consolidated script / manifests vs protocol). Inspection-only; emits a structured diff report. Compose with `/reproduce-paper` (protocol, plan, per figure, mismatch, and final report) and as a pre-commit gate after changing important artifacts.
 
 External/support skills:
 - **quimb-tensor-network** — quimb/QuTiP tensor network: MPS, PEPS, DMRG, TEBD
@@ -198,6 +200,7 @@ External/support skills:
 ## Tool Hierarchy
 
 - CLI tools: `tools/cli/` — atomic shell scripts
+- Flow state: `tools/flow/` — generic Rust gate ledger for multi-gate, multi-agent, or remote workflows. It records append-only `progress/events.jsonl` and derives `progress/state.toml`; use one child flow per independent paper/run and a parent flow only for aggregate campaign gates.
 - MCP tools: `tools/mcp/` — Claude-callable wrappers
 - Skills: `tools/skills/` — conversational workflows (managed by Ion)
 - Cluster profiles: `tools/cluster/` — per-cluster defaults (partitions, sbatch idioms, modules) consulted by cluster-aware skills via `tools/cluster/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Skills stay cluster-agnostic; cluster specifics live in profile cards.
@@ -246,7 +249,7 @@ ion self --help                          # Manage the Ion install
 
 ## Setup & Tool Installation
 
-- `make setup` performs the **minimum bootstrap only** — it installs Ion and adopts the declared skills. It does NOT install heavy domain tools.
+- `make setup` performs the **minimum bootstrap only** — it bootstraps Ion and Rust/Cargo if needed, installs/syncs Ion skills, and builds core harness CLI tools such as `tools/cli/flow`. It does NOT install heavy domain tools.
 - Install domain tools **on demand** with `make install <tool>`. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.

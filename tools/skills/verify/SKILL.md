@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Use after writing or modifying an important artifact (protocol TOML, knowledge-base card, reproduction script, computed result, final run report) to dispatch a high-effort review subagent that audits the artifact against its declared reference. Generic over target — protocol vs primary sources, KB card vs literature, script vs protocol/methodology, result vs paper-reported numbers, close vs protocol/artifacts.
+description: Use after writing or modifying an important artifact (protocol TOML, run plan, reproduction script, computed result, final run report, KB card) or when a reproduction gate fails and needs independent mismatch triage.
 ---
 
 # verify
@@ -23,7 +23,7 @@ The verifier must be independent from the authoring agent. If the current agent 
 
 - `<artifact>` — file path of the thing to verify.
 - `--against <reference>` — optional. Auto-inferred when obvious (KB card cites literature folder; script cites paper MD via comment header).
-- `--mode <protocol | kb-card | script | result | close>` — optional selector; the skill picks from the artifact extension and content when absent.
+- `--mode <protocol | plan | kb-card | script | result | mismatch | close>` — optional selector; the skill picks from the artifact extension and content when absent.
 
 ## Dispatch
 
@@ -36,6 +36,16 @@ Spawn an independent review subagent using the same model, reasoning/effort, san
 - Request a structured report (per-row / per-axis status with severity tags).
 
 Inspection-only on both artifact and reference. Do not downgrade the model or effort for speed — parity-with-doer is the point.
+
+Minimum context bundle:
+
+- The artifact under review, verbatim or with exact line ranges.
+- The primary source or exact primary-source excerpts when available.
+- The current `protocol.toml` when the artifact is downstream of a protocol.
+- Relevant `reproduce-plan.toml`, `run_spec.json`, scripts, manifests, figures, and check outputs for downstream artifacts.
+- The exact question: what claim, gate, or mismatch is being audited?
+
+KB cards, rendered notes, old results, and prior conversation summaries may be included as hints, but they cannot substitute for primary sources or current-run artifacts.
 
 ## Per-mode axes
 
@@ -64,6 +74,21 @@ Axes:
 
 Severity tags: `supported`, `unsupported`, `hint-leak`, `assumption`, `deviation`, `missing-check`, `non-generic`.
 
+### `plan`
+
+Compare `reproduce-plan.toml` and `run_spec.json` against the protocol and relevant primary-source methodology passages. This is the bridge audit: it checks whether the planned execution would actually produce evidence for the paper-derived claims.
+
+Axes:
+
+1. **Claim-to-route coverage** — every non-assumption protocol claim has an executable route, artifact target, and declared check, or is explicitly marked as a gap.
+2. **Figure dependency graph** — shared artifacts and dependency edges are consistent with the protocol; no figure depends on an undeclared or stale artifact.
+3. **Run-spec provenance** — cells carry the required source ids, claim ids, deviation ids, stack/profile identity, settings, and manifest contract.
+4. **Trusted-reference reachability** — the selected trusted check exercises the same code path and observable path as production at easier scale.
+5. **Remote/local clarity** — cluster execution, if used, is only a cell-running mechanism; monitoring, fetch, and manifest checks are declared.
+6. **Hint quarantine** — old data, old figures, old plans, and KB hints are not accepted as evidence.
+
+Severity tags: `covered`, `missing-route`, `plan-gap`, `stale-dependency`, `provenance-gap`, `weak-reference`, `hint-leak`.
+
 ### `script`
 
 Compare the script against the protocol TOML plus the cited primary methodology section. Four axes:
@@ -83,6 +108,20 @@ For each numerical claim (energy, gap, density, exponent, scaling collapse):
 - Compare to the script's output. ✓ within paper's error bar, ⚠ outside paper but within convergence margin, ✗ disagrees beyond budget.
 - Surface the verification table the paper itself reports (if any) and confirm reproduction.
 - Confirm each result artifact is `current_run` evidence with matching protocol/script hashes, or mark it stale and unsupported.
+
+### `mismatch`
+
+Audit a failed gate or contradictory result. The input is a failure packet: expected claim/check, observed output, protocol, relevant source passages, scripts, manifests, and any prior repair attempt. The verifier classifies the earliest wrong layer and invalidation scope; it does not prescribe fixes.
+
+Axes:
+
+1. **Observed-vs-expected mismatch** — state the concrete disagreement and cite the artifacts supporting both sides.
+2. **Mismatch class** — one of `source_misread`, `unsupported_assumption`, `convention_mismatch`, `plan_gap`, `script_bug`, `stack_or_remote_failure`, `stale_or_provenance_gap`, `insufficient_convergence`, `statistical_noise`, `paper_ambiguity`, or `out_of_scope`.
+3. **Earliest wrong layer** — source/protocol, trusted reference, plan/run spec, script/check/aggregator, stack/cluster, raw cells, figure/report, or paper scope.
+4. **Invalidation scope** — downstream artifacts and gates that can no longer support claims.
+5. **Evidence sufficiency** — whether the failure packet contains enough primary/current-run evidence to classify the mismatch, or which evidence is missing.
+
+Severity tags: `classified`, `under-evidenced`, `source-layer`, `plan-layer`, `script-layer`, `compute-layer`, `assembly-layer`, `report-layer`, `scope-layer`.
 
 ### `close`
 
@@ -106,7 +145,7 @@ Markdown report at `results/<run>/verify/verify_<artifact-stem>_<date>.md`. The 
 ```markdown
 # /verify report — <artifact> — <date>
 
-**Mode**: protocol | kb-card | script | result | close.
+**Mode**: protocol | plan | kb-card | script | result | mismatch | close.
 **Reference**: <path / lines>.
 
 | Axis / Row | Status | Severity | Notes |
@@ -121,6 +160,8 @@ Markdown report at `results/<run>/verify/verify_<artifact-stem>_<date>.md`. The 
 
 **No "Action items" section.** Translating findings into next-step options is the *calling skill's* job, not the subagent's (see Composition below).
 
+When `/verify` is part of a `tools/flow` run, the verifier still does not edit state. The caller records the review as an `attempt` on the relevant gate, attaches this report path, and finishes the attempt with `pass`, `fail`, or `blocked`. A failed report triggers the calling workflow's correction loop and downstream invalidation.
+
 ## Discipline (hard rules)
 
 - Inspection-only. Never modify the artifact from inside this skill.
@@ -133,7 +174,7 @@ Markdown report at `results/<run>/verify/verify_<artifact-stem>_<date>.md`. The 
 
 ## Composition
 
-- Called by `/reproduce-paper` for the protocol before compute, for each (figure, script, result) triple, and for the final close before claiming reproduction.
+- Called by `/reproduce-paper` for protocol, plan/run-spec, script, result, mismatch, and close audits.
 - Called by KB-card or script authors as a pre-commit gate.
 - The verifier surfaces what is wrong; it does not decide what to do.
 - **After the report lands, the calling skill (or the main agent) translates the findings into 2-3 Superpowers-style options** (Recommended first, each with one-line pros / cons) and presents them via `AskUserQuestion`. The user ratifies; only then does cleanup happen. Splitting audit (subagent) from prescription (main-agent fork) preserves the user's steering wheel.
@@ -144,6 +185,8 @@ Markdown report at `results/<run>/verify/verify_<artifact-stem>_<date>.md`. The 
 - Inventing a tag for an untagged numerical entry.
 - Treating KB-sourced protocol claims as primary-source support.
 - Treating old scripts, old plans, old data, or old figures as evidence without current hashes/provenance.
+- Skipping `plan` audit when the run plan or cell spec materially determines what will be computed.
+- Repairing a nontrivial mismatch without classifying the earliest wrong layer and invalidation scope.
 - Adding paper/domain-specific validator types to the generic protocol layer.
 - Closing a final run report without `close`-mode review or an equivalent independent reviewer.
 - "Verified" without per-axis status table.
