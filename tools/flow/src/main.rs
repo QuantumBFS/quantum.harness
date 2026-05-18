@@ -21,6 +21,16 @@ const FLOW_TEMPLATE_FILE: &str = "flow.toml";
 const PROTOCOL_FILE: &str = "protocol.toml";
 const ACTOR_ENV: &str = "FLOW_ACTOR_ID";
 
+// Identity is unforgeable-by-label: either host-injected via FLOW_ACTOR_ID,
+// or derived from the parent process id. Different subagent processes get
+// different PPIDs naturally; the same agent across calls keeps the same PPID.
+fn current_identity() -> String {
+    env::var(ACTOR_ENV)
+        .ok()
+        .filter(|v| !v.is_empty())
+        .unwrap_or_else(|| format!("ppid:{}", std::os::unix::process::parent_id()))
+}
+
 // One-word generic check kinds. Each names what the check does, never what
 // artifact it touches. Domain semantics live in protocol.toml fields.
 const CHECK_AUDIT: &str = "audit"; // verifier ran with a distinct actor
@@ -44,7 +54,7 @@ struct Attempt {
     gate: String,
     kind: String,
     actor_label: String,
-    actor_identity: Option<String>,
+    actor_identity: String,
     executor: Option<String>,
     command: Option<String>,
     report: Option<String>,
@@ -66,7 +76,7 @@ struct Override {
     gate: String,
     reason: String,
     actor_label: String,
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 
@@ -77,7 +87,7 @@ struct Decision {
     choice: String,
     reason: Option<String>,
     actor_label: String,
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 
@@ -87,7 +97,7 @@ struct Deviation {
     statement: String,
     reason: Option<String>,
     actor_label: String,
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 
@@ -128,8 +138,7 @@ enum Event {
         gate: String,
         kind: String,
         actor_label: String,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        actor_identity: Option<String>,
+        actor_identity: String,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         executor: Option<String>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -158,8 +167,7 @@ enum Event {
         gate: String,
         reason: String,
         actor_label: String,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        actor_identity: Option<String>,
+        actor_identity: String,
         at: String,
     },
     #[serde(rename = "decision_recorded")]
@@ -170,8 +178,7 @@ enum Event {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         reason: Option<String>,
         actor_label: String,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        actor_identity: Option<String>,
+        actor_identity: String,
         at: String,
     },
     #[serde(rename = "deviation_recorded")]
@@ -181,8 +188,7 @@ enum Event {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         reason: Option<String>,
         actor_label: String,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        actor_identity: Option<String>,
+        actor_identity: String,
         at: String,
     },
     #[serde(rename = "child_attached")]
@@ -579,7 +585,7 @@ fn cmd_attempt_start(args: &[String]) -> Result<()> {
     let gate = args[2].clone();
     let kind = required_option(args, "--kind")?;
     let actor_label = required_option(args, "--actor")?;
-    let actor_identity = env::var(ACTOR_ENV).ok().filter(|v| !v.is_empty());
+    let actor_identity = current_identity();
     let executor = option_value(args, "--executor");
     let command = option_value(args, "--command");
     with_flow_lock(dir, || {
@@ -693,7 +699,7 @@ fn cmd_override(args: &[String]) -> Result<()> {
     let check_id = args[1].clone();
     let reason = required_option(args, "--reason")?;
     let actor_label = option_value(args, "--actor").unwrap_or_else(|| "user".to_string());
-    let actor_identity = env::var(ACTOR_ENV).ok().filter(|v| !v.is_empty());
+    let actor_identity = current_identity();
     with_flow_lock(dir, || {
         let state = rebuild(dir)?;
         let protocol = load_protocol(dir)?;
@@ -740,7 +746,7 @@ fn cmd_decide(args: &[String]) -> Result<()> {
     let choice = required_option(args, "--choice")?;
     let reason = option_value(args, "--reason");
     let actor_label = option_value(args, "--actor").unwrap_or_else(|| "user".to_string());
-    let actor_identity = env::var(ACTOR_ENV).ok().filter(|v| !v.is_empty());
+    let actor_identity = current_identity();
     with_flow_lock(dir, || {
         ensure_flow(dir)?;
         append_event(
@@ -775,7 +781,7 @@ fn cmd_deviate(args: &[String]) -> Result<()> {
     let statement = required_option(args, "--statement")?;
     let reason = option_value(args, "--reason");
     let actor_label = option_value(args, "--actor").unwrap_or_else(|| "user".to_string());
-    let actor_identity = env::var(ACTOR_ENV).ok().filter(|v| !v.is_empty());
+    let actor_identity = current_identity();
     with_flow_lock(dir, || {
         ensure_flow(dir)?;
         append_event(
@@ -1180,41 +1186,18 @@ fn eval_audit(state: &State, check: &Check) -> (bool, String) {
             );
         }
         for p in &producers {
-            let identity_clash =
-                matches!((&p.actor_identity, &v.actor_identity), (Some(a), Some(b)) if a == b);
-            if identity_clash {
+            if p.actor_identity == v.actor_identity {
                 return (
                     false,
                     format!(
                         "self-audit: identity {} produced and audited",
-                        v.actor_identity.clone().unwrap_or_default()
-                    ),
-                );
-            }
-            if p.actor_identity.is_none()
-                && v.actor_identity.is_none()
-                && p.actor_label == v.actor_label
-            {
-                return (
-                    false,
-                    format!(
-                        "self-audit: label {} (no identity stamp; set FLOW_ACTOR_ID at spawn)",
-                        v.actor_label
+                        v.actor_identity
                     ),
                 );
             }
         }
     }
-    let stamped = auditors.iter().all(|a| a.actor_identity.is_some());
-    let detail = if stamped {
-        format!("audited by {} distinct actor(s)", auditors.len())
-    } else {
-        format!(
-            "audited by {} actor(s) [label-only; no FLOW_ACTOR_ID]",
-            auditors.len()
-        )
-    };
-    (true, detail)
+    (true, format!("audited by {} distinct actor(s)", auditors.len()))
 }
 
 fn eval_run(dir: &Path, check: &Check) -> (bool, String) {
@@ -1543,8 +1526,7 @@ struct StateAttempt {
     gate: String,
     kind: String,
     actor_label: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    actor_identity: Option<String>,
+    actor_identity: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     executor: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1571,8 +1553,7 @@ struct StateRecord {
     gate: String,
     reason: String,
     actor_label: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 
@@ -1584,8 +1565,7 @@ struct StateDecision {
     #[serde(skip_serializing_if = "Option::is_none")]
     reason: Option<String>,
     actor_label: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 
@@ -1596,8 +1576,7 @@ struct StateDeviation {
     #[serde(skip_serializing_if = "Option::is_none")]
     reason: Option<String>,
     actor_label: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    actor_identity: Option<String>,
+    actor_identity: String,
     at: String,
 }
 

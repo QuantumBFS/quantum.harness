@@ -692,16 +692,23 @@ gate = "protocol"
         template.to_str().unwrap(),
     ]);
 
-    let producer = assert_ok(&[
-        "attempt",
-        "start",
-        run_dir.to_str().unwrap(),
-        "protocol",
-        "--kind",
-        "produce",
-        "--actor",
-        "agent:author",
-    ]);
+    let producer = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "protocol",
+                "--kind",
+                "produce",
+                "--actor",
+                "agent:author",
+            ],
+            &[("FLOW_ACTOR_ID", "process-author")],
+        )
+        .stdout,
+    )
+    .to_string();
     assert_ok(&[
         "attempt",
         "finish",
@@ -709,16 +716,23 @@ gate = "protocol"
         producer.trim(),
     ]);
 
-    let auditor = assert_ok(&[
-        "attempt",
-        "start",
-        run_dir.to_str().unwrap(),
-        "protocol",
-        "--kind",
-        "audit",
-        "--actor",
-        "agent:independent-reviewer",
-    ]);
+    let auditor = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "protocol",
+                "--kind",
+                "audit",
+                "--actor",
+                "agent:independent-reviewer",
+            ],
+            &[("FLOW_ACTOR_ID", "process-reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
     let report = run_dir.join("verify").join("independent.md");
     write(&report, "independent review\n");
     assert_ok(&[

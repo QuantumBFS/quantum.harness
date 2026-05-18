@@ -5,7 +5,7 @@
 The tool is intentionally small:
 
 - `gate` — a checkpoint whose status (`pending` / `passed` / `failed`) is **derived live** from the protocol's `[[checks]]` and the event log. Never stored; never declared.
-- `attempt` — one actor trying to satisfy one gate. Roles are metadata: `--kind audit`, `--actor agent:source-reviewer`. Identity comes from the `FLOW_ACTOR_ID` env var (host-injected); `--actor` is the label.
+- `attempt` — one actor trying to satisfy one gate. Roles are metadata: `--kind audit`, `--actor agent:source-reviewer`. The `--actor` flag is the human-readable label; the unforgeable identity comes from `FLOW_ACTOR_ID` env when set, or the parent process id (`ppid:<n>`) when it isn't. Different subagent processes get different PPIDs naturally; same agent across calls keeps the same PPID. The `audit` check compares identity, not labels.
 - `artifact` — a file with a stable content hash, an optional producer attempt, and a `deps` snapshot of any source hashes referenced by `fresh` checks at registration time.
 - `decision` — a recorded fork choice: `flow decide <run> --id <id> --question "..." --choice "..."`. Surfaces in `flow status` so branches aren't buried in chat.
 - `deviation` — a recorded departure from the protocol-declared contract: `flow deviate <run> --id <id> --statement "..."`. Renders alongside protocol-declared `[[deviations]]`.
