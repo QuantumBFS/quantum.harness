@@ -81,5 +81,5 @@ The plan file and `progress/events.jsonl` are durable. Re-running this skill on 
 
 - `/solve` — single-problem loop. This skill runs atop solve when the user wants the full paper.
 - `/report` — renders the run dir as a shareable HTML page.
-- `/verify` — older name for the audit subagent pattern; still callable.
+- `/verify` — audit subagent dispatcher; the audit-kind attempt this skill records is a `/verify` call.
 - `/parameter-scan`, `/scaling-fit`, `/cross-method-check`, `/slurm` — primitives this skill orchestrates.

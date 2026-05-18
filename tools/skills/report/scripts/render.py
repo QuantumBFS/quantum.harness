@@ -221,9 +221,8 @@ def status_strip_html(protocol: dict, editorial: dict, run_dir: Path, overrides:
         popover = ed.get("popover") or c.get("statement", "")
         chips.append(chip_for(status, label, popover))
 
-    AUDIENCE_KINDS = {"audit", "run", "near"}
     for ch in checks:
-        if not (ch.get("report") or ch.get("kind") in AUDIENCE_KINDS):
+        if not ch.get("audience"):
             continue
         chid = ch.get("id", "")
         status = claim_status_from_verify(chid, run_dir)
@@ -381,10 +380,10 @@ def provenance_html(run_id: str, protocol: dict, flow_state: dict | None, n_cell
 
 _VERDICT_ICONS = {"match": "✓", "partial": "◐", "fail": "✗", "unknown": "?"}
 _VERDICT_LABELS = {
-    "match": "Reproduced",
-    "partial": "Partial reproduction",
-    "fail": "Fails to reproduce",
-    "unknown": "Verdict pending",
+    "match": "Pass",
+    "partial": "Partial",
+    "fail": "Fail",
+    "unknown": "Pending",
 }
 
 
@@ -544,15 +543,10 @@ def main() -> int:
         or ("Differences from the paper" if protocol.get("deviations") else "No declared deviations.")
     )
 
-    # Derive run_id, IDs, URLs
     run_id = artifact.get("run_id") or run_dir.name
     paper_id = artifact.get("paper", "")
-    # Match new-style (e.g. 2305.18541) or old-style (e.g. cond-mat/9507087) arXiv IDs.
-    arxiv_match = re.search(r"(\d{4}\.\d{4,5})|([a-z\-]+/\d{7})", paper_id)
-    arxiv_id = arxiv_match.group(0) if arxiv_match else paper_id.removeprefix("arXiv:")
+    source_url = artifact.get("url", "")
 
-    # Authors / title / venue: prefer explicit [artifact] fields; otherwise
-    # try the first source's note ("Authors. Venue (year).").
     authors = artifact.get("authors", "")
     paper_title = artifact.get("title", "")
     venue = artifact.get("venue", "")
@@ -566,19 +560,21 @@ def main() -> int:
             if not venue:
                 venue = rest.strip().rstrip(".").strip()
 
-    # Topbar paper line: assemble conditionally so empty fields don't leak
-    # bare separators (`<em></em>`, dangling em-dash, etc.).
     parts = []
     if authors:
         parts.append(f"<b>{html.escape(authors)}</b>")
     if paper_title:
         parts.append(f"<em>{html.escape(paper_title)}</em>")
     topbar_byline = " &mdash; ".join(parts)
+    link_html = (
+        f'<a href="{html.escape(source_url)}">{html.escape(source_url)}</a>'
+        if source_url else ""
+    )
     topbar_paper_html = (
         f'<span class="id">{html.escape(paper_id)}</span>'
         + (topbar_byline + " " if topbar_byline else "")
-        + (html.escape(venue) + " &middot; " if venue else "")
-        + f'<a href="https://arxiv.org/abs/{arxiv_id}">arxiv.org/abs/{arxiv_id}</a>'
+        + (html.escape(venue) + " &middot; " if venue and link_html else "")
+        + link_html
     )
 
     # Glossary JSON (key matches the data-term attribute on each .sym span;

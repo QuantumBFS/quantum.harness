@@ -54,7 +54,7 @@ When the audit `[[checks]]` fail (editorial sentence with no `sourced_by`, chip 
 | Override | `flow override <run-dir> <check-id> --reason "<text>"`. Recorded forever; the HTML banner shows ⊘. |
 | Stop | The report is not produced. |
 
-Never edit `render.py`, `preflight.py` (does not exist anymore), `run-report.md`, or `editorial.json` from the main agent to make a check pass. The renderer is mechanical; if it can't ship, the upstream evidence is missing.
+Never edit `render.py`, `run-report.md`, or `editorial.json` from the main agent to make a check pass. The renderer is mechanical; if it can't ship, the upstream evidence is missing.
 
 ## Bypass banner
 

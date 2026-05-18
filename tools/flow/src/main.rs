@@ -17,7 +17,6 @@ type Result<T> = std::result::Result<T, String>;
 const GATE_PENDING: &str = "pending";
 const GATE_PASSED: &str = "passed";
 const GATE_FAILED: &str = "failed";
-const GATE_BLOCKED: &str = "blocked";
 const GATE_INVALIDATED: &str = "invalidated";
 const FLOW_TEMPLATE_FILE: &str = "flow.toml";
 const PROTOCOL_FILE: &str = "protocol.toml";
@@ -187,14 +186,12 @@ fn run() -> Result<()> {
         "status" => cmd_status(&args),
         "next" => cmd_next(&args),
         "require" => cmd_require(&args),
-        "gate" => cmd_gate(&args),
         "artifact" => cmd_artifact(&args),
         "attempt" => cmd_attempt(&args),
         "check" => cmd_check(&args),
         "override" => cmd_override(&args),
         "invalidate" => cmd_invalidate(&args),
         "attach" => cmd_attach(&args),
-        "rebuild" => cmd_rebuild(&args),
         "-h" | "--help" | "help" => {
             println!("{}", usage());
             Ok(())
@@ -204,7 +201,7 @@ fn run() -> Result<()> {
 }
 
 fn usage() -> String {
-    "usage: harness-flow <init|status|next|require|gate|artifact|attempt|check|override|invalidate|attach|rebuild> ..."
+    "usage: harness-flow <init|status|next|require|artifact|attempt|check|override|invalidate|attach> ..."
         .to_string()
 }
 
@@ -294,35 +291,6 @@ fn cmd_require(args: &[String]) -> Result<()> {
     } else {
         Err(format!("{gate} not passed"))
     }
-}
-
-fn cmd_gate(args: &[String]) -> Result<()> {
-    if args.len() < 3 || args[0] != "add" {
-        return Err(
-            "usage: harness-flow gate add <dir> <gate> [--requires a,b] [--invalidates x,y]"
-                .to_string(),
-        );
-    }
-    let dir = Path::new(&args[1]);
-    let id = args[2].clone();
-    let requires = option_list(args, "--requires")?;
-    let invalidates = option_list(args, "--invalidates")?;
-    with_flow_lock(dir, || {
-        ensure_flow(dir)?;
-        append_event(
-            dir,
-            &event(
-                "gate_added",
-                vec![
-                    ("id", Value::String(id)),
-                    ("requires", Value::Array(requires)),
-                    ("invalidates", Value::Array(invalidates)),
-                ],
-            ),
-        )?;
-        rebuild(dir)?;
-        Ok(())
-    })
 }
 
 fn cmd_artifact(args: &[String]) -> Result<()> {
@@ -442,8 +410,6 @@ fn cmd_attempt_start(args: &[String]) -> Result<()> {
     })
 }
 
-// attempt finish runs the gate's declared checks from protocol.toml and
-// derives status from check results. The caller does not pass --status.
 fn cmd_attempt_finish(args: &[String]) -> Result<()> {
     if args.len() < 3 {
         return Err(
@@ -472,8 +438,7 @@ fn cmd_attempt_finish(args: &[String]) -> Result<()> {
             return Err(format!("stale attempt: {id}"));
         }
 
-        // Record finish event first so checks see this attempt as finished
-        // when they read the rebuilt state.
+        // Record finish before evaluating so checks see this attempt as finished.
         let report_value = report.clone().unwrap_or_default();
         append_event(
             dir,
@@ -486,8 +451,6 @@ fn cmd_attempt_finish(args: &[String]) -> Result<()> {
             ),
         )?;
         let state = rebuild(dir)?;
-
-        // Evaluate the gate's checks, derive status from results.
         let (status, results) = evaluate_gate(dir, &state, &attempt.gate);
         append_event(
             dir,
@@ -526,8 +489,6 @@ fn cmd_attempt_finish(args: &[String]) -> Result<()> {
     })
 }
 
-// check runs the gate's declared checks without finishing an attempt.
-// Useful for dry-runs and for the agent to see what's missing.
 fn cmd_check(args: &[String]) -> Result<()> {
     if args.len() != 2 {
         return Err("usage: harness-flow check <dir> <gate>".to_string());
@@ -550,10 +511,8 @@ fn cmd_check(args: &[String]) -> Result<()> {
     Ok(())
 }
 
-// override records a user-confirmed bypass of one declared check. The agent
-// invokes this only after presenting the bypass option through the host
-// platform's option API (AskUserQuestion in Claude Code, the equivalent in
-// Codex) and getting user confirmation. The CLI does no interactive prompt.
+// Agent invokes only after presenting the bypass via the host's option API
+// and getting user confirmation; the CLI itself is non-interactive.
 fn cmd_override(args: &[String]) -> Result<()> {
     if args.len() < 3 {
         return Err(
@@ -705,17 +664,6 @@ fn cmd_attach(args: &[String]) -> Result<()> {
             ),
         )?;
         rebuild(parent)?;
-        Ok(())
-    })
-}
-
-fn cmd_rebuild(args: &[String]) -> Result<()> {
-    if args.len() != 1 {
-        return Err("usage: harness-flow rebuild <dir>".to_string());
-    }
-    let dir = Path::new(&args[0]);
-    with_flow_lock(dir, || {
-        rebuild(dir)?;
         Ok(())
     })
 }
@@ -926,8 +874,7 @@ fn ready_gates(state: &State) -> Vec<String> {
         .keys()
         .filter(|gate| {
             let status = gate_status(state, gate);
-            (status == GATE_PENDING || status == GATE_INVALIDATED || status == GATE_BLOCKED
-                || status == GATE_FAILED)
+            (status == GATE_PENDING || status == GATE_INVALIDATED || status == GATE_FAILED)
                 && requirements_passed(state, gate)
         })
         .cloned()
@@ -1049,8 +996,7 @@ fn persist_flow_template(dir: &Path, template_text: &str) -> Result<()> {
     }
 }
 
-// load_protocol reads <run-dir>/protocol.toml if present. Absent file means
-// "no contract declared" — flow runs no checks and passes attempts trivially.
+// Absent file = no contract declared; flow runs no checks and passes attempts trivially.
 fn load_protocol(dir: &Path) -> Result<Protocol> {
     let path = dir.join(PROTOCOL_FILE);
     if !path.exists() {
@@ -1060,10 +1006,6 @@ fn load_protocol(dir: &Path) -> Result<Protocol> {
     toml::from_str(&text).map_err(|e| format!("protocol.toml parse error: {e}"))
 }
 
-// Evaluate every check declared on the given gate and derive its status.
-// Returns (status, [CheckResult, ...]). Status passes when every declared
-// check passes or has a recorded override; fails when any check fails
-// without an override; passes when no checks are declared (degraded mode).
 fn evaluate_gate(dir: &Path, state: &State, gate: &str) -> (String, Vec<CheckResult>) {
     let protocol = match load_protocol(dir) {
         Ok(p) => p,
@@ -1129,13 +1071,16 @@ fn eval_audit(state: &State, check: &Check) -> (bool, String) {
     let producers: Vec<&Attempt> = state
         .attempts
         .values()
-        .filter(|a| a.gate == check.gate && a.kind != "audit" && a.finished)
+        .filter(|a| a.gate == check.gate && a.kind != CHECK_AUDIT && a.finished)
         .collect();
     let auditors: Vec<&Attempt> = state
         .attempts
         .values()
-        .filter(|a| a.gate == check.gate && a.kind == "audit" && a.finished)
+        .filter(|a| a.gate == check.gate && a.kind == CHECK_AUDIT && a.finished)
         .collect();
+    if producers.is_empty() {
+        return (false, "no producer attempt to audit".to_string());
+    }
     if auditors.is_empty() {
         return (false, "no audit attempt finished".to_string());
     }

@@ -9,6 +9,7 @@ paper = ""             # arXiv id, DOI, or short paper id (e.g. "arXiv:2305.1854
 title = ""             # paper title; rendered as italicized topbar text
 authors = ""           # comma-separated author list; rendered bold in topbar
 venue = ""             # journal/year string (e.g. "PRX Quantum 4, 040317 (2023)")
+url = ""               # canonical URL for the source (arXiv, DOI, journal page); rendered as topbar link
 scope = "full-paper"   # full-paper | main-results | figure-subset | custom
 run_id = ""
 description = ""
@@ -34,7 +35,7 @@ assumption = false
 # ─── checks ──────────────────────────────────────────────────────────────────
 # Six generic kinds. Each names what the check does, never what artifact it
 # touches:
-#   audit   — a verify-kind attempt with an actor distinct from the producer
+#   audit   — an audit-kind attempt with an actor distinct from the producer
 #   run     — execute a shell command; exit 0 = pass
 #   exists  — declared paths/fields are present
 #   agree   — declared field values match across artifacts
@@ -42,17 +43,23 @@ assumption = false
 #   fresh   — artifact mtime ≥ source mtime
 # Paper-specific or skill-specific names belong in the data values (paths,
 # claims, ids) — never in the `kind` field.
+# `claims = [...]` on each check is informational metadata for /report's chip
+# resolution; flow itself does not enforce claim coverage.
+# `audience = true` opts a check into the rendered HTML's audience-facing
+# chip strip; default false keeps internal checks out of the deliverable.
 
 [[checks]]
 id = "protocol_audit"
 kind = "audit"
 gate = "protocol"
+audience = true
 claims = ["claim.example"]
 
 [[checks]]
 id = "script_audit"
 kind = "audit"
 gate = "script"
+audience = true
 claims = ["claim.example"]
 
 [[checks]]
@@ -88,6 +95,7 @@ against = ["protocol.toml", "scripts/reproduce.jl"]
 id = "trusted_reference_compare"
 kind = "near"
 gate = "trusted_check"
+audience = true
 claims = ["claim.example"]
 
   [[checks.compare]]
@@ -100,6 +108,7 @@ claims = ["claim.example"]
 id = "close_audit"
 kind = "audit"
 gate = "close"
+audience = true
 claims = ["claim.example"]
 
 # Optional: domain-specific validation via a shell command (kind = "run").
