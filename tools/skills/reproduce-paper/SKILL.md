@@ -7,6 +7,15 @@ description: Use when the user wants to reproduce the figures and main results o
 
 Thin orchestrator. The discipline lives in `protocol.toml`: `[[cells]]` declares the method route and `[[checks]]` declares the evidence checks evaluated mechanically by `tools/cli/flow`. This skill only sequences the work and composes the primitives.
 
+## Non-negotiables
+
+- Start from primary sources. KB cards, old scripts, previous figures, notes, and summaries are hints until confirmed or regenerated.
+- Fill `[[cells]]` before coding. Every executable cell MUST name `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`.
+- Method-agnostic is not method-optional. `flow` is a ledger; DO NOT use `flow` gates, attempt roles, or check kinds as the software-stack choice.
+- DO NOT silently weaken the target. Any change to paper setup, route, data, budget, scope, or uncertainty is a `[[deviations]]` row before compute.
+- DO NOT trust the first manifest as global. Assemble from all manifests; report settings as constant only after consensus.
+- Failed gates are not status text. Classify the mismatch, repair the earliest wrong layer, invalidate downstream artifacts, rerun, then re-verify.
+
 ## When to activate
 
 - The user types "reproduce paper X", "redo the figures of Y", or names a paper to follow end-to-end.
@@ -33,7 +42,7 @@ Each gate's contract lives in `protocol.toml` as `[[checks]]`. `flow` runs the c
 
 2. **Acquire sources.** Copy `tools/templates/reproduce-paper/protocol.toml` to `results/<run>/protocol.toml`, fill `[artifact]`, `[[sources]]`, and the `source` gate check paths from primary sources, then start a `run` attempt on `source`. Use Markdown as the readable source: if an official or rendered Markdown source exists, place it under `sources/` and cite that; if only a PDF exists, store the PDF under `sources/` and render it with `python3 tools/skills/download-ref/scripts/render.py --pdf <pdf> --out <markdown>`. Finish the attempt, then `flow require <run> source` before protocol audit.
 
-3. **Author the contract.** Fill the rest of `protocol.toml` from the primary source: `[entry]`, `[[claims]]`, `[[cells]]`, `[[checks]]`, `[[figures]]`, optional `[[deviations]]`, `[[repairs]]`, and `[[pending]]`. Each executable cell declares one route with one-word fields: `method`, `stack`, `route`, `source`, `check`, `state`, `scope`. Use one-word check kinds: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, `support`; keep check ids unique because they are override handles. Use attempt roles `audit`, `trial`, `run`, `report`.
+3. **Author the contract.** Fill the rest of `protocol.toml` from the primary source: `[entry]`, `[[claims]]`, `[[cells]]`, `[[checks]]`, `[[figures]]`, optional `[[deviations]]`, `[[repairs]]`, and `[[pending]]`. Each executable cell declares one route with one-word fields: `method`, `stack`, `route`, `source`, `check`, `state`, `scope`. Do this before implementing scripts or running compute. Use one-word check kinds: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, `support`; keep check ids unique because they are override handles. Use attempt roles `audit`, `trial`, `run`, `report`.
 
 4. **Audit the contract.** MUST SPAWN a real verifier subagent for an `audit`-kind attempt on the `protocol` gate (different `--actor` from whoever drafted the protocol). Do not write the verifier report yourself. If no verifier can be spawned, stop with `blocked: verifier subagent unavailable` and leave the gate open. Finish the attempt only after the verifier returns a report, using `--report <path>`.
 
@@ -43,9 +52,9 @@ Each gate's contract lives in `protocol.toml` as `[[checks]]`. `flow` runs the c
 
 7. **Trust.** Start a `run` attempt on `trust`. For each substantive figure, run the entry at a point where the answer is known (analytic limit, exact small instance, official benchmark), write trust artifacts under `trust/`, register them, and finish the attempt. Declare the check as `kind = "near"`. Failure here blocks `run`.
 
-8. **Run.** Dispatch via `/parameter-scan` + `/slurm` (or the declared primitive). The cell wrappers register manifests as artifacts with `--producer <run-attempt>`. The `run` gate's `[[checks]]` enforce `cover`, `exists`, `agree`, `fresh`, and `producer = "run"`. A manifest whose route fields do not match its `[[cells]]` block is invalid evidence.
+8. **Run.** Dispatch via `/parameter-scan` + `/slurm` (or the declared primitive). The cell wrappers register manifests as artifacts with `--producer <run-attempt>`. The `run` gate's `[[checks]]` enforce `cover`, `exists`, `agree`, `fresh`, and `producer = "run"`. A manifest whose route fields do not match its `[[cells]]` block is invalid evidence. Remote job status, `ssh` exit status, and scheduler `COMPLETED` are operational facts only; fetched manifests and checks are the evidence.
 
-9. **Assemble.** Start a `run` attempt on `assemble`. Walk the run manifests, validate consensus/support and route-field agreement, and produce each figure as `figs/<id>.png` plus `figs/<id>.json` (interactive plot source). Register assembled artifacts such as `figs/*` with the `run` attempt and finish it.
+9. **Assemble.** Start a `run` attempt on `assemble`. Walk all run manifests, validate consensus/support and route-field agreement, and produce each figure as `figs/<id>.png` plus `figs/<id>.json` (interactive plot source). Never infer global settings from the first completed cell. Register assembled artifacts such as `figs/*` with the `run` attempt and finish it.
 
 10. **Close.** Start a `report` attempt on `close`; generate `run-report.md`; keep the declared `[entry]` commands runnable with all parameters explicit. Register close-stage artifacts such as `run-report.md` with the `report` attempt; the entry artifact remains producer `run`. Finish the report attempt, then independently audit the close. The close gate runs `[entry].help` and `[entry].dry`; any evidence mutation should be caught by `fresh`.
 
@@ -88,7 +97,7 @@ Meanings:
 - `fallback` — named fallback in the method card, with source cited.
 - `deviation` — any other route; `deviation` must name a `[[deviations]]` row before compute.
 
-`flow` remains method-blind. It records the protocol, artifacts, and check outcomes; `/verify` decides whether the declared route is supported by the cited source and whether the script/manifests match it.
+`flow` remains method-blind. It records the protocol, artifacts, and check outcomes; `/verify` decides whether the declared route is supported by the cited source and whether the script/manifests match it. Do not invent method-specific gates or use `flow` commands to force a stack choice.
 
 `state` is the route-check result. Do not set it to `passed` until the check has actually run or the primary/official route has been inspected enough to support the claim. A `failed`, `skipped`, or empty state blocks compute unless the cell is explicitly scoped as `deviation` or `pending`.
 
