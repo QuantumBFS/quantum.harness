@@ -24,6 +24,7 @@ where = "login"
 command = ".venv/bin/python -c 'import jax; import tensorcircuit as tc; print(jax.devices()); tc.set_backend(\"jax\"); tc.about()'"
 
 [docs]
+kb = "knowledge-base/literature/vqe/tensorcircuit-tensorcircuit-ng.md"
 official = "https://tensorcircuit-ng.readthedocs.io/"
 install = "https://github.com/tensorcircuit/tensorcircuit-ng"
 repository = "https://github.com/tensorcircuit/tensorcircuit-ng"

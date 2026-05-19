@@ -13,7 +13,8 @@ Design rule:
 - Smoke tests state where they must run: login or compute allocation.
 
 The executable source of truth remains the Makefile and setup scripts. Stack
-contracts name the command, smoke test, official docs, and remote constraints.
+contracts name the command, smoke test, rendered KB reference when available,
+official upstream locators, and remote constraints.
 Method cards reference stack ids; skills decide when to use or install a stack.
 
 ## Required TOML Shape
@@ -45,6 +46,7 @@ where = "login"
 command = "..."
 
 [docs]
+kb = "knowledge-base/literature/<method>/<rendered-reference>.md"
 official = "https://official-docs.example/"
 ```
 
@@ -64,3 +66,10 @@ Optional top-level fields:
   stacks that must already be installed and smoke-tested before this stack's
   install command is run. Use it for dependency order, not for package-manager
   details.
+
+Optional docs fields:
+
+- `kb` points to a tracked rendered Markdown reference and is the in-repo source
+  material agents should cite when present.
+- `official`, `install`, and `repository` are upstream locators, not replacements
+  for a rendered KB entry.

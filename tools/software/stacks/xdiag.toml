@@ -23,5 +23,6 @@ where = "login"
 command = "julia --project=julia-env -e 'using XDiag'"
 
 [docs]
+kb = "knowledge-base/literature/ed/2505.02901_xdiag-exact-diagonalization-for-quantum-many-body-systems.md"
 official = "https://awietek.github.io/xdiag/"
 paper = "knowledge-base/literature/ed/2505.02901_xdiag-exact-diagonalization-for-quantum-many-body-systems.md"

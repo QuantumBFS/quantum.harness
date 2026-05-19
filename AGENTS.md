@@ -80,6 +80,8 @@ Dimension, lattice, filling, doping, boundary condition, disorder strength, and 
 
 `knowledge-base/` carries data and method-level reference. It is not a curriculum, reading path, or task catalog.
 
+For KB references, the tracked rendered Markdown is the source of truth. Upstream textbook, paper, repository, and documentation links in frontmatter, manifests, or stack contracts are locators for checking or regenerating those rendered entries; when a rendered KB entry exists, agents cite and inspect the Markdown path.
+
 Current cards:
 
 - `conventions.md` — sign / normalization defaults; Hamiltonian forms.
