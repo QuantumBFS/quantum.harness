@@ -6,7 +6,10 @@ This card is generic methodology. Paper-specific Hamiltonian reductions, constra
 
 ## Setup
 
-Canonical stack: `xdiag` (`tools/software/stacks/xdiag.toml`).
+Recommended stack order:
+
+1. `xdiag` (`tools/software/stacks/xdiag.toml`) — canonical ED stack.
+2. `quspin` (`tools/software/stacks/quspin.toml`) — Python fallback stack.
 
 ```
 make install julia
@@ -15,7 +18,7 @@ make install xdiag
 
 Activate the environment with `julia --project=julia-env`.
 
-Fallback: QuSpin is a Python ED library with a broad spin-chain interface. Use it when a workflow already depends on Python or when a QuSpin example exactly matches the target model. XDiag remains the default harness route.
+Fallback means the second recommended stack, not arbitrary installed Python packages. QuSpin is a Python ED library with a broad spin-chain interface. Use `quspin` only when a workflow already depends on Python, when a QuSpin example exactly matches the target model, or when the canonical XDiag route is recorded as failed/pending and the protocol declares `route = "fallback"`. XDiag remains the default harness route. Generic NumPy/SciPy ED is a deviation unless the paper's official code uses it.
 
 ## Scope
 

@@ -1,0 +1,28 @@
+id = "quspin"
+name = "QuSpin"
+language = "python"
+canonical_for = ["ed-fallback", "exact-diagonalization-fallback", "spin-chain-ed"]
+default_profile = "cpu"
+
+[profiles.cpu]
+label = "CPU"
+default = true
+install = "cpu"
+smoke = "cpu"
+
+[profiles.cpu.requirements]
+allocation = "login-or-compute"
+mpi = false
+
+[install.cpu]
+command = "make install quspin"
+notes = "Python fallback for ED only when the method card or protocol names QuSpin as the fallback. Do not substitute generic NumPy/SciPy ED for this stack."
+
+[smoke.cpu]
+where = "login"
+command = ".venv/bin/python -c 'import quspin; print(quspin.__version__)'"
+
+[docs]
+kb = "knowledge-base/literature/ed/1610.03042_quspin-a-python-package-for-dynamics-and-exact-diagonalisati.md"
+official = "https://quspin.github.io/QuSpin/"
+paper = "knowledge-base/literature/ed/1610.03042_quspin-a-python-package-for-dynamics-and-exact-diagonalisati.md"

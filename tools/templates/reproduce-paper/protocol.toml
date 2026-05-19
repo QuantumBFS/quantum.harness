@@ -65,7 +65,7 @@ deviation = ""        # required when route = "deviation"
 # Route meanings:
 #   paper      — primary source or official code/data specifies the route.
 #   canonical  — harness method card plus tools/software/stacks/<stack>.toml.
-#   fallback   — named fallback in the method card, with source cited.
+#   fallback   — next recommended fallback stack in the method card, with source cited.
 #   deviation  — any other route; declare a [[deviations]] row before compute.
 # `state = "passed"` means the route check actually ran or the official route
 # was inspected enough to support the claim. Empty, failed, or skipped states

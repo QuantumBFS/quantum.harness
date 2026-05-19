@@ -58,7 +58,7 @@ Compare the protocol against declared primary sources.
 3. **Check coverage** — each non-assumption claim is covered by ≥1 `[[checks]]` entry or by a justified deviation.
 4. **Generic check shape** — checks use one of the eight kinds: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, `support`; ids are unique override handles. No paper-specific or domain-specific kind names.
 5. **Cell routes** — every executable cell declares `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`; `route` is `paper`, `canonical`, `fallback`, or `deviation`.
-6. **Route authority** — `paper` routes cite primary / official sources, `canonical` routes cite a method card or stack card, `fallback` routes cite a named fallback, and `deviation` routes cite a deviation id before compute. Empty, failed, or skipped route state blocks compute unless scoped as a declared deviation or pending item.
+6. **Route authority** — `paper` routes cite primary / official sources, `canonical` routes cite a method card or stack card, `fallback` routes cite the method card's next recommended fallback stack, and `deviation` routes cite a deviation id before compute. Generic installed libraries are not fallback authority. Empty, failed, or skipped route state blocks compute unless scoped as a declared deviation or pending item.
 7. **Deviation clarity** — declared differences from the paper are scoped, claim-tagged, and have their own checks.
 8. **Repair clarity** — post-failure or contract-changing edits have `[[repairs]]` rows with `from`, `wrong`, `changed`, `invalidate`, and `state`.
 9. **Gate completeness** — every gate the flow template declares has checks sufficient to prevent stale or unsupported artifacts from passing.

@@ -21,7 +21,7 @@ ZLP := zlp
 .PHONY: setup core core-setup skills doctor install-flow test test-flow clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
-INSTALLABLE := quarto quimb julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro
+INSTALLABLE := quarto quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro
 
 help: ## Show available targets and installable tools
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -121,6 +121,13 @@ install-quimb: ## Install quimb + numerical deps into .venv (Python fallback sta
 	@uv venv .venv
 	@uv pip install quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
 	@echo "quimb environment ready in .venv"
+
+install-quspin: ## Install QuSpin exact diagonalization fallback stack into .venv
+	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
+	@uv venv .venv
+	@uv pip install quspin numpy scipy matplotlib
+	@.venv/bin/python -c 'import quspin; print(quspin.__version__)'
+	@echo "QuSpin environment ready in .venv"
 
 install-julia: ## Install Julia via juliaup (default harness language)
 	@command -v julia >/dev/null && { echo "Julia already installed: $$(julia --version)"; exit 0; } || true
