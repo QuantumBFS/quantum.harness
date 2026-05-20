@@ -5,13 +5,8 @@ skills-dir = "tools/skills"
 claude = ".claude/skills"
 
 [skills]
-# Tensor networks & quantum
-quimb-tensor-network = { source = "a5c-ai/babysitter/quimb-tensor-network" }
-
 # Research workflow
 arxiv-search = { source = "yorkeccak/scientific-skills/arxiv-search" }
-jupyter-notebook = { source = "openai/skills/jupyter-notebook" }
-sympy = { source = "davila7/claude-code-templates/sympy" }
 download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)
@@ -30,31 +25,13 @@ scientific-visualization = { source = "davila7/claude-code-templates/scientific-
 scientific-writing = { source = "davila7/claude-code-templates/scientific-writing" }
 latex-paper-en = { source = "bahayonghang/academic-writing-skills/latex-paper-en" }
 
-# Language
-julia = { source = "mindrally/skills/julia" }
+# Skill tooling
 ion-cli = { type = "local" }
 
 # UX
 onboard = { type = "local" }
 solve = { type = "local" }
 
-# Problem skills: models
-transverse-field-ising = "tools/skills/problems/models/transverse-field-ising"
-heisenberg = "tools/skills/problems/models/heisenberg"
-j1-j2 = "tools/skills/problems/models/j1-j2"
-t-v = "tools/skills/problems/models/t-v"
-hubbard = "tools/skills/problems/models/hubbard"
-t-j = "tools/skills/problems/models/t-j"
-anderson-impurity = "tools/skills/problems/models/anderson-impurity"
-multiorbital-hubbard = "tools/skills/problems/models/multiorbital-hubbard"
-spin-1-xxz = "tools/skills/problems/models/spin-1-xxz"
-potts-clock = "tools/skills/problems/models/potts-clock"
-
-# Problem skills: physics
-criticality = "tools/skills/problems/physics/criticality"
-frustration = "tools/skills/problems/physics/frustration"
-spin-liquid = "tools/skills/problems/physics/spin-liquid"
-mott-transition = "tools/skills/problems/physics/mott-transition"
-kondo-effect = "tools/skills/problems/physics/kondo-effect"
-magic = "tools/skills/problems/physics/magic"
-confinement = "tools/skills/problems/physics/confinement"
+# Problem dispatchers (auto-triggered; read cards under knowledge-base/{models,physics}/<name>/)
+model = { type = "local" }
+physics = { type = "local" }

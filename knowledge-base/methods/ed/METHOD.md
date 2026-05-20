@@ -95,7 +95,7 @@ For scripts that need precise control over convergence or excited states, use th
 ## Pitfalls
 
 - **Unresolved symmetries**: level statistics are meaningless if independent symmetry sectors are mixed.
-- **Basis convention drift**: spin, Pauli, fermion sign, and site-index conventions must match the model skill or protocol.
+- **Basis convention drift**: spin, Pauli, fermion sign, and site-index conventions must match the model card or protocol.
 - **Dense matrix overuse**: building `H` explicitly can dominate memory; prefer matrix-free `apply`/Lanczos for larger blocks.
 - **Lanczos ghosts**: insufficient orthogonalization or too many iterations can produce repeated spurious eigenvalues.
 - **Interior-state fragility**: rare high-energy eigenstates require an explicit targeting method and residual checks.

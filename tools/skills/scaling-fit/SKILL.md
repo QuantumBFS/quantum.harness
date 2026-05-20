@@ -11,7 +11,7 @@ Fit a finite-size scaling form to a size-indexed (and optionally parameter-index
 
 - User has a `(L, observable)` or `(L, parameter, observable)` table and wants exponents.
 - `/parameter-scan` flagged a critical-like / extremum / crossing label and exponents are wanted.
-- A `physics/*` skill needs an exponent to compare against universality-class expectations (`physics/criticality`, `physics/magic`, `physics/confinement`).
+- A physics card needs an exponent to compare against universality-class expectations (`knowledge-base/physics/criticality/PHYSICS.md`, `knowledge-base/physics/magic/PHYSICS.md`, `knowledge-base/physics/confinement/PHYSICS.md`).
 
 ## Inputs
 
@@ -50,7 +50,7 @@ Fit a finite-size scaling form to a size-indexed (and optionally parameter-index
 - After this skill runs, common follow-ups (offered via `AskUserQuestion`):
   - `/cross-method-check` — verify the fitted exponent against an independent method or observable on the same data (Recommended when the result will be reported).
   - Extend the scan range — when the fit is poor at the boundary of the swept range.
-  - Compare to a literature *range* — through `physics/criticality` (or the calling physics skill).
+  - Compare to a literature *range* — through `knowledge-base/physics/criticality/PHYSICS.md` (or the calling physics card).
   - Done.
 
 ## Notes

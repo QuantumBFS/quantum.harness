@@ -29,4 +29,4 @@ A user asks for susceptibility vs T, specific heat, thermal averages, finite-tem
 
 - **1D Heisenberg χ(T):** Bonner-Fisher curve. Peak at T ≈ 0.64J. Exact from Bethe ansatz thermodynamics.
 - **1D Heisenberg C(T):** Peak at T ≈ 0.48J.
-- For specific benchmark values, check `knowledge-base/benchmark-numbers.md` and the relevant model skill.
+- For specific benchmark values, check `knowledge-base/benchmark-numbers.md` and the relevant model card.

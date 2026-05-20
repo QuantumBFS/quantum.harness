@@ -1,6 +1,6 @@
 # Magic / Nonstabilizerness Benchmark Numbers
 
-Reference values for stabilizer Rényi entropies (SREs) and long-range magic across canonical models. Cited from the `physics/magic` skill's verification step and from model-skill magic branches. Per AGENTS.md "Verification practice §6", contested or method-sensitive values are reported as ranges, not single points.
+Reference values for stabilizer Rényi entropies (SREs) and long-range magic across canonical models. Cited from the `knowledge-base/physics/magic/PHYSICS.md`'s verification step and from model-card magic branches. Per AGENTS.md "Verification practice §6", contested or method-sensitive values are reported as ranges, not single points.
 
 Convention: the harness `M_n` definition lives in `knowledge-base/magic-conventions.md`. Numbers below assume that convention; if a paper uses a different normalization, translate before comparing.
 
@@ -79,7 +79,7 @@ These analytics are the limit-check anchor for any new magic implementation: it 
 
 ## How to use this file
 
-- Cite as `knowledge-base/magic-benchmarks.md#<model>` from `physics/magic` and the relevant model skills' verification steps.
+- Cite as `knowledge-base/magic-benchmarks.md#<model>` from `knowledge-base/physics/magic/PHYSICS.md` and the relevant model cards' verification steps.
 - For the 2D `Z_2` ↔ 2D Ising row, cite alongside the `magic-conventions.md` "Wegner-duality preservation" note.
 - If your problem is not listed: report converged values with bond-dim and `N_S` trends, *do not fabricate a benchmark*.
 - New numerical entries land here only with a tag (Literal / Analytic / Harness anchor) and a verifiable source. Citation is by *what the reference provides* (a benchmark, a method) rather than by author/year.

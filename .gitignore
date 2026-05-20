@@ -25,3 +25,4 @@ scripts/_*
 __pycache__/
 target/
 .superpowers/
+.claude/skills/ion-cli

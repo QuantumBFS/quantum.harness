@@ -1,6 +1,6 @@
 ---
 name: onboard
-description: Use when the user is new to the harness, asks "where do I start", or opens with an unclear / empty problem. Sets up domain software, optionally configures the user's compute cluster, and routes to the right problem skill.
+description: Use when the user is new to the harness, asks "where do I start", or opens with an unclear / empty problem. Sets up domain software, optionally configures the user's compute cluster, and routes to `/model` or `/physics`.
 ---
 
 # Onboard
@@ -94,9 +94,9 @@ That's it. Don't list models. Don't explain the architecture.
 
 ### 4. Route
 
-Infer the model or physics topic from the answer. Hand off to the matched skill. This skill exits.
+Infer the model or physics topic from the answer. Hand off to `/model` (if a specific Hamiltonian) or `/physics` (if a cross-model phenomenon question); the dispatcher reads the matching card. This skill exits.
 
-If ambiguous, use `AskUserQuestion` with 2–3 candidate skills — short labels, one-line tradeoff each, recommended first. Don't list all 13.
+If ambiguous, use `AskUserQuestion` with 2–3 candidate cards — short labels, one-line tradeoff each, recommended first. Don't list every card.
 
 If nothing fits: *"That's outside current scope (ground-state lattice problems). Want me to try an off-skill approach, or help you reframe?"*
 

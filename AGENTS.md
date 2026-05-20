@@ -57,22 +57,17 @@ Never default to "you're right, sorry, let me redo." That erodes the calibrated 
 
 ## Problem-Driven Skill Design
 
-Skills must be organized around problems, not lessons, methods, tools, metrics, or roadmaps.
-
-Use this canonical split:
+Domain content is organized around problems, not lessons, methods, tools, metrics, or roadmaps. Two dispatcher skills + paired cards:
 
 ```text
-tools/skills/problems/
-  models/
-  physics/
+tools/skills/model/    SKILL.md auto-fires when user names a model;   reads knowledge-base/models/<name>/MODEL.md
+tools/skills/physics/  SKILL.md auto-fires on cross-model questions;  reads knowledge-base/physics/<topic>/PHYSICS.md
 ```
 
-`models/` contains canonical Hamiltonian or Hilbert-space problem families.
-`physics/` contains cross-model organizing questions: phases, mechanisms, dynamics, solvability, and diagnostics.
+`knowledge-base/models/` cards cover canonical Hamiltonian or Hilbert-space problem families.
+`knowledge-base/physics/` cards cover cross-model organizing questions: phases, mechanisms, dynamics, solvability, and diagnostics.
 
-Ion may expose direct `tools/skills/<name>` symlink aliases for installation. Edit the nested `tools/skills/problems/...` source directories, not the aliases.
-
-Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside problem workflows, not in problem names. Do not create a separate visible method-skill taxonomy by default. If a problem skill mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
+Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside the model/physics cards, not in skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
 
 Dimension, lattice, filling, doping, boundary condition, disorder strength, and coupling regime are runtime choices unless they define a truly distinct canonical problem.
 
@@ -142,14 +137,14 @@ This checklist applies to figure-producing cell scripts AND to assembly / plot c
 
 Wasted-compute lesson on record: in the Turner 2018 reproduction, Fig 3(c) was first composed against `|⟨n|ψ⟩|²` instead of `|⟨n|ψ⟩|² L` (missed the L factor in the printed y-axis label) AND picked the highest-overlap exact zero mode instead of the lowest-|E|>0 special state ("adjacent to E = 0" was misread as "AT E = 0"). The fix required re-running L = 12, 14, 16, 18, 20, 22, 24, 26, 28 cells. Both errors were directly visible in the paper's printed caption and figure if the checklist had been worked through before compute.
 
-## Skill shapes
+## Card shapes
 
-Two shapes, both problem/research-driven:
+Domain content lives in cards under `knowledge-base/`, dispatched by the `/model` and `/physics` meta-skills:
 
-- **Model skills** (`tools/skills/problems/models/*`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`.
-- **Physics skills** (`tools/skills/problems/physics/*`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`.
+- **Model cards** (`knowledge-base/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`. Optional `TACITS.toml` co-located.
+- **Physics cards** (`knowledge-base/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`. Optional `TACITS.toml` co-located.
 
-Skills cite KB for any number, convention, or method-specific code shape. Skills hold workflow only — no hardcoded numbers, no embedded code skeletons, no canonical recipes.
+Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/verify`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
 
 ## Verification practice
 
@@ -162,11 +157,11 @@ Default verification, in priority order:
 5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g., DMRG + TEBD imaginary-time) and confirm agreement within both methods' accuracy budgets. Use ED only after `knowledge-base/methods/ed/METHOD.md` is rebuilt. Disagreement → setup error or insufficient convergence in one method.
 6. **Benchmark comparison (when published reference exists)** — `knowledge-base/benchmark-numbers.md`. For contested values, compare against the literature *range*, not a single number.
 
-When the problem is in a frontier regime (frontier flag in the skill), invoke the `arxiv-search` skill before interpretation: a tailored query with `<lattice> <model> <regime>` should return recent literature so the agent's conclusion sits inside the current debate, not outside it.
+When the problem is in a frontier regime (frontier flag in the card), invoke the `arxiv-search` skill before interpretation: a tailored query with `<lattice> <model> <regime>` should return recent literature so the agent's conclusion sits inside the current debate, not outside it.
 
 ## Writeup handoff
 
-After verification completes for a model skill, surface the writeup handoff as a final step. The default deliverable is two artifacts:
+After verification completes for a model card workflow, surface the writeup handoff as a final step. The default deliverable is two artifacts:
 
 1. **Consolidated runnable script** — all parameters explicit, the calculation reproducible from a fresh checkout against the harness's installed stack.
 2. **Short run report** — setup, settings, result, verification status (limit / symmetry / convergence / cross-method), residual uncertainty.
@@ -217,14 +212,14 @@ NEVER run a multi-hour calculation locally because the agent forgot the cluster 
 ## Installed Skills
 
 UX skills:
-- **onboard** — first-touch intake, domain setup, route to problem skill
+- **onboard** — first-touch intake, domain setup, route to `/model` or `/physics`
 - **solve** — interactive problem-solving loop: intake → act → report → next-steps → loop
 
-Local problem skills:
-- **models:** transverse-field-ising, heisenberg, j1-j2, t-v, hubbard, t-j, anderson-impurity, multiorbital-hubbard, spin-1-xxz, potts-clock
-- **physics:** criticality, frustration, spin-liquid, mott-transition, kondo-effect, magic, confinement
+Problem dispatchers (auto-triggered; read cards under `knowledge-base/{models,physics}/<name>/`):
+- **model** — fires when user names a harness-tracked model. Reads `MODEL.md` card and follows its workflow.
+- **physics** — fires when user asks a cross-model phenomenon question. Reads `PHYSICS.md` card and follows its evidence rubric.
 
-Problem-solving primitives (generic; topic-agnostic, compose with the problem skills above):
+Problem-solving primitives (generic; topic-agnostic, compose with the dispatchers above):
 - **parameter-scan** — sweep one or more declared axes for any produced quantity. Composes with `/slurm` for cluster execution.
 - **scaling-fit** — finite-size collapse, exponent extraction with uncertainty.
 - **cross-method-check** — verify the same observable with an independent method or diagnostic.
@@ -235,15 +230,11 @@ Problem-solving primitives (generic; topic-agnostic, compose with the problem sk
 - **memorize** — user-invoked at session end. Walk back through the session, cluster friction moments by root cause, and distill each cluster into the right scope: method/stack/model `TACITS.toml`, project-wide `AGENTS.md` invariant, or skill-level `SKILL.md` edit. Never agent-invoked. Sessions with real user pushback or wasted compute are the prime triggers.
 
 External/support skills:
-- **quimb-tensor-network** — quimb/QuTiP tensor network: MPS, PEPS, DMRG, TEBD
 - **arxiv-search** — Semantic arXiv search via Valyu
-- **jupyter-notebook** — Scaffold and edit .ipynb notebooks
-- **sympy** — Symbolic math: Hamiltonians, commutation relations, algebra
 - **scientific-visualization** — Publication-quality figures (matplotlib/seaborn/plotly)
 - **scientific-writing** — Scientific manuscript drafting
 - **latex-paper-en** — LaTeX academic paper writing
 - **download-ref** — Add arXiv/DOI/book methodology references under `knowledge-base/literature/<method>/`; rendered markdown is tracked, raw PDFs/metadata/figures are local-only.
-- **julia** — Julia development guidance, multiple dispatch, performance
 
 ## Tool Hierarchy
 

@@ -2,7 +2,7 @@
 
 Harness-default conventions for Pauli-string operators, stabilizer Rényi entropies (SREs), partition modes, and qudit generalizations. Skills cite this card; they never hardcode definitions.
 
-Cited by `physics/magic`, `methods/pauli-markov.md`, `methods/ttn.md`, and the four model skills carrying a magic branch.
+Cited by `knowledge-base/physics/magic/PHYSICS.md`, `methods/pauli-markov.md`, `methods/ttn.md`, and the four model cards carrying a magic branch.
 
 ## Pauli operators
 
@@ -82,7 +82,7 @@ Three standard partition primitives appear throughout magic workflows:
 | Local dimension `d` | Pauli group | Notes |
 |---|---|---|
 | 2 (qubit) | `{I, X, Y, Z}^N` | Standard `σ^a` matrices. |
-| 3 (qutrit) | `{T_{a,a'}}` per site, `9^N` strings total | Used in `models/potts-clock` (3-state Clock = 3-state Potts after duality on the 1D chain). |
+| 3 (qutrit) | `{T_{a,a'}}` per site, `9^N` strings total | Used in `knowledge-base/models/potts-clock/MODEL.md` (3-state Clock = 3-state Potts after duality on the 1D chain). |
 | `d > 3` | `T_{a,a'}` qudit Pauli per site, `d^{2N}` strings | Generic; q-state clock model. |
 
 T-states and canonical magic states:
@@ -98,7 +98,7 @@ For a product state of `N` copies, `M_n(|T⟩^{⊗N}) = N M_n(|T⟩)` by additiv
 
 For 2D models related by Wegner duality (e.g., 2D `Z_2` lattice gauge theory ↔ 2D transverse-field Ising on the dual square lattice), the SREs are *preserved* by the duality transformation. Concretely: computing `M_n` on the dual 2D Ising ground state is equivalent to computing it on the gauge-theory ground state in the charge-free sector. Skills exploit this to drive 2D gauge-theory calculations through the (computationally more convenient) 2D Ising route.
 
-This is a *derivation result*, not a runtime arg — it lives here once and is cited from `models/transverse-field-ising`'s 2D row and from `physics/confinement`.
+This is a *derivation result*, not a runtime arg — it lives here once and is cited from `knowledge-base/models/transverse-field-ising/MODEL.md`'s 2D row and from `knowledge-base/physics/confinement/PHYSICS.md`.
 
 ## Symmetry-restricted Pauli proposals
 
@@ -110,6 +110,6 @@ Additional restrictions:
 
 ## How to use this file
 
-- Cite as `knowledge-base/magic-conventions.md#<section>` from the `physics/magic` skill, the `methods/pauli-markov.md` and `methods/ttn.md` cards, and the model-skill branch-table rows for magic.
+- Cite as `knowledge-base/magic-conventions.md#<section>` from the `knowledge-base/physics/magic/PHYSICS.md`, the `methods/pauli-markov.md` and `methods/ttn.md` cards, and the model-card branch-table rows for magic.
 - Skills do *not* repeat these definitions in their own text — they cite this card.
-- New magic monotones (Bell magic, stabilizer nullity) added to the harness in future cycles extend this card; their workflow shape is added to the relevant method card and physics skill at the same time.
+- New magic monotones (Bell magic, stabilizer nullity) added to the harness in future cycles extend this card; their workflow shape is added to the relevant method card and physics card at the same time.

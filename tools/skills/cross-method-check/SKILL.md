@@ -17,7 +17,7 @@ Re-run the same observable at the same parameter point with an *independent* met
 ## Inputs
 
 - A *primary result*: `(method_A, observable, parameter point, accuracy budget)`.
-- A *secondary method or diagnostic*: pickable from the model skill's method-recommendation table or a related `physics/*` skill. Default selection (skill picks; user ratifies):
+- A *secondary method or diagnostic*: pickable from the model card's method-recommendation table or a related physics card. Default selection (skill picks; user ratifies):
 
   | Primary | Default secondary | Why |
   |---|---|---|
@@ -28,7 +28,7 @@ Re-run the same observable at the same parameter point with an *independent* met
   | Magic crossing as critical detector | Binder cumulant on the dual order parameter | Independent diagnostic on the same wavefunction; the canonical "magic-vs-Binder" cross-check at fixed `χ`. |
   | DMRG cylinder geometry | Different cylinder width at same `L_x` | Independent geometry; agreement gates cylinder bias on frustrated 2D. |
 
-- A *small-but-meaningful instance* — large enough that the comparison is non-trivial, small enough that the secondary method runs cheaply. Defaults from the model skill; the calling skill / user override.
+- A *small-but-meaningful instance* — large enough that the comparison is non-trivial, small enough that the secondary method runs cheaply. Defaults from the model card; the calling skill / user override.
 
 ## Workflow
 
@@ -69,6 +69,6 @@ The skill *surfaces* the disagreement; the calling skill (or `superpowers:system
 
 ## Notes
 
-- This skill does *not* invent the secondary method. Defaults come from the model skill's method-recommendation table; the calling skill or the user can override.
+- This skill does *not* invent the secondary method. Defaults come from the model card's method-recommendation table; the calling skill or the user can override.
 - Cross-diagnostic checks (e.g., magic vs Binder) are a special case where the two paths differ in physical content but converge on the same physical question; surface the methodological claim transparently.
 - For frontier regimes, cross-method checks often reveal the literature debate rather than closing it. Surface that as well.
