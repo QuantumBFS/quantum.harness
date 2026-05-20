@@ -50,16 +50,7 @@ producer). Every user-facing line is anchored to this audience.
    - Verification rubric (limit / symmetry / convergence / cross-method) noted
    </checklist>
 
-3. **Grep tacits (REQUIRED before compute).** Run `grep ^signal` on
-   `knowledge-base/models/<name>/TACITS.toml` for every matched model. For
-   each signal whose surface symptom matches your planned setup or
-   anticipated error, read the full `[[tacit]]` block. Skipping this grep
-   when a `TACITS.toml` exists is itself a failed step.
-
-   Read every signal line before deciding which is relevant. Filtering
-   happens after reading, not before — a signal you dismiss as "probably
-   not it" but whose symptom matches has cost the harness real compute in
-   prior sessions.
+3. **Grep tacits.** Before compute, grep `^signal` in the matched card's `TACITS.toml` (see [AGENTS.md → Tacit knowledge usage](../../../AGENTS.md#tacit-knowledge-usage), rules 1–3).
 
 4. **Execute.** Follow the card's declared workflow. The card names which
    primitive skills to compose (`/solve`, `/parameter-scan`, `/verify`,

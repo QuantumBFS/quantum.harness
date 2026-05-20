@@ -79,13 +79,13 @@ This skill follows the Jinguo-group recipe verbatim (https://book.jinguo-group.s
    - (b) `julia --project=<project_dir> -e 'using <package_name>'` exits 0.
    - (c) Reported version of `<package_name>` matches the `Project.toml` compat bound.
    </checklist>
-6. **Hand back**: 2-3 line summary (Julia version, mirror url, project env state).
+6. **Hand back**: Julia version, mirror url, project env state. Hand-back report per [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux).
 
 ## Output
 
 - For local: Julia installed and on `$PATH`; `~/.julia/config/startup.jl` configured; `julia-env/` instantiated and precompiled.
 - For remote: same, on `<alias>:<repo_path_remote>`.
-- A 2-3 line report.
+- Hand-back report per [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux).
 
 ## Composition
 

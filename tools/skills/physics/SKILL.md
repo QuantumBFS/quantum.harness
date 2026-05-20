@@ -45,11 +45,7 @@ mechanism questions, not for "solve <model>" (that's `/model`).
    - Model hooks (which `knowledge-base/models/<model>/MODEL.md` files to consult) noted
    </checklist>
 
-3. **Grep tacits (REQUIRED before compute or verdict).** When
-   `knowledge-base/physics/<topic>/TACITS.toml` exists, run `grep ^signal`
-   and read the full `[[tacit]]` block for every signal whose surface
-   symptom matches your evidence or interpretation. Skipping this grep is
-   itself a failed step.
+3. **Grep tacits.** Before compute, grep `^signal` in the matched card's `TACITS.toml` (see [AGENTS.md → Tacit knowledge usage](../../../AGENTS.md#tacit-knowledge-usage), rules 1–3).
 
 4. **Compose.** Read every model hook the topic card declares — not just
    the one that feels most relevant. The card chooses the cross-model

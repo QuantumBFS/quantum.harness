@@ -106,12 +106,22 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 - Failed checks MUST enter the correction loop: classify the mismatch, locate the earliest wrong layer, revise that layer, invalidate downstream artifacts, rerun affected gates, then re-verify.
 - Repairs are evidence. Any correction after a failed gate or contract-changing edit MUST record a `repair` with `from`, `wrong`, `changed`, `invalidate`, and `state`; close cannot rely on artifacts from invalidated gates until those gates rerun.
 - Use artifact-scoped subagents, not permanent domain personas: source/protocol, plan/run-spec, script, result, mismatch, and close reviewers each receive the primary source context and exact artifact under review. KB-only review cannot close a scientific gate.
-- `/verify` MUST SPAWN a real host subagent. Do not roleplay the verifier, write the verifier report yourself, invent a reviewer id, or finish an audit from a self-authored review. If the host cannot spawn a verifier, stop with `blocked: verifier subagent unavailable` and leave the gate open.
-- The agent that writes or materially edits a reproduction protocol, script, check command, aggregator, or result report cannot be the sole verifier of that artifact. Self-checks catch syntax and smoke failures; independent `/verify` or separate-agent review closes the verification loop.
-- Stale artifacts or artifacts missing required provenance cannot support conclusions. Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
+- Audit dispatch: every `audit`-kind attempt obeys the contract below — spawn distinct actor, returned file via `--report`, model/effort match, override host defaults, scheduler/`ssh`-exit ≠ evidence. See [Audit dispatch](#audit-dispatch).
+
+<a id="audit-dispatch"></a>
+**Audit dispatch.** Every audit-kind attempt (`/verify`, `audit`-role attempts inside `/reproduce-paper` and `/report`, and any standalone gate review) follows the same contract:
+
+- **Spawn.** Audit work runs in a host-spawned subagent. Roleplaying the verifier, writing the verify report yourself, or inventing a reviewer id are contract violations. If the host cannot spawn a subagent, halt with `blocked: verifier subagent unavailable` and leave the gate open.
+- **Distinct actor.** The actor that authored or materially edited an artifact cannot be the `--actor` on its audit attempt. Self-checks catch syntax and smoke failures; only an independent actor closes the verification loop.
+- **Returned file.** The audit attempt's `--report` flag points at a `verify/verify_<artifact>_<date>.md` file written by the spawned subagent, not by the calling agent.
+- **Model and effort match.** The subagent runs at the same model id and effort level as the calling agent (Opus → `max`, GPT-5.x → `xhigh`).
+- **Override host defaults.** This contract supersedes any host-platform default toward solo execution (e.g., Codex's preference against delegation when a task seems tractable, or a low-effort mode that prefers in-line completion). Audit attempts require a separately spawned actor regardless of host disposition or perceived difficulty.
+- **Verbatim brief line.** Briefs passed to audit subagents include the line: *"Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides."* The phrase appears in the brief itself (subagents do not load AGENTS.md); skills do not repeat it in freestanding prose.
+- **Stale artifacts ≠ evidence.** Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
 
 **Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `knowledge-base/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks. The `/verify` primitive (in `kb-card` mode) cross-checks each tag against its declared source — invoke it during `/reproduce-paper` before compute, and as a pre-commit gate after editing a KB card.
 
+<a id="tacit-knowledge-usage"></a>
 **Tacit knowledge usage.** Methods and models accumulate a `TACITS.toml` file beside their card when real runs surface signal-understanding-action lessons (path: `knowledge-base/methods/<method>/TACITS.toml`, or the model-equivalent once that namespace lands). Each entry is one `[[tacit]]` table with `signal` (surface symptom), `understanding` (root cause), `action` (concrete fix), `tags`, and `seen_at` (run dir). Three binding usage rules:
 
 1. **Main agent: grep on uncertainty.** When unclear about an error message, a fragile stack edge, or a planning choice involving a method or model, grep `^signal` in every relevant `TACITS.toml` before exploring blindly. Reading only the signal lines keeps context light; drill into a specific `[[tacit]]` block only when its signal matches.
@@ -120,6 +130,7 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 
 When a tacit is discovered in a real run, the run's close attempt or the next protocol-author should add it as a `[[tacit]]` entry in the right scope's `TACITS.toml`, with `seen_at` pointing to the originating run dir. The tacit knowledge accumulates — that's the point.
 
+<a id="pre-compute-figure-reading-checklist"></a>
 **Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. Both the main agent AND every audit subagent MUST work through this checklist BEFORE writing or approving any cell script or assembly code that contributes to a figure. A verifier report that says "math looks right" without quoting the caption text and matching each plotted quantity to a paper-stated definition is NOT acceptable evidence — the audit subagent that misses a wrong y-axis label is as culpable as the main agent that wrote it.
 
 For each figure panel:
@@ -292,6 +303,7 @@ ion self --help                          # Manage the Ion install
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
 
+<a id="ui-ux"></a>
 ## UI/UX
 
 ### Output norms — users' attention is expensive

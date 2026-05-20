@@ -6,19 +6,10 @@ description: Use after writing or modifying an important artifact (protocol TOML
 # verify
 
 <role>
-MUST SPAWN a real review subagent to audit an artifact against its declared reference. Generic over artifact type — the same mechanism (spawn-and-audit) applies to seven specific artifact families (modes below). Pick the matching mode; per-mode axes are the contract. The subagent reads both sources end-to-end and returns a structured diff report. Never modifies anything.
+Dispatcher that audits an artifact against its declared reference. Generic over artifact type — the same mechanism applies to seven artifact families (modes below). Pick the matching mode; per-mode axes are the contract. The subagent reads both sources end-to-end and returns a structured diff report. Never modifies anything.
 
-The verifier must be a **different actor** from the artifact's author. Flow's `audit` check kind enforces this mechanically; this skill is the dispatcher.
+Audit dispatch contract: see AGENTS.md → Audit dispatch.
 </role>
-
-<invariants>
-- Do not roleplay the verifier.
-- Do not write the verifier report yourself.
-- Do not invent reviewer ids.
-- Do not record or finish a flow audit unless the spawned subagent actually returned the review.
-
-If the host cannot spawn a verifier, stop with `blocked: verifier subagent unavailable` and leave the gate open.
-</invariants>
 
 ## When to activate
 
@@ -45,9 +36,7 @@ If the host cannot spawn a verifier, stop with `blocked: verifier subagent unava
 
 ## Dispatch
 
-MUST SPAWN the review subagent using the host subagent/delegation tool, with the same model id, reasoning/effort, sandbox, approval policy, and tool access as the main agent. **Same actor cannot author and verify** — flow rejects the `audit` check if `--actor` matches the producer's actor. Record the returned subagent id/name as `reviewer`.
-
-**Effort: always highest** (Opus `max` / GPT `xhigh`) per the project's universal rule.
+Audit dispatch contract: see AGENTS.md → Audit dispatch. Record the returned subagent id/name as `reviewer`.
 
 The verifier brief includes the following verbatim lines:
 
@@ -153,20 +142,7 @@ Severity tags (non-exhaustive): `supported`, `unsupported-claim`, `hint-leak`, `
 
 ## Figure-reading checklist
 
-Per the AGENTS.md pre-compute figure-reading checklist (Knowledge Base Role → "Pre-compute figure-reading checklist"). Referenced from `script` axis 7 and `result` axis R2.
-
-<checklist name="figure-reading">
-
-1. Caption verbatim.
-2. x-axis: variable name, units, range, scale (linear / log).
-3. y-axis: variable name, units, range, scale, AND any normalization factor (× L, × N, divided by D, log₂ vs log₁₀, …).
-4. Per-curve identity: for every line / marker / color, which state(s)? which subset of states? which sector? which observable?
-5. State-selection language as a contract — "state in the special band adjacent to E = 0", "lowest |E|>0 eigenstate", "middle of the band" each select a DIFFERENT specific state.
-6. Window / sub-region — "averaged over the middle 2/3 of the band", "i ∈ [D/5, D/2 − 500]", "excluding zero modes".
-7. Stated numerical anchors — record body-text quoted numbers as benchmarks the code output must reproduce.
-8. What the figure is NOT — closely-related states the panel does not plot.
-
-</checklist>
+Per AGENTS.md → Pre-compute figure-reading checklist (caption verbatim, axes + scale, y-normalization, per-curve identity, state-selection contract, window, anchors, NOT). Referenced from `script` axis 7 and `result` axis R2.
 
 ## Output
 
@@ -236,11 +212,10 @@ The verifier produces findings ONLY. The calling skill translates findings into 
 ## Discipline
 
 - Inspection-only. Never modify the artifact.
-- Same actor cannot author and verify (flow's `audit` check enforces this).
 - On ambiguity, MUST verdict ✗; never round up to ✓ on a "looks close" basis.
 - For Analytic and Harness anchors, the tag is sufficient provenance.
 - Generic over artifact type and reference. No artifact-specific logic.
-- Subagent matches the main agent's model/effort/sandbox unless the user asks otherwise.
+- Dispatch invariants: see AGENTS.md → Audit dispatch (flow's `audit` check enforces actor distinctness mechanically).
 
 ## Composition
 
@@ -259,10 +234,6 @@ In a flow-backed run, the caller records this audit as an `audit`-kind attempt o
 - Treating old scripts, plans, data, or figures as evidence without current hashes.
 - Adding paper- or domain-specific kind names to `[[checks]]`.
 - Closing a final run report without a `close`-mode review.
-- Roleplaying a verifier in the main agent.
-- Inventing a reviewer id or using role text as reviewer provenance.
-- Finishing a flow audit without a returned subagent review.
 - Single-line "looks fine" report — the structured per-axis table is the deliverable.
-- Suppressing findings the verifier judges "too small to matter" — coverage is the contract; the calling skill ranks.
-- Spawning a verifier with model id or reasoning/effort different from the main agent.
 - Subagent prescribing fixes / writing an `## Action items` section.
+- Audit dispatch contract violations: see AGENTS.md → Audit dispatch.

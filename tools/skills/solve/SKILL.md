@@ -65,7 +65,7 @@ Use the method card's code shape. If the canonical stack is missing, install the
 
 <instructions name="report">
 
-≤3 lines + convergence plot. Embed one-line reasoning: what method was chosen, why, what was verified.
+Per [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (≤3 lines + plot; embedded one-line reasoning).
 
 <example name="report bad">
 I ran DMRG on the Heisenberg chain. I set D=200 and the energy converged. I then cross-checked with ED and the values agree well. The Bethe ansatz value at infinite size is around -0.4431, which is consistent given finite-size effects.
@@ -83,11 +83,7 @@ Show the run command: `julia --project=julia-env scripts/<name>.jl`
 
 <instructions name="next-steps">
 
-Always offer via `AskUserQuestion` — Superpowers brainstorming pattern:
-
-- 2–3 options, each with short label + one-line pro/con.
-- Recommended option first, labeled "(Recommended)".
-- "Done" is always a real option, never padded.
+User-facing forks → [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (AskUserQuestion; 2–3 options; recommended first; Done always real).
 
 Common next-steps (pick the 2 or 3 most relevant — and ALWAYS include Done as one of the slots). The filter is genre, not laziness: if a parameter scan, a visualization, AND a cross-method check are all real follow-ups, pick the two with the highest information-per-compute and Done, not the single most obvious. When uncertain whether an option is relevant, include it; the user does the final filter by clicking.
 

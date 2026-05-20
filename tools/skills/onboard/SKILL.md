@@ -144,7 +144,7 @@ If the user picked "Save setup and exit" in step 3, exit with one line: *"Harnes
 
 Otherwise, infer the model or physics topic from the step 3a answer. Hand off to `/model` (if a specific Hamiltonian) or `/physics` (if a cross-model phenomenon question); the dispatcher reads the matching card. This skill exits.
 
-If the user's prompt is ambiguous between two or three specific routes, use `AskUserQuestion` with 2 or 3 options — each option is one candidate model card OR one candidate physics card. Each option has a short label and a one-line tradeoff. Recommended option first. Do not enumerate the full model or physics card lists.
+If the user's prompt is ambiguous between two or three specific routes, surface candidates via the user-facing fork pattern → [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (AskUserQuestion; 2–3 options; recommended first; Done always real). Each option is one candidate model card OR one candidate physics card. Do not enumerate the full model or physics card lists.
 
 If nothing fits: *"That's outside current scope (ground-state lattice problems). Want me to try an off-skill approach, or help you reframe?"*
 

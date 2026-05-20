@@ -42,11 +42,11 @@ A `<run-dir>` containing:
 
 1. **Verify close passed.** `flow require <run-dir> close`. If it errors, surface the blocker via the host's option API and stop.
 
-2. **Dispatch the polish subagent** as a `report`-kind attempt on the `report` gate. MUST SPAWN with the host subagent/delegation tool (same model id and effort as the main agent; actor id distinct from any producer). It writes `<run-dir>/editorial.json`. Brief and constraints in [Subagent briefs](#subagent-briefs). After return, register the file with `flow artifact add <run-dir> editorial <run-dir>/editorial.json --kind editorial --producer <attempt>`, then `flow attempt finish <run-dir> <attempt>`.
+2. **Dispatch the polish subagent** as a `report`-kind attempt on the `report` gate. Spawn per [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch) (model and effort match; actor id distinct from any producer). It writes `<run-dir>/editorial.json`. Brief and constraints in [Subagent briefs](#subagent-briefs). After return, register the file with `flow artifact add <run-dir> editorial <run-dir>/editorial.json --kind editorial --producer <attempt>`, then `flow attempt finish <run-dir> <attempt>`.
 
 3. **Render the HTML.** `python tools/skills/report/scripts/render.py <run-dir>`. The renderer reads `flow status --json` for derived state, composes the page from the template, and falls back to declared statements when editorial fields are missing. Output: `<run-dir>/report_<run-id>_<date>.html` + `report_latest.html` symlink.
 
-4. **Dispatch the audit subagent** as an `audit`-kind attempt on the `report` gate. MUST SPAWN with the host subagent/delegation tool (actor id distinct from the polish actor). It mechanically walks every checklist item and writes `verify/verify_report_<date>.md` + sibling `verify_report_<date>.toml`. Brief in [Subagent briefs](#subagent-briefs).
+4. **Dispatch the audit subagent** as an `audit`-kind attempt on the `report` gate. Spawn per [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch) (model and effort match; actor id distinct from the polish actor). It mechanically walks every checklist item and writes `verify/verify_report_<date>.md` + sibling `verify_report_<date>.toml`. Brief in [Subagent briefs](#subagent-briefs).
 
 5. **`flow attempt finish`** on the audit attempt with `--report <md-path>`. Flow parses the sidecar verdicts, runs the `report` gate's `[[checks]]`, and derives status. If pass, the run ships. If any item is `fail`, see [Failed checks](#failed-checks).
 

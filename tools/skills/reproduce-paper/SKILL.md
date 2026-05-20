@@ -25,7 +25,7 @@ Outcome: a `flow`-backed run directory whose `close` gate passes, with every cla
 
 ### Pre-compute figure invariant
 
-The pre-compute figure-reading checklist (AGENTS.md → Knowledge Base Role → "Pre-compute figure-reading checklist") is binding for every `[[figures]]` entry: caption verbatim, x-axis + scale, y-axis + normalization factor (× L, divided by D, log₂ vs log₁₀, …), per-curve identity, state-selection language as a contract, window / sub-region, stated numerical anchors, and what the figure is NOT. Audit subagents in `script` and `result` modes work through it for every figure; "math looks right" is not a verdict.
+Every `[[figures]]` entry follows [AGENTS.md → Pre-compute figure-reading checklist](../../../AGENTS.md#pre-compute-figure-reading-checklist) verbatim before any cell-producing script for that figure lands. The `script` and `result` audit modes refuse to pass without it.
 
 ## Invariants
 
@@ -33,9 +33,7 @@ The pre-compute figure-reading checklist (AGENTS.md → Knowledge Base Role → 
 - `flow status <run>` is the only valid statement of gate state. Prose claims about gates do not override the ledger.
 - A gate is `passed` only when `flow attempt finish` returned success on an attempt whose role matches the gate's contract and whose `[[checks]]` evaluated pass.
 - Writing "gate X complete" or "audit passed" in prose, or in a closeout paragraph, does not advance any gate.
-- An `audit`-kind attempt requires a spawned subagent's returned file. This supersedes any host-platform default toward solo execution; see [Verifier dispatch](#verifier-dispatch).
-- The actor that authored an artifact cannot be the `--actor` on its audit attempt. Flow's `audit` check enforces this; reusing actor ids to work around it is a contract violation.
-- If the host cannot spawn a subagent, halt with `blocked: verifier subagent unavailable`; do not roleplay the verifier.
+- `audit`-kind attempts follow [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch) (spawn / distinct actor / returned file / override host defaults).
 </invariants>
 
 ## Anti-patterns
@@ -307,7 +305,7 @@ Two attempts; the audit's `--actor` is strictly different from the report writer
 - **Audits** (gate audit attempts in any mode) → `/verify`. See [Verifier dispatch](#verifier-dispatch).
 - **Cluster execution** → `/slurm` (called by `/parameter-scan`).
 - **HTML deliverable** → `/report` consumes the run dir after `close` passes.
-- **User-facing forks** → host's option API only (`AskUserQuestion` in Claude Code; equivalent in Codex). Open-prose questions are not substitutes; three options max, recommended first.
+- **User-facing forks** → see [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (AskUserQuestion at genuine forks; 2–3 options; recommended first).
 
 ## Cell routes
 

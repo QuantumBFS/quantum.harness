@@ -30,7 +30,7 @@ The array interface is generic. **Every** array-job script the calling skill han
 
 1. **Pre-check** — three binary items, **all** MUST pass before continuing:
 
-   <checklist name="pre-check">
+   <checklist name="precheck">
    - (a) `tools/cluster/active.md` symlink resolves to a readable cluster profile file.
    - (b) `ssh <alias> echo ok` exits 0 within 10 s.
    - (c) `git status --porcelain` output is captured to the job record (empty → clean ship; non-empty → user authorization REQUIRED before ship).
@@ -39,14 +39,14 @@ The array interface is generic. **Every** array-job script the calling skill han
 
    - **2a. Probe.** Run `ssh <alias> 'sinfo -o "%P %a %.10l %.6D %.6t"'` (or the cluster profile's status command).
    - **2b. Filter.** Read the calling skill's resource-class hint (cpu / gpu / high-mem) and filter candidate partitions from the profile's partitions table.
-   - **2c. Surface options.** Present 2–3 candidates to the user via `AskUserQuestion` — recommended option first; each option carries partition name, current load (idle/mix/alloc/down node counts), cores/memory specs, expected queue wait, and a one-line pro / con.
+   - **2c. Surface options.** User-facing fork → [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (AskUserQuestion; 2–3 options; recommended first; Done always real). Skill-specific per-option payload: partition name, current load (idle/mix/alloc/down node counts), cores/memory specs, expected queue wait, one-line pro/con.
    - **2d. Ratify.** The user clicks; submission uses the ratified partition.
 
-   <example name="partition-fork bad">
+   <example name="partition bad">
    Submitting to default-cpu...
    </example>
 
-   <example name="partition-fork good">
+   <example name="partition good">
    Pick a partition (Recommended first):
    - default-cpu (Recommended) — 64 cores, 256 GB, idle 4 / mix 12 / alloc 18, ~5 min wait. Pro: matches the profile's default. Con: shared with the lab's running grid.
    - high-throughput — 32 cores, 128 GB, idle 14 / mix 6 / alloc 4, ~0 min wait. Pro: idle now, fastest start. Con: half the cores per node.
@@ -61,11 +61,11 @@ The array interface is generic. **Every** array-job script the calling skill han
    - `git`: stage and commit if working tree dirty (only with user authorization for this run); `git push origin <branch>`; `ssh <alias> "cd <repo> && git fetch && git checkout <branch> && git pull"`.
    - `rsync`: `rsync -avz --exclude='/results' --exclude='/.git' . <alias>:<repo>/`.
 5. **Submit**: `ssh <alias> "cd <repo> && sbatch <script>"` (with the partition picked in step 2). Capture job id. For array jobs, the run spec is rsynced first and `sbatch --array=1-N --export=ALL,HARNESS_RUN_SPEC=<path>,HARNESS_COMMAND='<command>' ...` supplies the generic cell selector and command. `HARNESS_ENTRYPOINT=<script>` remains a convenience fallback for executable scripts and Julia entrypoints.
-6. **Monitor**: poll `ssh <alias> "squeue -j <jobid> -h -o '%T %M %R'"`. A successful `sbatch` return is NOT a running job — it is a job in the queue. A `squeue` line showing `R` is NOT verified compute — the binary may segfault in the first second. Per AGENTS.md "Monitor before declaring success".
+6. **Monitor**: poll `ssh <alias> "squeue -j <jobid> -h -o '%T %M %R'"`. Scheduler / `ssh` exit status ≠ evidence — see [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch) and [Output norms → Monitor before declaring success](../../../AGENTS.md#ui-ux). Skill-specific settle-time discipline below.
 
    - **6a. Settle-time layered checks** — three binary items, in order:
 
-   <checklist name="settle-time">
+   <checklist name="settle">
    - **PENDING → RUNNING transition (1–3 min after `sbatch`).** Re-check `squeue -j <jid>`: state must be `R` (or `CG` cleaning-up if the job was instantaneous). If still `PD`, read the reason in parentheses (see PD-reason table below) and surface to the user.
    - **Startup health (1–3 min after first observed `R`).** Tail at least one cell's log to confirm actual compute is happening, not just "RUNNING" status. Sbatch can start a cell, hit a startup error (wrong PATH, missing module, OOM-at-init, broken sbatch.sh), and exit within seconds — the cell briefly shows `R` before flipping to `FAILED` / `COMPLETED`. Catching this early prevents a fire-and-forget failure across the whole grid.
    - **Long-run pulse (every 30–60 min for multi-hour jobs).** Poll state transitions (RUNNING → COMPLETED / FAILED / TIMEOUT) and tail one log periodically. Surface progress to the user via short status lines, not silence.
@@ -76,11 +76,11 @@ The array interface is generic. **Every** array-job script the calling skill han
    - `PD (AssocMaxJobsLimit)` / `PD (QOSMaxJobsPerUserLimit)` → account / quota throttle. Surface immediately; cannot be unstuck by waiting.
    - `PD (Dependency)` → another job must complete first. Verify the dependency is real.
 
-   <example name="pd-surfacing bad">
+   <example name="pd bad">
    sbatch returned 0, job 41273 submitted ✓
    </example>
 
-   <example name="pd-surfacing good">
+   <example name="pd good">
    Job 41273 submitted but currently PENDING (Resources): 14 jobs ahead of it on default-cpu. Choose: wait, switch to gpu-share (idle), or stop.
    </example>
 
@@ -96,7 +96,7 @@ The array interface is generic. **Every** array-job script the calling skill han
 
    - **6b. Utilization inspection (thread-level, NOT process-level).** A single `top` snapshot showing `%CPU = 100` from the process row is NOT a utilization measurement — that's one thread's instantaneous CPU on one core, which a multi-threaded process can saturate even when 7/8 cores are idle. The right inspection on the compute node:
 
-   <checklist name="utilization-inspection">
+   <checklist name="utilization">
 
    | command | what it answers | how to read it |
    |---|---|---|
@@ -141,11 +141,11 @@ If no profile is found, the skill emits the generic array wrapper without resour
 - Local results: `results/<run>/` populated from the cluster.
 - A 2-3 line report: success/fail counts + path + recommended next step.
 
-<example name="final-state bad">
+<example name="final bad">
 Job 41273 finished with 9 successes and 3 failures. Results are at results/run-A/. Suggest investigating the failed cells.
 </example>
 
-<example name="final-state good">
+<example name="final good">
 Run-A: 9/12 cells succeeded, 3 failed (OOM at L=32). Results: results/run-A/. Next: increase --mem to 64G and resubmit failed cells via /slurm resume run-A.
 </example>
 
@@ -174,7 +174,7 @@ Run-A: 9/12 cells succeeded, 3 failed (OOM at L=32). Results: results/run-A/. Ne
 
 ## Anti-patterns (auto-reject)
 
-<checklist name="anti-patterns">
+<checklist name="reject">
 - Asking the user to ssh / sbatch manually when this skill is available.
 - Hardcoding HPC2 specifics (partitions, modules, ssh alias) — they belong in the cluster profile.
 - Submitting via an unvetted MCP server when `/slurm` (Bash + ssh) suffices.
@@ -182,10 +182,10 @@ Run-A: 9/12 cells succeeded, 3 failed (OOM at L=32). Results: results/run-A/. Ne
 - Silent commits / pushes during the ship step without prior authorization.
 </checklist>
 
-<example name="silent-commit bad">
+<example name="silent bad">
 git tree is dirty — let me commit and push, then submit the job.
 </example>
 
-<example name="silent-commit good">
+<example name="silent good">
 Local tree has 3 modified files. Ship strategy: commit + push? (options: commit-and-push, rsync-bypass-git, abort)
 </example>

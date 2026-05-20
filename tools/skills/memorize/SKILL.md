@@ -82,7 +82,7 @@ action = "link against openblas64 or fall back to dsyevr"
 
    Do this step inline in the main agent — do NOT spawn a subagent. The main agent is the only context with the full session transcript; a subagent would have to be hand-fed the transcript and would lose the implicit memory of what was said.
 
-   **Coverage, not filtering.** Flag every friction moment you see, including ones you judge minor.
+   Coverage-not-filtering survey discipline: see [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch).
 
 2. **Cluster by root cause.** Group friction moments by what they were ACTUALLY about — not what they looked like. A "wrong y-axis label" and a "wrong state selection" both root-cause to "did not read the caption before coding"; that's one lesson, not two. Forty friction moments often distill to three lessons.
 
