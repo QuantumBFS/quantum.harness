@@ -179,9 +179,8 @@ After verification completes for a model card workflow, surface the writeup hand
 
 After the artifacts are in hand, if the user wants to publish, present, or share, route to:
 
-- `scientific-writing` / `latex-paper-en` — paper text.
+- `scientific-writing` — paper text.
 - `scientific-visualization` — figures.
-- `jupyter-notebook` — interactive companion.
 
 The handoff is offered, not forced. If the user just wants the result, that's a complete session.
 
@@ -244,7 +243,6 @@ External/support skills:
 - **arxiv-search** — Semantic arXiv search via Valyu
 - **scientific-visualization** — Publication-quality figures (matplotlib/seaborn/plotly)
 - **scientific-writing** — Scientific manuscript drafting
-- **latex-paper-en** — LaTeX academic paper writing
 - **download-ref** — Add arXiv/DOI/book methodology references under `knowledge-base/literature/<method>/`; rendered markdown is tracked, raw PDFs/metadata/figures are local-only.
 
 ## Tool Hierarchy

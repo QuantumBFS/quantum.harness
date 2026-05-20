@@ -47,6 +47,14 @@ commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:5a53d1f7f4cee4dee017a50d735335c7aae1874b2746207e076b5d9035315599"
 
 [[skill]]
+name = "scientific-visualization"
+source = "https://github.com/HughYau/AcademicForge.git"
+kind = "git"
+path = "scientific-visualization"
+commit = "410d5b29ab28a96cbb5915114df872b2cbe7d2d3"
+checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390bc74"
+
+[[skill]]
 name = "subagent-driven-development"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"

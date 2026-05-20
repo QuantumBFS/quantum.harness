@@ -407,7 +407,7 @@ On re-entry into an existing run dir:
 - Paper-specific words (claim ids, figure ids, deviation labels) live as data values in `protocol.toml`. Never in `flow`'s vocabulary, never in this skill's check-kind names.
 - Method- and stack-specific words also live as data values in `protocol.toml` and stack cards. Never add method-specific check kinds or `flow` gates.
 - Methodology absorption is a side-effect of running the verification figures the paper declares — they appear alongside the substantive figures because they are also `[[figures]]` entries with `claim_ids`.
-- The writeup-handoff close (declared entry + run report) happens in the `close` gate. Route to `scientific-writing` / `latex-paper-en` / `scientific-visualization` / `jupyter-notebook` for downstream artifacts.
+- The writeup-handoff close (declared entry + run report) happens in the `close` gate. Route to `scientific-writing` / `scientific-visualization` for downstream artifacts.
 
 ## Related
 

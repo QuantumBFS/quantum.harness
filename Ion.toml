@@ -19,11 +19,7 @@ reproduce-paper = { type = "local" }    # paper orchestrator (absorbs run-report
 verify = { type = "local" }
 report = { type = "local" }             # render single-page interactive HTML report from a reproduction run
 memorize = { type = "local" }           # session-end retrospective: distill lessons → TACITS.toml or AGENTS.md
-
-# Visualization & writing
-scientific-visualization = { source = "davila7/claude-code-templates/scientific-visualization" }
 scientific-writing = { source = "davila7/claude-code-templates/scientific-writing" }
-latex-paper-en = { source = "bahayonghang/academic-writing-skills/latex-paper-en" }
 
 # Skill tooling
 ion-cli = { type = "local" }
@@ -51,3 +47,4 @@ using-superpowers = { source = "obra/superpowers/skills/using-superpowers" }
 verification-before-completion = { source = "obra/superpowers/skills/verification-before-completion" }
 writing-plans = { source = "obra/superpowers/skills/writing-plans" }
 writing-skills = { source = "obra/superpowers/skills/writing-skills" }
+scientific-visualization = { source = "HughYau/AcademicForge/scientific-visualization" }
