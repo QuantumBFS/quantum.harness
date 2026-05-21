@@ -20,7 +20,7 @@ node.
 - Ansatz `|ψ_θ⟩`: parameterized wavefunction (RBM, CNN, Transformer, ...).
 - Variational energy `E_θ = ⟨ψ_θ|H|ψ_θ⟩ / ⟨ψ_θ|ψ_θ⟩`, estimated by Monte Carlo sampling.
 - Energy variance `σ²_E = ⟨H²⟩ - ⟨H⟩²`: zero for exact eigenstate.
-- V-score: `N × σ²_E / (E - E_∞)²` (see `knowledge-base/2302.04919-variational-benchmarks.md`).
+- V-score: `N × σ²_E / (E - E_∞)²`, with `E_∞ = Tr(H)/dim(H)` the infinite-temperature reference (Wu et al., arXiv:2302.04919).
 
 ## Code shape (Python / NetKet)
 
@@ -70,7 +70,7 @@ variance = data["Energy"]["Variance"][-1]
 
 - Frustrated 2D problems where DMRG cylinder geometry biases the answer (kagome, triangular, J1-J2).
 - Comparing variational energies across ansatz families.
-- V-score benchmarking (see `knowledge-base/2302.04919-variational-benchmarks.md`).
+- V-score benchmarking (Wu et al., arXiv:2302.04919).
 - Sign-problem regimes where QMC is blocked.
 
 ## When NOT to use
@@ -92,7 +92,7 @@ variance = data["Energy"]["Variance"][-1]
 - **Energy upper bound**: VMC energy is variational — it must be ≥ the true ground-state energy. If it's lower than a published exact result, something is wrong.
 - **Variance**: should decrease during training and be small at convergence.
 - **Cross-method**: compare VMC energy to DMRG (if available) on the same system. Agreement within variance is good.
-- **V-score**: compute and compare to published values in `knowledge-base/2302.04919-variational-benchmarks.md`.
+- **V-score**: compute and compare to published values in the V-score paper (Wu et al., arXiv:2302.04919).
 - **Multiple seeds**: run 3–5 independent optimizations; they should converge to similar energies.
 
 ## Citations
@@ -100,4 +100,4 @@ variance = data["Energy"]["Variance"][-1]
 - Carleo & Troyer, *Science* **355**, 602 (2017) — NQS with RBM.
 - NetKet documentation — https://www.netket.org
 - Becca & Sorella, *Quantum Monte Carlo Approaches for Correlated Systems* (Cambridge, 2017) — VMC foundations.
-- Variational benchmarks paper — see `knowledge-base/2302.04919-variational-benchmarks.md`.
+- Wu et al., *Variational benchmarks for quantum many-body problems*, arXiv:2302.04919 — V-score definition and benchmark families.

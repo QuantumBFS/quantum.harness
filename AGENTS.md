@@ -85,7 +85,6 @@ Current cards:
 - `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
 - `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. `ed/METHOD.md` uses Julia XDiag with QuSpin as a Python fallback reference. `vqe.md` uses TensorCircuit-NG on a preinstalled JAX backend. `qmc.md` uses Julia SSE/Carlo; `ctmrg.md` uses Julia PEPSKit. `vmc-nqs.md` uses Python/NetKet. `spectral.md` and `finite-t.md` are stubs (pointers only, no tested recipe). A method earns a folder `methods/<method>/` (containing `METHOD.md` + `TACITS.toml`) once tacit knowledge has accrued from real runs; before then it stays flat as `methods/<method>.md`.
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
-- `2302.04919-variational-benchmarks.md` — V-score paper notes.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
 

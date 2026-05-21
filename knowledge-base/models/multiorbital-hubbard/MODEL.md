@@ -51,7 +51,7 @@ Default checks:
 
 Optional check:
 
-- For three-orbital Kanamori at canonical fillings, compare to `knowledge-base/2302.04919-variational-benchmarks.md` and other published benchmarks where `U`, `J_Hund` match.
+- For three-orbital Kanamori at canonical fillings, compare to published benchmarks where `U`, `J_Hund` match (e.g. the V-score paper arXiv:2302.04919).
 
 ## Writeup handoff
 
