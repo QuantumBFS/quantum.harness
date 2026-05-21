@@ -38,7 +38,7 @@ Audit dispatch contract: see AGENTS.md → Audit dispatch.
 
 ## Dispatch
 
-Audit dispatch contract: see AGENTS.md → Audit dispatch. Record the returned subagent id/name as `reviewer`.
+Audit dispatch contract: see AGENTS.md → Audit dispatch. Record the subagent's runtime identity as `reviewer` in the sidecar; the returned id/name is display metadata only.
 
 The verifier brief includes the following verbatim lines:
 
@@ -170,8 +170,8 @@ status = "pass"      # pass | warn | fail
 mode = "protocol"    # protocol | plan | kb | script | result | mismatch | close | report | solve
 target = "protocol.toml"
 hash = "sha256:..."  # target hash; required when the audit check declares target
-author = "codex:<author-session>"
-reviewer = "subagent:<returned-id>"
+author = "<author-identity>"
+reviewer = "<reviewer-identity>"
 brief = "sha256:..."
 coverage = true
 
@@ -237,7 +237,7 @@ The verifier produces findings ONLY. The calling skill translates findings into 
 
 See [Output handoff](#output-handoff) for the findings-only contract — the *calling skill* translates findings into 2–3 user options via the host's native API (`AskUserQuestion` in Claude Code; equivalent in Codex). User ratifies; only then does cleanup happen.
 
-In a flow-backed run, the caller records this audit as an `audit`-kind attempt on the relevant gate, writes the markdown report and typed TOML sidecar, attaches the report path with `--report`, then `flow attempt finish`. Flow's `audit` check verifies actor distinctness, report/sidecar freshness, typed `mode`, target hash, `coverage`, required `items`, and top-level sidecar `status = "pass"` when those fields are declared by the check.
+In a flow-backed run, the caller records this audit as an `audit`-kind attempt on the relevant gate, the audit subagent writes the markdown report and typed TOML sidecar, and the same runtime identity should run `flow attempt finish --report <report>`. Flow's `audit` check verifies finish-actor distinctness, report/sidecar freshness, `reviewer` matching the finish identity, typed `mode`, target hash, `coverage`, required `items`, and top-level sidecar `status = "pass"` when those fields are declared by the check.
 
 ## Anti-patterns
 

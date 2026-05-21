@@ -7,7 +7,7 @@ The tool is intentionally small:
 - `gate` — a checkpoint whose status (`pending` / `passed` / `failed`) is **derived live** from the protocol's `[[checks]]` and the event log. Never stored; never declared.
 - `strict` — optional gate flag in `flow.toml`. A strict gate must have its template-declared `attempts` finished and its template-declared `checks` present in `protocol.toml`; otherwise it cannot pass.
 - `check` — a typed one-word predicate: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, or `support`. Check ids are global handles for overrides and cached run results, so `flow` rejects duplicate ids when it parses `protocol.toml`.
-- `attempt` — one actor trying to satisfy one gate. Roles are typed: `audit`, `trial`, `run`, `report`. The `--actor` flag is the human-readable label; identity comes from host session ids (`CODEX_THREAD_ID`, `CLAUDE_SESSION_ID`) when present, then `FLOW_ACTOR_ID`, then the parent process id (`ppid:<n>`). The `audit` check compares identity, not labels. Audit attempts must attach a `verify_*.md` report plus sibling `verify_*.toml` sidecar; flow hashes both at finish, so post-finish edits invalidate the audit.
+- `attempt` — one actor trying to satisfy one gate. Roles are typed: `audit`, `trial`, `run`, `report`. The `--actor` flag is the human-readable label; identity comes from host session ids (`CODEX_THREAD_ID`, `CLAUDE_SESSION_ID`) when present, then `FLOW_ACTOR_ID`, then the parent process id (`ppid:<n>`). `flow` records both start and finish identity; audit checks use finish identity when present. Audit attempts must attach a `verify_*.md` report plus sibling `verify_*.toml` sidecar; flow hashes both at finish, so post-finish edits invalidate the audit.
 - `artifact` — a file with a stable content hash, an optional producer attempt, and a `deps` snapshot of any source hashes referenced by `fresh` checks at registration time.
 - `producer` — an optional check field, for example `producer = "run"`. When present, each artifact consumed by the check must be registered from that attempt role. Trial artifacts cannot close run evidence.
 - `scope` — `[artifact].scope` is typed: `full`, `main`, `subset`, `snapshot`, or `custom`. `flow status --json` emits a run `verdict`: `green`, `muted`, or `blocked`.
@@ -34,8 +34,8 @@ status = "pass"    # pass | warn | fail
 mode = "script"    # protocol | plan | script | result | mismatch | close | report | solve | kb
 target = "scripts/reproduce"
 hash = "sha256:..." # optional current target hash
-author = "codex:<session>"
-reviewer = "codex:<session>"
+author = "<author-identity>"
+reviewer = "<reviewer-identity>"
 brief = "sha256:..."
 coverage = true
 
@@ -48,7 +48,7 @@ claim = "claim.energy"
 status = "pass"
 ```
 
-When `hash` is present, `target` must be present and match the current file hash at `attempt finish`. `author` and `reviewer`, when both present, must differ.
+When `hash` is present, `target` must be present and match the current file hash at `attempt finish`. `author` and `reviewer`, when both present, must differ. When `reviewer` is present, it must equal the audit attempt's recorded finish identity (`codex:<id>`, `claude:<id>`, `flow:<id>`, or `ppid:<id>`).
 Audit checks can require typed dispatch and coverage:
 
 ```toml

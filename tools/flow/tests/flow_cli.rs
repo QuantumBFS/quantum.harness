@@ -336,12 +336,15 @@ gate = "protocol"
         .stdout,
     )
     .to_string();
-    assert_ok(&[
-        "attempt",
-        "finish",
-        run_dir.to_str().unwrap(),
-        producer.trim(),
-    ]);
+    run_with_env(
+        &[
+            "attempt",
+            "finish",
+            run_dir.to_str().unwrap(),
+            producer.trim(),
+        ],
+        &[("FLOW_ACTOR_ID", "process-7")],
+    );
     let auditor = String::from_utf8_lossy(
         &run_with_env(
             &[
@@ -361,14 +364,17 @@ gate = "protocol"
     .to_string();
     let report = run_dir.join("verify").join("r.md");
     write_audit(&report, "pass");
-    assert_ok(&[
-        "attempt",
-        "finish",
-        run_dir.to_str().unwrap(),
-        auditor.trim(),
-        "--report",
-        report.to_str().unwrap(),
-    ]);
+    run_with_env(
+        &[
+            "attempt",
+            "finish",
+            run_dir.to_str().unwrap(),
+            auditor.trim(),
+            "--report",
+            report.to_str().unwrap(),
+        ],
+        &[("FLOW_ACTOR_ID", "process-7")],
+    );
     let stdout =
         String::from_utf8_lossy(&run(&["check", run_dir.to_str().unwrap(), "protocol"]).stdout)
             .to_string();
@@ -836,12 +842,15 @@ gate = "protocol"
         .stdout,
     )
     .to_string();
-    assert_ok(&[
-        "attempt",
-        "finish",
-        run_dir.to_str().unwrap(),
-        producer.trim(),
-    ]);
+    run_with_env(
+        &[
+            "attempt",
+            "finish",
+            run_dir.to_str().unwrap(),
+            producer.trim(),
+        ],
+        &[("FLOW_ACTOR_ID", "process-author")],
+    );
 
     let auditor = String::from_utf8_lossy(
         &run_with_env(
@@ -862,14 +871,17 @@ gate = "protocol"
     .to_string();
     let report = run_dir.join("verify").join("independent.md");
     write_audit(&report, "pass");
-    assert_ok(&[
-        "attempt",
-        "finish",
-        run_dir.to_str().unwrap(),
-        auditor.trim(),
-        "--report",
-        report.to_str().unwrap(),
-    ]);
+    run_with_env(
+        &[
+            "attempt",
+            "finish",
+            run_dir.to_str().unwrap(),
+            auditor.trim(),
+            "--report",
+            report.to_str().unwrap(),
+        ],
+        &[("FLOW_ACTOR_ID", "process-reviewer")],
+    );
 
     assert_ok(&["require", run_dir.to_str().unwrap(), "protocol"]);
 }
@@ -1154,7 +1166,7 @@ mode = "solve"
 target = "result.json"
 hash = "{}"
 author = "attempt:{}"
-reviewer = "subagent:reviewer"
+reviewer = "flow:reviewer"
 brief = "sha256:brief"
 coverage = true
 
@@ -1209,6 +1221,129 @@ status = "pass"
     .to_string();
     assert!(
         finish.lines().any(|line| line == "status\tpassed"),
+        "finish: {finish}"
+    );
+}
+
+#[test]
+fn audit_reviewer_must_match_finish_identity() {
+    let root = tmp_dir("audit-reviewer-finish");
+    let template = root.join("template.toml");
+    let run_dir = root.join("run");
+    write(
+        &template,
+        r#"
+[[gates]]
+id = "audit"
+strict = true
+attempts = ["run", "audit"]
+checks = ["audit"]
+"#,
+    );
+    fs::create_dir_all(&run_dir).unwrap();
+    let target = run_dir.join("result.json");
+    write(&target, "{\"energy\": -1.0}\n");
+    write(
+        &run_dir.join("protocol.toml"),
+        r#"
+[[checks]]
+id = "audit"
+kind = "audit"
+gate = "audit"
+mode = "solve"
+target = "result.json"
+coverage = true
+items = ["claim"]
+"#,
+    );
+    assert_ok(&[
+        "init",
+        run_dir.to_str().unwrap(),
+        "--template",
+        template.to_str().unwrap(),
+    ]);
+
+    let prod = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "run",
+                "--actor",
+                "agent:runner",
+            ],
+            &[("FLOW_ACTOR_ID", "runner")],
+        )
+        .stdout,
+    )
+    .to_string();
+    run_with_env(
+        &["attempt", "finish", run_dir.to_str().unwrap(), prod.trim()],
+        &[("FLOW_ACTOR_ID", "runner")],
+    );
+
+    let report = run_dir.join("verify").join("verify_result.md");
+    write(&report, "audit findings\n");
+    write(
+        &report.with_extension("toml"),
+        &format!(
+            r#"
+status = "pass"
+mode = "solve"
+target = "result.json"
+hash = "{}"
+author = "attempt:{}"
+reviewer = "flow:reviewer"
+brief = "sha256:brief"
+coverage = true
+
+[[items]]
+id = "claim"
+status = "pass"
+"#,
+            file_hash(&target),
+            prod.trim()
+        ),
+    );
+
+    let aud = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "audit",
+                "--actor",
+                "subagent:reviewer",
+            ],
+            &[("FLOW_ACTOR_ID", "reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
+    let finish = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "finish",
+                run_dir.to_str().unwrap(),
+                aud.trim(),
+                "--report",
+                report.to_str().unwrap(),
+            ],
+            &[("FLOW_ACTOR_ID", "caller")],
+        )
+        .stdout,
+    )
+    .to_string();
+    assert!(finish.contains("audit reviewer mismatch: expected flow:caller"));
+    assert!(
+        finish.lines().any(|line| line == "status\tfailed"),
         "finish: {finish}"
     );
 }
@@ -1283,7 +1418,7 @@ mode = "solve"
 target = "result.json"
 hash = "{}"
 author = "attempt:{}"
-reviewer = "subagent:reviewer"
+reviewer = "flow:reviewer"
 brief = "sha256:brief"
 coverage = true
 

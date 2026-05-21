@@ -36,7 +36,7 @@ mode = "report"
 target = "report_<run-id>_<date>.html"
 hash = "sha256:..."
 author = "attempt:<producer>"
-reviewer = "subagent:<returned-id>"
+reviewer = "<reviewer-identity>"
 brief = "sha256:..."
 coverage = true
 

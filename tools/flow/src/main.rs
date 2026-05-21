@@ -182,6 +182,8 @@ struct Attempt {
     #[serde(flatten)]
     actor: Actor,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    finish: Option<Actor>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     executor: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     command: Option<String>,
@@ -292,6 +294,8 @@ enum Event {
     #[serde(rename = "attempt_finished")]
     AttemptFinished {
         id: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        finish: Option<Actor>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         report: Option<Report>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1285,12 +1289,14 @@ fn cmd_attempt_start(args: &[String]) -> Result<()> {
 fn cmd_attempt_finish(args: &[String]) -> Result<()> {
     if args.len() < 3 {
         return Err(
-            "usage: harness-flow attempt finish <dir> <attempt> [--report <path>]".to_string(),
+            "usage: harness-flow attempt finish <dir> <attempt> [--report <path>] [--actor <actor>]"
+                .to_string(),
         );
     }
     let dir = Path::new(&args[1]);
     let id = args[2].clone();
     let raw_report = option_value(args, "--report");
+    let finish = stamped(args, "finish");
     with_flow_lock(dir, || {
         let state = rebuild(dir)?;
         let attempt = state
@@ -1310,6 +1316,7 @@ fn cmd_attempt_finish(args: &[String]) -> Result<()> {
             dir,
             &Event::AttemptFinished {
                 id: id.clone(),
+                finish: Some(finish),
                 report,
                 sidecar,
                 verdicts,
@@ -1712,6 +1719,7 @@ fn apply_event(state: &mut State, event: Event) -> Result<()> {
                     gate,
                     kind,
                     actor,
+                    finish: None,
                     executor,
                     command,
                     report: None,
@@ -1723,6 +1731,7 @@ fn apply_event(state: &mut State, event: Event) -> Result<()> {
         }
         Event::AttemptFinished {
             id,
+            finish,
             report,
             sidecar,
             verdicts,
@@ -1732,6 +1741,7 @@ fn apply_event(state: &mut State, event: Event) -> Result<()> {
                 .get_mut(&id)
                 .ok_or_else(|| format!("unknown attempt in event log: {id}"))?;
             attempt.finished = true;
+            attempt.finish = finish;
             attempt.report = report;
             attempt.sidecar = sidecar;
             attempt.verdicts = verdicts;
@@ -2055,6 +2065,10 @@ fn eval_check(ctx: &Ctx, check: &Check) -> CheckResult {
 // Producer and auditor must differ by identity. Prefer host session ids when
 // present, then FLOW_ACTOR_ID, then ppid fallback. The audit report and typed
 // sidecar are pinned at attempt-finish; post-finish edits invalidate the audit.
+fn finisher(attempt: &Attempt) -> &Actor {
+    attempt.finish.as_ref().unwrap_or(&attempt.actor)
+}
+
 fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
     let producers: Vec<&Attempt> = state
         .attempts
@@ -2073,12 +2087,13 @@ fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
         return (false, "no audit attempt finished".to_string());
     }
     for v in &auditors {
+        let auditor = finisher(v);
         let report = match v.report.as_ref() {
             Some(r) => r,
             None => {
                 return (
                     false,
-                    format!("audit attempt {} has no report", v.actor.label),
+                    format!("audit attempt {} has no report", auditor.label),
                 )
             }
         };
@@ -2102,7 +2117,7 @@ fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
             None => {
                 return (
                     false,
-                    format!("audit attempt {} has no sidecar", v.actor.label),
+                    format!("audit attempt {} has no sidecar", auditor.label),
                 )
             }
         };
@@ -2125,6 +2140,12 @@ fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
             return (
                 false,
                 format!("audit sidecar status {:?}", sidecar.status).to_lowercase(),
+            );
+        }
+        if !sidecar.reviewer.is_empty() && sidecar.reviewer != auditor.identity {
+            return (
+                false,
+                format!("audit reviewer mismatch: expected {}", auditor.identity),
             );
         }
         if let Some(mode) = check.mode {
@@ -2172,12 +2193,13 @@ fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
             }
         }
         for p in &producers {
-            if p.actor.identity == v.actor.identity {
+            let producer = finisher(p);
+            if producer.identity == auditor.identity {
                 return (
                     false,
                     format!(
                         "self-audit: identity {} produced and audited",
-                        v.actor.identity
+                        auditor.identity
                     ),
                 );
             }
