@@ -43,13 +43,25 @@ Dispatcher for independent audit. Pick a typed mode, spawn a verifier subagent, 
 
 ## Dispatch
 
-Consult only the reference for the chosen mode, plus [references/sidecar.md](references/sidecar.md). Assemble the subagent brief in this order:
+Consult only the reference for the chosen mode, plus [references/sidecar.md](references/sidecar.md). These reference files are not optional background; they are part of the verifier contract.
+
+The caller MUST put the literal reference filenames in the subagent audit prompt. Caller-written summaries are insufficient. Every verifier brief includes a `Required reference files` block naming:
+
+- `tools/skills/verify/references/<mode>.md`
+- `tools/skills/verify/references/sidecar.md`
+- Any composing-skill contract files that govern the gate, such as `tools/skills/reproduce-paper/SKILL.md`
+- Any required project anchors, such as `AGENTS.md#audit-dispatch` and `AGENTS.md#pre-compute-figure-reading-checklist`
+
+If a required reference filename is absent from the subagent audit prompt, the dispatch is invalid. If a required reference file is unavailable to the subagent, the verdict is `fail`.
+
+Assemble the subagent brief in this order:
 
 1. Verbatim kernel below.
-2. Chosen mode reference.
-3. Artifact path and verbatim artifact or precise line range.
-4. Reference path and verbatim source or precise line range.
-5. Exact claim, gate, or mismatch being audited.
+2. Required reference files block.
+3. Chosen mode reference path.
+4. Artifact path and verbatim artifact or precise line range.
+5. Reference path and verbatim source or precise line range.
+6. Exact claim, gate, or mismatch being audited.
 
 <brief>
 Think deeply. Inspect both sources end-to-end before reporting; avoid skim-based conclusions.
@@ -62,6 +74,19 @@ Output the per-axis status table. Do not write Action items or fixes — that is
 </brief>
 
 Minimum context bundle: artifact, primary source or exact excerpts, current `protocol.toml` when downstream of it, and the exact audit question.
+
+Brief block template:
+
+```text
+Required reference files to read before verdict:
+- tools/skills/verify/references/<mode>.md
+- tools/skills/verify/references/sidecar.md
+- <composing skill references, if any>
+- <AGENTS anchors, if any>
+
+Caller-written summaries are insufficient as substitutes for these filenames
+appearing in the audit prompt.
+```
 
 ## Output
 

@@ -23,6 +23,7 @@ User is technical, expects concise results and a plot, and should not answer set
 - Every `/solve` result is flow-backed with `tools/flow/templates/solve.toml` (`run -> audit -> close`).
 - Computed and interpretive claims are NOT final until `tools/cli/flow require <run> audit` exits 0.
 - `audit` is a spawned subagent attempt using `/verify --mode solve`; self-audit, roleplayed review, or invented reviewer id is invalid.
+- Audit dispatch MUST use `/verify`'s reference handoff; the verifier prompt must contain `tools/skills/verify/references/solve.md` and `tools/skills/verify/references/sidecar.md`.
 - Default audit items: `setup`, `limits`, `symmetry`, `convergence`, `claim`.
 - If no subagent is available, stop with `blocked: verifier subagent unavailable`; do not present the result as verified.
 - The audit brief includes exactly: "Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides."
@@ -69,7 +70,7 @@ After the run attempt finishes, spawn the verifier subagent with:
 - protocol/flow state
 - model, physics, method, and stack cards used
 - exact claim being audited
-- `/verify --mode solve` and the default item list unless the claim needs narrower one-word items
+- `/verify --mode solve`, `tools/skills/verify/references/solve.md`, `tools/skills/verify/references/sidecar.md`, and the default item list unless the claim needs narrower one-word items
 
 Finish the audit attempt only with:
 
