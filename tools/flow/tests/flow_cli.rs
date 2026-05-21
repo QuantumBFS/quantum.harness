@@ -1,4 +1,6 @@
+use sha2::{Digest, Sha256};
 use std::fs;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -34,6 +36,20 @@ fn write(path: &Path, content: &str) {
         fs::create_dir_all(parent).unwrap();
     }
     fs::write(path, content).unwrap();
+}
+
+fn file_hash(path: &Path) -> String {
+    let mut file = fs::File::open(path).unwrap();
+    let mut hasher = Sha256::new();
+    let mut buf = [0u8; 8192];
+    loop {
+        let n = file.read(&mut buf).unwrap();
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buf[..n]);
+    }
+    format!("sha256:{:x}", hasher.finalize())
 }
 
 fn write_audit(report: &Path, status: &str) {
@@ -1001,6 +1017,321 @@ gate = "protocol"
         String::from_utf8_lossy(&run(&["check", run_dir.to_str().unwrap(), "protocol"]).stdout)
             .to_string();
     assert!(out.contains("audit sidecar status warn"), "stdout: {out}");
+}
+
+#[test]
+fn strict_gate_requires_attempts_and_checks() {
+    let root = tmp_dir("strict-gate");
+    let template = root.join("template.toml");
+    let run_dir = root.join("run");
+    write(
+        &template,
+        r#"
+[[gates]]
+id = "run"
+strict = true
+attempts = ["run"]
+checks = ["result"]
+"#,
+    );
+    fs::create_dir_all(&run_dir).unwrap();
+    write(
+        &run_dir.join("protocol.toml"),
+        r#"
+[[checks]]
+id = "result"
+kind = "exists"
+gate = "run"
+paths = ["result.json"]
+"#,
+    );
+    assert_ok(&[
+        "init",
+        run_dir.to_str().unwrap(),
+        "--template",
+        template.to_str().unwrap(),
+    ]);
+
+    let pre = run(&["check", run_dir.to_str().unwrap(), "run"]);
+    assert!(!pre.status.success());
+    let pre_out = String::from_utf8_lossy(&pre.stdout);
+    assert!(
+        pre_out.contains("missing finished run"),
+        "stdout: {pre_out}"
+    );
+
+    write(&run_dir.join("result.json"), "{}\n");
+    let attempt = assert_ok(&[
+        "attempt",
+        "start",
+        run_dir.to_str().unwrap(),
+        "run",
+        "--kind",
+        "run",
+        "--actor",
+        "agent:runner",
+    ]);
+    let finish = assert_ok(&[
+        "attempt",
+        "finish",
+        run_dir.to_str().unwrap(),
+        attempt.trim(),
+    ]);
+    assert!(
+        finish.lines().any(|line| line == "status\tpassed"),
+        "finish: {finish}"
+    );
+}
+
+#[test]
+fn strict_audit_check_requires_typed_mode_items_and_coverage() {
+    let root = tmp_dir("strict-audit");
+    let template = root.join("template.toml");
+    let run_dir = root.join("run");
+    write(
+        &template,
+        r#"
+[[gates]]
+id = "audit"
+strict = true
+attempts = ["run", "audit"]
+checks = ["audit"]
+"#,
+    );
+    fs::create_dir_all(&run_dir).unwrap();
+    let target = run_dir.join("result.json");
+    write(&target, "{\"energy\": -1.0}\n");
+    write(
+        &run_dir.join("protocol.toml"),
+        r#"
+[[checks]]
+id = "audit"
+kind = "audit"
+gate = "audit"
+mode = "solve"
+target = "result.json"
+coverage = true
+items = ["setup", "limits", "claim"]
+"#,
+    );
+    assert_ok(&[
+        "init",
+        run_dir.to_str().unwrap(),
+        "--template",
+        template.to_str().unwrap(),
+    ]);
+
+    let prod = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "run",
+                "--actor",
+                "agent:runner",
+            ],
+            &[("FLOW_ACTOR_ID", "runner")],
+        )
+        .stdout,
+    )
+    .to_string();
+    run_with_env(
+        &["attempt", "finish", run_dir.to_str().unwrap(), prod.trim()],
+        &[("FLOW_ACTOR_ID", "runner")],
+    );
+
+    let report = run_dir.join("verify").join("verify_result.md");
+    write(&report, "audit findings\n");
+    write(
+        &report.with_extension("toml"),
+        &format!(
+            r#"
+status = "pass"
+mode = "solve"
+target = "result.json"
+hash = "{}"
+author = "attempt:{}"
+reviewer = "subagent:reviewer"
+brief = "sha256:brief"
+coverage = true
+
+[[items]]
+id = "setup"
+status = "pass"
+
+[[items]]
+id = "limits"
+status = "pass"
+
+[[items]]
+id = "claim"
+status = "pass"
+"#,
+            file_hash(&target),
+            prod.trim()
+        ),
+    );
+
+    let aud = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "audit",
+                "--actor",
+                "subagent:reviewer",
+            ],
+            &[("FLOW_ACTOR_ID", "reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
+    let finish = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "finish",
+                run_dir.to_str().unwrap(),
+                aud.trim(),
+                "--report",
+                report.to_str().unwrap(),
+            ],
+            &[("FLOW_ACTOR_ID", "reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
+    assert!(
+        finish.lines().any(|line| line == "status\tpassed"),
+        "finish: {finish}"
+    );
+}
+
+#[test]
+fn strict_audit_check_fails_when_item_missing() {
+    let root = tmp_dir("audit-item-missing");
+    let template = root.join("template.toml");
+    let run_dir = root.join("run");
+    write(
+        &template,
+        r#"
+[[gates]]
+id = "audit"
+strict = true
+attempts = ["run", "audit"]
+checks = ["audit"]
+"#,
+    );
+    fs::create_dir_all(&run_dir).unwrap();
+    let target = run_dir.join("result.json");
+    write(&target, "{}\n");
+    write(
+        &run_dir.join("protocol.toml"),
+        r#"
+[[checks]]
+id = "audit"
+kind = "audit"
+gate = "audit"
+mode = "solve"
+target = "result.json"
+coverage = true
+items = ["setup", "claim"]
+"#,
+    );
+    assert_ok(&[
+        "init",
+        run_dir.to_str().unwrap(),
+        "--template",
+        template.to_str().unwrap(),
+    ]);
+    let prod = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "run",
+                "--actor",
+                "agent:runner",
+            ],
+            &[("FLOW_ACTOR_ID", "runner")],
+        )
+        .stdout,
+    )
+    .to_string();
+    run_with_env(
+        &["attempt", "finish", run_dir.to_str().unwrap(), prod.trim()],
+        &[("FLOW_ACTOR_ID", "runner")],
+    );
+
+    let report = run_dir.join("verify_result.md");
+    write(&report, "audit findings\n");
+    write(
+        &report.with_extension("toml"),
+        &format!(
+            r#"
+status = "pass"
+mode = "solve"
+target = "result.json"
+hash = "{}"
+author = "attempt:{}"
+reviewer = "subagent:reviewer"
+brief = "sha256:brief"
+coverage = true
+
+[[items]]
+id = "setup"
+status = "pass"
+"#,
+            file_hash(&target),
+            prod.trim()
+        ),
+    );
+    let aud = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "start",
+                run_dir.to_str().unwrap(),
+                "audit",
+                "--kind",
+                "audit",
+                "--actor",
+                "subagent:reviewer",
+            ],
+            &[("FLOW_ACTOR_ID", "reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
+    let out = String::from_utf8_lossy(
+        &run_with_env(
+            &[
+                "attempt",
+                "finish",
+                run_dir.to_str().unwrap(),
+                aud.trim(),
+                "--report",
+                report.to_str().unwrap(),
+            ],
+            &[("FLOW_ACTOR_ID", "reviewer")],
+        )
+        .stdout,
+    )
+    .to_string();
+    assert!(out.contains("audit item missing: claim"), "stdout: {out}");
+    assert!(
+        out.lines().any(|line| line == "status\tfailed"),
+        "stdout: {out}"
+    );
 }
 
 fn fresh_setup(name: &str) -> (PathBuf, PathBuf) {

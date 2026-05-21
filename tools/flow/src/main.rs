@@ -67,6 +67,12 @@ struct Actor {
 struct Gate {
     #[serde(default)]
     requires: Vec<String>,
+    #[serde(default)]
+    strict: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    attempts: Vec<AttemptKind>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    checks: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,6 +86,22 @@ struct Sidecar {
     path: String,
     hash: String,
     status: VerdictStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mode: Option<AuditMode>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    target: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    target_hash: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    author: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    reviewer: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    brief: String,
+    #[serde(default)]
+    coverage: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    items: Vec<AuditItem>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -138,6 +160,16 @@ impl FromStr for AttemptKind {
 struct Verdict {
     claim: String,
     status: VerdictStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    note: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct AuditItem {
+    id: String,
+    status: VerdictStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    quote: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     note: Option<String>,
 }
@@ -238,6 +270,12 @@ enum Event {
         id: String,
         #[serde(default)]
         requires: Vec<String>,
+        #[serde(default)]
+        strict: bool,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        attempts: Vec<AttemptKind>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        checks: Vec<String>,
     },
     #[serde(rename = "attempt_started")]
     AttemptStarted {
@@ -319,6 +357,12 @@ struct GateSpec {
     id: String,
     #[serde(default)]
     requires: Vec<String>,
+    #[serde(default)]
+    strict: bool,
+    #[serde(default)]
+    attempts: Vec<AttemptKind>,
+    #[serde(default)]
+    checks: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -342,6 +386,14 @@ struct Check {
     audience: bool,
     #[serde(default)]
     claims: Vec<String>,
+    #[serde(default)]
+    mode: Option<AuditMode>,
+    #[serde(default)]
+    target: String,
+    #[serde(default)]
+    items: Vec<String>,
+    #[serde(default)]
+    coverage: bool,
     #[serde(default)]
     producer: Option<AttemptKind>,
     #[serde(default)]
@@ -539,7 +591,7 @@ impl RunVerdict {
 struct VerifyDoc {
     status: VerdictStatus,
     #[serde(default)]
-    mode: String,
+    mode: Option<AuditMode>,
     #[serde(default)]
     target: String,
     #[serde(default)]
@@ -549,7 +601,44 @@ struct VerifyDoc {
     #[serde(default)]
     reviewer: String,
     #[serde(default)]
+    brief: String,
+    #[serde(default)]
+    coverage: bool,
+    #[serde(default)]
     verdicts: Vec<Verdict>,
+    #[serde(default)]
+    items: Vec<AuditItem>,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+enum AuditMode {
+    Protocol,
+    Plan,
+    Script,
+    Result,
+    Mismatch,
+    Close,
+    Report,
+    Solve,
+    #[serde(alias = "kb-card")]
+    Kb,
+}
+
+impl AuditMode {
+    fn as_str(self) -> &'static str {
+        match self {
+            AuditMode::Protocol => "protocol",
+            AuditMode::Plan => "plan",
+            AuditMode::Script => "script",
+            AuditMode::Result => "result",
+            AuditMode::Mismatch => "mismatch",
+            AuditMode::Close => "close",
+            AuditMode::Report => "report",
+            AuditMode::Solve => "solve",
+            AuditMode::Kb => "kb",
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -655,6 +744,9 @@ fn cmd_init(args: &[String]) -> Result<()> {
                 &Event::GateAdded {
                     id: gate.id,
                     requires: gate.requires,
+                    strict: gate.strict,
+                    attempts: gate.attempts,
+                    checks: gate.checks,
                 },
             )?;
         }
@@ -1314,11 +1406,18 @@ fn finish_report(
             ));
         }
     }
-    let _mode = &doc.mode;
     let sidecar = Sidecar {
         path: rel_path(dir, &sidecar_path, &sidecar_path.display().to_string()),
         hash: file_hash(&sidecar_path)?,
         status: doc.status,
+        mode: doc.mode,
+        target: doc.target,
+        target_hash: doc.hash,
+        author: doc.author,
+        reviewer: doc.reviewer,
+        brief: doc.brief,
+        coverage: doc.coverage,
+        items: doc.items,
     };
     Ok((Some(report), Some(sidecar), doc.verdicts))
 }
@@ -1581,8 +1680,22 @@ fn apply_event(state: &mut State, event: Event) -> Result<()> {
         Event::FlowInitialized { flow_id, .. } => {
             state.flow_id = Some(flow_id);
         }
-        Event::GateAdded { id, requires } => {
-            state.gates.insert(id, Gate { requires });
+        Event::GateAdded {
+            id,
+            requires,
+            strict,
+            attempts,
+            checks,
+        } => {
+            state.gates.insert(
+                id,
+                Gate {
+                    requires,
+                    strict,
+                    attempts,
+                    checks,
+                },
+            );
         }
         Event::AttemptStarted {
             id,
@@ -1726,6 +1839,16 @@ fn parse_template_text(text: &str) -> Result<(Option<String>, Vec<GateSpec>)> {
         if !seen.insert(gate.id.clone()) {
             return Err(format!("duplicate gate id: {}", gate.id));
         }
+        if gate.strict && gate.attempts.is_empty() && gate.checks.is_empty() {
+            return Err(format!("strict gate {} needs attempts or checks", gate.id));
+        }
+    }
+    for gate in &template.gates {
+        for req in &gate.requires {
+            if !seen.contains(req) {
+                return Err(format!("gate {} requires unknown gate {}", gate.id, req));
+            }
+        }
     }
     Ok((template.flow.and_then(|flow| flow.id), template.gates))
 }
@@ -1791,6 +1914,16 @@ fn validate_protocol(protocol: &Protocol) -> Result<()> {
 // ─── gate evaluation (derived status) ────────────────────────────────────────
 
 fn evaluate_gate(ctx: &Ctx, gate: &str) -> (String, Vec<CheckResult>) {
+    let Some(spec) = ctx.state.gates.get(gate) else {
+        return (
+            GATE_FAILED.to_string(),
+            vec![CheckResult {
+                id: "gate".to_string(),
+                pass: false,
+                detail: format!("unknown gate: {gate}"),
+            }],
+        );
+    };
     let checks: Vec<&Check> = ctx
         .protocol
         .checks
@@ -1798,6 +1931,16 @@ fn evaluate_gate(ctx: &Ctx, gate: &str) -> (String, Vec<CheckResult>) {
         .filter(|c| c.gate == gate)
         .collect();
     if checks.is_empty() {
+        if spec.strict {
+            return (
+                GATE_FAILED.to_string(),
+                vec![CheckResult {
+                    id: "strict".to_string(),
+                    pass: false,
+                    detail: "strict gate has no protocol checks".to_string(),
+                }],
+            );
+        }
         // No checks declared: passed once any attempt finished, else pending.
         let any_finished = ctx
             .state
@@ -1819,7 +1962,7 @@ fn evaluate_gate(ctx: &Ctx, gate: &str) -> (String, Vec<CheckResult>) {
         .collect();
     let mut results = Vec::new();
     let mut any_fail = false;
-    for check in checks {
+    for check in &checks {
         if overridden.contains(check.id.as_str()) {
             results.push(CheckResult {
                 id: check.id.clone(),
@@ -1834,8 +1977,56 @@ fn evaluate_gate(ctx: &Ctx, gate: &str) -> (String, Vec<CheckResult>) {
         }
         results.push(r);
     }
+    if spec.strict {
+        eval_strict(ctx, gate, spec, &checks, &mut results, &mut any_fail);
+    }
     let status = if any_fail { GATE_FAILED } else { GATE_PASSED };
     (status.to_string(), results)
+}
+
+fn eval_strict(
+    ctx: &Ctx,
+    gate: &str,
+    spec: &Gate,
+    checks: &[&Check],
+    results: &mut Vec<CheckResult>,
+    any_fail: &mut bool,
+) {
+    for kind in &spec.attempts {
+        let ok = ctx
+            .state
+            .attempts
+            .values()
+            .any(|a| a.gate == gate && a.kind == *kind && a.finished);
+        if !ok {
+            *any_fail = true;
+        }
+        results.push(CheckResult {
+            id: format!("attempt:{}", kind.as_str()),
+            pass: ok,
+            detail: if ok {
+                format!("finished {}", kind.as_str())
+            } else {
+                format!("missing finished {}", kind.as_str())
+            },
+        });
+    }
+
+    for id in &spec.checks {
+        let ok = checks.iter().any(|c| c.id == *id);
+        if !ok {
+            *any_fail = true;
+        }
+        results.push(CheckResult {
+            id: format!("check:{id}"),
+            pass: ok,
+            detail: if ok {
+                "declared".to_string()
+            } else {
+                "missing protocol check".to_string()
+            },
+        });
+    }
 }
 
 fn eval_check(ctx: &Ctx, check: &Check) -> CheckResult {
@@ -1935,6 +2126,50 @@ fn eval_audit(dir: &Path, state: &State, check: &Check) -> (bool, String) {
                 false,
                 format!("audit sidecar status {:?}", sidecar.status).to_lowercase(),
             );
+        }
+        if let Some(mode) = check.mode {
+            if v.sidecar.as_ref().and_then(|s| s.mode) != Some(mode) {
+                return (
+                    false,
+                    format!("audit mode mismatch: expected {}", mode.as_str()),
+                );
+            }
+        }
+        if !check.target.is_empty() {
+            if sidecar.target != check.target {
+                return (
+                    false,
+                    format!("audit target mismatch: expected {}", check.target),
+                );
+            }
+            if sidecar.target_hash.is_empty() {
+                return (false, "audit target missing hash".to_string());
+            }
+        }
+        if check.coverage && !sidecar.coverage {
+            return (false, "audit coverage flag missing".to_string());
+        }
+        for item in &check.items {
+            let Some(found) = sidecar.items.iter().find(|i| i.id == *item) else {
+                return (false, format!("audit item missing: {item}"));
+            };
+            if found.status != VerdictStatus::Pass {
+                return (
+                    false,
+                    format!("audit item {item} status {:?}", found.status).to_lowercase(),
+                );
+            }
+        }
+        if check.coverage || !check.items.is_empty() {
+            if sidecar.author.is_empty() {
+                return (false, "audit author missing".to_string());
+            }
+            if sidecar.reviewer.is_empty() {
+                return (false, "audit reviewer missing".to_string());
+            }
+            if sidecar.brief.is_empty() {
+                return (false, "audit brief missing".to_string());
+            }
         }
         for p in &producers {
             if p.actor.identity == v.actor.identity {

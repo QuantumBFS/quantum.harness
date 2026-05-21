@@ -112,7 +112,7 @@ action = "link against openblas64 or fall back to dsyevr"
 ## Composition
 
 - Often invoked after `/reproduce-paper` close — especially when the close revealed waste.
-- Composes with `/verify` only obliquely: a tacit whose action requires the verifier to check something new (e.g., "audit must check declared stack matches actual imports") gets a cross-reference added to the matching mode in `tools/skills/verify/SKILL.md`. Mode choice is by the audited artifact: protocol-level → `protocol` mode; script-level → `script` mode; result-level → `result` mode; KB-card-level → `kb-card` mode.
+- Composes with `/verify` only obliquely: a tacit whose action requires the verifier to check something new (e.g., "audit must check declared stack matches actual imports") gets a cross-reference added to the matching mode in `tools/skills/verify/SKILL.md`. Mode choice is by the audited artifact: protocol-level → `protocol` mode; script-level → `script` mode; result-level → `result` mode; KB-card-level → `kb` mode.
 - Never invoked from inside another skill — this is a session-level retrospective, not a sub-step.
 
 ## Anti-patterns

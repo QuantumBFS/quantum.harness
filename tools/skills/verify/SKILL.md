@@ -22,17 +22,19 @@ Audit dispatch contract: see AGENTS.md → Audit dispatch.
 
 - `<artifact>` — file path of the artifact under review.
 - `--against <reference>` — optional. Auto-inferred when obvious.
-- `--mode <protocol | plan | kb-card | script | result | mismatch | close>` — selector; picked from artifact extension + content when absent.
+- `--mode <protocol | plan | kb | script | result | mismatch | close | report | solve>` — typed selector; picked from artifact extension + content when absent. `kb-card` is accepted only as a legacy alias for `kb`.
 
 | Mode | Use when | Detailed axes |
 |---|---|---|
 | `protocol` | Auditing `protocol.toml` against declared primary sources. | [protocol axes ↓](#protocol) |
 | `plan` | Auditing `reproduce-plan.toml` / `run_spec.json` against the protocol. | [plan axes ↓](#plan) |
-| `kb-card` | Auditing a KB card's anchors against literature. | [kb-card axes ↓](#kb-card) |
+| `kb` | Auditing a KB card's anchors against literature. | [kb axes ↓](#kb) |
 | `script` | Auditing a reproduction script against the protocol and methodology. | [script axes ↓](#script) |
 | `result` | Auditing produced numerical and figure results against declared references. | [result axes ↓](#result) |
 | `mismatch` | Triaging a failed gate. | [mismatch axes ↓](#mismatch) |
 | `close` | Auditing the final run report / declared entry / manifests. | [close axes ↓](#close) |
+| `report` | Auditing the rendered HTML report. | Report checklist supplied by `/report`. |
+| `solve` | Auditing a `/solve` result or interpretation. | setup, limits, symmetry, convergence, claim |
 
 ## Dispatch
 
@@ -56,7 +58,7 @@ Minimum context bundle: the artifact, the primary source (or exact excerpts), th
 
 ## Per-mode axes
 
-### `kb-card`
+### `kb`
 
 Per AGENTS.md provenance discipline.
 
@@ -151,7 +153,7 @@ Two files, side by side:
 1. **`<run-dir>/verify/verify_<artifact-stem>_<date>.md`** — human-readable per-axis findings.
 2. **`<run-dir>/verify/verify_<artifact-stem>_<date>.toml`** — machine-readable verdict sidecar consumed by `flow attempt finish` and surfaced in `flow status --json`. Renderers read claim verdicts from here, never by grepping the markdown.
 
-The sidecar has a top-level gate status plus one `[[verdicts]]` entry per claim the audit voted on.
+The sidecar has a top-level gate status. It may include `[[items]]` rows required by the active audit check and `[[verdicts]]` rows for claim-level renderer status.
 
 <rule name="sidecar-gating">
 Top-level `status` controls the audit gate: only `pass` passes. Per-claim `status` controls rendered claim chips. `note` is optional.
@@ -165,11 +167,21 @@ Top-level `status` controls the audit gate: only `pass` passes. Per-claim `statu
 
 ```toml
 status = "pass"      # pass | warn | fail
-mode = "protocol"    # protocol | plan | kb-card | script | result | mismatch | close
+mode = "protocol"    # protocol | plan | kb | script | result | mismatch | close | report | solve
 target = "protocol.toml"
-hash = "sha256:..."  # optional, but required when target freshness matters
+hash = "sha256:..."  # target hash; required when the audit check declares target
 author = "codex:<author-session>"
 reviewer = "subagent:<returned-id>"
+brief = "sha256:..."
+coverage = true
+
+[[items]]
+id = "source"
+status = "pass"
+
+[[items]]
+id = "claims"
+status = "pass"
 
 [[verdicts]]
 claim = "claim.scaling_exponent"
@@ -191,7 +203,7 @@ The markdown carries the verbatim passages, the per-axis table, and the detail. 
 ```markdown
 # /verify report — <artifact> — <date>
 
-**Mode**: protocol | plan | kb-card | script | result | mismatch | close.
+**Mode**: protocol | plan | kb | script | result | mismatch | close | report | solve.
 **Reference**: <path / lines>.
 
 | Axis / Row | Status | Severity | Claim ids | Notes |
@@ -225,7 +237,7 @@ The verifier produces findings ONLY. The calling skill translates findings into 
 
 See [Output handoff](#output-handoff) for the findings-only contract — the *calling skill* translates findings into 2–3 user options via the host's native API (`AskUserQuestion` in Claude Code; equivalent in Codex). User ratifies; only then does cleanup happen.
 
-In a flow-backed run, the caller records this audit as an `audit`-kind attempt on the relevant gate, writes the markdown report and typed TOML sidecar, attaches the report path with `--report`, then `flow attempt finish`. Flow's `audit` check verifies actor distinctness, report/sidecar freshness, and top-level sidecar `status = "pass"`.
+In a flow-backed run, the caller records this audit as an `audit`-kind attempt on the relevant gate, writes the markdown report and typed TOML sidecar, attaches the report path with `--report`, then `flow attempt finish`. Flow's `audit` check verifies actor distinctness, report/sidecar freshness, typed `mode`, target hash, `coverage`, required `items`, and top-level sidecar `status = "pass"` when those fields are declared by the check.
 
 ## Anti-patterns
 

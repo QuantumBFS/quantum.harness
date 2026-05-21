@@ -25,6 +25,44 @@ The active user is mid-research, technical, expects 3-line answers and a plot. T
 Intake → Match skill → Act → Report → Next-steps → (user picks) → Act → Report → ... → Done
 ```
 
+## Flow / audit contract
+
+<invariants name="flow">
+- Every `/solve` result is flow-backed. Computed and interpretive claims close only after `tools/cli/flow require <run> audit` exits 0.
+- Use `tools/flow/templates/solve.toml`: `run -> audit -> close`.
+- `run` is a `run` attempt that registers the result artifact(s).
+- `audit` is a spawned subagent attempt. Self-audit, roleplayed review, or invented reviewer id is invalid.
+- The audit check uses `kind = "audit"`, `mode = "solve"`, `coverage = true`, and one-word `items` appropriate to the claim. Default items: `setup`, `limits`, `symmetry`, `convergence`, `claim`.
+- The audit sidecar contains typed fields: `status`, `mode`, `target`, `hash`, `author`, `reviewer`, `brief`, `coverage`, and `[[items]]`.
+- If no subagent is available, stop with `blocked: verifier subagent unavailable`; do not present the result as verified.
+- Final user-facing report happens after the audit gate passes. If a turn ends earlier, emit `tools/cli/flow status <run>`.
+</invariants>
+
+Minimal solve protocol shape:
+
+```toml
+[[checks]]
+id = "run"
+kind = "exists"
+gate = "run"
+paths = ["result.json"]
+
+[[checks]]
+id = "audit"
+kind = "audit"
+gate = "audit"
+mode = "solve"
+target = "result.json"
+coverage = true
+items = ["setup", "limits", "symmetry", "convergence", "claim"]
+
+[[checks]]
+id = "close"
+kind = "exists"
+gate = "close"
+paths = ["run-report.md"]
+```
+
 ### 1. Intake
 
 <instructions name="intake">
@@ -49,11 +87,13 @@ If the problem hits a branch table redirect (e.g., dynamics → `spectral.md`, f
 
 Run the calculation without narrating the process to the user (no "Now I am setting up DMRG…", no "Sweep 1 complete…"). The user sees the final report only. Tool calls and computation should still flush their own progress to stdout/logs per the harness's progress-flush rule.
 
-Use the method card's code shape. If the canonical stack is missing, install the selected stack profile first; for remote runs, let `/slurm` run the profile's smoke test in the declared place (`login` or `compute`). Auto-generate a convergence plot. Save script to `scripts/` and results to `results/`.
+Initialize a solve flow before claim-producing work: `tools/cli/flow init results/<run> --template tools/flow/templates/solve.toml`. Use the method card's code shape. If the canonical stack is missing, install the selected stack profile first; for remote runs, let `/slurm` run the profile's smoke test in the declared place (`login` or `compute`). Auto-generate a convergence plot. Save script to `scripts/` and results to `results/`.
+
+After the run attempt finishes, spawn the audit subagent with the artifact, protocol, model/method cards used, and the exact claim to audit. The brief includes: *"Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides."* Finish the audit attempt with `--report verify/verify_<artifact>_<date>.md`; do not report the result to the user until the audit gate passes.
 
 <checklist name="branch-rules">
 
-- Frontier problems (the matching card has a `frontier` flag): dispatch `arxiv-search` BEFORE compute. Report the literature summary as the primary output of step 3. Offer compute as a next-step option in step 5, not as part of step 3.
+- Frontier problems (the matching card has a `frontier` flag): dispatch `arxiv-search` BEFORE compute. Treat the literature summary as the solve result, run it through the `solve` audit gate, then report it. Offer compute as a next-step option in step 5, not as part of step 3.
 - Off-scope problems (no model or physics card matches): follow the closest-card's stub instructions, OR present 2-3 candidate redirections via `AskUserQuestion`. Never silently run a calculation outside the card library.
 - Stub-redirect problems (card's branch table sends you elsewhere): follow the redirect immediately.
 
@@ -66,6 +106,8 @@ Use the method card's code shape. If the canonical stack is missing, install the
 <instructions name="report">
 
 Per [AGENTS.md → Output norms](../../../AGENTS.md#ui-ux) (≤3 lines + plot; embedded one-line reasoning).
+
+First line must be audit state. If `tools/cli/flow require <run> audit` has not passed, do not present the claim as final; emit `tools/cli/flow status <run>` and the blocker instead.
 
 <example name="report bad">
 I ran DMRG on the Heisenberg chain. I set D=200 and the energy converged. I then cross-checked with ED and the values agree well. The Bethe ansatz value at infinite size is around -0.4431, which is consistent given finite-size effects.

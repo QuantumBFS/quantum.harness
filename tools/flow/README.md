@@ -5,6 +5,7 @@
 The tool is intentionally small:
 
 - `gate` — a checkpoint whose status (`pending` / `passed` / `failed`) is **derived live** from the protocol's `[[checks]]` and the event log. Never stored; never declared.
+- `strict` — optional gate flag in `flow.toml`. A strict gate must have its template-declared `attempts` finished and its template-declared `checks` present in `protocol.toml`; otherwise it cannot pass.
 - `check` — a typed one-word predicate: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, or `support`. Check ids are global handles for overrides and cached run results, so `flow` rejects duplicate ids when it parses `protocol.toml`.
 - `attempt` — one actor trying to satisfy one gate. Roles are typed: `audit`, `trial`, `run`, `report`. The `--actor` flag is the human-readable label; identity comes from host session ids (`CODEX_THREAD_ID`, `CLAUDE_SESSION_ID`) when present, then `FLOW_ACTOR_ID`, then the parent process id (`ppid:<n>`). The `audit` check compares identity, not labels. Audit attempts must attach a `verify_*.md` report plus sibling `verify_*.toml` sidecar; flow hashes both at finish, so post-finish edits invalidate the audit.
 - `artifact` — a file with a stable content hash, an optional producer attempt, and a `deps` snapshot of any source hashes referenced by `fresh` checks at registration time.
@@ -30,11 +31,17 @@ Audit sidecars are typed:
 
 ```toml
 status = "pass"    # pass | warn | fail
-mode = "script"    # optional one-word verifier mode
+mode = "script"    # protocol | plan | script | result | mismatch | close | report | solve | kb
 target = "scripts/reproduce"
 hash = "sha256:..." # optional current target hash
 author = "codex:<session>"
 reviewer = "codex:<session>"
+brief = "sha256:..."
+coverage = true
+
+[[items]]
+id = "setup"
+status = "pass"
 
 [[verdicts]]
 claim = "claim.energy"
@@ -42,6 +49,20 @@ status = "pass"
 ```
 
 When `hash` is present, `target` must be present and match the current file hash at `attempt finish`. `author` and `reviewer`, when both present, must differ.
+Audit checks can require typed dispatch and coverage:
+
+```toml
+[[checks]]
+id = "audit"
+kind = "audit"
+gate = "audit"
+mode = "solve"
+target = "result.json"
+coverage = true
+items = ["setup", "limits", "symmetry", "convergence", "claim"]
+```
+
+When `mode`, `target`, `coverage`, or `items` are declared on an audit check, `flow` verifies the audit sidecar matches them. Missing or non-passing items block the gate.
 
 `cover` checks compare an observed file set to a declared set:
 
@@ -185,9 +206,12 @@ Reference docs: Codex hooks https://developers.openai.com/codex/hooks, Claude Co
 
 ## Reproduction Template
 
-The paper-reproduction gate contract is tracked at
-`tools/flow/templates/reproduce-paper.toml`. Add more tracked templates only
-when another workflow needs a different reusable gate graph.
+Tracked reusable gate contracts:
+
+- `tools/flow/templates/reproduce-paper.toml` — full paper reproduction.
+- `tools/flow/templates/solve.toml` — compact audited solve loop.
+
+Add more tracked templates only when another workflow needs a different reusable gate graph.
 
 ## Campaigns
 
