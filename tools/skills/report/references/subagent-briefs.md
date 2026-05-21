@@ -16,7 +16,7 @@ Both briefs follow the Role / Goal / Constraints / Output / Stop frame. Both inc
 - **Math in prose.** Wrap math spans in `$...$` for Results prose fields and captions. Do not use ASCII fallbacks.
 - **Figure captions.** Emit one paper-side and one run-side caption per declared figure. Captions name the observable, state/sector/window, and normalization.
 - **Citations.** Every sentence has a cite resolving to a real `file:line`; use `sources/paper.md` for paper-side content and `protocol.toml` for ours-side content. Empty cite means leave the slot empty and let the renderer fall back.
-- **Output.** `editorial.json` matching [editorial-schema.md](editorial-schema.md).
+- **Output.** `editorial.json` matching `tools/skills/report/SKILL.md` -> Main Contract.
 - **Stop.** When every required slot is filled or explicitly empty; never invent. Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides.
 
 </persistence>
