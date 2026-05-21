@@ -3,7 +3,6 @@ import './globals.css';
 import { RootProvider } from 'fumadocs-ui/provider';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { meta } from '@/lib/data';
 
 // Fumadocs's house typography: Inter for everything textual, JetBrains Mono
 // for code. No serif. The visual identity is monochromatic per fumadocs-ui's
@@ -11,10 +10,9 @@ import { meta } from '@/lib/data';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
 const mono  = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 
-export const metadata = {
-  title: `${meta.paperId} · ${meta.runId} · /report`,
-  description: meta.description,
-};
+// Page-level `metadata` lives in app/page.tsx — keeping the per-run data
+// import out of the layout's module graph means /_not-found (which inherits
+// this layout) never has to pull in @/lib/current-report or its MDX.
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
