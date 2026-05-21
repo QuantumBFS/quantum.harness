@@ -18,6 +18,7 @@ Outcome: a `flow`-backed run directory whose `close` gate passes. Claims are bac
 - Constant settings require manifest consensus across every cell.
 - Failed gates enter correction: classify mismatch, repair earliest wrong layer, invalidate downstream artifacts, rerun, re-verify.
 - Every figure entry carries caption verbatim and figure-reading fields before script or assembly code lands.
+- Figure semantics are paper contracts: each figure entry names the plotted metric/observable, basis or representation, operator or bra/ket objects for overlaps, state-selection rule, sector, window, normalization, and nearby states explicitly excluded. Proxy selectors such as nearest energy, highest overlap, or a convenient representative must be validated against the paper-defined identity or recorded as deviations before pass.
 </rules>
 
 ## Audit
@@ -25,7 +26,7 @@ Outcome: a `flow`-backed run directory whose `close` gate passes. Claims are bac
 <audit required="true">
 - Audit-kind attempts require a host-spawned subagent. The caller cannot roleplay, self-review, or invent an actor id.
 - Required audit gates: `protocol`, `script`, and `close`. Use `/verify` with typed modes matching the artifact.
-- Audit dispatch MUST use `/verify`'s reference handoff. The subagent audit prompt must contain the chosen verify mode reference filename, `tools/skills/verify/references/sidecar.md`, `tools/skills/reproduce-paper/SKILL.md`, and AGENTS anchors required by the artifact. Caller-written summaries alone are insufficient.
+- Audit dispatch MUST use `/verify`'s reference handoff. The subagent audit prompt must contain the chosen verify mode reference filename, `tools/skills/verify/references/sidecar.md`, `tools/skills/reproduce-paper/SKILL.md`, AGENTS anchors required by the artifact, and the `/verify` required tacit sweep block for protocol-declared methods/models. Caller-written summaries alone are insufficient.
 - Keep spawning until the host returns a real subagent and written `verify/verify_<artifact>_<date>.md`, or halt with `blocked: verifier subagent unavailable`.
 - The audit brief includes exactly: "Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides."
 - Before `flow attempt finish` on audit: spawned subagent exists, recorded finish identity differs from artifact author, markdown report exists, sibling TOML exists, and `--report` points at the returned report.
@@ -69,14 +70,15 @@ Each gate advances only when `flow attempt finish` exits 0 and `flow require <ru
 ### protocol
 
 1. Fill `[entry]`, `[[claims]]`, `[[cells]]`, `[[checks]]`, `[[figures]]`, optional `[[deviations]]`, `[[repairs]]`, and `[[pending]]` from primary sources.
-2. Use one-word check kinds: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, `support`.
-3. Use attempt kinds: `audit`, `trial`, `run`, `report`.
-4. Start a `run` attempt, register `protocol.toml`, finish it.
-5. Spawn verifier per the audit kernel and `/verify` reference handoff.
-6. Start an `audit` attempt with a reviewer display label. Runtime identity comes from the host session and must match the sidecar `reviewer`.
-7. Finish with `--report verify/verify_protocol_<date>.md`; require the gate.
+2. For figure-producing claims, fill the paper-defined figure semantics: metric/observable, basis or representation, overlap bra/ket or operator objects, state-selection rule, sector, window, normalization, excluded nearby states, and any proxy selector validation/deviation.
+3. Use one-word check kinds: `audit`, `run`, `exists`, `agree`, `near`, `fresh`, `cover`, `support`.
+4. Use attempt kinds: `audit`, `trial`, `run`, `report`.
+5. Start a `run` attempt, register `protocol.toml`, finish it.
+6. Spawn verifier per the audit kernel and `/verify` reference handoff.
+7. Start an `audit` attempt with a reviewer display label. Runtime identity comes from the host session and must match the sidecar `reviewer`.
+8. Finish with `--report verify/verify_protocol_<date>.md`; require the gate.
 
-The strict template requires a protocol check with `id = "protocol"` and `kind = "audit"`. It should declare `mode = "protocol"`, `target = "protocol.toml"`, `coverage = true`, and one-word `items` for source, claims, cells, routes, figures, deviations, and checks.
+The strict template requires a protocol check with `id = "protocol"` and `kind = "audit"`. It should declare `mode = "protocol"`, `target = "protocol.toml"`, `coverage = true`, and one-word `items` for source, claims, cells, routes, figures, deviations, tacits, and checks.
 
 ### plan
 
@@ -100,6 +102,8 @@ Entry contract:
 - The script echoes each cell's `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`.
 - Every manifest echoes the same seven fields.
 - Actual imports and library calls match declared `stack`.
+- Figure-producing code implements the protocol's paper-defined metric/basis/state/overlap contract. A proxy state selector must write evidence that the selected object satisfies the paper identity, or the script audit fails as `proxy` / `state-mismatch`.
+- The script audit check includes `tacits` in `items` whenever the protocol declares methods/models.
 
 ### trust
 

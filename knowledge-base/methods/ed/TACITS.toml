@@ -30,6 +30,32 @@ tags = ["lapack", "openblas32", "ilp64", "large-N", "segfault"]
 seen_at = ["results/quantum_scars_turner_2018"]
 
 [[tacit]]
+id = "ed-paper-state-selection-proxy"
+method = "ed"
+signal = "paper asks for a special-band/scar eigenstate but the ED script selects an exact state by nearest energy or nearest FSA eigenvalue"
+understanding = """
+Nearest-energy matching is a proxy for the paper's state identity. In scar
+or other sparse special-state problems, generic eigenstates can lie very
+near the target energy. If the paper defines the state by a band, overlap,
+sector, parent state, or basis trajectory, energy proximity alone does not
+prove that the selected eigenvector is the plotted object. This affects
+both overlap panels and derived averages such as PR2 over "special"
+eigenstates.
+"""
+action = """
+Before accepting the script or result, encode the paper's state identity
+in the protocol and validate it in code: e.g. check membership in the
+high-overlap band, overlap with the paper's parent/product state, required
+sector, excluded zero-mode status, and any stated basis trajectory. If the
+script uses a proxy selector such as nearest energy, nearest approximate
+eigenvalue, or highest overlap, record the proxy and write evidence that
+the selected exact state satisfies the paper-defined identity; otherwise
+the audit finding is proxy/state-mismatch.
+"""
+tags = ["state-selection", "proxy", "scar-band", "overlap", "PR2", "audit"]
+seen_at = ["results/turner_2018_fig3_fig4_l30"]
+
+[[tacit]]
 id = "ed-sparse-toarray-segfault-large-D"
 method = "ed"
 stack = ["numpy+scipy", "quspin"]

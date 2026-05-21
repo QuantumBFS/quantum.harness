@@ -16,6 +16,10 @@ coverage = true
 id = "source"
 status = "pass"
 
+[[items]]
+id = "tacits"       # required when method/model values are declared
+status = "pass"    # pass only after relevant TACITS.toml signal sweep
+
 [[verdicts]]
 claim = "claim.example"
 status = "warn"
@@ -32,6 +36,7 @@ Markdown shape:
 
 | Axis / Row | Status | Severity | Claim ids | Notes |
 |---|---|---|---|---|
+| Tacits | pass | match | claim.example | methods/models checked; matched tacit ids or `none` |
 
 ## Detailed findings
 ### Axis N — <name>

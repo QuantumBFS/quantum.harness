@@ -52,16 +52,19 @@ The caller MUST put the literal reference filenames in the subagent audit prompt
 - Any composing-skill contract files that govern the gate, such as `tools/skills/reproduce-paper/SKILL.md`
 - Any required project anchors, such as `AGENTS.md#audit-dispatch` and `AGENTS.md#pre-compute-figure-reading-checklist`
 
-If a required reference filename is absent from the subagent audit prompt, the dispatch is invalid. If a required reference file is unavailable to the subagent, the verdict is `fail`.
+Every verifier brief also includes a `Required tacit sweep` block whenever the artifact or current protocol declares method or model values. The prompt names the declared method/model values, not hardcoded `TACITS.toml` paths; the subagent locates matching co-located tacit files under `knowledge-base/`.
+
+If a required reference filename is absent from the subagent audit prompt, the dispatch is invalid. If a method/model is declared and the tacit sweep block is absent, the dispatch is invalid. If a required reference file is unavailable to the subagent, or a matching tacit signal applies and is ignored, the verdict is `fail`.
 
 Assemble the subagent brief in this order:
 
 1. Verbatim kernel below.
 2. Required reference files block.
-3. Chosen mode reference path.
-4. Artifact path and verbatim artifact or precise line range.
-5. Reference path and verbatim source or precise line range.
-6. Exact claim, gate, or mismatch being audited.
+3. Required tacit sweep block, when method/model values exist.
+4. Chosen mode reference path.
+5. Artifact path and verbatim artifact or precise line range.
+6. Reference path and verbatim source or precise line range.
+7. Exact claim, gate, or mismatch being audited.
 
 <brief>
 Think deeply. Inspect both sources end-to-end before reporting; avoid skim-based conclusions.
@@ -86,6 +89,13 @@ Required reference files to read before verdict:
 
 Caller-written summaries are insufficient as substitutes for these filenames
 appearing in the audit prompt.
+
+Required tacit sweep before verdict:
+- Declared methods/models under audit: <method/model values from artifact or protocol>
+- Locate matching co-located TACITS.toml files under knowledge-base/.
+- Search '^signal' in each TACITS.toml before loading full blocks.
+- Load matching [[tacit]] blocks only; state when no matching TACITS.toml or signal exists.
+- A matching tacit ignored by the artifact is a fail finding, not optional context.
 ```
 
 ## Output
@@ -96,6 +106,8 @@ Two files, side by side:
 - `<run-dir>/verify/verify_<artifact-stem>_<date>.toml`
 
 The sidecar top-level `status` controls the gate: only `pass` passes. `warn` and `fail` block unless the user records an override. The markdown carries verbatim passages, the per-axis table, and detailed findings. No `Action items` or `Next steps` section.
+
+When a tacit sweep is required, the sidecar includes an item `id = "tacits"` with `status = "pass"` only if all relevant `TACITS.toml` files were searched, matching blocks were considered, and no applicable tacit was ignored. The markdown table includes a `Tacits` row naming the declared methods/models and the matched tacit ids or `none`.
 
 ## Discipline
 
