@@ -167,7 +167,7 @@ Selection style. Build the candidate list dynamically from the current target. R
 - the paper's official code/data availability from primary sources;
 - the method card's canonical and fallback stack guidance;
 - installed-stack import/dry-run status;
-- existing local scaffolds for the same paper/figure;
+- existing local scaffolds or prior run artifacts for the same paper/figure;
 - user-stated method/tool preference;
 - feature fit for the target's basis, observable, symmetry, and output needs.
 
