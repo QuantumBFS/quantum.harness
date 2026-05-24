@@ -8,16 +8,19 @@ each. That's MUCH faster and more reliable than per-paper calls (which 429 fast)
 Usage:
     fetch_metadata.py --kb /abs/path/.knowledge --manifest manifest.json
 
-The manifest is JSON: {"arxiv": [{"id": "...", ...overrides}], "doi": [...]}
-Each entry is an object with at minimum an `id`; any other fields (title,
-authors, year, venue, note) are S2-metadata overrides that render.py consumes.
-This script only reads `id`.
+The manifest is JSON: {"arxiv": [{"id": "...", ...overrides}], "doi": [...],
+"github": [{"repository": "owner/name", ...}]}. Paper entries need an `id`;
+github entries need a `repository`. Other fields are render.py overrides —
+this script doesn't read them.
 Output: .raw/arxiv/<id>.json and .raw/doi/<safe>.json (where safe = doi with /→-)
 
 If --download-arxiv-pdfs is passed, also fetches the arXiv preprint PDFs into the
 same directory. For DOI entries with an `externalIds.ArXiv` preprint (very common
 even for paywalled journal papers), the arXiv PDF is fetched into .raw/doi/<safe>.pdf
 as a paywall-bypass fallback.
+
+If --clone-github is passed, shallow-clones each `github` entry's repo into
+.raw/repos/<owner>-<name>/ (matching render.py's `partition("-")` dirname convention).
 """
 from __future__ import annotations
 
