@@ -43,15 +43,7 @@ Next-steps are always offered as `AskUserQuestion` options. Common next-steps (i
 - **Writeup** — declared entry + run report, then route to writing skills.
 - **Stop here** — always a real option, never padded.
 
-Never march through a checklist of questions. If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
-
-### Communication style
-
-User-facing messages use plain English. Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`, `protocol.toml`, `manifest consensus`, etc.) stays in artifacts and code, not in user prompts.
-
-Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use. Common method families (ED, DMRG, QMC, VMC, NQS) need no introduction.
-
-Each message is terse — a few sentences or a compact table covering the key points, without overload. One question at a time when asking; never bundle multiple decisions in one prompt.
+If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
 
 ### Pushback and reconsideration
 
@@ -286,7 +278,8 @@ ion self --help                          # Manage the Ion install
 
 ### Output norms — users' attention is expensive
 
-- **Remember there is a human on the other side.** Keep interactions precise and concise. Name the concrete paper, file, tool, command, or result before discussing it; do not rely on shorthand, hidden session context, or agent-only labels. Avoid jargon unless it is necessary, and define it when used. Never assume the user has the same context as the agent or any subagent.
+- **Remember there is a human on the other side.** Keep interactions precise and concise. Name the concrete paper, file, tool, command, or result before discussing it; do not rely on shorthand, hidden session context, or agent-only labels. Never assume the user has the same context as the agent or any subagent.
+- **Plain English in user-facing messages.** Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`, `protocol.toml`, `manifest consensus`) stays in artifacts and code, not in user prompts. Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use; common method families (ED, DMRG, QMC, VMC, NQS) need no introduction. Other jargon, if necessary, gets defined when first used. Each message is terse — a few sentences or a compact table covering key points, no overload.
 - **Report results in ≤3 lines + a plot.** Primary quantity, verification status, one-line reasoning. Auto-generate the relevant convergence or stability plot with every calculation; this is the visual proof the result is trustworthy. Save the plot and display it. No extra user action needed.
 - **Use `AskUserQuestion` at genuine forks** — pre-action branches and post-result next-steps. Never for pre-flight ratification of clear defaults; never silently at a real fork. Both interrogating clear defaults and silently picking at real forks deny the user the steering wheel. At a real fork, think faithfully like a human: surface 2–3 options with pros / cons and the recommended one (the Superpowers brainstorming pattern in UI form). User clicks, doesn't type. Each option: short label + one-line with pro and con. Recommended option first, labeled "(Recommended)". Example:
   - `"Primary method (Recommended)"` — "Matches the paper's route most closely; uses the declared compute budget."
