@@ -34,7 +34,7 @@ Every interaction should answer one of:
 ## Principles
 
 1. **One workflow.** The skill is a conversational front end to paper reproduction.
-2. **Every decision point is asked.** Decisions the user could meaningfully shape are surfaced via Q&A, never hidden in script defaults.
+2. **Every decision point is asked.** Decisions the user could meaningfully shape are surfaced via Q&A, never hidden in script defaults. If the host question tool is unavailable, state that explicitly and do not pretend the choice was ratified.
 3. **One question at a time.** Never bundle multiple decisions in one prompt. If a topic needs multiple decisions, split it.
 4. **Plain English. No jargon.** Never expose harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`) to the user. Translate to plain language at the question; keep structured form in artifacts.
 5. **Paper-specific abbreviations get a one-sentence introduction on first use.** When the paper uses a non-standard abbreviation for a model, method, or quantity (PXP, FSA, RVB, AKLT, …), introduce it once with a one-sentence plain-English explanation when it first appears in a user-facing message.
@@ -196,6 +196,10 @@ Recommendation rules:
 
 ### Phase 6 — Settings
 
+Setup parameter questions start immediately after the tool/stack choice in Phase 5.2. Do not insert a separate "feasibility path", "route check", or "tool investigation" question between tool choice and parameter setup. Any import check, API limitation, feature gap, or installation status discovered for the chosen tool is reported as setup context and, when relevant, as a parameter-table row such as `tool readiness`, `basis support`, or `stack limitation`.
+
+The user's tool choice is the entry point to setup parameters, not permission to start a new tool-selection loop. If the chosen tool has a feature gap, present the closest executable setup parameters for that tool and explicitly mark the consequence (`faithful`, `fallback`, `deviation`, or `blocked-before-compute`). Only ask the user to switch tools after showing the setup parameter consequences for the chosen tool.
+
 Selection style. One question per method-specific setting, in a fixed order per method. Each setting is preceded by a compact parameter table:
 
 | Parameter | What it controls          | Why it matters                                | Recommendation                |
@@ -301,8 +305,8 @@ Run the approved tier only. The script lands at `scripts/<model>_<brief>.{jl|py}
 
 - One status line per cell start, in plain English (what's running, expected time). Flush stdout.
 - For any cell expected to take > 2 minutes, the script emits ~10–50 progress updates. Method cards declare the per-run `progress_every` default.
-- Each cell manifest records `method_setup`, `tool_choice`, `tool_reason`, `setup_guide`, `symmetry`, `approximation`, `solver_config`, and `solver_reason`, matching the approved plan. A mismatch is a failed manifest-consistency check.
-- Inline checks at each cell: primary-source match (caption, axes, normalization, state selection), limit or known-answer check when available, manifest consistency, freshness.
+- Each cell manifest records `method_setup`, `tool_choice`, `tool_reason`, `setup_guide`, `symmetry`, `approximation`, `solver_config`, and `solver_reason` for transparency in `run-report.md`.
+- Inline checks at each cell, only when scientifically meaningful: primary-source match (caption, axes, normalization, state selection) and limit or known-answer check when available. A failure opens Phase 9 (user decides repair / record deviation / stop). Manifest-bookkeeping checks are not enforced.
 - Cluster route composes with `/slurm`; this skill does not inline cluster idioms.
 
 ### Phase 9 — On check failure
