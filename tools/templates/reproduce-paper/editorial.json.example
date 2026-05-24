@@ -3,7 +3,7 @@
 
   "headline": {
     "text": "<ONE SENTENCE: claim + framing. Use [[key|symbol]] for any project-specific symbol so it gets a glossary tooltip. Avoid project jargon without a tooltip.>",
-    "sourced_by": ["protocol.toml#L<line>", "verify_<artifact>_<date>.md#L<line>"]
+    "sourced_by": ["protocol.toml#L<line>", "run-report.md#L<line>"]
   },
 
   "claims": [
@@ -11,7 +11,7 @@
       "id": "<protocol claim id>",
       "display_label": "<short human label, ≤ 20 chars; no jargon without expansion>",
       "popover": "<ONE SENTENCE: what was checked + the result. Cite numbers when available.>",
-      "sourced_by": ["protocol.toml#L<line>", "verify_<artifact>_<date>.md#L<line>"]
+      "sourced_by": ["protocol.toml#L<line>", "run-report.md#L<line>"]
     }
   ],
 
@@ -20,7 +20,7 @@
       "id": "<protocol deviation id>",
       "display_label": "<short human label>",
       "popover": "<ONE SENTENCE: what differs + why it matters>",
-      "discrepancy_paragraph": "<≤ 2 SENTENCES for the discrepancy panel. Quantify impact when verify supports a number (e.g., '5-20× overshoot in 13 of 28 cells').>",
+      "discrepancy_paragraph": "<≤ 2 SENTENCES for the discrepancy panel. Quantify impact when the run report supports a number (e.g., '5-20× overshoot in 13 of 28 cells').>",
       "sourced_by": ["protocol.toml#L<line>"]
     }
   ],
@@ -31,7 +31,7 @@
       "id": "<protocol check id>",
       "display_label": "<short human label, e.g. 'symmetry sector', 'limit-check L=8'>",
       "popover": "<ONE SENTENCE: what was checked + outcome>",
-      "sourced_by": ["protocol.toml#L<line>", "verify_<artifact>_<date>.md#L<line>"]
+      "sourced_by": ["protocol.toml#L<line>", "run-report.md#L<line>"]
     }
   ],
 

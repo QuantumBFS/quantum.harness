@@ -82,7 +82,7 @@ action = "link against openblas64 or fall back to dsyevr"
 
    Do this step inline in the main agent — do NOT spawn a subagent. The main agent is the only context with the full session transcript; a subagent would have to be hand-fed the transcript and would lose the implicit memory of what was said.
 
-   Coverage-not-filtering survey discipline: see [AGENTS.md → Audit dispatch](../../../AGENTS.md#audit-dispatch).
+   Coverage, not filtering — record every friction moment, including uncertain or minor ones; the user ranks and decides.
 
 2. **Cluster by root cause.** Group friction moments by what they were ACTUALLY about — not what they looked like. A "wrong y-axis label" and a "wrong state selection" both root-cause to "did not read the caption before coding"; that's one lesson, not two. Forty friction moments often distill to three lessons.
 
@@ -112,7 +112,6 @@ action = "link against openblas64 or fall back to dsyevr"
 ## Composition
 
 - Often invoked after `/reproduce-paper` close — especially when the close revealed waste.
-- Composes with `/verify` only obliquely: a tacit whose action requires the verifier to check something new (e.g., "audit must check declared stack matches actual imports") gets a cross-reference added to the matching mode in `tools/skills/verify/SKILL.md`. Mode choice is by the audited artifact: protocol-level → `protocol` mode; script-level → `script` mode; result-level → `result` mode; KB-card-level → `kb` mode.
 - Never invoked from inside another skill — this is a session-level retrospective, not a sub-step.
 
 ## Anti-patterns
@@ -148,7 +147,6 @@ Judgment calls — flag and reconsider:
 > - `.knowledge/methods/ed/TACITS.toml` — 7 `[[tacit]]` entries (segfault chain + stack drift + abandon-Python heuristic).
 > - `AGENTS.md` — 3 new invariant bullets (feature-gap-is-not-route-authority, audit-stack-at-protocol-time, pre-compute-figure-reading-checklist) + new "Compute resources" section.
 > - `tools/skills/slurm/SKILL.md` — layered settle-time discipline (PD→R + startup + long-run) in workflow Step 6.
-> - `tools/skills/verify/SKILL.md` — figure-reading checklist + stack-claim-match as `script` and `result` audit axes.
 >
 > One commit: `memorize: stack drift, figure-reading, ED segfault chain, cluster settle-time from Turner 2018 reproduction`.
 

@@ -7,7 +7,7 @@ description: Use when a beginner wants guided paper reproduction, tutorial-style
 
 Beginner-facing paper reproduction with a brainstorm-first surface. The skill iterates a plan with the user one question at a time, writes the agreed plan to `results/<run>/plan.md`, then executes the single approved tier and reports.
 
-This is a forked workflow, not a wrapper around `/reproduce-paper`. Do not spawn verifier subagents in this beginner flow. Do not require audit-kind gate attempts. If the user later wants evidence-grade certification, hand the produced artifacts to `/reproduce-paper` or `/verify`.
+This is a forked workflow, not a wrapper around `/reproduce-paper`. If the user later wants evidence-grade certification, hand the produced artifacts to `/reproduce-paper`.
 
 ## Pipeline
 
@@ -319,7 +319,7 @@ Run the approved tier only. The script lands at `scripts/<model>_<brief>.{jl|py}
 - One status line per cell start (what's running, expected time). Flush stdout.
 - For any cell expected to take > 2 minutes, the script emits ~10–50 progress updates. Method cards declare the per-run `progress_every` default.
 - Each cell manifest records `method_setup`, `tool_choice`, `tool_reason`, `setup_guide`, `symmetry`, `approximation`, `solver_config`, and `solver_reason`, matching the approved plan. A mismatch is a failed manifest-consistency check.
-- Inline checks at each cell: primary-source match (caption, axes, normalization, state selection), limit or known-answer check when available, manifest consistency, freshness. Do not spawn an audit subagent.
+- Inline checks at each cell: primary-source match (caption, axes, normalization, state selection), limit or known-answer check when available, manifest consistency, freshness.
 - On check failure, open a brainstorm-style `AskUserQuestion` with three options:
   1. **Repair** — fix the offending layer and rerun this cell. Recommended when the failure is a clear bug.
   2. **Record a deviation** — keep the cell, write a deviation row in `protocol.toml` and `plan.md`, continue as a learning run.
@@ -336,13 +336,13 @@ After execute completes, write `results/<run>/run-report.md`:
 - paper target vs reproduced target;
 - approved setup, bundled method setup, tool choice/reason, setup guide, symmetry, approximation, solver configuration/reason, time estimate, actual runtime;
 - produced artifacts (paths);
-- verification status: `self-checked` / `partial` / `failed` / `upgrade-to-audit-recommended`;
+- verification status: `self-checked` / `partial` / `failed` / `upgrade-recommended`;
 - exact rerun command.
 
 For a polished, shareable HTML deliverable, route to `/report --mode onboard`:
 
 - `/report <run-dir> --stage plan --mode onboard` previews the plan in HTML before approve.
-- `/report <run-dir> --stage append --mode onboard` renders the final HTML after execute, with a "beginner reproduction, self-checked" provenance chip so a reader can tell it is not audit-grade.
+- `/report <run-dir> --stage append --mode onboard` renders the final HTML after execute, with a "beginner reproduction, self-checked" provenance chip so a reader can tell it is a beginner run.
 
 Then ask one `AskUserQuestion` for the next step. The agent assembles options from the result state:
 
@@ -351,7 +351,7 @@ Then ask one `AskUserQuestion` for the next step. The agent assembles options fr
 | Render shareable HTML                      | User wants to share or archive the result                     |
 | Try a larger tier                          | Smoke or beginner passed cleanly                              |
 | Cross-check with an independent method     | Result sits near a phase boundary or frontier regime          |
-| Upgrade to full `/reproduce-paper` audit   | User wants evidence-grade certification                       |
+| Upgrade to full `/reproduce-paper`         | User wants evidence-grade certification                       |
 | Stop here                                  | Always available, never padded                                |
 
 ## Artifact Contract
@@ -375,8 +375,6 @@ Keep outputs compatible with the main harness so a directory produced here can b
 
 ## What Not To Do
 
-- Do not spawn verifier subagents in this beginner flow.
-- Do not require audit-kind gate attempts.
 - Do not present `protocol.toml` as the first thing the user must understand.
 - Do not start non-trivial compute without writing `plan.md` and getting the user to approve the plan.
 - Do not claim paper-grade certification without the full `/reproduce-paper` workflow.
@@ -389,8 +387,8 @@ Keep outputs compatible with the main harness so a directory produced here can b
 
 ## Handoff
 
-When the user wants full automation or audit-grade evidence:
+When the user wants the full reproduction workflow:
 
 > "We can upgrade this run to the full reproduction workflow using the artifacts already produced."
 
-Then hand off to `/reproduce-paper` (or `/verify` for a single artifact audit) with the run directory, target figure, `plan.md`, `protocol.toml`, manifests, figures, and `run-report.md`.
+Then hand off to `/reproduce-paper` with the run directory, target figure, `plan.md`, `protocol.toml`, manifests, figures, and `run-report.md`.

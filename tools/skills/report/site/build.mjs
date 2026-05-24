@@ -4,8 +4,7 @@
 //   node tools/skills/report/site/build.mjs <run-dir> --stage <plan|append>
 //
 // Reads:  <run-dir>/protocol.toml, editorial.json, sources/paper.md,
-//         cells/*/manifest.json, figs/*.{png,json}, verify/*.md,
-//         progress/state.toml.
+//         cells/*/manifest.json, figs/*.{png,json}.
 // Writes: site/lib/runs/<run-id>.ts        (per-run typed data),
 //         site/content/<run-id>.mdx        (per-run MDX shell),
 //         site/lib/current-report.tsx      (build-generated wrapper:
@@ -71,9 +70,8 @@ function usage(code) {
     `       <run-dir>  Path to a reproduction run directory.\n` +
     `       --stage    'plan' before compute (Problem + Methodology only) or\n` +
     `                  'append' after close (all three sections). Default: append.\n` +
-    `       --mode     'full' for /reproduce-paper runs (flow-gated, audited) or\n` +
-    `                  'onboard' for /reproduce-paper-onboard runs (gate-free,\n` +
-    `                  no audit subagent). Default: full.\n`
+    `       --mode     'full' for /reproduce-paper runs or 'onboard' for\n` +
+    `                  /reproduce-paper-onboard beginner runs. Default: full.\n`
   );
   exit(code);
 }

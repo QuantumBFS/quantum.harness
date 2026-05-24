@@ -1,9 +1,0 @@
-[flow]
-id = "campaign"
-
-[[gates]]
-id = "children"
-
-[[gates]]
-id = "close"
-requires = ["children"]

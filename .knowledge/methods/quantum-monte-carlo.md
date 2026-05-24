@@ -56,8 +56,7 @@ software, Carlo job output, postprocessing, and a visible finite-size trend.
 For a Heisenberg-model benchmark target, run square-lattice S=1/2 Heisenberg
 SSE and compare thermodynamic extrapolations against
 `.knowledge/benchmark-numbers.md`. Treat that as a benchmark comparison,
-not a paper reproduction, unless the primary paper has been ingested and
-verified through `/verify`.
+not a paper reproduction, unless the primary paper has been ingested.
 
 ## Notation
 

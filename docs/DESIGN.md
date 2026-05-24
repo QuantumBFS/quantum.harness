@@ -395,7 +395,7 @@ Tap-fallback (touch devices): see §13 Hover-or-tap.
 
 This is the **explanation-on-demand pattern**: the report's prose carries authority and density; the explanations sit one interaction away. Same pattern applies elsewhere in the harness skin — chip popovers, callout dot popups, deviation banner. They all exist so the report doesn't have to choose between density and accessibility.
 
-**Contract**: every project-specific symbol used in any user-visible text (headline, captions, chip popovers, discrepancy prose) **must** have a glossary entry with a matching `key`, and **must** be wrapped via the `[[key|display]]` markup in the editorial JSON. The polish-subagent brief enforces this; the close-mode verifier audits it. Without the entry, the report ships jargon — the design contract is broken.
+**Contract**: every project-specific symbol used in any user-visible text (headline, captions, chip popovers, discrepancy prose) **must** have a glossary entry with a matching `key`, and **must** be wrapped via the `[[key|display]]` markup in the editorial JSON. Without the entry, the report ships jargon — the design contract is broken.
 
 Used to define inline scientific symbols (`c_L(h)`, `M_2`, etc.) on hover or tap, without forcing definitions into the prose.
 
@@ -695,7 +695,7 @@ JS: on `mouseenter` of a `.legend-item`, add `.dim` to all `.curve, .pt, .errbar
 
 The interactive figure in the right-side `panel-card` is an inline `<svg>` element directly embedded in the HTML body, **not** a static image and **not** a third-party charting library (no Plotly, D3, or Chart.js — they violate the standalone-deliverable size budget and the warm-only Claude palette). The SVG renders interactively via DOM events (`mouseenter`, `click`, `mouseleave`) on its child elements; CSS class toggles (`.curve.dim`, `.pt.focus`, etc.) drive the focus / dim / hover-callout effects with native browser transitions.
 
-This section locks the structural and class-name conventions so every report renders consistently. The renderer (`tools/skills/report/helpers/render.py`) generates the SVG markup from `figs/<id>.json`; CSS lives here so the visual stays identical across reports.
+This section locks the structural and class-name conventions so every report renders consistently. The renderer (`tools/skills/report/site/build.mjs`) generates the SVG markup from `figs/<id>.json`; CSS lives here so the visual stays identical across reports.
 
 **Required SVG structure** (background overlays first, then grid, then data on top):
 

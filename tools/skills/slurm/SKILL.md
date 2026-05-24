@@ -15,9 +15,9 @@ For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell
 - Pre-checks must pass before submit: readable cluster profile, `ssh <alias> echo ok`, and captured local `git status --porcelain`.
 - Dirty worktree shipping requires user authorization. Do not silently commit, push, or rsync user changes.
 - Partition choice is ratified after queue probing. Do not blindly use the profile default when alternatives are viable.
-- Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests and `flow` checks do.
+- Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests do.
 - Array jobs receive an opaque run spec and write one manifest per cell. `/slurm` never parses or hardcodes axis names.
-- This skill does not spawn audit subagents. `/verify` is composed externally when a protocol/result needs audit.
+- This skill does not spawn audit subagents.
 </checklist>
 
 ## Inputs

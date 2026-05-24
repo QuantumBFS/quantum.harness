@@ -59,7 +59,7 @@ The caller is `solve`, a model/physics card, `/reproduce-paper`, or another work
 - Include failed or missing manifests in the assembled CSV.
 </invariants>
 
-Use `cover` plus `producer = "run"` in a flow-backed protocol so observed cell manifests exactly match declared run-spec cells. Trial artifacts belong outside the covered path unless declared.
+Observed cell manifests must exactly match declared run-spec cells. Trial artifacts belong outside the covered path unless declared.
 
 ## Run Spec Contract
 

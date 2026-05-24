@@ -1,12 +1,12 @@
 # Harness for Quantum Many-Body Physics
 
-Trustworthy, reproducible, agent-driven quantum many-body research harness. Three pieces hold the harness together: a **knowledge base** of methods, models, and physics; **workflow utilities** including `/solve`, `/reproduce-paper`, and `/verify`; and a **self-correcting state-machine ledger** that catches the agent’s mistakes before they ship.
+Trustworthy, reproducible, agent-driven quantum many-body research harness. Two pieces hold the harness together: a **knowledge base** of methods, models, and physics; and **workflow utilities** including `/solve` and `/reproduce-paper`.
 
 ## What it helps with
 
 - **Solving a concrete problem** — pick a method, run locally or on a cluster, verify, plot.
-- **Reproducing a paper end-to-end** — PDF → protocol → script → run → audit → HTML report.
-- **Validating with cross-method checks and audit subagents.**
+- **Reproducing a paper end-to-end** — PDF → protocol → script → run → HTML report.
+- **Validating with cross-method checks.**
 
 10 model cards and 7 method cards on file.
 
@@ -31,7 +31,6 @@ Skills you'll use most:
 - `/solve` — a concrete calculation, from intake to plot
 - `/reproduce-paper` — full paper reproduction
 - `/parameter-scan` + `/scaling-fit` — scans and finite-size extrapolation
-- `/verify` — audit any artifact via an independent subagent
 - `/slurm` — ship and submit on a cluster
 
 Method stacks install on demand; `make help` lists what's available.
@@ -68,8 +67,8 @@ End-to-end reproduction of *"Weak ergodicity breaking from quantum many-body sca
 
 A few things the harness caught during this run, recorded as tacits or deviations:
 
-- The first protocol draft used the exact zero mode in Fig 3c. The paper's caption says *"adjacent to $E=0$"*, not *"at $E=0$"* — a different state. The audit subagent flagged it before compute; the [figure-reading checklist](AGENTS.md#pre-compute-figure-reading-checklist) was added in response.
-- The protocol declared XDiag as the stack, but the script imported raw SciPy. The script audit caught it; the deviation was recorded properly the second time.
+- The first protocol draft used the exact zero mode in Fig 3c. The paper's caption says *"adjacent to $E=0$"*, not *"at $E=0$"* — a different state. The [figure-reading checklist](AGENTS.md#pre-compute-figure-reading-checklist) was added in response.
+- The protocol declared XDiag as the stack, but the script imported raw SciPy. The deviation was recorded properly the second time.
 - Dense `eigh` silently segfaulted on OpenBLAS at $D > 60{,}000$. The harness logged the tacit and escalated the $L=32$ cell to a Julia `eigen` worker on the cluster.
 
 ## Stack

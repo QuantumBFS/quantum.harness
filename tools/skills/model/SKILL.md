@@ -28,8 +28,7 @@ the skill when their prose names a harness-tracked model.
 The reader is a working physicist with no harness-internal context. They
 want the result with embedded reasoning (what method, why, what was
 verified), not the agent's process. They do NOT know harness vocabulary
-(subagent, manifest, attempt, gate, kind, override, deviation, flow,
-producer). Every user-facing line is anchored to this audience.
+(manifest, deviation). Every user-facing line is anchored to this audience.
 </audience>
 
 ## Workflow
@@ -51,7 +50,7 @@ producer). Every user-facing line is anchored to this audience.
 3. **Grep tacits.** Before compute, grep `^signal` in the matched card's `TACITS.toml` (see [AGENTS.md → Tacit knowledge usage](../../../AGENTS.md#tacit-knowledge-usage), rules 1–3).
 
 4. **Execute.** Follow the card's declared workflow. The card names which
-   primitive skills to compose (`/solve`, `/parameter-scan`, `/verify`,
+   primitive skills to compose (`/solve`, `/parameter-scan`,
    `/scaling-fit`, `/cross-method-check`, `/slurm`, `/reproduce-paper`). Do
    NOT substitute a different primitive because it feels more familiar; the
    card's choice is authoritative.
@@ -67,7 +66,7 @@ producer). Every user-facing line is anchored to this audience.
 <checklist name="anti-patterns">
 - Substituting generic ED/DMRG defaults for the card's declared workflow — fail.
 - Acting on agent memory ("I remember Heisenberg has 3 phases") instead of re-reading the card — fail. Memory drifts; cards don't.
-- Ignoring `TACITS.toml` signals when the audited artifact's symptom matches — fail.
+- Ignoring `TACITS.toml` signals when the artifact's symptom matches — fail.
 </checklist>
 
 <example name="memory-substitution bad">

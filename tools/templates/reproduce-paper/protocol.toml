@@ -1,8 +1,7 @@
 # Generic /reproduce-paper protocol template.
 #
 # This file is paper-agnostic. Claim ids and statements are authored from the
-# primary source for the requested reproduction. Flow treats them as opaque
-# obligations and only evaluates the declared [[checks]] mechanically.
+# primary source for the requested reproduction.
 
 [artifact]
 paper = ""             # arXiv id, DOI, or short paper id (e.g. "arXiv:2305.18541")
@@ -29,9 +28,8 @@ note = ""
 # Only paper/supplement/official-code/official-data sources may support primary
 # claims. KB hints, scripts, and prior artifacts are cached evidence; they
 # require confirmation against a primary source or an explicit assumption.
-# Prefer Markdown source paths for citation and audit. If only a PDF exists,
-# keep the raw PDF under sources/ and extract it to Markdown with
-# tools/skills/download-ref/helpers/render.py --pdf ... --out ...
+# Prefer Markdown source paths for citation. If only a PDF exists, keep the raw
+# PDF under sources/ and extract it to Markdown with the download-ref helpers.
 
 [[claims]]
 id = "claim.example"
@@ -45,9 +43,7 @@ fields = [
 ]
 
 # ─── cells ───────────────────────────────────────────────────────────────────
-# One block per executable route. `reproduce-paper` is method-agnostic, not
-# method-optional: methods and stacks are data values here, never flow gates or
-# check kinds.
+# One block per executable route.
 
 [[cells]]
 id = "cell-0001"
@@ -71,283 +67,9 @@ deviation = ""        # required when route = "deviation"
 # was inspected enough to support the claim. Empty, failed, or skipped states
 # block compute unless recorded as a deviation or pending item.
 
-# ─── checks ──────────────────────────────────────────────────────────────────
-# Eight generic kinds. Each names what the check does, never what artifact it
-# touches:
-#   audit   — an audit-kind attempt with an actor distinct from the producer
-#   run     — execute a shell command; exit 0 = pass
-#   exists  — declared paths/fields are present
-#   agree   — declared field values match across artifacts
-#   near    — numeric value within tolerance of a reference
-#   fresh   — artifact and declared sources unchanged since `flow artifact add`
-#   cover   — observed files matching `pattern` exactly equal declared `paths`
-#   support — claim-declared fields are present in matching artifacts
-# Paper-specific or skill-specific names belong in the data values (paths,
-# claims, ids) — never in the `kind` field.
-# Check ids are global override handles: keep each id unique in this file.
-# `claims = [...]` binds checks to claim ids. `support` dereferences each
-# claim's `fields = [...]`; other checks expose the binding to /report.
-# `producer = "run"` requires each declared artifact to be registered from a
-# run-kind attempt; trial artifacts cannot close evidence checks.
-# `audience = true` opts a check into the rendered HTML's audience-facing
-# chip strip; default false keeps internal checks out of the deliverable.
-
-[[checks]]
-id = "source"
-kind = "exists"
-gate = "source"
-audience = true
-claims = ["claim.example"]
-paths = ["sources/paper.md"]
-
-[[checks]]
-id = "protocol"
-kind = "audit"
-gate = "protocol"
-audience = true
-claims = ["claim.example"]
-
-[[checks]]
-id = "script"
-kind = "audit"
-gate = "script"
-audience = true
-claims = ["claim.example"]
-
-[[checks]]
-id = "cells"
-kind = "cover"
-gate = "run"
-claims = ["claim.example"]
-producer = "run"
-pattern = "cells/*/manifest.json"
-paths = [
-  "cells/cell-0001/manifest.json",
-  "cells/cell-0002/manifest.json",
-]
-
-[[checks]]
-id = "fields"
-kind = "exists"
-gate = "run"
-claims = ["claim.example"]
-producer = "run"
-fields = [
-  "cells/cell-0001/manifest.json:protocol_hash",
-  "cells/cell-0001/manifest.json:script_hash",
-  "cells/cell-0001/manifest.json:claims",
-  "cells/cell-0001/manifest.json:method",
-  "cells/cell-0001/manifest.json:stack",
-  "cells/cell-0001/manifest.json:route",
-  "cells/cell-0001/manifest.json:source",
-  "cells/cell-0001/manifest.json:check",
-  "cells/cell-0001/manifest.json:state",
-  "cells/cell-0001/manifest.json:scope",
-  "cells/cell-0001/manifest.json:deviation",
-]
-
-[[checks]]
-id = "hashes"
-kind = "agree"
-gate = "assemble"
-claims = ["claim.example"]
-producer = "run"
-against = [
-  "cells/cell-0001/manifest.json:protocol_hash",
-  "cells/cell-0002/manifest.json:protocol_hash",
-]
-
-[[checks]]
-id = "figures"
-kind = "exists"
-gate = "assemble"
-audience = true
-claims = ["claim.example"]
-producer = "run"
-paths = ["figs/fig-example.png", "figs/fig-example.json"]
-
-[[checks]]
-id = "figures_fresh"
-kind = "fresh"
-gate = "assemble"
-claims = ["claim.example"]
-producer = "run"
-paths = ["figs/fig-example.png", "figs/fig-example.json"]
-against = ["protocol.toml", "scripts/reproduce"]
-
-[[checks]]
-id = "support"
-kind = "support"
-gate = "assemble"
-audience = true
-claims = ["claim.example"]
-producer = "run"
-
-[[checks]]
-id = "trust"
-kind = "near"
-gate = "trust"
-audience = true
-claims = ["claim.example"]
-producer = "run"
-
-  [[checks.compare]]
-  actual = { path = "trust/trust-example.json", field = "observable" }
-  reference = { path = "references/reference.json", field = "observable_exact" }
-  uncertainty = { path = "trust/trust-example.json", field = "stderr" }
-  tolerance = { abs = 0.0 }
-
-[[checks]]
-id = "close"
-kind = "audit"
-gate = "close"
-audience = true
-claims = ["claim.example"]
-
-# Close-stage deliverables. /reproduce-paper's close step authors run-report.md
-# and checks the explicit runnable entry artifact. Figure files are assembled
-# and gated in `assemble`, not re-owned by close.
-
-[[checks]]
-id = "summary"
-kind = "exists"
-gate = "close"
-audience = true
-claims = ["claim.example"]
-producer = "report"
-paths = ["run-report.md"]
-
-[[checks]]
-id = "runner"
-kind = "exists"
-gate = "close"
-claims = ["claim.example"]
-producer = "run"
-paths = ["scripts/reproduce"]
-
-[[checks]]
-id = "help"
-kind = "run"
-gate = "close"
-entry = "help"
-
-[[checks]]
-id = "dry"
-kind = "run"
-gate = "close"
-entry = "dry"
-
-[[checks]]
-id = "summary_fresh"
-kind = "fresh"
-gate = "close"
-claims = ["claim.example"]
-producer = "report"
-paths = ["run-report.md"]
-against = ["protocol.toml"]
-
-[[checks]]
-id = "runner_fresh"
-kind = "fresh"
-gate = "close"
-claims = ["claim.example"]
-producer = "run"
-paths = ["scripts/reproduce"]
-against = ["protocol.toml"]
-
-# Report gate: /report's polish subagent writes editorial.json (registered as
-# a flow artifact); the audit subagent traces every editorial sentence to a
-# `sourced_by` pointer in the verify reports. The editorial_fresh check pins
-# editorial.json to the protocol it was produced against — a post-audit edit
-# invalidates the audit chain.
-
-[[checks]]
-id = "report"
-kind = "audit"
-gate = "report"
-audience = true
-claims = ["claim.example"]
-
-[[checks]]
-id = "editorial"
-kind = "fresh"
-gate = "report"
-claims = ["claim.example"]
-producer = "report"
-paths = ["editorial.json"]
-against = ["protocol.toml"]
-
-# Optional: domain-specific validation via a shell command (kind = "run").
-# The command should exit 0 on pass, nonzero on fail. Output is captured but
-# not interpreted — keep machine semantics in the exit code.
-# [[checks]]
-# id = "domain"
-# kind = "run"
-# gate = "script"
-# claims = ["claim.example"]
-# cmd = "scripts/check_domain"
-
-# ─── deviations ──────────────────────────────────────────────────────────────
-# Record deliberate differences from the paper instead of silently treating
-# them as equivalent.
-
-[[deviations]]
-id = "deviation.example"
-kind = ""              # method | stack | route | scope | budget | data | uncertainty
-from = ""
-to = ""
-statement = ""
-reason = ""
-claims = []
-checks = []
-
-# ─── repairs ─────────────────────────────────────────────────────────────────
-# Record corrections after failed gates or contract-changing edits. Runtime
-# fork choices are recorded with `flow decide`; repairs are protocol evidence
-# that downstream artifacts were invalidated and rerun.
-
-[[repairs]]
-id = "repair.example"
-from = ""              # source | protocol | plan | script | trust | run | assemble | close
-wrong = ""
-changed = []           # files or artifact ids changed by the repair
-invalidate = []        # gates invalidated by the repair
-state = ""             # open | rerun | closed
-
-# ─── pending ─────────────────────────────────────────────────────────────────
-# Declare next obligations the run does NOT meet (cross-method check, larger
-# system size, longer runtime). /report renders one muted chip per [[pending]]
-# entry so readers see what's missing without scrolling.
-
-[[pending]]
-id = "pending.example"
-statement = ""         # e.g. "Independent TTN run at L=128 to confirm c_L magnitude"
-reason = ""            # e.g. "TTN backend not yet wired in the harness"
-
-[budgets]
-wall_clock = ""
-compute = ""
-notes = ""
-
-# ─── figures ─────────────────────────────────────────────────────────────────
-# Figure pointers consumed by /report. One block per figure. `paper_path` is
-# the reference figure (from download-ref's .figures/); `ours_path` is the
-# reproduction's plot. `data_path` is optional — when present, /report renders
-# an interactive plot from it; when absent, only the static PNG. `claim_ids`
-# cross-references the [[claims]] this figure supports.
-
 [[figures]]
-id = "<short-id>"              # e.g. "fig4a"
-paper_path = ""                # e.g. .knowledge/literature/<method>/.figures/arxiv__<id>/<extracted-png>
-paper_authority = "primary"    # primary | trusted_reference | hint
-paper_attribution = ""         # e.g. "Tarabunga et al. 2023, Fig 4(a)"
-ours_path = ""                 # e.g. results/<run>/figs/<id>.png
-data_path = ""                 # e.g. results/<run>/figs/<id>.json (optional; enables interactive plot)
-claim_ids = []
-
-# Optional run-level overrides for /report. Defaults are sane; only set when
-# overriding.
-# featured_figure = "fig4a"
-# central_param = { h = 1.0 }
-# [report]
-# fonts = "cdn"
+id = "fig-example"
+display_id = "Fig 1"
+caption = ""           # caption verbatim from the paper
+paper_path = ""        # path to extracted paper figure under .figures/
+paper_attribution = ""

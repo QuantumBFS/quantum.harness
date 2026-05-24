@@ -10,7 +10,7 @@ Convention: the harness `M_n` definition lives in `.knowledge/magic-conventions.
 - *Analytic* — a closed-form value (e.g., stabilizer-state limit, single-qudit `T`-state).
 - *Harness anchor* — an empirical value computed by this repo with a tagged run name and a cross-check method.
 
-Rows without one of these tags are not benchmarks. The `/verify` primitive (in `kb-card` mode) cross-checks each tag against its source; failed rows are surfaced for cleanup. This card was patched on 2026-05-06 to remove fabricated anchors that did not satisfy this discipline (audit details inline).
+Rows without one of these tags are not benchmarks. This card was patched on 2026-05-06 to remove fabricated anchors that did not satisfy this discipline.
 
 ## 1D quantum Ising chain
 
@@ -83,4 +83,3 @@ These analytics are the limit-check anchor for any new magic implementation: it 
 - For the 2D `Z_2` ↔ 2D Ising row, cite alongside the `magic-conventions.md` "Wegner-duality preservation" note.
 - If your problem is not listed: report converged values with bond-dim and `N_S` trends, *do not fabricate a benchmark*.
 - New numerical entries land here only with a tag (Literal / Analytic / Harness anchor) and a verifiable source. Citation is by *what the reference provides* (a benchmark, a method) rather than by author/year.
-- Run `/verify <this-card>` before any reproduction (it dispatches an audit subagent that re-greps every Literal tag).

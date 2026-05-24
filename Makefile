@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-.PHONY: setup core core-setup skills doctor install-flow test test-flow clean help install $(addprefix install-,$(INSTALLABLE))
+.PHONY: skills test clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
 INSTALLABLE := quarto quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro report-site
@@ -30,12 +30,6 @@ help: ## Show available targets and installable tools
 	@echo "Installable tools — run 'make install <name>':"
 	@for t in $(INSTALLABLE); do echo "  $$t"; done
 
-setup: core ## Minimal bootstrap — core CLI tools only
-
-core: install-flow ## Build core harness CLI tools
-
-core-setup: core ## Backward-compatible alias for core
-
 skills: ## Install or sync Ion-managed skills
 	@set -e; \
 	if ! command -v ion >/dev/null 2>&1; then \
@@ -45,41 +39,6 @@ skills: ## Install or sync Ion-managed skills
 	  export PATH="$$HOME/.local/bin:$$PATH"; \
 	fi; \
 	ion add
-
-doctor: ## Check core harness readiness without installing domain stacks
-	@missing=0; \
-	if tools/cli/flow help >/dev/null 2>&1; then echo "flow	ok"; else echo "flow	missing"; missing=1; fi; \
-	if cargo --version >/dev/null 2>&1; then echo "cargo	ok"; elif command -v cargo >/dev/null 2>&1; then echo "cargo	broken"; else echo "cargo	missing"; fi; \
-	if command -v ion >/dev/null 2>&1; then echo "ion	ok"; else echo "ion	missing"; fi; \
-	exit $$missing
-
-install-flow: ## Build the generic workflow gate ledger CLI
-	@set -e; \
-	. "$$HOME/.cargo/env" 2>/dev/null || true; \
-	if ! cargo --version >/dev/null 2>&1; then \
-	  if command -v cargo >/dev/null 2>&1; then \
-	    echo "ERROR: cargo binary at $$(command -v cargo) is present but not runnable."; \
-	    echo "Your rustup default toolchain's cargo component is incomplete."; \
-	    echo "(rustup-init will not fix this — it respects the existing ~/.rustup/settings.toml.)"; \
-	    echo "Recovery:  rustup toolchain uninstall stable && rustup toolchain install stable"; \
-	    echo "Then rerun: make setup"; \
-	    exit 1; \
-	  fi; \
-	  command -v curl >/dev/null 2>&1 || { echo "curl not found. Install Rust/Cargo, then rerun: make setup"; exit 1; }; \
-	  echo "Cargo not found. Installing Rust/Cargo via rustup."; \
-	  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
-	  . "$$HOME/.cargo/env"; \
-	  cargo --version >/dev/null 2>&1 || { \
-	    echo "ERROR: rustup-init completed but cargo still does not run."; \
-	    echo "Likely cause: stale ~/.rustup/settings.toml pointing at a corrupted default toolchain."; \
-	    echo "Recovery:  rustup toolchain uninstall stable && rustup toolchain install stable"; \
-	    echo "Then rerun: make setup"; \
-	    exit 1; \
-	  }; \
-	fi; \
-	cargo build --release --manifest-path tools/flow/Cargo.toml; \
-	tools/cli/flow help >/dev/null; \
-	echo "flow CLI ready: tools/cli/flow"
 
 # Stable KEY=VALUE contract for the zlp-harness plugin's zlp-onboard skill.
 # Adding new keys is additive; older skill versions ignore unknown lines.
@@ -240,9 +199,6 @@ install-report-site: ## Install Node deps for /report's Fumadocs HTML builder
 render: ## Render a markdown file to HTML. Usage: make render FILE=<path.md>
 	@if [ -z "$(FILE)" ]; then echo "Usage: make render FILE=<path.md>"; exit 1; fi
 	tools/cli/render "$(FILE)"
-
-test-flow: ## Test the generic workflow gate ledger
-	cargo test --manifest-path tools/flow/Cargo.toml
 
 clean: ## Remove generated HTML artifacts
 	find . -name '*.html' -not -path './tools/templates/*' -delete

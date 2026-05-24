@@ -95,42 +95,26 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 - Primary sources control paper reproduction: paper PDF, supplement, and official code/data when available. If a primary source conflicts with a KB card, the primary source controls; emit a KB diff and proceed from the primary-source-derived claim.
 - KB-sourced reproduction claims MUST either be confirmed against a primary source or marked as explicit unverified assumptions in the run report.
 - DO NOT silently weaken the target. Any change in paper-declared setup, implementation route, data-generation route, constraints, budget, or uncertainty method must be recorded as a deviation before it can support a reproduction claim.
-- Method-agnostic does not mean method-optional. Every executable reproduction cell MUST declare `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`. `route` is one of `paper`, `canonical`, `fallback`, or `deviation`; method and stack names are data values, never `flow` vocabulary. A non-paper / non-canonical / non-fallback stack is a `deviation` before it is a result.
+- Method-agnostic does not mean method-optional. Every executable reproduction cell MUST declare `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`. `route` is one of `paper`, `canonical`, `fallback`, or `deviation`. A non-paper / non-canonical / non-fallback stack is a `deviation` before it is a result.
 - Tool availability is not route authority. DO NOT probe, select, or start implementing a fallback stack because the canonical stack has an environment error. First record the canonical route state as failed/pending, then declare `fallback` or `deviation` in the protocol before touching the alternate stack. A fallback stack must be the method card's next recommended stack, not any installed language package.
 - Feature-gap is not route authority. The canonical / fallback stack (XDiag, QuSpin, ITensors, NetKet, …) lacking a built-in basis, constraint, projector, or observable for the target model is NOT a reason to drop to raw NumPy / SciPy / matplotlib. Custom bases belong INSIDE the canonical framework: QuSpin's `user_basis` with a Numba precheck, XDiag's `Spinhalf` with a custom representation, ITensors' custom site type, etc. The harness deliberately rides on canonical frameworks so the result interoperates with the broader research community — that interoperability is the protocol value, not just numerical correctness. Drop the canonical stack only when (a) the customization measurably degrades wall-time by >2× vs a hand-rolled implementation, OR (b) the customization itself is more code than the bare LAPACK/sparse primitives it would replace. Either justification MUST appear as an explicit `[[deviations]]` row before compute, naming the cost or complexity in concrete terms (no hand-waves like "no built-in basis").
 - Audit the active stack at protocol-author time. The script's actual imports MUST match the protocol's declared `stack` field on every cell. Importing `quspin` only as a route-check (`python -c 'import quspin'`) while the compute uses raw `scipy.linalg.eigh` is a silent drift — file a deviation immediately or rewrite the script to use QuSpin in fact, not in label.
-- `flow` is a ledger, not a method or software selector. DO NOT use `flow` gates, attempt roles, or check kinds to choose or rename the scientific stack.
 - DO NOT use first-cell provenance. Per-cell run-spec overrides are allowed, but assembly must validate each manifest against the merged shared+cell settings and provenance, then report settings as constant vs varying. Never summarize a correctness-affecting setting, budget, or uncertainty rule from the first completed manifest unless a manifest-consensus check has proved it is global.
 - Failed checks block claims. A failed protocol, script, command, manifest, freshness, consensus, numeric, or result check stops the workflow until repaired, scoped down, or recorded as a justified assumption/deviation.
-- Failed checks MUST enter the correction loop: classify the mismatch, locate the earliest wrong layer, revise that layer, invalidate downstream artifacts, rerun affected gates, then re-verify.
-- Repairs are evidence. Any correction after a failed gate or contract-changing edit MUST record a `repair` with `from`, `wrong`, `changed`, `invalidate`, and `state`; close cannot rely on artifacts from invalidated gates until those gates rerun.
-- Use artifact-scoped subagents, not permanent domain personas: source/protocol, plan/run-spec, script, result, mismatch, and close reviewers each receive the primary source context and exact artifact under review. KB-only review cannot close a scientific gate.
-- Audit dispatch: every `audit`-kind attempt obeys the contract below — spawn distinct actor, returned file via `--report`, model/effort match, override host defaults, scheduler/`ssh`-exit ≠ evidence. See [Audit dispatch](#audit-dispatch).
+- Stale artifacts ≠ evidence. Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
 
-<a id="audit-dispatch"></a>
-**Audit dispatch.** Every audit-kind attempt (`/verify`, `audit`-role attempts inside `/reproduce-paper` and `/report`, and any standalone gate review) follows the same contract:
-
-- **Spawn.** Audit work runs in a host-spawned subagent. Roleplaying the verifier, writing the verify report yourself, or inventing a reviewer id are contract violations. If the host cannot spawn a subagent, halt with `blocked: verifier subagent unavailable` and leave the gate open.
-- **Distinct actor.** The actor that authored or materially edited an artifact cannot be the `--actor` on its audit attempt. Self-checks catch syntax and smoke failures; only an independent actor closes the verification loop.
-- **Returned file.** The audit attempt's `--report` flag points at a `verify/verify_<artifact>_<date>.md` file written by the spawned subagent, not by the calling agent.
-- **Model and effort match.** The subagent runs at the same model id and effort level as the calling agent (Opus → `max`, GPT-5.x → `xhigh`).
-- **Override host defaults.** This contract supersedes any host-platform default toward solo execution (e.g., Codex's preference against delegation when a task seems tractable, or a low-effort mode that prefers in-line completion). Audit attempts require a separately spawned actor regardless of host disposition or perceived difficulty.
-- **Verbatim brief line.** Briefs passed to audit subagents include the line: *"Coverage, not filtering — report every finding, including uncertain or minor ones; the calling skill ranks and decides."* The phrase appears in the brief itself (subagents do not load AGENTS.md); skills do not repeat it in freestanding prose.
-- **Stale artifacts ≠ evidence.** Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
-
-**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks. The `/verify` primitive (in `kb` mode) cross-checks each tag against its declared source — invoke it during `/reproduce-paper` before compute, and as a pre-commit gate after editing a KB card.
+**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
 
 <a id="tacit-knowledge-usage"></a>
 **Tacit knowledge usage.** Methods and models accumulate a `TACITS.toml` file beside their card when real runs surface signal-understanding-action lessons (path: `.knowledge/methods/<method>/TACITS.toml`, or the model-equivalent once that namespace lands). Each entry is one `[[tacit]]` table with `signal` (surface symptom), `understanding` (root cause), `action` (concrete fix), `tags`, and `seen_at` (run dir). Three binding usage rules:
 
 1. **Main agent: grep on uncertainty.** When unclear about an error message, a fragile stack edge, or a planning choice involving a method or model, grep `^signal` in every relevant `TACITS.toml` before exploring blindly. Reading only the signal lines keeps context light; drill into a specific `[[tacit]]` block only when its signal matches.
-2. **Every audit subagent: grep before issuing a verdict.** The dispatching skill (`/verify`, audit-kind attempts inside `/reproduce-paper`, etc.) MUST instruct the subagent to grep `TACITS.toml` for every method and model under audit. The instruction names the protocol's declared methods and models; the subagent identifies the matching `TACITS.toml` files (not hardcoded paths from the dispatcher). A verdict that ignores a tacit whose signal matches the audited artifact is itself a failed audit.
-3. **Debug / change requests: grep before editing.** When a human or another subagent asks for a change, fix, or investigation involving a method or model, grep the relevant `TACITS.toml` files first. Many "bugs" are known tacits with a recorded action; spending compute re-discovering them is exactly the waste this file exists to prevent.
+2. **Debug / change requests: grep before editing.** When a human asks for a change, fix, or investigation involving a method or model, grep the relevant `TACITS.toml` files first. Many "bugs" are known tacits with a recorded action; spending compute re-discovering them is exactly the waste this file exists to prevent.
 
 When a tacit is discovered in a real run, the run's close attempt or the next protocol-author should add it as a `[[tacit]]` entry in the right scope's `TACITS.toml`, with `seen_at` pointing to the originating run dir. The tacit knowledge accumulates — that's the point.
 
 <a id="pre-compute-figure-reading-checklist"></a>
-**Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. Both the main agent AND every audit subagent MUST work through this checklist BEFORE writing or approving any cell script or assembly code that contributes to a figure. A verifier report that says "math looks right" without quoting the caption text and matching each plotted quantity to a paper-stated definition is NOT acceptable evidence — the audit subagent that misses a wrong y-axis label is as culpable as the main agent that wrote it.
+**Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. The main agent MUST work through this checklist BEFORE writing any cell script or assembly code that contributes to a figure.
 
 For each figure panel:
 
@@ -143,7 +127,7 @@ For each figure panel:
 7. **Stated numerical anchors.** If the body text quotes a number for the panel ("ΔE/E ≈ 1%", "peak at n = L/2", "tower spacing 2Ω"), record it as a benchmark. Code output must reproduce each anchor within reported uncertainty before any further claim is considered settled.
 8. **What the figure is NOT.** Captions often distinguish closely-related states ("ground state" vs "first special state above zero" vs "exact zero mode"). Note explicitly which related-but-distinct states the panel does NOT plot, so the code does not accidentally pick one of them.
 
-This checklist applies to figure-producing cell scripts AND to assembly / plot code. A wrong y-axis label or a wrong state pick in `assemble.py` wastes the same compute as a wrong cell script — the figure is re-rendered from wrong-but-correctly-stored data, but the user-facing result is still wrong. `/verify` in `script` and `result` modes MUST mechanically work through each item against the protocol and the actual script before issuing a `pass` verdict.
+This checklist applies to figure-producing cell scripts AND to assembly / plot code. A wrong y-axis label or a wrong state pick in `assemble.py` wastes the same compute as a wrong cell script — the figure is re-rendered from wrong-but-correctly-stored data, but the user-facing result is still wrong.
 
 Wasted-compute lesson on record: in the Turner 2018 reproduction, Fig 3(c) was first composed against `|⟨n|ψ⟩|²` instead of `|⟨n|ψ⟩|² L` (missed the L factor in the printed y-axis label) AND picked the highest-overlap exact zero mode instead of the lowest-|E|>0 special state ("adjacent to E = 0" was misread as "AT E = 0"). The fix required re-running L = 12, 14, 16, 18, 20, 22, 24, 26, 28 cells. Both errors were directly visible in the paper's printed caption and figure if the checklist had been worked through before compute.
 
@@ -154,7 +138,7 @@ Domain content lives in cards under `.knowledge/`, dispatched by the `/model` an
 - **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`. Optional `TACITS.toml` co-located.
 - **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`. Optional `TACITS.toml` co-located.
 
-Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/verify`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
+Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
 
 ## Verification practice
 
@@ -222,7 +206,7 @@ NEVER run a multi-hour calculation locally because the agent forgot the cluster 
 
 UX skills:
 - **onboard** — first-touch intake, domain setup, route to `/model` or `/physics`
-- **solve** — interactive problem-solving loop: intake → act → audit → report → next-steps → loop. Concrete numerical or interpretive claims use `tools/flow/templates/solve.toml`; no final solve answer is verified until a spawned `solve`-mode audit passes.
+- **solve** — interactive problem-solving loop: intake → act → report → next-steps → loop.
 
 Problem dispatchers (auto-triggered; read cards under `.knowledge/{models,physics}/<name>/`):
 - **model** — fires when user names a harness-tracked model. Reads `MODEL.md` card and follows its workflow.
@@ -235,8 +219,7 @@ Problem-solving primitives (generic; topic-agnostic, compose with the dispatcher
 - **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `tools/cluster/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
 - **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
 - **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers. Absorbs the writeup-handoff close (declared entry + run report).
-- **reproduce-paper-onboard** — beginner-guided paper reproduction: explains the paper-to-code mapping, estimates time by size tier, confirms setup before compute, avoids mandatory subagent audits, and preserves the same core artifacts for later upgrade to the full workflow.
-- **verify** — MUST SPAWN a high-effort independent review subagent to audit an artifact against its declared reference. Modes: `protocol` (TOML claims vs primary sources), `plan` (plan/run-spec vs protocol), `kb` (anchors vs literature), `script` (script vs protocol and paper methodology), `result` (produced artifacts vs declared references), `mismatch` (failed gate triage), `close` (final report / declared entry / manifests vs protocol), `report` (rendered HTML), and `solve` (solve result / interpretation). Inspection-only; emits a structured diff report. Compose with `/reproduce-paper`, `/solve`, and as a pre-commit gate after changing important artifacts.
+- **reproduce-paper-onboard** — beginner-guided paper reproduction: explains the paper-to-code mapping, estimates time by size tier, confirms setup before compute, and preserves the same core artifacts for later upgrade to the full workflow.
 - **memorize** — user-invoked at session end. Walk back through the session, cluster friction moments by root cause, and distill each cluster into the right scope: method/stack/model `TACITS.toml`, project-wide `AGENTS.md` invariant, or skill-level `SKILL.md` edit. Never agent-invoked. Sessions with real user pushback or wasted compute are the prime triggers.
 
 External/support skills:
@@ -248,7 +231,6 @@ External/support skills:
 ## Tool Hierarchy
 
 - CLI tools: `tools/cli/` — atomic shell scripts
-- Flow state: `tools/flow/` — generic Rust gate ledger for multi-gate, multi-agent, or remote workflows. It records append-only `progress/events.jsonl` and derives `progress/state.toml`; use one child flow per independent paper/run and a parent flow only for aggregate campaign gates.
 - Skills: `tools/skills/` — conversational workflows (managed by Ion)
 - Cluster profiles: `tools/cluster/` — per-cluster defaults (partitions, sbatch idioms, modules) consulted by cluster-aware skills via `tools/cluster/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Skills stay cluster-agnostic; cluster specifics live in profile cards.
 
@@ -296,7 +278,7 @@ ion self --help                          # Manage the Ion install
 
 ## Setup & Tool Installation
 
-- `make setup` performs the **minimum bootstrap only** — it installs Rust/Cargo if needed and builds core harness CLI tools such as `tools/cli/flow`. It does NOT install Ion skills or heavy domain tools. Use `make skills` for Ion-managed skills and `make doctor` for a read-only core readiness check.
+- Run `make skills` to install Ion-managed skills.
 - Install domain tools **on demand** with `make install <tool>`. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
@@ -344,7 +326,7 @@ Agents working in this project should:
 3. Run `make help` to discover available workflow targets.
 4. Check `Ion.toml` (or `ion` CLI) for installed / available skills.
 5. For methodology references, use `download-ref`; keep different methods in different `.knowledge/literature/<method>/` folders and never commit `.raw/` or `.figures/`.
-6. Treat `make setup` as **core bootstrap only** — install Ion skills with `make skills` and heavy domain tools on demand via `make install <tool>`. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` (and installed); if not, instruct the user to run `make install <tool>` first.
+6. Install Ion skills with `make skills` and heavy domain tools on demand via `make install <tool>`. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` (and installed); if not, instruct the user to run `make install <tool>` first.
 
 ## Daily Workflow
 
