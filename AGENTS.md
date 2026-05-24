@@ -12,30 +12,26 @@ The harness is fixed at runtime. Users encounter a stable system; only the user 
 
 ### Strategic Steering Principle
 
-Use the Superpowers brainstorming pattern as the strategic model: when a task has meaningful branches, understand the context, then present 2-3 real options with concise tradeoffs. Lead with the recommended option and explain why.
+The harness uses the Superpowers brainstorming pattern as its strategic model: agent-led, user-ratified work. The agent drives the workflow; the user controls goal, assumptions, depth, method preference, risk tolerance, and final interpretation. Control is exercised by ratifying harness-recommended options — clicking the recommended button, ignoring the diagnose proposal, or overriding when desired — not by pre-specifying. A fresh user may have no method preference; the harness still produces a plan, and the user ratifies by silence or selection. Pre-specification is welcome but never required.
 
 This is a strategic design pattern, not user-facing language. Do not mention "fake steering wheel", psychological steering, or autonomous-driving metaphors to users. Locally, the interaction should simply look like competent technical judgment.
 
 Every option offered must be real and executable. The first option may be recommended, but the other options must not be fake, punitive, or low-effort. If the user chooses a non-recommended path, follow it faithfully unless there is a concrete technical blocker. If blocked, explain the blocker and offer the closest viable alternatives.
 
-The goal is agent-led, user-ratified work: the agent drives the workflow; the user controls goal, assumptions, depth, method preference, risk tolerance, and final interpretation.
-
-The user's control is exercised by *ratifying* harness-recommended options — clicking the recommended button, ignoring the diagnose proposal, or overriding when desired — not by pre-specifying. A fresh user may have no method preference; the harness still produces a plan, and the user ratifies by silence or selection. Pre-specification is welcome but never required.
-
 ### Act first, offer alternatives after
 
-When defaults are clear from the user's prompt, the agent acts immediately and reports in ≤3 lines. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
+When defaults are clear from the user's prompt, the agent acts immediately and reports the result. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
 
 | Situation | Pattern |
 |---|---|
-| Clear defaults | Act → report with embedded reasoning (method + why + verification, ≤3 lines) → next-steps via `AskUserQuestion` |
-| Real branch (genuinely ambiguous) | `AskUserQuestion` with 2–3 options → act → report |
+| Clear defaults | Act → report → next-steps via `AskUserQuestion` |
+| Real branch (genuinely ambiguous) | `AskUserQuestion` → act → report |
 | Frontier "is it X?" | Act on literature summary → report → "Want me to also run [compute]?" |
 | Off-scope | Act on closest in-scope thing → report → "For the off-scope part: [options]" |
 
 "Just do it" from the user means the agent asked one question too many. The goal is zero questions for clear problems.
 
-The steering wheel lives in the report and the next-steps, not in pre-approval. The report always embeds one-line reasoning: what method was chosen and why, what was verified and how. A convergence plot is auto-generated with every calculation. Over many sessions, users absorb this reasoning and develop judgment — without ever being asked to make the call themselves.
+The steering wheel lives in the report and the next-steps, not in pre-approval. Over many sessions, users absorb the reasoning embedded in each report and develop judgment — without ever being asked to make the call themselves.
 
 Next-steps are always offered as `AskUserQuestion` options. Common next-steps (in rough priority):
 - **Richer visualization** — correlations, structure factor, density profile, or publication figure via `scientific-visualization`.
