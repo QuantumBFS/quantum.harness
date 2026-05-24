@@ -206,20 +206,22 @@ Selection style. One question per method-specific setting, in a fixed order per 
 | --------- | ------------------------- | --------------------------------------------- | ----------------------------- |
 | `<name>`  | `<plain-language role>`   | `<correctness / cost / convergence consequence>` | `<recommended value or rule>` |
 
-Each setup question uses exactly 2–3 options. Every option must carry, in plain English:
+Each setup question uses exactly 2–3 options. Every option must carry, in plain English, the consequences a beginner would weigh:
 
-- the value or configuration (e.g., `exact within selected sector`, `Lanczos k=...`, `chi=200, sweeps=8, cutoff=1e-9`, `samples=10^6, chains=8`);
-- whether it matches the paper target or departs from it, and why;
-- expected wall-time and memory consequence (`~30 s, < 1 GB`, `~2 h, ~80 GB`, etc.);
-- the verification or convergence check it enables (`residual check`, `convergence ladder`, `bin-error estimate`, etc.).
+- **value or configuration** — e.g., `exact within selected sector`, `Lanczos k=...`, `chi=200, sweeps=8, cutoff=1e-9`, `samples=10^6, chains=8`;
+- **paper-fit** — matches the paper target, or departs and why;
+- **feasibility** — does it actually run on the chosen route and budget (`fits in workspace`, `needs cluster`, `marginal at L=20`, `blocked-before-compute`);
+- **cost** — wall-time and memory estimate (`~30 s, < 1 GB`, `~2 h, ~80 GB`);
+- **accuracy or quality** — expected precision against the paper target (`exact`, `~4-digit residual`, `~2% Monte Carlo error`, `truncation 1e-9`);
+- **verification** — convergence or correctness check enabled (`residual check`, `convergence ladder`, `bin-error estimate`).
 
 Then ask:
 
 > **<Setting> — use <recommended value>?**
 >
-> - **<recommended value> (recommended)** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
-> - **<alternative 1>** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
-> - **<alternative 2>** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
+> - **<recommended value> (recommended)** — <config>; <paper-fit>; <feasibility>; ~<wall>, ~<memory>; <accuracy>; <verification>
+> - **<alternative 1>** — <config>; <paper-fit>; <feasibility>; ~<wall>, ~<memory>; <accuracy>; <verification>
+> - **<alternative 2>** — <config>; <paper-fit>; <feasibility>; ~<wall>, ~<memory>; <accuracy>; <verification>
 
 Setting ladders per method:
 
