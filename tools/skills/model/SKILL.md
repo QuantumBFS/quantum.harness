@@ -47,15 +47,13 @@ verified), not the agent's process. They do NOT know harness vocabulary
    - Verification rubric (limit / symmetry / convergence / cross-method) noted
    </checklist>
 
-3. **Grep tacits.** Before compute, grep `^signal` in the matched card's `TACITS.toml` (see [AGENTS.md → Tacit knowledge usage](../../../AGENTS.md#tacit-knowledge-usage), rules 1–3).
-
-4. **Execute.** Follow the card's declared workflow. The card names which
+3. **Execute.** Follow the card's declared workflow. The card names which
    primitive skills to compose (`/solve`, `/parameter-scan`,
    `/scaling-fit`, `/cross-method-check`, `/slurm`, `/reproduce-paper`). Do
    NOT substitute a different primitive because it feels more familiar; the
    card's choice is authoritative.
 
-5. **Report.** Three lines or fewer in prose: primary quantity (value +
+4. **Report.** Three lines or fewer in prose: primary quantity (value +
    units), verification status (which checks passed), and one-line
    reasoning (method + why). Auto-generate and embed the relevant
    convergence or stability plot — never report a result without the visual
@@ -66,7 +64,6 @@ verified), not the agent's process. They do NOT know harness vocabulary
 <checklist name="anti-patterns">
 - Substituting generic ED/DMRG defaults for the card's declared workflow — fail.
 - Acting on agent memory ("I remember Heisenberg has 3 phases") instead of re-reading the card — fail. Memory drifts; cards don't.
-- Ignoring `TACITS.toml` signals when the artifact's symptom matches — fail.
 </checklist>
 
 <example name="memory-substitution bad">

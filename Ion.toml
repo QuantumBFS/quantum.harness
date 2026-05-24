@@ -18,7 +18,6 @@ setup-julia = { type = "local" }        # Julia install + mirror + project env (
 reproduce-paper = { type = "local" }    # paper orchestrator (absorbs run-report close)
 reproduce-paper-onboard = { type = "local" } # beginner-guided reproduction
 report = { type = "local" }             # render single-page interactive HTML report from a reproduction run
-memorize = { type = "local" }           # session-end retrospective: distill lessons → TACITS.toml or AGENTS.md
 scientific-writing = { source = "davila7/claude-code-templates/scientific-writing" }
 
 # Skill tooling

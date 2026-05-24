@@ -41,9 +41,7 @@ mechanism questions, not for "solve <model>" (that's `/model`).
    - Model hooks (which `.knowledge/models/<model>/MODEL.md` files to consult) noted
    </checklist>
 
-3. **Grep tacits.** Before compute, grep `^signal` in the matched card's `TACITS.toml` (see [AGENTS.md → Tacit knowledge usage](../../../AGENTS.md#tacit-knowledge-usage), rules 1–3).
-
-4. **Compose.** Read every model hook the topic card declares — not just
+3. **Compose.** Read every model hook the topic card declares — not just
    the one that feels most relevant. The card chooses the cross-model
    evidence pattern; an agent that consults only one model when the card
    lists three has weakened the evidence rubric. Then compose the named
@@ -54,7 +52,7 @@ mechanism questions, not for "solve <model>" (that's `/model`).
    rubric before issuing a verdict. Reporting "I checked the obvious one
    and it looked right" is a failed verdict.
 
-5. **Report.** Caveat-after, not caveat-first.
+4. **Report.** Caveat-after, not caveat-first.
 
    <example name="caveat-after bad">
    "While there is some debate, and the picture is not fully settled, the evidence is consistent with a spin liquid in the J2/J1 ≈ 0.5 regime."

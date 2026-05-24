@@ -83,7 +83,7 @@ Current cards:
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - `magic-conventions.md` — Pauli / clock-shift conventions, SRE definitions, partition modes, qudit generalizations, Wegner-duality SRE preservation.
 - `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
-- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX). A method earns a folder `methods/<method>/` (containing `METHOD.md` + `TACITS.toml`) once tacit knowledge has accrued from real runs; before then it stays flat as `methods/<method>.md`.
+- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
@@ -104,14 +104,6 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 - Stale artifacts ≠ evidence. Remote job status, `ssh` exit status, and scheduler `COMPLETED` state are operational facts only; fetched manifests and checks are the evidence.
 
 **Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
-
-<a id="tacit-knowledge-usage"></a>
-**Tacit knowledge usage.** Methods and models accumulate a `TACITS.toml` file beside their card when real runs surface signal-understanding-action lessons (path: `.knowledge/methods/<method>/TACITS.toml`, or the model-equivalent once that namespace lands). Each entry is one `[[tacit]]` table with `signal` (surface symptom), `understanding` (root cause), `action` (concrete fix), `tags`, and `seen_at` (run dir). Three binding usage rules:
-
-1. **Main agent: grep on uncertainty.** When unclear about an error message, a fragile stack edge, or a planning choice involving a method or model, grep `^signal` in every relevant `TACITS.toml` before exploring blindly. Reading only the signal lines keeps context light; drill into a specific `[[tacit]]` block only when its signal matches.
-2. **Debug / change requests: grep before editing.** When a human asks for a change, fix, or investigation involving a method or model, grep the relevant `TACITS.toml` files first. Many "bugs" are known tacits with a recorded action; spending compute re-discovering them is exactly the waste this file exists to prevent.
-
-When a tacit is discovered in a real run, the run's close attempt or the next protocol-author should add it as a `[[tacit]]` entry in the right scope's `TACITS.toml`, with `seen_at` pointing to the originating run dir. The tacit knowledge accumulates — that's the point.
 
 <a id="pre-compute-figure-reading-checklist"></a>
 **Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. The main agent MUST work through this checklist BEFORE writing any cell script or assembly code that contributes to a figure.
@@ -135,8 +127,8 @@ Wasted-compute lesson on record: in the Turner 2018 reproduction, Fig 3(c) was f
 
 Domain content lives in cards under `.knowledge/`, dispatched by the `/model` and `/physics` meta-skills:
 
-- **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`. Optional `TACITS.toml` co-located.
-- **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`. Optional `TACITS.toml` co-located.
+- **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`.
+- **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`.
 
 Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
 
@@ -220,7 +212,6 @@ Problem-solving primitives (generic; topic-agnostic, compose with the dispatcher
 - **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
 - **reproduce-paper** — orchestrate end-to-end paper reproduction: plans the figure dependency graph, surfaces methodology / verification / cross-check figs alongside substantive ones, composes the primitives above. Generic over papers. Absorbs the writeup-handoff close (declared entry + run report).
 - **reproduce-paper-onboard** — beginner-guided paper reproduction: explains the paper-to-code mapping, estimates time by size tier, confirms setup before compute, and preserves the same core artifacts for later upgrade to the full workflow.
-- **memorize** — user-invoked at session end. Walk back through the session, cluster friction moments by root cause, and distill each cluster into the right scope: method/stack/model `TACITS.toml`, project-wide `AGENTS.md` invariant, or skill-level `SKILL.md` edit. Never agent-invoked. Sessions with real user pushback or wasted compute are the prime triggers.
 
 External/support skills:
 - **arxiv-search** — Semantic arXiv search via Valyu

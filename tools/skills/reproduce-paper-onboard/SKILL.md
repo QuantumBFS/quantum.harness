@@ -83,10 +83,6 @@ Caption reading is mandatory for figure-producing targets. Record the caption te
 
 > "`plan.md` is the human-readable summary of what we're about to run. `protocol.toml` is the paper-to-code contract the broader harness uses — same content, machine-readable."
 
-Tacit references are signal-to-action lessons from previous runs. Mention a tacit only when it affects the current choice:
-
-> "There is a known pitfall here: [signal]. I will handle it by [action]."
-
 ### Q3 — Tier (size ladder)
 
 Always offer a size ladder. Use method-card scaling, primary-source sizes, and a tiny pilot when uncertain.

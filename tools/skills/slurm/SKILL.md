@@ -17,7 +17,6 @@ For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell
 - Partition choice is ratified after queue probing. Do not blindly use the profile default when alternatives are viable.
 - Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests do.
 - Array jobs receive an opaque run spec and write one manifest per cell. `/slurm` never parses or hardcodes axis names.
-- This skill does not spawn audit subagents.
 </checklist>
 
 ## Inputs

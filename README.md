@@ -65,11 +65,11 @@ End-to-end reproduction of *"Weak ergodicity breaking from quantum many-body sca
 | <img src="docs/figs/turner_2018/paper-fig4.png" alt="Turner 2018 Figure 4 — paper" /> | <img src="docs/figs/turner_2018/ours-fig4.png" alt="Reproduction of Fig 4 at L=28/30" /> |
 | **Paper Fig 4.** Level-spacing distribution $P(s)$ in the $(k=0,\,I=+1)$ sector at $L = 28, 30, 32$, against Poisson (P), semi-Poisson (SP), and Wigner-Dyson (WD). Inset: density of states $\rho(E)$ at $L=32$, dominated by a Gaussian bulk and a sharp $E=0$ spike from the Fibonacci-counted zero modes. | **Our reproduction** at $L=28$ and $L=30$ ($L=32$ pending). $P(s)$ falls on Wigner-Dyson, ruling out integrability. Inset: $\rho(E)$ at $L=30$ with the $E=0$ spike intact. The Hamiltonian is non-integrable; the scar tower is a genuine ETH anomaly. |
 
-A few things the harness caught during this run, recorded as tacits or deviations:
+A few things the harness caught during this run, recorded as deviations:
 
 - The first protocol draft used the exact zero mode in Fig 3c. The paper's caption says *"adjacent to $E=0$"*, not *"at $E=0$"* — a different state. The [figure-reading checklist](AGENTS.md#pre-compute-figure-reading-checklist) was added in response.
 - The protocol declared XDiag as the stack, but the script imported raw SciPy. The deviation was recorded properly the second time.
-- Dense `eigh` silently segfaulted on OpenBLAS at $D > 60{,}000$. The harness logged the tacit and escalated the $L=32$ cell to a Julia `eigen` worker on the cluster.
+- Dense `eigh` silently segfaulted on OpenBLAS at $D > 60{,}000$. The $L=32$ cell was escalated to a Julia `eigen` worker on the cluster.
 
 ## Stack
 
