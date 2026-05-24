@@ -26,5 +26,6 @@ Outside the event, this repo is a general QMB research harness.
 - Skills under [`tools/skills/`](tools/skills/), managed by [Ion](https://github.com/Roger-luo/Ion).
 - Cluster mechanism via `/slurm`; per-cluster defaults under [`tools/cluster/`](tools/cluster/).
 - Default stack: Julia (ITensors.jl, ITensorMPS.jl, KrylovKit.jl, MPSKit.jl, PEPSKit.jl, XDiag.jl) and Python (NetKet on JAX, QuSpin, TensorCircuit-NG, quimb).
+- Common skills: `/solve` (single calculation), `/reproduce-paper` (paper end-to-end), `/slurm` (ship + submit on cluster).
 
 Open an agent session in the repo and invoke `/onboard` for a first-touch setup.
