@@ -24,7 +24,7 @@ The user's control is exercised by *ratifying* harness-recommended options — c
 
 ### Act first, offer alternatives after
 
-When defaults are clear from the user's prompt and the work is cheap and reversible, the agent acts immediately and reports in ≤3 lines. For expensive or irreversible compute (paper reproduction, multi-hour cluster jobs, long simulations), the relevant skill brainstorms a plan and waits for user approval before touching compute. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate for the cheap path.
+When defaults are clear from the user's prompt, the agent acts immediately and reports in ≤3 lines. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
 
 | Situation | Pattern |
 |---|---|
