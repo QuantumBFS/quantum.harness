@@ -41,7 +41,7 @@ Every interaction should answer one of:
 6. **Terse messages. Cover key points, never overload.** Each message summarizes in a few sentences or a compact table.
 7. **Skip any question whose answer is already known.** Check the user's opening message, primary sources, and `protocol.toml` before each question; skip those already answered. Never ask the same thing twice.
 8. **Confirmation phases use two options: proceed / fix.** A table of inferred facts is shown; the user accepts the whole table or branches into a follow-up to correct one row.
-9. **Selection phases use Superpowers brainstorming style.** 2–4 options, recommended option first, each with a one-sentence reason. A free-text alternative is available when "Other" is needed.
+9. **Selection phases use Superpowers brainstorming style.** 2–4 options, recommended option first, each with a one-sentence reason. Every option must be real and executable, or explicitly marked as needing setup before compute; the user can pick any without penalty. A free-text alternative is available when "Other" is needed.
 
 ## Core Rule
 
@@ -206,13 +206,20 @@ Selection style. One question per method-specific setting, in a fixed order per 
 | --------- | ------------------------- | --------------------------------------------- | ----------------------------- |
 | `<name>`  | `<plain-language role>`   | `<correctness / cost / convergence consequence>` | `<recommended value or rule>` |
 
+Each setup question uses exactly 2–3 options. Every option must carry, in plain English:
+
+- the value or configuration (e.g., `exact within selected sector`, `Lanczos k=...`, `chi=200, sweeps=8, cutoff=1e-9`, `samples=10^6, chains=8`);
+- whether it matches the paper target or departs from it, and why;
+- expected wall-time and memory consequence (`~30 s, < 1 GB`, `~2 h, ~80 GB`, etc.);
+- the verification or convergence check it enables (`residual check`, `convergence ladder`, `bin-error estimate`, etc.).
+
 Then ask:
 
 > **<Setting> — use <recommended value>?**
 >
-> - **<recommended value> (recommended)** — <one-sentence reason>
-> - **<alternative 1>** — <one-sentence reason>
-> - **<alternative 2>** — <one-sentence reason>
+> - **<recommended value> (recommended)** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
+> - **<alternative 1>** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
+> - **<alternative 2>** — <config>; <paper-fit>; ~<wall>, ~<memory>; <verification>
 
 Setting ladders per method:
 
