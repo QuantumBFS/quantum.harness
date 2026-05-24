@@ -1045,7 +1045,7 @@ WCAG-AA contrast ratios; full keyboard navigation; ARIA semantics on interactive
 
 ## 15. Agent Prompt Guide — Harness Components
 
-Quick reference for an agent rendering a compliant report HTML. Use these prompts when composing components by hand or instructing a subagent to do so.
+Quick reference for an agent rendering a compliant report HTML. Use these prompts when composing components.
 
 **Status chip** (use for verification trust signals in the strip):
 

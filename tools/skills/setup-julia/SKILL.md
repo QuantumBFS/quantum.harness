@@ -131,7 +131,6 @@ This skill applies the NJU mirror automatically when the cluster profile's `regi
 ## Notes
 
 - Both module-loaded Julia (`module load julia/1.10.9`) and juliaup-installed Julia are supported. **Default: juliaup** — user-controlled Julia version makes `Project.toml` compatibility easier across laptop + cluster + collaborators. Use module-loaded Julia ONLY when the admin enforces it or the cluster blocks user binaries.
-- This skill is mechanical — no subagent dispatch.
 - This skill does NOT do cluster-level setup (ssh keys, scheduler config, account setup). That's `/onboard`'s cluster-setup stage and the cluster profile's `bootstrap_one_time`.
 
 ## Anti-patterns (auto-reject)

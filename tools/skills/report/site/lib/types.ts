@@ -13,7 +13,7 @@ export interface ProblemBlock {
 }
 
 // Visual-anchor schema (additive to the original paper|ours pair). The polish
-// subagent emits these fields when the paper centrally identifies a defining
+// step emits these fields when the paper centrally identifies a defining
 // equation, key facts, or a Hilbert-space dimension. Fall back to old paper/
 // ours prose when missing. All fields paper-agnostic.
 
@@ -48,7 +48,7 @@ export interface Model {
   name: string;
   paper: Sourced;
   ours: Sourced;
-  // visual-anchor fields (null = polish subagent didn't emit; renderer falls back to paper/ours prose):
+  // visual-anchor fields (null = polish step didn't emit; renderer falls back to paper/ours prose):
   equation?: MathExpr | null;
   summary?: Sourced | null;
   key_facts?: KeyFact[];
@@ -70,7 +70,7 @@ export interface Param {
   values: (number | string)[];
   scope: string | null;
   why: Sourced;
-  // audience-readable display fields (null = polish subagent didn't emit):
+  // audience-readable display fields (null = polish step didn't emit):
   label?: string | null;
   scope_label?: string | null;
   values_tex?: string[] | null;
@@ -103,7 +103,7 @@ export interface Deviation {
   from?: string | null;
   to?: string | null;
   reason?: string | null;          // alias for `why` from older protocol.toml rows
-  // Polish-subagent emitted (all optional; renderer falls back to prose):
+  // Polish-step emitted (all optional; renderer falls back to prose):
   display_label?: string | null;
   discrepancy_paragraph?: string | null;
   headline?: string | null;        // one-line summary (may contain $...$ math markers)
@@ -112,9 +112,9 @@ export interface Deviation {
   cite?: Cite;
 }
 
-// Key-result stat-chip used by the verdict hero. The polish subagent emits
-// 3-5 of these to surface headline numerical results. `value_tex` renders
-// via inline KaTeX; `value_unicode` is the accessibility / fallback string.
+// Key-result stat-chip used by the verdict hero. The polish step emits 3-5
+// of these to surface headline numerical results. `value_tex` renders via
+// inline KaTeX; `value_unicode` is the accessibility / fallback string.
 export interface KeyResult {
   label: string;
   value?: string;
@@ -166,7 +166,6 @@ export interface Meta {
   venue: string;
   url: string | null;
   stage: 'plan' | 'append';
-  mode: 'full' | 'onboard';
   toc: { title: string; url: string; depth: number }[];
 }
 

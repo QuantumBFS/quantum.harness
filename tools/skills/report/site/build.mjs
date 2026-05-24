@@ -47,10 +47,8 @@ function parseArgs() {
   if (args.length < 1) usage(1);
   const runDir = resolve(args[0]);
   let stage = 'append';
-  let mode = 'full';
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--stage') stage = args[++i];
-    else if (args[i] === '--mode') mode = args[++i];
     else if (args[i] === '-h' || args[i] === '--help') usage(0);
     else { stderr.write(`build: unknown arg ${args[i]}\n`); exit(2); }
   }
@@ -58,20 +56,14 @@ function parseArgs() {
     stderr.write(`build: --stage must be 'plan' or 'append' (got: ${stage})\n`);
     exit(2);
   }
-  if (mode !== 'full' && mode !== 'onboard') {
-    stderr.write(`build: --mode must be 'full' or 'onboard' (got: ${mode})\n`);
-    exit(2);
-  }
-  return { runDir, stage, mode };
+  return { runDir, stage };
 }
 function usage(code) {
   stdout.write(
-    `Usage: node build.mjs <run-dir> --stage <plan|append> [--mode <full|onboard>]\n` +
+    `Usage: node build.mjs <run-dir> --stage <plan|append>\n` +
     `       <run-dir>  Path to a reproduction run directory.\n` +
     `       --stage    'plan' before compute (Problem + Methodology only) or\n` +
-    `                  'append' after close (all three sections). Default: append.\n` +
-    `       --mode     'full' for /reproduce-paper runs or 'onboard' for\n` +
-    `                  /reproduce-paper-onboard beginner runs. Default: full.\n`
+    `                  'append' after close (all three sections). Default: append.\n`
   );
   exit(code);
 }
@@ -126,7 +118,7 @@ async function summarizeCells(runDir) {
 }
 
 // ─── load run ───────────────────────────────────────────────────────────────
-async function loadRun({ runDir, stage, mode }) {
+async function loadRun({ runDir, stage }) {
   const protocolPath = join(runDir, 'protocol.toml');
   if (!exists(protocolPath)) {
     stderr.write(`build: protocol.toml not found at ${protocolPath}\n`); exit(1);
@@ -155,8 +147,8 @@ async function loadRun({ runDir, stage, mode }) {
   // Methodology -----------------------------------------------------------
   // Carry the visual-anchor fields (equation, key_facts, dimension, summary,
   // delta_from_paper, headline, badge, operational, label, scope_label,
-  // text_tex, values_tex, …) through verbatim when the polish subagent
-  // emitted them. Renderer falls back to paper/ours prose when absent.
+  // text_tex, values_tex, …) through verbatim when the polish step emitted
+  // them. Renderer falls back to paper/ours prose when absent.
   const m = editorial.methodology ?? {};
   const models = (m.models ?? []).map(x => ({
     id: x.id, name: x.name ?? x.id,
@@ -245,7 +237,7 @@ async function loadRun({ runDir, stage, mode }) {
       kind:   d.kind ?? null,
       from:   d.from ?? null,
       to:     d.to ?? null,
-      // Polish-subagent emitted Results-side fields (all optional):
+      // Polish-step emitted Results-side fields (all optional):
       display_label:         ed.display_label ?? null,
       discrepancy_paragraph: ed.discrepancy_paragraph ?? null,
       headline:              ed.headline ?? null,
@@ -276,7 +268,6 @@ async function loadRun({ runDir, stage, mode }) {
     venue: artifact.venue ?? '',
     url,
     stage,
-    mode,
     toc: [
       { title: 'Problem',     url: '#problem',     depth: 2 },
       { title: 'Methodology', url: '#methodology', depth: 2 },
@@ -611,11 +602,11 @@ async function writeFinal(runDir, runId, today, html) {
 
 // ─── main ──────────────────────────────────────────────────────────────────
 async function main() {
-  const { runDir, stage, mode } = parseArgs();
+  const { runDir, stage } = parseArgs();
   if (!exists(runDir)) { stderr.write(`build: run-dir not found: ${runDir}\n`); exit(1); }
 
-  stdout.write(`build: loading ${runDir} (stage: ${stage}, mode: ${mode})\n`);
-  const data = await loadRun({ runDir, stage, mode });
+  stdout.write(`build: loading ${runDir} (stage: ${stage})\n`);
+  const data = await loadRun({ runDir, stage });
 
   const slug = sanitizeRunId(data.runId);
   stdout.write(`build: per-run slug: ${slug}\n`);

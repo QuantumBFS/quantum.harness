@@ -269,7 +269,7 @@ function MethodAnchor({ method: m }: { method: Method }) {
       )}
 
       {!m.headline?.tex && !m.operational?.length && (
-        /* fallback when polish subagent didn't emit anchor fields — show
+        /* fallback when polish step didn't emit anchor fields — show
            the paper/ours pair so we never render an empty card */
         <div className="grid md:grid-cols-2 gap-4 not-prose">
           <div className="panel-card">
@@ -321,7 +321,7 @@ function ParamRow({ param: p }: { param: Param }) {
 }
 
 // Map `method:ed_static` → "ed_static" with underscores hidden when no
-// scope_label was emitted (A1/A6 fallback — best-effort, polish subagent
+// scope_label was emitted (A1/A6 fallback — best-effort, polish step
 // should provide scope_label for full A8 compliance).
 function humanizeScope(scope: string | null | undefined): string | null {
   if (!scope) return null;

@@ -335,10 +335,10 @@ After execute completes, write `results/<run>/run-report.md`:
 - verification status: `self-checked` / `partial` / `failed` / `upgrade-recommended`;
 - exact rerun command.
 
-For a polished, shareable HTML deliverable, route to `/report --mode onboard`:
+For a polished, shareable HTML deliverable, route to `/report`:
 
-- `/report <run-dir> --stage plan --mode onboard` previews the plan in HTML before approve.
-- `/report <run-dir> --stage append --mode onboard` renders the final HTML after execute, with a "beginner reproduction, self-checked" provenance chip so a reader can tell it is a beginner run.
+- `/report <run-dir> --stage plan` previews the plan in HTML before approve.
+- `/report <run-dir> --stage append` renders the final HTML after execute, with a "beginner reproduction, self-checked" provenance chip so a reader can tell it is a beginner run.
 
 Then ask one `AskUserQuestion` for the next step. The agent assembles options from the result state:
 
