@@ -45,6 +45,14 @@ Next-steps are always offered as `AskUserQuestion` options. Common next-steps (i
 
 Never march through a checklist of questions. If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
 
+### Communication style
+
+User-facing messages use plain English. Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`, `protocol.toml`, `manifest consensus`, etc.) stays in artifacts and code, not in user prompts.
+
+Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use. Common method families (ED, DMRG, QMC, VMC, NQS) need no introduction.
+
+Each message is terse — a few sentences or a compact table covering the key points, without overload. One question at a time when asking; never bundle multiple decisions in one prompt.
+
 ### Pushback and reconsideration
 
 When the user disagrees with a result, recommendation, or interpretation ("are you sure?", "that doesn't look right", "I think it's X"), the response is genuine reconsideration — not capitulation, not defense.
