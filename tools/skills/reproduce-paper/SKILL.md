@@ -173,10 +173,14 @@ Selection style. Build the candidate list dynamically from the current target. R
 
 Select stack candidates by matching the target method against each card's `canonical_for` entries. Each option includes:
 
-- tool/stack name;
+- tool/stack name (user-facing label);
 - stack-card path (e.g., `tools/software/stacks/xdiag.toml`) or explicit non-stack provenance (`official-code`, `local-scaffold/deviation`);
+- stack id and language (from the stack card);
+- supported profiles and default profile (from the stack card);
 - setup state (`ready`, `import-check needed`, `install needed`, `official code unavailable`, etc.);
-- install command and smoke test when the option comes from a stack card;
+- install command and notes;
+- smoke test command and where it runs;
+- docs / KB links when present;
 - why it matches or departs from the paper target;
 - consequence for later symmetry / solver choices.
 
@@ -223,6 +227,8 @@ Then ask:
 > - **<alternative 1>** — <config>; <paper-fit>; <feasibility>; ~<wall>, ~<memory>; <accuracy>; <verification>
 > - **<alternative 2>** — <config>; <paper-fit>; <feasibility>; ~<wall>, ~<memory>; <accuracy>; <verification>
 
+The user's answer to one setting may change the recommendation for later settings; re-derive each recommendation from the current state before asking the next question.
+
 Setting ladders per method:
 
 - **ED**: basis representation, boundary condition, symmetry sector / block policy, approximation / full-spectrum policy, diagonalization mode, residual / check tolerance, size list, dense-memory / workspace estimate.
@@ -240,7 +246,7 @@ Recommendation rules per method:
 - **ED, large full-spectrum targets**: recommend cluster/high-memory dense ED when the paper-like size exceeds the local threshold. Do not silently switch to a selected-state solver just because dense ED is expensive.
 - **ED, approximate routes** (FSA = Forward Scattering Approximation, an approximate method that builds a small basis from successive Hamiltonian applications; Krylov selected states; reduced windows): present as an approximation/deviation with the scientific consequence. Do not call an approximation a reproduction of a full-spectrum ED panel.
 - **DMRG / MPS**: recommend a sweep schedule, maximum bond dimension, cutoff, and at least one convergence comparison appropriate to the scope.
-- **QMC**: recommend thermalization, samples, chains, binning, and target uncertainty.
+- **QMC**: recommend thermalization, samples, chains, binning, and target uncertainty. Quick-check scope may use low statistics, but the result must be labelled as quick-check quality.
 - **VMC / NQS**: recommend optimizer steps, samples per step, model size, seed count, and a validation observable.
 
 Record chosen settings in `protocol.toml` under `method_setup`, with nested `method_introduction`, `available_tools`, `setup_guide`, `tool_choice`, `tool_reason`, `parameter_choices`, and `stack_card` (or `non_stack_provenance`).
