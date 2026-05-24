@@ -63,7 +63,7 @@ The plan summary must include:
 
 ## Phases
 
-The skill marches the user through a fixed sequence of phases. Each phase is one or more questions; each question is skipped if its answer is already known. The phases are: Identify → Figure → Model → Scope → Method+Tool → Settings → Where → Approve. A ninth phase fires only on a check failure during Execute.
+The skill marches the user through a fixed sequence of phases. Each phase is one or more questions; each question is skipped if its answer is already known. The phases are: Identify → Reproduction map → Scope → Method+Tool → Settings → Where → Approve. An eighth phase fires only on a check failure during Execute.
 
 ### Phase 1 — Identify
 
@@ -81,47 +81,28 @@ Two questions. Each is skipped if its answer is already in the user's opening me
 > - **<medium figure>** — <one-line description>
 > - **<larger figure>** — <one-line description>
 
-### Phase 2 — What the figure shows
+### Phase 2 — Reproduction map
 
-Confirmation style. One question, table format. Read the figure caption from the primary source and fill the inferred values.
+Confirmation style. One question, table format. Inspect the primary source and produce a plain-language reproduction map covering what the paper plots, what the code must compute, the important parameters, the paper sizes, and the closest beginner pilot.
 
-> **What the figure shows**
+> **Reproduction map**
 >
-> From the caption I read it as:
+> From the paper I read it as:
 >
-> | Item            | Reading                                    |
-> | --------------- | ------------------------------------------ |
-> | Y-axis          | <inferred quantity>                        |
-> | X-axis          | <inferred variable>                        |
-> | Evaluated on    | <state(s) the quantity is computed on>     |
-> | States included | <selection rule, e.g. lowest 1 per sector> |
-> | States excluded | <if any, otherwise —>                      |
-> | Normalization   | <per site / per cell / raw / …>            |
->
-> - **Looks right** (recommended)
-> - **Fix something** — follow-up picks the row, then asks for the corrected value
-
-Caption text, axis labels, normalization, state-selection language, sector, window, and excluded nearby states are recorded verbatim into `protocol.toml` after confirmation.
-
-### Phase 3 — Model from the paper
-
-Confirmation style. Same table format as Phase 2.
-
-> **Model from the paper**
->
-> | Item        | Reading                          |
-> | ----------- | -------------------------------- |
-> | Hamiltonian | <name + one-line operator gist>  |
-> | Couplings   | <parameter values>               |
-> | Lattice     | <chain / square / kagome / …>    |
-> | Boundary    | <periodic / open / …>            |
+> | Item                   | Reading                                                                                            |
+> | ---------------------- | -------------------------------------------------------------------------------------------------- |
+> | Paper plots            | <y-axis quantity> vs <x-axis variable>                                                              |
+> | Code must compute      | <observable; on which state(s); with which selection rule; normalization; excluded nearby states>   |
+> | Important parameters   | <Hamiltonian (name + operator gist); couplings; lattice; boundary>                                  |
+> | Sizes in the paper     | <L list, or the paper-side size range>                                                              |
+> | Closest beginner pilot | <approachable subset, e.g. smallest size that still captures the figure>                            |
 >
 > - **Looks right** (recommended)
 > - **Fix something** — follow-up picks the row, then asks for the corrected value
 
-Any paper-specific abbreviation appearing in the table is introduced with one sentence below the table on first use.
+Caption text, axis labels, normalization, state-selection language, sector, window, excluded nearby states, Hamiltonian, couplings, lattice, and boundary are recorded verbatim into `protocol.toml` after confirmation. Any paper-specific abbreviation appearing in the map is introduced with one sentence below the table on first use.
 
-### Phase 4 — Scope
+### Phase 3 — Scope
 
 Selection style. Three options, each with size choice, wall-time and memory estimate computed from the paper's presumed method using the scaling rules below.
 
@@ -139,9 +120,9 @@ Scaling rules used to compute the per-option estimates:
 - **VMC / NQS**: `steps * samples * model_eval_cost`. Use a short pilot to estimate step rate.
 - **Unknown stack**: run a tiny pilot only after telling the user it is a timing probe, then update the estimate before the real run.
 
-### Phase 5 — Method and tool
+### Phase 4 — Method and tool
 
-#### 5.1 Method introduction + selection
+#### 4.1 Method introduction + selection
 
 Before asking which method to use, present a short method introduction:
 
@@ -160,7 +141,7 @@ Then ask, selection style:
 > - **<alternative 1>** — <one-sentence reason; if paper-specific, include one-sentence intro for the abbreviation>
 > - **<alternative 2>** — <one-sentence reason>
 
-#### 5.2 Tool selection
+#### 4.2 Tool selection
 
 Selection style. Build the candidate list dynamically from the current target. Read `tools/software/stacks/*.toml` before presenting, and consider:
 
@@ -198,9 +179,9 @@ Recommendation rules:
 > - **<alternative tool>** — <provenance>; <one-sentence reason>
 > - **<alternative tool>** — <provenance>; <one-sentence reason>
 
-### Phase 6 — Settings
+### Phase 5 — Settings
 
-Setup parameter questions start immediately after the tool/stack choice in Phase 5.2. Do not insert a separate "feasibility path", "route check", or "tool investigation" question between tool choice and parameter setup. Any import check, API limitation, feature gap, or installation status discovered for the chosen tool is reported as setup context and, when relevant, as a parameter-table row such as `tool readiness`, `basis support`, or `stack limitation`.
+Setup parameter questions start immediately after the tool/stack choice in Phase 4.2. Do not insert a separate "feasibility path", "route check", or "tool investigation" question between tool choice and parameter setup. Any import check, API limitation, feature gap, or installation status discovered for the chosen tool is reported as setup context and, when relevant, as a parameter-table row such as `tool readiness`, `basis support`, or `stack limitation`.
 
 The user's tool choice is the entry point to setup parameters, not permission to start a new tool-selection loop. If the chosen tool has a feature gap, present the closest executable setup parameters for that tool and explicitly mark the consequence (`faithful`, `fallback`, `deviation`, or `blocked-before-compute`). Only ask the user to switch tools after showing the setup parameter consequences for the chosen tool.
 
@@ -251,7 +232,7 @@ Recommendation rules per method:
 
 Record chosen settings in `protocol.toml` under `method_setup`, with nested `method_introduction`, `available_tools`, `setup_guide`, `tool_choice`, `tool_reason`, `parameter_choices`, and `stack_card` (or `non_stack_provenance`).
 
-### Phase 7 — Where to run
+### Phase 6 — Where to run
 
 Selection style. Two options.
 
@@ -262,7 +243,7 @@ Selection style. Two options.
 
 Recommend local only when the chosen scope and setup are expected to stay under 10 minutes and 16 GB. Otherwise recommend cluster. The cluster route composes with `/slurm` for ship / submit / monitor / fetch — this skill does not duplicate cluster idioms.
 
-### Phase 8 — Approve
+### Phase 7 — Approve
 
 Confirmation style. Compact plan table.
 
@@ -287,7 +268,7 @@ A non-approval rewinds to the relevant earlier phase — never silently downsize
 
 ## Plan Artifacts
 
-After Phase 8 approval, write `results/<run>/plan.md`:
+After Phase 7 approval, write `results/<run>/plan.md`:
 
 ```markdown
 # Plan: <paper-short> Fig <id>
@@ -321,10 +302,10 @@ Run the approved tier only. The script lands at `scripts/<model>_<brief>.{jl|py}
 - One status line per cell start, in plain English (what's running, expected time). Flush stdout.
 - For any cell expected to take > 2 minutes, the script emits ~10–50 progress updates. Method cards declare the per-run `progress_every` default.
 - Each cell manifest records `method_setup`, `tool_choice`, `tool_reason`, `setup_guide`, `symmetry`, `approximation`, `solver_config`, and `solver_reason` for transparency in `run-report.md`.
-- Inline checks at each cell, only when scientifically meaningful: primary-source match (caption, axes, normalization, state selection) and limit or known-answer check when available. A failure opens Phase 9 (user decides repair / record deviation / stop). Manifest-bookkeeping checks are not enforced.
+- Inline checks at each cell, only when scientifically meaningful: primary-source match (caption, axes, normalization, state selection) and limit or known-answer check when available. A failure opens Phase 8 (user decides repair / record deviation / stop). Manifest-bookkeeping checks are not enforced.
 - Cluster route composes with `/slurm`; this skill does not inline cluster idioms.
 
-### Phase 9 — On check failure
+### Phase 8 — On check failure
 
 Selection style; fires only when a check fails during Execute.
 
