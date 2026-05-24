@@ -1,11 +1,11 @@
 ---
 name: report
-description: Use when a `/reproduce-paper` run finishes and the user wants the shareable HTML deliverable, or when a `/reproduce-paper-onboard` beginner run finishes and wants the same HTML — phrases like "render report", "publish reproduction", "share results", "render the onboard run".
+description: Use when a `/reproduce-paper` run finishes and the user wants the shareable HTML deliverable — phrases like "render report", "publish reproduction", "share results".
 ---
 
 # report
 
-Outcome: one self-contained HTML at `<run-dir>/report_<run-id>_<date>.html`. Every sentence traces to `sources/paper.md`, `protocol.toml`, a current-run manifest, or `run-report.md`. Compute belongs upstream to `/reproduce-paper` or `/reproduce-paper-onboard`.
+Outcome: one self-contained HTML at `<run-dir>/report_<run-id>_<date>.html`. Every sentence traces to `sources/paper.md`, `protocol.toml`, a current-run manifest, or `run-report.md`. Compute belongs upstream to `/reproduce-paper`.
 
 ## Editorial
 

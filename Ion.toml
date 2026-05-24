@@ -15,8 +15,7 @@ scaling-fit = { type = "local" }
 cross-method-check = { type = "local" }
 slurm = { type = "local" }              # cluster mechanism (agent-does-ssh)
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
-reproduce-paper = { type = "local" }    # paper orchestrator (absorbs run-report close)
-reproduce-paper-onboard = { type = "local" } # beginner-guided reproduction
+reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
 report = { type = "local" }             # render single-page interactive HTML report from a reproduction run
 scientific-writing = { source = "davila7/claude-code-templates/scientific-writing" }
 

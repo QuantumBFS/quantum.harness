@@ -1,145 +1,375 @@
 ---
 name: reproduce-paper
-description: Use when the user wants to reproduce the figures and main results of a published paper end-to-end — phrases like "reproduce paper X", "redo the figures of Y", "reproduce arXiv 2302.04919", "put this paper through the harness as a calibration target", or right after `/download-ref` lands a new paper.
+description: Use when the user wants to reproduce a paper's figure or main result. Triggers include "reproduce paper X", "redo the figures of Y", "reproduce arXiv 2302.04919", "put this paper through the harness as a calibration target", "walk me through reproducing this paper", "beginner reproduction", "I don't know what size to choose", "explain while reproducing", or right after `/download-ref` lands a new paper.
 ---
 
 # reproduce-paper
 
-Outcome: a `results/<run>/` directory whose `run-report.md` lists primary-source-grounded claims, current-run manifests, and reproduced figures.
+Beginner-facing paper reproduction with a brainstorm-first surface. The skill iterates a plan with the user one question at a time, writes the agreed plan to `results/<run>/plan.md`, then executes the single approved tier and reports.
 
-## Non-Negotiables
-
-<rules>
-- Primary sources control; KB cards, notes, old scripts, old data, and old figures are hints until reconfirmed or regenerated.
-- Fill `[[cells]]` before cell-producing scripts. Each executable cell declares `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`.
-- Canonical-stack failure is recorded before fallback/deviation. Fallback means the method card's next recommended stack.
-- Paper setup, route, data, budget, scope, or uncertainty changes require a deviation before they support claims.
-- Constant settings require manifest consensus across every cell.
-- Failed checks enter correction: classify mismatch, repair earliest wrong layer, invalidate downstream artifacts, rerun.
-- Every figure entry carries caption verbatim and figure-reading fields before script or assembly code lands.
-- Figure semantics are paper contracts: each figure entry names the plotted metric/observable, basis or representation, operator or bra/ket objects for overlaps, state-selection rule, sector, window, normalization, and nearby states explicitly excluded. Proxy selectors such as nearest energy, highest overlap, or a convenient representative must be validated against the paper-defined identity or recorded as deviations.
-</rules>
-
-## Spine
+## Pipeline
 
 ```text
-source -> protocol -> plan -> script -> trust -> run -> assemble -> close
+Brainstorm  ──▶  Plan  ──▶  Execute  ──▶  Report
+ (questions)    plan.md     (1 tier)     + next step
 ```
 
-| Step | Action |
-|---|---|
-| source | populate `sources/` and source rows |
-| protocol | fill `protocol.toml` from primary sources |
-| plan | author `reproduce-plan.toml` |
-| script | implement `[entry]` |
-| trust | run known-answer points |
-| run | execute cells via `/parameter-scan` and `/slurm` |
-| assemble | walk manifests and render figures |
-| close | write `run-report.md` and register deliverables |
+Brainstorm yields a plan; plan approval gates Execute; Execute yields manifests and figures; Report consumes those and offers next-step options. Failures inside Execute pop back to a brainstorm-style fork (repair / record deviation / stop), not silent fallback.
 
-## Step Contracts
+## Audience Contract
 
-### source
+The user may know the physics goal but not harness vocabulary, method scaling, finite-size choices, or cluster trade-offs. They need information while waiting, not a black box.
 
-1. Place primary references under `sources/`. Prefer rendered Markdown; if only a PDF exists, render with `download-ref`.
-2. Fill `[artifact]`, `[[sources]]`, and source paths in `protocol.toml`.
+Every interaction should answer one of:
 
-### protocol
+- What are we trying to reproduce?
+- What exactly does the paper plot?
+- What parameters and sizes matter?
+- Which computational method, tool, and setup are we using, and why?
+- Which symmetry, approximation, and solver settings are being used, and why?
+- How long will each size take?
+- What will we learn from this run?
+- What changed from the paper setup, if anything?
 
-1. Fill `[entry]`, `[[claims]]`, `[[cells]]`, `[[figures]]`, optional `[[deviations]]` and `[[repairs]]` from primary sources.
-2. For figure-producing claims, fill paper-defined figure semantics: metric/observable, basis or representation, overlap bra/ket or operator objects, state-selection rule, sector, window, normalization, excluded nearby states, and any proxy selector validation/deviation.
+## Principles
 
-### plan
+1. **One workflow.** The skill is a conversational front end to paper reproduction.
+2. **Every decision point is asked.** Decisions the user could meaningfully shape are surfaced via Q&A, never hidden in script defaults.
+3. **One question at a time.** Never bundle multiple decisions in one prompt. If a topic needs multiple decisions, split it.
+4. **Plain English. No jargon.** Never expose harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`) to the user. Translate to plain language at the question; keep structured form in artifacts.
+5. **Paper-specific abbreviations get a one-sentence introduction on first use.** When the paper uses a non-standard abbreviation for a model, method, or quantity (PXP, FSA, RVB, AKLT, …), introduce it once with a one-sentence plain-English explanation when it first appears in a user-facing message.
+6. **Terse messages. Cover key points, never overload.** Each message summarizes in a few sentences or a compact table.
+7. **Skip any question whose answer is already known.** Check the user's opening message, primary sources, and `protocol.toml` before each question; skip those already answered. Never ask the same thing twice.
+8. **Confirmation phases use two options: proceed / fix.** A table of inferred facts is shown; the user accepts the whole table or branches into a follow-up to correct one row.
+9. **Selection phases use Superpowers brainstorming style.** 2–4 options, recommended option first, each with a one-sentence reason. A free-text alternative is available when "Other" is needed.
 
-Author `reproduce-plan.toml`: figure ids, substantive/methodology/verification/cross-check categories, dependency edges, and producing cell ids.
+## Core Rule
 
-### script
+Before compute, always confirm the exact setup and time estimate with the user by writing `plan.md` and asking them to approve the plan. A tiny import check or `--help` / `--dry` invocation is allowed before approval; nothing more.
 
-Entry contract:
+The plan summary must include:
 
-- `[entry] help` and `[entry] dry` exit before evidence IO.
-- The script echoes each cell's `method`, `stack`, `route`, `source`, `check`, `state`, and `scope`.
-- Every manifest echoes the same seven fields.
-- Actual imports and library calls match declared `stack`.
-- Figure-producing code implements the protocol's paper-defined metric/basis/state/overlap contract. A proxy state selector must write evidence that the selected object satisfies the paper identity.
+- target figure/result;
+- method and tool;
+- bundled method setup: method introduction, available tools with recommendation, and a setup guide with parameter explanations;
+- Hamiltonian or model parameters;
+- boundary conditions, sector, filling, lattice/geometry, and observables when relevant;
+- selected size tier;
+- symmetry choice and approximation choice when relevant;
+- solver configuration and the reason it is recommended;
+- local vs cluster route;
+- expected wall time and memory;
+- output files that will be produced.
 
-### trust
+## Phases
 
-1. Run `[entry]` at a known-answer point: analytic limit, exact small instance, official benchmark, or trusted reference.
-2. Save `trust/<fig-id>.json`.
+The skill marches the user through a fixed sequence of phases. Each phase is one or more questions; each question is skipped if its answer is already known. The phases are: Identify → Figure → Model → Scope → Method+Tool → Settings → Where → Approve. A ninth phase fires only on a check failure during Execute.
 
-Near-failure blocks `run`; repair entry or trusted reference before proceeding.
+### Phase 1 — Identify
 
-### run
+Two questions. Each is skipped if its answer is already in the user's opening message or in a `protocol.toml` from a prior run.
 
-1. Dispatch cells via `/parameter-scan` and `/slurm` or the declared primitive.
-2. Each cell wrapper writes `cells/<cell_id>/manifest.json`.
+**1.1 Paper.** Free-text.
 
-Required manifest properties:
+> Which paper?
 
-| Property | Meaning |
-|---|---|
-| coverage | Declared cells exactly match observed manifests. |
-| exists | Manifest files exist and parse. |
-| agree | Manifest route fields match `[[cells]]`. |
-| fresh | Hashes match current registration. |
+**1.2 Target.** Selection style. List candidate figures or quoted results from the paper, smallest-meaningful first as recommended.
 
-Scheduler state and logs are not evidence until manifests are fetched.
+> **Which figure or result from this paper?**
+>
+> - **<smallest meaningful figure> (recommended)** — <one-line description>
+> - **<medium figure>** — <one-line description>
+> - **<larger figure>** — <one-line description>
 
-### assemble
+### Phase 2 — What the figure shows
 
-1. Walk every `cells/<id>/manifest.json`.
-2. Validate each manifest against merged shared+cell settings and provenance.
-3. Report settings as constant only after manifest consensus proves it.
-4. Render each `[[figures]]` entry as `figs/<id>.png` and `figs/<id>.json`.
+Confirmation style. One question, table format. Read the figure caption from the primary source and fill the inferred values.
 
-### close
+> **What the figure shows**
+>
+> From the caption I read it as:
+>
+> | Item            | Reading                                    |
+> | --------------- | ------------------------------------------ |
+> | Y-axis          | <inferred quantity>                        |
+> | X-axis          | <inferred variable>                        |
+> | Evaluated on    | <state(s) the quantity is computed on>     |
+> | States included | <selection rule, e.g. lowest 1 per sector> |
+> | States excluded | <if any, otherwise —>                      |
+> | Normalization   | <per site / per cell / raw / …>            |
+>
+> - **Looks right** (recommended)
+> - **Fix something** — follow-up picks the row, then asks for the corrected value
 
-Generate `run-report.md` with runnable `[entry]` commands and explicit parameters. Register deliverables and resolve outstanding deviations or repairs.
+Caption text, axis labels, normalization, state-selection language, sector, window, and excluded nearby states are recorded verbatim into `protocol.toml` after confirmation.
 
-## Evidence
+### Phase 3 — Model from the paper
 
-Scheduler status, `ssh` exit, and `COMPLETED` are operational facts only. Evidence is fetched manifests, protocol rows, and figures from current-run data. Never patch downstream prose or figures to hide an upstream failure.
+Confirmation style. Same table format as Phase 2.
 
-## Failure
+> **Model from the paper**
+>
+> | Item        | Reading                          |
+> | ----------- | -------------------------------- |
+> | Hamiltonian | <name + one-line operator gist>  |
+> | Couplings   | <parameter values>               |
+> | Lattice     | <chain / square / kagome / …>    |
+> | Boundary    | <periodic / open / …>            |
+>
+> - **Looks right** (recommended)
+> - **Fix something** — follow-up picks the row, then asks for the corrected value
 
-Choose one real path: repair earliest wrong layer and rerun; record deviation/repair then rerun downstream; ask the user between concrete options; record user-approved override; or stop and report.
+Any paper-specific abbreviation appearing in the table is introduced with one sentence below the table on first use.
 
-## Cell Routes
+### Phase 4 — Scope
 
-Each executable cell declares:
+Selection style. Three options, each with size choice, wall-time and memory estimate computed from the paper's presumed method using the scaling rules below.
 
-```toml
-[[cells]]
-id = "cell-0001"
-claims = ["claim.example"]
-figures = ["fig1a"]
-method = "ed"
-stack = "xdiag"
-route = "canonical"  # paper | canonical | fallback | deviation
-source = ".knowledge/methods/ed/METHOD.md"
-check = "julia --project=julia-env -e 'using XDiag'"
-state = "passed"     # passed | failed | skipped | pending
-scope = "full"       # full | partial | sketch
-deviation = ""
+> **How deep should this run go?**
+>
+> - **Quick check (recommended start)** — smallest nontrivial size; seconds–minutes; confirms the setup runs.
+> - **Beginner** — modest size below the paper target; minutes–tens of minutes; shows the qualitative trend.
+> - **Paper-like** — paper sizes or the nearest feasible set; hour-scale, often cluster; reproduces the target.
+
+Scaling rules used to compute the per-option estimates:
+
+- **ED**: estimate Hilbert dimension first; dense memory is about `D^2 * 8` bytes and dense diagonalization scales as `O(D^3)`. Sparse/Lanczos depends on matvec cost and number of requested states.
+- **DMRG / MPS**: wall trend ~ `sweeps * L * chi^3`; memory trend ~ `L * chi^2 * 8`. Calibrate with a short low-`chi` run when uncertain.
+- **QMC**: `cost_per_sample * samples * chains`. Use a short pilot to estimate sample rate.
+- **VMC / NQS**: `steps * samples * model_eval_cost`. Use a short pilot to estimate step rate.
+- **Unknown stack**: run a tiny pilot only after telling the user it is a timing probe, then update the estimate before the real run.
+
+### Phase 5 — Method and tool
+
+#### 5.1 Method introduction + selection
+
+Before asking which method to use, present a short method introduction:
+
+- the method family (`ED`, `DMRG`, `QMC`, `VMC/NQS`, dynamics, etc.) and what it computes;
+- why this method is appropriate for the paper target and selected scope;
+- what its main cost driver is (`Hilbert dimension`, `bond dimension`, `samples`, `network size`, etc.);
+- what output it will produce for the target.
+
+Then ask, selection style:
+
+> **Which method?**
+>
+> For <target>, I recommend <method> — <one-sentence reason citing what the target needs>.
+>
+> - **<recommended method> (recommended)** — <one-sentence reason>
+> - **<alternative 1>** — <one-sentence reason; if paper-specific, include one-sentence intro for the abbreviation>
+> - **<alternative 2>** — <one-sentence reason>
+
+#### 5.2 Tool selection
+
+Selection style. Build the candidate list dynamically from the current target. Read `tools/software/stacks/*.toml` before presenting, and consider:
+
+- the paper's official code/data availability from primary sources;
+- the method card's canonical and fallback stack guidance;
+- installed-stack import/dry-run status;
+- existing local scaffolds for the same paper/figure;
+- user-stated method/tool preference;
+- feature fit for the target's basis, observable, symmetry, and output needs.
+
+Select stack candidates by matching the target method against each card's `canonical_for` entries. Each option includes:
+
+- tool/stack name;
+- stack-card path (e.g., `tools/software/stacks/xdiag.toml`) or explicit non-stack provenance (`official-code`, `local-scaffold/deviation`);
+- setup state (`ready`, `import-check needed`, `install needed`, `official code unavailable`, etc.);
+- install command and smoke test when the option comes from a stack card;
+- why it matches or departs from the paper target;
+- consequence for later symmetry / solver choices.
+
+Recommendation rules:
+
+- Prefer the paper's official code when it exists, is available, and fits the chosen scope.
+- Otherwise prefer the method card's canonical stack as confirmed by its matching stack card, then the method card's fallback stack as confirmed by its matching stack card, then an explicit deviation only when needed.
+- If the target requires a constrained basis, observable, sector, or data route that the canonical stack cannot express cleanly, still present the canonical stack-card option, then present the viable fallback/deviation. The recommended option may be the deviation only if the reason is concrete and recorded before compute.
+- Do not probe or implement a fallback just because the canonical stack has an environment error. Record the canonical stack state first, then let the user choose the fallback/deviation option.
+- A recommendation must cite the stack-card path or non-stack provenance, plus the feature-fit reason. Do not recommend a tool solely because it is installed.
+
+> **Which tool for <method>?**
+>
+> - **<recommended tool> (recommended)** — <stack-card path or provenance>; <one-sentence reason>
+> - **<alternative tool>** — <provenance>; <one-sentence reason>
+> - **<alternative tool>** — <provenance>; <one-sentence reason>
+
+### Phase 6 — Settings
+
+Selection style. One question per method-specific setting, in a fixed order per method. Each setting is preceded by a compact parameter table:
+
+| Parameter | What it controls          | Why it matters                                | Recommendation                |
+| --------- | ------------------------- | --------------------------------------------- | ----------------------------- |
+| `<name>`  | `<plain-language role>`   | `<correctness / cost / convergence consequence>` | `<recommended value or rule>` |
+
+Then ask:
+
+> **<Setting> — use <recommended value>?**
+>
+> - **<recommended value> (recommended)** — <one-sentence reason>
+> - **<alternative 1>** — <one-sentence reason>
+> - **<alternative 2>** — <one-sentence reason>
+
+Setting ladders per method:
+
+- **ED**: basis representation, boundary condition, symmetry sector / block policy, approximation / full-spectrum policy, diagonalization mode, residual / check tolerance, size list, dense-memory / workspace estimate.
+- **DMRG / MPS**: maximum bond dimension `chi`, sweeps, cutoff, initialization, boundary condition, observable, convergence comparison.
+- **QMC**: thermalization, samples, chains, bins, update type, estimator, uncertainty target.
+- **VMC / NQS**: ansatz / model size, optimizer, learning rate, samples, steps, seeds, validation observable.
+
+Settings already pinned in `protocol.toml` are skipped.
+
+For ED, the discipline is stricter: explicitly discuss the symmetry sector before route selection. Name each symmetry used by the paper or method (`k=0`, inversion parity, total `Sz`, particle number, point group, translation, boundary condition, etc.), say why the recommended sector is correct, and identify any exact symmetry that is not used. Confirm each ED item with the user one question at a time before continuing.
+
+Recommendation rules per method:
+
+- **ED, full-spectrum targets** (overlap scatter, level statistics): recommend dense full diagonalization when the selected symmetry-sector dimension fits the approved scope budget. State the approximation as "exact within the selected symmetry sector." Use sparse/Lanczos only when the target needs selected eigenpairs.
+- **ED, large full-spectrum targets**: recommend cluster/high-memory dense ED when the paper-like size exceeds the local threshold. Do not silently switch to a selected-state solver just because dense ED is expensive.
+- **ED, approximate routes** (FSA = Forward Scattering Approximation, an approximate method that builds a small basis from successive Hamiltonian applications; Krylov selected states; reduced windows): present as an approximation/deviation with the scientific consequence. Do not call an approximation a reproduction of a full-spectrum ED panel.
+- **DMRG / MPS**: recommend a sweep schedule, maximum bond dimension, cutoff, and at least one convergence comparison appropriate to the scope.
+- **QMC**: recommend thermalization, samples, chains, binning, and target uncertainty.
+- **VMC / NQS**: recommend optimizer steps, samples per step, model size, seed count, and a validation observable.
+
+Record chosen settings in `protocol.toml` under `method_setup`, with nested `method_introduction`, `available_tools`, `setup_guide`, `tool_choice`, `tool_reason`, `parameter_choices`, and `stack_card` (or `non_stack_provenance`).
+
+### Phase 7 — Where to run
+
+Selection style. Two options.
+
+> **Run here or on the cluster?**
+>
+> - **<recommended route> (recommended)** — <one-sentence reason citing wall/memory estimate>
+> - **<alternative>** — <one-sentence reason>
+
+Recommend local only when the chosen scope and setup are expected to stay under 10 minutes and 16 GB. Otherwise recommend cluster. The cluster route composes with `/slurm` for ship / submit / monitor / fetch — this skill does not duplicate cluster idioms.
+
+### Phase 8 — Approve
+
+Confirmation style. Compact plan table.
+
+> **Plan**
+>
+> | Field          | Value                                                  |
+> | -------------- | ------------------------------------------------------ |
+> | Paper / target | <citation, figure id>                                  |
+> | Method / tool  | <method>, <tool>                                       |
+> | Model          | <H, params, lattice, BC, L list>                       |
+> | Sector         | <symmetry choice>                                      |
+> | Solver         | <approximation + solver configuration>                 |
+> | Scope          | <quick check / beginner / paper-like>                  |
+> | Where          | <this machine / cluster>, ~<wall>, ~<memory>           |
+> | Outputs        | plan.md, protocol.toml, manifests, figs/, run-report.md |
+>
+> - **Approve** (recommended)
+> - **Change something** — follow-up picks which row to change, jumps back to that phase
+> - **Cancel**
+
+A non-approval rewinds to the relevant earlier phase — never silently downsize.
+
+## Plan Artifacts
+
+After Phase 8 approval, write `results/<run>/plan.md`:
+
+```markdown
+# Plan: <paper-short> Fig <id>
+
+**Paper.** <citation, primary-source path>
+**Target.** <figure/result, caption excerpt>
+**Method/tool.** <e.g., ED / XDiag>
+**Method setup.** <method introduction, available tools, setup guide, and parameter table: parameter / controls / why it matters / recommendation>
+**Tool choice.** <selected tool>
+**Tool reason.** <why this tool is recommended or chosen, including fallback/deviation status>
+**Setup guide.** <how to set up the selected tool before compute>
+**Parameters.** <J, lattice, BC, sector, …>
+**Tier.** <quick-check | beginner | paper-like>
+**Sizes.** <L = …>
+**Symmetry.** <sector / block / unresolved symmetries>
+**Approximation.** <exact within selected sector | selected-state approximation | …>
+**Solver configuration.** <dense full ED | Lanczos k=… | DMRG chi/sweeps/cutoff | …>
+**Solver reason.** <why this config is recommended for the target and scope>
+**Route.** <local | cluster>
+**Estimate.** <wall, memory>
+**Deviations.** <list, or "none">
+**Outputs.** protocol.toml, manifests, figs/<id>.png, run-report.md
 ```
 
-Route meanings:
+Fill `results/<run>/protocol.toml` from the same brainstorm answers. `plan.md` is the friendly user-facing artifact; `protocol.toml` is the machine-readable paper-to-code contract. Both are required and co-located.
 
-- `paper` — primary source or official code/data specifies the route.
-- `canonical` — harness method card plus stack profile authorizes it.
-- `fallback` — next recommended fallback stack in the method card.
-- `deviation` — any other route, justified by a `[[deviations]]` row before compute.
+## Execute
 
-`state = "passed"` requires the check to have actually run or a primary/official route to have been inspected enough to support the claim. `failed`, `skipped`, or `pending` blocks compute unless explicitly scoped as `deviation` or `pending`.
+Run the approved tier only. The script lands at `scripts/<model>_<brief>.{jl|py}` and writes manifests under `results/<run>/cells/<cell_id>/manifest.json`.
 
-If a route check fails from local environment problems, record failed/pending first. Do not inspect alternate stacks until the protocol declares fallback/deviation. For ED, the Python fallback is `quspin`; generic NumPy/SciPy ED is a deviation unless official paper code uses it.
+- One status line per cell start, in plain English (what's running, expected time). Flush stdout.
+- For any cell expected to take > 2 minutes, the script emits ~10–50 progress updates. Method cards declare the per-run `progress_every` default.
+- Each cell manifest records `method_setup`, `tool_choice`, `tool_reason`, `setup_guide`, `symmetry`, `approximation`, `solver_config`, and `solver_reason`, matching the approved plan. A mismatch is a failed manifest-consistency check.
+- Inline checks at each cell: primary-source match (caption, axes, normalization, state selection), limit or known-answer check when available, manifest consistency, freshness.
+- Cluster route composes with `/slurm`; this skill does not inline cluster idioms.
 
-## Closeout
+### Phase 9 — On check failure
 
-Completion requires `run-report.md` with all declared claims backed by current-run manifests or recorded deviations. Then `/report` may render the shareable HTML.
+Selection style; fires only when a check fails during Execute.
 
-## Resume
+> **Check failed.**
+>
+> <one-sentence: what failed and why it matters>
+>
+> - **Repair** (recommended when the failure is a clear bug) — fix the offending layer and rerun this cell.
+> - **Record as a change from the paper and continue** — keep the cell, write a deviation row in `protocol.toml` and `plan.md`, continue as a learning run.
+> - **Stop** — keep current artifacts, end the session.
 
-- Reuse figures with valid registered `figs/<id>.{png,json}` and fresh manifests.
-- Do not recompute without explicit user choice.
+During waits, communicate at meaningful checkpoints: start, after pilot or quick check, during long runs (current cell, elapsed time, expected remaining), after each scope. Do not fill the conversation with raw logs — summarize useful signal and keep log paths available.
+
+## Report
+
+After Execute completes, write `results/<run>/run-report.md`:
+
+- beginner summary (one paragraph);
+- paper target vs reproduced target;
+- approved setup, bundled method setup, tool choice/reason, setup guide, symmetry, approximation, solver configuration/reason, time estimate, actual runtime;
+- produced artifacts (paths);
+- verification status: `self-checked` / `partial` / `failed`;
+- exact rerun command.
+
+For a polished, shareable HTML deliverable, route to `/report`:
+
+- `/report <run-dir> --stage plan` previews the plan in HTML before approve.
+- `/report <run-dir> --stage append` renders the final HTML after execute, with a "beginner reproduction, self-checked" provenance chip so a reader can tell it is a beginner run.
+
+Then ask one `AskUserQuestion` for the next step. The agent assembles options from the result state:
+
+| Option                                 | When recommended                                     |
+| -------------------------------------- | ---------------------------------------------------- |
+| Render shareable HTML                  | User wants to share or archive the result            |
+| Try a larger scope                     | Quick check or beginner passed cleanly               |
+| Cross-check with an independent method | Result sits near a phase boundary or frontier regime |
+| Stop here                              | Always available, never padded                       |
+
+## Artifact Contract
+
+- `results/<run>/plan.md` — friendly human-readable plan.
+- `results/<run>/protocol.toml` — paper-to-code contract, deviations, selected cells, figure definitions.
+- `results/<run>/cells/<cell_id>/manifest.json` — one manifest per completed run cell.
+- `results/<run>/figs/<figure_id>.png` — reproduced figure image.
+- `results/<run>/figs/<figure_id>.json` — plotted data and settings.
+- `results/<run>/run-report.md` — plain-language summary, commands, verification status, and next choices.
+
+## What Stays From The Harness Contract
+
+- Primary sources control paper claims; `.knowledge/` cards are hints.
+- Figure captions and plotted quantities are read verbatim before coding.
+- Deviations from paper setup are recorded in both `plan.md` and `protocol.toml` before the affected cell runs.
+- Failed checks are explained and repaired (or scoped as deviations) before claiming success.
+
+## What Not To Do
+
+- Do not present `protocol.toml` as the first thing the user must understand.
+- Do not start non-trivial compute without writing `plan.md` and getting the user to approve the plan.
+- Do not bundle multiple decisions into a single prompt.
+- Do not expose harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `trust point`) in user-facing messages.
+- Do not introduce paper-specific abbreviations without a one-sentence plain-English explanation on first use.
+- Do not hide downsizing, fallback methods, missing observables, failed checks, or deviations.
+- Do not choose symmetry or solver settings before the user has seen the method introduction and confirmed the computational setup.
+- Do not present tool names without explaining the computational method, configurable parameters, what each parameter controls, why each matters, and the recommended setup.
+- Do not hide symmetry, approximation, or solver settings in script defaults; for ED, the user must confirm these before route selection.
+- Do not ask the user to decide a size without giving a size ladder, an estimate, and the corresponding cluster-vs-local recommendation.
+- Do not chain scopes automatically; run only the approved scope and offer the next step in the report.
