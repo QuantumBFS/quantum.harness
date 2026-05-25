@@ -16,7 +16,7 @@ cross-method-check = { type = "local" }
 slurm = { type = "local" }              # cluster mechanism (agent-does-ssh)
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
 reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
-report = { type = "local" }             # render single-page interactive HTML report from a reproduction run
+report = { type = "local" }             # render run.json into a self-contained HTML report (stdlib only)
 
 # Skill tooling
 ion-cli = { type = "local" }

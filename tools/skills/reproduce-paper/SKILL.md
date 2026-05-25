@@ -55,11 +55,9 @@ The run's memory lives in `results/<run>/run.json`. Write each confirmed choice 
 }
 ```
 
-## The report: one standalone HTML
+## The report: rendered by `/report`
 
-Rendered from `run.json` by `python3 tools/skills/reproduce-paper/render_report.py <run-dir>` (Python stdlib only) into `results/<run>/report.html` — a single self-contained file, like a PDF: inline CSS, each figure base64-embedded, equations as inline **MathML**. No external assets, no network, no build step — it opens offline anywhere. It lays out as **Model / Method / Figures** — the shared computation, then one block per figure. Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — same family, a little more polished.
-
-Write math as LaTeX: `model.H` is a bare equation and renders as a centered display block; any other string may carry inline math in `$…$`. The bundled stdlib converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
+`/report` renders `run.json` into one self-contained `results/<run>/report.html` (`python3 tools/skills/report/render_report.py <run-dir>`, Python stdlib only, opens offline), laid out as **Model / Method / Figures**. This skill owns the *plan and data* in `run.json`; `/report` owns turning it into HTML. Write math as LaTeX in `run.json` — `model.H` as a display equation, any other string carrying `$…$` inline, moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|` — and `/report` converts it to MathML.
 
 Two moments, same file, per figure:
 
@@ -70,12 +68,12 @@ Two moments, same file, per figure:
 
 1. **Brainstorm** each drift-relevant decision above, one at a time, saving each to `run.json` as it is confirmed. When the target figure is pinned, save the paper's panel as an image (`paper_image`) so the report can sit it beside ours.
 2. **Estimate carefully.** Use the scaling rules below to fill the cost table — it drives the user's scope and where-to-run choices. Flag finicky or custom parts up front so they're anticipated, but don't over-plan.
-3. **Build the proposal** page — `render_report.py <run-dir>`; give its path and, on a laptop, offer to open it.
+3. **Build the proposal** page — render via `/report`; give its path and, on a laptop, offer to open it.
 4. **Approve / Change / Discuss** — one question once the proposal is built. *Approve* (recommended) locks the plan and runs; *Change <which>* jumps back to that one choice; *Discuss* opens it up. This is the run's only approval.
 5. **Run** the approved plan. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its figure under `results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g., the chosen tool genuinely can't express this target).
-6. **Append results** — fill each figure's `results` block in `run.json` and re-run `render_report.py`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
+6. **Append results** — fill each figure's `results` block in `run.json` and re-render via `/report`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
 
-A cluster run composes with `/slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
+Rendering composes with `/report`; a cluster run composes with `/slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
 
 ## Estimating cost
 

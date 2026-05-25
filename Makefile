@@ -177,28 +177,5 @@ install-classical-repro: ## Install stacks for DMRG, QMC/SSE, and CTMRG reproduc
 	@for tool in itensors sse pepskit; do $(MAKE) install-$$tool; done
 	@echo "Classical reproduction stacks ready."
 
-install-report-site: ## Install Node deps for /report's Fumadocs HTML builder
-	@command -v node >/dev/null 2>&1 || { \
-	  echo "node not found. Install Node 18+ via: brew install node  (or your package manager)"; \
-	  exit 1; \
-	}
-	@if ! command -v pnpm >/dev/null 2>&1; then \
-	  echo "pnpm not found — installing"; \
-	  if command -v brew >/dev/null 2>&1; then brew install pnpm; \
-	  elif command -v npm >/dev/null 2>&1; then npm install -g pnpm; \
-	  else echo "Neither brew nor npm available; install pnpm manually."; exit 1; fi; \
-	fi
-	@if [ -d tools/skills/report/site/node_modules ]; then \
-	  echo "tools/skills/report/site/node_modules already present — skipping pnpm install"; \
-	else \
-	  cd tools/skills/report/site && pnpm install --prefer-offline; \
-	fi
-	@echo "/report Fumadocs site ready. Build a report with:"
-	@echo "  node tools/skills/report/site/build.mjs <run-dir> --stage <plan|append>"
-
-render: ## Render a markdown file to HTML. Usage: make render FILE=<path.md>
-	@if [ -z "$(FILE)" ]; then echo "Usage: make render FILE=<path.md>"; exit 1; fi
-	tools/cli/render "$(FILE)"
-
 clean: ## Remove generated HTML artifacts
-	find . -name '*.html' -not -path './tools/templates/*' -delete
+	find . -name '*.html' -not -path './docs/*' -delete
