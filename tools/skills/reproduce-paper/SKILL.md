@@ -14,7 +14,7 @@ Brainstorm  ──▶  Plan  ──▶  Execute  ──▶  Report
  (questions)    plan.md     (1 size)     + next step
 ```
 
-Brainstorm yields a plan; approving the plan starts Execute; Execute produces the data, figure, and report. A failed check during Execute pops back to a small fork (fix / note the change / stop), never a silent fallback.
+Brainstorm yields a plan; approving the plan starts Execute; Execute produces the figure and report. A failed check during Execute pops back to a small fork (fix / note the change / stop), never a silent fallback.
 
 ## Audience Contract
 
@@ -163,7 +163,7 @@ Confirmation style, compact plan table.
 > | Solver         | <approximation + solver configuration>                           |
 > | Scope          | <quick check / beginner / paper-like>                            |
 > | Where          | <this machine / cluster>, ~<wall>, ~<memory>                     |
-> | Outputs        | a written plan, the computed data, the figure, and a short report |
+> | Outputs        | a written plan, the figure, and a short report    |
 >
 > - **Approve** (recommended)
 > - **Change something** — follow-up picks which row to change and jumps back to that phase
