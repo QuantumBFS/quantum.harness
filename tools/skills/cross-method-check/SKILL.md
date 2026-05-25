@@ -1,5 +1,6 @@
 ---
 name: cross-method-check
+user-invocable: false
 description: Use when the user wants to confirm a single-method result with an independent method or diagnostic at the same parameter point — phrases like "cross-check this", "verify with another method", "is this an artifact of DMRG / VMC / QMC", "does a different method agree", or whenever the result sits near a phase boundary or in a frontier regime.
 ---
 

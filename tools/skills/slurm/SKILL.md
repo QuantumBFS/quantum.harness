@@ -1,5 +1,6 @@
 ---
 name: slurm
+user-invocable: false
 description: Use when a computation needs to run on a remote Slurm cluster (CPU- or GPU-heavy beyond laptop budget), when a multi-cell array job is ready to submit, when a submitted job needs status / monitoring / cancel / log-tail, or when only a few cells failed and the user wants to resume — phrases like "send this to the cluster", "sbatch this", "submit on HPC2", "check job status", "resubmit failed cells".
 ---
 

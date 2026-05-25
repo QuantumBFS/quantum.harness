@@ -1,5 +1,6 @@
 ---
 name: download-ref
+user-invocable: false
 description: Use when the user pastes an arXiv ID, a DOI, a paper title, a local PDF path, or a bibliography stub and wants it added to the harness's methodology references — phrases like "download this arXiv", "add a DMRG reference", "pull in DOI 10…", "render this PDF", "add a bibliography stub for".
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: scaling-fit
+user-invocable: false
 description: Use when the user has L-indexed or size-indexed data and wants finite-size scaling — phrases like "fit a power law", "data collapse", "extract the critical exponent", "finite-size extrapolation", "extrapolate to the thermodynamic limit", "fit log L", "polynomial fit in 1/L", or "collapse these curves".
 ---
 

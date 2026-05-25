@@ -1,5 +1,6 @@
 ---
 name: parameter-scan
+user-invocable: false
 description: Use when the user wants to vary one or more parameters and see how a quantity responds — phrases like "how does X depend on Y", "sweep U/t from 0 to 10", "scan J2/J1 across the transition", "finite-size series at L = 12, 16, 20, 24", "bond-dimension sweep chi=50 to 400", a single-axis scan, or a multi-axis grid.
 ---
 

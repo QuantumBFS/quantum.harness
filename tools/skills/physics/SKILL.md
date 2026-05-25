@@ -1,5 +1,6 @@
 ---
 name: physics
+user-invocable: false
 description: |
   Use when the user asks a phase, mechanism, or diagnostic question —
   whether or not a specific model is named. Triggering topics:

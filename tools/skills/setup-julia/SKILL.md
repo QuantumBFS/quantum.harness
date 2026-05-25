@@ -1,5 +1,6 @@
 ---
 name: setup-julia
+user-invocable: false
 description: >-
   Use when Julia is missing, wrong-version, uninstantiated, or mirror-misconfigured —
   symptoms like `julia: command not found`, missing `julia-env/Manifest.toml`,
