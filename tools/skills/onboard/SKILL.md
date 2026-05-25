@@ -33,7 +33,7 @@ The user is on first touch — they may not know the harness vocabulary (skill, 
 
 Run `make skills` only when skill sync is actually needed.
 
-Install only the stack the user's first selected workflow needs. Do not pre-install other method stacks. Each additional stack is installed on demand when that method is first invoked. `/report` needs nothing installed — it renders `run.json` to HTML with the Python standard library.
+Install only the stack the user's first selected workflow needs. Do not pre-install other method stacks. Each additional stack is installed on demand when that method is first invoked. `/report` needs nothing installed — it renders to HTML with the Python standard library.
 
 Report one line:
 - All good: "Domain stack ready."

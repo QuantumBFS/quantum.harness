@@ -33,7 +33,7 @@ Skip a question only when the user already answered it or it carries no scientif
 
 The run's memory lives in `results/<run>/run.json`. Write each confirmed choice to it the moment it is made; re-read it before building the report, before running, and before reporting. **Never** reconstruct a parameter from conversation memory — context is not a safe store.
 
-`run.json` is the *only* data source. The HTML report is built one-way from it and is never read back; there is no second copy of the data anywhere. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same data share one run, never copied across files. Representative shape (each figure's `results` block fills in after the run):
+`run.json` is the *only* data source. The report is built one-way from it — `run.json` → a generic `report.json` (the render input) → `report.html` — and never read back. `report.json` and the HTML are *derived* views, regenerated from `run.json`; they are never edited or treated as a second source. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same data share one run, never copied across files. Representative shape (each figure's `results` block fills in after the run):
 
 ```json
 {
@@ -55,9 +55,9 @@ The run's memory lives in `results/<run>/run.json`. Write each confirmed choice 
 }
 ```
 
-## The report: rendered by `/report`
+## The report: built from `run.json`, rendered by `/report`
 
-`/report` renders `run.json` into one self-contained `results/<run>/report.html` (`python3 tools/skills/report/render_report.py <run-dir>`, Python stdlib only, opens offline), laid out as **Model / Method / Figures**. This skill owns the *plan and data* in `run.json`; `/report` owns turning it into HTML. Write math as LaTeX in `run.json` — `model.H` as a display equation, any other string carrying `$…$` inline, moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|` — and `/report` converts it to MathML.
+Two stdlib-only, offline steps. First `python3 tools/skills/reproduce-paper/build_report.py <run-dir>` maps `run.json` → a generic `report.json`, laying the reproduction out as **Model / Method / Figures**. Then `/report` renders that into one self-contained `results/<run>/report.html` (`python3 tools/skills/report/render_report.py <run-dir>`). This skill owns the *plan, the data in `run.json`, and that layout* (`build_report.py`); `/report` owns only generic rendering and the LaTeX→MathML conversion. Write math as LaTeX in `run.json` — `model.H` as a display equation, any other string carrying `$…$` inline, moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|` — and it flows through to MathML.
 
 Two moments, same file, per figure:
 
@@ -68,10 +68,10 @@ Two moments, same file, per figure:
 
 1. **Brainstorm** each drift-relevant decision above, one at a time, saving each to `run.json` as it is confirmed. When the target figure is pinned, save the paper's panel as an image (`paper_image`) so the report can sit it beside ours.
 2. **Estimate carefully.** Use the scaling rules below to fill the cost table — it drives the user's scope and where-to-run choices. Flag finicky or custom parts up front so they're anticipated, but don't over-plan.
-3. **Build the proposal** page — render via `/report`; give its path and, on a laptop, offer to open it.
+3. **Build the proposal** page — `build_report.py`, then render via `/report`; give its path and, on a laptop, offer to open it.
 4. **Approve / Change / Discuss** — one question once the proposal is built. *Approve* (recommended) locks the plan and runs; *Change <which>* jumps back to that one choice; *Discuss* opens it up. This is the run's only approval.
 5. **Run** the approved plan. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its figure under `results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g., the chosen tool genuinely can't express this target).
-6. **Append results** — fill each figure's `results` block in `run.json` and re-render via `/report`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
+6. **Append results** — fill each figure's `results` block in `run.json`, re-run `build_report.py`, and re-render via `/report`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
 
 Rendering composes with `/report`; a cluster run composes with `/slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
 

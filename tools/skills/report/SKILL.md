@@ -1,26 +1,50 @@
 ---
 name: report
-description: Use to render the HTML deliverable of a reproduction run — the proposal before compute or the results after. Triggers include "render report", "build the report", "publish reproduction", "share results", or `/reproduce-paper` composing its proposal/results page.
+description: Use to render a run's HTML report — a reproduction proposal before compute, results after, or any structured run summary. Triggers include "render report", "build the report", "publish results", "share results", or a skill like `/reproduce-paper` composing its report page.
 ---
 
 # report
 
-Render one self-contained HTML report from a reproduction run's `run.json`. Compute belongs upstream to `/reproduce-paper`; this skill only renders.
+Render one self-contained HTML page from a generic report document. `report` draws whatever pieces it is handed, in order, and knows nothing about any particular kind of run; producers (e.g. `/reproduce-paper`) own the document's shape.
 
 ## Outcome
 
-`python3 tools/skills/report/render_report.py <run-dir>` reads `<run-dir>/run.json` and writes `<run-dir>/report.html` — a single offline file, like a PDF: inline CSS, each figure base64-embedded, equations as inline MathML. No dependencies, no network, no build step; it opens anywhere. Surface the path, and on a laptop offer to open it.
+`python3 tools/skills/report/render_report.py <run-dir>` reads `<run-dir>/report.json` and writes `<run-dir>/report.html` — a single offline file, like a PDF: inline CSS, each figure base64-embedded, equations as inline MathML. No dependencies, no network, no build step; it opens anywhere. Surface the path, and on a laptop offer to open it.
 
-## One source of data
+## The document
 
-`run.json` is the single source of truth; its schema (one shared computation + a `figures` list) is defined and filled by `/reproduce-paper`. The report is a one-way view of it and is never read back — render again after `run.json` changes. There is no separate editorial, polish, or provenance file.
+`report.json` is generic — a title plus an ordered list of sections, each an ordered list of pieces:
 
-## Layout
+```json
+{ "title": "…", "eyebrow": "…", "url": "…", "lede": "…",
+  "sections": [ { "title": "…", "note": "…", "blocks": [ … ] } ] }
+```
 
-**Model / Method / Figures** — the shared computation, then one block per figure. Each figure block shows the paper's own panel (`paper_image`) and, once present, our reproduction beside it. The same file serves both moments: before compute the figure result areas read *pending* (a proposal); after compute they fill in (the results) — `/reproduce-paper` decides what content each block carries.
+It is a one-way render input, produced from whatever the real source is — for a reproduction, `/reproduce-paper` builds it from `run.json` — and never read back. Render again after it changes. There is no separate editorial, polish, or provenance file.
 
-Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — same family, a little more polished.
+## Pieces (`block.kind`)
+
+Each block carries a `kind` plus its own fields; unknown kinds are skipped.
+
+| kind | fields | draws |
+|---|---|---|
+| `heading` | `text`, `level?` | a sub-title inside a section |
+| `text` | `text` | a paragraph (inline `$…$` math) |
+| `equation` | `tex` | a centered display formula |
+| `kv` | `pairs` (`[[k,v]…]` or object) | a label → value list; empty values drop out |
+| `table` | `columns`, `rows`, `numeric?` | a table; `numeric` is a per-column flag list for tabular, no-wrap cells |
+| `figures` | `items` (`[{src, caption}…]`) | images side by side, captioned, base64-embedded |
+| `verdict` | `status` (`good`/`warn`/`bad`), `label`, `why` | a colored badge + one-line reason |
+| `list` | `items`, `title?` | a bullet list, optionally inside a titled card |
+| `code` | `text`, `title?` | a monospaced command box |
+| `badge` | `text`, `style` (`good`/`warn`/`neutral`) | a small pill |
+| `note` | `text`, `label?`, `style?` (`info`/`pending`) | a highlighted callout (`pending` is the dashed placeholder) |
+| `card` | `blocks`, `title?` | a bordered box grouping nested pieces |
+
+Figure `src` paths are relative to `<run-dir>`; a missing file degrades to a small note rather than failing.
 
 ## Math
 
-`model.H` is a bare equation and renders as a centered display block; any other string may carry inline math in `$…$`. The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
+An `equation` block's `tex` is a bare LaTeX equation and renders as a centered display block; any string may carry inline math in `$…$` (or display in `$$…$$`). The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
+
+Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — same family, a little more polished.
