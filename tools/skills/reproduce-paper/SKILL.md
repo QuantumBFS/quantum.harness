@@ -31,7 +31,7 @@ The user may know the physics goal but not the computational method, finite-size
 1. **One workflow.** A conversational front end to paper reproduction.
 2. **Ask only the forks that matter.** Surface decisions the user could meaningfully shape; skip anything already answered in their message or a prior run, and anything with a clear default. Never ask the same thing twice. If the question tool is unavailable, say so — don't pretend a choice was ratified.
 3. **One question at a time.** Never bundle multiple decisions in one prompt; split a multi-part topic.
-4. **Plain English. No jargon.** Keep harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `protocol.toml`) in artifacts and code, never in user prompts. Translate to plain language at the question.
+4. **Plain English. No jargon.** Keep internal or code-level terms out of user prompts; translate to plain language at the question.
 5. **Introduce paper-specific abbreviations once.** A non-standard abbreviation for a model, method, or quantity (PXP, FSA, RVB, AKLT, …) gets a one-sentence plain-English introduction the first time it appears in a user-facing message. Common method families (ED, DMRG, QMC, VMC, NQS) need no introduction.
 6. **Terse messages.** A few sentences or a compact table; cover the key points, never overload.
 7. **Confirmation uses two options: proceed / fix.** Show a table of inferred facts; the user accepts it or branches to correct one row.
@@ -185,18 +185,16 @@ After approval, write `results/<run>/plan.md` — the friendly, human-readable p
 **Solver.** <dense full ED | Lanczos k=… | DMRG χ/sweeps/cutoff | …>, <why>
 **Where & estimate.** <local | cluster>, ~<wall>, ~<memory>
 **Changes from the paper.** <list, or "none">
-**Outputs.** plan.md, protocol.toml, figs/<id>.png, run-report.md
+**Outputs.** plan.md, figs/<id>.png, run-report.md
 ```
-
-`results/<run>/protocol.toml` is filled from the same answers; it is the machine-readable paper-to-code contract that `/report` reads, and it carries any change from the paper. `plan.md` is what the user reads.
 
 ## Execute
 
-Run the approved scope only. The script lands at `scripts/<model>_<brief>.{jl|py}` and writes a manifest per computed unit under `results/<run>/cells/<cell_id>/manifest.json` — the data `/report` consumes, not a gate.
+Run the approved scope only. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its data and figure under `results/<run>/`.
 
-- One plain-English status line per unit start (what's running, expected time). Flush stdout.
-- For any unit expected to take > 2 minutes, emit ~10–50 progress updates. Method cards declare the `progress_every` default.
-- Run a check at each unit only when it is scientifically meaningful: does the result match the primary source (caption, axes, normalization, state selection), plus any limit or known-answer check. A failure opens Phase 8. Bookkeeping checks are not enforced.
+- One plain-English status line per step (what's running, expected time). Flush stdout.
+- For any step expected to take > 2 minutes, emit ~10–50 progress updates. Method cards declare the `progress_every` default.
+- Run a check after a result only when it is scientifically meaningful: does it match the primary source (caption, axes, normalization, state selection), plus any limit or known-answer check. A failure opens Phase 8.
 - The cluster route composes with `/slurm`.
 
 ### Phase 8 — On check failure
@@ -205,7 +203,7 @@ Selection style; fires only when a meaningful check fails.
 
 > **Check failed.** <one sentence: what failed and why it matters>
 >
-> - **Repair** (recommended when it's a clear bug) — fix the offending layer and rerun this unit.
+> - **Repair** (recommended when it's a clear bug) — fix the offending layer and rerun this step.
 > - **Note the change and continue** — keep the result, record the change in the plan, continue as a learning run.
 > - **Stop** — keep current artifacts, end the session.
 
@@ -213,29 +211,22 @@ During waits, communicate at meaningful checkpoints (start, after the pilot or q
 
 ## Report
 
-After Execute, write `results/<run>/run-report.md`: a one-paragraph beginner summary; paper target vs reproduced target; the approved setup and actual runtime; produced artifact paths; verification status (`self-checked` / `partial` / `failed`); and the exact rerun command.
-
-For a shareable HTML deliverable, route to `/report`:
-
-- `/report <run-dir> --stage plan` previews the plan in HTML before approve.
-- `/report <run-dir> --stage append` renders the final HTML after Execute, with a "beginner reproduction, self-checked" chip so a reader can tell it is a beginner run.
+After Execute, write `results/<run>/run-report.md`: a one-paragraph beginner summary; paper target vs reproduced target; the approved setup and actual runtime; produced artifact paths; verification status (`self-checked` / `partial` / `failed`); and the exact rerun command. This run report plus the figure is the deliverable.
 
 Then ask one `AskUserQuestion` with 2–3 next steps chosen from the result state:
 
 | Option                                 | Offer when                                        |
 | -------------------------------------- | ------------------------------------------------- |
 | Try a larger scope                     | Quick check or beginner passed cleanly            |
-| Render shareable HTML                  | The user may want to share or archive the result  |
 | Cross-check with an independent method | The result sits near a phase boundary or frontier |
 | Stop here                              | Always available, never padded                    |
 
 ## Artifact Contract
 
-Outputs `/report` and the wider harness consume:
+What the run produces:
 
+- `scripts/<model>_<brief>.{jl|py}` — the runnable script.
 - `results/<run>/plan.md` — friendly human-readable plan.
-- `results/<run>/protocol.toml` — paper-to-code contract, changes from the paper, figure definitions.
-- `results/<run>/cells/<cell_id>/manifest.json` — one per computed unit.
 - `results/<run>/figs/<figure_id>.png` — reproduced figure.
 - `results/<run>/figs/<figure_id>.json` — plotted data and settings.
 - `results/<run>/run-report.md` — plain-language summary, commands, verification status, next choices.
@@ -250,7 +241,7 @@ Outputs `/report` and the wider harness consume:
 ## What Not To Do
 
 - Don't start non-trivial compute without writing `plan.md` and getting approval.
-- Don't present `protocol.toml` or other artifacts as the first thing the user must understand.
+- Don't make the user wade through internal files before they understand the plan in plain English.
 - Don't hide downsizing, fallback tools, missing observables, failed checks, or changes from the paper.
 - Don't choose symmetry or solver settings before the user has seen the method introduction; for ED, confirm the symmetry sector before choosing where to run.
 - Don't present a tool name without explaining the method, the configurable settings, and what each controls.

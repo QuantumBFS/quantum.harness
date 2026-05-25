@@ -191,7 +191,7 @@ Problem-solving primitives (generic; topic-agnostic, compose with the dispatcher
 - **cross-method-check** — verify the same observable with an independent method or diagnostic.
 - **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `tools/cluster/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
 - **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
-- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size tier, confirms setup before compute, then executes the approved tier and writes plan, protocol, manifests, figures, and a run report.
+- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size, confirms setup before compute, then executes the approved size and writes a plan, the figure and data, and a run report.
 
 External/support skills:
 - **arxiv-search** — Semantic arXiv search via Valyu
