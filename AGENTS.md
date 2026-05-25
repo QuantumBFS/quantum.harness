@@ -91,7 +91,7 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 
 For each figure panel:
 
-1. **Caption verbatim.** Quote the paper's caption text for the panel into the protocol's `[[figures]]` entry. Not paraphrased — verbatim. Subsequent steps refer to this exact text, not to a summary.
+1. **Caption verbatim.** Quote the paper's caption text for the panel verbatim — not paraphrased. Subsequent steps refer to this exact text, not to a summary.
 2. **x-axis.** Identify the variable name, units, range, and scale (linear / log). The printed axis label on the figure image is the source of truth; the body text may name the variable but not its scale or normalization.
 3. **y-axis.** Identify the variable name, units, range, scale, AND any normalization factor (× L, × N, divided by D, log₂ vs log₁₀, etc.). A missing or extra normalization factor is the most common silent error and is invisible from numerical values alone — it must be read off the printed axis label.
 4. **Per-curve identity.** For every line / marker / color in the panel: which state(s)? which subset of states? which sector? which observable? Match each to a single concrete object in code, named the same way the caption names it.
