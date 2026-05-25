@@ -102,7 +102,7 @@ Scaling rules for the estimates:
 > - **<alternative>** — <one-line reason; one-sentence intro if it's a paper-specific abbreviation>
 > - **<alternative>** — <one-line reason>
 
-**Tool.** Build the candidate list from the current target — the paper's official code/data, the method card's canonical and fallback stacks, what's installed, and any prior scaffold for this paper. Read `tools/software/stacks/*.toml` before presenting. Each option shows the tool name, its setup state (ready / needs install / official code unavailable), and a one-line reason.
+**Tool.** Build the candidate list from the current target — the paper's official code/data, the method card's canonical and fallback stacks, what's installed, any prior scaffold for this paper, and whether the tool can actually handle this target (the needed basis, symmetry, observable, and output). Read `tools/software/stacks/*.toml` before presenting. Each option shows the tool name, its setup state (ready / needs install / official code unavailable), and a one-line reason.
 
 > **Which tool for <method>?**
 >
@@ -190,7 +190,7 @@ After approval, write `results/<run>/plan.md` — the friendly, human-readable p
 
 ## Execute
 
-Run the approved scope only. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its data and figure under `results/<run>/`.
+Run the approved scope only. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its figure under `results/<run>/`.
 
 - One plain-English status line per step (what's running, expected time). Flush stdout.
 - For any step expected to take > 2 minutes, emit ~10–50 progress updates. Method cards declare the `progress_every` default.
@@ -228,7 +228,6 @@ What the run produces:
 - `scripts/<model>_<brief>.{jl|py}` — the runnable script.
 - `results/<run>/plan.md` — friendly human-readable plan.
 - `results/<run>/figs/<figure_id>.png` — reproduced figure.
-- `results/<run>/figs/<figure_id>.json` — plotted data and settings.
 - `results/<run>/run-report.md` — plain-language summary, commands, verification status, next choices.
 
 ## What Stays From The Harness Contract
