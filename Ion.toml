@@ -1,12 +1,10 @@
 [options]
 skills-dir = "tools/skills"
 
-[options.targets]
-claude = ".claude/skills"
-
 [skills]
 # Research workflow
 arxiv-search = { source = "yorkeccak/scientific-skills/arxiv-search" }
+survey = { source = "QuantumBFS/sci-brain/skills/survey" }  # topic survey → .knowledge/ base (BibTeX)
 download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)

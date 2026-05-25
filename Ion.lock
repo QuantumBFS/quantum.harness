@@ -1,4 +1,12 @@
 [[skill]]
+name = "arxiv-search"
+source = "https://github.com/yorkeccak/scientific-skills.git"
+kind = "git"
+path = "arxiv-search"
+commit = "20b3d503700656f847e6de873753335bf90e63e3"
+checksum = "sha256:7e5665b1d72138d28e50b371b63ee05b546bef14c16a949b1b1fc1d82bccd326"
+
+[[skill]]
 name = "brainstorming"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
@@ -7,12 +15,24 @@ commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:1518efecf35139a9a5b9e60906b71de874af08322200fab18a54848cea8c15fe"
 
 [[skill]]
+name = "cross-method-check"
+source = ""
+kind = "local"
+checksum = "sha256:8e2d7f19e85b73327abb41fefa6a9c88d7b8170b9d3b62a8baf2eff0bafe49fe"
+
+[[skill]]
 name = "dispatching-parallel-agents"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/dispatching-parallel-agents"
 commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
+
+[[skill]]
+name = "download-ref"
+source = ""
+kind = "local"
+checksum = "sha256:03c005611dcb49173d90736b56de3a32141a55933b2c40a5370a58b7483bd820"
 
 [[skill]]
 name = "executing-plans"
@@ -31,12 +51,54 @@ commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:932d23af11a3eb2b758f5b1d9aec7b6d28ddd26658328414f87f34dff7179d19"
 
 [[skill]]
+name = "ion-cli"
+source = ""
+kind = "local"
+checksum = "sha256:bd5d3a00554413b17ddca6c53aa2f639a7a0c5bdfd8d300126ea6a471d5d669c"
+
+[[skill]]
+name = "model"
+source = ""
+kind = "local"
+checksum = "sha256:42b6fdc4c5f1593a6d47eae9ad2edf274aac22e7b936b57e4c3f7785c58389ed"
+
+[[skill]]
+name = "onboard"
+source = ""
+kind = "local"
+checksum = "sha256:02039821ab1c8c2bcb69cc2a7ad43722dc1dfa3162760f3ee9238d12b2c45a81"
+
+[[skill]]
+name = "parameter-scan"
+source = ""
+kind = "local"
+checksum = "sha256:fbd622a06ee46ecc8d9e3c1193524d177a258a3379b24252e5ffba7105421022"
+
+[[skill]]
+name = "physics"
+source = ""
+kind = "local"
+checksum = "sha256:d3f42e2df34f64f2bec303e8d9ae97279f94d83da8f33d33c2295fe2b104d349"
+
+[[skill]]
 name = "receiving-code-review"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/receiving-code-review"
 commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:2760c85d4f4117b0006e7ba755f4bbd61f8f4c185f347999763c97f507274e30"
+
+[[skill]]
+name = "report"
+source = ""
+kind = "local"
+checksum = "sha256:4e854dbc8c7f2830e092675e047d823c55a48a36c3be04e714bc098a1845b19e"
+
+[[skill]]
+name = "reproduce-paper"
+source = ""
+kind = "local"
+checksum = "sha256:c5f9309ecae0946a71730976aad2db6fac5f19646946c360c05b8aed46ff1a17"
 
 [[skill]]
 name = "requesting-code-review"
@@ -47,6 +109,12 @@ commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:5a53d1f7f4cee4dee017a50d735335c7aae1874b2746207e076b5d9035315599"
 
 [[skill]]
+name = "scaling-fit"
+source = ""
+kind = "local"
+checksum = "sha256:dfd6a03b26f9e340c70be851dc4e859d03edfa54053a1f3f46ebcc94b0fed582"
+
+[[skill]]
 name = "scientific-visualization"
 source = "https://github.com/HughYau/AcademicForge.git"
 kind = "git"
@@ -55,12 +123,38 @@ commit = "410d5b29ab28a96cbb5915114df872b2cbe7d2d3"
 checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390bc74"
 
 [[skill]]
+name = "setup-julia"
+source = ""
+kind = "local"
+checksum = "sha256:81e56d1ae27360d0eb804b9974ad249f72e2f58c60e56cb4cdefdcf784f6f461"
+
+[[skill]]
+name = "slurm"
+source = ""
+kind = "local"
+checksum = "sha256:e9b732d8411ed3e93e35e0d41f23c74ebaf5e16c04bcd3bfb008cf03fa76341e"
+
+[[skill]]
+name = "solve"
+source = ""
+kind = "local"
+checksum = "sha256:a140a3ebd8025ae634b207460843351c8cde5aee00a3abd9134e7aac4916ee1f"
+
+[[skill]]
 name = "subagent-driven-development"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/subagent-driven-development"
 commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:22847d331db0aaedde0738d794896658020d25b703136d64f6690ee944688b7c"
+
+[[skill]]
+name = "survey"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/survey"
+commit = "3b5ad792bf60ef9c323cbac487748488da58d93e"
+checksum = "sha256:517a4a3f533508bf154464e1e41139359ec20003a7989b5bc16c68dfa76292fd"
 
 [[skill]]
 name = "systematic-debugging"
