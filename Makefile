@@ -18,10 +18,10 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-.PHONY: skills test clean help install $(addprefix install-,$(INSTALLABLE))
-.PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
-
 INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro
+
+.PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
+.PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
 help: ## Show available targets and installable tools
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \

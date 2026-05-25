@@ -62,7 +62,7 @@ The run's memory lives in `results/<run>/run.json`. Write each confirmed choice 
 Two moments, same file, per figure:
 
 - **Proposal** (before compute) — the plan in plain English: the model; the method (with a one-line plain-English `note` on the tool and its settings — what XDiag is, what `k_states`/`tol` do) and its parameters; scope and where — plus a **cost table** with one row per run point (run point → estimated wall time → memory) and a short note of anything likely to be finicky or custom. Then, for each figure, what it plots, the observable, what's expected, and the paper's target panel (when captured); its result area marked pending.
-- **Results** (after compute) — for each figure: our figure beside the paper's original panel — capture that panel as an image (`paper_image`) so the two sit side by side — a small table of the key numbers, an honest "matched / partly / didn't — because…", the wall time that ran and any changes from the plan, and one rerun line.
+- **Results** (after compute) — for each figure: our figure beside the paper's original panel — capture that panel as an image (`paper_image`) so the two sit side by side — a small table of the key numbers, an honest verdict (`match`: `yes` / `partly` / `no`, rendered as Reproduced / Partial match / Did not match) with a one-line `why`, the wall time that ran and any changes from the plan, and one rerun line.
 
 ## Flow
 
@@ -104,7 +104,7 @@ Read `tools/software/stacks/*.toml` before offering tools. Recommend the paper's
 - The primary source controls every paper claim; `.knowledge/` cards are hints.
 - Read captions, axis labels, and normalization verbatim before coding.
 - Record any change from the paper's setup in `run.json` before the affected run.
-- Report the result honestly against the "expected" written at plan time — matched, partly, or didn't, and why.
+- Report the result honestly against the "expected" written at plan time — set `match` to `yes`, `partly`, or `no`, and say why.
 
 ## Not this
 

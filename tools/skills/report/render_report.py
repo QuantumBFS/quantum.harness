@@ -332,7 +332,7 @@ def fig_block(f: dict, run_dir: Path) -> str:
     """One figure — a single view of the shared computation: its plan and result."""
     obs = f.get("observe", {})
     res = f.get("results") or {}
-    head = " — ".join(p for p in (esc(f.get("id")), mathify(f.get("plots"))) if p)
+    head = " — ".join(p for p in (mathify(f.get("id")), mathify(f.get("plots"))) if p)
     plan = kv(("x-axis", f.get("x")), ("y-axis", f.get("y")),
               ("Observable", obs.get("quantity")),
               ("Normalization", obs.get("normalization")),
@@ -363,7 +363,7 @@ def fig_block(f: dict, run_dir: Path) -> str:
                    f'<span class="why">{mathify(res.get("why"))}</span></div>')
         numbers = res.get("numbers") or {}
         if isinstance(numbers, dict) and numbers:
-            rows = "".join(f'<tr><td>{mathify(k)}</td><td class="num">{esc(v)}</td></tr>' for k, v in numbers.items())
+            rows = "".join(f'<tr><td>{mathify(k)}</td><td class="num">{mathify(v)}</td></tr>' for k, v in numbers.items())
             num_html = f'<table><thead><tr><th>Quantity</th><th>Value</th></tr></thead><tbody>{rows}</tbody></table>'
         else:
             num_html = ""
@@ -391,14 +391,14 @@ def render(run: dict, run_dir: Path) -> str:
     title = paper.get("title") or paper.get("id", "Reproduction")
     url = paper.get("url")
     sub = f'<p class="sub"><a href="{esc(url)}">{esc(url)}</a></p>' if url else ""
-    fig_ids = ", ".join(esc(f.get("id")) for f in figures if f.get("id"))
+    fig_ids = ", ".join(mathify(f.get("id")) for f in figures if f.get("id"))
     of_model = f' of the {mathify(model.get("name"))}' if model.get("name") else ""
     lede = (f'<p class="lede"><b>Reproducing:</b> {fig_ids}{of_model}.</p>'
             if fig_ids else "")
     header = (
         '<header class="hero">'
         f'<div class="eyebrow">{esc(paper.get("id", "reproduction"))}</div>'
-        f'<h1>{esc(title)}</h1>{sub}{lede}'
+        f'<h1>{mathify(title)}</h1>{sub}{lede}'
         '</header>'
     )
 
@@ -424,14 +424,14 @@ def render(run: dict, run_dir: Path) -> str:
                             ("Settings", fmt_map(meth.get("settings")))) + meth_note)
     cost_rows = "".join(
         f'<tr><td>{mathify(e.get("point"))}</td>'
-        f'<td class="num">{esc(e.get("wall"))}</td>'
-        f'<td class="num">{esc(e.get("memory"))}</td></tr>'
+        f'<td class="num">{mathify(e.get("wall"))}</td>'
+        f'<td class="num">{mathify(e.get("memory"))}</td></tr>'
         for e in est)
     cost = ('<table><thead><tr><th>Run point</th><th>Est. wall time</th>'
             f'<th>Est. memory</th></tr></thead><tbody>{cost_rows}</tbody></table>') if cost_rows else ""
     scope_line = " · ".join(p for p in (
-        f'Scope: {esc(scope.get("label"))}' if scope.get("label") else "",
-        f'Runs: {esc(run.get("where"))}' if run.get("where") else "") if p)
+        f'Scope: {mathify(scope.get("label"))}' if scope.get("label") else "",
+        f'Runs: {mathify(run.get("where"))}' if run.get("where") else "") if p)
     scope_html = f'<p class="note">{scope_line}</p>' if scope_line else ""
     risks = run.get("risks") or []
     risk_html = ('<div class="card"><div class="title">Anticipated rough spots</div><ul class="flat">'
