@@ -9,22 +9,23 @@ Beginner-facing paper reproduction. Brainstorm the science with the user one dec
 
 ## UX — top priority, always on
 
-- **Plain English, no jargon.** Translate internal or code-level terms at the question. A paper-specific abbreviation (PXP, FSA, RVB, AKLT, …) gets one plain-English intro the first time it appears in a user-facing message; common families (ED, DMRG, QMC, VMC, NQS) need none.
+Everything here serves one reader: a capable physicist new to this paper's methods and to these tools. Keep their mental load low.
+
+- **Plain English — assume nothing about jargon.** Before any term, setting, symbol, or axis label reaches that reader, ask whether they would know this exact token; if it feels obvious to *you*, that is the signal to check it, not skip it. Lead with the plain-English name, never let a symbol or abbreviation appear before the words that define it, and prefer plain words in labels (an axis reading "overlap with the Néel state" beats a bare "$|\langle Z_2|\psi\rangle|^2$"). Make each gloss the *consequence*, not just a definition — "`k_states` = how many low-lying states we compute; 1 = ground state only, so no excited-state tower" — since the point is to help them decide. Only the common method families (ED, DMRG, QMC, VMC, NQS) need no gloss.
 - **One decision at a time**, Superpowers brainstorming style: 2–3 options, recommended first, each one line, each real and executable or explicitly marked "needs setup." Never bundle two decisions in one prompt.
 - **Key points only — never a wall of terminal text.** Every message is a few sentences or one compact table that covers the key points. This holds everywhere: questions, setup, runs, waits — short status lines, never raw log dumps. A single question buried in many words is itself a failure.
 - Confirmations are terse: a small table of what's inferred, then a clear choice.
 
 ## Expose everything that can drift
 
-Surface **every** choice that could make the reproduction diverge from the paper — never hide one behind a silent default. Low user burden is the job of clarity and brevity *per question*, **not** of asking fewer questions. The drift-relevant decisions:
+Surface **every** choice that could make the reproduction diverge from the paper — never hide one behind a silent default. Low user burden is the job of clarity and brevity *per question*, **not** of asking fewer questions. The drift-relevant decisions — the shared computation first, then each figure:
 
-- which figure or panel;
+- which figure(s) or panel(s) — one run can reproduce several from the same computation;
 - model + couplings, lattice, boundary;
-- observable + normalization + state selection + symmetry sector;
 - method, and whether it is exact or an approximation;
-- the parameters that method needs;
-- size / scope;
-- where it runs.
+- the parameters that method needs (whatever knobs it actually has — e.g. the symmetry sector for ED, the bond dimension for DMRG);
+- size / scope, and where it runs;
+- **for each figure:** the observable plotted (the y-axis) + normalization + which states it uses; the x-axis — the parameter swept, its range and spacing; what we expect to see and what would count as reproduced.
 
 Skip a question only when the user already answered it or it carries no scientific consequence — and still show that choice in the proposal so nothing is hidden.
 
@@ -32,55 +33,62 @@ Skip a question only when the user already answered it or it carries no scientif
 
 The run's memory lives in `results/<run>/run.json`. Write each confirmed choice to it the moment it is made; re-read it before building the report, before running, and before reporting. **Never** reconstruct a parameter from conversation memory — context is not a safe store.
 
-`run.json` is the *only* data source. The HTML report is built one-way from it and is never read back; there is no second copy of the data anywhere. Representative shape (the `results` block fills in after the run):
+`run.json` is the *only* data source. The HTML report is built one-way from it and is never read back; there is no second copy of the data anywhere. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same data share one run, never copied across files. Representative shape (each figure's `results` block fills in after the run):
 
 ```json
 {
   "paper":    { "id": "arXiv:2302.04919", "title": "…", "url": "…" },
-  "figure":   { "id": "Fig 2a", "plots": "<y> vs <x>", "x": "…", "y": "…", "expected": "what we should see and why" },
-  "model":    { "name": "…", "H": "…", "couplings": { "J": 1.0 }, "lattice": "…", "boundary": "PBC" },
-  "observe":  { "quantity": "…", "normalization": "…", "sector": "k=0, Sz=0", "states": "…" },
-  "method":   { "family": "ED", "exact": true, "tool": "XDiag", "settings": { } },
-  "scope":    { "label": "beginner", "sizes": [12, 16, 20] },
-  "estimate": { "wall": "~6 min", "memory": "~2 GB" },
+  "model":    { "name": "…", "H": "H = J_1 \\sum_{\\langle ij\\rangle} \\mathbf{S}_i\\cdot\\mathbf{S}_j", "couplings": { "$J_1$": 1.0 }, "lattice": "…", "boundary": "PBC" },
+  "method":   { "family": "ED", "exact": true, "tool": "XDiag", "settings": { "sector": "k=0, Sz=0", "k_states": 1 }, "note": "what the tool is and what its key settings mean, in plain English" },
+  "scope":    { "label": "beginner" },
+  "estimate": [ { "point": "N=16", "wall": "~30 s", "memory": "~0.2 GB" }, { "point": "N=20", "wall": "~6 min", "memory": "~2 GB" } ],
   "where":    "local",
   "risks":    ["observable not built-in — implement by hand"],
-  "results":  { "figure": "figs/fig2a.png", "numbers": {}, "match": "", "why": "", "wall": "", "changes": [], "rerun": "" }
+  "figures":  [
+    {
+      "id": "Fig 2a", "paper_image": "figs/paper_fig2a.png", "plots": "$m^2$ vs $J_2/J_1$", "x": "$J_2/J_1$", "y": "$m^2$",
+      "observe":  { "quantity": "…", "normalization": "…", "states": "ground state only" },
+      "expected": "what we should see and why",
+      "results":  { "figure": "figs/fig2a.png", "numbers": {}, "match": "", "why": "", "wall": "", "changes": [], "rerun": "" }
+    }
+  ]
 }
 ```
 
 ## The report: one standalone HTML
 
-Built from `run.json` into `results/<run>/report.html` — a single self-contained file, like a PDF: inline CSS, math rendered with KaTeX (styles and fonts inlined), the figure embedded. It opens anywhere with no companion files, no build step, and no server. Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — match that family, but aim a little more polished.
+Rendered from `run.json` by `python3 tools/skills/reproduce-paper/render_report.py <run-dir>` (Python stdlib only) into `results/<run>/report.html` — a single self-contained file, like a PDF: inline CSS, each figure base64-embedded, equations as inline **MathML**. No external assets, no network, no build step — it opens offline anywhere. It lays out as **Model / Method / Figures** — the shared computation, then one block per figure. Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — same family, a little more polished.
 
-Two moments, same file:
+Write math as LaTeX: `model.H` is a bare equation and renders as a centered display block; any other string may carry inline math in `$…$`. The bundled stdlib converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
 
-- **Proposal** (before compute) — the plan laid out in plain English: figure, model, observable, method, parameters, scope, where — plus a **cost table** (size → estimated wall time → memory) and a short note of anything likely to be finicky or custom. Results area marked pending.
-- **Results** (after compute) — the figure inline (the paper's panel beside ours when we have it), a small table of the key numbers, an honest "matched / partly / didn't — because…", the settings and wall-time that actually ran, and one rerun line.
+Two moments, same file, per figure:
+
+- **Proposal** (before compute) — the plan in plain English: the model; the method (with a one-line plain-English `note` on the tool and its settings — what XDiag is, what `k_states`/`tol` do) and its parameters; scope and where — plus a **cost table** with one row per run point (run point → estimated wall time → memory) and a short note of anything likely to be finicky or custom. Then, for each figure, what it plots, the observable, what's expected, and the paper's target panel (when captured); its result area marked pending.
+- **Results** (after compute) — for each figure: our figure beside the paper's original panel — capture that panel as an image (`paper_image`) so the two sit side by side — a small table of the key numbers, an honest "matched / partly / didn't — because…", the wall time that ran and any changes from the plan, and one rerun line.
 
 ## Flow
 
-1. **Brainstorm** each drift-relevant decision above, one at a time, saving each to `run.json` as it is confirmed.
+1. **Brainstorm** each drift-relevant decision above, one at a time, saving each to `run.json` as it is confirmed. When the target figure is pinned, save the paper's panel as an image (`paper_image`) so the report can sit it beside ours.
 2. **Estimate carefully.** Use the scaling rules below to fill the cost table — it drives the user's scope and where-to-run choices. Flag finicky or custom parts up front so they're anticipated, but don't over-plan.
-3. **Build the proposal** HTML from `run.json`; give its path and, on a laptop, offer to open it.
+3. **Build the proposal** page — `render_report.py <run-dir>`; give its path and, on a laptop, offer to open it.
 4. **Approve / Change / Discuss** — one question once the proposal is built. *Approve* (recommended) locks the plan and runs; *Change <which>* jumps back to that one choice; *Discuss* opens it up. This is the run's only approval.
 5. **Run** the approved plan. The script lands at `scripts/<model>_<brief>.{jl|py}` and saves its figure under `results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g., the chosen tool genuinely can't express this target).
-6. **Append results** to the same HTML and the `results` block of `run.json`. Then offer 2–3 next steps drawn from the outcome (larger scope, cross-check via `/cross-method-check`, or stop).
+6. **Append results** — fill each figure's `results` block in `run.json` and re-run `render_report.py`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
 
 A cluster run composes with `/slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
 
 ## Estimating cost
 
 - **ED** — estimate the symmetry-reduced Hilbert dimension `D` first; dense memory ≈ `D² × 8` bytes, dense diagonalization ≈ `O(D³)`; sparse/Lanczos scales with matvec cost × requested states.
-- **DMRG / MPS** — wall ~ `sweeps × L × χ³`; memory ~ `L × χ² × 8`. Calibrate with a short low-`χ` run when unsure.
-- **QMC** — `cost_per_sample × samples × chains`; short pilot for the sample rate.
-- **VMC / NQS** — `steps × samples × model_eval_cost`; short pilot for the step rate.
+- **DMRG / MPS** — wall ~ `sweeps × L × χ³`; memory ~ `L × χ² × 8`. If unsure, the probe below times a few low-`χ` sweeps.
+- **QMC** — `cost_per_sample × samples × chains`; the probe times a short batch for the per-sample rate.
+- **VMC / NQS** — `steps × samples × model_eval_cost`; the probe times a few steps for the per-step rate.
 
-A tiny, clearly-labeled timing probe is allowed before approval *only* to make the estimate honest; no other compute before Approve.
+Exactly one tiny, clearly-labeled timing probe may run before approval, and only to measure a rate (per sweep / sample / step) so the estimate is honest. It yields no scientific result and is discarded. Fill one cost-table row per run point. No other compute before Approve.
 
 ## Parameters each method needs
 
-Ask the knobs the chosen method actually uses (skip any already pinned), each as its own crisp choice:
+Ask the knobs the chosen method actually uses (skip any already pinned), each as its own crisp choice — each glossed in plain English per the UX rule, and that gloss recorded in `method.note` so the report carries it too.
 
 - **ED** — basis, boundary, symmetry sector, full-spectrum vs selected-state policy, diagonalization mode, tolerance, size list.
 - **DMRG / MPS** — bond dimension `χ`, sweeps, cutoff, initialization, boundary, observable, a convergence check.
