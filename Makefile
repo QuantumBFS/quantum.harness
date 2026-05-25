@@ -21,7 +21,7 @@ ZLP := zlp
 .PHONY: skills test clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
-INSTALLABLE := quarto quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro report-site
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro
 
 help: ## Show available targets and installable tools
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -85,10 +85,6 @@ install: ## Install a specific tool on demand. Usage: make install <tool>
 
 $(INSTALLABLE):
 	@:
-
-install-quarto: ## Install Quarto + TinyTeX for content rendering
-	@command -v quarto >/dev/null && echo "Quarto already installed" || { echo "Install Quarto: https://quarto.org/docs/get-started/"; exit 1; }
-	@quarto install tinytex --no-prompt 2>/dev/null || true
 
 install-quimb: ## Install quimb + numerical deps into .venv (Python fallback stack)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }

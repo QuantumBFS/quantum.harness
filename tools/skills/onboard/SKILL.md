@@ -33,13 +33,7 @@ The user is on first touch — they may not know the harness vocabulary (skill, 
 
 Run `make skills` only when skill sync is actually needed.
 
-Install only the stack the user's first selected workflow needs. Do not pre-install other method stacks. Each additional stack is installed on demand when that method is first invoked.
-
-#### 1a. Node toolchain (for `/report`)
-
-`/report` renders its HTML deliverable from a Fumadocs / Next.js project at `tools/skills/report/site/`. This needs Node 18+ and `pnpm`. When the user's first selected workflow leads to a `/report` invocation — directly or via `/reproduce-paper` — run `make install report-site` once. The target probes for `node` and `pnpm`, installs `pnpm` via the local package manager if missing (Homebrew on macOS, `npm i -g pnpm` otherwise), then runs `pnpm install` inside the site directory. Idempotent on re-entry: subsequent calls skip if `tools/skills/report/site/node_modules/` already exists.
-
-Do not pre-install this stack — wait until `/report` is the actual next step. Other workflows (`/solve`, `/model` calculations that don't ship a doc) don't need it.
+Install only the stack the user's first selected workflow needs. Do not pre-install other method stacks. Each additional stack is installed on demand when that method is first invoked. `/report` needs nothing installed — it renders `run.json` to HTML with the Python standard library.
 
 Report one line:
 - All good: "Domain stack ready."
