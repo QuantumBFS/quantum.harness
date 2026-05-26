@@ -114,6 +114,13 @@ For deep repeated layers, express the layer update with JAX control flow (`jax.l
 - **Performance hygiene**: report compile time, warm runtime, and peak memory as separate quantities.
 - **Contractor consistency**: rerun a small case with a simple contractor and compare the energy/gradient.
 
+## Upstream agent resources
+
+TensorCircuit-NG ships its own agent skills (task playbooks) and memory notes (backend / AD / contraction usage lore) in-repo. Not vendored here — consult upstream when working in this method:
+
+- Skills: https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/skills
+- Memory: https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/memory
+
 ## Citations
 
 - `.knowledge/literature/quantum-circuit-simulation/tensorcircuit-tensorcircuit-ng.md` - official TensorCircuit-NG repository and documentation entry.
