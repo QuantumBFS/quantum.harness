@@ -68,15 +68,16 @@ def method_section(run: dict, meth: dict, scope: dict) -> dict:
             "blocks": blocks}
 
 
-def figure_section(f: dict) -> dict:
+def figure_blocks(f: dict) -> list:
     obs = f.get("observe", {})
     res = f.get("results") or {}
     title = " — ".join(p for p in (f.get("id"), f.get("plots")) if p)
-    blocks = [{"kind": "kv", "pairs": [
-        ["x-axis", f.get("x")], ["y-axis", f.get("y")],
-        ["Observable", obs.get("quantity")],
-        ["Normalization", obs.get("normalization")],
-        ["States used", obs.get("states")]]}]
+    blocks = [{"kind": "heading", "level": 3, "text": title},
+              {"kind": "kv", "pairs": [
+                  ["x-axis", f.get("x")], ["y-axis", f.get("y")],
+                  ["Observable", obs.get("quantity")],
+                  ["Normalization", obs.get("normalization")],
+                  ["States used", obs.get("states")]]}]
     if f.get("expected"):
         blocks.append({"kind": "note", "label": "What we expect:", "text": f["expected"]})
     figs = []
@@ -109,7 +110,7 @@ def figure_section(f: dict) -> dict:
                        "text": "Results pending — our figure, the key numbers, and the "
                                "Reproduced / Partial / Did-not-match verdict appear here "
                                "after the approved run."})
-    return {"title": title, "blocks": blocks}
+    return blocks
 
 
 def translate(run: dict) -> dict:
@@ -120,7 +121,11 @@ def translate(run: dict) -> dict:
     of_model = f' of the {model.get("name")}' if model.get("name") else ""
     sections = [model_section(model),
                 method_section(run, run.get("method", {}), run.get("scope", {}))]
-    sections += [figure_section(f) for f in figures]
+    fig_blocks = [blk for f in figures for blk in figure_blocks(f)]
+    if fig_blocks:
+        sections.append({"title": "Figures",
+                         "note": "Each figure is one view of the computation above — its plan, then its result.",
+                         "blocks": fig_blocks})
     return {
         "title": paper.get("title") or paper.get("id", "Reproduction"),
         "eyebrow": paper.get("id", "reproduction"),

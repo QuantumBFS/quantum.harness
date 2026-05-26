@@ -263,7 +263,7 @@ h1{font-family:var(--serif);font-size:30px;line-height:1.15;margin:8px 0 12px;ma
 section{margin:38px 0 0}
 section>h2{font-family:var(--serif);font-size:22px;margin:0 0 4px}
 section>.note{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:72ch}
-section h3{font-family:var(--serif);font-size:18px;margin:16px 0 6px}
+section h3{font-family:var(--serif);font-size:18px;margin:22px 0 6px;border-top:1px solid var(--line);padding-top:14px}
 .para{font-size:14px;margin:10px 0;max-width:72ch}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:13px 16px;margin:10px 0}
 .card .title{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:2px}
@@ -310,24 +310,25 @@ def data_uri(path: Path) -> str:
 
 def kv(*pairs) -> str:
     rows = "".join(
-        f'<div class="k">{esc(k)}</div><div class="v">{mathify(v)}</div>'
+        f'<div class="k">{mathify(k)}</div><div class="v">{mathify(v)}</div>'
         for k, v in pairs if v not in (None, "", [], {})
     )
     return f'<div class="kv">{rows}</div>' if rows else ""
 
 
 def figbox(src: str, cap: str) -> str:
-    return f'<div class="figbox"><img src="{src}" alt="{esc(cap)}"><div class="cap">{esc(cap)}</div></div>'
+    return f'<div class="figbox"><img src="{src}" alt="{esc(cap)}"><div class="cap">{mathify(cap)}</div></div>'
 
 
 def figures_row(items, base_dir: Path) -> str:
+    base = base_dir.resolve()
     figs, missing = [], ""
     for it in items:
         src = it.get("src")
         if not src:
             continue
-        p = base_dir / src
-        if p.exists():
+        p = (base_dir / src).resolve()
+        if p.is_relative_to(base) and p.exists():       # contained in the run dir, no traversal
             figs.append(figbox(data_uri(p), it.get("caption", "")))
         else:
             missing += (f'<p class="note">Image not embedded — '
@@ -340,6 +341,7 @@ def block(b: dict, base_dir: Path) -> str:
     k = b.get("kind")
     if k == "heading":
         lvl = b.get("level", 3)
+        lvl = lvl if isinstance(lvl, int) and 1 <= lvl <= 6 else 3
         return f"<h{lvl}>{mathify(b.get('text'))}</h{lvl}>"
     if k == "text":
         return f'<p class="para">{mathify(b.get("text"))}</p>'
@@ -373,14 +375,14 @@ def block(b: dict, base_dir: Path) -> str:
         if not items:
             return ""
         title = b.get("title")
-        return (f'<div class="card"><div class="title">{esc(title)}</div>'
+        return (f'<div class="card"><div class="title">{mathify(title)}</div>'
                 f'<ul class="flat">{items}</ul></div>' if title
                 else f'<ul class="flat">{items}</ul>')
     if k == "code":
         pre = (f'<pre style="margin:6px 0 0;font-size:12.5px;overflow-x:auto">'
                f'<code>{esc(b.get("text"))}</code></pre>')
         title = b.get("title")
-        return (f'<div class="card"><div class="title">{esc(title)}</div>{pre}</div>'
+        return (f'<div class="card"><div class="title">{mathify(title)}</div>{pre}</div>'
                 if title else f'<div class="card">{pre}</div>')
     if k == "badge":
         style = {"good": "pill exact", "warn": "pill approx"}.get(b.get("style"), "pill")
@@ -392,7 +394,7 @@ def block(b: dict, base_dir: Path) -> str:
         return f'<div class="expected">{lead}{mathify(b.get("text"))}</div>'
     if k == "card":
         inner = "".join(block(c, base_dir) for c in b.get("blocks", []))
-        title = f'<div class="title">{esc(b["title"])}</div>' if b.get("title") else ""
+        title = f'<div class="title">{mathify(b["title"])}</div>' if b.get("title") else ""
         return f'<div class="card">{title}{inner}</div>' if title or inner else ""
     return ""
 
@@ -406,7 +408,7 @@ def section(s: dict, base_dir: Path) -> str:
 
 def render(doc: dict, base_dir: Path) -> str:
     title = doc.get("title", "Report")
-    eyebrow = f'<div class="eyebrow">{esc(doc["eyebrow"])}</div>' if doc.get("eyebrow") else ""
+    eyebrow = f'<div class="eyebrow">{mathify(doc["eyebrow"])}</div>' if doc.get("eyebrow") else ""
     if doc.get("url"):
         sub = f'<p class="sub"><a href="{esc(doc["url"])}">{esc(doc["url"])}</a></p>'
     elif doc.get("subtitle"):

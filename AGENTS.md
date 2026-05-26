@@ -135,7 +135,6 @@ After verification completes for a model card workflow, surface the writeup hand
 
 After the artifacts are in hand, if the user wants to publish, present, or share, route to:
 
-- `scientific-writing` — paper text.
 - `scientific-visualization` — figures.
 
 The handoff is offered, not forced. If the user just wants the result, that's a complete session.
@@ -191,12 +190,11 @@ Problem-solving primitives (generic; topic-agnostic, compose with the dispatcher
 - **cross-method-check** — verify the same observable with an independent method or diagnostic.
 - **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `tools/cluster/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
 - **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
-- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size, confirms setup before compute, then executes the approved size and writes a plan, the figure and data, and a run report.
+- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size, confirms setup before compute, then executes the approved plan and renders a self-contained HTML report — proposal before compute, results (figure, key numbers, an honest verdict) after.
 
 External/support skills:
 - **arxiv-search** — Semantic arXiv search via Valyu
 - **scientific-visualization** — Publication-quality figures (matplotlib/seaborn/plotly)
-- **scientific-writing** — Scientific manuscript drafting
 - **download-ref** — Add arXiv/DOI/book methodology references under `.knowledge/literature/<method>/`; rendered markdown is tracked, raw PDFs/metadata/figures are local-only.
 
 ## Tool Hierarchy
@@ -208,10 +206,16 @@ External/support skills:
 ## Ion skill management
 
 Ion (`Roger-luo/Ion`, installed at `~/.local/bin/ion`) is the skill manager.
-Local skill sources live in `tools/skills/`; Ion installs them (symlinks)
-into `.claude/skills/` per `Ion.toml`'s `[options.targets]`. `.claude/skills/`
-is git-ignored — the source of truth is `tools/skills/`. Reload Claude Code
-after any `ion add` / `ion remove` so the session picks up changes.
+All skills live under `tools/skills/` (Ion's `skills-dir`): local skills are
+committed real directories; remote skills are fetched there by `ion add` as
+symlinks into Ion's cache (gitignored; pinned in `Ion.lock`). Claude Code reads
+them through the committed `.claude/skills → ../tools/skills` symlink, so
+`tools/skills/` is the single source of truth. Do **not** add an
+`[options.targets]` stanza pointing Ion at `.claude/skills`: that path is itself
+a symlink back into `tools/skills/`, so Ion would write its per-skill target
+links into the source dir and clobber every skill with self-referential,
+dangling links. Reload Claude Code after any `ion add` / `ion remove` so the
+session picks up changes.
 
 **Conventions:**
 - `AGENTS.md` is canonical; `CLAUDE.md` is a one-liner (`treat @AGENTS.md the

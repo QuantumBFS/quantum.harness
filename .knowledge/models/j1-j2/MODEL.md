@@ -62,7 +62,7 @@ When the user is in a frontier regime, invoke the `arxiv-search` skill with a ta
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-writing` / `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 
