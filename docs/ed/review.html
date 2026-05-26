@@ -1,8 +1,7 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exact Diagonalization in 2026 — scope, tricks, tools</title>
 <style>
   :root {
@@ -190,7 +189,7 @@
     <button onclick="downloadSnapshot()">⬇  Save filled HTML</button>
     <button onclick="exportJson()">{ }  Export edits (JSON)</button>
     <button onclick="document.getElementById('jsonImport').click()">⤴  Import edits (JSON)</button>
-    <input id="jsonImport" type="file" accept="application/json" style="display:none" onchange="importJson(event)" />
+    <input id="jsonImport" type="file" accept="application/json" style="display:none" onchange="importJson(event)">
     <button onclick="resetState()">↺  Reset edits</button>
     <button onclick="window.print()">🖨  Print / PDF</button>
   </div>
@@ -363,7 +362,11 @@
     <div class="k">License</div><div class="v tight">Apache-2.0</div>
   </div>
   <span class="notes-label">Expert judgement — paste reply here</span>
-  <textarea class="notes" data-key="ex.xdiag" placeholder="e.g. comparison to HPhi on Fugaku, real-world reliability of sublattice coding at N=50, build pain on a specific cluster…"></textarea>
+  <textarea class="notes" data-key="ex.xdiag" placeholder="e.g. comparison to HPhi on Fugaku, real-world reliability of sublattice coding at N=50, build pain on a specific cluster…">canonical
+advanced sparse solver algorithms
+
+spectral transformation (shift invert, etc.)
+- not only eigenvalue but also spec density (shift invert makes a spec with high dos to a distinguishable one)</textarea>
 </div>
 
 <div class="card" data-kind="tool" data-key="tool.quspin">
@@ -386,7 +389,7 @@
     <div class="k">License</div><div class="v tight">BSD-3-Clause</div>
   </div>
   <span class="notes-label">Expert judgement — paste reply here</span>
-  <textarea class="notes" data-key="ex.quspin"></textarea>
+  <textarea class="notes" data-key="ex.quspin">user friendly</textarea>
 </div>
 
 <div class="card" data-kind="tool" data-key="tool.hphi">
@@ -711,7 +714,7 @@
 </div>
 
 <!-- prerendered trick cards -->
-<div data-trick-root>
+<div data-trick-root="">
 
 <div class="card" data-kind="trick" data-key="trick.sublattice-coding">
   <div class="card-head">
@@ -726,10 +729,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.sub" data-key="s.sub" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.sub" data-key="s.sub" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.sub" data-key="s.sub" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.sub" data-key="s.sub" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.sub" data-key="s.sub" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.sub" data-key="s.sub" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.sub" data-key="s.sub" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.sub" data-key="s.sub" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes (autosaved)</span>
   <textarea class="notes" data-key="n.sub" placeholder="What worked, what didn't, where you used it…"></textarea>
@@ -748,10 +751,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.lin" data-key="s.lin" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.lin" data-key="s.lin" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.lin" data-key="s.lin" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.lin" data-key="s.lin" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.lin" data-key="s.lin" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.lin" data-key="s.lin" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.lin" data-key="s.lin" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.lin" data-key="s.lin" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.lin"></textarea>
@@ -770,10 +773,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.dfa" data-key="s.dfa" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.dfa" data-key="s.dfa" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.dfa" data-key="s.dfa" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.dfa" data-key="s.dfa" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.dfa" data-key="s.dfa" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.dfa" data-key="s.dfa" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.dfa" data-key="s.dfa" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.dfa" data-key="s.dfa" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.dfa"></textarea>
@@ -792,10 +795,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.pol" data-key="s.pol" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.pol" data-key="s.pol" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.pol" data-key="s.pol" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.pol" data-key="s.pol" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.pol" data-key="s.pol" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.pol" data-key="s.pol" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.pol" data-key="s.pol" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.pol" data-key="s.pol" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.pol"></textarea>
@@ -814,10 +817,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.si" data-key="s.si" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.si" data-key="s.si" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.si" data-key="s.si" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.si" data-key="s.si" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.si" data-key="s.si" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.si" data-key="s.si" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.si" data-key="s.si" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.si" data-key="s.si" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.si"></textarea>
@@ -836,10 +839,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.cfd" data-key="s.cfd" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.cfd" data-key="s.cfd" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.cfd" data-key="s.cfd" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.cfd" data-key="s.cfd" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.cfd" data-key="s.cfd" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.cfd" data-key="s.cfd" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.cfd" data-key="s.cfd" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.cfd" data-key="s.cfd" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.cfd"></textarea>
@@ -858,10 +861,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.mf" data-key="s.mf" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.mf" data-key="s.mf" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.mf" data-key="s.mf" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.mf" data-key="s.mf" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.mf" data-key="s.mf" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.mf" data-key="s.mf" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.mf" data-key="s.mf" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.mf" data-key="s.mf" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.mf"></textarea>
@@ -880,10 +883,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.hp" data-key="s.hp" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.hp" data-key="s.hp" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.hp" data-key="s.hp" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.hp" data-key="s.hp" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.hp" data-key="s.hp" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.hp" data-key="s.hp" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.hp" data-key="s.hp" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.hp" data-key="s.hp" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.hp"></textarea>
@@ -902,10 +905,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.ch" data-key="s.ch" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.ch" data-key="s.ch" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.ch" data-key="s.ch" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.ch" data-key="s.ch" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.ch" data-key="s.ch" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.ch" data-key="s.ch" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.ch" data-key="s.ch" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.ch" data-key="s.ch" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.ch"></textarea>
@@ -924,10 +927,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.th" data-key="s.th" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.th" data-key="s.th" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.th" data-key="s.th" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.th" data-key="s.th" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.th" data-key="s.th" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.th" data-key="s.th" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.th" data-key="s.th" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.th" data-key="s.th" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.th"></textarea>
@@ -946,10 +949,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.gp" data-key="s.gp" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.gp" data-key="s.gp" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.gp" data-key="s.gp" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.gp" data-key="s.gp" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.gp" data-key="s.gp" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.gp" data-key="s.gp" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.gp" data-key="s.gp" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.gp" data-key="s.gp" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.gp"></textarea>
@@ -968,10 +971,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.ev" data-key="s.ev" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.ev" data-key="s.ev" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.ev" data-key="s.ev" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.ev" data-key="s.ev" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.ev" data-key="s.ev" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.ev" data-key="s.ev" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.ev" data-key="s.ev" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.ev" data-key="s.ev" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.ev"></textarea>
@@ -990,10 +993,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.tr" data-key="s.tr" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.tr" data-key="s.tr" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.tr" data-key="s.tr" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.tr" data-key="s.tr" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.tr" data-key="s.tr" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.tr" data-key="s.tr" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.tr" data-key="s.tr" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.tr" data-key="s.tr" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.tr"></textarea>
@@ -1012,10 +1015,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.ro" data-key="s.ro" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.ro" data-key="s.ro" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.ro" data-key="s.ro" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.ro" data-key="s.ro" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.ro" data-key="s.ro" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.ro" data-key="s.ro" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.ro" data-key="s.ro" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.ro" data-key="s.ro" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.ro"></textarea>
@@ -1034,10 +1037,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.kt" data-key="s.kt" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.kt" data-key="s.kt" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.kt" data-key="s.kt" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.kt" data-key="s.kt" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.kt" data-key="s.kt" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.kt" data-key="s.kt" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.kt" data-key="s.kt" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.kt" data-key="s.kt" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.kt"></textarea>
@@ -1056,10 +1059,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.kp" data-key="s.kp" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.kp" data-key="s.kp" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.kp" data-key="s.kp" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.kp" data-key="s.kp" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.kp" data-key="s.kp" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.kp" data-key="s.kp" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.kp" data-key="s.kp" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.kp" data-key="s.kp" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.kp"></textarea>
@@ -1078,10 +1081,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.cn" data-key="s.cn" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.cn" data-key="s.cn" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.cn" data-key="s.cn" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.cn" data-key="s.cn" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.cn" data-key="s.cn" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.cn" data-key="s.cn" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.cn" data-key="s.cn" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.cn" data-key="s.cn" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.cn"></textarea>
@@ -1100,10 +1103,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.tp" data-key="s.tp" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.tp" data-key="s.tp" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.tp" data-key="s.tp" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.tp" data-key="s.tp" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.tp" data-key="s.tp" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.tp" data-key="s.tp" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.tp" data-key="s.tp" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.tp" data-key="s.tp" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.tp"></textarea>
@@ -1122,10 +1125,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.sp" data-key="s.sp" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.sp" data-key="s.sp" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.sp" data-key="s.sp" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.sp" data-key="s.sp" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.sp" data-key="s.sp" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.sp" data-key="s.sp" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.sp" data-key="s.sp" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.sp" data-key="s.sp" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.sp"></textarea>
@@ -1144,10 +1147,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.64" data-key="s.64" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.64" data-key="s.64" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.64" data-key="s.64" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.64" data-key="s.64" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.64" data-key="s.64" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.64" data-key="s.64" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.64" data-key="s.64" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.64" data-key="s.64" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.64"></textarea>
@@ -1166,10 +1169,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.hu" data-key="s.hu" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.hu" data-key="s.hu" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.hu" data-key="s.hu" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.hu" data-key="s.hu" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.hu" data-key="s.hu" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.hu" data-key="s.hu" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.hu" data-key="s.hu" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.hu" data-key="s.hu" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.hu"></textarea>
@@ -1188,10 +1191,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.spr" data-key="s.spr" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.spr" data-key="s.spr" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.spr" data-key="s.spr" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.spr" data-key="s.spr" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.spr" data-key="s.spr" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.spr" data-key="s.spr" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.spr" data-key="s.spr" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.spr" data-key="s.spr" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.spr"></textarea>
@@ -1210,10 +1213,10 @@
   </div>
   <div class="status-line">
     <span style="font-size:12px;color:var(--muted)">status:</span>
-    <label class="plan"><input type="radio" name="s.ss" data-key="s.ss" value="plan" /> planned</label>
-    <label class="tried"><input type="radio" name="s.ss" data-key="s.ss" value="tried" /> tried</label>
-    <label class="std"><input type="radio" name="s.ss" data-key="s.ss" value="std" /> standard</label>
-    <label class="skip"><input type="radio" name="s.ss" data-key="s.ss" value="skip" /> skip</label>
+    <label class="plan"><input type="radio" name="s.ss" data-key="s.ss" value="plan"> planned</label>
+    <label class="tried"><input type="radio" name="s.ss" data-key="s.ss" value="tried"> tried</label>
+    <label class="std"><input type="radio" name="s.ss" data-key="s.ss" value="std"> standard</label>
+    <label class="skip"><input type="radio" name="s.ss" data-key="s.ss" value="skip"> skip</label>
   </div>
   <span class="notes-label">your notes</span>
   <textarea class="notes" data-key="n.ss"></textarea>
@@ -1224,7 +1227,7 @@
 <details>
   <summary>Add a custom trick</summary>
   <div style="margin-top:8px">
-    <input class="notes" data-key="trick.custom.title" placeholder="Title" style="min-height:0;height:34px" />
+    <input class="notes" data-key="trick.custom.title" placeholder="Title" style="min-height:0;height:34px" value="">
     <textarea class="notes" data-key="trick.custom.body" placeholder="Description, citations, why it pays off, where you used it…"></textarea>
   </div>
 </details>
@@ -1337,7 +1340,7 @@
 <details>
   <summary>Add your own question</summary>
   <div style="margin-top:8px">
-    <input class="notes" data-key="q.custom.title" placeholder="Question" style="min-height:0;height:34px" />
+    <input class="notes" data-key="q.custom.title" placeholder="Question" style="min-height:0;height:34px" value="">
     <textarea class="notes" data-key="q.custom.body" placeholder="Context + expert answer…"></textarea>
   </div>
 </details>
@@ -1531,5 +1534,6 @@
 })();
 </script>
 
-</body>
-</html>
+
+
+</body></html>

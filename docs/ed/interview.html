@@ -1,8 +1,7 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exact diagonalization — expert interview</title>
 <style>
   :root {
@@ -155,13 +154,13 @@
   <div class="sub">Practical judgement for exact diagonalization</div>
   <div class="status" aria-live="polite"><span class="dot"></span><span id="saveStatus">saved locally</span></div>
   <nav id="auto-nav">
-    <ol id="nav-list"></ol>
+    <ol id="nav-list"><li><a href="#section-1">1. First look</a></li><li><a href="#section-2">2. Symmetries and sectors</a></li><li><a href="#section-3">3. Boundaries and clusters</a></li><li><a href="#section-4">4. Basis and Hamiltonian</a></li><li><a href="#section-5">5. Debugging a new code</a></li><li><a href="#section-6">6. Run-quality signals</a></li><li><a href="#section-7">7. Software and performance</a></li><li><a href="#section-8">8. Expert judgement</a></li><li><a href="#section-9">9. Optional deep probes</a></li></ol>
   </nav>
   <div class="controls">
     <button onclick="downloadSnapshot()">⬇  Save filled HTML</button>
     <button onclick="exportJson()">{ }  Export edits (JSON)</button>
     <button onclick="document.getElementById('jsonImport').click()">⤴  Import edits (JSON)</button>
-    <input id="jsonImport" type="file" accept="application/json,.json" style="display:none" onchange="importJson(event)" />
+    <input id="jsonImport" type="file" accept="application/json,.json" style="display:none" onchange="importJson(event)">
     <button onclick="resetState()">↺  Reset to template</button>
     <button onclick="window.print()">🖨  Print / PDF</button>
   </div>
@@ -176,8 +175,8 @@
 
 <header class="hero">
   <div class="tag">Interview script · quantum many-body methods</div>
-  <h1 contenteditable="true" data-title>Exact diagonalization — expert interview</h1>
-  <p class="lede" contenteditable="true" data-subtitle>An interview script for talking to a working exact diagonalization (ED) practitioner. Cues are prompts, not answer choices. The useful answer is usually: what signal did you notice, what did it mean, and what did you do next?</p>
+  <h1 contenteditable="true" data-title="">Exact diagonalization — expert interview</h1>
+  <p class="lede" contenteditable="true" data-subtitle="">An interview script for talking to a working exact diagonalization (ED) practitioner. Cues are prompts, not answer choices. The useful answer is usually: what signal did you notice, what did it mean, and what did you do next?</p>
   <div class="rhythm">
     <strong>Interview rhythm.</strong> Ask the question, let the expert answer freely, then use cues only if the answer stalls. Tick cues the expert touched on. When an answer is shaped like a lesson, capture it as <em>signal</em> (what they noticed) → <em>understanding</em> (what it meant) → <em>action</em> (what to do), plus <em>scope</em> (where the lesson applies) and <em>exception</em> (where it breaks).
   </div>
@@ -185,24 +184,2387 @@
   <div class="meta-grid">
     <div class="field">
       <label for="expertName">Expert</label>
-      <input id="expertName" data-meta="expert" type="text" placeholder="Name, affiliation" />
+      <input id="expertName" data-meta="expert" type="text" placeholder="Name, affiliation">
     </div>
     <div class="field">
       <label for="interviewerName">Interviewer</label>
-      <input id="interviewerName" data-meta="interviewer" type="text" placeholder="You" />
+      <input id="interviewerName" data-meta="interviewer" type="text" placeholder="You">
     </div>
     <div class="field">
       <label for="interviewDate">Date</label>
-      <input id="interviewDate" data-meta="date" type="date" />
+      <input id="interviewDate" data-meta="date" type="date">
     </div>
     <div class="field">
       <label for="context">Context</label>
-      <input id="context" data-meta="context" type="text" placeholder="Model, lattice, stack" />
+      <input id="context" data-meta="context" type="text" placeholder="Model, lattice, stack">
     </div>
   </div>
 </header>
 
-<div id="sections"></div>
+<div id="sections">
+      <section class="script-section" id="section-1" data-section-index="0">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">1. First look</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Start with concrete triage before method details.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="0">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q1.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">When you first see a Hamiltonian, lattice, and target observable, what do you check before touching code?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="0" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="0" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Hilbert-space size</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">conserved quantities</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">boundary conditions</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">known limits</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="4">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">whether ED is meaningful</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">Dense or Sparse (matrix-free) rep for the target observable
+
+ETH, scar, etc. =&gt; full spec =&gt; always dense Hamiltonian in a sector</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q1.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What makes this feel like a good ED problem?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="0" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="0" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">small-cluster benchmark</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">full spectrum</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">symmetry-resolved data</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">level statistics</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">validating DMRG, VMC, QMC results</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">What other methods cannot do</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q1.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you make the first feasibility estimate?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="0" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="0" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">basis dimension</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Lanczos vector memory</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sparse matrix memory</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">matrix-free matvec cost</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">laptop vs cluster</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="0" data-question="2" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-2" data-section-index="1">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">2. Symmetries and sectors</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Ask for defaults, then ask what signal changes the default.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="1">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q2.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Which symmetries do you normally use first, and why?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="1" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="1" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">particle number</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Sz</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">translation</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">inversion</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">spin flip</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">point group</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="6">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">SU(2)</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="7">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">particle-hole</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="0" data-cue="7" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">U(1): does not change basis</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q2.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">When do you deliberately avoid using a symmetry?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="1" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="1" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">implementation risk</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">fragile quantum numbers</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">small size already feasible</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">observable breaks symmetry</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">bookkeeping too costly</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q2.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you choose which sector to diagonalize?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="1" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="1" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">expected ground-state sector</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">scan all plausible sectors</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">literature convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">start without spatial symmetry</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="1" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">problem driven
+
+low-energy: ground state sector
+ETH: largest sector
+specific heat: all sectors</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-3" data-section-index="2">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">3. Boundaries and clusters</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Keep this tied to observables and finite-size artifacts.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="2">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q3.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you choose boundary conditions?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="2" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="2" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">open</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">periodic</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">cylinder</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">twisted flux</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">match literature</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">reduce momentum-shell artefacts</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">problem driven (user needs)</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q3.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">For 2D ED, how do you choose the cluster shape?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="2" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="2" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">aspect ratio</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">point-group symmetry</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="2">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">allowed momenta</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sublattice structure</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">frustration</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">largest feasible size</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="2" data-question="1" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">problem driven (user needs)</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-4" data-section-index="3">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">4. Basis and Hamiltonian</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Move from representation choices to the bugs experts expect.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="3">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q4.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you usually represent the basis?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="3" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="3" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">bitstrings</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">occupation integers</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">explicit occupation lists</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">package basis</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">constrained basis</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">fermionic ordering</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q4.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you map a state back to its index?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="3" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="3" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">lookup table</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">hash map</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="2">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">binary search</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">combinadic indexing</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">let the package handle it</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">hash map usually fastest</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q4.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Where do bugs most often enter the Hamiltonian?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="3" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="3" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">fermion signs</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">boundary terms</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">factor of 2 in coupling normalization</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Pauli convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="4">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">momentum phase</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">double-counted bonds</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="6">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">constant shifts</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="2" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">complicated symmetries (usually)</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="3">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q4.4</div>
+            <div class="qtext" contenteditable="true" data-question-text="">In symmetry-projected or momentum bases, what details are dangerous?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="3" data-question="3">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="3" data-question="3">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">representative choice</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="3" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">symmetry-orbit length</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="3" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="2">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">phase convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="3" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="3">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">zero-norm representatives</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="3" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="4">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">empty symmetry sectors</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="3" data-question="3" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">Hermicity surfaces problems</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-5" data-section-index="4">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">5. Debugging a new code</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Ask for the actual printouts and the order of attack.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="4">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q5.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Before diagonalizing, what debug information do you want to see?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="4" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="4" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">basis dimension</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sector label</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="2">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">bond count</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="3">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">term count</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="4">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Hermiticity error</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">trace</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="6">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">row sparsity</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="7">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">tiny spectrum</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="0" data-cue="7" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">1. basis dim
+2. Hermiticity error
+</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q5.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">If the first energy looks wrong, where do you look first?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="4" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="4" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">basis size</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sign convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">boundary condition</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">coupling normalization</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sector choice</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Lanczos tolerance</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="1" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q5.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What small-size or limit checks do you trust most?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="4" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="4" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">L=2</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">L=4</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">zero coupling</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="3">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">free limit</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">strong-coupling limit</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="5">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">exact analytic point</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="6">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">dense brute force</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="4" data-question="2" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">free limit: single-particle solution</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-6" data-section-index="5">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">6. Run-quality signals</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Separate good signs from stop-now signs.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="5">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q6.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What does a healthy ED run look like?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="5" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="5" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">expected dimensions</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">stable matvec time</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">residual decay</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">correct degeneracies</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">symmetry expectation values</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="5">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">benchmark agreement</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">1. expected dimensions
+2. benchmark agreement
+3. stable marvel time</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q6.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What makes you stop immediately?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="5" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="5" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">non-Hermitian matrix</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">complex eigenvalues</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">impossible energy</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">wrong degeneracy</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="4">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">sector dimension mismatch</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="5">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">memory far above estimate</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="1" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">1. sector dimension mismatch
+2. memory</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q6.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Have you had a run look converged but still be wrong?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="5" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="5" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">wrong observable</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">wrong sector</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">bad cluster</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">normalization error</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">misleading finite-size trend</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">trust package defaults</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="5" data-question="2" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">wrong matrix</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-7" data-section-index="6">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">7. Software and performance</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Focus on real tradeoffs, not package opinions in the abstract.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="6">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q7.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">How do you choose between package ED and custom ED?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="6" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="6" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">QuSpin</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">XDiag</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">custom sparse code</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">matrix-free code</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">collaborator stack</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">literature stack</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">BUILD UP basis and MATRIX ON ONES OWN
+
+Default not consider GPU unless specific requirements</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q7.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Where do real ED speedups usually come from?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="6" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="6" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">symmetry sectors</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">matrix-free matvec</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="2">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">state indexing</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">memory layout</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">avoiding allocations</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">threading</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="6">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">cluster use</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="6" data-question="1" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-8" data-section-index="7">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">8. Expert judgement</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Close with what a reviewer would accept or reject.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="7">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q8.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What makes an ED calculation feel clean and trustworthy?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="7" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="7" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">clear convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">reproducible geometry</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">explicit sectors</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">limit checks</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">residuals</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="5">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">benchmark comparison</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="6">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">code provenance</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="0" data-cue="6" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">physically sound</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q8.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">What mistake do juniors or agents repeatedly make?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="7" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="7" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">trust defaults</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">skip tiny checks</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">overuse symmetries</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">confuse conventions</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">ignore finite-size effects</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="5">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">report too few diagnostics</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="7" data-question="1" data-cue="5" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">Always double check / benchmark</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    
+      <section class="script-section" id="section-9" data-section-index="8">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title="">9. Optional deep probes</h2>
+            <p class="section-note" contenteditable="true" data-section-note="">Use only if the expert naturally goes there.</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="8">＋ question</button>
+        </div>
+        
+      <article class="question" data-question-index="0">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q9.1</div>
+            <div class="qtext" contenteditable="true" data-question-text="">When do anti-unitary symmetries matter practically?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="8" data-question="0">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="8" data-question="0">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">real Hamiltonian</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="0" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">time reversal</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="0" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">parity × time-reversal (PT)</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="0" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">real-basis memory halving</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="0" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">bookkeeping cost</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="0" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase."></textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="1">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q9.2</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Do you ever use SU(2) explicitly, or mostly as a check?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="8" data-question="1">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="8" data-question="1">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue " data-cue-index="0">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">block reduction</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="1" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="1">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">multiplet structure</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="1" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">implementation burden</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="1" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">degeneracy check</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="1" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">Just as a check</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      <article class="question" data-question-index="2">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">Q9.3</div>
+            <div class="qtext" contenteditable="true" data-question-text="">Where do people trip up with twisted boundary conditions?</div>
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="8" data-question="2">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="8" data-question="2">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          
+        <span class="cue checked" data-cue-index="0">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Berry phase</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="2" data-cue="0" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue checked" data-cue-index="1">
+          <input type="checkbox" checked="" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">Chern number</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="2" data-cue="1" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="2">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">flux insertion through the ring</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="2" data-cue="2" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="3">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">phase convention</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="2" data-cue="3" aria-label="remove cue">×</button>
+        </span>
+      
+        <span class="cue " data-cue-index="4">
+          <input type="checkbox" aria-label="mark cue">
+          <span class="cue-label" contenteditable="true">gauge choice</span>
+          <button class="cue-x" type="button" data-action="remove-cue" data-section="8" data-question="2" data-cue="4" aria-label="remove cue">×</button>
+        </span>
+      
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer="" placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">more points in k-space</textarea>
+        <details class="capture">
+          <summary>Capture as signal → understanding → action (with scope · exception)</summary>
+          <div class="capture-grid">
+            
+      <div class="capture-field ">
+        <label>Signal — what was observed</label>
+        <input data-capture="signal" type="text" value="" placeholder="e.g. 'energy off by exactly 2×'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Understanding — what it meant</label>
+        <input data-capture="understanding" type="text" value="" placeholder="e.g. 'sum double-counts NN bonds'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Action — what to do</label>
+        <input data-capture="action" type="text" value="" placeholder="e.g. 'divide coupling by 2 in code'">
+      </div>
+    
+            
+      <div class="capture-field ">
+        <label>Scope — where the lesson applies</label>
+        <input data-capture="scope" type="text" value="" placeholder="e.g. 'all Heisenberg lattices'">
+      </div>
+    
+            
+      <div class="capture-field wide">
+        <label>Exception — where it breaks</label>
+        <input data-capture="exception" type="text" value="" placeholder="e.g. 'fails for biased boundary terms'">
+      </div>
+    
+          </div>
+        </details>
+      </article>
+    
+      </section>
+    </div>
 
 <div class="footer">
   <p>Your edits autosave to this browser. <em>Save filled HTML</em> writes a new file with your edits already in it — reopen that file later (anywhere, no internet) to continue. <em>Export JSON</em> writes only the edits, smaller and easy to share. Works offline. Print to make a PDF transcript.</p>
@@ -216,7 +2578,7 @@
 
 <!-- Bootstrap state from a "Save filled HTML" snapshot lives here.
      Empty by default; takes precedence over the seed when present. -->
-<script type="application/json" id="bootstrap-state"></script>
+<script type="application/json" id="bootstrap-state">{"title":"Exact diagonalization — expert interview","subtitle":"An interview script for talking to a working exact diagonalization (ED) practitioner. Cues are prompts, not answer choices. The useful answer is usually: what signal did you notice, what did it mean, and what did you do next?","meta":{"expert":"","interviewer":"","date":"","context":""},"sections":[{"title":"1. First look","note":"Start with concrete triage before method details.","questions":[{"text":"When you first see a Hamiltonian, lattice, and target observable, what do you check before touching code?","cues":["Hilbert-space size","conserved quantities","boundary conditions","known limits","whether ED is meaningful"],"checked":[true,true,false,false,true],"answer":"Dense or Sparse (matrix-free) rep for the target observable\n\nETH, scar, etc. => full spec => always dense Hamiltonian in a sector","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"What makes this feel like a good ED problem?","cues":["small-cluster benchmark","full spectrum","symmetry-resolved data","level statistics","validating DMRG, VMC, QMC results"],"checked":[false,false,false,false,false],"answer":"What other methods cannot do","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"How do you make the first feasibility estimate?","cues":["basis dimension","Lanczos vector memory","sparse matrix memory","matrix-free matvec cost","laptop vs cluster"],"checked":[true,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"2. Symmetries and sectors","note":"Ask for defaults, then ask what signal changes the default.","questions":[{"text":"Which symmetries do you normally use first, and why?","cues":["particle number","Sz","translation","inversion","spin flip","point group","SU(2)","particle-hole"],"checked":[true,true,false,false,false,false,false,false],"answer":"U(1): does not change basis","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"When do you deliberately avoid using a symmetry?","cues":["implementation risk","fragile quantum numbers","small size already feasible","observable breaks symmetry","bookkeeping too costly"],"checked":[true,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"How do you choose which sector to diagonalize?","cues":["expected ground-state sector","scan all plausible sectors","literature convention","start without spatial symmetry"],"checked":[false,false,false,false],"answer":"problem driven\n\nlow-energy: ground state sector\nETH: largest sector\nspecific heat: all sectors","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"3. Boundaries and clusters","note":"Keep this tied to observables and finite-size artifacts.","questions":[{"text":"How do you choose boundary conditions?","cues":["open","periodic","cylinder","twisted flux","match literature","reduce momentum-shell artefacts"],"checked":[false,false,false,false,false,false],"answer":"problem driven (user needs)","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"For 2D ED, how do you choose the cluster shape?","cues":["aspect ratio","point-group symmetry","allowed momenta","sublattice structure","frustration","largest feasible size"],"checked":[true,true,true,false,false,false],"answer":"problem driven (user needs)","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"4. Basis and Hamiltonian","note":"Move from representation choices to the bugs experts expect.","questions":[{"text":"How do you usually represent the basis?","cues":["bitstrings","occupation integers","explicit occupation lists","package basis","constrained basis","fermionic ordering"],"checked":[true,false,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"How do you map a state back to its index?","cues":["lookup table","hash map","binary search","combinadic indexing","let the package handle it"],"checked":[false,true,true,false,false],"answer":"hash map usually fastest","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"Where do bugs most often enter the Hamiltonian?","cues":["fermion signs","boundary terms","factor of 2 in coupling normalization","Pauli convention","momentum phase","double-counted bonds","constant shifts"],"checked":[true,false,false,false,true,false,false],"answer":"complicated symmetries (usually)","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"In symmetry-projected or momentum bases, what details are dangerous?","cues":["representative choice","symmetry-orbit length","phase convention","zero-norm representatives","empty symmetry sectors"],"checked":[true,false,true,true,true],"answer":"Hermicity surfaces problems","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"5. Debugging a new code","note":"Ask for the actual printouts and the order of attack.","questions":[{"text":"Before diagonalizing, what debug information do you want to see?","cues":["basis dimension","sector label","bond count","term count","Hermiticity error","trace","row sparsity","tiny spectrum"],"checked":[true,false,true,true,true,false,false,false],"answer":"1. basis dim\n2. Hermiticity error\n","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"If the first energy looks wrong, where do you look first?","cues":["basis size","sign convention","boundary condition","coupling normalization","sector choice","Lanczos tolerance"],"checked":[true,false,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"What small-size or limit checks do you trust most?","cues":["L=2","L=4","zero coupling","free limit","strong-coupling limit","exact analytic point","dense brute force"],"checked":[false,false,false,true,false,true,true],"answer":"free limit: single-particle solution","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"6. Run-quality signals","note":"Separate good signs from stop-now signs.","questions":[{"text":"What does a healthy ED run look like?","cues":["expected dimensions","stable matvec time","residual decay","correct degeneracies","symmetry expectation values","benchmark agreement"],"checked":[true,true,false,false,false,true],"answer":"1. expected dimensions\n2. benchmark agreement\n3. stable marvel time","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"What makes you stop immediately?","cues":["non-Hermitian matrix","complex eigenvalues","impossible energy","wrong degeneracy","sector dimension mismatch","memory far above estimate"],"checked":[false,false,false,false,true,true],"answer":"1. sector dimension mismatch\n2. memory","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"Have you had a run look converged but still be wrong?","cues":["wrong observable","wrong sector","bad cluster","normalization error","misleading finite-size trend","trust package defaults"],"checked":[false,false,false,false,false,false],"answer":"wrong matrix","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"7. Software and performance","note":"Focus on real tradeoffs, not package opinions in the abstract.","questions":[{"text":"How do you choose between package ED and custom ED?","cues":["QuSpin","XDiag","custom sparse code","matrix-free code","collaborator stack","literature stack"],"checked":[false,false,false,false,false,false],"answer":"BUILD UP basis and MATRIX ON ONES OWN\n\nDefault not consider GPU unless specific requirements","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"Where do real ED speedups usually come from?","cues":["symmetry sectors","matrix-free matvec","state indexing","memory layout","avoiding allocations","threading","cluster use"],"checked":[true,true,true,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"8. Expert judgement","note":"Close with what a reviewer would accept or reject.","questions":[{"text":"What makes an ED calculation feel clean and trustworthy?","cues":["clear convention","reproducible geometry","explicit sectors","limit checks","residuals","benchmark comparison","code provenance"],"checked":[true,false,false,false,false,true,false],"answer":"physically sound","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"What mistake do juniors or agents repeatedly make?","cues":["trust defaults","skip tiny checks","overuse symmetries","confuse conventions","ignore finite-size effects","report too few diagnostics"],"checked":[false,true,false,false,false,false],"answer":"Always double check / benchmark","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]},{"title":"9. Optional deep probes","note":"Use only if the expert naturally goes there.","questions":[{"text":"When do anti-unitary symmetries matter practically?","cues":["real Hamiltonian","time reversal","parity × time-reversal (PT)","real-basis memory halving","bookkeeping cost"],"checked":[false,false,false,false,false],"answer":"","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"Do you ever use SU(2) explicitly, or mostly as a check?","cues":["block reduction","multiplet structure","implementation burden","degeneracy check"],"checked":[false,false,false,false],"answer":"Just as a check","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}},{"text":"Where do people trip up with twisted boundary conditions?","cues":["Berry phase","Chern number","flux insertion through the ring","phase convention","gauge choice"],"checked":[true,true,false,false,false],"answer":"more points in k-space","capture":{"signal":"","understanding":"","action":"","scope":"","exception":""}}]}]}</script>
 
 <script>
 (function () {
@@ -705,5 +3067,6 @@
   render();
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
