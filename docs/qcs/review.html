@@ -125,7 +125,7 @@
     <ol>
       <li><a href="#approaches">1. Which approach wins, when</a></li>
       <li><a href="#stack">2. The software stack</a></li>
-      <li><a href="#ceiling">3. The 2026 feasibility ceiling</a></li>
+      <li><a href="#ceiling">3. 2026 feasibility anchors</a></li>
       <li><a href="#picker">4. Choose by use case</a></li>
       <li><a href="#sources">5. Sources</a></li>
     </ol>
@@ -151,10 +151,10 @@
 <header class="hero">
   <div class="tag">Method review · high-level companion to the expert interview · current to 2026-05</div>
   <h1>Before you tune a single setting, two choices set your ceiling: how you represent the circuit, and which software stack you run it on.</h1>
-  <p>The running task is the variational quantum eigensolver (VQE): a parameterized circuit whose angles are tuned to minimize an energy — a ground-state search, done on a simulator. Two high-level forks come first. <strong>Representation:</strong> contract the circuit as a tensor network, hold the full amplitude vector, or approximate it as a matrix-product state. <strong>Stack:</strong> which framework you build on. Get these right and the detailed tuning has room to work; get them wrong and no setting saves you.</p>
-  <p>This is the high-level map. Its companion — the expert interview — drills into the detailed decisions <em>inside</em> a chosen stack (precision, gradient method, contraction tuning, hardware split) and the rule an expert uses for each. The concrete scale anchor here is the TensorCircuit-NG paper's benchmark: a 32-qubit, 16-layer transverse-field Ising VQE.</p>
+  <p>These two choices are general to quantum circuit simulation; the variational quantum eigensolver (VQE) — a parameterized circuit whose angles are tuned to minimize an energy — is the recurring example. Two high-level forks come first. <strong>Representation:</strong> contract the circuit as a tensor network, hold the full amplitude vector, or approximate it as a matrix-product state. <strong>Stack:</strong> which framework you build on. Get these right and the detailed tuning has room to work; get them wrong and no setting saves you.</p>
+  <p>This is the high-level map. Its companion — the expert interview — drills into the detailed decisions <em>inside</em> a chosen stack (precision, gradient method, contraction tuning, hardware split) and the rule an expert uses for each. The concrete scale anchor here is the TensorCircuit-NG (TC-NG) paper's benchmark: a 32-qubit, 16-layer transverse-field Ising VQE.</p>
   <div class="stats">
-    <div class="stat"><div class="v">32 q × 16 layers</div><div class="k">Benchmark variational circuit (TFIM), exact, on one GPU</div></div>
+    <div class="stat"><div class="v">32 q × 16 layers</div><div class="k">Benchmark variational circuit (transverse-field Ising model), exact, on one GPU</div></div>
     <div class="stat"><div class="v">17.86 s</div><div class="k">One warm energy-and-gradient evaluation, single H200 GPU</div></div>
     <div class="stat"><div class="v">≈ 33 qubits</div><div class="k">Full-statevector ceiling on an 80 GB GPU (2<sup>33</sup> × 8 B ≈ 64 GiB) — beyond it, contraction or MPS</div></div>
     <div class="stat"><div class="v">6 stacks</div><div class="k">TC-NG · quimb · Qiskit Aer · cuQuantum · PennyLane · Yao — section 2 chooses between them</div></div>
@@ -164,38 +164,38 @@
 <!-- ============================================================ -->
 <section id="approaches">
 <h2>1. Which approach wins, when</h2>
-<p class="lede">Three ways to represent the same VQE state. The choice fixes the memory wall and whether the answer is exact or approximate — the first thing to settle, before any framework or setting.</p>
+<p class="lede">Three ways to represent the same circuit state. The choice fixes the memory wall and whether the answer is exact or approximate — the first thing to settle, before any framework or setting.</p>
 
 <div class="scroll-x">
 <table>
   <thead><tr>
-    <th style="width:22%">Approach</th>
+    <th style="width:20%">Approach</th>
     <th>What it represents</th>
-    <th style="width:20%">When it wins</th>
-    <th style="width:16%">Reach (qubits)</th>
-    <th style="width:18%">Main limit</th>
+    <th style="width:18%">When it wins</th>
+    <th style="width:21%">Works while</th>
+    <th style="width:17%">Main limit</th>
   </tr></thead>
   <tbody>
     <tr>
       <td><strong>Tensor-network contraction</strong></td>
       <td>Builds the circuit as a network of tensors and contracts only what the observable needs — never forms the full 2<sup>N</sup> amplitude vector if the path avoids it.</td>
-      <td>The default for exact VQE energies and gradients; pays off whenever a smart contraction order keeps the largest intermediate tensor small.</td>
-      <td class="num">30+ at modest depth on one GPU (benchmark: 32 × 16)</td>
+      <td>The default for exact expectation values and gradients; pays off whenever a smart contraction order keeps the largest intermediate tensor small.</td>
+      <td>the largest intermediate tensor still fits memory (≈ 32 × 16 on one GPU)</td>
       <td>The largest intermediate tensor — <em>memory, not qubit count, is the wall.</em></td>
     </tr>
     <tr>
       <td><strong>Full statevector</strong></td>
       <td>The full 2<sup>N</sup> complex amplitude vector, held in memory.</td>
       <td>Smaller systems, verification, sampling and noise studies, or when you genuinely need every amplitude.</td>
-      <td class="num">≈ 33 on an 80 GB GPU (complex64)</td>
+      <td>the full 2<sup>N</sup> state fits memory (≈ 33 qubits on an 80 GB GPU)</td>
       <td>Memory doubles with every added qubit; no structure exploited.</td>
     </tr>
     <tr>
       <td><strong>Matrix-product state (MPS)</strong></td>
       <td>The state as a chain of small tensors linked by a bond dimension χ that caps how much entanglement it can carry.</td>
       <td>1D or low-entanglement circuits with many qubits, where χ stays bounded.</td>
-      <td class="num">100s, if entanglement (χ) stays bounded</td>
-      <td>A truncation error that grows with entanglement; too-small χ silently biases the energy.</td>
+      <td>the result converges at a feasible bond dimension χ (100s of qubits if χ stays small)</td>
+      <td>A truncation error that grows with entanglement; too-small χ silently biases the result.</td>
     </tr>
   </tbody>
 </table>
@@ -222,8 +222,8 @@
     <tr>
       <td><span class="focal">TensorCircuit-NG</span></td>
       <td>tensor network</td>
-      <td>Python on JAX / PyTorch / TF / NumPy</td>
-      <td>reverse-mode AD on JAX / TF / PyTorch; NumPy has none</td>
+      <td>Python on JAX / PyTorch / TensorFlow / NumPy</td>
+      <td>reverse-mode automatic differentiation (AD) on JAX / TensorFlow / PyTorch; NumPy has none</td>
       <td>yes · multi-GPU / distributed</td>
       <td>Large, deep <em>variational</em> circuits that need gradients through the simulation at scale; cotengra path optimization is the speed lever. The focal tool of the interview.</td>
     </tr>
@@ -231,7 +231,7 @@
       <td><strong>quimb</strong></td>
       <td>tensor network</td>
       <td>Python (autoray: NumPy / JAX / PyTorch / CuPy)</td>
-      <td>via AD backend (JAX / Torch / TF / autograd)</td>
+      <td>via AD backend (JAX / PyTorch / TensorFlow / autograd)</td>
       <td>yes (CuPy / JAX)</td>
       <td>Flexible tensor-network research — general networks, MPS / PEPS, not just circuits. Shares the same cotengra contraction engine; lighter on circuit-VQE conveniences.</td>
     </tr>
@@ -239,7 +239,7 @@
       <td><strong>Qiskit Aer</strong></td>
       <td>multi-method (statevector / density-matrix / MPS / stabilizer / TN)</td>
       <td>Python + C++</td>
-      <td>param-shift / finite-diff / lin-comb / SPSA / reverse-statevector (Qiskit Algorithms); no Aer-native AD</td>
+      <td>parameter-shift, finite-difference, and related methods via Qiskit Algorithms; no Aer-native AD</td>
       <td>yes (CUDA; cuStateVec / cuTensorNet)</td>
       <td>The IBM / Qiskit ecosystem; noise and density-matrix simulation, sampling, hardware-aligned workflows. Several methods (statevector, MPS, stabilizer) in one tool.</td>
     </tr>
@@ -275,7 +275,7 @@
   <p><span class="lab">When TensorCircuit-NG specifically wins:</span> a large or deep variational circuit where you need the gradient through the whole simulation, fast and repeatedly — that is where end-to-end automatic differentiation plus just-in-time compilation plus a cotengra-optimized contraction path compound into the benchmark's single-GPU numbers. <span class="lab">When a statevector tool is the better call:</span> smaller qubit counts where the full state fits, or when you need sampling, realistic noise, or tight integration with a particular hardware ecosystem.</p>
 </div>
 
-<span class="notes-label">Your take — which stack for which job, and where you'd deviate</span>
+<span class="notes-label">Expert correction — which row would you change, and what threshold or counterexample changes it?</span>
 <textarea class="notes" data-key="ex.stack" placeholder="e.g. when you'd reach for quimb over TC-NG; where cuQuantum-as-backend matters; what the comparison above gets wrong…"></textarea>
 
 <p style="font-size:12px;color:var(--muted);margin-top:12px;"><span style="font-weight:600">Provenance note:</span> the stack table is a high-level, qualitative comparison of each project's design and intended strengths — audited and corrected 2026-05-26, but not version-pinned. Frameworks evolve quickly; check each project's current documentation before relying on a specific capability.</p>
@@ -283,8 +283,8 @@
 
 <!-- ============================================================ -->
 <section id="ceiling">
-<h2>3. The 2026 feasibility ceiling</h2>
-<p class="lede">What a VQE of this kind reaches by hardware regime. For tensor-network contraction the ceiling is the largest intermediate tensor, not the qubit count alone — read it off the contraction cost before committing (a detail the interview covers).</p>
+<h2>3. 2026 feasibility anchors</h2>
+<p class="lede">What this kind of run reaches by hardware regime. For tensor-network contraction the ceiling is the largest intermediate tensor, not the qubit count alone — read it off the contraction cost before committing (a detail the interview covers).</p>
 <div class="feas">
   <div class="fcell">
     <div class="h">Laptop CPU</div>
@@ -298,12 +298,12 @@
   </div>
   <div class="fcell">
     <div class="h">Single GPU + slicing</div>
-    <div class="d">larger contractions, extra arithmetic</div>
+    <div class="d">fits any contraction, slower</div>
     <div class="note">When the largest tensor won't fit, slicing fixes some indices and sums the pieces, capping memory in exchange for repeated work — exact, just slower.</div>
   </div>
   <div class="fcell">
     <div class="h">Multi-GPU / distributed</div>
-    <div class="d">scales with devices</div>
+    <div class="d">scales with device count</div>
     <div class="note">Data-parallel for many independent terms or restarts; model-parallel (a distributed contractor) when a single contraction exceeds one device's memory.</div>
   </div>
 </div>
@@ -320,8 +320,8 @@
     <tr>
       <td>Prototype a small VQE (≤ 16 qubits), just get it correct</td>
       <td>full statevector or exact contraction</td>
-      <td>TC-NG (or any of the six)</td>
-      <td>Anything works at this size; pick the ecosystem you already know.</td>
+      <td>any of the six you know</td>
+      <td>Correctness, not scale, is the goal here — any of the six works; pick the one you know.</td>
     </tr>
     <tr>
       <td>Scale a VQE to ~30 qubits on one GPU</td>
@@ -348,13 +348,13 @@
       <td>Adjoint differentiation at moderate qubit counts, hardware-portable.</td>
     </tr>
     <tr>
-      <td>Julia-native workflow</td>
+      <td>Need Julia integration</td>
       <td>full statevector</td>
       <td>Yao.jl</td>
       <td>Fast statevector and circuit manipulation in Julia.</td>
     </tr>
     <tr>
-      <td>Maximum GPU throughput under your own framework</td>
+      <td>Building your own simulator backend</td>
       <td>statevector or contraction</td>
       <td>cuQuantum (as a backend)</td>
       <td>Engine, not framework — drive it from TC-NG, Qiskit, or PennyLane.</td>
@@ -368,7 +368,7 @@
   </tbody>
 </table>
 </div>
-<span class="notes-label">Your notes on the picker — cases it misses, or where your choice differs</span>
+<span class="notes-label">Missing use case — name it, the approach/stack you'd recommend, and why the table would mislead a student</span>
 <textarea class="notes" data-key="ex.picker"></textarea>
 </section>
 

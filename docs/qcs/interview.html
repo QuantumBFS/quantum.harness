@@ -153,7 +153,7 @@
 
 <aside class="nav">
   <h1>QCS Expert Interview</h1>
-  <div class="sub">Decisions &amp; run-behavior for quantum circuit simulation — VQE as the running task</div>
+  <div class="sub">Decisions &amp; run-behavior for quantum circuit simulation — VQE as a recurring example</div>
   <div class="status" aria-live="polite"><span class="dot"></span><span id="saveStatus">saved locally</span></div>
   <nav id="auto-nav">
     <ol id="nav-list"></ol>
@@ -178,7 +178,7 @@
 <header class="hero">
   <div class="tag">Interview script · quantum circuit simulation</div>
   <h1 contenteditable="true" data-title>Quantum circuit simulation — expert interview</h1>
-  <p class="lede" contenteditable="true" data-subtitle>Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). The variational quantum eigensolver (VQE) is the running task. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.</p>
+  <p class="lede" contenteditable="true" data-subtitle>Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). These decisions are general to quantum circuit simulation; the variational quantum eigensolver (VQE) is a recurring example, not the only target. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.</p>
 
   <div class="meta-grid">
     <div class="field">
@@ -194,8 +194,8 @@
       <input id="interviewDate" data-meta="date" type="date" />
     </div>
     <div class="field">
-      <label for="context">Context (what you're computing)</label>
-      <input id="context" data-meta="context" type="text" placeholder="e.g. ground state of 1D TFIM · VQE · TensorCircuit-NG" />
+      <label for="context">Context (the simulation setting)</label>
+      <input id="context" data-meta="context" type="text" placeholder="e.g. quantum circuit simulation in TensorCircuit-NG; VQE as a running example" />
     </div>
   </div>
 </header>
@@ -237,7 +237,7 @@
     run: {
       summary: "Capture the signal: healthy → red flag → likely cause → first action",
       fields: [
-        ["healthy", "Healthy — what a good run shows", "e.g. energy falls then plateaus; gradient shrinks", false],
+        ["healthy", "Healthy — what a good run shows", "e.g. loss falls then plateaus; gradient shrinks", false],
         ["redflag", "Red flag — what a bad run shows", "e.g. every step as slow as the first", false],
         ["cause",   "Likely cause",                   "e.g. silent re-tracing from changing shapes", false],
         ["action",  "First thing you do",             "e.g. fix shapes; move values into tensors; use scan", false]
@@ -253,28 +253,28 @@
   }
 
   const seed = {
-    version: 5,
+    version: 6,
     title: "Quantum circuit simulation — expert interview",
-    subtitle: "Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). The variational quantum eigensolver (VQE) is the running task. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.",
+    subtitle: "Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). These decisions are general to quantum circuit simulation; the variational quantum eigensolver (VQE) is a recurring example, not the only target. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.",
     meta: { expert: "", interviewer: "", date: "", context: "" },
     sections: [
       {
         title: "1. Runtime and representation",
         note: "The engine that runs the math, the numbers it uses, and how the state and operator are stored.",
         questions: [
-          { text: "When do you reach for JAX, PyTorch, TensorFlow, or NumPy on the same VQE code — and why is it not just taste?",
+          { text: "What backend do you start circuit simulation on, and what signal makes you switch between JAX, PyTorch, TensorFlow, or NumPy?",
             code: "tc.set_backend(…) · tc.runtime_backend",
-            cues: ["JAX (compiled speed)", "TF / JAX (full AD · JIT · batching)", "PyTorch (ecosystem)", "NumPy (debugging only)"],
+            cues: ["JAX (compiled speed)", "TensorFlow / JAX (automatic differentiation · compilation · batching)", "PyTorch (ecosystem)", "NumPy (debugging only)"],
             checked: [], answer: "", capture: blankCapture() },
           { text: "When is single precision safe, and what forces you to double?",
             code: "tc.set_dtype(complex64 / complex128)",
-            cues: ["default complex64", "complex128 for accuracy-sensitive energy / gradients", "single for large batched GPU runs", "watch gradient noise"],
+            cues: ["default complex64", "complex128 for accuracy-sensitive observables / gradients", "single for large batched GPU runs", "watch gradient noise"],
             checked: [], answer: "", capture: blankCapture() },
-          { text: "When do you keep the exact circuit, and when do you switch to a matrix-product-state (MPS) approximation — and how do you pick the bond dimension?",
-            code: "tc.Circuit  vs  tc.MPSCircuit (bond dimension)",
-            cues: ["exact for verification", "MPS for 1D / low-entanglement / many qubits", "compare MPS to exact on small sizes", "judging the truncation error"],
+          { text: "Once a matrix-product-state (MPS) approximation is the route, how do you pick the bond dimension and decide it has converged?",
+            code: "tc.MPSCircuit (bond dimension χ)",
+            cues: ["raise χ until the result stops moving", "cross-check against exact at small size", "watch the truncation error", "more entanglement needs larger χ"],
             checked: [], answer: "", capture: blankCapture() },
-          { text: "When should the Hamiltonian enter as a loop over Pauli terms, a sparse matrix, a dense matrix, or an MPO?",
+          { text: "When should the observable (often the Hamiltonian) enter as a loop over Pauli terms, a sparse matrix, a dense matrix, or a matrix-product operator (MPO)?",
             code: "expectation_ps · operator_expectation · PauliStringSum2COO · tn2qop",
             cues: ["simple term loop", "batched Pauli structures", "sparse COO", "dense (small only)", "MPO for short-range"],
             checked: [], answer: "", capture: blankCapture() }
@@ -296,7 +296,7 @@
             code: "jax.lax.scan  (+ jax.checkpoint for memory)",
             cues: ["unroll only shallow circuits", "scan for deep circuits", "scan + checkpoint when memory is tight"],
             checked: [], answer: "", capture: blankCapture() },
-          { text: "Which axis do you batch in one compiled call?",
+          { text: "What work do you batch into one compiled call — Pauli terms, parameter starts, data batches, or trajectories — and when does batching stop helping?",
             code: "vmap · vectorized_value_and_grad",
             cues: ["Pauli terms", "random starts / parameter sets", "data batches", "stochastic trajectories"],
             checked: [], answer: "", capture: blankCapture() }
@@ -306,7 +306,7 @@
         title: "3. Contraction and memory",
         note: "Choosing and tuning the tensor-network contraction — the core of large-scale simulation.",
         questions: [
-          { text: "When is the default greedy contraction enough, and when is it worth spending time on a cotengra search — and how big a budget?",
+          { text: "When does greedy contraction suffice, when is a cotengra path search worth the time, and how big a search budget before the gains flatten?",
             code: "set_contractor(greedy) · cotengra: max_time / max_repeats · contraction_info",
             cues: ["greedy for moderate circuits", "cotengra for larger circuits", "search once and reuse", "inspect FLOPs / WRITE / SIZE"],
             checked: [], answer: "", capture: blankCapture() },
@@ -318,7 +318,7 @@
             code: "DistributedContractor · cotengra_options · target_size",
             cues: ["no slicing if it fits", "slice on one GPU to avoid out-of-memory", "slice across devices", "accept extra FLOPs for memory"],
             checked: [], answer: "", capture: blankCapture() },
-          { text: "When the contraction must scale past one device, how do you decide which way to hand the network to the distributed contractor — a built-in expectation helper, runtime capture, or a hand-built graph?",
+          { text: "For distributed contraction, which entry path should a student try first — and when do you move from a built-in helper to runtime capture or a hand-built graph?",
             code: "expectation_before() / amplitude_before() · runtime_nodes_capture() · manual nodes_fn(params)",
             cues: ["built-in helper for a standard expectation value", "runtime capture to reuse high-level code unchanged", "hand-built graph only for an unusual observable", "more control costs more rewriting"],
             checked: [], answer: "", capture: blankCapture() }
@@ -328,13 +328,13 @@
         title: "4. Hardware and optimizer",
         note: "Where it runs, how the work is split across devices, and how the parameters are optimized.",
         questions: [
-          { text: "How do you choose between CPU, one GPU, data-parallel GPUs, or model-parallel contraction?",
+          { text: "Within TensorCircuit-NG, what tells you to stay on one GPU, batch across GPUs (data-parallel), or split one contraction across devices (model-parallel)?",
             code: "set_backend · jax.pmap · jax.jit + jax.sharding · DistributedContractor",
-            cues: ["CPU for debug", "one GPU for normal VQE", "data-parallel for many terms / batches", "model-parallel when one contraction exceeds memory"],
+            cues: ["CPU for debug", "one GPU for a typical run", "data-parallel for many terms / batches", "model-parallel when one contraction exceeds memory"],
             checked: [], answer: "", capture: blankCapture() },
           { text: "When do you use Adam/SGD, L-BFGS, SciPy (BFGS / COBYLA), or gradient-free optimization?",
             code: "backend.optimizer(optax…) · scipy_interface",
-            cues: ["Adam → SGD for large VQE", "L-BFGS for smooth tensor-network objectives", "SciPy BFGS / COBYLA for small special cases", "gradient-free only without gradients"],
+            cues: ["Adam → SGD for large problems", "L-BFGS for smooth tensor-network objectives", "SciPy BFGS / COBYLA for small special cases", "gradient-free only without gradients"],
             checked: [], answer: "", capture: blankCapture() },
           { text: "What timing result is honest enough to publish or compare?",
             code: "keep separate: compile · warm run · one-off path search",
@@ -346,7 +346,7 @@
         title: "5. Trusting the result",
         note: "The checks that separate a fast right answer from a fast wrong one.",
         questions: [
-          { text: "What checks must an optimized VQE number pass before you trust it — including the ones that catch a fast run that quietly settled on the wrong answer?",
+          { text: "What checks must an optimized result pass before you trust it — including the ones that catch a fast run that quietly settled on the wrong answer?",
             code: "small-system exact · Circuit ↔ MPSCircuit · Pauli/sparse/MPO agree · E ≥ exact ground · AD vs finite-diff",
             cues: ["exact check on a small system", "operator formats (Pauli / sparse / MPO) agree", "energy never dips below the true ground", "AD matches a finite-difference spot-check", "MPS converged in bond dimension", "compare to DMRG / ground truth"],
             checked: [], answer: "", capture: blankCapture() },
@@ -358,31 +358,31 @@
       },
       {
         title: "6. What a good run looks like (and a bad one)",
-        note: "End-to-end signs of health. The order an expert debugs in: device & dtype → smallest exact case → compile once, warm time stable → first energy / gradient / update → 10–20 steps → cross-checks → only then scale one axis at a time.",
+        note: "End-to-end signs of health. The order an expert debugs in: device & precision → smallest exact case → compile once, warm time stable → first loss / gradient / update → 10–20 steps → cross-checks → only then scale one axis at a time.",
         questions: [
-          { text: "Before committing to a run, what do you read off the contraction cost and the per-step energy cost — and what tells you it will never fit or finish?",
+          { text: "Before committing to a run, what do you read off the contraction cost and the per-step cost — and what tells you it will never fit or finish?",
             code: "contraction_info: FLOPs · WRITE · SIZE  ·  target_size", kind: "run",
-            cues: ["largest intermediate fits the device", "WRITE ok for the backward pass", "energy step not dominating the circuit", "switch to MPS / slice if it won't fit"],
+            cues: ["largest intermediate fits the device", "WRITE ok for the backward pass", "the observable step not dominating the circuit", "switch to MPS / slice if it won't fit"],
             checked: [], answer: "", capture: blankCapture("run") },
           { text: "After you compile value-and-gradient, how should the first call and the warm calls differ — and what tells you it's silently recompiling every step?",
             code: "jit(value_and_grad) · device barrier when timing", kind: "run",
             cues: ["first call slow, warm calls fast & steady", "every step as slow as the first = recompiling", "compile time grows with depth = unrolled", "fix shapes / use scan"],
             checked: [], answer: "", capture: blankCapture("run") },
-          { text: "In the first 5–20 steps, what do the energy, the gradient norm, and the update size tell you about whether training has even started?",
-            code: "energy curve · gradient norm (NaN check) · update vs param norm", kind: "run",
-            cues: ["energy trending down", "gradient finite & nonzero", "updates actually move the params", "flat curve can mean a broken gradient, not hard physics"],
+          { text: "In the first 5–20 steps, what do the loss, the gradient norm, and the update size tell you about whether training has even started?",
+            code: "loss curve · gradient norm (NaN check) · update vs param norm", kind: "run",
+            cues: ["loss trending down", "gradient finite & nonzero", "updates actually move the params", "flat curve can mean a broken gradient, not hard physics"],
             checked: [], answer: "", capture: blankCapture("run") },
-          { text: "When the energy plateaus, how do you tell a real minimum from a stuck one or an unstable one?",
-            code: "final energy vs reference · gradient norm at plateau · oscillation", kind: "run",
-            cues: ["low energy + small gradient = good", "high plateau + small gradient = stuck", "oscillation / blowup = step too big or precision", "compare to a known small case"],
+          { text: "When the loss plateaus, how do you tell a real minimum from a stuck one or an unstable one?",
+            code: "final loss vs reference · gradient norm at plateau · oscillation", kind: "run",
+            cues: ["low loss + small gradient = good", "high plateau + small gradient = stuck", "oscillation / blowup = step too big or precision", "compare to a known small case"],
             checked: [], answer: "", capture: blankCapture("run") },
           { text: "Across many warm steps, what should step time and peak memory do — and what does a creep, or a suspiciously cheap run, tell you?",
             code: "warm step time across iters · device memory · jax.devices()", kind: "run",
             cues: ["stable warm step time", "flat peak memory", "creep = re-tracing / leak / growing logs", "fast but GPU idle = silent CPU fallback"],
             checked: [], answer: "", capture: blankCapture("run") },
-          { text: "As you grow qubits, depth, batch, or bond dimension, what cost-and-accuracy trend is healthy, and what's the warning sign?",
+          { text: "When scaling up from a small exact case, which one axis (qubits, depth, batch, or bond dimension) do you grow first, and what trend tells you scaling is healthy?",
             code: "warm time / WRITE / SIZE vs N & depth · vmap throughput · error vs bond dim", kind: "run",
-            cues: ["cost grows predictably from small tests", "batching helps until memory saturates", "bigger bond dimension buys accuracy", "sudden cost cliff = bad path / re-search"],
+            cues: ["grow one axis at a time", "cost grows predictably from small tests", "batching helps until memory saturates", "sudden cost cliff = bad path / re-search"],
             checked: [], answer: "", capture: blankCapture("run") }
         ]
       }
