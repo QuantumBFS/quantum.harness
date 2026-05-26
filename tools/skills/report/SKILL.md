@@ -47,4 +47,4 @@ Figure `src` paths are relative to `<run-dir>`; a missing file degrades to a sma
 
 An `equation` block's `tex` is a bare LaTeX equation and renders as a centered display block; any string may carry inline math in `$…$` (or display in `$$…$$`). The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
 
-Visual reference: `docs/ed/ed_review.html` and `docs/ed/ed_interview.html` — same family, a little more polished.
+Visual reference: `docs/ed/review.html` and `docs/ed/interview.html` — same family, a little more polished.

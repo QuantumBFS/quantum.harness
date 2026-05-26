@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quantum circuit simulation in 2026 — choosing the approach and the stack</title>
+<style>
+  :root {
+    --bg: #fbfaf6;
+    --panel: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #5b5b5b;
+    --line: #e6e3da;
+    --accent: #1f5cd6;
+    --accent-soft: #e6efff;
+    --warm: #b8651e;
+    --warm-soft: #fcefdc;
+    --good: #1e7d3c;
+    --good-soft: #e1f3e6;
+    --bad: #b3261e;
+    --olive: #7c6f1d;
+    --olive-soft: #f5f1d8;
+    --code-bg: #f2f1eb;
+    --serif: "Iowan Old Style", "Source Serif 4", "Charter", Cambria, Georgia, serif;
+    --sans: -apple-system, "Inter", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--ink); margin: 0; padding: 0; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { line-height: 1.55; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--accent); }
+  code { font-family: var(--mono); font-size: 0.92em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+
+  /* Layout */
+  .shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+  aside.nav { background: #f4f1e8; border-right: 1px solid var(--line); padding: 22px 18px 32px; position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; }
+  aside.nav h1 { font-family: var(--serif); font-size: 18px; line-height: 1.25; margin: 0 0 4px; }
+  aside.nav .sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  aside.nav nav ol { list-style: none; padding: 0; margin: 0 0 18px; }
+  aside.nav nav ol li { font-size: 13.5px; padding: 4px 0; }
+  aside.nav nav ol li a { color: var(--ink); border-bottom: none; }
+  aside.nav nav ol li a:hover { color: var(--accent); }
+  aside.nav .controls { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  aside.nav .controls button { font-family: var(--sans); font-size: 12.5px; padding: 7px 9px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 4px; cursor: pointer; text-align: left; }
+  aside.nav .controls button:hover { border-color: var(--accent); color: var(--accent); }
+  aside.nav .meta { margin-top: 14px; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+  main { padding: 38px 48px 90px; max-width: 1080px; }
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside.nav { position: static; height: auto; }
+    main { padding: 24px 18px 70px; }
+  }
+
+  /* Hero */
+  .hero { padding-bottom: 22px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .hero .tag { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.15; margin: 6px 0 14px; max-width: 32ch; }
+  .hero p { font-size: 15.5px; color: #2a2a2a; max-width: 72ch; margin: 0 0 10px; }
+  .hero .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 20px; }
+  .hero .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+  .hero .stat .v { font-family: var(--serif); font-size: 19px; font-weight: 600; }
+  .hero .stat .k { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+  section { margin: 44px 0 0; }
+  section > h2 { font-family: var(--serif); font-size: 23px; margin: 0 0 6px; }
+  section > .lede { color: var(--muted); font-size: 14px; margin: 0 0 18px; max-width: 72ch; }
+  h3 { font-family: var(--serif); font-size: 17px; margin: 24px 0 8px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  thead th { background: #f7f5ed; text-align: left; padding: 9px 11px; font-weight: 600; border-bottom: 1px solid var(--line); }
+  tbody td { padding: 9px 11px; border-top: 1px solid var(--line); vertical-align: top; }
+  tbody tr:first-child td { border-top: none; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.tight { white-space: nowrap; }
+  td .focal { font-weight: 700; color: #143b87; }
+  .scroll-x { overflow-x: auto; }
+
+  /* Feasibility cells */
+  .feas { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-top: 10px; }
+  @media (max-width: 700px) { .hero .stats { grid-template-columns: repeat(2, 1fr); } .feas { grid-template-columns: 1fr; } }
+  .feas .fcell { background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 10px 12px; }
+  .feas .fcell .h { font-size: 12px; color: var(--muted); }
+  .feas .fcell .d { font-family: var(--serif); font-size: 17px; margin: 2px 0 4px; }
+  .feas .fcell .note { font-size: 12.5px; color: #333; }
+
+  /* Notes */
+  .notes { display: block; width: 100%; min-height: 44px; max-height: 240px; font-family: var(--sans); font-size: 13px; line-height: 1.45; color: #1a1a1a; padding: 7px 10px; border: 1px solid var(--line); border-radius: 4px; background: #fdfdfa; resize: vertical; margin-top: 6px; }
+  .notes:focus { outline: none; border-color: var(--accent); background: #fff; }
+  .notes-label { font-size: 11.5px; color: var(--muted); margin-top: 12px; display: block; }
+
+  .callout { background: #fafaf3; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 4px; padding: 11px 14px; margin: 14px 0; font-size: 13.5px; }
+  .callout .lab { font-weight: 600; color: #111; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 18px; right: 20px; background: #1a1a1a; color: #fff; padding: 9px 14px; border-radius: 5px; font-size: 13px; opacity: 0; transition: opacity 180ms; pointer-events: none; z-index: 99; }
+  #toast.show { opacity: 1; }
+
+  @media print {
+    aside.nav, .controls, #toast { display: none !important; }
+    main { padding: 0; max-width: 100%; }
+    table, .fcell, .callout { break-inside: avoid; }
+    body { font-size: 11pt; }
+  }
+
+  details { margin: 8px 0; }
+  details summary { cursor: pointer; font-size: 13px; color: var(--accent); user-select: none; }
+  details[open] summary { margin-bottom: 6px; }
+  ul.flat { padding-left: 20px; margin: 4px 0; }
+  ul.flat li { margin: 3px 0; font-size: 13.5px; }
+
+  .footer { margin-top: 50px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .footer p { margin: 3px 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="nav">
+  <h1>QCS approach &amp; stack, 2026</h1>
+  <div class="sub">High-level companion to the expert interview</div>
+  <nav>
+    <ol>
+      <li><a href="#approaches">1. Which approach wins, when</a></li>
+      <li><a href="#stack">2. The software stack</a></li>
+      <li><a href="#ceiling">3. The 2026 feasibility ceiling</a></li>
+      <li><a href="#picker">4. Choose by use case</a></li>
+      <li><a href="#sources">5. Sources</a></li>
+    </ol>
+  </nav>
+  <div class="controls">
+    <button onclick="downloadSnapshot()">⬇  Save filled HTML</button>
+    <button onclick="exportJson()">{ }  Export edits (JSON)</button>
+    <button onclick="document.getElementById('jsonImport').click()">⤴  Import edits (JSON)</button>
+    <input id="jsonImport" type="file" accept="application/json" style="display:none" onchange="importJson(event)" />
+    <button onclick="resetState()">↺  Reset edits</button>
+    <button onclick="window.print()">🖨  Print / PDF</button>
+  </div>
+  <div class="meta">
+    This page is the high-level map: <em>which</em> approach and <em>which</em>
+    software to choose. The detailed settings inside that choice — and the
+    expert's rule for each — live in the interview. Notes auto-save to your
+    browser; <em>Save filled HTML</em> bakes them into a file.
+  </div>
+</aside>
+
+<main>
+
+<header class="hero">
+  <div class="tag">Method review · high-level companion to the expert interview · current to 2026-05</div>
+  <h1>Before you tune a single setting, two choices set your ceiling: how you represent the circuit, and which software stack you run it on.</h1>
+  <p>The running task is the variational quantum eigensolver (VQE): a parameterized circuit whose angles are tuned to minimize an energy — a ground-state search, done on a simulator. Two high-level forks come first. <strong>Representation:</strong> contract the circuit as a tensor network, hold the full amplitude vector, or approximate it as a matrix-product state. <strong>Stack:</strong> which framework you build on. Get these right and the detailed tuning has room to work; get them wrong and no setting saves you.</p>
+  <p>This is the high-level map. Its companion — the expert interview — drills into the detailed decisions <em>inside</em> a chosen stack (precision, gradient method, contraction tuning, hardware split) and the rule an expert uses for each. The concrete scale anchor here is the TensorCircuit-NG paper's benchmark: a 32-qubit, 16-layer transverse-field Ising VQE.</p>
+  <div class="stats">
+    <div class="stat"><div class="v">32 q × 16 layers</div><div class="k">Benchmark variational circuit (TFIM), exact, on one GPU</div></div>
+    <div class="stat"><div class="v">17.86 s</div><div class="k">One warm energy-and-gradient evaluation, single H200 GPU</div></div>
+    <div class="stat"><div class="v">≈ 33 qubits</div><div class="k">Full-statevector ceiling on an 80 GB GPU (2<sup>33</sup> × 8 B ≈ 64 GiB) — beyond it, contraction or MPS</div></div>
+    <div class="stat"><div class="v">6 stacks</div><div class="k">TC-NG · quimb · Qiskit Aer · cuQuantum · PennyLane · Yao — section 2 chooses between them</div></div>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<section id="approaches">
+<h2>1. Which approach wins, when</h2>
+<p class="lede">Three ways to represent the same VQE state. The choice fixes the memory wall and whether the answer is exact or approximate — the first thing to settle, before any framework or setting.</p>
+
+<div class="scroll-x">
+<table>
+  <thead><tr>
+    <th style="width:22%">Approach</th>
+    <th>What it represents</th>
+    <th style="width:20%">When it wins</th>
+    <th style="width:16%">Reach (qubits)</th>
+    <th style="width:18%">Main limit</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Tensor-network contraction</strong></td>
+      <td>Builds the circuit as a network of tensors and contracts only what the observable needs — never forms the full 2<sup>N</sup> amplitude vector if the path avoids it.</td>
+      <td>The default for exact VQE energies and gradients; pays off whenever a smart contraction order keeps the largest intermediate tensor small.</td>
+      <td class="num">30+ at modest depth on one GPU (benchmark: 32 × 16)</td>
+      <td>The largest intermediate tensor — <em>memory, not qubit count, is the wall.</em></td>
+    </tr>
+    <tr>
+      <td><strong>Full statevector</strong></td>
+      <td>The full 2<sup>N</sup> complex amplitude vector, held in memory.</td>
+      <td>Smaller systems, verification, sampling and noise studies, or when you genuinely need every amplitude.</td>
+      <td class="num">≈ 33 on an 80 GB GPU (complex64)</td>
+      <td>Memory doubles with every added qubit; no structure exploited.</td>
+    </tr>
+    <tr>
+      <td><strong>Matrix-product state (MPS)</strong></td>
+      <td>The state as a chain of small tensors linked by a bond dimension χ that caps how much entanglement it can carry.</td>
+      <td>1D or low-entanglement circuits with many qubits, where χ stays bounded.</td>
+      <td class="num">100s, if entanglement (χ) stays bounded</td>
+      <td>A truncation error that grows with entanglement; too-small χ silently biases the energy.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted);margin-top:10px;">For a deep, large variational circuit where you need gradients, tensor-network contraction is usually the right call — it is the regime the benchmark above lives in. Full statevector is the simplest and best for small systems and for anything needing the whole state. MPS is the lever for long, weakly-entangled circuits.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="stack">
+<h2>2. The software stack</h2>
+<p class="lede">The framework fixes what is easy. Two families: <strong>tensor-network simulators</strong> contract the circuit and scale with its structure; <strong>statevector simulators</strong> hold the full amplitude vector — simplest, and strongest at smaller qubit counts, sampling, and noise. The differentiator for a variational task is whether the gradient flows through the simulation efficiently.</p>
+
+<div class="scroll-x">
+<table>
+  <thead><tr>
+    <th style="width:15%">Stack</th>
+    <th style="width:13%">Family</th>
+    <th>Backend / language</th>
+    <th style="width:15%">Gradients</th>
+    <th style="width:9%">GPU</th>
+    <th style="width:26%">When it wins</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="focal">TensorCircuit-NG</span></td>
+      <td>tensor network</td>
+      <td>Python on JAX / PyTorch / TF / NumPy</td>
+      <td>reverse-mode AD on JAX / TF / PyTorch; NumPy has none</td>
+      <td>yes · multi-GPU / distributed</td>
+      <td>Large, deep <em>variational</em> circuits that need gradients through the simulation at scale; cotengra path optimization is the speed lever. The focal tool of the interview.</td>
+    </tr>
+    <tr>
+      <td><strong>quimb</strong></td>
+      <td>tensor network</td>
+      <td>Python (autoray: NumPy / JAX / PyTorch / CuPy)</td>
+      <td>via AD backend (JAX / Torch / TF / autograd)</td>
+      <td>yes (CuPy / JAX)</td>
+      <td>Flexible tensor-network research — general networks, MPS / PEPS, not just circuits. Shares the same cotengra contraction engine; lighter on circuit-VQE conveniences.</td>
+    </tr>
+    <tr>
+      <td><strong>Qiskit Aer</strong></td>
+      <td>multi-method (statevector / density-matrix / MPS / stabilizer / TN)</td>
+      <td>Python + C++</td>
+      <td>param-shift / finite-diff / lin-comb / SPSA / reverse-statevector (Qiskit Algorithms); no Aer-native AD</td>
+      <td>yes (CUDA; cuStateVec / cuTensorNet)</td>
+      <td>The IBM / Qiskit ecosystem; noise and density-matrix simulation, sampling, hardware-aligned workflows. Several methods (statevector, MPS, stabilizer) in one tool.</td>
+    </tr>
+    <tr>
+      <td><strong>NVIDIA cuQuantum</strong></td>
+      <td>both (a backend SDK)</td>
+      <td>C++ / Python (CUDA)</td>
+      <td>low-level cuTensorNet gradient APIs; loop AD on caller / framework</td>
+      <td>yes · native multi-GPU</td>
+      <td>Maximum GPU / multi-GPU throughput as the engine <em>under</em> another framework (cuStateVec for statevector, cuTensorNet for contraction). No high-level VQE ergonomics of its own.</td>
+    </tr>
+    <tr>
+      <td><strong>PennyLane + Lightning</strong></td>
+      <td>statevector (+ lightning.tensor MPS/TN)</td>
+      <td>Python + C++</td>
+      <td>adjoint differentiation</td>
+      <td>yes (lightning.gpu / kokkos)</td>
+      <td>Differentiable quantum-machine-learning pipelines at moderate qubit counts; hardware-portable PennyLane workflows.</td>
+    </tr>
+    <tr>
+      <td><strong>Yao.jl</strong></td>
+      <td>statevector-first (+ TN via YaoToEinsum)</td>
+      <td>Julia</td>
+      <td>built-in AD (ChainRules / Zygote)</td>
+      <td>yes (CuYao / CUDA.jl)</td>
+      <td>Julia-native workflows: fast statevector plus easy circuit manipulation for research prototyping.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+  <p><span class="lab">When TensorCircuit-NG specifically wins:</span> a large or deep variational circuit where you need the gradient through the whole simulation, fast and repeatedly — that is where end-to-end automatic differentiation plus just-in-time compilation plus a cotengra-optimized contraction path compound into the benchmark's single-GPU numbers. <span class="lab">When a statevector tool is the better call:</span> smaller qubit counts where the full state fits, or when you need sampling, realistic noise, or tight integration with a particular hardware ecosystem.</p>
+</div>
+
+<span class="notes-label">Your take — which stack for which job, and where you'd deviate</span>
+<textarea class="notes" data-key="ex.stack" placeholder="e.g. when you'd reach for quimb over TC-NG; where cuQuantum-as-backend matters; what the comparison above gets wrong…"></textarea>
+
+<p style="font-size:12px;color:var(--muted);margin-top:12px;"><span style="font-weight:600">Provenance note:</span> the stack table is a high-level, qualitative comparison of each project's design and intended strengths — audited and corrected 2026-05-26, but not version-pinned. Frameworks evolve quickly; check each project's current documentation before relying on a specific capability.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="ceiling">
+<h2>3. The 2026 feasibility ceiling</h2>
+<p class="lede">What a VQE of this kind reaches by hardware regime. For tensor-network contraction the ceiling is the largest intermediate tensor, not the qubit count alone — read it off the contraction cost before committing (a detail the interview covers).</p>
+<div class="feas">
+  <div class="fcell">
+    <div class="h">Laptop CPU</div>
+    <div class="d">≲ 20–24 qubits, shallow</div>
+    <div class="note">For correctness and debugging, not speed. Automatic differentiation needs a real backend (JAX / PyTorch), not plain NumPy — switch before timing anything.</div>
+  </div>
+  <div class="fcell">
+    <div class="h">Single GPU (H200-class), exact contraction</div>
+    <div class="d">32 q × 16 layers — 17.86 s / eval</div>
+    <div class="note">The workhorse regime. One warm energy-and-gradient evaluation of the benchmark VQE in 17.86 s, after a one-off contraction-path search and compile.</div>
+  </div>
+  <div class="fcell">
+    <div class="h">Single GPU + slicing</div>
+    <div class="d">larger contractions, extra arithmetic</div>
+    <div class="note">When the largest tensor won't fit, slicing fixes some indices and sums the pieces, capping memory in exchange for repeated work — exact, just slower.</div>
+  </div>
+  <div class="fcell">
+    <div class="h">Multi-GPU / distributed</div>
+    <div class="d">scales with devices</div>
+    <div class="note">Data-parallel for many independent terms or restarts; model-parallel (a distributed contractor) when a single contraction exceeds one device's memory.</div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="picker">
+<h2>4. Choose by use case</h2>
+<p class="lede">The high-level starting point for the situations that actually come up — which approach and which stack. The detailed settings inside each choice are the interview's job.</p>
+<div class="scroll-x">
+<table>
+  <thead><tr><th style="width:30%">Use case</th><th style="width:22%">Approach</th><th style="width:24%">Stack</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Prototype a small VQE (≤ 16 qubits), just get it correct</td>
+      <td>full statevector or exact contraction</td>
+      <td>TC-NG (or any of the six)</td>
+      <td>Anything works at this size; pick the ecosystem you already know.</td>
+    </tr>
+    <tr>
+      <td>Scale a VQE to ~30 qubits on one GPU</td>
+      <td>tensor-network contraction</td>
+      <td><span class="focal">TC-NG</span></td>
+      <td>The benchmark regime — gradients through the simulation, cotengra path. Tuning lives in the interview.</td>
+    </tr>
+    <tr>
+      <td>1D / low-entanglement, many qubits</td>
+      <td>MPS</td>
+      <td>TC-NG · quimb</td>
+      <td>Converge the bond dimension χ against an exact small case.</td>
+    </tr>
+    <tr>
+      <td>Need the full state, sampling, or realistic noise</td>
+      <td>full statevector</td>
+      <td>Qiskit Aer · cuQuantum · PennyLane-Lightning</td>
+      <td>Statevector tools carry the noise / density-matrix and sampling machinery.</td>
+    </tr>
+    <tr>
+      <td>Differentiable quantum-machine-learning pipeline</td>
+      <td>full statevector + adjoint</td>
+      <td>PennyLane-Lightning</td>
+      <td>Adjoint differentiation at moderate qubit counts, hardware-portable.</td>
+    </tr>
+    <tr>
+      <td>Julia-native workflow</td>
+      <td>full statevector</td>
+      <td>Yao.jl</td>
+      <td>Fast statevector and circuit manipulation in Julia.</td>
+    </tr>
+    <tr>
+      <td>Maximum GPU throughput under your own framework</td>
+      <td>statevector or contraction</td>
+      <td>cuQuantum (as a backend)</td>
+      <td>Engine, not framework — drive it from TC-NG, Qiskit, or PennyLane.</td>
+    </tr>
+    <tr>
+      <td>One contraction too big for a single GPU</td>
+      <td>tensor-network + slicing / distribution</td>
+      <td><span class="focal">TC-NG</span></td>
+      <td>Slice to a memory cap, or split the contraction across devices.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<span class="notes-label">Your notes on the picker — cases it misses, or where your choice differs</span>
+<textarea class="notes" data-key="ex.picker"></textarea>
+</section>
+
+<!-- ============================================================ -->
+<section id="sources">
+<h2>5. Sources</h2>
+<p class="lede">Grounding for the scale anchors and the focal tool. Framework links are starting points for the verification noted in section 2.</p>
+<div style="columns: 2; column-gap: 28px; font-size: 12.5px; line-height: 1.55;">
+  <ul class="flat" style="break-inside: avoid;">
+    <li><a href="https://arxiv.org/abs/2602.14167">TensorCircuit-NG — arXiv:2602.14167</a> (pipeline, AD/JIT/VMAP, MPS, distributed contraction, Fig 2 benchmark)</li>
+    <li><a href="https://arxiv.org/abs/2205.10091">TensorCircuit — arXiv:2205.10091</a> (original design, backend-agnostic core)</li>
+    <li><a href="https://arxiv.org/abs/2002.01935">cotengra — arXiv:2002.01935</a> (hyper-optimized contraction-path search; shared by TC-NG and quimb)</li>
+    <li><a href="https://quimb.readthedocs.io">quimb — docs</a> (tensor-network library; circuits, MPS/PEPS)</li>
+  </ul>
+  <ul class="flat" style="break-inside: avoid;">
+    <li><a href="https://qiskit.github.io/qiskit-aer/">Qiskit Aer — docs</a> (simulation methods, GPU)</li>
+    <li><a href="https://developer.nvidia.com/cuquantum-sdk">NVIDIA cuQuantum SDK</a> (cuStateVec, cuTensorNet)</li>
+    <li><a href="https://docs.pennylane.ai/projects/lightning/">PennyLane Lightning — docs</a> (adjoint differentiation, GPU)</li>
+    <li><a href="https://yaoquantum.org">Yao.jl — docs</a> (Julia circuit framework)</li>
+  </ul>
+</div>
+<p style="font-size:12px;color:var(--muted);margin-top:12px;">Scale anchors (32 q × 16 layers, 17.86 s on a single H200) are read from the TensorCircuit-NG paper's Figure 2. The ≈ 33-qubit statevector ceiling is the arithmetic 2<sup>33</sup> complex64 amplitudes ≈ 64 GiB (69 GB). The framework family / gradient / GPU columns are high-level design characterizations — confirm specifics against current docs.</p>
+</section>
+
+<div class="footer">
+  <p>Revised 2026-05-26 as the high-level companion to the QCS expert interview: which approach and which stack. The detailed per-setting decisions, and the expert's rule for each, live in the interview. Notes persist in your browser via <code>localStorage</code> under key prefix <code>qcs2026/</code>.</p>
+  <p>Single file, no external assets, no network requests. Open offline. Print to PDF via the sidebar button.</p>
+</div>
+
+</main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  const KEY_PREFIX = 'qcs2026/';
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  function getAllInputs() {
+    return Array.from(document.querySelectorAll('[data-key]'));
+  }
+
+  function persist(el) {
+    const key = KEY_PREFIX + el.dataset.key;
+    if (el.type === 'radio') {
+      if (el.checked) localStorage.setItem(KEY_PREFIX + el.name, el.value);
+    } else if (el.type === 'checkbox') {
+      localStorage.setItem(key, el.checked ? '1' : '0');
+    } else {
+      localStorage.setItem(key, el.value);
+    }
+  }
+
+  function restore() {
+    getAllInputs().forEach(el => {
+      if (el.type === 'radio') {
+        const saved = localStorage.getItem(KEY_PREFIX + el.name);
+        if (saved !== null && el.value === saved) el.checked = true;
+      } else if (el.type === 'checkbox') {
+        const saved = localStorage.getItem(KEY_PREFIX + el.dataset.key);
+        if (saved === '1') el.checked = true;
+      } else {
+        const saved = localStorage.getItem(KEY_PREFIX + el.dataset.key);
+        if (saved !== null) el.value = saved;
+      }
+    });
+  }
+
+  function bindAll() {
+    getAllInputs().forEach(el => {
+      const evt = (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' && el.type !== 'radio' && el.type !== 'checkbox')
+        ? 'input' : 'change';
+      el.addEventListener(evt, () => persist(el));
+    });
+  }
+
+  window.downloadSnapshot = function () {
+    getAllInputs().forEach(el => {
+      if (el.type === 'radio' || el.type === 'checkbox') {
+        if (el.checked) el.setAttribute('checked', 'checked');
+        else el.removeAttribute('checked');
+      } else if (el.tagName === 'TEXTAREA') {
+        el.textContent = el.value;
+      } else if (el.tagName === 'INPUT') {
+        el.setAttribute('value', el.value);
+      }
+    });
+    const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const ts = new Date().toISOString().slice(0, 10);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'qcs_approach_and_stack_' + ts + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Filled HTML downloaded');
+  };
+
+  window.exportJson = function () {
+    const state = {};
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith(KEY_PREFIX)) state[k.slice(KEY_PREFIX.length)] = localStorage.getItem(k);
+    });
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const ts = new Date().toISOString().slice(0, 10);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'qcs-review-edits-' + ts + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Edits exported');
+  };
+
+  window.importJson = function (ev) {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const state = JSON.parse(e.target.result);
+        Object.keys(state).forEach(k => localStorage.setItem(KEY_PREFIX + k, state[k]));
+        restore();
+        showToast('Edits imported');
+      } catch (err) {
+        showToast('Import failed: bad JSON');
+      }
+    };
+    reader.readAsText(file);
+    ev.target.value = '';
+  };
+
+  window.resetState = function () {
+    if (!confirm('Wipe all your edits in this browser? (The original file is untouched.)')) return;
+    Object.keys(localStorage).filter(k => k.startsWith(KEY_PREFIX)).forEach(k => localStorage.removeItem(k));
+    getAllInputs().forEach(el => {
+      if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+    });
+    showToast('Edits reset');
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    restore();
+    bindAll();
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quantum circuit simulation — expert interview</title>
+<style>
+  :root {
+    --bg: #fbfaf6;
+    --panel: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #5b5b5b;
+    --faint: #8a8a85;
+    --line: #e6e3da;
+    --accent: #1f5cd6;
+    --accent-soft: #e6efff;
+    --warm: #b8651e;
+    --warm-soft: #fcefdc;
+    --good: #1e7d3c;
+    --good-soft: #e1f3e6;
+    --bad: #b3261e;
+    --bad-soft: #fbe4e2;
+    --olive: #7c6f1d;
+    --olive-soft: #f5f1d8;
+    --code-bg: #f2f1eb;
+    --serif: "Iowan Old Style", "Source Serif 4", "Charter", Cambria, Georgia, serif;
+    --sans: -apple-system, "Inter", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--ink); margin: 0; padding: 0; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { line-height: 1.55; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--accent); }
+  button, input, textarea { font: inherit; }
+  code { font-family: var(--mono); font-size: 0.92em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+
+  .shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+  aside.nav { background: #f4f1e8; border-right: 1px solid var(--line); padding: 22px 18px 32px; position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; }
+  aside.nav h1 { font-family: var(--serif); font-size: 18px; line-height: 1.25; margin: 0 0 4px; }
+  aside.nav .sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  aside.nav .status { display: inline-flex; align-items: center; gap: 7px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted); font-size: 11.5px; margin-bottom: 14px; }
+  aside.nav .status .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--good); }
+  aside.nav nav#auto-nav ol { list-style: none; padding: 0; margin: 0 0 14px; counter-reset: section; }
+  aside.nav nav#auto-nav ol li { font-size: 13px; padding: 3px 0; }
+  aside.nav nav#auto-nav ol li a { color: var(--ink); border-bottom: none; display: block; line-height: 1.3; }
+  aside.nav nav#auto-nav ol li a:hover { color: var(--accent); }
+  aside.nav .controls { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  aside.nav .controls button { font-family: var(--sans); font-size: 12.5px; padding: 7px 9px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 4px; cursor: pointer; text-align: left; }
+  aside.nav .controls button:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+  aside.nav .meta { margin-top: 14px; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+  main { padding: 38px 48px 90px; max-width: 1080px; }
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside.nav { position: static; height: auto; }
+    main { padding: 24px 18px 70px; }
+  }
+
+  /* Hero */
+  .hero { padding-bottom: 22px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .hero .tag { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warm); font-weight: 600; }
+  .hero h1 { font-family: var(--serif); font-size: 30px; line-height: 1.18; margin: 6px 0 12px; max-width: 30ch; outline: none; }
+  .hero h1[contenteditable="true"]:focus { box-shadow: inset 0 -2px 0 var(--accent-soft); }
+  .hero p.lede { font-size: 15px; color: #2a2a2a; max-width: 74ch; margin: 0 0 4px; outline: none; }
+  .hero p.lede[contenteditable="true"]:focus { box-shadow: inset 0 -2px 0 var(--accent-soft); }
+
+  .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 22px 0 0; }
+  @media (max-width: 700px) { .meta-grid { grid-template-columns: repeat(2, 1fr); } }
+  .meta-grid .field label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 3px; font-weight: 600; letter-spacing: 0.01em; }
+  .meta-grid .field input { width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); padding: 7px 9px; color: var(--ink); font-size: 13.5px; }
+  .meta-grid .field input:focus { outline: none; border-color: var(--accent); }
+
+  /* Sections */
+  section.script-section { margin: 38px 0 0; scroll-margin-top: 16px; }
+  section.script-section > .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  section.script-section > .section-head .section-title { font-family: var(--serif); font-size: 22px; line-height: 1.18; margin: 0 0 4px; outline: none; }
+  section.script-section > .section-head .section-title[contenteditable="true"]:focus { box-shadow: inset 0 -2px 0 var(--accent-soft); }
+  section.script-section > .section-head .section-note { font-size: 13px; color: var(--muted); margin: 0; max-width: 72ch; outline: none; }
+  section.script-section > .section-head .section-note[contenteditable="true"]:focus { box-shadow: inset 0 -2px 0 var(--accent-soft); }
+  section.script-section > .section-head .add-q { font-family: var(--sans); font-size: 12px; padding: 6px 10px; border: 1px solid var(--line); background: #fff; color: var(--muted); border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  section.script-section > .section-head .add-q:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Question card */
+  .question { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px 14px; margin: 10px 0; }
+  .question .q-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: flex-start; }
+  .question .q-left { min-width: 0; }
+  .question .qnum { font-family: var(--serif); font-size: 12.5px; color: var(--warm); font-weight: 700; letter-spacing: 0.02em; margin-bottom: 2px; }
+  .question .qtext { font-family: var(--serif); font-size: 16px; line-height: 1.36; font-weight: 600; color: var(--ink); outline: none; }
+  .question .qtext[contenteditable="true"]:focus { box-shadow: inset 0 -2px 0 var(--accent-soft); }
+  .question .qcode { font-size: 12px; color: var(--muted); margin-top: 5px; display: flex; align-items: baseline; gap: 6px; }
+  .question .qcode .arrow { color: var(--faint); white-space: nowrap; }
+  .question .qcode .code-tag { font-family: var(--mono); font-size: 11.5px; color: var(--olive); background: var(--olive-soft); border: 1px solid #e7e0bd; border-radius: 3px; padding: 1px 6px; overflow-wrap: anywhere; }
+  .question .q-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .question .q-actions button { font-family: var(--sans); font-size: 11.5px; padding: 4px 8px; border: 1px solid transparent; background: transparent; color: var(--faint); border-radius: 4px; cursor: pointer; }
+  .question .q-actions button:hover { border-color: var(--line); background: #fbfbf9; color: var(--ink); }
+  .question .q-actions button.danger:hover { color: var(--bad); border-color: var(--bad-soft); }
+
+  /* Cue pills */
+  .cue-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; align-items: center; }
+  .cue { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 8px 3px 6px; border: 1px solid var(--line); border-radius: 999px; background: #fbfbf9; color: #555; cursor: pointer; user-select: none; transition: background 80ms, border-color 80ms, color 80ms; }
+  .cue:hover { border-color: #c2c0b6; }
+  .cue input[type="checkbox"] { width: 12px; height: 12px; margin: 0; accent-color: var(--good); flex: 0 0 auto; cursor: pointer; }
+  .cue .cue-label { outline: none; min-width: 12px; max-width: 280px; overflow-wrap: anywhere; }
+  .cue .cue-label[contenteditable="true"]:focus { box-shadow: inset 0 -1px 0 var(--accent); }
+  .cue.checked { background: var(--good-soft); border-color: #b5d9bd; color: var(--good); }
+  .cue .cue-x { font-family: var(--sans); font-size: 13px; width: 14px; height: 14px; line-height: 1; padding: 0; border: none; background: transparent; color: var(--faint); cursor: pointer; border-radius: 999px; }
+  .cue .cue-x:hover { background: var(--bad-soft); color: var(--bad); }
+  .add-cue { font-family: var(--sans); font-size: 11.5px; padding: 3px 9px; border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 999px; cursor: pointer; }
+  .add-cue:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+
+  /* Answer + capture */
+  .notes-label { font-size: 11.5px; color: var(--muted); margin: 12px 0 4px; display: flex; justify-content: space-between; align-items: center; }
+  .notes-label .note-form { color: var(--faint); font-weight: 400; }
+  .notes { display: block; width: 100%; min-height: 56px; max-height: 320px; font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: var(--ink); padding: 8px 11px; border: 1px solid var(--line); border-radius: 4px; background: #fdfdfa; resize: vertical; }
+  .notes:focus { outline: none; border-color: var(--accent); background: #fff; }
+
+  details.capture { margin-top: 10px; }
+  details.capture summary { cursor: pointer; font-size: 12.5px; color: var(--accent); user-select: none; padding: 4px 0; list-style: none; }
+  details.capture summary::-webkit-details-marker { display: none; }
+  details.capture summary::before { content: "▸ "; color: var(--faint); }
+  details.capture[open] summary::before { content: "▾ "; }
+  .capture-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; margin-top: 8px; padding: 10px 12px; background: #fafaf3; border: 1px solid var(--line); border-radius: 4px; }
+  .capture-grid .capture-field { display: flex; flex-direction: column; }
+  .capture-grid .capture-field.wide { grid-column: 1 / -1; }
+  .capture-grid .capture-field label { font-size: 11.5px; color: var(--muted); margin-bottom: 2px; font-weight: 600; letter-spacing: 0.01em; }
+  .capture-grid .capture-field input { font-size: 13px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); }
+  .capture-grid .capture-field input:focus { outline: none; border-color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .capture-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 18px; right: 20px; background: #1a1a1a; color: #fff; padding: 9px 14px; border-radius: 5px; font-size: 13px; opacity: 0; transition: opacity 180ms; pointer-events: none; z-index: 99; }
+  #toast.show { opacity: 1; }
+
+  .footer { margin-top: 50px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .footer p { margin: 3px 0; }
+
+  /* Print */
+  @media print {
+    aside.nav, .q-actions, .add-cue, .add-q, .cue-x, #toast { display: none !important; }
+    main { padding: 0; max-width: 100%; }
+    .question, .hero, section.script-section { break-inside: avoid; }
+    body { font-size: 11pt; background: #fff; }
+    .notes, .capture-grid input { border-color: #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="nav">
+  <h1>QCS Expert Interview</h1>
+  <div class="sub">Decisions &amp; run-behavior for quantum circuit simulation — VQE as the running task</div>
+  <div class="status" aria-live="polite"><span class="dot"></span><span id="saveStatus">saved locally</span></div>
+  <nav id="auto-nav">
+    <ol id="nav-list"></ol>
+  </nav>
+  <div class="controls">
+    <button onclick="downloadSnapshot()">⬇  Save filled HTML</button>
+    <button onclick="exportJson()">{ }  Export edits (JSON)</button>
+    <button onclick="document.getElementById('jsonImport').click()">⤴  Import edits (JSON)</button>
+    <input id="jsonImport" type="file" accept="application/json,.json" style="display:none" onchange="importJson(event)" />
+    <button onclick="resetState()">↺  Reset to template</button>
+    <button onclick="window.print()">🖨  Print / PDF</button>
+  </div>
+  <div class="meta">
+    Autosaves to local browser storage on every edit. The
+    <em>Save filled HTML</em> button bakes your edits into a fresh copy
+    you can keep alongside this file. Reload-safe.
+  </div>
+</aside>
+
+<main>
+
+<header class="hero">
+  <div class="tag">Interview script · quantum circuit simulation</div>
+  <h1 contenteditable="true" data-title>Quantum circuit simulation — expert interview</h1>
+  <p class="lede" contenteditable="true" data-subtitle>Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). The variational quantum eigensolver (VQE) is the running task. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.</p>
+
+  <div class="meta-grid">
+    <div class="field">
+      <label for="expertName">Expert</label>
+      <input id="expertName" data-meta="expert" type="text" placeholder="Name, affiliation" />
+    </div>
+    <div class="field">
+      <label for="interviewerName">Interviewer</label>
+      <input id="interviewerName" data-meta="interviewer" type="text" placeholder="You" />
+    </div>
+    <div class="field">
+      <label for="interviewDate">Date</label>
+      <input id="interviewDate" data-meta="date" type="date" />
+    </div>
+    <div class="field">
+      <label for="context">Context (what you're computing)</label>
+      <input id="context" data-meta="context" type="text" placeholder="e.g. ground state of 1D TFIM · VQE · TensorCircuit-NG" />
+    </div>
+  </div>
+</header>
+
+<div id="sections"></div>
+
+<div class="footer">
+  <p>Your edits autosave to this browser. <em>Save filled HTML</em> writes a new file with your edits already in it — reopen that file later (anywhere, no internet) to continue. <em>Export JSON</em> writes only the edits, smaller and easy to share. Works offline. Print to make a PDF transcript.</p>
+  <p style="font-size:11px;opacity:0.7;margin-top:4px;">(Browser storage key: <code>quantum-harness/qcs-interview</code>; a cached copy from an older template version is ignored automatically.)</p>
+</div>
+
+</main>
+</div>
+
+<div id="toast"></div>
+
+<!-- Bootstrap state from a "Save filled HTML" snapshot lives here.
+     Empty by default; takes precedence over the seed when present. -->
+<script type="application/json" id="bootstrap-state"></script>
+
+<script>
+(function () {
+  const STORAGE_KEY = "quantum-harness/qcs-interview";
+
+  // Two card kinds share one render path. Config cards capture a decision;
+  // run cards capture a diagnostic signal. Each kind declares its capture fields
+  // as [key, label, placeholder, wide].
+  const CAPTURE = {
+    config: {
+      summary: "Capture the decision: what you set → default → switch when → costs → student trap",
+      fields: [
+        ["setting", "What you set — the choice & value", "e.g. set_contractor('cotengra', max_repeats=640)", false],
+        ["dflt",    "Default — write this if unsure",    "e.g. greedy contractor; complex64", false],
+        ["when",    "Switch when — the signal to change", "e.g. >24 qubits, or an out-of-memory error", false],
+        ["cost",    "Costs — what you trade for it",      "e.g. +minutes to compile; −half the memory", false],
+        ["trap",    "Student trap — what juniors get wrong", "e.g. times the compile, not the warm run", true]
+      ]
+    },
+    run: {
+      summary: "Capture the signal: healthy → red flag → likely cause → first action",
+      fields: [
+        ["healthy", "Healthy — what a good run shows", "e.g. energy falls then plateaus; gradient shrinks", false],
+        ["redflag", "Red flag — what a bad run shows", "e.g. every step as slow as the first", false],
+        ["cause",   "Likely cause",                   "e.g. silent re-tracing from changing shapes", false],
+        ["action",  "First thing you do",             "e.g. fix shapes; move values into tensors; use scan", false]
+      ]
+    }
+  };
+
+  function captureSpec(kind) { return CAPTURE[kind] || CAPTURE.config; }
+  function blankCapture(kind) {
+    const c = {};
+    for (const f of captureSpec(kind).fields) c[f[0]] = "";
+    return c;
+  }
+
+  const seed = {
+    version: 5,
+    title: "Quantum circuit simulation — expert interview",
+    subtitle: "Each item is one decision or signal from the simulator author's experience — when to choose one option over another (sections 1–5), and what a healthy run looks like versus a broken one (section 6). The variational quantum eigensolver (VQE) is the running task. Under each item is the concrete setting or signal in TensorCircuit-NG. The cue pills are prompts, not answer choices.",
+    meta: { expert: "", interviewer: "", date: "", context: "" },
+    sections: [
+      {
+        title: "1. Runtime and representation",
+        note: "The engine that runs the math, the numbers it uses, and how the state and operator are stored.",
+        questions: [
+          { text: "When do you reach for JAX, PyTorch, TensorFlow, or NumPy on the same VQE code — and why is it not just taste?",
+            code: "tc.set_backend(…) · tc.runtime_backend",
+            cues: ["JAX (compiled speed)", "TF / JAX (full AD · JIT · batching)", "PyTorch (ecosystem)", "NumPy (debugging only)"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When is single precision safe, and what forces you to double?",
+            code: "tc.set_dtype(complex64 / complex128)",
+            cues: ["default complex64", "complex128 for accuracy-sensitive energy / gradients", "single for large batched GPU runs", "watch gradient noise"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When do you keep the exact circuit, and when do you switch to a matrix-product-state (MPS) approximation — and how do you pick the bond dimension?",
+            code: "tc.Circuit  vs  tc.MPSCircuit (bond dimension)",
+            cues: ["exact for verification", "MPS for 1D / low-entanglement / many qubits", "compare MPS to exact on small sizes", "judging the truncation error"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When should the Hamiltonian enter as a loop over Pauli terms, a sparse matrix, a dense matrix, or an MPO?",
+            code: "expectation_ps · operator_expectation · PauliStringSum2COO · tn2qop",
+            cues: ["simple term loop", "batched Pauli structures", "sparse COO", "dense (small only)", "MPO for short-range"],
+            checked: [], answer: "", capture: blankCapture() }
+        ]
+      },
+      {
+        title: "2. Gradients, compilation, batching",
+        note: "How the gradient is taken, what gets compiled, and what gets run in parallel.",
+        questions: [
+          { text: "When is software backpropagation the right gradient, and when do you fall back to the parameter-shift rule?",
+            code: "backend.value_and_grad / backend.grad  (vs parameter-shift)",
+            cues: ["reverse-mode AD for simulation", "parameter-shift to mimic hardware", "higher-order (Jacobian / Hessian) only when needed"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "How do you decide what goes inside one compiled function?",
+            code: "jit(value_and_grad(loss)) · backend.jit · use_jit",
+            cues: ["no compile while debugging", "compile value + gradient together", "compile a translated circuit once", "no Python work in the timed path"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When should deep repeated layers be written as a loop instead of unrolled?",
+            code: "jax.lax.scan  (+ jax.checkpoint for memory)",
+            cues: ["unroll only shallow circuits", "scan for deep circuits", "scan + checkpoint when memory is tight"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "Which axis do you batch in one compiled call?",
+            code: "vmap · vectorized_value_and_grad",
+            cues: ["Pauli terms", "random starts / parameter sets", "data batches", "stochastic trajectories"],
+            checked: [], answer: "", capture: blankCapture() }
+        ]
+      },
+      {
+        title: "3. Contraction and memory",
+        note: "Choosing and tuning the tensor-network contraction — the core of large-scale simulation.",
+        questions: [
+          { text: "When is the default greedy contraction enough, and when is it worth spending time on a cotengra search — and how big a budget?",
+            code: "set_contractor(greedy) · cotengra: max_time / max_repeats · contraction_info",
+            cues: ["greedy for moderate circuits", "cotengra for larger circuits", "search once and reuse", "inspect FLOPs / WRITE / SIZE"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "How do you choose what the contraction search should minimize?",
+            code: "minimize = flops · write · size · combo",
+            cues: ["FLOPs for time", "WRITE for AD memory (cached intermediates)", "SIZE for the largest tensor", "blend when both matter"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When do you slice the contraction instead of shrinking the problem?",
+            code: "DistributedContractor · cotengra_options · target_size",
+            cues: ["no slicing if it fits", "slice on one GPU to avoid out-of-memory", "slice across devices", "accept extra FLOPs for memory"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When the contraction must scale past one device, how do you decide which way to hand the network to the distributed contractor — a built-in expectation helper, runtime capture, or a hand-built graph?",
+            code: "expectation_before() / amplitude_before() · runtime_nodes_capture() · manual nodes_fn(params)",
+            cues: ["built-in helper for a standard expectation value", "runtime capture to reuse high-level code unchanged", "hand-built graph only for an unusual observable", "more control costs more rewriting"],
+            checked: [], answer: "", capture: blankCapture() }
+        ]
+      },
+      {
+        title: "4. Hardware and optimizer",
+        note: "Where it runs, how the work is split across devices, and how the parameters are optimized.",
+        questions: [
+          { text: "How do you choose between CPU, one GPU, data-parallel GPUs, or model-parallel contraction?",
+            code: "set_backend · jax.pmap · jax.jit + jax.sharding · DistributedContractor",
+            cues: ["CPU for debug", "one GPU for normal VQE", "data-parallel for many terms / batches", "model-parallel when one contraction exceeds memory"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When do you use Adam/SGD, L-BFGS, SciPy (BFGS / COBYLA), or gradient-free optimization?",
+            code: "backend.optimizer(optax…) · scipy_interface",
+            cues: ["Adam → SGD for large VQE", "L-BFGS for smooth tensor-network objectives", "SciPy BFGS / COBYLA for small special cases", "gradient-free only without gradients"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "What timing result is honest enough to publish or compare?",
+            code: "keep separate: compile · warm run · one-off path search",
+            cues: ["report compile separately", "report warm execution separately", "report path-search separately", "match the baseline"],
+            checked: [], answer: "", capture: blankCapture() }
+        ]
+      },
+      {
+        title: "5. Trusting the result",
+        note: "The checks that separate a fast right answer from a fast wrong one.",
+        questions: [
+          { text: "What checks must an optimized VQE number pass before you trust it — including the ones that catch a fast run that quietly settled on the wrong answer?",
+            code: "small-system exact · Circuit ↔ MPSCircuit · Pauli/sparse/MPO agree · E ≥ exact ground · AD vs finite-diff",
+            cues: ["exact check on a small system", "operator formats (Pauli / sparse / MPO) agree", "energy never dips below the true ground", "AD matches a finite-difference spot-check", "MPS converged in bond dimension", "compare to DMRG / ground truth"],
+            checked: [], answer: "", capture: blankCapture() },
+          { text: "When is a speedup claim fair?",
+            code: "matched: task · hardware · gradient method · observable format",
+            cues: ["same task", "same hardware", "same gradient method", "same observable format", "compile / path-search accounted for"],
+            checked: [], answer: "", capture: blankCapture() }
+        ]
+      },
+      {
+        title: "6. What a good run looks like (and a bad one)",
+        note: "End-to-end signs of health. The order an expert debugs in: device & dtype → smallest exact case → compile once, warm time stable → first energy / gradient / update → 10–20 steps → cross-checks → only then scale one axis at a time.",
+        questions: [
+          { text: "Before committing to a run, what do you read off the contraction cost and the per-step energy cost — and what tells you it will never fit or finish?",
+            code: "contraction_info: FLOPs · WRITE · SIZE  ·  target_size", kind: "run",
+            cues: ["largest intermediate fits the device", "WRITE ok for the backward pass", "energy step not dominating the circuit", "switch to MPS / slice if it won't fit"],
+            checked: [], answer: "", capture: blankCapture("run") },
+          { text: "After you compile value-and-gradient, how should the first call and the warm calls differ — and what tells you it's silently recompiling every step?",
+            code: "jit(value_and_grad) · device barrier when timing", kind: "run",
+            cues: ["first call slow, warm calls fast & steady", "every step as slow as the first = recompiling", "compile time grows with depth = unrolled", "fix shapes / use scan"],
+            checked: [], answer: "", capture: blankCapture("run") },
+          { text: "In the first 5–20 steps, what do the energy, the gradient norm, and the update size tell you about whether training has even started?",
+            code: "energy curve · gradient norm (NaN check) · update vs param norm", kind: "run",
+            cues: ["energy trending down", "gradient finite & nonzero", "updates actually move the params", "flat curve can mean a broken gradient, not hard physics"],
+            checked: [], answer: "", capture: blankCapture("run") },
+          { text: "When the energy plateaus, how do you tell a real minimum from a stuck one or an unstable one?",
+            code: "final energy vs reference · gradient norm at plateau · oscillation", kind: "run",
+            cues: ["low energy + small gradient = good", "high plateau + small gradient = stuck", "oscillation / blowup = step too big or precision", "compare to a known small case"],
+            checked: [], answer: "", capture: blankCapture("run") },
+          { text: "Across many warm steps, what should step time and peak memory do — and what does a creep, or a suspiciously cheap run, tell you?",
+            code: "warm step time across iters · device memory · jax.devices()", kind: "run",
+            cues: ["stable warm step time", "flat peak memory", "creep = re-tracing / leak / growing logs", "fast but GPU idle = silent CPU fallback"],
+            checked: [], answer: "", capture: blankCapture("run") },
+          { text: "As you grow qubits, depth, batch, or bond dimension, what cost-and-accuracy trend is healthy, and what's the warning sign?",
+            code: "warm time / WRITE / SIZE vs N & depth · vmap throughput · error vs bond dim", kind: "run",
+            cues: ["cost grows predictably from small tests", "batching helps until memory saturates", "bigger bond dimension buys accuracy", "sudden cost cliff = bad path / re-search"],
+            checked: [], answer: "", capture: blankCapture("run") }
+        ]
+      }
+    ]
+  };
+
+  /* ---------- state plumbing ---------- */
+
+  let state = loadState();
+  const sectionsEl = document.getElementById("sections");
+  const navListEl = document.getElementById("nav-list");
+  const saveStatusEl = document.getElementById("saveStatus");
+  const toastEl = document.getElementById("toast");
+  let saveTimer = null;
+  let toastTimer = null;
+
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+
+  function loadState() {
+    // A "Save filled HTML" snapshot is the user's deliberate save and always loads.
+    const bootRaw = document.getElementById("bootstrap-state")?.textContent?.trim();
+    let boot = null;
+    if (bootRaw) {
+      try { boot = normalizeState(JSON.parse(bootRaw)); } catch (_e) { boot = null; }
+    }
+    // localStorage is a transient browser cache; honor it only when it was saved
+    // from the same template version. Bumping seed.version retires a stale cache.
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const ls = normalizeState(JSON.parse(raw));
+        if (ls.version === seed.version) return ls;
+      } catch (_e) {}
+    }
+    return boot || clone(seed);
+  }
+
+  function validateState(c) {
+    if (!c || !Array.isArray(c.sections)) throw new Error("invalid state");
+  }
+
+  function normalizeState(c) {
+    validateState(c);
+    const next = clone(c);
+    next.version = c.version;
+    next.title = next.title || seed.title;
+    next.subtitle = next.subtitle || seed.subtitle;
+    next.meta = Object.assign({}, seed.meta, next.meta || {});
+    next.sections = next.sections.map(section => ({
+      title: section.title || "Untitled section",
+      note: section.note || "",
+      questions: Array.isArray(section.questions) ? section.questions.map(q => {
+        const kind = q.kind === "run" ? "run" : "config";
+        const cues = Array.isArray(q.cues) ? q.cues : [];
+        const checked = Array.isArray(q.checked) ? q.checked : [];
+        return {
+          text: q.text || "Untitled question",
+          code: q.code || "",
+          kind,
+          cues,
+          checked: cues.map((_c, i) => Boolean(checked[i])),
+          answer: q.answer || "",
+          capture: Object.assign(blankCapture(kind), q.capture || {})
+        };
+      }) : []
+    }));
+    return next;
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1500);
+  }
+
+  function scheduleSave() {
+    saveStatusEl.textContent = "saving…";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 220);
+  }
+
+  function saveNow() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    saveStatusEl.textContent = "saved locally";
+  }
+
+  function saveAndRender() { saveNow(); render(); }
+
+  /* ---------- rendering ---------- */
+
+  function esc(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function escAttr(s) { return esc(s).replaceAll("'", "&#39;"); }
+
+  function sectionAnchor(i) { return `section-${i + 1}`; }
+
+  function render() {
+    document.querySelector("[data-title]").textContent = state.title || seed.title;
+    document.querySelector("[data-subtitle]").textContent = state.subtitle || seed.subtitle;
+    for (const inp of document.querySelectorAll("[data-meta]")) {
+      inp.value = state.meta[inp.dataset.meta] || "";
+    }
+
+    navListEl.innerHTML = state.sections.map((sec, i) =>
+      `<li><a href="#${sectionAnchor(i)}">${esc(sec.title)}</a></li>`
+    ).join("");
+
+    sectionsEl.innerHTML = state.sections.map((sec, i) => renderSection(sec, i)).join("");
+  }
+
+  function renderSection(sec, si) {
+    const qs = sec.questions.map((q, qi) => renderQuestion(q, si, qi)).join("");
+    return `
+      <section class="script-section" id="${sectionAnchor(si)}" data-section-index="${si}">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" contenteditable="true" data-section-title>${esc(sec.title)}</h2>
+            <p class="section-note" contenteditable="true" data-section-note>${esc(sec.note || "")}</p>
+          </div>
+          <button class="add-q" type="button" data-action="add-question" data-section="${si}">＋ item</button>
+        </div>
+        ${qs}
+      </section>
+    `;
+  }
+
+  function renderQuestion(q, si, qi) {
+    const number = `${si + 1}.${qi + 1}`;
+    const cuesHTML = q.cues.map((cue, ci) => {
+      const isChecked = q.checked && q.checked[ci];
+      return `
+        <span class="cue ${isChecked ? "checked" : ""}" data-cue-index="${ci}">
+          <input type="checkbox" ${isChecked ? "checked" : ""} aria-label="mark cue" />
+          <span class="cue-label" contenteditable="true">${esc(cue)}</span>
+          <button class="cue-x" type="button" data-action="remove-cue"
+                  data-section="${si}" data-question="${qi}" data-cue="${ci}"
+                  aria-label="remove cue">×</button>
+        </span>
+      `;
+    }).join("");
+
+    const codeHTML = q.code
+      ? `<div class="qcode"><span class="arrow">↳ in code</span><span class="code-tag">${esc(q.code)}</span></div>`
+      : "";
+
+    const spec = captureSpec(q.kind);
+    const captureHTML = spec.fields.map(f =>
+      captureField(f[0], f[1], q.capture[f[0]], f[3], f[2])
+    ).join("");
+
+    return `
+      <article class="question" data-question-index="${qi}">
+        <div class="q-head">
+          <div class="q-left">
+            <div class="qnum">${q.kind === "run" ? "S" : "D"}${number}</div>
+            <div class="qtext" contenteditable="true" data-question-text>${esc(q.text)}</div>
+            ${codeHTML}
+          </div>
+          <div class="q-actions">
+            <button type="button" data-action="add-cue" data-section="${si}" data-question="${qi}">＋ cue</button>
+            <button class="danger" type="button" data-action="remove-question" data-section="${si}" data-question="${qi}">remove</button>
+          </div>
+        </div>
+        <div class="cue-wrap">
+          ${cuesHTML}
+        </div>
+        <div class="notes-label">
+          <span>Answer notes</span><span class="note-form">free form · autosaved</span>
+        </div>
+        <textarea class="notes" data-answer placeholder="What did the expert actually say? Verbatim phrases beat paraphrase.">${esc(q.answer || "")}</textarea>
+        <details class="capture">
+          <summary>${esc(spec.summary)}</summary>
+          <div class="capture-grid">
+            ${captureHTML}
+          </div>
+        </details>
+      </article>
+    `;
+  }
+
+  function captureField(key, label, value, wide = false, placeholder = "") {
+    return `
+      <div class="capture-field ${wide ? "wide" : ""}">
+        <label>${esc(label)}</label>
+        <input data-capture="${key}" type="text" value="${escAttr(value || "")}" placeholder="${escAttr(placeholder)}" />
+      </div>
+    `;
+  }
+
+  /* ---------- DOM → state ---------- */
+
+  function collectFromDom() {
+    state.title = document.querySelector("[data-title]").textContent.trim();
+    state.subtitle = document.querySelector("[data-subtitle]").textContent.trim();
+
+    for (const inp of document.querySelectorAll("[data-meta]")) {
+      state.meta[inp.dataset.meta] = inp.value;
+    }
+
+    for (const sectionEl of sectionsEl.querySelectorAll("[data-section-index]")) {
+      const si = Number(sectionEl.dataset.sectionIndex);
+      const sec = state.sections[si];
+      sec.title = sectionEl.querySelector("[data-section-title]").textContent.trim();
+      sec.note  = sectionEl.querySelector("[data-section-note]").textContent.trim();
+
+      for (const qEl of sectionEl.querySelectorAll("[data-question-index]")) {
+        const qi = Number(qEl.dataset.questionIndex);
+        const q = sec.questions[qi];
+        q.text   = qEl.querySelector("[data-question-text]").textContent.trim();
+        q.answer = qEl.querySelector("[data-answer]").value;
+        q.cues    = Array.from(qEl.querySelectorAll(".cue-label")).map(el => el.textContent.trim());
+        q.checked = Array.from(qEl.querySelectorAll(".cue input[type='checkbox']")).map(el => el.checked);
+        q.capture = blankCapture(q.kind);
+        for (const inp of qEl.querySelectorAll("[data-capture]")) {
+          q.capture[inp.dataset.capture] = inp.value;
+        }
+      }
+    }
+  }
+
+  /* ---------- event wiring ---------- */
+
+  document.addEventListener("input", ev => {
+    if (ev.target.matches("[data-meta], textarea, [contenteditable='true'], .capture-field input")) {
+      collectFromDom();
+      scheduleSave();
+    }
+  });
+
+  document.addEventListener("change", ev => {
+    if (ev.target.matches("input[type='checkbox'], [data-meta], .capture-field input, input[type='date']")) {
+      // Refresh the visual pill state for checkbox changes
+      if (ev.target.matches(".cue input[type='checkbox']")) {
+        const cue = ev.target.closest(".cue");
+        if (cue) cue.classList.toggle("checked", ev.target.checked);
+      }
+      collectFromDom();
+      scheduleSave();
+    }
+  });
+
+  document.addEventListener("click", ev => {
+    const btn = ev.target.closest("button");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    if (!action) return;
+
+    const si = Number(btn.dataset.section);
+    const qi = Number(btn.dataset.question);
+    const ci = Number(btn.dataset.cue);
+
+    if (action === "add-cue") {
+      state.sections[si].questions[qi].cues.push("new cue");
+      state.sections[si].questions[qi].checked.push(false);
+      saveAndRender();
+    }
+    if (action === "remove-cue") {
+      state.sections[si].questions[qi].cues.splice(ci, 1);
+      state.sections[si].questions[qi].checked.splice(ci, 1);
+      saveAndRender();
+    }
+    if (action === "add-question") {
+      const kind = state.sections[si].questions[0]?.kind || "config";
+      state.sections[si].questions.push({
+        text: "New item", code: "", kind, cues: ["cue"], checked: [false],
+        answer: "", capture: blankCapture(kind)
+      });
+      saveAndRender();
+    }
+    if (action === "remove-question") {
+      if (window.confirm("Remove this item?")) {
+        state.sections[si].questions.splice(qi, 1);
+        saveAndRender();
+      }
+    }
+  });
+
+  window.addEventListener("beforeunload", () => { collectFromDom(); saveNow(); });
+
+  /* ---------- toolbar handlers (exposed on window) ---------- */
+
+  window.exportJson = function () {
+    collectFromDom();
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const ts = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `qcs-expert-interview-${ts}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast("edits exported");
+  };
+
+  window.importJson = function (ev) {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        state = normalizeState(JSON.parse(e.target.result));
+        saveAndRender();
+        showToast("edits imported");
+      } catch (err) {
+        showToast("import failed: bad JSON");
+      }
+    };
+    reader.readAsText(file);
+    ev.target.value = "";
+  };
+
+  window.resetState = function () {
+    if (!confirm("Wipe all your edits and return to the template? The original file is untouched.")) return;
+    state = clone(seed);
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+    showToast("reset to template");
+  };
+
+  window.downloadSnapshot = function () {
+    collectFromDom();
+    saveNow();
+    // Bake the current state into the bootstrap-state script tag so the
+    // downloaded file boots straight to these edits (no localStorage carry-over needed).
+    const bootEl = document.getElementById("bootstrap-state");
+    const prev = bootEl.textContent;
+    bootEl.textContent = JSON.stringify(state);
+    const html = "<!doctype html>\n" + document.documentElement.outerHTML;
+    bootEl.textContent = prev;  // restore so the live DOM stays as-is
+
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const ts = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `qcs-expert-interview-${ts}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast("filled HTML downloaded");
+  };
+
+  /* ---------- boot ---------- */
+
+  render();
+})();
+</script>
+</body>
+</html>
