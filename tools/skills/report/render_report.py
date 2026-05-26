@@ -30,6 +30,7 @@ import html
 import json
 import re
 import sys
+import urllib.parse
 from datetime import date
 from pathlib import Path
 
@@ -328,7 +329,7 @@ def figures_row(items, base_dir: Path) -> str:
         if not src:
             continue
         p = (base_dir / src).resolve()
-        if p.is_relative_to(base) and p.exists():       # contained in the run dir, no traversal
+        if p.is_relative_to(base) and p.is_file():       # contained in the run dir, no traversal, a real file
             figs.append(figbox(data_uri(p), it.get("caption", "")))
         else:
             missing += (f'<p class="note">Image not embedded — '
@@ -409,8 +410,11 @@ def section(s: dict, base_dir: Path) -> str:
 def render(doc: dict, base_dir: Path) -> str:
     title = doc.get("title", "Report")
     eyebrow = f'<div class="eyebrow">{mathify(doc["eyebrow"])}</div>' if doc.get("eyebrow") else ""
-    if doc.get("url"):
-        sub = f'<p class="sub"><a href="{esc(doc["url"])}">{esc(doc["url"])}</a></p>'
+    url = doc.get("url")
+    if url and urllib.parse.urlparse(url).scheme.lower() in ("http", "https", "mailto"):
+        sub = f'<p class="sub"><a href="{esc(url)}">{esc(url)}</a></p>'
+    elif url:                                            # unsafe/relative scheme: show as plain text, no live href
+        sub = f'<p class="sub">{esc(url)}</p>'
     elif doc.get("subtitle"):
         sub = f'<p class="sub">{mathify(doc["subtitle"])}</p>'
     else:

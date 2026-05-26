@@ -46,9 +46,9 @@ The run's memory lives in `results/<run>/run.json`. Write each confirmed choice 
   "risks":    ["observable not built-in — implement by hand"],
   "figures":  [
     {
-      "id": "Fig 2a", "paper_image": "figs/paper_fig2a.png", "plots": "$m^2$ vs $J_2/J_1$", "x": "$J_2/J_1$", "y": "$m^2$",
+      "id": "Fig 2a", "paper_image": "figs/paper_fig2a.png", "plots": "$m^2$ vs $J_2/J_1$", "x": "$J_2/J_1$", "x_range": "0 → 1, step 0.05", "y": "$m^2$",
       "observe":  { "quantity": "…", "normalization": "…", "states": "ground state only" },
-      "expected": "what we should see and why",
+      "expected": "what we should see, and what would count as reproduced",
       "results":  { "figure": "figs/fig2a.png", "numbers": {}, "match": "", "why": "", "wall": "", "changes": [], "rerun": "" }
     }
   ]

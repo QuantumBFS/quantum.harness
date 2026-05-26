@@ -74,7 +74,8 @@ def figure_blocks(f: dict) -> list:
     title = " — ".join(p for p in (f.get("id"), f.get("plots")) if p)
     blocks = [{"kind": "heading", "level": 3, "text": title},
               {"kind": "kv", "pairs": [
-                  ["x-axis", f.get("x")], ["y-axis", f.get("y")],
+                  ["x-axis", f.get("x")], ["Swept range", f.get("x_range")],
+                  ["y-axis", f.get("y")],
                   ["Observable", obs.get("quantity")],
                   ["Normalization", obs.get("normalization")],
                   ["States used", obs.get("states")]]}]
