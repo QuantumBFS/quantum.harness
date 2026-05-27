@@ -19,7 +19,7 @@ The caller is `solve`, a model/physics card, `/reproduce-paper`, or another work
 - Resume detection walks every `results/<run>/cells/*` directory; failed/missing cells stay visible.
 - Settings are constant only after manifest consensus across all cells.
 - The first manifest is never global provenance or global settings.
-- Cluster execution composes with `/slurm`; sbatch/ssh logic does not live here.
+- Cluster execution composes with `/using-slurm`; sbatch/ssh logic does not live here.
 - Every compute script writes its own `results/<run>/cells/<cell_id>/manifest.json`.
 </checklist>
 
@@ -43,7 +43,7 @@ The caller is `solve`, a model/physics card, `/reproduce-paper`, or another work
 1. **Plan.** Enumerate Cartesian product and write `results/<run>/parameter-scan.plan.json`.
 2. **Build run spec.** For resumable or cluster execution, write `results/<run>/run_spec.json` using the generic contract below.
 3. **Resume detect.** Identify cells with success manifests, failed manifests, missing manifests, or no cell directory.
-4. **Execute.** Run locally for small scans; compose with `/slurm` for cluster scans.
+4. **Execute.** Run locally for small scans; compose with `/using-slurm` for cluster scans.
 5. **Retry only by policy.** Auto-bump controlling settings only for cells whose manifest reports non-convergence and whose caller declared a retry policy.
 6. **Collect.** Assemble every manifest into `results/<run>/parameter-scan.csv`; failed/missing cells appear with status.
 7. **Plot.** Emit `results/<run>/parameter-scan.png`; choose line/errorbar, family curves, or heatmap based on axis arity.
@@ -149,7 +149,7 @@ Good: include every planned cell with `status = success | failed | missing | pen
 
 ## Composition
 
-- `/slurm` handles cluster array submission, monitoring, and fetch.
+- `/using-slurm` handles cluster array submission, monitoring, and fetch.
 - `/scaling-fit` consumes power-law-like, extremum, or crossing scans when the caller needs exponents/collapse.
 - `/cross-method-check` verifies one selected point independently.
 - Literature-dependent interpretation belongs to the caller's source-search/source-audit path.

@@ -1,5 +1,5 @@
 ---
-name: sse
+name: using-sse
 description: Use when choosing or running StochasticSeriesExpansion.jl or Carlo.jl for sign-free QMC/SSE workflows, MPI setup, or SSE setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use StochasticSeriesExpansion.jl with Carlo.jl for sign-problem-free stochastic-
 
 ## Sources
 
-- Stack contract: `skills/sse/stack.toml`
+- Stack contract: `skills/using-sse/stack.toml`
 - Method card: `.knowledge/methods/quantum-monte-carlo.md`
 - Install target: `make install sse`
 - Smoke test: `julia --project=julia-env -e 'using Carlo, StochasticSeriesExpansion'`
@@ -17,7 +17,7 @@ Use StochasticSeriesExpansion.jl with Carlo.jl for sign-problem-free stochastic-
 ## Workflow
 
 1. Confirm the model is sign-problem-free for the chosen lattice, coupling signs, and basis.
-2. Consult `stack.toml` for CPU vs MPI smoke tests and compose with `/slurm` for scheduled runs.
+2. Consult `stack.toml` for CPU vs MPI smoke tests and compose with `/using-slurm` for scheduled runs.
 3. Pin thermalization, samples, chains, bins, update type, estimator, seed policy, and target uncertainty.
 4. Report autocorrelation/binning diagnostics with the measured observable.
 
@@ -37,5 +37,5 @@ Estimate from `thermalization_sweeps + measurement_sweeps`, cost per sweep, numb
 
 - Per-sweep cost scales with lattice size, operator-string length, and update type; low temperature usually increases the operator string and autocorrelation.
 - Effective independent samples are fewer than raw samples when autocorrelation is large; include the binning/autocorrelation penalty in the estimate.
-- MPI reduces wall time only when chains or parameter points parallelize cleanly; use `stack.toml` for the MPI smoke test and `/slurm` for scheduled runs.
+- MPI reduces wall time only when chains or parameter points parallelize cleanly; use `stack.toml` for the MPI smoke test and `/using-slurm` for scheduled runs.
 - For uncertain cases, time a short non-production chain to estimate sweep rate and autocorrelation proxy, then show paper-size and local-PC-in-15-min estimates before asking scale.

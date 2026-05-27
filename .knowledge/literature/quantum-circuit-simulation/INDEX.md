@@ -16,5 +16,5 @@ Search inside this dir with `rg --hidden -g '!.raw' "term" .knowledge/` (or `rg`
 
 | File | Title | Authors | Year | Venue | Full text |
 |---|---|---|---|---|:---:|
-| [tensorcircuit-tensorcircuit-ng.md](tensorcircuit-tensorcircuit-ng.md) | tensorcircuit/tensorcircuit-ng |  |  |  | — |
+| [tensorcircuit-tensorcircuit-ng.md](tensorcircuit-tensorcircuit-ng.md) | tensorcircuit/using-tensorcircuit-ng |  |  |  | — |
 

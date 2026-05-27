@@ -1,5 +1,5 @@
 ---
-name: pepskit
+name: using-pepskit
 description: Use when choosing or running PEPSKit.jl or TensorKit.jl for PEPS, CTMRG, 2D classical/quantum tensor-network calculations, or PEPSKit setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use PEPSKit with TensorKit for PEPS / CTMRG calculations where convergence knobs
 
 ## Sources
 
-- Stack contract: `skills/pepskit/stack.toml`
+- Stack contract: `skills/using-pepskit/stack.toml`
 - Method card: `.knowledge/methods/peps-based-algorithm.md`
 - Install target: `make install pepskit`
 - Smoke test: `julia --project=julia-env -e 'using TensorKit, PEPSKit, QuadGK'`

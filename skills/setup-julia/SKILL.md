@@ -21,7 +21,7 @@ Idempotence is enforced, not aspirational:
 - (d) `verify` MUST pass on the no-op path (re-running the whole workflow on an already-set-up host exits 0 without modifying anything).
 </checklist>
 
-This skill is for *Julia-specific configuration*. Cluster-side conventions (ssh, scheduler, partitions) live in `skills/slurm/profiles/<active>.md` and are read here for `region` defaults and (when target is remote) the ssh alias and `repo_path_remote`.
+This skill is for *Julia-specific configuration*. Cluster-side conventions (ssh, scheduler, partitions) live in `skills/using-slurm/profiles/<active>.md` and are read here for `region` defaults and (when target is remote) the ssh alias and `repo_path_remote`.
 
 Julia package stacks are declared separately in `skills/<stack>/stack.toml`.
 This skill only makes Julia itself and `julia-env/` usable locally or remotely;
@@ -34,13 +34,13 @@ after that, the selected stack's install command (for example `make install iten
 - A fresh laptop / fresh cluster account needs the harness's Julia stack.
 - Package mirror changes (e.g., the user moves region or the institutional mirror updates).
 - Bumping Julia version (`--version 1.11.x`).
-- `/slurm`'s pre-submit check sees `julia-env/Manifest.toml` not yet instantiated on the cluster.
+- `/using-slurm`'s pre-submit check sees `julia-env/Manifest.toml` not yet instantiated on the cluster.
 
 ## Inputs
 
 | flag | type | default | source-of-default |
 |---|---|---|---|
-| `--target` | `local` \| `remote:<alias>` | `local` | CLI; for remote, `<alias>` matches `skills/slurm/profiles/<active>.md`'s `ssh.alias` field; the skill reads `repo_path_remote` for where the project lives. |
+| `--target` | `local` \| `remote:<alias>` | `local` | CLI; for remote, `<alias>` matches `skills/using-slurm/profiles/<active>.md`'s `ssh.alias` field; the skill reads `repo_path_remote` for where the project lives. |
 | `--region` | name | from cluster profile's `region` field | See [Mirror reference](#mirror-reference). |
 | `--mirror` | URL | unset | Advanced override for `JULIA_PKG_SERVER`. |
 | `--version` | `X.Y.Z` \| `release` | `release` | juliaup's stable channel. When `release`, the project's `julia_version` is also consulted. |
@@ -97,7 +97,7 @@ This skill follows the Jinguo-group recipe verbatim (https://book.jinguo-group.s
 **Callers** (who calls `/setup-julia`):
 
 - `/onboard` — if the user signals they will write Julia code (e.g., DMRG / ITensors workflows).
-- `/slurm` — pre-submit when the remote cluster's `julia-env/Manifest.toml` hasn't been instantiated yet.
+- `/using-slurm` — pre-submit when the remote cluster's `julia-env/Manifest.toml` hasn't been instantiated yet.
 - `make install julia` and `make install itensors` recipes (the makefile recipes can dispatch the skill via `${CLAUDE_SKILL_DIR}/setup-julia/...` once registered).
 
 **Downstream** (what runs after `/setup-julia`):
@@ -106,7 +106,7 @@ This skill follows the Jinguo-group recipe verbatim (https://book.jinguo-group.s
 
 **Data dependencies** (what `/setup-julia` reads):
 
-- `skills/slurm/profiles/<active>.md` — for the `region` default mirror and (for remote) the ssh alias and `repo_path_remote`.
+- `skills/using-slurm/profiles/<active>.md` — for the `region` default mirror and (for remote) the ssh alias and `repo_path_remote`.
 
 ## Mirror reference
 

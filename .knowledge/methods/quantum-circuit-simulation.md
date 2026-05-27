@@ -6,7 +6,7 @@ This card is generic methodology. Paper-specific benchmarks, hardware layouts, a
 
 ## Setup
 
-Canonical stack: `tensorcircuit-ng` with a JAX backend (`skills/tensorcircuit-ng/stack.toml`).
+Canonical stack: `tensorcircuit-ng` with a JAX backend (`skills/using-tensorcircuit-ng/stack.toml`).
 
 TensorCircuit-NG requires JAX first.
 
@@ -118,8 +118,8 @@ For deep repeated layers, express the layer update with JAX control flow (`jax.l
 
 TensorCircuit-NG ships its own agent skills (task playbooks) and memory notes (backend / AD / contraction usage lore) in-repo. Not vendored here — consult upstream when working in this method:
 
-- Skills: https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/skills
-- Memory: https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/memory
+- Skills: https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/skills
+- Memory: https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/memory
 
 ## Citations
 

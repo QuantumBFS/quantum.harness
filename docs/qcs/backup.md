@@ -15,7 +15,7 @@
 - **第一代软件白皮书**：[TensorCircuit: a Quantum Software Framework for the NISQ Era](https://arxiv.org/abs/2205.10091)
 - **第二代软件白皮书**：[TensorCircuit-NG: A Universal, Composable, and Scalable Platform for Quantum Computing and Quantum Simulation](https://arxiv.org/abs/2602.14167)
 - **Cotengra 核心文献**：[Hyper-optimized tensor network contraction](https://arxiv.org/abs/2002.01935)
-- TensorCircuit-NG 开源框架（自带基础 Harness）：https://github.com/tensorcircuit/tensorcircuit-ng
+- TensorCircuit-NG 开源框架（自带基础 Harness）：https://github.com/tensorcircuit/using-tensorcircuit-ng
 
 ### 3. 在线讨论时间
 

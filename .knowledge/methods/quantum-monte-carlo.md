@@ -7,7 +7,7 @@ method family and is not covered by this card.
 
 ## Setup
 
-Canonical stack: `sse` (`skills/sse/stack.toml`).
+Canonical stack: `sse` (`skills/using-sse/stack.toml`).
 
 ```
 make install julia
@@ -18,7 +18,7 @@ Activate the environment with `julia --project=julia-env`.
 
 Remote route: use `/setup-julia`, then the `sse:cpu` profile for single-process
 runs or `sse:cpu_mpi` inside a compute allocation for MPI runs. Cluster modules,
-partitions, and `mpirun`/`srun` details belong in `skills/slurm/profiles/<profile>.md`,
+partitions, and `mpirun`/`srun` details belong in `skills/using-slurm/profiles/<profile>.md`,
 not in this method card.
 
 Official install and usage docs:
@@ -154,7 +154,7 @@ system size or beta.
 ## Verification
 
 - **Install smoke**: run the `sse` stack smoke command from
-  `skills/sse/stack.toml`.
+  `skills/using-sse/stack.toml`.
 - **Sign check**: report the average sign when available; sign-free targets
   should not show a decaying sign.
 - **Thermalization and binning**: compare means after dropping early bins and

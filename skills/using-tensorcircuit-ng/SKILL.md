@@ -1,5 +1,5 @@
 ---
-name: tensorcircuit-ng
+name: using-tensorcircuit-ng
 description: Use when choosing or running TensorCircuit-NG for quantum-circuit simulation, differentiable circuits, VQE, JAX backend setup, or TensorCircuit-NG setup failures.
 ---
 
@@ -9,8 +9,8 @@ Use TensorCircuit-NG for JAX-backed circuit simulation, differentiable circuit w
 
 ## Sources
 
-- Stack contract: `skills/tensorcircuit-ng/stack.toml`
-- JAX prerequisite: `skills/jax/stack.toml`
+- Stack contract: `skills/using-tensorcircuit-ng/stack.toml`
+- JAX prerequisite: `skills/using-jax/stack.toml`
 - Method card: `.knowledge/methods/quantum-circuit-simulation.md`
 - QCS interview notes: `docs/qcs/interview.html`
 - QCS review notes: `docs/qcs/review.html`
@@ -29,7 +29,7 @@ Use TensorCircuit-NG for JAX-backed circuit simulation, differentiable circuit w
 Use this section as the source for TensorCircuit-NG-specific reproduction knobs unless the paper or official code fixes a value. QCS setup starts with representation and stack, then tunes settings inside that choice.
 
 - Representation: tensor-network contraction, full statevector, or MPS. Pick contraction for large/deep differentiable VQE when the largest intermediate tensor fits; statevector for small/full-state/noise/sampling; MPS for 1D low-entanglement circuits after `chi` convergence.
-- Backend/runtime: usually JAX for compiled speed, automatic differentiation, and batching; NumPy is debugging only. Use `/jax` for device, dtype, and compile setup.
+- Backend/runtime: usually JAX for compiled speed, automatic differentiation, and batching; NumPy is debugging only. Use `/using-jax` for device, dtype, and compile setup.
 - Precision: default complex64 for performance scans; complex128 when the observable, gradient, or baseline accuracy demands it.
 - Circuit/task: qubit count, geometry, gate set, depth/layers, parameter shape, initialization, seed policy, and whether the target is expectation, gradient/VQE, sampling, or training.
 - Observable form: Pauli-term loop, batched Pauli structure, sparse matrix, dense matrix only for small cases, or MPO-like form for short-range Hamiltonians.

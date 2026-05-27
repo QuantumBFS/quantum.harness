@@ -1,5 +1,5 @@
 ---
-name: jax
+name: using-jax
 description: Use when choosing or setting up JAX as a CPU/GPU backend for NetKet, TensorCircuit-NG, differentiable simulation, or JAX device/setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use JAX as the backend layer for Python simulation stacks such as NetKet and Ten
 
 ## Sources
 
-- Stack contract: `skills/jax/stack.toml`
+- Stack contract: `skills/using-jax/stack.toml`
 - QCS interview notes: `docs/qcs/interview.html`
 - QCS review notes: `docs/qcs/review.html`
 - CPU install target: `make install jax EXTRA=cpu`

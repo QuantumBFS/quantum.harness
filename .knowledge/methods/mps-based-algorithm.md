@@ -4,7 +4,7 @@ Matrix Product State methods for ground states and time evolution of 1D and quas
 
 ## Setup
 
-Canonical stack: `itensors` (`skills/itensors/stack.toml`).
+Canonical stack: `itensors` (`skills/using-itensors/stack.toml`).
 
 ```
 make install julia        # Install Julia via juliaup if missing

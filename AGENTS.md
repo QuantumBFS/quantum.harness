@@ -112,7 +112,7 @@ Python (`quimb` + `cotengra`) remains available as a fallback for tensor-network
 
 ## Compute resources
 
-The harness can use a remote cluster profile at `skills/slurm/profiles/active.md` for any task larger than a few minutes of local compute. **Compute feasibility is decided BEFORE the first run**, not discovered after watching a local process for an hour.
+The harness can use a remote cluster profile at `skills/using-slurm/profiles/active.md` for any task larger than a few minutes of local compute. **Compute feasibility is decided BEFORE the first run**, not discovered after watching a local process for an hour.
 
 Before launching any non-trivial computation:
 
@@ -120,8 +120,8 @@ Before launching any non-trivial computation:
 2. **Pick local vs remote with a clear threshold:**
    - Local: < 10 min wall, < 16 GB resident, fits within normal use of one CPU node.
    - Remote sbatch: everything else.
-3. **Read the cluster card BEFORE picking a partition.** `skills/slurm/profiles/<active>.md` lists partition memory / core / wall caps and recent usage notes. The default partition is a hint, not authority — an idle partition that matches needs beats a contested default. Concrete example: the Turner 2018 reproduction had L=30 dense ED take ~50 min locally vs ~10 min on a 64-core cluster node, and L=32 was infeasible locally entirely. That asymmetry should be caught BEFORE the first local run.
-4. **Compose with `/slurm`** (single-job or array) and `/parameter-scan` (multi-axis grids). The cluster mechanism handles ship-code → submit → monitor → fetch end-to-end.
+3. **Read the cluster card BEFORE picking a partition.** `skills/using-slurm/profiles/<active>.md` lists partition memory / core / wall caps and recent usage notes. The default partition is a hint, not authority — an idle partition that matches needs beats a contested default. Concrete example: the Turner 2018 reproduction had L=30 dense ED take ~50 min locally vs ~10 min on a 64-core cluster node, and L=32 was infeasible locally entirely. That asymmetry should be caught BEFORE the first local run.
+4. **Compose with `/using-slurm`** (single-job or array) and `/parameter-scan` (multi-axis grids). The cluster mechanism handles ship-code → submit → monitor → fetch end-to-end.
 
 NEVER run a multi-hour calculation locally because the agent forgot the cluster exists. The cluster IS the default for non-trivial compute; declare a deviation if local-only is actually justified.
 
@@ -131,7 +131,7 @@ NEVER run a multi-hour calculation locally because the agent forgot the cluster 
 - Skills: `skills/` — conversational workflows (managed by Ion)
 - Method-level skills: `skills/method-*/SKILL.md` — method insight and tool-skill selection for challenge tracks.
 - Software stack skills: `skills/<stack>/SKILL.md` with machine-readable setup in `skills/<stack>/stack.toml`.
-- Cluster profiles: `skills/slurm/profiles/` — per-cluster defaults (partitions, sbatch idioms, modules) consulted by cluster-aware skills via `skills/slurm/profiles/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Skills stay cluster-agnostic; cluster specifics live in profile cards.
+- Cluster profiles: `skills/using-slurm/profiles/` — per-cluster defaults (partitions, sbatch idioms, modules) consulted by cluster-aware skills via `skills/using-slurm/profiles/active.md` symlink or `HARNESS_CLUSTER_PROFILE=<name>` env var. Skills stay cluster-agnostic; cluster specifics live in profile cards.
 
 ## Ion skill management
 
@@ -203,11 +203,11 @@ ion self --help                          # Manage the Ion install
 - **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
 - **For final results, lead with the answer.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are." During planning or reproduction setup, lead with the current decision and the recommended option's reason.
 - **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.jl` and results (data + plot) saved to `results/`. Show the one-line run command: `julia --project=julia-env scripts/<name>.jl`. Never make the user ask for the script.
-- **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/slurm/profiles/<name>.md`), not in scripts.
+- **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/using-slurm/profiles/<name>.md`), not in scripts.
 - **Long iterative computes must emit intermediate estimates, not just final values.** A multi-hour run without progress output is a blind spot: the user cannot sanity-check whether the running estimate, error proxy, acceptance/progress counters, or convergence diagnostics are stabilizing. Print a partial estimate every K steps, where K is chosen so the user sees roughly 10-50 updates over the run. The script's standard runner enforces this via a `progress_every` knob; method cards declare a sensible default.
 - **Monitor before declaring success — don't fire-and-forget remote actions.** A "RUNNING" status / a 0 exit code from `ssh` is not success; only verified output is. After any non-trivial remote action, stay engaged through a *settle-time* before reporting "✓ done":
   - **Lightweight tasks** (env setup, install, instantiate, single ssh command): tail output in real-time. If silent for >30 sec on a non-precompile command, suspect (PATH issue, hung lock, missing prereq).
-  - **Cluster jobs**: cluster-specific settle-time discipline (partition selection from queue card, `PD → R` transition check, first-cell log tail, multi-hour periodic checks) lives in `skills/slurm/SKILL.md`. Compose with `/slurm` instead of inlining the rules here.
+  - **Cluster jobs**: cluster-specific settle-time discipline (partition selection from queue card, `PD → R` transition check, first-cell log tail, multi-hour periodic checks) lives in `skills/using-slurm/SKILL.md`. Compose with `/using-slurm` instead of inlining the rules here.
   - **Multi-hour local jobs**: periodic log checks every 30–60 min. Surface progress via short status lines, not silence.
   Settle-time scales with how far the job has to go before producing meaningful output. The cost of an extra 1–3 min of monitoring is much less than the cost of returning hours later to find 28 cells silently failed in the first minute — or that all 28 cells are still queued.
 - **Caveat-after, not caveat-first.** For contested regimes, state the consensus framing first, then qualify the unresolved point. Never open with the hedge.

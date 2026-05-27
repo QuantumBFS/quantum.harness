@@ -1,5 +1,5 @@
 ---
-name: xdiag
+name: using-xdiag
 description: Use when choosing or running XDiag.jl for exact diagonalization, symmetry-resolved sectors, Lanczos/Krylov calculations, or XDiag setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use XDiag as the harness's canonical exact-diagonalization stack when the target
 
 ## Sources
 
-- Stack contract: `skills/xdiag/stack.toml`
+- Stack contract: `skills/using-xdiag/stack.toml`
 - Method card: `.knowledge/methods/ed/METHOD.md`
 - ED interview notes: `docs/ed/interview.html`
 - ED review notes: `docs/ed/review.html`
@@ -43,7 +43,7 @@ Estimate cost from the symmetry-reduced block dimension `D` after basis constrai
 - Sparse / matrix-free: memory is operator/state storage plus Krylov vectors; wall is measured or estimated as `matvec_cost * iterations * requested_states`.
 - Paper-size estimate: compute or bound the paper's `D` after all sectors, then estimate dense vs sparse feasibility.
 - Local-15-min estimate: solve for the largest `D` that fits the local memory and time budget under the chosen solver; if uncertain, time one representative matvec or tiny block only.
-- Route to `/slurm` when the paper-size block exceeds local memory, exceeds the 15-minute target by a large factor, or needs MPI/distributed XDiag.
+- Route to `/using-slurm` when the paper-size block exceeds local memory, exceeds the 15-minute target by a large factor, or needs MPI/distributed XDiag.
 
 ## Use Another Route When
 

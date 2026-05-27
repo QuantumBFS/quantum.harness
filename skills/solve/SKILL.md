@@ -37,7 +37,7 @@ If a card redirects to dynamics, finite-T, or another stub, follow the redirect 
 
 ## Run
 
-Use the selected method card's code shape. Install missing canonical stack profiles before compute; route remote/non-trivial compute through `/slurm`. Save scripts under `scripts/`, results under `results/`, and generate a convergence/stability plot.
+Use the selected method card's code shape. Install missing canonical stack profiles before compute; route remote/non-trivial compute through `/using-slurm`. Save scripts under `scripts/`, results under `results/`, and generate a convergence/stability plot.
 
 Frontier card flag: run literature search first, present the literature-backed interpretation as the solve result, and offer compute as a next step.
 

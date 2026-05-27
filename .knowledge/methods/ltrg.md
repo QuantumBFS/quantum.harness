@@ -17,7 +17,7 @@ properties of quantum lattice models," `.knowledge/literature/ltrg/`.
 
 Recommended stack:
 
-1. `itensors` (`skills/itensors/stack.toml`) - explicit tensor construction,
+1. `itensors` (`skills/using-itensors/stack.toml`) - explicit tensor construction,
    contraction, SVD, and truncation.
 
 ```
@@ -27,7 +27,7 @@ make install itensors
 
 Activate the environment with `julia --project=julia-env`.
 
-Use `/itensors` for Julia setup, ITensor index mechanics, SVD keyword details,
+Use `/using-itensors` for Julia setup, ITensor index mechanics, SVD keyword details,
 and runtime troubleshooting. The LTRG method card owns the algorithmic choices:
 Trotter split, transfer tensor construction, contraction direction,
 normalization accounting, observable route, and convergence plan.
@@ -196,4 +196,4 @@ analytic or external data only as a benchmark after the LTRG result exists.
 ## Citations
 
 - `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md` - Li et al., original LTRG paper.
-- ITensors.jl stack and setup are handled by `/itensors`.
+- ITensors.jl stack and setup are handled by `/using-itensors`.

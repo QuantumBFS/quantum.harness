@@ -1,5 +1,5 @@
 ---
-name: itensors
+name: using-itensors
 description: Use when choosing or running ITensors.jl or ITensorMPS.jl for DMRG, TEBD, MPS calculations, tensor-network checks, or ITensors setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use ITensors / ITensorMPS for the harness's canonical 1D and quasi-1D tensor-net
 
 ## Sources
 
-- Stack contract: `skills/itensors/stack.toml`
+- Stack contract: `skills/using-itensors/stack.toml`
 - Method card: `.knowledge/methods/mps-based-algorithm.md`
 - Install target: `make install itensors`
 - Smoke test: `julia --project=julia-env -e 'using ITensors, ITensorMPS, KrylovKit, MPSKit'`

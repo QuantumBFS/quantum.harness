@@ -65,7 +65,7 @@ non-paper compute workflow.
 
 <checklist name="cluster-setup">
 
-Skip this stage if `skills/slurm/profiles/active.md` already exists (user has a profile from a prior session — idempotent).
+Skip this stage if `skills/using-slurm/profiles/active.md` already exists (user has a profile from a prior session — idempotent).
 
 Otherwise, ask one warm gate via `AskUserQuestion`. Most paper-grade calculations end up on a remote cluster eventually, and even a quick setup now persists the profile so future sessions ship/submit/monitor/fetch automatically without re-asking:
 
@@ -108,19 +108,19 @@ A single `WebFetch` rarely captures everything — most cluster docs sites have 
 - Job:
   1. Fetch the root page; identify the sidebar / nav menu; enumerate every sub-page relevant to: **login & connection**, **scheduler & job submission**, **partitions / queues / resource limits**, **environment setup / modules / `.bashrc`**, **filesystem layout**, **network reach** (internet from login / from compute).
   2. Fetch each relevant sub-page; extract verbatim instructions (sbatch examples, partition tables, module load lines, ssh hostnames, etc.).
-  3. Synthesize into the cluster profile schema declared in `skills/slurm/references/cluster-profiles.md`.
-  4. **Identify harness-side gotchas not explicit in the docs**: e.g., non-interactive ssh sessions not sourcing `/etc/profile` (so scheduler binaries are off PATH); two scheduler binaries on the system (`/usr/bin/sbatch` Ubuntu default vs `/opt/slurm/bin/sbatch` cluster's own); login-shell-only quirks. These are inferred from "the docs assume X, our harness uses Y" reasoning.
+  3. Synthesize into the cluster profile schema declared in `skills/using-slurm/references/cluster-profiles.md`.
+  4. **Identify harness-side gotchas not explicit in the docs**: e.g., non-interactive ssh sessions not sourcing `/etc/profile` (so scheduler binaries are off PATH); two scheduler binaries on the system (`/usr/bin/sbatch` Ubuntu default vs `/opt/using-slurm/bin/sbatch` cluster's own); login-shell-only quirks. These are inferred from "the docs assume X, our harness uses Y" reasoning.
 - Output:
   - The full **sub-page URL index** for the cluster (table: URL → what it documents). This goes into the profile's "Documentation" section so the harness has complete coverage, not a single-link fallback.
-  - The proposed `skills/slurm/profiles/<short-name>.md` content matching the schema.
-  - A **"Harness-side gotchas"** section capturing inferred issues + their workarounds (e.g., "ssh with `bash -l -c '...'` to get a login shell so `/opt/slurm/bin` is on PATH").
+  - The proposed `skills/using-slurm/profiles/<short-name>.md` content matching the schema.
+  - A **"Harness-side gotchas"** section capturing inferred issues + their workarounds (e.g., "ssh with `bash -l -c '...'` to get a login shell so `/opt/using-slurm/bin` is on PATH").
   - Anything the subagent could *not* extract from the docs — flagged for fallback to step **2c** (interactive questions) on those specific fields only, not the whole profile.
 
 **Coverage, not filtering.** Report every relevant sub-page URL, every partition row, every module-load line, every harness-side gotcha you spot — including ones you are unsure about or judge minor. Silently dropping a partition or a gotcha is the failure mode, not over-reporting.
 
 </brief>
 
-Display the proposed `skills/slurm/profiles/<short-name>.md` content inline as a fenced markdown block, then dispatch one `AskUserQuestion` with options: Accept and save, Edit then save, Discard and use walk-through (2c) instead. Write to disk only after the user picks Accept or completes an edit.
+Display the proposed `skills/using-slurm/profiles/<short-name>.md` content inline as a fenced markdown block, then dispatch one `AskUserQuestion` with options: Accept and save, Edit then save, Discard and use walk-through (2c) instead. Write to disk only after the user picks Accept or completes an edit.
 
 If the subagent fails outright (docs site is paywalled / JS-only with no API / 403 on subpages), fall through to **2c** (questions).
 
@@ -134,9 +134,9 @@ Pre-amble:
 3. *"What's your default queue or partition? You can override per job — this is just where jobs go if nothing else is specified."*
 4. AskUserQuestion: *"Which region is the cluster in?"* with options: `Mainland China (mirrors will be set up downstream)` / `Outside mainland China (default mirrors)` / `Air-gapped / no internet from login` / `Not sure`.
 
-Write the profile to `skills/slurm/profiles/<short-name>.md`, symlink `skills/slurm/profiles/active.md → <short-name>.md`. Confirm one line: *"Cluster profile saved at `skills/slurm/profiles/<name>.md`. Future jobs will use it automatically."*
+Write the profile to `skills/using-slurm/profiles/<short-name>.md`, symlink `skills/using-slurm/profiles/active.md → <short-name>.md`. Confirm one line: *"Cluster profile saved at `skills/using-slurm/profiles/<name>.md`. Future jobs will use it automatically."*
 
-Do NOT bootstrap Julia or instantiate environments here — that's `/setup-julia`'s job, dispatched on demand by `/slurm` when the first cluster Julia run happens.
+Do NOT bootstrap Julia or instantiate environments here — that's `/setup-julia`'s job, dispatched on demand by `/using-slurm` when the first cluster Julia run happens.
 
 ### 3. Problem intake — skippable
 
@@ -178,7 +178,7 @@ If nothing fits: *"That's outside current scope (ground-state lattice problems).
 - Ask the user to read docs.
 - Show a menu of 13 skills.
 - Hardcode package-level install instructions (the stack contracts in `skills/<stack>/stack.toml` name install commands, smoke tests, and upstream docs; the Makefile and setup scripts execute them). For paper rendering support, call `make install pdf-render`; do not inline pip commands in the conversation.
-- Bootstrap Julia on the cluster (that's `/setup-julia`, dispatched by `/slurm` on first cluster Julia run).
+- Bootstrap Julia on the cluster (that's `/setup-julia`, dispatched by `/using-slurm` on first cluster Julia run).
 - Pile questions on the user — every gate is one question with a clear *why* and an escape hatch.
 
 ## UX rule (applies to every gate in this skill)

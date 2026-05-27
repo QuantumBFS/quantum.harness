@@ -115,7 +115,7 @@ Two moments, same file, per figure:
 7. **Run** the approved plan. The script lands at `tracks/<track>/solutions/<model>_<brief>.{jl|py}` and saves its output (figures, data) under `tracks/<track>/results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g., the chosen tool genuinely can't express this target).
 8. **Append results** — fill each figure's `results` block in `run.json`, re-run `build_report.py`, and re-render via `/report`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
 
-Rendering composes with `/report`; a cluster run composes with `/slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
+Rendering composes with `/report`; a cluster run composes with `/using-slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
 
 ## Estimating cost
 
@@ -133,7 +133,7 @@ Read the selected method skill to determine which tool skill applies. Then read 
 
 ## Picking the tool
 
-Recommend the right method skill first, then the tool-using skill it selects. Method skills carry generic method insight and tool-selection rules; tool skills carry software-specific setup and estimates. For each candidate stack, consult its skill folder and `stack.toml` (for example `/xdiag` with `skills/xdiag/stack.toml`, `/netket` with `skills/netket/stack.toml`, `/tensorcircuit-ng`, `/pepskit`, `/itensors`, `/quspin`, `/sse`, or `/jax`). The executable source of truth for installs remains `Makefile` / setup scripts; `stack.toml` names install commands, smoke tests, docs, official URLs, and setup constraints. Method cards may narrow the stack order only after the method skill has selected the method route.
+Recommend the right method skill first, then the tool-using skill it selects. Method skills carry generic method insight and tool-selection rules; tool skills carry software-specific setup and estimates. For each candidate stack, consult its skill folder and `stack.toml` (for example `/using-xdiag` with `skills/using-xdiag/stack.toml`, `/using-netket` with `skills/using-netket/stack.toml`, `/using-tensorcircuit-ng`, `/using-pepskit`, `/using-itensors`, `/using-quspin`, `/using-sse`, or `/using-jax`). The executable source of truth for installs remains `Makefile` / setup scripts; `stack.toml` names install commands, smoke tests, docs, official URLs, and setup constraints. Method cards may narrow the stack order only after the method skill has selected the method route.
 
 **Tool introduction is mandatory.** When presenting the recommended tool, include a plain-English introduction: what the package is, who maintains it, what it does, and what makes it suited to this specific problem. Give solid, concrete reasons for the recommendation — not just "it supports X" but why X matters for this paper's reproduction. Do the same (shorter) for alternatives so the user can compare.
 

@@ -50,7 +50,7 @@ verified), not the agent's process. They do NOT know harness vocabulary
 
 3. **Execute.** Follow the card's declared workflow. The card names which
    primitive skills to compose (`/solve`, `/parameter-scan`,
-   `/scaling-fit`, `/cross-method-check`, `/slurm`, `/reproduce-paper`). Do
+   `/scaling-fit`, `/cross-method-check`, `/using-slurm`, `/reproduce-paper`). Do
    NOT substitute a different primitive because it feels more familiar; the
    card's choice is authoritative.
 

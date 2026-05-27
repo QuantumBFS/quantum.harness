@@ -1,5 +1,5 @@
 ---
-name: netket
+name: using-netket
 description: Use when choosing or running NetKet for VMC, neural quantum states, sampler or optimizer choices, JAX CPU/GPU setup, or NetKet setup failures.
 ---
 
@@ -9,7 +9,7 @@ Use NetKet for VMC / neural-quantum-state workflows where the task needs a varia
 
 ## Sources
 
-- Stack contract: `skills/netket/stack.toml`
+- Stack contract: `skills/using-netket/stack.toml`
 - Method card: `.knowledge/methods/variational-monte-carlo-neural-quantum-states.md`
 - CPU install target: `make install netket`
 - GPU install target: `make install netket-gpu`
@@ -29,7 +29,7 @@ Use this section as the source for NetKet-specific reproduction knobs unless the
 - Ansatz: RBM/CNN/Transformer or paper architecture, hidden ratio/width/depth/features, parameter count, dtype/precision, initialization, and seed policy.
 - Sampler: sampler type, chains, samples per iteration, burn-in, sweep size/decorrelation, and acceptance/autocorrelation diagnostics.
 - Optimizer: SGD/Adam/SR or paper optimizer, learning-rate schedule, diagonal shift, iteration count, and stopping rule.
-- Runtime profile: CPU, single-node GPU, or multi-node GPU; use `/jax` and the NetKet stack profile for device setup.
+- Runtime profile: CPU, single-node GPU, or multi-node GPU; use `/using-jax` and the NetKet stack profile for device setup.
 - Validation: energy variance, energy upper-bound sanity check, multiple seeds, small-size ED comparison when feasible, error bars/binning, and observable stability.
 
 ## Time estimate
@@ -44,5 +44,5 @@ Estimate from `iterations * samples_per_iteration * model_eval_cost`, plus JAX c
 ## Common Setup Notes
 
 - GPU smoke tests belong inside a compute allocation, not on a login node.
-- Multi-node GPU needs MPI/JAX distributed setup; compose with `/slurm`.
+- Multi-node GPU needs MPI/JAX distributed setup; compose with `/using-slurm`.
 - Do not silently fall back from GPU to CPU; report the setup failure and ask.

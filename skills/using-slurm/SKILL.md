@@ -1,5 +1,5 @@
 ---
-name: slurm
+name: using-slurm
 user-invocable: false
 description: Use when a computation needs to run on a remote Slurm cluster (CPU- or GPU-heavy beyond laptop budget), when a multi-cell array job is ready to submit, when a submitted job needs status / monitoring / cancel / log-tail, or when only a few cells failed and the user wants to resume — phrases like "send this to the cluster", "sbatch this", "submit on HPC2", "check job status", "resubmit failed cells".
 ---
@@ -8,7 +8,7 @@ description: Use when a computation needs to run on a remote Slurm cluster (CPU-
 
 Submit and monitor Slurm jobs from the local agent via `ssh`, `rsync`/`git`, `sbatch`, `squeue`, and `sacct`. Mechanism only: no cluster-side agent, no MCP server, no manual user relay.
 
-For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell decomposition; `/slurm` submits the resulting job or array.
+For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell decomposition; `/using-slurm` submits the resulting job or array.
 
 ## Binding Rules
 
@@ -17,13 +17,13 @@ For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell
 - Dirty worktree shipping requires user authorization. Do not silently commit, push, or rsync user changes.
 - Partition choice is ratified after queue probing. Do not blindly use the profile default when alternatives are viable.
 - Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests do.
-- Array jobs receive an opaque run spec and write one manifest per cell. `/slurm` never parses or hardcodes axis names.
+- Array jobs receive an opaque run spec and write one manifest per cell. `/using-slurm` never parses or hardcodes axis names.
 </checklist>
 
 ## Inputs
 
 - *Script* — sbatch script or compute script plus the active cluster profile's array template.
-- *Cluster profile* — `skills/slurm/profiles/active.md` or `HARNESS_CLUSTER_PROFILE=<name>`, providing ssh alias, remote repo path, scheduler idioms, partitions, modules, queue commands.
+- *Cluster profile* — `skills/using-slurm/profiles/active.md` or `HARNESS_CLUSTER_PROFILE=<name>`, providing ssh alias, remote repo path, scheduler idioms, partitions, modules, queue commands.
 - *Software stack* — optional stack id/profile from `skills/<stack>/stack.toml`.
 - *Cell map* — optional `results/<run>/run_spec.json`.
 - *Ship strategy* — `git` or `rsync`.
@@ -42,7 +42,7 @@ For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell
 
 ## Cluster Profile
 
-Consult the active profile from `skills/slurm/profiles/active.md` or
+Consult the active profile from `skills/using-slurm/profiles/active.md` or
 `HARNESS_CLUSTER_PROFILE=<name>` before submission. Required fields:
 
 - `ssh.alias`, `repo_path_remote`
@@ -54,7 +54,7 @@ Consult the active profile from `skills/slurm/profiles/active.md` or
 - sbatch idioms
 - queue/status commands
 
-The profile schema lives in `skills/slurm/references/cluster-profiles.md`.
+The profile schema lives in `skills/using-slurm/references/cluster-profiles.md`.
 Read it before creating or editing a profile.
 
 If no profile exists, emit a generic array wrapper without resource directives
@@ -181,7 +181,7 @@ Every array job receives `HARNESS_RUN_SPEC=<results/run/run_spec.json>` plus one
 results/<run>/cells/<cell_id>/manifest.json
 ```
 
-The manifest schema belongs to the calling workflow/method card. `/slurm` only submits, monitors, fetches, and classifies operational state.
+The manifest schema belongs to the calling workflow/method card. `/using-slurm` only submits, monitors, fetches, and classifies operational state.
 
 ## Resume
 
@@ -199,8 +199,8 @@ The manifest schema belongs to the calling workflow/method card. `/slurm` only s
 
 ## Composition
 
-- `/parameter-scan` calls `/slurm` once for array sweeps.
-- `/reproduce-paper` calls `/slurm` through evidence-producing primitives.
+- `/parameter-scan` calls `/using-slurm` once for array sweeps.
+- `/reproduce-paper` calls `/using-slurm` through evidence-producing primitives.
 - `/onboard` creates the cluster profile this skill reads.
 - `/setup-julia` is called only from first-run bootstrap when the submitted command requires Julia and Julia is not usable.
 
@@ -210,6 +210,6 @@ The manifest schema belongs to the calling workflow/method card. `/slurm` only s
 - Asking the user to ssh or sbatch manually when this skill can do it.
 - Hardcoding cluster specifics into this skill.
 - Submitting via an unvetted cluster-side service.
-- Bundling parameter-grid logic into `/slurm`.
+- Bundling parameter-grid logic into `/using-slurm`.
 - Silent commits, pushes, or broad rsync of dirty local changes.
 </checklist>

@@ -26,9 +26,9 @@ Outside the event, this repo is a general QMB research harness.
 - Skills under [`skills/`](skills/), managed by [Ion](https://github.com/Roger-luo/Ion).
 - Shell helpers and generated runnable calculations under [`scripts/`](scripts/).
 - Software stack contracts live beside stack skills as `skills/<stack>/stack.toml`.
-- Cluster mechanism via `/slurm`; per-cluster defaults under [`skills/slurm/profiles/`](skills/slurm/profiles/).
+- Cluster mechanism via `/using-slurm`; per-cluster defaults under [`skills/using-slurm/profiles/`](skills/using-slurm/profiles/).
 - Default stack: Julia (ITensors.jl, ITensorMPS.jl, KrylovKit.jl, MPSKit.jl, PEPSKit.jl, XDiag.jl) and Python (NetKet on JAX, QuSpin, TensorCircuit-NG, quimb).
-- Common skills: `/solve` (single calculation), `/track-starter` (choose a challenge-track target), `/reproduce-paper` (paper end-to-end), `/slurm` (ship + submit on cluster).
+- Common skills: `/solve` (single calculation), `/track-starter` (choose a challenge-track target), `/reproduce-paper` (paper end-to-end), `/using-slurm` (ship + submit on cluster).
 
 Open an agent session in the repo and invoke `/onboard` for a first-touch setup.
 
@@ -61,25 +61,25 @@ Skills are agent-invocable workflows under `skills/`. Invoke them with `/<name>`
 
 | Skill | Stack | Language |
 |---|---|---|
-| `/itensors` | ITensors.jl / ITensorMPS.jl — DMRG, TEBD, MPS | Julia |
-| `/pepskit` | PEPSKit.jl / TensorKit.jl — PEPS, CTMRG | Julia |
-| `/xdiag` | XDiag.jl — exact diagonalization, Lanczos | Julia |
-| `/sse` | StochasticSeriesExpansion.jl / Carlo.jl — sign-free QMC | Julia |
-| `/netket` | NetKet — VMC, neural quantum states | Python (JAX) |
-| `/quspin` | QuSpin — exact diagonalization | Python |
-| `/tensorcircuit-ng` | TensorCircuit-NG — differentiable quantum circuits, VQE | Python (JAX) |
-| `/jax` | JAX backend setup for NetKet / TensorCircuit-NG | Python |
+| `/using-itensors` | ITensors.jl / ITensorMPS.jl — DMRG, TEBD, MPS | Julia |
+| `/using-pepskit` | PEPSKit.jl / TensorKit.jl — PEPS, CTMRG | Julia |
+| `/using-xdiag` | XDiag.jl — exact diagonalization, Lanczos | Julia |
+| `/using-sse` | StochasticSeriesExpansion.jl / Carlo.jl — sign-free QMC | Julia |
+| `/using-netket` | NetKet — VMC, neural quantum states | Python (JAX) |
+| `/using-quspin` | QuSpin — exact diagonalization | Python |
+| `/using-tensorcircuit-ng` | TensorCircuit-NG — differentiable quantum circuits, VQE | Python (JAX) |
+| `/using-jax` | JAX backend setup for NetKet / TensorCircuit-NG | Python |
 
 ### Method Guidance
 
 | Skill | Purpose |
 |---|---|
-| `/method-ed` | Exact diagonalization route selection; invokes `/xdiag` or `/quspin` |
-| `/method-mps` | DMRG / TEBD / MPS route selection; invokes `/itensors` |
-| `/method-peps` | PEPS / CTMRG route selection; invokes `/pepskit` |
-| `/method-qmc` | Sign-free QMC / SSE route selection; invokes `/sse` |
-| `/method-vmc` | VMC / NQS route selection; invokes `/netket` and `/jax` |
-| `/method-qcs` | Circuit simulation route selection; invokes `/tensorcircuit-ng` and `/jax` |
+| `/method-ed` | Exact diagonalization route selection; invokes `/using-xdiag` or `/using-quspin` |
+| `/method-mps` | DMRG / TEBD / MPS route selection; invokes `/using-itensors` |
+| `/method-peps` | PEPS / CTMRG route selection; invokes `/using-pepskit` |
+| `/method-qmc` | Sign-free QMC / SSE route selection; invokes `/using-sse` |
+| `/method-vmc` | VMC / NQS route selection; invokes `/using-netket` and `/using-jax` |
+| `/method-qcs` | Circuit simulation route selection; invokes `/using-tensorcircuit-ng` and `/using-jax` |
 | `/method-mf` | Mean-field / SCF route selection; uses the mean-field method card |
 
 ### Infrastructure
@@ -88,7 +88,7 @@ Skills are agent-invocable workflows under `skills/`. Invoke them with `/<name>`
 |---|---|
 | `/onboard` | First-touch setup and orientation for new users |
 | `/setup-julia` | Bootstrap Julia environment with project dependencies |
-| `/slurm` | Ship computation to a remote Slurm cluster, monitor jobs, resume failures |
+| `/using-slurm` | Ship computation to a remote Slurm cluster, monitor jobs, resume failures |
 | `/ion-cli` | Skill lifecycle management (create, install, remove, search) |
 
 ### Knowledge
