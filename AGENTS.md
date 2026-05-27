@@ -55,24 +55,6 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 
 **Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
 
-<a id="pre-compute-figure-reading-checklist"></a>
-**Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. The main agent MUST work through this checklist BEFORE writing any cell script or assembly code that contributes to a figure.
-
-For each figure panel:
-
-1. **Caption verbatim.** Quote the paper's caption text for the panel verbatim — not paraphrased. Subsequent steps refer to this exact text, not to a summary.
-2. **x-axis.** Identify the variable name, units, range, and scale (linear / log). The printed axis label on the figure image is the source of truth; the body text may name the variable but not its scale or normalization.
-3. **y-axis.** Identify the variable name, units, range, scale, AND any normalization factor (× L, × N, divided by D, log₂ vs log₁₀, etc.). A missing or extra normalization factor is the most common silent error and is invisible from numerical values alone — it must be read off the printed axis label.
-4. **Per-curve identity.** For every line / marker / color in the panel: which state(s)? which subset of states? which sector? which observable? Match each to a single concrete object in code, named the same way the caption names it.
-5. **State-selection language is a contract.** Phrases like "state in the special band adjacent to E = 0", "lowest |E|>0 eigenstate", "middle of the band", "ground state in the symmetry sector", and "exact zero mode" each select a DIFFERENT specific state. Treat them as distinct contracts. Write down which exact eigenstate the caption picks, in code-precise terms, BEFORE picking it in code.
-6. **Window / sub-region.** Captions like "averaged over the middle 2/3 of the band", "i ∈ [D/5, D/2 − 500]", "excluding zero modes" define the data subset. Encode the window precisely; off-by-one and misread bounds silently change results.
-7. **Stated numerical anchors.** If the body text quotes a number for the panel ("ΔE/E ≈ 1%", "peak at n = L/2", "tower spacing 2Ω"), record it as a benchmark. Code output must reproduce each anchor within reported uncertainty before any further claim is considered settled.
-8. **What the figure is NOT.** Captions often distinguish closely-related states ("ground state" vs "first special state above zero" vs "exact zero mode"). Note explicitly which related-but-distinct states the panel does NOT plot, so the code does not accidentally pick one of them.
-
-This checklist applies to figure-producing cell scripts AND to assembly / plot code. A wrong y-axis label or a wrong state pick in `assemble.py` wastes the same compute as a wrong cell script — the figure is re-rendered from wrong-but-correctly-stored data, but the user-facing result is still wrong.
-
-Wasted-compute lesson on record: in the Turner 2018 reproduction, Fig 3(c) was first composed against `|⟨n|ψ⟩|²` instead of `|⟨n|ψ⟩|² L` (missed the L factor in the printed y-axis label) AND picked the highest-overlap exact zero mode instead of the lowest-|E|>0 special state ("adjacent to E = 0" was misread as "AT E = 0"). The fix required re-running L = 12, 14, 16, 18, 20, 22, 24, 26, 28 cells. Both errors were directly visible in the paper's printed caption and figure if the checklist had been worked through before compute.
-
 ## Card shapes
 
 Domain content lives in cards under `.knowledge/`, dispatched by the `/model` and `/physics` meta-skills:
@@ -142,39 +124,6 @@ Before launching any non-trivial computation:
 4. **Compose with `/slurm`** (single-job or array) and `/parameter-scan` (multi-axis grids). The cluster mechanism handles ship-code → submit → monitor → fetch end-to-end.
 
 NEVER run a multi-hour calculation locally because the agent forgot the cluster exists. The cluster IS the default for non-trivial compute; declare a deviation if local-only is actually justified.
-
-## Installed Skills
-
-UX skills:
-- **onboard** — first-touch intake, domain setup, route to `/model` or `/physics`
-- **track-starter** — reads `tracks/*/README.md`, summarizes student track tasks, lets the student choose a concrete track paper / figure, then hands off to `/reproduce-paper`.
-- **solve** — interactive problem-solving loop: intake → skill-guided decision → report → next-step options → loop.
-
-Problem dispatchers (auto-triggered; read cards under `.knowledge/{models,physics}/<name>/`):
-- **model** — fires when user names a harness-tracked model. Reads `MODEL.md` card and follows its workflow.
-- **physics** — fires when user asks a cross-model phenomenon question. Reads `PHYSICS.md` card and follows its evidence rubric.
-
-Problem-solving primitives (generic; topic-agnostic, compose with the dispatchers above):
-- **parameter-scan** — sweep one or more declared axes for any produced quantity. Composes with `/slurm` for cluster execution.
-- **scaling-fit** — finite-size collapse, exponent extraction with uncertainty.
-- **cross-method-check** — verify the same observable with an independent method or diagnostic.
-- **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `skills/slurm/profiles/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
-- **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
-- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size, confirms setup before compute, then executes the approved plan and renders a self-contained HTML report — proposal before compute, results (figure, key numbers, an honest verdict) after.
-
-Method-level guidance (used by `/reproduce-paper` after a target is chosen; these choose tool skills, not paper facts):
-- **method-ed** — exact diagonalization route selection; composes with `/xdiag` or `/quspin`.
-- **method-mps** — DMRG / TEBD / MPS route selection; composes with `/itensors`.
-- **method-peps** — PEPS / CTMRG / LTRG route selection; composes with `/pepskit` or `/itensors`.
-- **method-qmc** — sign-free SSE / QMC route selection; composes with `/sse`.
-- **method-vmc** — VMC / NQS route selection; composes with `/netket` and `/jax`.
-- **method-qcs** — circuit-simulation route selection; composes with `/tensorcircuit-ng` and `/jax`.
-- **method-mf** — mean-field / SCF route selection; uses the mean-field method card until a dedicated tool skill exists.
-
-External/support skills:
-- **arxiv-search** — Semantic arXiv search via Valyu
-- **scientific-visualization** — Publication-quality figures (matplotlib/seaborn/plotly)
-- **download-ref** — Add arXiv/DOI/book methodology references under `.knowledge/literature/<method>/`; rendered markdown is tracked, raw PDFs/metadata/figures are local-only.
 
 ## Repository Layout
 
