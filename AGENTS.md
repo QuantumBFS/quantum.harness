@@ -6,40 +6,7 @@ Problem-solving harness for ground-state lattice problems in quantum many-body p
 
 ## Core Harness Philosophy
 
-Agents solve concrete problems under light human steering. Users bring problems; agents diagnose, recommend, execute, verify, and surface only the decisions that genuinely matter. Good judgment is demonstrated through action — users absorb it by watching competent work happen.
-
 The harness is fixed at runtime. Users encounter a stable system; only the user learns, by absorbing judgment from the harness's reports. Harness changes happen in dev cycles, never during user sessions.
-
-### Strategic Steering Principle
-
-The harness uses the Superpowers brainstorming pattern as its strategic model: agent-led, user-ratified work. The agent drives the workflow; the user controls goal, assumptions, depth, method preference, risk tolerance, and final interpretation. Control is exercised by ratifying harness-recommended options — clicking the recommended button, ignoring the diagnose proposal, or overriding when desired — not by pre-specifying. A fresh user may have no method preference; the harness still produces a plan, and the user ratifies by silence or selection. Pre-specification is welcome but never required.
-
-This is a strategic design pattern, not user-facing language. Do not mention "fake steering wheel", psychological steering, or autonomous-driving metaphors to users. Locally, the interaction should simply look like competent technical judgment.
-
-Every option offered must be real and executable; alternatives to the recommended one must not be fake, punitive, or low-effort. If the user chooses a non-recommended path, follow it faithfully unless there is a concrete technical blocker. If blocked, explain the blocker and offer the closest viable alternatives.
-
-### Act first, offer alternatives after
-
-When defaults are clear from the user's prompt, the agent acts immediately and reports the result. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
-
-| Situation | Pattern |
-|---|---|
-| Clear defaults | Act → report → next-steps via `AskUserQuestion` |
-| Real branch (genuinely ambiguous) | `AskUserQuestion` → act → report |
-| Frontier "is it X?" | Act on literature summary → report → "Want me to also run [compute]?" |
-| Off-scope | Act on closest in-scope thing → report → "For the off-scope part: [options]" |
-
-"Just do it" from the user means the agent asked one question too many. The goal is zero questions for clear problems.
-
-The steering wheel lives in the report and the next-steps, not in pre-approval.
-
-Next-steps are always offered as `AskUserQuestion` options. Common next-steps (in rough priority):
-- **Richer visualization** — correlations, structure factor, density profile, or publication figure via `scientific-visualization`.
-- **Parameter scan or finite-size extrapolation** — the natural research follow-up.
-- **Writeup** — declared entry + run report, then route to writing skills.
-- **Stop here** — always a real option, never padded.
-
-If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
 
 ### Pushback and reconsideration
 
@@ -81,30 +48,12 @@ Current cards:
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - `magic-conventions.md` — Pauli / clock-shift conventions, SRE definitions, partition modes, qudit generalizations, Wegner-duality SRE preservation.
 - `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
-- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
+- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `ltrg.md` (finite-temperature LTRG via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
 
 **Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
-
-<a id="pre-compute-figure-reading-checklist"></a>
-**Pre-compute figure-reading checklist.** Reproducing a paper figure without first reading its caption verbatim and matching every plotted quantity to a paper-stated definition is the single biggest waste of computational budget in this harness. The main agent MUST work through this checklist BEFORE writing any cell script or assembly code that contributes to a figure.
-
-For each figure panel:
-
-1. **Caption verbatim.** Quote the paper's caption text for the panel verbatim — not paraphrased. Subsequent steps refer to this exact text, not to a summary.
-2. **x-axis.** Identify the variable name, units, range, and scale (linear / log). The printed axis label on the figure image is the source of truth; the body text may name the variable but not its scale or normalization.
-3. **y-axis.** Identify the variable name, units, range, scale, AND any normalization factor (× L, × N, divided by D, log₂ vs log₁₀, etc.). A missing or extra normalization factor is the most common silent error and is invisible from numerical values alone — it must be read off the printed axis label.
-4. **Per-curve identity.** For every line / marker / color in the panel: which state(s)? which subset of states? which sector? which observable? Match each to a single concrete object in code, named the same way the caption names it.
-5. **State-selection language is a contract.** Phrases like "state in the special band adjacent to E = 0", "lowest |E|>0 eigenstate", "middle of the band", "ground state in the symmetry sector", and "exact zero mode" each select a DIFFERENT specific state. Treat them as distinct contracts. Write down which exact eigenstate the caption picks, in code-precise terms, BEFORE picking it in code.
-6. **Window / sub-region.** Captions like "averaged over the middle 2/3 of the band", "i ∈ [D/5, D/2 − 500]", "excluding zero modes" define the data subset. Encode the window precisely; off-by-one and misread bounds silently change results.
-7. **Stated numerical anchors.** If the body text quotes a number for the panel ("ΔE/E ≈ 1%", "peak at n = L/2", "tower spacing 2Ω"), record it as a benchmark. Code output must reproduce each anchor within reported uncertainty before any further claim is considered settled.
-8. **What the figure is NOT.** Captions often distinguish closely-related states ("ground state" vs "first special state above zero" vs "exact zero mode"). Note explicitly which related-but-distinct states the panel does NOT plot, so the code does not accidentally pick one of them.
-
-This checklist applies to figure-producing cell scripts AND to assembly / plot code. A wrong y-axis label or a wrong state pick in `assemble.py` wastes the same compute as a wrong cell script — the figure is re-rendered from wrong-but-correctly-stored data, but the user-facing result is still wrong.
-
-Wasted-compute lesson on record: in the Turner 2018 reproduction, Fig 3(c) was first composed against `|⟨n|ψ⟩|²` instead of `|⟨n|ψ⟩|² L` (missed the L factor in the printed y-axis label) AND picked the highest-overlap exact zero mode instead of the lowest-|E|>0 special state ("adjacent to E = 0" was misread as "AT E = 0"). The fix required re-running L = 12, 14, 16, 18, 20, 22, 24, 26, 28 cells. Both errors were directly visible in the paper's printed caption and figure if the checklist had been worked through before compute.
 
 ## Card shapes
 
@@ -157,7 +106,7 @@ Do not preemptively scaffold these. When a real problem creates the demand, add 
 
 ## Tools & Languages
 
-Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Install via `make install julia && make install itensors`. Method cards in `.knowledge/methods/` use this stack for canonical code shapes.
+Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Method cards in `.knowledge/methods/` use this stack for canonical code shapes. For reproduction, benchmark, or multi-tool workflows, treat tool choice and installation as decision points: expose the recommended stack and viable alternatives before installing unless the user explicitly asks for setup only.
 
 Python (`quimb` + `cotengra`) remains available as a fallback for tensor-network sketches via `make install quimb`. Skills can route to either when both work; method cards are Julia-flavored.
 
@@ -175,39 +124,6 @@ Before launching any non-trivial computation:
 4. **Compose with `/slurm`** (single-job or array) and `/parameter-scan` (multi-axis grids). The cluster mechanism handles ship-code → submit → monitor → fetch end-to-end.
 
 NEVER run a multi-hour calculation locally because the agent forgot the cluster exists. The cluster IS the default for non-trivial compute; declare a deviation if local-only is actually justified.
-
-## Installed Skills
-
-UX skills:
-- **onboard** — first-touch intake, domain setup, route to `/model` or `/physics`
-- **track-starter** — reads `tracks/*/README.md`, summarizes student track tasks, lets the student choose a concrete track paper / figure, then hands off to `/reproduce-paper`.
-- **solve** — interactive problem-solving loop: intake → act → report → next-steps → loop.
-
-Problem dispatchers (auto-triggered; read cards under `.knowledge/{models,physics}/<name>/`):
-- **model** — fires when user names a harness-tracked model. Reads `MODEL.md` card and follows its workflow.
-- **physics** — fires when user asks a cross-model phenomenon question. Reads `PHYSICS.md` card and follows its evidence rubric.
-
-Problem-solving primitives (generic; topic-agnostic, compose with the dispatchers above):
-- **parameter-scan** — sweep one or more declared axes for any produced quantity. Composes with `/slurm` for cluster execution.
-- **scaling-fit** — finite-size collapse, exponent extraction with uncertainty.
-- **cross-method-check** — verify the same observable with an independent method or diagnostic.
-- **slurm** — agent-does-ssh cluster mechanism: ship code, submit (single or array), monitor, fetch. Reads cluster specifics from `skills/slurm/profiles/<active>.md`. Dispatches `/setup-julia` when the cluster's Julia env isn't instantiated. Does NOT know about parameter grids — that's `/parameter-scan`'s job.
-- **setup-julia** — install Julia (juliaup or `module load`), configure package mirror (defaults to Chinese mirror if cluster `region == mainland_china`), instantiate the project env. Generic over target (local laptop or remote ssh alias). Idempotent.
-- **reproduce-paper** — beginner-facing paper reproduction with a brainstorm-first surface. Walks the user through paper-to-code mapping one question at a time in plain English, estimates time by size, confirms setup before compute, then executes the approved plan and renders a self-contained HTML report — proposal before compute, results (figure, key numbers, an honest verdict) after.
-
-Method-level guidance (used by `/reproduce-paper` after a target is chosen; these choose tool skills, not paper facts):
-- **method-ed** — exact diagonalization route selection; composes with `/xdiag` or `/quspin`.
-- **method-mps** — DMRG / TEBD / MPS route selection; composes with `/itensors`.
-- **method-peps** — PEPS / CTMRG route selection; composes with `/pepskit`.
-- **method-qmc** — sign-free SSE / QMC route selection; composes with `/sse`.
-- **method-vmc** — VMC / NQS route selection; composes with `/netket` and `/jax`.
-- **method-qcs** — circuit-simulation route selection; composes with `/tensorcircuit-ng` and `/jax`.
-- **method-mf** — mean-field / SCF route selection; uses the mean-field method card until a dedicated tool skill exists.
-
-External/support skills:
-- **arxiv-search** — Semantic arXiv search via Valyu
-- **scientific-visualization** — Publication-quality figures (matplotlib/seaborn/plotly)
-- **download-ref** — Add arXiv/DOI/book methodology references under `.knowledge/literature/<method>/`; rendered markdown is tracked, raw PDFs/metadata/figures are local-only.
 
 ## Repository Layout
 
@@ -268,7 +184,7 @@ ion self --help                          # Manage the Ion install
 ## Setup & Tool Installation
 
 - Run `make skills` to install Ion-managed skills.
-- Install domain tools **on demand** with `make install <tool>`. Running `make help` lists the currently installable tools.
+- Install domain tools with `make install <tool>` after the active workflow or user has selected that tool. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
 
@@ -284,8 +200,8 @@ ion self --help                          # Manage the Ion install
   - `"Primary method (Recommended)"` — "Matches the paper's route most closely; uses the declared compute budget."
   - `"Independent check"` — "Catches setup mistakes; usually restricted to a reduced instance."
   - `"Source audit first"` — "Cheaply anchors expectations; no new computed data."
-- **Never dump checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. The agent runs verification internally; the user sees the result, not the process.
-- **Lead with the answer, qualify only if asked.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are."
+- **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
+- **For final results, lead with the answer.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are." During planning or reproduction setup, lead with the current decision and the recommended option's reason.
 - **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.jl` and results (data + plot) saved to `results/`. Show the one-line run command: `julia --project=julia-env scripts/<name>.jl`. Never make the user ask for the script.
 - **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/slurm/profiles/<name>.md`), not in scripts.
 - **Long iterative computes must emit intermediate estimates, not just final values.** A multi-hour run without progress output is a blind spot: the user cannot sanity-check whether the running estimate, error proxy, acceptance/progress counters, or convergence diagnostics are stabilizing. Print a partial estimate every K steps, where K is chosen so the user sees roughly 10-50 updates over the run. The script's standard runner enforces this via a `progress_every` knob; method cards declare a sensible default.
@@ -296,7 +212,7 @@ ion self --help                          # Manage the Ion install
   Settle-time scales with how far the job has to go before producing meaningful output. The cost of an extra 1–3 min of monitoring is much less than the cost of returning hours later to find 28 cells silently failed in the first minute — or that all 28 cells are still queued.
 - **Caveat-after, not caveat-first.** For contested regimes, state the consensus framing first, then qualify the unresolved point. Never open with the hedge.
 - **One question at a time** when questions are needed; prefer `AskUserQuestion` with options over open-ended text.
-- **Keep prose output under 10 lines.** `AskUserQuestion` options are rendered as buttons — they don't count toward this limit. If more prose is needed, ask before continuing.
+- **Avoid walls of words.** Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified.
 
 ### Terminal Formatting
 
@@ -307,12 +223,11 @@ ion self --help                          # Manage the Ion install
 ## Agent guidelines
 
 Agents working in this project should:
-1. Treat the core harness philosophy and problem-driven skill design above as the controlling design contract.
-2. Use existing `skills/`, `scripts/`, Makefile targets, and `.knowledge/` cards rather than reimplementing operations.
-3. Run `make help` to discover available workflow targets.
-4. Check `Ion.toml` (or `ion` CLI) for installed / available skills.
-5. For methodology references, use `download-ref`; keep different methods in different `.knowledge/literature/<method>/` folders and never commit `.raw/` or `.figures/`.
-6. Install Ion skills with `make skills` and heavy domain tools on demand via `make install <tool>`. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` (and installed); if not, instruct the user to run `make install <tool>` first.
+1. Use existing `skills/`, `scripts/`, Makefile targets, and `.knowledge/` cards rather than reimplementing operations.
+2. Run `make help` to discover available workflow targets.
+3. Check `Ion.toml` (or `ion` CLI) for installed / available skills.
+4. For methodology references, use `download-ref`; keep different methods in different `.knowledge/literature/<method>/` folders and never commit `.raw/` or `.figures/`.
+5. Install Ion skills with `make skills`; install heavy domain tools only after the active workflow or user selects that tool. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` and expose install/setup as a user-facing option when it affects the plan.
 
 ## Daily Workflow
 

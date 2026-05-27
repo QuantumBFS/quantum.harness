@@ -90,7 +90,7 @@ checksum = "sha256:6e880d99fc248eda2dcd39ea51cea6e98431507a95d7fd7daf7a2ec16afcd
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:c087916cc5e65895b153a741ce0eb234573232feda3b022a1c5067691fdea12b"
+checksum = "sha256:fe69cffbc90abb7103aff5065a951311d39b08ba3c73dd0e89274f986e31c417"
 
 [[skill]]
 name = "method-qcs"
@@ -126,7 +126,7 @@ checksum = "sha256:8ee7bbbfe81e7751dbaa98b9a64542e9ca2d3baba9ad7b2d01ae60668dc69
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:0f606eb3250fbc65a05fefd8ae4b8ee5165374a8e22a0c16cf87df8e7d54ee5c"
+checksum = "sha256:11d1f19ec6a3dd0fc5ea2debe5f693c269ccde7de8ce82cd6ce46b021b2ff440"
 
 [[skill]]
 name = "parameter-scan"

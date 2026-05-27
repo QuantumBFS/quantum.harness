@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro pdf-render
 
 .PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -172,6 +172,19 @@ install-pepskit: ## Install PEPSKit.jl + TensorKit.jl CTMRG stack into julia-env
 install-classical-repro: ## Install stacks for DMRG, QMC/SSE, and CTMRG reproduction targets
 	@for tool in itensors sse pepskit; do $(MAKE) install-$$tool; done
 	@echo "Classical reproduction stacks ready."
+
+install-pdf-render: ## Install PDF-to-Markdown rendering tools into .venv
+	@if command -v uv >/dev/null 2>&1; then \
+	  uv venv .venv; \
+	  uv pip install pymupdf pymupdf4llm; \
+	else \
+	  command -v python3 >/dev/null 2>&1 || { echo "python3 not found. Install Python 3 first."; exit 1; }; \
+	  python3 -m venv .venv; \
+	  .venv/bin/python -m pip install --upgrade pip; \
+	  .venv/bin/python -m pip install pymupdf pymupdf4llm; \
+	fi
+	@.venv/bin/python -c 'import pymupdf4llm; print("pymupdf4llm ready")'
+	@echo "PDF-to-Markdown rendering tools ready in .venv"
 
 clean: ## Remove generated HTML artifacts
 	find . -name '*.html' -not -path './docs/*' -delete

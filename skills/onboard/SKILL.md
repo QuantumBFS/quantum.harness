@@ -40,6 +40,27 @@ Report one line:
 - Something installed: "Installed [what]. Ready."
 - Install failed: say what failed, offer to debug. Don't proceed until the stack works.
 
+### 1a. PDF-to-Markdown support — optional, only when relevant
+
+Skip this stage unless the user's opening prompt already mentions papers,
+arXiv/DOI/PDF ingestion, methodology references, or figure reproduction. If
+that only becomes clear after step 3a, ask this gate there before routing.
+
+First check whether `.venv/bin/python -c 'import pymupdf4llm'` succeeds. If it
+does, continue without asking. Otherwise ask one warm gate via
+`AskUserQuestion`:
+
+> *"This looks like a paper/reference workflow. Do you want me to install PDF-to-Markdown rendering tools in `.venv`? They give agents cleaner paper text and extracted figures; skipping is OK, but reference ingestion will fall back to plainer text extraction."*
+
+Options:
+- `"Install PDF rendering tools (Recommended for paper workflows)"` — "Runs `make install pdf-render`; uses `uv` if present, otherwise Python's built-in venv."
+- `"Skip for now"` — "No install; paper ingestion still works with fallback text extraction, but figure/text quality may be weaker."
+
+If the user chooses install, confirm `pdf-render` appears in the Makefile's
+`INSTALLABLE` list, then run `make install pdf-render`. This is a support tool:
+if installation fails, say what failed and offer to debug, but do not block a
+non-paper compute workflow.
+
 ### 2. Cluster setup — warm gate, always asked
 
 <checklist name="cluster-setup">
@@ -133,6 +154,9 @@ Options:
 
 That's it. Don't list models. Don't explain the architecture.
 
+If the answer reveals a paper/reference workflow and step 1a was not already
+handled, run the step 1a PDF-to-Markdown support gate before routing.
+
 ### 4. Route
 
 <checklist name="route">
@@ -153,7 +177,7 @@ If nothing fits: *"That's outside current scope (ground-state lattice problems).
 - Walk through a tutorial.
 - Ask the user to read docs.
 - Show a menu of 13 skills.
-- Hardcode package-level install instructions (the stack contracts in `skills/<stack>/stack.toml` name install commands, smoke tests, and upstream docs; the Makefile and setup scripts execute them).
+- Hardcode package-level install instructions (the stack contracts in `skills/<stack>/stack.toml` name install commands, smoke tests, and upstream docs; the Makefile and setup scripts execute them). For paper rendering support, call `make install pdf-render`; do not inline pip commands in the conversation.
 - Bootstrap Julia on the cluster (that's `/setup-julia`, dispatched by `/slurm` on first cluster Julia run).
 - Pile questions on the user — every gate is one question with a clear *why* and an escape hatch.
 
