@@ -6,40 +6,7 @@ Problem-solving harness for ground-state lattice problems in quantum many-body p
 
 ## Core Harness Philosophy
 
-Agents solve concrete problems under light human steering. Users bring problems; agents diagnose, recommend, execute, verify, and surface only the decisions that genuinely matter. Good judgment is demonstrated through action — users absorb it by watching competent work happen.
-
 The harness is fixed at runtime. Users encounter a stable system; only the user learns, by absorbing judgment from the harness's reports. Harness changes happen in dev cycles, never during user sessions.
-
-### Strategic Steering Principle
-
-The harness uses the Superpowers brainstorming pattern as its strategic model: agent-led, user-ratified work. The agent drives the workflow; the user controls goal, assumptions, depth, method preference, risk tolerance, and final interpretation. Control is exercised by ratifying harness-recommended options — clicking the recommended button, ignoring the diagnose proposal, or overriding when desired — not by pre-specifying. A fresh user may have no method preference; the harness still produces a plan, and the user ratifies by silence or selection. Pre-specification is welcome but never required.
-
-This is a strategic design pattern, not user-facing language. Do not mention "fake steering wheel", psychological steering, or autonomous-driving metaphors to users. Locally, the interaction should simply look like competent technical judgment.
-
-Every option offered must be real and executable; alternatives to the recommended one must not be fake, punitive, or low-effort. If the user chooses a non-recommended path, follow it faithfully unless there is a concrete technical blocker. If blocked, explain the blocker and offer the closest viable alternatives.
-
-### Act first, offer alternatives after
-
-When defaults are clear from the user's prompt, the agent acts immediately and reports the result. Alternatives are offered AFTER the result, not before. The steering wheel is in the follow-up ("Want to also..."), not in a pre-approval gate.
-
-| Situation | Pattern |
-|---|---|
-| Clear defaults | Act → report → next-steps via `AskUserQuestion` |
-| Real branch (genuinely ambiguous) | `AskUserQuestion` → act → report |
-| Frontier "is it X?" | Act on literature summary → report → "Want me to also run [compute]?" |
-| Off-scope | Act on closest in-scope thing → report → "For the off-scope part: [options]" |
-
-"Just do it" from the user means the agent asked one question too many. The goal is zero questions for clear problems.
-
-The steering wheel lives in the report and the next-steps, not in pre-approval.
-
-Next-steps are always offered as `AskUserQuestion` options. Common next-steps (in rough priority):
-- **Richer visualization** — correlations, structure factor, density profile, or publication figure via `scientific-visualization`.
-- **Parameter scan or finite-size extrapolation** — the natural research follow-up.
-- **Writeup** — declared entry + run report, then route to writing skills.
-- **Stop here** — always a real option, never padded.
-
-If the user's prompt is too vague to infer anything (rare), present 2–3 starting points via `AskUserQuestion`.
 
 ### Pushback and reconsideration
 
@@ -157,7 +124,7 @@ Do not preemptively scaffold these. When a real problem creates the demand, add 
 
 ## Tools & Languages
 
-Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Install via `make install julia && make install itensors`. Method cards in `.knowledge/methods/` use this stack for canonical code shapes.
+Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Method cards in `.knowledge/methods/` use this stack for canonical code shapes. For reproduction, benchmark, or multi-tool workflows, treat tool choice and installation as decision points: expose the recommended stack and viable alternatives before installing unless the user explicitly asks for setup only.
 
 Python (`quimb` + `cotengra`) remains available as a fallback for tensor-network sketches via `make install quimb`. Skills can route to either when both work; method cards are Julia-flavored.
 
@@ -181,7 +148,7 @@ NEVER run a multi-hour calculation locally because the agent forgot the cluster 
 UX skills:
 - **onboard** — first-touch intake, domain setup, route to `/model` or `/physics`
 - **track-starter** — reads `tracks/*/README.md`, summarizes student track tasks, lets the student choose a concrete track paper / figure, then hands off to `/reproduce-paper`.
-- **solve** — interactive problem-solving loop: intake → act → report → next-steps → loop.
+- **solve** — interactive problem-solving loop: intake → skill-guided decision → report → next-step options → loop.
 
 Problem dispatchers (auto-triggered; read cards under `.knowledge/{models,physics}/<name>/`):
 - **model** — fires when user names a harness-tracked model. Reads `MODEL.md` card and follows its workflow.
@@ -268,7 +235,7 @@ ion self --help                          # Manage the Ion install
 ## Setup & Tool Installation
 
 - Run `make skills` to install Ion-managed skills.
-- Install domain tools **on demand** with `make install <tool>`. Running `make help` lists the currently installable tools.
+- Install domain tools with `make install <tool>` after the active workflow or user has selected that tool. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
 
@@ -284,8 +251,8 @@ ion self --help                          # Manage the Ion install
   - `"Primary method (Recommended)"` — "Matches the paper's route most closely; uses the declared compute budget."
   - `"Independent check"` — "Catches setup mistakes; usually restricted to a reduced instance."
   - `"Source audit first"` — "Cheaply anchors expectations; no new computed data."
-- **Never dump checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. The agent runs verification internally; the user sees the result, not the process.
-- **Lead with the answer, qualify only if asked.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are."
+- **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
+- **For final results, lead with the answer.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are." During planning or reproduction setup, lead with the current decision and the recommended option's reason.
 - **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.jl` and results (data + plot) saved to `results/`. Show the one-line run command: `julia --project=julia-env scripts/<name>.jl`. Never make the user ask for the script.
 - **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/slurm/profiles/<name>.md`), not in scripts.
 - **Long iterative computes must emit intermediate estimates, not just final values.** A multi-hour run without progress output is a blind spot: the user cannot sanity-check whether the running estimate, error proxy, acceptance/progress counters, or convergence diagnostics are stabilizing. Print a partial estimate every K steps, where K is chosen so the user sees roughly 10-50 updates over the run. The script's standard runner enforces this via a `progress_every` knob; method cards declare a sensible default.
@@ -296,7 +263,7 @@ ion self --help                          # Manage the Ion install
   Settle-time scales with how far the job has to go before producing meaningful output. The cost of an extra 1–3 min of monitoring is much less than the cost of returning hours later to find 28 cells silently failed in the first minute — or that all 28 cells are still queued.
 - **Caveat-after, not caveat-first.** For contested regimes, state the consensus framing first, then qualify the unresolved point. Never open with the hedge.
 - **One question at a time** when questions are needed; prefer `AskUserQuestion` with options over open-ended text.
-- **Keep prose output under 10 lines.** `AskUserQuestion` options are rendered as buttons — they don't count toward this limit. If more prose is needed, ask before continuing.
+- **Avoid walls of words.** Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified.
 
 ### Terminal Formatting
 
@@ -307,12 +274,11 @@ ion self --help                          # Manage the Ion install
 ## Agent guidelines
 
 Agents working in this project should:
-1. Treat the core harness philosophy and problem-driven skill design above as the controlling design contract.
-2. Use existing `skills/`, `scripts/`, Makefile targets, and `.knowledge/` cards rather than reimplementing operations.
-3. Run `make help` to discover available workflow targets.
-4. Check `Ion.toml` (or `ion` CLI) for installed / available skills.
-5. For methodology references, use `download-ref`; keep different methods in different `.knowledge/literature/<method>/` folders and never commit `.raw/` or `.figures/`.
-6. Install Ion skills with `make skills` and heavy domain tools on demand via `make install <tool>`. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` (and installed); if not, instruct the user to run `make install <tool>` first.
+1. Use existing `skills/`, `scripts/`, Makefile targets, and `.knowledge/` cards rather than reimplementing operations.
+2. Run `make help` to discover available workflow targets.
+3. Check `Ion.toml` (or `ion` CLI) for installed / available skills.
+4. For methodology references, use `download-ref`; keep different methods in different `.knowledge/literature/<method>/` folders and never commit `.raw/` or `.figures/`.
+5. Install Ion skills with `make skills`; install heavy domain tools only after the active workflow or user selects that tool. Before recommending a tool-dependent command, verify the tool is in `INSTALLABLE` and expose install/setup as a user-facing option when it affects the plan.
 
 ## Daily Workflow
 
