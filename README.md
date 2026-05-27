@@ -80,7 +80,7 @@ Skills are agent-invocable workflows under `skills/`. Invoke them with `/<name>`
 | `/method-qmc` | Sign-free QMC / SSE route selection; invokes `/using-sse` |
 | `/method-vmc` | VMC / NQS route selection; invokes `/using-netket` and `/using-jax` |
 | `/method-qcs` | Circuit simulation route selection; invokes `/using-tensorcircuit-ng` and `/using-jax` |
-| `/method-mf` | Mean-field / SCF route selection; uses the mean-field method card |
+
 
 ### Infrastructure
 

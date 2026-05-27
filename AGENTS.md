@@ -32,7 +32,7 @@ skills/physics/  SKILL.md auto-fires on cross-model questions;  reads .knowledge
 
 Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
 
-Method-level skills are the narrow exception for beginner reproduction and challenge-track onboarding: `method-ed`, `method-mps`, `method-peps`, `method-qmc`, `method-vmc`, `method-qcs`, and `method-mf`. They carry generic method insight and choose the right tool-using skill; they do not replace model/physics cards and do not own paper facts.
+Method-level skills are the narrow exception for beginner reproduction and challenge-track onboarding: `method-ed`, `method-mps`, `method-peps`, `method-qmc`, `method-vmc`, and `method-qcs`. They carry generic method insight and choose the right tool-using skill; they do not replace model/physics cards and do not own paper facts.
 
 Dimension, lattice, filling, doping, boundary condition, disorder strength, and coupling regime are runtime choices unless they define a truly distinct canonical problem.
 

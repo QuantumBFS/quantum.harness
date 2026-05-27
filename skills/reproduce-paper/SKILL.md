@@ -57,7 +57,7 @@ Use this source order:
 
 1. **Paper** — caption, axis labels, body, supplement, and verified official code. This fixes scientific facts.
 2. **Track-starter handoff / Track README** — only when `/track-starter` selected the target; use it as track-scoped objective context, not for target selection.
-3. **Method skill** — `/method-ed`, `/method-mps`, `/method-peps`, `/method-qmc`, `/method-vmc`, `/method-qcs`, or `/method-mf`; this is the source for generic method insight and tool-skill selection.
+3. **Method skill** — `/method-ed`, `/method-mps`, `/method-peps`, `/method-qmc`, `/method-vmc`, or `/method-qcs`; this is the source for generic method insight and tool-skill selection.
 4. **Selected tool skill** — `Parameter setup` and `Time estimate`; this is the source for software-specific knobs and cost.
 5. **Stack contract** — `skills/<stack>/stack.toml`; install, smoke test, runtime profile, docs, CPU/GPU/MPI setup.
 6. **Method/model cards** — fallback notation, code shape, pitfalls, and verification when paper/method/tool skill are silent.
