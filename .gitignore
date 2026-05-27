@@ -29,6 +29,7 @@ CLAUDE.md
 scripts/_*
 /results/
 /tmp/
+/.external/
 __pycache__/
 target/
 .superpowers/
