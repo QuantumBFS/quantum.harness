@@ -81,7 +81,7 @@ Current cards:
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - `magic-conventions.md` — Pauli / clock-shift conventions, SRE definitions, partition modes, qudit generalizations, Wegner-duality SRE preservation.
 - `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
-- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
+- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `ltrg.md` (finite-temperature LTRG via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
@@ -198,7 +198,7 @@ Problem-solving primitives (generic; topic-agnostic, compose with the dispatcher
 Method-level guidance (used by `/reproduce-paper` after a target is chosen; these choose tool skills, not paper facts):
 - **method-ed** — exact diagonalization route selection; composes with `/xdiag` or `/quspin`.
 - **method-mps** — DMRG / TEBD / MPS route selection; composes with `/itensors`.
-- **method-peps** — PEPS / CTMRG route selection; composes with `/pepskit`.
+- **method-peps** — PEPS / CTMRG / LTRG route selection; composes with `/pepskit` or `/itensors`.
 - **method-qmc** — sign-free SSE / QMC route selection; composes with `/sse`.
 - **method-vmc** — VMC / NQS route selection; composes with `/netket` and `/jax`.
 - **method-qcs** — circuit-simulation route selection; composes with `/tensorcircuit-ng` and `/jax`.

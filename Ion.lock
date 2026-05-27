@@ -90,7 +90,7 @@ checksum = "sha256:6e880d99fc248eda2dcd39ea51cea6e98431507a95d7fd7daf7a2ec16afcd
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:c087916cc5e65895b153a741ce0eb234573232feda3b022a1c5067691fdea12b"
+checksum = "sha256:fe69cffbc90abb7103aff5065a951311d39b08ba3c73dd0e89274f986e31c417"
 
 [[skill]]
 name = "method-qcs"
