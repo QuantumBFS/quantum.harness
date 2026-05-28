@@ -13,7 +13,7 @@ Infer the canonical setup from the user's prompt and propose it for ratification
 Build per `.knowledge/conventions.md`. The Hamiltonian:
 
 ```
-H = − Σ_{⟨ij⟩} [ S_i^x S_j^x + S_i^y S_j^y + Δ S_i^z S_j^z ] + D Σ_i (S_i^z)²
+H = Σ_{⟨ij⟩} [ S_i^x S_j^x + S_i^y S_j^y + Δ S_i^z S_j^z ] + D Σ_i (S_i^z)²
 ```
 
 with `S^a` the spin-1 operators. Explicit factor-of-2 / sign translations live in `.knowledge/conventions.md` if the user reports values from a different paper.
