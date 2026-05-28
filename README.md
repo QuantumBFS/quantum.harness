@@ -1,8 +1,10 @@
 # quantum.harness
 
-A student-facing quantum many-body research harness. It helps an AI agent choose a method, write runnable code, run the calculation, and verify the result.
-
+A computational quantum research harness. It helps an AI agent to run the simulation of quantum systems.
 Each method is curated by world-leading experts in that computational approach, so the guidance reflects real research practice: what to compute, which checks matter, and where common failures happen.
+
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/30c5dc11-f7e8-4b15-a161-0e78ddfecfad" />
+
 
 ## What The Harness Provides
 
