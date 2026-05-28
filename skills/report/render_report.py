@@ -21,6 +21,7 @@ draws whatever pieces it is handed, in order.
 Math convention:
   - an `equation` block's `tex` is a LaTeX equation (no delimiters), display math.
   - any string may carry inline LaTeX in $…$ (or display in $$…$$).
+  - any string may carry **bold** (→ <strong>) and ==highlight== (→ <mark>) spans for keypoints.
 The LaTeX→MathML converter below is stdlib-only and covers the physics subset
 (sub/superscripts, groups, \\frac, \\sqrt, sums/products/integrals with limits,
 Greek, \\mathbf/\\vec, common operators). Unknown commands render literally.
@@ -217,19 +218,27 @@ def _mathml(latex, display=False):
 
 
 _MATH = re.compile(r"\$\$(.+?)\$\$|\$(.+?)\$", re.DOTALL)
+_EMPH = re.compile(r"\*\*(.+?)\*\*")
+_MARK = re.compile(r"==(.+?)==")
+
+
+def _emph(escaped):
+    """Render ==highlight== and **bold** spans in escaped, math-free text."""
+    s = _MARK.sub(r"<mark>\1</mark>", escaped)
+    return _EMPH.sub(r"<strong>\1</strong>", s)
 
 
 def mathify(x):
-    """Escape text, converting $…$ / $$…$$ spans to inline MathML."""
+    """Escape text, converting $…$ / $$…$$ to MathML and **…** to <strong>."""
     if x is None:
         return ""
     s, out, last = str(x), [], 0
     for m in _MATH.finditer(s):
-        out.append(esc(s[last:m.start()]))
+        out.append(_emph(esc(s[last:m.start()])))
         disp = m.group(1) is not None
         out.append(_mathml(m.group(1) if disp else m.group(2), display=disp))
         last = m.end()
-    out.append(esc(s[last:]))
+    out.append(_emph(esc(s[last:])))
     return "".join(out)
 
 
@@ -250,6 +259,7 @@ body{line-height:1.55}
 a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
 a:hover{border-bottom-color:var(--accent)}
 code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+mark{background:#fde68a;color:var(--ink);padding:1px 5px;border-radius:3px;font-weight:600;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 math{font-family:var(--serif);font-size:1.04em}
 math[display="block"]{font-size:1.2em;margin:2px 0}
 .wrap{max-width:880px;margin:0 auto;padding:46px 40px 100px}
@@ -274,7 +284,9 @@ section h3{font-family:var(--serif);font-size:18px;margin:22px 0 6px;border-top:
 table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0}
 thead th{background:#f7f5ed;text-align:left;padding:9px 11px;font-weight:600;border-bottom:1px solid var(--line)}
 tbody td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:hover{background:#faf9f4}
 td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td.muted{color:var(--muted);font-size:.92em}
 .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:#fafafa;color:#444;white-space:nowrap}
 .pill.exact{background:var(--good-soft);border-color:#b4d9bd;color:var(--good)}
 .pill.approx{background:var(--warm-soft);border-color:#e7c79b;color:var(--warm)}
@@ -290,10 +302,23 @@ ul.flat{padding-left:20px;margin:6px 0} ul.flat li{margin:3px 0;font-size:13.5px
 .figbox img{max-width:100%;height:auto;display:block;margin:0 auto;border-radius:3px}
 .figbox .cap{font-size:12px;color:var(--muted);margin-top:7px}
 .pending{padding:14px 16px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:14px;background:#faf8f2}
+.toc{position:fixed;top:118px;left:calc(50% - 608px);width:152px;max-height:72vh;overflow:auto;font-size:12.5px;line-height:1.4}
+.toc .lbl{text-transform:uppercase;letter-spacing:.07em;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:9px}
+.toc a{display:block;color:var(--muted);padding:4px 0 4px 12px;border-left:2px solid var(--line);border-bottom:none}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.toc-bar{display:none}
+@media(max-width:1299px){
+  .toc{display:none}
+  .toc-bar{display:flex;gap:7px;overflow-x:auto;margin:20px 0 0;padding-bottom:2px}
+  .toc-bar a{white-space:nowrap;font-size:12px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--panel)}
+  .toc-bar a:hover{color:var(--ink)}
+  .toc-bar a.on{color:var(--accent);border-color:#bcd2f5;background:var(--accent-soft);font-weight:600}
+}
 .footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 .print-btn{position:fixed;top:16px;right:18px;font-family:var(--sans);font-size:12.5px;padding:7px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:5px;cursor:pointer}
 .print-btn:hover{border-color:var(--accent);color:var(--accent)}
-@media print{.print-btn{display:none}.wrap{max-width:100%;padding:0}.figs{position:static;left:auto;transform:none;width:auto}.card,table,.verdict,.figbox{break-inside:avoid}}
+@media print{.print-btn,.toc,.toc-bar{display:none}.wrap{max-width:100%;padding:0}.figs{position:static;left:auto;transform:none;width:auto}.card,table,.verdict,.figbox{break-inside:avoid}}
 """
 
 MIME = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
@@ -302,6 +327,11 @@ MIME = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
 
 def esc(x):
     return html.escape("" if x is None else str(x))
+
+
+def _slug(text):
+    s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
+    return s or "section"
 
 
 def data_uri(path: Path) -> str:
@@ -354,16 +384,21 @@ def block(b: dict, base_dir: Path) -> str:
         return kv(*[(p[0], p[1]) for p in pairs])
     if k == "table":
         cols = b.get("columns", [])
-        num = b.get("numeric") or [False] * len(cols)
+        num = b.get("numeric") or []
+        muted = b.get("muted") or []                      # per-column: render as a recessed citation
+        widths = b.get("widths") or []                    # per-column CSS widths via <colgroup>
+        group = ("<colgroup>" + "".join(f'<col style="width:{w}">' if w else "<col>"
+                                        for w in widths) + "</colgroup>") if widths else ""
         head = "".join(f"<th>{mathify(c)}</th>" for c in cols)
         body = ""
         for r in b.get("rows", []):
-            cells = "".join(
-                (f'<td class="num">{mathify(v)}</td>' if i < len(num) and num[i]
-                 else f"<td>{mathify(v)}</td>")
-                for i, v in enumerate(r))
+            cells = ""
+            for i, v in enumerate(r):
+                cls = (("num " if i < len(num) and num[i] else "")
+                       + ("muted" if i < len(muted) and muted[i] else "")).strip()
+                cells += f'<td class="{cls}">{mathify(v)}</td>' if cls else f"<td>{mathify(v)}</td>"
             body += f"<tr>{cells}</tr>"
-        return (f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
+        return (f"<table>{group}<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
                 if cols or body else "")
     if k == "figures":
         return figures_row(b.get("items", []), base_dir)
@@ -400,11 +435,12 @@ def block(b: dict, base_dir: Path) -> str:
     return ""
 
 
-def section(s: dict, base_dir: Path) -> str:
+def section(s: dict, base_dir: Path, sid: str = None) -> str:
     head = f'<h2>{mathify(s.get("title"))}</h2>' if s.get("title") else ""
     note = f'<p class="note">{mathify(s["note"])}</p>' if s.get("note") else ""
     body = "".join(block(b, base_dir) for b in s.get("blocks", []))
-    return f"<section>{head}{note}{body}</section>" if head or note or body else ""
+    idattr = f' id="{sid}"' if sid else ""
+    return f"<section{idattr}>{head}{note}{body}</section>" if head or note or body else ""
 
 
 def render(doc: dict, base_dir: Path) -> str:
@@ -421,14 +457,39 @@ def render(doc: dict, base_dir: Path) -> str:
         sub = ""
     lede = f'<p class="lede">{mathify(doc["lede"])}</p>' if doc.get("lede") else ""
     header = f'<header class="hero">{eyebrow}<h1>{mathify(title)}</h1>{sub}{lede}</header>'
-    body = "".join(section(s, base_dir) for s in doc.get("sections", []))
+    secs = doc.get("sections", [])
+    slugs, seen = [], {}                                 # unique anchor slug per titled section
+    for s in secs:
+        if not s.get("title"):
+            slugs.append(None)
+            continue
+        sl = _slug(s["title"])
+        seen[sl] = seen.get(sl, 0) + 1
+        slugs.append(sl if seen[sl] == 1 else f"{sl}-{seen[sl]}")
+    body = "".join(section(s, base_dir, sl) for s, sl in zip(secs, slugs))
+    nav_items = [(s.get("title"), sl) for s, sl in zip(secs, slugs) if sl]
+    if len(nav_items) >= 2:                              # in-page nav: left rail + chip-bar + scroll-spy
+        links = "".join(f'<a href="#{sl}">{esc(t)}</a>' for t, sl in nav_items)
+        rail = f'<nav class="toc"><div class="lbl">Contents</div>{links}</nav>'
+        bar = f'<nav class="toc-bar">{links}</nav>'
+        spy = ("<script>(function(){var L=[].slice.call("
+               "document.querySelectorAll('.toc a,.toc-bar a'));if(!L.length)return;"
+               "var m={};L.forEach(function(a){var i=a.getAttribute('href').slice(1);"
+               "(m[i]=m[i]||[]).push(a)});var o=new IntersectionObserver(function(es){"
+               "es.forEach(function(e){if(e.isIntersecting){"
+               "L.forEach(function(a){a.classList.remove('on')});"
+               "(m[e.target.id]||[]).forEach(function(a){a.classList.add('on')})}})},"
+               "{rootMargin:'-12% 0px -78% 0px'});"
+               "document.querySelectorAll('section[id]').forEach(function(s){o.observe(s)});})();</script>")
+    else:
+        rail = bar = spy = ""
     footer = (f'<div class="footer">Generated {date.today().isoformat()}. '
               'Single file, no external assets, opens offline.</div>')
     return (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{esc(title)}</title><style>{STYLE}</style></head><body>'
             f'<button class="print-btn" onclick="window.print()">Save as PDF</button>'
-            f'<main class="wrap">{header}{body}{footer}</main></body></html>\n')
+            f'<main class="wrap">{rail}{header}{bar}{body}{footer}</main>{spy}</body></html>\n')
 
 
 def main():
