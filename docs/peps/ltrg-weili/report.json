@@ -2,39 +2,47 @@
   "title": "Wei Li · LTRG — Method Distillation",
   "eyebrow": "/distill · expert-interview prep",
   "url": "https://arxiv.org/abs/1011.0155",
-  "lede": "Method-usage tricks of the Linearized Tensor Renormalization Group (LTRG) as practiced by Wei Li, distilled from the originating paper (Li et al., PRL 2010).",
+  "lede": "Method-usage tricks of the Linearized Tensor Renormalization Group (LTRG) and its closest successor, the Exponential Tensor Renormalization Group (XTRG), as practiced by Wei Li — distilled from the originating LTRG paper (Li et al., PRL 2010) and the XTRG paper (Chen, Chen, Chen, Li & Weichselbaum, PRX 2018).",
   "sections": [
     {
       "title": "Scope, tooling & cost",
-      "note": "Cases, tooling, and limits are surveyed across the LTRG family (LTRG → XTRG → tanTRG); the tricks below derive from the 2010 LTRG paper.",
+      "note": "Corpus: the originating LTRG paper and its closest successor XTRG. Cases, tooling, and cost are grounded in these two; the later tanTRG variant is named only as a beyond-corpus survey point.",
       "blocks": [
         {
           "kind": "table",
           "columns": ["Item", "Content", "Evidence"],
+          "widths": ["19%", "auto", "16%"],
+          "muted": [false, false, true],
           "rows": [
-            ["**What it does**", "==Finite-temperature thermodynamics== — free energy, internal energy, specific heat — of one- and two-dimensional quantum lattice models, reaching the ==thermodynamic limit== (an effectively infinite system) in one dimension.", "abstract; Eq.(2)–(3)"],
-            ["**Typical cases**", "Benchmarked on one-dimensional XY and Heisenberg chains (this paper); the successors XTRG and tanTRG extend it to ==two-dimensional cylinders of width 8–10== (square-, triangular-, and kagome-lattice magnets) and to the two-dimensional Hubbard model at ==temperatures of a few percent of the hopping energy==.", "arXiv:1011.0155, 1801.00142, 2212.11973"],
-            ["**Best-fit**", "Two-dimensional systems at finite temperature for which quantum Monte Carlo is obstructed by the ==sign problem== (negative sampling weights).", "closing summary; honeycomb test"],
-            ["**Boundary**", "In two dimensions the accessible ==cylinder width (≈8–10)== is set by the bond dimension $D_c$ rather than the total site count, and quantitative validation is restricted to the ==sign-problem-free regime==.", "Fig. 5; XTRG / tanTRG"],
-            ["**Software & tools**", "No general open-source LTRG implementation exists: LTRG and its successors (XTRG, tanTRG) are distributed only in the authors' QMagen package (MATLAB), and are otherwise ==implemented in-house== on a tensor / SVD library. The controlling parameters are intrinsic to LTRG — the bond dimension $D_c$ (retained states) and the imaginary-time step.", "QMagen; method papers"],
-            ["**Implementation**", "A one-dimensional core is ==≈300–800 lines== on a tensor / SVD library (≈1.5–3k for full XTRG / tanTRG). The principal difficulties are ==maintaining a stable truncation toward low temperature== and implementing symmetry-resolved tensor contractions.", "method papers"],
-            ["**Compute cost (CPU core-hours)**", "Each imaginary-time step scales as $O(D^6 D_c^3)$ — $D$ = ==local state dimension== (2 for spin-½), $D_c$ = bond dimension. Total cost ≈ this × number of imaginary-time steps × number of temperature points. ==Absolute core-hours are not reported== and remain an interview target.", "Fig. 2 caption"]
+            ["**What it does**", "==Finite-temperature thermodynamics== — free energy, internal energy, specific heat — of one- and two-dimensional quantum lattice models, reaching the ==thermodynamic limit== (an effectively infinite system) in one dimension; XTRG extends the reach to two dimensions and to ==exponentially low temperature==.", "LTRG'10 abstract; XTRG'18 abstract"],
+            ["**Typical cases**", "One-dimensional spin-½ XY and Heisenberg chains (both papers; XTRG down to inverse temperature $\\beta \\approx 82$ in units of $1/J$); two-dimensional ==square-lattice Heisenberg== ($4\\times4$ versus exact diagonalization, $16\\times5$ versus quantum Monte Carlo) and ==frustrated triangular-lattice Heisenberg== width-4 cylinders cooled to $T/J \\approx 0.03$ (XTRG). Beyond corpus: the later tanTRG variant reaches the two-dimensional Hubbard model.", "LTRG'10; XTRG'18 Figs. 4–8"],
+            ["**Best-fit**", "Two-dimensional quantum magnets at finite temperature for which quantum Monte Carlo is obstructed by the ==sign problem== (negative sampling weights), and systems with ==well-separated energy scales== where reaching the lowest scale cheaply is decisive.", "XTRG'18 §III.D"],
+            ["**Boundary**", "In two dimensions the accessible ==cylinder width is set by the bond dimension==, not the site count: XTRG validates width-4 triangular and width-5 square lattices quantitatively, while width-8 appears only in its cost estimate. Validation is restricted to where exact-diagonalization or quantum-Monte-Carlo reference data exist.", "XTRG'18 Figs. 7–8, Tab. I"],
+            ["**Software & tools**", "XTRG's non-Abelian symmetry is built on the ==QSpace tensor library==; LTRG and its successors are otherwise ==implemented in-house== (the authors' QMagen package, MATLAB). Controlling parameters are intrinsic to the method — the bond dimension $D$ (number of retained states, or $D^*$ multiplets under non-Abelian symmetry) and the imaginary-time / initialization step $\\tau$.", "XTRG'18 §II.A (QSpace)"],
+            ["**Implementation**", "A one-dimensional core is ==a few hundred lines== on a tensor / singular-value-decomposition library; the principal difficulties are ==maintaining a stable truncation toward low temperature== and implementing the symmetry-resolved (non-Abelian) tensor contractions. Line counts are not stated in the papers and remain an interview target.", "method papers"],
+            ["**Compute cost (CPU core-hours)**", "Per-run time complexity (XTRG'18 Tab. I): XTRG scales as $O(\\ln\\,\\beta\\, N D^4)$ against LTRG's $O((\\beta/\\tau)\\, N D^3)$, $N$ = number of sites — so XTRG needs ==only logarithmically many cooling steps==. XTRG is reported faster than the series-expansion variant by ==more than one order of magnitude==; non-Abelian SU(2) symmetry adds an $O((D/D^*)^m)$ gain with $D/D^* \\approx 3$–$4$. ==Absolute core-hours are not reported== and remain an interview target.", "XTRG'18 Tab. I, §II.A"]
           ]
         }
       ]
     },
     {
       "title": "Method-usage tricks",
-      "note": "Techniques for executing the method reliably.",
+      "note": "Techniques for executing the method reliably. LTRG'10 supplies the linearized-evolution craft; XTRG'18 the exponential-cooling craft.",
       "blocks": [
         {
           "kind": "table",
           "columns": ["Trick", "What it is", "Why it matters", "Evidence"],
+          "widths": ["16%", "auto", "26%", "13%"],
+          "muted": [false, false, false, true],
           "rows": [
-            ["**Linear decimation**", "The transfer-matrix network is decimated ==one row per imaginary-time step==, discarding only $D_c$ singular values per step — versus the older coarse-graining renormalization (TRG), which discards substantially more.", "Origin of LTRG's ==accuracy and scalability== over TRG.", "after Eq.(6); Fig. 2 caption"],
-            ["**Normalization-factor accumulation**", "Singular values are rescaled by their largest element at each step to ==prevent divergence== of the imaginary-time evolution; the free energy is reconstructed from the accumulated normalization factors.", "==The discarded norms encode the free energy==.", "free-energy paragraph (Fig. 3)"],
-            ["**Error-source attribution by regime**", "Independent variation of the imaginary-time step and the bond dimension $D_c$ isolates the error source: at ==high temperature== it saturates in $D_c$ (time-discretization–limited); at ==low temperature== it decreases with $D_c$ (truncation-limited).", "Identifies ==which parameter limits accuracy== in each regime.", "Fig. 4"],
-            ["**Thermodynamic limit via pairwise contraction**", "Pairwise contraction of $2^p$ matrices over $p$ steps yields $2^p$ sites — here $2^{100}$, ==effectively the thermodynamic limit== — at a cost growing only with $p$.", "==Removes finite-size error== at negligible cost in one dimension.", "free-energy paragraph"]
+            ["**Linear decimation**", "The transfer-matrix network is decimated ==one row per imaginary-time step==, discarding only the smallest singular values per step — versus the older coarse-graining renormalization (TRG), which discards substantially more.", "Origin of LTRG's ==accuracy and scalability== over TRG.", "LTRG'10 after Eq.(6); Fig. 2"],
+            ["**Normalization-factor accumulation**", "Singular values are rescaled by their largest element at each step to ==prevent divergence== of the imaginary-time evolution; the free energy is reconstructed from the accumulated normalization factors.", "==The discarded norms encode the free energy==.", "LTRG'10 (Fig. 3 text)"],
+            ["**Error-source attribution by regime**", "Independent variation of the imaginary-time step and the bond dimension isolates the error source: at ==high temperature== it saturates in bond dimension (time-discretization–limited); at ==low temperature== it decreases with bond dimension (truncation-limited).", "Identifies ==which parameter limits accuracy== in each regime.", "LTRG'10 Fig. 4"],
+            ["**Thermodynamic limit via pairwise contraction**", "Pairwise contraction of $2^p$ matrices over $p$ steps yields $2^p$ sites — here $2^{100}$, ==effectively the thermodynamic limit== — at a cost growing only with $p$.", "==Removes finite-size error== at negligible cost in one dimension.", "LTRG'10 (free-energy ¶)"],
+            ["**Exponential β-doubling**", "Each step squares the density operator, $\\rho_n = \\rho_{n-1}^2$, so the inverse temperature doubles, $\\beta \\to 2\\beta$, per step. The result is ==exponentially fast cooling with far fewer truncation steps== than a linear imaginary-time grid.", "Reaches low temperature ==exponentially fast==, and the ==fewer truncations also raise accuracy==.", "XTRG'18 Eqs.(4–5), Fig. 2, Tab. I"],
+            ["**Trotter-free series-expansion initialization**", "The starting operator $\\rho(\\tau_0)$ at exponentially small $\\tau_0$ is built from a ==Maclaurin/Taylor series== of $e^{-\\tau_0 H}$ — down to the lowest-order form $1-\\tau_0 H$ — using no Trotter–Suzuki gates, so arbitrary one- and two-dimensional long-range Hamiltonians initialize cleanly.", "==Removes the Trotter error at its root== and sidesteps the gate construction that is cumbersome for 2D Hamiltonians.", "XTRG'18 §II.C, Eq.(7), App. C"],
+            ["**Non-Abelian SU(2) symmetry in the thermal MPO**", "The density operator is represented in a ==multiplet basis==, so each bond carries $D^*$ multiplets rather than $D$ states ($D/D^* \\approx 3$–$4$ for spin-½), cutting cost by $O((D/D^*)^m)$. This is the ==first such implementation for finite-temperature MPOs==.", "Order-of-magnitude saving that ==makes 2D clusters reachable== at high precision.", "XTRG'18 §II.A"],
+            ["**Positivity-preserving contraction**", "The thermal state is formed as $\\rho(\\beta) = \\rho(\\tau)^\\dagger \\rho(\\tau)$ by contracting the half-$\\beta$ operator with its conjugate, which keeps $\\rho(\\beta)$ ==positive semidefinite even after truncation== and yields the partition function as the squared Frobenius norm $Z = \\Vert\\rho(\\tau)\\Vert_F^2$ — a ==free extra factor-of-two in cooling==.", "Numerically robust thermal state plus ==cheaper access to the free energy==.", "XTRG'18 §II.B"]
           ]
         }
       ]
@@ -46,17 +54,46 @@
         {
           "kind": "table",
           "columns": ["Trick", "What it is", "Why it matters", "Evidence"],
+          "widths": ["16%", "auto", "26%", "13%"],
+          "muted": [false, false, false, true],
           "rows": [
-            ["**Quantum-to-(D+1) classical mapping**", "A Trotter–Suzuki decomposition recasts the $D$-dimensional quantum model as a ==classical tensor network in one higher dimension==; the thermal density operator becomes a matrix product operator (a one-dimensional tensor chain).", "Reduces thermodynamics to a ==tensor-network contraction==.", "intro; Eq.(2)–(3)"],
-            ["**Impurity-tensor observables**", "The internal energy is read from a ==local impurity tensor== inserted in the network, cross-validated against the temperature derivative of the free energy.", "A measurement intrinsic to the network, ==not finite differencing==.", "internal-energy paragraph"]
+            ["**Quantum-to-(D+1) classical mapping**", "A Trotter–Suzuki decomposition recasts the $D$-dimensional quantum model as a ==classical tensor network in one higher dimension==; the thermal density operator becomes a matrix product operator (a one-dimensional tensor chain).", "Reduces thermodynamics to a ==tensor-network contraction==.", "LTRG'10 intro; Eq.(2–3)"],
+            ["**Impurity-tensor observables**", "The internal energy is read from a ==local impurity tensor== inserted in the network, cross-validated against the temperature derivative of the free energy.", "A measurement intrinsic to the network, ==not finite differencing==.", "LTRG'10 (internal-energy ¶)"],
+            ["**Logarithmic temperature grid from entanglement scaling**", "Because the MPO entanglement of a thermal state grows only as $S_E \\approx 3c\\,\\ln\\,\\beta$ ($c$ = central charge), the inverse temperature must change on a ==relative, not absolute, scale==; a logarithmic $\\beta$ grid is therefore the natural discretization, and it bounds the bond dimension to grow only ==algebraically (critical) or stay constant (gapped)== rather than as the feared $e^\\beta$.", "Tells you ==both the grid and why low temperature is tractable== at all.", "XTRG'18 §I–II.B, Eq.(1), Fig. 1"],
+            ["**Multi-scale exponential cooling**", "Doubling jumps directly to the temperature of a ==low-lying feature== a linear grid cannot reach affordably — for example the Kitaev gauge-flux specific-heat peak at $T_l/T_h \\sim 10^{-2}$, or the triangular-lattice two-peak structure ($T_l$ and $T_h$).", "Exposes ==physics hidden between widely separated energy scales==.", "XTRG'18 §III.D, Fig. 8"]
           ]
         }
       ]
     },
     {
-      "title": "Improvement directions",
+      "title": "Open problems & improvement directions",
+      "note": "Gaps are lifted from the corpus itself — its statements or its own data — never inferred. A gap that the expert's own later paper in the corpus resolves is shown as a one-line trajectory; only still-open problems enter the table. The directions that would close them are interview targets, not filled here.",
       "blocks": [
-        { "kind": "note", "style": "pending", "text": "—" }
+        {
+          "kind": "note",
+          "label": "Closed within the corpus —",
+          "text": "==High-temperature Trotter–Suzuki floor.== LTRG'10 (Fig. 4) flags that the relative error stops improving with bond dimension for $T>0.2J$ and yields only to a smaller imaginary-time step. XTRG'18 removes it structurally: the method is Trotter-free — series-expansion initialization at $\\tau_0$ as small as $10^{-6}$ (controlled to $<10^{-15}$) followed by exact $\\rho \\to \\rho^2$ doubling. ==Flagged in LTRG'10 → closed in XTRG'18==, so it is no longer an open problem."
+        },
+        {
+          "kind": "table",
+          "columns": ["Open problem (from the corpus)", "Why it matters", "Evidence"],
+          "widths": ["29%", "auto", "14%"],
+          "muted": [false, false, true],
+          "rows": [
+            ["**Interacting-fermion thermodynamics is claimed, not demonstrated**", "Across LTRG and XTRG, fermions appear only as the ==free-fermion XY chain== (mapped to a tight-binding model); XTRG's outlook lists \"interacting fermionic systems\" as a target but shows none. Interacting fermions such as the ==Hubbard model== are exactly the high-value ==sign-problem== cases the family is pitched at.", "XTRG'18 Eq.(3), §V; LTRG'10 summary"],
+            ["**Low-temperature specific heat has limited accuracy**", "The specific heat from numerical differentiation of the free energy on the logarithmic grid develops ==\"minor wiggles\" at the lowest temperatures==, compounded by MPO truncation at large $\\beta$; XTRG'18 ==shades the lowest-temperature regions of Fig. 7(c,f) as unreliable==.", "XTRG'18 Fig. 7(c,f) + text"]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "Interview targets (not settled in the corpus)",
+          "items": [
+            "Improvement directions — how to push past each open problem above — for the expert to supply.",
+            "Did the later tanTRG variant (beyond this corpus) actually deliver interacting-fermion, two-dimensional Hubbard thermodynamics, and at what width and temperature? This is the direction that would close the fermion gap.",
+            "How far does β-doubling push the 2D cylinder width in practice? The cost estimate cites width-8 (around 2000 multiplets) but demonstrated 2D is width-4 to width-5, and kagome and J1–J2 lattices are named as not-yet-explored.",
+            "What sets the floor on the low-temperature specific heat — numerical differentiation, truncation, or finite size — and can an MPO-native estimator avoid the differentiation wiggles?"
+          ]
+        }
       ]
     }
   ]
