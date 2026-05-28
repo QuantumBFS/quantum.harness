@@ -70,6 +70,16 @@ Run / sampling slots (from the method / reproduction layer):
 
 `suffix` — char string appended to the saved `.mat` filename; use a timestamp or run-id to disambiguate batch runs.
 
+### Reference runs (published — scale references, not defaults)
+
+Sampling-parameter sets the authors actually used. They are listed only to anchor the scale of a sensible run; **do not copy them as defaults**. Each was tuned for the system and target shown, and still requires the per-slot convergence checks above (`Δτ → 0`, `N_wlk` bias, block decorrelation, `τ_eq`) on your own system. Note how the authors changed `itv_pc` (40 → 5) and `itv_modsvd` (5 → 1) between systems — evidence that these are tuned, not fixed.
+
+| Source | System (`U=4`, `t=1`) | `deltau` | `N_wlk` | `N_blksteps` | `N_eqblk` | `N_blk` | `itv_modsvd` | `itv_pc` | `itv_Em` |
+|---|---|---|---|---|---|---|---|---|---|
+| `sample.m` tutorial | 2×1, 1↑1↓ | 0.01 | 100 | 40 | 2 | 20 | 5 | 10 | 20 |
+| §V timing | 4×4 5↑5↓ … 128×1 65↑63↓ | 0.01 | 1000 | 40 | 10 | 50 | 5 | 40 | 40 |
+| §VI Fig. 4 | 16×1, 5↑7↓ | 0.01 | 5000 | 40 | 30 | 150 | 1 | 5 | 40 |
+
 ### Choices the package fixes for you
 
 Surface these too, because they are not adjustable here without editing the package:
