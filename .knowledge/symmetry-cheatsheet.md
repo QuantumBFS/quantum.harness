@@ -77,7 +77,7 @@ Conserved quantities and lattice generators for common QMB problems. Skills cite
 
 ### ED
 
-Pending refreshed references.
+Symmetry-resolved sectors (momentum `k`, total `S^z`, point-group irreps) are built via `/method-ed` → `/using-xdiag`.
 
 ### DMRG
 

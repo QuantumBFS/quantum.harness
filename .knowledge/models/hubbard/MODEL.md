@@ -25,7 +25,7 @@ Build per `.knowledge/conventions.md`: `H = -t Σ (c†c + h.c.) + U Σ n↑n↓
 
 | Regime | Method | Card |
 |---|---|---|
-| Small cluster (N ≲ 16 sites) | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Small cluster (N ≲ 16 sites) | ED | `skills/method-ed/SKILL.md` |
 | 1D chain, ladder, narrow cylinder | DMRG | `skills/method-mps/SKILL.md` |
 | Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 | Half-filled bipartite at moderate `U` | AFQMC may be sign-free; recommend only after checking. | — |
@@ -50,15 +50,15 @@ Default checks:
 - **Symmetry**: `(N↑, N↓)` conservation; SU(2) for `H_Hubbard` with no field; particle-hole symmetry at half-filling on bipartite lattices.
 - **Convergence**: bond-dim sweep + cylinder-width when 2D.
 - **Internal consistency**: variance, double-occupancy trend (decreases with `U/t`), spin-spin correlations build up at large `U`.
-- **Cross-method validation** (when feasible) — check the U→∞ Heisenberg mapping at large U/t; use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — check the U→∞ Heisenberg mapping at large U/t; use an ED cross-check via `/method-ed`. See AGENTS.md "Verification practice".
 
 Optional check:
 
-- 1D chain at half-filling: compare to Lieb-Wu integral equations (`.knowledge/benchmark-numbers.md`). For 2D, the field is contested at intermediate `U` and finite doping — report values with their convergence trend rather than claiming a benchmark.
+- 1D chain at half-filling: compare to Lieb-Wu integral equations. For 2D, the field is contested at intermediate `U` and finite doping — report values with their convergence trend rather than claiming a benchmark.
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 

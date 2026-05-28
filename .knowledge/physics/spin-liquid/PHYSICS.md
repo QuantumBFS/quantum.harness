@@ -50,9 +50,9 @@ The harness explicitly does not claim coverage of contested SL identifications. 
 
 1. The diagnostic plan above (recommended).
 2. A constraint-only report ("at this size, no Néel order; gap inconclusive") with no SL labelling.
-3. A pointer to the relevant literature range with citations from `.knowledge/benchmark-numbers.md`.
+3. A pointer to the relevant literature range with citations.
 
-Before interpreting evidence in a frontier regime, invoke the `arxiv-search` skill with a tailored query (e.g., `kagome Heisenberg spin liquid recent`, `J1-J2 square 0.5 spin liquid`) to surface the current state of the debate. Cite recent findings alongside the diagnostic plan, do not work in isolation from the literature.
+Before interpreting evidence in a frontier regime, search recent literature with a tailored query (e.g., `kagome Heisenberg spin liquid recent`, `J1-J2 square 0.5 spin liquid`) to surface the current state of the debate. Cite recent findings alongside the diagnostic plan, do not work in isolation from the literature.
 
 ## Model hooks
 

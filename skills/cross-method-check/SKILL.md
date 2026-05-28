@@ -104,4 +104,4 @@ The skill *surfaces* the disagreement; the calling skill (or `superpowers:system
 - This skill MUST NOT invent the secondary method. Defaults come from the model card's method-recommendation table; the calling skill or the user can override.
 - Cross-diagnostic checks are a special case where the two paths differ in physical content but converge on the same physical question; surface the methodological claim transparently.
 
-**Frontier caveat.** When the comparison sits inside an active literature debate, the report MUST name the debate (cite the relevant arxiv ids via `arxiv-search` or `.knowledge/literature/`) and present the result as a position within the debate, not as a closing answer.
+**Frontier caveat.** When the comparison sits inside an active literature debate, the report MUST name the debate (cite the relevant arxiv ids via a literature search or `.knowledge/literature/`) and present the result as a position within the debate, not as a closing answer.

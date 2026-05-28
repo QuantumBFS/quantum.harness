@@ -1,6 +1,6 @@
 ---
 name: reproduce-paper
-description: Use when the user wants to reproduce a paper's figure or main result. Triggers include "reproduce paper X", "redo the figures of Y", "reproduce arXiv 2302.04919", "put this paper through the harness as a calibration target", "walk me through reproducing this paper", "beginner reproduction", "I don't know what size to choose", "explain while reproducing", or right after `/download-ref` lands a new paper.
+description: Use when the user wants to reproduce a paper's figure or main result. Triggers include "reproduce paper X", "redo the figures of Y", "reproduce arXiv <id>", "put this paper through the harness as a calibration target", "walk me through reproducing this paper", "beginner reproduction", "I don't know what size to choose", "explain while reproducing", or right after `/download-ref` lands a new paper.
 ---
 
 # reproduce-paper
@@ -42,7 +42,7 @@ After the planning questions are complete, `run.json` is the *only* data source.
 
 ```json
 {
-  "paper":    { "id": "arXiv:2302.04919", "title": "…", "url": "…" },
+  "paper":    { "id": "arXiv:XXXX.XXXXX", "title": "…", "url": "…" },
   "model":    { "name": "…", "H": "H = J_1 \\sum_{\\langle ij\\rangle} \\mathbf{S}_i\\cdot\\mathbf{S}_j", "couplings": { "$J_1$": 1.0 }, "lattice": "…", "boundary": "PBC" },
   "method":   { "family": "ED", "exact": true, "tool": "XDiag", "settings": { "sector": "k=0, Sz=0", "k_states": 1 }, "note": "what the tool is and what its key settings mean, in plain English" },
   "scope":    { "label": "beginner" },

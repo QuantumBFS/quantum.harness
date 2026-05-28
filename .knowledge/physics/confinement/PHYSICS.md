@@ -49,7 +49,7 @@ Confinement diagnostics in models beyond the canonical pure `Z_2` gauge / 2D Isi
 - Higgs phase boundaries in coupled gauge-matter theories often have ambiguous order parameters.
 - Topological-order content adjacent to the deconfined phase complicates interpretation.
 
-When the user is in a frontier regime, run the diagnostic plan, then invoke `arxiv-search` with a tailored query (e.g., `<lattice> confinement deconfinement transition`, `<model> Higgs phase`) before interpreting the result. Cite the literature range; do not claim closure.
+When the user is in a frontier regime, run the diagnostic plan, then search recent literature with a tailored query (e.g., `<lattice> confinement deconfinement transition`, `<model> Higgs phase`) before interpreting the result. Cite the literature range; do not claim closure.
 
 ## Model hooks
 

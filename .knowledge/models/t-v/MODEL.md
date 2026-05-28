@@ -27,7 +27,7 @@ Build per `.knowledge/conventions.md`: `H = -t Σ (c†c + h.c.) + V Σ n_i n_j`
 
 | Regime | Method | Card |
 |---|---|---|
-| Small chain or 2D cluster (N ≲ 24) | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Small chain or 2D cluster (N ≲ 24) | ED | `skills/method-ed/SKILL.md` |
 | 1D chain (any N), ladder | DMRG | `skills/method-mps/SKILL.md` |
 | Imaginary-time approach | TEBD | `skills/method-mps/SKILL.md` |
 | Sign-problem-free 2D bipartite cases | QMC may be applicable; check sign condition before recommending. | — |
@@ -48,15 +48,15 @@ Default checks:
 - **Symmetry**: particle number conservation; lattice translation; sublattice exchange (bipartite).
 - **Convergence**: bond-dim or basis-size sweep monotonic and asymptoting.
 - **Internal consistency**: variance, density profile near edges (Friedel oscillations expected for OBC).
-- **Cross-method validation** (when feasible) — re-run a small fixed-`N_f` cluster with an independent method, and check sign-problem-free QMC agreement when applicable. Use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — re-run a small fixed-`N_f` cluster with an independent method, and check sign-problem-free QMC agreement when applicable. Use an ED cross-check via `/method-ed`. See AGENTS.md "Verification practice".
 
 Optional check:
 
-- Compare to `.knowledge/benchmark-numbers.md` for the V=0 free-fermion limit and known integrable points.
+- Compare against published literature for the V=0 free-fermion limit and known integrable points.
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 

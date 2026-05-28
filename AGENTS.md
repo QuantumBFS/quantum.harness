@@ -6,7 +6,7 @@ Problem-solving harness for quantum many-body lattice problems, ground-state and
 
 ## Core Harness Philosophy
 
-The harness is fixed at runtime. Users encounter a stable system; only the user learns, by absorbing judgment from the harness's reports. Harness changes happen in dev cycles, never during user sessions.
+The harness is fixed at runtime. Users encounter a stable system; only the user learns — by being guided through the workflow in Superpowers brainstorming style, feeling each decision as it's made, with the reports as the durable record. Harness changes happen in dev cycles, never during user sessions.
 
 ### Pushback and reconsideration
 
@@ -36,7 +36,7 @@ skills/physics/  SKILL.md auto-fires on cross-model questions;  reads .knowledge
 `.knowledge/models/` cards cover canonical Hamiltonian or Hilbert-space problem families.
 `.knowledge/physics/` cards cover cross-model organizing questions: phases, mechanisms, dynamics, solvability, and diagnostics.
 
-Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
+Methods such as DMRG, DMFT, QMC, VMC, and fuzzy sphere belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
 
 Method-level skills (`skills/method-*`) are the narrow exception for beginner reproduction and challenge-track onboarding. Each `SKILL.md` carries workflow and routing on top, then the per-algorithm reference (notation, code shape, knobs, pitfalls) in a `## Details` section. They carry generic method insight and route to the right tool-using skill; the method↔tool mapping lives in each card's *Select software* section, not here. They do not replace model/physics cards and do not own paper facts.
 
@@ -50,14 +50,13 @@ Current cards:
 
 - `conventions.md` — sign / normalization defaults; Hamiltonian forms.
 - `limits.md` — exact reductions and known limits (U=0, U→∞ → t-J, XXZ Δ=1, …).
-- `benchmark-numbers.md` — reference E/N, gaps, order parameters with citations.
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - Per-method reference (notation, code shape, knobs, pitfalls) lives in the `## Details` section of each `skills/method-*/SKILL.md`, not in the knowledge base — see "Problem-Driven Skill Design".
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
 
-**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
+**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not trustworthy.
 
 ## Card shapes
 
@@ -66,7 +65,7 @@ Domain content lives in cards under `.knowledge/`, dispatched by the `/model` an
 - **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`.
 - **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`.
 
-Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
+Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or another reference card, never duplicate the numbers.
 
 ## Verification practice
 
@@ -77,7 +76,7 @@ Default verification, in priority order:
 3. **Convergence** — bond-dim / basis-size / Trotter-step / bath-size sweeps that asymptote.
 4. **Internal consistency** — energy variance small relative to E².
 5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g. DMRG + imaginary-time TEBD, an ED cross-check via `/method-ed`, or LTRG vs QMC at finite temperature) and confirm agreement within both methods' accuracy budgets. Disagreement → setup error or insufficient convergence in one method.
-6. **Benchmark comparison (when published reference exists)** — `.knowledge/benchmark-numbers.md`. For contested values, compare against the literature *range*, not a single number.
+6. **Literature comparison (when a published reference exists)** — compare against the published value, and for contested values against the literature *range*, not a single number.
 
 When the problem is in a frontier regime (frontier flag in the card), search recent literature before interpretation — a tailored query with `<lattice> <model> <regime>` — so the agent's conclusion sits inside the current debate, not outside it.
 

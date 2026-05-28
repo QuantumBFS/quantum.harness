@@ -25,11 +25,11 @@ Build per `.knowledge/conventions.md`: `H = J1 Σ S_i·S_j + J2 Σ S_i·S_j` (NN
 
 | Regime | Method | Card |
 |---|---|---|
-| Small cluster (N ≲ 32), exact comparison | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Small cluster (N ≲ 32), exact comparison | ED | `skills/method-ed/SKILL.md` |
 | Narrow cylinder (`L_y` ≲ 8) | DMRG | `skills/method-mps/SKILL.md` |
 | Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 | Wide-cylinder / 2D thermodynamic limit | Beyond current scope. Surface uncertainty; report what cylinder DMRG + ED constrain. | — |
-| Frustrated 2D variational (VMC / NQS) | VMC via NetKet; compare ansatz energies and V-scores. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
+| Frustrated 2D variational (VMC / NQS) | VMC via NetKet; compare ansatz energies. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
 
 ## Branch table
 
@@ -44,25 +44,25 @@ Build per `.knowledge/conventions.md`: `H = J1 Σ S_i·S_j + J2 Σ S_i·S_j` (NN
 
 Default checks:
 
-- **Limit checks** via `.knowledge/limits.md`: `J2 = 0` → NN Heisenberg (use square-lattice benchmark from `benchmark-numbers.md` if available); `J1 = 0` → decoupled sublattices (each is NN Heisenberg).
+- **Limit checks** via `.knowledge/limits.md`: `J2 = 0` → NN Heisenberg (compare to the published square-lattice value if available); `J1 = 0` → decoupled sublattices (each is NN Heisenberg).
 - **Symmetry**: total `S^z = 0` for AFM; lattice point group respected.
 - **Convergence**: bond-dim sweep + cylinder-width comparison. For the intermediate regime, document both — the answer often depends on the geometry choice.
 - **Internal consistency**: variance, sub-leading bond-dim corrections.
-- **Cross-method validation** (when feasible) — compare across cylinder geometries (`L_y` and wrapping); use ED only after `skills/method-ed/SKILL.md` is rebuilt. Disagreement on the intermediate regime is a known phenomenon — document, don't average it away. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — compare across cylinder geometries (`L_y` and wrapping); use an ED cross-check via `/method-ed`. Disagreement on the intermediate regime is a known phenomenon — document, don't average it away. See AGENTS.md "Verification practice".
 
 Optional check:
 
-- For canonical `J2/J1` regimes (Néel at small `J2`, stripe at large `J2`), compare to ranges in `.knowledge/benchmark-numbers.md`. **For `J2/J1 ≈ 0.5`, do not claim a benchmark match**: the field has not closed the question. Report your converged value, your sizes, and the active uncertainty.
+- For canonical `J2/J1` regimes (Néel at small `J2`, stripe at large `J2`), compare to ranges in the published literature. **For `J2/J1 ≈ 0.5`, do not claim a literature match**: the field has not closed the question. Report your converged value, your sizes, and the active uncertainty.
 
 ## Frontier flag
 
 The intermediate regime `J2/J1 ∈ [0.45, 0.55]` on the square lattice is among the canonical open problems in QMB. Competing claims (gapless U(1) spin liquid, gapped Z2, valence-bond crystal) coexist in the literature, with the answer often depending on geometry, sizes, and method. **Do not claim closure in this regime.**
 
-When the user is in a frontier regime, invoke the `arxiv-search` skill with a tailored query (e.g., `J1-J2 square spin liquid`, `J1-J2 deconfined criticality`) to surface the current debate before interpreting your evidence. Then call `spin-liquid` for the diagnostic and `criticality` if a transition is being characterized.
+When the user is in a frontier regime, search recent literature with a tailored query (e.g., `J1-J2 square spin liquid`, `J1-J2 deconfined criticality`) to surface the current debate before interpreting your evidence. Then call `spin-liquid` for the diagnostic and `criticality` if a transition is being characterized.
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 

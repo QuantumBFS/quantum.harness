@@ -123,7 +123,7 @@ This card is generic methodology. Paper-specific Hamiltonian choices, figure pro
 - Exact small-system cross-check: CPMC vs ED on the same Hamiltonian/boundary (CPMC-Lab Table I gives exact 2-site / 4-site / 2×4 / 4×4 energies at U/t = 4). `[High]`
 - Δτ→0 extrapolation; `N_wlk` population-control-bias check; block decorrelation (vary `binsize` / `N_blksteps`). `[High]`
 - Twist averaging + energy/site vs 1/L² to the thermodynamic limit; benchmark vs Bethe-ansatz / ED (1D E₀/M = −0.5736(1) vs −0.573729). `[High]`
-- SSE: β convergence for any ground-state claim; finite-size scaling across several L; compare square-lattice Heisenberg to `.knowledge/benchmark-numbers.md`. `[High/Med]`
+- SSE: β convergence for any ground-state claim; finite-size scaling across several L; compare square-lattice Heisenberg to published reference values. `[High/Med]`
 - **Criticize:** quoting the constrained-path energy as if it were variational (it is not); no Δτ→0 or `N_wlk` extrapolation; non-commuting observables read off the mixed estimator without back-propagation; a single-determinant trial with no symmetry restoration and no release/free-projection check on the constraint bias; PBC-only finite-size claims with no twist averaging. `[High/Low]`
 
 ## Citations
