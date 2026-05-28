@@ -111,7 +111,7 @@ This card is generic methodology. Paper-specific Hamiltonian choices, figure pro
 - Analytic/exact limits: benchmark vs the exact XY-chain solution (δf ≈ 7×10⁻⁶ at β = 120, Dc = 150); high- and low-T limits when the caller supplies them; β → large → ground-state energy e₀. `[High]`
 - Cross-check non-integrable models vs TMRG / QMC where available. `[High]`
 - Confirm every log scale factor is counted exactly once in the final quantity. `[High]`
-- **Wei Li would criticize:** a single-(τ, Dc) number with no τ→0 and no Dc-convergence study; trusting low-T data at small Dc; no benchmark against an exact / QMC reference; and ignoring that high-T error is Trotter while low-T error is truncation. `[Med]`
+- **Criticize:** a single-(τ, Dc) number with no τ→0 and no Dc-convergence study; trusting low-T data at small Dc; no benchmark against an exact / QMC reference; and ignoring that high-T error is Trotter while low-T error is truncation. `[Med]`
 
 ## Citations
 
