@@ -10,7 +10,7 @@ Use XDiag as the harness's canonical exact-diagonalization stack when the target
 ## Sources
 
 - Stack contract: `skills/using-xdiag/stack.toml`
-- Method card: `.knowledge/methods/ed/METHOD.md`
+- Method card: `skills/method-ed/SKILL.md`
 - ED interview notes: `docs/ed/interview.html`
 - ED review notes: `docs/ed/review.html`
 - Install target: `make install xdiag`
@@ -34,6 +34,54 @@ Use this section as the source for XDiag-specific reproduction knobs unless the 
 - Solver policy: dense full diagonalization for full spectra and scar/ETH overlap plots when the block fits; Lanczos/Krylov for extremal or targeted states; shift-invert / polynomial filtering only when the target is an interior window and the linear/filter setup is explicit.
 - Debug/validation: before diagonalization print basis dimension, sector label, bond/term count, Hermiticity error, and memory estimate. Stop on sector-dimension mismatch or memory far above estimate.
 - Trust checks: residuals, symmetry labels, tiny dense brute force or analytic/free-limit checks, benchmark comparison, and the plotted observable's normalization.
+
+## Knobs
+
+Concrete starting points for the ED knobs in Parameter setup.
+
+| Knob | Effect | Starting point |
+|---|---|---|
+| Sector choice | Dominates memory and correctness. Wrong sector gives a correct answer to the wrong problem. | Fix all conserved quantities before diagonalizing. |
+| Dense vs sparse | Dense gives complete spectra but scales quickly; sparse Lanczos gives selected eigenpairs. | Dense only for small `dim`; Lanczos otherwise. |
+| Lanczos tolerance | Controls eigenvalue residual and runtime. | Tight enough that residual is below the target observable tolerance. |
+| Number of Lanczos vectors | Controls convergence and memory. | Increase until target eigenpairs and observables stop moving. |
+| Reorthogonalization | Controls ghost eigenvalues in long Lanczos runs. | Enable or strengthen when repeated eigenvalues appear. |
+| Symmetry resolution | Required before level statistics and degeneracy claims. | Block by every exact symmetry used by the Hamiltonian. |
+| Thread count | XDiag uses shared-memory parallelism for matrix-vector operations. | Record `JULIA_NUM_THREADS` / OpenMP settings in manifests. |
+
+## Code shape
+
+The exact constructors and keyword names should be checked against the installed XDiag docs before writing a production script; the harness-level shape is:
+
+```julia
+using XDiag
+
+# 1. Select a Hilbert-space block.
+N = 16
+nup = div(N, 2)
+block = Spinhalf(N, nup)
+
+# 2. Build an operator sum. Julia site labels follow the XDiag Julia interface.
+ops = OpSum()
+for i in 1:(N - 1)
+    ops += 1.0 * Op("SdotS", [i, i + 1])
+end
+
+# 3. Ground state / low-lying states.
+e0, psi0 = eig0(ops, block)
+
+# 4. Operator application and Krylov dynamics stay matrix-free when possible.
+phi = apply(ops, psi0)
+# psi_t = time_evolve(ops, psi0, t; algorithm = "lanczos")
+```
+
+Densify only for deliberately small blocks where the complete spectrum is needed:
+
+```julia
+H = matrix(ops, block)
+```
+
+For scripts that need precise control over convergence or excited states, use the lower-level Lanczos routines exposed by XDiag rather than only the convenience ground-state wrapper.
 
 ## Time estimate
 

@@ -32,13 +32,13 @@ skills/physics/  SKILL.md auto-fires on cross-model questions;  reads .knowledge
 
 Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
 
-Method-level skills are the narrow exception for beginner reproduction and challenge-track onboarding: `method-ed`, `method-mps`, `method-peps`, `method-qmc`, `method-vmc`, and `method-qcs`. They carry generic method insight and choose the right tool-using skill; they do not replace model/physics cards and do not own paper facts.
+Method-level skills are the narrow exception for beginner reproduction and challenge-track onboarding. Each `SKILL.md` carries workflow and routing on top, then the per-algorithm reference (notation, code shape, knobs, pitfalls) in a `## Details` section: `method-ed` (Julia XDiag, QuSpin fallback), `method-mps` (DMRG + TEBD via ITensors.jl), `method-peps` (CTMRG via PEPSKit.jl), `method-ltrg` (finite-temperature LTRG via ITensors.jl), `method-qmc` (SSE via Carlo.jl), `method-vmc` (NetKet), `method-qcs` (TensorCircuit-NG on JAX), and `method-mf` (mean field, no dedicated tool skill). They carry generic method insight and choose the right tool-using skill; they do not replace model/physics cards and do not own paper facts.
 
 Dimension, lattice, filling, doping, boundary condition, disorder strength, and coupling regime are runtime choices unless they define a truly distinct canonical problem.
 
 ## Knowledge Base Role
 
-`.knowledge/` carries data and method-level reference. It is not a curriculum, reading path, or task catalog.
+`.knowledge/` carries data and literature reference. It is not a curriculum, reading path, or task catalog.
 
 Current cards:
 
@@ -48,7 +48,7 @@ Current cards:
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - `magic-conventions.md` — Pauli / clock-shift conventions, SRE definitions, partition modes, qudit generalizations, Wegner-duality SRE preservation.
 - `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
-- `methods/<method>.md` — per-algorithm notation, code shape, knobs, pitfalls. Cards match the challenge method labels: `mean-field.md`, `ed/METHOD.md` (Julia XDiag with QuSpin as Python fallback), `mps-based-algorithm.md` (DMRG + TEBD via ITensors.jl), `ltrg.md` (finite-temperature LTRG via ITensors.jl), `peps-based-algorithm.md` (CTMRG via PEPSKit.jl), `quantum-monte-carlo.md` (SSE via Carlo.jl), `variational-monte-carlo-neural-quantum-states.md` (NetKet), `quantum-circuit-simulation.md` (TensorCircuit-NG on JAX).
+- Per-method reference (notation, code shape, knobs, pitfalls) lives in the `## Details` section of each `skills/method-*/SKILL.md`, not in the knowledge base — see "Problem-Driven Skill Design".
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
@@ -72,7 +72,7 @@ Default verification, in priority order:
 2. **Symmetry** — conserved quantities respected; expected sector occupied.
 3. **Convergence** — bond-dim / basis-size / Trotter-step / bath-size sweeps that asymptote.
 4. **Internal consistency** — energy variance small relative to E².
-5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g., DMRG + TEBD imaginary-time) and confirm agreement within both methods' accuracy budgets. Use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. Disagreement → setup error or insufficient convergence in one method.
+5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g., DMRG + TEBD imaginary-time) and confirm agreement within both methods' accuracy budgets. Use ED only after `skills/method-ed/SKILL.md` is rebuilt. Disagreement → setup error or insufficient convergence in one method.
 6. **Benchmark comparison (when published reference exists)** — `.knowledge/benchmark-numbers.md`. For contested values, compare against the literature *range*, not a single number.
 
 When the problem is in a frontier regime (frontier flag in the card), invoke the `arxiv-search` skill before interpretation: a tailored query with `<lattice> <model> <regime>` should return recent literature so the agent's conclusion sits inside the current debate, not outside it.
@@ -106,7 +106,7 @@ Do not preemptively scaffold these. When a real problem creates the demand, add 
 
 ## Tools & Languages
 
-Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Method cards in `.knowledge/methods/` use this stack for canonical code shapes. For reproduction, benchmark, or multi-tool workflows, treat tool choice and installation as decision points: expose the recommended stack and viable alternatives before installing unless the user explicitly asks for setup only.
+Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Method cards (the `## Details` section of each `skills/method-*/SKILL.md`) use this stack for canonical code shapes. For reproduction, benchmark, or multi-tool workflows, treat tool choice and installation as decision points: expose the recommended stack and viable alternatives before installing unless the user explicitly asks for setup only.
 
 Python (`quimb` + `cotengra`) remains available as a fallback for tensor-network sketches via `make install quimb`. Skills can route to either when both work; method cards are Julia-flavored.
 

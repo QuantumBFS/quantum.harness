@@ -37,7 +37,7 @@ Do not ask 4 questions. Propose the framing; let the user correct if wrong.
 
 | Frustration source | Implication |
 |---|---|
-| Geometric (triangular, kagome, pyrochlore) | DMRG cylinder + ED; QMC blocked. VMC/NQS via NetKet for variational comparison (`.knowledge/methods/variational-monte-carlo-neural-quantum-states.md`). |
+| Geometric (triangular, kagome, pyrochlore) | DMRG cylinder + ED; QMC blocked. VMC/NQS via NetKet for variational comparison (`skills/method-vmc/SKILL.md`). |
 | Interaction (J1-J2 near `0.5`) | DMRG with multiple geometries + ED on small clusters; literature debate active. |
 | Fermionic sign | Constrained-path AFQMC (with bias discussion) or variational routes. |
 | Boundary-induced | Compare PBC and OBC; if frustration only at OBC, it's not intrinsic. |

@@ -25,8 +25,8 @@ If multi-orbital, hand off to `multiorbital-hubbard`. Build per `.knowledge/conv
 
 | Regime | Method | Card |
 |---|---|---|
-| Finite bath, small system (`L_bath` ≲ 8) | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| Bath as a chain, longer chains | DMRG / MPS impurity solver | `.knowledge/methods/mps-based-algorithm.md` |
+| Finite bath, small system (`L_bath` ≲ 8) | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Bath as a chain, longer chains | DMRG / MPS impurity solver | `skills/method-mps/SKILL.md` |
 | Continuous bath, low-energy Kondo scaling | NRG-style reasoning (out of current scope to run; note conceptually). | — |
 | DMFT lattice self-consistency | Out of current scope; flag and discuss the embedding context. | — |
 
@@ -46,7 +46,7 @@ Default checks:
 - **Symmetry**: total particle count, `S^z`, particle-hole at the symmetric point.
 - **Bath-size convergence**: report the trend of the observable as `L_bath` (or chain length) grows.
 - **Internal consistency**: variance; impurity occupancy; local moment.
-- **Cross-method validation** (when feasible) — cross-check star vs chain bath geometry; use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — cross-check star vs chain bath geometry; use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
 
 Optional check:
 

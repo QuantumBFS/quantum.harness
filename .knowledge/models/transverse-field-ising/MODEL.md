@@ -25,10 +25,10 @@ Build per `.knowledge/conventions.md`: `H = -J Σ σ^z_i σ^z_j - Γ Σ σ^x_i`.
 
 | Regime | Method | Card |
 |---|---|---|
-| 1D chain (any N) | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Tiny cluster (N ≲ 24), exact spectrum, debugging | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| Cylinder (square / triangular strips) | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time approach | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| 1D chain (any N) | DMRG | `skills/method-mps/SKILL.md` |
+| Tiny cluster (N ≲ 24), exact spectrum, debugging | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Cylinder (square / triangular strips) | DMRG | `skills/method-mps/SKILL.md` |
+| Imaginary-time approach | TEBD | `skills/method-mps/SKILL.md` |
 
 ## Branch table
 
@@ -51,7 +51,7 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry**: Z2 (`σ^z → -σ^z`) should be respected; spontaneous breaking shows only with explicit symmetry-breaking field at finite size.
 - **Convergence**: bond-dim sweep gives a monotonic, asymptoting energy curve.
 - **Internal consistency**: energy variance small relative to E².
-- **Cross-method validation (auto-paired when available)** — use TEBD, DMRG, or TTN cross-checks first. Use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use TEBD, DMRG, or TTN cross-checks first. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
 
 Optional check:
 

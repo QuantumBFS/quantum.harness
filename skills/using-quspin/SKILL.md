@@ -10,7 +10,7 @@ Use QuSpin only as the declared Python fallback for ED workflows, especially whe
 ## Sources
 
 - Stack contract: `skills/using-quspin/stack.toml`
-- Method card: `.knowledge/methods/ed/METHOD.md`
+- Method card: `skills/method-ed/SKILL.md`
 - ED interview notes: `docs/ed/interview.html`
 - ED review notes: `docs/ed/review.html`
 - Install target: `make install quspin`

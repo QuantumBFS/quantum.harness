@@ -25,11 +25,11 @@ Build per `.knowledge/conventions.md`: `H = J1 Σ S_i·S_j + J2 Σ S_i·S_j` (NN
 
 | Regime | Method | Card |
 |---|---|---|
-| Small cluster (N ≲ 32), exact comparison | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| Narrow cylinder (`L_y` ≲ 8) | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time route to ground state | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| Small cluster (N ≲ 32), exact comparison | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Narrow cylinder (`L_y` ≲ 8) | DMRG | `skills/method-mps/SKILL.md` |
+| Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 | Wide-cylinder / 2D thermodynamic limit | Beyond current scope. Surface uncertainty; report what cylinder DMRG + ED constrain. | — |
-| Frustrated 2D variational (VMC / NQS) | VMC via NetKet; compare ansatz energies and V-scores. Requires `make install netket`. | `.knowledge/methods/variational-monte-carlo-neural-quantum-states.md` |
+| Frustrated 2D variational (VMC / NQS) | VMC via NetKet; compare ansatz energies and V-scores. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
 
 ## Branch table
 
@@ -48,7 +48,7 @@ Default checks:
 - **Symmetry**: total `S^z = 0` for AFM; lattice point group respected.
 - **Convergence**: bond-dim sweep + cylinder-width comparison. For the intermediate regime, document both — the answer often depends on the geometry choice.
 - **Internal consistency**: variance, sub-leading bond-dim corrections.
-- **Cross-method validation** (when feasible) — compare across cylinder geometries (`L_y` and wrapping); use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. Disagreement on the intermediate regime is a known phenomenon — document, don't average it away. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — compare across cylinder geometries (`L_y` and wrapping); use ED only after `skills/method-ed/SKILL.md` is rebuilt. Disagreement on the intermediate regime is a known phenomenon — document, don't average it away. See AGENTS.md "Verification practice".
 
 Optional check:
 

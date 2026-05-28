@@ -25,11 +25,11 @@ Build per `.knowledge/conventions.md`: `H = -t Σ (c†c + h.c.) + U Σ n↑n↓
 
 | Regime | Method | Card |
 |---|---|---|
-| Small cluster (N ≲ 16 sites) | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| 1D chain, ladder, narrow cylinder | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time route to ground state | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| Small cluster (N ≲ 16 sites) | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| 1D chain, ladder, narrow cylinder | DMRG | `skills/method-mps/SKILL.md` |
+| Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 | Half-filled bipartite at moderate `U` | AFQMC may be sign-free; recommend only after checking. | — |
-| Frustrated / doped 2D variational (VMC / NQS) | Compare ansatz energies. Requires `make install netket`. | `.knowledge/methods/variational-monte-carlo-neural-quantum-states.md` |
+| Frustrated / doped 2D variational (VMC / NQS) | Compare ansatz energies. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
 | Local self-energy / Mott transition framing | DMFT — out of current scope unless an install target lands; surface explicitly. | — |
 
 ## Branch table
@@ -50,7 +50,7 @@ Default checks:
 - **Symmetry**: `(N↑, N↓)` conservation; SU(2) for `H_Hubbard` with no field; particle-hole symmetry at half-filling on bipartite lattices.
 - **Convergence**: bond-dim sweep + cylinder-width when 2D.
 - **Internal consistency**: variance, double-occupancy trend (decreases with `U/t`), spin-spin correlations build up at large `U`.
-- **Cross-method validation** (when feasible) — check the U→∞ Heisenberg mapping at large U/t; use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — check the U→∞ Heisenberg mapping at large U/t; use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
 
 Optional check:
 

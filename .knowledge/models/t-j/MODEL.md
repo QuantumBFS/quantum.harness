@@ -25,10 +25,10 @@ Build per `.knowledge/conventions.md`: `H = -t P(c†c+h.c.)P + J Σ(S·S - nn/4
 
 | Regime | Method | Card |
 |---|---|---|
-| Small cluster, exact reference | Projected ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| 1D chain, narrow cylinder | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time route | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
-| 2D doped variational (VMC / NQS) | VMC via NetKet for projected wavefunctions. Requires `make install netket`. | `.knowledge/methods/variational-monte-carlo-neural-quantum-states.md` |
+| Small cluster, exact reference | Projected ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| 1D chain, narrow cylinder | DMRG | `skills/method-mps/SKILL.md` |
+| Imaginary-time route | TEBD | `skills/method-mps/SKILL.md` |
+| 2D doped variational (VMC / NQS) | VMC via NetKet for projected wavefunctions. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
 
 ## Branch table
 
@@ -48,7 +48,7 @@ Default checks:
 - **Symmetry**: particle counts; `S^z` (and SU(2) when isotropic); lattice symmetries.
 - **Convergence**: bond-dim sweep; cylinder-width comparison for 2D.
 - **Hubbard cross-check**: when `J = 4t²/U` is being claimed, run the corresponding Hubbard at large `U` and compare ground-state energies up to the expected `O((t/U)^4)` correction.
-- **Cross-method validation** (when feasible) — re-run on a small projected cluster with an independent method; use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — re-run on a small projected cluster with an independent method; use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
 
 Optional check:
 

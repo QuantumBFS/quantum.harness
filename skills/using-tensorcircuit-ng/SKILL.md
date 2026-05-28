@@ -11,11 +11,12 @@ Use TensorCircuit-NG for JAX-backed circuit simulation, differentiable circuit w
 
 - Stack contract: `skills/using-tensorcircuit-ng/stack.toml`
 - JAX prerequisite: `skills/using-jax/stack.toml`
-- Method card: `.knowledge/methods/quantum-circuit-simulation.md`
+- Method card: `skills/method-qcs/SKILL.md`
 - QCS interview notes: `docs/qcs/interview.html`
 - QCS review notes: `docs/qcs/review.html`
 - QCS challenge brief: `docs/qcs/backup.md`
 - Install target: `make install tensorcircuit-ng`
+- Upstream agent resources (not vendored here; consult when working in this method): skills <https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/skills>, memory <https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/memory>
 
 ## Workflow
 
@@ -38,6 +39,54 @@ Use this section as the source for TensorCircuit-NG-specific reproduction knobs 
 - Optimizer/runtime loop: Adam/SGD for large noisy objectives, L-BFGS for smooth tensor-network objectives, SciPy optimizers for small special cases, gradient-free only when gradients are unavailable.
 - Validation: small-system exact check, Pauli/sparse/MPO agreement, energy not below exact ground state, AD vs finite-difference spot check, MPS `chi` convergence when used, and matched baseline for speed claims.
 
+## Knobs
+
+Concrete starting points for the knobs in Parameter setup.
+
+| Knob | Effect | Starting point |
+|---|---|---|
+| dtype | Accuracy and memory/runtime. | `complex64` for performance scans; `complex128` for precision checks. |
+| ansatz depth | Expressiveness and compilation graph size. | Sweep depth; avoid interpreting one depth as converged. |
+| contractor | Controls contraction order and memory. | `greedy` for smoke; cotengra-backed search for larger circuits. |
+| path-search budget | Better paths vs planning overhead. | Separate path-search time from steady execution time. |
+| slicing target | Trades memory for additional contraction work. | Use when peak memory blocks execution. |
+| `jit` boundary | Controls compilation granularity. | JIT the full value-and-gradient step for benchmarkable steady runtime. |
+| `scan` | Reduces graph growth for repeated layers. | Use for deep homogeneous layer stacks. |
+| checkpointing | Reduces backward memory at extra compute cost. | Use when gradients OOM before forward pass does. |
+| batching / `vmap` | Parallelizes seeds, terms, or parameter points. | Use only when batch axes are physically independent. |
+
+## Code shape
+
+```python
+import jax
+import tensorcircuit as tc
+
+tc.set_backend("jax")
+tc.set_contractor("greedy")  # switch to cotengra-backed contractors when needed
+
+
+def ansatz(params, n, depth):
+    c = tc.Circuit(n)
+    for layer in range(depth):
+        for i in range(n):
+            c.rx(i, theta=params[layer, i, 0])
+            c.rz(i, theta=params[layer, i, 1])
+        for i in range(n - 1):
+            c.cnot(i, i + 1)
+    return c
+
+
+def energy(params, hamiltonian, n, depth):
+    c = ansatz(params, n, depth)
+    return tc.backend.real(tc.templates.measurements.operator_expectation(c, hamiltonian))
+
+
+value_and_grad = tc.backend.jit(tc.backend.value_and_grad(energy))
+e, grad = value_and_grad(params, hamiltonian, n, depth)
+```
+
+For deep repeated layers, express the layer update with JAX control flow (`jax.lax.scan`) when possible. For large contractions, move path search and slicing into explicit contractor settings and record the contractor identity in the run manifest.
+
 ## Time estimate
 
 Estimate from representation, qubit count, depth/gate count, observable form, batch size, gradient path, contraction path, and device.
@@ -53,3 +102,5 @@ Estimate from representation, qubit count, depth/gate count, observable form, ba
 - Long first-run latency can be JAX compilation, not stalled physics.
 - GPU availability must be checked with `jax.devices()` inside the runtime allocation.
 - Do not substitute another circuit package without recording it as a protocol deviation.
+- Shape or dtype changes can trigger JAX recompilation; record parameter shape and dtype, and profile the `value_and_grad` step separately from the outer optimizer loop.
+- Path/contractor settings are part of the numerical method; do not change the contractor mid-scan without recording it.

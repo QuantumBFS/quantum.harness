@@ -1,4 +1,28 @@
-# Linearized Tensor Renormalization Group
+---
+name: method-ltrg
+description: Use when a finite-temperature Linearized Tensor Renormalization Group (LTRG) reproduction needs method-level route and tool selection — Trotterized classical tensor network, layer-by-layer boundary contraction, thermodynamic observables.
+---
+
+# Method LTRG
+
+LTRG is the finite-temperature tensor-network track: it maps a `d`-dimensional quantum lattice model to a `(d + 1)`-dimensional classical tensor network by Trotter-Suzuki decomposition, then contracts the network layer by layer while truncating the growing boundary with SVD. Use it to decide whether the target genuinely needs LTRG, then hand off to the tool skill for implementation mechanics.
+
+## Sources
+
+- Tool skill: `/using-itensors`
+
+## Route
+
+1. Use LTRG when the figure is a finite-temperature thermodynamic quantity (free energy, internal energy, specific heat, susceptibility) of a local quantum lattice model represented as a Trotterized classical network.
+2. Fix the Trotter split, transfer-tensor construction, contraction direction, normalization accounting, and observable route before setup — the method card owns these decisions.
+3. Recommend `/using-itensors` for ITensors.jl setup, index mechanics, SVD/truncation keywords, and runtime troubleshooting.
+4. If the target is a ground-state property, route to `/method-mps` or `/method-peps` instead; LTRG is a finite-temperature method.
+
+## Tool Handoff
+
+Invoke `/using-itensors` after the LTRG route is fixed. `/using-itensors` owns tensor construction, index management, SVD, truncation, and runtime troubleshooting; the method card owns the Trotter split, contraction order, normalization bookkeeping, and convergence plan.
+
+## Details
 
 LTRG maps a `d`-dimensional quantum lattice model at finite temperature into a
 `(d + 1)`-dimensional classical tensor network by Trotter-Suzuki
@@ -13,26 +37,7 @@ Primary source: Li, Ran, Gong, Zhao, Xi, Ye, and Su, "Linearized tensor
 renormalization group algorithm for the calculation of thermodynamic
 properties of quantum lattice models," `.knowledge/literature/ltrg/`.
 
-## Setup
-
-Recommended stack:
-
-1. `itensors` (`skills/using-itensors/stack.toml`) - explicit tensor construction,
-   contraction, SVD, and truncation.
-
-```
-make install julia
-make install itensors
-```
-
-Activate the environment with `julia --project=julia-env`.
-
-Use `/using-itensors` for Julia setup, ITensor index mechanics, SVD keyword details,
-and runtime troubleshooting. The LTRG method card owns the algorithmic choices:
-Trotter split, transfer tensor construction, contraction direction,
-normalization accounting, observable route, and convergence plan.
-
-## Scope
+### Scope
 
 Use this card for:
 
@@ -52,7 +57,7 @@ Do not use this card as the full recipe for:
 - Ground-state MPS algorithms that do not build and contract the finite-
   temperature transfer network.
 
-## Notation
+### Notation
 
 - `d`: spatial dimension of the quantum lattice model.
 - `β`: inverse temperature.
@@ -65,7 +70,7 @@ Do not use this card as the full recipe for:
 - Log scale factors: accumulated normalizations needed to recover the final
   partition function and free energy.
 
-## Algorithm
+### Algorithm
 
 1. Start from a local quantum Hamiltonian.
 2. Split the Hamiltonian into local pieces suitable for Trotter-Suzuki
@@ -89,55 +94,7 @@ Do not use this card as the full recipe for:
 15. Compute thermodynamic observables from the final contraction and accumulated
     normalizations.
 
-## Code Shape (Julia / ITensors.jl)
-
-The exact index layout and ITensor constructor details should be checked against
-the installed ITensors docs before writing a production script. The geometry is
-fixed by the caller's model and Trotter decomposition; the harness-level shape
-is:
-
-```julia
-using ITensors
-
-# 1. Build local basis indices and primed copies for adjacent imaginary-time
-#    layers. Use explicit tags so contractions are auditable.
-s1 = Index(q, "site1")
-s2 = Index(q, "site2")
-s1p = prime(s1)
-s2p = prime(s2)
-
-# 2. Build a local Hamiltonian tensor h on the chosen local term and exponentiate
-#    the imaginary-time gate.
-h = ITensor(s1, s2, s1p, s2p)
-# fill h from the caller's local Hamiltonian convention
-gate = exp(-tau * h)
-
-# 3. Interpret gate matrix elements as a local transfer tensor.
-T = gate
-
-# 4. If the chosen network geometry requires a local factorization, reshape and
-#    SVD the transfer tensor into local factors.
-U, S, V = svd(T, (s1, s2); maxdim = q^2)
-
-# 5. Repeatedly absorb transfer tensors into the current boundary tensor network,
-#    SVD-compress to Dc, normalize, and append log scale factors.
-log_scales = Float64[]
-for layer in 1:K
-    # boundary = absorb_layer(boundary, local_factors)
-    # boundary, spectrum = compress_boundary(boundary; maxdim = Dc)
-    # scale = normalize_boundary!(boundary)
-    # push!(log_scales, log(scale))
-end
-
-# 6. Contract the remaining boundary and combine it with log_scales to obtain
-#    the partition function or free energy in the chosen normalization.
-```
-
-This is a shape, not a reusable library function. Production scripts should keep
-index tags explicit, write intermediate convergence data incrementally, and
-record the normalization convention alongside the output.
-
-## Knobs
+### Knobs
 
 | Knob | Meaning |
 |---|---|
@@ -149,7 +106,7 @@ record the normalization convention alongside the output.
 | Normalization convention | How local scales are removed and later restored. |
 | Observable route | Direct partition-function quantity, tensor insertion, or controlled derivative. |
 
-## Cost Estimate
+### Cost Estimate
 
 Runtime grows with the number of layers `K = β / τ`, the number of local tensors
 absorbed per layer, and the SVD cost of compressing the boundary to `Dc`.
@@ -161,7 +118,7 @@ For uncertain implementations, run a small smoke calculation at reduced `β` and
 `Dc` to measure one-layer absorption and compression time. Treat that as a
 timing probe, not a scientific result.
 
-## Observables
+### Observables
 
 Free energy comes from the final contraction plus accumulated log scale factors.
 Other thermodynamic quantities require an observable-specific route supplied by
@@ -169,7 +126,7 @@ the caller: tensor insertion, a derivative of free energy, or another explicit
 estimator. Do not substitute an analytic solution for the LTRG calculation; use
 analytic or external data only as a benchmark after the LTRG result exists.
 
-## Verification
+### Verification
 
 - Sweep `τ` and check the expected approach as Trotter error decreases.
 - Sweep `Dc` and check observable stability and discarded weight.
@@ -180,7 +137,7 @@ analytic or external data only as a benchmark after the LTRG result exists.
 - Compare against the caller-provided benchmark only after producing the LTRG
   observable.
 
-## Pitfalls
+### Pitfalls
 
 - Dropping or double-counting normalization factors changes free energy.
 - Confusing local Hilbert dimension `q` with truncation dimension `Dc` changes
@@ -193,7 +150,7 @@ analytic or external data only as a benchmark after the LTRG result exists.
   boundary tensor networks unless a caller-supplied geometry fixes a more
   specific representation.
 
-## Citations
+### Citations
 
 - `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md` - Li et al., original LTRG paper.
 - ITensors.jl stack and setup are handled by `/using-itensors`.

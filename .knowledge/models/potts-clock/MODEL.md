@@ -31,11 +31,11 @@ with `X, Z` the qudit shift / clock operators (`X|k⟩ = |k+1 mod q⟩`, `Z|k⟩
 
 | Regime | Method | Card |
 |---|---|---|
-| 1D chain, any `q`, ground-state energy + standard observables | DMRG (qudit MPS) | `.knowledge/methods/mps-based-algorithm.md` |
-| 1D chain at large `N` with magic / Pauli-string sampling | MPS Based Algorithm | `.knowledge/methods/mps-based-algorithm.md` |
-| Tiny cluster (`N ≲ 16` for `q = 3`), exact spectrum | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| 2D square (small clusters / cylinders) | DMRG cylinder | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time route to ground state | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| 1D chain, any `q`, ground-state energy + standard observables | DMRG (qudit MPS) | `skills/method-mps/SKILL.md` |
+| 1D chain at large `N` with magic / Pauli-string sampling | MPS Based Algorithm | `skills/method-mps/SKILL.md` |
+| Tiny cluster (`N ≲ 16` for `q = 3`), exact spectrum | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| 2D square (small clusters / cylinders) | DMRG cylinder | `skills/method-mps/SKILL.md` |
+| Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 
 ## Branch table
 
@@ -55,7 +55,7 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry**: `Z_q` symmetry (`Π_i Z_i`) respected; ground state in the trivial sector for finite `L` with no symmetry-breaking field.
 - **Convergence**: bond-dim or basis-size sweep gives a monotonic, asymptoting energy curve. Auto-saved convergence plot per AGENTS.md output norm.
 - **Internal consistency**: energy variance small relative to `E²`.
-- **Cross-method validation (auto-paired when available)** — use DMRG / TTN cross-checks first. Use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use DMRG / TTN cross-checks first. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
 
 Optional check:
 

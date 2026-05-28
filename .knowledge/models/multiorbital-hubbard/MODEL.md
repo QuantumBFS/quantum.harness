@@ -25,8 +25,8 @@ Build per `.knowledge/conventions.md`. State which Kanamori terms are kept.
 
 | Regime | Method | Card |
 |---|---|---|
-| Single-site / impurity, small `M`, finite bath | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| Multi-orbital impurity with longer bath chain | DMRG / MPS impurity solver | `.knowledge/methods/mps-based-algorithm.md` |
+| Single-site / impurity, small `M`, finite bath | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Multi-orbital impurity with longer bath chain | DMRG / MPS impurity solver | `skills/method-mps/SKILL.md` |
 | Lattice multi-orbital | Out of current scope unless DMFT-embedded; flag explicitly. | — |
 | DMFT impurity solver | Out of current scope to run; note the context. | — |
 
@@ -47,7 +47,7 @@ Default checks:
 - **Symmetry**: orbital occupancies; total particle count; `S^z` and total `S²` when SU(2) is preserved; rotational invariance check at the local level.
 - **Hilbert space sanity**: confirm the basis size matches the analytic `4^M`-style count.
 - **Convergence**: bond-dim sweep; bath-size sweep for impurity problems.
-- **Cross-method validation** (when feasible) — re-solve at smaller orbital count or with density-density-only interactions as a sanity check; use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — re-solve at smaller orbital count or with density-density-only interactions as a sanity check; use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
 
 Optional check:
 

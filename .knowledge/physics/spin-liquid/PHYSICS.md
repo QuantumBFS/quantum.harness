@@ -22,7 +22,7 @@ For each item, the relevant model card drives the calculation; this skill specif
 - **Symmetry-protected long-range order proxies**: dimer-dimer correlations (rule out VBS), chiral order parameter (for chiral SL candidates).
 - **Ground-state degeneracy on torus**: e.g., 4-fold for Z₂ topological order. Hard to verify directly with DMRG but accessible via cylinder topology in some setups.
 
-How to compute each: see the relevant model card and method card (`.knowledge/methods/mps-based-algorithm.md` etc.).
+How to compute each: see the relevant model card and method card (`skills/method-mps/SKILL.md` etc.).
 
 ## Cross-checks
 

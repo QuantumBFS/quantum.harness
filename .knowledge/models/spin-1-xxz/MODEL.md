@@ -31,10 +31,10 @@ with `S^a` the spin-1 operators. Default sign-of-coupling matches the methodolog
 
 | Regime | Method | Card |
 |---|---|---|
-| 1D chain, ground-state energy + correlations | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Small cluster (`L ≲ 14`) for exact spectrum, gap, or cross-check | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| 1D ring (PBC) at large `L` with Pauli-string sampling | MPS Based Algorithm | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time route to ground state | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| 1D chain, ground-state energy + correlations | DMRG | `skills/method-mps/SKILL.md` |
+| Small cluster (`L ≲ 14`) for exact spectrum, gap, or cross-check | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| 1D ring (PBC) at large `L` with Pauli-string sampling | MPS Based Algorithm | `skills/method-mps/SKILL.md` |
+| Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 
 ## Branch table
 
@@ -54,7 +54,7 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry**: `S^z_total` conservation; lattice translation; reflection symmetry where applicable. Haldane phase is SPT — the entanglement spectrum is doubly degenerate on a periodic cut.
 - **Convergence**: bond-dim sweep gives monotonic, asymptoting energy. The Haldane phase has a finite gap → DMRG converges fast; the transition regions are slower (gap closing).
 - **Internal consistency**: energy variance small relative to `E²`; string order parameter saturates to a finite value in Haldane, vanishes in trivial phases.
-- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
 
 Optional check:
 

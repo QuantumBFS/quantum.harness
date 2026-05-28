@@ -27,9 +27,9 @@ Build per `.knowledge/conventions.md`: `H = -t Σ (c†c + h.c.) + V Σ n_i n_j`
 
 | Regime | Method | Card |
 |---|---|---|
-| Small chain or 2D cluster (N ≲ 24) | ED pending refreshed references | `.knowledge/methods/ed/METHOD.md` |
-| 1D chain (any N), ladder | DMRG | `.knowledge/methods/mps-based-algorithm.md` |
-| Imaginary-time approach | TEBD | `.knowledge/methods/mps-based-algorithm.md` |
+| Small chain or 2D cluster (N ≲ 24) | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| 1D chain (any N), ladder | DMRG | `skills/method-mps/SKILL.md` |
+| Imaginary-time approach | TEBD | `skills/method-mps/SKILL.md` |
 | Sign-problem-free 2D bipartite cases | QMC may be applicable; check sign condition before recommending. | — |
 
 ## Branch table
@@ -48,7 +48,7 @@ Default checks:
 - **Symmetry**: particle number conservation; lattice translation; sublattice exchange (bipartite).
 - **Convergence**: bond-dim or basis-size sweep monotonic and asymptoting.
 - **Internal consistency**: variance, density profile near edges (Friedel oscillations expected for OBC).
-- **Cross-method validation** (when feasible) — re-run a small fixed-`N_f` cluster with an independent method, and check sign-problem-free QMC agreement when applicable. Use ED only after `.knowledge/methods/ed/METHOD.md` is rebuilt. See AGENTS.md "Verification practice".
+- **Cross-method validation** (when feasible) — re-run a small fixed-`N_f` cluster with an independent method, and check sign-problem-free QMC agreement when applicable. Use ED only after `skills/method-ed/SKILL.md` is rebuilt. See AGENTS.md "Verification practice".
 
 Optional check:
 
