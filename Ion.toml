@@ -11,7 +11,7 @@ download-ref = { type = "local" }
 parameter-scan = { type = "local" }     # multi-axis sweeps (subsumes finite-size-scan)
 scaling-fit = { type = "local" }
 cross-method-check = { type = "local" }
-slurm = { type = "local" }              # cluster mechanism (agent-does-ssh)
+using-slurm = { type = "local" }        # cluster mechanism (agent-does-ssh)
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
 reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
 track-starter = { type = "local" }      # choose a challenge-track paper, then hand off to reproduce-paper
@@ -21,14 +21,15 @@ report = { type = "local" }             # render report.json into a self-contain
 ion-cli = { type = "local" }
 
 # Computational software stacks
-xdiag = { type = "local" }
-quspin = { type = "local" }
-itensors = { type = "local" }
-netket = { type = "local" }
-jax = { type = "local" }
-tensorcircuit-ng = { type = "local" }
-pepskit = { type = "local" }
-sse = { type = "local" }
+using-xdiag = { type = "local" }
+using-quspin = { type = "local" }
+using-itensors = { type = "local" }
+using-netket = { type = "local" }
+using-jax = { type = "local" }
+using-tensorcircuit-ng = { type = "local" }
+using-pepskit = { type = "local" }
+using-sse = { type = "local" }
+using-cpmc-lab = { type = "local" }
 
 # Method-level guidance
 method-ed = { type = "local" }

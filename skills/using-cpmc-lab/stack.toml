@@ -1,0 +1,29 @@
+id = "cpmc-lab"
+name = "CPMC-Lab"
+language = "matlab"
+canonical_for = ["cpmc-lab"]
+default_profile = "local_matlab"
+
+[profiles.local_matlab]
+label = "Local MATLAB"
+default = true
+install = "local"
+smoke = "local"
+
+[profiles.local_matlab.requirements]
+allocation = "login-or-compute"
+mpi = false
+matlab = true
+
+[install.local]
+command = "make install cpmc-lab"
+notes = "Downloads the official CPMC-Lab 2.0 tarball into .external/cpmc-lab/ and smoke-tests it with MATLAB. The downloaded package is ignored by git."
+
+[smoke.local]
+where = "login"
+command = "make install cpmc-lab"
+
+[docs]
+official = "https://cpmc-lab.wm.edu/"
+download = "https://cpmc-lab.wm.edu/CPMC_Lab2.0.tar.gz"
+license = "https://cpmc-lab.wm.edu/"

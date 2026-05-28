@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit classical-repro pdf-render
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit cpmc-lab classical-repro pdf-render
 
 .PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -168,6 +168,21 @@ install-pepskit: ## Install PEPSKit.jl + TensorKit.jl CTMRG stack into julia-env
 	@cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["PEPSKit", "TensorKit", "QuadGK", "Plots"])'
 	@echo "Julia PEPSKit/CTMRG environment ready in julia-env/"
 	@echo "Activate with: julia --project=julia-env"
+
+install-cpmc-lab: ## Install CPMC-Lab Matlab package into .external/cpmc-lab/
+	@matlab_bin="$$(command -v matlab 2>/dev/null || true)"; \
+	if [ -z "$$matlab_bin" ] && [ -x /Applications/MATLAB_R2026a.app/bin/matlab ]; then matlab_bin=/Applications/MATLAB_R2026a.app/bin/matlab; fi; \
+	[ -n "$$matlab_bin" ] || { echo "MATLAB not found. Put matlab on PATH or install MATLAB before CPMC-Lab."; exit 1; }; \
+	command -v curl >/dev/null 2>&1 || { echo "curl not found; install curl before CPMC-Lab."; exit 1; }; \
+	mkdir -p .external/downloads .external/cpmc-lab; \
+	if ! find .external/cpmc-lab -name CPMC_Lab.m -print -quit | grep -q .; then \
+	  curl -fsSL https://cpmc-lab.wm.edu/CPMC_Lab2.0.tar.gz -o .external/downloads/CPMC_Lab2.0.tar.gz; \
+	  tar -xzf .external/downloads/CPMC_Lab2.0.tar.gz -C .external/cpmc-lab; \
+	fi; \
+	cpmc_file="$$(find .external/cpmc-lab -name CPMC_Lab.m -print -quit)"; \
+	[ -n "$$cpmc_file" ] || { echo "CPMC_Lab.m was not found after extraction."; exit 1; }; \
+	cpmc_root="$$(dirname "$$cpmc_file")"; \
+	"$$matlab_bin" -batch "addpath('$$cpmc_root'); assert(exist('CPMC_Lab','file') == 2); disp('CPMC-Lab ready')"
 
 install-classical-repro: ## Install stacks for DMRG, QMC/SSE, and CTMRG reproduction targets
 	@for tool in itensors sse pepskit; do $(MAKE) install-$$tool; done

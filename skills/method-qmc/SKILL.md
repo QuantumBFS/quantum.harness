@@ -10,25 +10,30 @@ QMC is the stochastic sampling track. Use it to decide whether the target is sig
 ## Sources
 
 - Track README: `tracks/qmc/README.md`
-- Tool skill: `/using-sse`
+- Tool skills: `/using-sse`, `/using-cpmc-lab`
 
 ## Route
 
 1. Check sign-problem control first: lattice, coupling signs, basis, and observable must be compatible with the selected QMC route.
 2. Use SSE for sign-free spin/bosonic lattice targets, finite-temperature curves, beta convergence, and large-size statistical checks.
 3. Recommend `/using-sse` for StochasticSeriesExpansion.jl / Carlo.jl setup, stochastic parameters, MPI choice, and timing.
-4. If the target is determinant QMC, AFQMC, impurity CTQMC, or has an uncontrolled sign problem, do not force `/using-sse`; offer official code / web search or another track.
+4. Recommend `/using-cpmc-lab` when a constrained-path Monte Carlo / phaseless AFQMC route needs the official CPMC-Lab package as the software backend.
+5. If the target is determinant QMC, impurity CTQMC, or has an uncontrolled sign problem outside a supported package route, do not force `/using-sse`; offer official code / web search or another track.
 
 ## Tool Handoff
 
-Invoke `/using-sse` after the route is chosen. `/using-sse` owns thermalization, sweeps, chains, bins, beta/temperature grid, autocorrelation checks, sign checks, MPI setup, and time estimate.
+Invoke `/using-sse` after an SSE route is chosen. `/using-sse` owns thermalization, sweeps, chains, bins, beta/temperature grid, autocorrelation checks, sign checks, MPI setup, and time estimate.
+
+Invoke `/using-cpmc-lab` after a CPMC/AFQMC package route is chosen. `/using-cpmc-lab` owns the package mechanics: MATLAB setup, official package installation, batch invocation, `.mat` outputs, and package-level time probing. The scientific run parameters are caller-supplied (from the model and reproduction protocol), not set by this card.
 
 ## Details
 
 Stochastic sampling of the finite-temperature partition function. The harness
 default is stochastic series expansion (SSE) QMC for sign-problem-free spin and
-bosonic lattice Hamiltonians. Determinant / auxiliary-field QMC is a separate
-method family and is not covered by this card.
+bosonic lattice Hamiltonians. Constrained-path and phaseless auxiliary-field QMC
+(AFQMC) is also supported, but only through the official CPMC-Lab package route
+via `/using-cpmc-lab`; generic unconstrained determinant / auxiliary-field QMC is a
+separate method family and is not covered by this card.
 
 ### Scope
 
@@ -41,12 +46,14 @@ Use this card for:
   convergence.
 - Large-size checks where ED is impossible and DMRG geometry would bias a 2D
   result.
+- Constrained-path / phaseless AFQMC ground states of fermionic lattice
+  models, through the CPMC-Lab package route (`/using-cpmc-lab`).
 
 Do not use this card for:
 
 - Frustrated or fermionic models with an uncontrolled sign problem.
 - Real-time dynamics.
-- Generic determinant QMC, AFQMC, or continuous-time impurity QMC.
+- Generic unconstrained determinant QMC or continuous-time impurity QMC.
 
 ### Onboarding Reproduction Target
 
@@ -110,3 +117,6 @@ not a paper reproduction, unless the primary paper has been ingested.
 - `.knowledge/literature/quantum-monte-carlo/10-1017-9781316417041.md`
   - Becca and Sorella, *Quantum Monte Carlo Approaches for Correlated Systems*
     (2017).
+- `.knowledge/literature/quantum-monte-carlo/1407.7967_cpmc-lab-a-matlab-package-for-constrained-path-monte-carlo-c.md`
+  - Nguyen, Shi, Xu, and Zhang, *CPMC-Lab: A Matlab Package for Constrained-Path
+    Monte Carlo Calculations* (2014).
