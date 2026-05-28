@@ -73,7 +73,7 @@ During questioning, do not create a run directory, `run.json`, report, script, p
 
 Scripts go to `tracks/<track>/solutions/<script>.{jl|py}` — committed code that can be re-run. Generated data and figures go to `tracks/<track>/results/` — gitignored, not committed.
 
-After the planning questions are complete, `run.json` is the *only* data source. The report is built one-way from it — `run.json` → a generic `report.json` (the render input) → `report.html` — and never read back. `report.json` and the HTML are *derived* views, regenerated from `run.json`; they are never edited or treated as a second source. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same data share one run, never copied across files. Representative shape (each figure's `results` block fills in after the run):
+After the planning questions are complete, `run.json` is the *only* data source. The report is built one-way from it — `run.json` → a generic `report.json` (the render input) → `report.html` — and never read back. `report.json` and the HTML are *derived* views, regenerated from `run.json`; they are never edited or treated as a second source. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same data share one run, never copied across files. Representative shape (each figure's `results` block and the run's `actual` fill in after the run):
 
 ```json
 {
@@ -82,6 +82,7 @@ After the planning questions are complete, `run.json` is the *only* data source.
   "method":   { "family": "ED", "exact": true, "tool": "XDiag", "settings": { "sector": "k=0, Sz=0", "k_states": 1 }, "note": "what the tool is and what its key settings mean, in plain English" },
   "scope":    { "label": "beginner" },
   "estimate": [ { "point": "N=16", "wall": "~30 s", "memory": "~0.2 GB" }, { "point": "N=20", "wall": "~6 min", "memory": "~2 GB" } ],
+  "actual":   [ { "point": "N=16", "wall": "22 s", "memory": "0.2 GB" } ],
   "where":    "local",
   "risks":    ["observable not built-in — implement by hand"],
   "figures":  [
@@ -101,19 +102,24 @@ Two stdlib-only, offline steps. First `python3 skills/reproduce-paper/build_repo
 
 Two moments, same file, per figure:
 
-- **Proposal** (before compute) — the plan in plain English: the model; the method (with a one-line plain-English `note` on the tool and its settings — what XDiag is, what `k_states`/`tol` do) and its parameters; scope and where — plus a **cost table** with one row per run point (run point → estimated wall time → memory) and a short note of anything likely to be finicky or custom. Then, for each figure, what it plots, the observable, what's expected, and the paper's target panel (when captured); its result area marked pending.
-- **Results** (after compute) — for each figure: our figure beside the paper's original panel — capture that panel as an image (`paper_image`) so the two sit side by side — a small table of the key numbers, an honest verdict (`match`: `yes` / `partly` / `no`, rendered as Reproduced / Partial match / Did not match) with a one-line `why`, the wall time that ran and any changes from the plan, and one rerun line.
+- **Proposal** (before compute) — the plan in plain English: the model; the method (with a one-line plain-English `note` on the tool and its settings — what XDiag is, what `k_states`/`tol` do) and its parameters; scope and where — plus a **cost table** with one row per run point (run point → estimated wall time → memory) and a short note of anything likely to be finicky or custom. Then, for each figure, what it plots, the observable, what's expected, and **the paper's target panel captured as `paper_image`** — so the figs-to-reproduce are in the proposal report, not just after the run; its result area marked pending.
+- **Results** (after compute) — for each figure: our figure beside the paper's target panel already captured at proposal, so the two sit side by side — a small table of the key numbers, an honest verdict (`match`: `yes` / `partly` / `no`, rendered as Reproduced / Partial match / Did not match) with a one-line `why`, the wall time that ran and any changes from the plan, and one rerun line. The **cost table** also gains an Actual column beside each estimate, filled from the run's consumed wall time and memory (`actual`).
+
+### Showing figures and opening the report
+
+- **Discussion stage** — once the target figure/panel is identified, show the user the paper's figure being reproduced so they see the target while deciding. On the app, embed it inline as a markdown image link to the figure file (`![Fig 2a — from the paper](path/to/figure.png)`); in a terminal, open the image file instead (`open` / `xdg-open`). Surface is the AGENTS.md → Equation Rendering signal (`CLAUDE_CODE_ENTRYPOINT`). No run files are written yet.
+- **When the report is built or rebuilt** (the proposal, then again after results) — auto-open `report.html`, which carries the figs-to-reproduce beside our reproduction, in a browser on both terminal and app (`open` on macOS, `xdg-open` on Linux). Open it; don't merely offer.
 
 ## Flow
 
-1. **Brainstorm** each drift-relevant decision above, one at a time. Do not write files during this questioning phase; keep choices pending until the full plan is known.
+1. **Brainstorm** each drift-relevant decision above, one at a time. Do not write files during this questioning phase; keep choices pending until the full plan is known. Once the target figure/panel is identified, show the user that paper figure (see **Showing figures and opening the report**).
 2. **Show the setup card** after the target and source-fixed setup are known, before method-parameter questions.
 3. **Configure the run** — guide method/tool/runtime parameters one at a time, then print a compact configuration summary.
 4. **Estimate carefully.** Use the scaling rules below to fill the cost table — it drives the user's scope and where-to-run choices. For any scale question, estimate the paper-size run and the largest local-PC-in-15-min run before asking the user to choose. Flag finicky or custom parts up front so they're anticipated, but don't over-plan.
-5. **Materialize the proposal** — after all planning questions are answered, create the timestamped run directory, write `run.json`, capture the paper's target panel as `paper_image`, run `build_report.py`, then render via `/report`; give its path and, on a laptop, offer to open it.
+5. **Materialize the proposal** — after all planning questions are answered, create the timestamped run directory, write `run.json`, capture the paper's target panel as `paper_image` (so the figs-to-reproduce are in the proposal report), run `build_report.py`, render via `/report`, then open it per **Showing figures and opening the report**.
 6. **Approve / Change / Discuss** — one question once the proposal is built. *Approve* (recommended) locks the plan and runs; *Change <which>* jumps back to that one choice; *Discuss* opens it up. This is the run's only approval.
 7. **Run** the approved plan. The script lands at `tracks/<track>/solutions/<model>_<brief>.{jl|py}` and saves its output (figures, data) under `tracks/<track>/results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g., the chosen tool genuinely can't express this target).
-8. **Append results** — fill each figure's `results` block in `run.json`, re-run `build_report.py`, and re-render via `/report`. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
+8. **Append results** — fill each figure's `results` block and the run's `actual` (consumed wall time and memory per run point) in `run.json`, re-run `build_report.py`, re-render via `/report`, then open it per **Showing figures and opening the report**. Then offer a couple of next steps drawn from the outcome (e.g., a larger scope, another figure from the same data, or stop).
 
 Rendering composes with `/report`; a cluster run composes with `/using-slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
 

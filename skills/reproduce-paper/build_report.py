@@ -51,10 +51,18 @@ def method_section(run: dict, meth: dict, scope: dict) -> dict:
     blocks = [{"kind": "card", "title": "Approach", "blocks": approach}]
     est = run.get("estimate") or []
     if est:
-        blocks.append({"kind": "table",
-                       "columns": ["Run point", "Est. wall time", "Est. memory"],
-                       "numeric": [False, True, True],
-                       "rows": [[e.get("point"), e.get("wall"), e.get("memory")] for e in est]})
+        act = {a.get("point"): a for a in (run.get("actual") or [])}
+        if act:
+            blocks.append({"kind": "table",
+                           "columns": ["Run point", "Est. wall", "Actual wall", "Est. memory", "Actual memory"],
+                           "numeric": [False, True, True, True, True],
+                           "rows": [[e.get("point"), e.get("wall"), act.get(e.get("point"), {}).get("wall", "—"),
+                                     e.get("memory"), act.get(e.get("point"), {}).get("memory", "—")] for e in est]})
+        else:
+            blocks.append({"kind": "table",
+                           "columns": ["Run point", "Est. wall time", "Est. memory"],
+                           "numeric": [False, True, True],
+                           "rows": [[e.get("point"), e.get("wall"), e.get("memory")] for e in est]})
     scope_line = " · ".join(p for p in (
         f'Scope: {scope.get("label")}' if scope.get("label") else "",
         f'Runs: {run.get("where")}' if run.get("where") else "") if p)
@@ -64,7 +72,7 @@ def method_section(run: dict, meth: dict, scope: dict) -> dict:
     if risks:
         blocks.append({"kind": "list", "title": "Anticipated rough spots", "items": risks})
     return {"title": "Method",
-            "note": "One computation, shared by every figure — and what it should cost.",
+            "note": "One computation, shared by every figure — and what it should (then did) cost.",
             "blocks": blocks}
 
 
