@@ -220,6 +220,14 @@ ion self --help                          # Manage the Ion install
 - Tables for comparisons.
 - Blockquotes for single confirmations.
 
+### Equation Rendering
+
+Match equation notation to the reader's surface — **chat messages only** (reports always render LaTeX; plots use matplotlib mathtext):
+
+- **Default UTF-8 unicode math** — renders in any surface: `⟨ψ|H|ψ⟩`, `E₀/N = −0.4438`, `J₂/J₁ ≈ 0.5`, `gap Δ`, `S=½`, `Σ ∏ √ ⊗ † ≤ ≥ ± ∞`.
+- **LaTeX (`$…$`) only on a math-rendering app** (KaTeX/MathJax): `$E_0/N = -0.4438$`. Never in a terminal — it shows literal `$` and backslashes.
+- **Detect once per session; unknown → UTF-8** (the universal-safe default). Claude: `CLAUDE_CODE_ENTRYPOINT` (`cli` = terminal, `claude-desktop`/web/IDE = app). Codex: CLI = terminal, markdown-math cloud/IDE = app. Generic test: does the surface render `$x^2$` as math?
+
 ## Agent guidelines
 
 Agents working in this project should:
