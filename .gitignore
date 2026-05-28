@@ -1,4 +1,5 @@
 raw/
+.raw/
 .zulip/
 .DS_Store
 # Only Project.toml is committed (the dependency contract). Manifest.toml is

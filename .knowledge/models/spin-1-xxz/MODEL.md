@@ -32,7 +32,7 @@ with `S^a` the spin-1 operators. Explicit factor-of-2 / sign translations live i
 | Regime | Method | Card |
 |---|---|---|
 | 1D chain, ground-state energy + correlations | DMRG | `skills/method-mps/SKILL.md` |
-| Small cluster (`L ≲ 14`) for exact spectrum, gap, or cross-check | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Small cluster (`L ≲ 14`) for exact spectrum, gap, or cross-check | ED | `skills/method-ed/SKILL.md` |
 | Imaginary-time route to ground state | TEBD | `skills/method-mps/SKILL.md` |
 
 ## Branch table
@@ -52,7 +52,7 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry**: `S^z_total` conservation; lattice translation; reflection symmetry where applicable. Haldane phase is SPT — the entanglement spectrum is doubly degenerate on a periodic cut.
 - **Convergence**: bond-dim sweep gives monotonic, asymptoting energy. The Haldane phase has a finite gap → DMRG converges fast; the transition regions are slower (gap closing).
 - **Internal consistency**: energy variance small relative to `E²`; string order parameter saturates to a finite value in Haldane, vanishes in trivial phases.
-- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use an ED cross-check via `/method-ed`.
 
 Optional check:
 
@@ -66,7 +66,7 @@ The Haldane phase is SPT-protected by spatial inversion / time reversal / `Z_2 �
 2. A constraint-only report (transitions located but topology not labelled).
 3. A pointer to the literature range for the given symmetry sector.
 
-Before interpreting evidence in a frontier symmetry-broken regime, invoke `arxiv-search` with a tailored query.
+Before interpreting evidence in a frontier symmetry-broken regime, search recent literature with a tailored query.
 
 ## Branch table (diagnostics)
 
@@ -77,7 +77,7 @@ Before interpreting evidence in a frontier symmetry-broken regime, invoke `arxiv
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 

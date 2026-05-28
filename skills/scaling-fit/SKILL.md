@@ -73,7 +73,7 @@ This skill MUST NEVER name the physical exponent (ν, γ, c, etc.) or identify a
 
 **Binding.** This skill MUST NOT label the fitted parameter with a physics name (ν, γ, c, etc.). The calling skill provides labels.
 
-**Explanatory.** Universality-class comparison happens in the calling skill, citing `.knowledge/benchmark-numbers.md`. For contested universality classes the result should be presented as a range with the harness's value sitting inside the literature range, not as a definitive identification. The calling skill enforces this; this primitive just produces the fit.
+**Explanatory.** Universality-class comparison happens in the calling skill, against published literature. For contested universality classes the result should be presented as a range with the harness's value sitting inside the literature range, not as a definitive identification. The calling skill enforces this; this primitive just produces the fit.
 
 ## Anti-patterns (auto-reject)
 

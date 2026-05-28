@@ -1,12 +1,12 @@
 # Quantum Many-Body Physics Harness
 
-Problem-solving harness for ground-state lattice problems in quantum many-body physics. Computational approaches: DMRG, ED, TEBD, VMC/NQS via Julia (ITensors) and Python (NetKet).
+Problem-solving harness for quantum many-body lattice problems, ground-state and finite-temperature. Which methods, tools, and languages apply is owned by the method and tool skills (discovered at runtime); this file stays method-agnostic.
 
 **Audience.** This file is user-facing — loaded into every harness session. Dev-side scaffolding (milestones, design logs) lives under `docs/`, never inlined here.
 
 ## Core Harness Philosophy
 
-The harness is fixed at runtime. Users encounter a stable system; only the user learns, by absorbing judgment from the harness's reports. Harness changes happen in dev cycles, never during user sessions.
+The harness is fixed at runtime. Users encounter a stable system; only the user learns — by being guided through the workflow in Superpowers brainstorming style, feeling each decision as it's made, with the reports as the durable record. Harness changes happen in dev cycles, never during user sessions.
 
 ### Pushback and reconsideration
 
@@ -36,9 +36,9 @@ skills/physics/  SKILL.md auto-fires on cross-model questions;  reads .knowledge
 `.knowledge/models/` cards cover canonical Hamiltonian or Hilbert-space problem families.
 `.knowledge/physics/` cards cover cross-model organizing questions: phases, mechanisms, dynamics, solvability, and diagnostics.
 
-Methods such as DMRG, DMFT, QMC, VMC, fuzzy sphere, and V-score belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
+Methods such as DMRG, DMFT, QMC, VMC, and fuzzy sphere belong inside the model/physics cards, not in problem-dispatcher skill names. If a card mentions a method, it should include enough method, software, setup, output, and validation guidance for an agent with no chat history to act sensibly.
 
-Method-level skills are the narrow exception for beginner reproduction and challenge-track onboarding. Each `SKILL.md` carries workflow and routing on top, then the per-algorithm reference (notation, code shape, knobs, pitfalls) in a `## Details` section: `method-ed` (Julia XDiag, QuSpin fallback), `method-mps` (DMRG + TEBD via ITensors.jl), `method-peps` (CTMRG via PEPSKit.jl), `method-ltrg` (finite-temperature LTRG via ITensors.jl), `method-qmc` (SSE via Carlo.jl), `method-vmc` (NetKet), `method-qcs` (TensorCircuit-NG on JAX), and `method-mf` (mean field, no dedicated tool skill). They carry generic method insight and choose the right tool-using skill; they do not replace model/physics cards and do not own paper facts.
+Method-level skills (`skills/method-*`) are the narrow exception for beginner reproduction and challenge-track onboarding. Each `SKILL.md` carries workflow and routing on top, then the per-algorithm reference (notation, code shape, knobs, pitfalls) in a `## Details` section. They carry generic method insight and route to the right tool-using skill; the method↔tool mapping lives in each card's *Select software* section, not here. They do not replace model/physics cards and do not own paper facts.
 
 Dimension, lattice, filling, doping, boundary condition, disorder strength, and coupling regime are runtime choices unless they define a truly distinct canonical problem.
 
@@ -50,14 +50,13 @@ Current cards:
 
 - `conventions.md` — sign / normalization defaults; Hamiltonian forms.
 - `limits.md` — exact reductions and known limits (U=0, U→∞ → t-J, XXZ Δ=1, …).
-- `benchmark-numbers.md` — reference E/N, gaps, order parameters with citations.
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
 - Per-method reference (notation, code shape, knobs, pitfalls) lives in the `## Details` section of each `skills/method-*/SKILL.md`, not in the knowledge base — see "Problem-Driven Skill Design".
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
 Skills cite these cards; they never hardcode the data. New cards land when a real skill begins citing them.
 
-**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not benchmarks.
+**Provenance discipline.** Every numerical anchor on a KB card must carry one of three tags: *Literal* (a verbatim passage from a rendered literature file under `.knowledge/literature/<method>/`, with line number), *Analytic* (closed-form derivation from a stated definition or limit), or *Harness anchor* (verified empirical value from a tagged run in this repo, with a cross-check method named). Untagged numerical entries are not trustworthy.
 
 ## Card shapes
 
@@ -66,7 +65,7 @@ Domain content lives in cards under `.knowledge/`, dispatched by the `/model` an
 - **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`.
 - **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`.
 
-Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or a benchmark file, never duplicate the numbers.
+Cards hold the domain content (definitions, conventions, numerical anchors, code shapes, workflow). Skills (verbs like `/solve`, `/parameter-scan`, `/scaling-fit`) hold workflow generic across domains. Cite, never embed: a card may cite a method card or another reference card, never duplicate the numbers.
 
 ## Verification practice
 
@@ -76,10 +75,10 @@ Default verification, in priority order:
 2. **Symmetry** — conserved quantities respected; expected sector occupied.
 3. **Convergence** — bond-dim / basis-size / Trotter-step / bath-size sweeps that asymptote.
 4. **Internal consistency** — energy variance small relative to E².
-5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g., DMRG + TEBD imaginary-time) and confirm agreement within both methods' accuracy budgets. Use ED only after `skills/method-ed/SKILL.md` is rebuilt. Disagreement → setup error or insufficient convergence in one method.
-6. **Benchmark comparison (when published reference exists)** — `.knowledge/benchmark-numbers.md`. For contested values, compare against the literature *range*, not a single number.
+5. **Cross-method validation (when feasible)** — re-run with an independent method (e.g. DMRG + imaginary-time TEBD, an ED cross-check via `/method-ed`, or LTRG vs QMC at finite temperature) and confirm agreement within both methods' accuracy budgets. Disagreement → setup error or insufficient convergence in one method.
+6. **Literature comparison (when a published reference exists)** — compare against the published value, and for contested values against the literature *range*, not a single number.
 
-When the problem is in a frontier regime (frontier flag in the card), invoke the `arxiv-search` skill before interpretation: a tailored query with `<lattice> <model> <regime>` should return recent literature so the agent's conclusion sits inside the current debate, not outside it.
+When the problem is in a frontier regime (frontier flag in the card), search recent literature before interpretation — a tailored query with `<lattice> <model> <regime>` — so the agent's conclusion sits inside the current debate, not outside it.
 
 ## Writeup handoff
 
@@ -88,9 +87,7 @@ After verification completes for a model card workflow, surface the writeup hand
 1. **Consolidated runnable script** — all parameters explicit, the calculation reproducible from a fresh checkout against the harness's installed stack.
 2. **Short run report** — setup, settings, result, verification status (limit / symmetry / convergence / cross-method), residual uncertainty.
 
-After the artifacts are in hand, if the user wants to publish, present, or share, route to:
-
-- `scientific-visualization` — figures.
+After the artifacts are in hand, if the user wants to publish, present, or share, render the run into a self-contained HTML report (figures included) via `/report`.
 
 The handoff is offered, not forced. If the user just wants the result, that's a complete session.
 
@@ -99,7 +96,6 @@ The handoff is offered, not forced. If the user just wants the result, that's a 
 Out of scope for the current harness, added as new skills only when real problems demand them:
 
 - Real-time dynamics (`S(q,ω)`, quench dynamics, ETH).
-- Finite-temperature physics (METTS, susceptibility vs T, specific heat).
 - Open quantum systems (Lindbladian dynamics, dissipation).
 - Topological order beyond spin liquids (SPT, fractons).
 - Continuum-limit / field-theory methods (CFT identification, fuzzy sphere, RG).
@@ -110,9 +106,7 @@ Do not preemptively scaffold these. When a real problem creates the demand, add 
 
 ## Tools & Languages
 
-Default stack: **Julia + ITensors.jl** (ITensors.jl, ITensorMPS.jl, MPSKit.jl, KrylovKit.jl). Method cards (the `## Details` section of each `skills/method-*/SKILL.md`) use this stack for canonical code shapes. For reproduction, benchmark, or multi-tool workflows, treat tool choice and installation as decision points: expose the recommended stack and viable alternatives before installing unless the user explicitly asks for setup only.
-
-Python (`quimb` + `cotengra`) remains available as a fallback for tensor-network sketches via `make install quimb`. Skills can route to either when both work; method cards are Julia-flavored.
+Default stack: **Julia + ITensors.jl** — the method cards' `## Details` sections use it for canonical tensor-network and ED code shapes. But some tool skills bring their own runtime and dependencies (Julia, Python, or MATLAB); each `/using-*` skill and its `stack.toml` own that, installed via `make install <tool>`. Treat tool choice and installation as decision points: expose the recommended stack and real alternatives before installing, unless the user asks for setup only.
 
 ## Compute resources
 
@@ -206,7 +200,7 @@ ion self --help                          # Manage the Ion install
   - `"Source audit first"` — "Cheaply anchors expectations; no new computed data."
 - **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
 - **For final results, lead with the answer.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are." During planning or reproduction setup, lead with the current decision and the recommended option's reason.
-- **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.jl` and results (data + plot) saved to `results/`. Show the one-line run command: `julia --project=julia-env scripts/<name>.jl`. Never make the user ask for the script.
+- **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.{jl|py}` and results (data + plot) saved to `results/`. Show the one-line run command (`julia --project=julia-env scripts/<name>.jl` or `python scripts/<name>.py`). Never make the user ask for the script.
 - **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/using-slurm/profiles/<name>.md`), not in scripts.
 - **Long iterative computes must emit intermediate estimates, not just final values.** A multi-hour run without progress output is a blind spot: the user cannot sanity-check whether the running estimate, error proxy, acceptance/progress counters, or convergence diagnostics are stabilizing. Print a partial estimate every K steps, where K is chosen so the user sees roughly 10-50 updates over the run. The script's standard runner enforces this via a `progress_every` knob; method cards declare a sensible default.
 - **Monitor before declaring success — don't fire-and-forget remote actions.** A "RUNNING" status / a 0 exit code from `ssh` is not success; only verified output is. After any non-trivial remote action, stay engaged through a *settle-time* before reporting "✓ done":

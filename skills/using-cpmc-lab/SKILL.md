@@ -5,28 +5,41 @@ description: Use when installing, smoke-testing, locating, invoking, or choosing
 
 # CPMC-Lab
 
-Use this as a software stack skill. It owns package mechanics: where CPMC-Lab is installed, how Matlab finds it, how to call it non-interactively, what it returns, and the package's own documented guidance for setting its run parameters.
+Software-stack skill for the CPMC/AFQMC route. It owns the **software layer**: the run mechanics that make a CPMC-Lab run reproducible, the **software parameters (step 3)**, and the **time estimate (feeds step 4)**. It is the **step-2 handoff target** — `/method-qmc` decides CPMC/AFQMC is the route and hands off here.
 
-It does not own model choice, QMC method theory, paper figure facts, or physics validation. `/method-qmc` decides when this package is the backend and owns the method-level "why"; the model and paper skills own scientific values. This card records the package's documented parameter strategy so those choices can be surfaced to the user — not so it can invent them.
+It does **not** own method selection, QMC theory, the method-level "why" (Trotter error, sign problem, constrained-path bias) → `/method-qmc`; model choice → `.knowledge/models/`; paper figure facts and validation targets → `/reproduce-paper`. It records the package's *documented* parameter strategy so those choices can be surfaced to the user — not so it can invent them.
 
 ## Sources
 
 - Stack contract: `skills/using-cpmc-lab/stack.toml`
 - Official package page: `https://cpmc-lab.wm.edu/`
 - Install + smoke target: `make install cpmc-lab`
-- Parameter guidance and small-system exact energies (Table I): `.knowledge/literature/quantum-monte-carlo/1407.7967_cpmc-lab-a-matlab-package-for-constrained-path-monte-carlo-c.md` (§II.6–8, §IV.2, §V)
+- Parameter guidance, small-system exact energies (Table I), and timing: `.knowledge/literature/quantum-monte-carlo/1407.7967_cpmc-lab-a-matlab-package-for-constrained-path-monte-carlo-c.md` (§II.6–8, §IV.2, §V)
 
-## Workflow
+## What CPMC-Lab is — step 2 (the handoff target) {survey}
+
+What `/method-qmc` routes here for, and what to confirm before running.
+
+- **The package.** The official CPMC-Lab MATLAB package: pedagogical, ~2850 lines, Computer Physics Communications Non-Profit Use License. It returns ground-state energy `E ± standard error` for the **single-band repulsive Hubbard model**, with a free-electron (restricted-HF) Slater-determinant trial wavefunction built automatically. It is explicitly a *template* for a production FORTRAN/C AFQMC code, not a production code itself. `[High]`
+- **Ships with it.** `sample.m` runs a real 2-site calculation (use it as the functional smoke test); `GUI.m` is a standalone interactive entry (ignore for batch runs). `[High]`
+- **Efficiency.** MATLAB is much slower than a FORTRAN production code by a system-dependent factor — ≈32× for 4×4 5↑5↓ (32 vs 1 min), narrowing to ≈2.5× for 128×1 65↑63↓ (460 vs 186 min) (§V). `[High]` Production AFQMC (Zhang/Qin lineage) adds multi-determinant / symmetry-projected trials, back-propagation, and the phaseless approximation — none of which are in CPMC-Lab. `[Low]`
+- **Confirm it fits before routing here** (these are fixed by the package, not adjustable without editing it):
+  - **Repulsive single-band Hubbard only** (`U ≥ 0`). Other Hamiltonians require code changes → back to `/method-qmc`.
+  - **Energy via the mixed estimator** — exact for the energy, but observables that do not commute with `H` are biased (need back-propagation, not built in).
+  - **One free-electron (RHF) determinant trial** — the constrained-path bias is set by trial quality; better / multi-determinant trials (which reduce it) are not provided.
+  - **The CP energy is non-variational and biased**; removing the bias needs release / free-projection, not built in.
+
+## Run mechanics
+
+Package mechanics: how MATLAB finds the package, how to call it non-interactively, and how to read what it returns.
 
 1. Consult `stack.toml` for the install command, smoke command, docs URL, and runtime profile.
 2. Install with `make install cpmc-lab`; it downloads the official package into ignored local storage under `.external/cpmc-lab/`.
 3. Locate the extracted package root by finding `CPMC_Lab.m`.
-4. **Surface the run choices brainstorming-style before running.** For every parameter (see Parameters) whose value is not already fixed by an upstream model or reproduction skill, present its meaning, the documented setup strategy, and the tradeoff — one at a time — and let the user decide. Never silently default a value. Also surface the package-fixed choices so the user knows what is not adjustable here.
-5. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full Matlab app path when `matlab` is not on `PATH` (see Invocation).
+4. **Surface the run choices brainstorming-style before running.** For every parameter (see *Parameters*) not already fixed upstream, present its meaning, the documented setup strategy, and the tradeoff — one at a time — and let the user decide. Never silently default a value; also surface the package-fixed choices above so the user knows what is not adjustable here.
+5. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full MATLAB app path when `matlab` is not on `PATH` (see *Usage Notes*).
 6. Save package outputs under the active run directory: `.mat` files, logs, and any derived text/CSV summaries.
-7. Read `.mat` outputs with Matlab or Python `scipy.io.loadmat`; never treat console output as the only result record.
-
-## Invocation
+7. Read `.mat` outputs with MATLAB or Python `scipy.io.loadmat`; never treat console output as the only result record.
 
 Entry point is the function in `CPMC_Lab.m`, called with 21 positional arguments in fixed order:
 
@@ -37,13 +50,11 @@ Entry point is the function in `CPMC_Lab.m`, called with 21 positional arguments
     itv_modsvd, itv_pc, itv_Em, suffix);                     % intervals + output tag
 ```
 
-- Returns `E_ave` (ground-state energy), `E_err` (standard error), `savedFileName`. The saved `.mat` also holds `E` (per-block energies), `time`, `E_nonint_v` (non-interacting levels), and `Phi_T` (trial wavefunction).
-- No built-in parameter sweep — loop `CPMC_Lab` externally to vary a slot.
-- `sample.m` runs a real 2-site calculation; use it as a functional smoke test (stronger than the path-existence check `make install` performs). `GUI.m` is a standalone interactive entry — ignore it for batch runs.
+Returns `E_ave` (ground-state energy), `E_err` (standard error), `savedFileName`. The saved `.mat` also holds `E` (per-block energies), `time`, `E_nonint_v` (non-interacting levels), and `Phi_T` (trial wavefunction). There is no built-in parameter sweep — loop `CPMC_Lab` externally to vary a slot.
 
-## Parameters
+## Parameters — step 3 (software) {survey}
 
-Meaning, hard constraint (enforced by `validation.m`), and the package's documented setup strategy. The method-level "why" (Trotter error, sign problem, constrained-path bias) lives in `/method-qmc`; values come from the caller.
+Meaning, hard constraint (enforced by `validation.m`), and the package's documented setup strategy. The method-level "why" lives in `/method-qmc`; the scientific values come from the caller.
 
 Model slots (from the model / problem layer):
 
@@ -70,9 +81,9 @@ Run / sampling slots (from the method / reproduction layer):
 
 `suffix` — char string appended to the saved `.mat` filename; use a timestamp or run-id to disambiguate batch runs.
 
-### Reference runs (published — scale references, not defaults)
+### Reference runs (published — scale references, not defaults) {survey}
 
-Sampling-parameter sets the authors actually used (the `U` and lattice in each row are the scientific target, not part of the recipe — Fig. 4 in fact scans `U = 0–8`). They are listed only to anchor the scale of a sensible run; **do not copy them as defaults**. Each was tuned for the system and target shown, and still requires the per-slot convergence checks above (`Δτ → 0`, `N_wlk` bias, block decorrelation, `τ_eq`) on your own system. Note how the authors changed `itv_pc` (40 → 5) and `itv_modsvd` (5 → 1) between systems — evidence that these are tuned, not fixed.
+Sampling-parameter sets the authors actually used (the `U` and lattice in each row are the scientific target, not part of the recipe — Fig. 4 in fact scans `U = 0–8`). They anchor the *scale* of a sensible run; **do not copy them as defaults**. Each still requires the per-slot convergence checks above (`Δτ → 0`, `N_wlk` bias, block decorrelation, `τ_eq`) on your own system. Note how the authors changed `itv_pc` (40 → 5) and `itv_modsvd` (5 → 1) between systems — evidence that these are tuned, not fixed. `[High]`
 
 | Source | System (`t=1`) | `deltau` | `N_wlk` | `N_blksteps` | `N_eqblk` | `N_blk` | `itv_modsvd` | `itv_pc` | `itv_Em` |
 |---|---|---|---|---|---|---|---|---|---|
@@ -80,25 +91,16 @@ Sampling-parameter sets the authors actually used (the `U` and lattice in each r
 | §V timing | 4×4 5↑5↓ … 128×1 65↑63↓ | 0.01 | 1000 | 40 | 10 | 50 | 5 | 40 | 40 |
 | §VI Fig. 4 | 16×1, 5↑7↓ | 0.01 | 5000 | 40 | 30 | 150 | 1 | 5 | 40 |
 
-### Choices the package fixes for you
-
-Surface these too, because they are not adjustable here without editing the package:
-
-- **Trial wavefunction** is the free-electron (restricted-HF) Slater determinant, built automatically. Constrained-path bias is reduced by better / multi-determinant trial WFs, which this package does not provide.
-- **Energy uses the mixed estimator** — fine for the energy, but observables that do not commute with `H` are biased (need back-propagation).
-- **Repulsive single-band Hubbard only** (`U ≥ 0`). Other Hamiltonians require code changes → route back to `/method-qmc`.
-- **The CP energy is non-variational and biased**; removing the bias needs release / free-projection, which is not built in.
-
 ## Caller Contract
 
 The scientific values — model, lattice, couplings, sectors, run parameters, estimator, figure mapping, validation target — are caller-supplied. Where a value is open, resolve it via the step-4 brainstorm using the documented strategy above; defer model-physics choices to the model card and the run-design rationale to `/method-qmc`. This skill turns agreed values into a reproducible CPMC-Lab invocation; it does not originate them.
 
-## Time estimate
+## Time estimate — feeds step 4 {survey}
 
-Estimate runtime only after the run parameters are set.
+Estimate runtime only after the run parameters are set; the result feeds `/reproduce-paper`'s step-4 resource confirmation.
 
-- Built-in cost heuristic (`validation.m`): `N_wlk·N_blksteps·(N_eqblk+N_blk)·Lx·Ly·(N_up+N_dn) > 1e11` warns of a run longer than a day.
-- Cost scales roughly as `size³`; memory `∝ basis × electrons × walkers`. MATLAB is much slower than a FORTRAN production code by a system-dependent factor — ≈32× for 4×4 5↑5↓ (32 vs 1 min), narrowing to ≈2.5× for 128×1 65↑63↓ (460 vs 186 min) (§V).
+- Built-in cost heuristic (`validation.m`): `N_wlk·N_blksteps·(N_eqblk+N_blk)·Lx·Ly·(N_up+N_dn) > 1e11` warns of a run longer than a day. `[High]`
+- Cost scales roughly as `size³`; memory `∝ basis × electrons × walkers`. The MATLAB-vs-FORTRAN slowdown (≈32× at 4×4 → ≈2.5× at 128×1, §V) bounds how far a local run reaches. `[High]`
 - For an uncertain run size, use a short timing probe that measures package step rate only (no scientific claim), then multiply by the caller-specified parameter grid and repeat count.
 - Route to `/using-slurm` when the estimate exceeds local exploratory budget, or when independent points (twists, sizes) can run as an array.
 

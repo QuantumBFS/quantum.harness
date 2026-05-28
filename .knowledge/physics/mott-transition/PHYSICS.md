@@ -43,7 +43,7 @@ For *how* to compute each, see the model card (`hubbard`, `multiorbital-hubbard`
 
 The 2D doped Hubbard phase diagram (and the question "is there a Mott transition at finite hole density?") is contested. Do not claim a clean Mott identification in the doped 2D regime without being explicit about the literature uncertainty.
 
-Before interpreting evidence in a frontier regime, invoke the `arxiv-search` skill with a tailored query (e.g., `2D Hubbard doped Mott transition`, `multi-orbital orbital-selective Mott`) to surface recent results. Do not commit to an identification without seeing what the literature is actually claiming.
+Before interpreting evidence in a frontier regime, search recent literature with a tailored query (e.g., `2D Hubbard doped Mott transition`, `multi-orbital orbital-selective Mott`) to surface recent results. Do not commit to an identification without seeing what the literature is actually claiming.
 
 ## Model hooks
 

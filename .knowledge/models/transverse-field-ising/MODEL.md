@@ -26,7 +26,7 @@ Build per `.knowledge/conventions.md`: `H = -J Σ σ^z_i σ^z_j - Γ Σ σ^x_i`.
 | Regime | Method | Card |
 |---|---|---|
 | 1D chain (any N) | DMRG | `skills/method-mps/SKILL.md` |
-| Tiny cluster (N ≲ 24), exact spectrum, debugging | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Tiny cluster (N ≲ 24), exact spectrum, debugging | ED | `skills/method-ed/SKILL.md` |
 | Cylinder (square / triangular strips) | DMRG | `skills/method-mps/SKILL.md` |
 | Imaginary-time approach | TEBD | `skills/method-mps/SKILL.md` |
 
@@ -50,15 +50,15 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry**: Z2 (`σ^z → -σ^z`) should be respected; spontaneous breaking shows only with explicit symmetry-breaking field at finite size.
 - **Convergence**: bond-dim sweep gives a monotonic, asymptoting energy curve.
 - **Internal consistency**: energy variance small relative to E².
-- **Cross-method validation (auto-paired when available)** — use TEBD, DMRG, or TTN cross-checks first. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use TEBD, DMRG, or TTN cross-checks first. Use an ED cross-check via `/method-ed`.
 
 Optional check:
 
-- Compare to `.knowledge/benchmark-numbers.md` for canonical lattices when a reference exists. For 1D chain at criticality (`Γ = J`): exact `E/N = -4/π ≈ -1.2732` (free-fermion via Jordan-Wigner; convention-dependent).
+- Compare against published literature for canonical lattices when a reference exists. For 1D chain at criticality (`Γ = J`): exact `E/N = -4/π ≈ -1.2732` (free-fermion via Jordan-Wigner; convention-dependent).
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 

@@ -44,7 +44,7 @@ For *how* to compute each, see the model card (`heisenberg`, `transverse-field-i
 
 Genuine open questions in QMB criticality — deconfined criticality on the SU(2) checkerboard, the J1-J2 intermediate region, multi-orbital Mott QCPs — should be presented as constraint-only diagnostics rather than identification claims.
 
-Before interpreting evidence in a frontier regime, invoke the `arxiv-search` skill with a tailored query (e.g., `J1-J2 square deconfined criticality`, `kagome Heisenberg gap exponent`) to surface the current state of the debate. The harness's claim should sit inside the literature, not outside it.
+Before interpreting evidence in a frontier regime, search recent literature with a tailored query (e.g., `J1-J2 square deconfined criticality`, `kagome Heisenberg gap exponent`) to surface the current state of the debate. The harness's claim should sit inside the literature, not outside it.
 
 ## Model hooks
 

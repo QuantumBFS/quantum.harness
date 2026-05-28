@@ -26,7 +26,7 @@ Only surface a real choice when the prompt is genuinely ambiguous about the latt
 | Regime | Method | Card |
 |---|---|---|
 | 1D chain (any N), quasi-1D ladder | DMRG | `skills/method-mps/SKILL.md` |
-| Small cluster (N ≲ 24 sites), exact spectrum, debugging | ED pending refreshed references | `skills/method-ed/SKILL.md` |
+| Small cluster (N ≲ 24 sites), exact spectrum, debugging | ED | `skills/method-ed/SKILL.md` |
 | Cylinder (square / triangular / kagome strips, `L_y` small) | DMRG | `skills/method-mps/SKILL.md` |
 | Imaginary-time route to ground state, gap probes | TEBD | `skills/method-mps/SKILL.md` |
 | Frustrated 2D variational (VMC / NQS) | Compare ansatz energies on kagome / triangular. Requires `make install netket`. | `skills/method-vmc/SKILL.md` |
@@ -52,17 +52,17 @@ Default checks (all auto-run; results aggregated into the report's verification 
 - **Symmetry** — total `S^z` conservation; expected ground-state sector (singlet for finite AFM); lattice point group respected (see `.knowledge/symmetry-cheatsheet.md`).
 - **Convergence** — bond-dim or basis-size sweep produces a monotonic, asymptoting curve. Report the curve, not just the final value.
 - **Internal consistency** — energy variance is small relative to `E²` at the reported accuracy.
-- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use ED only after `skills/method-ed/SKILL.md` is rebuilt.
+- **Cross-method validation (auto-paired when available)** — use TEBD or another active independent route. Use an ED cross-check via `/method-ed`.
 
 Optional check (when a published reference exists):
 
-- Compare to `.knowledge/benchmark-numbers.md` for the lattice / coupling combination. Report the discrepancy honestly. If the published value is a *range* (e.g., kagome), report whether your value is consistent with the range, not whether it "matches."
+- Compare against published literature for the lattice / coupling combination. Report the discrepancy honestly. If the published value is a *range* (e.g., kagome), report whether your value is consistent with the range, not whether it "matches."
 
 If no benchmark exists for the user's specific problem (which is common for non-canonical sizes / parameters), report the converged value with bond-dim trend, variance, and the satisfied limit + symmetry checks. Do not claim a "match" without a reference.
 
 ## Writeup handoff
 
-After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then route to `scientific-visualization`. See AGENTS.md "Writeup handoff".
+After verification, if the user wants to communicate the result, consolidate to a runnable script + short run report, then render it via `/report`. See AGENTS.md "Writeup handoff".
 
 ## Related skills
 
