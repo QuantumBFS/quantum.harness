@@ -37,7 +37,7 @@ Use this section as the source for TensorCircuit-NG-specific reproduction knobs 
 - Differentiation/compilation: reverse-mode AD for simulation; parameter-shift only to mimic hardware. JIT the value-and-gradient step for benchmark timing; use `scan` for deep repeated layers and checkpointing when backward memory is tight.
 - Contraction/memory: greedy for smoke/moderate circuits; cotengra when contraction cost matters. Record path-search budget, objective (`flops`, `write`, `size`, or blend), largest intermediate, slicing target, and whether distributed contraction is data-parallel or model-parallel.
 - Optimizer/runtime loop: Adam/SGD for large noisy objectives, L-BFGS for smooth tensor-network objectives, SciPy optimizers for small special cases, gradient-free only when gradients are unavailable.
-- Validation: small-system exact check, Pauli/sparse/MPO agreement, energy not below exact ground state, AD vs finite-difference spot check, MPS `chi` convergence when used, and matched baseline for speed claims.
+- Validation: small-system exact check, Pauli/sparse/MPO agreement, energy not below exact ground state, AD vs finite-difference spot check, contractor cross-check (a simpler contractor must reproduce the same energy/gradient), MPS `chi` convergence when used, and matched baseline for speed claims.
 
 ## Knobs
 
