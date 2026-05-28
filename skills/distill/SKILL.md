@@ -39,7 +39,7 @@ Sweep each paper through these concerns; only populated ones reach the output.
 
 ## Flow
 
-1. **Intake (ask first).** Ask for the **expert name**, the **method / variant** (a single variant, or the **family the expert developed** — e.g. LTRG with its successors XTRG, tanTRG), and optionally a **publication source** (Scholar / arXiv / ORCID link or a paper list). If the name is ambiguous (several researchers share it), the method span is unclear (one variant vs. the family), or the source is missing, clarify in brainstorming style — one question at a time, never guess. Also fix the **output path** (method-group dir + variant abbreviation); when these are ambiguous — e.g. the variant's literature slug differs from its method-skill group, as LTRG (slug `ltrg`, group `/method-peps`) — present 2–3 path options and confirm, never guess.
+1. **Intake (ask first).** Ask for the **expert name**, the **method / variant** (a single variant, or the **family the expert developed** — e.g. LTRG with its successors XTRG, tanTRG), and optionally a **publication source** (Scholar / arXiv / ORCID link or a paper list). If the name is ambiguous (several researchers share it), the method span is unclear (one variant vs. the family), or the source is missing, clarify in brainstorming style — one question at a time, never guess. Also fix the **output path** (method-group dir + variant abbreviation); when these are ambiguous — e.g. the variant's literature slug differs from its method-skill group, as LTRG (slug `ltrg`, group `/method-ltrg`) — present 2–3 path options and confirm, never guess.
 2. **Resolve corpus.** Find the expert's papers on this method **and the related variants they developed** (the method's own family — *not* other methods for the same problem), from the given source, else web-search the name + method. This intersection (expert ∩ method-family) is the corpus. Rank by relevance + impact; keep a working set (~15–25).
 3. **Confirm papers before downloading.** Print a table — `Paper | Authors | Method usage | Year` — with the **chosen expert's name bolded** in each author list (this also disambiguates identity). Ask the user to confirm or trim the set. Download nothing until confirmed.
 4. **Download** the confirmed set via `/download-ref` into `.knowledge/literature/<method>/`.
@@ -50,7 +50,7 @@ Sweep each paper through these concerns; only populated ones reach the output.
 
 ## Output shape
 
-One webpage at `docs/<method-group>/<method-abbrev>-<expert>-distillation.html` (e.g. `docs/peps/ltrg-weili-distillation.html`). The group dir matches the existing `docs/<method>/` convention (those dirs already hold `interview.html` / `review.html`); the filename prefixes the specific method variant and the expert, both fixed at intake. Four sections, scientific-report register — declarative and impersonal, abbreviations spelled out, no colloquialisms.
+One webpage at `docs/<method-group>/<method-abbrev>-<expert>-distillation.html` (e.g. `docs/ltrg/ltrg-weili-distillation.html`). The group dir matches the existing `docs/<method>/` convention (those dirs already hold `interview.html` / `review.html`); the filename prefixes the specific method variant and the expert, both fixed at intake. Four sections, scientific-report register — declarative and impersonal, abbreviations spelled out, no colloquialisms.
 
 **Scope, tooling & cost** — one table (only rows with real content; method-level rows may be surveyed beyond the corpus):
 
