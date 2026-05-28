@@ -69,7 +69,6 @@ quantum-circuit-simulation
 ed
 anderson-impurity
 dmft
-magic
 ```
 
 Introduce a new slug only when no existing method card matches the

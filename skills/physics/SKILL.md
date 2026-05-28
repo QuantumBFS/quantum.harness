@@ -9,7 +9,6 @@ description: |
   - spin-liquid: fractionalized phases, topological order, RVB, "is this a spin liquid"
   - mott-transition: interaction-driven metal-insulator
   - kondo-effect: local-moment screening
-  - magic: non-stabilizerness, SRE, long-range magic
   - confinement: gauge-theory confinement diagnostics
   Fires once per topic the user names, not once per session.
 ---

@@ -20,14 +20,14 @@ This skill MUST NEVER name the physical exponent (ν, γ, c, etc.) or identify a
 
 - User has a `(L, observable)` or `(L, parameter, observable)` table and wants exponents.
 - `/parameter-scan` flagged a critical-like / extremum / crossing label and exponents are wanted.
-- A physics card needs an exponent to compare against universality-class expectations (`.knowledge/physics/criticality/PHYSICS.md`, `.knowledge/physics/magic/PHYSICS.md`, `.knowledge/physics/confinement/PHYSICS.md`).
+- A physics card needs an exponent to compare against universality-class expectations (`.knowledge/physics/criticality/PHYSICS.md`, `.knowledge/physics/confinement/PHYSICS.md`).
 
 ## Inputs
 
 - A data table: `(L, [parameter,] observable, uncertainty)` from `results/<run>/`.
 - A *fit form* — **exactly one** of the four below, picked by the calling skill, the user, or this skill's defaults. The skill does NOT auto-cycle through forms; the caller commits to one form per run.
   - `power-law` — `obs(L) ~ L^{-α}`. For gap-closing, correlation-length, and order-parameter scalings.
-  - `log-L` — `obs(L) ~ A log L + B`. For 1D CFT entanglement, long-range magic at criticality, and similar.
+  - `log-L` — `obs(L) ~ A log L + B`. For 1D CFT entanglement entropy at criticality and similar logarithmic growth.
   - `polynomial` — fixed-degree polynomial in `1/L`. Standard for energy-per-site extrapolation to the thermodynamic limit.
   - `data-collapse` — `f(L^{1/ν} (h − h_c))` with `obs · L^{γ/ν}` collapsed across sizes; extracts `(h_c, ν, γ/ν)`. The standard finite-size-scaling form.
 - Optional pinned values (e.g., user fixes `h_c` from prior work; this skill fits only the exponents).
@@ -73,7 +73,7 @@ This skill MUST NEVER name the physical exponent (ν, γ, c, etc.) or identify a
 
 **Binding.** This skill MUST NOT label the fitted parameter with a physics name (ν, γ, c, etc.). The calling skill provides labels.
 
-**Explanatory.** Universality-class comparison happens in the calling skill, citing `.knowledge/benchmark-numbers.md` or `.knowledge/magic-benchmarks.md`. For contested universality classes the result should be presented as a range with the harness's value sitting inside the literature range, not as a definitive identification. The calling skill enforces this; this primitive just produces the fit.
+**Explanatory.** Universality-class comparison happens in the calling skill, citing `.knowledge/benchmark-numbers.md`. For contested universality classes the result should be presented as a range with the harness's value sitting inside the literature range, not as a definitive identification. The calling skill enforces this; this primitive just produces the fit.
 
 ## Anti-patterns (auto-reject)
 

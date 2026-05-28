@@ -20,7 +20,7 @@ This primitive MUST stay generic over: which methods are compared, which observa
 
 - After a single-method calculation when the calling skill (or the user) wants verification.
 - When a single-method result lies near a phase boundary, in a frontier regime, or at a bond-dim where truncation may bias the answer.
-- When the same observable is computable in two distinct ways (e.g., DMRG-MPS vs TTN, magic-crossing vs Binder cumulant on the same dual model, `L(ρ_AB)` via Markov chain vs Pauli-basis MPS lift).
+- When the same observable is computable in two distinct ways (e.g., DMRG-MPS vs TTN, or two independent diagnostics that locate the same transition).
 - AGENTS.md verification rule §5: cross-method validation is a default check whenever feasible.
 
 ## Inputs
@@ -33,8 +33,6 @@ This primitive MUST stay generic over: which methods are compared, which observa
   | DMRG / MPS at small `L` | TEBD imaginary-time on the same `L` | Independent ground-state projector; agreement gates DMRG truncation. |
   | TTN sampling | DMRG-MPS perfect-sampling on the same wavefunction (different proposal class) | Independent sampler; agreement gates Markov-chain bias. |
   | DMRG-MPS at moderate `L` | TEBD imaginary-time on the same `L` | Independent ground-state projector. |
-  | Pauli-Markov sampling for magic | Deterministic Pauli-basis MPS lift | Sampling vs deterministic; orthogonal error budgets. |
-  | Magic crossing as critical detector | Binder cumulant on the dual order parameter | Independent diagnostic on the same wavefunction; the canonical "magic-vs-Binder" cross-check at fixed `χ`. |
   | DMRG cylinder geometry | Different cylinder width at same `L_x` | Independent geometry; agreement gates cylinder bias on frustrated 2D. |
 
 The "Why" column is jargon-shaped for the calling skill. When the rationale appears in the user-facing 2–3-line report, it MUST be rewritten in plain English:
@@ -52,7 +50,7 @@ DMRG can be biased by truncating the bond dimension. TEBD's imaginary-time evolu
 ## Workflow
 
 1. Lock the primary configuration (parameter point, sector, observable definition).
-2. Translate to the secondary method's setup. Confirm the *exact same observable* is being computed by checking **each** of: (a) sign conventions, (b) normalization, (c) sector / symmetry assignment, (d) boundary condition. For diagnostics that differ in form (`magic` vs `Binder`), confirm both target the *same physical question* (e.g., transition location).
+2. Translate to the secondary method's setup. Confirm the *exact same observable* is being computed by checking **each** of: (a) sign conventions, (b) normalization, (c) sector / symmetry assignment, (d) boundary condition. For diagnostics that differ in form, confirm both target the *same physical question* (e.g., transition location).
 3. Run the secondary calculation at the same instance.
 4. Compare the two values against the accuracy budgets provided by the calling skill — one budget per method. This skill MUST NOT invent or infer a tolerance. If the calling skill did NOT provide a budget for either method, stop with `blocked: missing accuracy budget for <method>`; do NOT fall back to a default tolerance.
 
@@ -63,7 +61,7 @@ DMRG can be biased by truncating the bond dimension. TEBD's imaginary-time evolu
 
 - **Agreement** — central values plus their respective uncertainty intervals overlap within both budgets.
 - **Disagreement** — the central-value ± budget intervals do NOT overlap. Per AGENTS.md, this implies setup error or insufficient convergence in one of the two methods. Surface **all candidate failure modes** (sign convention, sector, normalization, bond-dim, autocorrelation, etc.) and the specific evidence pointing to each. NEVER average the two values; NEVER pick one as "more likely correct" without surfacing the decision and its basis.
-- **Diagnostic split** — applies only to cross-diagnostic checks where the two diagnostics differ in form (e.g., `magic` vs `Binder`). When the two diagnostics disagree about the *interpretation* (one detects a transition, the other does not), report this as a method-on-problem robustness claim, not as a numerical disagreement.
+- **Diagnostic split** — applies only to cross-diagnostic checks where the two diagnostics differ in form (e.g., two independent critical detectors of different construction). When the two diagnostics disagree about the *interpretation* (one detects a transition, the other does not), report this as a method-on-problem robustness claim, not as a numerical disagreement.
 
 </checklist>
 6. Persist the comparison: `results/<run>/cross-method-check.csv` with both method outputs, the budgets, and the tag.
@@ -104,6 +102,6 @@ The skill *surfaces* the disagreement; the calling skill (or `superpowers:system
 **Binding.**
 
 - This skill MUST NOT invent the secondary method. Defaults come from the model card's method-recommendation table; the calling skill or the user can override.
-- Cross-diagnostic checks (e.g., magic vs Binder) are a special case where the two paths differ in physical content but converge on the same physical question; surface the methodological claim transparently.
+- Cross-diagnostic checks are a special case where the two paths differ in physical content but converge on the same physical question; surface the methodological claim transparently.
 
 **Frontier caveat.** When the comparison sits inside an active literature debate, the report MUST name the debate (cite the relevant arxiv ids via `arxiv-search` or `.knowledge/literature/`) and present the result as a position within the debate, not as a closing answer.

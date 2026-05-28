@@ -39,7 +39,6 @@ Only surface a real choice when the prompt is genuinely ambiguous about the latt
 | Lattice is triangular, kagome, or pyrochlore (frustrated) | Continue here for setup; if the question is about absence of order or topology, also call `spin-liquid`; if about the source of frustration, call `frustration`. |
 | User asks about NN + NNN couplings | Switch to `j1-j2`. |
 | Question is about quantum critical behavior (e.g., XXZ at Δ=1, dimerization) | Call `criticality` after the calculation. |
-| Question is about magic / SRE / nonstabilizerness on the spin-1/2 Heisenberg / XXZ chain | Run the wavefunction here; hand off to `.knowledge/physics/magic/PHYSICS.md`. Default partition: `L(ρ_AB)` for criticality (full-state magic alone is often inconclusive across XXZ scans — see `.knowledge/magic-benchmarks.md`). Two-site Pauli updates preserve U(1) `S^z` symmetry. |
 | User wants `S = 1` chain with single-ion anisotropy | Switch to `spin-1-xxz`. |
 | User wants doped, fermionic correlated physics | Switch to `t-j` or `hubbard`. |
 | User asks about `S(q,ω)` or dynamics | Out of current scope. |

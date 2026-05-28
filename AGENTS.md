@@ -46,8 +46,6 @@ Current cards:
 - `limits.md` — exact reductions and known limits (U=0, U→∞ → t-J, XXZ Δ=1, …).
 - `benchmark-numbers.md` — reference E/N, gaps, order parameters with citations.
 - `symmetry-cheatsheet.md` — conserved quantities, lattice point groups.
-- `magic-conventions.md` — Pauli / clock-shift conventions, SRE definitions, partition modes, qudit generalizations, Wegner-duality SRE preservation.
-- `magic-benchmarks.md` — reference SRE / long-range-magic values across canonical models, reported as literature ranges.
 - Per-method reference (notation, code shape, knobs, pitfalls) lives in the `## Details` section of each `skills/method-*/SKILL.md`, not in the knowledge base — see "Problem-Driven Skill Design".
 - `literature/<method>/` — rendered methodology references organized by method, each with its own `INDEX.md`. Raw PDFs, Semantic Scholar metadata, and extracted figures live in local-only `.raw/` / `.figures/` subfolders and must remain gitignored.
 
@@ -116,7 +114,7 @@ The harness can use a remote cluster profile at `skills/using-slurm/profiles/act
 
 Before launching any non-trivial computation:
 
-1. **Estimate the cost up front.** For dense ED: D² × 8 bytes is the matrix memory; wall ≈ O(D³) / aggregate-GFLOPS. For DMRG: χ² × L × 8 bytes is the MPS, wall ≈ #sweeps × (D × χ³). For QMC / Pauli-Markov: per-MCS cost × n_MCS × n_chains.
+1. **Estimate the cost up front.** For dense ED: D² × 8 bytes is the matrix memory; wall ≈ O(D³) / aggregate-GFLOPS. For DMRG: χ² × L × 8 bytes is the MPS, wall ≈ #sweeps × (D × χ³). For QMC: per-MCS cost × n_MCS × n_chains.
 2. **Pick local vs remote with a clear threshold:**
    - Local: < 10 min wall, < 16 GB resident, fits within normal use of one CPU node.
    - Remote sbatch: everything else.

@@ -24,7 +24,6 @@ and `.figures/` directories inside each method folder.
 - `anderson-impurity/` - Anderson/Kondo impurity solver references.
 - `dmft/` - DMFT references mentioned as adjacent/future methodology.
 - `ed/` - exact diagonalization references.
-- `magic/` - non-stabilizerness / SRE references.
 
 `ref.bib` lives at this directory's root. To regenerate it from the rendered
 markdown (e.g. after a manual edit drift) run
