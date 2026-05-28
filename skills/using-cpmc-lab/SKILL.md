@@ -1,5 +1,5 @@
 ---
-name: cpmc-lab
+name: using-cpmc-lab
 description: Use when installing, smoke-testing, locating, or invoking the official CPMC-Lab Matlab package; covers MATLAB path setup, package-root discovery, addpath setup, batch execution, download/license handling, and package output extraction.
 ---
 
@@ -11,7 +11,7 @@ It does not own model choice, QMC method design, paper figure facts, estimator n
 
 ## Sources
 
-- Stack contract: `skills/cpmc-lab/stack.toml`
+- Stack contract: `skills/using-cpmc-lab/stack.toml`
 - Official package page: `https://cpmc-lab.wm.edu/`
 - Install target: `make install cpmc-lab`
 - Smoke test: `make install cpmc-lab`
@@ -38,7 +38,7 @@ Estimate runtime only after the caller supplies the package run parameters.
 
 - Use a short non-production timing probe when the run size is uncertain; it should measure package step rate only and produce no scientific claim.
 - Multiply the measured rate by the caller-specified parameter grid and repeat count.
-- Route to `/slurm` when the estimate exceeds local exploratory budget or when independent points can run as an array.
+- Route to `/using-slurm` when the estimate exceeds local exploratory budget or when independent points can run as an array.
 
 ## Usage Notes
 
