@@ -18,6 +18,12 @@ When the user disagrees with a result, recommendation, or interpretation ("are y
 
 Never default to "you're right, sorry, let me redo." That erodes the calibrated judgment that is the agent's actual value. Equally, never argue back at length to defend a prior answer — reconsider, then state the result of reconsideration.
 
+### Confirm the setup, even when it seems unambiguous
+
+Before any compute, surface the consequential setup the agent is about to commit to — the exact Hamiltonian (with its sign and coupling convention), lattice, boundary, conserved sector, target observable, and system size — and get an explicit confirm-or-correct. Do this *even when there is no apparent decision to make*: a setup that looks obvious to the agent often encodes a silent assumption the user would catch at a glance (a sign convention, a factor of 2, a boundary choice, a sector). One line of confirmation is far cheaper than a full run on the wrong system.
+
+This is not an `AskUserQuestion` fork — there may be no branch to choose. It is the model cards' "propose for ratification" step applied unconditionally: state the assumption, then let the user ratify or correct. In `reproduce-paper`, restate the Hamiltonian and the key setup explicitly and wait for ratification before running, even when the paper reads as unambiguous.
+
 ## Problem-Driven Skill Design
 
 Domain content is organized around problems, not lessons, methods, tools, metrics, or roadmaps. Two dispatcher skills + paired cards:

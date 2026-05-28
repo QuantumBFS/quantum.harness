@@ -63,6 +63,7 @@ Method slugs MUST match an existing literature dir
 ```text
 mps-based-algorithm
 peps-based-algorithm
+ltrg
 quantum-monte-carlo
 variational-monte-carlo-neural-quantum-states
 quantum-circuit-simulation
