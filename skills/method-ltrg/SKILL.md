@@ -1,156 +1,119 @@
 ---
 name: method-ltrg
-description: Use when a finite-temperature Linearized Tensor Renormalization Group (LTRG) reproduction needs method-level route and tool selection — Trotterized classical tensor network, layer-by-layer boundary contraction, thermodynamic observables.
+description: Use when a finite-temperature Linearized Tensor Renormalization Group (LTRG) reproduction needs method-level route and tool selection — Trotterized classical tensor network from a quantum lattice model, layer-by-layer boundary contraction with SVD truncation, thermodynamic observables (free energy, internal energy, specific heat, susceptibility).
 ---
 
 # Method LTRG
 
-LTRG is the finite-temperature tensor-network track: it maps a `d`-dimensional quantum lattice model to a `(d + 1)`-dimensional classical tensor network by Trotter-Suzuki decomposition, then contracts the network layer by layer while truncating the growing boundary with SVD. Use it to decide whether the target genuinely needs LTRG, then hand off to the tool skill for implementation mechanics.
+LTRG is the finite-temperature tensor-network method class: map a `d`-dimensional quantum lattice model to a `(d+1)`-dimensional classical tensor network by Trotter-Suzuki decomposition, then contract layer by layer while truncating the growing boundary with SVD to bond dimension `Dc`. This card owns method selection (step 1), software routing (step 2), and method-level setup (step 3, method side). Method internals — including the algorithm — are in `## Details`; software parameter *values* and the ITensors primitives live in `/using-itensors`; paper- and model-specific facts live in `/reproduce-paper` and `.knowledge/models/`.
 
 ## Sources
 
 - Tool skill: `/using-itensors`
+- Primary literature: Li, Ran, Gong, Zhao, Xi, Ye, Su, *Linearized tensor renormalization group algorithm…* PRL (2011) `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md`.
 
-## Route
+## Select method — step 1
 
-1. Use LTRG when the figure is a finite-temperature thermodynamic quantity (free energy, internal energy, specific heat, susceptibility) of a local quantum lattice model represented as a Trotterized classical network.
-2. Fix the Trotter split, transfer-tensor construction, contraction direction, normalization accounting, and observable route before setup — the method card owns these decisions.
-3. Recommend `/using-itensors` for ITensors.jl setup, index mechanics, SVD/truncation keywords, and runtime troubleshooting.
-4. If the target is a ground-state property, route to `/method-mps` or `/method-peps` instead; LTRG is a finite-temperature method.
+### Suited for {survey}
 
-## Tool Handoff
+- Finite-temperature thermodynamics of low-dimensional quantum lattice models — 1D / quasi-1D chains and 2D lattices (e.g. honeycomb). Observables: free energy per site, internal energy, specific heat, susceptibility. `[High]`
+- Maps `d`-dim quantum → `(d+1)`-dim classical tensor network via Trotter-Suzuki, then decimates iTEBD-style; **sign-problem-free even in 2D**, a promising alternative to QMC for frustrated/fermionic 2D thermodynamics. `[High]`
+- Sizes reached: XY chain to length 2¹⁰⁰ (thermodynamic limit); temperature down to T/J ≈ 0.008 (β = 120); retained dimension Dc ≤ 150; 2D honeycomb Heisenberg benchmarked against QMC. `[High]`
 
-Invoke `/using-itensors` after the LTRG route is fixed. `/using-itensors` owns tensor construction, index management, SVD, truncation, and runtime troubleshooting; the method card owns the Trotter split, contraction order, normalization bookkeeping, and convergence plan.
+### Route elsewhere when
+
+- The target is a **ground-state** property → `/method-mps` (DMRG) or `/method-peps`; LTRG is a finite-temperature method.
+- An exact/analytic solution exists — use it only as a benchmark *after* the LTRG calculation, never as a substitute.
+
+### Options & trade-offs {survey}
+
+| Method | Good at | Weak at | Typical reach |
+|---|---|---|---|
+| LTRG (this card) | finite-T low-D, 2D sign-free, scalable transfer-network contraction | low-T needs large Dc; Trotter + truncation error to control | T/J ~ 0.008, Dc ≤ 150 `[High]` |
+| TMRG (transfer-matrix DMRG) | finite-T 1D, accurate | scales worse to 2D | 1D `[High]` |
+| coarse-graining TRG | 2D classical networks | discards O(Dcⁿ)/step → costlier | 2D `[High]` |
+| purification / METTS | finite-T via MPS, good low-T in 1D | 2D entanglement cost | 1D / quasi-1D `[Low]` |
+| QMC (`/method-qmc`) | finite-T, large sizes | sign problem (frustrated/fermionic) | sign-free only `[High/Med]` |
+| XTRG (later Wei Li work) | reaches lower T (logarithmic-in-β cooling) | more involved bookkeeping | very low T `[Low]` |
+
+## Select software — step 2
+
+### Open-source tools
+
+- No official LTRG package ships with the paper — it is an algorithm-only PRL. `[Med]`
+- The harness route is **ITensors.jl** (Julia): typed indices, SVD with truncation to `Dc`, and gate/transfer-tensor contraction, so the algorithm is expressed directly. The same algorithm is expressible in TeNPy or quimb. `[Med/Low]`
+- No reusable LTRG library function exists in-repo; the algorithm is in `## Details` below, and `/using-itensors` carries the ITensors **primitives** (typed indices, `svd` to `Dc`, gate exponentiation, incremental writes) to express it. `[High]`
+
+### Features to confirm
+
+- Typed indices with explicit tags, `svd` with `maxdim`/`cutoff`, gate exponentiation `exp(-τ·h)`, incremental writes of convergence data — owned by `/using-itensors`.
+
+### Options & trade-offs {survey}
+
+| Tool | Ecosystem / examples | Efficiency | When |
+|---|---|---|---|
+| ITensors.jl (this route) | Julia; ITensors primitives in `/using-itensors`, algorithm in `## Details` | native SVD/contraction; core op is the O(D⁶·Dc³) SVD step `[High]` | default `[Med]` |
+| TeNPy / quimb | Python TN ecosystems | comparable; needs a hand-built LTRG loop | if Python-bound `[Low]` |
+
+### Handoff
+
+Invoke **`/using-itensors`** once the LTRG route is fixed — it owns ITensors.jl setup, index mechanics, SVD/truncation keywords, the ITensors primitives that express the algorithm, and runtime troubleshooting. This card owns the Trotter split, contraction order, normalization bookkeeping, and the convergence plan; the model/paper skills own the Hamiltonian and figure facts.
+
+## Method setup — step 3 (method side)
+
+Conceptual knobs and the tricks behind them. Concrete ITensors values/code live in `/using-itensors`.
+
+| Knob | Controls | Trick / how it affects results {survey} |
+|---|---|---|
+| `τ` | Trotter step | decomposition error ∝ τ² (symmetric split); paper uses 0.1/0.05/0.02/0.01; smaller τ → more layers `[High]` |
+| `K` | number of imaginary-time steps | fixes `β = Kτ`; more steps reach lower T but accumulate more truncations `[High]` |
+| `Dc` | retained SVD dimension | dominant accuracy/cost lever (like `M` in TMRG); paper uses 50/100/150 `[High]` |
+| `D` (q) | local Hilbert dimension | sets transfer-tensor size; do not confuse with `Dc` `[High]` |
+| contraction direction / gate order | layer-absorption scheme | two equivalent schemes (Trotter-first or spatial-first); alternate the two projections per full Trotter step `[High]` |
+| normalization convention | scale bookkeeping | divide each step by the largest singular value (and each trace matrix by its largest element); collect the log factors to rebuild Z and the free energy `[High]` |
+
+**Cost** {survey}: the local evolution (contract + SVD of the transfer tensor) scales as **O(D⁶·Dc³)** per step — the dominant cost; the spatial trace contracts `2^p` matrices in `p` pairwise steps (logarithmic in chain length); memory is dominated by the `Dc`-bond boundary tensors plus the transient enlarged tensor. Estimate from intended `τ`, target `β`, `q`, geometry, and the `Dc` sweep before a full run. `[High/Med]`
 
 ## Details
 
-LTRG maps a `d`-dimensional quantum lattice model at finite temperature into a
-`(d + 1)`-dimensional classical tensor network by Trotter-Suzuki
-decomposition, then contracts the network layer by layer while truncating the
-growing boundary with SVD.
+LTRG maps a `d`-dimensional quantum lattice model at finite temperature into a `(d+1)`-dimensional classical tensor network by Trotter-Suzuki decomposition, then contracts it layer by layer while truncating the growing boundary with SVD.
 
-This card is generic methodology. Paper-specific Hamiltonian choices, figure
-protocols, caption and axis reading, and target claims belong in
-`reproduce-paper` protocols, not here.
-
-Primary source: Li, Ran, Gong, Zhao, Xi, Ye, and Su, "Linearized tensor
-renormalization group algorithm for the calculation of thermodynamic
-properties of quantum lattice models," `.knowledge/literature/ltrg/`.
-
-### Scope
-
-Use this card for:
-
-- Finite-temperature quantum lattice problems represented as a Trotterized
-  classical tensor network.
-- Layer-by-layer contraction of the transfer network with a truncated boundary
-  tensor network.
-- Thermodynamic observables derived from the partition function, tensor
-  insertions, or controlled derivatives.
-- LTRG reproductions where the calculation itself must be LTRG, not an analytic
-  or exact-solution shortcut.
-
-Do not use this card as the full recipe for:
-
-- Paper-specific figure protocols, axis labels, or plotted-curve contracts.
-- ITensor installation or syntax troubleshooting.
-- Ground-state MPS algorithms that do not build and contract the finite-
-  temperature transfer network.
+This card is generic methodology. Paper-specific Hamiltonian choices, figure protocols, and target claims belong in `/reproduce-paper`; model facts belong in `.knowledge/models/`.
 
 ### Notation
 
-- `d`: spatial dimension of the quantum lattice model.
-- `β`: inverse temperature.
-- `τ`: Trotter step.
-- `K`: number of Trotter steps, with `β = Kτ`.
-- `Dc`: retained SVD dimension for boundary compression.
-- `q`: local Hilbert-space dimension.
-- Boundary tensor network: the partially contracted region of the classical
-  tensor network.
-- Log scale factors: accumulated normalizations needed to recover the final
-  partition function and free energy.
+- `d` spatial dimension; `β` inverse temperature; `τ` Trotter step; `K` steps with `β = Kτ`.
+- `Dc` retained SVD dimension; `q` (a.k.a. `D`) local Hilbert dimension.
+- Boundary tensor network: the partially contracted region.
+- Log scale factors: accumulated normalizations needed to recover `Z` and the free energy.
 
 ### Algorithm
 
-1. Start from a local quantum Hamiltonian.
-2. Split the Hamiltonian into local pieces suitable for Trotter-Suzuki
-   decomposition.
-3. Approximate `Z = Tr exp(-βH)` by a product of imaginary-time gates, with
-   `β = Kτ`.
-4. Insert complete local bases between imaginary-time layers.
-5. Interpret the resulting expression as a `(d + 1)`-dimensional classical
-   tensor network.
-6. Build local transfer tensors from the imaginary-time gate matrix elements.
-7. Factor local transfer tensors by SVD when the chosen network geometry
-   requires it.
-8. Initialize the boundary tensor network representing the contracted region.
-9. Absorb one uncontracted layer into the boundary.
-10. Reshape the enlarged local objects for SVD.
-11. Keep the largest `Dc` singular values and update the boundary tensors.
-12. Normalize tensors or singular values and store the log scale factors.
-13. Repeat layer absorption and compression until the full imaginary-time
-    extent is contracted.
-14. Contract the remaining boundary tensor network.
-15. Compute thermodynamic observables from the final contraction and accumulated
-    normalizations.
+1. Split the local quantum Hamiltonian into Trotter-Suzuki pieces; approximate `Z = Tr e^{−βH}` as a product of imaginary-time gates with `β = Kτ`.
+2. Insert complete local bases between layers and read the result as a `(d+1)`-dim classical tensor network.
+3. Build local transfer tensors from the gate matrix elements; SVD-factor them if the geometry requires.
+4. Initialize the boundary tensor network; absorb one uncontracted layer.
+5. Reshape and SVD; keep the largest `Dc` singular values; update the boundary.
+6. Normalize, store the log scale factor; repeat layer absorption until the full imaginary-time extent is contracted.
+7. Contract the remaining boundary; combine with the log factors to obtain `Z`, the free energy, and derived thermodynamics.
 
-### Knobs
+## Verification — implementation stage {survey}
 
-| Knob | Meaning |
-|---|---|
-| `τ` | Trotter step; controls decomposition error and number of layers. |
-| `K` | Number of imaginary-time steps; fixes `β = Kτ`. |
-| `Dc` | Number of singular values retained during boundary compression. |
-| Contraction direction | Direction in which layers are absorbed into the boundary. |
-| Gate order | Ordering of local imaginary-time gates in the Trotter product. |
-| Normalization convention | How local scales are removed and later restored. |
-| Observable route | Direct partition-function quantity, tensor insertion, or controlled derivative. |
+### Intermediate (mid-run)
 
-### Cost Estimate
+- Per-step normalization factors (largest singular value) stay finite and vary smoothly on a log scale — a divergence means a missing normalization. `[High/Med]`
+- Discarded singular weight per SVD stays small and saturates as `Dc` grows. `[High/Med]`
 
-Runtime grows with the number of layers `K = β / τ`, the number of local tensors
-absorbed per layer, and the SVD cost of compressing the boundary to `Dc`.
-Memory is dominated by the boundary tensor network and retained singular
-spaces. Before a full reproduction run, estimate cost from the intended `τ`,
-target `β`, local Hilbert dimension `q`, boundary geometry, and `Dc` sweep.
+### Final verification + expert criticism
 
-For uncertain implementations, run a small smoke calculation at reduced `β` and
-`Dc` to measure one-layer absorption and compression time. Treat that as a
-timing probe, not a scientific result.
+- `τ → 0` extrapolation to remove Trotter error (dominant at high T). `[High]`
+- `Dc` convergence: the observable stops moving as `Dc` grows (e.g. Dc = 100 and 150 curves coincide); truncation error dominates at low T. `[High]`
+- Analytic/exact limits: benchmark vs the exact XY-chain solution (δf ≈ 7×10⁻⁶ at β = 120, Dc = 150); high- and low-T limits when the caller supplies them; β → large → ground-state energy e₀. `[High]`
+- Cross-check non-integrable models vs TMRG / QMC where available. `[High]`
+- Confirm every log scale factor is counted exactly once in the final quantity. `[High]`
+- **Wei Li would criticize:** a single-(τ, Dc) number with no τ→0 and no Dc-convergence study; trusting low-T data at small Dc; no benchmark against an exact / QMC reference; and ignoring that high-T error is Trotter while low-T error is truncation. `[Med]`
 
-### Observables
+## Citations
 
-Free energy comes from the final contraction plus accumulated log scale factors.
-Other thermodynamic quantities require an observable-specific route supplied by
-the caller: tensor insertion, a derivative of free energy, or another explicit
-estimator. Do not substitute an analytic solution for the LTRG calculation; use
-analytic or external data only as a benchmark after the LTRG result exists.
-
-### Verification
-
-- Sweep `τ` and check the expected approach as Trotter error decreases.
-- Sweep `Dc` and check observable stability and discarded weight.
-- Confirm that a reduced-size or reduced-temperature smoke run gives finite,
-  stable log normalization factors before scaling up.
-- Check that log scale factors are included exactly once in the final quantity.
-- Check high- and low-temperature limits when the caller supplies them.
-- Compare against the caller-provided benchmark only after producing the LTRG
-  observable.
-
-### Pitfalls
-
-- Dropping or double-counting normalization factors changes free energy.
-- Confusing local Hilbert dimension `q` with truncation dimension `Dc` changes
-  both cost estimates and tensor shapes.
-- A smaller `τ` increases the number of layers; report cost as a function of
-  both `τ` and `Dc`.
-- Derivatives of free energy amplify numerical noise; verify the underlying free
-  energy curve before trusting derivative observables.
-- Boundary representation is geometry-dependent. Keep the algorithm in terms of
-  boundary tensor networks unless a caller-supplied geometry fixes a more
-  specific representation.
-
-### Citations
-
-- `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md` - Li et al., original LTRG paper.
-- ITensors.jl stack and setup are handled by `/using-itensors`.
+- `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md` — Li et al. (2011), original LTRG paper.
+- ITensors.jl setup, API primitives, and runtime live in `/using-itensors`.
