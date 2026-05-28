@@ -21,7 +21,7 @@ Implementation                — run + intermediate output + verify (checks fro
 
 ## UX — top priority, always on
 
-Everything here serves one reader: a capable physicist new to this paper's methods and to these tools. Keep their mental load low.
+Everything here serves one reader: a capable physicist new to this paper's methods and to these tools. Keep their mental load low *per question* — but the real goal is that they **learn judgment**: walk them warmly through each decision — a sentence on what the knob does and how the choice would move the result — so they *feel* the tradeoff and build intuition they carry to the next problem. The explaining *is* the value, not overhead; so guide and explain each consequential choice, never silently default one, and never batch them behind a terse "use the standard settings."
 
 - **Plain English — assume nothing about jargon.** Before any term, setting, symbol, or axis label reaches that reader, ask whether they would know this exact token; if it feels obvious to *you*, that is the signal to check it, not skip it. Lead with the plain-English name, never let a symbol or abbreviation appear before the words that define it, and prefer plain words in labels (an axis reading "overlap with the Néel state" beats a bare "$|\langle Z_2|\psi\rangle|^2$"). Make each gloss the *consequence*, not just a definition — "`k_states` = how many low-lying states we compute; 1 = ground state only, so no excited-state tower" — since the point is to help them decide. Only the common method families (ED, DMRG, QMC, VMC, NQS) need no gloss.
 - **One decision at a time**, Superpowers brainstorming style: 2–3 options, each one line, each real and executable or explicitly marked "needs setup." Use the question tool when available; otherwise number the choices (`1.`, `2.`, `3.`) so the user can answer with a number. Mark a choice as recommended only when there is a real technical reason, and say the reason in the option line. Never bundle two decisions in one prompt.
@@ -38,7 +38,7 @@ During questioning, do not create a run directory, `run.json`, report, script, p
 
 Scripts go to `tracks/<track>/solutions/<script>.{jl|py}` — committed code that can be re-run. Generated data and figures go to `tracks/<track>/results/` — gitignored, not committed.
 
-After the planning questions are complete, `run.json` is the *only* data source. The report is built one-way from it — `run.json` → a generic `report.json` (the render input) → `report.html` — and never read back. `report.json` and the HTML are *derived* views, regenerated from `run.json`; they are never edited or treated as a second source. A run is **one computation** (model + method + sizes → one spectrum/dataset) and a list of **figures**, each a single view of it — so several figures from the same computation share one run, never copied across files. Representative shape (each figure's `results` block and the run's `actual` fill in after the run):
+After the planning questions are complete, `run.json` is the *only* data source. The report is built one-way from it — `run.json` → a generic `report.json` (the render input) → `report.html` — and never read back. `report.json` and the HTML are *derived* views, regenerated from `run.json`; they are never edited or treated as a second source. A run is **one computation** (model + method + its run points — system sizes, bond dimensions, or a temperature grid → one dataset: a spectrum, a curve, or thermodynamic functions) and a list of **figures**, each a single view of it — so several figures from the same computation share one run, never copied across files. Representative shape (each figure's `results` block and the run's `actual` fill in after the run):
 
 ```json
 {
@@ -60,6 +60,8 @@ After the planning questions are complete, `run.json` is the *only* data source.
   ]
 }
 ```
+
+The example is a ground-state ED run; the same schema flexes for a **finite-temperature** target — `x` becomes temperature or β, a run `point` is a `(Dc, τ)` or temperature setting rather than a size, and `method.settings` holds that method's knobs (e.g. `Dc`, `τ`, `β_max` for LTRG; `sweeps`, `thermalization`, `N_wlk` for QMC), so the computation yields thermodynamic curves instead of a spectrum.
 
 ## The report: built from `run.json`, rendered by `/report`
 
@@ -113,7 +115,7 @@ These three steps are owned by the method and tool skills; this spine only enfor
 
 **Step 1 — select method.** Recommend the right `/method-*` route first, with a concrete reason drawn from its *Select method* section (what problems it suits, sizes solved). Invoking the method skill is how this step is answered; do not re-derive method suitability here.
 
-**Step 2 — select software.** From the method skill's *Select software* section, present the recommended tool as "Use /<tool-skill>" with a concrete reason, then 1–2 real alternatives. **Tool introduction is mandatory** — what the package is, who maintains it, what it does, and why it suits *this* problem; do the same (shorter) for alternatives. One option must be `Search web for official paper code / setup` unless the user forbade web access or official code is already verified this turn. Each option shows setup state (`ready`, `needs install`, `needs web check`, `official code unavailable`) and a one-line consequence. Don't recommend a tool just because it is installed, and don't silently switch tools on an install error — say so and let the user choose.
+**Step 2 — select software.** From the method skill's *Select software* section, present the recommended tool as "Use /<tool-skill>" with a concrete reason, then 1–2 real alternatives. **Tool introduction is mandatory** — what the package is, who maintains it, what it does, and why it suits *this* problem; do the same (shorter) for alternatives. One option must be `Search web for official paper code / setup` unless the user forbade web access or official code is already verified this turn. Each option shows setup state (`ready`, `needs install`, `needs web check`, `official code unavailable`) and a one-line consequence. Don't recommend a tool just because it is installed, and don't silently switch tools on an install error — say so and let the user choose. Flag the effort honestly when it differs: most routes run an existing package, but some (e.g. LTRG) have no package and mean implementing the algorithm from the `/method-*` card's `## Details` with the tool's primitives — a larger, more error-prone job to choose with eyes open.
 
 **Step 3 — configure.** Guide parameters one at a time, skipping any already pinned by the paper or user. Pull **method-side knobs** (tricks, what each controls, how it affects results) from the `/method-*` *Method setup* section, and **software parameter values** from the `/using-*` *Parameter setup* / *Knobs* sections. Each question states: the parameter, why it matters for reproducing this figure, the paper-stated value if one exists, its source, and the consequence of each option. Record each gloss in `method.note` so the report carries it. *(Method-specific care travels with the method card — e.g. `/method-ed` requires naming every symmetry and flagging any approximation; `/method-qmc` requires the sign / equilibration checks; `/method-ltrg` requires the normalization bookkeeping.)* Finish with a compact configuration summary table (`Parameter`, `Value`, `Source`).
 
@@ -136,7 +138,7 @@ Then ask **Approve / Change / Discuss** — one question, the run's only approva
 3. **Verify correctness {survey}.** Apply the `/method-*` *Verification* — final checks (Δτ→0 / τ→0 extrapolation, Dc or bond-dimension convergence, small-system ED cross-check, benchmark comparison) — and report each figure's result honestly against the `expected` written at plan time: set `match` to `yes`, `partly`, or `no`, and say why.
 4. **Append results.** Fill each figure's `results` block and the run's `actual` (consumed wall time and memory per run point) in `run.json`, re-run `build_report.py`, re-render via `/report`, then open it. Offer a couple of next steps drawn from the outcome (a larger scope, another figure from the same data, or stop).
 
-Rendering composes with `/report`; a cluster run composes with `/using-slurm` (ship / submit / monitor / fetch); installs compose with `/setup-julia`. This skill does not duplicate those.
+Rendering composes with `/report`; a cluster run composes with `/using-slurm` (ship / submit / monitor / fetch); installs compose with the tool skill (`/setup-julia` for Julia, `/using-cpmc-lab` for the MATLAB CPMC-Lab package, and so on). This skill does not duplicate those.
 
 ## Stay honest
 
