@@ -86,8 +86,8 @@ The working dir keeps `report.json` as the source, so the page re-renders after 
 
 ## UX rules
 
-- **One decision at a time**, brainstorming style: 2–3 real options per question, recommend only with a stated reason; use the question tool when available, else number choices.
+- **One decision at a time**, brainstorming style (the `superpowers:brainstorming` approach — explore intent, never batch): 2–3 real options per question, recommend only with a stated reason; use the question tool when available, else number choices.
 - **Key points only — never a wall of text.** Every message is a few sentences or one compact table.
-- **Confirm, don't guess.** Ambiguous expert identity, method scope, or paper set → ask. Always confirm the paper table before any download.
-- **Scientific-report register, no jargon.** Declarative and impersonal — no colloquialisms (e.g. "the answer for free", "which knob to turn"). Keep proper scientific terms but gloss every symbol and abbreviation on first use — assume nothing (if you define $D_c$, define $D$ too).
+- **Confirm anything unclear, never guess.** Not only expert identity, method scope, or paper set — any unclear choice (output path, a trick's wording, whether a gap is grounded) → stop and ask, in the one-decision-at-a-time style above. Always confirm the paper table before any download.
+- **Precise, concise, self-defining.** Declarative and impersonal — no casual or colloquial wording (e.g. "the answer for free", "which knob to turn"). Keep the technical terms a method genuinely needs, but be precise and economical, and define every paper-specific term and piece of notation before (or at) its first use with a short plain-language explanation — assume nothing (if you write $D_c$, say what $D$ is too).
 - **Stay honest.** Each trick cites a real location; if a paper doesn't state something (e.g. core-hours), say so and mark it an interview target rather than inventing it.
