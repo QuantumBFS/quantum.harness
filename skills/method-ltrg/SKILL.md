@@ -74,6 +74,33 @@ Conceptual knobs and the tricks behind them — for each, the **intuition for ch
 
 **Cost**: the local evolution (contract + SVD of the transfer tensor) scales as **O(D⁶·Dc³)** per step — the dominant cost; the spatial trace contracts `2^p` matrices in `p` pairwise steps (logarithmic in chain length); memory is dominated by the `Dc`-bond boundary tensors plus the transient enlarged tensor. Estimate from intended `τ`, target `β`, `q`, geometry, and the `Dc` sweep before a full run.
 
+## Frontier — gaps, variants, future directions
+
+Baseline LTRG (the algorithm in `## Details`) has known weak points; most are closed by a published successor from the same Wei Li / Gang Su lineage. Use this map to decide *what to read or try* before reinventing the contraction loop. The 2011 PRL is the floor, not the state of the art.
+
+| Gap in baseline LTRG | Latest variant that closes it | What it buys | Reference (pull with `/download-ref`) |
+|---|---|---|---|
+| Trotter error dominates high-T; needs `τ→0` extrapolation | **SETTN** — series-expansion TTN: Taylor-expand `e^{−βH}`, express `H` and `Hⁿ` as MPOs | Trotter-error-free ("continuous-time") | PRB 95, 161104(R) (2017), arXiv:1609.01263 |
+| Linear cooling: `K = β/τ` truncations accumulate → low-T cost/error | **XTRG** — exponential cooling `ρ(2β) ← ρ(β)·ρ(β)` | reaches β in ~log₂(β/τ₀) steps; far fewer truncations → lower T *and* better accuracy; runs on 2D cylinders | PRX 8, 031082 (2018), arXiv:1801.00142 |
+| Single-layer asymmetry; density matrix not manifestly positive | **bilayer LTRG (LTRG++)** — evolve bra+ket layers together | higher accuracy; infinite-size LTRG++ ≡ TMRG in TN language | PRB 95, 144428 (2017), arXiv:1612.01896 |
+| Finite-T fermions / 2D Hubbard out of reach | **tanTRG** — tangent-space optimization of the thermal MPO, O(D³) | low-T 2D Hubbard on width-8 cylinder / 10×10; matches DQMC at half filling | PRL 130, 226502 (2023), arXiv:2212.11973 |
+| 2D limited to small width / honeycomb | XTRG on wider cylinders; finite-T PEPS / thermal CTMRG (`/method-peps`) | larger-area 2D thermodynamics | open direction |
+| No symmetry exploitation → bigger bonds than necessary | U(1)/SU(2) quantum-number indices | block-sparse tensors, lower cost at fixed accuracy | `/using-itensors` QN indices |
+
+### Want to improve on the baseline? Identify the need, then act
+
+State the requirement; take the paired action — read the reference (`/download-ref <arXiv>`) and/or try the primitive change via `/using-itensors`. Do not bolt a variant on blindly: each one changes the step 1–3 cost model and the primitives handed to the tool skill.
+
+| Your need | Recommendation |
+|---|---|
+| "Lower T without exploding Dc" | Switch linear → exponential cooling (XTRG): square the MPDO each step instead of absorbing one Trotter layer. Read arXiv:1801.00142; the new ITensors op is an MPO·MPO product + re-truncation. |
+| "Kill the Trotter error / clean high-T" | Replace the gate product with a series expansion of `e^{−βH}` (SETTN). Read arXiv:1609.01263; needs `H` and `Hⁿ` as MPOs. |
+| "Density matrix loses accuracy / positivity" | Go bilayer (LTRG++) — evolve bra and ket together. Read arXiv:1612.01896. |
+| "Finite-T in 2D / Hubbard / fermions" | tanTRG. Read arXiv:2212.11973; budget O(D³) tangent-space sweeps plus Grassmann / Jordan-Wigner bookkeeping. |
+| "Same physics, just cheaper" | Add U(1)/SU(2) symmetry to the indices (`/using-itensors`) before raising Dc. |
+
+When a variant is chosen, re-run method selection (step 1) with *its* cost model and hand the new primitives — MPO·MPO product, `Hⁿ` MPOs, QN indices — to `/using-itensors`. The convergence plan in `## Verification` still applies, but the dominant error source shifts (e.g. XTRG removes the linear-cooling truncation pileup; SETTN removes Trotter error).
+
 ## Details
 
 LTRG maps a `d`-dimensional quantum lattice model at finite temperature into a `(d+1)`-dimensional classical tensor network by Trotter-Suzuki decomposition, then contracts it layer by layer while truncating the growing boundary with SVD.
@@ -116,4 +143,5 @@ This card is generic methodology. Paper-specific Hamiltonian choices, figure pro
 ## Citations
 
 - `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md` — Li et al. (2011), original LTRG paper.
+- Successors (not yet in `.knowledge`; pull with `/download-ref`): bilayer LTRG++ arXiv:1612.01896 (PRB 95, 144428); SETTN arXiv:1609.01263 (PRB 95, 161104(R)); XTRG arXiv:1801.00142 (PRX 8, 031082); tanTRG arXiv:2212.11973 (PRL 130, 226502).
 - ITensors.jl setup, API primitives, and runtime live in `/using-itensors`.
