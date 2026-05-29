@@ -14,46 +14,46 @@ LTRG is the finite-temperature tensor-network method class: map a `d`-dimensiona
 
 ## Select method — step 1
 
-### Suited for {survey}
+### Suited for
 
-- Finite-temperature thermodynamics of low-dimensional quantum lattice models — 1D / quasi-1D chains and 2D lattices (e.g. honeycomb). Observables: free energy per site, internal energy, specific heat, susceptibility. `[High]`
-- Maps `d`-dim quantum → `(d+1)`-dim classical tensor network via Trotter-Suzuki, then decimates iTEBD-style; **sign-problem-free even in 2D**, a promising alternative to QMC for frustrated/fermionic 2D thermodynamics. `[High]`
-- Sizes reached: XY chain to length 2¹⁰⁰ (thermodynamic limit); temperature down to T/J ≈ 0.008 (β = 120); retained dimension Dc ≤ 150; 2D honeycomb Heisenberg benchmarked against QMC. `[High]`
+- Finite-temperature thermodynamics of low-dimensional quantum lattice models — 1D / quasi-1D chains and 2D lattices (e.g. honeycomb). Observables: free energy per site, internal energy, specific heat, susceptibility.
+- Maps `d`-dim quantum → `(d+1)`-dim classical tensor network via Trotter-Suzuki, then decimates iTEBD-style; **sign-problem-free even in 2D**, a promising alternative to QMC for frustrated/fermionic 2D thermodynamics.
+- Sizes reached: XY chain to length 2¹⁰⁰ (thermodynamic limit); temperature down to T/J ≈ 0.008 (β = 120); retained dimension Dc ≤ 150; 2D honeycomb Heisenberg benchmarked against QMC.
 
 ### Route elsewhere when
 
 - The target is a **ground-state** property → `/method-mps` (DMRG) or `/method-peps`; LTRG is a finite-temperature method.
 - An exact/analytic solution exists — use it only as a benchmark *after* the LTRG calculation, never as a substitute.
 
-### Options & trade-offs {survey}
+### Options & trade-offs
 
 | Method | Good at | Weak at | Typical reach |
 |---|---|---|---|
-| LTRG (this card) | finite-T low-D, 2D sign-free, scalable transfer-network contraction | low-T needs large Dc; Trotter + truncation error to control | T/J ~ 0.008, Dc ≤ 150 `[High]` |
-| TMRG (transfer-matrix DMRG) | finite-T 1D, accurate | scales worse to 2D | 1D `[High]` |
-| coarse-graining TRG | 2D classical networks | discards O(Dcⁿ)/step → costlier | 2D `[High]` |
-| purification / METTS | finite-T via MPS, good low-T in 1D | 2D entanglement cost | 1D / quasi-1D `[Low]` |
-| QMC (`/method-qmc`) | finite-T, large sizes | sign problem (frustrated/fermionic) | sign-free only `[High/Med]` |
-| XTRG (later Wei Li work) | reaches lower T (logarithmic-in-β cooling) | more involved bookkeeping | very low T `[Low]` |
+| LTRG (this card) | finite-T low-D, 2D sign-free, scalable transfer-network contraction | low-T needs large Dc; Trotter + truncation error to control | T/J ~ 0.008, Dc ≤ 150 |
+| TMRG (transfer-matrix DMRG) | finite-T 1D, accurate | scales worse to 2D | 1D |
+| coarse-graining TRG | 2D classical networks | discards O(Dcⁿ)/step → costlier | 2D |
+| purification / METTS | finite-T via MPS, good low-T in 1D | 2D entanglement cost | 1D / quasi-1D |
+| QMC (`/method-qmc`) | finite-T, large sizes | sign problem (frustrated/fermionic) | sign-free only |
+| XTRG (later Wei Li work) | reaches lower T (logarithmic-in-β cooling) | more involved bookkeeping | very low T |
 
 ## Select software — step 2
 
 ### Open-source tools
 
-- No official LTRG package ships with the paper — it is an algorithm-only PRL. `[Med]`
-- The harness route is **ITensors.jl** (Julia): typed indices, SVD with truncation to `Dc`, and gate/transfer-tensor contraction, so the algorithm is expressed directly. The same algorithm is expressible in TeNPy or quimb. `[Med/Low]`
-- No reusable LTRG library function exists in-repo; the algorithm is in `## Details` below, and `/using-itensors` carries the ITensors **primitives** (typed indices, `svd` to `Dc`, gate exponentiation, incremental writes) to express it. `[High]`
+- No official LTRG package ships with the paper — it is an algorithm-only PRL.
+- The harness route is **ITensors.jl** (Julia): typed indices, SVD with truncation to `Dc`, and gate/transfer-tensor contraction, so the algorithm is expressed directly. The same algorithm is expressible in TeNPy or quimb.
+- No reusable LTRG library function exists in-repo; the algorithm is in `## Details` below, and `/using-itensors` carries the ITensors **primitives** (typed indices, `svd` to `Dc`, gate exponentiation, incremental writes) to express it.
 
 ### Features to confirm
 
 - Typed indices with explicit tags, `svd` with `maxdim`/`cutoff`, gate exponentiation `exp(-τ·h)`, incremental writes of convergence data — owned by `/using-itensors`.
 
-### Options & trade-offs {survey}
+### Options & trade-offs
 
 | Tool | Ecosystem / examples | Efficiency | When |
 |---|---|---|---|
-| ITensors.jl (this route) | Julia; ITensors primitives in `/using-itensors`, algorithm in `## Details` | native SVD/contraction; core op is the O(D⁶·Dc³) SVD step `[High]` | default `[Med]` |
-| TeNPy / quimb | Python TN ecosystems | comparable; needs a hand-built LTRG loop | if Python-bound `[Low]` |
+| ITensors.jl (this route) | Julia; ITensors primitives in `/using-itensors`, algorithm in `## Details` | native SVD/contraction; core op is the O(D⁶·Dc³) SVD step | default |
+| TeNPy / quimb | Python TN ecosystems | comparable; needs a hand-built LTRG loop | if Python-bound |
 
 ### Handoff
 
@@ -63,16 +63,16 @@ Invoke **`/using-itensors`** once the LTRG route is fixed — it owns ITensors.j
 
 Conceptual knobs and the tricks behind them. Concrete ITensors values/code live in `/using-itensors`.
 
-| Knob | Controls | Trick / how it affects results {survey} |
+| Knob | Controls | Trick / how it affects results |
 |---|---|---|
-| `τ` | Trotter step | decomposition error ∝ τ² (symmetric split); paper uses 0.1/0.05/0.02/0.01; smaller τ → more layers `[High]` |
-| `K` | number of imaginary-time steps | fixes `β = Kτ`; more steps reach lower T but accumulate more truncations `[High]` |
-| `Dc` | retained SVD dimension | dominant accuracy/cost lever (like `M` in TMRG); paper uses 50/100/150 `[High]` |
-| `D` (q) | local Hilbert dimension | sets transfer-tensor size; do not confuse with `Dc` `[High]` |
-| contraction direction / gate order | layer-absorption scheme | two equivalent schemes (Trotter-first or spatial-first); alternate the two projections per full Trotter step `[High]` |
-| normalization convention | scale bookkeeping | divide each step by the largest singular value (and each trace matrix by its largest element); collect the log factors to rebuild Z and the free energy `[High]` |
+| `τ` | Trotter step | decomposition error ∝ τ² (symmetric split); paper uses 0.1/0.05/0.02/0.01; smaller τ → more layers |
+| `K` | number of imaginary-time steps | fixes `β = Kτ`; more steps reach lower T but accumulate more truncations |
+| `Dc` | retained SVD dimension | dominant accuracy/cost lever (like `M` in TMRG); paper uses 50/100/150 |
+| `D` (q) | local Hilbert dimension | sets transfer-tensor size; do not confuse with `Dc` |
+| contraction direction / gate order | layer-absorption scheme | two equivalent schemes (Trotter-first or spatial-first); alternate the two projections per full Trotter step |
+| normalization convention | scale bookkeeping | divide each step by the largest singular value (and each trace matrix by its largest element); collect the log factors to rebuild Z and the free energy |
 
-**Cost** {survey}: the local evolution (contract + SVD of the transfer tensor) scales as **O(D⁶·Dc³)** per step — the dominant cost; the spatial trace contracts `2^p` matrices in `p` pairwise steps (logarithmic in chain length); memory is dominated by the `Dc`-bond boundary tensors plus the transient enlarged tensor. Estimate from intended `τ`, target `β`, `q`, geometry, and the `Dc` sweep before a full run. `[High/Med]`
+**Cost**: the local evolution (contract + SVD of the transfer tensor) scales as **O(D⁶·Dc³)** per step — the dominant cost; the spatial trace contracts `2^p` matrices in `p` pairwise steps (logarithmic in chain length); memory is dominated by the `Dc`-bond boundary tensors plus the transient enlarged tensor. Estimate from intended `τ`, target `β`, `q`, geometry, and the `Dc` sweep before a full run.
 
 ## Details
 
@@ -97,21 +97,21 @@ This card is generic methodology. Paper-specific Hamiltonian choices, figure pro
 6. Normalize, store the log scale factor; repeat layer absorption until the full imaginary-time extent is contracted.
 7. Contract the remaining boundary; combine with the log factors to obtain `Z`, the free energy, and derived thermodynamics.
 
-## Verification — implementation stage {survey}
+## Verification — implementation stage
 
 ### Intermediate (mid-run)
 
-- Per-step normalization factors (largest singular value) stay finite and vary smoothly on a log scale — a divergence means a missing normalization. `[High/Med]`
-- Discarded singular weight per SVD stays small and saturates as `Dc` grows. `[High/Med]`
+- Per-step normalization factors (largest singular value) stay finite and vary smoothly on a log scale — a divergence means a missing normalization.
+- Discarded singular weight per SVD stays small and saturates as `Dc` grows.
 
 ### Final verification + expert criticism
 
-- `τ → 0` extrapolation to remove Trotter error (dominant at high T). `[High]`
-- `Dc` convergence: the observable stops moving as `Dc` grows (e.g. Dc = 100 and 150 curves coincide); truncation error dominates at low T. `[High]`
-- Analytic/exact limits: benchmark vs the exact XY-chain solution (δf ≈ 7×10⁻⁶ at β = 120, Dc = 150); high- and low-T limits when the caller supplies them; β → large → ground-state energy e₀. `[High]`
-- Cross-check non-integrable models vs TMRG / QMC where available. `[High]`
-- Confirm every log scale factor is counted exactly once in the final quantity. `[High]`
-- **Criticize:** a single-(τ, Dc) number with no τ→0 and no Dc-convergence study; trusting low-T data at small Dc; no benchmark against an exact / QMC reference; and ignoring that high-T error is Trotter while low-T error is truncation. `[Med]`
+- `τ → 0` extrapolation to remove Trotter error (dominant at high T).
+- `Dc` convergence: the observable stops moving as `Dc` grows (e.g. Dc = 100 and 150 curves coincide); truncation error dominates at low T.
+- Analytic/exact limits: benchmark vs the exact XY-chain solution (δf ≈ 7×10⁻⁶ at β = 120, Dc = 150); high- and low-T limits when the caller supplies them; β → large → ground-state energy e₀.
+- Cross-check non-integrable models vs TMRG / QMC where available.
+- Confirm every log scale factor is counted exactly once in the final quantity.
+- **Criticize:** a single-(τ, Dc) number with no τ→0 and no Dc-convergence study; trusting low-T data at small Dc; no benchmark against an exact / QMC reference; and ignoring that high-T error is Trotter while low-T error is truncation.
 
 ## Citations
 

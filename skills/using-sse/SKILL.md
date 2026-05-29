@@ -17,14 +17,14 @@ It does **not** own method selection, SSE theory, or the sign-freeness / autocor
 - Smoke test: `julia --project=julia-env -e 'using Carlo, StochasticSeriesExpansion'`
 - Official docs (verify the current API here — there is no in-repo software paper): StochasticSeriesExpansion.jl `https://lukas.weber.science/StochasticSeriesExpansion.jl/stable/`; tutorial `https://lukas.weber.science/StochasticSeriesExpansion.jl/stable/tutorial.html`; Carlo.jl `https://lukas.weber.science/Carlo.jl/dev/`
 
-## What SSE on Carlo is — step 2 (the handoff target) {survey}
+## What SSE on Carlo is — step 2 (the handoff target)
 
 What `/method-qmc` routes here for, and what to confirm before running.
 
-- **The packages.** StochasticSeriesExpansion.jl (Lukas Weber) is the sign-free SSE QMC engine; Carlo.jl is the Monte Carlo job framework underneath it — task scheduling, checkpointing, MPI parallelization, and result collection. `[Med]`
-- **Canonical for** sign-problem-free spin / boson lattices: finite-temperature observables (susceptibility, magnetization, Binder ratios) and ground states via large `beta`. The tutorial runs a honeycomb magnet susceptibility-vs-`T` curve. `[Med]`
-- **Efficiency.** Carlo.jl runs independent chains / parameter points in parallel via MPI and checkpoints long runs; throughput scales with the task count, not within a single chain. `[Med/Low]`
-- **Features to confirm fit the target** before routing here: a built-in model (e.g. `MagnetModel`), the `measure` observable set, the lattice `unitcell`, a `T` / `beta` scan, and MPI ranks. **Confirm sign-freeness first** — if the sign is uncontrolled for this lattice / coupling-signs / basis, stop and reroute (the criterion is `/method-qmc`'s). `[Med]`
+- **The packages.** StochasticSeriesExpansion.jl (Lukas Weber) is the sign-free SSE QMC engine; Carlo.jl is the Monte Carlo job framework underneath it — task scheduling, checkpointing, MPI parallelization, and result collection.
+- **Canonical for** sign-problem-free spin / boson lattices: finite-temperature observables (susceptibility, magnetization, Binder ratios) and ground states via large `beta`. The tutorial runs a honeycomb magnet susceptibility-vs-`T` curve.
+- **Efficiency.** Carlo.jl runs independent chains / parameter points in parallel via MPI and checkpoints long runs; throughput scales with the task count, not within a single chain.
+- **Features to confirm fit the target** before routing here: a built-in model (e.g. `MagnetModel`), the `measure` observable set, the lattice `unitcell`, a `T` / `beta` scan, and MPI ranks. **Confirm sign-freeness first** — if the sign is uncontrolled for this lattice / coupling-signs / basis, stop and reroute (the criterion is `/method-qmc`'s).
 
 ## Run mechanics
 
@@ -77,9 +77,9 @@ mpirun -n <ranks> julia --project=julia-env scripts/<job>.jl run
 
 Read the resulting `<job>.results.json` with `Carlo.ResultTools.dataframe`. Plot the primary observable versus the physical scan axis, with one curve per system size or `beta`.
 
-## Parameters — step 3 (software) {survey}
+## Parameters — step 3 (software)
 
-The source for SSE/Carlo-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored — `[Med]`.
+The source for SSE/Carlo-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored —.
 
 What to pin:
 
@@ -105,11 +105,11 @@ Concrete starting points:
 
 The scientific values — model, lattice, coupling signs, observable, temperature grid, validation target — are caller-supplied; resolve open ones via the step-4 brainstorm, deferring SSE theory and the sign / autocorrelation criteria to `/method-qmc` and model physics to the model card. This skill turns agreed values into a runnable Carlo/SSE job; it does not originate them.
 
-## Time estimate — feeds step 4 {survey}
+## Time estimate — feeds step 4
 
 Estimate from `thermalization_sweeps + measurement_sweeps`, cost per sweep, number of chains, and autocorrelation time; the result feeds `/reproduce-paper`'s step-4 resource confirmation.
 
-- Per-sweep cost scales with lattice size, operator-string length, and update type; low temperature usually grows the operator string and the autocorrelation. `[Med]`
+- Per-sweep cost scales with lattice size, operator-string length, and update type; low temperature usually grows the operator string and the autocorrelation.
 - Effective independent samples are fewer than raw samples when autocorrelation is large; include the binning / autocorrelation penalty.
 - MPI reduces wall time only when chains or parameter points parallelize cleanly; use `stack.toml` for the MPI smoke test and `/using-slurm` for scheduled runs.
 - For uncertain cases, time a short non-production chain to estimate sweep rate and an autocorrelation proxy, then show paper-size and local-PC-in-15-min estimates before asking scale.

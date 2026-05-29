@@ -17,14 +17,14 @@ It does **not** own method selection or the method algorithm / "why" — the DMR
 - Smoke test: `julia --project=julia-env -e 'using ITensors, ITensorMPS, KrylovKit, MPSKit'`
 - Official docs (verify the current API here — there is no in-repo software paper): `https://docs.itensor.org/ITensors/dev/`, ITensorMPS.jl `https://github.com/ITensor/ITensorMPS.jl`
 
-## What ITensors is — step 2 (the handoff target) {survey}
+## What ITensors is — step 2 (the handoff target)
 
 What `/method-mps` and `/method-ltrg` route here for, and what to confirm before running.
 
-- **The library.** ITensors.jl with ITensorMPS.jl — a Julia tensor-network library (the ITensor collaboration; Fishman, White, Stoudenmire). Typed indices with automatic contraction matching, block-sparse storage when quantum numbers are conserved, BLAS-backed dense contraction. ITensorMPS.jl carries the MPS/MPO/DMRG/TEBD layer. `[Med]`
-- **Canonical for** DMRG ground states, imaginary-/real-time TEBD, and MPS measurements; the official docs ship a large worked-example ecosystem (DMRG, TEBD, DMRG-X, quantum-number conservation). `[Med]`
-- **Efficiency.** Dense contraction via BLAS; large speedups from block-sparse tensors when `conserve_qns` is on; first-run Julia precompilation is setup time, not physics time. `[Med/Low]`
-- **Features to confirm fit the target** before routing here: a built-in site type (`S=1/2`, `Electron`, …), quantum-number conservation, `OpSum` → `MPO` Hamiltonian build, `dmrg` / `apply`, and `svd` with `maxdim` / `cutoff`. Confirm the current spelling against the official docs in *Sources* — the ITensors / ITensorMPS split moved several names. `[Med]`
+- **The library.** ITensors.jl with ITensorMPS.jl — a Julia tensor-network library (the ITensor collaboration; Fishman, White, Stoudenmire). Typed indices with automatic contraction matching, block-sparse storage when quantum numbers are conserved, BLAS-backed dense contraction. ITensorMPS.jl carries the MPS/MPO/DMRG/TEBD layer.
+- **Canonical for** DMRG ground states, imaginary-/real-time TEBD, and MPS measurements; the official docs ship a large worked-example ecosystem (DMRG, TEBD, DMRG-X, quantum-number conservation).
+- **Efficiency.** Dense contraction via BLAS; large speedups from block-sparse tensors when `conserve_qns` is on; first-run Julia precompilation is setup time, not physics time.
+- **Features to confirm fit the target** before routing here: a built-in site type (`S=1/2`, `Electron`, …), quantum-number conservation, `OpSum` → `MPO` Hamiltonian build, `dmrg` / `apply`, and `svd` with `maxdim` / `cutoff`. Confirm the current spelling against the official docs in *Sources* — the ITensors / ITensorMPS split moved several names.
 
 ## Run mechanics
 
@@ -102,9 +102,9 @@ gate   = exp(-tau * h)                                   # imaginary-time gate f
 U, S, V = svd(T, (s1, s2); maxdim = Dc, cutoff = 1e-12)  # truncate the boundary to Dc
 ```
 
-## Parameters — step 3 (software) {survey}
+## Parameters — step 3 (software)
 
-The source for ITensors / MPS-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored — `[Med]`.
+The source for ITensors / MPS-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored —.
 
 What to pin:
 
@@ -140,11 +140,11 @@ Concrete starting points (DMRG and TEBD share the bond-dimension / cutoff contro
 
 The scientific values — model, lattice, sectors, observable, bond-dimension target, convergence criteria, validation target — are caller-supplied; resolve open ones via the step-4 brainstorm, deferring the method algorithm / "why" and the convergence criteria to `/method-mps` or `/method-ltrg` and model physics to the model card. This skill turns agreed values into a runnable ITensors script; it does not originate them.
 
-## Time estimate — feeds step 4 {survey}
+## Time estimate — feeds step 4
 
 Estimate from length `L`, local dimension `d`, bond dimension `chi`, sweeps / time steps, and whether symmetries are used; the result feeds `/reproduce-paper`'s step-4 resource confirmation.
 
-- DMRG wall time scales roughly as `sweeps · L · chi^3` times the local MPO/site factor; memory roughly `L · chi^2` tensors, with a dtype and conserved-sector factor. `[Med]`
-- TEBD wall time scales as `time_steps · gates · chi^3`; memory follows the same `L · chi^2` pattern. `[Med]`
+- DMRG wall time scales roughly as `sweeps · L · chi^3` times the local MPO/site factor; memory roughly `L · chi^2` tensors, with a dtype and conserved-sector factor.
+- TEBD wall time scales as `time_steps · gates · chi^3`; memory follows the same `L · chi^2` pattern.
 - First-run Julia precompilation is setup time, not physics time; report it separately.
 - For uncertain cases, a tiny probe may time a few low-`chi` sweeps or TEBD steps, then extrapolate to the paper `chi` and the largest local-PC-in-15-min setting.
