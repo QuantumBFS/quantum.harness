@@ -81,9 +81,9 @@ The SSE route uses StochasticSeriesExpansion.jl / Carlo.jl (Julia; native, MPI-p
 
 ## Method setup — step 3 (method side)
 
-Conceptual knobs and the tricks behind them. Concrete software values live in `/using-sse` and `/using-cpmc-lab`.
+Conceptual knobs and the tricks behind them — for each, the **intuition for choosing it** and how it moves the result; these have no one-size default, so the trick *is* the guidance. Concrete software values live in `/using-sse` and `/using-cpmc-lab`.
 
-**CPMC/AFQMC** — method-level knobs (concrete CPMC-Lab parameter names, defaults, and convergence values live in `/using-cpmc-lab`):
+**CPMC/AFQMC** — method-level knobs (concrete CPMC-Lab parameter names, starting points, and convergence values live in `/using-cpmc-lab`):
 
 | Knob (method-level) | Controls | Trick / how it affects results |
 |---|---|---|

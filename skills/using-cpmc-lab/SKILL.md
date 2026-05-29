@@ -55,7 +55,7 @@ Returns `E_ave` (ground-state energy), `E_err` (standard error), `savedFileName`
 
 ## Parameters — step 3 (software)
 
-Meaning, hard constraint (enforced by `validation.m`), and the package's documented setup strategy. The method-level "why" lives in `/method-qmc`; the scientific values come from the caller.
+Meaning, hard constraint (enforced by `validation.m`), and the documented setup strategy — for each knob, a **starting point** where one is sensible (otherwise the **choosing principle**, since most of these have no system-independent default), how to converge it, and how it moves the result. Numerical knobs you tune and converge; scientific (model) slots come from the caller and stay neutral. The method-level "why" lives in `/method-qmc`.
 
 Model slots (from the model / problem layer):
 
@@ -75,10 +75,10 @@ Run / sampling slots (from the method / reproduction layer):
 | `N_wlk` | walker population | positive int | population-control bias shrinks as it grows (try 10/20/40/80); fewer walkers need more blocks for the same statistics |
 | `N_blksteps` | random-walk steps per block | positive int | set `≥` autocorrelation time so saved blocks decorrelate; find the minimum that does |
 | `N_eqblk` | equilibration (burn-in) blocks | non-neg int | burn-in time `τ_eq = deltau·N_blksteps·N_eqblk` must exceed the projection-to-ground-state time; read `τ_eq` off the E-vs-τ plot |
-| `N_blk` | measurement blocks | positive int | sets the sample count → error bar `∝ 1/√N_blk` |
+| `N_blk` | measurement blocks | positive int | sets the sample count → error bar `∝ 1/√N_blk`; raise until the error bar is small enough for the target |
 | `itv_modsvd` | re-orthonormalization interval | positive int; `> N_blksteps` ⇒ none | re-orthonormalize (modified Gram-Schmidt) often enough to stay numerically faithful; smaller is safer but costlier |
 | `itv_pc` | population-control interval | positive int; `> N_blksteps` ⇒ none | comb walkers periodically to stop weight blow-up; introduces a bias that can be extrapolated away |
-| `itv_Em` | energy-measurement interval | positive int, `≤ N_blksteps` | how often to measure energy within a block |
+| `itv_Em` | energy-measurement interval | positive int, `≤ N_blksteps` | how often to measure energy within a block; measuring is cheap, so keep it small for better statistics |
 
 `suffix` — char string appended to the saved `.mat` filename; use a timestamp or run-id to disambiguate batch runs.
 

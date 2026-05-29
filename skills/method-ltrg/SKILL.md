@@ -61,7 +61,7 @@ Invoke **`/using-itensors`** once the LTRG route is fixed — it owns ITensors.j
 
 ## Method setup — step 3 (method side)
 
-Conceptual knobs and the tricks behind them. Concrete ITensors values/code live in `/using-itensors`.
+Conceptual knobs and the tricks behind them — for each, the **intuition for choosing it** and how it moves the result; the trick is the guidance where there is no fixed default. Concrete ITensors values/code live in `/using-itensors`.
 
 | Knob | Controls | Trick / how it affects results |
 |---|---|---|

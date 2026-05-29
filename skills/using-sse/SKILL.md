@@ -79,7 +79,7 @@ Read the resulting `<job>.results.json` with `Carlo.ResultTools.dataframe`. Plot
 
 ## Parameters — step 3 (software)
 
-The source for SSE/Carlo-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored —.
+The source for SSE/Carlo-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored: begin from each, then converge it — the convergence check (β sweep, bin size, sweeps/chains), not the starting number, is what makes the result trustworthy.
 
 What to pin:
 

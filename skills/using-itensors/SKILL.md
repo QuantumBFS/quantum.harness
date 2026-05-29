@@ -104,7 +104,7 @@ U, S, V = svd(T, (s1, s2); maxdim = Dc, cutoff = 1e-12)  # truncate the boundary
 
 ## Parameters — step 3 (software)
 
-The source for ITensors / MPS-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored —.
+The source for ITensors / MPS-specific reproduction knobs unless the paper or official code fixes a value. Starting points are software practice, not paper-anchored: begin from each, then converge it — the convergence check (`maxdim`/bond dimension, `cutoff`, sweep count), not the starting number, is what makes the result trustworthy.
 
 What to pin:
 
