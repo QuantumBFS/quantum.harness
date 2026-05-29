@@ -73,6 +73,17 @@ Two routes:
 
 The SSE route uses StochasticSeriesExpansion.jl / Carlo.jl (Julia; native, MPI-parallel).
 
+### Efficiency & parallelism
+
+Cost is ~O(N³) per propagation step (N = sites/basis) × walkers × steps, memory ~O(N²) per walker; AFQMC is *embarrassingly parallel* over walkers and over independent points (twists, sizes, Δτ). What each tool does with that:
+
+| Tool | Parallelism | Reach |
+|---|---|---|
+| CPMC-Lab (harness) | single-core MATLAB — no MPI/GPU/threading; parallel only by farming independent runs as array jobs (`/using-slurm`) | ~100 sites locally (≈32 min @ 4×4 5↑5↓, ≈460 min @ 128×1) |
+| ipie | MPI + GPU (batched propagation / force bias) | O(1000) electrons on GPU clusters |
+| QMCPACK AFQMC | MPI + GPU (single-determinant trials) | leadership-HPC scale |
+| ALF / SmoQyDQMC.jl | MPI, lattice DQMC | finite-T lattice; sign-limited |
+
 ### Handoff
 
 - Invoke **`/using-sse`** once an SSE route is chosen — it owns thermalization, sweeps, chains, bins, the β grid, autocorrelation/binning diagnostics, MPI, and time estimate. The sign criterion stays in this card's *Verification*.
