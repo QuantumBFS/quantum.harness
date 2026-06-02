@@ -109,7 +109,7 @@ Each knob with its default and a consolidated principle/effect (with scaling whe
 | **Operator basis & truncation** | 13 even (pruned from 26) + 5 odd chosen directly (Ising even/odd sectors) | start from a generous symmetry-allowed set, prune operators with small variational coefficient (\|coupling\| < 0.001), enlarge until the leading eigenvalues stop moving; the dominant accuracy lever — too few biases the exponents; optimization cost grows ~linearly in the number of coefficients; the residual p_V vs target gauges the truncation error |
 | **Target distribution p_t** | uniform | choose p_t with analytic averages; uniform makes block spins uncorrelated → removes critical slowing down; p_t = the model's own block distribution recovers Swendsen (a Gaussian for continuous variables) |
 | **Coarsening steps** | 5 per run + 1 preliminary (this paper) | enough steps to read the coupling flow; near a known K_c one step gives the Jacobian; each step compounds truncation + finite-size error; at K_c the couplings stay constant (the convergence signature) |
-| **Sampling budget** | trajectory 3000→1240 steps, 20 sweeps/step, 16 walkers (this paper) | keep sweeps/step small — the trajectory averages per-step noise out; statistical error on the biased averages ~ 1/√samples and walker variance ~ 1/n_w, so lengthen the trajectory or add walkers to tighten the exponents |
+| **Sampling budget** | trajectory 3000→1240 steps, 20 sweeps/step, 16 walkers (this paper) | keep sweeps/step small — the trajectory averages per-step noise out; statistical error on the biased averages ~ 1/√samples and averaging over the walkers (the independent Monte-Carlo chains run in parallel) cuts variance ~ 1/(number of walkers), so lengthen the trajectory or add walkers to tighten the exponents |
 | **Locating K_c** | K_c ≈ 0.436 (2D Ising, b=3; exact 0.4407) | bracket by the coupling flow direction — couplings grow above K_c, shrink below; a tighter bracket → more accurate exponents and lets one small-b step give the Jacobian; near K_c the optimization is noise-sensitive |
 | **Optimizer** | averaged SGD (Bach–Moulines), µ = 5×10⁻⁵→5×10⁻⁶ (L-dependent) | build the bias from the running mean J̄, not instantaneous J; shrink µ as L grows for stability; reset the running mean at 10%/20% to drop its lag; averaged SGD converges ~ O(1/steps); stop at the J̄ plateau |
 | **Spin update** | single-spin Metropolis | local Metropolis on σ under weight e^{−(H+V(τ(σ)))}; rely on the bias (not cluster moves) to kill the correlation time, which otherwise diverges as τ ~ ξ^z near T_c |
@@ -123,7 +123,7 @@ Each knob with its default and a consolidated principle/effect (with scaling whe
 
 ### Cost & resource estimate
 
-Wall time is **one measured rate × a fixed amount of work**: the work (flip count) is *exact*, only the updater throughput is unknown; memory is negligible, so compute is the binding resource. Model-generic scaling (d dimensions, L per side, n_w walkers, n_op operators):
+Wall time is **one measured rate × a fixed amount of work**: the work (flip count) is *exact*, only the updater throughput is unknown; memory is negligible, so compute is the binding resource. Model-generic scaling, written in four quantities: **L** = lattice linear size, **d** = spatial dimension, **n_w** = number of walkers (the independent Monte-Carlo chains run in parallel), **n_op** = number of operators in the basis (the kept couplings).
 
 | Axis | Scaling |
 |---|---|
