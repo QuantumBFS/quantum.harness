@@ -114,3 +114,49 @@ Conceptual knobs and the trick behind each. Values are from 1707.08683 (2D Ising
 
 > **Surface the consequential knobs to the user loudly, not silently.** Two decide the result and must be felt: (1) the **operator basis & truncation** — the main accuracy lever; keeping too few interactions biases the exponents, and the fix is to enlarge the set until the leading eigenvalues stop moving; (2) the **block size & rule** — a larger block needs fewer coarsening steps but costs more, and the rule must be sensible (majority works; decimation-type rules fail). Present each with its consequence and the paper's value, and let the user choose.
 
+## Details
+
+Generic methodology; paper/model facts live in `/reproduce-paper` and `.knowledge/models/`. Math is unicode/plain (surface as LaTeX on an app).
+
+### The idea
+
+Near a critical point the coarse-grained (block-spin) distribution has a diverging correlation length, so sampling it directly suffers critical slowing down — the obstacle for standard MCRG. VMCRG sidesteps this: add a **bias potential V on the block spins** that forces their distribution to a simple **target p_t** (usually uniform → block spins uncorrelated → fast to sample).
+
+The bias is found by minimizing a convex functional Ω[V] which — up to a V-independent constant — is the Kullback–Leibler divergence KL(p_t ‖ p_V) between the target and the biased block-spin distribution p_V. Minimizing it drives p_V → p_t.
+
+The payoff is an identity: at the optimum, V_min = −H′ − log p_t + const, so for uniform p_t the **flattening bias is exactly minus the renormalized Hamiltonian**, H′ = −V_min. One convex optimization delivers both a fast, decorrelated sampler *and* the renormalized couplings K′_α = −J_min,α. (Reason: H′ is by definition −log of the block-spin distribution — an effective free energy — so a bias that cancels it to leave p_t must equal −H′ − log p_t.)
+
+Two pieces make it practical:
+- **Sampling without ever forming H′.** The biased average ⟨·⟩_V is sampled by ordinary Monte Carlo on the *fine* spins σ with weight e^{−H(σ)}·e^{−V(τ(σ))}; tracing out σ happens automatically, so the intractable partial trace defining H′ is never computed.
+- **Exponents from the linearized map.** Differentiating the optimum condition w.r.t. the couplings gives the RG Jacobian ∂K′/∂K at K_c; its eigenvalues give the exponents (λ = b^y), split by spin-flip symmetry into even (thermal) and odd (magnetic).
+
+Swendsen's classic MCRG is the **zero-bias corner**: take the target to be the model's own physical block distribution → V_min = 0 → Swendsen's formulae. A uniform target is the deliberate distortion that kills critical slowing down at no cost; the residual KL(p_t ‖ p_V) under a truncated basis is a built-in truncation-error monitor.
+
+### Notation
+- σ: fine spins; σ′ = τ(σ): block spins via block map τ; b: rescaling factor.
+- H = Σ_α K_α S_α: Hamiltonian (operators S_α, couplings K_α); H′, K′_α: renormalized.
+- V = Σ_α J_α S_α(σ′): bias potential; p_t: target; p_V ∝ e^{−(H′+V)}: biased block-spin distribution.
+- Ω[V]: convex functional; ⟨·⟩_V: biased-ensemble average; ⟨·⟩_pt: target average; K_c: critical coupling.
+
+### Algorithm
+
+1. **Block transformation & exact effective Hamiltonian.** Choose σ′ = τ(σ) (e.g. 3×3 majority, b=3). The block-spin distribution is the constrained partial trace p(σ′) = (1/Z) Σ_σ δ(τ(σ),σ′) e^{−H(σ)} = e^{−H′(σ′)}/Z′ (2), Z′=Z, so H′(σ′) = −log Σ_σ δ(τ(σ),σ′) e^{−H(σ)} (4). H′ generically grows all symmetry-allowed operators (even products only, zero-field Ising); Eq 4 is intractable and never evaluated.
+
+2. **Variational functional.** Ω[V] = log(Σ_σ′ e^{−[H′+V]} / Σ_σ′ e^{−H′}) + Σ_σ′ p_t V (5). Convex (first term is a log-partition); unique minimizer (up to a constant) gives H′ = −V_min − log p_t + const (6) and p_{V_min} = p_t (7).
+
+3. **Parametrize, gradient, Hessian.** V_J = Σ_α J_α S_α(σ′) (8) → Ω convex in J. Gradient ∂Ω/∂J_α = −⟨S_α⟩_V + ⟨S_α⟩_pt (9) — target minus biased average; zero at the optimum (⇔ p_V = p_t). Hessian ⟨S_α S_β⟩_V − ⟨S_α⟩_V⟨S_β⟩_V (10) — connected covariance, PSD (convexity).
+
+4. **The sampling crux.** Since V depends on σ only through σ′=τ(σ), e^{−V} pulls inside the trace: e^{−(H′+V)} = Σ_σ δ(τ(σ),σ′) e^{−H(σ)} e^{−V(τ(σ))}. So the biased block distribution is the marginal of the fine-spin distribution P(σ) ∝ e^{−H(σ)} e^{−V(τ(σ))}. **In practice:** run Metropolis on the *fine* spins σ with weight e^{−H}e^{−V(τ(σ))}; for any coarse operator, compute σ′=τ(σ) per sample and average. H′ and the partial trace are never formed. ⟨·⟩_pt is analytic for simple p_t (uniform → independent fair coins).
+
+5. **Optimize.** Minimize Ω(J) by averaged stochastic gradient descent (Bach–Moulines) from noisy gradient (9)/Hessian (10) over short MC runs; multiple independent walkers reduce variance; the iterate average → J_min.
+
+6. **Renormalized couplings & truncation.** With uniform p_t, K′_α = −J_min,α (11–12) — *mind the minus.* Drop operators with small |J_min,α| (variational truncation); gauge quality by the residual departure of p_{V_min} from p_t.
+
+7. **Jacobian & exponents.** The optimum condition (9)=0 defines K′ implicitly as a function of K. Perturb K_β→K_β+δK_β; K′ responds by δK′. Linearizing (13→15) gives A_βγ = Σ_α (∂K′_α/∂K_β) B_αγ (15), with biased-ensemble connected correlations
+   - A_βγ = ⟨S_β(σ) S_γ(σ′)⟩_V − ⟨S_β(σ)⟩_V⟨S_γ(σ′)⟩_V (16) — **fine** operator S_β(σ) vs **coarse** S_γ(σ′) (response to the bare coupling);
+   - B_αγ = ⟨S_α(σ′) S_γ(σ′)⟩_V − ⟨S_α(σ′)⟩_V⟨S_γ(σ′)⟩_V (17) — two **coarse** operators (response to the renormalized coupling).
+
+   Solve ∂K′/∂K = A B⁻¹ (matrix inversion); diagonalize. Eigenvalues give exponents via λ = b^y. Spin-flip symmetry block-diagonalizes the Jacobian into **even** (thermal → ν) and **odd** (magnetic) sectors — build A, B block-diagonally in parity. Setting the target to the unbiased block distribution makes V_min=0 and collapses (16–17) to **Swendsen's** formulae.
+
+8. **Locate K_c and evaluate there.** Bracket K_c by the flow direction of the couplings across iterations (grow → ordered, shrink → disordered); at K_c they stay constant (paper: window 0.4355–0.4365, b=3; fixed at 0.436). Evaluate the Jacobian at K_c — e.g. couplings after iteration 1 = K_α, after iteration 2 = K′_α; an accurate K_c lets a single coarsening step suffice.
+
