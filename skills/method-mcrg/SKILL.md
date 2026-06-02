@@ -121,6 +121,21 @@ Each knob with its default and a consolidated principle/effect (with scaling whe
 > 3. **Ask one question, then STOP and wait for the answer before the next knob.** Never batch; never accept a silent default.
 > 4. **Walk the knobs leading with the two that decide the result:** (1) **operator basis & truncation** — the accuracy lever; too few interactions bias the exponents, fix is to enlarge until the leading eigenvalues stop moving; (2) **block size & rule** — a larger block needs fewer steps but costs more, and the rule must respect the model's symmetry (majority works; decimation fails). Then the rest.
 
+### Cost & resource estimate
+
+Wall time is **one measured rate × a fixed amount of work**: the work (flip count) is *exact*, only the updater throughput is unknown; memory is negligible, so compute is the binding resource. Model-generic scaling (d dimensions, L per side, n_w walkers, n_op operators):
+
+| Axis | Scaling |
+|---|---|
+| **Compute (FLOPs)** | ∝ (total sweeps) × Lᵈ × n_w flips; per flip O(1) for ΔH + occasional O(operator support) for ΔV when a block vote tips; plus one n_op-operator lattice pass and an n_op×n_op covariance (Hessian) per step |
+| **Memory** | O(Lᵈ·n_w) spins + O(n_op²) Hessian — small, rarely the constraint |
+| **Throughput** | `vmap` over walkers is clean; the bias couples fine spins across each operator's block neighborhood, **breaking the simple checkerboard** → within-lattice vectorization capped. The dominant 1–2 order-of-magnitude unknown; settle it with one jit timing probe |
+| **Wall time** | flips ÷ updater rate, × number of optimizations (locate K_c bracket + the coarsening iterations the Jacobian needs) |
+
+*2D Ising illustration (b=3, n_op≈18, n_w=16): at the paper's budget the flip count runs ~3×10¹⁰ (L=45) to ~7×10¹¹ (L=300) — small L laptop-feasible (minutes–hours CPU, ~10× faster GPU), the largest L wants a GPU/cluster (`/using-slurm`).*
+
+> **Surface the cost to the user before any scale choice (reproduce-paper step 4).** Plain language: the wall time is *one measured rate × a fixed amount of work* — show the firm flip count for their lattice, name the single unknown (how fast the bias-coupled updater runs, which one short timing probe settles), and the per-size reality (small lattices on a laptop; the largest on a GPU/cluster). Let the user feel that **large-L compute is the only real gate** and that picking L sets the cost — never quote a single wall-time number before the probe.
+
 ## Details
 
 Generic methodology; paper/model facts live in `/reproduce-paper` and `.knowledge/models/`. Math is unicode/plain (surface as LaTeX on an app).
