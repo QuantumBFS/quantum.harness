@@ -32,6 +32,15 @@ Use this section as the source for JAX backend knobs used by NetKet, TensorCircu
 - Compilation: JIT boundary, static argument choices, shape stability, cache policy, and expected first-compile latency.
 - Validation: `jax.devices()` output, a backend smoke test in the target environment, and downstream package import.
 
+### Surface to the user — device & JIT boundary
+
+JAX has few knobs; surface these two, built from the user's own situation — don't pick silently.
+
+- **Device.** Ask what they have and how heavy the run is. CPU is fine for debugging and small/local runs; GPU pays off for large vectorized runs (many walkers, big lattices) but needs a compute allocation and an in-allocation smoke test. No GPU → default CPU and say so.
+- **JIT boundary.** Usually `jit` the whole compute-heavy function once — fastest steady state, one compile — rather than many small `jit`s (per-call dispatch overhead) or none (slow). Flag the first-compile latency.
+
+> Present these as a short choice in plain language, adapted to their setup (e.g. ask whether they have a GPU), with the trade-off shown — let the user feel it.
+
 ## Time estimate
 
 Estimate JAX-backed runs as two separate costs: compile time and steady-state execution time.
