@@ -5,7 +5,7 @@ description: Use when the user wants to reproduce a paper's figure or main resul
 
 # reproduce-paper
 
-Beginner-facing paper reproduction. This skill is the **spine of the reproduction workflow**: it owns step 0 (clarify the problem), steps 4–5 (review the plan, write the plan HTML), and the implementation stage (run, verify, report). It **delegates** method selection, software selection, and parameter setup (steps 1–3) to `/method-*` and `/using-*`, and model facts to `.knowledge/models/`. Brainstorm the science with the user one decision at a time, keep choices pending until the planning questions are complete, then save one `run.json`, build one standalone HTML report (proposal first, results appended), and run only the approved plan.
+Beginner-facing paper reproduction. This skill is the **spine of the reproduction workflow**: it owns step 0 (clarify the problem), steps 4–5 (review the plan, write the plan HTML), and the implementation stage (run, report, and opt-in verification on user request). It **delegates** method selection, software selection, and parameter setup (steps 1–3) to `/method-*` and `/using-*`, and model facts to `.knowledge/models/`. Brainstorm the science with the user one decision at a time, keep choices pending until the planning questions are complete, then save one `run.json`, build one standalone HTML report (proposal first, results appended), and run only the approved plan.
 
 The workflow, end to end:
 
@@ -16,7 +16,7 @@ The workflow, end to end:
 3. Configure                  — method setup in /method-*, software params in /using-*
 4. Review the plan            — owned here
 5. Write the plan HTML        — owned here
-Implementation                — run + intermediate output + verify (checks from /method-*)
+Implementation                — run + intermediate output + report (verification opt-in, on user request)
 ```
 
 ## UX — top priority, always on
@@ -142,8 +142,8 @@ Then ask **Approve / Change / Discuss** — one question, the run's only approva
 
 1. **Run** the approved plan. The script lands at `tracks/<track>/solutions/<model>_<brief>.{jl|py}` and saves output (figures, data) under `tracks/<track>/results/<run>/`. Fix ordinary code breakage quietly and rerun; interrupt the user only when a real choice is needed (e.g. the chosen tool genuinely can't express this target).
 2. **Intermediate output {survey}.** Long runs must emit partial estimates, not just a final value — and the method card says *which* signal to watch mid-run: QMC the energy-vs-imaginary-time flattening and the average sign; LTRG the finite, smooth log-scale factors and small discarded weight. Surface these as short status lines so correctness is partially confirmed before the run ends.
-3. **Verify correctness {survey}.** Apply the `/method-*` *Verification* — final checks (Δτ→0 / τ→0 extrapolation, Dc or bond-dimension convergence, small-system ED cross-check, benchmark comparison) — and report each figure's result honestly against the `expected` written at plan time: set `match` to `yes`, `partly`, or `no`, and say why.
-4. **Append results.** Fill each figure's `results` block and the run's `actual` (consumed wall time and memory per run point) in `run.json`, re-run `build_report.py`, re-render via `/report`, then open it. Offer a couple of next steps drawn from the outcome (a larger scope, another figure from the same data, or stop).
+3. **Append results + honest verdict.** For each figure set `match` to `yes`, `partly`, or `no` against the `expected` written at plan time and say why — a direct comparison of the run's numbers to expectation, no extra compute, always done. Fill each figure's `results` block and the run's `actual` (consumed wall time and memory per run point) in `run.json`, re-run `build_report.py`, re-render via `/report`, then open it. Offer a couple of next steps drawn from the outcome (a larger scope, another figure from the same data, or stop).
+4. **Verification is opt-in.** Do NOT run convergence sweeps, extrapolations (Δτ→0 / τ→0), small-system cross-checks, or benchmark reruns on your own — they cost compute and step 3 already reports the result. Invoke them ONLY when the user challenges or is confused about a result. When that happens: read the `/method-*` *Verification* / *Criticize* section and **propose** the relevant checks Superpowers-brainstorming style — 2–3 options, recommendation-first, each one line with what it confirms and its rough cost — then run only the check(s) the user confirms. Never spend compute on verification the user didn't ask for.
 
 Rendering composes with `/report`; a cluster run composes with `/using-slurm` (ship / submit / monitor / fetch); installs compose with the tool skill (`/setup-julia` for Julia, `/using-cpmc-lab` for the MATLAB CPMC-Lab package, and so on). This skill does not duplicate those.
 

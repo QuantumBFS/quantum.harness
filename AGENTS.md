@@ -220,12 +220,12 @@ ion self --help                          # Manage the Ion install
 
 ### Equation Rendering
 
-Match equation notation to the reader's surface — **chat messages only** (reports always render LaTeX; plots use matplotlib mathtext):
+Chat messages use **UTF-8 unicode math on every surface** (reports render LaTeX via MathML; plots use matplotlib mathtext):
 
-- **Default UTF-8 unicode math** — renders in any surface: `⟨ψ|H|ψ⟩`, `E₀/N = −0.4438`, `J₂/J₁ ≈ 0.5`, `gap Δ`, `S=½`, `Σ ∏ √ ⊗ † ≤ ≥ ± ∞`.
-- **LaTeX (`$…$`) only on a math-rendering app** (KaTeX/MathJax): `$E_0/N = -0.4438$`. Never in a terminal — it shows literal `$` and backslashes.
-- **Detect once per session; unknown → UTF-8** (the universal-safe default). Claude: `CLAUDE_CODE_ENTRYPOINT` (`cli` = terminal, `claude-desktop`/web/IDE = app). Codex: CLI = terminal, markdown-math cloud/IDE = app. Generic test: does the surface render `$x^2$` as math?
-- **Skill cards and reference docs store math in unicode/plain** (the universal-safe form, e.g. `K_c`, `S_α`, `⟨·⟩_V`), never `$…$`. When surfacing that math to a user, convert to their surface: LaTeX on an app, unicode/plain in a terminal.
+- **Always UTF-8 unicode math in chat** — `⟨ψ|H|ψ⟩`, `E₀/N = −0.4438`, `J₂/J₁ ≈ 0.5`, `gap Δ`, `S=½`, `Σ ∏ √ ⊗ † ≤ ≥ ± ∞`. Renders on any surface.
+- **Never emit `$…$` LaTeX in chat.** This harness always runs as **Claude Code**, whose chat panels (terminal, VS Code, desktop app, claude.ai/code) do **not** render `$…$` — they show literal `$` and backslashes. (The conversational claude.ai app *does* render LaTeX, but it is not a Claude Code surface and never the agent's output target here.) LaTeX lives only in the HTML report (→ MathML) and matplotlib mathtext.
+- **`CLAUDE_CODE_ENTRYPOINT` still distinguishes terminal vs GUI — for image embedding only** (`cli` = terminal → open files with `open`/`xdg-open`; `claude-desktop`/web/IDE = GUI → embed images inline as markdown). It is **not** a signal for math rendering.
+- **Skill cards and reference docs store math in unicode/plain** (`K_c`, `S_α`, `⟨·⟩_V`), surfaced to the user as-is.
 
 ## Agent guidelines
 
