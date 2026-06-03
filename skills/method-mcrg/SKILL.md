@@ -101,7 +101,7 @@ Invoke **/using-jax** once the route is fixed — it owns JAX CPU/GPU setup, jit
 
 ## Method setup — step 3
 
-Each knob with its default and a consolidated principle/effect (with scaling where it matters). Defaults are the paper's 2D-Ising values — parenthesized where model/paper-specific; the principle transfers to other models. K_c = the critical coupling, where the exponents are defined. Software-side values (JAX device, JIT boundary) live in `/using-jax`. *(Math unicode/plain; surface as LaTeX on an app.)*
+Each knob with its default and a consolidated principle/effect (with scaling where it matters). Defaults are the paper's 2D-Ising values — parenthesized where model/paper-specific; the principle transfers to other models. K_c = the critical coupling, where the exponents are defined. Software-side values (JAX device, JIT boundary) live in `/using-jax`. *(Math unicode/plain.)*
 
 | Knob | Default | Principle, effect & scaling |
 |---|---|---|
@@ -138,7 +138,7 @@ Wall time is **one measured rate × a fixed amount of work**: the work (flip cou
 
 ## Details
 
-Generic methodology; paper/model facts live in `/reproduce-paper` and `.knowledge/models/`. Math is unicode/plain (surface as LaTeX on an app).
+Generic methodology; paper/model facts live in `/reproduce-paper` and `.knowledge/models/`. Math is unicode/plain.
 
 ### The idea
 
