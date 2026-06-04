@@ -2,16 +2,53 @@
 
 Certified-bound track: noncommutative polynomial optimization via the structured
 moment-SOHS hierarchy, solved as a semidefinite program. Unlike every other track
-here, it returns a **provable lower bound** on the ground-state energy (and on Bell
-/ state-polynomial objectives), not an estimate — so it is the natural rigorous
-cross-check for a variational upper bound.
+here, it returns a **provable lower bound** on the ground-state energy (not an
+estimate) — the natural rigorous cross-check for a variational / QMC value.
 
-- **Method card:** `/method-polyopt` — cross-method routing, certification role, SDP cost heuristic.
+- **Method card:** `/method-polyopt` — routing, certification role, SDP cost heuristic.
 - **Software:** `/using-nctssos` — NCTSSoS.jl + Clarabel (`make install nctssos`).
-- **Modeling brain:** `/polyopt-guide` (reused upstream, from `exAClior/easy-nctssos`) — problem-type / algebra / formulation / sparsity / GNS. Ground truth on modeling.
+- **Modeling brain:** `/polyopt-guide` (reused upstream, `exAClior/easy-nctssos`) — algebra / formulation / sparsity / GNS. Ground truth on modeling.
+
+## Reproduction target
+
+Wang, Surace, Frérot, Legat, Renou, Magron, Acín, "Certifying ground-state
+properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024),
+[doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006),
+[arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
+
+**Figure 8** — ground-state energy of the **square-lattice antiferromagnetic
+Heisenberg model** with periodic boundary conditions: the certified SDP **lower
+bound** on the energy per site vs system size, compared to quantum Monte Carlo
+(QMC ≈ exact). Paper covers N = L×L with L = 4, 6, 8, 10.
+
+**Scope for this track: L = 4, 6, 8** (drop the paper's L = 10 — it is the
+expensive point and the one where degree-4 monomials are discarded).
+
+- **Hamiltonian.** H = ¼ Σ_{⟨ij⟩} Σ_{a∈{x,y,z}} σ^a_i σ^a_j on the L×L square
+  lattice, nearest-neighbor bonds, PBC (Eq. 13). Antiferromagnetic. Energy
+  reported **per site** (E/N).
+- **Method.** NCTSSoS moment-SOHS / NPA-style SDP via `/method-polyopt` →
+  `/using-nctssos`; Pauli algebra; monomial set and sparsity per `/polyopt-guide`
+  (the paper's basis: identity, single σ, two-spin σσ up to range 3, and a set of
+  three-/four-spin terms — see the Fig. 8 paragraph in the rendered paper).
+- **Target metric.** The certified lower bound E_SDP/N at each L, plotted vs L
+  beside the QMC reference; the takeaway is the ~1% relative gap E_SDP ≤ E₀ ≈ E_MC.
+
+### Benchmark (Table IX — the comparison anchor)
+
+| L | N | E_SDP/N (certified lower bound) | E_MC/N (QMC ≈ exact) |
+|---|---|---|---|
+| 4 | 16 | −0.70305078 | −0.7017777 |
+| 6 | 36 | −0.68317181 | −0.6788734 |
+| 8 | 64 | −0.67967080 | −0.6734875 |
+
+E_SDP is below E_MC at every size (a valid lower bound: E_SDP ≤ E₀ ≤ E_MC),
+relative gap ≈ 0.002–0.009.
 
 ## References
 
-1. **NCTSSoS.jl** — the solver. J. Wang et al., [github.com/QuantumSOS/NCTSSoS.jl](https://github.com/QuantumSOS/NCTSSoS.jl). Successor to NCTSSOS.
-2. **Moment-SOS / NPA hierarchy** — M. Navascués, S. Pironio, A. Acín, "A convergent hierarchy of semidefinite programs characterizing the set of quantum correlations," *New J. Phys.* **10**, 073013 (2008). [doi:10.1088/1367-2630/10/7/073013](https://doi.org/10.1088/1367-2630/10/7/073013), [arXiv:0803.4290](https://arxiv.org/abs/0803.4290).
-3. **NC sparsity (TSSOS family)** — J. Wang, V. Magron, J.-B. Lasserre, "TSSOS: A Moment-SOS Hierarchy That Exploits Term Sparsity," *SIAM J. Optim.* **31**, 30 (2021). [arXiv:1912.08899](https://arxiv.org/abs/1912.08899).
+1. **Reproduction target** — [@wang_2024_certifying] (above). Rendered:
+   `.knowledge/literature/polynomial-optimization/2310.05844_*.md`; Table IX in Appendix F. Ships the Julia package QMBCertify.
+2. **NCTSSoS.jl** — the solver. [github.com/QuantumSOS/NCTSSoS.jl](https://github.com/QuantumSOS/NCTSSoS.jl).
+3. **Sparse Polynomial Optimization: Theory and Practice** — Magron & Wang, World Scientific (2023), [arXiv:2208.11158](https://arxiv.org/abs/2208.11158). Background monograph ([@magron_2023_sparse]).
+4. **Moment-SOS / NPA hierarchy** — Navascués, Pironio, Acín, *New J. Phys.* **10**, 073013 (2008), [arXiv:0803.4290](https://arxiv.org/abs/0803.4290).
