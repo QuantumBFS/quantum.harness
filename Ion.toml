@@ -30,6 +30,9 @@ using-tensorcircuit-ng = { type = "local" }
 using-pepskit = { type = "local" }
 using-sse = { type = "local" }
 using-cpmc-lab = { type = "local" }
+using-nctssos = { type = "local" }
+# Reused upstream modeling brain for NCTSSoS (ground truth on polyopt modeling)
+polyopt-guide = { source = "exAClior/easy-nctssos/skills/polyopt-guide" }
 
 # Method-level guidance
 method-ed = { type = "local" }
@@ -41,6 +44,7 @@ method-mcrg = { type = "local" }
 method-vmc = { type = "local" }
 method-qcs = { type = "local" }
 method-mf = { type = "local" }
+method-polyopt = { type = "local" }
 
 # UX
 onboard = { type = "local" }

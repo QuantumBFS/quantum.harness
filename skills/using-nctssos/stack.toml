@@ -1,0 +1,29 @@
+id = "nctssos"
+name = "NCTSSoS.jl + Clarabel.jl"
+language = "julia"
+canonical_for = ["polyopt", "moment-sos", "noncommutative-optimization", "sohs-hierarchy"]
+default_profile = "cpu"
+
+[profiles.cpu]
+label = "CPU"
+default = true
+install = "cpu"
+smoke = "cpu"
+
+[profiles.cpu.requirements]
+allocation = "login-or-compute"
+mpi = false
+
+[install.cpu]
+command = "make install nctssos"
+notes = "Adds NCTSSoS + Clarabel to julia-env via Julia Pkg; setup-julia handles the Julia install/mirror first."
+
+[smoke.cpu]
+where = "login"
+command = "julia --project=julia-env -e 'using NCTSSoS, Clarabel'"
+
+[docs]
+official = "https://quantumsos.github.io/NCTSSoS.jl/"
+repo = "https://github.com/QuantumSOS/NCTSSoS.jl"
+solver = "https://github.com/oxfordcontrol/Clarabel.jl"
+modeling_skill = "polyopt-guide (exAClior/easy-nctssos) — ground truth on modeling"

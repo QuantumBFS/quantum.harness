@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit cpmc-lab classical-repro pdf-render
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit nctssos cpmc-lab classical-repro pdf-render
 
 .PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -167,6 +167,14 @@ install-pepskit: ## Install PEPSKit.jl + TensorKit.jl CTMRG stack into julia-env
 	@mkdir -p julia-env
 	@cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["PEPSKit", "TensorKit", "QuadGK", "Plots"])'
 	@echo "Julia PEPSKit/CTMRG environment ready in julia-env/"
+	@echo "Activate with: julia --project=julia-env"
+
+install-nctssos: ## Install NCTSSoS.jl + Clarabel.jl polynomial-optimization stack into julia-env/
+	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
+	@mkdir -p julia-env
+	@julia --project=julia-env -e 'using NCTSSoS, Clarabel' >/dev/null 2>&1 || { cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["NCTSSoS", "Clarabel", "Plots", "JSON"])'; }
+	@julia --project=julia-env -e 'using NCTSSoS, Clarabel'
+	@echo "Julia NCTSSoS polynomial-optimization environment ready in julia-env/"
 	@echo "Activate with: julia --project=julia-env"
 
 install-cpmc-lab: ## Install CPMC-Lab Matlab package into .external/cpmc-lab/
