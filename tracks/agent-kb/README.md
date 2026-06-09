@@ -1,4 +1,4 @@
-# AI Agent and Knowledge Base (智能体与数据库)
+# AI Agent and Knowledge Base
 
 A track about **AI for science**, on two coupled fronts:
 
