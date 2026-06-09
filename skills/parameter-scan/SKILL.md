@@ -40,14 +40,23 @@ The caller is `solve`, a model/physics card, `/reproduce-paper`, or another work
 
 ## Workflow
 
-1. **Plan.** Enumerate Cartesian product and write `results/<run>/parameter-scan.plan.json`.
-2. **Build run spec.** For resumable or cluster execution, write `results/<run>/run_spec.json` using the generic contract below.
-3. **Resume detect.** Identify cells with success manifests, failed manifests, missing manifests, or no cell directory.
+**The mechanical stages — enumeration, manifest collection + validation, shape labelling, and arity-based plotting — are implemented by `scripts/parameter_scan.py`; run its subcommands rather than doing them by hand.** Axis ranges, the per-cell compute, retry decisions, and interpretation stay with the caller.
+
+```bash
+python3 scripts/parameter_scan.py plan    --axes axes.json --run-id <run> [--settings s.json] [--provenance p.json]
+python3 scripts/parameter_scan.py collect --run-spec results/<run>/run_spec.json [--success-field FIELD] [--success-value true] [--value-field FIELD ...]
+python3 scripts/parameter_scan.py shape   --csv results/<run>/parameter-scan.csv --x-axis AXIS --value-col COL [--series-axis AXIS]
+python3 scripts/parameter_scan.py plot    --csv results/<run>/parameter-scan.csv --axes axes.json --value-col COL [--err-col COL]
+```
+
+1. **Plan.** `plan` enumerates the Cartesian product and writes `parameter-scan.plan.json` + `run_spec.json` (generic contract below).
+2. **Build run spec.** `plan` emits `run_spec.json` for resumable/cluster execution.
+3. **Resume detect.** `collect` (and `/using-slurm pending-cells`) classify cells: success / failed / missing manifest / no cell directory.
 4. **Execute.** Run locally for small scans; compose with `/using-slurm` for cluster scans.
 5. **Retry only by policy.** Auto-bump controlling settings only for cells whose manifest reports non-convergence and whose caller declared a retry policy.
-6. **Collect.** Assemble every manifest into `results/<run>/parameter-scan.csv`; failed/missing cells appear with status.
-7. **Plot.** Emit `results/<run>/parameter-scan.png`; choose line/errorbar, family curves, or heatmap based on axis arity.
-8. **Shape labels.** Apply generic shape labels from the reference; no physical interpretation.
+6. **Collect.** `collect` assembles every manifest into `parameter-scan.csv`; failed/missing cells appear with status and the validation report flags consensus violations.
+7. **Plot.** `plot` emits `parameter-scan.png`, choosing line/errorbar, family curves, or heatmap by axis arity.
+8. **Shape labels.** `shape` applies the generic shape labels from the table below; no physical interpretation.
 9. **Hand back.** Return table, plot, shape labels, and recommended next step to caller.
 
 ## Assemble Invariants

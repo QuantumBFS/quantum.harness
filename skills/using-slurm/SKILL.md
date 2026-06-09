@@ -30,6 +30,19 @@ For parameter grids, compose with `/parameter-scan`. `/parameter-scan` owns cell
 
 ## Workflow
 
+**The ssh/sbatch/squeue/sacct mechanics are implemented by `scripts/harness_slurm.sh`; drive it rather than typing remote commands by hand.** It hard-codes no cluster specifics — connection comes from the active profile or `--alias`/`--repo` overrides, and `--dry-run` previews any remote command before it leaves the laptop. The *judgment* stays with the agent: which partition (binding rule below), whether to ship a dirty tree, whether to retry a failed cell. Scheduler state is still not evidence — fetched manifests close claims.
+
+```bash
+scripts/harness_slurm.sh precheck                       # resolve profile, ssh echo ok, git dirty status
+scripts/harness_slurm.sh probe-partitions               # parsed sinfo table — agent ratifies the choice
+scripts/harness_slurm.sh submit --array N --run-spec results/<run>/run_spec.json \
+    --command '<cmd>' --partition <p> --time <t> --cpus <n>   # captures the job id
+scripts/harness_slurm.sh status <jobid>                 # squeue state + pending-reason category
+scripts/harness_slurm.sh fetch <run>                    # rsync results/<run>/ back
+scripts/harness_slurm.sh classify <run> <jobid>         # sacct + manifests -> per-cell outcome table
+scripts/harness_slurm.sh pending-cells <run> [--success-field F --success-value V]
+```
+
 1. **Pre-check.** Resolve profile, test ssh, capture dirty status.
 2. **Probe and ratify partition.** Inspect queue state and present 2-3 viable options with recommended first.
 3. **Bootstrap only if needed.** Ensure remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.

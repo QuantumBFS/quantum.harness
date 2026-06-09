@@ -31,6 +31,9 @@ scripts/_*
 /results/
 /tmp/
 /.external/
+.venv-tenpy/
+.pytest_cache/
+.coverage
 __pycache__/
 target/
 .superpowers/

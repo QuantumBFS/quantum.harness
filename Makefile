@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu sse pepskit nctssos cpmc-lab classical-repro pdf-render
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos cpmc-lab classical-repro pdf-render
 
 .PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -110,7 +110,16 @@ install-itensors: ## Install ITensors.jl + ITensorMPS.jl + KrylovKit.jl into jul
 	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
 	@mkdir -p julia-env
 	@cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["ITensors", "ITensorMPS", "KrylovKit", "MPSKit", "Plots"])'
+	@julia --project=julia-env -e 'using ITensors, ITensorMPS, KrylovKit, MPSKit'
 	@echo "Julia/ITensors environment ready in julia-env/"
+	@echo "Activate with: julia --project=julia-env"
+
+install-mpskit: ## Install MPSKit.jl + MPSKitModels.jl + TensorKit.jl into julia-env/ (infinite MPS: VUMPS/IDMRG)
+	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
+	@mkdir -p julia-env
+	@cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["MPSKit", "MPSKitModels", "TensorKit"])'
+	@julia --project=julia-env -e 'using MPSKit, MPSKitModels, TensorKit'
+	@echo "MPSKit environment ready in julia-env/"
 	@echo "Activate with: julia --project=julia-env"
 
 install-xdiag: ## Install XDiag.jl exact diagonalization stack into julia-env/
@@ -145,6 +154,7 @@ install-netket: ## Install NetKet + JAX for VMC / neural quantum states into .ve
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@[ -d .venv ] || uv venv .venv
 	@uv pip install netket jax jaxlib flax optax matplotlib
+	@.venv/bin/python -c 'import netket, jax; print(netket.__version__, jax.devices())'
 	@echo "NetKet environment ready in .venv"
 	@echo "Activate with: source .venv/bin/activate"
 
@@ -154,6 +164,14 @@ install-netket-gpu: ## Install NetKet with CUDA-enabled JAX wheels into .venv (L
 	@uv pip install 'netket[cuda]' matplotlib
 	@echo "NetKet GPU environment ready in .venv"
 	@echo "Smoke test inside a GPU allocation: JAX_PLATFORM_NAME=gpu python -c 'import jax; print(jax.devices())'"
+
+install-tenpy: ## Install TeNPy (physics-tenpy) into an isolated .venv-tenpy (Python iTEBD / MPS)
+	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
+	@uv venv .venv-tenpy
+	@uv pip install --python .venv-tenpy/bin/python physics-tenpy matplotlib
+	@.venv-tenpy/bin/python -c 'import tenpy; print(tenpy.__version__)'
+	@echo "TeNPy environment ready in .venv-tenpy (isolated venv: TeNPy pins a numpy ABI)"
+	@echo "Run with: .venv-tenpy/bin/python scripts/<name>.py"
 
 install-sse: ## Install Julia SSE QMC stack into julia-env/
 	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }

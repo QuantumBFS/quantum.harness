@@ -1,0 +1,29 @@
+id = "tenpy"
+name = "TeNPy (physics-tenpy)"
+language = "python"
+canonical_for = ["itebd", "idmrg", "vumps", "mps", "finite-temperature-purification"]
+default_profile = "cpu"
+
+[profiles.cpu]
+label = "CPU"
+default = true
+install = "cpu"
+smoke = "cpu"
+
+[profiles.cpu.requirements]
+allocation = "login-or-compute"
+mpi = false
+venv = ".venv-tenpy"
+
+[install.cpu]
+command = "make install tenpy"
+notes = "Installs into an isolated .venv-tenpy; TeNPy pins a numpy ABI and must not share the main .venv or an anaconda base."
+
+[smoke.cpu]
+where = "login"
+command = ".venv-tenpy/bin/python -c 'import tenpy; print(tenpy.__version__)'"
+
+[docs]
+method = "skills/method-mps/SKILL.md"
+official = "https://tenpy.readthedocs.io/en/latest/"
+paper = ".knowledge/literature/mps-based-algorithm/1701.07035_variational-optimization-algorithms-for-uniform-matrix-produ.md"

@@ -10,8 +10,8 @@ Use TeNPy (Tensor Network Python; Hauschild & Pollmann) as the harness's Python 
 ## Sources
 
 - Method card: `skills/method-mps/SKILL.md`
-- Install: `pip install physics-tenpy` into an **isolated virtualenv** (TeNPy pins a numpy ABI — installing into a shared anaconda base causes import-time ABI mismatches). The harness used a dedicated venv (TeNPy 1.1.0, numpy 2.x).
-- Smoke test: `python -c "import tenpy; print(tenpy.__version__)"`
+- Install: `make install tenpy` — creates the **isolated** `.venv-tenpy` and installs `physics-tenpy` + matplotlib (TeNPy pins a numpy ABI, so it must not share the main `.venv`/anaconda base or imports hit ABI mismatches). Run scripts with `.venv-tenpy/bin/python scripts/<name>.py`.
+- Smoke test (also run by the install target): `.venv-tenpy/bin/python -c "import tenpy; print(tenpy.__version__)"`
 - Primary literature: `1701.07035` (VUMPS) in `.knowledge/literature/mps-based-algorithm/`.
 
 ## Workflow

@@ -34,6 +34,17 @@ This skill MUST NEVER name the physical exponent (ν, γ, c, etc.) or identify a
 
 ## Workflow
 
+**The mechanical pipeline (load → validate → fit → bootstrap → χ²/ν → plot) is implemented by `scripts/scaling_fit.py` — run it, do not reimplement.** The agent's job is the *judgment* around it: pick the fit form, supply any pinned values, and interpret the result against the caller's physics anchor. One form per invocation (the script never auto-cycles).
+
+```bash
+python3 scripts/scaling_fit.py <data.csv> --form {power-law|log-L|polynomial|data-collapse} \
+  [--size-col L] [--obs-col obs] [--err-col err] [--param-col h] [--degree 2] \
+  [--pin name=value ...] [--bootstrap 1000] \
+  --out-csv results/<run>/scaling-fit.csv --out-png results/<run>/scaling-fit.png
+```
+
+The script enforces the steps below; the numbered list is the contract it implements (not a hand procedure):
+
 1. Load the table; verify size and uncertainty columns are present and non-empty for **every** row. If any row is missing one of the columns, stop with a one-line `blocked:` report naming the missing column; do NOT silently impute.
 2. Pick the fit form (default or as instructed). For `data-collapse`, both axes are scanned over `(h_c, ν, γ/ν)` to minimize collapse residual; for `power-law` / `log-L` / `polynomial`, weighted least-squares.
 3. Estimate uncertainties via bootstrap: resample the data points with their uncertainties **N times** (default N=1000), refit on **every** resample, and report quantile error bars from the resulting distribution. Cover **every** declared bootstrap resample; do NOT drop resamples for which the fit failed to converge silently — surface them in the report as `failed_resamples = N` so the caller can assess fit stability.
@@ -46,7 +57,7 @@ This skill MUST NEVER name the physical exponent (ν, γ, c, etc.) or identify a
 - `results/<run>/scaling-fit.csv` — fitted parameters, uncertainties, quality-of-fit.
 - `results/<run>/scaling-fit.png` — collapse / residual plot.
 - 2–3-line report: fitted exponent(s) with uncertainty, fit quality.
-- `scripts/<run>/scaling-fit.jl` (or `.py`) — reproducible script.
+- The exact `scripts/scaling_fit.py …` invocation is itself the reproducible record; save it with the run.
 
 ## Quality-of-fit interpretation
 
