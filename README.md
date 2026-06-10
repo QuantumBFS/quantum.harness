@@ -35,7 +35,7 @@ Each method is curated by world-leading experts in that computational approach.
 | Method | Expert contributor | Skill |
 |---|---|---|
 | Exact diagonalization | [Chen Cheng (程晨)](https://scholar.google.com/citations?user=LZpS-T0AAAAJ) | `/method-ed` |
-| MPS / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=7wiebe8AAAAJ) | `/method-mps` |
+| MPS / LTRG / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=7wiebe8AAAAJ) | `/method-mps` · `/method-ltrg` |
 | PEPS / CTMRG | [Hai-Jun Liao (廖海军)](https://scholar.google.com/citations?user=_8KbQtEAAAAJ) | `/method-peps` |
 | Quantum Monte Carlo | [Ming-Pu Qin (秦明普)](https://scholar.google.com/citations?user=ikqa-0IAAAAJ) | `/method-qmc` |
 | Monte Carlo renormalization group | [Yan-Tao Wu (武琰涛)](https://scholar.google.com/citations?user=D8sgaMwAAAAJ) | `/method-mcrg` |
