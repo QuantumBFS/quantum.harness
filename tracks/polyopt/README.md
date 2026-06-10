@@ -2,24 +2,24 @@
 
 ## Reproduction target
 
-Wang, Surace, Frérot, Legat, Renou, Magron, Acín, "Certifying ground-state properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024), [doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006), [arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
+Wang, Jansen, Frérot, Renou, Magron, Acín, "Scalable Ground-State Certification of Quantum Spin Systems via Structured Noncommutative Polynomial Optimization," arXiv:2604.01555 (2026), [arXiv:2604.01555](https://arxiv.org/abs/2604.01555).
 
-Reproduce **Figure 8** — the certified ground-state energy per site of the square-lattice antiferromagnetic Heisenberg model, $H = \frac{1}{4}\sum_{\langle ij\rangle}\vec{\sigma}_i\cdot\vec{\sigma}_j$ on the $L\times L$ lattice with periodic boundary conditions (Eq. 13), versus system size. The moment-SOHS / NPA-style semidefinite relaxation returns a *provable* lower bound $E_\mathrm{SDP}\le E_0$ rather than a variational estimate, plotted against quantum Monte Carlo ($\approx$ exact). Scope: $N = L\times L$ with $L = 4, 6, 8$ (the paper's $L = 10$, where degree-4 monomials are discarded, is dropped).
+Reproduce **Table 8 / Figure 7** — the certified ground-state energy per spin of the square-lattice antiferromagnetic Heisenberg model, $H = \frac{1}{4}\sum_{\langle ij\rangle}\vec{\sigma}_i\cdot\vec{\sigma}_j$ on the $L\times L$ lattice with periodic boundary conditions (Eq. 4.3), versus system size. The structured moment-SOHS / NPA-style semidefinite relaxation — correlative/term sparsity plus the model's sign, translation, and conjugation symmetries — returns a *provable* lower bound $E_\mathrm{SDP}\le E_0$ rather than a variational estimate, and scales to $L = 16$ (256 spins) in the paper. Scope for this track: $L = 4, 6, 8$, benchmarked against exact diagonalization ($L = 4, 6$) and QMC ($L = 8$).
 
-### Benchmark (Table IX)
+### Benchmark (Table 8)
 
-| L | N | E_SDP/N (certified lower bound) | E_MC/N (QMC ≈ exact) |
-|---|---|---|---|
-| 4 | 16 | −0.70305078 | −0.7017777 |
-| 6 | 36 | −0.68317181 | −0.6788734 |
-| 8 | 64 | −0.67967080 | −0.6734875 |
+| L | N | E_SDP/N (certified lower bound) | E_ref/N (ED for L≤6, QMC for L=8) | rel. gap |
+|---|---|---|---|---|
+| 4 | 16 | −0.701783 | −0.701780 | 0.00% |
+| 6 | 36 | −0.680886 | −0.678872 | 0.30% |
+| 8 | 64 | −0.676370 | −0.673487 | 0.43% |
 
-The bound sits below the QMC value at every size ($E_\mathrm{SDP}\le E_0\le E_\mathrm{MC}$), relative gap $\approx 0.002$–$0.009$.
+The bound sits at or below the reference at every size ($E_\mathrm{SDP}\le E_0\le E_\mathrm{ref}$), tightening on the predecessor work by orders of magnitude.
 
 ## References
 
-1. **Certifying ground-state properties** — the reproduction target above; certified moment-SOHS SDP bounds for 1D/2D spin systems. Ships the Julia package QMBCertify.
-   J. Wang, J. Surace, I. Frérot, B. Legat, M.-O. Renou, V. Magron, A. Acín, "Certifying ground-state properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024). [doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006), [arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
+1. **Scalable Ground-State Certification** — the reproduction target above; structured moment-SOHS SDP scaling certified spin-system bounds to 16×16 lattices. Ships the Julia package QMBCertify.
+   J. Wang, D. Jansen, I. Frérot, M.-O. Renou, V. Magron, A. Acín, "Scalable Ground-State Certification of Quantum Spin Systems via Structured Noncommutative Polynomial Optimization," arXiv:2604.01555 (2026). [arXiv:2604.01555](https://arxiv.org/abs/2604.01555), [github](https://github.com/wangjie212/QMBCertify).
 2. **Burgdorf, Klep & Povh** — noncommutative polynomial optimization: eigenvalue and trace optimization via the moment-SOHS hierarchy.
    S. Burgdorf, I. Klep, J. Povh, *Optimization of Polynomials in Non-Commuting Variables*, SpringerBriefs in Mathematics (Springer, 2016). [doi:10.1007/978-3-319-33338-0](https://doi.org/10.1007/978-3-319-33338-0).
 3. **NPA hierarchy** — convergent moment-SOS relaxations for noncommutative polynomial optimization.
