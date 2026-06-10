@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos cpmc-lab classical-repro pdf-render
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render
 
 .PHONY: skills clean help install $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -193,6 +193,15 @@ install-nctssos: ## Install NCTSSoS.jl + Clarabel.jl polynomial-optimization sta
 	@julia --project=julia-env -e 'using NCTSSoS, Clarabel' >/dev/null 2>&1 || { cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["NCTSSoS", "Clarabel", "Plots", "JSON"])'; }
 	@julia --project=julia-env -e 'using NCTSSoS, Clarabel'
 	@echo "Julia NCTSSoS polynomial-optimization environment ready in julia-env/"
+	@echo "Activate with: julia --project=julia-env"
+
+install-qmbcertify: ## Install QMBCertify.jl + Mosek structured-NPA certification stack into julia-env/
+	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
+	@mkdir -p julia-env
+	@julia --project=julia-env -e 'using QMBCertify' >/dev/null 2>&1 || { cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(url="https://github.com/wangjie212/QMBCertify"); Pkg.add(["Plots", "JSON"])'; }
+	@julia --project=julia-env -e 'using QMBCertify'
+	@echo "Julia QMBCertify structured-NPA environment ready in julia-env/"
+	@echo "Mosek needs a free academic license: set MOSEKLM_LICENSE_FILE or place ~/mosek/mosek.lic"
 	@echo "Activate with: julia --project=julia-env"
 
 install-cpmc-lab: ## Install CPMC-Lab Matlab package into .external/cpmc-lab/
