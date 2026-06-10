@@ -12,7 +12,6 @@ Use MPSKit as the harness's canonical Julia stack for **infinite / uniform MPS**
 - Method card: `skills/method-mps/SKILL.md`
 - Stack: the shared `julia-env`. Install with `make install mpskit` (adds MPSKit, MPSKitModels, TensorKit and runs the smoke); on a remote, instantiate `julia-env` via `/setup-julia` first.
 - Smoke test (also run by the install target): `julia --project=julia-env -e 'using MPSKit, MPSKitModels, TensorKit'`
-- Primary literature: `1701.07035` (VUMPS) in `.knowledge/literature/mps-based-algorithm/`.
 
 ## Workflow
 
@@ -28,7 +27,7 @@ Use this as the source for MPSKit-specific reproduction knobs unless the paper o
 
 - **Bond dimension D** — set via the virtual `ComplexSpace(D)` (no symmetry) or a graded space per sector (symmetric). The accuracy lever; run a D-series until the energy stops moving. For gapless systems, scale D (finite-entanglement scaling).
 - **Unit cell L** — the `length` of the `InfiniteMPS` (number of site tensors repeated). Must be ≥ the ground-state order period: 1-site for uniform/Haldane states, 2-site for Néel/AFM. A sublattice rotation can fold a 2-site ordered state to a 1-site cell (e.g. critical XXZ).
-- **Symmetry** — chosen through the TensorKit element/space: `Trivial` (no symmetry, the VUMPS-paper benchmark choice) or an abelian/non-abelian sector (`U1Irrep`, `SU2Irrep`) for a smaller, sector-pinned tensor. Match the paper.
+- **Symmetry** — chosen through the TensorKit element/space: `Trivial` (no symmetry) or an abelian/non-abelian sector (`U1Irrep`, `SU2Irrep`) for a smaller, sector-pinned tensor. Match the paper.
 - **Tolerance / stop criterion** — `tol` in the algorithm (e.g. `VUMPS(; tol=1e-12)`); the run stops when ‖B‖ falls below it. Probe ‖B‖ explicitly with `calc_galerkin`.
 - **Max iterations** — `maxiter`; the stop criterion should fire first. Hitting it = not converged.
 - **Eigensolver** — VUMPS uses an adaptive Lanczos/Arnoldi tolerance internally; do not pin it to a single coarse step (that defeats the adaptive schedule and can stall IDMRG — see the iterator note below).
@@ -42,7 +41,7 @@ Use this as the source for MPSKit-specific reproduction knobs unless the paper o
 | Unit-cell length | must hold the order period | 1-site uniform, 2-site AFM (or rotate to 1-site) |
 | `tol` / ‖B‖ target | convergence stringency | 1e-10…1e-12 for VUMPS/IDMRG |
 | `maxiter` | work cap | hundreds; raise if ‖B‖ hasn't met `tol` |
-| Symmetry sector (TensorKit) | block-diagonalizes → faster, pins sector | `Trivial` to match the VUMPS paper; U(1) Sz for speed |
+| Symmetry sector (TensorKit) | block-diagonalizes → faster, pins sector | `Trivial` for no symmetry; U(1) Sz for speed |
 | BLAS / Julia threads | wall time; benchmark fairness | `BLAS.set_num_threads(n)`, `JULIA_NUM_THREADS`; for a wall-time benchmark, **confirm the count with the user and warm up first** (see reproduce-paper) |
 
 ## Code shape
@@ -90,9 +89,9 @@ end
 Cost is `(L_cell · d · D³ · n_iter) ÷ throughput`. The work count is firm; throughput (BLAS rate, threads) is the unknown — settle it with one timed iteration at the target D.
 
 - Per iteration ∝ unit-cell length × physical dim d × D³ (local effective eigensolves).
-- **VUMPS reaches a given ‖B‖ in fewer iterations than IDMRG** (and far fewer than iTEBD at criticality) — the FIG.7 result.
+- Iteration count to a target ‖B‖ depends on the algorithm and proximity to criticality (the second soft factor in the estimate) — see `/method-mps`.
 - Memory is modest (O(D²) tensors + environments); compute is the gate.
-- D in the tens-to-low-hundreds (FIG.7: 54–120) is seconds-to-minutes on a laptop, single-thread. Larger D (cylinders, near-critical) scales as D³ → route to `/using-slurm`.
+- D in the tens-to-low-hundreds is seconds-to-minutes on a laptop, single-thread. Larger D (cylinders, near-critical) scales as D³ → route to `/using-slurm`.
 - **For a wall-time benchmark:** confirm the thread count with the user, run a warm-up pass to exclude JIT, and subtract per-checkpoint measurement time (reproduce-paper *performance benchmark* rules).
 
 ## Use Another Route When

@@ -26,4 +26,3 @@ command = ".venv-tenpy/bin/python -c 'import tenpy; print(tenpy.__version__)'"
 [docs]
 method = "skills/method-mps/SKILL.md"
 official = "https://tenpy.readthedocs.io/en/latest/"
-paper = ".knowledge/literature/mps-based-algorithm/1701.07035_variational-optimization-algorithms-for-uniform-matrix-produ.md"

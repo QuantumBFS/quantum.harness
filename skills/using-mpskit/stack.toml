@@ -25,4 +25,3 @@ command = "julia --project=julia-env -e 'using MPSKit, MPSKitModels, TensorKit'"
 [docs]
 method = "skills/method-mps/SKILL.md"
 official = "https://quantumkithub.github.io/MPSKit.jl/stable/"
-paper = ".knowledge/literature/mps-based-algorithm/1701.07035_variational-optimization-algorithms-for-uniform-matrix-produ.md"

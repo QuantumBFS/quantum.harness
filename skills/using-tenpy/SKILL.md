@@ -12,7 +12,6 @@ Use TeNPy (Tensor Network Python; Hauschild & Pollmann) as the harness's Python 
 - Method card: `skills/method-mps/SKILL.md`
 - Install: `make install tenpy` — creates the **isolated** `.venv-tenpy` and installs `physics-tenpy` + matplotlib (TeNPy pins a numpy ABI, so it must not share the main `.venv`/anaconda base or imports hit ABI mismatches). Run scripts with `.venv-tenpy/bin/python scripts/<name>.py`.
 - Smoke test (also run by the install target): `.venv-tenpy/bin/python -c "import tenpy; print(tenpy.__version__)"`
-- Primary literature: `1701.07035` (VUMPS) in `.knowledge/literature/mps-based-algorithm/`.
 
 ## Workflow
 
@@ -29,7 +28,7 @@ Use this as the source for TeNPy-specific knobs unless the paper or official cod
 - **Bond dimension `chi_max`** — in `trunc_params`. The accuracy lever; D-series until energy asymptotes; scale for gapless.
 - **Truncation `svd_min`** — singular values below this are dropped (e.g. `1e-14`); the soft floor on the bond.
 - **Geometry `bc_MPS`** — `'infinite'` (uniform, with a unit cell set by the lattice `L`) or `'finite'`. Unit cell must hold the order period (2-site for Néel; rotate to 1-site for critical XXZ).
-- **Symmetry `conserve`** — `None` (no symmetry, the VUMPS-paper benchmark choice), `'Sz'`, `'parity'`, or `'N'`. Pins the sector and speeds up; match the paper.
+- **Symmetry `conserve`** — `None` (no symmetry), `'Sz'`, `'parity'`, or `'N'`. Pins the sector and speeds up; match the paper.
 - **iTEBD time step τ (`dt`)** — refine in stages (`0.1 → 5e-4`); 2nd-order Trotter error ~τ². Build the gate with `calc_U(order, dt, type_evo='imag')`; evolve with `evolve(N_steps, dt)` (the method is `evolve` in TeNPy 1.1, not `update`). **Run each τ-stage to its energy plateau** — a small τ alone gives tiny per-step ΔE regardless of convergence.
 - **Initial state** — `MPS.from_lat_product_state(model.lat, [...])` in the target sector.
 
@@ -40,7 +39,7 @@ Use this as the source for TeNPy-specific knobs unless the paper or official cod
 | `chi_max` | dominant accuracy lever; cost ~χ³ | χ-series until energy asymptotes |
 | `svd_min` | truncation floor | `1e-14` |
 | `bc_MPS` | infinite vs finite; unit cell | `'infinite'`, cell = order period |
-| `conserve` | block-diagonalizes → faster, pins sector | `None` to match the VUMPS paper; `'Sz'` for speed |
+| `conserve` | block-diagonalizes → faster, pins sector | `None` for no symmetry; `'Sz'` for speed |
 | τ schedule (`dt`) + `N_steps` | iTEBD Trotter error + convergence | `0.1→5e-4`, each stage to its plateau |
 | numpy / OpenMP threads | wall time; benchmark fairness | set `OMP_NUM_THREADS` etc **before importing numpy**; for a benchmark, confirm the count with the user |
 
@@ -86,9 +85,9 @@ bnorm = float(np.sqrt(np.mean(np.asarray(sL)**2)))   # per-site RMS, left projec
 Cost is `(steps · L_cell · d · χ³) ÷ throughput`.
 
 - iTEBD per layer ∝ unit-cell × physical dim × χ³ (the SVD truncation dominates).
-- **iTEBD needs many steps and converges slowly near criticality** — at fixed τ the per-step ΔE shrinks, so convergence is governed by τ-refinement plus total imaginary time, not step count alone. This is why FIG.7's iTEBD curve lags VUMPS, especially in the critical panel.
+- **iTEBD needs many steps and converges slowly near criticality** — at fixed τ the per-step ΔE shrinks, so convergence is governed by τ-refinement plus total imaginary time, not step count alone.
 - Memory modest (O(χ²)); compute is the gate.
-- χ in the tens (FIG.7: 54–120) is seconds-to-minutes per τ-stage on a laptop; the full τ schedule for a critical system can run long — bound it.
+- χ in the tens is seconds-to-minutes per τ-stage on a laptop; the full τ schedule for a critical system can run long — bound it.
 - **For a wall-time benchmark:** confirm the thread count with the user (Python has no JIT warm-up, but exclude env-build and per-checkpoint measurement time) — reproduce-paper *performance benchmark* rules.
 
 ## Use Another Route When
