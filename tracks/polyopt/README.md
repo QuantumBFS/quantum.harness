@@ -50,5 +50,5 @@ relative gap ≈ 0.002–0.009.
 1. **Reproduction target** — [@wang_2024_certifying] (above). Rendered:
    `.knowledge/literature/polynomial-optimization/2310.05844_*.md`; Table IX in Appendix F. Ships the Julia package QMBCertify.
 2. **NCTSSoS.jl** — the solver. [github.com/QuantumSOS/NCTSSoS.jl](https://github.com/QuantumSOS/NCTSSoS.jl).
-3. **Sparse Polynomial Optimization: Theory and Practice** — Magron & Wang, World Scientific (2023), [arXiv:2208.11158](https://arxiv.org/abs/2208.11158). Background monograph ([@magron_2023_sparse]).
+3. **Optimization of Polynomials in Non-Commuting Variables** — Burgdorf, Klep & Povh, SpringerBriefs in Mathematics, Springer (2016), [doi:10.1007/978-3-319-33338-0](https://doi.org/10.1007/978-3-319-33338-0). NC-variables theory background ([@burgdorf_2016_optimization]).
 4. **Moment-SOS / NPA hierarchy** — Navascués, Pironio, Acín, *New J. Phys.* **10**, 073013 (2008), [arXiv:0803.4290](https://arxiv.org/abs/0803.4290).
