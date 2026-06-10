@@ -25,7 +25,7 @@ It does **not** own method selection or the modeling craft. Cross-method routing
 
 - **The library.** QMBCertify.jl (J. Wang) — a Julia package that certifies ground-state properties of quantum many-body systems via the **structured NPA hierarchy**. It builds the moment SDP, solves it with **Mosek**, then *rounds the floating-point Gram matrices (the SDP's sum-of-squares certificate matrices) to an exact, provably PSD rational certificate* — so the reported bound is rigorous, not merely numerical.
 - **Scope (honest boundary).** Currently the **1D and 2D (J1-J2) Heisenberg models** only. The symmetry exploitation, monomial bases, and reduced-density-matrix blocks are specialized to these models; it is not a general NC-polyopt solver.
-- **Capabilities** (one `examples/` template each): certified **energy** bounds (`certified_energy.jl`), certified **correlation / observable** bounds (`certified_corr.jl`), **structure-factor** bounds, **ground-state-property** bounds (`ground_state.jl`), **partition-function** bounds (`partition_function.jl`, via `PFB`), and **reduced-density-matrix positivity** blocks (`rdm_block.jl`).
+- **Capabilities** (see `examples/`): certified **energy** bounds (`certified_energy.jl`), certified **correlation / observable / structure-factor** bounds (`certified_corr.jl`), **ground-state-property** bounds (`ground_state.jl`), **partition-function** bounds (`partition_function.jl`, via `PFB`), and **reduced-density-matrix positivity** blocks (`rdm_block.jl`).
 - **Solver.** Mosek 11 (commercial; **free academic license** required) via `MosekTools`/`JuMP`. There is no open-source-solver path — Mosek is a hard dependency. DMRG cross-checks ship through `ITensors`/`ITensorMPS`.
 - **Why it scales.** The structured reductions block-diagonalize the SDP by the model's symmetries; the binding cost is the largest residual block (see the cost estimate), not the bare moment-matrix dimension.
 
@@ -57,8 +57,8 @@ opt, data = GSB(supp, coe, N, d;
 # Round the numeric solution to an EXACT certified bound
 result = certify_qmb(data, N, coe[1], opt; tol_gram=1e-15, tol_dft=1e-12, snn=true, J2=J2)
 
-result.newbound   # certified lower bound (this package's structured hierarchy)
-result.oldbound   # bound without the extra strengthening, for comparison
+result.newbound   # the exactly certified bound = numeric optimum + rigorous shift
+result.oldbound   # the raw (uncertified) Mosek numeric optimum, for comparison
 ```
 
 For correlations/observables use `certify_qmb_corr` (`examples/certified_corr.jl`); for partition functions use `PFB` (`examples/partition_function.jl`). All detailed in the repo `examples/`.
@@ -71,21 +71,23 @@ The source for QMBCertify-specific run knobs unless `/method-polyopt` or the pap
 
 | Knob (`GSB`) | Effect | Starting point |
 |---|---|---|
-| `d` | Relaxation order — half the monomial-basis degree; the tightening knob, cost grows steeply in it. | per `/method-polyopt`; 2 is standard. |
-| `extra` | Extra monomials added to the basis beyond degree `d` — tightens the bound at higher cost. | `0`; raise per `/method-polyopt`. |
+| `d` | Relaxation order — the monomial-basis degree (the moment matrix reaches degree 2d); the tightening knob, cost grows steeply in it. | per `/method-polyopt`; 2 is standard. |
+| `extra` | Long-range reach — includes two-site monomials separated by up to `extra+1` sites (the paper's long-range parameter r = extra+1); captures longer-range correlations. Degree is set by `d`, not this. | per `/method-polyopt`; `0` = nearest-neighbour only. |
 | `lattice` | `"chain"` (1D) or `"square"` (2D); selects the geometry and its symmetry group. | per the model. |
-| `rdm` | Order of the reduced-density-matrix positivity constraint (U(1)-block-diagonalised). `0` = off. | per `/method-polyopt`; `0` is the lightest. |
+| `rdm` | Order of the reduced-density-matrix positivity constraint (U(1)-block-diagonalised). `0` = off. | per `/method-polyopt`; examples use 8–10, `0` is the lightest. |
 | `pso`, `lso` | State-optimality strengthenings (PSD / linear) from the optimality conditions. | per `/method-polyopt`; `0` for the lightest run. |
+| `energy`, `correlation` | Switch from energy to **two-sided observable bounds**: pass a known `[lb, ub]` energy bracket as `energy` and set `correlation=true` to bound an observable over near-ground states. | `[]` / `false` (energy mode). |
 | `three_type` | Which three-body monomial families enter the basis. | `[1,1]` default. |
 | `SU2_symmetry` | Exploit SU(2) invariance for further reduction. | per the model. |
 | `Gram` | Return the Gram matrices — **required** for `certify_qmb` exact rounding. | `true` whenever certifying. |
 
-`certify_qmb` rounds the numeric solution to an exact rational certificate — the precision knobs:
+`certify_qmb` rounds the numeric solution to an exact rational certificate:
 
 | Knob (`certify_qmb`) | Effect | Starting point |
 |---|---|---|
+| `snn`, `J2` | **Define the certified Hamiltonian** — `snn=true` adds the J2 (next-nearest-neighbour) term, so the certificate is verified against the J1-J2 model. **Match these to the model you actually solved**, or you certify the wrong Hamiltonian. | per the model (`snn=true`, `J2` for J1-J2; `snn=false` for plain Heisenberg). |
 | `tol_gram`, `tol_dft` | Tolerances for the Gram / discrete-Fourier rounding to rationals. | `1e-15` / `1e-12`. |
-| `snn`, `eig_prec` | Strict-PSD rounding mode and eigen-precision (Arblib). | `snn=true`; raise `eig_prec` if rounding fails. |
+| `eig_prec` | Eigenvalue precision (Arblib) for the rigorous PSD enclosure that produces the shift. | raise if rounding fails. |
 
 ## Caller Contract
 

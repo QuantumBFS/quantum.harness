@@ -25,7 +25,7 @@ It does **not** own method selection or the modeling craft. Cross-method routing
 - **The library.** NCTSSoS.jl (J. Wang et al., successor to NCTSSOS) — a Julia package for sparse NC polyopt via the structured moment-SOHS hierarchy. Builds an SDP and solves it with a JuMP-compatible backend (Clarabel, open-source; Mosek, faster, academic license).
 - **Canonical for** certified lower bounds on operator polynomial minima (ground-state energy), Bell-inequality maxima, and state-/trace-polynomial optimization, with correlative + term sparsity and GNS reconstruction.
 - **Algebras** it enforces automatically: Pauli, Fermionic (CAR), Bosonic (CCR), Unipotent, Projector, free NonCommutative. *Which* algebra fits a given problem is `/method-polyopt`'s decision (it is a physics/modeling choice); the constructors that express each are below.
-- **Efficiency.** Sparsity — correlative (CS) via `MF`/`MMD` orderings and term (TS) via block structure — is the lever that makes larger problems feasible; the SDP solve dominates wall time and memory.
+- **Efficiency.** Sparsity — correlative (CS) via `MF`/`MMD` orderings (minimum-fill-in / minimum-degree) and term (TS) via block structure — is the lever that makes larger problems feasible; the SDP solve dominates wall time and memory.
 
 ## Run mechanics
 
@@ -60,10 +60,14 @@ One constructor per algebra; `/method-polyopt` picks which. Each returns a `regi
 |---|---|---|
 | Pauli (spin-½) | `create_pauli_variables(1:N)` → `(sx, sy, sz)` | `s²=I`, `sx·sy=i·sz`; **needs `ComplexF64` coefficients** |
 | Fermionic (CAR) | `create_fermionic_variables(1:N)` → `(c, cdag)` | `{aᵢ,aⱼ†}=δᵢⱼ`, `{aᵢ,aⱼ}=0` |
-| Bosonic (CCR) | `create_bosonic_variables(1:N)` → `(a, adag)` | `[cᵢ,cⱼ†]=δᵢⱼ` (∞-dim; GNS gives finite approximations) |
+| Bosonic (CCR) | `create_bosonic_variables(1:N)` → `(a, adag)` | `[aᵢ,aⱼ†]=δᵢⱼ` (∞-dim; GNS gives finite approximations) |
 | Unipotent (±1 observables) | `create_unipotent_variables([("A",1:2),("B",1:2)])` | `U²=I`; no cross-product rules |
 | Projector (projective measurements) | `create_projector_variables([("P",1:3),("Q",1:3)])` | `P²=P` |
 | Free NonCommutative | `create_noncommutative_variables([("X",1:2)])` | none; pass `ineq_constraints=[...]` for ball/custom relations |
+
+### State-polynomial / tracial objectives
+
+For objectives that multiply expectations (⟨A⟩⟨B⟩, covariances) or score by a trace, build an `NCStatePolynomial` instead of a plain operator polynomial: wrap operator expressions with `tr(·)` (trace / maximally-mixed expectation) or `s(·)` (expectation in an arbitrary state), combine, then pass to the same `cs_nctssos` hierarchy. For Bell, the **operator vs tracial** choice (decided in `/method-polyopt`) is realized by the grouping — separate label groups for the operator formulation (parties commute), one shared group for the tracial relaxation (transpose trick). Verify the exact constructors against the official docs.
 
 ## Parameters — step 3 (software)
 
@@ -104,7 +108,7 @@ flat = test_flatness(gns.hankel_matrix, gns.full_basis, gns.basis; atol=1e-8)
 flat.is_flat    # true ⇒ relaxation numerically exact, GNS reliable
 ```
 
-Correlation functions / order parameters read directly off the moment map (`result`'s `monomap`) via `symmetric_canon(NCTSSoS.expval(...))`.
+Correlation functions / order parameters read off the solved moment map (the low-level `moment_result`'s `monomap`; verify against the docs) via `symmetric_canon(NCTSSoS.expval(...))`.
 
 ## Caller Contract
 

@@ -11,7 +11,7 @@ PolyOpt turns a hard optimization over quantum operators into a **semidefinite p
 
 - **What it does.** Minimizing a polynomial in noncommuting operator variables — a Hamiltonian H over all states, a Bell expression, a state/trace polynomial — is intractable directly. Relax it: replace the operators by their **moments** (expectation values ⟨w⟩ of operator words w) and demand the **moment matrix** (the matrix whose entries are those moments) be **positive semidefinite (PSD)** — the consistency condition any genuine quantum state's moments satisfy. That relaxation is an SDP, and its optimum is a **one-sided certificate** — a *lower* bound on a minimum (or *upper* on a maximum). This is the **moment-SOS / sum-of-Hermitian-squares (SOHS)** hierarchy, also called the **NPA hierarchy**.
 - **Target.** A *certified* number: a lower bound E_lb ≤ E₀ on a ground-state energy, the largest value quantum mechanics allows for a Bell expression (its **Tsirelson bound**), or two-sided bounds on an observable's ground-state expectation.
-- **What's approximated.** The relaxation is exact only in the limit of infinite **relaxation order d** (half the degree of the moment matrix). At finite d the bound is rigorous but loose; raising d tightens it **monotonically**. Sparsity/symmetry truncations shrink the SDP at a controlled cost.
+- **What's approximated.** The relaxation is exact only in the limit of infinite **relaxation order d** (half the degree of the moment matrix). At finite d the bound is rigorous but loose; raising d tightens it **monotonically**. The symmetry reductions that shrink the SDP are *exact* (no loss); a truncated (sparse) monomial basis can loosen the bound but never breaks rigor.
 - **Its unique place in the harness.** Every other method returns an *estimate* — a variational upper bound, a stochastic estimate, a finite-size value. PolyOpt returns a **rigorous lower bound**. That makes it the rigorous half of a cross-check, not a competitor to DMRG / QMC / VMC.
 
 **Four problem types** — operator optimization, Bell inequality, state-polynomial optimization, property certification — and one decides the whole formulation. Step 1 classifies them (with the trade-offs); step 3 formulates.
@@ -24,7 +24,7 @@ PolyOpt turns a hard optimization over quantum operators into a **semidefinite p
 | Operators | the operator variables and their algebra (Pauli, fermionic, bosonic, dichotomic = ±1-valued, projector, free) | *(operators + algebra)* |
 | Constraints | the operators' algebraic relations + any extra equality / inequality constraints | *(constraints, if any)* |
 | Relaxation order d | the SDP size and the single tightening knob; the bound is monotone in d | *(target order / order series)* |
-| Target | a certified bound, a Bell maximum, or GNS-reconstructed operators | *(which, and whether GNS is needed)* |
+| Target | a certified bound, a Bell maximum, or concrete operators rebuilt from the solution (GNS reconstruction) | *(which, and whether GNS is needed)* |
 | What's approximated | finite relaxation order (+ sparsity / symmetry truncation) | *(order-convergence plan)* |
 
 > **Interaction principles — all user-facing surfacing in this card.** Plain language, no jargon: define every term and symbol before first use. No walls of words — a few sentences or one compact table per turn. One decision at a time, recommendation-first with one-line pros/cons. Precise and concise; let the user feel each choice, never a silent default.
@@ -72,8 +72,14 @@ Anchor the user's problem to the nearest row and quote its scale as a concrete r
 |---|---|---|
 | **Operator optimization** | minimize H = Σ couplings × operator words | the common case; SDP gives a lower bound on the minimum eigenvalue |
 | **Bell inequality** | maximize a Bell expression B | maximize B = minimize −B; the operator-vs-tracial grouping is the key modeling choice |
-| **State-polynomial** | products of expectations, ⟨A⟩⟨B⟩, tr(AB)−tr(A)tr(B) | needs the state-polynomial formulation (tr(·)/s(·) wrappers); the trickiest setup |
+| **State-polynomial** | products of expectations, ⟨A⟩⟨B⟩, tr(AB)−tr(A)tr(B) | needs the state-polynomial formulation (wrappers below); the trickiest setup |
 | **Property certification** | does quantity Q satisfy a bound? | a feasibility problem — add Q as a constraint |
+
+> **Surface the classification to the user (one question at a time).** Most problems self-classify from three questions — *What are you bounding?* (a Hamiltonian's energy → operator; a Bell expression → Bell; a product of expectations → state-polynomial; "does X satisfy a bound?" → certification); *What are the variables — physical operators or ±1 measurement outcomes?*; *Linear in the state, or products of expectations?* Confirm the type before any setup — it fixes the whole formulation.
+
+Two types carry a modeling sub-choice worth surfacing (the using-card expresses it; this card decides it):
+- **Bell — operator vs tracial.** *Operator* (recommended, the standard quantum-mechanics choice): put each party's measurements in a **separate group** so different parties' operators commute. *Tracial*: put all operators in **one group** (none commute) and use the transpose trick — only when you specifically study the tracial relaxation. (**Tracial** = scored by a trace, ⟨·⟩ = tr(·), rather than by a state; same bound as operator for CHSH, can differ for I3322.)
+- **State-polynomial — the wrappers.** When the objective multiplies expectations (⟨A⟩⟨B⟩), wrap operator expressions as `tr(·)` (trace / maximally-mixed expectation) or `s(·)` (**expectation in an arbitrary state**), then assemble the state polynomial. `/using-nctssos` carries the API.
 
 ### Certification role — the verification ladder
 
@@ -93,7 +99,7 @@ PolyOpt's output is a one-sided certificate; use it as such:
 | **Solver** | Mosek only (free academic license) | Clarabel (open-source) or Mosek |
 | **Returns** | an **exact** (rationally rounded) certified bound | a numeric SDP bound + moment data + GNS |
 
-> **Surface the software choice to the user** as a short what/why table: which engine, why it fits (the deciding fact is whether the structured symmetries apply — they are what let QMBCertify reach 16×16 where the general solver cannot), and the one consequence (Mosek license for QMBCertify vs open-source Clarabel for NCTSSoS). Let the user feel the choice even when one engine is the obvious fit.
+> **Surface the software choice to the user** as a short what/why table: which engine **and what it is** (QMBCertify.jl and NCTSSoS.jl, both from the NCTSSoS author J. Wang); why it fits (the deciding fact is whether the structured symmetries apply — they are what let QMBCertify reach 16×16 where the general solver cannot); and the one consequence (Mosek *academic license* for QMBCertify vs open-source Clarabel for NCTSSoS). **When reproducing this paper, name the reassuring fact: QMBCertify *is* the paper's own published reproduction code.** Let the user feel the choice even when one engine is the obvious fit.
 
 **Handoff.** Once the engine is fixed, invoke `/using-qmbcertify` or `/using-nctssos` — it owns install/run, the package's run knobs (step 3 software side), and the cost estimate. This card owns the modeling (below): algebra, objective, relaxation strategy.
 
@@ -107,7 +113,8 @@ The modeling decisions this card owns, distilled into knobs. Software-side value
 | **Algebra** | which operator algebra the variables obey (table below) | the most important modeling choice — a richer algebra encodes more relations → a tighter bound at the same order |
 | **Objective & constraints** | the Hamiltonian/Bell/state polynomial + any extra equality/inequality constraints | min vs max: the SDP minimizes — maximize f by minimizing −f and negating; add constraints to strengthen (e.g. RDM positivity) |
 | **Relaxation order d** | the single tightening knob | bound monotone in d; cost ~n^d. Start d=2; raise for a tighter bound, or higher when GNS reconstruction is needed |
-| **Sparsity / structure** | which reductions to exploit | correlative (variable cliques) + term (monomial blocks) for any local problem; for Heisenberg, the structured symmetries + RDM positivity (these are what `/using-qmbcertify` automates) |
+| **Sparsity / structure** | which reductions to exploit | correlative (variable cliques) + term (monomial blocks) for any local problem; for Heisenberg, the structured symmetries (these are what `/using-qmbcertify` automates) |
+| **Structural strengthenings** | whether to add RDM-positivity / state-optimality constraints (Heisenberg route) | tighten the bound *without* raising the order, at extra SDP size — probe with them off, switch on when the bound-vs-target gap demands; also the long-range basis reach. `/using-qmbcertify` exposes these as `rdm` / `pso` / `lso` / `extra`. |
 | **GNS reconstruction** | only if you need concrete realizing operators, not just the bound | needs higher order; reliable when the moment matrix is flat |
 
 **Algebra — pick by the operators' physics (the relations it auto-enforces give the tighter bound):**
@@ -123,9 +130,12 @@ The modeling decisions this card owns, distilled into knobs. Software-side value
 
 > **Confirm the setup with the user before running — one knob per turn, never batched (interaction principles above).**
 > 1. **Orient once.** One plain-language hook: *"We rewrite your minimization as a positivity (SDP) problem whose answer is a guaranteed lower bound on the true energy; raising one knob (the relaxation order) tightens the guarantee."* Tie each knob to its role.
-> 2. **Then loop, leading with the two that decide the result:** (1) **algebra** — the richer the encoded relations, the tighter the bound; (2) **relaxation order d** — the monotone tightening knob, traded against cost ~n^d. Then objective/constraints, sparsity/structure, and GNS only if reconstruction is wanted.
+> 2. **Then loop, leading with the knobs that decide the result — they differ by route:**
+>    - **General engine (`/using-nctssos`):** (1) **algebra** — richer relations → tighter bound; (2) **relaxation order d** — the monotone tightening knob, traded against cost ~n^d.
+>    - **Structured engine (`/using-qmbcertify`):** the algebra is fixed (Pauli/Heisenberg), so lead with (1) **relaxation order d** + the long-range reach; (2) **which strengthenings** (RDM / state-optimality) to switch on.
+>    Then objective/constraints, the rest, and GNS only if reconstruction is wanted.
 > 3. Recommended option first (labeled when there's a technical reason — e.g. the paper's value when reproducing), one-line why, 1–2 alternatives with one-line pro/con. **Ask one question, then STOP and wait** before the next knob.
-> 4. Capture the agreed choices (algebra, order, sparsity/structure, drafted objective/constraints, solver) as `run.json` `params` rows (`name`, `value`, `source`, `why`, `risk`, `fix`) **before** the run, so the proposal-first report is faithful. Then hand env + execution to the chosen using-card.
+> 4. Capture the agreed choices (algebra, order, strengthenings, drafted objective/constraints, solver) as `run.json` `params` rows **before** the run, per `/reproduce-paper` step 3, so the proposal-first report is faithful. Then hand env + execution to the chosen using-card.
 
 ### Cost & resource estimate — feeds step 4
 
@@ -147,7 +157,7 @@ A minimization min_state ⟨H⟩ is hard because the set of valid quantum states
 ### Structured reductions (why it scales)
 The general hierarchy blows up; exploiting the problem's structure is what makes large systems feasible:
 - **Sparsity.** *Correlative sparsity* groups variables into cliques by which co-appear in a term (each clique → a smaller moment matrix); *term sparsity* finds block structure from which monomials actually appear. Both shrink the SDP for any local Hamiltonian. **Caveat: stabilization ≠ exactness** — the term-sparsity graph can stop growing while the bound stays strictly loose; raise the order or go dense to gauge the gap.
-- **Symmetries (Heisenberg-specific, automated in `/using-qmbcertify`).** Sign, conjugate, permutation, dihedral, and (in 2D) translation symmetry **block-diagonalize** the SDP — taking the max block size from ~10⁹ down to ~10¹ in the demonstrated 1D case.
+- **Symmetries (Heisenberg-specific, automated in `/using-qmbcertify`).** Sign, conjugate, permutation, dihedral, and translation symmetry **block-diagonalize** the SDP (translation acts already in 1D via circulant/DFT structure; 2D adds a *second* round). Together with the algebraic equalities and the sparse basis, the reductions take the 1D max block size from ~10⁹ to ~10¹ (Table 2: 8.1×10⁹ → 322M by equalities → 12k by sparsity → 31 by symmetry) — symmetry being the final, *exact* step.
 - **Strengthenings.** *Reduced-density-matrix positivity* (PSD constraints on k-body RDMs, block-diagonal by U(1) magnetization) and *state-optimality conditions* add valid constraints that tighten the bound without raising the order.
 
 ### Notation
@@ -165,9 +175,8 @@ The general hierarchy blows up; exploiting the problem's structure is what makes
 
 ### Verification
 
-**Intermediate (mid-run) — partial confirmation while solving.** Watch three signals:
-- **Solver status & residual** — a clean optimal status with shrinking primal/dual residuals. A stalled or iteration-limited solve is *not yet a bound*.
-- **Bound monotone across orders** — raising the order should make the bound tighten (increase, for a lower bound). A drop signals a setup or solver-status problem, not physics.
+**Intermediate — partial confirmation.** Within a *single* solve, the signal is **solver status & residual** — a clean optimal status with shrinking primal/dual residuals; a stalled or iteration-limited solve is *not yet a bound*. Across an **order series**, also watch:
+- **Bound monotone across orders** — raising the order should tighten the bound (increase, for a lower bound). A drop signals a setup or solver-status problem, not physics.
 - **Flatness trend** — the moment matrix moving toward flat means the bound is approaching exact (and GNS will be reliable).
 
 **Final.**
