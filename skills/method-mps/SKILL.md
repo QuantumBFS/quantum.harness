@@ -14,7 +14,7 @@ A Matrix Product State (MPS) writes the wavefunction of a 1D (or narrow quasi-1D
 - **Target.** Ground-state energy per site, order parameters, correlation functions and the correlation length, the gap, entanglement entropy; with time evolution, dynamics and (via purification / METTS) finite temperature.
 - **What's approximated.** Truncating the bonds to finite D discards the smallest entanglement. Exact for gapped 1D as D grows; for **gapless / critical** systems the finite D imposes an effective correlation length (finite-entanglement scaling), so D must be pushed and scaled.
 
-**The infinite-regime headline (this card's new focus): VUMPS.** Among the infinite-MPS ground-state algorithms, **VUMPS** (Variational Uniform MPS) converges the variational gradient to machine precision — *even at criticality*, where IDMRG and iTEBD stall — which is exactly the comparison in FIG.7 of the VUMPS paper (arXiv:1701.07035).
+**Infinite-regime ground states — VUMPS.** Among the infinite-MPS ground-state algorithms, **VUMPS** (Variational Uniform MPS) converges the variational gradient to machine precision — *even at criticality*, where IDMRG and iTEBD stall — which is exactly the comparison in FIG.7 of the VUMPS paper (arXiv:1701.07035).
 
 > **When this card is invoked, before any choice, orient the user with this table (interaction principles below), filling the right column with *their* actual problem — Hamiltonian, geometry, target. If those aren't fixed yet, use the table to elicit them.**
 
