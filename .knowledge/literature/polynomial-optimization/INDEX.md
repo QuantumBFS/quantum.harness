@@ -9,7 +9,7 @@ Search inside this dir with `rg --hidden -g '!.raw' "term" .knowledge/` (or `rg`
 | File | Title | Authors | Year | Venue | Full text |
 |---|---|---|---|---|:---:|
 | [2604.01555_scalable-ground-state-certification-of-quantum-spin-systems.md](2604.01555_scalable-ground-state-certification-of-quantum-spin-systems.md) | Scalable Ground-State Certification of Quantum Spin Systems via Structured Noncommutative Polynomial Optimization | Jie Wang et al. | 2026 |  | ✅ |
-| [2310.05844_certifying-ground-state-properties-of-many-body-systems.md](2310.05844_certifying-ground-state-properties-of-many-body-systems.md) | Certifying Ground-State Properties of Many-Body Systems | Jie Wang et al. | 2024 | Physical Review X | ✅ |
+| [2310.05844_certifying-ground-state-properties-of-many-body-systems.md](2310.05844_certifying-ground-state-properties-of-many-body-systems.md) | Certifying ground-state properties of quantum many-body systems | Jie Wang et al. | 2024 | Physical Review X | ✅ |
 
 ## DOI (1 entries)
 
