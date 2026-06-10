@@ -1,40 +1,12 @@
-# Polynomial Optimization (moment-SOS / SOHS hierarchy)
-
-Certified-bound track: noncommutative polynomial optimization via the structured
-moment-SOHS hierarchy, solved as a semidefinite program. Unlike every other track
-here, it returns a **provable lower bound** on the ground-state energy (not an
-estimate) — the natural rigorous cross-check for a variational / QMC value.
-
-- **Method card:** `/method-polyopt` — routing, certification role, SDP cost heuristic.
-- **Software:** `/using-nctssos` — NCTSSoS.jl + Clarabel (`make install nctssos`).
-- **Modeling brain:** `/polyopt-guide` (reused upstream, `exAClior/easy-nctssos`) — algebra / formulation / sparsity / GNS. Ground truth on modeling.
+# Polynomial Optimization
 
 ## Reproduction target
 
-Wang, Surace, Frérot, Legat, Renou, Magron, Acín, "Certifying ground-state
-properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024),
-[doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006),
-[arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
+Wang, Surace, Frérot, Legat, Renou, Magron, Acín, "Certifying ground-state properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024), [doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006), [arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
 
-**Figure 8** — ground-state energy of the **square-lattice antiferromagnetic
-Heisenberg model** with periodic boundary conditions: the certified SDP **lower
-bound** on the energy per site vs system size, compared to quantum Monte Carlo
-(QMC ≈ exact). Paper covers N = L×L with L = 4, 6, 8, 10.
+Reproduce **Figure 8** — the certified ground-state energy per site of the square-lattice antiferromagnetic Heisenberg model, $H = \frac{1}{4}\sum_{\langle ij\rangle}\vec{\sigma}_i\cdot\vec{\sigma}_j$ on the $L\times L$ lattice with periodic boundary conditions (Eq. 13), versus system size. The moment-SOHS / NPA-style semidefinite relaxation returns a *provable* lower bound $E_\mathrm{SDP}\le E_0$ rather than a variational estimate, plotted against quantum Monte Carlo ($\approx$ exact). Scope: $N = L\times L$ with $L = 4, 6, 8$ (the paper's $L = 10$, where degree-4 monomials are discarded, is dropped).
 
-**Scope for this track: L = 4, 6, 8** (drop the paper's L = 10 — it is the
-expensive point and the one where degree-4 monomials are discarded).
-
-- **Hamiltonian.** H = ¼ Σ_{⟨ij⟩} Σ_{a∈{x,y,z}} σ^a_i σ^a_j on the L×L square
-  lattice, nearest-neighbor bonds, PBC (Eq. 13). Antiferromagnetic. Energy
-  reported **per site** (E/N).
-- **Method.** NCTSSoS moment-SOHS / NPA-style SDP via `/method-polyopt` →
-  `/using-nctssos`; Pauli algebra; monomial set and sparsity per `/polyopt-guide`
-  (the paper's basis: identity, single σ, two-spin σσ up to range 3, and a set of
-  three-/four-spin terms — see the Fig. 8 paragraph in the rendered paper).
-- **Target metric.** The certified lower bound E_SDP/N at each L, plotted vs L
-  beside the QMC reference; the takeaway is the ~1% relative gap E_SDP ≤ E₀ ≈ E_MC.
-
-### Benchmark (Table IX — the comparison anchor)
+### Benchmark (Table IX)
 
 | L | N | E_SDP/N (certified lower bound) | E_MC/N (QMC ≈ exact) |
 |---|---|---|---|
@@ -42,13 +14,14 @@ expensive point and the one where degree-4 monomials are discarded).
 | 6 | 36 | −0.68317181 | −0.6788734 |
 | 8 | 64 | −0.67967080 | −0.6734875 |
 
-E_SDP is below E_MC at every size (a valid lower bound: E_SDP ≤ E₀ ≤ E_MC),
-relative gap ≈ 0.002–0.009.
+The bound sits below the QMC value at every size ($E_\mathrm{SDP}\le E_0\le E_\mathrm{MC}$), relative gap $\approx 0.002$–$0.009$.
 
 ## References
 
-1. **Reproduction target** — [@wang_2024_certifying] (above). Rendered:
-   `.knowledge/literature/polynomial-optimization/2310.05844_*.md`; Table IX in Appendix F. Ships the Julia package QMBCertify.
-2. **NCTSSoS.jl** — the solver. [github.com/QuantumSOS/NCTSSoS.jl](https://github.com/QuantumSOS/NCTSSoS.jl).
-3. **Optimization of Polynomials in Non-Commuting Variables** — Burgdorf, Klep & Povh, SpringerBriefs in Mathematics, Springer (2016), [doi:10.1007/978-3-319-33338-0](https://doi.org/10.1007/978-3-319-33338-0). NC-variables theory background ([@burgdorf_2016_optimization]).
-4. **Moment-SOS / NPA hierarchy** — Navascués, Pironio, Acín, *New J. Phys.* **10**, 073013 (2008), [arXiv:0803.4290](https://arxiv.org/abs/0803.4290).
+1. **Certifying ground-state properties** — the reproduction target above; certified moment-SOHS SDP bounds for 1D/2D spin systems. Ships the Julia package QMBCertify.
+   J. Wang, J. Surace, I. Frérot, B. Legat, M.-O. Renou, V. Magron, A. Acín, "Certifying ground-state properties of quantum many-body systems," *Phys. Rev. X* **14**, 031006 (2024). [doi:10.1103/PhysRevX.14.031006](https://doi.org/10.1103/PhysRevX.14.031006), [arXiv:2310.05844](https://arxiv.org/abs/2310.05844).
+2. **Burgdorf, Klep & Povh** — noncommutative polynomial optimization: eigenvalue and trace optimization via the moment-SOHS hierarchy.
+   S. Burgdorf, I. Klep, J. Povh, *Optimization of Polynomials in Non-Commuting Variables*, SpringerBriefs in Mathematics (Springer, 2016). [doi:10.1007/978-3-319-33338-0](https://doi.org/10.1007/978-3-319-33338-0).
+3. **NPA hierarchy** — convergent moment-SOS relaxations for noncommutative polynomial optimization.
+   M. Navascués, S. Pironio, A. Acín, "A convergent hierarchy of semidefinite programs characterizing the set of quantum correlations," *New J. Phys.* **10**, 073013 (2008). [doi:10.1088/1367-2630/10/7/073013](https://doi.org/10.1088/1367-2630/10/7/073013), [arXiv:0803.4290](https://arxiv.org/abs/0803.4290).
+4. **NCTSSoS.jl** — moment-SOHS SDP solver with correlative/term sparsity (Clarabel/Mosek backend). [github](https://github.com/QuantumSOS/NCTSSoS.jl).
