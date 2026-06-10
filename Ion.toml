@@ -32,9 +32,8 @@ using-tensorcircuit-ng = { type = "local" }
 using-pepskit = { type = "local" }
 using-sse = { type = "local" }
 using-cpmc-lab = { type = "local" }
-using-nctssos = { type = "local" }
-# Reused upstream modeling brain for NCTSSoS (ground truth on polyopt modeling)
-polyopt-guide = { source = "exAClior/easy-nctssos/skills/polyopt-guide" }
+using-nctssos = { type = "local" }       # general NC-polyopt engine (Clarabel/Mosek)
+using-qmbcertify = { type = "local" }    # structured-NPA certifier for 1D/2D Heisenberg (Mosek)
 
 # Method-level guidance
 method-ed = { type = "local" }

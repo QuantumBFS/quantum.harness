@@ -114,7 +114,7 @@ These three steps are owned by the method and tool skills; this spine only enfor
 
 1. **Paper** — caption, axis labels, body, supplement, verified official code. Fixes scientific facts.
 2. **Track-starter handoff / Track README** — only when `/track-starter` selected the target; track-scoped objective context, not target selection.
-3. **`/method-*` skill** — `/method-ed`, `/method-mps`, `/method-peps`, `/method-qmc`, `/method-ltrg`, `/method-mcrg`, `/method-vmc`, `/method-qcs`, `/method-mf`. Source for **step 1** (which method suits the target) and **step 2** (which tool the method routes to), plus **step 3 method setup** (the conceptual knobs and tricks).
+3. **`/method-*` skill** — `/method-ed`, `/method-mps`, `/method-peps`, `/method-qmc`, `/method-ltrg`, `/method-mcrg`, `/method-vmc`, `/method-qcs`, `/method-mf`, `/method-polyopt`. Source for **step 1** (which method suits the target) and **step 2** (which tool the method routes to), plus **step 3 method setup** (the conceptual knobs and tricks).
 4. **Selected `/using-*` skill** — `Parameter setup`, `Knobs`, and `Time estimate`. Source for **step 3 software parameters** (the package-specific values) and software-specific cost.
 5. **Stack contract** — `skills/<stack>/stack.toml`: install, smoke test, runtime profile, docs, CPU/GPU/MPI setup.
 6. **Method/model cards** — fallback notation, code shape, pitfalls, verification when the paper / method skill / tool skill are silent.
