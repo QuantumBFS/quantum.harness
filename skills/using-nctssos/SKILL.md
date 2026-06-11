@@ -71,7 +71,7 @@ For objectives that multiply expectations (⟨A⟩⟨B⟩, covariances) or score
 
 ### Symmetry reduction (Wedderburn block-diagonalization)
 
-When the problem is invariant under a finite group — signed permutations of operators (Bell party/measurement swaps) or Clifford symmetries of a Pauli Hamiltonian — the moment matrix block-diagonalizes into one smaller PSD block per isotypic component (computed via SymbolicWedderburn). *Whether* a usable group exists and which generators express it is `/method-polyopt`'s call; this is the API:
+When the problem is invariant under a finite group — signed permutations of operators (Bell party/measurement swaps) or Clifford symmetries of a Pauli Hamiltonian — the moment matrix block-diagonalizes into one smaller PSD block per symmetry sector (computed via SymbolicWedderburn). *Whether* a usable group exists and which generators express it is `/method-polyopt`'s call; this is the API:
 
 ```julia
 # Manual generators — signed permutations of registry operators:
@@ -91,7 +91,11 @@ result = cs_nctssos(pop, config)
 result.symmetry    # SymmetryReport: group_order, invariant_moment_count, psd_block_sizes
 ```
 
-**Symmetry and sparsity are mutually exclusive** (current MVP scope): the symmetry path requires a dense single-clique relaxation (`NoElimination` for both CS and TS), Monoid/Pauli algebras, real signed-permutation/Clifford actions, and multiplicity-free scalar blocks — anything outside raises `ArgumentError` instead of silently building the wrong relaxation. It also blocks `cs_nctssos_higher` and GNS reconstruction (the reduced `monomap` lacks the dense moments). Switch it on when the group is large relative to the moment basis (CHSH: one 5×5 block → three 1×1; 2-site Heisenberg: order-48 group, scalar blocks); prefer CS/TS for large, weakly symmetric problems. Docs (under the official docs root): `manual/symmetry_adapted_basis/`, `manual/clifford_symmetry_detection/`, examples `examples/generated/chsh_symmetry/`, `examples/generated/pauli_clifford_symmetry/`; new algebras (e.g. fermionic actions) are developer territory — `manual/extending_symmetry/`.
+**Symmetry and sparsity are mutually exclusive** (current MVP scope):
+- **Requires** a dense single-clique relaxation (`NoElimination` for both CS and TS), Monoid/Pauli algebras, real signed-permutation/Clifford actions, and multiplicity-free scalar blocks — anything outside raises `ArgumentError` instead of silently building the wrong relaxation.
+- **Blocks** `cs_nctssos_higher` and GNS reconstruction (the reduced `monomap` lacks the dense moments).
+- **When to prefer it:** the group is large relative to the moment basis (CHSH: one 5×5 block → three 1×1; 2-site Heisenberg: order-48 group, scalar blocks). Prefer CS/TS for large, weakly symmetric problems.
+- **Docs** (under the official docs root): `manual/symmetry_adapted_basis/`, `manual/clifford_symmetry_detection/`; examples `examples/generated/chsh_symmetry/`, `examples/generated/pauli_clifford_symmetry/`. New algebras (e.g. fermionic actions) are developer territory — `manual/extending_symmetry/`.
 
 ## Parameters — step 3 (software)
 

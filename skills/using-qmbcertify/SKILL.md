@@ -25,9 +25,19 @@ It does **not** own method selection or the modeling craft. Cross-method routing
 
 ## What QMBCertify is — step 2 (the structure-exploiting handoff target)
 
-- **The library.** QMBCertify.jl (J. Wang) — a Julia package that bounds ground-state properties of quantum many-body systems via the **structured NPA hierarchy**. Its core deliverable is the **numeric SDP bound**: `GSB` builds the structured moment SDP and solves it with **Mosek**; with `Gram=true` it also exports the Gram matrices (the SDP's sum-of-squares certificate blocks). **Exact rational certification is a post-processing layer, not the solve**: the rounding pipeline (project the Gram blocks onto the exact SOHS identity in rational arithmetic, then shift the optimum by a rigorous Arblib minimum-eigenvalue enclosure) comes from a separate certification framework (Naceur, Wang, Magron, Acín — arXiv:2512.17713) whose 1D-chain implementation is bundled as `certify_qmb` / `certify_qmb_corr`. Report the SDP optimum as a *numeric* certified bound; call a number *exactly* certified only after that post-step runs cleanly.
+- **The library.** QMBCertify.jl (J. Wang) — a Julia package that bounds ground-state properties of quantum many-body systems via the **structured NPA hierarchy**. Its core deliverable is the **numeric SDP bound**: `GSB` builds the structured moment SDP and solves it with **Mosek**; with `Gram=true` it also exports the Gram matrices (the SDP's sum-of-squares certificate blocks).
+- **Exact rational certification is a post-processing layer, not the solve.** The rounding pipeline — project the Gram blocks onto the exact SOHS identity in rational arithmetic, then shift the optimum by a rigorous Arblib minimum-eigenvalue enclosure — comes from a separate certification framework (Naceur, Wang, Magron, Acín — arXiv:2512.17713) whose 1D-chain implementation is bundled as `certify_qmb` / `certify_qmb_corr`. Report the SDP optimum as a *numeric* certified bound; call a number *exactly* certified only after that post-step runs cleanly.
 - **Scope (honest boundary).** Currently the **1D and 2D (J1-J2) Heisenberg models** only. The symmetry exploitation, monomial bases, and reduced-density-matrix blocks are specialized to these models; it is not a general NC-polyopt solver. The exact-rounding layer is narrower still: `certify_qmb` hard-codes the **1D (J1-J2) Heisenberg chain** — 2D square-lattice runs get the numeric bound + Gram export, with no packaged exact certification.
-- **Capabilities** (see `examples/`): **energy** bounds with the 1D exact post-step (`certified_energy.jl`), **correlation / observable / structure-factor** bounds (`certified_corr.jl`, via the self-contained `certify_qmb_corr` driver), **ground-state-property** bounds (`ground_state.jl`), **partition-function** bounds (`partition_function.jl`, via `PFB` — numeric only), **reduced-density-matrix positivity** blocks (`rdm_block.jl`), and a manual SOHS-identity reconstruction from the exported Gram matrices (`certify.jl` — the ground truth for the Gram-export format).
+- **Capabilities** — one runnable template per capability in `examples/`:
+
+  | Capability | Example | Exactness |
+  |---|---|---|
+  | Energy bounds | `certified_energy.jl` | numeric + 1D exact post-step |
+  | Correlation / observable / structure-factor bounds | `certified_corr.jl` (self-contained `certify_qmb_corr` driver) | numeric + 1D exact post-step |
+  | Ground-state-property bounds | `ground_state.jl` | numeric |
+  | Partition-function bounds | `partition_function.jl` (`PFB`) | numeric only |
+  | Reduced-density-matrix positivity blocks | `rdm_block.jl` | numeric |
+  | Manual SOHS-identity reconstruction from exported Gram matrices | `certify.jl` | the ground truth for the Gram-export format |
 - **Solver.** Mosek 11 (commercial; **free academic license** required) via `MosekTools`/`JuMP`. There is no open-source-solver path — Mosek is a hard dependency. DMRG cross-checks ship through `ITensors`/`ITensorMPS`.
 - **Why it scales.** The structured reductions block-diagonalize the SDP by the model's symmetries; the binding cost is the largest residual block (see the cost estimate), not the bare moment-matrix dimension.
 
