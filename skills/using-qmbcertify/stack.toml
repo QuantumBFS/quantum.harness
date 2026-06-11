@@ -24,6 +24,7 @@ command = "julia --project=julia-env -e 'using QMBCertify'"
 
 [docs]
 repo = "https://github.com/wangjie212/QMBCertify"
+license = "CeCILL-2.1 (file LICENSE.en; GitHub sidebar shows NOASSERTION)"
 examples = "https://github.com/wangjie212/QMBCertify/tree/main/examples"
 solver = "https://www.mosek.com/ (free academic license required)"
 method_skill = "method-polyopt — owns algebra / objective / relaxation strategy"
