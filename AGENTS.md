@@ -69,7 +69,7 @@ Cards hold the domain content (definitions, conventions, numerical anchors, code
 
 ## Verification practice
 
-Default verification, in priority order:
+Verification is **opt-in**: run these checks only when the user challenges a result and debugging hasn't resolved it — never as default compute spend. When invoked, in priority order:
 
 1. **Limit checks** — sign convention and trivial-parameter limits via `.knowledge/limits.md`.
 2. **Symmetry** — conserved quantities respected; expected sector occupied.
