@@ -67,3 +67,4 @@ Use /survey to build a reference library.
 - [`skills/`](skills/) - agent workflows invoked as `/name`.
 - [Harnessing Quantum 2026 submission guide](https://giggleliu.github.io/summer-school-2026/zh/guide) - for summer-school participants.
 - [`AGENTS.md`](AGENTS.md) - full harness operating instructions.
+test
