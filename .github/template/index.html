@@ -31,7 +31,19 @@
   .pick .d{color:var(--mut);font-size:.9rem;margin-top:4px}
   .pick .n{color:var(--accent);font-weight:700;font-size:.8rem}
 
-  section.flow{padding:46px 0 8px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:6px;margin-top:30px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{appearance:none;background:none;border:none;cursor:pointer;text-align:left;
+       color:var(--mut);font-family:var(--sans);padding:13px 18px;border-radius:10px 10px 0 0;
+       border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s,background .15s}
+  .tab:hover{color:var(--ink);background:var(--panel)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);background:var(--panel)}
+  .tab .tn{display:block;color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .tab .tt{display:block;font-weight:700;font-size:1.02rem;margin-top:2px}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  section.flow{padding:34px 0 8px;border-bottom:1px solid var(--line)}
   .sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   .sec-h h2{font-size:1.55rem;margin:0}
   .badge{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
@@ -92,22 +104,20 @@
   journeys the harness is built around, each shown as a <b>real, captured run</b> — the transcripts
   and plots are the actual output, not mockups.</p>
 
-  <div class="pick">
-    <a href="#summer">
-      <div class="n">Workflow 1</div>
-      <div class="t">Summer school: reproduce, then challenge</div>
-      <div class="d">Pick a track, reproduce its reference paper, then go beyond it as a clean PR.</div>
-    </a>
-    <a href="#solve">
-      <div class="n">Workflow 2</div>
-      <div class="t">Bring your own problem</div>
-      <div class="d">State a model, get a verified ground-state calculation — scale to the cluster when it's heavy.</div>
-    </a>
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" aria-controls="panel-summer" id="tab-summer">
+      <span class="tn">Workflow 1 · Summer school</span>
+      <span class="tt">Reproduce, then challenge</span>
+    </button>
+    <button class="tab" role="tab" aria-controls="panel-solve" id="tab-solve">
+      <span class="tn">Workflow 2 · General use</span>
+      <span class="tt">Bring your own problem</span>
+    </button>
   </div>
 </header>
 
 <!-- ============================ WORKFLOW 1 ============================ -->
-<section class="flow" id="summer">
+<section class="flow tabpanel active" id="panel-summer" role="tabpanel" aria-labelledby="tab-summer">
   <div class="sec-h">
     <h2>Workflow 1 — Reproduce, then challenge</h2>
     <span class="badge">Harnessing Quantum 2026</span>
@@ -196,7 +206,7 @@ the help desk for go/no-go):</span>
 </section>
 
 <!-- ============================ WORKFLOW 2 ============================ -->
-<section class="flow" id="solve">
+<section class="flow tabpanel" id="panel-solve" role="tabpanel" aria-labelledby="tab-solve">
   <div class="sec-h">
     <h2>Workflow 2 — Bring your own problem</h2>
     <span class="badge">General use</span>
@@ -297,5 +307,24 @@ Script: <span class="pill">scripts/j1j2_heisenberg_dmrg.jl</span></span>
 </footer>
 
 </div>
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function activate(id){
+    tabs.forEach(function(t){
+      var on = t.getAttribute('aria-controls') === id;
+      t.classList.toggle('active', on);
+      document.getElementById(t.getAttribute('aria-controls')).classList.toggle('active', on);
+    });
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ activate(t.getAttribute('aria-controls')); });
+  });
+  // honor a deep link like #panel-solve on load
+  var h = location.hash.replace('#','');
+  if (h && document.getElementById(h)) activate(h);
+})();
+</script>
 </body>
 </html>
