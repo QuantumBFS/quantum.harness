@@ -11,6 +11,7 @@ and tool skill own the next step.
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/peps-methodology.md`
 - Track README: `tracks/peps/README.md`
 - Tool skill: `/using-pepskit`
 

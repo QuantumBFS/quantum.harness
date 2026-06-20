@@ -19,6 +19,7 @@ It does **not** own method selection or the modeling craft. Cross-method routing
 - Install target: `make install nctssos`
 - Smoke test: `julia --project=julia-env -e 'using NCTSSoS, Clarabel'`
 - Official docs (verify the current API here): `https://quantumsos.github.io/NCTSSoS.jl/`, repo `https://github.com/QuantumSOS/NCTSSoS.jl`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/nctssos-api.md`
 
 ## What NCTSSoS is — step 2 (the general-purpose handoff target)
 

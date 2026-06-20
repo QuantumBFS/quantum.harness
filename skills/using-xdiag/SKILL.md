@@ -15,6 +15,7 @@ Use XDiag as the harness's canonical exact-diagonalization stack when the target
 - ED review notes: `docs/ed/review.html`
 - Install target: `make install xdiag`
 - Smoke test: `julia --project=julia-env -e 'using XDiag'`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/xdiag-api.md`
 
 ## Workflow
 

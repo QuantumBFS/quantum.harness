@@ -16,6 +16,7 @@ It does **not** own method selection or the method algorithm / "why" — the DMR
 - Install target: `make install itensors`
 - Smoke test: `julia --project=julia-env -e 'using ITensors, ITensorMPS, KrylovKit, MPSKit'`
 - Official docs (verify the current API here — there is no in-repo software paper): `https://docs.itensor.org/ITensors/dev/`, ITensorMPS.jl `https://github.com/ITensor/ITensorMPS.jl`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/itensors-api.md`
 
 ## What ITensors is — step 2 (the handoff target)
 

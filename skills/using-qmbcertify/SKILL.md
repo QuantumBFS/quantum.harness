@@ -22,6 +22,7 @@ It does **not** own method selection or the modeling craft. Cross-method routing
 - License: **CeCILL-2.1** (GPL-compatible French free-software license; the file is `LICENSE.en`, which is why GitHub's sidebar shows "NOASSERTION"). Not registered in the Julia General registry — install is by repo URL (the make target does this).
 - Reference paper (the structured hierarchy this package implements): rendered in `.knowledge/literature/polynomial-optimization/` — see `/method-polyopt` Citations.
 - Exact-rounding framework (the post-certification layer, bundled for 1D chains via the framework authors' PR): Naceur, Wang, Magron, Acín, arXiv:2512.17713.
+- Local API reference (key API + worked examples, with links to upstream source): `references/qmbcertify-api.md`
 
 ## What QMBCertify is — step 2 (the structure-exploiting handoff target)
 

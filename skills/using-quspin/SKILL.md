@@ -15,6 +15,7 @@ Use QuSpin only as the declared Python fallback for ED workflows, especially whe
 - ED review notes: `docs/ed/review.html`
 - Install target: `make install quspin`
 - Smoke test: `.venv/bin/python -c 'import quspin; print(quspin.__version__)'`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/quspin-api.md`
 
 ## Workflow
 

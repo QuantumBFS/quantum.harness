@@ -31,6 +31,7 @@ MCRG computes the critical behavior of a classical spin model by repeatedly **co
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/mcrg-methodology.md`
 - Tool skill: `/using-jax` — the algorithm is implemented from scratch on JAX (see Step 2).
 - Primary literature (rendered in `.knowledge/literature/monte-carlo-renormalization-group/`):
   - **1707.08683** — Wu & Car, PRL 119, 220602 (2017) — variational MCRG, 2D Ising.

@@ -57,5 +57,6 @@ Do not use this card for:
 
 ### Citations
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/mf-methodology.md`
 - Ashcroft & Mermin, *Solid State Physics* (1976) — Hartree-Fock for lattice models.
 - Auerbach, *Interacting Electrons and Quantum Magnetism* (1994) — mean-field for spin systems.

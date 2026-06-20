@@ -14,6 +14,7 @@ Two routes:
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/qmc-methodology.md`
 - Track README: `tracks/qmc/README.md`
 - Tool skills: `/using-sse` (SSE route), `/using-cpmc-lab` (CPMC/AFQMC route)
 - Survey (primary, AFQMC): Zhang, *Auxiliary-Field Quantum Monte Carlo at Zero- and Finite-Temperature* (2019) `.knowledge/literature/quantum-monte-carlo/zhang_2019_auxiliary-field-quantum-monte-carlo.md` — the methodology reference for the CPMC/AFQMC route.

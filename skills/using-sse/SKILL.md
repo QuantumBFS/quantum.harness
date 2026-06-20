@@ -16,6 +16,7 @@ It does **not** own method selection, SSE theory, or the sign-freeness / autocor
 - Install target: `make install sse`
 - Smoke test: `julia --project=julia-env -e 'using Carlo, StochasticSeriesExpansion'`
 - Official docs (verify the current API here — there is no in-repo software paper): StochasticSeriesExpansion.jl `https://lukas.weber.science/StochasticSeriesExpansion.jl/stable/`; tutorial `https://lukas.weber.science/StochasticSeriesExpansion.jl/stable/tutorial.html`; Carlo.jl `https://lukas.weber.science/Carlo.jl/dev/`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/sse-api.md`
 
 ## What SSE on Carlo is — step 2 (the handoff target)
 

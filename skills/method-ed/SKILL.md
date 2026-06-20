@@ -9,6 +9,7 @@ Exact diagonalization is the finite-Hilbert-space oracle track. Use it to decide
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/ed-methodology.md`
 - Track README: `tracks/ed/README.md`
 - Interview notes: `docs/ed/interview.html`
 - Review notes: `docs/ed/review.html`

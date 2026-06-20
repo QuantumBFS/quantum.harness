@@ -31,6 +31,7 @@ A Matrix Product State (MPS) writes the wavefunction of a 1D (or narrow quasi-1D
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/mps-methodology.md`
 - Tool skills:
   - `/using-mpskit` — **MPSKit.jl** (Julia): infinite MPS (VUMPS, IDMRG, IDMRG2), finite DMRG, TDVP. The canonical route for uniform/infinite ground states in this harness.
   - `/using-tenpy` — **TeNPy** (Python): iTEBD (the algorithm MPSKit lacks), iDMRG, VUMPS, finite DMRG/TEBD, finite-T purification.

@@ -9,6 +9,7 @@ VMC/NQS is the variational stochastic track. Use it to decide whether a paper ta
 
 ## Sources
 
+- **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/vmc-methodology.md`
 - Track README: `tracks/vmc/README.md`
 - Tool skills: `/using-netket`, `/using-jax`
 

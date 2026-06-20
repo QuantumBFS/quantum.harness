@@ -14,6 +14,7 @@ Use NetKet for VMC / neural-quantum-state workflows where the task needs a varia
 - CPU install target: `make install netket`
 - GPU install target: `make install netket-gpu`
 - Docs: NetKet <https://www.netket.org>
+- Local API reference (key API + worked examples, with links to upstream docs): `references/netket-api.md`
 
 ## Workflow
 

@@ -14,6 +14,7 @@ Use PEPSKit with TensorKit for PEPS / CTMRG calculations where convergence knobs
 - Install target: `make install pepskit`
 - Smoke test: `julia --project=julia-env -e 'using TensorKit, PEPSKit, QuadGK'`
 - Docs: PEPSKit.jl <https://quantumkithub.github.io/PEPSKit.jl/stable/>; 2D classical Ising CTMRG example <https://quantumkithub.github.io/PEPSKit.jl/stable/examples/2d_ising_partition_function/>
+- Local API reference (key API + worked examples, with links to upstream docs): `references/pepskit-api.md`
 
 ## Workflow
 

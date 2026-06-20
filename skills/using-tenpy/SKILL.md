@@ -12,6 +12,7 @@ Use TeNPy (Tensor Network Python; Hauschild & Pollmann) as the harness's Python 
 - Method card: `skills/method-mps/SKILL.md`
 - Install: `make install tenpy` — creates the **isolated** `.venv-tenpy` and installs `physics-tenpy` + matplotlib (TeNPy pins a numpy ABI, so it must not share the main `.venv`/anaconda base or imports hit ABI mismatches). Run scripts with `.venv-tenpy/bin/python scripts/<name>.py`.
 - Smoke test (also run by the install target): `.venv-tenpy/bin/python -c "import tenpy; print(tenpy.__version__)"`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/tenpy-api.md`
 
 ## Workflow
 

@@ -15,6 +15,7 @@ It does **not** own method selection, QMC theory, the method-level "why" (Trotte
 - Official package page: `https://cpmc-lab.wm.edu/`
 - Install + smoke target: `make install cpmc-lab`
 - Parameter guidance, small-system exact energies (Table I), and timing: `.knowledge/literature/quantum-monte-carlo/1407.7967_cpmc-lab-a-matlab-package-for-constrained-path-monte-carlo-c.md` (§II.6–8, §IV.2, §V)
+- Local API reference (key API + worked examples, extracted from the MATLAB source): `references/cpmc-lab-api.md`
 
 ## What CPMC-Lab is — step 2 (the handoff target)
 

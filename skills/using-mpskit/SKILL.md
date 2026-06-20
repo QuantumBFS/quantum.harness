@@ -12,6 +12,7 @@ Use MPSKit as the harness's canonical Julia stack for **infinite / uniform MPS**
 - Method card: `skills/method-mps/SKILL.md`
 - Stack: the shared `julia-env`. Install with `make install mpskit` (adds MPSKit, MPSKitModels, TensorKit and runs the smoke); on a remote, instantiate `julia-env` via `/setup-julia` first.
 - Smoke test (also run by the install target): `julia --project=julia-env -e 'using MPSKit, MPSKitModels, TensorKit'`
+- Local API reference (key API + worked examples, with links to upstream docs): `references/mpskit-api.md`
 
 ## Workflow
 
