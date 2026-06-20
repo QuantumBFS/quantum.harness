@@ -20,7 +20,7 @@ ZLP := zlp
 
 INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render
 
-.PHONY: skills clean help install test $(addprefix install-,$(INSTALLABLE))
+.PHONY: skills clean help install test serve $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
 help: ## Show available targets and installable tools
@@ -241,5 +241,9 @@ install-pdf-render: ## Install PDF-to-Markdown rendering tools into .venv
 	@.venv/bin/python -c 'import pymupdf4llm; print("pymupdf4llm ready")'
 	@echo "PDF-to-Markdown rendering tools ready in .venv"
 
+serve: ## Serve the recommended-workflows website locally. Optional: PORT=8000
+	@echo "Serving .github/template at http://localhost:$(or $(PORT),8000)/ (Ctrl-C to stop)"
+	@python3 -m http.server $(or $(PORT),8000) --directory .github/template
+
 clean: ## Remove generated HTML artifacts
-	find . -name '*.html' -not -path './docs/*' -delete
+	find . -name '*.html' -not -path './docs/*' -not -path './.github/*' -delete

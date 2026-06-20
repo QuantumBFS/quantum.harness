@@ -21,11 +21,13 @@ A single self-contained page: `.github/template/index.html`.
   `.github/template/` (or base64-inlined). GitHub-Pages-ready.
 - Matches the harness `/report` HTML convention (offline, single file).
 
-## The two intended workflows
+## The intended workflows
 
-The site presents exactly **two** workflows. The "general user path" is the same
-as the problem-solving path (cluster is just its heavy-compute branch), so it is
-not a separate section.
+The site presents **three** workflows, divided by tabs. The "general user path" is
+the same as the problem-solving (computational-methods) path — cluster is just its
+heavy-compute branch — so it is folded into Workflow 2 rather than being a separate
+tab. Workflow 3 covers the sci-brain scientific-research skills (survey writing and
+brainstorming with AI agents).
 
 ### Workflow 1 — Summer school: reproduce, then challenge
 
