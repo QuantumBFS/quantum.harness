@@ -31,7 +31,22 @@
   .pick .d{color:var(--mut);font-size:.9rem;margin-top:4px}
   .pick .n{color:var(--accent);font-weight:700;font-size:.8rem}
 
-  section.flow{padding:46px 0 8px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:6px;margin-top:30px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{appearance:none;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:9px;
+       white-space:nowrap;color:var(--mut);font-family:var(--sans);font-size:.95rem;font-weight:600;
+       padding:14px 16px;border-radius:10px 10px 0 0;border-bottom:2px solid transparent;
+       margin-bottom:-1px;transition:color .15s,border-color .15s,background .15s}
+  .tab:hover{color:var(--ink);background:var(--panel)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);background:var(--panel)}
+  .tnum{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;flex:none;
+        border-radius:50%;background:var(--line);color:var(--mut);font-family:var(--mono);
+        font-size:.72rem;font-weight:700}
+  .tab.active .tnum{background:var(--accent);color:#fff}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  section.flow{padding:34px 0 8px;border-bottom:1px solid var(--line)}
   .sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   .sec-h h2{font-size:1.55rem;margin:0}
   .badge{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
@@ -78,6 +93,28 @@
   .files li{margin:3px 0}
   .pill{font-family:var(--mono);color:var(--accent2)}
   .anno{color:var(--mut);font-style:italic}
+/* sci-brain tab: two sub-flows */
+  .subflow{padding-top:30px;margin-top:8px;border-top:1px dashed var(--line)}
+  .subflow:first-of-type{border-top:none;padding-top:6px}
+  .subflow-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .subflow-h h3{font-size:1.18rem;margin:0}
+  .subflow-h .lett{font-family:var(--mono);color:var(--accent);font-weight:700}
+  .agents{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 2px}
+  .agent{flex:1 1 0;min-width:200px;background:var(--panel);border:1px solid var(--line);
+         border-radius:10px;padding:11px 13px}
+  .agent .who{font-weight:700;font-size:.92rem}
+  .agent .who.i{color:var(--accent2)} .agent .who.p{color:var(--warn)}
+  .agent small{display:block;color:var(--mut);font-size:.8rem;margin-top:2px}
+  /* ideas-report "document" artifact */
+  .doc{background:#fbfbfd;color:#1a1d27;border:1px solid var(--line);border-radius:12px;
+       padding:20px 22px;font-size:.86rem;line-height:1.5}
+  .doc h4{margin:0 0 2px;font-size:1.05rem;color:#0f1117}
+  .doc .meta{color:#6b7280;font-size:.78rem;margin-bottom:12px}
+  .doc dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+  .doc dt{font-weight:700;color:#4838c0;white-space:nowrap}
+  .doc dd{margin:0;color:#2b2f3a}
+  .doc .sig{color:#0a7d5a;font-weight:700}
+  .doc .sig.h{color:#b06d12} .doc .sig.p{color:#b3322c}
 </style>
 </head>
 <body>
@@ -85,29 +122,28 @@
 
 <header>
   <div class="kicker">Quantum Many-Body Harness</div>
-  <h1>Two recommended workflows, end to end</h1>
+<h1>Three recommended workflows, end to end</h1>
   <p class="lead">A problem-solving harness for quantum many-body lattice problems — ground-state and
-  finite-temperature. You drive it in plain language; it routes to the right method, runs the
-  calculation, verifies the result, and hands you a script + plot you can rerun. Below are the two
-  journeys the harness is built around, each shown as a <b>real, captured run</b> — the transcripts
-  and plots are the actual output, not mockups.</p>
+  finite-temperature — plus the scientific-research skills around it. You drive it in plain language;
+  it routes to the right method, runs the calculation, verifies the result, and hands you a script,
+  plot, or document you can rerun. Below are the three journeys the harness is built around, each shown
+  as a <b>real, captured run</b> — the transcripts, plots, and reports are actual output, not mockups.</p>
 
-  <div class="pick">
-    <a href="#summer">
-      <div class="n">Workflow 1</div>
-      <div class="t">Summer school: reproduce, then challenge</div>
-      <div class="d">Pick a track, reproduce its reference paper, then go beyond it as a clean PR.</div>
-    </a>
-    <a href="#solve">
-      <div class="n">Workflow 2</div>
-      <div class="t">Bring your own problem</div>
-      <div class="d">State a model, get a verified ground-state calculation — scale to the cluster when it's heavy.</div>
-    </a>
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" aria-controls="panel-summer" id="tab-summer">
+      <span class="tnum">1</span> Summer school: reproduce &amp; challenge
+    </button>
+    <button class="tab" role="tab" aria-controls="panel-solve" id="tab-solve">
+      <span class="tnum">2</span> Computational methods: solve a model
+    </button>
+    <button class="tab" role="tab" aria-controls="panel-scibrain" id="tab-scibrain">
+      <span class="tnum">3</span> sci-brain: survey &amp; brainstorm ideas
+    </button>
   </div>
 </header>
 
 <!-- ============================ WORKFLOW 1 ============================ -->
-<section class="flow" id="summer">
+<section class="flow tabpanel active" id="panel-summer" role="tabpanel" aria-labelledby="tab-summer">
   <div class="sec-h">
     <h2>Workflow 1 — Reproduce, then challenge</h2>
     <span class="badge">Harnessing Quantum 2026</span>
@@ -196,10 +232,10 @@ the help desk for go/no-go):</span>
 </section>
 
 <!-- ============================ WORKFLOW 2 ============================ -->
-<section class="flow" id="solve">
+<section class="flow tabpanel" id="panel-solve" role="tabpanel" aria-labelledby="tab-solve">
   <div class="sec-h">
     <h2>Workflow 2 — Bring your own problem</h2>
-    <span class="badge">General use</span>
+    <span class="badge">Computational methods</span>
   </div>
   <p class="sec-sub">The everyday path. State a concrete model in plain language; the harness infers the
   defaults, recommends a method, runs it, and verifies against a known limit. When the system gets too
@@ -274,6 +310,164 @@ Script: <span class="pill">scripts/j1j2_heisenberg_dmrg.jl</span></span>
   </div>
 </section>
 
+<!-- ============================ WORKFLOW 3 — SCI-BRAIN ============================ -->
+<section class="flow tabpanel" id="panel-scibrain" role="tabpanel" aria-labelledby="tab-scibrain">
+  <div class="sec-h">
+    <h2>Workflow 3 — Scientific research skills</h2>
+    <span class="badge">sci-brain</span>
+  </div>
+  <p class="sec-sub">The harness doesn't stop at numbers. The bundled <b>sci-brain</b> skills cover the
+  research work <em>around</em> a calculation: mapping a field and writing it up, and brainstorming new
+  directions with AI agents. Two flows below — a survey you can hand to a team, and an ideas report you
+  can take to a help desk or advisor.</p>
+
+  <!-- ---- 3a. Survey writing ---- -->
+  <div class="subflow">
+    <div class="subflow-h"><span class="lett">a.</span><h3>Survey writing</h3></div>
+    <p class="sec-sub">Map a research area from scratch: parallel search strategies build a literature
+    knowledge base with BibTeX, the references are fetched and rendered to full text, then a structured
+    state-of-the-art review is drafted section by section.</p>
+
+    <div class="strip">
+      <div class="step"><code>/survey</code><small>explore + build KB</small></div>
+      <div class="arrow">→</div>
+      <div class="step"><code>/download-ref</code><small>fetch + render PDFs</small></div>
+      <div class="arrow">→</div>
+      <div class="step"><code>/survey-writer</code><small>draft the review</small></div>
+    </div>
+
+    <div class="grid">
+      <div class="term">
+        <div class="bar"><span class="dot" style="background:#ff5f56"></span><span class="dot" style="background:#ffbd2e"></span><span class="dot" style="background:#27c93f"></span>&nbsp; Survey — open-source many-body software</div>
+<div class="body"><span class="u">&gt; /survey — open-source software for quantum many-body computation</span>
+
+<span class="a">Which search strategies should I run in parallel?</span>
+<span class="out">  ✓ Landscape mapping   broad field overview
+  ✓ Cross-method        DMRG vs QMC vs VMC vs DMFT stacks
+  ✓ Benchmarks/datasets shared model/result infrastructure</span>
+
+<span class="sys"># one search worker per strategy, in parallel → findings reports</span>
+<span class="out">Consolidated 3 reports, deduplicated by DOI/arXiv:
+  • Tensor networks: ITensor, TeNPy, MPSKit, PEPSKit …
+  • ED: QuSpin, XDiag, ALPS …
+  • QMC / VMC / DMFT: ALF, mVMC, NetKet, TRIQS, w2dynamics …</span>
+<span class="a">Which directions go into the knowledge base?</span>
+
+<span class="u">&gt; all of them</span>
+
+<span class="sys"># BibTeX verified against authoritative sources — never from memory</span>
+<span class="out">Knowledge base: 53 references, 24 papers rendered to full text
+  → .knowledge/literature/software/   ref.bib</span>
+
+<span class="u">&gt; /survey-writer — write it up, organized by method</span>
+
+<span class="sys"># drafts section by section, you approve each before the next</span>
+<span class="out">§ What and Why
+§ Technical approaches  (tensor networks · ED · QMC · VMC/NQS · DMFT)
+§ At-a-glance comparison
+§ Open problems
+<span class="good">Saved: articles/2026-06-20-many-body-software-review.pdf  (5 pages)</span></span>
+
+<span class="a">State-of-the-art review drafted from 53 grounded references,
+organized by technical approach with per-method trade-offs.</span></div>
+      </div>
+
+      <figure>
+        <img src="assets/survey_review.png" alt="First page of the generated many-body software review">
+        <figcaption><b>Captured result.</b> Page&nbsp;1 of the generated review,
+        <code>articles/2026-06-20-many-body-software-review.pdf</code> — a real 5-page state-of-the-art
+        report built from a <span class="pill">53-reference</span> knowledge base (24 papers rendered to
+        full text). Organized by technical approach (tensor networks, ED, QMC, VMC/NQS, DMFT), each with
+        its own state of the art and trade-offs.</figcaption>
+      </figure>
+    </div>
+
+    <div class="take">
+      <b>Takeaway.</b> From a one-line topic to a cited, team-ready review — the search, the BibTeX, and
+      the full-text rendering are all real artifacts under <span class="pill">.knowledge/</span> and
+      <span class="pill">articles/</span>, not a chat summary.
+    </div>
+  </div>
+
+  <!-- ---- 3b. Brainstorming ideas with AI agents ---- -->
+  <div class="subflow">
+    <div class="subflow-h"><span class="lett">b.</span><h3>Brainstorming ideas with AI agents</h3></div>
+    <p class="sec-sub">A research collaborator that thinks <em>with</em> you. A warm mentor drives the
+    conversation while a separate critic agent stress-tests every idea — the deal is "you think, I fetch":
+    the agents surface facts, references, and cross-field connections; you do the deep reasoning. The
+    converged direction becomes a structured ideas report.</p>
+
+    <div class="agents">
+      <div class="agent"><span class="who i">Ideator (mentor)</span><small>Proposes directions, surfaces a related fact from a neighboring field, encourages deeper thinking.</small></div>
+      <div class="agent"><span class="who p">Polya (critic)</span><small>Asks "what is the plan? can you solve a part of it?" — pins down the minimum viable experiment and the failure signals.</small></div>
+    </div>
+
+    <div class="strip">
+      <div class="step"><code>/brainstorm-ideas</code><small>two-agent dialogue</small></div>
+      <div class="arrow">→</div>
+      <div class="step"><code>/idea-writer</code><small>structured proposal</small></div>
+    </div>
+
+    <div class="grid">
+      <div class="term">
+        <div class="bar"><span class="dot" style="background:#ff5f56"></span><span class="dot" style="background:#ffbd2e"></span><span class="dot" style="background:#27c93f"></span>&nbsp; Brainstorm — neural states vs DMRG on frustrated magnets</div>
+<div class="body"><span class="u">&gt; /brainstorm-ideas — can neural quantum states beat DMRG
+  on the 2D J1-J2 model near maximal frustration?</span>
+
+<span class="sys">Ideator</span><span class="a"> Ambitious — I like it. The good news: this is
+exactly where DMRG struggles (2D area law fights you). Oh — this
+reminds me, in the survey we just built, NetKet's recent results
+on J1-J2 are the closest prior art. Worth a look.</span>
+
+<span class="sys">Polya</span><span class="warnc"> Before we dream: what is the plan, concretely?
+And can you solve a *part* of it first — a size where ED still
+gives ground truth?</span>
+
+<span class="u">&gt; start at a 6×6 lattice where I can cross-check against ED</span>
+
+<span class="sys">Ideator</span><span class="a"> Good instinct. I can't reason through the
+expressivity question myself — use your evolving brain here: is a
+shallow CNN ansatz enough near J2/J1≈0.5? Tell me what you'd need
+to know and I'll fetch it.</span>
+<span class="sys">Polya</span><span class="warnc"> Define the kill-criterion now, while it's cheap.</span>
+
+<span class="u">&gt; ok. /idea-writer — turn this into a proposal</span>
+
+<span class="sys"># writes Research Question · Novelty · MVP · success/hope/pivot
+# signals → articles/…-ideas-report.md</span>
+<span class="good">Saved: articles/2026-06-20-nqs-frustration-ideas-report.md</span></div>
+      </div>
+
+      <figure>
+        <div class="doc">
+          <h4>Neural quantum states near maximal frustration</h4>
+          <div class="meta">ideas report · generated by /idea-writer</div>
+          <dl>
+            <dt>Research question</dt><dd>Can a CNN-based neural quantum state reach DMRG-competitive energies for the 2D J₁–J₂ model at J₂/J₁ ≈ 0.5?</dd>
+            <dt>Novelty</dt><dd>Targets the exact regime where 2D DMRG area-law cost explodes.</dd>
+            <dt>Why now / why you</dt><dd>NetKet + JAX make the ansatz a few lines; you have the ED cross-check.</dd>
+            <dt>Cross-field link</dt><dd>Expressivity bounds borrowed from ML approximation theory.</dd>
+            <dt>Min. viable exp.</dt><dd>6×6 lattice vs ED ground truth before scaling up.</dd>
+            <dt class="sig">Success signal</dt><dd class="sig">Energy within ED error bars at 6×6, then beats DMRG χ-limit at 10×10.</dd>
+            <dt class="sig h">Hope signal</dt><dd class="sig h">Not yet at ED accuracy, but error falls steadily with width.</dd>
+            <dt class="sig p">Pivot signal</dt><dd class="sig p">Variance plateaus far above ED — change ansatz or abandon.</dd>
+          </dl>
+        </div>
+        <figcaption><b>Representative artifact.</b> The structure is exactly what <code>/idea-writer</code>
+        emits — research question, novelty, minimum viable experiment, and explicit success / hope / pivot
+        signals. (The survey above is a captured run; this brainstorming exchange is illustrative — the
+        dialogue is interactive by nature.)</figcaption>
+      </figure>
+    </div>
+
+    <div class="take">
+      <b>Takeaway.</b> Two agents with distinct jobs — a mentor that opens directions and a critic that
+      forces a minimum viable experiment and a kill-criterion — leave you with a proposal that already
+      knows how it could fail. You stay the thinker; the agents fetch and challenge.
+    </div>
+  </div>
+</section>
+
 <!-- ============================ FOOTER ============================ -->
 <footer>
   <h3>Where to start</h3>
@@ -297,5 +491,24 @@ Script: <span class="pill">scripts/j1j2_heisenberg_dmrg.jl</span></span>
 </footer>
 
 </div>
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function activate(id){
+    tabs.forEach(function(t){
+      var on = t.getAttribute('aria-controls') === id;
+      t.classList.toggle('active', on);
+      document.getElementById(t.getAttribute('aria-controls')).classList.toggle('active', on);
+    });
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ activate(t.getAttribute('aria-controls')); });
+  });
+  // honor a deep link like #panel-solve on load
+  var h = location.hash.replace('#','');
+  if (h && document.getElementById(h)) activate(h);
+})();
+</script>
 </body>
 </html>
