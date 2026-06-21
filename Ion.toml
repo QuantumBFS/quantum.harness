@@ -74,3 +74,4 @@ verification-before-completion = { source = "obra/superpowers/skills/verificatio
 writing-plans = { source = "obra/superpowers/skills/writing-plans" }
 writing-skills = { source = "obra/superpowers/skills/writing-skills" }
 scientific-visualization = { source = "HughYau/AcademicForge/scientific-visualization" }
+build-apptainer-image = { type = "local", path = "skills/build-apptainer-image" }

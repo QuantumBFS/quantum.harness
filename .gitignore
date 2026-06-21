@@ -72,6 +72,14 @@ docs/superpowers/
 skills/arxiv-search
 skills/survey
 
+# Per-user cluster profiles (connection secrets: host/IP, user, key paths, local
+# paths). Cluster cards (*.md) carry the same identifying info. The committed
+# localhost.toml stays as the public example; each user's real profile + active
+# pointer are local-only.
+skills/using-slurm/profiles/hkust-gz.toml
+skills/using-slurm/profiles/hkust-gz.md
+skills/using-slurm/profiles/active.toml
+
 # Git worktrees
 .worktrees/
 skills/polyopt-guide

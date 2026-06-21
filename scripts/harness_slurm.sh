@@ -73,14 +73,32 @@ resolve_repo() {
   echo "$v"
 }
 
+# Whether to wrap remote commands in a login shell. Some clusters expose the
+# scheduler (sbatch/squeue/sinfo) only on the login-shell PATH (sourced from
+# /etc/profile / modules), which non-interactive ssh skips. Cluster-agnostic:
+# off unless connection.login_shell=true in the profile (or $HARNESS_LOGIN_SHELL).
+login_shell_enabled() {
+  if [[ -n "${HARNESS_LOGIN_SHELL:-}" ]]; then
+    [[ "$HARNESS_LOGIN_SHELL" == "1" || "$HARNESS_LOGIN_SHELL" == "true" ]]
+    return
+  fi
+  local v; v="$(profile_field 'connection.login_shell' "$(profile_path)" || true)"
+  [[ "$v" == "true" || "$v" == "1" ]]
+}
+
 # Run a command on the cluster (or print it under dry-run).
 remote() {
   local alias="$1"; shift
+  local cmd="$*"
+  if login_shell_enabled; then
+    local esc=${cmd//\'/\'\\\'\'}   # single-quote-safe for the remote shell
+    cmd="bash -lc '$esc'"
+  fi
   if [[ "${HARNESS_SLURM_DRYRUN:-0}" == "1" ]]; then
-    echo "DRYRUN ssh $alias $*" >&2
+    echo "DRYRUN ssh $alias $cmd" >&2
     return 0
   fi
-  ssh -o BatchMode=yes "$alias" "$@"
+  ssh -o BatchMode=yes "$alias" "$cmd"
 }
 
 # --- pure parsers (testable from stdin) --------------------------------------
@@ -328,6 +346,93 @@ print(f"# {len(pending)}/{len(spec.get('cells', []))} cells still need a success
 PY
 }
 
+# Block until a job leaves the queue (polls squeue). Replaces agent-driven
+# poll loops: monitoring is mechanism, not LLM turns. Scoped for short jobs —
+# returns 2 on timeout so the caller can hand back rather than block forever.
+# Knobs: --interval <s> (0 skips sleep, for tests), --attempts <n>.
+cmd_wait() {
+  local jobid="${1:?wait: <jobid> required}"; shift || true
+  local interval="${HARNESS_WAIT_INTERVAL:-10}" attempts="${HARNESS_WAIT_ATTEMPTS:-180}"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --interval) interval="$2"; shift 2 ;;
+      --attempts) attempts="$2"; shift 2 ;;
+      *) die "wait: unknown flag $1" ;;
+    esac
+  done
+  local alias; alias="$(resolve_alias)"
+  if [[ "${HARNESS_SLURM_DRYRUN:-0}" == "1" ]]; then
+    echo "DRYRUN poll squeue -j $jobid every ${interval}s up to ${attempts} attempts" >&2
+    return 0
+  fi
+  local i state
+  for (( i=1; i<=attempts; i++ )); do
+    state="$(remote "$alias" "squeue -j $jobid -h -o '%T'" 2>/dev/null | head -1)"
+    if [[ -z "$state" ]]; then
+      echo "state:    DONE (left queue) after $((i-1)) poll(s)"
+      return 0
+    fi
+    echo "state:    $state (poll $i/$attempts)"
+    [[ "$interval" == 0 ]] || sleep "$interval"
+  done
+  echo "state:    TIMEOUT (still ${state:-?} after $attempts polls); job continues — check later"
+  return 2
+}
+
+# PASS/FAIL from a fetched smoke manifest. Split out so it is testable without
+# a cluster (just a local results/<run>/manifest.json).
+cmd_smoke_verdict() {
+  local run="${1:?smoke-verdict: <run> required}"
+  local man="results/${run}/manifest.json"
+  if [[ ! -f "$man" ]]; then
+    echo "VERDICT:  FAIL (no manifest at $man)"; return 1
+  fi
+  if grep -q '"status"[[:space:]]*:[[:space:]]*"ok"' "$man"; then
+    echo "VERDICT:  PASS ($man)"; return 0
+  fi
+  echo "VERDICT:  FAIL (status != ok in $man)"; return 1
+}
+
+# Canned end-to-end check: ship a trivial job, submit, wait, fetch, verdict.
+# One call replaces the agent choreographing inspect/ship/submit/poll/fetch.
+cmd_smoke_test() {
+  local partition="" walltime="00:05:00" run="smoke" script="scripts/smoke_test.sbatch"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --partition) partition="$2"; shift 2 ;;
+      --time) walltime="$2"; shift 2 ;;
+      --run) run="$2"; shift 2 ;;
+      *) die "smoke-test: unknown flag $1" ;;
+    esac
+  done
+  [[ -f "$script" ]] || die "smoke-test: missing $script"
+  local alias repo; alias="$(resolve_alias)"; repo="$(resolve_repo)"
+  if [[ "${HARNESS_SLURM_DRYRUN:-0}" == "1" ]]; then
+    echo "DRYRUN smoke-test plan:"
+    echo "  1. ship $script -> $alias:$repo/scripts/"
+    echo "  2. submit --script $script --partition ${partition:-<default>} --time $walltime"
+    echo "  3. wait <jobid>"
+    echo "  4. fetch $run"
+    echo "  5. smoke-verdict $run"
+    return 0
+  fi
+  echo "[1/5] ship $script"
+  remote "$alias" "mkdir -p $repo/scripts $repo/results/$run"
+  rsync -az "$script" "${alias}:${repo}/scripts/"
+  echo "[2/5] submit"
+  local out jobid
+  out="$(cmd_submit --script "$script" ${partition:+--partition "$partition"} --time "$walltime")"
+  printf '%s\n' "$out"
+  jobid="$(printf '%s' "$out" | awk '/^job_id:/{print $2}')"
+  [[ -n "$jobid" ]] || die "smoke-test: could not parse a job id"
+  echo "[3/5] wait on $jobid"
+  cmd_wait "$jobid" || true
+  echo "[4/5] fetch $run"
+  cmd_fetch "$run"
+  echo "[5/5] verdict"
+  cmd_smoke_verdict "$run"
+}
+
 # --- dispatch ----------------------------------------------------------------
 
 # Global overrides accepted before the subcommand.
@@ -348,6 +453,9 @@ case "$sub" in
   probe-partitions) cmd_probe_partitions "$@" ;;
   submit)           cmd_submit "$@" ;;
   status)           cmd_status "$@" ;;
+  wait)             cmd_wait "$@" ;;
+  smoke-test)       cmd_smoke_test "$@" ;;
+  smoke-verdict)    cmd_smoke_verdict "$@" ;;
   fetch)            cmd_fetch "$@" ;;
   classify)         cmd_classify "$@" ;;
   pending-cells)    cmd_pending_cells "$@" ;;
