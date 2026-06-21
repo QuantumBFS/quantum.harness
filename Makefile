@@ -32,7 +32,8 @@ help: ## Show available targets and installable tools
 
 test: ## Run the Python script test suite with coverage
 	python3 -m pytest scripts/tests/ -q \
-		--cov=cluster_profile --cov=cluster_guardrail --cov=parameter_scan --cov=scaling_fit \
+		--cov=cluster_profile --cov=cluster_guardrail --cov=cluster_probe \
+		--cov=parameter_scan --cov=scaling_fit \
 		--cov-report=term-missing
 
 skills: ## Install or sync Ion-managed skills
