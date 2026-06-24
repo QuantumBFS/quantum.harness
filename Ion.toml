@@ -24,7 +24,9 @@ report = { type = "local" }             # render report.json into a self-contain
 # Skill tooling
 ion-cli = { type = "local" }
 
-# Computational software stacks
+# Software stacks
+context7-cli = { source = "upstash/context7/skills/context7-cli" }
+find-docs = { type = "local" }
 using-xdiag = { type = "local" }
 using-quspin = { type = "local" }
 using-itensors = { type = "local" }

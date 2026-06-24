@@ -19,10 +19,32 @@ tracks/**/results/
 # via skills/download-ref/helpers/bibtex_to_manifest.py — don't sync.
 .knowledge/literature/manifests/
 
-# Managed by ion
-skills/ion-cli
+# Managed by Ion
 .claude/skills/
 CLAUDE.md
+
+# Remote skills managed by Ion. Ion recreates these symlinks from Ion.toml/Ion.lock.
+skills/arxiv-search
+skills/brainstorming
+skills/context7-cli
+skills/dispatching-parallel-agents
+skills/executing-plans
+skills/finishing-a-development-branch
+skills/idea-writer
+skills/ideas
+skills/ion-cli
+skills/receiving-code-review
+skills/requesting-code-review
+skills/scientific-visualization
+skills/subagent-driven-development
+skills/survey
+skills/systematic-debugging
+skills/test-driven-development
+skills/using-git-worktrees
+skills/using-superpowers
+skills/verification-before-completion
+skills/writing-plans
+skills/writing-skills
 
 # Claude runtime state
 .claude/scheduled_tasks.lock
@@ -37,40 +59,7 @@ scripts/_*
 __pycache__/
 target/
 .superpowers/
-.claude/skills/ion-cli
-skills/receiving-code-review
-.claude/skills/receiving-code-review
-skills/requesting-code-review
-.claude/skills/requesting-code-review
-skills/using-git-worktrees
-.claude/skills/using-git-worktrees
-skills/brainstorming
-.claude/skills/brainstorming
-skills/dispatching-parallel-agents
-.claude/skills/dispatching-parallel-agents
-skills/executing-plans
-.claude/skills/executing-plans
-skills/finishing-a-development-branch
-.claude/skills/finishing-a-development-branch
-skills/subagent-driven-development
-.claude/skills/subagent-driven-development
-skills/systematic-debugging
-.claude/skills/systematic-debugging
-skills/test-driven-development
-.claude/skills/test-driven-development
-skills/using-superpowers
-.claude/skills/using-superpowers
-skills/verification-before-completion
-.claude/skills/verification-before-completion
-skills/writing-plans
-.claude/skills/writing-plans
-skills/writing-skills
-.claude/skills/writing-skills
-skills/scientific-visualization
-.claude/skills/scientific-visualization
 docs/superpowers/
-skills/arxiv-search
-skills/survey
 
 # Per-user cluster profiles (connection secrets: host/IP, user, key paths, local
 # paths). Cluster cards (*.md) carry the same identifying info. The committed
@@ -82,9 +71,6 @@ skills/using-slurm/profiles/active.toml
 
 # Git worktrees
 .worktrees/
-skills/polyopt-guide
-skills/idea-writer
-skills/ideas
 
 # Cryochamber runtime (per-machine state). The chamber *design* — .cryo/plan.md,
 # .cryo/cryo.toml, .cryo/README.md — is committed; everything below is local.
