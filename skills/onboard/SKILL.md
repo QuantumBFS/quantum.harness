@@ -1,152 +1,124 @@
 ---
 name: onboard
-description: Use when the user is new to the harness, asks "where do I start" / "how do I use this" / "I'm new here", opens with an empty or unclear prompt, explicitly invokes `/onboard`, or starts a first session with no configured harness environment.
+description: "Use when first-touch harness setup is needed: user is new, asks where or how to start, invokes `/onboard`, opens with an empty or unclear prompt, or has no configured harness environment."
 ---
 
 # Onboard
 
-First-touch intake. Set up the core harness tools and domain environment, optionally configure the user's compute cluster, then get the user onto a real problem fast.
+First-touch **triggered setup**. Clarify what the user is considering, infer the tools the task depends on, confirm the install plan, then route to the right harness skill.
 
-## Audience definition (binding)
+## Audience
 
-<audience name="binding">
-The user is on first touch — they may not know the harness vocabulary (skill, profile), have no `julia-env/`, and have ≤2 minutes of patience before the conversation feels bureaucratic. Every question MUST read as a single warm sentence, not a checklist.
-</audience>
-
-## When to activate
-
-- "I'm new here" / "where do I start" / "how do I use this".
-- Empty or unclear opening.
-- User explicitly invokes `/onboard`.
-- First session detected (no `julia-env/` directory).
+The user may not know the harness vocabulary and may only have a vague first goal. Keep each question warm, short, and concrete. Do not ask them to name support tools.
 
 ## Workflow
 
-### 1. Setup — do it, don't ask
+### 1. Intent Gate
 
-<checklist name="setup">
+Before installing, configuring, or routing, get the first intent.
 
-- Install domain stacks on demand via `make install <tool>`, after confirming `<tool>` appears in the Makefile's `INSTALLABLE` list.
-- Read the per-stack contract at `skills/<stack>/stack.toml` for install commands, smoke tests, and upstream docs.
+If the opening prompt already makes the intent concrete, use it and skip this gate. Otherwise ask one single-choice question. Use an interactive choice UI when the host supports it; otherwise show the same options as a numbered list and wait.
 
-</checklist>
-
-Run `make skills` only when skill sync is actually needed.
-
-Install only the stack the user's first selected workflow needs. Do not pre-install other method stacks. Each additional stack is installed on demand when that method is first invoked. `/report` needs nothing installed — it renders to HTML with the Python standard library.
-
-Report one line:
-- All good: "Domain stack ready."
-- Something installed: "Installed [what]. Ready."
-- Install failed: say what failed, offer to debug. Don't proceed until the stack works.
-
-### 1a. PDF-to-Markdown support — optional, only when relevant
-
-Skip this stage unless the user's opening prompt already mentions papers,
-arXiv/DOI/PDF ingestion, methodology references, or figure reproduction. If
-that only becomes clear after step 3a, ask this gate there before routing.
-
-First check whether `.venv/bin/python -c 'import pymupdf4llm'` succeeds. If it
-does, continue without asking. Otherwise ask one warm gate via
-`AskUserQuestion`:
-
-> *"This looks like a paper/reference workflow. Do you want me to install PDF-to-Markdown rendering tools in `.venv`? They give agents cleaner paper text and extracted figures; skipping is OK, but reference ingestion will fall back to plainer text extraction."*
+> Tell me what you’re considering first, so I can set up the harness properly. If none of these fit, describe the direction briefly.
 
 Options:
-- `"Install PDF rendering tools (Recommended for paper workflows)"` — "Runs `make install pdf-render`; uses `uv` if present, otherwise Python's built-in venv."
-- `"Skip for now"` — "No install; paper ingestion still works with fallback text extraction, but figure/text quality may be weaker."
+- `Run a calculation`
+- `Reproduce a paper`
+- `Explore a model or physics question`
+- `Set up for later`
 
-If the user chooses install, confirm `pdf-render` appears in the Makefile's
-`INSTALLABLE` list, then run `make install pdf-render`. This is a support tool:
-if installation fails, say what failed and offer to debug, but do not block a
-non-paper compute workflow.
+If the user answers outside these options or uses a freeform "Other" field, ask at most one short follow-up, then classify triggers from that answer.
 
-### 2. Cluster setup — warm gate, always asked
+Completion criterion: one intent is selected, a freeform intent is understood, or the opening prompt already supplies an equivalent intent.
 
-<checklist name="cluster-setup">
+### 2. Task Detail
 
-Skip this stage if `skills/using-slurm/profiles/active.toml` already exists (user has a profile from a prior session — idempotent).
+Ask only the next missing detail needed to decide triggers and routing:
 
-Otherwise, ask one warm gate via `AskUserQuestion`. Most paper-grade calculations end up on a remote cluster eventually, and even a quick setup now persists the profile so future sessions ship/submit/monitor/fetch automatically without re-asking:
+- Run a calculation: ask for the model/problem and target quantity if absent.
+- Reproduce a paper: ask for the paper, figure, or reproduction target if absent.
+- Explore a model or physics question: ask for the model/topic/question if absent.
+- Set up for later: ask whether the user wants minimal setup, common support tools, or a specific stack.
 
-<example name="warm-gate good">
-*"Will you want to run on a remote cluster at some point (SLURM, PBS, plain ssh)? If yes, I'll capture the config now so future sessions don't have to re-ask. If local-only is genuinely all you need, that's fine too — pick that and we'll move on."*
-</example>
+Completion criterion: the task is concrete enough to decide whether it needs source material, software docs, compute resources, and a method/software route.
 
-<example name="warm-gate bad">
-Cluster?
-</example>
+### 3. Triggered Setup Survey
 
-<example name="warm-gate cold">
-Do you want to configure a cluster? Yes/No.
-</example>
+Inspect; do not install yet. Add a setup item only when a trigger below is active and the item is not already available.
 
-Options:
-- "Yes, capture cluster config now (Recommended — persists for every future session)"
-- `"Local-only for now"` — "No cluster config saved. Future remote runs will re-ask before they can ship."
+| Trigger | Setup item | Availability check |
+| --- | --- | --- |
+| Ion-managed skills are missing or stale | `make skills` | `ion add`/skill state requires sync |
+| Task may need source material beyond local KB: arXiv, DOI, PDF, captions, figures, methodology details, benchmark values, or external reference text | `pdf-render` | `.venv/bin/python -c 'import pymupdf4llm'` |
+| Task may need precise/current package usage beyond local refs: package APIs, examples, setup, migrations, capabilities, or version-sensitive docs | `node` | Node.js 18+, `npm`, and `npx` |
+| Task likely exceeds local compute, needs arrays/scans, or user wants reusable remote compute setup | `/setup-cluster` | `skills/using-slurm/profiles/active.toml` |
+| A method/software route has been selected | matching stack install | Makefile `INSTALLABLE` plus `skills/<stack>/stack.toml` |
 
-If the user picks "local-only", continue to step 3. If "yes", hand off to `/setup-cluster`:
+Source-material support is not a paper-only mode. It is triggered whenever the task may need material outside `.knowledge/` or the local skill references.
 
-</checklist>
+Completion criterion: every active trigger is either added to the pending install/config plan, marked already available, or explicitly skipped as irrelevant.
 
-#### 2a. Delegate to `/setup-cluster`
+### 4. Route Software Before Installing Stacks
 
-Profile creation lives in one place: the `/setup-cluster` skill. Dispatch it now
-— it builds the unified TOML profile (from the cluster's docs URL via a thorough
-subagent crawl, or a ≤4-question walk-through), probes live resources, seeds the
-student safety `[limits]`, and writes `skills/using-slurm/profiles/<name>.toml`
-plus the `active.toml` symlink. Stay warm: frame the why, offer the escape hatch,
-let `/setup-cluster` own the questions.
+If the task involves a calculation, code, package use, or paper reproduction that needs a method/software route, consult the relevant local sources before proposing stack installs:
 
-Do NOT bootstrap Julia or instantiate environments here — that's `/setup-julia`'s
-job, dispatched on demand by `/using-slurm` when the first cluster Julia run
-happens.
+- `/model` or `/physics` cards for problem routing.
+- `/method-*` skills for method choice.
+- `/using-*` skills and `skills/<stack>/stack.toml` for software choice, install target, smoke test, and runtime profile.
+- `find-docs` only when package/API details are harness-relevant, hard to find, or version-sensitive.
 
-### 3. Problem intake — skippable
+Present a single-choice fork with 2-3 real software/method options when there is a genuine choice. Each option gets a short reason and tradeoff. Include an `Other / preferred stack` escape hatch when the user may already have a preference.
 
-Setup and cluster profile are now persisted. Some users want to dive into a problem immediately; some just wanted the harness initialized and will return later. Ask once via `AskUserQuestion`:
+Completion criterion: either a software route is selected, no route is needed yet, or the task is routed to `/model`, `/physics`, or `/reproduce-paper` to decide the route there.
 
-> *"Setup is done. Want to start on a problem now, or save what we have and exit?"*
+### 5. Confirm Install Plan
 
-Options:
-- "Start a problem now (Recommended if you have one in mind)" — proceed to step 3a
-- "Save setup and exit" — skip to exit
+Before running any install or configuration command, show one compact table:
 
-#### 3a. Describe the problem
+| Benefit | Item | Action |
+| --- | --- | --- |
+| **cleaner PDF extraction** and **extracted figures** | `pdf-render` | `make install pdf-render` |
+| **more precise package usage** | `node` | `make install node` |
+| selected calculation stack | `itensors` | `make install itensors` |
+| **remote jobs without re-asking** | cluster profile | `/setup-cluster` |
 
-> *"What problem are you trying to solve?"*
+Only include rows that apply. Then ask one yes/no question:
 
-That's it. Don't list models. Don't explain the architecture.
+> Install/configure these now?
 
-If the answer reveals a paper/reference workflow and step 1a was not already
-handled, run the step 1a PDF-to-Markdown support gate before routing.
+If the user says no, skip the plan and continue only along paths that do not require the skipped setup.
 
-### 4. Route
+Completion criterion: the user approves the plan, rejects it, or asks to change it.
 
-<checklist name="route">
+### 6. Execute Approved Setup
 
-If the user picked "Save setup and exit" in step 3, exit with one line: *"Harness ready. `/model` or `/physics` will route you when you bring a problem."*
+For each approved Makefile target, confirm the target appears in `INSTALLABLE`, then run `make install <tool>`. For skill sync, run `make skills`. For cluster setup, hand off to `/setup-cluster`.
 
-Otherwise, infer the model or physics topic from the step 3a answer. Hand off to `/model` (if a specific Hamiltonian) or `/physics` (if a cross-model phenomenon question); the dispatcher reads the matching card. This skill exits.
+Classify failures:
 
-If the user's prompt is ambiguous between two or three specific routes, surface candidates via the user-facing fork pattern → [AGENTS.md → Output norms](../../AGENTS.md#ui-ux) (AskUserQuestion; 2–3 options; recommended first; Done always real). Each option is one candidate model card OR one candidate physics card. Do not enumerate the full model or physics card lists.
+- Support tools (`pdf-render`, `node`): say what failed, offer to debug, and continue if the task can proceed without them.
+- Domain stacks: block compute on that stack until fixed.
+- Cluster setup: continue local-only only if the task remains feasible locally.
 
-If nothing fits: *"That's outside current scope (ground-state lattice problems). Want me to try an off-skill approach, or help you reframe?"*
+Do not inline package-manager commands in chat. The Makefile and stack contracts own install details.
 
-</checklist>
+Completion criterion: every approved setup item is installed, skipped by the user, or failed with its effect on the task stated.
 
-## What this skill does NOT do
+### 7. Route or Exit
 
-- Lecture about the harness.
-- Walk through a tutorial.
-- Ask the user to read docs.
-- Show a menu of 13 skills.
-- Hardcode package-level install instructions (the stack contracts in `skills/<stack>/stack.toml` name install commands, smoke tests, and upstream docs; the Makefile and setup scripts execute them). For paper rendering support, call `make install pdf-render`; do not inline pip commands in the conversation.
-- Bootstrap Julia on the cluster (that's `/setup-julia`, dispatched by `/using-slurm` on first cluster Julia run).
-- Pile questions on the user — every gate is one question with a clear *why* and an escape hatch.
+- `Run a calculation`: route to `/model` for a specific Hamiltonian/model, or `/physics` for a cross-model question.
+- `Reproduce a paper`: route to `/reproduce-paper`.
+- `Explore a model or physics question`: route to `/model` or `/physics`; install nothing unless computation becomes necessary.
+- `Set up for later`: exit after the approved setup plan is handled.
 
-## UX rule (applies to every gate in this skill)
+Completion criterion: the next skill owns the task, or setup-only onboarding ends with one line: `Harness setup handled. Bring a model, paper, or calculation when you are ready.`
 
-**Every** user-facing question in this skill — including the warm gate in 2, the path-to-profile gate in 2a, **each** of the 4 walk-through questions in 2c, and the problem-or-exit gate in 3 — follows the pattern: *frame the why → state the consequence → offer the escape hatch → ask*. No question stands alone without context. Telegraphic prompts ("Cluster?", "URL?") are rude even when short. Warm-clear-concise.
+## Rules
 
-One short setup → one optional cluster gate → one problem question → route. Then exit.
+- No installs before intent, trigger survey, and install-plan confirmation.
+- No support-tool questions before they are triggered by the task.
+- No preinstalling all method stacks.
+- One decision per question.
+- Use interactive single-choice gates when available; otherwise use concise numbered options.
+- Setup gates follow the project decision-anchor rule in `AGENTS.md`.
+- Do not lecture about the harness, list every skill, or ask the user to read docs.
