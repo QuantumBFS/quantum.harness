@@ -45,6 +45,17 @@ Each block carries a `kind` plus its own fields; unknown kinds are skipped.
 
 Figure `src` paths are relative to `<run-dir>`; a missing file degrades to a small note rather than failing.
 
+## Captions
+
+`report` renders captions as supplied; producer skills own their content. A useful caption explains the result, not the file. For scientific or technical figures, include the result status, the plotted quantity and system, how to read the visual encoding, the key interpretation or signature, and the connection to the target source or run evidence when relevant. Define non-standard abbreviations on first use. Avoid captions that are only filenames, panel labels, or generic text like "Result" / "Plot".
+
+Compact shape:
+
+```text
+<Status>. <Quantity> for <system>. <Visual encoding>. <Interpretation/signature>.
+<Source target, runtime, or check when it matters>.
+```
+
 ## Math
 
 An `equation` block's `tex` is a bare LaTeX equation and renders as a centered display block; any string may carry inline math in `$…$` (or display in `$$…$$`), plus `**bold**` and `==highlight==` (yellow marker) spans for keypoints. The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
