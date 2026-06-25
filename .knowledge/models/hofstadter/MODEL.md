@@ -27,7 +27,7 @@ Conventions: spinless fermions on a 2D square lattice; `t > 0` nearest-neighbor 
 | C11 integrability | **free-fermion / quadratic → exactly solvable** via the Harper equation (a `q×q` Bloch matrix per magnetic crystal momentum), `O(N³)` | Diagonalizing the `q×q` Harper matrix over the magnetic BZ gives the full butterfly and the Chern labels. |
 | C12 sign problem | N/A — free fermions, no Monte Carlo required (Hofstadter–Hubbard / interacting extensions become sign-ful, magnetic-flux sign problem) | The magnetic field is itself a generic source of the QMC sign problem in interacting variants. |
 | D13 regime | ground state (`T = 0`) default; spectrum/transport are the targets; dynamics exactly tractable (quadratic) | The butterfly and the gap Chern labels are computed once and for all. |
-| D14 filling / doping | gaps open at fillings set by the **Diophantine equation** `r = q\, s + p\, t` (TKNN); the Hall plateau sits at each such commensurate filling | Filling selects which butterfly gap (and hence which Chern number) determines `σ_xy`. |
+| D14 filling / doping | gaps open at fillings set by the **Diophantine equation** `r = q\, s + p\, C` (TKNN; `C` = gap Chern number, `s` integer); the Hall plateau sits at each such commensurate filling | Filling selects which butterfly gap (and hence which Chern number `C`) determines `σ_xy`. |
 | D15 disorder | clean by default; disorder broadens subbands into Landau-like bands with localized states between the (topologically protected) extended levels — the mechanism of IQHE plateaus | Disorder is what makes the experimental quantum Hall plateaus flat; the Chern number is robust. |
 | D16 hermiticity | Hermitian / closed | — |
 
