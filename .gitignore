@@ -11,6 +11,8 @@ julia-env/.CondaPkg/
 .julia/
 .knowledge/literature/**/.raw/
 .knowledge/literature/**/.figures/
+.knowledge/models/**/.raw/
+.knowledge/models/**/.figures/
 tracks/**/.raw/
 tracks/**/.figures/
 tracks/**/results/
