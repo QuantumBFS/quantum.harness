@@ -2,6 +2,64 @@
 
 Solve Hubbard ground-state problems as correlated-electron tasks. Doping, extended terms (`t'`, `V`), lattice, and DMFT-style embedding are all workflow choices inside this problem — not separate skills.
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = -t \sum_{\langle ij\rangle,\sigma} \left( c^\dagger_{i\sigma} c_{j\sigma} + \text{h.c.} \right) + U \sum_i n_{i\uparrow} n_{i\downarrow} - \mu \sum_i n_i $$
+
+Conventions: `t > 0` standard hopping (energy unit `t = 1`), `U > 0` on-site repulsion (`U < 0` attractive), `⟨ij⟩` = nearest-neighbor bonds counted once. Half-filling sits at `μ = U/2`; the particle-hole-symmetric form subtracts `(U/2)Σ n_i`. See `.knowledge/conventions.md`.
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 1D chain / quasi-1D ladder / 2D square (`Z=4`), triangular / 3D cubic / `Z→∞` (DMFT) | Geometry sets the difficulty; 2D square is the cuprate-parent target. |
+| A2 boundary conditions | OBC (DMRG) · PBC (ED/QMC) · cylinder (2D DMRG) · infinite (iDMRG/DMFT) | Cylinder width caps the 2D-DMRG bond-dim budget. |
+| A3 statistics & local dim | fermion; `d = 4` per site (∅, ↑, ↓, ↑↓) | The four-state local space sets the ED `4^N` wall and MPS per-site cost. |
+| A4 interaction range | short-range: on-site `U` + NN hopping (extended Hubbard adds NN `V`, `t'`) | Local — area-law-compatible. |
+| B5 entanglement scaling | 1D: area+log near criticality (`c=1` charge + `c=1` spin off half-filling; Mott-gapped charge at half-filling) · 2D: area law | Spin-charge separation gives two gapless modes in the 1D metal. |
+| B6 spectral gap | half-filling: Mott charge gap for any `U>0` in 1D, for `U≳U_c` in 2D (gapless spin) · doped: gapless (metal) | 1D Mott gap opens at infinitesimal `U` (Lieb–Wu); spin sector stays gapless. |
+| B7 ground-state order | half-filled bipartite: AF Mott insulator (Néel SSB in 2D/3D) · doped 2D: stripes / d-wave SC candidate / pseudogap | Doped 2D ground state is the central open problem; stripes vs uniform SC nearly degenerate. |
+| B8 frustration | none on bipartite (chain, square, cubic) · geometric on triangular/`t'≠0` · fermionic sign always present | Fermionic antisymmetry is the intrinsic frustration. |
+| C9 global symmetry | U(1)_charge × SU(2)_spin (`N↑`, `N↓` separately conserved; `S^z`) · half-filled bipartite: SO(4) = spin SU(2) × η-pairing SU(2) | SO(4) (Yang–Zhang) adds pseudospin/η-pairing at half-filling on bipartite lattices. |
+| C10 spatial symmetry | translation (`k`), point group (`D_4` square), inversion | Block-diagonalizes ED sectors. |
+| C11 integrability | 1D: Bethe-ansatz integrable (Lieb–Wu) · 2D / 3D: non-integrable | 1D has exact spectrum and thermodynamics (TBA); higher D fully numerical. |
+| C12 sign problem | half-filled bipartite: sign-free in DQMC (particle-hole) · attractive `U<0`: sign-free at any filling · doped repulsive: severe sign problem | Sign-free at half-filling is what makes that regime numerically exact at scale. |
+| D13 regime | ground state (`T=0`) default; finite-T (DQMC/DMFT) and dynamics out of card scope | `E/N` + double occupancy are canonical GS targets. |
+| D14 filling / doping | half-filling (Mott) is the symmetric reference; doping is the key axis (turns on sign problem, opens competing orders) | Mott→doped is the decisive control parameter. |
+| D15 disorder | clean by default; disorder → Anderson–Hubbard / MIT (out of scope) | — |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- Half-filled bipartite (2D/3D) : antiferromagnetic Mott insulator — staggered magnetization `m_s`, spin structure-factor peak `S(π,π)`, charge (Mott) gap `Δ_c`.
+- 1D at half-filling : Mott insulator, no SSB (Mermin–Wagner); power-law spin correlations, gapped charge sector.
+- Doped 2D : competing stripe order (charge/spin density modulation), `d_{x²−y²}` superconducting pairing, pseudogap — diagnose via pair-field and charge/spin structure factors.
+
+### Canonical observables
+
+- Ground-state energy per site `E/N`; double occupancy `⟨n↑ n↓⟩`.
+- Staggered magnetization `m_s`, spin structure factor `S(q)`; charge gap `Δ_c`.
+- `d`-wave pair correlations and charge/spin stripe order parameters (doped 2D).
+- Momentum distribution `n(k)`; central charge `c` (1D, entanglement scaling).
+
+### Recommended methods
+
+- Primary (1D / ladder / cylinder): **DMRG/MPS** — near-exact in 1D, U(1)×SU(2) quantum-number conservation cuts cost (per `method-property-map.md` §MPS).
+- Primary (half-filled bipartite, large `N`): **sign-free DQMC/AFQMC** — particle-hole symmetry makes it numerically exact at scale (§QMC, C12).
+- Doped 2D (sign-blocked): **DMRG cylinders + AFQMC (constrained-path/phaseless) + VMC/NQS + iPEPS**, cross-checked (§B8/C12); **ED** as small-cluster oracle; **DMFT** for local self-energy / Mott transition.
+
+### Key reference
+
+[@qin_2021_hubbard] — the authoritative multi-method computational review of the Hubbard model (DMRG, AFQMC, DMFT/DCA, tensor networks) covering half-filling and the doped 2D problem, with cross-method consensus benchmarks.
+Rendered: `./2104.00064_the-hubbard-model-a-computational-perspective.md`.
+
+### Benchmarks
+
+- 1D chain, half-filling, thermodynamic limit (`U/t=4`): exact ground-state energy per site `E/N ≈ −0.5737 t` from the Lieb–Wu integral equations (Lieb & Wu, Phys. Rev. Lett. 20, 1445 (1968); convention `H = -tΣc†c + UΣn↑n↓`). At `U→∞` half-filling, `E/N → 4 ln 2 · (−t²/U)` (Heisenberg AFM, `J=4t²/U`).
+- 2D square, `U/t=8`, `δ=1/8` doping (`t'=0`): ground state is a period-8 stripe with `E/N = −0.767 ± 0.004 t` — four-method agreement (DMRG, AFQMC, iPEPS, DMET), reported in the Qin review [@qin_2021_hubbard] from the Simons-collaboration benchmark (Zheng et al., Science 358, 1155 (2017)).
+
 ## Diagnose
 
 Infer setup from the user's prompt and propose for ratification.
