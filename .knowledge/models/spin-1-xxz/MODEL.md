@@ -2,6 +2,62 @@
 
 Solve spin-1 XXZ chain ground-state problems with optional single-ion anisotropy. Distinct canonical problem family from the `heisenberg` skill (which targets spin-1/2 by default) because the spin-1 Hilbert space and SPT (Haldane) physics define a separate phase-diagram structure.
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = \sum_{\langle ij\rangle}\left[ S_i^x S_j^x + S_i^y S_j^y + \Delta\, S_i^z S_j^z \right] + D \sum_i (S_i^z)^2 $$
+
+Conventions: spin-1 `S`-operators (`d=3`), `⟨ij⟩` nearest-neighbor counted once; in-plane coupling set to 1, `Δ` the XXZ exchange anisotropy (`Δ=1` isotropic Heisenberg, `Δ=0` XY), `D` the single-ion anisotropy. See `.knowledge/conventions.md` for factor/sign translations.
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 1D chain (`Z=2`) | Quasi-1D ladders extend the family but soften the topological order. |
+| A2 boundary conditions | OBC (DMRG default; exposes edge spins) · PBC (clean entanglement-spectrum cut) | OBC reveals the S=1/2 Haldane edge modes. |
+| A3 statistics & local dim | spin-1; `d = 3` | Larger `d` than S=1/2 → higher per-site MPS/ED cost. |
+| A4 interaction range | short-range (nearest-neighbor) + on-site `D` | Local. |
+| B5 entanglement scaling | Haldane phase: area law (constant `S`), entanglement spectrum doubly degenerate | SPT signature lives in the entanglement spectrum, not a local order parameter. |
+| B6 spectral gap | Haldane phase: gapped (Haldane gap) · transitions (Ising/Gaussian): gap closes | Integer-spin chain is gapped — Haldane's conjecture. |
+| B7 ground-state order | Haldane = symmetry-protected topological (SPT) · large-`D` trivial · Néel (large `Δ`) SSB | Protected by `Z_2×Z_2` / inversion / time reversal; diagnose via string order. |
+| B8 frustration | none (default) | NNN coupling could add competition (out of default scope). |
+| C9 global symmetry | U(1) (`S^z_tot`); full SU(2) only at `Δ=1, D=0`; `Z_2×Z_2` (π-rotations) protects the Haldane SPT | `D` breaks SU(2)→U(1) even at `Δ=1`. |
+| C10 spatial symmetry | translation, inversion (protects SPT), reflection | Inversion is one of the protecting symmetries. |
+| C11 integrability | non-integrable (S=1 Heisenberg chain not Bethe-solvable; cf. exactly-solvable AKLT point with added biquadratic term) | The pure Heisenberg S=1 chain has no exact solution; AKLT is a nearby solvable model. |
+| C12 sign problem | sign-free (unfrustrated bipartite chain → QMC applicable; DMRG is the workhorse) | No frustration → no spin sign problem. |
+| D13 regime | ground state (`T=0`) default | Gap, string order, entanglement spectrum are the targets. |
+| D14 filling / doping | N/A (spin model) | — |
+| D15 disorder | clean by default | — |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- Haldane (SPT) : nonzero string order parameter `O_string^z = −lim_{|i−j|→∞} ⟨S_i^z exp(iπ Σ_{i<k<j} S_k^z) S_j^z⟩`; doubly-degenerate entanglement spectrum; fractional S=1/2 edge spins (OBC).
+- Large-`D` trivial : product-like `Π|S^z=0⟩`; string order vanishes; entanglement spectrum non-degenerate.
+- Néel (large `Δ`) : staggered magnetization, conventional SSB.
+
+### Canonical observables
+
+- `E/N`; Haldane gap `Δ_H`.
+- String order parameter (Haldane diagnostic) and conventional staggered magnetization.
+- Entanglement spectrum (degeneracy = SPT signature); edge magnetization (OBC).
+
+### Recommended methods
+
+- Primary: **DMRG/MPS** — 1D gapped area-law ground state; MPS natively measures string order and the entanglement spectrum (per `method-property-map.md` B7-SPT row).
+- Cross-check: **ED** on `L ≲ 14` for exact gap/spectrum; **TEBD** imaginary-time route; sign-free **QMC** also available (unfrustrated).
+
+### Key reference
+
+[@wierschem_2014_characterizing] — concise review of the Haldane phase in spin-1 Heisenberg antiferromagnets: string order, SPT classification, entanglement spectrum, and quasi-1D phase diagram.
+Rendered: `./1501.00422_characterizing-the-haldane-phase-in-quasi-one-dimensional-sp.md`.
+
+### Benchmarks
+
+- Haldane gap (S=1 isotropic Heisenberg chain, `Δ=1, D=0`): `Δ_H/J ≈ 0.41048(6)` — DMRG/QMC (White & Huse, Phys. Rev. B 48, 3844 (1993); Todo & Kato 2001).
+- Ground-state energy: `E/N ≈ −1.401484039` per spin (White & Huse DMRG, same `H` with in-plane coupling 1).
+
 ## Diagnose
 
 Infer the canonical setup from the user's prompt and propose it for ratification.

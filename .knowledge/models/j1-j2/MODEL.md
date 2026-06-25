@@ -2,6 +2,62 @@
 
 Solve J1-J2 spin-model ground-state problems. Competing nearest- and next-nearest-neighbor couplings make the regime `J2/J1 ≈ 0.5` (square lattice) one of the canonical hard / contested benchmarks in QMB.
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = J_1 \sum_{\langle ij\rangle} \mathbf{S}_i\cdot\mathbf{S}_j + J_2 \sum_{\langle\langle ij\rangle\rangle} \mathbf{S}_i\cdot\mathbf{S}_j $$
+
+Conventions: `S`-operator normalization, `⟨ij⟩` nearest-neighbor and `⟨⟨ij⟩⟩` next-nearest-neighbor (diagonal) bonds, each counted once; `J_1, J_2 > 0` AFM; `J_1 = 1` sets the scale, `g ≡ J_2/J_1` is the control parameter. See `.knowledge/conventions.md`.
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 2D square lattice (`Z=4` NN + 4 NNN); also 1D zigzag chain | NNN couplings span both sublattices, breaking bipartiteness for QMC. |
+| A2 boundary conditions | cylinder (2D DMRG default) · torus (ED) · OBC | Cylinder wrapping/width strongly affects the intermediate regime. |
+| A3 statistics & local dim | spin-1/2; `d = 2` | Default S=1/2; the contested regime is specific to S=1/2. |
+| A4 interaction range | short-range (NN + NNN) | Still local, but two competing couplings. |
+| B5 entanglement scaling | ordered phases: 2D area law · intermediate `g≈0.5`: enhanced/area-violating (candidate gapless QSL → power-law) | Entanglement growth in the window is what makes it method-limited. |
+| B6 spectral gap | Néel/stripe: gapless (Goldstone) over ordered GS · intermediate: gapped Z2 vs gapless U(1) QSL — unresolved | Order-of-gap in the window is part of the open question. |
+| B7 ground-state order | `g≲0.4` Néel SSB · `g≳0.6` stripe (collinear) SSB · `g≈0.5` candidate spin liquid / VBS (contested) | Two ordered phases flank a debated nonmagnetic window. |
+| B8 frustration | interaction-driven (competing `J_1` vs `J_2`) | The canonical interaction-frustrated benchmark. |
+| C9 global symmetry | SU(2) (total `S`), U(1) (`S^z_tot`) | Isotropic Heisenberg couplings → full SU(2). |
+| C10 spatial symmetry | translation, `C_4v` point group; stripe phase breaks `C_4 → C_2` | Lattice-rotation breaking is a stripe-order diagnostic. |
+| C11 integrability | non-integrable | No exact solution at any `g≠0`. |
+| C12 sign problem | severe (frustration breaks the Marshall sign rule) | QMC blocked → DMRG/PEPS/VMC + PolyOpt bounds. |
+| D13 regime | ground state (`T=0`) | Phase identification is the goal. |
+| D14 filling / doping | N/A (spin model) | — |
+| D15 disorder | clean by default | — |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- Néel (`g ≲ 0.4`) : staggered magnetization `m_s`, structure-factor peak at `(π,π)`.
+- Stripe / collinear (`g ≳ 0.6`) : peak at `(π,0)`/`(0,π)`, breaks `C_4` lattice rotation.
+- Intermediate `g ∈ [0.45,0.55]` (frontier) : candidate gapless U(1) spin liquid vs gapped Z2 vs valence-bond solid — diagnose with `spin-liquid`; dimer order parameter / VBS structure factor and entanglement spectrum.
+
+### Canonical observables
+
+- `E/N`; spin structure factor `S(q)` (locating `(π,π)` vs `(π,0)` peaks).
+- Order parameters `m_s` (Néel), stripe magnetization, VBS/dimer order parameter.
+- Entanglement entropy / spectrum (cylinder topological-degeneracy diagnostics).
+
+### Recommended methods
+
+- Primary: **DMRG on cylinders** + **PEPS/iPEPS** — frustration sign-blocks QMC, so tensor networks carry the load in 2D (per `method-property-map.md` B8/C12 gate).
+- Cross-check: **VMC/NQS** (variational upper bound, compare ansatz families); **ED** on `N ≤ 40` clusters; **PolyOpt** for a certified lower bound. Cross-method disagreement in the window is a known, reportable phenomenon — do not average it away.
+
+### Key reference
+
+[@morita_2014_quantum] — many-variable VMC with quantum-number projection mapping the full square-lattice `J_1`–`J_2` phase diagram; a canonical, downloadable entry into the contested intermediate-regime debate.
+Rendered: `./1410.7557_quantum-spin-liquid-in-spin-1-2-j1-j2-heisenberg-model-on-sq.md`.
+
+### Benchmarks
+
+- Phase boundaries (square lattice, S=1/2): Néel for `g ≲ 0.4`, nonmagnetic window `g ∈ ~[0.4, 0.6]`, stripe for `g ≳ 0.6` (Morita, Kaneko, Imada, J. Phys. Soc. Jpn. 84, 024720 (2015)).
+- Limit `g = 0`: reduces to NN square Heisenberg, `E/N ≈ −0.6694` (Sandvik QMC benchmark) — a built-in limit check.
+
 ## Diagnose
 
 Infer setup from the user's prompt and propose for ratification.

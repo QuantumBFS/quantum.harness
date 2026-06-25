@@ -2,6 +2,63 @@
 
 Solve `q`-state quantum Potts and quantum Clock ground-state problems. Generic over `q`. The 1D `q = 3` Clock model is also the quantum 3-state Potts model (after the standard duality), with critical `Z_3` parafermion CFT at `c = 4/5`. Higher `q` extends the family; `q = 2` reduces to the transverse-field Ising chain (use `transverse-field-ising` for that).
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = -\sum_{\langle ij\rangle}\left(X_i X_j^\dagger + X_i^\dagger X_j\right) - h\sum_i\left(Z_i + Z_i^\dagger\right) $$
+
+Conventions: qudit clock/shift operators with `X|k⟩ = |k+1 \bmod q⟩`, `Z|k⟩ = ω_q^k|k⟩`, `ω_q = e^{2πi/q}`; local dimension `d = q`; ferromagnetic coupling set to 1, `h ≥ 0` the transverse clock field (`h_c = 1` for `q=3`). For `q=2` this is the TFIM. See `.knowledge/conventions.md`.
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 1D chain (`Z=2`) · 2D square | 1D `q=3` is the canonical parafermion-CFT critical chain. |
+| A2 boundary conditions | PBC ring (criticality work) · OBC · cylinder (2D) | PBC preferred for finite-size scaling of the QPT. |
+| A3 statistics & local dim | qudit; `d = q` (3, 4, 5, …) | Local dimension grows with `q`, raising ED/MPS cost. |
+| A4 interaction range | short-range (nearest-neighbor) | Local. |
+| B5 entanglement scaling | gapped phases: area law · 1D critical (`q≤4`): area+log (`c=4/5` at `q=3`, `c=1` at `q=4`) | Central charge set by the parafermion/Potts CFT; `q=3 → c=4/5`. |
+| B6 spectral gap | gapped FM (`h<h_c`) and PM (`h>h_c`) · gapless at QCP (`q≤4`) · `q≥5`: first-order (no gapless point) | Order of transition changes at `q=5` in 1D. |
+| B7 ground-state order | FM (`h<h_c`): `Z_q` SSB, `q`-fold degenerate · PM (`h>h_c`): trivial | `Z_q` clock order parameter `⟨Z⟩`. |
+| B8 frustration | none on bipartite FM · possible on non-square (e.g. triangular Potts) | Default square/chain FM unfrustrated. |
+| C9 global symmetry | `Z_q` clock symmetry (generator `Π_i Z_i`) | The symmetry whose breaking defines the FM phase. |
+| C10 spatial symmetry | translation (`k`), inversion/reflection | Conserved momentum in PBC rings. |
+| C11 integrability | non-integrable in general; `q=2` free-fermion (TFIM); 1D critical point described by `Z_q` parafermion / Potts CFT | Self-dual critical point (Kramers–Wannier-type) located analytically. |
+| C12 sign problem | sign-free (ferromagnetic / bipartite) | QMC/SSE applicable; DMRG-qudit is the default workhorse. |
+| D13 regime | ground state (`T=0`) + order parameter scan | Criticality via finite-size scaling. |
+| D14 filling / doping | N/A (spin/qudit model) | — |
+| D15 disorder | clean by default | — |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- Ferromagnet (`h < h_c`) : `Z_q`-broken, `q`-fold degenerate; clock order parameter `⟨Z⟩ ≠ 0`.
+- Paramagnet (`h > h_c`) : trivial, field-polarized; `⟨Z⟩ = 0`.
+- Critical point (1D `q ≤ 4`) : continuous transition, parafermion/Potts CFT (`q=3`: `c=4/5`, `ν=5/6`). For `q ≥ 5` (1D) the transition is first-order.
+
+### Canonical observables
+
+- `E/N`; `Z_q` order parameter `⟨Z⟩` across an `h`-scan.
+- Spectral gap; correlation function `⟨Z_i Z_j^†⟩`.
+- Central charge `c` / critical exponent `ν` from finite-size collapse (`q=3`: `ν=5/6`).
+
+### Recommended methods
+
+- Primary: **DMRG (qudit MPS)** in 1D — area-law / area+log ground state, conserves the `Z_q` quantum number (per `method-property-map.md` §MPS, C9).
+- Cross-check: **ED** small clusters (`N ≲ 16` for `q=3`) for exact spectrum and the order of the transition; **TEBD** imaginary-time; sign-free **QMC** also applicable.
+
+### Key reference
+
+[@wu_1982_potts] — the authoritative review of the Potts model (classical and quantum, all `q`, duality, order of transition, exact results, CFT connections).
+Rendered: `./10-1103-revmodphys-54-235.md` _(bib stub — no PDF reachable; RMP 1982 paywalled, predates arXiv)_.
+
+### Benchmarks
+
+- 1D `q=3` Clock (= 3-state Potts) QCP: `h_c = 1` (self-dual), `Z_3` parafermion CFT `c = 4/5`, `ν = 5/6 ≈ 0.833` (literature range `ν ∈ [0.83, 0.85]`).
+- 1D `q=4`: critical `c = 1`; `q ≥ 5` (1D): first-order transition (no continuous critical point) — Wu RMP 1982.
+- Limit checks: `h = 0` → `q`-fold-degenerate FM, `E/N = −2`; `h → ∞` → PM, `E/N = −2h`; `q = 2` → recovers TFIM.
+
 ## Diagnose
 
 Infer the canonical setup from the user's prompt and propose it for ratification.

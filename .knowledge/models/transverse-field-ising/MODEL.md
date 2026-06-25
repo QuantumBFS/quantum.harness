@@ -2,6 +2,63 @@
 
 Solve transverse-field Ising ground-state problems. Lattice and `Γ/J` ratio determine method choice and what physics is accessible.
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = -J \sum_{\langle ij\rangle} \sigma^z_i \sigma^z_j - \Gamma \sum_i \sigma^x_i $$
+
+Conventions: Pauli-matrix notation (`σ^a`, not `S^a`); `J > 0` ferromagnetic Ising coupling, `Γ ≥ 0` transverse field; `J = 1` sets the scale and `Γ/J` is the control parameter (some references write `h` for `Γ`). See `.knowledge/conventions.md` (Pauli vs `S` factor of 4 per bond).
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 1D chain (`Z=2`) · 2D square (`Z=4`) · higher-D | The canonical 1D quantum-critical model; 2D is Wilson–Fisher 3D-Ising universality. |
+| A2 boundary conditions | OBC (DMRG) · PBC (ED, free-fermion) · cylinder (2D) | PBC matters for the exact Jordan–Wigner mapping. |
+| A3 statistics & local dim | spin-1/2; `d = 2` | Maps to free fermions in 1D via Jordan–Wigner. |
+| A4 interaction range | short-range (nearest-neighbor); long-range `1/r^α` variant | Long-range version inflates bond dimension (use TDVP). |
+| B5 entanglement scaling | gapped phases: area law (const in 1D) · 1D critical `Γ=J`: area+log, `c=1/2` | `c=1/2` is the Ising-CFT central charge (one Majorana). |
+| B6 spectral gap | gapped FM (`Γ<J`) and PM (`Γ>J`) · gapless at the QCP `Γ=J` (1D) | Quantum critical point separates ordered and disordered phases. |
+| B7 ground-state order | FM (`Γ<J`): `Z_2` SSB · PM (`Γ>J`): trivial paramagnet | Order parameter `⟨σ^z⟩` onsets below the critical field. |
+| B8 frustration | none on bipartite FM · geometric if AFM on triangular | Default FM is unfrustrated. |
+| C9 global symmetry | `Z_2` spin-flip (`P = Π_i σ^x_i`, parity) | The symmetry whose breaking defines the FM phase. |
+| C10 spatial symmetry | translation (`k`), inversion/parity | Conserved momentum in PBC. |
+| C11 integrability | free-fermion / quadratic (1D, exact via Jordan–Wigner) · 2D non-integrable | 1D diagonalizable in `O(N)`/`O(N³)`; the textbook exactly-solvable QPT. |
+| C12 sign problem | sign-free (ferromagnetic / bipartite → QMC applicable) | SSE/QMC works at scale; 1D is exact anyway. |
+| D13 regime | ground state (`T=0`) + gap; dynamics/finite-T out of card scope | `E/N` and gap are canonical targets. |
+| D14 filling / doping | N/A (spin model) | After Jordan–Wigner: free fermions at fixed filling. |
+| D15 disorder | clean by default; random-bond/field → infinite-randomness fixed point | Disordered 1D TFIM is the canonical strong-disorder RG example. |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- Ferromagnet (`Γ < J`) : `Z_2`-broken; order parameter `⟨σ^z⟩ ≠ 0` (magnetization).
+- Paramagnet (`Γ > J`) : trivial, field-polarized along `x`, `⟨σ^z⟩ = 0`.
+- Quantum critical point (1D `Γ = J`) : Ising CFT, `c = 1/2`, exponents `ν = 1`, `β = 1/8`, `z = 1`.
+
+### Canonical observables
+
+- `E/N`; spectral gap `Δ` (closes at the QCP).
+- Magnetization `⟨σ^z⟩` (order parameter); longitudinal correlations `⟨σ^z_i σ^z_j⟩`.
+- Central charge `c` from entanglement scaling at criticality.
+
+### Recommended methods
+
+- Primary (1D): **DMRG/MPS** — area-law / area+log ground state, near-exact; `Z_2` parity sector reduces cost (per `method-property-map.md` §MPS).
+- Primary (2D): **sign-free QMC** (SSE) — unfrustrated, exact at scale; or DMRG on cylinders.
+- Cross-check: **ED** small clusters; 1D **free-fermion** exact diagonalization (Jordan–Wigner) as an analytic oracle.
+
+### Key reference
+
+[@dutta_2010_quantum] — comprehensive downloadable review of quantum phase transitions in transverse-field spin models (1D exact solution, scaling, higher-D, dynamics, quantum information), preferred over the Sachdev textbook for an all-details source.
+Rendered: `./1012.0653_quantum-phase-transitions-in-transverse-field-spin-models-fr.md`.
+
+### Benchmarks
+
+- 1D chain QCP: `Γ_c/J = 1` exactly (self-dual / Jordan–Wigner); at criticality `c = 1/2`, `ν = 1`, `β = 1/8`. Ground-state energy density at `Γ = J = 1`: `E/N = −4/π ≈ −1.2732` (Pauli convention `H = −J Σ σ^z σ^z − Γ Σ σ^x`; from the free-fermion dispersion, consistent with this card's Verification note).
+- 2D square FM TFIM: critical field `(Γ/J)_c = 3.04438(2)`, 3D-Ising universality (Blöte & Deng, Phys. Rev. E 66, 066110 (2002)).
+
 ## Diagnose
 
 Infer setup from the user's prompt and propose for ratification.

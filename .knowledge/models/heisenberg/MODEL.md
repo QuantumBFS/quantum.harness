@@ -2,6 +2,64 @@
 
 Solve Heisenberg-spin ground-state problems. Lattice geometry and coupling regime determine which method works.
 
+## Physics card
+
+### Hamiltonian
+
+$$ H = J \sum_{\langle ij\rangle} \mathbf{S}_i\cdot\mathbf{S}_j $$
+
+Conventions: `S`-operator normalization (`S^a = σ^a/2` for S=1/2), `⟨ij⟩` = nearest-neighbor bonds counted once, `J > 0` antiferromagnetic (AFM), `J < 0` ferromagnetic (FM); largest coupling set to `J = 1`. See `.knowledge/conventions.md`.
+
+### Properties (A1–D16)
+
+| Axis | Value | Note |
+|---|---|---|
+| A1 dimension & geometry | 1D chain / quasi-1D ladder / 2D square (`Z=4`), triangular, kagome / 3D | Geometry is the master axis: it sets entanglement scaling and frustration. |
+| A2 boundary conditions | OBC (DMRG default) · PBC (ED/QMC) · cylinder (2D DMRG) | Cylinder width caps the 2D-DMRG bond-dim budget. |
+| A3 statistics & local dim | spin-S; `d = 2S+1` (`d=2` for S=1/2) | Maps to hard-core bosons via Matsubara–Matsuda; no statistics sign by itself. |
+| A4 interaction range | short-range (nearest-neighbor) | Local — area-law-compatible. |
+| B5 entanglement scaling | 1D gapless: area+log, `S=(c/3)log ℓ`, `c=1` · 2D ordered: area law (`∝ L`) | 1D AFM chain is critical (`c=1`); 2D Néel state obeys area law. |
+| B6 spectral gap | 1D S=1/2 AFM: gapless (power-law correlations) · 2D square AFM: gapless Goldstone magnons over ordered GS | Half-integer 1D chain gapless (LSM); 2D has long-range order + gapless spin waves. |
+| B7 ground-state order | 1D S=1/2: quasi-long-range (no SSB, Mermin–Wagner) · 2D square/3D: Néel SSB · frustrated 2D: candidate spin liquid / VBS | Bipartite unfrustrated lattices order (2D/3D); 1D and frustrated cases do not. |
+| B8 frustration | none on bipartite (chain, square, cubic) · geometric on triangular/kagome/pyrochlore | Frustration is what turns on the QMC sign problem for spins. |
+| C9 global symmetry | SU(2) (total `S`), U(1) (`S^z_tot`) | Full SU(2) at the isotropic point; a field breaks SU(2)→U(1). |
+| C10 spatial symmetry | translation (`k`), point group (`D_4` square, `D_6` triangular) | Block-diagonalizes ED sectors. |
+| C11 integrability | 1D S=1/2 chain: Bethe-ansatz integrable · 2D / S≥1 / frustrated: non-integrable | Exact 1D thermodynamics via TBA; everything else numerical. |
+| C12 sign problem | sign-free on bipartite (Marshall rule) · sign-ful on frustrated lattices | Unfrustrated → exact QMC at scale; frustrated → QMC blocked. |
+| D13 regime | ground state (`T=0`) default; finite-T and dynamics out of card scope | GS energy / order parameter are the canonical targets. |
+| D14 filling / doping | N/A (spin model, no charge) | Doping appears only after fermionization (t-J / Hubbard). |
+| D15 disorder | clean (translation-invariant) by default | Bond/site disorder → random-singlet physics (out of scope). |
+| D16 hermiticity | Hermitian / closed | — |
+
+### Phases & order parameters
+
+- 1D S=1/2 AFM chain : quasi-long-range order, no SSB; spin–spin correlations decay as a power law `⟨S_0·S_r⟩ ∼ (-1)^r / r` (log corrections).
+- 2D square / 3D AFM : Néel order; staggered (sublattice) magnetization `m_s` and structure-factor peak `S(π,π)`.
+- Frustrated (triangular/kagome) : 120° order (triangular) or candidate spin liquid / VBS (kagome) — diagnose via `spin-liquid`.
+
+### Canonical observables
+
+- Ground-state energy per site `E/N`.
+- Staggered magnetization `m_s` / sublattice magnetization (order parameter).
+- Static structure factor `S(q)`, peaked at the ordering wavevector.
+- Spin–spin correlation function `⟨S_i·S_j⟩`; central charge `c` (1D, from entanglement scaling).
+
+### Recommended methods
+
+- Primary: **DMRG/MPS** for 1D chains, ladders, and 2D cylinders — near-exact in 1D area-law/area+log regimes; SU(2)/U(1) quantum-number conservation cuts cost (per `method-property-map.md` §MPS).
+- Primary (unfrustrated 2D/3D, large `N`): **sign-free QMC** (SSE) — bipartite Marshall sign rule makes it exact at scale (§QMC, C12).
+- Cross-check: **ED** on small clusters (exact spectrum, oracle); **VMC/NQS** for frustrated 2D where QMC is sign-blocked.
+
+### Key reference
+
+[@manousakis_1991_spin] — the authoritative review of the spin-½ square-lattice Heisenberg antiferromagnet (spin-wave, Schwinger boson, series, QMC, ED) and its connection to the cuprate parents.
+Rendered: `./10-1103-revmodphys-63-1.md` _(bib stub — no PDF reachable; RMP 1991 paywalled, predates arXiv)_.
+
+### Benchmarks
+
+- 1D S=1/2 AFM chain (PBC, thermodynamic limit): `E/N = 1/4 − ln 2 ≈ −0.443147` — exact Bethe ansatz (Hulthén 1938; convention `H = J Σ S_i·S_j`, `J=1`).
+- 2D square S=1/2 AFM: `E/N ≈ −0.6694` (high-precision `−0.669441857(7)`), staggered magnetization `m_s ≈ 0.3074` — QMC/SSE (Sandvik, Phys. Rev. B 56, 11678 (1997)).
+
 ## Diagnose
 
 Infer the canonical setup from the user's prompt and propose it for ratification. Do not ask 8 questions.
