@@ -59,7 +59,7 @@ Rendered: `./1112.3793_spin-ice-fractionalization-and-topological-order.md`.
 
 ### Benchmarks
 
-- Residual (Pauling) entropy per spin: `S ≈ (1/2) ln(3/2) ≈ 0.202 k_B` per spin (`≈ 0.202 R` per mole of spins) — Pauling's ice-rule count, measured in Dy₂Ti₂O₇ by Ramirez et al. (Nature 399, 333 (1999)). Convention: nearest-neighbor / dipolar spin-ice. (Caveat: thermally well-equilibrated Dy₂Ti₂O₇ shows the residual entropy can be released at very low `T` — Pomaranski et al., Nat. Phys. 9, 353 (2013) — so the plateau is a quasi-equilibrium feature.)
+- Residual (Pauling) entropy per spin: `S ≈ (1/2) ln(3/2) ≈ 0.202 k_B` per spin (`≈ 0.202 R` per mole of spins) — Pauling's ice-rule count, consistent with the residual entropy measured in Dy₂Ti₂O₇ by Ramirez et al. (Nature 399, 333 (1999)). Convention: nearest-neighbor / dipolar spin-ice. (Caveat: thermally well-equilibrated Dy₂Ti₂O₇ shows the residual entropy can be released at very low `T` — Pomaranski et al., Nat. Phys. 9, 353 (2013) — so the plateau is a quasi-equilibrium feature.)
 - Pinch points: sharp bow-tie singularities in the spin structure factor `S(q)` at high-symmetry zone-boundary points, the real-space dipolar-correlation signature of the emergent U(1) Coulomb phase (neutron scattering on Ho₂Ti₂O₇/Dy₂Ti₂O₇) [@castelnovo_2011_spin].
 - Monopole deconfinement: ice-rule defects behave as free magnetic charges interacting via an emergent (entropic + magnetic) Coulomb `1/r` potential; their density and transport set the low-`T` dynamics [@castelnovo_2011_spin].
 

@@ -59,7 +59,7 @@ Rendered: `./0704.3011_many-body-physics-with-ultracold-gases.md`.
 ### Benchmarks
 
 - 1D, `n = 1` SF–Mott (Mott-lobe tip): `(t/U)_c ≈ 0.2974(3)` — DMRG (Kühner-White-Monien, PRB 61, 12474 (2000); consistent with Läuchli-Kollath). Convention `H = -t Σ(b†b+h.c.) + (U/2)Σ n(n-1)`.
-- 2D square, `n = 1`: `(t/U)_c = (J/U)_c = 0.05974(3)` — worm-algorithm QMC (Capogrosso-Sansone et al., PRB 77, 015602 (2008)).
+- 2D square, `n = 1`: `(t/U)_c = (J/U)_c = 0.05974(3)` — worm-algorithm QMC (Capogrosso-Sansone et al., PRA 77, 015602 (2008)).
 - 3D cubic, mean-field (Mott-tip estimate): `U_c/(z t) ≈ 5.83` at the `n=1` tip (`z = 6`), the Gutzwiller/strong-coupling result — exact-in-`Z→∞` baseline, corrected downward by fluctuations [@bloch_2007_many].
 
 ## How it is studied / Operational
