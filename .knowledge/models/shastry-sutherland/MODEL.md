@@ -60,7 +60,7 @@ _Reference choice: the canonical Miyahara–Ueda review (J. Phys.: Condens. Matt
 
 - Exact dimer phase (small `J/J'`): `E/spin = −3J'/8` — exact dimer-singlet energy (each dimer singlet contributes `−3J'/4` per bond = `−3J'/8` per spin; convention `H = J Σ_NN + J' Σ_dimer`).
 - Magnetization plateaus at commensurate `m/m_sat = 1/8, 1/3, …` (and others such as `1/4, 1/2`) observed in SrCu2(BO3)2 and reproduced by ED/DMRG.
-- Dimer→Néel quantum phase transition near `J/J' ≈ 0.675` (dimer→plaquette) and `≈ 0.76` (plaquette→Néel).
+- Phase transitions near `J/J' ≈ 0.675` (dimer→plaquette) and `≈ 0.76` (plaquette→Néel). The intermediate plaquette phase and these two boundaries are established by later studies (e.g. Corboz & Mila, PRB 87, 115144 (2013)); the cited 1998 Miyahara–Ueda paper reports a single dimer→Néel transition near `J/J' ≈ 0.7`.
 
 ## How it is studied / Operational
 
