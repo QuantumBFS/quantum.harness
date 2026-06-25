@@ -101,7 +101,7 @@ Build per `.knowledge/conventions.md`: `H = -t Σ (c†c + h.c.) + V Σ n_i n_j`
 
 Default checks:
 
-- **Limit checks** via `.knowledge/limits.md`: `V = 0` → free fermions (exact tight-binding band); large `V` at half-filling → CDW with `E/N = -V z / 4` (for chain) or analogous lattice Madelung; particle-hole symmetry on bipartite lattices at half-filling.
+- **Limit checks** via `.knowledge/limits.md`: `V = 0` → free fermions (exact tight-binding band); large `V` at half-filling → frozen CDW (alternating occupied/empty), so every NN bond has `n_i n_j = 0` and `E/N → 0` in this Hamiltonian's convention (`H = -tΣ + VΣ n_i n_j`); the particle-hole-symmetric form `VΣ(n_i-½)(n_j-½)` instead gives `E/N → -Vz/8` (= `-V/4` for the chain); particle-hole symmetry on bipartite lattices at half-filling.
 - **Symmetry**: particle number conservation; lattice translation; sublattice exchange (bipartite).
 - **Convergence**: bond-dim or basis-size sweep monotonic and asymptoting.
 - **Internal consistency**: variance, density profile near edges (Friedel oscillations expected for OBC).
