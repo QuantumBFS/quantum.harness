@@ -18,7 +18,7 @@ Conventions: spin-1/2 Pauli operators `σ^a` (NOT `S^a`; divide by 2 per operato
 | A2 boundary conditions | torus / PBC (flux sectors, exact solution) · cylinder (DMRG) | Torus is needed for the Z2 ground-state degeneracy and flux sectors. |
 | A3 statistics & local dim | spin-1/2; `d = 2`; solved via Majorana fermions (4 Majoranas/site, projected) | Fermionization is the engine of exact solvability. |
 | A4 interaction range | short-range (nearest-neighbor, bond-dependent) | Local. |
-| B5 entanglement scaling | area law + topological term; gapped phase has TEE `γ = ln 2` (`𝒟 = √2`) per anyon sector | The toric-code (gapped) phase is a Z2 topological state. |
+| B5 entanglement scaling | area law + topological term; gapped phase has TEE `γ = ln 𝒟 = ln 2` (total quantum dimension `𝒟 = 2`) | The toric-code (gapped) phase is a Z2 topological state. |
 | B6 spectral gap | gapless Z2 spin liquid (Dirac cones, isotropic regime) · gapped Z2 (anisotropic regime) · field-induced gap in the gapless phase | A magnetic field gaps the gapless phase into a chiral non-Abelian (Ising-anyon) phase. |
 | B7 ground-state order | **Z2 quantum spin liquid** — no local order; fractionalized Majorana + static Z2 flux excitations | Gapless (B-phase, Dirac) or gapped (A-phase, Abelian toric-code anyons); field → non-Abelian Ising anyons. |
 | B8 frustration | bond-dependent (compass) exchange frustration | Competing `x/y/z` Ising axes cannot be simultaneously satisfied → exchange frustration. |
