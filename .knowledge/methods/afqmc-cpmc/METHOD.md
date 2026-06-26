@@ -22,7 +22,7 @@ AFQMC projects the ground state by iterating `|Ψ⟩ ← e^{−ΔτH}|Ψ⟩` in 
 | M4 dimension fit (A1) | Any dimension (1D, 2D, 3D) | Frequently applied to 2D Hubbard where it gives the best GS energies among polynomial-cost methods. |
 | M5 statistics & local dim (A3) | Fermions (primary); also applied to real materials via plane-wave basis | Each walker is a Slater determinant; `N` orbitals (sites × spin); local dim `d=4` Hubbard. |
 | M6 entanglement regime (B5) | Volume-law tolerated | Walker space imposes no entanglement restriction; the constraint bias is the limit, not entanglement. |
-| M7 sign-problem dependence (C12) | Phaseless/constrained-path approximation removes the sign at the cost of a trial-state bias | Free-projection (unbiased) cost blows up `∝e^{2τ…}` with the sign; the constraint trades that for polynomial cost + controllable bias. |
+| M7 sign-problem dependence (C12) | Phaseless/constrained-path approximation removes the sign at the cost of a trial-state bias | Free-projection (unbiased) cost blows up `∝e^{2βNΔf}` with the sign; the constraint trades that for polynomial cost + controllable bias. |
 | M8 symmetry exploitation (C9/C10) | Trial state `\|Ψ_T⟩` can be symmetry-projected (UHF, ROHF, GHF) to reduce bias; particle-number and spin conservation preserved in walker propagation | Better `\|Ψ_T⟩` (e.g. from DMRG or VMC) directly reduces the phaseless bias. |
 | M9 time complexity | `O(N³)` per walker per step × `N_w` × `N_steps`; `O(N²)` per walker memory | `N` = number of orbitals/sites; `N³` from matrix products in Slater determinant updates; `N_w~100`–`1000` typical. |
 | M10 memory | `O(N²)` per walker (Slater determinant stored as `N×N_e` matrix) | Total `O(N_w·N²)`; modest compared to exact-diagonalization storage. |

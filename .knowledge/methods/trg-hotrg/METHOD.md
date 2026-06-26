@@ -40,7 +40,7 @@ TRG and HOTRG perform iterative coarse-graining of a tensor network — most nat
 
 ### Accuracy & guarantees
 
-- Class: controlled-bias, deterministic; variational upper bound on free energy at fixed χ
+- Class: controlled-bias, deterministic; controlled-bias estimate of the free energy (not a strict variational bound; bias → 0 as χ → ∞)
 - Primary approximation & its control: finite-χ truncation accumulated over coarse-graining steps; bias → 0 as χ → ∞; near criticality, TNR removes additional short-range-correlation contamination present in TRG
 - Error scaling: free-energy error ~ O(ε_trunc) per step; critical exponents converge as a power of χ with exponent that depends on the universality class
 

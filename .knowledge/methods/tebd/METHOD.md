@@ -24,7 +24,7 @@ TEBD represents the quantum state as a matrix product state (MPS) and evolves it
 | M6 entanglement regime (B5) | Area-law + area+log tolerated; volume-law blocks real-time | Real-time entanglement grows linearly `S(t)∝t` for thermalizing systems → **`χ(t)~e^{S(t)}`** caps reachable time `t*~log(χ_max)/rate`; MBL (D15) and integrable (C11) systems grow more slowly. |
 | M7 sign-problem dependence (C12) | Sign-immune | Tensor-network method; no Monte Carlo sampling; no sign problem. |
 | M8 symmetry exploitation (C9/C10) | U(1)/SU(2)/Z₂ quantum-number-conserving tensors; translation symmetry for iMPS (infinite systems) | Symmetry reduces effective `χ` by ~10× at fixed accuracy; iMPS with translation gives direct thermodynamic-limit access. |
-| M9 time complexity | `O(N·d·χ(t)³)` per Trotter step; Trotter error `O(Δτ^p)` | `p=2` standard; `p=4` higher-order Suzuki–Trotter. Total cost scales with number of steps and growth of `χ(t)`. |
+| M9 time complexity | `O(N·d·χ(t)³)` per Trotter step; Trotter error `O(Δτ^p)` | `p=2` standard; `p=4` higher-order Suzuki–Trotter. Total cost scales with number of steps and growth of `χ(t)`. No MPO `w` factor because TEBD applies nearest-neighbor gates directly (contrast TDVP's `O(N·w·d·χ³)`). |
 | M10 memory | `O(N·d·χ²)` for the MPS; environment/orthogonality center storage `O(d·χ²)` per bond | Manageable for `χ~1000`; the dominant memory is the MPS itself. |
 | M11 control knob | Bond dim `χ` (SVD truncation error) + Trotter step `Δτ` (Trotter error `O(Δτ^p)`) | Both must be converged; truncation error accumulates over time steps. |
 | M12 scale frontier | 1D chains `N~1000` sites routine (fixed `χ`); reachable time `t*~log(χ_max)/rate` | At `χ=512` and rate~1 (Heisenberg chain), `t*J~6`; longer for MBL/integrable (D15/C11). |
@@ -33,7 +33,7 @@ TEBD represents the quantum state as a matrix product state (MPS) and evolves it
 
 ### Cost & scaling
 
-- Time: `O(N·d·χ(t)³)` per Trotter step; total cost grows with reachable time as `χ(t)` increases
+- Time: `O(N·d·χ(t)³)` per Trotter step; total cost grows with reachable time as `χ(t)` increases; no MPO `w` factor because TEBD applies nearest-neighbor gates directly (contrast TDVP's `O(N·w·d·χ³)`)
 - Memory: `O(N·d·χ²)` for the MPS
 - Control knob: `χ` (truncation) + `Δτ` (Trotter error `O(Δτ^p)`)
 - Scale frontier: `N~1000` sites in 1D; reachable real time `t*~log(χ_max)/rate`

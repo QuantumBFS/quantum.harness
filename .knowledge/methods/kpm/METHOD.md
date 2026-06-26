@@ -33,7 +33,7 @@ KPM represents spectral quantities (density of states, dynamical structure facto
 
 ### Cost & scaling
 
-- Time: `O(M · R · N_nnz)` — linear in `M` and `R`; `N_nnz ≈ N · D_H` for short-range models
+- Time: `O(M · R · N_nnz)` — linear in `M` and `R`; `N_nnz ≈ N · D_blk` for short-range models
 - Memory: `O(D_H)` — only a few state vectors; no eigenvalue storage
 - Control knob: `M` (#moments) → spectral resolution `≈ bandwidth/M`; `R` (#random vectors) → statistical error `1/√(R · D_H)`
 - Scale frontier: `D_H ≈ 10^9–10^{10}` feasible (memory-limited only by the state vector size)

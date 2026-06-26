@@ -27,7 +27,7 @@ ED full constructs the Hamiltonian matrix in a symmetry-reduced block (using U(1
 | M9 time complexity | `O(D_blk³)` | Dense eigensolve (LAPACK `dsyevd`); dominant cost for useful system sizes. |
 | M10 memory | `O(D_blk²)` | Must store the full dense matrix and all eigenvectors; the first wall hit in practice. |
 | M11 control knob | None (exact) — the only knob is which symmetry sectors to diagonalize | No convergence parameter: result is exact within machine precision. |
-| M12 scale frontier | ~20 sites trivial dense; **~28–30 sites maximum for dense ED** with full symmetry (N=28 full-symmetry D_blk~1.8×10⁵ → ~250 GB; N=32 → ~44 TB, infeasible) | Dense `O(D_blk²)` memory is the binding wall. Iterative (Lanczos) ED reaches ~40 sites routine and 48–50 at the supercomputer frontier (Wietek–Läuchli 2018, arXiv:1804.05028) — see ed-lanczos card. |
+| M12 scale frontier | ~20 sites trivial dense; **~28–30 sites maximum for dense ED** with full symmetry (N=28 full-symmetry D_blk~1.8×10⁵ → ~250–520 GB (real vs complex double); N=32 → ~44 TB, infeasible) | Dense `O(D_blk²)` memory is the binding wall. Iterative (Lanczos) ED reaches ~40 sites routine and 48–50 at the supercomputer frontier (Wietek–Läuchli 2018, arXiv:1804.05028) — see ed-lanczos card. |
 | M13 primary approximation / bias | None — numerically exact | Only approximation is the finite cluster (open/periodic BC); bulk extrapolation requires finite-size scaling. |
 | M14 hard blocker / failure mode | Hilbert-space `d^N` wall: dense `O(D_blk²)` memory walls by `N ≈ 30` (spin-½) or `N ≈ 16` (Hubbard `d=4`) | No workaround within ED full; switch to ED Lanczos for larger `N` or for a few eigenstates. |
 
@@ -36,7 +36,7 @@ ED full constructs the Hamiltonian matrix in a symmetry-reduced block (using U(1
 - Time: `O(D_blk³)` — LAPACK dense eigensolve
 - Memory: `O(D_blk²)` — stores the full matrix and all eigenvectors
 - Control knob: none (exact); symmetry-sector choice determines `D_blk`
-- Scale frontier: ~20 sites trivial dense; ~28–30 sites maximum for dense ED (O(D_blk²) memory wall); iterative/Lanczos ED reaches ~40 sites routine and 48–50 at the supercomputer frontier (Wietek–Läuchli 2018) — see ed-lanczos card
+- Scale frontier: ~20 sites trivial dense; ~28–30 sites maximum for dense ED (O(D_blk²) memory wall; N=28 D_blk~1.8×10⁵ → ~250–520 GB (real vs complex double)); iterative/Lanczos ED reaches ~40 sites routine and 48–50 at the supercomputer frontier (Wietek–Läuchli 2018) — see ed-lanczos card
 
 ### Accuracy & guarantees
 
@@ -72,7 +72,7 @@ Rendered: `../../literature/ed/10-1007-978-3-540-74686-7-18.md` _(reused)_.
 
 ### Benchmarks
 
-- Dense ED frontier: **~28–30 sites** (spin-½ with full U(1) + translation + point-group symmetry); N=28 gives D_blk~1.8×10⁵ → ~250 GB for the dense matrix; N=32 → ~44 TB, infeasible.
+- Dense ED frontier: **~28–30 sites** (spin-½ with full U(1) + translation + point-group symmetry); N=28 gives D_blk~1.8×10⁵ → ~250–520 GB (real vs complex double) for the dense matrix; N=32 → ~44 TB, infeasible.
 - Iterative (Lanczos/Krylov) ED frontier: **48–50 sites** (spin-½ kagome/square lattice with sublattice coding, sparse matrix-vector products) [Wietek–Läuchli, arXiv:1804.05028; method-survey.md §1.1] — this belongs to ed-lanczos, not ed-full.
 - Spin-½ chain `N=20`: Hilbert-space dim `D_H = 2^20 ≈ 10^6`; with U(1) largest block `C(20,10) ≈ 184,756`; dense diag trivial on a laptop [@sandvik_2010_computational].
 - Hubbard `d=4`, `N=16`: `D_H = 4^16 ≈ 4×10^9` (full Fock space, all fillings; at half-filling `D_H = C(16,8)² ≈ 1.66×10^8`); requires full symmetry reduction to be tractable [method-survey.md §1.1].
