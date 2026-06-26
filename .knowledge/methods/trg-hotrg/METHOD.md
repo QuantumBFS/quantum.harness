@@ -1,6 +1,6 @@
 <!-- Method-card template. Axis definitions: ../method-property-checklist.md (M1–M14).
      Inverse model→method map: ../method-property-map.md. Cost derivations & citations:
-     ../method-survey.md. Cite keys resolve in ./ref.bib. -->
+     ../method-survey.md. Cite keys resolve in ../ref.bib. -->
 
 # Tensor Renormalization Group (TRG / HOTRG)
 
