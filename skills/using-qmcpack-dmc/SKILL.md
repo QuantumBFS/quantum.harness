@@ -377,4 +377,3 @@ convergence caveats.
 - **Cluster wrapper template:** `skills/using-qmcpack-dmc/source/run_qe_to_dmc.template.sh`.
 - **QE EPC skill for DFPT superconductivity:** `skills/using-qe-epc/SKILL.md` (different workflow).
 - **Local machine build note:** user-level `qmcpack-local-build` when available.
-- **Project reference used to seed this workflow:** `/home/zq/zqcodeml/posthcp-hydrogen-stru/.skills/qmcpack`.

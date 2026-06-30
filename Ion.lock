@@ -343,10 +343,22 @@ kind = "local"
 checksum = "sha256:75a861ac3d1dfa866f38981c4bc20c07323f276a5a21a7177ea24841d7fa820d"
 
 [[skill]]
+name = "using-qe-epc"
+source = ""
+kind = "local"
+checksum = "sha256:a2bfaf02689deced25bdc9f669ec2ecb06432e2574aa021fab022db4df207cef"
+
+[[skill]]
 name = "using-qmbcertify"
 source = ""
 kind = "local"
 checksum = "sha256:530bd53898ace03172e4738a07e986bf4a2622f108122f26afc535945ff39f22"
+
+[[skill]]
+name = "using-qmcpack-dmc"
+source = ""
+kind = "local"
+checksum = "sha256:e974c94d5678737fdb65fa24e546b36d032e50937cd172f7919ce32b55b1f811"
 
 [[skill]]
 name = "using-quspin"
