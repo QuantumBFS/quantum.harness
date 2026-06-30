@@ -91,19 +91,6 @@ After the artifacts are in hand, if the user wants to publish, present, or share
 
 The handoff is offered, not forced. If the user just wants the result, that's a complete session.
 
-## Future directions
-
-Out of scope for the current harness, added as new skills only when real problems demand them:
-
-- Real-time dynamics (`S(q,ω)`, quench dynamics, ETH).
-- Open quantum systems (Lindbladian dynamics, dissipation).
-- Topological order beyond spin liquids (SPT, fractons).
-- Continuum-limit / field-theory methods (CFT identification, fuzzy sphere, RG).
-- Empirical method-on-problem lore (per-problem bond-dim / size / failure-mode notes).
-- Composition layer for multi-aspect research questions.
-
-Do not preemptively scaffold these. When a real problem creates the demand, add the corresponding skill (and KB cards) following the same problem-driven design.
-
 ## Compute resources
 
 The harness can use a remote cluster profile at `skills/using-slurm/profiles/active.toml` for any task larger than a few minutes of local compute. **Compute feasibility is decided BEFORE the first run**, not discovered after watching a local process for an hour.
@@ -242,86 +229,3 @@ Agents working in this project should:
 
 Run `make help` to see available Makefile targets. Run `make test` to execute the
 Python script test suite (`scripts/tests/`) with coverage.
-
-## Reliable update sources
-
-Runtime config for the weekly advisor (`.cryo/` chamber and the
-`zlp-harness:zlp-advisor` skill read this section). Provisional — refine as the
-harness's active threads settle.
-
-- Source types: arXiv preprints, DOI/publisher pages, group/lab pages, code
-  releases, and web search over reliable/primary sources.
-- arXiv queries / categories (`cond-mat.str-el` first, then `quant-ph`):
-  - `DMRG OR "matrix product state" frustrated magnet`
-  - `PEPS OR iPEPS OR CTMRG "tensor network" 2D`
-  - `"quantum Monte Carlo" OR "stochastic series expansion" Hubbard OR Heisenberg`
-  - `"neural quantum state" OR "variational Monte Carlo" lattice`
-  - `"exact diagonalization" OR Lanczos "quantum many-body scars"`
-  - `J1-J2 OR kagome OR triangular "spin liquid"`
-- Web-search keywords:
-  - DMRG bond-dimension extrapolation
-  - iPEPS 2D Heisenberg
-  - quantum Monte Carlo sign problem Hubbard
-  - neural quantum states frustrated magnetism
-  - tensor-network contraction algorithms
-  - quantum many-body scars PXP
-  - spin-liquid numerical evidence
-- People / groups to watch (method contributors, per `README.md`):
-  - Chen Cheng (程晨) — exact diagonalization.
-  - Wei Li (李伟) — MPS / LTRG / DMRG / TEBD.
-  - Hai-Jun Liao (廖海军) — PEPS / CTMRG.
-  - Ming-Pu Qin (秦明普) — quantum Monte Carlo.
-  - Yan-Tao Wu (武琰涛) — Monte Carlo renormalization group.
-  - Shi-Xin Zhang (张士欣) — quantum circuit simulation.
-  - Kun Chen (陈锟), Jin-Guo Liu (刘金国) — AI agent / knowledge base.
-- Venues: PRX / PRX Quantum, PRB, PRL, Quantum, Nature Physics, SciPost Physics.
-- Other reliable sources:
-  - <https://arxiv.org/list/cond-mat.str-el/new> — daily strongly-correlated preprints.
-  - <https://arxiv.org/list/quant-ph/new> — daily quant-ph preprints.
-  - Release notes for the method stack (ITensors.jl, MPSKit.jl, PEPSKit.jl,
-    TeNPy, NetKet, TensorCircuit-NG, XDiag.jl) when a discussion depends on a
-    feature or version.
-- Avoid:
-  - unsourced social posts, SEO blogs, and generic news summaries unless the
-    user explicitly asks.
-
-## Cryochamber (`.cryo/`) — autonomous weekly advisor
-
-A [cryochamber](https://github.com/GiggleLiu/cryochamber) is parked at `.cryo/`
-to run the local advisor workflow automatically every **Monday 09:48
-Asia/Shanghai** (staggered after the other harness chambers on this machine). It
-wakes, runs the self-contained workflow in `.cryo/plan.md`, posts the digest to
-the `weekly advisor` topic on the `ManyBodyHarness` stream, and hibernates. The
-plan never terminates; only `cryo cancel` stops it.
-
-The Monday digest is minimalist by design: a header line, a status-tagged
-`TODOs` audit, and `Key reads (≤3)` (papers from the last 7 days, or a ≤3-year
-paper tied to a recently discussed topic). The chamber reads its "Reliable
-update sources" from the section above and never calls Claude Code plugin skills
-— it runs unattended under `opencode`, so the weekly path is fully
-self-contained.
-
-The chamber **design** (`plan.md`, `cryo.toml`, `README.md`) is committed; the
-chamber **runtime** (`messages/`, `*.log`, `timer.json`, `todo.json`,
-`NOTES.md`, `.cryo/.cryo/` socket dir) is gitignored as per-machine state. Only
-one collaborator's machine should run the daemon at a time, otherwise the digest
-gets posted twice. If you ever put real API keys in `cryo.toml`'s `[provider]`
-table, gitignore it first.
-
-### Common chamber commands
-
-Run from the chamber directory (`cd .cryo` first):
-
-```sh
-cryo status         # is the daemon alive? when does it next wake?
-cryo log            # daemon log
-cryo watch          # live-tail the current session
-cryo receive        # read accumulated outbox messages
-cryo restart        # pick up edits to cryo.toml or plan.md
-cryo cancel         # stop the daemon and drop the pending TODO
-cryo start          # first-time launch (fires a no-op bootstrap session)
-cryo send "<text>"  # nudge the agent between Mondays (watch_inbox=true)
-```
-
-`cryo start` fires a bootstrap session that only schedules the next
-Monday-09:48 run, so starting on a non-Monday will not double-post.
