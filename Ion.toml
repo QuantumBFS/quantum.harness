@@ -38,6 +38,8 @@ using-tensorcircuit-ng = { type = "local" }
 using-pepskit = { type = "local" }
 using-sse = { type = "local" }
 using-cpmc-lab = { type = "local" }
+using-qe-epc = { type = "local" }        # Quantum ESPRESSO native DFPT electron-phonon coupling / Tc workflow
+using-qmcpack-dmc = { type = "local" }   # QE -> QMCPACK Slater-Jastrow VMC/DMC workflow
 using-nctssos = { type = "local" }       # general NC-polyopt engine (Clarabel/Mosek)
 using-qmbcertify = { type = "local" }    # structured-NPA certifier for 1D/2D Heisenberg (Mosek)
 

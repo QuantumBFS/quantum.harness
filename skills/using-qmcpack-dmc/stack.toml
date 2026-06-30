@@ -1,0 +1,27 @@
+id = "qmcpack-dmc"
+name = "QMCPACK DMC with Quantum ESPRESSO orbitals"
+language = "c++"
+canonical_for = ["qmcpack", "dmc", "vmc", "first-principles-qmc", "slater-jastrow"]
+default_profile = "cpu_mpi"
+
+[profiles.cpu_mpi]
+label = "MPI CPU"
+default = true
+install = "site"
+smoke = "cpu_mpi"
+
+[profiles.cpu_mpi.requirements]
+allocation = "compute"
+mpi = true
+
+[install.site]
+command = "command -v pw.x && command -v pw2qmcpack.x && command -v qmcpack"
+notes = "Use matched site-provided QE and QMCPACK builds. Record executable paths, versions, compiler/MPI/HDF5 stack, and pseudopotential sources before production."
+
+[smoke.cpu_mpi]
+where = "compute"
+command = "pw.x -h >/dev/null && pw2qmcpack.x -h >/dev/null && qmcpack --version"
+
+[docs]
+qmcpack = "https://qmcpack.readthedocs.io/"
+qe = "https://www.quantum-espresso.org/Doc/"
