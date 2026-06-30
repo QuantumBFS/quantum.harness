@@ -24,10 +24,14 @@ report = { type = "local" }             # render report.json into a self-contain
 # Skill tooling
 ion-cli = { type = "local" }
 
-# Computational software stacks
+# Software stacks
+context7-cli = { source = "upstash/context7/skills/context7-cli" }
+find-docs = { type = "local" }
 using-xdiag = { type = "local" }
 using-quspin = { type = "local" }
 using-itensors = { type = "local" }
+using-mpskit = { type = "local" }        # infinite MPS
+using-tenpy = { type = "local" }         # Python tensor network package
 using-netket = { type = "local" }
 using-jax = { type = "local" }
 using-tensorcircuit-ng = { type = "local" }
@@ -53,6 +57,7 @@ method-polyopt = { type = "local" }
 onboard = { type = "local" }
 solve = { type = "local" }
 challenge = { type = "local" }   # post-reproduction challenge journey: ideate → help-desk go/no-go → attempt → /challenge-report
+challenge-report = { type = "local" }   # challenge completion report
 
 # Problem dispatchers (auto-triggered; read cards under .knowledge/{models,physics}/<name>/)
 model = { type = "local" }

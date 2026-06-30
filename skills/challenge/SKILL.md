@@ -125,6 +125,24 @@ this is what stops a student committing to a PhD chapter:
   leaving slack for the write-up and presentation. Refuse to wave through a candidate whose
   band exceeds the time left — say plainly why, and offer the scoped-down MVP instead.
 
+Before asking the student to choose, present the surviving candidates as a ranked comparison
+table. This is a user-facing presentation of the existing candidate content, not a new
+pipeline stage:
+
+| Column | Meaning |
+|---|---|
+| Rank | Feasibility / continuity order; omit a recommended label unless the reason is technical. |
+| Challenge | The concrete next experiment. |
+| Why it follows | How it extends the reproduced paper or previous result. |
+| MVP | The smallest run that tests the idea. |
+| Cost | Local/cluster placement and wall-time band. |
+| What it teaches | The consequence: what the result would decide or clarify. |
+| Risk / pivot | What can fail, and the scoped fallback signal. |
+
+Ask one question: `Which challenge should we take to the help desk?` Include
+`Other / advisor suggestion` as the final option when the host supports options, or as a
+numbered row otherwise.
+
 Land on **one** chosen challenge with its MVP. Record `chosen` (title, MVP, success/pivot
 signals) and set `step: "advisor"`.
 
@@ -179,6 +197,9 @@ for their presentation. `/challenge` stops here — it does not build the report
 - **Lead with the answer**, then a one-line reason. Results in ≤3 lines + a plot.
 - **Plain English** — gloss any non-standard term with its consequence on first use; common
   method families (ED, DMRG, QMC, VMC, NQS) need no gloss.
+- **Use tables for comparison.** When the student is choosing among 2+ challenges, show a
+  compact table with the action, reason, MVP, cost, consequence, and risk; use short prose
+  after a choice is made.
 - **Unicode math in chat** (`E₀/N`, `J₂/J₁`, `χ`, `Δ`), never `$…$`.
 - **Time-honest, always.** Every candidate carries a wall-time band against time left; the
   guard never waves through infeasible scope.

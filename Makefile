@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render node
 
 .PHONY: skills clean help install test serve $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -91,6 +91,41 @@ install: ## Install a specific tool on demand. Usage: make install <tool>
 
 $(INSTALLABLE):
 	@:
+
+install-node: ## Install Node.js 18+ and npm for Context7 CLI lookups
+	@set -e; \
+	if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then \
+	  major="$$(node -p 'Number(process.versions.node.split(".")[0])')"; \
+	  if [ "$$major" -ge 18 ]; then \
+	    echo "Node.js/npm already installed: $$(node --version), npm $$(npm --version)"; \
+	    exit 0; \
+	  fi; \
+	  echo "Node.js $$(node --version) is too old; installing Node.js 18+."; \
+	fi; \
+	os="$$(uname -s 2>/dev/null || echo unknown)"; \
+	case "$$os" in MINGW*|MSYS*|CYGWIN*) \
+	  echo "Native Windows is not supported by this Makefile target. Use WSL, or install Node.js 18+ manually: https://nodejs.org/en/download"; \
+	  exit 1; \
+	  ;; \
+	esac; \
+	if command -v brew >/dev/null 2>&1; then \
+	  brew install node; \
+	else \
+	  command -v curl >/dev/null 2>&1 || { echo "curl not found. Install Node.js 18+ manually: https://nodejs.org/en/download"; exit 1; }; \
+	  command -v bash >/dev/null 2>&1 || { echo "bash not found. Install Node.js 18+ manually: https://nodejs.org/en/download"; exit 1; }; \
+	  export NVM_DIR="$$HOME/.nvm"; \
+	  if [ ! -s "$$NVM_DIR/nvm.sh" ]; then \
+	    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh -o /tmp/nvm-install.sh; \
+	    bash /tmp/nvm-install.sh; \
+	  fi; \
+	  . "$$NVM_DIR/nvm.sh"; \
+	  nvm install --lts; \
+	  nvm alias default 'lts/*'; \
+	  echo "If node is not on PATH in a new shell, run: source $$NVM_DIR/nvm.sh"; \
+	fi; \
+	major="$$(node -p 'Number(process.versions.node.split(".")[0])')"; \
+	[ "$$major" -ge 18 ] || { echo "Node.js $$(node --version) is still below 18; install Node.js 18+ manually: https://nodejs.org/en/download"; exit 1; }; \
+	echo "Node.js/npm ready: $$(node --version), npm $$(npm --version)"
 
 install-quimb: ## Install quimb + numerical deps into .venv (Python fallback stack)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }

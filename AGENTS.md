@@ -91,23 +91,6 @@ After the artifacts are in hand, if the user wants to publish, present, or share
 
 The handoff is offered, not forced. If the user just wants the result, that's a complete session.
 
-## Future directions
-
-Out of scope for the current harness, added as new skills only when real problems demand them:
-
-- Real-time dynamics (`S(q,ω)`, quench dynamics, ETH).
-- Open quantum systems (Lindbladian dynamics, dissipation).
-- Topological order beyond spin liquids (SPT, fractons).
-- Continuum-limit / field-theory methods (CFT identification, fuzzy sphere, RG).
-- Empirical method-on-problem lore (per-problem bond-dim / size / failure-mode notes).
-- Composition layer for multi-aspect research questions.
-
-Do not preemptively scaffold these. When a real problem creates the demand, add the corresponding skill (and KB cards) following the same problem-driven design.
-
-## Tools & Languages
-
-Default stack: **Julia + ITensors.jl** — the method cards' `## Details` sections use it for canonical tensor-network and ED code shapes. But some tool skills bring their own runtime and dependencies (Julia, Python, or MATLAB); each `/using-*` skill and its `stack.toml` own that, installed via `make install <tool>`. Treat tool choice and installation as decision points: expose the recommended stack and real alternatives before installing, unless the user asks for setup only.
-
 ## Compute resources
 
 The harness can use a remote cluster profile at `skills/using-slurm/profiles/active.toml` for any task larger than a few minutes of local compute. **Compute feasibility is decided BEFORE the first run**, not discovered after watching a local process for an hour.
@@ -181,7 +164,7 @@ ion self --help                          # Manage the Ion install
 
 ## Setup & Tool Installation
 
-- Run `make skills` to install Ion-managed skills.
+- Run `make skills` at the start of setup to install/sync Ion-managed workflow skills. Tell the user this is the baseline skill sync before domain-tool installation or workflow-specific setup choices.
 - Install domain tools with `make install <tool>` after the active workflow or user has selected that tool. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
@@ -191,16 +174,23 @@ ion self --help                          # Manage the Ion install
 
 ### Output norms — users' attention is expensive
 
-- **Remember there is a human on the other side.** Keep interactions precise and concise. Name the concrete paper, file, tool, command, or result before discussing it; do not rely on shorthand, hidden session context, or agent-only labels. Never assume the user has the same context as the agent or any subagent.
-- **Plain English in user-facing messages.** Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `run.json`) stays in artifacts and code, not in user prompts. Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use; common method families (ED, DMRG, QMC, VMC, NQS) need no introduction. Other jargon, if necessary, gets defined when first used. Each message is terse — a few sentences or a compact table covering key points, no overload.
-- **Report results in ≤3 lines + a plot.** Primary quantity, verification status, one-line reasoning. Auto-generate the relevant convergence or stability plot with every calculation; this is the visual proof the result is trustworthy. Save the plot and display it. No extra user action needed.
-- **Use `AskUserQuestion` at genuine forks** — pre-action branches and post-result next-steps. At a real fork, think faithfully like a human: surface 2–3 options with pros / cons and the recommended one (the Superpowers brainstorming pattern in UI form). User clicks, doesn't type. Each option: short label + one-line with pro and con. Recommended option first, labeled "(Recommended)". Example:
+- **Remember there is a human on the other side.** Keep interactions precise and concise. Never assume the user has the same context as the agent or any subagent.
+- **Plain English in user-facing messages.** Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `run.json`) stays in artifacts and code, not in user prompts. Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use; common method families (ED, DMRG, QMC, VMC, NQS) need no introduction. Other jargon, if necessary, gets defined when first used. Avoid undefined abbreviations, internal workflow labels, raw logs, and compressed jargon. Define non-standard abbreviations inline on first use, e.g. `forward-scattering approximation (FSA)` or `PXP chain (Rydberg blockade model)`; after that, the abbreviation may be used.
+- **Maintain a reader trace during long workflows.** Every user-facing update, setup card, report caption, and final result should preserve the user's narrative thread: what object is being worked on, what it means, what evidence was produced, and what consequence follows. A reader trace usually names the **object** (paper, figure, model, file, package, command, or result), the **meaning** in plain domain language, the **evidence** (number, residual, source, plot, runtime, artifact), and the **consequence** (confirmed, changed, blocked, or next choice). Name the concrete paper, file, tool, command, or result before discussing it; do not rely on shorthand, hidden session context, or agent-only labels.
+- **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks.
+- **Avoid walls of words.** Each message is terse — a few sentences or a compact table covering key points, no overload. Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
+- **Decision gates need anchors.** For approval, setup, install, configuration, routing, or compute choices, give a **mental/logical anchor** first: why this decision exists and what consequence it changes. Then give a **visual anchor**: bold only the key consequence phrase(s), not the whole sentence. Shape the prompt as **why → consequence → escape hatch → ask**.
+- **Consequential notices need anchors.** For source-fixed facts or technical necessities where there is no real choice, do not fake a fork. Still surface why the step follows, what consequence it changes, and how the user can correct it. Shape the notice as **because → consequence → correction line → proceed**.
+  - Examples:
+    - Source-material setup: "This task may need source material beyond the local KB. I can install PDF-to-Markdown tools for **cleaner PDF extraction** and **extracted figures**; skipping is fine if local notes are enough. Install PDF rendering tools?"
+    - Cluster setup: "This task may need remote compute. I can capture the cluster config now so future jobs can submit without re-asking; local-only is fine if you want to start small. Configure a cluster?"
+- **Report results in ≤3 lines + a plot.** Primary quantity, verification status, one-line reasoning. Plot the produced result or an already-collected diagnostic so the user has visual evidence. Do not run extra convergence sweeps, stability checks, or cross-method validation unless verification has been explicitly requested.
+- **Use option UI at genuine forks** — pre-action branches and post-result next-steps. Use an interactive option UI when available; otherwise use numbered options. At a real fork, think faithfully like a human: surface 2–3 options with pros / cons and the recommended one (the Superpowers brainstorming pattern in UI form). Each option: short label + one-line with pro and con. Recommended option first, labeled "(Recommended)". Example:
   - `"Primary method (Recommended)"` — "Matches the paper's route most closely; uses the declared compute budget."
   - `"Independent check"` — "Catches setup mistakes; usually restricted to a reduced instance."
   - `"Source audit first"` — "Cheaply anchors expectations; no new computed data."
-- **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
 - **For final results, lead with the answer.** "quantity = value, converged, matches declared reference" — not "I checked 5 things and here they are." During planning or reproduction setup, lead with the current decision and the recommended option's reason.
-- **Auto-save scripts and results.** Every calculation produces a script saved to `scripts/<model>_<brief>.{jl|py}` and results (data + plot) saved to `results/`. Show the one-line run command (`julia --project=julia-env scripts/<name>.jl` or `python scripts/<name>.py`). Never make the user ask for the script.
+- **Surface generated artifacts.** When a workflow creates scripts, data, plots, or reports, save them where that workflow specifies and show the user the artifact paths plus the one-line run command. Never make the user ask for the script.
 - **Flush stdout after each progress line in any long-running script.** Block-buffered stdout (the default when redirected to a file, a slurm log, or any non-TTY sink) hides progress until the process exits — looks like a hang. Julia: `flush(stdout)` after each `println` / `@printf`. Python: `print(..., flush=True)` or `python -u`. Pair with per-cell incremental writes (manifest after each cell) so a kill or sleep loses at most one cell. Sbatch-side helpers (`srun --unbuffered`, `stdbuf -oL`) belong in cluster profiles (`skills/using-slurm/profiles/<name>.toml`), not in scripts.
 - **Long iterative computes must emit intermediate estimates, not just final values.** A multi-hour run without progress output is a blind spot: the user cannot sanity-check whether the running estimate, error proxy, acceptance/progress counters, or convergence diagnostics are stabilizing. Print a partial estimate every K steps, where K is chosen so the user sees roughly 10-50 updates over the run. The script's standard runner enforces this via a `progress_every` knob; method cards declare a sensible default.
 - **Monitor before declaring success — don't fire-and-forget remote actions.** A "RUNNING" status / a 0 exit code from `ssh` is not success; only verified output is. After any non-trivial remote action, stay engaged through a *settle-time* before reporting "✓ done":
@@ -210,7 +200,6 @@ ion self --help                          # Manage the Ion install
   Settle-time scales with how far the job has to go before producing meaningful output. The cost of an extra 1–3 min of monitoring is much less than the cost of returning hours later to find 28 cells silently failed in the first minute — or that all 28 cells are still queued.
 - **Caveat-after, not caveat-first.** For contested regimes, state the consensus framing first, then qualify the unresolved point. Never open with the hedge.
 - **One question at a time** when questions are needed; prefer `AskUserQuestion` with options over open-ended text.
-- **Avoid walls of words.** Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified.
 
 ### Terminal Formatting
 
@@ -240,86 +229,3 @@ Agents working in this project should:
 
 Run `make help` to see available Makefile targets. Run `make test` to execute the
 Python script test suite (`scripts/tests/`) with coverage.
-
-## Reliable update sources
-
-Runtime config for the weekly advisor (`.cryo/` chamber and the
-`zlp-harness:zlp-advisor` skill read this section). Provisional — refine as the
-harness's active threads settle.
-
-- Source types: arXiv preprints, DOI/publisher pages, group/lab pages, code
-  releases, and web search over reliable/primary sources.
-- arXiv queries / categories (`cond-mat.str-el` first, then `quant-ph`):
-  - `DMRG OR "matrix product state" frustrated magnet`
-  - `PEPS OR iPEPS OR CTMRG "tensor network" 2D`
-  - `"quantum Monte Carlo" OR "stochastic series expansion" Hubbard OR Heisenberg`
-  - `"neural quantum state" OR "variational Monte Carlo" lattice`
-  - `"exact diagonalization" OR Lanczos "quantum many-body scars"`
-  - `J1-J2 OR kagome OR triangular "spin liquid"`
-- Web-search keywords:
-  - DMRG bond-dimension extrapolation
-  - iPEPS 2D Heisenberg
-  - quantum Monte Carlo sign problem Hubbard
-  - neural quantum states frustrated magnetism
-  - tensor-network contraction algorithms
-  - quantum many-body scars PXP
-  - spin-liquid numerical evidence
-- People / groups to watch (method contributors, per `README.md`):
-  - Chen Cheng (程晨) — exact diagonalization.
-  - Wei Li (李伟) — MPS / LTRG / DMRG / TEBD.
-  - Hai-Jun Liao (廖海军) — PEPS / CTMRG.
-  - Ming-Pu Qin (秦明普) — quantum Monte Carlo.
-  - Yan-Tao Wu (武琰涛) — Monte Carlo renormalization group.
-  - Shi-Xin Zhang (张士欣) — quantum circuit simulation.
-  - Kun Chen (陈锟), Jin-Guo Liu (刘金国) — AI agent / knowledge base.
-- Venues: PRX / PRX Quantum, PRB, PRL, Quantum, Nature Physics, SciPost Physics.
-- Other reliable sources:
-  - <https://arxiv.org/list/cond-mat.str-el/new> — daily strongly-correlated preprints.
-  - <https://arxiv.org/list/quant-ph/new> — daily quant-ph preprints.
-  - Release notes for the method stack (ITensors.jl, MPSKit.jl, PEPSKit.jl,
-    TeNPy, NetKet, TensorCircuit-NG, XDiag.jl) when a discussion depends on a
-    feature or version.
-- Avoid:
-  - unsourced social posts, SEO blogs, and generic news summaries unless the
-    user explicitly asks.
-
-## Cryochamber (`.cryo/`) — autonomous weekly advisor
-
-A [cryochamber](https://github.com/GiggleLiu/cryochamber) is parked at `.cryo/`
-to run the local advisor workflow automatically every **Monday 09:48
-Asia/Shanghai** (staggered after the other harness chambers on this machine). It
-wakes, runs the self-contained workflow in `.cryo/plan.md`, posts the digest to
-the `weekly advisor` topic on the `ManyBodyHarness` stream, and hibernates. The
-plan never terminates; only `cryo cancel` stops it.
-
-The Monday digest is minimalist by design: a header line, a status-tagged
-`TODOs` audit, and `Key reads (≤3)` (papers from the last 7 days, or a ≤3-year
-paper tied to a recently discussed topic). The chamber reads its "Reliable
-update sources" from the section above and never calls Claude Code plugin skills
-— it runs unattended under `opencode`, so the weekly path is fully
-self-contained.
-
-The chamber **design** (`plan.md`, `cryo.toml`, `README.md`) is committed; the
-chamber **runtime** (`messages/`, `*.log`, `timer.json`, `todo.json`,
-`NOTES.md`, `.cryo/.cryo/` socket dir) is gitignored as per-machine state. Only
-one collaborator's machine should run the daemon at a time, otherwise the digest
-gets posted twice. If you ever put real API keys in `cryo.toml`'s `[provider]`
-table, gitignore it first.
-
-### Common chamber commands
-
-Run from the chamber directory (`cd .cryo` first):
-
-```sh
-cryo status         # is the daemon alive? when does it next wake?
-cryo log            # daemon log
-cryo watch          # live-tail the current session
-cryo receive        # read accumulated outbox messages
-cryo restart        # pick up edits to cryo.toml or plan.md
-cryo cancel         # stop the daemon and drop the pending TODO
-cryo start          # first-time launch (fires a no-op bootstrap session)
-cryo send "<text>"  # nudge the agent between Mondays (watch_inbox=true)
-```
-
-`cryo start` fires a bootstrap session that only schedules the next
-Monday-09:48 run, so starting on a non-Monday will not double-post.
