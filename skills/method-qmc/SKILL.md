@@ -1,22 +1,24 @@
 ---
 name: method-qmc
-description: Use when a quantum Monte Carlo (QMC) reproduction needs method-level route and tool selection — stochastic series expansion (SSE) for sign-free spin/boson finite-temperature targets, or constrained-path / phaseless auxiliary-field QMC (CPMC/AFQMC) for fermionic Hubbard ground states. Triggers include "QMC", "SSE", "stochastic series expansion", "finite-temperature susceptibility", "sign problem", "AFQMC", "CPMC", "constrained path", "Hubbard ground state by Monte Carlo".
+description: Use when a quantum Monte Carlo (QMC) reproduction needs method-level route and tool selection — stochastic series expansion (SSE) for sign-free spin/boson finite-temperature targets, constrained-path / phaseless auxiliary-field QMC (CPMC/AFQMC) for fermionic Hubbard ground states, or fixed-node diffusion Monte Carlo (DMC) for plane-wave solids using Quantum ESPRESSO orbitals. Triggers include "QMC", "SSE", "stochastic series expansion", "finite-temperature susceptibility", "sign problem", "AFQMC", "CPMC", "constrained path", "Hubbard ground state by Monte Carlo", "DMC", "diffusion Monte Carlo", "QMCPACK", "Slater-Jastrow", "twist averaging", "fixed-node".
 ---
 
 # Method QMC
 
 QMC is the stochastic-sampling method class. This card owns method selection (step 1), software routing (step 2), and method-level setup (step 3, method side). Method internals are in `## Details`; software parameter *values* live in the tool skills; paper- and model-specific facts live in `/reproduce-paper` and `.knowledge/models/`.
 
-Two routes:
+Three routes:
 
 - **SSE** — stochastic series expansion for sign-problem-free spin/bosonic lattices, finite-temperature curves (and ground states via large β).
 - **CPMC/AFQMC** — constrained-path / phaseless auxiliary-field QMC for interacting fermions. The survey covers both the **zero-temperature** (ground-state projection) and **finite-temperature** (grand-canonical) forms; the harness route — the official CPMC-Lab package — implements the ground-state form for repulsive Hubbard-type models.
+- **DMC** — real-space fixed-node diffusion Monte Carlo for plane-wave solids, using Quantum ESPRESSO orbitals for a Slater-Jastrow trial wavefunction with twist averaging. Handled as a self-contained pipeline in the **DMC route** section below (tool skills `/using-quantum-espresso` + `/using-qmcpack`).
 
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/qmc-methodology.md`
 - Track README: `tracks/qmc/README.md`
 - Tool skills: `/using-sse` (SSE route), `/using-cpmc-lab` (CPMC/AFQMC route)
+- Tool skills (DMC route): `/using-quantum-espresso` (QE orbital generation) and `/using-qmcpack` (Slater-Jastrow VMC/DMC)
 - Survey (primary, AFQMC): Zhang, *Auxiliary-Field Quantum Monte Carlo at Zero- and Finite-Temperature* (2019) `.knowledge/literature/quantum-monte-carlo/zhang_2019_auxiliary-field-quantum-monte-carlo.md` — the methodology reference for the CPMC/AFQMC route.
 - Reproduction target + CP algorithm details: Nguyen, Shi, Xu, Zhang, *CPMC-Lab* (2014) `.knowledge/literature/quantum-monte-carlo/1407.7967_cpmc-lab-a-matlab-package-for-constrained-path-monte-carlo-c.md`.
 - SSE methodology: Sandvik, *Computational Studies of Quantum Spin Systems* (2010); QMC textbook: Becca & Sorella (2017).
@@ -108,6 +110,101 @@ Conceptual knobs and the tricks behind them — for each, the **intuition for ch
 | Constraint release / self-consistency | systematic bias removal | free-projection to gauge/remove CP bias, or feed the AFQMC density matrix back as a self-consistent constraint |
 
 **SSE**: β = 1/T grid (a ground-state claim needs a β sweep, not one low-T point); thermalization sweeps (drop early bins); bin size (raise near criticality where autocorrelation grows); sweeps/chains (error bars); MPI chain count.
+
+## DMC route (VMC/DMC for plane-wave solids)
+
+Software-stack skill for using **QMCPACK DMC with Quantum ESPRESSO orbitals** to
+study periodic solids. It owns the package-level run mechanics: generate
+plane-wave orbitals with Quantum ESPRESSO, convert them with `pw2qmcpack.x`,
+build QMCPACK XML inputs, optimize the Jastrow, run fixed-node DMC, and
+summarize twist-averaged energies with defensible uncertainty and convergence
+caveats.
+
+### Operating principle
+
+**Pseudopotential-consistent, twist-first, stage-gated.**
+
+- **Pseudopotential-consistent** - use a norm-conserving QE UPF and the matching
+  QMCPACK XML pseudopotential from the same source. Do not mix a convenient QE
+  ultrasoft/PAW potential with a different QMC pseudopotential.
+- **Twist-first** - choose the QMC supercell and twist grid before generating
+  QE NSCF orbitals. A dense QE k grid is not a substitute for a QMC twist plan.
+- **Stage-gated** - prove each stage with a tiny smoke before expanding: QE
+  SCF/NSCF, `pw2qmcpack`, one QMCPACK twist, all twists, then production DMC.
+
+### The workflow spine
+
+Use this sequence unless the active project convention gives a validated reason
+to deviate:
+
+```text
+choose structure, supercell, twist grid, and pseudopotential pair
+pw.x scf                    # charge density
+pw.x nscf                   # exact full twist grid, nosym/noinv
+pw2qmcpack.x                # writes ESHDF under QE outdir
+build QMCPACK XML           # Slater determinant + Jastrow + Hamiltonian
+tiny VMC smoke              # one twist, short blocks
+Jastrow optimization        # linear method loops
+final VMC / SJ statistics   # fixed optimized Jastrow
+DMC                         # fixed-node, timestep/warmup/replica plan
+twist average and compare   # size-matched structures only
+```
+
+-> per-stage input files, exact invocation, and run-directory layout in using-qmcpack and using-quantum-espresso
+
+Pipeline orchestration: run the QE-stage script `using-quantum-espresso/source/qmcpack-orbitals/run_qe_orbitals.template.sh` to generate the trial orbitals, then the QMCPACK-stage script `using-qmcpack/source/run_qmcpack_dmc.template.sh`.
+
+### Method setup (judgment on the knobs)
+
+#### Generate QE orbitals
+
+-> QE SCF / NSCF / pw2qmcpack conversion mechanics passages in using-quantum-espresso (twist-first judgment is in Operating principle above)
+
+#### Prepare QMCPACK XML (method judgment)
+
+Required consistency checks:
+
+- `twistnum` matches the per-file twist index.
+- Electron group sizes match the valence electron count implied by the QMC
+  pseudopotentials.
+- Ionic positions and species match the QE structure.
+- Jastrow coefficients marked `optimize="yes"` are only optimized during the
+  intended optimization stage.
+
+Run one short VMC smoke before any optimization or DMC. Treat parser failures,
+missing HDF5, wrong electron counts, or pseudopotential mismatches as hard
+workflow errors; do not paper over them by changing DMC parameters.
+
+-> literal QMCPACK XML keywords, templates, and values in using-qmcpack
+
+#### Optimize and run DMC (method judgment)
+
+Use a short staged XML during development:
+
+```text
+tiny VMC preface
+linear-method Jastrow optimization loops
+final VMC with optimized Slater-Jastrow
+short DMC smoke
+```
+
+For production:
+
+- Reuse optimized Slater-Jastrow files only when the structure, ESHDF, twist
+  grid, pseudopotential pair, and relevant XML conventions match.
+- Keep timestep-bias checks explicit, usually at multiple `timestep` values.
+- Run independent DMC replicas with different seeds when statistics matter.
+- Define warmup/discard policy before summarizing scalar data.
+- Record `blocks`, `steps`, `timestep`, `targetwalkers`, warmup, seed, and
+  `twistnum` in a machine-readable timing or metadata file.
+
+Project-specific defaults belong to the project workflow, not this generic
+skill. For example, the post-HCP reference workflow uses fixed optimized DMC
+replicas and a 50-block production discard after warmup for long 3000-block
+runs; do not silently transfer that exact rule to unrelated systems without a
+fresh scalar-data check.
+
+-> literal DMC/VMC/optimization XML values and run mechanics in using-qmcpack
 
 ## Details
 

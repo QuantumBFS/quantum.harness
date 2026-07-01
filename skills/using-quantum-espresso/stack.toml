@@ -1,0 +1,45 @@
+id = "quantum-espresso"
+name = "Quantum ESPRESSO native PHonon EPC / Quantum ESPRESSO (pw.x + pw2qmcpack)"
+language = "fortran"
+canonical_for = ["electron-phonon-coupling", "dfpt", "superconductivity", "tc", "quantum-espresso", "dft", "pw.x", "pw2qmcpack", "orbital-generation"]
+default_profile = "dfpt"
+
+[profiles.dfpt]
+label = "DFPT / electron-phonon (MPI CPU)"
+default = true
+install = "site_dfpt"
+smoke = "dfpt"
+
+[profiles.dfpt.requirements]
+allocation = "compute"
+mpi = true
+
+[profiles.orbitals]
+label = "QMCPACK orbital generation (MPI CPU)"
+install = "site_orbitals"
+smoke = "orbitals"
+
+[profiles.orbitals.requirements]
+allocation = "compute"
+mpi = true
+
+[install.site_dfpt]
+command = "command -v pw.x && command -v ph.x && command -v q2r.x && command -v matdyn.x && command -v alpha2f.x"
+notes = "Use a site-provided Quantum ESPRESSO build with PHonon. Record executable paths, version, modules, MPI launcher, and whether alpha2f.x is serial for this build."
+
+[install.site_orbitals]
+command = "command -v pw.x && command -v pw2qmcpack.x"
+notes = "Use matched site-provided QE and complex QMCPACK builds. Record executable paths, versions, compiler/MPI/HDF5 stack, and pseudopotential sources before production."
+
+[smoke.dfpt]
+where = "compute"
+command = "pw.x -h >/dev/null && ph.x -h >/dev/null && q2r.x -h >/dev/null && matdyn.x -h >/dev/null && alpha2f.x -h >/dev/null"
+
+[smoke.orbitals]
+where = "compute"
+command = "pw.x -h >/dev/null && pw2qmcpack.x -h >/dev/null"
+
+[docs]
+official = "https://www.quantum-espresso.org/Doc/"
+phonon_examples = "PHonon/examples/tetra_example/ in the installed QE source tree"
+qe = "https://www.quantum-espresso.org/Doc/"

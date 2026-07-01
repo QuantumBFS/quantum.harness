@@ -38,8 +38,8 @@ using-tensorcircuit-ng = { type = "local" }
 using-pepskit = { type = "local" }
 using-sse = { type = "local" }
 using-cpmc-lab = { type = "local" }
-using-qe-epc = { type = "local" }        # Quantum ESPRESSO native DFPT electron-phonon coupling / Tc workflow
-using-qmcpack-dmc = { type = "local" }   # QE -> QMCPACK Slater-Jastrow VMC/DMC workflow
+using-quantum-espresso = { type = "local" }   # Quantum ESPRESSO: DFPT electron-phonon / Tc + pw2qmcpack orbital generation
+using-qmcpack = { type = "local" }            # QMCPACK Slater-Jastrow VMC/DMC for plane-wave solids
 using-nctssos = { type = "local" }       # general NC-polyopt engine (Clarabel/Mosek)
 using-qmbcertify = { type = "local" }    # structured-NPA certifier for 1D/2D Heisenberg (Mosek)
 
@@ -48,6 +48,7 @@ method-ed = { type = "local" }
 method-mps = { type = "local" }
 method-peps = { type = "local" }
 method-qmc = { type = "local" }
+method-dfpt = { type = "local" }         # DFPT electron-phonon superconductivity (native PHonon route)
 method-ltrg = { type = "local" }
 method-mcrg = { type = "local" }
 method-vmc = { type = "local" }

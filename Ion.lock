@@ -24,7 +24,7 @@ checksum = "sha256:4488976e66f34a8e45e1d17ab3d3802abd3006b641fbf86db3a8380d5f46f
 name = "challenge"
 source = ""
 kind = "local"
-checksum = "sha256:8fd97c22bbb9845fe145b5ccff346bf5ab9f759bc8826151f5016612f18e5b7b"
+checksum = "sha256:f11b2579ba73d96f25a68e02f833f7129a0ac04b65ba711419fa8abe956dde02"
 
 [[skill]]
 name = "challenge-report"
@@ -111,6 +111,12 @@ kind = "local"
 checksum = "sha256:bd5d3a00554413b17ddca6c53aa2f639a7a0c5bdfd8d300126ea6a471d5d669c"
 
 [[skill]]
+name = "method-dfpt"
+source = ""
+kind = "local"
+checksum = "sha256:7352f8335f79535e2558f545c795968ffcea2d79095eaf74611bbab62ceff339"
+
+[[skill]]
 name = "method-ed"
 source = ""
 kind = "local"
@@ -162,7 +168,7 @@ checksum = "sha256:4eedae5687e25ce59540a9c998b351af90f93a4be084ae1af29766b0becab
 name = "method-qmc"
 source = ""
 kind = "local"
-checksum = "sha256:9cafd10384c4b2686b64b6983e44c4a3ecddbba932dd9077b64aae89c6089861"
+checksum = "sha256:774a438d2267d6fdcb9098d2aeb9ee1c62fd42faf2e3f48a04bb1309c5cefbed"
 
 [[skill]]
 name = "method-vmc"
@@ -180,7 +186,7 @@ checksum = "sha256:2d27f7c2c9c6152608757e543375f647256f21df31f819a79131a7e21eb8b
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:8e37d796e9636eda9bd460830dcfaee4f8dd74aa8c401462654cf50975e49e5e"
+checksum = "sha256:26d00b7091b752dd1c89573125ec312aedba088b87c796d9e9a1a5fc96e9663f"
 
 [[skill]]
 name = "parameter-scan"
@@ -206,13 +212,13 @@ checksum = "sha256:2760c85d4f4117b0006e7ba755f4bbd61f8f4c185f347999763c97f507274
 name = "report"
 source = ""
 kind = "local"
-checksum = "sha256:f10ead9855d8bd1d77ff971aa56e3afc1a214130c60f8b4f977a0c08c7d7ed3d"
+checksum = "sha256:d3642e0acc77a57896014cfff02085381091b4b1f1b802c7dced6c82ce3de3ca"
 
 [[skill]]
 name = "reproduce-paper"
 source = ""
 kind = "local"
-checksum = "sha256:7acbdaf85c67bb50a3d31b354d4762a6a8e80812d7cd26b56ee0dec51d01106f"
+checksum = "sha256:2b8e51b1aa960275903e8d24ada83ef1c42cd9bf67ca1384b1a3f8d4f189260c"
 
 [[skill]]
 name = "requesting-code-review"
@@ -343,22 +349,22 @@ kind = "local"
 checksum = "sha256:75a861ac3d1dfa866f38981c4bc20c07323f276a5a21a7177ea24841d7fa820d"
 
 [[skill]]
-name = "using-qe-epc"
-source = ""
-kind = "local"
-checksum = "sha256:a2bfaf02689deced25bdc9f669ec2ecb06432e2574aa021fab022db4df207cef"
-
-[[skill]]
 name = "using-qmbcertify"
 source = ""
 kind = "local"
 checksum = "sha256:530bd53898ace03172e4738a07e986bf4a2622f108122f26afc535945ff39f22"
 
 [[skill]]
-name = "using-qmcpack-dmc"
+name = "using-qmcpack"
 source = ""
 kind = "local"
-checksum = "sha256:e974c94d5678737fdb65fa24e546b36d032e50937cd172f7919ce32b55b1f811"
+checksum = "sha256:4c01794330ed2e3fbff257d265f53f8e6db14b00b5a9ea367bd4edc7480cee8c"
+
+[[skill]]
+name = "using-quantum-espresso"
+source = ""
+kind = "local"
+checksum = "sha256:70aa4d368af5e12fdb198c7b3adc9cd262cd9b007b6de8c99197e53b456a8742"
 
 [[skill]]
 name = "using-quspin"
