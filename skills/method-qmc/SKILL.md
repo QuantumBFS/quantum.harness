@@ -152,7 +152,7 @@ twist average and compare   # size-matched structures only
 
 -> per-stage input files, exact invocation, and run-directory layout in using-qmcpack and using-quantum-espresso
 
-Pipeline orchestration: run the QE-stage script `using-quantum-espresso/source/qmcpack-orbitals/run_qe_orbitals.template.sh` to generate the trial orbitals, then the QMCPACK-stage script `using-qmcpack/source/run_qmcpack_dmc.template.sh`.
+Pipeline orchestration: run the QE-stage script `using-quantum-espresso/references/qmcpack-orbitals/run_qe_orbitals.template.sh` to generate the trial orbitals, then the QMCPACK-stage script `using-qmcpack/references/run_qmcpack_dmc.template.sh`.
 
 ### Method setup (judgment on the knobs)
 

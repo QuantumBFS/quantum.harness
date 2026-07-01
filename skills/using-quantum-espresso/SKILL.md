@@ -16,7 +16,7 @@ qualified superconducting `Tc` estimate.
 Method understanding, method-vs-method routing, and knob JUDGMENT live in method-dfpt; result interpretation lives in physics-electron-phonon-coupling.
 
 Stack contract: `skills/using-quantum-espresso/stack.toml`.
-The reusable source templates live in `skills/using-quantum-espresso/source/dfpt/`:
+The reusable source templates live in `skills/using-quantum-espresso/references/dfpt/`:
 
 ```text
 prepare-qe-todo.md
@@ -30,7 +30,7 @@ elph_densek_alpha2f.in
 run_epc_sbatch.template.sh
 ```
 
-Do not embed pseudopotential files in this skill. `source/dfpt/input-sources.md`
+Do not embed pseudopotential files in this skill. `references/dfpt/input-sources.md`
 points to QE/SSSP download locations and records what the PdH-style templates
 assume.
 
@@ -73,7 +73,7 @@ lattice tag, EPC q grid, and dense electron k grid.
 
 ### Phase 1 - Prepare inputs (input keywords and templates)
 
-Start from `skills/using-quantum-espresso/source/dfpt/` and adapt values to the project.
+Start from `skills/using-quantum-espresso/references/dfpt/` and adapt values to the project.
 
 #### SCF
 
@@ -118,7 +118,7 @@ parallel execution for that executable.
 
 ### Phase 2 - Submit safely
 
-Use `source/dfpt/run_epc_sbatch.template.sh` as a starting point for cluster jobs.
+Use `references/dfpt/run_epc_sbatch.template.sh` as a starting point for cluster jobs.
 Adapt the SBATCH header, modules, `QE_ROOT`, MPI launcher, `NPOOL`, and resource
 request to the target system.
 
@@ -248,11 +248,11 @@ caveats.
 
 ### Integrations
 
-- **Source templates:** `skills/using-quantum-espresso/source/dfpt/`.
+- **Source templates:** `skills/using-quantum-espresso/references/dfpt/`.
 - **Stack contract:** `skills/using-quantum-espresso/stack.toml`.
-- **Run preparation checklist:** `skills/using-quantum-espresso/source/dfpt/prepare-qe-todo.md`.
-- **Input provenance and download locations:** `skills/using-quantum-espresso/source/dfpt/input-sources.md`.
-- **Cluster wrapper template:** `skills/using-quantum-espresso/source/dfpt/run_epc_sbatch.template.sh`.
+- **Run preparation checklist:** `skills/using-quantum-espresso/references/dfpt/prepare-qe-todo.md`.
+- **Input provenance and download locations:** `skills/using-quantum-espresso/references/dfpt/input-sources.md`.
+- **Cluster wrapper template:** `skills/using-quantum-espresso/references/dfpt/run_epc_sbatch.template.sh`.
 - **QE upstream reference:** the installed QE documentation and
   `PHonon/examples/tetra_example/` in a QE source tree.
 
@@ -262,7 +262,7 @@ Software layer (QE / pw2qmcpack side) of the QE -> QMCPACK Slater-Jastrow VMC/DM
 
 ### Source templates (QE side)
 
-The reusable QE source templates are `source/qmcpack-orbitals/qe_scf.in`, `source/qmcpack-orbitals/qe_nscf.in`, and `source/qmcpack-orbitals/pw2qmcpack.in` (byte-exact copies). Stack contract and QMCPACK-side templates live in using-qmcpack.
+The reusable QE source templates are `references/qmcpack-orbitals/qe_scf.in`, `references/qmcpack-orbitals/qe_nscf.in`, and `references/qmcpack-orbitals/pw2qmcpack.in` (byte-exact copies). Stack contract and QMCPACK-side templates live in using-qmcpack.
 
 ### Run-directory layout (QE side)
 
@@ -294,8 +294,8 @@ QE-side Phase 0 items, moved verbatim from using-qmcpack:
 
 ### Generate QE orbitals
 
-Start from `source/qmcpack-orbitals/qe_scf.in`, `source/qmcpack-orbitals/qe_nscf.in`, and
-`source/qmcpack-orbitals/pw2qmcpack.in`.
+Start from `references/qmcpack-orbitals/qe_scf.in`, `references/qmcpack-orbitals/qe_nscf.in`, and
+`references/qmcpack-orbitals/pw2qmcpack.in`.
 
 #### SCF
 
@@ -358,7 +358,7 @@ rg -n "prefix|outdir|K_POINTS|nosym|noinv" qe_*.in pw2qmcpack.in
 
 ### Cluster wrapper template (QE stage)
 
-The QE SCF/NSCF/pw2qmcpack execution stage is the launcher `source/qmcpack-orbitals/run_qe_orbitals.template.sh` (byte-exact copy): QE SCF, QE NSCF, pw2qmcpack invocation, ESHDF check, and the `QE_BIN` / `PW2QMCPACK` / `QE_NP` / `QE_NPOOL` / `PW2QMCPACK_NP` env handling. -> the QMCPACK-stage launcher `using-qmcpack/source/run_qmcpack_dmc.template.sh` in using-qmcpack.
+The QE SCF/NSCF/pw2qmcpack execution stage is the launcher `references/qmcpack-orbitals/run_qe_orbitals.template.sh` (byte-exact copy): QE SCF, QE NSCF, pw2qmcpack invocation, ESHDF check, and the `QE_BIN` / `PW2QMCPACK` / `QE_NP` / `QE_NPOOL` / `PW2QMCPACK_NP` env handling. -> the QMCPACK-stage launcher `using-qmcpack/references/run_qmcpack_dmc.template.sh` in using-qmcpack.
 
 ### Monitor and diagnose (QE side)
 
@@ -400,5 +400,5 @@ The stack contract `stack.toml` (`id = "quantum-espresso"`, `language = "fortran
 
 ### Input provenance (QE side)
 
-The QE-side input-provenance lines and run-preparation rows now live here: `source/qmcpack-orbitals/input-sources.md` (QE documentation, version, QE-UPF source lines, Units, ESHDF Location) and `source/qmcpack-orbitals/prepare-qe-todo.md` (section "## 4. QE Orbital Inputs", the QE rows of "## 1. Version And Build Record", "## 3. Pseudopotential Pair", "## 2. Structure Materials", and "## 6. Run Controls").
--> the matched-pair prose and the QMCPACK-side rows in using-qmcpack/source/input-sources.md and using-qmcpack/source/prepare-qmcpack-todo.md
+The QE-side input-provenance lines and run-preparation rows now live here: `references/qmcpack-orbitals/input-sources.md` (QE documentation, version, QE-UPF source lines, Units, ESHDF Location) and `references/qmcpack-orbitals/prepare-qe-todo.md` (section "## 4. QE Orbital Inputs", the QE rows of "## 1. Version And Build Record", "## 3. Pseudopotential Pair", "## 2. Structure Materials", and "## 6. Run Controls").
+-> the matched-pair prose and the QMCPACK-side rows in using-qmcpack/references/input-sources.md and using-qmcpack/references/prepare-qmcpack-todo.md

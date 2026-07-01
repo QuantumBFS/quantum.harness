@@ -6,7 +6,7 @@ the project campaign note; do not treat this file itself as the run record.
 
 ## 1. Version And Build Record
 
--> the QE orbital-generation binary rows in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE orbital-generation binary rows in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 - [ ] Record the `qmcpack_complex` path, QMCPACK version, real/complex mode,
   HDF5 support, compiler/MPI stack, and OpenMP setting.
 - [ ] Save the scheduler launcher pattern: `mpirun`, `srun`, `ibrun`, or
@@ -21,14 +21,14 @@ head -n 120 sj_vmc_dmc_tw00.out
 ldd "$QMCPACK_COMPLEX_BIN" | grep -E "hdf5|mpi|not found" || true
 sha256sum pseudo/*.upf qmc_pseudo/*.xml
 ```
--> the QE evidence greps in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE evidence greps in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 
 Template version assumption:
 
 ```text
 QMCPACK: 4.3.x complex-valued ESHDF/einspline solid workflow
 ```
--> the QE template-version line in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE template-version line in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 
 If a project uses a different major version or a different XML/orbital route,
 run a one-twist VMC smoke before expanding to all twists or DMC.
@@ -39,13 +39,13 @@ run a one-twist VMC smoke before expanding to all twists or DMC.
 - [ ] Cell vectors and atomic positions checked against the intended pressure,
   lattice constant, or phase.
 - [ ] Atom count and species list recorded.
--> the QE input cell-units row in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE input cell-units row in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 - [ ] QMCPACK XML lattice vectors converted to bohr.
 - [ ] Size matching checked before comparing energies between structures.
 
 ## 3. Pseudopotential Pair
 
--> the QE-UPF row in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE-UPF row in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 - [ ] QMCPACK pseudopotential is the matching XML from the same source.
 - [ ] Exchange-correlation/source family recorded.
 - [ ] SHA256 hashes recorded for every UPF and XML pseudopotential.
@@ -81,7 +81,7 @@ orbital source.
 
 ## 4. QE Orbital Inputs
 
--> the whole "## 4. QE Orbital Inputs" section (moved verbatim) in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the whole "## 4. QE Orbital Inputs" section (moved verbatim) in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 
 ## 5. QMCPACK XML Inputs
 
@@ -97,7 +97,7 @@ orbital source.
 
 ## 6. Run Controls
 
--> the QE parallel-settings and converter rows in using-quantum-espresso/source/qmcpack-orbitals/prepare-qe-todo.md
+-> the QE parallel-settings and converter rows in using-quantum-espresso/references/qmcpack-orbitals/prepare-qe-todo.md
 - [ ] QMCPACK settings chosen: `PARALLEL_TWISTS`, `QMC_NP`,
   `OMP_NUM_THREADS`, `QMC_MPI_FLAGS`, and optional CPU sets.
 - [ ] Short one-twist VMC smoke planned before all-twist SJ optimization or DMC.

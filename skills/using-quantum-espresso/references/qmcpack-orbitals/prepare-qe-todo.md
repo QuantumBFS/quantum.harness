@@ -1,6 +1,6 @@
 # QE Orbital-Generation Run Preparation Todo
 
-QE-side checklist items moved verbatim from using-qmcpack/source/prepare-qmcpack-todo.md. The QMCPACK-side items stay there.
+QE-side checklist items moved verbatim from using-qmcpack/references/prepare-qmcpack-todo.md. The QMCPACK-side items stay there.
 
 ## 1. Version And Build Record (QE rows)
 

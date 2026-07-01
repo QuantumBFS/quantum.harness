@@ -23,7 +23,7 @@ binary paths and scheduler quirks.
 ## Scope and source templates
 
 Stack contract: `skills/using-qmcpack/stack.toml`.
-The reusable source templates live in `skills/using-qmcpack/source/`:
+The reusable source templates live in `skills/using-qmcpack/references/`:
 
 ```text
 prepare-qmcpack-todo.md
@@ -33,7 +33,7 @@ run_qmcpack_dmc.template.sh
 ```
 
 Do not embed pseudopotential files or production scalar/HDF5 output in this
-skill. `source/input-sources.md` points to documentation and starting locations
+skill. `references/input-sources.md` points to documentation and starting locations
 for matched QE/QMCPACK pseudopotential pairs.
 
 -> orbital-generation input templates and their mechanics in using-quantum-espresso
@@ -74,7 +74,7 @@ the project explicitly treats a small result file as durable evidence.
 Resolve the calculation context before writing or submitting anything.
 
 If starting a new calculation, first walk through
-`source/prepare-qmcpack-todo.md` and keep the completed copy or answers beside
+`references/prepare-qmcpack-todo.md` and keep the completed copy or answers beside
 the run tree.
 
 1. **Binaries.** Verify `qmcpack_complex`. For
@@ -98,7 +98,7 @@ the run tree.
 
 ## Prepare QMCPACK XML
 
-Start from `source/sj_vmc_dmc_tw00.xml` and generate one XML per twist.
+Start from `references/sj_vmc_dmc_tw00.xml` and generate one XML per twist.
 
 Required consistency checks:
 
@@ -108,7 +108,7 @@ Required consistency checks:
 - The Hamiltonian uses the matching QMCPACK XML pseudopotential.
 
 -> twistnum / electron-group / position / optimize-stage judgment in method-dmc
--> QMCPACK XML template: `source/sj_vmc_dmc_tw00.xml` (byte-exact copy)
+-> QMCPACK XML template: `references/sj_vmc_dmc_tw00.xml` (byte-exact copy)
 
 ## Submit safely (QMCPACK twist parallelism)
 
@@ -223,7 +223,7 @@ convergence caveats.
 
 ## Cluster wrapper template (QMCPACK launcher)
 
-The launcher `source/run_qmcpack_dmc.template.sh` (byte-exact copy) runs the twist-parallel QMCPACK stage. It consumes the orbital file produced upstream. -> the orbital-generation stage launcher `using-quantum-espresso/source/qmcpack-orbitals/run_qe_orbitals.template.sh` in using-quantum-espresso.
+The launcher `references/run_qmcpack_dmc.template.sh` (byte-exact copy) runs the twist-parallel QMCPACK stage. It consumes the orbital file produced upstream. -> the orbital-generation stage launcher `using-quantum-espresso/references/qmcpack-orbitals/run_qe_orbitals.template.sh` in using-quantum-espresso.
 
 ## Stack contract (QMCPACK)
 
@@ -243,10 +243,10 @@ The stack contract `stack.toml` (`id = "qmcpack"`, `language = "c++"`) covers th
 
 ## Integrations
 
-- **Run preparation checklist:** `skills/using-qmcpack/source/prepare-qmcpack-todo.md`.
-- **Source templates:** `skills/using-qmcpack/source/`.
+- **Run preparation checklist:** `skills/using-qmcpack/references/prepare-qmcpack-todo.md`.
+- **Source templates:** `skills/using-qmcpack/references/`.
 - **Stack contract:** `skills/using-qmcpack/stack.toml`.
-- **Input provenance and download locations:** `skills/using-qmcpack/source/input-sources.md`.
-- **Cluster wrapper template:** `skills/using-qmcpack/source/run_qmcpack_dmc.template.sh`.
+- **Input provenance and download locations:** `skills/using-qmcpack/references/input-sources.md`.
+- **Cluster wrapper template:** `skills/using-qmcpack/references/run_qmcpack_dmc.template.sh`.
 - **QE EPC skill for DFPT superconductivity:** `skills/using-quantum-espresso/SKILL.md` (different workflow).
 - **Local machine build note:** user-level `qmcpack-local-build` when available.

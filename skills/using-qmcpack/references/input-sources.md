@@ -8,7 +8,7 @@ pseudopotentials, executable paths, twist grids, and scheduler settings.
 
 - QMCPACK documentation: <https://qmcpack.readthedocs.io/>
 - QMCPACK input examples and source: <https://github.com/QMCPACK/qmcpack>
--> orbital-generation documentation link in using-quantum-espresso/source/qmcpack-orbitals/input-sources.md
+-> orbital-generation documentation link in using-quantum-espresso/references/qmcpack-orbitals/input-sources.md
 
 ## Version Assumptions
 
@@ -18,7 +18,7 @@ workflow:
 ```text
 QMCPACK: 4.3.x complex-valued ESHDF/einspline workflow
 ```
--> the QE-side version line in using-quantum-espresso/source/qmcpack-orbitals/input-sources.md
+-> the QE-side version line in using-quantum-espresso/references/qmcpack-orbitals/input-sources.md
 
 Record the exact executable paths, versions, compiler/MPI/HDF5 stack, and input
 template revision in each run directory. Treat these files as examples unless
@@ -31,7 +31,7 @@ For production QMCPACK, use a matched pseudopotential pair:
 ```text
 QMCPACK: XML pseudopotential for the same element/source
 ```
--> the QE-UPF source lines of "## Pseudopotentials" in using-quantum-espresso/source/qmcpack-orbitals/input-sources.md
+-> the QE-UPF source lines of "## Pseudopotentials" in using-quantum-espresso/references/qmcpack-orbitals/input-sources.md
 
 Do not use an ultrasoft or PAW QE pseudopotential as a production QMC orbital
 source unless the project has an explicit, validated route for doing so. In the
@@ -64,8 +64,8 @@ source. Record SHA256 hashes beside the run.
 
 ## Units
 
--> "## Units" (QE cell units and bohr conversion) in using-quantum-espresso/source/qmcpack-orbitals/input-sources.md
+-> "## Units" (QE cell units and bohr conversion) in using-quantum-espresso/references/qmcpack-orbitals/input-sources.md
 
 ## ESHDF Location
 
--> "## ESHDF Location" (where the orbital file is written, and keeping the QMCPACK `href` pointed at it) in using-quantum-espresso/source/qmcpack-orbitals/input-sources.md
+-> "## ESHDF Location" (where the orbital file is written, and keeping the QMCPACK `href` pointed at it) in using-quantum-espresso/references/qmcpack-orbitals/input-sources.md

@@ -1,6 +1,6 @@
 # Input Sources For QE Orbital-Generation Templates
 
-QE-side lines moved verbatim from using-qmcpack/source/input-sources.md. The QMCPACK-side lines and the shared matched-pair prose stay there.
+QE-side lines moved verbatim from using-qmcpack/references/input-sources.md. The QMCPACK-side lines and the shared matched-pair prose stay there.
 
 ## Documentation
 

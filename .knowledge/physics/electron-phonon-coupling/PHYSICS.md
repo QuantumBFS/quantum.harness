@@ -36,6 +36,6 @@ The convergence-qualified reporting rule — report `Tc` only with its q-grid, d
 
 ## Model hooks
 
--> concrete material/structure content in using-quantum-espresso/source/.
+-> concrete material/structure content in using-quantum-espresso/references/.
 -> package mechanics, input keywords, failure map in using-quantum-espresso.
 -> method understanding and convergence judgment in method-dfpt.

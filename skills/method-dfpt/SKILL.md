@@ -55,7 +55,7 @@ The per-stage input files, directory layout, and exact invocation mechanics live
 Resolve the calculation context before writing or submitting anything:
 
 If starting a new calculation, first walk through
-`using-quantum-espresso/source/dfpt/prepare-qe-todo.md` and keep the completed copy or answers beside the
+`using-quantum-espresso/references/dfpt/prepare-qe-todo.md` and keep the completed copy or answers beside the
 run tree.
 
 1. **QE executables.** Verify the QE version and paths for `pw.x`, `ph.x`,
