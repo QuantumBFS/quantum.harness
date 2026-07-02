@@ -85,7 +85,7 @@ The track paper (Turner et al., Nature Physics 14, 745 (2018) — PXP quantum ma
 
 ### Routing rule
 
-**`/using-xdiag` by default** for research-grade ED: symmetry-adapted blocks (generic space-group irreps), Lanczos, Krylov time evolution, Julia harness runs. **`/using-quspin` when** the paper/official code is Python or QuSpin, a QuSpin example matches the target, or the Hilbert space is *constrained* — QuSpin's constrained-basis machinery is the clean route. **No GPU by default**: no front-line ED tool ships GPU kernels (2026 review); consider GPU only on an explicit requirement. If neither tool expresses the target cleanly, the fork is official paper code / web search / custom basis-and-matrix build (the practitioner default for unusual bases — `references/ed-methodology.md` is written to make that reproducible) — recorded as a deviation.
+**`/using-xdiag` by default** for research-grade ED: symmetry-adapted blocks (generic space-group irreps), Lanczos, Krylov time evolution, Julia harness runs. **`/using-quspin` when** the paper/official code is Python or QuSpin, a QuSpin example matches the target, or the Hilbert space is *constrained* — QuSpin's constrained-basis machinery is the clean route. If neither tool expresses the target cleanly, the fork is official paper code / web search / custom build — writing the basis enumeration and Hamiltonian construction by hand (recipes in `references/ed-methodology.md`) and handing the matrix to a standard eigensolver; a larger, more error-prone effort — recorded as a deviation. This card supplies capability facts only (e.g. neither harness tool has GPU kernels — feature matrix below); hardware and compute placement are surfaced and confirmed with the user per reproduce-paper, never defaulted here.
 
 ### The packages
 
@@ -179,13 +179,14 @@ Print before diagonalizing, in this order:
 
 ### Final verification + expert criticism
 
+**Opt-in** — proposed to the user when they question a result (reproduce-paper owns the gate), never run unrequested.
+
+- **Benchmark menu** — exactly solvable results (2-site singlet, Bethe ansatz; values in `references/ed-methodology.md` §Validation and `.knowledge/limits.md`); free-particle / zero-coupling results; results from an independent method, or a dense/sparse cross-check on a smaller block. Why this is the sharp check: solver diagnostics only prove the matrix *as given* was solved — an external benchmark is what catches a wrong matrix (a run can converge cleanly on the wrong H).
 - **Residual** ‖H·ψ − E·ψ‖ for every reported eigenpair; **symmetry expectation values** of all imposed quantum numbers on returned states.
-- **Anchors** — free/zero-coupling limit against the single-particle solution; the exact small-system values and high-T limits in `references/ed-methodology.md` §Validation; `.knowledge/limits.md`.
-- **Benchmark against an independent value — always.** The expert failure mode: a run that converges cleanly on the **wrong matrix** — every solver diagnostic passes because H itself is wrong. Only an external benchmark catches it.
-- **Dense/sparse cross-check** on a smaller block; **SU(2) multiplet check** where applicable; **sum rules** for spectral functions and η→0 stability; **FTLM ≈ TPQ** within error bars for finite-T.
+- **SU(2) multiplet check** where applicable; **sum rules** for spectral functions and η→0 stability; **FTLM ≈ TPQ** within error bars for finite-T.
 - **Level statistics** only within one fully resolved sector, degeneracies removed.
 
-> **Criticize:** level statistics over mixed or partially resolved sectors; a converged Lanczos trusted without an external benchmark (wrong-matrix failure); excited states or spectra pulled without reorthogonalization (ghosts counted as physics); a constrained-basis dimension never checked against the exact count (constraint silently wrong); the zero-energy degenerate subspace left inside PXP gap ratios; thermodynamic-limit claims from one cluster with no size series; SU(2) "imposed" by assumption instead of checked via ⟨S²⟩.
+> **Criticize:** level statistics over mixed or partially resolved sectors; solver convergence read as correctness (only an external benchmark distinguishes a converged run from a converged run on the wrong matrix); excited states or spectra pulled without reorthogonalization (ghosts counted as physics); a constrained-basis dimension never checked against the exact count (constraint silently wrong); the zero-energy degenerate subspace left inside PXP gap ratios; thermodynamic-limit claims from one cluster with no size series; SU(2) "imposed" by assumption instead of checked via ⟨S²⟩.
 
 ## Citations
 
