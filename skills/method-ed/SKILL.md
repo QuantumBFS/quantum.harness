@@ -18,7 +18,7 @@ Exact diagonalization (ED) writes the many-body Hamiltonian in an explicit finit
 | Boundary & cluster | OBC/PBC; for 2D the cluster shape, aspect ratio, allowed momenta | *(boundary, cluster)* |
 | Symmetry sectors | conserved quantum numbers that block-diagonalize H: Sz / particle number, momentum k, parity p, spin flip z | *(which are imposed, which deliberately not)* |
 | Target observable | what the figure needs: spectrum, states, dynamics, T>0 curves, spectral function | *(the plotted quantity + which states)* |
-| Route | decided by the observable — the route table in *Select method* | *(route + why)* |
+| Route | decided by what the figure needs from the spectrum — the route table in *Select method* | *(route + why)* |
 | Block dimension D | the symmetry-reduced dimension — sets memory and wall time | *(compute before any estimate)* |
 
 > **Interaction principles — all user-facing surfacing in this card.** Plain language, no jargon: define every term, symbol, and axis before first use. No walls of words — a few sentences or one compact table per turn. One decision at a time, recommendation-first with one-line pros/cons. Precise and concise; let the user feel each choice, never a silent default.
@@ -66,20 +66,20 @@ The track paper (Turner et al., Nature Physics 14, 745 (2018) — PXP quantum ma
 
 ### Options & trade-offs — the route table
 
-**The target observable decides the route.** One row fits any figure; numbers live in *Cost & resource estimate*.
+**First identify what the figure needs from the spectrum: a few eigenpairs, an energy window, the full spectrum — or no eigenpairs at all** (dynamics, thermal averages, spectral functions). That fixes the branch; the block dimension D then fixes feasibility within it (numbers in *Cost & resource estimate*).
 
 | The figure needs | Route | Zoo card | Consequence |
 |---|---|---|---|
-| every eigenpair of a block (scars, ETH, level stats, exact thermodynamics) | **Dense full ED** | `ed-full` | complete information, but matrix + eigenvectors in memory — the smallest-D route |
-| ground state, gap, low-lying tower | **Lanczos / Krylov** | `ed-lanczos` | few exact eigenpairs at a-few-vectors memory; the oracle route |
-| a quench: ψ(t), revivals, echoes | **Krylov time evolution** | `ed-lanczos` | exact dynamics, no Trotter error; cost = matvecs per step × steps |
-| T > 0 curves beyond full-spectrum sizes | **FTLM / TPQ** | `ftlm-tpq` | stochastic trace over R random vectors; error shrinks with R and with D |
-| S(q,ω), A(ω), σ(ω) | **Continued fraction / KPM** | `ed-lanczos` / `kpm` | one extra Lanczos run / M Chebyshev matvecs; CF sharp at poles, KPM smooth for continua |
-| mid-spectrum eigenstates (MBL, embedded scars) at large D | **Shift-invert / polynomial filter** | `ed-lanczos` | interior access, but only with an explicit memory or filter budget |
+| **full spectrum** — every eigenpair of a block (scars, ETH, level stats, exact thermodynamics) | **Dense full ED** | `ed-full` | complete information, but matrix + eigenvectors in memory — feasible only while D permits; beyond that, reformulate (energy window, stochastic trace) or shrink the system |
+| **a few extremal eigenpairs** — ground state, gap, low-lying tower | **Lanczos / Krylov** | `ed-lanczos` | few exact eigenpairs at a-few-vectors memory; the oracle route |
+| **eigenpairs in an energy window** — MBL, scar towers beyond dense reach | **Shift-invert / polynomial filter** | `ed-lanczos` | interior access, but only with an explicit memory or filter budget |
+| **no eigenpairs** — a quench: ψ(t), revivals, echoes | **Krylov time evolution** | `ed-lanczos` | exact dynamics, no Trotter error; cost = matvecs per step × steps |
+| **no eigenpairs** — T > 0 curves beyond full-spectrum sizes | **FTLM / TPQ** | `ftlm-tpq` | stochastic trace over R random vectors; error shrinks with R and with D |
+| **no eigenpairs** — S(q,ω), A(ω), σ(ω) | **Continued fraction / KPM** | `ed-lanczos` / `kpm` | one extra Lanczos run / M Chebyshev matvecs; CF sharp at poles, KPM smooth for continua |
 
 ### Routing — surface to the user
 
-> **Surface the route as the forcing chain** — what the figure needs → what that forces — e.g. *"scar overlaps need every eigenstate ⇒ full spectrum ⇒ dense, in one fully specified sector"*, *"a revival curve is a quench ⇒ Krylov time evolution from \|Z₂⟩"*. Present 2–3 options only at a genuine fork; when reproducing, the paper's route wins — confirm it first, deviate only with the deviation recorded.
+> **Surface the route as the forcing chain** — first *how much of the spectrum the figure needs*, then what that forces — e.g. *"scar overlaps need many eigenstates ⇒ full spectrum ⇒ dense in one fully specified sector while D permits; beyond that, the eigenstates in an energy window (shift-invert / polynomial filter)"*, *"a revival curve is a quench ⇒ no eigenpairs needed ⇒ Krylov time evolution from \|Z₂⟩"*. Present 2–3 options only at a genuine fork; when reproducing, the paper's route wins — confirm it first, deviate only with the deviation recorded.
 
 ## Select software — step 2
 
