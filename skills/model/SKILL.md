@@ -67,22 +67,16 @@ verified), not the agent's process. They do NOT know harness vocabulary
    - Verification rubric (limit / symmetry / convergence / cross-method) noted
    </checklist>
 
-3. **Execute.** Follow the card's declared workflow. The card names which
-   primitive skills to compose (`/solve`, `/parameter-scan`,
-   `/scaling-fit`, `/cross-method-check`, `/using-slurm`, `/reproduce-paper`). Do
-   NOT substitute a different primitive because it feels more familiar; the
-   card's choice is authoritative.
-
-4. **Report.** Three lines or fewer in prose: primary quantity (value +
-   units), verification status (which checks passed), and one-line
-   reasoning (method + why). Auto-generate and embed the relevant
-   convergence or stability plot — never report a result without the visual
-   proof it converged.
+3. **Serve.** Surface the card's facts relevant to the moment — Hamiltonian
+   and conventions, phases and observables, method recommendations,
+   verification pointers — into whatever workflow is active
+   (`/reproduce-paper`, `/solve`, a method skill). The card informs that
+   workflow; it does not re-route or replace it.
 
 ## Anti-patterns
 
 <checklist name="anti-patterns">
-- Substituting generic ED/DMRG defaults for the card's declared workflow — fail.
+- Substituting generic defaults from memory for the card's declared facts and recommendations — fail.
 - Acting on agent memory ("I remember Heisenberg has 3 phases") instead of re-reading the card — fail. Memory drifts; cards don't.
 </checklist>
 
