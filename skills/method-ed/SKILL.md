@@ -30,7 +30,8 @@ Exact diagonalization (ED) writes the many-body Hamiltonian in an explicit finit
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithms: basis construction, symmetry adaptation, Lanczos, continued fraction, FTLM/TPQ estimators, validation anchors): `references/ed-methodology.md`
-- **Method-zoo cards** (M1–M14 property tables, cost classes): `.knowledge/methods/ed-full`, `ed-lanczos`, `ftlm-tpq`, `kpm`; `fci` is the quantum-chemistry sibling (same wall, different tooling).
+- **Method-zoo cards** (M1–M14 property tables, cost classes): `.knowledge/methods/ed-full`, `ed-lanczos`, `ftlm-tpq`, `kpm`; `fci` is the quantum-chemistry sibling (same wall, different tooling). Model → method gate: `.knowledge/method-property-map.md`.
+- **Knowledge cards**: `.knowledge/symmetry-cheatsheet.md` (conserved quantities, lattice point groups — the sector inventory), `.knowledge/conventions.md` (sign / normalization defaults), `.knowledge/limits.md` (exact limits for anchor checks).
 - Tool skills: `/using-xdiag` — **XDiag.jl** (Julia), the canonical symmetry-resolved ED stack; `/using-quspin` — **QuSpin** (Python), the fallback and the constrained-basis (`user_basis`) route.
 - Expert sources (distilled into this card): `docs/ed/interview.html` — practitioner interview; `docs/ed/review.html` — 2026 landscape: feasibility ceilings, 16-tool catalog, tricks list.
 - Track README: `tracks/ed/README.md`
@@ -134,7 +135,7 @@ Each knob with its default and the judgment behind it. Package-specific expressi
 
 | Knob | Default | Principle, effect & scaling |
 |---|---|---|
-| **Symmetries to impose** | all U(1) charges (Sz, particle number) always; spatial symmetries (translation, parity, point group, spin flip) when the paper uses them or the observable requires them | U(1) is free — it filters enumeration without changing basis states *(interview Q2.1)*. Each spatial symmetry divides D by ~N or \|G\| but adds representative/phase bookkeeping — **the place bugs enter** *(Q4.3)*, surfaced by the Hermiticity check *(Q4.4)*. Record every exact symmetry deliberately not used. Level statistics require *all* of them resolved |
+| **Symmetries to impose** | all U(1) charges (Sz, particle number) always; spatial symmetries (translation, parity, point group, spin flip) when the paper uses them or the observable requires them — inventory per `.knowledge/symmetry-cheatsheet.md` | U(1) is free — it filters enumeration without changing basis states *(interview Q2.1)*. Each spatial symmetry divides D by ~N or \|G\| but adds representative/phase bookkeeping — **the place bugs enter** *(Q4.3)*, surfaced by the Hermiticity check *(Q4.4)*. Record every exact symmetry deliberately not used. Level statistics require *all* of them resolved |
 | **Sector to diagonalize** | problem-driven *(Q2.3)* | low-energy target → the expected ground-state sector; ETH/scars → the largest sector, or the sector the initial/reference state lives in; thermodynamics → all sectors, summed with multiplicities. Wrong sector = a correct answer to the wrong problem |
 | **Boundary & cluster** | match the paper; PBC for momentum-resolved data and level statistics | problem-driven *(Q3.1–3.2)*: 2D cluster choice fixes aspect ratio, allowed momenta, point group — it is part of the physics, not a numerical detail. Twisted BC add momentum resolution (more k-points) at the cost of complex H *(Q9.3)* |
 | **Solver knobs per route** | Lanczos tolerance ~1e-12, iterations until the residual beats the observable tolerance; reorthogonalization **off for the ground state, full/selective for excited states and spectra**; FTLM/TPQ: R = 20–100, M_L = 50–100, more R at low T; KPM: order M sets resolution ≈ bandwidth/M, Jackson kernel; interior: explicit window + filter degree or LU memory budget | ghosts (spurious eigenvalue copies) appear exactly when many eigenpairs are pulled without reorthogonalization; FTLM/TPQ error ∝ 1/√(R·D) — check FTLM ≈ TPQ; interior solves are fragile without an explicit budget |
@@ -170,7 +171,7 @@ Generic methodology; the derivations live in `references/ed-methodology.md` — 
 ### Pitfalls
 
 - **Unresolved symmetries** — level statistics from mixed sectors are meaningless; degeneracies and zero-energy subspaces (PXP) must be handled before gap ratios.
-- **Basis convention drift** — spin vs Pauli normalization, fermion ordering, site indexing must match the model card; a factor-of-2 in couplings is the classic wrong-first-energy.
+- **Basis convention drift** — spin vs Pauli normalization, fermion ordering, site indexing must match `.knowledge/conventions.md` and the model card; a factor-of-2 in couplings is the classic wrong-first-energy.
 - **Symmetry-phase bugs** — representative mapping and character phases in projected bases are the most common silent failure; non-Hermiticity is how they surface *(interview Q4.4; review tricks)*.
 - **Dense overuse** — building H densely when only extremal states are needed wastes O(D²) memory; matrix-free Lanczos is the default beyond small blocks.
 - **Lanczos ghosts** — repeated spurious eigenvalues when pulling many states without reorthogonalization.

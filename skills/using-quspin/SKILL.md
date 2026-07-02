@@ -1,6 +1,6 @@
 ---
 name: using-quspin
-description: Use when choosing or running QuSpin as the Python fallback for exact diagonalization, constrained bases via user_basis, spin-chain ED examples, or QuSpin setup failures.
+description: Use when choosing or running QuSpin as the Python fallback for exact diagonalization, constrained-basis ED, spin-chain ED examples, or QuSpin setup failures.
 ---
 
 # QuSpin
