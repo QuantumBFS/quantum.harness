@@ -183,6 +183,7 @@ Print before diagonalizing, in this order:
 
 - **Benchmark menu** — exactly solvable results (2-site singlet, Bethe ansatz; values in `references/ed-methodology.md` §Validation and `.knowledge/limits.md`); free-particle / zero-coupling results; results from an independent method, or a dense/sparse cross-check on a smaller block. Why this is the sharp check: solver diagnostics only prove the matrix *as given* was solved — an external benchmark is what catches a wrong matrix (a run can converge cleanly on the wrong H).
 - **Residual** ‖H·ψ − E·ψ‖ for every reported eigenpair; **symmetry expectation values** of all imposed quantum numbers on returned states.
+- **Observable normalization** — the plotted quantity on the paper's exact scale convention (per-site vs total, spin-½ vs Pauli factors of 2, 1/N counts in structure factors); a constant-factor offset from the paper's curve is the fingerprint of a normalization mismatch, not physics.
 - **SU(2) multiplet check** where applicable; **sum rules** for spectral functions and η→0 stability; **FTLM ≈ TPQ** within error bars for finite-T.
 - **Level statistics** only within one fully resolved sector, degeneracies removed.
 

@@ -29,7 +29,7 @@ How to express each method decision in QuSpin, and what only QuSpin can answer.
 - **Basis class**: `*_basis_1d` for chains (built-in symmetry keywords), `*_basis_general` for any lattice/dimension (symmetries as permutation maps). Charges: `Nup`/`m` (spin), `Nf` (fermions, tuple for spinful), `Nb` (bosons). **`pauli` flag**: `spin_basis_1d` defaults to Pauli matrices — set `pauli=False` for textbook spin-½ operators, or every coupling silently gains a factor of 2 per operator.
 - **Symmetry blocks**: `kblock` (with `a` sites per unit cell), `pblock`, `zblock`, `pzblock`, sublattice `zAblock`/`zBblock` — one sector each, only for symmetries H actually has. For k ≠ 0, π QuSpin switches to real semi-momentum states when `kblock` and `pblock` are combined.
 - **Constrained bases (`user_basis`)**: the clean route for PXP/dimer/Rydberg constraints — a Numba-compiled precheck function enumerates only legal states. Check `basis.Ns` against the exact combinatorial count (the method card's first mid-run check) before anything downstream.
-- **Operators**: `static`/`dynamic` lists of `[operator string, site-coupling list]`; the k-th string character acts on the k-th site index per row. Add the Hermitian-conjugate string explicitly (`"+-"` needs `"-+"`) or QuSpin raises. dtype: `float64` unless a complex block (`kblock` ≠ 0, π) or complex coupling forces `complex128`. Keep `check_herm` / `check_symm` on while developing — they are the Hermiticity diagnostic; disable only in the final timed run.
+- **Operators**: `static`/`dynamic` lists of `[operator string, site-coupling list]`; the k-th string character acts on the k-th site index per row. Add the Hermitian-conjugate string explicitly (`"+-"` needs `"-+"`) or QuSpin raises. dtype: `float64` unless a complex block (`kblock` ≠ 0, π) or complex coupling forces `complex128`. Keep `check_herm` / `check_symm` on — they are the Hermiticity diagnostic and run once at construction.
 - **Solver calls**: `H.eigh()` dense full spectrum; `H.eigsh(k=…, which="SA")` Lanczos low-lying; `eigsh(sigma=…)` shift-invert interior one-liner; `expm_multiply_parallel` / `H.evolve` for Krylov dynamics; example 21 is the FTLM reference implementation (R ≈ 100, bootstrap errors).
 - **Diagnostics before diagonalizing**: print `basis.Ns`, the sector labels, and the term count; on a tiny system compare against a dense brute-force build, and against `/using-xdiag` when both express the target.
 
@@ -43,7 +43,7 @@ Package-level values only; what each route needs is the method card's call.
 | `dtype` | real vs complex storage (memory ×2) | `float64`; `complex128` only when the block or couplings force it |
 | `k` (in `eigsh`) | number of Lanczos eigenpairs | the states the figure needs; ARPACK wants `k ≪ Ns` |
 | `sigma` | shift-invert target energy | interior windows only, with the memory budget stated |
-| `check_herm`, `check_symm`, `check_pcon` | construction-time diagnostics | on during development, off only in the final timed run |
+| `check_herm`, `check_symm`, `check_pcon` | construction-time diagnostics | keep on; they run once at construction |
 | Threads | MKL/OpenBLAS OpenMP under the hood | record the thread env (`OMP_NUM_THREADS`, MKL) in manifests |
 
 ## Code shape
