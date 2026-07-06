@@ -18,7 +18,7 @@ cluster-jobs = { type = "local" }       # student-facing safe submit/manage/down
 setup-cluster = { type = "local" }      # build unified TOML profile + probe resources + seed safety limits
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
 reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
-track-starter = { type = "local" }      # choose a challenge-track paper, then hand off to reproduce-paper
+beginner-training = { type = "local" }  # 5-track guided training; Track 2 absorbs the old track-starter flow
 report = { type = "local" }             # render report.json into a self-contained HTML report (stdlib only)
 
 # Skill tooling

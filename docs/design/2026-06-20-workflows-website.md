@@ -3,6 +3,10 @@
 Date: 2026-06-20
 Status: approved (brainstorming)
 
+> **Superseded (2026-07-06):** the tabbed layout and `/track-starter` step were
+> replaced by the funnel redesign + `/beginner-training` (see
+> `docs/superpowers/specs/2026-07-06-beginner-training-and-website-design.md`, local).
+
 ## Goal
 
 A simple, self-contained website that introduces the harness's **recommended

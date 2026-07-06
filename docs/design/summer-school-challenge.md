@@ -12,7 +12,7 @@ Hefei National Laboratory, ~70 graduate students, 7 method tracks). Four phases 
 student: pick a track → onboard by reproducing a reference result → go *beyond* it as a
 challenge PR → present to advisors for prizes.
 
-**Gap.** The harness already covers setup (`/onboard`), track choice (`/track-starter`),
+**Gap.** The harness already covers setup (`/onboard`), track choice (`/beginner-training` (Track 2)),
 reproduction (`/reproduce-paper`), and reporting (`/challenge-report`). Nothing drives
 the phase between reproduction and reporting — the part where the student must invent and
 execute a challenge. There is also no mentorship layer for a stuck student.
@@ -54,7 +54,7 @@ the sci-brain set); there is no external product to price.
 | Skill | Role | Relationship to `/challenge` |
 |---|---|---|
 | `/onboard` | first-touch setup, audience calibration | upstream; mentor borrows its audience handling |
-| `/track-starter` | pick track + reproduction target | upstream |
+| `/beginner-training` (Track 2) | pick track + reproduction target | upstream |
 | `/reproduce-paper` | reproduce the reference (phase 2) | upstream; `/challenge` begins where it ends |
 | `/challenge-report` | report + submission-cleanliness gate | downstream; `/challenge` hands off to it |
 | `/solve` | ad-hoc problem-solving loop | reused inside the attempt driver |
