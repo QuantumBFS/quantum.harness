@@ -16,7 +16,7 @@ now save the later tracks from stalling thirty minutes in on a missing piece.
 | Check | Verifies | Needed by |
 |---|---|---|
 | Step 1 — harness skills | Ion-managed skills installed and in sync | every track |
-| Step 2 — pdf-render | PDF → markdown library importable | Track 3 (`/download-ref`) |
+| Step 2 — pdf-render | PDF → markdown library importable | Tracks 2 & 3 (paper reading, `/download-ref`) |
 | Step 3 — Julia environment | `julia-env` project instantiates | Track 2 (method stacks) |
 | Step 4 — GitHub CLI | `gh` logged in, `QuantumBFS/qsym-rs` visible | Track 4 (issues, PRs) |
 
