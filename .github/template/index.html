@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quantum Many-Body Harness — Recommended Workflows</title>
+<title>Quantum Many-Body Harness — Get Started</title>
 <style>
   :root{
     --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --ink:#e7e9ee; --mut:#9aa3b2;
@@ -23,28 +23,48 @@
           font-size:.74rem;margin-bottom:10px}
   h1{font-size:2.15rem;margin:.1em 0 .35em;line-height:1.15}
   .lead{color:var(--mut);font-size:1.08rem;max-width:74ch}
-  .pick{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
-  .pick a{flex:1 1 280px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
-          padding:16px 18px;color:var(--ink);transition:border-color .15s,transform .15s}
-  .pick a:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none}
-  .pick .t{font-weight:700;font-size:1.02rem}
-  .pick .d{color:var(--mut);font-size:.9rem;margin-top:4px}
-  .pick .n{color:var(--accent);font-weight:700;font-size:.8rem}
+  .notice{font-size:.8rem;color:var(--mut);border:1px solid var(--line);border-radius:8px;
+          padding:6px 10px;display:inline-block;margin-top:14px}
 
-.tabs{display:flex;gap:6px;margin-top:30px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  .tab{appearance:none;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:9px;
-       white-space:nowrap;color:var(--mut);font-family:var(--sans);font-size:.95rem;font-weight:600;
-       padding:14px 16px;border-radius:10px 10px 0 0;border-bottom:2px solid transparent;
-       margin-bottom:-1px;transition:color .15s,border-color .15s,background .15s}
-  .tab:hover{color:var(--ink);background:var(--panel)}
-  .tab.active{color:var(--ink);border-bottom-color:var(--accent);background:var(--panel)}
-  .tnum{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;flex:none;
-        border-radius:50%;background:var(--line);color:var(--mut);font-family:var(--mono);
-        font-size:.72rem;font-weight:700}
-  .tab.active .tnum{background:var(--accent);color:#fff}
-  .tabpanel{display:none}
-  .tabpanel.active{display:block;animation:fade .2s ease}
-  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  /* ① get-started numbered steps */
+  ol.start{counter-reset:s;list-style:none;padding:0;margin:20px 0 8px}
+  ol.start>li{position:relative;padding:0 0 20px 46px;max-width:74ch}
+  ol.start>li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:-1px;
+          width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+          font-family:var(--mono);font-size:.85rem;font-weight:700;
+          display:flex;align-items:center;justify-content:center}
+  ol.start pre{background:#0b0d13;border:1px solid var(--line);border-radius:10px;
+          padding:11px 14px;margin:9px 0 0;overflow-x:auto}
+  ol.start pre code{font-family:var(--mono);font-size:.84rem;color:var(--accent2)}
+  ol.start small{color:var(--mut)}
+
+  /* ② training-path track cards */
+  .trackrow{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+  .trackcard{flex:1 1 0;min-width:160px;background:var(--panel);border:1px solid var(--line);
+          border-radius:10px;padding:12px 13px}
+  .trackcard.cap{border-color:var(--accent)}
+  .trackcard b{display:block;font-size:.92rem}
+  .trackcard small{display:block;color:var(--mut);font-size:.78rem;margin-top:4px}
+  .trackcard .chk{display:block;color:var(--accent2);font-size:.72rem;margin-top:8px;
+          font-family:var(--mono);line-height:1.4}
+
+  /* ③ use-case cards */
+  details.usecase{border:1px solid var(--line);border-radius:12px;margin:16px 0;
+          background:rgba(23,26,35,.5)}
+  details.usecase>summary{cursor:pointer;padding:15px 18px;list-style:none;
+          display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  details.usecase>summary::-webkit-details-marker{display:none}
+  details.usecase>summary::before{content:"▸";color:var(--accent);font-size:1rem;flex:none}
+  details.usecase[open]>summary::before{content:"▾"}
+  details.usecase>summary .t{font-size:1.22rem;font-weight:700}
+  details.usecase>summary:hover .t{color:var(--accent2)}
+  details.usecase>.inner{padding:0 18px 20px}
+
+  /* footer method-zoo table */
+  table.zoo{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:10px}
+  table.zoo th,table.zoo td{border-bottom:1px solid var(--line);padding:7px 10px;
+          text-align:left;vertical-align:top}
+  table.zoo th{color:var(--ink)}
 
   section.flow{padding:34px 0 8px;border-bottom:1px solid var(--line)}
   .sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -122,32 +142,72 @@
 
 <header>
   <div class="kicker">Quantum Many-Body Harness</div>
-<h1>Three recommended workflows, end to end</h1>
+<h1>From first clone to your own discovery</h1>
   <p class="lead">A problem-solving harness for quantum many-body lattice problems — ground-state and
   finite-temperature — plus the scientific-research skills around it. You drive it in plain language;
   it routes to the right method, runs the calculation, verifies the result, and hands you a script,
-  plot, or document you can rerun. Below are the three journeys the harness is built around, each shown
-  as a <b>real, captured run</b> — the transcripts, plots, and reports are actual output, not mockups.</p>
-
-  <div class="tabs" role="tablist">
-    <button class="tab active" role="tab" aria-controls="panel-summer" id="tab-summer">
-      <span class="tnum">1</span> Summer school: reproduce &amp; challenge
-    </button>
-    <button class="tab" role="tab" aria-controls="panel-solve" id="tab-solve">
-      <span class="tnum">2</span> Computational methods: solve a model
-    </button>
-    <button class="tab" role="tab" aria-controls="panel-scibrain" id="tab-scibrain">
-      <span class="tnum">3</span> sci-brain: survey &amp; brainstorm ideas
-    </button>
-  </div>
+  plot, or document you can rerun. Everything below the fold is a <b>real, captured run</b> — the
+  transcripts, plots, and reports are actual output, not mockups.</p>
+  <p class="notice">Early stage — contributors welcome; formal release planned for August 2026.</p>
 </header>
 
-<!-- ============================ WORKFLOW 1 ============================ -->
-<section class="flow tabpanel active" id="panel-summer" role="tabpanel" aria-labelledby="tab-summer">
-  <div class="sec-h">
-    <h2>Workflow 1 — Reproduce, then challenge</h2>
-    <span class="badge">Harnessing Quantum 2026</span>
+<!-- ============================ ① GET STARTED ============================ -->
+<section class="flow" id="get-started">
+  <div class="sec-h"><h2>① Get started</h2></div>
+  <p class="sec-sub">Three steps from nothing to a guided training session. No prior experience with
+  agents, Julia, or many-body methods assumed.</p>
+  <ol class="start">
+    <li><b>Install an agent CLI</b> — Claude Code, Codex CLI, or OpenCode.
+        <small>Don't have one? Follow the
+        <a href="https://giggleliu.github.io/summer-school-2026/guide#setup">summer-school setup guide</a>.</small></li>
+    <li><b>Clone the harness and install its skills.</b>
+<pre><code>git clone https://github.com/QuantumBFS/quantum.harness
+cd quantum.harness
+make skills</code></pre></li>
+    <li><b>Start the guided training.</b> Paste into your agent:
+<pre><code>/beginner-training</code></pre>
+        <small>It asks which track you want, then walks it one confirmed step at a time — every command
+        is explained before it runs, and it never auto-solves for you.</small></li>
+  </ol>
+</section>
+
+<!-- ============================ ② TRAINING PATH ============================ -->
+<section class="flow" id="training-path">
+  <div class="sec-h"><h2>② Your training path</h2></div>
+  <p class="sec-sub">Five tracks, recommended in order — but each stands alone, so start anywhere.
+  Every track ends with a <b>checkpoint</b> that proves the result is trustworthy instead of just
+  claiming it.</p>
+  <div class="trackrow">
+    <div class="trackcard"><b>1 · Setup check</b>
+      <small>~0.5 h — verify skills, Python, Julia, and the GitHub CLI before you depend on them</small>
+      <span class="chk">✓ a deliberate failure that must fail</span></div>
+    <div class="trackcard"><b>2 · Reproduce a paper</b>
+      <small>~2–4 h — pick a method track, regenerate its published figure at laptop size</small>
+      <span class="chk">✓ signature match + wrong-input control</span></div>
+    <div class="trackcard"><b>3 · Conduct a literature survey</b>
+      <small>~1–2 h — build a real reference library with /download-ref and /survey</small>
+      <span class="chk">✓ bogus arXiv ID rejected; index counts match</span></div>
+    <div class="trackcard"><b>4 · Develop code like an expert</b>
+      <small>~3–5 h — take a starter issue to a reviewed PR: brainstorm → plan → TDD → review</small>
+      <span class="chk">✓ the PR + its attached self-review</span></div>
+    <div class="trackcard cap"><b>5 · Go beyond</b>
+      <small>capstone — extend the paper with your own time-boxed challenge and ship the report</small>
+      <span class="chk">✓ every number traces to a real run</span></div>
   </div>
+</section>
+
+<!-- ============================ ③ USE CASES ============================ -->
+<section class="flow" id="use-cases">
+  <div class="sec-h"><h2>③ What people use it for</h2></div>
+  <p class="sec-sub">Three journeys, each shown as a real captured run — open a card for the full
+  annotated transcript and the actual plot.</p>
+
+<details class="usecase" id="panel-summer" open>
+  <summary>
+    <span class="t">Reproduce &amp; challenge — the summer-school journey</span>
+    <span class="badge">Harnessing Quantum 2026</span>
+  </summary>
+  <div class="inner">
   <p class="sec-sub">The summer-school journey. You arrive on a method track, reproduce its reference
   result to calibrate yourself and the tooling, then invent a feasible <em>challenge</em> that goes
   beyond the paper and ship it. The harness guides each phase and teaches as it goes — it never
@@ -156,7 +216,7 @@
   <div class="strip">
     <div class="step"><code>/onboard</code><small>set up the stack</small></div>
     <div class="arrow">→</div>
-    <div class="step"><code>/track-starter</code><small>pick a track</small></div>
+    <div class="step"><code>/beginner-training</code><small>guided training: pick a track</small></div>
     <div class="arrow">→</div>
     <div class="step"><code>/reproduce-paper</code><small>reproduce the reference</small></div>
     <div class="arrow">→</div>
@@ -168,9 +228,10 @@
   <div class="grid">
     <div class="term">
       <div class="bar"><span class="dot" style="background:#ff5f56"></span><span class="dot" style="background:#ffbd2e"></span><span class="dot" style="background:#27c93f"></span>&nbsp; Harnessing Quantum — Exact Diagonalization track</div>
-<div class="body"><span class="u">&gt; /track-starter</span>
+<div class="body"><span class="u">&gt; /beginner-training</span>
 
-<span class="sys"># the harness lists the available tracks and their reference papers</span>
+<span class="sys"># Track 2 — Reproduce a paper: the harness lists the method tracks
+# and their reference papers</span>
 <span class="out">Track  Title                      Reference target
 ed     Exact Diagonalization      Turner et al., "Quantum many-body
                                   scars," Nat. Phys. 14, 745 (2018)</span>
@@ -229,14 +290,15 @@ the help desk for go/no-go):</span>
     <span class="num">3.3&nbsp;s</span> with residuals of <span class="num">~1e-14</span> — solid ground to
     launch a challenge from.
   </div>
-</section>
-
-<!-- ============================ WORKFLOW 2 ============================ -->
-<section class="flow tabpanel" id="panel-solve" role="tabpanel" aria-labelledby="tab-solve">
-  <div class="sec-h">
-    <h2>Workflow 2 — Bring your own problem</h2>
-    <span class="badge">Computational methods</span>
   </div>
+</details>
+
+<details class="usecase" id="panel-solve">
+  <summary>
+    <span class="t">Bring your own problem — solve a model end to end</span>
+    <span class="badge">Computational methods</span>
+  </summary>
+  <div class="inner">
   <p class="sec-sub">The everyday path. State a concrete model in plain language; the harness infers the
   defaults, recommends a method, runs it, and verifies against a known limit. When the system gets too
   big for your laptop, the same run ships to the cluster unchanged. Heavy compute is a branch inside this
@@ -308,14 +370,15 @@ Script: <span class="pill">scripts/j1j2_heisenberg_dmrg.jl</span></span>
     (<span class="num">|error| = 5.6e-16</span>). The cluster is the same workflow with a bigger N, not a
     detour.
   </div>
-</section>
-
-<!-- ============================ WORKFLOW 3 — SCI-BRAIN ============================ -->
-<section class="flow tabpanel" id="panel-scibrain" role="tabpanel" aria-labelledby="tab-scibrain">
-  <div class="sec-h">
-    <h2>Workflow 3 — Scientific research skills</h2>
-    <span class="badge">sci-brain</span>
   </div>
+</details>
+
+<details class="usecase" id="panel-scibrain">
+  <summary>
+    <span class="t">Survey &amp; brainstorm — the sci-brain research skills</span>
+    <span class="badge">sci-brain</span>
+  </summary>
+  <div class="inner">
   <p class="sec-sub">The harness doesn't stop at numbers. The bundled <b>sci-brain</b> skills cover the
   research work <em>around</em> a calculation: mapping a field and writing it up, and brainstorming new
   directions with AI agents. Two flows below — a survey you can hand to a team, and an ideas report you
@@ -466,13 +529,29 @@ to know and I'll fetch it.</span>
       knows how it could fail. You stay the thinker; the agents fetch and challenge.
     </div>
   </div>
+  </div>
+</details>
 </section>
 
 <!-- ============================ FOOTER ============================ -->
 <footer>
   <h3>Where to start</h3>
-  <p>New here? Just say what you want — <code>/onboard</code> sets up the stack and routes you. Or jump
-  straight in: name a model to enter Workflow&nbsp;2, or say <code>/track-starter</code> for Workflow&nbsp;1.</p>
+  <p>New here? Run <code>/beginner-training</code> and pick a track. Already know what you want?
+  Name a model to solve it directly, or say <code>/onboard</code> to set up the stack first.</p>
+
+  <h3 style="margin-top:24px">Methods &amp; the experts behind them</h3>
+  <p style="font-size:.86rem">Each method's guidance is curated by a world-leading expert in that
+  computational approach — what to compute, which checks matter, where the common failures hide.</p>
+  <table class="zoo">
+    <tr><th>Method</th><th>Expert contributor</th><th>Skill</th></tr>
+    <tr><td>Exact diagonalization</td><td><a href="https://scholar.google.com/citations?user=LZpS-T0AAAAJ">Chen Cheng (程晨)</a></td><td><code>/method-ed</code></td></tr>
+    <tr><td>MPS / LTRG / DMRG / TEBD</td><td><a href="https://scholar.google.com/citations?user=7wiebe8AAAAJ">Wei Li (李伟)</a></td><td><code>/method-mps</code> · <code>/method-ltrg</code></td></tr>
+    <tr><td>PEPS / CTMRG</td><td><a href="https://scholar.google.com/citations?user=_8KbQtEAAAAJ">Hai-Jun Liao (廖海军)</a></td><td><code>/method-peps</code></td></tr>
+    <tr><td>Quantum Monte Carlo</td><td><a href="https://scholar.google.com/citations?user=ikqa-0IAAAAJ">Ming-Pu Qin (秦明普)</a></td><td><code>/method-qmc</code></td></tr>
+    <tr><td>Monte Carlo renormalization group</td><td><a href="https://scholar.google.com/citations?user=D8sgaMwAAAAJ">Yan-Tao Wu (武琰涛)</a></td><td><code>/method-mcrg</code></td></tr>
+    <tr><td>Quantum circuit simulation</td><td><a href="https://scholar.google.com/citations?user=Ut8nVqIAAAAJ">Shi-Xin Zhang (张士欣)</a></td><td><code>/method-qcs</code></td></tr>
+    <tr><td>AI agent &amp; knowledge base</td><td><a href="https://scholar.google.com/citations?user=YItDGoIAAAAJ">Kun Chen (陈锟)</a>, <a href="https://scholar.google.com/citations?user=4edw228AAAAJ">Jin-Guo Liu (刘金国)</a></td><td><code>tracks/agent-kb</code></td></tr>
+  </table>
 
   <h3 style="margin-top:24px">What every run leaves behind</h3>
   <ul class="files">
@@ -491,24 +570,5 @@ to know and I'll fetch it.</span>
 </footer>
 
 </div>
-<script>
-(function(){
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-  function activate(id){
-    tabs.forEach(function(t){
-      var on = t.getAttribute('aria-controls') === id;
-      t.classList.toggle('active', on);
-      document.getElementById(t.getAttribute('aria-controls')).classList.toggle('active', on);
-    });
-    if (history.replaceState) history.replaceState(null, '', '#' + id);
-  }
-  tabs.forEach(function(t){
-    t.addEventListener('click', function(){ activate(t.getAttribute('aria-controls')); });
-  });
-  // honor a deep link like #panel-solve on load
-  var h = location.hash.replace('#','');
-  if (h && document.getElementById(h)) activate(h);
-})();
-</script>
 </body>
 </html>
