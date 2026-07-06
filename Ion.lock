@@ -7,6 +7,12 @@ commit = "20b3d503700656f847e6de873753335bf90e63e3"
 checksum = "sha256:7e5665b1d72138d28e50b371b63ee05b546bef14c16a949b1b1fc1d82bccd326"
 
 [[skill]]
+name = "beginner-training"
+source = ""
+kind = "local"
+checksum = "sha256:811b681ce4851843b8cf3875823ea1d6fefad0786b6232cf9bbb55d1ae51ebd8"
+
+[[skill]]
 name = "brainstorming"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
@@ -30,7 +36,7 @@ checksum = "sha256:f11b2579ba73d96f25a68e02f833f7129a0ac04b65ba711419fa8abe956dd
 name = "challenge-report"
 source = ""
 kind = "local"
-checksum = "sha256:aae245341b6ffc478f680fe0f13b41e3c3ff39744cf4aa3b11648dabfe2983bc"
+checksum = "sha256:cef4d759f2c8eaf294430f594f5c1620e9ef82b1c669f16f7255e4e70c7441b2"
 
 [[skill]]
 name = "cluster-jobs"
@@ -43,8 +49,8 @@ name = "context7-cli"
 source = "https://github.com/upstash/context7.git"
 kind = "git"
 path = "skills/context7-cli"
-commit = "8a6c029f659a5caa0702a1fd76016828a3c22398"
-checksum = "sha256:3be2d8debb56f5c3a339aeb2f4d2247d274cab132b838f29f28124b77ef1cc0b"
+commit = "98baa58d3625e2529e000f1c9f658fff25081bbb"
+checksum = "sha256:775d76839d2304da676d7e2a2c46997b803482c49de322c8b999d512721183e7"
 
 [[skill]]
 name = "cross-method-check"
@@ -64,7 +70,7 @@ checksum = "sha256:e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769
 name = "download-ref"
 source = ""
 kind = "local"
-checksum = "sha256:c735cdde5775cf475afb2742023faab0b4723260758c31be652e2a5db0aa3edf"
+checksum = "sha256:d6be3a2980d736fed9ca1a90553e5b2205f7913579d0ed7b1d90c412b3a533ad"
 
 [[skill]]
 name = "executing-plans"
@@ -108,7 +114,7 @@ checksum = "sha256:c44e782cd1d086cb9e73017229fb581d811776150046a672e15ae21819d15
 name = "ion-cli"
 source = ""
 kind = "local"
-checksum = "sha256:bd5d3a00554413b17ddca6c53aa2f639a7a0c5bdfd8d300126ea6a471d5d669c"
+checksum = "sha256:4207f3d4f43e93120acd5fdc26c60badab389e59d1a2caab74724ab0776a49ff"
 
 [[skill]]
 name = "method-dfpt"
@@ -174,7 +180,7 @@ checksum = "sha256:30fda9506a9d5a9731e1cea8890977bf08e23bbbbc3c2ab999d3367446f80
 name = "method-vmc"
 source = ""
 kind = "local"
-checksum = "sha256:058c6affa22b014a2c57d5b709e6b9eb049504b22ee0889567f88728c58bfe6c"
+checksum = "sha256:4933f51cd996c5190babcaf5b85a8ea9ec0d8b5aca6d8888713f4bc4f2694263"
 
 [[skill]]
 name = "model"
@@ -218,7 +224,7 @@ checksum = "sha256:d3642e0acc77a57896014cfff02085381091b4b1f1b802c7dced6c82ce3de
 name = "reproduce-paper"
 source = ""
 kind = "local"
-checksum = "sha256:2b8e51b1aa960275903e8d24ada83ef1c42cd9bf67ca1384b1a3f8d4f189260c"
+checksum = "sha256:517f561fa60e0bbb9ec659c6c1bc821365624ded318e1348d25d722af1976eca"
 
 [[skill]]
 name = "requesting-code-review"
@@ -239,7 +245,7 @@ name = "scientific-visualization"
 source = "https://github.com/HughYau/AcademicForge.git"
 kind = "git"
 path = "scientific-visualization"
-commit = "410d5b29ab28a96cbb5915114df872b2cbe7d2d3"
+commit = "6cbb818a4a822a5e1e856b18919da7484ff58dd4"
 checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390bc74"
 
 [[skill]]
@@ -291,12 +297,6 @@ kind = "git"
 path = "skills/test-driven-development"
 commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
 checksum = "sha256:126f1ebf6ccd414f42544f6e83d8cc5adb089e1108eaffb7c400701e37eecd9f"
-
-[[skill]]
-name = "track-starter"
-source = ""
-kind = "local"
-checksum = "sha256:2498080b89eff8184a943f649c744405930c6da771264a93808d7ade1fcdfae4"
 
 [[skill]]
 name = "using-cpmc-lab"
