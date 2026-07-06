@@ -34,8 +34,14 @@
           font-family:var(--mono);font-size:.85rem;font-weight:700;
           display:flex;align-items:center;justify-content:center}
   ol.start pre{background:#0b0d13;border:1px solid var(--line);border-radius:10px;
-          padding:11px 14px;margin:9px 0 0;overflow-x:auto}
+          padding:11px 14px;margin:9px 0 0;overflow-x:auto;position:relative}
   ol.start pre code{font-family:var(--mono);font-size:.84rem;color:var(--accent2)}
+  .copybtn{position:absolute;top:7px;right:7px;appearance:none;cursor:pointer;
+          background:var(--panel);color:var(--mut);border:1px solid var(--line);
+          border-radius:7px;font-family:var(--mono);font-size:.72rem;padding:4px 9px;
+          transition:color .15s,border-color .15s}
+  .copybtn:hover{color:var(--ink);border-color:var(--accent)}
+  .copybtn.ok{color:var(--ok);border-color:var(--ok)}
   ol.start small{color:var(--mut)}
 
   /* ② training-path track cards */
@@ -570,5 +576,26 @@ to know and I'll fetch it.</span>
 </footer>
 
 </div>
+<script>
+document.querySelectorAll('ol.start pre').forEach(function(pre){
+  var btn = document.createElement('button');
+  btn.className = 'copybtn';
+  btn.textContent = 'copy';
+  btn.setAttribute('aria-label', 'Copy to clipboard');
+  btn.addEventListener('click', function(){
+    var text = pre.querySelector('code').textContent;
+    function done(){ btn.textContent = 'copied ✓'; btn.classList.add('ok');
+      setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); done();
+    }
+  });
+  pre.appendChild(btn);
+});
+</script>
 </body>
 </html>
