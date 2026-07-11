@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "esbuild": "^0.21.0",
-    "three": "^0.165.0"
+    "esbuild": "0.21.5",
+    "three": "0.165.0"
   }
 }
