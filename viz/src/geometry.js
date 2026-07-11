@@ -198,7 +198,7 @@ export function buildLattice(scene) {
         nodes.setMatrixAt(k, M);
       }
     });
-    nodes.instanceColor.needsUpdate = true;
+    if (nodes.instanceColor) nodes.instanceColor.needsUpdate = true;
     if (scene.encode.nodes.sizeByValue) nodes.instanceMatrix.needsUpdate = true;
     solidE.forEach((ei, k) => {
       const e = scene.edges[ei];
@@ -211,7 +211,7 @@ export function buildLattice(scene) {
       edges.setColorAt(k, C);
       if (scene.encode.edges.widthByValue) placeEdge(k, ei, val);
     });
-    edges.instanceColor.needsUpdate = true;
+    if (edges.instanceColor) edges.instanceColor.needsUpdate = true;
     if (scene.encode.edges.widthByValue) edges.instanceMatrix.needsUpdate = true;
   }
 

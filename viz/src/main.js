@@ -62,11 +62,13 @@ export function mount(el, sceneJson) {
   injectCSS();
   const errors = validateScene(sceneJson);
   if (errors.length) { errorBox(el, errors); return { dispose() {} }; }
+  let view = null;
+  try {
   const scene = applyDefaults(sceneJson);
   const api = buildLattice(scene);
 
   const height = parseInt(el.dataset.height || "420", 10) || 420;
-  const view = document.createElement("div");
+  view = document.createElement("div");
   view.className = "lattix-view";
   view.style.height = `${height}px`;
   el.appendChild(view);
@@ -183,6 +185,11 @@ export function mount(el, sceneJson) {
       el.removeChild(view);
     },
   };
+  } catch (err) {
+    if (view && view.parentNode === el) el.removeChild(view);
+    errorBox(el, [`viewer failed: ${err.message}`]);
+    return { dispose() {} };
+  }
 }
 
 export function mountAll(root = document) {
@@ -195,6 +202,7 @@ export function mountAll(root = document) {
     let scene;
     try { scene = JSON.parse(tag.textContent); }
     catch (e) { errorBox(div, [`scene JSON does not parse: ${e.message}`]); return; }
-    mount(div, scene);
+    try { mount(div, scene); }
+    catch (e) { errorBox(div, [`viewer failed: ${e.message}`]); }
   });
 }
