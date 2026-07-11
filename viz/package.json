@@ -1,0 +1,9 @@
+{
+  "name": "lattix",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "three": "^0.165.0"
+  }
+}
