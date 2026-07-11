@@ -47,22 +47,34 @@ export function attachPicking(view, renderer, getCamera, scene, api) {
     return null;
   }
 
-  renderer.domElement.addEventListener("pointermove", (ev) => {
+  function onMove(ev) {
     const hit = cast(ev);
     if (!hit) { tip.style.display = "none"; return; }
     tip.textContent = describe(scene, hit);
     tip.style.display = "block";
     tip.style.left = `${ev.clientX + 14}px`;
     tip.style.top = `${ev.clientY + 10}px`;
-  });
-  renderer.domElement.addEventListener("pointerleave", () => {
+  }
+  function onLeave() {
     tip.style.display = "none";
-  });
+  }
   let selected = null;
-  renderer.domElement.addEventListener("click", (ev) => {
+  function onClick(ev) {
     const hit = cast(ev);
     selected = hit && hit.kind === "node" && hit.index !== selected
       ? hit.index : null;
     api.setHighlight(selected);
-  });
+  }
+  renderer.domElement.addEventListener("pointermove", onMove);
+  renderer.domElement.addEventListener("pointerleave", onLeave);
+  renderer.domElement.addEventListener("click", onClick);
+
+  return {
+    dispose() {
+      tip.remove();
+      renderer.domElement.removeEventListener("pointermove", onMove);
+      renderer.domElement.removeEventListener("pointerleave", onLeave);
+      renderer.domElement.removeEventListener("click", onClick);
+    },
+  };
 }

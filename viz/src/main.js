@@ -147,7 +147,7 @@ export function mount(el, sceneJson) {
   ui.appendChild(btns);
   view.appendChild(ui);
 
-  attachPicking(view, renderer, () => camera, scene, api);
+  const picking = attachPicking(view, renderer, () => camera, scene, api);
 
   let bar = null;
   if (scene.frames) bar = makeAnimationBar(view, scene, api);
@@ -180,6 +180,7 @@ export function mount(el, sceneJson) {
     dispose() {
       dead = true;
       ro.disconnect();
+      picking.dispose();
       if (bar) bar.dispose();
       renderer.dispose();
       el.removeChild(view);
