@@ -232,8 +232,10 @@ export function buildLattice(scene) {
 
   return {
     group, unit, bounds, nodeDomain, edgeDomain,
-    setNodeValues(vals) { curNodeVals = vals; paint(); },
-    setEdgeValues(vals) { curEdgeVals = vals; paint(); },
+    setNodeValues(vals) { curNodeVals = vals; paint();
+      if (this.onFrameValues) this.onFrameValues(curNodeVals, curEdgeVals); },
+    setEdgeValues(vals) { curEdgeVals = vals; paint();
+      if (this.onFrameValues) this.onFrameValues(curNodeVals, curEdgeVals); },
     setVectors,
     setHighlight(ni) { highlighted = ni; paint(); },
     setWrapMode(mode) { stubs.visible = mode !== "arc"; arcs.visible = mode === "arc"; },
