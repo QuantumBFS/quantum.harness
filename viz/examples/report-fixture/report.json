@@ -1,0 +1,25 @@
+{
+ "title": "Lattix report fixture",
+ "sections": [
+  {
+   "title": "Interactive views",
+   "blocks": [
+    {
+     "kind": "lattice3d",
+     "src": "scene.json",
+     "caption": "Interactive. $6\\times 6$ J1-J2 lattice with PBC."
+    },
+    {
+     "kind": "lattice3d",
+     "src": "scene.json",
+     "caption": "Second view \u2014 the JS bundle must appear only once."
+    },
+    {
+     "kind": "lattice3d",
+     "src": "missing.json",
+     "caption": "Deliberately missing scene."
+    }
+   ]
+  }
+ ]
+}
