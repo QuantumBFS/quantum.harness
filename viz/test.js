@@ -127,6 +127,17 @@ test("legendHTML renders colorbar gradient and type swatches", () => {
     [0, 1], [0, 1]), "");                              // nothing to show
 });
 
+test("legendHTML escapes attribute-breaking type colors", () => {
+  const s = applyDefaults({
+    nodes: [{ id: 0, pos: [0, 0, 0] }],
+    edges: [],
+    types: { X: { color: 'red" onmouseover="alert(1)' } },
+  });
+  const h = legendHTML(s, [0, 1], [0, 1]);
+  assert.ok(!h.includes('onmouseover="alert'));
+  assert.ok(h.includes("&quot;"));
+});
+
 test("sampleFrames discrete holds the floor frame and clamps", () => {
   const seq = [[0, 10], [2, 20], [4, 40]];
   assert.deepEqual(sampleFrames(seq, 1.9, false), [2, 20]);
