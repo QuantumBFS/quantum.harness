@@ -319,6 +319,9 @@ ul.flat{padding-left:20px;margin:6px 0} ul.flat li{margin:3px 0;font-size:13.5px
 .print-btn{position:fixed;top:16px;right:18px;font-family:var(--sans);font-size:12.5px;padding:7px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:5px;cursor:pointer}
 .print-btn:hover{border-color:var(--accent);color:var(--accent)}
 @media print{.print-btn,.toc,.toc-bar{display:none}.wrap{max-width:100%;padding:0}.figs{position:static;left:auto;transform:none;width:auto}.card,table,.verdict,.figbox{break-inside:avoid}}
+.lattix{position:relative;width:100%;margin:6px 0}
+.lattix-poster{display:none;width:100%}
+@media print{.lattix-poster{display:block}}
 """
 
 MIME = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
@@ -365,6 +368,33 @@ def figures_row(items, base_dir: Path) -> str:
             missing += (f'<p class="note">Image not embedded — '
                         f'<code>{esc(src)}</code> not found.</p>')
     return (f'<div class="figs">{"".join(figs)}</div>' if figs else "") + missing
+
+
+LATTIX_BUNDLE = Path(__file__).resolve().parent.parent.parent / "viz" / "dist" / "lattix.min.js"
+
+
+def lattice3d(b: dict, base_dir: Path) -> str:
+    base = base_dir.resolve()
+    src = b.get("src")
+    p = (base_dir / src).resolve() if src else None
+    if p is None or not (p.is_relative_to(base) and p.is_file()):
+        return (f'<p class="note">Interactive view not embedded — '
+                f'<code>{esc(src)}</code> not found.</p>')
+    try:
+        scene = json.dumps(json.loads(p.read_text()))
+    except ValueError:
+        return (f'<p class="note">Interactive view not embedded — '
+                f'<code>{esc(src)}</code> is not valid JSON.</p>')
+    scene = scene.replace("</", "<\\/")                  # keep </script> inert
+    h = b.get("height")
+    h = h if isinstance(h, int) and 200 <= h <= 1200 else 420
+    poster = ""
+    pp = (base_dir / b["poster"]).resolve() if b.get("poster") else None
+    if pp is not None and pp.is_relative_to(base) and pp.is_file():
+        poster = f'<img class="lattix-poster" src="{data_uri(pp)}" alt="">'
+    cap = f'<div class="cap">{mathify(b.get("caption"))}</div>' if b.get("caption") else ""
+    return (f'<div class="figbox"><div class="lattix" data-height="{h}">{poster}'
+            f'<script type="application/json">{scene}</script></div>{cap}</div>')
 
 
 def block(b: dict, base_dir: Path) -> str:
@@ -432,6 +462,8 @@ def block(b: dict, base_dir: Path) -> str:
         inner = "".join(block(c, base_dir) for c in b.get("blocks", []))
         title = f'<div class="title">{mathify(b["title"])}</div>' if b.get("title") else ""
         return f'<div class="card">{title}{inner}</div>' if title or inner else ""
+    if k == "lattice3d":
+        return lattice3d(b, base_dir)
     return ""
 
 
@@ -483,13 +515,23 @@ def render(doc: dict, base_dir: Path) -> str:
                "document.querySelectorAll('section[id]').forEach(function(s){o.observe(s)});})();</script>")
     else:
         rail = bar = spy = ""
+    lattix = ""
+    if 'class="lattix"' in body:                        # ≥1 lattice3d block rendered
+        if LATTIX_BUNDLE.is_file():
+            js = re.sub(r"</script", r"<\\/script", LATTIX_BUNDLE.read_text(),
+                        flags=re.I)
+            lattix = f"<script>{js}</script><script>Lattix.mountAll();</script>"
+        else:
+            body += ('<p class="note">Interactive views disabled — '
+                     '<code>viz/dist/lattix.min.js</code> not found; '
+                     'posters shown instead.</p>')
     footer = (f'<div class="footer">Generated {date.today().isoformat()}. '
               'Single file, no external assets, opens offline.</div>')
     return (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{esc(title)}</title><style>{STYLE}</style></head><body>'
             f'<button class="print-btn" onclick="window.print()">Save as PDF</button>'
-            f'<main class="wrap">{rail}{header}{bar}{body}{footer}</main>{spy}</body></html>\n')
+            f'<main class="wrap">{rail}{header}{bar}{body}{footer}</main>{spy}{lattix}</body></html>\n')
 
 
 def main():

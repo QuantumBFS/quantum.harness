@@ -42,6 +42,7 @@ Each block carries a `kind` plus its own fields; unknown kinds are skipped.
 | `badge` | `text`, `style` (`good`/`warn`/`neutral`) | a small pill |
 | `note` | `text`, `label?`, `style?` (`info`/`pending`) | a highlighted callout (`pending` is the dashed placeholder) |
 | `card` | `blocks`, `title?` | a bordered box grouping nested pieces |
+| `lattice3d` | `src`, `caption?`, `height?`, `poster?` | an interactive 3D lattice / tensor-network view from a scene JSON (schema: `viz/README.md`); `poster` is a static image used as the print fallback — always supply one |
 
 Figure `src` paths are relative to `<run-dir>`; a missing file degrades to a small note rather than failing.
 
@@ -61,3 +62,13 @@ Compact shape:
 An `equation` block's `tex` is a bare LaTeX equation and renders as a centered display block; any string may carry inline math in `$…$` (or display in `$$…$$`), plus `**bold**` and `==highlight==` (yellow marker) spans for keypoints. The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
 
 Visual reference: `docs/ed/review.html` and `docs/ed/interview.html` — same family, a little more polished.
+
+## Interactive lattice views
+
+A `lattice3d` block embeds a rotatable, hoverable 3D view of a lattice or
+tensor network. `src` names a scene JSON (sites, bonds, values, optional
+animation frames) in the run dir — the schema and examples live in
+`viz/README.md`. The JS viewer bundle is inlined once per page, only when at
+least one `lattice3d` block is present; the page stays a single offline file.
+Reports are also read in print/PDF form, so always provide a `poster` image
+(usually the matplotlib figure of the same data).
