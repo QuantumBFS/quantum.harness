@@ -40,6 +40,7 @@ const CSS = `
   .lattix-legend,.lattix-btns button,.lattix-bar{background:rgba(30,33,38,.85);color:#ddd}
 }
 @media print{.lattix-view,.lattix-ui{display:none!important}}
+@media print{.lattix-poster{display:block!important}}
 `;
 
 function injectCSS() {
@@ -151,6 +152,9 @@ export function mount(el, sceneJson) {
 
   let bar = null;
   if (scene.frames) bar = makeAnimationBar(view, scene, api);
+
+  // Mount succeeded: hide the pre-mount poster (kept visible in print via CSS).
+  el.querySelectorAll(".lattix-poster").forEach((p) => { p.style.display = "none"; });
 
   // ---- loop + resize -------------------------------------------------------
   let dead = false;

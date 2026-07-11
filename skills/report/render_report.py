@@ -320,7 +320,7 @@ ul.flat{padding-left:20px;margin:6px 0} ul.flat li{margin:3px 0;font-size:13.5px
 .print-btn:hover{border-color:var(--accent);color:var(--accent)}
 @media print{.print-btn,.toc,.toc-bar{display:none}.wrap{max-width:100%;padding:0}.figs{position:static;left:auto;transform:none;width:auto}.card,table,.verdict,.figbox{break-inside:avoid}}
 .lattix{position:relative;width:100%;margin:6px 0}
-.lattix-poster{display:none;width:100%}
+.lattix-poster{display:block;width:100%}
 @media print{.lattix-poster{display:block}}
 """
 
