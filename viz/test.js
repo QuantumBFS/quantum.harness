@@ -6,6 +6,7 @@ import {
 import {
   COLORMAPS, valueToColor, collectValues, autoDomain, resolveDomain, legendHTML,
 } from "./src/overlays.js";
+import { sampleFrames } from "./src/frames.js";
 
 const MIN = {
   nodes: [{ id: 0, pos: [0, 0, 0] }, { id: 1, pos: [1, 0, 0] }],
@@ -124,4 +125,19 @@ test("legendHTML renders colorbar gradient and type swatches", () => {
   assert.ok(h.includes("dashed"));                     // dashed swatch style
   assert.equal(legendHTML(applyDefaults({ nodes: [{ id: 0, pos: [0, 0, 0] }] }),
     [0, 1], [0, 1]), "");                              // nothing to show
+});
+
+test("sampleFrames discrete holds the floor frame and clamps", () => {
+  const seq = [[0, 10], [2, 20], [4, 40]];
+  assert.deepEqual(sampleFrames(seq, 1.9, false), [2, 20]);
+  assert.deepEqual(sampleFrames(seq, -3, false), [0, 10]);
+  assert.deepEqual(sampleFrames(seq, 99, false), [4, 40]);
+  assert.equal(sampleFrames([], 0, false), null);
+  assert.equal(sampleFrames(undefined, 0, false), null);
+});
+
+test("sampleFrames interpolates scalars and vectors", () => {
+  assert.deepEqual(sampleFrames([[0, 10], [2, 20]], 0.5, true), [1, 15]);
+  assert.deepEqual(sampleFrames([[[0, 0, 1]], [[0, 0, -1]]], 0.5, true), [[0, 0, 0]]);
+  assert.deepEqual(sampleFrames([[0], [2]], 1, true), [2]);   // exact frame
 });
