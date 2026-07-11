@@ -131,6 +131,40 @@ export function buildLattice(scene) {
   });
   stubs.instanceMatrix.needsUpdate = true;
 
+  // ---- always-on edge labels (tensor networks) -----------------------------
+  const labels = new THREE.Group();
+  if (scene.meta.labels === "always") {
+    const cache = new Map();
+    const makeSprite = (text) => {
+      if (!cache.has(text)) {
+        const c = document.createElement("canvas");
+        const ctx = c.getContext("2d");
+        ctx.font = "48px system-ui, sans-serif";
+        c.width = Math.ceil(ctx.measureText(text).width) + 16;
+        c.height = 64;
+        const ctx2 = c.getContext("2d");
+        ctx2.font = "48px system-ui, sans-serif";
+        ctx2.fillStyle = "#556";
+        ctx2.textBaseline = "middle";
+        ctx2.fillText(text, 8, 32);
+        cache.set(text, { tex: new THREE.CanvasTexture(c), w: c.width / c.height });
+      }
+      const { tex, w } = cache.get(text);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: tex, depthTest: false }));
+      sp.scale.set(0.32 * unit * w, 0.32 * unit, 1);
+      return sp;
+    };
+    for (const e of scene.edges) {
+      if (!e.label) continue;
+      const sp = makeSprite(String(e.label));
+      const a = posOf(e.s), b = posOf(e.t);
+      sp.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2,
+                      (a[2] + b[2]) / 2 + 0.12 * unit);
+      labels.add(sp);
+    }
+  }
+
   // ---- vectors (arrows): instanced shaft + instanced head ------------------
   const hasVec = scene.nodes.some((n) => Array.isArray(n.vector))
     || ((scene.frames || {}).vectors || []).length > 0;
@@ -226,7 +260,7 @@ export function buildLattice(scene) {
   paint();
   setVectors(null);
 
-  group.add(nodes, edges, dashGroup, stubs, arcs, shafts, heads);
+  group.add(nodes, edges, dashGroup, stubs, arcs, labels, shafts, heads);
   const bounds = new THREE.Box3();
   for (const n of scene.nodes) bounds.expandByPoint(V.set(...n.pos));
 
