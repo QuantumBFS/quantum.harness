@@ -49,7 +49,7 @@ Keep it to <=3 lines plus the plot: primary quantity, method/reason, verificatio
 
 ## Options
 
-Offer 2-3 real next steps, recommended first, with `Done` always available. Common options: richer visualization, parameter scan, deeper observable, cross-method check, literature context, writeup, different problem.
+Offer 2-3 real next steps, recommended first, with `Done` always available. Common options: richer visualization (a publication figure, or — for site-resolved data on a lattice — an interactive 3D view: emit a lattix scene JSON per `viz/README.md` and render it through `/report`'s `lattice3d` block), parameter scan, deeper observable, cross-method check, literature context, writeup, different problem.
 
 ## Done
 

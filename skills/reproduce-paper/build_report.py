@@ -31,9 +31,16 @@ def model_section(model: dict) -> dict:
         ["Lattice", model.get("lattice")],
         ["Boundary", model.get("boundary")],
     ]})
+    blocks = [{"kind": "card", "title": "Hamiltonian", "blocks": inner}]
+    if model.get("scene"):
+        blocks.append({"kind": "lattice3d", "src": model["scene"],
+                       "poster": model.get("scene_poster"),
+                       "caption": "Interactive lattice — rotate, hover a site or bond "
+                                  "to check couplings and boundary wraps against the "
+                                  "configuration above before any compute runs."})
     return {"title": "Model",
             "note": "The physical system — shared by every figure below.",
-            "blocks": [{"kind": "card", "title": "Hamiltonian", "blocks": inner}]}
+            "blocks": blocks}
 
 
 def method_section(run: dict, meth: dict, scope: dict) -> dict:
@@ -103,6 +110,12 @@ def figure_blocks(f: dict) -> list:
         figs.append({"src": res["figure"], "caption": "Our reproduction"})
     if figs:
         blocks.append({"kind": "figures", "items": figs})
+    if res.get("scene"):
+        blocks.append({"kind": "lattice3d", "src": res["scene"],
+                       "poster": res.get("figure"),
+                       "caption": res.get("scene_caption",
+                                          "Interactive view of the same data on the "
+                                          "lattice — rotate, hover, scrub frames.")})
 
     if res.get("figure") or res.get("match") or res.get("numbers"):
         verdict = {"yes": ("Reproduced", "good"), "partly": ("Partial match", "warn"),

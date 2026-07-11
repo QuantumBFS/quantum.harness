@@ -111,6 +111,8 @@ For each figure in `run.json`:
 
 11. **`table` — Key numbers.** From `results.numbers`.
 
+12. **`lattice3d` — Interactive lattice view (offer when the data is site-resolved).** If the run produced per-site or per-bond data on a lattice (local order parameters, correlations, MC snapshots), offer to emit a lattix scene JSON (schema: `viz/README.md`) and embed it with `{"kind": "lattice3d", "src": "<scene>.json", "poster": "<figure>.png", "caption": "…"}` — the static figure doubles as the print fallback. Skip silently for scalar-only results.
+
 After all figures: "Any additional blocks for the Results section?"
 
 ---
@@ -155,7 +157,7 @@ After all blocks: "Any additional blocks for the Highlight section?"
 
 ## Notes
 
-- All block kinds used (`text`, `card`, `kv`, `figures`, `verdict`, `table`, `badge`, `heading`, `code`, `note`) are already supported by `/report`.
+- All block kinds used (`text`, `card`, `kv`, `figures`, `verdict`, `table`, `badge`, `heading`, `code`, `note`, `lattice3d`) are already supported by `/report`.
 - If a figure's `results` is empty, show a `note` block with `"style": "pending"` instead of verdict/numbers.
 - Math in text uses `$...$` for inline, `$$...$$` for display — the renderer handles LaTeX to MathML.
 - Figure `src` paths are relative to `<run-dir>`.

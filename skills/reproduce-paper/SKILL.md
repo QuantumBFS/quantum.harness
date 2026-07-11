@@ -43,7 +43,7 @@ After the planning questions are complete, `run.json` is the *only* data source.
 ```json
 {
   "paper":    { "id": "arXiv:XXXX.XXXXX", "title": "…", "url": "…" },
-  "model":    { "name": "…", "H": "H = J_1 \\sum_{\\langle ij\\rangle} \\mathbf{S}_i\\cdot\\mathbf{S}_j", "couplings": { "$J_1$": 1.0 }, "lattice": "…", "boundary": "PBC" },
+  "model":    { "name": "…", "H": "H = J_1 \\sum_{\\langle ij\\rangle} \\mathbf{S}_i\\cdot\\mathbf{S}_j", "couplings": { "$J_1$": 1.0 }, "lattice": "…", "boundary": "PBC", "scene": "figs/scene_model.json" },
   "method":   { "family": "ED", "exact": true, "tool": "XDiag", "settings": { "sector": "k=0, Sz=0", "k_states": 1 }, "note": "what the tool is and what its key settings mean, in plain English" },
   "params":   [ { "name": "system size $N$", "value": "16, 20", "source": "we choose — paper used up to 40", "why": "largest size a laptop finishes in minutes; sets the finite-size error", "risk": "too small → finite-size artifacts mask the thermodynamic trend", "fix": "report the size series and extrapolate; cross-check the largest size on the cluster" } ],
   "scope":    { "label": "beginner" },
@@ -61,6 +61,8 @@ After the planning questions are complete, `run.json` is the *only* data source.
   ]
 }
 ```
+
+**Interactive lattice views.** For any lattice model, the run script should also emit a lattix scene JSON (schema: `viz/README.md`) so the report carries rotatable, hoverable 3D views — `model.scene` names a scene of the bare geometry (sites, bonds by coupling type with the `types` styling, PBC bonds marked `wrap: true`) and renders in the Model section of the *proposal*, where the user visually verifies the lattice, couplings, and boundary before compute; a figure's `results.scene` (optional `results.scene_caption`) names a scene carrying that figure's site- or bond-resolved data — local order parameters as node values/vectors, correlations as edge values, MC snapshots or sweep series as `frames` — and renders beside the result figure, with the static figure reused as its print `poster`. Both paths are relative to the run dir; skip `results.scene` when the observable has no per-site structure (e.g. a single scalar curve).
 
 The example is a ground-state ED run; the same schema flexes for a **finite-temperature** target — `x` becomes temperature or β, a run `point` is a `(Dc, τ)` or temperature setting rather than a size, and `method.settings` holds that method's knobs (e.g. `Dc`, `τ`, `β_max` for LTRG; `sweeps`, `thermalization`, `N_wlk` for QMC), so the computation yields thermodynamic curves instead of a spectrum.
 
