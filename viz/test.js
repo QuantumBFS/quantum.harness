@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   LIMITS, validateScene, applyDefaults, nodeIndex, isPlanar, medianEdgeLength,
 } from "./src/scene.js";
+import {
+  COLORMAPS, valueToColor, collectValues, autoDomain, resolveDomain, legendHTML,
+} from "./src/overlays.js";
 
 const MIN = {
   nodes: [{ id: 0, pos: [0, 0, 0] }, { id: 1, pos: [1, 0, 0] }],
@@ -72,4 +75,53 @@ test("medianEdgeLength ignores wrap bonds, defaults to 1", () => {
   });
   assert.equal(medianEdgeLength(s), 2);               // sorted [1,2] → index 1
   assert.equal(medianEdgeLength(applyDefaults({ nodes: MIN.nodes, edges: [] })), 1);
+});
+
+test("valueToColor hits endpoints and midpoint of diverging map", () => {
+  assert.deepEqual(valueToColor(-1, [-1, 1]).map((c) => Math.round(c * 255)),
+    [0x21, 0x66, 0xac]);
+  assert.deepEqual(valueToColor(0, [-1, 1]).map((c) => Math.round(c * 255)),
+    [0xf7, 0xf7, 0xf7]);
+  assert.deepEqual(valueToColor(99, [-1, 1]).map((c) => Math.round(c * 255)),
+    [0xb2, 0x18, 0x2b]);                               // clamped to hi
+});
+
+test("collectValues gathers base values and frame values", () => {
+  const s = applyDefaults({
+    nodes: [{ id: 0, pos: [0, 0, 0], value: 0.1 }, { id: 1, pos: [1, 0, 0] }],
+    edges: [],
+    frames: { nodes: [[0.5, -0.5]] },
+  });
+  assert.deepEqual(collectValues(s, "nodes").sort(), [-0.5, 0.1, 0.5].sort());
+});
+
+test("autoDomain: symmetric, plain, degenerate, empty", () => {
+  assert.deepEqual(autoDomain([-0.3, 0.5], true), [-0.5, 0.5]);
+  assert.deepEqual(autoDomain([2, 5], false), [2, 5]);
+  assert.deepEqual(autoDomain([3], false), [2.5, 3.5]);
+  assert.deepEqual(autoDomain([], false), [0, 1]);
+});
+
+test("resolveDomain: explicit domain wins, diverging auto is symmetric", () => {
+  const s = applyDefaults({
+    nodes: [{ id: 0, pos: [0, 0, 0], value: -0.2 }, { id: 1, pos: [1, 0, 0], value: 0.6 }],
+    edges: [],
+    encode: { edges: { domain: [-9, 9] } },
+  });
+  assert.deepEqual(resolveDomain(s, "nodes"), [-0.6, 0.6]);
+  assert.deepEqual(resolveDomain(s, "edges"), [-9, 9]);
+});
+
+test("legendHTML renders colorbar gradient and type swatches", () => {
+  const s = applyDefaults({
+    nodes: [{ id: 0, pos: [0, 0, 0], value: 1 }],
+    edges: [],
+    types: { J1: { color: "#4a6fa5", width: 2 }, J2: { color: "#c0504d", dash: true } },
+  });
+  const h = legendHTML(s, [-1, 1], [0, 1]);
+  assert.ok(h.includes("linear-gradient"));
+  assert.ok(h.includes("J1") && h.includes("J2"));
+  assert.ok(h.includes("dashed"));                     // dashed swatch style
+  assert.equal(legendHTML(applyDefaults({ nodes: [{ id: 0, pos: [0, 0, 0] }] }),
+    [0, 1], [0, 1]), "");                              // nothing to show
 });
