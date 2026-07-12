@@ -30,25 +30,33 @@ C_band_n = chern(hk, n+1) - chern(hk, n), n = 0..q-1 (telescoping sum is
 always exactly 0, C(q) - C(0) = 0 - 0, by construction - a trivial
 consistency check, not evidence of correctness on its own).
 
-Band touching (q even): the Harper spectrum can have an EXACT band touching
-(zero direct gap on the whole BZ) between two consecutive subbands - verified
-numerically here for (p,q) = (1,4) and (1,8) (middle gap; not for every even
-q, e.g. (1,6) has a small but nonzero middle gap - detection is by an
-explicit numerical gap scan, not a hardcoded "q even" rule). At an exact
-touching, the naive per-band difference above is not gauge-invariant / not
-robust to the FHS grid resolution `nk` (verified: for (p,q)=(1,4) the band-2
-vs band-3 individual diffs flip between [0,-2] and [-1,-1] as `nk` is varied
-40->120, while their SUM stays exactly -2 at every nk tested) - only the
-JOINT Chern number of the merged band group (computed via nocc jumping
-across the whole touching group at once, using only the genuinely open gaps
-above/below it) is well defined. Both are reported: `chern_numbers` (naive,
-per-slot) and `band_touching_groups` (the physically meaningful joint
-invariant for any detected touching group).
+Band touching (q even): the Harper spectrum has an EXACT band touching
+(zero direct gap) between the two central subbands in every even-q case
+tested here - (p,q) = (1,4), (1,6), (1,8) - e.g. for (1,6) the central pair
+touches at (kx,ky) = (pi/6, pi), direct gap < 1e-15 after refinement.
+Detection is a numerical minimum-direct-gap search per band pair (coarse
+grid scan + Nelder-Mead local refinement), not a hardcoded "q even" rule;
+no general theorem is claimed by this card. The refinement step matters: a
+pure grid scan is only reliable if the grid happens to contain the touching
+point (a 150x150 grid misses (1,6)'s touching at (pi/6, pi) because
+150/12 is not an integer, and reports a spurious ~0.051t "gap" - this
+exact artifact briefly made an earlier revision of this card claim (1,6)
+does NOT touch; the refinement now closes that hole for any grid). At an
+exact touching, the naive per-band difference above is not gauge-invariant /
+not robust to the FHS grid resolution `nk` (verified: for (p,q)=(1,4) the
+band-2 vs band-3 individual diffs flip between [0,-2] and [-1,-1] as `nk`
+is varied 40->120, while their SUM stays exactly -2 at every nk tested) -
+only the JOINT Chern number of the merged band group (computed via nocc
+jumping across the whole touching group at once, using only the genuinely
+open gaps above/below it) is well defined. Both are reported:
+`chern_numbers` (naive, per-slot) and `band_touching_groups` (the
+physically meaningful joint invariant for any detected touching group).
 """
 import sys
 from pathlib import Path
 
 import numpy as np
+from scipy.optimize import minimize
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _lib.cli import oracle_main  # noqa: E402
@@ -97,8 +105,22 @@ def compute(p=1, q=3, t=1.0, nk=60, nk_bands=120):
     flat = evs.reshape(-1, q)
     band_edges = [[float(flat[:, b].min()), float(flat[:, b].max())] for b in range(q)]
 
-    # detect exact band touchings (zero direct gap) and merge into groups
-    touching = [float((evs[..., b + 1] - evs[..., b]).min()) < _GAP_TOL for b in range(q - 1)]
+    # detect exact band touchings (zero direct gap) and merge into groups.
+    # A pure grid scan is unreliable when the touching momentum is not a grid
+    # point (e.g. (p,q)=(1,6) touches at (pi/6, pi), missed by a 150x150 grid),
+    # so refine each band pair's minimum direct gap locally from the grid argmin.
+    ks = np.linspace(0.0, 2.0 * np.pi, nk_bands, endpoint=False)
+    touching = []
+    for b in range(q - 1):
+        gaps = evs[..., b + 1] - evs[..., b]
+        i0 = np.unravel_index(np.argmin(gaps), gaps.shape)
+
+        def _pair_gap(kk, _b=b):
+            ev = np.linalg.eigvalsh(hk(kk[0], kk[1]))
+            return float(ev[_b + 1] - ev[_b])
+
+        res = minimize(_pair_gap, x0=[ks[i0[0]], ks[i0[1]]], method="Nelder-Mead")
+        touching.append(max(float(res.fun), 0.0) < _GAP_TOL)
     groups, cur = [], [0]
     for b in range(q - 1):
         if touching[b]:
@@ -140,13 +162,26 @@ def self_test():
     r5 = compute(p=2, q=5)
     assert sum(r5["chern_numbers"]) == 0 and r5["n_bands"] == 5
 
-    # anchor 4: Diophantine equation r = q*s + p*t reproduces the q=3 gap
-    # Cherns (|t| <= q/2): r=1 -> t=1,s=0 ; r=2 -> t=-1,s=1 (cumulative -2+... )
-    # equivalently the cumulative gap Cherns C(r) solve r = q*s + p*t exactly:
-    p, q = 1, 3
-    for rr, Cr in zip([1, 2], [1, -1]):
-        s = (rr - p * Cr) / q
-        assert abs(s - round(s)) < 1e-12  # s must be an integer
+    # anchor 4: p/q = 1/6 - central band touching at (kx,ky)=(pi/6,pi)
+    # (a point NOT on every grid: a 150x150 scan misses it - the refinement
+    # step in compute() is what this anchor guards)
+    r6 = compute(p=1, q=6)
+    assert sum(r6["chern_numbers"]) == 0 and r6["n_bands"] == 6
+    assert r6["band_touching_groups"] == [{"bands": [2, 3], "joint_chern": -4}]
+
+    # anchor 5: Diophantine equation r = q*s + p*t, with t the COMPUTED gap
+    # Chern (cumulative sum of the computed per-band chern_numbers up to band
+    # r) and s required to be an integer - checked for every genuinely open
+    # gap (gaps inside a touching group are skipped: no gap, no gap label)
+    for p, q, res in [(1, 3, r), (1, 4, r4), (2, 5, r5), (1, 6, r6)]:
+        closed = {g["bands"][i] for g in res["band_touching_groups"]
+                  for i in range(len(g["bands"]) - 1)}  # gap below band b+1 closed
+        cum = np.cumsum(res["chern_numbers"])
+        for rr in range(1, q):
+            if (rr - 1) in closed:  # gap between bands rr-1 and rr is closed
+                continue
+            t = int(cum[rr - 1])
+            assert (rr - p * t) % q == 0, (p, q, rr, t)
 
 
 if __name__ == "__main__":
