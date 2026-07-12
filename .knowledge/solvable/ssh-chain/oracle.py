@@ -6,8 +6,8 @@ hopping model.
 Two-site (A,B) unit cell, `v` the intracell (A-B, same cell) hopping, `w` the
 intercell (B-A, cell i to i+1) hopping. Bloch off-diagonal g(k) = v + w e^{ik};
 single-particle bands eps(k) = +-|g(k)|. Topological (winding nu=1, two
-protected OBC zero modes) for w>v; trivial (nu=0) for v>w; bulk gap closes at
-v=w. This is a genuine number-conserving fermion hopping problem (no pairing),
+protected OBC zero modes) for |w|>|v|; trivial (nu=0) for |v|>|w|; bulk gap
+closes at |v|=|w|. This is a genuine number-conserving fermion hopping problem (no pairing),
 so the many-body ground state at half filling is exactly the Slater
 determinant that fills every negative-energy single-particle eigenstate -
 no BdG machinery needed, unlike kitaev-chain/xy-chain.
@@ -19,8 +19,10 @@ half filling exactly one fermion occupies the lower band per unit cell, so
 `e0_per_site` here means "ground energy per unit cell" == "energy per
 particle" (they coincide at half filling) - i.e. E_total / L, NOT E_total /
 (2L). This is exactly the quantity the closed form
-`-(1/2pi) int |v + w e^{ik}| dk` computes, and it is exactly what the ED
-cross-check below divides by (L, not 2L).
+`-(1/2pi) int |v + w e^{ik}| dk` computes. (The ED cross-check in
+self_test() compares TOTAL energies - sum of negative single-particle
+eigenvalues vs ed.ground_energy - with no division, so it holds under
+either density convention.)
 """
 import sys
 from pathlib import Path
@@ -54,7 +56,7 @@ def compute(L=100, v=0.5, w=1.0, nk=2001):
     n_edge = int(np.sum(np.abs(ev) < gap / 4)) if gap > 0 else 0
     ks = np.linspace(0.0, 2.0 * np.pi, nk, endpoint=False)
     e0_per_site = -np.mean(np.abs(v + w * np.exp(1j * ks)))  # per unit cell
-    xi = 1.0 / np.log(w / v) if w > v > 0 else float("nan")
+    xi = 1.0 / np.log(abs(w) / abs(v)) if abs(w) > abs(v) > 0 else float("nan")
     return {
         "winding": nu,
         "gap": gap,
