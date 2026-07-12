@@ -283,3 +283,6 @@ serve: ## Serve the recommended-workflows website locally. Optional: PORT=8000
 
 clean: ## Remove generated HTML artifacts
 	find . -name '*.html' -not -path './docs/*' -not -path './.github/*' -delete
+
+test-oracles:  ## run the solvable-catalog oracle self-tests
+	cd .knowledge/solvable && uv run pytest -q

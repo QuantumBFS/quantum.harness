@@ -1,0 +1,13 @@
+[project]
+name = "solvable-oracles"
+version = "0.1.0"
+description = "Exact-solution oracle scripts for the quantum harness solvable-models catalog"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "scipy>=1.11"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
