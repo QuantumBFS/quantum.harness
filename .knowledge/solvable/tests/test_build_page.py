@@ -109,3 +109,20 @@ def test_parse_card_on_real_tfim(gen):
     assert first["quantity"]  # non-empty, no header/separator leakage
     assert first["quantity"] != "Quantity"
     assert "---" not in first["quantity"]
+
+
+def test_benchmark_citekeys_render_readable(gen):
+    # single key: readable text, raw key preserved in title= for provenance
+    out = gen._md_cell("[@Pfeuty1970]")
+    assert ">Pfeuty 1970<" in out
+    assert 'title="[@Pfeuty1970]"' in out
+    assert not out.startswith("[@")
+
+    # camel-cased multi-name key + multi-key cell
+    multi = gen._md_cell("[@LiebSchultzMattis1961; @Kitaev2003]")
+    assert "Lieb–Schultz–Mattis 1961" in multi
+    assert "Kitaev 2003" in multi
+    assert 'title="[@LiebSchultzMattis1961; @Kitaev2003]"' in multi
+
+    # yearless key degrades gracefully
+    assert ">Baxter<" in gen._md_cell("[@Baxter]")

@@ -168,10 +168,31 @@ def _esc(s: str) -> str:
     return html.escape(s, quote=True)
 
 
+def _fmt_cite(key: str) -> str:
+    """'@LiebSchultzMattis1961' -> 'Lieb–Schultz–Mattis 1961' (readable citekey)."""
+    key = key.strip().lstrip("@")
+    m = re.match(r"(.*?)(\d{4}[a-z]?)?$", key)
+    name = re.sub(r"(?<=[a-z])(?=[A-Z])", "–", m.group(1))
+    year = m.group(2)
+    return f"{name} {year}" if year else name
+
+
+def _cite_spans(escaped: str) -> str:
+    """Replace [@Key] / [@Key1; @Key2] tokens with readable spans.
+
+    The raw citekey token is kept as a title= attribute for provenance.
+    """
+    def repl(m):
+        keys = [k for k in m.group(1).split(";") if k.strip()]
+        pretty = ", ".join(_fmt_cite(k) for k in keys)
+        return f'<span class="cite" title="{_esc(m.group(0))}">{_esc(pretty)}</span>'
+    return re.sub(r"\[@([^\]]+)\]", repl, escaped)
+
+
 def _md_cell(s: str) -> str:
-    """Benchmark cell: escape, then re-inject `code` spans as <code>."""
+    """Benchmark cell: escape, humanize [@citekeys], re-inject `code` as <code>."""
     s = s.replace("\\|", "|")
-    out = _esc(s)
+    out = _cite_spans(_esc(s))
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", out)
 
 
@@ -199,7 +220,7 @@ def _render_built(e: dict) -> str:
     card = e["card"]
     body = [f'<div class="math">$${_esc(card["hamiltonian"])}$$</div>']
     if card["solvability"]:
-        body.append(f'<p class="solv">{_esc(card["solvability"])}</p>')
+        body.append(f'<p class="solv">{_cite_spans(_esc(card["solvability"]))}</p>')
     if card["benchmarks"]:
         rows = "\n".join(
             f'<tr><td>{_md_cell(r["quantity"])}</td><td>{_md_cell(r["params"])}</td>'
