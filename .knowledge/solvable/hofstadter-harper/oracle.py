@@ -41,7 +41,16 @@ pure grid scan is only reliable if the grid happens to contain the touching
 point (a 150x150 grid misses (1,6)'s touching at (pi/6, pi) because
 150/12 is not an integer, and reports a spurious ~0.051t "gap" - this
 exact artifact briefly made an earlier revision of this card claim (1,6)
-does NOT touch; the refinement now closes that hole for any grid). At an
+does NOT touch). The refinement must run with tight tolerances
+(xatol=1e-10, fatol=1e-12): scipy's Nelder-Mead defaults (1e-4) stall at a
+residual gap ~1e-5 on the conical (linear-in-|dk|) touching, above
+_GAP_TOL, and still miss it - also verified on (1,6)/nk_bands=150 and
+pinned in self_test(). With tight tolerances the refinement recovers the
+exact zero from the nearest grid point whenever the grid argmin lands in
+the touching point's basin of attraction (verified for the off-grid case
+above; a grid too coarse to get the argmin near the touching at all could
+in principle still miss it - not observed for any tested (p,q) at the
+default nk_bands=120). At an
 exact touching, the naive per-band difference above is not gauge-invariant /
 not robust to the FHS grid resolution `nk` (verified: for (p,q)=(1,4) the
 band-2 vs band-3 individual diffs flip between [0,-2] and [-1,-1] as `nk`
@@ -119,7 +128,12 @@ def compute(p=1, q=3, t=1.0, nk=60, nk_bands=120):
             ev = np.linalg.eigvalsh(hk(kk[0], kk[1]))
             return float(ev[_b + 1] - ev[_b])
 
-        res = minimize(_pair_gap, x0=[ks[i0[0]], ks[i0[1]]], method="Nelder-Mead")
+        # tight tolerances are load-bearing: Nelder-Mead's defaults
+        # (xatol=fatol=1e-4) stall at a residual gap ~1e-5 on a conical
+        # touching (linear in |k - k_touch|), above _GAP_TOL - verified for
+        # (p,q)=(1,6) at nk_bands=150, which then falsely reports "no touching"
+        res = minimize(_pair_gap, x0=[ks[i0[0]], ks[i0[1]]], method="Nelder-Mead",
+                       options={"xatol": 1e-10, "fatol": 1e-12})
         touching.append(max(float(res.fun), 0.0) < _GAP_TOL)
     groups, cur = [], [0]
     for b in range(q - 1):
@@ -162,10 +176,13 @@ def self_test():
     r5 = compute(p=2, q=5)
     assert sum(r5["chern_numbers"]) == 0 and r5["n_bands"] == 5
 
-    # anchor 4: p/q = 1/6 - central band touching at (kx,ky)=(pi/6,pi)
-    # (a point NOT on every grid: a 150x150 scan misses it - the refinement
-    # step in compute() is what this anchor guards)
-    r6 = compute(p=1, q=6)
+    # anchor 4: p/q = 1/6 - central band touching at (kx,ky)=(pi/6,pi).
+    # Run with nk_bands=150, a grid that does NOT contain the touching point
+    # (150/12 not an integer), so this anchor passes only if the local
+    # refinement (with tight xatol/fatol) actually does its job - grid-only
+    # detection, or refinement with scipy's default 1e-4 tolerances, both
+    # fail this exact call (verified).
+    r6 = compute(p=1, q=6, nk_bands=150)
     assert sum(r6["chern_numbers"]) == 0 and r6["n_bands"] == 6
     assert r6["band_touching_groups"] == [{"bands": [2, 3], "joint_chern": -4}]
 
