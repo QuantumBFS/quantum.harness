@@ -32,26 +32,46 @@ def stabilizer_rows(L, pbc=True):
     return rows
 
 
-def _in_rowspan(rows, target, ncols):
+def _in_rowspan(rows, target):
     """True iff GF(2) `target` lies in the row span of `rows` (rank test)."""
     r = gf2.rank(rows)
     return gf2.rank(list(rows) + [target]) == r
 
 
-def string_order_value(L, a, b):
-    """Exact <O> in the cluster ground state for the SPT string operator O
-    on endpoints a < b.
+def _pauli_row(L, paulis):
+    """Symplectic (x|z) row from {site: 'X'|'Y'|'Z'} (built independently of K_i)."""
+    xz = [0] * (2 * L)
+    for i, p in paulis.items():
+        if p in ("X", "Y"):
+            xz[i] = 1
+        if p in ("Z", "Y"):
+            xz[L + i] = 1
+    return xz
 
-    O = prod_{i=a+1}^{b-1} K_i = Z_a Y_{a+1} X_{a+2}...X_{b-2} Y_{b-1} Z_b:
-    a genuine product of stabilizers, so <O> = +1 exactly in every ground state
-    (each K_i has eigenvalue +1). Returns 1.0 after verifying membership.
+
+def string_order_value(L, a, b):
+    """Exact <O> in the cluster ground state for the decorated SPT string
+    operator on endpoints a < b:
+
+    O = Z_a Y_{a+1} X_{a+2}...X_{b-2} Y_{b-1} Z_b = prod_{i=a+1}^{b-1} K_i.
+
+    The symplectic vector of O is constructed directly from its Pauli content
+    (NOT by multiplying K_i together) and then checked for membership in the
+    GF(2) row span of the stabilizers — so the check can genuinely fail. Being
+    a product of stabilizers, O has <O> = +1 exactly in every ground state.
+    As a negative control, the naive undecorated string Z_a X...X Z_b is
+    checked to be OUTSIDE the row span (its ground-state expectation is 0).
     """
+    assert b - a >= 3
     rows = stabilizer_rows(L, pbc=True)
-    target = [0] * (2 * L)
-    for i in range(a + 1, b):
-        for k, v in enumerate(rows[i]):        # multiply K_i into target (GF2 add)
-            target[k] ^= v
-    assert _in_rowspan(rows, target, 2 * L), "string op is not a stabilizer product"
+    decorated = {a: "Z", a + 1: "Y", b - 1: "Y", b: "Z"}
+    decorated.update({i: "X" for i in range(a + 2, b - 1)})
+    naive = {a: "Z", b: "Z"}
+    naive.update({i: "X" for i in range(a + 1, b)})
+    assert _in_rowspan(rows, _pauli_row(L, decorated)), \
+        "decorated string op is not a stabilizer product"
+    assert not _in_rowspan(rows, _pauli_row(L, naive)), \
+        "naive ZX...XZ string unexpectedly in the stabilizer span"
     return 1.0
 
 

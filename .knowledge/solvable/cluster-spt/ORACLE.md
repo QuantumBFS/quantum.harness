@@ -1,6 +1,6 @@
 # Cluster-state SPT chain — exact-solution oracle
 
-Technique: T5 (commuting-projector / stabilizer) · Tier: A (closed-form, exact) · Script: S
+Technique: T4 (commuting-projector / stabilizer) · Tier: A (closed-form, exact) · Script: S
 
 ## Hamiltonian & conventions
 
@@ -26,8 +26,8 @@ T5: a **commuting-projector stabilizer Hamiltonian**. The ground space is the si
 
 ## Oracle script
 
-`python oracle.py --L 8` → prints `gsd_pbc`, `gsd_obc`, `gap`, `string_order`. Importable: `compute(L=8)`; helpers `stabilizer_rows(L, pbc)` (binary symplectic `(x|z)` rows), `string_order_value(L,a,b)` (exact `⟨O⟩` via GF(2) stabilizer-membership), `_ed_hamiltonian(L, pbc)` (sparse `-ΣK_i`).
-Self-test anchors: (1) `gsd_pbc(8) == 1`, `gsd_obc(8) == 4`, `string_order == 1.0` (GF(2)); (2) ED cross-check `L = 8` PBC (dim 256) — `ed.ground_states == 1`, `ed.gap == 2.0` to `1e-10`; (3) ED OBC — `ed.ground_states == 4`; (4) ED expectation of the decorated string operator `Z_1 Y_2 X_3 X_4 Y_5 Z_6` in the unique PBC ground state equals `1` to `1e-10`.
+`python oracle.py --L 8` → prints `gsd_pbc`, `gsd_obc`, `gap`, `string_order`. Importable: `compute(L=8)`; helpers `stabilizer_rows(L, pbc)` (binary symplectic `(x|z)` rows), `string_order_value(L,a,b)` (exact `⟨O⟩` via GF(2) stabilizer-membership — the symplectic vector of `O` is built independently from its Pauli content, then checked to lie in the stabilizer row span, with the naive undecorated `ZX…XZ` string verified to lie **outside** it as a negative control), `_ed_hamiltonian(L, pbc)` (sparse `-ΣK_i`).
+Self-test anchors: (1) `gsd_pbc(8) == 1`, `gsd_obc(8) == 4`, `string_order == 1.0` (GF(2) membership, with the undecorated-string negative control); (2) ED cross-check `L = 8` PBC (dim 256) — `ed.ground_states == 1`, `ed.gap == 2.0` to `1e-10`; (3) ED OBC — `ed.ground_states == 4`; (4) ED expectation of the decorated string operator `Z_1 Y_2 X_3 X_4 Y_5 Z_6` in the unique PBC ground state equals `1` to `1e-10`.
 
 ## Benchmarks
 

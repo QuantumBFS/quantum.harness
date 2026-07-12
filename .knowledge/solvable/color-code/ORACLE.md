@@ -1,6 +1,6 @@
 # Color code (6.6.6) — exact-solution oracle
 
-Technique: T5 (commuting-projector / stabilizer) · Tier: A (closed-form, exact) · Script: S
+Technique: T4 (commuting-projector / stabilizer) · Tier: A (closed-form, exact) · Script: S
 
 ## Hamiltonian & conventions
 
