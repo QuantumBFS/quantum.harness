@@ -72,6 +72,9 @@ HOOKS = {
     "inozemtsev-chain": "elliptic exchange; interpolates XXX ↔ Haldane–Shastry",
     "hubbard-1d-lieb-wu": "nested Bethe ansatz; Mott gap opens at any U>0",
     "susy-t-j": "J=2t su(2|1) supersymmetry; cross-sector supermultiplets",
+    "lieb-liniger": "δ-Bose gas; Lieb equation e(γ), γ→∞ gives π²/3",
+    "tonks-girardeau": "Bose–Fermi mapping; e=π²/3, g₂(0)=0",
+    "yang-gaudin": "nested Bethe ansatz; balanced fermions, π²/12→π²/3",
 }
 
 TIER_TITLES = {

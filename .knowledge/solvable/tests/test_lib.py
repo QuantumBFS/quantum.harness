@@ -1,5 +1,31 @@
 import numpy as np
-from _lib import quadratic, ed, gf2, topology, bethe
+from _lib import quadratic, ed, gf2, topology, bethe, fredholm
+
+
+def test_fredholm_zero_kernel_is_flat_source():
+    # K == 0: the equation collapses to rho(x) = g(x) = 1/(2 pi) exactly.
+    x, w, rho = fredholm.solve(lambda X, Y: np.zeros_like(X + Y), B=1.0, n=64)
+    assert np.allclose(rho, 1.0 / (2.0 * np.pi), atol=1e-14)
+
+
+def test_fredholm_constant_kernel_closed_form():
+    # K(x,y) = c (constant) on [-B, B].  Then rho is constant and, writing
+    # R = int_{-B}^{B} rho dy, the scalar equation rho = 1/2pi + (c/2pi) R with
+    # R = 2B rho gives R = B / (pi - Bc) and rho == 1 / (2 (pi - Bc)).
+    # Gauss-Legendre integrates the constant exactly, so the Nystrom solve is
+    # exact up to the linear solve (1e-12).
+    B, c = 1.0, 0.5
+    x, w, rho = fredholm.solve(lambda X, Y: c * np.ones_like(X + Y), B=B, n=128)
+    expected_rho = 1.0 / (2.0 * (np.pi - B * c))
+    assert np.allclose(rho, expected_rho, atol=1e-12)
+    assert abs((w @ rho) - B / (np.pi - B * c)) < 1e-12
+
+
+def test_fredholm_custom_driving_term():
+    # With K == 0 and g(x) = x the solution is rho(x) = x at the nodes.
+    x, w, rho = fredholm.solve(lambda X, Y: np.zeros_like(X + Y), B=2.0, n=32,
+                               g=lambda X: X)
+    assert np.allclose(rho, x, atol=1e-14)
 
 
 def _xxx_ed_energy(N):
