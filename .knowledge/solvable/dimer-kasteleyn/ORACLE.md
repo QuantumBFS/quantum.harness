@@ -29,12 +29,12 @@ The $1/4$ power compensates the double counting under $j\leftrightarrow m{+}1{-}
 
 ## Benchmarks
 
-| Board $m\times n$ | $Z$ (dimer coverings) | Source |
-|---|---|---|
-| $2\times2$ | $2$ | [@Kasteleyn1961] |
-| $2\times3$ | $3$ | [@Kasteleyn1961] |
-| $4\times4$ | $36$ | [@Kasteleyn1961] |
-| $\mathbf{8\times8}$ | $\mathbf{12\,988\,816}$ | [@Kasteleyn1961] |
+| Quantity | Params | Exact value | Source |
+|---|---|---|---|
+| $n_\text{coverings}$ | $2\times2$ | $2$ | [@Kasteleyn1961] |
+| $n_\text{coverings}$ | $2\times3$ | $3$ | [@Kasteleyn1961] |
+| $n_\text{coverings}$ | $4\times4$ | $36$ | [@Kasteleyn1961] |
+| $n_\text{coverings}$ | $8\times8$ open | $12\,988\,816$ | [@Kasteleyn1961] |
 
 The $8\times8 = 12{,}988{,}816$ row is the classic Fisher–Kasteleyn benchmark (the number of ways to tile a chessboard with 32 dominoes).
 

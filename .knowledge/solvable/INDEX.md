@@ -142,6 +142,6 @@ built `ORACLE.md` where available.
 
 ## Totals
 
-63 models — 37 built (wave 1 complete: 20 T1 + T4 cards; wave 2 in
-progress: 17 of 23 T2 + T3 cards), 20 wave 3 (T5 + T6 + T7). Script-flag
-totals: **46 S · 10 P · 7 T**.
+63 models — 43 built (wave 1 complete: 20 T1 + T4 cards; wave 2
+complete: 23 of 23 T2 + T3 cards), 20 wave 3 rows remaining (T5 + T6 +
+T7). Script-flag totals: **46 S · 10 P · 7 T**.

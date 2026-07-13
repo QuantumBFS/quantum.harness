@@ -367,6 +367,13 @@
 <div class="mbody">
 <div class="math">$$Z(m,n) = \#\{\text{perfect matchings of the } m\times n \text{ grid graph}\} = \#\{\text{domino tilings of the } m\times n \text{ board}\}$$</div>
 <p class="solv">T2 (2D classical / transfer matrix), by the Kasteleyn Pfaffian method. Kasteleyn (1961) showed that the perfect matchings of a planar lattice are counted by the Pfaffian of a suitably oriented (signed) adjacency matrix: choosing edge orientations so that every elementary face is &quot;clockwise-odd&quot; makes every matching contribute $+1$ to the Pfaffian, so $Z = |\mathrm{Pf}(A)| = \sqrt{|\det A|}$. Diagonalizing $A$ for the open $m\times n$ grid gives the eigenvalues $\pm 2i\cos\frac{j\pi}{m+1} \pm 2\cos\frac{k\pi}{n+1}$ and hence the closed product form below. Everything reported — the exact integer count for any finite board and the thermodynamic-limit entropy — is exact. Not exact: nothing about the *open-boundary* count; it is exact and closed-form. What is out of scope (exactly solvable, but not implemented here): the torus (periodic) dimer count, which on a genus-1 surface is not a single Pfaffian but a signed combination of four Pfaffians (the four spin structures) — exactly known, but a different formula from the one shipped; and weighted/monomer-doped variants. The card is honest about this: the product formula here is for open boundaries only.</p>
+<div class="tablewrap"><table class="bench"><thead><tr><th>Quantity</th><th>Params</th><th>Exact value</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>$n_\text{coverings}$</td><td>$2\times2$</td><td>$2$</td><td><span class="cite" title="[@Kasteleyn1961]">Kasteleyn 1961</span></td></tr>
+<tr><td>$n_\text{coverings}$</td><td>$2\times3$</td><td>$3$</td><td><span class="cite" title="[@Kasteleyn1961]">Kasteleyn 1961</span></td></tr>
+<tr><td>$n_\text{coverings}$</td><td>$4\times4$</td><td>$36$</td><td><span class="cite" title="[@Kasteleyn1961]">Kasteleyn 1961</span></td></tr>
+<tr><td>$n_\text{coverings}$</td><td>$8\times8$ open</td><td>$12\,988\,816$</td><td><span class="cite" title="[@Kasteleyn1961]">Kasteleyn 1961</span></td></tr>
+</tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/dimer-kasteleyn/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/dimer-kasteleyn/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
 </details>
