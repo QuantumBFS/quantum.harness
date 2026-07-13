@@ -70,6 +70,8 @@ HOOKS = {
     "zamolodchikov-fateev-spin1": "integrable spin-1 (Takhtajan–Babujian β=−1); c=3/2, gapless",
     "haldane-shastry": "1/r² exchange; Gutzwiller-RVB GS, E0=−(π²/24)(N+5/N)",
     "inozemtsev-chain": "elliptic exchange; interpolates XXX ↔ Haldane–Shastry",
+    "hubbard-1d-lieb-wu": "nested Bethe ansatz; Mott gap opens at any U>0",
+    "susy-t-j": "J=2t su(2|1) supersymmetry; cross-sector supermultiplets",
 }
 
 TIER_TITLES = {
