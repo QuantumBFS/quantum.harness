@@ -77,6 +77,10 @@ HOOKS = {
     "yang-gaudin": "nested Bethe ansatz; balanced fermions, π²/12→π²/3",
     "calogero-sutherland": "1/sin² ring; closed-form spectrum, E0=(π/L)²λ²N(N²−1)/3",
     "chiral-potts": "superintegrable Z_N; Onsager algebra, genus>1 rapidity curve",
+    "richardson-pairing": "reduced BCS; Richardson roots complexify at pairing collisions",
+    "gaudin-central-spin": "rational Gaudin magnet; commuting charges, ED-exact GS",
+    "kondo-bethe": "s–d Bethe ansatz; Wilson ratio R=2, ln 2→0",
+    "anderson-impurity-bethe": "symmetric SIAM Bethe ansatz; ⟨n_d⟩=1, R_W=2",
 }
 
 TIER_TITLES = {
