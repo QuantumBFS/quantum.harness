@@ -86,12 +86,12 @@ built `ORACLE.md` where available.
 | `lieb-liniger` | B | S | ✓ wave 2 | [ORACLE](./lieb-liniger/ORACLE.md) |
 | `tonks-girardeau` | A | S | ✓ wave 2 | [ORACLE](./tonks-girardeau/ORACLE.md) |
 | `yang-gaudin` | B | S | ✓ wave 2 | [ORACLE](./yang-gaudin/ORACLE.md) |
-| `calogero-sutherland` | B | P | wave 2 | — |
+| `calogero-sutherland` | B | P | ✓ wave 2 | [ORACLE](./calogero-sutherland/ORACLE.md) |
 | `kondo-bethe` | B | T | wave 2 | — |
 | `anderson-impurity-bethe` | B | T | wave 2 | — |
 | `richardson-pairing` | B | S | wave 2 | — |
 | `gaudin-central-spin` | B | S | wave 2 | — |
-| `chiral-potts` | B | T | wave 2 | — |
+| `chiral-potts` | B | T | ✓ wave 2 | [ORACLE](./chiral-potts/ORACLE.md) |
 
 ## T4 Commuting projector / stabilizer
 

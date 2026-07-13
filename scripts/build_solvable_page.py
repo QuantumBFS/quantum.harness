@@ -75,6 +75,8 @@ HOOKS = {
     "lieb-liniger": "δ-Bose gas; Lieb equation e(γ), γ→∞ gives π²/3",
     "tonks-girardeau": "Bose–Fermi mapping; e=π²/3, g₂(0)=0",
     "yang-gaudin": "nested Bethe ansatz; balanced fermions, π²/12→π²/3",
+    "calogero-sutherland": "1/sin² ring; closed-form spectrum, E0=(π/L)²λ²N(N²−1)/3",
+    "chiral-potts": "superintegrable Z_N; Onsager algebra, genus>1 rapidity curve",
 }
 
 TIER_TITLES = {
