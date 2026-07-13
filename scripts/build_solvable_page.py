@@ -59,6 +59,8 @@ HOOKS = {
     "haah-code": "cubic code; number-theoretic ground-space rank",
     "cluster-spt": "cluster stabilizers; SPT with protected edge modes",
     "ising-2d-onsager": "transfer matrix; Onsager free energy, Kaufman finite-torus Z",
+    "heisenberg-xxx": "coordinate Bethe ansatz; real roots, E/N = 1/4 − ln 2",
+    "xxz-chain": "Bethe ansatz; Δ-tuned e0 integral/series, Néel gap",
 }
 
 TIER_TITLES = {

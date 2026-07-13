@@ -75,8 +75,8 @@ built `ORACLE.md` where available.
 
 | Model | Tier | Script | Status | Card |
 |---|---|---|---|---|
-| `heisenberg-xxx` | B | S | wave 2 | — |
-| `xxz-chain` | B | S | wave 2 | — |
+| `heisenberg-xxx` | B | S | ✓ wave 2 | [ORACLE](./heisenberg-xxx/ORACLE.md) |
+| `xxz-chain` | B | S | ✓ wave 2 | [ORACLE](./xxz-chain/ORACLE.md) |
 | `xyz-chain` | B | P | wave 2 | — |
 | `zamolodchikov-fateev-spin1` | B | T | wave 2 | — |
 | `haldane-shastry` | B | S | wave 2 | — |

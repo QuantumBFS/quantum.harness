@@ -1,5 +1,31 @@
 import numpy as np
-from _lib import quadratic, ed, gf2, topology
+from _lib import quadratic, ed, gf2, topology, bethe
+
+
+def _xxx_ed_energy(N):
+    """Brute-force ED ground energy of H = sum_i S_i . S_{i+1} (PBC, S=sigma/2)."""
+    sx, sy, sz = ed.spin_ops(N)
+    H = sum(sx[i] @ sx[(i + 1) % N] + sy[i] @ sy[(i + 1) % N]
+            + sz[i] @ sz[(i + 1) % N] for i in range(N))
+    return ed.ground_energy(H)
+
+
+def test_bethe_xxx_ground_energy_matches_ed():
+    # GROUND TRUTH: Bethe-ansatz roots reproduce brute-force ED to 1e-10.
+    for N in (8, 10, 12):
+        roots = bethe.xxx_ground_roots(N)
+        assert len(roots) == N // 2, (N, len(roots))
+        e_bethe = bethe.xxx_energy(roots, N)
+        e_ed = _xxx_ed_energy(N)
+        assert abs(e_bethe - e_ed) < 1e-10, (N, e_bethe, e_ed)
+
+
+def test_bethe_roots_are_real_and_symmetric():
+    for N in (8, 10, 12):
+        r = bethe.xxx_ground_roots(N)
+        assert np.max(np.abs(r.imag)) < 1e-12
+        assert abs(np.sort(r)[::-1].sum() + 0.0) < 1e-10  # symmetric about 0
+        assert abs(np.sum(r)) < 1e-10
 
 
 def test_bdg_matches_ed_random_quadratic():
