@@ -66,6 +66,8 @@ HOOKS = {
     "hard-hexagons": "corner transfer matrix; Rogers–Ramanujan densities",
     "heisenberg-xxx": "coordinate Bethe ansatz; real roots, E/N = 1/4 − ln 2",
     "xxz-chain": "Bethe ansatz; Δ-tuned e0 integral/series, Néel gap",
+    "xyz-chain": "Baxter eight-vertex; exact XXZ/XY limits, ED-extrapolated generic",
+    "zamolodchikov-fateev-spin1": "integrable spin-1 (Takhtajan–Babujian β=−1); c=3/2, gapless",
 }
 
 TIER_TITLES = {

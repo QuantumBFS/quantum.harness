@@ -77,8 +77,8 @@ built `ORACLE.md` where available.
 |---|---|---|---|---|
 | `heisenberg-xxx` | B | S | ✓ wave 2 | [ORACLE](./heisenberg-xxx/ORACLE.md) |
 | `xxz-chain` | B | S | ✓ wave 2 | [ORACLE](./xxz-chain/ORACLE.md) |
-| `xyz-chain` | B | P | wave 2 | — |
-| `zamolodchikov-fateev-spin1` | B | T | wave 2 | — |
+| `xyz-chain` | B | P | ✓ wave 2 | [ORACLE](./xyz-chain/ORACLE.md) |
+| `zamolodchikov-fateev-spin1` | B | T | ✓ wave 2 | [ORACLE](./zamolodchikov-fateev-spin1/ORACLE.md) |
 | `haldane-shastry` | B | S | wave 2 | — |
 | `inozemtsev-chain` | B | T | wave 2 | — |
 | `hubbard-1d-lieb-wu` | B | S | wave 2 | — |
@@ -142,6 +142,6 @@ built `ORACLE.md` where available.
 
 ## Totals
 
-63 models — 28 built (wave 1 complete: 20 T1 + T4 cards; wave 2 in
-progress: 8 of 23 T2 + T3 cards), 20 wave 3 (T5 + T6 + T7). Script-flag
+63 models — 30 built (wave 1 complete: 20 T1 + T4 cards; wave 2 in
+progress: 10 of 23 T2 + T3 cards), 20 wave 3 (T5 + T6 + T7). Script-flag
 totals: **46 S · 10 P · 7 T**.
