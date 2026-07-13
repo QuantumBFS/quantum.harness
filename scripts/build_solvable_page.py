@@ -68,6 +68,8 @@ HOOKS = {
     "xxz-chain": "Bethe ansatz; Δ-tuned e0 integral/series, Néel gap",
     "xyz-chain": "Baxter eight-vertex; exact XXZ/XY limits, ED-extrapolated generic",
     "zamolodchikov-fateev-spin1": "integrable spin-1 (Takhtajan–Babujian β=−1); c=3/2, gapless",
+    "haldane-shastry": "1/r² exchange; Gutzwiller-RVB GS, E0=−(π²/24)(N+5/N)",
+    "inozemtsev-chain": "elliptic exchange; interpolates XXX ↔ Haldane–Shastry",
 }
 
 TIER_TITLES = {

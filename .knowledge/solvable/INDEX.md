@@ -79,8 +79,8 @@ built `ORACLE.md` where available.
 | `xxz-chain` | B | S | ✓ wave 2 | [ORACLE](./xxz-chain/ORACLE.md) |
 | `xyz-chain` | B | P | ✓ wave 2 | [ORACLE](./xyz-chain/ORACLE.md) |
 | `zamolodchikov-fateev-spin1` | B | T | ✓ wave 2 | [ORACLE](./zamolodchikov-fateev-spin1/ORACLE.md) |
-| `haldane-shastry` | B | S | wave 2 | — |
-| `inozemtsev-chain` | B | T | wave 2 | — |
+| `haldane-shastry` | B | S | ✓ wave 2 | [ORACLE](./haldane-shastry/ORACLE.md) |
+| `inozemtsev-chain` | B | T | ✓ wave 2 | [ORACLE](./inozemtsev-chain/ORACLE.md) |
 | `hubbard-1d-lieb-wu` | B | S | wave 2 | — |
 | `susy-t-j` | B | P | wave 2 | — |
 | `lieb-liniger` | B | S | wave 2 | — |
