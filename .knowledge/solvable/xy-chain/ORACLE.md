@@ -1,6 +1,6 @@
 # Anisotropic XY chain — exact-solution oracle
 
-Technique: T1 (free-fermion / Jordan-Wigner) · Tier: A (closed-form, exact) · Script: S
+Technique: T1 (free-fermion / Jordan–Wigner) · Tier: A (closed-form, exact) · Script: S
 
 ## Hamiltonian & conventions
 

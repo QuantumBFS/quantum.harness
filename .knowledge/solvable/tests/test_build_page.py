@@ -98,7 +98,7 @@ def test_parse_card_on_real_tfim(gen):
     # Solvability: first paragraph of the section, markdown stripped
     solv = card["solvability"]
     assert solv.strip()
-    assert "Jordan-Wigner" in solv
+    assert "Jordan–Wigner" in solv
     assert "**" not in solv and "`" not in solv
 
     # Benchmarks: at least one parsed data row with the table's four cells
@@ -109,6 +109,23 @@ def test_parse_card_on_real_tfim(gen):
     assert first["quantity"]  # non-empty, no header/separator leakage
     assert first["quantity"] != "Quantity"
     assert "---" not in first["quantity"]
+
+
+def test_every_built_entry_has_a_hook(gen):
+    """Every slug marked built (✓) in the real INDEX.md must have a HOOKS entry.
+
+    This reads the live INDEX at test time (not a fixture) so it tracks
+    whichever cards are actually built. It passes today because all wave-1
+    slugs have hooks; it is expected to start failing once wave-2 cards are
+    marked built without a matching HOOKS entry added yet, which is the
+    point — a loud, test-level reminder to fill in the hook.
+    """
+    index_text = (ROOT / "INDEX.md").read_text(encoding="utf-8")
+    entries = gen.parse_index(index_text)
+    built = [e for e in entries if e["built"]]
+    assert built, "expected at least one built entry in the real INDEX.md"
+    missing = [e["slug"] for e in built if not gen.HOOKS.get(e["slug"], "").strip()]
+    assert not missing, f"built slugs missing a HOOKS entry: {missing}"
 
 
 def test_benchmark_citekeys_render_readable(gen):

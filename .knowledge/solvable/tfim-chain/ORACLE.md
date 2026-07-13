@@ -1,6 +1,6 @@
 # Transverse-field Ising chain — exact-solution oracle
 
-Technique: T1 (free-fermion / Jordan-Wigner) · Tier: A (closed-form, exact) · Script: S
+Technique: T1 (free-fermion / Jordan–Wigner) · Tier: A (closed-form, exact) · Script: S
 
 ## Hamiltonian & conventions
 
@@ -12,7 +12,7 @@ Physics card: `.knowledge/models/transverse-field-ising/MODEL.md`. That card use
 
 ## Solvability statement
 
-T1: the chain maps to free fermions via a Jordan-Wigner transformation, giving a quadratic (Bogoliubov-diagonalizable) fermion Hamiltonian. Everything reported here — the full spectrum (via the single-particle dispersion `ε(k)`), the ground-state energy at finite `L` and in the thermodynamic limit, the gap, and the transverse magnetization — is exact for any `L`, `J`, `h`. The model is exactly solvable in its entirety — there is no approximation anywhere. **Not exact:** nothing; everything about this model is exact. Some exact quantities are simply not implemented in `oracle.py` (out of this card's scope, ground-state statics only): longitudinal spin-spin correlators `⟨σ^z_i σ^z_j⟩` (exactly known as Toeplitz determinants of the JW correlation matrix, requiring determinant/Pfaffian machinery), and finite-temperature and non-equilibrium quench quantities (also exactly computable from the free-fermion solution).
+T1: the chain maps to free fermions via a Jordan–Wigner transformation, giving a quadratic (Bogoliubov-diagonalizable) fermion Hamiltonian. Everything reported here — the full spectrum (via the single-particle dispersion `ε(k)`), the ground-state energy at finite `L` and in the thermodynamic limit, the gap, and the transverse magnetization — is exact for any `L`, `J`, `h`. The model is exactly solvable in its entirety — there is no approximation anywhere. **Not exact:** nothing; everything about this model is exact. Some exact quantities are simply not implemented in `oracle.py` (out of this card's scope, ground-state statics only): longitudinal spin-spin correlators `⟨σ^z_i σ^z_j⟩` (exactly known as Toeplitz determinants of the JW correlation matrix, requiring determinant/Pfaffian machinery), and finite-temperature and non-equilibrium quench quantities (also exactly computable from the free-fermion solution).
 
 ## Exact results
 
@@ -25,7 +25,7 @@ T1: the chain maps to free fermions via a Jordan-Wigner transformation, giving a
 ## Oracle script
 
 `python oracle.py --L 16 --h 1.0` → prints `e0_per_site`, `e0_thermodynamic`, `gap_single_fermion`, `mx`. Importable: `compute(L=16, h=1.0, J=1.0)`.
-Self-test anchors: (1) thermodynamic-limit energy at criticality equals closed form `-4/π`; (2) finite-`L` Jordan-Wigner energy matches brute-force ED for `(L,h) ∈ {(8,0.5),(8,1.0),(10,1.3)}`; (3) gap vanishes at `h=J` and equals `1.0` at `h=1.5, J=1`.
+Self-test anchors: (1) thermodynamic-limit energy at criticality equals closed form `-4/π`; (2) finite-`L` Jordan–Wigner energy matches brute-force ED for `(L,h) ∈ {(8,0.5),(8,1.0),(10,1.3)}`; (3) gap vanishes at `h=J` and equals `1.0` at `h=1.5, J=1`.
 
 ## Benchmarks
 
@@ -41,4 +41,4 @@ Self-test anchors: (1) thermodynamic-limit energy at criticality equals closed f
 
 ## Key reference
 
-[@Pfeuty1970] — the original exact solution of the 1D transverse-field Ising chain via Jordan-Wigner, source of the dispersion, thermodynamic-limit energy, and gap used above. Rendered: _(Wave 3)_.
+[@Pfeuty1970] — the original exact solution of the 1D transverse-field Ising chain via Jordan–Wigner, source of the dispersion, thermodynamic-limit energy, and gap used above. Rendered: _(Wave 3)_.

@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import html
 import re
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -517,11 +518,20 @@ def main(argv=None) -> None:
     args = ap.parse_args(argv)
 
     entries = parse_index(INDEX_MD.read_text(encoding="utf-8"))
+    techs_seen = set()
     for e in entries:
         e["hook"] = HOOKS.get(e["slug"], "")
+        techs_seen.add(e["technique"])
         if e["built"]:
             card_md = REPO / ".knowledge" / "solvable" / e["slug"] / "ORACLE.md"
             e["card"] = parse_card(card_md.read_text(encoding="utf-8"))
+            if not e["hook"]:
+                print(f"warning: built slug '{e['slug']}' has no HOOKS entry",
+                      file=sys.stderr)
+    for code in techs_seen:
+        if not SUBTITLES.get(code):
+            print(f"warning: technique '{code}' has no SUBTITLES entry",
+                  file=sys.stderr)
 
     page = render(entries)
     args.out.write_text(page, encoding="utf-8")

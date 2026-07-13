@@ -1,6 +1,6 @@
 """Anisotropic XY chain oracle: H = J sum [(1+g) Sx Sx + (1-g) Sy Sy] - h sum Sz.
 
-S = sigma/2 spin operators, J = 1 default, PBC. Jordan-Wigner maps the chain to
+S = sigma/2 spin operators, J = 1 default, PBC. Jordan–Wigner maps the chain to
 free (Bogoliubov-diagonalizable) fermions. With c_i = (prod_{j<i} sigma^z_j)
 sigma^-_i and sigma^z = 1 - 2 n:
 
@@ -58,7 +58,7 @@ def _sector(L, gamma, h, J, sector):
 
 
 def compute(L=64, gamma=0.0, h=0.0, J=1.0):
-    """XY-chain exact quantities via Jordan-Wigner; e0 = min over parity sectors."""
+    """XY-chain exact quantities via Jordan–Wigner; e0 = min over parity sectors."""
     e_abc, gap_abc = _sector(L, gamma, h, J, "abc")
     e_pbc, gap_pbc = _sector(L, gamma, h, J, "pbc")
     if e_abc <= e_pbc:
@@ -68,7 +68,9 @@ def compute(L=64, gamma=0.0, h=0.0, J=1.0):
 
 def self_test():
     # anchor 1: XX point (g=0, h=0) -> e0 = -1/pi in the thermodynamic limit
-    assert abs(compute(L=2000, gamma=0.0, h=0.0)["e0_per_site"] + 1 / np.pi) < 1e-4
+    # finite-size correction is O(1/L^2); at L=400 the deviation is ~3e-6, well
+    # inside the 1e-4 tolerance below.
+    assert abs(compute(L=400, gamma=0.0, h=0.0)["e0_per_site"] + 1 / np.pi) < 1e-4
     # anchor 2: JW energy matches brute-force ED at L=8 for three (g,h) points
     for gamma, h in [(0.0, 0.0), (0.7, 0.3), (1.0, 0.5)]:
         sx, sy, sz = ed.spin_ops(8)

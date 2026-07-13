@@ -47,6 +47,11 @@ def v2(k, g, n, m):
 
 
 def _depletion_integrand(k, g, n, m):
+    if k == 0:
+        # v2(0, ...) is a genuine 0/0 (numerator ~ gn, ebog -> 0); the k^2
+        # prefactor kills it in the limit, so short-circuit rather than let
+        # k**2 * inf evaluate to nan.
+        return 0.0
     return k ** 2 * v2(k, g, n, m)
 
 

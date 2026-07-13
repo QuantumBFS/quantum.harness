@@ -33,7 +33,7 @@ def pauli_ops(L):
 
 
 def fermion_ops(L):
-    """Jordan-Wigner spinless fermion annihilation/creation operators."""
+    """Jordan–Wigner spinless fermion annihilation/creation operators."""
     sm = sp.csr_matrix(np.array([[0, 1], [0, 0]], complex))  # |0><1|
     c = []
     for i in range(L):

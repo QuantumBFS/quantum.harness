@@ -36,7 +36,7 @@ def mx_thermo(J, h, dh=1e-5):
 
 
 def compute(L=16, h=1.0, J=1.0):
-    """TFIM chain exact quantities via Jordan-Wigner."""
+    """TFIM chain exact quantities via Jordan–Wigner."""
     return {
         "e0_per_site": e0_finite(L, J, h),
         "e0_thermodynamic": e0_thermo(J, h),

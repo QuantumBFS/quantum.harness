@@ -18,7 +18,7 @@ T1: the Hamiltonian is quadratic (bilinear, number-conserving) in the fermions, 
 
 - Bulk single-particle dispersion (PBC): $\varepsilon(k) = \pm|g(k)|$, $g(k) = v + w e^{ik}$
 - Winding number (chiral/sublattice invariant): $\nu = \dfrac{1}{2\pi i}\oint \dfrac{g'(k)}{g(k)}\,dk \in \{0,1\}$ — computed here via `topology.winding(g, nk)` (phase-unwrapping of `g(k)` around the origin); $\nu=1$ (topological) for $|w|>|v|$, $\nu=0$ (trivial) for $|v|>|w|$ [@SSH1979]
-- Bulk gap: $\Delta = 2\big|\,|v|-|w|\,\big|$, vanishing at the critical point $v=w$
+- Bulk gap: $\Delta = 2\big|\,|v|-|w|\,\big|$, vanishing at the critical point $|v| = |w|$
 - OBC edge modes: exactly two near-zero-energy states (one per end) in the topological phase ($|w|>|v|$), none in the trivial phase; detected here as OBC single-particle eigenvalues with $|\varepsilon| < \Delta/4$
 - Edge-mode decay length (topological phase, $|w|>|v|$): $\xi = 1/\ln(|w|/|v|)$ [@SSH1979]
 - Ground-state energy per unit cell (filled lower band, half filling — exactly one fermion per unit cell): $e_0 = -\dfrac{1}{2\pi}\displaystyle\int_0^{2\pi} |v+we^{ik}|\,dk$. **Density convention:** here "per site" means per unit cell (`L` counts unit cells, matching the OBC matrix size `2L` and `models/ssh/MODEL.md`'s "`N` cells" convention) — equivalently the energy per particle, since half filling puts exactly one occupied fermion per unit cell. This is `E_total / L`, *not* `E_total / (2L)`. (The ED cross-check itself sidesteps normalization entirely: it compares **total** energies — the sum of negative OBC single-particle eigenvalues against `ed.ground_energy` of the many-body Hamiltonian at `L = 4` unit cells — with no division by any length, so it is valid under either density convention)
