@@ -23,9 +23,16 @@ def test_bethe_xxx_ground_energy_matches_ed():
 def test_bethe_roots_are_real_and_symmetric():
     for N in (8, 10, 12):
         r = bethe.xxx_ground_roots(N)
-        assert np.max(np.abs(r.imag)) < 1e-12
-        assert abs(np.sort(r)[::-1].sum() + 0.0) < 1e-10  # symmetric about 0
-        assert abs(np.sum(r)) < 1e-10
+        # roots are symmetric about 0 as a SET: {r} == {-r}
+        assert np.allclose(np.sort(r), np.sort(-r), atol=1e-12), N
+        # roots genuinely solve the logarithmic Bethe equations
+        M = N // 2
+        I = np.arange(M) - (M - 1) / 2.0
+        diff = r[:, None] - r[None, :]
+        residual = (2 * np.arctan(2 * r)
+                    - 2 * np.pi * I / N
+                    - 2 * np.arctan(diff).sum(axis=1) / N)
+        assert np.max(np.abs(residual)) < 1e-12, (N, np.max(np.abs(residual)))
 
 
 def test_bdg_matches_ed_random_quadratic():

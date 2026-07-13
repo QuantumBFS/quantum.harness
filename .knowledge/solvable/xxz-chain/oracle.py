@@ -112,7 +112,7 @@ def self_test():
                     + D * sz[i] @ sz[(i + 1) % L] for i in range(L))
             e = ed.ground_energy(H) / L
             assert e < thermo, (D, L, e, thermo)      # below thermodynamic
-            assert e > prev, (D, L, e, prev)          # monotincreasing in L
+            assert e > prev, (D, L, e, prev)          # monotone increasing in L
             prev = e
         assert abs(e - thermo) / abs(thermo) < 0.02   # L=12 within 2%
 

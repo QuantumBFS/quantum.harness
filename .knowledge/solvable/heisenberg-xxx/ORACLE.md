@@ -54,7 +54,7 @@ Self-test anchors: (1) **ground truth** — the Bethe-ansatz energy equals brute
 
 ## Verification recipes
 
-- To check a DMRG/ED run at finite `N` (PBC): compare `e0_per_site_finite` from `oracle.py --N <N>` (exact Bethe value), tolerance `1e-8`. Note the finite-size energy sits *below* `1/4 − ln 2` and rises toward it as `≈ −π²/(6N²)·(v/N)`; do not compare a finite-`N` number directly to the thermodynamic constant.
+- To check a DMRG/ED run at finite `N` (PBC): compare `e0_per_site_finite` from `oracle.py --N <N>` (exact Bethe value), tolerance `1e-8`. Note the finite-size energy sits *below* `1/4 − ln 2` and rises toward it as the CFT correction `−πvc/(6N²) = −π²/(12N²)` (`v = π/2`, `c = 1`); do not compare a finite-`N` number directly to the thermodynamic constant.
 - To check a thermodynamic-limit extrapolation: compare the `1/N²`-extrapolated `E/N` against `1/4 − ln 2`.
 - To check a spin-wave/spinon-velocity measurement: compare against `π/2` (`J=1`).
 
