@@ -65,8 +65,8 @@ built `ORACLE.md` where available.
 | Model | Tier | Script | Status | Card |
 |---|---|---|---|---|
 | `ising-2d-onsager` | A | S | ✓ wave 2 | [ORACLE](./ising-2d-onsager/ORACLE.md) |
-| `ising-triangular` | A | S | wave 2 | — |
-| `dimer-kasteleyn` | A | S | wave 2 | — |
+| `ising-triangular` | A | S | ✓ wave 2 | [ORACLE](./ising-triangular/ORACLE.md) |
+| `dimer-kasteleyn` | A | S | ✓ wave 2 | [ORACLE](./dimer-kasteleyn/ORACLE.md) |
 | `six-vertex` | B | S | wave 2 | — |
 | `eight-vertex` | B | P | wave 2 | — |
 | `hard-hexagons` | B | P | wave 2 | — |
