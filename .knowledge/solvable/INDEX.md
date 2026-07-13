@@ -64,7 +64,7 @@ built `ORACLE.md` where available.
 
 | Model | Tier | Script | Status | Card |
 |---|---|---|---|---|
-| `ising-2d-onsager` | A | S | wave 2 | — |
+| `ising-2d-onsager` | A | S | ✓ wave 2 | [ORACLE](./ising-2d-onsager/ORACLE.md) |
 | `ising-triangular` | A | S | wave 2 | — |
 | `dimer-kasteleyn` | A | S | wave 2 | — |
 | `six-vertex` | B | S | wave 2 | — |

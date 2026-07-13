@@ -58,6 +58,7 @@ HOOKS = {
     "x-cube": "fracton order; subextensive degeneracy 6L−3",
     "haah-code": "cubic code; number-theoretic ground-space rank",
     "cluster-spt": "cluster stabilizers; SPT with protected edge modes",
+    "ising-2d-onsager": "transfer matrix; Onsager free energy, Kaufman finite-torus Z",
 }
 
 TIER_TITLES = {
