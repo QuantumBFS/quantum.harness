@@ -131,12 +131,16 @@ def compute(T=2.0, L=4):
 def self_test():
     # anchor 1: critical temperature closed form
     assert abs(tc() - 2.269185314213022) < 1e-12
-    # anchor 2: Kaufman ln Z == brute-force enumeration (the ground truth)
+    # anchor 2: Kaufman ln Z == brute-force enumeration (the ground truth);
+    # the asymmetric (3, 4) torus exercises the m/n role assignment
     for m, n in [(3, 3), (4, 4)]:
         for beta in [0.2, 0.4406868, 1.0]:
             k = partition_function_finite(m, n, beta)
             e = _enumerate_lnZ(m, n, beta)
             assert abs(k - e) <= 1e-10 * abs(e), (m, n, beta, k, e)
+    k = partition_function_finite(3, 4, 0.4406868)
+    e = _enumerate_lnZ(3, 4, 0.4406868)
+    assert abs(k - e) <= 1e-10 * abs(e), (3, 4, k, e)
     # anchor 3: internal energy at criticality equals -sqrt(2) exactly
     assert abs(internal_energy(tc()) + np.sqrt(2.0)) < 1e-10
     # anchor 4: free-energy consistency, u = f - T df/dT vs elliptic closed form
