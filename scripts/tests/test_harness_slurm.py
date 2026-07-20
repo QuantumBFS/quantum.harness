@@ -174,12 +174,14 @@ def test_submit_uses_profile_default_partition_and_required_gres(tmp_path):
 
 def test_submit_uses_explicit_partition_required_gres(tmp_path):
     profile = write_profile(tmp_path)
+    script = tmp_path / "job.sbatch"
+    script.write_text("#SBATCH --partition=default-gpu\n")
     r = run(
         [
             "--dry-run",
             "submit",
             "--script",
-            "scripts/job.sbatch",
+            str(script),
             "--partition",
             "explicit-gpu",
         ],
@@ -188,17 +190,20 @@ def test_submit_uses_explicit_partition_required_gres(tmp_path):
 
     assert r.returncode == 0
     assert "--partition=explicit-gpu" in r.stderr
+    assert "--partition=default-gpu" not in r.stderr
     assert "--gres=gpu:explicit:2" in r.stderr
 
 
 def test_submit_preserves_caller_gres_in_extra(tmp_path):
     profile = write_profile(tmp_path)
+    script = tmp_path / "job.sbatch"
+    script.write_text("#SBATCH --gres=gpu:script:4\n")
     r = run(
         [
             "--dry-run",
             "submit",
             "--script",
-            "scripts/job.sbatch",
+            str(script),
             "--extra",
             "--gres=gpu:caller:3",
         ],
@@ -207,6 +212,21 @@ def test_submit_preserves_caller_gres_in_extra(tmp_path):
 
     assert r.returncode == 0
     assert "--gres=gpu:caller:3" in r.stderr
+    assert "--gres=gpu:default:1" not in r.stderr
+
+
+def test_submit_combines_profile_default_partition_with_script_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    script = tmp_path / "job.sbatch"
+    script.write_text("#SBATCH --gres=gpu:script:4\n")
+
+    r = run(
+        ["--dry-run", "submit", "--script", str(script)],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--partition=default-gpu" in r.stderr
     assert "--gres=gpu:default:1" not in r.stderr
 
 
