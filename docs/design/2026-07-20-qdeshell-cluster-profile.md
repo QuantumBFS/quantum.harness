@@ -58,8 +58,12 @@ to delegate all TOML parsing to Python.
 
 In `/using-slurm`, add one pre-submit feasibility contract:
 
-1. Resolve the selected partition from an explicit request or the scheduler
-   default and include its `required_gres` unless the caller supplied GRES.
+1. Resolve submission resources without overriding batch-script intent. The
+   precedence is CLI `--partition` over script `#SBATCH --partition` over the
+   profile's `scheduler.default_partition`; for GRES it is `--extra --gres`
+   over script `#SBATCH --gres` over the selected partition's
+   `required_gres`. Reuse the existing Python `#SBATCH` parser rather than
+   duplicating directive parsing in Bash.
 2. Ship the authorized script and complete any required bootstrap so the exact
    submitted path is available remotely.
 3. Run that request through `harness_slurm.sh submit --test-only` when Slurm
