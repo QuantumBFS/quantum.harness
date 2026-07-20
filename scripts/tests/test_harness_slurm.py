@@ -210,6 +210,41 @@ def test_submit_preserves_caller_gres_in_extra(tmp_path):
     assert "--gres=gpu:default:1" not in r.stderr
 
 
+def test_submit_preserves_script_partition_and_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    script = tmp_path / "job.sbatch"
+    script.write_text(
+        "#SBATCH --partition=explicit-gpu\n"
+        "#SBATCH --gres=gpu:script:4\n"
+    )
+
+    r = run(
+        ["--dry-run", "submit", "--script", str(script)],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--partition=default-gpu" not in r.stderr
+    assert "--gres=gpu:default:1" not in r.stderr
+    assert " --partition=" not in r.stderr
+    assert " --gres=" not in r.stderr
+
+
+def test_submit_adds_required_gres_for_script_partition_without_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    script = tmp_path / "job.sbatch"
+    script.write_text("#SBATCH --partition=explicit-gpu\n")
+
+    r = run(
+        ["--dry-run", "submit", "--script", str(script)],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert " --partition=" not in r.stderr
+    assert "--gres=gpu:explicit:2" in r.stderr
+
+
 def test_submit_test_only_prints_scheduler_output_without_job_id_parsing(
     fake_ssh, tmp_path
 ):

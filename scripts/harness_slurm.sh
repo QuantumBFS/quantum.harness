@@ -59,6 +59,14 @@ profile_field() {
   python3 "$SCRIPT_DIR/cluster_profile.py" --field "$field" --profile "$file" 2>/dev/null
 }
 
+# Read one #SBATCH directive through the shared Python parser.
+script_field() {
+  local script="$1" field="$2"
+  [[ -f "$script" ]] || return 1
+  python3 "$SCRIPT_DIR/cluster_guardrail.py" \
+    directive "$script" --field "$field" 2>/dev/null
+}
+
 # Read a field from one named [[partitions]] row through cluster_profile.py.
 partition_field() {
   local partition="$1" field="$2" file="$3"
@@ -222,16 +230,26 @@ cmd_submit() {
     die "submit: --array requires --run-spec; use a plain --script for single jobs"
   fi
   local alias repo; alias="$(resolve_alias)"; repo="$(resolve_repo)"
-  partition="$(resolve_partition "$partition")"
+  local script_partition="" partition_cli="$partition"
+  script_partition="$(script_field "$script" partition || true)"
+  if [[ -z "$partition" && -n "$script_partition" ]]; then
+    partition="$script_partition"
+    partition_cli=""
+  else
+    partition="$(resolve_partition "$partition")"
+    partition_cli="$partition"
+  fi
 
-  local gres=""
-  if [[ ! "$extra" =~ (^|[[:space:]])--gres($|=|[[:space:]]) ]] && [[ -n "$partition" ]]; then
+  local gres="" script_gres=""
+  script_gres="$(script_field "$script" gres || true)"
+  if [[ ! "$extra" =~ (^|[[:space:]])--gres($|=|[[:space:]]) ]] \
+      && [[ -z "$script_gres" ]] && [[ -n "$partition" ]]; then
     gres="$(partition_field "$partition" 'required_gres' "$(profile_path)" || true)"
   fi
 
   local sbatch="sbatch"
   [[ "$test_only" == "true" ]] && sbatch="$sbatch --test-only"
-  [[ -n "$partition" ]] && sbatch="$sbatch --partition=$partition"
+  [[ -n "$partition_cli" ]] && sbatch="$sbatch --partition=$partition_cli"
   [[ -n "$gres" ]]      && sbatch="$sbatch --gres=$gres"
   [[ -n "$walltime" ]]  && sbatch="$sbatch --time=$walltime"
   [[ -n "$cpus" ]]      && sbatch="$sbatch --cpus-per-task=$cpus"

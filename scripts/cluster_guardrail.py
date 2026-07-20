@@ -81,8 +81,10 @@ def parse_directives(text: str) -> dict[str, str]:
     out: dict[str, str] = {}
     for raw in text.splitlines():
         line = raw.strip()
-        if not line.startswith("#SBATCH"):
+        if not line or (line.startswith("#") and not line.startswith("#SBATCH")):
             continue
+        if not line.startswith("#SBATCH"):
+            break
         body = line[len("#SBATCH") :].strip()
         # strip trailing inline comment
         body = body.split("#", 1)[0].strip()
@@ -364,7 +366,18 @@ def main(argv: list[str] | None = None) -> int:
     p_chk.add_argument("path")
     p_chk.add_argument("--profile", default=None)
 
+    p_dir = sub.add_parser("directive", help="read one #SBATCH directive")
+    p_dir.add_argument("script")
+    p_dir.add_argument("--field", required=True, choices=("partition", "gres"))
+
     args = parser.parse_args(argv)
+    if args.command == "directive":
+        directives = parse_directives(Path(args.script).read_text(encoding="utf-8"))
+        value = directives.get(args.field)
+        if value is None:
+            return 1
+        print(value)
+        return 0
     if args.command == "inspect":
         report, code = cmd_inspect(args.script, args.profile)
     else:
