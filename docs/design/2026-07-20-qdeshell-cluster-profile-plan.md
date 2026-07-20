@@ -4,7 +4,7 @@
 
 **Goal:** Add a public, secret-free QDES Slurm profile and teach `/using-slurm` to validate required GRES and impractical queue estimates before submitting.
 
-**Architecture:** Keep QDES-specific facts in one additive TOML profile. Extend the generic profile reference with an optional `required_gres` field, while the skill adds a scheduler-neutral feasibility gate based on the exact proposed `sbatch --test-only` request. Existing parsers remain unchanged because the schema tolerates additive fields.
+**Architecture:** Keep QDES-specific facts in one additive TOML profile. Extend the generic profile reference with an optional `required_gres` field, while the skill adds a scheduler-neutral feasibility gate based on the exact proposed `sbatch --test-only` request. Add a partition-row accessor to the Python profile parser and keep Bash limited to mechanics.
 
 **Tech Stack:** TOML, Markdown skill instructions, Python `pytest`, Bash/Slurm smoke commands, Ion skill validation.
 
@@ -16,6 +16,7 @@
 - Safety limits are one node, 64 CPUs, 24 hours, and 200 array cells; soft warnings start at 8 hours and 16 CPUs.
 - A live job is not submitted while `sbatch --test-only` predicts an impractical start time unless the user separately ratifies it.
 - PR title and body are written in English.
+- This fix pass commits locally but does not push or create a PR; the controller handles publication after re-review.
 
 ---
 
@@ -222,13 +223,13 @@ Add `required_gres = "gpu:a100:1"` to the GPU row in the full example.
 In `skills/using-slurm/SKILL.md`:
 
 - add pre-submit feasibility to the binding checklist;
-- insert it between partition ratification and bootstrap in the workflow; and
+- insert it after authorized shipping/bootstrap and before real submit; and
 - define the exact shape:
 
 ```text
 Build the complete resource request, including optional `required_gres` from
-the selected partition. When Slurm supports it, run the exact request through
-`sbatch --test-only` before shipping or submitting. Treat QOS/resource rejection
+the selected partition. After shipping/bootstrap has made the script available
+remotely, run the exact request through `sbatch --test-only`. Treat QOS/resource rejection
 as a profile/request mismatch. If the returned estimate is impractically far
 away, present wait/change/stop and require ratification before leaving a real
 job queued.
@@ -263,13 +264,54 @@ git add skills/using-slurm/SKILL.md skills/using-slurm/references/cluster-profil
 git commit -m "docs: guard slurm submissions with feasibility checks"
 ```
 
-### Task 3: End-to-end verification and English pull request
+### Task 3: Executable profile-driven feasibility guardrail
+
+**Files:**
+- Modify: `scripts/cluster_profile.py`
+- Modify: `scripts/harness_slurm.sh`
+- Modify: `scripts/tests/test_cluster_profile.py`
+- Modify: `scripts/tests/test_harness_slurm.py`
+
+**Interfaces:**
+- Consumes: explicit `--partition` or `[scheduler].default_partition`, plus optional `required_gres` on the selected partition row.
+- Produces: an exact `sbatch --test-only` request whose scheduler output is returned without job-ID parsing; real submit retains its existing job-record output.
+
+- [ ] **Step 1: Write focused failing parser and shell tests**
+
+Cover named partition lookup, explicit/default partition resolution, automatic
+GRES inclusion, caller-supplied GRES precedence, test-only output, and absence
+of real-submit job-ID parsing in test-only mode.
+
+- [ ] **Step 2: Verify RED**
+
+Run the new parser tests and shell tests separately. Confirm failures identify
+the missing partition accessor, omitted profile-derived flags, and unrecognized
+`--test-only` option.
+
+- [ ] **Step 3: Implement the minimal mechanics**
+
+Add `cluster_profile.get_partition` and CLI `--partition` scoping. In
+`harness_slurm.sh submit`, resolve the selected partition, ask the Python parser
+for its `required_gres`, add it only when `--extra` has no `--gres` request, and
+support `--test-only`. Print test-only scheduler output and return before job-ID
+parsing.
+
+- [ ] **Step 4: Verify GREEN and the public-profile hardening**
+
+Run both focused files. Extend the public-profile contract to assert portable
+filesystem paths, both fail-closed network booleans, and no forbidden public
+SSH/account keys.
+
+### Task 4: End-to-end verification and controller handoff
 
 **Files:**
 - Verify: `skills/using-slurm/profiles/qdeshell.toml`
 - Verify: `skills/using-slurm/SKILL.md`
 - Verify: `skills/using-slurm/references/cluster-profiles.md`
 - Verify: `scripts/tests/test_cluster_profile.py`
+- Verify: `scripts/tests/test_harness_slurm.py`
+- Verify: `scripts/cluster_profile.py`
+- Verify: `scripts/harness_slurm.sh`
 
 **Interfaces:**
 - Consumes: the committed QDES profile and revised skill contract.
@@ -299,16 +341,14 @@ Expected: `ssh_ok: true`; `qdagnormal` appears in the parsed partition table.
 ```bash
 HARNESS_PROFILE_FILE=skills/using-slurm/profiles/qdeshell.toml \
 HARNESS_SLURM_DRYRUN=1 \
-  scripts/harness_slurm.sh submit \
+  scripts/harness_slurm.sh submit --test-only \
     --script scripts/smoke_test.sbatch \
-    --partition qdagnormal \
     --time 00:01:00 \
-    --cpus 1 \
-    --extra '--gres=gpu:A800:1'
+    --cpus 1
 ```
 
-Expected: output contains `sbatch`, `--partition=qdagnormal`, and
-`--gres=gpu:A800:1`; no job ID is created.
+Expected: profile resolution adds `--partition=qdagnormal` and
+`--gres=gpu:A800:1` to the `sbatch --test-only` request; no job ID is created.
 
 - [ ] **Step 4: Review the complete diff and recent commits**
 
@@ -321,9 +361,11 @@ git log --oneline origin/main..HEAD
 Expected: only the approved design, plan, profile, focused test, schema, and
 skill guidance are present.
 
-- [ ] **Step 5: Push and open an English draft PR**
+- [ ] **Step 5: Hand off for re-review without publishing**
 
-Push `codex/qdeshell-cluster-profile`, then open a draft PR targeting `main`:
+Commit the tracked fixes with an English subject and provide the controller the
+verification report. Do not push or create a PR during this fix pass. The later
+draft PR should target `main` and use:
 
 ```text
 Title: Add a public QDES Slurm cluster profile

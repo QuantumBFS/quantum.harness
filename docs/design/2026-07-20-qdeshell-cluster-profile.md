@@ -3,9 +3,9 @@
 ## Goal
 
 Add a public, reusable QDES cluster profile for `/using-slurm` and make the
-skill stop before a costly or impractically delayed submission. The primary
-deliverable is the configuration file; the skill change is limited to the
-generic pre-submit guardrail revealed by the live QDES probe.
+skill stop before a costly or impractically delayed submission. The profile is
+paired with a small executable helper guardrail so the documented feasibility
+check can be performed without manually reconstructing profile defaults.
 
 ## Live evidence
 
@@ -52,15 +52,20 @@ or identity-file path. Each user remains responsible for defining the local
 ## Schema and skill change
 
 Extend the `[[partitions]]` reference schema with optional `required_gres`.
-This is an additive field, so existing profile parsing remains compatible.
+This is an additive field, so existing profiles remain compatible. Extend
+`cluster_profile.py` with a partition-row accessor and CLI scope; Bash continues
+to delegate all TOML parsing to Python.
 
 In `/using-slurm`, add one pre-submit feasibility contract:
 
-1. Include a partition's `required_gres` in the proposed resource request.
-2. Run the exact request through `sbatch --test-only` before submission when
-   the cluster supports it.
-3. Treat QOS/resource rejection as a configuration error to fix before submit.
-4. If the scheduler predicts an impractical start time, show wait/change/stop
+1. Resolve the selected partition from an explicit request or the scheduler
+   default and include its `required_gres` unless the caller supplied GRES.
+2. Ship the authorized script and complete any required bootstrap so the exact
+   submitted path is available remotely.
+3. Run that request through `harness_slurm.sh submit --test-only` when Slurm
+   supports it; print scheduler output without attempting job-ID parsing.
+4. Treat QOS/resource rejection as a configuration error to fix before submit.
+5. If the scheduler predicts an impractical start time, show wait/change/stop
    choices and do not leave a real job queued without user ratification.
 
 This PR will not teach QDES-specific behavior in `SKILL.md`; the site-specific
@@ -72,15 +77,19 @@ Use test-first validation:
 
 1. Add a cluster-profile test that initially fails because `qdeshell.toml` is
    absent, then checks TOML parsing, required anchors, `required_gres`, safety
-   limits, and absence of personal SSH fields.
+   limits, portable filesystem paths, fail-closed network booleans, and absence
+   of personal SSH/account fields.
 2. Run a baseline fresh-agent scenario against the current skill using the raw
    QDES probe transcript. Record whether it submits a CPU-only job, overlooks
    `QOSMinGRES`, or queues the delayed GPU job.
 3. Add the minimal skill guidance and repeat the same scenario with the revised
    skill. It must include the GPU requirement, use `sbatch --test-only`, and
    stop before the delayed real submission.
-4. Run the focused tests, skill validation, and the repository test suite.
-5. Re-run profile-driven `precheck`, `probe-partitions`, and a dry-run submit.
+4. Add focused parser and shell tests for explicit/default partition selection,
+   automatic GRES, `submit --test-only` output, and skipped job-ID parsing.
+5. Run the focused tests, skill validation, and the repository test suite.
+6. Re-run profile-driven `precheck`, `probe-partitions`, and a dry-run test-only
+   submit without manual partition or GRES flags.
    Do not submit a live QDES job unless its predicted start becomes practical
    and the user separately ratifies the GPU allocation.
 
@@ -91,6 +100,7 @@ The PR contains only:
 - the public QDES TOML profile;
 - the additive profile-schema documentation;
 - the minimal generic pre-submit guidance in `/using-slurm`; and
+- the additive profile parser and Slurm helper mechanics needed to execute it;
 - focused regression tests.
 
 It excludes personal connection data, a live `active.toml` symlink, remote

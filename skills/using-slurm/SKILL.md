@@ -38,6 +38,8 @@ This skill is agent-facing (harness array sweeps with run-spec manifests). **Stu
 ```bash
 scripts/harness_slurm.sh precheck                       # resolve profile, ssh echo ok, git dirty status
 scripts/harness_slurm.sh probe-partitions               # parsed sinfo table — agent ratifies the choice
+scripts/harness_slurm.sh submit --test-only --script <remote-script> \
+    --time <t> --cpus <n>                               # exact scheduler feasibility output
 scripts/harness_slurm.sh submit --array N --run-spec results/<run>/run_spec.json \
     --command '<cmd>' --partition <p> --time <t> --cpus <n>   # captures the job id
 scripts/harness_slurm.sh status <jobid>                 # squeue state + pending-reason category
@@ -48,9 +50,9 @@ scripts/harness_slurm.sh pending-cells <run> [--success-field F --success-value 
 
 1. **Pre-check.** Resolve profile, test ssh, capture dirty status.
 2. **Probe and ratify partition.** Inspect queue state and present 2-3 viable options with recommended first.
-3. **Pre-submit feasibility.** Build the complete resource request, including optional `required_gres` from the selected partition. When Slurm supports it, run the exact request through `sbatch --test-only` before shipping or submitting. Treat QOS/resource rejection as a profile/request mismatch. If the returned estimate is impractically far away, present wait/change/stop and require ratification before leaving a real job queued.
-4. **Bootstrap only if needed.** Ensure remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
-5. **Ship.** Use authorized `git` flow or explicit `rsync`.
+3. **Ship.** Use authorized `git` flow or explicit `rsync` so the submitted script exists at its remote path.
+4. **Bootstrap only if needed.** Ensure the remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
+5. **Pre-submit feasibility.** After shipping/bootstrap, run the exact request with `harness_slurm.sh submit --test-only ...`. The helper resolves an omitted partition from `scheduler.default_partition` and automatically adds optional `required_gres` from the selected partition unless the caller already supplied `--gres` in `--extra`. Print and inspect the scheduler response. Treat QOS/resource rejection as a profile/request mismatch. If the returned estimate is impractically far away, present wait/change/stop and require ratification before leaving a real job queued.
 6. **Submit.** Run `sbatch` on the remote repo and capture job id, partition, walltime, and cell count.
 7. **Monitor.** Check pending/running transitions, startup logs, and long-run pulses. If the job remains pending or fails at startup, surface choices rather than waiting silently.
 8. **Fetch.** On completion, sync `results/<run>/` back locally.

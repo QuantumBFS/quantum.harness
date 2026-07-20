@@ -129,7 +129,7 @@ quota_command = "sshare -U -u student07"
 
 ## Authoring a new profile
 
-The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`sinfo`, `scontrol show partition`, `sacctmgr show accounts`), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`.
+The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`sinfo`, `scontrol show partition`, `sacctmgr show accounts`), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`. Read a partition-scoped value with `python3 scripts/cluster_profile.py --partition <name> --field required_gres --profile <name>.toml`; `harness_slurm.sh submit` uses this interface instead of parsing TOML in Bash.
 
 ## Cards in this folder
 

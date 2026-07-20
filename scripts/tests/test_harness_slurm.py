@@ -36,6 +36,35 @@ def fake_ssh(tmp_path):
     return {"PATH": f"{bind}:{os.environ['PATH']}"}
 
 
+def write_profile(tmp_path):
+    profile = tmp_path / "cluster.toml"
+    profile.write_text(
+        """
+[identity]
+name = "test"
+
+[connection]
+repo_path_remote = "~/repo"
+
+[connection.ssh]
+alias = "test-cluster"
+
+[scheduler]
+type = "slurm"
+default_partition = "default-gpu"
+
+[[partitions]]
+name = "default-gpu"
+required_gres = "gpu:default:1"
+
+[[partitions]]
+name = "explicit-gpu"
+required_gres = "gpu:explicit:2"
+"""
+    )
+    return profile
+
+
 # --------------------------------------------------------------------------- #
 # wait
 # --------------------------------------------------------------------------- #
@@ -119,3 +148,99 @@ def test_smoke_test_missing_script(tmp_path):
     r = run(["--dry-run", "--alias", "x", "--repo", "/r", "smoke-test"], cwd=tmp_path)
     assert r.returncode != 0
     assert "missing" in r.stderr
+
+
+# --------------------------------------------------------------------------- #
+# profile-driven submit feasibility
+# --------------------------------------------------------------------------- #
+def test_submit_uses_profile_default_partition_and_required_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--test-only",
+            "--script",
+            "scripts/job.sbatch",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "sbatch --test-only" in r.stderr
+    assert "--partition=default-gpu" in r.stderr
+    assert "--gres=gpu:default:1" in r.stderr
+
+
+def test_submit_uses_explicit_partition_required_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--script",
+            "scripts/job.sbatch",
+            "--partition",
+            "explicit-gpu",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--partition=explicit-gpu" in r.stderr
+    assert "--gres=gpu:explicit:2" in r.stderr
+
+
+def test_submit_preserves_caller_gres_in_extra(tmp_path):
+    profile = write_profile(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--script",
+            "scripts/job.sbatch",
+            "--extra",
+            "--gres=gpu:caller:3",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--gres=gpu:caller:3" in r.stderr
+    assert "--gres=gpu:default:1" not in r.stderr
+
+
+def test_submit_test_only_prints_scheduler_output_without_job_id_parsing(
+    fake_ssh, tmp_path
+):
+    profile = write_profile(tmp_path)
+    scheduler_output = "sbatch: Job 42 to start at 2026-08-31T12:00:00"
+    r = run(
+        ["submit", "--test-only", "--script", "scripts/job.sbatch"],
+        env={
+            **fake_ssh,
+            "FAKE_OUT": scheduler_output,
+            "HARNESS_PROFILE_FILE": str(profile),
+        },
+    )
+
+    assert r.returncode == 0
+    assert r.stdout.strip() == scheduler_output
+    assert "could not parse a job id" not in r.stderr
+    assert "job_id:" not in r.stdout
+
+
+def test_submit_real_mode_still_parses_job_id(fake_ssh, tmp_path):
+    profile = write_profile(tmp_path)
+    r = run(
+        ["submit", "--script", "scripts/job.sbatch"],
+        env={
+            **fake_ssh,
+            "FAKE_OUT": "Submitted batch job 12345",
+            "HARNESS_PROFILE_FILE": str(profile),
+        },
+    )
+
+    assert r.returncode == 0
+    assert "job_id:    12345" in r.stdout
+    assert "partition: default-gpu" in r.stdout
