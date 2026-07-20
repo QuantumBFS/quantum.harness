@@ -141,6 +141,38 @@ def test_get_limits_malformed_types():
     assert lim.hard == {} and lim.soft == {} and lim.allowed_roots == []
 
 
+def test_public_qdeshell_profile_is_safe_and_complete():
+    path = cp.Path(__file__).resolve().parents[2] / (
+        "skills/using-slurm/profiles/qdeshell.toml"
+    )
+    profile = cp.load_profile(path)
+
+    assert cp.validate(profile) == []
+    assert profile["connection"]["repo_path_remote"] == "~/quantum.harness"
+    assert profile["connection"]["ssh"] == {"alias": "qdeshell"}
+    assert profile["scheduler"] == {
+        "type": "slurm",
+        "default_partition": "qdagnormal",
+    }
+
+    partition = profile["partitions"][0]
+    assert partition["name"] == "qdagnormal"
+    assert partition["required_gres"] == "gpu:A800:1"
+    assert partition["cores"] == 64
+    assert partition["gpu"] == "A800:8"
+
+    limits = cp.get_limits(profile)
+    assert limits.hard == {
+        "max_walltime": "24:00:00",
+        "max_nodes": 1,
+        "max_cpus": 64,
+        "max_array_size": 200,
+    }
+    assert limits.soft["warn_walltime"] == "08:00:00"
+    assert limits.soft["warn_cpus"] == 16
+    assert limits.allowed_roots == ["~/quantum.harness/results", "~/scratch"]
+
+
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
