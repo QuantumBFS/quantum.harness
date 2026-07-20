@@ -21,7 +21,7 @@ The schema is **additive**: new fields land as new keys/tables; parsers that don
 | `[connection]` | `repo_path_remote` | Where the harness checkout lives on the cluster. |
 | `[connection.ssh]` | `alias`, `host`, `user`, `identity_file`, `port` | ssh handle + the source-of-truth fields to reconstruct `~/.ssh/config`. The harness uses `alias` as the handle. |
 | `[scheduler]` | `type` (`slurm`/`pbs`/`lsf`/`none`), `default_partition` | How jobs are submitted. |
-| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu` | Array of partition rows. `class` (`default-cpu`, `gpu`, `high-mem`, `debug`, `long`, `emergency`) is how skills pick, not by name. |
+| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu`, `required_gres` | Array of partition rows. `class` (`default-cpu`, `gpu`, `high-mem`, `debug`, `long`, `emergency`) is how skills pick, not by name. `required_gres` is an optional exact Slurm GRES request imposed by partition/QOS. |
 | `[filesystem]` | `home`, `scratch`, `project`, `quota` | Paths + whether `/scratch` exists. |
 | `[network]` | `internet_from_login`, `internet_from_compute` | Booleans controlling ship strategy + in-job installs. |
 | `[region]` | `region` (`mainland_china` / blank) | Downstream mirror defaults. |
@@ -93,6 +93,7 @@ cores = 32
 memory = "512G"
 max_wall = "12:00:00"
 gpu = "a100:4"
+required_gres = "gpu:a100:1"
 
 [network]
 internet_from_login = true

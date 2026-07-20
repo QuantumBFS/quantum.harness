@@ -18,6 +18,7 @@ This skill is agent-facing (harness array sweeps with run-spec manifests). **Stu
 - Pre-checks must pass before submit: readable cluster profile, `ssh <alias> echo ok`, and captured local `git status --porcelain`.
 - Dirty worktree shipping requires user authorization. Do not silently commit, push, or rsync user changes.
 - Partition choice is ratified after queue probing. Do not blindly use the profile default when alternatives are viable.
+- Pre-submit feasibility is ratified before a real job is left queued.
 - Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests do.
 - Array jobs receive an opaque run spec and write one manifest per cell. `/using-slurm` never parses or hardcodes axis names.
 </checklist>
@@ -47,13 +48,14 @@ scripts/harness_slurm.sh pending-cells <run> [--success-field F --success-value 
 
 1. **Pre-check.** Resolve profile, test ssh, capture dirty status.
 2. **Probe and ratify partition.** Inspect queue state and present 2-3 viable options with recommended first.
-3. **Bootstrap only if needed.** Ensure remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
-4. **Ship.** Use authorized `git` flow or explicit `rsync`.
-5. **Submit.** Run `sbatch` on the remote repo and capture job id, partition, walltime, and cell count.
-6. **Monitor.** Check pending/running transitions, startup logs, and long-run pulses. If the job remains pending or fails at startup, surface choices rather than waiting silently.
-7. **Fetch.** On completion, sync `results/<run>/` back locally.
-8. **Diagnose.** Use `sacct` plus per-cell artifacts to classify success, OOM, walltime, logic failure, and convergence-out-of-budget.
-9. **Hand back.** Print per-cell status table and local results path.
+3. **Pre-submit feasibility.** Build the complete resource request, including optional `required_gres` from the selected partition. When Slurm supports it, run the exact request through `sbatch --test-only` before shipping or submitting. Treat QOS/resource rejection as a profile/request mismatch. If the returned estimate is impractically far away, present wait/change/stop and require ratification before leaving a real job queued.
+4. **Bootstrap only if needed.** Ensure remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
+5. **Ship.** Use authorized `git` flow or explicit `rsync`.
+6. **Submit.** Run `sbatch` on the remote repo and capture job id, partition, walltime, and cell count.
+7. **Monitor.** Check pending/running transitions, startup logs, and long-run pulses. If the job remains pending or fails at startup, surface choices rather than waiting silently.
+8. **Fetch.** On completion, sync `results/<run>/` back locally.
+9. **Diagnose.** Use `sacct` plus per-cell artifacts to classify success, OOM, walltime, logic failure, and convergence-out-of-budget.
+10. **Hand back.** Print per-cell status table and local results path.
 
 ## Cluster Profile
 
