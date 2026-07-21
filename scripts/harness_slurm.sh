@@ -67,6 +67,13 @@ script_field() {
     directive "$script" --field "$field" 2>/dev/null
 }
 
+# Read one sbatch option from the raw --extra string through the shared parser.
+extra_field() {
+  local extra="$1" field="$2"
+  [[ -n "$extra" ]] || return 1
+  python3 "$SCRIPT_DIR/cluster_guardrail.py" option --field "$field" -- "$extra"
+}
+
 # Read a field from one named [[partitions]] row through cluster_profile.py.
 partition_field() {
   local partition="$1" field="$2" file="$3"
@@ -217,6 +224,7 @@ cmd_submit() {
     esac
   done
   [[ -n "$script" ]] || die "submit: --script is required"
+  [[ -f "$script" && -r "$script" ]] || die "submit: --script must be a locally readable file: $script"
   # Two paths: a harness array/run-spec job, or a plain single-script job
   # (the /cluster-jobs student case). The array contract injects HARNESS_*;
   # a plain job just ships the script with the resource flags.
@@ -229,10 +237,30 @@ cmd_submit() {
   elif [[ -n "$array" ]]; then
     die "submit: --array requires --run-spec; use a plain --script for single jobs"
   fi
+
+  local extra_partition="" extra_gres="" extra_status=0 \
+        extra_partition_set="false" extra_gres_set="false"
+  if extra_partition="$(extra_field "$extra" partition)"; then
+    extra_partition_set="true"
+  else
+    extra_status=$?
+    [[ "$extra_status" -eq 1 ]] || die "submit: malformed --extra"
+  fi
+  extra_status=0
+  if extra_gres="$(extra_field "$extra" gres)"; then
+    extra_gres_set="true"
+  else
+    extra_status=$?
+    [[ "$extra_status" -eq 1 ]] || die "submit: malformed --extra"
+  fi
+
   local alias repo; alias="$(resolve_alias)"; repo="$(resolve_repo)"
   local script_partition="" partition_cli="$partition"
   script_partition="$(script_field "$script" partition || true)"
-  if [[ -z "$partition" && -n "$script_partition" ]]; then
+  if [[ "$extra_partition_set" == "true" ]]; then
+    partition="$extra_partition"
+    partition_cli=""
+  elif [[ -z "$partition" && -n "$script_partition" ]]; then
     partition="$script_partition"
     partition_cli=""
   else
@@ -242,8 +270,7 @@ cmd_submit() {
 
   local gres="" script_gres=""
   script_gres="$(script_field "$script" gres || true)"
-  if [[ ! "$extra" =~ (^|[[:space:]])--gres($|=|[[:space:]]) ]] \
-      && [[ -z "$script_gres" ]] && [[ -n "$partition" ]]; then
+  if [[ "$extra_gres_set" != "true" ]] && [[ -z "$script_gres" ]] && [[ -n "$partition" ]]; then
     gres="$(partition_field "$partition" 'required_gres' "$(profile_path)" || true)"
   fi
 

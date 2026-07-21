@@ -65,9 +65,19 @@ required_gres = "gpu:default:1"
 [[partitions]]
 name = "explicit-gpu"
 required_gres = "gpu:explicit:2"
+
+[[partitions]]
+name = "other-gpu"
+required_gres = "gpu:other:1"
 """
     )
     return profile
+
+
+def write_job_script(tmp_path, text=""):
+    script = tmp_path / "job.sbatch"
+    script.write_text(text)
+    return script
 
 
 # --------------------------------------------------------------------------- #
@@ -191,13 +201,14 @@ def test_smoke_test_missing_script(tmp_path):
 # --------------------------------------------------------------------------- #
 def test_submit_uses_profile_default_partition_and_required_gres(tmp_path):
     profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
     r = run(
         [
             "--dry-run",
             "submit",
             "--test-only",
             "--script",
-            "scripts/job.sbatch",
+            str(script),
         ],
         env={"HARNESS_PROFILE_FILE": str(profile)},
     )
@@ -208,10 +219,65 @@ def test_submit_uses_profile_default_partition_and_required_gres(tmp_path):
     assert "--gres=gpu:default:1" in r.stderr
 
 
+def test_submit_extra_partition_overrides_profile_default_for_required_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--test-only",
+            "--script",
+            str(script),
+            "--extra",
+            "--partition=explicit-gpu",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--partition=default-gpu" not in r.stderr
+    assert "--gres=gpu:explicit:2" in r.stderr
+    assert "--partition=explicit-gpu" in r.stderr
+
+
+@pytest.mark.parametrize("extra", ["--partition explicit-gpu", "-p explicit-gpu", "-pexplicit-gpu"])
+def test_submit_extra_partition_space_and_short_forms_select_required_gres(tmp_path, extra):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    r = run(
+        ["--dry-run", "submit", "--script", str(script), "--extra", extra],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--partition=default-gpu" not in r.stderr
+    assert "--gres=gpu:explicit:2" in r.stderr
+
+
+def test_submit_last_extra_partition_wins_for_required_gres(tmp_path):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--script",
+            str(script),
+            "--extra",
+            "--partition=explicit-gpu --partition=other-gpu",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode == 0
+    assert "--gres=gpu:other:1" in r.stderr
+    assert "--gres=gpu:explicit:2" not in r.stderr
+
+
 def test_submit_uses_explicit_partition_required_gres(tmp_path):
     profile = write_profile(tmp_path)
-    script = tmp_path / "job.sbatch"
-    script.write_text("#SBATCH --partition=default-gpu\n")
+    script = write_job_script(tmp_path, "#SBATCH --partition=default-gpu\n")
     r = run(
         [
             "--dry-run",
@@ -232,8 +298,7 @@ def test_submit_uses_explicit_partition_required_gres(tmp_path):
 
 def test_submit_preserves_caller_gres_in_extra(tmp_path):
     profile = write_profile(tmp_path)
-    script = tmp_path / "job.sbatch"
-    script.write_text("#SBATCH --gres=gpu:script:4\n")
+    script = write_job_script(tmp_path, "#SBATCH --gres=gpu:script:4\n")
     r = run(
         [
             "--dry-run",
@@ -253,8 +318,7 @@ def test_submit_preserves_caller_gres_in_extra(tmp_path):
 
 def test_submit_combines_profile_default_partition_with_script_gres(tmp_path):
     profile = write_profile(tmp_path)
-    script = tmp_path / "job.sbatch"
-    script.write_text("#SBATCH --gres=gpu:script:4\n")
+    script = write_job_script(tmp_path, "#SBATCH --gres=gpu:script:4\n")
 
     r = run(
         ["--dry-run", "submit", "--script", str(script)],
@@ -268,8 +332,8 @@ def test_submit_combines_profile_default_partition_with_script_gres(tmp_path):
 
 def test_submit_preserves_script_partition_and_gres(tmp_path):
     profile = write_profile(tmp_path)
-    script = tmp_path / "job.sbatch"
-    script.write_text(
+    script = write_job_script(
+        tmp_path,
         "#SBATCH --partition=explicit-gpu\n"
         "#SBATCH --gres=gpu:script:4\n"
     )
@@ -288,8 +352,7 @@ def test_submit_preserves_script_partition_and_gres(tmp_path):
 
 def test_submit_adds_required_gres_for_script_partition_without_gres(tmp_path):
     profile = write_profile(tmp_path)
-    script = tmp_path / "job.sbatch"
-    script.write_text("#SBATCH --partition=explicit-gpu\n")
+    script = write_job_script(tmp_path, "#SBATCH --partition=explicit-gpu\n")
 
     r = run(
         ["--dry-run", "submit", "--script", str(script)],
@@ -301,13 +364,48 @@ def test_submit_adds_required_gres_for_script_partition_without_gres(tmp_path):
     assert "--gres=gpu:explicit:2" in r.stderr
 
 
+def test_submit_malformed_extra_stops_before_sbatch(tmp_path):
+    profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
+    r = run(
+        [
+            "--dry-run",
+            "submit",
+            "--test-only",
+            "--script",
+            str(script),
+            "--extra",
+            "--partition='unterminated",
+        ],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode != 0
+    assert "malformed --extra" in r.stderr
+    assert "DRYRUN ssh" not in r.stderr
+
+
+def test_submit_missing_local_script_stops_before_sbatch(tmp_path):
+    profile = write_profile(tmp_path)
+    missing = tmp_path / "missing.sbatch"
+    r = run(
+        ["--dry-run", "submit", "--test-only", "--script", str(missing)],
+        env={"HARNESS_PROFILE_FILE": str(profile)},
+    )
+
+    assert r.returncode != 0
+    assert "locally readable" in r.stderr
+    assert "DRYRUN ssh" not in r.stderr
+
+
 def test_submit_test_only_prints_scheduler_output_without_job_id_parsing(
     fake_ssh, tmp_path
 ):
     profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
     scheduler_output = "sbatch: Job 42 to start at 2026-08-31T12:00:00"
     r = run(
-        ["submit", "--test-only", "--script", "scripts/job.sbatch"],
+        ["submit", "--test-only", "--script", str(script)],
         env={
             **fake_ssh,
             "FAKE_OUT": scheduler_output,
@@ -323,8 +421,9 @@ def test_submit_test_only_prints_scheduler_output_without_job_id_parsing(
 
 def test_submit_real_mode_still_parses_job_id(fake_ssh, tmp_path):
     profile = write_profile(tmp_path)
+    script = write_job_script(tmp_path)
     r = run(
-        ["submit", "--script", "scripts/job.sbatch"],
+        ["submit", "--script", str(script)],
         env={
             **fake_ssh,
             "FAKE_OUT": "Submitted batch job 12345",
