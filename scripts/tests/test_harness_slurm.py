@@ -16,6 +16,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "scripts" / "harness_slurm.sh"
+GUARDRAIL = REPO / "scripts" / "cluster_guardrail.py"
 
 
 def run(args, *, env=None, cwd=REPO):
@@ -23,6 +24,10 @@ def run(args, *, env=None, cwd=REPO):
     return subprocess.run(
         [str(SCRIPT), *args], capture_output=True, text=True, env=full, cwd=str(cwd)
     )
+
+
+def run_guardrail(args):
+    return subprocess.run(["python3", str(GUARDRAIL), *args], capture_output=True, text=True)
 
 
 @pytest.fixture
@@ -63,6 +68,37 @@ required_gres = "gpu:explicit:2"
 """
     )
     return profile
+
+
+# --------------------------------------------------------------------------- #
+# cluster_guardrail option parser
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(
+    ("extra", "expected"),
+    [
+        ("--partition=explicit-gpu", "explicit-gpu"),
+        ("--partition explicit-gpu", "explicit-gpu"),
+        ("-p explicit-gpu", "explicit-gpu"),
+        ("-pexplicit-gpu", "explicit-gpu"),
+        ("--partition=default-gpu --partition=explicit-gpu", "explicit-gpu"),
+    ],
+)
+def test_guardrail_option_reads_last_partition_from_extra(extra, expected):
+    r = run_guardrail(["option", "--field", "partition", "--", extra])
+    assert r.returncode == 0
+    assert r.stdout.strip() == expected
+
+
+def test_guardrail_option_reports_absent_field():
+    r = run_guardrail(["option", "--field", "partition", "--", "--time=01:00:00"])
+    assert r.returncode == 1
+    assert r.stdout == ""
+
+
+def test_guardrail_option_fails_closed_on_malformed_extra():
+    r = run_guardrail(["option", "--field", "partition", "--", "--partition='unterminated"])
+    assert r.returncode == 2
+    assert "malformed --extra" in r.stderr
 
 
 # --------------------------------------------------------------------------- #
