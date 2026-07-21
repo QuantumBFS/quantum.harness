@@ -37,7 +37,7 @@ Each method is curated by world-leading experts in that computational approach.
 | Exact diagonalization | [Chen Cheng (程晨)](https://scholar.google.com/citations?user=LZpS-T0AAAAJ) | `/method-ed` |
 | MPS / LTRG / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=7wiebe8AAAAJ) | `/method-mps` · `/method-ltrg` |
 | PEPS / CTMRG | [Hai-Jun Liao (廖海军)](https://scholar.google.com/citations?user=_8KbQtEAAAAJ), [Shenghan Jiang (姜胜寒)](https://kits.ucas.edu.cn/index.php/people/faculty/44-faculty/202-shenghan-jiang) | `/method-peps` |
-| Quantum Monte Carlo | [Ming-Pu Qin (秦明普)](https://scholar.google.com/citations?user=ikqa-0IAAAAJ), [Zi Hong Liu (刘子弘)](https://scholar.google.com/citations?user=TVCMMzAAAAAJ) | `/method-qmc` |
+| Quantum Monte Carlo | [Ming-Pu Qin (秦明普)](https://scholar.google.com/citations?user=ikqa-0IAAAAJ), [Zi Hong Liu (刘子宏)](https://scholar.google.com/citations?user=TVCMMzAAAAAJ) | `/method-qmc` |
 | Quantum circuit simulation | [Shi-Xin Zhang (张士欣)](https://scholar.google.com/citations?user=Ut8nVqIAAAAJ) | `/method-qcs` |
 | Noncommutative polynomial optimization | [Jie Wang (王杰)](https://wangjie212.github.io/jiewang/) | `/method-polyopt` |
 | AI agent and knowledge base | [Kun Chen (陈锟)](https://scholar.google.com/citations?user=YItDGoIAAAAJ), [Jin-Guo Liu (刘金国)](https://scholar.google.com/citations?user=4edw228AAAAJ) | [`tracks/agent-kb`](tracks/agent-kb/) |
