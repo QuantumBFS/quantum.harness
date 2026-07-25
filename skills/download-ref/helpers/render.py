@@ -137,7 +137,11 @@ def extract_pdf_text(
             finally:
                 os.chdir(old_cwd)
             if md and len(md.strip()) > 100:
-                text = md
+                # A PDF with a broken ToUnicode CMap yields lone surrogates here,
+                # which are not encodable as UTF-8. Every other extractor below
+                # reads through `errors="replace"`; this one returns a str, so
+                # normalize it the same way.
+                text = md.encode("utf-8", "replace").decode("utf-8")
         except ImportError:
             print("  pymupdf4llm not installed; falling back to markitdown/pdftotext", file=sys.stderr)
         except Exception as e:
