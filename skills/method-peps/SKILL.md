@@ -19,47 +19,32 @@ and tool skill own the next step.
 
 1. Use CTMRG/environment contraction when the figure depends on free energy, magnetization, transfer matrices, correlation length, or PEPS expectation values.
 2. Distinguish fixed-tensor contraction from variational PEPS optimization before selecting parameters.
-3. If the target is finite-temperature Linearized Tensor Renormalization Group, hand off to `/method-ltrg`; it owns the LTRG route, method card, and tool selection.
-4. Recommend `/using-pepskit` for PEPSKit.jl / TensorKit.jl setup, CTMRG settings, and timing.
-5. If the paper target is a package tutorial or official code, offer official code / web search before reimplementing formulas.
+3. Recommend `/using-pepskit` for PEPSKit.jl / TensorKit.jl setup, CTMRG settings, and timing.
+4. If the paper target is a package tutorial or official code, offer official code / web search before reimplementing formulas.
 
 ## Tool Handoff
 
-Invoke `/using-pepskit` for PEPS or CTMRG routes. For LTRG, hand off to `/method-ltrg`.
+Invoke `/using-pepskit` for PEPS or CTMRG routes.
 
 ## Details
 
-Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the default environment-contraction route.
-
 ### Scope
 
-Use this card for:
+The PEPS family of algorithms — the projected-entangled-pair-state ansatz for
+two- and higher-dimensional lattice states, and everything built on it:
 
-- Infinite 2D classical partition functions represented as local tensors.
-- PEPS environment contractions through CTMRG.
-- Visual finite-chi convergence studies of free energy, magnetization, energy,
-  or correlation length.
-- Simple classical onboarding figures, especially the 2D square-lattice Ising
-  model.
+- **Ansatz construction** — finite PEPS or an iPEPS unit cell, bond dimension `D`.
+- **Ground-state optimization** — imaginary-time simple update and full update,
+  variational / automatic-differentiation energy minimization.
+- **Environment contraction** — CTMRG, boundary-MPS / VUMPS.
+- **Observables** — read off the converged environment.
 
-Do not use this card as the full recipe for:
+Exact contraction of a PEPS is intractable, so every route approximates it under
+an environment dimension `chi_env` distinct from `D`. Convergence is shown in
+both.
 
-- Optimizing an iPEPS ground state.
-- Finite PEPS contraction.
-- Time evolution.
-- Claiming reproduction of an original CTMRG paper before its primary source
-  has been ingested under `.knowledge/literature/peps-based-algorithm/`.
-
-### Onboarding Reproduction Target
-
-Default visual target: the 2D classical Ising CTMRG example. Sweep temperature,
-contract the infinite partition function, and plot magnetization or free energy
-against the exact Onsager/Yang result. This is the cleanest CTMRG onboarding
-route because it is classical, visual, fast, and has an analytic reference.
-
-For a paper reproduction claim, first ingest the selected CTMRG paper with
-`download-ref` into `.knowledge/literature/peps-based-algorithm/`, then let
-`/reproduce-paper` derive the exact figure protocol from that primary source.
+Two-dimensional classical partition functions are the single-layer special case:
+the same contraction machinery on rank-4 tensors, with no double layer.
 
 ### Notation
 
@@ -92,17 +77,21 @@ For a paper reproduction claim, first ingest the selected CTMRG paper with
 
 ### Verification
 
-- **Residual convergence**: record CTMRG residual and iteration count for every
-  grid point.
-- **Chi convergence**: repeat the curve for at least two `chi_env` values; near
-  criticality, use more.
-- **Analytic limits**: check high-temperature and low-temperature Ising limits
-  before plotting a full curve.
-- **Exact curve**: compare the 2D Ising free energy, magnetization, and/or
-  energy against the analytic Onsager/Yang formulas used in the script.
+Always recorded, since they are byproducts of the run and cost nothing:
+
+- **Residual convergence**: CTMRG residual and iteration count for every grid
+  point.
+- **Discarded weight**: truncation error at each renormalization step.
+
+Opt-in, since they cost extra compute — propose them only when the user
+challenges a result, never by default:
+
+- **Chi convergence**: repeat the curve at a second `chi_env`; near criticality,
+  more.
+- **Analytic limits**: check the high-temperature and low-temperature limits of
+  the model.
 - **Tiny-network cross-check**: for a small finite patch, compare the local
-  tensor construction against direct enumeration before trusting the infinite
-  contraction.
+  tensor construction against direct enumeration.
 
 ### Citations
 
