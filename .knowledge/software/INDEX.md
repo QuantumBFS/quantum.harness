@@ -1,7 +1,7 @@
 # Software API references
 
 Extracted API + worked-example references for quantum many-body codes surveyed in
-`articles/2026-06-20-many-body-software-review.typ`. Each file pairs the package's
+`docs/articles/2026-06-20-many-body-software-review.typ`. Each file pairs the package's
 official documentation with its rendered release paper in
 `.knowledge/literature/software/`, and links back to the upstream docs.
 
