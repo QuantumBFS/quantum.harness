@@ -20,6 +20,13 @@ ZLP := zlp
 
 INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render node
 
+# Interpreter inside the venvs the install-* recipes create. Windows sets
+# OS=Windows_NT and Git Bash inherits it; everywhere else (macOS, Linux, WSL)
+# it is unset, so these expand to the POSIX layout unchanged.
+VENV_BIN       := $(if $(filter Windows_NT,$(OS)),Scripts,bin)
+VENV_PY        := .venv/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
+VENV_TENPY_PY  := .venv-tenpy/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
+
 .PHONY: skills clean help install test site serve $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
 
@@ -104,7 +111,7 @@ install-node: ## Install Node.js 18+ and npm for Context7 CLI lookups
 	fi; \
 	os="$$(uname -s 2>/dev/null || echo unknown)"; \
 	case "$$os" in MINGW*|MSYS*|CYGWIN*) \
-	  echo "Native Windows is not supported by this Makefile target. Use WSL, or install Node.js 18+ manually: https://nodejs.org/en/download"; \
+	  echo "No automatic Node.js installer for Windows (nvm and brew are POSIX-only). Install Node.js 18+ manually, then rerun: https://nodejs.org/en/download"; \
 	  exit 1; \
 	  ;; \
 	esac; \
@@ -130,14 +137,14 @@ install-node: ## Install Node.js 18+ and npm for Context7 CLI lookups
 install-quimb: ## Install quimb + numerical deps into .venv (Python fallback stack)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv
-	@uv pip install --python .venv/bin/python quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
+	@uv pip install --python $(VENV_PY) quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
 	@echo "quimb environment ready in .venv"
 
 install-quspin: ## Install QuSpin exact diagonalization fallback stack into .venv
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv
-	@uv pip install --python .venv/bin/python quspin numpy scipy matplotlib
-	@.venv/bin/python -c 'import quspin; print(quspin.__version__)'
+	@uv pip install --python $(VENV_PY) quspin numpy scipy matplotlib
+	@$(VENV_PY) -c 'import quspin; print(quspin.__version__)'
 	@echo "QuSpin environment ready in .venv"
 
 install-julia: ## Install Julia via juliaup (default harness language)
@@ -176,43 +183,43 @@ install-jax: ## Install JAX into .venv. Optional: EXTRA=cpu|cuda12|cuda13|cuda12
 	@[ -d .venv ] || uv venv .venv
 	@extra="$(or $(EXTRA),cpu)"; \
 	if [ "$$extra" = "cpu" ]; then \
-	  .venv/bin/python -c 'import jax' >/dev/null 2>&1 || uv pip install --python .venv/bin/python jax; \
+	  $(VENV_PY) -c 'import jax' >/dev/null 2>&1 || uv pip install --python $(VENV_PY) jax; \
 	else \
-	  uv pip install --python .venv/bin/python "jax[$$extra]"; \
+	  uv pip install --python $(VENV_PY) "jax[$$extra]"; \
 	fi
-	@.venv/bin/python -c 'import jax; print(jax.devices())'
+	@$(VENV_PY) -c 'import jax; print(jax.devices())'
 	@echo "JAX environment ready in .venv"
-	@echo "For GPU extras, run the GPU smoke inside a compute allocation: JAX_PLATFORM_NAME=gpu .venv/bin/python -c 'import jax; print(jax.devices())'"
+	@echo "For GPU extras, run the GPU smoke inside a compute allocation: JAX_PLATFORM_NAME=gpu $(VENV_PY) -c 'import jax; print(jax.devices())'"
 
 install-tensorcircuit-ng: ## Install TensorCircuit-NG after JAX has been installed and smoke-tested
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
-	@.venv/bin/python -c 'import jax; print(jax.devices())' || { echo "JAX is required first. Run: make install jax EXTRA=cpu"; exit 1; }
-	@.venv/bin/python -c 'import tensorcircuit, cotengra, psutil, matplotlib' >/dev/null 2>&1 || uv pip install --python .venv/bin/python tensorcircuit-ng cotengra psutil matplotlib
-	@.venv/bin/python -c 'import tensorcircuit as tc; tc.set_backend("jax"); tc.about()'
+	@$(VENV_PY) -c 'import jax; print(jax.devices())' || { echo "JAX is required first. Run: make install jax EXTRA=cpu"; exit 1; }
+	@$(VENV_PY) -c 'import tensorcircuit, cotengra, psutil, matplotlib' >/dev/null 2>&1 || uv pip install --python $(VENV_PY) tensorcircuit-ng cotengra psutil matplotlib
+	@$(VENV_PY) -c 'import tensorcircuit as tc; tc.set_backend("jax"); tc.about()'
 	@echo "TensorCircuit-NG environment ready in .venv"
 
 install-netket: ## Install NetKet + JAX for VMC / neural quantum states into .venv
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@[ -d .venv ] || uv venv .venv
-	@uv pip install --python .venv/bin/python netket jax jaxlib flax optax matplotlib
-	@.venv/bin/python -c 'import netket, jax; print(netket.__version__, jax.devices())'
+	@uv pip install --python $(VENV_PY) netket jax jaxlib flax optax matplotlib
+	@$(VENV_PY) -c 'import netket, jax; print(netket.__version__, jax.devices())'
 	@echo "NetKet environment ready in .venv"
-	@echo "Activate with: source .venv/bin/activate"
+	@echo "Activate with: source .venv/$(VENV_BIN)/activate"
 
 install-netket-gpu: ## Install NetKet with CUDA-enabled JAX wheels into .venv (Linux GPU nodes)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@[ -d .venv ] || uv venv .venv
-	@uv pip install --python .venv/bin/python 'netket[cuda]' matplotlib
+	@uv pip install --python $(VENV_PY) 'netket[cuda]' matplotlib
 	@echo "NetKet GPU environment ready in .venv"
 	@echo "Smoke test inside a GPU allocation: JAX_PLATFORM_NAME=gpu python -c 'import jax; print(jax.devices())'"
 
 install-tenpy: ## Install TeNPy (physics-tenpy) into an isolated .venv-tenpy (Python iTEBD / MPS)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv-tenpy
-	@uv pip install --python .venv-tenpy/bin/python physics-tenpy matplotlib
-	@.venv-tenpy/bin/python -c 'import tenpy; print(tenpy.__version__)'
+	@uv pip install --python $(VENV_TENPY_PY) physics-tenpy matplotlib
+	@$(VENV_TENPY_PY) -c 'import tenpy; print(tenpy.__version__)'
 	@echo "TeNPy environment ready in .venv-tenpy (isolated venv: TeNPy pins a numpy ABI)"
-	@echo "Run with: .venv-tenpy/bin/python scripts/<name>.py"
+	@echo "Run with: $(VENV_TENPY_PY) scripts/<name>.py"
 
 install-sse: ## Install Julia SSE QMC stack into julia-env/
 	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
@@ -267,14 +274,14 @@ install-classical-repro: ## Install stacks for DMRG, QMC/SSE, and CTMRG reproduc
 install-pdf-render: ## Install PDF-to-Markdown rendering tools into .venv
 	@if command -v uv >/dev/null 2>&1; then \
 	  uv venv .venv; \
-	  uv pip install --python .venv/bin/python pymupdf pymupdf4llm; \
+	  uv pip install --python $(VENV_PY) pymupdf pymupdf4llm; \
 	else \
 	  command -v python3 >/dev/null 2>&1 || { echo "python3 not found. Install Python 3 first."; exit 1; }; \
 	  python3 -m venv .venv; \
-	  .venv/bin/python -m pip install --upgrade pip; \
-	  .venv/bin/python -m pip install pymupdf pymupdf4llm; \
+	  $(VENV_PY) -m pip install --upgrade pip; \
+	  $(VENV_PY) -m pip install pymupdf pymupdf4llm; \
 	fi
-	@.venv/bin/python -c 'import pymupdf4llm; print("pymupdf4llm ready")'
+	@$(VENV_PY) -c 'import pymupdf4llm; print("pymupdf4llm ready")'
 	@echo "PDF-to-Markdown rendering tools ready in .venv"
 
 serve: ## Serve the recommended-workflows website locally. Optional: PORT=8000
