@@ -116,7 +116,7 @@ Estimate runtime only after the run parameters are set; the result feeds `/repro
 
 ## Usage Notes
 
-- MATLAB is the canonical, tested runtime. Octave is the free fallback the step-2 fork offers when MATLAB is unavailable — untested for this package, so `sample.m` must pass there before any real run, and the runtime is recorded in the run record.
+- MATLAB is the canonical runtime. Octave is the free fallback the step-2 fork offers when MATLAB is unavailable — verified once (Octave 11.3.0, macOS arm64: `sample.m` runs unmodified, E = −2.4377 ± 0.0055 vs Table I exact −2.44260, ~18 s); still run `sample.m` as the smoke gate on each new machine, and record the runtime in the run record.
 - The package license is the Computer Physics Communications Non-Profit Use License; do not vendor the downloaded package into git.
 - On this macOS machine, MATLAB is available at `/Applications/MATLAB_R2026a.app/bin/matlab` even when `matlab` is not on `PATH`.
 - To put MATLAB on `PATH`, create a shell-visible symlink such as `ln -s /Applications/MATLAB_R2026a.app/bin/matlab /opt/homebrew/bin/matlab`.
