@@ -125,6 +125,12 @@ procedure live in `/using-pepskit` *Time estimate*.
 - **PEPS versus partition-function environments**: PEPS double-layer
   environments and classical partition-function environments have different edge
   tensor structure. Do not copy observable formulas across them blindly.
+- **Insertion-tensor conventions**: splitting bond weights across legs does not
+  commute with weighting a bond by an observable — a wrong insertion leaves the
+  partition function and magnetization exact while silently corrupting bond
+  observables (energy, hence specific heat). Validate every insertion tensor
+  against small-lattice enumeration (free, milliseconds) before trusting it;
+  the concrete construction lives in `/using-pepskit`.
 
 ## Verification — implementation stage
 

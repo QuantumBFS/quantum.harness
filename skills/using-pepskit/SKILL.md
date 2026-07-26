@@ -102,6 +102,19 @@ The local tensor construction and exact Onsager/Yang comparison live in the
 reproduction script, not here. Write per-temperature results incrementally and
 emit progress after each temperature or `chi_env` point.
 
+> **Energy-insertion caution (verified against enumeration).** The upstream
+> example builds its energy tensor with an element-wise leg
+> `e = (-J s s') .* nt` (with `nt = sqrt(t)`, `t` the bond Boltzmann matrix).
+> That is wrong: element-wise and matrix products don't commute, so the
+> contracted link carries `nt·(E∘nt) ≠ E∘t` — internal energy comes out off by
+> O(1e-2–1e-1) while the partition function and magnetization stay
+> machine-exact. Build the energy leg `A` by solving `nt * A = (-J s s') .* t`,
+> so the full link is the energy-weighted Boltzmann factor `(-J s s')·e^{βJss'}`.
+> Validate **every** insertion tensor against brute-force enumeration on a
+> 2×2/3×3 torus before production — it costs milliseconds, and it is the only
+> check that catches a wrong insertion (a corrupted energy also silently
+> poisons the specific heat differentiated from it).
+
 ## Time estimate
 
 Estimate from PEPS bond dimension, environment dimension, unit-cell size, CTMRG iterations, and whether optimization is included.
