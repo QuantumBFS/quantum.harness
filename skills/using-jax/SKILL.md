@@ -10,7 +10,6 @@ Use JAX as the backend layer for Python simulation stacks such as NetKet and Ten
 ## Sources
 
 - Stack contract: `skills/using-jax/stack.toml`
-- QCS interview/review notes: archived on branch `backup/survey-docs` under `docs/qcs/`
 - CPU install target: `make install jax EXTRA=cpu`
 - Smoke test: `.venv/bin/python -c 'import jax; print(jax.devices())'`
 

@@ -242,8 +242,7 @@ def mathify(x):
     return "".join(out)
 
 
-# ── palette + components, lifted from the archived docs/ed/review.html ─────
-# (branch backup/survey-docs)
+# ── palette + components ────────────────────────────────────────────────────
 STYLE = """
 :root{
   --bg:#fbfaf6; --panel:#fff; --ink:#1a1a1a; --muted:#5b5b5b; --line:#e6e3da;
