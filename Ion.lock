@@ -10,7 +10,7 @@ checksum = "sha256:7e5665b1d72138d28e50b371b63ee05b546bef14c16a949b1b1fc1d82bccd
 name = "beginner-training"
 source = ""
 kind = "local"
-checksum = "sha256:826fc630ae8b0ade69599511a2687482420a67284917d1bbb42e5ec32b2a58c1"
+checksum = "sha256:5fa9151bb4a8cd2b148d7e511711d9f8230ad1e2ac61ace96f17b1fac2c62c1f"
 
 [[skill]]
 name = "brainstorm-ideas"
@@ -78,7 +78,7 @@ checksum = "sha256:b011107f17188e0b2898bb1856b5bac8b49537cc86e737c82126558a235bd
 name = "download-ref"
 source = ""
 kind = "local"
-checksum = "sha256:fa18f0cef9a039a3b63c20c1bc5a586f358b63aff94835e04c7b3f142123e2af"
+checksum = "sha256:47e4100427700b14820873d8e828d6f278d8a647970ed75013f72d8ff449b3ba"
 
 [[skill]]
 name = "executing-plans"
@@ -156,7 +156,7 @@ checksum = "sha256:4474a27848c4fac4e3b0a56c1443566be221cfb1abf016ceccaa39eb89e22
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:1e62e1fc0cd383ff5526b266b59f837a00dca2d0a4c4a686ee6692e631f393a4"
+checksum = "sha256:883caad5ffcbd70dd76568f9fd6218463e4b9e5eada027a5f0a56eb1144fc241"
 
 [[skill]]
 name = "method-polyopt"
@@ -192,7 +192,7 @@ checksum = "sha256:b34bcad782194e5b9170d663090608f777c8d95bd359c6f07fdadf53b22a9
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:26d00b7091b752dd1c89573125ec312aedba088b87c796d9e9a1a5fc96e9663f"
+checksum = "sha256:d41ce39573dd389b6407e829a08ac08d9f14643381eca59719303c5832b7bff3"
 
 [[skill]]
 name = "parameter-scan"
@@ -204,7 +204,13 @@ checksum = "sha256:02926e0d625325ed1c2d8f52cbcbdd18bf7f9b0a1badedab3437c0dad7c7c
 name = "physics"
 source = ""
 kind = "local"
-checksum = "sha256:9016977c9839a1a954858cb9cce253ca82c20a79f4c87892e0cd22b5494b5140"
+checksum = "sha256:5b7c5495e03d2e03eb509dc936b2c59ed40b6082a6ab15c254027c1c3131e3d3"
+
+[[skill]]
+name = "quantum-model"
+source = ""
+kind = "local"
+checksum = "sha256:f38f12a19acc5d00f64fb820b9aa172d2ccd58d43c2df762615f4605258c20b0"
 
 [[skill]]
 name = "receiving-code-review"
@@ -289,6 +295,12 @@ kind = "git"
 path = "skills/systematic-debugging"
 commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
 checksum = "sha256:5ab44290779cd788c3c38cb9a132c26cf36e3f5c897574f645f73ed37ef999da"
+
+[[skill]]
+name = "take-challenge"
+source = ""
+kind = "local"
+checksum = "sha256:9ecd3874c0c285a6c3831276a9483bcf6ce098bb4edc684cfae9fa4a81b9f215"
 
 [[skill]]
 name = "test-driven-development"
@@ -376,7 +388,7 @@ checksum = "sha256:8d7b256f2a6746f127a0150ae0d5631636f39363daf5b689bb688951df9db
 name = "using-slurm"
 source = ""
 kind = "local"
-checksum = "sha256:6b02ad46daa12f1b0e927847923bb53852f6c612d86fd9a5f9d5385177ac17ef"
+checksum = "sha256:45b2ee755a4c69adc5645365707f4a70f2c4571d30a3da3926ce25b9b48214ef"
 
 [[skill]]
 name = "using-sse"
@@ -402,7 +414,7 @@ checksum = "sha256:4d0a11229753e41d4222c2a03023ba9830a85ffb4bcd9391a25f5495b8c1b
 name = "using-tensorcircuit-ng"
 source = ""
 kind = "local"
-checksum = "sha256:be51c73277d7a261fbeee72e45a3d796059098220b6c4768e42390281c366baa"
+checksum = "sha256:bdb16fefca7b8c067d163b4575684065d5a909178e4af30be7747a2dbb1f8af2"
 
 [[skill]]
 name = "using-xdiag"
