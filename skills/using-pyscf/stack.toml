@@ -1,0 +1,27 @@
+id = "pyscf"
+name = "PySCF"
+language = "python"
+canonical_for = ["molecular-integrals", "fcidump", "active-space", "quantum-chemistry-reference"]
+default_profile = "cpu"
+
+[profiles.cpu]
+label = "CPU"
+default = true
+install = "cpu"
+smoke = "cpu"
+
+[profiles.cpu.requirements]
+allocation = "login-or-compute"
+mpi = false
+
+[install.cpu]
+command = "make install pyscf"
+notes = "Isolated .venv-pyscf; Python pinned to 3.13 (block2 ships no cp314 wheel). Installs pyscf + block2 + geometric. Record resolved versions in the run manifest."
+
+[smoke.cpu]
+where = "login"
+command = ".venv-pyscf/bin/python -c 'import pyscf; from pyblock2.driver.core import DMRGDriver; print(pyscf.__version__, \"block2 OK\")'"
+
+[docs]
+official = "https://pyscf.org/"
+source = "https://github.com/pyscf/pyscf"

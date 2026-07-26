@@ -361,6 +361,12 @@ kind = "local"
 checksum = "sha256:75a861ac3d1dfa866f38981c4bc20c07323f276a5a21a7177ea24841d7fa820d"
 
 [[skill]]
+name = "using-pyscf"
+source = ""
+kind = "local"
+checksum = "sha256:dfc5c7facc24f3e0e181bde07aa0f608934e7eab696b5629777b642a55f586ce"
+
+[[skill]]
 name = "using-qmbcertify"
 source = ""
 kind = "local"

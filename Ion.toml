@@ -42,6 +42,7 @@ using-quantum-espresso = { type = "local" }   # Quantum ESPRESSO: DFPT electron-
 using-qmcpack = { type = "local" }            # QMCPACK Slater-Jastrow VMC/DMC for plane-wave solids
 using-nctssos = { type = "local" }       # general NC-polyopt engine (Clarabel/Mosek)
 using-qmbcertify = { type = "local" }    # structured-NPA certifier for 1D/2D Heisenberg (Mosek)
+using-pyscf = { type = "local" }          # PySCF: molecular integrals, FCIDUMP, active spaces, reference energies
 
 # Method-level guidance
 method-ed = { type = "local" }
