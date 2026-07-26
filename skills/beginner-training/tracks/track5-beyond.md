@@ -20,7 +20,7 @@ cleanly.
 
 ## Scoped precheck
 
-A completed reproduction exists: results under `tracks/<id>/results/` from
+A completed reproduction exists: results under `tracks/<track>/results/` from
 Track 2, or the student names what they reproduced. A challenge extends a
 calibrated result — without one there is nothing to go beyond.
 
@@ -57,13 +57,13 @@ Run the attempt through the sci-brain pipeline, confirm-gated: `/survey` to
 ground it in a real reference library, `/brainstorm-ideas` to shape the
 approach into a minimum viable experiment, and `/autoresearch` to drive the
 runs — checking convergence/verification at each size the way the reproduction
-did. Save scripts under the team folder `tracks/<id>/solutions/<team-name>/`
+did. Save scripts under the team folder `tracks/<track>/solutions/<team-name>/`
 (the registered claim's folder) and data + plots under
-`tracks/<id>/results/<run>/` so every number is regenerable.
+`tracks/<track>/results/<run>/` so every number is regenerable.
 
 ### Step 5 — Ship it
 
-Run `/challenge-report`: it gates a clean PR under `tracks/<id>/` containing
+Run `/challenge-report`: it gates a clean PR under `tracks/<track>/` containing
 the report, scripts, and figures.
 
 ## Checkpoint — report integrity (integrity check)
@@ -74,8 +74,8 @@ Go through the generated report together, confirm-gated, and verify:
    which parameters, and what came out.
 2. **Placeholder-free**: no TODO / TBD / "figure to be added" anywhere.
 3. **Every number traces to a run**: each figure and quoted value maps to a
-   script under `tracks/<id>/solutions/<team-name>/` and data under
-   `tracks/<id>/results/` that actually exist — spot-check at least two.
+   script under `tracks/<track>/solutions/<team-name>/` and data under
+   `tracks/<track>/results/` that actually exist — spot-check at least two.
 
 A staged negative control would be artificial here — the report *is* the
 deliverable, so its integrity *is* the trust proof. Checkpoint passes when all
