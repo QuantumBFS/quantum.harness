@@ -60,6 +60,11 @@ selecting parameters — they need different knobs.
 
 - **PEPSKit.jl / TensorKit.jl** (default) — CTMRG, boundary methods, AD-based
   optimization, symmetric tensors. Route via `/using-pepskit`.
+- **When the paper or track requires implementing the algorithm itself** (a
+  pedagogical CTMRG written from the source's own construction), the package is
+  not the route: it supplies **tensor primitives** for the hand-written loop
+  and serves as the **independent cross-check** of it — `/using-pepskit`
+  carries both roles.
 - If the paper target is a package tutorial or ships official code, offer
   official code / web search before reimplementing formulas.
 
@@ -77,6 +82,8 @@ stated settings win — confirm them, don't re-derive.
 | Knob | Controls | Trick / how it affects results |
 |---|---|---|
 | `D` | ansatz bias | converge or extrapolate observables in `D`; critical or frustrated states need larger `D` |
+| unit cell | which ordered states the ansatz can hold | must hold the order period (a Néel state needs a 2-site/checkerboard cell); too small silently forbids the state |
+| derivative observables | how `C`, susceptibility are produced | a route choice: differentiate `e`/`f` on a dense temperature grid (differentiation amplifies finite-`chi_env` noise, worst near `T_c`) vs direct fluctuation estimator at extra contraction cost — `references/peps-methodology.md` §5 |
 | `chi_env` | contraction bias | an independent knob, not derived from `D`; converge in both (`chi_env ∝ D²` is the standard scale) |
 | update scheme | bias vs cost of optimization | simple update to warm-start, full update or AD to finish |
 | CTMRG iterations / residual tolerance | environment convergence | near criticality residuals converge slowly — raise `chi_env` and the iteration cap together |

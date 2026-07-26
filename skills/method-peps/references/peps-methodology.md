@@ -315,6 +315,17 @@ From the converged CTMRG environment:
   bond energies, dimer order, spin-spin nearest-neighbour correlators.
 - **Distance-r correlators** `⟨O_0 O_r⟩`: insert `r−1` edge/transfer tensors
   between the two operator sites along a row.
+- **Derivative observables (specific heat, susceptibility).** Two routes:
+  (a) **numerical differentiation** — `C = ∂e/∂T` (or `−T·∂²f/∂T²`) on a
+  temperature grid. Differentiation amplifies finite-`χ` noise, and worst
+  exactly where the figure lives (the peak/divergence at `T_c`): use a dense
+  grid near `T_c`, difference the lower-derivative quantity (`e` once rather
+  than `f` twice), and keep the per-point convergence (`χ`, residual) uniform
+  across the grid — a point-to-point convergence jump appears in the derivative
+  as spurious structure. (b) **direct estimator** — fluctuation formulas
+  (`⟨E²⟩−⟨E⟩²`-type) from multi-insertion networks; no differentiation noise,
+  extra contractions per point. For a classical partition function the standard
+  route is (a) from the energy-insertion `e(T)`.
 - **Correlation length from the CTM transfer matrix.** Build the row-to-row
   transfer matrix from the edge tensors (the χD²×χD² object whose repeated
   application generates a row of the network). Its leading eigenvalues `λ₀ ≥ λ₁ ≥…`

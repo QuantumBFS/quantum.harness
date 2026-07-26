@@ -49,7 +49,31 @@ Concrete starting points for the convergence controls in Parameter setup.
 
 ## Code shape
 
-For the classical Ising onboarding route, follow the PEPSKit example shape:
+Two modes — decided upstream (`/method-peps` step 2; the track README wins):
+a **hand-written loop on TensorKit primitives** when the target requires
+implementing the algorithm itself, or the **packaged high-level call**. When
+the loop is hand-written, the packaged call is the independent cross-check,
+not the deliverable.
+
+### CTMRG primitives (hand-written loop)
+
+The renormalization loop — grow the corner/edge, contract, SVD-truncate to
+`chi_env`, normalize, accumulate log scale factors — is owned by the source
+being reproduced and `/method-peps`. TensorKit supplies the primitives (check
+exact API against the TensorKit docs; illustrative shape):
+
+```julia
+using TensorKit   # @tensor contraction + tsvd truncation are the two primitives
+
+@tensor M[a b; c d] := C[a, e] * T[e, s, c] * ...        # grow the corner
+U, S, _ = tsvd(M; trunc = truncdim(chi_env))             # truncate to chi_env
+C = U' * M * ...                                          # renormalize the environment
+C = C / norm(C); # log the normalization factor with the step's output
+```
+
+### Packaged route (or cross-check of a hand-written loop)
+
+For the classical Ising route, the PEPSKit example shape:
 
 ```julia
 using LinearAlgebra

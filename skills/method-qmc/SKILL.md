@@ -110,7 +110,7 @@ Conceptual knobs and the tricks behind them — for each, the **intuition for ch
 | Estimator (mixed vs back-propagated) | observable accuracy | mixed is exact for the energy, biased for non-commuting observables → back-propagation for pure estimates |
 | Constraint release / self-consistency | systematic bias removal | free-projection to gauge/remove CP bias, or feed the AFQMC density matrix back as a self-consistent constraint |
 
-**SSE**: β = 1/T grid (a ground-state claim needs a β sweep, not one low-T point); thermalization sweeps (drop early bins); bin size (raise near criticality where autocorrelation grows); sweeps/chains (error bars); MPI chain count.
+**SSE**: β = 1/T grid (a ground-state claim needs a β sweep, not one low-T point); thermalization sweeps (drop early bins); bin size (raise near criticality where autocorrelation grows); sweeps/chains (error bars); MPI chain count. Derived observables (Binder ratios, fluctuation-based susceptibility) are nonlinear functions of bin means — their error bars come from jackknife/bootstrap over bins, not naive propagation; free post-processing of saved bins (API in `/using-sse`).
 
 ## DMC route (VMC/DMC for plane-wave solids)
 

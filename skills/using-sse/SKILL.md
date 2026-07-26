@@ -86,7 +86,7 @@ What to pin:
 
 - **Validity:** sign-problem-free basis, lattice, coupling signs, `T` / `beta`, and boundary. Stop or reroute if the sign is uncontrolled (criterion → `/method-qmc`).
 - **Markov chain:** update type, thermalization sweeps, measurement sweeps, sweep definition, chains / replicas, seed policy, checkpoint cadence.
-- **Estimator:** measured observable, normalization, improved estimator if used, bin size, autocorrelation handling, target uncertainty.
+- **Estimator:** measured observable, normalization, improved estimator if used, bin size, autocorrelation handling, target uncertainty. For derived observables (ratios, fluctuation-based susceptibility) use Carlo.jl's `Evaluator` (jackknife over bins) rather than propagating per-bin errors by hand.
 - **Runtime profile:** serial CPU vs MPI, process count, allocation, and whether the run is a parameter scan.
 - **Diagnostics the tool exposes:** acceptance / update rates, binning stability, autocorrelation time, independent-chain spread. The convergence *criteria* are the method card's.
 
