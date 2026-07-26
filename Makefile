@@ -18,7 +18,7 @@ export ZLP_RUN_ROOT      := $(ZULIP_LOCAL)/.run
 
 ZLP := zlp
 
-INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render node
+INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket netket-gpu mpskit tenpy sse pepskit nctssos qmbcertify cpmc-lab classical-repro pdf-render node pyscf
 
 # Interpreter inside the venvs the install-* recipes create. Windows sets
 # OS=Windows_NT and Git Bash inherits it; everywhere else (macOS, Linux, WSL)
@@ -26,6 +26,7 @@ INSTALLABLE := quimb quspin julia itensors xdiag jax tensorcircuit-ng netket net
 VENV_BIN       := $(if $(filter Windows_NT,$(OS)),Scripts,bin)
 VENV_PY        := .venv/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
 VENV_TENPY_PY  := .venv-tenpy/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
+VENV_PYSCF_PY  := .venv-pyscf/$(VENV_BIN)/python$(if $(filter Windows_NT,$(OS)),.exe,)
 
 .PHONY: skills clean help install test site serve $(addprefix install-,$(INSTALLABLE))
 .PHONY: zulip-whoami zulip-pull zulip-send zulip-topics zulip-messages zulip-config
@@ -220,6 +221,14 @@ install-tenpy: ## Install TeNPy (physics-tenpy) into an isolated .venv-tenpy (Py
 	@$(VENV_TENPY_PY) -c 'import tenpy; print(tenpy.__version__)'
 	@echo "TeNPy environment ready in .venv-tenpy (isolated venv: TeNPy pins a numpy ABI)"
 	@echo "Run with: $(VENV_TENPY_PY) scripts/<name>.py"
+
+install-pyscf: ## Install PySCF + block2 into an isolated .venv-pyscf (chemistry integrals, FCIDUMP, reference energies)
+	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
+	@[ -d .venv-pyscf ] || uv venv --python 3.13 .venv-pyscf   # block2 ships no cp314 wheel
+	@uv pip install --python $(VENV_PYSCF_PY) pyscf block2 geometric
+	@$(VENV_PYSCF_PY) -c 'import pyscf; from pyblock2.driver.core import DMRGDriver; print(pyscf.__version__, "block2 OK")'
+	@echo "PySCF environment ready in .venv-pyscf (isolated; Python pinned to 3.13 for block2 wheel coverage)"
+	@echo "Run with: $(VENV_PYSCF_PY) scripts/<name>.py"
 
 install-sse: ## Install Julia SSE QMC stack into julia-env/
 	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
