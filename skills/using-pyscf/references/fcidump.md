@@ -67,9 +67,9 @@ Verified on 2.14.0: exporting the water/6-31G anchor from `references/pyscf-api.
 §5.1 with plain `fcidump.from_scf(mf, "FCIDUMP.water")` produces:
 
 ```
-&FCI NORB=  13,NELEC=10,MS2=0,
- ORBSYM=1,1,1,1,1,1,1,1,1,1,1,1,1,
- ISYM=1,
+ &FCI NORB=  13,NELEC=10,MS2=0,
+  ORBSYM=1,1,1,1,1,1,1,1,1,1,1,1,1,
+  ISYM=1,
 ```
 
 `NORB=13` is all 13 basis functions of 6-31G water; `NELEC=10` is *all ten*
@@ -178,20 +178,63 @@ once there are core orbitals to freeze, as in the water anchor.
 
 When the consumer is block2 in the same interpreter, a round-trip through
 disk is unnecessary — feed `mcscf`'s effective integrals straight into
-`DMRGDriver.get_qc_mpo`:
+`DMRGDriver.get_qc_mpo`. The driver must exist and have `initialize_system`
+called on it before `get_qc_mpo` — omitting either raises immediately:
 
 ```python
+from pyscf import gto, scf, mcscf
+from pyblock2.driver.core import DMRGDriver, SymmetryTypes
+
+mol = gto.M(atom=[...], basis="6-31G", unit="Angstrom", verbose=0)
+mf = scf.RHF(mol).run(conv_tol=1e-12)
+ncas, nelecas = 6, 6
+ncore = (mol.nelectron - nelecas) // 2
+mc = mcscf.CASCI(mf, ncas, nelecas, ncore=ncore)
+e_casci = mc.kernel()[0]
+
 h1eff, ecore = mc.get_h1eff()
 g2e = mc.get_h2eff()
 
-from pyblock2.driver.core import DMRGDriver
-mpo = driver.get_qc_mpo(h1e=h1eff, g2e=g2e, ecore=ecore)
+driver = DMRGDriver(scratch="./tmp_block2", symm_type=SymmetryTypes.SU2, n_threads=4)
+driver.initialize_system(n_sites=ncas, n_elec=nelecas, spin=0)
+mpo = driver.get_qc_mpo(h1e=h1eff, g2e=g2e, ecore=ecore, iprint=0)
+
+ket = driver.get_random_mps(tag="GS", bond_dim=100, nroots=1)
+bond_dims = [100] * 4 + [200] * 4
+noises = [1e-4] * 4 + [1e-5] * 4 + [0]
+thrds = [1e-10] * 8
+energy = driver.dmrg(mpo, ket, n_sweeps=20, bond_dims=bond_dims,
+                      noises=noises, thrds=thrds, iprint=0)
 ```
 
 Verified against block2 0.5.3: `DMRGDriver.get_qc_mpo(self, h1e, g2e,
 ecore=0.0, ...)` accepts `h1e`/`g2e`/`ecore` positionally or by keyword, so
 `mc.get_h1eff() -> (h1eff, ecore)` and `mc.get_h2eff() -> g2e` feed it
-directly with no file in between.
+directly with no file in between — but only after `initialize_system` has
+set up the driver's site basis; calling `get_qc_mpo` on a bare `DMRGDriver()`
+raises before it ever looks at `h1e`/`g2e`.
+
+Run end-to-end on the water/6-31G CAS(6,6) anchor above (`.venv-pyscf`,
+block2 0.5.3):
+
+```
+E(CASCI) = -75.99839064483398
+E(DMRG)  = -75.99839064479121
+delta    = 4.28e-11
+```
+
+DMRG agrees with the exact CASCI diagonalization in the same active space to
+~4e-11 — the round trip through `get_h1eff`/`get_h2eff` into
+`get_qc_mpo`/`initialize_system` reproduces the reference solver to numerical
+noise, which is the check issue #83 depends on.
+
+**Canonical bridge, not this hand-assembly.** `.knowledge/software/block2-api.md`
+"Worked example 2" gives block2's own PySCF bridge,
+`pyblock2._pyscf.ao2mo.integrals.get_rhf_integrals`, which additionally
+returns `orb_sym` and `spin` (needed for `SU2`/spatial-symmetry runs) instead
+of hand-computing them. Prefer that card's route over reassembling
+`h1eff`/`g2e`/`ecore` by hand as done here; this section exists to make the
+minimal `mc.get_h1eff()`/`mc.get_h2eff()` shape concrete, not to replace it.
 
 **Write the FCIDUMP anyway as the shared record.** Even when one solver
 consumes the Hamiltonian in memory, the FCIDUMP is what lets an independent

@@ -115,7 +115,8 @@ cannot encode a per-atom direction anyway (§2). Three routes:
    the localization itself.
 
 Because the σ/occ-virtual framework in §2 is frozen (the diagnostic still
-applies), this choice moves the energy, not just the representation — the
+applies), this choice moves the *correlated* (CASCI/DMRG) energy, not just
+the representation — the
 three routes above can select different orbitals for the same cage, and each
 choice is a different physical active space. Report the construction actually
 used and its effect on the energy, not just the final number.
@@ -209,8 +210,9 @@ E(CASCI) = -78.03179043512773
 
 Two orbitals stand out at σ ≈ 0.998 and σ ≈ 0.999 — one per carbon's `2pz`,
 occupied (π) and virtual (π*) — with the rest of both blocks at σ well below
-`threshold=0.2` (many are ≈ 0 to machine precision, a few strays sit at
-10⁻⁵–10⁻⁴). That gap is the clean-separation diagnostic from §4: `CAS(2,2)`
+`threshold=0.2` (every other weight is 0 to machine precision except one
+stray in the virtual block at 9.2e-05). That gap is the clean-separation
+diagnostic from §4: `CAS(2,2)`
 is the unambiguous π/π* active space for ethylene. The HF energy agrees to
 5.68 × 10⁻¹⁴, far inside the ~10⁻¹⁰ target — confirming AVAS rotated the
 occupied and virtual blocks internally without mixing them (§2).

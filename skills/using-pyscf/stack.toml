@@ -13,6 +13,7 @@ smoke = "cpu"
 [profiles.cpu.requirements]
 allocation = "login-or-compute"
 mpi = false
+venv = ".venv-pyscf"
 
 [install.cpu]
 command = "make install pyscf"

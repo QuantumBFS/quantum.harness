@@ -53,7 +53,10 @@ assumption — a unit, a spin convention, a frozen core.
   energy.
 - **Spin.** `mol.spin` is **2S — the number of unpaired electrons**, not S. A
   singlet is `spin=0`, a triplet `spin=2`. For an open shell choose `scf.ROHF`
-  or `scf.UHF`; `scf.RHF` cannot represent it.
+  or `scf.UHF` explicitly — `scf.RHF` does not raise on `mol.spin != 0`; it
+  silently *dispatches to `ROHF`* instead, so a run that asked for RHF is
+  recorded as RHF while an ROHF calculation actually converged. See
+  `references/pyscf-api.md` §3.
 - **Frozen shells.** `ncore` in `mcscf.CASCI`, `frozen=` in `cc.CCSD`. These are
   independent of what a FCIDUMP contains — see `references/fcidump.md`.
 - **Integral index ordering.** PySCF uses Mulliken `(pq|rs)`; much of many-body
