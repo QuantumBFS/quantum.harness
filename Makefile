@@ -130,13 +130,13 @@ install-node: ## Install Node.js 18+ and npm for Context7 CLI lookups
 install-quimb: ## Install quimb + numerical deps into .venv (Python fallback stack)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv
-	@uv pip install quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
+	@uv pip install --python .venv/bin/python quimb cotengra autoray opt_einsum numpy scipy matplotlib jupyter ipykernel
 	@echo "quimb environment ready in .venv"
 
 install-quspin: ## Install QuSpin exact diagonalization fallback stack into .venv
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@uv venv .venv
-	@uv pip install quspin numpy scipy matplotlib
+	@uv pip install --python .venv/bin/python quspin numpy scipy matplotlib
 	@.venv/bin/python -c 'import quspin; print(quspin.__version__)'
 	@echo "QuSpin environment ready in .venv"
 
@@ -176,9 +176,9 @@ install-jax: ## Install JAX into .venv. Optional: EXTRA=cpu|cuda12|cuda13|cuda12
 	@[ -d .venv ] || uv venv .venv
 	@extra="$(or $(EXTRA),cpu)"; \
 	if [ "$$extra" = "cpu" ]; then \
-	  .venv/bin/python -c 'import jax' >/dev/null 2>&1 || uv pip install jax; \
+	  .venv/bin/python -c 'import jax' >/dev/null 2>&1 || uv pip install --python .venv/bin/python jax; \
 	else \
-	  uv pip install "jax[$$extra]"; \
+	  uv pip install --python .venv/bin/python "jax[$$extra]"; \
 	fi
 	@.venv/bin/python -c 'import jax; print(jax.devices())'
 	@echo "JAX environment ready in .venv"
@@ -187,14 +187,14 @@ install-jax: ## Install JAX into .venv. Optional: EXTRA=cpu|cuda12|cuda13|cuda12
 install-tensorcircuit-ng: ## Install TensorCircuit-NG after JAX has been installed and smoke-tested
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@.venv/bin/python -c 'import jax; print(jax.devices())' || { echo "JAX is required first. Run: make install jax EXTRA=cpu"; exit 1; }
-	@.venv/bin/python -c 'import tensorcircuit, cotengra, psutil, matplotlib' >/dev/null 2>&1 || uv pip install tensorcircuit-ng cotengra psutil matplotlib
+	@.venv/bin/python -c 'import tensorcircuit, cotengra, psutil, matplotlib' >/dev/null 2>&1 || uv pip install --python .venv/bin/python tensorcircuit-ng cotengra psutil matplotlib
 	@.venv/bin/python -c 'import tensorcircuit as tc; tc.set_backend("jax"); tc.about()'
 	@echo "TensorCircuit-NG environment ready in .venv"
 
 install-netket: ## Install NetKet + JAX for VMC / neural quantum states into .venv
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@[ -d .venv ] || uv venv .venv
-	@uv pip install netket jax jaxlib flax optax matplotlib
+	@uv pip install --python .venv/bin/python netket jax jaxlib flax optax matplotlib
 	@.venv/bin/python -c 'import netket, jax; print(netket.__version__, jax.devices())'
 	@echo "NetKet environment ready in .venv"
 	@echo "Activate with: source .venv/bin/activate"
@@ -202,7 +202,7 @@ install-netket: ## Install NetKet + JAX for VMC / neural quantum states into .ve
 install-netket-gpu: ## Install NetKet with CUDA-enabled JAX wheels into .venv (Linux GPU nodes)
 	@command -v uv >/dev/null 2>&1 || { echo "uv not found. Install uv first: https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
 	@[ -d .venv ] || uv venv .venv
-	@uv pip install 'netket[cuda]' matplotlib
+	@uv pip install --python .venv/bin/python 'netket[cuda]' matplotlib
 	@echo "NetKet GPU environment ready in .venv"
 	@echo "Smoke test inside a GPU allocation: JAX_PLATFORM_NAME=gpu python -c 'import jax; print(jax.devices())'"
 
@@ -267,7 +267,7 @@ install-classical-repro: ## Install stacks for DMRG, QMC/SSE, and CTMRG reproduc
 install-pdf-render: ## Install PDF-to-Markdown rendering tools into .venv
 	@if command -v uv >/dev/null 2>&1; then \
 	  uv venv .venv; \
-	  uv pip install pymupdf pymupdf4llm; \
+	  uv pip install --python .venv/bin/python pymupdf pymupdf4llm; \
 	else \
 	  command -v python3 >/dev/null 2>&1 || { echo "python3 not found. Install Python 3 first."; exit 1; }; \
 	  python3 -m venv .venv; \
