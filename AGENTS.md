@@ -125,8 +125,8 @@ them through the committed `.claude/skills → ../skills` symlink, so
 `[options.targets]` stanza pointing Ion at `.claude/skills`: that path is itself
 a symlink back into `skills/`, so Ion would write its per-skill target
 links into the source dir and clobber every skill with self-referential,
-dangling links. Reload Claude Code after any `ion add` / `ion remove` so the
-session picks up changes.
+dangling links. A session started in a `git worktree` has no remote skills
+(gitignored) — tell the user to run `make skills` first.
 
 **Conventions:**
 - `AGENTS.md` is canonical; `CLAUDE.md` is a one-liner (`treat @AGENTS.md the
