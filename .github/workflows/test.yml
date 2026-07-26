@@ -1,0 +1,33 @@
+name: test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest pytest-cov numpy scipy matplotlib
+      - run: make test
+
+  # Proves the install recipes resolve .venv/Scripts/python.exe. GNU make is not
+  # preinstalled on the Windows runner; bash is Git Bash, which supplies the
+  # sh.exe make shells out to.
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: choco install make -y
+      - run: make install-pdf-render
+      - run: test -f .venv/Scripts/python.exe
+      - run: .venv/Scripts/python.exe -c "import pymupdf4llm; print('ok')"
