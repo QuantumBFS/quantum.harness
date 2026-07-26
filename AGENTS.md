@@ -168,6 +168,7 @@ ion self --help                          # Manage the Ion install
 - Install domain tools with `make install <tool>` after the active workflow or user has selected that tool. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
+- Skills spell the venv interpreter as `.venv/bin/python`, the POSIX layout. On native Windows it is `.venv/Scripts/python.exe`; substitute it in any documented command before running one.
 
 <a id="ui-ux"></a>
 ## UI/UX
