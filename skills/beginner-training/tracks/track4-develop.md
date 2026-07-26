@@ -40,15 +40,24 @@ and whose `upstream` is `QuantumBFS/qsym-rs`.
 
 ### Step 2 — The student picks a starter issue (explicit gate)
 
-List the open starter issues **once**:
+List the open starter issues **once**, and check which are already claimed —
+an issue with a "working on it" comment (or an open PR referencing it) is
+taken; present it as such:
 
 ```bash
 gh issue list -R QuantumBFS/qsym-rs --label training-starter
+gh issue view <n> -R QuantumBFS/qsym-rs --comments
 ```
 
-The student must choose. Do not open, assume, or start driving any specific
-issue before they explicitly pick one. Answer questions about what each issue
-involves if asked.
+The student must choose among the unclaimed ones. Do not open, assume, or
+start driving any specific issue before they explicitly pick one. Answer
+questions about what each issue involves if asked. Once they pick, claim the
+issue: post a short "working on it" comment under it (confirm-gated, like
+every step) so other students see it is taken:
+
+```bash
+gh issue comment <n> -R QuantumBFS/qsym-rs --body "Working on it."
+```
 
 ### Step 3 — Brainstorm the design
 
