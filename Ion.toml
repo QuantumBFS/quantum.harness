@@ -21,6 +21,7 @@ cross-method-check = { type = "local" }
 using-slurm = { type = "local" }        # cluster mechanism (agent-does-ssh)
 cluster-jobs = { type = "local" }       # student-facing safe submit/manage/download (preview+confirm)
 setup-cluster = { type = "local" }      # build unified TOML profile + probe resources + seed safety limits
+build-apptainer-image = { type = "local", path = "skills/build-apptainer-image" }  # containerize a stack for cluster runs
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
 reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
 beginner-training = { type = "local" }  # 5-track guided training; Track 2 absorbs the old track-starter flow
@@ -86,4 +87,3 @@ verification-before-completion = { source = "obra/superpowers/skills/verificatio
 writing-plans = { source = "obra/superpowers/skills/writing-plans" }
 writing-skills = { source = "obra/superpowers/skills/writing-skills" }
 scientific-visualization = { source = "HughYau/AcademicForge/scientific-visualization" }
-build-apptainer-image = { type = "local", path = "skills/build-apptainer-image" }
