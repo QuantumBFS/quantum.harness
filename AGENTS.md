@@ -119,7 +119,8 @@ NEVER run a multi-hour calculation locally because the agent forgot the cluster 
 Ion (`Roger-luo/Ion`, installed at `~/.local/bin/ion`) is the skill manager.
 All skills live under `skills/` (Ion's `skills-dir`): local skills are
 committed real directories; remote skills are fetched there by `ion add` as
-symlinks into Ion's cache (gitignored; pinned in `Ion.lock`). Claude Code reads
+symlinks into Ion's cache (gitignored; `Ion.lock` is untracked — Ion never
+reads it on install, so pin a `rev` in `Ion.toml` when a source must not move). Claude Code reads
 them through the committed `.claude/skills → ../skills` symlink, so
 `skills/` is the single source of truth. Do **not** add an
 `[options.targets]` stanza pointing Ion at `.claude/skills`: that path is itself
