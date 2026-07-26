@@ -80,5 +80,5 @@ using-superpowers = { source = "obra/superpowers/skills/using-superpowers" }
 verification-before-completion = { source = "obra/superpowers/skills/verification-before-completion" }
 writing-plans = { source = "obra/superpowers/skills/writing-plans" }
 writing-skills = { source = "obra/superpowers/skills/writing-skills" }
-scientific-visualization = { source = "HughYau/AcademicForge/scientific-visualization" }
+scientific-visualization = { source = "HughYau/AcademicForge/scientific-visualization", rev = "8f1e7a29710ab7ea9c4b1b6f4073c8d2447ab833" }
 build-apptainer-image = { type = "local", path = "skills/build-apptainer-image" }
