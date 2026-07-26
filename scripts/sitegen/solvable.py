@@ -10,7 +10,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import parse, shell
+from . import benchmarks, parse, shell
 
 REPO = Path(__file__).resolve().parents[2]
 INDEX_MD = REPO / ".knowledge" / "solvable" / "INDEX.md"
@@ -230,6 +230,9 @@ def _render_built(e: dict) -> str:
             '<div class="tablewrap"><table class="bench">'
             '<thead><tr><th>Quantity</th><th>Params</th><th>Exact value</th>'
             f'<th>Source</th></tr></thead>\n<tbody>\n{rows}\n</tbody></table></div>')
+    bench = benchmarks.model_table(e["slug"])
+    if bench:
+        body.append(bench)
     links = [f'<a href="{BLOB}{e["slug"]}/ORACLE.md">ORACLE.md&nbsp;&#8599;</a>']
     if e["flag"] != "T":
         links.append(f'<a href="{BLOB}{e["slug"]}/oracle.py">oracle.py&nbsp;&#8599;</a>')

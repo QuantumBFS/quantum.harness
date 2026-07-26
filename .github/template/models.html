@@ -22,6 +22,7 @@
   a{color:var(--accent2);text-decoration:none}
   a:hover{text-decoration:underline}
   .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  .wrap.wide{max-width:1560px}
 
   /* ---- shared top nav ---- */
   .topnav{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
@@ -107,6 +108,12 @@
   table.bench td:last-child,table.bench td:nth-child(2){white-space:normal}
   table.bench th{color:var(--ink)}
   table.bench code,.cardlinks{font-family:var(--mono);font-size:.9em;color:var(--accent2)}
+  table.bench .unit{color:var(--mut);font-size:.92em}
+  table.matrix{font-size:.78rem}
+  table.matrix th,table.matrix td{padding:6px 8px}
+  table.matrix td{white-space:nowrap}
+  table.matrix code{color:inherit}
+  table.matrix .err{color:var(--mut)}
   .cardlinks{margin:14px 0 0;font-size:.78rem;display:flex;gap:16px}
 
   footer{padding:30px 0 60px;color:var(--mut);font-size:.85rem}
@@ -115,7 +122,7 @@
 <body>
 <div class="wrap">
 
-<nav class="topnav"><span class="brand">quantum.harness</span><span class="links"><a href="index.html">Home</a> <a href="solvable.html">Solvable</a> <a href="models.html" class="here">Models</a> <a href="methods.html">Methods</a></span></nav>
+<nav class="topnav"><span class="brand">quantum.harness</span><span class="links"><a href="index.html">Home</a> <a href="solvable.html">Solvable</a> <a href="models.html" class="here">Models</a> <a href="methods.html">Methods</a> <a href="benchmarks.html">Benchmarks</a></span></nav>
 
 <header>
   <div class="kicker">Quantum Many-Body Harness</div>
