@@ -10,6 +10,7 @@ LTRG is the finite-temperature tensor-network method class: map a `d`-dimensiona
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/ltrg-methodology.md`
+- **Method-zoo card** (M1–M14 property table, cost classes): `.knowledge/methods/ltrg-xtrg`. Model → method gate: `.knowledge/method-property-map.md`.
 - Tool skill: `/using-itensors`
 - Primary literature: Li, Ran, Gong, Zhao, Xi, Ye, Su, *Linearized tensor renormalization group algorithm…* PRL (2011) `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md`.
 

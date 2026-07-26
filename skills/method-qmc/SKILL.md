@@ -16,6 +16,7 @@ Three routes:
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/qmc-methodology.md`
+- **Method-zoo cards** (M1–M14 property tables, cost classes): `.knowledge/methods/afqmc-cpmc`, `sse`, `dqmc`, `dmc-gfmc`, `pimc`, `metropolis-mc`, `cluster-mc`, `diagmc`. Model → method gate: `.knowledge/method-property-map.md`.
 - Track README: `tracks/qmc/README.md`
 - Tool skills: `/using-sse` (SSE route), `/using-cpmc-lab` (CPMC/AFQMC route)
 - Tool skills (DMC route): `/using-quantum-espresso` (QE orbital generation) and `/using-qmcpack` (Slater-Jastrow VMC/DMC)
