@@ -192,7 +192,7 @@ checksum = "sha256:b34bcad782194e5b9170d663090608f777c8d95bd359c6f07fdadf53b22a9
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:d41ce39573dd389b6407e829a08ac08d9f14643381eca59719303c5832b7bff3"
+checksum = "sha256:1833c23240c0cc6ec0be43e65d4c086a8a551565b9620bf7fe57880c2e4482cd"
 
 [[skill]]
 name = "parameter-scan"
@@ -258,7 +258,7 @@ checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390b
 name = "setup-cluster"
 source = ""
 kind = "local"
-checksum = "sha256:1f7ab61bef998440c3fcc7083c23aeef1c4eb6e0869eb6d013e7c1b63222a2c1"
+checksum = "sha256:06e28d0593bbe48c01e5d6ff46292850bf80be0b3ef9b1b4a963f7ab3a687f41"
 
 [[skill]]
 name = "setup-julia"
@@ -388,7 +388,7 @@ checksum = "sha256:8d7b256f2a6746f127a0150ae0d5631636f39363daf5b689bb688951df9db
 name = "using-slurm"
 source = ""
 kind = "local"
-checksum = "sha256:45b2ee755a4c69adc5645365707f4a70f2c4571d30a3da3926ce25b9b48214ef"
+checksum = "sha256:ff081b97fe10a727693390c61375bef53646fb92f3037c826bae2e8e74eb39c4"
 
 [[skill]]
 name = "using-sse"

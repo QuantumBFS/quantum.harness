@@ -15,6 +15,10 @@ jobs:
           python-version: "3.12"
       - run: pip install pytest pytest-cov numpy scipy matplotlib
       - run: make test
+      # A stale lock makes every student's `make skills` dirty their tree.
+      # Editing a local skill must ship the resynced Ion.lock in the same PR.
+      - run: curl -fsSL https://raw.githubusercontent.com/Roger-luo/Ion/main/install.sh | sh
+      - run: $HOME/.local/bin/ion add && git diff --exit-code Ion.lock
 
   # Proves the install recipes resolve .venv/Scripts/python.exe. GNU make is not
   # preinstalled on the Windows runner; bash is Git Bash, which supplies the
