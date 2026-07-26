@@ -43,7 +43,7 @@ and whose `upstream` is `QuantumBFS/qsym-rs`.
 List the open starter issues **once**:
 
 ```bash
-gh issue list -R QuantumBFS/qsym-rs --label "good first issue"
+gh issue list -R QuantumBFS/qsym-rs --label training-starter
 ```
 
 The student must choose. Do not open, assume, or start driving any specific
