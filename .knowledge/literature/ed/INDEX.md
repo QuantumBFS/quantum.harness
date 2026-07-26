@@ -1,14 +1,15 @@
 # ed methodology references
 
-Generated 2026-06-20. Methodology references for the quantum many-body physics harness. Raw PDFs and extracted figures are local-only and gitignored.
+Generated 2026-07-27. Methodology references for the quantum many-body physics harness. Raw PDFs and extracted figures are local-only and gitignored.
 
 Search inside this dir with `rg --hidden -g '!.raw' "term" .knowledge/` (or `rg` from inside `.knowledge/` itself). The `.raw/` subdir holds the original PDFs / clones / HTML and is gitignored.
 
-## arXiv (5 entries)
+## arXiv (6 entries)
 
 | File | Title | Authors | Year | Venue | Full text |
 |---|---|---|---|---|:---:|
 | [2505.02901_xdiag-exact-diagonalization-for-quantum-many-body-systems.md](2505.02901_xdiag-exact-diagonalization-for-quantum-many-body-systems.md) | XDiag: Exact diagonalization for quantum many-body systems | A. Wietek et al. | 2025 | SciPost Physics Codebases | ✅ |
+| [1711.03528_weak-ergodicity-breaking-from-quantum-many-body-scars.md](1711.03528_weak-ergodicity-breaking-from-quantum-many-body-scars.md) | Weak ergodicity breaking from quantum many-body scars | C. J. Turner et al. | 2018 | Nature Physics | ✅ |
 | [1703.03637_quantum-lattice-model-solver-h.md](1703.03637_quantum-lattice-model-solver-h.md) | Quantum lattice model solver HΦ | M. Kawamura et al. | 2017 | Computer Physics Communications | ✅ |
 | [1610.03042_quspin-a-python-package-for-dynamics-and-exact-diagonalisati.md](1610.03042_quspin-a-python-package-for-dynamics-and-exact-diagonalisati.md) | QuSpin: a Python Package for Dynamics and Exact Diagonalisation of Quantum Many Body Systems part I: spin chains | P. Weinberg, M. Bukov | 2016 | arXiv: Computational Physics | ✅ |
 | [1110.0573_qutip-an-open-source-python-framework-for-the-dynamics-of-op.md](1110.0573_qutip-an-open-source-python-framework-for-the-dynamics-of-op.md) | QuTiP: An open-source Python framework for the dynamics of open quantum systems | J. Johansson, P. Nation, F. Nori | 2011 | Computer Physics Communications | ✅ |
