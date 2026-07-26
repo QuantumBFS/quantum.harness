@@ -119,10 +119,10 @@ end up recorded in the FCIDUMP.
 
 Rather than paraphrase the exact grammar (namelist syntax, integral-line
 layout, the core-energy sentinel line `0 0 0 0`), point a parser at the
-source: `pyscf/tools/fcidump.py` in
-https://github.com/pyscf/pyscf/tree/master/examples/tools — `write_head`,
-`write_hcore`, and `write_eri` are the three functions that emit every line
-in the file.
+source: `pyscf/tools/fcidump.py`,
+https://github.com/pyscf/pyscf/blob/master/pyscf/tools/fcidump.py —
+`write_head`, `write_hcore`, and `write_eri` are the three functions that
+emit every line in the file.
 
 ---
 
