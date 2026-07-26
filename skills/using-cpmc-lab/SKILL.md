@@ -36,12 +36,20 @@ What `/method-qmc` routes here for, and what to confirm before running.
 Package mechanics: how MATLAB finds the package, how to call it non-interactively, and how to read what it returns.
 
 1. Consult `stack.toml` for the install command, smoke command, docs URL, and runtime profile.
-2. Install with `make install cpmc-lab`; it downloads the official package into ignored local storage under `.external/cpmc-lab/`.
-3. Locate the extracted package root by finding `CPMC_Lab.m`.
-4. **Surface the run choices brainstorming-style before running.** For every parameter (see *Parameters*) not already fixed upstream, present its meaning, the documented setup strategy, and the tradeoff — one at a time — and let the user decide. Never silently default a value; also surface the package-fixed choices above so the user knows what is not adjustable here.
-5. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full MATLAB app path when `matlab` is not on `PATH` (see *Usage Notes*).
-6. Save package outputs under the active run directory: `.mat` files, logs, and any derived text/CSV summaries.
-7. Read `.mat` outputs with MATLAB or Python `scipy.io.loadmat`; never treat console output as the only result record.
+2. **If MATLAB is not installed**, stop and explain before anything else: the
+   package is written in MATLAB's language, which needs either MATLAB itself
+   (paid; most universities have a campus license, and MATLAB Online's free
+   tier covers small runs) or Octave, a free program that runs MATLAB code —
+   likely fine for this package's plain code, but untested, so treat results
+   with extra care until the smoke test passes. Then ask the user to choose:
+   `1. Install MATLAB / use a campus license`, `2. Try Octave`, `3. Stop here`.
+   Never pick silently.
+3. Install with `make install cpmc-lab`; it downloads the official package into ignored local storage under `.external/cpmc-lab/`.
+4. Locate the extracted package root by finding `CPMC_Lab.m`.
+5. **Surface the run choices brainstorming-style before running.** For every parameter (see *Parameters*) not already fixed upstream, present its meaning, the documented setup strategy, and the tradeoff — one at a time — and let the user decide. Never silently default a value; also surface the package-fixed choices above so the user knows what is not adjustable here.
+6. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full MATLAB app path when `matlab` is not on `PATH` (see *Usage Notes*).
+7. Save package outputs under the active run directory: `.mat` files, logs, and any derived text/CSV summaries.
+8. Read `.mat` outputs with MATLAB or Python `scipy.io.loadmat`; never treat console output as the only result record.
 
 Entry point is the function in `CPMC_Lab.m`, called with 21 positional arguments in fixed order:
 
