@@ -57,8 +57,9 @@ Run the attempt through the sci-brain pipeline, confirm-gated: `/survey` to
 ground it in a real reference library, `/brainstorm-ideas` to shape the
 approach into a minimum viable experiment, and `/autoresearch` to drive the
 runs — checking convergence/verification at each size the way the reproduction
-did. Save scripts under `scripts/` and data + plots under `results/` so every
-number is regenerable.
+did. Save scripts under the team folder `tracks/<id>/solutions/<team-name>/`
+(the registered claim's folder) and data + plots under
+`tracks/<id>/results/<run>/` so every number is regenerable.
 
 ### Step 5 — Ship it
 
@@ -73,8 +74,8 @@ Go through the generated report together, confirm-gated, and verify:
    which parameters, and what came out.
 2. **Placeholder-free**: no TODO / TBD / "figure to be added" anywhere.
 3. **Every number traces to a run**: each figure and quoted value maps to a
-   script under `scripts/` and data under `results/` that actually exist —
-   spot-check at least two.
+   script under `tracks/<id>/solutions/<team-name>/` and data under
+   `tracks/<id>/results/` that actually exist — spot-check at least two.
 
 A staged negative control would be artificial here — the report *is* the
 deliverable, so its integrity *is* the trust proof. Checkpoint passes when all
