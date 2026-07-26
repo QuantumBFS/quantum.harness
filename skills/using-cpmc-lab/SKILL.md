@@ -47,7 +47,7 @@ Package mechanics: how MATLAB finds the package, how to call it non-interactivel
 3. Install with `make install cpmc-lab`; it downloads the official package into ignored local storage under `.external/cpmc-lab/`.
 4. Locate the extracted package root by finding `CPMC_Lab.m`.
 5. **Surface the run choices brainstorming-style before running.** For every parameter (see *Parameters*) not already fixed upstream, present its meaning, the documented setup strategy, and the tradeoff — one at a time — and let the user decide. Never silently default a value; also surface the package-fixed choices above so the user knows what is not adjustable here.
-6. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full MATLAB app path when `matlab` is not on `PATH` (see *Usage Notes*).
+6. Build a driver that fills the `CPMC_Lab` signature with the agreed values and run it through `matlab -batch`, falling back to the full MATLAB app path when `matlab` is not on `PATH` (see *Usage Notes*). On the Octave route the same driver runs as `octave --eval "run('driver.m')"` — install Octave with the system package manager (`brew install octave` / `apt install octave`), and pass `sample.m` as the smoke test before any real run.
 7. Save package outputs under the active run directory: `.mat` files, logs, and any derived text/CSV summaries.
 8. Read `.mat` outputs with MATLAB or Python `scipy.io.loadmat`; never treat console output as the only result record.
 
@@ -116,7 +116,7 @@ Estimate runtime only after the run parameters are set; the result feeds `/repro
 
 ## Usage Notes
 
-- Prefer MATLAB over Octave for this package. Octave is a possible compatibility experiment, not the canonical route.
+- MATLAB is the canonical, tested runtime. Octave is the free fallback the step-2 fork offers when MATLAB is unavailable — untested for this package, so `sample.m` must pass there before any real run, and the runtime is recorded in the run record.
 - The package license is the Computer Physics Communications Non-Profit Use License; do not vendor the downloaded package into git.
 - On this macOS machine, MATLAB is available at `/Applications/MATLAB_R2026a.app/bin/matlab` even when `matlab` is not on `PATH`.
 - To put MATLAB on `PATH`, create a shell-visible symlink such as `ln -s /Applications/MATLAB_R2026a.app/bin/matlab /opt/homebrew/bin/matlab`.
