@@ -48,11 +48,17 @@ Inspect; do not install yet. Add a setup item only when a trigger below is activ
 
 | Trigger | Setup item | Availability check |
 | --- | --- | --- |
+| Session is on native Windows, not WSL | `make` and `sh` on PATH | `Get-Command make, sh` |
 | Ion-managed skills are missing or stale | `make skills` | `ion add`/skill state requires sync |
 | Task may need source material beyond local KB: arXiv, DOI, PDF, captions, figures, methodology details, benchmark values, or external reference text | `pdf-render` | `.venv/bin/python -c 'import pymupdf4llm'` |
 | Task may need precise/current package usage beyond local refs: package APIs, examples, setup, migrations, capabilities, or version-sensitive docs | `node` | Node.js 18+, `npm`, and `npx` |
 | Task likely exceeds local compute, needs arrays/scans, or user wants reusable remote compute setup | `/setup-cluster` | `skills/using-slurm/profiles/active.toml` |
 | A method/software route has been selected | matching stack install | Makefile `INSTALLABLE` plus `skills/<stack>/stack.toml` |
+
+On native Windows every `make` target is blocked until both exist: install Git
+for Windows for `sh.exe`, which make shells out to, and `winget install
+ezwinports.make`. Tell the user why, since installing only `make` leaves
+recipes failing under `cmd.exe`.
 
 Source-material support is not a paper-only mode. It is triggered whenever the task may need material outside `.knowledge/` or the local skill references.
 
