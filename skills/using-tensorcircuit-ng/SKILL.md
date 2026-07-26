@@ -16,7 +16,15 @@ Use TensorCircuit-NG for JAX-backed circuit simulation, differentiable circuit w
 - QCS review notes: `docs/qcs/review.html`
 - QCS challenge brief: `docs/qcs/backup.md`
 - Install target: `make install tensorcircuit-ng`
-- Upstream agent resources (not vendored here; consult when working in this method): skills <https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/skills>, memory <https://github.com/tensorcircuit/tensorcircuit-ng/tree/master/.agents/memory>
+- Upstream agent resources — when working in this method, shallow-clone the
+  repo into the gitignored raw store and read these dirs locally:
+  ```sh
+  git clone --depth 1 https://github.com/tensorcircuit/tensorcircuit-ng \
+    .knowledge/literature/quantum-circuit-simulation/.raw/repos/tensorcircuit-tensorcircuit-ng
+  ```
+  `.agents/skills/` (upstream skills), `.agents/memory/` (upstream agent
+  memory), `examples/` (140+ runnable scripts — VQE, contraction, profiling;
+  prefer an example as the starting template over writing from scratch)
 - Local API reference (key API + worked examples, with links to upstream docs): `references/tensorcircuit-ng-api.md`
 
 ## Workflow
