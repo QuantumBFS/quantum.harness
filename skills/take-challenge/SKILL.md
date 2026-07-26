@@ -36,14 +36,14 @@ Read off three things:
 
 | Axis | Source | Meaning |
 |---|---|---|
-| Method | the `### Method` field in the issue body | the six tracks — `ed`, `mps`, `peps`, `qmc`, `vmc`, `qcs` — plus `other` |
+| Method | the `### Method` field in the issue body | the seven tracks — `ed`, `mps`, `peps`, `qmc`, `qcs`, `polyopt`, `agent-kb` — plus `other` |
 | Ratification | labels | `accepted` = organizer-ratified; without it, proposed only and riskier to register |
 | Verification | labels | `autoresearch` = ships its own pass/fail gate, so "did it work?" is objective |
 | Already claimed | open PRs | a challenge another team registered; still takeable, but say they'd be racing |
 
 `Method` is a dropdown in the template but **free text in practice** — real values include
 `Semidefinite programming / Noncommutative polynomial optimization` and `MPS / QMC / VMC-NQS`.
-Normalize onto the six tracks, list slash-separated values under each, and say the grouping
+Normalize onto the seven tracks, list slash-separated values under each, and say the grouping
 is approximate. It is a browsing aid, never a filter applied on the team's behalf.
 
 **Present index-first.** Lead with the totals, then one row per method group with its count.
@@ -81,7 +81,7 @@ unnecessary.
 1. **The issue says so.** Several challenges name their solution folder outright (e.g. #71:
    "work under `tracks/qcs/solutions/<your-team>/`"). That wins over everything else,
    including the issue's own `Method` field, which can disagree with it.
-2. **The `Method` field**, normalized onto the six tracks.
+2. **The `Method` field**, normalized onto the seven tracks.
 3. **Ambiguous or spanning** (`MPS / QMC / VMC-NQS`, `Other`) — ask which track folder to file
    under. Don't pick for them.
 
