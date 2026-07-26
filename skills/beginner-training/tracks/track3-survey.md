@@ -31,8 +31,9 @@ question, not a field.
 
 Run `/download-ref` on the track paper's arXiv ID (e.g. `1711.03528` for the
 ED track). Explain each stage as it happens: metadata lookup, PDF fetch,
-markdown render, `INDEX.md` regeneration. Then open
-`.knowledge/literature/INDEX.md` together and find the new entry.
+markdown render, `INDEX.md` regeneration. Then open the topic's index —
+`.knowledge/literature/<topic>/INDEX.md` (for the ED example,
+`.knowledge/literature/ed/INDEX.md`) — together and find the new entry.
 
 ### Step 3 — Survey the topic
 
@@ -53,10 +54,10 @@ figures, conclusions — in that order. The lesson: a survey library is for
    `2513.99999`. Expected: the pipeline reports the lookup failure and adds
    **nothing** to the library. A fetcher that "succeeds" on garbage input
    cannot be trusted on real input.
-2. **Integrity check**: count entries in `.knowledge/literature/INDEX.md` and
-   compare with the number of reference directories/PDFs actually present.
-   The numbers must match — an index that over- or under-counts is worse than
-   no index.
+2. **Integrity check**: count entries in the topic's `INDEX.md` and compare
+   with the number of reference directories/PDFs actually present in that
+   topic folder. The numbers must match — an index that over- or under-counts
+   is worse than no index.
 
 Checkpoint passes when both hold and the student can explain what each half
 protects against.
