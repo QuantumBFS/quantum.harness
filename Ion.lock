@@ -7,6 +7,46 @@ commit = "20b3d503700656f847e6de873753335bf90e63e3"
 checksum = "sha256:7e5665b1d72138d28e50b371b63ee05b546bef14c16a949b1b1fc1d82bccd326"
 
 [[skill]]
+name = "autoresearch"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:99beaff1d4352598a1ea40b69eef80561143405e63aaba73ec64949deec9c1e2"
+
+[[skill]]
+name = "autoresearch-db"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-db"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:24bca2cf4343c9b81ea6e8499575fa0337228892561b0099d88430c6ee54b496"
+
+[[skill]]
+name = "autoresearch-run"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-run"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:ff80eff9424d7b55f942e54f7a759bf14178c6188d186244c7d287efb9ac41f0"
+
+[[skill]]
+name = "autoresearch-topics"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-topics"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:34ab163860a6946fd1469a7f432a27722f5d58373449c15c9335bc3cde3f8313"
+
+[[skill]]
+name = "autoresearch-validator"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-validator"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:80ba763d1905f294c8f03ad17e6571ba640fe0fc4865ca6034c253527c031d45"
+
+[[skill]]
 name = "beginner-training"
 source = ""
 kind = "local"
@@ -132,7 +172,7 @@ checksum = "sha256:dae76a5efc3f2c6994989777ef3398f4bde4fea73a24596f97461e5007313
 name = "method-ltrg"
 source = ""
 kind = "local"
-checksum = "sha256:e4a0de17807754fb7e6f035fcb49999fdb6bfa1a08d224709254ea07c898824f"
+checksum = "sha256:8d81d51c4f4f1a0b54cb1935719e1d847a23b69a0c7c829d52a9b7f1ca26965d"
 
 [[skill]]
 name = "method-mcrg"
@@ -150,31 +190,31 @@ checksum = "sha256:5a8fa756299f4484d645a7cd6aa9ab62c09bac8b11f842132598f20b710cd
 name = "method-mps"
 source = ""
 kind = "local"
-checksum = "sha256:4474a27848c4fac4e3b0a56c1443566be221cfb1abf016ceccaa39eb89e22546"
+checksum = "sha256:5c25c4608d59611e8ed833480e51505ce4dd363ed636df750a1bf2e8f5a318af"
 
 [[skill]]
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:883caad5ffcbd70dd76568f9fd6218463e4b9e5eada027a5f0a56eb1144fc241"
+checksum = "sha256:7497421e5ca1b47d6fcbec6a9bc1360337fadb70ab9b241ea6767f7dfdd594d6"
 
 [[skill]]
 name = "method-polyopt"
 source = ""
 kind = "local"
-checksum = "sha256:49d391e03ea6a7754d0f11da643a771daeed6f45f79e13270a5a33bb59a1b81b"
+checksum = "sha256:766460c93bfb31f376a635485c2c8f8b73f952a610cb2103331827c226034578"
 
 [[skill]]
 name = "method-qcs"
 source = ""
 kind = "local"
-checksum = "sha256:4eedae5687e25ce59540a9c998b351af90f93a4be084ae1af29766b0becab2b6"
+checksum = "sha256:afcefe57735eb30c4ad3f69ebd8579586a18bb7dfe886bccb0f53fed93cc5292"
 
 [[skill]]
 name = "method-qmc"
 source = ""
 kind = "local"
-checksum = "sha256:30fda9506a9d5a9731e1cea8890977bf08e23bbbbc3c2ab999d3367446f80be0"
+checksum = "sha256:819a1c21b099f7e0df66f0e3f6f54dcbd0a23bce650e6cda4bf2232004c0209e"
 
 [[skill]]
 name = "method-vmc"
@@ -192,7 +232,7 @@ checksum = "sha256:b34bcad782194e5b9170d663090608f777c8d95bd359c6f07fdadf53b22a9
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:d41ce39573dd389b6407e829a08ac08d9f14643381eca59719303c5832b7bff3"
+checksum = "sha256:1833c23240c0cc6ec0be43e65d4c086a8a551565b9620bf7fe57880c2e4482cd"
 
 [[skill]]
 name = "parameter-scan"
@@ -251,14 +291,14 @@ name = "scientific-visualization"
 source = "https://github.com/HughYau/AcademicForge.git"
 kind = "git"
 path = "scientific-visualization"
-commit = "8f1e7a29710ab7ea9c4b1b6f4073c8d2447ab833"
+commit = "1e3ece9e82758e34ca442398bac6edcaf1c61ea6"
 checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390bc74"
 
 [[skill]]
 name = "setup-cluster"
 source = ""
 kind = "local"
-checksum = "sha256:1f7ab61bef998440c3fcc7083c23aeef1c4eb6e0869eb6d013e7c1b63222a2c1"
+checksum = "sha256:06e28d0593bbe48c01e5d6ff46292850bf80be0b3ef9b1b4a963f7ab3a687f41"
 
 [[skill]]
 name = "setup-julia"
@@ -314,7 +354,7 @@ checksum = "sha256:a4126a9c5f17be3c228aa9e5755898ade283448b86099f56f40852e8c1453
 name = "using-cpmc-lab"
 source = ""
 kind = "local"
-checksum = "sha256:2c58bca32ae523d2c8ce3e96d6d44799d69f836ebb0e6f439c608e491fcf0ab3"
+checksum = "sha256:60a1184ddb67121b8955027082336f3c81a699ba477d180c65433e235ef70591"
 
 [[skill]]
 name = "using-git-worktrees"
@@ -358,7 +398,7 @@ checksum = "sha256:6f53db4fe417b54bbd2bbb4312ddb6589cd4bf8485411b6b7dd2546623591
 name = "using-pepskit"
 source = ""
 kind = "local"
-checksum = "sha256:75a861ac3d1dfa866f38981c4bc20c07323f276a5a21a7177ea24841d7fa820d"
+checksum = "sha256:2222d69a1de07f0cdc7bb7e55d82605305be16dbdc3853c0ab20a6897e14fb9a"
 
 [[skill]]
 name = "using-qmbcertify"
@@ -388,13 +428,13 @@ checksum = "sha256:8d7b256f2a6746f127a0150ae0d5631636f39363daf5b689bb688951df9db
 name = "using-slurm"
 source = ""
 kind = "local"
-checksum = "sha256:45b2ee755a4c69adc5645365707f4a70f2c4571d30a3da3926ce25b9b48214ef"
+checksum = "sha256:ff081b97fe10a727693390c61375bef53646fb92f3037c826bae2e8e74eb39c4"
 
 [[skill]]
 name = "using-sse"
 source = ""
 kind = "local"
-checksum = "sha256:e883cae031ce48ceeabf6c461bf10bd7208864c47fa3ef17b12808deffcb8564"
+checksum = "sha256:fe1e0dde8cab00f90601d8a7198fb46e5391a94ba3d184fc8e3459a49ad65ca2"
 
 [[skill]]
 name = "using-superpowers"
@@ -414,7 +454,7 @@ checksum = "sha256:4d0a11229753e41d4222c2a03023ba9830a85ffb4bcd9391a25f5495b8c1b
 name = "using-tensorcircuit-ng"
 source = ""
 kind = "local"
-checksum = "sha256:bdb16fefca7b8c067d163b4575684065d5a909178e4af30be7747a2dbb1f8af2"
+checksum = "sha256:72485e6614b10d0e087c091d9a8b3437f308314dcbb1d2e2e82ea588fb99457f"
 
 [[skill]]
 name = "using-xdiag"

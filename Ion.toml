@@ -7,6 +7,11 @@ arxiv-search = { source = "yorkeccak/scientific-skills/arxiv-search" }
 survey = { source = "QuantumBFS/sci-brain/skills/survey" }  # topic survey → .knowledge/ base (BibTeX)
 brainstorm-ideas = { source = "QuantumBFS/sci-brain/skills/brainstorm-ideas" }  # two-agent brainstorm grounded in a survey (for /take-challenge)
 idea-writer = { source = "QuantumBFS/sci-brain/skills/idea-writer" }  # write a chosen idea into a structured proposal (for /take-challenge)
+autoresearch = { source = "QuantumBFS/sci-brain/skills/autoresearch" }  # dispatcher of the autoresearch pipeline (Track 5 execution engine)
+autoresearch-topics = { source = "QuantumBFS/sci-brain/skills/autoresearch-topics" }      # stage 1: topics + metrics + acceptance gate
+autoresearch-db = { source = "QuantumBFS/sci-brain/skills/autoresearch-db" }              # stage 2: evidence base; owns the survey gate
+autoresearch-validator = { source = "QuantumBFS/sci-brain/skills/autoresearch-validator" }  # stage 3: sealed-holdout validator; owns the validator gate
+autoresearch-run = { source = "QuantumBFS/sci-brain/skills/autoresearch-run" }            # stage 4: the attempt loop
 download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)
