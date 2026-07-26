@@ -87,3 +87,6 @@ skills/autoresearch
 skills/autoresearch-db
 skills/autoresearch-run
 skills/autoresearch-topics
+
+# idea-writer output (local working artifacts; deliverables flow through PRs/issues)
+/articles/
