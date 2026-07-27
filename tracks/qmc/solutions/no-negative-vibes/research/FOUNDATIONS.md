@@ -96,6 +96,24 @@ V = [[ A,    i B],
 
 where `A^T = -A` and Hermitian `B` is positive or negative semidefinite.
 
+A second sufficient condition in the same paper is Majorana Kramers
+positivity. For every coefficient matrix `V`, there must be fixed
+transformations `S,P` with
+
+```text
+S^T V S = conjugate(V),
+P V P^(-1) = V,
+S^2 = -I,
+P^2 = I,
+P S = -S P.
+```
+
+`S` is real antisymmetric; `P` is a symmetric or antisymmetric Hermitian
+involution. The first relation creates reciprocal-conjugate eigenvalue
+quartets, while the second enforces the degeneracy needed when a quartet
+collapses on the unit circle. A complex candidate is not new merely because
+it lies outside the real split-orthogonal form; it must also fail this test.
+
 A complementary classification by anticommuting Majorana time-reversal
 symmetries found two fundamental sign-free symmetry classes, called the
 Majorana and Kramers classes. It already contains a "periodic table" of
@@ -127,6 +145,23 @@ A = K + eta H,
 with `K^T eta + eta K = 0` and symmetric `H >= 0`, because then
 `A^T eta + eta A = 2H`.
 
+The full 2024 filter is broader than this real special case. For complex
+skew-symmetric Majorana coefficient matrices `A`, it asks whether there are
+two anticommuting real orthogonal matrices `J_1,J_2`, with `J_2`
+skew-symmetric, such that
+
+```text
+J_1^T A J_1 = conjugate(A),
+i (J_2 A - A J_2) <= 0.
+```
+
+`J_1` may be symmetric or skew-symmetric. The first condition makes the
+fermionic trace real; the second places the evolution in a contraction
+semigroup whose strict interior cannot cross zero. Equality reduces to known
+symmetry mechanisms, while the cone contains Majorana reflection positivity
+and a Kramers-plus-pairing class. A novelty check against only
+`A^T eta + eta A >= 0` is therefore insufficient.
+
 ### 2.4 Pseudo-unitary prior art
 
 The split unitary direction is not untouched. For
@@ -144,6 +179,25 @@ conj(det(I + D)) = det(D)^(-1) det(I + D).              (1)
 It follows directly from `D^dagger = eta D^(-1) eta`. Thus the phase of the
 weight is locked to half the phase of `det(D)`, modulo pi. In particular,
 `det(I + D)` is real on `SU(p,q)`, but need not be nonnegative.
+
+For the QMC product `D = product_l exp(A_l)`, noncommutativity does not affect
+the determinant:
+
+```text
+det(D) = exp(sum_l trace(A_l)).
+```
+
+The configuration-weight phase is therefore
+
+```text
+arg(w) = Im(sum_l trace(A_l))/2  modulo pi.
+```
+
+This separates a known, additive phase from a residual binary sign. If the
+trace phase is configuration-independent it is only a global factor; if an HS
+prefactor supplies the inverse phase it may be cancelled; if every generator
+is traceless, the weight is real. None of these observations alone fixes the
+remaining sign.
 
 Appendix B of [Xu et al., PRX 9, 021022
 (2019)](https://arxiv.org/abs/1807.07574) proves the `SU(p,q)` reality result
