@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Team name** | BOTS:848 |
-| **Members** | 邰少捷, 龚环京, 贾博涵 |
+| **Members** | Shaojie Tai, Huanjing Gong, Bohan Jia |
 
 ## Challenge
 
