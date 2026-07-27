@@ -15,6 +15,7 @@ SOLUTION_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOLUTION_DIR))
 
 from landscapes import (  # noqa: E402
+    coverage_spectrum,
     hessian_vector_product,
     krylov_hessian_eigensystem,
     projection_fraction,
@@ -25,6 +26,22 @@ from landscapes import (  # noqa: E402
 
 
 class LandscapeTests(unittest.TestCase):
+    def test_coverage_spectrum_handles_missing_and_extra_dimensions(self) -> None:
+        reference = np.eye(4)[:, :2]
+        one_direction = np.eye(4)[:, :1]
+        full_space = np.eye(4)
+
+        np.testing.assert_allclose(
+            coverage_spectrum(reference, one_direction),
+            np.asarray([1.0, 0.0]),
+            atol=1e-12,
+        )
+        np.testing.assert_allclose(
+            coverage_spectrum(reference, full_space),
+            np.ones(2),
+            atol=1e-12,
+        )
+
     def test_generalized_gell_mann_basis(self) -> None:
         basis = np.asarray(traceless_hermitian_basis(4))
         self.assertEqual(basis.shape, (15, 4, 4))

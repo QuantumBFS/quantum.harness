@@ -221,6 +221,41 @@ def subspace_metrics(left: Array, right: Array) -> SubspaceMetrics:
     )
 
 
+def coverage_spectrum(reference: Array, candidate: Array) -> np.ndarray:
+    """Return how well a candidate space covers every reference direction.
+
+    ``reference`` has ``r`` orthonormal columns and defines the physical
+    directions that must be covered. ``candidate`` may have any number of
+    orthonormal columns. The returned ``r`` squared principal cosines lie in
+    ``[0, 1]``; missing dimensions are padded with zeros. Consequently, the
+    smallest value is a worst-case coverage certificate for every linear
+    combination in the reference space.
+    """
+
+    reference_np = np.asarray(reference, dtype=np.float64)
+    candidate_np = np.asarray(candidate, dtype=np.float64)
+    if reference_np.ndim != 2 or candidate_np.ndim != 2:
+        raise ValueError("subspace bases must be matrices")
+    if reference_np.shape[0] != candidate_np.shape[0]:
+        raise ValueError("subspace bases must share an ambient dimension")
+    reference_rank = reference_np.shape[1]
+    if reference_rank <= 0 or candidate_np.shape[1] <= 0:
+        raise ValueError("subspace bases must have at least one column")
+
+    overlap = np.einsum(
+        "ir,ik->rk",
+        reference_np,
+        candidate_np,
+        optimize=False,
+    )
+    singular_values = np.linalg.svd(overlap, compute_uv=False)
+    squared_cosines = np.zeros(reference_rank, dtype=np.float64)
+    squared_cosines[: singular_values.size] = np.clip(
+        singular_values, 0.0, 1.0
+    ) ** 2
+    return squared_cosines
+
+
 def projection_fraction(vector: Array, basis: Array) -> float:
     """Fraction of squared vector norm captured by an orthonormal basis."""
 

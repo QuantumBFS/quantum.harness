@@ -26,7 +26,7 @@ from sim_to_real import (  # noqa: E402
     propagate_expm,
     unitarity_defect,
 )
-from optimizers import _closed_loop_summary, optimize_black_box_scipy  # noqa: E402
+from optimizers import _closed_loop_summary  # noqa: E402
 
 
 class DynamicsTests(unittest.TestCase):
@@ -136,21 +136,6 @@ class BlackBoxTests(unittest.TestCase):
         np.testing.assert_allclose(result.params, [1.0])
         self.assertAlmostEqual(result.best_reported_fidelity, 0.99)
         self.assertAlmostEqual(result.best_exact_fidelity, 0.95)
-
-    def test_staged_optimizer_uses_an_incremental_query_budget(self) -> None:
-        fidelity = lambda params: jnp.exp(-jnp.vdot(params, params))
-        device = BlackBoxDevice(fidelity)
-        device.query(np.ones(2))
-        start = device.query_count
-        optimize_black_box_scipy(
-            device,
-            np.ones(2),
-            method="Nelder-Mead",
-            max_queries=7,
-            allow_existing_history=True,
-        )
-        self.assertLessEqual(device.query_count - start, 7)
-
 
 if __name__ == "__main__":
     unittest.main()

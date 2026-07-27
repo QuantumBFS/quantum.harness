@@ -1,275 +1,170 @@
-# Report: when model Hessian directions transfer to a noisy device
+# Generator coverage under model–device mismatch
 
 ## Question
 
-Can the `d²−1` active directions of a model-optimal quantum-control landscape
-reduce the number of expensive device experiments, and where does that
-advantage fail as model mismatch and shot noise grow?
+A two-qubit gate has `d²−1=15` independent phase-free generators, while the
+pulse in challenge #113 has 40 Fourier parameters. At zero model–device
+mismatch, the first 15 model-Hessian directions span the same parameter
+subspace as the 15 endpoint-generator directions.
 
-The study starts from the challenge notebook's two-qubit CNOT problem: four
-random Hermitian controls, a random drift Hamiltonian, ten sine coefficients
-per control, total time `T=1`, and 40 real pulse parameters. The objective is
-the phase-insensitive trace infidelity
+The question is:
 
-```text
-L(θ) = 1 − |Tr(U(θ)† U_target)| / d.
-```
+> After the true generator subspace rotates, how many leading model-Hessian
+> parameter directions are required to cover all 15 true generators?
 
-The success threshold is `L ≤ 10⁻³`.
+This report studies structural mismatch
+`H₀,true = H₀ + εV`. Here `ε` is not finite-shot measurement noise. Exact
+simulated Jacobians are used to isolate the geometry before considering how to
+estimate it on hardware.
 
-## Protocol
+## Step 1 — Confirm the baseline dimension
 
-### Differentiable model
+At the calibrated model optimum:
 
-The model uses the notebook's seed 42 Hamiltonians and Fourier pulse. Evolution
-uses a midpoint product of matrix exponentials:
+| Gate | `d` | Pulse parameters | `d²−1` | Hessian rank | Jacobian rank |
+|---|---:|---:|---:|---:|---:|
+| single-qubit X | 2 | 20 | 3 | 3 | 3 |
+| two-qubit CNOT | 4 | 40 | 15 | 15 | 15 |
 
-```text
-Uₙ₊₁ = exp(−i H(tₙ₊½; θ) Δt) Uₙ.
-```
+For the CNOT at `ε=0`, the Hessian and endpoint-Jacobian rank-15 parameter
+subspaces agree to numerical precision. Thus `k=15` is both necessary by
+dimension and sufficient in the matched model.
 
-Every step is unitary up to matrix-exponential roundoff. The implementation
-also retains the notebook's adaptive `odeint` backend as an independent
-cross-check.
+## Step 2 — Define generator coverage
 
-The model optimum is found with JAX gradients and BFGS. Landscape directions
-are extracted in two ways:
+Let:
 
-- an explicit 40×40 Hessian for validation;
-- forward-over-reverse HVPs exposed as a SciPy `LinearOperator`, followed by
-  the symmetric Krylov solver `eigsh`.
+- `Jtrue(ε)` be the `15×40` true endpoint Jacobian at the model-optimal pulse;
+- `Rtrue(ε)` be its 15-dimensional right-singular parameter subspace;
+- `Vk` contain the first `k` model-Hessian eigenvectors.
 
-The endpoint Jacobian is expressed in an orthonormal generalized Gell-Mann
-basis after removing global phase. It independently measures the reachable
-local `su(d)` tangent space.
-
-### Simulated true device
-
-The device differs only through a controlled drift perturbation:
+The coverage spectrum is
 
 ```text
-H₀,true = H₀ + εV,
-Tr(V) = 0,
-V = V†,
-‖V‖F = ‖H₀‖F.
+cᵢ(k, ε) = σᵢ²(Rtrueᵀ Vk),   i=1,…,15.
 ```
 
-The same `V` (seed 113) is used across the `ε` sweep so that increasing `ε`
-changes magnitude rather than direction.
+`cᵢ=1` means complete coverage and `cᵢ=0` means a missing direction. The
+worst-generator certificate is
 
-`BlackBoxDevice.query(θ)` is the only closed-loop interface. One query:
+```text
+cmin(k, ε) = minᵢ cᵢ(k, ε).
+```
 
-1. evaluates the private true-device fidelity;
-2. optionally draws `successes ~ Binomial(shots, F)`;
-3. returns only `1 − successes/shots`;
-4. increments both query and shot counters.
+For threshold `τ`, define
 
-Exact fidelity is logged only as latent simulation truth for scoring. No
-closed-loop optimizer receives a gradient, Hamiltonian, exact fidelity, or
-unreported device state.
+```text
+kτ(ε) = smallest k such that cmin(k, ε) ≥ τ.
+```
 
-### Comparisons
+The main table uses `τ=95%`; 90% and 99% are also reported.
 
-The primary finite-shot experiment uses COBYQA, 65,536 shots/query, a
-1,000-query cap, and five seeds. It compares:
+An exact-rank test is not sufficient here. After a generic perturbation, the
+restricted `k=15` Jacobian can still have algebraic rank 15 because an
+arbitrarily small nonzero projection counts as independent. The thresholded
+principal-cosine certificate measures robust coverage rather than mere
+nonzero rank.
 
-- the leading `k` model Hessian eigenvectors for
-  `k ∈ {3,5,10,15,20,30,40}`;
-- independently seeded random `k`-dimensional subspaces;
-- the raw 40 pulse coordinates.
+## Step 3 — Hold `k=15` fixed
 
-Failures are right-censored at 1,001 queries in the median/IQR plot. Success is
-defined by the latent true fidelity for honest offline scoring. A noisy
-single-query threshold crossing is not used for early termination.
+The formal scan uses 21 values of `ε` and five independently seeded drift
+directions.
 
-## Numerical calibration
+| `ε` | median worst-generator coverage with top 15 |
+|---:|---:|
+| 0.00 | 1.000 |
+| 0.05 | 0.994 |
+| 0.10 | 0.977 |
+| 0.15 | 0.946 |
+| 0.20 | 0.901 |
+| 0.30 | 0.797 |
+| 0.50 | 0.567 |
+| 0.75 | 0.286 |
+| 1.00 | 0.092 |
 
-The structure-preserving model reached `L = 6.74×10⁻¹⁴`; the notebook-style
-ODE optimization reached `2.93×10⁻⁹`. At the structure-preserving optimum:
+![Fixed top-15 coverage](artifacts/generator_coverage_fixed15_vs_epsilon.png)
 
-| Diagnostic | Value |
-|---|---:|
-| `‖U†U−I‖F` | `8.67×10⁻¹⁵` |
-| 256-step loss | `6.73×10⁻¹⁴` |
-| 512-step loss | `9.24×10⁻⁹` |
-| high-accuracy ODE loss | `1.67×10⁻⁸` |
-| phase-aligned 256→512 unitary difference | `2.72×10⁻⁴` |
-| phase-aligned 512→ODE unitary difference | `9.05×10⁻⁵` |
-| `|λ₁₅|/|λ₁₆|` | `2.30×10⁵` |
-| Hessian/endpoint-Jacobian mean subspace overlap | `0.9999999999998` |
-| explicit-Hessian/HVP-Krylov mean overlap | `≈1` |
+In the small-mismatch region,
 
-Thus the integrator error is many orders below the `10⁻³` target, and the
-15-direction spectral split is not a discretization artifact.
+```text
+1 − cmin(k=15) ≈ 2.06 ε².
+```
 
-![Calibrated Hessian spectrum](artifacts/calibration_hessian_spectrum.png)
+The fitted exponent is `2.000` with log-space `R²=0.931`. This agrees with
+subspace perturbation: the angle changes at first order in `ε`, while lost
+coverage is a squared sine and therefore starts at order `ε²`.
 
-## Result 1: geometry alone does not cause the observed failure
+![Small-gap scaling](artifacts/generator_coverage_small_gap_scaling.png)
 
-The privileged screen optimizes the simulated true loss with exact gradients.
-It is diagnostic only; it is not counted as a black-box result.
+## Step 4 — Increase `k` until all 15 generators are covered
 
-Open-loop transfer stops meeting the target between `ε=0.03`
-(`L=2.01×10⁻⁴`) and `ε=0.1` (`L=2.25×10⁻³`). Meanwhile, the true top-15
-subspace rotates strongly:
+Every integer `k=15,…,40` is evaluated, giving 2,730 coverage measurements.
 
-| `ε` | Open-loop `L` | Mean model/true top-15 overlap | Largest principal angle |
+| `ε` | median `k₉₀` | median `k₉₅` [seed range] | median `k₉₉` |
 |---:|---:|---:|---:|
-| 0.03 | `2.01×10⁻⁴` | 0.9994 | 4.17° |
-| 0.1 | `2.25×10⁻³` | 0.9934 | 14.52° |
-| 0.3 | `2.04×10⁻²` | 0.9132 | 78.73° |
-| 0.5 | `5.60×10⁻²` | 0.8803 | 85.91° |
-| 2.0 | `4.68×10⁻¹` | 0.6409 | 85.57° |
+| 0.00 | 15 | 15 [15,15] | 15 |
+| 0.05 | 15 | 15 [15,15] | 15 |
+| 0.10 | 15 | 15 [15,15] | 27 |
+| 0.15 | 15 | 16 [15,19] | 35 |
+| 0.20 | 15 | 25 [15,36] | 38 |
+| 0.25 | 19 | 31 [26,39] | 40 |
+| 0.30 | 25 | 35 [34,39] | 40 |
+| 0.40 | 34 | 36 [35,40] | 40 |
+| 0.50 | 35 | 39 [36,40] | 40 |
+| 0.75 | 38 | 40 [39,40] | 40 |
+| 1.00 | 40 | 40 [40,40] | 40 |
 
-Despite that rotation, exact-gradient optimization inside the original model
-top-15 subspace reached numerical-zero loss for every tested `ε≤2`. Therefore
-the finite-shot failure at large `ε` is not captured by a binary
-“subspace can/cannot reach the target” story. The model subspace becomes badly
-conditioned and hard to identify from noisy scalar evaluations before it
-becomes strictly incapable.
+![Required k](artifacts/generator_coverage_required_k_vs_epsilon.png)
 
-![Privileged reachability versus mismatch](artifacts/reachability_vs_epsilon.png)
+![Coverage heatmap](artifacts/generator_coverage_heatmap.png)
 
-## Result 2: the dimension sweet spot moves with the gap
+At the 95% threshold the empirical pattern is:
 
-![Queries versus dimension](artifacts/queries_vs_dimension.png)
+1. `ε≤0.10`: `k≈15`;
+2. `0.15≤ε≤0.50`: rapid transition from `k≈16` to `k≈39`;
+3. `ε≥0.75`: almost the full 40-dimensional parameter space is needed.
 
-At `ε=0.1`, `k=10` already reaches the operational `10⁻³` threshold in all
-trials, but `k=15` is the first dimension that resolves all local `su(4)`
-directions. It succeeds in 32 queries for every seed. The raw full search
-succeeds in 3/5 trials with a median of 165 queries, a factor of about 5.2 in
-query count and total shots.
+The threshold changes the exact crossing points, but not this pattern.
 
-At `ε=0.3`, top-15 succeeds in 3/5 trials. A five-direction safety margin does
-not change that success rate in this sample, but `k=30` restores 5/5 success
-with median 114 queries. Raw full search succeeds in only 1/5 trials.
+## Step 5 — Robustness checks
 
-At `ε=0.5`, top-15 fails in all trials. The model-ordered success rates are
-3/5 at `k=20`, 4/5 at `k=30`, and 5/5 at `k=40`; raw full search is 5/5.
-Among the reliable full-span variants, Hessian ordering reaches the target in
-median 176 queries versus 251 for raw coordinates.
+- Five independent drift directions are included.
+- For every `ε` and drift seed, `cmin` is monotone non-decreasing with `k`.
+- At `k=40`, all 105 `ε×seed` cases recover full coverage numerically.
+- The complete seed-113 `k₉₅(ε)` curve is identical at 128, 256, and 512
+  propagation steps.
 
-This supports a practical rule: start near `d²−1`, but widen when repeated
-finite-shot runs plateau above target. The model eigenvalue order remains
-useful even after the strict low-dimensional reduction has failed.
+Selected resolution check:
 
-## Result 3: shot noise defines a second boundary
-
-At fixed `ε=0.3`, ten trials per shot budget give:
-
-| Shots/query | Top-15 success | Raw-40 success | Top-15 median queries among successes |
+| `ε` | `k₉₅` at 128 steps | 256 steps | 512 steps |
 |---:|---:|---:|---:|
-| 4,096 | 0/10 | 0/10 | — |
-| 16,384 | 4/10 | 1/10 | 44 |
-| 65,536 | 9/10 | 2/10 | 51 |
-| 262,144 | 9/10 | 0/10 | 40 |
+| 0.10 | 15 | 15 | 15 |
+| 0.20 | 20 | 20 | 20 |
+| 0.30 | 34 | 34 | 34 |
+| 0.50 | 36 | 36 | 36 |
+| 0.75 | 39 | 39 | 39 |
+| 1.00 | 40 | 40 | 40 |
 
-The raw optimizer's non-monotone success rate is an honest indication of
-optimizer instability; these ten-seed samples do not justify claiming strict
-monotonicity. The robust conclusion is that reducing the search to the model
-top-15 directions dramatically improves finite-shot success throughout the
-tested range.
+## Conclusion
 
-![Success versus shot budget](artifacts/success_vs_shots.png)
+The number of physical generators remains 15. What changes with structural
+mismatch is the number of *model-ranked Hessian parameter directions* needed
+to cover those generators.
 
-## Result 4: `d²−1` is observed for two system sizes
+Small mismatch preserves the model top-15 space, with coverage loss growing
+approximately as `ε²`. Moderate mismatch produces a rapid, seed-dependent
+increase in required `k`. Strong mismatch makes the Hessian ordering
+insufficient for substantial dimensional reduction.
 
-The same seeded construction was run for a single-qubit X gate with 20 pulse
-parameters and a two-qubit CNOT with 40:
+This report deliberately stops here. It does not yet design a fixed-rank
+optimizer or claim that the true generator subspace can be estimated under
+finite-shot noise at the same cost.
 
-| Gate | `d²−1` | Observed Hessian rank | Endpoint-Jacobian rank | Spectral gap after predicted rank |
-|---|---:|---:|---:|---:|
-| X | 3 | 3 | 3 | `1.94×10⁷` |
-| CNOT | 15 | 15 | 15 | `2.30×10⁵` |
+## Reproduce
 
-![Rank invariant](artifacts/hessian_rank_invariant.png)
-
-## Result 5: device feedback can recover the right 15 directions
-
-The dimension sweep above is diagnostic: it identifies where fixed top-`k`
-subspaces work, but permanent widening is not scalable. The final method
-instead performs staged optimization on a rank-15 basis. After an unconfirmed
-stage it introduces two temporary orthogonal scouts and estimates the
-restricted Hessian
-
-```text
-        [ diag(λactive)     0.2 Cᵀ ]
-Hlocal ≈ [                           ],
-        [    0.2 C       diag(λscout)]
+```bash
+python3 tracks/qcs/solutions/Fermichen99/run_generator_coverage.py
 ```
 
-where each element of the `15×2` cross block `C` is obtained by a four-point
-mixed finite difference. The factor 0.2 is a conservative shrinkage prior:
-finite-shot sensitivity tests showed that replacing the model basis
-aggressively degrades its already-good alignment. Diagonal second differences,
-four center repeats, and all mixed differences make one update cost
-`4 + 2(15+2) + 4·15·2 = 158` device queries. The leading 15 eigenvectors of
-this 17-dimensional local matrix define the next basis; the deployed search
-dimension therefore never exceeds 15.
-
-The optimizer uses only noisy reported query values. Four repeated
-measurements and a one-sided Wilson upper bound decide whether a stage has
-reliably crossed `L≤10⁻³`. Exact fidelity and endpoint-Jacobian overlaps are
-computed only afterward for offline scoring.
-
-At 65,536 shots/query, five seeds, and a 1,000-query cap:
-
-| `ε` | Tracked rank 15 | Fixed top 15 | Fixed top 30 | Raw 40 |
-|---:|---:|---:|---:|---:|
-| 0.3 | **5/5**, median 55 | 4/5, median 46 censored | 5/5, median 89 | 0/5 |
-| 0.5 | **5/5**, median 394 | 2/5 | 3/5, median 140 censored | 1/5 |
-
-At `ε=0.5`, every tracked run succeeded, including two that required both
-rank-preserving updates. The median final offline subspace overlap was 0.944,
-close to the initial 0.948; this is expected because each update explores only
-two new directions and is deliberately conservative. The large reliability
-gain despite a small global-overlap change shows that correcting a few
-optimization-relevant directions matters more than replacing the whole basis.
-
-![Tracked rank-15 comparison](artifacts/rank15_tracking_comparison.png)
-
-![Tracked subspace alignment](artifacts/rank15_subspace_alignment.png)
-
-## Interpretation
-
-Four distinct thresholds matter:
-
-1. **Open-loop threshold:** the model pulse itself stops meeting the true
-   target near `ε≈0.1`.
-2. **Efficient-calibration threshold:** top-15 remains useful at `ε=0.3` but
-   requires more shots or a safety margin for reliable success.
-3. **Fixed-reduction threshold:** by `ε=0.5`, top-15 fails under the declared
-   finite-shot protocol.
-4. **Tracking threshold:** at the same `ε=0.5`, conservative device-side
-   rotation restores 5/5 success without increasing the deployed rank.
-
-The privileged result shows that threshold 3 is algorithmic/statistical before
-it is geometric. The tracked experiment then supplies a constructive response:
-use `d²−1` as a rank constraint, not as a frozen set of model eigenvectors.
-Principal-angle rotation remains a useful offline diagnostic, but is not
-required by the device-side algorithm.
-
-## Limitations and next experiment
-
-- The black box is simulated, not superconducting hardware.
-- Binomial sampling of trace fidelity is a controlled noise proxy, not a full
-  randomized-benchmarking or process-tomography likelihood.
-- Only one Hamiltonian seed and one perturbation direction are used in the
-  headline gap scan; optimizer/noise seeds provide the plotted error bars.
-- COBYQA is deliberately a simple baseline. Its raw full-space behavior is
-  unstable under noise, so the numbers should not be generalized to every
-  derivative-free optimizer.
-- The two-scout update can only correct the missing directions it samples; the
-  current five-seed result is evidence for the mechanism, not a sample-complexity
-  theorem.
-- Cross-curvature estimation costs `O(kr)` queries per update for rank `k` and
-  `r` scouts. Testing structured scouts and simultaneous estimators is the next
-  route to lower constants at larger `d`.
-
-## Reproducibility
-
-Every long script prints progress with flushing and writes machine-readable
-JSON/CSV plus figures. The committed compact artifacts contain the exact
-reference-run settings, environment, aggregate statistics, and rerun commands.
-Raw per-query and per-trial results are generated under the gitignored
-`tracks/qcs/results/` directory.
+The full 2,730-row table, threshold summaries, fit, figures, and metadata are
+committed under `artifacts/generator_coverage_*`.

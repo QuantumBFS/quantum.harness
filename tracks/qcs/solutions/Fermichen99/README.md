@@ -24,55 +24,46 @@ retained only for offline scoring and is never exposed to the optimizer.
 
 ## Main result
 
-![Queries to target versus search dimension](artifacts/queries_vs_dimension.png)
+The current study asks a geometric question before designing another
+optimizer:
 
-For a two-qubit CNOT (`d=4`, 40 Fourier parameters), 65,536 shots/query and
-five seeds:
+> How many leading model-Hessian parameter directions are needed to cover all
+> `d²−1=15` true endpoint-generator directions?
 
-| Drift gap | Model subspace | Success | Median queries to `1−F ≤ 10⁻³` | Raw 40-dimensional baseline |
-|---:|---:|---:|---:|---:|
-| `ε=0.1` | `k=15` | 5/5 | 32 | 3/5; median 165 |
-| `ε=0.3` | `k=15` | 3/5 | 57, with failures censored | 1/5 |
-| `ε=0.3` | `k=30` | 5/5 | 114 | 1/5 |
-| `ε=0.5` | `k=15` | 0/5 | failure | 5/5; median 251 |
-| `ε=0.5` | `k=30` | 4/5 | 132 | 5/5; median 251 |
-| `ε=0.5` | `k=40`, Hessian ordered | 5/5 | 176 | 5/5; median 251 |
+For each structural mismatch `ε`, the 15-dimensional right-singular subspace
+of the true endpoint Jacobian is compared with the first `k` model-Hessian
+eigenvectors. The squared principal cosines are the coverage spectrum. The
+smallest cosine gives a worst-generator certificate, and `kτ` is the smallest
+`k` for which every generator direction has coverage at least `τ`.
 
-The useful conclusion is not merely “15 directions work.” The experiment
-locates a boundary:
+![Required Hessian directions](artifacts/generator_coverage_required_k_vs_epsilon.png)
 
-- with a small gap, `d²−1=15` is both sufficient and about five times cheaper
-  than raw full-space calibration;
-- with a moderate gap, carrying extra model directions restores reliability;
-- with a large gap, the fixed top-15 subspace fails even though a privileged
-  noiseless optimizer proves that it remains geometrically capable of reaching
-  the gate. The practical failure is noise and conditioning, not simple
-  reachability.
+The formal scan uses 21 values of `ε`, five independent drift directions, and
+every integer `k=15,…,40`. At the main 95% threshold:
 
-### Fixed-rank recovery instead of permanent widening
+| `ε` region | Median required `k₉₅` |
+|---|---:|
+| `ε≤0.10` | 15 |
+| `ε=0.15` | 16 |
+| `ε=0.20` | 25 |
+| `ε=0.25` | 31 |
+| `ε=0.30` | 35 |
+| `ε=0.40` | 36 |
+| `ε=0.50` | 39 |
+| `ε≥0.75` | 40 |
 
-The final method keeps the deployed optimizer at exactly `d²−1=15`
-coordinates. When a noise-aware confirmation test detects a plateau, it
-temporarily probes two orthogonal scout directions, estimates only the
-current/scout cross-curvature block, rotates the 15-dimensional basis, and
-immediately compresses back to rank 15. Neither the simulated exact fidelity
-nor the true-device Jacobian is used to make a closed-loop decision.
+For small mismatch, the lost worst-direction coverage follows
+`1−cmin(k=15) ≈ 2.06 ε²`; the fitted exponent is 2.000 with log-space
+`R²=0.931`. Thus the physical generator count remains 15, while the number of
+*model-ranked parameter directions required to cover those generators* grows
+from 15 toward the full 40-dimensional pulse space.
 
-At 65,536 shots/query, a 1,000-query cap, and five seeds:
+The threshold is essential: exact algebraic rank can remain 15 even when one
+generator combination has only a tiny projection into the chosen parameter
+space. `k₉₅` measures robust worst-direction coverage, not merely nonzero rank.
 
-| Drift gap | Tracked rank 15 | Fixed top 15 | Fixed top 30 | Raw 40 |
-|---:|---:|---:|---:|---:|
-| `ε=0.3` | **5/5**, median 55 queries | 4/5, median 46 censored | 5/5, median 89 | 0/5 |
-| `ε=0.5` | **5/5**, median 394 queries | 2/5 | 3/5, median 140 censored | 1/5 |
-
-The important scaling result is therefore not “increase `k` until it works.”
-Temporary scouts locate missing directions while the optimization rank stays
-fixed at the physical tangent-space dimension. One rank-15 update costs 158
-scalar queries here, versus permanently optimizing 30 or 40 coordinates.
-
-Random subspaces are a real baseline, not a placeholder. At `ε=0.3`, all five
-random trials failed for `k≤20`, while the Hessian-informed runs succeeded in
-3/5 trials for both `k=15` and `k=20`.
+This is a structural-mismatch result. It does not yet propose a fixed-rank
+adaptive optimizer or estimate the subspace through finite-shot queries.
 
 ## Noise and invariant checks
 
@@ -109,7 +100,7 @@ uv pip install --python .venv/bin/python \
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_dimension_sweep.py
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_noise_sweep.py
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_invariant_check.py
-.venv/bin/python tracks/qcs/solutions/Fermichen99/run_rank15_tracking.py
+.venv/bin/python tracks/qcs/solutions/Fermichen99/run_generator_coverage.py
 
 .venv/bin/python -m unittest discover \
   -s tracks/qcs/solutions/Fermichen99/tests -q
@@ -136,10 +127,9 @@ noise, and invariant metadata are in the committed `*_run.json` files.
 | `run_dimension_sweep.py` | headline dimension/gap experiment with seeds and error bars |
 | `run_noise_sweep.py` | shot-budget experiment |
 | `run_invariant_check.py` | `d²−1` check for `d=2` and `d=4` |
-| `subspace_tracking.py` | query-only, rank-preserving cross-curvature rotation |
-| `run_rank15_tracking.py` | tracked rank-15 versus fixed/widened baselines |
+| `run_generator_coverage.py` | dense `ε×k` scan of Hessian-direction coverage of all true generators |
 | `REPORT.md` | methods, results, interpretation, and limitations |
-| `challenge_report.html` | self-contained four-section challenge report |
+| `challenge_report.html` | self-contained step-by-step challenge report |
 
 ## Scope and honest failure
 
@@ -148,8 +138,8 @@ This submission uses a software black box with drift mismatch
 oracle samples the trace fidelity as a binomial probability, which is a useful
 controlled noise model but not a complete randomized-benchmarking protocol.
 
-A fixed model top-15 basis fails at `ε=0.5` under finite shots. The adaptive
-rank-15 method recovers all five reference trials, but it has only been tested
-on one Hamiltonian seed and one perturbation direction. This supports the
-mechanism—track the active tangent space rather than widen blindly—without
-claiming universal hardware performance.
+The generator-coverage scan uses exact simulated endpoint Jacobians. It
+therefore identifies the geometric number of model-Hessian directions needed,
+not the query cost of learning that number on hardware. The reported trend is
+checked across five drift directions and three propagation resolutions, but
+still uses one base Hamiltonian/control instance.
