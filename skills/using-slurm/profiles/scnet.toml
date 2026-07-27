@@ -12,15 +12,23 @@ alias = "scnet"
 
 [scheduler]
 type = "slurm"
-default_partition = "hx1hdnormal01"
+default_partition = "xhacnormalb"
 
 [[partitions]]
-name = "hx1hdnormal01"
+name = "xhacnormalb"
 class = "cpu"
 cores = 128
-memory = "510000M"
+memory = "500000M"
 max_wall = "333-08:00:00"
-gpu = "Hygon DCU:8"
+gpu = ""
+
+[[partitions]]
+name = "xhhgnormal"
+class = "gpu"
+cores = 64
+memory = "300000M"
+max_wall = "333-08:00:00"
+gpu = "NVIDIAGeForceRTX3080:4"
 
 [filesystem]
 home = "~"
