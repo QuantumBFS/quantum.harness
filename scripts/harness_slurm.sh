@@ -20,7 +20,7 @@
 # Subcommands:
 #   precheck                 resolve profile, test ssh, capture git dirty status
 #   probe-partitions         ssh sinfo and print a parsed candidate table
-#   submit ...               build+run sbatch, capture the job id (see --help)
+#   submit ...               build+run sbatch, or validate with --test-only
 #   status <jobid>           squeue the job, parse state + pending-reason category
 #   fetch <run>              rsync results/<run>/ back from the cluster
 #   classify <run> <jobid>   sacct + per-cell manifests -> cell outcome table
@@ -57,6 +57,35 @@ profile_field() {
   local field="$1" file="$2"
   [[ -f "$file" ]] || return 1
   python3 "$SCRIPT_DIR/cluster_profile.py" --field "$field" --profile "$file" 2>/dev/null
+}
+
+# Read one #SBATCH directive through the shared Python parser.
+script_field() {
+  local script="$1" field="$2"
+  [[ -f "$script" ]] || return 1
+  python3 "$SCRIPT_DIR/cluster_guardrail.py" \
+    directive "$script" --field "$field" 2>/dev/null
+}
+
+# Read one sbatch option from the raw --extra string through the shared parser.
+extra_field() {
+  local extra="$1" field="$2"
+  [[ -n "$extra" ]] || return 1
+  python3 "$SCRIPT_DIR/cluster_guardrail.py" option --field "$field" -- "$extra"
+}
+
+# Read a field from one named [[partitions]] row through cluster_profile.py.
+partition_field() {
+  local partition="$1" field="$2" file="$3"
+  [[ -f "$file" ]] || return 1
+  python3 "$SCRIPT_DIR/cluster_profile.py" \
+    --partition "$partition" --field "$field" --profile "$file" 2>/dev/null
+}
+
+resolve_partition() {
+  local explicit="$1"
+  if [[ -n "$explicit" ]]; then echo "$explicit"; return; fi
+  profile_field 'scheduler.default_partition' "$(profile_path)" || true
 }
 
 resolve_alias() {
@@ -178,7 +207,7 @@ cmd_probe_partitions() {
 
 cmd_submit() {
   local array="" run_spec="" command="" entrypoint="" partition="" walltime="" cpus="" \
-        script="scripts/harness_array_sbatch.sh" extra=""
+        script="scripts/harness_array_sbatch.sh" extra="" test_only="false"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --array) array="$2"; shift 2 ;;
@@ -190,10 +219,12 @@ cmd_submit() {
       --cpus) cpus="$2"; shift 2 ;;
       --script) script="$2"; shift 2 ;;
       --extra) extra="$2"; shift 2 ;;
+      --test-only) test_only="true"; shift ;;
       *) die "submit: unknown flag $1" ;;
     esac
   done
   [[ -n "$script" ]] || die "submit: --script is required"
+  [[ -f "$script" && -r "$script" ]] || die "submit: --script must be a locally readable file: $script"
   # Two paths: a harness array/run-spec job, or a plain single-script job
   # (the /cluster-jobs student case). The array contract injects HARNESS_*;
   # a plain job just ships the script with the resource flags.
@@ -206,10 +237,47 @@ cmd_submit() {
   elif [[ -n "$array" ]]; then
     die "submit: --array requires --run-spec; use a plain --script for single jobs"
   fi
+
+  local extra_partition="" extra_gres="" extra_status=0 \
+        extra_partition_set="false" extra_gres_set="false"
+  if extra_partition="$(extra_field "$extra" partition)"; then
+    extra_partition_set="true"
+  else
+    extra_status=$?
+    [[ "$extra_status" -eq 1 ]] || die "submit: malformed --extra"
+  fi
+  extra_status=0
+  if extra_gres="$(extra_field "$extra" gres)"; then
+    extra_gres_set="true"
+  else
+    extra_status=$?
+    [[ "$extra_status" -eq 1 ]] || die "submit: malformed --extra"
+  fi
+
   local alias repo; alias="$(resolve_alias)"; repo="$(resolve_repo)"
+  local script_partition="" partition_cli="$partition"
+  script_partition="$(script_field "$script" partition || true)"
+  if [[ "$extra_partition_set" == "true" ]]; then
+    partition="$extra_partition"
+    partition_cli=""
+  elif [[ -z "$partition" && -n "$script_partition" ]]; then
+    partition="$script_partition"
+    partition_cli=""
+  else
+    partition="$(resolve_partition "$partition")"
+    partition_cli="$partition"
+  fi
+
+  local gres="" script_gres=""
+  script_gres="$(script_field "$script" gres || true)"
+  if [[ "$extra_gres_set" != "true" ]] && [[ -z "$script_gres" ]] && [[ -n "$partition" ]]; then
+    gres="$(partition_field "$partition" 'required_gres' "$(profile_path)" || true)"
+  fi
 
   local sbatch="sbatch"
-  [[ -n "$partition" ]] && sbatch="$sbatch --partition=$partition"
+  [[ "$test_only" == "true" ]] && sbatch="$sbatch --test-only"
+  [[ -n "$partition_cli" ]] && sbatch="$sbatch --partition=$partition_cli"
+  [[ -n "$gres" ]]      && sbatch="$sbatch --gres=$gres"
   [[ -n "$walltime" ]]  && sbatch="$sbatch --time=$walltime"
   [[ -n "$cpus" ]]      && sbatch="$sbatch --cpus-per-task=$cpus"
   [[ -n "$array" ]]     && sbatch="$sbatch --array=1-$array"
@@ -219,6 +287,10 @@ cmd_submit() {
   local out
   out="$(remote "$alias" "cd $repo && $sbatch")"
   if [[ "${HARNESS_SLURM_DRYRUN:-0}" == "1" ]]; then return 0; fi
+  if [[ "$test_only" == "true" ]]; then
+    [[ -n "$out" ]] && printf '%s\n' "$out"
+    return 0
+  fi
   local jobid; jobid="$(printf '%s' "$out" | grep -oE 'Submitted batch job [0-9]+' | awk '{print $NF}')"
   [[ -n "$jobid" ]] || { printf '%s\n' "$out" >&2; die "could not parse a job id from sbatch output"; }
   echo "job_id:    $jobid"

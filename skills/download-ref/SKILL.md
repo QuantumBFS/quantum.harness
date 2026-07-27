@@ -54,7 +54,7 @@ or multiple comma-separated slugs for a paper relevant to several methods).
 Per-method JSON manifests are derived from ref.bib via `bibtex_to_manifest.py`.
 
 This layout matches sci-brain's KB conventions closely enough that
-sci-brain tools (`download-ref`, `ideas`, `survey`) can operate on any
+sci-brain tools (`download-ref`, `brainstorm-ideas`, `survey`) can operate on any
 single method dir by passing `--kb .knowledge/literature/<method>`.
 
 Method slugs MUST match an existing literature dir

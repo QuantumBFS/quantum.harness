@@ -79,7 +79,8 @@ is picked, ask one follow-up question offering tracks 3, 4, and 5. The tracks:
    assume, or drive any specific issue before the learner picks it.
 5. **Track 5 — Go beyond** → `tracks/track5-beyond.md`. The capstone. Precheck:
    a completed reproduction to extend (Track 2 done, or the student names a
-   reproduced result). Runs `/challenge` → `/challenge-report`.
+   reproduced result). Runs `/take-challenge`, then the sci-brain pipeline
+   (`/survey` → `/brainstorm-ideas` → `/autoresearch`), then `/challenge-report`.
 
 Plus **Recommended full path** → run 1 → 2 → 3 → 4 → 5 in order. Any track is
 selectable first; do not force the order.

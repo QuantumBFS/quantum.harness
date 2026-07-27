@@ -40,35 +40,68 @@ and whose `upstream` is `QuantumBFS/qsym-rs`.
 
 ### Step 2 — The student picks a starter issue (explicit gate)
 
-List the open starter issues **once**:
+List the open starter issues **once**, and check which are already claimed —
+an issue with a "working on it" comment (or an open PR referencing it) is
+taken; present it as such:
 
 ```bash
-gh issue list -R QuantumBFS/qsym-rs --label "good first issue"
+gh issue list -R QuantumBFS/qsym-rs --label training-starter
+gh issue view <n> -R QuantumBFS/qsym-rs --comments
 ```
 
-The student must choose. Do not open, assume, or start driving any specific
-issue before they explicitly pick one. Answer questions about what each issue
-involves if asked.
+If no unclaimed labeled issue remains, widen the listing to all open issues —
+student-proposed starters (Step 3) stay unlabeled until a maintainer curates
+them, and an unclaimed one of those is a fine pick:
 
-### Step 3 — Brainstorm the design
+```bash
+gh issue list -R QuantumBFS/qsym-rs --state open
+```
+
+The student must choose among the unclaimed ones. Do not open, assume, or
+start driving any specific issue before they explicitly pick one. Answer
+questions about what each issue involves if asked. Once they pick, claim the
+issue: post a short "working on it" comment under it (confirm-gated, like
+every step) so other students see it is taken:
+
+```bash
+gh issue comment <n> -R QuantumBFS/qsym-rs --body "Working on it."
+```
+
+### Step 3 — Propose a new starter issue (brainstorm, then file)
+
+The pool must not shrink: each student takes one issue out and puts one in,
+before solving their own. Invoke the `brainstorming` skill to find it — what
+small, canonical capability should a symbolic engine have that this one
+doesn't? The mentor questions and pushes back brainstorming-style — one
+question at a time, 2–3 candidates, rejecting artificial features that bolt on
+concepts the package deliberately lacks — until the idea is native and
+genuinely useful. Then write it to match the existing starter issues' shape
+(code-anchored Background; tightly-scoped Task; Verification with exact
+outputs, a negative control, and a regression check) and file it, confirm-gated:
+
+```bash
+gh issue create -R QuantumBFS/qsym-rs --title "<title>" --body "<body>"
+```
+
+### Step 4 — Brainstorm the design
 
 Invoke the `brainstorming` skill on the chosen issue: what is actually being
 asked, what are 2–3 ways to do it, which is right and why. The design gets the
 student's approval before any code.
 
-### Step 4 — Write the plan
+### Step 5 — Write the plan
 
 Invoke the `writing-plans` skill: bite-sized tasks, each with a failing test
 first. Explain **TDD** (test-driven development: write the test that fails,
 then the minimal code that passes it — so every behavior is pinned by a test).
 
-### Step 5 — Implement, test-first
+### Step 6 — Implement, test-first
 
 Execute the plan one task at a time under the Teaching Protocol: failing test
 → run it (must fail) → minimal implementation → run it (must pass) → commit.
 Small commits with clear messages — each one a checkpoint you can retreat to.
 
-### Step 6 — Request review, then open the PR
+### Step 7 — Request review, then open the PR
 
 Invoke `requesting-code-review` on the finished branch and fix what it finds.
 Then:
@@ -84,7 +117,7 @@ The checkpoint artifact is the open PR. Verify together, confirm-gated:
 
 1. The PR links its issue (`Closes #N`), CI/tests pass, and every commit
    builds a reviewable story.
-2. A **self-review record** — the output of the review skill in Step 6, listing
+2. A **self-review record** — the output of the review skill in Step 7, listing
    what was checked and what was fixed — is posted as a PR comment. A PR that
    says "reviewed" without the record is a claim, not evidence.
 

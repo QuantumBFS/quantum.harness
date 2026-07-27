@@ -22,6 +22,7 @@
   a{color:var(--accent2);text-decoration:none}
   a:hover{text-decoration:underline}
   .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  .wrap.wide{max-width:1560px}
 
   /* ---- shared top nav ---- */
   .topnav{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
@@ -107,6 +108,12 @@
   table.bench td:last-child,table.bench td:nth-child(2){white-space:normal}
   table.bench th{color:var(--ink)}
   table.bench code,.cardlinks{font-family:var(--mono);font-size:.9em;color:var(--accent2)}
+  table.bench .unit{color:var(--mut);font-size:.92em}
+  table.matrix{font-size:.78rem}
+  table.matrix th,table.matrix td{padding:6px 8px}
+  table.matrix td{white-space:nowrap}
+  table.matrix code{color:inherit}
+  table.matrix .err{color:var(--mut)}
   .cardlinks{margin:14px 0 0;font-size:.78rem;display:flex;gap:16px}
 
   footer{padding:30px 0 60px;color:var(--mut);font-size:.85rem}
@@ -115,7 +122,7 @@
 <body>
 <div class="wrap">
 
-<nav class="topnav"><span class="brand">quantum.harness</span><span class="links"><a href="index.html">Home</a> <a href="solvable.html" class="here">Solvable</a> <a href="models.html">Models</a> <a href="methods.html">Methods</a></span></nav>
+<nav class="topnav"><span class="brand">quantum.harness</span><span class="links"><a href="index.html">Home</a> <a href="solvable.html" class="here">Solvable</a> <a href="models.html">Models</a> <a href="methods.html">Methods</a> <a href="benchmarks.html">Benchmarks</a></span></nav>
 
 <header>
   <div class="kicker">Quantum Many-Body Harness</div>
@@ -149,6 +156,19 @@
 <tr><td><code>e0_thermodynamic</code></td><td><code>h = J = 1</code> (critical)</td><td><code>-4/π ≈ -1.27324</code></td><td><span class="cite" title="[@Pfeuty1970]">Pfeuty 1970</span></td></tr>
 <tr><td><code>gap_single_fermion</code></td><td><code>h = 1.5, J = 1</code></td><td><code>1</code></td><td><span class="cite" title="[@Pfeuty1970]">Pfeuty 1970</span></td></tr>
 <tr><td><code>m</code> (elliptic-integral parameter, <code>m = k²</code>)</td><td>definition</td><td><code>m = 4Jh/(J+h)²</code></td><td><span class="cite" title="[@Pfeuty1970]">Pfeuty 1970</span></td></tr>
+</tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>34</code><span class="unit"> L sites</span></td><td><code>1.4&times;10<sup>-12</sup></code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>mps</code></td><td><code>256</code><span class="unit"> L sites</span></td><td><code>3.7&times;10<sup>-12</sup></code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>peps</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d">skills/method-peps/SKILL.md:32</span></td></tr>
+<tr><td><code>ltrg</code></td><td><code>1&#8239;048&#8239;576</code><span class="unit"> L sites</span></td><td><code>3.4&times;10<sup>-5</sup></code></td><td><code title="energy_per_site (FRONTIER: thermodynamic limit L=2^20, beta=512, 3-tau tau->0, Dc=150, vs exact JW u(beta=512))">energy_per_site</code></td></tr>
+<tr><td><code>mcrg</code></td><td><code>9</code><span class="unit"> L sites</span></td><td><code>0.22</code></td><td><code>e0</code></td></tr>
+<tr><td><code>qmc</code></td><td><code>128</code><span class="unit"> L sites</span></td><td><code>6.0&times;10<sup>-5</sup></code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>vmc</code></td><td><code>128</code><span class="unit"> L sites</span></td><td><code>0.0034</code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>mf</code></td><td><code>1&#8239;073&#8239;741&#8239;824</code><span class="unit"> L sites</span></td><td><code>0.018</code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>polyopt</code></td><td><code>114&#8239;688</code><span class="unit"> L sites</span></td><td><code>0.57</code></td><td><code>e0_lower_bound_per_site</code></td></tr>
+<tr><td><code>qcs</code></td><td><code>1024</code><span class="unit"> L sites</span></td><td><code>0.0085</code></td><td><code>e0_per_site</code></td></tr>
 </tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/tfim-chain/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/tfim-chain/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
@@ -355,6 +375,21 @@
 <tr><td><code>internal_energy</code></td><td>$T=T_c$</td><td>$-\sqrt2 \approx -1.4142136$ (per site, $J=1$)</td><td><span class="cite" title="[@Onsager1944]">Onsager 1944</span></td></tr>
 <tr><td><code>magnetization</code></td><td>$T=2$, $J=1$</td><td>$(1-\sinh^{-4}1)^{1/8} = 0.9113194$</td><td><span class="cite" title="[@Onsager1944]">Onsager 1944</span></td></tr>
 </tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>5</code><span class="unit"> L (L×L)</span></td><td><code>0.0024</code></td><td><code>internal_energy_per_site</code></td></tr>
+<tr><td><code>mps</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="**When the user's goal falls outside 1D/quasi-1D:** recognize it before any setup; explain *what fits better and why* in a short what/why table; stay warm — guide, don't dismiss. (Interaction principl">skills/method-mps/SKILL.md:74</span></td></tr>
+<tr><td><code>peps</code></td><td><code>160</code><span class="unit"> L (L×L)</span></td><td><code>2.1&times;10<sup>-4</sup></code></td><td><code>internal_energy_per_site_T2.26918531421302</code></td></tr>
+<tr><td><code>ltrg</code></td><td><code>1024</code><span class="unit"> L (L×L)</span></td><td><code>0.002</code></td><td><code>internal_energy_per_site</code></td></tr>
+<tr><td><code>mcrg</code></td><td><code>6561</code><span class="unit"> L (L×L)</span></td><td><code>9.8&times;10<sup>-4</sup></code></td><td><code>beta_exponent</code></td></tr>
+<tr><td><code>qmc</code></td><td><code>256</code><span class="unit"> L (L×L)</span></td><td><code>0.0016</code></td><td><code>internal_energy_per_site</code></td></tr>
+<tr><td><code>vmc</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="The whole method is *zero-temperature, ground-state* by default; finite-T and real-time variants exist (t-VMC, Section 4 note) but are out of scope here except where noted.">skills/method-vmc/references/vmc-methodology.md:29-30</span></td></tr>
+<tr><td><code>mf</code></td><td><code>32&#8239;768</code><span class="unit"> L (L×L)</span></td><td><code>0.76</code></td><td><code>tc</code></td></tr>
+<tr><td><code>polyopt</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="| Finite temperature | LTRG `/method-ltrg`, QMC `/method-qmc` | certified finite-T relaxations exist (Fawzi-Fawzi-Scalet 2024) but have no large-scale demonstrations yet |
+
+> **When the goal falls out">skills/method-polyopt/SKILL.md:71-73</span></td></tr>
+<tr><td><code>qcs</code></td><td colspan="3">failed &mdash; the software route broke (largest attempted: 4)</td></tr>
+</tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/ising-2d-onsager/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/ising-2d-onsager/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
 </details>
@@ -544,6 +579,19 @@
 <tr><td><code>mott_gap</code></td><td><code>U=8</code></td><td><code>4.6795171</code></td><td><span class="cite" title="[@Ovchinnikov1970]">Ovchinnikov 1970</span></td></tr>
 <tr><td><code>e0_strong_coupling_asymptote</code></td><td><code>U→∞</code></td><td><code>-4 ln2/U</code> (ratio <code>e0/asymptote → 1</code>)</td><td><span class="cite" title="[@LiebWu1968]">Lieb–Wu 1968</span></td></tr>
 </tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>20</code><span class="unit"> L sites</span></td><td><code>0.0027</code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>mps</code></td><td><code>256</code><span class="unit"> L sites</span></td><td><code>2.7&times;10<sup>-6</sup></code></td><td><code title="e0_per_site (thermodynamic limit, U/t=4, half filling)">e0_per_site</code></td></tr>
+<tr><td><code>peps</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d">skills/method-peps/SKILL.md:32</span></td></tr>
+<tr><td><code>ltrg</code></td><td><code>8192</code><span class="unit"> L sites</span></td><td><code>0.0084</code></td><td><code title="u(beta=48) — FAILS blind gates (truncation drift)">u(beta=48)</code></td></tr>
+<tr><td><code>mcrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title=""></span></td></tr>
+<tr><td><code>qmc</code></td><td><code>254</code><span class="unit"> L sites</span></td><td><code>0.0021</code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>vmc</code></td><td colspan="3">failed &mdash; the software route broke (largest attempted: 24)</td></tr>
+<tr><td><code>mf</code></td><td><code>2&#8239;200&#8239;000&#8239;000&#8239;000</code><span class="unit"> L sites</span></td><td><code>0.18</code></td><td><code>ground_state_energy_per_site_e0</code></td></tr>
+<tr><td><code>polyopt</code></td><td><code>16&#8239;384</code><span class="unit"> L sites</span></td><td><code>2.5</code></td><td><code></code></td></tr>
+<tr><td><code>qcs</code></td><td><code>14</code><span class="unit"> L sites</span></td><td><code>0.25</code></td><td><code>e0_per_site</code></td></tr>
+</tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/hubbard-1d-lieb-wu/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/hubbard-1d-lieb-wu/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
 </details>
@@ -726,6 +774,19 @@
 <tr><td><code>gap_pair</code></td><td>torus, <code>J = 1</code></td><td><code>4</code> (minimal anyon pair, <code>ΔE = 4</code>)</td><td><span class="cite" title="[@Kitaev2003]">Kitaev 2003</span></td></tr>
 <tr><td><code>n_qubits</code></td><td><code>L×L</code> torus</td><td><code>2L²</code></td><td>—</td></tr>
 </tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>5</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>6.9&times;10<sup>-12</sup></code></td><td><code>gap_pair</code></td></tr>
+<tr><td><code>mps</code></td><td><code>9</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>5.5&times;10<sup>-12</sup></code></td><td><code>e0</code></td></tr>
+<tr><td><code>peps</code></td><td><code>∞</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>2.2&times;10<sup>-16</sup></code></td><td><code>ground-state energy per qubit</code></td></tr>
+<tr><td><code>ltrg</code></td><td><code>28</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>3.2&times;10<sup>-14</sup></code></td><td><code title="free_energy_per_qubit (beta=1)">free_energy_per_qubit</code></td></tr>
+<tr><td><code>mcrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.">skills/method-mcrg/SKILL.md:68</span></td></tr>
+<tr><td><code>qmc</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title=""></span></td></tr>
+<tr><td><code>vmc</code></td><td><code>5</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>0.035</code></td><td><code title="e0_per_qubit (variational, TRAINING estimate — walltime-cut partial; no final high-sample measurement)">e0_per_qubit</code></td></tr>
+<tr><td><code>mf</code></td><td><code>88&#8239;000</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>0.5</code></td><td><code>ground_state_energy_per_qubit_e0</code></td></tr>
+<tr><td><code>polyopt</code></td><td><code>112</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>1.1&times;10<sup>-10</sup></code></td><td><code>e0_lower_bound_per_qubit</code></td></tr>
+<tr><td><code>qcs</code></td><td><code>576</code><span class="unit"> L (L×L, 2L² qubits)</span></td><td><code>0 (machine-exact)</code></td><td><code>e0_per_qubit</code></td></tr>
+</tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/toric-code/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/toric-code/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
 </details>
@@ -841,6 +902,19 @@
 <tr><td><code>string_order</code> <code>O^z</code></td><td>infinite chain</td><td><code>−4/9</code></td><td><span class="cite" title="[@AKLT1987]">AKLT 1987</span></td></tr>
 <tr><td>GS degeneracy</td><td>PBC / OBC</td><td><code>1</code> / <code>4</code></td><td><span class="cite" title="[@AKLT1987]">AKLT 1987</span></td></tr>
 <tr><td>Haldane gap</td><td><code>L=8</code> PBC (numerical)</td><td><code>≈ 0.700</code> (not closed form)</td><td>ED (this card)</td></tr>
+</tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>20</code><span class="unit"> L sites</span></td><td><code>5.0&times;10<sup>-16</sup></code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>mps</code></td><td><code>∞</code><span class="unit"> L sites</span></td><td><code>1.7&times;10<sup>-16</sup></code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>peps</code></td><td><code>∞</code><span class="unit"> L sites</span></td><td><code>1.6&times;10<sup>-15</sup></code></td><td><code>string_order</code></td></tr>
+<tr><td><code>ltrg</code></td><td><code>1&#8239;073&#8239;741&#8239;824</code><span class="unit"> L sites</span></td><td><code>1.8&times;10<sup>-8</sup></code></td><td><code title="ground-state energy per site e0 = u(beta->large)">ground-state energy per site e0</code></td></tr>
+<tr><td><code>mcrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title=""></span></td></tr>
+<tr><td><code>qmc</code></td><td><code>16</code><span class="unit"> L sites</span></td><td><code>0.046</code></td><td><code>e0_per_site</code></td></tr>
+<tr><td><code>vmc</code></td><td><code>16</code><span class="unit"> L sites</span></td><td><code>0.078</code></td><td><code title="e0_per_site (variational upper bound)">e0_per_site</code></td></tr>
+<tr><td><code>mf</code></td><td><code>3&#8239;200&#8239;000&#8239;000</code><span class="unit"> L sites</span></td><td><code>0.5</code></td><td><code>ground_state_energy_per_site_e0</code></td></tr>
+<tr><td><code>polyopt</code></td><td><code>32&#8239;768</code><span class="unit"> L sites</span></td><td><code>0.12</code></td><td><code>e0_lower_bound_per_site</code></td></tr>
+<tr><td><code>qcs</code></td><td><code>16&#8239;384</code><span class="unit"> L sites</span></td><td><code>1.2&times;10<sup>-14</sup></code></td><td><code>e0_per_site</code></td></tr>
 </tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/aklt-chain/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/aklt-chain/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
@@ -976,6 +1050,19 @@
 <tr><td><code>e0_thermodynamic</code></td><td>symmetric, <code>h = 1.5, J = 1</code></td><td><code>−0.75</code></td><td><span class="cite" title="[@LipkinMeshkovGlick1965]">Lipkin–Meshkov–Glick 1965</span></td></tr>
 <tr><td><code>sx_order_thermo</code></td><td>broken, <code>h = 0.5, J = 1</code></td><td><code>√3/4 ≈ 0.4330</code></td><td><span class="cite" title="[@LipkinMeshkovGlick1965]">Lipkin–Meshkov–Glick 1965</span></td></tr>
 <tr><td>critical gap exponent</td><td><code>h = J</code>, <code>N ∈ {200..1600}</code></td><td><code>≈ −1/3</code> (observed <code>−0.32</code>)</td><td><span class="cite" title="[@DusuelVidal2005]">Dusuel–Vidal 2005</span></td></tr>
+</tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>1&#8239;000&#8239;000&#8239;000</code><span class="unit"> N spins</span></td><td><code>0 (machine-exact)</code></td><td><code>e0_per_spin</code></td></tr>
+<tr><td><code>mps</code></td><td><code>131&#8239;072</code><span class="unit"> N spins</span></td><td><code>1.9&times;10<sup>-12</sup></code></td><td><code>e0_per_spin</code></td></tr>
+<tr><td><code>peps</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d">skills/method-peps/SKILL.md:32</span></td></tr>
+<tr><td><code>ltrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="Take a 1D Hamiltonian of nearest-neighbour terms, H = Σᵢ hᵢ,ᵢ₊₁ (e.g. XY chain hᵢ,ᵢ₊₁ = −J(SᵢˣSᵢ₊₁ˣ + SᵢʸSᵢ₊₁ʸ)). Split into an even and an odd bond group, H = H₁ + H₂, where all terms within H₁ commu">skills/method-ltrg/references/ltrg-methodology.md:58-59</span></td></tr>
+<tr><td><code>mcrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.">skills/method-mcrg/SKILL.md:68</span></td></tr>
+<tr><td><code>qmc</code></td><td><code>300&#8239;000</code><span class="unit"> N spins</span></td><td><code>2.4&times;10<sup>-5</sup></code></td><td><code>e0_per_spin</code></td></tr>
+<tr><td><code>vmc</code></td><td><code>16&#8239;384</code><span class="unit"> N spins</span></td><td><code>1.7&times;10<sup>-8</sup></code></td><td><code>e0_per_spin</code></td></tr>
+<tr><td><code>mf</code></td><td><code>25&#8239;000&#8239;000&#8239;000</code><span class="unit"> N spins</span></td><td><code>8.6&times;10<sup>-12</sup></code></td><td><code>e0_per_spin</code></td></tr>
+<tr><td><code>polyopt</code></td><td><code>100&#8239;000&#8239;000&#8239;000</code><span class="unit"> N spins</span></td><td><code>1.4&times;10<sup>-11</sup></code></td><td><code title="e0_per_spin (certified lower bound)">e0_per_spin</code></td></tr>
+<tr><td><code>qcs</code></td><td><code>429&#8239;000&#8239;000</code><span class="unit"> N spins</span></td><td><code>3.3&times;10<sup>-11</sup></code></td><td><code>e0_per_spin</code></td></tr>
 </tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/lmg/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/lmg/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>
@@ -1160,6 +1247,19 @@
 <tr><td>self-dual <code>K(1),K(3),K(5)</code> (measured)</td><td><code>L=8</code>, 400 real, seed 7</td><td><code>1.01, 5.30, 8.06</code> (vs <code>1,5,9</code>)</td><td>this card (measured)</td></tr>
 <tr><td>self-dual <code>K(1),K(3),K(5)</code> (measured)</td><td><code>L=10</code>, 80 real, seed 7</td><td><code>0.94, 4.52, 8.50</code> (vs <code>1,5,9</code>)</td><td>this card (measured)</td></tr>
 <tr><td>control <code>K(1)</code> (<code>b=π/5</code>)</td><td><code>L=8 / L=10</code>, seed 7</td><td><code>8.7 / 13.9</code> (off band)</td><td>this card (measured)</td></tr>
+</tbody></table></div>
+<p class="solv"><strong>Benchmark</strong> &mdash; largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size. Accuracy bar: 10<sup>-8</sup> for deterministic routes, 10<sup>-3</sup> for variational, 2&sigma; for stochastic; entries above their bar report the method&#x27;s intrinsic limit at this size (2026-07).</p><div class="tablewrap"><table class="bench"><thead><tr><th>Method</th><th>Largest size</th><th>rel. error at frontier</th><th>Observable</th></tr></thead>
+<tbody>
+<tr><td><code>ed</code></td><td><code>18</code><span class="unit"> L qubits</span></td><td><code>0.013</code></td><td><code>sff_K1_selfdual</code></td></tr>
+<tr><td><code>mps</code></td><td><code>∞</code><span class="unit"> L qubits</span></td><td><code>1.4&times;10<sup>-15</sup></code></td><td><code title="K(1),K(3),K(5) at L=2048, direct Route-A MPO-trace, nreal=99840 (256 chunks x 390), seed ladder from 7">K(1),K(3),K(5)</code></td></tr>
+<tr><td><code>peps</code></td><td><code>∞ (t=11)</code><span class="unit"> L qubits</span></td><td><code>3.2&times;10<sup>-11</sup></code></td><td><code title="K_TL(11) = BKP 2t; block subspace iteration, m_unit=22, conv=true, resid=3.0e-07, wall 771.9s">K_TL(11)</code></td></tr>
+<tr><td><code>ltrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="All equilibrium thermodynamics of a quantum lattice model follow from the partition function  Z(beta) = Tr e^(-beta H).">skills/method-ltrg/references/ltrg-methodology.md:26</span></td></tr>
+<tr><td><code>mcrg</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.">skills/method-mcrg/SKILL.md:68</span></td></tr>
+<tr><td><code>qmc</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title=""></span></td></tr>
+<tr><td><code>vmc</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="The whole method is *zero-temperature, ground-state* by default; finite-T and real-time variants exist (t-VMC, Section 4 note) but are out of scope here except where noted.">skills/method-vmc/references/vmc-methodology.md:29-30</span></td></tr>
+<tr><td><code>mf</code></td><td><code>760</code><span class="unit"> L qubits</span></td><td><code>1.1&times;10<sup>-13</sup></code></td><td><code>sff_selfdual_K(t=1)</code></td></tr>
+<tr><td><code>polyopt</code></td><td colspan="3">unsuitable &mdash; <span class="cite" title="| Full spectrum, dynamics | ED `/method-ed`, MPS `/method-mps` | the hierarchy targets the extremal eigenvalue; no dynamics formulation exists |">skills/method-polyopt/SKILL.md:70</span></td></tr>
+<tr><td><code>qcs</code></td><td><code>1&#8239;000&#8239;000&#8239;000</code><span class="unit"> L qubits</span></td><td><code>3.1&times;10<sup>-6</sup></code></td><td><code>sff_selfdual K(1)</code></td></tr>
 </tbody></table></div>
 <p class="cardlinks"><a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/kicked-ising-floquet/ORACLE.md">ORACLE.md&nbsp;&#8599;</a> <a href="https://github.com/QuantumBFS/quantum.harness/blob/main/.knowledge/solvable/kicked-ising-floquet/oracle.py">oracle.py&nbsp;&#8599;</a></p>
 </div>

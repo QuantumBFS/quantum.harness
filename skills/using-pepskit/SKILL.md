@@ -49,7 +49,31 @@ Concrete starting points for the convergence controls in Parameter setup.
 
 ## Code shape
 
-For the classical Ising onboarding route, follow the PEPSKit example shape:
+Two modes — decided upstream (`/method-peps` step 2; the track README wins):
+a **hand-written loop on TensorKit primitives** when the target requires
+implementing the algorithm itself, or the **packaged high-level call**. When
+the loop is hand-written, the packaged call is the independent cross-check,
+not the deliverable.
+
+### CTMRG primitives (hand-written loop)
+
+The renormalization loop — grow the corner/edge, contract, SVD-truncate to
+`chi_env`, normalize, accumulate log scale factors — is owned by the source
+being reproduced and `/method-peps`. TensorKit supplies the primitives (check
+exact API against the TensorKit docs; illustrative shape):
+
+```julia
+using TensorKit   # @tensor contraction + tsvd truncation are the two primitives
+
+@tensor M[a b; c d] := C[a, e] * T[e, s, c] * ...        # grow the corner
+U, S, _ = tsvd(M; trunc = truncdim(chi_env))             # truncate to chi_env
+C = U' * M * ...                                          # renormalize the environment
+C = C / norm(C); # log the normalization factor with the step's output
+```
+
+### Packaged route (or cross-check of a hand-written loop)
+
+For the classical Ising route, the PEPSKit example shape:
 
 ```julia
 using LinearAlgebra
@@ -77,6 +101,19 @@ e = expectation_value(Z, (1, 1) => E, env)
 The local tensor construction and exact Onsager/Yang comparison live in the
 reproduction script, not here. Write per-temperature results incrementally and
 emit progress after each temperature or `chi_env` point.
+
+> **Energy-insertion caution (verified against enumeration).** The upstream
+> example builds its energy tensor with an element-wise leg
+> `e = (-J s s') .* nt` (with `nt = sqrt(t)`, `t` the bond Boltzmann matrix).
+> That is wrong: element-wise and matrix products don't commute, so the
+> contracted link carries `nt·(E∘nt) ≠ E∘t` — internal energy comes out off by
+> O(1e-2–1e-1) while the partition function and magnetization stay
+> machine-exact. Build the energy leg `A` by solving `nt * A = (-J s s') .* t`,
+> so the full link is the energy-weighted Boltzmann factor `(-J s s')·e^{βJss'}`.
+> Validate **every** insertion tensor against brute-force enumeration on a
+> 2×2/3×3 torus before production — it costs milliseconds, and it is the only
+> check that catches a wrong insertion (a corrupted energy also silently
+> poisons the specific heat differentiated from it).
 
 ## Time estimate
 

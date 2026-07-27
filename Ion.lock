@@ -7,18 +7,66 @@ commit = "20b3d503700656f847e6de873753335bf90e63e3"
 checksum = "sha256:7e5665b1d72138d28e50b371b63ee05b546bef14c16a949b1b1fc1d82bccd326"
 
 [[skill]]
+name = "autoresearch"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:99beaff1d4352598a1ea40b69eef80561143405e63aaba73ec64949deec9c1e2"
+
+[[skill]]
+name = "autoresearch-db"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-db"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:24bca2cf4343c9b81ea6e8499575fa0337228892561b0099d88430c6ee54b496"
+
+[[skill]]
+name = "autoresearch-run"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-run"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:ff80eff9424d7b55f942e54f7a759bf14178c6188d186244c7d287efb9ac41f0"
+
+[[skill]]
+name = "autoresearch-topics"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-topics"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:34ab163860a6946fd1469a7f432a27722f5d58373449c15c9335bc3cde3f8313"
+
+[[skill]]
+name = "autoresearch-validator"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/autoresearch-validator"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:80ba763d1905f294c8f03ad17e6571ba640fe0fc4865ca6034c253527c031d45"
+
+[[skill]]
 name = "beginner-training"
 source = ""
 kind = "local"
-checksum = "sha256:811b681ce4851843b8cf3875823ea1d6fefad0786b6232cf9bbb55d1ae51ebd8"
+checksum = "sha256:5fa9151bb4a8cd2b148d7e511711d9f8230ad1e2ac61ace96f17b1fac2c62c1f"
+
+[[skill]]
+name = "brainstorm-ideas"
+source = "https://github.com/QuantumBFS/sci-brain.git"
+kind = "git"
+path = "skills/brainstorm-ideas"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:4020aa3aef1434e45d3a924fe446840d65bd9fde4c2ef5ee3faa87a4844cabd0"
 
 [[skill]]
 name = "brainstorming"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/brainstorming"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:1518efecf35139a9a5b9e60906b71de874af08322200fab18a54848cea8c15fe"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:d15f54e073ccf2a06588c9c7584e480b08b8188f154b5ed9e2ba13735cc23219"
 
 [[skill]]
 name = "build-apptainer-image"
@@ -30,13 +78,13 @@ checksum = "sha256:4488976e66f34a8e45e1d17ab3d3802abd3006b641fbf86db3a8380d5f46f
 name = "challenge"
 source = ""
 kind = "local"
-checksum = "sha256:f11b2579ba73d96f25a68e02f833f7129a0ac04b65ba711419fa8abe956dde02"
+checksum = "sha256:ad6df746b6124ed9f8ee58b4ed99186dbfcceee352d4e8346afde10d5f75917b"
 
 [[skill]]
 name = "challenge-report"
 source = ""
 kind = "local"
-checksum = "sha256:cef4d759f2c8eaf294430f594f5c1620e9ef82b1c669f16f7255e4e70c7441b2"
+checksum = "sha256:905cc0915508430a3ce702e7b82450ef3d4ccfcabe6b2ca35a929636040db7cf"
 
 [[skill]]
 name = "cluster-jobs"
@@ -49,8 +97,8 @@ name = "context7-cli"
 source = "https://github.com/upstash/context7.git"
 kind = "git"
 path = "skills/context7-cli"
-commit = "98baa58d3625e2529e000f1c9f658fff25081bbb"
-checksum = "sha256:775d76839d2304da676d7e2a2c46997b803482c49de322c8b999d512721183e7"
+commit = "b250c2515694eee4b6df4db82fa056df9ed3e306"
+checksum = "sha256:731d96a76cea573ee198367bcb58309dff37152cbe49812ff6c500af9dc36423"
 
 [[skill]]
 name = "cross-method-check"
@@ -63,22 +111,22 @@ name = "dispatching-parallel-agents"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/dispatching-parallel-agents"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:b011107f17188e0b2898bb1856b5bac8b49537cc86e737c82126558a235bd62a"
 
 [[skill]]
 name = "download-ref"
 source = ""
 kind = "local"
-checksum = "sha256:d6be3a2980d736fed9ca1a90553e5b2205f7913579d0ed7b1d90c412b3a533ad"
+checksum = "sha256:47e4100427700b14820873d8e828d6f278d8a647970ed75013f72d8ff449b3ba"
 
 [[skill]]
 name = "executing-plans"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/executing-plans"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:b41c919caf1bb07fbacb0e29899ac513f9eb11cd4dd695975ad352c2c03cc4d7"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:78a07800ee99a5861ae10be59d79fad085fdca10444e8aaeb2691597e357cff8"
 
 [[skill]]
 name = "find-docs"
@@ -91,30 +139,22 @@ name = "finishing-a-development-branch"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/finishing-a-development-branch"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:932d23af11a3eb2b758f5b1d9aec7b6d28ddd26658328414f87f34dff7179d19"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:a2afe045ea677114a89854f296ae57f8d34eb84864daa7b08ea9434acded724d"
 
 [[skill]]
 name = "idea-writer"
 source = "https://github.com/QuantumBFS/sci-brain.git"
 kind = "git"
 path = "skills/idea-writer"
-commit = "3b5ad792bf60ef9c323cbac487748488da58d93e"
-checksum = "sha256:2d368342a751ffe127409db098fd9fe7f7d5866b42771b527e5382cbb04ad8f6"
-
-[[skill]]
-name = "ideas"
-source = "https://github.com/QuantumBFS/sci-brain.git"
-kind = "git"
-path = "skills/ideas"
-commit = "3b5ad792bf60ef9c323cbac487748488da58d93e"
-checksum = "sha256:c44e782cd1d086cb9e73017229fb581d811776150046a672e15ae21819d15573"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:9e974150838d46556ef69ce30415fd040908bd6b0d7f9689b0b0f9c628f113ad"
 
 [[skill]]
 name = "ion-cli"
 source = ""
 kind = "local"
-checksum = "sha256:4207f3d4f43e93120acd5fdc26c60badab389e59d1a2caab74724ab0776a49ff"
+checksum = "sha256:bd5d3a00554413b17ddca6c53aa2f639a7a0c5bdfd8d300126ea6a471d5d669c"
 
 [[skill]]
 name = "method-dfpt"
@@ -126,13 +166,13 @@ checksum = "sha256:39dd8ce99137e90d385214e8d9d75bcee5268a76158c8515059a8bc3fb548
 name = "method-ed"
 source = ""
 kind = "local"
-checksum = "sha256:dbe4c49558233ada5189da37f53b984a9e56d77258ad371b04dde65ef87a261d"
+checksum = "sha256:dae76a5efc3f2c6994989777ef3398f4bde4fea73a24596f97461e500731346c"
 
 [[skill]]
 name = "method-ltrg"
 source = ""
 kind = "local"
-checksum = "sha256:e4a0de17807754fb7e6f035fcb49999fdb6bfa1a08d224709254ea07c898824f"
+checksum = "sha256:8d81d51c4f4f1a0b54cb1935719e1d847a23b69a0c7c829d52a9b7f1ca26965d"
 
 [[skill]]
 name = "method-mcrg"
@@ -150,31 +190,31 @@ checksum = "sha256:5a8fa756299f4484d645a7cd6aa9ab62c09bac8b11f842132598f20b710cd
 name = "method-mps"
 source = ""
 kind = "local"
-checksum = "sha256:4474a27848c4fac4e3b0a56c1443566be221cfb1abf016ceccaa39eb89e22546"
+checksum = "sha256:5c25c4608d59611e8ed833480e51505ce4dd363ed636df750a1bf2e8f5a318af"
 
 [[skill]]
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:1e62e1fc0cd383ff5526b266b59f837a00dca2d0a4c4a686ee6692e631f393a4"
+checksum = "sha256:7497421e5ca1b47d6fcbec6a9bc1360337fadb70ab9b241ea6767f7dfdd594d6"
 
 [[skill]]
 name = "method-polyopt"
 source = ""
 kind = "local"
-checksum = "sha256:49d391e03ea6a7754d0f11da643a771daeed6f45f79e13270a5a33bb59a1b81b"
+checksum = "sha256:766460c93bfb31f376a635485c2c8f8b73f952a610cb2103331827c226034578"
 
 [[skill]]
 name = "method-qcs"
 source = ""
 kind = "local"
-checksum = "sha256:4eedae5687e25ce59540a9c998b351af90f93a4be084ae1af29766b0becab2b6"
+checksum = "sha256:afcefe57735eb30c4ad3f69ebd8579586a18bb7dfe886bccb0f53fed93cc5292"
 
 [[skill]]
 name = "method-qmc"
 source = ""
 kind = "local"
-checksum = "sha256:30fda9506a9d5a9731e1cea8890977bf08e23bbbbc3c2ab999d3367446f80be0"
+checksum = "sha256:819a1c21b099f7e0df66f0e3f6f54dcbd0a23bce650e6cda4bf2232004c0209e"
 
 [[skill]]
 name = "method-vmc"
@@ -186,13 +226,13 @@ checksum = "sha256:4933f51cd996c5190babcaf5b85a8ea9ec0d8b5aca6d8888713f4bc4f2694
 name = "model"
 source = ""
 kind = "local"
-checksum = "sha256:2d27f7c2c9c6152608757e543375f647256f21df31f819a79131a7e21eb8bb38"
+checksum = "sha256:b34bcad782194e5b9170d663090608f777c8d95bd359c6f07fdadf53b22a99b3"
 
 [[skill]]
 name = "onboard"
 source = ""
 kind = "local"
-checksum = "sha256:26d00b7091b752dd1c89573125ec312aedba088b87c796d9e9a1a5fc96e9663f"
+checksum = "sha256:1833c23240c0cc6ec0be43e65d4c086a8a551565b9620bf7fe57880c2e4482cd"
 
 [[skill]]
 name = "parameter-scan"
@@ -204,35 +244,41 @@ checksum = "sha256:02926e0d625325ed1c2d8f52cbcbdd18bf7f9b0a1badedab3437c0dad7c7c
 name = "physics"
 source = ""
 kind = "local"
-checksum = "sha256:9016977c9839a1a954858cb9cce253ca82c20a79f4c87892e0cd22b5494b5140"
+checksum = "sha256:5b7c5495e03d2e03eb509dc936b2c59ed40b6082a6ab15c254027c1c3131e3d3"
+
+[[skill]]
+name = "quantum-model"
+source = ""
+kind = "local"
+checksum = "sha256:f38f12a19acc5d00f64fb820b9aa172d2ccd58d43c2df762615f4605258c20b0"
 
 [[skill]]
 name = "receiving-code-review"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/receiving-code-review"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:2760c85d4f4117b0006e7ba755f4bbd61f8f4c185f347999763c97f507274e30"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:59361179fc9225173e0c145ffd9bafbf9fdbf8b43ce3dc308497a0b4f83a6063"
 
 [[skill]]
 name = "report"
 source = ""
 kind = "local"
-checksum = "sha256:d3642e0acc77a57896014cfff02085381091b4b1f1b802c7dced6c82ce3de3ca"
+checksum = "sha256:977097485e1d4dc65af9d814a8e91b0b9fa63b5bb4ab641aae5b11dd45764d83"
 
 [[skill]]
 name = "reproduce-paper"
 source = ""
 kind = "local"
-checksum = "sha256:517f561fa60e0bbb9ec659c6c1bc821365624ded318e1348d25d722af1976eca"
+checksum = "sha256:1976ec2dfe34db0cc733a76f4a418f369a97438f1b7ac7a11aa705c4de502924"
 
 [[skill]]
 name = "requesting-code-review"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/requesting-code-review"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:5a53d1f7f4cee4dee017a50d735335c7aae1874b2746207e076b5d9035315599"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:0ec3e6df8e809ada4221c6972321d885d622019545370fed76c9d866a0b54658"
 
 [[skill]]
 name = "scaling-fit"
@@ -245,14 +291,14 @@ name = "scientific-visualization"
 source = "https://github.com/HughYau/AcademicForge.git"
 kind = "git"
 path = "scientific-visualization"
-commit = "6cbb818a4a822a5e1e856b18919da7484ff58dd4"
+commit = "1e3ece9e82758e34ca442398bac6edcaf1c61ea6"
 checksum = "sha256:dfe730f72015268b902a22d2e5f389cfaf5478463749e26fb865f4dff390bc74"
 
 [[skill]]
 name = "setup-cluster"
 source = ""
 kind = "local"
-checksum = "sha256:1f7ab61bef998440c3fcc7083c23aeef1c4eb6e0869eb6d013e7c1b63222a2c1"
+checksum = "sha256:06e28d0593bbe48c01e5d6ff46292850bf80be0b3ef9b1b4a963f7ab3a687f41"
 
 [[skill]]
 name = "setup-julia"
@@ -264,53 +310,59 @@ checksum = "sha256:a4a5429d11fc4536ffe1715c1be027758e06d5c94320753f9fa2c279a6870
 name = "solve"
 source = ""
 kind = "local"
-checksum = "sha256:9bf5c3f4efc13da544ee233c0108594bba114123e2774489fc9ef3f93006cdbb"
+checksum = "sha256:25b6c7027b6f3cde3263578f84e1627990b9c8dd6be939588427081337702a34"
 
 [[skill]]
 name = "subagent-driven-development"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/subagent-driven-development"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:22847d331db0aaedde0738d794896658020d25b703136d64f6690ee944688b7c"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:102d254f065317f6b991d78434cbddccf4588e6a43a11216ea55a1cd0e42bc3d"
 
 [[skill]]
 name = "survey"
 source = "https://github.com/QuantumBFS/sci-brain.git"
 kind = "git"
 path = "skills/survey"
-commit = "3b5ad792bf60ef9c323cbac487748488da58d93e"
-checksum = "sha256:517a4a3f533508bf154464e1e41139359ec20003a7989b5bc16c68dfa76292fd"
+commit = "df5a3842b03ad8088c37fc94c1e366f767d16a2c"
+checksum = "sha256:0cfab5e37c0a3b127f9d93ccd820bb4631ece0a7fd9c2301a1e663617c083375"
 
 [[skill]]
 name = "systematic-debugging"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/systematic-debugging"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:ebdc9e15e5745a87d6342b6ebbc90d1ac2766b95f2334a9450fc696842815e4d"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:5ab44290779cd788c3c38cb9a132c26cf36e3f5c897574f645f73ed37ef999da"
+
+[[skill]]
+name = "take-challenge"
+source = ""
+kind = "local"
+checksum = "sha256:9ecd3874c0c285a6c3831276a9483bcf6ce098bb4edc684cfae9fa4a81b9f215"
 
 [[skill]]
 name = "test-driven-development"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/test-driven-development"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:126f1ebf6ccd414f42544f6e83d8cc5adb089e1108eaffb7c400701e37eecd9f"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:a4126a9c5f17be3c228aa9e5755898ade283448b86099f56f40852e8c14532be"
 
 [[skill]]
 name = "using-cpmc-lab"
 source = ""
 kind = "local"
-checksum = "sha256:2c58bca32ae523d2c8ce3e96d6d44799d69f836ebb0e6f439c608e491fcf0ab3"
+checksum = "sha256:60a1184ddb67121b8955027082336f3c81a699ba477d180c65433e235ef70591"
 
 [[skill]]
 name = "using-git-worktrees"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/using-git-worktrees"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:bd10bc57c23040630b17c877a9bc7b4be40c35161a2e2f110d770d78e3b0a4ff"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:48c8a1040e378e0cb7208107294e3afa9067b9370c3f33b49a443eb6b7528b0d"
 
 [[skill]]
 name = "using-itensors"
@@ -346,7 +398,7 @@ checksum = "sha256:6f53db4fe417b54bbd2bbb4312ddb6589cd4bf8485411b6b7dd2546623591
 name = "using-pepskit"
 source = ""
 kind = "local"
-checksum = "sha256:75a861ac3d1dfa866f38981c4bc20c07323f276a5a21a7177ea24841d7fa820d"
+checksum = "sha256:2222d69a1de07f0cdc7bb7e55d82605305be16dbdc3853c0ab20a6897e14fb9a"
 
 [[skill]]
 name = "using-qmbcertify"
@@ -370,27 +422,27 @@ checksum = "sha256:43e136261b0cfd281ff7691bb482405f111fe7ec884ef4cc3179c7208a24f
 name = "using-quspin"
 source = ""
 kind = "local"
-checksum = "sha256:08f7edc6785d9cd7513fef6b92fff6b79531ec760f4850e4710e8bf1a9a3924b"
+checksum = "sha256:8d7b256f2a6746f127a0150ae0d5631636f39363daf5b689bb688951df9db237"
 
 [[skill]]
 name = "using-slurm"
 source = ""
 kind = "local"
-checksum = "sha256:6b02ad46daa12f1b0e927847923bb53852f6c612d86fd9a5f9d5385177ac17ef"
+checksum = "sha256:ff081b97fe10a727693390c61375bef53646fb92f3037c826bae2e8e74eb39c4"
 
 [[skill]]
 name = "using-sse"
 source = ""
 kind = "local"
-checksum = "sha256:e883cae031ce48ceeabf6c461bf10bd7208864c47fa3ef17b12808deffcb8564"
+checksum = "sha256:fe1e0dde8cab00f90601d8a7198fb46e5391a94ba3d184fc8e3459a49ad65ca2"
 
 [[skill]]
 name = "using-superpowers"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/using-superpowers"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:114207d2bda1336e283288aed358f51e1a78bbcd42e7d4e3e16a89095a89b006"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:5b1650e78b3ad9c2873af211916d1a90082d33ea3242dd9210918bc83136005a"
 
 [[skill]]
 name = "using-tenpy"
@@ -402,34 +454,34 @@ checksum = "sha256:4d0a11229753e41d4222c2a03023ba9830a85ffb4bcd9391a25f5495b8c1b
 name = "using-tensorcircuit-ng"
 source = ""
 kind = "local"
-checksum = "sha256:be51c73277d7a261fbeee72e45a3d796059098220b6c4768e42390281c366baa"
+checksum = "sha256:72485e6614b10d0e087c091d9a8b3437f308314dcbb1d2e2e82ea588fb99457f"
 
 [[skill]]
 name = "using-xdiag"
 source = ""
 kind = "local"
-checksum = "sha256:3307432f05e84d371e94331192766026d364aff438494bd927b91d26a465ed78"
+checksum = "sha256:a73d0d90843578d448668976cd6eb67137f309dc46f30ebf49a06b67db0f3b1b"
 
 [[skill]]
 name = "verification-before-completion"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/verification-before-completion"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:9b446f0c7fe1cfb560b1d34439523b1a76d5f177290007b2c053a1c749a4a8ba"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:b529822bdac4b197b180fe12225cff86b930b65910435103c10622df7f041651"
 
 [[skill]]
 name = "writing-plans"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/writing-plans"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:6525448d840035c66700b81fbbfeb77431df04316615869569393f62af6a5616"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:d43fb38f3078227cb4f7529bb11d6b3bb6c12ebeeb70c3deadcee185b55c58f7"
 
 [[skill]]
 name = "writing-skills"
 source = "https://github.com/obra/superpowers.git"
 kind = "git"
 path = "skills/writing-skills"
-commit = "f2cbfbefebbfef77321e4c9abc9e949826bea9d7"
-checksum = "sha256:272ccd701f41b94e1119aaa99455a52cdb8e07283cb6a6aab32a7722d96bef45"
+commit = "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9"
+checksum = "sha256:aba546cca0b311c34e4ea6fd1b822dc98a602fe2fa505b91d6d9231a9f2ba94b"

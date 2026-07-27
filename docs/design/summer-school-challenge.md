@@ -64,7 +64,7 @@ the sci-brain set); there is no external product to price.
 | Tool | Capability covered |
 |---|---|
 | `sci-brain:survey` | parallel literature exploration → survey registry (`summary.md` + `.bib`) |
-| `sci-brain:ideas` | two-agent ideation (Ideator proposes, Polya critique), adversarial ranking |
+| `sci-brain:brainstorm-ideas` | two-agent ideation (Ideator proposes, Polya critique), adversarial ranking |
 | `sci-brain:idea-writer` | structured ideas report: research question, **minimum-viable experiment**, success/hope/pivot signals |
 
 **Gaps nothing off-the-shelf covers (so `/challenge` must own them):** the orchestration
@@ -78,7 +78,7 @@ mentor behavior.
 
 - **Journey spine + resume state** — track where the student is, route to the right skill,
   resume across days. The skeleton everything hangs on.
-- **Challenge ideation wiring** — run `sci-brain:survey → ideas → idea-writer`, grounded in
+- **Challenge ideation wiring** — run `sci-brain:survey → brainstorm-ideas → idea-writer`, grounded in
   the track's frontier maps; output is *ranked, feasibility-tagged* candidates.
 - **Feasibility / time-box guardrail** — "can you finish this in the days left?" plus a
   compute-cost sanity check (reuses the harness cost rules and `/using-slurm`). Gates every
@@ -108,7 +108,7 @@ Nothing dropped.
 | Module | Purpose | Interface (in → out) | Depends on |
 |---|---|---|---|
 | **Spine / state** | own the journey position; route; resume | session start → current step + next action; reads/writes a small run-state file under `tracks/<track>/` | — |
-| **Ideation** | produce ranked, feasible challenge candidates | track + reproduction context → ranked candidates | `sci-brain:survey/ideas/idea-writer`, track frontier maps |
+| **Ideation** | produce ranked, feasible challenge candidates | track + reproduction context → ranked candidates | `sci-brain:survey/brainstorm-ideas/idea-writer`, track frontier maps |
 | **Feasibility guard** | gate candidates on time + compute | candidate → feasible? (time band, compute estimate, cluster need) | harness cost rules, `/using-slurm` |
 | **Advisor digest** | make the help-desk one-pager; record verdict | chosen candidate → digest + recorded go/no-go | idea-writer report |
 | **Attempt driver** | scope MVP, scaffold + run, iterate | go-verdict → run dir with results | `/solve`, harness run scaffolding |
@@ -134,7 +134,7 @@ Nothing dropped.
 
 - **A — Thin orchestrator over the sci-brain pipeline, pre-seeded with the track's frontier
   map** *(recommended)* — pass the track's frontier/literature context into
-  `sci-brain:survey`, let `ideas` brainstorm, `idea-writer` write; `/challenge` only adds
+  `sci-brain:survey`, let `brainstorm-ideas` brainstorm, `idea-writer` write; `/challenge` only adds
   the hackathon-feasibility lens and ranking. Maximum borrow, minimum build.
 - **B — Custom ideation prompt inside `/challenge`.** Full control, but reimplements what
   sci-brain already does well and diverges from it over time.

@@ -1,9 +1,10 @@
 # quantum.harness
 
-> **Warning**
-> This harness system is in a very early stage. Contributors are welcome, but
-> the project is not ready for general users yet. A formal release is planned
-> for August 2026.
+> **Note**
+> This harness system is in an early stage and evolving fast. Harnessing
+> Quantum 2026 participants: this is the repository you work in and send your
+> pull request to — start with [Start Here](#start-here) below. A formal release is planned for
+> August 2026.
 
 A computational quantum research harness. It helps an AI agent to run the simulation of quantum systems.
 Each method is curated by world-leading experts in that computational approach, so the guidance reflects real research practice: what to compute, which checks matter, and where common failures happen.
@@ -24,7 +25,7 @@ Paste this into Claude Code, Codex, or OpenCode:
 
 ```text
 Clone https://github.com/QuantumBFS/quantum.harness.
-Run `make skills` to install the harness skills.
+Run `/onboard` and `make skills` to install necessary dependencies.
 Then run `/beginner-training` skill to start the guided training.
 ```
 
@@ -35,11 +36,11 @@ Each method is curated by world-leading experts in that computational approach.
 | Method | Expert contributor | Skill |
 |---|---|---|
 | Exact diagonalization | [Chen Cheng (程晨)](https://scholar.google.com/citations?user=LZpS-T0AAAAJ) | `/method-ed` |
-| MPS / LTRG / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=7wiebe8AAAAJ) | `/method-mps` · `/method-ltrg` |
+| MPS / LTRG / DMRG / TEBD | [Wei Li (李伟)](https://scholar.google.com/citations?user=5hKtgtAAAAAJ) | `/method-mps` · `/method-ltrg` |
 | PEPS / CTMRG | [Hai-Jun Liao (廖海军)](https://scholar.google.com/citations?user=_8KbQtEAAAAJ), [Shenghan Jiang (姜胜寒)](https://kits.ucas.edu.cn/index.php/people/faculty/44-faculty/202-shenghan-jiang) | `/method-peps` |
 | Quantum Monte Carlo | [Ming-Pu Qin (秦明普)](https://scholar.google.com/citations?user=ikqa-0IAAAAJ), [Zi Hong Liu (刘子宏)](https://scholar.google.com/citations?user=TVCMMzAAAAAJ) | `/method-qmc` |
 | Quantum circuit simulation | [Shi-Xin Zhang (张士欣)](https://scholar.google.com/citations?user=Ut8nVqIAAAAJ) | `/method-qcs` |
-| Noncommutative polynomial optimization | [Jie Wang (王杰)](https://wangjie212.github.io/jiewang/) | `/method-polyopt` |
+| Semidefinite programming | [Jie Wang (王杰)](https://wangjie212.github.io/jiewang/) | `/method-polyopt` |
 | AI agent and knowledge base | [Kun Chen (陈锟)](https://scholar.google.com/citations?user=YItDGoIAAAAJ), [Jin-Guo Liu (刘金国)](https://scholar.google.com/citations?user=4edw228AAAAJ) | [`tracks/agent-kb`](tracks/agent-kb/) |
 
 ## Example Prompts
@@ -65,5 +66,5 @@ Use /survey to build a reference library.
 
 - [`.knowledge/`](.knowledge/) - model, physics, method, benchmark, and literature cards.
 - [`skills/`](skills/) - agent workflows invoked as `/name`.
-- [Harnessing Quantum 2026 submission guide](https://giggleliu.github.io/summer-school-2026/zh/guide) - for summer-school participants.
+- Harnessing Quantum 2026 submission guide - for summer-school participants: [English](https://giggleliu.github.io/summer-school-2026/guide) · [中文](https://giggleliu.github.io/summer-school-2026/zh/guide).
 - [`AGENTS.md`](AGENTS.md) - full harness operating instructions.

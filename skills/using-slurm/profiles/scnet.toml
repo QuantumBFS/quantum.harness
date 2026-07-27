@@ -1,0 +1,82 @@
+[identity]
+name = "scnet"
+purpose = "SCNet (scnet.cn) HPC service — Sugon/hpccube platform, Hygon CPU + DCU nodes"
+maintainer = "QuantumBFS"
+
+[connection]
+repo_path_remote = "~/quantum.harness"
+login_shell = false
+
+[connection.ssh]
+alias = "scnet"
+
+[scheduler]
+type = "slurm"
+default_partition = "hx1hdnormal01"
+
+[[partitions]]
+name = "hx1hdnormal01"
+class = "cpu"
+cores = 128
+memory = "510000M"
+max_wall = "333-08:00:00"
+gpu = "Hygon DCU:8"
+
+[filesystem]
+home = "~"
+scratch = "~"
+project = "~/quantum.harness"
+quota = ""
+
+[network]
+internet_from_login = true
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "24:00:00"
+max_nodes = 1
+max_cpus = 128
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 32
+unusual_partitions = []
+
+[limits.paths]
+allowed_roots = ["~/quantum.harness/results", "~"]
+
+[[documentation]]
+url = "https://www.scnet.cn/help/docs/mainsite/hpc/cmd/connect-to-hpc/"
+documents = "SSH connection setup via the SCNet web console (host, port, key download)"
+
+[[documentation]]
+url = "https://www.hpccube.com/doc/1.0.6/11250/general-handbook/scheduler/intro.html"
+documents = "scheduler overview for the Sugon/hpccube platform family"
+
+[[gotchas]]
+symptom = "ssh prints 'server gave bad signature for RSA key 0: error in libcrypto'"
+cause = "the login node offers a defective RSA host key alongside a valid ED25519 one"
+fix = "harmless — the connection proceeds over the ED25519 key; filter the warning when parsing"
+
+[[gotchas]]
+symptom = "jobs get less memory than expected"
+cause = "DefMemPerCPU=3800M on hx1hdnormal01; memory scales with --cpus-per-task"
+fix = "request --mem or more CPUs explicitly when a cell needs more than 3.8G per core"
+
+[[gotchas]]
+symptom = "only one partition appears in sinfo"
+cause = "the account association exposes hx1hdnormal01 only (QOS user_<name>)"
+fix = "treat it as the sole candidate; re-probe after any account/quota change"
+
+[commands]
+squeue = "squeue -u $USER"
+sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"
+sinfo = "sinfo -o '%P %a %.10l %.6D %.6t'"
+quota_command = "sacctmgr -n -P show assoc where user=$USER format=Account,Partition,QOS,GrpTRES,MaxTRES"
+
+[notes]
+text = "Live-probed 2026-07-26 via login node zz-login01: 836 nodes (277 idle), 128 cores + 510G + 8 Hygon DCUs each. CPU-only requests are accepted (no required_gres) with immediate estimated start; smoke job 710339 COMPLETED 0:0. Login node has internet (mirrors reachable) and Anaconda/Apptainer modules; compute-node internet is fail-closed false until probed."

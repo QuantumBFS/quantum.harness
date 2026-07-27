@@ -1,5 +1,5 @@
 ---
-name: model
+name: quantum-model
 user-invocable: false
 description: |
   Use when the user names or describes a harness-tracked quantum lattice

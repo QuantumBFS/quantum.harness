@@ -45,11 +45,11 @@ def test_parse_directives_forms():
         "#SBATCH --nodes 2\n"
         "#SBATCH -p debug\n"
         "#SBATCH --array=1-10  # a comment\n"
-        "echo not a directive\n"
-        "#SBATCH --time=02:00:00\n"  # later overrides
+        "echo first command\n"
+        "#SBATCH --time=02:00:00\n"  # ignored after the first command
     )
     d = g.parse_directives(text)
-    assert d["time"] == "02:00:00"
+    assert d["time"] == "01:00:00"
     assert d["nodes"] == "2"
     assert d["partition"] == "debug"
     assert d["array"] == "1-10"
@@ -267,3 +267,15 @@ def test_main_check_path(tmp_path, capsys):
     rc = g.main(["check-path", "~/scratch/x", "--profile", _profile(tmp_path)])
     assert rc == 0
     capsys.readouterr()
+
+
+def test_cli_directive_field(tmp_path, capsys):
+    script = _script(
+        tmp_path,
+        "#SBATCH --partition=script-gpu\n#SBATCH --gres=gpu:script:4\n",
+    )
+
+    rc = g.main(["directive", script, "--field", "gres"])
+
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == "gpu:script:4"

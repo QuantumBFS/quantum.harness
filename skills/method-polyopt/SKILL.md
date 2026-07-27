@@ -32,6 +32,7 @@ PolyOpt turns a hard optimization over quantum operators into a **semidefinite p
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/polyopt-methodology.md`
+- **Method-zoo card** (M1–M14 property table, cost classes): `.knowledge/methods/sdp-nctssos`. Model → method gate: `.knowledge/method-property-map.md`.
 - Tool skills (step-2 targets): `/using-qmbcertify` — the structured certifier for 1D/2D (J1-J2) Heisenberg models (Mosek); `/using-nctssos` — the general NC-polyopt engine for any algebra / Bell / state-polynomial (Clarabel/Mosek).
 - Primary literature (rendered in `.knowledge/literature/polynomial-optimization/`; each carries its source URL in the frontmatter):
   - **2604.01555** — Wang, Jansen, Frérot, Renou, Magron, Acín (2026) — *structured* NPA certification scaling to 16×16 lattices; the current state of the art.

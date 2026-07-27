@@ -21,7 +21,7 @@ The schema is **additive**: new fields land as new keys/tables; parsers that don
 | `[connection]` | `repo_path_remote` | Where the harness checkout lives on the cluster. |
 | `[connection.ssh]` | `alias`, `host`, `user`, `identity_file`, `port` | ssh handle + the source-of-truth fields to reconstruct `~/.ssh/config`. The harness uses `alias` as the handle. |
 | `[scheduler]` | `type` (`slurm`/`pbs`/`lsf`/`none`), `default_partition` | How jobs are submitted. |
-| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu` | Array of partition rows. `class` (`default-cpu`, `gpu`, `high-mem`, `debug`, `long`, `emergency`) is how skills pick, not by name. |
+| `[[partitions]]` | `name`, `class`, `cores`, `memory`, `max_wall`, `gpu`, `required_gres` | Array of partition rows. `class` (`default-cpu`, `gpu`, `high-mem`, `debug`, `long`, `emergency`) is how skills pick, not by name. `required_gres` is an optional exact Slurm GRES request imposed by partition/QOS. |
 | `[filesystem]` | `home`, `scratch`, `project`, `quota` | Paths + whether `/scratch` exists. |
 | `[network]` | `internet_from_login`, `internet_from_compute` | Booleans controlling ship strategy + in-job installs. |
 | `[region]` | `region` (`mainland_china` / blank) | Downstream mirror defaults. |
@@ -93,6 +93,7 @@ cores = 32
 memory = "512G"
 max_wall = "12:00:00"
 gpu = "a100:4"
+required_gres = "gpu:a100:1"
 
 [network]
 internet_from_login = true
@@ -128,8 +129,12 @@ quota_command = "sshare -U -u student07"
 
 ## Authoring a new profile
 
-The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`sinfo`, `scontrol show partition`, `sacctmgr show accounts`), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`.
+The recommended path is `/setup-cluster`. For manual authoring: probe the cluster (`sinfo`, `scontrol show partition`, `sacctmgr show accounts`), write `skills/using-slurm/profiles/<name>.toml` following the tables above, activate it (`ln -s <name>.toml active.toml` or the env var), and test with a tiny job. Validate shape with `python3 scripts/cluster_profile.py --field connection.ssh.alias --profile <name>.toml`. Read a partition-scoped value with `python3 scripts/cluster_profile.py --partition <name> --field required_gres --profile <name>.toml`; `harness_slurm.sh submit` uses this interface instead of parsing TOML in Bash. Submission resource precedence is CLI/`--extra`, then the script's `#SBATCH` directives, then profile defaults, so profile values fill omissions without overriding script intent.
+
+## Per-cluster setup notes (`<name>-setup.md`)
+
+A profile may ship a committed, secret-free sibling `skills/using-slurm/profiles/<name>-setup.md` describing how a new user provisions credentials for that cluster: portal steps to obtain host/port/username, key download and install, and the `~/.ssh/config` stanza template. `/setup-cluster`'s connection bootstrap reads it when the profile's alias is unreachable. Keep it instructions-only — never a real hostname-for-a-user, username, port, or key; those stay in each user's own ssh config.
 
 ## Cards in this folder
 
-Profiles are optional and user/site-specific. Public profiles may be committed; private profiles should stay gitignored locally.
+Profiles are optional and user/site-specific. Public profiles may be committed; private profiles should stay gitignored locally. Setup-notes siblings (`<name>-setup.md`) are always committable — they describe the provisioning process, not any user's credentials.

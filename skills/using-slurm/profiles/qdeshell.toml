@@ -1,0 +1,83 @@
+[identity]
+name = "qdeshell"
+purpose = "QDES GPU compute service"
+maintainer = "QuantumBFS"
+
+[connection]
+repo_path_remote = "~/quantum.harness"
+login_shell = false
+
+[connection.ssh]
+alias = "qdeshell"
+
+[scheduler]
+type = "slurm"
+default_partition = "qdagnormal"
+
+[[partitions]]
+name = "qdagnormal"
+class = "gpu"
+cores = 64
+memory = "2051791M"
+max_wall = "333-08:00:00"
+gpu = "A800:8"
+required_gres = "gpu:A800:1"
+
+[filesystem]
+home = "~"
+scratch = "~/scratch"
+project = "~/quantum.harness"
+quota = ""
+
+[network]
+internet_from_login = false
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "24:00:00"
+max_nodes = 1
+max_cpus = 64
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 16
+unusual_partitions = ["qdagnormal"]
+
+[limits.paths]
+allowed_roots = ["~/quantum.harness/results", "~/scratch"]
+
+[[documentation]]
+url = "https://www.hpccube.com/doc/1.0.6/11250/general-handbook/scheduler/intro.html"
+documents = "scheduler overview and login-node policy"
+
+[[documentation]]
+url = "https://www.hpccube.com/doc/1.0.6/11250/general-handbook/scheduler/sinfo.html"
+documents = "partition and node-state reference"
+
+[[gotchas]]
+symptom = "CPU-only jobs fail with QOSMinGRES"
+cause = "partition_qdagnormal requires one GPU per job"
+fix = "request --gres=gpu:A800:1 and validate the exact request with sbatch --test-only"
+
+[[gotchas]]
+symptom = "A valid smoke request has a distant estimated start"
+cause = "the only visible A800 partition is heavily allocated"
+fix = "show the estimate and do not queue the real job without user ratification"
+
+[[gotchas]]
+symptom = "SSH commands print C.UTF-8 locale warnings"
+cause = "the remote image does not provide the forwarded C.UTF-8 locale"
+fix = "ignore the warning for parsing or configure a locale installed on the remote service"
+
+[commands]
+squeue = "squeue -u $USER"
+sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"
+sinfo = "sinfo -o '%P %a %.10l %.6D %.6t'"
+quota_command = "sacctmgr -n -P show assoc where user=$USER format=Account,Partition,QOS,GrpTRES,MaxTRES"
+
+[notes]
+text = "Live probe found Anaconda, Apptainer, and Singularity modules. Compute-node internet is fail-closed false until a scheduled probe verifies it."

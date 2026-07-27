@@ -29,7 +29,7 @@ This is not an `AskUserQuestion` fork — there may be no branch to choose. It i
 Domain content is organized around problems, not lessons, methods, tools, metrics, or roadmaps. Two dispatcher skills + paired cards:
 
 ```text
-skills/model/    SKILL.md auto-fires when user names a model;   reads .knowledge/models/<name>/MODEL.md
+skills/quantum-model/ SKILL.md auto-fires when user names a model; reads .knowledge/models/<name>/MODEL.md
 skills/physics/  SKILL.md auto-fires on cross-model questions;  reads .knowledge/physics/<topic>/PHYSICS.md
 ```
 
@@ -60,7 +60,7 @@ Skills cite these cards; they never hardcode the data. New cards land when a rea
 
 ## Card shapes
 
-Domain content lives in cards under `.knowledge/`, dispatched by the `/model` and `/physics` meta-skills:
+Domain content lives in cards under `.knowledge/`, dispatched by the `quantum-model` and `physics` meta-skills:
 
 - **Model cards** (`.knowledge/models/<name>/MODEL.md`) drive calculations: `Diagnose → Workflow → Method recommendations → Branch table → Verification`.
 - **Physics cards** (`.knowledge/physics/<topic>/PHYSICS.md`) evaluate evidence: `Diagnose → Evidence to gather → Cross-checks → Interpretation rules → Model hooks`.
@@ -125,8 +125,8 @@ them through the committed `.claude/skills → ../skills` symlink, so
 `[options.targets]` stanza pointing Ion at `.claude/skills`: that path is itself
 a symlink back into `skills/`, so Ion would write its per-skill target
 links into the source dir and clobber every skill with self-referential,
-dangling links. Reload Claude Code after any `ion add` / `ion remove` so the
-session picks up changes.
+dangling links. A session started in a `git worktree` has no remote skills
+(gitignored) — tell the user to run `make skills` first.
 
 **Conventions:**
 - `AGENTS.md` is canonical; `CLAUDE.md` is a one-liner (`treat @AGENTS.md the
@@ -168,6 +168,7 @@ ion self --help                          # Manage the Ion install
 - Install domain tools with `make install <tool>` after the active workflow or user has selected that tool. Running `make help` lists the currently installable tools.
 - Adding a new installable tool: append its name to the `INSTALLABLE` variable in the `Makefile` and add a matching `install-<tool>` recipe. Keep recipes idempotent (check before installing).
 - When suggesting a command that requires a tool, first check that tool is in `INSTALLABLE` (and installed) — otherwise tell the user to run `make install <tool>` before proceeding.
+- Skills spell the venv interpreter as `.venv/bin/python`, the POSIX layout. On native Windows it is `.venv/Scripts/python.exe`; substitute it in any documented command before running one.
 
 <a id="ui-ux"></a>
 ## UI/UX
@@ -178,7 +179,7 @@ ion self --help                          # Manage the Ion install
 - **Plain English in user-facing messages.** Internal harness vocabulary (`cell`, `manifest`, `route`, `deviation`, `run.json`) stays in artifacts and code, not in user prompts. Paper-, model-, or method-specific abbreviations that are non-standard for this field (PXP, FSA, RVB, AKLT, …) get a one-sentence plain-English introduction on first use; common method families (ED, DMRG, QMC, VMC, NQS) need no introduction. Other jargon, if necessary, gets defined when first used. Avoid undefined abbreviations, internal workflow labels, raw logs, and compressed jargon. Define non-standard abbreviations inline on first use, e.g. `forward-scattering approximation (FSA)` or `PXP chain (Rydberg blockade model)`; after that, the abbreviation may be used.
 - **Maintain a reader trace during long workflows.** Every user-facing update, setup card, report caption, and final result should preserve the user's narrative thread: what object is being worked on, what it means, what evidence was produced, and what consequence follows. A reader trace usually names the **object** (paper, figure, model, file, package, command, or result), the **meaning** in plain domain language, the **evidence** (number, residual, source, plot, runtime, artifact), and the **consequence** (confirmed, changed, blocked, or next choice). Name the concrete paper, file, tool, command, or result before discussing it; do not rely on shorthand, hidden session context, or agent-only labels.
 - **Do not dump walls of checklists, verification details, convention notes, or method-card content** unless the user explicitly asks.
-- **Avoid walls of words.** Each message is terse — a few sentences or a compact table covering key points, no overload. Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
+- **Avoid walls of words — volume buries the key information.** Each message is terse — a few sentences or a compact table covering key points, no overload. The reader must never have to dig the one fact that matters out of surrounding prose. Keep each turn compact; when more is required by a skill, split it into one decision at a time with 2–3 options, concise pros and cons, and one recommended option when technically justified. When a skill requires source confirmation, setup cards, or proposal approval, present the required material compactly and one decision at a time.
 - **Decision gates need anchors.** For approval, setup, install, configuration, routing, or compute choices, give a **mental/logical anchor** first: why this decision exists and what consequence it changes. Then give a **visual anchor**: bold only the key consequence phrase(s), not the whole sentence. Shape the prompt as **why → consequence → escape hatch → ask**.
 - **Consequential notices need anchors.** For source-fixed facts or technical necessities where there is no real choice, do not fake a fork. Still surface why the step follows, what consequence it changes, and how the user can correct it. Shape the notice as **because → consequence → correction line → proceed**.
   - Examples:

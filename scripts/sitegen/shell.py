@@ -14,7 +14,8 @@ from __future__ import annotations
 from . import parse
 
 NAV = [("index.html", "Home"), ("solvable.html", "Solvable"),
-       ("models.html", "Models"), ("methods.html", "Methods")]
+       ("models.html", "Models"), ("methods.html", "Methods"),
+       ("benchmarks.html", "Benchmarks")]
 
 KATEX_HEAD = """\
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
@@ -36,6 +37,7 @@ CSS = """\
   a{color:var(--accent2);text-decoration:none}
   a:hover{text-decoration:underline}
   .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  .wrap.wide{max-width:1560px}
 
   /* ---- shared top nav ---- */
   .topnav{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
@@ -121,6 +123,12 @@ CSS = """\
   table.bench td:last-child,table.bench td:nth-child(2){white-space:normal}
   table.bench th{color:var(--ink)}
   table.bench code,.cardlinks{font-family:var(--mono);font-size:.9em;color:var(--accent2)}
+  table.bench .unit{color:var(--mut);font-size:.92em}
+  table.matrix{font-size:.78rem}
+  table.matrix th,table.matrix td{padding:6px 8px}
+  table.matrix td{white-space:nowrap}
+  table.matrix code{color:inherit}
+  table.matrix .err{color:var(--mut)}
   .cardlinks{margin:14px 0 0;font-size:.78rem;display:flex;gap:16px}
 
   footer{padding:30px 0 60px;color:var(--mut);font-size:.85rem}"""
@@ -213,12 +221,26 @@ def chips(group: str, values, titles=None) -> str:
 
 
 def page(*, title: str, lead: str, total: int, chips_html: str, sections_html: str,
-         footer_html: str, here: str, search_placeholder: str) -> str:
+         footer_html: str, here: str, search_placeholder: str,
+         filterbar: bool = True, wide: bool = False) -> str:
     """Assemble a full catalog page from its parts.
 
     All interpolated args are trusted HTML — escape card-derived text with
-    parse.esc / parse.md_inline upstream.
+    parse.esc / parse.md_inline upstream. filterbar=False drops the search
+    bar, chips, and filter JS for static pages.
     """
+    fb = f'''<div class="filterbar">
+  <div class="fb-row">
+    <input id="q" type="search" placeholder="{search_placeholder}" aria-label="Search">
+    <span id="count">{total} of {total}</span>
+  </div>
+  <div class="fb-chips">
+{chips_html}
+  </div>
+</div>
+
+''' if filterbar else ""
+    js = f"<script>\n{FILTER_JS}\n</script>\n" if filterbar else ""
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -231,7 +253,7 @@ def page(*, title: str, lead: str, total: int, chips_html: str, sections_html: s
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap{" wide" if wide else ""}">
 
 {nav(here)}
 
@@ -241,26 +263,13 @@ def page(*, title: str, lead: str, total: int, chips_html: str, sections_html: s
   <p class="lead">{lead}</p>
 </header>
 
-<div class="filterbar">
-  <div class="fb-row">
-    <input id="q" type="search" placeholder="{search_placeholder}" aria-label="Search">
-    <span id="count">{total} of {total}</span>
-  </div>
-  <div class="fb-chips">
-{chips_html}
-  </div>
-</div>
-
-{sections_html}
+{fb}{sections_html}
 
 <footer>
 {footer_html}
 </footer>
 
 </div>
-<script>
-{FILTER_JS}
-</script>
-</body>
+{js}</body>
 </html>
 '''

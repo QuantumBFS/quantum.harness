@@ -1,4 +1,4 @@
-# Polynomial Optimization
+# Semidefinite Programming
 
 ## Reproduction target
 

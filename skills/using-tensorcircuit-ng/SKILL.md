@@ -12,11 +12,16 @@ Use TensorCircuit-NG for JAX-backed circuit simulation, differentiable circuit w
 - Stack contract: `skills/using-tensorcircuit-ng/stack.toml`
 - JAX prerequisite: `skills/using-jax/stack.toml`
 - Method card: `skills/method-qcs/SKILL.md`
-- QCS interview notes: `docs/qcs/interview.html`
-- QCS review notes: `docs/qcs/review.html`
-- QCS challenge brief: `docs/qcs/backup.md`
 - Install target: `make install tensorcircuit-ng`
-- Upstream agent resources (not vendored here; consult when working in this method): skills <https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/skills>, memory <https://github.com/tensorcircuit/using-tensorcircuit-ng/tree/master/.agents/memory>
+- Upstream agent resources — when working in this method, shallow-clone the
+  repo into the gitignored raw store and read these dirs locally:
+  ```sh
+  git clone --depth 1 https://github.com/tensorcircuit/tensorcircuit-ng \
+    .knowledge/literature/quantum-circuit-simulation/.raw/repos/tensorcircuit-tensorcircuit-ng
+  ```
+  `.agents/skills/` (upstream skills), `.agents/memory/` (upstream agent
+  memory), `examples/` (140+ runnable scripts — VQE, contraction, profiling;
+  prefer an example as the starting template over writing from scratch)
 - Local API reference (key API + worked examples, with links to upstream docs): `references/tensorcircuit-ng-api.md`
 
 ## Workflow
@@ -92,10 +97,10 @@ For deep repeated layers, express the layer update with JAX control flow (`jax.l
 
 Estimate from representation, qubit count, depth/gate count, observable form, batch size, gradient path, contraction path, and device.
 
-- Statevector: memory is `2^n` complex amplitudes times dtype, multiplied by batches/gradients. `docs/qcs/review.html` gives an 80 GB GPU anchor of about 33 complex64 qubits.
+- Statevector: memory is `2^n` complex amplitudes times dtype, multiplied by batches/gradients. Anchor: an 80 GB GPU holds about 33 complex64 qubits.
 - Tensor-network contraction: memory is the largest intermediate tensor from contraction info, not qubit count alone; wall is contraction FLOPs plus path search and compile time.
 - MPS: memory/time depend on bond dimension `chi`; the run is approximate unless `chi` convergence is shown.
-- Timing must separate one-off path search, JAX compile, warm value-and-gradient runtime, and optimizer-loop overhead. The QCS benchmark anchor is 32 qubits x 16 layers with one warm energy+gradient evaluation on a single H200 GPU; `docs/qcs/backup.md` gives a CPU baseline target of 24 qubits x 12 layers.
+- Timing must separate one-off path search, JAX compile, warm value-and-gradient runtime, and optimizer-loop overhead. The QCS benchmark anchor is 32 qubits x 16 layers with one warm energy+gradient evaluation on a single H200 GPU; the CPU baseline target is 24 qubits x 12 layers (see the track README).
 - First estimate paper-size qubits/depth and the largest local-PC-in-15-min circuit. If memory is infeasible, use slicing, GPU/cluster, MPS approximation, or reduced scope as explicit options.
 
 ## Common Setup Notes

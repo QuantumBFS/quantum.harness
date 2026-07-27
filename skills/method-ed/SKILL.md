@@ -29,7 +29,6 @@ Exact diagonalization (ED) writes the many-body Hamiltonian in an explicit finit
 - **Method-zoo cards** (M1–M14 property tables, cost classes): `.knowledge/methods/ed-full`, `ed-lanczos`, `ftlm-tpq`, `kpm`; `fci` is the quantum-chemistry sibling (same wall, different tooling). Model → method gate: `.knowledge/method-property-map.md`.
 - **Knowledge cards**: `.knowledge/symmetry-cheatsheet.md` (conserved quantities, lattice point groups — the sector inventory), `.knowledge/conventions.md` (sign / normalization defaults), `.knowledge/limits.md` (exact limits for anchor checks).
 - Tool skills: `/using-xdiag` — **XDiag.jl** (Julia), the canonical symmetry-resolved ED stack; `/using-quspin` — **QuSpin** (Python), the fallback and the constrained-basis route.
-- Expert sources — the routing, sector, and verification judgment in this card is distilled from: `docs/ed/interview.html` (practitioner interview), `docs/ed/review.html` (2026 landscape: feasibility ceilings, 16-tool catalog, tricks).
 - Track README: `tracks/ed/README.md`
 - Literature (rendered under `.knowledge/literature/ed/`): Sandvik `1101.3281`; Weiße & Fehske `10-1007-978-3-540-74686-7-18`; XDiag `2505.02901`; QuSpin `1610.03042`.
 

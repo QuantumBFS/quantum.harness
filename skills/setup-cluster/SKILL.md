@@ -2,11 +2,12 @@
 name: setup-cluster
 user-invocable: false
 description: >-
-  Use when a usable cluster profile is needed and none exists — a fresh account,
-  no `skills/using-slurm/profiles/active.toml`, "set up my cluster", "configure
-  HPC", or when `/cluster-jobs` / `/onboard` / `/using-slurm` find no profile.
-  Builds the unified TOML profile (ssh + scheduler + partitions), probes live
-  resources, and seeds the student safety `[limits]`.
+  Use when a usable cluster connection or profile is needed and something is
+  missing — a fresh account, no `skills/using-slurm/profiles/active.toml`,
+  "set up my cluster", "configure HPC", a profile whose ssh alias is
+  unreachable ("Could not resolve hostname", no key installed, credentials
+  never provisioned), or when `/cluster-jobs` / `/onboard` / `/using-slurm`
+  find no profile or fail their ssh precheck.
 ---
 
 # setup-cluster
@@ -18,15 +19,50 @@ cluster stage here, and `/cluster-jobs` / `/using-slurm` route here when no
 profile is found. Mirrors `/setup-julia` (dispatched on demand, not a slash
 command).
 
-Three things, in order: **build the profile → probe live resources → seed
-`[limits]`**. The schema is `skills/using-slurm/references/cluster-profiles.md`
-— read it before writing; do not invent fields.
+Four things, in order: **bootstrap the connection → build the profile → probe
+live resources → seed `[limits]`**. The schema is
+`skills/using-slurm/references/cluster-profiles.md` — read it before writing;
+do not invent fields.
 
 ## Idempotency
 
-Skip if `skills/using-slurm/profiles/active.toml` already exists *and* carries a
-`[limits]` section. If the profile exists but predates limits, jump straight to
-**3. Seed limits** and append them — do not rebuild the profile.
+Route by state — never rebuild finished work:
+
+First matching row wins:
+
+| State | Action |
+|---|---|
+| Profile resolves, has `[limits]`, `ssh <alias> echo ok` passes | Skip entirely. |
+| Profile file exists with `[limits]`, but ssh fails (whether or not anything resolves it) | Run **0. Connection bootstrap**; then, if nothing resolves the profile, activate it (§4). Do not rebuild. |
+| Profile file exists, ssh passes, but nothing resolves it (no `active.toml`, no env var) | Activate it (symlink or env var, §4) — do not rebuild. |
+| Profile resolves but predates `[limits]` | Jump to **3. Seed limits** and append. |
+| No profile file for this cluster | Full run, §0–§4. |
+
+The skip test includes the ssh check: a profile whose alias is unreachable is
+not "already set up", however complete its TOML is.
+
+## 0. Connection bootstrap
+
+Skip when `ssh <alias> echo ok` already passes. Otherwise the student has no
+provisioned access — a state no amount of profile-building fixes.
+
+1. **Find the cluster's credential instructions.** Read the sibling setup notes
+   `skills/using-slurm/profiles/<name>-setup.md` if they exist; otherwise use
+   the profile's `[[documentation]]` URLs (or the docs crawl below) to locate
+   the login/credential pages. Portal-provisioned clusters (SCNet, hpccube-family)
+   issue host, port, username, and a downloadable key from a web console — the
+   student must do those portal steps; walk them through, one at a time.
+2. **Install key + alias.** Once the student has host/port/user/key: move the
+   key under `~/.ssh/`, `chmod 600` it, and append a `Host <alias>` stanza to
+   `~/.ssh/config` matching the profile's `connection.ssh.alias`. The agent
+   writes the stanza; never paste a private key into the repo or the profile.
+   macOS gotcha: TCC blocks agent processes from reading `~/Downloads` — have
+   the student move the downloaded key themselves (`! mv ~/Downloads/<key>
+   ~/.ssh/...` run from their prompt, or Finder) rather than retrying.
+3. **Verify, then hand back.** `ssh <alias> echo ok` must print `ok` before
+   continuing to §1. When the profile already exists, activate it first if
+   nothing resolves it (§4), then return to the caller. Do not proceed on
+   faith.
 
 ## 1. Build the profile
 
@@ -123,5 +159,9 @@ on demand by the submitting skill.
 ## Composition
 
 - `/onboard` delegates its cluster-setup stage to this skill.
-- `/cluster-jobs` and `/using-slurm` route here when no profile exists.
+- `/cluster-jobs` and `/using-slurm` route here when no profile exists **or
+  when their ssh precheck fails** (→ §0 Connection bootstrap).
 - `/setup-julia` runs afterward, on demand, for language setup.
+- Per-cluster credential instructions live in
+  `skills/using-slurm/profiles/<name>-setup.md` (committed, secret-free), not
+  in this skill.

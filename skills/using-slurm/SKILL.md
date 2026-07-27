@@ -18,6 +18,7 @@ This skill is agent-facing (harness array sweeps with run-spec manifests). **Stu
 - Pre-checks must pass before submit: readable cluster profile, `ssh <alias> echo ok`, and captured local `git status --porcelain`.
 - Dirty worktree shipping requires user authorization. Do not silently commit, push, or rsync user changes.
 - Partition choice is ratified after queue probing. Do not blindly use the profile default when alternatives are viable.
+- Pre-submit feasibility is ratified before a real job is left queued.
 - Scheduler state is not scientific evidence. `sbatch` success, `squeue COMPLETED`, and `ssh` exit status do not close reproduction claims; fetched manifests do.
 - Array jobs receive an opaque run spec and write one manifest per cell. `/using-slurm` never parses or hardcodes axis names.
 </checklist>
@@ -37,6 +38,8 @@ This skill is agent-facing (harness array sweeps with run-spec manifests). **Stu
 ```bash
 scripts/harness_slurm.sh precheck                       # resolve profile, ssh echo ok, git dirty status
 scripts/harness_slurm.sh probe-partitions               # parsed sinfo table — agent ratifies the choice
+scripts/harness_slurm.sh submit --test-only --script <local-script> \
+    --time <t> --cpus <n>                               # local-inspected script, exact scheduler feasibility output
 scripts/harness_slurm.sh submit --array N --run-spec results/<run>/run_spec.json \
     --command '<cmd>' --partition <p> --time <t> --cpus <n>   # captures the job id
 scripts/harness_slurm.sh status <jobid>                 # squeue state + pending-reason category
@@ -47,13 +50,14 @@ scripts/harness_slurm.sh pending-cells <run> [--success-field F --success-value 
 
 1. **Pre-check.** Resolve profile, test ssh, capture dirty status.
 2. **Probe and ratify partition.** Inspect queue state and present 2-3 viable options with recommended first.
-3. **Bootstrap only if needed.** Ensure remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
-4. **Ship.** Use authorized `git` flow or explicit `rsync`.
-5. **Submit.** Run `sbatch` on the remote repo and capture job id, partition, walltime, and cell count.
-6. **Monitor.** Check pending/running transitions, startup logs, and long-run pulses. If the job remains pending or fails at startup, surface choices rather than waiting silently.
-7. **Fetch.** On completion, sync `results/<run>/` back locally.
-8. **Diagnose.** Use `sacct` plus per-cell artifacts to classify success, OOM, walltime, logic failure, and convergence-out-of-budget.
-9. **Hand back.** Print per-cell status table and local results path.
+3. **Ship.** Use authorized `git` flow or explicit `rsync` so the submitted script exists at its remote path.
+4. **Bootstrap only if needed.** Ensure the remote repo and declared stack are usable; dispatch `/setup-julia` only for Julia commands when Julia is not ready.
+5. **Pre-submit feasibility.** After shipping/bootstrap, run the exact request with `harness_slurm.sh submit --test-only ...`. The `--script` path must be a locally readable regular file so the helper can inspect its `#SBATCH` directives before adding command-line defaults. Partition precedence is the last partition option in `--extra`, then dedicated `--partition`, then the script's `#SBATCH --partition`, then `scheduler.default_partition`. The helper adds optional `required_gres` for the effective partition only when neither `--extra --gres` nor the script supplies `#SBATCH --gres`. Print and inspect the scheduler response. Treat QOS/resource rejection as a profile/request mismatch. If the returned estimate is impractically far away, present wait/change/stop and require ratification before leaving a real job queued.
+6. **Submit.** Run `sbatch` on the remote repo and capture job id, partition, walltime, and cell count.
+7. **Monitor.** Check pending/running transitions, startup logs, and long-run pulses. If the job remains pending or fails at startup, surface choices rather than waiting silently.
+8. **Fetch.** On completion, sync `results/<run>/` back locally.
+9. **Diagnose.** Use `sacct` plus per-cell artifacts to classify success, OOM, walltime, logic failure, and convergence-out-of-budget.
+10. **Hand back.** Print per-cell status table and local results path.
 
 ## Cluster Profile
 
@@ -75,6 +79,12 @@ Read it before creating or editing a profile.
 If no profile exists, emit a generic array wrapper without resource directives
 and recommend `/onboard` cluster setup. Do not invent partitions, CPUs, memory,
 or walltime.
+
+If a profile exists but the precheck ssh test fails (unresolvable alias,
+missing key, never-provisioned credentials), dispatch `/setup-cluster` — its
+connection bootstrap owns credential acquisition, guided by the profile's
+sibling `profiles/<name>-setup.md` notes. Do not stop at "check ~/.ssh/config",
+and do not rebuild the profile.
 
 ## Partition Ratification
 

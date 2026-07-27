@@ -1,0 +1,1958 @@
+{
+ "campaigns": {
+  "solvable-frontier": {
+   "date": "2026-07",
+   "definition": "largest size each method reached within 100 CPU core-hours per run; relative error vs the exact solution at that size",
+   "bars": {
+    "deterministic": 1e-08,
+    "variational": 0.001,
+    "stochastic": "2sigma"
+   },
+   "provenance": "fliingelephant/quantum.harness campaign/solvable-benchmark"
+  }
+ },
+ "entries": [
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "20",
+   "size_unit": "L sites",
+   "rel_err": 4.996e-16,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     16.0,
+     9.99201e-16
+    ],
+    [
+     18.0,
+     6.66134e-16
+    ],
+    [
+     20.0,
+     4.996e-16
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "ltrg",
+   "status": "COMPLETED",
+   "size": "1073741824",
+   "size_unit": "L sites",
+   "rel_err": 1.7880052938235025e-08,
+   "observable": "ground-state energy per site e0 = u(beta->large)",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "mcrg",
+   "status": "UNSUITABLE",
+   "why": "",
+   "card_ref": null
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "3200000000",
+   "size_unit": "L sites",
+   "rel_err": 0.5000000000000325,
+   "observable": "ground_state_energy_per_site_e0",
+   "points": [
+    [
+     8.0,
+     0.5
+    ],
+    [
+     3200000000.0,
+     0.5000000000000325
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "\u221e",
+   "size_unit": "L sites",
+   "rel_err": 1.6653345369377348e-16,
+   "observable": "e0_per_site",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "peps",
+   "status": "COMPLETED",
+   "size": "\u221e",
+   "size_unit": "L sites",
+   "rel_err": 1.6237011735142914e-15,
+   "observable": "string_order",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "polyopt",
+   "status": "COMPLETED",
+   "size": "32768",
+   "size_unit": "L sites",
+   "rel_err": 0.12499998802180479,
+   "observable": "e0_lower_bound_per_site",
+   "points": [
+    [
+     64.0,
+     0.12499999939133777
+    ],
+    [
+     4096.0,
+     0.12499998831995279
+    ],
+    [
+     32768.0,
+     0.12499998802180479
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "16384",
+   "size_unit": "L sites",
+   "rel_err": 1.1657341758564144e-14,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     4096.0,
+     1.9984014443252818e-15
+    ],
+    [
+     4096.0,
+     4.121702978920894e-15
+    ],
+    [
+     4096.0,
+     4.496403249731884e-15
+    ],
+    [
+     4096.0,
+     4.746203430272544e-15
+    ],
+    [
+     8192.0,
+     3.747002708109903e-15
+    ],
+    [
+     8192.0,
+     4.246603069191224e-15
+    ],
+    [
+     8192.0,
+     4.496403249731884e-15
+    ],
+    [
+     8192.0,
+     5.995204332975845e-15
+    ],
+    [
+     13312.0,
+     3.747002708109903e-15
+    ],
+    [
+     13312.0,
+     4.246603069191224e-15
+    ],
+    [
+     13312.0,
+     5.995204332975845e-15
+    ],
+    [
+     13312.0,
+     1.1823875212257917e-14
+    ],
+    [
+     16384.0,
+     3.8719027983802334e-15
+    ],
+    [
+     16384.0,
+     4.496403249731884e-15
+    ],
+    [
+     16384.0,
+     1.1657341758564144e-14
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "qmc",
+   "status": "COMPLETED",
+   "size": "16",
+   "size_unit": "L sites",
+   "rel_err": 0.04622,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     8.0,
+     0.00976
+    ],
+    [
+     10.0,
+     0.00544
+    ],
+    [
+     12.0,
+     0.00993
+    ],
+    [
+     14.0,
+     0.01632
+    ],
+    [
+     16.0,
+     0.04622
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "aklt-chain",
+   "method": "vmc",
+   "status": "COMPLETED",
+   "size": "16",
+   "size_unit": "L sites",
+   "rel_err": 0.07753018440208209,
+   "observable": "e0_per_site (variational upper bound)",
+   "points": [
+    [
+     8.0,
+     0.0329945878974649
+    ],
+    [
+     16.0,
+     0.06659411798990866
+    ],
+    [
+     16.0,
+     0.07753018440208209
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "20",
+   "size_unit": "L sites",
+   "rel_err": 0.0026534552194332544,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     6.0,
+     0.06574818028197668
+    ],
+    [
+     10.0,
+     0.016911973173014183
+    ],
+    [
+     12.0,
+     0.0051710134927121015
+    ],
+    [
+     14.0,
+     6.897790515510004e-13
+    ],
+    [
+     14.0,
+     0.006989103277479621
+    ],
+    [
+     16.0,
+     0.003786746803350047
+    ],
+    [
+     16.0,
+     0.003786746803745775
+    ],
+    [
+     18.0,
+     0.003786277154202124
+    ],
+    [
+     20.0,
+     0.0026534552194332544
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "ltrg",
+   "status": "COMPLETED",
+   "size": "8192",
+   "size_unit": "L sites",
+   "rel_err": 0.00844,
+   "observable": "u(beta=48) \u2014 FAILS blind gates (truncation drift)",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "mcrg",
+   "status": "UNSUITABLE",
+   "why": "",
+   "card_ref": null
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "2200000000000",
+   "size_unit": "L sites",
+   "rel_err": 0.18235798,
+   "observable": "ground_state_energy_per_site_e0",
+   "points": [
+    [
+     1000000000.0,
+     0.18235798
+    ],
+    [
+     2200000000000.0,
+     0.18235798
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "256",
+   "size_unit": "L sites",
+   "rel_err": 2.659839367642479e-06,
+   "observable": "e0_per_site (thermodynamic limit, U/t=4, half filling)",
+   "points": [
+    [
+     64.0,
+     7.169632719936827e-05
+    ],
+    [
+     256.0,
+     2.659839367642479e-06
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "peps",
+   "status": "UNSUITABLE",
+   "why": "Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d",
+   "card_ref": "skills/method-peps/SKILL.md:32"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "polyopt",
+   "status": "COMPLETED",
+   "size": "16384",
+   "size_unit": "L sites",
+   "rel_err": 2.49,
+   "observable": null,
+   "points": [
+    [
+     6.0,
+     2.485964020067615
+    ],
+    [
+     6.0,
+     2.4859641278194804
+    ],
+    [
+     256.0,
+     2.4859639429881013
+    ],
+    [
+     16384.0,
+     2.48596400213872
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "14",
+   "size_unit": "L sites",
+   "rel_err": 0.24642077914565208,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     4.0,
+     0.08373677507380893
+    ],
+    [
+     6.0,
+     0.06484168850799382
+    ],
+    [
+     6.0,
+     0.2822988712206658
+    ],
+    [
+     8.0,
+     0.028467562818993448
+    ],
+    [
+     10.0,
+     0.010433247801795786
+    ],
+    [
+     12.0,
+     0.025020058242455248
+    ],
+    [
+     14.0,
+     0.24642077914565208
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "qmc",
+   "status": "COMPLETED",
+   "size": "254",
+   "size_unit": "L sites",
+   "rel_err": 0.0020609850228313848,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     6.0,
+     0.06543094838048139
+    ],
+    [
+     14.0,
+     0.007106256429043424
+    ],
+    [
+     30.0,
+     0.0010878866965017648
+    ],
+    [
+     62.0,
+     0.00032759870456817254
+    ],
+    [
+     254.0,
+     0.0020609850228313848
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "hubbard-1d-lieb-wu",
+   "method": "vmc",
+   "status": "FAILED",
+   "size": "24",
+   "size_unit": "L sites",
+   "rel_err": 0.06532127520151687,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     6.0,
+     0.061258754528886294
+    ],
+    [
+     12.0,
+     0.0047571665074332015
+    ],
+    [
+     18.0,
+     0.04917258508847161
+    ],
+    [
+     20.0,
+     0.05387483366561586
+    ],
+    [
+     20.0,
+     0.05750426235830498
+    ],
+    [
+     24.0,
+     0.06532127520151687
+    ],
+    [
+     24.0,
+     0.10378354471576444
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "5",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.002363988988513908,
+   "observable": "internal_energy_per_site",
+   "points": [
+    [
+     2.0,
+     0.03165783054880585
+    ],
+    [
+     3.0,
+     0.012668617823809515
+    ],
+    [
+     4.0,
+     0.00024448344683389
+    ],
+    [
+     4.0,
+     0.0056232313623354475
+    ],
+    [
+     4.0,
+     0.006902538539957676
+    ],
+    [
+     5.0,
+     0.002363988988513908
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "ltrg",
+   "status": "COMPLETED",
+   "size": "1024",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.001973347889449415,
+   "observable": "internal_energy_per_site",
+   "points": [
+    [
+     4.0,
+     0.008730003650791076
+    ],
+    [
+     4.0,
+     0.012214512655056214
+    ],
+    [
+     8.0,
+     0.005769085903365202
+    ],
+    [
+     8.0,
+     0.0058663464785419055
+    ],
+    [
+     8.0,
+     0.012540862525700256
+    ],
+    [
+     16.0,
+     0.00103160273287929
+    ],
+    [
+     16.0,
+     0.001781492571290971
+    ],
+    [
+     32.0,
+     0.0002696012155436083
+    ],
+    [
+     32.0,
+     0.00031669568295826034
+    ],
+    [
+     64.0,
+     0.00011895772514160492
+    ],
+    [
+     64.0,
+     0.0019097374169912233
+    ],
+    [
+     128.0,
+     1.585413841256465e-05
+    ],
+    [
+     128.0,
+     0.00197488635412262
+    ],
+    [
+     256.0,
+     3.160410106237609e-06
+    ],
+    [
+     256.0,
+     8.064853201705932e-06
+    ],
+    [
+     256.0,
+     0.00014638160220849225
+    ],
+    [
+     256.0,
+     0.0008299919497554694
+    ],
+    [
+     256.0,
+     0.001973347889449415
+    ],
+    [
+     512.0,
+     2.263314228581754e-06
+    ],
+    [
+     512.0,
+     0.001973347889449415
+    ],
+    [
+     1024.0,
+     2.263314228581754e-06
+    ],
+    [
+     1024.0,
+     0.001973347889449415
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "mcrg",
+   "status": "COMPLETED",
+   "size": "6561",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.000978320562024848,
+   "observable": "beta_exponent",
+   "points": [
+    [
+     81.0,
+     0.18577189561158658
+    ],
+    [
+     6561.0,
+     0.000978320562024848
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "32768",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.762747174039086,
+   "observable": "tc",
+   "points": [
+    [
+     8.0,
+     0.762747174039086
+    ],
+    [
+     1024.0,
+     0.762747174039086
+    ],
+    [
+     8192.0,
+     0.762747174039086
+    ],
+    [
+     32768.0,
+     0.762747174039086
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "mps",
+   "status": "UNSUITABLE",
+   "why": "**When the user's goal falls outside 1D/quasi-1D:** recognize it before any setup; explain *what fits better and why* in a short what/why table; stay warm \u2014 guide, don't dismiss. (Interaction principl",
+   "card_ref": "skills/method-mps/SKILL.md:74"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "peps",
+   "status": "COMPLETED",
+   "size": "160",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.000205237012702649,
+   "observable": "internal_energy_per_site_T2.26918531421302",
+   "points": [
+    [
+     3.0,
+     5.317352874356864e-12
+    ],
+    [
+     20.0,
+     0.0002394624584199946
+    ],
+    [
+     20.0,
+     0.9988387763371465
+    ],
+    [
+     20.0,
+     1.7577336864849336
+    ],
+    [
+     40.0,
+     0.0763149310175088
+    ],
+    [
+     40.0,
+     1.7577336864849336
+    ],
+    [
+     80.0,
+     0.00020559877332816553
+    ],
+    [
+     80.0,
+     0.023283149565895455
+    ],
+    [
+     160.0,
+     0.000205237012702649
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "polyopt",
+   "status": "UNSUITABLE",
+   "why": "| Finite temperature | LTRG `/method-ltrg`, QMC `/method-qmc` | certified finite-T relaxations exist (Fawzi-Fawzi-Scalet 2024) but have no large-scale demonstrations yet |\n\n> **When the goal falls out",
+   "card_ref": "skills/method-polyopt/SKILL.md:71-73"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "qcs",
+   "status": "FAILED",
+   "size": "4",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.022024128335963407,
+   "observable": "internal_energy_per_site",
+   "points": [
+    [
+     2.0,
+     0.19999971988899456
+    ],
+    [
+     2.0,
+     0.19999988428219906
+    ],
+    [
+     3.0,
+     0.13929804857940833
+    ],
+    [
+     3.0,
+     0.13932715207835347
+    ],
+    [
+     4.0,
+     0.022024128335963407
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "qmc",
+   "status": "COMPLETED",
+   "size": "256",
+   "size_unit": "L (L\u00d7L)",
+   "rel_err": 0.0015805951282045064,
+   "observable": "internal_energy_per_site",
+   "points": [
+    [
+     4.0,
+     0.10824557200354841
+    ],
+    [
+     16.0,
+     0.02879213155013478
+    ],
+    [
+     64.0,
+     0.006503853046218221
+    ],
+    [
+     256.0,
+     0.0015805951282045064
+    ],
+    [
+     256.0,
+     0.0016327561150267806
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "ising-2d-onsager",
+   "method": "vmc",
+   "status": "UNSUITABLE",
+   "why": "The whole method is *zero-temperature, ground-state* by default; finite-T and real-time variants exist (t-VMC, Section 4 note) but are out of scope here except where noted.",
+   "card_ref": "skills/method-vmc/references/vmc-methodology.md:29-30"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "18",
+   "size_unit": "L qubits",
+   "rel_err": 0.01332964197391906,
+   "observable": "sff_K1_selfdual",
+   "points": [
+    [
+     12.0,
+     0.01803315850523779
+    ],
+    [
+     18.0,
+     0.01332964197391906
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "ltrg",
+   "status": "UNSUITABLE",
+   "why": "All equilibrium thermodynamics of a quantum lattice model follow from the partition function  Z(beta) = Tr e^(-beta H).",
+   "card_ref": "skills/method-ltrg/references/ltrg-methodology.md:26"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "mcrg",
+   "status": "UNSUITABLE",
+   "why": "MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.",
+   "card_ref": "skills/method-mcrg/SKILL.md:68"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "760",
+   "size_unit": "L qubits",
+   "rel_err": 1.14e-13,
+   "observable": "sff_selfdual_K(t=1)",
+   "points": [
+    [
+     8.0,
+     1.8e-15
+    ],
+    [
+     8.0,
+     4.402371095286487
+    ],
+    [
+     8.0,
+     304.17578125
+    ],
+    [
+     10.0,
+     1906.348632812
+    ],
+    [
+     760.0,
+     1.14e-13
+    ],
+    [
+     760.0,
+     1.9693e+159
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "\u221e",
+   "size_unit": "L qubits",
+   "rel_err": 1.38e-15,
+   "observable": "K(1),K(3),K(5) at L=2048, direct Route-A MPO-trace, nreal=99840 (256 chunks x 390), seed ladder from 7",
+   "points": [
+    [
+     8.0,
+     1.3e-15
+    ],
+    [
+     2048.0,
+     0.003546
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "peps",
+   "status": "COMPLETED",
+   "size": "\u221e (t=11)",
+   "size_unit": "L qubits",
+   "rel_err": 3.2e-11,
+   "observable": "K_TL(11) = BKP 2t; block subspace iteration, m_unit=22, conv=true, resid=3.0e-07, wall 771.9s",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "polyopt",
+   "status": "UNSUITABLE",
+   "why": "| Full spectrum, dynamics | ED `/method-ed`, MPS `/method-mps` | the hierarchy targets the extremal eigenvalue; no dynamics formulation exists |",
+   "card_ref": "skills/method-polyopt/SKILL.md:70"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "1000000000",
+   "size_unit": "L qubits",
+   "rel_err": 3.11e-06,
+   "observable": "sff_selfdual K(1)",
+   "points": [
+    [
+     10.0,
+     0.0245
+    ],
+    [
+     1000.0,
+     0.0145
+    ],
+    [
+     10000.0,
+     0.0228
+    ],
+    [
+     30000.0,
+     0.0261
+    ],
+    [
+     1000000.0,
+     3.11e-09
+    ],
+    [
+     10000000.0,
+     0.537
+    ],
+    [
+     100000000.0,
+     3.11e-07
+    ],
+    [
+     1000000000.0,
+     3.11e-06
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "qmc",
+   "status": "UNSUITABLE",
+   "why": "",
+   "card_ref": null
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "kicked-ising-floquet",
+   "method": "vmc",
+   "status": "UNSUITABLE",
+   "why": "The whole method is *zero-temperature, ground-state* by default; finite-T and real-time variants exist (t-VMC, Section 4 note) but are out of scope here except where noted.",
+   "card_ref": "skills/method-vmc/references/vmc-methodology.md:29-30"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "1000000000",
+   "size_unit": "N spins",
+   "rel_err": 0.0,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     100.0,
+     0.0
+    ],
+    [
+     100000000.0,
+     3.55e-16
+    ],
+    [
+     300000000.0,
+     0.0
+    ],
+    [
+     1000000000.0,
+     0.0
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "ltrg",
+   "status": "UNSUITABLE",
+   "why": "Take a 1D Hamiltonian of nearest-neighbour terms, H = \u03a3\u1d62 h\u1d62,\u1d62\u208a\u2081 (e.g. XY chain h\u1d62,\u1d62\u208a\u2081 = \u2212J(S\u1d62\u02e3S\u1d62\u208a\u2081\u02e3 + S\u1d62\u02b8S\u1d62\u208a\u2081\u02b8)). Split into an even and an odd bond group, H = H\u2081 + H\u2082, where all terms within H\u2081 commu",
+   "card_ref": "skills/method-ltrg/references/ltrg-methodology.md:58-59"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "mcrg",
+   "status": "UNSUITABLE",
+   "why": "MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.",
+   "card_ref": "skills/method-mcrg/SKILL.md:68"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "25000000000",
+   "size_unit": "N spins",
+   "rel_err": 8.574652e-12,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     1000000.0,
+     2.1436e-07
+    ],
+    [
+     100000000.0,
+     2.1436e-09
+    ],
+    [
+     1000000000.0,
+     2.1436e-10
+    ],
+    [
+     25000000000.0,
+     0.0
+    ],
+    [
+     25000000000.0,
+     8.574652e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "131072",
+   "size_unit": "N spins",
+   "rel_err": 1.8655269017645607e-12,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     64.0,
+     7.953779989497823e-12
+    ],
+    [
+     256.0,
+     1.9416999809035023e-13
+    ],
+    [
+     256.0,
+     3.799981406868737e-13
+    ],
+    [
+     256.0,
+     9.97827906091361e-13
+    ],
+    [
+     256.0,
+     3.5440461808666483e-12
+    ],
+    [
+     256.0,
+     1.048038776712714e-11
+    ],
+    [
+     1024.0,
+     7.999034539668948e-13
+    ],
+    [
+     4096.0,
+     5.328791551322549e-16
+    ],
+    [
+     4096.0,
+     7.460308171851569e-15
+    ],
+    [
+     16384.0,
+     5.382290798682935e-14
+    ],
+    [
+     16384.0,
+     7.442837771116005e-14
+    ],
+    [
+     65536.0,
+     2.407666184813828e-12
+    ],
+    [
+     65536.0,
+     2.9261830502020208e-12
+    ],
+    [
+     131072.0,
+     1.8655269017645607e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "peps",
+   "status": "UNSUITABLE",
+   "why": "Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d",
+   "card_ref": "skills/method-peps/SKILL.md:32"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "polyopt",
+   "status": "COMPLETED",
+   "size": "100000000000",
+   "size_unit": "N spins",
+   "rel_err": 1.3714e-11,
+   "observable": "e0_per_spin (certified lower bound)",
+   "points": [
+    [
+     8.0,
+     0.021773455156667832
+    ],
+    [
+     8.0,
+     0.14597614541307932
+    ],
+    [
+     100.0,
+     0.013744377315534751
+    ],
+    [
+     10000.0,
+     0.000138552902713463
+    ],
+    [
+     1000000.0,
+     1.385639995969304e-06
+    ],
+    [
+     100000000.0,
+     1.385260951864275e-08
+    ],
+    [
+     1000000000.0,
+     1.381834202322183e-09
+    ],
+    [
+     10000000000.0,
+     1.346871059098026e-10
+    ],
+    [
+     100000000000.0,
+     1.3714185342876294e-11
+    ],
+    [
+     1000000000000.0,
+     2.398792275925584e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "429000000",
+   "size_unit": "N spins",
+   "rel_err": 3.3483793498911986e-11,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     1000.0,
+     2.0270616481063598e-09
+    ],
+    [
+     10000.0,
+     5.53218490082353e-11
+    ],
+    [
+     100000000.0,
+     1.4359393643331946e-10
+    ],
+    [
+     429000000.0,
+     3.3483793498911986e-11
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "qmc",
+   "status": "COMPLETED",
+   "size": "300000",
+   "size_unit": "N spins",
+   "rel_err": 2.44e-05,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     100.0,
+     0.000474
+    ],
+    [
+     1000.0,
+     0.000103
+    ],
+    [
+     10000.0,
+     0.000122
+    ],
+    [
+     30000.0,
+     6.03e-05
+    ],
+    [
+     166000.0,
+     2.56e-05
+    ],
+    [
+     300000.0,
+     2.44e-05
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "lmg",
+   "method": "vmc",
+   "status": "COMPLETED",
+   "size": "16384",
+   "size_unit": "N spins",
+   "rel_err": 1.703e-08,
+   "observable": "e0_per_spin",
+   "points": [
+    [
+     12.0,
+     0.0002856
+    ],
+    [
+     100.0,
+     3.795e-05
+    ],
+    [
+     200.0,
+     6.009e-06
+    ],
+    [
+     200.0,
+     7.29e-06
+    ],
+    [
+     800.0,
+     2.27e-07
+    ],
+    [
+     1024.0,
+     3.029e-07
+    ],
+    [
+     1024.0,
+     3.765e-07
+    ],
+    [
+     1024.0,
+     4.971e-07
+    ],
+    [
+     4096.0,
+     1.908e-08
+    ],
+    [
+     16384.0,
+     1.703e-08
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "34",
+   "size_unit": "L sites",
+   "rel_err": 1.3702447497196346e-12,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     32.0,
+     1.220263784389623e-15
+    ],
+    [
+     34.0,
+     1.3702447497196346e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "ltrg",
+   "status": "COMPLETED",
+   "size": "1048576",
+   "size_unit": "L sites",
+   "rel_err": 3.4172e-05,
+   "observable": "energy_per_site (FRONTIER: thermodynamic limit L=2^20, beta=512, 3-tau tau->0, Dc=150, vs exact JW u(beta=512))",
+   "points": [
+    [
+     16.0,
+     3.4668e-05
+    ],
+    [
+     1024.0,
+     4.7457e-06
+    ],
+    [
+     1048576.0,
+     2.0674e-07
+    ],
+    [
+     1048576.0,
+     3.4172e-05
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "mcrg",
+   "status": "COMPLETED",
+   "size": "9",
+   "size_unit": "L sites",
+   "rel_err": 0.21985384145449338,
+   "observable": "e0",
+   "points": [
+    [
+     9.0,
+     0.21985384145449338
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "1073741824",
+   "size_unit": "L sites",
+   "rel_err": 0.018252296485601425,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     8.0,
+     0.024548389919358732
+    ],
+    [
+     1048576.0,
+     0.018252295753321313
+    ],
+    [
+     67108864.0,
+     0.018252295738185383
+    ],
+    [
+     1073741824.0,
+     0.018252296485601425
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "256",
+   "size_unit": "L sites",
+   "rel_err": 3.721904474225011e-12,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     4.0,
+     3.6786821105902147e-05
+    ],
+    [
+     8.0,
+     2.0559504685629e-06
+    ],
+    [
+     16.0,
+     1.236179777284901e-07
+    ],
+    [
+     32.0,
+     7.659680105528772e-09
+    ],
+    [
+     64.0,
+     5.803265585332176e-10
+    ],
+    [
+     128.0,
+     4.673499636536706e-11
+    ],
+    [
+     256.0,
+     3.721904474225011e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "peps",
+   "status": "UNSUITABLE",
+   "why": "Projected Entangled Pair States and associated contraction methods (CTMRG, simple/full update, variational optimization) for two-dimensional quantum and classical lattice problems, with CTMRG as the d",
+   "card_ref": "skills/method-peps/SKILL.md:32"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "polyopt",
+   "status": "COMPLETED",
+   "size": "114688",
+   "size_unit": "L sites",
+   "rel_err": 0.570796325019838,
+   "observable": "e0_lower_bound_per_site",
+   "points": [
+    [
+     4.0,
+     2.3764190890970662e-08
+    ],
+    [
+     4.0,
+     0.5307337115744967
+    ],
+    [
+     4.0,
+     0.5307337277281848
+    ],
+    [
+     8.0,
+     0.560722574366742
+    ],
+    [
+     16.0,
+     0.568274243539024
+    ],
+    [
+     32.0,
+     0.5701655767481459
+    ],
+    [
+     64.0,
+     0.5706386237342175
+    ],
+    [
+     128.0,
+     0.5707568988415533
+    ],
+    [
+     256.0,
+     0.5707864684552203
+    ],
+    [
+     512.0,
+     0.570793860913952
+    ],
+    [
+     1024.0,
+     0.5707957090300805
+    ],
+    [
+     2048.0,
+     0.5707961710603957
+    ],
+    [
+     4096.0,
+     0.5707962865680971
+    ],
+    [
+     8192.0,
+     0.5707963154449429
+    ],
+    [
+     16384.0,
+     0.570796322664563
+    ],
+    [
+     32768.0,
+     0.570796324469407
+    ],
+    [
+     65536.0,
+     0.5707963249193972
+    ],
+    [
+     114688.0,
+     0.570796325019838
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "1024",
+   "size_unit": "L sites",
+   "rel_err": 0.008497155186520224,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     64.0,
+     0.011917942883913981
+    ],
+    [
+     128.0,
+     0.01005717437011615
+    ],
+    [
+     256.0,
+     0.009148153972515694
+    ],
+    [
+     512.0,
+     0.008704705858981313
+    ],
+    [
+     1024.0,
+     0.008497155186520224
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "qmc",
+   "status": "COMPLETED",
+   "size": "128",
+   "size_unit": "L sites",
+   "rel_err": 5.985677546336448e-05,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     4.0,
+     0.0006932579201866956
+    ],
+    [
+     4.0,
+     0.0011189932386933951
+    ],
+    [
+     4.0,
+     0.013748258108690698
+    ],
+    [
+     4.0,
+     0.2301366049395311
+    ],
+    [
+     4.0,
+     0.2331454534265014
+    ],
+    [
+     8.0,
+     0.00010127226737984384
+    ],
+    [
+     8.0,
+     0.0008896398696894442
+    ],
+    [
+     8.0,
+     0.0008953213854123817
+    ],
+    [
+     32.0,
+     4.491834556788532e-05
+    ],
+    [
+     128.0,
+     5.985677546336448e-05
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "tfim-chain",
+   "method": "vmc",
+   "status": "COMPLETED",
+   "size": "128",
+   "size_unit": "L sites",
+   "rel_err": 0.003371330462930409,
+   "observable": "e0_per_site",
+   "points": [
+    [
+     8.0,
+     4.635359065169048e-06
+    ],
+    [
+     16.0,
+     0.00014589690658138444
+    ],
+    [
+     32.0,
+     0.00019649273828186
+    ],
+    [
+     64.0,
+     0.001337908881880215
+    ],
+    [
+     128.0,
+     0.003371330462930409
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "ed",
+   "status": "COMPLETED",
+   "size": "5",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 6.88160639583657e-12,
+   "observable": "gap_pair",
+   "points": [
+    [
+     8.0,
+     0.0
+    ],
+    [
+     8.0,
+     6.661338147750939e-16
+    ],
+    [
+     18.0,
+     8.881784197001252e-16
+    ],
+    [
+     18.0,
+     4.440892098500626e-15
+    ],
+    [
+     32.0,
+     4.440892098500626e-16
+    ],
+    [
+     32.0,
+     1.7763568394002505e-15
+    ],
+    [
+     50.0,
+     6.88160639583657e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "ltrg",
+   "status": "COMPLETED",
+   "size": "28",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 3.2314e-14,
+   "observable": "free_energy_per_qubit (beta=1)",
+   "points": [
+    [
+     18.0,
+     3.7748e-15
+    ],
+    [
+     18.0,
+     1.0406e-12
+    ],
+    [
+     18.0,
+     0.00038728
+    ],
+    [
+     200.0,
+     8.8008e-16
+    ],
+    [
+     200.0,
+     2.2627e-11
+    ],
+    [
+     200.0,
+     0.0036464
+    ],
+    [
+     288.0,
+     2.2004e-16
+    ],
+    [
+     512.0,
+     1.9704e-16
+    ],
+    [
+     800.0,
+     1.2286e-15
+    ],
+    [
+     968.0,
+     9.6926e-15
+    ],
+    [
+     1152.0,
+     3.9609e-14
+    ],
+    [
+     1352.0,
+     1.064e-14
+    ],
+    [
+     1568.0,
+     3.2314e-14
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "mcrg",
+   "status": "UNSUITABLE",
+   "why": "MCRG fits only when the target is critical-point data (exponents or renormalized couplings), or a quantum model mapped to classical.",
+   "card_ref": "skills/method-mcrg/SKILL.md:68"
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "mf",
+   "status": "COMPLETED",
+   "size": "88000",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 0.5,
+   "observable": "ground_state_energy_per_qubit_e0",
+   "points": [
+    [
+     18.0,
+     0.5
+    ],
+    [
+     3200000000.0,
+     0.5
+    ],
+    [
+     15488000000.0,
+     0.5
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "mps",
+   "status": "COMPLETED",
+   "size": "9",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 5.522e-12,
+   "observable": "e0",
+   "points": [
+    [
+     2.0,
+     6.661e-16
+    ],
+    [
+     3.0,
+     2.22e-16
+    ],
+    [
+     4.0,
+     0.0
+    ],
+    [
+     6.0,
+     7.327e-15
+    ],
+    [
+     8.0,
+     5.97e-12
+    ],
+    [
+     9.0,
+     5.522e-12
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "peps",
+   "status": "COMPLETED",
+   "size": "\u221e",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 2.220446049250313e-16,
+   "observable": "ground-state energy per qubit",
+   "points": []
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "polyopt",
+   "status": "COMPLETED",
+   "size": "112",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 1.0989953391771223e-10,
+   "observable": "e0_lower_bound_per_qubit",
+   "points": [
+    [
+     3.0,
+     1.1019529733147237e-10
+    ],
+    [
+     6.0,
+     1.0988587817450934e-10
+    ],
+    [
+     10.0,
+     1.0981882070382198e-10
+    ],
+    [
+     16.0,
+     1.0979206432892852e-10
+    ],
+    [
+     24.0,
+     1.09795061931095e-10
+    ],
+    [
+     32.0,
+     1.0971179520424812e-10
+    ],
+    [
+     80.0,
+     1.0967438068831825e-10
+    ],
+    [
+     112.0,
+     1.0989953391771223e-10
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "qcs",
+   "status": "COMPLETED",
+   "size": "576",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 0.0,
+   "observable": "e0_per_qubit",
+   "points": [
+    [
+     3.0,
+     0.0
+    ],
+    [
+     256.0,
+     0.0
+    ],
+    [
+     384.0,
+     0.0
+    ],
+    [
+     544.0,
+     0.0
+    ],
+    [
+     576.0,
+     0.0
+    ]
+   ]
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "qmc",
+   "status": "UNSUITABLE",
+   "why": "",
+   "card_ref": null
+  },
+  {
+   "campaign": "solvable-frontier",
+   "model": "toric-code",
+   "method": "vmc",
+   "status": "COMPLETED",
+   "size": "5",
+   "size_unit": "L (L\u00d7L, 2L\u00b2 qubits)",
+   "rel_err": 0.0353,
+   "observable": "e0_per_qubit (variational, TRAINING estimate \u2014 walltime-cut partial; no final high-sample measurement)",
+   "points": [
+    [
+     8.0,
+     0.0020112638626494928
+    ],
+    [
+     18.0,
+     0.0011257175220359035
+    ],
+    [
+     32.0,
+     0.02455480102346419
+    ],
+    [
+     50.0,
+     0.03525553262044241
+    ],
+    [
+     72.0,
+     0.35062034797430097
+    ]
+   ]
+  }
+ ]
+}

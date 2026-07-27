@@ -123,6 +123,17 @@ def get_field(profile: dict, dotted: str) -> object | None:
     return node
 
 
+def get_partition(profile: dict, name: str) -> dict | None:
+    """Return the named ``[[partitions]]`` row, or ``None`` when absent."""
+    partitions = profile.get("partitions", [])
+    if not isinstance(partitions, list):
+        return None
+    for partition in partitions:
+        if isinstance(partition, dict) and partition.get("name") == name:
+            return partition
+    return None
+
+
 def get_limits(profile: dict) -> Limits:
     """Extract ``[limits]`` into a :class:`Limits`, tolerating absence."""
     block = profile.get("limits", {})
@@ -154,6 +165,11 @@ def _format_value(value: object) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Read a field from a cluster profile.")
     parser.add_argument("--field", required=True, help="dotted path, e.g. ssh.alias")
+    parser.add_argument(
+        "--partition",
+        default=None,
+        help="read --field from the named [[partitions]] row",
+    )
     parser.add_argument("--profile", default=None, help="profile file (default: resolved active)")
     args = parser.parse_args(argv)
 
@@ -164,7 +180,17 @@ def main(argv: list[str] | None = None) -> int:
         print(f"cluster_profile: {exc}", file=sys.stderr)
         return 1
 
-    value = get_field(profile, args.field)
+    scope = profile
+    if args.partition:
+        scope = get_partition(profile, args.partition)
+        if scope is None:
+            print(
+                f"cluster_profile: partition '{args.partition}' not found in {path}",
+                file=sys.stderr,
+            )
+            return 1
+
+    value = get_field(scope, args.field)
     if value is None:
         print(f"cluster_profile: field '{args.field}' not set in {path}", file=sys.stderr)
         return 1

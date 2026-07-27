@@ -165,7 +165,7 @@
 
 <nav class="topnav">
   <span class="brand">quantum.harness</span>
-  <span class="links"><a href="index.html" class="here">Home</a> <a href="solvable.html">Solvable</a> <a href="models.html">Models</a> <a href="methods.html">Methods</a></span>
+  <span class="links"><a href="index.html" class="here">Home</a> <a href="solvable.html">Solvable</a> <a href="models.html">Models</a> <a href="methods.html">Methods</a> <a href="benchmarks.html">Benchmarks</a></span>
 </nav>
 
 <header>
@@ -231,7 +231,7 @@ make skills</code></pre></li>
       <small>~3–5 h — take a starter issue to a reviewed PR: brainstorm → plan → TDD → review</small>
       <span class="chk">✓ the PR + its attached self-review</span></div>
     <div class="trackcard cap"><b>5 · Go beyond</b>
-      <small>capstone — extend the paper with your own time-boxed challenge and ship the report</small>
+      <small>capstone — register a catalog challenge, take it past the paper, and ship the report</small>
       <span class="chk">✓ every number traces to a real run</span></div>
   </div>
 </section>
@@ -249,9 +249,9 @@ make skills</code></pre></li>
   </summary>
   <div class="inner">
   <p class="sec-sub">The summer-school journey. You arrive on a method track, reproduce its reference
-  result to calibrate yourself and the tooling, then invent a feasible <em>challenge</em> that goes
-  beyond the paper and ship it. The harness guides each phase and teaches as it goes — it never
-  auto-solves the challenge for you.</p>
+  result to calibrate yourself and the tooling, then pick a <em>challenge</em> from the school's
+  released catalog, register your team's claim, and take it beyond the paper. The harness guides each
+  phase and teaches as it goes — it never auto-solves the challenge for you.</p>
 
   <div class="strip">
     <div class="step"><code>/onboard</code><small>set up the stack</small></div>
@@ -260,7 +260,13 @@ make skills</code></pre></li>
     <div class="arrow">→</div>
     <div class="step"><code>/reproduce-paper</code><small>reproduce the reference</small></div>
     <div class="arrow">→</div>
-    <div class="step"><code>/challenge</code><small>go beyond it</small></div>
+    <div class="step"><code>/take-challenge</code><small>register a catalog challenge</small></div>
+    <div class="arrow">→</div>
+    <div class="step"><code>/survey</code><small>build the reference base</small></div>
+    <div class="arrow">→</div>
+    <div class="step"><code>/brainstorm-ideas</code><small>shape the approach</small></div>
+    <div class="arrow">→</div>
+    <div class="step"><code>/autoresearch</code><small>run the attempt</small></div>
     <div class="arrow">→</div>
     <div class="step"><code>/challenge-report</code><small>clean PR + report</small></div>
   </div>
@@ -301,18 +307,20 @@ Figure: figs/fig3a.png
 above the thermal bulk — the paper's signature. <span class="good">self-checked</span>:
 residuals ~1e-14, correct sector dimensions.</span>
 
-<span class="u">&gt; /challenge — what could I try beyond this?</span>
+<span class="u">&gt; /take-challenge — show me the ED group</span>
 
-<span class="a">Ranked, time-boxed candidates (you choose, then take it to
-the help desk for go/no-go):</span>
-<span class="out">  1. Push L=24→28 on the cluster; track how the scar
-     overlap scales with system size.        (~hours, cluster)
-  2. Add a chemical-potential detuning term and watch the
-     scar band detach / reconnect.            (~half day, local)
-  3. Compare exact scars vs the FSA tower error vs L.
-                                              (~hours, local)</span>
-<span class="anno">… you pick one, the mentor gives graded hints, then
-/challenge-report gates a clean PR under tracks/ed/.</span></div>
+<span class="sys"># the catalog is real: open GitHub issues labelled `challenge`
+# on QuantumBFS/quantum.harness, grouped by method</span>
+<span class="out">41 released challenges · exact diagonalization: 3
+  #36   ED benchmark for interacting Thouless pumps
+  #126  Spectral gap theorem for an open AKLT-type lattice
+        (autoresearch: ships its own pass/fail gate)
+  #129  ED workbench in Rust for electronic structure
+All three are organizer-ratified (accepted).</span>
+<span class="anno">… the team picks one; /take-challenge registers the claim
+as a PR under tracks/ed/solutions/, then the sci-brain loop —
+/survey, /brainstorm-ideas, /autoresearch — runs the attempt
+and /challenge-report ships the report.</span></div>
     </div>
 
     <figure>
@@ -587,11 +595,11 @@ to know and I'll fetch it.</span>
   <table class="zoo">
     <tr><th>Method</th><th>Expert contributor</th><th>Skill</th></tr>
     <tr><td>Exact diagonalization</td><td><a href="https://scholar.google.com/citations?user=LZpS-T0AAAAJ">Chen Cheng (程晨)</a></td><td><code>/method-ed</code></td></tr>
-    <tr><td>MPS / LTRG / DMRG / TEBD</td><td><a href="https://scholar.google.com/citations?user=7wiebe8AAAAJ">Wei Li (李伟)</a></td><td><code>/method-mps</code> · <code>/method-ltrg</code></td></tr>
-    <tr><td>PEPS / CTMRG</td><td><a href="https://scholar.google.com/citations?user=_8KbQtEAAAAJ">Hai-Jun Liao (廖海军)</a></td><td><code>/method-peps</code></td></tr>
-    <tr><td>Quantum Monte Carlo</td><td><a href="https://scholar.google.com/citations?user=ikqa-0IAAAAJ">Ming-Pu Qin (秦明普)</a></td><td><code>/method-qmc</code></td></tr>
-    <tr><td>Monte Carlo renormalization group</td><td><a href="https://scholar.google.com/citations?user=D8sgaMwAAAAJ">Yan-Tao Wu (武琰涛)</a></td><td><code>/method-mcrg</code></td></tr>
+    <tr><td>MPS / LTRG / DMRG / TEBD</td><td><a href="https://scholar.google.com/citations?user=5hKtgtAAAAAJ">Wei Li (李伟)</a></td><td><code>/method-mps</code> · <code>/method-ltrg</code></td></tr>
+    <tr><td>PEPS / CTMRG</td><td><a href="https://scholar.google.com/citations?user=_8KbQtEAAAAJ">Hai-Jun Liao (廖海军)</a>, <a href="https://kits.ucas.edu.cn/index.php/people/faculty/44-faculty/202-shenghan-jiang">Shenghan Jiang (姜胜寒)</a></td><td><code>/method-peps</code></td></tr>
+    <tr><td>Quantum Monte Carlo</td><td><a href="https://scholar.google.com/citations?user=ikqa-0IAAAAJ">Ming-Pu Qin (秦明普)</a>, <a href="https://scholar.google.com/citations?user=TVCMMzAAAAAJ">Zi Hong Liu (刘子宏)</a></td><td><code>/method-qmc</code></td></tr>
     <tr><td>Quantum circuit simulation</td><td><a href="https://scholar.google.com/citations?user=Ut8nVqIAAAAJ">Shi-Xin Zhang (张士欣)</a></td><td><code>/method-qcs</code></td></tr>
+    <tr><td>Semidefinite programming</td><td><a href="https://wangjie212.github.io/jiewang/">Jie Wang (王杰)</a></td><td><code>/method-polyopt</code></td></tr>
     <tr><td>AI agent &amp; knowledge base</td><td><a href="https://scholar.google.com/citations?user=YItDGoIAAAAJ">Kun Chen (陈锟)</a>, <a href="https://scholar.google.com/citations?user=4edw228AAAAJ">Jin-Guo Liu (刘金国)</a></td><td><code>tracks/agent-kb</code></td></tr>
   </table>
 

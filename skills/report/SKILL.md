@@ -61,7 +61,6 @@ Compact shape:
 
 An `equation` block's `tex` is a bare LaTeX equation and renders as a centered display block; any string may carry inline math in `$…$` (or display in `$$…$$`), plus `**bold**` and `==highlight==` (yellow marker) spans for keypoints. The bundled stdlib LaTeX→MathML converter covers the physics subset (sub/superscripts, sums and products with limits, fractions, roots, Greek, `\mathbf`/`\vec`, common operators, and `\left…\right` for grouped, sized delimiters — write moduli and bra-kets as `\left|\langle Z_2|\psi\rangle\right|^2` so the exponent sits on the whole `|…|`); unknown commands render literally.
 
-Visual reference: `docs/ed/review.html` and `docs/ed/interview.html` — same family, a little more polished.
 
 ## Interactive lattice views
 

@@ -48,11 +48,17 @@ Inspect; do not install yet. Add a setup item only when a trigger below is activ
 
 | Trigger | Setup item | Availability check |
 | --- | --- | --- |
+| Session is on native Windows, not WSL | `make` and `sh` on PATH | `Get-Command make, sh` |
 | Ion-managed skills are missing or stale | `make skills` | `ion add`/skill state requires sync |
 | Task may need source material beyond local KB: arXiv, DOI, PDF, captions, figures, methodology details, benchmark values, or external reference text | `pdf-render` | `.venv/bin/python -c 'import pymupdf4llm'` |
 | Task may need precise/current package usage beyond local refs: package APIs, examples, setup, migrations, capabilities, or version-sensitive docs | `node` | Node.js 18+, `npm`, and `npx` |
 | Task likely exceeds local compute, needs arrays/scans, or user wants reusable remote compute setup | `/setup-cluster` | `skills/using-slurm/profiles/active.toml` |
 | A method/software route has been selected | matching stack install | Makefile `INSTALLABLE` plus `skills/<stack>/stack.toml` |
+
+On native Windows every `make` target is blocked until both exist: install Git
+for Windows for `sh.exe`, which make shells out to, and `winget install
+ezwinports.make`. Tell the user why, since installing only `make` leaves
+recipes failing under `cmd.exe`.
 
 Source-material support is not a paper-only mode. It is triggered whenever the task may need material outside `.knowledge/` or the local skill references.
 
@@ -62,14 +68,14 @@ Completion criterion: every active trigger is either added to the pending instal
 
 If the task involves a calculation, code, package use, or paper reproduction that needs a method/software route, consult the relevant local sources before proposing stack installs:
 
-- `/model` or `/physics` cards for problem routing.
+- `/quantum-model` or `/physics` cards for problem routing.
 - `/method-*` skills for method choice.
 - `/using-*` skills and `skills/<stack>/stack.toml` for software choice, install target, smoke test, and runtime profile.
 - `find-docs` only when package/API details are harness-relevant, hard to find, or version-sensitive.
 
 Present a single-choice fork with 2-3 real software/method options when there is a genuine choice. Each option gets a short reason and tradeoff. Include an `Other / preferred stack` escape hatch when the user may already have a preference.
 
-Completion criterion: either a software route is selected, no route is needed yet, or the task is routed to `/model`, `/physics`, or `/reproduce-paper` to decide the route there.
+Completion criterion: either a software route is selected, no route is needed yet, or the task is routed to `/quantum-model`, `/physics`, or `/reproduce-paper` to decide the route there.
 
 ### 5. Confirm Install Plan
 
@@ -106,9 +112,9 @@ Completion criterion: every approved setup item is installed, skipped by the use
 
 ### 7. Route or Exit
 
-- `Run a calculation`: route to `/model` for a specific Hamiltonian/model, or `/physics` for a cross-model question.
+- `Run a calculation`: route to `/quantum-model` for a specific Hamiltonian/model, or `/physics` for a cross-model question.
 - `Reproduce a paper`: route to `/reproduce-paper`.
-- `Explore a model or physics question`: route to `/model` or `/physics`; install nothing unless computation becomes necessary.
+- `Explore a model or physics question`: route to `/quantum-model` or `/physics`; install nothing unless computation becomes necessary.
 - `Set up for later`: exit after the approved setup plan is handled.
 
 Completion criterion: the next skill owns the task, or setup-only onboarding ends with one line: `Harness setup handled. Bring a model, paper, or calculation when you are ready.`

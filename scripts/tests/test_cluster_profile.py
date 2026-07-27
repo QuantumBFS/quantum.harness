@@ -141,6 +141,87 @@ def test_get_limits_malformed_types():
     assert lim.hard == {} and lim.soft == {} and lim.allowed_roots == []
 
 
+def test_get_partition_by_name():
+    profile = {
+        "partitions": [
+            {"name": "cpu"},
+            {"name": "gpu", "required_gres": "gpu:a100:1"},
+        ]
+    }
+
+    assert cp.get_partition(profile, "gpu") == {
+        "name": "gpu",
+        "required_gres": "gpu:a100:1",
+    }
+    assert cp.get_partition(profile, "missing") is None
+
+
+def test_public_qdeshell_profile_is_safe_and_complete():
+    path = cp.Path(__file__).resolve().parents[2] / (
+        "skills/using-slurm/profiles/qdeshell.toml"
+    )
+    profile = cp.load_profile(path)
+
+    assert cp.validate(profile) == []
+    assert profile["connection"]["repo_path_remote"] == "~/quantum.harness"
+    assert profile["connection"]["ssh"] == {"alias": "qdeshell"}
+    assert profile["scheduler"] == {
+        "type": "slurm",
+        "default_partition": "qdagnormal",
+    }
+
+    partition = profile["partitions"][0]
+    assert partition["name"] == "qdagnormal"
+    assert partition["required_gres"] == "gpu:A800:1"
+    assert partition["cores"] == 64
+    assert partition["gpu"] == "A800:8"
+
+    limits = cp.get_limits(profile)
+    assert limits.hard == {
+        "max_walltime": "24:00:00",
+        "max_nodes": 1,
+        "max_cpus": 64,
+        "max_array_size": 200,
+    }
+    assert limits.soft["warn_walltime"] == "08:00:00"
+    assert limits.soft["warn_cpus"] == 16
+    assert limits.allowed_roots == ["~/quantum.harness/results", "~/scratch"]
+    assert profile["filesystem"] == {
+        "home": "~",
+        "scratch": "~/scratch",
+        "project": "~/quantum.harness",
+        "quota": "",
+    }
+    assert profile["network"] == {
+        "internet_from_login": False,
+        "internet_from_compute": False,
+    }
+
+    forbidden_keys = {
+        "host",
+        "hostname",
+        "user",
+        "username",
+        "port",
+        "key",
+        "key_path",
+        "identity_file",
+        "account",
+        "account_name",
+    }
+
+    def all_keys(value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                yield key.lower()
+                yield from all_keys(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from all_keys(child)
+
+    assert forbidden_keys.isdisjoint(all_keys(profile))
+
+
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
@@ -155,6 +236,31 @@ def test_cli_field_list(tmp_path, capsys):
     p = _write(tmp_path, FULL_PROFILE)
     cp.main(["--field", "limits.soft.unusual_partitions", "--profile", str(p)])
     assert capsys.readouterr().out.strip() == "gpu-large"
+
+
+def test_cli_partition_field(tmp_path, capsys):
+    profile = FULL_PROFILE + """
+
+[[partitions]]
+name = "cpu"
+
+[[partitions]]
+name = "gpu"
+required_gres = "gpu:a100:1"
+"""
+    p = _write(tmp_path, profile)
+    rc = cp.main(
+        [
+            "--partition",
+            "gpu",
+            "--field",
+            "required_gres",
+            "--profile",
+            str(p),
+        ]
+    )
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == "gpu:a100:1"
 
 
 def test_cli_field_bool(tmp_path, capsys):

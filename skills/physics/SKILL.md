@@ -16,8 +16,8 @@ description: |
 # physics dispatcher
 
 Auto-triggered when the user asks about a cross-model phenomenon, mechanism,
-or diagnostic. Different from `/model`: `/physics` fires for diagnostic or
-mechanism questions, not for "solve <model>" (that's `/model`).
+or diagnostic. Different from `/quantum-model`: `/physics` fires for diagnostic or
+mechanism questions, not for "solve <model>" (that's `/quantum-model`).
 
 <example name="physics good">
 "Is this a spin liquid?" — /physics fires on the diagnostic question.
@@ -25,8 +25,8 @@ mechanism questions, not for "solve <model>" (that's `/model`).
 </example>
 
 <example name="physics not-applicable">
-"Solve Heisenberg" — /model fires; /physics does not.
-"Compute the ground state of TFIM" — /model fires; /physics does not.
+"Solve Heisenberg" — /quantum-model fires; /physics does not.
+"Compute the ground state of TFIM" — /quantum-model fires; /physics does not.
 </example>
 
 ## Workflow

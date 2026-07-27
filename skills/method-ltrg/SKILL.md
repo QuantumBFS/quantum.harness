@@ -10,6 +10,7 @@ LTRG is the finite-temperature tensor-network method class: map a `d`-dimensiona
 ## Sources
 
 - **Methodology reference** (reproduction-grade algorithm, parameters, validation, gap analysis): `references/ltrg-methodology.md`
+- **Method-zoo card** (M1–M14 property table, cost classes): `.knowledge/methods/ltrg-xtrg`. Model → method gate: `.knowledge/method-property-map.md`.
 - Tool skill: `/using-itensors`
 - Primary literature: Li, Ran, Gong, Zhao, Xi, Ye, Su, *Linearized tensor renormalization group algorithm…* PRL (2011) `.knowledge/literature/ltrg/1011.0155_linearized-tensor-renormalization-group-algorithm-for-the-ca.md`.
 
@@ -72,6 +73,7 @@ Conceptual knobs and the tricks behind them — for each, the **intuition for ch
 | `D` (q) | local Hilbert dimension | sets transfer-tensor size; do not confuse with `Dc` |
 | contraction direction / gate order | layer-absorption scheme | two equivalent schemes (Trotter-first or spatial-first); alternate the two projections per full Trotter step |
 | normalization convention | scale bookkeeping | divide each step by the largest singular value (and each trace matrix by its largest element); collect the log factors to rebuild Z and the free energy |
+| derivative observables | how `C`, susceptibility are produced | a route choice: numerically differentiate `f`/`e` on a dense β grid (differentiation amplifies truncation noise) vs direct estimator at extra contraction cost — `references/ltrg-methodology.md` §4.2 |
 
 **Cost**: the local evolution (contract + SVD of the transfer tensor) scales as **O(D⁶·Dc³)** per step — the dominant cost; the spatial trace contracts `2^p` matrices in `p` pairwise steps (logarithmic in chain length); memory is dominated by the `Dc`-bond boundary tensors plus the transient enlarged tensor. Estimate from intended `τ`, target `β`, `q`, geometry, and the `Dc` sweep before a full run.
 

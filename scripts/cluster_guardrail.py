@@ -26,6 +26,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import sys
 from pathlib import Path
 
@@ -63,6 +64,40 @@ _SECRET_RULES = [
 ]
 
 
+def parse_sbatch_option(extra: str, field: str) -> str | None:
+    """Return the last requested sbatch option from a raw ``--extra`` string."""
+    try:
+        tokens = shlex.split(extra)
+    except ValueError as exc:
+        raise ValueError(f"malformed --extra: {exc}") from exc
+
+    value: str | None = None
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token.startswith("--"):
+            name_value = token[2:]
+            name, sep, option_value = name_value.partition("=")
+            if name == field:
+                if sep:
+                    value = option_value
+                elif i + 1 < len(tokens):
+                    i += 1
+                    value = tokens[i]
+                else:
+                    value = ""
+        elif field == "partition" and token == "-p":
+            if i + 1 < len(tokens):
+                i += 1
+                value = tokens[i]
+            else:
+                value = ""
+        elif field == "partition" and token.startswith("-p") and len(token) > 2:
+            value = token[2:]
+        i += 1
+    return value
+
+
 def worst(*tiers: str) -> str:
     """Return the highest-severity tier among the arguments."""
     return max(tiers, key=lambda t: _TIER_RANK[t], default="clean")
@@ -81,8 +116,10 @@ def parse_directives(text: str) -> dict[str, str]:
     out: dict[str, str] = {}
     for raw in text.splitlines():
         line = raw.strip()
-        if not line.startswith("#SBATCH"):
+        if not line or (line.startswith("#") and not line.startswith("#SBATCH")):
             continue
+        if not line.startswith("#SBATCH"):
+            break
         body = line[len("#SBATCH") :].strip()
         # strip trailing inline comment
         body = body.split("#", 1)[0].strip()
@@ -364,7 +401,32 @@ def main(argv: list[str] | None = None) -> int:
     p_chk.add_argument("path")
     p_chk.add_argument("--profile", default=None)
 
+    p_dir = sub.add_parser("directive", help="read one #SBATCH directive")
+    p_dir.add_argument("script")
+    p_dir.add_argument("--field", required=True, choices=("partition", "gres"))
+
+    p_opt = sub.add_parser("option", help="read one option from a raw sbatch --extra string")
+    p_opt.add_argument("extra")
+    p_opt.add_argument("--field", required=True, choices=("partition", "gres"))
+
     args = parser.parse_args(argv)
+    if args.command == "option":
+        try:
+            value = parse_sbatch_option(args.extra, args.field)
+        except ValueError as exc:
+            print(f"cluster_guardrail: {exc}", file=sys.stderr)
+            return 2
+        if value is None:
+            return 1
+        print(value)
+        return 0
+    if args.command == "directive":
+        directives = parse_directives(Path(args.script).read_text(encoding="utf-8"))
+        value = directives.get(args.field)
+        if value is None:
+            return 1
+        print(value)
+        return 0
     if args.command == "inspect":
         report, code = cmd_inspect(args.script, args.profile)
     else:
