@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "topic": "minimal-hessian-subspace-calibration-demo",
+  "acceptance_gate": {
+    "target_true_infidelity": 0.001,
+    "minimum_seeds_per_cell": 5,
+    "required_median_query_saving_vs_full": 2.0,
+    "required_outputs": [
+      "queries_to_target_vs_k",
+      "shots_to_target_vs_k",
+      "final_exact_true_infidelity",
+      "failure_case_for_too_small_k",
+      "model_gap_boundary_sweep"
+    ]
+  },
+  "instances": [
+    {
+      "id": "one_qubit_x_sanity",
+      "role": "sanity",
+      "hilbert_dimension": 2,
+      "target_gate": "X",
+      "expected_generic_rank": 3,
+      "raw_parameter_dim": 24,
+      "pulse_basis": {
+        "kind": "piecewise_constant",
+        "controls": ["sigma_x", "sigma_y"],
+        "segments": 12
+      },
+      "model_truth_gaps": [
+        {"epsilon": 0.0, "perturbation": "none"},
+        {"epsilon": 0.01, "perturbation": "detuning_shift_z"},
+        {"epsilon": 0.03, "perturbation": "detuning_shift_z_plus_control_scale"},
+        {"epsilon": 0.06, "perturbation": "detuning_shift_z_plus_control_scale"}
+      ],
+      "k_grid": [0, 1, 2, 3, 5, 8, 24],
+      "shots_per_query": [256, 1024, 8192],
+      "seeds": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": "two_qubit_cz_minimal",
+      "role": "headline",
+      "hilbert_dimension": 4,
+      "target_gate": "CZ",
+      "expected_generic_rank": 15,
+      "raw_parameter_dim": 48,
+      "pulse_basis": {
+        "kind": "piecewise_constant",
+        "controls": ["xi", "yi", "ix", "iy"],
+        "segments": 12
+      },
+      "model_truth_gaps": [
+        {"epsilon": 0.0, "perturbation": "none"},
+        {"epsilon": 0.01, "perturbation": "zz_drift_shift"},
+        {"epsilon": 0.03, "perturbation": "zz_drift_shift_plus_control_scale"},
+        {"epsilon": 0.08, "perturbation": "zz_drift_shift_plus_control_scale_plus_stray_ix"}
+      ],
+      "k_grid": [0, 3, 8, 15, 24, 48],
+      "shots_per_query": [256, 1024, 8192],
+      "seeds": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": "two_qubit_cz_safety_margin",
+      "role": "failure_boundary",
+      "hilbert_dimension": 4,
+      "target_gate": "CZ",
+      "expected_generic_rank": 15,
+      "raw_parameter_dim": 64,
+      "pulse_basis": {
+        "kind": "fourier_crab",
+        "controls": ["xi", "yi", "ix", "iy"],
+        "harmonics": 8
+      },
+      "model_truth_gaps": [
+        {"epsilon": 0.03, "perturbation": "zz_drift_shift_plus_control_scale"},
+        {"epsilon": 0.08, "perturbation": "zz_drift_shift_plus_control_scale_plus_stray_ix"},
+        {"epsilon": 0.15, "perturbation": "rotated_control_axes"}
+      ],
+      "k_grid": [8, 15, 20, 24, 32, 64],
+      "shots_per_query": [1024],
+      "seeds": [0, 1, 2, 3, 4]
+    }
+  ],
+  "methods": [
+    {
+      "id": "full_raw_nelder_mead",
+      "search_space": "all_raw_parameters",
+      "optimizer": "Nelder-Mead",
+      "purpose": "fair full-dimensional closed-loop baseline"
+    },
+    {
+      "id": "random_subspace_nelder_mead",
+      "search_space": "random_orthonormal_k_subspace",
+      "optimizer": "Nelder-Mead",
+      "purpose": "control for the mere benefit of dimensionality reduction"
+    },
+    {
+      "id": "hessian_subspace_nelder_mead",
+      "search_space": "top_k_model_hessian_eigenvectors",
+      "optimizer": "Nelder-Mead",
+      "purpose": "primary Hessian-guided method"
+    },
+    {
+      "id": "hessian_safety_margin_nelder_mead",
+      "search_space": "top_k_model_hessian_eigenvectors_with_k_above_expected_rank",
+      "optimizer": "Nelder-Mead",
+      "purpose": "test whether carrying extra directions delays model-gap failure"
+    }
+  ],
+  "oracle_contract": {
+    "closed_loop_inputs": ["pulse_parameters", "shots", "seed"],
+    "closed_loop_outputs": ["noisy_infidelity_estimate"],
+    "private_validator_outputs": ["exact_true_infidelity", "query_count", "shot_count"],
+    "forbidden_to_optimizer": [
+      "true_hamiltonian_parameters",
+      "true_gradients",
+      "true_hessian",
+      "exact_true_infidelity_during_search"
+    ]
+  },
+  "metrics": [
+    {
+      "id": "queries_to_target",
+      "aggregation": "median_over_seeds",
+      "definition": "first query index whose candidate reaches exact true infidelity <= target threshold"
+    },
+    {
+      "id": "shots_to_target",
+      "aggregation": "median_over_seeds",
+      "definition": "queries_to_target multiplied by shots_per_query"
+    },
+    {
+      "id": "final_exact_true_infidelity",
+      "aggregation": "median_and_spread_over_seeds",
+      "definition": "exact true-device infidelity of the final optimizer candidate"
+    },
+    {
+      "id": "subspace_rank_gap",
+      "aggregation": "per_instance",
+      "definition": "number of model Hessian eigenvalues above rank threshold compared with d^2 - 1"
+    },
+    {
+      "id": "leakage_boundary_check",
+      "aggregation": "static_and_runtime",
+      "definition": "assert optimizer sees only the scalar oracle and query log"
+    }
+  ]
+}
