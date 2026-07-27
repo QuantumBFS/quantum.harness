@@ -142,7 +142,15 @@ insertions at separation r where accessible.
 - **Acceptance:** both smoke tests load and run a trivial contraction.
 - **Failure/fallback:** precompile/mirror issues → `/setup-julia` (mirror config);
   version conflicts → pin compatible versions in Manifest.
-- **Depends/status:** none → **pending** (Julia absent; julia-env has TensorKit only, no Manifest).
+- **Depends/status:** none → **done 2026-07-27** — Julia 1.12.6 (juliaup, NJU mirror);
+  TensorKit 0.16.5 + PEPSKit 0.8.0 + MPSKit 0.13.12 + MPSKitModels 0.4.7 in `julia-env`
+  (resolved combo: PEPSKit 0.8.0 requires TensorKit 0.16.x, not 0.17); ℤ₂-graded smoke
+  test passed. TensorKit 0.16 API notes for later milestones: constructor
+  `TensorMap{T}(undef, cod, dom)` (no function-based form); iterate `blocks(t)`, access
+  `block(t, c)`, list `blocksectors(t)`; `@tensor M[a; b]` — the semicolon is required,
+  otherwise all free indices land in the codomain (V⊗V′ vector instead of an
+  endomorphism V→V). `julia-env/Project.toml` carries PEPSKit locally but stays
+  **uncommitted** (submission cleanliness: commits confined to this folder).
 
 ### M1 — Hamiltonian + required 2×2 ED unit test
 - **Purpose:** validate term construction independently of any PEPS machinery.
