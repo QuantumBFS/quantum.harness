@@ -23,5 +23,5 @@ workflow.
 ## Working Repository
 
 Development starts in the private AGPL-3.0 repository
-`JunkaiWang-TheoPhy/quantum-harness-215-occam-rust-port`. The #71 implementation
+`JunkaiWang-TheoPhy/quantum-harness-115-occam-rust-port`. The #71 implementation
 line lives under the `challenge-71-occam/` subfolder.
