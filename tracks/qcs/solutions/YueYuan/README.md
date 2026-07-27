@@ -32,3 +32,9 @@ Produce the minimal headline demo for a simulated two-qubit gate:
 - perturbed query-only true device,
 - noisy closed-loop optimizer,
 - query-count comparison between full search and Hessian-guided subspace search.
+
+## Current Autoresearch State
+
+The survey/database phase and validator gate are complete. The executable validator now lives in `research/validator/`, with public development instances in `research/benchmark/dev/` and a sealed gitignored holdout split under `research/benchmark/private/`.
+
+Next step: run candidate attempts against the development validator, then use the holdout only under the recorded budget in `research/validator/MANIFEST.json`.

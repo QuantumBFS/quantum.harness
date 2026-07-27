@@ -1,6 +1,6 @@
 # Autoresearch State
 
-- stage: validator         # topics | db | validator | run | done
+- stage: run               # topics | db | validator | run | done
 - topic: minimal-hessian-subspace-calibration-demo
 - batch_size: 10           # attempts per cycle
 - time_limit_seconds: 300  # hard wall-clock limit per scored run
@@ -11,8 +11,9 @@
 - next_cycle: 1            # next reflection cycle number
 - gates:
   - survey_gate: passed 2026-07-27  # pending | passed YYYY-MM-DD
-  - validator_gate: pending  # pending | passed YYYY-MM-DD
-- validator_env: (unset)   # docker | fallback (<reason>)
+  - validator_gate: passed 2026-07-27  # pending | passed YYYY-MM-DD
+- validator_env: fallback (Docker unavailable; local Python 3.11 subprocess sandbox with static source scan and timeout)
 - overrides:
   - 2026-07-27: User asked Codex to "start automatic research" and set goal "Use Karpathy's autoresearch scheme to deal with the 113rd challenge"; proceeded with the previously recommended issue-113 topic and recorded its strict acceptance gate in topics.md.
   - 2026-07-27: Autoresearch-db normally asks the user to select insight areas after distillation; because the user requested automatic research, selected the core implementation insights and shelved the optional theory/hardware extensions without pausing.
+  - 2026-07-27: User approved the validator bar; created GOAL.md, public dev split, sealed gitignored holdout split, validate.py, manifest, and negative controls. Validator self-test passed without using holdout.

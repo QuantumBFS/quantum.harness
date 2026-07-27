@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "provenance": "Public development split derived from tracks/qcs/solutions/YueYuan/research/database/benchmark_plan.json and challenge issue #113.",
+  "instances": [
+    {
+      "id": "one_qubit_x_sanity",
+      "role": "sanity",
+      "hilbert_dimension": 2,
+      "target_gate": "X",
+      "expected_generic_rank": 3,
+      "raw_parameter_dim": 24,
+      "k_grid": [0, 1, 2, 3, 5, 8, 24],
+      "shots_per_query": [256, 1024, 8192],
+      "seeds": [0, 1, 2, 3, 4],
+      "model_truth_gaps": [
+        {"epsilon": 0.0, "perturbation": "none"},
+        {"epsilon": 0.01, "perturbation": "detuning_shift_z"},
+        {"epsilon": 0.03, "perturbation": "detuning_shift_z_plus_control_scale"},
+        {"epsilon": 0.06, "perturbation": "detuning_shift_z_plus_control_scale"}
+      ]
+    },
+    {
+      "id": "two_qubit_cz_minimal",
+      "role": "headline",
+      "hilbert_dimension": 4,
+      "target_gate": "CZ",
+      "expected_generic_rank": 15,
+      "raw_parameter_dim": 48,
+      "k_grid": [0, 3, 8, 15, 24, 48],
+      "shots_per_query": [256, 1024, 8192],
+      "seeds": [0, 1, 2, 3, 4],
+      "model_truth_gaps": [
+        {"epsilon": 0.0, "perturbation": "none"},
+        {"epsilon": 0.01, "perturbation": "zz_drift_shift"},
+        {"epsilon": 0.03, "perturbation": "zz_drift_shift_plus_control_scale"},
+        {"epsilon": 0.08, "perturbation": "zz_drift_shift_plus_control_scale_plus_stray_ix"}
+      ]
+    },
+    {
+      "id": "two_qubit_cz_safety_margin",
+      "role": "failure_boundary",
+      "hilbert_dimension": 4,
+      "target_gate": "CZ",
+      "expected_generic_rank": 15,
+      "raw_parameter_dim": 64,
+      "k_grid": [8, 15, 20, 24, 32, 64],
+      "shots_per_query": [1024],
+      "seeds": [0, 1, 2, 3, 4],
+      "model_truth_gaps": [
+        {"epsilon": 0.03, "perturbation": "zz_drift_shift_plus_control_scale"},
+        {"epsilon": 0.08, "perturbation": "zz_drift_shift_plus_control_scale_plus_stray_ix"},
+        {"epsilon": 0.15, "perturbation": "rotated_control_axes"}
+      ]
+    }
+  ]
+}

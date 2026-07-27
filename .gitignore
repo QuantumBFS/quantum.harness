@@ -77,6 +77,9 @@ skills/using-slurm/profiles/active.toml
 # Git worktrees
 .worktrees/
 
+# YueYuan autoresearch validator holdout
+tracks/qcs/solutions/YueYuan/research/benchmark/private/
+
 # Cryochamber state — never commit a local chamber
 .cryo/
 

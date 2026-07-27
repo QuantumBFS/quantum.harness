@@ -1,0 +1,177 @@
+{
+  "controls": {
+    "cheater": {
+      "expected_error": "forbidden_source",
+      "expected_status": "rejected"
+    },
+    "cherry-picked-k": {
+      "expected_error": "missing_k_sweep",
+      "expected_status": "rejected"
+    },
+    "env-escape": {
+      "expected_error": "forbidden_source",
+      "expected_status": "rejected"
+    },
+    "lucky-noisy-fidelity": {
+      "expected_error": "no_exact_final_check",
+      "expected_status": "rejected"
+    },
+    "one-seed": {
+      "expected_error": "insufficient_seeds",
+      "expected_status": "rejected"
+    },
+    "passing-synthetic": {
+      "expected_status": "accepted"
+    },
+    "timeout": {
+      "expected_error": "candidate_timeout",
+      "expected_status": "rejected"
+    },
+    "too-easy-gap": {
+      "expected_error": "insufficient_gap_sweep",
+      "expected_status": "rejected"
+    },
+    "weak-baseline": {
+      "expected_error": "missing_required_method",
+      "expected_status": "rejected"
+    },
+    "wrong-answer": {
+      "expected_error": "final_infidelity_above_threshold",
+      "expected_status": "rejected"
+    }
+  },
+  "dev_instances": "../benchmark/dev/instances.json",
+  "environment": {
+    "docker": "unavailable",
+    "engine": "python-subprocess",
+    "python": "3.11",
+    "sandbox": "static-source-scan+subprocess-timeout"
+  },
+  "goal_file": "GOAL.md",
+  "holdout_instances": "../benchmark/private/instances.json",
+  "holdout_instances_committed": false,
+  "holdout_queries_used": 0,
+  "holdout_query_budget": 1,
+  "holdout_query_log": [],
+  "holdout_query_policy": "one aggregate holdout query per three reflection cycles",
+  "schema_version": 1,
+  "self_test": {
+    "controls": {
+      "cheater": {
+        "error_codes": [
+          "forbidden_source"
+        ],
+        "exit_code": 1,
+        "expected_error": "forbidden_source",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "cherry-picked-k": {
+        "error_codes": [
+          "missing_k_sweep",
+          "missing_small_k_failure"
+        ],
+        "exit_code": 1,
+        "expected_error": "missing_k_sweep",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "env-escape": {
+        "error_codes": [
+          "forbidden_source"
+        ],
+        "exit_code": 1,
+        "expected_error": "forbidden_source",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "lucky-noisy-fidelity": {
+        "error_codes": [
+          "no_exact_final_check",
+          "no_exact_final_check",
+          "no_exact_final_check",
+          "no_exact_final_check",
+          "no_exact_final_check"
+        ],
+        "exit_code": 1,
+        "expected_error": "no_exact_final_check",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "one-seed": {
+        "error_codes": [
+          "insufficient_seeds",
+          "insufficient_seeds",
+          "insufficient_seeds",
+          "insufficient_seeds",
+          "insufficient_seeds",
+          "insufficient_seeds",
+          "incomplete_headline_cell",
+          "incomplete_headline_cell"
+        ],
+        "exit_code": 1,
+        "expected_error": "insufficient_seeds",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "passing-synthetic": {
+        "error_codes": [],
+        "exit_code": 0,
+        "expected_error": null,
+        "expected_status": "accepted",
+        "ok": true,
+        "status": "accepted"
+      },
+      "timeout": {
+        "error_codes": [
+          "candidate_timeout"
+        ],
+        "exit_code": 1,
+        "expected_error": "candidate_timeout",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "too-easy-gap": {
+        "error_codes": [
+          "insufficient_gap_sweep"
+        ],
+        "exit_code": 1,
+        "expected_error": "insufficient_gap_sweep",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "weak-baseline": {
+        "error_codes": [
+          "missing_required_method",
+          "incomplete_headline_cell",
+          "incomplete_headline_cell"
+        ],
+        "exit_code": 1,
+        "expected_error": "missing_required_method",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      },
+      "wrong-answer": {
+        "error_codes": [
+          "final_infidelity_above_threshold",
+          "incomplete_headline_cell"
+        ],
+        "exit_code": 1,
+        "expected_error": "final_infidelity_above_threshold",
+        "expected_status": "rejected",
+        "ok": true,
+        "status": "rejected"
+      }
+    },
+    "ran_at_utc": "2026-07-27T14:17:08+00:00",
+    "status": "passed"
+  }
+}
