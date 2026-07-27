@@ -9,16 +9,19 @@
 1. 在 baseline 实例 `operator_loschmidt_echo_49x648` 上复现公开 BP-TN 结果。
 2. 不以“多报几位小数”为精度提升，而是补齐统计误差、有限键维误差、浮点误差
    和 δ=0 重标度偏差，给出可审计的误差预算。
-3. 将完全相同的输入解析、BP-TN 演化、随机初态和误差分析迁移到 active 实例
+3. baseline 复现通过后，增加 PEPO/Heisenberg-picture 2D 张量网络测试，以
+   operator bond dimension 和环境收缩维度的双重收敛检查，提供不同于 BP-TN
+   Schrödinger-picture 的独立系统误差诊断。
+4. 将完全相同的输入解析、BP-TN 演化、随机初态和误差分析迁移到 active 实例
    `operator_loschmidt_echo_49x1296`。
-4. 只有 `49x1296` 通过资源和收敛门槛，才考虑 `70x1872`；本阶段不把
+5. 只有 `49x1296` 通过资源和收敛门槛，才考虑 `70x1872`；本阶段不把
    `56x1488` 作为目标。
 
 本计划按逐个可验收的 goal 组织，不按自然日组织。原有
 [Variational 计划](../issue-119-variational/PLAN.md)保持不变，作为 OLE 路线受阻时
 可独立启动的备选路线。
 
-## 2. 初学者需要先理解的五件事
+## 2. 初学者需要先理解的六件事
 
 ### 2.1 什么是 Loschmidt echo
 
@@ -99,7 +102,35 @@ Sδ,rescaled = Sδ,raw / S₀,raw.
 - S₀、Sδ/S₀ 和两者差值作为数值偏差诊断同时报告；
 - 重标度结果不得在没有解释的情况下替代原始结果。
 
-### 2.5 为什么 `49x1296` 是最合适的 active 目标
+### 2.5 PEPO/Heisenberg-picture 与 BP-TN 有什么不同
+
+BP-TN 主路线采用 Schrödinger picture：从许多随机计算基态出发，向前演化状态，
+再用样本平均估计 trace。PEPO（projected entangled-pair operator，投影纠缠对
+算符）采用 Heisenberg picture：不再逐个演化随机初态，而是直接演化目标算符。
+例如把
+
+```text
+Õ = U O U†
+```
+
+表示成 heavy-hex 图上的二维 PEPO，再收缩
+`2⁻ⁿTr(Õ Vδ† Õ Vδ)`。某些库默认计算的是 `U†OU` 而不是 `UOU†`，因此实际门序
+必须通过 G1 的小系统 exact oracle 核对，不能只根据“Heisenberg picture”这个名字
+推断。
+
+PEPO 的虚拟键维记作 `Dop`。它限制演化算符能够保留的 operator entanglement
+（算符纠缠）；最终二维网络的近似收缩还需要独立的环境维度 `χenv`。因此：
+
+- 增大 `Dop` 主要减少算符演化的截断误差；
+- 增大 `χenv` 主要减少最终二维网络的环境收缩误差；
+- 若直接收缩归一化 trace，就不需要随机初态，也没有 `N_init` 统计误差；
+- 只扫描 `Dop` 或只扫描 `χenv`，都不能宣称 PEPO 已收敛。
+
+这条路线的价值不是保证比 BP-TN 更准，而是提供结构不同的近似：BP-TN 主要压缩
+演化中的状态，PEPO 主要压缩传播后的算符。两者若收敛到一致区间，可显著增强
+baseline 的可信度；若不一致，则能定位尚未被原误差预算捕捉的系统偏差。
+
+### 2.6 为什么 `49x1296` 是最合适的 active 目标
 
 Tracker 当前把 `49x648` 列为 baseline，把 `49x1296` 和 `70x1872` 列为 active
 OLE 实例。前两个实例具有：
@@ -196,7 +227,40 @@ G0 会把重新核对的日期和来源 commit 写进输入 manifest。
 浮动的 `main`。根 Makefile 当前可安装 ITensors，但没有独立的 TNQS target；
 因此 TNQS 由本 solution 的 Julia environment 明确拥有，不假装是全局依赖。
 
-### 4.2 精确/更受控张量网络：验证方法
+### 4.2 进阶测试：PEPO/Heisenberg-picture 2D 张量网络
+
+PEPO 路线只在 G2 的 BP-TN baseline 复现通过后启动。它受
+[Liao 等人的 127-qubit kicked-Ising PEPO 工作](https://arxiv.org/abs/2308.03082)
+直接启发：从局域 Pauli 算符开始，在 Heisenberg picture 中反向穿过电路，用二维
+PEPO 表示逐渐扩展的算符，并在每次双比特门后把增长的虚拟键截断到 `Dop`。
+
+第一实现候选是 quimb 的
+[`CircuitPEPOSimpleUpdate`](https://quimb.readthedocs.io/en/latest/autoapi/quimb/tensor/circuit/pepo/index.html)：
+它支持 arbitrary-geometry edge list、反向 lightcone、Vidal-style gauging 和
+`max_bond`/`cutoff` 截断，能够直接表示本实例的 heavy-hex 子图。正式实现仍须用
+G1 exact oracle 验证门序、角度和 `UOU†`/`U†OU` 约定；不能因为 API 名称匹配就
+跳过协议测试。根 Makefile 已提供 `make install quimb`，但依赖版本仍由本
+solution 的锁定环境拥有。
+
+`CircuitPEPOSimpleUpdate` 负责产生有限 `Dop` 的演化算符；OLE 的 PEPO–PEPO
+闭合 overlap 另用带最大边界维度 `χenv` 的 boundary contraction 收缩，并在小系统
+上用 cotengra exact contraction 复核。这样 `Dop` 和 `χenv` 才是两个可单独扫描的
+误差来源，而不是一个含义不清的 `max_bond`。
+
+这条路线使用两个独立精度旋钮：
+
+- `Dop`：PEPO operator bond dimension，控制演化算符的压缩；
+- `χenv`：最终 PEPO overlap/trace 的环境收缩维度，控制二维闭合网络的压缩。
+
+它还记录逐门/逐层 discarded weight、operator norm drift、Hermiticity defect、
+最终虚部、peak memory 和 walltime。PEPO 结果在完成 `Dop` 与 `χenv` 双扫描前
+一律标记为 diagnostic；不能用单个较大 `Dop` 的数值替代 BP-TN baseline。
+
+PEPO 暂不自动迁移到 `49x1296`。只有 G3P 在 `49x648` 上通过精度和资源门槛后，
+才为 active 实例另做 feasibility gate，避免把 baseline 测试未经验证地升级成第二
+条生产主线。
+
+### 4.3 精确/更受控张量网络：验证方法
 
 TensorCircuit-NG 或 quimb/cotengra 用作独立小系统 oracle；TNQS 自带的 exact、
 boundary-MPS 和 loop correction 用作同语言交叉检查。它们的职责是：
@@ -209,7 +273,7 @@ boundary-MPS 和 loop correction 用作同语言交叉检查。它们的职责�
 它们不是完整 49×1296 的默认主方法，因为 exact contraction 的最大中间张量可能
 突然超过内存。
 
-### 4.3 Pauli propagation：负面对照，不作 headline
+### 4.4 Pauli propagation：负面对照，不作 headline
 
 Single-path Pauli Monte Carlo 便宜，也能复现公开 0.808/0.619 附近的数值。但公开
 方法说明它只按振幅平方选择 Pauli path，对旋转角 θ→−θ 不敏感，无法保留路径之间
@@ -230,6 +294,7 @@ Single-path Pauli Monte Carlo 便宜，也能复现公开 0.808/0.619 附近的�
 | G1：建立小系统精确 oracle | QASM parser tests、n≤20 精确结果、δ=0/逆电路检查 | 两个独立实现对同一小实例误差≤1×10⁻¹⁰ |
 | G2：复现 49×648 公开基线 | χ=192/512 raw 结果、逐层截断记录 | χ=512 与 0.821658489 的差≤max(0.002, 3SE) |
 | G3：提升 baseline 精度 | paired-χ 扫描、N_init 自适应、误差预算 | 给出 raw 中心值、统计区间和数值误差包络；不再报告无误差数字 |
+| G3P：PEPO 进阶测试 | Heisenberg-picture PEPO direct-trace 结果、Dop/χenv 双扫描 | 小系统 exact 通过；完整 baseline 给出独立收敛包络或明确的失败边界 |
 | G4：审计系统偏差 | δ=0、raw/rescaled、精度与方法交叉检查 | 每个误差来源分开量化；重标度不被冒充为严格修正 |
 | G5：49×1296 可行性门 | active pilot、内存/时间模型、go/no-go | 生产设置满足 cluster 内存和 walltime 安全余量 |
 | G6：49×1296 生产结果 | active raw 与 rescaled 结果、误差预算 | χ 趋势和初态统计可解释；否则明确标记 diagnostic |
@@ -253,9 +318,12 @@ Single-path Pauli Monte Carlo 便宜，也能复现公开 0.808/0.619 附近的�
    - `49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm`；
    - `49Q_OLE_circuit_L_6_b_0.25_delta0.15.qasm`。
 2. 生成 manifest，记录 URL、tracker commit、Git blob SHA、SHA-256、字节数、
-   QASM register、活动 qubit、门数、门类型和 observable。
+   QASM register、活动 qubit、门数、门类型和 observable；同时导出带明确门序、
+   角度和内部节点编号的规范化 JSON gate manifest，供 Julia BP 与 Python PEPO
+   runner 共同读取。
 3. 解析 QASM 中的物理标签，生成显式 `physical_label ↔ internal_index` 映射。
-4. 固定 Julia ≥1.10、TNQS 0.4.4、ITensors 0.9 和实际 Manifest。
+4. 固定 Julia ≥1.10、TNQS 0.4.4、ITensors 0.9 和实际 Manifest；同时记录 Python
+   minor version，并固定 quimb、cotengra、numpy 的实际解析版本。
 5. 将公开提交未说明的 `N_init`、SVD cutoff、BP tolerance、message update
    schedule 和 dtype 列为 provenance gaps。默认 pilot 可采用上游示例中的
    `cutoff=1×10⁻¹²` 与 `normalize_tensors=true`，但在获得来源确认前不得声称这些
@@ -388,20 +456,93 @@ conservative total half-width: εtotal = εstat,95% + εnum
 P3 未达到不否定路线；只要 P1 完成且诚实说明限制，就比现有“中心值、无误差条”
 更可审计。
 
+### G3P：PEPO/Heisenberg-picture 2D 张量网络进阶测试
+
+#### 固定问题
+
+本 goal 只测试 baseline：49-qubit heavy-hex 子图、官方 QASM blob
+`716305eb99ed9fafb356bf971269ff1d8d66b03e`、L=3、b=0.25、δ=0.15、
+O=Z₅₂Z₅₉Z₇₂，并同时计算 δ=0。默认使用 ComplexF64。任何裁剪图或浅层电路只
+用于 G1/G3P 的验证阶梯，不能替代完整 `49x648` 结果。
+
+#### 表示与计算流程
+
+1. 从 bond-dimension-1 的局域 Pauli PEPO 构造 O。
+2. 按通过 G1 验证的反向门序施加共轭，得到近似 Õ；跳过反向 lightcone 之外的门。
+3. 每次双比特门后用 simple-update/gauged SVD 截断到 `Dop`，保存 discarded
+   weight；不静默改变 cutoff。
+4. 构造闭合 overlap `2⁻ⁿTr(Õ Vδ† Õ Vδ)`，分别计算 δ=0 和 δ=0.15。
+5. 用独立的 `χenv` 收缩闭合二维网络；在可精确收缩的小实例上同时保存 exact
+   contraction。
+
+PEPO 直接估计 trace，不使用 BP-TN 的随机初态 seed bank，也不报告虚构的
+`N_init` 统计误差。它与 BP-TN 共享 QASM parser、物理节点映射、observable、
+dtype 约定和 run metadata schema。
+
+#### 测试阶梯
+
+1. 在 G1 的 n≤20、L≤2 实例上关闭截断或把 `Dop` 提高到 exact 所需维度，
+   验证 PEPO 与 statevector/exact contraction 的绝对误差≤1×10⁻¹⁰。
+2. 在相同小实例上启用有限 `Dop`，确认 discarded weight、operator norm drift
+   和 OLE 误差之间的关系可解释。
+3. 在完整 `49x648` 上先运行 `Dop=4,8,16`；只有实测内存和 walltime 留有至少
+   20% 安全余量时才追加 `Dop=32`。
+4. 对每个 `Dop` 使用
+   `χenv,low=max(32,Dop²)` 与 `χenv,high=2χenv,low`。若高值超过节点内存，
+   该点记为 resource boundary，不用低 `χenv` 冒充收敛结果。
+5. ComplexF32 只在 n≤20 和 `Dop≤8` 上作浮点敏感度对照；完整 baseline 的
+   headline 候选保持 ComplexF64。
+
+#### PEPO 误差包络
+
+令 `Dhi` 是实际完成的最大 `Dop`，`Dprev` 是前一个值，并用最大 `Dop` 的两个
+环境维度定义：
+
+```text
+εDop = |f(Dhi, χenv,high) − f(Dprev, χenv,high)|
+εenv = |f(Dhi, χenv,high) − f(Dhi, χenv,low)|
+εfp = 小系统 ComplexF32/F64 的最大差
+d0,PEPO = |fδ=0(Dhi, χenv,high) − 1|
+εPEPO = εDop + εenv + εfp + d0,PEPO
+```
+
+这是保守的数值收敛包络，不具有统计 coverage，也不假设 PEPO 随 `Dop` 变分或
+单调。raw δ=0.15 始终作为主值；δ=0 ratio 只作为与 BP-TN 相同口径的诊断。
+
+#### 通过条件与结果解释
+
+- 小系统 exact oracle 通过，且 PEPO 的共轭方向和官方 QASM 完全一致；
+- `|Im f|`、Hermiticity defect 和 operator norm drift 随精度旋钮总体下降，
+  任何异常跳变都能追溯到具体门层；
+- 至少完成 `Dop=8,16` 及各自两个 `χenv`，否则只交付 resource/convergence
+  boundary；
+- **PEPO-T1**：给出完整 baseline raw 值和分项 `εPEPO`；
+- **PEPO-T2**：`εDop≤1×10⁻³` 且 `εenv≤1×10⁻³`；
+- PEPO 与 BP-TN 包络重叠时记为 independent cross-check；不重叠时记为
+  method discrepancy，进入 G4 排查，不能选择性丢弃其中一个结果。
+
+PEPO-T2 是把该路线称为“baseline 精度提升候选”的最低门槛。若只达到 PEPO-T1，
+它仍是有效的进阶测试，但不能作为更高精度 headline。
+
 ### G4：系统偏差与独立方法审计
 
 1. 在 G1 小实例上比较 BP、boundary-MPS、loop-corrected BP 和 exact。
 2. 逐步增加 L 和 patch 大小，找出 BP 偏差开始超过 1×10⁻³ 的位置。
 3. 在完整 49×648 的低 χ 设置上比较 BP 与 boundary-MPS 可行的局部观测量。
-4. 运行 single-path Pauli propagation 的 θ→−θ 测试，展示其结果不变的已知
+4. 在相同小实例和完整 baseline 上比较 PEPO 与 BP，分别保留 BP 的 χ/N_init
+   误差预算和 PEPO 的 Dop/χenv 误差包络，不把两者混成一个来源不明的误差条。
+5. 运行 single-path Pauli propagation 的 θ→−θ 测试，展示其结果不变的已知
    失败模式；该测试通过反而证明它不能捕捉本问题所需的相位信息。
-5. 分别画出：
+6. 分别画出：
    - fδ 对 χ；
+   - fδ 对 Dop，并用不同曲线表示 χenv；
    - paired χ differences；
    - statistical CI 对 N_init；
    - S₀ 对 χ；
+   - PEPO 的 δ=0 defect、Hermiticity defect 和 discarded weight；
+   - BP 与 PEPO 的独立误差包络；
    - raw 与 rescaled 的差；
-   - peak memory / time 对 χ。
+   - peak memory / time 对 χ、Dop 和 χenv。
 
 只有当这些图共同支持一个稳定区间时，才能称 baseline “precision improved”。
 
@@ -496,28 +637,35 @@ issue-119-ole/
 ├── PLAN.md                         # 本文，只描述已批准路线
 ├── Project.toml                    # solution-local Julia 依赖
 ├── Manifest.toml                   # 固定 TNQS/ITensors 版本
+├── requirements-pepo.txt           # 固定 quimb/cotengra/numpy 版本
 ├── configs/
 │   ├── baseline-49x648.toml        # L=3 协议与扫描参数
+│   ├── baseline-pepo.toml          # Dop/χenv/cutoff 与资源门槛
 │   └── active-49x1296.toml         # 只含经过审计的配置差异
 ├── scripts/
-│   ├── fetch_inputs.jl             # 下载、hash、manifest
+│   ├── fetch_inputs.jl             # 下载、hash、导出跨语言规范化 gate manifest
 │   ├── validate_small.jl           # exact oracle 与 identity tests
 │   ├── run_bp.jl                   # 单个 instance/χ/seed runner
+│   ├── run_pepo.py                  # 单个 Dop/χenv 的 direct-trace runner
 │   ├── run_array.sh                # cluster array 入口
-│   └── analyze.jl                  # paired differences 与误差预算
+│   ├── analyze.jl                  # BP paired differences 与误差预算
+│   └── analyze_pepo.py             # Dop/χenv 收敛与 PEPO 误差包络
 ├── src/
 │   ├── OLEProtocol.jl              # QASM、节点和 observable 定义
 │   ├── BPTNRunner.jl               # BP-TN 演化与逐层 diagnostics
-│   └── ErrorBudget.jl              # 统计区间和系统误差包络
+│   ├── ErrorBudget.jl              # BP 统计区间和系统误差包络
+│   └── pepo_runner.py              # PEPO 构造、演化和闭合 overlap
 ├── tests/
 │   ├── protocol_tests.jl
 │   ├── exact_oracle_tests.jl
-│   └── error_budget_tests.jl
+│   ├── error_budget_tests.jl
+│   └── test_pepo_small.py           # PEPO 对 statevector/exact contraction
 └── runs/                            # 运行产物；大 checkpoint 不提交 Git
 ```
 
 每个文件只承担一个职责。`run_bp.jl` 不自行猜 observable 或 QASM 映射；
-`analyze.jl` 不重新运行模拟；配置文件不包含隐藏默认值。
+`run_pepo.py` 只能读取 G0 导出的规范化 gate manifest，不能独立重解释 QASM；
+分析脚本不重新运行模拟；配置文件不包含隐藏默认值。
 
 ## 8. 计算资源策略
 
@@ -526,19 +674,27 @@ issue-119-ole/
 - G0 输入解析；
 - G1 n≤20 exact oracle；
 - G2 χ=64/128 的单初态 smoke test；
+- G3P n≤20，以及完整图 `Dop=4` 的静态网络/路径估算；只有估算低于本地阈值时
+  才执行完整图 probe；
 - 结果分析和绘图。
 
-χ=192/512、多初态 baseline 生产计算和全部 active 计算在启动前都必须：
+χ=192/512、多初态 baseline 生产计算、完整图 `Dop≥8` 的 PEPO 扫描和全部 active
+计算在启动前都必须：
 
 1. 读取并确认 active Slurm profile；
-2. 用一个初态做内存/时间 probe；
+2. BP 用一个初态做 probe；PEPO 用最低 `(Dop,χenv)` 网格点做 probe；
 3. 选择满足实测需求的 partition；
-4. 用 job array 按初态并行；
-5. 监控 `PD→R`、首个初态输出和增量结果；
-6. stdout 每个层或初态刷新一次，禁止长时间无进度输出。
+4. BP job array 按初态并行；PEPO 按 `(Dop,χenv,δ)` 或 exact slices 并行；
+5. 监控 `PD→R`、首个初态/网格点/slice 输出和增量结果；
+6. stdout 每个层、初态、网格点或 slice 刷新一次，禁止长时间无进度输出。
 
 公开的 118 s、149 s 和 1680 s 只能作为历史锚点，因为其 N_init、软件版本和具体
 硬件并未完整披露，不能直接当我们的 walltime 保证。
+
+PEPO 没有随机初态这一并行轴，主要并行轴是 `(Dop,χenv,δ)` 和闭合网络的 contraction
+slices。启动完整 `49x648` 前，必须分别估算 PEPO 演化和最终 overlap contraction
+的最大中间张量；若 `χenv,high` 超过节点内存，按 G3P 记录 resource boundary，
+不能只完成低环境维度后宣称收敛。
 
 ## 9. 主要风险与停止条件
 
@@ -550,6 +706,9 @@ issue-119-ole/
 | χ 偏差未收敛 | paired drift 不下降或 raw/rescaled 差持续扩大 | 结果只标 diagnostic；资源允许才试更高 χ |
 | 统计成本过高 | pilot 推得 N_required>512 | 报告已达到 CI，不虚构窄误差 |
 | 浮点误差 | ComplexF32/F64 差接近目标精度 | 生产改用 ComplexF64 或扩大 εfp |
+| PEPO 算符纠缠增长过快 | discarded weight、norm/Hermiticity defect 随层数快速增大 | 提高 Dop 后仍不改善则停在 PEPO-T1；不迁移到 active |
+| PEPO 环境未收敛 | χenv 翻倍后结果变化>1×10⁻³ 或内存超限 | 报告 εenv/resource boundary，不把该值作为高精度结果 |
+| BP 与 PEPO 不一致 | 两个独立误差包络不重叠 | 回到小系统和逐层诊断；保留 discrepancy，不按偏好选值 |
 | Pauli MC 给出“稳定”数字 | 符号翻转结果不变 | 只作负面对照，不升级为主方法 |
 | active 资源超限 | χ=512 外推越过 80% memory 或 70% walltime | 交付 cost report 后停止 G6 |
 | 上游代码漂移 | Manifest/tree hash 变化 | 固定旧环境；升级必须重新过 G1/G2 |
@@ -562,11 +721,12 @@ issue-119-ole/
 2. 小系统精确 oracle 通过；
 3. χ=192/512 的 baseline 中心值得到复现；
 4. baseline 至少达到 P1：有统计区间和分项数值误差预算；
-5. `49x1296` 完成可行性 gate；
-6. 若 gate 通过，产出带误差预算的 active 结果；若不通过，产出可复现实测 cost
+5. G3P 至少完成 PEPO-T1，或给出可复现的 PEPO resource/convergence boundary；
+6. `49x1296` 完成可行性 gate；
+7. 若 gate 通过，产出带误差预算的 active 结果；若不通过，产出可复现实测 cost
    report 和停止依据；
-7. 所有 headline 均能追溯到 raw per-seed data、配置和 commit；
-8. Variational 备选计划未被本路线修改。
+8. 所有 headline 均能追溯到 raw per-seed/per-grid data、配置和 commit；
+9. Variational 备选计划未被本路线修改。
 
 这一定义允许“可信的负面结果”：证明 active 计算在当前资源或当前 BP-TN 精度下
 不可行，也比提交一个没有误差、无法解释重标度的数字更符合 issue #119 的目标。
@@ -585,3 +745,5 @@ issue-119-ole/
 - [OLE 模型、测量协议与经典方法说明](https://algorithmiq.fi/files/model-information-flow-complex-material-document.pdf)
 - [TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl)
 - [Gauging tensor networks with belief propagation](https://scipost.org/10.21468/SciPostPhys.15.6.222)
+- [Simulation of IBM's kicked Ising experiment with Projected Entangled Pair Operator](https://arxiv.org/abs/2308.03082)
+- [quimb `CircuitPEPOSimpleUpdate` 文档](https://quimb.readthedocs.io/en/latest/autoapi/quimb/tensor/circuit/pepo/index.html)
