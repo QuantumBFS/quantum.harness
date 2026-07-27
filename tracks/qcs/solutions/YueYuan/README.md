@@ -37,4 +37,6 @@ Produce the minimal headline demo for a simulated two-qubit gate:
 
 The survey/database phase and validator gate are complete. The executable validator now lives in `research/validator/`, with public development instances in `research/benchmark/dev/` and a sealed gitignored holdout split under `research/benchmark/private/`.
 
-Attempt 001 has started the run stage with a local rank-15 surrogate candidate under `research/attempts/attempt-001/`. It is accepted by the public dev validator with a score of `2.9263157894736844`, and its log records that the next step is replacing the surrogate query model with an actual tiny-system quantum-control loop.
+Attempt 001 started the run stage with a local rank-15 surrogate candidate. Attempt 002 now adds a toy two-qubit dynamics path under `research/attempts/attempt-002/`: exact unitary propagation, CZ infidelity, finite-difference Hessian geometry, and exact final checks. The public dev validator accepts attempt 002 with score `3.031578947368421`.
+
+Next step: replace attempt 002's deterministic query trace model with an actual derivative-free closed-loop optimizer against the noisy scalar oracle.
