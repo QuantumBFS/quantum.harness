@@ -16,6 +16,7 @@ sys.path.insert(0, str(SOLUTION_DIR))
 
 from sim_to_real import (  # noqa: E402
     BlackBoxDevice,
+    QueryRecord,
     fourier_controls,
     make_demo_problem,
     make_drift_perturbation,
@@ -25,6 +26,7 @@ from sim_to_real import (  # noqa: E402
     propagate_expm,
     unitarity_defect,
 )
+from optimizers import _closed_loop_summary, optimize_black_box_scipy  # noqa: E402
 
 
 class DynamicsTests(unittest.TestCase):
@@ -116,6 +118,38 @@ class BlackBoxTests(unittest.TestCase):
         for record in device.history:
             self.assertGreaterEqual(record.reported_fidelity, 0.0)
             self.assertLessEqual(record.reported_fidelity, 1.0)
+
+    def test_closed_loop_returns_best_reported_not_latent_params(self) -> None:
+        device = BlackBoxDevice(lambda _: jnp.asarray(0.5))
+        device.history.extend(
+            [
+                QueryRecord(1, 0.99, 0.90, np.asarray([1.0])),
+                QueryRecord(2, 0.94, 0.95, np.asarray([2.0])),
+            ]
+        )
+        result = _closed_loop_summary(
+            device,
+            target_infidelity=0.01,
+            optimizer_success=True,
+            message="test",
+        )
+        np.testing.assert_allclose(result.params, [1.0])
+        self.assertAlmostEqual(result.best_reported_fidelity, 0.99)
+        self.assertAlmostEqual(result.best_exact_fidelity, 0.95)
+
+    def test_staged_optimizer_uses_an_incremental_query_budget(self) -> None:
+        fidelity = lambda params: jnp.exp(-jnp.vdot(params, params))
+        device = BlackBoxDevice(fidelity)
+        device.query(np.ones(2))
+        start = device.query_count
+        optimize_black_box_scipy(
+            device,
+            np.ones(2),
+            method="Nelder-Mead",
+            max_queries=7,
+            allow_existing_history=True,
+        )
+        self.assertLessEqual(device.query_count - start, 7)
 
 
 if __name__ == "__main__":

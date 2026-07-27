@@ -29,6 +29,7 @@ class DifferentiableResult:
 @dataclass(frozen=True)
 class ClosedLoopResult:
     params: np.ndarray
+    best_reported_fidelity: float
     best_exact_fidelity: float
     query_count: int
     shot_count: int
@@ -133,10 +134,17 @@ def _closed_loop_summary(
     target_infidelity: float,
     optimizer_success: bool,
     message: str,
+    selection_start: int = 0,
 ) -> ClosedLoopResult:
     if not device.history:
         raise ValueError("closed-loop optimizer made no device queries")
-    best = max(device.history, key=lambda record: record.exact_fidelity)
+    selectable_history = device.history[selection_start:]
+    if not selectable_history:
+        raise ValueError("selection window contains no device queries")
+    best_reported = max(
+        selectable_history, key=lambda record: record.reported_fidelity
+    )
+    best_exact = max(device.history, key=lambda record: record.exact_fidelity)
     query_to_target = next(
         (
             record.query
@@ -146,8 +154,9 @@ def _closed_loop_summary(
         None,
     )
     return ClosedLoopResult(
-        params=best.params.copy(),
-        best_exact_fidelity=best.exact_fidelity,
+        params=best_reported.params.copy(),
+        best_reported_fidelity=best_reported.reported_fidelity,
+        best_exact_fidelity=best_exact.exact_fidelity,
         query_count=device.query_count,
         shot_count=device.shot_count,
         query_to_target=query_to_target,
@@ -165,13 +174,15 @@ def optimize_black_box_scipy(
     max_queries: int = 2000,
     target_infidelity: float = 1e-3,
     optimizer_options: dict[str, object] | None = None,
+    allow_existing_history: bool = False,
+    evaluation_repeats: int = 1,
 ) -> ClosedLoopResult:
     """Run a SciPy derivative-free optimizer against the query-only device."""
 
-    if device.query_count:
+    if device.query_count and not allow_existing_history:
         raise ValueError("device history must be empty at optimizer start")
-    if max_queries <= 0:
-        raise ValueError("max_queries must be positive")
+    if max_queries <= 0 or evaluation_repeats <= 0:
+        raise ValueError("query budget and evaluation repeats must be positive")
 
     origin_np = np.asarray(origin, dtype=np.float64)
     if basis is None:
@@ -179,17 +190,35 @@ def optimize_black_box_scipy(
     else:
         basis_np = np.asarray(basis, dtype=np.float64)
     initial = np.zeros(basis_np.shape[1], dtype=np.float64)
+    query_count_at_start = device.query_count
+    best_objective = np.inf
+    best_objective_params = origin_np.copy()
 
     def objective(coefficients: np.ndarray) -> float:
-        if device.query_count >= max_queries:
+        nonlocal best_objective, best_objective_params
+        used = device.query_count - query_count_at_start
+        if used + evaluation_repeats > max_queries:
             raise QueryBudgetExhausted
-        return device.query(
-            _affine_subspace_point(origin_np, basis_np, coefficients)
+        params = _affine_subspace_point(
+            origin_np, basis_np, coefficients
         )
+        value = float(
+            np.mean(
+                [
+                    device.query(params)
+                    for _ in range(evaluation_repeats)
+                ]
+            )
+        )
+        if value < best_objective:
+            best_objective = value
+            best_objective_params = params.copy()
+        return value
 
+    maximum_evaluations = max(1, max_queries // evaluation_repeats)
     options: dict[str, object] = {
-        "maxiter": max_queries,
-        "maxfev": max_queries,
+        "maxiter": maximum_evaluations,
+        "maxfev": maximum_evaluations,
     }
     # A single finite-shot observation below the target is not reliable
     # evidence that the latent device fidelity has reached it.  Only use
@@ -214,11 +243,22 @@ def optimize_black_box_scipy(
     except QueryBudgetExhausted:
         pass
 
-    return _closed_loop_summary(
+    summary = _closed_loop_summary(
         device,
         target_infidelity=target_infidelity,
         optimizer_success=success,
         message=message,
+        selection_start=query_count_at_start,
+    )
+    return ClosedLoopResult(
+        params=best_objective_params,
+        best_reported_fidelity=1.0 - best_objective,
+        best_exact_fidelity=summary.best_exact_fidelity,
+        query_count=summary.query_count,
+        shot_count=summary.shot_count,
+        query_to_target=summary.query_to_target,
+        optimizer_success=summary.optimizer_success,
+        message=summary.message,
     )
 
 

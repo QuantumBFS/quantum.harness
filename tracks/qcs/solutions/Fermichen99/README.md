@@ -49,6 +49,27 @@ locates a boundary:
   the gate. The practical failure is noise and conditioning, not simple
   reachability.
 
+### Fixed-rank recovery instead of permanent widening
+
+The final method keeps the deployed optimizer at exactly `d²−1=15`
+coordinates. When a noise-aware confirmation test detects a plateau, it
+temporarily probes two orthogonal scout directions, estimates only the
+current/scout cross-curvature block, rotates the 15-dimensional basis, and
+immediately compresses back to rank 15. Neither the simulated exact fidelity
+nor the true-device Jacobian is used to make a closed-loop decision.
+
+At 65,536 shots/query, a 1,000-query cap, and five seeds:
+
+| Drift gap | Tracked rank 15 | Fixed top 15 | Fixed top 30 | Raw 40 |
+|---:|---:|---:|---:|---:|
+| `ε=0.3` | **5/5**, median 55 queries | 4/5, median 46 censored | 5/5, median 89 | 0/5 |
+| `ε=0.5` | **5/5**, median 394 queries | 2/5 | 3/5, median 140 censored | 1/5 |
+
+The important scaling result is therefore not “increase `k` until it works.”
+Temporary scouts locate missing directions while the optimization rank stays
+fixed at the physical tangent-space dimension. One rank-15 update costs 158
+scalar queries here, versus permanently optimizing 30 or 40 coordinates.
+
 Random subspaces are a real baseline, not a placeholder. At `ε=0.3`, all five
 random trials failed for `k≤20`, while the Hessian-informed runs succeeded in
 3/5 trials for both `k=15` and `k=20`.
@@ -88,6 +109,7 @@ uv pip install --python .venv/bin/python \
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_dimension_sweep.py
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_noise_sweep.py
 .venv/bin/python tracks/qcs/solutions/Fermichen99/run_invariant_check.py
+.venv/bin/python tracks/qcs/solutions/Fermichen99/run_rank15_tracking.py
 
 .venv/bin/python -m unittest discover \
   -s tracks/qcs/solutions/Fermichen99/tests -q
@@ -114,7 +136,10 @@ noise, and invariant metadata are in the committed `*_run.json` files.
 | `run_dimension_sweep.py` | headline dimension/gap experiment with seeds and error bars |
 | `run_noise_sweep.py` | shot-budget experiment |
 | `run_invariant_check.py` | `d²−1` check for `d=2` and `d=4` |
+| `subspace_tracking.py` | query-only, rank-preserving cross-curvature rotation |
+| `run_rank15_tracking.py` | tracked rank-15 versus fixed/widened baselines |
 | `REPORT.md` | methods, results, interpretation, and limitations |
+| `challenge_report.html` | self-contained four-section challenge report |
 
 ## Scope and honest failure
 
@@ -123,7 +148,8 @@ This submission uses a software black box with drift mismatch
 oracle samples the trace fidelity as a binomial probability, which is a useful
 controlled noise model but not a complete randomized-benchmarking protocol.
 
-The top-15 reduction fails at `ε=0.5` under finite shots. Widening to 30
-directions recovers most trials, while the full search recovers all of them at
-roughly twice the median query count. That failure is part of the result rather
-than being hidden by optimizer tuning.
+A fixed model top-15 basis fails at `ε=0.5` under finite shots. The adaptive
+rank-15 method recovers all five reference trials, but it has only been tested
+on one Hamiltonian seed and one perturbation direction. This supports the
+mechanism—track the active tangent space rather than widen blindly—without
+claiming universal hardware performance.

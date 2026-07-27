@@ -184,20 +184,70 @@ parameters and a two-qubit CNOT with 40:
 
 ![Rank invariant](artifacts/hessian_rank_invariant.png)
 
+## Result 5: device feedback can recover the right 15 directions
+
+The dimension sweep above is diagnostic: it identifies where fixed top-`k`
+subspaces work, but permanent widening is not scalable. The final method
+instead performs staged optimization on a rank-15 basis. After an unconfirmed
+stage it introduces two temporary orthogonal scouts and estimates the
+restricted Hessian
+
+```text
+        [ diag(λactive)     0.2 Cᵀ ]
+Hlocal ≈ [                           ],
+        [    0.2 C       diag(λscout)]
+```
+
+where each element of the `15×2` cross block `C` is obtained by a four-point
+mixed finite difference. The factor 0.2 is a conservative shrinkage prior:
+finite-shot sensitivity tests showed that replacing the model basis
+aggressively degrades its already-good alignment. Diagonal second differences,
+four center repeats, and all mixed differences make one update cost
+`4 + 2(15+2) + 4·15·2 = 158` device queries. The leading 15 eigenvectors of
+this 17-dimensional local matrix define the next basis; the deployed search
+dimension therefore never exceeds 15.
+
+The optimizer uses only noisy reported query values. Four repeated
+measurements and a one-sided Wilson upper bound decide whether a stage has
+reliably crossed `L≤10⁻³`. Exact fidelity and endpoint-Jacobian overlaps are
+computed only afterward for offline scoring.
+
+At 65,536 shots/query, five seeds, and a 1,000-query cap:
+
+| `ε` | Tracked rank 15 | Fixed top 15 | Fixed top 30 | Raw 40 |
+|---:|---:|---:|---:|---:|
+| 0.3 | **5/5**, median 55 | 4/5, median 46 censored | 5/5, median 89 | 0/5 |
+| 0.5 | **5/5**, median 394 | 2/5 | 3/5, median 140 censored | 1/5 |
+
+At `ε=0.5`, every tracked run succeeded, including two that required both
+rank-preserving updates. The median final offline subspace overlap was 0.944,
+close to the initial 0.948; this is expected because each update explores only
+two new directions and is deliberately conservative. The large reliability
+gain despite a small global-overlap change shows that correcting a few
+optimization-relevant directions matters more than replacing the whole basis.
+
+![Tracked rank-15 comparison](artifacts/rank15_tracking_comparison.png)
+
+![Tracked subspace alignment](artifacts/rank15_subspace_alignment.png)
+
 ## Interpretation
 
-Three distinct thresholds matter:
+Four distinct thresholds matter:
 
 1. **Open-loop threshold:** the model pulse itself stops meeting the true
    target near `ε≈0.1`.
 2. **Efficient-calibration threshold:** top-15 remains useful at `ε=0.3` but
    requires more shots or a safety margin for reliable success.
 3. **Fixed-reduction threshold:** by `ε=0.5`, top-15 fails under the declared
-   finite-shot protocol; widening toward the full span is required.
+   finite-shot protocol.
+4. **Tracking threshold:** at the same `ε=0.5`, conservative device-side
+   rotation restores 5/5 success without increasing the deployed rank.
 
 The privileged result shows that threshold 3 is algorithmic/statistical before
-it is geometric. Principal-angle rotation is therefore a useful warning signal
-but not, by itself, a reachability certificate.
+it is geometric. The tracked experiment then supplies a constructive response:
+use `d²−1` as a rank constraint, not as a frozen set of model eigenvectors.
+Principal-angle rotation remains a useful offline diagnostic, but is not
+required by the device-side algorithm.
 
 ## Limitations and next experiment
 
@@ -209,13 +259,12 @@ but not, by itself, a reachability certificate.
 - COBYQA is deliberately a simple baseline. Its raw full-space behavior is
   unstable under noise, so the numbers should not be generalized to every
   derivative-free optimizer.
-- A data-driven rule that re-estimates the active subspace from device queries
-  remains open.
-
-The next research step is an adaptive trust-region scheme that begins with the
-model top-15 basis, detects a noise-aware plateau, and adds orthogonal
-directions in small batches. The present `k=20/30/40` sweep supplies the
-fixed-basis baselines such a method must beat.
+- The two-scout update can only correct the missing directions it samples; the
+  current five-seed result is evidence for the mechanism, not a sample-complexity
+  theorem.
+- Cross-curvature estimation costs `O(kr)` queries per update for rank `k` and
+  `r` scouts. Testing structured scouts and simultaneous estimators is the next
+  route to lower constants at larger `d`.
 
 ## Reproducibility
 

@@ -1,0 +1,229 @@
+{
+  "title": "Challenge #113: Tracking the Right d²−1 Control Directions",
+  "eyebrow": "Quantum Control · Fermichen99",
+  "url": "https://github.com/QuantumBFS/quantum.harness/issues/113",
+  "lede": "Device-side cross-curvature updates keep the optimizer at rank 15 yet recover 5/5 strong-mismatch trials, outperforming fixed rank 15, permanent rank 30, and raw rank 40 searches.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "Why the model Hessian must transfer to a noisy device without losing its scaling advantage.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "A differentiable simulator can optimize a quantum gate and expose its local Hessian, but a real device may differ through drift and only return noisy scalar fidelity measurements. For a two-qubit gate, the physically relevant phase-free unitary tangent space has dimension $d^2-1=15$, even though the pulse has 40 Fourier coefficients. The challenge is to use those 15 directions on the mismatched device without assuming that the simulator's exact eigenvectors remain correct."
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Device evaluations are the expensive resource. Searching all 40 pulse coordinates discards known quantum geometry, while permanently widening from 15 to 30 only postpones the same scaling problem. A rank-preserving update would retain the $d^2-1$ scaling law while adapting to model error."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Challenge", "#113 — Sim-to-Real for Quantum Gates"],
+            ["Team", "Fermichen99 (individual submission)"],
+            ["System", "Two-qubit CNOT, d=4"],
+            ["Controls", "4 random Hermitian controls × 10 sine coefficients = 40 parameters"],
+            ["Target", "True infidelity 1−F ≤ 10⁻³"],
+            ["Device gap", "H₀,true = H₀ + εV, with ε ∈ {0.3, 0.5}"],
+            ["Noise", "65,536 binomial shots per query"],
+            ["Budget", "1,000 scalar device queries per run"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Kill criterion",
+          "style": "info",
+          "text": "Stop pursuing fixed-rank tracking if it cannot improve reliability over fixed top-15 at ε=0.5, or if success requires exposing exact device fidelity, gradients, Hamiltonians, or a permanently enlarged optimization space."
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "A model-informed, device-corrected subspace with a hard rank constraint.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Strict query-only closed loop",
+          "style": "good"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Model basis", "Leading 15 eigenvectors of the calibrated simulator Hessian"],
+            ["Optimizer", "Staged COBYQA in exactly 15 coordinates"],
+            ["Plateau test", "4 confirmation queries with a one-sided Wilson upper bound"],
+            ["Temporary scouts", "2 random directions orthogonal to the current rank-15 basis"],
+            ["Device estimator", "Diagonal and active/scout cross-curvature finite differences"],
+            ["Update rule", "Diagonalize a 17×17 restricted Hessian, retain only its leading 15 eigenvectors"],
+            ["Conservative prior", "Cross block multiplied by 0.2; measured diagonals blended 50:50 with model curvature"],
+            ["Stage budgets", "200 + 200 + 272 optimization queries; up to two 158-query updates"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The model supplies a well-conditioned rank-15 coordinate system. When the device does not confirm the target, the algorithm probes only how that active space couples to two temporary orthogonal scouts. It estimates the 15×2 cross block with four-point mixed differences, updates the local eigenspace, and immediately compresses back to rank 15. The scouts are measurements, not new deployed optimization parameters."
+        },
+        {
+          "kind": "code",
+          "title": "Restricted curvature model",
+          "text": "          [ diag(λ_active)       0.2 Cᵀ       ]\nH_local ≈ [                                      ]\n          [     0.2 C       diag(λ_scout)    ]\n\nrank(B_next) = d²−1 = 15"
+        },
+        {
+          "kind": "table",
+          "columns": ["Operation", "Formula", "Queries"],
+          "numeric": [false, false, true],
+          "rows": [
+            ["Center repeats", "4", "4"],
+            ["Diagonal curvatures", "2(k+r), k=15, r=2", "34"],
+            ["Cross curvatures", "4kr", "120"],
+            ["One rank-preserving update", "4 + 2(k+r) + 4kr", "158"],
+            ["Maximum two updates", "2 × 158", "316"]
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Black-box boundary",
+          "style": "info",
+          "text": "All optimizer choices, confirmations, and subspace rotations use only the noisy value returned by device.query. Exact fidelity and the true endpoint Jacobian are retained solely for offline simulation scoring and never select a parameter or direction."
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "Five optimizer/noise seeds per mismatch value, with failures censored at budget+1.",
+      "blocks": [
+        {
+          "kind": "heading",
+          "text": "Fixed rank 15 beats widening at strong mismatch",
+          "level": 2
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "rank15_tracking_comparison.png",
+              "caption": "Pass. Success rate and censored query cost for 40 closed-loop runs. At ε=0.5, tracked rank 15 reaches 5/5 while fixed top-15 reaches 2/5, fixed top-30 reaches 3/5, and raw 40 reaches 1/5."
+            },
+            {
+              "src": "rank15_subspace_alignment.png",
+              "caption": "Offline diagnostic. Mean squared principal-angle cosine between the deployed rank-15 basis and the true device tangent space. Conservative updates preserve high alignment; this Jacobian is not available to the algorithm."
+            }
+          ]
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Primary criterion passed",
+          "why": "At ε=0.5 the tracked rank-15 method succeeded in all 5 seeds without permanently increasing the search rank; every declared baseline was less reliable."
+        },
+        {
+          "kind": "table",
+          "columns": ["ε", "Method", "Rank", "Success", "Censored median q*", "Median best 1−F", "Median queries used"],
+          "numeric": [true, false, true, true, true, true, true],
+          "rows": [
+            ["0.3", "Tracked", "15", "5/5", "55", "2.22×10⁻⁴", "204"],
+            ["0.3", "Fixed top-15", "15", "4/5", "46", "3.47×10⁻⁴", "248"],
+            ["0.3", "Fixed top-30", "30", "5/5", "89", "1.24×10⁻⁴", "540"],
+            ["0.3", "Raw coordinates", "40", "0/5", "1001", "6.57×10⁻³", "708"],
+            ["0.5", "Tracked", "15", "5/5", "394", "6.46×10⁻⁴", "566"],
+            ["0.5", "Fixed top-15", "15", "2/5", "1001", "1.46×10⁻³", "260"],
+            ["0.5", "Fixed top-30", "30", "3/5", "140", "4.11×10⁻⁴", "558"],
+            ["0.5", "Raw coordinates", "40", "1/5", "1001", "2.54×10⁻³", "746"]
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "The algorithm updates only when confirmation fails",
+          "level": 2
+        },
+        {
+          "kind": "table",
+          "columns": ["ε", "Tracked runs", "Runs needing update", "Total updates", "Median projector rotation", "Success"],
+          "numeric": [true, true, true, true, true, true],
+          "rows": [
+            ["0.3", "5", "1", "1", "0.0656", "5/5"],
+            ["0.5", "5", "5", "7", "0.1127", "5/5"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The strong-gap case activates the intended mechanism: all five runs required at least one device-side rotation and two required a second rotation. The median final offline overlap was 0.944 versus an initial 0.948. This small change is informative rather than disappointing: correcting a few optimization-relevant directions can substantially improve reliability without replacing the whole tangent space."
+        },
+        {
+          "kind": "note",
+          "label": "Evidence files",
+          "style": "info",
+          "text": "All values in this section come from tracking_summary.csv, tracking_trials.csv, and tracking_stages.csv, generated by run_rank15_tracking.py. run.json records the environment, seeds, budgets, and exact rerun command."
+        }
+      ]
+    },
+    {
+      "title": "Highlight",
+      "note": "What this changes about the interpretation of d²−1.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What's innovative",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The method treats $d^2-1$ as a hard rank constraint rather than a frozen list of simulator eigenvectors. Temporary scouts estimate only the missing cross-curvature information, so model structure is corrected instead of discarded."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Significance of the output",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "The earlier top-k sweep showed where fixed bases fail; the tracked experiment explains how to respond without blind widening. At the hardest tested mismatch, fixed rank 15 changed from 2/5 to 5/5 success and surpassed permanent rank 30 despite using half as many deployed coordinates."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Broader impact",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "For larger gates, raw pulse dimension may grow far faster than the local unitary tangent space. Model-informed rank constraints plus query-only rotation offer a path toward calibration whose optimization dimension follows system geometry, while still tolerating moderate simulator-to-device drift."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Limits and next test",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "The device is simulated with binomial fidelity noise, not real hardware.",
+                "The headline study uses one Hamiltonian seed and one drift direction; five seeds cover optimizer and measurement randomness only.",
+                "Each update costs O(kr) queries for active rank k and r scouts; structured scouts or simultaneous mixed-derivative estimators may reduce the constant.",
+                "The next scaling test should repeat the invariant and tracking protocol for larger d while holding the deployed rank at d²−1."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "Reproduce the tracked comparison",
+          "text": "python3 tracks/qcs/solutions/Fermichen99/run_rank15_tracking.py"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "Challenge outcome",
+          "why": "The kill criterion was not triggered: fixed-rank tracking improved strong-gap reliability, respected the strict black-box boundary, and produced a fully reproducible run."
+        }
+      ]
+    }
+  ]
+}
