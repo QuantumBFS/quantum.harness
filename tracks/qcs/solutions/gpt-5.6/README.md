@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Team name** | gpt-5.6 |
-| **Members** | Hongye Tang, Yizhou Wei |
+| **Members** | Hongye Tang, Yizhou Wei, Hao Wu |
 
 ## Challenge
 
