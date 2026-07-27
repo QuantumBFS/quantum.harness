@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Team name** | WangTheoPhys |
-| **Members** | WangTheoPhys |
+| **Members** | Junkai Wang, WangTheoPhys@outlook.com |
 
 ## Challenge
 
