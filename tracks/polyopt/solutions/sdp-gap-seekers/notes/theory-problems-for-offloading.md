@@ -1,5 +1,12 @@
 # Theory problems for offloading — SDP spectral gap certification on square-lattice J1-J2
 
+> **Historical handoff.** Problem A below was the initial offloading brief. Its
+> finite-volume orthogonal-excitation framing is not the hierarchy used by
+> arXiv:2606.03836 and must not be implemented literally. The authoritative
+> corrected formulation is
+> [`../square-j1j2-gap-sdp-spec.md`](../square-j1j2-gap-sdp-spec.md). This file
+> is retained to preserve the original questions and provenance.
+
 > These are self-contained mathematical problems. The context is semidefinite
 > programming (SDP) certification of spectral gaps in quantum spin systems via
 > the noncommutative polynomial optimization (NCSOS / moment-SOS) hierarchy.
