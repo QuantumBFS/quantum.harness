@@ -58,12 +58,14 @@ byte-for-byte (acceptance test 6).
 
 ## Status / caveats
 
-- The script was written by reading `src/basicfunction.jl` + `example/example.jl`
-  and is **not yet executed** (no local solver environment, per the laptop
-- compute constraint). The first remote run must be checked against the
-  closed-form expectations above before its basis-size output is trusted.
-- It captures `H` + basis entries but **not** the assembled `tsupp` affine
-  constraints or the `pos`/`gpos` PSD variable layout — those live inside
-  `certify_*_gap` and would require either instrumenting that function or
-  refactoring it to return an `AssembledGapSDP` (refactor D2). The basis+H
-  inventory is the part needed for acceptance test 6 as written.
+- The script was written by reading `src/basicfunction.jl` + `src/sdp.jl` +
+  `example/example.jl` and is **not yet executed** (no local solver environment,
+  per the laptop-compute constraint). The first remote run must pass the schema
+  §4 asserts (Ising 17 / kagome 18 H terms + known coefficients) before its output
+  is trusted as the diff oracle.
+- It captures `H` (exact-rational) + basis/gbasis entries + the assembled `tsupp`
+  affine rows (both Ising and kagome, mirrored solver-free from `certify_*_gap`'s
+  support-collection loops) + `pos`/`gpos` block metadata. The full per-entry
+  `(j,k) → tsupp_row` coefficient map (the JuMP wiring inside `certify_*_gap`) is
+  deferred to v1.1 — it is the part that needs the D2 `AssembledGapSDP` extract.
+- See `legacy-inventory-schema.md` for the v1 canonical format contract.

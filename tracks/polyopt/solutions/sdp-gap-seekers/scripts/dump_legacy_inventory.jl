@@ -38,6 +38,7 @@ reduce_!(args...; kw...)          = SpectralGap.reduce!(args...; kw...)
 PSDstate_entry_(args...; kw...)   = SpectralGap.PSDstate_entry(args...; kw...)
 isz_(args...; kw...)              = SpectralGap.isz(args...; kw...)
 reduce_mirror_(args...; kw...)    = SpectralGap.reduce_mirror(args...; kw...)
+reduce_perm_(args...; kw...)      = SpectralGap.reduce_perm(args...; kw...)
 
 # ---- helpers ----------------------------------------------------------------
 # exact rational of a Float coefficient known to be a short binary fraction
@@ -93,6 +94,50 @@ function ising_tsupp(basis, gbasis, H, N)
         if !isz_(gbasis[l][i][1]; model="Ising") && !isz_(gbasis[l][j][1]; model="Ising")
             temp = [reduce_mirror_(gbasis[l][i][1], N), reduce_mirror_(gbasis[l][j][1], N)]
             push!(tsupp, sort([gbasis[l][i][2]; gbasis[l][j][2]; temp]))
+        end
+    end
+    sort!(tsupp); unique!(tsupp)
+    return tsupp
+end
+
+# Mirror certify_Heisenberg_kagome_gap's support collection (model="kagome",
+# reduce_perm). Three loops: basis pairs, gbasis pairs (PSDstate_entry +
+# reduce_perm mirror), and the 9-site even-component-count posepsd9 supports.
+# The N>5 stationarity-monomial block is JuMP wiring and adds no tsupp rows, so
+# it is not mirrored here.
+function kagome_tsupp(basis, gbasis, H, N)
+    lb  = length.(basis)
+    lgb = length.(gbasis)
+    tsupp = Vector{Vector{Int}}[]
+    for i in 1:length(basis), j in 1:lb[i], k in j:lb[i]
+        bi, c = reduce_!([basis[i][j][1]; basis[i][k][1]], N; model = "kagome")
+        if c != 0
+            if isempty(bi)
+                push!(tsupp, sort([basis[i][j][2]; basis[i][k][2]]))
+            else
+                push!(tsupp, sort([basis[i][j][2]; basis[i][k][2]; [bi]]))
+            end
+        end
+    end
+    for l in 1:length(gbasis), i in 1:lgb[l], j in i:lgb[l]
+        bis = PSDstate_entry_(gbasis[l][i][1], gbasis[l][j][1], H, N; model = "kagome")[1]
+        for bi in bis
+            if isempty(bi)
+                push!(tsupp, sort([gbasis[l][i][2]; gbasis[l][j][2]]))
+            else
+                push!(tsupp, sort([gbasis[l][i][2]; gbasis[l][j][2]; [bi]]))
+            end
+        end
+        if !isz_(gbasis[l][i][1]; model = "kagome") && !isz_(gbasis[l][j][1]; model = "kagome")
+            temp = [reduce_perm_(gbasis[l][i][1]), reduce_perm_(gbasis[l][j][1])]
+            push!(tsupp, sort([gbasis[l][i][2]; gbasis[l][j][2]; temp]))
+        end
+    end
+    for i in 0:3, j in 0:3, k in 0:3, l in 0:3, s in 0:3, t in 0:3, u in 0:3, v in 0:3, w in 0:3
+        ind = [i, j, k, l, s, t, u, v, w]
+        if all(x -> iseven(sum(ind .== x)), 1:3)
+            inx = ind .!= 0
+            push!(tsupp, [reduce_perm_(3 * (Vector(1:9)[inx] .- 1) + ind[inx])])
         end
     end
     sort!(tsupp); unique!(tsupp)
@@ -169,7 +214,7 @@ function dump_ising(io, N, g_raz, d)
     return (lb=lb, lgb=lgb, ntsupp=length(tsupp), nterms=length(H.supp))
 end
 
-# ---- Kagome case (H + basis only at v1; tsupp TODO) -------------------------
+# ---- Kagome case (H + basis + tsupp; model="kagome", reduce_perm) -----------
 function dump_kagome(io, N, d)
     @info "Kagome N=$N d=$d"
     triples = [[1, 2, 3], [1, 4, 5]]
@@ -190,6 +235,7 @@ function dump_kagome(io, N, d)
     basis  = [get_kagome_basis_(N, triples, edges, d; label = i) for i in 1:2]
     gbasis = [get_kagome_bulkbasis_(N, inner_triples, inner_edges, d - 1; label = i) for i in 1:2]
     lb, lgb = length.(basis), length.(gbasis)
+    tsupp = kagome_tsupp(basis, gbasis, H, N)
 
     println(io, "format_version = 1")
     println(io, "generator = dump_legacy_inventory.jl")
@@ -204,8 +250,7 @@ function dump_kagome(io, N, d)
     write_basis_block(io, "pos", 2, basis[2]); println(io)
     write_basis_block(io, "gpos", 1, gbasis[1]); println(io)
     write_basis_block(io, "gpos", 2, gbasis[2]); println(io)
-    println(io, "[tsupp]")
-    println(io, "nrows = TODO  # kagome tsupp mirroring lands in v1.1 (model=\"kagome\", reduce_perm)")
+    write_tsupp(io, tsupp); println(io)
     println(io, "[pos.blocks]")
     for (k, dim) in enumerate(lb)
         println(io, "block[", k, "] kind=pos label=", k, " dimension=", dim,
@@ -216,7 +261,7 @@ function dump_kagome(io, N, d)
         println(io, "block[", k, "] kind=gpos label=", k, " dimension=", dim,
                 " basis_id=basis.gpos.L", k)
     end
-    return (lb=lb, lgb=lgb, nterms=length(H.supp))
+    return (lb=lb, lgb=lgb, ntsupp=length(tsupp), nterms=length(H.supp))
 end
 
 function spectralgap_source()
@@ -250,7 +295,7 @@ function main()
 
     @info "wrote legacy_inventory.math.txt + legacy_inventory.runmeta.txt"
     @info "Ising  : H=$(stats_ising.nterms) terms, lb=$(stats_ising.lb), lgb=$(stats_ising.lgb), |tsupp|=$(stats_ising.ntsupp)"
-    @info "Kagome : H=$(stats_kagome.nterms) terms, lb=$(stats_kagome.lb), lgb=$(stats_kagome.lgb)"
+    @info "Kagome : H=$(stats_kagome.nterms) terms, lb=$(stats_kagome.lb), lgb=$(stats_kagome.lgb), |tsupp|=$(stats_kagome.ntsupp)"
     @info "sha256(math) = ", h
 end
 
