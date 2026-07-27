@@ -15,6 +15,13 @@
 - 新候选必须通过的新颖性检查；
 - 数值 oracle 的正确性和可复现性要求。
 
+随后按任务使用：
+
+- [EXACT_CERTIFICATES.md](EXACT_CERTIFICATES.md)：人类可读的精确正、负、零测试锚点；
+- [CANDIDATE_CARD.md](CANDIDATE_CARD.md)：每个新候选都复制并填写的评估模板；
+- [ENVIRONMENT.md](ENVIRONMENT.md)：本机可用软件、错误环境和待定依赖；
+- [KICKOFF.md](KICKOFF.md)：明日开工顺序、两到三人分工和交付标准。
+
 ## 明天组队时
 
 先读 [../START_HERE.md](../START_HERE.md) 的“现在做到哪里”，再按三类任务分工：
@@ -23,4 +30,5 @@
 2. 候选矩阵类和物理 DQMC 映射；
 3. 文献排重与精确证明。
 
-研究结论只维护在上述两份正文中，避免出现多个互相矛盾的版本。
+定理和文献结论只维护在 `FOUNDATIONS.md`，精确测试数据只维护在
+`fixtures/exact_certificates.json`，避免出现多个互相矛盾的版本。
