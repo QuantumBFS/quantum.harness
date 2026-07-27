@@ -1,0 +1,3 @@
+[submodule "challenges/omnievolve"]
+	path = challenges/omnievolve
+	url = https://github.com/UynajGI/omnievolve.git
