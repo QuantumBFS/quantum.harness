@@ -5,20 +5,20 @@
 | **Team name** | JOE |
 | **Members** | Bei Qiao (乔北), Institute of Physics, Chinese Academy of Sciences (IOP) |
 
-## Challenge
+## Challenges
 
 | Row | |
 |---|---|
-| **Challenge** | Can exact symmetry structure make two hard fermionic Monte Carlo problems certifiable: an exchange-antisymmetric, SO(3)-equivariant neural quantum state for the ν = 1/3 chiral-graviton gap, and physically realizable matrix classes with provably nonnegative determinantal-QMC weights? |
-| **Catalog issue** | Addresses #15 and Addresses #121 — both released by Lei Wang, Institute of Physics, Chinese Academy of Sciences. |
-| **Track** | `qmc` — #15 uses Variational Monte Carlo / Neural Quantum States, and #121 uses Quantum Monte Carlo. |
+| **Challenge A** | Addresses #15 — construct an exchange-antisymmetric, SO(3)-equivariant neural quantum state for the ν = 1/3 chiral graviton and compute the gap Δ = E(L=2) − E(L=0). |
+| **Challenge B** | Addresses #121 — search for new physically realizable matrix classes with provably nonnegative determinantal-QMC weights. |
+| **Relationship** | These are two independent research workstreams pursued by the same team. They share the `qmc` track and this registration PR, but no scientific dependence between them is claimed. |
+| **Proposer** | Both challenges were released by Lei Wang, Institute of Physics, Chinese Academy of Sciences. |
+| **Track** | `qmc` — #15 uses Variational Monte Carlo / Neural Quantum States; #121 concerns sign-problem-free Quantum Monte Carlo. |
 
-## Organization
+## Working repository
 
-This is a single-team, single-PR registration with two symmetry-driven QMC workstreams:
+The two workstreams are maintained separately in the team repository:
 
-1. `chiral-graviton/` — challenge #15.
-2. `sign-free-hunter/` — challenge #121.
-
-We welcome organizer guidance if the event requires one of the two challenges
-to be designated as the sole official entry.
+- Repository: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026
+- Challenge #15: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/main/challenges/15-chiral-graviton
+- Challenge #121: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/main/challenges/121-sign-free-hunter
