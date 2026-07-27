@@ -19,3 +19,9 @@ This registration targets the #115 migration deliverable, not a full solution of
 the hardest #71 hidden-function discovery task. The first milestone is a
 bit-exact Rust verifier and benchmark report against the original Julia
 workflow.
+
+## Working Repository
+
+Development starts in the private AGPL-3.0 repository
+`JunkaiWang-TheoPhy/quantum-harness-215-occam-rust-port`. The #71 implementation
+line lives under the `challenge-71-occam/` subfolder.
