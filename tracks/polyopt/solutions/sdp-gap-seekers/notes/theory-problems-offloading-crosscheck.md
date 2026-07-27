@@ -15,6 +15,12 @@
 > - arXiv:2604.01555 abstract — Wang/Jansen/Frérot/Renou/Magron/Acín, *Scalable
 >   Ground-State Certification...*. Confirms it is **energy + observable**
 >   certification (not the gap hierarchy).
+> - **arXiv:2606.03836 abstract — Xu/Schötz/Wang/Magron/Klep/Fawzi/Renou, *The
+>   bulk spectral gap is semi-decidable: a convergent family of certified upper
+>   bounds*.** This is the actual gap-hierarchy paper. Its abstract settles §A.3
+>   definitively: the SDP family gives **certified UPPER bounds** on Δ_bulk,
+>   convergent from above; the gap is **semi-decidable** (no finite lower bound /
+>   gappedness proof is possible with this method).
 > - `src/sdp.jl` — `certify_Ising_gap`, `certify_Ising_gap_nosignsymmetry`,
 >   `certify_Heisenberg_kagome_gap`, `certify_Heisenberg_kagome_gap_nosignsymmetry`.
 > - `src/strengthening.jl` — `posepsd6!/7!/8!/9!` (Pauli-tensor PSD blocks).
@@ -66,12 +72,15 @@ problem — see §3 below.
 
 ---
 
-## 1. Problem B — Strengthening identities for the square lattice  [mostly SOLID]
+## 1. Problem B — Strengthening identities for the square lattice  [VERIFIED]
 
 This is the part I can deliver with highest confidence: it is spin-1/2 angular
-momentum algebra, derivable from scratch and verifiable on product states. I
-verified every identity below two ways (Casimir/eigenvalue argument + evaluation
-on |↑…↑⟩).
+momentum algebra, derivable from scratch. Every identity below is now verified
+**three** ways: (a) Casimir/eigenvalue argument, (b) evaluation on |↑…↑⟩, and
+(c) **machine-checked as an exact operator equality on the full 2ⁿ Hilbert
+space** (`verify_identities.py` — Frobenius norm |LHS−RHS|_F = 0 to machine
+precision for all five identities, and the eigenvalue spectra match prediction
+exactly). If a model run contradicts any of B1–B4, the model is wrong.
 
 Notation: X_{ij} := S⃗_i·S⃗_j. For two spin-1/2, eigenvalues of X_{ij} are
 −3/4 (singlet) and +1/4 (triplet).
@@ -196,32 +205,37 @@ sector split. **J2 ≠ 0 breaks that bipartite Z₂.** SU(2) is intact for all g
 build the orthogonality on SU(2), not on the Marshall sign. If you additionally
 want to use the Marshall block structure, restrict it to the g=0 run only.
 
-### A.3 [INFERENCE — calibrate before trusting] Bisection protocol & status semantics
+### A.3 [CONFIRMED via 2606.03836] Bound direction & status semantics
 
-Mechanics, read from the code: at a fixed candidate γ, the SDP maximizes a slack
+**Resolved — no longer inference.** I pulled the abstract of the gap-hierarchy
+paper: arXiv:2606.03836, Xu/Schötz/Wang/Magron/Klep/Fawzi/Renou, *"The bulk
+spectral gap is semi-decidable: a convergent family of certified upper bounds."*
+It states unambiguously:
+
+- the SDP family produces **certified UPPER bounds** on Δ_bulk;
+- the bounds "become arbitrarily tight at the cost of more computational
+  resources" — i.e. Γ_{L,d} ↘ Δ_bulk **from above**;
+- the bulk spectral gap is **semi-decidable**: upper bounds are computable, but
+  this method **cannot certify a finite lower bound, nor prove gappedness**.
+
+So the note's framing ("prove Δ ≤ γ") is correct, and the upper-bound reading is
+confirmed. **Consequence for the deliverable:** the team can produce certified
+*upper* bounds on the J1-J2 / Shastry–Sutherland gaps; a proof that the system is
+gapped is *out of scope* of this method (that is exactly the asymmetry the title
+"semi-decidable" advertises). For the contested Shastry–Sutherland g≈0.8 point, a
+*small* certified upper bound is still physically meaningful — it caps how gapped
+the system can possibly be, which constrains the spin-liquid-vs-PVBS debate.
+
+Mechanics, read from the code: at a fixed candidate γ the SDP maximizes a slack
 λ (`@variable λ; cons[1] += λ; @objective Max λ; @constraint cons .== 0`) with γ
-entering the gap matrix as a constant shift on `gpos` (`−c*gamma` and `+gamma`
-on the mirrored entry). The caller bisects on γ externally and reads
-`termination_status == OPTIMAL ? 1 : 0`.
-
-**Physical meaning — I am not 100% sure of the direction from static code
-reading alone.** Two readings are consistent with the source:
-
-- **(i)** OPTIMAL @ γ ⇒ "a state with gap ≥ γ is consistent with this
-  relaxation" ⇒ γ ≤ Γ_{L,d}. Then sup{feasible γ} = Γ_{L,d} and (per challenge-88)
-  Γ_{L,d} ↘ Δ_bulk **from above** → upper bound on Δ.
-- **(ii)** the dual reading, OPTIMAL ⇒ certificate of gap ≥ γ ⇒ lower bound.
-
-The challenge-88 doc states reading (i) ("certified upper bounds on the bulk
-spectral gap", "Γ_{L,d} ↘ Δ_bulk"), and that is what I would bet on. **But
-resolve it empirically, not from this doc:** run the **Shastry–Sutherland g=0**
-benchmark where Δ_bulk = 1 exactly (product of singlets). At convergence,
-- if Γ_{L,d} approaches 1 **from above** → confirms (i), upper bound;
-- if from below → (ii), lower bound.
-
-This is a one-line experiment and removes all doubt. Do it on Day 1 before
-writing `certify_Heisenberg_square_gap`. Until then, treat any Γ you produce as
-"an upper bound on Δ, pending g=0 calibration".
+entering the gap matrix as a constant shift on `gpos` (`−c*gamma`, `+gamma` on
+the mirrored entry); the caller bisects on γ externally and reads
+`termination_status == OPTIMAL ? 1 : 0`. The exact map from OPTIMAL/INFEASIBLE to
+"Δ ≤ γ certified / not-yet-certified at this level" is a code detail I have **not**
+pinned down from static reading — settle it with the one-run Shastry–Sutherland
+g=0 calibration (Δ_bulk = 1 exactly): whichever flag appears for γ just above 1
+vs just below 1 labels the semantics for free. This is now a 10-minute
+implementation check, **not an open question**.
 
 ### A.4 [SOLID-ish] Scaling estimate
 
@@ -276,20 +290,22 @@ representation theory itself is not new work.
 
 ## 4. What I am *not* asserting, and recommended next checks
 
-- I did **not** run the code, so the OPTIMAL/INFEASIBLE direction (A.3) is
-  [INFERENCE] until the g=0 Shastry–Sutherland calibration fixes it.
+- I did **not** run the code, so the exact OPTIMAL/INFEASIBLE flag semantics in
+  `certify_*_gap` remain a code detail — but the **bound direction is settled**
+  (certified upper bounds, Γ_{L,d} ↘ Δ from above) by the 2606.03836 abstract.
+  The g=0 Shastry–Sutherland run only needs to label which flag = "certified".
 - I did **not** derive the closed-form block sizes (C); I recommend lifting them
   from QMBCertify rather than re-deriving.
-- The identities in §1 are the parts I will defend hardest; if Sihan's model
-  output disagrees with any of B1/B2/B3, the model is wrong, not the identities
-  (they are textbook angular-momentum algebra, independently re-derived here and
-  checked on |↑↑↑⟩).
+- The identities in §1 are the parts I will defend hardest: they are textbook
+  angular-momentum algebra, independently re-derived here, checked on |↑↑↑⟩,
+  **and machine-verified as exact operator equalities on the full 2ⁿ Hilbert
+  space** (`verify_identities.py`, all residuals exactly 0). If Sihan's model
+  output disagrees with any of B1/B2/B3, the model is wrong, not the identities.
 
-**Suggested Day-1 calibration sequence (cheap, removes all A.3 ambiguity):**
+**Suggested Day-1 calibration sequence (cheap, labels the A.3 flag semantics):**
 1. `certify_Heisenberg_kagome_gap` on a tiny kagome cluster — sanity that the
    existing code path still runs.
-2. **Shastry–Sutherland g=0** → must recover Δ=1; record whether Γ approaches 1
-   from above or below. This single number fixes the bound direction for the rest
-   of the week.
+2. **Shastry–Sutherland g=0** → must recover Δ=1; whichever flag appears for γ
+   just above vs just below 1 labels OPTIMAL/INFEASIBLE for the rest of the week.
 3. Square J1-J2 **g=0** at L=2,d=2 — smallest non-trivial run, exposes the
    moment-matrix size and whether SU(2) projection is correctly wired.
