@@ -32,6 +32,6 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 
 - Challenge registration metadata is present.
 - Benchmark scope and paper-gap analysis are archived.
-- Benchmark implementation is capped at five short, worktree-isolated attempts; Attempt 01 has not started.
-- No numerical implementation or compute result is claimed yet.
-- Next gate: ratify the exact Hamiltonian, normalization, background-charge convention, conserved sectors, and `N=6` ED observable definitions before computation.
+- Benchmark implementation is capped at five short, worktree-isolated attempts; Attempt 01 closed as an ED-oracle `slice-pass`.
+- The verified `N=6`, `2Q=15` reference has `E0=3.8716349140212465`, `E2=4.003323325986339`, and `Delta2=0.13168841196509273` before background/density corrections.
+- All ED-oracle gates pass. Full Benchmark v0 remains pending until an NQS/VMC candidate passes Monte Carlo error and ED cross-check gates.

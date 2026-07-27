@@ -6,7 +6,7 @@ The rules and worktree naming convention are in
 
 | Attempt | Branch | Outcome | Benchmark status | Journal |
 |---:|---|---|---|---|
-| 01 | `challenge/qmc-chiral-graviton-a01` | not started | not run | -- |
+| 01 | `challenge/qmc-chiral-graviton-a01` | slice-pass | ED reference ready; candidate pending | [attempt-01.md](attempt-01.md) |
 | 02 | `challenge/qmc-chiral-graviton-a02` | not started | not run | -- |
 | 03 | `challenge/qmc-chiral-graviton-a03` | not started | not run | -- |
 | 04 | `challenge/qmc-chiral-graviton-a04` | not started | not run | -- |

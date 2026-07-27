@@ -134,7 +134,7 @@ Run: `python -m pytest tracks/qmc/solutions/BOTS-848/tests -q`
 
 Expected: all Attempt 01 tests pass.
 
-- [ ] **Step 5: Run the N=6 oracle**
+- [x] **Step 5: Run the N=6 oracle**
 
 Run:
 
@@ -151,12 +151,12 @@ Expected: exit 0 and a JSON report with all ED gates true.
 - Modify: `tracks/qmc/solutions/BOTS-848/logs/attempt-01.md`
 - Modify: `tracks/qmc/solutions/BOTS-848/logs/README.md`
 
-- [ ] **Step 1: Record exact commands, commits, numerical result, and residuals**
+- [x] **Step 1: Record exact commands, commits, numerical result, and residuals**
 
-- [ ] **Step 2: Run fresh verification**
+- [x] **Step 2: Run fresh verification**
 
 Run the scoped pytest suite, the CLI, JSON structural checks, `git diff --check`, and `git status --short`.
 
-- [ ] **Step 3: Commit implementation separately from the final journal**
+- [x] **Step 3: Commit implementation separately from the final journal**
 
 Use one implementation commit and one journal-only commit so a failure journal can be integrated independently.
