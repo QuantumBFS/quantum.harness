@@ -19,3 +19,9 @@ This registration starts from a conservative design track. The immediate output
 is a Rust-inspired typed tensor DSL design memo grounded in the #129 ED/FCI
 workbench and the #114 tensor-library verification line, before committing to a
 full native language implementation.
+
+## Working Repository
+
+Development starts in the private AGPL-3.0 repository
+`JunkaiWang-TheoPhy/quantum-harness-216-certified-tensor-dsl`, with initial
+design notes and a small Rust prototype crate under `prototype/`.
