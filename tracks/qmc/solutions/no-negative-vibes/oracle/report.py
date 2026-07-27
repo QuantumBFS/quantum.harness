@@ -1,4 +1,4 @@
-"""Aggregate and plot a classical-group falsification scan."""
+"""Aggregate and plot a structured determinant-weight falsification scan."""
 
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def _plot_summary(summary: pd.DataFrame, path: Path) -> None:
     ax.set_yticks(positions, ordered.index)
     ax.set_xlim(0.0, 1.02)
     ax.set_xlabel("fraction of sampled products")
-    ax.set_title("Classical-group determinant-weight falsification scan")
+    ax.set_title("Structured determinant-weight falsification scan")
     ax.grid(axis="x", alpha=0.25)
     ax.legend(loc="lower right")
     for position, (_, row) in enumerate(ordered.iterrows()):

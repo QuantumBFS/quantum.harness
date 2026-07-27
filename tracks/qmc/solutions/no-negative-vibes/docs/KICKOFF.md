@@ -9,12 +9,14 @@
 - 精确证书、运行参数、软件环境和随机种子必须能复核。
 - 基线 oracle 已通过测试；15 个结构族的 90 万次扫描已完成，不应无理由重复。
 - 经典群中的明显失败项已有精确或确定性数值反例，详见 [BASELINE_RESULTS.md](BASELINE_RESULTS.md)。
+- 标准 Hermitian AZ 十类的 72 万次扫描也已完成；六类失败、四类约化到已知机制，详见
+  [AZ_TENFOLD_RESULTS.md](AZ_TENFOLD_RESULTS.md)。
 
 ## 仍然开放，必须由团队讨论
 
 - 主攻哪个候选矩阵类，备选哪个；
 - 第一套物理 Hamiltonian 和 Hubbard–Stratonovich 分解；
-- AZ 表还是复杂 Majorana 表述作为主线；
+- 复杂 Majorana 表述还是“AZ 约束交半正定锥”作为主线；
 - 第一个新增候选生成器和对应的最小精确证书；
 - 第一轮扩展扫描预算；
 - 最终由谁负责证明、代码、物理映射和写作。
@@ -23,7 +25,7 @@
 
 1. 全员读 [START_HERE](../START_HERE.md)、[基线结果](BASELINE_RESULTS.md) 和
    [文献空白](LITERATURE_GAP_2026.md)。
-2. 用 [候选评估卡](CANDIDATE_CARD.md) 比较 AZ 表与复杂 Majorana 表述。
+2. 用 [候选评估卡](CANDIDATE_CARD.md) 比较复杂 Majorana 表述与一个明确的锥交集。
 3. 选一个主候选和一个备选；每个候选明确“最快能杀死它的最小维数检验”。
 4. 复用现有 oracle，按新增精确测试 → 新生成器 → 小扫描的顺序推进。
 

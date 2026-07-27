@@ -165,6 +165,180 @@
       "expected_weight": "2 + 2*I",
       "expected_sign": "complex",
       "exact_relations": ["D^dagger eta D = eta"]
+    },
+    {
+      "id": "az_ai_three_spd_negative",
+      "family": "AZ AI",
+      "factors_in_product_order": [
+        [["5", "2"], ["2", "1"]],
+        [["18", "-9"], ["-9", "5"]],
+        [["1", "-3"], ["-3", "13"]]
+      ],
+      "matrix": [["177", "-671"], ["66", "-250"]],
+      "expected_determinant": "36",
+      "expected_weight": "-36",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "trs_operator": [["1", "0"], ["0", "1"]]
+      },
+      "exact_relations": [
+        "each P_i is real symmetric positive definite",
+        "H_i = log(P_i) is an AZ AI Hermitian generator",
+        "three factors are sufficient while one or two positive definite factors have positive weight"
+      ]
+    },
+    {
+      "id": "az_aiii_three_spd_negative",
+      "family": "AZ AIII",
+      "factors_in_product_order": [
+        [
+          ["41/9", "56/45 - 64*I/15"],
+          ["56/45 + 64*I/15", "41/9"]
+        ],
+        [
+          ["41/9", "-320/153 + 200*I/51"],
+          ["-320/153 - 200*I/51", "41/9"]
+        ],
+        [
+          ["25/7", "24/25 + 576*I/175"],
+          ["24/25 - 576*I/175", "25/7"]
+        ]
+      ],
+      "matrix": [
+        ["(-4594923 + 30884736*I)/1204875", "8*(-258336 + 29473*I)/80325"],
+        ["8*(-258336 - 29473*I)/80325", "(-4594923 - 30884736*I)/1204875"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-753344/133875",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "chiral_operator": [["1", "0"], ["0", "-1"]]
+      },
+      "exact_relations": [
+        "S P_i S = P_i^-1",
+        "H_i = log(P_i) is Hermitian and satisfies S H_i S = -H_i",
+        "the complex off-diagonal phases distinguish AIII from its real BDI subset"
+      ]
+    },
+    {
+      "id": "az_ci_three_spd_negative",
+      "family": "AZ CI",
+      "factors_in_product_order": [
+        [["29/5", "64/15"], ["64/15", "149/45"]],
+        [["409/125", "-288/125"], ["-288/125", "241/125"]],
+        [["53/35", "-96/35"], ["-96/35", "197/35"]]
+      ],
+      "matrix": [
+        ["24449/875", "-28352/525"],
+        ["49984/2625", "-57907/1575"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-53744/7875",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "trs_operator": [["1", "0"], ["0", "1"]],
+        "phs_operator": [["0", "1"], ["-1", "0"]]
+      },
+      "exact_relations": [
+        "P_i is real symmetric positive definite with determinant one",
+        "J P_i J^dagger = P_i^-1",
+        "H_i = log(P_i) is an AZ CI Hermitian generator"
+      ]
+    },
+    {
+      "id": "az_a_d_three_spd_complex",
+      "family": "AZ A and D",
+      "factors_in_product_order": [
+        [
+          ["5/3", "0", "4*I/3", "0"],
+          ["0", "5/3", "0", "4*I/3"],
+          ["-4*I/3", "0", "5/3", "0"],
+          ["0", "-4*I/3", "0", "5/3"]
+        ],
+        [
+          ["5/3", "4*I/3", "0", "0"],
+          ["-4*I/3", "5/3", "0", "0"],
+          ["0", "0", "5/3", "-4*I/3"],
+          ["0", "0", "4*I/3", "5/3"]
+        ],
+        [
+          ["5/3", "0", "0", "-4*I/3"],
+          ["0", "5/3", "4*I/3", "0"],
+          ["0", "-4*I/3", "5/3", "0"],
+          ["4*I/3", "0", "0", "5/3"]
+        ]
+      ],
+      "matrix": [
+        ["125/27 + 64*I/27", "80/27 + 100*I/27", "-80/27 + 100*I/27", "80/27 - 100*I/27"],
+        ["-80/27 - 100*I/27", "125/27 + 64*I/27", "-80/27 + 100*I/27", "-80/27 + 100*I/27"],
+        ["80/27 - 100*I/27", "80/27 - 100*I/27", "125/27 + 64*I/27", "-80/27 - 100*I/27"],
+        ["-80/27 + 100*I/27", "80/27 - 100*I/27", "80/27 + 100*I/27", "125/27 + 64*I/27"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "2816/27 + 77824*I/729",
+      "expected_sign": "complex",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "phs_operator": [
+          ["1", "0", "0", "0"],
+          ["0", "1", "0", "0"],
+          ["0", "0", "1", "0"],
+          ["0", "0", "0", "1"]
+        ]
+      },
+      "exact_relations": [
+        "P_i^* = P_i^-1, so H_i = log(P_i) is an AZ D Hermitian generator",
+        "AZ A contains the same factors after forgetting particle-hole symmetry"
+      ]
+    },
+    {
+      "id": "az_c_three_spd_complex",
+      "family": "AZ C",
+      "factors_in_product_order": [
+        [
+          ["5/3", "-4*I/3", "0", "0"],
+          ["4*I/3", "5/3", "0", "0"],
+          ["0", "0", "5/3", "-4*I/3"],
+          ["0", "0", "4*I/3", "5/3"]
+        ],
+        [
+          ["5/3", "0", "0", "4/3"],
+          ["0", "5/3", "4/3", "0"],
+          ["0", "4/3", "5/3", "0"],
+          ["4/3", "0", "0", "5/3"]
+        ],
+        [
+          ["5/3", "0", "4/3", "0"],
+          ["0", "5/3", "0", "-4/3"],
+          ["4/3", "0", "5/3", "0"],
+          ["0", "-4/3", "0", "5/3"]
+        ]
+      ],
+      "matrix": [
+        ["125/27 - 64*I/27", "-80/27 - 100*I/27", "100/27 - 80*I/27", "100/27 + 80*I/27"],
+        ["80/27 + 100*I/27", "125/27 - 64*I/27", "100/27 + 80*I/27", "-100/27 + 80*I/27"],
+        ["100/27 - 80*I/27", "100/27 + 80*I/27", "125/27 - 64*I/27", "-80/27 - 100*I/27"],
+        ["100/27 + 80*I/27", "-100/27 + 80*I/27", "80/27 + 100*I/27", "125/27 - 64*I/27"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "2816/27 - 77824*I/729",
+      "expected_sign": "complex",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "phs_operator": [
+          ["0", "0", "1", "0"],
+          ["0", "0", "0", "1"],
+          ["-1", "0", "0", "0"],
+          ["0", "-1", "0", "0"]
+        ]
+      },
+      "exact_relations": [
+        "C P_i^* C^dagger = P_i^-1",
+        "H_i = log(P_i) is an AZ C Hermitian generator"
+      ]
     }
   ]
 }

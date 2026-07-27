@@ -11,11 +11,26 @@ import time
 import numpy as np
 
 from . import __version__
-from .families import available_cases, random_generator, structure_residual
+from . import az_families, families
 from .weights import classify_product, product_exponentials
 
 
 _CLASSIFICATIONS = ("positive", "negative", "zero", "complex", "uncertain")
+
+
+def _available_cases() -> dict[str, families.FamilyCase]:
+    classical = families.available_cases()
+    az = az_families.available_cases()
+    overlap = classical.keys() & az.keys()
+    if overlap:
+        raise RuntimeError(f"duplicate candidate case names: {sorted(overlap)}")
+    return {**classical, **az}
+
+
+def _candidate_module(case: str):
+    if case in az_families.available_cases():
+        return az_families
+    return families
 
 
 def _write_json_atomic(path: Path, payload: dict[str, object]) -> None:
@@ -118,11 +133,13 @@ def scan_cell(
     seed: int,
     samples: int,
 ) -> dict[str, object]:
-    if case not in available_cases():
+    cases = _available_cases()
+    if case not in cases:
         raise ValueError(f"unknown case: {case}")
     if depth < 1 or samples < 1:
         raise ValueError("depth and samples must be positive")
 
+    candidate_module = _candidate_module(case)
     rng = np.random.default_rng(seed)
     counts = {classification: 0 for classification in _CLASSIFICATIONS}
     max_residual = 0.0
@@ -132,11 +149,15 @@ def scan_cell(
 
     for _ in range(samples):
         generators = [
-            random_generator(case, rng, scale=scale) for _ in range(depth)
+            candidate_module.random_generator(case, rng, scale=scale)
+            for _ in range(depth)
         ]
         max_residual = max(
             max_residual,
-            *(structure_residual(case, generator) for generator in generators),
+            *(
+                candidate_module.structure_residual(case, generator)
+                for generator in generators
+            ),
         )
         product = product_exponentials(generators)
         result = classify_product(product)
@@ -160,7 +181,7 @@ def scan_cell(
                     condition_number=result.condition_number,
                 )
 
-    spec = available_cases()[case]
+    spec = cases[case]
     return {
         "schema_version": 1,
         "completed": True,

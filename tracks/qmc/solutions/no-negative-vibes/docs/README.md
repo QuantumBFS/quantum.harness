@@ -17,6 +17,7 @@
 
 随后按任务使用：
 
+- [AZ_TENFOLD_RESULTS.md](AZ_TENFOLD_RESULTS.md)：72 万次 AZ 扫描、深度三证书和已知类约化；
 - [BASELINE_RESULTS.md](BASELINE_RESULTS.md)：90 万次基线扫描、淘汰表和证据边界；
 - [COMPUTE_STRATEGY.md](COMPUTE_STRATEGY.md)：候选规模、吞吐基准和超算触发条件；
 - [LITERATURE_GAP_2026.md](LITERATURE_GAP_2026.md)：截至 2026-07-27 的文献边界与推荐主线；
@@ -29,7 +30,7 @@
 
 先读 [../START_HERE.md](../START_HERE.md) 的“现在做到哪里”，再按三类任务分工：
 
-1. AZ/结构化候选生成器、数值 oracle 与精确反例；
+1. Majorana/锥交集候选生成器、数值 oracle 与精确反例；
 2. 候选矩阵类和物理 DQMC 映射；
 3. 文献排重、已知类约化与精确证明。
 

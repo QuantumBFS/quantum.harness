@@ -54,7 +54,7 @@
 
 ## 精确证书把数值反例闭合
 
-机器可读的 [11 个精确证书](../fixtures/exact_certificates.json) 覆盖：
+机器可读证书库中的 [11 个经典群证书](../fixtures/exact_certificates.json) 覆盖：
 
 - `O(1,1)` 的正、负、零三个连通分支；
 - `Sp(2,R)`、`Sp(4,R)`、`SL(3,R)` 的剪切乘积负例；

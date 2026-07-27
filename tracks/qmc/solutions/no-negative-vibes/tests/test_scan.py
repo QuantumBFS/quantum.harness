@@ -31,6 +31,17 @@ def test_scan_cell_is_deterministic() -> None:
     assert left == right
 
 
+def test_scan_cell_accepts_az_candidates_through_the_common_manifest() -> None:
+    """Catches an AZ generator that bypasses provenance or result accounting."""
+    manifest = scan_cell(case="az_aii", depth=4, scale=0.5, seed=29, samples=30)
+
+    assert manifest["provenance"]["family"] == "az_aii_hermitian"
+    assert sum(manifest["counts"].values()) == 30
+    assert manifest["max_structure_residual"] < 1e-12
+    assert manifest["counts"]["negative"] == 0
+    assert manifest["counts"]["complex"] == 0
+
+
 def test_run_spec_writes_resumable_parameter_scan_manifest(tmp_path) -> None:
     """Catches writing results outside the declared cell or recomputing completed cells."""
     run_dir = tmp_path / "run"
