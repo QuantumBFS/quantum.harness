@@ -17,6 +17,9 @@
 
 随后按任务使用：
 
+- [BASELINE_RESULTS.md](BASELINE_RESULTS.md)：90 万次基线扫描、淘汰表和证据边界；
+- [COMPUTE_STRATEGY.md](COMPUTE_STRATEGY.md)：候选规模、吞吐基准和超算触发条件；
+- [LITERATURE_GAP_2026.md](LITERATURE_GAP_2026.md)：截至 2026-07-27 的文献边界与推荐主线；
 - [EXACT_CERTIFICATES.md](EXACT_CERTIFICATES.md)：人类可读的精确正、负、零测试锚点；
 - [CANDIDATE_CARD.md](CANDIDATE_CARD.md)：每个新候选都复制并填写的评估模板；
 - [ENVIRONMENT.md](ENVIRONMENT.md)：本机可用软件、错误环境和待定依赖；
@@ -26,9 +29,10 @@
 
 先读 [../START_HERE.md](../START_HERE.md) 的“现在做到哪里”，再按三类任务分工：
 
-1. 数值 oracle 与测试；
+1. AZ/结构化候选生成器、数值 oracle 与精确反例；
 2. 候选矩阵类和物理 DQMC 映射；
-3. 文献排重与精确证明。
+3. 文献排重、已知类约化与精确证明。
 
-定理和文献结论只维护在 `FOUNDATIONS.md`，精确测试数据只维护在
-`fixtures/exact_certificates.json`，避免出现多个互相矛盾的版本。
+精确测试数据的唯一机器可读源是 `fixtures/exact_certificates.json`；扫描事实的唯一
+机器可读源是结果目录中的 `run.json`、`parameter-scan.csv` 和逐格 manifest。文档负责解释，
+不替代原始数据。

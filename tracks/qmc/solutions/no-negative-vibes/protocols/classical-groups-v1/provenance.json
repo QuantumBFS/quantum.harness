@@ -1,0 +1,11 @@
+{
+  "protocol": "classical-groups-v1",
+  "precision": "numpy-scipy-float64",
+  "weight": "det(I + product_l exp(A_l))",
+  "purpose": "falsification-only baseline; survival is not a proof",
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1506.05349",
+    "https://arxiv.org/abs/1712.09412"
+  ]
+}
