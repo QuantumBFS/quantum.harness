@@ -9,8 +9,9 @@
 | Team | Rewrite It In Rust! (RIIR 2607 Hefei) |
 | Members | Chenxi Wan, Yedi Shen, Junkai Wang |
 | Workbench | [`JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust) |
-| Validated workbench revision | [`f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/tree/f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d) |
+| Validated workbench revision | [`006aae252e50a469934d11d0d12e1cb05a57477c`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/tree/006aae252e50a469934d11d0d12e1cb05a57477c) |
 | Calculation revision | [`c5a3aa698c26826b5feae470caea9c4b47680268`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/tree/c5a3aa698c26826b5feae470caea9c4b47680268) |
+| Release | [`v0.1.0`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/releases/tag/v0.1.0) |
 | License | GNU Affero General Public License v3.0 |
 | Reproduction instructions | [reproduction-prompt.md](reproduction-prompt.md) |
 
@@ -170,7 +171,7 @@ collide, including explicit deterministic semantics. The report also records
 mutable/output-buffer, BLAS-1, layout, numerical, dispatch, and parallel
 reduction friction with proposed minimal reproducers:
 
-[`reports/tenferro-gap-list.md`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/blob/f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d/reports/tenferro-gap-list.md)
+[`reports/tenferro-gap-list.md`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/blob/v0.1.0/reports/tenferro-gap-list.md)
 
 ## Reproduce
 
@@ -183,7 +184,7 @@ run is:
 git clone \
   https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust.git
 cd quantum-harness-129-workbench-rust
-git checkout f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d
+git checkout v0.1.0
 cargo build --release --locked
 
 RAYON_NUM_THREADS=10 target/release/ed_workbench_rs cc-series \

@@ -11,7 +11,10 @@ repository:
 https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust
 
 validated submission revision:
-f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d
+006aae252e50a469934d11d0d12e1cb05a57477c
+
+public release:
+https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust/releases/tag/v0.1.0
 
 validated numerical calculation revision:
 c5a3aa698c26826b5feae470caea9c4b47680268
@@ -26,7 +29,7 @@ Clone and build the exact submission revision with its committed lockfile:
 git clone \
   https://github.com/JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust.git
 cd quantum-harness-129-workbench-rust
-git checkout f4fadfc82dc338fd6b78f7e7a1e6a7ad2bbac47d
+git checkout v0.1.0
 cargo build --release --locked
 ```
 
