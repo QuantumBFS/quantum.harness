@@ -16,4 +16,4 @@
 ## Working Repository
 
 Development starts in the private AGPL-3.0 repository
-`JunkaiWang-TheoPhy/quantum-harness-129-ed-workbench-rust`.
+`JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust`.
