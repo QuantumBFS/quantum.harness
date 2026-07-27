@@ -42,7 +42,7 @@ flush(stdout)
 #   Heisenberg bond -> [[1;4]], coef 3/2 ;  J2 diagonal -> [[1;7]], coef 3/2*g.
 function run_case(tag, L, d, g, rdm, ref)
     supp = g > 0 ? [[1; 4], [1; 7]] : [[1; 4]]
-    coe  = g > 0 ? [3//2, 3//2 * g] : [3//2]
+    coe  = g > 0 ? [1.5, 1.5 * g] : [1.5]   # Float64, not Rational: GSB dispatches on coe's eltype
     refstr = isnan(ref) ? "none" : string(ref)
     println("=" ^ 70)
     println("$tag : L=$L d=$d g=$g rdm=$rdm  (ref=$refstr)")
@@ -73,28 +73,40 @@ function run_case(tag, L, d, g, rdm, ref)
     end
 end
 
-# ---- Tier 1: tighten the L=4 deliverable cases at d=6 (cheap, high value) ----
-println("\n##### TIER 1: L=4 d=6 sweep (tighten existing bounds) #####"); flush(stdout)
-run_case("L4-g0.0-d6",   4, 6, 0.0,   8, -0.7018)
-run_case("L4-g0.3-d6",   4, 6, 0.3,   8, -0.5559)
-run_case("L4-g0.5-d6",   4, 6, 0.5,   8, -0.4976)
-run_case("L4-g0.535-d6", 4, 6, 0.535, 8, NaN)       # challenge point (SPEC §2), no ref
-run_case("L4-g0.7-d6",   4, 6, 0.7,   8, -0.4836)
+# NOTE: the first submission banked L=4 J1-J2 d=6 (g=0.3,0.5,0.535,0.7) and
+# found d=6 == d=4 to 6 digits -> the bound is d-converged at L=4 (rdm=8 is
+# doing the work). So d-tightening J1-J2 is unproductive; this resubmission
+# focuses on (a) Heisenberg L-frontier for the thermodynamic trend and
+# (b) d-convergence probes to confirm the same holds at g=0, plus challenge-
+# point d=8. rdm convention mirrors sdp_final.sh: rdm=8 for L<=6, rdm=0 for L>=8.
 
-# ---- Tier 2: tighten Heisenberg at larger L, d=6 ----
-println("\n##### TIER 2: Heisenberg d=6 at L=6,8 #####"); flush(stdout)
-run_case("L6-g0.0-d6", 6, 6, 0.0, 8, -0.678872)
-run_case("L8-g0.0-d6", 8, 6, 0.0, 0, -0.676370)     # paper ref
+rdm_of(L) = L <= 6 ? 8 : 0
 
-# ---- Tier 3: push L frontier at d=4 (moderate cost) ----
-println("\n##### TIER 3: Heisenberg d=4 at L=10,12 (frontier) #####"); flush(stdout)
-run_case("L10-g0.0-d4", 10, 4, 0.0, 0, NaN)
-run_case("L12-g0.0-d4", 12, 4, 0.0, 0, NaN)
+# ---- Tier 1: L=4 Heisenberg d-convergence probe (cheap) ----
+println("\n##### TIER 1: L=4 Heisenberg d-convergence (d=6,8) #####"); flush(stdout)
+run_case("L4-g0.0-d6",  4, 6, 0.0, rdm_of(4), -0.7018)
+run_case("L4-g0.0-d8",  4, 8, 0.0, rdm_of(4), -0.7018)
 
-# ---- Tier 4: expensive frontier pushes (run only if earlier tiers leave time) ----
-println("\n##### TIER 4: expensive (L=10 d=6, L=4 d=8) #####"); flush(stdout)
-run_case("L10-g0.0-d6", 10, 6, 0.0, 0, NaN)
-run_case("L4-g0.0-d8",   4, 8, 0.0, 8, -0.7018)
+# ---- Tier 2: Heisenberg L=6,8 d=6 (tighten + paper ref) ----
+println("\n##### TIER 2: Heisenberg L=6,8 at d=6 #####"); flush(stdout)
+run_case("L6-g0.0-d6",  6, 6, 0.0, rdm_of(6), -0.678872)
+run_case("L8-g0.0-d6",  8, 6, 0.0, rdm_of(8), -0.676370)
+
+# ---- Tier 3: L frontier at d=4 (thermodynamic trend) ----
+println("\n##### TIER 3: Heisenberg L=10,12,14 at d=4 (frontier) #####"); flush(stdout)
+run_case("L10-g0.0-d4", 10, 4, 0.0, rdm_of(10), NaN)
+run_case("L12-g0.0-d4", 12, 4, 0.0, rdm_of(12), NaN)
+run_case("L14-g0.0-d4", 14, 4, 0.0, rdm_of(14), NaN)
+
+# ---- Tier 4: challenge-point d=8 convergence (g=0.5, 0.535) ----
+println("\n##### TIER 4: challenge-point d=8 (g=0.5, 0.535) #####"); flush(stdout)
+run_case("L4-g0.5-d8",   4, 8, 0.5,   rdm_of(4), -0.4976)
+run_case("L4-g0.535-d8", 4, 8, 0.535, rdm_of(4), NaN)
+
+# ---- Tier 5: expensive frontier d=6 (run only if earlier tiers leave time) ----
+println("\n##### TIER 5: Heisenberg L=10,12 at d=6 (expensive) #####"); flush(stdout)
+run_case("L10-g0.0-d6", 10, 6, 0.0, rdm_of(10), NaN)
+run_case("L12-g0.0-d6", 12, 6, 0.0, rdm_of(12), NaN)
 
 println("\n=== ALL DONE ===  ", Dates.format(now(), "yyyy-mm-dd HH:MM:SS"))
 flush(stdout)
