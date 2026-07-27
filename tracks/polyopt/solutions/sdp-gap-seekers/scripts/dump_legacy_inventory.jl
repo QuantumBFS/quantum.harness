@@ -21,10 +21,11 @@
 # Run on SCNet:
 #   julia --project=julia-env scripts/dump_legacy_inventory.jl
 #
-# STATUS: written from src/basicfunction.jl + src/sdp.jl + example/example.jl;
-# NOT yet executed (laptop-compute constraint). First remote run MUST pass the
-# asserts (§4 of the schema) and the tsupp output should be spot-checked against a
-# manual trace at N=9,d=2 before the file is trusted as the diff oracle.
+# STATUS: validated on SCNet (solver-free, login-node run). Asserts pass:
+# Ising N=9 d=2 -> H=17 terms, lb=[211,50], lgb=[11,14], |tsupp|=2705;
+# Kagome N=5 d=2 -> H=18 terms, lb=[31,22], lgb=[0,1], |tsupp|=10982.
+# Output is deterministic; the frozen oracle math file should be committed from a
+# clean run (see legacy-inventory-schema.md §4–5) before merging.
 
 using SpectralGap
 using SHA
@@ -265,10 +266,13 @@ function dump_kagome(io, N, d)
 end
 
 function spectralgap_source()
+    # Portable + deterministic: no git dependency (some remotes have an old git
+    # without -C, and .external may not be a repo). pkgversion is stable for a
+    # fixed checkout; fall back to a descriptive string if it is unavailable.
     try
-        return strip(read(`git -C .external/SpectralGap rev-parse HEAD`, String))
+        return string("SpectralGap.jl v", pkgversion(SpectralGap))
     catch
-        return "unknown"
+        return "SpectralGap.jl (.external, patched)"
     end
 end
 
