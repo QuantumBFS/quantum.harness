@@ -1,6 +1,6 @@
 # Challenge #15 Scalable NQS v1 Design
 
-> Status: user-approved design, awaiting written-spec review
+> Status: approved; Step 1 implementation plan ready
 >
 > Date: 2026-07-28
 >
