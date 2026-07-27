@@ -70,6 +70,19 @@ A = [[C, B],
 where `C` and `D` are real skew-symmetric. The original numerical conjecture
 was the special case `C = D = 0`.
 
+Unequal signatures do not give a new direction. If `M` is in the identity
+component of `O(p,q)` and `r = max(p,q)`, pad the smaller-signature side with
+an identity block. The padded matrix lies in the identity component of
+`O(r,r)` and
+
+```text
+det(I + padded(M)) = 2^abs(p-q) det(I + M).
+```
+
+The split theorem therefore already implies nonnegativity on the identity
+component of every `O(p,q)`. A search over unequal sublattice sizes must not
+be reported as a new matrix class.
+
 ### 2.2 Majorana and Kramers positivity
 
 Majorana reflection positivity gives a sufficient block-kernel condition for
@@ -187,7 +200,14 @@ This is an exact rational, product-of-exponentials certificate that the real
 symplectic group does not give a universally nonnegative determinant class.
 It is a strong negative control, not a novelty claim.
 
-### 3.3 Exact SU(1,1) negative example
+The obstruction persists in every higher rank: take the direct sum of this
+`2 x 2` block with `I_(2n-2)`. The result lies in `Sp(2n,R)` and has
+
+```text
+det(I + D_n) = (-1/2) 2^(2n-2) < 0.
+```
+
+### 3.3 Exact SU(1,1) negative examples and a similarity reduction
 
 The 2019 pseudo-unitary paper supplies
 
@@ -201,6 +221,61 @@ det(I + D) = 2 - 2 sqrt(2) < 0.
 This distinguishes "the determinant is real" from "the determinant is
 nonnegative." Squaring the one-flavour determinant, as happens for two
 identical flavours, removes this sign.
+
+There is also a rational certificate. The fixed Cayley transform
+
+```text
+C = (1/sqrt(2)) [[1,-i],
+                 [1, i]]
+```
+
+maps `SL(2,R) = Sp(2,R)` to `SU(1,1)`. Applying it to the symplectic
+certificate above gives
+
+```text
+C diag(-2,-1/2) C^(-1)
+    = [[-5/4,-3/4],
+       [-3/4,-5/4]] in SU(1,1),
+
+det(I + C D C^(-1)) = -1/2.
+```
+
+Because the determinant weight is invariant under a fixed similarity
+transformation, the lowest-dimensional `Sp(2,R)` and `SU(1,1)` negative
+directions are the same obstruction in different bases. They must not be
+counted as two independent findings.
+
+Embedding the rational `SU(1,1)` block and filling all other positive and
+negative directions with identities gives, for every `p,q >= 1`, an element
+of `SU(p,q)` with
+
+```text
+det(I + D_(p,q)) = (-1/2) 2^(p+q-2) < 0.
+```
+
+Thus a single fermion flavour fails universally across the noncompact
+pseudo-unitary family; the useful known statement is phase/reality control,
+followed by even-flavour squaring.
+
+### 3.4 Small classical-group smoke table
+
+The following analytic checks are useful before attempting a large
+Altland--Zirnbauer sweep. They are calibration facts, not novelty claims.
+
+| Matrix group | Sign of `det(I+D)` | Reason or exact obstruction |
+|---|---|---|
+| `O(n)` | nonnegative | non-real eigenvalues pair as conjugates; `det(D)=-1` forces a `-1` eigenvalue and hence zero weight |
+| identity component of `O(p,q)` | nonnegative | padding reduction to the split `O(r,r)` theorem |
+| `Sp(2n,R)` | can be negative | rational shear certificate above, padded by identities |
+| compact `USp(2n)` | nonnegative | conjugate/Kramers eigenvalue pairing; already a known mechanism |
+| `SU(2)` | nonnegative | eigenvalues are `lambda` and `conj(lambda)` |
+| `SU(n)`, `n >= 3` | can be negative | with `zeta = exp(2 pi i/n)`, `D = zeta I_n` has weight `(1+zeta)^n = -(2 cos(pi/n))^n` |
+| `SU(p,q)`, `p,q >= 1` | real but can be negative | rational embedded `SU(1,1)` certificate above |
+| `U(p,q)` | fixed phase, not fixed sign | equation (1) locks the phase to `arg(det(D))/2` modulo `pi` |
+
+The surviving compact rows are immediately suspect of reducing to orthogonal
+or Kramers pairing. The noncompact symplectic and pseudo-unitary rows are
+already eliminated as universal one-flavour nonnegative classes.
 
 ## 4. Novelty checklist
 
@@ -253,6 +328,13 @@ The initial regression suite should include:
 - the exact `SU(1,1)` negative example and its positive even-flavour square;
 - deterministic replay from a recorded seed.
 
+For report readiness, committed code and small exact certificates should stay
+under `tracks/qmc/solutions/no-negative-vibes/`. Generated scans belong under
+`tracks/qmc/results/<run-id>/` and should retain a `run.json`, per-cell
+manifests, machine-readable tables, and plots. The final narrative must state
+the sampled dimensions, depths, sample counts, seeds, precision escalation
+policy, software versions, and which claims are exact versus empirical.
+
 ## 6. Direction triage
 
 | Direction | Current assessment | Immediate value | Main risk |
@@ -279,6 +361,7 @@ Recommended order:
 - [MathOverflow I](https://mathoverflow.net/questions/204460/how-to-prove-this-determinant-is-positive)
 - [Tao, standard branch of the matrix logarithm](https://terrytao.wordpress.com/2015/05/03/the-standard-branch-of-the-matrix-logarithm/)
 - [Wang et al., split orthogonal group](https://arxiv.org/abs/1506.05349)
+- [Wu and Zhang, Kramers time-reversal condition](https://arxiv.org/abs/cond-mat/0407272)
 - [MathOverflow II](https://mathoverflow.net/questions/229788/how-to-prove-this-determinant-is-positive-ii)
 - [Wei et al., Majorana positivity](https://arxiv.org/abs/1601.01994)
 - [Li, Jiang, and Yao, Majorana time-reversal classes](https://arxiv.org/abs/1601.05780)
