@@ -1,10 +1,10 @@
-# OmniEvolve — #71 Occam's Circuit
+# quantumevolve — #71 Occam's Circuit
 
 ## Team
 
 | | |
 |---|---|
-| **Team name** | OmniEvolve |
+| **Team name** | quantumevolve |
 | **Members** | 結凪 (UynajGI) |
 
 ## Challenge

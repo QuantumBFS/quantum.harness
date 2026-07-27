@@ -1,10 +1,10 @@
-# OmniEvolve — #117 Lennard-Jones Cluster Global Optimization
+# quantumevolve — #117 Lennard-Jones Cluster Global Optimization
 
 ## Team
 
 | | |
 |---|---|
-| **Team name** | OmniEvolve |
+| **Team name** | quantumevolve |
 | **Members** | 結凪 (UynajGI) |
 
 ## Challenge
