@@ -23,5 +23,5 @@ full native language implementation.
 ## Working Repository
 
 Development starts in the private AGPL-3.0 repository
-`JunkaiWang-TheoPhy/quantum-harness-216-certified-tensor-dsl`, with initial
+`JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl`, with initial
 design notes and a small Rust prototype crate under `prototype/`.
