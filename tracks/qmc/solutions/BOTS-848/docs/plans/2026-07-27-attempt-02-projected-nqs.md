@@ -36,6 +36,6 @@
 
 ## Task 5: Close and integrate the attempt
 
-- [ ] Record commands, configuration, numerical values, MC errors, residuals, and failure lessons.
-- [ ] Run fresh scoped tests, CLI, JSON structural checks, `git diff --check`, and status.
-- [ ] Commit implementation separately from the closure journal and integrate only after verification.
+- [x] Record commands, configuration, numerical values, MC errors, residuals, and failure lessons.
+- [x] Run fresh scoped tests, CLI, JSON structural checks, `git diff --check`, and status.
+- [x] Commit implementation separately from the closure journal and integrate only after verification.
