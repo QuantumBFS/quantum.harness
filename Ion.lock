@@ -50,7 +50,7 @@ checksum = "sha256:80ba763d1905f294c8f03ad17e6571ba640fe0fc4865ca6034c253527c031
 name = "beginner-training"
 source = ""
 kind = "local"
-checksum = "sha256:5fa9151bb4a8cd2b148d7e511711d9f8230ad1e2ac61ace96f17b1fac2c62c1f"
+checksum = "sha256:7daf95f7fb225887ab678669a4189811b6323a57c8a71dd2fb805108ac17aeb4"
 
 [[skill]]
 name = "brainstorm-ideas"
@@ -166,7 +166,7 @@ checksum = "sha256:39dd8ce99137e90d385214e8d9d75bcee5268a76158c8515059a8bc3fb548
 name = "method-ed"
 source = ""
 kind = "local"
-checksum = "sha256:dae76a5efc3f2c6994989777ef3398f4bde4fea73a24596f97461e500731346c"
+checksum = "sha256:851c20b702263ce47687c1d424df3278d6408aedf192071feec1b44c7d84071c"
 
 [[skill]]
 name = "method-ltrg"
@@ -196,7 +196,7 @@ checksum = "sha256:5c25c4608d59611e8ed833480e51505ce4dd363ed636df750a1bf2e8f5a31
 name = "method-peps"
 source = ""
 kind = "local"
-checksum = "sha256:7497421e5ca1b47d6fcbec6a9bc1360337fadb70ab9b241ea6767f7dfdd594d6"
+checksum = "sha256:737700184436df32eeeff55b1df859e72e1f5dc85b856416c8aba7f667dbe418"
 
 [[skill]]
 name = "method-polyopt"
@@ -208,7 +208,7 @@ checksum = "sha256:766460c93bfb31f376a635485c2c8f8b73f952a610cb2103331827c226034
 name = "method-qcs"
 source = ""
 kind = "local"
-checksum = "sha256:afcefe57735eb30c4ad3f69ebd8579586a18bb7dfe886bccb0f53fed93cc5292"
+checksum = "sha256:d21ca39b19d444f29709adffdcaa4bb8b6b98bb3fb0455eefde98476252f5cc1"
 
 [[skill]]
 name = "method-qmc"
@@ -264,7 +264,7 @@ checksum = "sha256:59361179fc9225173e0c145ffd9bafbf9fdbf8b43ce3dc308497a0b4f83a6
 name = "report"
 source = ""
 kind = "local"
-checksum = "sha256:977097485e1d4dc65af9d814a8e91b0b9fa63b5bb4ab641aae5b11dd45764d83"
+checksum = "sha256:0f6ffd2555a8a72cb262196c5d0f1d54bd3d0bea0afc828758b6583bab488f28"
 
 [[skill]]
 name = "reproduce-paper"
@@ -340,7 +340,7 @@ checksum = "sha256:5ab44290779cd788c3c38cb9a132c26cf36e3f5c897574f645f73ed37ef99
 name = "take-challenge"
 source = ""
 kind = "local"
-checksum = "sha256:9ecd3874c0c285a6c3831276a9483bcf6ce098bb4edc684cfae9fa4a81b9f215"
+checksum = "sha256:4438160f5ad6c4976ce79d4dcf708cf16f5e9c6718dcbb68d9c26a27ffb92c4d"
 
 [[skill]]
 name = "test-driven-development"
@@ -374,7 +374,7 @@ checksum = "sha256:d0b32523abe7ffe84579fcab7794899d3042a0dea2abc98d48a336daf0679
 name = "using-jax"
 source = ""
 kind = "local"
-checksum = "sha256:1312c043dbe2042841cc421ae713c13aaa5148d7150913032a326153f8dc222f"
+checksum = "sha256:812c6142a3545484b8978448f723305d12beb9642dade3a1cdf2907f4054ecd0"
 
 [[skill]]
 name = "using-mpskit"
@@ -398,7 +398,7 @@ checksum = "sha256:6f53db4fe417b54bbd2bbb4312ddb6589cd4bf8485411b6b7dd2546623591
 name = "using-pepskit"
 source = ""
 kind = "local"
-checksum = "sha256:2222d69a1de07f0cdc7bb7e55d82605305be16dbdc3853c0ab20a6897e14fb9a"
+checksum = "sha256:e8b06bbf5d4c8096b6b1eec564a6688c8204466e7ba4cbd05c821c1e9cb9b81c"
 
 [[skill]]
 name = "using-qmbcertify"
@@ -454,7 +454,7 @@ checksum = "sha256:4d0a11229753e41d4222c2a03023ba9830a85ffb4bcd9391a25f5495b8c1b
 name = "using-tensorcircuit-ng"
 source = ""
 kind = "local"
-checksum = "sha256:72485e6614b10d0e087c091d9a8b3437f308314dcbb1d2e2e82ea588fb99457f"
+checksum = "sha256:aaa342820110669b6ca3039164ac6a6fce7d7c1d080454539447ddbadddec689"
 
 [[skill]]
 name = "using-xdiag"
