@@ -7,7 +7,7 @@
                            # (default 5 min; user-confirmed, and
                            # adjustable, at the validator stage)
 - authorized_attempts: 0   # attempts the loop may run without user review
-- next_attempt: 3          # next .worktrees/attempt-NNN number
+- next_attempt: 4          # next .worktrees/attempt-NNN number
 - next_cycle: 1            # next reflection cycle number
 - gates:
   - survey_gate: passed 2026-07-27  # pending | passed YYYY-MM-DD
@@ -19,3 +19,4 @@
   - 2026-07-27: User approved the validator bar; created GOAL.md, public dev split, sealed gitignored holdout split, validate.py, manifest, and negative controls. Validator self-test passed without using holdout.
   - 2026-07-27: Started run stage with attempt-001, a local rank-15 surrogate candidate. Public dev validator accepted it with score 2.9263157894736844. Treat as run-loop smoke evidence, not final physics evidence.
   - 2026-07-27: Attempt-002 replaced the direct surrogate with local toy two-qubit unitary propagation, finite-difference Hessian geometry, and exact final infidelity checks. Public dev validator accepted it with score 3.031578947368421. Next gap: real derivative-free closed-loop optimization traces.
+  - 2026-07-27: Attempt-003 replaced deterministic query formulas with a pure-NumPy noisy-oracle simplex optimizer. Public dev validator accepted it with score 3.235294117647059. Next gap: per-query trace artifacts and research-grade plots/tables.
