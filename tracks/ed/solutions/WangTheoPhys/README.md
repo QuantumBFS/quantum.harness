@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Team name** | WangTheoPhys |
-| **Members** | Junkai Wang, WangTheoPhys@outlook.com |
+| **Team name** | Rewrite It In Rust! |
+| **Members** | Chenxi Wan, Yedi Shen, Junkai Wang |
 
 ## Challenge
 
@@ -17,3 +17,12 @@
 
 Development starts in the private AGPL-3.0 repository
 `JunkaiWang-TheoPhy/quantum-harness-129-workbench-rust`.
+
+## Companion Rust Registrations
+
+This is the main Rewrite It In Rust! workbench registration. The related Rust
+infrastructure and writing tracks are registered separately:
+
+- #214 — `tenferro-rs` verification from ED/FCI workloads.
+- #215 — Rust port of the #71 Occam's Circuit verifier workflow.
+- #216 — Rust-inspired certified tensor DSL design.
