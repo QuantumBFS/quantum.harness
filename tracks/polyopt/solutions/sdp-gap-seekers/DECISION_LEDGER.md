@@ -575,4 +575,7 @@ signed congruence of all 1,332 projected upper-triangle coefficients. If it
 passes under Slurm after the moment-inventory gate, remove only the two
 S3-standard duplicate cones. The resulting target inventory is six positive
 cones with sides `[36,36,45,37,36,45]`, one scalar gap cone, and 4,772
-packed PSD coordinates.
+packed PSD coordinates. Prepare optimizer-free JuMP translations for the
+moment-only and six-cone assemblies so a passing truth gate can advance
+without another source-design cycle; their presence does not authorize a
+model build.

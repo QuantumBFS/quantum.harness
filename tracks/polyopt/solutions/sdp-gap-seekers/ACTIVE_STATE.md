@@ -374,5 +374,7 @@ Updated: 2026-07-29 UTC.
   36, and will compare all 1,332 projected upper-triangle coefficients under
   the induced exact signed congruence. Only a passing Slurm truth run may
   remove the two duplicate 36-side cones and reach the predicted 4,772
-  packed PSD coordinates.
+  packed PSD coordinates. Optimizer-free JuMP mappings for both the
+  moment-only fallback and the gated six-cone candidate are source-prepared;
+  neither is authorized for MOF generation before its truth gate passes.
 - No decision-changing user or resource need is open.
