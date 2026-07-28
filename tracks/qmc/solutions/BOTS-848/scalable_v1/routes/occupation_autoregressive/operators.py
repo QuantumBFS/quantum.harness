@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import struct
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
@@ -19,8 +20,14 @@ LogAmplitude = Callable[[int], complex]
 # maximum matrix-element magnitude. A zero matrix therefore has zero tolerance.
 HERMITIAN_RELATIVE_TOLERANCE = 1.0e-12
 _MAX_FLOAT = float(np.finfo(np.float64).max)
-_DECIMAL_RESTORE_THRESHOLD = _MAX_FLOAT / 16.0
-_LOG_HALF_MIN_SUBNORMAL = math.log(math.ldexp(1.0, -1074)) - math.log(2.0)
+_MIN_SUBNORMAL = math.ldexp(1.0, -1074)
+_FAST_COMPONENT_MIN = math.ldexp(1.0, -900)
+_FAST_COMPONENT_MAX = _MAX_FLOAT / 32.0
+_LN_2 = math.log(2.0)
+_LOG_10_OF_2 = math.log10(2.0)
+_LOG_10_OF_5 = math.log10(5.0)
+_FALLBACK_BASE_PRECISION = 1600
+_FALLBACK_MAX_PRECISION = 6400
 
 
 def _integer(name: str, value: object) -> int:
@@ -170,52 +177,14 @@ def _validated_pair_matrix(
     return matrix
 
 
-def _coefficient_logpolar(
-    coefficient: complex,
-    *,
-    label: str,
-) -> tuple[float, complex, float, float]:
-    """Validate a coefficient and return stable log-polar scale data.
-
-    The rectangular components are normalized by their largest magnitude
-    before a direction is formed.  If this normalization loses an originally
-    nonzero component, the coefficient cannot be represented faithfully by
-    the log-polar estimator and is rejected explicitly.
-    """
+def _validated_coefficient(coefficient: complex, *, label: str) -> complex:
+    """Retain both finite binary64 rectangular components without rescaling."""
 
     if not math.isfinite(coefficient.real) or not math.isfinite(
         coefficient.imag
     ):
         raise ValueError(f"{label} must be finite")
-    rectangular_scale = max(abs(coefficient.real), abs(coefficient.imag))
-    if rectangular_scale == 0.0:
-        return -math.inf, 0.0j, 0.0, -math.inf
-
-    scaled_real = coefficient.real / rectangular_scale
-    scaled_imag = coefficient.imag / rectangular_scale
-    if (
-        coefficient.real != 0.0
-        and scaled_real == 0.0
-        or coefficient.imag != 0.0
-        and scaled_imag == 0.0
-    ):
-        raise ValueError(
-            f"{label} component dynamic range cannot be "
-            "represented in log-polar form"
-        )
-    normalized_magnitude = math.hypot(scaled_real, scaled_imag)
-    direction = complex(
-        scaled_real / normalized_magnitude,
-        scaled_imag / normalized_magnitude,
-    )
-    log_rectangular_scale = math.log(rectangular_scale)
-    log_magnitude = log_rectangular_scale + math.log(normalized_magnitude)
-    return (
-        log_magnitude,
-        direction,
-        rectangular_scale,
-        log_rectangular_scale,
-    )
+    return coefficient
 
 
 @dataclass(frozen=True, slots=True, init=False, eq=False)
@@ -251,13 +220,6 @@ class PreparedPairOperator:
             raise ValueError("two_q must be non-negative")
         pair_basis = _validated_pairs(pairs, orbital_limit)
         matrix = _validated_pair_matrix(pair_matrix, len(pair_basis))
-        for coefficient in matrix.flat:
-            value = complex(coefficient)
-            if value != 0.0:
-                _coefficient_logpolar(
-                    value,
-                    label="pair_matrix coefficient",
-                )
         rectangular_scale = float(
             np.max(
                 np.maximum(np.abs(matrix.real), np.abs(matrix.imag)),
@@ -397,174 +359,300 @@ def _phase_direction(target_phase: float, source_phase: float) -> complex:
     return complex(math.cos(reduced), math.sin(reduced))
 
 
-def _overflow_safe_fsum(values: Sequence[float]) -> float:
-    try:
-        return math.fsum(values)
-    except OverflowError:
-        exact = sum(
-            (Decimal.from_float(value) for value in values),
-            start=Decimal(0),
-        )
-        return float(exact)
-
-
-def _log_parts_difference(
-    left: Sequence[float],
-    right: Sequence[float],
-) -> float:
-    return _overflow_safe_fsum((*left, *(-value for value in right)))
-
-
-def _decimal_exp_product(scale: float, relative_logabs: float) -> float:
-    """Restore a boundary component from its exact float scale."""
-
-    if relative_logabs == -math.inf:
-        return 0.0
-    if relative_logabs == math.inf:
-        raise OverflowError("local estimator result is outside complex128 range")
-    if relative_logabs > 4096.0:
-        raise OverflowError("local estimator result is outside complex128 range")
-    if relative_logabs < -4096.0:
-        return 0.0
-
-    with localcontext() as context:
-        context.prec = 100
-        context.Emax = 999_999
-        context.Emin = -999_999
-        exact = Decimal.from_float(scale) * Decimal.from_float(
-            relative_logabs
-        ).exp()
-        if exact > Decimal.from_float(_MAX_FLOAT):
-            raise OverflowError(
-                "local estimator result is outside complex128 range"
-            )
-        result = float(exact)
-    if not math.isfinite(result):
-        raise OverflowError("local estimator result is outside complex128 range")
-    return result
-
-
-def _restore_component(
-    scale: float,
-    relative_logabs: float,
-    sign: float,
-) -> float:
-    if relative_logabs == -math.inf:
-        return math.copysign(0.0, sign)
-    if relative_logabs == math.inf:
-        raise OverflowError("local estimator result is outside complex128 range")
-    try:
-        relative_magnitude = math.exp(relative_logabs)
-    except OverflowError:
-        relative_magnitude = math.inf
-    if math.isfinite(relative_magnitude):
-        candidate = scale * relative_magnitude
-        if (
-            math.isfinite(candidate)
-            and candidate != 0.0
-            and candidate < _DECIMAL_RESTORE_THRESHOLD
-        ):
-            return math.copysign(candidate, sign)
-    magnitude = _decimal_exp_product(scale, relative_logabs)
-    return math.copysign(magnitude, sign)
+def _float_bits(value: float) -> int:
+    if value == 0.0:
+        return 0
+    return struct.unpack(">Q", struct.pack(">d", value))[0]
 
 
 @dataclass(frozen=True, slots=True)
-class _LogComponentTerm:
-    log_parts: tuple[float, ...]
-    sign: float
-    scale: float
-    log_scale: float
+class _Dyadic:
+    """Exact ``mantissa * 2**exponent`` representation of binary64 data."""
+
+    mantissa: int
+    exponent: int
 
 
-def _largest_component_index(terms: Sequence[_LogComponentTerm]) -> int:
-    anchor_index = 0
-    for index in range(1, len(terms)):
-        difference = _log_parts_difference(
-            terms[index].log_parts,
-            terms[anchor_index].log_parts,
-        )
-        if difference > 0.0 or (
-            difference == 0.0
-            and terms[index].scale > terms[anchor_index].scale
-        ):
-            anchor_index = index
-    return anchor_index
+def _normalized_dyadic(mantissa: int, exponent: int) -> _Dyadic:
+    if mantissa == 0:
+        return _Dyadic(0, 0)
+    trailing = (abs(mantissa) & -abs(mantissa)).bit_length() - 1
+    return _Dyadic(mantissa >> trailing, exponent + trailing)
 
 
-def _restore_log_component(
-    term: _LogComponentTerm,
-    source_logabs: float,
-) -> float:
-    relative_logabs = _log_parts_difference(
-        term.log_parts,
-        (term.log_scale, source_logabs),
+def _dyadic_from_float(value: float) -> _Dyadic:
+    if value == 0.0:
+        return _Dyadic(0, 0)
+    numerator, denominator = value.as_integer_ratio()
+    return _normalized_dyadic(numerator, -(denominator.bit_length() - 1))
+
+
+def _dyadic_add(left: _Dyadic, right: _Dyadic) -> _Dyadic:
+    if left.mantissa == 0:
+        return right
+    if right.mantissa == 0:
+        return left
+    exponent = min(left.exponent, right.exponent)
+    mantissa = (
+        (left.mantissa << (left.exponent - exponent))
+        + (right.mantissa << (right.exponent - exponent))
     )
-    return _restore_component(term.scale, relative_logabs, term.sign)
+    return _normalized_dyadic(mantissa, exponent)
 
 
-def _sum_log_component(
-    terms: Sequence[tuple[float, float, complex, float, float]],
-    source_logabs: float,
-    *,
-    imaginary: bool,
-) -> float:
-    remaining: list[_LogComponentTerm] = []
-    for coefficient_logabs, target_logabs, direction, scale, log_scale in terms:
-        component = direction.imag if imaginary else direction.real
-        if component == 0.0:
-            continue
-        remaining.append(
-            _LogComponentTerm(
-                log_parts=(
-                    coefficient_logabs,
-                    target_logabs,
-                    math.log(abs(component)),
-                ),
-                sign=math.copysign(1.0, component),
-                scale=scale,
-                log_scale=log_scale,
-            )
+def _dyadic_negate(value: _Dyadic) -> _Dyadic:
+    return _Dyadic(-value.mantissa, value.exponent)
+
+
+def _dyadic_multiply(left: _Dyadic, right: _Dyadic) -> _Dyadic:
+    return _normalized_dyadic(
+        left.mantissa * right.mantissa,
+        left.exponent + right.exponent,
+    )
+
+
+def _dyadic_to_decimal(value: _Dyadic) -> Decimal:
+    return Decimal(value.mantissa) * (Decimal(2) ** value.exponent)
+
+
+def _dyadic_required_decimal_digits(value: _Dyadic) -> int:
+    if value.mantissa == 0:
+        return 1
+    mantissa_bits = abs(value.mantissa).bit_length()
+    if value.exponent >= 0:
+        return int((mantissa_bits + value.exponent) * _LOG_10_OF_2) + 4
+    return int(
+        mantissa_bits * _LOG_10_OF_2
+        + (-value.exponent) * _LOG_10_OF_5
+    ) + 4
+
+
+def _dyadic_logabs(value: _Dyadic) -> float:
+    magnitude = abs(value.mantissa)
+    bits = magnitude.bit_length()
+    shift = max(bits - 53, 0)
+    leading = magnitude >> shift
+    return math.fsum(
+        (
+            math.log(float(leading)),
+            float(shift + value.exponent) * _LN_2,
+        )
+    )
+
+
+def _dyadic_to_float(value: _Dyadic) -> float | None:
+    try:
+        result = math.ldexp(float(value.mantissa), value.exponent)
+    except OverflowError:
+        return None
+    if not math.isfinite(result) or result == 0.0 and value.mantissa != 0:
+        return None
+    return result
+
+
+def _dyadic_ratio_float(left: _Dyadic, right: _Dyadic) -> float | None:
+    try:
+        ratio = float(left.mantissa) / float(right.mantissa)
+        ratio = math.ldexp(ratio, left.exponent - right.exponent)
+    except (OverflowError, ZeroDivisionError):
+        return None
+    if not math.isfinite(ratio) or ratio == 0.0 and left.mantissa != 0:
+        return None
+    return ratio
+
+
+@dataclass(frozen=True, slots=True)
+class _DyadicLogTerm:
+    target_logabs: float
+    value: _Dyadic
+
+    @property
+    def sort_key(self) -> tuple[int, int, int]:
+        return (
+            _float_bits(self.target_logabs),
+            self.value.exponent,
+            self.value.mantissa,
         )
 
-    while remaining:
-        anchor_index = _largest_component_index(remaining)
-        anchor = remaining[anchor_index]
-        band: list[tuple[_LogComponentTerm, float]] = []
-        lower: list[_LogComponentTerm] = []
-        for term in remaining:
-            delta = _log_parts_difference(term.log_parts, anchor.log_parts)
-            if delta == math.inf:
-                raise OverflowError(
-                    "local estimator log scale is outside the supported range"
-                )
-            if delta > _LOG_HALF_MIN_SUBNORMAL:
-                band.append((term, delta))
+
+def _effective_log(term: _DyadicLogTerm) -> float:
+    try:
+        return math.fsum((term.target_logabs, _dyadic_logabs(term.value)))
+    except OverflowError:
+        return math.copysign(math.inf, term.target_logabs)
+
+
+def _try_fast_component(
+    terms: Sequence[_DyadicLogTerm],
+    source_logabs: float,
+) -> float | None:
+    """Deterministic ordinary-row path using true dyadic component ratios."""
+
+    anchor = max(terms, key=lambda term: (_effective_log(term), term.sort_key))
+    relative_terms: list[float] = []
+    for term in sorted(terms, key=lambda item: item.sort_key):
+        ratio = _dyadic_ratio_float(term.value, anchor.value)
+        if ratio is None:
+            return None
+        try:
+            target_delta = math.fsum(
+                (term.target_logabs, -anchor.target_logabs)
+            )
+        except OverflowError:
+            return None
+        if not math.isfinite(target_delta) or abs(target_delta) > 745.0:
+            return None
+        relative = ratio * math.exp(target_delta)
+        if not math.isfinite(relative) or relative == 0.0:
+            return None
+        relative_terms.append(relative)
+
+    try:
+        scaled = math.fsum(relative_terms)
+        absolute_sum = math.fsum(abs(value) for value in relative_terms)
+    except OverflowError:
+        return None
+    if scaled == 0.0 or not math.isfinite(scaled):
+        return None
+    if absolute_sum > abs(scaled) * math.ldexp(1.0, 20):
+        return None
+
+    anchor_value = _dyadic_to_float(anchor.value)
+    if anchor_value is None:
+        return None
+    try:
+        source_delta = math.fsum((anchor.target_logabs, -source_logabs))
+    except OverflowError:
+        return None
+    if not math.isfinite(source_delta) or abs(source_delta) > 700.0:
+        return None
+    base = anchor_value * math.exp(source_delta)
+    candidate = base * scaled
+    if not math.isfinite(candidate) or candidate == 0.0:
+        return None
+    magnitude = abs(candidate)
+    if not _FAST_COMPONENT_MIN <= magnitude <= _FAST_COMPONENT_MAX:
+        return None
+    return candidate
+
+
+def _decimal_component_once(
+    terms: Sequence[_DyadicLogTerm],
+    source_logabs: float,
+    precision: int,
+) -> tuple[str, float | None, bool]:
+    with localcontext() as context:
+        context.prec = precision
+        context.Emax = 999_999
+        context.Emin = -999_999
+
+        anchor = max(terms, key=lambda term: (_effective_log(term), term.sort_key))
+        anchor_effective = _effective_log(anchor)
+        band_limit = precision * math.log(10.0) * 0.75
+        included: list[_DyadicLogTerm] = []
+        lower: list[_DyadicLogTerm] = []
+        for term in terms:
+            difference = anchor_effective - _effective_log(term)
+            if difference <= band_limit + 64.0:
+                included.append(term)
             else:
                 lower.append(term)
 
-        if len(band) == 1:
-            return _restore_log_component(band[0][0], source_logabs)
+        anchor_decimal = abs(_dyadic_to_decimal(anchor.value))
+        scaled = Decimal(0)
+        scaled_absolute_sum = Decimal(0)
+        anchor_target = Decimal.from_float(anchor.target_logabs)
+        for term in sorted(included, key=lambda item: item.sort_key):
+            ratio = _dyadic_to_decimal(term.value) / anchor_decimal
+            target_delta = Decimal.from_float(term.target_logabs) - anchor_target
+            if abs(target_delta) > Decimal(100_000):
+                return "indeterminate", None, False
+            contribution = ratio * target_delta.exp()
+            scaled += contribution
+            scaled_absolute_sum += abs(contribution)
 
-        bounded = math.fsum(
-            math.exp(delta) * term.sign
-            for term, delta in band
+        rounding_uncertainty = (
+            scaled_absolute_sum + abs(scaled) + Decimal(1)
+        ) * (Decimal(10) ** (-precision + 64))
+        lower_uncertainty = Decimal(len(lower)) * Decimal(
+            -band_limit
+        ).exp()
+        scaled_uncertainty = rounding_uncertainty + lower_uncertainty
+        if scaled == 0 or abs(scaled) <= scaled_uncertainty * 4:
+            return "indeterminate", None, False
+
+        source_delta = anchor_target - Decimal.from_float(source_logabs)
+        base_logabs = anchor_decimal.ln() + source_delta
+        final_logabs = base_logabs + abs(scaled).ln()
+        maximum_logabs = Decimal.from_float(_MAX_FLOAT).ln()
+        half_minimum_logabs = (
+            Decimal.from_float(_MIN_SUBNORMAL) / Decimal(2)
+        ).ln()
+
+        if final_logabs > maximum_logabs + Decimal(2):
+            return "overflow", None, True
+        if final_logabs < half_minimum_logabs - Decimal(2):
+            return "value", math.copysign(0.0, float(scaled)), True
+        if abs(source_delta) > Decimal(100_000):
+            return "indeterminate", None, False
+
+        base = anchor_decimal * source_delta.exp()
+        central = base * scaled
+        absolute_uncertainty = abs(base) * scaled_uncertainty
+        lower_endpoint = central - absolute_uncertainty
+        upper_endpoint = central + absolute_uncertainty
+        candidate = float(central)
+        lower_float = float(lower_endpoint)
+        upper_float = float(upper_endpoint)
+        certified = (
+            _float_bits(candidate) == _float_bits(lower_float)
+            and _float_bits(candidate) == _float_bits(upper_float)
         )
-        if bounded == 0.0:
-            remaining = lower
-            continue
+        if not math.isfinite(candidate):
+            return "overflow", None, certified
+        return "value", candidate, certified
 
-        residual = _LogComponentTerm(
-            log_parts=(*anchor.log_parts, math.log(abs(bounded))),
-            sign=math.copysign(1.0, bounded),
-            scale=anchor.scale,
-            log_scale=anchor.log_scale,
+
+def _fallback_component(
+    terms: Sequence[_DyadicLogTerm],
+    source_logabs: float,
+) -> float:
+    required_digits = max(
+        _FALLBACK_BASE_PRECISION,
+        *( _dyadic_required_decimal_digits(term.value) + 64 for term in terms),
+    )
+    precision = _FALLBACK_BASE_PRECISION
+    while precision < required_digits:
+        precision *= 2
+    while precision <= _FALLBACK_MAX_PRECISION:
+        status, value, certified = _decimal_component_once(
+            terms,
+            source_logabs,
+            precision,
         )
-        if not lower:
-            return _restore_log_component(residual, source_logabs)
-        remaining = [*lower, residual]
+        if certified:
+            if status == "overflow":
+                raise OverflowError(
+                    "local estimator result is outside complex128 range"
+                )
+            assert value is not None
+            return value
+        precision *= 2
+    raise ArithmeticError(
+        "local estimator rounding is indeterminate at precision limit"
+    )
 
-    return 0.0
+
+def _sum_dyadic_component(
+    terms: Sequence[_DyadicLogTerm],
+    source_logabs: float,
+) -> float:
+    if not terms:
+        return 0.0
+    fast = _try_fast_component(terms, source_logabs)
+    if fast is not None:
+        return fast
+    return _fallback_component(terms, source_logabs)
 
 
 def local_from_log_neighbors(
@@ -587,24 +675,21 @@ def local_from_log_neighbors(
     )
     assert source_logpsi is not None
 
-    terms: list[tuple[float, float, complex, float, float]] = []
+    factor_groups: dict[
+        tuple[int, int, int],
+        tuple[float, complex, _Dyadic, _Dyadic],
+    ] = {}
     for target_raw, coefficient_raw in neighbors.items():
         target = _validated_nonnegative_state(target_raw)
-        coefficient = _scalar_complex(
-            coefficient_raw,
+        coefficient = _validated_coefficient(
+            _scalar_complex(
+                coefficient_raw,
+                label="neighbor coefficient",
+            ),
             label="neighbor coefficient",
         )
         if coefficient == 0.0:
             continue
-        (
-            coefficient_logabs,
-            coefficient_direction,
-            rectangular_scale,
-            log_rectangular_scale,
-        ) = _coefficient_logpolar(
-            coefficient,
-            label="neighbor coefficient",
-        )
         target_logpsi = _logpsi_value(
             logpsi,
             target,
@@ -613,31 +698,87 @@ def local_from_log_neighbors(
         )
         if target_logpsi is None:
             continue
-        direction = coefficient_direction * _phase_direction(
+        phase = _phase_direction(
             target_logpsi.imag,
             source_logpsi.imag,
         )
-        terms.append(
-            (
-                coefficient_logabs,
-                target_logpsi.real,
-                direction,
-                rectangular_scale,
-                log_rectangular_scale,
-            )
+        factor_key = (
+            _float_bits(target_logpsi.real),
+            _float_bits(phase.real),
+            _float_bits(phase.imag),
         )
-    if not terms:
+        coefficient_real = _dyadic_from_float(coefficient.real)
+        coefficient_imaginary = _dyadic_from_float(coefficient.imag)
+        previous = factor_groups.get(factor_key)
+        if previous is None:
+            factor_groups[factor_key] = (
+                target_logpsi.real,
+                phase,
+                coefficient_real,
+                coefficient_imaginary,
+            )
+        else:
+            factor_groups[factor_key] = (
+                previous[0],
+                previous[1],
+                _dyadic_add(previous[2], coefficient_real),
+                _dyadic_add(previous[3], coefficient_imaginary),
+            )
+
+    target_groups: dict[int, tuple[float, _Dyadic, _Dyadic]] = {}
+    for factor_key in sorted(factor_groups):
+        target_logabs, phase, coefficient_real, coefficient_imaginary = (
+            factor_groups[factor_key]
+        )
+        if coefficient_real.mantissa == 0 and coefficient_imaginary.mantissa == 0:
+            continue
+        phase_real = _dyadic_from_float(phase.real)
+        phase_imaginary = _dyadic_from_float(phase.imag)
+        rotated_real = _dyadic_add(
+            _dyadic_multiply(coefficient_real, phase_real),
+            _dyadic_negate(
+                _dyadic_multiply(coefficient_imaginary, phase_imaginary)
+            ),
+        )
+        rotated_imaginary = _dyadic_add(
+            _dyadic_multiply(coefficient_real, phase_imaginary),
+            _dyadic_multiply(coefficient_imaginary, phase_real),
+        )
+        target_key = _float_bits(target_logabs)
+        previous_target = target_groups.get(target_key)
+        if previous_target is None:
+            target_groups[target_key] = (
+                target_logabs,
+                rotated_real,
+                rotated_imaginary,
+            )
+        else:
+            target_groups[target_key] = (
+                previous_target[0],
+                _dyadic_add(previous_target[1], rotated_real),
+                _dyadic_add(previous_target[2], rotated_imaginary),
+            )
+
+    if not target_groups:
         return 0.0j
+    real_terms = tuple(
+        _DyadicLogTerm(target_logabs, real)
+        for target_logabs, real, _imaginary in target_groups.values()
+        if real.mantissa != 0
+    )
+    imaginary_terms = tuple(
+        _DyadicLogTerm(target_logabs, imaginary)
+        for target_logabs, _real, imaginary in target_groups.values()
+        if imaginary.mantissa != 0
+    )
     return complex(
-        _sum_log_component(
-            terms,
+        _sum_dyadic_component(
+            real_terms,
             source_logpsi.real,
-            imaginary=False,
         ),
-        _sum_log_component(
-            terms,
+        _sum_dyadic_component(
+            imaginary_terms,
             source_logpsi.real,
-            imaginary=True,
         ),
     )
 
