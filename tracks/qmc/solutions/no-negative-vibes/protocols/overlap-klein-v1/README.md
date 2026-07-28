@@ -18,16 +18,29 @@ ordered by bridge label and contain solver diagnostics plus replayable
 certificates.  Process count and elapsed wall time are separate `execution`
 metadata written by the CLI, so they cannot change the scientific payload.
 
-Run one preregistered cell from the solution directory:
+Before a production run with `workers > 1`, complete and retain a matching
+one-worker smoke result for the same family, mask, and source commit.  The
+Task 7/8 experiment log is the durable record of that smoke evidence; the
+runner intentionally keeps no additional persistent state.
+
+The CLI fails closed unless all three thread limits are the literal string
+`1`: `OMP_NUM_THREADS`, `MKL_NUM_THREADS`, and `OPENBLAS_NUM_THREADS`.  It
+records the validated limits and its `spawn` process start method in the
+separate `execution` metadata.
+
+First run the one-worker smoke from the solution directory:
 
 ```bash
-PYTHONPATH=. python -m oracle.overlap_klein \
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
   --family number-conserving \
   --mask rings-bridges \
   --workers 1 \
   --source-commit 0123456789abcdef0123456789abcdef01234567 \
-  --output result.json
+  --output smoke-result.json
 ```
 
-Use the source commit of the code being run.  The runner rejects abbreviated or
-non-hex provenance and atomically writes sorted UTF-8 JSON.
+After the matching smoke is recorded, repeat the same command with the chosen
+production worker count and a distinct output path.  Use the source commit of
+the code being run.  The runner rejects abbreviated or non-hex provenance and
+atomically writes sorted UTF-8 JSON.

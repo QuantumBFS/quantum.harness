@@ -6,10 +6,13 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 import json
 import math
+import multiprocessing
+import os
 from pathlib import Path
 import re
 import tempfile
 import time
+import warnings
 
 import numpy as np
 import scipy
@@ -224,6 +227,39 @@ def _require_worker_count(workers: int) -> None:
         raise ValueError("workers must be a positive integer")
 
 
+def validate_blas_thread_environment(
+    environment: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Fail closed unless every BLAS implementation is limited to one thread."""
+    source = os.environ if environment is None else environment
+    names = ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")
+    settings: dict[str, str] = {}
+    for name in names:
+        value = source.get(name)
+        if value != "1":
+            raise ValueError(f"{name} must be set to the string '1'")
+        settings[name] = value
+    return settings
+
+
+def execution_metadata(
+    *,
+    workers: int,
+    wall_time_seconds: float,
+    thread_settings: Mapping[str, str],
+) -> dict[str, object]:
+    """Describe non-scientific execution controls kept outside scan payloads."""
+    _require_worker_count(workers)
+    return {
+        "workers": workers,
+        "wall_time_seconds": wall_time_seconds,
+        "blas_threads": validate_blas_thread_environment(thread_settings),
+        "process_start_method": multiprocessing.get_context(
+            "spawn"
+        ).get_start_method(),
+    }
+
+
 def _normalized_source_commit(source_commit: str) -> str:
     if not isinstance(source_commit, str) or re.fullmatch(
         r"[0-9a-fA-F]{40}", source_commit
@@ -257,6 +293,49 @@ def _attach_exact_primal(
         payload["exact_replay_diagnostic"] = f"{type(error).__name__}: {error}"
         return False
     return True
+
+
+def classify_anchor(
+    system: ExactMetzlerSystem,
+    label: str,
+    *,
+    positive_solve: AnchorSolve,
+    negative_solve: AnchorSolve,
+) -> dict[str, object]:
+    """Classify one bridge only after its terminal evidence exactly replays."""
+    if positive_solve.label != label or positive_solve.sign != 1:
+        raise ValueError("positive solve does not match its anchor")
+    if negative_solve.label != label or negative_solve.sign != -1:
+        raise ValueError("negative solve does not match its anchor")
+    positive = _solve_to_json(positive_solve)
+    negative = _solve_to_json(negative_solve)
+    positive_primal = _attach_exact_primal(system, positive_solve, positive)
+    negative_primal = _attach_exact_primal(system, negative_solve, negative)
+    anchor: dict[str, object] = {
+        "label": label,
+        "positive": positive,
+        "negative": negative,
+    }
+    if positive_primal or negative_primal:
+        anchor["classification"] = "certified-feasible"
+    elif (
+        positive_solve.status == "infeasible"
+        and negative_solve.status == "infeasible"
+    ):
+        try:
+            zero_certificate = find_zero_dual(system, label)
+            if not verify_zero_dual(system, zero_certificate):
+                raise ArithmeticError("exact dual certificate did not replay")
+            anchor["zero_certificate"] = certificate_to_json(zero_certificate)
+            anchor["classification"] = "certified-zero"
+        except (ArithmeticError, TypeError, ValueError) as error:
+            anchor["dual_replay_diagnostic"] = (
+                f"{type(error).__name__}: {error}"
+            )
+            anchor["classification"] = "numerical-only"
+    else:
+        anchor["classification"] = "numerical-only"
+    return anchor
 
 
 def _system_metadata(system: ExactMetzlerSystem) -> dict[str, object]:
@@ -295,6 +374,7 @@ def run_anchor_scan(
 
     with ProcessPoolExecutor(
         max_workers=workers,
+        mp_context=multiprocessing.get_context("spawn"),
         initializer=_initialize_anchor_worker,
         initargs=(system,),
     ) as executor:
@@ -308,35 +388,14 @@ def run_anchor_scan(
     for label in labels:
         negative_solve = by_label_sign[(label, -1)]
         positive_solve = by_label_sign[(label, 1)]
-        negative = _solve_to_json(negative_solve)
-        positive = _solve_to_json(positive_solve)
-        negative_primal = _attach_exact_primal(system, negative_solve, negative)
-        positive_primal = _attach_exact_primal(system, positive_solve, positive)
-        anchor: dict[str, object] = {
-            "label": label,
-            "positive": positive,
-            "negative": negative,
-        }
-        if positive_primal or negative_primal:
-            anchor["classification"] = "certified-feasible"
-        elif (
-            positive_solve.status == "infeasible"
-            and negative_solve.status == "infeasible"
-        ):
-            try:
-                zero_certificate = find_zero_dual(system, label)
-                if not verify_zero_dual(system, zero_certificate):
-                    raise ArithmeticError("exact dual certificate did not replay")
-                anchor["zero_certificate"] = certificate_to_json(zero_certificate)
-                anchor["classification"] = "certified-zero"
-            except (ArithmeticError, TypeError, ValueError) as error:
-                anchor["dual_replay_diagnostic"] = (
-                    f"{type(error).__name__}: {error}"
-                )
-                anchor["classification"] = "numerical-only"
-        else:
-            anchor["classification"] = "numerical-only"
-        anchors.append(anchor)
+        anchors.append(
+            classify_anchor(
+                system,
+                label,
+                positive_solve=positive_solve,
+                negative_solve=negative_solve,
+            )
+        )
 
     return {
         "schema_version": 1,
@@ -575,12 +634,19 @@ def _reconstruct_float(
         candidate = sp.Integer(nearest_integer)
     else:
         try:
-            candidate = sp.nsimplify(
-                value,
-                [sp.sqrt(2)],
-                tolerance=tolerance,
-                full=True,
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=".*bitcount function is deprecated.*",
+                    category=DeprecationWarning,
+                    module=r"mpmath\.libmp\.libintmath",
+                )
+                candidate = sp.nsimplify(
+                    value,
+                    [sp.sqrt(2)],
+                    tolerance=tolerance,
+                    full=True,
+                )
         except Exception as error:
             raise ArithmeticError(
                 "SymPy failed to reconstruct the coefficient in Q(sqrt(2))"
@@ -1068,6 +1134,7 @@ def _cli_source_commit(value: str) -> str:
 
 
 def main() -> None:
+    thread_settings = validate_blas_thread_environment()
     parser = argparse.ArgumentParser(
         description="Run the preregistered overlapping Klein-cone anchor scan."
     )
@@ -1093,10 +1160,11 @@ def main() -> None:
         workers=args.workers,
         source_commit=args.source_commit,
     )
-    result["execution"] = {
-        "workers": args.workers,
-        "wall_time_seconds": time.perf_counter() - started,
-    }
+    result["execution"] = execution_metadata(
+        workers=args.workers,
+        wall_time_seconds=time.perf_counter() - started,
+        thread_settings=thread_settings,
+    )
     write_result(result, args.output)
 
 
