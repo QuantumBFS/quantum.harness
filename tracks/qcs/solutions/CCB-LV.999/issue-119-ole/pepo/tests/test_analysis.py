@@ -185,7 +185,15 @@ def test_analyze_run_writes_auditable_records_report_and_two_cut_figure(tmp_path
     assert assessment["status_counts"] == {"success": 5, "failed": 1, "missing": 0, "pending": 0}
     assert assessment["successful_record_count"] == 5
     assert assessment["failed_or_incomplete_cells"] == [
-        {"cell_id": "cell-0006", "status": "failed", "run_dir": str(run_dir)}
+        {
+            "cell_id": "cell-0006",
+            "status": "failed",
+            "run_dir": str(run_dir),
+            "params": {"dop": 2, "chi_env": 16},
+            "dop": 2,
+            "chi_env": 16,
+            "delta": 0.15,
+        }
     ]
     persisted = json.loads((output_dir / "assessment.json").read_text(encoding="utf-8"))
     assert persisted["epsilon_pepo"] == pytest.approx(0.0005)
@@ -208,6 +216,147 @@ def test_analyze_run_rejects_inconsistent_successful_provenance(tmp_path: Path):
             bp_budget=BP_BUDGET,
             target=TARGET,
         )
+
+
+def test_analyze_run_rejects_uniformly_wrong_provenance_against_approved_protocol(tmp_path: Path):
+    """Breaks if matching but non-approved QASM/quimb provenance is certified."""
+
+    run_dir = _write_run(tmp_path)
+    spec_path = run_dir / "run_spec.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["provenance"] = {"qasm_sha256": "wrong-qasm", "quimb_commit": "wrong-quimb"}
+    _write_json(spec_path, spec)
+    for index in range(1, 6):
+        manifest_path = run_dir / "cells" / f"cell-{index:04d}" / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["provenance"] = {"qasm_sha256": "wrong-qasm", "quimb_commit": "wrong-quimb"}
+        _write_json(manifest_path, manifest)
+
+    with pytest.raises(ValueError, match="approved qasm_sha256"):
+        ANALYZER.analyze_run_directories(
+            [run_dir],
+            output_dir=tmp_path / "analysis",
+            bp_mean=BP_MEAN,
+            bp_budget=BP_BUDGET,
+            target=TARGET,
+        )
+
+
+def test_analyze_run_rejects_successful_manifest_not_matching_its_run_spec(tmp_path: Path):
+    """Breaks if a successful cell can alter its planned Dop after enumeration."""
+
+    run_dir = _write_run(tmp_path)
+    manifest_path = run_dir / "cells" / "cell-0001" / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["params"]["dop"] = 3
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(ValueError, match="manifest params.dop must match run_spec"):
+        ANALYZER.analyze_run_directories(
+            [run_dir],
+            output_dir=tmp_path / "analysis",
+            bp_mean=BP_MEAN,
+            bp_budget=BP_BUDGET,
+            target=TARGET,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value", "error"),
+    [
+        ("observable_sites", [1, 2, 3], "approved observable_sites"),
+        ("evolution_cutoff", 1e-9, "approved evolution_cutoff"),
+        ("contraction_cutoff", 1e-9, "approved contraction_cutoff"),
+        ("delta", 0.2, "approved delta"),
+    ],
+)
+def test_analyze_run_rejects_uniformly_wrong_settings_against_approved_protocol(
+    tmp_path: Path,
+    field: str,
+    wrong_value: object,
+    error: str,
+):
+    """Breaks if matching but non-approved PEPO settings can reach assessment."""
+
+    run_dir = _write_run(tmp_path)
+    spec_path = run_dir / "run_spec.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["settings"][field] = wrong_value
+    _write_json(spec_path, spec)
+    for index in range(1, 6):
+        manifest_path = run_dir / "cells" / f"cell-{index:04d}" / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["settings"][field] = wrong_value
+        _write_json(manifest_path, manifest)
+
+    with pytest.raises(ValueError, match=error):
+        ANALYZER.analyze_run_directories(
+            [run_dir],
+            output_dir=tmp_path / "analysis",
+            bp_mean=BP_MEAN,
+            bp_budget=BP_BUDGET,
+            target=TARGET,
+        )
+
+
+def test_analyze_run_preserves_unavailable_planned_coordinates(tmp_path: Path):
+    """Breaks if failed, missing, or pending cells lose their declared scan coordinates."""
+
+    run_dir = _write_run(tmp_path)
+    spec_path = run_dir / "run_spec.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["cells"].extend(
+        [
+            {"cell_id": "cell-0007", "params": {"dop": 16, "chi_env": 64}},
+            {"cell_id": "cell-0008", "params": {"dop": 16, "chi_env": 128, "delta": 0}},
+        ]
+    )
+    _write_json(spec_path, spec)
+    (run_dir / "cells" / "cell-0007").mkdir(parents=True)
+
+    output_dir = tmp_path / "analysis"
+    assessment = ANALYZER.analyze_run_directories(
+        [run_dir],
+        output_dir=output_dir,
+        bp_mean=BP_MEAN,
+        bp_budget=BP_BUDGET,
+        target=TARGET,
+    )
+
+    assert assessment["failed_or_incomplete_cells"] == [
+        {
+            "cell_id": "cell-0006",
+            "status": "failed",
+            "run_dir": str(run_dir),
+            "params": {"dop": 2, "chi_env": 16},
+            "dop": 2,
+            "chi_env": 16,
+            "delta": 0.15,
+        },
+        {
+            "cell_id": "cell-0007",
+            "status": "missing",
+            "run_dir": str(run_dir),
+            "params": {"dop": 16, "chi_env": 64},
+            "dop": 16,
+            "chi_env": 64,
+            "delta": 0.15,
+        },
+        {
+            "cell_id": "cell-0008",
+            "status": "pending",
+            "run_dir": str(run_dir),
+            "params": {"dop": 16, "chi_env": 128, "delta": 0},
+            "dop": 16,
+            "chi_env": 128,
+            "delta": 0.0,
+        },
+    ]
+    persisted = json.loads((output_dir / "assessment.json").read_text(encoding="utf-8"))
+    assert persisted["failed_or_incomplete_cells"] == assessment["failed_or_incomplete_cells"]
+    markdown = (output_dir / "PEPO_49Q_VALIDATION.md").read_text(encoding="utf-8")
+    assert "Dop=2, χenv=16, δ=0.15" in markdown
+    assert "Dop=16, χenv=128, δ=0" in markdown
 
 
 def test_analyze_run_detects_delta_overridden_by_a_control_axis(tmp_path: Path):

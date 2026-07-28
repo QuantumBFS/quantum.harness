@@ -27,6 +27,12 @@ import parameter_scan as parameter_scan  # noqa: E402
 DEFAULT_BP_MEAN = 0.8183229131612796
 DEFAULT_BP_BUDGET = 0.0044
 DEFAULT_TARGET = 0.001
+APPROVED_QASM_SHA256 = "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
+APPROVED_QUIMB_COMMIT = "3c89529fe0a3487133a3928201691161e110abdf"
+APPROVED_OBSERVABLE_SITES = [52, 59, 72]
+APPROVED_EVOLUTION_CUTOFF = 1.0e-12
+APPROVED_CONTRACTION_CUTOFF = 1.0e-12
+APPROVED_DELTAS = (0.0, 0.15)
 
 
 def _finite_number(value: object, label: str) -> float:
@@ -152,7 +158,60 @@ def _require_mapping(document: dict[str, Any], key: str, cell_id: str) -> dict[s
     return value
 
 
-def _successful_record(manifest: dict[str, Any], cell_id: str, run_dir: Path) -> dict[str, Any]:
+def _require_equal(actual: object, expected: object, label: str) -> None:
+    if actual != expected:
+        raise ValueError(f"{label}: expected {expected!r}, got {actual!r}")
+
+
+def _approved_contract(
+    *,
+    label: str,
+    provenance: dict[str, Any],
+    settings: dict[str, Any],
+    delta: object,
+) -> None:
+    _require_equal(provenance.get("qasm_sha256"), APPROVED_QASM_SHA256, f"{label}: approved qasm_sha256")
+    _require_equal(provenance.get("quimb_commit"), APPROVED_QUIMB_COMMIT, f"{label}: approved quimb_commit")
+    _require_equal(settings.get("observable_sites"), APPROVED_OBSERVABLE_SITES, f"{label}: approved observable_sites")
+    _require_equal(_finite_number(settings.get("evolution_cutoff"), f"{label}: evolution_cutoff"), APPROVED_EVOLUTION_CUTOFF, f"{label}: approved evolution_cutoff")
+    _require_equal(_finite_number(settings.get("contraction_cutoff"), f"{label}: contraction_cutoff"), APPROVED_CONTRACTION_CUTOFF, f"{label}: approved contraction_cutoff")
+    numeric_delta = _finite_number(delta, f"{label}: delta")
+    if numeric_delta not in APPROVED_DELTAS:
+        raise ValueError(f"{label}: approved delta must be one of {APPROVED_DELTAS!r}, got {numeric_delta!r}")
+
+
+def _planned_cell_contract(run_spec: dict[str, Any], cell: dict[str, Any]) -> dict[str, Any]:
+    cell_id = str(cell.get("cell_id"))
+    params = _require_mapping(cell, "params", cell_id)
+    shared_settings = _require_mapping(run_spec, "settings", "run_spec")
+    cell_settings = cell.get("settings", {})
+    if not isinstance(cell_settings, dict):
+        raise ValueError(f"{cell_id}: planned settings must be a JSON object")
+    settings = {**shared_settings, **cell_settings}
+    provenance = _require_mapping(run_spec, "provenance", "run_spec")
+    delta = params.get("delta", settings.get("delta"))
+    _approved_contract(
+        label=f"planned {cell_id}",
+        provenance=provenance,
+        settings=settings,
+        delta=delta,
+    )
+    return {
+        "params": dict(params),
+        "dop": _positive_integer(params.get("dop"), f"{cell_id}: planned params.dop"),
+        "chi_env": _positive_integer(params.get("chi_env"), f"{cell_id}: planned params.chi_env"),
+        "delta": _finite_number(delta, f"{cell_id}: planned delta"),
+        "settings": settings,
+        "provenance": provenance,
+    }
+
+
+def _successful_record(
+    manifest: dict[str, Any],
+    cell_id: str,
+    run_dir: Path,
+    expected: dict[str, Any],
+) -> dict[str, Any]:
     params = _require_mapping(manifest, "params", cell_id)
     settings = _require_mapping(manifest, "settings", cell_id)
     provenance = _require_mapping(manifest, "provenance", cell_id)
@@ -160,12 +219,35 @@ def _successful_record(manifest: dict[str, Any], cell_id: str, run_dir: Path) ->
     observable_sites = settings.get("observable_sites")
     if not isinstance(observable_sites, list) or not observable_sites:
         raise ValueError(f"{cell_id}: observable_sites is missing")
+    declared_delta = params.get("delta", settings.get("delta"))
+    _approved_contract(
+        label=f"{cell_id} manifest",
+        provenance=provenance,
+        settings=settings,
+        delta=declared_delta,
+    )
+    _require_equal(params.get("dop"), expected["dop"], f"{cell_id}: manifest params.dop must match run_spec")
+    _require_equal(params.get("chi_env"), expected["chi_env"], f"{cell_id}: manifest params.chi_env must match run_spec")
+    _require_equal(_finite_number(declared_delta, f"{cell_id}: manifest delta"), expected["delta"], f"{cell_id}: manifest delta must match run_spec")
+    for field in ("observable_sites", "evolution_cutoff", "contraction_cutoff"):
+        actual = settings.get(field)
+        expected_value = expected["settings"].get(field)
+        if field.endswith("cutoff"):
+            actual = _finite_number(actual, f"{cell_id}: manifest {field}")
+            expected_value = _finite_number(expected_value, f"{cell_id}: planned {field}")
+        _require_equal(actual, expected_value, f"{cell_id}: manifest {field} must match run_spec")
+    for field in ("qasm_sha256", "quimb_commit"):
+        _require_equal(
+            provenance.get(field),
+            expected["provenance"].get(field),
+            f"{cell_id}: manifest {field} must match run_spec",
+        )
     return {
         "dop": _positive_integer(params.get("dop"), f"{cell_id}: params.dop"),
         "chi_env": _positive_integer(params.get("chi_env"), f"{cell_id}: params.chi_env"),
         "value": _finite_number(result.get("value_real"), f"{cell_id}: result.value_real"),
         "delta": _finite_number(
-            params.get("delta", settings.get("delta")),
+            declared_delta,
             f"{cell_id}: declared delta",
         ),
         "observable_sites": observable_sites,
@@ -187,7 +269,7 @@ def _validate_consensus(records: list[dict[str, Any]]) -> None:
             raise ValueError(f"inconsistent {label} across successful PEPO manifests")
 
 
-def _load_run(run_dir: Path) -> tuple[list[dict[str, Any]], dict[str, int], list[dict[str, str]]]:
+def _load_run(run_dir: Path) -> tuple[list[dict[str, Any]], dict[str, int], list[dict[str, Any]]]:
     spec_path = run_dir / "run_spec.json"
     try:
         run_spec = json.loads(spec_path.read_text(encoding="utf-8"))
@@ -195,20 +277,37 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, Any]], dict[str, int], list
         raise ValueError(f"run specification does not exist: {spec_path}") from error
     if not isinstance(run_spec, dict) or not isinstance(run_spec.get("cells"), list):
         raise ValueError(f"invalid run specification: {spec_path}")
+    planned = {
+        str(cell.get("cell_id")): _planned_cell_contract(run_spec, cell)
+        for cell in run_spec["cells"]
+    }
+    if len(planned) != len(run_spec["cells"]):
+        raise ValueError(f"duplicate cell_id in run specification: {spec_path}")
 
     report = parameter_scan.collect(run_spec, run_dir, "status", "success", ["result.value_real"])
     parameter_scan.write_csv(report["rows"], run_dir / "parameter-scan.csv")
     records: list[dict[str, Any]] = []
-    unavailable: list[dict[str, str]] = []
+    unavailable: list[dict[str, Any]] = []
     for row in report["rows"]:
         cell_id = str(row["cell_id"])
+        expected = planned[cell_id]
         if row["status"] != "success":
-            unavailable.append({"cell_id": cell_id, "status": str(row["status"]), "run_dir": str(run_dir)})
+            unavailable.append(
+                {
+                    "cell_id": cell_id,
+                    "status": str(row["status"]),
+                    "run_dir": str(run_dir),
+                    "params": expected["params"],
+                    "dop": expected["dop"],
+                    "chi_env": expected["chi_env"],
+                    "delta": expected["delta"],
+                }
+            )
             continue
         _, manifest = parameter_scan.classify_cell(run_dir, cell_id)
         if manifest is None:
             raise ValueError(f"{cell_id}: successful cell has no readable manifest")
-        records.append(_successful_record(manifest, cell_id, run_dir))
+        records.append(_successful_record(manifest, cell_id, run_dir, expected))
     return records, report["status_counts"], unavailable
 
 
@@ -222,7 +321,7 @@ def _sum_status_counts(counts: Iterable[dict[str, int]]) -> dict[str, int]:
 
 def _render_plot(
     assessment: dict[str, Any],
-    unavailable: list[dict[str, str]],
+    unavailable: list[dict[str, Any]],
     output_dir: Path,
 ) -> dict[str, str]:
     plt.rcParams.update({"font.size": 8, "axes.labelsize": 9, "xtick.labelsize": 8, "ytick.labelsize": 8})
@@ -252,7 +351,10 @@ def _render_plot(
         axis.legend(frameon=False, fontsize=6.5, loc="best")
     axes[0].set_ylabel("Normalized OLE F")
     if unavailable:
-        shown = ", ".join(f"{item['cell_id']} ({item['status']})" for item in unavailable[:3])
+        shown = "; ".join(
+            f"Dop={item['dop']}, χenv={item['chi_env']}, δ={item['delta']:g} ({item['status']})"
+            for item in unavailable[:3]
+        )
         extra = "" if len(unavailable) <= 3 else f"; +{len(unavailable) - 3} more"
         figure.text(0.01, 0.01, f"Unavailable planned cells: {shown}{extra}", fontsize=7)
     figure.tight_layout(rect=(0.0, 0.05 if unavailable else 0.0, 1.0, 1.0))
@@ -286,7 +388,10 @@ def _write_report(assessment: dict[str, Any], output_dir: Path) -> Path:
     ]
     if unavailable:
         lines.extend(["", "Unavailable cells are retained in assessment.json:"])
-        lines.extend(f"- {item['run_dir']}/{item['cell_id']}: {item['status']}" for item in unavailable)
+        lines.extend(
+            f"- Dop={item['dop']}, χenv={item['chi_env']}, δ={item['delta']:g}: {item['status']} ({item['run_dir']}/{item['cell_id']})"
+            for item in unavailable
+        )
     report_path = output_dir / "PEPO_49Q_VALIDATION.md"
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report_path
@@ -305,7 +410,7 @@ def analyze_run_directories(
     if not paths:
         raise ValueError("at least one run directory is required")
     all_records: list[dict[str, Any]] = []
-    all_unavailable: list[dict[str, str]] = []
+    all_unavailable: list[dict[str, Any]] = []
     counts: list[dict[str, int]] = []
     for run_dir in paths:
         records, status_counts, unavailable = _load_run(run_dir)
