@@ -288,3 +288,22 @@ The passing `test.log` SHA-256 is
 `9ef5f74de8b184d44233c2744f32a9977948c89f8f5bee5210d161cc0f67eae2`;
 peak process RSS was 965,468 KiB. Proceed to clean solver-free MOF builds and
 reload checks for both fixed gamma values.
+
+## 2026-07-29 — accept immutable full-permutation MOF inputs
+
+Slurm job `22988518` built and independently reloaded both solver-free models
+from clean commit `d799a63`. The gamma=0 model/runmeta SHA-256 values are
+`4f62a5e16822d2df174af8d9013bb1622c54d8c47bd2f78a59a086524ad4d67f`
+and
+`a0ac07d93e0101732d4d588762754f0ed4837ae2b294f53f7d6bae7573e1152f`;
+the gamma=1/2 values are
+`e47bf0d3146ada223bbb389920ea4ca1f79efef467ee7a81ef72d42741652e9f`
+and
+`39da4547ce672cc3d087db7a199adcb76e73ab81672361beffe9c06910a6f05f`.
+
+Both reloads confirm 3,250 variables, 13 constraints, all 12 named real PSD
+cones, 16,707 triangle coordinates, and maximum side 81. Treat these as
+immutable inputs. The dedicated runner must replay their checksum, fixed
+setup, all four exact-reduction schemas, every recorded source hash, and the
+reloaded cone inventory before optimization. Preserve the mandated order:
+gamma=0 first, gamma=1/2 only after its audited feasible solution.

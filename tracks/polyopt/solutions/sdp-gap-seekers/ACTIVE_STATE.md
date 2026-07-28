@@ -195,4 +195,22 @@ Updated: 2026-07-29 UTC.
   `9ef5f74de8b184d44233c2744f32a9977948c89f8f5bee5210d161cc0f67eae2`.
 - Next gate: clean solver-free full-permutation MOF builds and reloads for
   gamma=0 and gamma=1/2.
+- Full spin-permutation MOF build attempt r1, Slurm job `22988518`, completed
+  both clean exact builds and independent reload checks from commit
+  `d799a63`. Each model has 3,250 variables, 13 constraints, the complete 12
+  named real PSD cones, 16,707 triangle entries, and maximum side 81.
+  Gamma=0 model/runmeta SHA-256 values are
+  `4f62a5e16822d2df174af8d9013bb1622c54d8c47bd2f78a59a086524ad4d67f`
+  and
+  `a0ac07d93e0101732d4d588762754f0ed4837ae2b294f53f7d6bae7573e1152f`;
+  gamma=1/2 values are
+  `e47bf0d3146ada223bbb389920ea4ca1f79efef467ee7a81ef72d42741652e9f`
+  and
+  `39da4547ce672cc3d087db7a199adcb76e73ab81672361beffe9c06910a6f05f`.
+  Job peak RSS was 919,912 KiB and elapsed time was 4:49.
+- The separate full-permutation runner allowlists those inputs and fails
+  closed on all four reduction layers, the complete source-hash inventory,
+  and the reloaded 3,250-variable/12-cone schema before attaching Mosek.
+  Gamma=0 is the next numerical truth gate; gamma=1/2 remains unauthorized
+  until it passes.
 - No decision-changing user or resource need is open.
