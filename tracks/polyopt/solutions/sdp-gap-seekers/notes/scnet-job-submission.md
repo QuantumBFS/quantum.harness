@@ -52,6 +52,15 @@ sha256sum .external/SpectralGap/src/sdp.jl                          # local
 ssh scnet 'sha256sum ~/quantum.harness/.external/SpectralGap/src/sdp.jl'   # remote
 ```
 
+**The git channel is a two-step, not one.** The push target is the **bare** repo
+`~/quantum.harness.git`; jobs run in the **working clone** `~/quantum.harness`,
+which is a separate checkout. So `git push scnet <branch>` lands commits in the
+bare repo, then `ssh scnet 'cd ~/quantum.harness && git pull'` moves them into the
+working clone. `git push` printing `Everything up-to-date` means only that the
+**bare** repo is current — the working clone can still be several commits behind
+until you pull. Forgetting the pull = SCNet runs old code with no error.
+
+
 GitHub is **blocked on SCNet**, so you cannot `git fetch` there — everything
 routes through the local→SCNet bare-repo push. (Push to origin/GitHub separately
 from the laptop, when its HTTPS cooperates.)
@@ -132,6 +141,7 @@ only if a script you don't control buffers.
 | Tool timeout eaten by TCP handshake | ssh "fails" spuriously | `timeout 60 ssh -o ConnectTimeout=50 …`, retry once |
 | Buffered Julia stdout | log looks empty/hung | `flush(stdout)` after each println |
 | `git pull` on SCNet fetching from GitHub | fails (GitHub blocked) | route via `git push scnet` from laptop |
+| `git push scnet` says "up-to-date" but SCNet runs old code | working clone not pulled | push → **then** `ssh scnet 'cd ~/quantum.harness && git pull'` (bare ≠ working clone) |
 | Brute-force local SDP | WSL OOM-kill (~15 GB) | SCNet only |
 
 ## Minimal end-to-end template
