@@ -1175,3 +1175,28 @@
 - 正确做法是让 GLM 使用独立的 `OMNIEVOLVE_LLM_FALLBACK_*` 凭证与 endpoint；
   当前 #232 运行在 Qwen 刷新前临时把 GLM fallback endpoint 映射为 primary，
   避免每次先浪费三次 Qwen 重试。密钥只存在 gitignored `.env`，不写入日志或提交。
+
+### F-62：GLM 推理耗尽 4096-token 输出预算后生成空源码
+
+- #232 实验 `e77d30c4b48b45fd` 在 generation 6 得到有效 best 后，
+  generation 7–15 连续九个 candidate 的 artifact hash 都是空文件的 SHA-256
+  `e3b0c442...`；verifier 均以 `candidate must define build_candidate()` 正确拒绝。
+- LLM ledger 显示对应多次调用恰好用满 `output_tokens=4096`，说明 GLM 把预算耗在
+  reasoning、没有留下最终代码正文。该段不是搜索停滞，而是 provider 输出预算与
+  structured-code contract 不匹配。
+- 为避免继续烧无效轮次，后台 20 代任务在 generation 15 停止。恢复前应提高 GLM
+  输出预算或让 gateway 在 `content` 为空时以更高预算重试，并在创建 candidate 前
+  拒绝空 artifact。
+- 修复后 #232 默认输出预算提高到 32k；gateway 在正文为空且 output token 使用率
+  ≥90% 时按 2× 扩容重试，最高 128k。所有截断响应仍计入 ledger/预算；若到上限仍
+  无正文则拒绝该 generation。Fast Loop 在 critic 前后各设空源码硬门，空 CAS
+  artifact 不再落库。
+
+### F-63：恢复已完成实验时运行状态和 checkpoint 不更新
+
+- 同一实验恢复运行到 generation 15 时，数据库仍报告 `status=completed`、
+  `finished_at` 为首轮结束时间，checkpoint 仍停在 generation 1；只有 candidate
+  表持续增长。CLI `status` 因而同时显示旧的 completed 状态和新的 14+ generations。
+- 这会让监控误判任务已经完成，并使进程异常退出后无法从最新有效代恢复。
+  后续需在 resume 开始时重新标记 running，并在每个 durable generation 后原子更新
+  checkpoint；结束或显式停止时再写最终状态。
