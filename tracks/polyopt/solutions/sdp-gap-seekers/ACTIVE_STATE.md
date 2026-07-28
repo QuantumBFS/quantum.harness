@@ -81,4 +81,14 @@ Updated: 2026-07-29 UTC.
 - Next gate: the separate real-cone runner must pass gamma=0, independently
   reconstructing all 11 packed symmetric matrices, before gamma=1/2 can run
   with the reduced memory request.
+- Real-cone gamma=0 truth gate passed on attempt r1, Slurm job `22988279`.
+  Mosek returned `OPTIMAL` with primal and dual feasible points;
+  normalization was exactly 1, worst PSD violation was 0, and the smallest
+  independently reconstructed block eigenvalue was 0.09561232145445703.
+  Total runner wall was 93.057 s and peak process RSS was 5,917,112 KiB.
+  Mosek's factor had 111 million nonzeros after factorization versus
+  1.45 billion in the Hermitian-bridge baseline. `result.toml` SHA-256 is
+  `de1b023911579f1952d7585524730c2e77b248997b98d467b9f0c9b58d50dc36`.
+- The exact real representation has therefore passed its independent
+  gamma=0 numerical equivalence gate; gamma=1/2 is authorized next.
 - No decision-changing user or resource need is open.
