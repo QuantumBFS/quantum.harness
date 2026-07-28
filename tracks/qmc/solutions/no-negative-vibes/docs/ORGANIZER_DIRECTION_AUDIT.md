@@ -11,7 +11,7 @@
 1. TN/DQMC 表述的完整引用链排重；
 2. `arXiv:1601.01994v2` 复 Majorana 条件的简洁矩阵定理；
 3. BDI/AII/DIII/CII 的完整 BdG/Pfaffian 半群锥；
-4. 比 TN 更大的主子式非负半群；
+4. 新得到的奇数阶 positive-monomial / block-TN 半群的文献排重与局域 HS 映射；
 5. 超出普通一维开放链的新物理模型与 HS 映射。
 
 TN 与 2024 条件的代数排重已完成：整个 TN 类同时包含 `+D/-D`，因此不能属于固定实
@@ -39,12 +39,13 @@ Hamiltonian。
 | AZ 十重对称类周期表 | **标准 Hermitian `4 x 4` 第一轮完成** | 72 万次扫描；六类精确失败；BDI、AII、DIII、CII 约化到已知 split-orthogonal/Kramers 机制 | 不是完整 BdG/Pfaffian 分类；未覆盖任意表示、非 Hermitian Majorana 生成元和各类的半群锥 |
 | 每个幸存群项的半群锥推广 | **数守恒自然锥第一轮完成；完整 BdG 仍开放** | 除 15 族、139.2 万权重和 TN 严格证明外，新完成 BDI/AII/DIII/CII 七族、14 万权重专用协议；三个幸存者均保留已知 split/Kramers 对称，BDI 两面锥有解析反例，另三个放松项有 80 位复权 | DIII/CII 数值反例尚待符号化；完整非 Hermitian Majorana、pairing、Pfaffian/Spin-trace 锥不在本轮覆盖内 |
 | 复 Majorana positivity 的简洁矩阵表述 | **部分完成，主命题未解决** | 有直接 Fock/Spin 迹 oracle、固定 `J1,J2` 的规范块表示、行列式平方交叉检查和精确反例库 | 尚未把 `1601.01994v2` 的全部复条件压缩为主办方要求的简单 determinant/Pfaffian 矩阵定理 |
-| AI 自拟结构化生成元集合 | **取得首个严格恒正、且不归入挑战已知机制的候选** | TN 路径类有一般证明和 2024 非归约证明；环、星、稠密图和换规范推广有反例；两个不同 split cones 对任意 `sin(theta)!=0` 都有 `16(1-q^2 sin^2 theta)` 反例 | 必须完成文献优先权与新物理映射，不能把经典全非负数学本身冒充首创 |
+| AI 自拟结构化生成元集合 | **取得两个严格恒正矩阵机制候选** | TN 路径之外，新得到奇数阶 positive-monomial / block-TN 循环因子化定理；偶阶路由、moving metric、双向 reciprocal 和 near-commuting 均有反例 | 两类都必须完成文献优先权与新物理映射，不能把已知矩阵数学本身冒充首创 |
 | 具体 Hamiltonian 与 HS 分解 | **已有精确非对称算法映射，Hamiltonian 创新性未闭合** | 除两个密度 HS 基线外，已证明 `t-V` 局部键门是两个非对称 TN 高斯传播子的精确正和；重叠键无固定共同 Hermitian 度量 | 开放一维无符号本身已知；普通环/分支又被交换符号 no-go 关闭，需转向配对、相关 hopping 或非平凡 gauge/ancilla 编码 |
 
 ## 大规模候选覆盖表
 
-累计 `3,852,000` 个权重不等于穷尽候选空间。当前覆盖应这样理解：
+累计 `4,044,000` 个主权重，另加 640 条宇称分辨 Majorana 历史，不等于穷尽候选空间。
+当前覆盖应这样理解：
 
 | 候选池 | 是否已有大规模扫描 | 当前判断 |
 |---|---|---|
@@ -53,8 +54,10 @@ Hamiltonian。
 | 共享 `J1`、旋转 `J2` 的 Majorana 双锥 | **是：700,000** | 已由任意小夹角解析反例关闭，不需继续随机扫 |
 | 15 个路径/图/混合锥/分块半群 | **是：1,392,000** | 朴素图扩展和完整旋转 split-cone 并集关闭；TN 路径存活并已证明 |
 | BDI/AII/DIII/CII 幸存结构的数守恒半群锥 | **是：140,000** | 自然 PSD/metric-cone 第一轮完成；非平凡放松均失败，零失败者均约化到已知 split/Kramers |
+| 12 个激进路由/表示/范数候选 | **是：192,000** | odd monomial、odd block-TN、fixed norm 和 reciprocal 严格幸存；四个放松失败；`D_4` 约化到已知 split |
+| Majorana 宇称分辨 | **是：640 条历史** | canonical convention 下的 period-4 数值猜想；互补扇区有 float64 负权，尚无任意精度重放 |
 | 完整复 Majorana 非 Hermitian/配对生成元 | **否** | 只扫过一个旋转双锥切片；主办方要求的复矩阵定理仍未完成 |
-| 比 TN 更大的主子式/外幂锥半群 | **否** | 目前只有 TN 与逐扇区符号规范边界；尚无系统生成器 |
+| 比 TN 更大的主子式/外幂锥半群 | **部分完成** | odd monomial 是新的 `P0` 乘法半群候选；非诱导 exterior-cone 仍未开始 |
 | 物理可达的受限锥交集 | **否** | 必须从具体 Hamiltonian/HS 反推，不能用无物理来源的整锥随机矩阵代替 |
 | 非平凡 gauge/ancilla、宇称串相关 hopping | **否** | 普通 ancilla 偏迹已由非负矩阵元障碍排除；非平凡编码仍开放 |
 | 配对/Majorana/Pfaffian 物理模型 | **否** | 现有 determinant AZ 扫描不能替代 Pfaffian/Spin-trace 权重检查 |
@@ -63,11 +66,12 @@ Hamiltonian。
 
 1. `complex-Majorana-structured-v1`：在复矩阵定理写清后，对物理允许的 pairing/HS
    子空间做 Spin-trace 与 Pfaffian 联合扫描；
-2. 一个定义明确、乘法闭合的“比 TN 更大主子式半群”小维对抗协议；
+2. 对 odd monomial / block-TN 做完整文献排重和局域 HS 反推；
 3. 只有上述某个结构化候选在小维对抗搜索中存活，才扩大到 `10^6` 量级。
 
-“更大的主子式半群”和“非平凡物理编码”目前还处在定义候选阶段，直接大扫没有明确采样
-空间，得到的零负例率也没有科学含义。
+odd monomial 已给出一个更大搜索空间中的严格 `P0` 候选；尚未实现的非诱导外幂锥和
+非平凡物理编码仍处在定义候选阶段，直接大扫没有明确采样空间，得到的零负例率也没有
+科学含义。
 
 ## 哪些结论可以直接对外说
 
@@ -94,7 +98,7 @@ Hamiltonian。
 
 ## 推荐顺序
 
-1. 先复核 TN/2024 非归约证明并完成 TN 路径类的文献引用链排重；
-2. 用 TN 的双对角/平面网络分解寻找超出普通开放链的具体 Hamiltonian/HS 模型；
-3. 若物理推广失败，把 TN 作为严格边界结果，再搜索更大的主子式非负乘法半群；
+1. 排重 odd monomial / block-TN 的 `P0` 与 generalized-permutation 文献；
+2. 为离散 odd grade 反推局域可采样 HS，并继续 TN 的物理映射；
+3. 在 canonical convention 下证明或推翻 Majorana 受保护宇称公式；
 4. 复 Majorana 已知条件继续整理为 determinant、Pfaffian、Spin-trace 三层支撑语言。

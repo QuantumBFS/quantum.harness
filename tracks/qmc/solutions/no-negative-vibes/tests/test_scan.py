@@ -62,6 +62,47 @@ def test_scan_cell_accepts_frontier_candidates() -> None:
     assert manifest["counts"]["complex"] == 0
 
 
+def test_scan_cell_accepts_direct_monomial_factors() -> None:
+    manifest = scan_cell(
+        case="odd_monomial_c3",
+        depth=6,
+        scale=0.8,
+        seed=37,
+        samples=30,
+    )
+
+    assert manifest["provenance"]["family"] == "odd_scalar_monomial"
+    assert (
+        manifest["provenance"]["factor"]
+        == "oracle.monomial_candidates.random_factor"
+    )
+    assert "generator" not in manifest["provenance"]
+    assert sum(manifest["counts"].values()) == 30
+    assert manifest["max_structure_residual"] < 1e-12
+    assert manifest["counts"]["negative"] == 0
+    assert manifest["counts"]["complex"] == 0
+
+
+def test_scan_cell_accepts_speculative_generator_cases() -> None:
+    manifest = scan_cell(
+        case="reciprocal_parabolic4",
+        depth=5,
+        scale=0.8,
+        seed=39,
+        samples=30,
+    )
+
+    assert manifest["provenance"]["family"] == "reciprocal_parabolic_flag"
+    assert (
+        manifest["provenance"]["generator"]
+        == "oracle.speculative_candidates.random_generator"
+    )
+    assert sum(manifest["counts"].values()) == 30
+    assert manifest["max_structure_residual"] < 1e-12
+    assert manifest["counts"]["negative"] == 0
+    assert manifest["counts"]["complex"] == 0
+
+
 def test_run_spec_writes_resumable_parameter_scan_manifest(tmp_path) -> None:
     """Catches writing results outside the declared cell or recomputing completed cells."""
     run_dir = tmp_path / "run"

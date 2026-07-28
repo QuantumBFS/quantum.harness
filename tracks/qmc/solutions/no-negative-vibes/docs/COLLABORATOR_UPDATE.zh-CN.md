@@ -4,7 +4,8 @@
 
 ## 一句话状态
 
-我们已经累计检查 3,852,000 个权重，完成经典群、标准 Hermitian AZ、Majorana 双锥、
+我们已经累计检查 4,044,000 个主权重，另做 640 条宇称分辨 Majorana 历史；每条历史
+分别计算 even、odd 和完整 Fock 迹。我们已完成经典群、标准 Hermitian AZ、Majorana 双锥、
 15 个新半群候选和七个 AZ 幸存类自然半群锥的系统排查。最新进展是找到一个有一般证明的
 恒正矩阵类：三对角 Metzler
 路径生成元的指数乘积全非负，因此任意维数、任意时间片都有 `det(I+D)>=1`。它已映射到
@@ -13,7 +14,9 @@
 因此 TN 已经成为真实辅助场算法，不再只是抽象矩阵类。但一维开边界无符号本身已知，
 目前仍不能声称发现了新 Hamiltonian。另一方面，任意两个不同旋转的 split cones 已由
 显式两层反例完全关闭。BDI/AII/DIII/CII 的自然数守恒锥也完成第一轮：真正放松已知
-对称的四项均产生负权或复权，三个零失败项仍只是已知 split/Kramers 机制。
+对称的四项均产生负权或复权，三个零失败项仍只是已知 split/Kramers 机制。最新一轮又
+找到有一般证明的奇数阶 positive-monomial / block-TN 路由半群，并在 canonical
+convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值猜想。
 
 ## 已经完成
 
@@ -23,12 +26,13 @@
    - 区分正、负、零、复相位和数值不确定；
    - 对 Fock 乘积逐层正数归一化，对病态 determinant 只记录相位/对数并标记不可用检查；
    - 每个参数格保存种子、结构残差和反例。
-2. 建立 47 个 determinant 结构生成器：
+2. 建立 59 个 determinant 结构生成器：
    - 15 个经典群/李代数候选；
    - 10 个 AZ Hermitian 时间片类；
    - 15 个路径、图、混合锥和分块半群候选/对照。
    - 7 个 BDI/AII/DIII/CII 自然半群锥候选/对照。
-3. 完成七轮主扫描：
+   - 12 个 odd-monomial、公共范数、reciprocal、`D_4` 和可交换代数激进候选/对照。
+3. 完成八轮主扫描和一轮宇称 survey：
    - `classical-groups-v1`：900 格、900,000 个乘积；
    - `az-tenfold-hermitian-v1`：720 格、720,000 个乘积。
    - `majorana-shared-reality-cones-v2`：1,792 格、448,000 个直接 Fock 迹；
@@ -36,8 +40,10 @@
    - `frontier-semigroups-v1`：1,440 格、720,000 个行列式；
    - `frontier-mixed-split-stress-v1`：672 格、672,000 个行列式。
    - `az-survivor-cones-v1`：560 格、140,000 个行列式。
+   - `speculative-structures-v1`：960 格、192,000 个行列式。
+   - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
 4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现和精确非对称键门
-   分解；138 个自动测试全通过。
+   分解；199 个自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -120,6 +126,23 @@
 - 下一突破口已收窄为非平凡 gauge/ancilla 编码、带宇称串相关 hopping、
   pairing/Majorana 或更大半群。
 
+### 激进候选首批
+
+- 12 族、192,000 个 determinant 权重的正式扫描全部完成；
+- 奇数阶 positive-monomial 满足
+  `det(I+B)=product_C(1+product_{i in C}d_i)>0`，是任意深度的一般证明；
+- 三循环已有负的非主子式，所以它不属于 ordinary TN；类包含任意正对角矩阵，也排除
+  固定 Kramers 和公共范数收缩；
+- 奇数循环的 block-TN 推广同样严格恒正，是当前最值得寻找局域 HS 映射的候选；
+- 偶阶 `V4` 路由已有精确 `-9/4` 反例；moving metric、双向 reciprocal coupling 和
+  near-commuting 并集分别产生 4,542、3,894、846 个负权，代表例均由 80 位重放；
+- fixed `l_infinity`、reciprocal-parabolic 和 commuting 类严格恒正，但分别属于公共
+  收缩、三角因子化和可积对照；`D_4` Lusztig 则约化到已知 split `SO(4,4)`；
+- 另做 640 条 Majorana 宇称分辨历史：在 canonical `J1/J2` 和当前 Jordan-Wigner
+  取向下，`m=2..6` 中猜想扇区 `pi_*=(-1)^[m(m+1)/2]` 全部正，互补扇区累计观察到
+  204 个 float64 负权。这个 convention-dependent 猜想尚无证明，互补负例也尚未做
+  任意精度重放。
+
 ## 我们没有声称什么
 
 - 没有声称随机扫描能证明非负；
@@ -130,16 +153,13 @@
 ## 下一步建议
 
 不再重复扫描整个命名群、普通 AZ 类、自然数守恒 AZ metric cone 或同分布双锥。下一步
-围绕 TN 路径结果闭环：
+围绕两个新候选闭环：
 
-1. 深查 TN 条件在 AFQMC/DQMC 中是否已有直接表述；
-2. 由合作者或出题人复核已完成的 2024 contraction-semigroup 非归约证明；
-3. 沿 bond-channel/discrete HS 引用链排重精确非对称键门公式；
-4. 构造非平凡 gauge/ancilla 编码或宇称串相关 hopping 的局部门，显式绕过扇区符号
-   no-go；
-5. 写清 complex-Majorana/BdG 的 Pfaffian 与 Spin-trace 分支，再筛物理允许的 pairing
-   子空间；
-6. 若不能产生新物理，再转向比 TN 更大的主子式非负乘法半群。
+1. 查 `P0`/monomial matrix semigroup 文献，确认奇数阶路由的新颖性边界；
+2. 为 odd monomial / block-TN grade 构造局域、可采样的 HS 分解；
+3. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
+4. 若两条都不能物理闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
+   编码。
 
 任何新候选按以下漏斗处理：
 
@@ -165,6 +185,8 @@
 - [复合矩阵规范 no-go](COMPOUND_GAUGE_NO_GO.md)
 - [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [AZ 幸存类半群锥](AZ_SURVIVOR_CONE_RESULTS.md)
+- [激进候选首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)
+- [激进候选清单](SPECULATIVE_CANDIDATE_BATCH.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)
 - [经典群基线](BASELINE_RESULTS.md)

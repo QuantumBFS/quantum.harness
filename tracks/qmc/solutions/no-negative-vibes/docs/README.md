@@ -29,6 +29,10 @@
   高精度反例和混合 split-cone 解析关闭；
 - [AZ_SURVIVOR_CONE_RESULTS.md](AZ_SURVIVOR_CONE_RESULTS.md)：BDI/AII/DIII/CII 七个自然
   数守恒半群锥的 14 万权重筛选、80 位反例和完整 BdG 边界；
+- [SPECULATIVE_STRUCTURE_RESULTS.md](SPECULATIVE_STRUCTURE_RESULTS.md)：奇数阶 monomial
+  的一般证明、12 族 19.2 万权重、四类 80 位反例和 Majorana 宇称猜想；
+- [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
+  spinor/exterior-cone 候选的定义、排重与停止条件；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；

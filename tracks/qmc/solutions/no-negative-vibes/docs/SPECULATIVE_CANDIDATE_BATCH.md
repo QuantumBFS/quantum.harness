@@ -16,6 +16,18 @@ w(A_1,...,A_L) = det[I + exp(A_1)...exp(A_L)] >= 0
 对任意允许的时间片、任意深度都成立。一次负权足以淘汰；随机零失败只算候选，只有一般
 证明或精确证书才能升级结论。
 
+## 首批回填
+
+第一批代码、192,000 个 determinant 权重、640 条宇称分辨 Majorana 历史和 80 位反例
+已经完成，详见[首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)。每条 Majorana 历史分别
+计算 even、odd 和完整 Fock 迹。
+
+- odd monomial / block-TN：升级为有一般证明的主候选，物理映射仍开放；
+- fixed `l_infinity`、reciprocal-parabolic、commuting：严格正，但新颖性较低；
+- moving metric、双向 reciprocal、near-commuting、偶阶 monomial：已有负权，关闭；
+- `D_4` Lusztig：约化到已知 split `SO(4,4)`，不作为新机制；
+- Majorana 宇称公式：首批完全符合，但仍是待证明猜想。
+
 ## 第一优先级：本轮立即实现
 
 ### S1. 奇数阶 positive-monomial 半群
@@ -33,7 +45,8 @@ B = P_g diag(d_1,...,d_n),   d_i > 0,
 det(I+B) = product_C [1 + product_{i in C} d_i] > 0.
 ```
 
-这严格超出 ordinary TN：三循环置换矩阵已经有负的非主子式；在奇维也不可能靠全局
+这个类包含 ordinary TN 之外的元素：三循环置换矩阵已经有负的非主子式；在奇维也
+不可能靠全局
 `J^2=-I` Kramers 结构解释。每个正 monomial 因子若只含奇循环，则没有负实本征值，存在
 实矩阵对数，所以可以写回 `B=exp(A)`。
 
@@ -51,14 +64,17 @@ det(I+B) = product_C [1 + product_{i in C} d_i] > 0.
 
 ### S2. 奇数循环的 block-TN wreath 半群
 
-把 monomial 的正标量换成 TN 块 `X_i`。长度为奇数的块循环贡献
+把 monomial 的正标量换成可逆 TN 块 `X_i`。长度为奇数的块循环贡献
 
 ```text
 det(I + X_l ... X_1) >= 0,
 ```
 
-因为 TN 块乘积仍 TN。它把已有开放路径传播子通过离散奇循环路由起来，可能产生比单条
+因为可逆 TN 块乘积仍 TN。它把已有开放路径传播子通过离散奇循环路由起来，可能产生比单条
 链更丰富的辅助场几何。
+
+对本轮可逆块，奇循环的奇次幂在对角块上给出正谱 TN 乘积，因此原循环没有负实本征值；
+由 Culver real-log criterion，它仍能写成一个实矩阵指数。奇异 TN 只作为闭包边界。
 
 首批实例：
 
@@ -75,7 +91,8 @@ a_ii + sum_{j != i} |a_ij| h_j/h_i <= 0.
 
 则 `diag(h)^(-1) exp(A) diag(h)` 的无穷范数不超过 1。任意乘积的谱半径不超过 1；
 实本征值位于 `[-1,1]`，非实本征值共轭成对，所以 `det(I+D)>=0`。这个锥允许稠密、
-带符号、有环的单粒子图，明显大于 TN 路径。
+带符号、有环的单粒子图，而 ordinary TN 路径不覆盖这些一般矩阵；这里不主张两类有
+简单的集合包含关系。
 
 它在 QMC 语境里的新颖性有限：本质仍是公共 Banach 范数收缩，但不等同于已有固定二次
 metric 锥。必须同时测试每片独立改变 `h` 的并集；后者预期像 rotated cones 一样失败。
@@ -115,13 +132,13 @@ det(I+D) = det(I+X)^2 / det(X) >= 0.
 - `reciprocal_parabolic4`
 - `reciprocal_bicoupled4`：打开任意 lower block 的边界对照
 
-### S5. split `D_4` 的 Lusztig/Chevalley 正锥
+### S5. split `D_4` 的 Lusztig/Chevalley 正锥（已降级）
 
 对 split `SO(4,4)` 的八维向量表示，取 Cartan 元加上所有 simple-root Chevalley
 生成元的非负组合。每片指数落在 Lusztig totally nonnegative monoid 的闭包，乘积仍在
 其中。
 
-候选证明不要求八维矩阵本身 ordinary TN。对每个外幂表示，
+原候选证明设想不要求八维矩阵本身 ordinary TN。对每个外幂表示，
 
 ```text
 det(I+D) = sum_k Tr[Lambda^k(D)].
@@ -136,8 +153,9 @@ det(I+D) = sum_k Tr[Lambda^k(D)].
 - `lusztig_d4_positive`
 - `lusztig_d4_signed`：允许任意根系数的边界对照
 
-这里的零失败只能把候选送入“补齐 canonical-basis 证明和已知文献排重”，不能直接称新
-定理。
+首批审计发现所有这些 simple-root 生成元已经满足同一个 split `SO(4,4)` 约束，而且
+允许任意根系数的 signed 对照也仍受该约束保护。因此零失败无需诉诸上面的
+canonical-basis 设想，当前状态已降为 `known_reduction`，不再推进为新机制。
 
 ### S6. 稠密可交换代数
 
@@ -190,13 +208,15 @@ flag 或 TN，立即停止。
 Z_even/odd = Tr[(1 +/- (-1)^F) U] / 2.
 ```
 
-初步小样本提示可能只有一个随模式数变化的宇称扇区受保护，
+初步小样本提示可能只有一个随模式数变化的宇称扇区受保护。在 canonical `J1/J2`、
+当前 Jordan-Wigner Majorana 排序和取向下，
 
 ```text
 pi_* = (-1)^[m(m+1)/2].
 ```
 
-这是猜想而非结果；另一扇区已有大量负样本。下一批应先系统重放，再检查 2016 证明中的
+这是 convention-dependent 猜想而非结果；orientation-reversing Majorana 重排可交换
+even/odd 标签。另一扇区已有大量数值负样本。下一批应先系统重放，再检查 2016 证明中的
 反射取向符号，不能把“总迹正”误读成“两扇区都正”。
 
 ### S10. pairwise-overlap Majorana cone nerve
@@ -228,6 +248,8 @@ pi_* = (-1)^[m(m+1)/2].
 
 ## 文献锚点
 
+- Culver, *On the existence and uniqueness of the real logarithm of a matrix*,
+  1966: <https://doi.org/10.1090/S0002-9939-1966-0202740-6>
 - Fomin and Zelevinsky, *Totally nonnegative and oscillatory elements in
   semisimple groups*, 1998: <https://arxiv.org/abs/math/9811100>
 - Fomin and Zelevinsky, *Double Bruhat cells and total positivity*, 1999:
@@ -238,4 +260,3 @@ pi_* = (-1)^[m(m+1)/2].
   simulations*, 2017/2024 version: <https://arxiv.org/abs/1712.09412>
 - Han, Wan, and Yao, *Pfaffian quantum Monte Carlo*, 2024:
   <https://arxiv.org/abs/2408.10311>
-

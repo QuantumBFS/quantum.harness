@@ -15,6 +15,7 @@
 | 查看最新 139.2 万权重初筛 | [新半群初筛结果](docs/FRONTIER_SEMIGROUP_RESULTS.md) |
 | 查看 AZ 幸存类的 14 万权重锥筛选 | [AZ 幸存类半群锥](docs/AZ_SURVIVOR_CONE_RESULTS.md) |
 | 查看已占位的激进候选批次 | [新结构候选与证伪清单](docs/SPECULATIVE_CANDIDATE_BATCH.md) |
+| 查看激进候选首批 19.2 万权重结果 | [奇数阶路由与宇称分辨 Majorana](docs/SPECULATIVE_STRUCTURE_RESULTS.md) |
 | 查看当前结论和文献边界 | [研究地基](docs/FOUNDATIONS.md) |
 | 接着推进项目 | [当前状态与下一步](START_HERE.md) |
 
