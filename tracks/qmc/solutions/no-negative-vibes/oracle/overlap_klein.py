@@ -31,6 +31,7 @@ from oracle.metzler_system import (
 
 
 _WORKER_SYSTEM: ExactMetzlerSystem | None = None
+_WORKER_NUMERIC_MATRIX: np.ndarray | None = None
 
 
 @dataclass(frozen=True)
@@ -206,18 +207,25 @@ def build_system(family: str, mask: str) -> ExactMetzlerSystem:
     )
 
 
-def _initialize_anchor_worker(system: ExactMetzlerSystem) -> None:
+def _initialize_anchor_worker(
+    system: ExactMetzlerSystem,
+    numeric_matrix: np.ndarray,
+) -> None:
     """Install the parent-compiled system in a spawn-safe worker process."""
-    global _WORKER_SYSTEM
+    _validated_numeric_system_matrix(system, numeric_matrix)
+    global _WORKER_SYSTEM, _WORKER_NUMERIC_MATRIX
     _WORKER_SYSTEM = system
+    _WORKER_NUMERIC_MATRIX = numeric_matrix
 
 
 def _solve_anchor_worker(task: tuple[str, int]) -> AnchorSolve:
     """Solve one labelled sign problem using the initialized exact system."""
-    if _WORKER_SYSTEM is None:
+    if _WORKER_SYSTEM is None or _WORKER_NUMERIC_MATRIX is None:
         raise RuntimeError("anchor worker was not initialized")
     label, sign = task
-    return solve_anchor(_WORKER_SYSTEM, label, sign)
+    return _solve_anchor_with_matrix(
+        _WORKER_SYSTEM, label, sign, _WORKER_NUMERIC_MATRIX
+    )
 
 
 def _require_worker_count(workers: int) -> None:
@@ -299,6 +307,7 @@ def classify_anchor(
     *,
     positive_solve: AnchorSolve,
     negative_solve: AnchorSolve,
+    numeric_matrix: np.ndarray | None = None,
 ) -> dict[str, object]:
     """Classify one bridge only after its terminal evidence exactly replays."""
     if positive_solve.label != label or positive_solve.sign != 1:
@@ -321,7 +330,9 @@ def classify_anchor(
         and negative_solve.status == "infeasible"
     ):
         try:
-            zero_certificate = find_zero_dual(system, label)
+            zero_certificate = find_zero_dual(
+                system, label, numeric_matrix=numeric_matrix
+            )
             if not verify_zero_dual(system, zero_certificate):
                 raise ArithmeticError("exact dual certificate did not replay")
             anchor["zero_certificate"] = certificate_to_json(zero_certificate)
@@ -367,6 +378,7 @@ def run_anchor_scan(
     _require_worker_count(workers)
     normalized_commit = _normalized_source_commit(source_commit)
     system = build_system(family, mask)
+    numeric_matrix = _numeric_system_matrix(system)
     labels = bridge_labels(family)
     tasks = tuple((label, sign) for label in labels for sign in (-1, 1))
 
@@ -374,7 +386,7 @@ def run_anchor_scan(
         max_workers=workers,
         mp_context=multiprocessing.get_context("spawn"),
         initializer=_initialize_anchor_worker,
-        initargs=(system,),
+        initargs=(system, numeric_matrix),
     ) as executor:
         solves = tuple(executor.map(_solve_anchor_worker, tasks))
     by_label_sign = {
@@ -392,6 +404,7 @@ def run_anchor_scan(
                 label,
                 positive_solve=positive_solve,
                 negative_solve=negative_solve,
+                numeric_matrix=numeric_matrix,
             )
         )
 
@@ -525,18 +538,33 @@ def _validate_system_field(system: ExactMetzlerSystem) -> None:
         _q_sqrt_two_coefficients(value)
 
 
-def _numeric_q_sqrt_two_coefficients(
+def _numeric_system_matrix(
     system: ExactMetzlerSystem,
 ) -> np.ndarray:
-    """Convert the system through its exact Q(sqrt(2)) representation."""
+    """Convert only stored exact coefficients to an immutable C-order matrix."""
     _require_system(system)
-    values = np.empty(system.coefficients.shape, dtype=float)
-    for row in range(system.coefficients.rows):
-        for column in range(system.coefficients.cols):
-            values[row, column] = _q_sqrt_two_to_float(
-                system.coefficients[row, column]
-            )
+    values = np.zeros(system.coefficients.shape, dtype=float, order="C")
+    for (row, column), value in system.coefficients.todok().items():
+        values[row, column] = _q_sqrt_two_to_float(value)
+    values.setflags(write=False)
     return values
+
+
+def _validated_numeric_system_matrix(
+    system: ExactMetzlerSystem,
+    matrix: np.ndarray,
+) -> np.ndarray:
+    if not isinstance(matrix, np.ndarray):
+        raise TypeError("numeric system matrix must be a NumPy array")
+    if matrix.shape != system.coefficients.shape:
+        raise ValueError("numeric system matrix has the wrong shape")
+    if not matrix.flags.c_contiguous or matrix.flags.writeable:
+        raise ValueError("numeric system matrix must be C-contiguous and read-only")
+    if not np.issubdtype(matrix.dtype, np.floating) or not np.all(
+        np.isfinite(matrix)
+    ):
+        raise ValueError("numeric system matrix must be finite floating-point data")
+    return matrix
 
 
 def _empty_anchor_result(
@@ -555,13 +583,27 @@ def _empty_anchor_result(
 def solve_anchor(
     system: ExactMetzlerSystem, anchor_label: str, sign: int
 ) -> AnchorSolve:
+    return _solve_anchor_with_matrix(
+        system,
+        anchor_label,
+        sign,
+        _numeric_system_matrix(system),
+    )
+
+
+def _solve_anchor_with_matrix(
+    system: ExactMetzlerSystem,
+    anchor_label: str,
+    sign: int,
+    matrix: np.ndarray,
+) -> AnchorSolve:
     _require_system(system)
     anchor = _anchor_index(system, anchor_label)
     _require_sign(sign)
     _validate_system_field(system)
 
     try:
-        matrix = _numeric_q_sqrt_two_coefficients(system)
+        matrix = _validated_numeric_system_matrix(system, matrix)
         variables = len(system.labels)
         equality = np.zeros((1, variables), dtype=float)
         equality[0, anchor] = 1.0
@@ -779,8 +821,14 @@ def _numeric_dual(
     *,
     anchor: int,
     sign: int,
+    numeric_matrix: np.ndarray | None = None,
 ) -> np.ndarray:
-    matrix = _numeric_q_sqrt_two_coefficients(system)
+    matrix = _validated_numeric_system_matrix(
+        system,
+        _numeric_system_matrix(system)
+        if numeric_matrix is None
+        else numeric_matrix,
+    )
     row_count = len(system.rows)
     target = np.zeros(len(system.labels), dtype=float)
     target[anchor] = float(sign)
@@ -936,17 +984,31 @@ def _reconstruct_dual_weights(
 
 
 def find_zero_dual(
-    system: ExactMetzlerSystem, anchor_label: str
+    system: ExactMetzlerSystem,
+    anchor_label: str,
+    *,
+    numeric_matrix: np.ndarray | None = None,
 ) -> ExactDualCertificate:
     _require_system(system)
     anchor = _anchor_index(system, anchor_label)
     _validate_system_field(system)
+    matrix = _validated_numeric_system_matrix(
+        system,
+        _numeric_system_matrix(system)
+        if numeric_matrix is None
+        else numeric_matrix,
+    )
     exact_weights: list[tuple[sp.Expr, ...]] = []
     for sign in (1, -1):
         target_values = [sp.Integer(0)] * len(system.labels)
         target_values[anchor] = sp.Integer(sign)
         target = sp.ImmutableMatrix(target_values)
-        numerical = _numeric_dual(system, anchor=anchor, sign=sign)
+        numerical = _numeric_dual(
+            system,
+            anchor=anchor,
+            sign=sign,
+            numeric_matrix=matrix,
+        )
         exact_weights.append(
             _reconstruct_dual_weights(system, numerical, target)
         )
