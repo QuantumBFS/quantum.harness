@@ -11,7 +11,7 @@
 | | |
 |---|---|
 | **Team name** | BoundGSEnergy |
-| **Members** | Fo-Hong Wang |
+| **Members** | Fo-Hong Wang, Siyuan Chen |
 
 ## Challenge
 
