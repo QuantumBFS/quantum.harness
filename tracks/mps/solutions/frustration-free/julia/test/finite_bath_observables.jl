@@ -5,7 +5,9 @@ include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
 using .FiniteBathObservables:
     ObservableCursor,
     ObservableInterrupted,
+    _thermal_setup_maxima,
     build_finite_bath_context,
+    copy_identity_purification,
     finite_bath_observables,
     impurity_green_function
 using .FiniteBathCheckpoint:
@@ -418,6 +420,23 @@ end
             resume_state = endpoint_with_evolution,
         ),
     )
+    endpoint_with_operator_claim = ObservableResumeState(
+        endpoint_before.resume_state.cursor,
+        nothing,
+        endpoint_before.resume_state.thermal_psi,
+        merge(
+            endpoint_before.resume_state.data,
+            (; operator_log_norm = 0.0),
+        ),
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (;
+            psi = endpoint_before.psi,
+            resume_state = endpoint_with_operator_claim,
+        ),
+    )
 
     interior_before = only(filter(
         snapshot ->
@@ -467,6 +486,58 @@ end
             resume_state = complete_with_evolution,
         ),
     )
+end
+
+@testset "nonzero Krylov thermal resume preserves complete diagnostics" begin
+    beta = 0.04
+    tau = [0.01]
+    parameters = FiniteBathParameters(
+        [0.13], [0.17]; U = 0.61, epsilon_d = -0.27, mu = 0.03
+    )
+    common = (;
+        beta,
+        tau,
+        time_step = 0.02,
+        cutoff = 1.0e-14,
+        maxdim = 128,
+        krylov_expansion_dim = 2,
+    )
+    context = build_finite_bath_context(parameters)
+    setup_maxima = _thermal_setup_maxima(
+        copy_identity_purification(context),
+        context.hamiltonian;
+        krylov_expansion_dim = common.krylov_expansion_dim,
+        cutoff = common.cutoff,
+        maxdim = common.maxdim,
+    )
+    uninterrupted = finite_bath_observables(parameters; common...)
+    @test setup_maxima == (
+        uninterrupted.thermal_state.diagnostics.initial_max_link_dimension,
+        uninterrupted.thermal_state.diagnostics.expanded_max_link_dimension,
+    )
+
+    snapshots = NamedTuple[]
+    managed = finite_bath_observables(
+        parameters;
+        common...,
+        checkpoint_manager = (psi, state) ->
+            push!(snapshots, (; psi = copy(psi), resume_state = state)),
+    )
+    assert_observable_equivalence(managed, uninterrupted)
+
+    thermal_step = only(filter(
+        snapshot ->
+            snapshot.resume_state.cursor.phase === :thermal &&
+            snapshot.resume_state.evolution_state.completed_steps == 1,
+        snapshots,
+    ))
+    resumed = finite_bath_observables(
+        parameters; common..., resume = thermal_step
+    )
+    assert_observable_equivalence(resumed, uninterrupted)
+    @test resumed.diagnostics.maximum_link_dimensions_by_bond ==
+          uninterrupted.diagnostics.maximum_link_dimensions_by_bond
+    @test resumed.diagnostics.settings == uninterrupted.diagnostics.settings
 end
 
 @testset "durable observable checkpoint resumes through Task 3 manager" begin

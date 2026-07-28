@@ -38,6 +38,20 @@ its CT-HYB comparison follow only after this gate passes.
   e^{-(\beta-\tau)K}d_\sigma e^{-\tau K}d_\sigma^\dagger
   \right].
   \]
+- The endpoints are strict fermionic identities evaluated from the completed
+  thermal state:
+  \[
+  G_\sigma(0)=-(1-\langle n_\sigma\rangle),\qquad
+  G_\sigma(\beta)=-\langle n_\sigma\rangle.
+  \]
+  They perform no Green-branch TDVP and no impurity operator insertion.
+  Endpoint processing is atomic at its `:before` cursor and advances directly
+  to the next spin/tau branch; an endpoint `:after` cursor is invalid because
+  it would falsely claim an applied operator.
+- Exactly-once impurity insertion applies only for \(0<\tau<\beta\). For those
+  non-endpoint branches, `:before` denotes pre-insertion evolution and
+  `:after` denotes a state where the operator has already been applied exactly
+  once and its log norm is retained for resume.
 - The MPS state contains interleaved physical and ancilla `Electron` sites.
   The \(\beta=0\) state is a product over sites of normalized local identity
   pairs. Only physical sites evolve under \(e^{-\beta K/2}\).
