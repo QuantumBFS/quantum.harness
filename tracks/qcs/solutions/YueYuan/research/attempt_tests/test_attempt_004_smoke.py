@@ -30,3 +30,31 @@ def test_attempt_004_local_smoke_emits_required_records(tmp_path):
     } <= {row["method"] for row in rows}
     assert {"small", "medium", "large"} <= {row["mismatch"] for row in rows}
     assert {128, 512, 2048} <= {row["shots_per_query"] for row in rows}
+
+
+def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
+    out_dir = tmp_path / "smoke"
+    smoke = subprocess.run(
+        [sys.executable, str(ATTEMPT / "run_local_smoke.py"), "--out", str(out_dir), "--fast"],
+        text=True,
+        capture_output=True,
+    )
+    assert smoke.returncode == 0, smoke.stderr
+    figs = subprocess.run(
+        [sys.executable, str(ATTEMPT / "make_figures.py"), "--results", str(out_dir)],
+        text=True,
+        capture_output=True,
+    )
+    assert figs.returncode == 0, figs.stderr
+    expected = {
+        "model_optimization_history.png",
+        "hessian_spectrum.png",
+        "queries_to_target_vs_k.png",
+        "shots_to_target_vs_k.png",
+        "advantage_vs_gap.png",
+        "success_rate_vs_shots.png",
+        "failure_mode.png",
+    }
+    actual = {path.name for path in (out_dir / "figures").glob("*.png")}
+    assert expected <= actual
+    assert (out_dir / "summary.json").exists()
