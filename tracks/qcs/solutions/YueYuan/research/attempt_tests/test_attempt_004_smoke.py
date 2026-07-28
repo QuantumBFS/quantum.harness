@@ -79,6 +79,7 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
         "headline_comparison.csv",
         "failure_modes.csv",
         "recovery_study.csv",
+        "spectrum_summary.csv",
     } <= {
         path.name for path in tables.glob("*.csv")
     }
@@ -105,6 +106,20 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
     with (tables / "headline_comparison.csv").open() as handle:
         rows = list(csv.DictReader(handle))
         assert "adaptive_hessian_subspace_nelder_mead" in {row["method"] for row in rows}
+    with (tables / "spectrum_summary.csv").open() as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        assert rows
+        assert {
+            "system",
+            "seed",
+            "effective_rank",
+            "benchmark_rank",
+            "curvature_at_benchmark_k",
+            "k_for_90pct_curvature",
+            "k_for_95pct_curvature",
+            "k_for_99pct_curvature",
+        } <= set(reader.fieldnames or [])
 
 
 def test_attempt_004_candidate_export_has_challenge_methods(tmp_path):

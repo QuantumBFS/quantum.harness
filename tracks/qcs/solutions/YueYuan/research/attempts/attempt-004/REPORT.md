@@ -58,9 +58,9 @@ task and 10 concurrent tasks. It produced:
 - 5,121 open-loop history rows;
 - 144 Hessian spectra;
 - 207 aggregate method/system/gap/shot/k groups;
-- CSV summary tables for group statistics, headline comparisons, and failure
-  modes, plus a recovery study comparing benchmark `k` against the best widened
-  Hessian subspace;
+- CSV summary tables for group statistics, headline comparisons, failure modes,
+  Hessian-spectrum diagnostics, and a recovery study comparing benchmark `k`
+  against the best widened Hessian subspace;
 - zero tracebacks in the checked Slurm logs.
 
 Generated artifacts are intentionally ignored by git and are stored locally under
@@ -86,6 +86,24 @@ under `tracks/qcs/results/YueYuan/attempt-004/full_reachable/summary_tables/`:
 - `headline_comparison.csv`
 - `failure_modes.csv`
 - `recovery_study.csv`
+- `spectrum_summary.csv`
+
+## Spectrum Dimension Diagnostics
+
+The implementation records measured Hessian-spectrum diagnostics rather than
+assuming the useful subspace dimension is exactly `d^2 - 1`. The
+`spectrum_summary.csv` table reports effective rank above the numerical
+threshold, benchmark rank, total absolute curvature, benchmark-rank curvature
+capture, and the minimum `k` needed to capture 90%, 95%, and 99% of absolute
+curvature.
+
+On the full sweep, the one-qubit spectra have formal effective rank 16 because
+small curvature tails remain above threshold, but benchmark `k=3` captures
+median 0.990 of absolute curvature and the median `k` for 95% capture is 3. The
+two-qubit spectra have formal effective rank 47-48, but benchmark `k=15`
+captures median 0.998 of absolute curvature; median `k` for 90%, 95%, and 99%
+capture is 7, 9, and 10. This separates formal rank from practical curvature
+concentration and justifies sweeping both below and above the benchmark ranks.
 
 ## Headline Results
 
@@ -202,6 +220,8 @@ the useful resource for this attempt.
   recorded in JSONL.
 - Success confidence intervals plus query/shot interquartile ranges: recorded in
   `summary.json` and CSV summary tables.
+- Measured effective-rank and curvature-concentration diagnostics: recorded in
+  `spectrum_summary.csv`.
 - Seven required figures plus one recovery-study figure: generated from the full
   sweep with visible uncertainty intervals where applicable.
 - Recovery study: documents when widening `k` helps and when it fails.
@@ -215,17 +235,17 @@ the useful resource for this attempt.
 Local verification after the adaptive recovery addition:
 
 - Focused red/green reachability test: passing.
-- Attempt-004 tests: passing (`20 passed`).
-- Broader YueYuan attempt tests: passing (`34 passed`).
+- Attempt-004 tests: passing (`21 passed`).
+- Broader YueYuan attempt tests: passing (`35 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 15 groups).
 - Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
-  four CSV tables).
+  five CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
 - Focused adaptive CPU sweep: completed with 48/48 tasks, 600 run records, 48
   adaptive rows, and zero tracebacks.
 - Focused adaptive figure/table generation: passing (`600` rows, `75` groups,
-  eight PNGs, four CSV tables).
+  eight PNGs, five CSV tables).
 
 The generated files are intentionally ignored by git.
 

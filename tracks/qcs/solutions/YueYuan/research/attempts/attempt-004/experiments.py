@@ -68,8 +68,18 @@ def run_sweep(sweep, out_dir: Path, selected_index: int | None = None, fast: boo
         spectra.append(
             {
                 "system": system_cfg.name,
+                "mismatch": mismatch,
+                "shots_per_query": shots,
                 "seed": seed,
                 "eigenvalues": [float(value) for value in eig_values],
+                "effective_rank": hessian.effective_rank(eig_values),
+                "benchmark_rank": system_cfg.benchmark_rank,
+                "curvature_at_benchmark_k": hessian.curvature_fraction(
+                    eig_values, system_cfg.benchmark_rank
+                ),
+                "k_for_90pct_curvature": hessian.min_k_for_curvature(eig_values, 0.90),
+                "k_for_95pct_curvature": hessian.min_k_for_curvature(eig_values, 0.95),
+                "k_for_99pct_curvature": hessian.min_k_for_curvature(eig_values, 0.99),
             }
         )
 

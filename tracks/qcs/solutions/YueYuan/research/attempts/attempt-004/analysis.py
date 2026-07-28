@@ -7,6 +7,8 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
+import hessian
+
 
 def read_jsonl(path: Path) -> list[dict]:
     if not path.exists():
@@ -136,7 +138,11 @@ def write_summary_tables(results_dir: Path, summary: dict | None = None) -> list
 
     recovery_path = tables / "recovery_study.csv"
     _write_csv(recovery_path, recovery_study_rows(summary["groups"]), RECOVERY_FIELDS)
-    return [group_path, headline_path, failure_path, recovery_path]
+    spectrum_path = tables / "spectrum_summary.csv"
+    spectra_file = results_dir / "hessian_spectra.json"
+    spectra = json.loads(spectra_file.read_text()) if spectra_file.exists() else []
+    _write_csv(spectrum_path, spectrum_summary_rows(spectra), SPECTRUM_FIELDS)
+    return [group_path, headline_path, failure_path, recovery_path, spectrum_path]
 
 
 def _headline_rows(groups: list[dict]) -> list[dict]:
@@ -169,6 +175,22 @@ RECOVERY_FIELDS = (
     "recovery_delta_success",
     "recovered_by_widening",
 )
+
+SPECTRUM_FIELDS = (
+    "system",
+    "mismatch",
+    "shots_per_query",
+    "seed",
+    "effective_rank",
+    "benchmark_rank",
+    "total_absolute_curvature",
+    "curvature_at_benchmark_k",
+    "k_for_90pct_curvature",
+    "k_for_95pct_curvature",
+    "k_for_99pct_curvature",
+)
+
+BENCHMARK_RANK = {"one_qubit_x": 3, "two_qubit_cz": 15}
 
 
 def recovery_study_rows(groups: list[dict]) -> list[dict]:
@@ -230,6 +252,52 @@ def recovery_study_rows(groups: list[dict]) -> list[dict]:
                         and best["success_rate"] > benchmark["success_rate"],
                     }
                 )
+    return rows
+
+
+def spectrum_summary_rows(spectra: list[dict]) -> list[dict]:
+    rows = []
+    for spectrum in spectra:
+        eigenvalues = spectrum.get("eigenvalues", [])
+        benchmark_rank = int(
+            spectrum.get(
+                "benchmark_rank",
+                BENCHMARK_RANK.get(spectrum.get("system"), 0),
+            )
+        )
+        total_absolute_curvature = float(
+            sum(abs(float(value)) for value in eigenvalues)
+        )
+        rows.append(
+            {
+                "system": spectrum.get("system"),
+                "mismatch": spectrum.get("mismatch"),
+                "shots_per_query": spectrum.get("shots_per_query"),
+                "seed": spectrum.get("seed"),
+                "effective_rank": spectrum.get(
+                    "effective_rank",
+                    hessian.effective_rank(eigenvalues),
+                ),
+                "benchmark_rank": benchmark_rank,
+                "total_absolute_curvature": total_absolute_curvature,
+                "curvature_at_benchmark_k": spectrum.get(
+                    "curvature_at_benchmark_k",
+                    hessian.curvature_fraction(eigenvalues, benchmark_rank),
+                ),
+                "k_for_90pct_curvature": spectrum.get(
+                    "k_for_90pct_curvature",
+                    hessian.min_k_for_curvature(eigenvalues, 0.90),
+                ),
+                "k_for_95pct_curvature": spectrum.get(
+                    "k_for_95pct_curvature",
+                    hessian.min_k_for_curvature(eigenvalues, 0.95),
+                ),
+                "k_for_99pct_curvature": spectrum.get(
+                    "k_for_99pct_curvature",
+                    hessian.min_k_for_curvature(eigenvalues, 0.99),
+                ),
+            }
+        )
     return rows
 
 

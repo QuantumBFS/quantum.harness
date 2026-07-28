@@ -37,3 +37,15 @@ def test_attempt_004_eigenspace_is_orthonormal_and_ranked():
     for index in range(3):
         residual = hess @ eig.vectors[:, index] - eig.values[index] * eig.vectors[:, index]
         assert np.linalg.norm(residual) < 1e-6
+
+
+def test_attempt_004_effective_rank_and_curvature_cover_are_data_driven():
+    eigenvalues = np.array([4.0, -2.0, 1.0, 0.25, 1e-10])
+
+    assert hessian.effective_rank(eigenvalues, threshold=1e-8) == 4
+    assert hessian.curvature_fraction(eigenvalues, k=0) == 0.0
+    assert np.isclose(hessian.curvature_fraction(eigenvalues, k=2), 6.0 / 7.25)
+    assert hessian.curvature_fraction(eigenvalues, k=99) == 1.0
+    assert hessian.min_k_for_curvature(eigenvalues, 0.50) == 1
+    assert hessian.min_k_for_curvature(eigenvalues, 0.90) == 3
+    assert hessian.min_k_for_curvature(eigenvalues, 0.99) == 4

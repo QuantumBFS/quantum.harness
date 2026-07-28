@@ -45,3 +45,22 @@ def leading_eigenspace(hess: np.ndarray, k: int) -> EigenspaceResult:
 def effective_rank(eigenvalues: np.ndarray, threshold: float = 1e-8) -> int:
     values = np.asarray(eigenvalues, dtype=float)
     return int(np.sum(np.abs(values) > threshold))
+
+
+def curvature_fraction(eigenvalues: np.ndarray, k: int) -> float:
+    values = np.sort(np.abs(np.asarray(eigenvalues, dtype=float)))[::-1]
+    total = float(np.sum(values))
+    if total <= 0.0 or k <= 0:
+        return 0.0
+    return min(1.0, float(np.sum(values[:k])) / total)
+
+
+def min_k_for_curvature(eigenvalues: np.ndarray, fraction: float) -> int:
+    if not 0.0 <= fraction <= 1.0:
+        raise ValueError("fraction must be between 0 and 1")
+    values = np.sort(np.abs(np.asarray(eigenvalues, dtype=float)))[::-1]
+    total = float(np.sum(values))
+    if total <= 0.0 or fraction <= 0.0:
+        return 0
+    cumulative = np.cumsum(values) / total
+    return int(np.searchsorted(cumulative, fraction, side="left") + 1)

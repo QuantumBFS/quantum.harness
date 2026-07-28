@@ -13,7 +13,8 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - Piecewise-constant controls, phase-insensitive gate fidelity, and JAX
   differentiation through the final propagator.
 - Gradient-based open-loop model optimization.
-- Dense Hessian extraction plus Hessian-vector-product cross-checks.
+- Dense Hessian extraction plus Hessian-vector-product cross-checks and
+  effective-rank/curvature-concentration diagnostics.
 - Strict finite-shot `QueryOnlyDevice` with query and shot accounting.
 - Model-only transfer, full-space Nelder-Mead, random-subspace Nelder-Mead,
   Hessian-subspace Nelder-Mead, and adaptive Hessian widening.
@@ -31,7 +32,8 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - `device.py`: hidden true-device perturbations and query-only interface.
 - `optimizers.py`, `baselines.py`: derivative-free closed-loop methods.
 - `experiments.py`: sweep orchestration and JSONL output.
-- `plotting.py`, `make_figures.py`: figures, summaries, and CSV tables.
+- `plotting.py`, `make_figures.py`: figures, summaries, and CSV tables,
+  including `spectrum_summary.csv`.
 - `run_candidate.py`: compact validator-facing export.
 - `slurm/`: conservative array-job scripts for larger CPU/GPU checks.
 
@@ -82,6 +84,9 @@ The required boxes from `challenge_113_codex_spec.md` are covered as follows:
 
 - Differentiable model, open-loop optimization, gradients, Hessian/HVP, and
   leading eigenspaces are implemented and tested.
+- Effective Hessian dimension is measured from the spectrum and surfaced in
+  `spectrum_summary.csv`; the report distinguishes formal numerical rank from
+  practical curvature concentration.
 - Query-only noisy device, finite-shot noise, counters, and hidden-device
   boundary checks are implemented and tested.
 - Model-only, full-space, random-subspace, Hessian-subspace, and adaptive
