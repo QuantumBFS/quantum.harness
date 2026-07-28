@@ -33,14 +33,30 @@ function cache_config_from_toml(path)
     )
 end
 
-function default_uniform_pt_builder(model, exact_dt, compression_tolerance, settings)
-    return UniformTEMPO.uniTEMPO(model.coupling_operator, exact_dt,
-                                 t -> bath_correlation(model, t),
-                                 compression_tolerance;
-                                 auto_nc=settings.auto_nc, n_c=settings.n_c,
-                                 truncation=settings.truncation, cap_rank=settings.cap_rank,
-                                 max_rank=settings.max_rank, low_rank_svd=settings.low_rank_svd,
-                                 svd_filtering_tol=settings.svd_filtering_tolerance)
+function default_uniform_pt_builder(model, exact_dt, compression_tolerance, settings;
+                                    unitempo::Function=UniformTEMPO.uniTEMPO)
+    pt = unitempo(model.coupling_operator, exact_dt,
+                  t -> bath_correlation(model, t),
+                  compression_tolerance;
+                  auto_nc=settings.auto_nc, n_c=settings.n_c,
+                  truncation=settings.truncation, cap_rank=settings.cap_rank,
+                  max_rank=settings.max_rank, low_rank_svd=settings.low_rank_svd,
+                  svd_filtering_tol=settings.svd_filtering_tolerance)
+    convergence_metadata = Dict{String,Any}(
+        "builder_identity" => "UniformTEMPO.uniTEMPO",
+        "status" => "completed",
+        "achieved_chi" => UniformTEMPO.bond_dim(pt),
+        "build_settings" => Dict(
+            "auto_nc" => settings.auto_nc,
+            "n_c" => settings.n_c,
+            "truncation" => String(settings.truncation),
+            "cap_rank" => settings.cap_rank,
+            "max_rank" => settings.max_rank,
+            "low_rank_svd" => settings.low_rank_svd,
+            "svd_filtering_tolerance" => settings.svd_filtering_tolerance,
+        ),
+    )
+    return pt, convergence_metadata
 end
 
 """
