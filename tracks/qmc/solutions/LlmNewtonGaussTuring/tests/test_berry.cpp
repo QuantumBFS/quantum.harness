@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 using namespace cm;
 static int failures = 0;
@@ -15,7 +16,6 @@ static void approx_eq(const std::string& n, double g, double e, double tol = 1e-
     else { std::ostringstream o; o << "got=" << g << " expected=" << e; check(n, false, o.str()); }
 }
 
-// FHS gauge invariance — random U(1) phases cancel exactly
 static void test_gauge() {
     std::cout << "--- Gauge invariance ---" << std::endl;
     auto lat = make_chain(2);
@@ -52,9 +52,26 @@ static void test_1d_n4() {
     bool any = false;
     for (size_t i=0;i<c.size();++i) for(size_t j=0;j<c[i].size();++j) {
         if (std::abs(c[i][j].F12)>1e-8) any=true;
-        std::cout << "  F(" << g.vals1[i] << ","<<g.vals2[j]<<")="<<c[i][j].F12 << std::endl;
+        std::cout << "  F("<<g.vals1[i]<<","<<g.vals2[j]<<")="<<c[i][j].F12<<std::endl;
     }
     check("F12 != 0", any);
+}
+
+static void test_convergence() {
+    std::cout << "--- Finite-size convergence (θ=0, Ω=1, dθ=0.05, dΩ=0.05) ---" << std::endl;
+    std::vector<double> dens;
+    for (int N : {2, 4, 6}) {
+        auto lat = make_chain(N);
+        GroundState g00=solve_ground_state(lat,1.0,1.0,0.0);
+        GroundState g10=solve_ground_state(lat,1.0,1.0,0.05);
+        GroundState g11=solve_ground_state(lat,1.0,1.05,0.05);
+        GroundState g01=solve_ground_state(lat,1.0,1.05,0.0);
+        auto bc = fhs_curvature(g00, g10, g11, g01);
+        double d = bc.F12 / N;
+        dens.push_back(d);
+        std::cout << "  N=" << N << " F12/N=" << d << std::endl;
+    }
+    check("density bounded", std::abs(dens[2]) < std::abs(dens[0]) * 4);
 }
 
 static void test_2d() {
@@ -67,7 +84,7 @@ static void test_2d() {
 }
 
 int main() {
-    test_gauge(); test_1d_n2(); test_1d_n4(); test_2d();
+    test_gauge(); test_1d_n2(); test_1d_n4(); test_convergence(); test_2d();
     std::cout << std::endl;
     if (!failures) std::cout << "All Berry-phase tests passed." << std::endl;
     else std::cerr << failures << " FAILED." << std::endl;
