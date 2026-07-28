@@ -467,15 +467,19 @@ function rational_rotation_is_invariant(
         words = words_by_skeleton[skeleton]
         rank = sum(length, words; init=0)
         assignments = axis_assignments(rank)
-        for target_axes in assignments
-            original = component_polynomial(
+        components = ExactLinearPolynomial[
+            component_polynomial(
                 words,
-                target_axes,
+                axes,
                 quotient,
                 full_spin_representatives,
             )
+            for axes in assignments
+        ]
+        for (target_index, target_axes) in enumerate(assignments)
+            original = components[target_index]
             rotated = ExactLinearPolynomial()
-            for source_axes in assignments
+            for (source_index, source_axes) in enumerate(assignments)
                 coefficient = prod(
                     RATIONAL_ROTATION[
                         Int(target_axes[index]),
@@ -487,12 +491,7 @@ function rational_rotation_is_invariant(
                 iszero(coefficient) && continue
                 add_scaled!(
                     rotated,
-                    component_polynomial(
-                        words,
-                        source_axes,
-                        quotient,
-                        full_spin_representatives,
-                    ),
+                    components[source_index],
                     coefficient,
                 )
             end
