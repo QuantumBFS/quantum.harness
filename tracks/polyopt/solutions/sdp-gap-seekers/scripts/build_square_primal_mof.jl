@@ -113,15 +113,18 @@ function git_output(args...)
     return readchomp(command)
 end
 
-function source_metadata()
-    relative_files = [
+function source_metadata(
+    extra_relative_files::Vector{String}=String[],
+)
+    relative_files = unique([
         "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareJ1J2Prototype.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/GenericGapModel.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapSymbolics.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapAssembly.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/PrimalGapJuMP.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_square_primal_mof.jl",
-    ]
+        extra_relative_files...,
+    ])
     dirty_text = git_output("status", "--porcelain", "--untracked-files=all")
     dirty_paths = isempty(dirty_text) ?
         String[] :
@@ -232,6 +235,10 @@ function build_point(
     bundle_path::String,
     shared_source_metadata,
     gamma::Rational{BigInt},
+    basis_spec::StructuredBasisSpec=StructuredBasisSpec(
+        :one_symbol_lift,
+        1,
+    ),
 )
     label = point_label(gamma)
     point_path = joinpath(bundle_path, label)
@@ -246,7 +253,7 @@ function build_point(
         gamma,
         2;
         basis_mode=:structured,
-        basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
+        basis_spec=basis_spec,
     )
 
     GC.gc()
@@ -376,7 +383,7 @@ function build_point(
             "mof_reload" => timed_metadata(replay_measurement),
         ),
         "known_limitations" => [
-            "positive one_symbol_lift/v1 basis is incomplete",
+            "positive $(basis_spec.family)/v$(basis_spec.version) basis is incomplete",
             "bare_inner_pauli/v1 stationarity family is incomplete",
             "no state symmetry is imposed",
             "no solver was invoked",

@@ -518,6 +518,88 @@ end
     @test_throws ArgumentError basis_manifest(invalid_problem, :gap)
 end
 
+@testset "bare-weight-one Rung A basis manifests" begin
+    patch = square_patch_geometry(1)
+    model = square_j1j2_model(1//2)
+    spec = StructuredBasisSpec(:bare_weight_one, 1)
+    problem = GapProblem(
+        patch,
+        model,
+        0//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=spec,
+    )
+    positive = basis_manifest(problem, :positive)
+    gap = basis_manifest(problem, :gap)
+    plan = assembly_plan(problem)
+
+    @test_throws ArgumentError StructuredBasisSpec(:bare_weight_one, 2)
+    @test_throws ArgumentError StructuredBasisSpec(:unknown_family, 1)
+    @test positive.family == gap.family == :bare_weight_one
+    @test positive.family_version == gap.family_version == 1
+    @test positive.max_degree == 2
+    @test gap.max_degree == 1
+    @test length(positive.entries) == 28
+    @test length(gap.entries) == 4
+    @test !positive.is_complete
+    @test !gap.is_complete
+    @test all(isempty(entry.state_symbols) for entry in positive.entries)
+    @test all(isempty(entry.state_symbols) for entry in gap.entries)
+    @test maximum(state_monomial_degree, positive.entries) == 1
+    @test maximum(state_monomial_degree, gap.entries) == 1
+    @test state_monomial_string(first(positive.entries)) ==
+          "zeta=[];op=I"
+    @test issubset(Set(gap.entries), Set(positive.entries))
+    @test validate_basis_manifest(positive, problem, :positive)
+    @test validate_basis_manifest(gap, problem, :gap)
+    @test positive.sha256 ==
+          "82566b1d19312b0bd2b2fe78a62b12289021ecf3304a8c95610db40dc223ecbe"
+    @test gap.sha256 ==
+          "28f324d2b785f58928fc0cbcfa4ac71df0f168efad1120ff71b576ff9795d8c4"
+    @test plan.positive_basis_dimension == 28
+    @test plan.gap_basis_dimension == 4
+    @test !plan.is_complete
+    @test plan.positive_basis_sha256 == positive.sha256
+    @test plan.gap_basis_sha256 == gap.sha256
+    @test plan.problem_sha256 ==
+          "0943a4f7c3786e927f71e5f122c5256ced291fed08f5ea1c884eb59f92f7f687"
+
+    one_symbol_problem = GapProblem(
+        patch,
+        model,
+        0//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
+    )
+    @test issubset(
+        Set(positive.entries),
+        Set(basis_manifest(one_symbol_problem, :positive).entries),
+    )
+    @test issubset(
+        Set(gap.entries),
+        Set(basis_manifest(one_symbol_problem, :gap).entries),
+    )
+    @test plan.problem_sha256 !=
+          assembly_plan(one_symbol_problem).problem_sha256
+
+    higher_problem = GapProblem(
+        patch,
+        model,
+        0//1,
+        3;
+        basis_mode=:structured,
+        basis_spec=spec,
+    )
+    @test basis_manifest(higher_problem, :positive).entries ==
+          positive.entries
+    @test basis_manifest(higher_problem, :gap).entries ==
+          gap.entries
+    @test basis_manifest(higher_problem, :positive).sha256 !=
+          positive.sha256
+end
+
 include(joinpath(@__DIR__, "primal_gap_symbolics_tests.jl"))
 
 include(joinpath(@__DIR__, "..", "src", "SmallEDOracle.jl"))

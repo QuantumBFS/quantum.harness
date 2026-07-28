@@ -131,19 +131,20 @@ end
 """
 Versioned selection rule for a materialized structured basis.
 
-The first supported family, `:one_symbol_lift` version 1, contains every bare
-Pauli word through the requested degree and one pure scalar row `ζ(w)` for
-every nonidentity word. It is deterministic and nested in degree, but it is
-not a complete state-polynomial hierarchy and applies no symmetry quotient.
-An individual low-degree manifest can nevertheless equal the full finite
-inventory; `BasisManifest.is_complete` records that finite-level fact.
+The `:one_symbol_lift` version 1 family contains every bare Pauli word through
+the requested degree and one pure scalar row `ζ(w)` for every nonidentity
+word. The deliberately weaker `:bare_weight_one` version 1 family contains
+only the identity and single-site bare Pauli words. Both are deterministic,
+but neither applies a symmetry quotient. An individual low-degree manifest
+can nevertheless equal the full finite inventory; `BasisManifest.is_complete`
+records that finite-level fact.
 """
 struct StructuredBasisSpec
     family::Symbol
     version::Int
 
     function StructuredBasisSpec(family::Symbol, version::Int)
-        family == :one_symbol_lift ||
+        family in (:one_symbol_lift, :bare_weight_one) ||
             throw(ArgumentError("unsupported structured basis family"))
         version == 1 ||
             throw(ArgumentError("unsupported structured basis family version"))
@@ -609,6 +610,37 @@ const ONE_SYMBOL_LIFT_V1_SELECTION_RULE =
     "zeta(w) row for each nonidentity word; no multi-zeta rows; " *
     "no symmetry quotient"
 
+const BARE_WEIGHT_ONE_V1_SELECTION_RULE =
+    "identity plus all bare Pauli words of support weight one when " *
+    "max_degree is at least one; no state-symbol rows; no symmetry quotient"
+
+function bare_weight_one_entries(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    isempty(site_ids) &&
+        throw(ArgumentError("structured basis needs at least one site"))
+    issorted(site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be sorted"))
+    length(unique(site_ids)) == length(site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be unique"))
+    all(site -> site > 0, site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be positive"))
+    max_degree >= 0 ||
+        throw(ArgumentError("basis degree must be nonnegative"))
+
+    local_words = enumerate_pauli_words(
+        length(site_ids),
+        min(max_degree, 1),
+    )
+    entries = StateMonomial[
+        StateMonomial(PauliWord[], remap_word(word, site_ids))
+        for word in local_words
+    ]
+    sort!(entries; by=state_monomial_sort_key)
+    return entries
+end
+
 function structured_basis_contents(
     spec::StructuredBasisSpec,
     site_ids::Vector{Int},
@@ -632,6 +664,23 @@ function structured_basis_contents(
             entries,
             is_complete,
             ONE_SYMBOL_LIFT_V1_SELECTION_RULE,
+        )
+    elseif spec.family == :bare_weight_one && spec.version == 1
+        entries = bare_weight_one_entries(site_ids, max_degree)
+        selected_count = BigInt(length(entries))
+        expected_selected_count = operator_word_count(
+            length(site_ids),
+            min(max_degree, 1),
+        )
+        selected_count == expected_selected_count ||
+            error("bare-weight-one materialization disagrees with its exact count")
+        is_complete =
+            selected_count ==
+            full_state_basis_count(length(site_ids), max_degree)
+        return (
+            entries,
+            is_complete,
+            BARE_WEIGHT_ONE_V1_SELECTION_RULE,
         )
     end
     error("validated structured basis spec has no implementation")

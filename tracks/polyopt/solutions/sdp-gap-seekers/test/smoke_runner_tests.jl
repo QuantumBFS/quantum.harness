@@ -27,4 +27,36 @@ include(joinpath(
         model,
         MOSEK_SOLVE_FORM_ATTRIBUTE,
     ) == Int(Mosek.MSK_SOLVE_DUAL.value)
+
+    options = parse_args([
+        "--model",
+        "model.mof.json",
+        "--runmeta",
+        "runmeta.toml",
+        "--output",
+        "result.toml",
+        "--expected-basis-family",
+        "bare_weight_one",
+        "--expected-positive-dimension",
+        "28",
+        "--expected-gap-dimension",
+        "4",
+        "--time-limit-seconds",
+        "600",
+        "--threads",
+        "4",
+    ])
+    @test options.expected_basis_family == "bare_weight_one"
+    @test options.expected_positive_dimension == 28
+    @test options.expected_gap_dimension == 4
+    @test options.time_limit_seconds == 600
+    @test options.threads == 4
+    @test_throws ArgumentError parse_args([
+        "--model",
+        "model.mof.json",
+        "--runmeta",
+        "runmeta.toml",
+        "--output",
+        "result.toml",
+    ])
 end

@@ -25,11 +25,15 @@ function usage()
             --model <model.mof.json> \\
             --runmeta <runmeta.toml> \\
             --output <result.toml> \\
+            --expected-basis-family <family> \\
+            --expected-positive-dimension <n> \\
+            --expected-gap-dimension <n> \\
             [--time-limit-seconds 1800] [--threads 16]
 
         Reads a previously verified Square direct-primal MOF, validates its
-        SHA-256 against runmeta, attaches Mosek, and performs one feasibility
-        solve. Raw MOI statuses are always written, including on exceptions.
+        SHA-256 and intended basis identity against runmeta, attaches Mosek,
+        and performs one feasibility solve. Raw MOI statuses are always
+        written, including on exceptions.
         """,
     )
 end
@@ -55,6 +59,9 @@ function parse_args(args::Vector{String})
             "--model",
             "--runmeta",
             "--output",
+            "--expected-basis-family",
+            "--expected-positive-dimension",
+            "--expected-gap-dimension",
             "--time-limit-seconds",
             "--threads",
         )
@@ -66,7 +73,14 @@ function parse_args(args::Vector{String})
             throw(ArgumentError("unknown argument: $argument"))
         end
     end
-    for required in ("--model", "--runmeta", "--output")
+    for required in (
+        "--model",
+        "--runmeta",
+        "--output",
+        "--expected-basis-family",
+        "--expected-positive-dimension",
+        "--expected-gap-dimension",
+    )
         haskey(values, required) ||
             throw(ArgumentError("$required is required"))
     end
@@ -82,6 +96,15 @@ function parse_args(args::Vector{String})
         model=values["--model"],
         runmeta=values["--runmeta"],
         output=values["--output"],
+        expected_basis_family=values["--expected-basis-family"],
+        expected_positive_dimension=parse_positive_int(
+            values["--expected-positive-dimension"],
+            "--expected-positive-dimension",
+        ),
+        expected_gap_dimension=parse_positive_int(
+            values["--expected-gap-dimension"],
+            "--expected-gap-dimension",
+        ),
         time_limit_seconds=time_limit,
         threads=threads,
     )
@@ -203,6 +226,9 @@ end
 function validate_input(
     model_path::String,
     runmeta_path::String,
+    expected_basis_family::String,
+    expected_positive_dimension::Int,
+    expected_gap_dimension::Int,
 )
     isfile(model_path) ||
         throw(ArgumentError("MOF does not exist: $model_path"))
@@ -229,6 +255,19 @@ function validate_input(
         error("smoke solve is locked to the 9-site outer patch")
     runmeta["setup"]["inner_site_count"] == 1 ||
         error("smoke solve is locked to the 1-site inner patch")
+    basis = runmeta["basis"]
+    basis["positive_family"] == expected_basis_family ||
+        error("positive basis family differs from the explicit launch expectation")
+    basis["gap_family"] == expected_basis_family ||
+        error("gap basis family differs from the explicit launch expectation")
+    basis["positive_family_version"] == 1 ||
+        error("smoke solve accepts only positive basis family version 1")
+    basis["gap_family_version"] == 1 ||
+        error("smoke solve accepts only gap basis family version 1")
+    basis["positive_dimension"] == expected_positive_dimension ||
+        error("positive basis dimension differs from the explicit launch expectation")
+    basis["gap_dimension"] == expected_gap_dimension ||
+        error("gap basis dimension differs from the explicit launch expectation")
     return runmeta, actual_sha256
 end
 
@@ -281,6 +320,9 @@ function main(args::Vector{String}=ARGS)
         runmeta, mof_sha256 = validate_input(
             options.model,
             options.runmeta,
+            options.expected_basis_family,
+            options.expected_positive_dimension,
+            options.expected_gap_dimension,
         )
         result["mof_sha256"] = mof_sha256
         result["input_assembly_sha256"] =

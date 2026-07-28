@@ -1,38 +1,38 @@
 #!/bin/bash
 #SBATCH --partition=xhacnormalb
-#SBATCH --job-name=square-primal-g0
-#SBATCH --time=01:00:00
-#SBATCH --cpus-per-task=64
+#SBATCH --job-name=square-rung-a-g0
+#SBATCH --time=00:10:00
+#SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=3800M
-#SBATCH --output=slurm-square-primal-%j.out
-#SBATCH --error=slurm-square-primal-%j.err
+#SBATCH --output=slurm-square-rung-a-%j.out
+#SBATCH --error=slurm-square-rung-a-%j.err
 
 set -euo pipefail
 
 export PATH="$HOME/julia-1.11.5/bin:$PATH"
 export MOSEKBINDIR="$HOME/mosek/mosek/11.2/tools/platform/linux64x86/bin"
 export LD_LIBRARY_PATH="$HOME/julia-1.11.5/lib/julia:${LD_LIBRARY_PATH:-}"
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-64}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 
 cd "$SLURM_SUBMIT_DIR"
 
-SOURCE_BUNDLE="tracks/polyopt/solutions/sdp-gap-seekers/results/square-primal-gate-b-20260728-r1"
+SOURCE_BUNDLE="tracks/polyopt/solutions/sdp-gap-seekers/results/square-rung-a-g0-20260728-r1"
 SOURCE_POINT="${SOURCE_BUNDLE}/gamma-0"
-RUN_ID="square-primal-smoke-${SLURM_JOB_ID}"
+RUN_ID="square-rung-a-smoke-${SLURM_JOB_ID}"
 RUN_DIR="results/${RUN_ID}"
 RESULT_PATH="${RUN_DIR}/result.toml"
-SUBMIT_STDOUT="slurm-square-primal-${SLURM_JOB_ID}.out"
-SUBMIT_STDERR="slurm-square-primal-${SLURM_JOB_ID}.err"
+SUBMIT_STDOUT="slurm-square-rung-a-${SLURM_JOB_ID}.out"
+SUBMIT_STDERR="slurm-square-rung-a-${SLURM_JOB_ID}.err"
 
 mkdir -p "$RUN_DIR"
 mv "$SUBMIT_STDOUT" "${RUN_DIR}/slurm.out"
 mv "$SUBMIT_STDERR" "${RUN_DIR}/slurm.err"
 
-echo "[square-primal-sbatch] run_id=${RUN_ID}"
-echo "[square-primal-sbatch] host=$(hostname)"
-echo "[square-primal-sbatch] started=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo "[square-primal-sbatch] source_point=${SOURCE_POINT}"
-echo "[square-primal-sbatch] cpus=${SLURM_CPUS_PER_TASK:-unavailable}"
+echo "[square-rung-a-sbatch] run_id=${RUN_ID}"
+echo "[square-rung-a-sbatch] host=$(hostname)"
+echo "[square-rung-a-sbatch] started=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "[square-rung-a-sbatch] source_point=${SOURCE_POINT}"
+echo "[square-rung-a-sbatch] cpus=${SLURM_CPUS_PER_TASK:-unavailable}"
 flush_output() {
     sync
 }
@@ -61,11 +61,11 @@ julia \
     --model "${SOURCE_POINT}/model.mof.json" \
     --runmeta "${SOURCE_POINT}/runmeta.toml" \
     --output "$RESULT_PATH" \
-    --expected-basis-family one_symbol_lift \
-    --expected-positive-dimension 703 \
-    --expected-gap-dimension 7 \
-    --time-limit-seconds 3600 \
-    --threads "${SLURM_CPUS_PER_TASK:-64}"
+    --expected-basis-family bare_weight_one \
+    --expected-positive-dimension 28 \
+    --expected-gap-dimension 4 \
+    --time-limit-seconds 600 \
+    --threads "${SLURM_CPUS_PER_TASK:-4}"
 solver_exit=$?
 set -e
 
@@ -102,7 +102,7 @@ sacct \
     sha256sum "${checksum_files[@]}" > SHA256SUMS
 )
 
-echo "[square-primal-sbatch] solver_exit=${solver_exit}"
-echo "[square-primal-sbatch] finished=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "[square-rung-a-sbatch] solver_exit=${solver_exit}"
+echo "[square-rung-a-sbatch] finished=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 flush_output
 exit "$solver_exit"

@@ -186,6 +186,64 @@ end
     ).set.side_dimension == 7
 end
 
+@testset "Square Rung A exact primal assembly" begin
+    problem = GapProblem(
+        square_patch_geometry(1),
+        square_j1j2_model(1//2),
+        0//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:bare_weight_one, 1),
+    )
+    assembled = assemble_primal_gap(problem)
+    repeated = assemble_primal_gap(problem)
+
+    @test length(assembled.positive_basis.entries) == 28
+    @test length(assembled.gap_basis.entries) == 4
+    @test length(assembled.hamiltonian_terms) == 60
+    @test length(assembled.stationarity_equalities) == 3
+    @test length(assembled.moments) == 352
+    @test maximum(moment_degree, assembled.moments) == 2
+    @test assembled.problem_sha256 ==
+          "0943a4f7c3786e927f71e5f122c5256ced291fed08f5ea1c884eb59f92f7f687"
+    @test assembled.moments_sha256 ==
+          "25ca49cbb527bd2d531469a26f9f5fcbd84d3d35c666fb27b8cb46819c544e5c"
+    @test assembled.coefficient_map_sha256 ==
+          "16fca8dbad3e2cfd6a0c47bfa8e4c6fa9c39710caeb07ff974009e919edcb051"
+    @test assembled.assembly_sha256 ==
+          "4ffed703ab3d84660bf03fd5bf7f524ec0bd697560f304b9cb5a08de863125a5"
+    @test repeated.assembly_sha256 == assembled.assembly_sha256
+
+    terms = assembled.hamiltonian_terms
+    for left in assembled.positive_basis.entries
+        for right in assembled.positive_basis.entries
+            @test positive_entry(right, left) ==
+                  adjoint_polynomial(positive_entry(left, right))
+        end
+    end
+    for left in assembled.gap_basis.entries
+        for right in assembled.gap_basis.entries
+            @test gap_entry(right, left, terms, problem.gamma) ==
+                  adjoint_polynomial(
+                      gap_entry(left, right, terms, problem.gamma),
+                  )
+        end
+    end
+
+    jump_model = build_jump_primal(assembled)
+    @test JuMP.num_variables(jump_model.model) == 352
+    @test JuMP.num_constraints(
+        jump_model.model;
+        count_variable_in_set_constraints=false,
+    ) == 6
+    @test JuMP.constraint_object(
+        jump_model.positive_constraint,
+    ).set.side_dimension == 28
+    @test JuMP.constraint_object(
+        jump_model.gap_constraint,
+    ).set.side_dimension == 4
+end
+
 @testset "exactness and Hermitian matrix relations" begin
     patch = square_patch_geometry(1)
     model = square_j1j2_model(1//2)

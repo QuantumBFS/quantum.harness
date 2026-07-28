@@ -79,6 +79,19 @@ equality. Thus, for every nonempty site set:
 This flag says nothing about whether the selector family becomes complete as
 the degree grows.
 
+The deliberately smaller Square Rung A selector is
+
+```text
+StructuredBasisSpec(:bare_weight_one, 1).
+```
+
+It contains only the identity and all bare single-site Pauli words when the
+declared maximum degree is at least one. It contains no state-symbol rows and
+no symmetry quotient. At maximum degree zero it contains only the identity;
+at higher degrees its row set stays fixed while the declared maximum degree
+remains part of the manifest hash. This is a sound principal-submatrix
+relaxation of `one_symbol_lift/v1`, not a complete hierarchy.
+
 ## Positive and gap roles
 
 For a `GapProblem` at degree `d`:
@@ -94,10 +107,11 @@ the outer patch, and sorts the copy. Reversing an otherwise identical
 `LocalPatch.inner_ids` vector therefore produces identical rows and a
 byte-identical manifest hash without mutating the patch.
 
-The v1 selector is nested in degree. Increasing `d` appends higher-degree rows
-without reordering the existing prefix. Because the inner sites are a subset
-of the outer sites, the gap rows are also contained in the corresponding
-positive manifest.
+The `one_symbol_lift/v1` selector is nested in degree. Increasing `d` appends
+higher-degree rows without reordering the existing prefix. The
+`bare_weight_one/v1` selector is constant once its maximum degree reaches one,
+so it is nested by equality. Because the inner sites are a subset of the outer
+sites, the gap rows are also contained in the corresponding positive manifest.
 
 `AssemblyPlan.is_complete` describes the mathematical selection, not whether
 a solver matrix has been allocated:
@@ -171,6 +185,21 @@ gap SHA-256 =
 
 problem SHA-256 at g=1/2 and γ=1/10 =
   f6f7cd7a0cc2e053e40ecd82f52a24438536869e3340b959cd7f68cab4467f4e
+```
+
+For the `bare_weight_one/v1` Rung A fixture at the same `L=1,d=2`:
+
+```text
+positive rows = 28
+positive SHA-256 =
+  82566b1d19312b0bd2b2fe78a62b12289021ecf3304a8c95610db40dc223ecbe
+
+gap rows = 4
+gap SHA-256 =
+  28f324d2b785f58928fc0cbcfa4ac71df0f168efad1120ff71b576ff9795d8c4
+
+problem SHA-256 at g=1/2 and γ=0 =
+  0943a4f7c3786e927f71e5f122c5256ced291fed08f5ea1c884eb59f92f7f687
 ```
 
 Constructors take defensive copies of nested Pauli words, row arrays, and site
