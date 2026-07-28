@@ -13,17 +13,73 @@
 # before claiming a formally certified bound. Flag values below are labelled
 # "numerical" accordingly.
 
-## 1. SpectralGap.jl source pin (frozen)
+## 1. SpectralGap.jl source pin (frozen) — CORRECTED 2026-07-28
+
+> **Correction (per Sihan's 11:19 review):** an earlier version of this section
+> claimed "pristine `SpectralGap@a1171c9`". That was **wrong**. The mounted
+> `.external/SpectralGap` working tree carries a **small local patch** on top of
+> `a1171c9` (two files modified, uncommitted). The SHA-256 values below are the
+> **working-tree (patched)** files — i.e. the code that actually produced the
+> results. The patch is documented in full and is **result-neutral on the Mosek
+> path** (see "patch effect" below). Reproducers must apply the same patch.
 
 | field | value |
 |---|---|
 | upstream repo | https://github.com/wangjie212/SpectralGap.git |
-| commit | `a1171c906ff2cc2901e58c2426397a2f68c32bb7` ("use the new formulation and add extra constraints") |
+| base commit | `a1171c906ff2cc2901e58c2426397a2f68c32bb7` ("use the new formulation and add extra constraints") |
+| **patch** | local, uncommitted, 2 files (`src/SpectralGap.jl`, `src/sdp.jl`) — full diff below |
 | mounted at | `.external/SpectralGap/` (local path dep, gitignored; resolved via `julia-env/Project.toml` UUID `2cd8220c-fa98-40a0-8d32-c3094c958e9c`) |
-| `src/SpectralGap.jl` SHA-256 | `ec0a8b4e723e0accaee33826bd6f2bb4eef82debaf3a9f9a9e51cc749fb7648f` |
-| `src/basicfunction.jl` SHA-256 | `2095cf7401355f37e9d17915b3ab29d44712d8e40f750eb8449f8c294229b03a` |
-| `src/sdp.jl` SHA-256 | `dbdb31d13f4eb484a9f80f6190d8ac31e8030580246228ca5dca3a1bc86e9208` |
-| `src/strengthening.jl` SHA-256 | `de56b12b17049f81f689d4caef193b9dfd3bf50061fc78b1bf1547a748f7c57b` |
+| `src/SpectralGap.jl` working-tree SHA-256 | `ec0a8b4e723e0accaee33826bd6f2bb4eef82debaf3a9f9a9e51cc749fb7648f` (base-blob `940cd72b…`) |
+| `src/basicfunction.jl` SHA-256 | `2095cf7401355f37e9d17915b3ab29d44712d8e40f750eb8449f8c294229b03a` (unmodified = base) |
+| `src/sdp.jl` working-tree SHA-256 | `dbdb31d13f4eb484a9f80f6190d8ac31e8030580246228ca5dca3a1bc86e9208` (base-blob `b35c4ed6…`) |
+| `src/strengthening.jl` SHA-256 | `de56b12b17049f81f689d4caef193b9dfd3bf50061fc78b1bf1547a748f7c57b` (unmodified = base) |
+
+### The local patch (exact diff vs `a1171c9`)
+
+```diff
+--- a/src/SpectralGap.jl   # + `using Clarabel` and an UNUSED _select_optimizer helper
++++ b/src/SpectralGap.jl
+@@ using MathOptInterface
+ using JuMP
+ using MosekTools
++using Clarabel
+ using LinearAlgebra
+@@
++# Solver selection: Mosek if available (MOSEKBINDIR set), else Clarabel
++function _select_optimizer()
++    if haskey(ENV, "MOSEKBINDIR") || haskey(ENV, "MOSEK_PLATFORM")
++        return Mosek.Optimizer
++    else
++        return Clarabel.Optimizer
++    end
++end
+
+--- a/src/sdp.jl   # + two empty-PSD-block skip guards in certify_Heisenberg_kagome_gap
++++ b/src/sdp.jl
+@@ in the positivity-block loop:
+     for i = 1:length(basis)
++        lb[i] > 0 || continue
+         pos[i] = @variable(model, [1:lb[i], 1:lb[i]], PSD)
+@@ in the gap-block loop:
+     for l = 1:length(gbasis)
++        lgb[l] > 0 || continue
+         gpos[l] = @variable(model, [1:lgb[l], 1:lgb[l]], PSD)
+```
+
+**Patch effect on results: none on the Mosek path.**
+- The `_select_optimizer` helper is defined but **never called** — both
+  `certify_*_gap` functions still hardcode `Model(optimizer_with_attributes(Mosek.Optimizer))`.
+  So the solver, model, and solution are identical to base `a1171c9`.
+- The `lb[i] > 0 || continue` / `lgb[l] > 0 || continue` guards **skip the
+  construction of 0-dimension PSD blocks**. A 0×0 PSD variable contributes zero
+  rows/columns to the SDP, so skipping it is numerically equivalent to
+  constructing it — it only avoids a `MosekError(20401)` ("dimension 0 invalid")
+  on inputs where some basis block is empty. For the runs that succeeded
+  (TFIM N=9 d=2; kagome N=13 d=3), all blocks were non-empty, so the guards are
+  no-ops there.
+
+(All working-tree files also have mode `100755` vs base `100644` — a cosmetic
+`chmod +x`, no content effect.)
 
 ## 2. Hamiltonian conventions (normalization)
 
@@ -74,31 +130,41 @@ flag = certify_Heisenberg_kagome_gap(N, H, triples, edges, triples0, edges0,
 | tolerances | Mosek defaults (no custom `mosek_setting`) | Mosek defaults |
 | SCNet job | 22970362 | 22970838 |
 
-## 5. Results — γ-scan transitions (numerical)
+## 5. Results — γ-scan legacy-flag transitions
 
-**TFIM (Gate 5, validated):**
+> **Status semantics (per Sihan's 11:19 review):** the certify functions collapse
+> every non-OPTIMAL Mosek status to `flag=0`. They do **not** expose raw
+> termination/primal-dual status, residuals, or an infeasibility/Farkas witness.
+> The transitions below are therefore **legacy flag-transition candidates**, not
+> "validated infeasibility" or "certified Δ upper bounds." Promoting a candidate
+> to a certified bound requires the §8 residual/witness audit (capture raw
+> status + a Farkas certificate for the infeasible γ). Direction (monotone
+> decrease of flag with γ, no reversals) is confirmed in both scans.
+
+**TFIM (Gate 5 — pipeline calibration):**
 | γ | 0.15 | 0.20 | 0.22 | 0.24 | 0.25 | 0.26 | 0.27 | 0.28 | 0.30 | 0.34 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | flag | 1 | 1 | 1 | 1 | **1** | **0** | 0 | 0 | 0 | 0 |
 
-Transition γ* ∈ (0.25, 0.26] → **Δ_TFIM ≤ 0.26** (reference 0.258 ✓).
+Flag transition γ* ∈ (0.25, 0.26] → **Δ_TFIM ≤ 0.26 candidate** (reference 0.258).
 
 **Kagome Heisenberg, N=13, d=3 (#88 frustrated target):**
 | γ | 1.0 | 1.2 | 1.26 | 1.28 | 1.29 | 1.30 |
 |---|---|---|---|---|---|---|
 | flag | 1 | 1 | **1** | **0** | 0 | 0 |
 
-Transition γ* ∈ (1.26, 1.28] → **Δ_kagome ≤ 1.28** (reference ~1.28 ✓).
+Flag transition γ* ∈ (1.26, 1.28] → **Δ_kagome ≤ 1.28 candidate** (reference ~1.28).
 
-Raw per-γ logs: `gap_tfim.results`, `gap_kagome.results` (on SCNet; append as
-the scan continues to N=27 d=3 + N=13 d=4).
+Raw per-γ logs: `gap_tfim.results`, `gap_kagome.results` (on SCNet; N=27 d=3 +
+N=13 d=4 scans are running to tighten the kagome candidate).
 
 ## 6. Direction reminder (for the dual-run check)
 
 Feasibility is monotone decreasing in γ (per SPEC §1 / arXiv:2606.03836):
 - `flag=1` (OPTIMAL) → γ feasible → Δ could be ≥ γ (not excluded).
-- `flag=0` (non-OPTIMAL) → γ infeasible → Δ < γ (excludes gap ≥ γ).
-- largest feasible γ* → certified **upper** bound: Δ ≤ γ*.
+- `flag=0` (non-OPTIMAL collapsed) → treated as infeasible → would give Δ < γ,
+  **but** without the raw status this could mask a timeout/numerical failure.
+- largest feasible γ* → **candidate** upper bound Δ ≤ γ*, pending the §8 audit.
 
 The kagome scan obeys this (feasible at low γ, infeasible above the transition,
 no reversals) — the direction check Sihan's side will independently confirm.
