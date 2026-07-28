@@ -352,6 +352,24 @@ def test_local_estimator_skips_exact_zero_neighbor_logpsi() -> None:
     assert observed == pytest.approx(0.5)
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        complex(math.inf, 0.0),
+        complex(math.nan, 0.0),
+        complex(0.0, math.inf),
+        complex(-math.inf, math.inf),
+    ],
+)
+def test_local_estimator_rejects_other_nonfinite_neighbor_logpsi(
+    value: complex,
+) -> None:
+    log_values = {1: 0.0j, 2: value}
+
+    with pytest.raises(ValueError, match="neighbor logpsi"):
+        local_from_log_neighbors(1, {2: 1.0}, log_values.__getitem__)
+
+
 def test_local_estimator_skips_zero_coefficient_before_logpsi_call() -> None:
     calls: Counter[int] = Counter()
 
@@ -435,6 +453,17 @@ def test_local_estimator_rejects_coefficient_component_dynamic_range() -> None:
         local_from_log_neighbors(1, {2: coefficient}, lambda _state: 0.0j)
 
 
+@pytest.mark.parametrize(
+    "coefficient",
+    [complex(math.inf), complex(math.nan), complex(1.0, math.inf)],
+)
+def test_local_estimator_rejects_nonfinite_coefficient(
+    coefficient: complex,
+) -> None:
+    with pytest.raises(ValueError, match="neighbor coefficient must be finite"):
+        local_from_log_neighbors(1, {2: coefficient}, lambda _state: 0.0j)
+
+
 def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> None:
     coefficient = complex(
         math.ldexp(1.0, -1050),
@@ -464,7 +493,7 @@ def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> Non
     )
 
     assert isinstance(observed, complex)
-    assert observed == expected
+    assert observed == pytest.approx(expected, rel=1.0e-13)
 
 
 def test_local_estimator_rejects_mathematically_unrepresentable_term() -> None:
@@ -508,7 +537,7 @@ def test_local_estimator_allows_out_of_range_terms_to_cancel() -> None:
 
     observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
 
-    assert observed == complex(1.0)
+    assert observed == pytest.approx(complex(1.0), rel=5.0e-14)
 
 
 def test_local_estimator_returns_zero_for_exactly_canceling_row() -> None:

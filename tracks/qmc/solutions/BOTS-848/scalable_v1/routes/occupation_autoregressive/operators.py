@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from fractions import Fraction
 from numbers import Integral, Real
 from types import MappingProxyType
 
@@ -13,11 +12,12 @@ import numpy as np
 
 
 NeighborMap = dict[int, complex]
-Amplitude = Callable[[int], complex]
+LogAmplitude = Callable[[int], complex]
 
 # The maximum-norm Hermitian defect is compared with this fraction of the
 # maximum matrix-element magnitude. A zero matrix therefore has zero tolerance.
 HERMITIAN_RELATIVE_TOLERANCE = 1.0e-12
+_LOG_MAX_FLOAT = math.log(np.finfo(np.float64).max)
 
 
 def _integer(name: str, value: object) -> int:
@@ -167,6 +167,54 @@ def _validated_pair_matrix(
     return matrix
 
 
+def _coefficient_logpolar(
+    coefficient: complex,
+    *,
+    label: str,
+) -> tuple[float, complex, float, float]:
+    """Validate a coefficient and return stable log-polar scale data.
+
+    The rectangular components are normalized by their largest magnitude
+    before a direction is formed.  If this normalization loses an originally
+    nonzero component, the coefficient cannot be represented faithfully by
+    the log-polar estimator and is rejected explicitly.
+    """
+
+    if not math.isfinite(coefficient.real) or not math.isfinite(
+        coefficient.imag
+    ):
+        raise ValueError(f"{label} must be finite")
+    rectangular_scale = max(abs(coefficient.real), abs(coefficient.imag))
+    if rectangular_scale == 0.0:
+        return -math.inf, 0.0j, 0.0, -math.inf
+
+    scaled_real = coefficient.real / rectangular_scale
+    scaled_imag = coefficient.imag / rectangular_scale
+    if (
+        coefficient.real != 0.0
+        and scaled_real == 0.0
+        or coefficient.imag != 0.0
+        and scaled_imag == 0.0
+    ):
+        raise ValueError(
+            f"{label} component dynamic range cannot be "
+            "represented in log-polar form"
+        )
+    normalized_magnitude = math.hypot(scaled_real, scaled_imag)
+    direction = complex(
+        scaled_real / normalized_magnitude,
+        scaled_imag / normalized_magnitude,
+    )
+    log_rectangular_scale = math.log(rectangular_scale)
+    log_magnitude = log_rectangular_scale + math.log(normalized_magnitude)
+    return (
+        log_magnitude,
+        direction,
+        rectangular_scale,
+        log_rectangular_scale,
+    )
+
+
 @dataclass(frozen=True, slots=True, init=False, eq=False)
 class PreparedPairOperator:
     """Validated, immutable pair data prepared once outside sampling loops.
@@ -200,6 +248,13 @@ class PreparedPairOperator:
             raise ValueError("two_q must be non-negative")
         pair_basis = _validated_pairs(pairs, orbital_limit)
         matrix = _validated_pair_matrix(pair_matrix, len(pair_basis))
+        for coefficient in matrix.flat:
+            value = complex(coefficient)
+            if value != 0.0:
+                _coefficient_logpolar(
+                    value,
+                    label="pair_matrix coefficient",
+                )
         scale = float(np.max(np.abs(matrix), initial=0.0))
         defect = float(
             np.max(np.abs(matrix - matrix.conj().T), initial=0.0)
@@ -284,185 +339,254 @@ def two_body_neighbors(
     }
 
 
-def _amplitude_value(
-    amplitude: Amplitude,
-    state: int,
-    *,
-    label: str,
-) -> complex:
-    try:
-        raw_value = amplitude(state)
-    except TypeError:
-        raise
+def _scalar_complex(raw_value: object, *, label: str) -> complex:
     value_array = np.asarray(raw_value)
     if value_array.shape != ():
         raise TypeError(f"{label} must be a scalar")
     try:
-        value = complex(value_array.item())
+        return complex(value_array.item())
     except (TypeError, ValueError) as error:
         raise TypeError(f"{label} must be numeric") from error
+
+
+def _logpsi_value(
+    logpsi: LogAmplitude,
+    state: int,
+    *,
+    label: str,
+    allow_zero: bool,
+) -> complex | None:
+    value = _scalar_complex(logpsi(state), label=label)
+    if value.real == -math.inf and math.isfinite(value.imag):
+        if allow_zero:
+            return None
+        raise ValueError(f"{label} must represent a nonzero amplitude")
     if not math.isfinite(value.real) or not math.isfinite(value.imag):
-        raise ValueError(f"{label} must be finite")
+        raise ValueError(
+            f"{label} must have a finite log-magnitude and phase"
+        )
     return value
 
 
-def _normalized_complex(value: complex) -> tuple[complex, int]:
-    """Return ``value = mantissa * 2**exponent`` with O(1) components."""
-
-    scale = max(abs(value.real), abs(value.imag))
-    if scale == 0.0:
-        return 0.0j, 0
-    _, exponent = math.frexp(scale)
-    mantissa = complex(
-        math.ldexp(value.real, -exponent),
-        math.ldexp(value.imag, -exponent),
+def _phase_direction(target_phase: float, source_phase: float) -> complex:
+    if target_phase == source_phase:
+        return 1.0 + 0.0j
+    period = 2.0 * math.pi
+    difference = math.remainder(target_phase, period) - math.remainder(
+        source_phase,
+        period,
     )
-    return mantissa, exponent
+    reduced = math.remainder(difference, period)
+    return complex(math.cos(reduced), math.sin(reduced))
 
 
-def _scaled_complex_product_ratio(
-    coefficient: complex,
-    target: complex,
-    denominator: complex,
-) -> tuple[complex, int]:
-    """Keep ``coefficient * target / denominator`` in scaled form.
-
-    Each finite nonzero input is split into a complex O(1) mantissa and a
-    binary exponent. Only the mantissas are multiplied and divided. The result
-    remains scaled until every row term has been accumulated, so a term may be
-    outside complex128 when later terms make the final row sum representable.
-    """
-
-    values = (coefficient, target, denominator)
-    if any(
-        not math.isfinite(value.real) or not math.isfinite(value.imag)
-        for value in values
-    ):
-        raise ValueError("complex product-ratio inputs must be finite")
-    if denominator == 0.0:
-        raise ValueError("complex product-ratio denominator must be nonzero")
-    if coefficient == 0.0 or target == 0.0:
-        return 0.0j, 0
-
-    coefficient_mantissa, coefficient_exponent = _normalized_complex(coefficient)
-    target_mantissa, target_exponent = _normalized_complex(target)
-    denominator_mantissa, denominator_exponent = _normalized_complex(denominator)
-    result_mantissa = (
-        coefficient_mantissa * target_mantissa / denominator_mantissa
-    )
-    exponent = (
-        coefficient_exponent + target_exponent - denominator_exponent
-    )
-    return result_mantissa, exponent
-
-
-def _exact_scaled_component_sum(
-    terms: Sequence[tuple[complex, int]],
-    *,
-    imaginary: bool,
+def _log_difference(
+    coefficient_logabs: float,
+    target_logabs: float,
+    anchor_coefficient_logabs: float,
+    anchor_target_logabs: float,
 ) -> float:
-    """Exactly sum one binary64 component before its final float conversion."""
-
-    encoded: list[tuple[int, int]] = []
-    for mantissa, term_exponent in terms:
-        component = mantissa.imag if imaginary else mantissa.real
-        if component == 0.0:
-            continue
-        numerator, denominator = component.as_integer_ratio()
-        denominator_exponent = denominator.bit_length() - 1
-        encoded.append(
-            (numerator, term_exponent - denominator_exponent)
-        )
-    if not encoded:
-        return 0.0
-
-    base_exponent = min(exponent for _, exponent in encoded)
-    total = sum(
-        numerator << (exponent - base_exponent)
-        for numerator, exponent in encoded
-    )
-    if total == 0:
-        return 0.0
-    exact = (
-        Fraction(total << base_exponent, 1)
-        if base_exponent >= 0
-        else Fraction(total, 1 << -base_exponent)
-    )
     try:
-        result = float(exact)
+        difference = math.fsum(
+            (
+                coefficient_logabs,
+                target_logabs,
+                -anchor_coefficient_logabs,
+                -anchor_target_logabs,
+            )
+        )
+    except OverflowError as error:
+        raise OverflowError(
+            "local estimator log scale is outside the supported range"
+        ) from error
+    if not math.isfinite(difference):
+        raise OverflowError(
+            "local estimator log scale is outside the supported range"
+        )
+    return difference
+
+
+def _restore_component(
+    anchor_scale: float,
+    anchor_logscale: float,
+    relative_logabs: float,
+    sign: float,
+) -> float:
+    try:
+        full_logabs = math.fsum((anchor_logscale, relative_logabs))
     except OverflowError as error:
         raise OverflowError(
             "local estimator result is outside complex128 range"
         ) from error
-    if not math.isfinite(result):
+    if math.isnan(full_logabs):
         raise OverflowError("local estimator result is outside complex128 range")
-    return result
+
+    magnitude: float | None = None
+    try:
+        relative_magnitude = math.exp(relative_logabs)
+    except OverflowError:
+        relative_magnitude = math.inf
+    if math.isfinite(relative_magnitude):
+        candidate = anchor_scale * relative_magnitude
+        if math.isfinite(candidate) and (
+            candidate != 0.0 or full_logabs == -math.inf
+        ):
+            magnitude = candidate
+    if magnitude is None:
+        if full_logabs >= _LOG_MAX_FLOAT:
+            raise OverflowError(
+                "local estimator result is outside complex128 range"
+            )
+        try:
+            magnitude = math.exp(full_logabs)
+        except OverflowError as error:
+            raise OverflowError(
+                "local estimator result is outside complex128 range"
+            ) from error
+    if not math.isfinite(magnitude):
+        raise OverflowError("local estimator result is outside complex128 range")
+    return math.copysign(magnitude, sign)
 
 
-def _sum_scaled_complex(
-    terms: Sequence[tuple[complex, int]],
-) -> complex:
-    """Sum a complete scaled-complex row and restore complex128 once."""
-
-    return complex(
-        _exact_scaled_component_sum(terms, imaginary=False),
-        _exact_scaled_component_sum(terms, imaginary=True),
-    )
-
-
-def local_from_neighbors(
+def local_from_log_neighbors(
     state: int,
     neighbors: Mapping[int, complex],
-    amplitude: Amplitude,
+    logpsi: LogAmplitude,
 ) -> complex:
-    """Evaluate ``sum_t H[s,t] psi(t) / psi(s)`` from a sparse row."""
+    """Evaluate ``sum_t H[s,t] exp(logpsi(t) - logpsi(s))`` stably."""
 
     source = _validated_nonnegative_state(state)
     if not isinstance(neighbors, Mapping):
         raise TypeError("neighbors must be a mapping")
-    if not callable(amplitude):
-        raise TypeError("amplitude must be callable")
-    denominator = _amplitude_value(
-        amplitude,
+    if not callable(logpsi):
+        raise TypeError("logpsi must be callable")
+    source_logpsi = _logpsi_value(
+        logpsi,
         source,
-        label="sampled amplitude",
+        label="sampled logpsi",
+        allow_zero=False,
     )
-    if denominator == 0.0:
-        raise ValueError("sampled amplitude must be nonzero")
+    assert source_logpsi is not None
 
-    scaled_terms: list[tuple[complex, int]] = []
+    terms: list[tuple[float, float, complex, float, float]] = []
     for target_raw, coefficient_raw in neighbors.items():
         target = _validated_nonnegative_state(target_raw)
-        coefficient_array = np.asarray(coefficient_raw)
-        if coefficient_array.shape != ():
-            raise TypeError("neighbor coefficient must be a scalar")
-        try:
-            coefficient = complex(coefficient_array.item())
-        except (TypeError, ValueError) as error:
-            raise TypeError("neighbor coefficient must be numeric") from error
-        if not math.isfinite(coefficient.real) or not math.isfinite(coefficient.imag):
-            raise ValueError("neighbor coefficient must be finite")
+        coefficient = _scalar_complex(
+            coefficient_raw,
+            label="neighbor coefficient",
+        )
         if coefficient == 0.0:
             continue
-        target_amplitude = _amplitude_value(
-            amplitude,
-            target,
-            label="neighbor amplitude",
+        (
+            coefficient_logabs,
+            coefficient_direction,
+            rectangular_scale,
+            log_rectangular_scale,
+        ) = _coefficient_logpolar(
+            coefficient,
+            label="neighbor coefficient",
         )
-        scaled_terms.append(
-            _scaled_complex_product_ratio(
-                coefficient,
-                target_amplitude,
-                denominator,
+        target_logpsi = _logpsi_value(
+            logpsi,
+            target,
+            label="neighbor logpsi",
+            allow_zero=True,
+        )
+        if target_logpsi is None:
+            continue
+        direction = coefficient_direction * _phase_direction(
+            target_logpsi.imag,
+            source_logpsi.imag,
+        )
+        terms.append(
+            (
+                coefficient_logabs,
+                target_logpsi.real,
+                direction,
+                rectangular_scale,
+                log_rectangular_scale,
             )
         )
-    return _sum_scaled_complex(scaled_terms)
+    if not terms:
+        return 0.0j
+
+    anchor_index = 0
+    for index in range(1, len(terms)):
+        coefficient_logabs, target_logabs, _, _, _ = terms[index]
+        anchor_coefficient_logabs, anchor_target_logabs, _, _, _ = terms[
+            anchor_index
+        ]
+        if _log_difference(
+            coefficient_logabs,
+            target_logabs,
+            anchor_coefficient_logabs,
+            anchor_target_logabs,
+        ) > 0.0:
+            anchor_index = index
+
+    (
+        anchor_coefficient_logabs,
+        anchor_target_logabs,
+        _,
+        anchor_scale,
+        anchor_logscale,
+    ) = terms[anchor_index]
+    scaled_real: list[float] = []
+    scaled_imag: list[float] = []
+    for coefficient_logabs, target_logabs, direction, _, _ in terms:
+        delta = _log_difference(
+            coefficient_logabs,
+            target_logabs,
+            anchor_coefficient_logabs,
+            anchor_target_logabs,
+        )
+        scaled_magnitude = math.exp(delta) if delta > -math.inf else 0.0
+        scaled_real.append(scaled_magnitude * direction.real)
+        scaled_imag.append(scaled_magnitude * direction.imag)
+
+    bounded_real = math.fsum(scaled_real)
+    bounded_imag = math.fsum(scaled_imag)
+    if bounded_real == 0.0 and bounded_imag == 0.0:
+        return 0.0j
+    try:
+        anchor_relative_logabs = math.fsum(
+            (
+                anchor_coefficient_logabs,
+                anchor_target_logabs,
+                -anchor_logscale,
+                -source_logpsi.real,
+            )
+        )
+    except OverflowError as error:
+        raise OverflowError(
+            "local estimator result is outside complex128 range"
+        ) from error
+    if not math.isfinite(anchor_relative_logabs):
+        raise OverflowError("local estimator result is outside complex128 range")
+
+    components = []
+    for bounded_component in (bounded_real, bounded_imag):
+        if bounded_component == 0.0:
+            components.append(0.0)
+            continue
+        relative_logabs = anchor_relative_logabs + math.log(
+            abs(bounded_component)
+        )
+        components.append(
+            _restore_component(
+                anchor_scale,
+                anchor_logscale,
+                relative_logabs,
+                bounded_component,
+            )
+        )
+    return complex(*components)
 
 
 def local_energy(
     state: int,
     operator: PreparedPairOperator,
-    amplitude: Amplitude,
+    logpsi: LogAmplitude,
 ) -> complex:
     """Evaluate the local energy for a Hermitian two-body Hamiltonian.
 
@@ -473,7 +597,7 @@ def local_energy(
 
     column = two_body_neighbors(state, operator)
     row = {target: coefficient.conjugate() for target, coefficient in column.items()}
-    return local_from_neighbors(state, row, amplitude)
+    return local_from_log_neighbors(state, row, logpsi)
 
 
 def ladder_neighbors(
@@ -555,7 +679,7 @@ def local_l2(
     state: int,
     two_q: int,
     target_m: float,
-    amplitude: Amplitude,
+    logpsi: LogAmplitude,
 ) -> complex:
     """Evaluate ``L_- L_+ + M(M+1)`` locally in a fixed-M sector."""
 
@@ -573,4 +697,4 @@ def local_l2(
     diagonal = (target_m2 / 2.0) * (target_m2 / 2.0 + 1.0)
     if diagonal != 0.0:
         neighbors[source] = neighbors.get(source, 0.0j) + diagonal
-    return local_from_neighbors(source, neighbors, amplitude)
+    return local_from_log_neighbors(source, neighbors, logpsi)
