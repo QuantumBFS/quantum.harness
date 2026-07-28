@@ -39,8 +39,8 @@ Columns: model | (N, d, symmetry) | certified Δ ≤ | reference | solver | runt
 |---|---|---|---|---|---|---|---|
 | 1 | 1D TFIM (transverse-field Ising) | N=9, g=0.5, d=2, sign-symmetric | **≤ 0.26** | 0.258 (example.jl / legacy-inventory-spec) | Mosek 11.2.2 | 4–25 s | **VALIDATED (Gate 5 ✓)** |
 | 2 | Kagome Heisenberg (frustrated, #88) | N=13, d=3, sign-symmetric | **≤ 1.28** | ~1.28 (example.jl) ✓ | Mosek 11.2.2 | ~290 s | **VALIDATED (matches ref)** |
-| 3 | Kagome Heisenberg (frustrated, #88) | N=27, d=3, sign-symmetric | — (queued) | ~1.15 (example.jl) | Mosek 11.2.2 | — | queued (Config 2) |
-| 4 | Kagome Heisenberg (frustrated, #88) | N=13, d=4, sign-symmetric | — (queued) | < 1.28 (tighter) | Mosek 11.2.2 | — | queued (Config 3) |
+| 3 | Kagome Heisenberg (frustrated, #88) | N=27, d=3, sign-symmetric | — | ~1.15 (example.jl) | Mosek 11.2.2 | — | **OOM** (243 GB node limit; H built, first solve oom-killed) |
+| 4 | Kagome Heisenberg (frustrated, #88) | N=13, d=4, sign-symmetric | — (running) | < 1.28 (tighter) | Mosek 11.2.2 | — | running (job 22972604) |
 
 **Row 1 detail (Gate 5 — pipeline validated):** γ-scan N=9 g=0.5 d=2 sign-symmetric —
 feasible at γ ∈ {0.15, 0.20, 0.22, 0.24, 0.25}, infeasible at γ ∈ {0.26, 0.27, 0.28, 0.30, 0.34}.
@@ -52,6 +52,15 @@ which lives in the symmetry-broken / no-sign-symmetry sector).
 **Kagome note (row 2–4):** d=2 is **structurally invalid** for kagome — the
 degree-1 bulk/gap basis is empty → 0-dimension PSD block → `MosekError(20401)`.
 d=3 (degree-2 bulk basis) is the minimum working order, matching `example.jl`.
+
+**Row 2 detail (kagome N=13 d=3 — frustrated #88 bound):** γ-scan was clean and
+monotone (no reversals — the SPEC §9 sanity check passes): feasible at
+γ ∈ {1.0, 1.2, 1.26}, infeasible at γ ∈ {1.28, 1.29, 1.30, 1.32, 1.35, 1.4, 1.6}.
+Transition γ* ∈ (1.26, 1.28] → **Δ_kagome ≤ 1.28**, matching `example.jl`.
+~290 s/solve. **Row 3 (N=27 d=3) OOM'd** at the 243 GB node limit (the SDP for
+N=27 is too large for `xhacnormalb` at `mem-per-cpu=3800M`); N=27 needs a
+larger-memory node or a sparser formulation. **Row 4 (N=13 d=4) running** — same
+N=13 patch that succeeded at d=3, one order higher → should fit and tighten.
 
 ## Status (2026-07-28)
 
