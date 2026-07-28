@@ -7,7 +7,7 @@ Status: success — the seven-site PEPO result agrees with the independent dense
 ```bash
 OLE_ROOT=tracks/qcs/solutions/CCB-LV.999/issue-119-ole
 uv run --project "$OLE_ROOT/pepo" python "$OLE_ROOT/scripts/validate_pepo_small.py"
-uv run --project "$OLE_ROOT/pepo" python "$OLE_ROOT/scripts/validate_pepo_small.py" --execute --confirm "c9457cb9056bdb5b" --output-dir "/home/peter0627/project/quantum.harness/results/issue119-pepo-small-oracle"
+uv run --project "$OLE_ROOT/pepo" python "$OLE_ROOT/scripts/validate_pepo_small.py" --execute --confirm "1bcf6ca3077c1a79" --output-dir "/home/peter0627/project/quantum.harness/results/issue119-pepo-small-oracle"
 ```
 
 ## Results
@@ -34,6 +34,6 @@ uv run --project "$OLE_ROOT/pepo" python "$OLE_ROOT/scripts/validate_pepo_small.
 
 - QASM SHA-256: `1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455`
 - quimb revision: `3c89529fe0a3487133a3928201691161e110abdf`
-- numerical-core digest: `4b07886e968661b20424523deb9fb2a3d5deae062392016f6922c74f1ac1e300`
-- wall time: 19.688 s
-- peak RSS: 296583168 bytes
+- numerical-core digest: `843030ed46b1ad7ebf2dc3cbe216e97bf035c0774ff9f094f704a2ee746d96c0`
+- wall time: 19.109 s
+- peak RSS: 300957696 bytes
