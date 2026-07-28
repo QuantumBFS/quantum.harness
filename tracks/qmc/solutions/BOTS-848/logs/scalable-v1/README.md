@@ -3,10 +3,13 @@
 | Step | Purpose | Current attempt | Status |
 |---:|---|---:|---|
 | 1 | common protocol and evaluator | a03 | step-pass |
-| 2 | occupation autoregressive NQS | not started | pending |
-| 3 | continuous holomorphic NQS | not started | pending |
-| 4 | CF-Flow L=2 and route selection | not started | pending |
-| 5 | winner N=8, then SCNet N=10/12 | not started | pending |
+| 2A | occupation autoregressive NQS | not started | pending |
+| 2B | continuous holomorphic NQS | not started | pending |
+| 2C | CF-Flow L=2 prototype | not started | pending |
+| 2D | analytic L=2 seed times neural correlator | not started | pending |
+| 3 | synchronized audit, ED reveal, and route selection | not started | pending |
+| 4 | winner N=8 | not started | pending |
+| 5 | winner SCNet N=10/12 | not started | pending |
 
 ## Step 1 attempt accounting
 
@@ -19,8 +22,9 @@ Step 1 used three implementation attempts within one research step:
 - [Attempt a03](s01-a03.md) performed Task 7 closure and classified Step 1 as
   `step-pass` after fresh verification.
 
-Attempts a04 and a05 were unused. Step 2 starts in a new worktree and resets
-its implementation-attempt counter to a01.
+Attempts a04 and a05 were unused. The additive Route D admission consumes no
+Step 2 attempt. After admission, Steps 2A-2D start in separate worktrees and
+each has its own `a01` through `a05` implementation-attempt counter.
 
 ## Trusted-pipeline boundary
 
