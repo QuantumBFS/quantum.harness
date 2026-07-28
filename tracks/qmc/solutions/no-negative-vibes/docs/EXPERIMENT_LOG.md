@@ -126,3 +126,58 @@ Decision / next experiment:
   at the merge SHA. Do not conflate integration success with content review.
 - Decision / next experiment: stop periodic teammate-PR handling and focus
   compute/review capacity on our own R01 program.
+
+## ALG-0003 — six-mode support geometry and BdG basis compiler
+
+- Proposal ID: `R01`
+- Question: Can the two overlapping Klein plaquettes be assigned a fixed,
+  non-complete six-mode support graph with deterministic number-conserving and
+  BdG quadratic bases suitable for exact inequality compilation?
+- Prediction: the preregistered masks contain 7 ring, 2 bridge, and 4 diagonal
+  edges; directed hopping and pairing labels map to the intended exact Fock
+  operators.
+- Source commit: `550b629f87e1882ea1195ab9fff3d546703bdd32`
+- Protocol/config: exact geometry, mask nesting, edge exclusion, dimension,
+  label, operator, API rejection, immutability, and hand-derived fermionic
+  phase tests.
+- Host role and resources: WSL verification worker; one pytest process.
+- Command: `python -m pytest tests/test_overlap_klein.py -q`, then
+  `python -m pytest tests -q`.
+- Result: focused `16 passed in 0.59s`; full `261 passed, 382 warnings in
+  3.78s`.
+- Evidence paths and hashes: `oracle/overlap_klein.py` and
+  `tests/test_overlap_klein.py` at `550b629`; final independent review:
+  specification PASS, quality APPROVED, zero findings.
+- Interpretation: the six-mode search space is now fixed and reproducible,
+  including two genuine cross-block bridge edges. No feasibility, positivity,
+  noncommutativity, or physical-model claim has yet been made.
+- Transferable lesson: comparing a generated BdG matrix to the same production
+  constructor is circular. Pin creation/annihilation matrix elements by hand,
+  including a spectator-occupation Jordan--Wigner minus sign, and require
+  annihilation to equal the transpose of creation.
+- Decision / next experiment: compile every within-parity off-diagonal Metzler
+  inequality exactly in `Q(sqrt(2))`.
+
+## ENV-0003 — nested CPU-worker key-authentication readiness probe
+
+- Proposal ID: infrastructure prerequisite
+- Question: Is the dedicated public key already installed on the nested CPU
+  worker so unattended parameter cells can start safely?
+- Prediction: a strict-host-key, password-disabled `BatchMode` probe returns
+  the logical CPU count.
+- Source commit: `71661db1bd269faa573ac2559abc2969ef8da3dc`
+- Protocol/config: dedicated key, strict host-key checking, eight-second
+  connect timeout, and no password fallback.
+- Host role and resources: WSL gateway to the CPU worker.
+- Command: secret-free `ssh -o BatchMode=yes ... nproc` readiness probe.
+- Result: failed with `Permission denied (publickey,password)`; no remote
+  command ran.
+- Evidence paths and hashes: terminal transcript in the active goal task; the
+  public-key and host fingerprints remain only in the private handoff.
+- Interpretation: the worker is reachable but unattended authentication is
+  not configured. Small exact tasks remain unblocked on WSL.
+- Transferable lesson: never place an initial password in a command, script,
+  environment variable, or log. Install the dedicated public key once through
+  an interactive `ssh-copy-id`, then re-run a password-disabled probe.
+- Decision / next experiment: continue exact compiler work on WSL; before the
+  first broad parameter scan, complete the one-time interactive key install.
