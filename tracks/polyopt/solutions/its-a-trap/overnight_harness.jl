@@ -21,9 +21,10 @@ mkpath(OUTDIR)
 mkpath(joinpath(OUTDIR, "cell_logs"))
 
 # ---------------------------------------------------------------- budgets ----
-const MAX_WALL_S       = 600
-const MAX_RSS_GB       = 18      # WSL has 24 GB; leave headroom for the OS
-const MAX_PROC_SWAP_GB = 0.5
+# ENV-overridable (plan: 7200 s per 1D cell for the targets queue).
+const MAX_WALL_S       = parse(Int,     get(ENV, "MAX_WALL_S", "600"))
+const MAX_RSS_GB       = parse(Float64, get(ENV, "MAX_RSS_GB", "18"))
+const MAX_PROC_SWAP_GB = parse(Float64, get(ENV, "MAX_PROC_SWAP_GB", "0.5"))
 
 # ------------------------------------------------- CONFIG A (source of truth) --
 # One object. It both constructs the GSB call and serialises into the row.
@@ -34,6 +35,19 @@ config_a(N) = (
     mosek_tol_pfeas = 1e-8, mosek_tol_dfeas = 1e-8, mosek_tol_relgap = 1e-8,
     supp = [[1, 4]], coe = [3 / 4],
 )
+
+# Reference of record: high-precision Bethe references (J2=0 rows) from
+# bethe_ref.json in OUTDIR, if present. MG point J2=0.5 is exact (-0.375).
+function load_bethe(outdir)
+    p = joinpath(outdir, "bethe_ref.json")
+    isfile(p) || return Dict{Int,Float64}()
+    d = Dict{Int,Float64}()
+    for m in eachmatch(r"\"(\d+)\":\s*(-?[0-9.eE+-]+)", read(p, String))
+        d[parse(Int, m.captures[1])] = parse(Float64, m.captures[2])
+    end
+    return d
+end
+const BETHE = load_bethe(OUTDIR)
 
 # Table 3 of arXiv:2604.01555 — N => (DMRG upper, SDP Old, SDP New)
 const TABLE3 = Dict(
@@ -136,7 +150,8 @@ end
 
 # ------------------------------------------------------------------- CSV ----
 const COLS = [
-  "step","label","N","opt","table3_dmrg","table3_new","table3_old","dev_vs_dmrg","dev_vs_new",
+  "step","label","N","opt","E_ref","ref_source","gap_ref","rel_err","J2_model",
+  "table3_dmrg","table3_new","table3_old","dev_vs_dmrg","dev_vs_new",
   "d","extra","r","rdm","pso","lso","lol","three_type","SU2_symmetry","lattice","Gram",
   "correlation","J2","supp","coe","mosek_tol_pfeas","mosek_tol_dfeas","mosek_tol_relgap",
   "termination_status","primal_status","status_source","primal_residual","dual_residual",
@@ -204,8 +219,23 @@ function runcell(step, label, N, overrides)
     wall = time() - t0
 
     p = parse_solverlog(cell_log)
+    # Reference of record + signed gap (plan correction 7).
+    # gap_ref = E_ref/site − opt/site: positive = our bound sits below the
+    # reference, as a lower bound must vs an upper/near-exact reference.
+    J2m = Float64(get(overrides, :J2_model, 0.0))
+    E_ref = ""; ref_source = ""
+    if J2m == 0.0 && haskey(BETHE, N)
+        E_ref = BETHE[N]; ref_source = "bethe_high_precision"
+    elseif J2m == 0.5
+        E_ref = -0.375; ref_source = "MG_exact"
+    end
+    # GSB's objv is already per-site (cf. Table 3 units; overnight rows).
+    gap_ref = (opt isa Number && E_ref isa Number) ? E_ref - opt : ""
+    rel_err = (gap_ref isa Number && E_ref isa Number) ? abs(gap_ref / E_ref) : ""
     row = merge(PROV, (
         step = step, label = label, N = N, opt = opt,
+        E_ref = E_ref, ref_source = ref_source, gap_ref = gap_ref,
+        rel_err = rel_err, J2_model = J2m,
         table3_dmrg = t3[1], table3_old = t3[2], table3_new = t3[3],
         dev_vs_dmrg = opt isa Number ? opt - t3[1] : "",
         dev_vs_new  = opt isa Number ? opt - t3[3] : "",
@@ -242,7 +272,17 @@ function parsecell(spec)
     for kv in split(rest, ',', keepempty = false)
         k, v = split(kv, '=')
         ov[Symbol(k)] = v == "true" ? true : v == "false" ? false :
-                        something(tryparse(Int, v), v)
+                        something(tryparse(Int, v), tryparse(Float64, v), v)
+    end
+    # model=j1j2 switches the Hamiltonian encoding (J2 value from the J2 key).
+    # GSB's own J2 kwarg is correlation-path-only (bound_gsp.jl:557) and stays 0.
+    if get(ov, :model, "") == "j1j2"
+        J2 = Float64(get(ov, :J2, 0.0))
+        ov[:supp] = [[1, 4], [1, 7]]
+        ov[:coe]  = [3 / 4, 3 / 4 * J2]
+        ov[:J2]   = 0          # keep the kwarg out of the energy objective
+        ov[:J2_model] = J2     # serialized so the row records the physics
+        delete!(ov, :model)
     end
     return (label, parse(Int, nstr), NamedTuple(ov))
 end
