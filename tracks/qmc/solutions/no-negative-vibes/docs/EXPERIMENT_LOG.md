@@ -1,6 +1,6 @@
 # Experiment log
 
-Updated: 2026-07-28
+Updated: 2026-07-29
 
 Every completed scientific experiment is appended here whether it succeeds,
 fails, or only exposes an infrastructure defect. Large outputs live under the
@@ -291,3 +291,108 @@ Decision / next experiment:
 - Decision / next experiment: run the versioned real six-mode protocol for
   all support/family cells and persist exact certificates before interpreting
   feasibility.
+
+## R01-E001 — number-conserving six-mode bridge gate
+
+- Proposal ID: `R01`
+- Question: For the fixed overlapping Klein circuit
+  `U = U_[2,3,4,5] U_[0,1,2,3]`, can any directed hopping coefficient on
+  either cross-cluster bridge survive the exact Metzler cone when the
+  quadratic basis is number conserving?
+- Prediction: at least one bridge direction and sign survives after the ring
+  terms are admitted; adding the preregistered diagonal terms may enlarge the
+  cone if the smaller mask fails.
+- Scientific source commit:
+  `24c80c4e1c1f182278e799b7f5de53deb65bf2f4`.
+- Protocol/config: `overlap-klein-v1`, exact field `Q(sqrt(2))`; independent
+  `workers=1` smoke followed by `workers=14` production for each mask; spawn
+  process start; `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`.
+- Host role and resources: WSL scientific worker, Linux
+  `4.4.0-26100-Microsoft`, Python `3.11.15`, Intel Core i9-11900K, 16 logical
+  CPUs and 31 GiB RAM. Production used 14 processes and retained two logical
+  CPUs. The 64-CPU worker was intentionally not used because these were the
+  same scientific cells, not an independent verification request.
+- Package versions: oracle `0.1.0`, NumPy `2.4.6`, SciPy `1.17.1`, SymPy
+  `1.14.0`.
+
+Commands, run from `tracks/qmc/solutions/no-negative-vibes`:
+
+```text
+SOURCE_COMMIT=24c80c4e1c1f182278e799b7f5de53deb65bf2f4
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python -m oracle.overlap_klein --family number-conserving --mask rings-bridges --workers 1 --source-commit $SOURCE_COMMIT --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python -m oracle.overlap_klein --family number-conserving --mask rings-diagonals-bridges --workers 1 --source-commit $SOURCE_COMMIT --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-diagonals-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python -m oracle.overlap_klein --family number-conserving --mask rings-bridges --workers 14 --source-commit $SOURCE_COMMIT --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python -m oracle.overlap_klein --family number-conserving --mask rings-diagonals-bridges --workers 14 --source-commit $SOURCE_COMMIT --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges-attempt-01.json
+```
+
+Every scientific runner attempt in this experiment succeeded and produced a
+new attempt-numbered JSON:
+
+| Role / mask | Workers | Wall (s) | Raw path | SHA-256 |
+|---|---:|---:|---|---|
+| smoke / `rings-bridges` | 1 | 34.5008 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-bridges-attempt-01.json` | `42ce1da95f7cdf4f3c9b7339001518265aa619ef1b654975ae03cdf932804da1` |
+| smoke / `rings-diagonals-bridges` | 1 | 59.9634 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-diagonals-bridges-attempt-01.json` | `777d4ea88fb1ae4c83b20017b17e15aefeab1d8dd38650ebcc6d23f154ad0129` |
+| production / `rings-bridges` | 14 | 29.2986 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges-attempt-01.json` | `5317ca436b30bd734ad917cfe32c2c74b3436cb9f5b6165eb80dc14637a2859d` |
+| production / `rings-diagonals-bridges` | 14 | 46.0726 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges-attempt-01.json` | `37d175bb701c573fdba433614765fe58302ee37f764393824c89cd38ebb68e36` |
+
+For each mask, the complete smoke and production scientific payloads are
+equal after removing only the top-level `execution` object. All eight
+production exact certificates and all eight smoke exact certificates replayed
+against the independently rebuilt exact system; no solver branch reported
+`status="error"`.
+
+### Exact classifications
+
+`rings-bridges` has system shape `560 x 24`. Its compact certificate pointers
+are under `fixtures/overlap_klein_r01.json#/cells/0/anchors`:
+
+| Directed bridge anchor | `+1` survives? / status | `-1` survives? / status | Classification | Exact certificate |
+|---|---|---|---|---|
+| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/0/zero_certificate` |
+| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/1/zero_certificate` |
+| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/2/zero_certificate` |
+| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/3/zero_certificate` |
+
+`rings-diagonals-bridges` has system shape `748 x 32`. Its compact certificate
+pointers are under
+`fixtures/overlap_klein_r01.json#/cells/1/anchors`:
+
+| Directed bridge anchor | `+1` survives? / status | `-1` survives? / status | Classification | Exact certificate |
+|---|---|---|---|---|
+| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/0/zero_certificate` |
+| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/1/zero_certificate` |
+| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/2/zero_certificate` |
+| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/3/zero_certificate` |
+
+For every row above, the committed certificate supplies nonnegative exact
+weights with `C^T y_+ = e_a` and `C^T y_- = -e_a`. Therefore every
+`x` satisfying the fixed exact Metzler inequalities `C x >= 0` obeys both
+`x_a >= 0` and `x_a <= 0`, hence `x_a = 0`. This proves that all four
+directed cross-cluster hopping coordinates vanish throughout each of the two
+fixed number-conserving cones. In particular, a nonzero Hermitian bridge
+hopping cannot be assembled inside either cone.
+
+- Interpretation: the preregistered prediction failed, but it failed
+  rigorously. Adding all four allowed diagonal edges enlarged the basis from
+  24 to 32 coordinates and the constraint system from 560 to 748 rows without
+  rescuing any directed bridge hopping.
+- Scope: this no-go is only for the fixed six-mode transform, the stated
+  number-conserving quadratic families, and the two stated support masks. It
+  does not exclude a larger BdG cone, Gaussian micro-words, another transform,
+  an open cone elsewhere, or a positive-coefficient physical HS
+  decomposition. It is not a no-go theorem for the full `R01` program or for
+  arbitrary physical Hamiltonians.
+- Committed evidence:
+  `fixtures/overlap_klein_r01.json` contains the two cells, raw hashes,
+  execution provenance, sign-local statuses, and replayable exact
+  certificates. The compact branch schema deliberately renames raw
+  `exact_primal_certificate` to `certificate`; zero certificates retain the
+  raw `zero_certificate` name.
+- Transferable lesson: a two-sided exact Farkas pair proves a cone coordinate
+  is identically zero, whereas a one-sided numerical `infeasible` status only
+  says that sign had no numerical primal in that run. Never upgrade the latter
+  to an exact exclusion.
+- Decision / next experiment: run Task 8 on the BdG expansion, testing whether
+  pairing terms rescue a hopping bridge or produce a certified `pc`/`pa`
+  bridge coordinate. Keep the two masks as distinct cells and allocate them
+  disjointly across the authorized workers after matching one-worker smokes.
