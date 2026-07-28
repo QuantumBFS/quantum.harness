@@ -1,3 +1,22 @@
+diff --git a/Project.toml b/Project.toml
+old mode 100644
+new mode 100755
+index 62e90a7..84926f4
+--- a/Project.toml
++++ b/Project.toml
+@@ -4,10 +4,12 @@ authors = ["Jie Wang <wangjie212@amss.ac.cn>"]
+ version = "0.3.0"
+ 
+ [deps]
++Clarabel = "61c947e1-3e6d-4ee4-985a-eec8c727bd6e"
+ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+ MosekTools = "1ec41992-ff65-5c91-ac43-2df89e9693a4"
++Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+ 
+ [compat]
+ MathOptInterface = "1.48.0"
 diff --git a/src/SpectralGap.jl b/src/SpectralGap.jl
 old mode 100644
 new mode 100755
