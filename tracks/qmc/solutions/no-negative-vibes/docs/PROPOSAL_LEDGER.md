@@ -29,3 +29,11 @@ exact certificate.
 Do not delete failed proposals. Mark their terminal status, link the evidence,
 and summarize the transferable lesson in `EXPERIMENT_LOG.md`. Reserve
 directions from the design require a new row and card before implementation.
+
+## Recorded status transitions
+
+- `R01`: `claimed-design -> running` at `ff3759e`. The exact occupation-basis
+  algebra, fixed four-mode Klein--Hodge transform, non-inducedness anchor, and
+  one exact Metzler seed now have replay tests. This is an implementation
+  milestone only: it does **not** yet establish a six-mode cone, arbitrary-depth
+  positivity, novelty, or a physical HS realization.

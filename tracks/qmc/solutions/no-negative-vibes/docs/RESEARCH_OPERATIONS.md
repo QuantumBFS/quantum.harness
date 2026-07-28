@@ -15,6 +15,11 @@ belong here.
 - Push each interpreted experiment immediately after its log and compact
   evidence are committed.
 - Never point the default research push at the organizer-facing branch.
+- Teammate forks may proceed independently. Do not periodically review, merge,
+  or synchronize them unless the research owner explicitly asks; protect
+  compute and review time for the active topic branch.
+- If a merge is needed, distinguish mechanical integration verification from
+  scientific content review. A green merge test does not endorse a claim.
 
 ## WSL transfer when GitHub is unreachable
 
@@ -77,3 +82,13 @@ An experiment is not closed when the program exits. It is closed after:
 4. `EXPERIMENT_LOG.md` is updated;
 5. compact evidence and replay tests are committed;
 6. the commit is pushed to the shared topic branch.
+
+## Review gates for exact algebra
+
+- A fixed basis transform test must assert the literal basis rows and identity
+  action outside the active sector, not only orthogonality.
+- Embedding tests must compute at least one expected global basis index
+  independently of the embedding helper.
+- Record a single-generator Metzler witness as such. Do not upgrade it to an
+  open-cone, arbitrary-depth, novelty, or physical-HS claim without the
+  corresponding separate certificates.
