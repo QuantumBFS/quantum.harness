@@ -8,18 +8,22 @@
 
 ## Team
 
-| | |
-|---|---|
-| **Team name** | BoundGSEnergy |
-| **Members** | Fo-Hong Wang, Siyuan Chen |
+<table>
+<tbody>
+<tr><th>Team name</th><td>BoundGSEnergy</td></tr>
+<tr><th>Members</th><td>Fo-Hong Wang, Siyuan Chen</td></tr>
+</tbody>
+</table>
 
 ## Challenge
 
-| Row | |
-|---|---|
-| **Challenge** | Combine the NPA hierarchy of SDP relaxations with renormalization-group coarse-graining (PRX 14, 021008, Sec. III-D-2) plus the structure-exploiting techniques of arXiv:2604.01555, to push *certified* ground-state-energy lower bounds for spin-1/2 Heisenberg systems to larger sizes and tighter accuracy — going beyond the reproduction of the published structured-NPA bounds. |
-| **Catalog issue** | Addresses #49 — released by Jie Wang (AMSS-CAS). |
-| **Track** | `polyopt` — from the issue's `Method` field ("Noncommutative polynomial optimization/Quantum bootstrap"), normalized onto the seven tracks. |
+<table>
+<tbody>
+<tr><th>Challenge</th><td>Combine the NPA hierarchy of SDP relaxations with renormalization-group coarse-graining (PRX 14, 021008, Sec. III-D-2) plus the structure-exploiting techniques of arXiv:2604.01555, to push <em>certified</em> ground-state-energy lower bounds for spin-1/2 Heisenberg systems to larger sizes and tighter accuracy — going beyond the reproduction of the published structured-NPA bounds.</td></tr>
+<tr><th>Catalog issue</th><td>Addresses <a href="https://github.com/QuantumBFS/quantum.harness/issues/49">#49</a> — released by Jie Wang (AMSS-CAS).</td></tr>
+<tr><th>Track</th><td><code>polyopt</code> — from the issue's <code>Method</code> field ("Noncommutative polynomial optimization/Quantum bootstrap"), normalized onto the seven tracks.</td></tr>
+</tbody>
+</table>
 
 ## Plan (seed)
 
