@@ -367,4 +367,12 @@ Updated: 2026-07-29 UTC.
   tensor tests, and dedicated Slurm inventory gate are now prepared; all
   eight synthetic assertions pass. Inventory job `22988914` is queued behind
   the two primary jobs. No model uses this candidate yet.
+- The next continuous-spin cone theorem is now encoded but remains behind
+  that inventory gate. For each of the 36 spatial rank-two skeletons in both
+  positive families it pairs the S3-standard component `XX-ZZ` with the
+  nontrivial-character component `XZ+ZX`, proves the skeleton map has rank
+  36, and will compare all 1,332 projected upper-triangle coefficients under
+  the induced exact signed congruence. Only a passing Slurm truth run may
+  remove the two duplicate 36-side cones and reach the predicted 4,772
+  packed PSD coordinates.
 - No decision-changing user or resource need is open.

@@ -559,3 +559,20 @@ nontrivial use count be positive. This is a consequential action correction,
 not an identical repeat. The failed log SHA-256 is
 `a7e2e3ff6d9240bcbaedb5a49df7624737d1ab68277b60bfc44a7938d60982f4`;
 Slurm MaxRSS was 713,484 KiB.
+
+## 2026-07-29 — prepare the exact continuous-spin l=2 cone gate
+
+Within each centered/scalar rank-two row skeleton, the current octahedral
+decomposition retains the diagonal l=2 component `XX-ZZ` and the
+off-diagonal component `XZ+ZX` as separate 36-side cones. Both have squared
+component norm two. Continuous-spin invariance predicts identical
+multiplicity matrices, but this prediction is not yet accepted as a model
+reduction.
+
+Encode a separate fail-closed truth gate that requires canonical component
+rows, a full-rank spatial-skeleton bijection in both families, and exact
+signed congruence of all 1,332 projected upper-triangle coefficients. If it
+passes under Slurm after the moment-inventory gate, remove only the two
+S3-standard duplicate cones. The resulting target inventory is six positive
+cones with sides `[36,36,45,37,36,45]`, one scalar gap cone, and 4,772
+packed PSD coordinates.
