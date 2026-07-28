@@ -35,3 +35,11 @@ but not JuMP's original `HermitianMatrixShape`. The corrected runner validates
 the cone set/dimension, then independently rebuilds each matrix from MOI's
 real-upper followed by imaginary-strict-upper vector packing. No optimizer was
 attached in r1 and no scientific status was produced.
+
+## 2026-07-29 — MosekTools raw attributes
+
+Gamma=0 attempt r2 (job `22987979`) passed the immutable-input, source-hash,
+setup, count, and named-cone checks. It then stopped before `optimize!` because
+MosekTools 0.15.10 accepts `MSK_IPAR_NUM_THREADS` through MOI's string-valued
+raw optimizer attribute, not the Mosek.jl enum used by the older Square
+runner. The Shastry runner now uses the supported raw attribute API.

@@ -872,7 +872,7 @@ function main(arguments::Vector{String}=ARGS)
         )
         JuMP.set_optimizer_attribute(
             model,
-            Mosek.MSK_IPAR_NUM_THREADS,
+            "MSK_IPAR_NUM_THREADS",
             options.threads,
         )
 
