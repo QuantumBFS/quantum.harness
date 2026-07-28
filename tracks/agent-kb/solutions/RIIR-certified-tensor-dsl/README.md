@@ -15,6 +15,7 @@
 | **Track** | `agent-kb`, chosen by the team because the issue's `Method` field is `Other` and the work is agent-native language and verification infrastructure. |
 | **Selected bar** | Mandatory Goal 1a and Goal 1b, plus Goal 2a. |
 | **Status** | Complete. |
+| **Source access** | [Public implementation repository](https://github.com/JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl) |
 
 ## Result
 
@@ -41,7 +42,10 @@ parity, proof, provider, and provenance gates pass.
 Challenge #82 defines Goal 2 as "choose one" and states that the single bar is
 Goal 1 plus one of Goal 2. This submission selects Goal 2a. Goal 2b derived
 automatic differentiation is the alternative Goal 2 path, not an additional
-requirement for this submission.
+requirement for this submission. The optional extension is specified in the
+public
+[`docs/goal-2b-todo.md`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl/blob/codex/goal-2a-u1-compilation/docs/goal-2b-todo.md)
+roadmap.
 
 ## Evidence
 
@@ -66,7 +70,7 @@ Goal 2b automatic differentiation.
 
 The implementation and
 [`v0.2.0` release](https://github.com/JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl/releases/tag/v0.2.0)
-are hosted in the private AGPL-3.0 repository
-`JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl`. The links above
-resolve for authorized reviewers. Organizers and reviewers can be granted
-direct access without changing the repository's private visibility.
+are hosted in the public AGPL-3.0 repository
+[`JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl`](https://github.com/JunkaiWang-TheoPhy/quantum-harness-82-certified-tensor-dsl).
+The source, locked reports, schemas, proof provenance, release assets, and
+reproduction instructions are available without an access grant.
