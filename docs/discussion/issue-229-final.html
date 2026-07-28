@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Issue #229 — finite-abelian symmetry reduction</title>
+<style>
+body{margin:0;background:#f8f8f5;color:#151515;font:15px/1.55 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:32px 22px 56px}h1{font-size:24px;margin-bottom:4px}h2{font-size:18px;margin-top:28px;border-bottom:1px solid #ddd;padding-bottom:5px}.meta,.note{color:#666}.kpis{display:flex;flex-wrap:wrap;gap:12px}.kpi{flex:1 1 180px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px}.value{font-size:26px;font-weight:650}.pass{color:#086b26}table{border-collapse:collapse;width:100%;background:#fff}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #ddd}th{color:#555}code{background:#eee;padding:1px 4px;border-radius:3px}svg{max-width:100%;height:auto;background:#fff;border:1px solid #ddd;border-radius:6px}.bar{fill:#2a78d6}.threshold{stroke:#777;stroke-width:1.5;stroke-dasharray:5 4}.axis{stroke:#aaa}.label{font:12px system-ui,sans-serif;fill:#444}.number{font:12px system-ui,sans-serif;font-weight:650;fill:#111}
+</style>
+</head>
+<body><main>
+<h1>Issue #229 — finite-abelian symmetry reduction</h1>
+<p class="meta">Final autoresearch result · 2026-07-28 · scope: Z₂ and finite product-cyclic groups</p>
+<div class="kpis">
+<div class="kpi"><div>Acceptance result</div><div class="value pass">PASS</div><div>30 development + 20 sealed</div></div>
+<div class="kpi"><div>Worst spectral error</div><div class="value">1.07×10⁻¹⁴</div><div>limit: 10⁻⁷ scaled</div></div>
+<div class="kpi"><div>Worst residual</div><div class="value">2.09×10⁻¹⁴</div><div>limit: 10⁻¹⁰</div></div>
+<div class="kpi"><div>Repository tests</div><div class="value pass">229</div><div>all passed</div></div>
+</div>
+<h2>Structural reduction</h2>
+<svg viewBox="0 0 760 290" role="img" aria-label="Cubic work proxy reduction by symmetry family">
+<line x1="70" y1="235" x2="720" y2="235" class="axis"/>
+<line x1="70" y1="40" x2="70" y2="235" class="axis"/>
+<line x1="70" y1="228" x2="720" y2="228" class="threshold"/><text x="710" y="222" text-anchor="end" class="label">Z₂ bar 3×</text>
+<line x1="70" y1="210" x2="720" y2="210" class="threshold"/><text x="710" y="204" text-anchor="end" class="label">product bar 10×</text>
+<rect x="175" y="225" width="150" height="10" class="bar"/><text x="250" y="218" text-anchor="middle" class="number">4×</text><text x="250" y="258" text-anchor="middle" class="label">Z₂ geometric mean</text>
+<rect x="455" y="134" width="150" height="101" class="bar"/><text x="530" y="127" text-anchor="middle" class="number">40.39×</text><text x="530" y="258" text-anchor="middle" class="label">product-cyclic geometric mean</text>
+<text x="20" y="145" transform="rotate(-90 20 145)" text-anchor="middle" class="label">D³ / Σₖdₖ³ (linear scale)</text>
+</svg>
+<p class="note">Development corpus: Z₂ min/mean/max = 4×/4×/4×; product-cyclic = 16×/40.39×/81×. The sealed corpus passed the same family-specific gates; only its aggregate result is retained.</p>
+<h2>What was implemented</h2>
+<ul>
+<li>Generic character projectors for G = ∏ᵢZₙᵢ from supplied unitary generators.</li>
+<li>Orthonormal populated-sector bases, reduced Hermitian blocks, and sector eigenvalues.</li>
+<li>An independent validator that reconstructs the dense matrix and checks projectors, basis orthonormality, blocks, commutators, minimum eigenvalue, and full spectrum.</li>
+<li>Deterministic 30/20 development/holdout corpus plus a runtime-only probe.</li>
+<li>Negative controls for lookup behavior, wrong answers, dense passthrough, timeout, and practical environment escape.</li>
+</ul>
+<h2>Acceptance evidence</h2>
+<table><thead><tr><th>Check</th><th>Required</th><th>Observed</th></tr></thead><tbody>
+<tr><td>Development corpus</td><td>30 cases + runtime probe</td><td class="pass">31/31 passed</td></tr>
+<tr><td>Sealed corpus</td><td>20 cases + runtime probe</td><td class="pass">21/21 passed</td></tr>
+<tr><td>Spectral equivalence</td><td>≤10⁻⁷(1+|reference|)</td><td>≤1.07×10⁻¹⁴ on development</td></tr>
+<tr><td>Certificate residual</td><td>≤10⁻¹⁰</td><td>≤2.09×10⁻¹⁴ on development</td></tr>
+<tr><td>Z₂ work proxy</td><td>≥3×</td><td>4×</td></tr>
+<tr><td>Product-cyclic work proxy</td><td>≥10×</td><td>16×–81×</td></tr>
+<tr><td>Negative controls</td><td>all rejected</td><td class="pass">5/5 rejected</td></tr>
+</tbody></table>
+<h2>Reproduce</h2>
+<p><code>.venv/bin/python research/validator/validate.py research/candidate --instances dev --out /tmp/issue229-dev-report.json</code></p>
+<p><code>PATH="$PWD/.venv/bin:$PATH" make test</code></p>
+<h2>Scope boundary</h2>
+<p>This establishes finite-abelian block reduction for invariant finite-dimensional Hermitian matrices. It is a validated linear-algebra precursor to moment-SDP symmetry reduction, not a complete NPA moment-SDP builder. Permutation symmetry and SU(2) are deferred.</p>
+</main></body></html>

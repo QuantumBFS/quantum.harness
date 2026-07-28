@@ -88,5 +88,8 @@ skills/autoresearch-db
 skills/autoresearch-run
 skills/autoresearch-topics
 
+# Sealed autoresearch holdout for issue #229
+research/benchmark/private/
+
 # idea-writer output (local working artifacts; deliverables flow through PRs/issues)
 /articles/
