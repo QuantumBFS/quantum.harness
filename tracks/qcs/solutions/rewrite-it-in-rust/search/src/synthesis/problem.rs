@@ -51,6 +51,34 @@ impl SynthesisProblem {
         dataset: &Dataset,
         limits: &SynthesisLimits,
     ) -> Result<Self, OccamError> {
+        let problem = Self::from_partial_dataset_with_limits(dataset, limits)?;
+        let row_count = 1usize
+            .checked_shl(dataset.input_width.try_into().map_err(|_| {
+                OccamError::ArithmeticOverflow {
+                    context: "complete truth-table row count",
+                }
+            })?)
+            .ok_or(OccamError::ArithmeticOverflow {
+                context: "complete truth-table row count",
+            })?;
+        require(
+            "synthesis truth-table rows",
+            row_count,
+            limits.max_truth_rows,
+        )?;
+        if problem.rows.len() != row_count {
+            return Err(OccamError::Validation(format!(
+                "synthesis requires a complete truth table with {row_count} rows, found {}",
+                problem.rows.len()
+            )));
+        }
+        Ok(problem)
+    }
+
+    pub fn from_partial_dataset_with_limits(
+        dataset: &Dataset,
+        limits: &SynthesisLimits,
+    ) -> Result<Self, OccamError> {
         require("synthesis inputs", dataset.input_width, limits.max_inputs)?;
         require(
             "synthesis outputs",
@@ -67,28 +95,18 @@ impl SynthesisProblem {
                 "synthesis requires at least one output".into(),
             ));
         }
-        let row_count = 1usize
-            .checked_shl(dataset.input_width.try_into().map_err(|_| {
-                OccamError::ArithmeticOverflow {
-                    context: "complete truth-table row count",
-                }
-            })?)
-            .ok_or(OccamError::ArithmeticOverflow {
-                context: "complete truth-table row count",
-            })?;
         require(
-            "synthesis truth-table rows",
-            row_count,
+            "synthesis constraint rows",
+            dataset.samples.len(),
             limits.max_truth_rows,
         )?;
-        if dataset.samples.len() != row_count {
-            return Err(OccamError::Validation(format!(
-                "synthesis requires a complete truth table with {row_count} rows, found {}",
-                dataset.samples.len()
-            )));
+        if dataset.samples.is_empty() {
+            return Err(OccamError::Validation(
+                "synthesis requires at least one constraint row".into(),
+            ));
         }
 
-        let mut rows = vec![None; row_count];
+        let mut rows = Vec::with_capacity(dataset.samples.len());
         for (sample_index, sample) in dataset.samples.iter().enumerate() {
             if sample.input.len() != dataset.input_width {
                 return Err(OccamError::Validation(format!(
@@ -110,38 +128,26 @@ impl SynthesisProblem {
                 .input
                 .iter()
                 .fold(0usize, |index, bit| (index << 1) | usize::from(*bit));
-            if let Some(previous) = &rows[assignment] {
-                let kind = if previous == &sample.expected {
+            rows.push((assignment, sample.input.clone(), sample.expected.clone()));
+        }
+        rows.sort_by_key(|row| row.0);
+        for pair in rows.windows(2) {
+            if pair[0].0 == pair[1].0 {
+                let kind = if pair[0].2 == pair[1].2 {
                     "duplicate"
                 } else {
                     "conflicting duplicate"
                 };
                 return Err(OccamError::Validation(format!(
-                    "{kind} synthesis input assignment at sample {}",
-                    sample_index + 1
+                    "{kind} synthesis input assignment {}",
+                    pair[0].0
                 )));
             }
-            rows[assignment] = Some(sample.expected.clone());
         }
-
         let rows = rows
             .into_iter()
-            .enumerate()
-            .map(|(assignment, expected)| {
-                let expected = expected.ok_or_else(|| {
-                    OccamError::Validation(format!(
-                        "synthesis truth table is missing input assignment {assignment}"
-                    ))
-                })?;
-                let input = (0..dataset.input_width)
-                    .map(|column| {
-                        let shift = dataset.input_width - column - 1;
-                        (assignment >> shift) & 1 == 1
-                    })
-                    .collect();
-                Ok(TruthRow { input, expected })
-            })
-            .collect::<Result<Vec<_>, OccamError>>()?;
+            .map(|(_, input, expected)| TruthRow { input, expected })
+            .collect();
 
         Ok(Self {
             input_width: dataset.input_width,
@@ -258,6 +264,19 @@ mod tests {
                 .to_string()
                 .contains("output width")
         );
+    }
+
+    #[test]
+    fn canonicalizes_partial_constraint_tables_for_cegis() {
+        let dataset = parse_dataset("input,output\n11,0\n01,1\n").unwrap();
+        let problem = SynthesisProblem::from_partial_dataset_with_limits(
+            &dataset,
+            &SynthesisLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(problem.rows.len(), 2);
+        assert_eq!(problem.rows[0].input, [false, true]);
+        assert_eq!(problem.rows[1].input, [true, true]);
     }
 
     #[test]

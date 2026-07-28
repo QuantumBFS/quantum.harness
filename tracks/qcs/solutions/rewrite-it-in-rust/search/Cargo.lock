@@ -304,9 +304,10 @@ dependencies = [
 
 [[package]]
 name = "occam71_rust"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "clap",
+ "libc",
  "proptest",
  "rand",
  "rand_chacha",

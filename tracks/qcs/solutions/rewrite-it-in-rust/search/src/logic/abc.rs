@@ -110,6 +110,76 @@ pub fn optimize_with_abc(
     Ok(AbcOptimizationResult { report, candidates })
 }
 
+pub(crate) fn synthesize_partial_with_abc(
+    pla: &str,
+    abc_binary: &Path,
+    genlib_path: &Path,
+    command_limits: &ExternalCommandLimits,
+    limits: &ResourceLimits,
+) -> Result<String, OccamError> {
+    let abc_binary = absolute_existing_path(abc_binary, "ABC executable")?;
+    let genlib_path = absolute_existing_path(genlib_path, "ABC GENLIB")?;
+    limits.require(
+        "partial PLA source bytes",
+        pla.len(),
+        limits.max_source_bytes,
+    )?;
+    let temporary = TemporaryDirectory::new("occam71-partial-abc")?;
+    fs::write(temporary.path.join("observed.pla"), pla).map_err(|source| {
+        OccamError::WriteFile {
+            path: temporary.path.join("observed.pla"),
+            source,
+        }
+    })?;
+    fs::copy(genlib_path, temporary.path.join("occam.genlib")).map_err(|source| {
+        OccamError::WriteFile {
+            path: temporary.path.join("occam.genlib"),
+            source,
+        }
+    })?;
+    let script = "\
+read_pla observed.pla
+espresso
+strash
+dc2
+read_library occam.genlib
+map -a
+write_blif hypothesis.blif
+quit
+";
+    fs::write(temporary.path.join("flow.abc"), script).map_err(|source| OccamError::WriteFile {
+        path: temporary.path.join("flow.abc"),
+        source,
+    })?;
+    let process = run_bounded_command(
+        &abc_binary,
+        &["-f", "flow.abc"],
+        &temporary.path,
+        command_limits,
+    )?;
+    if !process.success {
+        let detail = format!(
+            "{}\n{}",
+            String::from_utf8_lossy(&process.stdout),
+            String::from_utf8_lossy(&process.stderr)
+        );
+        return Err(OccamError::Validation(format!(
+            "partial ABC process failed: {}",
+            bounded_tail(&detail, 4_096)
+        )));
+    }
+    let mapped_source = read_bounded(
+        &temporary.path.join("hypothesis.blif"),
+        limits.max_source_bytes,
+    )?;
+    let mapped_text = std::str::from_utf8(&mapped_source)
+        .map_err(|error| OccamError::Validation(format!("mapped BLIF is not UTF-8: {error}")))?;
+    let mapped = parse_mapped_blif(mapped_text)?;
+    let netlist = mapped.into_official_netlist()?;
+    parse_netlist_with_limits(&netlist, limits)?;
+    Ok(netlist)
+}
+
 fn absolute_existing_path(path: &Path, label: &str) -> Result<PathBuf, OccamError> {
     fs::canonicalize(path).map_err(|error| {
         OccamError::Validation(format!(

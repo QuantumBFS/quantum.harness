@@ -9,17 +9,22 @@ use clap::{Parser, Subcommand, ValueEnum};
 use occam71_rust::{
     AbcOptimizationConfig, AbcPortfolioReport, ArithmeticOperation, BenchmarkBackend,
     DEFAULT_LIMITS, LearnRequest, MdlLearnRequest, MdlSearchConfig, OccamError, PeepholeConfig,
-    PeepholeOptimizationReport, SynthesisLimits, SynthesisProblem, SynthesisStatus, WindowConfig,
-    compare_circuits_exhaustively, generate_dataset, learn_instance, learn_mdl,
+    PeepholeOptimizationReport, SynthesisLimits, SynthesisProblem, SynthesisStatus, TrialKey,
+    WindowConfig, compare_circuits_exhaustively, generate_dataset, learn_instance, learn_mdl,
     load_written_instance, optimize_peepholes, optimize_with_abc, pack_dataset, parse_dataset,
-    parse_netlist, parse_packed_dataset, ripple_carry_adder, run_benchmark, run_experiment,
-    sha256_hex, shift_add_multiplier, synthesize_minimal, verify, verify_prepacked,
-    write_instance_artifacts, write_manifest,
+    parse_netlist, parse_packed_dataset, render_semantic_jsonl, ripple_carry_adder, run_benchmark,
+    run_isolated_experiment, run_measured_trial, sha256_hex, shift_add_multiplier,
+    synthesize_minimal, verify, verify_prepacked, write_instance_artifacts, write_manifest,
+    write_semantic_jsonl,
 };
 use serde::Serialize;
 
 #[derive(Debug, Parser)]
-#[command(name = "occam71-rust", about = "Rust verifier for #71 Occam's Circuit")]
+#[command(
+    name = "occam71-rust",
+    version,
+    about = "Rust verifier for #71 Occam's Circuit"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -138,18 +143,35 @@ enum Command {
         #[arg(long, default_value_t = false)]
         abc_only: bool,
     },
-    /// Run the complete deterministic Occam generalization matrix.
-    ExperimentRun {
+    /// Run exactly one measured Occam research trial.
+    ExperimentTrial {
         #[arg(long)]
         config: PathBuf,
         #[arg(long)]
         tasks: PathBuf,
         #[arg(long)]
-        raw: PathBuf,
+        key_json: String,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long)]
+        abc: Option<PathBuf>,
+    },
+    /// Run the complete isolated Occam generalization matrix.
+    ExperimentRun {
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        tasks: PathBuf,
+        #[arg(long = "raw-measured", alias = "raw")]
+        raw_measured: PathBuf,
+        #[arg(long)]
+        semantic: Option<PathBuf>,
+        #[arg(long)]
+        abc: Option<PathBuf>,
         #[arg(long, value_parser = parse_positive_usize, default_value_t = 1)]
         jobs: usize,
-        #[arg(long, default_value_t = false)]
-        check: bool,
+        #[arg(long = "check-semantic", alias = "check", default_value_t = false)]
+        check_semantic: bool,
     },
     /// Recompute and write the aggregate A-D solution manifest.
     WriteManifest {
@@ -620,48 +642,68 @@ fn run() -> Result<(), OccamError> {
                 &report,
             );
         }
+        Command::ExperimentTrial {
+            config,
+            tasks,
+            key_json,
+            output,
+            abc,
+        } => {
+            let key: TrialKey = serde_json::from_str(&key_json).map_err(|error| {
+                OccamError::Validation(format!("invalid trial key JSON: {error}"))
+            })?;
+            let record = run_measured_trial(&config, &tasks, key, &output, abc)?;
+            println!("status:           {:?}", record.status);
+            println!("runtime micros:   {}", record.runtime_micros);
+            println!("peak RSS bytes:   {}", record.peak_rss_bytes);
+            println!("record:           {}", output.display());
+        }
         Command::ExperimentRun {
             config,
             tasks,
-            raw,
+            raw_measured,
+            semantic,
+            abc,
             jobs,
-            check,
+            check_semantic,
         } => {
-            let task_source = read(&tasks)?;
-            let compiled_tasks = include_str!("../../research/tasks.json");
-            if serde_json::from_str::<serde_json::Value>(&task_source).map_err(|error| {
-                OccamError::Validation(format!("invalid task manifest JSON: {error}"))
-            })? != serde_json::from_str::<serde_json::Value>(compiled_tasks).unwrap()
-            {
+            if check_semantic && semantic.is_none() {
                 return Err(OccamError::Validation(
-                    "task manifest differs from the compiled evaluator-only definitions".into(),
+                    "--check-semantic requires --semantic".into(),
                 ));
             }
-            if check {
-                let temporary = raw.with_extension(format!("jsonl.{}.check", std::process::id()));
-                run_experiment(&config, &temporary)?;
-                let expected = fs::read(&raw).map_err(|source| OccamError::ReadFile {
-                    path: raw.clone(),
-                    source,
-                })?;
-                let actual = fs::read(&temporary).map_err(|source| OccamError::ReadFile {
-                    path: temporary.clone(),
-                    source,
-                })?;
-                let _ = fs::remove_file(&temporary);
-                if actual != expected {
-                    return Err(OccamError::Validation(
-                        "regenerated experiment raw JSONL differs".into(),
-                    ));
+            let executable = std::env::current_exe().map_err(|error| {
+                OccamError::Validation(format!("cannot resolve current executable: {error}"))
+            })?;
+            let records = run_isolated_experiment(
+                &executable,
+                &config,
+                &tasks,
+                &raw_measured,
+                abc.as_deref(),
+                jobs,
+            )?;
+            println!("trials:           {}", records.len());
+            println!("jobs requested:   {jobs}");
+            println!("raw measured:     {}", raw_measured.display());
+            if let Some(semantic) = semantic {
+                if check_semantic {
+                    let expected =
+                        fs::read_to_string(&semantic).map_err(|source| OccamError::ReadFile {
+                            path: semantic.clone(),
+                            source,
+                        })?;
+                    let actual = render_semantic_jsonl(&records)?;
+                    if actual != expected {
+                        return Err(OccamError::Validation(
+                            "regenerated semantic JSONL differs".into(),
+                        ));
+                    }
+                    println!("status:           semantic projection reproducible");
+                } else {
+                    write_semantic_jsonl(&semantic, &records)?;
                 }
-                println!("trials:           20480");
-                println!("jobs requested:   {jobs}");
-                println!("status:           reproducible");
-            } else {
-                run_experiment(&config, &raw)?;
-                println!("trials:           20480");
-                println!("jobs requested:   {jobs}");
-                println!("raw:              {}", raw.display());
+                println!("semantic target:  {}", semantic.display());
             }
         }
         Command::WriteManifest { output_dir } => {

@@ -400,7 +400,7 @@ fn validate_problem(
     limits: &SynthesisLimits,
 ) -> Result<(), OccamError> {
     let dataset = problem_dataset(problem);
-    let canonical = SynthesisProblem::from_dataset_with_limits(&dataset, limits)?;
+    let canonical = SynthesisProblem::from_partial_dataset_with_limits(&dataset, limits)?;
     if &canonical != problem {
         return Err(OccamError::Validation(
             "SynthesisProblem rows are not in canonical input order".into(),

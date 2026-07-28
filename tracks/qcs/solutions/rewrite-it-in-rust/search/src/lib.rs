@@ -65,9 +65,15 @@ pub use reference::{
     shift_add_multiplier_with_limits, synthesize_family, synthesize_family_with_limits,
 };
 pub use research::{
-    ExperimentConfig, ObservedTask, OracleTask, ResearchMethod, Split, TaskClass, TaskManifest,
-    TrialKey, TrialRecord, TrialStatus, expected_trial_keys, load_experiment_config,
-    official_and_synthetic_tasks, render_dataset, run_experiment, run_trial, split_task,
+    AbcDontCareLearner, BddOrder, BddResult, EvolutionConfig, EvolutionResult, EvolutionTraceEntry,
+    ExperimentConfig, GrammarEvolutionLearner, LearnedHypothesis, LearnerFailure,
+    MemorizationLearner, ObservedTask, OracleTask, ResearchLearner, ResearchMethod, ResearchTools,
+    RobddLearner, SEMANTIC_PROJECTION_EXCLUDED_FIELDS, SatCegisLearner, SemanticTrialRecord, Split,
+    TaskClass, TaskManifest, TrialBudget, TrialKey, TrialRecord, TrialStatus, build_robdd,
+    default_adapters, evolve, evolve_with_budget, expected_trial_keys, load_experiment_config,
+    official_and_synthetic_tasks, peak_rss_bytes, render_dataset, render_partial_pla,
+    render_semantic_jsonl, run_experiment, run_isolated_experiment, run_measured_trial, run_trial,
+    run_trial_with_tools, semantic_projection, split_task, write_semantic_jsonl,
 };
 pub use scalar::{evaluate, evaluate_with_limits};
 pub use synthesis::{

@@ -17,6 +17,18 @@ pub enum ResearchMethod {
     OracleExpression,
 }
 
+impl ResearchMethod {
+    pub const AUTOMATIC: [Self; 7] = [
+        Self::LegacyRegistry,
+        Self::MdlEnumerator,
+        Self::AbcDontCare,
+        Self::Robdd,
+        Self::SatCegis,
+        Self::GrammarEvolution,
+        Self::Memorization,
+    ];
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExperimentConfig {
@@ -67,6 +79,12 @@ pub struct TrialRecord {
     pub minimum_unique: Option<bool>,
     pub runtime_micros: u64,
     pub peak_rss_bytes: u64,
+    #[serde(default)]
+    pub host_identifier: String,
+    #[serde(default)]
+    pub process_id: u32,
+    #[serde(default)]
+    pub started_unix_micros: u64,
     pub hypothesis_sha256: Option<String>,
     pub detail: String,
 }
@@ -114,14 +132,15 @@ pub fn expected_trial_keys(
 }
 
 fn validate_config(config: &ExperimentConfig) -> Result<(), OccamError> {
+    let dimensions_are_supported = (config.fractions.len() == 8 && config.seeds.len() == 20)
+        || (config.fractions.len() == 1 && config.seeds.len() == 1);
     if config.schema_version != 1
-        || config.fractions.len() != 8
-        || config.seeds.len() != 20
+        || !dimensions_are_supported
         || config.methods.len() != 8
         || config.trial_timeout_millis == 0
     {
         return Err(OccamError::Validation(
-            "experiment config does not match the fixed protocol".into(),
+            "experiment config does not match the full or smoke protocol".into(),
         ));
     }
     if config
