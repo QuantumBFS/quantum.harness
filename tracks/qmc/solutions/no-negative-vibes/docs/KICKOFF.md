@@ -13,12 +13,15 @@
   [AZ_TENFOLD_RESULTS.md](AZ_TENFOLD_RESULTS.md)。
 - Majorana 直接 Spin-trace oracle 和 70 万个双锥权重已完成；共同 `J1` 不足以保护符号，
   并有深度二精确负分支，详见 [MAJORANA_CONE_RESULTS.md](MAJORANA_CONE_RESULTS.md)。
+- 任意小夹角完整双锥并集也已被两层公式
+  `p=-4 sin(theta)sinh(q)^2<0` 解析关闭，详见
+  [小角解析反例](SMALL_ANGLE_COUNTEREXAMPLE.md)。
 
 ## 仍然开放，必须由团队讨论
 
 - 主攻哪个候选矩阵类，备选哪个；
 - 第一套物理 Hamiltonian 和 Hubbard–Stratonovich 分解；
-- 小角 Majorana 解析/约束优化还是物理 HS 反向映射作为主线；
+- 物理可达受限子集还是公共收缩度量作为主线；
 - 下一个不约化到已知收缩半群的候选生成器；
 - 第一轮扩展扫描预算；
 - 最终由谁负责证明、代码、物理映射和写作。
@@ -28,7 +31,7 @@
 1. 全员读 [START_HERE](../START_HERE.md)、[基线结果](BASELINE_RESULTS.md) 和
    [文献空白](LITERATURE_GAP_2026.md)。
 2. 读 [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)，不要重复已关闭的共同 `J1` 并集命题。
-3. 用 [候选评估卡](CANDIDATE_CARD.md) 比较小角解析/优化与一个具体 Hamiltonian/HS 映射。
+3. 用 [候选评估卡](CANDIDATE_CARD.md) 比较物理可达受限子集与一个公共收缩度量候选。
 4. 选一个主候选和一个备选；复用现有 oracle，按精确测试 → 新生成器 → 小扫描推进。
 
 ## 两到三人的并行分工
@@ -54,4 +57,4 @@
 - 分工分支使用 `candidate/<name>`、`oracle/<task>` 或 `physics/<model>`。
 - 不改主办方 harness 的 skill、公共脚本或其他队伍目录。
 - 合并前保证测试命令、随机种子和输出路径写进提交说明。
-- 当前本地准备提交尚未推送；对外推送和 PR 由团队确认后进行。
+- 当前协作分支是 `challenge/qmc-sign-free-hunter`；提交前检查远端和测试状态。

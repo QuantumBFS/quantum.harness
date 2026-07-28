@@ -305,3 +305,47 @@ def shared_reality_rotation(block_size: int, *, angle: float) -> np.ndarray:
         ]
     )
     return hadamard @ eigenbasis_rotation @ hadamard.T
+
+
+def small_angle_negative_pair(
+    *,
+    angle: float,
+    q: float = 1.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the analytic two-layer counterexample for any 0 < angle < pi.
+
+    Both four-Majorana generators lie in reflection-positive cones that share
+    the canonical J1.  The second cone is obtained by rotating J2 through
+    ``angle``.  Their exact Fock trace is
+
+        -4 sin(angle) sinh(q)^2.
+
+    The construction sits on rank-one boundaries of the two cones.  ``q`` must
+    be positive; the sign claim additionally requires 0 < angle < pi.
+    """
+    if not math.isfinite(angle):
+        raise ValueError("angle must be finite")
+    if not math.isfinite(q) or q <= 0.0:
+        raise ValueError("q must be finite and positive")
+
+    block_c = q * np.array(
+        [[1.0, 1j], [-1j, 1.0]],
+        dtype=complex,
+    )
+
+    def generator(block_b_12: complex) -> np.ndarray:
+        block_b = np.array(
+            [[0.0, block_b_12], [-block_b_12, 0.0]],
+            dtype=complex,
+        )
+        return np.block(
+            [
+                [block_b, 1j * block_c],
+                [-1j * block_c.T, block_b.conj()],
+            ]
+        )
+
+    first = generator(math.pi - 1j * q)
+    second = generator(1j * q)
+    rotation = shared_reality_rotation(2, angle=angle)
+    return first, rotation @ second @ rotation.T

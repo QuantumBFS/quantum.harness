@@ -6,7 +6,13 @@ from pathlib import Path
 import numpy as np
 import sympy as sp
 
-from oracle.majorana import spin_trace_weight
+from oracle.majorana import (
+    canonical_reflection_structures,
+    reflection_structure_residual,
+    shared_reality_rotation,
+    small_angle_negative_pair,
+    spin_trace_weight,
+)
 
 
 FIXTURE = (
@@ -105,3 +111,57 @@ def test_float_majorana_oracle_matches_exact_trace_certificate() -> None:
     assert result.classification == case["expected_sign"]
     assert np.allclose(result.value, expected, rtol=1e-12, atol=1e-12)
     assert result.square_identity_residual < 1e-12
+
+
+def test_small_angle_family_has_exact_negative_trace_formula() -> None:
+    case = json.loads(FIXTURE.read_text())["cases"][1]
+    q, theta = sp.symbols("q theta", positive=True, real=True)
+    cosine = sp.cos(theta / 2)
+    sine = sp.sin(theta / 2)
+
+    # On the rank-one cone boundary, each odd-parity exponential is lower
+    # triangular with off-diagonal magnitude 2*sinh(q).  The even sector
+    # contributes -2, while the rotated odd sector gives the expression below.
+    odd_trace = 2 * (cosine**2 + sine**2) - (
+        8 * cosine * sine * sp.sinh(q) ** 2
+    )
+    derived_weight = sp.trigsimp(-2 + odd_trace)
+    expected_weight = sp.sympify(
+        case["expected_trace_weight"],
+        locals={"q": q, "theta": theta},
+    )
+
+    assert sp.trigsimp(derived_weight - expected_weight) == 0
+
+
+def test_small_angle_family_obeys_its_two_cone_constraints() -> None:
+    angle = 0.137
+    first, second = small_angle_negative_pair(angle=angle)
+    j1, j2 = canonical_reflection_structures(2)
+    rotation = shared_reality_rotation(2, angle=angle)
+    rotated_j2 = rotation @ j2 @ rotation.T
+
+    assert reflection_structure_residual(
+        first,
+        j1=j1,
+        j2=j2,
+        require_cone=True,
+    ) < 1e-12
+    assert reflection_structure_residual(
+        second,
+        j1=j1,
+        j2=rotated_j2,
+        require_cone=True,
+    ) < 1e-12
+
+
+def test_float_oracle_matches_small_angle_negative_family() -> None:
+    q = 0.7
+    for angle in [1e-6, 1e-3, 0.1, 1.0, 3.0]:
+        generators = small_angle_negative_pair(angle=angle, q=q)
+        result = spin_trace_weight(list(generators))
+        expected = -4.0 * np.sin(angle) * np.sinh(q) ** 2
+
+        assert result.classification == "negative"
+        assert np.allclose(result.value, expected, rtol=1e-9, atol=1e-12)
+        assert result.square_identity_residual < 1e-9

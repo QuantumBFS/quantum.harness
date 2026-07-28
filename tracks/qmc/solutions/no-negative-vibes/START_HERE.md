@@ -10,7 +10,7 @@
 - 已完成题目拆解、主要已知定理和新颖性边界的调研。
 - determinant oracle、Majorana 直接 Fock/Spin 迹 oracle、25 个基线结构生成器、可恢复参数
   扫描和汇总绘图已经实现并通过自动测试。
-- 17 组正、负、零或复相位证书已保存为机器可读的精确符号数据，并通过 SymPy 验证。
+- 18 组正、负、零或复相位证书已保存为机器可读的精确符号数据，并通过 SymPy 验证。
 - `classical-groups-v1` 已完成 900 个参数格点、90 万个矩阵乘积，运行记录无缺失。
 - `az-tenfold-hermitian-v1` 已完成 720 个格点、72 万个乘积；六个失败类均从深度 3 开始，
   并已得到五组 Hermitian 正定三因子精确证书。
@@ -22,19 +22,22 @@
   AII/DIII/CII 约化到 Kramers，其余六类有精确负权或复权。
 - 已完成 448,000 个“共享 `J1`、旋转 `J2`”Majorana 双锥权重和 252,000 个小角压力样本：
   共同实结构只保证实权，不能保证非负；相反锥已有 `p=2-2*cosh(1)<0` 的深度二精确证书。
-- 下一步不是重复普通 AZ 或双锥宽扫，而是转向小角解析/约束优化、其他非平凡锥交集和具体
+- 已找到任意小非零夹角的两层解析反例
+  `p(theta,q)=-4*sin(theta)*sinh(q)^2<0`，完整旋转双锥并集方向已关闭。
+- 下一步不是重复普通 AZ 或双锥宽扫，而是转向物理可达受限子集、公共收缩度量和具体
   DQMC 映射。
 
 ## 阅读顺序
 
 1. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：先理解问题、术语和我们为什么这样做。
-2. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和小角边界。
-3. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-4. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-5. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-6. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-7. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
-8. [明日开工板](docs/KICKOFF.md)：组队后直接照此确定主候选、分工和第一轮交付。
+2. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：先看本轮最重要的新结果和直观。
+3. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
+4. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+5. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+6. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+7. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+8. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+9. [明日开工板](docs/KICKOFF.md)：组队后直接照此确定主候选、分工和第一轮交付。
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
@@ -67,8 +70,8 @@ cd /home/volper/harness_quantum/signfree-qmc
 普通经典群、标准 Hermitian AZ 表和普通 Majorana 双锥宽扫都已经跑完，不需要重复。下一步
 应满足至少一个条件：
 
-1. 解析或约束优化小角 Majorana 双锥，判断是否存在角度/范数联合界；
-2. 是不约化到同一已知收缩半群的其他对称约束与半正定锥交集；
-3. 直接来自一个明确的 Hamiltonian 和 HS 分解。
+1. 从明确 Hamiltonian 与 HS 分解反推可达子集，检查是否避开秩一零权边界；
+2. 寻找不约化到同一已知收缩半群、但共享更强收缩度量的受限锥交集；
+3. 推导角度、范数、层数和离边界距离共同控制的定量界。
 
 对新候选仍按小维度反例搜索 → 精确证书 → 已知类约化 → 扩大扫描 → 证明 → 物理映射推进。

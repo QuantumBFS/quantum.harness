@@ -18,6 +18,7 @@
 随后按任务使用：
 
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
+- [SMALL_ANGLE_COUNTEREXAMPLE.md](SMALL_ANGLE_COUNTEREXAMPLE.md)：任意小夹角两层负权的直观与解析推导；
 - [MAJORANA_CONE_RESULTS.md](MAJORANA_CONE_RESULTS.md)：直接 Spin 迹、双锥反例和小角压力测试；
 - [AZ_TENFOLD_RESULTS.md](AZ_TENFOLD_RESULTS.md)：72 万次 AZ 扫描、深度三证书和已知类约化；
 - [BASELINE_RESULTS.md](BASELINE_RESULTS.md)：90 万次基线扫描、淘汰表和证据边界；
@@ -36,6 +37,7 @@
 2. 候选矩阵类和物理 DQMC 映射；
 3. 文献排重、已知类约化与精确证明。
 
-精确测试数据的唯一机器可读源是 `fixtures/exact_certificates.json`；扫描事实的唯一
+精确测试数据的机器可读源是 `fixtures/exact_certificates.json` 和
+`fixtures/majorana_trace_certificates.json`；扫描事实的唯一
 机器可读源是结果目录中的 `run.json`、`parameter-scan.csv` 和逐格 manifest。文档负责解释，
 不替代原始数据。
