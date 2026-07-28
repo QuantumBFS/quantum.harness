@@ -1,6 +1,6 @@
 # Challenge #15 Scalable NQS v1 Design
 
-> Status: approved; Step 1 implementation plan ready
+> Status: approved; Step 1 protocol/evaluator implemented
 >
 > Date: 2026-07-28
 >
