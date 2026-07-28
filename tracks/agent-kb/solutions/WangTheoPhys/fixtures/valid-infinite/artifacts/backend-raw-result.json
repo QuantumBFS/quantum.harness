@@ -1,0 +1,90 @@
+{
+  "schema_version": "tn-agent.tenpy.raw-result.v1",
+  "request_digest": "sha256:e8a0eed66378a47b078a99227b308775c34312b561efbb0988fd6e8beff4c064",
+  "plan_id": "sha256:583e130a0daa654eeecfe215f84196d37cb1792480d811dfc42f11b1cb25df60",
+  "capability_id": "tenpy.infinite_1d.vumps",
+  "backend_id": "tenpy",
+  "backend_version": "1.1.0",
+  "adapter_id": "tenpy.v1",
+  "adapter_version": "1.0.0",
+  "status": "succeeded",
+  "environment": {
+    "schema_version": "tn-agent.tenpy.environment.v1",
+    "environment_digest": "sha256:33f97f66d496d52d7a68f6a05160f07f90b1d928cea8481f892db7dac132a756",
+    "runtime_id": "python",
+    "runtime_version": "3.12.4",
+    "dependencies": {
+      "numpy": "2.0.1",
+      "tenpy": "1.1.0"
+    }
+  },
+  "observables": {
+    "energy": {
+      "status": "measured",
+      "value": -0.4431,
+      "units": "J",
+      "normalization": "per-site",
+      "reason": null
+    },
+    "variance": {
+      "status": "backend_limited",
+      "value": null,
+      "units": "J^2",
+      "normalization": "per-site",
+      "reason": "TeNPy 1.1.0 does not expose UniformMPS energy variance"
+    },
+    "entanglement_entropy": {
+      "status": "measured",
+      "value": [
+        0.612,
+        0.731
+      ],
+      "units": "dimensionless",
+      "normalization": "bond",
+      "reason": null
+    },
+    "transfer_spectrum": {
+      "status": "measured",
+      "value": [
+        1.0,
+        0.721,
+        0.519,
+        0.374
+      ],
+      "units": "dimensionless",
+      "normalization": "spectrum",
+      "reason": null
+    },
+    "central_charge_fit": {
+      "status": "derived",
+      "value": 0.501,
+      "units": "dimensionless",
+      "normalization": "fit",
+      "reason": null
+    }
+  },
+  "convergence": [
+    {
+      "step": 1,
+      "metrics": {
+        "energy": -0.443
+      }
+    },
+    {
+      "step": 2,
+      "metrics": {
+        "energy": -0.4431,
+        "canonical_residual": 0.001,
+        "symmetry_residual": 1e-10
+      }
+    }
+  ],
+  "warnings": [
+    "variance is backend-limited on the infinite route"
+  ],
+  "known_limitations": [
+    "TeNPy UniformMPS is experimental.",
+    "Energy variance is backend-limited on this route.",
+    "The fixture does not count as a generated challenge problem."
+  ]
+}

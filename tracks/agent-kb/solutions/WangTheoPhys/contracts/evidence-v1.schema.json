@@ -1,0 +1,603 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/contracts/evidence-v1.schema.json",
+  "title": "WangTheoPhys Tensor-Network Evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment_digest",
+    "binding",
+    "execution",
+    "repeat_execution",
+    "artifacts",
+    "observables",
+    "validator_results",
+    "provenance",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wangtheophys.tn-evidence.v1"
+    },
+    "experiment_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "binding": {
+      "$ref": "#/$defs/binding"
+    },
+    "execution": {
+      "$ref": "#/$defs/execution"
+    },
+    "repeat_execution": {
+      "$ref": "#/$defs/execution"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "observables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/observable"
+      }
+    },
+    "validator_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/validator_result"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "result_digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_request"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_result"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_raw_result"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "validator_evidence"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_stdout"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_stderr"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_repeat_raw_result"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_repeat_result"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "energy_reference"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_repeat_stdout"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "artifacts": {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "backend_repeat_stderr"
+              }
+            },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonempty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_id",
+        "adapter_id",
+        "backend_id",
+        "request_schema",
+        "result_schema"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.backend-binding.v1"
+        },
+        "capability_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "backend_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_schema": {
+          "$ref": "#/$defs/identifier"
+        },
+        "result_schema": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "return_code",
+        "execution_handle",
+        "retryable",
+        "stdout_digest",
+        "stderr_digest",
+        "stdout_truncated",
+        "stderr_truncated"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.execution-evidence.v1"
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "timed_out",
+            "cancelled",
+            "not_executed"
+          ]
+        },
+        "return_code": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "execution_handle": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "stdout_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "stderr_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "stdout_truncated": {
+          "type": "boolean"
+        },
+        "stderr_truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "role": {
+              "const": "backend_request"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_raw_result"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_result"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "validator_evidence"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_stdout"
+            },
+            "media_type": {
+              "const": "text/plain"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_stderr"
+            },
+            "media_type": {
+              "const": "text/plain"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_repeat_raw_result"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_repeat_result"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "energy_reference"
+            },
+            "media_type": {
+              "const": "application/json"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_repeat_stdout"
+            },
+            "media_type": {
+              "const": "text/plain"
+            }
+          },
+          "required": ["role", "media_type"]
+        },
+        {
+          "properties": {
+            "role": {
+              "const": "backend_repeat_stderr"
+            },
+            "media_type": {
+              "const": "text/plain"
+            }
+          },
+          "required": ["role", "media_type"]
+        }
+      ],
+      "required": [
+        "relative_path",
+        "digest",
+        "size_bytes",
+        "media_type",
+        "role"
+      ],
+      "properties": {
+        "relative_path": {
+          "type": "string",
+          "pattern": "^(?!.*[\\u0000-\\u001F\\u007F])(?!/)(?![A-Za-z]:)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\\\)(?!.*\\/$).+$"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        },
+        "media_type": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "role": {
+          "enum": [
+            "backend_request",
+            "backend_result",
+            "backend_raw_result",
+            "backend_repeat_result",
+            "backend_repeat_raw_result",
+            "energy_reference",
+            "validator_evidence",
+            "backend_stdout",
+            "backend_stderr",
+            "backend_repeat_stdout",
+            "backend_repeat_stderr"
+          ]
+        }
+      }
+    },
+    "observable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "status",
+        "evidence_digest"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": [
+            "measured",
+            "derived",
+            "backend_limited"
+          ]
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "validator_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "reason_code",
+        "metric_value",
+        "evidence_digest"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "reported_only",
+            "backend_limited"
+          ]
+        },
+        "reason_code": {
+          "$ref": "#/$defs/identifier"
+        },
+        "metric_value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "request_digest",
+        "backend_result_digest",
+        "repeat_backend_result_digest",
+        "generated_by",
+        "generated_at"
+      ],
+      "properties": {
+        "plan_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "backend_result_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "repeat_backend_result_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "generated_by": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

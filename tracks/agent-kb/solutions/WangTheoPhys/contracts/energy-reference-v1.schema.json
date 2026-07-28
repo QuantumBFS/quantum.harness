@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/contracts/energy-reference-v1.schema.json",
+  "title": "WangTheoPhys Preregistered Energy Reference v1",
+  "description": "A preregistered energy anchor with exact physics and semantic identities. The gate verifies the record; it does not rerun the cited reference method.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "reference_id",
+    "capability_id",
+    "physics_digest",
+    "observable",
+    "value",
+    "units",
+    "normalization",
+    "method",
+    "citation",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wangtheophys.tn-energy-reference.v1"
+    },
+    "reference_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "capability_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "physics_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "observable": {
+      "const": "energy"
+    },
+    "value": {
+      "type": "number"
+    },
+    "units": {
+      "const": "J"
+    },
+    "normalization": {
+      "enum": [
+        "total",
+        "per-site"
+      ]
+    },
+    "method": {
+      "$ref": "#/$defs/identifier"
+    },
+    "citation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

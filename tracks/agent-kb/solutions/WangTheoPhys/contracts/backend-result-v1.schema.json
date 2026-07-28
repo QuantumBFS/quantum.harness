@@ -1,0 +1,463 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/contracts/backend-result-v1.schema.json",
+  "title": "tn-agent BackendResultBundleV1",
+  "description": "Public JSON form of tn_agent.backends.models.BackendResultBundleV1. The semantic result_digest is the canonical SHA-256 of every field except result_digest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_digest",
+    "binding",
+    "backend",
+    "environment",
+    "execution",
+    "observables",
+    "convergence",
+    "diagnostics",
+    "provenance",
+    "artifacts",
+    "warnings",
+    "known_limitations",
+    "backend_limited_fields",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "tn-agent.backend-result.v1"
+    },
+    "request_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "binding": {
+      "$ref": "#/$defs/binding"
+    },
+    "backend": {
+      "$ref": "#/$defs/backend"
+    },
+    "environment": {
+      "$ref": "#/$defs/environment"
+    },
+    "execution": {
+      "$ref": "#/$defs/execution"
+    },
+    "observables": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 4096,
+      "propertyNames": {
+        "$ref": "#/$defs/identifier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/observable"
+      }
+    },
+    "convergence": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/convergence_point"
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/result_artifact"
+      }
+    },
+    "warnings": {
+      "$ref": "#/$defs/string_array"
+    },
+    "known_limitations": {
+      "$ref": "#/$defs/string_array"
+    },
+    "backend_limited_fields": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "result_digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonempty": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "nullable_nonempty": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nonempty"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "string_array": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/nonempty"
+      }
+    },
+    "json_value": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/json_value"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/json_value"
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_id",
+        "adapter_id",
+        "backend_id",
+        "request_schema",
+        "result_schema"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.backend-binding.v1"
+        },
+        "capability_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "backend_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_schema": {
+          "type": "string",
+          "pattern": "^tn-agent\\.[a-z0-9.-]+\\.v1$"
+        },
+        "result_schema": {
+          "const": "tn-agent.backend-result.v1"
+        }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "backend_id",
+        "backend_version",
+        "adapter_id",
+        "adapter_version"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.backend-identity.v1"
+        },
+        "backend_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "backend_version": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "adapter_version": {
+          "$ref": "#/$defs/nonempty"
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "environment_digest",
+        "runtime_id",
+        "runtime_version",
+        "dependencies"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.environment-identity.v1"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "runtime_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "runtime_version": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "dependencies": {
+          "type": "object",
+          "maxProperties": 4096,
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "return_code",
+        "execution_handle",
+        "retryable",
+        "stdout_digest",
+        "stderr_digest",
+        "stdout_truncated",
+        "stderr_truncated"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.execution-evidence.v1"
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "timed_out",
+            "cancelled",
+            "not_executed"
+          ]
+        },
+        "return_code": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "execution_handle": {
+          "$ref": "#/$defs/nullable_nonempty"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "stdout_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "stderr_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "stdout_truncated": {
+          "type": "boolean"
+        },
+        "stderr_truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "observable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "name",
+        "status",
+        "value",
+        "units",
+        "normalization",
+        "reason"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.observable-evidence.v1"
+        },
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": [
+            "measured",
+            "derived",
+            "unavailable",
+            "backend_limited"
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/json_value"
+        },
+        "units": {
+          "$ref": "#/$defs/nullable_nonempty"
+        },
+        "normalization": {
+          "$ref": "#/$defs/nullable_nonempty"
+        },
+        "reason": {
+          "$ref": "#/$defs/nullable_nonempty"
+        }
+      }
+    },
+    "convergence_point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "step",
+        "metrics"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.convergence-point.v1"
+        },
+        "step": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metrics": {
+          "type": "object",
+          "maxProperties": 4096,
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "code",
+        "severity",
+        "message",
+        "field"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.diagnostic.v1"
+        },
+        "code": {
+          "$ref": "#/$defs/identifier"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "message": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "field": {
+          "$ref": "#/$defs/nullable_nonempty"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "plan_id",
+        "capability_id",
+        "adapter_id",
+        "raw_result_relative"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.provenance-evidence.v1"
+        },
+        "plan_id": {
+          "$ref": "#/$defs/digest"
+        },
+        "capability_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "adapter_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "raw_result_relative": {
+          "type": "string"
+        }
+      }
+    },
+    "result_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "relative_path",
+        "digest",
+        "media_type",
+        "size_bytes"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.result-artifact.v1"
+        },
+        "relative_path": {
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "media_type": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

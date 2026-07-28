@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/library/heuristic-v1.schema.json",
+  "title": "WangTheoPhys Accumulating Heuristic v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "heuristic_id",
+    "revision",
+    "recorded_at",
+    "applies_to",
+    "claim",
+    "action",
+    "source",
+    "evidence",
+    "confidence",
+    "contradicts",
+    "supersedes",
+    "claim_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wangtheophys.tn-heuristic.v1"
+    },
+    "record_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "heuristic_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "applies_to": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "claim": {
+      "$ref": "#/$defs/nonempty"
+    },
+    "action": {
+      "$ref": "#/$defs/nonempty"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "confidence": {
+      "$ref": "#/$defs/confidence"
+    },
+    "contradicts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "supersedes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "claim_status": {
+      "enum": [
+        "working",
+        "retired"
+      ]
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonempty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "uri",
+        "sha256",
+        "citation"
+      ],
+      "properties": {
+        "kind": {
+          "const": "repository_skill"
+        },
+        "uri": {
+          "type": "string",
+          "pattern": "^skills/[a-z0-9][a-z0-9-]{0,63}/SKILL[.]md$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/digest"
+        },
+        "citation": {
+          "$ref": "#/$defs/nonempty"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "summary",
+        "uri",
+        "sha256"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "method_card",
+            "workflow_card",
+            "contract_audit"
+          ]
+        },
+        "summary": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "uri": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "sha256": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "method_card",
+                  "workflow_card"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "uri": {
+                "pattern": "^skills/[a-z0-9][a-z0-9-]{0,63}/SKILL[.]md$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "contract_audit"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "uri": {
+                "pattern": "^(?:docs|tests)/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9._-]+$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "score",
+        "basis"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "$ref": "#/$defs/nonempty"
+        }
+      }
+    }
+  }
+}

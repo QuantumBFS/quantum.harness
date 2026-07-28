@@ -1,0 +1,888 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/QuantumBFS/quantum.harness/blob/main/tracks/agent-kb/solutions/WangTheoPhys/contracts/experiment-v1.schema.json",
+  "title": "WangTheoPhys Tensor-Network Experiment v1",
+  "description": "Fail-closed preregistration contract. The executable gate is the semantic authority for route coherence and acceptance policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "problem",
+    "physics",
+    "capability",
+    "backend_binding",
+    "numerics",
+    "observables",
+    "validators",
+    "acceptance",
+    "reference",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wangtheophys.tn-experiment.v1"
+    },
+    "problem": {
+      "$ref": "#/$defs/problem"
+    },
+    "physics": {
+      "$ref": "#/$defs/physics"
+    },
+    "capability": {
+      "$ref": "#/$defs/capability"
+    },
+    "backend_binding": {
+      "$ref": "#/$defs/binding"
+    },
+    "numerics": {
+      "$ref": "#/$defs/numerics"
+    },
+    "observables": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "const": "energy"
+          }
+        },
+        {
+          "contains": {
+            "const": "variance"
+          }
+        }
+      ]
+    },
+    "validators": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/validator"
+      }
+    },
+    "acceptance": {
+      "$ref": "#/$defs/acceptance"
+    },
+    "reference": {
+      "$ref": "#/$defs/reference"
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonempty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "problem_id",
+        "title",
+        "research_question",
+        "novelty_claim",
+        "status",
+        "task_family"
+      ],
+      "properties": {
+        "problem_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "title": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "research_question": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "novelty_claim": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "status": {
+          "enum": [
+            "candidate",
+            "test_fixture"
+          ]
+        },
+        "task_family": {
+          "enum": [
+            "ground_state_1d_finite",
+            "ground_state_1d_infinite"
+          ]
+        }
+      }
+    },
+    "model": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/tfim_model"
+        },
+        {
+          "$ref": "#/$defs/xxz_model"
+        }
+      ]
+    },
+    "tfim_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "representation",
+        "family",
+        "operators",
+        "couplings",
+        "onsite_terms",
+        "neighbor_range"
+      ],
+      "properties": {
+        "representation": {
+          "const": "operator_sum"
+        },
+        "family": {
+          "const": "tfim"
+        },
+        "operators": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "sigma_x_i*sigma_x_i+1",
+              "sigma_z_i"
+            ]
+          }
+        },
+        "couplings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "J",
+            "g"
+          ],
+          "properties": {
+            "J": {
+              "type": "number"
+            },
+            "g": {
+              "type": "number"
+            }
+          }
+        },
+        "onsite_terms": {
+          "const": []
+        },
+        "neighbor_range": {
+          "const": 1
+        }
+      }
+    },
+    "xxz_model": {
+      "type": "object",
+      "description": "Spin-1/2 XXZ Hamiltonian H=sum_i[Jxy(Sx_i Sx_{i+1}+Sy_i Sy_{i+1})+Jxy*Delta Sz_i Sz_{i+1}-h Sz_i], so Delta is dimensionless and Jz=Jxy*Delta.",
+      "additionalProperties": false,
+      "required": [
+        "representation",
+        "family",
+        "operators",
+        "couplings",
+        "onsite_terms",
+        "neighbor_range"
+      ],
+      "properties": {
+        "representation": {
+          "const": "operator_sum"
+        },
+        "family": {
+          "const": "xxz"
+        },
+        "operators": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "Sx_i*Sx_i+1",
+              "Sy_i*Sy_i+1",
+              "Sz_i*Sz_i+1",
+              "Sz_i"
+            ]
+          }
+        },
+        "couplings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "Jxy",
+            "Delta",
+            "h"
+          ],
+          "properties": {
+            "Jxy": {
+              "type": "number",
+              "const": 1.0
+            },
+            "Delta": {
+              "type": "number"
+            },
+            "h": {
+              "type": "number"
+            }
+          }
+        },
+        "onsite_terms": {
+          "const": []
+        },
+        "neighbor_range": {
+          "const": 1
+        }
+      }
+    },
+    "lattice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "length",
+        "boundary",
+        "local_dim",
+        "unit_cell"
+      ],
+      "properties": {
+        "type": {
+          "const": "chain"
+        },
+        "length": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "boundary": {
+          "enum": [
+            "open",
+            "infinite"
+          ]
+        },
+        "local_dim": {
+          "const": 2
+        },
+        "unit_cell": {
+          "enum": [
+            1,
+            2
+          ]
+        }
+      }
+    },
+    "symmetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "U1_Sz",
+        "parity",
+        "translation",
+        "target_sector"
+      ],
+      "properties": {
+        "U1_Sz": {
+          "type": "boolean"
+        },
+        "parity": {
+          "type": "boolean"
+        },
+        "translation": {
+          "type": "boolean"
+        },
+        "target_sector": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/target_sector"
+            }
+          ]
+        }
+      }
+    },
+    "target_sector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_Sz"
+      ],
+      "properties": {
+        "total_Sz": {
+          "type": "integer"
+        }
+      }
+    },
+    "ansatz": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "algorithm",
+        "variant",
+        "initial_state",
+        "allow_bond_growth",
+        "target_precision"
+      ],
+      "properties": {
+        "family": {
+          "const": "mps"
+        },
+        "algorithm": {
+          "enum": [
+            "dmrg",
+            "vumps"
+          ]
+        },
+        "variant": {
+          "const": "two_site"
+        },
+        "initial_state": {
+          "enum": [
+            "all_z_plus",
+            "neel"
+          ]
+        },
+        "allow_bond_growth": {
+          "const": true
+        },
+        "target_precision": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "physics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "lattice",
+        "symmetry",
+        "ansatz"
+      ],
+      "properties": {
+        "model": {
+          "$ref": "#/$defs/model"
+        },
+        "lattice": {
+          "$ref": "#/$defs/lattice"
+        },
+        "symmetry": {
+          "$ref": "#/$defs/symmetry"
+        },
+        "ansatz": {
+          "$ref": "#/$defs/ansatz"
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_id",
+        "maturity",
+        "known_limitations"
+      ],
+      "properties": {
+        "capability_id": {
+          "enum": [
+            "tenpy.finite_1d.dmrg",
+            "tenpy.infinite_1d.vumps"
+          ]
+        },
+        "maturity": {
+          "enum": [
+            "stable",
+            "experimental"
+          ]
+        },
+        "known_limitations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_id",
+        "adapter_id",
+        "backend_id",
+        "request_schema",
+        "result_schema"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tn-agent.backend-binding.v1"
+        },
+        "capability_id": {
+          "enum": [
+            "tenpy.finite_1d.dmrg",
+            "tenpy.infinite_1d.vumps"
+          ]
+        },
+        "adapter_id": {
+          "const": "tenpy.v1"
+        },
+        "backend_id": {
+          "const": "tenpy"
+        },
+        "request_schema": {
+          "enum": [
+            "tn-agent.tenpy.finite-tfim-dmrg.v1",
+            "tn-agent.tenpy.infinite-xxz-vumps.v1"
+          ]
+        },
+        "result_schema": {
+          "const": "tn-agent.backend-result.v1"
+        }
+      }
+    },
+    "fit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "min_chi",
+        "max_chi"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_chi": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_chi": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compute",
+        "num_eigs"
+      ],
+      "properties": {
+        "compute": {
+          "type": "boolean"
+        },
+        "num_eigs": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "numerics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_bond_dim",
+        "cutoff",
+        "max_sweeps",
+        "mixer",
+        "lanczos_maxiter",
+        "checkpoint_every",
+        "finite_entanglement_fit",
+        "transfer_matrix",
+        "seed"
+      ],
+      "properties": {
+        "max_bond_dim": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cutoff": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_sweeps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_sweeps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mixer": {
+          "type": "boolean"
+        },
+        "lanczos_maxiter": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "checkpoint_every": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "entropy_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finite_entanglement_fit": {
+          "$ref": "#/$defs/fit"
+        },
+        "transfer_matrix": {
+          "$ref": "#/$defs/transfer"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "validator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "policy",
+        "metric",
+        "operator",
+        "threshold"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "parse_consistency",
+            "convergence",
+            "variance",
+            "canonical_form",
+            "symmetry_check",
+            "benchmark_compare",
+            "reproducibility",
+            "artifact_completeness"
+          ]
+        },
+        "policy": {
+          "enum": [
+            "required_pass",
+            "reported_only",
+            "backend_limited"
+          ]
+        },
+        "metric": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "operator": {
+          "enum": [
+            "max",
+            "min",
+            "equals",
+            null
+          ]
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "required_validator_ids",
+        "allowed_backend_limited_ids",
+        "reported_only_validator_ids",
+        "require_execution_success"
+      ],
+      "properties": {
+        "mode": {
+          "const": "all_required"
+        },
+        "required_validator_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "allowed_backend_limited_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "reported_only_validator_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "require_execution_success": {
+          "const": true
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observable",
+        "value",
+        "units",
+        "normalization",
+        "source"
+      ],
+      "properties": {
+        "observable": {
+          "const": "energy"
+        },
+        "value": {
+          "type": "number"
+        },
+        "units": {
+          "const": "J"
+        },
+        "normalization": {
+          "enum": [
+            "total",
+            "per-site"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "uri",
+            "sha256"
+          ],
+          "properties": {
+            "kind": {
+              "const": "registered_artifact"
+            },
+            "uri": {
+              "type": "string",
+              "pattern": "^(?!.*[\\u0000-\\u001F\\u007F])(?!/)(?![A-Za-z]:)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\\\)(?!.*\\/$).+$"
+            },
+            "sha256": {
+              "$ref": "#/$defs/digest"
+            }
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "uri",
+        "sha256"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/identifier"
+        },
+        "uri": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "sha256": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "created_by",
+        "created_at",
+        "sources",
+        "generation_log_uri",
+        "human_gatekeeper_role"
+      ],
+      "properties": {
+        "created_by": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "generation_log_uri": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "human_gatekeeper_role": {
+          "$ref": "#/$defs/nonempty"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capability": {
+            "properties": {
+              "capability_id": {
+                "const": "tenpy.finite_1d.dmrg"
+              }
+            },
+            "required": [
+              "capability_id"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "problem": {
+            "properties": {
+              "task_family": {
+                "const": "ground_state_1d_finite"
+              }
+            }
+          },
+          "capability": {
+            "properties": {
+              "maturity": {
+                "const": "stable"
+              }
+            }
+          },
+          "backend_binding": {
+            "properties": {
+              "capability_id": {
+                "const": "tenpy.finite_1d.dmrg"
+              },
+              "request_schema": {
+                "const": "tn-agent.tenpy.finite-tfim-dmrg.v1"
+              }
+            }
+          },
+          "reference": {
+            "properties": {
+              "normalization": {
+                "const": "total"
+              }
+            }
+          },
+          "numerics": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "min_sweeps"
+                  ]
+                },
+                {
+                  "required": [
+                    "entropy_tolerance"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capability": {
+            "properties": {
+              "capability_id": {
+                "const": "tenpy.infinite_1d.vumps"
+              }
+            },
+            "required": [
+              "capability_id"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "problem": {
+            "properties": {
+              "task_family": {
+                "const": "ground_state_1d_infinite"
+              }
+            }
+          },
+          "capability": {
+            "properties": {
+              "maturity": {
+                "const": "experimental"
+              }
+            }
+          },
+          "backend_binding": {
+            "properties": {
+              "capability_id": {
+                "const": "tenpy.infinite_1d.vumps"
+              },
+              "request_schema": {
+                "const": "tn-agent.tenpy.infinite-xxz-vumps.v1"
+              }
+            }
+          },
+          "reference": {
+            "properties": {
+              "normalization": {
+                "const": "per-site"
+              }
+            }
+          },
+          "numerics": {
+            "required": [
+              "min_sweeps",
+              "entropy_tolerance"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

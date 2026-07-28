@@ -1,0 +1,69 @@
+{
+  "schema_version": "tn-agent.tenpy.finite-tfim-dmrg.v1",
+  "capability_id": "tenpy.finite_1d.dmrg",
+  "plan_id": "sha256:56217e253c4f5e13e66b9939c8ff5f56d26ee77023869288be54c2fe2c0ae307",
+  "model_family": "tfim",
+  "representation": "operator_sum",
+  "operators": [
+    "sigma_x_i*sigma_x_i+1",
+    "sigma_z_i"
+  ],
+  "boundary": "open",
+  "local_dimension": 2,
+  "unit_cell": 1,
+  "algorithm": "dmrg",
+  "variant": "two_site",
+  "active_sites": 2,
+  "initial_state": "all_z_plus",
+  "allow_bond_growth": true,
+  "target_precision": 1e-08,
+  "seed": 1234,
+  "numerics": {
+    "max_bond_dim": 32,
+    "chi_schedule": [
+      32
+    ],
+    "requested_cutoff": 1e-10,
+    "effective_svd_min": 1e-10,
+    "engine_cutoff": 1e-10,
+    "max_sweeps": 5,
+    "min_sweeps": 0,
+    "entropy_tolerance": null,
+    "mixer": true,
+    "lanczos_maxiter": 8,
+    "lanczos_n_max": 8,
+    "checkpoint_every": 2,
+    "diagonal_gauge_frequency": 0,
+    "check_overlap": false
+  },
+  "finite_entanglement_fit": {
+    "enabled": false,
+    "min_chi": 32,
+    "max_chi": 128,
+    "entropy_statistic": "center"
+  },
+  "transfer_matrix": {
+    "compute": false,
+    "num_eigs": 4
+  },
+  "acceptance": {
+    "require_all_validators": false,
+    "energy_drift_max": 1e-06,
+    "variance_max": 0.0,
+    "canonical_residual_max": 1e-08,
+    "symmetry_residual_max": 0.0,
+    "reproducibility_max": 0.0
+  },
+  "requested_observables": [
+    "correlator_sigma_x",
+    "energy",
+    "entanglement_entropy",
+    "magnetization_z",
+    "variance"
+  ],
+  "length": 8,
+  "coupling_j": 1.0,
+  "transverse_field_g": 0.8,
+  "conserve": null,
+  "target_total_sz": null
+}
