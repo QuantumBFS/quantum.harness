@@ -1,0 +1,9 @@
+hybrid_test.jl  PASS  (seed 20260728, ε=5e-7)
+H0   PASS  oracle: reduce 1.0e-15  reconstruct 3.5e-16  rows 3.3e-16 (E0/N = -0.4515446354)
+H1   PASS  no-op tower: base -0.451544624579  noop -0.451544624579  |Δ|=0.0e+00
+H2   PASS  ΔCG8(N=10,n=6) = +1.165e-08  (base -0.4515446246 → hyb -0.4515446129)
+H3   PASS  E_hyb -0.4515446129 ≤ E0/N -0.4515446354  (slack -2.252e-08)
+     cost: base 35.8s → hybrid 17.5s
+H4a  PASS  N=12: base -0.4489492784  CG6 -0.4489492806  CG9 -0.4489492799
+H4b  PASS  monotone: E9−E6 = +6.755e-10
+H4c  PASS  validity: E0/N(12) = -0.4489492431
