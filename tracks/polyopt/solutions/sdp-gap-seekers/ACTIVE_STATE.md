@@ -225,4 +225,21 @@ Updated: 2026-07-29 UTC.
   factor makes it slightly worse than the 8,803-variable spin-axis model at
   gamma=0; after the fixed gamma=1/2 run, pursue a true full-S3 row-space
   decomposition rather than treating variable count alone as a memory proxy.
+- Full spin-permutation gamma=1/2 attempt r1, Slurm job `22988534`, passed
+  every fail-closed gate and returned `OPTIMAL` with primal and dual feasible
+  points. Normalization was exactly 1, maximum affine residual and worst PSD
+  violation were 0, and the smallest reconstructed block eigenvalue was
+  `0.09503337763320019`. Solver wall was 18.648 s, total runner wall 37.017 s,
+  process peak RSS 2,736,824 KiB, and the factor had 60.3 million nonzeros.
+  `result.toml` SHA-256 is
+  `d19b811d37dcbc6229351d1642afe6cc197f072bf5c8e862a5a4989a282ff5d3`.
+- The finite-relaxation decision remains feasible at gamma=1/2. The
+  3,250-variable quotient is 3.8% faster but uses 11.7% more RSS than the
+  spin-axis representation at this point, so the 8,803-variable model remains
+  the best measured memory representation.
+- Active exact-memory route: under full S3 invariance, the three nontrivial
+  V4 character blocks form one orbit. Prove whether one stable-character
+  `36+45` decomposition makes each retained 81-side orbit-representative cone
+  redundant, including the analogous gap scalar. This removes cone rows
+  rather than only moment variables and is the next decision-relevant gate.
 - No decision-changing user or resource need is open.

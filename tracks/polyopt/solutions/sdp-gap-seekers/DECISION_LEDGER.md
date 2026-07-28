@@ -324,3 +324,26 @@ from 2,602,300 to 2,750,960 KiB, and total wall from 40.568 to 43.098 s at
 gamma=0. Do not infer memory improvement from moment count alone. Complete
 the fixed gamma=1/2 decision run, then switch to an exact S3 row-space/cone
 decomposition if its representation action can be proved.
+
+## 2026-07-29 — full-permutation gamma=1/2 is feasible; switch to cone rows
+
+Slurm job `22988534` passed every immutable-input and replay gate and returned
+`OPTIMAL` with primal and dual feasible points. Independent reconstruction
+gave normalization 1, zero affine and PSD violations, and minimum block
+eigenvalue `0.09503337763320019`. Total runner wall was 37.017 s, process
+peak RSS was 2,736,824 KiB, and `result.toml` SHA-256 is
+`d19b811d37dcbc6229351d1642afe6cc197f072bf5c8e862a5a4989a282ff5d3`.
+
+The scientific decision is unchanged: the exact `d=2` finite relaxation is
+feasible at gamma=1/2. Relative to the spin-axis model, the full moment
+quotient is 3.8% faster but uses 11.7% more process RSS and grows the factor
+from 41.2 million to 60.3 million nonzeros. Keep the spin-axis model as the
+measured memory baseline.
+
+Switch routes from moment count to cone rows. Full S3 permutes all three
+nontrivial V4 characters transitively. If exact coefficient replay proves
+that the retained 81-side orbit representative is congruent to the stable
+character's existing 36- and 45-side eigenspace blocks, drop the redundant
+81-side cone in each positive family and the analogous redundant gap scalar.
+Do not remove any cone until this relation is proved exhaustively over exact
+coefficients.

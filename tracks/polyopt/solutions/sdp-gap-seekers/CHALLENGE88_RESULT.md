@@ -133,3 +133,43 @@ Additional preserved artifacts:
   `9b9519a2059e718651af52a7b98e75dc046eab57be33ca3ea9d2325ba28d7fb2`
   and
   `f12eaa63e64d8643e4b361d245669d013bdf853d83bda8c35499e8f42dbde485`.
+
+## Exact full spin-permutation result
+
+The full six-element spin-axis permutation group further reduces the
+conjugation-real moment inventory to 3,250 exact orbit variables while
+retaining all 12 already-proved spin-axis PSD cones. Exhaustive truth gates
+checked all 190,860 source coefficient covariance identities before the
+conjugation phase gauge.
+
+| gamma | Slurm job | status/audit | minimum block eigenvalue | total wall | peak process RSS | factor nonzeros |
+|---|---:|---|---:|---:|---:|---:|
+| 0 | 22988532 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.13079207445451374 | 43.098 s | 2,750,960 KiB | 6.07e7 |
+| 1/2 | 22988534 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.09503337763320019 | 37.017 s | 2,736,824 KiB | 6.03e7 |
+
+This exact quotient preserves the gamma=1/2 feasibility decision. It is 3.8%
+faster but uses 11.7% more process RSS than the spin-axis model at gamma=1/2,
+so the 8,803-variable spin-axis representation remains the measured
+memory-best form. The result identifies cone-row elimination, rather than
+scalar moment count alone, as the next exact memory target.
+
+Additional preserved artifacts:
+
+- Full spin-permutation proof:
+  `EXACT_FULL_SPIN_PERMUTATION.md`.
+- Passing model truth gate:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-spin-truth-xh5-20260729-r2/`
+  (`test.log` SHA-256
+  `9ef5f74de8b184d44233c2744f32a9977948c89f8f5bee5210d161cc0f67eae2`).
+- Gamma=0 solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-spin-g0p8-gamma0-solve-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `365bef5ca2bae523fdc4903650bcf4cbbfd3c53a7b54a015dcc7b9a2b0dc542c`).
+- Gamma=1/2 solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-spin-g0p8-gamma0p5-solve-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `d19b811d37dcbc6229351d1642afe6cc197f072bf5c8e862a5a4989a282ff5d3`).
+- Immutable gamma=0 and gamma=1/2 model SHA-256 values are
+  `4f62a5e16822d2df174af8d9013bb1622c54d8c47bd2f78a59a086524ad4d67f`
+  and
+  `e47bf0d3146ada223bbb389920ea4ca1f79efef467ee7a81ef72d42741652e9f`.
