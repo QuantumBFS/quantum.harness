@@ -414,6 +414,48 @@ def test_local_estimator_is_invariant_under_global_logpsi_shifts(
     assert observed == pytest.approx(expected, rel=2.0e-14, abs=2.0e-14)
 
 
+def test_local_estimator_is_order_invariant_at_maximum_finite_components() -> None:
+    maximum = np.finfo(np.float64).max
+    limit = math.log(maximum)
+    log_values = {
+        1: 0.0j,
+        2: complex(limit, 0.0),
+        3: complex(limit - math.log(1.0e300), 0.0),
+    }
+    term_a = (2, 1.0)
+    term_b = (3, 1.0e300j)
+
+    observed = [
+        local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+        for order in ((term_a, term_b), (term_b, term_a))
+    ]
+
+    assert all(math.isfinite(value.real) for value in observed)
+    assert all(math.isfinite(value.imag) for value in observed)
+    assert observed[0] == pytest.approx(complex(maximum, maximum), rel=3.0e-14)
+    assert observed[1] == pytest.approx(observed[0], rel=1.0e-15)
+
+
+def test_local_estimator_saturates_unrepresentable_negative_log_difference() -> None:
+    log_values = {
+        1: complex(1.0e308, 0.0),
+        2: complex(1.0e308, 0.0),
+        3: complex(-1.0e308, 0.0),
+    }
+
+    observed = local_from_log_neighbors(
+        1,
+        {2: 1.0, 3: 1.0},
+        log_values.__getitem__,
+    )
+
+    assert observed == pytest.approx(1.0)
+
+
 def test_local_estimator_preserves_multiply_first_extreme_result() -> None:
     log_values = {
         1: complex(math.log(1.0e-315), 0.0),
@@ -552,6 +594,17 @@ def test_local_estimator_returns_zero_for_exactly_canceling_row() -> None:
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     pair_matrix = np.array(
         [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],
+        dtype=np.complex128,
+    )
+
+    with pytest.raises(ValueError, match="pair_matrix must be Hermitian"):
+        PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
+
+
+def test_prepared_pair_operator_rejects_extreme_non_hermitian_input() -> None:
+    maximum = np.finfo(np.float64).max
+    pair_matrix = np.array(
+        [[0.0, complex(maximum, maximum)], [0.0, 0.0]],
         dtype=np.complex128,
     )
 
