@@ -30,3 +30,13 @@ malicious dynamic Python or arbitrary file access. A concrete route may claim
 `oracle_isolated` only after a route-specific factory test proves that the
 evaluator loads the same checkpoint produced by that route's trainer and bound
 to that run by its manifest.
+
+## Resource lifecycle boundary
+
+Step 1 `resource_budget_valid` enforces only the placement-selected wall-time,
+peak-RSS, and checkpoint-size ceilings. The frozen `remote_max_cpus=32` becomes
+enforceable in Step 5, where tests must inspect the actual `using-slurm` job
+request. Peak VRAM remains observed-only until a hardware-specific ceiling is
+approved and frozen; no VRAM ceiling is implied by Step 1. Independently, the
+Step 2 route-factory test that binds the trainer-produced checkpoint to the same
+run manifest remains a hard requirement for `oracle_isolated`.

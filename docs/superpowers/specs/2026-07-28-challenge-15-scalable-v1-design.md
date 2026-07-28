@@ -230,7 +230,13 @@ implemented. It fixes:
 - post-training sample count, burn-in, chains, blocking rule, and minimum ESS;
 - symmetry residual, Casimir, multiplet-splitting, and MC-error thresholds;
 - model-capacity ceilings and allowed route-specific capacity mapping;
-- per-run wall, CPU/GPU, RAM/VRAM, and checkpoint limits;
+- placement-selected wall-time, peak-RSS, and checkpoint-size ceilings used by
+  the Step 1 `resource_budget_valid` gate;
+- `remote_max_cpus=32`, enforced in Step 5 by testing the actual `using-slurm`
+  job request rather than by the Step 1 resource record;
+- peak VRAM and device details as observed-only evidence until a
+  hardware-specific ceiling is approved and frozen; no VRAM ceiling is implied
+  by the Step 1 gate;
 - the fixed `N=8` no-training smoke batch used for growth measurements.
 
 The values are chosen using oracle-free microbenchmarks and resource
