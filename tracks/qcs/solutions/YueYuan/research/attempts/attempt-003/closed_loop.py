@@ -224,7 +224,7 @@ def _projected_correction(mixing: np.ndarray, bias: np.ndarray, subspace: np.nda
 
 def _initial_step(method: str, k: int, gap: float) -> float:
     if method == "full_raw_nelder_mead":
-        return 0.10
+        return 0.20
     if method == "random_subspace_nelder_mead":
         return 0.10
     if k <= 15:
