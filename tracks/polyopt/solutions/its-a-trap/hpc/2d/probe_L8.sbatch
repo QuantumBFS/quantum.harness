@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=c2d-L8
-#SBATCH --partition=xhhgnormal
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=220G
+#SBATCH --partition=xhacnormalb
+#SBATCH --cpus-per-task=64
 #SBATCH --time=12:00:00
 #SBATCH --output=slurm-2d-%j.out
 # 2D resource probe, L=8 (64 sites). Same named knob vector as L=6.

@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=t1q-scnet
-#SBATCH --partition=xhhgnormal
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=120G
+#SBATCH --partition=xhacnormalb
+#SBATCH --cpus-per-task=32
 #SBATCH --time=12:00:00
 #SBATCH --array=1-23%4
 #SBATCH --output=slurm-%A_%a.out
@@ -15,7 +14,7 @@ export PATH="$HOME/julia/bin:$PATH"   # mirror-installed 1.12.6 (bootstrap_remot
 # old system libstdc++ lacks GLIBCXX_3.4.21 needed by Mosek libtbb —
 # julia ships a newer one (fix verified on login02, MOSEK 11.2.2 runs)
 export LD_LIBRARY_PATH="$HOME/julia/lib/julia:$HOME/mosek/bin:${LD_LIBRARY_PATH:-}"
-export MAX_WALL_S=42000 MAX_RSS_GB=110 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=8
+export MAX_WALL_S=42000 MAX_RSS_GB=110 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=16
 
 RUN="${RUN_NAME:?set RUN_NAME via sbatch --export}"
 SPEC=$(grep -v '^#' tracks/polyopt/solutions/its-a-trap/hpc/cells.txt \

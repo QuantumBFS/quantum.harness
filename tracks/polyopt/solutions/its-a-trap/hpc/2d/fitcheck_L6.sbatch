@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=c2d-fit
-#SBATCH --partition=xhhgnormal
+#SBATCH --partition=xhacnormalb
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=2G
 #SBATCH --time=00:10:00
 #SBATCH --output=slurm-2d-%j.out
 # Fit-check: reads the L6 row; exit code IS the verdict for releasing L8.

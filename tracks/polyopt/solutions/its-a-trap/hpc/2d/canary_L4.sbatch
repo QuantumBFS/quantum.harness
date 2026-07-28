@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=c2d-L4
-#SBATCH --partition=xhhgnormal
+#SBATCH --partition=xhacnormalb
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=30G
 #SBATCH --time=02:00:00
 #SBATCH --output=slurm-2d-%j.out
 # 2D chain head: L=4 canary. Purpose: encoding / normalization / solve path.
