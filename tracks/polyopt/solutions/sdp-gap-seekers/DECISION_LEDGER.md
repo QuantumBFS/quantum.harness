@@ -604,8 +604,9 @@ by 67.6%, and total wall by 16.2%. `result.toml` SHA-256 is
 the Slurm-log SHA-256 is
 `6758ca56c0296ab4e5194e283a7729e320fe27c5bc368419389755e3388b548e`.
 The gamma=0 equivalence gate passes and authorizes isotypic gamma=1/2.
-Wait for the spatial and continuous jobs running from commit `2b4e3da`
-before advancing their shared remote worktree to the value-export runner.
+The spatial and continuous jobs from commit `2b4e3da` have now completed,
+so the shared remote worktree may advance to the value-export runner before
+gamma=1/2 submission.
 
 ## 2026-07-29 — define the combined spin/spatial exact route
 
@@ -647,3 +648,34 @@ for a candidate it rebuilds all 6,104 exact rational matrix entries and
 requires every no-pivot rational LDL diagonal to be strictly positive.
 Binary64 decoding, decimal rounding, and positive/indefinite LDL examples
 pass all eight local synthetic assertions.
+
+## 2026-07-29 — corrected spatial reflection passes
+
+Slurm job `22988911` passed all 28 assertions after the induced moment action
+was corrected to site reflection followed by full-spin orbit
+re-representation. The exact involution maps 3,250 isotypic moments to 1,711
+representatives. All 6,104 source cone coefficients are covariant, all 2,913
+spatial plus/minus cross entries are exact zeros, and the nine split row
+bases have full dimensions `[36,36,36,45,37,36,36,45,1]`.
+
+The equivalent representation has 16 positive cones with sides
+`[21,15,21,15,21,15,24,21,22,15,21,15,21,15,24,21]`, one scalar gap
+cone, 3,191 packed PSD entries, and maximum side 24. `test.log` SHA-256 is
+`3d60469de1da702d33bf6d3bee971fa4bcd99b0e0d852b2246bdd2c4803c327b`;
+process peak was 896,892 KiB and Slurm MaxRSS 773,896 KiB. Accept the theorem
+and authorize clean solver-free MOF generation for both fixed gamma values.
+
+## 2026-07-29 — continuous-spin moment quotient passes
+
+Slurm job `22988914` passed all 23 assertions. The exact delta-tensor
+parameterization maps 3,250 isotypic moments to 2,458 pivots across 874
+axis-erased skeletons: one rank-zero, 81 rank-two, and 792 rank-four. The
+rational infinite-order rotation gate replays 64,882 components exactly,
+both deterministic assemblies agree, and all 6,104 isotypic packed cone
+entries reconstruct.
+
+`test.log` SHA-256 is
+`cd489366f56038bb97cc4dc208bc59ff95b5fc52622ba3e3d44002108d1f0317`;
+process peak was 826,164 KiB and Slurm MaxRSS 722,980 KiB. Accept the moment
+quotient and authorize the separately encoded l=2 cone-redundancy truth
+gate. Do not build a continuous-spin MOF until that gate passes.

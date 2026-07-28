@@ -168,3 +168,16 @@ projection. The combined model is authorized only if:
 This route should be considered only after the six-cone continuous-spin
 model is measured. A smaller packed coordinate count is not by itself
 evidence of lower Mosek factor fill or peak RSS.
+
+## Accepted moment-inventory gate
+
+Slurm job `22988914` passed all 23 exact assertions. The quotient maps 3,250
+isotypic moments to 2,458 continuous-spin pivots across 874 axis-erased
+skeletons: one rank-zero skeleton, 81 rank-two skeletons, and 792 rank-four
+skeletons. It replays 64,882 exact component transformations under the
+rational infinite-order rotation. Two independent coefficient builds agree,
+and all 6,104 isotypic packed cone entries reconstruct.
+
+The moment reduction is accepted. It is substantial enough to authorize the
+separate l=2 cone-redundancy truth gate, but no continuous-spin MOF may be
+built until that second gate passes.

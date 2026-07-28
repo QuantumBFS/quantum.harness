@@ -60,16 +60,19 @@ using JuMP
     @test truth.exact
     @test truth.site_map_involutive
     @test truth.hamiltonian_invariant
+    @test truth.source_moment_count == 3_250
     @test truth.source_moment_count == length(isotypic.moments)
-    @test truth.quotient_moment_count <= truth.source_moment_count
-    @test truth.eliminated_moment_count >= 0
+    @test truth.quotient_moment_count == 1_711
+    @test truth.eliminated_moment_count == 1_539
     @test truth.raw_nonrepresentative_count > 0
     @test truth.coefficient_covariant
     @test truth.coefficient_count == 6_104
     @test truth.equality_space_invariant
     @test truth.stable_cross_blocks_zero
-    @test truth.stable_cross_entry_count > 0
+    @test truth.stable_cross_entry_count == 2_913
     @test truth.stable_bases_invertible
+    @test truth.stable_basis_dimensions ==
+          [36, 36, 36, 45, 37, 36, 36, 45, 1]
 
     reduced = assemble_spatial_reflection_reduced_primal(
         isotypic;
@@ -81,14 +84,18 @@ using JuMP
     )
     report = spatial_reflection_reduced_assembly_report(reduced)
     @test report.source_isotypic_moments == length(isotypic.moments)
-    @test report.spatial_moments <= report.source_isotypic_moments
-    @test report.eliminated_spatial_moments >= 0
+    @test report.spatial_moments == 1_711
+    @test report.eliminated_spatial_moments == 1_539
     @test report.positive_block_dimensions ==
           truth.positive_block_dimensions
     @test report.gap_block_dimensions == truth.gap_block_dimensions
+    @test report.positive_block_dimensions ==
+          [21, 15, 21, 15, 21, 15, 24, 21,
+           22, 15, 21, 15, 21, 15, 24, 21]
+    @test report.gap_block_dimensions == [1]
     @test report.equality_count == 0
-    @test report.maximum_psd_side_dimension <
-          maximum(length.(getfield.(isotypic.positive_blocks, :rows)))
+    @test report.real_psd_triangle_entries == 3_191
+    @test report.maximum_psd_side_dimension == 24
     @test reduced.coefficient_map_sha256 ==
           repeated.coefficient_map_sha256
     @test reduced.assembly_sha256 == repeated.assembly_sha256

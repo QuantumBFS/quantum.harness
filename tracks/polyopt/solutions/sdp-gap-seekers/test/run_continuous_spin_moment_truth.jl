@@ -61,17 +61,15 @@ using .ContinuousSpinMomentReduction
     truth = continuous_spin_moment_truth(isotypic)
     @test truth.exact
     @test truth.source_moment_count == 3_250
-    @test 0 < truth.invariant_moment_count <
-          truth.source_moment_count
-    @test truth.eliminated_moment_count ==
-          truth.source_moment_count - truth.invariant_moment_count
-    @test truth.skeleton_count > 0
-    @test truth.rank_two_skeleton_count > 0
-    @test truth.rank_four_skeleton_count > 0
+    @test truth.invariant_moment_count == 2_458
+    @test truth.eliminated_moment_count == 792
+    @test truth.skeleton_count == 874
+    @test truth.rank_two_skeleton_count == 81
+    @test truth.rank_four_skeleton_count == 792
     @test truth.substitutions_complete
     @test truth.pivots_exact
     @test truth.rational_rotation_invariant
-    @test truth.rational_rotation_component_check_count > 0
+    @test truth.rational_rotation_component_check_count == 64_882
     @test truth.rational_rotation_orthogonal
     @test truth.rational_rotation_determinant == 1
 

@@ -327,8 +327,7 @@ Updated: 2026-07-29 UTC.
   reloaded nine-cone inventory before Mosek is attached. Gamma=0 is the next
   numerical gate; gamma=1/2 remains unauthorized until it passes.
 - Isotypic gamma=0 gate job `22988910` and corrected spatial truth r2 job
-  `22988911` are submitted under Slurm. Both are pending only on the shared
-  association job cap.
+  `22988911` cleared the shared association cap and completed.
 - Isotypic gamma=0 attempt r1, Slurm job `22988910`, subsequently passed
   every immutable-input, six-layer reduction, source-hash, and nine-cone
   reload gate. Mosek returned `OPTIMAL` with primal and dual feasible
@@ -372,20 +371,37 @@ Updated: 2026-07-29 UTC.
   re-representations on r2. Peak Slurm RSS was 713,484 KiB; `test.log`
   SHA-256 is
   `a7e2e3ff6d9240bcbaedb5a49df7624737d1ab68277b60bfc44a7938d60982f4`.
-- While the spatial truth and isotypic builder jobs wait/run under the shared
-  association cap, a later exact continuous-spin route has been derived for
+- While the spatial and isotypic jobs were queued under the shared
+  association cap, a later exact continuous-spin route was derived for
   the rank-at-most-four moment inventory. It parameterizes rank-two moments
   by `delta_ab` and rank-four moments by the three delta pairings, with an
   exact rational-rotation gate. Its source-level parameterizer, synthetic
-  tensor tests, and dedicated Slurm inventory gate are now prepared; all
-  eight synthetic assertions pass. Inventory job `22988914` is queued behind
-  the two primary jobs. No model uses this candidate yet.
-- The next continuous-spin cone theorem is now encoded but remains behind
-  that inventory gate. For each of the 36 spatial rank-two skeletons in both
+  tensor tests, and dedicated Slurm inventory gate were prepared; all eight
+  synthetic assertions pass. Inventory job `22988914` has now passed. No
+  model uses this candidate yet.
+- Corrected spatial-reflection truth r2, Slurm job `22988911`, passed all 28
+  assertions. Composing site reflection with full-spin re-representation
+  closes the 3,250-moment inventory and leaves 1,711 moments. All 6,104
+  source coefficients are covariant, all 2,913 plus/minus cross entries
+  vanish, and every row split has full rank. The exact model has 16 positive
+  cone sides `[21,15,21,15,21,15,24,21,22,15,21,15,21,15,24,21]`,
+  one scalar gap cone, 3,191 packed entries, and maximum side 24.
+  `test.log` SHA-256 is
+  `3d60469de1da702d33bf6d3bee971fa4bcd99b0e0d852b2246bdd2c4803c327b`;
+  process peak was 896,892 KiB and Slurm MaxRSS 773,896 KiB.
+- Continuous-spin moment truth r1, Slurm job `22988914`, passed all 23
+  assertions. It maps 3,250 moments to 2,458 pivots across 874 skeletons and
+  replays 64,882 exact rational-rotation components while reconstructing all
+  6,104 cone entries deterministically. `test.log` SHA-256 is
+  `cd489366f56038bb97cc4dc208bc59ff95b5fc52622ba3e3d44002108d1f0317`;
+  process peak was 826,164 KiB and Slurm MaxRSS 722,980 KiB. The separate
+  l=2 cone-redundancy gate is now authorized.
+- The next continuous-spin cone theorem is encoded and now authorized by
+  the passing inventory gate. For each of the 36 spatial rank-two skeletons in both
   positive families it pairs the S3-standard component `XX-ZZ` with the
   nontrivial-character component `XZ+ZX`, proves the skeleton map has rank
   36, and will compare all 1,332 projected upper-triangle coefficients under
-  the induced exact signed congruence. Only a passing Slurm truth run may
+  the induced exact signed congruence. Only its passing Slurm truth run may
   remove the two duplicate 36-side cones and reach the predicted 4,772
   packed PSD coordinates. Optimizer-free JuMP mappings for both the
   moment-only fallback and the gated six-cone candidate are source-prepared;
