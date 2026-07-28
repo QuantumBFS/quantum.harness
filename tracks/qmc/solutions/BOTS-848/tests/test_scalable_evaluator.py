@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
+import inspect
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,14 @@ from scalable_v1.evaluator import (
     evaluate_candidate,
     validate_run_record,
     write_json_report,
+)
+from scalable_v1.overlap import (
+    EDOverlapOracle,
+    FidelityEstimate,
+    build_ed_overlap_oracle,
+    evaluate_overlaps,
+    fidelity_from_log_amplitudes,
+    normalized_fidelity,
 )
 from scalable_v1.protocol import ProtocolConfig, load_protocol
 from run_scalable_evaluator import load_factory, main
@@ -109,6 +118,21 @@ class FakeDiagnostics:
         }
 
 
+class FakeOverlapOracle:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, int]] = []
+
+    def amplitude(self, label: str, configs: Any) -> np.ndarray:
+        self.calls.append((label, len(configs)))
+        return np.ones(len(configs), dtype=complex)
+
+
+def build_fake_overlap_oracle(physics: Any) -> FakeOverlapOracle:
+    assert physics["n_electrons"] == 6
+    assert physics["two_q"] == 15
+    return FakeOverlapOracle()
+
+
 def make_frozen_run(
     tmp_path: Path, *, tamper_checkpoint: bool = False
 ) -> tuple[Path, Path, Path, Path, ProtocolConfig]:
@@ -150,6 +174,200 @@ def make_frozen_run(
     if tamper_checkpoint:
         artifacts["checkpoint"].write_bytes(b"tampered")
     return project_root, run_dir, manifest_path, oracle_path, protocol
+
+
+def test_normalized_fidelity_is_scale_invariant_and_detects_orthogonality() -> None:
+    candidate = np.array([1.0 + 2.0j, -3.0j, 0.5 - 0.25j])
+    scale = -2.5 + 4.0j
+
+    assert normalized_fidelity(candidate, scale * candidate) == pytest.approx(1.0)
+    assert normalized_fidelity(
+        np.array([1.0, 1.0]), np.array([1.0, -1.0])
+    ) == pytest.approx(0.0, abs=1.0e-15)
+
+
+@pytest.mark.parametrize(
+    ("candidate", "oracle", "message"),
+    [
+        (np.ones(2), np.ones(3), "same shape"),
+        (np.array([]), np.array([]), "nonempty"),
+        (np.array([1.0, np.nan]), np.ones(2), "finite"),
+        (np.ones(2), np.array([1.0, np.inf]), "finite"),
+        (np.zeros(2), np.ones(2), "denominator"),
+        (np.ones(2), np.zeros(2), "denominator"),
+    ],
+)
+def test_normalized_fidelity_rejects_invalid_samples(
+    candidate: np.ndarray, oracle: np.ndarray, message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        normalized_fidelity(candidate, oracle)
+
+
+def test_fidelity_from_log_amplitudes_uses_full_ratio_and_block_jackknife() -> None:
+    candidate_log = np.zeros(4, dtype=complex)
+    oracle_log = np.array([0.0, 0.0, 0.0, 1.0j * np.pi])
+
+    estimate = fidelity_from_log_amplitudes(
+        candidate_log, oracle_log, block_size=2
+    )
+
+    assert estimate.mean == pytest.approx(0.25, abs=1.0e-15)
+    assert estimate.standard_error == pytest.approx(0.5)
+    assert estimate.effective_sample_size == 4.0
+    assert estimate.to_dict() == {
+        "mean": pytest.approx(0.25),
+        "standard_error": pytest.approx(0.5),
+        "effective_sample_size": 4.0,
+    }
+    assert all(type(value) is float for value in estimate.to_dict().values())
+
+
+def test_fidelity_from_log_amplitudes_stabilizes_extreme_complex_ratios() -> None:
+    candidate_log = np.array([1000.0 + 0.2j] * 4)
+    oracle_log = candidate_log + np.log(3.0) - 0.7j
+
+    estimate = fidelity_from_log_amplitudes(
+        candidate_log, oracle_log, block_size=2
+    )
+
+    assert estimate.mean == pytest.approx(1.0)
+    assert estimate.standard_error == pytest.approx(0.0)
+
+
+@pytest.mark.parametrize(
+    ("candidate_log", "oracle_log", "block_size", "message"),
+    [
+        (np.zeros(4), np.zeros(5), 2, "same shape"),
+        (np.zeros(0), np.zeros(0), 1, "nonempty"),
+        (np.array([0.0, np.nan, 0.0, 0.0]), np.zeros(4), 2, "finite"),
+        (np.zeros(4), np.zeros(4), 3, "divisible"),
+        (np.zeros(4), np.zeros(4), 4, "at least two blocks"),
+    ],
+)
+def test_fidelity_from_log_amplitudes_rejects_invalid_inputs(
+    candidate_log: np.ndarray,
+    oracle_log: np.ndarray,
+    block_size: int,
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        fidelity_from_log_amplitudes(
+            candidate_log, oracle_log, block_size=block_size
+        )
+
+
+@pytest.mark.parametrize(
+    ("values", "message"),
+    [
+        ((float("nan"), 0.0, 1.0), "finite"),
+        ((0.5, float("inf"), 1.0), "finite"),
+        ((0.5, 0.0, float("nan")), "finite"),
+        ((-0.1, 0.0, 1.0), "between zero and one"),
+        ((1.1, 0.0, 1.0), "between zero and one"),
+        ((0.5, -0.1, 1.0), "nonnegative"),
+        ((0.5, 0.1, 0.0), "positive"),
+    ],
+)
+def test_fidelity_estimate_rejects_nonfinite_or_out_of_range_values(
+    values: tuple[float, float, float], message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        FidelityEstimate(*values)
+
+
+def test_ed_overlap_oracle_supports_bitsets_and_batched_spinors() -> None:
+    coefficients = np.array([0.6, 0.8j])
+    state_data = {
+        label: ((1, 2), coefficients)
+        for label in ("ground", "-2", "-1", "0", "1", "2")
+    }
+    oracle = EDOverlapOracle(
+        n_electrons=1,
+        two_q=1,
+        state_data=state_data,
+        chunk_size=1,
+    )
+    coefficients[:] = 0.0
+
+    assert oracle.amplitude("ground", np.array([1, 2, 1 << 2])) == pytest.approx(
+        np.array([0.6, 0.8j, 0.0])
+    )
+
+    spinors = np.array(
+        [
+            [[1.0 + 0.0j, 0.0 + 0.0j]],
+            [[0.0 + 0.0j, 1.0 + 0.0j]],
+        ]
+    )
+    normalization = np.sqrt(2.0 / (4.0 * np.pi))
+    assert oracle.amplitude("ground", spinors) == pytest.approx(
+        np.array([0.8j * normalization, -0.6 * normalization])
+    )
+
+
+@pytest.mark.parametrize(
+    ("label", "configs", "message"),
+    [
+        ("invalid", np.array([1]), "label"),
+        ("ground", np.array(1), "shape"),
+        ("ground", np.ones((2, 1)), "shape"),
+        ("ground", np.array([[[np.nan, 0.0]]]), "finite"),
+    ],
+)
+def test_ed_overlap_oracle_rejects_invalid_labels_and_configurations(
+    label: str, configs: np.ndarray, message: str
+) -> None:
+    state_data = {
+        state_label: ((1, 2), np.array([1.0, 0.0]))
+        for state_label in ("ground", "-2", "-1", "0", "1", "2")
+    }
+    oracle = EDOverlapOracle(n_electrons=1, two_q=1, state_data=state_data)
+
+    with pytest.raises(ValueError, match=message):
+        oracle.amplitude(label, configs)
+
+
+def test_evaluate_overlaps_uses_exact_reveal_sampling_schedule() -> None:
+    protocol = load_protocol()
+    candidate = FakeCandidate()
+    oracle = FakeOverlapOracle()
+
+    overlaps = evaluate_overlaps(candidate, protocol, oracle)
+
+    states = [candidate.ground, *(candidate.tower[m] for m in range(-2, 3))]
+    for state_index, state in enumerate(states):
+        assert state.sample_calls == [
+            (4096, 3848 + 1000 * state_index)
+        ]
+    assert oracle.calls == [
+        (label, 4096) for label in ("ground", "-2", "-1", "0", "1", "2")
+    ]
+    assert overlaps["ground_fidelity"].mean == 1.0
+    assert set(overlaps["l2_fidelity_by_m"]) == {"-2", "-1", "0", "1", "2"}
+    assert all(
+        estimate.mean == 1.0
+        for estimate in overlaps["l2_fidelity_by_m"].values()
+    )
+
+
+def test_evaluate_overlaps_rejects_invalid_sample_metadata() -> None:
+    candidate = FakeCandidate()
+
+    def bad_sample(n_samples: int, seed: int) -> SampleBatch:
+        return SampleBatch(np.arange(n_samples), n_samples, 0, seed)
+
+    candidate.ground.sample = bad_sample  # type: ignore[method-assign]
+    with pytest.raises(ValueError, match="frozen burn-in"):
+        evaluate_overlaps(candidate, load_protocol(), FakeOverlapOracle())
+
+
+def test_evaluate_candidate_defaults_to_the_production_overlap_builder() -> None:
+    parameter = inspect.signature(evaluate_candidate).parameters[
+        "overlap_oracle_builder"
+    ]
+
+    assert parameter.default is build_ed_overlap_oracle
 
 
 def test_collect_evidence_uses_the_frozen_sampling_schedule() -> None:
@@ -278,11 +496,17 @@ def test_clean_evaluation_reveals_only_after_audit_and_builds_exact_schema(
 ) -> None:
     project_root, _, manifest_path, oracle_path, protocol = make_frozen_run(tmp_path)
     oracle_calls: list[str] = []
+    overlap_builder_calls: list[dict[str, Any]] = []
     progress: list[str] = []
 
     def recording_oracle_loader(raw: str) -> dict[str, Any]:
         oracle_calls.append("oracle")
         return json.loads(raw)
+
+    def recording_overlap_builder(physics: Any) -> FakeOverlapOracle:
+        assert progress[-1].startswith("reveal:")
+        overlap_builder_calls.append(dict(physics))
+        return FakeOverlapOracle()
 
     record = evaluate_candidate(
         candidate=FakeCandidate(),
@@ -293,10 +517,12 @@ def test_clean_evaluation_reveals_only_after_audit_and_builds_exact_schema(
         oracle_path=oracle_path,
         training_seed=848,
         oracle_loader=recording_oracle_loader,
+        overlap_oracle_builder=recording_overlap_builder,
         progress=progress.append,
     )
 
     assert oracle_calls == ["oracle"]
+    assert overlap_builder_calls == [dict(protocol.physics)]
     assert len(progress) == 2
     assert progress[0].startswith("audit:")
     assert progress[1].startswith("reveal:")
@@ -335,6 +561,30 @@ def test_clean_evaluation_reveals_only_after_audit_and_builds_exact_schema(
     assert record["resources"]["checkpoint_bytes"] >= 512
     assert record["resources"]["effective_sample_size"] == 65536.0
     assert record["resources"]["ess_per_second"] > 0.0
+    assert set(record["ed_comparison"]) == {
+        "ground_absolute_error",
+        "excited_absolute_error_by_m",
+        "gap_absolute_error",
+        "gap_z_score",
+        "ground_fidelity",
+        "l2_fidelity_by_m",
+        "minimum_l2_fidelity",
+        "overlap_wall_seconds",
+    }
+    assert record["ed_comparison"]["ground_fidelity"] == {
+        "mean": 1.0,
+        "standard_error": 0.0,
+        "effective_sample_size": 4096.0,
+    }
+    assert set(record["ed_comparison"]["l2_fidelity_by_m"]) == {
+        "-2",
+        "-1",
+        "0",
+        "1",
+        "2",
+    }
+    assert record["ed_comparison"]["minimum_l2_fidelity"] == 1.0
+    assert record["ed_comparison"]["overlap_wall_seconds"] > 0.0
     assert validate_run_record(record) is None
 
 
@@ -346,10 +596,15 @@ def test_tampered_manifest_stops_before_collection_or_oracle_read(
     )
     candidate = FakeCandidate()
     oracle_calls: list[str] = []
+    overlap_builder_calls: list[str] = []
 
     def recording_oracle_loader(raw: str) -> dict[str, Any]:
         oracle_calls.append("oracle")
         return json.loads(raw)
+
+    def recording_overlap_builder(physics: Any) -> FakeOverlapOracle:
+        overlap_builder_calls.append("overlap")
+        return FakeOverlapOracle()
 
     with pytest.raises(ValueError, match="manifest audit failed"):
         evaluate_candidate(
@@ -361,10 +616,12 @@ def test_tampered_manifest_stops_before_collection_or_oracle_read(
             oracle_path=tmp_path / "missing-oracle.json",
             training_seed=848,
             oracle_loader=recording_oracle_loader,
+            overlap_oracle_builder=recording_overlap_builder,
         )
 
     assert candidate.ground.sample_calls == []
     assert oracle_calls == []
+    assert overlap_builder_calls == []
 
 
 @pytest.mark.parametrize(
@@ -378,6 +635,14 @@ def test_tampered_manifest_stops_before_collection_or_oracle_read(
                 blindness={"human_blind": False, "oracle_isolated": False}
             ),
             "blindness mismatch",
+        ),
+        (
+            lambda record: record["ed_comparison"].pop("ground_fidelity"),
+            "overlap schema mismatch",
+        ),
+        (
+            lambda record: record["ed_comparison"]["l2_fidelity_by_m"].pop("2"),
+            "overlap M set mismatch",
         ),
     ],
 )
@@ -393,6 +658,7 @@ def test_validate_run_record_rejects_schema_drift(
         project_root=project_root,
         oracle_path=oracle_path,
         training_seed=848,
+        overlap_oracle_builder=build_fake_overlap_oracle,
     )
     changed = copy.deepcopy(record)
     mutation(changed)
@@ -436,6 +702,57 @@ def test_validate_run_record_rejects_invalid_gate_values_and_semantics(
         project_root=project_root,
         oracle_path=oracle_path,
         training_seed=848,
+        overlap_oracle_builder=build_fake_overlap_oracle,
+    )
+    changed = copy.deepcopy(record)
+    mutation(changed)
+
+    with pytest.raises(ValueError, match=message):
+        validate_run_record(changed)
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda record: record["ed_comparison"]["ground_fidelity"].__setitem__(
+                "mean", 1.1
+            ),
+            "fidelity mean",
+        ),
+        (
+            lambda record: record["ed_comparison"]["l2_fidelity_by_m"]["0"].__setitem__(
+                "standard_error", -0.1
+            ),
+            "fidelity standard_error",
+        ),
+        (
+            lambda record: record["ed_comparison"].__setitem__(
+                "minimum_l2_fidelity", float("nan")
+            ),
+            "minimum L2 fidelity",
+        ),
+        (
+            lambda record: record["ed_comparison"].__setitem__(
+                "overlap_wall_seconds", 0.0
+            ),
+            "overlap wall time",
+        ),
+    ],
+)
+def test_validate_run_record_rejects_invalid_overlap_values(
+    tmp_path: Path, mutation: Any, message: str
+) -> None:
+    project_root, _, manifest_path, oracle_path, protocol = make_frozen_run(tmp_path)
+    record = evaluate_candidate(
+        candidate=FakeCandidate(),
+        diagnostics=FakeDiagnostics(),
+        protocol=protocol,
+        manifest_path=manifest_path,
+        project_root=project_root,
+        oracle_path=oracle_path,
+        training_seed=848,
+        overlap_oracle_builder=build_fake_overlap_oracle,
     )
     changed = copy.deepcopy(record)
     mutation(changed)
@@ -454,6 +771,7 @@ def test_write_json_report_is_strict_and_restorable(tmp_path: Path) -> None:
         project_root=project_root,
         oracle_path=oracle_path,
         training_seed=848,
+        overlap_oracle_builder=build_fake_overlap_oracle,
     )
     output = tmp_path / "nested" / "report.json"
 
@@ -479,6 +797,7 @@ def test_write_json_report_preserves_old_target_when_replace_fails(
         project_root=project_root,
         oracle_path=oracle_path,
         training_seed=848,
+        overlap_oracle_builder=build_fake_overlap_oracle,
     )
     output = tmp_path / "report.json"
     output.write_text("old report\n", encoding="utf-8")
@@ -510,6 +829,16 @@ def test_cli_roundtrip_with_an_in_memory_synthetic_factory(
 
     module.factory = factory  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, module.__name__, module)
+    def evaluate_with_fake_overlap(**kwargs: Any) -> dict[str, Any]:
+        return evaluate_candidate(
+            **kwargs,
+            overlap_oracle_builder=build_fake_overlap_oracle,
+        )
+
+    monkeypatch.setattr(
+        "run_scalable_evaluator.evaluate_candidate",
+        evaluate_with_fake_overlap,
+    )
     output = tmp_path / "cli" / "report.json"
 
     exit_code = main(
@@ -546,6 +875,9 @@ def test_cli_roundtrip_with_an_in_memory_synthetic_factory(
     assert restored["resources"]["n8_smoke_complete"] is True
     assert restored["resources"]["effective_sample_size"] == 65536.0
     assert restored["resources"]["ess_per_second"] > 0.0
+    assert restored["ed_comparison"]["ground_fidelity"]["mean"] == 1.0
+    assert restored["ed_comparison"]["minimum_l2_fidelity"] == 1.0
+    assert restored["ed_comparison"]["overlap_wall_seconds"] > 0.0
     assert restored["gates"]["scalable_v1_pass"] is True
 
 

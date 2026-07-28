@@ -18,6 +18,7 @@ from .gates import (
     apply_ed_reveal,
     evaluate_pre_reveal,
 )
+from .overlap import build_ed_overlap_oracle, evaluate_overlaps
 from .protocol import ProtocolConfig
 from .resources import RuntimeMeter
 from .statistics import blocking_estimate, combine_independent
@@ -26,6 +27,21 @@ from .statistics import blocking_estimate, combine_independent
 SCHEMA_VERSION = "challenge-15-scalable-v1.0"
 L2_M_VALUES = (-2, -1, 0, 1, 2)
 L2_M_KEYS = frozenset(str(m) for m in L2_M_VALUES)
+FIDELITY_ESTIMATE_KEYS = frozenset(
+    {"mean", "standard_error", "effective_sample_size"}
+)
+ED_COMPARISON_KEYS = frozenset(
+    {
+        "ground_absolute_error",
+        "excited_absolute_error_by_m",
+        "gap_absolute_error",
+        "gap_z_score",
+        "ground_fidelity",
+        "l2_fidelity_by_m",
+        "minimum_l2_fidelity",
+        "overlap_wall_seconds",
+    }
+)
 BLINDNESS_RECORD = {"human_blind": False, "oracle_isolated": True}
 RUN_RECORD_KEYS = frozenset(
     {
@@ -205,6 +221,9 @@ def evaluate_candidate(
     oracle_path: Path,
     training_seed: int,
     oracle_loader: Callable[[str], Mapping[str, Any]] = json.loads,
+    overlap_oracle_builder: Callable[
+        [Mapping[str, Any]], Any
+    ] = build_ed_overlap_oracle,
     progress: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     if progress is not None:
@@ -249,6 +268,22 @@ def evaluate_candidate(
         oracle_loader(oracle_text),
         protocol,
     )
+    with RuntimeMeter() as overlap_meter:
+        overlap_oracle = overlap_oracle_builder(protocol.physics)
+        overlaps = evaluate_overlaps(candidate, protocol, overlap_oracle)
+    ground_fidelity = overlaps["ground_fidelity"]
+    l2_fidelity_by_m = overlaps["l2_fidelity_by_m"]
+    revealed["ed_comparison"].update(
+        ground_fidelity=ground_fidelity.to_dict(),
+        l2_fidelity_by_m={
+            magnetic_number: estimate.to_dict()
+            for magnetic_number, estimate in l2_fidelity_by_m.items()
+        },
+        minimum_l2_fidelity=float(
+            min(estimate.mean for estimate in l2_fidelity_by_m.values())
+        ),
+        overlap_wall_seconds=float(overlap_meter.wall_seconds),
+    )
     revealed.update(
         schema_version=SCHEMA_VERSION,
         protocol_sha256=protocol.sha256,
@@ -286,6 +321,80 @@ def validate_run_record(record: Mapping[str, Any]) -> None:
 
     if record.get("blindness") != BLINDNESS_RECORD:
         raise ValueError("run record blindness mismatch")
+
+    ed_comparison = record.get("ed_comparison")
+    if (
+        not isinstance(ed_comparison, Mapping)
+        or set(ed_comparison) != ED_COMPARISON_KEYS
+    ):
+        raise ValueError("run record overlap schema mismatch")
+    ground_fidelity = ed_comparison.get("ground_fidelity")
+    _validate_fidelity_record(ground_fidelity)
+    l2_fidelity_by_m = ed_comparison.get("l2_fidelity_by_m")
+    if (
+        not isinstance(l2_fidelity_by_m, Mapping)
+        or set(l2_fidelity_by_m) != L2_M_KEYS
+    ):
+        raise ValueError("run record overlap M set mismatch")
+    for estimate in l2_fidelity_by_m.values():
+        _validate_fidelity_record(estimate)
+
+    minimum_l2_fidelity = ed_comparison.get("minimum_l2_fidelity")
+    if (
+        type(minimum_l2_fidelity) is not float
+        or not math.isfinite(minimum_l2_fidelity)
+        or minimum_l2_fidelity < 0.0
+        or minimum_l2_fidelity > 1.0
+    ):
+        raise ValueError("run record minimum L2 fidelity must be finite and bounded")
+    expected_minimum = min(
+        estimate["mean"] for estimate in l2_fidelity_by_m.values()
+    )
+    if not math.isclose(
+        minimum_l2_fidelity,
+        expected_minimum,
+        rel_tol=0.0,
+        abs_tol=1.0e-15,
+    ):
+        raise ValueError("run record minimum L2 fidelity semantics mismatch")
+    overlap_wall_seconds = ed_comparison.get("overlap_wall_seconds")
+    if (
+        type(overlap_wall_seconds) is not float
+        or not math.isfinite(overlap_wall_seconds)
+        or overlap_wall_seconds <= 0.0
+    ):
+        raise ValueError("run record overlap wall time must be finite and positive")
+
+
+def _validate_fidelity_record(estimate: Any) -> None:
+    if not isinstance(estimate, Mapping) or set(estimate) != FIDELITY_ESTIMATE_KEYS:
+        raise ValueError("run record fidelity estimate schema mismatch")
+    mean = estimate.get("mean")
+    if (
+        type(mean) is not float
+        or not math.isfinite(mean)
+        or mean < 0.0
+        or mean > 1.0
+    ):
+        raise ValueError("run record fidelity mean must be finite and bounded")
+    standard_error = estimate.get("standard_error")
+    if (
+        type(standard_error) is not float
+        or not math.isfinite(standard_error)
+        or standard_error < 0.0
+    ):
+        raise ValueError(
+            "run record fidelity standard_error must be finite and nonnegative"
+        )
+    effective_sample_size = estimate.get("effective_sample_size")
+    if (
+        type(effective_sample_size) is not float
+        or not math.isfinite(effective_sample_size)
+        or effective_sample_size <= 0.0
+    ):
+        raise ValueError(
+            "run record fidelity effective_sample_size must be finite and positive"
+        )
 
 
 def write_json_report(result: Mapping[str, Any], output: Path) -> Path:
