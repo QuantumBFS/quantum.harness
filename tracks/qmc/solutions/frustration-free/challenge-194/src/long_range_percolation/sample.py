@@ -7,6 +7,27 @@ import numpy as np
 from .union_find import UnionFind
 
 
+def _validated_int64_array(array: object, name: str) -> np.ndarray:
+    values = np.asarray(array)
+    dtype = values.dtype
+    if dtype == np.bool_:
+        raise ValueError(f"{name} must use an integer dtype")
+    if np.issubdtype(dtype, np.floating):
+        raise ValueError(f"{name} must use an integer dtype")
+    if np.issubdtype(dtype, np.complexfloating):
+        raise ValueError(f"{name} must use an integer dtype")
+    if dtype == np.object_:
+        raise ValueError(f"{name} must use an integer dtype")
+    if not np.issubdtype(dtype, np.integer):
+        raise ValueError(f"{name} must use an integer dtype")
+    if np.issubdtype(dtype, np.unsignedinteger) and values.size:
+        if np.any(values > np.iinfo(np.int64).max):
+            raise ValueError(
+                f"{name} contains values that cannot be represented as int64"
+            )
+    return np.array(values, dtype=np.int64, copy=True)
+
+
 @dataclass(frozen=True)
 class GraphSample:
     length: int
@@ -20,8 +41,8 @@ class GraphSample:
             or self.length < 1
         ):
             raise ValueError("length must be a positive integer")
-        edges = np.array(self.edges, dtype=np.int64, copy=True)
-        labels = np.array(self.labels, dtype=np.int64, copy=True)
+        edges = _validated_int64_array(self.edges, "edges")
+        labels = _validated_int64_array(self.labels, "labels")
         if edges.ndim != 2 or edges.shape[1:] != (2,):
             raise ValueError("edges must have shape (n_edges, 2)")
         if labels.shape != (self.length,):
