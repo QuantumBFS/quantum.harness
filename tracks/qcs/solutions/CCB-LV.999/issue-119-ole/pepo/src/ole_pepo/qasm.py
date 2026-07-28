@@ -51,7 +51,7 @@ def _unsupported(line_number: int, statement: str) -> ValueError:
 
 
 def _parse_angle(expression: str) -> float:
-    compact = re.sub(r"\s+", "", expression)
+    compact = expression.strip()
     if _SIGNED_DECIMAL.fullmatch(compact):
         value = float(compact)
         if math.isfinite(value):

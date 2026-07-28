@@ -74,14 +74,14 @@ def test_parser_supports_a_single_qubit_barrier():
         pytest.param("rx(pi/2) q[80];", id="outside-register"),
         pytest.param("cz q[52],q[52];", id="repeated-cz-endpoint"),
         pytest.param("rx(sin(pi/2)) q[52];", id="nested-angle"),
+        pytest.param("rx(p i/2) q[52];", id="whitespace-inside-pi-token"),
+        pytest.param("rx(1 . 5) q[52];", id="whitespace-inside-decimal-token"),
         pytest.param("barrier q[80];", id="barrier-outside-register"),
     ],
 )
 def test_parser_rejects_outside_strict_subset(changed: str):
     """Breaks if malformed supported-gate syntax is accepted."""
-    if changed.startswith("rx(sin"):
-        text = TINY_QASM.replace("rx(pi/2) q[52];", changed)
-    elif changed.startswith("rx(pi/2) q[80]"):
+    if changed.startswith("rx"):
         text = TINY_QASM.replace("rx(pi/2) q[52];", changed)
     elif changed.startswith("cz"):
         text = TINY_QASM.replace("cz q[52],q[53];", changed)
