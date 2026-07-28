@@ -25,11 +25,16 @@ Hamiltonian (issue convention):
 - **C1 Hamiltonian.** Exactly as above; Jₑ = Jₘ = 1 sets the energy unit.
 - **C2 Operators.** Aₛ = ∏_{i∈s} Xᵢ (star, X-type); B_p = ∏_{i∈p} Zᵢ (plaquette, Z-type).
 - **C3 Lattice and unit cell.** Square lattice of vertices; spin-½ on every *edge*.
-  Unit cell = one vertex plus its two outgoing edges (east and north) → **2 physical
-  spins per unit cell**; tensors T_E (horizontal edge) and T_N (vertical edge), related
-  by rotation. Stars are centered on vertices, plaquettes on faces. The exact PEPSKit
-  `InfiniteSquare` shape mapping (e.g. unitcell=(1,2)) is fixed at implementation time
-  and recorded in run.json.
+  Unit cell = one **composite site**: a vertex together with its two outgoing edges
+  (east and north) → **2 physical spins per composite site** (fused dim-4 leg).
+  **One PEPS tensor per composite site** (the vertex simplex V and the two edge
+  projection tensors P_E, P_N contracted — the split V/P network is the parent
+  construction, see §4.2 note; on the split network the 4-body gates are not
+  applicable by simple update). Stored as a **(2,2) supercell** (4 composite sites =
+  8 physical spins), required by the SU cluster machinery. Stars are centered on
+  vertices, plaquettes on faces; both are **3-site L-shaped terms** on the composite
+  lattice: star (r,c) = {E(r,c), E(r,c−1), N(r,c), N(r+1,c)}, plaquette (r,c) =
+  {E(r,c), E(r−1,c), N(r,c), N(r,c+1)} — incidence identical to M1's ED construction.
 - **C4 Environment contraction.** iPEPS in the thermodynamic limit. Default: CTMRG
   (PEPSKit). Sanctioned alternative: boundary-MPS / VUMPS fixed points (MPSKit;
   arXiv:1810.07006). Both share the environment bond dimension χ; one cross-check at a
@@ -95,14 +100,25 @@ insertions at separation r where accessible.
    storage alone does not imply any physical symmetry.
 2. **Exact virtual-ℤ₂ invariance of the local tensor.** A constraint on tensor
    *values*: each local tensor is an exact ℤ₂ intertwiner — nonzero components only
-   where total leg charge is conserved (for the exact toric-code tensor:
-   Tᵖ_{lrud} = δ_{p, l⊕r⊕u⊕d}, i.e. p⊕l⊕r⊕u⊕d = 0). Maintained exactly through
-   initialization, simple/full update, AD optimization, and field continuation (C7).
-3. **Pulling-through relations.** The operational content of the symmetry. Single
-   layer: Z_v^⊗4·T = Z_p·T (since (−1)^{l+r+u+d} = (−1)^p) — a virtual-Z string pulls
-   through a tensor, converting to a physical Z. Double layer: bra/ket phases cancel,
-   so virtual-Z strings pull through the norm network freely; hence [𝕋, 𝒵] = 0 with
-   𝒵 the global virtual-Z string, and twist seams are well-defined and movable.
+   where total leg charge is conserved. For the exact toric-code tensor (amended at
+   M2): the composite rank-6 tensor
+   T^{pE pN}_{nesw} = (−1)^{pE·e + pN·n} · δ_{n⊕e⊕s⊕w,0} / 2,
+   i.e. the vertex parity simplex with the edge-occupancy copied to the physical
+   spins **in the X basis** (amplitude ⟨p|H|a⟩). Rationale: the naive Z-basis copy
+   (δ_{pE,e}δ_{pN,n}·δ_{parity}) builds the Z-basis *cycle gas* — the toric code
+   with stars↔plaquettes exchanged (⟨Aₛ⟩ = 0 for our H); the X-basis copy builds
+   the cycle gas in the X basis = the cut gas in the Z basis = ∏ₛ(1+Aₛ)|0⟩.
+   Verified: E_cell = −8 and ⟨Aₛ⟩ = ⟨B_p⟩ = 1 to 2e-16 by CTMRG with zero
+   optimization. Maintained exactly through initialization, simple/full update,
+   AD optimization, and field continuation (C7).
+3. **Pulling-through relations.** The operational content of the symmetry. For the
+   composite rank-6 tensor (amended at M2): Z^{⊗4}·T = T on the virtual legs
+   (virtual invariance), and a virtual Z on a single leg equals a physical Z on the
+   corresponding edge spin (Z_e·T = Z_{pE}·T, Z_n·T = Z_{pN}·T) — a virtual-Z
+   string pulls through a tensor and can be absorbed by physical Z's. Double layer:
+   bra/ket phases cancel, so virtual-Z strings pull through the norm network freely;
+   hence [𝕋, 𝒵] = 0 with 𝒵 the global virtual-Z string, and twist seams are
+   well-defined and movable.
 4. **Symmetry of transfer-matrix boundary fixed points — NOT imposed.** The boundary
    fixed points (dominant eigenvectors of 𝕋₍g,α₎, MPOs on the virtual legs) may or may
    not be 𝒵-symmetric. Their symmetry breaking, sector degeneracy, and endpoint form
@@ -112,10 +128,13 @@ insertions at separation r where accessible.
 
 ## 5. Verification protocol
 
-- **V1 (machinery floor, h=0).** With the M2-optimized h=0 state, every non-vacuum
-  sector shows |λ/λ₀| below a documented residual floor set by the optimization error
-  (ideal fixed point: ξ = 0). If the floor is too high for M5, tighten the h=0
-  optimization or trigger the exact-tensor fallback (below).
+- **V1 (machinery floor, h=0).** With the M2-optimized h=0 state, in every non-vacuum
+   sector the leading **form-factor-selected** eigenvalue (§3 selection rule) shows
+   |λ/λ₀| below a documented residual floor set by the optimization error (ideal
+   fixed point: ξ = 0). The boundary-parity partner of the vacuum — the (0,−)
+   dominant state whose endpoint form factor vanishes — is exempt by construction
+   (amended wording at M2). If the floor is too high for M5, tighten the h=0
+   optimization or trigger the exact-tensor fallback (below).
 - **V2 (e/m assignment).** Along (hₓ, 0): hₓ anticommutes with B_p = ∏Z, so it
   condenses plaquette violations — the sector assigned m = (1,+) must show growing ξ
   while e = (0,−) stays short-ranged. If observed reversed, swap e ↔ m labels for our
@@ -125,9 +144,9 @@ insertions at separation r where accessible.
   optimizer budget in M2-Fallback is exhausted; (ii) sector structure at h=0
   unresolvable (vacuum degeneracy / parity blocks not identifiable); (iii) M5 requires
   a cleaner ξ floor than optimization reached. Action: construct the analytic
-  ℤ₂-graded toric-code tensor Tᵖ_{lrud} = δ_{p, l⊕r⊕u⊕d}, validate the full machinery
-  with it (E₀/N = −1 exactly, ξ = 0 in all sectors), then use it as the h=0 anchor and
-  as the M3 initialization.
+  ℤ₂-graded toric-code tensor of §4.2 (composite rank-6, X-basis copy), validate the
+  full machinery with it (E_cell = −8 exactly, ξ = 0 in all sectors), then use it as
+  the h=0 anchor and as the M3 initialization.
 - **Dense/unconstrained validation comparison (limited).** One nonsymmetric ComplexF64
   energy comparison at 1–2 mid-field points, small D, quantifying the exact-ℤ₂ ansatz
   restriction; recorded in run.json. Never the production path.
@@ -186,10 +205,18 @@ insertions at separation r where accessible.
 - **Acceptance:** |E₀/N + 1| ≤ 1e-6 (target 1e-8); ⟨Aₛ⟩=⟨B_p⟩=1 within the same
   tolerance site-resolved; spectrum shows the expected fixed-point structure;
   CTMRG/VUMPS cross-check agrees.
-- **Failure/fallback (in order):** new random seed; more SU steps / smaller Trotter
-  step; AD settings (iterscheme :diffgauge vs :fixed, LBFGS memory); then the
-  **exact-tensor fallback** (§5).
-- **Depends/status:** M0, M1 → **pending**.
+- **Failure/fallback (in order):** new random seed; stage-wise SU schedule (pin one
+  stabilizer sector, then grow the other — validated 2026-07-28, see FINDINGS.md §6)
+  or product-state init; AD settings (gradient-solver/gauge mode, LBFGS memory);
+  then the **exact-tensor fallback** (§5).
+- **Depends/status:** M0, M1 → **in progress (2026-07-28)** — machinery validated
+  (exact tensor: E_cell = −8, stabilizers = 1 to 2e-16; normalization anchored:
+  `expectation_value` = unit-cell total; SU gates exact per single-gate tanh(2dt)
+  check). **Key finding:** random-init full-circuit SU stalls at non-ground fixed
+  points at every D tested (2, 3, 4, 6); documented with mechanism and the validated
+  working routes (stage-wise SU, product-state init) in `FINDINGS.md`. SU-stage
+  schedule amendment (stage-wise SU: pin A sector → plaquette-only phase) proposed,
+  awaiting ratification; AD and spectrum/VUMPS stages pending.
 
 ### M3 — Adiabatic ground states along (hₓ, 0) (workflow step 4)
 - **Purpose:** production ground states on the MVP path.
