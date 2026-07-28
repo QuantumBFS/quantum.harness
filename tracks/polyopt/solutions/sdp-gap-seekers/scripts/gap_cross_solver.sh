@@ -46,19 +46,24 @@ end
 open("gap_cross_solver.results", "w") do io
     println(io, "# gamma  mosek_flag  mosek_term  mosek_primal  | clarabel_flag  clarabel_term  clarabel_primal  | agree?")
 end
-for gamma in [0.25, 0.26, 0.30]
+for gamma in [0.25, 0.26]
     print("gamma=", gamma, " : "); flush(stdout)
-    # Mosek
+    # Mosek (default path)
     rm = try
-        certify_Ising_gap(N, H, gamma, d, QUIET=true, optimizer=Mosek.Optimizer)
+        certify_Ising_gap(N, H, gamma, d, QUIET=true,
+                          optimizer=optimizer_with_attributes(Mosek.Optimizer))
     catch e
         println("MOSEK EXC: ", sprint(showerror, e)); flush(stdout)
         (flag=-1, termination="EXC", primal="EXC", dual="EXC", objective=NaN,
          farkas_mmat=nothing, farkas_min_eig=nothing)
     end
-    # Clarabel (independent)
+    flush(stdout)
+    # Clarabel (independent, pure Julia) -- bounded so it returns a verdict on
+    # this complex SDP where it is far slower than Mosek.
     rc = try
-        certify_Ising_gap(N, H, gamma, d, QUIET=true, optimizer=Clarabel.Optimizer)
+        certify_Ising_gap(N, H, gamma, d, QUIET=true,
+                          optimizer=optimizer_with_attributes(Clarabel.Optimizer,
+                              "max_iter" => 500, "time_limit" => 120))
     catch e
         println("CLARABEL EXC: ", sprint(showerror, e)); flush(stdout)
         (flag=-1, termination="EXC", primal="EXC", dual="EXC", objective=NaN,
