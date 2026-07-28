@@ -9,11 +9,12 @@ include("augmented_step.jl")
 include("floquet_operator.jl")
 include("steady_state.jl")
 include("correlations.jl")
+include("heat_current.jl")
 include("reference_data.jl")
 include("redfield_magnus.jl")
 include("diagnostics.jl")
 
-export RunConfig, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
+export RunConfig, Fig3Config, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
        drive_hamiltonian, system_hamiltonian, bath_correlation, bath_gamma,
        UniformIFAdapter, UniformIFBuildSettings, adapt_uniform_pt,
        installed_uniformtempo_revision, uniform_if_metadata, uniform_if_key,
@@ -24,14 +25,18 @@ export RunConfig, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
        apply_period_adjoint!, precompute_half_step_channels,
        estimated_dense_bytes, dense_floquet, FloquetLinearOperator,
        FloquetEigenResult, FloquetWarmStart, validate_warm_start,
-       solve_floquet_steady_state, reduce_system_state, micromotion_states,
+       solve_floquet_steady_state, normalize_floquet_trace,
+       reduce_system_state, micromotion_states,
        InsertionConvention, CorrelationCheckpoint,
        save_correlation_checkpoint, load_correlation_checkpoint,
        floquet_correlation_serial!, floquet_correlation_threaded!,
        correlation_diagnostics, periodic_autocorrelation_fft,
        periodic_autocorrelation_direct, decompose_correlation,
+       spectral_density, continuous_current_fft, continuous_current_direct!,
+       DeltaPeak, delta_peak_weights, run_fig3,
        floquet_eigen_diagnostics,
-       load_reference_curve, redfield_magnus!, redfield_magnus_paper_formula,
+       load_reference_curve, fig3_reference_grid, load_fig3_reference,
+       fig3_reference_path, redfield_magnus!, redfield_magnus_paper_formula,
        run_fig2, parse_exact_baseline, render_refreshed_errors
 
 end

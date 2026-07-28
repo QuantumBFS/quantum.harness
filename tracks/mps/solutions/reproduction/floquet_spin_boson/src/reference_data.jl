@@ -25,3 +25,30 @@ function load_reference_curve(path::AbstractString, expected_times::AbstractVect
     end
     return (; times, values)
 end
+
+"""The exact frequency grid declared by the authors' Zenodo Fig. 3 script."""
+fig3_reference_grid() = collect(0.005:0.005:15.0)
+
+"""Load a headerless Fig. 3 current vector on the exact 3000-point author grid."""
+function load_fig3_reference(path::AbstractString)
+    grid = fig3_reference_grid()
+    loaded = load_reference_curve(path, grid)
+    all(isfinite, loaded.values) ||
+        throw(ArgumentError("Fig. 3 reference contains non-finite current values"))
+    return (; omega=loaded.times, current=loaded.values)
+end
+
+function _fig3_frequency_label(omega_d::Real)
+    return isinteger(omega_d) ? string(round(Int, omega_d)) : string(Float64(omega_d))
+end
+
+"""Resolve the exact author filename for one of the six Fig. 3 points."""
+function fig3_reference_path(reference_dir::AbstractString,
+                             drive::Symbol, omega_d::Real)
+    drive in (:longitudinal, :transversal) ||
+        throw(ArgumentError("Fig. 3 reference drive is invalid"))
+    label = _fig3_frequency_label(omega_d)
+    filename =
+        "heat_current_$(drive)_Ω_1_ϵ_d_1_ω_d_$(label)_α_0.05_ω_c_2.5_bond_dim_235_dt_0.052.csv"
+    return joinpath(reference_dir, filename)
+end

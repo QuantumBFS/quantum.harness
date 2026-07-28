@@ -51,6 +51,7 @@ end
 
 function _krylov_eigenpairs(floquet::FloquetOperator, initial::Vector{ComplexF64},
                             candidate_count::Int, tolerance::Real,
+                            physical_tolerance::Real,
                             max_iterations::Int)
     n = size(floquet, 1)
     count = min(candidate_count, n - 1)
@@ -87,7 +88,8 @@ function _krylov_eigenpairs(floquet::FloquetOperator, initial::Vector{ComplexF64
         adjoint(FloquetLinearOperator(floquet)), left, conj(λ))
     converged = right_info.converged >= count &&
         left_info.converged >= count &&
-        right_residual <= tolerance && left_residual <= tolerance
+        right_residual <= tolerance && left_residual <= tolerance &&
+        abs(λ - 1) <= physical_tolerance
     return FloquetEigenResult(
         λ, subleading, gap, right, left, right_residual, left_residual,
         right_info.numiter + left_info.numiter,
@@ -186,7 +188,8 @@ function solve_floquet_steady_state(floquet::FloquetOperator;
                                  Int(max_iterations))
     end
     result = _krylov_eigenpairs(
-        floquet, initial, Int(candidate_count), tolerance, Int(max_iterations))
+        floquet, initial, Int(candidate_count), tolerance,
+        physical_eigenvalue_tolerance, Int(max_iterations))
     result.converged && return result
     fallback = _period_iteration(floquet, result.right_vector, tolerance,
                                  physical_eigenvalue_tolerance,
@@ -216,6 +219,43 @@ end
 reduce_system_state(augmented::AbstractVector, adapter::UniformIFAdapter;
                     normalize::Bool=true) =
     reduce_system_state(augmented, adapter.v_left; normalize)
+
+"""
+Fix the physical trace of an augmented Floquet state while preserving ⟨LF|RF⟩=1.
+
+Krylov eigenvectors have an arbitrary complex gauge. Correlation insertions
+must act on a trace-one augmented state, not merely on a biorthogonally
+normalized eigenvector.
+"""
+function normalize_floquet_trace(result::FloquetEigenResult,
+                                 v_left::AbstractVector)
+    reduced = reduce_system_state(
+        result.right_vector, v_left; normalize=false)
+    trace_scale = ComplexF64(reduced.trace)
+    abs(trace_scale) > sqrt(eps(Float64)) ||
+        throw(ArgumentError("Floquet eigenvector has vanishing physical trace"))
+    right = result.right_vector ./ trace_scale
+    # dot(conj(trace_scale)*L, R/trace_scale) == dot(L,R)
+    left = conj(trace_scale) .* result.left_vector
+    abs(dot(left, right) - 1) <= 256eps(Float64) *
+        max(norm(left) * norm(right), 1.0) ||
+        throw(ErrorException(
+            "physical trace normalization lost left/right biorthogonality"))
+    return FloquetEigenResult(
+        result.eigenvalue,
+        result.subleading_eigenvalue,
+        result.spectral_gap,
+        right,
+        left,
+        result.right_residual,
+        result.left_residual,
+        result.iterations,
+        result.matvec_count,
+        result.backend,
+        result.converged,
+        result.fallback_used,
+        result.nonconvergence_reason)
+end
 
 function micromotion_states(floquet::FloquetOperator, initial::AbstractVector,
                             v_left::AbstractVector, model::SpinBosonModel;

@@ -1,0 +1,28 @@
+# Local smoke test only: deliberately not a paper-precision configuration.
+mode = "quick"
+dt_target = 3.141592653589793 # π; smoke test only
+longitudinal_frequencies = [10.0, 5.0, 2.5]
+transversal_frequencies = [2.0, 1.5, 1.0]
+correlation_lag_steps = 256
+tail_count = 32
+tail_norm_tolerance = 1.0e-3
+tail_mean_tolerance = 1.0e-4
+tail_slope_tolerance = 1.0e-4
+c0_tolerance = 1.0e-2
+omega_max = 15.0
+nmax = 8
+weight_tolerance = 0.0
+eigensolver_tolerance = 1.0e-8
+eigensolver_max_iterations = 300
+
+compression_tolerance = 1.0e-3
+cache_dir = "output/fig3-quick/cache"
+rebuild_cache = false
+temperature = 0.0
+auto_nc = false
+n_c = 64
+truncation = "rel"
+cap_rank = 16
+max_rank = 16
+low_rank_svd = false
+svd_filtering_tolerance = 0.0

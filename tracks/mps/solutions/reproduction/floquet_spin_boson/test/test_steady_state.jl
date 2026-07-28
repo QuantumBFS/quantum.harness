@@ -55,6 +55,17 @@ end
     @test result.eigenvalue ≈ 1 atol=1e-11
 end
 
+@testset "Krylov residual cannot certify a nonstationary leading mode" begin
+    nonstationary = Diagonal(ComplexF64[0.9989, 0.8, 0.6, 0.4])
+    result = solve_floquet_steady_state(one_phase_floquet(nonstationary);
+        candidate_count=3, tolerance=1e-12,
+        physical_eigenvalue_tolerance=1e-6,
+        max_iterations=100)
+    @test !result.converged
+    @test result.fallback_used
+    @test result.nonconvergence_reason == :dominant_eigenvalue_not_physical
+end
+
 @testset "complex biorthogonal normalization convention" begin
     basis = ComplexF64[
         1 + im  1  0  0
@@ -93,6 +104,30 @@ end
     # A raw sum over the bond index would give diag(0.7,0.3), proving that
     # reduction follows UniformTEMPO's v_l contraction instead.
     @test normalized.density_matrix ≈ expected / 1.2
+end
+
+@testset "Floquet eigenvectors acquire physical trace without losing biorthogonality" begin
+    right = (2 + im) .* ComplexF64[1, 0, 0, 1]
+    left = right ./ dot(right, right)
+    result = FloquetEigenResult(
+        1 + 0im, 0.7 + 0im, 0.3, right, left,
+        1e-12, 2e-12, 4, 12, :krylov, true, false, nothing)
+    physical = normalize_floquet_trace(result, ComplexF64[1])
+    @test reduce_system_state(
+        physical.right_vector, ComplexF64[1]; normalize=false).trace ≈ 1
+    @test dot(physical.left_vector, physical.right_vector) ≈ 1
+    @test physical.eigenvalue == result.eigenvalue
+    @test physical.right_residual == result.right_residual
+    @test result.right_vector == right
+
+    identity4 = Matrix{ComplexF64}(I, 4, 4)
+    floquet = FloquetOperator(
+        reshape(identity4, 1, 4, 1, 4), [identity4], [identity4])
+    correlation = zeros(ComplexF64, 2)
+    floquet_correlation_serial!(
+        correlation, floquet, [physical.right_vector],
+        SIGMA_Z, ComplexF64[1])
+    @test correlation[1] ≈ 1
 end
 
 @testset "period iteration fallback reports convergence and failure" begin
