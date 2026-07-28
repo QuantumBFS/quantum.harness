@@ -634,19 +634,78 @@ def test_result_payload_contains_replayable_terminal_evidence(
             )
 
 
-def test_r01_fixture_covers_both_number_conserving_cells_without_duplicates() -> None:
-    """Catches missing, repeated, or convention-drifted R01 evidence cells."""
+def test_r01_fixture_schema_v2_orders_e001_and_e002_without_losing_cells() -> None:
+    """Catches retaining the single-experiment schema or dropping an R01 cell."""
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    cells = [
-        cell
-        for cell in payload["cells"]
-        if cell["family"] == "number-conserving"
+    assert payload["fixture_schema_version"] == 2
+    assert payload["protocol"] == "overlap-klein-v1"
+    assert "experiment_id" not in payload
+    assert "source_commit" not in payload
+    assert "package_versions" not in payload
+    assert "cells" not in payload
+
+    experiments = payload["experiments"]
+    assert [
+        (experiment["experiment_id"], experiment["source_commit"])
+        for experiment in experiments
+    ] == [
+        (
+            "R01-E001",
+            "24c80c4e1c1f182278e799b7f5de53deb65bf2f4",
+        ),
+        (
+            "R01-E002",
+            "d42786ae8a47899c90ac4811424c66aad2910713",
+        ),
     ]
-    assert [cell["mask"] for cell in cells] == [
-        "rings-bridges",
-        "rings-diagonals-bridges",
+    assert [
+        [
+            (cell["family"], cell["mask"])
+            for cell in experiment["cells"]
+        ]
+        for experiment in experiments
+    ] == [
+        [
+            ("number-conserving", "rings-bridges"),
+            ("number-conserving", "rings-diagonals-bridges"),
+        ],
+        [
+            ("bdg", "rings-bridges"),
+            ("bdg", "rings-diagonals-bridges"),
+        ],
     ]
-    for cell in cells:
+
+    for experiment in experiments:
+        assert len(experiment["cells"]) == 2
+        for cell in experiment["cells"]:
+            system = build_system(cell["family"], cell["mask"])
+            expected_labels = bridge_labels(cell["family"])
+            assert cell["system_shape"] == list(system.coefficients.shape)
+            assert cell["anchor_count"] == len(expected_labels)
+            assert [anchor["label"] for anchor in cell["anchors"]] == list(
+                expected_labels
+            )
+
+
+def test_r01_fixture_covers_both_number_conserving_cells_without_duplicates() -> None:
+    """Catches missing, repeated, or convention-drifted R01-E001 evidence."""
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    experiment = next(
+        experiment
+        for experiment in payload["experiments"]
+        if experiment["experiment_id"] == "R01-E001"
+    )
+    assert experiment["source_commit"] == (
+        "24c80c4e1c1f182278e799b7f5de53deb65bf2f4"
+    )
+    assert [
+        (cell["family"], cell["mask"], cell["system_shape"])
+        for cell in experiment["cells"]
+    ] == [
+        ("number-conserving", "rings-bridges", [560, 24]),
+        ("number-conserving", "rings-diagonals-bridges", [748, 32]),
+    ]
+    for cell in experiment["cells"]:
         system = build_system(cell["family"], cell["mask"])
         expected_labels = bridge_labels(cell["family"])
         assert cell["system_shape"] == list(system.coefficients.shape)
@@ -656,45 +715,250 @@ def test_r01_fixture_covers_both_number_conserving_cells_without_duplicates() ->
         )
 
 
+def test_r01_fixture_v2_records_exact_raw_provenance_per_host() -> None:
+    """Catches swapped workers, roles, hashes, or false cross-host metadata."""
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    observed = []
+    for experiment in payload["experiments"]:
+        for cell in experiment["cells"]:
+            assert cell[
+                "scientific_payload_equal_after_removing_only_top_level_execution"
+            ] is True
+            assert cell["package_versions"] == {
+                "numpy": "2.4.6",
+                "oracle": "0.1.0",
+                "scipy": "1.17.1",
+                "sympy": "1.14.0",
+            }
+            for raw in cell["raw_results"]:
+                assert raw["execution"]["blas_threads"] == {
+                    "MKL_NUM_THREADS": "1",
+                    "OMP_NUM_THREADS": "1",
+                    "OPENBLAS_NUM_THREADS": "1",
+                }
+                assert raw["execution"]["process_start_method"] == "spawn"
+                assert raw["execution"]["wall_time_seconds"] > 0
+            observed.append(
+                (
+                    experiment["experiment_id"],
+                    cell["family"],
+                    cell["mask"],
+                    cell["system_shape"],
+                    cell["host_role"],
+                    [
+                        (
+                            raw["role"],
+                            raw["path"],
+                            raw["sha256"],
+                            raw["execution"]["workers"],
+                        )
+                        for raw in cell["raw_results"]
+                    ],
+                )
+            )
+
+    assert observed == [
+        (
+            "R01-E001",
+            "number-conserving",
+            "rings-bridges",
+            [560, 24],
+            "WSL",
+            [
+                (
+                    "smoke",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E001-smoke-rings-bridges-attempt-01.json",
+                    "42ce1da95f7cdf4f3c9b7339001518265aa619ef1b654975ae03cdf932804da1",
+                    1,
+                ),
+                (
+                    "production",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E001-rings-bridges-attempt-01.json",
+                    "5317ca436b30bd734ad917cfe32c2c74b3436cb9f5b6165eb80dc14637a2859d",
+                    14,
+                ),
+            ],
+        ),
+        (
+            "R01-E001",
+            "number-conserving",
+            "rings-diagonals-bridges",
+            [748, 32],
+            "WSL",
+            [
+                (
+                    "smoke",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E001-smoke-rings-diagonals-bridges-attempt-01.json",
+                    "777d4ea88fb1ae4c83b20017b17e15aefeab1d8dd38650ebcc6d23f154ad0129",
+                    1,
+                ),
+                (
+                    "production",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E001-rings-diagonals-bridges-attempt-01.json",
+                    "37d175bb701c573fdba433614765fe58302ee37f764393824c89cd38ebb68e36",
+                    14,
+                ),
+            ],
+        ),
+        (
+            "R01-E002",
+            "bdg",
+            "rings-bridges",
+            [1052, 42],
+            "WSL",
+            [
+                (
+                    "smoke",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E002-smoke-rings-bridges-attempt-01.json",
+                    "e86f5e96a879f1deaab8ad4aac38d8e66aa8bf23807060b53aee14c215729788",
+                    1,
+                ),
+                (
+                    "production",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E002-rings-bridges-attempt-01.json",
+                    "ece5bc0595ffedba6633adf9afb0c19cfbfcbb9197e119929528b4297dbdf1c9",
+                    14,
+                ),
+            ],
+        ),
+        (
+            "R01-E002",
+            "bdg",
+            "rings-diagonals-bridges",
+            [1456, 58],
+            "CPU",
+            [
+                (
+                    "smoke",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E002-smoke-rings-diagonals-bridges-attempt-01.json",
+                    "dc4699c3df42720d3c4cce720124699c885d2b782ec85e9934635e5a529e8bb7",
+                    1,
+                ),
+                (
+                    "production",
+                    "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/"
+                    "R01-E002-rings-diagonals-bridges-attempt-01.json",
+                    "c5e62e1cd2c8af829c7b003d36a13460a0d965360f6c9ab8af98ccec06dcc3e3",
+                    62,
+                ),
+            ],
+        ),
+    ]
+
+
 def test_r01_fixture_classifications_are_consistent_and_all_certificates_replay() -> None:
     """Catches unsupported classifications or compact certificate corruption."""
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    cells = [
-        cell
-        for cell in payload["cells"]
-        if cell["family"] == "number-conserving"
+    experiments = payload["experiments"]
+    assert len(experiments) == 2
+    assert all(len(experiment["cells"]) == 2 for experiment in experiments)
+    assert [
+        [
+            [anchor["classification"] for anchor in cell["anchors"]]
+            for cell in experiment["cells"]
+        ]
+        for experiment in experiments
+    ] == [
+        [["certified-zero"] * 4, ["certified-zero"] * 4],
+        [["certified-zero"] * 8, ["certified-zero"] * 8],
     ]
-    assert len(cells) == 2
-    for cell in cells:
+    for experiment in experiments:
+        for cell in experiment["cells"]:
+            system = build_system(cell["family"], cell["mask"])
+            for anchor in cell["anchors"]:
+                assert anchor["positive"]["status"] in {
+                    "feasible",
+                    "infeasible",
+                }
+                assert anchor["negative"]["status"] in {
+                    "feasible",
+                    "infeasible",
+                }
+                if anchor["classification"] == "certified-feasible":
+                    replayed = 0
+                    for sign_name in ("positive", "negative"):
+                        branch = anchor[sign_name]
+                        if "certificate" in branch:
+                            certificate = certificate_from_json(
+                                branch["certificate"], system
+                            )
+                            assert verify_primal(system, certificate)
+                            assert certificate.anchor_label == anchor["label"]
+                            assert certificate.anchor_sign == (
+                                1 if sign_name == "positive" else -1
+                            )
+                            replayed += 1
+                    assert replayed >= 1
+                elif anchor["classification"] == "certified-zero":
+                    assert anchor["positive"]["status"] == "infeasible"
+                    assert anchor["negative"]["status"] == "infeasible"
+                    certificate = certificate_from_json(
+                        anchor["zero_certificate"], system
+                    )
+                    assert verify_zero_dual(system, certificate)
+                    assert certificate.anchor_label == anchor["label"]
+                elif anchor["classification"] == "numerical-only":
+                    assert "zero_certificate" not in anchor
+                else:
+                    raise AssertionError(anchor["classification"])
+
+
+def test_r01_bdg_anchor_kinds_and_number_conserving_inclusion_are_explicit() -> None:
+    """Catches conflating hopping/pair anchors or a zero-pairing hopping ray."""
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    bdg_experiment = next(
+        experiment
+        for experiment in payload["experiments"]
+        if experiment["experiment_id"] == "R01-E002"
+    )
+    expected_kinds = [
+        ("h0<-4", "hopping"),
+        ("h1<-5", "hopping"),
+        ("h4<-0", "hopping"),
+        ("h5<-1", "hopping"),
+        ("pa0,4", "pair-annihilation"),
+        ("pa1,5", "pair-annihilation"),
+        ("pc0,4", "pair-creation"),
+        ("pc1,5", "pair-creation"),
+    ]
+    hopping_primal_count = 0
+    for cell in bdg_experiment["cells"]:
+        assert [
+            (anchor["label"], anchor["anchor_kind"])
+            for anchor in cell["anchors"]
+        ] == expected_kinds
         system = build_system(cell["family"], cell["mask"])
+        pairing_indices = [
+            index
+            for index, label in enumerate(system.labels)
+            if label.startswith(("pa", "pc"))
+        ]
+        assert pairing_indices
         for anchor in cell["anchors"]:
-            if anchor["classification"] == "certified-feasible":
-                replayed = 0
-                for sign_name in ("positive", "negative"):
-                    branch = anchor[sign_name]
-                    if "certificate" in branch:
-                        certificate = certificate_from_json(
-                            branch["certificate"], system
-                        )
-                        assert verify_primal(system, certificate)
-                        assert certificate.anchor_label == anchor["label"]
-                        assert certificate.anchor_sign == (
-                            1 if sign_name == "positive" else -1
-                        )
-                        replayed += 1
-                assert replayed >= 1
-            elif anchor["classification"] == "certified-zero":
-                assert anchor["positive"]["status"] == "infeasible"
-                assert anchor["negative"]["status"] == "infeasible"
+            if anchor["anchor_kind"] != "hopping":
+                continue
+            for sign_name in ("positive", "negative"):
+                branch = anchor[sign_name]
+                if "certificate" not in branch:
+                    continue
+                hopping_primal_count += 1
                 certificate = certificate_from_json(
-                    anchor["zero_certificate"], system
+                    branch["certificate"], system
                 )
-                assert verify_zero_dual(system, certificate)
-                assert certificate.anchor_label == anchor["label"]
-            elif anchor["classification"] == "numerical-only":
-                assert "zero_certificate" not in anchor
-            else:
-                raise AssertionError(anchor["classification"])
+                assert isinstance(certificate, ExactPrimalCertificate)
+                assert any(
+                    sp.simplify(certificate.coefficients[index]) != 0
+                    for index in pairing_indices
+                )
+
+    assert hopping_primal_count == 0
 
 
 def test_classifier_keeps_two_feasible_sign_certificates_separate() -> None:
