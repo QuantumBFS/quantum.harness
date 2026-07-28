@@ -133,7 +133,10 @@ def write_summary_tables(results_dir: Path, summary: dict | None = None) -> list
     ]
     failure_path = tables / "failure_modes.csv"
     _write_csv(failure_path, failure_rows, GROUP_FIELDS + ("failure_rate",))
-    return [group_path, headline_path, failure_path]
+
+    recovery_path = tables / "recovery_study.csv"
+    _write_csv(recovery_path, recovery_study_rows(summary["groups"]), RECOVERY_FIELDS)
+    return [group_path, headline_path, failure_path, recovery_path]
 
 
 def _headline_rows(groups: list[dict]) -> list[dict]:
@@ -147,6 +150,84 @@ def _headline_rows(groups: list[dict]) -> list[dict]:
             "random_subspace_nelder_mead",
         } and row["k"] == benchmark_k.get(row["system"]):
             rows.append(row)
+    return rows
+
+
+RECOVERY_FIELDS = (
+    "system",
+    "mismatch",
+    "shots_per_query",
+    "benchmark_k",
+    "benchmark_success_rate",
+    "benchmark_median_queries_to_target",
+    "best_k",
+    "best_success_rate",
+    "best_median_queries_to_target",
+    "best_median_final_infidelity",
+    "recovery_delta_success",
+    "recovered_by_widening",
+)
+
+
+def recovery_study_rows(groups: list[dict]) -> list[dict]:
+    benchmark_k = {"one_qubit_x": 3, "two_qubit_cz": 15}
+    rows = []
+    for system in sorted({row["system"] for row in groups}):
+        for mismatch in sorted({row["mismatch"] for row in groups if row["system"] == system}):
+            shots_values = sorted(
+                {
+                    row["shots_per_query"]
+                    for row in groups
+                    if row["system"] == system and row["mismatch"] == mismatch
+                }
+            )
+            for shots in shots_values:
+                hessian = [
+                    row
+                    for row in groups
+                    if row["system"] == system
+                    and row["mismatch"] == mismatch
+                    and row["shots_per_query"] == shots
+                    and row["method"] == "hessian_subspace_nelder_mead"
+                ]
+                if not hessian:
+                    continue
+                benchmark = next(
+                    (row for row in hessian if row["k"] == benchmark_k.get(system)),
+                    None,
+                )
+                if benchmark is None:
+                    continue
+                best = sorted(
+                    hessian,
+                    key=lambda row: (
+                        -row["success_rate"],
+                        row["median_queries_to_target"]
+                        if row["median_queries_to_target"] is not None
+                        else 10**9,
+                        row["median_final_infidelity"],
+                    ),
+                )[0]
+                rows.append(
+                    {
+                        "system": system,
+                        "mismatch": mismatch,
+                        "shots_per_query": shots,
+                        "benchmark_k": benchmark["k"],
+                        "benchmark_success_rate": benchmark["success_rate"],
+                        "benchmark_median_queries_to_target": benchmark[
+                            "median_queries_to_target"
+                        ],
+                        "best_k": best["k"],
+                        "best_success_rate": best["success_rate"],
+                        "best_median_queries_to_target": best["median_queries_to_target"],
+                        "best_median_final_infidelity": best["median_final_infidelity"],
+                        "recovery_delta_success": best["success_rate"]
+                        - benchmark["success_rate"],
+                        "recovered_by_widening": best["k"] != benchmark["k"]
+                        and best["success_rate"] > benchmark["success_rate"],
+                    }
+                )
     return rows
 
 

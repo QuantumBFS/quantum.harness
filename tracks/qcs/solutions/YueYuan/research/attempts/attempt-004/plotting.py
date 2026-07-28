@@ -21,6 +21,7 @@ REQUIRED_FIGURES = (
     "advantage_vs_gap.png",
     "success_rate_vs_shots.png",
     "failure_mode.png",
+    "recovery_study.png",
 )
 
 
@@ -203,6 +204,39 @@ def _plot_failure_mode(path: Path, rows: list[dict]) -> None:
     plt.close(fig)
 
 
+def _plot_recovery_study(path: Path, rows: list[dict]) -> None:
+    recovery_rows = analysis.recovery_study_rows(rows)
+    max_shots = max([row["shots_per_query"] for row in recovery_rows], default=0)
+    focus = [row for row in recovery_rows if row["shots_per_query"] == max_shots]
+    labels = [f"{row['system']}\n{row['mismatch']}" for row in focus]
+    benchmark = [row["benchmark_success_rate"] for row in focus]
+    best = [row["best_success_rate"] for row in focus]
+    xs = list(range(len(focus)))
+    width = 0.38
+
+    fig, ax = plt.subplots(figsize=(7.5, 4.4))
+    ax.bar([x - width / 2 for x in xs], benchmark, width=width, label="benchmark k")
+    ax.bar([x + width / 2 for x in xs], best, width=width, label="best widened k")
+    for x, row in zip(xs, focus):
+        ax.text(
+            x + width / 2,
+            row["best_success_rate"] + 0.03,
+            f"k={row['best_k']}",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+    ax.set_title("Recovery From Widening Hessian k")
+    ax.set_ylabel("success rate")
+    ax.set_ylim(0.0, 1.1)
+    ax.set_xticks(xs, labels, rotation=35, ha="right")
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(path, dpi=160)
+    plt.close(fig)
+
+
 def _simple_bar(path: Path, title: str, labels: list[str], values: list[float], ylabel: str) -> None:
     fig, ax = plt.subplots(figsize=(7, 4.4))
     ax.bar(range(len(labels)), values)
@@ -314,4 +348,5 @@ def make_all(results_dir: Path) -> list[Path]:
     _plot_advantage(figures / "advantage_vs_gap.png", rows)
     _plot_success_vs_shots(figures / "success_rate_vs_shots.png", rows)
     _plot_failure_mode(figures / "failure_mode.png", rows)
+    _plot_recovery_study(figures / "recovery_study.png", rows)
     return [figures / name for name in REQUIRED_FIGURES]

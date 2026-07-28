@@ -55,6 +55,7 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
         "advantage_vs_gap.png",
         "success_rate_vs_shots.png",
         "failure_mode.png",
+        "recovery_study.png",
     }
     actual = {path.name for path in (out_dir / "figures").glob("*.png")}
     assert expected <= actual
@@ -72,7 +73,12 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
     } <= set(first_group)
 
     tables = out_dir / "summary_tables"
-    assert {"group_summary.csv", "headline_comparison.csv", "failure_modes.csv"} <= {
+    assert {
+        "group_summary.csv",
+        "headline_comparison.csv",
+        "failure_modes.csv",
+        "recovery_study.csv",
+    } <= {
         path.name for path in tables.glob("*.csv")
     }
     with (tables / "group_summary.csv").open() as handle:
@@ -84,6 +90,16 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
             "queries_to_target_q75",
             "shots_to_target_q25",
             "shots_to_target_q75",
+        } <= set(reader.fieldnames or [])
+    with (tables / "recovery_study.csv").open() as handle:
+        reader = csv.DictReader(handle)
+        assert {
+            "benchmark_k",
+            "benchmark_success_rate",
+            "best_k",
+            "best_success_rate",
+            "recovery_delta_success",
+            "recovered_by_widening",
         } <= set(reader.fieldnames or [])
 
 

@@ -50,7 +50,8 @@ task and 10 concurrent tasks. It produced:
 - 144 Hessian spectra;
 - 207 aggregate method/system/gap/shot/k groups;
 - CSV summary tables for group statistics, headline comparisons, and failure
-  modes;
+  modes, plus a recovery study comparing benchmark `k` against the best widened
+  Hessian subspace;
 - zero tracebacks in the checked Slurm logs.
 
 Generated artifacts are intentionally ignored by git and are stored locally under
@@ -66,6 +67,7 @@ Required figures were regenerated under
 - `advantage_vs_gap.png`
 - `success_rate_vs_shots.png`
 - `failure_mode.png`
+- `recovery_study.png`
 
 The headline query/shot, success-rate, and failure-mode figures use visible
 interquartile or confidence intervals. Machine-readable tables are generated
@@ -74,6 +76,7 @@ under `tracks/qcs/results/YueYuan/attempt-004/full_reachable/summary_tables/`:
 - `group_summary.csv`
 - `headline_comparison.csv`
 - `failure_modes.csv`
+- `recovery_study.csv`
 
 ## Headline Results
 
@@ -116,6 +119,26 @@ These failures support the challenge's intended conclusion: Hessian subspaces
 help when the model and device remain sufficiently aligned, but fixed subspaces
 can fail under rotated or missing true-device directions.
 
+## Recovery Study
+
+The recovery study compares the benchmark Hessian dimension against the best
+widened Hessian dimension already present in the full `k` sweep. At 2048 shots:
+
+| System | Gap | Benchmark `k` success | Best widened `k` | Best success | Delta |
+|---|---:|---:|---:|---:|---:|
+| one-qubit X | large | 0.875 | 8 | 1.000 | +0.125 |
+| one-qubit X | medium | 0.750 | 4 | 1.000 | +0.250 |
+| one-qubit X | small | 1.000 | 3 | 1.000 | +0.000 |
+| two-qubit CZ | large | 0.000 | 3 | 0.000 | +0.000 |
+| two-qubit CZ | medium | 0.000 | 3 | 0.125 | +0.125 |
+| two-qubit CZ | small | 0.625 | 32 | 0.750 | +0.125 |
+
+This separates two outcomes: widening the Hessian subspace can recover some
+aligned or moderately shifted cases, but it does not solve the hardest
+two-qubit large-gap case. That residual failure is the clearest evidence that
+some mismatch rotates or adds relevant directions beyond what a fixed model
+subspace captures.
+
 ## GPU Note
 
 A GPU probe allocated one GPU successfully, but the installed JAX environment was
@@ -136,8 +159,9 @@ the useful resource for this attempt.
   recorded in JSONL.
 - Success confidence intervals plus query/shot interquartile ranges: recorded in
   `summary.json` and CSV summary tables.
-- Seven required figures: generated from the full sweep with visible uncertainty
-  intervals where applicable.
+- Seven required figures plus one recovery-study figure: generated from the full
+  sweep with visible uncertainty intervals where applicable.
+- Recovery study: documents when widening `k` helps and when it fails.
 - Failure case: documented for large mismatch and for the initial weak-entangler
   two-qubit model.
 - Reproducibility: Slurm scripts, local smoke runner, full-sweep runner, tests,
@@ -152,8 +176,8 @@ Local verification after the two-qubit reachability fix:
 - Broader YueYuan attempt tests: passing (`33 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 12 groups).
-- Figure/table generation: passing (`1,656` rows, `207` groups, seven PNGs,
-  three CSV tables).
+- Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
+  four CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
 
 The generated files are intentionally ignored by git.
