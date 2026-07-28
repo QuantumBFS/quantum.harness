@@ -1153,3 +1153,25 @@
   在 Windows 中文环境按 GBK 解码，触发 `UnicodeDecodeError`，未生成 HTML。
 - 修复：report JSON、lattix scene、viewer bundle 的文本读取以及 HTML 写出全部显式
   使用 UTF-8。该修复不改变报告 schema 或页面内容，仅消除平台默认编码差异。
+
+### F-60：#232 图 33 从控制题切换到真实状态多项式目标
+
+- 目标锁定 arXiv:2310.00612 Table 4 的七算符图 #33：
+  `β(G)=sup_ρ Σ_i⟨A_i⟩²`，边反对易、非边对易，已知下界 `α(G)=2`。
+- 新 evaluator 固定图、算符代数、目标函数和评分公式；候选只能选择最多 16 个
+  三次或四次 square-free 基向量。verifier 独立重建状态多项式矩矩阵的全部恒等式，
+  因而 LLM 不能通过修改物理问题或放松约束获得高分。
+- 完整 degree-2 基线为 `upper=2.002487136812566`，完整 degree-3 为
+  `upper=2.000057479970073`。两者均强于论文 reduced hierarchy 的对应数值；
+  后续仍须导出并精确验证对偶 SOHS，数值 SDP 不直接当作研究证书。
+- 真实首代实验 `e77d30c4b48b45fd`：GLM 提议 5 个交叠 triples，
+  `upper 2.002487136812566 → 2.0022720549588313`，
+  `score 0.5000 → 0.5299`，矩阵仅由 29×29 增至 34×34。这是有效但尚小的真实提升。
+
+### F-61：模型名列表不等于跨 endpoint fallback
+
+- 把 `openai/glm-5.2` 直接放到 primary model router 后，网关仍使用 primary Qwen
+  的 token-plan endpoint，导致 GLM 名字也收到同一配额错误。
+- 正确做法是让 GLM 使用独立的 `OMNIEVOLVE_LLM_FALLBACK_*` 凭证与 endpoint；
+  当前 #232 运行在 Qwen 刷新前临时把 GLM fallback endpoint 映射为 primary，
+  避免每次先浪费三次 Qwen 重试。密钥只存在 gitignored `.env`，不写入日志或提交。

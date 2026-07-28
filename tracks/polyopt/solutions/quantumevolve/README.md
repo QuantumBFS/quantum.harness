@@ -4,7 +4,7 @@ This directory registers team **quantumevolve** for
 [challenge #232](https://github.com/QuantumBFS/quantum.harness/issues/232).
 It deliberately avoids an HPC-first workflow.
 
-The current seed is a seconds-scale CHSH control problem:
+The root seed is a seconds-scale CHSH control problem:
 
 - `initial_code.py` supplies an exact SOHS upper certificate and an imperfect
   explicit two-qubit strategy.
@@ -38,3 +38,8 @@ python verify_candidate.py initial_code.py
 The first evolution target is the explicit strategy angle pair.  It gives a
 continuous gap signal while the exact certificate gate proves that the
 evaluation pipeline is working before any larger SDP is introduced.
+
+The real campaign now lives in `graph33/`. It targets the unresolved
+seven-observable state-polynomial constant from Table 4 of arXiv:2310.00612
+and evolves sparse higher-degree moment bases. The CHSH files remain here as a
+regression control.
