@@ -1,0 +1,83 @@
+Issue #128 deep verification transcript
+=======================================
+
+Status
+------
+valid: true
+verification_level: deep
+deep_proof_regenerated: true
+test_suite: 56 passed, 7 slow tests deselected
+
+Benchmark
+---------
+Hamiltonian: periodic square-lattice spin-1/2 isotropic Heisenberg
+normalization: h_ij = (XX+YY+ZZ)/4
+L: 12
+N: 144
+T: 1
+operator-norm tolerance: 1e-6
+cost: group exponentials, bond propagators, and 3-CNOT-per-bond upper bound
+
+Published rigorous baseline
+---------------------------
+formula: five-copy fourth-order Suzuki formula
+published theorem: Childs-Su-Tran-Wiebe-Zhu high-order commutator bound
+norm instantiation: expand each partial Hamiltonian sum, then local Pauli-l1
+all 31 theorem centers scanned: center 20 is minimal
+certified site-density upper bound: 164.97591695274392
+steps: 393
+group exponentials: 11791
+bond propagators: 848952
+CNOT upper bound: 2546856
+
+Candidate certificate
+---------------------
+formula: the same five-copy fourth-order Suzuki formula
+method: local log E5 + E7 majorant + exact right-generator tail
+certified E5 site Pauli-l1 upper bound: 1.0312915120959002
+certified E7 site majorant: 9652.49828556245
+
+At r=136:
+degree-4 contribution: 4.340985168056117e-7
+degree-5 contribution: 3.830281030637750e-8
+degree-6 contribution: 2.230486607644384e-7
+degree-7 contribution: 2.933476798355164e-8
+degree >= 8 tail:      2.663070253253453e-7
+global error upper bound: 9.910917811853245e-7
+
+At r=135:
+global error upper bound: 1.033576466170403e-6
+
+Therefore r=136 is the smallest step count accepted by this certificate.
+
+Candidate resources
+-------------------
+steps: 136
+group exponentials: 4081
+bond propagators: 293832
+CNOT upper bound: 881496
+
+Certified comparison
+--------------------
+exact group/CNOT improvement ratio: 11791/4081
+decimal improvement: 2.889242832639059
+global twofold target met: true
+
+Additional published recursive-Suzuki audit
+-------------------------------------------
+The same generic locality tail theorem gives:
+
+order  steps  stages/step  merged group exponentials
+2      44946  7            269677
+4       1212  31            36361
+6        554  151           83101
+8        503  751          377251
+
+These are conservative generic-order bounds, not replacements for the
+sharper Childs fourth-order baseline above. They establish that simply
+raising the recursive Suzuki order does not create a closer rigorous
+competitor for this benchmark.
+
+Verifier command
+----------------
+PYTHONPATH=src python scripts/verify.py certificates/issue128-certificate.json --deep
