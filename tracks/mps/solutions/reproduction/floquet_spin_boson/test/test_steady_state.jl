@@ -115,6 +115,34 @@ end
     @test failed.nonconvergence_reason == :maximum_iterations
 end
 
+@testset "period iteration never certifies an unphysical dominant mode" begin
+    unphysical = one_phase_floquet(
+        Diagonal(ComplexF64[1.02, 1.0, 0.8, 0.5]))
+    result = solve_floquet_steady_state(unphysical;
+        backend=:period_iteration, tolerance=1e-3,
+        max_iterations=200, initial_vector=ones(ComplexF64, 4))
+    @test !result.converged
+    @test result.nonconvergence_reason == :dominant_eigenvalue_not_physical
+end
+
+@testset "period iteration requires conjugate left and right eigenvalues" begin
+    # Right iteration reaches λ=1, while the same initial vector is exactly
+    # orthogonal to the corresponding right eigenvector used by Q† iteration.
+    basis = ComplexF64[
+        1  1  0  0
+        0 -1  0  0
+        0  0  1  0
+        0  0  0  1
+    ]
+    mismatch = basis * Diagonal(ComplexF64[0.9, 1.0, 0.5, 0.4]) / basis
+    result = solve_floquet_steady_state(one_phase_floquet(mismatch);
+        backend=:period_iteration, tolerance=1e-8,
+        max_iterations=300, initial_vector=ones(ComplexF64, 4))
+    @test !result.converged
+    @test result.nonconvergence_reason == :left_right_eigenvalue_mismatch
+    @test result.left_residual > 1e-4
+end
+
 @testset "micromotion caches states and closes one period" begin
     identity4 = Matrix{ComplexF64}(I, 4, 4)
     floquet = FloquetOperator(reshape(identity4, 1, 4, 1, 4),

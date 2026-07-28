@@ -119,7 +119,8 @@ function _period_eigenvector(operator, initial::Vector{ComplexF64},
 end
 
 function _period_iteration(floquet::FloquetOperator, initial::Vector{ComplexF64},
-                           tolerance::Real, max_iterations::Int)
+                           tolerance::Real, physical_tolerance::Real,
+                           max_iterations::Int)
     right, λ, right_residual, right_iterations, right_ops, right_ok =
         _period_eigenvector(FloquetLinearOperator(floquet), initial,
                             tolerance, max_iterations)
@@ -132,24 +133,38 @@ function _period_iteration(floquet::FloquetOperator, initial::Vector{ComplexF64}
     right ./= overlap
     right_residual = _relative_residual(FloquetLinearOperator(floquet), right, λ)
     left_residual = _relative_residual(
-        adjoint(FloquetLinearOperator(floquet)), left, left_λ)
-    converged = right_ok && left_ok &&
-        right_residual <= tolerance && left_residual <= tolerance
+        adjoint(FloquetLinearOperator(floquet)), left, conj(λ))
+    eigenvalue_consistency_tolerance = max(physical_tolerance, 10tolerance)
+    reason = if !(right_ok && left_ok)
+        :maximum_iterations
+    elseif abs(λ - 1) > physical_tolerance
+        :dominant_eigenvalue_not_physical
+    elseif abs(left_λ - conj(λ)) > eigenvalue_consistency_tolerance
+        :left_right_eigenvalue_mismatch
+    elseif right_residual > tolerance || left_residual > tolerance
+        :residual_tolerance_not_met
+    else
+        nothing
+    end
+    converged = isnothing(reason)
     return FloquetEigenResult(
         λ, nothing, NaN, right, left, right_residual, left_residual,
         right_iterations + left_iterations, right_ops + left_ops,
         :period_iteration, converged, true,
-        converged ? nothing : :maximum_iterations)
+        reason)
 end
 
 function solve_floquet_steady_state(floquet::FloquetOperator;
         backend::Symbol=:krylov, candidate_count::Integer=4,
         tolerance::Real=1e-10, max_iterations::Integer=1000,
+        physical_eigenvalue_tolerance::Real=1e-6,
         initial_vector=nothing, warm_start::Union{Nothing,FloquetWarmStart}=nothing,
         exact_dt::Union{Nothing,Real}=nothing,
         q_identity::Union{Nothing,AbstractString}=nothing)
     tolerance > 0 || throw(ArgumentError("eigensolver tolerance must be positive"))
     max_iterations > 0 || throw(ArgumentError("maximum iterations must be positive"))
+    physical_eigenvalue_tolerance > 0 ||
+        throw(ArgumentError("physical eigenvalue tolerance must be positive"))
     candidate_count > 0 || throw(ArgumentError("candidate count must be positive"))
     backend in (:krylov, :period_iteration) ||
         throw(ArgumentError("unsupported Floquet eigensolver backend"))
@@ -166,13 +181,16 @@ function solve_floquet_steady_state(floquet::FloquetOperator;
     norm(initial) > 0 || throw(ArgumentError("initial vector must be nonzero"))
 
     if backend === :period_iteration
-        return _period_iteration(floquet, initial, tolerance, Int(max_iterations))
+        return _period_iteration(floquet, initial, tolerance,
+                                 physical_eigenvalue_tolerance,
+                                 Int(max_iterations))
     end
     result = _krylov_eigenpairs(
         floquet, initial, Int(candidate_count), tolerance, Int(max_iterations))
     result.converged && return result
-    fallback = _period_iteration(floquet, result.right_vector,
-                                 tolerance, Int(max_iterations))
+    fallback = _period_iteration(floquet, result.right_vector, tolerance,
+                                 physical_eigenvalue_tolerance,
+                                 Int(max_iterations))
     return fallback
 end
 
