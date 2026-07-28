@@ -36,6 +36,9 @@
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity，并反推奇环吸引 spinless-fermion 模型的新候选；
+- [GRADED_MONOMIAL_RESULTS.md](GRADED_MONOMIAL_RESULTS.md)：graded crossing 的循环
+  定理、三角受挫物理模型、任意历史证据、real-exponential grade ancilla 加强版和
+  文献边界；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；

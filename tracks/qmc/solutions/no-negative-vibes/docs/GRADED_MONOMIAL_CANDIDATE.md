@@ -3,7 +3,8 @@
 日期：2026-07-28  
 负责人：`xianzhipan`  
 分支：`work/xianzhi/graded-monomial`  
-状态：`proof-candidate`
+状态：`physical-candidate`（一般证明、物理模型和 real-exponential ancilla lift 已完成；
+文献与已知机制排重未完成）
 
 ## 1. 候选定义
 
@@ -157,3 +158,13 @@ U_e/t_e = r_e - 1/r_e
 - 奇环模型可由一个固定局域规范直接化为已知 stoquastic 模型；
 - 文献表明这正是已有 loop/meron 算法的标准重写。
 
+## 7. 首轮结果
+
+一般循环证明、三角形吸引 spinless-fermion 模型、任意历史测试和单-mode
+grade-ancilla 实指数加强版均已完成，详见
+[GRADED_MONOMIAL_RESULTS.md](GRADED_MONOMIAL_RESULTS.md)。
+
+当前没有触发数学或物理停止条件；但初步文献审计确认 `r=1` 边界与
+graded permutation / `su(1|1)` 模型相关，逐 permutation-sign 重组也邻近
+meron-cluster 思想。因此候选只升级到 `physical-candidate`，不升级为
+`challenge-ready`。
