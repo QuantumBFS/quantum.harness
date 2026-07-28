@@ -48,6 +48,9 @@ def nelder_mead(objective, x0: np.ndarray, step: float, max_queries: int, bounds
             break
         values.append(evaluate(point))
 
+    if dim == 0 or queries >= max_queries:
+        return OptimizeResult(best_x=best_x, best_value=best_value, queries=queries, history=history)
+
     alpha, gamma, rho, sigma = 1.0, 2.0, 0.5, 0.5
     while queries < max_queries:
         order = np.argsort(values)

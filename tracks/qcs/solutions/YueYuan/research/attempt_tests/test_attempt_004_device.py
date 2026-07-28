@@ -74,3 +74,27 @@ def test_attempt_004_nelder_mead_uses_only_scalar_objective():
     assert result.queries == len(calls)
     assert result.queries <= 80
     assert len(result.history) == result.queries
+
+
+def test_attempt_004_nelder_mead_handles_zero_dimensional_search():
+    import optimizers
+
+    calls = []
+
+    def objective(x):
+        calls.append(np.asarray(x).copy())
+        return 0.25
+
+    result = optimizers.nelder_mead(
+        objective,
+        np.zeros(0),
+        step=0.2,
+        max_queries=8,
+        bounds=(-1.0, 1.0),
+    )
+
+    assert result.best_x.shape == (0,)
+    assert result.best_value == 0.25
+    assert result.queries == 1
+    assert len(calls) == 1
+    assert len(result.history) == 1
