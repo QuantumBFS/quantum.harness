@@ -46,6 +46,20 @@ include(joinpath(
     "FullSpinPermutationPrimalGapJuMP.jl",
 ))
 using .FullSpinPermutationPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinConeReduction.jl",
+))
+using .FullSpinConeReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinConeReducedPrimalGapJuMP.jl",
+))
+using .FullSpinConeReducedPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -296,6 +310,74 @@ using JuMP
     )
     @test full_spin_jump_model.assembly_sha256 ==
           full_spin_reduced.assembly_sha256
+
+    cone_truth =
+        full_spin_nontrivial_cone_redundancy_truth(full_spin_reduced)
+    @test cone_truth.exact
+    @test cone_truth.orbit_block_count == 3
+    @test cone_truth.orbit_block_dimensions == [1, 81, 81]
+    @test cone_truth.orbit_projection_exact
+    @test cone_truth.orbit_congruence_exact
+    @test cone_truth.orbit_entry_count == 6_643
+    @test cone_truth.stable_cross_blocks_zero
+    @test cone_truth.stable_cross_entry_count == 3_240
+    @test cone_truth.stable_bases_invertible
+    @test cone_truth.stable_basis_dimensions == [1, 81, 81]
+    @test cone_truth.conjugation_parity_uniform
+
+    cone_reduced = assemble_full_spin_cone_reduced_primal(
+        full_spin_reduced;
+        verify_truth=false,
+    )
+    cone_repeated = assemble_full_spin_cone_reduced_primal(
+        full_spin_reduced;
+        verify_truth=false,
+    )
+    cone_report =
+        full_spin_cone_reduced_assembly_report(cone_reduced)
+    @test cone_report.source_full_spin_moments == 3_250
+    @test cone_report.cone_reduced_moments <= 3_250
+    @test cone_report.eliminated_unused_moments >= 0
+    @test cone_report.removed_orbit_cones == 3
+    @test cone_report.positive_block_dimensions ==
+          [72, 36, 36, 45, 73, 36, 36, 45]
+    @test cone_report.gap_block_dimensions == [1]
+    @test cone_report.equality_count == 0
+    @test cone_report.real_psd_triangle_entries == 10_064
+    @test cone_report.maximum_psd_side_dimension == 73
+    @test cone_reduced.coefficient_map_sha256 ==
+          cone_repeated.coefficient_map_sha256
+    @test cone_reduced.assembly_sha256 ==
+          cone_repeated.assembly_sha256
+
+    cone_jump_model =
+        build_full_spin_cone_reduced_jump_primal(cone_reduced)
+    @test JuMP.num_variables(cone_jump_model.model) ==
+          cone_report.cone_reduced_moments
+    @test isempty(cone_jump_model.equality_constraints)
+    @test length(cone_jump_model.psd_constraints) == 9
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in cone_jump_model.psd_constraints
+    )) == [1, 36, 36, 36, 36, 45, 45, 72, 73]
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in cone_jump_model.psd_constraints
+    )
+    @test cone_jump_model.assembly_sha256 ==
+          cone_reduced.assembly_sha256
+    println(
+        "[full-spin-cone-truth] moments=",
+        cone_report.cone_reduced_moments,
+        ", removed_cones=",
+        cone_report.removed_orbit_cones,
+        ", psd_entries=",
+        cone_report.real_psd_triangle_entries,
+        ", congruence_checks=",
+        cone_truth.orbit_entry_count,
+    )
+    flush(stdout)
 end
 
 @testset "V4 character multiplication and projection" begin
