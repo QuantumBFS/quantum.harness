@@ -2,6 +2,7 @@ import json
 import pathlib
 import subprocess
 import sys
+import csv
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[6]
@@ -58,6 +59,32 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
     actual = {path.name for path in (out_dir / "figures").glob("*.png")}
     assert expected <= actual
     assert (out_dir / "summary.json").exists()
+
+    summary = json.loads((out_dir / "summary.json").read_text())
+    first_group = summary["groups"][0]
+    assert {
+        "success_ci95_low",
+        "success_ci95_high",
+        "queries_to_target_q25",
+        "queries_to_target_q75",
+        "shots_to_target_q25",
+        "shots_to_target_q75",
+    } <= set(first_group)
+
+    tables = out_dir / "summary_tables"
+    assert {"group_summary.csv", "headline_comparison.csv", "failure_modes.csv"} <= {
+        path.name for path in tables.glob("*.csv")
+    }
+    with (tables / "group_summary.csv").open() as handle:
+        reader = csv.DictReader(handle)
+        assert {
+            "success_ci95_low",
+            "success_ci95_high",
+            "queries_to_target_q25",
+            "queries_to_target_q75",
+            "shots_to_target_q25",
+            "shots_to_target_q75",
+        } <= set(reader.fieldnames or [])
 
 
 def test_attempt_004_candidate_export_has_challenge_methods(tmp_path):

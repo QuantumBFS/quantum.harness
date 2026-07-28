@@ -49,6 +49,8 @@ task and 10 concurrent tasks. It produced:
 - 5,121 open-loop history rows;
 - 144 Hessian spectra;
 - 207 aggregate method/system/gap/shot/k groups;
+- CSV summary tables for group statistics, headline comparisons, and failure
+  modes;
 - zero tracebacks in the checked Slurm logs.
 
 Generated artifacts are intentionally ignored by git and are stored locally under
@@ -64,6 +66,14 @@ Required figures were regenerated under
 - `advantage_vs_gap.png`
 - `success_rate_vs_shots.png`
 - `failure_mode.png`
+
+The headline query/shot, success-rate, and failure-mode figures use visible
+interquartile or confidence intervals. Machine-readable tables are generated
+under `tracks/qcs/results/YueYuan/attempt-004/full_reachable/summary_tables/`:
+
+- `group_summary.csv`
+- `headline_comparison.csv`
+- `failure_modes.csv`
 
 ## Headline Results
 
@@ -124,7 +134,10 @@ the useful resource for this attempt.
   completed.
 - Query-to-target, shot-to-target, success, final fidelity, and failure status:
   recorded in JSONL.
-- Seven required figures: generated from the full sweep.
+- Success confidence intervals plus query/shot interquartile ranges: recorded in
+  `summary.json` and CSV summary tables.
+- Seven required figures: generated from the full sweep with visible uncertainty
+  intervals where applicable.
 - Failure case: documented for large mismatch and for the initial weak-entangler
   two-qubit model.
 - Reproducibility: Slurm scripts, local smoke runner, full-sweep runner, tests,
@@ -139,6 +152,8 @@ Local verification after the two-qubit reachability fix:
 - Broader YueYuan attempt tests: passing (`33 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 12 groups).
+- Figure/table generation: passing (`1,656` rows, `207` groups, seven PNGs,
+  three CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
 
 The generated files are intentionally ignored by git.
