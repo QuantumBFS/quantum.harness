@@ -235,12 +235,13 @@ install-pepskit: ## Install PEPSKit.jl + TensorKit.jl CTMRG stack into julia-env
 	@echo "Julia PEPSKit/CTMRG environment ready in julia-env/"
 	@echo "Activate with: julia --project=julia-env"
 
-install-nctssos: ## Install NCTSSoS.jl + Clarabel.jl polynomial-optimization stack into julia-env/
+install-nctssos: ## Install NCTSSoS.jl + Mosek.jl polynomial-optimization stack into julia-env/
 	@command -v julia >/dev/null 2>&1 || { echo "Julia not found. Run: make install julia"; exit 1; }
 	@mkdir -p julia-env
-	@julia --project=julia-env -e 'using NCTSSoS, Clarabel' >/dev/null 2>&1 || { cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["NCTSSoS", "Clarabel", "Plots", "JSON"])'; }
-	@julia --project=julia-env -e 'using NCTSSoS, Clarabel'
-	@echo "Julia NCTSSoS polynomial-optimization environment ready in julia-env/"
+	@julia --project=julia-env -e 'using NCTSSoS, JuMP, Mosek, MosekTools' >/dev/null 2>&1 || { cd julia-env && julia --project=. -e 'using Pkg; Pkg.add(["NCTSSoS", "JuMP", "Mosek", "MosekTools", "Plots", "JSON"])'; }
+	@julia --project=julia-env -e 'using NCTSSoS, JuMP, Mosek, MosekTools'
+	@echo "Julia NCTSSoS/Mosek polynomial-optimization environment ready in julia-env/"
+	@echo "Mosek needs a valid license: set MOSEKLM_LICENSE_FILE or place ~/mosek/mosek.lic"
 	@echo "Activate with: julia --project=julia-env"
 
 install-qmbcertify: ## Install QMBCertify.jl + Mosek structured-NPA certification stack into julia-env/
