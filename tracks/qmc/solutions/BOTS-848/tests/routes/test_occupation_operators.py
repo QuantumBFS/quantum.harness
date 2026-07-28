@@ -343,6 +343,56 @@ def test_local_estimator_preserves_ratio_before_subnormal_product() -> None:
     assert observed == pytest.approx(complex(1.0e-10), rel=1.0e-15)
 
 
+def test_local_estimator_preserves_ratio_before_overflowing_division() -> None:
+    amplitudes = {1: complex(1.0e-315), 2: complex(1.0)}
+
+    observed = local_from_neighbors(
+        1,
+        {2: complex(1.0e-315)},
+        amplitudes.__getitem__,
+    )
+
+    assert isinstance(observed, complex)
+    assert observed == pytest.approx(complex(1.0), rel=1.0e-15)
+
+
+def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> None:
+    coefficient = complex(
+        math.ldexp(1.0, -1050),
+        math.ldexp(1.0, -1051),
+    )
+    target = complex(
+        math.ldexp(1.0, 1000),
+        -math.ldexp(1.0, 999),
+    )
+    denominator = complex(
+        math.ldexp(1.0, -1000),
+        math.ldexp(1.0, -1001),
+    )
+    expected = complex(
+        math.ldexp(1.0, 950),
+        -math.ldexp(1.0, 949),
+    )
+    amplitudes = {1: denominator, 2: target}
+
+    observed = local_from_neighbors(
+        1,
+        {2: coefficient},
+        amplitudes.__getitem__,
+    )
+
+    assert isinstance(observed, complex)
+    assert observed == expected
+
+
+def test_local_estimator_rejects_mathematically_unrepresentable_term() -> None:
+    coefficient = complex(math.ldexp(1.0, 1023))
+    amplitudes = {1: complex(1.0), 2: complex(2.0)}
+
+    with pytest.raises(OverflowError, match="outside complex128 range"):
+        local_from_neighbors(1, {2: coefficient}, amplitudes.__getitem__)
+
+
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     pair_matrix = np.array(
         [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],

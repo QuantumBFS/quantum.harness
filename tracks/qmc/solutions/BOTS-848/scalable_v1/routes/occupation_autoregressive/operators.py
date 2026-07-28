@@ -305,6 +305,67 @@ def _amplitude_value(
     return value
 
 
+def _normalized_complex(value: complex) -> tuple[complex, int]:
+    """Return ``value = mantissa * 2**exponent`` with O(1) components."""
+
+    scale = max(abs(value.real), abs(value.imag))
+    if scale == 0.0:
+        return 0.0j, 0
+    _, exponent = math.frexp(scale)
+    mantissa = complex(
+        math.ldexp(value.real, -exponent),
+        math.ldexp(value.imag, -exponent),
+    )
+    return mantissa, exponent
+
+
+def _robust_complex_product_ratio(
+    coefficient: complex,
+    target: complex,
+    denominator: complex,
+) -> complex:
+    """Compute ``coefficient * target / denominator`` without order hazards.
+
+    Each finite nonzero input is split into a complex O(1) mantissa and a
+    binary exponent. Only the mantissas are multiplied and divided; the merged
+    exponent is restored once so neither fixed multiply-first nor divide-first
+    overflow/underflow can corrupt a representable result.
+    """
+
+    values = (coefficient, target, denominator)
+    if any(
+        not math.isfinite(value.real) or not math.isfinite(value.imag)
+        for value in values
+    ):
+        raise ValueError("complex product-ratio inputs must be finite")
+    if denominator == 0.0:
+        raise ValueError("complex product-ratio denominator must be nonzero")
+    if coefficient == 0.0 or target == 0.0:
+        return 0.0j
+
+    coefficient_mantissa, coefficient_exponent = _normalized_complex(coefficient)
+    target_mantissa, target_exponent = _normalized_complex(target)
+    denominator_mantissa, denominator_exponent = _normalized_complex(denominator)
+    result_mantissa = (
+        coefficient_mantissa * target_mantissa / denominator_mantissa
+    )
+    result_exponent = (
+        coefficient_exponent + target_exponent - denominator_exponent
+    )
+    try:
+        result = complex(
+            math.ldexp(result_mantissa.real, result_exponent),
+            math.ldexp(result_mantissa.imag, result_exponent),
+        )
+    except OverflowError as error:
+        raise OverflowError(
+            "complex product-ratio result is outside complex128 range"
+        ) from error
+    if not math.isfinite(result.real) or not math.isfinite(result.imag):
+        raise OverflowError("complex product-ratio result is outside complex128 range")
+    return result
+
+
 def local_from_neighbors(
     state: int,
     neighbors: Mapping[int, complex],
@@ -344,7 +405,11 @@ def local_from_neighbors(
             target,
             label="neighbor amplitude",
         )
-        numerator += coefficient * (target_amplitude / denominator)
+        numerator += _robust_complex_product_ratio(
+            coefficient,
+            target_amplitude,
+            denominator,
+        )
     return numerator
 
 
