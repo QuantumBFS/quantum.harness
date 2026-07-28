@@ -20,6 +20,7 @@ set(LIB_SOURCES
     src/lattice.cpp
     src/ed.cpp
     src/sse.cpp
+    src/berry.cpp
 )
 
 # Static library
@@ -41,12 +42,22 @@ add_executable(test_sse tests/test_sse.cpp)
 target_link_libraries(test_sse PRIVATE cm148)
 add_test(NAME test_sse COMMAND test_sse)
 
+# Test: Berry phase
+add_executable(test_berry tests/test_berry.cpp)
+target_link_libraries(test_berry PRIVATE cm148)
+add_test(NAME test_berry COMMAND test_berry)
+
 # Diagnostic driver (not part of the test suite)
 add_executable(debug_sse tools/debug_sse.cpp)
 target_link_libraries(debug_sse PRIVATE cm148)
 
 add_executable(debug_cv tools/debug_cv.cpp)
 target_link_libraries(debug_cv PRIVATE cm148)
+
+# Stage 3 square-lattice benchmark scan
+find_package(Threads REQUIRED)
+add_executable(scan_square tools/scan_square.cpp)
+target_link_libraries(scan_square PRIVATE cm148 Threads::Threads)
 
 # Enable CTest
 enable_testing()

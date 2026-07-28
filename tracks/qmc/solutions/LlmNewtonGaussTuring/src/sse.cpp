@@ -195,53 +195,80 @@ SSEResult SSE::run() {
     const double qmin = lat_.smallest_momentum();
     const std::array<double, 3> qvec = {qmin, 0.0, 0.0};
 
-    int total = params_.n_thermal + params_.n_bins * params_.sweeps_per_bin;
+    // precompute the q_min phase factors
+    std::vector<double> cosq(N_), sinq(N_);
+    for (int i = 0; i < N_; ++i) {
+        double qr = qvec[0] * lat_.site_coords[i][0]
+                  + qvec[1] * lat_.site_coords[i][1]
+                  + qvec[2] * lat_.site_coords[i][2];
+        cosq[i] = std::cos(qr);
+        sinq[i] = std::sin(qr);
+    }
+
+    SSEResult res;
+    res.bin_E.reserve(params_.n_bins);
+    res.bin_m2.reserve(params_.n_bins);
+    res.bin_m4.reserve(params_.n_bins);
+    res.bin_S0.reserve(params_.n_bins);
+    res.bin_Sq.reserve(params_.n_bins);
+
     double sE = 0, sn = 0, sn2 = 0, sm = 0, sm2 = 0, sm4 = 0, sS0 = 0, sSq = 0;
     double sNc = 0, sNb = 0, sNf = 0;
     int nm = 0, nbad = 0;
 
-    for (int sw = 0; sw < total; ++sw) {
+    for (int sw = 0; sw < params_.n_thermal; ++sw) {
         diagonalUpdate();
         clusterUpdate();
-
-        if (sw >= params_.n_thermal &&
-            (sw - params_.n_thermal) % params_.sweeps_per_bin == 0) {
-            ++nm;
-            if (!verifyConfig()) ++nbad;
-            { int nc = 0, nb = 0, nf = 0;
-              for (int p = 0; p < M_; ++p) {
-                  if (opType_[p] == Op::CONST_SITE) ++nc;
-                  else if (opType_[p] == Op::BOND) ++nb;
-                  else if (opType_[p] == Op::FLIP_SITE) ++nf;
-              }
-              sNc += nc; sNb += nb; sNf += nf; }
-            // energy from the expansion order n
-            double E = (-static_cast<double>(n_) / beta_ + h_ * N_ + J_ * Nb_) / N_;
-            sE += E; sn += n_; sn2 += static_cast<double>(n_) * n_;
-
-            // magnetisation moments on the stored state |alpha(0)> (exact
-            // unbiased estimator of the diagonal observables)
-            double Mz = 0.0;
-            for (int i = 0; i < N_; ++i) Mz += spin_[i];
-            double mm = Mz / N_, mm2 = mm * mm;
-            sm += std::abs(mm); sm2 += mm2; sm4 += mm2 * mm2;
-
-            // structure factor S(0) and S(q_min) from the same state
-            double S0 = mm2; // = (sum sigma)^2 / N^2
-            double re = 0.0, im = 0.0;
-            for (int i = 0; i < N_; ++i) {
-                double qr = qvec[0] * lat_.site_coords[i][0]
-                          + qvec[1] * lat_.site_coords[i][1]
-                          + qvec[2] * lat_.site_coords[i][2];
-                re += spin_[i] * std::cos(qr);
-                im += spin_[i] * std::sin(qr);
-            }
-            double Sq = (re * re + im * im) / (static_cast<double>(N_) * N_);
-            sS0 += S0; sSq += Sq;
-        }
     }
 
-    SSEResult res;
+    const double invBin = 1.0 / std::max(params_.sweeps_per_bin, 1);
+    for (int bin = 0; bin < params_.n_bins; ++bin) {
+        double bE = 0, bm2 = 0, bm4 = 0, bS0 = 0, bSq = 0;
+
+        for (int s = 0; s < params_.sweeps_per_bin; ++s) {
+            diagonalUpdate();
+            clusterUpdate();
+            ++nm;
+
+            if (params_.check_config && !verifyConfig()) ++nbad;
+            if (params_.census) {
+                int nc = 0, nb = 0, nf = 0;
+                for (int p = 0; p < M_; ++p) {
+                    if (opType_[p] == Op::CONST_SITE) ++nc;
+                    else if (opType_[p] == Op::BOND) ++nb;
+                    else if (opType_[p] == Op::FLIP_SITE) ++nf;
+                }
+                sNc += nc; sNb += nb; sNf += nf;
+            }
+
+            // energy from the expansion order n
+            double E = (-static_cast<double>(n_) / beta_ + h_ * N_ + J_ * Nb_) / N_;
+            sn += n_; sn2 += static_cast<double>(n_) * n_;
+
+            // magnetisation moments and structure factors on |alpha(0)>
+            double Mz = 0.0, re = 0.0, im = 0.0;
+            for (int i = 0; i < N_; ++i) {
+                Mz += spin_[i];
+                re += spin_[i] * cosq[i];
+                im += spin_[i] * sinq[i];
+            }
+            double mm = Mz / N_, mm2 = mm * mm;
+            double S0 = mm2;
+            double Sq = (re * re + im * im) / (static_cast<double>(N_) * N_);
+
+            sE += E; sm += std::abs(mm); sm2 += mm2; sm4 += mm2 * mm2;
+            sS0 += S0; sSq += Sq;
+
+            bE += E; bm2 += mm2; bm4 += mm2 * mm2; bS0 += S0; bSq += Sq;
+        }
+
+        res.bin_E.push_back(bE * invBin);
+        res.bin_m2.push_back(bm2 * invBin);
+        res.bin_m4.push_back(bm4 * invBin);
+        res.bin_S0.push_back(bS0 * invBin);
+        res.bin_Sq.push_back(bSq * invBin);
+    }
+
     double inv = 1.0 / std::max(nm, 1);
     res.energy = sE * inv;
     double navg = sn * inv, n2avg = sn2 * inv;
@@ -259,9 +286,11 @@ SSEResult SSE::run() {
     }
 
     res.n_op_avg = navg / N_;
-    res.n_const_avg = sNc * inv;
-    res.n_bond_avg = sNb * inv;
-    res.n_flip_avg = sNf * inv;
+    if (params_.census) {
+        res.n_const_avg = sNc * inv;
+        res.n_bond_avg = sNb * inv;
+        res.n_flip_avg = sNf * inv;
+    }
     res.consistency_failures = nbad;
     res.sign_avg = 1.0;
     res.n_measure = nm;

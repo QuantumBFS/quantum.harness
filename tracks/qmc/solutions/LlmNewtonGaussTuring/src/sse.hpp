@@ -50,6 +50,10 @@ struct SSEParams {
     int n_bins = 200;
     int sweeps_per_bin = 20;
     int seed = 42;
+    // Per-sweep validation/diagnostics.  Both are O(M) per sweep, so production
+    // scans turn them off; the test suite leaves them on.
+    bool check_config = true;   // verify world-line closure and bond alignment
+    bool census = true;         // tally operator types (<n_const> identity)
 };
 
 struct SSEResult {
@@ -69,6 +73,11 @@ struct SSEResult {
     // diagnostics (operator-type census; <n_const> must equal beta*h*N exactly)
     double n_const_avg = 0.0, n_bond_avg = 0.0, n_flip_avg = 0.0;
     int consistency_failures = 0;
+
+    // Raw bin-level data.  Nonlinear estimators (Q_L, xi_L/L) must be
+    // recomputed inside a jackknife/bootstrap over these bins rather than
+    // propagated from the scalar means above (Stage 0 protocol 4.2).
+    std::vector<double> bin_E, bin_m2, bin_m4, bin_S0, bin_Sq;
 };
 
 class SSE {
