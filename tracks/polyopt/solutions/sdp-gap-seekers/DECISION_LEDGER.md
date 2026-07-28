@@ -458,3 +458,36 @@ cross blocks. The first run is an inventory gate and will harden its exact
 moment and block counts only after all theorem conditions pass. Keep it behind
 the already-queued isotypic proof so an unproved downstream route cannot
 obscure that result.
+
+## 2026-07-29 — nine-cone gamma=0 gate passes and authorizes gamma=1/2
+
+Slurm job `22988753` passed the immutable input, fixed setup, five-layer exact
+reduction, source-hash, and reloaded nine-cone gates. Mosek returned `OPTIMAL`
+with primal and dual feasible points. Independent reconstruction gave
+normalization 1, zero affine and PSD violations, and minimum block eigenvalue
+`0.1252658219892882`.
+
+Solver wall was 10.661 s, total runner wall 27.593 s, process peak RSS
+1,699,824 KiB, and the post-factor nonzero count was 26.3 million.
+`result.toml` SHA-256 is
+`f3b394aff863243aee7706f7c52f728ca303df043429e7c70245e6d79ce2e3a0`.
+Relative to the spin-axis gamma=0 memory baseline, the exact cone reduction
+cuts RSS by 34.7%, total wall by 32.0%, and factor fill by 36.5%. The
+numerical equivalence gate passes, so gamma=1/2 is now authorized.
+
+## 2026-07-29 — full-spin trivial isotypic theorem passes
+
+Slurm job `22988781` passed all 177 assertions in the complete exact testset
+and all 32 character checks. The gate proved the 108/109 source dimensions,
+72 three-row orbits plus the scalar identity, exact full rank of both
+`t,w,m` bases, zero for all 7,848 cross entries, and `W=3M` for all 1,332
+standard upper-triangle entries. Two deterministic coefficient assemblies
+and the optimizer-free nine-cone JuMP reconstruction also agree.
+
+The exact representation retains all 3,250 moments with positive block sides
+`[36,36,36,45,37,36,36,45]`, one scalar gap cone, 6,104 packed PSD
+coordinates, and maximum side 45. `test.log` SHA-256 is
+`1ec6ebdd77b6a94c04b1956c5cfd07f62ad780a2fb34f0fbed7c7351f12f2ee9`;
+the process-time peak was 979,428 KiB and Slurm step MaxRSS was 821,520 KiB.
+The theorem is accepted. Complete the already-authorized nine-cone
+gamma=1/2 result before building solver inputs from this next reduction.

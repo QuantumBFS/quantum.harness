@@ -289,25 +289,31 @@ Updated: 2026-07-29 UTC.
 - The dedicated nine-cone runner allowlists those four hashes and fails
   closed on the fixed setup, all five exact-reduction layers, the complete
   15-file source inventory, and the reloaded model counts and named cone
-  sides. Gamma=0 is the next numerical truth gate; gamma=1/2 remains
-  unauthorized until its returned point passes the independent residual and
-  nine-block eigenvalue audit.
-- Nine-cone gamma=0 attempt r1 is queued as Slurm job `22988753`; its current
-  pending reason is the xH5 association job limit, not a runner or model
-  failure.
-- Next exact route prepared while the solve waits: decompose the two remaining
-  trivial-V4 positive blocks into full-S3 isotypic rows. On each of 72
+  sides.
+- Nine-cone gamma=0 attempt r1, Slurm job `22988753`, passed every preflight
+  and returned `OPTIMAL` with primal and dual feasible points. Normalization,
+  maximum affine residual, and worst PSD violation were exactly 1, 0, and 0;
+  the smallest eigenvalue across all nine reconstructed blocks was
+  `0.1252658219892882`. Solver wall was 10.661 s, total runner wall
+  27.593 s, process peak RSS 1,699,824 KiB, and the factor had 26.3 million
+  nonzeros after factorization. `result.toml` SHA-256 is
+  `f3b394aff863243aee7706f7c52f728ca303df043429e7c70245e6d79ce2e3a0`.
+  The gate authorizes the nine-cone gamma=1/2 run.
+- Full-spin trivial-isotypic truth attempt r1, Slurm job `22988781`, passed
+  all 177 main assertions plus 32 character tests. On each of 72
   three-row axis orbits, the exact integer basis
-  `t=(1,1,1)`, `w=(1,1,-2)`, `m=(1,-1,0)` predicts zero cross blocks and
-  `W=3M`, so one standard-irrep copy is redundant. The proposed equivalent
-  model retains nine cones but reduces packed PSD entries from 10,064 to
-  6,104 and maximum side from 73 to 45. It is not accepted until its
-  exhaustive Slurm truth gate passes.
+  `t=(1,1,1)`, `w=(1,1,-2)`, `m=(1,-1,0)` has full rank; all 7,848 cross
+  entries vanish and all 1,332 standard entries obey `W=3M`. Two coefficient
+  builds and optimizer-free JuMP reconstruction agree. The equivalent model
+  retains 3,250 moments and nine cones, reduces packed PSD entries from
+  10,064 to 6,104, and reduces maximum side from 73 to 45. `test.log`
+  SHA-256 is
+  `1ec6ebdd77b6a94c04b1956c5cfd07f62ad780a2fb34f0fbed7c7351f12f2ee9`.
 - A subsequent independent candidate is now source-complete but unproved:
   the anti-diagonal site reflection `(x,y)->(-y,-x)` is the only nonidentity
   D4 map that preserves the actual level-1 Shastry--Sutherland Hamiltonian
   term multiset. A separate exact gate checks its site/moment involution,
   all 6,104 isotypic coefficients, equality space, eigenspace ranks, and
-  every spatial plus/minus cross entry. It will not be submitted ahead of
-  the queued isotypic proof.
+  every spatial plus/minus cross entry. It remains behind the authorized
+  nine-cone gamma=1/2 decision run.
 - No decision-changing user or resource need is open.

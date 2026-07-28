@@ -41,5 +41,14 @@ must establish:
 6. two independent coefficient assemblies and the optimizer-free JuMP
    reconstruction agree.
 
-No cone or row is removed from a solver input until this gate passes under
-Slurm.
+## Passing result
+
+Slurm job `22988781` passed all required gates: all 7,848 cross entries were
+exactly zero, all 1,332 standard-block relations obeyed `W=3M`, both
+combination bases had ranks 108 and 109, two coefficient builds agreed, and
+the optimizer-free JuMP model reconstructed the expected nine cones.
+
+The accepted exact representation has 3,250 moments, positive block
+dimensions `[36,36,36,45,37,36,36,45]`, one `1 x 1` gap block, 6,104 packed
+PSD coordinates, and maximum side 45. The passing `test.log` SHA-256 is
+`1ec6ebdd77b6a94c04b1956c5cfd07f62ad780a2fb34f0fbed7c7351f12f2ee9`.
