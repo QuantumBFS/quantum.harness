@@ -4,7 +4,12 @@ import pytest
 
 import long_range_percolation as lrp
 from long_range_percolation.enumeration import (
+    LOG_RATE_EXP_OVERFLOW,
+    LOG_RATE_EXP_UNDERFLOW,
+    LOG_RATE_OPEN_SATURATION,
     GraphOutcome,
+    _log_closed_edge_weight,
+    _log_open_edge_weight,
     enumerate_graphs,
     exact_partition_distribution,
 )
@@ -99,6 +104,73 @@ def test_large_kappa_with_saturated_edge_probabilities():
     for item in outcomes:
         if item.mask != fully_open_mask:
             assert item.probability < 1e-50
+
+
+def test_huge_kappa_enumerates_without_overflow():
+    spec = ModelSpec(2, 1.0, 1e308)
+    edge_count = spec.length * (spec.length - 1) // 2
+    outcomes = list(enumerate_graphs(spec))
+    assert len(outcomes) == 2 ** edge_count
+    for outcome in outcomes:
+        assert math.isfinite(outcome.probability)
+        assert outcome.probability >= 0.0
+    assert math.fsum(item.probability for item in outcomes) == pytest.approx(1.0)
+    fully_open_mask = (1 << edge_count) - 1
+    open_outcome = next(item for item in outcomes if item.mask == fully_open_mask)
+    assert open_outcome.probability == pytest.approx(1.0)
+    assert outcomes[0].probability == 0.0
+    assert outcomes[0].mask == 0
+
+
+@pytest.mark.parametrize(
+    ("log_rate", "side"),
+    [
+        (math.nextafter(LOG_RATE_EXP_UNDERFLOW, float("-inf")), "below"),
+        (math.nextafter(LOG_RATE_EXP_UNDERFLOW, float("inf")), "above"),
+    ],
+)
+def test_log_open_edge_weight_near_underflow_threshold(log_rate, side):
+    weight = _log_open_edge_weight(log_rate)
+    assert math.isfinite(weight)
+    assert weight <= 0.0
+    if side == "below":
+        assert weight == log_rate
+
+
+@pytest.mark.parametrize(
+    ("log_rate", "side"),
+    [
+        (math.nextafter(LOG_RATE_OPEN_SATURATION, float("-inf")), "below"),
+        (math.nextafter(LOG_RATE_OPEN_SATURATION, float("inf")), "above"),
+    ],
+)
+def test_log_open_edge_weight_near_saturation_threshold(log_rate, side):
+    weight = _log_open_edge_weight(log_rate)
+    assert math.isfinite(weight)
+    assert weight <= 0.0
+    if side == "above":
+        assert weight == 0.0
+
+
+@pytest.mark.parametrize(
+    ("log_rate", "side"),
+    [
+        (math.nextafter(LOG_RATE_EXP_OVERFLOW, float("-inf")), "below"),
+        (math.nextafter(LOG_RATE_EXP_OVERFLOW, float("inf")), "above"),
+    ],
+)
+def test_log_closed_edge_weight_near_overflow_threshold(log_rate, side):
+    weight = _log_closed_edge_weight(log_rate)
+    if side == "above":
+        assert weight == -math.inf
+    else:
+        assert math.isfinite(weight)
+        assert weight <= 0.0
+
+
+def test_log_closed_edge_weight_underflow_is_negative_zero():
+    log_rate = math.nextafter(LOG_RATE_EXP_UNDERFLOW, float("-inf"))
+    assert _log_closed_edge_weight(log_rate) == -0.0
 
 
 def test_package_root_exports_enumeration_symbols():
