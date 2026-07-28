@@ -194,3 +194,17 @@ count is zero. Change only that expectation and add an explicit orbit-count
 progress line before r2. The r1 `test.log` SHA-256 is
 `6fd3e823ca20b335dbe779b4cd7d3b3be1993d93e5dfe0cbc32ffdd37746cba6`;
 peak process RSS was 839,724 KiB.
+
+## 2026-07-29 — spin-axis exact truth gate passed
+
+Slurm job `22988394` passed all 107 dedicated assertions. The exhaustive
+result is 8,803 moment variables, 7,857 fewer than the conjugation-real model,
+12 PSD blocks, maximum side 81, and 16,707 packed real triangle entries.
+All 31,810 source coefficient covariance identities and 8,460 stable
+plus/minus cross-entry zeros were evaluated over exact rationals.
+
+The passing `test.log` SHA-256 is
+`f286d48a89b462b11dfbd199d22339e403b167c0672b2ac34c76ed816b39d66d`;
+peak process RSS was 856,408 KiB. Proceed to clean solver-free MOF builds for
+both fixed gamma values, retaining the required gamma=0-before-gamma=1/2
+optimization order.

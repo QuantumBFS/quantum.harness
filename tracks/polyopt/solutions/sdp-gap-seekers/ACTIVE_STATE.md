@@ -126,4 +126,14 @@ Updated: 2026-07-29 UTC.
   test requires zero and prints the exact orbit count on r2. Peak process RSS
   was 839,724 KiB; `test.log` SHA-256 is
   `6fd3e823ca20b335dbe779b4cd7d3b3be1993d93e5dfe0cbc32ffdd37746cba6`.
+- Spin-axis truth attempt r2, Slurm job `22988394`, passed all 107 assertions
+  in 1:13.6 of test time. The exact quotient has 8,803 moments, eliminating
+  7,857 from the conjugation-real inventory, and zero sign-odd fixed moments.
+  It has 12 real PSD blocks with dimensions
+  `[72,36,81,36,45,73,36,81,36,45]` plus `[1,1]`, maximum side 81, and
+  16,707 triangle entries. Peak process RSS was 856,408 KiB. `test.log`
+  SHA-256 is
+  `f286d48a89b462b11dfbd199d22339e403b167c0672b2ac34c76ed816b39d66d`.
+- Next gate: build and reload immutable solver-free spin-axis MOFs for both
+  gamma values, then solve gamma=0 before authorizing gamma=1/2.
 - No decision-changing user or resource need is open.
