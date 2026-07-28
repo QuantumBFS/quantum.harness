@@ -54,6 +54,9 @@ struct SSEParams {
     // scans turn them off; the test suite leaves them on.
     bool check_config = true;   // verify world-line closure and bond alignment
     bool census = true;         // tally operator types (<n_const> identity)
+    bool stage4_estimators = false; // opt-in propagation/time-averaged observables
+    bool measure_dthetah = false;   // measure diagonal ∂θH estimator
+    double theta_berry = 0.0;       // θ at which ∂θH is measured
 };
 
 struct SSEResult {
@@ -66,6 +69,9 @@ struct SSEResult {
     double Sq0 = 0.0;      // structure factor S(0)  (= m2)
     double Sqmin = 0.0;    // structure factor S(q_min)
     double xi_over_L = 0.0;// second-moment correlation length / L
+    double spacetime_m2 = 0.0; // moments of beta^{-1} integral m(tau) d tau
+    double spacetime_m4 = 0.0;
+    double spacetime_Q = 0.0;  // Blote-Deng space-time Binder ratio
     double n_op_avg = 0.0; // <n> / N
     double sign_avg = 1.0; // always 1 (sign-problem free)
     int n_measure = 0;
@@ -74,10 +80,14 @@ struct SSEResult {
     double n_const_avg = 0.0, n_bond_avg = 0.0, n_flip_avg = 0.0;
     int consistency_failures = 0;
 
+    // ∂θH diagonal estimator (per site): J sin(2θ) × ⟨Σ_bonds ZZ⟩ / N
+    double dthetah_diag = 0.0;
+
     // Raw bin-level data.  Nonlinear estimators (Q_L, xi_L/L) must be
     // recomputed inside a jackknife/bootstrap over these bins rather than
     // propagated from the scalar means above (Stage 0 protocol 4.2).
     std::vector<double> bin_E, bin_m2, bin_m4, bin_S0, bin_Sq;
+    std::vector<double> bin_spacetime_m2, bin_spacetime_m4;
 };
 
 class SSE {

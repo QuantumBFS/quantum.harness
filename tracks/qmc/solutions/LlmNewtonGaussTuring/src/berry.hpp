@@ -53,4 +53,11 @@ BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
 std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
     const Lattice& lattice, double J, const ParamGrid& grid);
 
+// Compute ⟨∂θH⟩ at given (θ,Ω) via full ED spectrum at finite β.
+// At θ=0: ∂θH = J Σ_{bonds} (Y_i Z_j + Z_i Y_j), purely off-diagonal.
+// Returns the expectation value (diagonal part only for now).
+// For T=0, pass a large β (e.g. 100.0).
+double compute_dthetah_ed(const Lattice& lattice, double J, double Omega,
+                          double theta, double beta);
+
 } // namespace cm

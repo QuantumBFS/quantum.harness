@@ -276,4 +276,58 @@ std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
     return r;
 }
 
+// ──────────────────────────────────────────────────────────────
+// ∂θH expectation via ED thermal average (for SSE cross-check)
+// ──────────────────────────────────────────────────────────────
+
+double compute_dthetah_ed(const Lattice& lattice, double J, double Omega,
+                          double theta, double beta)
+{
+    int N = static_cast<int>(lattice.N), dim = 1 << N;
+    if (dim > 64) throw std::runtime_error("compute_dthetah_ed: dim > 64");
+
+    // Build H = -J Σ ZZ - Omega Σ X (real symmetric TFIM, θ=0)
+    DenseSymMatrix H(static_cast<std::size_t>(dim));
+    for (int st = 0; st < dim; ++st) {
+        for (int bi = 0; bi < static_cast<int>(lattice.Nb); ++bi) {
+            int i = static_cast<int>(lattice.bonds[bi].i);
+            int j = static_cast<int>(lattice.bonds[bi].j);
+            int si = (st >> i) & 1, sj = (st >> j) & 1;
+            H(st, st) += -J * (1 - 2*si) * (1 - 2*sj);
+        }
+        for (int si = 0; si < N; ++si)
+            H(st, st ^ (1 << si)) += -Omega;
+    }
+
+    auto eigsys = jacobi_eigen(H, 50, 1e-12);
+
+    // Compute thermal expectation of Σ ZZ (per-site, for ∂θH diag)
+    double Z = 0.0, sum_ZZ = 0.0;
+    for (int n = 0; n < dim; ++n) {
+        double E_n = eigsys.eigenvalues[n];
+        double w = std::exp(-beta * (E_n - eigsys.eigenvalues[0])); // shift for numerics
+        Z += w;
+
+        // Compute ⟨ψ_n| Σ_bonds ZZ |ψ_n⟩
+        double zz_n = 0.0;
+        auto& psi_n = eigsys.eigenvectors;
+        for (int st = 0; st < dim; ++st) {
+            double psi2 = psi_n[st * dim + n] * psi_n[st * dim + n]; // |⟨st|ψ_n⟩|²
+            for (int bi = 0; bi < static_cast<int>(lattice.Nb); ++bi) {
+                int i = static_cast<int>(lattice.bonds[bi].i);
+                int j = static_cast<int>(lattice.bonds[bi].j);
+                int si = (st >> i) & 1, sj = (st >> j) & 1;
+                zz_n += psi2 * (1 - 2*si) * (1 - 2*sj);
+            }
+        }
+        sum_ZZ += w * zz_n;
+    }
+
+    // ∂θH_diag(θ) = J sin(2θ) × ⟨Σ_{bonds} ZZ⟩ / N  (per-site)
+    double zz_exp = sum_ZZ / Z; // thermal expectation of Σ_bonds ZZ
+    double dthetah_diag = J * std::sin(2 * theta) * zz_exp / N;
+
+    return dthetah_diag;
+}
+
 } // namespace cm
