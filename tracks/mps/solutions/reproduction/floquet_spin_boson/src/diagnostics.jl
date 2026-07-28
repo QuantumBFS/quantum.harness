@@ -4,6 +4,22 @@ function error_metrics(values::AbstractVector, reference)
             rmse=sqrt(sum(abs2, errors) / length(errors)))
 end
 
+"""Return serialization-friendly diagnostics for an augmented Floquet solve."""
+function floquet_eigen_diagnostics(result::FloquetEigenResult)
+    return (; lambda0=result.eigenvalue,
+            subleading_eigenvalue=result.subleading_eigenvalue,
+            spectral_gap=result.spectral_gap,
+            right_residual=result.right_residual,
+            left_residual=result.left_residual,
+            iterations=result.iterations,
+            matvec_count=result.matvec_count,
+            backend=String(result.backend),
+            converged=result.converged,
+            fallback_used=result.fallback_used,
+            nonconvergence_reason=isnothing(result.nonconvergence_reason) ?
+                nothing : String(result.nonconvergence_reason))
+end
+
 """Read only exact metrics from the legacy strict Fig. 2 JSON schema.
 
 Partial Redfield refreshes must fail closed if either exact panel is absent,

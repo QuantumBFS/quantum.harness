@@ -1,6 +1,7 @@
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 UniformTEMPO = "df6cb18e-c722-4276-9e4b-1aef7d428362"
