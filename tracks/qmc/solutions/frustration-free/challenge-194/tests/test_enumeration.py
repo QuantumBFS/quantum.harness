@@ -69,6 +69,20 @@ def test_zero_coupling_assigns_unit_mass_to_empty_graph():
         assert outcome.component_sizes == expected_sizes
 
 
+def test_tiny_kappa_enumerates_without_underflow_cliff():
+    spec = ModelSpec(6, 1.0, 5e-324)
+    edge_count = spec.length * (spec.length - 1) // 2
+    outcomes = list(enumerate_graphs(spec))
+    assert len(outcomes) == 2 ** edge_count
+    for outcome in outcomes:
+        assert math.isfinite(outcome.probability)
+        assert outcome.probability >= 0.0
+    total = math.fsum(item.probability for item in outcomes)
+    assert total == pytest.approx(1.0)
+    assert outcomes[0].mask == 0
+    assert outcomes[0].probability / total == pytest.approx(1.0, rel=1e-12)
+
+
 def test_large_kappa_with_saturated_edge_probabilities():
     spec = ModelSpec(2, 1.0, 100.0)
     edge_count = spec.length * (spec.length - 1) // 2

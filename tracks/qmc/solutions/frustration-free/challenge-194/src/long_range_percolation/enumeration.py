@@ -4,6 +4,8 @@ from dataclasses import dataclass
 import math
 from typing import Iterator
 
+import numpy as np
+
 from .kernel import periodic_kernel
 from .model import ModelSpec, iter_unordered_edges
 from .union_find import UnionFind
@@ -15,6 +17,18 @@ class GraphOutcome:
     probability: float
     open_edges: int
     component_sizes: tuple[int, ...]
+
+
+def _log_open_edge_weight(log_rate: float) -> float:
+    rate = math.exp(log_rate)
+    if rate == 0.0:
+        return log_rate
+    if math.exp(-rate) == 1.0:
+        complement = -math.expm1(-rate)
+        if complement == 0.0:
+            return log_rate
+        return math.log(complement)
+    return math.log1p(-math.exp(-rate))
 
 
 def _component_sizes_for_mask(
@@ -32,8 +46,6 @@ def _component_sizes_for_mask(
 def enumerate_graphs(spec: ModelSpec) -> Iterator[GraphOutcome]:
     if spec.length > 6:
         raise ValueError("exact enumeration supports length at most six")
-    kernel = periodic_kernel(spec.length, spec.sigma)
-    rates = spec.kappa * kernel
     edges = list(iter_unordered_edges(spec.length))
     if spec.kappa == 0.0:
         for mask in range(1 << len(edges)):
@@ -48,6 +60,8 @@ def enumerate_graphs(spec: ModelSpec) -> Iterator[GraphOutcome]:
                 ),
             )
         return
+    kernel = periodic_kernel(spec.length, spec.sigma)
+    log_rates = math.log(spec.kappa) + np.log(kernel)
     for mask in range(1 << len(edges)):
         union_find = UnionFind(spec.length)
         log_probability = 0.0
@@ -55,13 +69,13 @@ def enumerate_graphs(spec: ModelSpec) -> Iterator[GraphOutcome]:
         for index, (left, right) in enumerate(edges):
             separation = right - left
             distance = min(separation, spec.length - separation)
-            rate = float(rates[distance - 1])
+            log_rate = float(log_rates[distance - 1])
             if mask & (1 << index):
-                log_probability += math.log(-math.expm1(-rate))
+                log_probability += _log_open_edge_weight(log_rate)
                 open_count += 1
                 union_find.union(left, right)
             else:
-                log_probability += -rate
+                log_probability += -math.exp(log_rate)
         yield GraphOutcome(
             mask=mask,
             probability=math.exp(log_probability),
