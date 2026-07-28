@@ -96,6 +96,28 @@
         "resume_state": {"type": "object"}
       }
     },
+    "checkpointRetirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "status", "cell_id", "input_sha256",
+        "completed_cell_artifact_sha256", "retired_pointer_file",
+        "retired_pointer_sha256", "retirement_sha256"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "status": {"const": "retired"},
+        "cell_id": {"type": "string", "pattern": "^c[0-9]{4}-[0-9a-f]{12}$"},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "completed_cell_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "retired_pointer_file": {
+          "type": "string",
+          "pattern": "^current-[0-9a-f]{64}\\.json$"
+        },
+        "retired_pointer_sha256": {"$ref": "#/$defs/sha256"},
+        "retirement_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
     "namedLimit": {
       "type": "object",
       "additionalProperties": false,

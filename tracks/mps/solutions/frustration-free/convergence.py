@@ -1194,22 +1194,15 @@ def _strict_canonical_json_file(path: Path, name: str) -> Any:
     return value
 
 
-def validate_checkpoint_root(
-    checkpoint_root: str | os.PathLike[str],
+def _validate_checkpoint_pointer(
+    root: Path,
+    pointer_path: Path,
     *,
     cell: dict[str, Any],
 ) -> str:
-    """Validate a Task 3 checkpoint tree and return its current fingerprint."""
-
-    root = Path(checkpoint_root)
-    if not root.is_dir() or root.is_symlink():
-        raise ValueError("checkpoint root must be a real directory")
-    if {path.name for path in root.iterdir()} != {"current.json", "generations"}:
-        raise ValueError("checkpoint root entries do not match schema")
     generations = root / "generations"
     if not generations.is_dir() or generations.is_symlink():
         raise ValueError("checkpoint generations must be a real directory")
-    pointer_path = root / "current.json"
     pointer = _strict_canonical_json_file(pointer_path, "checkpoint current pointer")
     validate_artifact_schema(pointer, "checkpointPointer")
     pointer_keys = {
@@ -1365,6 +1358,166 @@ def validate_checkpoint_root(
     if not current_validated:
         raise ValueError("checkpoint current generation is missing")
     return _sha256_file(pointer_path)
+
+
+def validate_checkpoint_root(
+    checkpoint_root: str | os.PathLike[str],
+    *,
+    cell: dict[str, Any],
+) -> str:
+    """Validate an active Task 3 checkpoint tree and return its fingerprint."""
+
+    root = Path(checkpoint_root)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("checkpoint root must be a real directory")
+    if {path.name for path in root.iterdir()} != {"current.json", "generations"}:
+        raise ValueError("active checkpoint root entries do not match schema")
+    return _validate_checkpoint_pointer(root, root / "current.json", cell=cell)
+
+
+def _retirement_sha256(retirement: dict[str, Any]) -> str:
+    payload = {
+        key: value
+        for key, value in retirement.items()
+        if key != "retirement_sha256"
+    }
+    return _sha256(_canonical_json(payload))
+
+
+def _write_checkpoint_retirement(
+    root: Path,
+    *,
+    cell: dict[str, Any],
+    completed_cell: dict[str, Any],
+    retired_pointer: Path,
+) -> None:
+    retirement = {
+        "schema_version": 1,
+        "status": "retired",
+        "cell_id": cell["cell_id"],
+        "input_sha256": cell["input_sha256"],
+        "completed_cell_artifact_sha256": completed_cell["artifact_sha256"],
+        "retired_pointer_file": retired_pointer.name,
+        "retired_pointer_sha256": _sha256_file(retired_pointer),
+    }
+    retirement["retirement_sha256"] = _retirement_sha256(retirement)
+    validate_artifact_schema(retirement, "checkpointRetirement")
+    acceptance.atomic_write_json(root / "retirement.json", retirement)
+    _fsync_directory(root)
+
+
+def validate_retired_checkpoint_root(
+    checkpoint_root: str | os.PathLike[str],
+    *,
+    cell: dict[str, Any],
+    completed_cell: dict[str, Any],
+) -> str:
+    """Validate retained generations and their completed-cell retirement."""
+
+    root = Path(checkpoint_root)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("retired checkpoint root must be a real directory")
+    if {path.name for path in root.iterdir()} != {
+        "generations",
+        "retired",
+        "retirement.json",
+    }:
+        raise ValueError("retired checkpoint root entries do not match schema")
+    retired = root / "retired"
+    if not retired.is_dir() or retired.is_symlink():
+        raise ValueError("retired checkpoint pointers must be a real directory")
+    pointers = list(retired.iterdir())
+    if not pointers:
+        raise ValueError("retired checkpoint pointers must not be empty")
+    fingerprints = {}
+    for pointer in pointers:
+        if (
+            not pointer.is_file()
+            or pointer.is_symlink()
+            or not pointer.name.startswith("current-")
+            or not pointer.name.endswith(".json")
+            or len(pointer.name) != len("current-") + 64 + len(".json")
+        ):
+            raise ValueError("retired checkpoint pointer entry is invalid")
+        fingerprint = _sha256_file(pointer)
+        if pointer.name != f"current-{fingerprint}.json":
+            raise ValueError("retired checkpoint pointer filename hash mismatch")
+        _validate_checkpoint_pointer(root, pointer, cell=cell)
+        fingerprints[pointer.name] = fingerprint
+    retirement = _strict_canonical_json_file(
+        root / "retirement.json", "checkpoint retirement"
+    )
+    validate_artifact_schema(retirement, "checkpointRetirement")
+    if retirement["retirement_sha256"] != _retirement_sha256(retirement):
+        raise ValueError("checkpoint retirement SHA256 mismatch")
+    expected_bindings = {
+        "cell_id": cell["cell_id"],
+        "input_sha256": cell["input_sha256"],
+        "completed_cell_artifact_sha256": completed_cell["artifact_sha256"],
+    }
+    for name, expected in expected_bindings.items():
+        if retirement[name] != expected:
+            raise ValueError(f"checkpoint retirement {name} mismatch")
+    pointer_name = retirement["retired_pointer_file"]
+    if fingerprints.get(pointer_name) != retirement["retired_pointer_sha256"]:
+        raise ValueError("checkpoint retirement pointer binding mismatch")
+    return retirement["retirement_sha256"]
+
+
+def retire_checkpoint_root(
+    checkpoint_root: str | os.PathLike[str],
+    *,
+    cell: dict[str, Any],
+    completed_cell: dict[str, Any],
+) -> str:
+    """Retire only current.json while preserving immutable generations."""
+
+    root = Path(checkpoint_root)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("checkpoint root must be a real directory")
+    entries = {path.name for path in root.iterdir()}
+    allowed = {"current.json", "generations", "retired", "retirement.json"}
+    if not entries.issubset(allowed) or "generations" not in entries:
+        raise ValueError("checkpoint root entries do not match retirement schema")
+    retired = root / "retired"
+    if retired.exists() or retired.is_symlink():
+        if not retired.is_dir() or retired.is_symlink():
+            raise ValueError("retired checkpoint pointers must be a real directory")
+    else:
+        retired.mkdir()
+        _fsync_directory(root)
+    current = root / "current.json"
+    if current.exists() or current.is_symlink():
+        fingerprint = _validate_checkpoint_pointer(root, current, cell=cell)
+        retired_pointer = retired / f"current-{fingerprint}.json"
+        if retired_pointer.exists() or retired_pointer.is_symlink():
+            if (
+                not retired_pointer.is_file()
+                or retired_pointer.is_symlink()
+                or retired_pointer.read_bytes() != current.read_bytes()
+            ):
+                raise ValueError("retired checkpoint pointer collision")
+            current.unlink()
+        else:
+            os.replace(current, retired_pointer)
+        _fsync_directory(retired)
+        _fsync_directory(root)
+    else:
+        pointers = sorted(retired.glob("current-*.json"))
+        if not pointers:
+            raise ValueError("checkpoint retirement has no retained pointer")
+        for pointer in pointers:
+            _validate_checkpoint_pointer(root, pointer, cell=cell)
+        retired_pointer = pointers[-1]
+    _write_checkpoint_retirement(
+        root,
+        cell=cell,
+        completed_cell=completed_cell,
+        retired_pointer=retired_pointer,
+    )
+    return validate_retired_checkpoint_root(
+        root, cell=cell, completed_cell=completed_cell
+    )
 
 
 def invoke_julia_runner_monitored(
@@ -1620,11 +1773,11 @@ def run_cell(
                 existing_valid = False
         if existing_valid:
             if checkpoint_root.exists() or checkpoint_root.is_symlink():
-                if checkpoint_root.is_dir() and not checkpoint_root.is_symlink():
-                    shutil.rmtree(checkpoint_root)
-                else:
-                    checkpoint_root.unlink()
-                _fsync_directory(checkpoints_root)
+                retire_checkpoint_root(
+                    checkpoint_root,
+                    cell=cell,
+                    completed_cell=existing,
+                )
             return {"action": "skipped", "cell": existing, "path": destination}
         if destination.exists() or destination.is_symlink():
             archived = archive_superseded_directory(destination)
@@ -1744,11 +1897,11 @@ def run_cell(
             _fsync_directory(staging)
             atomic_publish_directory(staging, destination)
             if checkpoint_root.exists() or checkpoint_root.is_symlink():
-                if checkpoint_root.is_dir() and not checkpoint_root.is_symlink():
-                    shutil.rmtree(checkpoint_root)
-                else:
-                    checkpoint_root.unlink()
-                _fsync_directory(checkpoints_root)
+                retire_checkpoint_root(
+                    checkpoint_root,
+                    cell=cell,
+                    completed_cell=artifact,
+                )
             return {"action": action, "cell": artifact, "path": destination}
         finally:
             if staging.exists():
@@ -2419,6 +2572,7 @@ def validate_existing(
         "resources": False,
         "cells": 0,
         "checkpoints": 0,
+        "retired_checkpoints": 0,
         "archived_cells": 0,
         "archived_checkpoints": 0,
         "analysis": False,
@@ -2453,12 +2607,66 @@ def validate_existing(
         cells_root = root / "cells"
         expected_cells = {cell["cell_id"]: cell for cell in plan["cells"]}
         expected_ids = set(expected_cells)
-        if cells_root.exists():
+        if cells_root.exists() or cells_root.is_symlink():
             if not cells_root.is_dir() or cells_root.is_symlink():
                 raise ValueError("cells must be a real directory")
+        checkpoints_root = root / "checkpoints"
+        if checkpoints_root.exists() or checkpoints_root.is_symlink():
+            if (
+                not checkpoints_root.is_dir()
+                or checkpoints_root.is_symlink()
+            ):
+                raise ValueError("checkpoints must be a real directory")
+        artifacts = []
+        for cell in plan["cells"]:
+            cell_id = cell["cell_id"]
+            with cell_advisory_lock(cells_root, cell_id):
+                recover_abandoned_cell_state(cells_root, cell_id)
+                directory = cells_root / cell_id
+                artifact = None
+                if directory.exists() or directory.is_symlink():
+                    if not directory.is_dir() or directory.is_symlink():
+                        raise ValueError(
+                            f"completed cell must be a real directory: {cell_id}"
+                        )
+                    artifact = _load_json(
+                        directory / "cell.json", "completed cell"
+                    )
+                    validate_cell_artifact(
+                        artifact,
+                        expected_cell=cell,
+                        artifact_directory=directory,
+                    )
+                checkpoint = checkpoints_root / cell_id
+                if checkpoint.exists() or checkpoint.is_symlink():
+                    try:
+                        if artifact is None:
+                            validate_checkpoint_root(checkpoint, cell=cell)
+                            checked["checkpoints"] += 1
+                        else:
+                            retire_checkpoint_root(
+                                checkpoint,
+                                cell=cell,
+                                completed_cell=artifact,
+                            )
+                            checked["retired_checkpoints"] += 1
+                    except (OSError, TypeError, ValueError) as error:
+                        archived = archive_superseded_directory(checkpoint)
+                        raise ValueError(
+                            "invalid checkpoint was archived at "
+                            f"{archived}: {error}"
+                        ) from error
+                if artifact is not None:
+                    artifacts.append(artifact)
+                    checked["cells"] += 1
+        if cells_root.exists():
             for entry in cells_root.iterdir():
                 name = entry.name
                 if name in expected_ids:
+                    if not entry.is_dir() or entry.is_symlink():
+                        raise ValueError(
+                            f"completed cell must be a real directory: {name}"
+                        )
                     continue
                 if name == ".locks":
                     if not entry.is_dir() or entry.is_symlink():
@@ -2484,28 +2692,14 @@ def validate_existing(
                     checked["archived_cells"] += 1
                     continue
                 raise ValueError(f"unexpected stale cell entry: {name}")
-        checkpoints_root = root / "checkpoints"
-        if checkpoints_root.exists() or checkpoints_root.is_symlink():
-            if (
-                not checkpoints_root.is_dir()
-                or checkpoints_root.is_symlink()
-            ):
-                raise ValueError("checkpoints must be a real directory")
-            for entry in list(checkpoints_root.iterdir()):
+        if checkpoints_root.exists():
+            for entry in checkpoints_root.iterdir():
                 name = entry.name
                 if name in expected_ids:
-                    with cell_advisory_lock(cells_root, name):
-                        try:
-                            validate_checkpoint_root(
-                                entry, cell=expected_cells[name]
-                            )
-                        except (OSError, TypeError, ValueError) as error:
-                            archived = archive_superseded_directory(entry)
-                            raise ValueError(
-                                "invalid checkpoint was archived at "
-                                f"{archived}: {error}"
-                            ) from error
-                    checked["checkpoints"] += 1
+                    if not entry.is_dir() or entry.is_symlink():
+                        raise ValueError(
+                            f"checkpoint must be a real directory: {name}"
+                        )
                     continue
                 if any(
                     name.startswith(f".{cell_id}.superseded-")
@@ -2519,19 +2713,6 @@ def validate_existing(
                     checked["archived_checkpoints"] += 1
                     continue
                 raise ValueError(f"unexpected checkpoint entry: {name}")
-        artifacts = []
-        for cell in plan["cells"]:
-            directory = root / "cells" / cell["cell_id"]
-            if not directory.exists():
-                continue
-            artifact = _load_json(directory / "cell.json", "completed cell")
-            validate_cell_artifact(
-                artifact,
-                expected_cell=cell,
-                artifact_directory=directory,
-            )
-            artifacts.append(artifact)
-            checked["cells"] += 1
         analysis_path = root / "analysis.json"
         if analysis_path.exists() or analysis_path.is_symlink():
             validate_analysis_artifact(

@@ -450,13 +450,19 @@ def test_completed_cell_is_skipped_but_stale_cell_fails_closed(tmp_path):
         tmp_path / "checkpoints" / plan["cells"][0]["cell_id"]
     )
     _write_python_validated_checkpoint(checkpoint_root, plan["cells"][0])
+    generations = {
+        path.name for path in (checkpoint_root / "generations").iterdir()
+    }
     second = convergence.run_cell(
         plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
     )
 
     assert first["action"] == "completed"
     assert second["action"] == "skipped"
-    assert not checkpoint_root.exists()
+    _assert_retired_checkpoint(checkpoint_root, first["cell"])
+    assert {
+        path.name for path in (checkpoint_root / "generations").iterdir()
+    } == generations
     assert calls == [plan["cells"][0]["cell_id"]]
 
     cell_path = tmp_path / "cells" / plan["cells"][0]["cell_id"] / "cell.json"
@@ -1315,7 +1321,7 @@ def test_rss_breach_remains_nonretryable(tmp_path, monkeypatch):
         )
 
 
-def test_run_cell_uses_durable_checkpoint_namespace_and_cleans_after_publish(
+def test_run_cell_retires_pointer_and_retains_generations_after_publish(
     tmp_path,
 ):
     plan = _plan(
@@ -1330,8 +1336,7 @@ def test_run_cell_uses_durable_checkpoint_namespace_and_cleans_after_publish(
 
     def executor(item, _staging, checkpoint_root):
         observed.append(checkpoint_root)
-        checkpoint_root.mkdir(parents=True)
-        (checkpoint_root / "partial").write_text("resume", encoding="utf-8")
+        _write_python_validated_checkpoint(checkpoint_root, item)
         return _solver_result(item)
 
     result = convergence.run_cell(
@@ -1344,7 +1349,8 @@ def test_run_cell_uses_durable_checkpoint_namespace_and_cleans_after_publish(
 
     assert observed == [tmp_path / "checkpoints" / cell["cell_id"]]
     assert result["action"] == "completed"
-    assert not observed[0].exists()
+    _assert_retired_checkpoint(observed[0], result["cell"])
+    assert list((observed[0] / "generations").iterdir())
     assert set(path.name for path in result["path"].iterdir()) == {
         "bath.json",
         "mps-input.json",
@@ -1480,6 +1486,28 @@ def _write_python_validated_checkpoint(root, cell):
     )
 
 
+def _assert_retired_checkpoint(root, completed_cell):
+    assert root.is_dir()
+    assert not (root / "current.json").exists()
+    assert (root / "generations").is_dir()
+    assert (root / "retired").is_dir()
+    retired_pointers = list((root / "retired").glob("current-*.json"))
+    assert retired_pointers
+    retirement = json.loads(
+        (root / "retirement.json").read_text(encoding="utf-8")
+    )
+    assert retirement["cell_id"] == completed_cell["cell_id"]
+    assert retirement["input_sha256"] == completed_cell["input_sha256"]
+    assert (
+        retirement["completed_cell_artifact_sha256"]
+        == completed_cell["artifact_sha256"]
+    )
+    assert retirement["retired_pointer_file"] == retired_pointers[-1].name
+    assert retirement["retired_pointer_sha256"] == convergence._sha256(
+        retired_pointers[-1].read_bytes()
+    )
+
+
 def test_validate_existing_accepts_only_hash_valid_planned_checkpoint(tmp_path):
     plan = _plan(
         betas=[0.2],
@@ -1511,6 +1539,120 @@ def test_validate_existing_accepts_only_hash_valid_planned_checkpoint(tmp_path):
     assert any(
         entry.name.startswith(f".{plan['cells'][0]['cell_id']}.superseded-")
         for entry in checkpoint.parent.iterdir()
+    )
+
+
+def test_validate_existing_repairs_completed_cell_with_active_checkpoint(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    completed = convergence.run_cell(
+        plan,
+        0,
+        run,
+        executor=lambda item, _stage: _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )["cell"]
+    checkpoint = run / "checkpoints" / plan["cells"][0]["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, plan["cells"][0])
+    generations = {
+        path.name for path in (checkpoint / "generations").iterdir()
+    }
+
+    checked = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+
+    assert checked["cells"] == 1
+    assert checked["retired_checkpoints"] == 1
+    _assert_retired_checkpoint(checkpoint, completed)
+    assert {
+        path.name for path in (checkpoint / "generations").iterdir()
+    } == generations
+
+
+def test_validate_existing_waits_for_concurrent_cell_publication(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    entered = threading.Event()
+    release = threading.Event()
+    run_errors = []
+    validation_errors = []
+    validation_results = []
+
+    def executor(item, _stage, checkpoint_root):
+        _write_python_validated_checkpoint(checkpoint_root, item)
+        entered.set()
+        assert release.wait(timeout=5)
+        return _solver_result(item)
+
+    def execute():
+        try:
+            convergence.run_cell(
+                plan,
+                0,
+                run,
+                executor=executor,
+                julia_project=SOLUTION_DIR / "julia",
+            )
+        except BaseException as error:
+            run_errors.append(error)
+
+    def validate():
+        try:
+            validation_results.append(
+                convergence.validate_existing(
+                    plan_path=plan_path,
+                    resources_path=run / "resources.json",
+                    run_directory=run,
+                )
+            )
+        except BaseException as error:
+            validation_errors.append(error)
+
+    runner = threading.Thread(target=execute)
+    runner.start()
+    assert entered.wait(timeout=5)
+    validator = threading.Thread(target=validate)
+    validator.start()
+    time.sleep(0.1)
+    assert validator.is_alive()
+    release.set()
+    runner.join(timeout=5)
+    validator.join(timeout=5)
+
+    assert not runner.is_alive()
+    assert not validator.is_alive()
+    assert run_errors == []
+    assert validation_errors == []
+    assert validation_results[0]["cells"] == 1
+    assert validation_results[0]["retired_checkpoints"] == 1
+    completed = json.loads(
+        (
+            run
+            / "cells"
+            / plan["cells"][0]["cell_id"]
+            / "cell.json"
+        ).read_text(encoding="utf-8")
+    )
+    _assert_retired_checkpoint(
+        run / "checkpoints" / plan["cells"][0]["cell_id"],
+        completed,
     )
 
 

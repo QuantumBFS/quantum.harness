@@ -136,10 +136,14 @@ partial, mismatched, or concurrently attempted output cannot be treated as
 complete. Resumable state lives outside immutable results at
 `RUN/checkpoints/<cell-id>/` under the same lock. Only hash-valid checkpoint
 trees bound to a planned cell are resumed. Invalid checkpoint trees are
-archived and fail closed; a checkpoint is removed only after the completed
-cell directory has been validated and atomically published. Draft 2020-12
-validation covers plans, resource estimates, checkpoint cursors, completed
-cells, and analyses using `convergence.schema.json`.
+archived and fail closed. After the completed cell directory is validated and
+atomically published, only the active `current.json` pointer is retired;
+immutable generations remain under `generations/`, the retired pointer remains
+under `retired/`, and `retirement.json` binds that audit state to the completed
+cell artifact. A completed cell and active checkpoint pointer are never
+accepted simultaneously. Draft 2020-12 validation covers plans, resource
+estimates, checkpoint cursors and retirement records, completed cells, and
+analyses using `convergence.schema.json`.
 
 Create a tiny local pilot run bundle and run it with an explicit runtime Julia
 project:
