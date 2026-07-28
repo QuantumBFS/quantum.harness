@@ -1,8 +1,10 @@
 """Tests for clean-Ising Lyapunov and central-charge analysis."""
 
 import importlib.util
+import json
 import math
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -119,6 +121,38 @@ class CleanLyapunovTests(unittest.TestCase):
             0.5 * (reported["upper"] - reported["lower"]),
             places=14,
         )
+
+    def test_analysis_artifacts_include_data_fit_and_plot(self):
+        """Catches incomplete or non-machine-readable analysis output."""
+        module = _load_module()
+        if not hasattr(module, "write_analysis_artifacts"):
+            self.fail("write_analysis_artifacts is missing")
+        sizes = np.array([8, 10, 12, 16, 20], dtype=float)
+        energies = -0.93 * sizes - math.pi * 0.5 / (6.0 * sizes) + 0.15 / sizes**3
+        rows = [
+            {
+                "L": int(size),
+                "ell_1": float(-energy),
+                "qr_ell1": float(-energy),
+                "qr_abs_error": 0.0,
+            }
+            for size, energy in zip(sizes, energies)
+        ]
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_dir = Path(temporary_directory)
+            summary = module.write_analysis_artifacts(rows, output_dir)
+
+            csv_path = output_dir / "lyapunov_spectrum.csv"
+            json_path = output_dir / "central_charge_fit.json"
+            plot_path = output_dir / "central_charge_fit.png"
+            self.assertTrue(csv_path.exists())
+            self.assertTrue(json_path.exists())
+            self.assertGreater(plot_path.stat().st_size, 1000)
+            with json_path.open(encoding="utf-8") as handle:
+                saved = json.load(handle)
+            self.assertAlmostEqual(saved["reported"]["midpoint"], 0.5, places=10)
+            self.assertEqual(saved, summary)
 
 
 if __name__ == "__main__":
