@@ -52,6 +52,7 @@ def _solver_output(*, input_sha256="a" * 64):
             "project_toml_sha256": "1" * 64,
             "manifest_toml_sha256": "2" * 64,
             "runner_source_sha256": "3" * 64,
+            "checkpoint_source_sha256": "8" * 64,
             "purification_source_sha256": "4" * 64,
             "observables_source_sha256": "5" * 64,
             "model_definition_sha256": "7" * 64,
@@ -268,6 +269,7 @@ def test_mps_request_binds_canonical_path_free_checkpoint_identity():
         "project_toml_sha256",
         "manifest_toml_sha256",
         "runner_source_sha256",
+        "checkpoint_source_sha256",
         "purification_source_sha256",
         "observables_source_sha256",
         "model_definition_sha256",
@@ -293,6 +295,18 @@ def test_provenance_hashes_must_match_python_recomputation(name):
             expected_tau=[0.0, 0.5, 1.0],
             expected_provenance=expected,
         )
+
+
+def test_expected_runner_provenance_binds_checkpoint_source():
+    expected = acceptance.expected_runner_provenance(
+        julia_project=SOLUTION_DIR / "julia",
+        bath_file_sha256="a" * 64,
+        krylov_expansion_dim=32,
+    )
+
+    assert expected["checkpoint_source_sha256"] == acceptance._sha256_file(
+        acceptance.JULIA_CHECKPOINT
+    )
 
 
 def _tree_bytes(directory):

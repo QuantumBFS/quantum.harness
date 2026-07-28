@@ -214,6 +214,8 @@ end
         @test isfile(output_path)
         output = strict_json_read(read(output_path), "resumed output")
         @test output["schema_version"] == RUNNER_SCHEMA_VERSION
+        @test output["provenance"]["checkpoint_source_sha256"] ==
+            source_sha256(joinpath(@__DIR__, "..", "finite_bath_checkpoint.jl"))
     end
 end
 

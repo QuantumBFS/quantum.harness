@@ -710,6 +710,7 @@ def expected_runner_provenance(
         "project_toml_sha256": _sha256_file(project),
         "manifest_toml_sha256": _sha256_file(manifest),
         "runner_source_sha256": _sha256_file(JULIA_RUNNER),
+        "checkpoint_source_sha256": _sha256_file(JULIA_CHECKPOINT),
         "purification_source_sha256": _sha256_file(JULIA_PURIFICATION),
         "observables_source_sha256": _sha256_file(JULIA_OBSERVABLES),
         "model_definition_sha256": _sha256_file(MODEL_DEFINITION),

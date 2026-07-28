@@ -653,6 +653,8 @@ function make_output(request, result, profiling)
             project_toml_sha256 = source_sha256(active_project),
             manifest_toml_sha256 = source_sha256(manifest),
             runner_source_sha256 = source_sha256(@__FILE__),
+            checkpoint_source_sha256 =
+                source_sha256(joinpath(@__DIR__, "finite_bath_checkpoint.jl")),
             purification_source_sha256 =
                 source_sha256(joinpath(@__DIR__, "finite_bath_purification.jl")),
             observables_source_sha256 =
