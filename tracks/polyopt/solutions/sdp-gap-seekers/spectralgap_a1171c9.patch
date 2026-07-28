@@ -28,9 +28,24 @@ index c384283..8b27a46
 diff --git a/src/sdp.jl b/src/sdp.jl
 old mode 100644
 new mode 100755
-index ed6716a..f234d0f
+index ed6716a..417143d
 --- a/src/sdp.jl
 +++ b/src/sdp.jl
+@@ -1,4 +1,4 @@
+-function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
++function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false, optimizer=Mosek.Optimizer)
+     println("********************************** SpectralGap **********************************")
+     println("SpectralGap is launching...")
+     basis = [get_basis(N, d, label=i) for i in [1,2]]
+@@ -48,7 +48,7 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+         println("There are $(length(tsupp)) affine constraints.")
+         println("Assembling the SDP...")
+     end
+-    model = Model(optimizer_with_attributes(Mosek.Optimizer))
++    model = Model(optimizer_with_attributes(optimizer))
+     set_optimizer_attribute(model, MOI.Silent(), QUIET)
+     cons = [AffExpr(0) for i=1:length(tsupp)]
+     pos = Vector{Symmetric{VariableRef}}(undef, length(basis))
 @@ -133,8 +133,7 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
      #     add_to_expression!(cons[Locb], -μ)
      # end
