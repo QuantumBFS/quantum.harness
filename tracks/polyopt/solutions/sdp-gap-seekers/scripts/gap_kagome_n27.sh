@@ -60,10 +60,10 @@ for gamma in gammas
     if flag == 1; lf = max(lf, gamma); end
     if flag == 0; si = min(si, gamma); end
 end
-println("TRANSITION N=27 d=3: largest_feasible=", lf, " smallest_infeasible=", si==Inf?"none":si)
+println("TRANSITION N=27 d=3: largest_feasible=", lf, " smallest_infeasible=", si == Inf ? "none" : si)
 flush(stdout)
 open("gap_kagome_n27.results", "a") do io
-    println(io, "TRANSITION largest_feasible=", lf, " smallest_infeasible=", si==Inf?"none":si)
+    println(io, "TRANSITION largest_feasible=", lf, " smallest_infeasible=", si == Inf ? "none" : si)
 end
 println("=== DONE ===  ", Dates.format(now(),"HH:MM:SS")); flush(stdout)
 JLEOF
