@@ -82,6 +82,18 @@ target_compile_definitions(sample_stage4_cell PRIVATE
     CM_CXX_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
 )
 
+# Optional independent implementation audit.  ParaToric is intentionally not
+# vendored; point CMake at a separately pinned checkout/build with
+# -DCM_ENABLE_PARATORIC_AUDIT=ON -Dparatoric_DIR=<build>/cmake.
+option(CM_ENABLE_PARATORIC_AUDIT "Build the ParaToric-vs-ED audit tool" OFF)
+if(CM_ENABLE_PARATORIC_AUDIT)
+    find_package(Boost 1.87 CONFIG REQUIRED COMPONENTS log_setup log)
+    find_package(paratoric CONFIG REQUIRED)
+    add_executable(paratoric_crosscheck tools/paratoric_crosscheck.cpp)
+    target_link_libraries(paratoric_crosscheck PRIVATE cm148 paratoric::core)
+    target_compile_features(paratoric_crosscheck PRIVATE cxx_std_23)
+endif()
+
 # Stage 1: Berry curvature scan tools
 add_executable(scan_berry_chain tools/scan_berry_chain.cpp)
 target_link_libraries(scan_berry_chain PRIVATE cm148)

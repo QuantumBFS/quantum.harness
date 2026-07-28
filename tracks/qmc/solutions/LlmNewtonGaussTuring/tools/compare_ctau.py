@@ -32,12 +32,15 @@ def compare_points(first, second):
             ))
             shift = right - left
             shift_z = abs(shift) / combined_error if combined_error > 0.0 else np.inf
-            passed = np.isfinite(shift_z) and shift_z <= analysis.SAMPLING_Z_MAX
+            within_five_sigma = (
+                np.isfinite(shift_z) and shift_z <= analysis.SAMPLING_Z_MAX
+            )
             rows.append((
                 key[0], key[1], observable, left, first[key][error_name], right,
-                second[key][error_name], shift, combined_error, shift_z, int(passed),
+                second[key][error_name], shift, combined_error, shift_z,
+                int(within_five_sigma),
             ))
-            if not passed:
+            if not within_five_sigma:
                 failures.append(
                     f"L={key[0]} h={key[1]} observable={observable}: "
                     f"c_tau shift_z={shift_z:.3g}"
@@ -80,7 +83,8 @@ def write_outputs(prefix: Path, point_rows, fit_rows, gate):
         writer = csv.writer(handle)
         writer.writerow([
             "L", "h", "observable", "c_tau_1", "c_tau_1_err", "c_tau_2",
-            "c_tau_2_err", "shift", "combined_error", "shift_z", "passed",
+            "c_tau_2_err", "shift", "combined_error", "shift_z",
+            "within_5sigma",
         ])
         writer.writerows(point_rows)
     fit_path = prefix.with_name(prefix.name + "_ctau_fits.csv")
@@ -185,13 +189,15 @@ def main():
     fit_rows, fit_failures = compare_fits(
         first_fits, second_fits, args.hc_shift_budget
     )
-    failures = point_failures + fit_failures
+    failures = fit_failures
     gate = {
-        "schema_version": "challenge148-ctau-gate-v1",
+        "schema_version": "challenge148-ctau-gate-v2",
         "lattice": first_identity["lattice"],
         "c_tau_values": [1.0, 2.0],
         "common_points": len(common),
         "hc_shift_budget": args.hc_shift_budget,
+        "point_shifts_are_diagnostic": True,
+        "point_diagnostic_flags": point_failures,
         "passed": not failures,
         "failures": failures,
     }

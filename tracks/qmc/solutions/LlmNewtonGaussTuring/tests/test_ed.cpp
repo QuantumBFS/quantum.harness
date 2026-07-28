@@ -338,6 +338,67 @@ static void test_1d_critical_point() {
     }
 }
 
+static void test_parity_resolved_thermal_energy() {
+    std::cout << "--- parity-resolved ED ---" << std::endl;
+    const auto lattice = make_chain(4);
+    const double J = 1.0;
+    const double h = 0.8;
+
+    const auto full = jacobi_eigen(build_tfim_hamiltonian(lattice, J, h));
+    const auto even = jacobi_eigen(
+        build_tfim_parity_hamiltonian(lattice, J, h, +1));
+    const auto odd = jacobi_eigen(
+        build_tfim_parity_hamiltonian(lattice, J, h, -1));
+    std::vector<double> sector_spectrum = even.eigenvalues;
+    sector_spectrum.insert(sector_spectrum.end(),
+                           odd.eigenvalues.begin(), odd.eigenvalues.end());
+    std::sort(sector_spectrum.begin(), sector_spectrum.end());
+    bool spectrum_matches = sector_spectrum.size() == full.eigenvalues.size();
+    for (std::size_t level = 0; level < sector_spectrum.size() && spectrum_matches; ++level)
+        spectrum_matches =
+            std::abs(sector_spectrum[level] - full.eigenvalues[level]) < 1e-10;
+    check("even plus odd spectra recover full TFIM", spectrum_matches);
+
+    const double beta = 2.3;
+    const auto even_thermal =
+        compute_parity_thermal_energy(lattice, J, h, beta, +1);
+    const auto odd_thermal =
+        compute_parity_thermal_energy(lattice, J, h, beta, -1);
+    const double log_scale = std::max(even_thermal.log_partition,
+                                      odd_thermal.log_partition);
+    const double even_weight = std::exp(even_thermal.log_partition - log_scale);
+    const double odd_weight = std::exp(odd_thermal.log_partition - log_scale);
+    const double combined_energy =
+        (even_weight * even_thermal.energy + odd_weight * odd_thermal.energy)
+        / (even_weight + odd_weight);
+    const double full_energy =
+        compute_thermal_obs(lattice, J, h, beta).E * lattice.N;
+    check("parity partition sum recovers full thermal energy",
+          std::abs(combined_energy - full_energy) < 1e-10,
+          "sector=" + std::to_string(combined_energy)
+              + " full=" + std::to_string(full_energy));
+    check("Hamiltonian components sum to sector energy",
+          std::abs(even_thermal.exchange_energy + even_thermal.field_energy
+                   - even_thermal.energy) < 1e-12);
+
+    const auto cold_even =
+        compute_parity_thermal_energy(lattice, J, h, 120.0, +1);
+    const auto cold_odd =
+        compute_parity_thermal_energy(lattice, J, h, 120.0, -1);
+    check("finite-volume odd sector is suppressed at low temperature",
+          cold_even.log_partition - cold_odd.log_partition > 20.0,
+          "log(Z+/Z-)="
+              + std::to_string(cold_even.log_partition - cold_odd.log_partition));
+
+    bool invalid_parity_rejected = false;
+    try {
+        (void)build_tfim_parity_hamiltonian(lattice, J, h, 0);
+    } catch (const std::invalid_argument&) {
+        invalid_parity_rejected = true;
+    }
+    check("invalid parity rejected", invalid_parity_rejected);
+}
+
 int main() {
     test_hamiltonian_symmetry();
     test_independent_spins();
@@ -347,6 +408,7 @@ int main() {
     test_thermal_limits();
     test_structure_factor();
     test_1d_critical_point();
+    test_parity_resolved_thermal_energy();
 
     std::cout << std::endl;
     if (failures == 0) {

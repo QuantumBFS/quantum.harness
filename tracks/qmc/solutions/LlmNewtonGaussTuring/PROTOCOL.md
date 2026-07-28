@@ -1,8 +1,8 @@
 # Challenge 148 Frozen Production Protocol
 
-Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3+rev4`.
+Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3+rev4+rev5+rev6`.
 
-This is the clean-checkout copy of the preregistration and four append-only
+This is the clean-checkout copy of the preregistration and six append-only
 clarifications. Pilot evidence may select final sizes and sampling budgets, but
 may not change the Hamiltonian, primary estimator, fit family, uncertainty
 rules, blinding rule, or verdict gate without a new protocol identifier.
@@ -69,12 +69,47 @@ $h_c$ shift must be at most 5.0 combined standard errors. These checks use all
 five stored raw observables and failures remain explicit.
 
 The direct $c_\tau=1$ versus $c_\tau=2$ comparison requires both dimensionless
-observables to be statistically consistent at every common point under the
-same 5.0 threshold. For the fitted critical field, the two-sided 95% upper
-bound $|\Delta h_c|+1.96\sigma_{\Delta h_c}$ must not exceed one quarter of
-the total target uncertainty: $4.5\times10^{-6}$ for triangular and
-$2.0\times10^{-6}$ for honeycomb. A comparison may therefore be consistent
-but unresolved; unresolved is a failed final systematic gate.
+observables and the fitted critical field to be reported on the common grid.
+Protocol Revision 5 corrects Revision 4's pointwise-invariance requirement
+after the first doubled-$c_\tau$ pilot exposed its false premise. $Q_L$ uses a
+full imaginary-time average and both dimensionless observables are finite-size
+scaling functions of the space-time aspect ratio, so changing $c_\tau$ is
+expected to change their point values. Pointwise standardized shifts remain
+diagnostics but are not pass/fail gates. The invariant is the extrapolated
+transition location. Its two-sided 95% upper bound
+$|\Delta h_c|+1.96\sigma_{\Delta h_c}$ must not exceed one quarter of the
+total target uncertainty: $4.5\times10^{-6}$ for triangular and
+$2.0\times10^{-6}$ for honeycomb. A fitted comparison may be statistically
+consistent but unresolved; unresolved is a failed final systematic gate.
+
+Protocol Revision 6 freezes the independent-route normalization before any
+ParaToric thermodynamic-limit scan. The route uses ParaToric v1.0.3 at commit
+`e7bc78446ba083aeeae1ada9c883fa03bf205890`, with the external build-only
+compatibility diff SHA-256
+`3bd7a5231c38f048035f13f23bb20162b6f6e1f2264270dbeb61e2ce35073d30`.
+In the $x$ basis with $\lambda=0$, the target TFIM maps to
+
+$$
+h_{\rm eTC}=J_{\rm TFIM}=1,\qquad
+J_{\rm eTC}=h_{\rm TFIM},\qquad \mu=64.
+$$
+
+The target triangular lattice uses ParaToric's honeycomb gauge lattice; the
+target honeycomb lattice uses its triangular gauge lattice. ParaToric's
+periodic trace is compared to the full finite-volume TFIM thermal trace. The
+even spin-flip sector remains a reported diagnostic, not the comparison
+oracle. This ensemble choice was fixed by the nondegenerate square $L=3$
+comparison before target-lattice production.
+
+Qualification compares the exchange and transverse-field energies to ED. Its
+QMC uncertainty is the maximum of base-block, doubled-block, and independent-
+chain standard errors; the ED budget is $10^{-10}$ and agreement requires a
+difference no larger than five combined standard errors. Every sampled
+$A_v$ must remain $+1$. The analytic full-edge-flip acceptance bound
+$\exp[-\beta(4\mu-2)]$ is recorded. ParaToric triangular $L=2$ has degenerate
+periodic plaquette incidence and is not a honeycomb-target oracle; the first
+independent honeycomb scan must therefore use $L\ge4$. These qualification
+checks do not satisfy the independent thermodynamic-limit verdict gate.
 
 ## Frozen fit family
 

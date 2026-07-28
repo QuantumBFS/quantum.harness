@@ -31,6 +31,21 @@ CTAU = importlib.util.module_from_spec(CTAU_SPEC)
 assert CTAU_SPEC.loader is not None
 CTAU_SPEC.loader.exec_module(CTAU)
 
+COST_SPEC = importlib.util.spec_from_file_location(
+    "estimate_stage5", ROOT / "tools" / "estimate_stage5.py"
+)
+COST = importlib.util.module_from_spec(COST_SPEC)
+assert COST_SPEC.loader is not None
+COST_SPEC.loader.exec_module(COST)
+
+PARATORIC_SPEC = importlib.util.spec_from_file_location(
+    "run_paratoric_crosscheck", ROOT / "tools" / "run_paratoric_crosscheck.py"
+)
+PARATORIC = importlib.util.module_from_spec(PARATORIC_SPEC)
+assert PARATORIC_SPEC.loader is not None
+sys.modules[PARATORIC_SPEC.name] = PARATORIC
+PARATORIC_SPEC.loader.exec_module(PARATORIC)
+
 
 def require(condition: bool, message: str) -> None:
     if not condition:
@@ -250,6 +265,45 @@ def test_ctau_comparison() -> None:
     )
 
 
+def test_cost_model() -> None:
+    rows = [(size, 0.25 * size**3) for size in (4, 6, 8, 10) for _ in range(3)]
+    sizes, medians, coefficient, exponent = COST.fit_wall_model(rows)
+    require(len(sizes) == 4 and len(medians) == 4, "cost model lost a size")
+    require(abs(exponent - 3.0) < 1e-12, "cost exponent was not recovered")
+    require(abs(coefficient - 0.25) < 1e-12, "cost coefficient was not recovered")
+
+
+def test_paratoric_comparison_statistics() -> None:
+    case = PARATORIC.parse_case("triangular:2:4")
+    require(case.beta == 0.5, "default ParaToric beta does not satisfy beta*field=L")
+    expect_value_error(
+        lambda: PARATORIC.parse_case("kagome:2:1"),
+        "unsupported ParaToric target lattice must be rejected",
+    )
+
+    rng = np.random.default_rng(148)
+    chains = []
+    for chain_index in range(4):
+        rows = [{"record": "exact_full"}, {"record": "exact_even_diagnostic"}]
+        values = 3.0 + rng.normal(scale=0.2, size=1000) + 0.001 * chain_index
+        rows.extend({"exchange_energy": f"{value:.17g}"} for value in values)
+        chains.append(rows)
+    mean, uncertainty, diagnostics = PARATORIC.summarize_chains(
+        chains, "exchange_energy"
+    )
+    require(abs(mean - 3.0) < 0.02, "ParaToric chain mean is wrong")
+    require(uncertainty > 0.0, "ParaToric uncertainty must be positive")
+    require(
+        uncertainty
+        == max(
+            diagnostics["base_error"],
+            diagnostics["doubled_error"],
+            diagnostics["chain_error"],
+        ),
+        "ParaToric uncertainty did not use the conservative registered maximum",
+    )
+
+
 def synthetic_protocol_data():
     rng = np.random.default_rng(148)
     sizes = (4, 6, 8, 10, 12)
@@ -367,6 +421,8 @@ def main() -> None:
     test_scaling_fit()
     test_sampling_gates()
     test_ctau_comparison()
+    test_cost_model()
+    test_paratoric_comparison_statistics()
     print("All Stage 4 analysis tests passed.")
 
 

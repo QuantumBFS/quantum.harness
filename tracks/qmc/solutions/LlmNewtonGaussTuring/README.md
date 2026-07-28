@@ -119,12 +119,58 @@ uv run --script tools/compare_ctau.py \
   --hc-shift-budget <registered-budget> --enforce
 ```
 
-This gate distinguishes statistical consistency from sufficient resolution:
-the 95% upper bound on the fitted shift must fit inside the registered absolute
-finite-temperature budget.
+Pointwise observable shifts are reported but are not gates because changing
+the space-time aspect ratio changes the finite-size scaling functions. The
+hard gate distinguishes fitted critical-field consistency from sufficient
+resolution: the 95% upper bound on the fitted shift must fit inside the
+registered absolute finite-temperature budget.
 
 Generated data remain Git-ignored. Historical Stage 3/4 pilot uncertainties
 are invalid because those runs reused seeds across fields and resampled bins as
 independent. New claims must come from freshly generated manifests and raw bins
 using the current pipeline. `scan_stage4` remains only as a historical
 monolithic rerun entry point.
+
+## Stage 5 cost model
+
+Use completed cell manifests and one accepted fit to estimate a larger grid:
+
+```bash
+uv run --script tools/estimate_stage5.py <run-directory> \
+  --fit-csv <accepted-fit.csv> --observable xi \
+  --target-error <registered-hc-error> \
+  --future-sizes 24,32,40,48,56,64 --field-count 7 \
+  --chains 4 --workers 16 --output-prefix <results-prefix>
+```
+
+The output fits measured median cell wall time to a power law in $L$ and shows
+both a same-statistics pilot and an optimistic production estimate. It assumes
+ideal worker scaling and the $L^{1/\nu}$ critical-slope gain; it excludes
+autocorrelation growth, failed systematic gates, queueing, and I/O, so it is a
+planning lower bound rather than a precision forecast.
+
+## ParaToric independent-route qualification
+
+ParaToric is an optional, separately pinned dependency. Configure its core and
+tests first, then point this project at the generated package config:
+
+```bash
+cmake -S . -B build-paratoric-audit -DCMAKE_BUILD_TYPE=Release \
+  -DCM_ENABLE_PARATORIC_AUDIT=ON \
+  -Dparatoric_DIR=<paratoric-build>/cmake \
+  -DBoost_DIR=<boost-root>/lib/cmake/Boost-1.88.0 \
+  -DBoost_USE_STATIC_LIBS=OFF
+cmake --build build-paratoric-audit --target paratoric_crosscheck
+
+uv run --script tools/run_paratoric_crosscheck.py \
+  --executable build-paratoric-audit/paratoric_crosscheck \
+  --output <results-directory> \
+  --case square:3:3.04438 --case triangular:2:4.76 \
+  --chains 4 --thermal 200000 --samples 50000 --between 100 \
+  --boost-lib <boost-root>/lib
+```
+
+The tool writes raw chains, the full/even-sector diagnostics, and the required
+`cross-method-check.csv`. These are normalization checks only. The honeycomb
+target starts at $L=4$ because ParaToric's triangular $L=2$ periodic plaquettes
+are degenerate, and no independent thermodynamic-limit result is yet accepted.

@@ -24,7 +24,7 @@ from typing import Any
 
 RAW_SCHEMA = "challenge148-raw-v1"
 MANIFEST_SCHEMA = "challenge148-cell-v1"
-PROTOCOL_ID = "c148-prereg-v1+rev1+rev2+rev3+rev4"
+PROTOCOL_ID = "c148-prereg-v1+rev1+rev2+rev3+rev4+rev5+rev6"
 SOLUTION_REL = Path("tracks/qmc/solutions/LlmNewtonGaussTuring")
 SOURCE_PATHS = (SOLUTION_REL, Path("scripts/parameter_scan.py"))
 REQUIRED_RAW_COLUMNS = {

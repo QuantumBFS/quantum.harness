@@ -58,6 +58,11 @@ EigenSystem jacobi_eigen(const DenseSymMatrix& A, int max_sweeps = 50,
 // For ferromagnetic J > 0, sign-problem-free.
 DenseSymMatrix build_tfim_hamiltonian(const Lattice& lattice, double J, double h);
 
+// Build H in a fixed eigen-sector of P = product_i sigma^x_i.  The toric-code
+// duality on a periodic lattice imposes P=+1 through product_p B_p=+1.
+DenseSymMatrix build_tfim_parity_hamiltonian(const Lattice& lattice, double J,
+                                             double h, int parity);
+
 // ============================================================
 // Lanczos ground-state solver
 // ============================================================
@@ -91,6 +96,18 @@ struct ThermalObs {
 // N_sites = lattice.N.
 ThermalObs compute_thermal_obs(const Lattice& lattice, double J, double h,
                                double beta);
+
+struct ParityThermalEnergy {
+    int parity = 0;
+    double log_partition = 0.0;
+    double energy = 0.0;
+    double exchange_energy = 0.0;
+    double field_energy = 0.0;
+};
+
+// Total and Hamiltonian-component energies in a fixed P=+/-1 sector.
+ParityThermalEnergy compute_parity_thermal_energy(
+    const Lattice& lattice, double J, double h, double beta, int parity);
 
 // ============================================================
 // Structure factor S(q) = (1/N^2) sum_{i,j} <sigma^z_i sigma^z_j> e^{iq·(r_i-r_j)}

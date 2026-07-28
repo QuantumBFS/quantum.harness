@@ -183,6 +183,43 @@ DenseSymMatrix build_tfim_hamiltonian(const Lattice& lattice, double J, double h
     return H;
 }
 
+DenseSymMatrix build_tfim_parity_hamiltonian(const Lattice& lattice, double J,
+                                             double h, int parity) {
+    if (!std::isfinite(J) || !std::isfinite(h))
+        throw std::invalid_argument("build_tfim_parity_hamiltonian: couplings must be finite");
+    if (parity != -1 && parity != 1)
+        throw std::invalid_argument("build_tfim_parity_hamiltonian: parity must be +/-1");
+    const std::size_t full_dim = checked_spin_dimension(
+        lattice.N, std::size_t{1} << 14, "build_tfim_parity_hamiltonian");
+    validate_bond_indices(lattice, "build_tfim_parity_hamiltonian");
+
+    const std::size_t dim = full_dim / 2;
+    const std::size_t representative_bit = std::size_t{1} << (lattice.N - 1);
+    const std::size_t full_mask = full_dim - 1;
+    DenseSymMatrix H(dim);
+
+    // Representatives have their highest bit clear.  If a transverse-field
+    // flip leaves that half of the basis, global spin flip returns it and
+    // contributes the selected parity eigenvalue.
+    for (std::size_t state = 0; state < dim; ++state) {
+        double diagonal = 0.0;
+        for (const auto& bond : lattice.bonds)
+            diagonal -= J * sigma_z(state, bond.i) * sigma_z(state, bond.j);
+        H(state, state) += diagonal;
+
+        for (std::size_t site = 0; site < lattice.N; ++site) {
+            std::size_t target = flip_bit(state, site);
+            double phase = 1.0;
+            if ((target & representative_bit) != 0) {
+                target ^= full_mask;
+                phase = static_cast<double>(parity);
+            }
+            H(state, target) -= h * phase;
+        }
+    }
+    return H;
+}
+
 // ============================================================
 // Lanczos ground-state solver (matrix-free)
 // ============================================================
@@ -446,6 +483,50 @@ ThermalObs compute_thermal_obs(const Lattice& lattice, double J, double h, doubl
     obs.m4 = exp_m4 / (N_ * N_ * N_ * N_);
     obs.Q  = (obs.m2 * obs.m2) / (obs.m4 > 1e-30 ? obs.m4 : 1e-30);
     return obs;
+}
+
+ParityThermalEnergy compute_parity_thermal_energy(
+    const Lattice& lattice, double J, double h, double beta, int parity) {
+    if (!std::isfinite(beta) || beta < 0.0)
+        throw std::invalid_argument(
+            "compute_parity_thermal_energy: beta must be finite and non-negative");
+
+    DenseSymMatrix hamiltonian =
+        build_tfim_parity_hamiltonian(lattice, J, h, parity);
+    const EigenSystem eigensystem = jacobi_eigen(hamiltonian);
+    const std::size_t dim = hamiltonian.dim;
+    const double ground_energy = eigensystem.eigenvalues.front();
+
+    std::vector<double> exchange_diagonal(dim, 0.0);
+    for (std::size_t state = 0; state < dim; ++state)
+        for (const auto& bond : lattice.bonds)
+            exchange_diagonal[state] -=
+                J * sigma_z(state, bond.i) * sigma_z(state, bond.j);
+
+    double shifted_partition = 0.0;
+    double energy_sum = 0.0;
+    double exchange_sum = 0.0;
+    for (std::size_t level = 0; level < dim; ++level) {
+        const double energy = eigensystem.eigenvalues[level];
+        const double weight = std::exp(-beta * (energy - ground_energy));
+        shifted_partition += weight;
+        energy_sum += energy * weight;
+
+        double exchange = 0.0;
+        for (std::size_t state = 0; state < dim; ++state) {
+            const double amplitude = eigensystem.eigenvectors[state * dim + level];
+            exchange += amplitude * amplitude * exchange_diagonal[state];
+        }
+        exchange_sum += exchange * weight;
+    }
+
+    ParityThermalEnergy result;
+    result.parity = parity;
+    result.log_partition = -beta * ground_energy + std::log(shifted_partition);
+    result.energy = energy_sum / shifted_partition;
+    result.exchange_energy = exchange_sum / shifted_partition;
+    result.field_energy = result.energy - result.exchange_energy;
+    return result;
 }
 
 // ============================================================
