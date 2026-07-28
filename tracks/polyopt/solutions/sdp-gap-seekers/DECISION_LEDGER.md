@@ -578,4 +578,6 @@ cones with sides `[36,36,45,37,36,45]`, one scalar gap cone, and 4,772
 packed PSD coordinates. Prepare optimizer-free JuMP translations for the
 moment-only and six-cone assemblies so a passing truth gate can advance
 without another source-design cycle; their presence does not authorize a
-model build.
+model build. A tiny synthetic rank-two test independently checks both
+canonical l=2 components, their squared norm two, orientation reversal, and
+the signed skeleton permutation; all eight assertions pass.

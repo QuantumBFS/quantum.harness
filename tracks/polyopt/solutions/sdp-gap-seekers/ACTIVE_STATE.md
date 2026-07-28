@@ -377,4 +377,6 @@ Updated: 2026-07-29 UTC.
   packed PSD coordinates. Optimizer-free JuMP mappings for both the
   moment-only fallback and the gated six-cone candidate are source-prepared;
   neither is authorized for MOF generation before its truth gate passes.
+  A separate one-skeleton synthetic test passes all eight row-orientation,
+  norm, and signed-permutation assertions locally.
 - No decision-changing user or resource need is open.
