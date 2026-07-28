@@ -104,3 +104,11 @@ Slurm job `22988194` passed Julia macro expansion and stopped in source
 provenance collection before assembly. The xH5 Git version does not implement
 `branch --show-current`. The builder now uses the portable plumbing command
 `symbolic-ref --short HEAD`; no model or MOF was emitted by r2.
+
+## 2026-07-29 — retain the clean-tree gate after build r3
+
+Slurm job `22988216` reached the clean-source check and refused to build
+because its own default `slurm-22988216.out` was untracked at the checkout
+root. The gate is correct and remains strict. The sbatch wrapper now routes
+scheduler stdout into the ignored track-results tree, so generated job logs
+cannot masquerade as source dirtiness.

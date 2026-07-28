@@ -6,6 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=12G
 #SBATCH --time=00:30:00
+#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/slurm-%j.out
 
 set -euo pipefail
 

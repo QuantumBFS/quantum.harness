@@ -64,4 +64,9 @@ Updated: 2026-07-29 UTC.
   and stopped in provenance collection before assembly because xH5's older
   Git does not support `branch --show-current`. Peak RSS was 642,716 KiB.
   The next revision uses portable `symbolic-ref --short HEAD`.
+- Derived-MOF build attempt r3, Slurm job `22988216`, then failed closed
+  before assembly because Slurm created its stdout file as an untracked file
+  at the repository root. Peak RSS was 626,716 KiB. Scheduler stdout is now
+  directed into the ignored track-results tree so the clean-source gate
+  measures code rather than its own job log.
 - No decision-changing user or resource need is open.
