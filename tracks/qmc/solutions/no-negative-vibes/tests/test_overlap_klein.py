@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
 import json
+import math
 from pathlib import Path
+import warnings
 
 import pytest
 import sympy as sp
@@ -15,17 +17,21 @@ from oracle.overlap_klein import (
     ExactPrimalCertificate,
     bridge_labels,
     build_system,
+    classify_anchor,
     certificate_from_json,
     certificate_to_json,
     find_zero_dual,
+    execution_metadata,
     overlap_geometry,
     quadratic_basis,
     reconstruct_exact_primal,
+    _reconstruct_float,
     run_anchor_scan,
     solve_anchor,
     support_edges,
     verify_primal,
     verify_zero_dual,
+    validate_blas_thread_environment,
     write_result,
 )
 
@@ -550,14 +556,22 @@ def test_build_system_uses_the_fixed_overlap_klein_geometry() -> None:
     assert system.coefficients.shape == (560, 24)
 
 
-def test_anchor_scan_is_deterministic_across_worker_counts() -> None:
-    """Catches completion-order output or execution metadata in the payload."""
-    one = run_anchor_scan(
+@pytest.fixture(scope="module")
+def number_conserving_anchor_scan() -> dict[str, object]:
+    """One real scan shared by payload-evidence tests."""
+    return run_anchor_scan(
         "number-conserving",
         "rings-bridges",
         workers=1,
         source_commit="a" * 40,
     )
+
+
+def test_anchor_scan_is_deterministic_across_worker_counts(
+    number_conserving_anchor_scan: dict[str, object],
+) -> None:
+    """Catches completion-order output or execution metadata in the payload."""
+    one = number_conserving_anchor_scan
     two = run_anchor_scan(
         "number-conserving",
         "rings-bridges",
@@ -571,23 +585,149 @@ def test_anchor_scan_is_deterministic_across_worker_counts() -> None:
     assert one["anchor_count"] == len(bridge_labels("number-conserving"))
 
 
-def test_result_payload_contains_replayable_terminal_evidence() -> None:
+def test_result_payload_contains_replayable_terminal_evidence(
+    number_conserving_anchor_scan: dict[str, object],
+) -> None:
     """Catches omitted solver diagnostics or certificate classifications."""
-    result = run_anchor_scan(
-        "number-conserving",
-        "rings-bridges",
-        workers=1,
-        source_commit="b" * 40,
-    )
+    result = number_conserving_anchor_scan
+    system = build_system("number-conserving", "rings-bridges")
     for anchor in result["anchors"]:
         assert set(anchor) >= {"label", "positive", "negative", "classification"}
         assert set(anchor["positive"]) >= {"status", "solver_message"}
         assert set(anchor["negative"]) >= {"status", "solver_message"}
-        assert anchor["classification"] in {
-            "certified-feasible",
-            "certified-zero",
-            "numerical-only",
-        }
+        if anchor["classification"] == "certified-feasible":
+            primals = [
+                sign["exact_primal_certificate"]
+                for sign in (anchor["positive"], anchor["negative"])
+                if "exact_primal_certificate" in sign
+            ]
+            assert primals
+            for payload in primals:
+                certificate = certificate_from_json(payload, system)
+                assert isinstance(certificate, ExactPrimalCertificate)
+                assert verify_primal(system, certificate)
+        elif anchor["classification"] == "certified-zero":
+            assert anchor["positive"]["status"] == "infeasible"
+            assert anchor["negative"]["status"] == "infeasible"
+            certificate = certificate_from_json(anchor["zero_certificate"], system)
+            assert isinstance(certificate, ExactDualCertificate)
+            assert verify_zero_dual(system, certificate)
+        else:
+            assert anchor["classification"] == "numerical-only"
+            assert "zero_certificate" not in anchor
+            assert all(
+                "exact_primal_certificate" not in sign
+                for sign in (anchor["positive"], anchor["negative"])
+            )
+
+
+def test_classifier_keeps_two_feasible_sign_certificates_separate() -> None:
+    """Catches collapsing two exact primal witnesses into one ambiguous field."""
+    system = _synthetic_system([[1, 0], [0, 1]])
+    anchor = classify_anchor(
+        system,
+        "x",
+        positive_solve=solve_anchor(system, "x", 1),
+        negative_solve=solve_anchor(system, "x", -1),
+    )
+
+    assert anchor["classification"] == "certified-feasible"
+    assert "zero_certificate" not in anchor
+    for sign in (anchor["positive"], anchor["negative"]):
+        certificate = certificate_from_json(sign["exact_primal_certificate"], system)
+        assert isinstance(certificate, ExactPrimalCertificate)
+        assert verify_primal(system, certificate)
+
+
+def test_classifier_requires_a_replaying_double_dual_for_zero() -> None:
+    """Catches promoting two nominal infeasibilities without both exact duals."""
+    system = _synthetic_system([[1, 0], [-1, 0]])
+    anchor = classify_anchor(
+        system,
+        "x",
+        positive_solve=solve_anchor(system, "x", 1),
+        negative_solve=solve_anchor(system, "x", -1),
+    )
+
+    assert anchor["classification"] == "certified-zero"
+    certificate = certificate_from_json(anchor["zero_certificate"], system)
+    assert isinstance(certificate, ExactDualCertificate)
+    assert verify_zero_dual(system, certificate)
+
+
+def test_classifier_downgrades_an_unreplayable_double_dual() -> None:
+    """Catches calling nominal infeasibility a zero without an exact dual."""
+    system = _synthetic_system([[0, 1], [0, -1]])
+    anchor = classify_anchor(
+        system,
+        "x",
+        positive_solve=AnchorSolve("x", 1, "infeasible", (), None, "nominal"),
+        negative_solve=AnchorSolve("x", -1, "infeasible", (), None, "nominal"),
+    )
+
+    assert anchor["classification"] == "numerical-only"
+    assert "zero_certificate" not in anchor
+    assert "dual_replay_diagnostic" in anchor
+
+
+def test_classifier_downgrades_a_failed_exact_primal_reconstruction() -> None:
+    """Catches treating a floating feasible solve as certified without replay."""
+    system = _synthetic_system([[1, 0], [0, 1]])
+    anchor = classify_anchor(
+        system,
+        "x",
+        positive_solve=AnchorSolve(
+            "x", 1, "feasible", (1.0, math.nan), 0.0, "nominal"
+        ),
+        negative_solve=AnchorSolve("x", -1, "error", (), None, "failed"),
+    )
+
+    assert anchor["classification"] == "numerical-only"
+    assert "exact_primal_certificate" not in anchor["positive"]
+    assert "exact_replay_diagnostic" in anchor["positive"]
+
+
+def test_blas_thread_validator_requires_all_three_thread_limits() -> None:
+    """Catches running a parallel scan with a missing or non-unit BLAS limit."""
+    expected = {
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+    }
+    assert validate_blas_thread_environment(expected) == expected
+    for name in expected:
+        invalid = {**expected, name: "2"}
+        with pytest.raises(ValueError, match=name):
+            validate_blas_thread_environment(invalid)
+
+
+def test_execution_metadata_records_validated_threads_and_spawn() -> None:
+    """Catches an execution payload that hides BLAS limits or start method."""
+    settings = {
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+    }
+    assert execution_metadata(
+        workers=2, wall_time_seconds=1.25, thread_settings=settings
+    ) == {
+        "workers": 2,
+        "wall_time_seconds": 1.25,
+        "blas_threads": settings,
+        "process_start_method": "spawn",
+    }
+
+
+def test_noninteger_q_sqrt_two_reconstruction_does_not_emit_bitcount_warning() -> None:
+    """Catches broad or missing suppression around SymPy's exact reconstruction."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "error",
+            message=".*bitcount function is deprecated.*",
+            category=DeprecationWarning,
+            module=r"mpmath\\.libmp\\.libintmath",
+        )
+        assert _reconstruct_float(math.sqrt(2), max_denominator=10000) == sp.sqrt(2)
 
 
 @pytest.mark.parametrize("workers", (0, -1, True))
