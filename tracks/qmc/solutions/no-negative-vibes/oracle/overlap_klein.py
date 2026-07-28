@@ -532,6 +532,18 @@ def _numeric_coefficients_without_bitcount_warning(
         return numeric_coefficients(system)
 
 
+def _float_without_bitcount_warning(expression: sp.Expr) -> float:
+    """Evaluate one exact scalar while silencing one third-party deprecation."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=".*bitcount function is deprecated.*",
+            category=DeprecationWarning,
+            module=r"mpmath\.libmp\.libintmath",
+        )
+        return float(expression)
+
+
 def _empty_anchor_result(
     label: str, sign: int, status: str, message: str
 ) -> AnchorSolve:
@@ -666,7 +678,10 @@ def _reconstruct_float(
         raise ArithmeticError(
             "coefficient did not reconstruct in Q(sqrt(2))"
         ) from error
-    if abs(float(normalized) - value) > 1e-9 * max(1.0, abs(value)):
+    if (
+        abs(_float_without_bitcount_warning(normalized) - value)
+        > 1e-9 * max(1.0, abs(value))
+    ):
         raise ArithmeticError(
             "exact reconstruction does not match the numerical coefficient"
         )

@@ -725,11 +725,11 @@ def test_q_sqrt_two_numeric_solves_do_not_emit_bitcount_warning() -> None:
             "error",
             message=".*bitcount function is deprecated.*",
             category=DeprecationWarning,
-            module=r"mpmath\\.libmp\\.libintmath",
+            module=r"mpmath\.libmp\.libintmath",
         )
         assert solve_anchor(system, "x", 1).status == "infeasible"
         certificate = find_zero_dual(system, "x")
-    assert verify_zero_dual(system, certificate)
+        assert verify_zero_dual(system, certificate)
 
 
 @pytest.mark.parametrize("workers", (0, -1, True))
