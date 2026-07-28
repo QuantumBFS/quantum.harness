@@ -213,4 +213,16 @@ Updated: 2026-07-29 UTC.
   and the reloaded 3,250-variable/12-cone schema before attaching Mosek.
   Gamma=0 is the next numerical truth gate; gamma=1/2 remains unauthorized
   until it passes.
+- Full spin-permutation gamma=0 truth gate attempt r1, Slurm job `22988532`,
+  passed every preflight and returned `OPTIMAL` with primal and dual feasible
+  points. Normalization was exactly 1, maximum affine residual and worst PSD
+  violation were 0, and the smallest eigenvalue across all 12 independently
+  reconstructed blocks was `0.13079207445451374`. Solver wall was 20.941 s,
+  total runner wall 43.098 s, process peak RSS 2,750,960 KiB, and the factor
+  had 60.7 million nonzeros after factorization. `result.toml` SHA-256 is
+  `365bef5ca2bae523fdc4903650bcf4cbbfd3c53a7b54a015dcc7b9a2b0dc542c`.
+- The quotient is numerically valid, so gamma=1/2 is authorized. Its denser
+  factor makes it slightly worse than the 8,803-variable spin-axis model at
+  gamma=0; after the fixed gamma=1/2 run, pursue a true full-S3 row-space
+  decomposition rather than treating variable count alone as a memory proxy.
 - No decision-changing user or resource need is open.

@@ -307,3 +307,20 @@ immutable inputs. The dedicated runner must replay their checksum, fixed
 setup, all four exact-reduction schemas, every recorded source hash, and the
 reloaded cone inventory before optimization. Preserve the mandated order:
 gamma=0 first, gamma=1/2 only after its audited feasible solution.
+
+## 2026-07-29 — full-permutation gamma=0 gate passes but factor fill grows
+
+Slurm job `22988532` passed all fail-closed gates and returned `OPTIMAL` with
+primal and dual feasible points. Independent reconstruction gave
+normalization 1, zero affine and PSD violations, and minimum block eigenvalue
+`0.13079207445451374`. Total runner wall was 43.098 s, process peak RSS was
+2,750,960 KiB, and `result.toml` SHA-256 is
+`365bef5ca2bae523fdc4903650bcf4cbbfd3c53a7b54a015dcc7b9a2b0dc542c`.
+
+The exact quotient passes its required numerical equivalence gate and
+authorizes gamma=1/2. However, reducing scalar moments from 8,803 to 3,250
+increased factor fill from 41.4 million to 60.7 million nonzeros, peak RSS
+from 2,602,300 to 2,750,960 KiB, and total wall from 40.568 to 43.098 s at
+gamma=0. Do not infer memory improvement from moment count alone. Complete
+the fixed gamma=1/2 decision run, then switch to an exact S3 row-space/cone
+decomposition if its representation action can be proved.
