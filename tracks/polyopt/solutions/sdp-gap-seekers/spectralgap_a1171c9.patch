@@ -28,7 +28,7 @@ index c384283..8b27a46
 diff --git a/src/sdp.jl b/src/sdp.jl
 old mode 100644
 new mode 100755
-index ed6716a..e6372e7
+index ed6716a..5c72207
 --- a/src/sdp.jl
 +++ b/src/sdp.jl
 @@ -1,4 +1,4 @@
@@ -80,36 +80,36 @@ index ed6716a..e6372e7
 -    #         end
 -    #     end
 -    # end
-+    # §8 Farkas / dual-moment (SOS) certificate extraction. The upstream author
-+    # left this commented; we activate it to extract the infeasibility witness
-+    # when Mosek reports an INFEASIBILITY_CERTIFICATE. mmat is the dual moment
-+    # matrix reconstructed from -dual(con_eq); a valid Farkas/SOS certificate
-+    # requires mmat[i] ⪰ 0 for each block (validated by the caller via min-eig).
-+    farkas_mmat = nothing
-+    farkas_min_eig = nothing
-+    if _pstatus == MathOptInterface.INFEASIBILITY_CERTIFICATE
-+        dual_var = -dual.(con_eq)
-+        farkas_mmat = Vector{Matrix{ComplexF64}}(undef, length(basis))
-+        for i = 1:length(basis)
-+            farkas_mmat[i] = zeros(ComplexF64, lb[i], lb[i])
-+            for j = 1:lb[i], k = 1:lb[i]
-+                @inbounds bi,c = reduce!([basis[i][j][1]; basis[i][k][1]], N)
-+                if c != 0
-+                    if isempty(bi)
-+                        Locb = bfind(tsupp, sort([basis[i][j][2]; basis[i][k][2]]))
-+                    else
-+                        Locb = bfind(tsupp, sort([basis[i][j][2]; basis[i][k][2]; [bi]]))
-+                    end
-+                    farkas_mmat[i][j,k] = c*dual_var[Locb]
-+                end
-+            end
-+        end
-+        farkas_min_eig = [minimum(real.(eigvals(Hermitian(mm)))) for mm in farkas_mmat]
++    # §8 primal-ray extraction (CORRECTED per advisor review 2026-07-28).
++    # This is a Max-λ / homogeneous-equality SOS conic problem. When Mosek
++    # reports primal_status = INFEASIBILITY_CERTIFICATE it has found an unbounded
++    # improving ray of the *primal* model; the ray lives in the VARIABLE VALUES
++    # value.(pos/gpos/λ), NOT in dual(con_eq) (the earlier dual() attempt read
++    # the wrong side and returned degenerate zeros). A valid infeasibility/
++    # dual-infeasibility certificate requires ALL of:
++    #   (a) λ_ray > 0                (genuine improving direction)
++    #   (b) every pos[i] ⪰ 0          (ray stays in the positivity cone)
++    #   (c) every gpos[l] ⪰ 0         (ray stays in the gap cone)
++    #   (d) cons residual ≈ 0         (the homogeneous affine identity holds)
++    # (d) is evaluated by JuMP's value.(cons), independent of the solver flag.
++    # NOTE: under SLOW_PROGRESS the ray is a candidate only; (a)-(d) must pass
++    # and ideally be re-checked with rational/interval post-processing.
++    cert_ray = nothing
++    if _pstatus == MathOptInterface.INFEASIBILITY_CERTIFICATE ||
++       _pstatus == MathOptInterface.NEARLY_INFEASIBILITY_CERTIFICATE
++        lam_ray = value(λ)
++        pos_min_eig = [lb[i] > 0 ? minimum(real.(eigvals(Hermitian(value.(pos[i]))))) : NaN
++                       for i in eachindex(basis)]
++        gpos_min_eig = [lgb[l] > 0 ? minimum(real.(eigvals(Hermitian(value.(gpos[l]))))) : NaN
++                        for l in eachindex(gbasis)]
++        cons_res = maximum(abs, value.(cons))
++        cert_ray = (lambda=lam_ray, pos_min_eig=pos_min_eig,
++                    gpos_min_eig=gpos_min_eig, cons_residual=cons_res)
 +    end
      flag = status == MathOptInterface.OPTIMAL ? 1 : 0
 -    return flag
 +    return (flag=flag, termination=status, primal=_pstatus, dual=_dstatus, objective=_objv,
-+            farkas_mmat=farkas_mmat, farkas_min_eig=farkas_min_eig)
++            cert_ray=cert_ray)
  end
  
  function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
