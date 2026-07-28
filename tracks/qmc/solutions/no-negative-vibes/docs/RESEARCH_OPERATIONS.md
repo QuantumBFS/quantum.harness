@@ -152,6 +152,11 @@ An experiment is not closed when the program exits. It is closed after:
 - PowerShell variable names are case-insensitive and some common names are
   built in and read-only. Use task-specific names such as `$sshTarget`; do not
   reuse `$Host`, `$HOME`, or similarly global state.
+- A nested SSH command starts in the remote account's default directory, not
+  the repository directory named by an absolute pytest target. Consequently,
+  `PYTHONPATH=.` can fail collection even when the test path is absolute. Use
+  an absolute solution-directory `PYTHONPATH` or explicitly change the remote
+  working directory before invoking Python.
 - A quoting or transfer-helper failure that never started the scientific
   runner is an operational failure, not a new scientific attempt. Preserve
   the original raw file, verify its hash, record the mechanical lesson here,

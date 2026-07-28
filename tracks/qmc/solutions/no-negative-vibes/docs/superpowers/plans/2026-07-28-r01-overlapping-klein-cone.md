@@ -1086,10 +1086,24 @@ git push shared work/zibo/representation-cones
 - Consumes: exact number-conserving evidence and BdG system.
 - Produces: exact BdG bridge survival/no-go result `R01-E002`.
 
-- [ ] **Step 1: Probe the CPU worker through WSL without a job**
+- [ ] **Step 1: Freeze one source commit and synchronize both workers**
 
-Use strict host-key checking and key authentication. Record only the public
-resource facts in the experiment log:
+Do not start E002 until the interpreted E001 commit is on the shared branch
+and the Task 8 evidence-protocol amendment is also committed and pushed.
+Freeze that resulting full 40-hex commit as `TASK8_SOURCE_COMMIT`; do not let
+each host independently choose its current branch tip.
+
+Create a complete Git bundle for the pinned branch, verify it, and record its
+SHA-256.  Transfer it over the authenticated Windows-to-WSL hop and then the
+strict-host-key WSL-to-CPU hop.  Fast-forward both isolated clones and require:
+
+```text
+WSL HEAD == CPU HEAD == TASK8_SOURCE_COMMIT
+both worktrees clean
+```
+
+Probe CPU readiness through WSL without a scientific job.  Record only the
+public resource facts in the experiment log:
 
 ```text
 logical CPU count
@@ -1098,29 +1112,63 @@ OS/Python/SciPy/SymPy versions
 scheduler = plain SSH or detected scheduler
 ```
 
+The environment was already bootstrapped in `ENV-0004`; do not reinstall it
+when the BatchMode key, pinned clone, and dedicated Python remain healthy.
 If key authentication is not configured, stop CPU setup without embedding the
 password in a command, file, environment variable, or log. Run R01-E002 on WSL
 instead; lack of the second worker does not block this small exact experiment.
+In that fallback, WSL must run the larger mask's own workers=1 smoke before its
+production cell; the CPU-assigned smoke is not skipped.
 
-- [ ] **Step 2: Run a one-worker BdG smoke cell on WSL**
+- [ ] **Step 2: Run a matching one-worker smoke on each assigned host**
+
+The WSL smoke owns `bdg/rings-bridges`:
 
 ```bash
-SOURCE_COMMIT="$(git rev-parse HEAD)"
-OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
-python -m oracle.overlap_klein \
+set -euo pipefail
+TASK8_SOURCE_COMMIT="<replace-with-the-pinned-full-40-hex-commit>"
+SOURCE_COMMIT="$TASK8_SOURCE_COMMIT"
+test "$(git -C /home/zibojin/code/nnv-zibo rev-parse HEAD)" = "$SOURCE_COMMIT"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+PYTHONPATH=/home/zibojin/code/nnv-zibo/tracks/qmc/solutions/no-negative-vibes \
+/home/zibojin/miniforge3/envs/quantum_harness/bin/python \
+  -m oracle.overlap_klein \
   --family bdg \
   --mask rings-bridges \
   --workers 1 \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke.json
+  --output /home/zibojin/code/nnv-zibo/tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-bridges-attempt-01.json
 ```
 
-Verify exit status, primal residuals, and exact certificate replay before
-parallel work.
+The CPU smoke owns `bdg/rings-diagonals-bridges` and runs from its solution
+directory with its dedicated Python:
 
-- [ ] **Step 3: Partition the two BdG cells**
+```bash
+set -euo pipefail
+TASK8_SOURCE_COMMIT="<replace-with-the-pinned-full-40-hex-commit>"
+SOURCE_COMMIT="$TASK8_SOURCE_COMMIT"
+test "$(git -C /home/jzb/code/nnv-zibo rev-parse HEAD)" = "$SOURCE_COMMIT"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+PYTHONPATH=/home/jzb/code/nnv-zibo/tracks/qmc/solutions/no-negative-vibes \
+/home/jzb/miniforge3/envs/quantum-harness/bin/python \
+  -m oracle.overlap_klein \
+  --family bdg \
+  --mask rings-diagonals-bridges \
+  --workers 1 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output /home/jzb/code/nnv-zibo/tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-diagonals-bridges-attempt-01.json
+```
 
-If the CPU worker is ready:
+These distinct smokes may run concurrently.  Verify exit status, exact pinned
+source/family/mask, no `status="error"`, and every embedded primal/double-dual
+certificate before production.  Use a new `attempt-NN` path for any retry and
+record a failed attempt even when no JSON was produced.  If CPU readiness
+failed, replace only the CPU paths/interpreter above with their WSL absolute
+counterparts and run this larger-mask smoke on WSL before proceeding.
+
+- [ ] **Step 3: Run the disjoint production pair**
+
+Only after both matching smokes pass:
 
 - WSL runs `bdg/rings-bridges` with 14 workers;
 - CPU runs `bdg/rings-diagonals-bridges` with
@@ -1134,49 +1182,132 @@ On each assigned worker, from the solution directory, run the corresponding
 command:
 
 ```bash
-SOURCE_COMMIT="$(git rev-parse HEAD)"
-OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
-python -m oracle.overlap_klein \
+set -euo pipefail
+TASK8_SOURCE_COMMIT="<replace-with-the-pinned-full-40-hex-commit>"
+SOURCE_COMMIT="$TASK8_SOURCE_COMMIT"
+test "$(git -C /home/zibojin/code/nnv-zibo rev-parse HEAD)" = "$SOURCE_COMMIT"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+PYTHONPATH=/home/zibojin/code/nnv-zibo/tracks/qmc/solutions/no-negative-vibes \
+/home/zibojin/miniforge3/envs/quantum_harness/bin/python \
+  -m oracle.overlap_klein \
   --family bdg \
   --mask rings-bridges \
   --workers 14 \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges.json
+  --output /home/zibojin/code/nnv-zibo/tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges-attempt-01.json
 ```
 
 For the CPU worker, set `CPU_WORKERS` to exactly two fewer than the probed
 logical CPU count:
 
 ```bash
-SOURCE_COMMIT="$(git rev-parse HEAD)"
-CPU_WORKERS="$(( $(nproc) - 2 ))"
-OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
-python -m oracle.overlap_klein \
+set -euo pipefail
+TASK8_SOURCE_COMMIT="<replace-with-the-pinned-full-40-hex-commit>"
+SOURCE_COMMIT="$TASK8_SOURCE_COMMIT"
+test "$(git -C /home/jzb/code/nnv-zibo rev-parse HEAD)" = "$SOURCE_COMMIT"
+CPU_PYTHON=/home/jzb/miniforge3/envs/quantum-harness/bin/python
+CPU_WORKERS="$("$CPU_PYTHON" -c 'import os; print(max(1, (os.cpu_count() or 1) - 2))')"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+PYTHONPATH=/home/jzb/code/nnv-zibo/tracks/qmc/solutions/no-negative-vibes \
+"$CPU_PYTHON" -m oracle.overlap_klein \
   --family bdg \
   --mask rings-diagonals-bridges \
   --workers "$CPU_WORKERS" \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges.json
+  --output /home/jzb/code/nnv-zibo/tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges-attempt-01.json
 ```
 
-- [ ] **Step 4: Replay and append compact certificates**
+In the CPU-unavailable fallback, run this larger-mask production on WSL with
+the WSL absolute clone/interpreter/output paths and `--workers 14`, only after
+the matching larger-mask workers=1 WSL smoke has passed.
 
-Extend the fixture replay test to BdG cells. Require exact reconstruction for
-every `certified-feasible` anchor and double-dual replay for every
-`certified-zero` anchor. Preserve `numerical-only` diagnostics but do not use
-them for a theorem.
+For each host-local smoke/production pair, remove only the top-level
+`execution` object and require the complete remaining payloads to be equal.
+Do not drop package versions, solver diagnostics, source commit,
+classifications, or certificates from this comparison.
 
-- [ ] **Step 5: Record and push R01-E002**
+- [ ] **Step 4: Return all four raw files with end-to-end hashes**
+
+Validate and SHA-256 hash all four generated raws in place.  In the normal
+split, this means two WSL raws plus two CPU raws: copy the CPU pair into WSL
+using unique `.part` destinations, recompute the hash, and atomically rename
+only after it matches.  In the CPU-unavailable fallback, all four raws are
+already on WSL, so skip the nonexistent CPU hop.  In either route, copy all
+four WSL-held raws through the outer Windows gateway and into the local
+ignored results tree, again using `.part`, recomputing SHA-256 at every hop,
+and atomically renaming only after a match.  A transfer mismatch is an
+operational failure; preserve the source raw and failed `.part` and never
+overwrite a previously named attempt.
+
+- [ ] **Step 5: Migrate the fixture schema and replay BdG evidence**
+
+Before creating E002 data, add RED tests that require exactly two ordered BdG
+cells, their expected labels/shapes, both raw roles/hashes/worker counts,
+scientific-payload equality, terminal non-error branches, sign-local evidence,
+and exact replay of every certificate.
+
+The E001 fixture has one top-level experiment/source/package record, which
+cannot correctly describe E002 or two software hosts.  Migrate to
+`fixture_schema_version=2`:
+
+```text
+protocol: overlap-klein-v1
+experiments:
+  - experiment_id: R01-E001
+    source_commit: 24c80c4e1c1f182278e799b7f5de53deb65bf2f4
+    cells: [...]
+  - experiment_id: R01-E002
+    source_commit: TASK8_SOURCE_COMMIT
+    cells: [...]
+```
+
+Store package versions and public host role per cell (or per raw pair), not as
+one false cross-host constant.  Preserve every `numerical-only` diagnostic but
+do not use it for a theorem.  If one sign has an exact primal while the other
+is merely numerically infeasible, report the latter as unresolved rather than
+as an exact one-sided exclusion.
+
+The migration test must also require exactly the original two E001
+number-conserving cells with their full source commit
+`24c80c4e1c1f182278e799b7f5de53deb65bf2f4`, raw hashes, classifications, and
+replaying exact certificates.  The v2 fixture contains exactly two
+experiments with two cells each; migration must not weaken or silently drop
+the already reviewed E001 evidence.
+
+Use the exact inclusion `K_NC -> K_BdG` as a consistency check.  Since E001
+proved every number-conserving bridge zero, a BdG hopping primal may survive
+only with at least one nonzero pairing coefficient; an all-zero-pairing
+hopping witness is a hard contradiction.  Distinguish hopping anchors from
+pair-creation/pair-annihilation anchors.  Do not infer a Hermitian Hamiltonian
+from separate directed survivors; a later functional-anchor test must impose
+the hopping adjoint pair or `pc=pa` in one common cone element.
+
+- [ ] **Step 6: Record, verify on both hosts, commit, and push R01-E002**
 
 Append the full experiment schema and the lesson that distinguishes hopping
-from pair-creation/pair-annihilation bridges. Run all tests, commit, and push:
+from pair-creation/pair-annihilation bridges.  Record every scientific and
+operational attempt, source/bundle/raw hashes, machine assignment, all
+anchor/sign evidence, strict claim scope, and next decision.  Run focused and
+full tests on WSL and the committed fixture replay tests on CPU.
+
+The distributed verification order is:
+
+1. locally construct and preflight the fixture/tests/docs;
+2. commit the candidate tracked state **without pushing**;
+3. create, verify, and hash a complete bundle for that exact candidate commit;
+4. fast-forward clean WSL and CPU clones to the same candidate commit;
+5. run the WSL focused/full suites and CPU committed fixture replay tests;
+6. if either host fails, fix locally in a new commit and repeat the
+   bundle/synchronization/tests;
+7. only after both hosts pass, push the exact verified commit.
+
+Then publish the verified result:
 
 ```bash
-git add tracks/qmc/solutions/no-negative-vibes/fixtures/overlap_klein_r01.json \
-        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
-        tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md \
-        tracks/qmc/solutions/no-negative-vibes/docs/RESEARCH_OPERATIONS.md
-git commit -m "research: record six-mode BdG Klein result"
+set -euo pipefail
+VERIFIED_CANDIDATE_COMMIT="<replace-with-the-full-40-hex-commit-tested-on-both-hosts>"
+test -z "$(git status --short)"
+test "$(git rev-parse HEAD)" = "$VERIFIED_CANDIDATE_COMMIT"
 git push shared work/zibo/representation-cones
 ```
 
