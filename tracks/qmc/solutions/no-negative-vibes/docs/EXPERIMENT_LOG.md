@@ -251,3 +251,43 @@ Decision / next experiment:
   values.
 - Decision / next experiment: solve anchored number-conserving and BdG LPs,
   rationalize candidate rays, and replay exact primal or dual certificates.
+
+## ALG-0005 — anchored LP and exact primal/double-dual replay
+
+- Proposal ID: `R01`
+- Question: Can numerical anchored feasibility be upgraded, without hidden
+  coefficient bounds, to exact `Q(sqrt(2))` primal certificates or exact
+  two-sided Farkas certificates proving an anchor is identically zero?
+- Prediction: synthetic feasible, infeasible, unbounded-coefficient,
+  degenerate-support, empty, structural-zero, and positively rescaled systems
+  are classified without a false certificate; JSON replay is canonical and
+  system-bound.
+- Source commit: `5c7b3293e199f6e6dbb8832c30f8188659801675`
+- Protocol/config: HiGHS discovery with unbounded variables; forced exact
+  anchor; exact full-cone replay; positive and negative dual identities;
+  `N=10^5` / `N=10^12` row-scaling tests; malformed and malicious JSON tests.
+- Host role and resources: WSL primary replay and CPU-worker independent
+  environment replay; one test process and one BLAS thread.
+- Command: `python -m pytest tests/test_overlap_klein.py -q`, followed on WSL
+  by `python -m pytest tests -q`.
+- Result: the initial `b310b4a` replay failed 4 focused tests because
+  SymPy/mpmath `full=True` reconstruction crashed at exact/near integer one.
+  After the narrow compatibility fix and review-completeness fixes, final WSL
+  focused `44 passed, 12 warnings in 1.21s`; WSL full `324 passed, 1020
+  warnings in 10.68s`; CPU focused `44 passed, 12 warnings in 1.73s`.
+- Evidence paths and hashes: Task 5 production/fix commits `b310b4a`,
+  `98e6cbf`, and `5c7b329`; final independent review approved specification,
+  production, and quality with zero findings.
+- Interpretation: the certificate layer is now conservative and complete for
+  the tested exact cases. It cannot turn a floating success into a theorem
+  without exact replay, and its proof power is invariant under positive
+  rescaling in the tested `10^12` range. No actual R01 anchor has yet been
+  classified.
+- Transferable lesson: third-party symbolic reconstruction may fail at simple
+  boundary values; isolate the version-specific failure and keep the
+  nontrivial mandated algorithm. More importantly, never threshold away
+  positive Farkas weights or impose an undeclared denominator cap: both change
+  theorem-proving power under harmless row scaling.
+- Decision / next experiment: run the versioned real six-mode protocol for
+  all support/family cells and persist exact certificates before interpreting
+  feasibility.
