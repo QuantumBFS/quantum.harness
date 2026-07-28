@@ -150,4 +150,15 @@ Updated: 2026-07-29 UTC.
   setup, reduction-layer, source-file, variable, constraint, named-cone, and
   side-dimension fields before attaching Mosek. Gamma=0 remains the next
   numerical gate.
+- Spin-axis gamma=0 truth gate attempt r1, Slurm job `22988457`, passed every
+  preflight and returned `OPTIMAL` with primal and dual feasible points.
+  Normalization was exactly 1, maximum affine residual and worst PSD violation
+  were 0, and the smallest eigenvalue across all 12 independently
+  reconstructed blocks was `0.11159895759531112`. Solver wall was 22.250 s,
+  total runner wall 40.568 s, process peak RSS 2,602,300 KiB, and the factor
+  had 41.4 million nonzeros after factorization. `result.toml` SHA-256 is
+  `68d145b91ba34bec17d3c5ca5088a5a8419ee37caaaa39b60e68ab5e9d66465c`.
+- The additional exact representation has passed its gamma=0 numerical
+  equivalence gate. Gamma=1/2 is authorized next with the same runner and
+  solver settings.
 - No decision-changing user or resource need is open.

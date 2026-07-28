@@ -226,3 +226,18 @@ real cones, 16,707 triangle entries, and maximum side 81. These become
 immutable allowlisted inputs. Use a separate runner that verifies their
 checksums, full runmeta, and every recorded source hash before optimization;
 run gamma=0 first.
+
+## 2026-07-29 — spin-axis gamma=0 gate passed
+
+Slurm job `22988457` passed the immutable-input, fixed-setup, all-reduction,
+recorded-source-hash, reloaded-count, and 12-named-cone gates before attaching
+Mosek. It returned `OPTIMAL` with primal and dual feasible points.
+Independent reconstruction found normalization 1, zero affine and PSD
+violations, and minimum eigenvalue `0.11159895759531112`.
+
+The factor had 41.4 million nonzeros after factorization, total runner wall
+was 40.568 s, and process peak RSS was 2,602,300 KiB. The preserved
+`result.toml` SHA-256 is
+`68d145b91ba34bec17d3c5ca5088a5a8419ee37caaaa39b60e68ab5e9d66465c`.
+This passes the required gamma=0 numerical equivalence gate and authorizes
+gamma=1/2 without a setup or tolerance change.
