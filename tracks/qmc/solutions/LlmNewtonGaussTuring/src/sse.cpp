@@ -64,6 +64,7 @@ SSE::SSE(const Lattice& lattice, double J, double h, double beta,
 
     sitePos_.assign(N_, {});
     segBase_.assign(N_, 0);
+    segmentCursor_.assign(N_, 0);
 }
 
 // Grow the operator string when the expansion order approaches the cutoff.
@@ -170,11 +171,21 @@ void SSE::clusterUpdate() {
     // 2. Union the two segments bound by every BOND operator.
     parent_.resize(nSeg);
     for (int s = 0; s < nSeg; ++s) parent_[s] = s;
+    std::fill(segmentCursor_.begin(), segmentCursor_.end(), 0);
     for (int p = 0; p < M_; ++p) {
         if (opType_[p] != Op::BOND) continue;
         int b = opIdx_[p];
         int i = static_cast<int>(lat_.bonds[b].i), j = static_cast<int>(lat_.bonds[b].j);
-        ufUnion(segBase_[i] + localSegment(i, p), segBase_[j] + localSegment(j, p));
+        auto segment_at = [this, p](int site) {
+            const auto& positions = sitePos_[site];
+            const int k = static_cast<int>(positions.size());
+            if (k == 0) return segBase_[site];
+            int& cursor = segmentCursor_[site];
+            while (cursor < k && positions[cursor] < p) ++cursor;
+            const int local = (cursor == 0 || cursor == k) ? (k - 1) : (cursor - 1);
+            return segBase_[site] + local;
+        };
+        ufUnion(segment_at(i), segment_at(j));
     }
 
     // 3. Flip each cluster with probability 1/2 (decision taken on the root).
@@ -250,6 +261,17 @@ SSEResult SSE::run() {
         }
     }
 
+    // Stage 4 visits the same propagated state for every diagonal operator.
+    // Keep these buffers outside the sweep loop so allocation is not part of
+    // the production hot path.
+    std::vector<std::int8_t> propagated;
+    std::vector<double> q_re, q_im;
+    if (params_.stage4_estimators) {
+        propagated.resize(N_);
+        q_re.resize(qvecs.size());
+        q_im.resize(qvecs.size());
+    }
+
     SSEResult res;
     res.bin_E.reserve(params_.n_bins);
     res.bin_m2.reserve(params_.n_bins);
@@ -258,6 +280,10 @@ SSEResult SSE::run() {
     res.bin_Sq.reserve(params_.n_bins);
     res.bin_spacetime_m2.reserve(params_.n_bins);
     res.bin_spacetime_m4.reserve(params_.n_bins);
+    if (params_.census) {
+        res.bin_exchange_energy.reserve(params_.n_bins);
+        res.bin_field_energy.reserve(params_.n_bins);
+    }
 
     double sE = 0, sn = 0, sn2 = 0, sm = 0, sm2 = 0, sm4 = 0, sS0 = 0, sSq = 0;
     double sTm2 = 0, sTm4 = 0;
@@ -273,6 +299,7 @@ SSEResult SSE::run() {
     const double invBin = 1.0 / std::max(params_.sweeps_per_bin, 1);
     for (int bin = 0; bin < params_.n_bins; ++bin) {
         double bE = 0, bm2 = 0, bm4 = 0, bS0 = 0, bSq = 0, bTm2 = 0, bTm4 = 0;
+        double bExchange = 0, bField = 0;
 
         for (int s = 0; s < params_.sweeps_per_bin; ++s) {
             diagonalUpdate();
@@ -280,8 +307,8 @@ SSEResult SSE::run() {
             ++nm;
 
             if (params_.check_config && !verifyConfig()) ++nbad;
+            int nc = 0, nb = 0, nf = 0;
             if (params_.census) {
-                int nc = 0, nb = 0, nf = 0;
                 for (int p = 0; p < M_; ++p) {
                     if (opType_[p] == Op::CONST_SITE) ++nc;
                     else if (opType_[p] == Op::BOND) ++nb;
@@ -292,6 +319,10 @@ SSEResult SSE::run() {
 
             // energy from the expansion order n
             double E = (-static_cast<double>(n_) / beta_ + h_ * N_ + J_ * Nb_) / N_;
+            if (params_.census) {
+                bExchange += (-static_cast<double>(nb) / beta_ + J_ * Nb_) / N_;
+                bField += (-static_cast<double>(nf) / beta_) / N_;
+            }
             sn += n_; sn2 += static_cast<double>(n_) * n_;
 
             // Legacy path measures on |alpha(0)>.  Stage 4 instead averages
@@ -305,7 +336,7 @@ SSEResult SSE::run() {
             double tm2 = mm * mm, tm4 = tm2 * tm2;
 
             if (params_.stage4_estimators) {
-                std::vector<std::int8_t> propagated = spin_;
+                std::copy(spin_.begin(), spin_.end(), propagated.begin());
                 double current_Mz = Mz;
                 double equal_m2 = 0.0, equal_m4 = 0.0, equal_Sq = 0.0;
                 int propagated_count = 0;
@@ -315,13 +346,20 @@ SSEResult SSE::run() {
                 double p3 = p2 * current_m;
                 double p4 = p2 * p2;
                 std::size_t interval_count = 1;
-                std::vector<double> q_re(qvecs.size(), 0.0), q_im(qvecs.size(), 0.0);
+                std::fill(q_re.begin(), q_re.end(), 0.0);
+                std::fill(q_im.begin(), q_im.end(), 0.0);
                 for (std::size_t q = 0; q < qvecs.size(); ++q) {
                     for (int i = 0; i < N_; ++i) {
                         q_re[q] += propagated[i] * cosq[q][i];
                         q_im[q] += propagated[i] * sinq[q][i];
                     }
                 }
+                double qsum = 0.0;
+                for (std::size_t q = 0; q < qvecs.size(); ++q) {
+                    qsum += (q_re[q] * q_re[q] + q_im[q] * q_im[q])
+                          / (static_cast<double>(N_) * N_);
+                }
+                qsum /= static_cast<double>(qvecs.size());
                 for (int pidx = 0; pidx < M_; ++pidx) {
                     if (opType_[pidx] == Op::NONE) continue;
 
@@ -329,12 +367,7 @@ SSEResult SSE::run() {
                     const double current_m_squared = current_m * current_m;
                     equal_m2 += current_m_squared;
                     equal_m4 += current_m_squared * current_m_squared;
-                    double qsum = 0.0;
-                    for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                        qsum += (q_re[q] * q_re[q] + q_im[q] * q_im[q])
-                              / (static_cast<double>(N_) * N_);
-                    }
-                    equal_Sq += qsum / std::max<std::size_t>(qvecs.size(), 1);
+                    equal_Sq += qsum;
                     ++propagated_count;
 
                     if (opType_[pidx] == Op::FLIP_SITE) {
@@ -346,6 +379,12 @@ SSEResult SSE::run() {
                             q_im[q] += delta * sinq[q][site];
                         }
                         propagated[site] = -propagated[site];
+                        qsum = 0.0;
+                        for (std::size_t q = 0; q < qvecs.size(); ++q) {
+                            qsum += (q_re[q] * q_re[q] + q_im[q] * q_im[q])
+                                  / (static_cast<double>(N_) * N_);
+                        }
+                        qsum /= static_cast<double>(qvecs.size());
                     }
                     current_m = current_Mz / N_;
                     const double current_m_squared_after = current_m * current_m;
@@ -368,16 +407,7 @@ SSEResult SSE::run() {
                 if (propagated_count == 0) {
                     equal_m2 = mm * mm;
                     equal_m4 = equal_m2 * equal_m2;
-                    double qsum = 0.0;
-                    for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                        double re = 0.0, im = 0.0;
-                        for (int i = 0; i < N_; ++i) {
-                            re += spin_[i] * cosq[q][i];
-                            im += spin_[i] * sinq[q][i];
-                        }
-                        qsum += (re * re + im * im) / (static_cast<double>(N_) * N_);
-                    }
-                    equal_Sq = qsum / std::max<std::size_t>(qvecs.size(), 1);
+                    equal_Sq = qsum;
                     propagated_count = 1;
                 }
                 mm2 = equal_m2 / propagated_count;
@@ -427,6 +457,10 @@ SSEResult SSE::run() {
         res.bin_Sq.push_back(bSq * invBin);
         res.bin_spacetime_m2.push_back(bTm2 * invBin);
         res.bin_spacetime_m4.push_back(bTm4 * invBin);
+        if (params_.census) {
+            res.bin_exchange_energy.push_back(bExchange * invBin);
+            res.bin_field_energy.push_back(bField * invBin);
+        }
 
         if (params_.progress_every_bins > 0
             && ((bin + 1) % params_.progress_every_bins == 0
@@ -468,6 +502,8 @@ SSEResult SSE::run() {
         res.n_const_avg = sNc * inv;
         res.n_bond_avg = sNb * inv;
         res.n_flip_avg = sNf * inv;
+        res.exchange_energy = (-res.n_bond_avg / beta_ + J_ * Nb_) / N_;
+        res.field_energy = (-res.n_flip_avg / beta_) / N_;
     }
     res.config_checked = params_.check_config;
     res.consistency_failures = params_.check_config ? nbad : -1;

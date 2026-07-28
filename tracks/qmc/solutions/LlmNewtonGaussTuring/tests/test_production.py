@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import subprocess
 import tempfile
 from argparse import Namespace
 from pathlib import Path
@@ -77,6 +78,32 @@ def main() -> None:
                 run_spec=spec_path, workers=2, retry_failed=False, collect=True
             )
         )
+
+        # The seeded sampler is part of the resumable-cell contract.  Run a
+        # small cell twice and compare the complete raw files, not only a
+        # derived observable, so estimator optimizations cannot alter the
+        # trajectory or metadata silently.
+        deterministic_a = run_dir / "deterministic-a.csv"
+        deterministic_b = run_dir / "deterministic-b.csv"
+        deterministic_command = [
+            str(sampler), "square", "4", "3.04", "1", "148148", "hot",
+            "20", "4", "2",
+        ]
+        subprocess.run(
+            [*deterministic_command, str(deterministic_a)],
+            cwd=ROOT, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True,
+        )
+        subprocess.run(
+            [*deterministic_command, str(deterministic_b)],
+            cwd=ROOT, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True,
+        )
+        require(
+            deterministic_a.read_bytes() == deterministic_b.read_bytes(),
+            "seeded sampler output is not deterministic",
+        )
+
         RUNNER.cmd_run_cell(
             Namespace(run_spec=spec_path, cell="cell-0001", retry_failed=False)
         )

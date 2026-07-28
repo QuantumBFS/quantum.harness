@@ -1,8 +1,8 @@
 # Challenge 148 Frozen Production Protocol
 
-Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3+rev4+rev5+rev6`.
+Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3+rev4+rev5+rev6+rev7`.
 
-This is the clean-checkout copy of the preregistration and six append-only
+This is the clean-checkout copy of the preregistration and seven append-only
 clarifications. Pilot evidence may select final sizes and sampling budgets, but
 may not change the Hamiltonian, primary estimator, fit family, uncertainty
 rules, blinding rule, or verdict gate without a new protocol identifier.
@@ -110,6 +110,74 @@ $\exp[-\beta(4\mu-2)]$ is recorded. ParaToric triangular $L=2$ has degenerate
 periodic plaquette incidence and is not a honeycomb-target oracle; the first
 independent honeycomb scan must therefore use $L\ge4$. These qualification
 checks do not satisfy the independent thermodynamic-limit verdict gate.
+
+Protocol Revision 7 freezes the ParaToric critical-observable scan before any
+such data are generated. ParaToric is run in the $x$ basis with
+$h_{\rm eTC}=1$, $J_{\rm eTC}=g$, and $\beta=L/g$, where $g$ is the target
+TFIM field. This is the energy-rescaled form of the paper convention
+$J_{\rm eTC}=1$, $h_{\rm eTC}=1/g$, and $\beta=L$.
+
+The independent primary observable is ParaToric's binary periodic winding
+projector $\Pi$ under the package name `percolation_probability`. Its
+dimensionless statistic is
+
+$$
+U_\Pi=\frac{\langle\Pi^4\rangle}{\langle\Pi^2\rangle^2}.
+$$
+
+This is ParaToric's Binder convention, which is inverse to the registered
+direct-SSE convention and must not be compared to the direct $Q^*$. The
+supporting observable is `staggered_imaginary_times`, analyzed through the
+same $U_O=\langle O^4\rangle/\langle O^2\rangle^2$ convention. Package-level
+summary statistics are diagnostics only; accepted estimates are rebuilt from
+the stored raw series.
+
+The frozen ParaToric grids are:
+
+| Target TFIM | Gauge lattice | $L$ | Target-field values $g$ | Registered $L_{\min}$ |
+|---|---|---|---|---|
+| Triangular | Honeycomb | 8, 12, 16, 20, 24, 32 | 4.740 to 4.800 inclusive by 0.005 | 8, 12, 16 |
+| Honeycomb | Triangular | 10, 12, 16, 20, 24, 32 | 2.110 to 2.150 inclusive by 0.005 | 10, 12, 16 |
+
+Every production point contains four independently seeded chains, each with
+$500L^3$ thermalization updates, 30,000 stored samples, and $8L^3$ updates
+between samples. Seeds are nonzero and unique across the complete grid. A
+bounded cost pilot may use fewer stored samples, but its data cannot enter a
+critical fit and cannot change the axes or production cadence.
+
+Acceptance requires no ParaToric warning, every stored $A_v=+1$, at least
+eight circular blocks per chain at block length
+$\lceil2\max\tau_{\rm int}\rceil$, and at least 1,000 effective samples per
+chain for both critical observables. First-half versus second-half,
+base-versus-doubled-block, and single-chain-versus-other-chain differences
+must be at most five combined standard errors; doubled/base standard-error
+ratios must lie in $[1/2,2]$. Fits after discarding an additional 10% and 20%
+of every chain must shift by at most five combined standard errors. Each size
+must contain at least two field points with pooled
+$0.05<\langle\Pi\rangle<0.95$.
+
+The primary joint fit applies the frozen scaling family below to $U_\Pi$.
+The supporting SIT fit uses the same family. Both use 2,000 chain-plus-
+circular-block bootstrap resamples; more than 1% failed resamples, rank loss,
+a condition number above $10^{12}$, or $\chi^2/{\rm dof}>3$ fails the fit.
+The registered variants omit the mixed term, take
+$\omega\in\{0.80,0.83,0.86\}$, and apply every listed $L_{\min}$. The total
+uncertainty is
+
+$$
+\sigma_{\rm ind}=\sqrt{\sigma_{\rm bootstrap}^2+\Delta_{\rm variant}^2},
+$$
+
+where $\Delta_{\rm variant}$ is the largest absolute registered-variant shift.
+Adjacent-size crossing drift with exponent $1/\nu+\omega$ is reported as a
+secondary diagnostic and is not averaged with the joint fit.
+
+The independent route is accepted separately for each target lattice only if
+the $U_\Pi$ and SIT fields agree within three combined total uncertainties,
+the primary total uncertainty is at most $1.8\times10^{-5}$ for triangular or
+$8.0\times10^{-6}$ for honeycomb, and the primary field agrees with the
+separately frozen direct-SSE field within three combined total uncertainties.
+No triangular-to-honeycomb ratio is evaluated during these checks.
 
 ## Frozen fit family
 

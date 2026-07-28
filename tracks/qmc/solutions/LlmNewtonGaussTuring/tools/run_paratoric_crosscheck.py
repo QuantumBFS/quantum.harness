@@ -112,7 +112,16 @@ def run_chain(
         capture_output=True,
         env=environment,
     )
-    rows = list(csv.DictReader(completed.stdout.splitlines()))
+    lines = completed.stdout.splitlines()
+    try:
+        header = next(index for index, line in enumerate(lines) if line.startswith("record,"))
+    except StopIteration as error:
+        raise ValueError("ParaToric output has no CSV header") from error
+    warnings = [line for line in lines[:header] if line.strip()]
+    warnings.extend(line for line in completed.stderr.splitlines() if line.strip())
+    if warnings:
+        raise ValueError(f"ParaToric warning gate failed: {warnings}")
+    rows = list(csv.DictReader(lines[header:]))
     expected = 2 + samples
     if len(rows) != expected or rows[0]["record"] != "exact_full":
         raise ValueError(f"ParaToric returned {len(rows)} rows, expected {expected}")
@@ -276,11 +285,22 @@ def write_outputs(
     metadata = {
         "executable": str(executable),
         "executable_sha256": executable_hash(executable),
+        "driver_sha256": executable_hash(Path(__file__).resolve()),
         "paratoric_commit": PARATORIC_COMMIT,
         "paratoric_external_patch_sha256": PARATORIC_PATCH_SHA256,
         "uncertainty_rule": "max(base-block, doubled-block, independent-chain SEM); comparison budget = 5 combined SEM",
         "ed_uncertainty": 1e-10,
         "cases": diagnostics,
+        "artifacts": {
+            "cross-method-check.csv": {
+                "sha256": executable_hash(output / "cross-method-check.csv"),
+                "bytes": (output / "cross-method-check.csv").stat().st_size,
+            },
+            "paratoric-raw.csv": {
+                "sha256": executable_hash(output / "paratoric-raw.csv"),
+                "bytes": (output / "paratoric-raw.csv").stat().st_size,
+            },
+        },
     }
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 

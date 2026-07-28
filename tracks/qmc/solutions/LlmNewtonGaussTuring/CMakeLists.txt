@@ -82,6 +82,9 @@ target_compile_definitions(sample_stage4_cell PRIVATE
     CM_CXX_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
 )
 
+add_executable(sample_sse_energy tools/sample_sse_energy.cpp)
+target_link_libraries(sample_sse_energy PRIVATE cm148)
+
 # Optional independent implementation audit.  ParaToric is intentionally not
 # vendored; point CMake at a separately pinned checkout/build with
 # -DCM_ENABLE_PARATORIC_AUDIT=ON -Dparatoric_DIR=<build>/cmake.
@@ -92,6 +95,10 @@ if(CM_ENABLE_PARATORIC_AUDIT)
     add_executable(paratoric_crosscheck tools/paratoric_crosscheck.cpp)
     target_link_libraries(paratoric_crosscheck PRIVATE cm148 paratoric::core)
     target_compile_features(paratoric_crosscheck PRIVATE cxx_std_23)
+
+    add_executable(paratoric_critical_sampler tools/paratoric_critical_sampler.cpp)
+    target_link_libraries(paratoric_critical_sampler PRIVATE paratoric::core)
+    target_compile_features(paratoric_critical_sampler PRIVATE cxx_std_23)
 endif()
 
 # Stage 1: Berry curvature scan tools

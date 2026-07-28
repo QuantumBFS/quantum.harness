@@ -64,6 +64,8 @@ struct SSEParams {
 
 struct SSEResult {
     double energy = 0.0;   // <H>/N
+    double exchange_energy = 0.0; // -J <sum_b sigma^z_i sigma^z_j> / N
+    double field_energy = 0.0;    // -h <sum_i sigma^x_i> / N
     double Cv = 0.0;       // heat capacity / N
     double m = 0.0;        // <|m|>,        m = (1/N) sum sigma^z
     double m2 = 0.0;       // <m^2>
@@ -93,6 +95,7 @@ struct SSEResult {
     // propagated from the scalar means above (Stage 0 protocol 4.2).
     std::vector<double> bin_E, bin_m2, bin_m4, bin_S0, bin_Sq;
     std::vector<double> bin_spacetime_m2, bin_spacetime_m4;
+    std::vector<double> bin_exchange_energy, bin_field_energy;
 };
 
 class SSE {
@@ -126,6 +129,7 @@ private:
     // cluster-update scratch (reused across sweeps)
     std::vector<std::vector<int>> sitePos_; // per-site sorted site-operator positions
     std::vector<int> segBase_;              // per-site global id of its first segment
+    std::vector<int> segmentCursor_;        // monotone scan cursor during bond unions
     std::vector<int> parent_;               // union-find over segments
     std::vector<std::uint8_t> flip_;        // per-segment flip decision
 

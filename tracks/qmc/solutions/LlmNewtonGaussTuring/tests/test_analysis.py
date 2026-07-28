@@ -46,6 +46,31 @@ assert PARATORIC_SPEC.loader is not None
 sys.modules[PARATORIC_SPEC.name] = PARATORIC
 PARATORIC_SPEC.loader.exec_module(PARATORIC)
 
+PARATORIC_SSE_SPEC = importlib.util.spec_from_file_location(
+    "run_paratoric_sse_crosscheck",
+    ROOT / "tools" / "run_paratoric_sse_crosscheck.py",
+)
+PARATORIC_SSE = importlib.util.module_from_spec(PARATORIC_SSE_SPEC)
+assert PARATORIC_SSE_SPEC.loader is not None
+PARATORIC_SSE_SPEC.loader.exec_module(PARATORIC_SSE)
+
+PARATORIC_CRITICAL_SPEC = importlib.util.spec_from_file_location(
+    "run_paratoric_critical",
+    ROOT / "tools" / "run_paratoric_critical.py",
+)
+PARATORIC_CRITICAL = importlib.util.module_from_spec(PARATORIC_CRITICAL_SPEC)
+assert PARATORIC_CRITICAL_SPEC.loader is not None
+sys.modules[PARATORIC_CRITICAL_SPEC.name] = PARATORIC_CRITICAL
+PARATORIC_CRITICAL_SPEC.loader.exec_module(PARATORIC_CRITICAL)
+
+PARATORIC_ANALYSIS_SPEC = importlib.util.spec_from_file_location(
+    "analyze_paratoric_critical",
+    ROOT / "tools" / "analyze_paratoric_critical.py",
+)
+PARATORIC_ANALYSIS = importlib.util.module_from_spec(PARATORIC_ANALYSIS_SPEC)
+assert PARATORIC_ANALYSIS_SPEC.loader is not None
+PARATORIC_ANALYSIS_SPEC.loader.exec_module(PARATORIC_ANALYSIS)
+
 
 def require(condition: bool, message: str) -> None:
     if not condition:
@@ -303,6 +328,182 @@ def test_paratoric_comparison_statistics() -> None:
         "ParaToric uncertainty did not use the conservative registered maximum",
     )
 
+    direct_chains = []
+    for chain_index in range(4):
+        values = 2.0 + rng.normal(scale=0.1, size=1000) + 0.001 * chain_index
+        direct_chains.append(
+            [{"exchange_energy": f"{value:.17g}"} for value in values]
+        )
+    direct_mean, direct_uncertainty, direct_diagnostics = PARATORIC_SSE.summarize(
+        direct_chains, "exchange_energy"
+    )
+    require(abs(direct_mean - 2.0) < 0.02, "direct-SSE chain mean is wrong")
+    require(direct_uncertainty > 0.0, "direct-SSE uncertainty must be positive")
+    require(
+        direct_uncertainty
+        == max(
+            direct_diagnostics["base_error"],
+            direct_diagnostics["doubled_error"],
+            direct_diagnostics["chain_error"],
+        ),
+        "direct-SSE uncertainty did not use the conservative maximum",
+    )
+    require(
+        PARATORIC_SSE.independent_difference_z(
+            np.asarray([1.0, 1.1]), np.asarray([1.0, 1.1])
+        ) == 0.0,
+        "identical hot/cold chain groups must have zero standardized difference",
+    )
+    require(
+        np.isinf(PARATORIC_SSE.independent_difference_z(
+            np.ones(2), np.full(2, 2.0)
+        )),
+        "separated zero-variance hot/cold groups must fail",
+    )
+
+
+def test_paratoric_critical_contract() -> None:
+    axes = PARATORIC_CRITICAL.plan_axes("triangular", "production")
+    require(
+        axes["L"] == [8, 12, 16, 20, 24, 32]
+        and axes["field"][0] == 4.740
+        and axes["field"][-1] == 4.800,
+        "triangular ParaToric production axes differ from Revision 7",
+    )
+    require(
+        PARATORIC_CRITICAL.plan_axes("honeycomb", "pilot")["L"] == [10, 16],
+        "honeycomb cost pilot sizes differ from Revision 7",
+    )
+    params = {
+        "target_lattice": "triangular", "L": 8, "field": 4.77,
+        "chain": 0, "seed": 148700,
+    }
+    seed = PARATORIC_CRITICAL.stable_seed("test-run", params)
+    require(
+        seed == PARATORIC_CRITICAL.stable_seed("test-run", params),
+        "ParaToric stable seed is not deterministic",
+    )
+    require(
+        1 <= seed <= PARATORIC_CRITICAL.MAX_PARATORIC_SEED,
+        "ParaToric stable seed exceeds the sampler's signed-int range",
+    )
+    portable = PARATORIC_CRITICAL.portable_path(
+        ROOT / "build-paratoric-audit" / "paratoric_critical_sampler"
+    )
+    require(
+        not Path(portable).is_absolute()
+        and PARATORIC_CRITICAL.resolve_setting_path(portable).is_absolute(),
+        "repository-contained sampler paths are not portable across hosts",
+    )
+    settings = {
+        "samples_per_chain": 8, "n_thermal": 256000,
+        "updates_between": 4096, "mu": 64.0, "purpose": "pilot",
+    }
+    rows = []
+    for sample in range(8):
+        rows.append({
+            "raw_schema": PARATORIC_CRITICAL.RAW_SCHEMA,
+            "target_lattice": "triangular", "gauge_lattice": "honeycomb",
+            "L": "8", "beta": f"{8 / 4.77:.17g}", "field": "4.77",
+            "mu": "64", "seed": "148700", "sample": str(sample),
+            "n_thermal": "256000", "n_samples": "8",
+            "updates_between": "4096",
+            "percolation_probability": str(sample % 2),
+            "staggered_imaginary_times": f"{0.1 * (-1) ** sample:.17g}",
+            "star_x": "1", "package_tau_percolation": "0.5",
+            "package_tau_sit": "0.75", "package_tau_star": "0.5",
+        })
+    diagnostics = PARATORIC_CRITICAL.validate_rows(rows, params, settings)
+    require(
+        diagnostics["percolation_mean"] == 0.5
+        and diagnostics["max_star_defect"] == 0.0,
+        "valid ParaToric critical raw series produced wrong diagnostics",
+    )
+    bad_rows = [dict(row) for row in rows]
+    bad_rows[0]["star_x"] = "0.9"
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_rows(bad_rows, params, settings),
+        "ParaToric critical contract accepted a star-sector defect",
+    )
+
+    manifests = []
+    for size, rate in ((8, 2e-7), (16, 3e-7)):
+        updates = 500 * size**3 + 200 * 8 * size**3
+        for chain in range(4):
+            manifests.append({
+                "params": {"L": size}, "total_updates": updates,
+                "wall_seconds": rate * updates * (1.0 + 0.01 * chain),
+            })
+    cost = PARATORIC_CRITICAL.cost_projection(manifests, "triangular", 16)
+    require(
+        cost["aggregate_cpu_seconds"] > cost["ideal_wall_seconds"] > 0.0,
+        "ParaToric critical cost projection is invalid",
+    )
+
+
+def test_paratoric_critical_analysis() -> None:
+    binary = np.asarray([0.0, 1.0, 0.0, 1.0])
+    require(
+        PARATORIC_ANALYSIS.binder_value(binary) == 2.0,
+        "binary winding Binder statistic does not use the ParaToric convention",
+    )
+    require(
+        np.isnan(PARATORIC_ANALYSIS.binder_value(np.zeros(8))),
+        "zero-moment Binder statistic must be rejected",
+    )
+
+    rng = np.random.default_rng(1487)
+    chain_map = {}
+    for chain in range(4):
+        values = np.empty((4096, 3))
+        values[:, 0] = rng.binomial(1, 0.5, size=len(values))
+        values[:, 1] = np.clip(rng.normal(scale=0.3, size=len(values)), -1.0, 1.0)
+        values[:, 2] = 1.0
+        chain_map[chain] = values
+    point, taus = PARATORIC_ANALYSIS.point_estimate(
+        chain_map, 20, np.random.default_rng(1488)
+    )
+    diagnostic = PARATORIC_ANALYSIS.sampling_diagnostic(
+        chain_map, point["block"], taus
+    )
+    require(point["U_pi"] > 1.0 and point["U_sit"] > 1.0,
+            "raw series produced invalid Binder statistics")
+    require(point["U_pi_err"] > 0.0 and point["U_sit_err"] > 0.0,
+            "raw-series bootstrap produced non-positive errors")
+    require(diagnostic["minimum_blocks"] >= PARATORIC_ANALYSIS.MIN_BLOCKS,
+            "analysis undercounted independent circular blocks")
+    require(diagnostic["minimum_primary_ess"] >= 1000.0,
+            "analysis undercounted effective winding samples")
+
+    n_boot = 20
+    hc = 4.77031
+    coefficients = np.asarray([2.0, 0.02, -0.0002, 0.04, 0.003])
+    points = {}
+    fit_rng = np.random.default_rng(1489)
+    for size in (8, 12, 16, 20, 24, 32):
+        for field in PARATORIC_CRITICAL.PRODUCTION["triangular"]["fields"]:
+            value = (
+                ANALYSIS.design_matrix(
+                    np.asarray([float(size)]), np.asarray([field]), hc
+                ) @ coefficients
+            ).item()
+            samples = value + fit_rng.normal(scale=2e-4, size=n_boot)
+            error = float(np.std(samples, ddof=1))
+            points[(size, field)] = {
+                "U_pi": value, "U_pi_err": error, "U_pi_boot": samples,
+                "U_sit": value, "U_sit_err": error, "U_sit_boot": samples,
+                "percolation_mean": 0.5,
+            }
+    fit = PARATORIC_ANALYSIS.fit_variant(
+        points, "U_pi", 8, 0.83, True, n_boot
+    )
+    require(fit["status"] == "ok" and fit["fit_gate_passed"],
+            f"synthetic ParaToric corrected fit failed: {fit}")
+    require(abs(fit["hc"] - hc) < 2e-6,
+            "synthetic ParaToric critical field was not recovered")
+    require(all(row["passed"] for row in PARATORIC_ANALYSIS.bracketing_rows(points)),
+            "valid winding-probability brackets failed")
+
 
 def synthetic_protocol_data():
     rng = np.random.default_rng(148)
@@ -423,6 +624,8 @@ def main() -> None:
     test_ctau_comparison()
     test_cost_model()
     test_paratoric_comparison_statistics()
+    test_paratoric_critical_contract()
+    test_paratoric_critical_analysis()
     print("All Stage 4 analysis tests passed.")
 
 

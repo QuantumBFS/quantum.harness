@@ -174,3 +174,94 @@ The tool writes raw chains, the full/even-sector diagnostics, and the required
 `cross-method-check.csv`. These are normalization checks only. The honeycomb
 target starts at $L=4$ because ParaToric's triangular $L=2$ periodic plaquettes
 are degenerate, and no independent thermodynamic-limit result is yet accepted.
+
+Dense ED is infeasible at the first valid honeycomb-target size because $L=4$
+contains 32 TFIM spins. Compare ParaToric with the independent direct-SSE
+energy-component estimator instead:
+
+```bash
+cmake --build build-production --target sample_sse_energy
+cmake --build build-paratoric-audit --target paratoric_crosscheck
+
+uv run --script tools/run_paratoric_sse_crosscheck.py \
+  --paratoric-executable build-paratoric-audit/paratoric_crosscheck \
+  --sse-executable build-production/sample_sse_energy \
+  --output ../../../../results/c148-paratoric-sse-honey-l4 \
+  --case honeycomb:4:2.1325 --chains 4 \
+  --p-thermal 200000 --p-samples 50000 --p-between 100 \
+  --sse-thermal 10000 --sse-bins 1000 --sse-sweeps 25 \
+  --boost-lib <boost-root>/lib
+```
+
+The comparison retains the same maximum-of-reblocking-and-chain-error rule,
+requires two hot and two cold SSE chains, reports their hot/cold agreement,
+fails on ParaToric warnings or star defects, and checks the SSE energy-component
+sum against its expansion-order estimator. The stored `v2` field-energy chains
+have a post-hoc hot/cold difference of 10.1535 standard errors; that diagnostic
+motivates the proposed equilibration repair before the finite-volume check is
+treated as final physical evidence. It does not satisfy the independent
+thermodynamic-limit gate in either case.
+
+Protocol Revision 7 freezes a separate raw-series target for the independent
+critical scan. The executable enforces the dual gauge lattice and
+$\beta h_{\rm TFIM}=L$ from the target lattice, size, and target field:
+
+```bash
+cmake --build build-paratoric-audit --target paratoric_critical_sampler
+
+LD_LIBRARY_PATH=<boost-root>/lib \
+  build-paratoric-audit/paratoric_critical_sampler \
+  triangular 8 4.77 64 148700 256000 200 4096 \
+  > paratoric-critical-raw.csv
+```
+
+Each row stores the binary periodic winding projector, the staggered-
+imaginary-time observable, the star-sector diagnostic, and ParaToric's
+package-level autocorrelation estimates. Accepted Binder statistics and errors
+are rebuilt from the raw series under Revision 7; this executable does not
+calculate a critical-field ratio.
+
+Create a bounded cost-only plan through the generic parameter-scan contract,
+then execute, collect, and project the frozen production cost:
+
+```bash
+uv run --script tools/run_paratoric_critical.py plan \
+  --run-id c148-paratoric-triangular-critical-pilot-v2 \
+  --output ../../../../results/c148-paratoric-triangular-critical-pilot-v2 \
+  --target triangular --purpose pilot \
+  --sampler build-paratoric-audit/paratoric_critical_sampler \
+  --boost-lib <boost-root>/lib
+
+uv run --script tools/run_paratoric_critical.py run-local \
+  --run-spec ../../../../results/c148-paratoric-triangular-critical-pilot-v2/run_spec.json \
+  --workers 4 --collect
+
+uv run --script tools/run_paratoric_critical.py cost \
+  --run-spec ../../../../results/c148-paratoric-triangular-critical-pilot-v2/run_spec.json \
+  --workers 16
+```
+
+The pilot uses only two frozen sizes at one frozen-grid field and cannot enter
+a critical fit. Production planning expands to every Revision 7 size, field,
+and chain, constrains ParaToric seeds to its positive signed-integer range,
+stores repository-contained executable paths portably, and refuses a dirty
+scoped source tree. Long cells emit 30-second heartbeat lines.
+
+Analyze a complete production run with the Revision 7 adapter:
+
+```bash
+uv run --script tools/analyze_paratoric_critical.py \
+  ../../../../results/<production-run>/run_spec.json \
+  --bootstrap 2000 \
+  --direct-summary ../../../../results/<accepted-direct-run>/summary.json \
+  --enforce-protocol
+```
+
+The adapter rebuilds the winding and SIT Binder statistics from raw chains,
+uses the existing corrected joint fit with the registered fixed exponents and
+variants, and writes sampling, bracketing, prefix, crossing, fit, residual,
+and provenance artifacts. The generic `scripts/scaling_fit.py --form
+data-collapse` is not interchangeable with this fit because it lacks the
+registered correction terms and chain-plus-circular-block resampling. The
+analysis summary always records `ratio_computed=false`; cross-lattice unsealing
+remains outside the independent-route acceptance step.

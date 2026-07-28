@@ -69,9 +69,10 @@ void write_row(const std::string& record, const std::string& target,
 } // namespace
 
 int main(int argc, char** argv) {
-    if (argc != 10) {
+    if (argc != 10 && argc != 11) {
         std::cerr << "usage: paratoric_crosscheck <square|triangular|honeycomb> <L> "
-                     "<field> <beta> <mu> <seed> <thermal> <samples> <between>\n";
+                     "<field> <beta> <mu> <seed> <thermal> <samples> <between> "
+                     "[--no-ed]\n";
         return 2;
     }
 
@@ -85,27 +86,37 @@ int main(int argc, char** argv) {
         const int thermal = parse_int(argv[7], "thermal");
         const int samples = parse_int(argv[8], "samples");
         const int between = parse_int(argv[9], "between");
+        const bool with_ed = argc == 10;
+        if (!with_ed && std::string(argv[10]) != "--no-ed")
+            throw std::invalid_argument("the optional final argument must be --no-ed");
         if (L < 2 || field <= 0.0 || beta <= 0.0 || mu <= 0.0 || seed == 0
             || thermal <= 0 || samples <= 0 || between <= 0)
             throw std::invalid_argument("all numeric arguments must be positive and seed must be nonzero");
 
         const cm::Lattice lattice = target_lattice(target, L);
         const std::string gauge = dual_gauge_lattice(target);
-        const auto even = cm::compute_parity_thermal_energy(
-            lattice, 1.0, field, beta, +1);
-        const auto odd = cm::compute_parity_thermal_energy(
-            lattice, 1.0, field, beta, -1);
-        const double log_scale = std::max(even.log_partition, odd.log_partition);
-        const double even_weight = std::exp(even.log_partition - log_scale);
-        const double odd_weight = std::exp(odd.log_partition - log_scale);
-        const double weight_sum = even_weight + odd_weight;
-        const double even_fraction = even_weight / weight_sum;
-        const double full_exchange =
-            (even_weight * even.exchange_energy + odd_weight * odd.exchange_energy)
-            / weight_sum;
-        const double full_field =
-            (even_weight * even.field_energy + odd_weight * odd.field_energy)
-            / weight_sum;
+        double even_fraction = -1.0;
+        double full_exchange = 0.0, full_field = 0.0;
+        double even_exchange = 0.0, even_field = 0.0;
+        if (with_ed) {
+            const auto even = cm::compute_parity_thermal_energy(
+                lattice, 1.0, field, beta, +1);
+            const auto odd = cm::compute_parity_thermal_energy(
+                lattice, 1.0, field, beta, -1);
+            const double log_scale = std::max(even.log_partition, odd.log_partition);
+            const double even_weight = std::exp(even.log_partition - log_scale);
+            const double odd_weight = std::exp(odd.log_partition - log_scale);
+            const double weight_sum = even_weight + odd_weight;
+            even_fraction = even_weight / weight_sum;
+            full_exchange =
+                (even_weight * even.exchange_energy + odd_weight * odd.exchange_energy)
+                / weight_sum;
+            full_field =
+                (even_weight * even.field_energy + odd_weight * odd.field_energy)
+                / weight_sum;
+            even_exchange = even.exchange_energy;
+            even_field = even.field_energy;
+        }
 
         paratoric::Config config;
         config.lat_spec = paratoric::LatSpec{
@@ -138,11 +149,13 @@ int main(int argc, char** argv) {
         std::cout << "record,target_lattice,gauge_lattice,L,N,beta,field,mu,seed,"
                      "sample,exchange_energy,field_energy,total_energy,star_x,"
                      "even_partition_fraction\n";
-        write_row("exact_full", target, gauge, L, lattice.N, beta, field, mu,
-                  seed, -1, full_exchange, full_field, 1.0, even_fraction);
-        write_row("exact_even_diagnostic", target, gauge, L, lattice.N, beta,
-                  field, mu, seed, -1, even.exchange_energy, even.field_energy,
-                  1.0, even_fraction);
+        if (with_ed) {
+            write_row("exact_full", target, gauge, L, lattice.N, beta, field, mu,
+                      seed, -1, full_exchange, full_field, 1.0, even_fraction);
+            write_row("exact_even_diagnostic", target, gauge, L, lattice.N, beta,
+                      field, mu, seed, -1, even_exchange, even_field,
+                      1.0, even_fraction);
+        }
         for (int sample = 0; sample < samples; ++sample) {
             write_row("paratoric", target, gauge, L, lattice.N, beta, field, mu,
                       seed, sample,

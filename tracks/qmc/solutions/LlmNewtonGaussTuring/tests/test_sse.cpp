@@ -34,6 +34,12 @@ static void test_j0_limit() {
     SSE sse(lat, 0.0, h, beta, p);
     auto res = sse.run();
     approx_eq("E/N = -h tanh(bh)", res.energy, -h * std::tanh(beta * h), 0.05);
+    approx_eq("field E/N = -h tanh(bh)", res.field_energy,
+              -h * std::tanh(beta * h), 0.05);
+    check("J=0 exchange component vanishes", std::abs(res.exchange_energy) < 1e-12);
+    check("energy component bins recorded",
+          res.bin_exchange_energy.size() == static_cast<std::size_t>(p.n_bins)
+          && res.bin_field_energy.size() == static_cast<std::size_t>(p.n_bins));
     approx_eq("m2 = 1/N", res.m2, 1.0 / N, 0.08);
     std::cout << "  E/N=" << res.energy << " m2=" << res.m2 << " n/N=" << res.n_op_avg << std::endl;
 }
