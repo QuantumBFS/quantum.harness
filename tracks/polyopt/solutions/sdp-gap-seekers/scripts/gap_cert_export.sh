@@ -24,16 +24,23 @@ echo "Node: $(hostname), Start: $(date)"
 
 ARTIFACT="tfim_cert_N9_g0.26.jls"
 
-echo "=== Step 1: certify TFIM N=9 gamma=0.26 with export_cert ==="
+echo "=== Step 1: certify TFIM N=9 gamma=0.26 (returns cert_artifact) ==="
 julia --project=julia-env << JLEOF
-using SpectralGap, MosekTools, Dates
+using SpectralGap, MosekTools, Serialization, Dates
 N=9; g=0.5
 H = ncpoly([[3*[i; i+1] for i = 1:N-1]; [[3i-2] for i = 1:N]], [-ones(N-1); g*ones(N)])
-println("certify N=\$N g=\$g d=2 gamma=0.26 (export_cert=$ARTIFACT) start=", Dates.format(now(),"HH:MM:SS"))
-r = certify_Ising_gap(N, H, 0.26, 2, QUIET=true, export_cert="$ARTIFACT")
-println("flag=", r.flag, " term=", r.termination, " primal=", r.primal)
-println("cert_ray=", r.cert_ray)
-println("done ", Dates.format(now(),"HH:MM:SS"))
+println("certify start=", Dates.format(now(),"HH:MM:SS")); flush(stdout)
+r = certify_Ising_gap(N, H, 0.26, 2, QUIET=true)
+println("flag=", r.flag, " term=", r.termination, " primal=", r.primal); flush(stdout)
+println("cert_ray=", r.cert_ray); flush(stdout)
+if r.cert_artifact !== nothing
+    open("$ARTIFACT", "w") do io
+        serialize(io, r.cert_artifact)
+    end
+    println("artifact serialized to $ARTIFACT  (affine_map entries=", length(r.cert_artifact.affine_map), ")"); flush(stdout)
+else
+    println("NO cert_artifact (feasible side or no INFEASIBILITY_CERTIFICATE)"); flush(stdout)
+end
 JLEOF
 
 echo; echo "=== Step 2: independent verifier (no JuMP/Mosek) ==="
