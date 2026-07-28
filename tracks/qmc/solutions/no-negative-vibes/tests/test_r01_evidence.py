@@ -275,6 +275,85 @@ def test_raw_evidence_validator_compares_payloads_after_only_execution_removal(
         )
 
 
+def test_raw_evidence_validator_rejects_a_raw_path_outside_repository_root(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, raw_payloads = (
+        _build_evidence_tree(tmp_path)
+    )
+    smoke_record = fixture["experiments"][0]["cells"][0]["raw_results"][0]
+    smoke_record["path"] = "../outside-repository.json"
+    smoke_record["sha256"] = _write_json(
+        tmp_path / "outside-repository.json",
+        raw_payloads["smoke"],
+    )
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="repository root"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_requires_every_referenced_raw_file(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, _ = _build_evidence_tree(
+        tmp_path
+    )
+    smoke_record = fixture["experiments"][0]["cells"][0]["raw_results"][0]
+    (repository_root / smoke_record["path"]).unlink()
+
+    with pytest.raises(ValueError, match="missing"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_requires_one_smoke_and_one_production_role(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, _ = _build_evidence_tree(
+        tmp_path
+    )
+    fixture["experiments"][0]["cells"][0]["raw_results"][1]["role"] = (
+        "smoke"
+    )
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="roles"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_rejects_incomplete_raw_provenance(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, raw_payloads = (
+        _build_evidence_tree(tmp_path)
+    )
+    production = raw_payloads["production"]
+    del production["source_commit"]
+    production_record = fixture["experiments"][0]["cells"][0][
+        "raw_results"
+    ][1]
+    production_record["sha256"] = _write_json(
+        repository_root / production_record["path"],
+        production,
+    )
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="source_commit"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
 @pytest.mark.parametrize(
     "mask",
     ("rings-bridges", "rings-diagonals-bridges"),
