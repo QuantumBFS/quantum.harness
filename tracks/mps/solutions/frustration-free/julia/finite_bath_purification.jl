@@ -6,6 +6,8 @@ using KrylovKit: exponentiate
 import ITensorMPS: measure!
 
 export FiniteBathParameters,
+    EvolutionInterrupted,
+    EvolutionResumeState,
     MAX_EVOLUTION_STEPS,
     MAX_IMAGINARY_TIME_STEPS,
     MAX_LOCAL_EXPONENT_MAGNITUDE,
@@ -107,6 +109,66 @@ struct PurificationResult{SiteVector, Diagnostics}
     psi::MPS
     hamiltonian::MPO
     diagnostics::Diagnostics
+end
+
+struct EvolutionResumeState
+    completed_steps::Int
+    beta_endpoint::Float64
+    log_unnormalized_norm::Float64
+    maximum_link_dimensions_by_bond::Vector{Int}
+    step_history::Vector{NamedTuple}
+    expansion_applied::Bool
+end
+
+function EvolutionResumeState(;
+    completed_steps,
+    beta_endpoint,
+    log_unnormalized_norm,
+    maximum_link_dimensions_by_bond,
+    step_history,
+    expansion_applied = false,
+)
+    completed_steps =
+        _nonnegative_integer(completed_steps, "completed_steps")
+    beta_endpoint = _finite_real(beta_endpoint, "beta_endpoint")
+    beta_endpoint >= 0 ||
+        throw(ArgumentError("beta_endpoint must be nonnegative"))
+    log_unnormalized_norm =
+        _finite_real(log_unnormalized_norm, "log_unnormalized_norm")
+    maximum_link_dimensions_by_bond isa AbstractVector ||
+        throw(
+            ArgumentError(
+                "maximum_link_dimensions_by_bond must be a vector of nonnegative integers"
+            ),
+        )
+    bond_dimensions = [
+        _nonnegative_integer(value, "maximum_link_dimensions_by_bond values")
+        for value in maximum_link_dimensions_by_bond
+    ]
+    step_history isa AbstractVector &&
+        all(entry -> entry isa NamedTuple, step_history) ||
+        throw(ArgumentError("step_history must be a vector of named tuples"))
+    length(step_history) == completed_steps ||
+        throw(
+            ArgumentError(
+                "step_history length must equal completed_steps"
+            ),
+        )
+    expansion_applied isa Bool ||
+        throw(ArgumentError("expansion_applied must be a boolean"))
+    return EvolutionResumeState(
+        completed_steps,
+        beta_endpoint,
+        log_unnormalized_norm,
+        bond_dimensions,
+        NamedTuple[step_history...],
+        expansion_applied,
+    )
+end
+
+struct EvolutionInterrupted <: Exception
+    psi::MPS
+    state::EvolutionResumeState
 end
 
 function _finite_real(value, name::AbstractString)
@@ -388,6 +450,9 @@ function _evolve_normalized_state(
     hamiltonian_norm_bound,
     progress = false,
     progress_label = "evolution",
+    resume_state = nothing,
+    step_callback = nothing,
+    stop_requested = () -> false,
 )
     beta, time_step, cutoff, maxdim =
         _evolution_settings(beta, time_step, cutoff, maxdim)
@@ -398,12 +463,38 @@ function _evolve_normalized_state(
         throw(ArgumentError("input state must be normalized"))
 
     plan = _evolution_plan(beta, time_step, bound)
+    if resume_state !== nothing
+        resume_state isa EvolutionResumeState ||
+            throw(ArgumentError("resume_state must be an EvolutionResumeState"))
+        resume_state.completed_steps <= plan.steps ||
+            throw(
+                ArgumentError(
+                    "resume_state completed_steps exceeds the planned step count"
+                ),
+            )
+        expected_beta_endpoint =
+            resume_state.completed_steps == plan.steps ?
+            beta : resume_state.completed_steps * plan.effective_time_step
+        isapprox(
+            resume_state.beta_endpoint,
+            expected_beta_endpoint;
+            atol = 8 * eps(Float64) * max(1.0, abs(expected_beta_endpoint)),
+            rtol = 8 * eps(Float64),
+        ) ||
+            throw(
+                ArgumentError(
+                    "resume_state beta_endpoint is inconsistent with the effective step"
+                ),
+            )
+    end
     initial_link_dimensions = linkdims(psi)
     initial_max_link_dimension = maximum(initial_link_dimensions; init = 1)
     expansion_krylov_dimension = _nonnegative_integer(
         krylov_expansion_dim, "krylov_expansion_dim"
     )
-    if expansion_krylov_dimension > 0
+    expansion_applied =
+        resume_state !== nothing && resume_state.expansion_applied
+    if !expansion_applied && expansion_krylov_dimension > 0
         psi = expand(
             psi,
             hamiltonian;
@@ -414,13 +505,30 @@ function _evolve_normalized_state(
         )
         normalize!(psi)
     end
+    expansion_applied = true
     expanded_max_link_dimension = maximum(linkdims(psi); init = 1)
-    maximum_link_dimensions_by_bond =
-        max.(linkdims(psi), initial_link_dimensions)
-    log_unnormalized_norm = 0.0
-    step_history = NamedTuple[]
+    if resume_state === nothing
+        maximum_link_dimensions_by_bond =
+            max.(linkdims(psi), initial_link_dimensions)
+        log_unnormalized_norm = 0.0
+        step_history = NamedTuple[]
+        first_step = 1
+    else
+        length(resume_state.maximum_link_dimensions_by_bond) ==
+            length(linkdims(psi)) ||
+            throw(
+                ArgumentError(
+                    "resume_state bond-dimension history does not match the input state"
+                ),
+            )
+        maximum_link_dimensions_by_bond =
+            copy(resume_state.maximum_link_dimensions_by_bond)
+        log_unnormalized_norm = resume_state.log_unnormalized_norm
+        step_history = copy(resume_state.step_history)
+        first_step = resume_state.completed_steps + 1
+    end
     progress_interval = max(1, cld(max(plan.steps, 1), 20))
-    for step_index in 1:plan.steps
+    for step_index in first_step:plan.steps
         beta_increment =
             step_index == plan.steps ?
             beta - plan.effective_time_step * (plan.steps - 1) :
@@ -500,6 +608,17 @@ function _evolve_normalized_state(
             )
             flush(stdout)
         end
+        state = EvolutionResumeState(
+            completed_steps = step_index,
+            beta_endpoint = beta_endpoint,
+            log_unnormalized_norm = log_unnormalized_norm,
+            maximum_link_dimensions_by_bond =
+                copy(maximum_link_dimensions_by_bond),
+            step_history = copy(step_history),
+            expansion_applied = expansion_applied,
+        )
+        step_callback === nothing || step_callback(psi, state)
+        stop_requested() && throw(EvolutionInterrupted(copy(psi), state))
     end
     normalize!(psi)
     return psi, (;

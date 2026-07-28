@@ -5,6 +5,8 @@ using ITensorMPS
 
 include(joinpath(@__DIR__, "..", "finite_bath_purification.jl"))
 using .FiniteBathPurification:
+    EvolutionInterrupted,
+    EvolutionResumeState,
     FiniteBathParameters,
     MAX_EVOLUTION_STEPS,
     MAX_IMAGINARY_TIME_STEPS,
@@ -13,6 +15,153 @@ using .FiniteBathPurification:
     identity_purification,
     interleaved_sites,
     physical_hamiltonian_mpo
+
+@testset "evolution resume state validation" begin
+    history = [
+        (; beta_endpoint = 0.05, cumulative_log_norm = -0.01),
+        (; beta_endpoint = 0.10, cumulative_log_norm = -0.02),
+    ]
+    state = EvolutionResumeState(
+        completed_steps = 2,
+        beta_endpoint = 0.1,
+        log_unnormalized_norm = -0.02,
+        maximum_link_dimensions_by_bond = [4, 8, 4],
+        step_history = history,
+        expansion_applied = true,
+    )
+
+    @test state.completed_steps == 2
+    @test state.beta_endpoint == 0.1
+    @test state.log_unnormalized_norm == -0.02
+    @test state.maximum_link_dimensions_by_bond == [4, 8, 4]
+    @test state.step_history == history
+    @test state.expansion_applied
+    @test_throws ArgumentError EvolutionResumeState(
+        completed_steps = -1,
+        beta_endpoint = 0.0,
+        log_unnormalized_norm = 0.0,
+        maximum_link_dimensions_by_bond = Int[],
+        step_history = NamedTuple[],
+    )
+    @test_throws ArgumentError EvolutionResumeState(
+        completed_steps = 0,
+        beta_endpoint = 0.0,
+        log_unnormalized_norm = Inf,
+        maximum_link_dimensions_by_bond = Int[],
+        step_history = NamedTuple[],
+    )
+    @test_throws ArgumentError EvolutionResumeState(
+        completed_steps = 2,
+        beta_endpoint = 0.1,
+        log_unnormalized_norm = -0.02,
+        maximum_link_dimensions_by_bond = [4, 8, 4],
+        step_history = history[1:1],
+    )
+end
+
+@testset "resume cursor matches the evolution plan" begin
+    parameters =
+        FiniteBathParameters([0.0], [0.1]; U = 0.8, epsilon_d = -0.4)
+    sites, psi = identity_purification(parameters)
+    hamiltonian = physical_hamiltonian_mpo(sites, parameters)
+    common = (;
+        beta = 0.2,
+        time_step = 0.05,
+        cutoff = 1.0e-12,
+        maxdim = 64,
+        krylov_expansion_dim = 0,
+        hamiltonian_norm_bound =
+            FiniteBathPurification._hamiltonian_norm_bound(parameters),
+    )
+    five_steps = [
+        (; beta_endpoint = 0.05 * step, cumulative_log_norm = -0.01 * step)
+        for step in 1:5
+    ]
+    beyond_plan = EvolutionResumeState(
+        completed_steps = 5,
+        beta_endpoint = 0.25,
+        log_unnormalized_norm = -0.05,
+        maximum_link_dimensions_by_bond = linkdims(psi),
+        step_history = five_steps,
+    )
+    inconsistent_endpoint = EvolutionResumeState(
+        completed_steps = 2,
+        beta_endpoint = 0.11,
+        log_unnormalized_norm = -0.02,
+        maximum_link_dimensions_by_bond = linkdims(psi),
+        step_history = five_steps[1:2],
+    )
+
+    @test_throws ArgumentError FiniteBathPurification._evolve_normalized_state(
+        psi, hamiltonian; common..., resume_state = beyond_plan
+    )
+    @test_throws ArgumentError FiniteBathPurification._evolve_normalized_state(
+        psi, hamiltonian; common..., resume_state = inconsistent_endpoint
+    )
+end
+
+@testset "interrupted TDVP resumes at a completed step boundary" begin
+    parameters =
+        FiniteBathParameters([0.0], [0.1]; U = 0.8, epsilon_d = -0.4)
+    sites, initial = identity_purification(parameters)
+    hamiltonian = physical_hamiltonian_mpo(sites, parameters)
+    common = (;
+        beta = 0.2,
+        time_step = 0.05,
+        cutoff = 1.0e-12,
+        maxdim = 64,
+        krylov_expansion_dim = 2,
+        hamiltonian_norm_bound =
+            FiniteBathPurification._hamiltonian_norm_bound(parameters),
+    )
+
+    full_psi, full_diagnostics =
+        FiniteBathPurification._evolve_normalized_state(
+            copy(initial), hamiltonian; common...
+        )
+    callback_states = EvolutionResumeState[]
+    interruption = try
+        FiniteBathPurification._evolve_normalized_state(
+            copy(initial),
+            hamiltonian;
+            common...,
+            step_callback = (psi, state) -> begin
+                @test norm(psi) ≈ 1.0 atol = 1.0e-12
+                @test length(state.step_history) == state.completed_steps
+                @test last(state.step_history).cumulative_log_norm ==
+                      state.log_unnormalized_norm
+                push!(callback_states, state)
+            end,
+            stop_requested = () -> length(callback_states) == 2,
+        )
+        nothing
+    catch error
+        error
+    end
+
+    @test interruption isa EvolutionInterrupted
+    @test length(callback_states) == 2
+    @test interruption.state == callback_states[end]
+    @test interruption.state.completed_steps == 2
+    @test interruption.state.beta_endpoint == 0.1
+    @test interruption.state.expansion_applied
+    resumed_psi, resumed_diagnostics =
+        FiniteBathPurification._evolve_normalized_state(
+            interruption.psi,
+            hamiltonian;
+            common...,
+            resume_state = interruption.state,
+        )
+
+    @test norm(full_psi) ≈ norm(resumed_psi) atol = 1.0e-12
+    @test full_diagnostics.log_unnormalized_norm ≈
+          resumed_diagnostics.log_unnormalized_norm atol = 1.0e-12
+    @test full_diagnostics.maximum_link_dimensions_by_bond ==
+          resumed_diagnostics.maximum_link_dimensions_by_bond
+    @test linkdims(full_psi) == linkdims(resumed_psi)
+    @test full_diagnostics.step_history == resumed_diagnostics.step_history
+    @test abs(inner(full_psi, resumed_psi)) ≈ 1.0 atol = 1.0e-11
+end
 
 function dense_annihilation(n_modes::Int, mode::Int)
     dimension = 1 << n_modes
