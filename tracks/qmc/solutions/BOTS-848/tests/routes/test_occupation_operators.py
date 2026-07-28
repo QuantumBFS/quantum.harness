@@ -436,8 +436,10 @@ def test_local_estimator_is_order_invariant_at_maximum_finite_components() -> No
 
     assert all(math.isfinite(value.real) for value in observed)
     assert all(math.isfinite(value.imag) for value in observed)
-    assert observed[0] == pytest.approx(complex(maximum, maximum), rel=3.0e-14)
-    assert observed[1] == pytest.approx(observed[0], rel=1.0e-15)
+    assert observed[0].real == pytest.approx(maximum, rel=3.0e-14)
+    assert observed[0].imag == pytest.approx(maximum, rel=3.0e-14)
+    assert observed[1].real == pytest.approx(observed[0].real, rel=1.0e-15)
+    assert observed[1].imag == pytest.approx(observed[0].imag, rel=1.0e-15)
 
 
 def test_local_estimator_saturates_unrepresentable_negative_log_difference() -> None:
