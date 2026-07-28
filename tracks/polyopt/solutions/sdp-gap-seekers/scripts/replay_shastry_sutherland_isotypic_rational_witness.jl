@@ -52,6 +52,10 @@ const EXPECTED_MODEL_SHA256 =
     "22aa6d169fabbe6b9f41eeba4ddc7d37fb1f8b769427714875760ae94dc559f9"
 const EXPECTED_RUNMETA_SHA256 =
     "8e84bde7043d0023cbd82181d83f1a70622f222b6a706d0a36b9f45283e94e99"
+const EXPECTED_SOURCE_COMMIT =
+    "792e61c648c2c729327f37aee511ca2464b39161"
+const EXPECTED_SOURCE_TREE =
+    "f9be3021137afd19809b10f0182867b81941595d"
 const G_COUPLING = BigInt(4) // BigInt(5)
 const GAMMA = BigInt(1) // BigInt(2)
 const DENOMINATOR_POWERS = (6, 8, 10, 12)
@@ -257,6 +261,21 @@ function validate_inputs(options)
     )
     require_equal(setup["gamma"]["canonical"], "1//2", "gamma")
 
+    require_equal(
+        runmeta["source"]["git_commit"],
+        EXPECTED_SOURCE_COMMIT,
+        "builder source commit",
+    )
+    require_equal(
+        runmeta["source"]["git_tree"],
+        EXPECTED_SOURCE_TREE,
+        "builder source tree",
+    )
+    require_equal(
+        runmeta["source"]["dirty_paths_at_build"],
+        String[],
+        "builder dirty paths",
+    )
     recorded_files = runmeta["source"]["files_sha256"]
     for (relative, expected_sha256) in recorded_files
         path = repository_path(relative)
