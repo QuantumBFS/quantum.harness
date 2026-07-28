@@ -76,7 +76,8 @@ end
 
 function _check_workspace(work::StepWorkspace, layout::AugmentedLayout)
     expected = layout.augmented_dimension
-    length(work.tmp1) == expected && length(work.tmp2) == expected ||
+    length(work.tmp1) == expected && length(work.tmp2) == expected &&
+        length(work.period1) == expected && length(work.period2) == expected ||
         throw(DimensionMismatch("step workspace has the wrong layout"))
     return nothing
 end

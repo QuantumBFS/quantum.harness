@@ -1,5 +1,6 @@
 using LinearAlgebra
 using Random
+using UniformTEMPO
 
 """
 Independent dense reference for one augmented step.
@@ -140,5 +141,43 @@ end
         long_alloc = @allocated apply_period!(y, x, long, long_work)
         @test short_alloc <= 256
         @test long_alloc <= short_alloc + 64
+    end
+
+    @testset "solver-facing operator reuses its owned workspace" begin
+        χ = 100
+        M = 20
+        q = randn(rng, ComplexF64, χ, 4, χ, 4)
+        left, right = random_channels(rng, M)
+        floquet = FloquetOperator(q, left, right)
+        solver_operator = FloquetLinearOperator(floquet)
+        solver_adjoint = adjoint(solver_operator)
+        x = randn(rng, ComplexF64, 4χ)
+        y = similar(x)
+        mul!(y, solver_operator, x)
+        mul!(y, solver_adjoint, x)
+        @test @allocated(mul!(y, solver_operator, x)) == 0
+        @test @allocated(mul!(y, solver_adjoint, x)) == 0
+        @test y ≈ adjoint(dense_floquet(floquet;
+                                        memory_limit_bytes=estimated_dense_bytes(floquet))) * x
+    end
+
+    @testset "real UniformTEMPO evolve guards q-axis compatibility" begin
+        χ = 3
+        dt = 0.08
+        q = randn(rng, ComplexF64, χ, 4, χ, 4)
+        v_right = randn(rng, ComplexF64, χ)
+        v_left = transpose(randn(rng, ComplexF64, χ))
+        pt = UniformTEMPO.UniformPTMPO(2, dt, q, v_right, v_left)
+        initial = randn(rng, ComplexF64, χ, 4)
+        model = SpinBosonModel(drive=:transversal)
+        omega_d = 1.7
+        h_s(t) = system_hamiltonian(model, t, omega_d)
+        left = UniformTEMPO.local_channel((0.0, dt / 2), h_s)
+        right = UniformTEMPO.local_channel((dt / 2, dt), h_s)
+        step = StepOperator(q, left, right)
+        actual = similar(vec(initial))
+        apply_step!(actual, vec(initial), step, StepWorkspace(step))
+        expected = UniformTEMPO.evolve(pt, initial, 1, h_s; return_full=true)
+        @test actual ≈ vec(expected) rtol=1e-12 atol=1e-12
     end
 end

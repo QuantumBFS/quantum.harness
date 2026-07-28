@@ -52,7 +52,7 @@ end
                       scale * hx cos(phase) - scale * hz]
 end
 
-@inline _liouville_channel(unitary) = kron(transpose(conj(unitary)), unitary)
+@inline _liouville_channel(unitary) = kron(conj(unitary), unitary)
 
 """
 Precompute both midpoint half-step channels for every phase of one exact period.
@@ -185,6 +185,60 @@ function LinearAlgebra.mul!(y::AbstractVector, operator::AdjointFloquetOperator,
 end
 
 function Base.:*(operator::AdjointFloquetOperator, x::AbstractVector)
+    y = similar(x, promote_type(eltype(operator), eltype(x)), size(operator, 1))
+    return mul!(y, operator, x)
+end
+
+"""
+Allocation-safe solver-facing view of a `FloquetOperator`.
+
+The view owns one persistent `StepWorkspace`; repeated forward and adjoint
+`mul!` calls allocate no work buffers after warm-up. Because the workspace is
+mutable, one view is deliberately neither reentrant nor safe for concurrent
+matvecs. Create one `FloquetLinearOperator` per solver, task, or thread.
+"""
+struct FloquetLinearOperator{F<:FloquetOperator,W<:StepWorkspace}
+    parent::F
+    workspace::W
+end
+
+FloquetLinearOperator(floquet::FloquetOperator) =
+    FloquetLinearOperator(floquet, StepWorkspace(floquet))
+
+Base.size(operator::FloquetLinearOperator) = size(operator.parent)
+Base.size(operator::FloquetLinearOperator, dimension::Integer) =
+    size(operator.parent, dimension)
+Base.eltype(operator::FloquetLinearOperator) = eltype(operator.parent)
+
+function LinearAlgebra.mul!(y::AbstractVector, operator::FloquetLinearOperator,
+                            x::AbstractVector)
+    return apply_period!(y, x, operator.parent, operator.workspace)
+end
+
+function Base.:*(operator::FloquetLinearOperator, x::AbstractVector)
+    y = similar(x, promote_type(eltype(operator), eltype(x)), size(operator, 1))
+    return mul!(y, operator, x)
+end
+
+struct AdjointFloquetLinearOperator{O<:FloquetLinearOperator}
+    parent::O
+end
+
+Base.adjoint(operator::FloquetLinearOperator) =
+    AdjointFloquetLinearOperator(operator)
+Base.adjoint(operator::AdjointFloquetLinearOperator) = operator.parent
+Base.size(operator::AdjointFloquetLinearOperator) = reverse(size(operator.parent))
+Base.size(operator::AdjointFloquetLinearOperator, dimension::Integer) =
+    size(operator)[dimension]
+Base.eltype(operator::AdjointFloquetLinearOperator) = eltype(operator.parent)
+
+function LinearAlgebra.mul!(y::AbstractVector, operator::AdjointFloquetLinearOperator,
+                            x::AbstractVector)
+    return apply_period_adjoint!(y, x, operator.parent.parent,
+                                 operator.parent.workspace)
+end
+
+function Base.:*(operator::AdjointFloquetLinearOperator, x::AbstractVector)
     y = similar(x, promote_type(eltype(operator), eltype(x)), size(operator, 1))
     return mul!(y, operator, x)
 end

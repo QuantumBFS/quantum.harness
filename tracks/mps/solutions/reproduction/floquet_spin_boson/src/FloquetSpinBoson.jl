@@ -20,7 +20,7 @@ export RunConfig, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
        AugmentedLayout, composite_index, StepOperator, StepWorkspace,
        apply_step!, apply_step_adjoint!, FloquetOperator, apply_period!,
        apply_period_adjoint!, precompute_half_step_channels,
-       estimated_dense_bytes, dense_floquet,
+       estimated_dense_bytes, dense_floquet, FloquetLinearOperator,
        load_reference_curve, redfield_magnus!, redfield_magnus_paper_formula,
        run_fig2, parse_exact_baseline, render_refreshed_errors
 
