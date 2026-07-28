@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from collections import Counter
+from itertools import permutations
 
 import numpy as np
 import pytest
@@ -456,6 +457,84 @@ def test_local_estimator_saturates_unrepresentable_negative_log_difference() -> 
     )
 
     assert observed == pytest.approx(1.0)
+
+
+def test_local_estimator_descends_after_signed_dominant_cancellation() -> None:
+    coefficients = {2: 1.0, 3: -1.0, 4: 1.0}
+    log_values = {
+        1: 0.0j,
+        2: complex(1.0e308, 0.0),
+        3: complex(1.0e308, 0.0),
+        4: 0.0j,
+    }
+
+    for order in permutations(coefficients):
+        neighbors = {state: coefficients[state] for state in order}
+        observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
+
+        assert observed == 1.0 + 0.0j
+
+
+def test_local_estimator_descends_through_orthogonal_cancellation_levels() -> None:
+    coefficients = {
+        2: 1.0,
+        3: -1.0,
+        4: 1.0j,
+        5: -1.0j,
+        6: 2.0 + 3.0j,
+    }
+    log_values = {
+        1: 0.0j,
+        2: complex(1.0e308, 0.0),
+        3: complex(1.0e308, 0.0),
+        4: complex(5.0e307, 0.0),
+        5: complex(5.0e307, 0.0),
+        6: 0.0j,
+    }
+
+    for order in permutations(coefficients):
+        neighbors = {state: coefficients[state] for state in order}
+        observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
+
+        assert observed == pytest.approx(2.0 + 3.0j, rel=1.0e-15)
+
+
+@pytest.mark.parametrize(
+    ("coefficient", "target_logabs", "expected"),
+    [
+        (1.0e-300, 1400.5582407915977, 1.7976931348622307e308),
+        (
+            math.ldexp(1.0, -1074),
+            1454.2227848147652,
+            1.7976931348621938e308,
+        ),
+    ],
+)
+def test_local_estimator_restores_finite_near_maximum_component(
+    coefficient: float,
+    target_logabs: float,
+    expected: float,
+) -> None:
+    log_values = {1: 0.0j, 2: complex(target_logabs, 0.0)}
+
+    observed = local_from_log_neighbors(
+        1,
+        {2: coefficient},
+        log_values.__getitem__,
+    )
+
+    assert observed == complex(expected)
+
+
+def test_local_estimator_rejects_true_near_maximum_overflow() -> None:
+    log_values = {1: 0.0j, 2: complex(19.00718499517029, 0.0)}
+
+    with pytest.raises(OverflowError, match="outside complex128 range"):
+        local_from_log_neighbors(
+            1,
+            {2: 1.0e300},
+            log_values.__getitem__,
+        )
 
 
 def test_local_estimator_preserves_multiply_first_extreme_result() -> None:
