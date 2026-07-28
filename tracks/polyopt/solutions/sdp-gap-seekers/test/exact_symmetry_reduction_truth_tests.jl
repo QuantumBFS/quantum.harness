@@ -4,6 +4,20 @@ include(joinpath(@__DIR__, "..", "src", "ReducedPrimalGapAssembly.jl"))
 using .ReducedPrimalGapAssembly
 include(joinpath(@__DIR__, "..", "src", "ReducedPrimalGapJuMP.jl"))
 using .ReducedPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ConjugationSymmetryReduction.jl",
+))
+using .ConjugationSymmetryReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ConjugationReducedPrimalGapJuMP.jl",
+))
+using .ConjugationReducedPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -70,6 +84,56 @@ using JuMP
         for constraint in jump_model.psd_constraints
     )) == [1, 1, 1, 81, 81, 81, 81, 81, 81, 108, 109]
     @test jump_model.assembly_sha256 == reduced.assembly_sha256
+
+    conjugation_truth = conjugation_reduction_truth(reduced)
+    @test conjugation_truth.exact
+    @test conjugation_truth.hamiltonian_invariant
+    @test conjugation_truth.coefficient_covariant
+    @test conjugation_truth.coefficient_count == 31_810
+    @test conjugation_truth.realified_coefficients_real
+    @test conjugation_truth.equality_space_invariant
+
+    real_reduced = assemble_conjugation_reduced_primal(reduced)
+    real_repeated = assemble_conjugation_reduced_primal(
+        reduced;
+        verify_truth=false,
+    )
+    real_report = conjugation_reduced_assembly_report(real_reduced)
+    @test real_report.source_moments == 74_602
+    @test real_report.v4_moments == 19_108
+    @test real_report.real_moments < real_report.v4_moments
+    @test real_report.eliminated_conjugation_odd_moments > 0
+    @test real_report.positive_block_dimensions ==
+          report.positive_block_dimensions
+    @test real_report.gap_block_dimensions == report.gap_block_dimensions
+    @test real_report.equality_count <= report.equality_count
+    @test real_report.real_psd_triangle_entries == 31_810
+    @test real_report.generic_hermitian_bridge_triangle_entries == 126_525
+    @test all(
+        key -> !conjugation_odd(key),
+        real_reduced.moments,
+    )
+    @test real_reduced.coefficient_map_sha256 ==
+          real_repeated.coefficient_map_sha256
+    @test real_reduced.assembly_sha256 == real_repeated.assembly_sha256
+
+    real_jump_model =
+        build_conjugation_reduced_jump_primal(real_reduced)
+    @test JuMP.num_variables(real_jump_model.model) ==
+          real_report.real_moments
+    @test length(real_jump_model.equality_constraints) ==
+          real_report.equality_count
+    @test length(real_jump_model.psd_constraints) == 11
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in real_jump_model.psd_constraints
+    )) == [1, 1, 1, 81, 81, 81, 81, 81, 81, 108, 109]
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in real_jump_model.psd_constraints
+    )
+    @test real_jump_model.assembly_sha256 == real_reduced.assembly_sha256
 end
 
 @testset "V4 character multiplication and projection" begin
@@ -90,4 +154,10 @@ end
     noninvariant = positive_entry(bare_row(x), bare_row(y))
     @test v4_invariant_projection(invariant) == invariant
     @test iszero(v4_invariant_projection(noninvariant))
+
+    @test !conjugation_odd(x)
+    @test conjugation_odd(y)
+    @test !conjugation_odd(z)
+    @test conjugation_sign(x) == 1
+    @test conjugation_sign(y) == -1
 end

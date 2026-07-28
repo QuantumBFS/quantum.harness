@@ -42,6 +42,13 @@ Updated: 2026-07-29 UTC.
 - Compute boundary: all MOF reload/solve work runs through Slurm on xH5;
   Bohrium and xH5 login are limited to source checks, Git, transfer, queue
   inspection, and artifact collection.
-- Further exact memory reduction is not decision-relevant for the fixed target:
-  both required solves completed within eight minutes and the 60 GiB request.
+- The generic Hermitian-to-real solver bridge scalarizes the eight positive
+  blocks into 126,525 semidefinite coordinates and produces a
+  1.45--1.51-billion-nonzero factor. This representation, rather than the
+  maximum side dimension 109, explains the 44--46 GiB solve peak.
+- Active exact-memory route: computational-basis conjugation averaging plus
+  a diagonal phase gauge. If its exhaustive xH5 truth gate passes, the same
+  finite relaxation uses real PSD blocks with 31,807 positive-cone
+  coordinates, plus three scalar gap blocks. No immutable source file or
+  supplied MOF is modified.
 - No decision-changing user or resource need is open.

@@ -63,6 +63,21 @@ of the exact `d=2` finite relaxation at gamma=1/2. It is not a certified
 physical lower bound on the bulk gap.
 
 No infeasibility ray replay is needed because the solver did not report
-infeasibility. Further exact memory reduction is deferred: peak process RSS
-was 44,494,548 KiB and the target solve completed in 425.4 s total, so another
-reduction would not change the requested gamma=1/2 decision.
+infeasibility.
+
+## 2026-07-29 — reopen exact memory reduction after bridge diagnosis
+
+The continuation objective requires pursuing the Challenge 88 result beyond
+the wrapper milestone. The Mosek log shows that MOI's generic Hermitian bridge
+turns the eight positive blocks into 126,525 scalarized semidefinite
+coordinates and a 1.45--1.51-billion-nonzero factor. That makes an exact
+representation reduction decision-relevant even though both fixed-gamma
+solves fit the original 60 GiB allocation.
+
+The highest-value route is computational-basis conjugation averaging. The
+fixed Hamiltonian is invariant; averaging preserves unrestricted
+feasibility, removes conjugation-odd moments, and a fixed diagonal unitary
+gauge makes every remaining block real symmetric. The predicted positive-cone
+coordinate count is 31,807. This route must pass exhaustive exact coefficient
+and equality-space tests under Slurm before any derived MOF is generated or
+solved.
