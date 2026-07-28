@@ -1,7 +1,7 @@
 import hashlib
 import json
 
-from qh147.run_ed import main
+from qh147.run_ed import config_digest, load_config, main
 
 
 def _config(tmp_path):
@@ -72,3 +72,20 @@ def test_one_cell_writes_a_hashed_success_manifest_and_reuses_it(
     before = spectrum.stat().st_mtime_ns
     assert main(args) == 0
     assert spectrum.stat().st_mtime_ns == before
+
+
+def test_config_digest_is_independent_of_json_formatting(tmp_path):
+    compact = tmp_path / "compact.json"
+    pretty = tmp_path / "pretty.json"
+    payload = json.loads(_config(tmp_path).read_text(encoding="utf-8"))
+    compact.write_text(
+        json.dumps(payload, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    pretty.write_text(
+        json.dumps(payload, indent=2) + "\r\n",
+        encoding="utf-8",
+    )
+    assert config_digest(load_config(compact)) == config_digest(
+        load_config(pretty)
+    )

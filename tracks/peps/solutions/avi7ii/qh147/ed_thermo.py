@@ -9,7 +9,12 @@ from pathlib import Path
 import numpy as np
 
 from .exact import thermal_from_spectrum
-from .run_ed import load_config, logical_sectors, sector_directory
+from .run_ed import (
+    config_digest,
+    load_config,
+    logical_sectors,
+    sector_directory,
+)
 
 
 def _beta_grid(config: dict) -> np.ndarray:
@@ -28,7 +33,7 @@ def _complete_spectrum(
     config: dict,
     root: Path,
 ) -> np.ndarray:
-    config_hash = hashlib.sha256(config_path.read_bytes()).hexdigest()
+    config_hash = config_digest(config)
     pieces = []
     recovered = 0
     sectors = logical_sectors(config)

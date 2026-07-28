@@ -76,8 +76,13 @@ def _atomic_spectrum(path: Path, eigenvalues: np.ndarray) -> None:
     os.replace(temporary, path)
 
 
-def _config_hash(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def config_digest(config: dict) -> str:
+    canonical = json.dumps(
+        config,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
 
 
 def _peak_memory() -> int:
@@ -124,7 +129,7 @@ def _rehearse(
         field_directory(root, config["field"]) / "rehearsal.json",
         {
             "status": "rehearsed",
-            "config_sha256": _config_hash(config_path),
+            "config_sha256": config_digest(config),
             "cells": cells,
         },
     )
@@ -174,7 +179,7 @@ def main(argv=None) -> int:
         parity,
     )
     output.mkdir(parents=True, exist_ok=True)
-    config_hash = _config_hash(args.config)
+    config_hash = config_digest(config)
     if _existing_success(output, config_hash):
         print(
             json.dumps(
