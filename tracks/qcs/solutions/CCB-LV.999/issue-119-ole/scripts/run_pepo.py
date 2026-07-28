@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from numbers import Integral, Real
 from pathlib import Path
+import re
 import time
 from typing import Callable
 
@@ -48,6 +50,7 @@ PERTURBATION_COUNT = 24
 RESULT_TOLERANCE = 1.0e-8
 DEFAULT_EVOLUTION_CUTOFF = 1.0e-10
 DEFAULT_CONTRACTION_CUTOFF = 1.0e-10
+RUN_ROOT_PATTERN = re.compile(r"^issue119-pepo-.+$")
 Z = np.diag([1.0, -1.0]).astype(np.complex128)
 
 EvolutionFunction = Callable[..., tuple[complex, EvolutionDiagnostics]]
@@ -93,6 +96,25 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def confined_output_path(path: str | Path) -> Path:
+    """Resolve one output below repo-root results/issue119-pepo-*."""
+    requested = Path(path)
+    if ".." in requested.parts:
+        raise ValueError("--output must not contain '..'")
+    candidate = requested if requested.is_absolute() else WORKSPACE_ROOT / requested
+    resolved = candidate.resolve()
+    results_root = (WORKSPACE_ROOT / "results").resolve()
+    try:
+        relative = resolved.relative_to(results_root)
+    except ValueError as error:
+        raise ValueError("--output must remain under repo-root results/") from error
+    if len(relative.parts) < 2 or RUN_ROOT_PATTERN.fullmatch(relative.parts[0]) is None:
+        raise ValueError(
+            "--output run root must match results/issue119-pepo-*"
+        )
+    return resolved
+
+
 def validate_small_oracle(path: str | Path) -> dict[str, object]:
     """Require a current successful small-oracle certificate."""
     certificate_path = Path(path)
@@ -120,6 +142,7 @@ def validate_small_oracle(path: str | Path) -> dict[str, object]:
         isinstance(error, bool)
         or not isinstance(error, (int, float))
         or not math.isfinite(float(error))
+        or float(error) < 0.0
         or float(error) > 1.0e-10
     ):
         raise ValueError("small-oracle maximum absolute error is invalid")
@@ -256,6 +279,77 @@ def _json_component(value: float) -> float | None:
     return value if math.isfinite(value) else None
 
 
+def _nonnegative_diagnostic_integer(name: str, value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, Integral):
+        raise ValueError(f"{name} must be a nonnegative integer")
+    converted = int(value)
+    if converted < 0:
+        raise ValueError(f"{name} must be a nonnegative integer")
+    return converted
+
+
+def _nonnegative_finite_diagnostic(
+    name: str,
+    value: object,
+    *,
+    allow_none: bool = False,
+) -> float | None:
+    if value is None and allow_none:
+        return None
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(f"{name} must be a finite nonnegative real")
+    converted = float(value)
+    if not math.isfinite(converted):
+        raise ValueError(f"{name} is non-finite")
+    if converted < 0.0:
+        raise ValueError(f"{name} must be nonnegative")
+    return converted
+
+
+def _progress_document(record: ProgressRecord) -> dict[str, object]:
+    return {
+        "processed_causal_gates": _nonnegative_diagnostic_integer(
+            "processed_causal_gates", record.processed_causal_gates
+        ),
+        "total_causal_gates": _nonnegative_diagnostic_integer(
+            "total_causal_gates", record.total_causal_gates
+        ),
+        "support_size": _nonnegative_diagnostic_integer(
+            "support_size", record.support_size
+        ),
+        "max_realized_bond": _nonnegative_diagnostic_integer(
+            "max_realized_bond", record.max_realized_bond
+        ),
+        "retained_tail_ratio": _nonnegative_finite_diagnostic(
+            "retained_tail_ratio",
+            record.retained_tail_ratio,
+            allow_none=True,
+        ),
+        "elapsed_seconds": _nonnegative_finite_diagnostic(
+            "elapsed_seconds", record.elapsed_seconds
+        ),
+    }
+
+
+def _diagnostics_document(
+    diagnostics: EvolutionDiagnostics,
+) -> dict[str, object]:
+    return {
+        "causal_gates": _nonnegative_diagnostic_integer(
+            "causal_gates", diagnostics.causal_gates
+        ),
+        "final_support_size": len(diagnostics.final_support),
+        "max_realized_bond": _nonnegative_diagnostic_integer(
+            "max_realized_bond", diagnostics.max_realized_bond
+        ),
+        "max_retained_tail_ratio": _nonnegative_finite_diagnostic(
+            "max_retained_tail_ratio",
+            diagnostics.max_retained_tail_ratio,
+            allow_none=True,
+        ),
+    }
+
+
 def execute(
     args: argparse.Namespace,
     token: str,
@@ -273,6 +367,7 @@ def execute(
     }
     raw_value: complex | None = None
     diagnostics: EvolutionDiagnostics | None = None
+    safe_diagnostics: dict[str, object] | None = None
 
     def publish_progress(record: ProgressRecord) -> None:
         processed = record.processed_causal_gates
@@ -282,17 +377,9 @@ def execute(
             or processed == record.total_causal_gates
         ):
             return
+        safe_progress = _progress_document(record)
         latest_progress.clear()
-        latest_progress.update(
-            {
-                "processed_causal_gates": processed,
-                "total_causal_gates": record.total_causal_gates,
-                "support_size": record.support_size,
-                "max_realized_bond": record.max_realized_bond,
-                "retained_tail_ratio": record.retained_tail_ratio,
-                "elapsed_seconds": record.elapsed_seconds,
-            }
-        )
+        latest_progress.update(safe_progress)
         atomic_write_json(
             partial_path,
             {
@@ -326,6 +413,7 @@ def execute(
             observable_operators=observable_operators,
             progress_callback=publish_progress,
         )
+        safe_diagnostics = _diagnostics_document(diagnostics)
         value_real, value_imag = _checked_result(complex(raw_value))
         manifest: dict[str, object] = {
             "status": "success",
@@ -338,12 +426,7 @@ def execute(
                 "wall_seconds": time.monotonic() - started,
                 "peak_rss_bytes": peak_rss_bytes(),
             },
-            "diagnostics": {
-                "causal_gates": diagnostics.causal_gates,
-                "final_support_size": len(diagnostics.final_support),
-                "max_realized_bond": diagnostics.max_realized_bond,
-                "max_retained_tail_ratio": diagnostics.max_retained_tail_ratio,
-            },
+            "diagnostics": safe_diagnostics,
         }
         atomic_write_json(args.output, manifest)
         return manifest
@@ -364,13 +447,8 @@ def execute(
                 "wall_seconds": time.monotonic() - started,
                 "peak_rss_bytes": peak_rss_bytes(),
             }
-        if diagnostics is not None:
-            failure["diagnostics"] = {
-                "causal_gates": diagnostics.causal_gates,
-                "final_support_size": len(diagnostics.final_support),
-                "max_realized_bond": diagnostics.max_realized_bond,
-                "max_retained_tail_ratio": diagnostics.max_retained_tail_ratio,
-            }
+        if safe_diagnostics is not None:
+            failure["diagnostics"] = safe_diagnostics
         atomic_write_json(args.output, failure)
         raise
 
@@ -383,6 +461,7 @@ def main(
     parser = _parser()
     args = parser.parse_args(argv)
     try:
+        args.output = confined_output_path(args.output)
         validate_small_oracle(args.oracle_manifest)
     except ValueError as error:
         parser.error(str(error))

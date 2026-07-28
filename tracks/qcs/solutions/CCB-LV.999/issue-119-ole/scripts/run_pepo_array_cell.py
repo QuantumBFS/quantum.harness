@@ -18,6 +18,8 @@ OLE_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = OLE_ROOT.parents[4]
 DEFAULT_EVOLUTION_CUTOFF = 1.0e-10
 DEFAULT_CONTRACTION_CUTOFF = 1.0e-10
+RUN_ROOT_PATTERN = re.compile(r"^issue119-pepo-.+$")
+CELL_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def parse_confirmation_token(output: str) -> str:
@@ -27,6 +29,33 @@ def parse_confirmation_token(output: str) -> str:
     return matches[0]
 
 
+def confined_run_root(run_dir: object, workspace_root: Path) -> Path:
+    if not isinstance(run_dir, str):
+        raise ValueError("run_dir must be a relative string")
+    requested = Path(run_dir)
+    if requested.is_absolute() or ".." in requested.parts:
+        raise ValueError("run_dir must be relative and must not contain '..'")
+    if (
+        len(requested.parts) != 2
+        or requested.parts[0] != "results"
+        or RUN_ROOT_PATTERN.fullmatch(requested.parts[1]) is None
+    ):
+        raise ValueError("run_dir must match results/issue119-pepo-*")
+    resolved = (workspace_root / requested).resolve()
+    results_root = (workspace_root / "results").resolve()
+    try:
+        resolved.relative_to(results_root)
+    except ValueError as error:
+        raise ValueError("run_dir must remain under repo-root results/") from error
+    return resolved
+
+
+def safe_cell_id(cell_id: object) -> str:
+    if not isinstance(cell_id, str) or CELL_ID_PATTERN.fullmatch(cell_id) is None:
+        raise ValueError("cell_id must be one safe relative path component")
+    return cell_id
+
+
 def selected_payload(run_spec: dict, selector: int) -> dict:
     cells = run_spec["cells"]
     if selector < 1 or selector > len(cells):
@@ -34,8 +63,10 @@ def selected_payload(run_spec: dict, selector: int) -> dict:
     cell = cells[selector - 1]
     settings = {**run_spec.get("settings", {}), **cell.get("settings", {})}
     params = cell["params"]
+    confined_run_root(run_spec["run_dir"], WORKSPACE_ROOT)
+    cell_id = safe_cell_id(cell["cell_id"])
     return {
-        "cell_id": cell["cell_id"],
+        "cell_id": cell_id,
         "params": params,
         "settings": settings,
         "provenance": run_spec.get("provenance", {}),
@@ -120,12 +151,9 @@ def run_cell(
 ) -> Path:
     selected = _declared_values(payload)
     direct_runner = runner or OLE_ROOT / "scripts" / "run_pepo.py"
-    cell_dir = (
-        workspace_root
-        / payload["run_dir"]
-        / "cells"
-        / payload["cell_id"]
-    )
+    run_root = confined_run_root(payload["run_dir"], workspace_root)
+    cell_id = safe_cell_id(payload["cell_id"])
+    cell_dir = (run_root / "cells" / cell_id).resolve()
     source_result = cell_dir / "pepo-result.json"
     command = [
         str(python_bin),

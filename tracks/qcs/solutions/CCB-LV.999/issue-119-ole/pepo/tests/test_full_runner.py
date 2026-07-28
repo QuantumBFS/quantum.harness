@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -16,9 +17,6 @@ OLE_ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE_ROOT = OLE_ROOT.parents[4]
 RUNNER_SCRIPT = OLE_ROOT / "scripts" / "run_pepo.py"
 ARRAY_SCRIPT = OLE_ROOT / "scripts" / "run_pepo_array_cell.py"
-ORACLE_MANIFEST = (
-    WORKSPACE_ROOT / "results" / "issue119-pepo-small-oracle" / "manifest.json"
-)
 
 
 def _load_script(name: str, path: Path):
@@ -36,9 +34,38 @@ ARRAY_RUNNER = _load_script("run_pepo_array_cell_test", ARRAY_SCRIPT)
 
 @pytest.fixture
 def valid_oracle(tmp_path: Path) -> Path:
+    provenance = {
+        "qasm_sha256": FULL_RUNNER.EXPECTED_QASM_SHA256,
+        "quimb_commit": FULL_RUNNER.PINNED_QUIMB_COMMIT,
+        "core_source_digest": FULL_RUNNER.core_source_digest(FULL_RUNNER.OLE_ROOT),
+    }
     path = tmp_path / "small-oracle.json"
-    path.write_bytes(ORACLE_MANIFEST.read_bytes())
+    path.write_text(
+        json.dumps(
+            {
+                "status": "success",
+                "provenance": provenance,
+                "validation": {
+                    "success": True,
+                    "max_absolute_error": 0.0,
+                    **provenance,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
     return path
+
+
+@pytest.fixture
+def confined_output(tmp_path: Path):
+    run_root = (
+        WORKSPACE_ROOT
+        / "results"
+        / f"issue119-pepo-pytest-{tmp_path.name}"
+    )
+    yield run_root / "manifest.json"
+    shutil.rmtree(run_root, ignore_errors=True)
 
 
 def _direct_command(output: Path, oracle: Path) -> list[str]:
@@ -70,12 +97,13 @@ def _inspect_token(
     return matches[0]
 
 
-def test_missing_small_oracle_manifest_is_refused(tmp_path: Path):
+def test_missing_small_oracle_manifest_is_refused(
+    tmp_path: Path, confined_output: Path
+):
     """Breaks if a full-cell plan can proceed without its success certificate."""
-    output = tmp_path / "manifest.json"
 
     completed = subprocess.run(
-        _direct_command(output, tmp_path / "absent.json"),
+        _direct_command(confined_output, tmp_path / "absent.json"),
         cwd=WORKSPACE_ROOT,
         text=True,
         capture_output=True,
@@ -83,7 +111,7 @@ def test_missing_small_oracle_manifest_is_refused(tmp_path: Path):
 
     assert completed.returncode != 0
     assert "small-oracle" in completed.stderr
-    assert not output.exists()
+    assert not confined_output.exists()
 
 
 @pytest.mark.parametrize(
@@ -95,16 +123,15 @@ def test_missing_small_oracle_manifest_is_refused(tmp_path: Path):
     ],
 )
 def test_stale_small_oracle_provenance_is_refused(
-    tmp_path: Path, valid_oracle: Path, field: str
+    valid_oracle: Path, confined_output: Path, field: str
 ):
     """Breaks if changed input, environment, or numerical core can reuse a stale oracle."""
     document = json.loads(valid_oracle.read_text(encoding="utf-8"))
     document["provenance"][field] = "stale"
     valid_oracle.write_text(json.dumps(document), encoding="utf-8")
-    output = tmp_path / "manifest.json"
 
     completed = subprocess.run(
-        _direct_command(output, valid_oracle),
+        _direct_command(confined_output, valid_oracle),
         cwd=WORKSPACE_ROOT,
         text=True,
         capture_output=True,
@@ -112,17 +139,16 @@ def test_stale_small_oracle_provenance_is_refused(
 
     assert completed.returncode != 0
     assert field in completed.stderr
-    assert not output.exists()
+    assert not confined_output.exists()
 
 
 def test_dry_run_prints_one_token_without_writing_a_manifest(
-    tmp_path: Path, valid_oracle: Path
+    valid_oracle: Path, confined_output: Path
 ):
     """Breaks if inspection computes a PEPO cell or emits an ambiguous confirmation."""
-    output = tmp_path / "manifest.json"
 
     completed = subprocess.run(
-        _direct_command(output, valid_oracle),
+        _direct_command(confined_output, valid_oracle),
         cwd=WORKSPACE_ROOT,
         text=True,
         capture_output=True,
@@ -137,20 +163,20 @@ def test_dry_run_prints_one_token_without_writing_a_manifest(
         )
     ) == 1
     assert "dry_run=true" in completed.stdout
-    assert not output.exists()
-    assert not output.with_suffix(".partial.json").exists()
+    assert not confined_output.exists()
+    assert not confined_output.with_suffix(".partial.json").exists()
 
 
 def test_wrong_confirmation_preserves_existing_output(
-    tmp_path: Path, valid_oracle: Path
+    valid_oracle: Path, confined_output: Path
 ):
     """Breaks if an unconfirmed execute can replace an existing cell result."""
-    output = tmp_path / "manifest.json"
-    output.write_bytes(b'{"status":"success","sentinel":true}\n')
+    confined_output.parent.mkdir(parents=True)
+    confined_output.write_bytes(b'{"status":"success","sentinel":true}\n')
 
     completed = subprocess.run(
         [
-            *_direct_command(output, valid_oracle),
+            *_direct_command(confined_output, valid_oracle),
             "--execute",
             "--confirm",
             "0" * 16,
@@ -161,16 +187,15 @@ def test_wrong_confirmation_preserves_existing_output(
     )
 
     assert completed.returncode != 0
-    assert output.read_bytes() == b'{"status":"success","sentinel":true}\n'
+    assert confined_output.read_bytes() == b'{"status":"success","sentinel":true}\n'
 
 
 def test_execute_revalidates_oracle_before_publishing_cell_state(
-    tmp_path: Path, valid_oracle: Path
+    valid_oracle: Path, confined_output: Path
 ):
     """Breaks if execution starts from a certificate that became stale after inspection."""
-    output = tmp_path / "manifest.json"
     args = FULL_RUNNER._parser().parse_args(
-        _direct_command(output, valid_oracle)[2:]
+        _direct_command(confined_output, valid_oracle)[2:]
     )
     certificate = json.loads(valid_oracle.read_text(encoding="utf-8"))
     certificate["provenance"]["core_source_digest"] = "stale-after-inspection"
@@ -185,17 +210,17 @@ def test_execute_revalidates_oracle_before_publishing_cell_state(
             ),
         )
 
-    assert not output.exists()
-    assert not output.with_suffix(".partial.json").exists()
+    assert not confined_output.exists()
+    assert not confined_output.with_suffix(".partial.json").exists()
 
 
 def test_successful_injected_run_writes_atomic_progress_and_result(
-    tmp_path: Path,
     valid_oracle: Path,
+    confined_output: Path,
     capsys: pytest.CaptureFixture[str],
 ):
     """Breaks if a controlled full-cell result loses raw value, diagnostics, or atomic files."""
-    output = tmp_path / "cell" / "manifest.json"
+    output = confined_output.parent / "cell" / "manifest.json"
     token = _inspect_token(FULL_RUNNER, output, valid_oracle, capsys)
 
     def controlled_evolution(
@@ -262,14 +287,14 @@ def test_successful_injected_run_writes_atomic_progress_and_result(
     ],
 )
 def test_invalid_raw_result_writes_failure_manifest(
-    tmp_path: Path,
     valid_oracle: Path,
+    confined_output: Path,
     capsys: pytest.CaptureFixture[str],
     raw_value: complex,
     message: str,
 ):
     """Breaks if an invalid complex contraction is published as a successful cell."""
-    output = tmp_path / "manifest.json"
+    output = confined_output
     token = _inspect_token(FULL_RUNNER, output, valid_oracle, capsys)
 
     def invalid_evolution(_protocol, **_settings):
@@ -296,6 +321,97 @@ def test_invalid_raw_result_writes_failure_manifest(
     assert manifest["status"] == "failure"
     assert message in manifest["failure"]["message"]
     assert not output.with_suffix(".json.tmp").exists()
+
+
+@pytest.mark.parametrize(
+    "output",
+    [
+        pytest.param(Path("/tmp/issue119-pepo-escape/manifest.json"), id="absolute"),
+        pytest.param(
+            Path("results/issue119-pepo-safe/../../escape/manifest.json"),
+            id="traversal",
+        ),
+    ],
+)
+def test_direct_runner_refuses_output_outside_repo_results_before_writing(
+    output: Path,
+    valid_oracle: Path,
+):
+    """Breaks if a direct output path can escape the repo-root PEPO results tree."""
+    with pytest.raises(SystemExit):
+        FULL_RUNNER.main(_direct_command(output, valid_oracle)[2:])
+
+    assert not output.exists()
+
+
+@pytest.mark.parametrize(
+    "bad_error",
+    [
+        pytest.param(-1.0e-12, id="negative"),
+        pytest.param(float("nan"), id="nan"),
+        pytest.param(float("inf"), id="infinity"),
+        pytest.param(True, id="bool"),
+    ],
+)
+def test_direct_runner_refuses_invalid_oracle_error(
+    bad_error: object,
+    valid_oracle: Path,
+    confined_output: Path,
+):
+    """Breaks if a non-error or non-finite oracle error can certify a full cell."""
+    certificate = json.loads(valid_oracle.read_text(encoding="utf-8"))
+    certificate["validation"]["max_absolute_error"] = bad_error
+    valid_oracle.write_text(json.dumps(certificate), encoding="utf-8")
+
+    with pytest.raises(SystemExit):
+        FULL_RUNNER.main(
+            _direct_command(confined_output, valid_oracle)[2:]
+        )
+
+    assert not confined_output.exists()
+
+
+@pytest.mark.parametrize("source", ["progress", "final"])
+def test_nonfinite_diagnostic_publishes_atomic_failure_manifest(
+    source: str,
+    valid_oracle: Path,
+    confined_output: Path,
+    capsys: pytest.CaptureFixture[str],
+):
+    """Breaks if strict JSON encoding prevents a terminal numerical failure record."""
+    token = _inspect_token(FULL_RUNNER, confined_output, valid_oracle, capsys)
+
+    def nonfinite_evolution(
+        _protocol,
+        *,
+        progress_callback,
+        **_settings,
+    ):
+        if source == "progress":
+            progress_callback(ProgressRecord(1, 2, 3, 2, float("inf"), 0.01))
+        diagnostics = SimpleNamespace(
+            causal_gates=2,
+            final_support=(52, 59, 72),
+            max_realized_bond=2,
+            max_retained_tail_ratio=float("nan"),
+        )
+        return complex(0.5, 0.0), diagnostics
+
+    returncode = FULL_RUNNER.main(
+        [
+            *_direct_command(confined_output, valid_oracle)[2:],
+            "--execute",
+            "--confirm",
+            token,
+        ],
+        evolution_function=nonfinite_evolution,
+    )
+
+    assert returncode == 1
+    manifest = json.loads(confined_output.read_text(encoding="utf-8"))
+    assert manifest["status"] == "failure"
+    assert "non-finite" in manifest["failure"]["message"]
+    assert not confined_output.with_suffix(".json.tmp").exists()
 
 
 def _run_spec() -> dict:
@@ -399,6 +515,51 @@ def test_inspect_refuses_out_of_range_selector(tmp_path: Path, selector: str):
 
     assert completed.returncode != 0
     assert "outside 1:2" in completed.stderr
+
+
+@pytest.mark.parametrize(
+    "run_dir",
+    [
+        pytest.param("/tmp/issue119-pepo-escape", id="absolute"),
+        pytest.param(
+            "results/issue119-pepo-safe/../../escape",
+            id="traversal",
+        ),
+        pytest.param("results/not-a-pepo-run", id="wrong-run-root"),
+    ],
+)
+def test_adapter_refuses_unconfined_run_dir_before_writing(
+    tmp_path: Path, run_dir: str
+):
+    """Breaks if a scan run directory can escape its workspace PEPO results tree."""
+    run_spec = _run_spec()
+    run_spec["run_dir"] = run_dir
+
+    with pytest.raises(ValueError, match="run_dir"):
+        ARRAY_RUNNER.selected_payload(run_spec, 1)
+
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    "cell_id",
+    [
+        pytest.param("../cell-0001", id="traversal"),
+        pytest.param("/tmp/cell-0001", id="absolute"),
+        pytest.param("nested/cell-0001", id="nested"),
+    ],
+)
+def test_adapter_refuses_unsafe_cell_id_before_writing(
+    tmp_path: Path, cell_id: str
+):
+    """Breaks if a scan cell identifier is accepted as more than one safe component."""
+    run_spec = _run_spec()
+    run_spec["cells"][0]["cell_id"] = cell_id
+
+    with pytest.raises(ValueError, match="cell_id"):
+        ARRAY_RUNNER.selected_payload(run_spec, 1)
+
+    assert list(tmp_path.iterdir()) == []
 
 
 def _write_fake_direct_runner(path: Path, *, mismatched: bool = False) -> None:
