@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 import inspect
+import itertools
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import types
 from typing import Any
@@ -36,6 +38,14 @@ from scalable_v1.overlap import (
 )
 from scalable_v1.protocol import ProtocolConfig, load_protocol
 from run_scalable_evaluator import load_factory, main
+
+
+SOLUTION_ROOT = Path(__file__).resolve().parents[1]
+EAGER_ED_MODULE_PREFIXES = (
+    "benchmark_v0.ed_oracle",
+    "benchmark_v0.fock_ed",
+    "benchmark_v0.lll_coulomb",
+)
 
 
 @dataclass
@@ -174,6 +184,100 @@ def make_frozen_run(
     if tamper_checkpoint:
         artifacts["checkpoint"].write_bytes(b"tampered")
     return project_root, run_dir, manifest_path, oracle_path, protocol
+
+
+def _run_clean_interpreter(source: str, *arguments: Path) -> None:
+    completed = subprocess.run(
+        [sys.executable, "-c", source, *(str(path) for path in arguments)],
+        cwd=SOLUTION_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+
+
+def test_importing_evaluator_does_not_load_ed_implementation_modules() -> None:
+    source = f"""
+import sys
+import scalable_v1.evaluator
+
+prefixes = {EAGER_ED_MODULE_PREFIXES!r}
+loaded = sorted(
+    name
+    for name in sys.modules
+    if any(name == prefix or name.startswith(prefix + '.') for prefix in prefixes)
+)
+assert loaded == [], loaded
+"""
+
+    _run_clean_interpreter(source)
+
+
+def test_failed_manifest_audit_does_not_load_ed_implementation_modules(
+    tmp_path: Path,
+) -> None:
+    source = f"""
+import sys
+from pathlib import Path
+
+from scalable_v1.evaluator import evaluate_candidate
+from scalable_v1.protocol import load_protocol
+
+root = Path(sys.argv[1])
+manifest = root / 'invalid-manifest.json'
+manifest.write_text('{{"schema_version": "invalid"}}', encoding='utf-8')
+try:
+    evaluate_candidate(
+        candidate=object(),
+        diagnostics=object(),
+        protocol=load_protocol(),
+        manifest_path=manifest,
+        project_root=root,
+        oracle_path=root / 'missing-oracle.json',
+        training_seed=848,
+    )
+except ValueError as error:
+    assert 'manifest audit failed' in str(error), error
+else:
+    raise AssertionError('invalid manifest unexpectedly passed audit')
+
+prefixes = {EAGER_ED_MODULE_PREFIXES!r}
+loaded = sorted(
+    name
+    for name in sys.modules
+    if any(name == prefix or name.startswith(prefix + '.') for prefix in prefixes)
+)
+assert loaded == [], loaded
+"""
+
+    _run_clean_interpreter(source, tmp_path)
+
+
+def _fixed_m_dimension(n_electrons: int, two_q: int, target_m: int) -> int:
+    return sum(
+        1
+        for occupied in itertools.combinations(range(two_q + 1), n_electrons)
+        if sum(-two_q + 2 * orbital for orbital in occupied) == 2 * target_m
+    )
+
+
+def test_real_n6_ed_overlap_oracle_builds_six_normalized_states() -> None:
+    oracle = build_ed_overlap_oracle(load_protocol().physics)
+
+    assert set(oracle._states) == {"ground", "-2", "-1", "0", "1", "2"}
+    for label, state in oracle._states.items():
+        target_m = 0 if label == "ground" else int(label)
+        assert len(state.basis) == _fixed_m_dimension(6, 15, target_m)
+        assert state.coefficients.shape == (len(state.basis),)
+        assert np.all(np.isfinite(state.coefficients))
+        assert np.linalg.norm(state.coefficients) == pytest.approx(1.0)
+        assert state.coefficients.flags.writeable is False
+
+        configs = np.asarray(state.basis[:4], dtype=np.int64)
+        assert oracle.amplitude(label, configs) == pytest.approx(
+            state.coefficients[:4]
+        )
 
 
 def test_normalized_fidelity_is_scale_invariant_and_detects_orthogonality() -> None:

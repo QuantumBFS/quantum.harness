@@ -8,17 +8,6 @@ from typing import Any
 
 import numpy as np
 
-from benchmark_v0.ed_oracle import _select_lowest_l_state
-from benchmark_v0.fock_ed import (
-    fixed_m_basis,
-    hamiltonian_matrix,
-    l_squared_matrix,
-)
-from benchmark_v0.lll_coulomb import (
-    antisymmetrized_pair_matrix,
-    coulomb_integrals,
-)
-
 from .contracts import CandidateAdapter, StateHandle
 from .protocol import ProtocolConfig
 
@@ -394,6 +383,17 @@ def _validated_physics_integer(physics: Mapping[str, Any], name: str) -> int:
 
 def build_ed_overlap_oracle(physics: Mapping[str, Any]) -> EDOverlapOracle:
     """Build the strict-LLL Coulomb ED states after the reveal boundary."""
+
+    from benchmark_v0.ed_oracle import _select_lowest_l_state
+    from benchmark_v0.fock_ed import (
+        fixed_m_basis,
+        hamiltonian_matrix,
+        l_squared_matrix,
+    )
+    from benchmark_v0.lll_coulomb import (
+        antisymmetrized_pair_matrix,
+        coulomb_integrals,
+    )
 
     n_electrons = _validated_physics_integer(physics, "n_electrons")
     two_q = _validated_physics_integer(physics, "two_q")
