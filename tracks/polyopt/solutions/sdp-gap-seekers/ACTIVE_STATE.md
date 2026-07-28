@@ -253,4 +253,12 @@ Updated: 2026-07-29 UTC.
   `11b7b016a5ca7f41b5b93a609e321bed3b7ed71cfb4b89221cb02b4e6f442baa`;
   peak process RSS was 915,688 KiB. R2 tests the phase-corrected congruence
   without changing the proposed cone inventory.
+- Full-spin cone truth attempt r2, Slurm job `22988562`, passed 143 of 144
+  assertions. All phase-corrected congruences and every mathematical gate
+  passed. The sole failure expected at least one mixed transport-phase pair;
+  the exact count was zero because all source-to-target phase changes within
+  each related block share one real/imaginary class. R3 requires that stronger
+  phase-class alignment and zero count. Peak process RSS was 970,408 KiB;
+  `test.log` SHA-256 is
+  `c3d822ceba8abf183d59cd1c50d8a1a0e5fbb349e97461351f4756aff45b4d90`.
 - No decision-changing user or resource need is open.

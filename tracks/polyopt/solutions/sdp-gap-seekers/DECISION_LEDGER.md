@@ -366,3 +366,19 @@ phase `p'`, the transport phase is `q = sign * conj(p') * p`, which lies in
 imaginary, both real matrix entries must vanish exactly. This changes a
 consequential proof input rather than repeating the failed signed-real
 assumption.
+
+## 2026-07-29 — cone truth r2 proves the congruence and sharpens phase count
+
+Slurm job `22988562` passed 143 of 144 assertions. The phase-corrected
+6,643-entry congruence, exact stable basis ranks, all cross-block zeros, and
+the concrete nine-cone model passed. The only failure was a diagnostic
+expecting a positive mixed transport-phase count; the exact count was zero.
+Peak RSS was 970,408 KiB and `test.log` SHA-256 is
+`c3d822ceba8abf183d59cd1c50d8a1a0e5fbb349e97461351f4756aff45b4d90`.
+
+The stronger exact statement is that, within each related character block,
+all row transport phases have the same real/imaginary class even though the
+individual conjugation parities vary. Thus every pairwise factor
+`conj(q_i)q_j` is real. R3 changes the diagnostic to require this phase-class
+alignment and an exactly zero mixed-pair count; no model or cone inventory is
+changed.

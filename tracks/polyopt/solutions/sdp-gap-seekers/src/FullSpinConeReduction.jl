@@ -221,6 +221,7 @@ function full_spin_nontrivial_cone_redundancy_truth(
     stable_cross_blocks_zero = true
     stable_bases_invertible = true
     gauge_phases_well_formed = true
+    gauge_phase_classes_aligned = true
     gauge_mixed_entries_zero = true
     orbit_entry_count = 0
     stable_cross_entry_count = 0
@@ -255,6 +256,8 @@ function full_spin_nontrivial_cone_redundancy_truth(
             ),
             transport_phases,
         )
+        gauge_phase_classes_aligned &=
+            length(unique([phase^2 for phase in transport_phases])) == 1
         for left in 1:dimension, right in left:dimension
             orbit_projected = projected_source_block_entry(
                 assembly,
@@ -319,6 +322,7 @@ function full_spin_nontrivial_cone_redundancy_truth(
         stable_cross_blocks_zero &&
         stable_bases_invertible &&
         gauge_phases_well_formed &&
+        gauge_phase_classes_aligned &&
         gauge_mixed_entries_zero
     return (
         exact=exact,
@@ -332,6 +336,7 @@ function full_spin_nontrivial_cone_redundancy_truth(
         stable_bases_invertible=stable_bases_invertible,
         stable_basis_dimensions=sort(stable_basis_dimensions),
         gauge_phases_well_formed=gauge_phases_well_formed,
+        gauge_phase_classes_aligned=gauge_phase_classes_aligned,
         gauge_mixed_entries_zero=gauge_mixed_entries_zero,
         gauge_mixed_entry_count=gauge_mixed_entry_count,
     )
