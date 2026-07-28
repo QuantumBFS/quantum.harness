@@ -351,3 +351,30 @@ def test_six_mode_compiler_float_values_match_numpy_conjugation() -> None:
 
     assert system.coefficients.rows > 0
     assert np.allclose(compiled, observed, atol=1e-12)
+
+
+def test_six_mode_compiler_retains_every_nonzero_direct_row() -> None:
+    from oracle.klein_hodge import overlap_klein_circuit
+    from oracle.overlap_klein import quadratic_basis
+
+    basis = quadratic_basis("number-conserving", "rings-bridges")
+    transform = overlap_klein_circuit()
+    blocks = parity_indices(6)
+    system = compile_metzler_system(transform, basis, blocks)
+    transformed_basis = tuple(
+        sp.simplify(transform * item.fock * transform.T) for item in basis
+    )
+    expected_rows = tuple(
+        MetzlerRow(parity, target, source)
+        for parity, block in zip(("even", "odd"), blocks, strict=True)
+        for target in block
+        for source in block
+        if target != source
+        if any(
+            sp.simplify(matrix[target, source]) != 0
+            for matrix in transformed_basis
+        )
+    )
+
+    assert len(expected_rows) == 560
+    assert system.rows == expected_rows
