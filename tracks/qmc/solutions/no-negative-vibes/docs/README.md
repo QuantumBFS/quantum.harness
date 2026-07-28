@@ -33,6 +33,9 @@
   的一般证明、12 族 19.2 万权重、四类 80 位反例和 Majorana 宇称猜想；
 - [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
   spinor/exterior-cone 候选的定义、排重与停止条件；
+- [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
+  加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
+  parity，并反推奇环吸引 spinless-fermion 模型的新候选；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；
