@@ -3,7 +3,6 @@
 import csv
 import importlib.util
 import math
-import os
 import sys
 import tempfile
 import unittest
@@ -71,6 +70,42 @@ class TransferActionTests(unittest.TestCase):
         operator = module.IsingTransferOperator(4, 0.4, 0.4)
         with self.assertRaises(ValueError):
             operator._matvec(np.ones(8))
+
+
+class DominantEigenvalueTests(unittest.TestCase):
+    def test_dominant_eigenpair_matches_dense_oracle(self):
+        """Catches a wrong Lanczos target, normalization, or residual."""
+        module = _load_module()
+        if not hasattr(module, "dominant_eigenpair"):
+            self.fail("dominant_eigenpair is missing")
+        L = 4
+        k = module.critical_coupling()
+        expected = np.linalg.eigvalsh(_dense_transfer(L, k, k))[-1]
+
+        result = module.dominant_eigenpair(L, k, k, tol=1e-12)
+
+        relative_error = abs(result["lambda0"] - expected) / expected
+        self.assertLess(relative_error, 1e-11)
+        self.assertLess(result["relative_residual"], 1e-10)
+
+    def test_run_sizes_writes_two_raw_rows_and_plot(self):
+        """Catches dropped widths, malformed output, or an accidental fit-only path."""
+        module = _load_module()
+        if not hasattr(module, "run_sizes"):
+            self.fail("run_sizes is missing")
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp)
+            results = module.run_sizes([4, 6], output_dir, tol=1e-11)
+
+            with (output_dir / "values.csv").open(newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+            self.assertEqual([int(row["L"]) for row in rows], [4, 6])
+            self.assertEqual([int(row["dimension"]) for row in rows], [16, 64])
+            self.assertTrue(all(float(row["lambda0"]) > 0.0 for row in rows))
+            self.assertTrue(all(row["relative_residual"] for row in rows))
+            self.assertEqual([item["L"] for item in results], [4, 6])
+            self.assertTrue((output_dir / "leading_eigenvalues.png").exists())
 
 
 if __name__ == "__main__":
