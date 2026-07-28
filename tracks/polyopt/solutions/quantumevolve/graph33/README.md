@@ -39,3 +39,22 @@ omnievolve run ../../tracks/polyopt/solutions/quantumevolve/graph33/initial_code
   -c ../../tracks/polyopt/solutions/quantumevolve/graph33/config.toml \
   --trusted --no-self-evolve --gens 20 --seed 232
 ```
+
+## Exported generation-9 certificate
+
+The best 20-generation basis gives the numerical SDP upper bound
+`2.0001719333682058`.  The committed exact certificate deliberately uses the
+slightly looser rational upper bound `20003/10000 = 2.0003` so that every
+coefficient identity and positive-semidefinite check can be performed with
+exact rational arithmetic.
+
+```text
+challenges/omnievolve/.venv/Scripts/python.exe \
+  tracks/polyopt/solutions/quantumevolve/graph33/verify_dual_certificate.py \
+  tracks/polyopt/solutions/quantumevolve/graph33/certificates/dual_certificate_exact.json
+```
+
+The verifier checks 225 affine coefficient constraints and proves positivity
+of the 45-by-45 Gram matrix through 45 strictly positive exact LDL pivots.
+`certificates/dual_certificate_numeric.json` retains the floating solver output
+for diagnostics; it is not itself the proof.
