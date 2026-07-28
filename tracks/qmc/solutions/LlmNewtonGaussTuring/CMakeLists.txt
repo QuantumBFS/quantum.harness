@@ -57,6 +57,11 @@ add_executable(test_dthetah tests/test_dthetah.cpp)
 target_link_libraries(test_dthetah PRIVATE cm148)
 add_test(NAME test_dthetah COMMAND test_dthetah)
 
+# Test: Berry phase Stage 3 (FHS vs response, 2D benchmark, critical region)
+add_executable(test_berry_stage3 tests/test_berry_stage3.cpp)
+target_link_libraries(test_berry_stage3 PRIVATE cm148)
+add_test(NAME test_berry_stage3 COMMAND test_berry_stage3)
+
 # Diagnostic driver (not part of the test suite)
 add_executable(debug_sse tools/debug_sse.cpp)
 target_link_libraries(debug_sse PRIVATE cm148)
