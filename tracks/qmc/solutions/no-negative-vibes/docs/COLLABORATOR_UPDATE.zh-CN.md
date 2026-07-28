@@ -30,7 +30,7 @@
    - `majorana-small-angle-stress-v1`：840 格、252,000 个直接 Fock 迹。
    - `frontier-semigroups-v1`：1,440 格、720,000 个行列式；
    - `frontier-mixed-split-stress-v1`：672 格、672,000 个行列式。
-4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现；92 个自动测试全通过。
+4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现；95 个自动测试全通过。
 
 ## 当前最重要的结果
 
