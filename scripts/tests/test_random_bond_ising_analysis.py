@@ -114,6 +114,26 @@ class CentralChargeFitTests(unittest.TestCase):
             result["reported"]["fit_envelope_upper"],
         )
 
+    def test_two_block_bootstrap_has_finite_sample_variance_correction(self):
+        """Catches the factor-of-two variance bias of a raw two-block bootstrap."""
+        module = _load_module()
+        results = _synthetic_strip_results()
+        for item in results:
+            center = item["lyapunov"]
+            blocks = np.array([center - 0.004, center + 0.004])
+            lyapunov_se = np.std(blocks, ddof=1) / math.sqrt(len(blocks))
+            item["block_log_norm_means"] = blocks
+            item["lyapunov_se"] = float(lyapunov_se)
+            item["free_energy_se"] = float(lyapunov_se / item["L"])
+
+        result = module.central_charge_summary(
+            results, bootstrap_samples=10000, seed=7
+        )
+
+        bootstrap_se = result["reported"]["bootstrap_se"]
+        linear_se = result["primary_L8_l24"]["central_charge_linear_se"]
+        self.assertAlmostEqual(bootstrap_se / linear_se, 1.0, delta=0.04)
+
 
 class ArtifactWorkflowTests(unittest.TestCase):
     def test_artifacts_include_blocks_widths_fit_projection_and_plot(self):
@@ -185,7 +205,46 @@ class ArtifactWorkflowTests(unittest.TestCase):
         self.assertEqual(len(calls), 5)
         self.assertEqual([item["L"] for item in selected], [8, 10, 12, 16, 20])
         self.assertFalse(runtime["production_launched"])
+        self.assertIs(runtime.get("preliminary"), True)
+        self.assertEqual(runtime.get("pilot_runtime_seconds"), 5.0)
+        self.assertEqual(
+            runtime.get("projected_production_seconds"),
+            runtime["projected_total_seconds"],
+        )
         self.assertTrue(math.isfinite(summary["reported"]["central_charge"]))
+
+    def test_workflow_rejects_invalid_configuration_before_pilot(self):
+        """Catches expensive strip runs starting before cheap input validation."""
+        module = _load_module()
+        defaults = {
+            "sizes": [8, 10, 12, 16, 20],
+            "p": 0.1092212,
+            "seed": 122,
+            "pilot_blocks": 2,
+            "target_se": 1e-4,
+            "max_local_seconds": 600.0,
+            "bootstrap_samples": 20,
+            "output_dir": Path("unused"),
+        }
+        invalid = (
+            {"sizes": [8, 10, 12, 16]},
+            {"sizes": [8, 10, 12, 16, 16]},
+            {"sizes": [2, 4, 8, 10, 12]},
+            {"p": 0.5},
+            {"target_se": 0.0},
+            {"max_local_seconds": -1.0},
+            {"bootstrap_samples": 1},
+        )
+
+        def forbidden_runner(**kwargs):
+            raise AssertionError(f"pilot started with invalid configuration: {kwargs}")
+
+        for override in invalid:
+            with self.subTest(override=override):
+                arguments = dict(defaults)
+                arguments.update(override)
+                with self.assertRaises(ValueError):
+                    module.run_workflow(strip_runner=forbidden_runner, **arguments)
 
 
 if __name__ == "__main__":

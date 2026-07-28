@@ -117,7 +117,12 @@ def central_charge_summary(strip_results, bootstrap_samples, seed):
             if blocks.ndim != 1 or len(blocks) < 2 or not np.all(np.isfinite(blocks)):
                 raise ValueError("each width requires at least two finite block means")
             sampled = rng.choice(blocks, size=len(blocks), replace=True)
-            sampled_values.append(-float(np.mean(sampled)) / item["L"])
+            observed_mean = float(np.mean(blocks))
+            sampled_mean = float(np.mean(sampled))
+            corrected_mean = observed_mean + math.sqrt(
+                len(blocks) / (len(blocks) - 1.0)
+            ) * (sampled_mean - observed_mean)
+            sampled_values.append(-corrected_mean / item["L"])
         bootstrap_charges.append(
             fit_central_charge(sizes, sampled_values, errors, True, 8)[
                 "central_charge"
@@ -260,9 +265,28 @@ def run_workflow(
     """Run a five-width pilot and continue only when its measured cost fits."""
     if strip_runner is None:
         strip_runner = run_random_strip
+    sizes = [int(L) for L in sizes]
     pilot_blocks = int(pilot_blocks)
+    bootstrap_samples = int(bootstrap_samples)
+    p = float(p)
+    target_se = float(target_se)
+    max_local_seconds = float(max_local_seconds)
     if pilot_blocks < 2:
         raise ValueError("pilot_blocks must be at least two")
+    if len(sizes) < 5 or len(set(sizes)) != len(sizes):
+        raise ValueError("at least five unique widths are required")
+    if any(L < 2 for L in sizes):
+        raise ValueError("all widths must be at least two")
+    if sum(L >= 8 for L in sizes) < 3 or sum(L >= 10 for L in sizes) < 3:
+        raise ValueError("sizes do not support the requested L>=8 and L>=10 fits")
+    if not math.isfinite(p) or not 0.0 < p < 0.5:
+        raise ValueError("p must satisfy 0 < p < 0.5")
+    if not math.isfinite(target_se) or target_se <= 0.0:
+        raise ValueError("target_se must be finite and positive")
+    if not math.isfinite(max_local_seconds) or max_local_seconds < 0.0:
+        raise ValueError("max_local_seconds must be finite and nonnegative")
+    if bootstrap_samples < 2:
+        raise ValueError("bootstrap_samples must be at least two")
 
     pilots = []
     for L in sizes:
@@ -306,14 +330,20 @@ def run_workflow(
     summary = central_charge_summary(
         selected, bootstrap_samples=bootstrap_samples, seed=int(seed) + 20000
     )
+    achieved_target_all = bool(
+        all(item["free_energy_se"] <= target_se for item in selected)
+    )
     runtime = {
         "production_launched": production_launched,
         "projected_total_seconds": projected_total,
+        "projected_production_seconds": projected_total,
+        "pilot_runtime_seconds": float(
+            sum(item["runtime_seconds"] for item in pilots)
+        ),
         "target_free_energy_se": float(target_se),
         "max_local_seconds": float(max_local_seconds),
-        "achieved_target_all": bool(
-            all(item["free_energy_se"] <= target_se for item in selected)
-        ),
+        "achieved_target_all": achieved_target_all,
+        "preliminary": not achieved_target_all,
     }
     write_analysis_artifacts(
         selected, summary, projections, runtime, output_dir
@@ -322,7 +352,8 @@ def run_workflow(
     print(
         f"c_eff={reported['central_charge']:.8f} +/- "
         f"{reported['bootstrap_se']:.3e} (bootstrap); "
-        f"production_launched={production_launched}",
+        f"production_launched={production_launched}; "
+        f"preliminary={not achieved_target_all}",
         flush=True,
     )
     return selected, summary, runtime
