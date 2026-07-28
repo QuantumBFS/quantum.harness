@@ -1,5 +1,82 @@
 using JLD2
 
+const CORRELATION_CHECKPOINT_SCHEMA_VERSION = 1
+
+"""A resumable, unnormalized phase sum for one correlation calculation."""
+struct CorrelationCheckpoint
+    schema_version::Int
+    config_hash::String
+    completed_phases::Int
+    phase_count::Int
+    lag_count::Int
+    partial_sum::Vector{ComplexF64}
+end
+
+function CorrelationCheckpoint(config_hash::AbstractString,
+                               completed_phases::Integer,
+                               phase_count::Integer,
+                               partial_sum::AbstractVector)
+    isempty(config_hash) &&
+        throw(ArgumentError("correlation checkpoint config hash cannot be empty"))
+    phase_count > 0 ||
+        throw(ArgumentError("correlation checkpoint phase count must be positive"))
+    0 <= completed_phases <= phase_count ||
+        throw(ArgumentError("completed phases are outside the checkpoint range"))
+    isempty(partial_sum) &&
+        throw(ArgumentError("correlation checkpoint partial sum cannot be empty"))
+    eltype(partial_sum) <: Complex ||
+        throw(ArgumentError("correlation checkpoint must retain complex values"))
+    all(isfinite, partial_sum) ||
+        throw(ArgumentError("correlation checkpoint contains non-finite values"))
+    values = ComplexF64.(partial_sum)
+    return CorrelationCheckpoint(
+        CORRELATION_CHECKPOINT_SCHEMA_VERSION, String(config_hash),
+        Int(completed_phases), Int(phase_count), length(values), values)
+end
+
+"""Atomically persist a correlation checkpoint in the destination directory."""
+function save_correlation_checkpoint(path::AbstractString,
+                                     checkpoint::CorrelationCheckpoint)
+    directory = dirname(path)
+    mkpath(directory)
+    temporary_path, temporary_io = mktemp(directory; cleanup=false)
+    close(temporary_io)
+    try
+        JLD2.jldsave(
+            temporary_path;
+            schema_version=checkpoint.schema_version,
+            config_hash=checkpoint.config_hash,
+            completed_phases=checkpoint.completed_phases,
+            phase_count=checkpoint.phase_count,
+            lag_count=checkpoint.lag_count,
+            partial_sum=checkpoint.partial_sum)
+        mv(temporary_path, path; force=true)
+    catch
+        ispath(temporary_path) && rm(temporary_path; force=true)
+        rethrow()
+    end
+    return path
+end
+
+"""Load and validate a correlation checkpoint without accepting older schemas."""
+function load_correlation_checkpoint(path::AbstractString)
+    isfile(path) ||
+        throw(ArgumentError("correlation checkpoint does not exist: " * path))
+    payload = JLD2.load(path)
+    required = ("schema_version", "config_hash", "completed_phases",
+                "phase_count", "lag_count", "partial_sum")
+    all(key -> haskey(payload, key), required) ||
+        throw(ArgumentError("correlation checkpoint is incomplete: " * path))
+    payload["schema_version"] == CORRELATION_CHECKPOINT_SCHEMA_VERSION ||
+        throw(ArgumentError("correlation checkpoint schema is incompatible"))
+    checkpoint = CorrelationCheckpoint(
+        payload["config_hash"], payload["completed_phases"],
+        payload["phase_count"], payload["partial_sum"])
+    checkpoint.lag_count == payload["lag_count"] ||
+        throw(ArgumentError("correlation checkpoint lag count is inconsistent"))
+    return checkpoint
+end
+
 """Return the deterministic on-disk location of one provenance-specific IF cache."""
 function uniform_if_cache_path(cache_dir::AbstractString, metadata::AbstractDict)
     return joinpath(cache_dir, "uniform-if-" * uniform_if_key(metadata) * ".jld2")

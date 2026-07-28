@@ -162,4 +162,95 @@ end
         @test_throws ArgumentError correlation_diagnostics(C; tail_count=1)
         @test_throws ArgumentError correlation_diagnostics(C; tail_count=6)
     end
+
+    @testset "threaded phase reduction matches serial reference" begin
+        χ = 2
+        M = 7
+        q = randn(rng, ComplexF64, χ, 4, χ, 4)
+        left, right = correlation_random_channels(rng, M)
+        floquet = FloquetOperator(q, left, right)
+        phase_states = [randn(rng, ComplexF64, 4χ) for _ in 1:M]
+        v_left = randn(rng, ComplexF64, χ)
+        serial = zeros(ComplexF64, 11)
+        threaded = similar(serial)
+        floquet_correlation_serial!(
+            serial, floquet, phase_states, SIGMA_Z, v_left)
+        floquet_correlation_threaded!(
+            threaded, floquet, phase_states, SIGMA_Z, v_left;
+            config_hash="threaded-equality", batch_size=2)
+        @test threaded ≈ serial rtol=2e-12 atol=2e-12
+        @test LinearAlgebra.BLAS.get_num_threads() == 1
+    end
+
+    @testset "checkpoint resumes completed phase batches exactly" begin
+        χ = 2
+        M = 7
+        q = randn(rng, ComplexF64, χ, 4, χ, 4)
+        left, right = correlation_random_channels(rng, M)
+        floquet = FloquetOperator(q, left, right)
+        phase_states = [randn(rng, ComplexF64, 4χ) for _ in 1:M]
+        v_left = randn(rng, ComplexF64, χ)
+        expected = zeros(ComplexF64, 9)
+        resumed = similar(expected)
+        floquet_correlation_serial!(
+            expected, floquet, phase_states, SIGMA_Z, v_left)
+
+        mktempdir() do directory
+            checkpoint_path = joinpath(directory, "correlation.jld2")
+            batch_count = Ref(0)
+            @test_throws ErrorException floquet_correlation_threaded!(
+                resumed, floquet, phase_states, SIGMA_Z, v_left;
+                config_hash="resume-fixture",
+                checkpoint_path,
+                batch_size=2,
+                after_batch=checkpoint -> begin
+                    batch_count[] += 1
+                    batch_count[] == 1 && error("controlled interruption")
+                end)
+            @test isfile(checkpoint_path)
+            saved = load_correlation_checkpoint(checkpoint_path)
+            @test saved isa CorrelationCheckpoint
+            @test saved.config_hash == "resume-fixture"
+            @test saved.completed_phases == 2
+
+            floquet_correlation_threaded!(
+                resumed, floquet, phase_states, SIGMA_Z, v_left;
+                config_hash="resume-fixture",
+                checkpoint_path,
+                batch_size=2,
+                resume=true)
+            @test resumed ≈ expected rtol=2e-12 atol=2e-12
+            @test !isfile(checkpoint_path)
+        end
+    end
+
+    @testset "resume metadata and nested parallelism fail closed" begin
+        identity4 = Matrix{ComplexF64}(I, 4, 4)
+        floquet = FloquetOperator(
+            reshape(identity4, 1, 4, 1, 4),
+            fill(identity4, 4), fill(identity4, 4))
+        phase_states = fill(ComplexF64[1, 0, 0, 0], 4)
+        mktempdir() do directory
+            checkpoint_path = joinpath(directory, "correlation.jld2")
+            @test_throws ErrorException floquet_correlation_threaded!(
+                zeros(ComplexF64, 3), floquet, phase_states,
+                SIGMA_Z, ComplexF64[1];
+                config_hash="original",
+                checkpoint_path,
+                batch_size=2,
+                after_batch=checkpoint -> error("stop"))
+            @test_throws ArgumentError floquet_correlation_threaded!(
+                zeros(ComplexF64, 3), floquet, phase_states,
+                SIGMA_Z, ComplexF64[1];
+                config_hash="changed",
+                checkpoint_path,
+                batch_size=2,
+                resume=true)
+        end
+        @test_throws ArgumentError floquet_correlation_threaded!(
+            zeros(ComplexF64, 3), floquet, phase_states,
+            SIGMA_Z, ComplexF64[1];
+            config_hash="nested",
+            parallel_mode=:frequencies)
+    end
 end

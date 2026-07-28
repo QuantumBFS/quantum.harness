@@ -107,6 +107,144 @@ function floquet_correlation_serial!(C::AbstractVector,
     return C
 end
 
+function _accumulate_correlation_phase!(
+    accumulator::AbstractVector,
+    start_phase::Integer,
+    floquet::FloquetOperator,
+    phase_states::AbstractVector,
+    v_left::AbstractVector,
+    convention::InsertionConvention,
+    work::StepWorkspace)
+
+    M = length(floquet.left_channels)
+    _apply_system_channel!(
+        work.period1, phase_states[start_phase],
+        convention.early_superoperator, floquet.layout)
+    source = work.period1
+    destination = work.period2
+    accumulator[1] += _late_observable_contraction(
+        source, v_left, convention.late_trace_vector, floquet.layout)
+    @inbounds for lag in 1:(length(accumulator) - 1)
+        phase = mod1(start_phase + lag - 1, M)
+        _apply_phase!(destination, source, floquet, phase, work)
+        source, destination = destination, source
+        accumulator[lag + 1] += _late_observable_contraction(
+            source, v_left, convention.late_trace_vector, floquet.layout)
+    end
+    return accumulator
+end
+
+function _validate_correlation_checkpoint(checkpoint::CorrelationCheckpoint,
+                                          config_hash::AbstractString,
+                                          phase_count::Integer,
+                                          lag_count::Integer)
+    checkpoint.config_hash == config_hash ||
+        throw(ArgumentError("correlation checkpoint config hash mismatch"))
+    checkpoint.phase_count == phase_count ||
+        throw(ArgumentError("correlation checkpoint phase count mismatch"))
+    checkpoint.lag_count == lag_count ||
+        throw(ArgumentError("correlation checkpoint lag count mismatch"))
+    return checkpoint
+end
+
+"""
+Compute a phase-parallel correlation with resumable, atomic batch checkpoints.
+
+Each Julia thread owns its `StepWorkspace` and complex partial accumulator.
+`parallel_mode=:frequencies` is rejected to prevent nested frequency/phase
+parallelism. A checkpoint stores the unnormalized sum over a contiguous prefix
+of completed phases and is removed only after successful completion.
+"""
+function floquet_correlation_threaded!(
+    C::AbstractVector,
+    floquet::FloquetOperator,
+    phase_states::AbstractVector,
+    operator::AbstractMatrix,
+    v_left::AbstractVector;
+    convention::InsertionConvention=InsertionConvention(operator),
+    config_hash::AbstractString,
+    checkpoint_path::Union{Nothing,AbstractString}=nothing,
+    batch_size::Integer=max(1, Threads.nthreads()),
+    resume::Bool=false,
+    parallel_mode::Symbol=:phases,
+    after_batch::Function=(_ -> nothing))
+
+    parallel_mode in (:phases, :none) ||
+        throw(ArgumentError(
+            "phase correlation cannot run inside frequency parallelism"))
+    batch_size > 0 || throw(ArgumentError("batch_size must be positive"))
+    isempty(config_hash) &&
+        throw(ArgumentError("correlation config hash cannot be empty"))
+    resume && isnothing(checkpoint_path) &&
+        throw(ArgumentError("resume requires a checkpoint path"))
+    convention.side === :left ||
+        throw(ArgumentError("ordered correlation requires left insertion Sρ"))
+    convention.operator == ComplexF64.(operator) ||
+        throw(ArgumentError("insertion convention does not match operator"))
+    M = _validate_correlation_inputs(
+        C, floquet, phase_states, v_left, convention)
+
+    LinearAlgebra.BLAS.set_num_threads(1)
+    completed = 0
+    total = zeros(ComplexF64, length(C))
+    if resume
+        checkpoint = load_correlation_checkpoint(checkpoint_path)
+        _validate_correlation_checkpoint(
+            checkpoint, config_hash, M, length(C))
+        completed = checkpoint.completed_phases
+        copyto!(total, checkpoint.partial_sum)
+    elseif !isnothing(checkpoint_path) && isfile(checkpoint_path)
+        throw(ArgumentError(
+            "checkpoint already exists; pass resume=true or choose another path"))
+    end
+
+    # Julia may expose an interactive pool whose thread IDs are larger than
+    # `Threads.nthreads()` for the default pool. Index by the full ID range so
+    # every thread that can execute the loop owns a distinct workspace.
+    thread_count = parallel_mode === :phases ? Threads.maxthreadid() : 1
+    workspaces = [StepWorkspace(floquet) for _ in 1:thread_count]
+    partials = [zeros(ComplexF64, length(C)) for _ in 1:thread_count]
+
+    while completed < M
+        batch_stop = min(M, completed + Int(batch_size))
+        foreach(partial -> fill!(partial, zero(ComplexF64)), partials)
+        if parallel_mode === :phases
+            Threads.@threads :static for start_phase in (completed + 1):batch_stop
+                thread_index = Threads.threadid()
+                _accumulate_correlation_phase!(
+                    partials[thread_index], start_phase, floquet, phase_states,
+                    v_left, convention, workspaces[thread_index])
+            end
+        else
+            for start_phase in (completed + 1):batch_stop
+                _accumulate_correlation_phase!(
+                    partials[1], start_phase, floquet, phase_states,
+                    v_left, convention, workspaces[1])
+            end
+        end
+        for partial in partials
+            @inbounds for index in eachindex(total)
+                total[index] += partial[index]
+            end
+        end
+        completed = batch_stop
+        checkpoint = CorrelationCheckpoint(
+            config_hash, completed, M, total)
+        isnothing(checkpoint_path) ||
+            save_correlation_checkpoint(checkpoint_path, checkpoint)
+        after_batch(checkpoint)
+    end
+
+    scale = inv(Float64(M))
+    @inbounds for index in eachindex(C)
+        C[index] = total[index] * scale
+    end
+    if !isnothing(checkpoint_path) && isfile(checkpoint_path)
+        rm(checkpoint_path; force=true)
+    end
+    return C
+end
+
 """Return C(0), complex tail mean, tail norm, and magnitude-tail slope."""
 function correlation_diagnostics(C::AbstractVector; tail_count::Integer)
     eltype(C) <: Complex ||
