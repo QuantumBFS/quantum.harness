@@ -1,3 +1,8 @@
+from long_range_percolation.enumeration import (
+    GraphOutcome,
+    enumerate_graphs,
+    exact_partition_distribution,
+)
 from long_range_percolation.kernel import (
     edge_probabilities,
     kernel_weight_sum,
@@ -22,9 +27,12 @@ from long_range_percolation.union_find import UnionFind
 
 __all__ = [
     "DistanceClass",
+    "GraphOutcome",
     "GraphSample",
     "ModelSpec",
     "UnionFind",
+    "enumerate_graphs",
+    "exact_partition_distribution",
     "canonical_edge",
     "distance_classes",
     "edge_probabilities",
