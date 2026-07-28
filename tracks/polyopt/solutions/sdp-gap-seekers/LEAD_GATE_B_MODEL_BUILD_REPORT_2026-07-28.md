@@ -251,6 +251,60 @@ that SSH, repository shipping, Julia, Mosek, or `sbatch` were misconfigured.
 Future work should not probe GPU partitions for this CPU-only SDP unless the
 known CPU partition actually rejects a real submission.
 
+## 8.2 First real submission and infrastructure-only failure
+
+The exact corrected script was submitted through `harness_slurm.sh`:
+
+```text
+job_id   = 22986072
+partition = xhacnormalb
+CPUs      = 16
+memory    = 60,800 MB
+walltime  = 00:30:00
+```
+
+Despite the preceding `--test-only` projection of December 2026, the real job
+started one second after submission:
+
+```text
+SubmitTime = 2026-07-28T22:35:10
+StartTime  = 2026-07-28T22:35:11
+EndTime    = 2026-07-28T22:35:11
+```
+
+It failed before the batch script executed:
+
+```text
+State    = FAILED
+Reason   = JobLaunchFailure
+ExitCode = 0:53
+Elapsed  = 00:00:00
+Node     = a01r06n03
+MaxRSS   = unavailable
+stdout   = not created
+result   = not created
+```
+
+This is scheduler/node launch evidence, not a Julia, Mosek, MOF, memory, or
+model failure. The assigned node was already heavily shared:
+
+```text
+State=MIXED
+CPUAlloc=112 of 128
+AllocMem=381472M
+FreeMem=92700M
+```
+
+The appropriate single retry is the identical committed request with:
+
+```text
+--exclude=a01r06n03
+```
+
+No scientific or solver setting should change. If that retry also produces a
+pre-execution `JobLaunchFailure`, stop and treat the cluster launch path as the
+blocker rather than repeatedly resubmitting.
+
 ## 9. Claim boundary
 
 Gate B proves a deterministic, replayable solver input for the declared
