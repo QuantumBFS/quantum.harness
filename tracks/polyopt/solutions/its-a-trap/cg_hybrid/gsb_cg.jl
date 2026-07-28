@@ -126,6 +126,14 @@ eval(Meta.parseall(_FORK_BODY))
 function GSB_cg(supp, coe, L, d; lattice = "chain", correlation = false,
                 energy = [], SU2_symmetry = false, writetofile = false,
                 tower = nothing, kwargs...)
+    # HARD GUARD (final-plan amendment 2 / ten-corrections law): a tower may
+    # only be attached when a validated gate record exists next to this file.
+    if tower !== nothing
+        gate = joinpath(@__DIR__, "hybrid_test.out")
+        isfile(gate) || error("tower=on without gate record: $(gate) missing — run hybrid_test.jl first")
+        startswith(readline(gate), "hybrid_test.jl  PASS") ||
+            error("tower=on but gate record is not PASS — no coupled run permitted")
+    end
     lattice == "chain"      || error("GSB_cg envelope: lattice=chain only")
     correlation == false    || error("GSB_cg envelope: correlation unsupported")
     isempty(energy)         || error("GSB_cg envelope: energy window unsupported")

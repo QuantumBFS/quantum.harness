@@ -286,6 +286,20 @@ function parsecell(spec)
         ov[:J2]   = 0          # keep the kwarg out of the energy objective
         ov[:J2_model] = J2     # serialized so the row records the physics
         delete!(ov, :model)
+       elseif get(ov, :model, "") == "heis2d"
+        # 2D LxL Heisenberg torus (encoding from QMBCertify examples/ground_state.jl:36-37)
+        ov[:supp] = [[1, 4]]
+        ov[:coe]  = [3 / 2]
+        ov[:lattice] = "square"
+        delete!(ov, :model)
+    elseif get(ov, :model, "") == "j1j2sq"
+        # 2D J1-J2 (examples/ground_state.jl:50-53); Remark 6.1: callers pass pso=0, lso=0
+        J2 = Float64(get(ov, :J2, 0.0))
+        ov[:supp] = [[1, 4], [1, 7]]
+        ov[:coe]  = [3 / 2, 3 / 2 * J2]
+        ov[:lattice] = "square"
+        ov[:J2] = 0; ov[:J2_model] = J2
+        delete!(ov, :model)
     end
     return (label, parse(Int, nstr), NamedTuple(ov))
 end
