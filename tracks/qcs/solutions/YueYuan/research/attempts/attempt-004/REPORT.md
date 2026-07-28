@@ -36,6 +36,9 @@ Hessian at that model optimum, and then evaluates:
 - adaptive Hessian-subspace Nelder-Mead, which starts from a low-dimensional
   pilot subspace and widens inside the same total query budget when the noisy
   query-only pilot does not reach a perfect observed score.
+- device-informed adaptive Hessian-subspace Nelder-Mead, which spends counted
+  finite-shot black-box probes to estimate residual directions when the model
+  Hessian subspace appears to stall.
 
 All closed-loop optimizers use the same query budget, target infidelity
 `1e-3`, shots per query, seed set, clipping bounds, and noisy scalar device
@@ -55,6 +58,13 @@ methods. It starts at `k=3` for both systems, then may widen to a safety subspac
 of `k=8` for the one-qubit target or `k=32` for the two-qubit target. The widen
 decision is based only on the noisy observed infidelity returned by the device,
 not on exact simulator fidelity.
+
+The device-informed method goes one step further than widening. After a pilot
+search, it samples paired perturbations in random residual directions orthogonal
+to the model Hessian basis, estimates a finite-shot local curvature proxy, and
+continues in a merged model-plus-device-informed basis. Probe directions are
+selected only from noisy device responses; exact fidelity remains an audit
+quantity used for reporting and query-to-target accounting.
 
 ## Full Sweep
 
@@ -198,6 +208,57 @@ can then summarize the run. The summary carries `real_hardware: false` for the
 current dry run so generated local evidence cannot be mistaken for hardware
 evidence.
 
+## Device-Informed Adaptive Subspace
+
+`device_subspace.py` implements black-box paired probing. For each residual
+direction, the routine queries `theta + delta q` and `theta - delta q`, estimates
+`(f_plus + f_minus - 2 f_center) / delta^2` from finite-shot infidelity values,
+and appends selected residual directions after orthonormalizing them against the
+model Hessian basis. All center and paired probe calls use the same
+`QueryOnlyDevice`, so probe overhead is included in `query_count` and
+`total_shots`.
+
+The fast focused runner is intentionally small and targets known hard mismatch
+cells. It produced 10 records and 2 device-informed records:
+
+| System | Gap | Shots | Method | Success | Final infidelity | Probe queries | Selected probe directions |
+|---|---:|---:|---|---:|---:|---:|---:|
+| one-qubit X | large | 256 | device-informed adaptive | 0 | 0.013113 | 9 | 0 |
+| two-qubit CZ | medium | 256 | device-informed adaptive | 0 | 0.015340 | 9 | 2 |
+
+This fast run is not a target-reaching claim. It is a method smoke check and
+negative/partial recovery signal: on both hard cells the device-informed method
+lowered final infidelity relative to fixed Hessian, random-subspace, and
+full-space baselines, but the 9-query probe overhead did not reach the
+`1e-3` target under the 48-query fast budget. The result supports the research
+story in a careful way: device data can identify useful residual directions, but
+the benefit depends on shot noise, probe budget, and whether the residual
+directions have measurable curvature.
+
+Generated focused artifacts are:
+
+- `device_informed_summary.csv`
+- `device_informed_recovery.csv`
+- `device_informed_recovery.png`
+
+## Invariant Rank Probe
+
+The challenge asks whether the useful dimension tracks `d^2 - 1` across
+systems. The new lightweight invariant probe adds an explicit three-entry
+table. The one- and two-qubit rows are recomputed through the attempt-004 model
+Hessian path; the three-qubit row is a labeled local-chart sanity check:
+
+| Evidence | `d` | Benchmark `d^2 - 1` | Observed metric | Curvature at benchmark | Caveat |
+|---|---:|---:|---:|---:|---|
+| one-qubit X model-Hessian smoke | 2 | 3 | `k95 = 3` | 0.970 | Formal numerical rank is 16 because of small tails; practical curvature concentrates near the benchmark rank. |
+| two-qubit CZ model-Hessian smoke | 4 | 15 | `k95 = 10` | 0.975 | The `d^2 - 1` benchmark is conservative here and captures more than 95% of model-Hessian curvature. |
+| three-qubit local chart | 8 | 63 | exact chart rank = 63 | 1.000 | Local unitary-chart sanity probe, not a full three-qubit closed-loop calibration. |
+
+This does not replace a full three-qubit calibration, but it closes a software
+dimension-counting gap without overclaiming: the report now distinguishes
+attempt-004 model-Hessian smoke evidence from the labeled `d=8` local-chart
+invariant check.
+
 ## Adaptive Recovery
 
 A focused adaptive CPU sweep tested the actual query-only widening rule at 2048
@@ -242,6 +303,10 @@ the useful resource for this attempt.
 - Strict query-only finite-shot device with query and shot counters: implemented.
 - Batch hardware adapter, exported pulse payloads, count ingestion, and dry-run
   hardware-style summary: implemented and tested.
+- Device-informed paired probing and adaptive residual subspace selection:
+  implemented and tested.
+- Lightweight invariant/rank probe with model-Hessian smoke rows for `d=2` and
+  `d=4`, plus a labeled `d=8` local chart: implemented and tested.
 - Model-only, full-space, random-subspace, and Hessian-subspace methods:
   implemented.
 - Adaptive query-only Hessian recovery method with budget-preserving widening:
@@ -270,12 +335,16 @@ Local verification after the hardware-readiness addition:
 
 - Focused red/green reachability test: passing.
 - Focused hardware adapter and dry-run tests: passing (`4 passed`).
-- Attempt-004 tests: passing (`25 passed`).
-- Broader YueYuan attempt tests: passing (`39 passed`).
+- Device-informed subspace tests: passing (`4 passed`).
+- Invariant probe tests: passing (`2 passed`).
+- Attempt-004 tests: passing (`31 passed`).
+- Broader YueYuan attempt tests: passing (`45 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 15 groups).
 - Hardware dry run: passing (7 candidates, 1,792 total shots,
   `real_hardware: false`).
+- Device-informed fast focus: passing (10 records, 2 device-informed records).
+- Invariant rank probe: passing (3 rows, `d=8` labeled `local_unitary_chart`).
 - Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
   five CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.

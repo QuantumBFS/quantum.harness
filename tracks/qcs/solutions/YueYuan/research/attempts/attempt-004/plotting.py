@@ -237,6 +237,37 @@ def _plot_recovery_study(path: Path, rows: list[dict]) -> None:
     plt.close(fig)
 
 
+def make_device_informed_recovery(results_dir: Path) -> Path:
+    results_dir = Path(results_dir)
+    summary = analysis.write_summary(results_dir)
+    analysis.write_device_informed_tables(results_dir, summary)
+    rows = analysis.device_informed_recovery_rows(summary["groups"])
+    figures = results_dir / "figures"
+    figures.mkdir(parents=True, exist_ok=True)
+    path = figures / "device_informed_recovery.png"
+    labels = [f"{row['system']}\n{row['mismatch']}" for row in rows]
+    fixed = [row["fixed_hessian_success_rate"] for row in rows]
+    widen = [row["widen_only_success_rate"] for row in rows]
+    informed = [row["device_informed_success_rate"] for row in rows]
+    xs = list(range(len(rows)))
+    width = 0.25
+
+    fig, ax = plt.subplots(figsize=(7.5, 4.4))
+    ax.bar([x - width for x in xs], fixed, width=width, label="fixed Hessian")
+    ax.bar(xs, widen, width=width, label="widen-only")
+    ax.bar([x + width for x in xs], informed, width=width, label="device-informed")
+    ax.set_title("Device-Informed Adaptive Recovery")
+    ax.set_ylabel("success rate")
+    ax.set_ylim(0.0, 1.1)
+    ax.set_xticks(xs, labels, rotation=35, ha="right")
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(path, dpi=160)
+    plt.close(fig)
+    return path
+
+
 def _simple_bar(path: Path, title: str, labels: list[str], values: list[float], ylabel: str) -> None:
     fig, ax = plt.subplots(figsize=(7, 4.4))
     ax.bar(range(len(labels)), values)

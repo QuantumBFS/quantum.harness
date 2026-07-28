@@ -60,6 +60,21 @@ def aggregate(results_dir: Path) -> dict:
         success_count = sum(1 for item in items if item["success"])
         success_rate = success_count / len(items)
         success_low, success_high = success_interval(success_count, len(items))
+        probe_queries = [
+            item.get("device_probe_query_count")
+            for item in items
+            if item.get("device_probe_query_count") is not None
+        ]
+        probe_shots = [
+            item.get("device_probe_shot_count")
+            for item in items
+            if item.get("device_probe_shot_count") is not None
+        ]
+        probe_selected = [
+            item.get("device_probe_directions_selected")
+            for item in items
+            if item.get("device_probe_directions_selected") is not None
+        ]
         summaries.append(
             {
                 "system": system,
@@ -81,6 +96,15 @@ def aggregate(results_dir: Path) -> dict:
                 "median_final_infidelity": statistics.median(
                     [item["final_infidelity"] for item in items]
                 ),
+                "median_probe_query_count": statistics.median(probe_queries)
+                if probe_queries
+                else None,
+                "median_probe_shot_count": statistics.median(probe_shots)
+                if probe_shots
+                else None,
+                "median_probe_directions_selected": statistics.median(probe_selected)
+                if probe_selected
+                else None,
             }
         )
     return {"rows": len(rows), "groups": summaries}
@@ -188,6 +212,25 @@ SPECTRUM_FIELDS = (
     "k_for_90pct_curvature",
     "k_for_95pct_curvature",
     "k_for_99pct_curvature",
+)
+
+DEVICE_INFORMED_FIELDS = GROUP_FIELDS + (
+    "median_probe_query_count",
+    "median_probe_shot_count",
+    "median_probe_directions_selected",
+)
+
+DEVICE_INFORMED_RECOVERY_FIELDS = (
+    "system",
+    "mismatch",
+    "shots_per_query",
+    "fixed_hessian_success_rate",
+    "widen_only_success_rate",
+    "device_informed_success_rate",
+    "device_informed_delta_vs_fixed",
+    "device_informed_delta_vs_widen_only",
+    "device_informed_median_final_infidelity",
+    "device_informed_median_probe_query_count",
 )
 
 BENCHMARK_RANK = {"one_qubit_x": 3, "two_qubit_cz": 15}
@@ -299,6 +342,105 @@ def spectrum_summary_rows(spectra: list[dict]) -> list[dict]:
             }
         )
     return rows
+
+
+def device_informed_summary_rows(groups: list[dict]) -> list[dict]:
+    methods = {
+        "full_space_nelder_mead",
+        "random_subspace_nelder_mead",
+        "hessian_subspace_nelder_mead",
+        "adaptive_hessian_subspace_nelder_mead",
+        "device_informed_adaptive_hessian_nelder_mead",
+    }
+    return [row for row in groups if row["method"] in methods]
+
+
+def device_informed_recovery_rows(groups: list[dict]) -> list[dict]:
+    rows = []
+    for system in sorted({row["system"] for row in groups}):
+        benchmark_k = BENCHMARK_RANK.get(system)
+        for mismatch in sorted({row["mismatch"] for row in groups if row["system"] == system}):
+            shots_values = sorted(
+                {
+                    row["shots_per_query"]
+                    for row in groups
+                    if row["system"] == system and row["mismatch"] == mismatch
+                }
+            )
+            for shots in shots_values:
+                fixed = _find_group(
+                    groups,
+                    system,
+                    mismatch,
+                    shots,
+                    "hessian_subspace_nelder_mead",
+                    benchmark_k,
+                )
+                widen = _find_group(
+                    groups,
+                    system,
+                    mismatch,
+                    shots,
+                    "adaptive_hessian_subspace_nelder_mead",
+                )
+                informed = _find_group(
+                    groups,
+                    system,
+                    mismatch,
+                    shots,
+                    "device_informed_adaptive_hessian_nelder_mead",
+                )
+                if fixed is None or widen is None or informed is None:
+                    continue
+                rows.append(
+                    {
+                        "system": system,
+                        "mismatch": mismatch,
+                        "shots_per_query": shots,
+                        "fixed_hessian_success_rate": fixed["success_rate"],
+                        "widen_only_success_rate": widen["success_rate"],
+                        "device_informed_success_rate": informed["success_rate"],
+                        "device_informed_delta_vs_fixed": informed["success_rate"]
+                        - fixed["success_rate"],
+                        "device_informed_delta_vs_widen_only": informed["success_rate"]
+                        - widen["success_rate"],
+                        "device_informed_median_final_infidelity": informed[
+                            "median_final_infidelity"
+                        ],
+                        "device_informed_median_probe_query_count": informed[
+                            "median_probe_query_count"
+                        ],
+                    }
+                )
+    return rows
+
+
+def write_device_informed_tables(results_dir: Path, summary: dict | None = None) -> list[Path]:
+    results_dir = Path(results_dir)
+    summary = summary or aggregate(results_dir)
+    tables = results_dir / "summary_tables"
+    tables.mkdir(parents=True, exist_ok=True)
+    summary_path = tables / "device_informed_summary.csv"
+    recovery_path = tables / "device_informed_recovery.csv"
+    _write_csv(summary_path, device_informed_summary_rows(summary["groups"]), DEVICE_INFORMED_FIELDS)
+    _write_csv(
+        recovery_path,
+        device_informed_recovery_rows(summary["groups"]),
+        DEVICE_INFORMED_RECOVERY_FIELDS,
+    )
+    return [summary_path, recovery_path]
+
+
+def _find_group(groups, system, mismatch, shots, method, k=None):
+    for row in groups:
+        if row["system"] != system or row["mismatch"] != mismatch:
+            continue
+        if row["shots_per_query"] != shots or row["method"] != method:
+            continue
+        if k is not None and row["k"] != k:
+            continue
+        return row
+    return None
 
 
 def _write_csv(path: Path, rows: list[dict], fieldnames) -> None:

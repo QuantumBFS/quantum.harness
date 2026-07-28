@@ -18,8 +18,14 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - Strict finite-shot `QueryOnlyDevice` with query and shot accounting.
 - Backend-neutral hardware candidate/job/result records, batch artifact export,
   result ingestion, and a dry-run hardware backend that exposes only counts.
+- Device-informed adaptive subspace probing: paired finite-shot black-box
+  perturbations estimate residual directions when the model Hessian subspace
+  stalls.
 - Model-only transfer, full-space Nelder-Mead, random-subspace Nelder-Mead,
   Hessian-subspace Nelder-Mead, and adaptive Hessian widening.
+- Lightweight invariant/rank probe: one- and two-qubit rows are recomputed from
+  the attempt-004 model-Hessian path, and the three-qubit row is labeled as a
+  local-chart sanity check.
 - Sweeps over search dimension `k`, model-truth gap, shot budget, two system
   sizes, and multiple random seeds.
 - Figure generation for the required query, shot, success, failure, and Hessian
@@ -32,6 +38,8 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - `open_loop.py`: model-only optimization.
 - `hessian.py`: dense Hessian, HVP, and eigenspace utilities.
 - `device.py`: hidden true-device perturbations and query-only interface.
+- `device_subspace.py`: black-box paired probing and residual direction
+  selection for device-informed adaptive recovery.
 - `hardware_adapter.py`: batch hardware boundary, dry-run backend, and
   JSON/CSV/JSONL artifact helpers.
 - `optimizers.py`, `baselines.py`: derivative-free closed-loop methods.
@@ -41,6 +49,11 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - `run_candidate.py`: compact validator-facing export.
 - `run_hardware_dry_run.py`: hardware-style dry run that exports batch
   candidates, pulse payloads, shot-count results, and a summary.
+- `run_device_informed_focus.py`: focused hard-mismatch comparison including
+  the device-informed adaptive method.
+- `invariant_probe.py`, `run_invariant_probe.py`: lightweight `d^2 - 1`
+  invariant/rank probe with explicit evidence labels for model-Hessian smoke
+  rows versus the three-qubit chart sanity check.
 - `slurm/`: conservative array-job scripts for larger CPU/GPU checks.
 
 ## Local Setup
@@ -61,15 +74,19 @@ python3 -m pytest tracks/qcs/solutions/YueYuan/research/attempt_tests -q
 python3 tracks/qcs/solutions/YueYuan/research/validator/self_test.py
 python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_candidate.py --fast --out /tmp/yueyuan-attempt004-candidate.json
 python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_hardware_dry_run.py --out /tmp/yueyuan-attempt004-hardware --shots 256
+python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_device_informed_focus.py --out /tmp/yueyuan-attempt004-device-informed --fast
+python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_invariant_probe.py --out /tmp/yueyuan-attempt004-invariant
 ```
 
 The latest local verification recorded in `REPORT.md` was:
 
-- attempt-004 tests: `25 passed`;
-- broader YueYuan attempt tests: `39 passed`;
+- attempt-004 tests: `31 passed`;
+- broader YueYuan attempt tests: `45 passed`;
 - validator self-test: `"status": "passed"`;
 - fast candidate export: schema version 1, 15 groups;
-- hardware dry run: 7 candidates, 1,792 total shots, `real_hardware: false`.
+- hardware dry run: 7 candidates, 1,792 total shots, `real_hardware: false`;
+- device-informed fast focus: 10 records, 2 device-informed records;
+- invariant probe: 3 rows, including `d=8` local-chart evidence.
 
 ## Hardware-Style Dry Run
 
@@ -93,6 +110,34 @@ This path is intended as a swap point for a real lab/cloud backend: a future
 hardware run can replace `hardware_results.jsonl` with measured counts while
 leaving candidate generation, result ingestion, and objective reconstruction
 unchanged. No committed result claims real hardware execution.
+
+## Device-Informed Adaptive Subspace
+
+`device_subspace.py` adds the method-level recovery mechanism that the fixed and
+widen-only Hessian baselines lacked. Around the current best pulse, it samples
+paired residual perturbations using only finite-shot black-box responses,
+estimates a local curvature proxy, orthonormalizes selected directions against
+the model Hessian basis, and charges every probe query and shot to the same
+closed-loop budget.
+
+`run_device_informed_focus.py --fast` is a small local smoke comparison on known
+hard mismatch cells. It emits `runs.jsonl`, `device_informed_summary.csv`,
+`device_informed_recovery.csv`, and `device_informed_recovery.png`. In the fast
+run, device-informed probing did not reach the target, but it reduced final
+infidelity versus the fixed Hessian, random, and full-space baselines in the two
+tested hard cells while recording a 9-query probing overhead. Larger generated
+sweeps should be kept under ignored results directories.
+
+## Invariant Rank Probe
+
+`run_invariant_probe.py` writes `invariant_rank_probe.csv` and
+`invariant_rank_probe.png`. It records the expected `d^2 - 1` dimensions for
+`d=2`, `d=4`, and `d=8`. The one- and two-qubit entries are recomputed from the
+attempt-004 model-Hessian path and report the smallest dimension capturing 95%
+of curvature plus the curvature captured at the `d^2 - 1` benchmark. The
+three-qubit entry is explicitly labeled `local_unitary_chart`, so it is a
+dimension-counting sanity check rather than a three-qubit closed-loop
+calibration.
 
 ## Smoke Results And Figures
 
@@ -122,6 +167,10 @@ The required boxes from `challenge_113_codex_spec.md` are covered as follows:
   boundary checks are implemented and tested.
 - Hardware-style batch export, count ingestion, dry-run backend, and
   no-real-hardware accounting are implemented and tested.
+- Device-informed residual probing, counted probe overhead, focused comparison,
+  and recovery summaries are implemented and tested.
+- Invariant/rank probe covers model-Hessian smoke checks for `d=2` and `d=4`,
+  plus a labeled `d=8` local-chart sanity check.
 - Model-only, full-space, random-subspace, Hessian-subspace, and adaptive
   Hessian methods are implemented with shared optimizer family, query budget,
   shots, target, bounds, and seed protocol.
