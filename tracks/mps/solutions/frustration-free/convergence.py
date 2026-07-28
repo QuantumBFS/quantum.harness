@@ -18,6 +18,7 @@ from pathlib import Path
 import platform
 import signal
 import shutil
+import statistics
 import subprocess
 import tempfile
 import threading
@@ -27,7 +28,7 @@ from typing import Any, Callable, Sequence
 from jsonschema import Draft202012Validator
 
 
-MODULE_VERSION = "4.0.0"
+MODULE_VERSION = "5.0.0"
 SOFTWARE_VERSION = "challenge81-frustration-free-2"
 PLAN_SCHEMA_VERSION = 1
 CELL_SCHEMA_VERSION = 1
@@ -1115,9 +1116,14 @@ def resource_sha256(resources: dict[str, Any]) -> str:
 def validate_resources(resources: Any, plan: dict[str, Any]) -> None:
     if not isinstance(resources, dict):
         raise TypeError("resources must be a JSON object")
-    validate_artifact_schema(resources, "resourceEstimate")
-    if resources.get("artifact_type") != "resource_estimate":
+    artifact_type = resources.get("artifact_type")
+    definitions = {
+        "resource_estimate": "resourceEstimate",
+        "calibrated_resources": "calibratedResources",
+    }
+    if artifact_type not in definitions:
         raise ValueError("unsupported resource artifact type")
+    validate_artifact_schema(resources, definitions[artifact_type])
     if resources.get("generator") != {
         "name": "convergence.py",
         "version": MODULE_VERSION,
@@ -1127,6 +1133,28 @@ def validate_resources(resources: Any, plan: dict[str, Any]) -> None:
         raise ValueError("unsupported or stale resource software version")
     if resources.get("plan_sha256") != plan["plan_sha256"]:
         raise ValueError("resources plan SHA256 does not match plan")
+    if artifact_type == "calibrated_resources":
+        _digest(resources.get("base_resource_sha256"), "base resource SHA256")
+        _digest(resources.get("calibration_sha256"), "calibration SHA256")
+        cell_ids = [cell["cell_id"] for cell in resources["cells"]]
+        expected_cell_ids = [cell["cell_id"] for cell in plan["cells"]]
+        if len(set(cell_ids)) != len(cell_ids) or set(cell_ids) != set(
+            expected_cell_ids
+        ):
+            raise ValueError("calibrated resource cells do not match plan")
+        for cell in resources["cells"]:
+            if cell["recommended_wall_seconds"] < math.ceil(
+                cell["predicted_wall_seconds"]
+            ):
+                raise ValueError(
+                    "calibrated wall recommendation is not conservative"
+                )
+        if resources["allocation"]["memory_bytes"] < resources[
+            "observed_resources"
+        ]["max_peak_rss_bytes"]:
+            raise ValueError(
+                "calibrated memory allocation is below observed peak RSS"
+            )
     if _digest(resources.get("resource_sha256"), "resource SHA256") != resource_sha256(
         resources
     ):
@@ -2376,6 +2404,458 @@ def estimate_plan_resources(plan: dict[str, Any]) -> dict[str, Any]:
     return artifact
 
 
+def calibration_sha256(calibration: dict[str, Any]) -> str:
+    payload = {
+        key: value
+        for key, value in calibration.items()
+        if key != "calibration_sha256"
+    }
+    return _sha256(_canonical_json(payload))
+
+
+def _sample_stddev(values: Sequence[float]) -> float:
+    return statistics.stdev(values) if len(values) > 1 else 0.0
+
+
+def _validate_calibration_telemetry(
+    plan: dict[str, Any], telemetry: Sequence[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    if isinstance(telemetry, (str, bytes)) or not isinstance(telemetry, Sequence):
+        raise TypeError("calibration telemetry must be a sequence")
+    if len(telemetry) < 2:
+        raise ValueError("calibration requires at least two telemetry samples")
+    cells = {cell["cell_id"]: cell for cell in plan["cells"]}
+    records = []
+    runtime_identities = set()
+    source_identities = set()
+    checkpoint_identities = set()
+    required = {
+        "schema_version",
+        "plan_sha256",
+        "cell_id",
+        "input_sha256",
+        "request_sha256",
+        "checkpoint_sha256",
+        "source_sha256",
+        "runtime_sha256",
+        "runtime",
+        "checkpoint",
+        "slurm",
+    }
+    for position, raw in enumerate(telemetry):
+        if not isinstance(raw, dict) or set(raw) != required:
+            raise ValueError(
+                f"calibration telemetry sample {position} keys do not match schema"
+            )
+        record = copy.deepcopy(raw)
+        if record["schema_version"] != 1:
+            raise ValueError("calibration telemetry schema version is unsupported")
+        cell = cells.get(record["cell_id"])
+        if cell is None:
+            raise ValueError("calibration telemetry has mixed or unplanned cell identity")
+        request = _runner_request_for_cell(cell)
+        expected_request_sha256 = _sha256(_canonical_json(request) + b"\n")
+        expected_source_sha256 = _sha256(
+            _canonical_json(cell["provenance"]["source_sha256"])
+        )
+        expected = {
+            "plan_sha256": plan["plan_sha256"],
+            "input_sha256": cell["input_sha256"],
+            "request_sha256": expected_request_sha256,
+            "source_sha256": expected_source_sha256,
+        }
+        for name, value in expected.items():
+            if record[name] != value:
+                raise ValueError(
+                    f"calibration telemetry has mixed {name} identity"
+                )
+        checkpoint_sha256 = _digest(
+            record["checkpoint_sha256"], "checkpoint SHA256"
+        )
+        if checkpoint_sha256 in checkpoint_identities:
+            raise ValueError("calibration telemetry repeats a checkpoint identity")
+        checkpoint_identities.add(checkpoint_sha256)
+        runtime_sha256 = _digest(record["runtime_sha256"], "runtime SHA256")
+        if runtime_sha256 != _sha256(_canonical_json(record["runtime"])):
+            raise ValueError("calibration telemetry runtime identity mismatch")
+        runtime_identities.add(runtime_sha256)
+        source_identities.add(record["source_sha256"])
+
+        checkpoint = record["checkpoint"]
+        if not isinstance(checkpoint, dict) or set(checkpoint) != {
+            "validated",
+            "completed_beta",
+            "completed_steps",
+            "max_link_dimension",
+            "write_seconds",
+            "read_seconds",
+            "size_bytes",
+        }:
+            raise ValueError("checkpoint telemetry keys do not match schema")
+        if checkpoint["validated"] is not True:
+            raise ValueError("checkpoint telemetry was not validated")
+        _real(checkpoint["completed_beta"], "completed beta", positive=True)
+        _positive_integer(checkpoint["completed_steps"], "completed steps")
+        _positive_integer(
+            checkpoint["max_link_dimension"], "maximum link dimension"
+        )
+        for name in ("write_seconds", "read_seconds"):
+            value = _real(checkpoint[name], f"checkpoint {name}")
+            if value < 0:
+                raise ValueError(f"checkpoint {name} must be nonnegative")
+        _positive_integer(checkpoint["size_bytes"], "checkpoint size")
+
+        slurm = record["slurm"]
+        if not isinstance(slurm, dict) or set(slurm) != {
+            "validated",
+            "job_id",
+            "elapsed_seconds",
+            "allocated_cpus",
+            "allocated_memory_bytes",
+            "max_rss_bytes",
+            "julia_threads",
+            "blas_threads",
+        }:
+            raise ValueError("Slurm telemetry keys do not match schema")
+        if slurm["validated"] is not True:
+            raise ValueError("Slurm telemetry was not validated")
+        if not isinstance(slurm["job_id"], str) or not slurm["job_id"]:
+            raise ValueError("Slurm job identity is invalid")
+        _real(slurm["elapsed_seconds"], "Slurm elapsed seconds", positive=True)
+        for name in (
+            "allocated_cpus",
+            "allocated_memory_bytes",
+            "max_rss_bytes",
+            "julia_threads",
+            "blas_threads",
+        ):
+            _positive_integer(slurm[name], f"Slurm {name}")
+        records.append(record)
+    if len(runtime_identities) != 1 or len(source_identities) != 1:
+        raise ValueError("calibration telemetry contains mixed source/runtime identities")
+    return records
+
+
+def validate_calibration(
+    calibration: Any, plan: dict[str, Any]
+) -> None:
+    if not isinstance(calibration, dict):
+        raise TypeError("calibration must be a JSON object")
+    validate_artifact_schema(calibration, "runtimeCalibration")
+    if calibration.get("generator") != {
+        "name": "convergence.py",
+        "version": MODULE_VERSION,
+    }:
+        raise ValueError("unsupported or stale calibration generator version")
+    if calibration.get("software_version") != SOFTWARE_VERSION:
+        raise ValueError("unsupported or stale calibration software version")
+    if calibration.get("plan_sha256") != plan["plan_sha256"]:
+        raise ValueError("calibration plan SHA256 does not match plan")
+    if _digest(
+        calibration.get("calibration_sha256"), "calibration SHA256"
+    ) != calibration_sha256(calibration):
+        raise ValueError("calibration SHA256 mismatch")
+    expected_source = {
+        _sha256(_canonical_json(cell["provenance"]["source_sha256"]))
+        for cell in plan["cells"]
+    }
+    if calibration["identity"]["source_sha256"] not in expected_source:
+        raise ValueError("calibration source identity does not match plan")
+
+
+def calibrate_plan_resources(
+    plan: dict[str, Any],
+    base_resources: dict[str, Any],
+    telemetry: Sequence[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Derive hash-bound calibration and resources from validated telemetry."""
+
+    validate_plan(plan)
+    validate_resources(base_resources, plan)
+    if base_resources["artifact_type"] != "resource_estimate":
+        raise ValueError("calibration requires the original resource estimate")
+    records = _validate_calibration_telemetry(plan, telemetry)
+    samples = []
+    for record in records:
+        checkpoint = record["checkpoint"]
+        slurm = record["slurm"]
+        elapsed = float(slurm["elapsed_seconds"])
+        completed_beta = float(checkpoint["completed_beta"])
+        completed_steps = int(checkpoint["completed_steps"])
+        samples.append(
+            {
+                "telemetry_sha256": _sha256(_canonical_json(record)),
+                "cell_id": record["cell_id"],
+                "input_sha256": record["input_sha256"],
+                "request_sha256": record["request_sha256"],
+                "checkpoint_sha256": record["checkpoint_sha256"],
+                "max_link_dimension": checkpoint["max_link_dimension"],
+                "allocation": {
+                    "cpus": slurm["allocated_cpus"],
+                    "memory_bytes": slurm["allocated_memory_bytes"],
+                },
+                "rates": {
+                    "completed_beta_per_second": completed_beta / elapsed,
+                    "steps_per_second": completed_steps / elapsed,
+                    "seconds_per_step": elapsed / completed_steps,
+                },
+                "checkpoint_overhead": {
+                    "write_seconds": checkpoint["write_seconds"],
+                    "read_seconds": checkpoint["read_seconds"],
+                    "size_bytes": checkpoint["size_bytes"],
+                },
+                "actual_runtime": {
+                    "julia_threads": slurm["julia_threads"],
+                    "blas_threads": slurm["blas_threads"],
+                    "peak_rss_bytes": slurm["max_rss_bytes"],
+                },
+            }
+        )
+    samples.sort(
+        key=lambda item: (
+            item["allocation"]["cpus"],
+            item["allocation"]["memory_bytes"],
+            item["cell_id"],
+            item["checkpoint_sha256"],
+        )
+    )
+
+    grouped_links: dict[str, list[float]] = {}
+    grouped_allocations: dict[tuple[int, int], list[dict[str, Any]]] = {}
+    for sample in samples:
+        grouped_links.setdefault(str(sample["max_link_dimension"]), []).append(
+            sample["rates"]["seconds_per_step"]
+        )
+        allocation_key = (
+            sample["allocation"]["cpus"],
+            sample["allocation"]["memory_bytes"],
+        )
+        grouped_allocations.setdefault(allocation_key, []).append(sample)
+    link_dimension_groups = {}
+    for dimension, values in sorted(grouped_links.items(), key=lambda item: int(item[0])):
+        link_dimension_groups[dimension] = {
+            "sample_count": len(values),
+            "mean_seconds_per_step": statistics.fmean(values),
+            "sample_stddev_seconds_per_step": _sample_stddev(values),
+            "min_seconds_per_step": min(values),
+            "max_seconds_per_step": max(values),
+        }
+    allocation_rates = []
+    for (cpus, memory_bytes), allocation_samples in sorted(grouped_allocations.items()):
+        rates = [item["rates"]["steps_per_second"] for item in allocation_samples]
+        allocation_rates.append(
+            {
+                "cpus": cpus,
+                "memory_bytes": memory_bytes,
+                "sample_count": len(rates),
+                "mean_steps_per_second": statistics.fmean(rates),
+            }
+        )
+    best_throughput = max(
+        item["mean_steps_per_second"] for item in allocation_rates
+    )
+    eligible = [
+        item
+        for item in allocation_rates
+        if item["mean_steps_per_second"] >= 0.9 * best_throughput
+    ]
+    selected = min(eligible, key=lambda item: (item["cpus"], item["memory_bytes"]))
+    selected_samples = [
+        sample
+        for sample in samples
+        if sample["allocation"]["cpus"] == selected["cpus"]
+        and sample["allocation"]["memory_bytes"] == selected["memory_bytes"]
+    ]
+    selected_seconds = [
+        sample["rates"]["seconds_per_step"] for sample in selected_samples
+    ]
+    mean_seconds = statistics.fmean(selected_seconds)
+    stddev_seconds = _sample_stddev(selected_seconds)
+    all_seconds = [sample["rates"]["seconds_per_step"] for sample in samples]
+    conservative_stddev_seconds = max(
+        stddev_seconds, _sample_stddev(all_seconds)
+    )
+    writes = [
+        sample["checkpoint_overhead"]["write_seconds"] for sample in samples
+    ]
+    reads = [sample["checkpoint_overhead"]["read_seconds"] for sample in samples]
+    sizes = [sample["checkpoint_overhead"]["size_bytes"] for sample in samples]
+    peak_rss = [
+        sample["actual_runtime"]["peak_rss_bytes"] for sample in samples
+    ]
+    julia_threads = sorted(
+        {sample["actual_runtime"]["julia_threads"] for sample in samples}
+    )
+    blas_threads = sorted(
+        {sample["actual_runtime"]["blas_threads"] for sample in samples}
+    )
+    selected_julia_threads = sorted(
+        {
+            sample["actual_runtime"]["julia_threads"]
+            for sample in selected_samples
+        }
+    )
+    selected_blas_threads = sorted(
+        {
+            sample["actual_runtime"]["blas_threads"]
+            for sample in selected_samples
+        }
+    )
+    runtime_sha256 = records[0]["runtime_sha256"]
+    source_sha256 = records[0]["source_sha256"]
+    calibration = {
+        "schema_version": 1,
+        "artifact_type": "runtime_calibration",
+        "generator": {"name": "convergence.py", "version": MODULE_VERSION},
+        "software_version": SOFTWARE_VERSION,
+        "plan_sha256": plan["plan_sha256"],
+        "base_resource_sha256": base_resources["resource_sha256"],
+        "identity": {
+            "source_sha256": source_sha256,
+            "runtime_sha256": runtime_sha256,
+            "telemetry_sha256": _sha256(_canonical_json(records)),
+        },
+        "samples": samples,
+        "link_dimension_groups": link_dimension_groups,
+        "checkpoint_overhead": {
+            "mean_write_seconds": statistics.fmean(writes),
+            "max_write_seconds": max(writes),
+            "mean_read_seconds": statistics.fmean(reads),
+            "max_read_seconds": max(reads),
+            "max_size_bytes": max(sizes),
+        },
+        "observed_resources": {
+            "max_peak_rss_bytes": max(peak_rss),
+            "actual_julia_threads": julia_threads,
+            "actual_blas_threads": blas_threads,
+        },
+        "selected_allocation": copy.deepcopy(selected),
+        "selection_policy": {
+            "rule": "smallest_cpu_then_memory_allocation_within_fraction_of_best",
+            "throughput_fraction_of_best": 0.9,
+            "best_mean_steps_per_second": best_throughput,
+        },
+        "uncertainty": {
+            "basis": "measured_sample_dispersion",
+            "sample_count": len(samples),
+            "seconds_per_step_sample_stddev": _sample_stddev(all_seconds),
+            "selected_seconds_per_step_mean": mean_seconds,
+            "selected_seconds_per_step_sample_stddev": stddev_seconds,
+            "conservative_standard_deviations": 2.0,
+        },
+    }
+    calibration["calibration_sha256"] = calibration_sha256(calibration)
+
+    overhead_mean = statistics.fmean(writes) + statistics.fmean(reads)
+    overhead_upper = max(writes) + max(reads)
+    calibrated_cells = []
+    for base_cell in base_resources["cells"]:
+        work_steps = base_cell["steps"] * base_cell["branch_equivalents"]
+        predicted = work_steps * mean_seconds + overhead_mean
+        recommended = math.ceil(
+            work_steps * (mean_seconds + 2.0 * conservative_stddev_seconds)
+            + overhead_upper
+        )
+        calibrated_cells.append(
+            {
+                "cell_id": base_cell["cell_id"],
+                "work_steps": work_steps,
+                "predicted_wall_seconds": predicted,
+                "wall_uncertainty_seconds": (
+                    2.0 * conservative_stddev_seconds * work_steps
+                    + max(0.0, overhead_upper - overhead_mean)
+                ),
+                "recommended_wall_seconds": max(
+                    math.ceil(predicted), recommended
+                ),
+                "recommended_memory_bytes": math.ceil(
+                    max(peak_rss) * MEMORY_SAFETY_FACTOR
+                ),
+            }
+        )
+    calibrated = {
+        "schema_version": 1,
+        "artifact_type": "calibrated_resources",
+        "generator": {"name": "convergence.py", "version": MODULE_VERSION},
+        "software_version": SOFTWARE_VERSION,
+        "plan_sha256": plan["plan_sha256"],
+        "base_resource_sha256": base_resources["resource_sha256"],
+        "calibration_sha256": calibration["calibration_sha256"],
+        "allocation": {
+            "cpus": selected["cpus"],
+            "memory_bytes": max(
+                selected["memory_bytes"],
+                math.ceil(max(peak_rss) * MEMORY_SAFETY_FACTOR),
+            ),
+            "actual_julia_threads": selected_julia_threads,
+            "actual_blas_threads": selected_blas_threads,
+        },
+        "observed_resources": copy.deepcopy(calibration["observed_resources"]),
+        "uncertainty": copy.deepcopy(calibration["uncertainty"]),
+        "cells": calibrated_cells,
+    }
+    calibrated["resource_sha256"] = resource_sha256(calibrated)
+    validate_artifact_schema(calibration, "runtimeCalibration")
+    validate_artifact_schema(calibrated, "calibratedResources")
+    return calibration, calibrated
+
+
+def publish_calibrated_resources(
+    run_directory: str | os.PathLike[str],
+    *,
+    telemetry: Sequence[dict[str, Any]],
+) -> dict[str, Path]:
+    """Publish immutable calibration files without changing the plan envelope."""
+
+    root = Path(run_directory).resolve()
+    completion_path = root / "completion.json"
+    if not completion_path.is_file() or completion_path.is_symlink():
+        raise ValueError("published completion must be a regular non-symlink file")
+    with completion_path.open("rb") as lock_stream:
+        fcntl.flock(lock_stream.fileno(), fcntl.LOCK_EX)
+        try:
+            plan, base_resources, _completion = validate_published_plan_run(root)
+            calibration, calibrated = calibrate_plan_resources(
+                plan, base_resources, telemetry
+            )
+            calibration_path = root / "calibration.json"
+            resources_path = root / "resources-calibrated.json"
+            existing = [
+                path.exists() or path.is_symlink()
+                for path in (calibration_path, resources_path)
+            ]
+            if any(existing):
+                if not all(existing):
+                    raise ValueError(
+                        "immutable calibration publication is incomplete"
+                    )
+                published_calibration = _strict_canonical_json_file(
+                    calibration_path, "published calibration"
+                )
+                published_resources = _strict_canonical_json_file(
+                    resources_path, "published calibrated resources"
+                )
+                validate_calibration(published_calibration, plan)
+                validate_resources(published_resources, plan)
+                if (
+                    published_calibration != calibration
+                    or published_resources != calibrated
+                ):
+                    raise ValueError(
+                        "immutable calibration files contain different telemetry"
+                    )
+            else:
+                _write_canonical(calibration_path, calibration)
+                _write_canonical(resources_path, calibrated)
+                _fsync_directory(root)
+            return {
+                "calibration": calibration_path,
+                "resources": resources_path,
+            }
+        finally:
+            fcntl.flock(lock_stream.fileno(), fcntl.LOCK_UN)
+
+
 def _load_json(path: Path, name: str) -> Any:
     return acceptance.strict_json_loads(
         path.read_text(encoding="utf-8"), name=name
@@ -2388,6 +2868,8 @@ PLAN_RUN_ALLOWED_ENTRIES = {
     "cells",
     "checkpoints",
     "analysis.json",
+    "calibration.json",
+    "resources-calibrated.json",
 }
 
 
@@ -2457,6 +2939,30 @@ def validate_published_plan_run(
         completion["completion_sha256"], "plan completion SHA256"
     ) != _plan_completion_sha256(completion):
         raise ValueError("plan completion SHA256 mismatch")
+    calibration_path = root / "calibration.json"
+    calibrated_path = root / "resources-calibrated.json"
+    calibration_entries = [
+        path.exists() or path.is_symlink()
+        for path in (calibration_path, calibrated_path)
+    ]
+    if any(calibration_entries):
+        if not all(calibration_entries):
+            raise ValueError("published calibration artifact pair is incomplete")
+        calibration = _strict_canonical_json_file(
+            calibration_path, "published calibration"
+        )
+        calibrated = _strict_canonical_json_file(
+            calibrated_path, "published calibrated resources"
+        )
+        validate_calibration(calibration, plan)
+        validate_resources(calibrated, plan)
+        if (
+            calibration["base_resource_sha256"] != resources["resource_sha256"]
+            or calibrated["base_resource_sha256"] != resources["resource_sha256"]
+            or calibrated["calibration_sha256"]
+            != calibration["calibration_sha256"]
+        ):
+            raise ValueError("published calibration bindings mismatch")
     return plan, resources, completion
 
 
@@ -2853,6 +3359,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     analyze_parser.add_argument("--run-directory", type=Path, required=True)
     analyze_parser.add_argument("--output", type=Path)
     analyze_parser.add_argument("--allow-incomplete", action="store_true")
+    calibrate_parser = subparsers.add_parser("calibrate")
+    calibrate_parser.add_argument("--plan", type=Path, required=True)
+    calibrate_parser.add_argument("--run-directory", type=Path, required=True)
+    calibrate_parser.add_argument("--telemetry", type=Path, required=True)
     validate_parser = subparsers.add_parser("validate-existing")
     validate_parser.add_argument("--plan", type=Path, required=True)
     validate_parser.add_argument("--resources", type=Path)
@@ -2899,6 +3409,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     plan = _load_json(args.plan, "convergence plan")
     validate_plan(plan)
+    if args.command == "calibrate":
+        run_root = args.run_directory.resolve()
+        if args.plan.resolve() != (run_root / "plan.json").resolve():
+            raise ValueError(
+                "calibration requires the published bundled plan.json"
+            )
+        telemetry = _load_json(args.telemetry, "calibration telemetry")
+        outputs = publish_calibrated_resources(run_root, telemetry=telemetry)
+        calibration = _load_json(outputs["calibration"], "published calibration")
+        resources = _load_json(
+            outputs["resources"], "published calibrated resources"
+        )
+        print(
+            f"calibration_sha256={calibration['calibration_sha256']} "
+            f"resource_sha256={resources['resource_sha256']} "
+            f"calibration={outputs['calibration']} "
+            f"resources={outputs['resources']}",
+            flush=True,
+        )
+        return 0
     if args.command == "estimate":
         estimate = estimate_plan_resources(plan)
         if args.output:
@@ -2920,13 +3450,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             _published_plan, bundled_resources, _completion = (
                 validate_published_plan_run(run_root, expected_plan=plan)
             )
-            if args.resources is not None and args.resources.resolve() != (
-                run_root / "resources.json"
-            ).resolve():
-                raise ValueError(
-                    "production execution requires bundled resources.json"
-                )
             resources = bundled_resources
+            if args.resources is not None:
+                requested = args.resources.resolve()
+                base_path = (run_root / "resources.json").resolve()
+                calibrated_path = (
+                    run_root / "resources-calibrated.json"
+                ).resolve()
+                if requested == calibrated_path:
+                    resources = _load_json(
+                        requested, "calibrated resource estimate"
+                    )
+                    validate_resources(resources, plan)
+                elif requested != base_path:
+                    raise ValueError(
+                        "production execution requires bundled resources.json "
+                        "or resources-calibrated.json"
+                    )
         elif args.resources is not None:
             resources = _load_json(args.resources, "resource estimate")
         if args.command == "run-cell":

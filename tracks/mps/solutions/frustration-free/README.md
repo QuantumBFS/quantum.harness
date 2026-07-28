@@ -233,6 +233,54 @@ that status for scheduler requeue policy. Exit 75 without a fresh validated
 checkpoint is a hard failure. RSS limits and scientific/diagnostic failures
 remain nonretryable.
 
+After the 4/8/16-thread calibration jobs finish, export one strict JSON
+telemetry record per validated checkpoint/Slurm observation. Each record binds
+the plan, cell input, runner request, checkpoint generation, complete source
+set, and runtime identity. Its checkpoint section contains completed beta,
+completed steps, observed maximum link dimension, write/read time, and size;
+its Slurm section contains elapsed time, allocation, MaxRSS, and the Julia/BLAS
+thread counts actually observed. Records with a false validation flag,
+unexpected fields, invalid values, duplicate checkpoints, or mixed
+plan/input/request/source/runtime identities are rejected.
+
+Publish the calibration without changing `resources.json`, `completion.json`,
+or either completion/current pointer:
+
+```bash
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py calibrate \
+  --plan "$RUN/plan.json" --run-directory "$RUN" \
+  --telemetry "$RUN/slurm-calibration-telemetry.json"
+```
+
+This creates canonical, hash-bound `calibration.json` and
+`resources-calibrated.json`. Existing identical files are revalidated and
+reused; different or partial files fail closed. `calibration.json` reports
+completed-beta/second and steps/second, time-per-step groups by observed
+maximum link dimension, checkpoint overhead and size, MaxRSS, actual thread
+counts, and measured dispersion. The chosen allocation is the smallest CPU
+then memory allocation whose mean throughput is at least 90% of the best
+observed mean. Per-cell wall recommendations add a two-standard-deviation
+measured margin and worst observed checkpoint overhead.
+
+Production use of the calibrated allocation is explicit:
+
+```bash
+CALIBRATED_ACK="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["resource_sha256"])' \
+  "$RUN/resources-calibrated.json")"
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py run-cell \
+  --plan "$RUN/plan.json" --run-directory "$RUN" \
+  --resources "$RUN/resources-calibrated.json" \
+  --acknowledge-resources "$CALIBRATED_ACK" \
+  --execution-target cluster \
+  --julia-project "$PWD/tracks/mps/solutions/frustration-free/julia" \
+  --cell-index 0
+```
+
+The exact `resource_sha256` is the required production acknowledgment; the
+original estimate's hash cannot acknowledge calibrated resources.
+
 **Neither beta=16 nor beta=32 is accepted from one setting.** Results remain
 unaccepted until controlled bath-size, timestep, and maxdim comparisons all
 meet their named tolerances. The bath claim additionally requires the complete

@@ -37,12 +37,16 @@ def test_machine_readable_schema_covers_plan_cell_and_analysis():
         "completedCell",
         "convergenceAnalysis",
         "resourceEstimate",
+        "runtimeCalibration",
+        "calibratedResources",
     }
     assert schema["oneOf"] == [
         {"$ref": "#/$defs/convergencePlan"},
         {"$ref": "#/$defs/completedCell"},
         {"$ref": "#/$defs/convergenceAnalysis"},
         {"$ref": "#/$defs/resourceEstimate"},
+        {"$ref": "#/$defs/runtimeCalibration"},
+        {"$ref": "#/$defs/calibratedResources"},
     ]
 
 
@@ -2317,3 +2321,262 @@ def test_tiny_real_julia_tdvp_only_pilot(tmp_path):
     else:
         assert cell["resources"]["peak_rss_bytes"] is None
         assert cell["resources"]["peak_rss_method"] is None
+
+
+def _calibration_telemetry(plan):
+    cell = plan["cells"][0]
+    source_sha256 = convergence._sha256(
+        convergence._canonical_json(cell["provenance"]["source_sha256"])
+    )
+    runtime = {
+        "julia_environment_sha256": cell["provenance"][
+            "julia_environment_sha256"
+        ],
+        "julia_version": "1.11.7",
+        "blas_vendor": "openblas",
+    }
+    runtime_sha256 = convergence._sha256(
+        convergence._canonical_json(runtime)
+    )
+    request_sha256 = convergence._sha256(
+        convergence._canonical_json(convergence._runner_request_for_cell(cell))
+        + b"\n"
+    )
+    records = []
+    for index, (
+        cpus,
+        seconds,
+        completed_beta,
+        completed_steps,
+        max_link_dimension,
+        rss,
+    ) in enumerate(
+        [
+            (4, 98.0, 4.0, 20, 64, 2_000_000_000),
+            (4, 100.0, 4.0, 20, 64, 2_100_000_000),
+            (8, 92.0, 4.0, 20, 128, 2_500_000_000),
+            (16, 90.0, 4.0, 20, 128, 3_000_000_000),
+        ]
+    ):
+        records.append(
+            {
+                "schema_version": 1,
+                "plan_sha256": plan["plan_sha256"],
+                "cell_id": cell["cell_id"],
+                "input_sha256": cell["input_sha256"],
+                "request_sha256": request_sha256,
+                "checkpoint_sha256": f"{index + 1:064x}",
+                "source_sha256": source_sha256,
+                "runtime_sha256": runtime_sha256,
+                "runtime": runtime,
+                "checkpoint": {
+                    "validated": True,
+                    "completed_beta": completed_beta,
+                    "completed_steps": completed_steps,
+                    "max_link_dimension": max_link_dimension,
+                    "write_seconds": 2.0 + index,
+                    "read_seconds": 1.0 + index / 2,
+                    "size_bytes": 10_000_000 + index,
+                },
+                "slurm": {
+                    "validated": True,
+                    "job_id": str(1000 + index),
+                    "elapsed_seconds": seconds,
+                    "allocated_cpus": cpus,
+                    "allocated_memory_bytes": 8 * 1024**3,
+                    "max_rss_bytes": rss,
+                    "julia_threads": cpus,
+                    "blas_threads": 1,
+                },
+            }
+        )
+    return records
+
+
+def test_calibration_derives_rates_groups_overheads_and_conservative_resources():
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="production",
+    )
+    resources = convergence.estimate_plan_resources(plan)
+
+    calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, resources, _calibration_telemetry(plan)
+    )
+
+    assert calibration["artifact_type"] == "runtime_calibration"
+    assert calibration["calibration_sha256"] == convergence.calibration_sha256(
+        calibration
+    )
+    assert [sample["allocation"]["cpus"] for sample in calibration["samples"]] == [
+        4,
+        4,
+        8,
+        16,
+    ]
+    assert calibration["samples"][0]["rates"] == {
+        "completed_beta_per_second": pytest.approx(4.0 / 98.0),
+        "steps_per_second": pytest.approx(20.0 / 98.0),
+        "seconds_per_step": pytest.approx(98.0 / 20.0),
+    }
+    assert set(calibration["link_dimension_groups"]) == {"64", "128"}
+    assert calibration["checkpoint_overhead"]["max_size_bytes"] == 10_000_003
+    assert calibration["checkpoint_overhead"]["max_write_seconds"] == 5.0
+    assert calibration["checkpoint_overhead"]["max_read_seconds"] == 2.5
+    assert calibration["observed_resources"]["max_peak_rss_bytes"] == 3_000_000_000
+    assert calibration["observed_resources"]["actual_julia_threads"] == [4, 8, 16]
+    assert calibration["observed_resources"]["actual_blas_threads"] == [1]
+    assert calibration["selected_allocation"]["cpus"] == 4
+    assert calibration["selection_policy"]["throughput_fraction_of_best"] == 0.9
+    assert calibration["uncertainty"]["seconds_per_step_sample_stddev"] > 0
+
+    assert calibrated["artifact_type"] == "calibrated_resources"
+    assert calibrated["plan_sha256"] == plan["plan_sha256"]
+    assert calibrated["base_resource_sha256"] == resources["resource_sha256"]
+    assert calibrated["calibration_sha256"] == calibration["calibration_sha256"]
+    assert calibrated["resource_sha256"] == convergence.resource_sha256(calibrated)
+    assert calibrated["allocation"]["cpus"] == 4
+    assert calibrated["cells"][0]["recommended_wall_seconds"] >= (
+        calibrated["cells"][0]["predicted_wall_seconds"]
+    )
+    assert calibrated["uncertainty"]["basis"] == "measured_sample_dispersion"
+
+
+def test_calibration_rejects_mixed_plan_source_runtime_and_request_identities():
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="production",
+    )
+    resources = convergence.estimate_plan_resources(plan)
+    for field in (
+        "plan_sha256",
+        "input_sha256",
+        "request_sha256",
+        "source_sha256",
+        "runtime_sha256",
+    ):
+        telemetry = _calibration_telemetry(plan)
+        telemetry[-1][field] = "f" * 64
+        with pytest.raises(ValueError, match="identity|mixed"):
+            convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+
+def test_calibration_publication_is_immutable_and_preserves_original_bundle(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="production",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    resources_before = (run / "resources.json").read_bytes()
+    completion_before = (run / "completion.json").read_bytes()
+    pointer_before = (tmp_path / "current.json").read_bytes()
+
+    result = convergence.publish_calibrated_resources(
+        run, telemetry=_calibration_telemetry(plan)
+    )
+
+    assert result == {
+        "calibration": run / "calibration.json",
+        "resources": run / "resources-calibrated.json",
+    }
+    calibration = json.loads(result["calibration"].read_text(encoding="utf-8"))
+    calibrated = json.loads(result["resources"].read_text(encoding="utf-8"))
+    convergence.validate_calibration(calibration, plan)
+    convergence.validate_resources(calibrated, plan)
+    assert (run / "resources.json").read_bytes() == resources_before
+    assert (run / "completion.json").read_bytes() == completion_before
+    assert (tmp_path / "current.json").read_bytes() == pointer_before
+    assert (
+        convergence.publish_calibrated_resources(
+            run, telemetry=_calibration_telemetry(plan)
+        )
+        == result
+    )
+    changed = _calibration_telemetry(plan)
+    changed[0]["slurm"]["elapsed_seconds"] += 1
+    with pytest.raises(ValueError, match="immutable|different"):
+        convergence.publish_calibrated_resources(run, telemetry=changed)
+
+
+def test_production_accepts_only_explicit_calibrated_resource_acknowledgment(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="production",
+    )
+    base = convergence.estimate_plan_resources(plan)
+    _calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, base, _calibration_telemetry(plan)
+    )
+
+    with pytest.raises(ValueError, match="acknowledgment"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda cell, _stage: _solver_result(cell),
+            julia_project=SOLUTION_DIR / "julia",
+            resources=calibrated,
+            resource_acknowledgment=base["resource_sha256"],
+        )
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda cell, _stage: _solver_result(cell),
+        julia_project=SOLUTION_DIR / "julia",
+        resources=calibrated,
+        resource_acknowledgment=calibrated["resource_sha256"],
+    )
+    assert result["action"] == "completed"
+
+
+def test_calibrate_cli_publishes_fixed_artifacts_without_advancing_pointer(
+    tmp_path, capsys
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="production",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    telemetry_path = tmp_path / "telemetry.json"
+    telemetry_path.write_text(
+        json.dumps(_calibration_telemetry(plan)), encoding="utf-8"
+    )
+    pointer_before = (tmp_path / "current.json").read_bytes()
+
+    status = convergence.main(
+        [
+            "calibrate",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(run),
+            "--telemetry",
+            str(telemetry_path),
+        ]
+    )
+
+    assert status == 0
+    assert (run / "calibration.json").is_file()
+    assert (run / "resources-calibrated.json").is_file()
+    assert (tmp_path / "current.json").read_bytes() == pointer_before
+    output = capsys.readouterr().out
+    assert "calibration_sha256=" in output
+    assert "resource_sha256=" in output

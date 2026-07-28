@@ -6,7 +6,9 @@
     {"$ref": "#/$defs/convergencePlan"},
     {"$ref": "#/$defs/completedCell"},
     {"$ref": "#/$defs/convergenceAnalysis"},
-    {"$ref": "#/$defs/resourceEstimate"}
+    {"$ref": "#/$defs/resourceEstimate"},
+    {"$ref": "#/$defs/runtimeCalibration"},
+    {"$ref": "#/$defs/calibratedResources"}
   ],
   "$defs": {
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
@@ -601,6 +603,185 @@
           }
         },
         "policy": {"type": "string"}, "analysis_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "calibrationRates": {
+      "type": "object", "additionalProperties": false,
+      "required": ["completed_beta_per_second", "steps_per_second", "seconds_per_step"],
+      "properties": {
+        "completed_beta_per_second": {"type": "number", "exclusiveMinimum": 0},
+        "steps_per_second": {"type": "number", "exclusiveMinimum": 0},
+        "seconds_per_step": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "calibrationSample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["telemetry_sha256", "cell_id", "input_sha256", "request_sha256", "checkpoint_sha256", "max_link_dimension", "allocation", "rates", "checkpoint_overhead", "actual_runtime"],
+      "properties": {
+        "telemetry_sha256": {"$ref": "#/$defs/sha256"},
+        "cell_id": {"type": "string"},
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "request_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "max_link_dimension": {"type": "integer", "minimum": 1},
+        "allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes"],
+          "properties": {
+            "cpus": {"type": "integer", "minimum": 1},
+            "memory_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "rates": {"$ref": "#/$defs/calibrationRates"},
+        "checkpoint_overhead": {
+          "type": "object", "additionalProperties": false,
+          "required": ["write_seconds", "read_seconds", "size_bytes"],
+          "properties": {
+            "write_seconds": {"type": "number", "minimum": 0},
+            "read_seconds": {"type": "number", "minimum": 0},
+            "size_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "actual_runtime": {
+          "type": "object", "additionalProperties": false,
+          "required": ["julia_threads", "blas_threads", "peak_rss_bytes"],
+          "properties": {
+            "julia_threads": {"type": "integer", "minimum": 1},
+            "blas_threads": {"type": "integer", "minimum": 1},
+            "peak_rss_bytes": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "calibrationUncertainty": {
+      "type": "object", "additionalProperties": false,
+      "required": ["basis", "sample_count", "seconds_per_step_sample_stddev", "selected_seconds_per_step_mean", "selected_seconds_per_step_sample_stddev", "conservative_standard_deviations"],
+      "properties": {
+        "basis": {"const": "measured_sample_dispersion"},
+        "sample_count": {"type": "integer", "minimum": 2},
+        "seconds_per_step_sample_stddev": {"type": "number", "minimum": 0},
+        "selected_seconds_per_step_mean": {"type": "number", "exclusiveMinimum": 0},
+        "selected_seconds_per_step_sample_stddev": {"type": "number", "minimum": 0},
+        "conservative_standard_deviations": {"type": "number", "minimum": 0}
+      }
+    },
+    "observedCalibrationResources": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_peak_rss_bytes", "actual_julia_threads", "actual_blas_threads"],
+      "properties": {
+        "max_peak_rss_bytes": {"type": "integer", "minimum": 1},
+        "actual_julia_threads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 1}},
+        "actual_blas_threads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 1}}
+      }
+    },
+    "runtimeCalibration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "generator", "software_version", "plan_sha256", "base_resource_sha256", "identity", "samples", "link_dimension_groups", "checkpoint_overhead", "observed_resources", "selected_allocation", "selection_policy", "uncertainty", "calibration_sha256"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "artifact_type": {"const": "runtime_calibration"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "base_resource_sha256": {"$ref": "#/$defs/sha256"},
+        "identity": {
+          "type": "object", "additionalProperties": false,
+          "required": ["source_sha256", "runtime_sha256", "telemetry_sha256"],
+          "properties": {
+            "source_sha256": {"$ref": "#/$defs/sha256"},
+            "runtime_sha256": {"$ref": "#/$defs/sha256"},
+            "telemetry_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "samples": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/calibrationSample"}},
+        "link_dimension_groups": {
+          "type": "object", "additionalProperties": false,
+          "patternProperties": {
+            "^[1-9][0-9]*$": {
+              "type": "object", "additionalProperties": false,
+              "required": ["sample_count", "mean_seconds_per_step", "sample_stddev_seconds_per_step", "min_seconds_per_step", "max_seconds_per_step"],
+              "properties": {
+                "sample_count": {"type": "integer", "minimum": 1},
+                "mean_seconds_per_step": {"type": "number", "exclusiveMinimum": 0},
+                "sample_stddev_seconds_per_step": {"type": "number", "minimum": 0},
+                "min_seconds_per_step": {"type": "number", "exclusiveMinimum": 0},
+                "max_seconds_per_step": {"type": "number", "exclusiveMinimum": 0}
+              }
+            }
+          }
+        },
+        "checkpoint_overhead": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mean_write_seconds", "max_write_seconds", "mean_read_seconds", "max_read_seconds", "max_size_bytes"],
+          "properties": {
+            "mean_write_seconds": {"type": "number", "minimum": 0},
+            "max_write_seconds": {"type": "number", "minimum": 0},
+            "mean_read_seconds": {"type": "number", "minimum": 0},
+            "max_read_seconds": {"type": "number", "minimum": 0},
+            "max_size_bytes": {"type": "integer", "minimum": 1}
+          }
+        },
+        "observed_resources": {"$ref": "#/$defs/observedCalibrationResources"},
+        "selected_allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes", "sample_count", "mean_steps_per_second"],
+          "properties": {
+            "cpus": {"type": "integer", "minimum": 1},
+            "memory_bytes": {"type": "integer", "minimum": 1},
+            "sample_count": {"type": "integer", "minimum": 1},
+            "mean_steps_per_second": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "selection_policy": {
+          "type": "object", "additionalProperties": false,
+          "required": ["rule", "throughput_fraction_of_best", "best_mean_steps_per_second"],
+          "properties": {
+            "rule": {"const": "smallest_cpu_then_memory_allocation_within_fraction_of_best"},
+            "throughput_fraction_of_best": {"const": 0.9},
+            "best_mean_steps_per_second": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "uncertainty": {"$ref": "#/$defs/calibrationUncertainty"},
+        "calibration_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "calibratedResourceCell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["cell_id", "work_steps", "predicted_wall_seconds", "wall_uncertainty_seconds", "recommended_wall_seconds", "recommended_memory_bytes"],
+      "properties": {
+        "cell_id": {"type": "string"},
+        "work_steps": {"type": "integer", "minimum": 1},
+        "predicted_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "wall_uncertainty_seconds": {"type": "number", "minimum": 0},
+        "recommended_wall_seconds": {"type": "integer", "minimum": 1},
+        "recommended_memory_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "calibratedResources": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "artifact_type", "generator", "software_version", "plan_sha256", "base_resource_sha256", "calibration_sha256", "allocation", "observed_resources", "uncertainty", "cells", "resource_sha256"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "artifact_type": {"const": "calibrated_resources"},
+        "generator": {"$ref": "#/$defs/generator"},
+        "software_version": {"type": "string", "minLength": 1},
+        "plan_sha256": {"$ref": "#/$defs/sha256"},
+        "base_resource_sha256": {"$ref": "#/$defs/sha256"},
+        "calibration_sha256": {"$ref": "#/$defs/sha256"},
+        "allocation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["cpus", "memory_bytes", "actual_julia_threads", "actual_blas_threads"],
+          "properties": {
+            "cpus": {"type": "integer", "minimum": 1},
+            "memory_bytes": {"type": "integer", "minimum": 1},
+            "actual_julia_threads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 1}},
+            "actual_blas_threads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 1}}
+          }
+        },
+        "observed_resources": {"$ref": "#/$defs/observedCalibrationResources"},
+        "uncertainty": {"$ref": "#/$defs/calibrationUncertainty"},
+        "cells": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/calibratedResourceCell"}},
+        "resource_sha256": {"$ref": "#/$defs/sha256"}
       }
     },
     "resourceCell": {
