@@ -268,7 +268,7 @@ def test_successful_injected_run_writes_atomic_progress_and_result(
         "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
     )
     assert manifest["provenance"]["core_source_digest"] == (
-        "843030ed46b1ad7ebf2dc3cbe216e97bf035c0774ff9f094f704a2ee746d96c0"
+        FULL_RUNNER.core_source_digest(FULL_RUNNER.OLE_ROOT)
     )
     partial = json.loads(
         output.with_suffix(".partial.json").read_text(encoding="utf-8")

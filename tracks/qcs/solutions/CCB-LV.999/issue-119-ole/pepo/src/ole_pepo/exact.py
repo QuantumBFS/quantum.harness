@@ -144,16 +144,24 @@ def normalized_ole_dense(
     return complex(value)
 
 
+def seven_site_oracle_edges(protocol: OLEProtocol) -> tuple[tuple[int, int], ...]:
+    """Return the audited CZ path after checking the cropped protocol identity."""
+    if frozenset(protocol.active_sites) != SEVEN_SITE_ORACLE:
+        raise ValueError(f"unexpected seven-site active labels: {sorted(protocol.active_sites)}")
+    edges = frozenset(
+        tuple(sorted(gate.qubits)) for gate in protocol.gates if gate.name == "cz"
+    )
+    if edges != _SEVEN_SITE_EDGES:
+        raise ValueError(f"unexpected seven-site CZ edges: {sorted(edges)}")
+    return tuple(sorted(edges))
+
+
 def seven_site_oracle_protocol(
     full_protocol: OLEProtocol, delta_zero: bool = False
 ) -> OLEProtocol:
     """Crop the audited seven-site OLE fixture and optionally set δ to zero."""
     cropped = crop_protocol(full_protocol, SEVEN_SITE_ORACLE)
-    edges = frozenset(
-        tuple(sorted(gate.qubits)) for gate in cropped.gates if gate.name == "cz"
-    )
-    if edges != _SEVEN_SITE_EDGES:
-        raise ValueError(f"unexpected seven-site CZ edges: {sorted(edges)}")
+    seven_site_oracle_edges(cropped)
     perturbations = tuple(
         gate
         for gate in cropped.gates

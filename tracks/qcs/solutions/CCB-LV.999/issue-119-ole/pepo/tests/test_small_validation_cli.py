@@ -1,5 +1,6 @@
 import json
 import importlib.util
+from dataclasses import replace
 from pathlib import Path
 import re
 import subprocess
@@ -11,6 +12,12 @@ import pytest
 
 OLE_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = OLE_ROOT / "scripts/validate_pepo_small.py"
+EXPECTED_EDGES = [[33, 39], [39, 53], [49, 50], [50, 51], [51, 52], [52, 53]]
+EXPECTED_TARGET = {
+    "normalization": {"base": 2, "exponent": 7},
+    "trace_factors": ["O", "C†", "O", "C"],
+    "observable": {"pauli": "Z", "site": 52},
+}
 
 
 def _inspect() -> subprocess.CompletedProcess[str]:
@@ -29,6 +36,44 @@ def _validator_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _assert_certificate_protocol(document: dict[str, object]) -> None:
+    protocol = document["protocol"]
+    assert isinstance(protocol, dict)
+    assert protocol["sites"] == [33, 39, 49, 50, 51, 52, 53]
+    assert protocol["interaction_edges"] == EXPECTED_EDGES
+    assert protocol["normalized_overlap_target"] == EXPECTED_TARGET
+
+
+def test_certificate_protocol_rejects_wrong_cropped_edge_or_normalized_target():
+    """Breaks if a geometry or target detached from the cropped oracle can be certified."""
+    validator = _validator_module()
+    full = validator.read_validated_qasm(
+        validator.QASM_PATH, validator.QASM_SHA256, validator.QASM_BYTES
+    )
+    cropped = validator.seven_site_oracle_protocol(full)
+
+    certificate = validator._certificate_protocol(cropped, {52: validator.Z})
+    assert certificate["interaction_edges"] == EXPECTED_EDGES
+    assert certificate["normalized_overlap_target"] == EXPECTED_TARGET
+
+    wrong_edge = replace(
+        cropped,
+        layers=tuple(
+            tuple(
+                replace(gate, qubits=(33, 49))
+                if gate.name == "cz" and tuple(sorted(gate.qubits)) == (33, 39)
+                else gate
+                for gate in layer
+            )
+            for layer in cropped.layers
+        ),
+    )
+    with pytest.raises(ValueError, match="seven-site CZ edges"):
+        validator._certificate_protocol(wrong_edge, {52: validator.Z})
+    with pytest.raises(ValueError, match="normalized overlap observable"):
+        validator._certificate_protocol(cropped, {51: validator.Z})
 
 
 def test_inspect_is_repeatable_without_altering_default_manifest():
@@ -81,6 +126,8 @@ def test_execute_publishes_running_progress_and_isolated_success_artifacts(tmp_p
         if manifest_path.exists():
             document = json.loads(manifest_path.read_text(encoding="utf-8"))
             observed_running |= document["status"] == "running"
+            if document["status"] == "running":
+                _assert_certificate_protocol(document)
             observed_progress |= (
                 document["status"] == "running"
                 and "processed_causal_gates" in document.get("progress", {})
@@ -94,6 +141,7 @@ def test_execute_publishes_running_progress_and_isolated_success_artifacts(tmp_p
 
     manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["status"] == "success"
+    _assert_certificate_protocol(manifest)
     assert manifest["validation"]["dense_delta_zero"] == pytest.approx(1.0, abs=1e-10)
     assert manifest["validation"]["pepo_delta_zero"] == pytest.approx(1.0, abs=1e-10)
     assert manifest["validation"]["dense_delta_015"] == pytest.approx(
@@ -104,7 +152,10 @@ def test_execute_publishes_running_progress_and_isolated_success_artifacts(tmp_p
     assert set(manifest["validation"]["truncated_delta_015"]) == {"1", "2", "4"}
     assert manifest["timings"]["wall_seconds"] > 0
     assert manifest["resources"]["peak_rss_bytes"] > 0
-    assert (output_dir / "PEPO_SMALL_VALIDATION.md").exists()
+    assert manifest["resources"]["wall_seconds"] == manifest["timings"]["wall_seconds"]
+    report = (output_dir / "PEPO_SMALL_VALIDATION.md").read_text(encoding="utf-8")
+    assert "| interaction edges | (33,39), (39,53), (49,50), (50,51), (51,52), (52,53) |" in report
+    assert "| normalized-overlap target | 2^-7 Tr[O C† O C], O=Z52 |" in report
     if root_report_before is None:
         assert not root_report.exists()
     else:

@@ -8,13 +8,19 @@ from dataclasses import asdict
 import math
 from pathlib import Path
 import time
+from typing import Mapping
 
 import numpy as np
 
 from ole_pepo import PINNED_QUIMB_COMMIT
 from ole_pepo.contraction import normalized_overlap_exact
 from ole_pepo.engine import ProgressRecord, build_pepo_circuit
-from ole_pepo.exact import normalized_ole_dense, seven_site_oracle_protocol
+from ole_pepo.exact import (
+    SEVEN_SITE_OBSERVABLE,
+    normalized_ole_dense,
+    seven_site_oracle_edges,
+    seven_site_oracle_protocol,
+)
 from ole_pepo.qasm import read_validated_qasm
 from ole_pepo.records import (
     SmallOracleStatus,
@@ -36,6 +42,7 @@ OBSERVABLE_SITE = 52
 EXACT_TOLERANCE = 1e-10
 TRUNCATED_DOP = (1, 2, 4)
 Z = np.diag([1.0, -1.0]).astype(np.complex128)
+OBSERVABLES = {OBSERVABLE_SITE: Z}
 
 
 def _confirmation_document() -> dict[str, object]:
@@ -48,6 +55,32 @@ def _confirmation_document() -> dict[str, object]:
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "sites": list(SITES),
         "truncated_dop": list(TRUNCATED_DOP),
+    }
+
+
+def _certificate_protocol(
+    cropped_protocol, observables: Mapping[int, np.ndarray]
+) -> dict[str, object]:
+    """Serialize the checked crop and exact observable used by both solvers."""
+    sites = tuple(cropped_protocol.active_sites)
+    edges = seven_site_oracle_edges(cropped_protocol)
+    observable_sites = tuple(sorted(observables))
+    if observable_sites != SEVEN_SITE_OBSERVABLE:
+        raise ValueError("normalized overlap observable must be the audited Z52 operator")
+    observable_site = observable_sites[0]
+    if not np.array_equal(observables[observable_site], Z):
+        raise ValueError("normalized overlap observable must be Pauli Z")
+    return {
+        "sites": list(sites),
+        "interaction_edges": [list(edge) for edge in edges],
+        "observable": f"Z{observable_site}",
+        "normalized_overlap_target": {
+            "normalization": {"base": 2, "exponent": len(sites)},
+            "trace_factors": ["O", "C†", "O", "C"],
+            "observable": {"pauli": "Z", "site": observable_site},
+        },
+        "delta_modes": [0, 0.15],
+        "exact_tolerance": EXACT_TOLERANCE,
     }
 
 
@@ -64,7 +97,7 @@ def _real_checked(name: str, value: complex) -> float:
 def _exact_pepo_value(protocol, progress_callback=None) -> float:
     circuit = build_pepo_circuit(protocol, max_bond=None, cutoff=0.0)
     evolved = circuit.evolve_product(
-        {OBSERVABLE_SITE: Z},
+        OBSERVABLES,
         max_bond=None,
         cutoff=0.0,
         progress_every=100,
@@ -72,14 +105,14 @@ def _exact_pepo_value(protocol, progress_callback=None) -> float:
     )
     return _real_checked(
         "untruncated PEPO value",
-        normalized_overlap_exact(evolved.operator, {OBSERVABLE_SITE: Z}),
+        normalized_overlap_exact(evolved.operator, OBSERVABLES),
     )
 
 
 def _truncated_pepo_value(protocol, dop: int, progress_callback=None) -> float:
     circuit = build_pepo_circuit(protocol, max_bond=dop, cutoff=0.0)
     evolved = circuit.evolve_product(
-        {OBSERVABLE_SITE: Z},
+        OBSERVABLES,
         max_bond=dop,
         cutoff=0.0,
         progress_every=100,
@@ -87,7 +120,7 @@ def _truncated_pepo_value(protocol, dop: int, progress_callback=None) -> float:
     )
     return _real_checked(
         f"truncated PEPO value at Dop={dop}",
-        normalized_overlap_exact(evolved.operator, {OBSERVABLE_SITE: Z}),
+        normalized_overlap_exact(evolved.operator, OBSERVABLES),
     )
 
 
@@ -98,10 +131,12 @@ def _render_report(
     timings = manifest["timings"]
     resources = manifest["resources"]
     provenance = manifest["provenance"]
+    protocol = manifest["protocol"]
     assert isinstance(validation, dict)
     assert isinstance(timings, dict)
     assert isinstance(resources, dict)
     assert isinstance(provenance, dict)
+    assert isinstance(protocol, dict)
     lines = [
         "# PEPO small-oracle validation",
         "",
@@ -118,6 +153,23 @@ def _render_report(
             f'--output-dir "{output_dir}"'
         ),
         "```",
+        "",
+        "## Protocol",
+        "",
+        "| field | value |",
+        "| --- | --- |",
+        f"| active sites | {','.join(map(str, protocol['sites']))} |",
+        (
+            "| interaction edges | "
+            + ", ".join(f"({left},{right})" for left, right in protocol["interaction_edges"])
+            + " |"
+        ),
+        (
+            "| normalized-overlap target | "
+            f"2^-{protocol['normalized_overlap_target']['normalization']['exponent']} "
+            "Tr[O C† O C], "
+            f"O={protocol['observable']} |"
+        ),
         "",
         "## Results",
         "",
@@ -166,12 +218,7 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "core_source_digest": core_source_digest(OLE_ROOT),
     }
-    protocol = {
-        "sites": list(SITES),
-        "observable": "Z52",
-        "delta_modes": [0, 0.15],
-        "exact_tolerance": EXACT_TOLERANCE,
-    }
+    protocol: dict[str, object] | None = None
     partial_validation: dict[str, object] = {}
     progress: dict[str, object] = {"phase": "starting", "elapsed_seconds": 0.0}
 
@@ -192,33 +239,34 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
                 f"{phase}: causal_gates={record.processed_causal_gates}/{record.total_causal_gates}",
                 flush=True,
             )
-        atomic_write_json(
-            output_dir / "manifest.json",
-            {
-                "status": "running",
-                "protocol": protocol,
-                "provenance": provenance,
-                "progress": progress,
-                "validation": partial_validation,
-            },
-        )
+        running_manifest: dict[str, object] = {
+            "status": "running",
+            "provenance": provenance,
+            "progress": progress,
+            "validation": partial_validation,
+        }
+        if protocol is not None:
+            running_manifest["protocol"] = protocol
+        atomic_write_json(output_dir / "manifest.json", running_manifest)
 
     def progress_callback(phase: str):
         return lambda record: publish_running(phase, record)
 
-    publish_running("validating_qasm")
     try:
         print("validating_qasm", flush=True)
         full_protocol = read_validated_qasm(QASM_PATH, QASM_SHA256, QASM_BYTES)
-        publish_running("building_seven_site_protocols")
         print("building_seven_site_protocols", flush=True)
         zero_protocol = seven_site_oracle_protocol(full_protocol, delta_zero=True)
         delta_protocol = seven_site_oracle_protocol(full_protocol, delta_zero=False)
+        protocol = _certificate_protocol(delta_protocol, OBSERVABLES)
+        if _certificate_protocol(zero_protocol, OBSERVABLES) != protocol:
+            raise RuntimeError("delta-zero crop changed certificate protocol metadata")
+        publish_running("building_seven_site_protocols")
 
         publish_running("computing_dense_delta_zero")
         print("computing_dense_delta_zero", flush=True)
         dense_zero = _real_checked(
-            "dense delta-zero value", normalized_ole_dense(zero_protocol, (OBSERVABLE_SITE,))
+            "dense delta-zero value", normalized_ole_dense(zero_protocol, SEVEN_SITE_OBSERVABLE)
         )
         partial_validation["dense_delta_zero"] = dense_zero
         publish_running("computing_pepo_delta_zero")
@@ -230,7 +278,7 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
         publish_running("computing_dense_delta_015")
         print("computing_dense_delta_015", flush=True)
         dense_delta = _real_checked(
-            "dense delta-0.15 value", normalized_ole_dense(delta_protocol, (OBSERVABLE_SITE,))
+            "dense delta-0.15 value", normalized_ole_dense(delta_protocol, SEVEN_SITE_OBSERVABLE)
         )
         partial_validation["dense_delta_015"] = dense_delta
         publish_running("computing_pepo_delta_015")
@@ -261,6 +309,11 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
             raise RuntimeError("delta-zero control differs from one beyond exact tolerance")
         if max_error > EXACT_TOLERANCE:
             raise RuntimeError(f"untruncated PEPO exact error {max_error:.3e} exceeds tolerance")
+        if protocol is None:
+            raise RuntimeError("success certificate is missing checked protocol metadata")
+        wall_seconds = time.monotonic() - started
+        if not math.isfinite(wall_seconds):
+            raise RuntimeError("wall time is non-finite")
 
         status = SmallOracleStatus(
             success=True,
@@ -282,24 +335,26 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
                 "exact_errors": errors,
                 "truncated_delta_015": truncated,
             },
-            "timings": {"wall_seconds": time.monotonic() - started},
-            "resources": {"peak_rss_bytes": peak_rss_bytes()},
+            "timings": {"wall_seconds": wall_seconds},
+            "resources": {
+                "wall_seconds": wall_seconds,
+                "peak_rss_bytes": peak_rss_bytes(),
+            },
         }
         _render_report(manifest, _report_path(output_dir), confirmation, output_dir)
         atomic_write_json(output_dir / "manifest.json", manifest)
         return manifest
     except Exception as error:
-        atomic_write_json(
-            output_dir / "manifest.json",
-            {
-                "status": "failure",
-                "protocol": protocol,
-                "provenance": provenance,
-                "progress": progress,
-                "validation": partial_validation,
-                "failure": {"type": type(error).__name__, "message": str(error)},
-            },
-        )
+        failure_manifest: dict[str, object] = {
+            "status": "failure",
+            "provenance": provenance,
+            "progress": progress,
+            "validation": partial_validation,
+            "failure": {"type": type(error).__name__, "message": str(error)},
+        }
+        if protocol is not None:
+            failure_manifest["protocol"] = protocol
+        atomic_write_json(output_dir / "manifest.json", failure_manifest)
         raise
 
 
