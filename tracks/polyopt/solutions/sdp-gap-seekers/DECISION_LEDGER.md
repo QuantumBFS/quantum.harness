@@ -52,3 +52,17 @@ gave normalization 1 exactly, three zero affine residuals, zero PSD violation,
 and a smallest block eigenvalue of 0.0948505094335904. The gamma=1/2 solve is
 therefore unblocked without changing the Hamiltonian, window, state class,
 degree, reduction, solver settings, or audit tolerance.
+
+## 2026-07-29 — gamma=1/2 is feasible in the exact finite relaxation
+
+Gamma=1/2 attempt r1 (job `22988032`) returned Mosek `OPTIMAL` with primal and
+dual feasible points. Independent reconstruction gave normalization 1, zero
+affine residual, zero PSD violation, and smallest block eigenvalue
+0.08943315828795756. The decision-grade conclusion is numerical feasibility
+of the exact `d=2` finite relaxation at gamma=1/2. It is not a certified
+physical lower bound on the bulk gap.
+
+No infeasibility ray replay is needed because the solver did not report
+infeasibility. Further exact memory reduction is deferred: peak process RSS
+was 44,494,548 KiB and the target solve completed in 425.4 s total, so another
+reduction would not change the requested gamma=1/2 decision.

@@ -28,10 +28,20 @@ Updated: 2026-07-29 UTC.
   was 0.0948505094335904. Solver wall was 444.861 s; peak process RSS was
   46,385,640 KiB. `result.toml` SHA-256 is
   `ec362cdf456a7ad7f180ce2418bcea1b547f831c8d0c21cfc827844b2e06258e`.
-- Current gate: run gamma=1/2 with the same immutable setup and runner.
-- Required solve order is satisfied: gamma=1/2 is now authorized by the
+- Gamma=1/2 target: passed on attempt r1, Slurm job `22988032`. Mosek returned
+  `OPTIMAL` with primal and dual `FEASIBLE_POINT`; normalization was exactly 1,
+  all three affine residuals and the worst PSD violation were 0, and the
+  smallest block eigenvalue was 0.08943315828795756. Solver wall was
+  407.505 s; peak process RSS was 44,494,548 KiB. `result.toml` SHA-256 is
+  `63c3ed036605c9ed15e67e762115bf73f67b1724b7e6ea6281cf21559b1dc021`.
+- Terminal status: the requested exact finite relaxation is numerically
+  feasible at gamma=1/2. This does not prove a physical bulk gap; it says this
+  `d=2` relaxation does not exclude gamma=1/2.
+- Required solve order was satisfied: gamma=1/2 ran only after the
   residual-checked gamma=0 result.
 - Compute boundary: all MOF reload/solve work runs through Slurm on xH5;
   Bohrium and xH5 login are limited to source checks, Git, transfer, queue
   inspection, and artifact collection.
-- No decision-changing user or resource need is currently open.
+- Further exact memory reduction is not decision-relevant for the fixed target:
+  both required solves completed within eight minutes and the 60 GiB request.
+- No decision-changing user or resource need is open.
