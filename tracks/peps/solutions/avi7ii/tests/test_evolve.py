@@ -1,6 +1,7 @@
 from dataclasses import replace
 import json
 
+import numpy as np
 import pytest
 
 from qh147.compress import (
@@ -10,6 +11,7 @@ from qh147.compress import (
 )
 from qh147.evolve import ChainConfig, run_chain
 from qh147.pepo import FinitePEPO
+from qh147.trotter import dense_trotter_step
 
 
 def _config(**changes) -> ChainConfig:
@@ -204,3 +206,27 @@ def test_configuration_hash_is_stable_and_sensitive():
     config = _config()
     assert config.config_sha256() == _config().config_sha256()
     assert config.config_sha256() != _config(h=0.8).config_sha256()
+
+
+@pytest.mark.parametrize("mode", ["ordinary", "thermodynamic"])
+def test_real_two_by_two_one_step_matches_dense_trotter(tmp_path, mode):
+    config = replace(
+        _config(),
+        lx=2,
+        ly=2,
+        beta_stop=0.025,
+        max_iterations=1,
+    )
+
+    result = run_chain(config, tmp_path, mode=mode)
+
+    assert result.latest is not None
+    recovered = result.latest.pepo.to_dense() * np.exp(result.latest.log_scale)
+    expected = dense_trotter_step(
+        2,
+        2,
+        j=config.j,
+        h=config.h,
+        delta_beta=config.delta_beta,
+    )
+    assert np.allclose(recovered, expected, rtol=1e-8, atol=1e-9)
