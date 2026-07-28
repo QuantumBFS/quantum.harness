@@ -19,6 +19,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 set(LIB_SOURCES
     src/lattice.cpp
     src/ed.cpp
+    src/sse.cpp
 )
 
 # Static library
@@ -34,6 +35,11 @@ add_test(NAME test_lattice COMMAND test_lattice)
 add_executable(test_ed tests/test_ed.cpp)
 target_link_libraries(test_ed PRIVATE cm148)
 add_test(NAME test_ed COMMAND test_ed)
+
+# Test: SSE
+add_executable(test_sse tests/test_sse.cpp)
+target_link_libraries(test_sse PRIVATE cm148)
+add_test(NAME test_sse COMMAND test_sse)
 
 # Enable CTest
 enable_testing()
