@@ -1,0 +1,29 @@
+# Reduced smoke grid only; this configuration does not claim paper precision.
+mode = "quick"
+dt_target = 0.5235987755982988 # π / 6
+frequencies = [1.0, 2.5, 5.0]
+correlation_lag_steps = 256
+tail_count = 32
+tail_norm_tolerance = 1.0e-3
+tail_mean_tolerance = 1.0e-4
+tail_slope_tolerance = 1.0e-4
+c0_tolerance = 1.0e-6
+omega_max = 15.0
+nmax = 8
+weight_tolerance = 0.0
+eigensolver_tolerance = 1.0e-8
+eigensolver_max_iterations = 500
+energy_balance_tolerance = 1.0
+energy_balance_floor = 1.0e-10
+
+compression_tolerance = 1.0e-3
+cache_dir = "output/fig5-quick/cache"
+rebuild_cache = false
+temperature = 0.0
+auto_nc = false
+n_c = 64
+truncation = "rel"
+cap_rank = 16
+max_rank = 16
+low_rank_svd = false
+svd_filtering_tolerance = 0.0

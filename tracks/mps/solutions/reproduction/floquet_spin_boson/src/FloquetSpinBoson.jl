@@ -14,7 +14,8 @@ include("reference_data.jl")
 include("redfield_magnus.jl")
 include("diagnostics.jl")
 
-export RunConfig, Fig3Config, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
+export RunConfig, Fig3Config, Fig5Config, period_grid,
+       SpinBosonModel, SIGMA_X, SIGMA_Z,
        drive_hamiltonian, system_hamiltonian, bath_correlation, bath_gamma,
        UniformIFAdapter, UniformIFBuildSettings, adapt_uniform_pt,
        installed_uniformtempo_revision, uniform_if_metadata, uniform_if_key,
@@ -33,10 +34,14 @@ export RunConfig, Fig3Config, period_grid, SpinBosonModel, SIGMA_X, SIGMA_Z,
        correlation_diagnostics, periodic_autocorrelation_fft,
        periodic_autocorrelation_direct, decompose_correlation,
        spectral_density, continuous_current_fft, continuous_current_direct!,
-       DeltaPeak, delta_peak_weights, run_fig3,
+       DeltaPeak, delta_peak_weights, group_frequencies_by_dt,
+       integrated_current, period_averaged_power, pending_fig5_points,
+       fig5_config_hash,
+       run_fig3, run_fig5,
        floquet_eigen_diagnostics,
        load_reference_curve, fig3_reference_grid, load_fig3_reference,
-       fig3_reference_path, redfield_magnus!, redfield_magnus_paper_formula,
+       fig3_reference_path, fig5_reference_grid, load_fig5_reference,
+       fig5_reference_path, redfield_magnus!, redfield_magnus_paper_formula,
        run_fig2, parse_exact_baseline, render_refreshed_errors
 
 end

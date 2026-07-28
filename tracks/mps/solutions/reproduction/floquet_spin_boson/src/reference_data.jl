@@ -52,3 +52,24 @@ function fig3_reference_path(reference_dir::AbstractString,
         "heat_current_$(drive)_Ω_1_ϵ_d_1_ω_d_$(label)_α_0.05_ω_c_2.5_bond_dim_235_dt_0.052.csv"
     return joinpath(reference_dir, filename)
 end
+
+"""The exact 191-point drive-frequency grid declared by the Fig. 5 script."""
+fig5_reference_grid() = collect(0.5:0.05:10.0)
+
+"""Load one headerless Fig. 5 total-current curve on the author grid."""
+function load_fig5_reference(path::AbstractString)
+    grid = fig5_reference_grid()
+    loaded = load_reference_curve(path, grid)
+    all(isfinite, loaded.values) ||
+        throw(ArgumentError("Fig. 5 reference contains non-finite values"))
+    return (; frequencies=loaded.times, current=loaded.values)
+end
+
+"""Resolve the exact author filename for one Fig. 5 drive direction."""
+function fig5_reference_path(reference_dir::AbstractString, drive::Symbol)
+    drive in (:longitudinal, :transversal) ||
+        throw(ArgumentError("Fig. 5 reference drive is invalid"))
+    return joinpath(
+        reference_dir,
+        "total_heat_current_$(drive)_Ω_1_ϵ_d_1_α_0.05_ω_c_2.5_bond_dim_235_dt_0.052.csv")
+end

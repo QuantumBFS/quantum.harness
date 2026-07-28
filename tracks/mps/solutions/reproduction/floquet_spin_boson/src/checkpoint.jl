@@ -77,6 +77,57 @@ function load_correlation_checkpoint(path::AbstractString)
     return checkpoint
 end
 
+function _fig5_manifest_is_complete(path::AbstractString,
+                                    config_hash::AbstractString)
+    isfile(path) || return false
+    contents = read(path, String)
+    status_match = match(r"\"status\"\s*:\s*\"([^\"]+)\"", contents)
+    hash_match = match(r"\"config_hash\"\s*:\s*\"([^\"]+)\"", contents)
+    return !isnothing(status_match) && status_match.captures[1] == "ok" &&
+           !isnothing(hash_match) && hash_match.captures[1] == config_hash
+end
+
+"""Return failed, incompatible, and missing Fig. 5 points in grid order."""
+function pending_fig5_points(output_dir::AbstractString,
+                             drive::Symbol,
+                             frequencies::AbstractVector,
+                             config_hash::AbstractString)
+    drive in (:longitudinal, :transversal) ||
+        throw(ArgumentError("Fig. 5 drive must be longitudinal or transversal"))
+    isempty(config_hash) &&
+        throw(ArgumentError("Fig. 5 config hash cannot be empty"))
+    pending = Float64[]
+    for frequency in frequencies
+        frequency isa Real && isfinite(frequency) && frequency > 0 ||
+            throw(ArgumentError(
+                "Fig. 5 frequencies must be finite and positive"))
+        manifest = joinpath(
+            output_dir, String(drive), string(Float64(frequency)),
+            "manifest.json")
+        _fig5_manifest_is_complete(manifest, config_hash) ||
+            push!(pending, Float64(frequency))
+    end
+    return pending
+end
+
+"""Atomically write one self-contained Fig. 5 point manifest."""
+function save_fig5_manifest(path::AbstractString, contents::AbstractString)
+    directory = dirname(path)
+    mkpath(directory)
+    temporary_path, temporary_io = mktemp(directory; cleanup=false)
+    try
+        write(temporary_io, contents)
+        flush(temporary_io)
+        close(temporary_io)
+        mv(temporary_path, path; force=true)
+    catch
+        isopen(temporary_io) && close(temporary_io)
+        ispath(temporary_path) && rm(temporary_path; force=true)
+        rethrow()
+    end
+    return path
+end
+
 """Return the deterministic on-disk location of one provenance-specific IF cache."""
 function uniform_if_cache_path(cache_dir::AbstractString, metadata::AbstractDict)
     return joinpath(cache_dir, "uniform-if-" * uniform_if_key(metadata) * ".jld2")
