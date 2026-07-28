@@ -17,6 +17,10 @@
 
 随后按任务使用：
 
+- [TOTAL_NONNEGATIVE_PATH_CLASS.md](TOTAL_NONNEGATIVE_PATH_CLASS.md)：当前严格恒正候选、证明和
+  Hubbard/`t-V` 开链 HS 映射；
+- [FRONTIER_SEMIGROUP_RESULTS.md](FRONTIER_SEMIGROUP_RESULTS.md)：15 族广扫、压力扫描、
+  高精度反例和混合 split-cone 解析关闭；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；

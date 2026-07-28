@@ -11,23 +11,32 @@ import time
 import numpy as np
 
 from . import __version__
-from . import az_families, families
+from . import az_families, families, frontier_candidates
 from .weights import classify_product, product_exponentials
 
 
 _CLASSIFICATIONS = ("positive", "negative", "zero", "complex", "uncertain")
 
 
-def _available_cases() -> dict[str, families.FamilyCase]:
-    classical = families.available_cases()
-    az = az_families.available_cases()
-    overlap = classical.keys() & az.keys()
+def _available_cases() -> dict[str, object]:
+    groups = [
+        families.available_cases(),
+        az_families.available_cases(),
+        frontier_candidates.available_cases(),
+    ]
+    overlap = set()
+    seen: set[str] = set()
+    for group in groups:
+        overlap.update(seen & group.keys())
+        seen.update(group)
     if overlap:
         raise RuntimeError(f"duplicate candidate case names: {sorted(overlap)}")
-    return {**classical, **az}
+    return {case: spec for group in groups for case, spec in group.items()}
 
 
 def _candidate_module(case: str):
+    if case in frontier_candidates.available_cases():
+        return frontier_candidates
     if case in az_families.available_cases():
         return az_families
     return families
@@ -196,7 +205,7 @@ def scan_cell(
             "oracle_version": __version__,
             "family": spec.family,
             "prior_status": spec.prior_status,
-            "generator": "oracle.families.random_generator",
+            "generator": f"{candidate_module.__name__}.random_generator",
             "weight": "det(I + product_l exp(A_l))",
             "precision": "numpy/scipy float64",
         },

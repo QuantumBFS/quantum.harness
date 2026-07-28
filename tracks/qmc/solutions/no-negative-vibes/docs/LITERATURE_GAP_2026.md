@@ -1,4 +1,4 @@
-# 截至 2026-07-27 的文献边界与研究空白
+# 截至 2026-07-28 的文献边界与研究空白
 
 ## 总判断
 
@@ -61,6 +61,21 @@ table”“complex Majorana simple matrix formulation”“semigroup determinant
   当前费米子行列式分类相邻，但不能替代本挑战的矩阵结构分析。
 
 这些论文不能直接成为我们的答案；它们说明“新物理映射”和“不可无符号的边界”仍是活跃方向。
+
+## 新增窄题：全非负矩阵与 QMC
+
+本轮发现三对角 Metzler 生成元给出全非负时间演化，从而严格保证
+`det(I+D)>=1`。这里必须区分三层新颖性：
+
+1. 全非负矩阵、其乘法半群和三对角 cooperative generator 是经典数学；
+2. 开放最近邻一维 Hubbard 模型无符号是已有物理基线；
+3. “TN 半群作为逐构型 determinant-QMC 充分条件”、单 flavor `t-V` 开链任意化学势
+   密度通道证明，以及由平面网络得到更大物理模型，是否已有直接先例仍需排重。
+
+用 `"totally nonnegative" quantum Monte Carlo`、`"total positivity" fermion determinant`
+等精确组合检索，暂未命中直接完成第 3 项的论文；这只是初筛。数学入口是
+[Margaliot and Sontag](https://arxiv.org/abs/1802.09590)，当前证明、边界与物理模型见
+[全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)。
 
 ## 推荐的三档路线
 

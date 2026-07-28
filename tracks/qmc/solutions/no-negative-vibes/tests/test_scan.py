@@ -42,6 +42,26 @@ def test_scan_cell_accepts_az_candidates_through_the_common_manifest() -> None:
     assert manifest["counts"]["complex"] == 0
 
 
+def test_scan_cell_accepts_frontier_candidates() -> None:
+    manifest = scan_cell(
+        case="tn_path4_sym",
+        depth=5,
+        scale=0.8,
+        seed=31,
+        samples=30,
+    )
+
+    assert manifest["provenance"]["family"] == "tn_path_symmetric"
+    assert (
+        manifest["provenance"]["generator"]
+        == "oracle.frontier_candidates.random_generator"
+    )
+    assert sum(manifest["counts"].values()) == 30
+    assert manifest["max_structure_residual"] < 1e-12
+    assert manifest["counts"]["negative"] == 0
+    assert manifest["counts"]["complex"] == 0
+
+
 def test_run_spec_writes_resumable_parameter_scan_manifest(tmp_path) -> None:
     """Catches writing results outside the declared cell or recomputing completed cells."""
     run_dir = tmp_path / "run"

@@ -4,11 +4,12 @@
 
 ## 一句话状态
 
-我们已经从“理解题目”推进到“有 determinant 与 Majorana 直接 Spin-trace oracle、四轮
-可复现主扫描和精确反例库”的阶段：累计检查 2,320,000 个权重，完成普通经典群、标准
-Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没有发现新的恒非负类，但
-已经精确排除一批自然候选；尤其已证明任意小非零夹角的完整 Majorana 双锥混用都会出现
-负权，下一步缩小到物理可达受限子集、公共收缩度量和物理映射。
+我们已经累计检查 3,712,000 个权重，完成经典群、标准 Hermitian AZ、Majorana 双锥和
+15 个新半群候选的系统排查。最新进展是找到一个有一般证明的恒正矩阵类：三对角 Metzler
+路径生成元的指数乘积全非负，因此任意维数、任意时间片都有 `det(I+D)>=1`。它已映射到
+开放 Hubbard 链和单 flavor 排斥 `t-V` 链的 HS 时间片；但一维开边界无符号本身已知，
+目前不能声称发现了新物理类。另一方面，任意两个不同旋转的 split cones 已由显式两层
+反例完全关闭。
 
 ## 已经完成
 
@@ -18,15 +19,18 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
    - 区分正、负、零、复相位和数值不确定；
    - 对 Fock 乘积逐层正数归一化，对病态 determinant 只记录相位/对数并标记不可用检查；
    - 每个参数格保存种子、结构残差和反例。
-2. 建立 25 个结构生成器：
+2. 建立 40 个 determinant 结构生成器：
    - 15 个经典群/李代数候选；
-   - 10 个 AZ Hermitian 时间片类。
-3. 完成四轮主扫描：
+   - 10 个 AZ Hermitian 时间片类；
+   - 15 个路径、图、混合锥和分块半群候选/对照。
+3. 完成六轮主扫描：
    - `classical-groups-v1`：900 格、900,000 个乘积；
    - `az-tenfold-hermitian-v1`：720 格、720,000 个乘积。
    - `majorana-shared-reality-cones-v2`：1,792 格、448,000 个直接 Fock 迹；
    - `majorana-small-angle-stress-v1`：840 格、252,000 个直接 Fock 迹。
-4. 建立 18 组精确 SymPy 证书和 53 个自动测试。
+   - `frontier-semigroups-v1`：1,440 格、720,000 个行列式；
+   - `frontier-mixed-split-stress-v1`：672 格、672,000 个行列式。
+4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现；92 个自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -65,21 +69,31 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
 - 因此不存在只由夹角控制的完整双锥恒正小角区；此前 `0.05–0.3` 随机零命中只是抽样漏掉
   秩一零权边界。
 
+### 新半群与全非负路径
+
+- 三对角 Metzler 路径的矩阵指数是全非负矩阵，乘积仍全非负；
+- `det(I+D)` 等于全部主子式之和，所以一般性地有 `det(I+D)>=1`；
+- 环、星形、稠密 Metzler 图和逐片独立符号规范均已出现负权；
+- 掺杂开放 Hubbard 链和单 flavor 排斥 `t-V` 开链的离散 HS 时间片都落入该类；
+- 任意两个不同旋转 split cones 的完整并集都有
+  `w=16[1-q^2 sin^2(theta)]<0` 的两层反例；
+- 139.2 万个新权重的累计 CPU 时间约 15 分钟，说明当前不需要超算。
+
 ## 我们没有声称什么
 
 - 没有声称随机扫描能证明非负；
 - 没有声称已经发现新无符号 QMC 类；
 - 没有把复权自动等同于所有 BdG QMC 表述都有相位问题；
-- 还没有完成一个新类到具体 Hamiltonian 和 Hubbard--Stratonovich 分解的映射。
+- 没有把 TN 路径数学类直接称为新物理发现；开放一维模型本身已有无符号先例。
 
 ## 下一步建议
 
-不再重复扫描整个命名群、普通 AZ 类或同分布 Majorana 双锥。主线改为寻找真正新的、
-物理可实现的恒非负半群锥；复 Majorana 表述只作为候选排重和分支判断工具。优先比较：
+不再重复扫描整个命名群、普通 AZ 类或同分布双锥。下一步围绕 TN 路径结果闭环：
 
-1. 带受限跨块耦合、但不能约化到固定全局 `J1,J2` 的分块半群；
-2. AZ 幸存结构上不落入已知 Majorana/Kramers/2024 条件的新不变锥；
-3. 从明确 Hamiltonian 与 HS 分解反推、并在时间层乘法下闭合的物理可达子集。
+1. 深查 TN 条件在 AFQMC/DQMC 中是否已有直接表述；
+2. 证明它是否被 2024 contraction-semigroup 条件包含；
+3. 从 TN 双对角/平面网络分解构造超出普通一维开链的物理 HS 模型；
+4. 若不能产生新物理，再转向比 TN 更大的主子式非负乘法半群。
 
 任何新候选按以下漏斗处理：
 
@@ -99,6 +113,8 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
 - [总入口](../START_HERE.md)
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
+- [全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)
+- [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)
 - [经典群基线](BASELINE_RESULTS.md)

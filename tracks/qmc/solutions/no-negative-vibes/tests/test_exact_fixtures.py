@@ -95,3 +95,29 @@ def test_float_oracle_classifies_every_exact_fixture_consistently() -> None:
         matrix = np.array(exact_matrix.evalf(), dtype=complex)
         result = classify_product(matrix)
         assert result.classification == case["expected_sign"], case["id"]
+
+
+def test_mixed_split_cone_certificate_has_exact_slice_membership() -> None:
+    data = json.loads(FIXTURE.read_text())
+    case = next(
+        item
+        for item in data["cases"]
+        if item["id"] == "mixed_split_cones_rational_angle_negative"
+    )
+
+    for generator_rows, metric_rows, factor_rows in zip(
+        case["slice_generators"],
+        case["slice_metrics"],
+        case["factors_in_product_order"],
+        strict=True,
+    ):
+        generator = _matrix(generator_rows)
+        metric = _matrix(metric_rows)
+        factor = _matrix(factor_rows)
+        cone = generator.T * metric + metric * generator
+
+        assert generator**2 == sp.zeros(generator.rows)
+        assert factor == sp.eye(generator.rows) + generator
+        assert cone == cone.T
+        assert all(entry >= 0 for entry in cone.diagonal())
+        assert all(eigenvalue >= 0 for eigenvalue in cone.eigenvals())

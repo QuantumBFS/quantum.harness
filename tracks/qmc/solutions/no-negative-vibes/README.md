@@ -9,6 +9,8 @@
 | 想做什么 | 从哪里开始 |
 |---|---|
 | 第一次了解题目 | [中文零基础导读](docs/ONBOARDING.zh-CN.md) |
+| 查看当前严格恒正候选 | [全非负路径半群](docs/TOTAL_NONNEGATIVE_PATH_CLASS.md) |
+| 查看最新 139.2 万权重初筛 | [新半群初筛结果](docs/FRONTIER_SEMIGROUP_RESULTS.md) |
 | 查看当前结论和文献边界 | [研究地基](docs/FOUNDATIONS.md) |
 | 接着推进项目 | [当前状态与下一步](START_HERE.md) |
 
