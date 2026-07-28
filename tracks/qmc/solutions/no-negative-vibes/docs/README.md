@@ -18,6 +18,7 @@
 随后按任务使用：
 
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
+- [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [SMALL_ANGLE_COUNTEREXAMPLE.md](SMALL_ANGLE_COUNTEREXAMPLE.md)：任意小夹角两层负权的直观与解析推导；
 - [MAJORANA_CONE_RESULTS.md](MAJORANA_CONE_RESULTS.md)：直接 Spin 迹、双锥反例和小角压力测试；
 - [AZ_TENFOLD_RESULTS.md](AZ_TENFOLD_RESULTS.md)：72 万次 AZ 扫描、深度三证书和已知类约化；

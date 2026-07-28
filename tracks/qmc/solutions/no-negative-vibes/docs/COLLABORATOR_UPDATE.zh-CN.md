@@ -93,6 +93,7 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
 ## 查看入口
 
 - [总入口](../START_HERE.md)
+- [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)
 - [经典群基线](BASELINE_RESULTS.md)
