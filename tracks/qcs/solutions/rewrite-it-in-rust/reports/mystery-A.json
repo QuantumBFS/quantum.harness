@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "instance": "mystery-A",
+  "selected_family": "add",
+  "operand_bits": 8,
+  "input_width": 16,
+  "output_width": 9,
+  "candidate_scores": [
+    {
+      "family": "add",
+      "evaluated_rows": 2000,
+      "exact_matches": 2000,
+      "mismatches": 0,
+      "first_mismatch_row": null
+    }
+  ],
+  "gate_count": 37,
+  "circuit_sha256": "cac11ee6ad87c22af5c23222325fc285433c802f012919f056c2cf07b5b6b83a",
+  "training_scalar": {
+    "samples": 2000,
+    "gate_count": 37,
+    "exact_matches": 2000,
+    "correct_bits": 18000,
+    "total_bits": 18000
+  },
+  "training_packed": {
+    "samples": 2000,
+    "gate_count": 37,
+    "exact_matches": 2000,
+    "correct_bits": 18000,
+    "total_bits": 18000
+  },
+  "exhaustive_cases": 65536,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 2000,
+  "prediction_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7",
+  "expected_commitment_sha256": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7",
+  "commitment_matches": true
+}

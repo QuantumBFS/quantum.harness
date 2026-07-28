@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "instance": "mystery-B",
+  "selected_family": "abs-diff",
+  "operand_bits": 7,
+  "input_width": 14,
+  "output_width": 7,
+  "candidate_scores": [
+    {
+      "family": "abs-diff",
+      "evaluated_rows": 1500,
+      "exact_matches": 1500,
+      "mismatches": 0,
+      "first_mismatch_row": null
+    }
+  ],
+  "gate_count": 52,
+  "circuit_sha256": "27f291224e01c310759085602b09196a7293e71d3fa44f885da559f123332fb4",
+  "training_scalar": {
+    "samples": 1500,
+    "gate_count": 52,
+    "exact_matches": 1500,
+    "correct_bits": 10500,
+    "total_bits": 10500
+  },
+  "training_packed": {
+    "samples": 1500,
+    "gate_count": 52,
+    "exact_matches": 1500,
+    "correct_bits": 10500,
+    "total_bits": 10500
+  },
+  "exhaustive_cases": 16384,
+  "exhaustive_mismatches": 0,
+  "prediction_rows": 2000,
+  "prediction_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28",
+  "expected_commitment_sha256": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28",
+  "commitment_matches": true
+}
