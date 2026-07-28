@@ -26,7 +26,7 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
    - `az-tenfold-hermitian-v1`：720 格、720,000 个乘积。
    - `majorana-shared-reality-cones-v2`：1,792 格、448,000 个直接 Fock 迹；
    - `majorana-small-angle-stress-v1`：840 格、252,000 个直接 Fock 迹。
-4. 建立 18 组精确 SymPy 证书和 48 个自动测试。
+4. 建立 18 组精确 SymPy 证书和 49 个自动测试。
 
 ## 当前最重要的结果
 

@@ -165,3 +165,14 @@ def test_float_oracle_matches_small_angle_negative_family() -> None:
         assert result.classification == "negative"
         assert np.allclose(result.value, expected, rtol=1e-9, atol=1e-12)
         assert result.square_identity_residual < 1e-9
+
+
+def test_small_angle_family_can_keep_a_fixed_negative_margin() -> None:
+    for angle in [1e-6, 1e-3, 0.1]:
+        q = np.arcsinh(1.0 / np.sqrt(np.sin(angle)))
+        result = spin_trace_weight(
+            list(small_angle_negative_pair(angle=angle, q=q))
+        )
+
+        assert result.classification == "negative"
+        assert np.allclose(result.value, -4.0, rtol=1e-8, atol=1e-10)

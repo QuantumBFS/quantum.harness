@@ -90,6 +90,15 @@ p = p_even + p_odd
 所以 `theta=0` 时权重恰好为零，而任意 `0<theta<pi` 都严格为负。这里不需要统计推断，
 也不存在浮点符号不确定性。
 
+反例也不必在小角度下变得微弱。若取
+
+```text
+q(theta) = asinh(1 / sqrt(sin(theta))),
+```
+
+就会对每个 `0<theta<pi` 精确得到 `p=-4`。当 `theta` 趋近零时，
+`q(theta)` 只按约 `log(1/theta)/2` 增长；不需要让生成元尺度按 `1/theta` 爆炸。
+
 机器可读公式保存在
 [majorana_trace_certificates.json](../fixtures/majorana_trace_certificates.json)，SymPy 测试会
 验证解析化简；生产 Fock oracle 还会在从 `1e-6` 到 `3` 弧度的多个角度重放该反例。
