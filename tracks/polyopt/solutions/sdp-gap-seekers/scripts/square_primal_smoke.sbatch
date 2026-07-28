@@ -84,6 +84,11 @@ else
         > "${RUN_DIR}/result-missing.txt"
     checksum_files=(result-missing.txt "${checksum_files[@]}")
 fi
+for optional_artifact in preopt.toml mosek.log; do
+    if test -f "${RUN_DIR}/${optional_artifact}"; then
+        checksum_files=("${optional_artifact}" "${checksum_files[@]}")
+    fi
+done
 sacct \
     -j "$SLURM_JOB_ID" \
     --format=JobID,State,ExitCode,MaxRSS,Elapsed,AllocCPUS \

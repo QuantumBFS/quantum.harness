@@ -10,6 +10,7 @@ using MosekTools
 
 const RESULT_SCHEMA = "square-primal-smoke-result-v1"
 const MOSEK_NUM_THREADS_ATTRIBUTE = "MSK_IPAR_NUM_THREADS"
+const MOSEK_SOLVE_FORM_ATTRIBUTE = "MSK_IPAR_INTPNT_SOLVE_FORM"
 
 function progress(message::AbstractString)
     println("[square-primal-solve] ", message)
@@ -165,6 +166,40 @@ function set_mosek_num_threads!(model::JuMP.Model, threads::Int)
     return nothing
 end
 
+function set_mosek_dual_solve_form!(model::JuMP.Model)
+    JuMP.set_optimizer_attribute(
+        model,
+        MOSEK_SOLVE_FORM_ATTRIBUTE,
+        Int(Mosek.MSK_SOLVE_DUAL.value),
+    )
+    return nothing
+end
+
+function mosek_task_summary(
+    optimizer::MosekTools.Optimizer,
+    attach_wall_seconds::Float64,
+)
+    task = optimizer.task
+    num_bar_variables = Mosek.getnumbarvar(task)
+    return Dict(
+        "schema_version" => "square-primal-mosek-preopt-v1",
+        "attach_wall_seconds" => attach_wall_seconds,
+        "peak_process_rss_kib_after_attach" => peak_rss_kib(),
+        "scalar_variable_count" => Mosek.getnumvar(task),
+        "linear_constraint_count" => Mosek.getnumcon(task),
+        "scalar_matrix_nonzero_count" => Mosek.getnumanz(task),
+        "semidefinite_variable_count" => num_bar_variables,
+        "semidefinite_dimensions" => [
+            Mosek.getdimbarvarj(task, index)
+            for index in 1:num_bar_variables
+        ],
+        "semidefinite_constraint_nonzero_count" =>
+            Mosek.getnumbaranz(task),
+        "solve_form" => "dual",
+        "solve_form_parameter" => Int(Mosek.MSK_SOLVE_DUAL.value),
+    )
+end
+
 function validate_input(
     model_path::String,
     runmeta_path::String,
@@ -272,10 +307,50 @@ function main(args::Vector{String}=ARGS)
         JuMP.set_optimizer(model, MosekTools.Optimizer)
         JuMP.set_time_limit_sec(model, Float64(options.time_limit_seconds))
         set_mosek_num_threads!(model, options.threads)
+        set_mosek_dual_solve_form!(model)
 
-        progress("optimize! started")
+        progress("copying bridged model to Mosek")
+        attach_start = time()
+        JuMP.MOI.Utilities.attach_optimizer(model)
+        attach_wall_seconds = time() - attach_start
+        progress(
+            "Mosek task attached after " *
+            "$(round(attach_wall_seconds; digits=3))s",
+        )
+
+        mosek_optimizer = JuMP.unsafe_backend(model)
+        preopt_path = joinpath(dirname(options.output), "preopt.toml")
+        preopt = mosek_task_summary(
+            mosek_optimizer,
+            attach_wall_seconds,
+        )
+        write_result(preopt_path, preopt)
+        progress(
+            "Mosek task: scalar_variables=" *
+            "$(preopt["scalar_variable_count"]), constraints=" *
+            "$(preopt["linear_constraint_count"]), PSD_dimensions=" *
+            "$(preopt["semidefinite_dimensions"]), solve_form=dual",
+        )
+
+        mosek_log_path = joinpath(dirname(options.output), "mosek.log")
+        mosek_log_io = open(mosek_log_path, "w")
+        Mosek.putstreamfunc(
+            mosek_optimizer.task,
+            Mosek.MSK_STREAM_LOG,
+            message -> begin
+                print(mosek_log_io, message)
+                flush(mosek_log_io)
+            end,
+        )
+
+        progress("optimize! started with forced dual solve form")
         solve_start = time()
-        JuMP.optimize!(model)
+        try
+            JuMP.optimize!(model)
+        finally
+            flush(mosek_log_io)
+            close(mosek_log_io)
+        end
         solve_wall_seconds = time() - solve_start
         progress("optimize! returned after $(round(solve_wall_seconds; digits=3))s")
 

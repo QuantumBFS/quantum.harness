@@ -20,4 +20,11 @@ include(joinpath(
         MOSEK_NUM_THREADS_ATTRIBUTE,
     ) == 3
     @test_throws ArgumentError set_mosek_num_threads!(model, 0)
+
+    @test MOSEK_SOLVE_FORM_ATTRIBUTE == "MSK_IPAR_INTPNT_SOLVE_FORM"
+    @test set_mosek_dual_solve_form!(model) === nothing
+    @test JuMP.get_optimizer_attribute(
+        model,
+        MOSEK_SOLVE_FORM_ATTRIBUTE,
+    ) == Int(Mosek.MSK_SOLVE_DUAL.value)
 end
