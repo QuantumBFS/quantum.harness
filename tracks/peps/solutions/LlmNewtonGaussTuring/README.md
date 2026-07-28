@@ -15,8 +15,24 @@
 
 ## Implementation status
 
-This directory currently contains registration metadata only. No PEPS/iPEPS,
-CTMRG environment, tensor-network overlap, bond-dimension convergence, or
-thermodynamic-limit Berry-curvature implementation exists here yet. The shared
-ED/FHS and SSE diagnostics live under
-`tracks/qmc/solutions/LlmNewtonGaussTuring/`; they do not satisfy the PEPS route.
+### Stage 4 (2026-07-29): Pure-NumPy PEPS-FHS engine
+
+Core engine (`peps_fhs.py`) provides:
+- Dense TFIM Hamiltonian with Kolodrubetz rotation $H(\theta,\Omega) = R_x(\theta) H_0 R_x^\dagger(\theta)$
+- Exact diagonalization for small systems (up to $N=9$, dim=512)
+- MPS decomposition with bond-dimension truncation (snake-path PEPS proxy)
+- FHS Berry curvature: $F_{12} = -\arg(U_1 U_2 U_1^* U_2^*) / (d\theta \cdot d\Omega)$
+- 1D JW chain oracle for cross-validation
+
+Test suite (`test_peps_fhs.py`): 9/9 passing.  
+CLI sweep (`run_stage4.py`): CSV output compatible with C++ `scan_berry_square`.
+
+Validated properties:
+- $H(\theta)$ rotation identity: machine precision
+- $F_{12}$ is $\theta$-independent (physical)
+- MPS $D \ge 4$ matches ED to $10^{-14}$ for $L=2$
+- Near-critical curvature enhancement visible
+
+Limitations: quimb unavailable (network); MPS uses 1D bonds only. Full 2D PEPS with vertical virtual bonds and SimpleUpdate optimization requires quimb — planned for Stage 5.
+
+See `STAGE4_REPORT.md` for full details.
