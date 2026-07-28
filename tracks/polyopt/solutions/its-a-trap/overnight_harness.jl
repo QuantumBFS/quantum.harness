@@ -25,6 +25,9 @@ mkpath(joinpath(OUTDIR, "cell_logs"))
 const MAX_WALL_S       = parse(Int,     get(ENV, "MAX_WALL_S", "600"))
 const MAX_RSS_GB       = parse(Float64, get(ENV, "MAX_RSS_GB", "18"))
 const MAX_PROC_SWAP_GB = parse(Float64, get(ENV, "MAX_PROC_SWAP_GB", "0.5"))
+# Mosek thread cap (0 = auto). On shared HPC nodes auto-detect sees ALL
+# physical cores, not the cgroup share — set explicitly in sbatch scripts.
+const MOSEK_THREADS    = parse(Int,     get(ENV, "MOSEK_THREADS", "0"))
 
 # ------------------------------------------------- CONFIG A (source of truth) --
 # One object. It both constructs the GSB call and serialises into the row.
@@ -197,7 +200,7 @@ function runcell(step, label, N, overrides)
                                QUIET = false,
                                mosek_setting = mosek_para(cfg.mosek_tol_pfeas,
                                                           cfg.mosek_tol_dfeas,
-                                                          cfg.mosek_tol_relgap, 0))
+                                                          cfg.mosek_tol_relgap, MOSEK_THREADS))
                     optref[] = o
                 end
             end
@@ -305,7 +308,7 @@ if startswith(STEP, "step4") &&
                     three_type = c.three_type, SU2_symmetry = c.SU2_symmetry,
                     Gram = c.Gram, correlation = c.correlation, J2 = c.J2, QUIET = true,
                     mosek_setting = mosek_para(c.mosek_tol_pfeas, c.mosek_tol_dfeas,
-                                               c.mosek_tol_relgap, 0))
+                                               c.mosek_tol_relgap, MOSEK_THREADS))
             catch
             end
         end
