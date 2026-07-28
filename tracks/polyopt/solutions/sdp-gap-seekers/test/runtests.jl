@@ -186,3 +186,5 @@ using .SmallEDOracle
     @test comparison.hermiticity_error == 0
     @test comparison.trace == 0
 end
+
+include(joinpath(@__DIR__, "legacy_inventory_format_tests.jl"))

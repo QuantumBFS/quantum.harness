@@ -6,29 +6,38 @@
 #   - 1D transverse-field Ising, N=9, g=1/2, d=2   (example.jl TFIM benchmark)
 #   - Kagome Heisenberg,  N=5,             d=2   (smallest example.jl cluster)
 #
-# Output files (in cwd):
+# Output file (in cwd unless --output is given):
 #   legacy_inventory.math.txt   byte-stable math inventory (H, basis, gbasis,
 #                               tsupp affine rows, pos/gpos block metadata)
-#   legacy_inventory.runmeta.txt  solver-run metadata; since this run is
-#                                solver-free, it only records that fact
+#
+# This script never runs a solver, so it never creates
+# legacy_inventory.runmeta.txt. Solver-run metadata belongs to an explicitly
+# requested paired solver run and is outside the mathematical hash.
 #
 # Solver-free: calls ONLY ncpoly construction + get_basis/get_kagome_basis/
 # get_bulkbasis/get_kagome_bulkbasis + reduce!/PSDstate_entry/isz/reduce_mirror.
-# It does NOT call certify_*_gap and does NOT touch JuMP/Mosek, so it avoids the
-# Mosek-11 zero-dim-PSD bug. The tsupp construction MIRRORS the support-collection
-# loops of certify_Ising_gap / certify_Heisenberg_kagome_gap line-for-line.
+# It does NOT call certify_*_gap, construct a JuMP model, or instantiate/call a
+# Mosek optimizer, so it avoids the Mosek-11 zero-dim-PSD bug. Importing
+# SpectralGap still loads its JuMP/MosekTools package dependencies. The tsupp
+# construction MIRRORS the support-collection loops of
+# certify_Ising_gap / certify_Heisenberg_kagome_gap line-for-line.
 #
 # Run on SCNet:
-#   julia --project=julia-env scripts/dump_legacy_inventory.jl
+#   julia --startup-file=no --project=julia-env \
+#     tracks/polyopt/solutions/sdp-gap-seekers/scripts/dump_legacy_inventory.jl \
+#     --output legacy_inventory.math.txt
 #
-# STATUS: validated on SCNet (solver-free, login-node run). Asserts pass:
+# STATUS: the pre-hash-fix generator was validated on SCNet (solver-free).
+# Its asserts passed:
 # Ising N=9 d=2 -> H=17 terms, lb=[211,50], lgb=[11,14], |tsupp|=2705;
 # Kagome N=5 d=2 -> H=18 terms, lb=[31,22], lgb=[0,1], |tsupp|=10982.
-# Output is deterministic; the frozen oracle math file should be committed from a
-# clean run (see legacy-inventory-schema.md §4–5) before merging.
+# The corrected serialization + verifier still need two independent clean SCNet
+# reproductions before any output is committed as the frozen oracle.
 
 using SpectralGap
-using SHA
+
+include(joinpath(@__DIR__, "..", "src", "LegacyInventoryFormat.jl"))
+using .LegacyInventoryFormat
 
 # ---- SpectralGap internals (not exported) -----------------------------------
 get_basis_(args...; kw...)        = SpectralGap.get_basis(args...; kw...)
@@ -45,6 +54,18 @@ reduce_perm_(args...; kw...)      = SpectralGap.reduce_perm(args...; kw...)
 # exact rational of a Float coefficient known to be a short binary fraction
 rat(c::Real) = rationalize(Int, c)
 
+function write_header(io; model, config, basis_ordering)
+    println(io, "format_version = 1")
+    println(io, "generator = dump_legacy_inventory.jl")
+    println(io, "spectralgap_source = ", spectralgap_source())
+    println(io, "model = ", model)
+    println(io, "config = ", config)
+    println(io, "normalization = spin-1/2, S=sigma/2, Heisenberg factor 1/4")
+    println(io, "encoding = Pauli index = 3*(site-1)+alpha; alpha in {1=x,2=y,3=z}")
+    println(io, "basis_ordering = ", basis_ordering)
+    println(io)
+end
+
 function write_terms(io, supp, coe)
     # stable id: sort terms by (num, den, support) — type-stable key
     entries = [(rat(c), s) for (s, c) in zip(supp, coe)]
@@ -53,7 +74,7 @@ function write_terms(io, supp, coe)
     println(io, "nterms = ", length(entries))
     for (i, (r, s)) in enumerate(entries)
         println(io, "H[", i, "] coeff=", numerator(r), "/", denominator(r),
-                " support=", s)
+                " support=", canonical_int_vector(s))
     end
 end
 
@@ -63,7 +84,11 @@ function write_basis_block(io, scope, lbl, block)
     println(io, "dimension = ", length(block))
     for (i, entry) in enumerate(block)
         word, aux = entry
-        println(io, "entry[", i, "] word=", word, " aux=", aux)
+        println(
+            io,
+            "entry[", i, "] word=", canonical_int_vector(word),
+            " aux=", canonical_nested_int_vectors(aux),
+        )
     end
 end
 
@@ -149,7 +174,7 @@ function write_tsupp(io, tsupp)
     println(io, "[tsupp]")
     println(io, "nrows = ", length(tsupp))
     for (i, row) in enumerate(tsupp)
-        println(io, "row[", i, "] = ", row)
+        println(io, "row[", i, "] = ", canonical_nested_int_vectors(row))
     end
 end
 
@@ -163,7 +188,7 @@ function write_blocks(io, scope, lbls)
 end
 
 # ---- Ising case -------------------------------------------------------------
-function dump_ising(io, N, g_raz, d)
+function dump_ising(header_io, payload_io, N, g_raz, d)
     g_float = Float64(g_raz)
     @info "Ising N=$N g=$g_raz d=$d"
     H = ncpoly([[3*[i; i+1] for i in 1:N-1]; [[3i - 2] for i in 1:N]],
@@ -182,41 +207,42 @@ function dump_ising(io, N, g_raz, d)
     lb, lgb = length.(basis), length.(gbasis)
     tsupp = ising_tsupp(basis, gbasis, H, N)
 
-    # ---- header (§2.1) ----
-    println(io, "format_version = 1")
-    println(io, "generator = dump_legacy_inventory.jl")
-    println(io, "spectralgap_source = ", spectralgap_source())
-    println(io, "model = 1D-transverse-field-Ising")
-    println(io, "config = N=", N, " g=", numerator(g_raz), "/", denominator(g_raz), " d=", d)
-    println(io, "normalization = spin-1/2, S=sigma/2, Heisenberg factor 1/4")
-    println(io, "encoding = Pauli index = 3*(site-1)+alpha; alpha in {1=x,2=y,3=z}")
-    println(io, "basis_ordering = get_basis label=1 then label=2; entries in emission order")
-    println(io)
+    # ---- human/provenance header (§2.1, excluded from math SHA) ----
+    write_header(
+        header_io;
+        model = "1D-transverse-field-Ising",
+        config = string(
+            "N=", N,
+            " g=", numerator(g_raz), "/", denominator(g_raz),
+            " d=", d,
+        ),
+        basis_ordering = "get_basis label=1 then label=2; entries in emission order",
+    )
     # ---- H (§2.2) ----
-    write_terms(io, H.supp, H.coe); println(io)
+    write_terms(payload_io, H.supp, H.coe); println(payload_io)
     # ---- basis blocks (§2.3) ----
-    write_basis_block(io, "pos", 1, basis[1]); println(io)
-    write_basis_block(io, "pos", 2, basis[2]); println(io)
-    write_basis_block(io, "gpos", 1, gbasis[1]); println(io)
-    write_basis_block(io, "gpos", 2, gbasis[2]); println(io)
+    write_basis_block(payload_io, "pos", 1, basis[1]); println(payload_io)
+    write_basis_block(payload_io, "pos", 2, basis[2]); println(payload_io)
+    write_basis_block(payload_io, "gpos", 1, gbasis[1]); println(payload_io)
+    write_basis_block(payload_io, "gpos", 2, gbasis[2]); println(payload_io)
     # ---- tsupp affine rows (§2.4) ----
-    write_tsupp(io, tsupp); println(io)
+    write_tsupp(payload_io, tsupp); println(payload_io)
     # ---- block layout metadata (§2.5) ----
-    println(io, "[pos.blocks]")
+    println(payload_io, "[pos.blocks]")
     for (k, dim) in enumerate(lb)
-        println(io, "block[", k, "] kind=pos label=", k,
+        println(payload_io, "block[", k, "] kind=pos label=", k,
                 " dimension=", dim, " basis_id=basis.pos.L", k)
     end
-    println(io, "[gpos.blocks]")
+    println(payload_io, "[gpos.blocks]")
     for (k, dim) in enumerate(lgb)
-        println(io, "block[", k, "] kind=gpos label=", k,
+        println(payload_io, "block[", k, "] kind=gpos label=", k,
                 " dimension=", dim, " basis_id=basis.gpos.L", k)
     end
     return (lb=lb, lgb=lgb, ntsupp=length(tsupp), nterms=length(H.supp))
 end
 
 # ---- Kagome case (H + basis + tsupp; model="kagome", reduce_perm) -----------
-function dump_kagome(io, N, d)
+function dump_kagome(header_io, payload_io, N, d)
     @info "Kagome N=$N d=$d"
     triples = [[1, 2, 3], [1, 4, 5]]
     edges = Vector{Int}[]
@@ -238,69 +264,93 @@ function dump_kagome(io, N, d)
     lb, lgb = length.(basis), length.(gbasis)
     tsupp = kagome_tsupp(basis, gbasis, H, N)
 
-    println(io, "format_version = 1")
-    println(io, "generator = dump_legacy_inventory.jl")
-    println(io, "spectralgap_source = ", spectralgap_source())
-    println(io, "model = kagome-Heisenberg")
-    println(io, "config = N=", N, " d=", d)
-    println(io, "normalization = spin-1/2, S=sigma/2, Heisenberg factor 1/4")
-    println(io, "encoding = Pauli index = 3*(site-1)+alpha; alpha in {1=x,2=y,3=z}")
-    println(io)
-    write_terms(io, H.supp, H.coe); println(io)
-    write_basis_block(io, "pos", 1, basis[1]); println(io)
-    write_basis_block(io, "pos", 2, basis[2]); println(io)
-    write_basis_block(io, "gpos", 1, gbasis[1]); println(io)
-    write_basis_block(io, "gpos", 2, gbasis[2]); println(io)
-    write_tsupp(io, tsupp); println(io)
-    println(io, "[pos.blocks]")
+    write_header(
+        header_io;
+        model = "kagome-Heisenberg",
+        config = string("N=", N, " d=", d),
+        basis_ordering = "get_kagome_basis label=1 then label=2; entries in emission order",
+    )
+    write_terms(payload_io, H.supp, H.coe); println(payload_io)
+    write_basis_block(payload_io, "pos", 1, basis[1]); println(payload_io)
+    write_basis_block(payload_io, "pos", 2, basis[2]); println(payload_io)
+    write_basis_block(payload_io, "gpos", 1, gbasis[1]); println(payload_io)
+    write_basis_block(payload_io, "gpos", 2, gbasis[2]); println(payload_io)
+    write_tsupp(payload_io, tsupp); println(payload_io)
+    println(payload_io, "[pos.blocks]")
     for (k, dim) in enumerate(lb)
-        println(io, "block[", k, "] kind=pos label=", k, " dimension=", dim,
+        println(payload_io, "block[", k, "] kind=pos label=", k, " dimension=", dim,
                 " basis_id=basis.pos.L", k)
     end
-    println(io, "[gpos.blocks]")
+    println(payload_io, "[gpos.blocks]")
     for (k, dim) in enumerate(lgb)
-        println(io, "block[", k, "] kind=gpos label=", k, " dimension=", dim,
+        println(payload_io, "block[", k, "] kind=gpos label=", k, " dimension=", dim,
                 " basis_id=basis.gpos.L", k)
     end
     return (lb=lb, lgb=lgb, ntsupp=length(tsupp), nterms=length(H.supp))
 end
 
 function spectralgap_source()
-    # Portable + deterministic: no git dependency (some remotes have an old git
-    # without -C, and .external may not be a repo). pkgversion is stable for a
-    # fixed checkout; fall back to a descriptive string if it is unavailable.
+    # Prefer the exact source commit without relying on `git -C` (unavailable on
+    # one legacy remote). This is provenance only and is excluded from math SHA.
+    source_root = normpath(joinpath(dirname(pathof(SpectralGap)), ".."))
     try
-        return string("SpectralGap.jl v", pkgversion(SpectralGap))
+        git_top = strip(read(
+            Cmd(`git rev-parse --show-toplevel`; dir = source_root),
+            String,
+        ))
+        realpath(git_top) == realpath(source_root) ||
+            error("SpectralGap source is not its own git checkout")
+        commit = strip(read(Cmd(`git rev-parse HEAD`; dir = source_root), String))
+        occursin(r"^[0-9a-f]{40}$", commit) ||
+            error("git returned a non-SHA revision")
+        dirty = !isempty(strip(read(
+            Cmd(`git status --porcelain`; dir = source_root),
+            String,
+        )))
+        version = try
+            string(pkgversion(SpectralGap))
+        catch
+            "unknown"
+        end
+        return "git=$commit dirty=$dirty package_version=$version"
     catch
-        return "SpectralGap.jl (.external, patched)"
+        version = try
+            string(pkgversion(SpectralGap))
+        catch
+            "unknown"
+        end
+        return "git=unavailable dirty=unknown package_version=$version"
     end
 end
 
-# ---- main: build math content, hash it, write both files --------------------
-function main()
-    # Ising + Kagome math inventory into a buffer so we can hash it
-    buf = IOBuffer()
-    stats_ising  = dump_ising(buf, 9, 1//2, 2)
-    println(buf)
-    stats_kagome = dump_kagome(buf, 5, 2)
-    math_no_hash = String(take!(buf))
-    h = bytes2hex(sha256(math_no_hash))
+# ---- main: build and verify the solver-free mathematical inventory ----------
+function parse_output_path(args)
+    isempty(args) && return "legacy_inventory.math.txt"
+    length(args) == 2 && args[1] == "--output" ||
+        throw(ArgumentError("usage: dump_legacy_inventory.jl [--output PATH]"))
+    return args[2]
+end
 
-    open("legacy_inventory.math.txt", "w") do io
-        write(io, math_no_hash)
-        println(io, "sha256 = ", h)
-    end
-    open("legacy_inventory.runmeta.txt", "w") do io
-        println(io, "# solver-run metadata")
-        println(io, "solver_run = false   # this was a solver-free inventory construction")
-        println(io, "note = no JuMP/Mosek invoked; tsupp mirrored from certify_*_gap")
-        println(io, "math_sha256 = ", h)
-    end
+function main(args = ARGS)
+    output_path = parse_output_path(args)
+    ising_header, ising_payload = IOBuffer(), IOBuffer()
+    stats_ising = dump_ising(ising_header, ising_payload, 9, 1//2, 2)
+    kagome_header, kagome_payload = IOBuffer(), IOBuffer()
+    stats_kagome = dump_kagome(kagome_header, kagome_payload, 5, 2)
+    records = [
+        InventoryRecord(String(take!(ising_header)), String(take!(ising_payload))),
+        InventoryRecord(String(take!(kagome_header)), String(take!(kagome_payload))),
+    ]
 
-    @info "wrote legacy_inventory.math.txt + legacy_inventory.runmeta.txt"
+    write_math_inventory(output_path, records)
+    report = verify_math_inventory_file(output_path)
+
+    @info "wrote solver-free math inventory: $output_path"
     @info "Ising  : H=$(stats_ising.nterms) terms, lb=$(stats_ising.lb), lgb=$(stats_ising.lgb), |tsupp|=$(stats_ising.ntsupp)"
     @info "Kagome : H=$(stats_kagome.nterms) terms, lb=$(stats_kagome.lb), lgb=$(stats_kagome.lgb), |tsupp|=$(stats_kagome.ntsupp)"
-    @info "sha256(math) = ", h
+    @info "sha256(canonical math payload) = ", report.math_sha256
 end
 
-main()
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    main()
+end
