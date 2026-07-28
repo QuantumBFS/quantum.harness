@@ -197,6 +197,7 @@ Majorana 宇称分辨 period-4 数值猜想。
 ## 查看入口
 
 - [总入口](../START_HERE.md)
+- [成果总账](RESULTS_LEDGER.md)
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
 - [全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)

@@ -5,7 +5,19 @@
 寻找新的、可映射回具体量子模型的矩阵结构，使辅助场量子蒙卡的每个构型权重
 `det(I + exp(A_1) ... exp(A_L))` 始终非负；或者用精确反例排除一个看似可行的候选。
 
-## 现在做到哪里
+## 当前结论
+
+先看 [成果总账](docs/RESULTS_LEDGER.md)。截至 2026-07-28：
+
+- 两套纯 determinant 正性机制和一套 graded 正权机制已经严格证明；
+- 四组局域相互作用 Hamiltonian 已完成映射，但尚无一组能确认是新的无符号物理类；
+- graded monomial 已约化到已知 Majorana 正性，odd block-TN 的自然局域化有精确负权；
+- 当前主线只剩 Majorana 宇称猜想，以及合作者正在验证的 Klein-Hodge/spinor 表示锥。
+
+下面的长清单用于审计数字，日常不需要逐条阅读。
+
+<details>
+<summary>展开完整扫描与证明快照</summary>
 
 - 已完成题目拆解、主要已知定理和新颖性边界的调研。
 - determinant oracle、Majorana 直接 Fock/Spin 迹 oracle、25 个基线结构生成器、可恢复参数
@@ -69,11 +81,23 @@
   independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
-- 当前完整自动测试为 `219 passed`。
+- 当前完整自动测试为 `220 passed`。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
+</details>
+
 ## 阅读顺序
+
+日常只需：
+
+1. [成果总账](docs/RESULTS_LEDGER.md)：统一的数量、结论和开放问题；
+2. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：补齐术语；
+3. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：只看接下来做什么；
+4. 与某个结论有关时，再进入对应专题文档。
+
+<details>
+<summary>展开专题复核索引</summary>
 
 1. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：先理解问题、术语和我们为什么这样做。
 2. [全非负路径类](docs/TOTAL_NONNEGATIVE_PATH_CLASS.md)：看当前严格恒正主候选、三步证明和
@@ -106,6 +130,8 @@
 19. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
 20. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
 21. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+
+</details>
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
