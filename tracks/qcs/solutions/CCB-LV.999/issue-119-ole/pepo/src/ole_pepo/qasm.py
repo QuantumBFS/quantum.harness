@@ -234,7 +234,7 @@ def replace_perturbations(
     return replace(protocol, layers=new_layers)
 
 
-def crop_protocol(protocol: OLEProtocol, sites: tuple[int, ...] | list[int]) -> OLEProtocol:
+def crop_protocol(protocol: OLEProtocol, sites: tuple[int, ...] | list[int] | frozenset[int]) -> OLEProtocol:
     """Keep gates whose complete support is contained in ``sites``."""
     site_set = frozenset(sites)
     keep = lambda gate: all(qubit in site_set for qubit in gate.qubits)
