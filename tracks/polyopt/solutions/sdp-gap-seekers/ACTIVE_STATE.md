@@ -360,5 +360,7 @@ Updated: 2026-07-29 UTC.
   association cap, a later exact continuous-spin route has been derived for
   the rank-at-most-four moment inventory. It parameterizes rank-two moments
   by `delta_ab` and rank-four moments by the three delta pairings, with an
-  exact rational-rotation gate. No model uses this candidate yet.
+  exact rational-rotation gate. Its source-level parameterizer, synthetic
+  tensor tests, and dedicated Slurm inventory gate are now prepared; all
+  eight synthetic assertions pass. No model uses this candidate yet.
 - No decision-changing user or resource need is open.
