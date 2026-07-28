@@ -28,6 +28,19 @@ All calculations retain exact-zero exponential-channel pruning, HDF5
 checkpoints with full provenance, and initialization-only checkpoint reuse.
 Approximate MPO compression is forbidden.
 
+An older `chi=128` checkpoint whose code hash differs from the current tree
+may seed `chi=256` only through audited initialization reuse. Before loading
+the MPS tensors, verify and record the Hamiltonian parameters, `sigma`, `L`,
+`Gamma`, `K`, `alpha`, `r_fit`, exponential-coefficient hash, MPO/operator
+convention, parity sector, and lattice structure. Record both the checkpoint
+and current code hashes. A mismatch in any physical or structural field
+rejects reuse. A code-hash mismatch alone is permitted only for this
+initialization path.
+
+The seeded `chi=256` state is then fully reoptimized with the current code.
+No energy, observable, or convergence diagnostic stored in the old
+checkpoint is reused as a `chi=256` result.
+
 ## MPS truncation uncertainty
 
 The baseline is the existing `K=24`, `chi=128` local pilot. Targeted
@@ -92,9 +105,11 @@ than replaced by an expanded or adaptive scan.
 6. Produce separate MPS- and MPO-uncertainty tables and a compact local
    reproduction report.
 
-Every cell is independently resumable. A completed checkpoint is reused
-only when its physical parameters, parity, K, alpha, `r_fit`, requested
-bond dimension, code hash, and fit hash match exactly.
+Every cell is independently resumable. A completed checkpoint used as a
+final result is reused only when its physical parameters, parity, K, alpha,
+`r_fit`, requested bond dimension, code hash, and fit hash match exactly.
+The separately documented audited initialization path is the sole exception
+to exact code-hash matching.
 
 ## Acceptance and interpretation
 
