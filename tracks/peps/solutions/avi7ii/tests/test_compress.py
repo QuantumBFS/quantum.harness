@@ -190,3 +190,35 @@ def test_compression_modes_record_the_same_compute_budget():
     assert ordinary.budget.cutoff == objective.contractor.cutoff
     assert ordinary.budget.max_iterations == 1
     assert ordinary.budget.optimizer == "L-BFGS-B"
+
+
+def test_result_history_excludes_nonfinite_line_search_trials():
+    teacher = FinitePEPO.identity(2, 2)
+    for gate in second_order_gates(
+        2,
+        2,
+        j=1.0,
+        h=3.0,
+        delta_beta=0.025,
+    ):
+        teacher.apply_gate(gate, max_bond=8)
+    objective = CompressionObjective(
+        BoundaryContractor(chi=16, cutoff=1e-10),
+        j=1.0,
+        h=3.0,
+        tolerances=ThermodynamicTolerances(
+            z=5e-2,
+            u=5e-2,
+            contraction_noise=1e-7,
+        ),
+        weights=ThermodynamicWeights(z=1.0, u=1.0, hermiticity=1.0),
+    )
+
+    result = VariationalCompressor(
+        objective,
+        max_iterations=3,
+    ).compress(teacher, max_bond=1, mode="thermodynamic")
+
+    assert result.iterations <= result.budget.max_iterations
+    assert all(np.isfinite(value) for value in result.loss_history)
+    assert np.isclose(result.loss_history[-1], result.final.as_floats().total)

@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -134,3 +136,16 @@ def test_nonpositive_partition_is_rejected_only_when_reporting_floats():
         )
     with pytest.raises(FloatingPointError, match="non-positive"):
         point.as_floats()
+
+
+def test_boundary_contraction_does_not_require_optional_kahypar():
+    pepo = FinitePEPO.identity(2, 2)
+    contractor = BoundaryContractor(chi=4, cutoff=1e-12)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "error",
+            message="Couldn't import `kahypar`.*",
+            category=UserWarning,
+        )
+        assert np.isclose(contractor.trace(pepo), 16.0)

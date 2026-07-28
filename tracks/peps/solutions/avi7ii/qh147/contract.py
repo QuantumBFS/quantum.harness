@@ -123,6 +123,7 @@ class BoundaryContractor:
             max_bond=self.chi,
             cutoff=self.cutoff,
             canonize=True,
+            final_contract_opts={"optimize": "greedy"},
         )
 
     def trace(self, pepo: FinitePEPO):

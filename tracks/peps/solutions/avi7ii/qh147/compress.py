@@ -258,7 +258,20 @@ class VariationalCompressor:
             teacher_point=teacher_point,
             mode=mode,
         )
-        history = tuple(float(value) for value in optimizer.losses)
+        history = tuple(
+            value
+            for value in (float(raw) for raw in optimizer.losses)
+            if math.isfinite(value)
+        )
+        final_loss = final.as_floats().total
+        if not history or not math.isclose(
+            history[-1],
+            final_loss,
+            rel_tol=1e-12,
+            abs_tol=1e-14,
+        ):
+            history = (*history, final_loss)
+        iterations = int(optimizer.res.nit)
         budget = CompressionBudget(
             chi=self.objective.contractor.chi,
             cutoff=self.objective.contractor.cutoff,
@@ -270,7 +283,7 @@ class VariationalCompressor:
             pepo=optimized,
             initial=initial,
             final=final,
-            iterations=len(history),
+            iterations=iterations,
             loss_history=history,
             max_bond=final_bond,
             mode=mode,
