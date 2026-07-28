@@ -35,7 +35,7 @@ if r.cert_artifact === nothing
     println("ERROR: no cert_artifact"); flush(stdout); exit(1)
 end
 open("$ARTIFACT", "w") do io; serialize(io, r.cert_artifact); end
-println("artifact serialized: $ARTIFACT  (nvars=$(r.cert_artifact.nvars), ncons=$(r.cert_artifact.nconstraints), affmap=$(length(r.cert_artifact.affine_map)))"); flush(stdout)
+println("artifact serialized: $ARTIFACT  (nvars=\$(r.cert_artifact.nvars), ncons=\$(r.cert_artifact.nconstraints), affmap=\$(length(r.cert_artifact.affine_map)))"); flush(stdout)
 JLEOF
 
 echo; echo "=== Step 2: SOUND verifier (one-x binding, no JuMP/Mosek) ==="
