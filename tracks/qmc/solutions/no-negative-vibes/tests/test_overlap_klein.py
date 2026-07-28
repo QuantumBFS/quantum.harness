@@ -257,6 +257,25 @@ def test_primal_reconstruction_enforces_anchor_and_denominator_limit() -> None:
         )
 
 
+def test_primal_reconstruction_forces_an_accepted_anchor_before_nsimplify() -> None:
+    system = _synthetic_system([[1, 0]])
+    accepted_outer_tolerance = AnchorSolve(
+        label="x",
+        sign=1,
+        status="feasible",
+        coefficients=(1.0 + 5e-9, 0.0),
+        min_slack=1.0,
+        message="synthetic",
+    )
+
+    certificate = reconstruct_exact_primal(
+        system, accepted_outer_tolerance
+    )
+
+    assert certificate.coefficients == (sp.Integer(1), sp.Integer(0))
+    assert verify_primal(system, certificate)
+
+
 def test_primal_reconstruction_never_upgrades_an_invalid_float_solution() -> None:
     system = _synthetic_system([[0, -1]])
     invalid = AnchorSolve(
@@ -320,6 +339,20 @@ def test_dual_reconstruction_handles_q_sqrt_two_and_degenerate_rows() -> None:
     ) == 0
 
 
+@pytest.mark.parametrize("scale", (10**5, 10**12))
+def test_dual_zero_proof_is_invariant_under_positive_row_scaling(
+    scale: int,
+) -> None:
+    system = _synthetic_system([[scale, 0], [-scale, 0]])
+
+    certificate = find_zero_dual(system, "x")
+
+    inverse_scale = sp.Rational(1, scale)
+    assert certificate.plus_weights == (inverse_scale, sp.Integer(0))
+    assert certificate.minus_weights == (sp.Integer(0), inverse_scale)
+    assert verify_zero_dual(system, certificate)
+
+
 def test_dual_search_refuses_to_claim_a_missing_zero_proof() -> None:
     with pytest.raises(ArithmeticError, match="dual"):
         find_zero_dual(_synthetic_system([[1, 0], [0, 1]]), "x")
@@ -340,6 +373,36 @@ def test_verifiers_reject_wrong_anchor_or_exact_identity() -> None:
 
     assert not verify_primal(system, wrong_primal)
     assert not verify_zero_dual(system, wrong_dual)
+
+
+def test_empty_metzler_system_has_both_anchored_primals_but_no_zero_dual() -> None:
+    system = ExactMetzlerSystem(
+        labels=("x", "y"),
+        rows=(),
+        coefficients=sp.ImmutableSparseMatrix(0, 2, {}),
+    )
+
+    for sign in (-1, 1):
+        solve = solve_anchor(system, "x", sign)
+        assert solve.status == "feasible"
+        assert verify_primal(
+            system, reconstruct_exact_primal(system, solve)
+        )
+    with pytest.raises(ArithmeticError, match="dual"):
+        find_zero_dual(system, "x")
+
+
+def test_structurally_zero_anchor_has_both_primals_but_no_zero_dual() -> None:
+    system = _synthetic_system([[0, 1], [0, -1]])
+
+    for sign in (-1, 1):
+        solve = solve_anchor(system, "x", sign)
+        assert solve.status == "feasible"
+        certificate = reconstruct_exact_primal(system, solve)
+        assert certificate.coefficients[0] == sign
+        assert verify_primal(system, certificate)
+    with pytest.raises(ArithmeticError, match="dual"):
+        find_zero_dual(system, "x")
 
 
 def test_exact_primal_certificate_json_round_trip() -> None:
@@ -447,3 +510,25 @@ def test_certificate_json_rejects_noncanonical_or_false_certificates() -> None:
         certificate_from_json(noncanonical, system)
     with pytest.raises(ValueError, match="verify"):
         certificate_from_json(false_certificate, system)
+
+
+def test_certificate_json_serializer_enforces_the_parser_length_limit() -> None:
+    enormous = sp.Integer(10) ** 300
+    certificate = ExactPrimalCertificate(
+        anchor_label="x",
+        anchor_sign=1,
+        coefficients=(sp.Integer(1), enormous),
+    )
+    payload = {
+        "kind": "primal",
+        "anchor_label": "x",
+        "anchor_sign": 1,
+        "coefficients": ["1", sp.sstr(enormous)],
+    }
+
+    with pytest.raises(ValueError, match="too long"):
+        certificate_to_json(certificate)
+    with pytest.raises(ValueError, match="short strings"):
+        certificate_from_json(
+            payload, _synthetic_system([[1, 0], [0, 1]])
+        )

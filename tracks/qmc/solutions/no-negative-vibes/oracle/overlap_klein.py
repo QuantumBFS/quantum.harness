@@ -364,7 +364,7 @@ def _require_denominator_limit(max_denominator: int) -> None:
 
 
 def _reconstruct_float(
-    value: float, *, max_denominator: int
+    value: float, *, max_denominator: int | None
 ) -> sp.Expr:
     if not math.isfinite(value):
         raise ArithmeticError("cannot reconstruct a nonfinite coefficient")
@@ -421,10 +421,11 @@ def reconstruct_exact_primal(
         raise ArithmeticError("anchor solve does not satisfy its anchor")
 
     exact = tuple(
-        _reconstruct_float(value, max_denominator=max_denominator)
-        for value in solve.coefficients
+        sp.Integer(solve.sign)
+        if index == anchor
+        else _reconstruct_float(value, max_denominator=max_denominator)
+        for index, value in enumerate(solve.coefficients)
     )
-    exact = exact[:anchor] + (sp.Integer(solve.sign),) + exact[anchor + 1 :]
     certificate = ExactPrimalCertificate(
         anchor_label=solve.label,
         anchor_sign=solve.sign,
@@ -528,7 +529,7 @@ def _numeric_dual(
     residual = matrix.T @ weights - target
     if np.max(np.abs(residual), initial=0.0) > 1e-8:
         raise ArithmeticError("dual solver returned an inaccurate identity")
-    return np.where(np.abs(weights) <= 1e-10, 0.0, weights)
+    return weights
 
 
 def _fit_free_parameters(
@@ -536,7 +537,7 @@ def _fit_free_parameters(
     parameters: tuple[sp.Symbol, ...],
     numerical: np.ndarray,
     *,
-    max_denominator: int,
+    max_denominator: int | None,
 ) -> dict[sp.Symbol, sp.Expr]:
     zero_substitution = {parameter: sp.Integer(0) for parameter in parameters}
     particular = np.array(
@@ -564,14 +565,10 @@ def _reconstruct_dual_weights(
     system: ExactMetzlerSystem,
     numerical: np.ndarray,
     target: sp.ImmutableMatrix,
-    *,
-    max_denominator: int = 10000,
 ) -> tuple[sp.Expr, ...]:
-    _require_denominator_limit(max_denominator)
-
     try:
         direct = tuple(
-            _reconstruct_float(float(value), max_denominator=max_denominator)
+            _reconstruct_float(float(value), max_denominator=None)
             for value in numerical
         )
     except ArithmeticError:
@@ -579,64 +576,69 @@ def _reconstruct_dual_weights(
     if direct and _dual_identity_holds(system, direct, target):
         return direct
 
-    active = tuple(
-        index for index, value in enumerate(numerical) if value > 1e-10
+    raw_positive = tuple(
+        index for index, value in enumerate(numerical) if value > 0
     )
-    if not active:
-        raise ArithmeticError("dual support reconstruction is empty")
-    exact_matrix = system.coefficients.T.extract(
-        range(len(system.labels)), active
+    expanded = tuple(
+        index for index, value in enumerate(numerical) if value != 0
     )
-    solution_set = sp.linsolve((exact_matrix, target))
-    if solution_set == sp.EmptySet:
-        raise ArithmeticError(
-            "numerical dual support has no exact solution"
-        )
-    expressions = tuple(next(iter(solution_set)))
-    parameters = tuple(
-        sorted(
-            set().union(
-                *(expression.free_symbols for expression in expressions)
-            ),
-            key=str,
-        )
-    )
-    substitutions: list[dict[sp.Symbol, sp.Expr]] = []
-    if parameters:
-        try:
-            substitutions.append(
-                _fit_free_parameters(
-                    expressions,
-                    parameters,
-                    numerical[np.array(active)],
-                    max_denominator=max_denominator,
-                )
-            )
-        except (ArithmeticError, TypeError, ValueError):
-            pass
-        substitutions.append(
-            {parameter: sp.Integer(0) for parameter in parameters}
-        )
-    else:
-        substitutions.append({})
+    all_rows = tuple(range(len(system.rows)))
+    supports: list[tuple[int, ...]] = []
+    for support in (raw_positive, expanded, all_rows):
+        if support and support not in supports:
+            supports.append(support)
 
-    for substitution in substitutions:
-        try:
-            support_values = tuple(
-                _normalized_q_sqrt_two(
-                    expression.subs(substitution),
-                    max_denominator=max_denominator,
-                )
-                for expression in expressions
-            )
-        except (ArithmeticError, ValueError):
+    for active in supports:
+        exact_matrix = system.coefficients.T.extract(
+            range(len(system.labels)), active
+        )
+        solution_set = sp.linsolve((exact_matrix, target))
+        if solution_set == sp.EmptySet:
             continue
-        candidate = [sp.Integer(0)] * len(system.rows)
-        for index, value in zip(active, support_values, strict=True):
-            candidate[index] = value
-        exact = tuple(candidate)
-        if _dual_identity_holds(system, exact, target):
-            return exact
+        expressions = tuple(next(iter(solution_set)))
+        parameters = tuple(
+            sorted(
+                set().union(
+                    *(expression.free_symbols for expression in expressions)
+                ),
+                key=str,
+            )
+        )
+        substitutions: list[dict[sp.Symbol, sp.Expr]] = []
+        if parameters:
+            try:
+                substitutions.append(
+                    _fit_free_parameters(
+                        expressions,
+                        parameters,
+                        numerical[np.array(active)],
+                        max_denominator=None,
+                    )
+                )
+            except (ArithmeticError, TypeError, ValueError):
+                pass
+            substitutions.append(
+                {parameter: sp.Integer(0) for parameter in parameters}
+            )
+        else:
+            substitutions.append({})
+
+        for substitution in substitutions:
+            try:
+                support_values = tuple(
+                    _normalized_q_sqrt_two(
+                        expression.subs(substitution)
+                    )
+                    for expression in expressions
+                )
+            except (ArithmeticError, ValueError):
+                continue
+            candidate = [sp.Integer(0)] * len(system.rows)
+            for index, value in zip(active, support_values, strict=True):
+                candidate[index] = value
+            exact = tuple(candidate)
+            if _dual_identity_holds(system, exact, target):
+                return exact
     raise ArithmeticError(
         "dual support could not be reconstructed as a nonnegative "
         "Q(sqrt(2)) identity"
@@ -698,7 +700,10 @@ def verify_zero_dual(
 
 
 def _canonical_q_sqrt_two(expression: sp.Expr) -> str:
-    return sp.sstr(_normalized_q_sqrt_two(expression))
+    serialized = sp.sstr(_normalized_q_sqrt_two(expression))
+    if len(serialized) > 256:
+        raise ValueError("canonical certificate number is too long")
+    return serialized
 
 
 def _parse_canonical_q_sqrt_two(value: object) -> sp.Expr:
