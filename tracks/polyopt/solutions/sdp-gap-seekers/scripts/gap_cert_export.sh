@@ -35,6 +35,8 @@ H = ncpoly([[3*[i; i+1] for i = 1:N-1]; [[3i-2] for i = 1:N]], [-ones(N-1); g*on
 println("certify start=", Dates.format(now(),"HH:MM:SS")); flush(stdout)
 r = certify_Ising_gap(N, H, 0.26, 2, QUIET=true)
 println("flag=", r.flag, " term=", r.termination, " primal=", r.primal); flush(stdout)
+using JuMP, MosekTools
+println("versions: julia=", VERSION, " JuMP=v", pkgversion(JuMP), " MosekTools=v", pkgversion(MosekTools)); flush(stdout)
 if r.cert_artifact === nothing
     println("ERROR: no cert_artifact"); flush(stdout); exit(1)
 end
@@ -51,7 +53,6 @@ echo; echo "=== Step 3: corruption self-tests (verifier must reject each) ==="
 julia "$SCRIPTS/test_verifier_corruption.jl" "$ARTIFACT"
 echo "corruption-test exit: $?"
 
-echo; echo "=== Epilogue: artifact hash + package versions ==="
+echo; echo "=== Epilogue: artifact hash ==="
 sha256sum "$ARTIFACT"
-julia --project=julia-env -e 'using JuMP, MathOptInterface, MosekTools; for m in (JuMP, MathOptInterface, MosekTools); println("$(m) v$(pkgversion(m))"); end; println("julia v", VERSION)'
 echo "Finished: $(date)"
