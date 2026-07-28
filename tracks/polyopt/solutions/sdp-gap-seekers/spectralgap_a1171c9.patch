@@ -20,16 +20,15 @@ index 62e90a7..84926f4
 diff --git a/src/SpectralGap.jl b/src/SpectralGap.jl
 old mode 100644
 new mode 100755
-index c384283..b0b9b3b
+index c384283..8b27a46
 --- a/src/SpectralGap.jl
 +++ b/src/SpectralGap.jl
-@@ -3,10 +3,21 @@ module SpectralGap
+@@ -3,10 +3,20 @@ module SpectralGap
  using MathOptInterface
  using JuMP
  using MosekTools
 +using Clarabel
  using LinearAlgebra
-+using Serialization
  
  export ncpoly, certify_Ising_gap, certify_Ising_gap_nosignsymmetry, certify_Heisenberg_kagome_gap, certify_Heisenberg_kagome_gap_nosignsymmetry
  
@@ -48,7 +47,7 @@ index c384283..b0b9b3b
 diff --git a/src/sdp.jl b/src/sdp.jl
 old mode 100644
 new mode 100755
-index ed6716a..b7c384c
+index ed6716a..cd39c01
 --- a/src/sdp.jl
 +++ b/src/sdp.jl
 @@ -1,4 +1,4 @@
@@ -76,7 +75,7 @@ index ed6716a..b7c384c
      if QUIET == false
          println("Solving the SDP...")
      end
-@@ -145,25 +144,69 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+@@ -145,25 +144,67 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -115,6 +114,7 @@ index ed6716a..b7c384c
 +    # NOTE: under SLOW_PROGRESS the ray is a candidate only; (a)-(d) must pass
 +    # and ideally be re-checked with rational/interval post-processing.
 +    cert_ray = nothing
++    cert_artifact = nothing
 +    if _pstatus == MathOptInterface.INFEASIBILITY_CERTIFICATE ||
 +       _pstatus == MathOptInterface.NEARLY_INFEASIBILITY_CERTIFICATE
 +        lam_ray = value(λ)
@@ -125,45 +125,42 @@ index ed6716a..b7c384c
 +        cons_res = maximum(abs, value.(cons))
 +        cert_ray = (lambda=lam_ray, pos_min_eig=pos_min_eig,
 +                    gpos_min_eig=gpos_min_eig, cons_residual=cons_res)
-+        # PORTABLE CERTIFICATE ARTIFACT (advisor re-audit). Export the complete
-+        # normalized primal ray + the sparse affine map (extracted from the
-+        # assembled AffExpr terms) so a SEPARATE verifier can reconstruct the
-+        # constraint identity without JuMP/Mosek. The verifier reads this file
-+        # and recomputes cons[k] = sum coef*ray_value[var]; it does not call the
-+        # original model. Ray is normalized to lambda=1.
-+        if export_cert !== nothing
-+            all_vars = all_variables(model)
-+            vidx = Dict(var => idx for (idx, var) in enumerate(all_vars))  # position key per variable
-+            ray_vals = value.(all_vars)
-+            affmap = Tuple{Int,Int,Float64}[]          # (constraint_k, var_position, coef)
-+            for k in eachindex(cons)
-+                for (var, coef) in pairs(cons[k].terms)
-+                    push!(affmap, (k, vidx[var], Float64(coef)))
-+                end
++        # PORTABLE CERTIFICATE ARTIFACT (advisor re-audit). Capture the complete
++        # primal ray + the sparse affine map (from the assembled AffExpr terms)
++        # so a SEPARATE verifier can reconstruct the constraint identity without
++        # JuMP/Mosek. certify RETURNS this data; the driver script serializes it
++        # (avoids adding Serialization as a package dep). The independent verifier
++        # reconstructs cons[k] = sum coef*ray_value[var] and re-audits PSD.
++        cert_artifact = nothing
++        all_vars = all_variables(model)
++        vidx = Dict(var => idx for (idx, var) in enumerate(all_vars))
++        ray_vals = value.(all_vars)
++        affmap = Tuple{Int,Int,Float64}[]          # (constraint_k, var_position, coef)
++        for k in eachindex(cons)
++            for (var, coef) in pairs(cons[k].terms)
++                push!(affmap, (k, vidx[var], Float64(coef)))
 +            end
-+            pos_mats = [lb[i] > 0 ? Matrix(Float64.(value.(pos[i]))) : zeros(0, 0)
-+                        for i in eachindex(basis)]
-+            gpos_mats = [lgb[l] > 0 ? Matrix(Float64.(value.(gpos[l]))) : zeros(0, 0)
-+                         for l in eachindex(gbasis)]
-+            lam_v = Float64(value(λ))
-+            artifact = (N=N, gamma=Float64(gamma), d=d, lso=lso,
-+                        termination=string(status), primal=string(_pstatus),
-+                        dual=string(_dstatus), objective=Float64(_objv),
-+                        lambda=lam_v, normalized = iszero(lam_v) ? lam_v : 1.0,
-+                        pos_sizes=copy(lb), gap_sizes=copy(lgb),
-+                        pos_mats=pos_mats, gpos_mats=gpos_mats,
-+                        ray_values=ray_vals, affine_map=affmap)
-+            serialize(export_cert, artifact)
 +        end
++        pos_mats = [lb[i] > 0 ? Matrix(Float64.(value.(pos[i]))) : zeros(0, 0)
++                    for i in eachindex(basis)]
++        gpos_mats = [lgb[l] > 0 ? Matrix(Float64.(value.(gpos[l]))) : zeros(0, 0)
++                     for l in eachindex(gbasis)]
++        cert_artifact = (N=N, gamma=Float64(gamma), d=d, lso=lso,
++                         termination=string(status), primal=string(_pstatus),
++                         dual=string(_dstatus), objective=Float64(_objv),
++                         lambda=Float64(value(λ)),
++                         pos_sizes=copy(lb), gap_sizes=copy(lgb),
++                         pos_mats=pos_mats, gpos_mats=gpos_mats,
++                         ray_values=ray_vals, affine_map=affmap)
 +    end
      flag = status == MathOptInterface.OPTIMAL ? 1 : 0
 -    return flag
 +    return (flag=flag, termination=status, primal=_pstatus, dual=_dstatus, objective=_objv,
-+            cert_ray=cert_ray)
++            cert_ray=cert_ray, cert_artifact=cert_artifact)
  end
  
  function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
-@@ -339,9 +382,12 @@ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=
+@@ -339,9 +380,12 @@ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -177,7 +174,7 @@ index ed6716a..b7c384c
  end
  
  function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; lso=4, QUIET=false)
-@@ -398,6 +444,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -398,6 +442,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
      cons = [AffExpr(0) for i=1:length(tsupp)]
      pos = Vector{Symmetric{VariableRef}}(undef, length(basis))
      for i = 1:length(basis)
@@ -185,7 +182,7 @@ index ed6716a..b7c384c
          pos[i] = @variable(model, [1:lb[i], 1:lb[i]], PSD)
          for j = 1:lb[i], k = j:lb[i]
              @inbounds bi,c = reduce!([basis[i][j][1]; basis[i][k][1]], N, realify=true, model="kagome")
-@@ -417,6 +464,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -417,6 +462,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
      end
      gpos = Vector{Symmetric{VariableRef}}(undef, length(gbasis))
      for l = 1:length(gbasis)
@@ -193,7 +190,7 @@ index ed6716a..b7c384c
          gpos[l] = @variable(model, [1:lgb[l], 1:lgb[l]], PSD)
          for i = 1:lgb[l], j = i:lgb[l]
              bis,coes = PSDstate_entry(gbasis[l][i][1], gbasis[l][j][1], H, N, realify=true, model="kagome")
-@@ -494,9 +542,12 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -494,9 +540,12 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -207,7 +204,7 @@ index ed6716a..b7c384c
  end
  
  function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; obj=nothing, lso=4, QUIET=false)
-@@ -690,7 +741,10 @@ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples
+@@ -690,7 +739,10 @@ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
