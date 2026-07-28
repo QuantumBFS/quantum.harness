@@ -39,6 +39,8 @@ The survey/database phase and validator gate are complete. The executable valida
 
 Attempt 001 started the run stage with a local rank-15 surrogate candidate. Attempt 002 added a toy two-qubit dynamics path under `research/attempts/attempt-002/`: exact unitary propagation, CZ infidelity, finite-difference Hessian geometry, and exact final checks. The public dev validator accepted attempt 002 with score `3.031578947368421`.
 
-Attempt 003 now replaces deterministic query formulas with a pure-NumPy noisy-oracle simplex optimizer under `research/attempts/attempt-003/`. The public dev validator accepts attempt 003 with score `3.235294117647059`.
+Attempt 003 now replaces deterministic query formulas with a pure-NumPy noisy-oracle simplex optimizer under `research/attempts/attempt-003/`. The public dev validator accepts attempt 003 with score `2.4615384615384617`.
 
-Next step: store per-query traces in ignored results and turn the accepted attempt into research-grade tables/plots over `k`, gap, and shot budget.
+Attempt 004 implements the full checklist path: JAX differentiable one-qubit and two-qubit dynamics, open-loop model optimization, Hessian/HVP checks, a strict query-only finite-shot device, model-only/full/random/Hessian baselines, multi-axis sweeps, generated figures, Slurm scripts, and a short report.
+
+Next step: run the capped HPC sweep and update the attempt-004 report with full CPU/GPU scan results.

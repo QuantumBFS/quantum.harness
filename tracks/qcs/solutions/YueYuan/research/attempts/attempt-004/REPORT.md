@@ -28,6 +28,18 @@ rules.
 Run `make_figures.py` after a smoke or full sweep to regenerate summary tables and the
 seven required figures.
 
+## Verification
+
+Local verification was run with the smoke configuration.
+
+- Attempt-004 tests: passing (`17 passed`).
+- YueYuan validator and attempt tests: passing (`37 passed`).
+- Validator self-test: passing (`"status": "passed"`).
+- Smoke output: `tracks/qcs/results/YueYuan/attempt-004/smoke/`.
+- Required figures: generated under `tracks/qcs/results/YueYuan/attempt-004/smoke/figures/`.
+
+The generated files are intentionally ignored by git.
+
 ## Failure Mode
 
 The large mismatch level introduces rotated error channels. The expected failure
