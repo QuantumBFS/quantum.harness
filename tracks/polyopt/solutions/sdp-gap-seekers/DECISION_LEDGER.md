@@ -382,3 +382,19 @@ individual conjugation parities vary. Thus every pairwise factor
 `conj(q_i)q_j` is real. R3 changes the diagnostic to require this phase-class
 alignment and an exactly zero mixed-pair count; no model or cone inventory is
 changed.
+
+## 2026-07-29 — full-spin nontrivial-character cone theorem passes
+
+Slurm job `22988602` passed all 145 exact assertions. The truth gate replayed
+all 6,643 orbit entries with their exact realification transport phases,
+proved full rank of the retained stable-character bases, verified phase-class
+alignment and every plus/minus cross zero, and reconstructed the concrete
+JuMP model without an optimizer.
+
+The equivalent representation removes two 81-side positive cones and one
+redundant gap scalar. It retains 3,250 moments and nine real PSD cones with
+10,064 packed triangle coordinates and maximum side 73. Peak process RSS was
+835,316 KiB and `test.log` SHA-256 is
+`6fac20b5e07a66d4fc863cdaa45f92d53a219a19e0be3b5075669d140c1ec219`.
+Proceed to clean solver-free builds and reload checks for both fixed gamma
+values; optimization still requires gamma=0 to pass before gamma=1/2.

@@ -261,4 +261,16 @@ Updated: 2026-07-29 UTC.
   phase-class alignment and zero count. Peak process RSS was 970,408 KiB;
   `test.log` SHA-256 is
   `c3d822ceba8abf183d59cd1c50d8a1a0e5fbb349e97461351f4756aff45b4d90`.
+- Full-spin cone truth attempt r3, Slurm job `22988602`, passed all 145
+  assertions. All 6,643 phase-corrected orbit congruences, exact stable basis
+  ranks, phase-class alignment, plus/minus cross zeros, deterministic
+  coefficient assembly, and optimizer-free JuMP reconstruction passed. The
+  equivalent model retains 3,250 moments and nine real PSD cones with
+  dimensions `[72,36,36,45,73,36,36,45]` plus `[1]`, 10,064 packed triangle
+  entries, and maximum side 73. Peak process RSS was 835,316 KiB;
+  `test.log` SHA-256 is
+  `6fac20b5e07a66d4fc863cdaa45f92d53a219a19e0be3b5075669d140c1ec219`.
+- Next gate: build and independently reload clean solver-free cone-reduced
+  MOFs for both gamma values, then preserve the required gamma=0-before-
+  gamma=1/2 optimization order.
 - No decision-changing user or resource need is open.
