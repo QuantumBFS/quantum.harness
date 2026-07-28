@@ -9,6 +9,13 @@
       "sha256": "edf46c58060493e05bff05133f3d768c099576241ce8c65f672b89b18fa4eef8"
     },
     {
+      "name": "2606.02930v1-source.tar.gz",
+      "title": "LaTeX source and figure package for the implicit logarithmic evolution paper",
+      "url": "https://arxiv.org/e-print/2606.02930v1",
+      "size": 117425,
+      "sha256": "700d99e7dc1ebd28c7b2ba2137f0fd4287222bfabb55555a1d39753e26a01d2a"
+    },
+    {
       "name": "2107.13941v1.pdf",
       "title": "Minimally Entangled Typical Thermal States Algorithms for Finite Temperature Matsubara Green Functions",
       "url": "https://arxiv.org/pdf/2107.13941v1",
@@ -44,6 +51,27 @@
       "sha256": "ce61c6a9c09805e2cc08655b2b327e7f081fc393105b08df326612af528234a1"
     },
     {
+      "name": "2312.13668v3.pdf",
+      "title": "Finite Temperature Minimal Entangled Typical Thermal States Impurity Solver",
+      "url": "https://arxiv.org/pdf/2312.13668v3",
+      "size": 940467,
+      "sha256": "457852e3a3ec30f908ead4027e2fe22bfc53d5df4c04c0e04e97a7240c439e50"
+    },
+    {
+      "name": "2310.09842v2.pdf",
+      "title": "Grassmann Time-Evolving Matrix Product Operators for Equilibrium Quantum Impurity Problems",
+      "url": "https://arxiv.org/pdf/2310.09842v2",
+      "size": 1232670,
+      "sha256": "332cf6e34302ea5e70ee9656d0c77d94d2b25aaec0ec4af891c090cbad3ab1e8"
+    },
+    {
+      "name": "2308.05279v3.pdf",
+      "title": "Grassmann Time-Evolving Matrix Product Operators for Quantum Impurity Models",
+      "url": "https://arxiv.org/pdf/2308.05279v3",
+      "size": 779349,
+      "sha256": "28a56502dc40a3c472761465f548c82e93ac245a8a1ae51a6791caab43dd6330"
+    },
+    {
       "name": "1901.05824v3.pdf",
       "title": "Time-evolution methods for matrix-product states",
       "url": "https://arxiv.org/pdf/1901.05824v3",
@@ -63,6 +91,11 @@
       "name": "ITensorMPS.jl",
       "url": "https://github.com/ITensor/ITensorMPS.jl.git",
       "commit": "7ce812c42bfedcb3da1c250fdd5f19cb20394d4d"
+    },
+    {
+      "name": "finiteTMPS",
+      "url": "https://github.com/emstoudenmire/finiteTMPS.git",
+      "commit": "9f306c45585888e94993ce4ad9435cdaf89a0cbf"
     },
     {
       "name": "CBEAlgorithms",
