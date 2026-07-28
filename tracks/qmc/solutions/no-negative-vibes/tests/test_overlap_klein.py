@@ -10,8 +10,10 @@ import sys
 import warnings
 
 import pytest
+import numpy as np
 import sympy as sp
 
+import oracle.overlap_klein as overlap_klein
 from oracle.fock_basis import quadratic_term
 from oracle.metzler_system import ExactMetzlerSystem, MetzlerRow
 from oracle.overlap_klein import (
@@ -28,6 +30,7 @@ from oracle.overlap_klein import (
     overlap_geometry,
     quadratic_basis,
     _q_sqrt_two_to_float,
+    _numeric_system_matrix,
     reconstruct_exact_primal,
     run_anchor_scan,
     solve_anchor,
@@ -754,6 +757,40 @@ def test_q_sqrt_two_to_float_uses_the_exact_field_decomposition() -> None:
         ).status == "infeasible"
 
     assert observed == pytest.approx(1.5 - math.sqrt(2.0) / 3.0)
+
+
+def test_numeric_system_matrix_converts_only_sparse_exact_entries_once() -> None:
+    """Catches dense structural-zero conversion or a mutable worker matrix."""
+    system = _synthetic_system(
+        [[sp.sqrt(2), 0], [0, -sp.Rational(3, 2)]]
+    )
+
+    matrix = _numeric_system_matrix(system)
+
+    assert matrix.flags.c_contiguous
+    assert not matrix.flags.writeable
+    assert np.array_equal(
+        matrix,
+        np.array([[math.sqrt(2.0), 0.0], [0.0, -1.5]]),
+    )
+
+
+def test_anchor_worker_reuses_the_initialized_numeric_matrix() -> None:
+    """Catches workers rebuilding a numeric system for each anchor-sign task."""
+    system = _synthetic_system([[sp.sqrt(2), 0], [0, 1]])
+    matrix = _numeric_system_matrix(system)
+    try:
+        overlap_klein._initialize_anchor_worker(system, matrix)
+        positive = overlap_klein._solve_anchor_worker(("x", 1))
+        negative = overlap_klein._solve_anchor_worker(("x", -1))
+
+        assert overlap_klein._WORKER_NUMERIC_MATRIX is matrix
+        assert positive.status == "feasible"
+        assert negative.status == "infeasible"
+        assert not matrix.flags.writeable
+    finally:
+        overlap_klein._WORKER_SYSTEM = None
+        overlap_klein._WORKER_NUMERIC_MATRIX = None
 
 
 def _runner_environment_without_blas_limits() -> dict[str, str]:
