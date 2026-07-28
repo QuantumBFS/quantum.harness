@@ -156,14 +156,22 @@ insertions at separation r where accessible.
 - **Purpose:** validate term construction independently of any PEPS machinery.
 - **Tasks:** build Aₛ, B_p, field terms; exact diagonalization on the 2×2 periodic
   torus (8 spins). Required checks: E₀(h=0) = −8; a few (hₓ, h_z) field points;
-  large-field polarized limit E₀/N → −(hₓ+h_z). Optional (stretch): 3×3 ED (18
-  spins); TFIM-duality spectrum check along (hₓ, 0).
+  large-field limits: along (hₓ, 0) E₀/N → −hₓ − Jₑ/2 (exact, since
+  [Aₛ, ΣᵢXᵢ] = 0 makes the star part contribute its minimum −NₛJₑ at all hₓ);
+  generic direction E₀/N → −√(hₓ² + h_z²) up to an O(J) first-order shift.
+  Optional (stretch): 3×3 ED (18 spins); TFIM-duality spectrum check along (hₓ, 0).
 - **Files/outputs:** `scripts/ed_checks.jl`; `tests/runtests.jl` (2×2 test);
   `results/<run>/ed_2x2.csv`.
 - **Acceptance:** unit test passes in seconds and is re-runnable before every later stage.
 - **Failure/fallback:** mismatch → fix sign/factor conventions in the terms; never
   loosen the test.
-- **Depends/status:** M0 → **pending**.
+- **Depends/status:** M0 → **done 2026-07-28** — 7/7 gates pass in 1.5 s
+  (`tests/runtests.jl`): operator construction (incidence, involutions, commutation,
+  [Aₛ, ΣX] = 0), E₀ = −8 with degeneracy 4 and gap 4 (gap measured **above the
+  degenerate ground space**, vals[degen+1] − E₀), all ground states stabilized
+  (⟨Aₛ⟩ = ⟨B_p⟩ = 1 to 1e-15), self-duality |ΔE₀| < 1e-14, monotonicity, large-field
+  windows (E₀/N = −5.5125 at (5,0); −7.3538 at (5,5) vs −√50 = −7.0711).
+  CSV: `tracks/peps/results/20260728-114418-ed-checks/ed_2x2.csv`.
 
 ### M2 — Ground state at h=0 by optimization (workflow steps 1–3)
 - **Purpose:** validate the full ground-state pipeline (random init → update → AD →

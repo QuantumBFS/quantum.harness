@@ -1,5 +1,7 @@
 # [peps] anyon-correlator: anyon correlators from PEPS transfer matrices across the toric-code field transition
 
+**Status:** see [PROGRESS.md](PROGRESS.md) (current milestone M1) · plan: [PLAN.md](PLAN.md)
+
 ## Team
 
 | | |
