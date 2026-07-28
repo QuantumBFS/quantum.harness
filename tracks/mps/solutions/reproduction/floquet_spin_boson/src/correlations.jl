@@ -1,4 +1,5 @@
 using LinearAlgebra
+using FFTW
 
 """
 Ordered two-time convention in column-major Liouville space.
@@ -265,4 +266,118 @@ function correlation_diagnostics(C::AbstractVector; tail_count::Integer)
     return (; c0=ComplexF64(first(C)), tail_norm=Float64(tail_norm),
             tail_mean=ComplexF64(tail_mean),
             tail_slope=Float64(numerator / denominator))
+end
+
+function _validate_periodic_signal(signal::AbstractVector,
+                                   lag_count::Integer)
+    isempty(signal) &&
+        throw(ArgumentError("periodic signal cannot be empty"))
+    eltype(signal) <: Real ||
+        throw(ArgumentError("periodic expectation signal must be real"))
+    all(isfinite, signal) ||
+        throw(ArgumentError("periodic signal contains non-finite values"))
+    lag_count > 0 || throw(ArgumentError("lag_count must be positive"))
+    return length(signal)
+end
+
+"""Direct O(M×K) circular average `(1/M)Σₘ s[m+k]s[m]`."""
+function periodic_autocorrelation_direct(
+    signal::AbstractVector;
+    lag_count::Integer=length(signal))
+
+    M = _validate_periodic_signal(signal, lag_count)
+    result = zeros(Float64, Int(lag_count))
+    @inbounds for lag in 0:(Int(lag_count) - 1)
+        value = 0.0
+        for phase in 1:M
+            value += Float64(signal[mod1(phase + lag, M)]) *
+                     Float64(signal[phase])
+        end
+        result[lag + 1] = value / M
+    end
+    return result
+end
+
+"""
+FFT circular average with Julia's inverse-transform normalization made explicit.
+
+`ifft(abs2.(fft(s)))` is the circular correlation sum, so division by M
+produces the phase average used by the Floquet correlation decomposition.
+"""
+function periodic_autocorrelation_fft(
+    signal::AbstractVector;
+    lag_count::Integer=length(signal))
+
+    M = _validate_periodic_signal(signal, lag_count)
+    one_period = real.(ifft(abs2.(fft(Float64.(signal))))) ./ M
+    result = Vector{Float64}(undef, Int(lag_count))
+    @inbounds for index in eachindex(result)
+        result[index] = one_period[mod1(index, M)]
+    end
+    return result
+end
+
+function _positive_frequency_coefficients(signal::AbstractVector)
+    M = length(signal)
+    amplitudes = fft(Float64.(signal)) ./ M
+    positive_count = fld(M, 2)
+    coefficients = zeros(Float64, positive_count + 1)
+    coefficients[1] = abs2(amplitudes[1])
+    @inbounds for harmonic in 1:positive_count
+        # Positive and negative harmonics form a pair except at the
+        # self-conjugate Nyquist bin of an even-length sampled period.
+        multiplicity = iseven(M) && harmonic == M ÷ 2 ? 1.0 : 2.0
+        coefficients[harmonic + 1] =
+            multiplicity * abs2(amplitudes[harmonic + 1])
+    end
+    return coefficients
+end
+
+"""
+Subtract the non-decaying periodic autocorrelation and validate the connected tail.
+
+The returned `delta_coefficients` use index `n+1` for harmonic n:
+`c₀=|a₀|²` and `cₙ=2|aₙ|²` for paired positive harmonics. The sampled
+Nyquist bin, when present, is self-conjugate and therefore has multiplicity one.
+"""
+function decompose_correlation(
+    correlation::AbstractVector,
+    signal::AbstractVector;
+    tail_count::Integer,
+    tail_norm_tolerance::Real,
+    tail_mean_tolerance::Real,
+    tail_slope_tolerance::Real)
+
+    eltype(correlation) <: Complex ||
+        throw(ArgumentError("full correlation must retain complex values"))
+    length(correlation) >= length(signal) ||
+        throw(DimensionMismatch(
+            "correlation must cover at least one complete drive period"))
+    all(isfinite, correlation) ||
+        throw(ArgumentError("full correlation contains non-finite values"))
+    for (name, tolerance) in (
+        ("tail_norm_tolerance", tail_norm_tolerance),
+        ("tail_mean_tolerance", tail_mean_tolerance),
+        ("tail_slope_tolerance", tail_slope_tolerance))
+        isfinite(tolerance) && tolerance >= 0 ||
+            throw(ArgumentError(name * " must be finite and nonnegative"))
+    end
+    _validate_periodic_signal(signal, length(correlation))
+
+    c_asym = ComplexF64.(periodic_autocorrelation_fft(
+        signal; lag_count=length(correlation)))
+    c_decay = ComplexF64.(correlation) .- c_asym
+    diagnostics = correlation_diagnostics(c_decay; tail_count)
+    accepted =
+        diagnostics.tail_norm <= tail_norm_tolerance &&
+        abs(diagnostics.tail_mean) <= tail_mean_tolerance &&
+        abs(diagnostics.tail_slope) <= tail_slope_tolerance
+    accepted ||
+        throw(ArgumentError(
+            "decaying correlation tail did not satisfy configured tolerances"))
+    return (;
+        c_asym,
+        c_decay,
+        delta_coefficients=_positive_frequency_coefficients(signal),
+        diagnostics)
 end

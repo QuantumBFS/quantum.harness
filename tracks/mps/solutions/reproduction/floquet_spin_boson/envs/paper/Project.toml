@@ -6,6 +6,7 @@ version = "0.1.0"
 # environment as a paper reproduction until provenance identifies a revision.
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 UniformTEMPO = "df6cb18e-c722-4276-9e4b-1aef7d428362"
 
