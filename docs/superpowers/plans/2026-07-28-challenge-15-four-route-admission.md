@@ -259,7 +259,7 @@ Write `s01-route-d-admission.md` with two machine-readable lines matching:
 
 Follow them with the test count, command exits, changed-section result, and classification
 `common-amendment-pass`. `comparison_base_sha` is the literal `git rev-parse
-HEAD` printed after Task 1's additive protocol commit. The journal is a child
+HEAD` printed after Task 2's reveal-only fidelity commit. The journal is a child
 documentation commit and is not part of that recorded code base; this avoids
 an impossible self-referential commit hash. State that the admission consumes
 no `s02*` attempt.
