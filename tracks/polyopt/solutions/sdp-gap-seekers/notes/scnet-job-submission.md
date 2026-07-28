@@ -122,6 +122,46 @@ Mosek either isn't found or returns a license error.
 Partition: `xhacnormalb` (CPU, 64–128 cores, ~500 GB). The SBATCH `--output=` /
 `--error=` paths are relative to the launch cwd (`~/quantum.harness`).
 
+## The `--output` directory must pre-exist (the 0:53 CANCELLED trap)
+
+**This was the root cause of the failed `square-primal-g0` jobs 22986072 / 22986104,
+confirmed by reproduction (job 22986467). It is the most insidious trap because an
+in-script `mkdir` cannot save it.**
+
+Slurm opens `--output` / `--error` at **batch-step launch — before the batch script
+executes**. If the target directory does not exist, the open fails and Slurm cancels
+the batch step instantly. The script (which might contain `mkdir -p results/`) never
+runs. Signature in `sacct`:
+
+```
+<JOBID>          |FAILED  |0:53|00:00:01|None|<node>
+<JOBID>.batch    |CANCELLED|0:53|00:00:01|    |<node>
+<JOBID>.extern   |COMPLETED|0:0 |00:00:01|    |<node>     <- allocation was fine
+```
+
+plus **no `.out`/`.err` files created** and `Reason=None`. The `.extern` step
+completing tells you the allocation worked — the failure is the batch step's stdout
+open. (`0:53` = cancelled, signal 53; elapsed ~1s.) A node-exclude retry reproduces
+on the next node because the dir is missing everywhere.
+
+`results/` is gitignored, so a fresh SCNet checkout has no `results/` and any
+`#SBATCH --output=results/<name>-%j.out` self-destructs. Two fixes:
+
+```bash
+# Fix A (one-line, before sbatch): pre-create the dir on SCNet
+ssh scnet 'cd ~/quantum.harness && mkdir -p results'
+
+# Fix B (durable, in the .sbatch): write --output to cwd, relocate after mkdir
+#SBATCH --output=slurm-<name>-%j.out          # cwd always exists
+# ... then inside the script, after `mkdir -p "$RUN_DIR"`:
+mv "slurm-<name>-${SLURM_JOB_ID}.out" "$RUN_DIR/"   # optional tidy-up
+```
+
+**Diagnostic for any future instant-CANCEL:** submit a minimal script that writes
+`--output` to the cwd (see `scripts/scnet_launch_diag.sbatch`). If it COMPLETED but
+the real job CANCELS at 0:53, the real job's `--output`/`--error` dir is missing —
+not a Slurm/node problem.
+
 ## Output buffering — or, "the log looks hung"
 
 When stdout is redirected to a slurm log (not a TTY) it is block-buffered, so a
@@ -134,6 +174,7 @@ only if a script you don't control buffers.
 
 | Trap | Symptom | Fix |
 |---|---|---|
+| `--output=<dir>/…` dir does not pre-exist | `.batch CANCELLED 0:53` in ~1s, `.extern COMPLETED`, **no** `.out` file | `mkdir -p <dir>` on SCNet **before** sbatch (in-script mkdir can't save it; the dir must exist at launch) |
 | Forgot to scp `.external/SpectralGap` | SCNet runs stale solver, "impossible" results | scp + SHA-256 verify both sides |
 | `LD_LIBRARY_PATH` without `:-` under `set -u` | script aborts instantly, empty log | `${LD_LIBRARY_PATH:-}` |
 | Declaring success on "RUNNING" / ssh-exit 0 | false positives | check exit markers + `squeue` empty + RESULT line |
@@ -163,3 +204,25 @@ timeout 118 ssh -o ConnectTimeout=50 scnet 'sleep 105; cd ~/quantum.harness &&
 # 5. fetch artifacts back
 scp scnet:~/quantum.harness/<artifact> tracks/polyopt/solutions/sdp-gap-seekers/evidence/
 ```
+
+## Found while diagnosing (NOT a submission issue — for the solver owner)
+
+After the submission bug was fixed (job `22986474` ran to completion instead of
+cancelling at 0:53), the Square gamma=0 smoke surfaced an **application** error in
+`solve_square_primal_mof.jl:262`:
+
+```
+MethodError: no method matching set_attribute(::Model, ::Iparam, ::Int64)
+```
+
+Cause: `JuMP.set_optimizer_attribute(model, Mosek.MSK_IPAR_NUM_THREADS, options.threads)`
+passes the Mosek `Iparam` **enum** where JuMP wants a **string** attribute name. Fix:
+
+```julia
+JuMP.set_optimizer_attribute(model, "MSK_IPAR_NUM_THREADS", options.threads)
+# or the MOI-native: JuMP.set_attribute(model, MOI.NumberOfThreads(), options.threads)
+```
+
+This is the Square MVP solver code, so the fix belongs to its owner — recorded here
+only so the next agent doesn't re-discover it. The submission path itself is healthy.
+
