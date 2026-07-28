@@ -32,7 +32,7 @@ Generated from `results.csv` by `make_results_md.py`. Do not hand-edit:
 
 | cell | N | rdm | pso | lso | opt | dev vs Table3 New | delta = opt_A - opt_cell | termination | solve_s | wall_s | RSS GB | limit_hit |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gate | 10 | 10 | 3 | true | -0.45154459452835116 | +5.472e-09 | +4.1482e-03 | OPTIMAL | 20.9 | 2067 | 1.1 | - |
+| gate | 10 | 10 | 3 | true | -0.45154459452835116 | +5.472e-09 | - | OPTIMAL | 20.9 | 2067 | 1.1 | - |
 | step2_A | 14 | 10 | 3 | true | -0.44739636848093645 | +3.152e-08 | - | OPTIMAL | 145.9 | 2190 | 1.1 | - |
 | step2_B | 14 | false | 3 | true | -0.4473985952430302 | -2.195e-06 | +2.2268e-06 | SLOW_PROGRESS | 2.6 | 5 | 13.8 | - |
 | step3_C | 14 | 10 | 0 | true | -0.4473963899319207 | +1.007e-08 | +2.1451e-08 | OPTIMAL | 89.1 | 2192 | 13.9 | - |
@@ -45,6 +45,15 @@ Generated from `results.csv` by `make_results_md.py`. Do not hand-edit:
 | ladder | 40 | 10 | 3 | true | (none) | - | - | *N/A* | nan | 600 | 2.1 | MAX_WALL_S |
 | ladder | 46 | 10 | 3 | true | (none) | - | - | *N/A* | nan | 600 | 2.2 | MAX_WALL_S |
 | ladder | 50 | 10 | 3 | true | (none) | - | - | *N/A* | nan | 600 | 2.4 | MAX_WALL_S |
+| lad | 10 | 8 | 3 | true | -0.45154457774281065 | +2.226e-08 | - | OPTIMAL | 2.2 | 12 | 1.4 | - |
+| lad | 14 | 8 | 3 | true | -0.4473967708312458 | -3.708e-07 | +4.0235e-07 | SLOW_PROGRESS | 5.7 | 16 | 1.9 | - |
+| lad | 18 | 8 | 3 | true | -0.4457104197357416 | -1.920e-06 | - | SLOW_PROGRESS | 11.1 | 22 | 2.8 | - |
+| lad | 22 | 8 | 3 | true | -0.4448640232152412 | -5.523e-06 | - | SLOW_PROGRESS | 19.5 | 36 | 3.8 | - |
+| lad | 26 | 8 | 3 | true | -0.4443800955269053 | -8.696e-06 | - | SLOW_PROGRESS | 32.6 | 53 | 5.2 | - |
+| lad | 30 | 8 | 3 | true | -0.44407763514631926 | -1.084e-05 | - | SLOW_PROGRESS | 44.0 | 65 | 8.9 | - |
+| lad | 34 | 8 | 3 | true | -0.4438777732472986 | -1.457e-05 | - | SLOW_PROGRESS | 71.8 | 99 | 11.4 | - |
+| lad | 40 | 8 | 3 | true | -0.44368276029850706 | -1.786e-05 | - | SLOW_PROGRESS | 128.4 | 178 | 16.7 | - |
+| lad | 46 | 8 | 3 | true | (none) | - | - | *N/A* | nan | 86 | 18.0 | MAX_RSS_GB |
 
 **Killed rows.** Cells with `limit_hit=MAX_WALL_S` and no `opt` were killed
 during construction and never reached MOSEK. `results.csv` records
@@ -65,6 +74,14 @@ ladder rows use the thread-based monitor and are per-cell.
 | step2_B | 1.2e-8 | 1.6e-9 | 3.1e-11 | SLOW_PROGRESS |
 | step3_C | 1.1e-8 | 2.5e-7 | 6.3e-12 | OPTIMAL |
 | step3_D | 5.4e-9 | 4.9e-9 | 1.2e-11 | OPTIMAL |
+| lad | 4.5e-9 | 5.5e-9 | 1.9e-11 | OPTIMAL |
+| lad | 9.8e-9 | 9.1e-10 | 2.6e-11 | SLOW_PROGRESS |
+| lad | 3.0e-8 | 7.4e-10 | 4.3e-11 | SLOW_PROGRESS |
+| lad | 2.0e-8 | 1.9e-10 | 3.3e-11 | SLOW_PROGRESS |
+| lad | 1.3e-7 | 1.1e-9 | 3.9e-11 | SLOW_PROGRESS |
+| lad | 2.8e-7 | 6.9e-10 | 8.9e-11 | SLOW_PROGRESS |
+| lad | 1.0e-7 | 3.8e-9 | 5.1e-11 | SLOW_PROGRESS |
+| lad | 1.7e-7 | 4.5e-9 | 1.3e-10 | SLOW_PROGRESS |
 
 Declared tolerance is 1e-8. Any difference at or below ~1e-8 is not
 resolvable: `delta_RDM` (~1e-6) is, `delta_pso` and `delta_lso` (~1e-8)

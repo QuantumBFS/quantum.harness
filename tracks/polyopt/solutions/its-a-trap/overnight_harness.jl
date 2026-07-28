@@ -251,12 +251,15 @@ logline("**$STEP** started; cells = `$(join(CELLS, " "))`")
 # warm-up runs ONCE for the sweep, not once per restarted driver. The protocol
 # asks for a warm-up "before any timing is recorded"; because a killed cell
 # forces a driver restart, repeating it per cell would cost ~34 min each.
-if STEP == "step4" && !any(startswith(l, "step4,") for l in (isfile(CSV) ? readlines(CSV) : String[]))
+if startswith(STEP, "step4") &&
+   !any(startswith(l, STEP * ",") for l in (isfile(CSV) ? readlines(CSV) : String[]))
     logline("warm-up throwaway N=10 solve (not recorded; once per sweep)")
-    open(joinpath(OUTDIR, "cell_logs", "warmup.log"), "w") do io
+    open(joinpath(OUTDIR, "cell_logs", "warmup_$(STEP).log"), "w") do io
         redirect_stdout(io) do
             try
-                c = config_a(10)
+                # Warm-up must carry the same overrides as the sweep, or it pays a
+                # config cost the sweep never pays (rdm=10 construction is ~2050 s).
+                c = merge(config_a(10), isempty(CELLS) ? NamedTuple() : parsecell(CELLS[1])[3])
                 GSB(c.supp, c.coe, 10, c.d; lattice = c.lattice, extra = c.extra,
                     rdm = c.rdm, pso = c.pso, lso = c.lso, lol = c.lol,
                     three_type = c.three_type, SU2_symmetry = c.SU2_symmetry,

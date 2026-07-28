@@ -57,8 +57,10 @@ w("| cell | N | rdm | pso | lso | opt | dev vs Table3 New | "
 w("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
 for r in rows:
     killed = bool(r["limit_hit"]) and not r["opt"]
+    # delta is only meaningful against CONFIG A at the SAME N (N=14).
     delta = (f"{opt_a - float(r['opt']):+.4e}"
-             if (opt_a is not None and r["opt"] and r["label"] != "step2_A") else "-")
+             if (opt_a is not None and r["opt"] and r["label"] != "step2_A"
+                 and r["N"] == "14") else "-")
     w("| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
         r["label"], r["N"], r["rdm"], r["pso"], r["lso"],
         r["opt"] if r["opt"] else "(none)",
