@@ -31,8 +31,12 @@ JULIA_DIR = SOLUTION_DIR / "julia"
 JULIA_RUNNER = JULIA_DIR / "finite_bath_mps_runner.jl"
 JULIA_PURIFICATION = JULIA_DIR / "finite_bath_purification.jl"
 JULIA_OBSERVABLES = JULIA_DIR / "finite_bath_observables.jl"
+JULIA_CHECKPOINT = JULIA_DIR / "finite_bath_checkpoint.jl"
 MODEL_DEFINITION = SOLUTION_DIR / "model.json"
 DEFAULT_OUTPUT_DIRECTORY = SOLUTION_DIR / "results" / "acceptance"
+RUNNER_SCHEMA_VERSION = 2
+CHECKPOINT_SCHEMA_VERSION = 1
+CHECKPOINT_WRITER_VERSION = "1.0.0"
 
 
 def _load_local_module(name: str, filename: str):
@@ -459,12 +463,17 @@ def validate_acceptance_run(
             "schema_version",
             "bath_artifact_json",
             "bath_artifact_file_sha256",
+            "checkpoint",
             "model",
             "tau",
             "solver_settings",
         },
         "MPS request payload",
     )
+    if request_payload["schema_version"] != RUNNER_SCHEMA_VERSION:
+        raise ValueError("unsupported MPS request schema version")
+    if request_payload["checkpoint"] != _checkpoint_request_identity():
+        raise ValueError("MPS request checkpoint identity is stale")
     bath_bytes = (root / "bath.json").read_bytes()
     if request_payload["bath_artifact_json"].encode("utf-8") != bath_bytes:
         raise ValueError("MPS request embedded bath does not match bath.json")
@@ -739,7 +748,10 @@ def verify_mps_output(
         },
         "MPS output",
     )
-    if type(output["schema_version"]) is not int or output["schema_version"] != 1:
+    if (
+        type(output["schema_version"]) is not int
+        or output["schema_version"] != RUNNER_SCHEMA_VERSION
+    ):
         raise ValueError("unsupported MPS output schema version")
     if _validate_digest(output["input_sha256"], "MPS input SHA256") != (
         expected_input_sha256
@@ -951,13 +963,30 @@ def convergence_study_record() -> dict[str, Any]:
     }
 
 
+def _checkpoint_request_identity() -> dict[str, Any]:
+    return {
+        "checkpoint_schema": CHECKPOINT_SCHEMA_VERSION,
+        "writer_version": CHECKPOINT_WRITER_VERSION,
+        "source_hashes": {
+            "checkpoint": _sha256_file(JULIA_CHECKPOINT),
+            "model_definition": _sha256_file(MODEL_DEFINITION),
+            "observables": _sha256_file(JULIA_OBSERVABLES),
+            "purification": _sha256_file(JULIA_PURIFICATION),
+            "runner": _sha256_file(JULIA_RUNNER),
+        },
+        "project_toml_sha256": _sha256_file(JULIA_DIR / "Project.toml"),
+        "manifest_toml_sha256": _sha256_file(JULIA_DIR / "Manifest.toml"),
+    }
+
+
 def _make_mps_request(
     bath_json: str, fixture: dict[str, Any]
 ) -> dict[str, Any]:
     payload = {
-        "schema_version": 1,
+        "schema_version": RUNNER_SCHEMA_VERSION,
         "bath_artifact_json": bath_json,
         "bath_artifact_file_sha256": _sha256_bytes(bath_json.encode("utf-8")),
+        "checkpoint": _checkpoint_request_identity(),
         "model": copy.deepcopy(fixture["model"]),
         "tau": copy.deepcopy(fixture["tau"]),
         "solver_settings": copy.deepcopy(fixture["solver_settings"]),
@@ -1100,6 +1129,7 @@ def run_acceptance(
         oracle_path = staging / "ed-oracle.json"
         input_path = staging / "mps-input.json"
         mps_path = staging / "mps-result.json"
+        checkpoint_root = staging / ".mps-checkpoint"
         acceptance_path = staging / "acceptance.json"
 
         print("Building shared two-site bath in unique staging tree", flush=True)
@@ -1158,9 +1188,11 @@ def run_acceptance(
             str(JULIA_RUNNER),
             str(input_path),
             str(mps_path),
+            str(checkpoint_root),
         ]
         print("Invoking Julia finite-bath MPS runner", flush=True)
         invoke_julia_runner(command, output_path=mps_path)
+        shutil.rmtree(checkpoint_root, ignore_errors=True)
         mps_output = strict_json_loads(
             mps_path.read_text(encoding="utf-8"), name="Julia MPS output"
         )

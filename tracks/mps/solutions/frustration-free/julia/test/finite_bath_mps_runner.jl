@@ -69,9 +69,36 @@ function minimal_runner_request()
     )
     bath_json = canonical_artifact_json(bath_artifact) * "\n"
     payload = Dict(
-        "schema_version" => 1,
+        "schema_version" => 2,
         "bath_artifact_json" => bath_json,
         "bath_artifact_file_sha256" => bytes2hex(sha256(codeunits(bath_json))),
+        "checkpoint" => Dict(
+            "checkpoint_schema" => 1,
+            "writer_version" => "1.0.0",
+            "source_hashes" => Dict(
+                "checkpoint" => source_sha256(
+                    joinpath(@__DIR__, "..", "finite_bath_checkpoint.jl")
+                ),
+                "model_definition" => source_sha256(
+                    joinpath(@__DIR__, "..", "..", "model.json")
+                ),
+                "observables" => source_sha256(
+                    joinpath(@__DIR__, "..", "finite_bath_observables.jl")
+                ),
+                "purification" => source_sha256(
+                    joinpath(@__DIR__, "..", "finite_bath_purification.jl")
+                ),
+                "runner" => source_sha256(
+                    joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl")
+                ),
+            ),
+            "project_toml_sha256" => source_sha256(
+                joinpath(@__DIR__, "..", "Project.toml")
+            ),
+            "manifest_toml_sha256" => source_sha256(
+                joinpath(@__DIR__, "..", "Manifest.toml")
+            ),
+        ),
         "model" => Dict(
             "U" => 0.8, "beta" => 0.5, "epsilon_d" => -0.4, "mu" => 0.0
         ),
@@ -87,6 +114,20 @@ function minimal_runner_request()
         "payload_json" => canonical_request_json(payload),
         "sha256" => repeat("0", 64),
     )
+end
+
+function signed_runner_request(; beta = 0.5, time_step = 0.01)
+    request = minimal_runner_request()
+    payload = strict_json_read(request["payload_json"], "test request")
+    payload["model"]["beta"] = beta
+    payload["tau"] = [0.0, beta]
+    payload["solver_settings"]["time_step"] = time_step
+    payload["solver_settings"]["maxdim"] = 64
+    payload["solver_settings"]["krylov_expansion_dim"] = 0
+    request["payload_json"] = canonical_request_json(payload)
+    request["sha256"] =
+        bytes2hex(sha256(codeunits(request["payload_json"])))
+    return request
 end
 
 @testset "runner thermal diagnostics are complete and bounded" begin
@@ -122,6 +163,60 @@ end
     @test summary.krylov_local_updates == 10
 end
 
+@testset "SIGUSR1 and SIGTERM set only cooperative flags" begin
+    install_cooperative_shutdown_handlers()
+    for signal_number in (10, Base.SIGTERM)
+        Threads.atomic_xchg!(SHUTDOWN_REQUESTED, false)
+        @test ccall(:kill, Cint, (Cint, Cint), getpid(), signal_number) == 0
+        deadline = time() + 5
+        while !SHUTDOWN_REQUESTED[] && time() < deadline
+            sleep(0.01)
+        end
+        @test SHUTDOWN_REQUESTED[]
+    end
+end
+
+@testset "SIGUSR1 checkpoints and resumes without final output" begin
+    mktempdir() do directory
+        input_path = joinpath(directory, "input.json")
+        output_path = joinpath(directory, "output.json")
+        checkpoint_root = joinpath(directory, "checkpoint")
+        log_path = joinpath(directory, "runner.log")
+        write(input_path, JSON3.write(signed_runner_request(; beta = 0.2, time_step = 0.05)))
+        project = dirname(Base.active_project())
+        command = `$(Base.julia_cmd()) --project=$project $(joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl")) $input_path $output_path $checkpoint_root`
+
+        process = open(log_path, "w") do log
+            child = run(pipeline(command; stdout = log, stderr = log); wait = false)
+            deadline = time() + 90
+            while time() < deadline
+                flush(log)
+                occursin("Running finite-bath MPS", read(log_path, String)) && break
+                process_exited(child) && break
+                sleep(0.05)
+            end
+            @test process_running(child)
+            process_running(child) && kill(child, 10)
+            wait(child)
+            child
+        end
+
+        @test process.exitcode == 75
+        @test !ispath(output_path)
+        @test isfile(joinpath(checkpoint_root, "current.json"))
+        first_log = read(log_path, String)
+        @test occursin("continuation required", first_log)
+        @test !occursin("Published validated MPS result", first_log)
+
+        resumed = run(command; wait = false)
+        wait(resumed)
+        @test resumed.exitcode == 0
+        @test isfile(output_path)
+        output = strict_json_read(read(output_path), "resumed output")
+        @test output["schema_version"] == RUNNER_SCHEMA_VERSION
+    end
+end
+
 @testset "runner rejects unverified payload hashes and duplicate keys" begin
     request = minimal_runner_request()
     mktempdir() do directory
@@ -133,6 +228,22 @@ end
         checked = read_request(valid_path)
         @test checked.payload_digest == valid["sha256"]
         @test checked.settings.krylov_expansion_dim == 32
+        @test checked.checkpoint["checkpoint_schema"] == 1
+
+        wrong_source = deepcopy(valid)
+        wrong_source_payload = strict_json_read(
+            wrong_source["payload_json"], "wrong source payload"
+        )
+        wrong_source_payload["checkpoint"]["source_hashes"]["runner"] =
+            repeat("f", 64)
+        wrong_source["payload_json"] =
+            canonical_request_json(wrong_source_payload)
+        wrong_source["sha256"] = bytes2hex(
+            sha256(codeunits(wrong_source["payload_json"]))
+        )
+        wrong_source_path = joinpath(directory, "wrong-source.json")
+        write(wrong_source_path, JSON3.write(wrong_source))
+        @test_throws ArgumentError read_request(wrong_source_path)
 
         corrupted = deepcopy(valid)
         corrupted_payload = strict_json_read(

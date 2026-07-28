@@ -5,14 +5,91 @@ using SHA
 using LinearAlgebra
 using ITensors
 using ITensorMPS
+using HDF5
 
 include(joinpath(@__DIR__, "finite_bath_purification.jl"))
 using .FiniteBathPurification: FiniteBathParameters
 include(joinpath(@__DIR__, "finite_bath_observables.jl"))
-using .FiniteBathObservables: finite_bath_observables
+using .FiniteBathObservables: ObservableInterrupted, finite_bath_observables
+using .FiniteBathCheckpoint:
+    CheckpointIdentity, load_current_checkpoint, write_checkpoint_generation
 
-const RUNNER_SCHEMA_VERSION = 1
-const RUNNER_VERSION = "2.0.0"
+const RUNNER_SCHEMA_VERSION = 2
+const RUNNER_VERSION = "3.0.0"
+const CHECKPOINT_SCHEMA_VERSION = 1
+const CHECKPOINT_WRITER_VERSION = "1.0.0"
+const CONTINUATION_EXIT_CODE = 75
+const PTHREAD_SIG_UNBLOCK = Cint(1)
+const SHUTDOWN_REQUESTED = Threads.Atomic{Bool}(false)
+const SIGUSR1_CONDITION = Ref{Union{Nothing,Base.AsyncCondition}}(nothing)
+const SIGTERM_CONDITION = Ref{Union{Nothing,Base.AsyncCondition}}(nothing)
+const SIGTERM_ASYNC_HANDLE = Ref{Ptr{Cvoid}}(C_NULL)
+
+function sigterm_handler(::Cint)::Cvoid
+    ccall(
+        :uv_async_send,
+        Cint,
+        (Ptr{Cvoid},),
+        SIGTERM_ASYNC_HANDLE[],
+    )
+    return
+end
+
+const SIGTERM_HANDLER = @cfunction(sigterm_handler, Cvoid, (Cint,))
+
+function install_cooperative_shutdown_handlers()
+    Threads.atomic_xchg!(SHUTDOWN_REQUESTED, false)
+    usr1_condition = Base.AsyncCondition() do _
+        Threads.atomic_xchg!(SHUTDOWN_REQUESTED, true)
+    end
+    Base.uv_unref(usr1_condition.handle)
+    SIGUSR1_CONDITION[] = usr1_condition
+    ccall(
+        :jl_set_peek_cond,
+        Cvoid,
+        (Ptr{Cvoid},),
+        usr1_condition.handle,
+    )
+    term_condition = Base.AsyncCondition() do _
+        Threads.atomic_xchg!(SHUTDOWN_REQUESTED, true)
+    end
+    Base.uv_unref(term_condition.handle)
+    SIGTERM_CONDITION[] = term_condition
+    SIGTERM_ASYNC_HANDLE[] = term_condition.handle
+    previous = ccall(
+        :signal,
+        Ptr{Cvoid},
+        (Cint, Ptr{Cvoid}),
+        Cint(Base.SIGTERM),
+        SIGTERM_HANDLER,
+    )
+    previous == Ptr{Cvoid}(-1) &&
+        error("could not install cooperative SIGTERM handler")
+    signal_set = zeros(UInt8, 128)
+    ccall(:sigemptyset, Cint, (Ptr{Cvoid},), signal_set) == 0 ||
+        error("could not initialize cooperative SIGTERM set")
+    ccall(
+        :sigaddset,
+        Cint,
+        (Ptr{Cvoid}, Cint),
+        signal_set,
+        Cint(Base.SIGTERM),
+    ) == 0 || error("could not add SIGTERM to cooperative signal set")
+    ccall(
+        :pthread_sigmask,
+        Cint,
+        (Cint, Ptr{Cvoid}, Ptr{Cvoid}),
+        PTHREAD_SIG_UNBLOCK,
+        signal_set,
+        C_NULL,
+    ) == 0 || error("could not unblock SIGTERM")
+    return nothing
+end
+
+function cooperative_shutdown_requested()
+    yield()
+    return SHUTDOWN_REQUESTED[]
+end
 
 function strict_json_value(value, name)
     if value isa JSON3.Object
@@ -305,6 +382,7 @@ function read_request(path)
             "schema_version",
             "bath_artifact_json",
             "bath_artifact_file_sha256",
+            "checkpoint",
             "model",
             "tau",
             "solver_settings",
@@ -329,6 +407,53 @@ function read_request(path)
         validate_bath_artifact(bath_artifact, bath_json, model_definition)
     epsilon = validated_bath.epsilon
     coupling = validated_bath.coupling
+
+    checkpoint = require_exact_keys(
+        payload["checkpoint"],
+        [
+            "checkpoint_schema",
+            "writer_version",
+            "source_hashes",
+            "project_toml_sha256",
+            "manifest_toml_sha256",
+        ],
+        "checkpoint",
+    )
+    checkpoint["checkpoint_schema"] == CHECKPOINT_SCHEMA_VERSION ||
+        throw(ArgumentError("unsupported checkpoint schema version"))
+    checkpoint["writer_version"] == CHECKPOINT_WRITER_VERSION ||
+        throw(ArgumentError("unsupported checkpoint writer version"))
+    source_hashes = require_exact_keys(
+        checkpoint["source_hashes"],
+        [
+            "checkpoint",
+            "model_definition",
+            "observables",
+            "purification",
+            "runner",
+        ],
+        "checkpoint source hashes",
+    )
+    source_paths = Dict(
+        "checkpoint" => joinpath(@__DIR__, "finite_bath_checkpoint.jl"),
+        "model_definition" => joinpath(@__DIR__, "..", "model.json"),
+        "observables" => joinpath(@__DIR__, "finite_bath_observables.jl"),
+        "purification" => joinpath(@__DIR__, "finite_bath_purification.jl"),
+        "runner" => @__FILE__,
+    )
+    for (name, path) in source_paths
+        validate_digest(source_hashes[name], "checkpoint source hash $name") ==
+            source_sha256(path) ||
+            throw(ArgumentError("checkpoint source hash mismatch: $name"))
+    end
+    project_hash =
+        validate_digest(checkpoint["project_toml_sha256"], "checkpoint project SHA256")
+    manifest_hash =
+        validate_digest(checkpoint["manifest_toml_sha256"], "checkpoint manifest SHA256")
+    project_hash == source_sha256(joinpath(@__DIR__, "Project.toml")) ||
+        throw(ArgumentError("checkpoint project SHA256 mismatch"))
+    manifest_hash == source_sha256(joinpath(@__DIR__, "Manifest.toml")) ||
+        throw(ArgumentError("checkpoint manifest SHA256 mismatch"))
 
     model = require_exact_keys(
         payload["model"], ["U", "beta", "epsilon_d", "mu"], "model"
@@ -379,9 +504,11 @@ function read_request(path)
         request,
         payload,
         payload_digest,
+        bath_sha256 = String(bath_artifact["sha256"]),
         parameters,
         beta,
         tau,
+        checkpoint,
         settings = (; time_step, cutoff, maxdim, krylov_expansion_dim),
     )
 end
@@ -437,6 +564,33 @@ end
 
 function source_sha256(path)
     return bytes2hex(sha256(read(path)))
+end
+
+function checkpoint_identity(request)
+    checkpoint = request.checkpoint
+    return CheckpointIdentity(;
+        request_sha256 = bytes2hex(sha256(request.raw)),
+        input_payload_sha256 = request.payload_digest,
+        bath_sha256 = request.bath_sha256,
+        solver_settings = Dict(
+            "beta" => request.beta,
+            "tau" => request.tau,
+            "time_step" => request.settings.time_step,
+            "cutoff" => request.settings.cutoff,
+            "maxdim" => request.settings.maxdim,
+            "krylov_expansion_dim" =>
+                request.settings.krylov_expansion_dim,
+        ),
+        source_hashes = checkpoint["source_hashes"],
+        project_toml_sha256 = checkpoint["project_toml_sha256"],
+        manifest_toml_sha256 = checkpoint["manifest_toml_sha256"],
+        julia_version = string(VERSION),
+        itensors_version = string(Base.pkgversion(ITensors)),
+        itensormps_version = string(Base.pkgversion(ITensorMPS)),
+        hdf5_version = string(Base.pkgversion(HDF5)),
+        checkpoint_schema = checkpoint["checkpoint_schema"],
+        writer_version = checkpoint["writer_version"],
+    )
 end
 
 function make_output(request, result, profiling)
@@ -545,30 +699,77 @@ function atomic_write_json(path, value)
 end
 
 function main(args = ARGS)
-    length(args) == 2 ||
-        throw(ArgumentError("usage: finite_bath_mps_runner.jl INPUT.json OUTPUT.json"))
-    input_path, output_path = abspath.(args)
+    length(args) == 3 ||
+        throw(
+            ArgumentError(
+                "usage: finite_bath_mps_runner.jl " *
+                "INPUT.json OUTPUT.json CHECKPOINT_ROOT"
+            ),
+        )
+    input_path, output_path, checkpoint_root = abspath.(args)
     println("Reading validated MPS request: $input_path")
     flush(stdout)
     request_started = time_ns()
     request = read_request(input_path)
+    identity = checkpoint_identity(request)
+    current_path = joinpath(checkpoint_root, "current.json")
+    resume =
+        ispath(current_path) || islink(current_path) ?
+        load_current_checkpoint(checkpoint_root, identity) : nothing
+    install_cooperative_shutdown_handlers()
     request_finished = time_ns()
     println(
         "Running finite-bath MPS: n_bath=$(length(request.parameters.epsilon)), " *
-        "beta=$(request.beta), tau_points=$(length(request.tau))",
+        "beta=$(request.beta), tau_points=$(length(request.tau)), " *
+        "resuming=$(resume !== nothing)",
     )
     flush(stdout)
     settings = request.settings
-    result = finite_bath_observables(
-        request.parameters;
-        beta = request.beta,
-        tau = request.tau,
-        time_step = settings.time_step,
-        cutoff = settings.cutoff,
-        maxdim = settings.maxdim,
-        krylov_expansion_dim = settings.krylov_expansion_dim,
-        progress = true,
-    )
+    shutdown_checkpoint_published = Ref(false)
+    checkpoint_manager = function (psi, state)
+        cooperative_shutdown_requested() || return nothing
+        completed_steps =
+            state.evolution_state === nothing ?
+            0 : state.evolution_state.completed_steps
+        write_checkpoint_generation(
+            checkpoint_root,
+            identity,
+            completed_steps,
+            psi,
+            state,
+        )
+        shutdown_checkpoint_published[] = true
+        return nothing
+    end
+    stop_requested = function ()
+        return cooperative_shutdown_requested() &&
+               shutdown_checkpoint_published[]
+    end
+    result = try
+        finite_bath_observables(
+            request.parameters;
+            beta = request.beta,
+            tau = request.tau,
+            time_step = settings.time_step,
+            cutoff = settings.cutoff,
+            maxdim = settings.maxdim,
+            krylov_expansion_dim = settings.krylov_expansion_dim,
+            progress = true,
+            checkpoint_manager,
+            resume,
+            stop_requested,
+        )
+    catch error
+        if error isa ObservableInterrupted
+            load_current_checkpoint(checkpoint_root, identity)
+            println(
+                "Published validated MPS checkpoint; continuation required"
+            )
+            flush(stdout)
+            return CONTINUATION_EXIT_CODE
+        end
+        rethrow()
+    end
     evolution_finished = time_ns()
     base_profile = (;
         phase_timings_seconds = (;
@@ -606,9 +807,9 @@ function main(args = ARGS)
     atomic_write_json(output_path, output)
     println("Published validated MPS result: $output_path")
     flush(stdout)
-    return nothing
+    return 0
 end
 
 if abspath(PROGRAM_FILE) == abspath(@__FILE__)
-    main()
+    exit(main())
 end

@@ -23,7 +23,7 @@ SPEC.loader.exec_module(acceptance)
 
 def _solver_output(*, input_sha256="a" * 64):
     return {
-        "schema_version": 1,
+        "schema_version": acceptance.RUNNER_SCHEMA_VERSION,
         "input_sha256": input_sha256,
         "input_payload_sha256": "b" * 64,
         "solver": {
@@ -217,6 +217,51 @@ def test_strict_json_boundary_enforces_size_and_depth_limits():
         acceptance.strict_json_loads(nested, name="nested")
 
 
+def test_mps_request_binds_canonical_path_free_checkpoint_identity():
+    fixture = acceptance.acceptance_fixture()
+    bath_json = '{"payload":{},"sha256":"' + "a" * 64 + '"}\n'
+
+    request = acceptance._make_mps_request(bath_json, fixture)
+    payload = acceptance.strict_json_loads(request["payload_json"])
+
+    assert payload["schema_version"] == 2
+    checkpoint = payload["checkpoint"]
+    assert checkpoint == {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "source_hashes": {
+            "checkpoint": acceptance._sha256_file(
+                acceptance.JULIA_DIR / "finite_bath_checkpoint.jl"
+            ),
+            "model_definition": acceptance._sha256_file(
+                acceptance.MODEL_DEFINITION
+            ),
+            "observables": acceptance._sha256_file(
+                acceptance.JULIA_OBSERVABLES
+            ),
+            "purification": acceptance._sha256_file(
+                acceptance.JULIA_PURIFICATION
+            ),
+            "runner": acceptance._sha256_file(acceptance.JULIA_RUNNER),
+        },
+        "project_toml_sha256": acceptance._sha256_file(
+            acceptance.JULIA_DIR / "Project.toml"
+        ),
+        "manifest_toml_sha256": acceptance._sha256_file(
+            acceptance.JULIA_DIR / "Manifest.toml"
+        ),
+    }
+    assert all(
+        not Path(value).is_absolute()
+        for value in checkpoint.values()
+        if isinstance(value, str)
+    )
+    assert request["payload_json"] == acceptance._request_canonical_text(payload)
+    assert request["sha256"] == acceptance._sha256_bytes(
+        request["payload_json"].encode("utf-8")
+    )
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -295,7 +340,7 @@ def _build_valid_acceptance_stage(root, name):
         krylov_expansion_dim=settings["krylov_expansion_dim"],
     )
     solver_output = {
-        "schema_version": 1,
+        "schema_version": acceptance.RUNNER_SCHEMA_VERSION,
         "input_sha256": acceptance._sha256_file(input_path),
         "input_payload_sha256": request["sha256"],
         "solver": {"name": "finite_bath_mps", "settings": settings},
