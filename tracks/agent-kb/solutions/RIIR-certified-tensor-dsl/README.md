@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Team name** | Rewrite It In Rust! |
+| **Team name** | Ranger |
 | **Members** | Chenxi Wan, Yedi Shen, Junkai Wang |
 
 ## Challenge
