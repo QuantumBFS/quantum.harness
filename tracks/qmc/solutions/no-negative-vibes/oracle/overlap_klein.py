@@ -1,21 +1,35 @@
 from __future__ import annotations
 
+import argparse
 from collections.abc import Mapping
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+import json
 import math
+from pathlib import Path
+import re
+import tempfile
+import time
 
 import numpy as np
+import scipy
 from scipy.optimize import linprog
 import sympy as sp
 from sympy.polys.polyerrors import PolynomialError
 
-from oracle.fock_basis import QuadraticBasisElement, quadratic_term
+from oracle import __version__
+from oracle.fock_basis import QuadraticBasisElement, parity_indices, quadratic_term
+from oracle.klein_hodge import overlap_klein_circuit
 from oracle.metzler_system import (
     ExactMetzlerSystem,
+    compile_metzler_system,
     exact_nonnegative,
     numeric_coefficients,
     verify_exact_metzler,
 )
+
+
+_WORKER_SYSTEM: ExactMetzlerSystem | None = None
 
 
 @dataclass(frozen=True)
@@ -180,6 +194,193 @@ def bridge_labels(family: str) -> tuple[str, ...]:
         if family == "bdg":
             labels.extend((f"pc{i},{j}", f"pa{i},{j}"))
     return tuple(sorted(labels))
+
+
+def build_system(family: str, mask: str) -> ExactMetzlerSystem:
+    """Compile the fixed overlapping-Klein transform for one protocol cell."""
+    return compile_metzler_system(
+        overlap_klein_circuit(),
+        quadratic_basis(family, mask),
+        parity_indices(_GEOMETRY.modes),
+    )
+
+
+def _initialize_anchor_worker(system: ExactMetzlerSystem) -> None:
+    """Install the parent-compiled system in a spawn-safe worker process."""
+    global _WORKER_SYSTEM
+    _WORKER_SYSTEM = system
+
+
+def _solve_anchor_worker(task: tuple[str, int]) -> AnchorSolve:
+    """Solve one labelled sign problem using the initialized exact system."""
+    if _WORKER_SYSTEM is None:
+        raise RuntimeError("anchor worker was not initialized")
+    label, sign = task
+    return solve_anchor(_WORKER_SYSTEM, label, sign)
+
+
+def _require_worker_count(workers: int) -> None:
+    if not isinstance(workers, int) or isinstance(workers, bool) or workers <= 0:
+        raise ValueError("workers must be a positive integer")
+
+
+def _normalized_source_commit(source_commit: str) -> str:
+    if not isinstance(source_commit, str) or re.fullmatch(
+        r"[0-9a-fA-F]{40}", source_commit
+    ) is None:
+        raise ValueError("source_commit must be exactly 40 hexadecimal characters")
+    return source_commit.lower()
+
+
+def _solve_to_json(solve: AnchorSolve) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "status": solve.status,
+        "solver_message": solve.message,
+        "min_slack": solve.min_slack,
+    }
+    if solve.status == "feasible":
+        payload["coefficients"] = list(solve.coefficients)
+    return payload
+
+
+def _attach_exact_primal(
+    system: ExactMetzlerSystem,
+    solve: AnchorSolve,
+    payload: dict[str, object],
+) -> bool:
+    if solve.status != "feasible":
+        return False
+    try:
+        certificate = reconstruct_exact_primal(system, solve)
+        payload["exact_primal_certificate"] = certificate_to_json(certificate)
+    except (ArithmeticError, TypeError, ValueError) as error:
+        payload["exact_replay_diagnostic"] = f"{type(error).__name__}: {error}"
+        return False
+    return True
+
+
+def _system_metadata(system: ExactMetzlerSystem) -> dict[str, object]:
+    geometry = overlap_geometry()
+    return {
+        "system_shape": [system.coefficients.rows, system.coefficients.cols],
+        "exact_field": "Q(sqrt(2))",
+        "transform": {
+            "name": "overlap_klein_circuit",
+            "convention": "right embedded Klein-Hodge gate composed after left",
+            "formula": "U = U_[2,3,4,5] U_[0,1,2,3]",
+        },
+        "geometry": {
+            "modes": geometry.modes,
+            "blocks": [list(block) for block in geometry.blocks],
+            "ring_edges": [list(edge) for edge in geometry.ring_edges],
+            "diagonal_edges": [list(edge) for edge in geometry.diagonal_edges],
+            "bridge_edges": [list(edge) for edge in geometry.bridge_edges],
+        },
+    }
+
+
+def run_anchor_scan(
+    family: str,
+    mask: str,
+    *,
+    workers: int,
+    source_commit: str,
+) -> dict[str, object]:
+    """Run the fixed anchor scan and return only deterministic scientific data."""
+    _require_worker_count(workers)
+    normalized_commit = _normalized_source_commit(source_commit)
+    system = build_system(family, mask)
+    labels = bridge_labels(family)
+    tasks = tuple((label, sign) for label in labels for sign in (-1, 1))
+
+    with ProcessPoolExecutor(
+        max_workers=workers,
+        initializer=_initialize_anchor_worker,
+        initargs=(system,),
+    ) as executor:
+        solves = tuple(executor.map(_solve_anchor_worker, tasks))
+    by_label_sign = {
+        (solve.label, solve.sign): solve
+        for solve in solves
+    }
+
+    anchors: list[dict[str, object]] = []
+    for label in labels:
+        negative_solve = by_label_sign[(label, -1)]
+        positive_solve = by_label_sign[(label, 1)]
+        negative = _solve_to_json(negative_solve)
+        positive = _solve_to_json(positive_solve)
+        negative_primal = _attach_exact_primal(system, negative_solve, negative)
+        positive_primal = _attach_exact_primal(system, positive_solve, positive)
+        anchor: dict[str, object] = {
+            "label": label,
+            "positive": positive,
+            "negative": negative,
+        }
+        if positive_primal or negative_primal:
+            anchor["classification"] = "certified-feasible"
+        elif (
+            positive_solve.status == "infeasible"
+            and negative_solve.status == "infeasible"
+        ):
+            try:
+                zero_certificate = find_zero_dual(system, label)
+                if not verify_zero_dual(system, zero_certificate):
+                    raise ArithmeticError("exact dual certificate did not replay")
+                anchor["zero_certificate"] = certificate_to_json(zero_certificate)
+                anchor["classification"] = "certified-zero"
+            except (ArithmeticError, TypeError, ValueError) as error:
+                anchor["dual_replay_diagnostic"] = (
+                    f"{type(error).__name__}: {error}"
+                )
+                anchor["classification"] = "numerical-only"
+        else:
+            anchor["classification"] = "numerical-only"
+        anchors.append(anchor)
+
+    return {
+        "schema_version": 1,
+        "protocol": "overlap-klein-v1",
+        "source_commit": normalized_commit,
+        "family": family,
+        "mask": mask,
+        "anchor_count": len(anchors),
+        "system": _system_metadata(system),
+        "package_versions": {
+            "numpy": np.__version__,
+            "scipy": scipy.__version__,
+            "sympy": sp.__version__,
+            "oracle": __version__,
+        },
+        "anchors": anchors,
+    }
+
+
+def write_result(payload: Mapping[str, object], output: Path) -> None:
+    """Write a replay payload as sorted UTF-8 JSON without torn final files."""
+    destination = Path(output)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    serialized = json.dumps(
+        payload, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False
+    ) + "\n"
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+            temporary.write(serialized)
+        Path(temporary_name).replace(destination)
+    finally:
+        if temporary_name is not None:
+            temporary_path = Path(temporary_name)
+            if temporary_path.exists():
+                temporary_path.unlink()
 
 
 def _require_system(system: ExactMetzlerSystem) -> None:
@@ -843,3 +1044,61 @@ def certificate_from_json(
             raise ValueError("dual certificate does not verify")
         return certificate
     raise ValueError(f"unknown certificate kind: {kind!r}")
+
+
+def _cli_worker_count(value: str) -> int:
+    try:
+        workers = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(
+            "workers must be a positive integer"
+        ) from error
+    try:
+        _require_worker_count(workers)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
+    return workers
+
+
+def _cli_source_commit(value: str) -> str:
+    try:
+        return _normalized_source_commit(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the preregistered overlapping Klein-cone anchor scan."
+    )
+    parser.add_argument(
+        "--family", choices=("number-conserving", "bdg"), required=True
+    )
+    parser.add_argument(
+        "--mask",
+        choices=("rings-bridges", "rings-diagonals-bridges"),
+        required=True,
+    )
+    parser.add_argument("--workers", type=_cli_worker_count, required=True)
+    parser.add_argument(
+        "--source-commit", type=_cli_source_commit, required=True
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+
+    started = time.perf_counter()
+    result = run_anchor_scan(
+        args.family,
+        args.mask,
+        workers=args.workers,
+        source_commit=args.source_commit,
+    )
+    result["execution"] = {
+        "workers": args.workers,
+        "wall_time_seconds": time.perf_counter() - started,
+    }
+    write_result(result, args.output)
+
+
+if __name__ == "__main__":
+    main()
