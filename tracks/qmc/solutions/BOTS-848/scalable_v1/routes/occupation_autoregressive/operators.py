@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from fractions import Fraction
 from numbers import Integral, Real
 from types import MappingProxyType
 
@@ -319,17 +320,17 @@ def _normalized_complex(value: complex) -> tuple[complex, int]:
     return mantissa, exponent
 
 
-def _robust_complex_product_ratio(
+def _scaled_complex_product_ratio(
     coefficient: complex,
     target: complex,
     denominator: complex,
-) -> complex:
-    """Compute ``coefficient * target / denominator`` without order hazards.
+) -> tuple[complex, int]:
+    """Keep ``coefficient * target / denominator`` in scaled form.
 
     Each finite nonzero input is split into a complex O(1) mantissa and a
-    binary exponent. Only the mantissas are multiplied and divided; the merged
-    exponent is restored once so neither fixed multiply-first nor divide-first
-    overflow/underflow can corrupt a representable result.
+    binary exponent. Only the mantissas are multiplied and divided. The result
+    remains scaled until every row term has been accumulated, so a term may be
+    outside complex128 when later terms make the final row sum representable.
     """
 
     values = (coefficient, target, denominator)
@@ -341,7 +342,7 @@ def _robust_complex_product_ratio(
     if denominator == 0.0:
         raise ValueError("complex product-ratio denominator must be nonzero")
     if coefficient == 0.0 or target == 0.0:
-        return 0.0j
+        return 0.0j, 0
 
     coefficient_mantissa, coefficient_exponent = _normalized_complex(coefficient)
     target_mantissa, target_exponent = _normalized_complex(target)
@@ -349,21 +350,64 @@ def _robust_complex_product_ratio(
     result_mantissa = (
         coefficient_mantissa * target_mantissa / denominator_mantissa
     )
-    result_exponent = (
+    exponent = (
         coefficient_exponent + target_exponent - denominator_exponent
     )
-    try:
-        result = complex(
-            math.ldexp(result_mantissa.real, result_exponent),
-            math.ldexp(result_mantissa.imag, result_exponent),
+    return result_mantissa, exponent
+
+
+def _exact_scaled_component_sum(
+    terms: Sequence[tuple[complex, int]],
+    *,
+    imaginary: bool,
+) -> float:
+    """Exactly sum one binary64 component before its final float conversion."""
+
+    encoded: list[tuple[int, int]] = []
+    for mantissa, term_exponent in terms:
+        component = mantissa.imag if imaginary else mantissa.real
+        if component == 0.0:
+            continue
+        numerator, denominator = component.as_integer_ratio()
+        denominator_exponent = denominator.bit_length() - 1
+        encoded.append(
+            (numerator, term_exponent - denominator_exponent)
         )
+    if not encoded:
+        return 0.0
+
+    base_exponent = min(exponent for _, exponent in encoded)
+    total = sum(
+        numerator << (exponent - base_exponent)
+        for numerator, exponent in encoded
+    )
+    if total == 0:
+        return 0.0
+    exact = (
+        Fraction(total << base_exponent, 1)
+        if base_exponent >= 0
+        else Fraction(total, 1 << -base_exponent)
+    )
+    try:
+        result = float(exact)
     except OverflowError as error:
         raise OverflowError(
-            "complex product-ratio result is outside complex128 range"
+            "local estimator result is outside complex128 range"
         ) from error
-    if not math.isfinite(result.real) or not math.isfinite(result.imag):
-        raise OverflowError("complex product-ratio result is outside complex128 range")
+    if not math.isfinite(result):
+        raise OverflowError("local estimator result is outside complex128 range")
     return result
+
+
+def _sum_scaled_complex(
+    terms: Sequence[tuple[complex, int]],
+) -> complex:
+    """Sum a complete scaled-complex row and restore complex128 once."""
+
+    return complex(
+        _exact_scaled_component_sum(terms, imaginary=False),
+        _exact_scaled_component_sum(terms, imaginary=True),
+    )
 
 
 def local_from_neighbors(
@@ -386,7 +430,7 @@ def local_from_neighbors(
     if denominator == 0.0:
         raise ValueError("sampled amplitude must be nonzero")
 
-    numerator = 0.0j
+    scaled_terms: list[tuple[complex, int]] = []
     for target_raw, coefficient_raw in neighbors.items():
         target = _validated_nonnegative_state(target_raw)
         coefficient_array = np.asarray(coefficient_raw)
@@ -405,12 +449,14 @@ def local_from_neighbors(
             target,
             label="neighbor amplitude",
         )
-        numerator += _robust_complex_product_ratio(
-            coefficient,
-            target_amplitude,
-            denominator,
+        scaled_terms.append(
+            _scaled_complex_product_ratio(
+                coefficient,
+                target_amplitude,
+                denominator,
+            )
         )
-    return numerator
+    return _sum_scaled_complex(scaled_terms)
 
 
 def local_energy(

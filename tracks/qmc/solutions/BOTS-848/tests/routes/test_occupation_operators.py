@@ -393,6 +393,42 @@ def test_local_estimator_rejects_mathematically_unrepresentable_term() -> None:
         local_from_neighbors(1, {2: coefficient}, amplitudes.__getitem__)
 
 
+def test_local_estimator_sums_canceling_large_terms_before_final_restore() -> None:
+    amplitudes = {state: complex(1.0) for state in range(1, 5)}
+    neighbors = {
+        2: complex(1.0e308),
+        3: complex(1.0e308),
+        4: complex(-1.0e308),
+    }
+
+    observed = local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+
+    assert observed == complex(1.0e308)
+
+
+def test_local_estimator_rejects_unrepresentable_final_row_sum() -> None:
+    amplitudes = {state: complex(1.0) for state in range(1, 4)}
+    neighbors = {2: complex(1.0e308), 3: complex(1.0e308)}
+
+    with pytest.raises(OverflowError, match="outside complex128 range"):
+        local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+
+
+def test_local_estimator_allows_out_of_range_terms_to_cancel() -> None:
+    scale = complex(math.ldexp(1.0, 1023))
+    amplitudes = {
+        1: complex(1.0),
+        2: complex(2.0),
+        3: complex(2.0),
+        4: complex(1.0),
+    }
+    neighbors = {2: scale, 3: -scale, 4: complex(1.0)}
+
+    observed = local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+
+    assert observed == complex(1.0)
+
+
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     pair_matrix = np.array(
         [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],
