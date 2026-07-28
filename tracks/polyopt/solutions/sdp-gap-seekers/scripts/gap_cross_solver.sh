@@ -23,7 +23,7 @@ cd ~/quantum.harness
 echo "Node: $(hostname), Start: $(date)"
 
 julia --project=julia-env << 'JLEOF'
-using SpectralGap, MosekTools, Clarabel, Dates
+using SpectralGap, MosekTools, Clarabel, JuMP, MathOptInterface, Dates
 
 N = 9; g = 0.5
 H = ncpoly([[3*[i; i+1] for i = 1:N-1]; [[3i-2] for i = 1:N]],
