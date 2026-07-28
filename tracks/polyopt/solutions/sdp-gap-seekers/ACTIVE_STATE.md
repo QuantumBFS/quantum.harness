@@ -326,6 +326,9 @@ Updated: 2026-07-29 UTC.
   all six exact-reduction layers, all 17 recorded source hashes, and the
   reloaded nine-cone inventory before Mosek is attached. Gamma=0 is the next
   numerical gate; gamma=1/2 remains unauthorized until it passes.
+- Isotypic gamma=0 gate job `22988910` and corrected spatial truth r2 job
+  `22988911` are submitted under Slurm. Both are pending only on the shared
+  association job cap.
 - Nine-cone gamma=1/2 attempt r1, Slurm job `22988816`, passed every
   fail-closed input, setup, reduction, source-hash, and reloaded-cone gate.
   Mosek returned `OPTIMAL` with primal and dual feasible points.
@@ -362,5 +365,6 @@ Updated: 2026-07-29 UTC.
   by `delta_ab` and rank-four moments by the three delta pairings, with an
   exact rational-rotation gate. Its source-level parameterizer, synthetic
   tensor tests, and dedicated Slurm inventory gate are now prepared; all
-  eight synthetic assertions pass. No model uses this candidate yet.
+  eight synthetic assertions pass. Inventory job `22988914` is queued behind
+  the two primary jobs. No model uses this candidate yet.
 - No decision-changing user or resource need is open.
