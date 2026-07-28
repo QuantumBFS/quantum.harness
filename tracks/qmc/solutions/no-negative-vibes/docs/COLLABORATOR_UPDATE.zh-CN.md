@@ -7,9 +7,11 @@
 我们已经累计检查 3,712,000 个权重，完成经典群、标准 Hermitian AZ、Majorana 双锥和
 15 个新半群候选的系统排查。最新进展是找到一个有一般证明的恒正矩阵类：三对角 Metzler
 路径生成元的指数乘积全非负，因此任意维数、任意时间片都有 `det(I+D)>=1`。它已映射到
-开放 Hubbard 链和单 flavor 排斥 `t-V` 链的 HS 时间片；但一维开边界无符号本身已知，
-目前不能声称发现了新物理类。另一方面，任意两个不同旋转的 split cones 已由显式两层
-反例完全关闭。
+开放 Hubbard 链和单 flavor 排斥 `t-V` 链的 HS 时间片。现在又得到排斥 `t-V` 局部
+键门的精确非对称 TN 高斯分解，而且三站点重叠键无法由一个固定度量共同 Hermitian 化；
+因此 TN 已经成为真实辅助场算法，不再只是抽象矩阵类。但一维开边界无符号本身已知，
+目前仍不能声称发现了新 Hamiltonian。另一方面，任意两个不同旋转的 split cones 已由
+显式两层反例完全关闭。
 
 ## 已经完成
 
@@ -30,7 +32,8 @@
    - `majorana-small-angle-stress-v1`：840 格、252,000 个直接 Fock 迹。
    - `frontier-semigroups-v1`：1,440 格、720,000 个行列式；
    - `frontier-mixed-split-stress-v1`：672 格、672,000 个行列式。
-4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现；95 个自动测试全通过。
+4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现和精确非对称键门
+   分解；126 个自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -81,6 +84,27 @@
   `w=16[1-q^2 sin^2(theta)]<0` 的两层反例；
 - 139.2 万个新权重的累计 CPU 时间约 15 分钟，说明当前不需要超算。
 
+### 精确非对称 `t-V` 键门
+
+- 对 `h_b=-t(c_1^dag c_2+h.c.)+Vn_1n_2-mu_b(n_1+n_2)`，构造了两个显式
+  `2 x 2` TN 矩阵 `B_+/-`，严格满足
+  `exp(-dt h_b)=[Gamma(B_+)+Gamma(B_-)]/2`；
+- 这不是小步长近似，每个局部键门恒等式在有限 `dt` 上精确；
+- 一个连续参数 `0<=kappa<1` 控制左右 hopping 的非对称性，但不改变物理门；
+- 单独一个键仍共享非对角正定度量；三站点重叠键的共同对称 intertwiner 空间则为零，
+  已防止把孤立键假象误报成新机制；
+- 四站点 9 个依次键门的 `2^9=512` 个场构型全部满足单行列式严格正；另一组三站点枚举
+  配分函数对 `kappa=0,0.3,0.6,0.9` 数值不变；
+- 连续 TN 切锥只能是三对角 Metzler，说明环、分支或远邻 hopping 不能靠裸 TN 动能
+  直接加入；
+- TN 高斯算符在 Fock 基中的矩阵元都是非负子式，普通远邻 hopping 却会随中间占据数
+  翻转符号，所以任意 TN 高斯正和也不能直接产生环或真正分支；
+- 即使允许每个粒子数扇区独立做固定符号规范，2–6 站点全部连通图穷举仍只有开放路径
+  幸存：`1,3,12,60,360=N!/2`，环和三支星形都有二粒子交换负闭环；
+- 普通 ancilla 的 Fock 投影/偏迹仍保持逐元非负，也不能修复远邻 hopping；
+- 下一突破口已收窄为非平凡 gauge/ancilla 编码、带宇称串相关 hopping、
+  pairing/Majorana 或更大半群。
+
 ## 我们没有声称什么
 
 - 没有声称随机扫描能证明非负；
@@ -94,8 +118,10 @@
 
 1. 深查 TN 条件在 AFQMC/DQMC 中是否已有直接表述；
 2. 由合作者或出题人复核已完成的 2024 contraction-semigroup 非归约证明；
-3. 从 TN 双对角/平面网络分解构造超出普通一维开链的物理 HS 模型；
-4. 若不能产生新物理，再转向比 TN 更大的主子式非负乘法半群。
+3. 沿 bond-channel/discrete HS 引用链排重精确非对称键门公式；
+4. 构造非平凡 gauge/ancilla 编码或宇称串相关 hopping 的局部门，显式绕过扇区符号
+   no-go；
+5. 若不能产生新物理，再转向比 TN 更大的主子式非负乘法半群。
 
 任何新候选按以下漏斗处理：
 
@@ -117,6 +143,8 @@
 - [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
 - [全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)
 - [TN 新机制审计](TN_NOVELTY_AUDIT.md)
+- [TN 物理映射前沿](TN_PHYSICAL_MAPPING_FRONTIER.md)
+- [复合矩阵规范 no-go](COMPOUND_GAUGE_NO_GO.md)
 - [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)
