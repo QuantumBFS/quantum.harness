@@ -208,3 +208,21 @@ The passing `test.log` SHA-256 is
 peak process RSS was 856,408 KiB. Proceed to clean solver-free MOF builds for
 both fixed gamma values, retaining the required gamma=0-before-gamma=1/2
 optimization order.
+
+## 2026-07-29 — accept immutable spin-axis MOF inputs
+
+Slurm job `22988427` built and reloaded both solver-free models from clean
+commit `07394a1`. The gamma=0 model SHA-256 is
+`9b9519a2059e718651af52a7b98e75dc046eab57be33ca3ea9d2325ba28d7fb2`;
+gamma=1/2 is
+`f12eaa63e64d8643e4b361d245669d013bdf853d83bda8c35499e8f42dbde485`.
+Their runmeta SHA-256 values are respectively
+`51dcf29d6961eb3ac0fb19d24f24dcc923f02657944b67d5cfc7b8c1d001d4aa`
+and
+`aae8943e21c2efc2744a65e633606474f6b5061bd183350dd7d35f8019bebe3d`.
+
+Both reload gates confirmed 8,803 variables, 13 constraints, all 12 named
+real cones, 16,707 triangle entries, and maximum side 81. These become
+immutable allowlisted inputs. Use a separate runner that verifies their
+checksums, full runmeta, and every recorded source hash before optimization;
+run gamma=0 first.

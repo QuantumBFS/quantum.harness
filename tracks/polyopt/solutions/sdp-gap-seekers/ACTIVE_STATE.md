@@ -136,4 +136,18 @@ Updated: 2026-07-29 UTC.
   `f286d48a89b462b11dfbd199d22339e403b167c0672b2ac34c76ed816b39d66d`.
 - Next gate: build and reload immutable solver-free spin-axis MOFs for both
   gamma values, then solve gamma=0 before authorizing gamma=1/2.
+- Spin-axis MOF build attempt r1, Slurm job `22988427`, completed both clean
+  exact builds and independent reload checks from commit `07394a1`. Each model
+  has 8,803 variables, 13 constraints, 12 named real PSD cones, 16,707
+  triangle entries, and maximum side 81. Gamma=0 model/runmeta SHA-256 values
+  are `9b9519a2059e718651af52a7b98e75dc046eab57be33ca3ea9d2325ba28d7fb2`
+  and `51dcf29d6961eb3ac0fb19d24f24dcc923f02657944b67d5cfc7b8c1d001d4aa`;
+  gamma=1/2 values are
+  `f12eaa63e64d8643e4b361d245669d013bdf853d83bda8c35499e8f42dbde485`
+  and `aae8943e21c2efc2744a65e633606474f6b5061bd183350dd7d35f8019bebe3d`.
+  Job peak RSS was 815,816 KiB and elapsed time was 2:36.
+- The separate spin-axis runner allowlists those four hashes and validates all
+  setup, reduction-layer, source-file, variable, constraint, named-cone, and
+  side-dimension fields before attaching Mosek. Gamma=0 remains the next
+  numerical gate.
 - No decision-changing user or resource need is open.
