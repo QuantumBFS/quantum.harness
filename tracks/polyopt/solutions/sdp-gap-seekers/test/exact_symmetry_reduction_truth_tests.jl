@@ -60,6 +60,20 @@ include(joinpath(
     "FullSpinConeReducedPrimalGapJuMP.jl",
 ))
 using .FullSpinConeReducedPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinIsotypicReduction.jl",
+))
+using .FullSpinIsotypicReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinIsotypicPrimalGapJuMP.jl",
+))
+using .FullSpinIsotypicPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -379,6 +393,77 @@ using JuMP
         cone_report.real_psd_triangle_entries,
         ", congruence_checks=",
         cone_truth.orbit_entry_count,
+    )
+    flush(stdout)
+
+    isotypic_truth = full_spin_trivial_isotypic_truth(cone_reduced)
+    @test isotypic_truth.exact
+    @test isotypic_truth.source_dimensions == [108, 109]
+    @test isotypic_truth.trivial_dimensions == [36, 37]
+    @test isotypic_truth.standard_dimensions == [36, 36]
+    @test isotypic_truth.singleton_orbit_count == 1
+    @test isotypic_truth.triple_orbit_count == 72
+    @test isotypic_truth.row_actions_unsigned
+    @test isotypic_truth.conjugation_rows_even
+    @test isotypic_truth.involution_exact
+    @test isotypic_truth.cross_blocks_zero
+    @test isotypic_truth.cross_entry_count == 7_848
+    @test isotypic_truth.standard_blocks_proportional
+    @test isotypic_truth.standard_proportionality_factor == 3
+    @test isotypic_truth.standard_relation_entry_count == 1_332
+    @test isotypic_truth.bases_invertible
+    @test isotypic_truth.basis_dimensions == [108, 109]
+
+    isotypic_reduced = assemble_full_spin_isotypic_reduced_primal(
+        cone_reduced;
+        verify_truth=false,
+    )
+    isotypic_repeated = assemble_full_spin_isotypic_reduced_primal(
+        cone_reduced;
+        verify_truth=false,
+    )
+    isotypic_report =
+        full_spin_isotypic_reduced_assembly_report(isotypic_reduced)
+    @test isotypic_report.source_full_spin_moments == 3_250
+    @test isotypic_report.isotypic_moments <= 3_250
+    @test isotypic_report.eliminated_unused_moments >= 0
+    @test isotypic_report.positive_block_dimensions ==
+          [36, 36, 36, 45, 37, 36, 36, 45]
+    @test isotypic_report.gap_block_dimensions == [1]
+    @test isotypic_report.equality_count == 0
+    @test isotypic_report.real_psd_triangle_entries == 6_104
+    @test isotypic_report.maximum_psd_side_dimension == 45
+    @test isotypic_reduced.coefficient_map_sha256 ==
+          isotypic_repeated.coefficient_map_sha256
+    @test isotypic_reduced.assembly_sha256 ==
+          isotypic_repeated.assembly_sha256
+
+    isotypic_jump_model =
+        build_full_spin_isotypic_reduced_jump_primal(isotypic_reduced)
+    @test JuMP.num_variables(isotypic_jump_model.model) ==
+          isotypic_report.isotypic_moments
+    @test isempty(isotypic_jump_model.equality_constraints)
+    @test length(isotypic_jump_model.psd_constraints) == 9
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in isotypic_jump_model.psd_constraints
+    )) == [1, 36, 36, 36, 36, 36, 37, 45, 45]
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in isotypic_jump_model.psd_constraints
+    )
+    @test isotypic_jump_model.assembly_sha256 ==
+          isotypic_reduced.assembly_sha256
+    println(
+        "[full-spin-isotypic-truth] moments=",
+        isotypic_report.isotypic_moments,
+        ", psd_entries=",
+        isotypic_report.real_psd_triangle_entries,
+        ", cross_checks=",
+        isotypic_truth.cross_entry_count,
+        ", standard_checks=",
+        isotypic_truth.standard_relation_entry_count,
     )
     flush(stdout)
 end

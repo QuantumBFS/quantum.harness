@@ -292,4 +292,15 @@ Updated: 2026-07-29 UTC.
   sides. Gamma=0 is the next numerical truth gate; gamma=1/2 remains
   unauthorized until its returned point passes the independent residual and
   nine-block eigenvalue audit.
+- Nine-cone gamma=0 attempt r1 is queued as Slurm job `22988753`; its current
+  pending reason is the xH5 association job limit, not a runner or model
+  failure.
+- Next exact route prepared while the solve waits: decompose the two remaining
+  trivial-V4 positive blocks into full-S3 isotypic rows. On each of 72
+  three-row axis orbits, the exact integer basis
+  `t=(1,1,1)`, `w=(1,1,-2)`, `m=(1,-1,0)` predicts zero cross blocks and
+  `W=3M`, so one standard-irrep copy is redundant. The proposed equivalent
+  model retains nine cones but reduces packed PSD entries from 10,064 to
+  6,104 and maximum side from 73 to 45. It is not accepted until its
+  exhaustive Slurm truth gate passes.
 - No decision-changing user or resource need is open.

@@ -420,3 +420,23 @@ allowlisted MOF and runmeta hashes, fixed setup, every exact reduction layer,
 all recorded source hashes, and the reloaded cone inventory before Mosek is
 attached. Preserve the mandated order: gamma=0 first and gamma=1/2 only after
 an audited feasible gamma=0 point.
+
+## 2026-07-29 — pursue the remaining trivial-character S3 isotypic split
+
+Nine-cone gamma=0 job `22988753` is pending on the xH5 association job limit.
+Use that scheduler wait for an independent exact derivation rather than
+repeating or tuning a solve.
+
+The trivial-V4 centered and scalar row spaces have dimensions 108 and 109:
+36 axis-permutation triples, plus the scalar identity. For each triple, the
+integer basis `t=(1,1,1)`, `w=(1,1,-2)`, `m=(1,-1,0)` separates the trivial
+S3 irrep from two standard-irrep directions. Full-S3 invariance predicts
+exactly zero cross blocks and `W=3M`; if exhaustive coefficient replay and
+full-rank checks pass, only `t` and one `m` copy are needed.
+
+This would change positive block sides from
+`[72,36,36,45,73,36,36,45]` to
+`[36,36,36,45,37,36,36,45]`, reducing packed cone coordinates from 10,064
+to 6,104 and maximum side from 73 to 45. The route is mathematically exact,
+but no solver model may rely on it until the dedicated Slurm truth gate
+passes all 7,848 cross-entry and 1,332 proportionality checks.
