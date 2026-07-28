@@ -39,7 +39,7 @@ in the variable primal values). See §8 open item.
 
 | # | model | config | numerical Δ-transition | reference | solver | runtime/case | status |
 |---|---|---|---|---|---|---|---|
-| 1 | 1D TFIM (transverse-field Ising) | N=9, g=0.5, d=2, legacy "sign-symmetric" | flag flips 0.25→0.26; **primal ray extracted + independently validated** (λ=0.0051>0, Gram PSD, cons residual=0) | 0.258 provenance **unverified** (example.jl sets ub=lb=0.24, no 0.258 emitted; cite the paper's Table S1 if used) | Mosek 11.2.2 | 4–25 s | pipeline calibration only; **not** a #88 target. §8 status: candidate with validated primal improving ray (caveat: SLOW_PROGRESS termination; rational/interval post-processing pending) |
+| 1 | 1D TFIM (transverse-field Ising) | N=9, g=0.5, d=2, legacy "sign-symmetric" | flag flips 0.25→0.26; **candidate primal ray read + same-model residual-checked** (λ=0.0051>0, Gram PSD, cons residual=0 in the originating JuMP model) | 0.258 provenance **unverified** (example.jl sets ub=lb=0.24, no 0.258 emitted; cite the paper's Table S1 if used) | Mosek 11.2.2 | 4–25 s | pipeline calibration only; **not** a #88 target. §8 status: **numerical candidate** — same-model check, NOT independent verification (advisor re-audit). Promotion to certified needs a separate verifier + complete ray artifact. |
 | 2 | Kagome Heisenberg | N=13, d=3 | flag flips 1.26→1.28 | ~1.28 (bundled in `example.jl`) | Mosek 11.2.2 | ~290 s | **legacy reproduction** (kagome is in the upstream example; low novelty) |
 | 3 | Kagome Heisenberg | N=27, d=3 | — | ~1.15 (example.jl) | Mosek 11.2.2 | — | **killed** — 2h08m zero progress on 128-cpu/486GB; do not brute-force again without phase instrumentation |
 | 4 | Kagome Heisenberg | N=13, d=4 | flag flips 1.26→1.28 | identical to d=3 | Mosek 11.2.2 | ~220 s | **identical-SDP regression**, not convergence — `get_kagome_basis` has no `d>3` branch, so d=4 builds the same model as d=3 |
@@ -101,3 +101,28 @@ in the variable primal values). See §8 open item.
    not square Heisenberg g=0 (which is gapless — Néel + Goldstone).
 4. **Kagome tightening (low priority):** N=13 d=2 regression, then one N=27 d=2
    γ-point — only after the certificate path is fixed.
+
+## §8 certificate pipeline — staged status (per advisor re-audit)
+
+To remove the earlier contradiction: the TFIM ray promotion at commit `8775271`
+was an overclaim (it was a same-model `value.(cons)` check, not independent
+verification) and is reverted above. The four stages, honestly:
+
+1. **Preliminary same-model extraction/check — DONE.** `certify_Ising_gap` reads
+   `value.(pos/gpos/λ)`, reports λ>0, Gram min-eigs, and `value.(cons)` residual
+   (= 0) within the originating JuMP model. Independent of the legacy `flag`, NOT
+   independent of the model/solve.
+2. **Complete certificate serialization — NOT DONE.** Need to export the full
+   normalized ray (all Gram matrices + stationarity multipliers + sparse affine
+   map + ordered basis/support manifest + normalization metadata + hash).
+3. **Independent verification — NOT DONE.** Need a separate checker that does NOT
+   call JuMP, Mosek, or the original constraint-construction; it reconstructs the
+   affine identity from the exported artifact and re-audits PSD/residual with
+   scale-aware tolerances (rational/interval preferred).
+4. **Decisive solver status or rigorous post-processing — NOT DONE.** Current
+   termination is `SLOW_PROGRESS`; need either a decisive `DUAL_INFEASIBLE` or
+   rational/interval certification.
+
+**Current defensible claim:** "TFIM N=9 γ=0.26: a candidate primal improving ray
+was read from variable values and passed same-model floating-point checks
+(λ>0, Gram PSD, cons residual=0). Numerical candidate, not a certified bound."
