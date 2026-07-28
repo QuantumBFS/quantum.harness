@@ -13,7 +13,12 @@ REPO_ROOT="${SLURM_SUBMIT_DIR:-$(pwd)}"
 cd "$REPO_ROOT"
 mkdir -p tracks/qcs/results/YueYuan/attempt-004/full tracks/qcs/results/YueYuan/attempt-004/logs
 
+if [ -f "$HOME/.venvs/quantum-harness-a004/bin/activate" ]; then
+  . "$HOME/.venvs/quantum-harness-a004/bin/activate"
+fi
+
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 export XLA_FLAGS="--xla_force_host_platform_device_count=${SLURM_CPUS_PER_TASK:-4}"
-python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_full_sweep.py \
+"$PYTHON_BIN" tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_full_sweep.py \
   --out tracks/qcs/results/YueYuan/attempt-004/full \
   --task-index "${SLURM_ARRAY_TASK_ID}"

@@ -90,5 +90,7 @@ def test_attempt_004_slurm_scripts_are_capped_and_secret_free():
     assert "%25" in cpu
     assert "#SBATCH --gres=gpu:1" in gpu
     assert "%1" in gpu
+    assert "$HOME/.venvs/quantum-harness-a004/bin/activate" in cpu
+    assert "$HOME/.venvs/quantum-harness-a004/bin/activate" in gpu
     forbidden = ["password", "ssh ", "IdentityFile", "id_ed25519", "HostName", "User "]
     assert not any(marker in combined for marker in forbidden)
