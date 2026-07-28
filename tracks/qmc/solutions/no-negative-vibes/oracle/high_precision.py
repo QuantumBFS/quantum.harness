@@ -1,4 +1,4 @@
-"""Replay a saved scan example with arbitrary-precision matrix exponentials."""
+"""Replay a saved generator or direct-factor example at high precision."""
 
 from __future__ import annotations
 
@@ -26,20 +26,30 @@ def _decode_matrix(payload: object) -> mp.matrix:
 
 
 def replay_weight(example: dict[str, object], *, dps: int = 80) -> mp.mpf | mp.mpc:
-    """Re-evaluate det(I + product exp(A_l)) from a recorded example."""
+    """Re-evaluate a recorded determinant weight."""
 
     if dps < 30:
         raise ValueError("dps must be at least 30")
     with mp.workdps(dps):
-        generators = [
-            _decode_matrix(payload) for payload in example["generators"]
-        ]
-        size = generators[0].rows
+        if "generators" in example:
+            matrices = [
+                _decode_matrix(payload) for payload in example["generators"]
+            ]
+            exponentiate = True
+        elif "factors" in example:
+            matrices = [
+                _decode_matrix(payload) for payload in example["factors"]
+            ]
+            exponentiate = False
+        else:
+            raise ValueError("example must contain generators or factors")
+
+        size = matrices[0].rows
         product = mp.eye(size)
-        for generator in generators:
-            if generator.rows != size or generator.cols != size:
-                raise ValueError("all generators must have the same square shape")
-            product = product * mp.expm(generator)
+        for matrix in matrices:
+            if matrix.rows != size or matrix.cols != size:
+                raise ValueError("all matrices must have the same square shape")
+            product = product * (mp.expm(matrix) if exponentiate else matrix)
         return mp.det(mp.eye(size) + product)
 
 

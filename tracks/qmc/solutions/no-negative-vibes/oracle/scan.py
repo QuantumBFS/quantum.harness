@@ -11,7 +11,14 @@ import time
 import numpy as np
 
 from . import __version__
-from . import az_families, az_semigroup_cones, families, frontier_candidates
+from . import (
+    az_families,
+    az_semigroup_cones,
+    families,
+    frontier_candidates,
+    monomial_candidates,
+    speculative_candidates,
+)
 from .weights import classify_product, product_exponentials
 
 
@@ -24,6 +31,8 @@ def _available_cases() -> dict[str, object]:
         az_families.available_cases(),
         az_semigroup_cones.available_cases(),
         frontier_candidates.available_cases(),
+        monomial_candidates.available_cases(),
+        speculative_candidates.available_cases(),
     ]
     overlap = set()
     seen: set[str] = set()
@@ -36,6 +45,10 @@ def _available_cases() -> dict[str, object]:
 
 
 def _candidate_module(case: str):
+    if case in monomial_candidates.available_cases():
+        return monomial_candidates
+    if case in speculative_candidates.available_cases():
+        return speculative_candidates
     if case in az_semigroup_cones.available_cases():
         return az_semigroup_cones
     if case in frontier_candidates.available_cases():
@@ -117,16 +130,17 @@ def _encode_matrix(matrix: np.ndarray) -> object:
 
 
 def _encode_example(
-    generators: list[np.ndarray],
+    matrices: list[np.ndarray],
     product: np.ndarray,
     *,
+    matrix_kind: str = "generators",
     phase: complex,
     log_abs: float,
     sigma_min: float,
     condition_number: float,
 ) -> dict[str, object]:
     return {
-        "generators": [_encode_matrix(generator) for generator in generators],
+        matrix_kind: [_encode_matrix(matrix) for matrix in matrices],
         "product": _encode_matrix(product),
         "phase": {"real": phase.real, "imag": phase.imag},
         "log_abs_weight": log_abs if math.isfinite(log_abs) else None,
@@ -158,20 +172,41 @@ def scan_cell(
     min_sigma_min = math.inf
     examples: dict[str, dict[str, object]] = {}
     example_margins: dict[str, float] = {}
+    factor_sampler = getattr(candidate_module, "random_factor", None)
+    factor_residual = getattr(candidate_module, "factor_structure_residual", None)
+    direct_factor_case = factor_sampler is not None
+    if direct_factor_case and factor_residual is None:
+        raise RuntimeError(
+            f"{candidate_module.__name__} defines random_factor without "
+            "factor_structure_residual"
+        )
 
     for _ in range(samples):
-        generators = [
-            candidate_module.random_generator(case, rng, scale=scale)
-            for _ in range(depth)
-        ]
+        if direct_factor_case:
+            matrices = [
+                factor_sampler(case, rng, scale=scale)
+                for _ in range(depth)
+            ]
+            residual_function = factor_residual
+            product = np.eye(matrices[0].shape[0], dtype=matrices[0].dtype)
+            for factor in matrices:
+                product = product @ factor
+            matrix_kind = "factors"
+        else:
+            matrices = [
+                candidate_module.random_generator(case, rng, scale=scale)
+                for _ in range(depth)
+            ]
+            residual_function = candidate_module.structure_residual
+            product = product_exponentials(matrices)
+            matrix_kind = "generators"
         max_residual = max(
             max_residual,
             *(
-                candidate_module.structure_residual(case, generator)
-                for generator in generators
+                residual_function(case, matrix)
+                for matrix in matrices
             ),
         )
-        product = product_exponentials(generators)
         result = classify_product(product)
         counts[result.classification] += 1
         min_sigma_min = min(min_sigma_min, result.sigma_min)
@@ -185,8 +220,9 @@ def scan_cell(
             if margin > example_margins.get(result.classification, -1.0):
                 example_margins[result.classification] = margin
                 examples[result.classification] = _encode_example(
-                    generators,
+                    matrices,
                     product,
+                    matrix_kind=matrix_kind,
                     phase=result.phase,
                     log_abs=result.log_abs,
                     sigma_min=result.sigma_min,
@@ -194,6 +230,20 @@ def scan_cell(
                 )
 
     spec = cases[case]
+    if direct_factor_case:
+        generator_provenance = {
+            "factor": f"{candidate_module.__name__}.random_factor",
+            "factor_interpretation": (
+                "each sampled factor is constructed to be the exponential "
+                "of a real one-body generator"
+            ),
+            "weight": "det(I + product_l B_l)",
+        }
+    else:
+        generator_provenance = {
+            "generator": f"{candidate_module.__name__}.random_generator",
+            "weight": "det(I + product_l exp(A_l))",
+        }
     return {
         "schema_version": 1,
         "completed": True,
@@ -208,8 +258,7 @@ def scan_cell(
             "oracle_version": __version__,
             "family": spec.family,
             "prior_status": spec.prior_status,
-            "generator": f"{candidate_module.__name__}.random_generator",
-            "weight": "det(I + product_l exp(A_l))",
+            **generator_provenance,
             "precision": "numpy/scipy float64",
         },
         "counts": counts,

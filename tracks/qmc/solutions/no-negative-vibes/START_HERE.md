@@ -48,6 +48,15 @@
   保留已知 split/Kramers 机制；BDI 两面锥有 4,219 个负权，DIII/CII 的非平凡放松在
   深度 2 或 3 即产生复权，并由 80 位重放确认；BDI 另有两层解析反例
   `16(1-q^2)<0`。
+- 新完成 12 个激进结构的 192,000 权重筛选。奇数阶 positive-monomial 和 block-TN
+  路由已有循环分解的一般正性证明，且包含 ordinary TN 之外的矩阵，并排除固定
+  Kramers 和公共范数收缩解释；
+  偶阶路由、逐片改变收缩 metric、双向 reciprocal coupling 和 near-commuting 并集均
+  已由 80 位负例排除。`D_4` Lusztig 锥约化到已知 split `SO(4,4)`。
+- 新完成 640 条 Majorana auxiliary-field 历史；每条分别计算 even、odd 和完整 Fock 迹。
+  在 canonical `J1/J2` 与当前 Jordan-Wigner 取向下，猜想
+  `pi_*=(-1)^[m(m+1)/2]` 指定的扇区在 `m=2..6` 零失败，互补扇区每个维数都观察到
+  数值负权；这是 convention-dependent ensemble-level 猜想，不是已完成定理。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
@@ -66,16 +75,20 @@
    反例和任意小 split-cone 夹角解析反例。
 7. [AZ 幸存类半群锥](docs/AZ_SURVIVOR_CONE_RESULTS.md)：看七族、14 万权重、80 位反例和
    为什么零失败者仍只是已知机制。
-8. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
-9. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
-10. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
-11. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
-12. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
-13. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-14. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-15. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-16. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-17. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+8. [激进候选首批结果](docs/SPECULATIVE_STRUCTURE_RESULTS.md)：看奇数阶 monomial 的一般
+   证明、四类 80 位反例和 Majorana 宇称猜想。
+9. [激进候选清单](docs/SPECULATIVE_CANDIDATE_BATCH.md)：看已占位的下一批
+   spinor/exterior-cone 方向。
+10. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
+11. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
+12. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
+13. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
+14. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
+15. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+16. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+17. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+18. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+19. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
@@ -105,14 +118,14 @@ cd /home/volper/harness_quantum/signfree-qmc
 
 ## 下一步
 
-外围宽扫和自然 AZ 数守恒锥筛选已完成，不需要重复。现在做三件事：
+外围宽扫和第一批激进结构筛选已完成，不需要重复。现在做三件事：
 
-1. 沿 discrete/bond-channel HS 引用链排查精确非对称键门分解是否已有直接先例；
-2. 请合作者/出题人复核已完成的 2024 contraction-semigroup 非归约证明；
-3. 直接 TN 正和、逐扇区符号规范和普通 ancilla 偏迹都无法产生普通非相邻 hopping，
-   自然 AZ metric cones 也已快速失败；下一步只攻击真正改变 Hilbert 空间的
-   gauge/ancilla 编码、带宇称串相关 hopping、完整 pairing/Majorana/Pfaffian 或更大半群。
+1. 为 odd monomial / block-TN 的离散 grade 寻找局域、可采样的 HS 来源并完整排重
+   `P0`/generalized-permutation 文献；
+2. 从 Majorana reflection-positivity 证明中推导或推翻
+   `pi_*=(-1)^[m(m+1)/2]` 的受保护宇称；
+3. 若两条都不能物理闭环，再攻击 spinor-Metzler、非诱导 exterior-cone 或真正改变
+   Hilbert 空间的 gauge/ancilla 编码。
 
-现有一维构造本身可作为新辅助场算法候选继续测方差和条件数；如果正和路线仍不能产生
-超出已知一维事实的模型，就把 TN 结果定位为新矩阵机制候选、算法分解和边界定理，继续
-搜索比 TN 更大的主子式非负乘法半群，不冒充新 Hamiltonian。
+TN 一维构造和 odd monomial 都已经是严格矩阵机制；只有得到自然局域 Hamiltonian/HS
+映射后，才升级为新的物理无符号类。
