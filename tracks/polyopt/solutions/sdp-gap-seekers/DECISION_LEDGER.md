@@ -602,3 +602,18 @@ splits, and exact zero cross blocks after projection. Do not implement or
 submit this combined model until the standalone continuous-spin and spatial
 truth gates both pass, and do not assume that its smaller cone inventory
 will reduce solver fill before measuring the six-cone model.
+
+## 2026-07-29 — preserve primal values for an exact feasibility witness
+
+The audited gamma=1/2 solutions are comfortably inside every reconstructed
+PSD cone. A later exact strengthening can round the moment vector to modest
+rationals, rebuild every coefficient over the original exact assembly, and
+prove positive definiteness by rational LDL pivots. The existing result
+artifacts record only eigenvalue diagnostics, not the moment vector.
+
+Revise the isotypic runner to export each named primal variable using its
+exact IEEE-754 binary representation and checksum that generated table. Do
+not change or rerun the queued gamma=0 attempt. If it passes, use this
+revision for the already-authorized gamma=1/2 solve, then attempt the
+rational replay as a separate Slurm gate. Failure to rationalize is not
+solver infeasibility and must not change the existing numerical conclusion.

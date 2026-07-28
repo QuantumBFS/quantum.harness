@@ -17,7 +17,7 @@ using MosekTools
 
 const B = BaselineRunnerUtilities
 const RESULT_SCHEMA =
-    "shastry-sutherland-full-spin-isotypic-real-solve-result-v1"
+    "shastry-sutherland-full-spin-isotypic-real-solve-result-v2"
 const RUNMETA_SCHEMA =
     "shastry-sutherland-full-spin-isotypic-real-mof-runmeta-v1"
 const SOURCE_ASSEMBLY_SCHEMA = "primal-gap-assembly-v1"
@@ -884,6 +884,58 @@ function solution_diagnostics(
     )
 end
 
+function write_primal_values(
+    path::String,
+    model::JuMP.Model,
+    input_hashes,
+)
+    variables = JuMP.all_variables(model)
+    values = JuMP.value.(variables)
+    all(isfinite, values) ||
+        error("solver returned a nonfinite primal variable")
+    names = JuMP.name.(variables)
+    length(unique(names)) == length(names) ||
+        error("reloaded MOF variable names are not unique")
+    all(!isempty, names) ||
+        error("reloaded MOF contains an unnamed variable")
+
+    temporary = path * ".tmp"
+    ispath(path) && error("refusing existing primal-value artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing temporary primal-value artifact: $temporary")
+    open(temporary, "w") do io
+        println(
+            io,
+            "# schema=shastry-sutherland-full-spin-isotypic-primal-values-v1",
+        )
+        println(
+            io,
+            "# model_mof_sha256=",
+            input_hashes.model_sha256,
+        )
+        println(
+            io,
+            "# runmeta_sha256=",
+            input_hashes.runmeta_sha256,
+        )
+        println(io, "index\tname\tfloat64_bits")
+        for (index, (name, value)) in
+            enumerate(zip(names, values))
+            println(io, index, '\t', name, '\t', bitstring(value))
+        end
+    end
+    mv(temporary, path)
+    return Dict(
+        "schema_version" =>
+            "shastry-sutherland-full-spin-isotypic-primal-values-v1",
+        "filename" => basename(path),
+        "variable_count" => length(variables),
+        "bytes" => filesize(path),
+        "sha256" => B.file_sha256(path),
+        "encoding" => "index-tab-name-tab-ieee754-binary64-bits",
+    )
+end
+
 function main(arguments::Vector{String}=ARGS)
     options = B.parse_args(arguments)
     isnothing(options) && return 0
@@ -1024,6 +1076,16 @@ function main(arguments::Vector{String}=ARGS)
         )
 
         diagnostics = if JuMP.has_values(model)
+            progress("exporting exact IEEE-754 primal variable bits")
+            primal_values_path = joinpath(
+                dirname(options.output),
+                "primal-values.tsv",
+            )
+            result["primal_values"] = write_primal_values(
+                primal_values_path,
+                model,
+                input_files,
+            )
             progress("reconstructing all 9 real symmetric PSD blocks")
             solution_diagnostics(model, options.audit_tolerance)
         else

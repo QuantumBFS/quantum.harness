@@ -387,4 +387,9 @@ Updated: 2026-07-29 UTC.
   intertwining test, and spatial cone cross-zero proof are specified in
   `EXACT_CONTINUOUS_SPIN_REDUCTION_PLAN.md`. No combined source or job is
   authorized yet.
+- The next isotypic solver revision exports every primal variable as its
+  exact IEEE-754 bit pattern and includes the generated table in the run
+  manifest. This does not alter the queued gamma=0 job. If that gate passes,
+  the authorized gamma=1/2 run can preserve enough information for a
+  separate rational positive-definiteness replay.
 - No decision-changing user or resource need is open.

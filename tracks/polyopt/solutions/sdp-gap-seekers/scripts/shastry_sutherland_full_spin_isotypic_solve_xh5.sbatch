@@ -85,15 +85,19 @@ printf '%s\n' "$solver_exit" > "$RUN_DIR/runner-exit-code.txt"
 printf '%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$RUN_DIR/finished-at-utc.txt"
 (
     cd "$RUN_DIR"
-    sha256sum \
-        result.toml \
-        runner.log \
-        input-runmeta.toml \
-        input-SHA256SUMS \
-        runner-commit.txt \
-        git-status.txt \
-        runner-exit-code.txt \
-        finished-at-utc.txt > SHA256SUMS
+    checksum_files=(
+        result.toml
+        runner.log
+        input-runmeta.toml
+        input-SHA256SUMS
+        runner-commit.txt
+        git-status.txt
+        runner-exit-code.txt
+        finished-at-utc.txt
+    )
+    [[ -f primal-values.tsv ]] &&
+        checksum_files+=(primal-values.tsv)
+    sha256sum "${checksum_files[@]}" > SHA256SUMS
 )
 
 echo "[ss-full-spin-isotypic-solve] runner_exit=$solver_exit"
