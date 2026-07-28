@@ -15,13 +15,18 @@
 
 ## Scope Note
 
-This registration targets the #115 migration deliverable, not a full solution of
-the hardest #71 hidden-function discovery task. The first milestone is a
-bit-exact Rust verifier and benchmark report against the original Julia
-workflow.
+**Status: Completed — v0.5.0 (July 28, 2026).**
+
+The completed #115 migration now includes the bit-exact Rust verifier,
+bit-parallel and compiled evaluation backends, deterministic benchmark and
+evidence pipelines, pinned ABC/Yosys/Espresso provenance, bounded fuzzing, and
+the measured, auditable Occam generalization study. The companion #71 solution
+is submitted in [PR #220](https://github.com/QuantumBFS/quantum.harness/pull/220).
 
 ## Working Repository
 
-Development starts in the private AGPL-3.0 repository
+The completed implementation is maintained in the private AGPL-3.0 repository
 `JunkaiWang-TheoPhy/quantum-harness-115-occam-rust-port`. The #71 implementation
-line lives under the `challenge-71-occam/` subfolder.
+line lives under the `challenge-71-occam/` subfolder. The audited v0.5.0 source
+commit is `e9120224fe0b1f45ed309ad6b40bf7c9c381af38`; private CI and Release
+links are available to authorized reviewers.
