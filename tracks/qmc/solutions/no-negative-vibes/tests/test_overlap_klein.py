@@ -547,7 +547,7 @@ def test_build_system_uses_the_fixed_overlap_klein_geometry() -> None:
         item.label
         for item in quadratic_basis("number-conserving", "rings-bridges")
     )
-    assert system.coefficients.shape == (992, 24)
+    assert system.coefficients.shape == (560, 24)
 
 
 def test_anchor_scan_is_deterministic_across_worker_counts() -> None:
