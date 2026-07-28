@@ -199,3 +199,97 @@ full-basis data, or oracle outputs.
 Local try 4 result: `slice-pass / external-spec-review-pending`.  External
 specification review is required before declaring try 4 spec-compliant or
 starting any later route item.
+
+## External specification review — try 4 failed
+
+This section supersedes the local `slice-pass` disposition above.  The final
+external review conclusion was:
+
+> Not Spec compliant — 3 Important issues; quality review must be blocked.
+
+The 81 focused tests, 296 full tests, compilation and static isolation checks,
+zero N=6 fallback calls, and approximately `1.64x` to `1.71x` raw-parent
+performance ratios remain factual.  They do not establish specification
+compliance against the following new finite-result and termination
+counterexamples.
+
+### Important 1 — fast path rounds the dyadic anchor before scaling
+
+Use coefficient `min_subnormal`, sampled source log-magnitude `-700`, target
+log-magnitude `0`, and a target/source phase difference of `acos(0.75)`.  The
+fallback and high-precision reference return
+
+`3.758229113666584e-20 + 3.314446534921493e-20j`.
+
+The ordinary fast path instead returns
+
+`5.010972151555445e-20 + 5.010972151555445e-20j`.
+
+Root-cause evidence: phase rotation correctly creates exact dyadic components,
+including `0.75 * min_subnormal`, that are not themselves representable as
+binary64.  `_dyadic_to_float` rounds each anchor component before the common
+`exp(700)` restoration.  Both distinct dyadics round to the same minimum
+subnormal scale, so the later multiplication magnifies an already lost
+component difference.  Retaining a dyadic as the source of truth is
+insufficient if the fast path converts that truth to float before scaling.
+
+### Important 2 — ordinary fast path lacks whole-row RN-even certification
+
+Set sampled source log-magnitude to `1.3735516793873876` and use the four
+coefficient/target-log-magnitude pairs:
+
+- `(3.4428098013331905, -0.47673852159895347)`;
+- `(6.530397713504417, -0.8514257707488002)`;
+- `(-5.208222393324844, -1.2559283904236707)`;
+- `(-4.376072469198897, 0.06587580241150182)`.
+
+The 2,500-digit whole-row reference and the explicit fallback both return
+`-0.3121756978941482`.  The fast path returns
+`-0.3121756978941483` for all 24 insertion orders, a two-ulp error.
+
+Root-cause evidence: deterministic ordering prevents permutation drift but
+does not prove correct rounding.  The fast path separately rounds dyadic
+ratios, exponentials, scaled terms, the `math.fsum` result, and final restore.
+Its cancellation threshold detects only gross conditioning; it has no
+whole-row error interval showing that all accumulated uncertainty lies inside
+one binary64 round-to-nearest-even cell.
+
+### Important 3 — exact halfway ties cannot terminate
+
+Use equal logpsi factors with coefficients `a = 2^-901` and `b = 2^-954`.
+Their exact dyadic sum is the halfway value between `a` and the next binary64
+number.  Round-to-nearest-even must return
+
+`a = 5.915260930833874e-272`.
+
+Both insertion orders instead exhaust the 6,400-digit precision limit and
+raise `ArithmeticError`.
+
+Root-cause evidence: the fallback surrounds its Decimal approximation with a
+symmetric nonzero uncertainty interval.  At an exact midpoint that interval
+always crosses both adjacent rounding cells, regardless of increased Decimal
+precision.  The implementation has no exact dyadic tie detector and no direct
+binary64 round-to-nearest-even termination rule for an exactly representable
+structural sum.
+
+### Terminal disposition and final-attempt boundary
+
+- Try 4 result: `failed`.
+- Reviewer disposition: `Not Spec compliant`; quality review is blocked by
+  three Important finite-result or termination failures.
+- Try 4 active implementation time remains approximately `00:31`.  Activity
+  after final external review was documentation-only closeout; no additional
+  implementation interval was started or inferred.
+- The commit containing this section is the terminal commit for try 4.  This
+  worktree must not receive further production or test patches.
+- Any next rescue is the final allowed attempt, try `5/5`.  It must start in a
+  new independent worktree from this terminal commit; try 5 was not started
+  here.
+- A final architecture must not round dyadic anchors before common scaling,
+  must certify the complete fast-row round-to-nearest-even result, and must
+  terminate exact dyadic halfway ties with the IEEE even rule.  Another failed
+  rescue exhausts the attempt budget and leaves the goal blocked.
+- No production code or tests were changed after review.  No A03 work was
+  started, and no push was performed.
+
+Final try 4 disposition: `failed / terminal`.
