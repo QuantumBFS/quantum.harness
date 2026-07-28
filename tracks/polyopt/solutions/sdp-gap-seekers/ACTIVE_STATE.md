@@ -69,4 +69,16 @@ Updated: 2026-07-29 UTC.
   at the repository root. Peak RSS was 626,716 KiB. Scheduler stdout is now
   directed into the ignored track-results tree so the clean-source gate
   measures code rather than its own job log.
+- Derived-MOF build attempt r4, Slurm job `22988221`, completed both gamma
+  inputs from clean commit `25a8311`. The exact conjugation quotient has
+  16,660 moments, eliminates 2,448 additional V4 moments, retains the same 11
+  block sides, and uses 31,810 real PSD triangle coordinates. All three
+  prior affine equalities restrict to exact zero. Gamma=0 model SHA-256 is
+  `0a2c9166eb033a2e782ab91a062491961a5d8139a1b04e80f6f564d1a75a6e14`;
+  gamma=1/2 is
+  `b50d66a48a45de0f2a25e411ab3dcc6a06f3a99b06626951277ae09686062707`.
+  Job peak RSS was 819,548 KiB and elapsed time was 4:09.
+- Next gate: the separate real-cone runner must pass gamma=0, independently
+  reconstructing all 11 packed symmetric matrices, before gamma=1/2 can run
+  with the reduced memory request.
 - No decision-changing user or resource need is open.

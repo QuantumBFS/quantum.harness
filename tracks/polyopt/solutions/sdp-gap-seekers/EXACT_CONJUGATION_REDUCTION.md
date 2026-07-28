@@ -1,7 +1,7 @@
 # Exact conjugation and real-cone reduction
 
-Status: implementation awaiting the xH5 exhaustive truth gate. This document
-does not report a new solve.
+Status: exact truth gate and solver-free MOF build passed on xH5. This
+document does not yet report a new solve.
 
 ## Claim
 
@@ -47,6 +47,12 @@ scalarized semidefinite coordinates for the eight positive blocks. Direct
 real cones require 31,807 coordinates for those blocks, plus three scalar gap
 coordinates. This is a representation reduction, not constraint dropping.
 
+The exact projection reduces the V4 inventory from 19,108 to 16,660 scalar
+moments by removing 2,448 conjugation-odd moments. All three V4-reduced affine
+equalities restrict to exact zero on this invariant inventory, so the real
+model has normalization plus 11 PSD constraints and no additional affine
+equalities.
+
 ## Machine truth gates
 
 `ConjugationSymmetryReduction.jl` checks over exact rationals:
@@ -60,5 +66,13 @@ coordinates. This is a representation reduction, not constraint dropping.
 5. the emitted coefficient maps reproduce exactly the conjugation-even
    subset of the V4 moment inventory.
 
-The xH5 truth run will fix the remaining exact moment/equality counts and bind
-the derived model to deterministic coefficient and assembly hashes.
+Slurm job `22988221` generated and reloaded both solver-free models from clean
+commit `25a8311d12d24b5495c531a9741249180ed28b4f`:
+
+```text
+gamma=0:   model SHA-256 0a2c9166eb033a2e782ab91a062491961a5d8139a1b04e80f6f564d1a75a6e14
+gamma=1/2: model SHA-256 b50d66a48a45de0f2a25e411ab3dcc6a06f3a99b06626951277ae09686062707
+```
+
+Both reload as 16,660 variables and 11 named
+`PositiveSemidefiniteConeTriangle` constraints with the declared dimensions.

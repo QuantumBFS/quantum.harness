@@ -112,3 +112,18 @@ because its own default `slurm-22988216.out` was untracked at the checkout
 root. The gate is correct and remains strict. The sbatch wrapper now routes
 scheduler stdout into the ignored track-results tree, so generated job logs
 cannot masquerade as source dirtiness.
+
+## 2026-07-29 — exact conjugation-reduced MOFs accepted
+
+Slurm job `22988221` completed both clean, solver-free builds and reload
+checks. The exact real model has 16,660 moments, zero surviving affine
+equalities, and 31,810 real PSD triangle coordinates. This is a 2,448-moment
+and 94,715-cone-coordinate reduction relative to the V4 model as presented to
+Mosek's generic Hermitian bridge.
+
+The gamma=0 and gamma=1/2 model SHA-256 values are respectively
+`0a2c9166eb033a2e782ab91a062491961a5d8139a1b04e80f6f564d1a75a6e14`
+and
+`b50d66a48a45de0f2a25e411ab3dcc6a06f3a99b06626951277ae09686062707`.
+They are immutable derived inputs. The real-cone runner must pass gamma=0
+before the gamma=1/2 memory comparison is authorized.
