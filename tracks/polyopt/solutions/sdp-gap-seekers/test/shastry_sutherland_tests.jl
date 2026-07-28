@@ -116,6 +116,8 @@ end
 
 include(joinpath(@__DIR__, "..", "src", "ShastrySutherlandPrimalOracle.jl"))
 using .ShastrySutherlandPrimalOracle
+include(joinpath(@__DIR__, "..", "src", "ShastrySutherlandReducedOracle.jl"))
+using .ShastrySutherlandReducedOracle
 
 @testset "exact dimer state in assembled M/G/K constraints" begin
     patch = square_patch_geometry(1)
@@ -160,4 +162,47 @@ using .ShastrySutherlandPrimalOracle
         basis_spec=StructuredBasisSpec(:one_symbol_lift, 1),
     )
     @test_throws ArgumentError evaluate_dimer_primal(assemble_primal_gap(nonzero_g))
+end
+
+@testset "exact dimer state in V4-reduced M/G/K constraints" begin
+    patch = square_patch_geometry(1)
+    model = shastry_sutherland_model(0//1)
+    spec = StructuredBasisSpec(:one_symbol_lift, 1)
+    exact_problem = GapProblem(
+        patch,
+        model,
+        1//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=spec,
+    )
+    exact_reduced = assemble_reduced_primal(
+        assemble_primal_gap(exact_problem);
+        verify_truth=false,
+    )
+    exact_evaluation = evaluate_reduced_dimer_primal(exact_reduced)
+    @test exact_evaluation.equalities_exact_zero
+    @test exact_evaluation.positive_minimum >= -1e-10
+    @test exact_evaluation.gap_minimum >= -1e-10
+
+    overclaim_problem = GapProblem(
+        patch,
+        model,
+        11//10,
+        2;
+        basis_mode=:structured,
+        basis_spec=spec,
+    )
+    overclaim_reduced = assemble_reduced_primal(
+        assemble_primal_gap(overclaim_problem);
+        verify_truth=false,
+    )
+    overclaim_evaluation = evaluate_reduced_dimer_primal(overclaim_reduced)
+    @test overclaim_evaluation.equalities_exact_zero
+    @test isapprox(
+        overclaim_evaluation.gap_minimum,
+        -0.1;
+        atol=1e-12,
+        rtol=0,
+    )
 end

@@ -59,6 +59,9 @@ implementation branch.
 - [`SHASTRY_SUTHERLAND_DIMER_GATE.md`](SHASTRY_SUTHERLAND_DIMER_GATE.md):
   periodic orthogonal-dimer geometry, exact `g=0` moment oracle, assembled
   `M/G/K` gate, and `4x4` finite-torus benchmarks at `g=0,0.8`.
+- [`EXACT_V4_REDUCTION_TRUTH.md`](EXACT_V4_REDUCTION_TRUTH.md): proof contract
+  and exhaustive symbolic tests for the centered/scalar congruence, gap facial
+  reduction, and exact V4 state-polynomial quotient.
 
 The solver-independent Julia core uses standard libraries only and does not
 solve an SDP. The optional finite-torus ED oracle uses NumPy and SciPy. The
