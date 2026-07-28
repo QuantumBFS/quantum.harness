@@ -492,6 +492,26 @@ the process-time peak was 979,428 KiB and Slurm step MaxRSS was 821,520 KiB.
 The theorem is accepted. Complete the already-authorized nine-cone
 gamma=1/2 result before building solver inputs from this next reduction.
 
+## 2026-07-29 — accept immutable full-spin isotypic MOF inputs
+
+Slurm job `22988846` completed both clean solver-free builds and independent
+MOF reload checks from commit `792e61c`. The gamma=0 model/runmeta SHA-256
+values are
+`990e78381e25b2be683f00d93ffc85ff543d6beed0580b660b25d8f8cf8b90d2`
+and
+`7fac0e27fafe3b902fc3322b880aeccce38f2ba5b0061a172e3f7057bc1e1d23`;
+the gamma=1/2 values are
+`22aa6d169fabbe6b9f41eeba4ddc7d37fb1f8b769427714875760ae94dc559f9`
+and
+`8e84bde7043d0023cbd82181d83f1a70622f222b6a706d0a36b9f45283e94e99`.
+
+Both reloads prove 3,250 variables, 10 constraints, all nine named cone
+dimensions, 6,104 packed triangle coordinates, and maximum side 45. The
+build job used 897,624 KiB MaxRSS in 3:54; its Slurm-log SHA-256 is
+`7036d9caa22973f63ca4b0c09113556fcecfb9e637f39b1edb101cfa3bc1834a`.
+Treat the inputs as immutable and preserve the gamma=0-before-gamma=1/2
+optimization order.
+
 ## 2026-07-29 — nine-cone gamma=1/2 remains feasible at 1.63 GiB
 
 Slurm job `22988816` passed all immutable-input and replay gates and returned

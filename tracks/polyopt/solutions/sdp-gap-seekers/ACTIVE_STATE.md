@@ -309,6 +309,23 @@ Updated: 2026-07-29 UTC.
   10,064 to 6,104, and reduces maximum side from 73 to 45. `test.log`
   SHA-256 is
   `1ec6ebdd77b6a94c04b1956c5cfd07f62ad780a2fb34f0fbed7c7351f12f2ee9`.
+- Full-spin isotypic MOF build attempt r1, Slurm job `22988846`, completed
+  both clean exact builds and independent reload gates from source commit
+  `792e61c`. Each input has 3,250 variables, 10 constraints, nine named real
+  PSD cones, 6,104 packed triangle entries, and maximum side 45. Gamma=0
+  model/runmeta SHA-256 values are
+  `990e78381e25b2be683f00d93ffc85ff543d6beed0580b660b25d8f8cf8b90d2`
+  and
+  `7fac0e27fafe3b902fc3322b880aeccce38f2ba5b0061a172e3f7057bc1e1d23`;
+  gamma=1/2 values are
+  `22aa6d169fabbe6b9f41eeba4ddc7d37fb1f8b769427714875760ae94dc559f9`
+  and
+  `8e84bde7043d0023cbd82181d83f1a70622f222b6a706d0a36b9f45283e94e99`.
+  Job MaxRSS was 897,624 KiB and elapsed time was 3:54.
+- The dedicated isotypic runner now allowlists those four hashes and checks
+  all six exact-reduction layers, all 17 recorded source hashes, and the
+  reloaded nine-cone inventory before Mosek is attached. Gamma=0 is the next
+  numerical gate; gamma=1/2 remains unauthorized until it passes.
 - Nine-cone gamma=1/2 attempt r1, Slurm job `22988816`, passed every
   fail-closed input, setup, reduction, source-hash, and reloaded-cone gate.
   Mosek returned `OPTIMAL` with primal and dual feasible points.
