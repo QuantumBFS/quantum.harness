@@ -305,6 +305,65 @@ No scientific or solver setting should change. If that retry also produces a
 pre-execution `JobLaunchFailure`, stop and treat the cluster launch path as the
 blocker rather than repeatedly resubmitting.
 
+## 8.3 Authorized identical retry: launch path blocked
+
+The single authorized retry was submitted with the same committed batch
+script and only the failed node excluded:
+
+```text
+job_id    = 22986104
+partition = xhacnormalb
+CPUs      = 16
+memory    = 60,800 MB
+walltime  = 00:30:00
+exclude   = a01r06n03
+```
+
+Slurm assigned a different node and again failed before the batch script
+executed:
+
+```text
+State    = FAILED
+ExitCode = 0:53
+Elapsed  = 00:00:01
+Node     = a01r08n02
+stdout   = not created
+result   = not created
+```
+
+The accounting rows were:
+
+```text
+22986104        FAILED     0:53  00:00:01  a01r08n02
+22986104.batch  CANCELLED  0:53  00:00:01  a01r08n02
+22986104.extern COMPLETED   0:0  00:00:01  a01r08n02
+```
+
+This reproduces the pre-execution launch failure on two distinct compute
+nodes. In particular, neither attempt loaded Julia, read the MOF, initialized
+Mosek, or allocated the SDP. It is therefore not evidence about feasibility,
+model correctness, solver stability, runtime, or memory.
+
+### Stop decision
+
+Do not submit a third copy of this SDP job without new evidence. Gate C is
+**BLOCKED at the SCNet batch-launch layer**, while Gate B remains passed.
+
+The next action should be one of the following, in order:
+
+1. ask SCNet support/administration to inspect jobs `22986072` and `22986104`
+   and the node-side reason for batch launch exit `0:53`;
+2. if an infrastructure diagnostic is desired before that response, obtain
+   explicit approval for a minimal batch script on `xhacnormalb` using the
+   same account/resource pattern but no Julia, Mosek, or model input;
+3. after a minimal job executes successfully, resubmit the unchanged
+   `gamma=0` smoke job once and inspect its checksum-bound result;
+4. do not submit `gamma=1/4` until `gamma=0` has executed and its artifacts
+   have passed review.
+
+Changing the scientific model, MOF, Julia/Mosek paths, partition, or memory
+request is not justified by the evidence currently available.
+
 ## 9. Claim boundary
 
 Gate B proves a deterministic, replayable solver input for the declared
