@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import random
+import struct
 from collections import Counter
 from decimal import Decimal, localcontext
 from itertools import permutations
@@ -123,6 +124,10 @@ def _decimal_row_oracle(
             real += rotated_real * factor
             imaginary += rotated_imaginary * factor
     return complex(float(real), float(imaginary))
+
+
+def _float_hex(value: float) -> str:
+    return struct.pack(">d", value).hex()
 
 
 def test_route_local_fermion_actions_match_fock_ed_term_by_term() -> None:
@@ -560,6 +565,120 @@ def test_local_estimator_preserves_binary64_endpoint_at_unit_factor(
         {2: coefficient},
         lambda _state: 0.0j,
     ) == complex(coefficient)
+
+
+def _dyadic_rounding_cases() -> list[tuple[operators._Dyadic, float]]:
+    minimum = math.ldexp(1.0, -1074)
+    normal = math.ldexp(1.0, -901)
+    normal_next = math.nextafter(normal, math.inf)
+    maximum = float(np.finfo(np.float64).max)
+    halfway_even = operators._dyadic_add(
+        operators._dyadic_from_float(normal),
+        operators._normalized_dyadic(1, -954),
+    )
+    halfway_odd = operators._dyadic_add(
+        operators._dyadic_from_float(normal_next),
+        operators._normalized_dyadic(1, -954),
+    )
+    overflow_halfway = operators._dyadic_add(
+        operators._dyadic_from_float(maximum),
+        operators._normalized_dyadic(1, 970),
+    )
+    return [
+        (operators._normalized_dyadic(3, -1), 1.5),
+        (operators._normalized_dyadic(1, -1074), minimum),
+        (operators._normalized_dyadic(1, -1075), 0.0),
+        (operators._normalized_dyadic(-1, -1076), -0.0),
+        (operators._normalized_dyadic(3, -1076), minimum),
+        (halfway_even, normal),
+        (halfway_odd, math.nextafter(normal_next, math.inf)),
+        (operators._dyadic_from_float(maximum), maximum),
+        (overflow_halfway, math.inf),
+    ]
+
+
+@pytest.mark.parametrize(("value", "expected"), _dyadic_rounding_cases())
+def test_exact_dyadic_to_binary64_rounds_nearest_even(
+    value: operators._Dyadic,
+    expected: float,
+) -> None:
+    observed = operators._dyadic_to_binary64(value)
+
+    assert _float_hex(observed) == _float_hex(expected)
+
+
+def test_local_estimator_does_not_round_rotated_subnormal_anchor_before_scale() -> None:
+    minimum = math.ldexp(1.0, -1074)
+    log_values = {
+        1: complex(-700.0, 0.0),
+        2: complex(0.0, math.acos(0.75)),
+    }
+
+    observed = local_from_log_neighbors(
+        1,
+        {2: minimum},
+        log_values.__getitem__,
+    )
+
+    assert observed == complex(
+        3.758229113666584e-20,
+        3.314446534921493e-20,
+    )
+
+
+def test_local_estimator_certifies_ordinary_row_rounding_under_all_orders(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source_logabs = 1.3735516793873876
+    terms = (
+        (2, 3.4428098013331905),
+        (3, 6.530397713504417),
+        (4, -5.208222393324844),
+        (5, -4.376072469198897),
+    )
+    log_values = {
+        1: complex(source_logabs, 0.0),
+        2: complex(-0.47673852159895347, 0.0),
+        3: complex(-0.8514257707488002, 0.0),
+        4: complex(-1.2559283904236707, 0.0),
+        5: complex(0.06587580241150182, 0.0),
+    }
+    expected_bits = "bfd3faafc743ed09"
+
+    for order in permutations(terms):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+
+        assert _float_hex(observed.real) == expected_bits
+
+    monkeypatch.setattr(operators, "_try_fast_component", lambda *_args: None)
+    fallback = local_from_log_neighbors(
+        1,
+        dict(terms),
+        log_values.__getitem__,
+    )
+    assert _float_hex(fallback.real) == expected_bits
+
+
+def test_local_estimator_terminates_exact_dyadic_halfway_tie(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    even = math.ldexp(1.0, -901)
+    halfway = math.ldexp(1.0, -954)
+    terms = ((2, even), (3, halfway))
+    monkeypatch.setattr(operators, "_FALLBACK_MAX_PRECISION", 1600)
+
+    for order in permutations(terms):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            lambda _state: 0.0j,
+        )
+
+        assert _float_hex(observed.real) == _float_hex(even)
 
 
 def test_local_estimator_recovers_tiny_component_after_exact_row_cancellation() -> None:
