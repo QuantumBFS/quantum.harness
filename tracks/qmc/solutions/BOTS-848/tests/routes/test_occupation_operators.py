@@ -20,7 +20,9 @@ from benchmark_v0.lll_coulomb import (
     antisymmetrized_pair_matrix,
     coulomb_integrals,
 )
+from scalable_v1.routes.occupation_autoregressive import operators
 from scalable_v1.routes.occupation_autoregressive.operators import (
+    PreparedPairOperator,
     apply_one_body,
     apply_two_body,
     compose_ladders,
@@ -120,6 +122,7 @@ def test_local_energy_matches_tiny_public_coulomb_hamiltonian() -> None:
     basis = fixed_m_basis(3, two_q, 0.0)
     integrals = coulomb_integrals(two_q, n_theta=20, n_phi=28)
     pairs, pair_matrix = antisymmetrized_pair_matrix(integrals)
+    operator = PreparedPairOperator.build(pairs, pair_matrix, two_q)
     hamiltonian = hamiltonian_matrix(basis, pairs, pair_matrix)
     values = np.array(
         [1.0 + 0.17j * (index + 1) for index in range(len(basis))],
@@ -131,10 +134,8 @@ def test_local_energy_matches_tiny_public_coulomb_hamiltonian() -> None:
     for index, state in enumerate(basis):
         assert local_energy(
             state,
-            pairs=pairs,
-            pair_matrix=pair_matrix,
+            operator=operator,
             amplitude=amplitude,
-            two_q=two_q,
         ) == pytest.approx(expected[index] / values[index], abs=1.0e-12)
 
 
@@ -145,6 +146,7 @@ def test_local_energy_uses_h_current_target_for_complex_hermitian_input() -> Non
         [[0.0, 1.0 + 2.0j], [1.0 - 2.0j, 0.0]],
         dtype=np.complex128,
     )
+    operator = PreparedPairOperator.build(pairs, pair_matrix, two_q)
     basis = full_basis(2, two_q)
     hamiltonian = hamiltonian_matrix(basis, pairs, pair_matrix)
     values = np.array(
@@ -158,10 +160,36 @@ def test_local_energy_uses_h_current_target_for_complex_hermitian_input() -> Non
         expected = (hamiltonian @ values)[index] / values[index]
         assert local_energy(
             state,
-            pairs=pairs,
-            pair_matrix=pair_matrix,
+            operator=operator,
             amplitude=amplitude,
-            two_q=two_q,
+        ) == pytest.approx(expected, abs=1.0e-12)
+
+
+def test_random_complex_hermitian_prepared_operator_matches_full_basis() -> None:
+    two_q = 4
+    pairs = tuple(
+        (a, b)
+        for a in range(two_q + 1)
+        for b in range(a + 1, two_q + 1)
+    )
+    rng = np.random.default_rng(848)
+    raw = rng.normal(size=(len(pairs), len(pairs))) + 1j * rng.normal(
+        size=(len(pairs), len(pairs))
+    )
+    pair_matrix = raw + raw.conj().T
+    operator = PreparedPairOperator.build(pairs, pair_matrix, two_q)
+    basis = full_basis(2, two_q)
+    hamiltonian = hamiltonian_matrix(basis, pairs, pair_matrix)
+    values = rng.normal(size=len(basis)) + 1j * rng.normal(size=len(basis))
+    values += 1.0 + 0.5j
+    amplitude = _amplitude_from_basis(basis, values)
+
+    for index, state in enumerate(basis):
+        expected = (hamiltonian @ values)[index] / values[index]
+        assert local_energy(
+            state,
+            operator=operator,
+            amplitude=amplitude,
         ) == pytest.approx(expected, abs=1.0e-12)
 
 
@@ -173,14 +201,13 @@ def test_two_body_neighbors_merge_repeated_targets_before_amplitude_calls() -> N
     pair_matrix[pair_index[(0, 3)], pair_index[(0, 2)]] = 2.0
     pair_matrix[pair_index[(1, 3)], pair_index[(1, 2)]] = -0.5
     pair_matrix += pair_matrix.conj().T
+    operator = PreparedPairOperator.build(pairs, pair_matrix, two_q)
     source = (1 << 0) | (1 << 1) | (1 << 2)
     target = (1 << 0) | (1 << 1) | (1 << 3)
 
     neighbors = two_body_neighbors(
         source,
-        pairs=pairs,
-        pair_matrix=pair_matrix,
-        two_q=two_q,
+        operator=operator,
     )
     assert set(neighbors) == {target}
 
@@ -192,10 +219,8 @@ def test_two_body_neighbors_merge_repeated_targets_before_amplitude_calls() -> N
 
     local_energy(
         source,
-        pairs=pairs,
-        pair_matrix=pair_matrix,
+        operator=operator,
         amplitude=amplitude,
-        two_q=two_q,
     )
 
     assert calls[target] == 1
@@ -255,14 +280,17 @@ def test_compose_ladders_merges_paths_and_keeps_diagonal_return() -> None:
     assert saw_merged_target
 
 
-@pytest.mark.parametrize("target_m", [0.0, 1.0])
+@pytest.mark.parametrize(
+    ("two_q", "target_m"),
+    [(6, 0.0), (6, 1.0), (5, -0.5)],
+)
 def test_local_l2_matches_tiny_exact_matrix_for_complex_amplitudes(
+    two_q: int,
     target_m: float,
 ) -> None:
-    two_q = 6
     basis = fixed_m_basis(3, two_q, target_m)
     matrix = l_squared_matrix(basis, two_q=two_q, target_m=target_m)
-    rng = np.random.default_rng(848 + int(target_m))
+    rng = np.random.default_rng(848 + round(2 * target_m))
     values = rng.normal(size=len(basis)) + 1j * rng.normal(size=len(basis))
     values += 0.7 + 0.3j
     amplitude = _amplitude_from_basis(basis, values)
@@ -277,10 +305,119 @@ def test_local_l2_matches_tiny_exact_matrix_for_complex_amplitudes(
         ) == pytest.approx(expected[index] / values[index], abs=1.0e-12)
 
 
-@pytest.mark.parametrize("value", [0.0, 1.0e-301, np.nan, np.inf, complex(1, np.inf)])
+@pytest.mark.parametrize("value", [0.0, np.nan, np.inf, complex(1, np.inf)])
 def test_local_estimator_rejects_bad_sampled_amplitude(value: complex) -> None:
     with pytest.raises(ValueError, match="sampled amplitude"):
         local_from_neighbors(1, {1: 2.0}, lambda _state: value)
+
+
+def test_local_estimator_accepts_nonzero_subthreshold_amplitude() -> None:
+    assert local_from_neighbors(1, {1: 2.0}, lambda _state: 1.0e-301) == (
+        pytest.approx(2.0)
+    )
+
+
+def test_local_estimator_is_invariant_under_tiny_global_amplitude_scale() -> None:
+    neighbors = {1: 2.0 - 0.5j, 2: -0.25 + 0.75j}
+    values = {1: 1.0 + 0.5j, 2: -0.4 + 0.8j}
+    expected = local_from_neighbors(1, neighbors, values.__getitem__)
+    scaled = {state: value * 1.0e-301 for state, value in values.items()}
+
+    observed = local_from_neighbors(1, neighbors, scaled.__getitem__)
+
+    assert math.isfinite(observed.real)
+    assert math.isfinite(observed.imag)
+    assert observed == pytest.approx(expected, rel=2.0e-14, abs=2.0e-14)
+
+
+def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
+    pair_matrix = np.array(
+        [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],
+        dtype=np.complex128,
+    )
+
+    with pytest.raises(ValueError, match="pair_matrix must be Hermitian"):
+        PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
+
+
+def test_prepared_pair_operator_rejects_direct_construction() -> None:
+    with pytest.raises(TypeError, match="must be created with build"):
+        PreparedPairOperator()
+
+
+@pytest.mark.parametrize(
+    ("pairs", "two_q", "error", "message"),
+    [
+        (((1, 0),), 1, ValueError, "canonical order"),
+        (((0, 0),), 1, ValueError, "canonical order"),
+        (((0, 1), (0, 1)), 1, ValueError, "unique"),
+        (((0, 2),), 1, ValueError, "must be in"),
+        (((False, 1),), 1, TypeError, "must be an integer"),
+        (((0, 1),), True, TypeError, "two_q must be an integer"),
+    ],
+)
+def test_prepared_pair_operator_requires_canonical_unique_integer_pairs(
+    pairs,
+    two_q,
+    error: type[Exception],
+    message: str,
+) -> None:
+    pair_count = len(pairs)
+    with pytest.raises(error, match=message):
+        PreparedPairOperator.build(
+            pairs,
+            np.eye(pair_count, dtype=np.complex128),
+            two_q,
+        )
+
+
+def test_prepared_pair_operator_copies_and_freezes_inputs() -> None:
+    source_pairs = [[0, 1], [2, 3]]
+    source_matrix = np.array(
+        [[2.0, 1.0 + 2.0j], [1.0 - 2.0j, 3.0]],
+        dtype=np.complex128,
+    )
+    expected_matrix = source_matrix.copy()
+
+    operator = PreparedPairOperator.build(source_pairs, source_matrix, two_q=3)
+    source_pairs[0][0] = 1
+    source_matrix[:] = 99.0
+
+    assert operator.two_q == 3
+    assert operator.pairs == ((0, 1), (2, 3))
+    np.testing.assert_array_equal(operator.matrix, expected_matrix)
+    assert not operator.matrix.flags.writeable
+    assert isinstance(operator.nonzero_by_column, tuple)
+    assert all(isinstance(entries, tuple) for entries in operator.nonzero_by_column)
+    assert dict(operator.source_column_by_pair) == {(0, 1): 0, (2, 3): 1}
+    with pytest.raises(ValueError, match="read-only"):
+        operator.matrix[0, 0] = 0.0
+    with pytest.raises(TypeError):
+        operator.source_column_by_pair[(0, 1)] = 7
+
+
+def test_prepared_pair_operator_is_reused_without_quadratic_rescan(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    two_q = 3
+    pairs = tuple((a, b) for a in range(4) for b in range(a + 1, 4))
+    pair_matrix = np.eye(len(pairs), dtype=np.complex128)
+    operator = PreparedPairOperator.build(pairs, pair_matrix, two_q)
+    cached_nonzeros = operator.nonzero_by_column
+
+    def unexpected_scan(*_args, **_kwargs):
+        raise AssertionError("hot path repeated the pair-matrix scan")
+
+    monkeypatch.setattr(operators.np, "flatnonzero", unexpected_scan)
+
+    for state in full_basis(2, two_q):
+        assert two_body_neighbors(state, operator=operator) == {state: 1.0}
+        assert local_energy(
+            state,
+            operator=operator,
+            amplitude=lambda _state: 1.0,
+        ) == pytest.approx(1.0)
+    assert operator.nonzero_by_column is cached_nonzeros
 
 
 def test_operator_estimators_reject_bad_shapes_and_configuration_inputs() -> None:
@@ -288,7 +425,7 @@ def test_operator_estimators_reject_bad_shapes_and_configuration_inputs() -> Non
     amplitude = lambda _state: 1.0
 
     with pytest.raises(ValueError, match="pair_matrix must have shape"):
-        two_body_neighbors(3, pairs=pairs, pair_matrix=np.zeros((1, 2)), two_q=1)
+        PreparedPairOperator.build(pairs, np.zeros((1, 2)), two_q=1)
     with pytest.raises(ValueError, match="outside the orbital range"):
         ladder_neighbors(1 << 3, 1, direction=1)
     with pytest.raises(ValueError, match="direction must be -1 or 1"):

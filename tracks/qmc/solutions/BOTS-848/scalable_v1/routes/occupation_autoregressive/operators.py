@@ -4,13 +4,19 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from numbers import Integral, Real
+from types import MappingProxyType
 
 import numpy as np
 
 
 NeighborMap = dict[int, complex]
 Amplitude = Callable[[int], complex]
+
+# The maximum-norm Hermitian defect is compared with this fraction of the
+# maximum matrix-element magnitude. A zero matrix therefore has zero tolerance.
+HERMITIAN_RELATIVE_TOLERANCE = 1.0e-12
 
 
 def _integer(name: str, value: object) -> int:
@@ -125,6 +131,7 @@ def _validated_pairs(
     except TypeError as error:
         raise TypeError("pairs must be a sequence of orbital pairs") from error
     validated = []
+    seen: set[tuple[int, int]] = set()
     for index, pair in enumerate(entries):
         if not isinstance(pair, Sequence) or isinstance(pair, (str, bytes)):
             raise TypeError(f"pairs[{index}] must contain two orbitals")
@@ -132,9 +139,13 @@ def _validated_pairs(
             raise ValueError(f"pairs[{index}] must contain two orbitals")
         first = _orbital(f"pairs[{index}][0]", pair[0], two_q)
         second = _orbital(f"pairs[{index}][1]", pair[1], two_q)
-        if first == second:
-            raise ValueError(f"pairs[{index}] must contain distinct orbitals")
-        validated.append((first, second))
+        if first >= second:
+            raise ValueError(f"pairs[{index}] must use canonical order a < b")
+        canonical_pair = (first, second)
+        if canonical_pair in seen:
+            raise ValueError("pairs must be globally unique")
+        seen.add(canonical_pair)
+        validated.append(canonical_pair)
     return tuple(validated)
 
 
@@ -147,7 +158,7 @@ def _validated_pair_matrix(
     if raw.shape != expected_shape:
         raise ValueError(f"pair_matrix must have shape {expected_shape}")
     try:
-        matrix = np.asarray(pair_matrix, dtype=np.complex128)
+        matrix = np.array(pair_matrix, dtype=np.complex128, copy=True, order="C")
     except (TypeError, ValueError) as error:
         raise TypeError("pair_matrix must contain numeric values") from error
     if not np.all(np.isfinite(matrix)):
@@ -155,11 +166,79 @@ def _validated_pair_matrix(
     return matrix
 
 
+@dataclass(frozen=True, slots=True, init=False)
+class PreparedPairOperator:
+    """Validated, immutable pair data prepared once outside sampling loops.
+
+    Hermiticity uses the scale-relative maximum-norm criterion
+    ``max(abs(A - A^dagger)) <= HERMITIAN_RELATIVE_TOLERANCE * max(abs(A))``.
+    The matrix owns no writable buffer, and nonzero target rows are cached per
+    source column so per-configuration work never rescans the pair matrix.
+    """
+
+    two_q: int
+    pairs: tuple[tuple[int, int], ...]
+    matrix: np.ndarray
+    nonzero_by_column: tuple[tuple[tuple[int, complex], ...], ...]
+    source_column_by_pair: Mapping[tuple[int, int], int]
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        raise TypeError(
+            "PreparedPairOperator instances must be created with build()"
+        )
+
+    @classmethod
+    def build(
+        cls,
+        pairs: Sequence[tuple[int, int]],
+        pair_matrix: object,
+        two_q: int,
+    ) -> PreparedPairOperator:
+        orbital_limit = _integer("two_q", two_q)
+        if orbital_limit < 0:
+            raise ValueError("two_q must be non-negative")
+        pair_basis = _validated_pairs(pairs, orbital_limit)
+        matrix = _validated_pair_matrix(pair_matrix, len(pair_basis))
+        scale = float(np.max(np.abs(matrix), initial=0.0))
+        defect = float(
+            np.max(np.abs(matrix - matrix.conj().T), initial=0.0)
+        )
+        tolerance = HERMITIAN_RELATIVE_TOLERANCE * scale
+        if defect > tolerance:
+            raise ValueError(
+                "pair_matrix must be Hermitian within relative tolerance "
+                f"{HERMITIAN_RELATIVE_TOLERANCE:g}"
+            )
+
+        nonzero_by_column = tuple(
+            tuple(
+                (int(row), complex(matrix[row, column]))
+                for row in np.flatnonzero(matrix[:, column] != 0.0)
+            )
+            for column in range(len(pair_basis))
+        )
+        frozen_matrix = np.frombuffer(
+            matrix.tobytes(order="C"),
+            dtype=np.complex128,
+        ).reshape(matrix.shape)
+        instance = object.__new__(cls)
+        object.__setattr__(instance, "two_q", orbital_limit)
+        object.__setattr__(instance, "pairs", pair_basis)
+        object.__setattr__(instance, "matrix", frozen_matrix)
+        object.__setattr__(instance, "nonzero_by_column", nonzero_by_column)
+        object.__setattr__(
+            instance,
+            "source_column_by_pair",
+            MappingProxyType(
+                {pair: column for column, pair in enumerate(pair_basis)}
+            ),
+        )
+        return instance
+
+
 def two_body_neighbors(
     state: int,
-    pairs: Sequence[tuple[int, int]],
-    pair_matrix: object,
-    two_q: int,
+    operator: PreparedPairOperator,
 ) -> NeighborMap:
     """Return sparse ``H[target, source]`` entries for one source bitset.
 
@@ -167,33 +246,36 @@ def two_body_neighbors(
     determinant targets are merged before this mapping is returned.
     """
 
-    source, orbital_limit = _validated_state(state, two_q)
-    pair_basis = _validated_pairs(pairs, orbital_limit)
-    matrix = _validated_pair_matrix(pair_matrix, len(pair_basis))
-    occupied_sources = [
-        (column, c, d)
-        for column, (c, d) in enumerate(pair_basis)
-        if source & (1 << c) and source & (1 << d)
+    if not isinstance(operator, PreparedPairOperator):
+        raise TypeError("operator must be a PreparedPairOperator")
+    source, orbital_limit = _validated_state(state, operator.two_q)
+    occupied_orbitals = [
+        orbital
+        for orbital in range(orbital_limit + 1)
+        if source & (1 << orbital)
     ]
     neighbors: NeighborMap = {}
-    for column, c, d in occupied_sources:
-        nonzero_target_rows = np.flatnonzero(matrix[:, column] != 0.0)
-        for row_raw in nonzero_target_rows:
-            row = int(row_raw)
-            a, b = pair_basis[row]
-            matrix_element = matrix[row, column]
-            applied = apply_two_body(
-                source,
-                a=a,
-                b=b,
-                c=c,
-                d=d,
-                two_q=orbital_limit,
-            )
-            if applied is None:
+    for first_index, c in enumerate(occupied_orbitals):
+        for d in occupied_orbitals[first_index + 1 :]:
+            column = operator.source_column_by_pair.get((c, d))
+            if column is None:
                 continue
-            target, sign = applied
-            neighbors[target] = neighbors.get(target, 0.0j) + sign * matrix_element
+            for row, matrix_element in operator.nonzero_by_column[column]:
+                a, b = operator.pairs[row]
+                applied = apply_two_body(
+                    source,
+                    a=a,
+                    b=b,
+                    c=c,
+                    d=d,
+                    two_q=orbital_limit,
+                )
+                if applied is None:
+                    continue
+                target, sign = applied
+                neighbors[target] = (
+                    neighbors.get(target, 0.0j) + sign * matrix_element
+                )
     return {
         target: coefficient
         for target, coefficient in neighbors.items()
@@ -240,8 +322,8 @@ def local_from_neighbors(
         source,
         label="sampled amplitude",
     )
-    if abs(denominator) < 1.0e-300:
-        raise ValueError("sampled amplitude magnitude must be at least 1e-300")
+    if denominator == 0.0:
+        raise ValueError("sampled amplitude must be nonzero")
 
     numerator = 0.0j
     for target_raw, coefficient_raw in neighbors.items():
@@ -268,10 +350,8 @@ def local_from_neighbors(
 
 def local_energy(
     state: int,
-    pairs: Sequence[tuple[int, int]],
-    pair_matrix: object,
+    operator: PreparedPairOperator,
     amplitude: Amplitude,
-    two_q: int,
 ) -> complex:
     """Evaluate the local energy for a Hermitian two-body Hamiltonian.
 
@@ -280,7 +360,7 @@ def local_energy(
     its complex conjugate, including for genuinely complex pair matrices.
     """
 
-    column = two_body_neighbors(state, pairs, pair_matrix, two_q)
+    column = two_body_neighbors(state, operator)
     row = {target: coefficient.conjugate() for target, coefficient in column.items()}
     return local_from_neighbors(state, row, amplitude)
 
