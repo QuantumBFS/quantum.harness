@@ -409,6 +409,86 @@ There is still no feasibility evidence: job `22986474` never called
 `gamma=0` smoke submission from commit `634f113` or a documentation-only
 descendant. `gamma=1/4` remains gated on review of that result.
 
+## 8.5 First corrected solve: measured memory gate
+
+The corrected runner was submitted from documentation descendant `dee16cc`:
+
+```text
+job_id    = 22986777
+partition = xhacnormalb
+CPUs      = 16
+memory    = 60,800 MB
+walltime  = 00:30:00
+node      = a01r06n07
+```
+
+All setup gates passed. The job:
+
+1. created and retained stdout/stderr inside its run bundle;
+2. verified the MOF, runmeta, and input checksum ledger;
+3. recorded exact source commit `dee16cc4de938624f4e17ce590af8dd327d1063f`;
+4. validated the Gate B metadata and read the MOF;
+5. attached Mosek with 16 threads;
+6. reached the explicit `optimize! started` marker.
+
+The compute cgroup then killed Julia for memory exhaustion:
+
+```text
+Slurm state       = OUT_OF_MEMORY
+Slurm exit        = 0:125
+batch elapsed     = 00:01:17
+requested memory  = 60,800 MB
+solver exit       = 137
+result.toml       = absent because the Julia process was killed
+```
+
+Slurm explicitly reported:
+
+```text
+Detected 1 oom-kill event(s) in StepId=22986777.batch
+```
+
+The recorded `MaxRSS=1,781,264 KiB` is not a credible peak for this event: it
+is a coarse Slurm sample from a process that was killed during a large
+allocation. The cgroup OOM state, exit 137, and `slurmstepd` message are the
+authoritative evidence.
+
+The surviving bundle was fetched to:
+
+```text
+results/square-primal-smoke-22986777/
+```
+
+Every file listed in its partial `SHA256SUMS` ledger verifies. No result
+classification is possible, because the solver did not return.
+
+### Memory-resized retry
+
+Commit `2efd932` changes only operational resources and hard-kill artifact
+handling:
+
+```text
+CPUs             = 64
+memory per CPU   = 3,800 MB
+total memory     = 243,200 MB
+walltime         = 01:00:00
+Mosek threads    = 64
+```
+
+The scientific point, MOF, exact assembly, solver, and status policy are
+unchanged. A fourfold memory request is justified because the 60.8 GB cgroup
+was exhausted immediately after interior-point optimization began, while the
+703-dimensional complex PSD block and 74,602 scalar variables make the
+factorization cost substantially larger than Gate B construction.
+
+The batch script now also writes a checksum-bound `result-missing.txt` marker
+if a hard-killed solver produces no `result.toml`, instead of failing its
+artifact-ledger step on the absent file.
+
+Submit this resized gamma-zero point once. If 243.2 GB also OOMs, stop before
+requesting the full 486.4 GB node and inspect formulation/bridge sparsity and
+Mosek memory diagnostics. `gamma=1/4` remains gated.
+
 ## 9. Claim boundary
 
 Gate B proves a deterministic, replayable solver input for the declared
