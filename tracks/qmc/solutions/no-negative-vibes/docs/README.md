@@ -33,6 +33,11 @@
   的一般证明、12 族 19.2 万权重、四类 80 位反例和 Majorana 宇称猜想；
 - [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
   spinor/exterior-cone 候选的定义、排重与停止条件；
+- [superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md](superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md)：
+  表示–半群–正迹统一框架、三条新研究包、双机实验和论文级验收设计；
+- [PROPOSAL_LEDGER.md](PROPOSAL_LEDGER.md)：本分支每个可证伪提案的认领与状态索引；
+- [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md)：成功、失败和基础设施实验的连续经验日志；
+- [RESEARCH_OPERATIONS.md](RESEARCH_OPERATIONS.md)：Git、WSL、环境、并行与实验闭环的可复用操作经验；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；
