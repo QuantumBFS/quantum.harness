@@ -1,0 +1,13 @@
+name = "FloquetSpinBosonPaper"
+uuid = "c0a78f6f-1e0f-47c4-a11d-1d5f2a97f002"
+version = "0.1.0"
+
+# The paper-era UniformTEMPO revision is unresolved; do not instantiate this
+# environment as a paper reproduction until provenance identifies a revision.
+[deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+UniformTEMPO = "df6cb18e-c722-4276-9e4b-1aef7d428362"
+
+[sources]
+UniformTEMPO = {url = "https://github.com/uniformTEMPO/UniformTEMPO.jl"}

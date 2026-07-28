@@ -1,0 +1,8 @@
+mode = "quick"
+dt_target = 0.05235987755982989 # π / 60
+frequencies = [2.5]
+steps = 4
+compression_tolerance = 1.0e-7
+run_exact = false
+
+# A quick run requires a grid-matched fixture; it never claims paper accuracy.

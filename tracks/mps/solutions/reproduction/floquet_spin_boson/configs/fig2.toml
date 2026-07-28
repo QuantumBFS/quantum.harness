@@ -1,0 +1,9 @@
+mode = "validation"
+dt_target = 0.05235987755982989 # π / 60
+frequencies = [2.5, 10.0]
+steps = 3819
+compression_tolerance = 1.0e-7
+run_exact = true
+
+# The reference CSVs contain samples t=0,…,3819dt; strict validation rejects
+# any mismatch instead of trimming curves to their common prefix.
