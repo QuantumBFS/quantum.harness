@@ -24,3 +24,20 @@ def test_evolution_grid_is_exact_and_immutable():
 def test_invalid_model_configuration_fails(kwargs):
     with pytest.raises(ValueError):
         ModelConfig(**kwargs)
+
+
+@pytest.mark.parametrize(
+    ("config_type", "kwargs"),
+    [
+        (ModelConfig, {"fields": [3.0]}),
+        (EvolutionConfig, {"bond_dims": [4, 6, 8]}),
+    ],
+)
+def test_mutable_sequences_are_rejected(config_type, kwargs):
+    with pytest.raises(TypeError):
+        config_type(**kwargs)
+
+
+def test_output_grid_must_include_beta_max_exactly():
+    with pytest.raises(ValueError, match="exact output grid"):
+        EvolutionConfig(beta_min=0.1, beta_max=1.0, output_step=0.2)
