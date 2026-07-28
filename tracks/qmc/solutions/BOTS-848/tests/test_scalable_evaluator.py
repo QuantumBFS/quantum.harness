@@ -401,6 +401,49 @@ def test_validate_run_record_rejects_schema_drift(
         validate_run_record(changed)
 
 
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda record: record["gates"].__setitem__("lll_valid", "true"),
+            "gate values must be booleans",
+        ),
+        (
+            lambda record: record["gates"].__setitem__("lll_valid", 1),
+            "gate values must be booleans",
+        ),
+        (
+            lambda record: record["gates"].__setitem__("lll_valid", False),
+            "scalable_v1_pass semantics",
+        ),
+        (
+            lambda record: record["gates"].__setitem__(
+                "scalable_v1_pass", False
+            ),
+            "scalable_v1_pass semantics",
+        ),
+    ],
+)
+def test_validate_run_record_rejects_invalid_gate_values_and_semantics(
+    tmp_path: Path, mutation: Any, message: str
+) -> None:
+    project_root, _, manifest_path, oracle_path, protocol = make_frozen_run(tmp_path)
+    record = evaluate_candidate(
+        candidate=FakeCandidate(),
+        diagnostics=FakeDiagnostics(),
+        protocol=protocol,
+        manifest_path=manifest_path,
+        project_root=project_root,
+        oracle_path=oracle_path,
+        training_seed=848,
+    )
+    changed = copy.deepcopy(record)
+    mutation(changed)
+
+    with pytest.raises(ValueError, match=message):
+        validate_run_record(changed)
+
+
 def test_write_json_report_is_strict_and_restorable(tmp_path: Path) -> None:
     project_root, _, manifest_path, oracle_path, protocol = make_frozen_run(tmp_path)
     record = evaluate_candidate(

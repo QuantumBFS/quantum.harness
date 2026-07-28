@@ -268,6 +268,14 @@ def validate_run_record(record: Mapping[str, Any]) -> None:
     gates = record.get("gates")
     if not isinstance(gates, Mapping) or set(gates) != set(FINAL_GATE_NAMES):
         raise ValueError("run record gate set mismatch")
+    if any(type(gates[name]) is not bool for name in FINAL_GATE_NAMES):
+        raise ValueError("run record gate values must be booleans")
+    base_gate_names = tuple(
+        name for name in FINAL_GATE_NAMES if name != "scalable_v1_pass"
+    )
+    expected_final = all(gates[name] is True for name in base_gate_names)
+    if gates["scalable_v1_pass"] is not expected_final:
+        raise ValueError("run record scalable_v1_pass semantics mismatch")
 
     statistics = record.get("statistics")
     if not isinstance(statistics, Mapping):
