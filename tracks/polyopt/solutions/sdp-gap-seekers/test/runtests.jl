@@ -516,6 +516,8 @@ end
     @test_throws ArgumentError basis_manifest(invalid_problem, :gap)
 end
 
+include(joinpath(@__DIR__, "primal_gap_symbolics_tests.jl"))
+
 include(joinpath(@__DIR__, "..", "src", "SmallEDOracle.jl"))
 using .SmallEDOracle
 
