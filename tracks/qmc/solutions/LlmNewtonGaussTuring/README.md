@@ -28,6 +28,10 @@
   exact reruns of the earlier equal-time workflow.
 - Scan cells use distinct 64-bit seeds for every `(lattice,L,h,replica)` and
   workers return results to the main thread for deterministic CSV ordering.
+- `SSEResult::config_checked` says whether the O(M) world-line validation ran.
+  `consistency_failures == -1` is the explicit unchecked sentinel; zero is a
+  result only when `config_checked` is true. Production scans disable this
+  expensive check after the test-suite qualification.
 
 ## Berry-curvature conventions (Challenge 73)
 
@@ -46,6 +50,22 @@ different quantities; `F12` includes division by the oriented plaquette area.
 For the one-dimensional chain, the thermodynamic-limit oracle is
 
 $$
+
+For an even periodic spin chain, the finite-size oracle uses the antiperiodic
+Jordan-Wigner momenta $k_m=(2m+1)pi/N$:
+
+$$
+rac{F_{	hetaOmega}^{(N)}}{N}=-rac{J^2}{2N}sum_{m=0}^{N-1}
+rac{sin^2 k_m}{(J^2+Omega^2-2JOmegacos k_m)^{3/2}}.
+$$
+
+FHS plaquettes are compared to this same-$N$ oracle under grid refinement; a
+finite plaquette has discretisation error and is not expected to agree to
+machine precision. All four ground-state corners must report convergence.
+
+The historical `dthetah_diagonal` API is a prefactor-weighted ZZ expectation
+in the unrotated $H_0$ ensemble. It is an SSE-versus-ED diagnostic, not the
+physical rotated-state diagonal expectation and not a generalized force.
 \frac{F_{\theta\Omega}}{N}=-\frac{J^2}{2\pi}
 \int_0^\pi\frac{\sin^2k\,dk}
 {(J^2+\Omega^2-2J\Omega\cos k)^{3/2}}.
@@ -81,3 +101,6 @@ uv run --script tools/analyze_stage4.py honeycomb_stage4_trial_bins.csv \
 Generated data remain Git-ignored.  Historical Stage 3/4 pilot uncertainties
 are not reusable after the seed and bootstrap audit; any new claim must be
 derived from freshly generated raw bins with the current analysis pipeline.
+The current Stage 4 driver is deterministic but monolithic; it does not yet
+implement the preregistered resumable per-cell manifest, atomic completion,
+host/build provenance, or raw-file hash contract required for production.

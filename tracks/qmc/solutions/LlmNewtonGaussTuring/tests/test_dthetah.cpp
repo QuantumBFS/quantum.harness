@@ -4,6 +4,7 @@
 #include <cmath>
 #include <complex>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -196,7 +197,20 @@ static void test_full_equilibrium_derivative_zero() {
           + "+i" + std::to_string(expectation.imag()));
 }
 
+static void test_diagnostic_input_guards() {
+    bool rejected = false;
+    try {
+        (void)compute_dthetah_diagonal_ed(
+            make_chain(4), 1.0, 1.0,
+            std::numeric_limits<double>::quiet_NaN(), 4.0);
+    } catch (const std::invalid_argument&) {
+        rejected = true;
+    }
+    check("non-finite diagnostic angle rejected by ED", rejected);
+}
+
 int main() {
+    test_diagnostic_input_guards();
     test_dthetah_zero_at_theta_zero();
     test_dthetah_sse_vs_ed();
     test_dthetah_theta_scan();

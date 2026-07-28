@@ -78,9 +78,11 @@ struct SSEResult {
     int n_thermal = 0;
     // diagnostics (operator-type census; <n_const> must equal beta*h*N exactly)
     double n_const_avg = 0.0, n_bond_avg = 0.0, n_flip_avg = 0.0;
-    int consistency_failures = 0;
+    bool config_checked = false;
+    int consistency_failures = -1; // -1 means the O(M) check was not performed
 
-    // ∂θH diagonal estimator (per site): J sin(2θ) × ⟨Σ_bonds ZZ⟩ / N
+    // H0-ensemble diagnostic: J sin(2θ) × ⟨Σ_bonds ZZ⟩_{H0} / N.
+    // Kept under its historical name for source compatibility.
     double dthetah_diagonal = 0.0;
 
     // Raw bin-level data.  Nonlinear estimators (Q_L, xi_L/L) must be

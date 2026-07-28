@@ -81,6 +81,15 @@ target_link_libraries(scan_berry_chain PRIVATE cm148)
 add_executable(scan_berry_square tools/scan_berry_square.cpp)
 target_link_libraries(scan_berry_square PRIVATE cm148)
 
+add_test(
+    NAME test_berry_cli_endpoint
+    COMMAND scan_berry_chain 4 0 0.001 0.001 1.5 1.501 0.001 1
+)
+set_tests_properties(
+    test_berry_cli_endpoint
+    PROPERTIES PASS_REGULAR_EXPRESSION "theta,Omega,F12,F12_per_N"
+)
+
 # Enable CTest
 enable_testing()
 

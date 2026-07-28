@@ -37,8 +37,10 @@ def expect_value_error(function, message: str) -> None:
 
 HEADER = (
     "lattice,geometry_version,L,N,Nb,h,beta,seed,bin,n_thermal,n_bins,"
-    "sweeps_per_bin,E,spacetime_m2,spacetime_m4,S0,Sq,q_norm,q_count\n"
+    "sweeps_per_bin,config_checked,consistency_failures,E,spacetime_m2,"
+    "spacetime_m4,S0,Sq,q_norm,q_count\n"
 )
+HEADER_COLUMNS = HEADER.strip().split(",")
 
 
 def valid_rows() -> list[str]:
@@ -52,7 +54,7 @@ def valid_rows() -> list[str]:
                     rows.append(
                         f"square,square-v1,{size},{size * size},{2 * size * size},"
                         f"{field:.17g},{size / field:.17g},{seed},{bin_index},10,2,5,"
-                        f"-1.0,0.2,0.08,0.2,0.1,{2 * np.pi / size:.17g},4\n"
+                        f"0,-1,-1.0,0.2,0.08,0.2,0.1,{2 * np.pi / size:.17g},4\n"
                     )
     return rows
 
@@ -100,6 +102,28 @@ def test_input_validation(directory: Path) -> None:
     expect_value_error(
         lambda: ANALYSIS.load_bins(missing_column),
         "a missing metadata column must be rejected",
+    )
+
+    wrong_momentum = directory / "wrong_momentum.csv"
+    altered = rows.copy()
+    columns = altered[0].split(",")
+    columns[HEADER_COLUMNS.index("q_norm")] = f"{1.01 * 2 * np.pi / 4:.17g}"
+    altered[0] = ",".join(columns)
+    write_csv(wrong_momentum, altered)
+    expect_value_error(
+        lambda: ANALYSIS.load_bins(wrong_momentum),
+        "a lattice-incompatible momentum norm must be rejected",
+    )
+
+    ambiguous_check = directory / "ambiguous_check.csv"
+    altered = rows.copy()
+    columns = altered[0].split(",")
+    columns[HEADER_COLUMNS.index("consistency_failures")] = "0"
+    altered[0] = ",".join(columns)
+    write_csv(ambiguous_check, altered)
+    expect_value_error(
+        lambda: ANALYSIS.load_bins(ambiguous_check),
+        "an unchecked configuration must use the -1 sentinel",
     )
 
 

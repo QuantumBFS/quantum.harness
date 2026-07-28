@@ -34,6 +34,9 @@ static int checked_dimension(const Lattice& lattice, int maximum, const char* co
 std::vector<cplx> build_kolodrubetz_hamiltonian(
     const Lattice& lattice, double J, double Omega, double theta)
 {
+    if (!std::isfinite(J) || !std::isfinite(Omega) || !std::isfinite(theta))
+        throw std::invalid_argument(
+            "build_kolodrubetz_hamiltonian: couplings and angle must be finite");
     const int dim = checked_dimension(lattice, 1024, "build_kolodrubetz_hamiltonian");
     const int N = static_cast<int>(lattice.N);
     const int Nb = static_cast<int>(lattice.bonds.size());
@@ -243,6 +246,20 @@ cplx overlap(const GroundState& a, const GroundState& b) {
     return s;
 }
 
+static void validate_fhs_ground_state(const GroundState& state,
+                                      const char* label) {
+    if (!state.converged)
+        throw std::runtime_error(std::string("fhs_curvature: unconverged ") + label);
+    if (!std::isfinite(state.E0) || !std::isfinite(state.residual)
+        || state.residual < 0.0)
+        throw std::invalid_argument(
+            std::string("fhs_curvature: invalid solver metadata for ") + label);
+    for (const auto& amplitude : state.eigenvector)
+        if (!std::isfinite(amplitude.real()) || !std::isfinite(amplitude.imag()))
+            throw std::invalid_argument(
+                std::string("fhs_curvature: non-finite amplitude in ") + label);
+}
+
 BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
                               const GroundState& gs11, const GroundState& gs01,
                               double dlambda1, double dlambda2)
@@ -250,6 +267,10 @@ BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
     const double area = dlambda1 * dlambda2;
     if (!std::isfinite(area) || area == 0.0)
         throw std::invalid_argument("fhs_curvature: plaquette steps must have non-zero finite area");
+    validate_fhs_ground_state(gs00, "gs00");
+    validate_fhs_ground_state(gs10, "gs10");
+    validate_fhs_ground_state(gs11, "gs11");
+    validate_fhs_ground_state(gs01, "gs01");
 
     BerryCurvature bc;
     auto U1 = overlap(gs00, gs10);
@@ -326,6 +347,9 @@ double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omeg
 {
     const int dim = checked_dimension(lattice, 64, "compute_dthetah_diagonal_ed");
     const int N = static_cast<int>(lattice.N);
+    if (!std::isfinite(J) || !std::isfinite(Omega) || !std::isfinite(theta))
+        throw std::invalid_argument(
+            "compute_dthetah_diagonal_ed: couplings and angle must be finite");
     if (!std::isfinite(beta) || beta < 0.0)
         throw std::invalid_argument(
             "compute_dthetah_diagonal_ed: beta must be finite and non-negative");
@@ -345,7 +369,7 @@ double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omeg
 
     auto eigsys = jacobi_eigen(H, 50, 1e-12);
 
-    // Compute thermal expectation of Σ ZZ (per-site, for ∂θH diag)
+    // Compute the H0 thermal expectation of Σ ZZ for the diagnostic.
     double Z = 0.0, sum_ZZ = 0.0;
     for (int n = 0; n < dim; ++n) {
         double E_n = eigsys.eigenvalues[n];
@@ -367,7 +391,8 @@ double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omeg
         sum_ZZ += w * zz_n;
     }
 
-    // ∂θH_diag(θ) = J sin(2θ) × ⟨Σ_{bonds} ZZ⟩ / N  (per-site)
+    // Historical name: dthetah_diagonal. This is the H0-ensemble diagnostic,
+    // not a rotated-state expectation or an equilibrium generalized force.
     double zz_exp = sum_ZZ / Z; // thermal expectation of Σ_bonds ZZ
     double dthetah_diagonal = J * std::sin(2 * theta) * zz_exp / N;
 
@@ -396,6 +421,28 @@ double adaptive_simpson(const std::function<double(double)>& function,
 }
 
 } // namespace
+
+double tfim_chain_berry_curvature_density_finite(std::size_t sites, double J,
+                                                 double Omega) {
+    if (sites < 2 || sites % 2 != 0)
+        throw std::invalid_argument(
+            "tfim_chain_berry_curvature_density_finite: sites must be even and >= 2");
+    if (!(J >= 0.0) || !std::isfinite(J) || !std::isfinite(Omega))
+        throw std::invalid_argument(
+            "tfim_chain_berry_curvature_density_finite: invalid coupling");
+    if (J == 0.0) return 0.0;
+
+    double sum = 0.0;
+    for (std::size_t mode = 0; mode < sites; ++mode) {
+        const double momentum = M_PI * (2.0 * static_cast<double>(mode) + 1.0)
+                              / static_cast<double>(sites);
+        const double sine = std::sin(momentum);
+        const double dispersion2 = J * J + Omega * Omega
+                                 - 2.0 * J * Omega * std::cos(momentum);
+        sum += sine * sine / std::pow(dispersion2, 1.5);
+    }
+    return -J * J * sum / (2.0 * static_cast<double>(sites));
+}
 
 double tfim_chain_berry_curvature_density_exact(double J, double Omega,
                                                 double tolerance) {

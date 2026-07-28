@@ -212,7 +212,8 @@ LanczosResult lanczos_ground(const Lattice& lattice, double J, double h,
                                                    "lanczos_ground");
     validate_bond_indices(lattice, "lanczos_ground");
     if (max_iter <= 0) throw std::invalid_argument("lanczos_ground: max_iter must be positive");
-    if (!(tol > 0.0)) throw std::invalid_argument("lanczos_ground: tol must be positive");
+    if (!(tol > 0.0) || !std::isfinite(tol))
+        throw std::invalid_argument("lanczos_ground: tol must be finite and positive");
     const int iteration_limit = std::min<int>(max_iter, static_cast<int>(dim));
 
     LanczosResult result;
@@ -459,6 +460,10 @@ double compute_structure_factor(const Lattice& lattice, double J, double h,
         throw std::invalid_argument("compute_structure_factor: missing site coordinates");
     if (!std::isfinite(beta) || beta < 0.0)
         throw std::invalid_argument("compute_structure_factor: beta must be finite and non-negative");
+    if (!std::all_of(q.begin(), q.end(), [](double component) {
+            return std::isfinite(component);
+        }))
+        throw std::invalid_argument("compute_structure_factor: momentum must be finite");
 
     const EigenSystem& es = cached_eigen(lattice, J, h);
     std::vector<double> p = basis_probabilities(es, dim, beta);

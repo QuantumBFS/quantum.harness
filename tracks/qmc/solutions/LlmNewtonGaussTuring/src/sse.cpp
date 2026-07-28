@@ -36,6 +36,11 @@ SSE::SSE(const Lattice& lattice, double J, double h, double beta,
     if (!std::isfinite(beta_) || beta_ <= 0) throw std::invalid_argument("beta must be finite and > 0");
     if (params_.n_thermal < 0 || params_.n_bins <= 0 || params_.sweeps_per_bin <= 0)
         throw std::invalid_argument("SSE sweep counts require thermal >= 0, bins > 0, sweeps/bin > 0");
+    if (params_.n_bins > std::numeric_limits<int>::max() / params_.sweeps_per_bin)
+        throw std::length_error("SSE measurement sweep count exceeds integer range");
+    if (params_.measure_rotated_bond_diagonal
+        && !std::isfinite(params_.rotation_theta))
+        throw std::invalid_argument("rotation_theta must be finite when its diagnostic is enabled");
     std::string diagnostic;
     if (!lattice.verify(&diagnostic))
         throw std::invalid_argument("invalid lattice: " + diagnostic);
@@ -392,7 +397,8 @@ SSEResult SSE::run() {
             sS0 += S0; sSq += Sq;
             sTm2 += tm2; sTm4 += tm4;
 
-            // ∂θH diagonal estimator: J sin(2θ) Σ_{bonds} ZZ / N
+            // Prefactor-weighted H0-ensemble ZZ diagnostic. It is not the
+            // rotated-state diagonal expectation or the generalized force.
             if (params_.measure_rotated_bond_diagonal) {
                 double sum_zz = 0;
                 for (int b = 0; b < Nb_; ++b) {
@@ -443,7 +449,8 @@ SSEResult SSE::run() {
         res.n_bond_avg = sNb * inv;
         res.n_flip_avg = sNf * inv;
     }
-    res.consistency_failures = nbad;
+    res.config_checked = params_.check_config;
+    res.consistency_failures = params_.check_config ? nbad : -1;
     res.sign_avg = 1.0;
     res.n_measure = nm;
     res.n_thermal = params_.n_thermal;

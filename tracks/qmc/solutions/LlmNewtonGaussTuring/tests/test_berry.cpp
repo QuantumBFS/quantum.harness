@@ -199,21 +199,76 @@ void test_jordan_wigner_oracle() {
     approx_equal("independent-spin curvature vanishes",
                  tfim_chain_berry_curvature_density_exact(0.0, 1.0), 0.0, 0.0);
 
-    const auto lattice6 = make_chain(6);
-    const auto lattice8 = make_chain(8);
-    const auto finite6 = fhs_curvature_single(
-        lattice6, 1.0, 0.0, 1.5, 0.001, 0.001);
-    const auto finite8 = fhs_curvature_single(
-        lattice8, 1.0, 0.0, 1.5, 0.001, 0.001);
-    check("finite-chain plaquettes valid", finite6.valid && finite8.valid);
-    const double density6 = finite6.F12 / lattice6.N;
-    const double density8 = finite8.F12 / lattice8.N;
-    check("FHS finite-size error decreases toward JW limit",
-          std::abs(density8 - exact) < std::abs(density6 - exact),
-          "N6=" + std::to_string(density6)
-          + " N8=" + std::to_string(density8));
-    approx_equal("N=8 FHS approaches JW density", density8,
-                 exact, 0.15 * std::abs(exact));
+    const double expected_values[] = {
+        -0.1142859610355, -0.1105501748728,
+        -0.1031471502195, -0.09783932245726,
+    };
+    const std::size_t sizes[] = {4, 6, 8, 10};
+    for (std::size_t index = 0; index < 4; ++index)
+        approx_equal("finite JW N=" + std::to_string(sizes[index]),
+                     tfim_chain_berry_curvature_density_finite(
+                         sizes[index], 1.0, 1.5),
+                     expected_values[index], 5e-13);
+
+    const auto lattice = make_chain(6);
+    const double finite_exact = tfim_chain_berry_curvature_density_finite(
+        lattice.N, 1.0, 1.5);
+    const auto centered_plaquette = [&lattice](double step) {
+        return fhs_curvature_single(
+            lattice, 1.0, -0.5 * step, 1.5 - 0.5 * step, step, step);
+    };
+    const auto coarse = centered_plaquette(0.004);
+    const auto medium = centered_plaquette(0.002);
+    const auto fine = centered_plaquette(0.001);
+    check("finite-chain refinement plaquettes valid",
+          coarse.valid && medium.valid && fine.valid);
+    const double coarse_error = std::abs(coarse.F12 / lattice.N - finite_exact);
+    const double medium_error = std::abs(medium.F12 / lattice.N - finite_exact);
+    const double fine_error = std::abs(fine.F12 / lattice.N - finite_exact);
+    check("FHS grid refinement approaches finite-size JW oracle",
+          medium_error < coarse_error && fine_error < medium_error,
+          "coarse=" + std::to_string(coarse_error)
+          + " medium=" + std::to_string(medium_error)
+          + " fine=" + std::to_string(fine_error));
+    check("fine FHS agrees with finite-size JW within discretisation budget",
+          fine_error < 3e-4, "error=" + std::to_string(fine_error));
+
+    check("finite JW approaches thermodynamic oracle off criticality",
+          std::abs(tfim_chain_berry_curvature_density_finite(
+                       64, 1.0, 1.5) - exact) < 1e-10);
+}
+
+void test_berry_input_guards() {
+    const auto lattice = make_chain(4);
+    bool coupling_rejected = false;
+    try {
+        (void)build_kolodrubetz_hamiltonian(
+            lattice, 1.0, 1.0, std::numeric_limits<double>::quiet_NaN());
+    } catch (const std::invalid_argument&) {
+        coupling_rejected = true;
+    }
+    check("non-finite rotated-Hamiltonian angle rejected", coupling_rejected);
+
+    auto g00 = spinor(0.4, 0.1);
+    auto g10 = spinor(0.5, 0.1);
+    auto g11 = spinor(0.5, 0.2);
+    auto g01 = spinor(0.4, 0.2);
+    g11.converged = false;
+    bool unconverged_rejected = false;
+    try {
+        (void)fhs_curvature(g00, g10, g11, g01, 0.1, 0.1);
+    } catch (const std::runtime_error&) {
+        unconverged_rejected = true;
+    }
+    check("unconverged FHS corner rejected", unconverged_rejected);
+
+    bool odd_size_rejected = false;
+    try {
+        (void)tfim_chain_berry_curvature_density_finite(5, 1.0, 1.5);
+    } catch (const std::invalid_argument&) {
+        odd_size_rejected = true;
+    }
+    check("unsupported odd-size JW sector rejected", odd_size_rejected);
 }
 
 } // namespace
@@ -224,6 +279,7 @@ int main() {
         test_rotated_hamiltonian_identity();
         test_grid_order_and_magnetization_response();
         test_jordan_wigner_oracle();
+        test_berry_input_guards();
     } catch (const std::exception& error) {
         std::cerr << "Exception: " << error.what() << std::endl;
         ++failures;

@@ -55,7 +55,10 @@ def load(path: Path):
         raise ValueError(f"missing or empty input: {path}")
     raw = np.genfromtxt(path, delimiter=",", names=True, dtype=None, encoding="utf-8")
     raw = np.atleast_1d(raw)
-    required = {"L", "h", "seed", "bin", "m2", "m4", "S0", "Sq"}
+    required = {
+        "L", "h", "seed", "bin", "config_checked", "consistency_failures",
+        "m2", "m4", "S0", "Sq",
+    }
     missing = required - set(raw.dtype.names or ())
     if missing:
         raise ValueError(f"missing columns: {', '.join(sorted(missing))}")
@@ -69,6 +72,13 @@ def load(path: Path):
         owner = seed_owner.setdefault(seed, (L, h))
         if owner != (L, h):
             raise ValueError(f"RNG seed {seed} is reused across cells {owner} and {(L, h)}")
+        config_checked = int(row["config_checked"])
+        consistency_failures = int(row["consistency_failures"])
+        if config_checked not in (0, 1):
+            raise ValueError(f"invalid configuration-check flag in chain {(L, h, seed)}")
+        if ((config_checked == 1 and consistency_failures < 0)
+                or (config_checked == 0 and consistency_failures != -1)):
+            raise ValueError(f"invalid configuration-check result in chain {(L, h, seed)}")
         values = np.asarray([row["m2"], row["m4"], row["S0"], row["Sq"]], dtype=float)
         if not np.all(np.isfinite(values)):
             raise ValueError(f"non-finite observable in chain {(L, h, seed)}")

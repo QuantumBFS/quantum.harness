@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lattice.hpp"
+#include <cstddef>
 #include <complex>
 #include <vector>
 
@@ -61,11 +62,17 @@ BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
 std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
     const Lattice& lattice, double J, const ParamGrid& grid);
 
-// Diagonal sigma-z-basis component of partial_theta H at finite beta:
-// J sin(2 theta) <sum_bonds Z_i Z_j>/N. This is not the expectation value of
-// the full derivative, whose equilibrium expectation vanishes identically.
+// Prefactor-weighted ZZ diagnostic in the unrotated H0 thermal ensemble:
+// J sin(2 theta) <sum_bonds Z_i Z_j>_{H0}/N. The historical API name is kept
+// for compatibility; this is neither the physical rotated-state expectation of
+// the diagonal operator nor the full generalized force.
 double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omega,
                                    double theta, double beta);
+
+// Exact finite-size 1D oracle for an even periodic spin chain. The ground state
+// lies in the antiperiodic Jordan-Wigner sector k_m=(2m+1)pi/N.
+double tfim_chain_berry_curvature_density_finite(std::size_t sites, double J,
+                                                double Omega);
 
 // Thermodynamic-limit 1D oracle at fixed J for the convention above.
 // It is independent of theta and diverges to -infinity at |Omega| = J.

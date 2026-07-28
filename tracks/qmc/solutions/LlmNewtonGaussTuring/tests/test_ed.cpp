@@ -209,6 +209,15 @@ static void test_input_guards() {
     }
     check("Lanczos invalid bond rejected", endpoint_guarded);
 
+    bool tolerance_guarded = false;
+    try {
+        (void)lanczos_ground(make_chain(2), 1.0, 1.0, 20,
+                             std::numeric_limits<double>::infinity());
+    } catch (const std::invalid_argument&) {
+        tolerance_guarded = true;
+    }
+    check("non-finite Lanczos tolerance rejected", tolerance_guarded);
+
     bool beta_guarded = false;
     try {
         (void)compute_thermal_obs(make_chain(2), 1.0, 1.0,
@@ -217,6 +226,16 @@ static void test_input_guards() {
         beta_guarded = true;
     }
     check("non-finite inverse temperature rejected", beta_guarded);
+
+    bool momentum_guarded = false;
+    try {
+        (void)compute_structure_factor(
+            make_chain(2), 1.0, 1.0, 1.0,
+            {std::numeric_limits<double>::quiet_NaN(), 0.0, 0.0});
+    } catch (const std::invalid_argument&) {
+        momentum_guarded = true;
+    }
+    check("non-finite structure-factor momentum rejected", momentum_guarded);
 }
 
 // ============================================================

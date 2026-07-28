@@ -3,6 +3,7 @@
 #include "../src/sse.hpp"
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -169,12 +170,48 @@ static void test_operator_identity() {
         auto res = sse.run();
         approx_eq(std::string("<n_const> ") + c.tag, res.n_const_avg,
                   beta * c.h * c.lat.N, 0.02, 0.0);
+        check(std::string("configs checked ") + c.tag, res.config_checked);
         check(std::string("valid configs ") + c.tag, res.consistency_failures == 0,
               "failures=" + std::to_string(res.consistency_failures));
     }
 }
 
+static void test_diagnostic_and_count_guards() {
+    std::cout << "--- SSE diagnostic and count guards ---" << std::endl;
+    SSEParams unchecked;
+    unchecked.n_thermal = 0; unchecked.n_bins = 1; unchecked.sweeps_per_bin = 1;
+    unchecked.check_config = false; unchecked.census = false;
+    auto result = SSE(make_chain(2), 1.0, 1.0, 1.0, unchecked).run();
+    check("unchecked result is explicit",
+          !result.config_checked && result.consistency_failures == -1);
+
+    SSEParams invalid_angle;
+    invalid_angle.measure_rotated_bond_diagonal = true;
+    invalid_angle.rotation_theta = std::numeric_limits<double>::quiet_NaN();
+    bool angle_rejected = false;
+    try {
+        SSE invalid(make_chain(2), 1.0, 1.0, 1.0, invalid_angle);
+        (void)invalid;
+    } catch (const std::invalid_argument&) {
+        angle_rejected = true;
+    }
+    check("non-finite diagnostic angle rejected", angle_rejected);
+
+    SSEParams overflow;
+    overflow.n_bins = std::numeric_limits<int>::max();
+    overflow.sweeps_per_bin = 2;
+    bool count_rejected = false;
+    try {
+        SSE invalid(make_chain(2), 1.0, 1.0, 1.0, overflow);
+        (void)invalid;
+    } catch (const std::length_error&) {
+        count_rejected = true;
+    }
+    check("measurement sweep overflow rejected", count_rejected);
+}
+
 int main() {
+    test_diagnostic_and_count_guards();
     test_operator_identity();
     test_j0_limit();
     test_j0_spacetime_moment();

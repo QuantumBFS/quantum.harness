@@ -34,7 +34,8 @@ struct Cell {
     SSEResult result;
     // results
     double Q = 0, xi = 0, E = 0, m2 = 0;
-    int bad = 0;
+    bool config_checked = false;
+    int bad = -1;
 
     Cell(int linear_size, double field, double inverse_temperature,
          std::uint64_t random_seed)
@@ -69,6 +70,7 @@ void run_cell(Cell& c, int n_thermal, int n_bins, int sweeps_per_bin) {
     c.xi = xi2 > 0.0 ? std::sqrt(xi2) / Ld : 0.0;
     c.E = mean(c.result.bin_E);
     c.m2 = c.result.m2;
+    c.config_checked = c.result.config_checked;
     c.bad = c.result.consistency_failures;
 }
 
@@ -140,7 +142,7 @@ int main(int argc, char** argv) {
         std::cerr << "scan_square: cannot open raw-bin output\n";
         return 1;
     }
-    raw << "L,h,beta,seed,bin,E,m2,m4,S0,Sq\n";
+    raw << "L,h,beta,seed,bin,config_checked,consistency_failures,E,m2,m4,S0,Sq\n";
     raw << std::setprecision(17);
 
     const int requested_threads = argc > 4 ? std::atoi(argv[4]) : 0;
@@ -182,7 +184,8 @@ int main(int argc, char** argv) {
     for (const auto& cell : cells)
         for (std::size_t bin = 0; bin < cell.result.bin_m2.size(); ++bin)
             raw << cell.L << ',' << cell.h << ',' << cell.beta << ',' << cell.seed << ','
-                << bin << ',' << cell.result.bin_E[bin] << ',' << cell.result.bin_m2[bin] << ','
+                << bin << ',' << (cell.config_checked ? 1 : 0) << ',' << cell.bad << ','
+                << cell.result.bin_E[bin] << ',' << cell.result.bin_m2[bin] << ','
                 << cell.result.bin_m4[bin] << ',' << cell.result.bin_S0[bin] << ','
                 << cell.result.bin_Sq[bin] << '\n';
     raw.close();
@@ -265,8 +268,15 @@ int main(int argc, char** argv) {
     crossings("Q_L", true);
     crossings("xi_L/L", false);
 
-    int totbad = 0; for (const auto& c : cells) totbad += c.bad;
-    std::cout << "\nconsistency failures: " << totbad << "\n";
+    const bool configs_checked = std::all_of(
+        cells.begin(), cells.end(), [](const Cell& cell) { return cell.config_checked; });
+    if (configs_checked) {
+        int total_failures = 0;
+        for (const auto& cell : cells) total_failures += cell.bad;
+        std::cout << "\nconsistency failures: " << total_failures << "\n";
+    } else {
+        std::cout << "\nconsistency check: not performed\n";
+    }
     std::cout << "raw bins -> square_bins" << tag
               << ".csv ; diagnostic summary -> square_summary" << tag << ".csv\n";
     return 0;

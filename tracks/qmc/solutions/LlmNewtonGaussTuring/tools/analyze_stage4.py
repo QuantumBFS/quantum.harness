@@ -30,7 +30,8 @@ def load_bins(path: Path):
     data = np.atleast_1d(data)
     required = {
         "lattice", "geometry_version", "L", "N", "Nb", "h", "beta", "seed", "bin",
-        "n_thermal", "n_bins", "sweeps_per_bin", "E", "spacetime_m2",
+        "n_thermal", "n_bins", "sweeps_per_bin", "config_checked",
+        "consistency_failures", "E", "spacetime_m2",
         "spacetime_m4", "S0", "Sq", "q_norm", "q_count",
     }
     names = set(data.dtype.names or ())
@@ -86,8 +87,20 @@ def load_bins(path: Path):
         if (int(row["n_thermal"]) < 0 or int(row["n_bins"]) <= 0
                 or int(row["sweeps_per_bin"]) <= 0):
             raise ValueError(f"invalid sampling budget in cell {key}")
+        config_checked = int(row["config_checked"])
+        consistency_failures = int(row["consistency_failures"])
+        if config_checked not in (0, 1):
+            raise ValueError(f"invalid configuration-check flag in cell {key}")
+        if ((config_checked == 1 and consistency_failures < 0)
+                or (config_checked == 0 and consistency_failures != -1)):
+            raise ValueError(f"invalid configuration-check result in cell {key}")
         expected_q_count = 4 if lattice == "square" else 6
-        if (float(row["q_norm"]) <= 0.0
+        expected_q_norm = (
+            2.0 * np.pi / L
+            if lattice == "square"
+            else 4.0 * np.pi / (np.sqrt(3.0) * L)
+        )
+        if (not np.isclose(float(row["q_norm"]), expected_q_norm, rtol=1e-12)
                 or int(row["q_count"]) != expected_q_count):
             raise ValueError(f"invalid momentum metadata in cell {key}")
         chains[key].append(
@@ -109,6 +122,8 @@ def load_bins(path: Path):
             "sweeps_per_bin": int(row["sweeps_per_bin"]),
             "n_thermal": int(row["n_thermal"]),
             "n_bins": int(row["n_bins"]),
+            "config_checked": bool(config_checked),
+            "consistency_failures": consistency_failures,
         }
         if cell_key in metadata and metadata[cell_key] != row_metadata:
             raise ValueError(f"inconsistent metadata within cell {cell_key}")

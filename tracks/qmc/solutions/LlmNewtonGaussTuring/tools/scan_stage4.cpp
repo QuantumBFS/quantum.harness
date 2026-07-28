@@ -37,7 +37,8 @@ struct Cell {
     double Q = 0.0;
     double xi = 0.0;
     double energy = 0.0;
-    int failures = 0;
+    bool config_checked = false;
+    int failures = -1;
 
     Cell(int linear_size, double field, double inverse_temperature,
          std::uint64_t random_seed)
@@ -121,6 +122,7 @@ void run_cell(const ScanSpec& spec, Cell& cell, int n_thermal, int n_bins,
     cell.Q = ratio(cell.result.bin_spacetime_m2, cell.result.bin_spacetime_m4);
     cell.xi = xi_over_L(cell.result, lattice);
     cell.energy = cell.result.energy;
+    cell.config_checked = cell.result.config_checked;
     cell.failures = cell.result.consistency_failures;
 }
 
@@ -184,7 +186,7 @@ int main(int argc, char** argv) {
         std::ofstream raw(stem + "_bins.csv");
         if (!raw) throw std::runtime_error("cannot open raw-bin output");
         raw << "lattice,geometry_version,L,N,Nb,h,beta,seed,bin,n_thermal,n_bins,sweeps_per_bin,"
-               "E,equal_m2,equal_m4,"
+               "config_checked,consistency_failures,E,equal_m2,equal_m4,"
                "spacetime_m2,spacetime_m4,S0,Sq,q_norm,q_count\n";
         raw << std::setprecision(17);
 
@@ -262,6 +264,7 @@ int main(int argc, char** argv) {
                     << cell.L << ',' << lattice.N << ',' << lattice.Nb << ','
                     << cell.h << ',' << cell.beta << ',' << cell.seed << ',' << bin << ','
                     << n_thermal << ',' << n_bins << ',' << sweeps_per_bin << ','
+                    << (cell.config_checked ? 1 : 0) << ',' << cell.failures << ','
                     << cell.result.bin_E[bin] << ',' << cell.result.bin_m2[bin] << ','
                     << cell.result.bin_m4[bin] << ','
                     << cell.result.bin_spacetime_m2[bin] << ','
@@ -275,13 +278,14 @@ int main(int argc, char** argv) {
 
         std::ofstream summary(stem + "_summary.csv");
         if (!summary) throw std::runtime_error("cannot open summary output");
-        summary << "lattice,geometry_version,L,h,beta,seed,Q_spacetime,xi_over_L,E,failures\n";
+        summary << "lattice,geometry_version,L,h,beta,seed,Q_spacetime,xi_over_L,E,"
+                   "config_checked,consistency_failures\n";
         summary << std::setprecision(17);
         for (const Cell& cell : cells)
             summary << spec.lattice << ',' << spec.geometry_version << ','
                     << cell.L << ',' << cell.h << ',' << cell.beta << ',' << cell.seed << ','
                     << cell.Q << ',' << cell.xi << ',' << cell.energy << ','
-                    << cell.failures << '\n';
+                    << (cell.config_checked ? 1 : 0) << ',' << cell.failures << '\n';
 
         std::cout << "raw=" << stem << "_bins.csv\n"
                   << "summary=" << stem << "_summary.csv\n"
