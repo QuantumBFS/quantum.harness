@@ -491,3 +491,35 @@ coordinates, and maximum side 45. `test.log` SHA-256 is
 the process-time peak was 979,428 KiB and Slurm step MaxRSS was 821,520 KiB.
 The theorem is accepted. Complete the already-authorized nine-cone
 gamma=1/2 result before building solver inputs from this next reduction.
+
+## 2026-07-29 — nine-cone gamma=1/2 remains feasible at 1.63 GiB
+
+Slurm job `22988816` passed all immutable-input and replay gates and returned
+`OPTIMAL` with primal and dual feasible points. Independent reconstruction
+gave normalization 1, zero affine and PSD violations, and minimum block
+eigenvalue `0.09098861640180578`. The process peak was 1,666,944 KiB, Slurm
+MaxRSS was 1,668,768 KiB, total runner wall was 34.586 s, and the post-factor
+nonzero count was 26.4 million. `result.toml` SHA-256 is
+`f24c297da06061b08aa9e94e83f401967cb055e89620bb9eceb834425c16e031`.
+
+Relative to the spin-axis gamma=1/2 result, exact redundant-cone removal cuts
+process RSS by 32.0% and factor fill by 35.9%. The scientific conclusion is
+unchanged: this exact `d=2` finite relaxation is feasible at gamma=1/2 and
+does not exclude that candidate gap. No infeasibility certificate branch is
+applicable.
+
+## 2026-07-29 — derive a continuous-spin fallback beyond discrete S3
+
+The fixed Hamiltonian and unrestricted relaxation are invariant under global
+spin rotations, and the existing conjugation reduction permits averaging to
+the corresponding `O(3)`-invariant subspace. Because every retained scalar
+moment has total Pauli degree at most four and even axis parities, its spin
+tensor is generated exactly by `delta_ab` at rank two and the three delta
+pairings at rank four.
+
+Prepare an inventory-only exact route after the isotypic model: enumerate
+each axis-erased skeleton, account for state-symbol commutativity by rational
+row reduction, choose existing moment pivots, and verify the substitution
+under the rational infinite-order rotation with cosine `3/5`. Do not build or
+solve a derived MOF until this separate truth gate passes and the pivot count
+is decision-relevant.

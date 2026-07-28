@@ -173,3 +173,39 @@ Additional preserved artifacts:
   `4f62a5e16822d2df174af8d9013bb1622c54d8c47bd2f78a59a086524ad4d67f`
   and
   `e47bf0d3146ada223bbb389920ea4ca1f79efef467ee7a81ef72d42741652e9f`.
+
+## Exact nontrivial-character cone reduction result
+
+Full spin invariance makes the three nontrivial V4 character cones one orbit.
+Exact phase-corrected congruence replay removes two redundant 81-side
+positive cones and one redundant gap scalar. The equivalent model has 3,250
+moments, nine real PSD cones, 10,064 packed triangle entries, and maximum
+side 73.
+
+| gamma | Slurm job | status/audit | minimum block eigenvalue | total wall | peak process RSS | factor nonzeros |
+|---|---:|---|---:|---:|---:|---:|
+| 0 | 22988753 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.1252658219892882 | 27.593 s | 1,699,824 KiB | 2.63e7 |
+| 1/2 | 22988816 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.09098861640180578 | 34.586 s | 1,666,944 KiB | 2.64e7 |
+
+At gamma=1/2 this cuts process RSS by 32.0% and factor fill by 35.9%
+relative to the spin-axis representation. It is 26.7x smaller in process RSS
+and 12.3x faster in total wall than the original Hermitian-bridge solve. The
+exact finite-relaxation decision remains feasible; this is not a physical
+bulk-gap proof.
+
+Additional preserved artifacts:
+
+- Exact cone-redundancy proof:
+  `EXACT_FULL_SPIN_CONE_REDUCTION.md`.
+- Gamma=0 solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-spin-cone-real-g0p8-gamma0-solve-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `f3b394aff863243aee7706f7c52f728ca303df043429e7c70245e6d79ce2e3a0`).
+- Gamma=1/2 solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-spin-cone-real-g0p8-gamma0p5-solve-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `f24c297da06061b08aa9e94e83f401967cb055e89620bb9eceb834425c16e031`).
+- Immutable gamma=0 and gamma=1/2 model SHA-256 values are
+  `a34c629a502b515fc615467bc876f691c0494d523c32f4e1dc5323d84b235d26`
+  and
+  `ce3f4030afdc19d90b0f3a1bd2e8a2d6f3f06c19aad6c61e3b0bbbfe68de17a9`.

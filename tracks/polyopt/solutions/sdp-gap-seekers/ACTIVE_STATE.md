@@ -309,11 +309,30 @@ Updated: 2026-07-29 UTC.
   10,064 to 6,104, and reduces maximum side from 73 to 45. `test.log`
   SHA-256 is
   `1ec6ebdd77b6a94c04b1956c5cfd07f62ad780a2fb34f0fbed7c7351f12f2ee9`.
+- Nine-cone gamma=1/2 attempt r1, Slurm job `22988816`, passed every
+  fail-closed input, setup, reduction, source-hash, and reloaded-cone gate.
+  Mosek returned `OPTIMAL` with primal and dual feasible points.
+  Normalization was exactly 1, maximum affine residual and worst PSD
+  violation were 0, and the smallest eigenvalue across all nine independently
+  reconstructed blocks was `0.09098861640180578`. Solver wall was 11.817 s,
+  total runner wall 34.586 s, process peak RSS 1,666,944 KiB, Slurm MaxRSS
+  1,668,768 KiB, and the factor had 26.4 million nonzeros after
+  factorization. `result.toml` SHA-256 is
+  `f24c297da06061b08aa9e94e83f401967cb055e89620bb9eceb834425c16e031`.
+- The exact nine-cone representation therefore cuts gamma=1/2 process RSS
+  by 32.0% and factor fill by 35.9% relative to the spin-axis model. The
+  finite-relaxation conclusion remains feasible at gamma=1/2; no
+  infeasibility ray exists to replay.
 - A subsequent independent candidate is now source-complete but unproved:
   the anti-diagonal site reflection `(x,y)->(-y,-x)` is the only nonidentity
   D4 map that preserves the actual level-1 Shastry--Sutherland Hamiltonian
   term multiset. A separate exact gate checks its site/moment involution,
   all 6,104 isotypic coefficients, equality space, eigenspace ranks, and
   every spatial plus/minus cross entry. It remains behind the authorized
-  nine-cone gamma=1/2 decision run.
+  nine-cone gamma=1/2 decision run, which is now complete.
+- While the spatial truth and isotypic builder jobs wait/run under the shared
+  association cap, a later exact continuous-spin route has been derived for
+  the rank-at-most-four moment inventory. It parameterizes rank-two moments
+  by `delta_ab` and rank-four moments by the three delta pairings, with an
+  exact rational-rotation gate. No model uses this candidate yet.
 - No decision-changing user or resource need is open.
