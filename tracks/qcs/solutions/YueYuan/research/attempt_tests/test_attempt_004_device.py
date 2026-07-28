@@ -9,6 +9,7 @@ ATTEMPT = ROOT / "tracks/qcs/solutions/YueYuan/research/attempts/attempt-004"
 sys.path.insert(0, str(ATTEMPT))
 
 import config
+import baselines
 import device
 import pulses
 import systems
@@ -98,3 +99,35 @@ def test_attempt_004_nelder_mead_handles_zero_dimensional_search():
     assert result.queries == 1
     assert len(calls) == 1
     assert len(result.history) == 1
+
+
+def test_attempt_004_adaptive_hessian_widens_using_query_budget():
+    model = systems.build_system(config.ONE_QUBIT_X)
+    true_system = device.build_true_system(model, "large", seed=16)
+    start = np.zeros(config.ONE_QUBIT_X.raw_dim)
+    hess = np.eye(config.ONE_QUBIT_X.raw_dim)
+    cfg = config.ClosedLoopConfig(
+        query_budget=10,
+        target_infidelity=1e-6,
+        initial_step=0.08,
+    )
+
+    record = baselines.run_adaptive_hessian_method(
+        model,
+        true_system,
+        start,
+        hess,
+        initial_k=0,
+        max_k=2,
+        shots=64,
+        seed=17,
+        cfg=cfg,
+    )
+
+    assert record.method == "adaptive_hessian_subspace_nelder_mead"
+    assert record.k == 2
+    assert record.adaptive_initial_k == 0
+    assert record.adaptive_final_k == 2
+    assert record.adaptive_widened is True
+    assert record.query_count <= cfg.query_budget
+    assert record.total_shots == record.query_count * 64

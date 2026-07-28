@@ -28,6 +28,7 @@ def test_attempt_004_local_smoke_emits_required_records(tmp_path):
         "full_space_nelder_mead",
         "random_subspace_nelder_mead",
         "hessian_subspace_nelder_mead",
+        "adaptive_hessian_subspace_nelder_mead",
     } <= {row["method"] for row in rows}
     assert {"small", "medium", "large"} <= {row["mismatch"] for row in rows}
     assert {128, 512, 2048} <= {row["shots_per_query"] for row in rows}
@@ -101,6 +102,9 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
             "recovery_delta_success",
             "recovered_by_widening",
         } <= set(reader.fieldnames or [])
+    with (tables / "headline_comparison.csv").open() as handle:
+        rows = list(csv.DictReader(handle))
+        assert "adaptive_hessian_subspace_nelder_mead" in {row["method"] for row in rows}
 
 
 def test_attempt_004_candidate_export_has_challenge_methods(tmp_path):

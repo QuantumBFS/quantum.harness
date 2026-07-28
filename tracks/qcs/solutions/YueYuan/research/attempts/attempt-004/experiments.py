@@ -18,6 +18,21 @@ def _k_grid(sweep, system_config):
     return sweep.one_qubit_k if system_config.name == "one_qubit_x" else sweep.two_qubit_k
 
 
+def _adaptive_max_k(sweep, system_config) -> int:
+    target = min(
+        system_config.raw_dim,
+        max(system_config.benchmark_rank + 1, 2 * system_config.benchmark_rank),
+    )
+    for k in _k_grid(sweep, system_config):
+        if k >= target:
+            return min(k, system_config.raw_dim)
+    return system_config.raw_dim
+
+
+def _adaptive_initial_k(system_config) -> int:
+    return min(3, system_config.benchmark_rank, system_config.raw_dim)
+
+
 def _write_jsonl(path: Path, rows) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as handle:
@@ -92,6 +107,19 @@ def run_sweep(sweep, out_dir: Path, selected_index: int | None = None, fast: boo
                     closed_cfg,
                 )
                 records.append({**record.to_json(), "mismatch": mismatch})
+
+        adaptive = baselines.run_adaptive_hessian_method(
+            system,
+            true_system,
+            opt.theta,
+            hess,
+            initial_k=_adaptive_initial_k(system_cfg),
+            max_k=_adaptive_max_k(sweep, system_cfg),
+            shots=shots,
+            seed=seed,
+            cfg=closed_cfg,
+        )
+        records.append({**adaptive.to_json(), "mismatch": mismatch})
 
     _write_jsonl(out_dir / "runs.jsonl", records)
     _write_jsonl(out_dir / "open_loop_history.jsonl", open_history)

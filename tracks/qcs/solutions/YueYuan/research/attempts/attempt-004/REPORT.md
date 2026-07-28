@@ -32,13 +32,22 @@ Hessian at that model optimum, and then evaluates:
 - model-only transfer to the true device;
 - full-space Nelder-Mead over all pulse parameters;
 - random-subspace Nelder-Mead at the benchmark rank;
-- Hessian-subspace Nelder-Mead over a sweep of `k`.
+- Hessian-subspace Nelder-Mead over a sweep of `k`;
+- adaptive Hessian-subspace Nelder-Mead, which starts from a low-dimensional
+  pilot subspace and widens inside the same total query budget when the noisy
+  query-only pilot does not reach a perfect observed score.
 
 All closed-loop optimizers use the same query budget, target infidelity
 `1e-3`, shots per query, seed set, clipping bounds, and noisy scalar device
 interface. Exact true fidelity is used only by the audit layer for scoring and
 stopping-accounting diagnostics; the optimizer receives only finite-shot scalar
 infidelity estimates.
+
+The adaptive method uses the same black-box boundary as the other closed-loop
+methods. It starts at `k=3` for both systems, then may widen to a safety subspace
+of `k=8` for the one-qubit target or `k=32` for the two-qubit target. The widen
+decision is based only on the noisy observed infidelity returned by the device,
+not on exact simulator fidelity.
 
 ## Full Sweep
 
@@ -139,6 +148,36 @@ two-qubit large-gap case. That residual failure is the clearest evidence that
 some mismatch rotates or adds relevant directions beyond what a fixed model
 subspace captures.
 
+## Adaptive Recovery
+
+A focused adaptive CPU sweep tested the actual query-only widening rule at 2048
+shots across all systems and model-truth gaps, with 8 seeds per cell. The sweep
+ran 48 Slurm array tasks and produced 600 run records, 1,707 open-loop history
+rows, 48 Hessian spectra, 75 aggregate groups, and 48 adaptive-method rows with
+zero tracebacks in the checked logs. Generated data remains ignored under
+`tracks/qcs/results/YueYuan/attempt-004/focus_adaptive_pilot2/`.
+
+At 2048 shots, the adaptive method preserved the good one-qubit behavior while
+improving the hard two-qubit failure story:
+
+| System | Gap | Adaptive safety `k` | Final `k` values used | Widened seeds | Adaptive success | Adaptive median queries | Adaptive median final infidelity |
+|---|---:|---:|---|---:|---:|---:|---:|
+| one-qubit X | small | 8 | 3 | 0/8 | 1.000 | 3.0 | 0.000548 |
+| one-qubit X | medium | 8 | 3, 8 | 1/8 | 0.750 | 9.5 | 0.000646 |
+| one-qubit X | large | 8 | 3 | 0/8 | 0.875 | 14.0 | 0.000753 |
+| two-qubit CZ | small | 32 | 3, 32 | 1/8 | 0.625 | 3.0 | 0.001063 |
+| two-qubit CZ | medium | 32 | 3, 32 | 3/8 | 0.125 | 7.0 | 0.002352 |
+| two-qubit CZ | large | 32 | 3, 32 | 7/8 | 0.000 | n/a | 0.004556 |
+
+For the two-qubit medium gap, the benchmark Hessian method at `k=15` had zero
+target-reaching success and median final infidelity 0.004237; the adaptive
+method found one successful seed and lowered the median final infidelity to
+0.002352. For the two-qubit large gap, adaptive widening still had zero
+target-reaching success, but reduced median final infidelity from 0.008544 for
+benchmark Hessian `k=15` to 0.004556. This is useful negative evidence: adaptive
+widening helps diagnose and partially mitigate mismatch, but it is not enough to
+solve the hardest rotated two-qubit case within the current query budget.
+
 ## GPU Note
 
 A GPU probe allocated one GPU successfully, but the installed JAX environment was
@@ -153,7 +192,11 @@ the useful resource for this attempt.
 - Strict query-only finite-shot device with query and shot counters: implemented.
 - Model-only, full-space, random-subspace, and Hessian-subspace methods:
   implemented.
+- Adaptive query-only Hessian recovery method with budget-preserving widening:
+  implemented and tested.
 - Sweeps over `k`, model-truth gap, shot budget, two system sizes, and 8 seeds:
+  completed.
+- Focused high-shot adaptive sweep across all systems and gaps with 8 seeds:
   completed.
 - Query-to-target, shot-to-target, success, final fidelity, and failure status:
   recorded in JSONL.
@@ -169,16 +212,20 @@ the useful resource for this attempt.
 
 ## Verification
 
-Local verification after the two-qubit reachability fix:
+Local verification after the adaptive recovery addition:
 
 - Focused red/green reachability test: passing.
-- Attempt-004 tests: passing (`19 passed`).
-- Broader YueYuan attempt tests: passing (`33 passed`).
+- Attempt-004 tests: passing (`20 passed`).
+- Broader YueYuan attempt tests: passing (`34 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
-- Fast candidate export: passing (`schema_version=1`, 12 groups).
+- Fast candidate export: passing (`schema_version=1`, 15 groups).
 - Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
   four CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
+- Focused adaptive CPU sweep: completed with 48/48 tasks, 600 run records, 48
+  adaptive rows, and zero tracebacks.
+- Focused adaptive figure/table generation: passing (`600` rows, `75` groups,
+  eight PNGs, four CSV tables).
 
 The generated files are intentionally ignored by git.
 

@@ -150,6 +150,8 @@ def _headline_rows(groups: list[dict]) -> list[dict]:
             "random_subspace_nelder_mead",
         } and row["k"] == benchmark_k.get(row["system"]):
             rows.append(row)
+        elif row["method"] == "adaptive_hessian_subspace_nelder_mead":
+            rows.append(row)
     return rows
 
 
