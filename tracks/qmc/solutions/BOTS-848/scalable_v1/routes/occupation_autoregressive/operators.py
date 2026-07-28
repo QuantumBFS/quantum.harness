@@ -166,7 +166,7 @@ def _validated_pair_matrix(
     return matrix
 
 
-@dataclass(frozen=True, slots=True, init=False)
+@dataclass(frozen=True, slots=True, init=False, eq=False)
 class PreparedPairOperator:
     """Validated, immutable pair data prepared once outside sampling loops.
 
@@ -344,8 +344,8 @@ def local_from_neighbors(
             target,
             label="neighbor amplitude",
         )
-        numerator += coefficient * target_amplitude
-    return numerator / denominator
+        numerator += coefficient * (target_amplitude / denominator)
+    return numerator
 
 
 def local_energy(

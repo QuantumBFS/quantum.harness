@@ -330,6 +330,19 @@ def test_local_estimator_is_invariant_under_tiny_global_amplitude_scale() -> Non
     assert observed == pytest.approx(expected, rel=2.0e-14, abs=2.0e-14)
 
 
+def test_local_estimator_preserves_ratio_before_subnormal_product() -> None:
+    amplitudes = {1: complex(1.0e-315), 2: complex(1.0e-315)}
+
+    observed = local_from_neighbors(
+        1,
+        {2: complex(1.0e-10)},
+        amplitudes.__getitem__,
+    )
+
+    assert isinstance(observed, complex)
+    assert observed == pytest.approx(complex(1.0e-10), rel=1.0e-15)
+
+
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     pair_matrix = np.array(
         [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],
@@ -343,6 +356,14 @@ def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
 def test_prepared_pair_operator_rejects_direct_construction() -> None:
     with pytest.raises(TypeError, match="must be created with build"):
         PreparedPairOperator()
+
+
+def test_prepared_pair_operator_uses_identity_equality() -> None:
+    first = PreparedPairOperator.build(((0, 1),), np.eye(1), two_q=1)
+    second = PreparedPairOperator.build(((0, 1),), np.eye(1), two_q=1)
+
+    assert first == first
+    assert first != second
 
 
 @pytest.mark.parametrize(
