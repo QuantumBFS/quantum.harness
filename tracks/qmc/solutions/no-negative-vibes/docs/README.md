@@ -23,6 +23,11 @@
   contraction-semigroup 的严格非归约证明；
 - [TN_PHYSICAL_MAPPING_FRONTIER.md](TN_PHYSICAL_MAPPING_FRONTIER.md)：连续 TN 的开放路径
   no-go、排斥 `t-V` 键门的精确非对称辅助场分解，以及新矩阵机制与新物理模型的边界；
+- [TN_INVERSE_HS_CANDIDATE.md](TN_INVERSE_HS_CANDIDATE.md)：从 TN Jacobi/平面网络因子
+  反向构造宇称串相关 hopping 与局域物理顶点的候选卡、证据标准和停止条件；
+- [TN_NETWORK_PHYSICAL_MODEL.md](TN_NETWORK_PHYSICAL_MODEL.md)：四场 TN 平面网络的
+  精确三站点 correlated-hopping Hamiltonian、任意历史证明、Jordan--Wigner 物理解释
+  和正 TN Gaussian 正和必然 stoquastic 的一般边界；
 - [COMPOUND_GAUGE_NO_GO.md](COMPOUND_GAUGE_NO_GO.md)：比 TN 更宽的逐粒子数符号规范、
   普通 hopping 图只有开放路径幸存的图论结论，以及 2–6 站点全连通图穷举；
 - [FRONTIER_SEMIGROUP_RESULTS.md](FRONTIER_SEMIGROUP_RESULTS.md)：15 族广扫、压力扫描、
@@ -40,6 +45,12 @@
 - [PROPOSAL_LEDGER.md](PROPOSAL_LEDGER.md)：本分支每个可证伪提案的认领与状态索引；
 - [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md)：成功、失败和基础设施实验的连续经验日志；
 - [RESEARCH_OPERATIONS.md](RESEARCH_OPERATIONS.md)：Git、WSL、环境、并行与实验闭环的可复用操作经验；
+- [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
+  加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
+  parity，并反推奇环吸引 spinless-fermion 模型的新候选；
+- [GRADED_MONOMIAL_RESULTS.md](GRADED_MONOMIAL_RESULTS.md)：graded crossing 的循环
+  定理、三角受挫物理模型、任意历史证据、real-exponential grade ancilla 加强版和
+  文献边界；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；
