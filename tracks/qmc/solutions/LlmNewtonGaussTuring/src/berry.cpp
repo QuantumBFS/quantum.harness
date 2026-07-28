@@ -118,15 +118,22 @@ BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
                               const GroundState& gs11, const GroundState& gs01)
 {
     BerryCurvature bc;
-    auto U1 = overlap(gs00, gs10); bc.absU1 = std::abs(U1);
-    auto U2 = overlap(gs10, gs11); double a2 = std::abs(U2);
-    auto U3 = std::conj(overlap(gs11, gs01)); double a3 = std::abs(U3);
-    auto U4 = std::conj(overlap(gs01, gs00)); bc.absU2 = std::abs(U4);
+    // FHS formula: F₁₂ = arg[U₁ U₂ U₁^* U₂^*]
+    // U₁ = ⟨ψ₀₀|ψ₁₀⟩ / |...|,  U₂ = ⟨ψ₁₀|ψ₁₁⟩ / |...|
+    // U₁^* = ⟨ψ₁₁|ψ₀₁⟩ / |...|, U₂^* = ⟨ψ₀₁|ψ₀₀⟩ / |...|
+    auto U1 = overlap(gs00, gs10);
+    auto U2 = overlap(gs10, gs11);
+    auto U1star = overlap(gs11, gs01);  // ⟨ψ₁₁|ψ₀₁⟩ = conj(⟨ψ₀₁|ψ₁₁⟩)
+    auto U2star = overlap(gs01, gs00);  // ⟨ψ₀₁|ψ₀₀⟩ = conj(⟨ψ₀₀|ψ₀₁⟩)
+
+    bc.absU1 = std::abs(U1);
+    bc.absU2 = std::abs(U2star);
     if (bc.absU1 > 1e-30) U1 /= bc.absU1; else U1 = cplx(1,0);
-    if (a2 > 1e-30) U2 /= a2; else U2 = cplx(1,0);
-    if (a3 > 1e-30) U3 /= a3; else U3 = cplx(1,0);
-    if (bc.absU2 > 1e-30) U4 /= bc.absU2; else U4 = cplx(1,0);
-    bc.F12 = std::arg(U1 * U2 * U3 * U4);
+    if (std::abs(U2) > 1e-30) U2 /= std::abs(U2); else U2 = cplx(1,0);
+    if (std::abs(U1star) > 1e-30) U1star /= std::abs(U1star); else U1star = cplx(1,0);
+    if (bc.absU2 > 1e-30) U2star /= bc.absU2; else U2star = cplx(1,0);
+
+    bc.F12 = std::arg(U1 * U2 * U1star * U2star);
     return bc;
 }
 
