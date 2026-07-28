@@ -381,7 +381,7 @@ def lattice3d(b: dict, base_dir: Path) -> str:
         return (f'<p class="note">Interactive view not embedded — '
                 f'<code>{esc(src)}</code> not found.</p>')
     try:
-        scene = json.dumps(json.loads(p.read_text()))
+        scene = json.dumps(json.loads(p.read_text(encoding="utf-8")))
     except ValueError:
         return (f'<p class="note">Interactive view not embedded — '
                 f'<code>{esc(src)}</code> is not valid JSON.</p>')
@@ -518,7 +518,7 @@ def render(doc: dict, base_dir: Path) -> str:
     lattix = ""
     if 'class="lattix"' in body:                        # ≥1 lattice3d block rendered
         if LATTIX_BUNDLE.is_file():
-            js = re.sub(r"</script", r"<\\/script", LATTIX_BUNDLE.read_text(),
+            js = re.sub(r"</script", r"<\\/script", LATTIX_BUNDLE.read_text(encoding="utf-8"),
                         flags=re.I)
             lattix = f"<script>{js}</script><script>Lattix.mountAll();</script>"
         else:
@@ -538,9 +538,9 @@ def main():
     if len(sys.argv) != 2:
         sys.exit("usage: python3 skills/report/render_report.py <run-dir>")
     run_dir = Path(sys.argv[1]).resolve()
-    doc = json.loads((run_dir / "report.json").read_text())
+    doc = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
     out = run_dir / "report.html"
-    out.write_text(render(doc, run_dir))
+    out.write_text(render(doc, run_dir), encoding="utf-8")
     print(f"wrote {out}")
 
 

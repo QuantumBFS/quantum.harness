@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">OmniEvolve Phase 1 outcomes</title>
+  <desc id="desc">Occam gate counts and LJ proposal outcomes.</desc>
+  <rect width="1200" height="520" fill="#f7f8fa"/>
+  <style>
+    .title{font:700 28px system-ui,sans-serif;fill:#172033}
+    .sub{font:600 20px system-ui,sans-serif;fill:#34415a}
+    .label{font:16px system-ui,sans-serif;fill:#34415a}
+    .value{font:700 18px system-ui,sans-serif;fill:#172033}
+    .note{font:14px system-ui,sans-serif;fill:#667085}
+    .axis{stroke:#c7ccd6;stroke-width:2}
+  </style>
+  <text x="50" y="48" class="title">Phase 1: verified outcome, not activity</text>
+
+  <rect x="40" y="75" width="545" height="400" rx="18" fill="#fff" stroke="#dde1e8"/>
+  <text x="70" y="115" class="sub">Occam’s Circuit — gate count</text>
+  <line x1="190" y1="400" x2="540" y2="400" class="axis"/>
+  <rect x="220" y="155" width="75" height="245" rx="6" fill="#9aa4b5"/>
+  <rect x="350" y="182" width="75" height="218" rx="6" fill="#377dff"/>
+  <rect x="480" y="187" width="75" height="213" rx="6" fill="#f4a340"/>
+  <text x="257" y="145" text-anchor="middle" class="value">422</text>
+  <text x="387" y="172" text-anchor="middle" class="value">399</text>
+  <text x="517" y="177" text-anchor="middle" class="value">397</text>
+  <text x="257" y="428" text-anchor="middle" class="label">Earlier exact</text>
+  <text x="387" y="428" text-anchor="middle" class="label">Best exact</text>
+  <text x="517" y="428" text-anchor="middle" class="label">Invalid near miss</text>
+  <text x="70" y="460" class="note">Final restart improvement: 0 gates. The 397-gate candidate fails one bit.</text>
+
+  <rect x="615" y="75" width="545" height="400" rx="18" fill="#fff" stroke="#dde1e8"/>
+  <text x="645" y="115" class="sub">LJ924 — exploratory outcomes</text>
+  <line x1="680" y1="400" x2="1120" y2="400" class="axis"/>
+  <rect x="710" y="400" width="90" height="0" rx="6" fill="#d64545"/>
+  <rect x="860" y="190" width="90" height="210" rx="6" fill="#377dff"/>
+  <rect x="1010" y="250" width="90" height="150" rx="6" fill="#6c8f75"/>
+  <text x="755" y="382" text-anchor="middle" class="value">0</text>
+  <text x="905" y="180" text-anchor="middle" class="value">14</text>
+  <text x="1055" y="240" text-anchor="middle" class="value">10</text>
+  <text x="755" y="428" text-anchor="middle" class="label">Strict gains</text>
+  <text x="905" y="428" text-anchor="middle" class="label">Valid proposals</text>
+  <text x="1055" y="428" text-anchor="middle" class="label">Unique hashes</text>
+  <text x="645" y="460" class="note">Diverse proposals were real, but every valid submission retained the incumbent.</text>
+</svg>

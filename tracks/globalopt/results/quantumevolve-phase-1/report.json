@@ -1,0 +1,209 @@
+{
+  "title": "OmniEvolve Phase 1: LJ924 and Occam’s Circuit",
+  "eyebrow": "quantumevolve · Phase 1 retrospective",
+  "url": "https://github.com/QuantumBFS/quantum.harness/pull/181",
+  "lede": "The pipeline worked, but Phase 1 did not produce a competitive breakthrough: Occam reached a 399-gate exact solution, while LJ924 never beat its incumbent.",
+  "sections": [
+    {
+      "title": "Challenge",
+      "note": "What was attempted and what counts as success.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Phase 1 tested whether LLM-guided program evolution could solve two very different optimization challenges in one reusable framework. LJ924 asks for a lower-energy 924-atom Lennard–Jones cluster with strict force convergence. Occam’s Circuit asks for exact hidden Boolean functions using as few gates as possible."
+        },
+        {
+          "kind": "card",
+          "title": "Significance",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Both tasks have hard, independent verification and an unambiguous ordering of valid solutions. A successful campaign would therefore demonstrate genuine algorithm discovery rather than subjective LLM code quality."
+            }
+          ]
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Team", "quantumevolve"],
+            ["Framework", "OmniEvolve"],
+            ["Catalog issues", "#117 LJ clusters; #71 Occam’s Circuit"],
+            ["Tracks", "globalopt and qcs"],
+            ["Phase 1 duration", "One working day"],
+            ["Primary success criterion", "Strict verified improvement over the incumbent"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Approach",
+      "note": "How the campaigns searched and how candidates were checked.",
+      "blocks": [
+        {
+          "kind": "badge",
+          "text": "Independent verifier; evolutionary search; partial/negative outcome",
+          "style": "warn"
+        },
+        {
+          "kind": "kv",
+          "pairs": [
+            ["Search method", "LLM Director/Coder mutations with durable candidate lineage"],
+            ["Occam verifier", "Full four-instance train/holdout simulation; exactness before gate count"],
+            ["LJ verifier", "Recomputed energy, force residual, minimum distance and coordinate hash"],
+            ["Storage", "Content-addressed source artifacts and SQLite experiment ledger"],
+            ["Fallback", "Qwen primary, GLM-5.2 after primary quota exhaustion"]
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The evaluator was strengthened during the day. Occam failures gained first-counterexample and bit-level feedback. LJ separated the safe incumbent submission from the best exploratory proposal, so failed searches could no longer hide behind an unchanged fallback structure. These changes made the search observable, but did not create a competitive improvement."
+        },
+        {
+          "kind": "table",
+          "columns": ["Campaign", "Evaluated candidates", "LLM calls", "Tokens", "Candidate evaluation time"],
+          "rows": [
+            ["Occam final restart", "20 (generations 0–19)", "51", "615,971", "48.3 s total"],
+            ["LJ924 final restart", "18 (generations 0–17)", "42", "463,191", "48.5 min total"]
+          ],
+          "numeric": [false, false, true, true, false]
+        },
+        {
+          "kind": "note",
+          "label": "Evidence scope",
+          "style": "info",
+          "text": "Numbers above come from experiments c460de690d184e57 (Occam) and 8ab0d946b5424f57 (LJ924). LJ generations 7 and 10 have no usable metrics, so the report states 18 durable candidates but only 16 valid metric-bearing evaluations."
+        }
+      ]
+    },
+    {
+      "title": "Results",
+      "note": "Competition value is separated from engineering value.",
+      "blocks": [
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "phase1-outcomes.svg",
+              "caption": "Phase 1 outcome. Occam improved its earlier audited 422-gate implementation to a 399-gate exact solution, but the final restart did not beat 399. The 397-gate candidate is shown separately because it fails one output bit. LJ generated diverse proposals but recorded zero strict incumbent improvements."
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "text": "Occam’s Circuit",
+          "level": 3
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "Partial result, no final-restart gain",
+          "why": "The broader day improved 422 → 399 exact gates, but the final 20-candidate restart found no exact candidate below 399."
+        },
+        {
+          "kind": "table",
+          "columns": ["Quantity", "Result", "Interpretation"],
+          "rows": [
+            ["Best exact total", "399 gates", "A/B/C/D = 37/50/168/144"],
+            ["Final-restart exact candidates", "11 of 20", "Correctness retention worked"],
+            ["Final-restart best improvement", "0 gates", "Generation 0 remained champion"],
+            ["Closest smaller candidate", "397 gates", "Average bit accuracy 0.9969618; one wrong bit on mystery-C"],
+            ["Behavior signatures", "6", "The loop explored distinct behaviors, not only source no-ops"]
+          ],
+          "numeric": [false, false, false]
+        },
+        {
+          "kind": "heading",
+          "text": "LJ924",
+          "level": 3
+        },
+        {
+          "kind": "verdict",
+          "status": "bad",
+          "label": "No competitive improvement",
+          "why": "No candidate achieved a strict energy improvement with the required force convergence; every valid submission retained the incumbent."
+        },
+        {
+          "kind": "table",
+          "columns": ["Quantity", "Result", "Interpretation"],
+          "rows": [
+            ["Incumbent energy", "−6558.225147857513", "Remained the best verified structure"],
+            ["Strict improvements", "0", "No competition progress"],
+            ["Valid exploratory proposals", "14", "Proposal channel worked"],
+            ["Unique proposal hashes", "10", "Search was behaviorally diverse"],
+            ["Unique proposal modes", "7", "Relocation, shrink and strain families were attempted"],
+            ["Submission fallbacks", "16 of 16 valid evaluations", "Exploration never cleared the strict gate"]
+          ],
+          "numeric": [false, false, false]
+        },
+        {
+          "kind": "card",
+          "title": "Why the two searches stalled",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "Occam has an exactness cliff: global natural-language rewrites often save gates by breaking a rare truth-table case. The missing primitive is formal local synthesis or equivalence-preserving peephole search.",
+                "LJ starts from an exceptionally well-relaxed incumbent. Single-core local perturbations usually return to the same basin or retain excessive force, while meaningful basin crossing needs a different search algorithm and much more parallel compute.",
+                "Failure memory and dense feedback improved diagnosis, but feedback cannot compensate for a candidate representation that does not expose safe, composable improvements."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Highlight and Next Phase",
+      "note": "What is retained, what is archived, and why #229 is next.",
+      "blocks": [
+        {
+          "kind": "card",
+          "title": "What is genuinely reusable",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Phase 1 produced an auditable evolution stack: behavioral counterexamples, proposal-versus-incumbent separation, durable failure memory, cross-provider fallback and content-addressed candidate history. These are infrastructure results, not substitutes for a winning solution."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Phase 1 decision",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Archive both brute-force campaigns. Preserve the Occam generation-15 397-gate candidate as a one-counterexample repair lead, but do not spend additional LLM generations on either task without changing the search representation."
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "Recommended Phase 2: issue #229",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "Automated symmetry reduction for noncommutative moment hierarchies is a better OmniEvolve target because each mutation can be checked for exact or solver-tolerance equivalence, while block-size reduction and runtime provide continuous progress."
+            },
+            {
+              "kind": "table",
+              "columns": ["Phase 2 component", "Fast local contract"],
+              "rows": [
+                ["Initial corpus", "6–10 low-order toy models"],
+                ["Symmetries", "Z₂ parity first; small permutation groups second"],
+                ["Hard gate", "Dense and reduced SDP optima agree; reconstruction residual passes"],
+                ["Fitness", "Valid-equivalence tier, then block-size reduction and runtime"],
+                ["Per-candidate budget", "5–10 seconds; no HPC"],
+                ["Promotion rule", "Only expand corpus after the small verifier suite is stable"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "Bottom line",
+          "style": "info",
+          "text": "The day was not a competitive success. Its useful conclusion is narrower and actionable: OmniEvolve needs verifier-bounded, composable candidate transformations. Issue #229 naturally supplies that structure; LJ924 does not, and Occam requires a formal synthesis backend before more evolution is justified."
+        }
+      ]
+    }
+  ]
+}

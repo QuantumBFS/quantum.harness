@@ -1147,3 +1147,9 @@
 - 该 CHSH 结果只是 verifier/control 的端到端校准，不作为 #232 科研成果；
   下一步必须在相同 exact-certificate contract 下换成 catalogued open
   state-polynomial Bell constant。
+### F-59：Windows 报告渲染器用系统默认 GBK 读取 UTF-8 JSON
+
+- Phase 1 报告包含英文弯引号，`render_report.py` 的无参数 `Path.read_text()`
+  在 Windows 中文环境按 GBK 解码，触发 `UnicodeDecodeError`，未生成 HTML。
+- 修复：report JSON、lattix scene、viewer bundle 的文本读取以及 HTML 写出全部显式
+  使用 UTF-8。该修复不改变报告 schema 或页面内容，仅消除平台默认编码差异。
