@@ -28,7 +28,7 @@ from scalable_v1.routes.occupation_autoregressive.operators import (
     compose_ladders,
     ladder_neighbors,
     local_energy,
-    local_from_neighbors,
+    local_from_log_neighbors,
     local_l2,
     two_body_neighbors,
 )
@@ -51,12 +51,25 @@ def _oracle_apply_one_body(
     return target, sign_1 * sign_2
 
 
-def _amplitude_from_basis(
+def _logpsi_from_basis(
     basis: tuple[int, ...],
     values: np.ndarray,
+    *,
+    real_shift: float = 0.0,
+    phase_shift: float = 0.0,
 ):
-    amplitudes = dict(zip(basis, values, strict=True))
-    return amplitudes.__getitem__
+    log_values = {
+        state: (
+            complex(-math.inf, phase_shift)
+            if value == 0.0
+            else complex(
+                math.log(abs(value)) + real_shift,
+                math.atan2(value.imag, value.real) + phase_shift,
+            )
+        )
+        for state, value in zip(basis, values, strict=True)
+    }
+    return log_values.__getitem__
 
 
 def test_route_local_fermion_actions_match_fock_ed_term_by_term() -> None:
@@ -128,14 +141,14 @@ def test_local_energy_matches_tiny_public_coulomb_hamiltonian() -> None:
         [1.0 + 0.17j * (index + 1) for index in range(len(basis))],
         dtype=np.complex128,
     )
-    amplitude = _amplitude_from_basis(basis, values)
+    logpsi = _logpsi_from_basis(basis, values)
     expected = hamiltonian @ values
 
     for index, state in enumerate(basis):
         assert local_energy(
             state,
             operator=operator,
-            amplitude=amplitude,
+            logpsi=logpsi,
         ) == pytest.approx(expected[index] / values[index], abs=1.0e-12)
 
 
@@ -153,7 +166,7 @@ def test_local_energy_uses_h_current_target_for_complex_hermitian_input() -> Non
         [1.0 + (0.1 + 0.2j) * index for index in range(len(basis))],
         dtype=np.complex128,
     )
-    amplitude = _amplitude_from_basis(basis, values)
+    logpsi = _logpsi_from_basis(basis, values)
 
     assert pair_matrix[0, 1] != pair_matrix[1, 0]
     for index, state in enumerate(basis):
@@ -161,7 +174,7 @@ def test_local_energy_uses_h_current_target_for_complex_hermitian_input() -> Non
         assert local_energy(
             state,
             operator=operator,
-            amplitude=amplitude,
+            logpsi=logpsi,
         ) == pytest.approx(expected, abs=1.0e-12)
 
 
@@ -182,14 +195,14 @@ def test_random_complex_hermitian_prepared_operator_matches_full_basis() -> None
     hamiltonian = hamiltonian_matrix(basis, pairs, pair_matrix)
     values = rng.normal(size=len(basis)) + 1j * rng.normal(size=len(basis))
     values += 1.0 + 0.5j
-    amplitude = _amplitude_from_basis(basis, values)
+    logpsi = _logpsi_from_basis(basis, values)
 
     for index, state in enumerate(basis):
         expected = (hamiltonian @ values)[index] / values[index]
         assert local_energy(
             state,
             operator=operator,
-            amplitude=amplitude,
+            logpsi=logpsi,
         ) == pytest.approx(expected, abs=1.0e-12)
 
 
@@ -213,14 +226,15 @@ def test_two_body_neighbors_merge_repeated_targets_before_amplitude_calls() -> N
 
     calls: Counter[int] = Counter()
 
-    def amplitude(state: int) -> complex:
+    def logpsi(state: int) -> complex:
         calls[state] += 1
-        return 1.0 + 0.25j * state
+        value = 1.0 + 0.25j * state
+        return complex(math.log(abs(value)), math.atan2(value.imag, value.real))
 
     local_energy(
         source,
         operator=operator,
-        amplitude=amplitude,
+        logpsi=logpsi,
     )
 
     assert calls[target] == 1
@@ -293,7 +307,7 @@ def test_local_l2_matches_tiny_exact_matrix_for_complex_amplitudes(
     rng = np.random.default_rng(848 + round(2 * target_m))
     values = rng.normal(size=len(basis)) + 1j * rng.normal(size=len(basis))
     values += 0.7 + 0.3j
-    amplitude = _amplitude_from_basis(basis, values)
+    logpsi = _logpsi_from_basis(basis, values)
     expected = matrix @ values
 
     for index, state in enumerate(basis):
@@ -301,59 +315,124 @@ def test_local_l2_matches_tiny_exact_matrix_for_complex_amplitudes(
             state,
             two_q=two_q,
             target_m=target_m,
-            amplitude=amplitude,
+            logpsi=logpsi,
         ) == pytest.approx(expected[index] / values[index], abs=1.0e-12)
 
 
-@pytest.mark.parametrize("value", [0.0, np.nan, np.inf, complex(1, np.inf)])
-def test_local_estimator_rejects_bad_sampled_amplitude(value: complex) -> None:
-    with pytest.raises(ValueError, match="sampled amplitude"):
-        local_from_neighbors(1, {1: 2.0}, lambda _state: value)
+@pytest.mark.parametrize(
+    "value",
+    [
+        complex(-math.inf, 0.25),
+        complex(math.inf, 0.0),
+        complex(math.nan, 0.0),
+        complex(0.0, math.inf),
+        complex(0.0, math.nan),
+    ],
+)
+def test_local_estimator_rejects_zero_or_nonfinite_sampled_logpsi(
+    value: complex,
+) -> None:
+    with pytest.raises(ValueError, match="sampled logpsi"):
+        local_from_log_neighbors(1, {1: 2.0}, lambda _state: value)
 
 
-def test_local_estimator_accepts_nonzero_subthreshold_amplitude() -> None:
-    assert local_from_neighbors(1, {1: 2.0}, lambda _state: 1.0e-301) == (
-        pytest.approx(2.0)
+def test_local_estimator_skips_exact_zero_neighbor_logpsi() -> None:
+    log_values = {
+        1: complex(0.0, 0.5),
+        2: complex(-math.inf, 123.0),
+        3: complex(math.log(2.0), 0.5),
+    }
+
+    observed = local_from_log_neighbors(
+        1,
+        {2: 1.0e308, 3: 0.25},
+        log_values.__getitem__,
     )
 
+    assert observed == pytest.approx(0.5)
 
-def test_local_estimator_is_invariant_under_tiny_global_amplitude_scale() -> None:
+
+def test_local_estimator_skips_zero_coefficient_before_logpsi_call() -> None:
+    calls: Counter[int] = Counter()
+
+    def logpsi(state: int) -> complex:
+        calls[state] += 1
+        if state == 2:
+            raise AssertionError("zero coefficient evaluated logpsi")
+        return 0.0j
+
+    assert local_from_log_neighbors(1, {2: 0.0, 3: 2.0}, logpsi) == 2.0
+    assert calls == Counter({1: 1, 3: 1})
+
+
+@pytest.mark.parametrize("real_shift", [-1000.0, 0.0, 1000.0])
+@pytest.mark.parametrize("phase_shift", [0.0, 19.75])
+def test_local_estimator_is_invariant_under_global_logpsi_shifts(
+    real_shift: float,
+    phase_shift: float,
+) -> None:
+    basis = (1, 2)
     neighbors = {1: 2.0 - 0.5j, 2: -0.25 + 0.75j}
-    values = {1: 1.0 + 0.5j, 2: -0.4 + 0.8j}
-    expected = local_from_neighbors(1, neighbors, values.__getitem__)
-    scaled = {state: value * 1.0e-301 for state, value in values.items()}
+    values = np.array([1.0 + 0.5j, -0.4 + 0.8j])
+    expected = local_from_log_neighbors(
+        1,
+        neighbors,
+        _logpsi_from_basis(basis, values),
+    )
 
-    observed = local_from_neighbors(1, neighbors, scaled.__getitem__)
+    observed = local_from_log_neighbors(
+        1,
+        neighbors,
+        _logpsi_from_basis(
+            basis,
+            values,
+            real_shift=real_shift,
+            phase_shift=phase_shift,
+        ),
+    )
 
     assert math.isfinite(observed.real)
     assert math.isfinite(observed.imag)
     assert observed == pytest.approx(expected, rel=2.0e-14, abs=2.0e-14)
 
 
-def test_local_estimator_preserves_ratio_before_subnormal_product() -> None:
-    amplitudes = {1: complex(1.0e-315), 2: complex(1.0e-315)}
+def test_local_estimator_preserves_multiply_first_extreme_result() -> None:
+    log_values = {
+        1: complex(math.log(1.0e-315), 0.0),
+        2: complex(math.log(1.0e-315), 0.0),
+    }
 
-    observed = local_from_neighbors(
+    observed = local_from_log_neighbors(
         1,
         {2: complex(1.0e-10)},
-        amplitudes.__getitem__,
+        log_values.__getitem__,
     )
 
     assert isinstance(observed, complex)
-    assert observed == pytest.approx(complex(1.0e-10), rel=1.0e-15)
+    assert observed == pytest.approx(complex(1.0e-10), rel=1.0e-14)
 
 
-def test_local_estimator_preserves_ratio_before_overflowing_division() -> None:
-    amplitudes = {1: complex(1.0e-315), 2: complex(1.0)}
+def test_local_estimator_preserves_divide_first_extreme_result() -> None:
+    log_values = {
+        1: complex(math.log(1.0e-315), 0.0),
+        2: complex(0.0, 0.0),
+    }
 
-    observed = local_from_neighbors(
+    observed = local_from_log_neighbors(
         1,
         {2: complex(1.0e-315)},
-        amplitudes.__getitem__,
+        log_values.__getitem__,
     )
 
     assert isinstance(observed, complex)
-    assert observed == pytest.approx(complex(1.0), rel=1.0e-15)
+    assert observed == pytest.approx(complex(1.0), rel=2.0e-14)
+
+
+def test_local_estimator_rejects_coefficient_component_dynamic_range() -> None:
+    coefficient = complex(1.0e308, 2.0 ** -1074)
+
+    with pytest.raises(ValueError, match="coefficient component dynamic range"):
+        local_from_log_neighbors(1, {2: coefficient}, lambda _state: 0.0j)
 
 
 def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> None:
@@ -373,12 +452,15 @@ def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> Non
         math.ldexp(1.0, 950),
         -math.ldexp(1.0, 949),
     )
-    amplitudes = {1: denominator, 2: target}
+    logpsi = _logpsi_from_basis(
+        (1, 2),
+        np.array([denominator, target], dtype=np.complex128),
+    )
 
-    observed = local_from_neighbors(
+    observed = local_from_log_neighbors(
         1,
         {2: coefficient},
-        amplitudes.__getitem__,
+        logpsi,
     )
 
     assert isinstance(observed, complex)
@@ -387,46 +469,55 @@ def test_local_estimator_preserves_complex_phase_across_binary_extremes() -> Non
 
 def test_local_estimator_rejects_mathematically_unrepresentable_term() -> None:
     coefficient = complex(math.ldexp(1.0, 1023))
-    amplitudes = {1: complex(1.0), 2: complex(2.0)}
+    log_values = {1: 0.0j, 2: complex(math.log(2.0), 0.0)}
 
     with pytest.raises(OverflowError, match="outside complex128 range"):
-        local_from_neighbors(1, {2: coefficient}, amplitudes.__getitem__)
+        local_from_log_neighbors(1, {2: coefficient}, log_values.__getitem__)
 
 
 def test_local_estimator_sums_canceling_large_terms_before_final_restore() -> None:
-    amplitudes = {state: complex(1.0) for state in range(1, 5)}
+    log_values = {state: 0.0j for state in range(1, 5)}
     neighbors = {
         2: complex(1.0e308),
         3: complex(1.0e308),
         4: complex(-1.0e308),
     }
 
-    observed = local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+    observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
 
     assert observed == complex(1.0e308)
 
 
 def test_local_estimator_rejects_unrepresentable_final_row_sum() -> None:
-    amplitudes = {state: complex(1.0) for state in range(1, 4)}
+    log_values = {state: 0.0j for state in range(1, 4)}
     neighbors = {2: complex(1.0e308), 3: complex(1.0e308)}
 
     with pytest.raises(OverflowError, match="outside complex128 range"):
-        local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+        local_from_log_neighbors(1, neighbors, log_values.__getitem__)
 
 
 def test_local_estimator_allows_out_of_range_terms_to_cancel() -> None:
     scale = complex(math.ldexp(1.0, 1023))
-    amplitudes = {
-        1: complex(1.0),
-        2: complex(2.0),
-        3: complex(2.0),
-        4: complex(1.0),
+    log_values = {
+        1: 0.0j,
+        2: complex(math.log(2.0), 0.0),
+        3: complex(math.log(2.0), 0.0),
+        4: 0.0j,
     }
     neighbors = {2: scale, 3: -scale, 4: complex(1.0)}
 
-    observed = local_from_neighbors(1, neighbors, amplitudes.__getitem__)
+    observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
 
     assert observed == complex(1.0)
+
+
+def test_local_estimator_returns_zero_for_exactly_canceling_row() -> None:
+    log_values = {state: 0.0j for state in range(1, 4)}
+    neighbors = {2: complex(1.0e308), 3: complex(-1.0e308)}
+
+    observed = local_from_log_neighbors(1, neighbors, log_values.__getitem__)
+
+    assert observed == 0.0j
 
 
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
@@ -436,6 +527,17 @@ def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     )
 
     with pytest.raises(ValueError, match="pair_matrix must be Hermitian"):
+        PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
+
+
+def test_prepared_pair_operator_rejects_coefficient_component_dynamic_range() -> None:
+    coefficient = complex(1.0e308, 2.0 ** -1074)
+    pair_matrix = np.array(
+        [[0.0, coefficient], [coefficient.conjugate(), 0.0]],
+        dtype=np.complex128,
+    )
+
+    with pytest.raises(ValueError, match="coefficient component dynamic range"):
         PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
 
 
@@ -522,14 +624,14 @@ def test_prepared_pair_operator_is_reused_without_quadratic_rescan(
         assert local_energy(
             state,
             operator=operator,
-            amplitude=lambda _state: 1.0,
+            logpsi=lambda _state: 0.0j,
         ) == pytest.approx(1.0)
     assert operator.nonzero_by_column is cached_nonzeros
 
 
 def test_operator_estimators_reject_bad_shapes_and_configuration_inputs() -> None:
     pairs = ((0, 1),)
-    amplitude = lambda _state: 1.0
+    logpsi = lambda _state: 0.0j
 
     with pytest.raises(ValueError, match="pair_matrix must have shape"):
         PreparedPairOperator.build(pairs, np.zeros((1, 2)), two_q=1)
@@ -538,8 +640,8 @@ def test_operator_estimators_reject_bad_shapes_and_configuration_inputs() -> Non
     with pytest.raises(ValueError, match="direction must be -1 or 1"):
         ladder_neighbors(1, 1, direction=0)
     with pytest.raises(TypeError, match="target_m must be a finite integer or half-integer"):
-        local_l2(1, two_q=1, target_m=True, amplitude=amplitude)
+        local_l2(1, two_q=1, target_m=True, logpsi=logpsi)
     with pytest.raises(ValueError, match="target_m must be a finite integer or half-integer"):
-        local_l2(1, two_q=1, target_m=0.25, amplitude=amplitude)
+        local_l2(1, two_q=1, target_m=0.25, logpsi=logpsi)
     with pytest.raises(ValueError, match="target_m must be a finite integer or half-integer"):
-        local_l2(1, two_q=1, target_m=np.inf, amplitude=amplitude)
+        local_l2(1, two_q=1, target_m=np.inf, logpsi=logpsi)
