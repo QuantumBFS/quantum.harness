@@ -85,7 +85,6 @@ end
 
 component_squared_norm(signature) =
     sum(abs2, values(signature); init=0)
-end
 
 function blocks_for_family(
     assembly::ContinuousSpinReducedPrimalAssembly,
