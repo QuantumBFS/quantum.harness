@@ -47,6 +47,11 @@ add_executable(test_berry tests/test_berry.cpp)
 target_link_libraries(test_berry PRIVATE cm148)
 add_test(NAME test_berry COMMAND test_berry)
 
+# Test: Berry phase Stage 1
+add_executable(test_berry_stage1 tests/test_berry_stage1.cpp)
+target_link_libraries(test_berry_stage1 PRIVATE cm148)
+add_test(NAME test_berry_stage1 COMMAND test_berry_stage1)
+
 # Diagnostic driver (not part of the test suite)
 add_executable(debug_sse tools/debug_sse.cpp)
 target_link_libraries(debug_sse PRIVATE cm148)
@@ -58,6 +63,13 @@ target_link_libraries(debug_cv PRIVATE cm148)
 find_package(Threads REQUIRED)
 add_executable(scan_square tools/scan_square.cpp)
 target_link_libraries(scan_square PRIVATE cm148 Threads::Threads)
+
+# Stage 1: Berry curvature scan tools
+add_executable(scan_berry_chain tools/scan_berry_chain.cpp)
+target_link_libraries(scan_berry_chain PRIVATE cm148)
+
+add_executable(scan_berry_square tools/scan_berry_square.cpp)
+target_link_libraries(scan_berry_square PRIVATE cm148)
 
 # Enable CTest
 enable_testing()

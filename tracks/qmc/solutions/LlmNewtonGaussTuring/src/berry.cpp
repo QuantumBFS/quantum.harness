@@ -1,5 +1,8 @@
 #include "berry.hpp"
+#include "ed.hpp"
+#include <algorithm>
 #include <cmath>
+#include <random>
 #include <stdexcept>
 
 namespace cm {
@@ -7,6 +10,10 @@ namespace cm {
 using cplx = std::complex<double>;
 
 static inline int sv(int st, int site) { return (st >> site) & 1; }
+
+// ──────────────────────────────────────────────────────────────
+// Hamiltonian builder
+// ──────────────────────────────────────────────────────────────
 
 std::vector<cplx> build_kolodrubetz_hamiltonian(
     const Lattice& lattice, double J, double Omega, double theta)
@@ -45,68 +52,171 @@ std::vector<cplx> build_kolodrubetz_hamiltonian(
     return H;
 }
 
-// Krylov-subspace (Lanczos-like) for ground state
-static cplx cplx_dot(const std::vector<cplx>& x, const std::vector<cplx>& y, int n) {
+// ──────────────────────────────────────────────────────────────
+// Linear algebra helpers
+// ──────────────────────────────────────────────────────────────
+
+static inline cplx cplx_dot(const std::vector<cplx>& x,
+                             const std::vector<cplx>& y, int n) {
     cplx s(0, 0);
     for (int i = 0; i < n; ++i) s += std::conj(x[i]) * y[i];
     return s;
 }
 
-GroundState solve_ground_state(const Lattice& lattice, double J, double Omega, double theta)
+static inline double cplx_abs_sq(const std::vector<cplx>& x, int n) {
+    double s = 0;
+    for (int i = 0; i < n; ++i) s += std::norm(x[i]);
+    return s;
+}
+
+static void cplx_matvec(const cplx* H, int dim,
+                         const cplx* x, cplx* y) {
+    for (int i = 0; i < dim; ++i) {
+        y[i] = cplx(0, 0);
+        for (int j = 0; j < dim; ++j)
+            y[i] += H[i*dim + j] * x[j];
+    }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Complex Hermitian Lanczos with full reorthogonalisation
+// ──────────────────────────────────────────────────────────────
+
+GroundState solve_ground_state_lanczos(
+    const Lattice& lattice, double J, double Omega, double theta,
+    int m_max)
 {
     int N = static_cast<int>(lattice.N), dim = 1 << N;
-    if (dim > 256) throw std::runtime_error("dim too large (>256)");
+    if (dim > 1024)
+        throw std::runtime_error("solve_ground_state_lanczos: dim > 1024");
 
-    auto H = build_kolodrubetz_hamiltonian(lattice, J, Omega, theta);
-    int K = std::min(16, dim);
-    std::vector<std::vector<cplx>> V(K, std::vector<cplx>(dim));
+    auto Hmat = build_kolodrubetz_hamiltonian(lattice, J, Omega, theta);
 
-    // random init
-    for (int i = 0; i < dim; ++i) V[0][i] = cplx((i*12345+67890)%1000/1000.0, (i*54321+9876)%1000/1000.0);
+    // Adaptive m_max for small dim
+    if (m_max > dim) m_max = dim;
+
+    std::vector<std::vector<cplx>> Q;  // Lanczos vectors
+    Q.reserve(m_max + 1);
+
+    // Deterministic random initial vector
+    std::mt19937 rng(static_cast<unsigned>(
+        std::hash<double>{}(theta * 1e9 + Omega * 1e6 + J * 1e3 + N + 42)));
+    std::uniform_real_distribution<double> dist(-1, 1);
+
+    Q.push_back(std::vector<cplx>(dim));
     double nr = 0;
-    for (auto& z : V[0]) nr += std::norm(z);
+    for (int i = 0; i < dim; ++i) {
+        Q[0][i] = cplx(dist(rng), dist(rng));
+        nr += std::norm(Q[0][i]);
+    }
     nr = std::sqrt(nr);
-    for (auto& z : V[0]) z /= nr;
+    for (auto& z : Q[0]) z /= nr;
 
-    std::vector<cplx> tmp(dim);
-    for (int k = 1; k < K; ++k) {
-        for (int i = 0; i < dim; ++i) { tmp[i] = cplx(0,0); for (int j = 0; j < dim; ++j) tmp[i] += H[i*dim + j] * V[k-1][j]; }
-        for (int j = 0; j < k; ++j) { cplx a = cplx_dot(V[j], tmp, dim); for (int i = 0; i < dim; ++i) tmp[i] -= a * V[j][i]; }
-        double n2 = 0; for (auto& z : tmp) n2 += std::norm(z);
-        if (n2 < 1e-30) break;
-        n2 = std::sqrt(n2);
-        for (int i = 0; i < dim; ++i) V[k][i] = tmp[i] / n2;
+    std::vector<double> alpha;
+    std::vector<double> beta;
+    alpha.reserve(m_max);
+    beta.reserve(m_max);
+    beta.push_back(0);
+
+    std::vector<cplx> w(dim);
+    int m = 0;
+
+    for (int k = 0; k < m_max; ++k) {
+        cplx_matvec(Hmat.data(), dim, Q[k].data(), w.data());
+        double ak = std::real(cplx_dot(Q[k], w, dim));
+        alpha.push_back(ak);
+
+        if (k > 0) {
+            for (int i = 0; i < dim; ++i)
+                w[i] -= beta[k] * Q[k-1][i];
+        }
+        for (int i = 0; i < dim; ++i)
+            w[i] -= ak * Q[k][i];
+
+        // Full reorthogonalisation
+        for (int j = 0; j <= k; ++j) {
+            cplx proj = cplx_dot(Q[j], w, dim);
+            for (int i = 0; i < dim; ++i)
+                w[i] -= proj * Q[j][i];
+        }
+
+        double bkp1 = std::sqrt(cplx_abs_sq(w, dim));
+        beta.push_back(bkp1);
+
+        if (bkp1 < 1e-14) {
+            m = k + 1;
+            break;
+        }
+
+        Q.push_back(std::vector<cplx>(dim));
+        for (int i = 0; i < dim; ++i)
+            Q[k+1][i] = w[i] / bkp1;
+
+        // Convergence check every 5 iterations
+        if (k >= 9 && (k + 1) % 5 == 0) {
+            int curr_m = k + 1;
+            DenseSymMatrix T(static_cast<std::size_t>(curr_m));
+            for (int i = 0; i < curr_m; ++i) {
+                T(i, i) = alpha[i];
+                if (i > 0) { T(i, i-1) = beta[i]; T(i-1, i) = beta[i]; }
+            }
+            auto eigsys = jacobi_eigen(T, 50, 1e-12);
+            double E0_curr = eigsys.eigenvalues[0];
+
+            if (curr_m >= 15) {
+                int prev_m = curr_m - 5;
+                DenseSymMatrix Tprev(static_cast<std::size_t>(prev_m));
+                for (int i = 0; i < prev_m; ++i) {
+                    Tprev(i, i) = alpha[i];
+                    if (i > 0) { Tprev(i, i-1) = beta[i]; Tprev(i-1, i) = beta[i]; }
+                }
+                auto eigsys_prev = jacobi_eigen(Tprev, 50, 1e-12);
+                if (std::abs(E0_curr - eigsys_prev.eigenvalues[0]) < 1e-10) {
+                    m = curr_m;
+                    break;
+                }
+            }
+        }
+        m = k + 1;
     }
 
-    // projected matrix T = V† H V
-    std::vector<cplx> T(K * K, cplx(0,0));
-    for (int a = 0; a < K; ++a) {
-        for (int i = 0; i < dim; ++i) { tmp[i] = cplx(0,0); for (int j = 0; j < dim; ++j) tmp[i] += H[i*dim + j] * V[a][j]; }
-        for (int b = 0; b < K; ++b) T[a*K + b] = cplx_dot(V[b], tmp, dim);
+    // Diagonalise final T_m
+    DenseSymMatrix Tm(static_cast<std::size_t>(m));
+    for (int i = 0; i < m; ++i) {
+        Tm(i, i) = alpha[i];
+        if (i > 0) { Tm(i, i-1) = beta[i]; Tm(i-1, i) = beta[i]; }
+    }
+    auto eigsys = jacobi_eigen(Tm, 50, 1e-12);
+    double E0 = eigsys.eigenvalues[0];
+
+    // Reconstruct ground-state eigenvector
+    std::vector<cplx> psi0(dim, cplx(0, 0));
+    for (int j = 0; j < m; ++j) {
+        double y0j = eigsys.eigenvectors[j * m];
+        for (int i = 0; i < dim; ++i)
+            psi0[i] += y0j * Q[j][i];
     }
 
-    // power iteration on T for smallest eigenvalue
-    std::vector<cplx> x(K, cplx(0,0)); for (int i = 0; i < K; ++i) x[i] = cplx(1.0/K, 0);
-    for (int iter = 0; iter < 100; ++iter) {
-        std::vector<cplx> y(K, cplx(0,0));
-        for (int a = 0; a < K; ++a) for (int b = 0; b < K; ++b) y[a] += T[a*K + b] * x[b];
-        double ny = 0; for (auto& z : y) ny += std::norm(z);
-        if (ny < 1e-30) break;
-        ny = std::sqrt(ny);
-        for (int a = 0; a < K; ++a) x[a] = y[a] / ny;
-    }
-    std::vector<cplx> Hx(K, cplx(0,0));
-    for (int a = 0; a < K; ++a) for (int b = 0; b < K; ++b) Hx[a] += T[a*K + b] * x[b];
-    cplx E0p = cplx_dot(x, Hx, K);
+    nr = std::sqrt(cplx_abs_sq(psi0, dim));
+    if (nr > 1e-30)
+        for (auto& z : psi0) z /= nr;
 
-    std::vector<cplx> psi0(dim, cplx(0,0));
-    for (int a = 0; a < K; ++a) for (int i = 0; i < dim; ++i) psi0[i] += x[a] * V[a][i];
-    double nf = 0; for (auto& z : psi0) nf += std::norm(z);
-    nf = std::sqrt(nf);
-    for (auto& z : psi0) z /= nf;
-
-    return {std::move(psi0), dim, std::real(E0p)};
+    return {std::move(psi0), dim, E0};
 }
+
+// ──────────────────────────────────────────────────────────────
+// Auto-dispatch (delegates to Lanczos)
+// ──────────────────────────────────────────────────────────────
+
+GroundState solve_ground_state(
+    const Lattice& lattice, double J, double Omega, double theta)
+{
+    return solve_ground_state_lanczos(lattice, J, Omega, theta);
+}
+
+// ──────────────────────────────────────────────────────────────
+// Overlap and FHS curvature
+// ──────────────────────────────────────────────────────────────
 
 cplx overlap(const GroundState& a, const GroundState& b) {
     cplx s(0,0);
@@ -118,13 +228,10 @@ BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
                               const GroundState& gs11, const GroundState& gs01)
 {
     BerryCurvature bc;
-    // FHS formula: F₁₂ = arg[U₁ U₂ U₁^* U₂^*]
-    // U₁ = ⟨ψ₀₀|ψ₁₀⟩ / |...|,  U₂ = ⟨ψ₁₀|ψ₁₁⟩ / |...|
-    // U₁^* = ⟨ψ₁₁|ψ₀₁⟩ / |...|, U₂^* = ⟨ψ₀₁|ψ₀₀⟩ / |...|
     auto U1 = overlap(gs00, gs10);
     auto U2 = overlap(gs10, gs11);
-    auto U1star = overlap(gs11, gs01);  // ⟨ψ₁₁|ψ₀₁⟩ = conj(⟨ψ₀₁|ψ₁₁⟩)
-    auto U2star = overlap(gs01, gs00);  // ⟨ψ₀₁|ψ₀₀⟩ = conj(⟨ψ₀₀|ψ₀₁⟩)
+    auto U1star = overlap(gs11, gs01);
+    auto U2star = overlap(gs01, gs00);
 
     bc.absU1 = std::abs(U1);
     bc.absU2 = std::abs(U2star);
@@ -136,6 +243,25 @@ BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
     bc.F12 = std::arg(U1 * U2 * U1star * U2star);
     return bc;
 }
+
+// ──────────────────────────────────────────────────────────────
+// Convenience wrapper
+// ──────────────────────────────────────────────────────────────
+
+BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
+                                     double theta, double Omega,
+                                     double dtheta, double dOmega)
+{
+    auto g00 = solve_ground_state(lattice, J, Omega, theta);
+    auto g10 = solve_ground_state(lattice, J, Omega, theta + dtheta);
+    auto g11 = solve_ground_state(lattice, J, Omega + dOmega, theta + dtheta);
+    auto g01 = solve_ground_state(lattice, J, Omega + dOmega, theta);
+    return fhs_curvature(g00, g10, g11, g01);
+}
+
+// ──────────────────────────────────────────────────────────────
+// Grid computation
+// ──────────────────────────────────────────────────────────────
 
 std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
     const Lattice& lattice, double J, const ParamGrid& grid)

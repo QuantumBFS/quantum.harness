@@ -27,9 +27,15 @@ struct BerryCurvature {
 std::vector<std::complex<double>> build_kolodrubetz_hamiltonian(
     const Lattice& lattice, double J, double Omega, double theta);
 
-// Krylov-subspace ground-state solver (dim ≤ 2^8).
+// Complex Hermitian Lanczos ground-state solver (dim ≤ 1024).
+// Uses full reorthogonalisation; reliable for N ≤ 10.
 GroundState solve_ground_state(const Lattice& lattice, double J,
                                double Omega, double theta);
+
+// Synonymous with solve_ground_state (kept for API clarity).
+GroundState solve_ground_state_lanczos(const Lattice& lattice, double J,
+                                        double Omega, double theta,
+                                        int m_max = 150);
 
 // Overlap between two ground states.
 std::complex<double> overlap(const GroundState& a, const GroundState& b);
@@ -37,6 +43,11 @@ std::complex<double> overlap(const GroundState& a, const GroundState& b);
 // FHS Berry curvature on one plaquette.
 BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
                               const GroundState& gs11, const GroundState& gs01);
+
+// Convenience: compute F12 for a single parameter-space plaquette.
+BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
+                                     double theta, double Omega,
+                                     double dtheta, double dOmega);
 
 // Compute curvature on full grid.
 std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
