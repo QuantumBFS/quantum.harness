@@ -23,6 +23,16 @@ one-worker smoke result for the same family, mask, and source commit.  The
 Task 7/8 experiment log is the durable record of that smoke evidence; the
 runner intentionally keeps no additional persistent state.
 
+For the production stage, the required worker policy is exactly
+`max(1, logical_cpus-2)`.  On Windows, macOS, and Unix-like systems, calculate
+the integer with:
+
+```bash
+python -c "import os; print(max(1, (os.cpu_count() or 1) - 2))"
+```
+
+Use that printed value only after the matching one-worker smoke is recorded.
+
 The CLI fails closed unless all three thread limits are the literal string
 `1`: `OMP_NUM_THREADS`, `MKL_NUM_THREADS`, and `OPENBLAS_NUM_THREADS`.  It
 records the validated limits and its `spawn` process start method in the
@@ -40,7 +50,7 @@ python -m oracle.overlap_klein \
   --output smoke-result.json
 ```
 
-After the matching smoke is recorded, repeat the same command with the chosen
-production worker count and a distinct output path.  Use the source commit of
-the code being run.  The runner rejects abbreviated or non-hex provenance and
-atomically writes sorted UTF-8 JSON.
+After the matching smoke is recorded, repeat the same command with the printed
+`max(1, logical_cpus-2)` worker count and a distinct output path.  Use the
+source commit of the code being run.  The runner rejects abbreviated or non-hex
+provenance and atomically writes sorted UTF-8 JSON.

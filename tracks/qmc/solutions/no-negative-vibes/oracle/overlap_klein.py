@@ -12,7 +12,6 @@ from pathlib import Path
 import re
 import tempfile
 import time
-import warnings
 
 import numpy as np
 import scipy
@@ -27,7 +26,6 @@ from oracle.metzler_system import (
     ExactMetzlerSystem,
     compile_metzler_system,
     exact_nonnegative,
-    numeric_coefficients,
     verify_exact_metzler,
 )
 
@@ -497,6 +495,15 @@ def _q_sqrt_two_coefficients(
     return sp.Rational(a), sp.Rational(b)
 
 
+def _q_sqrt_two_to_float(expression: sp.Expr) -> float:
+    """Evaluate an exact Q(sqrt(2)) scalar without SymPy/mpmath floats."""
+    a, b = _q_sqrt_two_coefficients(expression)
+    return (
+        int(a.p) / int(a.q)
+        + (int(b.p) / int(b.q)) * math.sqrt(2.0)
+    )
+
+
 def _normalized_q_sqrt_two(
     expression: sp.Expr,
     *,
@@ -518,30 +525,18 @@ def _validate_system_field(system: ExactMetzlerSystem) -> None:
         _q_sqrt_two_coefficients(value)
 
 
-def _numeric_coefficients_without_bitcount_warning(
+def _numeric_q_sqrt_two_coefficients(
     system: ExactMetzlerSystem,
 ) -> np.ndarray:
-    """Convert exact coefficients while silencing one third-party deprecation."""
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=".*bitcount function is deprecated.*",
-            category=DeprecationWarning,
-            module=r"mpmath\.libmp\.libintmath",
-        )
-        return numeric_coefficients(system)
-
-
-def _float_without_bitcount_warning(expression: sp.Expr) -> float:
-    """Evaluate one exact scalar while silencing one third-party deprecation."""
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=".*bitcount function is deprecated.*",
-            category=DeprecationWarning,
-            module=r"mpmath\.libmp\.libintmath",
-        )
-        return float(expression)
+    """Convert the system through its exact Q(sqrt(2)) representation."""
+    _require_system(system)
+    values = np.empty(system.coefficients.shape, dtype=float)
+    for row in range(system.coefficients.rows):
+        for column in range(system.coefficients.cols):
+            values[row, column] = _q_sqrt_two_to_float(
+                system.coefficients[row, column]
+            )
+    return values
 
 
 def _empty_anchor_result(
@@ -566,7 +561,7 @@ def solve_anchor(
     _validate_system_field(system)
 
     try:
-        matrix = _numeric_coefficients_without_bitcount_warning(system)
+        matrix = _numeric_q_sqrt_two_coefficients(system)
         variables = len(system.labels)
         equality = np.zeros((1, variables), dtype=float)
         equality[0, anchor] = 1.0
@@ -679,7 +674,7 @@ def _reconstruct_float(
             "coefficient did not reconstruct in Q(sqrt(2))"
         ) from error
     if (
-        abs(_float_without_bitcount_warning(normalized) - value)
+        abs(_q_sqrt_two_to_float(normalized) - value)
         > 1e-9 * max(1.0, abs(value))
     ):
         raise ArithmeticError(
@@ -785,7 +780,7 @@ def _numeric_dual(
     anchor: int,
     sign: int,
 ) -> np.ndarray:
-    matrix = _numeric_coefficients_without_bitcount_warning(system)
+    matrix = _numeric_q_sqrt_two_coefficients(system)
     row_count = len(system.rows)
     target = np.zeros(len(system.labels), dtype=float)
     target[anchor] = float(sign)
@@ -830,11 +825,17 @@ def _fit_free_parameters(
 ) -> dict[sp.Symbol, sp.Expr]:
     zero_substitution = {parameter: sp.Integer(0) for parameter in parameters}
     particular = np.array(
-        [float(expression.subs(zero_substitution)) for expression in expressions]
+        [
+            _q_sqrt_two_to_float(expression.subs(zero_substitution))
+            for expression in expressions
+        ]
     )
     directions = np.array(
         [
-            [float(sp.diff(expression, parameter)) for parameter in parameters]
+            [
+                _q_sqrt_two_to_float(sp.diff(expression, parameter))
+                for parameter in parameters
+            ]
             for expression in expressions
         ],
         dtype=float,
@@ -1156,7 +1157,6 @@ def _cli_source_commit(value: str) -> str:
 
 
 def main() -> None:
-    thread_settings = validate_blas_thread_environment()
     parser = argparse.ArgumentParser(
         description="Run the preregistered overlapping Klein-cone anchor scan."
     )
@@ -1174,6 +1174,10 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    try:
+        thread_settings = validate_blas_thread_environment()
+    except ValueError as error:
+        parser.error(str(error))
 
     started = time.perf_counter()
     result = run_anchor_scan(
