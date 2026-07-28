@@ -73,6 +73,8 @@
 
 - 三对角 Metzler 路径的矩阵指数是全非负矩阵，乘积仍全非负；
 - `det(I+D)` 等于全部主子式之和，所以一般性地有 `det(I+D)>=1`；
+- 类中同时包含 `+D/-D`，已严格排除固定 Kramers、split/contraction metric；标准
+  Majorana 加倍后也排除 Wei 2024 的固定 `J_2` 条件，包括固定复正交换基；
 - 环、星形、稠密 Metzler 图和逐片独立符号规范均已出现负权；
 - 掺杂开放 Hubbard 链和单 flavor 排斥 `t-V` 开链的离散 HS 时间片都落入该类；
 - 任意两个不同旋转 split cones 的完整并集都有
@@ -91,7 +93,7 @@
 不再重复扫描整个命名群、普通 AZ 类或同分布双锥。下一步围绕 TN 路径结果闭环：
 
 1. 深查 TN 条件在 AFQMC/DQMC 中是否已有直接表述；
-2. 证明它是否被 2024 contraction-semigroup 条件包含；
+2. 由合作者或出题人复核已完成的 2024 contraction-semigroup 非归约证明；
 3. 从 TN 双对角/平面网络分解构造超出普通一维开链的物理 HS 模型；
 4. 若不能产生新物理，再转向比 TN 更大的主子式非负乘法半群。
 
@@ -114,6 +116,7 @@
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
 - [全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)
+- [TN 新机制审计](TN_NOVELTY_AUDIT.md)
 - [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)

@@ -72,6 +72,11 @@ table”“complex Majorana simple matrix formulation”“semigroup determinant
 3. “TN 半群作为逐构型 determinant-QMC 充分条件”、单 flavor `t-V` 开链任意化学势
    密度通道证明，以及由平面网络得到更大物理模型，是否已有直接先例仍需排重。
 
+矩阵机制层面的排重已单独完成：利用任意对角 `+D/-D`，可排除固定 Kramers、
+split/contraction metric 和 Wei 2024 Majorana 条件，即使允许固定复正交换基。详见
+[TN 新机制审计](TN_NOVELTY_AUDIT.md)。因此这里剩下的是文献优先权与物理模型新颖性，
+不是 2024 条件的包含关系。
+
 用 `"totally nonnegative" quantum Monte Carlo`、`"total positivity" fermion determinant`
 等精确组合检索，暂未命中直接完成第 3 项的论文；这只是初筛。数学入口是
 [Margaliot and Sontag](https://arxiv.org/abs/1802.09590)，当前证明、边界与物理模型见

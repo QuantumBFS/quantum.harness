@@ -144,7 +144,7 @@ reflection/Kramers positivity 与 2024 contraction-semigroup 条件整理成不�
 
 ### 下一轮交付
 
-- TN 与 2024 contraction-semigroup 的明确包含/不包含证明；
+- 请合作者/出题人复核已完成的 TN/2024 非包含证明；
 - 一张 TN 平面网络物理候选卡；
 - 一个超出普通开放链的最小格点模型和可执行生成器；
 - 明确的“已知一维重述 / 约化到 2024 / 真正值得继续”判断。
@@ -163,8 +163,9 @@ reflection/Kramers positivity 与 2024 contraction-semigroup 条件整理成不�
 
 ## 执行顺序
 
-1. **已完成**：`U(p,q)` 相位律、TN 路径严格证明、两个 HS 基线和 139.2 万权重筛选。
-2. **立即开始**：完成 TN 与 2024 contraction-semigroup 的代数排重。
+1. **已完成**：`U(p,q)` 相位律、TN 路径严格证明、两个 HS 基线、139.2 万权重筛选，
+   以及 TN 对固定 Kramers/split/2024 条件的代数排重。
+2. **立即开始**：复核 TN 非归约证明并完成 TN/DQMC 引用链排重。
 3. **同步进行**：沿 TN 双对角/平面网络分解寻找超出普通开放链的物理可达模型。
 4. **按需补足**：只完成判断 TN 或其扩张所需的复 Majorana 分支工具。
 5. 若 TN 物理扩张约化为已知一维事实，转向更大的主子式非负乘法半群。
@@ -173,9 +174,9 @@ reflection/Kramers positivity 与 2024 contraction-semigroup 条件整理成不�
 近期精力分配：
 
 ```text
-45%  TN/2024 新颖性排重与严格边界
-40%  TN 平面网络的 Hamiltonian/HS 物理推广
-15%  复 Majorana 与候选排重基础设施
+20%  TN 新颖性证明复核与文献引用链
+60%  TN 平面网络的 Hamiltonian/HS 物理推广
+20%  复 Majorana 与候选排重基础设施
 ```
 
 ## 两人协作建议

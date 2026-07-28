@@ -19,6 +19,8 @@
 
 - [TOTAL_NONNEGATIVE_PATH_CLASS.md](TOTAL_NONNEGATIVE_PATH_CLASS.md)：当前严格恒正候选、证明和
   Hubbard/`t-V` 开链 HS 映射；
+- [TN_NOVELTY_AUDIT.md](TN_NOVELTY_AUDIT.md)：TN 类对 Kramers、固定度量和 2024
+  contraction-semigroup 的严格非归约证明；
 - [FRONTIER_SEMIGROUP_RESULTS.md](FRONTIER_SEMIGROUP_RESULTS.md)：15 族广扫、压力扫描、
   高精度反例和混合 split-cone 解析关闭；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；

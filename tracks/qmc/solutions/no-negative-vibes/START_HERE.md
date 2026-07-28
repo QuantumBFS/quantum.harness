@@ -30,6 +30,9 @@
   Metzler 图、逐片换规范和双向分块耦合均已有负权。
 - 找到全非负路径半群：三对角 Metzler 生成元的指数及任意乘积全非负，因此一般性地有
   `det(I+D)>=1`；这不是零负例猜想，而是任意维数、深度的严格证明。
+- 已完成 TN 矩阵类的核心新颖性排重：利用类中同时包含 `+D/-D`，严格排除固定
+  split metric、实收缩锥和 Kramers；在 Majorana 表示中进一步排除 Wei 2024 条件，
+  包括任意固定复正交换基。
 - 已把它映射到掺杂开放 Hubbard 链和单 flavor 排斥 `t-V` 开放链的离散 HS 时间片，并
   穷举两个小系统的全部辅助场构型。
 - 两个不同旋转 split cones 的完整并集也已解析关闭：四维两层权重
@@ -42,18 +45,20 @@
 1. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：先理解问题、术语和我们为什么这样做。
 2. [全非负路径类](docs/TOTAL_NONNEGATIVE_PATH_CLASS.md)：看当前严格恒正主候选、三步证明和
    两个物理 HS 最小模型。
-3. [新半群初筛结果](docs/FRONTIER_SEMIGROUP_RESULTS.md)：看 139.2 万权重淘汰表、80 位
+3. [TN 新机制审计](docs/TN_NOVELTY_AUDIT.md)：看它为什么不约化到 Kramers、
+   split/contraction metric 或 Wei 2024 Majorana 条件，以及目前还不能声称什么。
+4. [新半群初筛结果](docs/FRONTIER_SEMIGROUP_RESULTS.md)：看 139.2 万权重淘汰表、80 位
    反例和任意小 split-cone 夹角解析反例。
-4. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
-5. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
-6. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
-7. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
-8. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
-9. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-10. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-11. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-12. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-13. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+5. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
+6. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
+7. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
+8. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
+9. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
+10. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+11. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+12. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+13. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+14. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
@@ -86,7 +91,7 @@ cd /home/volper/harness_quantum/signfree-qmc
 外围宽扫已完成，不需要重复。现在围绕全非负路径类做三件事：
 
 1. 深查“total nonnegativity + AFQMC/DQMC”及单 flavor `t-V` 开链任意化学势是否已有直接先例；
-2. 判断它是否被 2024 contraction-semigroup 条件经固定 Majorana 变换完整包含；
+2. 请合作者/出题人复核已完成的 2024 contraction-semigroup 非归约证明；
 3. 从 TN 的双对角/平面网络分解构造一个不只是普通 Jordan--Wigner 开链的物理 HS 模型。
 
 如果第三步不能产生超出已知一维事实的模型，就把 TN 结果作为漂亮的充分条件和边界定理，

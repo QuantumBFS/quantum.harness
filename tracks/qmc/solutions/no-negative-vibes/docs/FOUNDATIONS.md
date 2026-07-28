@@ -152,7 +152,7 @@ skew-symmetric, such that
 
 ```text
 J_1^T A J_1 = conjugate(A),
-i (J_2 A - A J_2) <= 0.
+i (J_2 A - conjugate(A) J_2) <= 0.
 ```
 
 `J_1` may be symmetric or skew-symmetric. The first condition makes the
@@ -161,6 +161,12 @@ semigroup whose strict interior cannot cross zero. Equality reduces to known
 symmetry mechanisms, while the cone contains Majorana reflection positivity
 and a Kramers-plus-pairing class. A novelty check against only
 `A^T eta + eta A >= 0` is therefore insufficient.
+
+For the totally nonnegative path class, this broader check is now complete:
+the allowed `+D/-D` diagonal directions force the cone inequality to equality,
+and the resulting site-local anticommutation relations are incompatible with
+`J_2^2=-I`, even after a fixed complex orthogonal Majorana basis change. See
+[TN_NOVELTY_AUDIT.md](TN_NOVELTY_AUDIT.md).
 
 ### 2.4 Pseudo-unitary prior art
 
