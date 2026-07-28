@@ -1,6 +1,36 @@
 # Square J1-J2 gap certifier — structured-basis interface spec
 
-> Target: a `certify_Heisenberg_square_gap` that produces certified upper bounds
+> ## ⚠️ CORRECTION BANNER (2026-07-28, per advisor P1 review)
+>
+> This document was written before the advisor audit and contains **several
+> claims now known to be wrong**. Do not implement it verbatim. The authoritative
+> plan is the older `spectralgap-refactor-plan.md` (generic, unsymmetrized
+> baseline first). Specific retractions:
+>
+> 1. **"Square Heisenberg g=0 is gapped / positive gap ~1" is FALSE.** The 2D
+>    spin-1/2 square Heisenberg antiferromagnet has Néel order + gapless
+>    Goldstone modes. A finite relaxation may return a positive number, but that
+>    does not certify a physical gap. The correct **positive-gap calibration is
+>    Shastry-Sutherland g=0 (Δ_bulk = 1)** — also an official #88 target.
+> 2. **The kagome `reduce!` does NOT supply Square spatial symmetry.** For
+>    `model="kagome"` it does component-count parity zeroing + cyclic X/Y/Z
+>    identification (`reduce_perm`). It applies **no** square translations, C4
+>    rotations, or mirrors, and is **not a full SU(2) irrep quotient**. Treat
+>    `label ∈ {1..4}` as legacy word-selection sectors, not scalar/vector SU(2)
+>    blocks, until a representation-theoretic derivation exists.
+> 3. **Recommended order (advisor):** (a) explicit unsymmetrized positive/gap/
+>    stationarity basis first — no hidden symmetry; (b) review PR #3's
+>    `basis_manifest(problem, role)` directly before treating Square as
+>    unblocked; (c) coefficient-by-coefficient legacy regression against a TFIM
+>    or kagome wrapper; (d) only then connect the Square Hamiltonian; (e) add
+>    symmetry generators one at a time, each tested as a Hamiltonian automorphism.
+> 4. The validated `ncpoly` H construction in `src/SquareGapCertify.jl`
+>    (term counts, spin normalization) remains reliable — only the *basis +
+>    symmetry* parts above are retracted.
+>
+> ---
+
+> Target: a `certify_Heisenberg_square_gap` that produces upper bounds
 > on the bulk spectral gap of the 2D square-lattice J1-J2 Heisenberg model,
 > filling the one gap in `SpectralGap.jl`'s turnkey certifiers (Ising + kagome
 > exist; square does not). This doc specifies the missing piece — the

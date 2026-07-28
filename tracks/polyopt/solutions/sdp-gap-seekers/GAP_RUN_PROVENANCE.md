@@ -1,5 +1,29 @@
 # Gap-cert run provenance — frozen for independent reproduction
 
+> ## ⚠️ STALE (2026-07-28, per advisor P0 review) — do NOT trust for reproduction yet
+>
+> This document is **out of sync with the current checkout** and is preserved
+> only as a historical reference. Known defects (to be fixed in Phase 1):
+> - describes an **older patch** than the current `spectralgap_a1171c9.patch`
+>   (omits the status-return, the `optimizer` keyword, and the attempted
+>   certificate-extraction logic);
+> - records an **obsolete `src/sdp.jl` hash** (current is
+>   `1e13b401a0a83c64ea1d40cfb8c91ff007ea10bd28b9a0e94f9882338a27fde0`);
+> - the patch **omits `Project.toml`** (the `using Clarabel` addition requires a
+>   dependency change that is not in the checked-in patch);
+> - the "bit-for-bit reproducible" claim is **retracted** — `filter_mons` uses
+>   `rand(...)` for stationarity-row fingerprinting, so assembly is not literally
+>   deterministic without a frozen seed / deterministic selection;
+> - **raw result files are not committed** to the branch (they live on SCNet);
+> - the §8 "Farkas cert available" framing is **wrong** — the witness, if any,
+>   is on the variable-primal side (`value.()`), not `dual(con_eq)`; and
+>   `SLOW_PROGRESS` means the outcome is not decisive.
+>
+> It will be regenerated after one complete patch (incl. `Project.toml`) is
+> frozen, raw results are committed, and the certificate path is corrected.
+> Until then, treat the gap values as **numerical transition candidates**, not
+> reproducible certified bounds.
+
 > Frozen record of the turnkey `SpectralGap.jl` gap-certification runs, per the
 > 2026-07-28 coordination ask (independent SCNet dual-run to verify the
 > feasible/infeasible → gap-upper-bound direction). Anyone pulling

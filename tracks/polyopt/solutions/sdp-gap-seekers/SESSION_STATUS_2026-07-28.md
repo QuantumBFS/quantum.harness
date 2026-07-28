@@ -1,5 +1,16 @@
 # Session status & review request — sdp-gap-seekers / challenge #88
 
+> ## ⚠️ SUPERSEDED — see `ADVISOR_REVIEW_2026-07-28.md`
+>
+> This was the **input** to the advisor review. Several of its claims are
+> **overstated/wrong** and have been corrected by the advisor (P0/P1 findings)
+> and in the ledgers: the gap values are numerical transition candidates (NOT
+> "two certified upper bounds"); the "d-convergence" is an implementation
+> artifact; kagome is calibration (the #88 target is square J1-J2, then
+> Shastry-Sutherland, then triangular); the §8 Farkas framing read the wrong
+> conic side. Read the advisor review for the authoritative assessment + the
+> corrected ledgers (`gap-cert-ledger.md`, `energy-cert-ledger.md`).
+
 > **Purpose:** a self-contained snapshot for a fresh advisor session to review
 > our position and give strategic/technical advice. Written 2026-07-28 after a
 > long working session. Read this, then the referenced files, then tell us where
