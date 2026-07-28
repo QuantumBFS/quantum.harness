@@ -47,7 +47,7 @@ index c384283..8b27a46
 diff --git a/src/sdp.jl b/src/sdp.jl
 old mode 100644
 new mode 100755
-index ed6716a..12b5943
+index ed6716a..fa15692
 --- a/src/sdp.jl
 +++ b/src/sdp.jl
 @@ -1,4 +1,4 @@
@@ -162,7 +162,7 @@ index ed6716a..12b5943
 +                         termination=string(status), primal=string(_pstatus),
 +                         dual=string(_dstatus), objective=Float64(_objv),
 +                         nvars=nvars, nconstraints=length(cons),
-+                         affine_constants=zeros(Float64, length(cons)),
++                         affine_constants=[Float64(cons[k].constant) for k in eachindex(cons)],
 +                         affine_map=affmap, c=cvec,
 +                         pos_var_positions=pos_varpos, gap_var_positions=gap_varpos,
 +                         pos_sizes=copy(lb), gap_sizes=copy(lgb),

@@ -19,9 +19,13 @@ export JULIA_NUM_THREADS=4
 
 cd ~/quantum.harness
 SCRIPTS=tracks/polyopt/solutions/sdp-gap-seekers/scripts
-ARTIFACT="tfim_cert_N9_g0.26.jls"
+EVID=tracks/polyopt/solutions/sdp-gap-seekers/evidence
+mkdir -p "$EVID"
+ARTIFACT="$EVID/tfim_cert_N9_g0.26.jls"
 
 echo "Node: $(hostname), Start: $(date)"
+echo "Julia: $(julia --version), repo: $(git rev-parse --short HEAD 2>/dev/null)"
+echo "patch SHA-256: $(sha256sum tracks/polyopt/solutions/sdp-gap-seekers/spectralgap_a1171c9.patch | cut -d' ' -f1)"
 
 echo "=== Step 1: certify TFIM N=9 gamma=0.26 (returns cert_artifact) ==="
 julia --project=julia-env << JLEOF
@@ -47,4 +51,7 @@ echo; echo "=== Step 3: corruption self-tests (verifier must reject each) ==="
 julia "$SCRIPTS/test_verifier_corruption.jl" "$ARTIFACT"
 echo "corruption-test exit: $?"
 
+echo; echo "=== Epilogue: artifact hash + package versions ==="
+sha256sum "$ARTIFACT"
+julia --project=julia-env -e 'using JuMP, MathOptInterface, MosekTools; for m in (JuMP, MathOptInterface, MosekTools); println("$(m) v$(pkgversion(m))"); end; println("julia v", VERSION)'
 echo "Finished: $(date)"
