@@ -1,6 +1,7 @@
 #include "sse.hpp"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 
@@ -38,6 +39,8 @@ SSE::SSE(const Lattice& lattice, double J, double h, double beta,
         throw std::invalid_argument("SSE sweep counts require thermal >= 0, bins > 0, sweeps/bin > 0");
     if (params_.n_bins > std::numeric_limits<int>::max() / params_.sweeps_per_bin)
         throw std::length_error("SSE measurement sweep count exceeds integer range");
+    if (params_.progress_every_bins < 0)
+        throw std::invalid_argument("progress_every_bins must be >= 0");
     if (params_.measure_rotated_bond_diagonal
         && !std::isfinite(params_.rotation_theta))
         throw std::invalid_argument("rotation_theta must be finite when its diagnostic is enabled");
@@ -50,10 +53,14 @@ SSE::SSE(const Lattice& lattice, double J, double h, double beta,
     opType_.assign(M_, Op::NONE);
     opIdx_.assign(M_, -1);
 
-    // random initial state |alpha(0)>
+    // Explicit hot/cold starts support the production thermalization gate.
     spin_.resize(N_);
-    std::uniform_int_distribution<int> coin(0, 1);
-    for (int i = 0; i < N_; ++i) spin_[i] = coin(rng_) ? 1 : -1;
+    if (params_.initial_state == InitialState::ORDERED_UP) {
+        std::fill(spin_.begin(), spin_.end(), 1);
+    } else {
+        std::uniform_int_distribution<int> coin(0, 1);
+        for (int i = 0; i < N_; ++i) spin_[i] = coin(rng_) ? 1 : -1;
+    }
 
     sitePos_.assign(N_, {});
     segBase_.assign(N_, 0);
@@ -420,6 +427,19 @@ SSEResult SSE::run() {
         res.bin_Sq.push_back(bSq * invBin);
         res.bin_spacetime_m2.push_back(bTm2 * invBin);
         res.bin_spacetime_m4.push_back(bTm4 * invBin);
+
+        if (params_.progress_every_bins > 0
+            && ((bin + 1) % params_.progress_every_bins == 0
+                || bin + 1 == params_.n_bins)) {
+            const double measured = static_cast<double>((bin + 1) * params_.sweeps_per_bin);
+            const double partial_m2 = sTm2 / measured;
+            const double partial_m4 = sTm4 / measured;
+            const double partial_q = partial_m2 * partial_m2
+                                   / std::max(partial_m4, 1e-30);
+            std::cerr << "progress bins=" << (bin + 1) << '/' << params_.n_bins
+                      << " E=" << (sE / measured)
+                      << " Q_spacetime=" << partial_q << std::endl;
+        }
     }
 
     double inv = 1.0 / std::max(nm, 1);

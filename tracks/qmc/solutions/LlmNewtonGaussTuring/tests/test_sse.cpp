@@ -1,6 +1,7 @@
 #include "../src/lattice.hpp"
 #include "../src/ed.hpp"
 #include "../src/sse.hpp"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -136,6 +137,33 @@ static void test_xi_vs_ed() {
     std::cout << "  xi/L(SSE)=" << res.xi_over_L << " xi/L(ED)=" << ed_xi << std::endl;
 }
 
+// Exercise the propagation-averaged Stage 4 structure factor on both target
+// geometries. These small clusters provide an exact same-Hamiltonian oracle for
+// the basis phases, symmetry-related q averaging, and second-moment convention.
+static void test_stage4_target_lattices_vs_ed() {
+    std::cout << "--- Stage 4 target lattices vs ED ---" << std::endl;
+    struct Case { const char* tag; Lattice lattice; double h; std::uint64_t seed; };
+    std::vector<Case> cases;
+    cases.push_back({"triangular 3x3", make_triangular(3, 3), 4.5, 14831});
+    cases.push_back({"honeycomb 2x2", make_honeycomb(2, 2), 2.1, 14822});
+    for (const auto& c : cases) {
+        const double beta = 2.0;
+        const auto ed = compute_thermal_obs(c.lattice, 1.0, c.h, beta);
+        const double ed_xi = compute_xi_over_L(c.lattice, 1.0, c.h, beta);
+        SSEParams p;
+        p.n_thermal = 6000;
+        p.n_bins = 10000;
+        p.sweeps_per_bin = 2;
+        p.seed = c.seed;
+        p.stage4_estimators = true;
+        const auto result = SSE(c.lattice, 1.0, c.h, beta, p).run();
+        approx_eq(std::string("Stage 4 E ") + c.tag, result.energy, ed.E, 0.04);
+        approx_eq(std::string("Stage 4 m2 ") + c.tag, result.m2, ed.m2, 0.08);
+        approx_eq(std::string("Stage 4 xi/L ") + c.tag,
+                  result.xi_over_L, ed_xi, 0.14, 0.02);
+    }
+}
+
 // 1D critical chain energy trends to the Jordan-Wigner thermodynamic value.
 static void test_1d_critical() {
     std::cout << "--- 1D critical (h=J=1) ---" << std::endl;
@@ -210,7 +238,30 @@ static void test_diagnostic_and_count_guards() {
     check("measurement sweep overflow rejected", count_rejected);
 }
 
+static void test_initial_states() {
+    std::cout << "--- SSE initial states ---" << std::endl;
+    const auto cold_lattice = make_chain(8);
+    SSEParams cold;
+    cold.initial_state = InitialState::ORDERED_UP;
+    SSE cold_sse(cold_lattice, 1.0, 1.0, 1.0, cold);
+    check("cold start is fully ordered",
+          std::all_of(cold_sse.spin().begin(), cold_sse.spin().end(),
+                      [](std::int8_t spin) { return spin == 1; }));
+
+    const auto hot_lattice = make_chain(8);
+    SSEParams hot;
+    hot.seed = 20260729;
+    hot.initial_state = InitialState::RANDOM;
+    SSE hot_sse(hot_lattice, 1.0, 1.0, 1.0, hot);
+    check("hot start is reproducible and nontrivial",
+          std::any_of(hot_sse.spin().begin(), hot_sse.spin().end(),
+                      [](std::int8_t spin) { return spin == -1; })
+          && std::any_of(hot_sse.spin().begin(), hot_sse.spin().end(),
+                         [](std::int8_t spin) { return spin == 1; }));
+}
+
 int main() {
+    test_initial_states();
     test_diagnostic_and_count_guards();
     test_operator_identity();
     test_j0_limit();
@@ -219,6 +270,7 @@ int main() {
     test_sse_vs_ed_chain();
     test_sse_vs_ed_square();
     test_xi_vs_ed();
+    test_stage4_target_lattices_vs_ed();
     test_1d_critical();
     std::cout << std::endl;
     if (failures == 0) std::cout << "All SSE tests passed." << std::endl;

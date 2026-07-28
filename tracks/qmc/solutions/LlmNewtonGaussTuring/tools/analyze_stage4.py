@@ -16,10 +16,16 @@ import numpy as np
 
 NU = 0.629971
 OMEGA = 0.83
+REGISTERED_OMEGAS = (0.80, 0.83, 0.86)
 GEOMETRY_VERSIONS = {
     "square": "square-v1",
     "triangular": "triangular-v1",
     "honeycomb": "honeycomb-v2",
+}
+PROTOCOL_WINDOWS = {
+    "square": {"broad": (3.00, 3.10), "narrow": (3.03, 3.06), "l_min": (4, 6, 8)},
+    "triangular": {"broad": (4.70, 4.84), "narrow": (4.74, 4.80), "l_min": (6, 8, 10, 12)},
+    "honeycomb": {"broad": (2.08, 2.18), "narrow": (2.11, 2.15), "l_min": (10, 12, 14)},
 }
 
 
@@ -29,9 +35,10 @@ def load_bins(path: Path):
     data = np.genfromtxt(path, delimiter=",", names=True, dtype=None, encoding="utf-8")
     data = np.atleast_1d(data)
     required = {
-        "lattice", "geometry_version", "L", "N", "Nb", "h", "beta", "seed", "bin",
+        "raw_schema", "lattice", "geometry_version", "L", "N", "Nb", "h", "beta",
+        "c_tau", "seed", "initial_state", "bin",
         "n_thermal", "n_bins", "sweeps_per_bin", "config_checked",
-        "consistency_failures", "E", "spacetime_m2",
+        "consistency_failures", "update_algorithm", "sign_avg", "E", "spacetime_m2",
         "spacetime_m4", "S0", "Sq", "q_norm", "q_count",
     }
     names = set(data.dtype.names or ())
@@ -45,10 +52,15 @@ def load_bins(path: Path):
     metadata = {}
     chain_expected_bins = {}
     seed_owner = {}
+    starts_by_cell = defaultdict(set)
     lattice_versions = set()
     for row in data:
-        key = (int(row["L"]), round(float(row["h"]), 8), int(row["seed"]))
-        cell_key = key[:2]
+        L = int(row["L"])
+        field_key = round(float(row["h"]), 8)
+        seed = int(row["seed"])
+        initial_state = str(row["initial_state"])
+        key = (L, field_key, initial_state, seed)
+        cell_key = (L, field_key)
         numeric = np.asarray(
             [row["beta"], row["E"], row["spacetime_m2"], row["spacetime_m4"],
              row["S0"], row["Sq"], row["q_norm"]],
@@ -56,11 +68,15 @@ def load_bins(path: Path):
         )
         if not np.all(np.isfinite(numeric)):
             raise ValueError(f"non-finite numeric value in cell {key}")
-        owner = seed_owner.setdefault(key[2], cell_key)
-        if owner != cell_key:
+        if initial_state not in {"hot", "cold"}:
+            raise ValueError(f"invalid initial state {initial_state!r} in cell {key}")
+        owner_key = (*cell_key, initial_state)
+        owner = seed_owner.setdefault(seed, owner_key)
+        if owner != owner_key:
             raise ValueError(
-                f"RNG seed {key[2]} is reused across cells {owner} and {cell_key}"
+                f"RNG seed {seed} is reused across chains {owner} and {owner_key}"
             )
+        starts_by_cell[cell_key].add(initial_state)
         lattice_version = (str(row["lattice"]), str(row["geometry_version"]))
         lattice_versions.add(lattice_version)
         lattice, geometry_version = lattice_version
@@ -70,7 +86,6 @@ def load_bins(path: Path):
             raise ValueError(
                 f"unexpected geometry version {geometry_version!r} for {lattice}"
             )
-        L = key[0]
         field = float(row["h"])
         if not np.isfinite(field) or field <= 0.0:
             raise ValueError(f"invalid transverse field in cell {key}")
@@ -82,8 +97,11 @@ def load_bins(path: Path):
         }[lattice]
         if L < 2 or int(row["N"]) != expected_sites or int(row["Nb"]) != expected_bonds:
             raise ValueError(f"inconsistent lattice counts in cell {key}")
-        if not np.isclose(float(row["beta"]), L / field, rtol=1e-12):
-            raise ValueError(f"cell {key} does not use beta=L/h")
+        c_tau = float(row["c_tau"])
+        if not np.isfinite(c_tau) or c_tau <= 0.0:
+            raise ValueError(f"invalid c_tau in cell {key}")
+        if not np.isclose(float(row["beta"]), c_tau * L / field, rtol=1e-12):
+            raise ValueError(f"cell {key} does not use beta*h/L=c_tau")
         if (int(row["n_thermal"]) < 0 or int(row["n_bins"]) <= 0
                 or int(row["sweeps_per_bin"]) <= 0):
             raise ValueError(f"invalid sampling budget in cell {key}")
@@ -94,6 +112,12 @@ def load_bins(path: Path):
         if ((config_checked == 1 and consistency_failures < 0)
                 or (config_checked == 0 and consistency_failures != -1)):
             raise ValueError(f"invalid configuration-check result in cell {key}")
+        if str(row["raw_schema"]) != "challenge148-raw-v1":
+            raise ValueError(f"unsupported raw schema in cell {key}")
+        if str(row["update_algorithm"]) != "sandvik-tfim-cluster-v1":
+            raise ValueError(f"unsupported update algorithm in cell {key}")
+        if float(row["sign_avg"]) != 1.0:
+            raise ValueError(f"cell {key} is not sign-free")
         expected_q_count = 4 if lattice == "square" else 6
         expected_q_norm = (
             2.0 * np.pi / L
@@ -117,6 +141,7 @@ def load_bins(path: Path):
             "lattice": lattice_version[0],
             "geometry_version": lattice_version[1],
             "beta": float(row["beta"]),
+            "c_tau": c_tau,
             "q_norm": float(row["q_norm"]),
             "q_count": int(row["q_count"]),
             "sweeps_per_bin": int(row["sweeps_per_bin"]),
@@ -145,11 +170,19 @@ def load_bins(path: Path):
             )
         ordered[key] = np.asarray([item[1:] for item in rows], dtype=float)
     fields_by_size = defaultdict(set)
-    for L, h, _ in ordered:
+    for L, h, _, _ in ordered:
         fields_by_size[L].add(h)
     field_sets = {tuple(sorted(fields)) for fields in fields_by_size.values()}
     if len(field_sets) != 1:
         raise ValueError("input is not a complete rectangular (L,h) grid")
+    start_sets = {tuple(sorted(starts)) for starts in starts_by_cell.values()}
+    if len(start_sets) != 1:
+        raise ValueError("cells do not contain a consistent set of initial states")
+    for cell_key, starts in starts_by_cell.items():
+        metadata[cell_key]["initial_states"] = tuple(sorted(starts))
+    c_tau_values = {row_metadata["c_tau"] for row_metadata in metadata.values()}
+    if len(c_tau_values) != 1:
+        raise ValueError(f"input mixes c_tau values: {sorted(c_tau_values)}")
     return ordered, metadata
 
 
@@ -204,15 +237,18 @@ def circular_block_resample(values: np.ndarray, block: int, rng: np.random.Gener
 
 def grouped_cells(chains):
     cells = defaultdict(dict)
-    for (L, h, seed), values in chains.items():
-        cells[(L, h)][seed] = values
+    for (L, h, initial_state, seed), values in chains.items():
+        cells[(L, h)][(initial_state, seed)] = values
     return cells
 
 
 def resample_cell(chain_map, block: int, rng: np.random.Generator) -> np.ndarray:
-    seeds = np.asarray(sorted(chain_map))
-    selected = rng.choice(seeds, size=len(seeds), replace=True)
-    return np.concatenate([circular_block_resample(chain_map[int(seed)], block, rng) for seed in selected])
+    chain_keys = sorted(chain_map)
+    selected = rng.integers(0, len(chain_keys), len(chain_keys))
+    return np.concatenate([
+        circular_block_resample(chain_map[chain_keys[index]], block, rng)
+        for index in selected
+    ])
 
 
 def point_estimates(cells, metadata, n_boot: int, rng: np.random.Generator):
@@ -226,16 +262,26 @@ def point_estimates(cells, metadata, n_boot: int, rng: np.random.Generator):
     for key in sorted(cells):
         L, h = key
         chain_map = cells[key]
-        tau_by_seed = []
-        for seed, values in sorted(chain_map.items()):
+        starts = [chain_key[0] for chain_key in chain_map]
+        if set(starts) == {"hot", "cold"}:
+            per_start = {start: starts.count(start) for start in {"hot", "cold"}}
+            if min(per_start.values()) < 2:
+                raise ValueError(f"cell {key} needs at least two chains per hot/cold start")
+        tau_by_chain = []
+        for (initial_state, seed), values in sorted(chain_map.items()):
             taus = chain_taus(values)
             tau = float(np.max(taus))
-            tau_by_seed.append(tau)
+            tau_by_chain.append(tau)
             diagnostics.append(
-                (L, h, seed, *taus, tau, tau * metadata[key]["sweeps_per_bin"])
+                (
+                    L, h, initial_state, seed, *taus, tau,
+                    tau * metadata[key]["sweeps_per_bin"],
+                    len(values) / (2.0 * tau),
+                    int(len(values) // max(1, np.ceil(2.0 * tau))),
+                )
             )
-        block = max(1, int(np.ceil(2.0 * max(tau_by_seed))))
-        combined = np.concatenate([chain_map[seed] for seed in sorted(chain_map)])
+        block = max(1, int(np.ceil(2.0 * max(tau_by_chain))))
+        combined = np.concatenate([chain_map[chain_key] for chain_key in sorted(chain_map)])
         q = q_value(combined)
         xi = xi_value(combined, L, metadata[key]["q_norm"])
         q_boot = np.empty(n_boot)
@@ -256,6 +302,61 @@ def point_estimates(cells, metadata, n_boot: int, rng: np.random.Generator):
             "chains": len(chain_map),
         }
     return points, diagnostics
+
+
+def _difference_z(first: np.ndarray, second: np.ndarray) -> float:
+    if len(first) < 2 or len(second) < 2:
+        return np.nan
+    variance = np.var(first, axis=0, ddof=1) / len(first)
+    variance += np.var(second, axis=0, ddof=1) / len(second)
+    scale = np.sqrt(np.maximum(variance, 0.0))
+    difference = np.abs(np.mean(first, axis=0) - np.mean(second, axis=0))
+    z = np.divide(difference, scale, out=np.zeros_like(difference), where=scale > 0.0)
+    z[(scale == 0.0) & (difference > 0.0)] = np.inf
+    return float(np.max(z))
+
+
+def sampling_diagnostics(cells):
+    rows = []
+    failures = []
+    for (L, h), chain_map in sorted(cells.items()):
+        starts = defaultdict(list)
+        stationarity = []
+        minimum_blocks = np.inf
+        for (initial_state, _), values in sorted(chain_map.items()):
+            starts[initial_state].append(values.mean(axis=0))
+            tau = float(np.max(chain_taus(values)))
+            block = max(1, int(np.ceil(2.0 * tau)))
+            minimum_blocks = min(minimum_blocks, len(values) // block)
+            block_means = np.asarray([
+                values[index:index + block].mean(axis=0)
+                for index in range(0, len(values) - block + 1, block)
+            ])
+            midpoint = len(block_means) // 2
+            if midpoint >= 2 and len(block_means) - midpoint >= 2:
+                stationarity.append(
+                    _difference_z(block_means[:midpoint], block_means[midpoint:])
+                )
+        start_z = np.nan
+        if set(starts) == {"hot", "cold"}:
+            start_z = _difference_z(np.asarray(starts["hot"]), np.asarray(starts["cold"]))
+        stationarity_z = max(stationarity, default=np.nan)
+        starts_ok = set(starts) == {"hot", "cold"} and min(map(len, starts.values())) >= 2
+        blocks_ok = minimum_blocks >= 8
+        start_ok = np.isfinite(start_z) and start_z <= 3.5
+        stationarity_ok = np.isfinite(stationarity_z) and stationarity_z <= 3.5
+        passed = starts_ok and blocks_ok and start_ok and stationarity_ok
+        rows.append((
+            L, h, len(starts.get("hot", [])), len(starts.get("cold", [])),
+            int(minimum_blocks), start_z, stationarity_z, int(passed),
+        ))
+        if not passed:
+            failures.append(
+                f"L={L} h={h}: hot/cold={dict((k, len(v)) for k, v in starts.items())} "
+                f"min_blocks={int(minimum_blocks)} start_z={start_z:.3g} "
+                f"stationarity_z={stationarity_z:.3g}"
+            )
+    return rows, failures
 
 
 def design_matrix(L, h, hc, omega=OMEGA, include_mixed=True):
@@ -350,6 +451,170 @@ def fit_hc(L, h, y, error, omega=OMEGA, include_mixed=True):
     return hc, chi2, dof, coeff, rank, condition
 
 
+def fit_observable(
+    observable, keys, points, cells, metadata, n_boot, seed, omega, include_mixed
+):
+    L = np.asarray([key[0] for key in keys], dtype=float)
+    h = np.asarray([key[1] for key in keys], dtype=float)
+    error_name = {"Q": "Q_err", "xi": "xi_err"}.get(observable)
+    if error_name is None:
+        raise ValueError(f"unsupported observable {observable!r}")
+    rng = np.random.default_rng(seed + (0 if observable == "Q" else 1))
+    y = np.asarray([points[key][observable] for key in keys])
+    error = np.asarray([points[key][error_name] for key in keys])
+    finite = np.isfinite(y) & np.isfinite(error) & (error > 0.0)
+    minimum_points = (4 if not include_mixed else 5) + 2
+    if finite.sum() < minimum_points:
+        raise ValueError(
+            f"{observable} fit has only {finite.sum()} valid points; needs {minimum_points}"
+        )
+    hc, chi2, dof, coeff, rank, condition = fit_hc(
+        L[finite], h[finite], y[finite], error[finite],
+        omega=omega, include_mixed=include_mixed,
+    )
+    samples = []
+    failed = 0
+    for _ in range(n_boot):
+        sampled_y = []
+        for key in keys:
+            sampled = resample_cell(cells[key], points[key]["block"], rng)
+            sampled_y.append(
+                q_value(sampled)
+                if observable == "Q"
+                else xi_value(sampled, key[0], metadata[key]["q_norm"])
+            )
+        sampled_y = np.asarray(sampled_y)
+        valid = np.isfinite(sampled_y) & finite
+        if valid.sum() >= minimum_points:
+            try:
+                samples.append(fit_hc(
+                    L[valid], h[valid], sampled_y[valid], error[valid],
+                    omega=omega, include_mixed=include_mixed,
+                )[0])
+            except ValueError:
+                failed += 1
+        else:
+            failed += 1
+    if len(samples) < 2:
+        raise ValueError(f"{observable} bootstrap produced fewer than two valid fits")
+    samples = np.asarray(samples)
+    ci_low, ci_high = np.quantile(samples, [0.025, 0.975])
+    return {
+        "hc": hc,
+        "error": np.std(samples, ddof=1),
+        "ci_low": ci_low,
+        "ci_high": ci_high,
+        "chi2": chi2,
+        "dof": dof,
+        "coeff": coeff,
+        "rank": rank,
+        "condition": condition,
+        "omega": omega,
+        "include_mixed": include_mixed,
+        "bootstrap_success": len(samples),
+        "bootstrap_failed": failed,
+        "bootstrap_failure_rate": failed / n_boot,
+    }
+
+
+def fit_observables(keys, points, cells, metadata, n_boot, seed, omega, include_mixed):
+    return {
+        observable: fit_observable(
+            observable, keys, points, cells, metadata, n_boot, seed, omega,
+            include_mixed,
+        )
+        for observable in ("Q", "xi")
+    }
+
+
+def select_keys(points, h_min, h_max, l_min):
+    keys = sorted(
+        key for key in points
+        if key[0] >= l_min and h_min <= key[1] <= h_max
+    )
+    if len(keys) < 8:
+        raise ValueError("fit selection has fewer than eight points")
+    return keys
+
+
+def validate_protocol_selection(metadata, points, window, l_min, omega):
+    lattice = next(iter(metadata.values()))["lattice"]
+    protocol = PROTOCOL_WINDOWS[lattice]
+    if window not in ("broad", "narrow"):
+        raise ValueError("protocol enforcement requires a broad or narrow window")
+    if l_min not in protocol["l_min"]:
+        raise ValueError(
+            f"L_min={l_min} is not registered for {lattice}: {protocol['l_min']}"
+        )
+    if not any(np.isclose(omega, value, rtol=0.0, atol=1e-12)
+               for value in REGISTERED_OMEGAS):
+        raise ValueError(f"omega={omega} is not registered: {REGISTERED_OMEGAS}")
+    sizes = {key[0] for key in points}
+    if l_min not in sizes:
+        raise ValueError(f"registered L_min={l_min} is absent from the input")
+    for key, row_metadata in metadata.items():
+        if row_metadata["initial_states"] != ("cold", "hot"):
+            raise ValueError(f"cell {key} does not contain both hot and cold starts")
+        if row_metadata["c_tau"] not in (1.0, 2.0):
+            raise ValueError(f"cell {key} uses unregistered c_tau={row_metadata['c_tau']}")
+
+
+def robustness_matrix(points, cells, metadata, n_boot, seed):
+    lattice = next(iter(metadata.values()))["lattice"]
+    protocol = PROTOCOL_WINDOWS[lattice]
+    rows = []
+    failures = []
+    for window in ("broad", "narrow"):
+        h_min, h_max = protocol[window]
+        for l_min in protocol["l_min"]:
+            for include_mixed in (True, False):
+                for omega in REGISTERED_OMEGAS:
+                    variant = (
+                        f"window={window} L_min={l_min} omega={omega:.2f} "
+                        f"mixed={int(include_mixed)}"
+                    )
+                    try:
+                        validate_protocol_selection(
+                            metadata, points, window, l_min, omega
+                        )
+                        keys = select_keys(points, h_min, h_max, l_min)
+                    except ValueError as error:
+                        for observable in ("Q", "xi"):
+                            failures.append(
+                                f"{variant} observable={observable}: {error}"
+                            )
+                            rows.append((
+                                window, h_min, h_max, l_min, omega,
+                                int(include_mixed), observable, "failed", str(error),
+                                0, *(np.nan,) * 11,
+                            ))
+                        continue
+                    for observable in ("Q", "xi"):
+                        try:
+                            result = fit_observable(
+                                observable, keys, points, cells, metadata, n_boot,
+                                seed, omega, include_mixed,
+                            )
+                            rows.append((
+                                window, h_min, h_max, l_min, omega,
+                                int(include_mixed), observable, "ok", "", len(keys),
+                                result["hc"], result["error"], result["ci_low"],
+                                result["ci_high"], result["chi2"], result["dof"],
+                                result["chi2"] / result["dof"], result["condition"],
+                                result["bootstrap_success"],
+                                result["bootstrap_failed"],
+                                result["bootstrap_failure_rate"],
+                            ))
+                        except ValueError as error:
+                            failures.append(f"{variant} observable={observable}: {error}")
+                            rows.append((
+                                window, h_min, h_max, l_min, omega,
+                                int(include_mixed), observable, "failed", str(error),
+                                len(keys), *(np.nan,) * 11,
+                            ))
+    return rows, failures
+
+
 def crossing(fields, first, second):
     difference = first - second
     roots = []
@@ -374,15 +639,25 @@ def crossings(points, observable):
     return rows
 
 
-def write_outputs(input_path, points, diagnostics, fits, crossing_rows, suffix=""):
+def write_outputs(
+    input_path, points, diagnostics, sampling_rows, fits, crossing_rows, suffix=""
+):
     stem = input_path.with_name(input_path.stem.removesuffix("_bins") + suffix)
     with stem.with_name(stem.name + "_autocorrelation.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow([
-            "L", "h", "seed", "tau_m2", "tau_m4", "tau_S0", "tau_Sq", "tau_E",
-            "tau_max_bins", "tau_max_sweeps",
+            "L", "h", "initial_state", "seed", "tau_m2", "tau_m4", "tau_S0",
+            "tau_Sq", "tau_E", "tau_max_bins", "tau_max_sweeps",
+            "effective_samples", "independent_blocks",
         ])
         writer.writerows(diagnostics)
+    with stem.with_name(stem.name + "_sampling_gates.csv").open("w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow([
+            "L", "h", "hot_chains", "cold_chains", "minimum_independent_blocks",
+            "hot_cold_z_max", "stationarity_z_max", "passed",
+        ])
+        writer.writerows(sampling_rows)
     with stem.with_name(stem.name + "_points.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["L", "h", "Q", "Q_err", "xi_over_L", "xi_err", "block_bins", "block_sweeps", "chains"])
@@ -392,14 +667,16 @@ def write_outputs(input_path, points, diagnostics, fits, crossing_rows, suffix="
         writer = csv.writer(handle)
         writer.writerow([
             "observable", "hc", "hc_boot_err", "hc_boot_ci_low", "hc_boot_ci_high",
-            "chi2", "dof", "chi2_per_dof", "rank", "condition",
+            "chi2", "dof", "chi2_per_dof", "rank", "condition", "omega",
+            "include_mixed",
             "bootstrap_success", "bootstrap_failed", "bootstrap_failure_rate",
         ])
         for name, result in fits.items():
             writer.writerow([
                 name, result["hc"], result["error"], result["ci_low"], result["ci_high"],
                 result["chi2"], result["dof"], result["chi2"] / result["dof"],
-                result["rank"], result["condition"], result["bootstrap_success"],
+                result["rank"], result["condition"], result["omega"],
+                int(result["include_mixed"]), result["bootstrap_success"],
                 result["bootstrap_failed"], result["bootstrap_failure_rate"],
             ])
     with stem.with_name(stem.name + "_crossings.csv").open("w", newline="") as handle:
@@ -421,6 +698,61 @@ def write_outputs(input_path, points, diagnostics, fits, crossing_rows, suffix="
     figure.savefig(stem.with_name(stem.name + "_crossings.png"), dpi=180)
     plt.close(figure)
 
+    figure, axes = plt.subplots(1, 2, figsize=(11, 4.5), constrained_layout=True)
+    for axis, (observable, error_name, title) in zip(
+        axes,
+        (("Q", "Q_err", "Binder ratio"), ("xi", "xi_err", "Correlation length")),
+    ):
+        result = fits[observable]
+        for L in sizes:
+            rows = sorted(
+                (h, point) for (size, h), point in points.items() if size == L
+            )
+            fields = np.asarray([row[0] for row in rows])
+            values = np.asarray([row[1][observable] for row in rows])
+            errors = np.asarray([row[1][error_name] for row in rows])
+            lengths = np.full_like(fields, float(L))
+            model = design_matrix(
+                lengths, fields, result["hc"], result["omega"],
+                result["include_mixed"],
+            ) @ result["coeff"]
+            finite = np.isfinite(values) & np.isfinite(errors) & (errors > 0.0)
+            scaling_variable = (
+                (fields - result["hc"]) * lengths ** (1.0 / NU)
+            )
+            axis.plot(
+                scaling_variable[finite],
+                ((values - model) / errors)[finite],
+                "o", ms=3, label=f"L={L}",
+            )
+        axis.axhline(0.0, color="black", linewidth=0.8)
+        axis.axhline(2.0, color="0.6", linewidth=0.7, linestyle="--")
+        axis.axhline(-2.0, color="0.6", linewidth=0.7, linestyle="--")
+        axis.set(
+            xlabel=r"$(h-h_c)L^{1/\nu}$",
+            ylabel="standardized residual",
+            title=title,
+        )
+        axis.legend(ncol=2, fontsize=8)
+    figure.savefig(stem.with_name(stem.name + "_residuals.png"), dpi=180)
+    plt.close(figure)
+
+
+def write_robustness_output(input_path, rows, suffix=""):
+    stem = input_path.with_name(input_path.stem.removesuffix("_bins") + suffix)
+    path = stem.with_name(stem.name + "_robustness.csv")
+    with path.open("w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow([
+            "window", "h_min", "h_max", "L_min", "omega", "include_mixed",
+            "observable", "status", "failure", "n_points", "hc", "hc_boot_err",
+            "hc_boot_ci_low", "hc_boot_ci_high", "chi2", "dof", "chi2_per_dof",
+            "condition", "bootstrap_success", "bootstrap_failed",
+            "bootstrap_failure_rate",
+        ])
+        writer.writerows(rows)
+    return path
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -429,102 +761,96 @@ def main():
     parser.add_argument("--seed", type=int, default=20260729)
     parser.add_argument("--h-min", type=float)
     parser.add_argument("--h-max", type=float)
-    parser.add_argument("--l-min", type=int, default=0)
+    parser.add_argument("--l-min", type=int)
     parser.add_argument("--omega", type=float, default=OMEGA)
     parser.add_argument("--omit-mixed", action="store_true")
+    parser.add_argument("--protocol-window", choices=("broad", "narrow"))
+    parser.add_argument("--enforce-protocol", action="store_true")
+    parser.add_argument("--robustness-matrix", action="store_true")
     parser.add_argument("--label", default="")
+    parser.add_argument("--enforce-sampling-gates", action="store_true")
     args = parser.parse_args()
     if args.bootstrap < 2:
         parser.error("--bootstrap must be at least 2")
 
-    rng = np.random.default_rng(args.seed)
     chains, metadata = load_bins(args.bins)
     cells = grouped_cells(chains)
-    points, diagnostics = point_estimates(cells, metadata, args.bootstrap, rng)
-
-    keys = sorted(
-        key for key in points
-        if key[0] >= args.l_min
-        and (args.h_min is None or key[1] >= args.h_min)
-        and (args.h_max is None or key[1] <= args.h_max)
+    points, diagnostics = point_estimates(
+        cells, metadata, args.bootstrap, np.random.default_rng(args.seed)
     )
-    if len(keys) < 8:
-        raise ValueError("fit selection has fewer than eight points")
+    sampling_rows, sampling_failures = sampling_diagnostics(cells)
+    lattice = next(iter(metadata.values()))["lattice"]
+    protocol = PROTOCOL_WINDOWS[lattice]
+    if args.protocol_window is not None:
+        if args.h_min is not None or args.h_max is not None:
+            parser.error("--protocol-window cannot be combined with --h-min/--h-max")
+        h_min, h_max = protocol[args.protocol_window]
+        l_min = args.l_min if args.l_min is not None else protocol["l_min"][0]
+    else:
+        h_min = args.h_min if args.h_min is not None else -np.inf
+        h_max = args.h_max if args.h_max is not None else np.inf
+        l_min = args.l_min if args.l_min is not None else 0
+    if args.enforce_protocol:
+        validate_protocol_selection(
+            metadata, points, args.protocol_window, l_min, args.omega
+        )
+
+    keys = select_keys(points, h_min, h_max, l_min)
     L = np.asarray([key[0] for key in keys], dtype=float)
     h = np.asarray([key[1] for key in keys], dtype=float)
-    fits = {}
-    for observable, error_name in (("Q", "Q_err"), ("xi", "xi_err")):
-        y = np.asarray([points[key][observable] for key in keys])
-        error = np.asarray([points[key][error_name] for key in keys])
-        finite = np.isfinite(y) & np.isfinite(error) & (error > 0.0)
-        minimum_points = (4 if args.omit_mixed else 5) + 2
-        if finite.sum() < minimum_points:
-            raise ValueError(
-                f"{observable} fit has only {finite.sum()} valid points; needs {minimum_points}"
-            )
-        hc, chi2, dof, _, rank, condition = fit_hc(
-            L[finite], h[finite], y[finite], error[finite],
-            omega=args.omega, include_mixed=not args.omit_mixed,
-        )
-        samples = []
-        failed = 0
-        for _ in range(args.bootstrap):
-            sampled_y = []
-            for key in keys:
-                block = points[key]["block"]
-                sampled = resample_cell(cells[key], block, rng)
-                sampled_y.append(q_value(sampled) if observable == "Q" else xi_value(sampled, key[0], metadata[key]["q_norm"]))
-            sampled_y = np.asarray(sampled_y)
-            valid = np.isfinite(sampled_y) & finite
-            if valid.sum() >= minimum_points:
-                try:
-                    samples.append(fit_hc(
-                        L[valid], h[valid], sampled_y[valid], error[valid],
-                        omega=args.omega, include_mixed=not args.omit_mixed,
-                    )[0])
-                except ValueError:
-                    failed += 1
-            else:
-                failed += 1
-        if len(samples) < 2:
-            raise ValueError(f"{observable} bootstrap produced fewer than two valid fits")
-        samples = np.asarray(samples)
-        ci_low, ci_high = np.quantile(samples, [0.025, 0.975])
-        fits[observable] = {
-            "hc": hc,
-            "error": np.std(samples, ddof=1),
-            "ci_low": ci_low,
-            "ci_high": ci_high,
-            "chi2": chi2,
-            "dof": dof,
-            "rank": rank,
-            "condition": condition,
-            "bootstrap_success": len(samples),
-            "bootstrap_failed": failed,
-            "bootstrap_failure_rate": failed / args.bootstrap,
-        }
+    fits = fit_observables(
+        keys, points, cells, metadata, args.bootstrap, args.seed, args.omega,
+        not args.omit_mixed,
+    )
 
     selected_points = {key: points[key] for key in keys}
     crossing_rows = []
     for observable in ("Q", "xi"):
         crossing_rows.extend((observable, first, second, value) for first, second, value in crossings(selected_points, observable))
     suffix = f"_{args.label}" if args.label else ""
-    write_outputs(args.bins, selected_points, diagnostics, fits, crossing_rows, suffix)
+    write_outputs(
+        args.bins, selected_points, diagnostics, sampling_rows, fits, crossing_rows, suffix
+    )
 
-    lattice = next(iter(metadata.values()))["lattice"]
+    matrix_failures = []
+    if args.robustness_matrix:
+        matrix_rows, matrix_failures = robustness_matrix(
+            points, cells, metadata, args.bootstrap, args.seed
+        )
+        matrix_path = write_robustness_output(args.bins, matrix_rows, suffix)
+        print(
+            f"robustness_matrix={matrix_path} rows={len(matrix_rows)} "
+            f"failed={len(matrix_failures)}"
+        )
+
     geometry = next(iter(metadata.values()))["geometry_version"]
-    print(f"lattice={lattice} geometry={geometry} cells={len(points)} chains={len(chains)}")
+    starts = next(iter(metadata.values()))["initial_states"]
+    c_tau = next(iter(metadata.values()))["c_tau"]
+    print(
+        f"lattice={lattice} geometry={geometry} cells={len(points)} chains={len(chains)} "
+        f"c_tau={c_tau:g} starts={','.join(starts)}"
+    )
     print(
         f"fit_selection={len(keys)} h=[{h.min():.8g},{h.max():.8g}] "
         f"L=[{int(L.min())},{int(L.max())}] omega={args.omega} mixed={not args.omit_mixed}"
     )
-    print(f"max_tau_int_bins={max(row[8] for row in diagnostics):.3f}")
+    print(f"max_tau_int_bins={max(row[9] for row in diagnostics):.3f}")
+    print(
+        f"sampling_gates={'pass' if not sampling_failures else 'fail'} "
+        f"failed_cells={len(sampling_failures)}/{len(sampling_rows)}"
+    )
     for observable, result in fits.items():
         print(
             f"{observable}: hc={result['hc']:.8f} +/- {result['error']:.8f} "
             f"chi2/dof={result['chi2'] / result['dof']:.3f} "
             f"condition={result['condition']:.3e} "
-            f"bootstrap_failed={result['bootstrap_failed']}/{args.bootstrap}"
+        f"bootstrap_failed={result['bootstrap_failed']}/{args.bootstrap}"
+        )
+    if (args.enforce_sampling_gates or args.enforce_protocol) and sampling_failures:
+        raise ValueError("sampling gates failed:\n" + "\n".join(sampling_failures))
+    if args.enforce_protocol and matrix_failures:
+        raise ValueError(
+            "registered robustness variants failed:\n" + "\n".join(matrix_failures)
         )
 
 

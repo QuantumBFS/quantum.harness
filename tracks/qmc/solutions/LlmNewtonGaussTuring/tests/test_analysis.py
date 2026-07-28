@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
 import tempfile
 from pathlib import Path
 
@@ -36,8 +37,9 @@ def expect_value_error(function, message: str) -> None:
 
 
 HEADER = (
-    "lattice,geometry_version,L,N,Nb,h,beta,seed,bin,n_thermal,n_bins,"
-    "sweeps_per_bin,config_checked,consistency_failures,E,spacetime_m2,"
+    "raw_schema,lattice,geometry_version,L,N,Nb,h,beta,c_tau,seed,initial_state,"
+    "bin,n_thermal,n_bins,sweeps_per_bin,update_algorithm,sign_avg,config_checked,"
+    "consistency_failures,E,spacetime_m2,"
     "spacetime_m4,S0,Sq,q_norm,q_count\n"
 )
 HEADER_COLUMNS = HEADER.strip().split(",")
@@ -52,9 +54,11 @@ def valid_rows() -> list[str]:
                 seed = size * 10000 + field_index * 100 + replica
                 for bin_index in (0, 1):
                     rows.append(
-                        f"square,square-v1,{size},{size * size},{2 * size * size},"
-                        f"{field:.17g},{size / field:.17g},{seed},{bin_index},10,2,5,"
-                        f"0,-1,-1.0,0.2,0.08,0.2,0.1,{2 * np.pi / size:.17g},4\n"
+                        f"challenge148-raw-v1,square,square-v1,{size},{size * size},"
+                        f"{2 * size * size},{field:.17g},{size / field:.17g},1,{seed},"
+                        f"{'hot' if replica == 1 else 'cold'},{bin_index},10,2,5,"
+                        f"sandvik-tfim-cluster-v1,1,0,-1,-1.0,0.2,0.08,0.2,0.1,"
+                        f"{2 * np.pi / size:.17g},4\n"
                     )
     return rows
 
@@ -79,10 +83,10 @@ def test_input_validation(directory: Path) -> None:
     )
 
     reused_seed = directory / "reused_seed.csv"
-    first_seed = rows[0].split(",")[7]
+    first_seed = rows[0].split(",")[HEADER_COLUMNS.index("seed")]
     altered = rows.copy()
     columns = altered[8].split(",")
-    columns[7] = first_seed
+    columns[HEADER_COLUMNS.index("seed")] = first_seed
     altered[8] = ",".join(columns)
     write_csv(reused_seed, altered)
     expect_value_error(
@@ -91,7 +95,16 @@ def test_input_validation(directory: Path) -> None:
     )
 
     incomplete_grid = directory / "incomplete_grid.csv"
-    write_csv(incomplete_grid, [row for row in rows if not row.startswith("square,square-v1,6,36,72,3.06")])
+    def keep_complete_row(row: str) -> bool:
+        columns = row.split(",")
+        return not (
+            columns[HEADER_COLUMNS.index("L")] == "6"
+            and np.isclose(float(columns[HEADER_COLUMNS.index("h")]), 3.06)
+        )
+    write_csv(
+        incomplete_grid,
+        [row for row in rows if keep_complete_row(row)],
+    )
     expect_value_error(
         lambda: ANALYSIS.load_bins(incomplete_grid),
         "an incomplete (L,h) rectangle must be rejected",
@@ -126,6 +139,18 @@ def test_input_validation(directory: Path) -> None:
         "an unchecked configuration must use the -1 sentinel",
     )
 
+    mixed_c_tau = directory / "mixed_c_tau.csv"
+    altered = rows.copy()
+    columns = altered[0].split(",")
+    columns[HEADER_COLUMNS.index("c_tau")] = "2"
+    columns[HEADER_COLUMNS.index("beta")] = f"{2 * 4 / 3.02:.17g}"
+    altered[0] = ",".join(columns)
+    write_csv(mixed_c_tau, altered)
+    expect_value_error(
+        lambda: ANALYSIS.load_bins(mixed_c_tau),
+        "a file containing mixed imaginary-time aspect ratios must be rejected",
+    )
+
 
 def test_scaling_fit() -> None:
     sizes = np.repeat(np.asarray([6.0, 8.0, 10.0, 12.0]), 7)
@@ -156,10 +181,132 @@ def test_scaling_fit() -> None:
     )
 
 
+def test_sampling_gates() -> None:
+    rng = np.random.default_rng(20260729)
+    chain_map = {}
+    baseline = np.asarray([0.2, 0.08, 0.2, 0.1, -3.0])
+    for initial_state in ("hot", "cold"):
+        for replica in (0, 1):
+            values = baseline + rng.normal(scale=0.002, size=(64, 5))
+            chain_map[(initial_state, 100 * (initial_state == "cold") + replica)] = values
+    cells = {(8, 3.04): chain_map}
+    metadata = {
+        (8, 3.04): {"sweeps_per_bin": 5, "q_norm": 2 * np.pi / 8}
+    }
+    points, diagnostics = ANALYSIS.point_estimates(
+        cells, metadata, 20, np.random.default_rng(1234)
+    )
+    require((8, 3.04) in points and len(diagnostics) == 4, "valid chains were not analyzed")
+    _, failures = ANALYSIS.sampling_diagnostics(cells)
+    require(not failures, f"stationary hot/cold chains failed gates: {failures}")
+
+    shifted = {key: values.copy() for key, values in chain_map.items()}
+    for key in shifted:
+        if key[0] == "cold":
+            shifted[key][:, 0] += 0.2
+    _, failures = ANALYSIS.sampling_diagnostics({(8, 3.04): shifted})
+    require(failures, "a large hot/cold split was not rejected")
+
+
+def synthetic_protocol_data():
+    rng = np.random.default_rng(148)
+    sizes = (4, 6, 8, 10, 12)
+    fields = (3.00, 3.02, 3.03, 3.04, 3.05, 3.06, 3.08, 3.10)
+    points = {}
+    cells = {}
+    metadata = {}
+    q_coeff = np.asarray([0.61, 0.012, -0.00010, 0.035, 0.002])
+    xi_coeff = np.asarray([0.42, -0.008, 0.00008, 0.025, -0.001])
+    for size in sizes:
+        for field in fields:
+            lengths = np.asarray([float(size)])
+            field_array = np.asarray([field])
+            q = (ANALYSIS.design_matrix(lengths, field_array, 3.044) @ q_coeff).item()
+            xi = (ANALYSIS.design_matrix(lengths, field_array, 3.044) @ xi_coeff).item()
+            key = (size, field)
+            points[key] = {
+                "Q": q,
+                "Q_err": 0.002,
+                "xi": xi,
+                "xi_err": 0.002,
+                "block": 1,
+            }
+            q_norm = 2 * np.pi / size
+            denom = 4 * np.sin(q_norm / 2) ** 2
+            chain_map = {}
+            for start_index, initial_state in enumerate(("hot", "cold")):
+                for replica in (0, 1):
+                    values = np.empty((32, 5))
+                    values[:, 0] = 0.2 + rng.normal(scale=2e-4, size=32)
+                    values[:, 1] = 0.04 / q + rng.normal(scale=1e-4, size=32)
+                    values[:, 2] = (
+                        1.0 + (xi * size) ** 2 * denom
+                        + rng.normal(scale=2e-3, size=32)
+                    )
+                    values[:, 3] = 1.0 + rng.normal(scale=2e-3, size=32)
+                    values[:, 4] = -1.0 + rng.normal(scale=2e-3, size=32)
+                    chain_map[(initial_state, 1000 * size + 10 * start_index + replica)] = values
+            cells[key] = chain_map
+            metadata[key] = {
+                "lattice": "square",
+                "geometry_version": "square-v1",
+                "q_norm": q_norm,
+                "c_tau": 1.0,
+                "initial_states": ("cold", "hot"),
+                "config_checked": True,
+                "consistency_failures": 0,
+            }
+    return points, cells, metadata
+
+
+def test_protocol_and_robustness(directory: Path) -> None:
+    points, cells, metadata = synthetic_protocol_data()
+    ANALYSIS.validate_protocol_selection(metadata, points, "broad", 4, 0.83)
+    expect_value_error(
+        lambda: ANALYSIS.validate_protocol_selection(
+            metadata, points, "broad", 5, 0.83
+        ),
+        "an unregistered minimum size must be rejected",
+    )
+    expect_value_error(
+        lambda: ANALYSIS.validate_protocol_selection(
+            metadata, points, "broad", 4, 0.9
+        ),
+        "an unregistered correction exponent must be rejected",
+    )
+
+    rows, failures = ANALYSIS.robustness_matrix(
+        points, cells, metadata, n_boot=2, seed=20260729
+    )
+    expected_rows = 2 * 3 * 2 * 3 * 2
+    require(len(rows) == expected_rows, "robustness matrix omitted registered variants")
+    require(
+        all(row[7] in {"ok", "failed"} for row in rows),
+        "every robustness row must have an explicit status",
+    )
+    require(
+        len(failures) == sum(row[7] == "failed" for row in rows),
+        "matrix failures and failed rows must agree",
+    )
+    output = ANALYSIS.write_robustness_output(
+        directory / "square_bins.csv", rows, "_test"
+    )
+    with output.open(newline="") as handle:
+        written = list(csv.DictReader(handle))
+    require(len(written) == expected_rows, "robustness CSV has the wrong row count")
+    require(
+        {row["observable"] for row in written} == {"Q", "xi"},
+        "robustness CSV omitted an observable",
+    )
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory() as directory:
-        test_input_validation(Path(directory))
+        path = Path(directory)
+        test_input_validation(path)
+        test_protocol_and_robustness(path)
     test_scaling_fit()
+    test_sampling_gates()
     print("All Stage 4 analysis tests passed.")
 
 

@@ -9,33 +9,32 @@
 
 | Row | |
 |---|---|
-| **Challenge** | Is the ratio of transverse-field Ising critical points on the triangular and honeycomb lattices exactly √5? Determine whether $R = h_c^{\triangle}/h_c^{\hexagon} = \sqrt{5}$ holds by sharpening both critical fields with sign-free QMC (SSE with cluster updates), using a pre-registered finite-size scaling analysis and a sealed verdict gate. |
-| **Catalog issue** | Addresses #148 — "Is the ratio of transverse-field Ising critical points on the triangular and honeycomb lattices exactly √5?", released by Xiao-Yan Xu, Shanghai Jiao Tong University. |
-| **Track** | `tracks/qmc/solutions/LlmNewtonGaussTuring/` — the issue specifies `Method: Quantum Monte Carlo`. |
+| **Challenge** | Test whether the triangular/honeycomb transverse-field Ising critical-field ratio is exactly $\sqrt{5}$ using sign-free SSE QMC, preregistered finite-size scaling, and a sealed verdict gate. |
+| **Catalog issue** | Addresses #148, released by Xiao-Yan Xu, Shanghai Jiao Tong University. |
+| **Track** | `tracks/qmc/solutions/LlmNewtonGaussTuring/` |
 
 ## Implementation contract
 
-- `make_honeycomb()` is the single honeycomb constructor.  It preserves the
-  historical site and bond ordering exactly while correcting only the
-  primitive vectors and basis embedding, so all three graph bonds have equal
-  length.  Index-based Stage 1-3 code remains compatible.
-- `smallest_momentum_vectors()` enumerates every shortest non-zero torus
-  momentum using a geometry-derived finite bound; square, triangular, and
-  honeycomb structure factors average all symmetry-related directions.
-- `SSEParams::stage4_estimators = true` enables propagation-averaged equal-time
-  observables and the analytic Dirichlet-spacing estimator for the Blote-Deng
-  space-time Binder ratio.  The default measurement path remains available for
-  exact reruns of the earlier equal-time workflow.
-- Scan cells use distinct 64-bit seeds for every `(lattice,L,h,replica)` and
-  workers return results to the main thread for deterministic CSV ordering.
-- `SSEResult::config_checked` says whether the O(M) world-line validation ran.
-  `consistency_failures == -1` is the explicit unchecked sentinel; zero is a
-  result only when `config_checked` is true. Production scans disable this
-  expensive check after the test-suite qualification.
+- `make_honeycomb()` preserves the historical site and bond ordering while
+  using equal-length graph bonds in the stored embedding.
+- `smallest_momentum_vectors()` enumerates every symmetry-related shortest
+  non-zero torus momentum from the geometry rather than a fixed search box.
+- `SSEParams::stage4_estimators` enables propagation-averaged equal-time
+  observables and the exact Dirichlet-spacing estimator for the Blote-Deng
+  space-time Binder ratio.
+- Production cells use distinct deterministic 64-bit seeds for every
+  `(lattice,L,h,initial_state,replica)` and include both hot and cold starts.
+- `config_checked=false` is represented by `consistency_failures=-1`; zero is
+  reported only when the O(M) world-line validation actually ran.
+- `run_stage4.py` writes one atomic raw file and manifest per cell, records
+  source/build/host provenance and SHA-256 hashes, and refuses incomplete or
+  mismatched collections.
+
+The frozen physical and statistical choices are in [`PROTOCOL.md`](PROTOCOL.md).
 
 ## Berry-curvature conventions (Challenge 73)
 
-The rotated Hamiltonian is
+The shared code also serves Challenge 73. Its rotated Hamiltonian is
 
 $$
 H(\theta,\Omega)=R_x(\theta)H(0,\Omega)R_x^\dagger(\theta),\qquad
@@ -44,63 +43,72 @@ $$
 
 With $A_\mu=i\langle\psi|\partial_\mu\psi\rangle$, the normalized-overlap
 Wilson loop has phase $\arg W=-\int F_{\theta\Omega}\,d\theta\,d\Omega$.
-`BerryCurvature::wilson_phase`, `flux`, and `F12` therefore denote three
-different quantities; `F12` includes division by the oriented plaquette area.
+`wilson_phase`, `flux`, and `F12` are therefore distinct quantities; `F12`
+includes division by oriented plaquette area.
 
 For the one-dimensional chain, the thermodynamic-limit oracle is
 
 $$
-
-For an even periodic spin chain, the finite-size oracle uses the antiperiodic
-Jordan-Wigner momenta $k_m=(2m+1)pi/N$:
-
-$$
-rac{F_{	hetaOmega}^{(N)}}{N}=-rac{J^2}{2N}sum_{m=0}^{N-1}
-rac{sin^2 k_m}{(J^2+Omega^2-2JOmegacos k_m)^{3/2}}.
-$$
-
-FHS plaquettes are compared to this same-$N$ oracle under grid refinement; a
-finite plaquette has discretisation error and is not expected to agree to
-machine precision. All four ground-state corners must report convergence.
-
-The historical `dthetah_diagonal` API is a prefactor-weighted ZZ expectation
-in the unrotated $H_0$ ensemble. It is an SSE-versus-ED diagnostic, not the
-physical rotated-state diagonal expectation and not a generalized force.
 \frac{F_{\theta\Omega}}{N}=-\frac{J^2}{2\pi}
 \int_0^\pi\frac{\sin^2k\,dk}
 {(J^2+\Omega^2-2J\Omega\cos k)^{3/2}}.
 $$
 
+For an even periodic chain, the same-size oracle uses antiperiodic
+Jordan-Wigner momenta $k_m=(2m+1)\pi/N$:
+
+$$
+\frac{F_{\theta\Omega}^{(N)}}{N}=-\frac{J^2}{2N}\sum_{m=0}^{N-1}
+\frac{\sin^2 k_m}{(J^2+\Omega^2-2J\Omega\cos k_m)^{3/2}}.
+$$
+
+FHS plaquettes are compared to this finite-$N$ oracle under grid refinement.
+All four ground-state corners must converge. The historical
+`dthetah_diagonal` API is only a prefactor-weighted ZZ expectation in the
+unrotated ensemble, not a generalized force.
+
 ## Build and validation
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j 8
-ctest --test-dir build --output-on-failure
+cmake -S . -B build-production -DCMAKE_BUILD_TYPE=Release
+cmake --build build-production --parallel 8
+ctest --test-dir build-production --output-on-failure
 ```
 
-The suite includes lattice safety and compatibility checks, physical Lanczos
-residuals, explicit rotation/FHS/Jordan-Wigner identities, SSE exact limits,
-and synthetic validation of the Python scaling analysis.
+The suite covers lattice invariants, Lanczos residuals, rotation/FHS/Jordan-
+Wigner identities, SSE analytic limits and ED comparisons, synthetic scaling,
+and the complete atomic cell/manifest/collection path.
 
-## Stage 4 scan
+## Resumable Challenge 148 scan
 
-The paper's physical continuous-time length is `L`, which maps to the quantum
-inverse temperature `beta = L / h` in this Hamiltonian convention.
+The paper-matched aspect ratio is $\beta h/L=c_\tau=1$; selected finite-
+temperature checks use $c_\tau=2$.
 
 ```bash
-./build/scan_stage4 triangular 5000 200 25 12 _trial 20 6
-./build/scan_stage4 honeycomb 5000 200 25 12 _trial 20 10
+uv run --script tools/run_stage4.py plan \
+  --run-id c148-triangular-stage4 --lattice triangular \
+  --sizes 6,8,10,12,14,16,18,20 \
+  --fields 4.74,4.75,4.76,4.77,4.78,4.79,4.80 \
+  --thermal 5000 --bins 200 --sweeps-per-bin 25
 
-uv run --script tools/analyze_stage4.py triangular_stage4_trial_bins.csv \
-  --bootstrap 500 --h-min 4.74 --h-max 4.80 --label narrow
-uv run --script tools/analyze_stage4.py honeycomb_stage4_trial_bins.csv \
-  --bootstrap 500 --h-min 2.11 --h-max 2.15 --label narrow
+uv run --script tools/run_stage4.py run-local \
+  --run-spec ../../../../results/c148-triangular-stage4/run_spec.json \
+  --workers 12 --collect
+
+uv run --script tools/analyze_stage4.py \
+  ../../../../results/c148-triangular-stage4/c148-triangular-stage4_bins.csv \
+  --bootstrap 500 --protocol-window narrow --l-min 6 \
+  --robustness-matrix --enforce-protocol --label narrow
 ```
 
-Generated data remain Git-ignored.  Historical Stage 3/4 pilot uncertainties
-are not reusable after the seed and bootstrap audit; any new claim must be
-derived from freshly generated raw bins with the current analysis pipeline.
-The current Stage 4 driver is deterministic but monolithic; it does not yet
-implement the preregistered resumable per-cell manifest, atomic completion,
-host/build provenance, or raw-file hash contract required for production.
+Protocol enforcement admits only the frozen field windows, minimum sizes, and
+correction exponents, and also enforces the hot/cold sampling gates. The
+robustness command writes every registered window/$L_{\min}$/$\omega$/mixed-
+term result, including explicit failed variants, to one CSV. The companion
+crossing and standardized-residual figures are written beside the fit tables.
+
+Generated data remain Git-ignored. Historical Stage 3/4 pilot uncertainties
+are invalid because those runs reused seeds across fields and resampled bins as
+independent. New claims must come from freshly generated manifests and raw bins
+using the current pipeline. `scan_stage4` remains only as a historical
+monolithic rerun entry point.

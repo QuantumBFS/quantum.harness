@@ -74,6 +74,14 @@ target_link_libraries(scan_square PRIVATE cm148 Threads::Threads)
 add_executable(scan_stage4 tools/scan_stage4.cpp)
 target_link_libraries(scan_stage4 PRIVATE cm148 Threads::Threads)
 
+add_executable(sample_stage4_cell tools/sample_stage4_cell.cpp)
+target_link_libraries(sample_stage4_cell PRIVATE cm148)
+target_compile_definitions(sample_stage4_cell PRIVATE
+    CM_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    CM_CXX_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CM_CXX_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+)
+
 # Stage 1: Berry curvature scan tools
 add_executable(scan_berry_chain tools/scan_berry_chain.cpp)
 target_link_libraries(scan_berry_chain PRIVATE cm148)
@@ -98,5 +106,14 @@ if(UV_EXECUTABLE)
     add_test(
         NAME test_analysis
         COMMAND ${UV_EXECUTABLE} run --script ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_analysis.py
+    )
+endif()
+
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(
+        NAME test_production
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_production.py
+                --sampler $<TARGET_FILE:sample_stage4_cell>
     )
 endif()

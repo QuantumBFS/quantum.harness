@@ -185,7 +185,8 @@ int main(int argc, char** argv) {
         const std::string stem = spec.lattice + "_stage4" + tag;
         std::ofstream raw(stem + "_bins.csv");
         if (!raw) throw std::runtime_error("cannot open raw-bin output");
-        raw << "lattice,geometry_version,L,N,Nb,h,beta,seed,bin,n_thermal,n_bins,sweeps_per_bin,"
+        raw << "raw_schema,lattice,geometry_version,L,N,Nb,h,beta,c_tau,seed,initial_state,"
+               "bin,n_thermal,n_bins,sweeps_per_bin,update_algorithm,sign_avg,"
                "config_checked,consistency_failures,E,equal_m2,equal_m4,"
                "spacetime_m2,spacetime_m4,S0,Sq,q_norm,q_count\n";
         raw << std::setprecision(17);
@@ -260,10 +261,11 @@ int main(int argc, char** argv) {
             const double qnorm = lattice.smallest_momentum();
             const std::size_t qcount = lattice.smallest_momentum_vectors().size();
             for (std::size_t bin = 0; bin < cell.result.bin_E.size(); ++bin) {
-                raw << spec.lattice << ',' << spec.geometry_version << ','
+                raw << "challenge148-raw-v1," << spec.lattice << ',' << spec.geometry_version << ','
                     << cell.L << ',' << lattice.N << ',' << lattice.Nb << ','
-                    << cell.h << ',' << cell.beta << ',' << cell.seed << ',' << bin << ','
+                    << cell.h << ',' << cell.beta << ",1," << cell.seed << ",hot," << bin << ','
                     << n_thermal << ',' << n_bins << ',' << sweeps_per_bin << ','
+                    << "sandvik-tfim-cluster-v1,1,"
                     << (cell.config_checked ? 1 : 0) << ',' << cell.failures << ','
                     << cell.result.bin_E[bin] << ',' << cell.result.bin_m2[bin] << ','
                     << cell.result.bin_m4[bin] << ','

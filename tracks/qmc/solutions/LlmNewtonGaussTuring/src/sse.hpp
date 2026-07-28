@@ -44,12 +44,15 @@
 namespace cm {
 
 enum class Op : std::int8_t { NONE = -1, FLIP_SITE = 0, CONST_SITE = 1, BOND = 2 };
+enum class InitialState : std::int8_t { RANDOM = 0, ORDERED_UP = 1 };
 
 struct SSEParams {
     int n_thermal = 2000;
     int n_bins = 200;
     int sweeps_per_bin = 20;
     std::uint64_t seed = 42;
+    InitialState initial_state = InitialState::RANDOM;
+    int progress_every_bins = 0;
     // Per-sweep validation/diagnostics.  Both are O(M) per sweep, so production
     // scans turn them off; the test suite leaves them on.
     bool check_config = true;   // verify world-line closure and bond alignment
