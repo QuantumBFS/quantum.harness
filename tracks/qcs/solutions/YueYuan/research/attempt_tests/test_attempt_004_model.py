@@ -57,7 +57,7 @@ def test_attempt_004_systems_have_required_dimensions():
     assert len(one.control_hamiltonians) == 2
     assert one.config.raw_dim == 16
     assert two.target.shape == (4, 4)
-    assert len(two.control_hamiltonians) == 4
+    assert len(two.control_hamiltonians) == 6
     assert two.config.raw_dim == 48
 
 
@@ -76,3 +76,24 @@ def test_attempt_004_dynamics_are_unitary_and_phase_invariant():
     assert float(abs(identity[1, 1] - 1.0)) < 1e-9
     assert float(dynamics.unitary_infidelity(system.target, system.target)) < 1e-12
     assert float(dynamics.unitary_infidelity(1j * system.target, system.target)) < 1e-12
+
+
+def test_attempt_004_two_qubit_open_loop_reaches_cz_with_48_parameters():
+    config = load_module("config")
+    systems = load_module("systems")
+    pulses = load_module("pulses")
+    open_loop = load_module("open_loop")
+
+    system = systems.build_system(config.TWO_QUBIT_CZ)
+    start = pulses.initial_pulse(config.TWO_QUBIT_CZ, seed=0)
+    cfg = config.OpenLoopConfig(
+        steps=90,
+        learning_rate=0.035,
+        target_infidelity=2e-3,
+        seed_scale=0.0,
+    )
+
+    result = open_loop.optimize_model_pulse(system, start, cfg)
+
+    assert system.config.raw_dim == 48
+    assert result.final_infidelity <= 2e-3

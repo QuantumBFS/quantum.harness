@@ -46,13 +46,16 @@ def build_system(config: SystemConfig) -> SystemModel:
         controls = (2.0 * pauli_x(), 2.0 * pauli_y())
         drift = 0.08 * pauli_z()
     elif config.name == "two_qubit_cz":
+        zi = jnp.kron(pauli_z(), pauli_i())
         xi = jnp.kron(pauli_x(), pauli_i())
         yi = jnp.kron(pauli_y(), pauli_i())
+        iz = jnp.kron(pauli_i(), pauli_z())
         ix = jnp.kron(pauli_i(), pauli_x())
         iy = jnp.kron(pauli_i(), pauli_y())
         zz = jnp.kron(pauli_z(), pauli_z())
-        controls = (0.5 * xi, 0.5 * yi, 0.5 * ix, 0.5 * iy)
-        drift = 0.18 * zz
+        # Local phase controls make CZ reachable inside the fixed unit-time toy model.
+        controls = (1.6 * xi, 1.6 * yi, 1.6 * zi, 1.6 * ix, 1.6 * iy, 1.6 * iz)
+        drift = 0.8 * zz
     else:
         raise ValueError(f"unknown system config: {config.name}")
     return SystemModel(

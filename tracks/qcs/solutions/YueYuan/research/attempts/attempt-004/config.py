@@ -62,7 +62,7 @@ class SweepConfig:
 
 
 ONE_QUBIT_X = SystemConfig("one_qubit_x", "X", 2, 8, 2, 0.8, 3)
-TWO_QUBIT_CZ = SystemConfig("two_qubit_cz", "CZ", 4, 12, 4, 0.55, 15)
+TWO_QUBIT_CZ = SystemConfig("two_qubit_cz", "CZ", 4, 8, 6, 1.8, 15)
 
 
 def default_smoke_sweep() -> SweepConfig:
