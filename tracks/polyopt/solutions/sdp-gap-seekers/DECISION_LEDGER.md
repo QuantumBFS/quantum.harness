@@ -153,3 +153,11 @@ from 44,494,548 to 6,001,456 KiB, total wall from 425.4 to 97.9 s, and
 post-factor nonzeros from 1.51 billion to 112 million. The finite-relaxation
 decision is unchanged: gamma=1/2 is feasible, while the exact implementation
 now fits comfortably inside a 32 GiB allocation.
+
+## 2026-07-29 — bounded dual-form audit
+
+The automatic real-cone solve selected Mosek's primal form. A forced dual form
+is mathematically the same SDP and may change only the Newton factorization.
+Test it first at gamma=0 under the same 16-CPU, 32 GiB cap. Continue to
+gamma=1/2 only if factor fill or peak RSS improves; otherwise close the route
+after the gamma=0 artifact instead of repeating a worse setting.

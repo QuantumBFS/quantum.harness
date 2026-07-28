@@ -89,6 +89,22 @@ function progress(message::AbstractString)
     flush(stdout)
 end
 
+function requested_solve_form()
+    label = lowercase(get(ENV, "SS_MOSEK_SOLVE_FORM", "free"))
+    forms = Dict(
+        "free" => Mosek.MSK_SOLVE_FREE,
+        "primal" => Mosek.MSK_SOLVE_PRIMAL,
+        "dual" => Mosek.MSK_SOLVE_DUAL,
+    )
+    haskey(forms, label) ||
+        throw(
+            ArgumentError(
+                "SS_MOSEK_SOLVE_FORM must be free, primal, or dual",
+            ),
+        )
+    return (label=label, value=forms[label])
+end
+
 function validate_input_files(
     model_path::String,
     runmeta_path::String,
@@ -558,6 +574,7 @@ end
 function main(arguments::Vector{String}=ARGS)
     options = B.parse_args(arguments)
     isnothing(options) && return 0
+    solve_form = requested_solve_form()
     wall_start = time()
     result = Dict(
         "schema_version" => RESULT_SCHEMA,
@@ -576,6 +593,7 @@ function main(arguments::Vector{String}=ARGS)
         "threads" => options.threads,
         "representation" =>
             "exact-v4-conjugation-invariant-real-symmetric",
+        "mosek_solve_form" => solve_form.label,
         "runtime" => Dict(
             "julia_version" => string(VERSION),
             "julia_executable" => Base.julia_cmd().exec[1],
@@ -653,8 +671,13 @@ function main(arguments::Vector{String}=ARGS)
             "MSK_IPAR_NUM_THREADS",
             options.threads,
         )
+        JuMP.set_optimizer_attribute(
+            model,
+            "MSK_IPAR_INTPNT_SOLVE_FORM",
+            solve_form.value,
+        )
 
-        progress("optimize! started")
+        progress("optimize! started; solve_form=$(solve_form.label)")
         solve_start = time()
         JuMP.optimize!(model)
         solve_wall_seconds = time() - solve_start

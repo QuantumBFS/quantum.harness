@@ -20,6 +20,7 @@ MOSEK_BIN_DIR="${MOSEK_BIN_DIR:-/work/home/sihhu/quantum-hackson/toolchains/mose
 MOSEK_LICENSE="${MOSEK_LICENSE:-/work/home/sihhu/mosek/mosek.lic}"
 SS_TIME_LIMIT_SECONDS="${SS_TIME_LIMIT_SECONDS:-3300}"
 SS_AUDIT_TOLERANCE="${SS_AUDIT_TOLERANCE:-1e-7}"
+SS_MOSEK_SOLVE_FORM="${SS_MOSEK_SOLVE_FORM:-free}"
 
 REPOSITORY_ROOT="$(git rev-parse --show-toplevel)"
 EXPECTED_ROOT="/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
@@ -61,8 +62,10 @@ echo "[ss-conj-solve] started=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "[ss-conj-solve] gamma=$SS_EXPECTED_GAMMA"
 echo "[ss-conj-solve] cpus=${SLURM_CPUS_PER_TASK:-missing}"
 echo "[ss-conj-solve] input=$SS_INPUT_POINT"
+echo "[ss-conj-solve] mosek_solve_form=$SS_MOSEK_SOLVE_FORM"
 
 set +e
+export SS_MOSEK_SOLVE_FORM
 "$JULIA_BIN" \
     --project="$JULIA_PROJECT" \
     --startup-file=no \
