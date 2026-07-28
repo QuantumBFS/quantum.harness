@@ -46,6 +46,8 @@ implementation branch.
   mathematical specification and solver-status semantics.
 - [`basis-counts.md`](basis-counts.md): exact solver-free formal basis counts
   and raw dense-memory estimates.
+- [`structured-basis-manifest.md`](structured-basis-manifest.md): materialized
+  positive/gap row contract, completeness semantics, ordering, and SHA-256.
 - [`local-identities.md`](local-identities.md): exact two-, three-, and
   four-site identities and their role in structured relaxations.
 - [`spectralgap-refactor-plan.md`](spectralgap-refactor-plan.md): migration
@@ -58,6 +60,13 @@ assemble or solve an SDP. The external Mosek/SpectralGap/QMBCertify environment
 reported in [`notes/`](notes/) is a separate solver setup; its local patches
 must be committed and regression-tested before this repository can rely on
 them.
+
+The Julia checks reported here were run locally; they are not SCNet
+reproduction artifacts. Before the legacy inventory becomes a frozen oracle,
+Sihan and Xiansheng must each run the same pinned generator and validation
+commands independently on SCNet, retain the command/environment logs, and
+compare the resulting canonical digests. One person's remote run or the other
+person's local unit suite does not satisfy that two-party gate.
 
 ## Result language
 
@@ -74,4 +83,6 @@ them.
   Xiansheng.
 - Square model specification, structured-basis prototype, exact algebra, and
   solver-independent tests: Sihan.
+- Independent SCNet reproduction of the frozen manifest/inventory: both
+  members, from the same pinned revisions.
 - SDP assembly, certificate validation, and reported scans: joint review.

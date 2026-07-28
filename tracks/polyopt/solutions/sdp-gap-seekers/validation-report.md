@@ -13,7 +13,7 @@ julia --startup-file=no \
   tracks/polyopt/solutions/sdp-gap-seekers/test/runtests.jl
 ```
 
-Result: `182/182` checks passed.
+Result: `289/289` checks passed.
 
 ```text
 square patch geometry                       24
@@ -22,9 +22,78 @@ bare Pauli basis counts                    72
 full state-polynomial formal counts        13
 storage estimates                           2
 exact local spin identities                22
-generic solver-free problem adapter        36
+generic solver-free problem adapter        43
+structured basis manifests                100
 small finite-patch ED construction oracle   3
 ```
+
+## Structured basis manifest
+
+The first regression run deliberately added two checks before changing the
+implementation. Both failed:
+
+```text
+input PauliWord mutation changed an existing StateMonomial
+self-consistently rehashed one-row truncation passed manifest validation
+```
+
+The implementation now takes defensive copies of nested Pauli words, manifest
+entries, and site IDs. Validation reconstructs the exact row inventory for the
+declared family/version instead of checking only generic shape and a
+self-reported hash. The same two regressions then passed.
+
+An independent review added adversarial tests before the corresponding fixes.
+The first red run stopped on the delimiter-collision regression before the
+later testset could execute; the same test-first patch also encoded the
+remaining review findings:
+
+```text
+["C4","mirror"] and ["C4|mirror"] had the same problem hash
+the gap manifest was incorrectly marked incomplete at maximum degree 1
+no problem-contextual manifest validator existed
+reversed but equivalent inner-site IDs were rejected
+an out-of-range inner-site ID could enter a manifest
+```
+
+After the fixes, a one-argument validator proves only internal consistency.
+The contextual overload reconstructs the problem/role expectation and rejects
+consistently rehashed role, site, degree, and digest substitutions. Manifest
+site IDs are defensively copied, range-checked, deduplicated, and sorted.
+
+Additional checks cover:
+
+- positive degree `d` and gap degree `d-1`;
+- actual, non-renumbered inner-patch site IDs at `L=1` and `L=2`;
+- permutation invariance plus duplicate/out-of-range rejection for inner IDs;
+- full assembly-plan and problem-SHA invariance under inner-ID permutation;
+- gap-row inclusion in the positive rows;
+- prefix nesting when `d` increases;
+- duplicate, nested-mutation, and truncated-list rejection;
+- contextual rejection of role/site/degree/hash substitutions;
+- finite-inventory completeness at degrees `0`, `1`, and `2` for 1, 2, and 9
+  sites;
+- injective problem hashing for delimiter-bearing symmetry generators;
+- basis-hash independence from model coefficients and `γ`;
+- stable manifest and problem SHA-256 anchors.
+
+For `L=1`, `d=2`, `g=1/2`, and `γ=1/10`:
+
+```text
+positive rows = 703
+positive SHA-256 =
+  83befe24c09bccdc7d228fc60c606d301dd76c10688121e1e466d43a583d5c13
+
+gap rows = 7
+gap SHA-256 =
+  5be3d2db7be104d1bc431898496e8e34116787a7f14a30886fa6933924bea169
+
+problem SHA-256 =
+  f6f7cd7a0cc2e053e40ecd82f52a24438536869e3340b959cd7f68cab4467f4e
+```
+
+These hashes identify basis/problem inputs only. They are not solver
+certificates or numerical gap bounds. The problem digest uses the tagged,
+byte-length-prefixed schema `gap-problem-fingerprint-v2`.
 
 ## Small ED oracle
 
@@ -77,16 +146,50 @@ the SDP specification.
   absent.
 - No dependencies were installed to work around these unrelated environment
   failures.
-- The new Julia suite and all three solver-free scripts run with Julia 1.11.1
-  and standard libraries only.
-- No trailing whitespace was found in the new files.
-- The existing tracked README was not modified; all implementation artifacts
-  are currently untracked in the team branch.
+- The new Julia suite and all three standard-library solver-free scripts run
+  with Julia 1.11.1.
+- The separate legacy dump could not load locally because `SpectralGap` is not
+  installed in `julia-env`; no dependency was installed to manufacture a
+  local substitute for the required pinned SCNet reproduction.
+- `git diff --check`: passed for the complete structured-basis diff.
+- No dependencies were installed.
+
+These are local checks, not SCNet reproduction artifacts. The remote gate
+requires Sihan and Xiansheng to run the same pinned generator and validation
+commands independently on SCNet, archive command/environment logs, and compare
+canonical digests. Xiansheng's reported legacy-generator run and Sihan's local
+unit suite are distinct partial evidence; neither alone satisfies that gate.
+
+## Legacy-inventory interface audit
+
+`origin/feature/legacy-affine-inventory` at `a01a425` was inspected read-only;
+it was not merged, rebased, or modified. Its intended row mapping is compatible:
+legacy `word/aux` corresponds to the manifest's
+`operator_word/state_symbols`, and `pos/gpos` corresponds to
+`positive/gap`.
+
+The legacy branch is not yet a frozen coefficient-diff oracle:
+
+- its generator now covers Ising and Kagome `tsupp`, and its reported SCNet
+  run passed the 17/18-term assertions, but the generated math inventory and
+  canonical digest are not committed;
+- its schema says the variable header is excluded from SHA-256, while the
+  current script hashes the entire buffered output including that header;
+- its schema says solver-free runs omit run metadata, while the script always
+  writes a run-metadata file;
+- the full `(j,k) -> (tsupp row, coefficient)` wiring remains deferred, and the
+  branch's spec/status prose still says the generator has not been run.
+
+The current Square manifest is also flat and unsymmetrized, whereas the legacy
+inventory has labelled symmetry blocks. A later assembly contract must preserve
+block IDs explicitly; row order alone cannot supply that information.
 
 ## What remains unvalidated
 
-- equivalence of a refactored assembly with upstream Ising/Kagome block and
-  affine-constraint inventories;
+- a validated, byte-stable legacy Ising/Kagome inventory and
+  coefficient-by-coefficient equivalence with the generic encoding;
+- explicit symmetry/block metadata joining a flat manifest to legacy labelled
+  PSD blocks;
 - the actual state-polynomial moment and gap matrices for Square J1-J2;
 - any JuMP/solver backend;
 - status-to-semantic-result handling under real solver responses;
