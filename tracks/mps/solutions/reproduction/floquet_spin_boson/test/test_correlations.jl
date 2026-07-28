@@ -1,6 +1,12 @@
 using LinearAlgebra
 using Random
 
+function correlation_random_channels(rng, phase_count)
+    left = [randn(rng, ComplexF64, 4, 4) for _ in 1:phase_count]
+    right = [randn(rng, ComplexF64, 4, 4) for _ in 1:phase_count]
+    return left, right
+end
+
 function explicit_system_action(x, channel, χ)
     y = zeros(ComplexF64, 4χ)
     for sout in 1:4, a in 1:χ, sin in 1:4
@@ -69,7 +75,7 @@ end
         χ = 2
         M = 3
         q = randn(rng, ComplexF64, χ, 4, χ, 4)
-        left, right = random_channels(rng, M)
+        left, right = correlation_random_channels(rng, M)
         floquet = FloquetOperator(q, left, right)
         phase_states = [randn(rng, ComplexF64, 4χ) for _ in 1:M]
         v_left = ComplexF64[1 + 0.2im, -0.4 + 0.3im]
