@@ -52,12 +52,22 @@ for gamma in [0.25, 0.26, 0.30]
             "  dual=", r.dual, "  obj=", round(r.objective, digits=4),
             "  [", round(t, digits=1), "s]")
     if r.farkas_min_eig !== nothing
-        # §8 validation: the dual moment matrix (Farkas/SOS certificate) must be
-        # PSD for each block. min_eig >= -tol => certificate is valid.
+        # §8 validation. CAVEAT: under SLOW_PROGRESS + dual_status=NO_SOLUTION,
+        # JuMP dual() is not populated, so the reconstructed mmat is degenerate
+        # (all-zero). Detect that rather than false-positive on "0 is PSD".
         tol = 1e-6
-        psd_ok = all(me -> me >= -tol, r.farkas_min_eig)
-        println("    FARKAS cert: min_eig per block=", round.(r.farkas_min_eig, digits=6),
-                "  => ", psd_ok ? "PSD (certificate VALID, §8 satisfied)" : "NOT PSD (cert weak/invalid)")
+        norms = [norm(mm) for mm in r.farkas_mmat]
+        degenerate = all(n -> n < tol, norms)
+        if degenerate
+            println("    FARKAS cert: mmat norms=", round.(norms, digits=6),
+                    "  => DEGENERATE (dual() not populated under SLOW_PROGRESS;",
+                    " real extraction needs Mosek MSK_IPAR_INFEAS_REPORT_AUTO)")
+        else
+            psd_ok = all(me -> me >= -tol, r.farkas_min_eig)
+            println("    FARKAS cert: min_eig per block=", round.(r.farkas_min_eig, digits=6),
+                    " norms=", round.(norms, digits=6),
+                    "  => ", psd_ok ? "PSD (certificate VALID, §8 satisfied)" : "NOT PSD (cert weak/invalid)")
+        end
     end
     flush(stdout)
     open("gap_tfim_status.results", "a") do io
