@@ -118,3 +118,75 @@ ED result artifacts.
 - No push was performed, and A03 was not started.
 
 Final disposition: `DONE`.
+
+## External specification review — try 1 failed
+
+This section supersedes the pre-review `DONE` disposition above.  The external
+specification review examined HEAD
+`782f745b36983a7c268df673ec99ed2df10ca355` and concluded:
+
+> Not Spec compliant — BLOCKED. Three Important issues were found; the first
+> two are new finite-result errors and trigger the architecture stop signal.
+
+### Important 1 — order-dependent finite result
+
+Let `L = log(np.finfo(np.float64).max)`, with sampled source logpsi `0`.  The
+two neighbor terms are:
+
+- A: coefficient `1`, target logpsi `L`;
+- B: coefficient `1j * 1e300`, target logpsi `L - log(1e300)`.
+
+In A-then-B insertion order, the estimator returns approximately
+`1.7976931348622732e308 + i*1.7976931348622732e308`.  In B-then-A order, it
+raises `OverflowError`.  Both mappings represent the same mathematical row and
+should return the same finite complex value.
+
+Root-cause evidence: terms with equal effective log magnitude retain the first
+term as the anchor.  The two insertion orders therefore select different
+anchor rectangular scales and reach recovery paths with different overflow
+semantics.  The result is incorrectly dependent on mapping order.
+
+### Important 2 — safe negative log difference rejected
+
+Use sampled source logpsi `1e308`, two target logpsi values `1e308` and
+`-1e308`, and coefficient `1` for both terms.  The expected result is
+`1 + exp(-2e308)`, which rounds safely to approximately `1`.  Instead, forming
+the second relative log difference produces `-2e308`, and the implementation
+raises:
+
+`OverflowError: local estimator log scale is outside the supported range`.
+
+Root-cause evidence: `_log_difference` rejects every nonfinite floating result.
+A negative overflow in a log-magnitude difference is a safe underflowing term
+and should saturate to zero contribution; only a positive unrepresentable
+difference should be rejected.  The current shared rejection path therefore
+turns a finite row result into an exception.
+
+### Important 3 — non-Hermitian extreme matrix accepted
+
+Let `z = complex(max_float, max_float)` and pass the matrix
+`[[0, z], [0, 0]]` to `PreparedPairOperator.build`.  This matrix is plainly not
+Hermitian and must be rejected.  It is instead accepted.
+
+Root-cause evidence: `np.abs` overflows both the matrix scale and Hermitian
+defect to `inf`.  The comparison becomes `inf > inf`, which is false, so the
+non-Hermitian matrix passes validation.  Hermiticity needs an overflow-safe
+relative comparison.
+
+### Terminal disposition and next-attempt boundary
+
+- Try 1 result: `failed`.
+- Reviewer disposition: `Not Spec compliant — BLOCKED`.
+- The earlier ordinary-scale tests and performance record remain factual but
+  do not establish specification compliance against these finite-result and
+  validation counterexamples.
+- Try 1 active implementation time remains approximately `00:27`.  Work after
+  the external review was documentation-only closeout; no new active
+  implementation interval was started or inferred.
+- The commit containing this section is the terminal commit for try 1.
+- Any next rescue must start from that terminal commit in a new, independent
+  worktree.  It must not continue patching this try 1 worktree.
+- No try 2 or A03 work was started, no production code or tests were changed
+  after review, and no push was performed.
+
+Final try 1 disposition: `failed / terminal`.
