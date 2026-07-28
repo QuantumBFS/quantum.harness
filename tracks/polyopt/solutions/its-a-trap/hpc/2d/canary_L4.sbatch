@@ -22,15 +22,5 @@ julia -t 2 --project=julia-env \
   "c2d_L4:4:model=heis2d,extra=0,rdm=8,pso=0,lso=false"
 rc=$?
 echo "=== canary julia exit=$rc"
-# verdict: row exists, has opt, opt is a VALID lower bound of -0.7017802
-python3 - "$OUT/results.csv" <<'PY'
-import csv, sys
-rows = list(csv.DictReader(open(sys.argv[1])))
-assert rows, "no canary row"
-r = rows[-1]
-opt = float(r["opt"]) if r["opt"] else None
-assert opt is not None, "canary produced no optimum"
-E0 = -0.7017802
-assert opt <= E0 + 1e-6, f"INVALID BOUND: opt={opt} above 4x4 torus E0/N={E0}"
-print(f"CANARY OK: opt={opt}  (E0/N={E0}, slack={E0-opt:.3e})  status={r['termination_status']}")
-PY
+# verdict (compute nodes have no python3 — julia checker)
+julia tracks/polyopt/solutions/its-a-trap/hpc/2d/check_row.jl "$OUT/results.csv" canary
