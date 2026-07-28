@@ -161,3 +161,20 @@ is mathematically the same SDP and may change only the Newton factorization.
 Test it first at gamma=0 under the same 16-CPU, 32 GiB cap. Continue to
 gamma=1/2 only if factor fill or peak RSS improves; otherwise close the route
 after the gamma=0 artifact instead of repeating a worse setting.
+
+## 2026-07-29 — close the forced-dual route at gamma=0
+
+Slurm job `22988322` passed all fail-closed gates and recorded the requested
+solve form as `dual`, but Mosek reported `Optimizer - solved problem : the
+primal`. Its 68.5-million-before / 111-million-after factor nonzero counts and
+iterate sequence match the default real-cone gamma=0 run. It returned
+`OPTIMAL`, zero audited residual and PSD violation, and minimum eigenvalue
+`0.09561232145445703`.
+
+There is no factor-fill improvement to justify a gamma=1/2 repeat. The
+process peak was 6,235,104 KiB versus 5,917,112 KiB for the default, and the
+preserved `result.toml` SHA-256 is
+`b8007b0d9e50338cc770789a8472555b0ce1706f13f13b6e808ed4a11054ae36`.
+Close this tuning route and move to an exact model-level involution:
+`X↔Z, Y↦−Y`, a π spin rotation that commutes with the already-proved
+conjugation symmetry.

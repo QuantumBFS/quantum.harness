@@ -102,4 +102,18 @@ Updated: 2026-07-29 UTC.
 - Current best exact representation cuts gamma=1/2 process peak RSS by
   7.4x and total wall by 4.3x without changing the finite relaxation or its
   feasibility decision.
+- Forced-dual gamma=0 audit attempt r1, Slurm job `22988322`, requested
+  `MSK_SOLVE_DUAL` but Mosek still reported that it solved the primal and
+  reproduced the default factor signature: 68.5 million nonzeros before and
+  111 million after factorization. It returned the same residual-checked
+  feasible point class and minimum eigenvalue `0.09561232145445703`, while
+  process peak RSS rose to 6,235,104 KiB and total runner wall was 83.418 s.
+  The route is closed without a gamma=1/2 repetition. `result.toml` SHA-256
+  is `b8007b0d9e50338cc770789a8472555b0ce1706f13f13b6e808ed4a11054ae36`.
+- Active exact-memory route: quotient the conjugation-real model by the
+  order-two physical spin rotation `X↔Z, Y↦−Y`. This symmetry commutes with
+  computational-basis conjugation, identifies the two exchanged V4
+  character blocks, and exactly splits every stable block into its
+  involution eigenspaces. The next step is a source-only inventory of its
+  moment orbits and row-space splits before implementing a new derived model.
 - No decision-changing user or resource need is open.
