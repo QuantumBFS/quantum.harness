@@ -19,10 +19,10 @@ H = -sum_{i<j} J_L(j-i; sigma=1.75) Z_phys_i Z_phys_j
 
 where `J_L` is the pinned periodic Hurwitz-zeta image sum. In the rotated
 TeNPy basis, `X_phys` is `Sigmaz` and `Z_phys` is `Sigmax`. The even parity
-sector supplies the ground state and full, non-connected physical
-correlations; the odd parity sector supplies the first excitation. Thus
-`C(r)` is evaluated as the translation-averaged `Sigmax-Sigmax`
-correlation.
+sector supplies the ground state and the full correlation function without
+connected-correlation subtraction; the odd parity sector supplies the first
+excitation. Thus `C(r)` is evaluated as the translation-averaged
+`Sigmax-Sigmax` correlation.
 
 All calculations retain exact-zero exponential-channel pruning, HDF5
 checkpoints with full provenance, and initialization-only checkpoint reuse.
@@ -65,13 +65,20 @@ compare:
   periodic Hurwitz-zeta table, including maximum/RMS errors and the central
   tail;
 - `R_xi` at `Gamma=1.560` and `Gamma=1.565`;
-- the interpolated two-size crossing behavior over that fixed bracket;
+- the interpolated two-size crossing behavior over that fixed bracket,
+  using the same linear interpolation of
+  `R_xi(L,Gamma) - R_xi(2L,Gamma)` for both K values;
 - odd-even gaps at the same two Gamma values.
 
 The K comparison uses direct `chi=128` as its common MPS baseline, exact-zero
 pruning, and checkpointing. It is deliberately not a full K=32 scan or
 finite-size scaling campaign. K-induced changes are kept separate from the
 `K=24`, `chi=128` to `chi=256` MPS shifts.
+
+If K=32 cost becomes limiting, retain the L=64 comparisons and avoid
+repeating L=32 cells beyond the minimum needed to define the two-size
+crossing. Any resulting incomplete crossing comparison is labeled rather
+than replaced by an expanded or adaptive scan.
 
 ## Execution order and resumability
 
@@ -99,6 +106,9 @@ The local result is accepted as a validated reproduction when:
 - the `chi=128` to `chi=256` shifts are explicitly reported;
 - the `K=24` to `K=32` coupling, crossing, and gap shifts are explicitly
   reported;
+- the critical-region behavior remains qualitatively stable under the tested
+  chi and K variations, without requiring agreement with published
+  thermodynamic-limit values;
 - unresolved convergence is labeled rather than hidden or escalated
   automatically.
 
