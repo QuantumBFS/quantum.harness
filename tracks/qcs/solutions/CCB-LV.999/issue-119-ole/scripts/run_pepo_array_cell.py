@@ -46,7 +46,10 @@ def confined_run_root(run_dir: object, workspace_root: Path) -> Path:
     results_root = declared_results_root.resolve()
     if results_root != declared_results_root:
         raise ValueError("run_dir results root must not be a symlink")
-    resolved = (workspace / requested).resolve()
+    lexical_run_root = workspace / requested
+    resolved = lexical_run_root.resolve()
+    if resolved != lexical_run_root:
+        raise ValueError("run_dir selected root must not redirect through a symlink")
     try:
         resolved.relative_to(results_root)
     except ValueError as error:

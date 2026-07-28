@@ -656,6 +656,37 @@ def test_array_run_rejects_run_root_symlink_before_subprocess(tmp_path: Path):
     assert list(redirected.iterdir()) == []
 
 
+def test_array_run_rejects_matching_sibling_run_root_symlink_before_subprocess(
+    tmp_path: Path,
+):
+    """Breaks if one valid PEPO run identity can redirect into a sibling run."""
+    run_spec = _run_spec()
+    run_spec["run_dir"] = "results/issue119-pepo-A"
+    payload = ARRAY_RUNNER.selected_payload(run_spec, 1)
+    results_root = tmp_path / "results"
+    results_root.mkdir()
+    sibling = results_root / "issue119-pepo-B"
+    sibling.mkdir()
+    (results_root / "issue119-pepo-A").symlink_to(
+        sibling,
+        target_is_directory=True,
+    )
+    marker = tmp_path / "runner-invoked"
+    fake_runner = tmp_path / "fake-run-pepo.py"
+    _write_marker_runner(fake_runner, marker)
+
+    with pytest.raises(ValueError, match="run_dir"):
+        ARRAY_RUNNER.run_cell(
+            payload,
+            workspace_root=tmp_path,
+            python_bin=Path(sys.executable),
+            runner=fake_runner,
+        )
+
+    assert not marker.exists()
+    assert list(sibling.iterdir()) == []
+
+
 def test_array_run_rejects_cells_symlink_escape_before_subprocess(tmp_path: Path):
     """Breaks if a pre-existing cells symlink can redirect a selected cell outside its run."""
     payload = ARRAY_RUNNER.selected_payload(_run_spec(), 1)
