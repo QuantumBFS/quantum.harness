@@ -212,10 +212,15 @@ def _initialize_anchor_worker(
     numeric_matrix: np.ndarray,
 ) -> None:
     """Install the parent-compiled system in a spawn-safe worker process."""
-    _validated_numeric_system_matrix(system, numeric_matrix)
+    _validated_numeric_system_matrix(
+        system, numeric_matrix, require_readonly=False
+    )
+    worker_matrix = np.array(numeric_matrix, dtype=float, order="C", copy=True)
+    worker_matrix.setflags(write=False)
+    _validated_numeric_system_matrix(system, worker_matrix)
     global _WORKER_SYSTEM, _WORKER_NUMERIC_MATRIX
     _WORKER_SYSTEM = system
-    _WORKER_NUMERIC_MATRIX = numeric_matrix
+    _WORKER_NUMERIC_MATRIX = worker_matrix
 
 
 def _solve_anchor_worker(task: tuple[str, int]) -> AnchorSolve:
@@ -553,12 +558,16 @@ def _numeric_system_matrix(
 def _validated_numeric_system_matrix(
     system: ExactMetzlerSystem,
     matrix: np.ndarray,
+    *,
+    require_readonly: bool = True,
 ) -> np.ndarray:
     if not isinstance(matrix, np.ndarray):
         raise TypeError("numeric system matrix must be a NumPy array")
     if matrix.shape != system.coefficients.shape:
         raise ValueError("numeric system matrix has the wrong shape")
-    if not matrix.flags.c_contiguous or matrix.flags.writeable:
+    if not matrix.flags.c_contiguous or (
+        require_readonly and matrix.flags.writeable
+    ):
         raise ValueError("numeric system matrix must be C-contiguous and read-only")
     if not np.issubdtype(matrix.dtype, np.floating) or not np.all(
         np.isfinite(matrix)
@@ -583,12 +592,20 @@ def _empty_anchor_result(
 def solve_anchor(
     system: ExactMetzlerSystem, anchor_label: str, sign: int
 ) -> AnchorSolve:
-    return _solve_anchor_with_matrix(
-        system,
-        anchor_label,
-        sign,
-        _numeric_system_matrix(system),
-    )
+    _require_system(system)
+    _anchor_index(system, anchor_label)
+    _require_sign(sign)
+    _validate_system_field(system)
+    try:
+        matrix = _numeric_system_matrix(system)
+    except Exception as error:
+        return _empty_anchor_result(
+            anchor_label,
+            sign,
+            "error",
+            f"{type(error).__name__}: {error}",
+        )
+    return _solve_anchor_with_matrix(system, anchor_label, sign, matrix)
 
 
 def _solve_anchor_with_matrix(

@@ -5,6 +5,7 @@ import json
 import math
 import os
 from pathlib import Path
+import pickle
 import subprocess
 import sys
 import warnings
@@ -779,12 +780,16 @@ def test_anchor_worker_reuses_the_initialized_numeric_matrix() -> None:
     """Catches workers rebuilding a numeric system for each anchor-sign task."""
     system = _synthetic_system([[sp.sqrt(2), 0], [0, 1]])
     matrix = _numeric_system_matrix(system)
+    spawn_matrix = pickle.loads(pickle.dumps(matrix))
+    assert spawn_matrix.flags.writeable
     try:
-        overlap_klein._initialize_anchor_worker(system, matrix)
+        overlap_klein._initialize_anchor_worker(system, spawn_matrix)
         positive = overlap_klein._solve_anchor_worker(("x", 1))
         negative = overlap_klein._solve_anchor_worker(("x", -1))
 
-        assert overlap_klein._WORKER_NUMERIC_MATRIX is matrix
+        assert overlap_klein._WORKER_NUMERIC_MATRIX is not spawn_matrix
+        assert overlap_klein._WORKER_NUMERIC_MATRIX is not None
+        assert not overlap_klein._WORKER_NUMERIC_MATRIX.flags.writeable
         assert positive.status == "feasible"
         assert negative.status == "infeasible"
         assert not matrix.flags.writeable
