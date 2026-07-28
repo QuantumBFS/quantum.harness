@@ -1,22 +1,29 @@
 from dataclasses import FrozenInstanceError
+from pathlib import Path
 
 import numpy as np
 import pytest
 import quimb.tensor as qtn
 
+from ole_pepo.contraction import normalized_overlap_exact
 from ole_pepo.engine import (
     ProductObservablePEPO,
     ProgressRecord,
     build_pepo_circuit,
     reverse_lightcone_indices,
 )
-from ole_pepo.qasm import OLEProtocol, QASMGate
+from ole_pepo.exact import normalized_ole_dense, seven_site_oracle_protocol
+from ole_pepo.qasm import OLEProtocol, QASMGate, parse_qasm
 
 
 I = np.eye(2, dtype=np.complex128)
 X = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex128)
 Z = np.diag([1.0, -1.0]).astype(np.complex128)
 CZ = np.diag([1.0, 1.0, 1.0, -1.0]).astype(np.complex128)
+FULL_QASM = (
+    Path(__file__).resolve().parents[2]
+    / "inputs/49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm"
+)
 
 
 def _three_site_gates() -> tuple[qtn.Gate, ...]:
@@ -200,3 +207,19 @@ def test_build_pepo_circuit_refuses_protocol_without_cz_geometry():
 
     with pytest.raises(ValueError, match="CZ geometry"):
         build_pepo_circuit(protocol, max_bond=4, cutoff=1e-9)
+
+
+@pytest.mark.parametrize("delta_zero", [True, False])
+def test_seven_site_exact_pepo_matches_dense(delta_zero):
+    """Breaks if real PEPO evolution and the independent seven-site oracle diverge."""
+    full = parse_qasm(FULL_QASM.read_text(encoding="utf-8"))
+    protocol = seven_site_oracle_protocol(full, delta_zero=delta_zero)
+    dense = normalized_ole_dense(protocol, (52,))
+    circuit = build_pepo_circuit(protocol, max_bond=None, cutoff=0.0)
+    evolved = circuit.evolve_product({52: Z}, cutoff=0.0)
+    pepo = normalized_overlap_exact(evolved.operator, {52: Z})
+
+    assert pepo == pytest.approx(dense, abs=1e-10)
+    if delta_zero:
+        assert dense == pytest.approx(1.0, abs=1e-10)
+        assert pepo == pytest.approx(1.0, abs=1e-10)
