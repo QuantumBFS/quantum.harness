@@ -186,4 +186,13 @@ Updated: 2026-07-29 UTC.
   only their scalar coefficient maps to the 3,250 full-permutation orbit
   variables. This is an exact feasible-set quotient and avoids assuming a new
   complex phase-gauge block congruence.
+- Full spin-permutation model truth attempt r2, Slurm job `22988509`, passed
+  all 146 assertions, including two deterministic exact coefficient-map
+  builds and optimizer-free JuMP reconstruction. The derived model has 3,250
+  variables, zero affine equalities, the same 12 proved cone dimensions,
+  16,707 triangle entries, and maximum side 81. Peak process RSS was 965,468
+  KiB; `test.log` SHA-256 is
+  `9ef5f74de8b184d44233c2744f32a9977948c89f8f5bee5210d161cc0f67eae2`.
+- Next gate: clean solver-free full-permutation MOF builds and reloads for
+  gamma=0 and gamma=1/2.
 - No decision-changing user or resource need is open.

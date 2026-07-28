@@ -275,3 +275,16 @@ only its exact scalar coefficient maps onto the full S3 orbit inventory. This
 is sufficient for equivalence by group averaging and avoids making an
 unproved relation between conjugation phase gauges under permutations that
 move the Y axis.
+
+## 2026-07-29 — full-permutation derived model gate passes
+
+Slurm job `22988509` passed all 146 assertions after adding the concrete
+coefficient quotient and JuMP layer. Two independent exact builds produced
+identical coefficient-map and assembly hashes. The model has 3,250 variables,
+zero affine equalities, and retains the complete 12-cone spin-axis inventory
+with 16,707 triangle entries and maximum side 81.
+
+The passing `test.log` SHA-256 is
+`9ef5f74de8b184d44233c2744f32a9977948c89f8f5bee5210d161cc0f67eae2`;
+peak process RSS was 965,468 KiB. Proceed to clean solver-free MOF builds and
+reload checks for both fixed gamma values.
