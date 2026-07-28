@@ -329,6 +329,19 @@ Updated: 2026-07-29 UTC.
 - Isotypic gamma=0 gate job `22988910` and corrected spatial truth r2 job
   `22988911` are submitted under Slurm. Both are pending only on the shared
   association job cap.
+- Isotypic gamma=0 attempt r1, Slurm job `22988910`, subsequently passed
+  every immutable-input, six-layer reduction, source-hash, and nine-cone
+  reload gate. Mosek returned `OPTIMAL` with primal and dual feasible
+  points. Normalization was exactly 1, affine and PSD violations were zero,
+  and the minimum reconstructed eigenvalue was `0.11113568782699743`.
+  Solve wall was 6.624 s, total runner wall 23.124 s, process peak RSS
+  1,016,136 KiB, Slurm MaxRSS 1,018,020 KiB, and factor fill 8.53 million
+  nonzeros. `result.toml` SHA-256 is
+  `2fc5f7e8c5af8a3a3d1ab425ff38d24d01948361dd02e1e6af5fe9f3db65cb07`;
+  the Slurm log SHA-256 is
+  `6758ca56c0296ab4e5194e283a7729e320fe27c5bc368419389755e3388b548e`.
+  This gate authorizes isotypic gamma=1/2 after the two old-source truth jobs
+  finish and the remote worktree can safely advance.
 - Nine-cone gamma=1/2 attempt r1, Slurm job `22988816`, passed every
   fail-closed input, setup, reduction, source-hash, and reloaded-cone gate.
   Mosek returned `OPTIMAL` with primal and dual feasible points.

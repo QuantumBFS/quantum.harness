@@ -586,6 +586,27 @@ and then gamma 1/2, records every source hash and layer schema, and
 independently reloads all named cones. Keep it unsubmitted until both new
 truth gates pass.
 
+## 2026-07-29 — isotypic gamma=0 gate passes
+
+Slurm job `22988910` passed the immutable MOF/runmeta manifests, fixed setup,
+all six exact-reduction schemas and counts, all 17 recorded source hashes,
+and the reloaded inventory of 3,250 variables and nine named cones. Mosek
+returned `OPTIMAL` with primal and dual feasible points. Independent
+reconstruction gave normalization 1, zero affine and PSD violations, and
+minimum block eigenvalue `0.11113568782699743`.
+
+Solve wall was 6.624 s, total runner wall 23.124 s, process peak RSS
+1,016,136 KiB, Slurm MaxRSS 1,018,020 KiB, and the factor contained
+8.53 million nonzeros. Relative to the preceding nine-cone gamma=0 solve,
+the exact isotypic representation reduces process RSS by 40.2%, factor fill
+by 67.6%, and total wall by 16.2%. `result.toml` SHA-256 is
+`2fc5f7e8c5af8a3a3d1ab425ff38d24d01948361dd02e1e6af5fe9f3db65cb07`;
+the Slurm-log SHA-256 is
+`6758ca56c0296ab4e5194e283a7729e320fe27c5bc368419389755e3388b548e`.
+The gamma=0 equivalence gate passes and authorizes isotypic gamma=1/2.
+Wait for the spatial and continuous jobs running from commit `2b4e3da`
+before advancing their shared remote worktree to the value-export runner.
+
 ## 2026-07-29 — define the combined spin/spatial exact route
 
 The shared Slurm association cap is delaying all three active jobs before
