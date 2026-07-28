@@ -31,6 +31,8 @@
   数守恒半群锥的 14 万权重筛选、80 位反例和完整 BdG 边界；
 - [SPECULATIVE_STRUCTURE_RESULTS.md](SPECULATIVE_STRUCTURE_RESULTS.md)：奇数阶 monomial
   的一般证明、12 族 19.2 万权重、四类 80 位反例和 Majorana 宇称猜想；
+- [ODD_BLOCK_TN_LOCALITY_AUDIT.md](ODD_BLOCK_TN_LOCALITY_AUDIT.md)：局域 `C3`
+  route 与 crossed TN hopping 的六模式两层精确负权，及 block-TN 的物理降级边界；
 - [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
   spinor/exterior-cone 候选的定义、排重与停止条件；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络

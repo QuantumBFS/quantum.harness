@@ -6,7 +6,7 @@
 
 我们已经累计检查 4,044,000 个主权重，另做 640 条宇称分辨 Majorana 历史；每条历史
 分别计算 even、odd 和完整 Fock 迹。我们已完成经典群、标准 Hermitian AZ、Majorana 双锥、
-15 个新半群候选和七个 AZ 幸存类自然半群锥的系统排查。最新进展是找到一个有一般证明的
+15 个新半群候选和七个 AZ 幸存类自然半群锥的系统排查。我们找到一个有一般证明的
 恒正矩阵类：三对角 Metzler
 路径生成元的指数乘积全非负，因此任意维数、任意时间片都有 `det(I+D)>=1`。它已映射到
 开放 Hubbard 链和单 flavor 排斥 `t-V` 链的 HS 时间片。现在又得到排斥 `t-V` 局部
@@ -15,8 +15,10 @@
 目前仍不能声称发现了新 Hamiltonian。另一方面，任意两个不同旋转的 split cones 已由
 显式两层反例完全关闭。BDI/AII/DIII/CII 的自然数守恒锥也完成第一轮：真正放松已知
 对称的四项均产生负权或复权，三个零失败项仍只是已知 split/Kramers 机制。最新一轮又
-找到有一般证明的奇数阶 positive-monomial / block-TN 路由半群，并在 canonical
-convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值猜想。
+找到有一般证明的奇数阶 positive-monomial / block-TN 路由半群；但它最自然的局域闭包
+已被两个合法时间片的精确反例 `det(I+XR)=-2` 关闭。抽象固定分区定理仍正确，不能直接
+升级为局域无符号模型。当前尚未关闭的具体方向是在 canonical convention 下观察到的
+Majorana 宇称分辨 period-4 数值猜想。
 
 ## 已经完成
 
@@ -43,7 +45,8 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
    - `speculative-structures-v1`：960 格、192,000 个行列式。
    - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
 4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现、精确非对称键门
-   分解和 graded-monomial 的 Majorana 包含证书；219 个自动测试全通过。
+   分解、graded-monomial 的 Majorana 包含证书和 block-TN 局域闭包精确反例；220 个
+   自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -133,7 +136,9 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
   `det(I+B)=product_C(1+product_{i in C}d_i)>0`，是任意深度的一般证明；
 - 三循环已有负的非主子式，所以它不属于 ordinary TN；类包含任意正对角矩阵，也排除
   固定 Kramers 和公共范数收缩；
-- 奇数循环的 block-TN 推广同样严格恒正，是当前最值得寻找局域 HS 映射的候选；
+- 奇数循环的固定分区 block-TN 推广同样严格恒正；但局域站点内 `C3` 路由与跨站
+  flavor-preserving TN hopping 使用交叉分区，已经在两站点、三 flavor、两层得到
+  `det(I+XR)=-2`，因此最自然的局域闭包不成立；
 - 偶阶 `V4` 路由已有精确 `-9/4` 反例；moving metric、双向 reciprocal coupling 和
   near-commuting 并集分别产生 4,542、3,894、846 个负权，代表例均由 80 位重放；
 - fixed `l_infinity`、reciprocal-parabolic 和 commuting 类严格恒正，但分别属于公共
@@ -168,9 +173,10 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 ## 下一步建议
 
 不再重复扫描整个命名群、普通 AZ 类、自然数守恒 AZ metric cone 或同分布双锥。下一步
-围绕两个新候选闭环：
+围绕尚未关闭的候选闭环：
 
-1. 把 graded monomial 作为已知类约化案例存档，不再投入新物理类的主线资源；
+1. 把 graded monomial 作为已知类约化案例、把 odd block-TN 局域映射作为精确失败案例
+   存档，不再投入新物理类的主线资源；
 2. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
 3. 若该方向不能闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
    编码。
@@ -201,6 +207,7 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 - [AZ 幸存类半群锥](AZ_SURVIVOR_CONE_RESULTS.md)
 - [激进候选首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)
 - [graded monomial 结果与排重](GRADED_MONOMIAL_RESULTS.md)
+- [odd block-TN 局域性审计](ODD_BLOCK_TN_LOCALITY_AUDIT.md)
 - [激进候选清单](SPECULATIVE_CANDIDATE_BATCH.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)

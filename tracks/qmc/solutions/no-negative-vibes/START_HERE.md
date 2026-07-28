@@ -65,6 +65,10 @@
   吸引，因而严格包含在 2016 Majorana reflection positivity 类中。它是有用的矩阵
   表述和特殊 CT 分解，不是新的无符号 Hamiltonian 类。进一步文献核对还确认，所用
   cycle factor 是已知 monomial 特征多项式分解的直接推论，因此矩阵端也不主张新定理。
+- 对旧的 odd block-TN 候选完成最关键的局域闭环：两个格点、三个 flavor 上，
+  independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
+  实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
+  Hamiltonian 推广已关闭。
 - 当前完整自动测试为 `219 passed`。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
@@ -88,18 +92,20 @@
    证明、四类 80 位反例和 Majorana 宇称猜想。
 9. [graded monomial 排重结果](docs/GRADED_MONOMIAL_RESULTS.md)：看 crossing
    cycle 定理、奇环模型，以及为什么它最终属于已知 Majorana 正性类。
-10. [激进候选清单](docs/SPECULATIVE_CANDIDATE_BATCH.md)：看已占位的下一批
+10. [odd block-TN 局域闭环](docs/ODD_BLOCK_TN_LOCALITY_AUDIT.md)：看固定分块
+   定理为何不能无代价局域化，以及两层整数反例。
+11. [激进候选清单](docs/SPECULATIVE_CANDIDATE_BATCH.md)：看已占位的下一批
    spinor/exterior-cone 方向。
-11. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
-12. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
-13. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
-14. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
-15. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
-16. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-17. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-18. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-19. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-20. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+12. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
+13. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
+14. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
+15. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
+16. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
+17. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+18. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+19. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+20. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+21. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
@@ -131,8 +137,7 @@ cd /home/volper/harness_quantum/signfree-qmc
 
 外围宽扫和第一批激进结构筛选已完成，不需要重复。现在做三件事：
 
-1. 保留 graded monomial 作为已知类约化案例，不再把其奇环吸引模型当成新物理主线；
-   若继续研究，只考察其 cycle-factor/grade 表述是否带来算法效率，而不主张新正性类；
+1. graded monomial 和 odd block-TN 都转为已知类/精确边界回归，不再作为新物理主线；
 2. 从 Majorana reflection-positivity 证明中推导或推翻
    `pi_*=(-1)^[m(m+1)/2]` 的受保护宇称；
 3. 若两条都不能物理闭环，再攻击 spinor-Metzler、非诱导 exterior-cone 或真正改变

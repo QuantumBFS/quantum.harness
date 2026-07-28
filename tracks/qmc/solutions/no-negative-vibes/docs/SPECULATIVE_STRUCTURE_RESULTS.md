@@ -4,7 +4,7 @@
 
 ## 一句话结论
 
-首批得到两个值得继续追、但物理映射尚未完成的结构：
+首批曾得到两个值得继续追、但物理映射尚未完成的结构：
 
 1. **奇数阶 positive-monomial / block-TN 路由半群**：有任意深度的一般正性证明，
    包含 ordinary TN 之外的矩阵，也不能由固定 Kramers 或公共范数收缩解释；
@@ -12,8 +12,15 @@
    在 canonical convention 下完全符合 `pi_*=(-1)^[m(m+1)/2]` 的受保护扇区猜想；
    每条历史分别计算 even、odd 和完整 Fock 迹，另一扇区在每个测试维数都观察到数值负权。
 
-第一项的恒正矩阵定理已经证明，文献和物理新颖性仍是候选；第二项仍只是高质量数值猜想。
-两者都还没有完成局域 Hamiltonian/HS 映射，因此不能声称已经发现新的物理无符号模型。
+后续排重和局域闭环已经改变第一项的判断：
+
+- monomial cycle-factor 是已知特征多项式公式的直接推论，矩阵端不再主张新定理；
+- 固定 block partition 的正性定理仍成立；
+- independent local `C3` routes 与 crossed TN hopping 已有六模式、两层、整数矩阵
+  反例 `det(I+XR)=-2`，自然局域物理推广关闭。
+
+因此 odd monomial / block-TN 已降为 `math-only / natural-local-closure-falsified`。
+第二项仍只是高质量数值猜想。两者都不能声称新的物理无符号模型。
 
 同时，四个看似自然的放松全部被淘汰：
 
@@ -60,7 +67,7 @@ split `D_4` Lusztig 锥也零负例，但它整体位于已知 `SO(4,4)` split-o
 只能是浮点乘积的数值坍缩；V4 则允许真实零权。所有严格幸存者的结论来自下面的一般证明，
 不依赖这些病态样本。
 
-## 新主候选：奇数阶 positive-monomial 半群
+## 数学幸存、物理降级：奇数阶 positive-monomial 半群
 
 ### 定义
 
@@ -120,9 +127,9 @@ monomial/TN pattern，不单独证明可逆性。回归测试对代表样本调�
   `exp(+/- 2 pi i/3)`，而 TN 矩阵的本征值为非负实数。相似变换保谱，因此不存在一个
   固定相似变换把整个类送进 TN。
 
-这还不是完整的文献新颖性证明。针对 “odd-order monomial + fermion determinant/QMC”
-的定向 arXiv 检索没有找到直接先例，但必须继续查矩阵半群、`P0` 矩阵和 generalized
-permutation 文献，不能把“暂时没搜到”写成“此前无人发现”。
+后续文献核对确认，monomial 矩阵的特征多项式按 permutation cycles 分解是已知结果；
+上述正性是对奇数阶群和正权的直接推论。因此它仍是正确的 QMC 证书，但不作为新的矩阵
+定理主张。
 
 ### block-TN 推广
 
@@ -139,9 +146,10 @@ det[I + (-1)^(ell-1) X_ell...X_1].
 `ell` 因而不可能让原块循环产生负实本征值。按照 Culver 的 real-log criterion，该实
 可逆矩阵存在实对数。奇异 TN 只属于数学闭包边界，不是本轮 `B=exp(A)` 生成器的一部分。
 
-这条推广的物理吸引力比纯标量版本更高：它可能把已有的一维 TN 局部传播通过一个离散
-奇循环 HS 变量进行路由。但当前构造的实对数一般是稠密/非局域的，尚未得到一个自然局域
-Hamiltonian。
+这条推广曾被认为可能把一维 TN 传播通过离散奇循环 HS 变量进行路由。后续
+[局域闭环审计](ODD_BLOCK_TN_LOCALITY_AUDIT.md)表明：让路由在每个格点独立局域化，
+再用 flavor-preserving TN hopping 连通格点，会在最短两层产生精确负权 `-2`。
+固定全局 block partition 的定理未被否定，但尚无自然局域 Hamiltonian。
 
 ## 四个被击穿的边界
 
@@ -282,7 +290,7 @@ float64 负权，但尚未做任意精度重放。如果能从 2016 reflection-p
 
 | 方向 | 数学状态 | 新颖性状态 | 物理状态 |
 |---|---|---|---|
-| odd monomial / block-TN | 已有一般证明 | 有希望，仍需完整文献排重 | 尚无局域 HS 映射 |
+| odd monomial / block-TN | 固定分块已有一般证明 | 底层公式已知 | 自然局域闭包有精确反例 |
 | Majorana protected parity | canonical convention 下 640 条零失败猜想 | 有希望，需解析证明 | 可直接关联固定宇称 ensemble |
 | fixed `l_infinity` | 已有一般证明 | 公共范数收缩，优先级低 | 可能只是强衰减区 |
 | reciprocal parabolic | 已有一般证明 | 三角闭包，优先级中低 | 尚无自然模型 |
@@ -291,10 +299,10 @@ float64 负权，但尚未做任意精度重放。如果能从 2016 reflection-p
 
 接下来的真正门槛不是再把样本数乘十，而是：
 
-1. 为 odd monomial grade 找到局域、可采样的 HS 离散变量；
-2. 查清 `P0`/monomial matrix semigroup 文献中的直接先例；
-3. 证明或推翻 Majorana 宇称公式；
-4. 把 spinor-Metzler 或非诱导 exterior-cone 做成非已知机制的可行锥。
+1. odd/block-TN 转为存档和回归边界，不继续常规局域化；
+2. 证明或推翻 Majorana 宇称公式；
+3. 把 spinor-Metzler 或非诱导 exterior-cone 做成非已知机制的可行锥；
+4. 只有出现 constrained gauge/ancilla 新机制时才重新打开 block-TN。
 
 ## 复现与代码
 

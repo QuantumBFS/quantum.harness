@@ -24,10 +24,15 @@
 - 两个不同旋转 split-contraction cones 的完整并集也被任意小角两层解析反例关闭。
 - BDI/AII/DIII/CII 七个自然数守恒半群锥已完成 14 万权重初筛；四个非平凡放松项出现
   负权或复权，三个零失败项分别约化到已知 split/Kramers 机制。
+- graded monomial 已约化到已知 `su(1|1)` 顶点和 Majorana reflection positivity；
+  奇数阶 fixed-partition block-TN 虽有严格正性证明，但最自然的局域闭包已由两站点、
+  三 flavor、两层精确反例 `det(I+XR)=-2` 关闭。
 
-接下来不应继续增加同分布随机扫描。**主线先围绕 TN 路径类完成新颖性和物理推广闭环。**
-它的数学正确性已经解决，尚未解决的是“是否超出已知一维无符号事实”。“复 Majorana 简洁
-矩阵语言”继续作为支撑工具：只做到足以可靠排重、判断 Spin/Pfaffian 分支和检验候选。
+接下来不应继续增加同分布随机扫描。TN 路径、graded monomial 和 odd block-TN 的当前
+自然物理闭包均已得到明确边界，**主线转向 Majorana 宇称猜想的证明或反例**。若它也被
+关闭，再依次进入 spinor-Metzler、非诱导 exterior-cone 和非平凡 gauge/ancilla 编码。
+“复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
+分支和检验候选。
 
 ## 主线 A：发现新的物理无符号类
 
@@ -48,19 +53,23 @@
 
 按优先级研究：
 
-1. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
+1. **Majorana 宇称分辨半群**：先把当前 period-4 数值规律写成精确命题，重放互补扇区
+   的最小负例，并从 2016 reflection-positivity 证明判断受保护扇区是否真有乘法闭包；
+2. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
+   要求它不是任意单粒子非负矩阵通过外幂表示的平凡提升；
+3. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
    但普通远邻 hopping 被扇区符号 no-go 关闭；简单 Fock ancilla 投影/偏迹仍保持矩阵元
    非负，也无效。下一步必须显式改变物理 Hilbert 空间/规范约束，或使用相关宇称串；
-2. **比 TN 更大的主子式非负半群**：只要求乘积的全部主子式非负，研究 TN 是否存在物理
+4. **比 TN 更大的主子式非负半群**：只要求乘积的全部主子式非负，研究 TN 是否存在物理
    可用的严格扩张；
-3. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
+5. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
    不存在一个把它直接约化到已知类的固定全局 `J1,J2`；
-4. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
+6. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
    允许真实 pairing，并用 Pfaffian/Spin trace 而非只看 determinant，再逐项排除已知
    Majorana/Kramers/2024 半群；
-5. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
+7. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
    分解实际可达、且在乘法下闭合的子集；
-6. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
+8. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
    并有额外机制控制剩余 `Z2` 符号时才继续。
 
 ### 候选进入计算前的硬门槛
@@ -190,19 +199,22 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 1. **已完成**：`U(p,q)` 相位律、TN 路径严格证明、两个 HS 基线、139.2 万权重筛选、
    TN 对固定 Kramers/split/2024 条件的代数排重，以及精确非对称 `t-V` 键门分解。
 2. **已完成**：`AZ-survivor-cones-v1` 的 14 万权重筛选；自然数守恒放松没有新幸存者。
-3. **立即开始**：复核 TN 非归约证明，并沿 bond-channel/discrete HS 引用链排重键门公式。
-4. **同步进行**：攻击非平凡 gauge/ancilla 编码与宇称串相关 hopping，尝试同时越过
+3. **已完成**：graded monomial 已知类排重；odd fixed-partition block-TN 定理确认，
+   以及其自然局域 crossed-partition 闭包的精确 `-2` 反例。
+4. **立即开始**：复核 Majorana 宇称 period-4 猜想，先做精确重放和最小维证明/反例。
+5. **随后进行**：攻击 spinor-Metzler、非诱导 exterior-cone，以及非平凡 gauge/ancilla
+   编码与宇称串相关 hopping，尝试同时越过
    连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-5. **按需补足**：先完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-6. 若正和路线仍约化为已知一维事实，转向更大的主子式非负乘法半群或 ancilla 投影。
-7. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+6. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
+7. 若上述路线仍约化为已知类，转向更大的主子式非负乘法半群。
+8. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
 近期精力分配：
 
 ```text
-20%  TN 新颖性证明复核与文献引用链
-60%  TN 平面网络的 Hamiltonian/HS 物理推广
-20%  复 Majorana 与候选排重基础设施
+50%  Majorana 宇称猜想的证明、反例和精确证书
+30%  spinor/exterior/gauge 新候选及已知类排重
+20%  复 Majorana、Pfaffian 与 Spin-trace 基础设施
 ```
 
 ## 两人协作建议

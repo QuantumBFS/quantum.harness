@@ -4,12 +4,13 @@ from itertools import combinations
 
 import numpy as np
 import pytest
-from scipy.linalg import expm
+from scipy.linalg import expm, logm
 
 from oracle.monomial_candidates import (
     available_cases,
     even_v4_boundary_factors,
     factor_structure_residual,
+    local_c3_crossed_tn_boundary_factors,
     random_factor,
     real_exponential_witnesses,
     real_log_audit,
@@ -137,6 +138,32 @@ def test_random_even_v4_products_find_the_expected_boundary_failure() -> None:
 
     assert any(weight < -1e-9 for weight in classifications)
     assert any(weight > 1e-9 for weight in classifications)
+
+
+def test_local_c3_routes_and_crossed_tn_hopping_have_exact_negative_weight() -> None:
+    hopping, route = local_c3_crossed_tn_boundary_factors()
+
+    assert np.allclose(route @ route @ route, np.eye(6), atol=1e-13)
+    route_logarithm = logm(route)
+    assert np.linalg.norm(route_logarithm.imag) < 1e-12
+    assert np.allclose(expm(route_logarithm.real), route, atol=1e-12)
+
+    for flavor in range(3):
+        modes = (flavor, 3 + flavor)
+        block = hopping[np.ix_(modes, modes)]
+        assert np.allclose(block, block.T, atol=1e-14)
+        assert np.min(block) > 0.0
+        assert np.linalg.det(block) > 0.0
+        assert np.linalg.eigvalsh(block).min() > 0.0
+
+    hopping_logarithm = logm(hopping)
+    assert np.linalg.norm(hopping_logarithm.imag) < 1e-12
+    assert np.allclose(expm(hopping_logarithm.real), hopping, atol=1e-12)
+
+    assert np.linalg.det(np.eye(6) + hopping) > 0.0
+    assert np.linalg.det(np.eye(6) + route) > 0.0
+    weight = float(np.linalg.det(np.eye(6) + hopping @ route))
+    assert np.isclose(weight, -2.0, atol=1e-12)
 
 
 def test_structure_residual_rejects_dense_perturbation() -> None:
