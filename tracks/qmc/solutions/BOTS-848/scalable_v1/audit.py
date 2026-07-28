@@ -11,6 +11,9 @@ from pathlib import Path
 from .protocol import ProtocolConfig
 
 
+REVEAL_ONLY_CANDIDATE_MODULE_PREFIXES = ("scalable_v1.overlap",)
+
+
 @dataclass(frozen=True)
 class AuditResult:
     valid: bool
@@ -161,7 +164,11 @@ def verify_manifest(
     source_items = payload.get("source_files", [])
     if not source_items:
         issues.append("source files must be nonempty")
-    forbidden_prefixes = protocol.oracle["forbidden_module_prefixes"]
+    forbidden_prefixes = tuple(protocol.oracle["forbidden_module_prefixes"])
+    candidate_forbidden_prefixes = (
+        *forbidden_prefixes,
+        *REVEAL_ONLY_CANDIDATE_MODULE_PREFIXES,
+    )
     forbidden_fragments = protocol.oracle["forbidden_path_fragments"]
     root = Path(project_root).resolve()
     for item in source_items:
@@ -177,10 +184,10 @@ def verify_manifest(
         for module in sorted(imported_modules(source)):
             if any(
                 module == prefix or module.startswith(f"{prefix}.")
-                for prefix in forbidden_prefixes
+                for prefix in candidate_forbidden_prefixes
             ):
                 issues.append(f"forbidden candidate import: {module}")
-        for prefix in forbidden_prefixes:
+        for prefix in candidate_forbidden_prefixes:
             if prefix in source and not any(prefix in issue for issue in issues):
                 issues.append(f"forbidden candidate module reference: {prefix}")
         for fragment in forbidden_fragments:

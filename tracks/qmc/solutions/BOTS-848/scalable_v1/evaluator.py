@@ -18,7 +18,12 @@ from .gates import (
     apply_ed_reveal,
     evaluate_pre_reveal,
 )
-from .overlap import build_ed_overlap_oracle, evaluate_overlaps
+from .overlap import (
+    CONTINUOUS_IMPORTANCE_METHOD,
+    EXACT_OCCUPATION_METHOD,
+    build_ed_overlap_oracle,
+    evaluate_overlaps,
+)
 from .protocol import ProtocolConfig
 from .resources import RuntimeMeter
 from .statistics import blocking_estimate, combine_independent
@@ -28,7 +33,13 @@ SCHEMA_VERSION = "challenge-15-scalable-v1.0"
 L2_M_VALUES = (-2, -1, 0, 1, 2)
 L2_M_KEYS = frozenset(str(m) for m in L2_M_VALUES)
 FIDELITY_ESTIMATE_KEYS = frozenset(
-    {"mean", "standard_error", "effective_sample_size"}
+    {
+        "mean",
+        "standard_error",
+        "method",
+        "raw_sample_count",
+        "effective_sample_size",
+    }
 )
 ED_COMPARISON_KEYS = frozenset(
     {
@@ -386,14 +397,29 @@ def _validate_fidelity_record(estimate: Any) -> None:
         raise ValueError(
             "run record fidelity standard_error must be finite and nonnegative"
         )
+    method = estimate.get("method")
+    if method not in {EXACT_OCCUPATION_METHOD, CONTINUOUS_IMPORTANCE_METHOD}:
+        raise ValueError("run record fidelity method is invalid")
+    raw_sample_count = estimate.get("raw_sample_count")
+    if type(raw_sample_count) is not int or raw_sample_count <= 0:
+        raise ValueError("run record fidelity raw sample count must be positive")
     effective_sample_size = estimate.get("effective_sample_size")
-    if (
+    if method == EXACT_OCCUPATION_METHOD:
+        if effective_sample_size is not None:
+            raise ValueError("run record exact occupation ESS must be null")
+        if standard_error != 0.0:
+            raise ValueError(
+                "run record exact occupation standard_error must be zero"
+            )
+    elif (
         type(effective_sample_size) is not float
         or not math.isfinite(effective_sample_size)
         or effective_sample_size <= 0.0
+        or effective_sample_size > raw_sample_count
     ):
         raise ValueError(
-            "run record fidelity effective_sample_size must be finite and positive"
+            "run record fidelity effective_sample_size must be finite, positive, "
+            "and no greater than raw_sample_count"
         )
 
 

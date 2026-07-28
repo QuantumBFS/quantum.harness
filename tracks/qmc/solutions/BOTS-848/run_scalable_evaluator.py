@@ -6,6 +6,7 @@ import importlib
 from pathlib import Path
 from typing import Any
 
+from scalable_v1.audit import verify_manifest
 from scalable_v1.evaluator import evaluate_candidate, write_json_report
 from scalable_v1.protocol import ProtocolConfig, load_protocol
 
@@ -49,6 +50,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     protocol = load_protocol()
     if arguments.training_seed not in protocol.training["seeds"]:
         parser.error("training seed must be one of the frozen protocol seeds")
+
+    audit = verify_manifest(
+        arguments.manifest,
+        project_root=arguments.project_root,
+        protocol=protocol,
+        expected_training_seed=arguments.training_seed,
+    )
+    if not audit.valid:
+        raise ValueError(f"manifest audit failed: {'; '.join(audit.issues)}")
 
     factory = load_factory(arguments.candidate)
     candidate, diagnostics = factory(protocol, arguments.training_seed)

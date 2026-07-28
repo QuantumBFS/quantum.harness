@@ -14,6 +14,8 @@ from .protocol import ProtocolConfig
 
 L2_M_VALUES = (-2, -1, 0, 1, 2)
 OVERLAP_LABELS = ("ground", "-2", "-1", "0", "1", "2")
+EXACT_OCCUPATION_METHOD = "exact_occupation_normalized_overlap"
+CONTINUOUS_IMPORTANCE_METHOD = "candidate_importance_block_jackknife"
 
 
 def _finite_complex_vector(values: Any, *, name: str) -> np.ndarray:
@@ -72,36 +74,74 @@ def normalized_fidelity(
 class FidelityEstimate:
     mean: float
     standard_error: float
-    effective_sample_size: float
+    effective_sample_size: float | None
+    method: str = CONTINUOUS_IMPORTANCE_METHOD
+    raw_sample_count: int = 1
 
     def __post_init__(self) -> None:
-        values = (self.mean, self.standard_error, self.effective_sample_size)
+        values = (self.mean, self.standard_error)
         if any(type(value) is bool for value in values):
             raise ValueError("fidelity estimate values must be finite")
         try:
-            mean, standard_error, effective_sample_size = map(float, values)
+            mean, standard_error = map(float, values)
         except (TypeError, ValueError, OverflowError) as error:
             raise ValueError("fidelity estimate values must be finite") from error
-        if not all(
-            math.isfinite(value)
-            for value in (mean, standard_error, effective_sample_size)
-        ):
+        if not all(math.isfinite(value) for value in (mean, standard_error)):
             raise ValueError("fidelity estimate values must be finite")
         if mean < 0.0 or mean > 1.0:
             raise ValueError("fidelity mean must be between zero and one")
         if standard_error < 0.0:
             raise ValueError("fidelity standard_error must be nonnegative")
-        if effective_sample_size <= 0.0:
-            raise ValueError("fidelity effective_sample_size must be positive")
+        if self.method not in {EXACT_OCCUPATION_METHOD, CONTINUOUS_IMPORTANCE_METHOD}:
+            raise ValueError("fidelity method is invalid")
+        if type(self.raw_sample_count) is not int or self.raw_sample_count <= 0:
+            raise ValueError("fidelity raw sample count must be a positive integer")
+
+        effective_sample_size: float | None
+        if self.method == EXACT_OCCUPATION_METHOD:
+            if self.effective_sample_size is not None:
+                raise ValueError("exact occupation ESS must be null")
+            if standard_error != 0.0:
+                raise ValueError("exact occupation standard_error must be zero")
+            effective_sample_size = None
+        else:
+            if (
+                self.effective_sample_size is None
+                or type(self.effective_sample_size) is bool
+            ):
+                raise ValueError(
+                    "fidelity effective_sample_size must be finite and positive"
+                )
+            try:
+                effective_sample_size = float(self.effective_sample_size)
+            except (TypeError, ValueError, OverflowError) as error:
+                raise ValueError(
+                    "fidelity effective_sample_size must be finite and positive"
+                ) from error
+            if (
+                not math.isfinite(effective_sample_size)
+                or effective_sample_size <= 0.0
+                or effective_sample_size > self.raw_sample_count
+            ):
+                raise ValueError(
+                    "fidelity effective_sample_size must be finite, positive, "
+                    "and no greater than raw_sample_count"
+                )
         object.__setattr__(self, "mean", mean)
         object.__setattr__(self, "standard_error", standard_error)
         object.__setattr__(self, "effective_sample_size", effective_sample_size)
 
-    def to_dict(self) -> dict[str, float]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "mean": float(self.mean),
             "standard_error": float(self.standard_error),
-            "effective_sample_size": float(self.effective_sample_size),
+            "method": self.method,
+            "raw_sample_count": self.raw_sample_count,
+            "effective_sample_size": (
+                None
+                if self.effective_sample_size is None
+                else float(self.effective_sample_size)
+            ),
         }
 
 
@@ -155,7 +195,17 @@ def _estimate_ratio_fidelity(
         / block_count
         * float(np.sum((leave_one_out - jackknife_center) ** 2))
     )
-    return FidelityEstimate(mean, standard_error, float(sample_count))
+    block_weight_square_sum = float(np.sum(block_squared_sums**2))
+    if block_weight_square_sum <= 0.0:
+        raise ValueError("importance weights have a zero denominator")
+    effective_sample_size = squared_sum**2 / block_weight_square_sum
+    return FidelityEstimate(
+        mean,
+        standard_error,
+        float(effective_sample_size),
+        method=CONTINUOUS_IMPORTANCE_METHOD,
+        raw_sample_count=sample_count,
+    )
 
 
 def fidelity_from_log_amplitudes(
@@ -164,7 +214,13 @@ def fidelity_from_log_amplitudes(
     *,
     block_size: int,
 ) -> FidelityEstimate:
-    """Estimate fidelity from log amplitudes sampled from candidate |psi|^2."""
+    """Estimate continuous-state fidelity from candidate |psi|^2 samples.
+
+    This importance estimator assumes absolute continuity of the ED state with
+    respect to the candidate distribution.  For nonzero analytic strict-LLL
+    sphere states, isolated nodes are measure zero.  Integer occupation states
+    do not satisfy that sampling argument and must use the exact basis overlap.
+    """
 
     candidate_log = _finite_complex_vector(
         candidate_log_amplitude, name="candidate log amplitudes"
@@ -212,6 +268,59 @@ def _fidelity_from_oracle_amplitudes(
         * (np.angle(oracle[nonzero]) - np.imag(candidate_log[nonzero]))
     )
     return _estimate_ratio_fidelity(ratios, block_size=block_size)
+
+
+def _amplitudes_from_exact_log_values(values: Any) -> np.ndarray:
+    try:
+        log_values = np.asarray(values, dtype=np.complex128)
+    except (TypeError, ValueError) as error:
+        raise ValueError("exact occupation logpsi must be a vector") from error
+    if log_values.ndim != 1 or log_values.size == 0:
+        raise ValueError("exact occupation logpsi must be a nonempty vector")
+    real = np.real(log_values)
+    imaginary = np.imag(log_values)
+    exact_zero = np.isneginf(real)
+    if (
+        not np.all(np.isfinite(imaginary))
+        or np.any(np.isnan(real))
+        or np.any(np.isposinf(real))
+        or not np.all(np.isfinite(real) | exact_zero)
+    ):
+        raise ValueError(
+            "exact occupation logpsi must be finite or -inf for exact zeros"
+        )
+    nonzero = np.isfinite(real)
+    amplitudes = np.zeros(log_values.shape, dtype=np.complex128)
+    if np.any(nonzero):
+        shift = float(np.max(real[nonzero]))
+        amplitudes[nonzero] = np.exp(
+            real[nonzero] - shift + 1.0j * imaginary[nonzero]
+        )
+    return amplitudes
+
+
+def _exact_occupation_fidelity(
+    state: StateHandle,
+    label: str,
+    oracle: EDOverlapOracle,
+    *,
+    raw_sample_count: int,
+) -> FidelityEstimate:
+    basis = oracle.occupation_basis(label)
+    coefficients = oracle.occupation_coefficients(label)
+    configs = np.asarray(basis)
+    candidate_log = np.asarray(state.logpsi(configs))
+    if candidate_log.shape != (len(basis),):
+        raise ValueError("logpsi must return one value per ED occupation basis state")
+    candidate_amplitude = _amplitudes_from_exact_log_values(candidate_log)
+    mean = normalized_fidelity(candidate_amplitude, coefficients)
+    return FidelityEstimate(
+        mean,
+        0.0,
+        None,
+        method=EXACT_OCCUPATION_METHOD,
+        raw_sample_count=raw_sample_count,
+    )
 
 
 @dataclass(frozen=True)
@@ -329,6 +438,18 @@ class EDOverlapOracle:
         if not np.all(np.isfinite(spinors)):
             raise ValueError("sphere spinor configurations must be finite")
         return self._sphere_amplitude(state, spinors)
+
+    def occupation_basis(self, label: str) -> tuple[int, ...]:
+        if type(label) is not str or label not in self._states:
+            raise ValueError("invalid ED overlap label")
+        return self._states[label].basis
+
+    def occupation_coefficients(self, label: str) -> np.ndarray:
+        if type(label) is not str or label not in self._states:
+            raise ValueError("invalid ED overlap label")
+        coefficients = self._states[label].coefficients.view()
+        coefficients.setflags(write=False)
+        return coefficients
 
     def _sphere_amplitude(
         self,
@@ -489,29 +610,62 @@ def evaluate_overlaps(
     states = (ground, *(tower[m] for m in L2_M_VALUES))
     labels = OVERLAP_LABELS
     sampling = protocol.sampling
-    sample_count = int(sampling["minimum_ess_per_state"])
+    raw_sample_count = int(sampling["minimum_ess_per_state"])
+    chain_count = int(sampling["chains"])
     burn_in_steps = int(sampling["burn_in_steps"])
     block_size = int(sampling["block_size"])
+    if chain_count <= 0 or raw_sample_count % chain_count:
+        raise ValueError("overlap raw sample count must divide across chains")
+    samples_per_chain = raw_sample_count // chain_count
+    if samples_per_chain % block_size:
+        raise ValueError("overlap block_size must divide samples per chain")
     base_seed = int(protocol.symmetry["seed"])
     estimates: list[FidelityEstimate] = []
 
     for state_index, (state, label) in enumerate(zip(states, labels, strict=True)):
-        seed = base_seed + 1000 * state_index
-        batch = state.sample(sample_count, seed)
-        if (
-            batch.n_samples != sample_count
-            or batch.seed != seed
-            or len(batch.configs) != sample_count
-        ):
-            raise ValueError("sample batch does not match the frozen schedule")
-        if batch.burn_in_steps != burn_in_steps:
-            raise ValueError("sample batch does not use the frozen burn-in")
-        candidate_log = np.asarray(state.logpsi(batch.configs))
-        if candidate_log.shape != (sample_count,) or not np.all(
+        configuration_batches: list[np.ndarray] = []
+        for chain in range(chain_count):
+            seed = base_seed + 1000 * state_index + chain
+            batch = state.sample(samples_per_chain, seed)
+            if (
+                batch.n_samples != samples_per_chain
+                or batch.seed != seed
+                or len(batch.configs) != samples_per_chain
+            ):
+                raise ValueError("sample batch does not match the frozen schedule")
+            if batch.burn_in_steps != burn_in_steps:
+                raise ValueError("sample batch does not use the frozen burn-in")
+            configuration_batches.append(np.asarray(batch.configs))
+
+        integer_batches = [
+            configs.ndim == 1 and configs.dtype.kind in "iu"
+            for configs in configuration_batches
+        ]
+        if all(integer_batches):
+            estimates.append(
+                _exact_occupation_fidelity(
+                    state,
+                    label,
+                    oracle,
+                    raw_sample_count=raw_sample_count,
+                )
+            )
+            continue
+        if any(integer_batches):
+            raise ValueError("overlap chains must use one configuration representation")
+
+        try:
+            configurations = np.concatenate(configuration_batches, axis=0)
+        except ValueError as error:
+            raise ValueError("overlap chain configuration shapes must match") from error
+        if len(configurations) != raw_sample_count:
+            raise ValueError("combined overlap batch does not match raw sample count")
+        candidate_log = np.asarray(state.logpsi(configurations))
+        if candidate_log.shape != (raw_sample_count,) or not np.all(
             np.isfinite(candidate_log)
         ):
             raise ValueError("logpsi must be a finite vector of sampled values")
-        oracle_amplitude = oracle.amplitude(label, batch.configs)
+        oracle_amplitude = oracle.amplitude(label, configurations)
         estimates.append(
             _fidelity_from_oracle_amplitudes(
                 candidate_log,
