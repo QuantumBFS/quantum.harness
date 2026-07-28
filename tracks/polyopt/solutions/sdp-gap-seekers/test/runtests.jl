@@ -518,6 +518,8 @@ end
 
 include(joinpath(@__DIR__, "primal_gap_symbolics_tests.jl"))
 
+include(joinpath(@__DIR__, "shastry_sutherland_tests.jl"))
+
 include(joinpath(@__DIR__, "..", "src", "SmallEDOracle.jl"))
 using .SmallEDOracle
 

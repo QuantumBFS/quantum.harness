@@ -23,6 +23,8 @@ export PauliInteractionTemplate,
        ExplicitStateSymmetry,
        square_patch_geometry,
        square_j1j2_model,
+       shastry_sutherland_model,
+       anchor_allowed,
        instantiate_terms,
        validate_model_buffer,
        assembly_plan,
@@ -53,18 +55,30 @@ function square_patch_geometry(L::Int)
     return LocalPatch("linf-square", L, sites, site_to_id, inner_ids)
 end
 
-"""One translated local Pauli interaction before a finite patch is chosen."""
+"""
+One periodically translated local Pauli interaction before a finite patch is
+chosen.
+
+`anchor_period` and `anchor_residues` select which lattice sites may anchor a
+translate. The default period `(1, 1)` and residue `(0, 0)` recover ordinary
+one-site translation invariance.
+"""
 struct PauliInteractionTemplate{T<:Real}
     offsets::Vector{Site}
     axes::Vector{Symbol}
     coefficient::T
     tag::Symbol
+    anchor_period::Site
+    anchor_residues::Vector{Site}
 
     function PauliInteractionTemplate(
         offsets::Vector{Site},
         axes::Vector{Symbol},
         coefficient::T,
         tag::Symbol,
+        ;
+        anchor_period::Site=Site(1, 1),
+        anchor_residues::Vector{Site}=[Site(0, 0)],
     ) where {T<:Real}
         isempty(offsets) && throw(ArgumentError("interaction support cannot be empty"))
         length(offsets) == length(axes) ||
@@ -73,11 +87,29 @@ struct PauliInteractionTemplate{T<:Real}
             throw(ArgumentError("interaction template contains a duplicate site"))
         all(axis -> axis in (:X, :Y, :Z), axes) ||
             throw(ArgumentError("Pauli axes must be :X, :Y, or :Z"))
-        new{T}(offsets, axes, coefficient, tag)
+        anchor_period.x >= 1 && anchor_period.y >= 1 ||
+            throw(ArgumentError("anchor periods must be positive"))
+        isempty(anchor_residues) &&
+            throw(ArgumentError("at least one anchor residue is required"))
+        canonical_residues = sort(unique(
+            Site(
+                mod(residue.x, anchor_period.x),
+                mod(residue.y, anchor_period.y),
+            )
+            for residue in anchor_residues
+        ))
+        new{T}(
+            offsets,
+            axes,
+            coefficient,
+            tag,
+            anchor_period,
+            canonical_residues,
+        )
     end
 end
 
-"""Translation-invariant finite-range Pauli interaction."""
+"""Periodic translation-invariant finite-range Pauli interaction."""
 struct TranslationInvariantPauliModel{T<:Real}
     name::String
     templates::Vector{PauliInteractionTemplate{T}}
@@ -308,8 +340,64 @@ function square_j1j2_model(g::T) where {T<:Real}
     return TranslationInvariantPauliModel("square-j1-j2", templates)
 end
 
+"""
+Spin-1/2 Shastry-Sutherland model in the Challenge 88 normalization
+
+    H(g) = sum_dimer S_i*S_j + g sum_square_NN S_i*S_j,
+
+where `S_i*S_j = (X_i X_j + Y_i Y_j + Z_i Z_j) / 4`.
+
+The two dimer templates are anchored on residues `(0, 0)` and `(0, 1)`
+modulo `(2, 2)`. They form the standard orthogonal-dimer covering; every
+infinite-lattice site belongs to exactly one dimer.
+"""
+function shastry_sutherland_model(g::T) where {T<:Real}
+    C = typeof(g / 4)
+    converted_g = convert(C, g)
+    templates = PauliInteractionTemplate{C}[]
+
+    for displacement in (Site(1, 0), Site(0, 1)), axis in (:X, :Y, :Z)
+        push!(
+            templates,
+            PauliInteractionTemplate(
+                [Site(0, 0), displacement],
+                [axis, axis],
+                converted_g / convert(C, 4),
+                :square,
+            ),
+        )
+    end
+
+    for (anchor_residue, displacement) in (
+        (Site(0, 0), Site(-1, 1)),
+        (Site(0, 1), Site(1, 1)),
+    ), axis in (:X, :Y, :Z)
+        push!(
+            templates,
+            PauliInteractionTemplate(
+                [Site(0, 0), displacement],
+                [axis, axis],
+                one(C) / convert(C, 4),
+                :dimer;
+                anchor_period=Site(2, 2),
+                anchor_residues=[anchor_residue],
+            ),
+        )
+    end
+
+    return TranslationInvariantPauliModel("shastry-sutherland", templates)
+end
+
 translate(anchor::Site, offset::Site) =
     Site(anchor.x + offset.x, anchor.y + offset.y)
+
+function anchor_allowed(template::PauliInteractionTemplate, anchor::Site)
+    residue = Site(
+        mod(anchor.x, template.anchor_period.x),
+        mod(anchor.y, template.anchor_period.y),
+    )
+    return residue in template.anchor_residues
+end
 
 function instantiate_terms(
     model::TranslationInvariantPauliModel{T},
@@ -317,6 +405,7 @@ function instantiate_terms(
 ) where {T<:Real}
     terms = LocalPauliTerm{T}[]
     for anchor in patch.sites, template in model.templates
+        anchor_allowed(template, anchor) || continue
         support = [translate(anchor, offset) for offset in template.offsets]
         all(site -> haskey(patch.site_to_id, site), support) || continue
         factors = [
@@ -358,6 +447,7 @@ function validate_model_buffer(
                 inner_site.x - touching_offset.x,
                 inner_site.y - touching_offset.y,
             )
+            anchor_allowed(template, anchor) || continue
             translated_support = [
                 translate(anchor, offset)
                 for offset in template.offsets
