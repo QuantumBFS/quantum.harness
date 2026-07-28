@@ -58,3 +58,23 @@ def test_attempt_004_make_figures_writes_required_pngs(tmp_path):
     actual = {path.name for path in (out_dir / "figures").glob("*.png")}
     assert expected <= actual
     assert (out_dir / "summary.json").exists()
+
+
+def test_attempt_004_candidate_export_has_challenge_methods(tmp_path):
+    out_file = tmp_path / "submission.json"
+    result = subprocess.run(
+        [sys.executable, str(ATTEMPT / "run_candidate.py"), "--out", str(out_file), "--fast"],
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(out_file.read_text())
+    assert payload["schema_version"] == 1
+    assert payload["attempt"] == "attempt-004-full-checklist"
+    methods = {group["method"] for group in payload["results"]}
+    assert {
+        "full_space_nelder_mead",
+        "random_subspace_nelder_mead",
+        "hessian_subspace_nelder_mead",
+    } <= methods
