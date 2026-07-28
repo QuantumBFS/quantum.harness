@@ -1,5 +1,9 @@
 #!/bin/bash
+#SBATCH --partition=xhacnormalb
 #SBATCH --job-name=square-primal-g0
+#SBATCH --time=00:30:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem-per-cpu=3800M
 #SBATCH --output=results/slurm-square-primal-%j.out
 
 set -euo pipefail

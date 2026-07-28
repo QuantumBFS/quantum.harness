@@ -200,7 +200,7 @@ Proposed first request:
 ```text
 partition = xhacnormalb
 CPUs      = 16
-memory    = 64,000 MB
+memory    = 3,800 MB per CPU = 60,800 MB total
 walltime  = 00:30:00
 points    = gamma=0 only
 ```
@@ -217,6 +217,39 @@ Reasoning:
 
 `gamma=1/4` must not be submitted until `gamma=0` returns coherently and its
 artifacts are fetched and checked.
+
+## 8.1 Operational correction after scheduler preflight
+
+The first preflight used `--mem=64000M` with 16 CPUs. SCNet rejected it because
+the account enforces approximately 3,800 MB per requested CPU. Increasing to
+17 CPUs made that request valid, but `sbatch --test-only` returned a highly
+pessimistic December 2026 estimated start. A 9-CPU/32-GB request returned a
+similar estimate. Attempts to use the generic GPU partition were correctly
+abandoned because its QOS requires a GPU and the tested GRES requests did not
+match an available configuration.
+
+The existing repository already contains the relevant successful operational
+contract, which should have been reused first:
+
+- `SESSION_STATUS_2026-07-28.md`, Infrastructure notes;
+- `GAP_RUN_PROVENANCE.md`, Section 3;
+- successful jobs `22970362` and `22970838`.
+
+That contract is:
+
+```text
+partition=xhacnormalb
+cpus-per-task=16
+mem-per-cpu=3800M
+explicit Julia 1.11.5 and Mosek 11.2 environment
+direct sbatch from ~/quantum.harness
+```
+
+The smoke script now embeds that exact resource and environment pattern.
+The December estimate was a scheduler priority/start projection, not evidence
+that SSH, repository shipping, Julia, Mosek, or `sbatch` were misconfigured.
+Future work should not probe GPU partitions for this CPU-only SDP unless the
+known CPU partition actually rejects a real submission.
 
 ## 9. Claim boundary
 
