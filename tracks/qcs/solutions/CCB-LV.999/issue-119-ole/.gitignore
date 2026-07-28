@@ -1,0 +1,5 @@
+/inputs/*.qasm
+/inputs/*.manifest.toml
+/runs/*
+!/runs/.gitkeep
+/pepo/.venv/
