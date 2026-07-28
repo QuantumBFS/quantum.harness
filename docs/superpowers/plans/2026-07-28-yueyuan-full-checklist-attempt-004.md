@@ -2088,7 +2088,7 @@ def test_attempt_004_slurm_scripts_are_capped_and_secret_free():
     assert "%25" in cpu
     assert "#SBATCH --gres=gpu:1" in gpu
     assert "%1" in gpu
-    forbidden = ["password", "scarf1046", "scarf.rl.ac.uk", "id_ed25519"]
+    forbidden = ["password", "ssh ", "IdentityFile", "id_ed25519", "HostName", "User "]
     assert not any(marker in combined for marker in forbidden)
 ```
 
@@ -2351,9 +2351,8 @@ Expected: collect only partition names, module-loading conventions, and output d
 - [ ] **Step 3: Dry-run secret scan before any remote action**
 
 ```bash
-rg -n 'password|scarf1046|scarf\.rl\.ac\.uk|id_ed25519|BEGIN OPENSSH|PRIVATE KEY' \
-  tracks/qcs/solutions/YueYuan/research/attempts/attempt-004 \
-  docs/superpowers/specs docs/superpowers/plans || true
+# Run a local rg scan for known site-specific account, host, password,
+# SSH-key, and private-key markers. Keep the marker list outside committed files.
 ```
 
 Expected: no credential values. Generic words in safety prose are acceptable only when they do not reveal account material.
@@ -2454,8 +2453,8 @@ HPC verification was not completed in this run. The committed Slurm scripts are 
 - [ ] **Step 12: Run final secret scan**
 
 ```bash
-rg -n 'scarf1046|scarf\.rl\.ac\.uk|BEGIN OPENSSH|PRIVATE KEY|password:' \
-  tracks/qcs/solutions/YueYuan docs/superpowers || true
+# Run a local rg scan for known site-specific account, host, password,
+# SSH-key, and private-key markers. Keep the marker list outside committed files.
 ```
 
 Expected: no credential material.
@@ -2539,8 +2538,8 @@ Expected: only expected branch state and pre-existing `Ion.lock` if still dirty.
 - [ ] **Step 7: Run final secret scan**
 
 ```bash
-rg -n 'scarf1046|scarf\.rl\.ac\.uk|BEGIN OPENSSH|PRIVATE KEY|password:' \
-  tracks/qcs/solutions/YueYuan docs/superpowers || true
+# Run a local rg scan for known site-specific account, host, password,
+# SSH-key, and private-key markers. Keep the marker list outside committed files.
 ```
 
 Expected: no credential material.
