@@ -391,5 +391,9 @@ Updated: 2026-07-29 UTC.
   exact IEEE-754 bit pattern and includes the generated table in the run
   manifest. This does not alter the queued gamma=0 job. If that gate passes,
   the authorized gamma=1/2 run can preserve enough information for a
-  separate rational positive-definiteness replay.
+  separate rational positive-definiteness replay. That replay is now
+  source-prepared: it verifies all input/source/assembly hashes, tries common
+  decimal denominators `10^6` through `10^12`, and accepts only strictly
+  positive exact rational LDL pivots for all nine cones. Its eight helper
+  assertions pass locally; no certificate job is yet authorized.
 - No decision-changing user or resource need is open.

@@ -617,3 +617,12 @@ not change or rerun the queued gamma=0 attempt. If it passes, use this
 revision for the already-authorized gamma=1/2 solve, then attempt the
 rational replay as a separate Slurm gate. Failure to rationalize is not
 solver infeasibility and must not change the existing numerical conclusion.
+
+Prepare the separate replay now, but keep it unsubmitted. It fails closed on
+the allowlisted MOF/runmeta, the solve and primal-table manifests, all
+recorded source hashes, the fixed setup, and every exact assembly hash. It
+tries common decimal denominators `10^6`, `10^8`, `10^10`, and `10^12`;
+for a candidate it rebuilds all 6,104 exact rational matrix entries and
+requires every no-pivot rational LDL diagonal to be strictly positive.
+Binary64 decoding, decimal rounding, and positive/indefinite LDL examples
+pass all eight local synthetic assertions.
