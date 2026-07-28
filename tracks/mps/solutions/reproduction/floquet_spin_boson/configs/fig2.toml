@@ -6,7 +6,14 @@ compression_tolerance = 1.0e-7
 run_exact = true
 cache_dir = "output/cache"
 rebuild_cache = false
-uniformtempo_revision = "432f48822c6d463698bf7617ac04732b83cb71a9"
+temperature = 0.0
+auto_nc = true
+n_c = 100000
+truncation = "rel"
+cap_rank = 100000
+max_rank = 100000
+low_rank_svd = false
+svd_filtering_tolerance = 0.0
 
 # The reference CSVs contain samples t=0,…,3819dt; strict validation rejects
 # any mismatch instead of trimming curves to their common prefix.

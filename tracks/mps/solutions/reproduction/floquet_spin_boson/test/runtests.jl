@@ -5,4 +5,5 @@ using .FloquetSpinBoson
 
 include("test_model.jl")
 include("test_uniform_if.jl")
+include("test_uniform_if_cli.jl")
 include("test_regression.jl")

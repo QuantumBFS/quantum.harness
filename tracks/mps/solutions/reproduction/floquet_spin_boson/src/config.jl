@@ -8,7 +8,14 @@ Base.@kwdef struct RunConfig
     run_exact::Bool = false
     cache_dir::String = "output/cache"
     rebuild_cache::Bool = false
-    uniformtempo_revision::String = "432f48822c6d463698bf7617ac04732b83cb71a9"
+    temperature::Float64 = 0.0
+    auto_nc::Bool = true
+    n_c::Int = 100_000
+    truncation::Symbol = :rel
+    cap_rank::Int = 100_000
+    max_rank::Int = 100_000
+    low_rank_svd::Bool = false
+    svd_filtering_tolerance::Float64 = 0.0
 end
 
 """Construct a Floquet grid whose last point closes the drive period exactly."""

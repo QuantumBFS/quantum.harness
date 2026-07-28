@@ -16,7 +16,9 @@ function atomic_save(path::AbstractString, adapter::UniformIFAdapter; before_ren
                      q=adapter.q,
                      v_left=adapter.v_left,
                      v_right=adapter.v_right,
-                     metadata=adapter.metadata)
+                     metadata=adapter.metadata,
+                     achieved_chi=size(adapter.q, 1),
+                     convergence_metadata=adapter.convergence_metadata)
         isnothing(before_rename) || before_rename()
         mv(temporary_path, path; force=true)
     catch
@@ -29,11 +31,16 @@ end
 function _load_uniform_if(path::AbstractString, expected_metadata::AbstractDict)
     isfile(path) || throw(ArgumentError("uniform-IF cache does not exist: " * path))
     payload = JLD2.load(path)
-    required = ("q", "v_left", "v_right", "metadata")
+    required = ("q", "v_left", "v_right", "metadata", "achieved_chi", "convergence_metadata")
     all(key -> haskey(payload, key), required) ||
         throw(ArgumentError("uniform-IF cache is incomplete: " * path))
+    payload["achieved_chi"] == size(payload["q"], 1) ||
+        throw(ArgumentError("uniform-IF cache achieved χ disagrees with q: " * path))
+    payload["convergence_metadata"] isa AbstractDict ||
+        throw(ArgumentError("uniform-IF cache convergence metadata is invalid: " * path))
     adapter = UniformIFAdapter(payload["q"], payload["v_left"], payload["v_right"],
-                               payload["metadata"])
+                               payload["metadata"];
+                               convergence_metadata=payload["convergence_metadata"])
     _canonical_uniform_if_metadata(adapter.metadata) ==
         _canonical_uniform_if_metadata(_string_metadata(expected_metadata)) ||
         throw(ArgumentError("uniform-IF cache provenance mismatch: " * path))
