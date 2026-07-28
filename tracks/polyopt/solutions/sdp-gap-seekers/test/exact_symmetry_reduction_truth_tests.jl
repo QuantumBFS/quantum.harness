@@ -18,6 +18,20 @@ include(joinpath(
     "ConjugationReducedPrimalGapJuMP.jl",
 ))
 using .ConjugationReducedPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "SpinAxisInvolutionReduction.jl",
+))
+using .SpinAxisInvolutionReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "SpinAxisInvolutionPrimalGapJuMP.jl",
+))
+using .SpinAxisInvolutionPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -134,6 +148,62 @@ using JuMP
         for constraint in real_jump_model.psd_constraints
     )
     @test real_jump_model.assembly_sha256 == real_reduced.assembly_sha256
+
+    spin_axis_truth = spin_axis_reduction_truth(real_reduced)
+    @test spin_axis_truth.exact
+    @test spin_axis_truth.hamiltonian_invariant
+    @test spin_axis_truth.coefficient_covariant
+    @test spin_axis_truth.coefficient_count == 31_810
+    @test spin_axis_truth.stable_cross_blocks_zero
+    @test spin_axis_truth.stable_cross_entry_count == 8_460
+    @test spin_axis_truth.equality_space_invariant
+
+    spin_axis_reduced = assemble_spin_axis_reduced_primal(
+        real_reduced;
+        verify_truth=false,
+    )
+    spin_axis_repeated = assemble_spin_axis_reduced_primal(
+        real_reduced;
+        verify_truth=false,
+    )
+    spin_axis_report =
+        spin_axis_reduced_assembly_report(spin_axis_reduced)
+    @test spin_axis_report.source_moments == 74_602
+    @test spin_axis_report.v4_moments == 19_108
+    @test spin_axis_report.conjugation_real_moments ==
+          real_report.real_moments
+    @test spin_axis_report.spin_axis_moments <
+          spin_axis_report.conjugation_real_moments
+    @test spin_axis_report.eliminated_spin_axis_moments > 0
+    @test spin_axis_report.forced_zero_moments > 0
+    @test spin_axis_report.positive_block_dimensions ==
+          [72, 36, 81, 36, 45, 73, 36, 81, 36, 45]
+    @test spin_axis_report.gap_block_dimensions == [1, 1]
+    @test spin_axis_report.equality_count == 0
+    @test spin_axis_report.real_psd_triangle_entries == 16_707
+    @test spin_axis_report.maximum_psd_side_dimension == 81
+    @test spin_axis_reduced.coefficient_map_sha256 ==
+          spin_axis_repeated.coefficient_map_sha256
+    @test spin_axis_reduced.assembly_sha256 ==
+          spin_axis_repeated.assembly_sha256
+
+    spin_axis_jump_model =
+        build_spin_axis_reduced_jump_primal(spin_axis_reduced)
+    @test JuMP.num_variables(spin_axis_jump_model.model) ==
+          spin_axis_report.spin_axis_moments
+    @test isempty(spin_axis_jump_model.equality_constraints)
+    @test length(spin_axis_jump_model.psd_constraints) == 12
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in spin_axis_jump_model.psd_constraints
+    )) == [1, 1, 36, 36, 36, 36, 45, 45, 72, 73, 81, 81]
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in spin_axis_jump_model.psd_constraints
+    )
+    @test spin_axis_jump_model.assembly_sha256 ==
+          spin_axis_reduced.assembly_sha256
 end
 
 @testset "V4 character multiplication and projection" begin
@@ -160,4 +230,18 @@ end
     @test !conjugation_odd(z)
     @test conjugation_sign(x) == 1
     @test conjugation_sign(y) == -1
+
+    x_sign, transformed_x = spin_axis_involution(x)
+    y_sign, transformed_y = spin_axis_involution(y)
+    z_sign, transformed_z = spin_axis_involution(z)
+    @test x_sign == 1
+    @test y_sign == -1
+    @test z_sign == 1
+    @test transformed_x == z
+    @test transformed_y == y
+    @test transformed_z == x
+    @test spin_axis_involution(transformed_x) == (1, x)
+    @test spin_axis_involution(transformed_y) == (-1, y)
+    @test spin_axis_character(v4_character(x)) == v4_character(z)
+    @test spin_axis_character(v4_character(y)) == v4_character(y)
 end
