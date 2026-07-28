@@ -1,5 +1,8 @@
 from collections import Counter
+import inspect
 
+import long_range_percolation.geometric as geometric_module
+import long_range_percolation.oracle as oracle_module
 import numpy as np
 import pytest
 from scipy.stats import binomtest
@@ -13,12 +16,42 @@ from long_range_percolation.oracle import sample_quadratic
 GEOMETRIC_DISTANCE_SAMPLE_COUNT = 20_000
 PARTITION_SAMPLE_COUNT = 40_000
 
-GEOMETRIC_DISTANCE_FAMILYWISE_ALPHA = 0.001
-PARTITION_FAMILYWISE_ALPHA = 0.001
+FAMILYWISE_ALPHA = 0.001
 
+GEOMETRIC_DISTANCE_LENGTHS = (4, 8, 32)
+PARTITION_LENGTHS = (4, 6)
 GEOMETRIC_DISTANCE_SEED_BASE = 100_000
 ORACLE_PARTITION_SEED_BASE = 200_000
 GEOMETRIC_PARTITION_SEED_BASE = 1_200_000
+PARTITION_SAMPLERS = (
+    ("quadratic", sample_quadratic, ORACLE_PARTITION_SEED_BASE),
+    ("geometric", sample_geometric, GEOMETRIC_PARTITION_SEED_BASE),
+)
+
+
+def _geometric_distance_family_denominator() -> int:
+    return sum(
+        len(distance_classes(length))
+        for length in GEOMETRIC_DISTANCE_LENGTHS
+    )
+
+
+def _partition_family_denominator() -> int:
+    return sum(
+        len(exact_partition_distribution(ModelSpec(length, 0.9, 0.6)))
+        * len(PARTITION_SAMPLERS)
+        for length in PARTITION_LENGTHS
+    )
+
+
+GEOMETRIC_DISTANCE_BONFERRONI_DENOMINATOR = (
+    _geometric_distance_family_denominator()
+)
+PARTITION_BONFERRONI_DENOMINATOR = _partition_family_denominator()
+GEOMETRIC_DISTANCE_GLOBAL_ALPHA = (
+    FAMILYWISE_ALPHA / GEOMETRIC_DISTANCE_BONFERRONI_DENOMINATOR
+)
+PARTITION_GLOBAL_ALPHA = FAMILYWISE_ALPHA / PARTITION_BONFERRONI_DENOMINATOR
 
 
 def _edge_distance(edge: tuple[int, int], length: int) -> int:
@@ -44,8 +77,31 @@ def _partition_counts(samples: list) -> Counter[tuple[int, ...]]:
     return counts
 
 
-@pytest.mark.parametrize("length", [4, 8, 32])
-def test_geometric_distance_frequencies_match_exact_bernoulli_probabilities(length: int):
+def _acceptance_message(
+    *,
+    family: str,
+    pvalue: float,
+    threshold: float,
+    length: int,
+    sampler: str,
+    distance: int | None = None,
+    partition: tuple[int, ...] | None = None,
+) -> str:
+    fields = [
+        f"family={family}",
+        f"pvalue={pvalue:.6g}",
+        f"threshold={threshold:.6g}",
+        f"L={length}",
+        f"sampler={sampler}",
+    ]
+    if distance is not None:
+        fields.append(f"distance={distance}")
+    if partition is not None:
+        fields.append(f"partition={partition}")
+    return ", ".join(fields)
+
+
+def _geometric_distance_acceptance_cases(length: int) -> list[dict[str, object]]:
     spec = ModelSpec(length, 1.0, 0.7)
     samples = [
         sample_geometric(spec, np.random.default_rng(GEOMETRIC_DISTANCE_SEED_BASE + index))
@@ -56,29 +112,31 @@ def test_geometric_distance_frequencies_match_exact_bernoulli_probabilities(leng
         spec,
         periodic_kernel(length, spec.sigma),
     )
-    classes = distance_classes(length)
-    alpha = GEOMETRIC_DISTANCE_FAMILYWISE_ALPHA / len(classes)
-
-    for item in classes:
+    cases: list[dict[str, object]] = []
+    for item in distance_classes(length):
         trials = GEOMETRIC_DISTANCE_SAMPLE_COUNT * item.multiplicity
         result = binomtest(
             counts[item.distance],
             trials,
             probabilities[item.distance - 1],
         )
-        assert result.pvalue > alpha
+        cases.append(
+            {
+                "distance": item.distance,
+                "length": length,
+                "pvalue": float(result.pvalue),
+                "sampler": "geometric",
+            }
+        )
+    return cases
 
 
-@pytest.mark.parametrize("length", [4, 6])
-def test_oracle_and_geometric_partition_histograms_match_exact_distribution(length: int):
+def _partition_acceptance_cases(length: int) -> list[dict[str, object]]:
     spec = ModelSpec(length, 0.9, 0.6)
     exact_distribution = exact_partition_distribution(spec)
-    alpha = PARTITION_FAMILYWISE_ALPHA / len(exact_distribution)
+    cases: list[dict[str, object]] = []
 
-    for sampler, seed_base in [
-        (sample_quadratic, ORACLE_PARTITION_SEED_BASE),
-        (sample_geometric, GEOMETRIC_PARTITION_SEED_BASE),
-    ]:
+    for sampler_name, sampler, seed_base in PARTITION_SAMPLERS:
         samples = [
             sampler(spec, np.random.default_rng(seed_base + index))
             for index in range(PARTITION_SAMPLE_COUNT)
@@ -86,11 +144,57 @@ def test_oracle_and_geometric_partition_histograms_match_exact_distribution(leng
         observed = _partition_counts(samples)
         for partition, probability in exact_distribution.items():
             result = binomtest(observed[partition], PARTITION_SAMPLE_COUNT, probability)
-            assert result.pvalue > alpha
+            cases.append(
+                {
+                    "length": length,
+                    "partition": partition,
+                    "pvalue": float(result.pvalue),
+                    "sampler": sampler_name,
+                }
+            )
+    return cases
 
 
-def test_accelerated_and_quadratic_samples_use_independent_seed_streams():
-    spec = ModelSpec(32, 1.0, 0.7)
-    quadratic = sample_quadratic(spec, np.random.default_rng(11))
-    geometric = sample_geometric(spec, np.random.default_rng(12))
-    assert not np.array_equal(quadratic.edges, geometric.edges)
+@pytest.mark.parametrize("length", GEOMETRIC_DISTANCE_LENGTHS)
+def test_geometric_distance_frequencies_match_exact_bernoulli_probabilities(length: int):
+    for case in _geometric_distance_acceptance_cases(length):
+        assert case["pvalue"] > GEOMETRIC_DISTANCE_GLOBAL_ALPHA, _acceptance_message(
+            family="geometric-distance",
+            pvalue=float(case["pvalue"]),
+            threshold=GEOMETRIC_DISTANCE_GLOBAL_ALPHA,
+            length=length,
+            sampler=str(case["sampler"]),
+            distance=int(case["distance"]),
+        )
+
+
+@pytest.mark.parametrize("length", PARTITION_LENGTHS)
+def test_oracle_and_geometric_partition_histograms_match_exact_distribution(length: int):
+    for case in _partition_acceptance_cases(length):
+        assert case["pvalue"] > PARTITION_GLOBAL_ALPHA, _acceptance_message(
+            family="partition",
+            pvalue=float(case["pvalue"]),
+            threshold=PARTITION_GLOBAL_ALPHA,
+            length=length,
+            sampler=str(case["sampler"]),
+            partition=tuple(case["partition"]),
+        )
+
+
+def test_geometric_and_quadratic_samplers_remain_structurally_independent():
+    geometric_module_source = inspect.getsource(geometric_module)
+    geometric_sampler_source = inspect.getsource(sample_geometric)
+    oracle_module_source = inspect.getsource(oracle_module)
+    quadratic_sampler_source = inspect.getsource(sample_quadratic)
+
+    assert "distance_classes" in geometric_module_source
+    assert "_iter_open_offsets" in geometric_sampler_source
+    assert "sample_quadratic" not in geometric_module_source
+    assert "iter_unordered_edges" not in geometric_module_source
+    assert "for left in range(spec.length)" not in geometric_sampler_source
+    assert "for right in range(left + 1, spec.length)" not in geometric_sampler_source
+
+    assert "for left in range(spec.length)" in quadratic_sampler_source
+    assert "for right in range(left + 1, spec.length)" in quadratic_sampler_source
+    assert "_iter_open_offsets" not in oracle_module_source
+    assert "sample_geometric" not in oracle_module_source
