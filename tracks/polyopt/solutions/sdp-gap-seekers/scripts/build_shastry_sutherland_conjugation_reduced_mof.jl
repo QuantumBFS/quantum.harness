@@ -148,7 +148,8 @@ function source_metadata()
     return Dict(
         "git_commit" => git_output("rev-parse", "HEAD"),
         "git_tree" => git_output("rev-parse", "HEAD^{tree}"),
-        "git_branch" => git_output("branch", "--show-current"),
+        "git_branch" =>
+            git_output("symbolic-ref", "--short", "HEAD"),
         "dirty_paths_at_build" =>
             isempty(dirty) ?
             String[] :

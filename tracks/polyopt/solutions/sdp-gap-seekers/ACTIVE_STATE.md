@@ -60,4 +60,8 @@ Updated: 2026-07-29 UTC.
   because a line-broken `@timed` macro call did not expand. Peak RSS was
   532,916 KiB. The corrected builder places the macro argument on the same
   expression and receives a local load/`--help` check before r2.
+- Derived-MOF build attempt r2, Slurm job `22988194`, passed macro expansion
+  and stopped in provenance collection before assembly because xH5's older
+  Git does not support `branch --show-current`. Peak RSS was 642,716 KiB.
+  The next revision uses portable `symbolic-ref --short HEAD`.
 - No decision-changing user or resource need is open.

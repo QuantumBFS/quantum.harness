@@ -97,3 +97,10 @@ Slurm job `22988179` stopped during Julia macro expansion: a line break left
 `@timed` without its expression. No source assembly, model, MOF, or solve ran.
 The next attempt moves the macro argument into the same expression and first
 loads the complete script through its `--help` path.
+
+## 2026-07-29 — derived-MOF build r2 exposed xH5 Git compatibility
+
+Slurm job `22988194` passed Julia macro expansion and stopped in source
+provenance collection before assembly. The xH5 Git version does not implement
+`branch --show-current`. The builder now uses the portable plumbing command
+`symbolic-ref --short HEAD`; no model or MOF was emitted by r2.
