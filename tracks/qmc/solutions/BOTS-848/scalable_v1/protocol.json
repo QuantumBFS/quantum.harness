@@ -1,4 +1,5 @@
 {
+
   "schema_version": "challenge-15-scalable-v1.0",
   "physics": {"geometry": "Haldane sphere", "n_electrons": 6, "two_q": 15, "filling": 0.3333333333333333, "polarization": "fully polarized fermions", "interaction": "1/(sqrt(Q) * |Omega_i-Omega_j|)", "units": "e^2/(epsilon*l_B)", "ground_l": 0, "excited_l": 2},
   "training": {"seeds": [848, 1848, 2848], "optimizer": "adam", "learning_rate": 0.001, "beta1": 0.9, "beta2": 0.999, "epsilon": 1e-08, "gradient_clip_norm": 10.0, "optimizer_updates": 2048, "batch_size_per_sector": 512, "local_energy_evaluations_per_sector": 1048576, "checkpoint_interval": 128, "checkpoint_selection": "final_update", "dtype": "complex128"},

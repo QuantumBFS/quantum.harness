@@ -10,7 +10,7 @@ from scalable_v1.protocol import load_protocol
 
 PROTOCOL_PATH = Path(__file__).parents[1] / "scalable_v1" / "protocol.json"
 FROZEN_PROTOCOL_SHA256 = (
-    "7d032ff9331c0efdce26db675fc367208370f6a8fe47c9d448496ff78e29e1b4"
+    "2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38"
 )
 
 
@@ -74,8 +74,10 @@ def test_protocol_sha256_uses_exact_committed_bytes() -> None:
     assert load_protocol().sha256 == expected
 
 
-def test_protocol_uses_lf_line_endings() -> None:
-    assert b"\r\n" not in PROTOCOL_PATH.read_bytes()
+def test_protocol_uses_canonical_lf_layout() -> None:
+    raw = PROTOCOL_PATH.read_bytes()
+    assert b"\r\n" not in raw
+    assert raw.startswith(b"{\n\n")
 
 
 def test_protocol_sha256_matches_frozen_snapshot() -> None:
