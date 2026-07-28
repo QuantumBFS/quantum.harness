@@ -40,6 +40,12 @@ Local verification was run with the smoke configuration.
 
 The generated files are intentionally ignored by git.
 
+## HPC Verification
+
+HPC verification was not completed in this run. A noninteractive key probe failed
+before any remote checkout or job submission, and no password was used. The committed
+Slurm scripts are ready for conservative CPU/GPU execution after local tests pass.
+
 ## Failure Mode
 
 The large mismatch level introduces rotated error channels. The expected failure
