@@ -344,25 +344,26 @@ against the independently rebuilt exact system; no solver branch reported
 ### Exact classifications
 
 `rings-bridges` has system shape `560 x 24`. Its compact certificate pointers
-are under `fixtures/overlap_klein_r01.json#/cells/0/anchors`:
+are under
+`fixtures/overlap_klein_r01.json#/experiments/0/cells/0/anchors`:
 
 | Directed bridge anchor | `+1` survives? / status | `-1` survives? / status | Classification | Exact certificate |
 |---|---|---|---|---|
-| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/0/zero_certificate` |
-| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/1/zero_certificate` |
-| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/2/zero_certificate` |
-| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/0/anchors/3/zero_certificate` |
+| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/0/anchors/0/zero_certificate` |
+| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/0/anchors/1/zero_certificate` |
+| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/0/anchors/2/zero_certificate` |
+| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/0/anchors/3/zero_certificate` |
 
 `rings-diagonals-bridges` has system shape `748 x 32`. Its compact certificate
 pointers are under
-`fixtures/overlap_klein_r01.json#/cells/1/anchors`:
+`fixtures/overlap_klein_r01.json#/experiments/0/cells/1/anchors`:
 
 | Directed bridge anchor | `+1` survives? / status | `-1` survives? / status | Classification | Exact certificate |
 |---|---|---|---|---|
-| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/0/zero_certificate` |
-| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/1/zero_certificate` |
-| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/2/zero_certificate` |
-| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/cells/1/anchors/3/zero_certificate` |
+| `h0<-4` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/1/anchors/0/zero_certificate` |
+| `h1<-5` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/1/anchors/1/zero_certificate` |
+| `h4<-0` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/1/anchors/2/zero_certificate` |
+| `h5<-1` | no / `infeasible` | no / `infeasible` | `certified-zero` | `/experiments/0/cells/1/anchors/3/zero_certificate` |
 
 For every row above, the committed certificate supplies nonnegative exact
 weights with `C^T y_+ = e_a` and `C^T y_- = -e_a`. Therefore every
@@ -383,9 +384,10 @@ hopping cannot be assembled inside either cone.
   decomposition. It is not a no-go theorem for the full `R01` program or for
   arbitrary physical Hamiltonians.
 - Committed evidence:
-  `fixtures/overlap_klein_r01.json` contains the two cells, raw hashes,
-  execution provenance, sign-local statuses, and replayable exact
-  certificates. The compact branch schema deliberately renames raw
+  `fixtures/overlap_klein_r01.json#/experiments/0` contains the original two
+  E001 cells, raw hashes, execution provenance, sign-local statuses, and
+  replayable exact certificates inside fixture schema v2. The compact branch
+  schema deliberately renames raw
   `exact_primal_certificate` to `certificate`; zero certificates retain the
   raw `zero_certificate` name.
 - Transferable lesson: a two-sided exact Farkas pair proves a cone coordinate
@@ -396,3 +398,158 @@ hopping cannot be assembled inside either cone.
   pairing terms rescue a hopping bridge or produce a certified `pc`/`pa`
   bridge coordinate. Keep the two masks as distinct cells and allocate them
   disjointly across the authorized workers after matching one-worker smokes.
+
+## R01-E002 — BdG six-mode bridge gate
+
+- Proposal ID: `R01`
+- Question: For the same fixed overlapping Klein circuit
+  `U = U_[2,3,4,5] U_[0,1,2,3]`, does enlarging the real quadratic basis from
+  number-conserving hopping to BdG hopping plus pair creation and pair
+  annihilation permit any nonzero cross-cluster bridge coordinate?
+- Prediction: at least one bridge coordinate and sign survives exactly after
+  pairing terms are admitted, leaving a candidate cross-cluster BdG cone for
+  a later common-element/noncommutativity test.
+- Scientific source commit:
+  `d42786ae8a47899c90ac4811424c66aad2910713`.
+- Frozen-source evidence: complete bundle
+  `r01-task8-source-d42786a.bundle`, SHA-256
+  `6bce3dbe9609c234879d2eeeceb4a4a5ad64ac1f82ed49af3f14a6d0edcd4838`.
+  The local, WSL-worker, and CPU-worker clones were clean at the same full SHA
+  before any runner started.
+- Protocol/config: `overlap-klein-v1`, raw schema v1, exact field
+  `Q(sqrt(2))`; one matching `workers=1` smoke per assigned cell; production
+  only after both smokes had no error branches and every certificate replayed;
+  spawn process start; `OMP_NUM_THREADS`, `MKL_NUM_THREADS`, and
+  `OPENBLAS_NUM_THREADS` each set to `1`.
+- Package versions on both scientific hosts: oracle `0.1.0`, NumPy `2.4.6`,
+  SciPy `1.17.1`, SymPy `1.14.0`.
+
+Public host assignment and readiness:
+
+| Host role | Assigned cell | OS | Logical CPUs / production workers | RAM (bytes) | Python | Scheduler |
+|---|---|---|---:|---:|---|---|
+| WSL worker | `bdg/rings-bridges` | `Linux 4.4.0-26100-Microsoft x86_64` | 16 / 14 | 34113646592 | 3.11.15 | plain SSH |
+| CPU worker | `bdg/rings-diagonals-bridges` | `Linux 6.8.0-111-generic x86_64` | 64 / 62 | 540659666944 | 3.11.15 | plain SSH through the authenticated gateway |
+
+Each command ran from its assigned solution directory with that host's
+dedicated Python:
+
+```text
+SOURCE_COMMIT=d42786ae8a47899c90ac4811424c66aad2910713
+SOLUTION=<assigned absolute solution directory>
+PYTHON=<assigned dedicated interpreter>
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH="$SOLUTION" "$PYTHON" -m oracle.overlap_klein --family bdg --mask rings-bridges --workers 1 --source-commit "$SOURCE_COMMIT" --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH="$SOLUTION" "$PYTHON" -m oracle.overlap_klein --family bdg --mask rings-diagonals-bridges --workers 1 --source-commit "$SOURCE_COMMIT" --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-diagonals-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH="$SOLUTION" "$PYTHON" -m oracle.overlap_klein --family bdg --mask rings-bridges --workers 14 --source-commit "$SOURCE_COMMIT" --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges-attempt-01.json
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH="$SOLUTION" "$PYTHON" -m oracle.overlap_klein --family bdg --mask rings-diagonals-bridges --workers 62 --source-commit "$SOURCE_COMMIT" --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges-attempt-01.json
+```
+
+### Attempt ledger
+
+All scientific runner attempts succeeded. The failed rows below are
+operational or test-authoring attempts; none started an extra scientific cell
+or changed an existing raw.
+
+| Attempt | Kind | Result and preserved evidence |
+|---|---|---|
+| source sync | operation | PASS: the complete source bundle was verified, both isolated worker clones fast-forwarded to the pinned full SHA, and both worktrees checked clean. |
+| readiness probe 1 | operation | FAIL before Python: a combined nested-SSH `python -c` probe lost its quoting. No runner and no raw. |
+| readiness probe 2 | operation | PASS: simple argv-only probes verified BatchMode authentication, public resources, versions, schedulers, clean trees, and exact source identities. |
+| local WSL preflight | operation | FAIL before remote access: this Codex host has no local WSL, so the already-authorized Windows gateway route was used. No runner and no raw. |
+| attempt-path preflight | operation | WSL PASS with no E002 raw; CPU `find` exited 1 because its results directory did not yet exist. All four `attempt-01` names remained unused. |
+| helper egress | operation | DENIED locally before transfer by the execution sandbox; the controller performed the already-authorized remote work. No remote change, runner, or raw. |
+| smoke / `rings-bridges` | science | PASS, WSL worker, `workers=1`; raw and hash are in the table below. |
+| smoke / `rings-diagonals-bridges` | science | PASS, CPU worker, `workers=1`; raw and hash are in the table below. |
+| smoke validator 1 | operation | FAIL before certificate replay: helper assumed BLAS-thread values were integers rather than strings. Both raws and hashes unchanged. |
+| smoke validator 2 | operation | FAIL before certificate replay: helper looked for `system.shape` instead of `system.system_shape`. Both raws and hashes unchanged. |
+| schema probe 1 | operation | FAIL before JSON inspection with `ModuleNotFoundError: oracle` because the probe omitted the absolute solution `PYTHONPATH`. Raws unchanged. |
+| smoke validator 3 | operation | WSL PASS; CPU outer control timed out with exit 124 while its read-only replay PID remained active. The PID was allowed to finish and confirmed absent before retry; this was not a certificate verdict. |
+| smoke validator 4 | operation | PASS: CPU replay reran with a longer timeout. Both smokes then had complete terminal/non-error and exact-certificate gates. |
+| production / `rings-bridges` | science | PASS, WSL worker, `workers=14`; raw and hash are in the table below. |
+| production / `rings-diagonals-bridges` | science | PASS, CPU worker, `workers=62`; raw and hash are in the table below. |
+| production validation | operation | PASS on both hosts: all certificates replayed and each smoke/production pair had equal complete payloads after deleting only top-level `execution`. |
+| raw return | operation | PASS: the CPU pair moved to WSL, then all four files moved through the gateway to the local ignored tree using unique `.part`, SHA-256 verification at every hop, and atomic rename. |
+| RED attempt 1 | test authoring | INVALID: pytest collected zero tests because of an `IndentationError` in the new test. Only test indentation changed afterward. |
+| RED attempt 2 | test authoring | VALID RED: WSL exit 1, `1 failed in 0.66s`; schema v1 reported actual `1` against required fixture schema `2`. |
+| GREEN monitor 1 | operation | A read-only `pgrep` pattern containing spaces was split by the remote shell and exited 1; argv-only `pgrep -af pytest` then confirmed the unaffected pytest process. |
+| GREEN migration replay | verification | PASS: WSL exit 0, `4 passed in 437.84s`; schema/order, exact raw provenance, all compact certificates, anchor kinds, and the number-conserving inclusion guard passed. |
+
+The four scientific raws:
+
+| Host / role / mask | Workers | Raw wall (s) | Raw path | SHA-256 |
+|---|---:|---:|---|---|
+| WSL / smoke / `rings-bridges` | 1 | 197.2485009000011 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-bridges-attempt-01.json` | `e86f5e96a879f1deaab8ad4aac38d8e66aa8bf23807060b53aee14c215729788` |
+| CPU / smoke / `rings-diagonals-bridges` | 1 | 563.7972104456276 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-diagonals-bridges-attempt-01.json` | `dc4699c3df42720d3c4cce720124699c885d2b782ec85e9934635e5a529e8bb7` |
+| WSL / production / `rings-bridges` | 14 | 137.92176029999973 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges-attempt-01.json` | `ece5bc0595ffedba6633adf9afb0c19cfbfcbb9197e119929528b4297dbdf1c9` |
+| CPU / production / `rings-diagonals-bridges` | 62 | 384.1710428921506 | `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges-attempt-01.json` | `c5e62e1cd2c8af829c7b003d36a13460a0d965360f6c9ab8af98ccec06dcc3e3` |
+
+For each mask, smoke and production were exactly equal after removing only
+the top-level `execution` object. The WSL production replay took 124.8 s and
+the CPU production replay 345.0 s. Every one of the 16 production anchors and
+16 smoke anchors had terminal, non-error sign branches; every embedded exact
+double-dual certificate replayed. There were no `numerical-only` branches or
+diagnostics to promote into a theorem.
+
+### Exact classifications
+
+The `rings-bridges` BdG system has shape `1052 x 42`; its pointers begin at
+`fixtures/overlap_klein_r01.json#/experiments/1/cells/0/anchors`.
+The `rings-diagonals-bridges` system has shape `1456 x 58`; its pointers begin
+at `/experiments/1/cells/1/anchors`.
+
+| Mask | Anchor / kind | `+1` status | `-1` status | Classification | Exact certificate pointer |
+|---|---|---|---|---|---|
+| `rings-bridges` | `h0<-4` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/0/zero_certificate` |
+| `rings-bridges` | `h1<-5` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/1/zero_certificate` |
+| `rings-bridges` | `h4<-0` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/2/zero_certificate` |
+| `rings-bridges` | `h5<-1` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/3/zero_certificate` |
+| `rings-bridges` | `pa0,4` / pair annihilation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/4/zero_certificate` |
+| `rings-bridges` | `pa1,5` / pair annihilation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/5/zero_certificate` |
+| `rings-bridges` | `pc0,4` / pair creation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/6/zero_certificate` |
+| `rings-bridges` | `pc1,5` / pair creation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/0/anchors/7/zero_certificate` |
+| `rings-diagonals-bridges` | `h0<-4` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/0/zero_certificate` |
+| `rings-diagonals-bridges` | `h1<-5` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/1/zero_certificate` |
+| `rings-diagonals-bridges` | `h4<-0` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/2/zero_certificate` |
+| `rings-diagonals-bridges` | `h5<-1` / hopping | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/3/zero_certificate` |
+| `rings-diagonals-bridges` | `pa0,4` / pair annihilation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/4/zero_certificate` |
+| `rings-diagonals-bridges` | `pa1,5` / pair annihilation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/5/zero_certificate` |
+| `rings-diagonals-bridges` | `pc0,4` / pair creation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/6/zero_certificate` |
+| `rings-diagonals-bridges` | `pc1,5` / pair creation | `infeasible` | `infeasible` | `certified-zero` | `/experiments/1/cells/1/anchors/7/zero_certificate` |
+
+For every row, nonnegative exact weights satisfy
+`C^T y_+ = e_a` and `C^T y_- = -e_a`. Thus every listed hopping,
+pair-annihilation, and pair-creation coordinate is identically zero throughout
+its fixed BdG cone.
+
+The exact inclusion from the number-conserving cone into the BdG cone sets all
+pairing coefficients to zero. Consequently, a BdG hopping primal with
+all-zero pairing support would contradict the E001 hopping-coordinate no-go.
+No BdG hopping primal exists here, so the inclusion check is consistent. The
+pairing anchors are independently zero as well.
+
+- Interpretation: the preregistered prediction failed exactly. Both fixed BdG
+  cones have a coordinate-wise directed bridge no-go: all four hopping, two
+  pair-creation, and two pair-annihilation bridge coordinates vanish. Because
+  there are no separate directed survivors, this also excludes a nonzero
+  Hermitian hopping-adjoint or `pc=pa` bridge target in either cone; no later
+  functional-anchor combination is needed for these two cells.
+- Scope: this is only a theorem about the fixed six-mode transform, exact
+  field, real quadratic BdG basis, and the two stated support masks. It does
+  not cover another transform, another support, Gaussian micro-words, an open
+  cone elsewhere, arbitrary Hamiltonians, a physical positive-coefficient HS
+  decomposition, or an `N=8` construction.
+- Committed evidence:
+  `fixtures/overlap_klein_r01.json#/experiments/1` records both BdG cells with
+  per-cell public host/package metadata, exact raw roles/hashes/worker counts,
+  sign-local statuses, anchor kinds, and replayable double-dual certificates.
+  Fixture schema v2 retains the full reviewed E001 experiment at
+  `/experiments/0`.
+- Transferable lesson: hopping, pair-creation, and pair-annihilation anchors
+  are distinct directed coordinates. Separate survivors would not alone
+  construct one Hermitian cone element; the hopping adjoint pair or `pc=pa`
+  must be imposed in a common functional-anchor test. Here every coordinate
+  is exactly zero, so that later test is unnecessary.
+- Decision / next experiment: treat the two preregistered six-mode masks as a
+  fixed-structure no-go and change structure rather than inventing a survivor.
+  A later task may update the proposal status; this experiment does not launch
+  an `N=8` scan or claim a general BdG/HS no-go.

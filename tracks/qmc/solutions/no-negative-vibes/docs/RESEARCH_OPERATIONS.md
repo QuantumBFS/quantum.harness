@@ -118,6 +118,17 @@ An experiment is not closed when the program exits. It is closed after:
   qualifiers next to the conclusion. It does not automatically exclude a BdG
   enlargement, a different transform, a micro-word construction, an open cone
   elsewhere, or a physical positive-coefficient HS map.
+- Under the exact inclusion from a number-conserving cone into its BdG
+  enlargement, a hopping primal with every pair-creation and
+  pair-annihilation coefficient zero must already be a number-conserving
+  primal. Treat an all-zero-pairing hopping survivor after an exact
+  number-conserving hopping no-go as a hard contradiction, not as new physics.
+- Hopping, pair-creation, and pair-annihilation bridge anchors are distinct
+  directed coordinates. Separate directed survivors do not construct one
+  Hermitian cone element: impose the hopping adjoint pair or `pc=pa` in one
+  common functional anchor. If every directed coordinate is independently
+  exact zero, the common Hermitian target is already excluded and needs no
+  extra functional solve.
 
 ## Deterministic smoke-to-production promotion
 
@@ -138,10 +149,18 @@ An experiment is not closed when the program exits. It is closed after:
   records the raw path, SHA-256, worker/thread metadata, full source commit,
   package versions, classifications, sign-local statuses, and only the exact
   certificates needed for replay.
+- Put source identity at experiment scope and package versions plus public
+  host role at cell or raw-pair scope. One top-level source/package record is
+  false provenance as soon as a fixture contains multiple experiments or
+  software hosts.
 - Raw and compact schemas need not have identical names. In the R01 fixture,
   raw branch field `exact_primal_certificate` becomes `certificate`;
   `zero_certificate` stays unchanged. Make such conversions explicit in the
   fixture schema and test the compact form directly.
+- Across a CPU-to-WSL-to-gateway-to-local return path, receive into a unique
+  `.part`, recompute SHA-256 on both sides of every hop, and atomically rename
+  only after equality. Preserve the source and any mismatched `.part`; never
+  overwrite a prior attempt name.
 
 ## Windows-to-WSL validation helpers
 
@@ -157,6 +176,14 @@ An experiment is not closed when the program exits. It is closed after:
   `PYTHONPATH=.` can fail collection even when the test path is absolute. Use
   an absolute solution-directory `PYTHONPATH` or explicitly change the remote
   working directory before invoking Python.
+- Before writing a validator, inspect one real raw's top-level, `system`,
+  `execution`, anchor, and sign-branch keys. Reuse the runner's actual schema:
+  for overlap-klein v1 the shape is `system.system_shape`, while
+  `execution.blas_threads` maps environment names to the string `"1"`.
+- Exact certificate replay may outlive an outer SSH timeout even though it is
+  making CPU progress. On timeout, check the specific remote PID and wait for
+  it to exit before retrying with a longer keepalive/timeout; never stack a
+  duplicate replay or mistake exit 124 for a certificate verdict.
 - A quoting or transfer-helper failure that never started the scientific
   runner is an operational failure, not a new scientific attempt. Preserve
   the original raw file, verify its hash, record the mechanical lesson here,
