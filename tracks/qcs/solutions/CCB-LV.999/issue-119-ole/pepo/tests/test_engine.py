@@ -219,7 +219,7 @@ def test_seven_site_exact_pepo_matches_dense(delta_zero):
     evolved = circuit.evolve_product({52: Z}, cutoff=0.0)
     pepo = normalized_overlap_exact(evolved.operator, {52: Z})
 
-    assert pepo == pytest.approx(dense, abs=1e-10)
+    assert pepo == pytest.approx(dense, rel=0.0, abs=1e-10)
     if delta_zero:
-        assert dense == pytest.approx(1.0, abs=1e-10)
-        assert pepo == pytest.approx(1.0, abs=1e-10)
+        assert dense == pytest.approx(1.0, rel=0.0, abs=1e-10)
+        assert pepo == pytest.approx(1.0, rel=0.0, abs=1e-10)

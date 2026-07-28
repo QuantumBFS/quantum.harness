@@ -59,10 +59,11 @@ def test_exact_and_compressed_overlap_match_independent_dense_oracle(
 
     assert exact == pytest.approx(
         dense_value,
+        rel=0.0,
         abs=1e-11,
     )
-    assert compressed == pytest.approx(exact, abs=1e-10)
-    assert compressed == pytest.approx(dense_value, abs=1e-10)
+    assert compressed == pytest.approx(exact, rel=0.0, abs=1e-10)
+    assert compressed == pytest.approx(dense_value, rel=0.0, abs=1e-10)
 
 
 def test_product_observable_overlap_matches_independent_dense_oracle(
@@ -74,6 +75,7 @@ def test_product_observable_overlap_matches_independent_dense_oracle(
 
     assert normalized_overlap_exact(operator, {0: Z, 2: Z}) == pytest.approx(
         dense_value,
+        rel=0.0,
         abs=1e-11,
     )
 
@@ -95,6 +97,7 @@ def test_identity_evolution_has_unit_normalized_product_overlap():
 
     assert normalized_overlap_exact(operator, {0: Z, 2: Z}) == pytest.approx(
         1.0,
+        rel=0.0,
         abs=1e-12,
     )
 
