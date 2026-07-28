@@ -1191,6 +1191,9 @@
   ≥90% 时按 2× 扩容重试，最高 128k。所有截断响应仍计入 ledger/预算；若到上限仍
   无正文则拒绝该 generation。Fast Loop 在 critic 前后各设空源码硬门，空 CAS
   artifact 不再落库。
+- 真实 GLM live smoke `85cf829c083a4058` 在修复后完成一代：
+  `total_tokens=3903`，candidate 非空且 `score 0.5000→0.5856`；说明修复不只通过
+  stub 回归，线上 provider 也恢复了代码正文。
 
 ### F-63：恢复已完成实验时运行状态和 checkpoint 不更新
 
