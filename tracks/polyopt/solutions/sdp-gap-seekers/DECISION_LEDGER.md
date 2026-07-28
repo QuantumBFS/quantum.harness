@@ -347,3 +347,22 @@ character's existing 36- and 45-side eigenspace blocks, drop the redundant
 81-side cone in each positive family and the analogous redundant gap scalar.
 Do not remove any cone until this relation is proved exhaustively over exact
 coefficients.
+
+## 2026-07-29 — cone truth r1 requires complex gauge phases
+
+Slurm job `22988542` passed 139 of 142 assertions. The three failures were the
+aggregate truth flag, the signed-real congruence flag, and its assumption that
+computational-basis conjugation parity is uniform inside a V4 character
+block. The orbit inventory `[1,81,81]`, 6,643-entry traversal, exact stable
+basis ranks, stable plus/minus cross zeros, and the nine-cone JuMP assembly
+all passed. Peak RSS was 915,688 KiB and `test.log` SHA-256 is
+`11b7b016a5ca7f41b5b93a609e321bed3b7ed71cfb4b89221cb02b4e6f442baa`.
+
+The proper correction follows from the already-fixed conjugation gauge. If a
+row has gauge phase `p` and the signed spin permutation maps it to a row with
+phase `p'`, the transport phase is `q = sign * conj(p') * p`, which lies in
+`{±1,±i}`. Replay the congruence as
+`R_orbit[i,j] = conj(q_i) q_j R_stable[p(i),p(j)]`; whenever the factor is
+imaginary, both real matrix entries must vanish exactly. This changes a
+consequential proof input rather than repeating the failed signed-real
+assumption.

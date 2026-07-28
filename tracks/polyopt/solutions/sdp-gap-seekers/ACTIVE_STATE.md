@@ -242,4 +242,15 @@ Updated: 2026-07-29 UTC.
   `36+45` decomposition makes each retained 81-side orbit-representative cone
   redundant, including the analogous gap scalar. This removes cone rows
   rather than only moment variables and is the next decision-relevant gate.
+- Full-spin cone truth attempt r1, Slurm job `22988542`, passed 139 of 142
+  assertions. The expected `[1,81,81]` redundant-cone inventory, all exact
+  basis ranks and cross-block zeros, and the concrete nine-cone/10,064-entry
+  JuMP assembly passed. The three failures share one cause: conjugation parity
+  is not uniform within a V4 character block, so the realification transport
+  is not a purely signed real permutation. The correct exact congruence has
+  row phases in `{±1,±i}`; mixed-phase entries must vanish. The r1 `test.log`
+  SHA-256 is
+  `11b7b016a5ca7f41b5b93a609e321bed3b7ed71cfb4b89221cb02b4e6f442baa`;
+  peak process RSS was 915,688 KiB. R2 tests the phase-corrected congruence
+  without changing the proposed cone inventory.
 - No decision-changing user or resource need is open.

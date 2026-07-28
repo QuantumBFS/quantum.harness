@@ -173,18 +173,36 @@ function mapping_to_stable_block(
     return signs, indices
 end
 
-function uniform_conjugation_parity(block::ReducedPSDBlock)
-    return length(unique(conjugation_odd(row.word) for row in block.rows)) == 1
+realification_phase(row) =
+    conjugation_odd(row.word) ?
+    Complex{Int}(0, 1) :
+    Complex{Int}(1, 0)
+
+function realification_transport_phases(
+    orbit_block::SpinAxisReducedPSDBlock,
+    stable_source::ReducedPSDBlock,
+    signs::Vector{Int},
+    target_indices::Vector{Int},
+)
+    return Complex{Int}[
+        signs[index] *
+        conj(realification_phase(
+            stable_source.rows[target_indices[index]],
+        )) *
+        realification_phase(orbit_block.source_block.rows[index])
+        for index in eachindex(signs)
+    ]
 end
 
 """
 Prove that the full-S3 quotient makes each orbit-representative cone redundant.
 
 The three nontrivial V4 characters form one S3 orbit. A chosen character
-block is exactly congruent, by a signed row permutation, to the stable
-nontrivial character block. The latter already has an exact invertible
-involution basis and zero plus/minus cross block, so its retained eigenspace
-cones imply the orbit-representative cone and conversely.
+block is exactly congruent, by a signed row permutation followed by exact row
+phases in `{±1,±i}`, to the stable nontrivial character block. The latter
+already has an exact invertible involution basis and zero plus/minus cross
+block, so its retained eigenspace cones imply the orbit-representative cone
+and conversely.
 """
 function full_spin_nontrivial_cone_redundancy_truth(
     assembly::FullSpinReducedPrimalAssembly,
@@ -202,9 +220,11 @@ function full_spin_nontrivial_cone_redundancy_truth(
     orbit_congruence_exact = true
     stable_cross_blocks_zero = true
     stable_bases_invertible = true
-    conjugation_parity_uniform = true
+    gauge_phases_well_formed = true
+    gauge_mixed_entries_zero = true
     orbit_entry_count = 0
     stable_cross_entry_count = 0
+    gauge_mixed_entry_count = 0
     stable_basis_dimensions = Int[]
 
     for orbit_block in orbit_blocks
@@ -218,12 +238,23 @@ function full_spin_nontrivial_cone_redundancy_truth(
         push!(stable_basis_dimensions, basis_rank)
         stable_bases_invertible &= basis_rank == dimension
 
-        conjugation_parity_uniform &=
-            uniform_conjugation_parity(orbit_block.source_block) &&
-            uniform_conjugation_parity(stable_source)
-
         signs, target_indices =
             mapping_to_stable_block(orbit_block, stable_source)
+        transport_phases = realification_transport_phases(
+            orbit_block,
+            stable_source,
+            signs,
+            target_indices,
+        )
+        gauge_phases_well_formed &= all(
+            phase -> phase in (
+                Complex{Int}(1, 0),
+                Complex{Int}(-1, 0),
+                Complex{Int}(0, 1),
+                Complex{Int}(0, -1),
+            ),
+            transport_phases,
+        )
         for left in 1:dimension, right in left:dimension
             orbit_projected = projected_source_block_entry(
                 assembly,
@@ -245,9 +276,18 @@ function full_spin_nontrivial_cone_redundancy_truth(
                 target_indices[left],
                 target_indices[right],
             )
+            gauge_factor =
+                conj(transport_phases[left]) *
+                transport_phases[right]
             orbit_congruence_exact &=
                 orbit_projected ==
-                (signs[left] * signs[right]) * stable_projected
+                gauge_factor * stable_projected
+            if !iszero(imag(gauge_factor))
+                gauge_mixed_entries_zero &=
+                    iszero(orbit_projected) &&
+                    iszero(stable_projected)
+                gauge_mixed_entry_count += 1
+            end
             orbit_entry_count += 1
         end
 
@@ -278,7 +318,8 @@ function full_spin_nontrivial_cone_redundancy_truth(
         orbit_congruence_exact &&
         stable_cross_blocks_zero &&
         stable_bases_invertible &&
-        conjugation_parity_uniform
+        gauge_phases_well_formed &&
+        gauge_mixed_entries_zero
     return (
         exact=exact,
         orbit_block_count=length(orbit_blocks),
@@ -290,7 +331,9 @@ function full_spin_nontrivial_cone_redundancy_truth(
         stable_cross_entry_count=stable_cross_entry_count,
         stable_bases_invertible=stable_bases_invertible,
         stable_basis_dimensions=sort(stable_basis_dimensions),
-        conjugation_parity_uniform=conjugation_parity_uniform,
+        gauge_phases_well_formed=gauge_phases_well_formed,
+        gauge_mixed_entries_zero=gauge_mixed_entries_zero,
+        gauge_mixed_entry_count=gauge_mixed_entry_count,
     )
 end
 

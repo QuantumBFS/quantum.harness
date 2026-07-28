@@ -323,7 +323,9 @@ using JuMP
     @test cone_truth.stable_cross_entry_count == 3_240
     @test cone_truth.stable_bases_invertible
     @test cone_truth.stable_basis_dimensions == [1, 81, 81]
-    @test cone_truth.conjugation_parity_uniform
+    @test cone_truth.gauge_phases_well_formed
+    @test cone_truth.gauge_mixed_entries_zero
+    @test cone_truth.gauge_mixed_entry_count > 0
 
     cone_reduced = assemble_full_spin_cone_reduced_primal(
         full_spin_reduced;

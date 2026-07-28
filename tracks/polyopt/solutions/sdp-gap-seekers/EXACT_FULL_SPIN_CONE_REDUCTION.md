@@ -10,9 +10,11 @@ those cones are redundant.
 The three nontrivial V4 characters form one transitive S3 orbit. For each
 positive-matrix family, and for the facially reduced gap matrix, a signed row
 permutation maps the retained 81-side orbit-representative character block to
-the stable nontrivial character block. The computational-basis conjugation
-parity is constant inside each character block, so its fixed realification
-phase cancels from this congruence.
+the stable nontrivial character block before realification. The fixed
+computational-basis conjugation gauge contributes an exact row phase in
+`{±1,±i}`. Entries joining real-phase and imaginary-phase row classes vanish
+exactly after full-S3 projection, leaving an exact unitary congruence between
+the real symmetric blocks.
 
 The stable character already has an exact invertible involution basis. Its
 plus/minus cross block is exactly zero after invariant-moment projection.
@@ -36,10 +38,10 @@ rationals:
 1. all three expected orbit-representative cones have dimensions `[1,81,81]`;
 2. every orbit entry equals its direct full-S3 source projection;
 3. all 6,643 orbit entries match the signed-permutation congruence to the
-   stable character;
+   stable character with their exact realification phases;
 4. every retained stable-character combination basis has exact full rank;
 5. every plus/minus cross entry is exactly zero; and
-6. conjugation parity is uniform in every related V4 character block.
+6. every mixed real/imaginary transport-phase entry is exactly zero.
 
 The expected retained cone dimensions are
 `[72,36,36,45,73,36,36,45]` plus one `1 x 1` gap block: nine real PSD cones,
