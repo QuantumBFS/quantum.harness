@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+export PATH="$HOME/julia-1.11.5/bin:$PATH"
+export MOSEKBINDIR="$HOME/mosek/mosek/11.2/tools/platform/linux64x86/bin"
+export LD_LIBRARY_PATH="$HOME/julia-1.11.5/lib/julia:${LD_LIBRARY_PATH:-}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-16}"
+
 cd "$SLURM_SUBMIT_DIR"
 
 SOURCE_BUNDLE="tracks/polyopt/solutions/sdp-gap-seekers/results/square-primal-gate-b-20260728-r1"
