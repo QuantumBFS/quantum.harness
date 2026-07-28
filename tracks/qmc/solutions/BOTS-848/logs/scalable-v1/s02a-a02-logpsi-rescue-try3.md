@@ -148,3 +148,68 @@ full-basis data, or oracle outputs.
 Local try 3 result: `slice-pass / external-spec-review-pending`.  External
 specification review is required before declaring try 3 spec-compliant or
 starting any later route item.
+
+## External specification review — try 3 failed
+
+This section supersedes the local `slice-pass` disposition above.  The final
+external review conclusion was:
+
+> Not Spec compliant — 2 Important issues; quality review must be blocked.
+
+The 70 focused tests, 285 full tests, compilation and static isolation checks,
+ordinary-row comparisons, physical-range audit, and performance measurements
+remain factual.  They do not establish specification compliance against the
+following new finite-result counterexamples.
+
+### Important 1 — rounded coefficient-log collision erases one ulp
+
+Set sampled source and both target logpsi values to `0`.  Let
+`x = 1e300` and `y = math.nextafter(x, +math.inf)`, with neighbors
+`{2: x, 3: -y}`.  The two distinct binary64 coefficients satisfy
+`math.log(x) == math.log(y)`.  The estimator returns `0j`, but summing the
+original coefficients gives
+
+`math.fsum((x, -y)) = -1.487016908477783e284`.
+
+Root-cause evidence: the reduction around `operators.py:549-555` uses only the
+rounded coefficient-log delta.  Both terms therefore become unit magnitudes
+with opposite signs and are classified as an exact cancellation.  Compressing
+each binary64 coefficient to `coefficient_logabs` before summation has already
+discarded the ulp-scale difference, so the later hierarchical descent cannot
+recover the finite answer.
+
+### Important 2 — insufficient Decimal precision causes false overflow
+
+Use one neighbor with coefficient `max_float`, sampled source logpsi `0`, and
+target logpsi `0`.  The exact operation is multiplication by `exp(0) = 1`, so
+the estimator must return the original finite `max_float`.  It instead raises
+`OverflowError`.
+
+Root-cause evidence: the fallback around `operators.py:430-438` performs the
+product with Decimal precision 100.  `Decimal.from_float(max_float)` needs
+about 309 decimal digits for its exact integer representation.  The
+multiplication is rounded upward at precision 100 and then compared against a
+separately exact `Decimal.from_float(max_float)`, producing a false overflow.
+The path therefore mixes a rounded Decimal result with an exact boundary in a
+comparison that is not conservative in either direction.
+
+### Terminal disposition and architecture reset boundary
+
+- Try 3 result: `failed`.
+- Reviewer disposition: `Not Spec compliant`; quality review is blocked by
+  two Important finite-result errors.
+- Try 3 active implementation time remains approximately `00:15`.  Activity
+  after final external review was documentation-only closeout; no additional
+  implementation interval was started or inferred.
+- This is the third consecutive failed rescue.  Any future try 4 must begin
+  with an architecture reset in a new independent worktree from the terminal
+  commit, not another local patch to this reduction.
+- The reset must not treat `coefficient_logabs` as the sole numerical truth.
+  It must preserve the actual binary64 scale/component through cancellation,
+  and every high-precision path must carry enough precision to represent any
+  binary64 input exactly before making a representability comparison.
+- The commit containing this section is the terminal commit for try 3.
+- No production code or tests were changed after review.  No try 4 or A03 was
+  started, and no push was performed.
+
+Final try 3 disposition: `failed / terminal`.
