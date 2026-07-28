@@ -89,9 +89,12 @@ whereas `χenv` is the maximum intermediate bond retained while contracting the
 closed final tensor network. They control distinct approximations and should
 not be reported as one generic PEPO bond dimension.
 
-This command is a full-system inspection only: it prints the confirmed setup
-and starts no PEPO evolution. It deliberately has no `--seed` option because
-the PEPO trace is deterministic.
+With the currently stale small-oracle certificate, this command exits nonzero
+at the certificate gate *before* printing a setup or confirmation token, and
+it starts no PEPO evolution. After the certificate has been refreshed, the
+same command is a side-effect-free full-system inspection: it prints the
+confirmed setup and token but still starts no PEPO evolution. It deliberately
+has no `--seed` option because the PEPO trace is deterministic.
 
 ```bash
 uv run --project "$OLE_ROOT/pepo" \
@@ -115,10 +118,12 @@ python3 scripts/parameter_scan.py plan \
   --provenance "$OLE_ROOT/configs/pepo-provenance.json" \
   --run-id issue119-pepo-49q-pilot \
   --run-dir results/issue119-pepo-49q-pilot
-uv run --project "$OLE_ROOT/pepo" \
-  python "$OLE_ROOT/scripts/run_pepo_array_cell.py" \
-  --run-spec results/issue119-pepo-49q-pilot/run_spec.json \
-  --selector 1 --inspect-only
+for selector in 1 2 3 4; do
+  uv run --project "$OLE_ROOT/pepo" \
+    python "$OLE_ROOT/scripts/run_pepo_array_cell.py" \
+    --run-spec results/issue119-pepo-49q-pilot/run_spec.json \
+    --selector "$selector" --inspect-only
+done
 ```
 
 After the selected cells have completed, collect the generic manifest table
