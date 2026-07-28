@@ -425,4 +425,12 @@ Updated: 2026-07-29 UTC.
   decimal denominators `10^6` through `10^12`, and accepts only strictly
   positive exact rational LDL pivots for all nine cones. Its eight helper
   assertions pass locally; no certificate job is yet authorized.
+- Submission attempt `2026-07-29T-current` for the authorized isotypic
+  gamma=1/2 job was rejected by Slurm before a job ID or output directory was
+  created: account `giggleliu` was at its 200-job
+  `AssocGrpSubmitJobsLimit`. Because the submission command was fail-fast,
+  neither the spatial builder nor the continuous-spin cone truth job was
+  submitted. Do not repeat while the association signature is unchanged;
+  use the interval for source work and probe the account before the next
+  submission.
 - No decision-changing user or resource need is open.

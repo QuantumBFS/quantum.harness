@@ -679,3 +679,19 @@ entries reconstruct.
 process peak was 826,164 KiB and Slurm MaxRSS 722,980 KiB. Accept the moment
 quotient and authorize the separately encoded l=2 cone-redundancy truth
 gate. Do not build a continuous-spin MOF until that gate passes.
+
+## 2026-07-29 — shared submission cap delays three authorized gates
+
+After a fresh `xhacnormalb` queue probe, the first submission in the
+authorized batch was rejected before Slurm assigned a job ID:
+
+```text
+AssocGrpSubmitJobsLimit
+group max submit job limit exceeded 200 (used:200 + requested:1)
+```
+
+The fail-fast submission wrapper therefore created no isotypic gamma=1/2,
+spatial-build, or continuous-spin-cone job and no result directory. This is
+the same shared-account resource signature seen earlier, so an identical
+submission is not repeated while the count remains saturated. Continue with
+source-only preparation, then re-probe immediately before the next attempt.
