@@ -11,8 +11,14 @@ so they cannot silently discard a completed expensive validation.
 """
 function parse_exact_baseline(json::AbstractString)
     records = Dict{Float64, NamedTuple{(:max_error, :rmse, :samples), Tuple{Float64, Float64, Int}}}()
-    pattern = r"\"([0-9]+(?:\.[0-9]+)?)\":\{\"max_error\":([^,}]+),\"rmse\":([^,}]+),\"samples\":([0-9]+)"
-    for found in eachmatch(pattern, json)
+    exact_panel = match(r"\"exact\":\{(.*)\},\"redfield\":", json)
+    payload = isnothing(exact_panel) ? json : exact_panel.captures[1]
+    # Legacy top-level panels are accepted only with the companion marker that
+    # identifies their max_error/rmse fields as exact rather than Redfield.
+    pattern = isnothing(exact_panel) ?
+        r"\"([0-9]+(?:\.[0-9]+)?)\":\{\"max_error\":([^,}]+),\"rmse\":([^,}]+),\"samples\":([0-9]+),\"redfield_max_error\":" :
+        r"\"([0-9]+(?:\.[0-9]+)?)\":\{\"max_error\":([^,}]+),\"rmse\":([^,}]+),\"samples\":([0-9]+)"
+    for found in eachmatch(pattern, payload)
         ωd = parse(Float64, found.captures[1])
         records[ωd] = (; max_error=parse(Float64, found.captures[2]),
                         rmse=parse(Float64, found.captures[3]),
