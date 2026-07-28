@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import math
 from typing import Iterator
 
-from .kernel import edge_probabilities, periodic_kernel
+from .kernel import periodic_kernel
 from .model import ModelSpec, iter_unordered_edges
 from .union_find import UnionFind
 
@@ -32,10 +32,8 @@ def _component_sizes_for_mask(
 def enumerate_graphs(spec: ModelSpec) -> Iterator[GraphOutcome]:
     if spec.length > 6:
         raise ValueError("exact enumeration supports length at most six")
-    probabilities = edge_probabilities(
-        spec,
-        periodic_kernel(spec.length, spec.sigma),
-    )
+    kernel = periodic_kernel(spec.length, spec.sigma)
+    rates = spec.kappa * kernel
     edges = list(iter_unordered_edges(spec.length))
     if spec.kappa == 0.0:
         for mask in range(1 << len(edges)):
@@ -57,13 +55,13 @@ def enumerate_graphs(spec: ModelSpec) -> Iterator[GraphOutcome]:
         for index, (left, right) in enumerate(edges):
             separation = right - left
             distance = min(separation, spec.length - separation)
-            probability = float(probabilities[distance - 1])
+            rate = float(rates[distance - 1])
             if mask & (1 << index):
-                log_probability += math.log(probability)
+                log_probability += math.log(-math.expm1(-rate))
                 open_count += 1
                 union_find.union(left, right)
             else:
-                log_probability += math.log1p(-probability)
+                log_probability += -rate
         yield GraphOutcome(
             mask=mask,
             probability=math.exp(log_probability),
