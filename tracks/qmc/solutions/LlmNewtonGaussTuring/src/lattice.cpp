@@ -105,14 +105,21 @@ std::vector<int> Lattice::get_coordination() const {
 // ============================================================
 double Lattice::smallest_momentum() const {
     if (dim == 0) return 0.0;
+    // Momenta allowed on an La x Lb periodic torus are
+    //   k = (na/La) recip_a + (nb/Lb) recip_b,   na, nb integers.
+    // The smallest non-zero one is what enters the second-moment
+    // correlation length; scanning integer multiples of the *reciprocal
+    // lattice* vectors instead would return |recip_a| = 2*pi, which on the
+    // torus aliases to q = 0 (e^{i 2*pi x} = 1) and collapses xi/L to 0.
+    const double La = L[0] > 0 ? static_cast<double>(L[0]) : 1.0;
+    const double Lb = L[1] > 0 ? static_cast<double>(L[1]) : 1.0;
     double k_min = std::numeric_limits<double>::max();
-    // For 2D: scan small multiples of recip_a, recip_b.
     for (int na = -1; na <= 1; ++na) {
         for (int nb = -1; nb <= 1; ++nb) {
             if (na == 0 && nb == 0) continue;
             std::array<double, 3> k = {
-                na * recip_a[0] + nb * recip_b[0],
-                na * recip_a[1] + nb * recip_b[1],
+                (na / La) * recip_a[0] + (nb / Lb) * recip_b[0],
+                (na / La) * recip_a[1] + (nb / Lb) * recip_b[1],
                 0.0
             };
             double kn = std::sqrt(k[0] * k[0] + k[1] * k[1]);

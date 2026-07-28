@@ -9,193 +9,264 @@ SSE::SSE(const Lattice& lattice, double J, double h, double beta,
          const SSEParams& params)
     : lat_(lattice), J_(J), h_(h), beta_(beta),
       N_(static_cast<int>(lattice.N)), Nb_(static_cast<int>(lattice.Nb)),
-      possibleOperatorNumber_(Nb_ + N_),
-      energyShift_(0.0), params_(params),
-      cutoff_(20), operatorNum_(0),
-      rng_(static_cast<unsigned>(params.seed)),
-      halfLinkNum_(N_ / 2)
-{
+      nCand_(N_ + Nb_), params_(params),
+      M_(20), n_(0),
+      rng_(static_cast<std::uint64_t>(params.seed)) {
     if (J_ < 0) throw std::runtime_error("J must be >= 0");
     if (h_ <= 0) throw std::runtime_error("h must be > 0");
-    if (N_ % 2 != 0) throw std::runtime_error("N must be even");
-    setEnergyShift();
-    operatorList_.assign(cutoff_, std::make_pair(OpType::NO_OPERATOR, -1));
+
+    opType_.assign(M_, Op::NONE);
+    opIdx_.assign(M_, -1);
+
+    // random initial state |alpha(0)>
+    spin_.resize(N_);
     std::uniform_int_distribution<int> coin(0, 1);
-    for (int i = 0; i < N_; ++i) spin_.push_back(coin(rng_) ? SpinDir::Up : SpinDir::Down);
+    for (int i = 0; i < N_; ++i) spin_[i] = coin(rng_) ? 1 : -1;
+
+    sitePos_.assign(N_, {});
+    segBase_.assign(N_, 0);
 }
 
-void SSE::setEnergyShift() {
-    const SpinDir s2[2] = {SpinDir::Up, SpinDir::Down};
-    energyShift_ = 0.0; double maxE = 0.0;
-    for (auto a : s2) for (auto b : s2) maxE = std::max(maxE, -bondWeight(a, b));
-    energyShift_ = -maxE - 0.1;
-}
-
-void SSE::adjustCutoff() {
-    if (cutoff_ * 0.9 < operatorNum_) {
-        int adj = std::max(1, static_cast<int>(0.1 * cutoff_));
-        cutoff_ += adj;
-        operatorList_.insert(operatorList_.end(), adj, std::make_pair(OpType::NO_OPERATOR, -1));
+// Grow the operator string when the expansion order approaches the cutoff.
+// Only grows (never truncates a sampled configuration); ~1/3 head-room keeps
+// the fixed-length truncation error unobservable.
+void SSE::ensureCutoff() {
+    int need = n_ + n_ / 3 + 4;
+    if (need > M_) {
+        opType_.resize(need, Op::NONE);
+        opIdx_.resize(need, -1);
+        M_ = need;
     }
 }
 
+// ------------------------------------------------------------
+// Diagonal update: insert / remove CONST_SITE and BOND operators,
+// propagating the spin state through FLIP_SITE operators.
+// ------------------------------------------------------------
 void SSE::diagonalUpdate() {
-    adjustCutoff();
-    int tot = possibleOperatorNumber_;
-    std::uniform_int_distribution<int> rc(0, tot - 1);
-    std::uniform_real_distribution<double> u01(0.0, 1.0);
-    auto ifC = [&](double p) { return p >= 1.0 || (p > 0.0 && u01(rng_) < p); };
+    ensureCutoff();
+    std::uniform_int_distribution<int> pickCand(0, nCand_ - 1);
 
-    for (auto& op : operatorList_) {
-        auto& [t, idx] = op; double P = -1.0;
-        if (t != OpType::NO_OPERATOR) {
-            switch (t) {
-                case OpType::BOND_OPERATOR: {
-                    int bi = lat_.bonds[idx].i, bj = lat_.bonds[idx].j;
-                    P = (cutoff_ - operatorNum_ + 1) / (tot * beta_ * bondWeight(spin_[bi], spin_[bj]));
-                    break;
+    for (int p = 0; p < M_; ++p) {
+        switch (opType_[p]) {
+            case Op::NONE: {
+                int c = pickCand(rng_);
+                if (c < N_) {                    // propose CONST_SITE, weight h
+                    double Pacc = nCand_ * beta_ * h_ / (M_ - n_);
+                    if (Pacc >= 1.0 || u01_(rng_) < Pacc) {
+                        opType_[p] = Op::CONST_SITE; opIdx_[p] = c; ++n_;
+                    }
+                } else {                         // propose BOND, weight 2J if aligned
+                    int b = c - N_;
+                    double w = bondWeight(spin_[lat_.bonds[b].i], spin_[lat_.bonds[b].j]);
+                    if (w > 0.0) {
+                        double Pacc = nCand_ * beta_ * w / (M_ - n_);
+                        if (Pacc >= 1.0 || u01_(rng_) < Pacc) {
+                            opType_[p] = Op::BOND; opIdx_[p] = b; ++n_;
+                        }
+                    }
                 }
-                case OpType::CONST_OPERATOR:
-                    P = (cutoff_ - operatorNum_ + 1) / (tot * beta_ * h_); break;
-                case OpType::OFFDIAG_OPERATOR: flip(spin_[idx]); break;
-                default: break;
+                break;
             }
-            if (t != OpType::OFFDIAG_OPERATOR && ifC(P)) { op = std::make_pair(OpType::NO_OPERATOR, -1); --operatorNum_; }
-        } else {
-            int c = rc(rng_);
-            if (c < N_) {
-                P = tot * beta_ * h_ / (cutoff_ - operatorNum_);
-                if (ifC(P)) { t = OpType::CONST_OPERATOR; idx = c; ++operatorNum_; }
-            } else {
-                int b = c - N_, bi = lat_.bonds[b].i, bj = lat_.bonds[b].j;
-                P = tot * beta_ * bondWeight(spin_[bi], spin_[bj]) / (cutoff_ - operatorNum_);
-                if (ifC(P)) { t = OpType::BOND_OPERATOR; idx = b; ++operatorNum_; }
+            case Op::CONST_SITE: {
+                double Pacc = (M_ - n_ + 1) / (nCand_ * beta_ * h_);
+                if (Pacc >= 1.0 || u01_(rng_) < Pacc) { opType_[p] = Op::NONE; opIdx_[p] = -1; --n_; }
+                break;
             }
+            case Op::BOND: {
+                int b = opIdx_[p];
+                double w = bondWeight(spin_[lat_.bonds[b].i], spin_[lat_.bonds[b].j]); // = 2J
+                double Pacc = (M_ - n_ + 1) / (nCand_ * beta_ * w);
+                if (Pacc >= 1.0 || u01_(rng_) < Pacc) { opType_[p] = Op::NONE; opIdx_[p] = -1; --n_; }
+                break;
+            }
+            case Op::FLIP_SITE:
+                spin_[opIdx_[p]] = -spin_[opIdx_[p]]; // propagate the world line
+                break;
         }
     }
 }
 
-void SSE::lineUpdate() {
-    linkA_.assign(halfLinkNum_, {}); linkB_.assign(halfLinkNum_, {});
-    singleSiteList_.assign(N_, {}); link_.assign(N_, {});
-    constructLink(); updateLattice<true>(linkA_, linkB_); updateLattice<false>(linkB_, linkA_);
-    writeBack(); linkA_.clear(); linkB_.clear(); singleSiteList_.clear(); link_.clear();
+// ------------------------------------------------------------
+// Union-find over segments
+// ------------------------------------------------------------
+int SSE::ufFind(int x) {
+    while (parent_[x] != x) { parent_[x] = parent_[parent_[x]]; x = parent_[x]; }
+    return x;
+}
+void SSE::ufUnion(int a, int b) {
+    int ra = ufFind(a), rb = ufFind(b);
+    if (ra != rb) parent_[ra] = rb;
 }
 
-void SSE::constructLink() {
-    for (std::size_t oi = 0; oi < operatorList_.size(); ++oi) {
-        auto [t, idx] = operatorList_[oi];
-        switch (t) {
-            case OpType::NO_OPERATOR: continue;
-            case OpType::BOND_OPERATOR: {
-                int i = lat_.bonds[idx].i, j = lat_.bonds[idx].j;
-                SpinDir si = spin_[i], sj = spin_[j];
-                if (i % 2 == 0) {
-                    linkA_[i>>1].push_back({t, idx, (int)oi, si, sj, 0});
-                    linkB_[j>>1].push_back({t, idx, (int)oi, si, sj, 0});
-                    linkA_[i>>1].back().imageIndex = linkB_[j>>1].size() - 1;
-                    linkB_[j>>1].back().imageIndex = linkA_[i>>1].size() - 1;
-                } else {
-                    linkA_[j>>1].push_back({t, idx, (int)oi, si, sj, 0});
-                    linkB_[i>>1].push_back({t, idx, (int)oi, si, sj, 0});
-                    linkA_[j>>1].back().imageIndex = linkB_[i>>1].size() - 1;
-                    linkB_[i>>1].back().imageIndex = linkA_[j>>1].size() - 1;
-                } break;
-            }
-            case OpType::CONST_OPERATOR:
-                if (idx % 2 == 0) {
-                    linkA_[idx>>1].push_back({t, idx, (int)oi, spin_[idx], spin_[idx], 0});
-                    singleSiteList_[idx].push_back({oi, linkA_[idx>>1].size() - 1});
-                } else {
-                    linkB_[idx>>1].push_back({t, idx, (int)oi, spin_[idx], spin_[idx], 0});
-                    singleSiteList_[idx].push_back({oi, linkB_[idx>>1].size() - 1});
-                } break;
-            case OpType::OFFDIAG_OPERATOR:
-                if (idx % 2 == 0) {
-                    linkA_[idx>>1].push_back({t, idx, (int)oi, spin_[idx], -spin_[idx], 0});
-                    singleSiteList_[idx].push_back({oi, linkA_[idx>>1].size() - 1});
-                } else {
-                    linkB_[idx>>1].push_back({t, idx, (int)oi, spin_[idx], -spin_[idx], 0});
-                    singleSiteList_[idx].push_back({oi, linkB_[idx>>1].size() - 1});
-                } flip(spin_[idx]); break;
-        }
+// Local segment index on `site` that contains string position `pos`.
+// sitePos_[site] is the sorted list of that site's site-operator positions,
+// dividing the (periodic) world line into k = max(size,1) segments.  Segment
+// k-1 is the wrap-around segment straddling propagation index 0.
+int SSE::localSegment(int site, int pos) const {
+    const auto& sp = sitePos_[site];
+    int k = static_cast<int>(sp.size());
+    if (k == 0) return 0;
+    int c = static_cast<int>(std::lower_bound(sp.begin(), sp.end(), pos) - sp.begin());
+    return (c == 0 || c == k) ? (k - 1) : (c - 1);
+}
+
+// ------------------------------------------------------------
+// Cluster update (Sandvik 2003 TFIM Swendsen-Wang, rejection-free)
+// ------------------------------------------------------------
+void SSE::clusterUpdate() {
+    // 1. Collect each site's site-operator positions (string scanned in order,
+    //    so positions come out already sorted) and lay out global segment ids.
+    for (int i = 0; i < N_; ++i) sitePos_[i].clear();
+    for (int p = 0; p < M_; ++p) {
+        Op t = opType_[p];
+        if (t == Op::CONST_SITE || t == Op::FLIP_SITE) sitePos_[opIdx_[p]].push_back(p);
     }
-}
-
-template<bool IsA>
-void SSE::updateLattice(std::vector<std::vector<OpLink>>& link,
-                         std::vector<std::vector<OpLink>>& oth) {
-    int off = IsA ? 0 : 1;
-    std::uniform_real_distribution<double> u01(0.0, 1.0);
-    for (int site = 0; site < halfLinkNum_; ++site) {
-        auto& sSL = singleSiteList_[(site<<1)+off]; if (sSL.empty()) continue;
-        for (const auto& soi : sSL) {
-            std::size_t li = soi.linkIndex; double mp = 0.0;
-            while (true) {
-                li = (li + 1) % link[site].size();
-                auto& [ot, oi, _, cfgi, cfgj, im] = link[site][li]; (void)_; (void)im;
-                if (ot == OpType::BOND_OPERATOR) {
-                    int bi = lat_.bonds[oi].i;
-                    bool cs = (bi == ((site<<1)|off));
-                    mp += cs ? std::log(bondWeight(-cfgi, cfgj)/bondWeight(cfgi, cfgj))
-                             : std::log(bondWeight(cfgi, -cfgj)/bondWeight(cfgi, cfgj));
-                } else break;
-            }
-            if (u01(rng_) < std::exp(mp)) {
-                { auto& [ot, oi, _, cfgi, cfgj, im] = link[site][li]; (void)_; (void)oi; (void)cfgj; (void)im;
-                  flip(cfgi); ot = (ot == OpType::OFFDIAG_OPERATOR) ? OpType::CONST_OPERATOR : OpType::OFFDIAG_OPERATOR; }
-                while (true) {
-                    li = (li + link[site].size() - 1) % link[site].size();
-                    auto& [ot, oi, _, cfgi, cfgj, im] = link[site][li]; (void)_; (void)oi;
-                    if (ot == OpType::BOND_OPERATOR) {
-                        int bi = lat_.bonds[oi].i;
-                        bool cs = (bi == ((site<<1)|off));
-                        if (cs) { flip(cfgi); flip(IsA ? oth[site][im].cfgi : oth[(site+1)%halfLinkNum_][im].cfgi); }
-                        else { flip(cfgj); flip(IsA ? oth[(site-1+halfLinkNum_)%halfLinkNum_][im].cfgj : oth[site][im].cfgj); }
-                    } else { flip(cfgj); ot = (ot == OpType::OFFDIAG_OPERATOR) ? OpType::CONST_OPERATOR : OpType::OFFDIAG_OPERATOR; break; }
-                }
-            }
-        }
-    }
-}
-template void SSE::updateLattice<true>(std::vector<std::vector<OpLink>>&, std::vector<std::vector<OpLink>>&);
-template void SSE::updateLattice<false>(std::vector<std::vector<OpLink>>&, std::vector<std::vector<OpLink>>&);
-
-void SSE::writeBack() {
-    for (int i = 0; i < N_; ++i) link_[i] = (i % 2 == 0) ? linkA_[i >> 1] : linkB_[i >> 1];
+    int nSeg = 0;
     for (int i = 0; i < N_; ++i) {
-        if (link_[i].empty()) continue;
-        const auto& f = link_[i][0]; int bj = lat_.bonds[f.opIndex].j;
-        spin_[i] = (f.opType == OpType::BOND_OPERATOR && i == bj) ? f.cfgj : f.cfgi;
+        segBase_[i] = nSeg;
+        nSeg += std::max<int>(1, static_cast<int>(sitePos_[i].size()));
+    }
+
+    // 2. Union the two segments bound by every BOND operator.
+    parent_.resize(nSeg);
+    for (int s = 0; s < nSeg; ++s) parent_[s] = s;
+    for (int p = 0; p < M_; ++p) {
+        if (opType_[p] != Op::BOND) continue;
+        int b = opIdx_[p];
+        int i = static_cast<int>(lat_.bonds[b].i), j = static_cast<int>(lat_.bonds[b].j);
+        ufUnion(segBase_[i] + localSegment(i, p), segBase_[j] + localSegment(j, p));
+    }
+
+    // 3. Flip each cluster with probability 1/2 (decision taken on the root).
+    flip_.assign(nSeg, 2); // 2 = undecided
+    for (int s = 0; s < nSeg; ++s) {
+        int r = ufFind(s);
+        if (flip_[r] == 2) flip_[r] = (u01_(rng_) < 0.5) ? 1 : 0;
+        flip_[s] = flip_[r];
+    }
+
+    // 4a. Update the stored state |alpha(0)>: site i lives in its wrap-around
+    //     segment (local index k-1, or 0 when the world line has no site ops).
+    for (int i = 0; i < N_; ++i) {
+        int k = static_cast<int>(sitePos_[i].size());
+        int wrap = segBase_[i] + (k > 0 ? k - 1 : 0);
+        if (flip_[wrap]) spin_[i] = -spin_[i];
+    }
+
+    // 4b. Toggle each site operator whose two neighbouring segments disagree on
+    //     the flip decision (CONST <-> FLIP; both weight h, so weight-preserving).
+    for (int i = 0; i < N_; ++i) {
+        const auto& sp = sitePos_[i];
+        int k = static_cast<int>(sp.size());
+        for (int s = 0; s < k; ++s) {
+            int below = segBase_[i] + (s - 1 + k) % k; // segment ending at this op
+            int above = segBase_[i] + s;               // segment starting at this op
+            if (flip_[below] != flip_[above]) {
+                Op& t = opType_[sp[s]];
+                t = (t == Op::FLIP_SITE) ? Op::CONST_SITE : Op::FLIP_SITE;
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------
+// Debug: configuration consistency
+// ------------------------------------------------------------
+bool SSE::verifyConfig() {
+    std::vector<std::int8_t> s = spin_;
+    for (int p = 0; p < M_; ++p) {
+        if (opType_[p] == Op::BOND) {
+            int b = opIdx_[p];
+            if (s[lat_.bonds[b].i] != s[lat_.bonds[b].j]) return false; // anti-aligned bond
+        } else if (opType_[p] == Op::FLIP_SITE) {
+            s[opIdx_[p]] = -s[opIdx_[p]];
+        }
     }
     for (int i = 0; i < N_; ++i)
-        for (const auto& r : singleSiteList_[i]) operatorList_[r.listIndex].first = link_[i][r.linkIndex].opType;
+        if (s[i] != spin_[i]) return false; // world line does not close
+    return true;
 }
 
-double SSE::magnetization() const {
-    double s = 0.0; for (auto sp : spin_) s += to_int(sp); return s / N_;
-}
-double SSE::computeEnergy() const {
-    return (-operatorNum_ / beta_ - energyShift_ * Nb_ + h_ * N_) / N_;
-}
-
+// ------------------------------------------------------------
+// Driver
+// ------------------------------------------------------------
 SSEResult SSE::run() {
-    SSEResult res; int tot = params_.n_thermal + params_.n_bins * params_.sweeps_per_bin;
-    double sE = 0, sE2 = 0, sm = 0, sm2 = 0, sm4 = 0, sn = 0; int nm = 0;
-    for (int sw = 0; sw < tot; ++sw) {
-        diagonalUpdate(); lineUpdate();
-        if (sw >= params_.n_thermal && (sw - params_.n_thermal) % params_.sweeps_per_bin == 0) {
-            ++nm; double E = computeEnergy(); sE += E; sE2 += E*E;
-            double m = magnetization(), m2 = m*m; sm += std::abs(m); sm2 += m2; sm4 += m2*m2;
-            sn += operatorNum_;
+    const double qmin = lat_.smallest_momentum();
+    const std::array<double, 3> qvec = {qmin, 0.0, 0.0};
+
+    int total = params_.n_thermal + params_.n_bins * params_.sweeps_per_bin;
+    double sE = 0, sn = 0, sn2 = 0, sm = 0, sm2 = 0, sm4 = 0, sS0 = 0, sSq = 0;
+    double sNc = 0, sNb = 0, sNf = 0;
+    int nm = 0, nbad = 0;
+
+    for (int sw = 0; sw < total; ++sw) {
+        diagonalUpdate();
+        clusterUpdate();
+
+        if (sw >= params_.n_thermal &&
+            (sw - params_.n_thermal) % params_.sweeps_per_bin == 0) {
+            ++nm;
+            if (!verifyConfig()) ++nbad;
+            { int nc = 0, nb = 0, nf = 0;
+              for (int p = 0; p < M_; ++p) {
+                  if (opType_[p] == Op::CONST_SITE) ++nc;
+                  else if (opType_[p] == Op::BOND) ++nb;
+                  else if (opType_[p] == Op::FLIP_SITE) ++nf;
+              }
+              sNc += nc; sNb += nb; sNf += nf; }
+            // energy from the expansion order n
+            double E = (-static_cast<double>(n_) / beta_ + h_ * N_ + J_ * Nb_) / N_;
+            sE += E; sn += n_; sn2 += static_cast<double>(n_) * n_;
+
+            // magnetisation moments on the stored state |alpha(0)> (exact
+            // unbiased estimator of the diagonal observables)
+            double Mz = 0.0;
+            for (int i = 0; i < N_; ++i) Mz += spin_[i];
+            double mm = Mz / N_, mm2 = mm * mm;
+            sm += std::abs(mm); sm2 += mm2; sm4 += mm2 * mm2;
+
+            // structure factor S(0) and S(q_min) from the same state
+            double S0 = mm2; // = (sum sigma)^2 / N^2
+            double re = 0.0, im = 0.0;
+            for (int i = 0; i < N_; ++i) {
+                double qr = qvec[0] * lat_.site_coords[i][0]
+                          + qvec[1] * lat_.site_coords[i][1]
+                          + qvec[2] * lat_.site_coords[i][2];
+                re += spin_[i] * std::cos(qr);
+                im += spin_[i] * std::sin(qr);
+            }
+            double Sq = (re * re + im * im) / (static_cast<double>(N_) * N_);
+            sS0 += S0; sSq += Sq;
         }
     }
-    double inv = 1.0 / std::max(nm, 1); res.energy = sE * inv;
-    res.Cv = (sE2*inv - res.energy*res.energy) * beta_ * beta_ * N_;
-    res.m = sm*inv; res.m2 = sm2*inv; res.m4 = sm4*inv;
-    res.Q = (res.m2 > 1e-30) ? res.m2*res.m2/res.m4 : 0;
-    res.n_op_avg = sn*inv/N_; res.n_measure=nm; res.n_thermal=params_.n_thermal;
-    res.susceptibility = res.m2 * beta_ * N_; return res;
+
+    SSEResult res;
+    double inv = 1.0 / std::max(nm, 1);
+    res.energy = sE * inv;
+    double navg = sn * inv, n2avg = sn2 * inv;
+    res.Cv = (n2avg - navg * navg - navg) / N_;   // (<n^2>-<n>^2-<n>)/N
+    res.m = sm * inv; res.m2 = sm2 * inv; res.m4 = sm4 * inv;
+    res.Q = (res.m2 > 1e-30) ? res.m2 * res.m2 / res.m4 : 0.0;
+    res.Sq0 = sS0 * inv; res.Sqmin = sSq * inv;
+
+    // second-moment correlation length, same convention as the ED oracle
+    if (qmin > 1e-12 && res.Sqmin > 1e-30) {
+        double denom = 4.0 * std::pow(std::sin(qmin / 2.0), 2);
+        double xi2 = (res.Sq0 / res.Sqmin - 1.0) / denom;
+        int Lmax = std::max({lat_.L[0], lat_.L[1], lat_.L[2]});
+        if (xi2 > 0 && Lmax > 0) res.xi_over_L = std::sqrt(xi2) / Lmax;
+    }
+
+    res.n_op_avg = navg / N_;
+    res.n_const_avg = sNc * inv;
+    res.n_bond_avg = sNb * inv;
+    res.n_flip_avg = sNf * inv;
+    res.consistency_failures = nbad;
+    res.sign_avg = 1.0;
+    res.n_measure = nm;
+    res.n_thermal = params_.n_thermal;
+    return res;
 }
 
 } // namespace cm

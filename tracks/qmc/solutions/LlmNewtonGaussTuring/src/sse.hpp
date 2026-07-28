@@ -1,45 +1,74 @@
 #pragma once
 
 // ============================================================
-// Two TFIM SSE decomposition strategies explored (git history):
+// Serial SSE QMC for the pure ferromagnetic transverse-field Ising model
 //
-// A) Standard Sandvik: bondWeight = J(1+σσ), no energy shift
-//    Operators: BOND + OFFDIAG (no CONST)
-//    Update: diagonal + cluster (union-find)
-//    Energy: E = J·Nb - ⟨n⟩/β
-//    Issue: OFFDIAG count explodes (no removal mechanism)
+//     H = -J sum_<ij> sigma^z_i sigma^z_j - h sum_i sigma^x_i ,   J>0, h>0.
 //
-// B) Reference energy-shift (current): bondWeight = -(Jσσ+E_shift)
-//    Operators: BOND + CONST (diagonal) + OFFDIAG (line update toggle)
-//    Update: diagonal + line update (sse_new port)
-//    Energy: E = -⟨n⟩/β - E_shift·Nb + h·N     [matches ED <0.5%]
-//    Issue: m2 too low in ordered phase (shift inverts weight landscape)
-//    Rationale: Challenge 148 primary observable is critical field h_c
-//    from Q_L and ξ/L — energy accuracy is the key requirement.
+// Stage 3 redesign (graph-agnostic Swendsen-Wang cluster update).
+//
+// Standard non-negative Sandvik (2003) decomposition, H = -sum_a H_a + C:
+//   - CONST_SITE : diagonal identity on a site,   weight h
+//   - FLIP_SITE  : off-diagonal sigma^x on a site, weight h
+//   - BOND       : diagonal Ising on a bond,       weight J(1 + s_i s_j)
+//                  = 2J on an aligned bond, 0 on an anti-aligned bond
+//   C = J*Nb + h*N   (energy offset).
+//
+// The FM weight landscape (aligned bond = 2J, anti-aligned = 0) means bond
+// operators only ever sit on aligned pairs and bind those two world lines.
+// A single-world-line ("line") update cannot flip through such a bond without
+// hitting weight 0; the Stage 2 code sidestepped this with an inverted
+// energy-shift convention that destroyed ferromagnetic order (m^2 ~20x too
+// small).  The cluster update instead flips *both* bound world lines together,
+// so every bond stays aligned and the flip is rejection-free.  This restores
+// the correct m^2 / m^4 / Q_L and works on any graph (no bipartite / 1D
+// assumption), replacing the Stage 2 A/B line update.
+//
+// Off-diagonal update (Sandvik 2003 TFIM cluster update, rejection-free):
+//   - Cut each site's imaginary-time world line at every site operator
+//     (CONST or FLIP); the stretches between cuts are "segments".
+//   - Fuse the two segments touched by each BOND operator (union-find):
+//     they must flip together to keep the bond aligned.
+//   - Flip each resulting cluster with probability 1/2.  A site operator whose
+//     two neighbouring segments disagree on the flip toggles CONST<->FLIP
+//     (both weight h, so the move is weight-preserving).
+//
+// Energy estimator:  E/N = -<n>/(beta N) + h + J*Nb/N.
 // ============================================================
 
-
 #include "lattice.hpp"
-#include <cstddef>
+#include <cstdint>
 #include <random>
 #include <vector>
 
 namespace cm {
 
-enum class OpType : int { NO_OPERATOR = -1, OFFDIAG_OPERATOR, BOND_OPERATOR, CONST_OPERATOR };
-enum class SpinDir : int { Up = 1, Down = -1 };
-inline SpinDir operator-(SpinDir s) { return static_cast<SpinDir>(-static_cast<int>(s)); }
-inline void flip(SpinDir& s) { s = -s; }
-inline int to_int(SpinDir s) { return static_cast<int>(s); }
+enum class Op : std::int8_t { NONE = -1, FLIP_SITE = 0, CONST_SITE = 1, BOND = 2 };
 
-using OpIndex = int;
-using OpListType = std::pair<OpType, OpIndex>;
+struct SSEParams {
+    int n_thermal = 2000;
+    int n_bins = 200;
+    int sweeps_per_bin = 20;
+    int seed = 42;
+};
 
-struct SSEParams { int n_thermal = 1000; int n_bins = 100; int sweeps_per_bin = 50; int seed = 42; };
 struct SSEResult {
-    double energy = 0.0, energy_sq = 0.0, Cv = 0.0, m = 0.0, m2 = 0.0, m4 = 0.0, Q = 0.0;
-    double n_op_avg = 0.0, sign_avg = 1.0, susceptibility = 0.0;
-    int n_measure = 0, n_thermal = 0;
+    double energy = 0.0;   // <H>/N
+    double Cv = 0.0;       // heat capacity / N
+    double m = 0.0;        // <|m|>,        m = (1/N) sum sigma^z
+    double m2 = 0.0;       // <m^2>
+    double m4 = 0.0;       // <m^4>
+    double Q = 0.0;        // <m^2>^2 / <m^4>   (Blote-Deng Binder ratio)
+    double Sq0 = 0.0;      // structure factor S(0)  (= m2)
+    double Sqmin = 0.0;    // structure factor S(q_min)
+    double xi_over_L = 0.0;// second-moment correlation length / L
+    double n_op_avg = 0.0; // <n> / N
+    double sign_avg = 1.0; // always 1 (sign-problem free)
+    int n_measure = 0;
+    int n_thermal = 0;
+    // diagnostics (operator-type census; <n_const> must equal beta*h*N exactly)
+    double n_const_avg = 0.0, n_bond_avg = 0.0, n_flip_avg = 0.0;
+    int consistency_failures = 0;
 };
 
 class SSE {
@@ -47,45 +76,46 @@ public:
     SSE(const Lattice& lattice, double J, double h, double beta,
         const SSEParams& params = SSEParams{});
     SSEResult run();
-    int operatorNum() const { return operatorNum_; }
-    const std::vector<SpinDir>& spin() const { return spin_; }
-    double energyShift() const { return energyShift_; }
 
-    double bondWeight(SpinDir a, SpinDir b) const {
-        return -(J_ * to_int(a) * to_int(b) + energyShift_);
-    }
+    // BOND weight in the standard non-negative FM decomposition:
+    //   2J if the two spins are aligned, 0 if anti-aligned.  s in {+1,-1}.
+    double bondWeight(int si, int sj) const { return J_ * (1 + si * sj); }
 
-    struct OpLink {
-        OpType opType = OpType::NO_OPERATOR; OpIndex opIndex = 0; int listIndex = 0;
-        SpinDir cfgi = SpinDir::Up, cfgj = SpinDir::Down; std::size_t imageIndex = 0;
-    };
-    struct SiteRef { std::size_t listIndex; std::size_t linkIndex; };
+    int operatorNum() const { return n_; }
+    const std::vector<std::int8_t>& spin() const { return spin_; }
 
 private:
     const Lattice& lat_;
     double J_, h_, beta_;
-    int N_, Nb_, possibleOperatorNumber_;
-    double energyShift_;
+    int N_, Nb_, nCand_;          // nCand_ = N_ + Nb_ diagonal candidates
     SSEParams params_;
-    int cutoff_, operatorNum_;
-    std::vector<OpListType> operatorList_;
-    std::vector<SpinDir> spin_;
-    std::mt19937 rng_;
 
-    void setEnergyShift();
-    void adjustCutoff();
+    int M_;                        // operator-string cutoff (length)
+    int n_;                        // current number of non-identity operators
+    std::vector<Op> opType_;       // per-slot operator type
+    std::vector<int> opIdx_;       // per-slot site (SITE ops) or bond (BOND) index
+    std::vector<std::int8_t> spin_;// +/-1, stored state |alpha(0)>
+
+    std::mt19937_64 rng_;
+    std::uniform_real_distribution<double> u01_{0.0, 1.0};
+
+    // cluster-update scratch (reused across sweeps)
+    std::vector<std::vector<int>> sitePos_; // per-site sorted site-operator positions
+    std::vector<int> segBase_;              // per-site global id of its first segment
+    std::vector<int> parent_;               // union-find over segments
+    std::vector<std::uint8_t> flip_;        // per-segment flip decision
+
+    void ensureCutoff();
     void diagonalUpdate();
-    void lineUpdate();
-    void constructLink();
-    template<bool IsA> void updateLattice(std::vector<std::vector<OpLink>>& link,
-                                           std::vector<std::vector<OpLink>>& linkOther);
-    void writeBack();
-    double magnetization() const;
-    double computeEnergy() const;
+    void clusterUpdate();
 
-    int halfLinkNum_;
-    std::vector<std::vector<OpLink>> linkA_, linkB_, link_;
-    std::vector<std::vector<SiteRef>> singleSiteList_;
+    int ufFind(int x);
+    void ufUnion(int a, int b);
+    int localSegment(int site, int pos) const;
+
+    // debug: propagate |alpha(0)> through the string; return true iff it closes
+    // on itself and every BOND operator sits on an aligned pair.
+    bool verifyConfig();
 };
 
 } // namespace cm

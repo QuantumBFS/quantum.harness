@@ -337,49 +337,105 @@ static double magnetization(std::size_t state, std::size_t N) {
     return static_cast<double>(sum_sz);
 }
 
+// ------------------------------------------------------------
+// Cached eigensystem
+// ------------------------------------------------------------
+// compute_thermal_obs / compute_structure_factor / compute_xi_over_L are each
+// called repeatedly at the same (lattice, J, h) in the test suite.  The Jacobi
+// solve is O(dim^3) per sweep, so a one-entry cache keyed on the Hamiltonian
+// inputs avoids re-diagonalising the same matrix several times.
+namespace {
+
+struct EDCache {
+    bool valid = false;
+    std::string name;
+    std::size_t N = 0;
+    double J = 0.0, h = 0.0;
+    std::vector<Bond> bonds;
+    EigenSystem es;
+
+    bool matches(const Lattice& lat, double J_, double h_) const {
+        if (!valid || name != lat.name || N != lat.N || J != J_ || h != h_) return false;
+        if (bonds.size() != lat.bonds.size()) return false;
+        for (std::size_t k = 0; k < bonds.size(); ++k)
+            if (bonds[k].i != lat.bonds[k].i || bonds[k].j != lat.bonds[k].j) return false;
+        return true;
+    }
+};
+
+const EigenSystem& cached_eigen(const Lattice& lat, double J, double h) {
+    static EDCache cache;
+    if (!cache.matches(lat, J, h)) {
+        DenseSymMatrix H = build_tfim_hamiltonian(lat, J, h);
+        cache.es = jacobi_eigen(H);
+        cache.name = lat.name; cache.N = lat.N; cache.J = J; cache.h = h;
+        cache.bonds = lat.bonds; cache.valid = true;
+    }
+    return cache.es;
+}
+
+// Boltzmann-weighted probability of each basis state:
+//   p(c) = (1/Z) sum_n e^{-beta(E_n-E_0)} |<c|psi_n>|^2
+// This is the piece the previous implementation got wrong: it used the
+// eigenvalue loop index directly as a basis-state label, never touching the
+// eigenvectors, which corrupted every diagonal observable (m, m2, m4, Q, S(q))
+// while leaving the eigenvalue-only quantities (E, Cv) correct.
+std::vector<double> basis_probabilities(const EigenSystem& es, std::size_t dim,
+                                        double beta, double* Z_out = nullptr,
+                                        double* E_out = nullptr, double* E2_out = nullptr) {
+    const double E0 = es.eigenvalues[0];
+    std::vector<double> p(dim, 0.0);
+    double Z = 0.0, sE = 0.0, sE2 = 0.0;
+    for (std::size_t n = 0; n < dim; ++n) {
+        const double En = es.eigenvalues[n];
+        const double w = std::exp(-beta * (En - E0));
+        Z += w; sE += En * w; sE2 += En * En * w;
+        if (w < 1e-300) continue;
+        for (std::size_t c = 0; c < dim; ++c) {
+            const double amp = es.eigenvectors[c * dim + n];
+            p[c] += w * amp * amp;
+        }
+    }
+    const double invZ = 1.0 / Z;
+    for (std::size_t c = 0; c < dim; ++c) p[c] *= invZ;
+    if (Z_out) *Z_out = Z;
+    if (E_out) *E_out = sE * invZ;
+    if (E2_out) *E2_out = sE2 * invZ;
+    return p;
+}
+
+} // namespace
+
 ThermalObs compute_thermal_obs(const Lattice& lattice, double J, double h, double beta) {
     std::size_t dim = 1ULL << lattice.N;
     if (dim > (1ULL << 14))
         throw std::runtime_error("Hilbert space too large for full ED thermal (> 2^14)");
 
-    DenseSymMatrix H = build_tfim_hamiltonian(lattice, J, h);
-    auto es = jacobi_eigen(H);
+    const EigenSystem& es = cached_eigen(lattice, J, h);
 
-    double Z = 0.0;
-    double exp_E = 0.0, exp_E2 = 0.0;
+    double avgE = 0.0, avgE2 = 0.0;
+    std::vector<double> p = basis_probabilities(es, dim, beta, nullptr, &avgE, &avgE2);
+
     double exp_m = 0.0, exp_m2 = 0.0, exp_m4 = 0.0;
-
-    // Ground state energy
-    double E0 = es.eigenvalues[0];
-
-    for (std::size_t s = 0; s < dim; ++s) {
-        double En = es.eigenvalues[s];
-        double boltz = std::exp(-beta * (En - E0));
-        Z += boltz;
-
-        exp_E += En * boltz;
-        exp_E2 += En * En * boltz;
-
-        double m_s = magnetization(s, lattice.N);
-        exp_m += std::abs(m_s) * boltz;
-
-        double m2_s = m_s * m_s;
-        exp_m2 += m2_s * boltz;
-
-        double m4_s = m2_s * m2_s;
-        exp_m4 += m4_s * boltz;
+    for (std::size_t c = 0; c < dim; ++c) {
+        if (p[c] == 0.0) continue;
+        const double m_c = magnetization(c, lattice.N);   // raw sum of sigma^z
+        const double m2_c = m_c * m_c;
+        exp_m  += std::abs(m_c) * p[c];
+        exp_m2 += m2_c * p[c];
+        exp_m4 += m2_c * m2_c * p[c];
     }
 
+    const double N_ = static_cast<double>(lattice.N);
     ThermalObs obs;
-    double invZ = 1.0 / Z;
-    obs.E = (exp_E * invZ) / static_cast<double>(lattice.N);
-    obs.Cv = ((exp_E2 * invZ) - std::pow(exp_E * invZ, 2)) /
-             (beta * beta * static_cast<double>(lattice.N));
-    obs.m = (exp_m * invZ) / static_cast<double>(lattice.N);
-    double N_ = static_cast<double>(lattice.N);
-    obs.m2 = (exp_m2 * invZ) / (N_ * N_);
-    obs.m4 = (exp_m4 * invZ) / (N_ * N_ * N_ * N_);
-    obs.Q = (obs.m2 * obs.m2) / (obs.m4 > 1e-30 ? obs.m4 : 1e-30);
+    obs.E = avgE / N_;
+    // heat capacity C = beta^2 (<E^2> - <E>^2); previously this divided by
+    // beta^2 instead of multiplying.
+    obs.Cv = beta * beta * (avgE2 - avgE * avgE) / N_;
+    obs.m  = exp_m / N_;
+    obs.m2 = exp_m2 / (N_ * N_);
+    obs.m4 = exp_m4 / (N_ * N_ * N_ * N_);
+    obs.Q  = (obs.m2 * obs.m2) / (obs.m4 > 1e-30 ? obs.m4 : 1e-30);
     return obs;
 }
 
@@ -393,38 +449,32 @@ double compute_structure_factor(const Lattice& lattice, double J, double h,
     if (dim > (1ULL << 14))
         throw std::runtime_error("Hilbert space too large for structure factor");
 
-    DenseSymMatrix H = build_tfim_hamiltonian(lattice, J, h);
-    auto es = jacobi_eigen(H);
-    double E0 = es.eigenvalues[0];
+    const EigenSystem& es = cached_eigen(lattice, J, h);
+    std::vector<double> p = basis_probabilities(es, dim, beta);
 
-    double Z = 0.0;
-    double sq_sum = 0.0;
-    double N_ = static_cast<double>(lattice.N);
-
-    for (std::size_t s = 0; s < dim; ++s) {
-        double En = es.eigenvalues[s];
-        double boltz = std::exp(-beta * (En - E0));
-        Z += boltz;
-
-        // Compute <s|sigma^z_i sigma^z_j|s>
-        double corr_sum = 0.0;
-        for (std::size_t i = 0; i < lattice.N; ++i) {
-            for (std::size_t j = 0; j < lattice.N; ++j) {
-                double szi = static_cast<double>(sigma_z(s, i));
-                double szj = static_cast<double>(sigma_z(s, j));
-                double dr[3] = {
-                    lattice.site_coords[i][0] - lattice.site_coords[j][0],
-                    lattice.site_coords[i][1] - lattice.site_coords[j][1],
-                    lattice.site_coords[i][2] - lattice.site_coords[j][2]
-                };
-                double qdr = q[0] * dr[0] + q[1] * dr[1] + q[2] * dr[2];
-                corr_sum += szi * szj * std::cos(qdr);
-            }
-        }
-        sq_sum += corr_sum * boltz;
+    // S(q) = (1/N^2) < |sum_i sigma^z_i e^{i q.r_i}|^2 >
+    std::vector<double> cosq(lattice.N), sinq(lattice.N);
+    for (std::size_t i = 0; i < lattice.N; ++i) {
+        const double qr = q[0] * lattice.site_coords[i][0]
+                        + q[1] * lattice.site_coords[i][1]
+                        + q[2] * lattice.site_coords[i][2];
+        cosq[i] = std::cos(qr);
+        sinq[i] = std::sin(qr);
     }
 
-    return sq_sum / (Z * N_ * N_);
+    const double N_ = static_cast<double>(lattice.N);
+    double acc = 0.0;
+    for (std::size_t c = 0; c < dim; ++c) {
+        if (p[c] == 0.0) continue;
+        double re = 0.0, im = 0.0;
+        for (std::size_t i = 0; i < lattice.N; ++i) {
+            const double s = static_cast<double>(sigma_z(c, i));
+            re += s * cosq[i];
+            im += s * sinq[i];
+        }
+        acc += (re * re + im * im) * p[c];
+    }
+    return acc / (N_ * N_);
 }
 
 // ============================================================

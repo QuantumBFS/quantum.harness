@@ -41,5 +41,12 @@ add_executable(test_sse tests/test_sse.cpp)
 target_link_libraries(test_sse PRIVATE cm148)
 add_test(NAME test_sse COMMAND test_sse)
 
+# Diagnostic driver (not part of the test suite)
+add_executable(debug_sse tools/debug_sse.cpp)
+target_link_libraries(debug_sse PRIVATE cm148)
+
+add_executable(debug_cv tools/debug_cv.cpp)
+target_link_libraries(debug_cv PRIVATE cm148)
+
 # Enable CTest
 enable_testing()

@@ -169,12 +169,34 @@ static void test_thermal_limits() {
     std::cout << "  beta=0.01: E=" << obs_high.E
               << " m=" << obs_high.m << " Q=" << obs_high.Q << std::endl;
 
-    // Low temperature (beta = 100): ground state dominates
+    // Low temperature.  The N=4 FM chain at h=0.5 has a near-degenerate ground
+    // doublet (split by delta = 0.0355 here), so at beta=100 we sit at
+    // beta*delta = 3.55 — right on the two-level Schottky peak.  Cv/N is
+    // therefore O(0.1), NOT small; asserting "Cv small" at this beta only
+    // passed while Cv was mis-normalised (divided by beta^2 instead of
+    // multiplied).  Check it against the exact two-level formula instead.
+    auto H = build_tfim_hamiltonian(lat, J, h);
+    auto es = jacobi_eigen(H);
+    double delta = es.eigenvalues[1] - es.eigenvalues[0];
+
     auto obs_low = compute_thermal_obs(lat, J, h, 100.0);
     check("low-T E reasonable", std::isfinite(obs_low.E));
-    check("low-T Cv small", obs_low.Cv < 1e-3);
+    {
+        double x = 100.0 * delta;
+        double schottky = (x * x * std::exp(x) / std::pow(1.0 + std::exp(x), 2)) / lat.N;
+        check("low-T Cv = two-level Schottky",
+              std::abs(obs_low.Cv - schottky) < 1e-9 * (1.0 + std::abs(schottky)),
+              "got=" + std::to_string(obs_low.Cv) + " schottky=" + std::to_string(schottky));
+    }
     std::cout << "  beta=100: E=" << obs_low.E
-              << " Cv=" << obs_low.Cv << " Q=" << obs_low.Q << std::endl;
+              << " Cv=" << obs_low.Cv << " Q=" << obs_low.Q
+              << " (doublet split delta=" << delta << ")" << std::endl;
+
+    // Deep in the gap (beta*delta >> 1) the heat capacity really does vanish.
+    auto obs_vlow = compute_thermal_obs(lat, J, h, 1000.0);
+    check("deep low-T Cv -> 0", obs_vlow.Cv < 1e-9,
+          "got=" + std::to_string(obs_vlow.Cv));
+    std::cout << "  beta=1000: Cv=" << obs_vlow.Cv << std::endl;
 }
 
 // ============================================================
