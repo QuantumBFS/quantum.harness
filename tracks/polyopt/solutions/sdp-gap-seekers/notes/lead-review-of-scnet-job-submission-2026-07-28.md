@@ -156,3 +156,26 @@ Before the next gamma-zero smoke:
 8. classify raw MOI/Mosek statuses conservatively; job `22986474` contains no
    feasibility evidence because `optimize!` was never reached;
 9. do not launch `gamma=1/4` until the corrected gamma-zero result is reviewed.
+
+## Lead implementation status
+
+Requirements 1–3 above were completed in:
+
+```text
+634f113 square-gap: fix SCNet smoke launch and Mosek threads
+```
+
+The batch script now opens stdout/stderr in the submission directory and moves
+both open files into the run bundle after creating it. The solver uses the raw
+string attribute `MSK_IPAR_NUM_THREADS`. A mock-optimizer regression test
+checks that the attribute is installed with the requested integer value and
+rejects a nonpositive thread count.
+
+Verification:
+
+```text
+bash syntax check: passed
+Julia suite:        573 passed, 0 failed, 0 errored
+```
+
+Requirements 4–9 remain the execution and evidence gate.

@@ -307,6 +307,8 @@ blocker rather than repeatedly resubmitting.
 
 ## 8.3 Authorized identical retry: launch path blocked
 
+**Historical diagnosis, superseded by Section 8.4 below.**
+
 The single authorized retry was submitted with the same committed batch
 script and only the failed node excluded:
 
@@ -363,6 +365,49 @@ The next action should be one of the following, in order:
 
 Changing the scientific model, MOF, Julia/Mosek paths, partition, or memory
 request is not justified by the evidence currently available.
+
+## 8.4 Corrected launch diagnosis and application handoff
+
+The infrastructure-blocked conclusion in Sections 8.2–8.3 was provisional and
+is now superseded. The missing `results/` output directory was the cause of
+the pre-execution failures. Slurm opens a batch job's configured stdout/stderr
+paths before executing the script, so the script's own later `mkdir` could not
+repair the path.
+
+The controlled evidence is:
+
+| Job | Node | Result | Meaning |
+|---|---|---|---|
+| `22986463` | `a01r02n04` | safe-path diagnostic `COMPLETED 0:0` with `OK` output | basic batch launch was healthy |
+| `22986467` | `a01r02n04` | bad-output-path reproduction `FAILED 0:53`, batch `CANCELLED 0:53`, no output | reproduced the original path failure on the same healthy node |
+| `22986474` | `a01r08n05` | real batch ran 56 seconds and exited `1:0` | pre-creating `results/` allowed the application to execute |
+
+Job `22986474` passed the input SHA-256 checks, validated the Gate B metadata,
+read the MOF, and reached solver attachment. It then stopped before
+`optimize!` because the runner passed a `Mosek.Iparam` enum where JuMP 1.31.1
+requires a raw string or MOI optimizer attribute:
+
+```text
+MethodError: set_attribute(::Model, ::Iparam, ::Int64)
+```
+
+Commit `634f113` makes both fixes durable:
+
+- Slurm stdout/stderr initially target the existing submission directory and
+  are moved into the run bundle after its directory is created;
+- the thread parameter uses raw attribute name `MSK_IPAR_NUM_THREADS`;
+- a mock-optimizer regression test covers attribute installation.
+
+The full Julia suite passes:
+
+```text
+573 passed, 0 failed, 0 errored
+```
+
+There is still no feasibility evidence: job `22986474` never called
+`optimize!`. The next permitted scientific action is one corrected
+`gamma=0` smoke submission from commit `634f113` or a documentation-only
+descendant. `gamma=1/4` remains gated on review of that result.
 
 ## 9. Claim boundary
 
