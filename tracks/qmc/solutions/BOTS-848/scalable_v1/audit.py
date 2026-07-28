@@ -11,7 +11,10 @@ from pathlib import Path
 from .protocol import ProtocolConfig
 
 
-REVEAL_ONLY_CANDIDATE_MODULE_PREFIXES = ("scalable_v1.overlap",)
+REVEAL_ONLY_CANDIDATE_MODULE_PREFIXES = (
+    "scalable_v1.evaluator",
+    "scalable_v1.overlap",
+)
 
 
 @dataclass(frozen=True)

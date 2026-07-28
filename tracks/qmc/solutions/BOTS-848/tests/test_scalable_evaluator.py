@@ -326,6 +326,47 @@ def test_manifest_audit_rejects_candidate_reference_to_reveal_only_overlap(
     )
 
 
+@pytest.mark.parametrize(
+    ("source_text", "expected_issue"),
+    [
+        (
+            "from scalable_v1.evaluator import build_ed_overlap_oracle as leaked\n",
+            "forbidden candidate import: scalable_v1.evaluator",
+        ),
+        (
+            "import scalable_v1.evaluator as coordinator\n",
+            "forbidden candidate import: scalable_v1.evaluator",
+        ),
+        (
+            "COORDINATOR_MODULE = 'scalable_v1.evaluator'\n",
+            "forbidden candidate module reference: scalable_v1.evaluator",
+        ),
+    ],
+)
+def test_manifest_audit_rejects_candidate_evaluator_import_and_reference_variants(
+    tmp_path: Path,
+    source_text: str,
+    expected_issue: str,
+) -> None:
+    project_root, _, manifest_path, _, protocol = make_frozen_run(
+        tmp_path,
+        source_text=source_text,
+    )
+
+    audit = verify_manifest(
+        manifest_path,
+        project_root=project_root,
+        protocol=protocol,
+        expected_training_seed=848,
+    )
+
+    assert audit.valid is False
+    assert "scalable_v1.evaluator" not in protocol.oracle[
+        "forbidden_module_prefixes"
+    ]
+    assert expected_issue in audit.issues
+
+
 def test_importing_evaluator_does_not_load_ed_implementation_modules() -> None:
     source = f"""
 import sys
