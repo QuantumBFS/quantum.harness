@@ -17,7 +17,7 @@ export LD_LIBRARY_PATH="$HOME/julia/lib/julia:$HOME/mosek/bin:${LD_LIBRARY_PATH:
 export MAX_WALL_S=6000 MAX_RSS_GB=26 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=4
 OUT="tracks/polyopt/results/${RUN_NAME:?}/cell_c2d_L4"
 mkdir -p "$OUT"
-julia -t 2 --project=julia-env \
+julia -t 2 -L tracks/polyopt/solutions/its-a-trap/hpc/2d/resort_patch.jl --project=julia-env \
   tracks/polyopt/solutions/its-a-trap/overnight_harness.jl "$OUT" t2d \
   "c2d_L4:4:model=heis2d,extra=0,rdm=8,pso=0,lso=false"
 rc=$?

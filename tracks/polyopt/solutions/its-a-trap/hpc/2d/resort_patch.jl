@@ -1,6 +1,8 @@
 # resort_patch.jl — method-lane monkey-patch for the upstream bug documented
-# in BLOCKED.md. NOT loaded anywhere until the morning arbiter approves.
-# Include AFTER `using QMBCertify`, BEFORE any lattice="square" GSB call.
+# in BLOCKED.md. APPROVED by the arbiter 2026-07-29 morning ("2D 用
+# monkey-patch 跑起来"). Loaded via `julia -L resort_patch.jl` in the 2D
+# sbatch scripts; self-contained (loads QMBCertify itself).
+using QMBCertify
 #
 # Semantics: sort the support list, merge coefficients of duplicates —
 # matching the call sites in eigen_circmat (basic_function.jl:316/:341) where
