@@ -42,6 +42,12 @@ from oracle.overlap_klein import (
     write_result,
 )
 
+FIXTURE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "fixtures"
+    / "overlap_klein_r01.json"
+)
+
 
 def _synthetic_system(
     coefficients: list[list[sp.Expr | int]],
@@ -626,6 +632,69 @@ def test_result_payload_contains_replayable_terminal_evidence(
                 "exact_primal_certificate" not in sign
                 for sign in (anchor["positive"], anchor["negative"])
             )
+
+
+def test_r01_fixture_covers_both_number_conserving_cells_without_duplicates() -> None:
+    """Catches missing, repeated, or convention-drifted R01 evidence cells."""
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    cells = [
+        cell
+        for cell in payload["cells"]
+        if cell["family"] == "number-conserving"
+    ]
+    assert [cell["mask"] for cell in cells] == [
+        "rings-bridges",
+        "rings-diagonals-bridges",
+    ]
+    for cell in cells:
+        system = build_system(cell["family"], cell["mask"])
+        expected_labels = bridge_labels(cell["family"])
+        assert cell["system_shape"] == list(system.coefficients.shape)
+        assert cell["anchor_count"] == len(expected_labels)
+        assert [anchor["label"] for anchor in cell["anchors"]] == list(
+            expected_labels
+        )
+
+
+def test_r01_fixture_classifications_are_consistent_and_all_certificates_replay() -> None:
+    """Catches unsupported classifications or compact certificate corruption."""
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    cells = [
+        cell
+        for cell in payload["cells"]
+        if cell["family"] == "number-conserving"
+    ]
+    assert len(cells) == 2
+    for cell in cells:
+        system = build_system(cell["family"], cell["mask"])
+        for anchor in cell["anchors"]:
+            if anchor["classification"] == "certified-feasible":
+                replayed = 0
+                for sign_name in ("positive", "negative"):
+                    branch = anchor[sign_name]
+                    if "certificate" in branch:
+                        certificate = certificate_from_json(
+                            branch["certificate"], system
+                        )
+                        assert verify_primal(system, certificate)
+                        assert certificate.anchor_label == anchor["label"]
+                        assert certificate.anchor_sign == (
+                            1 if sign_name == "positive" else -1
+                        )
+                        replayed += 1
+                assert replayed >= 1
+            elif anchor["classification"] == "certified-zero":
+                assert anchor["positive"]["status"] == "infeasible"
+                assert anchor["negative"]["status"] == "infeasible"
+                certificate = certificate_from_json(
+                    anchor["zero_certificate"], system
+                )
+                assert verify_zero_dual(system, certificate)
+                assert certificate.anchor_label == anchor["label"]
+            elif anchor["classification"] == "numerical-only":
+                assert "zero_certificate" not in anchor
+            else:
+                raise AssertionError(anchor["classification"])
 
 
 def test_classifier_keeps_two_feasible_sign_certificates_separate() -> None:
