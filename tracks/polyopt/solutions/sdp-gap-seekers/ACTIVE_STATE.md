@@ -273,4 +273,23 @@ Updated: 2026-07-29 UTC.
 - Next gate: build and independently reload clean solver-free cone-reduced
   MOFs for both gamma values, then preserve the required gamma=0-before-
   gamma=1/2 optimization order.
+- Full-spin cone-reduced MOF build attempt r1, Slurm job `22988604`,
+  completed both exact builds and independent reload checks from clean commit
+  `2f87e7a`. Each model has 3,250 variables, 10 constraints, nine named real
+  PSD cones, 10,064 triangle entries, and maximum side 73. Gamma=0
+  model/runmeta SHA-256 values are
+  `a34c629a502b515fc615467bc876f691c0494d523c32f4e1dc5323d84b235d26`
+  and
+  `0b2942005c4bae13019508484d7af35106b67fbc978b067b99e484e7b588d086`;
+  gamma=1/2 values are
+  `ce3f4030afdc19d90b0f3a1bd2e8a2d6f3f06c19aad6c61e3b0bbbfe68de17a9`
+  and
+  `3c880055c1728faeda17c49301819b41272c5fcac0654c19db3e85da0e528ca3`.
+  Job peak RSS was 917,940 KiB and elapsed time was 5:21.
+- The dedicated nine-cone runner allowlists those four hashes and fails
+  closed on the fixed setup, all five exact-reduction layers, the complete
+  15-file source inventory, and the reloaded model counts and named cone
+  sides. Gamma=0 is the next numerical truth gate; gamma=1/2 remains
+  unauthorized until its returned point passes the independent residual and
+  nine-block eigenvalue audit.
 - No decision-changing user or resource need is open.

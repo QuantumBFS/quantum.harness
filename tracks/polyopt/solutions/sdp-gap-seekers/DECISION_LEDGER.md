@@ -398,3 +398,25 @@ redundant gap scalar. It retains 3,250 moments and nine real PSD cones with
 `6fac20b5e07a66d4fc863cdaa45f92d53a219a19e0be3b5075669d140c1ec219`.
 Proceed to clean solver-free builds and reload checks for both fixed gamma
 values; optimization still requires gamma=0 to pass before gamma=1/2.
+
+## 2026-07-29 — accept immutable nine-cone MOF inputs
+
+Slurm job `22988604` built and independently reloaded both solver-free models
+from clean commit `2f87e7a`. The gamma=0 model/runmeta SHA-256 values are
+`a34c629a502b515fc615467bc876f691c0494d523c32f4e1dc5323d84b235d26`
+and
+`0b2942005c4bae13019508484d7af35106b67fbc978b067b99e484e7b588d086`;
+the gamma=1/2 values are
+`ce3f4030afdc19d90b0f3a1bd2e8a2d6f3f06c19aad6c61e3b0bbbfe68de17a9`
+and
+`3c880055c1728faeda17c49301819b41272c5fcac0654c19db3e85da0e528ca3`.
+
+Both reloads confirm 3,250 variables, 10 constraints, all nine named real PSD
+cones, 10,064 packed triangle coordinates, and maximum side 73. Job peak RSS
+was 917,940 KiB and elapsed time was 5:21; the Slurm-log SHA-256 is
+`f35286e6c2083aeacc43655ceceb47a20831d3261e11bcd1159300fd1e922280`.
+Treat the two bundles as immutable. The separate runner must verify the
+allowlisted MOF and runmeta hashes, fixed setup, every exact reduction layer,
+all recorded source hashes, and the reloaded cone inventory before Mosek is
+attached. Preserve the mandated order: gamma=0 first and gamma=1/2 only after
+an audited feasible gamma=0 point.
