@@ -47,7 +47,7 @@ index c384283..8b27a46
 diff --git a/src/sdp.jl b/src/sdp.jl
 old mode 100644
 new mode 100755
-index ed6716a..cd39c01
+index ed6716a..752acf4
 --- a/src/sdp.jl
 +++ b/src/sdp.jl
 @@ -1,4 +1,4 @@
@@ -75,7 +75,7 @@ index ed6716a..cd39c01
      if QUIET == false
          println("Solving the SDP...")
      end
-@@ -145,25 +144,67 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
+@@ -145,25 +144,78 @@ function certify_Ising_gap(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -125,33 +125,44 @@ index ed6716a..cd39c01
 +        cons_res = maximum(abs, value.(cons))
 +        cert_ray = (lambda=lam_ray, pos_min_eig=pos_min_eig,
 +                    gpos_min_eig=gpos_min_eig, cons_residual=cons_res)
-+        # PORTABLE CERTIFICATE ARTIFACT (advisor re-audit). Capture the complete
-+        # primal ray + the sparse affine map (from the assembled AffExpr terms)
-+        # so a SEPARATE verifier can reconstruct the constraint identity without
-+        # JuMP/Mosek. certify RETURNS this data; the driver script serializes it
-+        # (avoids adding Serialization as a package dep). The independent verifier
-+        # reconstructs cons[k] = sum coef*ray_value[var] and re-audits PSD.
-+        cert_artifact = nothing
++        # PORTABLE CERTIFICATE ARTIFACT (advisor recheck: ONE source of truth).
++        # The verifier must reconstruct EVERYTHING from the single vector x =
++        # ray_values via explicit index maps -- no separately-exported float
++        # matrices or scalar lambda (those created an unsound verifier that
++        # checked three unbound copies). Schema:
++        #   x = ray_values (length nvars) -- the sole primal ray
++        #   affine_map = sparse A as (constraint_k, var_position, coef)
++        #   affine_constants (all 0 for this homogeneous model)
++        #   c = objective vector (Max lambda -> c = e_{lambda_pos})
++        #   pos_var_positions[i][j,k] / gap_var_positions[l][j,k] -> position in x
++        #   lambda_var_position -> position in x
++        # The verifier rebuilds Gram matrices from x via the index maps, checks
++        # symmetry (aliasing), PSD, A*x + constants = 0, and c'x > 0.
 +        all_vars = all_variables(model)
++        nvars = length(all_vars)
 +        vidx = Dict(var => idx for (idx, var) in enumerate(all_vars))
-+        ray_vals = value.(all_vars)
-+        affmap = Tuple{Int,Int,Float64}[]          # (constraint_k, var_position, coef)
++        x = value.(all_vars)
++        affmap = Tuple{Int,Int,Float64}[]
 +        for k in eachindex(cons)
 +            for (var, coef) in pairs(cons[k].terms)
 +                push!(affmap, (k, vidx[var], Float64(coef)))
 +            end
 +        end
-+        pos_mats = [lb[i] > 0 ? Matrix(Float64.(value.(pos[i]))) : zeros(0, 0)
-+                    for i in eachindex(basis)]
-+        gpos_mats = [lgb[l] > 0 ? Matrix(Float64.(value.(gpos[l]))) : zeros(0, 0)
-+                     for l in eachindex(gbasis)]
-+        cert_artifact = (N=N, gamma=Float64(gamma), d=d, lso=lso,
++        lambda_pos = vidx[λ]
++        cvec = zeros(Float64, nvars); cvec[lambda_pos] = 1.0
++        pos_varpos = [lb[i] > 0 ? [vidx[pos[i][j, k]] for j in 1:lb[i], k in 1:lb[i]]
++                                : zeros(Int, 0, 0) for i in eachindex(basis)]
++        gap_varpos = [lgb[l] > 0 ? [vidx[gpos[l][j, k]] for j in 1:lgb[l], k in 1:lgb[l]]
++                                 : zeros(Int, 0, 0) for l in eachindex(gbasis)]
++        cert_artifact = (schema_version=1, N=N, gamma=Float64(gamma), d=d, lso=lso,
 +                         termination=string(status), primal=string(_pstatus),
 +                         dual=string(_dstatus), objective=Float64(_objv),
-+                         lambda=Float64(value(λ)),
++                         nvars=nvars, nconstraints=length(cons),
++                         affine_constants=zeros(Float64, length(cons)),
++                         affine_map=affmap, c=cvec,
++                         pos_var_positions=pos_varpos, gap_var_positions=gap_varpos,
 +                         pos_sizes=copy(lb), gap_sizes=copy(lgb),
-+                         pos_mats=pos_mats, gpos_mats=gpos_mats,
-+                         ray_values=ray_vals, affine_map=affmap)
++                         lambda_var_position=lambda_pos, ray_values=x)
 +    end
      flag = status == MathOptInterface.OPTIMAL ? 1 : 0
 -    return flag
@@ -160,7 +171,7 @@ index ed6716a..cd39c01
  end
  
  function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=6, QUIET=false)
-@@ -339,9 +380,12 @@ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=
+@@ -339,9 +391,12 @@ function certify_Ising_gap_nosignsymmetry(N::Int, H::ncpoly, gamma, d::Int; lso=
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -174,7 +185,7 @@ index ed6716a..cd39c01
  end
  
  function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; lso=4, QUIET=false)
-@@ -398,6 +442,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -398,6 +453,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
      cons = [AffExpr(0) for i=1:length(tsupp)]
      pos = Vector{Symmetric{VariableRef}}(undef, length(basis))
      for i = 1:length(basis)
@@ -182,7 +193,7 @@ index ed6716a..cd39c01
          pos[i] = @variable(model, [1:lb[i], 1:lb[i]], PSD)
          for j = 1:lb[i], k = j:lb[i]
              @inbounds bi,c = reduce!([basis[i][j][1]; basis[i][k][1]], N, realify=true, model="kagome")
-@@ -417,6 +462,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -417,6 +473,7 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
      end
      gpos = Vector{Symmetric{VariableRef}}(undef, length(gbasis))
      for l = 1:length(gbasis)
@@ -190,7 +201,7 @@ index ed6716a..cd39c01
          gpos[l] = @variable(model, [1:lgb[l], 1:lgb[l]], PSD)
          for i = 1:lgb[l], j = i:lgb[l]
              bis,coes = PSDstate_entry(gbasis[l][i][1], gbasis[l][j][1], H, N, realify=true, model="kagome")
-@@ -494,9 +540,12 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
+@@ -494,9 +551,12 @@ function certify_Heisenberg_kagome_gap(N::Int, H::ncpoly, triples, edges, inner_
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
@@ -204,7 +215,7 @@ index ed6716a..cd39c01
  end
  
  function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples, edges, inner_triples, inner_edges, gamma, d::Int; obj=nothing, lso=4, QUIET=false)
-@@ -690,7 +739,10 @@ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples
+@@ -690,7 +750,10 @@ function certify_Heisenberg_kagome_gap_nosignsymmetry(N::Int, H::ncpoly, triples
          println("SDP solving time: $time seconds.")
      end
      status = termination_status(model)
