@@ -3,41 +3,37 @@ set -eu
 
 export LC_ALL=C
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-    echo "usage: $0 DATASET_ROOT [OUTPUT_ROOT]" >&2
+search_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+solution_root=$(CDPATH= cd -- "$search_root/.." && pwd)
+mode=${1:---check}
+
+if [ "$mode" != "--check" ]; then
+    echo "usage: $0 [--check]" >&2
     exit 2
 fi
 
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-solution_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
-dataset_root=$1
-output_root=${2:-$solution_root}
-target_dir=$(mktemp -d "${TMPDIR:-/tmp}/occam71-rust-target.XXXXXX")
-trap 'rm -rf "$target_dir"' EXIT HUP INT TERM
+cargo test --locked --manifest-path "$search_root/Cargo.toml"
 
-for suffix in A B C D; do
-    instance="mystery-$suffix"
-    for input in train.csv test_inputs.csv commitment.sha256; do
-        if [ ! -f "$dataset_root/$instance/$input" ]; then
-            echo "missing $dataset_root/$instance/$input" >&2
-            exit 1
-        fi
-    done
-done
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/occam71-snapshot.XXXXXX")
+trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+cargo run --quiet --release --locked \
+    --manifest-path "$search_root/Cargo.toml" -- \
+    experiment-run \
+    --config "$solution_root/research/config.json" \
+    --tasks "$solution_root/research/tasks.json" \
+    --raw "$temporary/raw.jsonl"
 
-CARGO_TARGET_DIR="$target_dir" cargo build --release \
-    --manifest-path "$script_dir/rust/Cargo.toml"
-binary="$target_dir/release/occam71_rust"
+if command -v sha256sum >/dev/null 2>&1; then
+    actual=$(sha256sum "$temporary/raw.jsonl" | awk '{print $1}')
+else
+    actual=$(shasum -a 256 "$temporary/raw.jsonl" | awk '{print $1}')
+fi
+expected=$(awk -F'"' \
+    '/"raw_matrix_sha256"/ { print $4; exit }' \
+    "$solution_root/research-manifest.json")
+if [ "$actual" != "$expected" ]; then
+    echo "research raw matrix hash mismatch: expected $expected, got $actual" >&2
+    exit 1
+fi
 
-for suffix in A B C D; do
-    instance="mystery-$suffix"
-    "$binary" learn \
-        --instance "$instance" \
-        --train "$dataset_root/$instance/train.csv" \
-        --test-inputs "$dataset_root/$instance/test_inputs.csv" \
-        --commitment "$dataset_root/$instance/commitment.sha256" \
-        --output-dir "$output_root"
-done
-
-"$binary" write-manifest --output-dir "$output_root"
-echo "Occam #71 artifacts written to $output_root"
+echo "Standalone Occam source, artifacts, and 20,480-trial matrix verified."

@@ -15,7 +15,7 @@
     }
   ],
   "gate_count": 37,
-  "circuit_sha256": "cac11ee6ad87c22af5c23222325fc285433c802f012919f056c2cf07b5b6b83a",
+  "circuit_sha256": "143f1e3987d853f30b7adb6bd8981c4e6bffb5cad25dc5ad5b35b9525095d9af",
   "training_scalar": {
     "samples": 2000,
     "gate_count": 37,

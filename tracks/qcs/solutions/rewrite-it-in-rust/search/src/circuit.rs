@@ -32,13 +32,15 @@ impl GateOp {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Source {
     Input(usize),
     Wire(usize),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Operand {
     pub source: Source,
     pub inverted: bool,

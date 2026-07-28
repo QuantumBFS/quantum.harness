@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source_commit": "c96da169042369ba5a593a4611bd8c3dd27b38f8",
+  "trial_rows": 20480,
+  "files": {
+    "config.json": "3f0baed1eda5d86b5c03ea76074fe2882a5143ed6df177c1a3f6b1510112d14a",
+    "tasks.json": "f0510a535870087e5dcbce5f617c20024412018b671871d782979a3ef17e3e5a",
+    "raw.jsonl": "15990cfc98dd86024b446e1108a58b93d7163e8e5b7accbed4957e2ae35cd846",
+    "aggregate.csv": "7ee693513505712cd773d7a01abfdd86896a544df50086a2828ca41cf7e22d04",
+    "aggregate.json": "78c99e656fa325860741d30119d429f181a44e45b884c061581886412e6de1ec",
+    "report.md": "19a03bccb9245e5fbd033e839600064de3c4f0a113baf3e14f73d0346d9202fa",
+    "figures/gates-vs-accuracy.svg": "d65f85600e34fe9146f7e4efa61fd72ad36298914aee863a2d6b7849577a4017",
+    "figures/fraction-vs-recovery.svg": "2e5de8a53cb2abd2754dd8a7e7d0c82b143efb04c3ed132a4432dbbe121f4b18",
+    "figures/description-vs-gates.svg": "cb1cfc2ee27085e4f833dbd00a86589ed95af6565ffb9c94bd115438e177ca94",
+    "environment.json": "748e2bbb30b69426cbd298bf97f569a300789f3587637ff16b600d214fcb95f3"
+  },
+  "external": {
+    "abc_lock_sha256": "010acbb7d9c9ad4ce3211c2e6316bcd197f9dfe2e8746fc6d0c287476fa64f7a",
+    "optimization_report_sha256": "960484ba8cdfc51ecf2d42140b41dfbf8163178250951e461fcac590ae1d4788"
+  }
+}

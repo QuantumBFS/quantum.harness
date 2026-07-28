@@ -8,7 +8,8 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ArithmeticFamily, CandidateScore, OccamError, ResourceLimits, VerificationMetrics,
+    ArithmeticFamily, CandidateScore, MdlSearchReport, OccamError, ResourceLimits,
+    VerificationMetrics,
     learning::{learner::LearnResult, prediction::sha256_hex},
 };
 
@@ -42,6 +43,37 @@ impl LearningReport {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
+pub struct MdlLearningReport {
+    pub schema_version: u32,
+    pub learner: String,
+    pub expression: String,
+    pub description_cost: usize,
+    pub minimum_unique: bool,
+    pub equal_cost_expression_count: usize,
+    pub search: MdlSearchReport,
+    pub operand_bits: usize,
+    pub input_width: usize,
+    pub output_width: usize,
+    pub gate_count: usize,
+    pub circuit_sha256: String,
+    pub training_scalar: VerificationMetrics,
+    pub training_packed: VerificationMetrics,
+    pub exhaustive_cases: usize,
+    pub exhaustive_mismatches: usize,
+    pub prediction_rows: usize,
+    pub prediction_sha256: String,
+    pub expected_commitment_sha256: Option<String>,
+    pub commitment_matches: Option<bool>,
+}
+
+impl MdlLearningReport {
+    pub fn to_json_pretty(&self) -> Result<String, OccamError> {
+        pretty_json(self)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Manifest {
     pub schema_version: u32,
     pub solution: String,
@@ -51,6 +83,53 @@ pub struct Manifest {
 impl Manifest {
     pub fn to_json_pretty(&self) -> Result<String, OccamError> {
         pretty_json(self)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ResearchSolutionManifest {
+    pub schema_version: u32,
+    pub solution: String,
+    pub learner: String,
+    pub baseline_tag: String,
+    pub instances: Vec<ManifestInstance>,
+    pub optimization_report_path: String,
+    pub optimization_report_sha256: String,
+    pub research_manifest_path: String,
+    pub research_manifest_sha256: String,
+}
+
+impl ResearchSolutionManifest {
+    pub fn to_json_pretty(&self) -> Result<String, OccamError> {
+        pretty_json(self)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(untagged)]
+pub enum AnySolutionManifest {
+    V2(ResearchSolutionManifest),
+    V1(Manifest),
+}
+
+impl AnySolutionManifest {
+    pub fn from_json(source: &str) -> Result<Self, OccamError> {
+        let manifest: Self = serde_json::from_str(source).map_err(|error| {
+            OccamError::Validation(format!("invalid solution manifest JSON: {error}"))
+        })?;
+        match &manifest {
+            Self::V1(value) if value.schema_version == 1 => Ok(manifest),
+            Self::V2(value) if value.schema_version == 2 => Ok(manifest),
+            Self::V1(value) => Err(OccamError::Validation(format!(
+                "unsupported legacy solution manifest schema {}",
+                value.schema_version
+            ))),
+            Self::V2(value) => Err(OccamError::Validation(format!(
+                "unsupported research solution manifest schema {}",
+                value.schema_version
+            ))),
+        }
     }
 }
 
@@ -193,15 +272,42 @@ pub fn write_manifest(
             )));
         }
     }
-    let manifest = Manifest {
-        schema_version: 1,
-        solution: "rewrite-it-in-rust".into(),
-        instances: entries,
-    };
     create_dir_all(output_root)?;
     let path = output_root.join("manifest.json");
     let temporary = temporary_path(&path);
-    let encoded = manifest.to_json_pretty()?;
+    let optimization_path = output_root.join("optimization/report.json");
+    let research_path = output_root.join("research-manifest.json");
+    let encoded = if optimization_path.is_file() && research_path.is_file() {
+        ResearchSolutionManifest {
+            schema_version: 2,
+            solution: "rewrite-it-in-rust".into(),
+            learner: "mdl-enumerator".into(),
+            baseline_tag: "v0.2.0".into(),
+            instances: entries,
+            optimization_report_path: "optimization/report.json".into(),
+            optimization_report_sha256: sha256_hex(&fs::read(&optimization_path).map_err(
+                |source| OccamError::ReadFile {
+                    path: optimization_path,
+                    source,
+                },
+            )?),
+            research_manifest_path: "research-manifest.json".into(),
+            research_manifest_sha256: sha256_hex(&fs::read(&research_path).map_err(|source| {
+                OccamError::ReadFile {
+                    path: research_path,
+                    source,
+                }
+            })?),
+        }
+        .to_json_pretty()?
+    } else {
+        Manifest {
+            schema_version: 1,
+            solution: "rewrite-it-in-rust".into(),
+            instances: entries,
+        }
+        .to_json_pretty()?
+    };
     let result = write_synced(&temporary, encoded.as_bytes()).and_then(|()| {
         fs::rename(&temporary, &path).map_err(|source| OccamError::WriteFile {
             path: path.clone(),

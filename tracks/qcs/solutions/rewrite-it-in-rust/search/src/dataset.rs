@@ -1,12 +1,13 @@
 use crate::{DEFAULT_LIMITS, OccamError, ResourceLimits, dataset_scan::scan_dataset};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Sample {
     pub input: Vec<bool>,
     pub expected: Vec<bool>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Dataset {
     pub input_width: usize,
     pub output_width: usize,

@@ -14,18 +14,18 @@
       "first_mismatch_row": null
     }
   ],
-  "gate_count": 168,
-  "circuit_sha256": "d139bb17ebf4d4a1740c14ae20377432ce51d0f3754eb14e60db7d9d38da7565",
+  "gate_count": 167,
+  "circuit_sha256": "f1d5838a3198b304f671c7479f619fba86ca63bc364b0ac2b0f7fd036fd3cf78",
   "training_scalar": {
     "samples": 1200,
-    "gate_count": 168,
+    "gate_count": 167,
     "exact_matches": 1200,
     "correct_bits": 14400,
     "total_bits": 14400
   },
   "training_packed": {
     "samples": 1200,
-    "gate_count": 168,
+    "gate_count": 167,
     "exact_matches": 1200,
     "correct_bits": 14400,
     "total_bits": 14400
