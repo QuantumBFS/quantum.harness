@@ -378,5 +378,7 @@ Updated: 2026-07-29 UTC.
   moment-only fallback and the gated six-cone candidate are source-prepared;
   neither is authorized for MOF generation before its truth gate passes.
   A separate one-skeleton synthetic test passes all eight row-orientation,
-  norm, and signed-permutation assertions locally.
+  norm, and signed-permutation assertions locally. A clean, solver-free
+  two-gamma MOF builder is also prepared with every preceding exact truth
+  gate and independent named-cone reload, but it remains unsubmitted.
 - No decision-changing user or resource need is open.

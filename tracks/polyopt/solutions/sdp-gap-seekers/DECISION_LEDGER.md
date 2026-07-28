@@ -580,4 +580,8 @@ moment-only and six-cone assemblies so a passing truth gate can advance
 without another source-design cycle; their presence does not authorize a
 model build. A tiny synthetic rank-two test independently checks both
 canonical l=2 components, their squared norm two, orientation reversal, and
-the signed skeleton permutation; all eight assertions pass.
+the signed skeleton permutation; all eight assertions pass. Prepare a
+solver-free builder that replays the complete reduction chain for gamma 0
+and then gamma 1/2, records every source hash and layer schema, and
+independently reloads all named cones. Keep it unsubmitted until both new
+truth gates pass.
