@@ -11,6 +11,8 @@ using .FiniteBathObservables:
 using .FiniteBathCheckpoint:
     CheckpointCursor,
     CheckpointIdentity,
+    EvolutionResumeState,
+    ObservableResumeState,
     load_current_checkpoint,
     write_checkpoint_generation
 
@@ -34,10 +36,23 @@ function assert_observable_equivalence(actual, expected)
     @test actual.G_up ≈ expected.G_up atol = 1.0e-10
     @test actual.G_dn ≈ expected.G_dn atol = 1.0e-10
     @test actual.tau == expected.tau
-    @test actual.diagnostics.green_up == expected.diagnostics.green_up
-    @test actual.diagnostics.green_dn == expected.diagnostics.green_dn
-    @test actual.diagnostics.log_partition ≈
-          expected.diagnostics.log_partition atol = 1.0e-10
+    @test actual.diagnostics == expected.diagnostics
+    @test keys(actual.thermal_state.diagnostics) ==
+          keys(expected.thermal_state.diagnostics)
+    for key in keys(actual.thermal_state.diagnostics)
+        actual_value = getproperty(actual.thermal_state.diagnostics, key)
+        expected_value = getproperty(expected.thermal_state.diagnostics, key)
+        if key === :parameters
+            @test fieldnames(typeof(actual_value)) ==
+                  fieldnames(typeof(expected_value))
+            for field in fieldnames(typeof(actual_value))
+                @test getfield(actual_value, field) ==
+                      getfield(expected_value, field)
+            end
+        else
+            @test actual_value == expected_value
+        end
+    end
 end
 
 """
@@ -256,6 +271,15 @@ end
             push!(snapshots, (; psi = copy(psi), resume_state = state)),
     )
     assert_observable_equivalence(managed, uninterrupted)
+    @test !any(
+        snapshot ->
+            snapshot.resume_state.cursor.phase === :green &&
+            snapshot.resume_state.cursor.segment === :after &&
+            snapshot.resume_state.data.tau[
+                snapshot.resume_state.cursor.tau_index
+            ] in (0.0, beta),
+        snapshots,
+    )
 
     selectors = [
         snapshot ->
@@ -297,13 +321,7 @@ end
             ObservableCursor(:green, 1, :up, :before),
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 1, :up, :after),
-        snapshot ->
-            snapshot.resume_state.cursor ==
             ObservableCursor(:green, 1, :dn, :before),
-        snapshot ->
-            snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 1, :dn, :after),
     ]
     for selector in selectors
         target = findfirst(selector, snapshots)
@@ -346,6 +364,108 @@ end
         parameters;
         common...,
         resume = (; psi = inconsistent.psi, resume_state = bad_state),
+    )
+
+    thermal_snapshot = only(filter(
+        snapshot ->
+            snapshot.resume_state.cursor.phase === :thermal &&
+            snapshot.resume_state.evolution_state.completed_steps == 1,
+        snapshots,
+    ))
+    missing_thermal_evolution = ObservableResumeState(
+        thermal_snapshot.resume_state.cursor,
+        nothing,
+        nothing,
+        thermal_snapshot.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (;
+            psi = thermal_snapshot.psi,
+            resume_state = missing_thermal_evolution,
+        ),
+    )
+
+    endpoint_before = only(filter(
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 1, :up, :before),
+        snapshots,
+    ))
+    false_endpoint_after = ObservableResumeState(
+        ObservableCursor(:green, 1, :up, :after),
+        nothing,
+        endpoint_before.resume_state.thermal_psi,
+        endpoint_before.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (; psi = endpoint_before.psi, resume_state = false_endpoint_after),
+    )
+    endpoint_with_evolution = ObservableResumeState(
+        endpoint_before.resume_state.cursor,
+        thermal_snapshot.resume_state.evolution_state,
+        endpoint_before.resume_state.thermal_psi,
+        endpoint_before.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (;
+            psi = endpoint_before.psi,
+            resume_state = endpoint_with_evolution,
+        ),
+    )
+
+    interior_before = only(filter(
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :up, :before) &&
+            snapshot.resume_state.evolution_state === nothing,
+        snapshots,
+    ))
+    zero_step_evolution = EvolutionResumeState(;
+        completed_steps = 0,
+        beta_endpoint = 0.0,
+        log_unnormalized_norm = 0.0,
+        maximum_link_dimensions_by_bond = linkdims(interior_before.psi),
+        step_history = NamedTuple[],
+        expansion_applied = true,
+    )
+    before_with_zero_step = ObservableResumeState(
+        interior_before.resume_state.cursor,
+        zero_step_evolution,
+        interior_before.resume_state.thermal_psi,
+        interior_before.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (;
+            psi = interior_before.psi,
+            resume_state = before_with_zero_step,
+        ),
+    )
+
+    complete_snapshot = only(filter(
+        snapshot -> snapshot.resume_state.cursor.phase === :complete,
+        snapshots,
+    ))
+    complete_with_evolution = ObservableResumeState(
+        complete_snapshot.resume_state.cursor,
+        thermal_snapshot.resume_state.evolution_state,
+        complete_snapshot.resume_state.thermal_psi,
+        complete_snapshot.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (;
+            psi = complete_snapshot.psi,
+            resume_state = complete_with_evolution,
+        ),
     )
 end
 

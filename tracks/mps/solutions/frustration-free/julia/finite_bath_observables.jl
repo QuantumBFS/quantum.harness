@@ -643,11 +643,34 @@ function _publish_observable_checkpoint(
     return nothing
 end
 
-function _empty_observable_data(tau, settings)
+function _thermal_setup_maxima(
+    psi,
+    hamiltonian;
+    krylov_expansion_dim,
+    cutoff,
+    maxdim,
+)
+    initial = maximum(linkdims(psi); init = 1)
+    iszero(krylov_expansion_dim) && return initial, initial
+    expanded = expand(
+        deepcopy(psi),
+        hamiltonian;
+        alg = "global_krylov",
+        krylovdim = krylov_expansion_dim,
+        cutoff = max(cutoff, eps(Float64)),
+        apply_kwargs = (; maxdim),
+    )
+    normalize!(expanded)
+    return initial, maximum(linkdims(expanded); init = 1)
+end
+
+function _empty_observable_data(tau, settings, thermal_setup_maxima)
     count = length(tau)
     return (;
         tau = copy(tau),
         settings,
+        thermal_initial_max_link_dimension = thermal_setup_maxima[1],
+        thermal_expanded_max_link_dimension = thermal_setup_maxima[2],
         thermal_diagnostics = nothing,
         n_d = nothing,
         double_occupancy = nothing,
@@ -709,6 +732,12 @@ function _validate_observable_resume(state::ObservableResumeState)
             throw(ArgumentError("thermal cursor contains Green-function results"))
         data.thermal_diagnostics === nothing ||
             throw(ArgumentError("thermal cursor contains completed thermal diagnostics"))
+        data.thermal_initial_max_link_dimension > 0 &&
+            data.thermal_expanded_max_link_dimension > 0 ||
+            throw(ArgumentError("thermal setup diagnostics are invalid"))
+        state.evolution_state !== nothing &&
+            state.evolution_state.completed_steps > 0 ||
+            throw(ArgumentError("thermal cursor requires active evolution state"))
     elseif cursor.phase === :green
         cursor.tau_index <= length(data.tau) ||
             throw(ArgumentError("observable cursor tau_index is out of bounds"))
@@ -717,18 +746,36 @@ function _validate_observable_resume(state::ObservableResumeState)
         all(completed[1:(position - 1)]) &&
             !any(completed[position:end]) ||
             throw(ArgumentError("observable cursor disagrees with partial results"))
-        if cursor.segment === :before
+        endpoint =
+            data.tau[cursor.tau_index] == 0.0 ||
+            data.tau[cursor.tau_index] == data.thermal_diagnostics.beta
+        if endpoint
+            cursor.segment === :before ||
+                throw(ArgumentError("endpoint cursor must be before"))
+            state.evolution_state === nothing ||
+                throw(ArgumentError("endpoint cursor cannot carry evolution state"))
+            data.before === nothing && data.operator_log_norm === nothing ||
+                throw(ArgumentError("endpoint cursor contains operator state"))
+        elseif cursor.segment === :before
             data.before === nothing && data.operator_log_norm === nothing ||
                 throw(ArgumentError("before cursor contains post-operator state"))
-        elseif data.tau[cursor.tau_index] != 0.0 &&
-               data.tau[cursor.tau_index] !=
-               data.thermal_diagnostics.beta
+            state.evolution_state === nothing ||
+                state.evolution_state.completed_steps > 0 ||
+                throw(ArgumentError("before cursor evolution state has no completed step"))
+        else
             data.before !== nothing && data.operator_log_norm !== nothing ||
                 throw(ArgumentError("after cursor lacks operator state"))
+            state.evolution_state === nothing ||
+                state.evolution_state.completed_steps > 0 ||
+                throw(ArgumentError("after cursor evolution state has no completed step"))
         end
     else
         all(completed) ||
             throw(ArgumentError("complete cursor has incomplete results"))
+        state.evolution_state === nothing ||
+            throw(ArgumentError("complete cursor cannot carry evolution state"))
+        data.before === nothing && data.operator_log_norm === nothing ||
+            throw(ArgumentError("complete cursor contains branch state"))
     end
     return nothing
 end
@@ -874,7 +921,14 @@ function _finite_bath_observables_resumable(
         cursor = ObservableCursor(:thermal, 0, :none, :none)
         evolution_state = nothing
         thermal_psi = nothing
-        data = _empty_observable_data(tau, settings)
+        thermal_setup_maxima = _thermal_setup_maxima(
+            active,
+            context.hamiltonian;
+            krylov_expansion_dim,
+            cutoff,
+            maxdim,
+        )
+        data = _empty_observable_data(tau, settings, thermal_setup_maxima)
     else
         active, state = _resume_parts(resume)
         state.data.tau == tau ||
@@ -917,6 +971,15 @@ function _finite_bath_observables_resumable(
             resume_state = evolution_state,
             step_callback = callback,
         )
+        thermal_diagnostics = merge(
+            thermal_diagnostics,
+            (;
+                initial_max_link_dimension =
+                    data.thermal_initial_max_link_dimension,
+                expanded_max_link_dimension =
+                    data.thermal_expanded_max_link_dimension,
+            ),
+        )
         thermal_psi = copy(active)
         thermal = PurificationResult(
             context.sites,
@@ -958,13 +1021,6 @@ function _finite_bath_observables_resumable(
         diagnostics_key =
             spin === :up ? :diagnostics_up : :diagnostics_dn
         if point == 0.0 || point == beta
-            if cursor.segment === :before
-                cursor = ObservableCursor(:green, index, spin, :after)
-                state = _observable_state(cursor, nothing, thermal_psi, data)
-                _publish_observable_checkpoint(
-                    checkpoint_manager, stop_requested, active, state
-                )
-            end
             n_spin = spin === :up ? data.n_up : data.n_dn
             value = point == 0.0 ? -(1 - n_spin) : -n_spin
             diagnostics = _endpoint_green_diagnostics(
