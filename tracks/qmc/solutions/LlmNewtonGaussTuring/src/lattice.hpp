@@ -26,7 +26,9 @@ struct Lattice {
     std::size_t Nb = 0;                      // number of undirected bonds
     std::size_t dim = 0;                     // spatial dimension
     std::array<int, 3> L = {};               // linear sizes {Lx, Ly, Lz}
-    std::vector<Bond> bonds;                 // each bond exactly once
+    // Hamiltonian bonds. Small periodic tori can contain parallel bonds with
+    // the same endpoints; each entry is one interaction term.
+    std::vector<Bond> bonds;
     std::vector<std::array<double, 3>> site_coords;
     std::array<double, 3> prim_vec_a = {};   // primitive vector a
     std::array<double, 3> prim_vec_b = {};   // primitive vector b
@@ -47,6 +49,10 @@ struct Lattice {
 
     // Smallest non-zero reciprocal-lattice momentum.
     double smallest_momentum() const;
+
+    // All symmetry-related shortest non-zero momenta allowed by the periodic
+    // torus.  Unlike smallest_momentum(), this retains their directions.
+    std::vector<std::array<double, 3>> smallest_momentum_vectors() const;
 
     // Return a copy with bond indices permuted.  Used to verify index
     // independence of the build.
@@ -69,7 +75,7 @@ Lattice make_square(int Lx, int Ly);
 Lattice make_triangular(int Lx, int Ly);
 
 // 2D honeycomb lattice: two-site basis, N = 2 * Lx * Ly, Nb = 3 * Ly * Lx.
-//    prim_a, prim_b same as triangular.
+//    prim_a = (1/2, sqrt(3)/2), prim_b = (-1/2, sqrt(3)/2).
 //    Sublattice A at (0, 0), sublattice B at (0, 1/sqrt(3)).
 Lattice make_honeycomb(int Lx, int Ly);
 

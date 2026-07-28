@@ -2,6 +2,8 @@
 #include "ed.hpp"
 #include <algorithm>
 #include <cmath>
+#include <functional>
+#include <limits>
 #include <random>
 #include <stdexcept>
 
@@ -11,6 +13,20 @@ using cplx = std::complex<double>;
 
 static inline int sv(int st, int site) { return (st >> site) & 1; }
 
+static int checked_dimension(const Lattice& lattice, int maximum, const char* context) {
+    if (lattice.N == 0)
+        throw std::invalid_argument(std::string(context) + ": lattice has no sites");
+    if (lattice.N >= static_cast<std::size_t>(std::numeric_limits<int>::digits))
+        throw std::length_error(std::string(context) + ": site count overflows basis index");
+    const int dim = 1 << static_cast<int>(lattice.N);
+    if (dim > maximum)
+        throw std::length_error(std::string(context) + ": Hilbert space exceeds solver limit");
+    for (const auto& bond : lattice.bonds)
+        if (bond.i >= lattice.N || bond.j >= lattice.N)
+            throw std::out_of_range(std::string(context) + ": bond endpoint outside lattice");
+    return dim;
+}
+
 // ──────────────────────────────────────────────────────────────
 // Hamiltonian builder
 // ──────────────────────────────────────────────────────────────
@@ -18,9 +34,11 @@ static inline int sv(int st, int site) { return (st >> site) & 1; }
 std::vector<cplx> build_kolodrubetz_hamiltonian(
     const Lattice& lattice, double J, double Omega, double theta)
 {
-    int N = static_cast<int>(lattice.N), dim = 1 << N, Nb = static_cast<int>(lattice.Nb);
+    const int dim = checked_dimension(lattice, 1024, "build_kolodrubetz_hamiltonian");
+    const int N = static_cast<int>(lattice.N);
+    const int Nb = static_cast<int>(lattice.bonds.size());
     double c = std::cos(theta), s = std::sin(theta);
-    std::vector<cplx> H(dim * dim, cplx(0, 0));
+    std::vector<cplx> H(static_cast<std::size_t>(dim) * dim, cplx(0, 0));
 
     for (int bi = 0; bi < Nb; ++bi) {
         int i = static_cast<int>(lattice.bonds[bi].i);
@@ -28,19 +46,19 @@ std::vector<cplx> build_kolodrubetz_hamiltonian(
         int mi = 1 << i, mj = 1 << j;
         for (int st = 0; st < dim; ++st) {
             int si = sv(st, i), sj = sv(st, j);
-            double zz = (1 - 2*si) * (1 - 2*sj);
+            const double zi = 1 - 2 * si;
+            const double zj = 1 - 2 * sj;
+            const double zz = zi * zj;
             H[st*dim + st] += -J * c * c * zz;
 
             int st2 = st ^ mj;
-            double zi = (1 - 2*si);
-            H[st*dim + st2] += J * s * c * cplx(0, 1) * zi * (sj ? -1.0 : 1.0);
+            H[st*dim + st2] += cplx(0, -J * s * c * zz);
 
             int st3 = st ^ mi;
-            double zj = (1 - 2*sj);
-            H[st*dim + st3] += J * s * c * cplx(0, 1) * (si ? -1.0 : 1.0) * zj;
+            H[st*dim + st3] += cplx(0, -J * s * c * zz);
 
             int st4 = st ^ mi ^ mj;
-            H[st*dim + st4] += -J * s * s * ((si == sj) ? -1.0 : 1.0);
+            H[st*dim + st4] += J * s * s * zz;
         }
     }
     for (int si = 0; si < N; ++si) {
@@ -86,9 +104,9 @@ GroundState solve_ground_state_lanczos(
     const Lattice& lattice, double J, double Omega, double theta,
     int m_max)
 {
-    int N = static_cast<int>(lattice.N), dim = 1 << N;
-    if (dim > 1024)
-        throw std::runtime_error("solve_ground_state_lanczos: dim > 1024");
+    const int dim = checked_dimension(lattice, 1024, "solve_ground_state_lanczos");
+    if (m_max <= 0)
+        throw std::invalid_argument("solve_ground_state_lanczos: m_max must be positive");
 
     auto Hmat = build_kolodrubetz_hamiltonian(lattice, J, Omega, theta);
 
@@ -99,8 +117,7 @@ GroundState solve_ground_state_lanczos(
     Q.reserve(m_max + 1);
 
     // Deterministic random initial vector
-    std::mt19937 rng(static_cast<unsigned>(
-        std::hash<double>{}(theta * 1e9 + Omega * 1e6 + J * 1e3 + N + 42)));
+    std::mt19937 rng(42);
     std::uniform_real_distribution<double> dist(-1, 1);
 
     Q.push_back(std::vector<cplx>(dim));
@@ -120,6 +137,7 @@ GroundState solve_ground_state_lanczos(
 
     std::vector<cplx> w(dim);
     int m = 0;
+    bool converged = false;
 
     for (int k = 0; k < m_max; ++k) {
         cplx_matvec(Hmat.data(), dim, Q[k].data(), w.data());
@@ -133,51 +151,36 @@ GroundState solve_ground_state_lanczos(
         for (int i = 0; i < dim; ++i)
             w[i] -= ak * Q[k][i];
 
-        // Full reorthogonalisation
-        for (int j = 0; j <= k; ++j) {
-            cplx proj = cplx_dot(Q[j], w, dim);
-            for (int i = 0; i < dim; ++i)
-                w[i] -= proj * Q[j][i];
-        }
+        // Two-pass full reorthogonalisation keeps the Krylov basis stable near
+        // small gaps and makes the Ritz residual meaningful.
+        for (int pass = 0; pass < 2; ++pass)
+            for (int j = 0; j <= k; ++j) {
+                cplx proj = cplx_dot(Q[j], w, dim);
+                for (int i = 0; i < dim; ++i) w[i] -= proj * Q[j][i];
+            }
 
         double bkp1 = std::sqrt(cplx_abs_sq(w, dim));
         beta.push_back(bkp1);
 
-        if (bkp1 < 1e-14) {
-            m = k + 1;
-            break;
-        }
-
-        Q.push_back(std::vector<cplx>(dim));
-        for (int i = 0; i < dim; ++i)
-            Q[k+1][i] = w[i] / bkp1;
-
-        // Convergence check every 5 iterations
-        if (k >= 9 && (k + 1) % 5 == 0) {
-            int curr_m = k + 1;
+        m = k + 1;
+        const bool breakdown = bkp1 <= 1e-14;
+        const bool check_now = m >= 2 && (m % 5 == 0 || breakdown || m == m_max);
+        if (check_now) {
+            int curr_m = m;
             DenseSymMatrix T(static_cast<std::size_t>(curr_m));
             for (int i = 0; i < curr_m; ++i) {
                 T(i, i) = alpha[i];
                 if (i > 0) { T(i, i-1) = beta[i]; T(i-1, i) = beta[i]; }
             }
             auto eigsys = jacobi_eigen(T, 50, 1e-12);
-            double E0_curr = eigsys.eigenvalues[0];
-
-            if (curr_m >= 15) {
-                int prev_m = curr_m - 5;
-                DenseSymMatrix Tprev(static_cast<std::size_t>(prev_m));
-                for (int i = 0; i < prev_m; ++i) {
-                    Tprev(i, i) = alpha[i];
-                    if (i > 0) { Tprev(i, i-1) = beta[i]; Tprev(i-1, i) = beta[i]; }
-                }
-                auto eigsys_prev = jacobi_eigen(Tprev, 50, 1e-12);
-                if (std::abs(E0_curr - eigsys_prev.eigenvalues[0]) < 1e-10) {
-                    m = curr_m;
-                    break;
-                }
-            }
+            const double last_component = eigsys.eigenvectors[(curr_m - 1) * curr_m];
+            const double residual = bkp1 * std::abs(last_component);
+            converged = residual <= 1e-11 * (1.0 + std::abs(eigsys.eigenvalues[0]));
         }
-        m = k + 1;
+        if (converged || breakdown) break;
+
+        Q.push_back(std::vector<cplx>(dim));
+        for (int i = 0; i < dim; ++i) Q[k+1][i] = w[i] / bkp1;
     }
 
     // Diagonalise final T_m
@@ -201,7 +204,19 @@ GroundState solve_ground_state_lanczos(
     if (nr > 1e-30)
         for (auto& z : psi0) z /= nr;
 
-    return {std::move(psi0), dim, E0};
+    std::vector<cplx> Hpsi(dim);
+    cplx_matvec(Hmat.data(), dim, psi0.data(), Hpsi.data());
+    E0 = std::real(cplx_dot(psi0, Hpsi, dim));
+    double residual2 = 0.0;
+    for (int i = 0; i < dim; ++i) residual2 += std::norm(Hpsi[i] - E0 * psi0[i]);
+
+    GroundState result;
+    result.eigenvector = std::move(psi0);
+    result.dim = dim;
+    result.E0 = E0;
+    result.residual = std::sqrt(residual2);
+    result.converged = result.residual <= 1e-10 * (1.0 + std::abs(E0));
+    return result;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -219,14 +234,23 @@ GroundState solve_ground_state(
 // ──────────────────────────────────────────────────────────────
 
 cplx overlap(const GroundState& a, const GroundState& b) {
+    if (a.dim != b.dim || a.dim <= 0
+        || a.eigenvector.size() != static_cast<std::size_t>(a.dim)
+        || b.eigenvector.size() != static_cast<std::size_t>(b.dim))
+        throw std::invalid_argument("overlap: incompatible ground-state dimensions");
     cplx s(0,0);
     for (int i = 0; i < a.dim; ++i) s += std::conj(a.eigenvector[i]) * b.eigenvector[i];
     return s;
 }
 
 BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
-                              const GroundState& gs11, const GroundState& gs01)
+                              const GroundState& gs11, const GroundState& gs01,
+                              double dlambda1, double dlambda2)
 {
+    const double area = dlambda1 * dlambda2;
+    if (!std::isfinite(area) || area == 0.0)
+        throw std::invalid_argument("fhs_curvature: plaquette steps must have non-zero finite area");
+
     BerryCurvature bc;
     auto U1 = overlap(gs00, gs10);
     auto U2 = overlap(gs10, gs11);
@@ -235,12 +259,22 @@ BerryCurvature fhs_curvature(const GroundState& gs00, const GroundState& gs10,
 
     bc.absU1 = std::abs(U1);
     bc.absU2 = std::abs(U2star);
-    if (bc.absU1 > 1e-30) U1 /= bc.absU1; else U1 = cplx(1,0);
-    if (std::abs(U2) > 1e-30) U2 /= std::abs(U2); else U2 = cplx(1,0);
-    if (std::abs(U1star) > 1e-30) U1star /= std::abs(U1star); else U1star = cplx(1,0);
-    if (bc.absU2 > 1e-30) U2star /= bc.absU2; else U2star = cplx(1,0);
+    bc.min_overlap = std::min({bc.absU1, std::abs(U2), std::abs(U1star), bc.absU2});
+    if (!(bc.min_overlap > 1e-12)) {
+        bc.wilson_phase = std::numeric_limits<double>::quiet_NaN();
+        bc.flux = std::numeric_limits<double>::quiet_NaN();
+        bc.F12 = std::numeric_limits<double>::quiet_NaN();
+        return bc;
+    }
+    U1 /= std::abs(U1);
+    U2 /= std::abs(U2);
+    U1star /= std::abs(U1star);
+    U2star /= std::abs(U2star);
 
-    bc.F12 = std::arg(U1 * U2 * U1star * U2star);
+    bc.wilson_phase = std::arg(U1 * U2 * U1star * U2star);
+    bc.flux = -bc.wilson_phase;
+    bc.F12 = bc.flux / area;
+    bc.valid = true;
     return bc;
 }
 
@@ -256,7 +290,7 @@ BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
     auto g10 = solve_ground_state(lattice, J, Omega, theta + dtheta);
     auto g11 = solve_ground_state(lattice, J, Omega + dOmega, theta + dtheta);
     auto g01 = solve_ground_state(lattice, J, Omega + dOmega, theta);
-    return fhs_curvature(g00, g10, g11, g01);
+    return fhs_curvature(g00, g10, g11, g01, dtheta, dOmega);
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -266,13 +300,20 @@ BerryCurvature fhs_curvature_single(const Lattice& lattice, double J,
 std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
     const Lattice& lattice, double J, const ParamGrid& grid)
 {
-    int n1 = static_cast<int>(grid.vals1.size()), n2 = static_cast<int>(grid.vals2.size());
+    const int n1 = static_cast<int>(grid.theta_values.size());
+    const int n2 = static_cast<int>(grid.omega_values.size());
+    if (n1 < 2 || n2 < 2)
+        throw std::invalid_argument("compute_berry_curvature_grid: each axis needs at least two points");
     std::vector<std::vector<GroundState>> gs(n1, std::vector<GroundState>(n2));
     for (int i = 0; i < n1; ++i) for (int j = 0; j < n2; ++j)
-        gs[i][j] = solve_ground_state(lattice, J, grid.vals1[i], grid.vals2[j]);
+        gs[i][j] = solve_ground_state(lattice, J, grid.omega_values[j], grid.theta_values[i]);
     std::vector<std::vector<BerryCurvature>> r(n1-1, std::vector<BerryCurvature>(n2-1));
-    for (int i = 0; i < n1-1; ++i) for (int j = 0; j < n2-1; ++j)
-        r[i][j] = fhs_curvature(gs[i][j], gs[i+1][j], gs[i+1][j+1], gs[i][j+1]);
+    for (int i = 0; i < n1-1; ++i) for (int j = 0; j < n2-1; ++j) {
+        const double dtheta = grid.theta_values[i + 1] - grid.theta_values[i];
+        const double dOmega = grid.omega_values[j + 1] - grid.omega_values[j];
+        r[i][j] = fhs_curvature(gs[i][j], gs[i+1][j], gs[i+1][j+1], gs[i][j+1],
+                                dtheta, dOmega);
+    }
     return r;
 }
 
@@ -280,16 +321,19 @@ std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
 // ∂θH expectation via ED thermal average (for SSE cross-check)
 // ──────────────────────────────────────────────────────────────
 
-double compute_dthetah_ed(const Lattice& lattice, double J, double Omega,
-                          double theta, double beta)
+double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omega,
+                                   double theta, double beta)
 {
-    int N = static_cast<int>(lattice.N), dim = 1 << N;
-    if (dim > 64) throw std::runtime_error("compute_dthetah_ed: dim > 64");
+    const int dim = checked_dimension(lattice, 64, "compute_dthetah_diagonal_ed");
+    const int N = static_cast<int>(lattice.N);
+    if (!std::isfinite(beta) || beta < 0.0)
+        throw std::invalid_argument(
+            "compute_dthetah_diagonal_ed: beta must be finite and non-negative");
 
     // Build H = -J Σ ZZ - Omega Σ X (real symmetric TFIM, θ=0)
     DenseSymMatrix H(static_cast<std::size_t>(dim));
     for (int st = 0; st < dim; ++st) {
-        for (int bi = 0; bi < static_cast<int>(lattice.Nb); ++bi) {
+        for (int bi = 0; bi < static_cast<int>(lattice.bonds.size()); ++bi) {
             int i = static_cast<int>(lattice.bonds[bi].i);
             int j = static_cast<int>(lattice.bonds[bi].j);
             int si = (st >> i) & 1, sj = (st >> j) & 1;
@@ -313,7 +357,7 @@ double compute_dthetah_ed(const Lattice& lattice, double J, double Omega,
         auto& psi_n = eigsys.eigenvectors;
         for (int st = 0; st < dim; ++st) {
             double psi2 = psi_n[st * dim + n] * psi_n[st * dim + n]; // |⟨st|ψ_n⟩|²
-            for (int bi = 0; bi < static_cast<int>(lattice.Nb); ++bi) {
+            for (int bi = 0; bi < static_cast<int>(lattice.bonds.size()); ++bi) {
                 int i = static_cast<int>(lattice.bonds[bi].i);
                 int j = static_cast<int>(lattice.bonds[bi].j);
                 int si = (st >> i) & 1, sj = (st >> j) & 1;
@@ -325,9 +369,61 @@ double compute_dthetah_ed(const Lattice& lattice, double J, double Omega,
 
     // ∂θH_diag(θ) = J sin(2θ) × ⟨Σ_{bonds} ZZ⟩ / N  (per-site)
     double zz_exp = sum_ZZ / Z; // thermal expectation of Σ_bonds ZZ
-    double dthetah_diag = J * std::sin(2 * theta) * zz_exp / N;
+    double dthetah_diagonal = J * std::sin(2 * theta) * zz_exp / N;
 
-    return dthetah_diag;
+    return dthetah_diagonal;
+}
+
+namespace {
+
+double adaptive_simpson(const std::function<double(double)>& function,
+                        double left, double right, double f_left, double f_mid,
+                        double f_right, double whole, double tolerance, int depth) {
+    const double midpoint = 0.5 * (left + right);
+    const double left_midpoint = 0.5 * (left + midpoint);
+    const double right_midpoint = 0.5 * (midpoint + right);
+    const double f_left_midpoint = function(left_midpoint);
+    const double f_right_midpoint = function(right_midpoint);
+    const double left_value = (midpoint - left) * (f_left + 4.0 * f_left_midpoint + f_mid) / 6.0;
+    const double right_value = (right - midpoint) * (f_mid + 4.0 * f_right_midpoint + f_right) / 6.0;
+    const double refined = left_value + right_value;
+    if (depth == 0 || std::abs(refined - whole) <= 15.0 * tolerance)
+        return refined + (refined - whole) / 15.0;
+    return adaptive_simpson(function, left, midpoint, f_left, f_left_midpoint, f_mid,
+                            left_value, 0.5 * tolerance, depth - 1)
+         + adaptive_simpson(function, midpoint, right, f_mid, f_right_midpoint, f_right,
+                            right_value, 0.5 * tolerance, depth - 1);
+}
+
+} // namespace
+
+double tfim_chain_berry_curvature_density_exact(double J, double Omega,
+                                                double tolerance) {
+    if (!(J >= 0.0) || !std::isfinite(J) || !std::isfinite(Omega))
+        throw std::invalid_argument("tfim_chain_berry_curvature_density_exact: invalid coupling");
+    if (!(tolerance > 0.0) || !std::isfinite(tolerance))
+        throw std::invalid_argument("tfim_chain_berry_curvature_density_exact: invalid tolerance");
+    if (J == 0.0) return 0.0;
+    if (std::abs(std::abs(Omega) - J) <= 8.0 * std::numeric_limits<double>::epsilon()
+                                            * std::max({1.0, J, std::abs(Omega)}))
+        return -std::numeric_limits<double>::infinity();
+
+    const auto integrand = [J, Omega](double momentum) {
+        const double sine = std::sin(momentum);
+        const double dispersion2 = J * J + Omega * Omega
+                                 - 2.0 * J * Omega * std::cos(momentum);
+        return sine * sine / std::pow(dispersion2, 1.5);
+    };
+    const double left = 0.0;
+    const double right = M_PI;
+    const double midpoint = 0.5 * (left + right);
+    const double f_left = integrand(left);
+    const double f_mid = integrand(midpoint);
+    const double f_right = integrand(right);
+    const double whole = (right - left) * (f_left + 4.0 * f_mid + f_right) / 6.0;
+    const double integral = adaptive_simpson(integrand, left, right, f_left, f_mid, f_right,
+                                             whole, tolerance, 24);
+    return -J * J * integral / (2.0 * M_PI);
 }
 
 } // namespace cm

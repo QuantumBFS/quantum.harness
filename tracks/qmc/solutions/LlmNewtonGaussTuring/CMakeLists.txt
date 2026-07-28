@@ -83,3 +83,11 @@ target_link_libraries(scan_berry_square PRIVATE cm148)
 
 # Enable CTest
 enable_testing()
+
+find_program(UV_EXECUTABLE uv)
+if(UV_EXECUTABLE)
+    add_test(
+        NAME test_analysis
+        COMMAND ${UV_EXECUTABLE} run --script ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_analysis.py
+    )
+endif()

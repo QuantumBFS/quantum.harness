@@ -4,7 +4,10 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <map>
+#include <numeric>
+#include <stdexcept>
 #include <string>
 
 using namespace cm;
@@ -147,9 +150,73 @@ static void test_lanczos_vs_ed() {
           std::abs(lr.E0 - E0_ed) < 1e-8,
           "lanczos=" + std::to_string(lr.E0) +
           " ED=" + std::to_string(E0_ed));
+    const double norm = std::inner_product(
+        lr.psi0.begin(), lr.psi0.end(), lr.psi0.begin(), 0.0);
+    check("lanczos Ritz vector normalized", std::abs(norm - 1.0) < 1e-12,
+          "norm2=" + std::to_string(norm));
+    std::vector<double> Hpsi(H.dim);
+    H.matvec(lr.psi0.data(), Hpsi.data());
+    const double rayleigh = std::inner_product(
+        lr.psi0.begin(), lr.psi0.end(), Hpsi.begin(), 0.0);
+    check("lanczos energy is Rayleigh quotient",
+          std::abs(rayleigh - lr.E0) < 1e-12,
+          "rayleigh=" + std::to_string(rayleigh));
+    double residual2 = 0.0;
+    for (std::size_t index = 0; index < H.dim; ++index) {
+        const double value = Hpsi[index] - lr.E0 * lr.psi0[index];
+        residual2 += value * value;
+    }
+    const double residual = std::sqrt(residual2);
+    check("reported Lanczos residual is physical residual",
+          std::abs(residual - lr.residual) < 1e-13,
+          "reported=" + std::to_string(lr.residual)
+          + " direct=" + std::to_string(residual));
+    check("Lanczos residual meets tolerance", residual < 2e-9,
+          "residual=" + std::to_string(residual));
     std::cout << "  E0 (ED)     = " << E0_ed << std::endl;
     std::cout << "  E0 (Lanczos)= " << lr.E0 << std::endl;
     std::cout << "  iterations   = " << lr.niter << std::endl;
+}
+
+static void test_input_guards() {
+    std::cout << "--- input guards ---" << std::endl;
+    Lattice oversized;
+    oversized.N = std::numeric_limits<std::size_t>::digits;
+    bool shift_guarded = false;
+    try {
+        (void)build_tfim_hamiltonian(oversized, 1.0, 1.0);
+    } catch (const std::length_error&) {
+        shift_guarded = true;
+    }
+    check("basis shift overflow rejected", shift_guarded);
+
+    bool matrix_guarded = false;
+    try {
+        DenseSymMatrix matrix(std::numeric_limits<std::size_t>::max());
+        (void)matrix;
+    } catch (const std::length_error&) {
+        matrix_guarded = true;
+    }
+    check("dense matrix product overflow rejected", matrix_guarded);
+
+    auto invalid = make_chain(4);
+    invalid.bonds.front().i = invalid.N;
+    bool endpoint_guarded = false;
+    try {
+        (void)lanczos_ground(invalid, 1.0, 1.0);
+    } catch (const std::out_of_range&) {
+        endpoint_guarded = true;
+    }
+    check("Lanczos invalid bond rejected", endpoint_guarded);
+
+    bool beta_guarded = false;
+    try {
+        (void)compute_thermal_obs(make_chain(2), 1.0, 1.0,
+                                  std::numeric_limits<double>::infinity());
+    } catch (const std::invalid_argument&) {
+        beta_guarded = true;
+    }
+    check("non-finite inverse temperature rejected", beta_guarded);
 }
 
 // ============================================================
@@ -257,6 +324,7 @@ int main() {
     test_independent_spins();
     test_classical_ising();
     test_lanczos_vs_ed();
+    test_input_guards();
     test_thermal_limits();
     test_structure_factor();
     test_1d_critical_point();

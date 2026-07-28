@@ -1,19 +1,46 @@
 #include "sse.hpp"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 
 namespace cm {
 
+namespace {
+
+int checked_sse_count(std::size_t value, const char* label) {
+    if (value > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+        throw std::length_error(std::string(label) + " exceeds SSE integer range");
+    return static_cast<int>(value);
+}
+
+int checked_candidate_count(const Lattice& lattice) {
+    const auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
+    if (lattice.N > maximum || lattice.Nb > maximum || lattice.N > maximum - lattice.Nb)
+        throw std::length_error("diagonal candidate count exceeds SSE integer range");
+    return static_cast<int>(lattice.N + lattice.Nb);
+}
+
+} // namespace
+
 SSE::SSE(const Lattice& lattice, double J, double h, double beta,
          const SSEParams& params)
     : lat_(lattice), J_(J), h_(h), beta_(beta),
-      N_(static_cast<int>(lattice.N)), Nb_(static_cast<int>(lattice.Nb)),
-      nCand_(N_ + Nb_), params_(params),
+      N_(checked_sse_count(lattice.N, "site count")),
+      Nb_(checked_sse_count(lattice.Nb, "bond count")),
+      nCand_(checked_candidate_count(lattice)), params_(params),
       M_(20), n_(0),
-      rng_(static_cast<std::uint64_t>(params.seed)) {
-    if (J_ < 0) throw std::runtime_error("J must be >= 0");
-    if (h_ <= 0) throw std::runtime_error("h must be > 0");
+      rng_(params.seed) {
+    if (!std::isfinite(J_) || J_ < 0) throw std::invalid_argument("J must be finite and >= 0");
+    if (!std::isfinite(h_) || h_ <= 0) throw std::invalid_argument("h must be finite and > 0");
+    if (!std::isfinite(beta_) || beta_ <= 0) throw std::invalid_argument("beta must be finite and > 0");
+    if (params_.n_thermal < 0 || params_.n_bins <= 0 || params_.sweeps_per_bin <= 0)
+        throw std::invalid_argument("SSE sweep counts require thermal >= 0, bins > 0, sweeps/bin > 0");
+    std::string diagnostic;
+    if (!lattice.verify(&diagnostic))
+        throw std::invalid_argument("invalid lattice: " + diagnostic);
+    if (lattice.site_coords.size() != lattice.N)
+        throw std::invalid_argument("SSE requires one coordinate per lattice site");
 
     opType_.assign(M_, Op::NONE);
     opIdx_.assign(M_, -1);
@@ -192,12 +219,11 @@ bool SSE::verifyConfig() {
 // Driver
 // ------------------------------------------------------------
 SSEResult SSE::run() {
-    const double qmin = lat_.smallest_momentum();
-    std::vector<std::array<double, 3>> qvecs;
-    if (params_.stage4_estimators)
-        qvecs = lat_.smallest_momentum_vectors();
-    else
-        qvecs.push_back({qmin, 0.0, 0.0});
+    const std::vector<std::array<double, 3>> qvecs = lat_.smallest_momentum_vectors();
+    if (qvecs.empty()) throw std::runtime_error("SSE requires a non-zero torus momentum");
+    const auto& first_q = qvecs.front();
+    const double qmin = std::sqrt(first_q[0] * first_q[0] + first_q[1] * first_q[1]
+                                + first_q[2] * first_q[2]);
 
     // precompute the q_min phase factors
     std::vector<std::vector<double>> cosq(qvecs.size(), std::vector<double>(N_));
@@ -367,14 +393,14 @@ SSEResult SSE::run() {
             sTm2 += tm2; sTm4 += tm4;
 
             // ∂θH diagonal estimator: J sin(2θ) Σ_{bonds} ZZ / N
-            if (params_.measure_dthetah) {
+            if (params_.measure_rotated_bond_diagonal) {
                 double sum_zz = 0;
                 for (int b = 0; b < Nb_; ++b) {
                     int i = static_cast<int>(lat_.bonds[b].i);
                     int j = static_cast<int>(lat_.bonds[b].j);
                     sum_zz += spin_[i] * spin_[j];
                 }
-                sDtH += J_ * std::sin(2 * params_.theta_berry) * sum_zz / N_;
+                sDtH += J_ * std::sin(2 * params_.rotation_theta) * sum_zz / N_;
             }
 
             bE += E; bm2 += mm2; bm4 += mm4; bS0 += S0; bSq += Sq;
@@ -395,13 +421,13 @@ SSEResult SSE::run() {
     double navg = sn * inv, n2avg = sn2 * inv;
     res.Cv = (n2avg - navg * navg - navg) / N_;   // (<n^2>-<n>^2-<n>)/N
     res.m = sm * inv; res.m2 = sm2 * inv; res.m4 = sm4 * inv;
-    res.Q = (res.m2 > 1e-30) ? res.m2 * res.m2 / res.m4 : 0.0;
+    res.Q = (res.m4 > 1e-30) ? res.m2 * res.m2 / res.m4 : 0.0;
     res.Sq0 = sS0 * inv; res.Sqmin = sSq * inv;
     res.spacetime_m2 = sTm2 * inv;
     res.spacetime_m4 = sTm4 * inv;
     res.spacetime_Q = res.spacetime_m2 * res.spacetime_m2
                     / std::max(res.spacetime_m4, 1e-30);
-    res.dthetah_diag = sDtH * inv;
+    res.dthetah_diagonal = sDtH * inv;
 
     // second-moment correlation length, same convention as the ED oracle
     if (qmin > 1e-12 && res.Sqmin > 1e-30) {

@@ -36,6 +36,29 @@ static void test_j0_limit() {
     std::cout << "  E/N=" << res.energy << " m2=" << res.m2 << " n/N=" << res.n_op_avg << std::endl;
 }
 
+// For independent spins, the single-world-line moments are
+// mu2=tanh(a)/a and mu4=3(a-tanh(a))/a^3, a=beta*h.  Independence then gives
+// <mbar^2>=mu2/N and <mbar^4>=[mu4+3(N-1)mu2^2]/N^3.
+static void test_j0_spacetime_moment() {
+    std::cout << "--- J=0 space-time magnetisation ---" << std::endl;
+    int N = 4; double h = 1.0, beta = 2.0;
+    auto lat = make_chain(N);
+    SSEParams p; p.n_thermal = 4000; p.n_bins = 8000; p.sweeps_per_bin = 2;
+    p.seed = 20260729; p.stage4_estimators = true;
+    SSE sse(lat, 0.0, h, beta, p);
+    auto res = sse.run();
+    const double a = beta * h;
+    const double mu2 = std::tanh(a) / a;
+    const double mu4 = 3.0 * (a - std::tanh(a)) / (a * a * a);
+    const double expected_m2 = mu2 / N;
+    const double expected_m4 = (mu4 + 3.0 * (N - 1) * mu2 * mu2)
+                             / (N * N * N);
+    approx_eq("spacetime m2", res.spacetime_m2, expected_m2, 0.06, 0.0);
+    approx_eq("spacetime m4", res.spacetime_m4, expected_m4, 0.08, 0.0);
+    approx_eq("spacetime Binder ratio", res.spacetime_Q,
+              expected_m2 * expected_m2 / expected_m4, 0.10, 0.0);
+}
+
 // Near-classical ordered phase (h << J): the previously-broken observable.
 // Stage 2 gave m2 ~ 0.036; the correct value is close to 1.
 static void test_near_classical() {
@@ -154,6 +177,7 @@ static void test_operator_identity() {
 int main() {
     test_operator_identity();
     test_j0_limit();
+    test_j0_spacetime_moment();
     test_near_classical();
     test_sse_vs_ed_chain();
     test_sse_vs_ed_square();

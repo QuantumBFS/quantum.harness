@@ -4,6 +4,8 @@
 #include <array>
 #include <complex>
 #include <cstddef>
+#include <limits>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -23,7 +25,11 @@ struct DenseSymMatrix {
     std::vector<double> data;   // row-major, dim*dim
 
     DenseSymMatrix() : dim(0) {}
-    DenseSymMatrix(std::size_t d) : dim(d), data(d * d, 0.0) {}
+    DenseSymMatrix(std::size_t d) : dim(d) {
+        if (d != 0 && d > std::numeric_limits<std::size_t>::max() / d)
+            throw std::length_error("dense matrix dimension overflow");
+        data.assign(d * d, 0.0);
+    }
 
     double& operator()(std::size_t i, std::size_t j) { return data[i * dim + j]; }
     double  operator()(std::size_t i, std::size_t j) const { return data[i * dim + j]; }
@@ -56,10 +62,11 @@ DenseSymMatrix build_tfim_hamiltonian(const Lattice& lattice, double J, double h
 // Lanczos ground-state solver
 // ============================================================
 struct LanczosResult {
-    double E0;                              // ground-state energy
+    double E0 = 0.0;                        // ground-state energy
     std::vector<double> psi0;               // ground-state wavefunction, dim entries
-    int niter;                              // number of iterations used
-    bool converged;
+    double residual = 0.0;                  // ||H psi0 - E0 psi0||_2
+    int niter = 0;                          // number of iterations used
+    bool converged = false;
 };
 
 // Matrix-free Lanczos for H|psi> in the spin-1/2 basis.

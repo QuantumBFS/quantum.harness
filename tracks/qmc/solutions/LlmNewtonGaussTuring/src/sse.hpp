@@ -49,14 +49,14 @@ struct SSEParams {
     int n_thermal = 2000;
     int n_bins = 200;
     int sweeps_per_bin = 20;
-    int seed = 42;
+    std::uint64_t seed = 42;
     // Per-sweep validation/diagnostics.  Both are O(M) per sweep, so production
     // scans turn them off; the test suite leaves them on.
     bool check_config = true;   // verify world-line closure and bond alignment
     bool census = true;         // tally operator types (<n_const> identity)
     bool stage4_estimators = false; // opt-in propagation/time-averaged observables
-    bool measure_dthetah = false;   // measure diagonal ∂θH estimator
-    double theta_berry = 0.0;       // θ at which ∂θH is measured
+    bool measure_rotated_bond_diagonal = false;
+    double rotation_theta = 0.0;
 };
 
 struct SSEResult {
@@ -81,7 +81,7 @@ struct SSEResult {
     int consistency_failures = 0;
 
     // ∂θH diagonal estimator (per site): J sin(2θ) × ⟨Σ_bonds ZZ⟩ / N
-    double dthetah_diag = 0.0;
+    double dthetah_diagonal = 0.0;
 
     // Raw bin-level data.  Nonlinear estimators (Q_L, xi_L/L) must be
     // recomputed inside a jackknife/bootstrap over these bins rather than

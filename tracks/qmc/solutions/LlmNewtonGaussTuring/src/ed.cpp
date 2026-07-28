@@ -2,11 +2,34 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <stdexcept>
 
 namespace cm {
+
+namespace {
+
+std::size_t checked_spin_dimension(std::size_t sites, std::size_t maximum,
+                                   const char* context) {
+    if (sites == 0)
+        throw std::invalid_argument(std::string(context) + ": lattice has no sites");
+    if (sites >= std::numeric_limits<std::size_t>::digits)
+        throw std::length_error(std::string(context) + ": site count overflows basis index");
+    const std::size_t dimension = std::size_t{1} << sites;
+    if (dimension > maximum)
+        throw std::length_error(std::string(context) + ": Hilbert space exceeds solver limit");
+    return dimension;
+}
+
+void validate_bond_indices(const Lattice& lattice, const char* context) {
+    for (const auto& bond : lattice.bonds)
+        if (bond.i >= lattice.N || bond.j >= lattice.N)
+            throw std::out_of_range(std::string(context) + ": bond endpoint outside lattice");
+}
+
+} // namespace
 
 // ============================================================
 // DenseSymMatrix::matvec
@@ -129,9 +152,11 @@ static inline int sigma_z(std::size_t state, std::size_t b) {
 // Build TFIM Hamiltonian (dense)
 // ============================================================
 DenseSymMatrix build_tfim_hamiltonian(const Lattice& lattice, double J, double h) {
-    std::size_t dim = 1ULL << lattice.N;
-    if (dim > (1ULL << 13))
-        throw std::runtime_error("Hilbert space too large for dense ED (> 2^13)");
+    if (!std::isfinite(J) || !std::isfinite(h))
+        throw std::invalid_argument("build_tfim_hamiltonian: couplings must be finite");
+    const std::size_t dim = checked_spin_dimension(lattice.N, std::size_t{1} << 13,
+                                                   "build_tfim_hamiltonian");
+    validate_bond_indices(lattice, "build_tfim_hamiltonian");
 
     DenseSymMatrix H(dim);
 
@@ -181,148 +206,130 @@ static void hamiltonian_vec(const Lattice& lattice, double J, double h,
 
 LanczosResult lanczos_ground(const Lattice& lattice, double J, double h,
                              int max_iter, double tol) {
-    std::size_t dim = 1ULL << lattice.N;
-    if (dim > (1ULL << 20))
-        throw std::runtime_error("Hilbert space too large for Lanczos (> 2^20)");
+    if (!std::isfinite(J) || !std::isfinite(h))
+        throw std::invalid_argument("lanczos_ground: couplings must be finite");
+    const std::size_t dim = checked_spin_dimension(lattice.N, std::size_t{1} << 20,
+                                                   "lanczos_ground");
+    validate_bond_indices(lattice, "lanczos_ground");
+    if (max_iter <= 0) throw std::invalid_argument("lanczos_ground: max_iter must be positive");
+    if (!(tol > 0.0)) throw std::invalid_argument("lanczos_ground: tol must be positive");
+    const int iteration_limit = std::min<int>(max_iter, static_cast<int>(dim));
 
     LanczosResult result;
-    result.niter = 0;
-    result.converged = false;
 
     // Random initial vector
     std::mt19937_64 rng(42);
     std::normal_distribution<double> dist(0.0, 1.0);
-    std::vector<double> v1(dim);
+    std::vector<double> initial(dim);
     double norm = 0.0;
     for (std::size_t i = 0; i < dim; ++i) {
-        v1[i] = dist(rng);
-        norm += v1[i] * v1[i];
+        initial[i] = dist(rng);
+        norm += initial[i] * initial[i];
     }
     norm = std::sqrt(norm);
-    for (auto& x : v1) x /= norm;
+    for (auto& value : initial) value /= norm;
 
+    auto apply_hamiltonian = [&](const std::vector<double>& input,
+                                 std::vector<double>& output) {
+        std::fill(output.begin(), output.end(), 0.0);
+        for (std::size_t state = 0; state < dim; ++state)
+            if (std::abs(input[state]) > 1e-30)
+                hamiltonian_vec(lattice, J, h, state, input[state], output);
+    };
+
+    std::vector<double> q = initial;
+    std::vector<double> q_previous(dim, 0.0);
     std::vector<double> w(dim);
-    std::vector<double> alpha(max_iter);
-    std::vector<double> beta(max_iter + 1, 0.0);
-    std::vector<double> v0; // previous, starts empty
+    std::vector<double> alpha;
+    std::vector<double> beta(1, 0.0);
+    alpha.reserve(iteration_limit);
+    beta.reserve(iteration_limit + 1);
 
     // Lanczos iteration
-    for (int k = 0; k < max_iter; ++k) {
-        // w = H |v1>
-        std::fill(w.begin(), w.end(), 0.0);
-        // Loop over non-zero amplitudes
-        for (std::size_t s = 0; s < dim; ++s) {
-            if (std::abs(v1[s]) > 1e-30)
-                hamiltonian_vec(lattice, J, h, s, v1[s], w);
-        }
+    for (int k = 0; k < iteration_limit; ++k) {
+        apply_hamiltonian(q, w);
+        if (k > 0)
+            for (std::size_t i = 0; i < dim; ++i) w[i] -= beta[k] * q_previous[i];
 
-        // alpha_k = <v1|w>
         double ak = 0.0;
-        for (std::size_t i = 0; i < dim; ++i)
-            ak += v1[i] * w[i];
-        alpha[k] = ak;
+        for (std::size_t i = 0; i < dim; ++i) ak += q[i] * w[i];
+        alpha.push_back(ak);
+        for (std::size_t i = 0; i < dim; ++i) w[i] -= ak * q[i];
 
-        // w = w - alpha_k * v1 - beta_k * v0
-        if (k > 0) {
-            for (std::size_t i = 0; i < dim; ++i)
-                w[i] -= beta[k] * v0[i];
-        }
-        for (std::size_t i = 0; i < dim; ++i)
-            w[i] -= ak * v1[i];
-
-        // beta_{k+1} = ||w||
         double bk = 0.0;
-        for (std::size_t i = 0; i < dim; ++i)
-            bk += w[i] * w[i];
+        for (double value : w) bk += value * value;
         bk = std::sqrt(bk);
-        beta[k + 1] = bk;
+        beta.push_back(bk);
 
         result.niter = k + 1;
-
-        // Check convergence via tridiagonal eigenvalue stability
-        // Monitor the smallest Ritz value change over recent iterations.
-        if (k >= 5) {
-            // Solve tentative tridiagonal system
-            int kk = k + 1;
-            DenseSymMatrix T(kk);
-            for (int i = 0; i < kk; ++i) {
-                T(i, i) = alpha[i];
-                if (i + 1 < kk) {
-                    T(i, i + 1) = beta[i + 1];
-                    T(i + 1, i) = beta[i + 1];
+        const bool breakdown = bk <= 1e-14;
+        const bool check_now = result.niter >= 2
+            && (result.niter % 5 == 0 || breakdown || result.niter == iteration_limit);
+        if (check_now) {
+            DenseSymMatrix tridiagonal(static_cast<std::size_t>(result.niter));
+            for (int i = 0; i < result.niter; ++i) {
+                tridiagonal(i, i) = alpha[i];
+                if (i + 1 < result.niter) {
+                    tridiagonal(i, i + 1) = beta[i + 1];
+                    tridiagonal(i + 1, i) = beta[i + 1];
                 }
             }
-            auto t_eig = jacobi_eigen(T);
-            double E_current = t_eig.eigenvalues[0];
-
-            // Also solve using previous step (k)
-            if (k >= 6) {
-                int kk_prev = k;
-                DenseSymMatrix Tprev(kk_prev);
-                for (int i = 0; i < kk_prev; ++i) {
-                    Tprev(i, i) = alpha[i];
-                    if (i + 1 < kk_prev) {
-                        Tprev(i, i + 1) = beta[i + 1];
-                        Tprev(i + 1, i) = beta[i + 1];
-                    }
-                }
-                auto t_eig_prev = jacobi_eigen(Tprev);
-                double E_prev = t_eig_prev.eigenvalues[0];
-                if (std::abs(E_current - E_prev) < tol) {
-                    result.converged = true;
-                    break;
-                }
-            }
+            const auto eigensystem = jacobi_eigen(tridiagonal);
+            const double last_component = eigensystem.eigenvectors[
+                static_cast<std::size_t>(result.niter - 1) * result.niter];
+            const double ritz_residual = bk * std::abs(last_component);
+            if (ritz_residual <= tol * (1.0 + std::abs(eigensystem.eigenvalues[0])))
+                result.converged = true;
         }
+        if (result.converged || breakdown) break;
 
-        if (bk < 1e-30) {
-            result.converged = true;
-            break;
-        }
-
-        // v0 = v1, v1 = w / beta_{k+1}
-        v0 = v1;
-        for (std::size_t i = 0; i < dim; ++i)
-            v1[i] = w[i] / bk;
+        q_previous.swap(q);
+        for (std::size_t i = 0; i < dim; ++i) q[i] = w[i] / bk;
     }
 
-    // Solve tridiagonal eigenvalue problem
-    int n = result.niter;
-    // Use simple power iteration to find smallest eigenvalue of tridiagonal
-    std::vector<double> t_diag(alpha.begin(), alpha.begin() + n);
-    std::vector<double> t_off(beta.begin() + 1, beta.begin() + n);
-
-    // Build dense tridiagonal and use Jacobi
-    DenseSymMatrix T(n);
+    const int n = result.niter;
+    DenseSymMatrix T(static_cast<std::size_t>(n));
     for (int i = 0; i < n; ++i) {
-        T(i, i) = t_diag[i];
+        T(i, i) = alpha[i];
         if (i + 1 < n) {
-            T(i, i + 1) = t_off[i];
-            T(i + 1, i) = t_off[i];
+            T(i, i + 1) = beta[i + 1];
+            T(i + 1, i) = beta[i + 1];
         }
     }
-    auto t_eig = jacobi_eigen(T);
-    result.E0 = t_eig.eigenvalues[0];
+    const auto t_eig = jacobi_eigen(T);
 
-    // Reconstruct ground-state eigenvector
-    result.psi0.resize(dim, 0.0);
-    // Re-run Lanczos to accumulate the Ritz vector
-    {
-        std::mt19937_64 rng2(42);
-        std::normal_distribution<double> dist2(0.0, 1.0);
-        std::vector<double> q(dim);
-        double nrm = 0.0;
-        for (std::size_t i = 0; i < dim; ++i) {
-            q[i] = dist2(rng2);
-            nrm += q[i] * q[i];
-        }
-        nrm = std::sqrt(nrm);
-        for (auto& x : q) x /= nrm;
-
-        // Re-do Lanczos and store Krylov vectors (memory-heavy but OK for verification)
-        // For now return the eigenvalues only; verified by ED comparison
-        // In production, use a restarted Lanczos with explicit Ritz vector
+    // Deterministic second Lanczos pass reconstructs Q_n y without retaining
+    // every Krylov vector from the first pass.
+    result.psi0.assign(dim, 0.0);
+    q = initial;
+    std::fill(q_previous.begin(), q_previous.end(), 0.0);
+    for (int k = 0; k < n; ++k) {
+        const double coefficient = t_eig.eigenvectors[static_cast<std::size_t>(k) * n];
+        for (std::size_t i = 0; i < dim; ++i) result.psi0[i] += coefficient * q[i];
+        if (k + 1 == n) break;
+        apply_hamiltonian(q, w);
+        if (k > 0)
+            for (std::size_t i = 0; i < dim; ++i) w[i] -= beta[k] * q_previous[i];
+        for (std::size_t i = 0; i < dim; ++i) w[i] -= alpha[k] * q[i];
+        q_previous.swap(q);
+        for (std::size_t i = 0; i < dim; ++i) q[i] = w[i] / beta[k + 1];
     }
+
+    norm = 0.0;
+    for (double value : result.psi0) norm += value * value;
+    norm = std::sqrt(norm);
+    if (!(norm > 0.0)) throw std::runtime_error("lanczos_ground: zero Ritz vector");
+    for (double& value : result.psi0) value /= norm;
+
+    apply_hamiltonian(result.psi0, w);
+    result.E0 = std::inner_product(result.psi0.begin(), result.psi0.end(), w.begin(), 0.0);
+    double residual2 = 0.0;
+    for (std::size_t i = 0; i < dim; ++i) {
+        const double difference = w[i] - result.E0 * result.psi0[i];
+        residual2 += difference * difference;
+    }
+    result.residual = std::sqrt(residual2);
+    result.converged = result.residual <= tol * (1.0 + std::abs(result.E0));
 
     return result;
 }
@@ -364,7 +371,7 @@ struct EDCache {
 };
 
 const EigenSystem& cached_eigen(const Lattice& lat, double J, double h) {
-    static EDCache cache;
+    thread_local EDCache cache;
     if (!cache.matches(lat, J, h)) {
         DenseSymMatrix H = build_tfim_hamiltonian(lat, J, h);
         cache.es = jacobi_eigen(H);
@@ -407,9 +414,10 @@ std::vector<double> basis_probabilities(const EigenSystem& es, std::size_t dim,
 } // namespace
 
 ThermalObs compute_thermal_obs(const Lattice& lattice, double J, double h, double beta) {
-    std::size_t dim = 1ULL << lattice.N;
-    if (dim > (1ULL << 14))
-        throw std::runtime_error("Hilbert space too large for full ED thermal (> 2^14)");
+    const std::size_t dim = checked_spin_dimension(lattice.N, std::size_t{1} << 14,
+                                                   "compute_thermal_obs");
+    if (!std::isfinite(beta) || beta < 0.0)
+        throw std::invalid_argument("compute_thermal_obs: beta must be finite and non-negative");
 
     const EigenSystem& es = cached_eigen(lattice, J, h);
 
@@ -445,9 +453,12 @@ ThermalObs compute_thermal_obs(const Lattice& lattice, double J, double h, doubl
 double compute_structure_factor(const Lattice& lattice, double J, double h,
                                 double beta,
                                 const std::array<double, 3>& q) {
-    std::size_t dim = 1ULL << lattice.N;
-    if (dim > (1ULL << 14))
-        throw std::runtime_error("Hilbert space too large for structure factor");
+    const std::size_t dim = checked_spin_dimension(lattice.N, std::size_t{1} << 14,
+                                                   "compute_structure_factor");
+    if (lattice.site_coords.size() != lattice.N)
+        throw std::invalid_argument("compute_structure_factor: missing site coordinates");
+    if (!std::isfinite(beta) || beta < 0.0)
+        throw std::invalid_argument("compute_structure_factor: beta must be finite and non-negative");
 
     const EigenSystem& es = cached_eigen(lattice, J, h);
     std::vector<double> p = basis_probabilities(es, dim, beta);
@@ -481,14 +492,17 @@ double compute_structure_factor(const Lattice& lattice, double J, double h,
 // Second-moment correlation length
 // ============================================================
 double compute_xi_over_L(const Lattice& lattice, double J, double h, double beta) {
-    double q_min = lattice.smallest_momentum();
-    if (q_min < 1e-12) return 0.0;
-
-    // Choose direction along reciprocal a
-    std::array<double, 3> q_vec = {q_min, 0.0, 0.0};
+    const auto momenta = lattice.smallest_momentum_vectors();
+    if (momenta.empty()) return 0.0;
+    const auto& first = momenta.front();
+    const double q_min = std::sqrt(first[0] * first[0] + first[1] * first[1]
+                                 + first[2] * first[2]);
 
     double S0 = compute_structure_factor(lattice, J, h, beta, {0.0, 0.0, 0.0});
-    double Sq = compute_structure_factor(lattice, J, h, beta, q_vec);
+    double Sq = 0.0;
+    for (const auto& momentum : momenta)
+        Sq += compute_structure_factor(lattice, J, h, beta, momentum);
+    Sq /= static_cast<double>(momenta.size());
 
     double L_eff = static_cast<double>(std::max({lattice.L[0], lattice.L[1], lattice.L[2]}));
     double denom = 4.0 * std::pow(std::sin(q_min / 2.0), 2);

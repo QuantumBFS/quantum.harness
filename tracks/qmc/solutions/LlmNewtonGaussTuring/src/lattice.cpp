@@ -1,7 +1,8 @@
 #include "lattice.hpp"
 #include <algorithm>
+#include <array>
 #include <cmath>
-#include <set>
+#include <limits>
 #include <sstream>
 
 namespace cm {
@@ -35,31 +36,33 @@ bool Lattice::verify(std::string* diag) const {
         fail("bonds.size() = " + std::to_string(bonds.size()) +
              " != Nb = " + std::to_string(Nb));
 
-    // bond uniqueness and index range
-    std::set<std::pair<std::size_t, std::size_t>> bond_set;
+    // Bond entries are Hamiltonian terms, so parallel edges are legitimate on
+    // small periodic tori (for example, the two bonds of an L=2 chain).
+    bool bond_indices_valid = true;
     for (const auto& b : bonds) {
-        if (b.i >= N || b.j >= N)
+        if (b.i >= N || b.j >= N) {
             fail("bond (" + std::to_string(b.i) + "," + std::to_string(b.j) +
                  ") out of range N=" + std::to_string(N));
+            bond_indices_valid = false;
+            continue;
+        }
         if (b.i == b.j)
             fail("self-loop at site " + std::to_string(b.i));
-        auto p = std::minmax(b.i, b.j);
-        if (!bond_set.insert(p).second)
-            fail("duplicate bond (" + std::to_string(p.first) + "," +
-                 std::to_string(p.second) + ")");
     }
 
     // coordination
-    auto coord = get_coordination();
-    for (std::size_t s = 0; s < N; ++s) {
-        if (coord[s] != expected_coordination)
-            fail("site " + std::to_string(s) + " coordination " +
-                 std::to_string(coord[s]) + " expected " +
-                 std::to_string(expected_coordination));
+    if (bond_indices_valid) {
+        auto coord = get_coordination();
+        for (std::size_t s = 0; s < N; ++s) {
+            if (coord[s] != expected_coordination)
+                fail("site " + std::to_string(s) + " coordination " +
+                     std::to_string(coord[s]) + " expected " +
+                     std::to_string(expected_coordination));
+        }
     }
 
     // connectivity (all sites reachable via BFS)
-    if (N > 0) {
+    if (N > 0 && bond_indices_valid) {
         std::vector<bool> visited(N, false);
         std::vector<std::size_t> stack{0};
         visited[0] = true;
@@ -94,6 +97,8 @@ bool Lattice::verify(std::string* diag) const {
 std::vector<int> Lattice::get_coordination() const {
     std::vector<int> c(N, 0);
     for (const auto& b : bonds) {
+        if (b.i >= N || b.j >= N)
+            throw std::out_of_range("bond endpoint outside lattice");
         ++c[b.i];
         ++c[b.j];
     }
@@ -104,33 +109,110 @@ std::vector<int> Lattice::get_coordination() const {
 // Lattice::smallest_momentum
 // ============================================================
 double Lattice::smallest_momentum() const {
-    if (dim == 0) return 0.0;
+    const auto momenta = smallest_momentum_vectors();
+    if (momenta.empty()) return 0.0;
+    const auto& k = momenta.front();
+    return std::sqrt(k[0] * k[0] + k[1] * k[1] + k[2] * k[2]);
+}
+
+std::vector<std::array<double, 3>> Lattice::smallest_momentum_vectors() const {
+    if (dim == 0) return {};
+    if (dim > 3) throw std::invalid_argument("lattice dimension must be <= 3");
+
     // Momenta allowed on an La x Lb periodic torus are
-    //   k = (na/La) recip_a + (nb/Lb) recip_b,   na, nb integers.
-    // The smallest non-zero one is what enters the second-moment
-    // correlation length; scanning integer multiples of the *reciprocal
-    // lattice* vectors instead would return |recip_a| = 2*pi, which on the
-    // torus aliases to q = 0 (e^{i 2*pi x} = 1) and collapses xi/L to 0.
-    const double La = L[0] > 0 ? static_cast<double>(L[0]) : 1.0;
-    const double Lb = L[1] > 0 ? static_cast<double>(L[1]) : 1.0;
-    double k_min = std::numeric_limits<double>::max();
-    for (int na = -1; na <= 1; ++na) {
-        for (int nb = -1; nb <= 1; ++nb) {
-            if (na == 0 && nb == 0) continue;
-            std::array<double, 3> k = {
-                (na / La) * recip_a[0] + (nb / Lb) * recip_b[0],
-                (na / La) * recip_a[1] + (nb / Lb) * recip_b[1],
-                0.0
-            };
-            double kn = std::sqrt(k[0] * k[0] + k[1] * k[1]);
-            if (kn > 1e-12 && kn < k_min)
-                k_min = kn;
+    //   k = sum_i (n_i/L_i) b_i,   n_i integers.
+    // Let G contain the scaled reciprocal vectors as columns. If |G n| is no
+    // larger than an initial basis-vector candidate k0, then
+    //   |n| <= ||G^+||_F |k0|.
+    // This gives a finite, geometry-dependent search bound and avoids a fixed
+    // coefficient window that fails for sufficiently skewed tori.
+    const std::array<std::array<double, 3>, 3> reciprocal = {recip_a, recip_b, recip_c};
+    std::array<std::array<double, 3>, 3> basis{};
+    double k_min = std::numeric_limits<double>::infinity();
+    for (std::size_t axis = 0; axis < dim; ++axis) {
+        if (L[axis] <= 0)
+            throw std::invalid_argument("periodic lattice extent must be positive");
+        double norm2 = 0.0;
+        for (std::size_t component = 0; component < 3; ++component) {
+            basis[axis][component] = reciprocal[axis][component] / static_cast<double>(L[axis]);
+            norm2 += basis[axis][component] * basis[axis][component];
+        }
+        if (norm2 <= 1e-24)
+            throw std::invalid_argument("active reciprocal vector is zero");
+        k_min = std::min(k_min, std::sqrt(norm2));
+    }
+
+    double augmented[3][6] = {};
+    for (std::size_t row = 0; row < dim; ++row) {
+        for (std::size_t col = 0; col < dim; ++col) {
+            for (std::size_t component = 0; component < 3; ++component)
+                augmented[row][col] += basis[row][component] * basis[col][component];
+        }
+        augmented[row][dim + row] = 1.0;
+    }
+    for (std::size_t col = 0; col < dim; ++col) {
+        std::size_t pivot = col;
+        for (std::size_t row = col + 1; row < dim; ++row)
+            if (std::abs(augmented[row][col]) > std::abs(augmented[pivot][col])) pivot = row;
+        if (std::abs(augmented[pivot][col]) <= 1e-18)
+            throw std::invalid_argument("reciprocal vectors are linearly dependent");
+        if (pivot != col)
+            for (std::size_t entry = 0; entry < 2 * dim; ++entry)
+                std::swap(augmented[pivot][entry], augmented[col][entry]);
+        const double scale = augmented[col][col];
+        for (std::size_t entry = 0; entry < 2 * dim; ++entry) augmented[col][entry] /= scale;
+        for (std::size_t row = 0; row < dim; ++row) {
+            if (row == col) continue;
+            const double factor = augmented[row][col];
+            for (std::size_t entry = 0; entry < 2 * dim; ++entry)
+                augmented[row][entry] -= factor * augmented[col][entry];
         }
     }
-    return (k_min < std::numeric_limits<double>::max()) ? k_min : 0.0;
+    double pseudoinverse_frobenius2 = 0.0;
+    for (std::size_t axis = 0; axis < dim; ++axis)
+        pseudoinverse_frobenius2 += augmented[axis][dim + axis];
+    const int bound = std::max(1, static_cast<int>(
+        std::ceil(k_min * std::sqrt(std::max(0.0, pseudoinverse_frobenius2)) + 1e-12)));
+
+    std::vector<std::array<double, 3>> momenta;
+    const int b_lower = dim >= 2 ? -bound : 0;
+    const int b_upper = dim >= 2 ? bound : 0;
+    const int c_lower = dim >= 3 ? -bound : 0;
+    const int c_upper = dim >= 3 ? bound : 0;
+    for (int na = -bound; na <= bound; ++na) {
+        for (int nb = b_lower; nb <= b_upper; ++nb) {
+            for (int nc = c_lower; nc <= c_upper; ++nc) {
+                if (na == 0 && nb == 0 && nc == 0) continue;
+                std::array<double, 3> k = {
+                    na * basis[0][0] + nb * basis[1][0] + nc * basis[2][0],
+                    na * basis[0][1] + nb * basis[1][1] + nc * basis[2][1],
+                    na * basis[0][2] + nb * basis[1][2] + nc * basis[2][2]
+                };
+                double kn = std::sqrt(k[0] * k[0] + k[1] * k[1] + k[2] * k[2]);
+                if (kn <= 1e-12) continue;
+                const double tolerance = 1e-10 * std::max(1.0, k_min);
+                if (kn < k_min - tolerance) {
+                    k_min = kn;
+                    momenta.clear();
+                    momenta.push_back(k);
+                } else if (std::abs(kn - k_min) <= tolerance) {
+                    momenta.push_back(k);
+                }
+            }
+        }
+    }
+    return momenta;
 }
 
 Lattice Lattice::with_permuted_index(const std::vector<std::size_t>& perm) const {
+    if (perm.size() != N)
+        throw std::invalid_argument("permutation size must equal lattice.N");
+    std::vector<bool> seen(N, false);
+    for (std::size_t value : perm) {
+        if (value >= N || seen[value])
+            throw std::invalid_argument("permutation must be a bijection on [0,N)");
+        seen[value] = true;
+    }
     Lattice out = *this;
     for (auto& b : out.bonds) {
         b.i = perm[b.i];
@@ -266,85 +348,37 @@ Lattice make_honeycomb(int Lx, int Ly) {
     lat.L = {Lx, Ly, 1};
     lat.expected_coordination = 3;
 
-    lat.prim_vec_a = {1.0, 0.0, 0.0};
-    lat.prim_vec_b = {0.5, sqrt3 / 2.0, 0.0};
-    lat.recip_a = {2.0 * M_PI, -2.0 * M_PI / sqrt3, 0.0};
-    lat.recip_b = {0.0, 4.0 * M_PI / sqrt3, 0.0};
+    lat.prim_vec_a = {0.5, sqrt3 / 2.0, 0.0};
+    lat.prim_vec_b = {-0.5, sqrt3 / 2.0, 0.0};
+    lat.recip_a = {2.0 * M_PI, 2.0 * M_PI / sqrt3, 0.0};
+    lat.recip_b = {-2.0 * M_PI, 2.0 * M_PI / sqrt3, 0.0};
 
-    // Sublattice offsets within unit cell
-    const std::array<double, 2> offset_A = {0.0, 0.0};
-    const std::array<double, 2> offset_B = {0.0, 1.0 / sqrt3};
-
-    // Index function: site = sub * Nuc + uc
-    auto site = [Nuc](int sub, int uc_x, int uc_y, int Lx, int Ly) -> std::size_t {
-        int x = (uc_x % Lx + Lx) % Lx;
-        int y = (uc_y % Ly + Ly) % Ly;
-        std::size_t uc = static_cast<std::size_t>(x) * Ly + static_cast<std::size_t>(y);
+    const std::array<double, 3> offset_B = {0.0, 1.0 / sqrt3, 0.0};
+    auto site = [Nuc, Lx, Ly](int sub, int x, int y) -> std::size_t {
+        const int wx = (x % Lx + Lx) % Lx;
+        const int wy = (y % Ly + Ly) % Ly;
+        const std::size_t uc = static_cast<std::size_t>(wx) * Ly + static_cast<std::size_t>(wy);
         return (sub == 0 ? 0 : Nuc) + uc;
     };
 
-    auto uc_coord = [](int x, int y, double ax, double ay, double bx, double by)
-        -> std::array<double, 2> {
-        return {x * ax + y * bx, x * ay + y * by};
-    };
-
-    // Neighbor vectors: A→B
-    // n1 = (0, 0) [B in same cell]; n2 = (-1, 0) [B in cell to left];
-    // n3 = (0, -1) [B in cell down]
-    const int dn[3][2] = {{0, 0}, {-1, 0}, {0, -1}};
-
+    lat.site_coords.resize(lat.N);
     for (int x = 0; x < Lx; ++x) {
         for (int y = 0; y < Ly; ++y) {
-            // A site in this cell
-            std::size_t sA = site(0, x, y, Lx, Ly);
+            const std::size_t uc = static_cast<std::size_t>(x) * Ly + static_cast<std::size_t>(y);
+            const std::array<double, 3> r = {
+                x * lat.prim_vec_a[0] + y * lat.prim_vec_b[0],
+                x * lat.prim_vec_a[1] + y * lat.prim_vec_b[1],
+                0.0
+            };
+            lat.site_coords[uc] = r;
+            lat.site_coords[Nuc + uc] = {r[0] + offset_B[0], r[1] + offset_B[1], 0.0};
 
-            for (int n = 0; n < 3; ++n) {
-                int bx = x + dn[n][0];
-                int by = y + dn[n][1];
-                std::size_t sB = site(1, bx, by, Lx, Ly);
-                // Ensure unique edge: sA < sB
-                if (sA < sB)
-                    lat.bonds.push_back({sA, sB});
-                else
-                    lat.bonds.push_back({sB, sA});
-            }
-
-            // Coords
-            auto coord_A = uc_coord(x, y,
-                lat.prim_vec_a[0], lat.prim_vec_a[1],
-                lat.prim_vec_b[0], lat.prim_vec_b[1]);
-            lat.site_coords.push_back({coord_A[0] + offset_A[0],
-                                       coord_A[1] + offset_A[1], 0.0});
-
-            auto coord_B = uc_coord(x, y,
-                lat.prim_vec_a[0], lat.prim_vec_a[1],
-                lat.prim_vec_b[0], lat.prim_vec_b[1]);
-            lat.site_coords.push_back({coord_B[0] + offset_B[0],
-                                       coord_B[1] + offset_B[1], 0.0});
+            const std::size_t a = site(0, x, y);
+            lat.bonds.push_back({a, site(1, x, y)});
+            lat.bonds.push_back({a, site(1, x - 1, y)});
+            lat.bonds.push_back({a, site(1, x, y - 1)});
         }
     }
-
-    // Re-sort site_coords to match the site ordering (A first, then B)
-    // Currently was appended in interleaved order — need to fix.
-    // Sites are {A_0, B_0, A_1, B_1, ...} but index is A_0...A_{Nuc-1}, B_0...B_{Nuc-1}
-    {
-        auto sc = lat.site_coords;
-        lat.site_coords.clear();
-        lat.site_coords.resize(lat.N);
-        for (int x = 0; x < Lx; ++x) {
-            for (int y = 0; y < Ly; ++y) {
-                std::size_t ucidx = static_cast<std::size_t>(x) * Ly + static_cast<std::size_t>(y);
-                auto coord_A2 = uc_coord(x, y,
-                    lat.prim_vec_a[0], lat.prim_vec_a[1],
-                    lat.prim_vec_b[0], lat.prim_vec_b[1]);
-                lat.site_coords[ucidx] = {coord_A2[0] + offset_A[0],
-                                          coord_A2[1] + offset_A[1], 0.0};
-                lat.site_coords[Nuc + ucidx] = {coord_A2[0] + offset_B[0],
-                                                coord_A2[1] + offset_B[1], 0.0};
-            }
-        }
-    }
-
     return lat;
 }
 
