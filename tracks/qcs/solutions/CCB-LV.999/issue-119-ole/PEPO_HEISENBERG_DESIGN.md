@@ -215,10 +215,13 @@ issue-119-ole/
 │   ├── validate_pepo_small.py
 │   ├── run_pepo.py
 │   └── analyze_pepo.py
-└── results/
-    ├── pepo-small-oracle/
-    └── pepo-49q-scan/
 ```
+
+Runtime artifacts use the repository-standard, gitignored
+`<workspace>/results/issue119-pepo-*/` tree. Keeping runtime cells at the
+workspace root lets the existing `parameter_scan.py` and
+`harness_slurm.sh fetch/classify` paths work without a project-specific copy
+of the cluster machinery.
 
 Responsibilities:
 
@@ -529,7 +532,8 @@ result.
 
 ### 13.2 Cell manifest
 
-Every cell writes `results/<run>/cells/<cell-id>/manifest.json` with:
+Every cell writes the repository-standard
+`<workspace>/results/<run>/cells/<cell-id>/manifest.json` with:
 
 - status and timestamps;
 - exact command and fixed settings;
@@ -616,11 +620,11 @@ pepo/...
 scripts/validate_pepo_small.py
 scripts/run_pepo.py
 scripts/analyze_pepo.py
-results/pepo-small-oracle/...
-results/pepo-49q-scan/run_spec.json
-results/pepo-49q-scan/cells/*/manifest.json
-results/pepo-49q-scan/parameter-scan.csv
-results/pepo-49q-scan/pepo-convergence.png
+<workspace>/results/issue119-pepo-small-oracle/...
+<workspace>/results/issue119-pepo-49q-scan/run_spec.json
+<workspace>/results/issue119-pepo-49q-scan/cells/*/manifest.json
+<workspace>/results/issue119-pepo-49q-scan/parameter-scan.csv
+<workspace>/results/issue119-pepo-49q-scan/pepo-convergence.png
 ```
 
 The short final report must state:
