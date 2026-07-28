@@ -552,6 +552,7 @@ function validate_reloaded_model(model::JuMP.Model)
     require_equal(psd_constraint_count, 11, "MOF PSD constraint count")
 
     dimensions = Dict{String,Int}()
+    value_shapes = Dict{String,String}()
     for (name, expected_dimension) in EXPECTED_PSD_DIMENSIONS
         reference = JuMP.constraint_by_name(model, name)
         isnothing(reference) && error("MOF lost PSD block $name")
@@ -563,14 +564,8 @@ function validate_reloaded_model(model::JuMP.Model)
             expected_dimension,
             "$name side dimension",
         )
-        reference.shape isa JuMP.HermitianMatrixShape ||
-            error("$name lost Hermitian matrix shape")
-        require_equal(
-            reference.shape.side_dimension,
-            expected_dimension,
-            "$name shape dimension",
-        )
         dimensions[name] = expected_dimension
+        value_shapes[name] = string(typeof(reference.shape))
     end
     return Dict(
         "passed" => true,
@@ -578,6 +573,7 @@ function validate_reloaded_model(model::JuMP.Model)
         "constraint_count_excluding_variable_sets" => 15,
         "psd_constraint_count" => psd_constraint_count,
         "psd_block_dimensions" => dimensions,
+        "jump_value_shapes" => value_shapes,
         "max_psd_side_dimension" => maximum(values(dimensions)),
     )
 end
@@ -608,6 +604,52 @@ function affine_residual(reference::JuMP.ConstraintRef)
         "scale" => scale,
         "normalized_residual" => residual / scale,
     )
+end
+
+function reconstruct_hermitian_constraint(
+    reference::JuMP.ConstraintRef,
+    dimension::Int,
+)
+    raw_value = JuMP.value(reference)
+    if raw_value isa Hermitian || raw_value isa AbstractMatrix
+        matrix = Matrix{ComplexF64}(raw_value)
+        size(matrix) == (dimension, dimension) ||
+            error("matrix-shaped cone value has the wrong size")
+        return matrix
+    end
+    raw_value isa AbstractVector ||
+        error("unsupported Hermitian cone value shape $(typeof(raw_value))")
+    length(raw_value) == dimension^2 ||
+        error(
+            "packed Hermitian cone value has length $(length(raw_value)); " *
+            "expected $(dimension^2)",
+        )
+
+    # MOI.HermitianPositiveSemidefiniteConeTriangle stores the upper-triangle
+    # real entries first, followed by the strict-upper-triangle imaginary
+    # entries. Rebuild explicitly instead of trusting JuMP's in-memory shape,
+    # which is not preserved by MathOptFormat reload.
+    packed = Float64.(raw_value)
+    matrix = zeros(ComplexF64, dimension, dimension)
+    real_index = 0
+    imaginary_index = dimension * (dimension + 1) ÷ 2
+    for column in 1:dimension
+        for row in 1:(column - 1)
+            real_index += 1
+            imaginary_index += 1
+            value =
+                packed[real_index] + im * packed[imaginary_index]
+            matrix[row, column] = value
+            matrix[column, row] = conj(value)
+        end
+        real_index += 1
+        matrix[column, column] = packed[real_index]
+    end
+    real_index == dimension * (dimension + 1) ÷ 2 ||
+        error("internal real packing reconstruction failure")
+    imaginary_index == dimension^2 ||
+        error("internal imaginary packing reconstruction failure")
+    return matrix
 end
 
 function solution_diagnostics(
@@ -641,10 +683,11 @@ function solution_diagnostics(
     worst_normalized_psd_violation = 0.0
     for name in sort!(collect(keys(EXPECTED_PSD_DIMENSIONS)))
         reference = JuMP.constraint_by_name(model, name)
-        reconstructed = Matrix{ComplexF64}(JuMP.value(reference))
         dimension = EXPECTED_PSD_DIMENSIONS[name]
-        size(reconstructed) == (dimension, dimension) ||
-            error("$name reconstructed with the wrong matrix size")
+        reconstructed = reconstruct_hermitian_constraint(
+            reference,
+            dimension,
+        )
         hermiticity_residual = maximum(
             abs,
             reconstructed - reconstructed',

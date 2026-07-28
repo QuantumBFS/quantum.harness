@@ -26,3 +26,12 @@ and all 11 reconstructed Hermitian PSD blocks pass a declared scale-aware
 Use `xhacnormalb`, one node, 16 CPUs, 60 GiB, and a two-hour allocation. This
 fits xH5's per-CPU memory policy and keeps all operations that may approach or
 exceed 1 GiB RSS off login/Bohrium nodes.
+
+## 2026-07-29 — MOF Hermitian packing
+
+Gamma=0 attempt r1 (job `22987967`) showed that MathOptFormat reload preserves
+the named `HermitianPositiveSemidefiniteConeTriangle` set and side dimension
+but not JuMP's original `HermitianMatrixShape`. The corrected runner validates
+the cone set/dimension, then independently rebuilds each matrix from MOI's
+real-upper followed by imaginary-strict-upper vector packing. No optimizer was
+attached in r1 and no scientific status was produced.
