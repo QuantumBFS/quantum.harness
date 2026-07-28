@@ -244,7 +244,7 @@ def test_primal_reconstruction_enforces_anchor_and_denominator_limit() -> None:
         label="x",
         sign=1,
         status="feasible",
-        coefficients=(1.0 + 1e-12, float(sp.sqrt(2) / 2)),
+        coefficients=(1.0 + 1e-12, math.sqrt(2) / 2),
         min_slack=0.0,
         message="synthetic",
     )
