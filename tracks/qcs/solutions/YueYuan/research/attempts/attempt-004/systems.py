@@ -43,7 +43,7 @@ def target_gate(name: str):
 
 def build_system(config: SystemConfig) -> SystemModel:
     if config.name == "one_qubit_x":
-        controls = (0.5 * pauli_x(), 0.5 * pauli_y())
+        controls = (2.0 * pauli_x(), 2.0 * pauli_y())
         drift = 0.08 * pauli_z()
     elif config.name == "two_qubit_cz":
         xi = jnp.kron(pauli_x(), pauli_i())
