@@ -90,8 +90,8 @@ def test_dry_run_reports_steps_modes_and_storage_without_evolution(
 def test_evolve_dispatches_exactly_one_mode(tmp_path, monkeypatch):
     calls = []
 
-    def fake_run_chain(config, run_root, *, mode):
-        calls.append((config, run_root, mode))
+    def fake_run_chain(config, run_root, *, mode, stop_after_steps):
+        calls.append((config, run_root, mode, stop_after_steps))
         return ChainResult(accepted_betas=(), resumed_from=0.0, latest=None)
 
     monkeypatch.setattr(run_module, "run_chain", fake_run_chain)
@@ -105,12 +105,14 @@ def test_evolve_dispatches_exactly_one_mode(tmp_path, monkeypatch):
             str(tmp_path),
             "--compression-mode",
             "thermodynamic",
+            "--stop-after-steps",
+            "1",
         ]
     )
 
     assert code == 0
     assert len(calls) == 1
-    assert calls[0][1:] == (tmp_path, "thermodynamic")
+    assert calls[0][1:] == (tmp_path, "thermodynamic", 1)
 
 
 def test_measure_rejects_chi_outside_the_configuration(tmp_path):

@@ -214,6 +214,8 @@ def _parser() -> argparse.ArgumentParser:
                 required=True,
                 choices=("ordinary", "thermodynamic"),
             )
+        if name == "evolve":
+            command.add_argument("--stop-after-steps", type=int)
         if name == "measure":
             command.add_argument("--chi", required=True, type=int)
     return parser
@@ -231,6 +233,7 @@ def main(argv=None) -> int:
             chain,
             args.run_root,
             mode=args.compression_mode,
+            stop_after_steps=args.stop_after_steps,
         )
         print(
             json.dumps(

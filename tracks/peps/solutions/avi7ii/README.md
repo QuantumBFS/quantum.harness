@@ -32,3 +32,36 @@ a complete run with:
 ```text
 python -m qh147.ed_thermo --config tracks/peps/solutions/avi7ii/configs/ed-4x4.json --run-root tracks/peps/results/issue147-ed --output tracks/peps/results/issue147-ed/assembled
 ```
+
+## 10x10 production PEPO chain
+
+The first production comparison fixes the open-boundary Pauli TFIM at
+`J=1`, `h=3`, student bond dimension `D=4`, and `delta_beta=0.025`. Inspect the
+40-step, two-mode request without constructing the network:
+
+```text
+.venv\Scripts\python.exe -m qh147.run dry-run --config tracks/peps/solutions/avi7ii/configs/pepo-h3-d4.json --run-root tracks/peps/results/issue147-pepo
+```
+
+Do not run the 10x10 evolution locally. On SCNet, time exactly one
+thermodynamic step first:
+
+```text
+python -u -m qh147.run evolve --config tracks/peps/solutions/avi7ii/configs/pepo-h3-d4.json --run-root tracks/peps/results/issue147-pepo --compression-mode thermodynamic --stop-after-steps 1
+```
+
+The same command without `--stop-after-steps` resumes from the immutable first
+checkpoint. Run the ordinary mode with `--compression-mode ordinary`; it uses
+the same `D`, `chi`, optimizer, and iteration cap in a separate directory.
+
+After all 40 checkpoints exist for a mode, measure them independently at both
+declared boundary dimensions:
+
+```text
+python -u -m qh147.run measure --config tracks/peps/solutions/avi7ii/configs/pepo-h3-d4.json --run-root tracks/peps/results/issue147-pepo --compression-mode thermodynamic --chi 16
+python -u -m qh147.run measure --config tracks/peps/solutions/avi7ii/configs/pepo-h3-d4.json --run-root tracks/peps/results/issue147-pepo --compression-mode thermodynamic --chi 32
+```
+
+Repeat the two measurement commands for `ordinary`. Dense 0.025-grid data and
+the ten public beta points are written under
+`tracks/peps/results/issue147-pepo/measurements/<mode>/chi-<chi>/`.
