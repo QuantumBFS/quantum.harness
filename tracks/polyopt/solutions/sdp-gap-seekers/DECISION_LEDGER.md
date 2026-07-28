@@ -43,3 +43,12 @@ setup, count, and named-cone checks. It then stopped before `optimize!` because
 MosekTools 0.15.10 accepts `MSK_IPAR_NUM_THREADS` through MOI's string-valued
 raw optimizer attribute, not the Mosek.jl enum used by the older Square
 runner. The Shastry runner now uses the supported raw attribute API.
+
+## 2026-07-29 — gamma=0 truth gate passed
+
+Attempt r3 (job `22987983`, runner commit `40b1f02`) returned Mosek
+`OPTIMAL` with primal and dual feasible points. Independent reconstruction
+gave normalization 1 exactly, three zero affine residuals, zero PSD violation,
+and a smallest block eigenvalue of 0.0948505094335904. The gamma=1/2 solve is
+therefore unblocked without changing the Hamiltonian, window, state class,
+degree, reduction, solver settings, or audit tolerance.
