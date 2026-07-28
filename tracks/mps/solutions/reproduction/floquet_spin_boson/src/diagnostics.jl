@@ -4,6 +4,41 @@ function error_metrics(values::AbstractVector, reference)
             rmse=sqrt(sum(abs2, errors) / length(errors)))
 end
 
+"""Read only exact metrics from the legacy strict Fig. 2 JSON schema.
+
+Partial Redfield refreshes must fail closed if either exact panel is absent,
+so they cannot silently discard a completed expensive validation.
+"""
+function parse_exact_baseline(json::AbstractString)
+    records = Dict{Float64, NamedTuple{(:max_error, :rmse, :samples), Tuple{Float64, Float64, Int}}}()
+    pattern = r"\"([0-9]+(?:\.[0-9]+)?)\":\{\"max_error\":([^,}]+),\"rmse\":([^,}]+),\"samples\":([0-9]+)"
+    for found in eachmatch(pattern, json)
+        ωd = parse(Float64, found.captures[1])
+        records[ωd] = (; max_error=parse(Float64, found.captures[2]),
+                        rmse=parse(Float64, found.captures[3]),
+                        samples=parse(Int, found.captures[4]))
+    end
+    isempty(records) && throw(ArgumentError("baseline JSON has no exact validation records"))
+    return records
+end
+
+function render_error_panel(records)
+    entries = String[]
+    for ωd in sort(collect(keys(records)))
+        r = records[ωd]
+        push!(entries, "\"$(ωd)\":{\"max_error\":$(r.max_error),\"rmse\":$(r.rmse),\"samples\":$(r.samples)}")
+    end
+    return "{" * join(entries, ",") * "}"
+end
+
+"""Render a versioned JSON refresh that preserves prior exact metrics verbatim."""
+function render_refreshed_errors(exact::AbstractDict, redfield::AbstractDict, config::RunConfig)
+    Set(keys(exact)) == Set(keys(redfield)) ||
+        throw(ArgumentError("exact and refreshed Redfield frequency sets differ"))
+    provenance = "{\"implementation\":\"period-resolved-driven-redfield\",\"drive\":\"transversal-sigma_z\",\"mode\":\"$(config.mode)\",\"dt_target\":$(config.dt_target),\"steps\":$(config.steps),\"frequencies\":[" * join(sort(collect(keys(redfield))), ",") * "]}"
+    return "{\"provenance\":$(provenance),\"exact\":$(render_error_panel(exact)),\"redfield\":$(render_error_panel(redfield))}"
+end
+
 """Exact uniTEMPO transient curve, kept behind the Fig. 2 baseline interface."""
 function uniformtempo_exact_curve(model::SpinBosonModel, ωd::Real, dt::Real,
                                   steps::Integer, tolerance::Real)

@@ -80,3 +80,17 @@ end
         @test result[2.5].redfield.max_error > 1e-3
     end
 end
+
+@testset "Redfield-only refresh preserves prior exact validation" begin
+    previous = "{\"2.5\":{\"max_error\":0.0034,\"rmse\":0.0015,\"samples\":3820,\"redfield_max_error\":1e-5},\"10.0\":{\"max_error\":0.0020,\"rmse\":0.0004,\"samples\":3820,\"redfield_max_error\":1e-5}}"
+    exact = parse_exact_baseline(previous)
+    @test exact[2.5].max_error == 0.0034
+    @test_throws ArgumentError parse_exact_baseline("{}")
+
+    refreshed = render_refreshed_errors(exact,
+        Dict(2.5 => (; max_error=0.11, rmse=0.02, samples=3820),
+             10.0 => (; max_error=0.22, rmse=0.03, samples=3820)),
+        RunConfig(frequencies=[2.5, 10.0], steps=3819))
+    @test occursin("period-resolved-driven-redfield", refreshed)
+    @test occursin("\"max_error\":0.11", refreshed)
+end
