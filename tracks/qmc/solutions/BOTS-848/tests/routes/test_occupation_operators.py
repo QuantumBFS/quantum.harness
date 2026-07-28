@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import math
+import random
 from collections import Counter
+from decimal import Decimal, localcontext
 from itertools import permutations
 
 import numpy as np
@@ -71,6 +73,56 @@ def _logpsi_from_basis(
         for state, value in zip(basis, values, strict=True)
     }
     return log_values.__getitem__
+
+
+def _oracle_phase_direction(target_phase: float, source_phase: float) -> complex:
+    if target_phase == source_phase:
+        return 1.0 + 0.0j
+    period = 2.0 * math.pi
+    difference = math.remainder(target_phase, period) - math.remainder(
+        source_phase,
+        period,
+    )
+    reduced = math.remainder(difference, period)
+    return complex(math.cos(reduced), math.sin(reduced))
+
+
+def _decimal_row_oracle(
+    state: int,
+    neighbors: dict[int, complex],
+    log_values: dict[int, complex],
+) -> complex:
+    """Independent whole-row oracle using exact binary64 Decimal inputs."""
+
+    source = log_values[state]
+    with localcontext() as context:
+        context.prec = 2500
+        context.Emax = 999_999
+        context.Emin = -999_999
+        real = Decimal(0)
+        imaginary = Decimal(0)
+        for target, coefficient in neighbors.items():
+            target_logpsi = log_values[target]
+            phase = _oracle_phase_direction(target_logpsi.imag, source.imag)
+            coefficient_real = Decimal.from_float(coefficient.real)
+            coefficient_imaginary = Decimal.from_float(coefficient.imag)
+            phase_real = Decimal.from_float(phase.real)
+            phase_imaginary = Decimal.from_float(phase.imag)
+            rotated_real = (
+                coefficient_real * phase_real
+                - coefficient_imaginary * phase_imaginary
+            )
+            rotated_imaginary = (
+                coefficient_real * phase_imaginary
+                + coefficient_imaginary * phase_real
+            )
+            relative_logabs = Decimal.from_float(
+                target_logpsi.real
+            ) - Decimal.from_float(source.real)
+            factor = relative_logabs.exp()
+            real += rotated_real * factor
+            imaginary += rotated_imaginary * factor
+    return complex(float(real), float(imaginary))
 
 
 def test_route_local_fermion_actions_match_fock_ed_term_by_term() -> None:
@@ -477,6 +529,101 @@ def test_local_estimator_saturates_unrepresentable_negative_log_difference() -> 
     assert observed == pytest.approx(1.0)
 
 
+def test_local_estimator_preserves_binary64_coefficient_ulp_residual() -> None:
+    x = 1.0e300
+    y = math.nextafter(x, math.inf)
+    expected = complex(math.fsum((x, -y)))
+    log_values = {1: 0.0j, 2: 0.0j, 3: 0.0j}
+
+    for order in (((2, x), (3, -y)), ((3, -y), (2, x))):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+
+        assert observed == expected
+
+
+@pytest.mark.parametrize(
+    "coefficient",
+    [
+        float(np.finfo(np.float64).max),
+        math.ldexp(1.0, -1074),
+    ],
+)
+def test_local_estimator_preserves_binary64_endpoint_at_unit_factor(
+    coefficient: float,
+) -> None:
+    assert local_from_log_neighbors(
+        1,
+        {2: coefficient},
+        lambda _state: 0.0j,
+    ) == complex(coefficient)
+
+
+def test_local_estimator_recovers_tiny_component_after_exact_row_cancellation() -> None:
+    maximum = float(np.finfo(np.float64).max)
+    minimum = math.ldexp(1.0, -1074)
+    terms = ((2, complex(maximum, minimum)), (3, complex(-maximum)))
+    log_values = {1: 0.0j, 2: 0.0j, 3: 0.0j}
+
+    for order in permutations(terms):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+
+        assert observed == complex(0.0, minimum)
+
+
+def test_local_estimator_combines_ulp_residual_with_lower_log_band() -> None:
+    x = 1.0e300
+    y = math.nextafter(x, math.inf)
+    residual = abs(math.fsum((x, -y)))
+    terms = ((2, x), (3, -y), (4, residual))
+    log_values = {
+        1: 0.0j,
+        2: 0.0j,
+        3: 0.0j,
+        4: complex(-math.log(2.0), 0.0),
+    }
+    expected = _decimal_row_oracle(1, dict(terms), log_values)
+
+    for order in permutations(terms):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+
+        assert observed == expected
+
+
+def test_local_estimator_accumulates_multiple_sub_half_ulp_lower_terms() -> None:
+    lower_logabs = -54.0 * math.log(2.0)
+    terms = ((2, 1.0), (3, 1.0), (4, 1.0), (5, 1.0))
+    log_values = {
+        1: 0.0j,
+        2: 0.0j,
+        3: complex(math.nextafter(lower_logabs, -math.inf), 0.0),
+        4: complex(lower_logabs, 0.0),
+        5: complex(math.nextafter(lower_logabs, math.inf), 0.0),
+    }
+    expected = _decimal_row_oracle(1, dict(terms), log_values)
+
+    assert expected == complex(math.nextafter(1.0, math.inf))
+    for order in permutations(terms):
+        observed = local_from_log_neighbors(
+            1,
+            dict(order),
+            log_values.__getitem__,
+        )
+
+        assert observed == expected
+
+
 def test_local_estimator_descends_after_signed_dominant_cancellation() -> None:
     coefficients = {2: 1.0, 3: -1.0, 4: 1.0}
     log_values = {
@@ -555,6 +702,74 @@ def test_local_estimator_rejects_true_near_maximum_overflow() -> None:
         )
 
 
+def test_local_estimator_rounds_minimum_subnormal_halfway_boundary() -> None:
+    minimum = math.ldexp(1.0, -1074)
+    threshold = -math.log(2.0)
+
+    below = local_from_log_neighbors(
+        1,
+        {2: minimum},
+        {1: 0.0j, 2: complex(math.nextafter(threshold, -math.inf), 0.0)}.__getitem__,
+    )
+    above = local_from_log_neighbors(
+        1,
+        {2: minimum},
+        {1: 0.0j, 2: complex(math.nextafter(threshold, math.inf), 0.0)}.__getitem__,
+    )
+
+    assert below == 0.0j
+    assert above == complex(minimum)
+
+
+def test_local_estimator_preserves_maximum_complex_components() -> None:
+    maximum = float(np.finfo(np.float64).max)
+    coefficient = complex(maximum, maximum)
+
+    observed = local_from_log_neighbors(
+        1,
+        {2: coefficient},
+        lambda _state: 0.0j,
+    )
+
+    assert observed == coefficient
+
+
+def test_local_estimator_rejects_true_complex_component_overflow() -> None:
+    maximum = float(np.finfo(np.float64).max)
+    coefficient = complex(maximum, maximum)
+    log_values = {1: 0.0j, 2: complex(math.ulp(1.0), 0.0)}
+
+    with pytest.raises(OverflowError, match="outside complex128 range"):
+        local_from_log_neighbors(
+            1,
+            {2: coefficient},
+            log_values.__getitem__,
+        )
+
+
+def test_local_estimator_handles_huge_log_difference_without_direct_exp() -> None:
+    safe_logs = {
+        1: complex(1.0e308, 0.0),
+        2: complex(-1.0e308, 0.0),
+    }
+    overflow_logs = {
+        1: complex(-1.0e308, 0.0),
+        2: complex(1.0e308, 0.0),
+    }
+
+    assert local_from_log_neighbors(
+        1,
+        {2: 1.0},
+        safe_logs.__getitem__,
+    ) == 0.0j
+    with pytest.raises(OverflowError, match="outside complex128 range"):
+        local_from_log_neighbors(
+            1,
+            {2: 1.0},
+            overflow_logs.__getitem__,
+        )
+
+
 def test_local_estimator_preserves_multiply_first_extreme_result() -> None:
     log_values = {
         1: complex(math.log(1.0e-315), 0.0),
@@ -587,11 +802,17 @@ def test_local_estimator_preserves_divide_first_extreme_result() -> None:
     assert observed == pytest.approx(complex(1.0), rel=2.0e-14)
 
 
-def test_local_estimator_rejects_coefficient_component_dynamic_range() -> None:
-    coefficient = complex(1.0e308, 2.0 ** -1074)
+def test_local_estimator_preserves_coefficient_component_dynamic_range() -> None:
+    coefficient = complex(
+        float(np.finfo(np.float64).max),
+        math.ldexp(1.0, -1074),
+    )
 
-    with pytest.raises(ValueError, match="coefficient component dynamic range"):
-        local_from_log_neighbors(1, {2: coefficient}, lambda _state: 0.0j)
+    assert local_from_log_neighbors(
+        1,
+        {2: coefficient},
+        lambda _state: 0.0j,
+    ) == coefficient
 
 
 @pytest.mark.parametrize(
@@ -690,6 +911,41 @@ def test_local_estimator_returns_zero_for_exactly_canceling_row() -> None:
     assert observed == 0.0j
 
 
+def test_local_estimator_matches_wide_exponent_decimal_oracle_under_shuffle() -> None:
+    rng = random.Random(848)
+    for case in range(6):
+        source_logabs = rng.uniform(-200.0, 200.0)
+        source_phase = rng.uniform(-20.0, 20.0)
+        log_values = {1: complex(source_logabs, source_phase)}
+        terms: list[tuple[int, complex]] = []
+        for offset in range(8):
+            state = offset + 2
+            coefficient = complex(
+                math.ldexp(rng.uniform(-1.0, 1.0), rng.randint(-300, 300)),
+                math.ldexp(rng.uniform(-1.0, 1.0), rng.randint(-300, 300)),
+            )
+            target_logabs = source_logabs + rng.uniform(-350.0, 350.0)
+            target_phase = rng.uniform(-20.0, 20.0)
+            log_values[state] = complex(target_logabs, target_phase)
+            terms.append((state, coefficient))
+
+        expected = _decimal_row_oracle(1, dict(terms), log_values)
+        observed: list[complex] = []
+        for shuffle in range(3):
+            shuffled = list(terms)
+            random.Random(10_000 * case + shuffle).shuffle(shuffled)
+            observed.append(
+                local_from_log_neighbors(
+                    1,
+                    dict(shuffled),
+                    log_values.__getitem__,
+                )
+            )
+
+        assert all(value == observed[0] for value in observed)
+        assert observed[0] == pytest.approx(expected, rel=5.0e-13, abs=1.0e-300)
+
+
 def test_prepared_pair_operator_rejects_non_hermitian_20_6_input() -> None:
     pair_matrix = np.array(
         [[0.0, 1.0 + 2.0j], [20.6 + 0.0j, 0.0]],
@@ -711,15 +967,24 @@ def test_prepared_pair_operator_rejects_extreme_non_hermitian_input() -> None:
         PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
 
 
-def test_prepared_pair_operator_rejects_coefficient_component_dynamic_range() -> None:
-    coefficient = complex(1.0e308, 2.0 ** -1074)
+def test_prepared_pair_operator_preserves_coefficient_component_dynamic_range() -> None:
+    coefficient = complex(
+        float(np.finfo(np.float64).max),
+        math.ldexp(1.0, -1074),
+    )
     pair_matrix = np.array(
         [[0.0, coefficient], [coefficient.conjugate(), 0.0]],
         dtype=np.complex128,
     )
 
-    with pytest.raises(ValueError, match="coefficient component dynamic range"):
-        PreparedPairOperator.build(((0, 1), (2, 3)), pair_matrix, two_q=3)
+    prepared = PreparedPairOperator.build(
+        ((0, 1), (2, 3)),
+        pair_matrix,
+        two_q=3,
+    )
+
+    assert prepared.matrix[0, 1] == coefficient
+    assert prepared.matrix[1, 0] == coefficient.conjugate()
 
 
 def test_prepared_pair_operator_rejects_direct_construction() -> None:
