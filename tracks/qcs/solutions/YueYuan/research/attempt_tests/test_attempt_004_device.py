@@ -51,3 +51,26 @@ def test_attempt_004_noisy_variance_decreases_with_shots():
         high.append(device.QueryOnlyDevice(true_system, seed=seed).query(theta, shots=2048, seed=seed))
 
     assert np.var(high) < np.var(low)
+
+
+def test_attempt_004_nelder_mead_uses_only_scalar_objective():
+    import optimizers
+
+    calls = []
+
+    def objective(x):
+        calls.append(np.asarray(x).copy())
+        return float(np.sum((x - np.array([0.2, -0.1])) ** 2))
+
+    result = optimizers.nelder_mead(
+        objective,
+        np.zeros(2),
+        step=0.2,
+        max_queries=80,
+        bounds=(-1.0, 1.0),
+    )
+
+    assert result.best_value < 1e-4
+    assert result.queries == len(calls)
+    assert result.queries <= 80
+    assert len(result.history) == result.queries
