@@ -32,6 +32,13 @@ include(joinpath(
     "SpinAxisInvolutionPrimalGapJuMP.jl",
 ))
 using .SpinAxisInvolutionPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinPermutationReduction.jl",
+))
+using .FullSpinPermutationReduction
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -215,6 +222,28 @@ using JuMP
         spin_axis_report.real_psd_triangle_entries,
     )
     flush(stdout)
+
+    full_spin_truth = full_spin_permutation_truth(real_reduced)
+    @test full_spin_truth.exact
+    @test full_spin_truth.hamiltonian_invariant
+    @test full_spin_truth.coefficient_covariant
+    @test full_spin_truth.coefficient_check_count == 6 * 31_810
+    @test full_spin_truth.conjugation_inventory_closed
+    @test full_spin_truth.conjugation_action_unsigned
+    @test full_spin_truth.equality_space_invariant
+    @test full_spin_truth.source_moment_count == 16_660
+    @test full_spin_truth.quotient_moment_count <
+          spin_axis_report.spin_axis_moments
+    @test full_spin_truth.eliminated_moment_count > 7_857
+    println(
+        "[full-spin-truth] moments=",
+        full_spin_truth.quotient_moment_count,
+        ", eliminated=",
+        full_spin_truth.eliminated_moment_count,
+        ", coefficient_checks=",
+        full_spin_truth.coefficient_check_count,
+    )
+    flush(stdout)
 end
 
 @testset "V4 character multiplication and projection" begin
@@ -255,4 +284,24 @@ end
     @test spin_axis_involution(transformed_y) == (-1, y)
     @test spin_axis_character(v4_character(x)) == v4_character(z)
     @test spin_axis_character(v4_character(y)) == v4_character(y)
+
+    @test length(SPIN_AXIS_PERMUTATIONS) == 6
+    @test count(
+        permutation -> permutation_sign(permutation) == 1,
+        SPIN_AXIS_PERMUTATIONS,
+    ) == 3
+    @test count(
+        permutation -> permutation_sign(permutation) == -1,
+        SPIN_AXIS_PERMUTATIONS,
+    ) == 3
+    swap_xy = (UInt8(2), UInt8(1), UInt8(3))
+    cycle_xyz = (UInt8(2), UInt8(3), UInt8(1))
+    @test full_spin_permutation(x, swap_xy) == (-1, y)
+    @test full_spin_permutation(y, swap_xy) == (-1, x)
+    @test full_spin_permutation(z, swap_xy) == (-1, z)
+    @test full_spin_permutation(x, cycle_xyz) == (1, y)
+    @test full_spin_character(v4_character(x), swap_xy) ==
+          v4_character(y)
+    @test full_spin_character(v4_character(z), swap_xy) ==
+          v4_character(z)
 end
