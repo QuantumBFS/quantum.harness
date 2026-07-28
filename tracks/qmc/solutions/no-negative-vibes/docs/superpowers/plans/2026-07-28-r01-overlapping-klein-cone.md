@@ -1,0 +1,1305 @@
+# R01 Overlapping Klein Cone Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build an exact and numerical six-mode oracle that either exhibits a certified cross-cluster quadratic Klein/Fock Metzler cone with two noncommuting rays or proves that every designated cross-cluster coefficient vanishes by exact dual certificates.
+
+**Architecture:** Separate exact occupation-basis algebra, fixed Klein circuit construction, Metzler inequality compilation, and LP/certificate logic into focused modules. Compile one fixed algebraic inequality system per geometry/family, use SciPy HiGHS only to discover sparse primal or dual supports, and replay every scientific conclusion with SymPy exact arithmetic before recording it.
+
+**Tech Stack:** Python 3.11+, NumPy, SciPy (`optimize.linprog`), SymPy exact sparse matrices, pytest, JSON protocol fixtures, Git/GitHub shared topic branch, WSL and a plain-SSH CPU worker.
+
+## Global Constraints
+
+- Work only in `work/zibo/representation-cones`; merge through internal PR #3.
+- Do not update the organizer-facing branch or PR #178.
+- Use one fixed, field-independent Fock transform for every layer in a candidate.
+- Treat actual even/odd parity traces as the physical branches; never infer their signs from an arbitrary square root of a determinant.
+- Numerical feasibility is discovery evidence only. A survivor needs an exact algebraic primal certificate; a no-go needs exact positive dual identities.
+- A negative floating-point weight is not a counterexample until high-precision or exact replay succeeds.
+- Run tests from `tracks/qmc/solutions/no-negative-vibes` with `PYTHONPATH=.`.
+- Set `OMP_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, and `OPENBLAS_NUM_THREADS=1`.
+- Use `workers=max(1, logical_cpus-2)` only after a deterministic one-worker smoke run.
+- Append every completed experiment, including failures, to `docs/EXPERIMENT_LOG.md`, and append reusable mechanical lessons to `docs/RESEARCH_OPERATIONS.md`.
+- Commit and push each interpreted experiment before starting the next one.
+- Commit no hostnames, usernames, passwords, private-key paths, or private handoff content.
+
+---
+
+## File map
+
+Create these focused modules:
+
+- `oracle/fock_basis.py`: exact Jordan–Wigner occupation operators, parity indices, and quadratic Fock basis elements.
+- `oracle/klein_hodge.py`: exact four-mode Klein–Hodge transform, contiguous even-gate embedding, overlap circuit, Plücker diagnostic, and four-mode seed.
+- `oracle/metzler_system.py`: exact transformed off-diagonal inequality compiler and exact Metzler predicates.
+- `oracle/overlap_klein.py`: six-mode geometry, support masks, anchored LPs, exact primal/dual certificates, protocol runner, and CLI.
+- `tests/test_fock_basis.py`: CAR, signs, parity, and one-body second-quantization tests.
+- `tests/test_klein_hodge.py`: exact transform, non-inducedness, embedding, and four-mode seed tests.
+- `tests/test_metzler_system.py`: compiler row provenance and exact/numeric consistency tests.
+- `tests/test_overlap_klein.py`: geometry, anchor feasibility, certificate replay, deterministic multiprocessing, and payload-schema tests.
+- `protocols/overlap-klein-v1/{README.md,settings.json,axes.json,provenance.json}`: preregistered six-mode experiment.
+- `fixtures/overlap_klein_r01.json`: compact terminal R01 result and exact certificate strings.
+- `docs/OVERLAPPING_KLEIN_RESULTS.md`: human-readable theorem/survivor/no-go conclusion.
+
+Modify:
+
+- `docs/EXPERIMENT_LOG.md`: one entry per completed run.
+- `docs/PROPOSAL_LEDGER.md`: R01 state transitions with evidence links.
+- `docs/RESEARCH_OPERATIONS.md`: new reusable environment or transfer lessons.
+- `docs/README.md`: link the terminal R01 result.
+
+---
+
+### Task 1: Exact occupation-basis quadratic algebra
+
+**Files:**
+
+- Create: `tracks/qmc/solutions/no-negative-vibes/oracle/fock_basis.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/tests/test_fock_basis.py`
+
+**Interfaces:**
+
+- Produces:
+  - `annihilation_operator(modes: int, index: int) -> sympy.ImmutableSparseMatrix`
+  - `creation_operator(modes: int, index: int) -> sympy.ImmutableSparseMatrix`
+  - `parity_indices(modes: int) -> tuple[tuple[int, ...], tuple[int, ...]]`
+  - `one_body_operator(matrix: sympy.MatrixBase) -> sympy.ImmutableSparseMatrix`
+  - `quadratic_term(modes: int, kind: str, i: int, j: int) -> sympy.ImmutableSparseMatrix`
+  - `exact_to_numpy(matrix: sympy.MatrixBase) -> numpy.ndarray`
+  - immutable `QuadraticBasisElement(label, kind, i, j, fock)`
+- Consumers: Tasks 2–9.
+
+- [ ] **Step 1: Write failing CAR and occupation-sign tests**
+
+```python
+from __future__ import annotations
+
+import numpy as np
+import pytest
+import sympy as sp
+
+from oracle.fock_basis import (
+    annihilation_operator,
+    creation_operator,
+    exact_to_numpy,
+    one_body_operator,
+    parity_indices,
+    quadratic_term,
+)
+
+
+def test_exact_creation_annihilation_operators_satisfy_car() -> None:
+    modes = 3
+    identity = sp.eye(1 << modes)
+    annihilation = [annihilation_operator(modes, i) for i in range(modes)]
+    creation = [creation_operator(modes, i) for i in range(modes)]
+
+    for i in range(modes):
+        for j in range(modes):
+            expected = identity if i == j else sp.zeros(1 << modes)
+            assert annihilation[i] * creation[j] + creation[j] * annihilation[i] == expected
+            assert annihilation[i] * annihilation[j] + annihilation[j] * annihilation[i] == sp.zeros(1 << modes)
+
+
+def test_jordan_wigner_sign_uses_lower_occupied_modes() -> None:
+    operator = creation_operator(3, 2)
+    source = 0b011
+    target = 0b111
+    assert operator[target, source] == 1
+
+    operator = creation_operator(3, 1)
+    source = 0b001
+    target = 0b011
+    assert operator[target, source] == -1
+
+
+def test_quadratic_terms_preserve_parity() -> None:
+    even, odd = parity_indices(4)
+    for kind in ("hop", "pair_create", "pair_annihilate"):
+        matrix = quadratic_term(4, kind, 0, 2)
+        assert matrix.extract(even, odd) == sp.zeros(len(even), len(odd))
+        assert matrix.extract(odd, even) == sp.zeros(len(odd), len(even))
+
+
+def test_one_body_operator_matches_direct_sum_over_hops() -> None:
+    matrix = sp.Matrix([[2, 3], [5, 7]])
+    expected = (
+        2 * quadratic_term(2, "hop", 0, 0)
+        + 3 * quadratic_term(2, "hop", 0, 1)
+        + 5 * quadratic_term(2, "hop", 1, 0)
+        + 7 * quadratic_term(2, "hop", 1, 1)
+    )
+    assert one_body_operator(matrix) == expected
+    assert exact_to_numpy(expected).dtype == np.float64
+
+
+@pytest.mark.parametrize(("modes", "index"), [(0, 0), (2, -1), (2, 2)])
+def test_invalid_mode_indices_are_rejected(modes: int, index: int) -> None:
+    with pytest.raises(ValueError):
+        annihilation_operator(modes, index)
+```
+
+- [ ] **Step 2: Run the new tests and verify import failure**
+
+Run:
+
+```bash
+cd tracks/qmc/solutions/no-negative-vibes
+PYTHONPATH=. python -m pytest tests/test_fock_basis.py -q
+```
+
+Expected: collection fails with `ModuleNotFoundError: No module named 'oracle.fock_basis'`.
+
+- [ ] **Step 3: Implement exact state-transition operators**
+
+Use occupation states `0..2**modes-1` and the sign
+`(-1)**((state & ((1 << index) - 1)).bit_count())`. Define:
+
+```python
+@dataclass(frozen=True)
+class QuadraticBasisElement:
+    label: str
+    kind: str
+    i: int
+    j: int
+    fock: sp.ImmutableSparseMatrix
+```
+
+Implement `quadratic_term` with these exact conventions:
+
+```python
+if kind == "hop":
+    result = creation_operator(modes, i) * annihilation_operator(modes, j)
+elif kind == "pair_create":
+    if not i < j:
+        raise ValueError("pair indices must satisfy i < j")
+    result = creation_operator(modes, i) * creation_operator(modes, j)
+elif kind == "pair_annihilate":
+    if not i < j:
+        raise ValueError("pair indices must satisfy i < j")
+    result = annihilation_operator(modes, j) * annihilation_operator(modes, i)
+else:
+    raise ValueError(f"unknown quadratic term kind: {kind}")
+```
+
+Return immutable sparse matrices and convert to NumPy through
+`np.array(matrix.tolist(), dtype=float)`.
+
+- [ ] **Step 4: Run focused and baseline tests**
+
+Run:
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_fock_basis.py -q
+PYTHONPATH=. python -m pytest tests -q
+```
+
+Expected: new tests pass and baseline remains at least `199 passed`.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/fock_basis.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_fock_basis.py
+git commit -m "feat: add exact occupation-basis quadratic algebra"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 2: Exact Klein–Hodge transform and four-mode theorem anchor
+
+**Files:**
+
+- Create: `tracks/qmc/solutions/no-negative-vibes/oracle/klein_hodge.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/tests/test_klein_hodge.py`
+
+**Interfaces:**
+
+- Consumes: Task 1 exact Fock operators.
+- Produces:
+  - `klein_hodge_gate() -> sympy.ImmutableSparseMatrix`
+  - `embed_contiguous_even_gate(gate, *, start: int, total_modes: int) -> sympy.ImmutableSparseMatrix`
+  - `overlap_klein_circuit() -> sympy.ImmutableSparseMatrix`
+  - `klein_seed_one_body() -> sympy.ImmutableMatrix`
+  - `plucker_quadric(two_particle_coordinates: sympy.MatrixBase) -> sympy.Expr`
+  - `is_orthogonal_exact(matrix: sympy.MatrixBase) -> bool`
+
+- [ ] **Step 1: Write failing exact transform tests**
+
+```python
+import sympy as sp
+
+from oracle.fock_basis import one_body_operator, parity_indices
+from oracle.klein_hodge import (
+    embed_contiguous_even_gate,
+    is_orthogonal_exact,
+    klein_hodge_gate,
+    klein_seed_one_body,
+    overlap_klein_circuit,
+    plucker_quadric,
+)
+
+
+def _is_metzler(matrix: sp.MatrixBase) -> bool:
+    return all(
+        sp.simplify(matrix[i, j]) >= 0
+        for i in range(matrix.rows)
+        for j in range(matrix.cols)
+        if i != j
+    )
+
+
+def test_klein_gate_is_exact_orthogonal_and_number_sector_preserving() -> None:
+    gate = klein_hodge_gate()
+    assert gate.shape == (16, 16)
+    assert is_orthogonal_exact(gate)
+    for left in range(16):
+        for right in range(16):
+            if left.bit_count() != right.bit_count():
+                assert gate[left, right] == 0
+
+
+def test_klein_transform_is_not_induced_by_one_particle_basis_change() -> None:
+    gate = klein_hodge_gate()
+    two_particle = (3, 5, 9, 6, 10, 12)
+    transformed_e12 = gate.extract(two_particle, two_particle).T * sp.eye(6)[:, 0]
+    assert sp.simplify(plucker_quadric(transformed_e12)) != 0
+
+
+def test_exact_four_mode_seed_is_metzler_in_both_parities() -> None:
+    gate = klein_hodge_gate()
+    transformed = sp.simplify(gate * one_body_operator(klein_seed_one_body()) * gate.T)
+    even, odd = parity_indices(4)
+    assert _is_metzler(transformed.extract(even, even))
+    assert _is_metzler(transformed.extract(odd, odd))
+
+
+def test_overlap_circuit_is_one_fixed_six_mode_orthogonal_gate() -> None:
+    gate = overlap_klein_circuit()
+    assert gate.shape == (64, 64)
+    assert is_orthogonal_exact(gate)
+
+    left = embed_contiguous_even_gate(klein_hodge_gate(), start=0, total_modes=6)
+    right = embed_contiguous_even_gate(klein_hodge_gate(), start=2, total_modes=6)
+    assert gate == right * left
+```
+
+- [ ] **Step 2: Run and verify import failure**
+
+Run:
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_klein_hodge.py -q
+```
+
+Expected: collection fails because `oracle.klein_hodge` does not exist.
+
+- [ ] **Step 3: Implement the fixed basis convention**
+
+Use two-particle occupation order:
+
+```python
+_TWO_PARTICLE_STATES = (0b0011, 0b0101, 0b1001, 0b0110, 0b1010, 0b1100)
+```
+
+The rows of the `6 x 6` change-of-coordinates block are:
+
+```text
+(e12 + e34)/sqrt(2)
+(e12 - e34)/sqrt(2)
+(e13 - e24)/sqrt(2)
+(e13 + e24)/sqrt(2)
+(e14 + e23)/sqrt(2)
+(e14 - e23)/sqrt(2)
+```
+
+Embed this block into a `16 x 16` identity. Restrict
+`embed_contiguous_even_gate` to sorted contiguous mode blocks and reject all
+other embeddings; this avoids silently choosing a fermionic tensor convention
+for noncontiguous gates.
+
+Use the exact seed:
+
+```python
+sp.ImmutableMatrix(
+    [
+        [3, 1, 0, 1],
+        [1, 0, 2, 0],
+        [0, 2, 0, 2],
+        [1, 0, 2, 0],
+    ]
+)
+```
+
+For bivector coordinates `(p12,p13,p14,p23,p24,p34)`, return
+`p12*p34 - p13*p24 + p14*p23`. The gate stores new-basis vectors as
+rows, so the test applies its transpose to `e12`. Since induced exterior
+transformations are closed under inversion, a non-induced inverse proves the
+gate itself is non-induced.
+
+- [ ] **Step 4: Run focused and baseline tests**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_fock_basis.py tests/test_klein_hodge.py -q
+PYTHONPATH=. python -m pytest tests -q
+```
+
+Expected: all tests pass; the exact seed test establishes the convention before
+six-mode work.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/klein_hodge.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_klein_hodge.py
+git commit -m "feat: encode exact Klein-Hodge Fock transform"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 3: Six-mode geometry and quadratic support masks
+
+**Files:**
+
+- Create: `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+
+**Interfaces:**
+
+- Consumes: `QuadraticBasisElement`, `quadratic_term`, and the overlap circuit.
+- Produces:
+  - immutable `OverlapGeometry(modes, blocks, ring_edges, diagonal_edges, bridge_edges)`
+  - `overlap_geometry() -> OverlapGeometry`
+  - `support_edges(mask: str) -> tuple[tuple[int, int], ...]`
+  - `quadratic_basis(family: str, mask: str) -> tuple[QuadraticBasisElement, ...]`
+  - `bridge_labels(family: str) -> tuple[str, ...]`
+- Later tasks extend the same module; do not add LP code in this task.
+
+- [ ] **Step 1: Write failing geometry and basis tests**
+
+```python
+from oracle.overlap_klein import (
+    bridge_labels,
+    overlap_geometry,
+    quadratic_basis,
+    support_edges,
+)
+
+
+def test_overlap_geometry_has_two_fixed_plaquettes_and_two_bridges() -> None:
+    geometry = overlap_geometry()
+    assert geometry.modes == 6
+    assert geometry.blocks == ((0, 1, 2, 3), (2, 3, 4, 5))
+    assert geometry.bridge_edges == ((0, 4), (1, 5))
+    assert set(geometry.ring_edges) == {
+        (0, 1), (1, 2), (2, 3), (0, 3),
+        (3, 4), (4, 5), (2, 5),
+    }
+
+
+def test_support_masks_are_nested_and_do_not_become_complete_graph() -> None:
+    rings = set(support_edges("rings"))
+    bridges = set(support_edges("rings-bridges"))
+    full = set(support_edges("rings-diagonals-bridges"))
+    assert rings < bridges < full
+    assert len(full) == 13
+    assert (0, 5) not in full
+    assert (1, 4) not in full
+
+
+def test_number_conserving_basis_has_directed_hops_and_onsite_terms() -> None:
+    basis = quadratic_basis("number-conserving", "rings-bridges")
+    labels = {item.label for item in basis}
+    assert {"n0", "h0<-1", "h1<-0", "h0<-4", "h4<-0"} <= labels
+    assert all(item.kind == "hop" for item in basis)
+
+
+def test_bdg_basis_adds_independent_creation_and_annihilation_terms() -> None:
+    number = quadratic_basis("number-conserving", "rings-bridges")
+    bdg = quadratic_basis("bdg", "rings-bridges")
+    labels = {item.label for item in bdg}
+    assert len(bdg) == len(number) + 2 * len(support_edges("rings-bridges"))
+    assert {"pc0,4", "pa0,4"} <= labels
+    assert set(bridge_labels("bdg")) == {
+        "h0<-4", "h4<-0", "pc0,4", "pa0,4",
+        "h1<-5", "h5<-1", "pc1,5", "pa1,5",
+    }
+```
+
+- [ ] **Step 2: Run and verify missing interfaces**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+```
+
+Expected: import fails for the new geometry functions.
+
+- [ ] **Step 3: Implement exact mask and label conventions**
+
+Use:
+
+```python
+ring_edges = ((0, 1), (1, 2), (2, 3), (0, 3), (3, 4), (4, 5), (2, 5))
+diagonal_edges = ((0, 2), (1, 3), (2, 4), (3, 5))
+bridge_edges = ((0, 4), (1, 5))
+```
+
+For every undirected edge `(i,j)`, add directed hopping terms
+`c_i^dag c_j` and `c_j^dag c_i`. Add six onsite terms. For `bdg`, also add
+`c_i^dag c_j^dag` and `c_j c_i` once per edge. Sort labels and edges
+deterministically.
+
+- [ ] **Step 4: Run focused tests**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+```
+
+Expected: all geometry/basis tests pass.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py
+git commit -m "feat: define six-mode overlap candidate geometry"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 4: Exact Metzler inequality compiler
+
+**Files:**
+
+- Create: `tracks/qmc/solutions/no-negative-vibes/oracle/metzler_system.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/tests/test_metzler_system.py`
+
+**Interfaces:**
+
+- Consumes: exact transform and `QuadraticBasisElement`.
+- Produces:
+  - immutable `MetzlerRow(parity, target_state, source_state)`
+  - immutable `ExactMetzlerSystem(labels, rows, coefficients)`
+  - `compile_metzler_system(transform, basis, parity_blocks) -> ExactMetzlerSystem`
+  - `numeric_coefficients(system) -> numpy.ndarray`
+  - `exact_linear_combination(system, coefficients) -> sympy.ImmutableMatrix`
+  - `exact_nonnegative(expr: sympy.Expr) -> bool`
+  - `verify_exact_metzler(system, coefficients) -> bool`
+
+- [ ] **Step 1: Write failing compiler tests**
+
+```python
+import numpy as np
+import sympy as sp
+
+from oracle.fock_basis import QuadraticBasisElement, parity_indices, quadratic_term
+from oracle.metzler_system import (
+    compile_metzler_system,
+    numeric_coefficients,
+    verify_exact_metzler,
+)
+
+
+def test_identity_compiler_tracks_offdiagonal_rows_and_labels() -> None:
+    basis = (
+        QuadraticBasisElement("h0<-1", "hop", 0, 1, quadratic_term(2, "hop", 0, 1)),
+        QuadraticBasisElement("h1<-0", "hop", 1, 0, quadratic_term(2, "hop", 1, 0)),
+    )
+    system = compile_metzler_system(sp.eye(4), basis, parity_indices(2))
+    assert system.labels == ("h0<-1", "h1<-0")
+    assert system.coefficients.cols == 2
+    assert all(row.target_state != row.source_state for row in system.rows)
+    assert np.allclose(numeric_coefficients(system), np.array(system.coefficients.tolist(), dtype=float))
+
+
+def test_exact_verifier_accepts_positive_hops_and_rejects_negative_hop() -> None:
+    basis = (
+        QuadraticBasisElement("h0<-1", "hop", 0, 1, quadratic_term(2, "hop", 0, 1)),
+        QuadraticBasisElement("h1<-0", "hop", 1, 0, quadratic_term(2, "hop", 1, 0)),
+    )
+    system = compile_metzler_system(sp.eye(4), basis, parity_indices(2))
+    assert verify_exact_metzler(system, (sp.Integer(1), sp.Integer(2)))
+    assert not verify_exact_metzler(system, (sp.Integer(-1), sp.Integer(2)))
+
+
+def test_compiler_drops_only_identically_zero_constraint_rows() -> None:
+    basis = (
+        QuadraticBasisElement("n0", "hop", 0, 0, quadratic_term(2, "hop", 0, 0)),
+    )
+    system = compile_metzler_system(sp.eye(4), basis, parity_indices(2))
+    assert system.coefficients.rows == 0
+    assert system.rows == ()
+
+
+def test_exact_sign_decision_handles_q_sqrt_two() -> None:
+    from oracle.metzler_system import exact_nonnegative
+
+    assert exact_nonnegative(-1 + sp.sqrt(2))
+    assert exact_nonnegative(3 - 2 * sp.sqrt(2))
+    assert not exact_nonnegative(1 - sp.sqrt(2))
+```
+
+- [ ] **Step 2: Run and verify import failure**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_metzler_system.py -q
+```
+
+Expected: `oracle.metzler_system` is missing.
+
+- [ ] **Step 3: Implement sparse exact conjugation**
+
+For each basis element compute `transform * element.fock * transform.T`.
+For every ordered off-diagonal pair within even and odd blocks, collect one
+row across all basis elements. Drop a row only when every exact coefficient
+simplifies to zero. Store row provenance before converting to a SymPy
+immutable sparse matrix.
+
+Implement `exact_nonnegative` by expanding every value as
+`a + b*sqrt(2)` with rational `a,b`. Decide equal-sign cases immediately. In
+the mixed-sign cases compare the exact rationals `a*a` and `2*b*b`, reversing
+the answer according to which coefficient is negative. Raise `ValueError`
+rather than guessing when the residual after subtracting
+`a + b*sqrt(2)` is nonzero or either coefficient is not rational.
+
+- [ ] **Step 4: Cross-check exact and float systems**
+
+Add this test after the minimal implementation:
+
+```python
+def test_six_mode_compiler_float_values_match_direct_conjugation() -> None:
+    from oracle.klein_hodge import overlap_klein_circuit
+    from oracle.overlap_klein import quadratic_basis
+
+    basis = quadratic_basis("number-conserving", "rings-bridges")
+    transform = overlap_klein_circuit()
+    system = compile_metzler_system(transform, basis, parity_indices(6))
+    rng = np.random.default_rng(20260728)
+    coefficients = rng.normal(size=len(basis))
+    direct = np.array(
+        (transform * sum(
+            (sp.Float(value) * item.fock for value, item in zip(coefficients, basis)),
+            sp.zeros(64),
+        ) * transform.T).tolist(),
+        dtype=float,
+    )
+    compiled = numeric_coefficients(system) @ coefficients
+    observed = np.array(
+        [direct[row.target_state, row.source_state] for row in system.rows]
+    )
+    assert np.allclose(compiled, observed, atol=1e-12)
+```
+
+- [ ] **Step 5: Run focused and baseline tests**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_metzler_system.py -q
+PYTHONPATH=. python -m pytest tests -q
+```
+
+- [ ] **Step 6: Commit and push**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/metzler_system.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_metzler_system.py
+git commit -m "feat: compile exact parity Metzler systems"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 5: Anchored LP and exact primal/dual certificate replay
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+
+**Interfaces:**
+
+- Consumes: `ExactMetzlerSystem`.
+- Produces:
+  - immutable `AnchorSolve(label, sign, status, coefficients, min_slack, message)`
+  - immutable `ExactPrimalCertificate(anchor_label, anchor_sign, coefficients)`
+  - immutable `ExactDualCertificate(anchor_label, plus_weights, minus_weights)`
+  - `solve_anchor(system, anchor_label: str, sign: int) -> AnchorSolve`
+  - `reconstruct_exact_primal(system, solve, max_denominator=10000) -> ExactPrimalCertificate`
+  - `find_zero_dual(system, anchor_label: str) -> ExactDualCertificate`
+  - `verify_primal(system, certificate) -> bool`
+  - `verify_zero_dual(system, certificate) -> bool`
+  - `certificate_to_json(certificate) -> dict[str, object]`
+  - `certificate_from_json(payload, system) -> ExactPrimalCertificate | ExactDualCertificate`
+
+- [ ] **Step 1: Write failing synthetic cone tests**
+
+```python
+import sympy as sp
+
+from oracle.metzler_system import ExactMetzlerSystem, MetzlerRow
+from oracle.overlap_klein import (
+    find_zero_dual,
+    reconstruct_exact_primal,
+    solve_anchor,
+    verify_primal,
+    verify_zero_dual,
+)
+
+
+def _system(coefficients: list[list[int]]) -> ExactMetzlerSystem:
+    rows = tuple(
+        MetzlerRow("even", index + 1, 0)
+        for index in range(len(coefficients))
+    )
+    return ExactMetzlerSystem(
+        labels=("x", "y"),
+        rows=rows,
+        coefficients=sp.ImmutableSparseMatrix(coefficients),
+    )
+
+
+def test_anchor_solver_and_exact_primal_replay() -> None:
+    system = _system([[1, 0], [0, 1]])
+    solve = solve_anchor(system, "x", +1)
+    assert solve.status == "feasible"
+    certificate = reconstruct_exact_primal(system, solve)
+    assert verify_primal(system, certificate)
+    assert certificate.coefficients[0] == 1
+
+
+def test_dual_certificate_proves_anchor_is_identically_zero() -> None:
+    system = _system([[1, 0], [-1, 0], [0, 1]])
+    assert solve_anchor(system, "x", +1).status == "infeasible"
+    assert solve_anchor(system, "x", -1).status == "infeasible"
+    certificate = find_zero_dual(system, "x")
+    assert verify_zero_dual(system, certificate)
+```
+
+- [ ] **Step 2: Run and verify missing interfaces**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+```
+
+Expected: import errors for the LP/certificate functions.
+
+- [ ] **Step 3: Implement unbounded anchored feasibility**
+
+Solve:
+
+```text
+C x >= 0
+e_anchor^T x = sign
+```
+
+with `linprog(c=zeros, A_ub=-C, b_ub=0, A_eq=e_anchor,
+b_eq=[sign], bounds=[(None,None)]*n, method="highs")`. Do not impose a
+coefficient box in the feasibility decision. Record
+`min(C @ x)` and reject a nominal success when it is below `-1e-9`.
+
+Reconstruct each coefficient with:
+
+```python
+sp.nsimplify(value, [sp.sqrt(2)], tolerance=1e-10, full=True)
+```
+
+Force the anchor to exact `+1` or `-1` and verify every exact inequality.
+Failure to reconstruct raises `ArithmeticError`; it does not silently downgrade
+to an exact certificate.
+
+- [ ] **Step 4: Implement the double-dual zero proof**
+
+To prove `x_anchor == 0` on `{x: Cx>=0}`, find nonnegative vectors `y+` and
+`y-` satisfying:
+
+```text
+C.T y+ =  e_anchor
+C.T y- = -e_anchor.
+```
+
+Discover supports with HiGHS and reconstruct positive weights over
+`Q(sqrt(2))`. Verify exact equality and exact nonnegativity. Serialize SymPy
+numbers with `sp.sstr`; parse only the generated grammar with
+`sp.sympify(value, locals={"sqrt": sp.sqrt})`.
+
+- [ ] **Step 5: Add JSON round-trip tests**
+
+```python
+def test_exact_certificate_json_round_trip() -> None:
+    system = _system([[1, 0], [0, 1]])
+    certificate = reconstruct_exact_primal(system, solve_anchor(system, "x", +1))
+    payload = certificate_to_json(certificate)
+    replayed = certificate_from_json(payload, system)
+    assert replayed == certificate
+    assert verify_primal(system, replayed)
+```
+
+- [ ] **Step 6: Run focused and baseline tests**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+PYTHONPATH=. python -m pytest tests -q
+```
+
+- [ ] **Step 7: Commit and push**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py
+git commit -m "feat: certify anchored Klein cone feasibility"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 6: Versioned R01 runner and deterministic protocol
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/README.md`
+- Create: `tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/settings.json`
+- Create: `tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/axes.json`
+- Create: `tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/provenance.json`
+
+**Interfaces:**
+
+- Produces:
+  - `build_system(family: str, mask: str) -> ExactMetzlerSystem`
+  - `run_anchor_scan(family, mask, *, workers, source_commit) -> dict[str, object]`
+  - `write_result(payload, output: pathlib.Path) -> None`
+  - `main() -> None`
+- CLI:
+
+```text
+python -m oracle.overlap_klein
+  --family {number-conserving,bdg}
+  --mask {rings-bridges,rings-diagonals-bridges}
+  --workers INTEGER
+  --source-commit 40_HEX
+  --output PATH
+```
+
+- [ ] **Step 1: Write failing deterministic runner tests**
+
+```python
+def test_anchor_scan_is_deterministic_across_worker_counts() -> None:
+    one = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=1,
+        source_commit="a" * 40,
+    )
+    two = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=2,
+        source_commit="a" * 40,
+    )
+    assert one == two
+    assert one["schema_version"] == 1
+    assert one["protocol"] == "overlap-klein-v1"
+    assert one["source_commit"] == "a" * 40
+    assert one["anchor_count"] == len(bridge_labels("number-conserving"))
+
+
+def test_result_payload_contains_replayable_terminal_evidence() -> None:
+    result = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=1,
+        source_commit="b" * 40,
+    )
+    for anchor in result["anchors"]:
+        assert set(anchor) >= {"label", "positive", "negative", "classification"}
+        assert set(anchor["positive"]) >= {"status", "solver_message"}
+        assert set(anchor["negative"]) >= {"status", "solver_message"}
+        assert anchor["classification"] in {
+            "certified-feasible",
+            "certified-zero",
+            "numerical-only",
+        }
+```
+
+- [ ] **Step 2: Run and verify missing runner**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+```
+
+- [ ] **Step 3: Implement deterministic process-level parallelism**
+
+Compile the system once in the parent. Submit one `(anchor_label, sign)` solve
+per process with `ProcessPoolExecutor`. Sort results by the order in
+`bridge_labels`, never completion order. For each anchor:
+
+- if either sign has an exact primal, classify `certified-feasible`;
+- if both signs are infeasible and the double dual verifies, classify
+  `certified-zero`;
+- otherwise classify `numerical-only` and retain solver diagnostics without a
+  scientific conclusion.
+
+Record system shape, exact coefficient field `Q(sqrt(2))`, transform convention,
+geometry, package versions, worker count, wall time, and certificate payloads.
+Each sign record contains its own exact primal certificate when reconstructed.
+A `certified-zero` anchor instead contains one `zero_certificate` with the two
+exact conic dual identities; do not collapse two feasible signs into one
+ambiguous certificate field.
+
+- [ ] **Step 4: Write the preregistered protocol files**
+
+`settings.json` must contain:
+
+```json
+{
+  "schema_version": 1,
+  "protocol": "overlap-klein-v1",
+  "modes": 6,
+  "blocks": [[0, 1, 2, 3], [2, 3, 4, 5]],
+  "families": ["number-conserving", "bdg"],
+  "masks": ["rings-bridges", "rings-diagonals-bridges"],
+  "anchor_signs": [-1, 1],
+  "exact_field": "Q(sqrt(2))",
+  "blas_threads": 1,
+  "worker_policy": "max(1, logical_cpus-2)"
+}
+```
+
+`axes.json` lists the four family/mask cells in deterministic order.
+`provenance.json` cites design commit `b0d40ff`, common baseline `04e72bd`, and
+the design/candidate-card paths. `README.md` explains success/failure semantics
+and states that `numerical-only` is not a conclusion.
+
+- [ ] **Step 5: Run focused and baseline tests**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+PYTHONPATH=. python -m pytest tests -q
+```
+
+- [ ] **Step 6: Commit and push before any experiment**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1
+git commit -m "feat: preregister overlapping Klein cone protocol"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 7: Experiment R01-E001 — number-conserving six-mode gate
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md`
+- Create after run: ignored raw results under
+  `tracks/qmc/results/no-negative-vibes/overlap-klein-v1/`
+- Create after interpretation: `tracks/qmc/solutions/no-negative-vibes/fixtures/overlap_klein_r01.json`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+
+**Interfaces:**
+
+- Consumes: Task 6 CLI and protocol.
+- Produces: first exact number-conserving result, fixture replay, and log entry
+  `R01-E001`.
+
+- [ ] **Step 1: Transfer the exact source commit to the WSL worker**
+
+Push the branch first. If worker GitHub access fails twice, create and verify a
+Git bundle for the exact branch, transfer it over the authenticated SSH hop,
+and fetch it into the isolated worker clone. Verify:
+
+```bash
+git rev-parse HEAD
+git status --short
+```
+
+Expected: the exact pushed commit and an empty status.
+
+- [ ] **Step 2: Run a one-worker smoke cell**
+
+From the solution directory:
+
+```bash
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family number-conserving \
+  --mask rings-bridges \
+  --workers 1 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke.json
+```
+
+Verify that `SOURCE_COMMIT` is the same value already checked before the run;
+do not use a branch name as provenance.
+
+Expected operational result: exit code zero, every anchor classified, and
+every embedded exact certificate replays. The scientific classification is
+intentionally determined by the run.
+
+- [ ] **Step 3: Run the full number-conserving mask pair**
+
+Use 14 WSL workers:
+
+```bash
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family number-conserving \
+  --mask rings-bridges \
+  --workers 14 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges.json
+
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family number-conserving \
+  --mask rings-diagonals-bridges \
+  --workers 14 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges.json
+```
+
+The two cells are distinct experiments within `R01-E001`; do not also send
+them to the CPU worker.
+
+- [ ] **Step 4: Add fixture replay before interpretation**
+
+Copy only compact exact certificates and summaries into
+`fixtures/overlap_klein_r01.json`. Add:
+
+```python
+def test_committed_r01_fixture_replays_every_number_conserving_certificate() -> None:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    for cell in payload["cells"]:
+        if cell["family"] != "number-conserving":
+            continue
+        system = build_system(cell["family"], cell["mask"])
+        for anchor in cell["anchors"]:
+            if anchor["classification"] == "certified-feasible":
+                for sign_name in ("positive", "negative"):
+                    branch = anchor[sign_name]
+                    if "certificate" in branch:
+                        certificate = certificate_from_json(branch["certificate"], system)
+                        assert verify_primal(system, certificate)
+            elif anchor["classification"] == "certified-zero":
+                certificate = certificate_from_json(anchor["zero_certificate"], system)
+                assert verify_zero_dual(system, certificate)
+```
+
+- [ ] **Step 5: Record the result and transferable lesson**
+
+Append `R01-E001` with source commit, commands, CPU/RAM/workers, system
+dimensions, every anchor classification, certificate paths, interpretation,
+and next decision. State explicitly whether cross-cluster hopping survives.
+
+- [ ] **Step 6: Verify, commit, and push the interpreted experiment**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+PYTHONPATH=. python -m pytest tests -q
+git add tracks/qmc/solutions/no-negative-vibes/fixtures/overlap_klein_r01.json \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md \
+        tracks/qmc/solutions/no-negative-vibes/docs/RESEARCH_OPERATIONS.md
+git commit -m "research: record six-mode number-conserving Klein result"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 8: Experiment R01-E002 — BdG pairing extension and CPU split
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/fixtures/overlap_klein_r01.json`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md`
+- Modify when needed: `tracks/qmc/solutions/no-negative-vibes/docs/RESEARCH_OPERATIONS.md`
+
+**Interfaces:**
+
+- Consumes: exact number-conserving evidence and BdG system.
+- Produces: exact BdG bridge survival/no-go result `R01-E002`.
+
+- [ ] **Step 1: Probe the CPU worker through WSL without a job**
+
+Use strict host-key checking and key authentication. Record only the public
+resource facts in the experiment log:
+
+```text
+logical CPU count
+available RAM
+OS/Python/SciPy/SymPy versions
+scheduler = plain SSH or detected scheduler
+```
+
+If key authentication is not configured, stop CPU setup without embedding the
+password in a command, file, environment variable, or log. Run R01-E002 on WSL
+instead; lack of the second worker does not block this small exact experiment.
+
+- [ ] **Step 2: Run a one-worker BdG smoke cell on WSL**
+
+```bash
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family bdg \
+  --mask rings-bridges \
+  --workers 1 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke.json
+```
+
+Verify exit status, primal residuals, and exact certificate replay before
+parallel work.
+
+- [ ] **Step 3: Partition the two BdG cells**
+
+If the CPU worker is ready:
+
+- WSL runs `bdg/rings-bridges` with 14 workers;
+- CPU runs `bdg/rings-diagonals-bridges` with
+  `max(1,logical_cpus-2)` workers.
+
+If it is not ready, WSL runs both cells sequentially. Never run the same
+production cell on both machines unless the protocol is explicitly changed to
+independent verification.
+
+On each assigned worker, from the solution directory, run the corresponding
+command:
+
+```bash
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family bdg \
+  --mask rings-bridges \
+  --workers 14 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges.json
+```
+
+For the CPU worker, set `CPU_WORKERS` to exactly two fewer than the probed
+logical CPU count:
+
+```bash
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+CPU_WORKERS="$(( $(nproc) - 2 ))"
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family bdg \
+  --mask rings-diagonals-bridges \
+  --workers "$CPU_WORKERS" \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges.json
+```
+
+- [ ] **Step 4: Replay and append compact certificates**
+
+Extend the fixture replay test to BdG cells. Require exact reconstruction for
+every `certified-feasible` anchor and double-dual replay for every
+`certified-zero` anchor. Preserve `numerical-only` diagnostics but do not use
+them for a theorem.
+
+- [ ] **Step 5: Record and push R01-E002**
+
+Append the full experiment schema and the lesson that distinguishes hopping
+from pair-creation/pair-annihilation bridges. Run all tests, commit, and push:
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/fixtures/overlap_klein_r01.json \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md \
+        tracks/qmc/solutions/no-negative-vibes/docs/RESEARCH_OPERATIONS.md
+git commit -m "research: record six-mode BdG Klein result"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 9: Noncommutativity, topology, and known-reduction audit
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+- Create: `tracks/qmc/solutions/no-negative-vibes/docs/OVERLAPPING_KLEIN_RESULTS.md`
+
+**Interfaces:**
+
+- Produces:
+  - `certificate_operator(system, certificate) -> sympy.ImmutableSparseMatrix`
+  - `commutator_is_nonzero(left, right) -> bool`
+  - `support_graph_invariants(nonzero_coefficients: Mapping[str, str | sympy.Expr]) -> dict[str, int | bool]`
+  - `common_bilinear_forms(one_particle_generators) -> tuple[sympy.ImmutableMatrix, ...]`
+  - `parity_word_trace_audit(rays, *, depths: tuple[int, ...], seed: int) -> dict[str, object]`
+  - `classify_r01_fixture(payload) -> dict[str, object]`
+
+- [ ] **Step 1: Write failing audit tests**
+
+```python
+def test_commutator_audit_is_exact() -> None:
+    left = sp.Matrix([[0, 1], [0, 0]])
+    right = sp.Matrix([[0, 0], [1, 0]])
+    assert commutator_is_nonzero(left, right)
+    assert not commutator_is_nonzero(left, 2 * left)
+
+
+def test_support_graph_detects_loop_and_degree_three() -> None:
+    certificate = {
+        "h0<-1": "1",
+        "h1<-2": "1",
+        "h2<-0": "1",
+        "h2<-3": "1",
+    }
+    invariants = support_graph_invariants(certificate)
+    assert invariants["cycle_rank"] >= 1
+    assert invariants["max_degree"] >= 3
+
+
+def test_common_bilinear_form_solver_replays_every_returned_form() -> None:
+    generators = (
+        sp.Matrix([[0, 1], [0, 0]]),
+        sp.Matrix([[0, 0], [1, 0]]),
+    )
+    for form in common_bilinear_forms(generators):
+        for generator in generators:
+            assert generator.T * form + form * generator == sp.zeros(2)
+
+
+def test_word_trace_audit_checks_both_parities_at_requested_depths() -> None:
+    rays = (
+        sp.diag(0, 1, 2, 3),
+        sp.diag(3, 2, 1, 0),
+    )
+    result = parity_word_trace_audit(rays, depths=(2, 5), seed=20260728)
+    assert [cell["depth"] for cell in result["cells"]] == [2, 5]
+    assert all(cell["even_trace"] > 0 for cell in result["cells"])
+    assert all(cell["odd_trace"] > 0 for cell in result["cells"])
+```
+
+- [ ] **Step 2: Implement exact audits**
+
+Build graph invariants from nonzero hopping/pairing labels. For
+number-conserving certificates, reconstruct the one-particle matrices and
+solve the homogeneous linear system
+`A_i.T * eta + eta * A_i = 0` over symmetric `eta`. Report nullity, ranks, and
+signatures of exact/numerical basis combinations; do not claim “not split”
+merely because one chosen `eta` is singular.
+
+For BdG certificates, document the Fock/Spin branch as primary and mark the
+full arbitrary-similarity MTR/reflection classification as unresolved unless a
+constructive common form is found. The result document must distinguish
+proved exclusions from numerical/structural evidence.
+
+For every selected ray pair, run deterministic alternating and seeded words at
+depths `2,3,4,8,12`. Compute the even and odd Fock traces directly after
+positive rescaling. This audits representation conventions only; the exact
+Metzler cone argument remains the proof.
+
+- [ ] **Step 3: Select two exact feasible rays or close by no-go**
+
+If any bridge anchor survives, search exact fixture rays for a pair with
+nonzero commutator and the required graph topology. If none exists, state the
+strongest exact result actually proved:
+
+- all bridge coefficients vanish;
+- only one bridge type survives;
+- all feasible recorded rays commute;
+- or evidence is incomplete because a certificate stayed `numerical-only`.
+
+Do not upgrade beyond the fixture.
+
+- [ ] **Step 4: Write the human-readable result**
+
+`OVERLAPPING_KLEIN_RESULTS.md` must contain:
+
+- exact transform and basis conventions;
+- system dimensions and support masks;
+- R01-E001/E002 tables;
+- explicit primal rays or dual identities;
+- noncommutativity/topology audit;
+- known-reduction status;
+- arbitrary-depth trace proof if a cone survives;
+- exact no-go statement if bridges vanish;
+- physical consequence for R02;
+- reproducibility commands and fixture links.
+
+- [ ] **Step 5: Run tests, commit, and push**
+
+```bash
+PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
+PYTHONPATH=. python -m pytest tests -q
+git add tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
+        tracks/qmc/solutions/no-negative-vibes/docs/OVERLAPPING_KLEIN_RESULTS.md
+git commit -m "research: close overlapping Klein cone audit"
+git push shared work/zibo/representation-cones
+```
+
+---
+
+### Task 10: Close Plan A and route the next paper branch
+
+**Files:**
+
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/PROPOSAL_LEDGER.md`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/README.md`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/docs/COLLABORATOR_UPDATE.zh-CN.md`
+- Modify: `tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/provenance.json`
+
+**Interfaces:**
+
+- Produces: terminal R01 status and one explicit next-plan decision.
+
+- [ ] **Step 1: Update the proposal state from exact evidence**
+
+Allowed terminal/continuation states:
+
+- `falsified` when the intended cross-cluster claim has an exact no-go;
+- `known-reduction` when an exact known mechanism covers every survivor;
+- `proof-candidate` when an exact noncommuting cross-cluster cone survives but
+  physical HS is still open;
+- `physical-candidate` only if an already exact positive local gate exists.
+
+Link the fixture, result document, experiments, protocol, and closing commit.
+
+- [ ] **Step 2: Choose exactly one next main plan**
+
+- If R01 has an exact noncommuting survivor, write Plan B for R02 using that
+  global transform.
+- If R01 proves a no-go, write Plan B around the four-mode HS separation/no-go
+  theorem and promote CP/gauge reserve structures only through new cards.
+- In either case, R03 triality may receive independent Plan C and run in
+  parallel after Plan A review.
+
+- [ ] **Step 3: Final verification**
+
+Run on the WSL worker at the closing commit:
+
+```bash
+PYTHONPATH=. python -m pytest tests -q
+git status --short
+```
+
+Expected: all tests pass and the worktree is clean after documentation commit.
+
+- [ ] **Step 4: Commit, push, and update internal PR #3**
+
+```bash
+git add tracks/qmc/solutions/no-negative-vibes/docs \
+        tracks/qmc/solutions/no-negative-vibes/protocols/overlap-klein-v1/provenance.json
+git commit -m "docs: conclude R01 overlapping Klein investigation"
+git push shared work/zibo/representation-cones
+```
+
+Keep PR #3 draft until the teammate can review the exact claim. Do not merge it
+or export to the organizer-facing branch as part of Plan A.

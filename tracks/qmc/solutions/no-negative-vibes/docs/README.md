@@ -35,6 +35,8 @@
   spinor/exterior-cone 候选的定义、排重与停止条件；
 - [superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md](superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md)：
   表示–半群–正迹统一框架、三条新研究包、双机实验和论文级验收设计；
+- [superpowers/plans/2026-07-28-r01-overlapping-klein-cone.md](superpowers/plans/2026-07-28-r01-overlapping-klein-cone.md)：
+  R01 六模重叠 Klein/Fock 锥的精确表示、LP、证书、双机实验和结案计划；
 - [PROPOSAL_LEDGER.md](PROPOSAL_LEDGER.md)：本分支每个可证伪提案的认领与状态索引；
 - [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md)：成功、失败和基础设施实验的连续经验日志；
 - [RESEARCH_OPERATIONS.md](RESEARCH_OPERATIONS.md)：Git、WSL、环境、并行与实验闭环的可复用操作经验；
