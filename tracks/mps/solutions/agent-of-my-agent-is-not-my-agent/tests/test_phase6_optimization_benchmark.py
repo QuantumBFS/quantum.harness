@@ -250,6 +250,11 @@ def test_direct_only_refines_from_audited_checkpoint(tmp_path: Path) -> None:
         timeout=180,
     )
     assert first.returncode == 0, first.stderr
+    legacy_summary_path = baseline / "summary.json"
+    legacy_summary = json.loads(legacy_summary_path.read_text())
+    for field in ("num_exponentials", "alpha", "r_fit"):
+        legacy_summary["settings"].pop(field)
+    legacy_summary_path.write_text(json.dumps(legacy_summary))
 
     refined = tmp_path / "refined"
     second = subprocess.run(
@@ -261,6 +266,8 @@ def test_direct_only_refines_from_audited_checkpoint(tmp_path: Path) -> None:
             str(baseline / "checkpoints"),
             "--initial-chi",
             "8",
+            "--initial-summary",
+            str(baseline / "summary.json"),
             "--output-dir",
             str(refined),
         ],
@@ -276,6 +283,9 @@ def test_direct_only_refines_from_audited_checkpoint(tmp_path: Path) -> None:
     initialization = summary["initialization"]["even"]
     assert initialization["mode"] == "audited_initialization_only"
     assert initialization["fully_reoptimize_required"] is True
+    assert initialization["source_summary"]["mpo_pruned"] is True
+    assert initialization["source_summary"]["approximate_compression"] is False
+    assert initialization["source_summary"]["mpo_chi"] >= 2
     assert summary["direct"]["even"]["requested_chi"] == 16
     assert (
         refined / "checkpoints" / "even" / "chi16" / "state.h5"

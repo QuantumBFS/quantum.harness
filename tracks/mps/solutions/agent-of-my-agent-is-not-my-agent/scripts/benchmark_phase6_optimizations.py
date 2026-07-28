@@ -60,6 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-sweeps", type=int, default=30)
     parser.add_argument("--initial-checkpoint-root", type=Path)
     parser.add_argument("--initial-chi", type=int, default=128)
+    parser.add_argument("--initial-summary", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
 
@@ -141,6 +142,10 @@ def _state_record(state, seconds: float) -> dict:
 
 def main() -> None:
     args = parse_args()
+    if (args.initial_checkpoint_root is None) != (args.initial_summary is None):
+        raise ValueError(
+            "--initial-checkpoint-root and --initial-summary are required together"
+        )
     sectors = tuple(dict.fromkeys(args.sectors))
     if not args.direct_only and sectors != ("even", "odd"):
         raise ValueError("--sectors is supported only with --direct-only")
@@ -246,6 +251,11 @@ def main() -> None:
         )
 
     direct_states = {}
+    source_summary = (
+        json.loads(args.initial_summary.read_text())
+        if args.initial_summary is not None
+        else None
+    )
     if args.run_direct or args.direct_only:
         for sector in sectors:
             initial_psi = None
@@ -262,6 +272,59 @@ def main() -> None:
                     operator_convention="rotated-xz-periodized-v1",
                     lattice_fingerprint=mps_lattice_fingerprint(current_initial),
                 )
+                source_settings = source_summary["settings"]
+                source_fit = source_summary["fit"]
+                source_actual = {
+                    **source_settings,
+                    "num_exponentials": source_settings.get(
+                        "num_exponentials",
+                        source_fit.get("K"),
+                    ),
+                    "alpha": source_settings.get(
+                        "alpha",
+                        source_fit.get("alpha"),
+                    ),
+                    "r_fit": source_settings.get(
+                        "r_fit",
+                        source_fit.get("r_fit"),
+                    ),
+                }
+                expected_source = {
+                    "sigma": normalized["sigma"],
+                    "length": args.length,
+                    "gamma": args.gamma,
+                    "num_exponentials": primary["num_exponentials"],
+                    "alpha": primary["alpha"],
+                    "r_fit": primary["r_fit"],
+                }
+                for field, expected_value in expected_source.items():
+                    if source_actual.get(field) != expected_value:
+                        raise ValueError(
+                            f"initial summary {field} mismatch: "
+                            f"{source_actual.get(field)!r} != {expected_value!r}"
+                        )
+                source_mpo = source_summary["mpo"]
+                if not source_mpo.get("pruned"):
+                    raise ValueError("initial summary MPO was not zero-pruned")
+                if source_mpo.get("approximate_compression") is not False:
+                    raise ValueError(
+                        "initial summary used approximate MPO compression"
+                    )
+                if source_mpo.get("active_channels") != active.tolist():
+                    raise ValueError(
+                        "initial summary active exponential channels mismatch"
+                    )
+                if int(source_mpo.get("chi")) != int(max(mpo.chi)):
+                    raise ValueError("initial summary MPO dimension mismatch")
+                audit["source_summary"] = {
+                    "path": str(args.initial_summary.resolve()),
+                    "code_hash": source_summary["code_hash"],
+                    "fit_hash": source_summary["fit"]["fit_hash"],
+                    "mpo_pruned": True,
+                    "approximate_compression": False,
+                    "active_channels": source_mpo["active_channels"],
+                    "mpo_chi": int(source_mpo["chi"]),
+                }
                 result["initialization"][sector] = audit
                 summary_path.write_text(json.dumps(result, indent=2) + "\n")
             print(f"starting direct {sector} DMRG", flush=True)
