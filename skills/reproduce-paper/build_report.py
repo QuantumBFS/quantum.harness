@@ -150,6 +150,7 @@ def translate(run: dict) -> dict:
     of_model = f' of the {model.get("name")}' if model.get("name") else ""
     sections = [model_section(model),
                 method_section(run, run.get("method", {}), run.get("scope", {}))]
+    sections.extend(run.get("extra_sections") or [])
     fig_blocks = [blk for f in figures for blk in figure_blocks(f)]
     if fig_blocks:
         sections.append({"title": "Figures",
