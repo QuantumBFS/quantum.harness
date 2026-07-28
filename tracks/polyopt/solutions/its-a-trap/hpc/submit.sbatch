@@ -2,9 +2,9 @@
 #SBATCH --job-name=t1q-scnet
 #SBATCH --partition=hx1hdnormal01
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=60G
+#SBATCH --mem=120G
 #SBATCH --time=12:00:00
-#SBATCH --array=1-12
+#SBATCH --array=1-22
 #SBATCH --output=slurm-%A_%a.out
 # One overnight_harness cell per array task; cells.txt line = task id.
 # Every cell writes its OWN outdir (results.csv append is not concurrency-safe)
@@ -12,7 +12,7 @@
 set -u
 cd "$HOME/quantum.harness"
 export PATH="$HOME/julia/bin:$PATH"   # mirror-installed 1.12.6 (bootstrap_remote.sh)
-export MAX_WALL_S=42000 MAX_RSS_GB=55 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=8
+export MAX_WALL_S=42000 MAX_RSS_GB=110 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=8
 
 RUN="${RUN_NAME:?set RUN_NAME via sbatch --export}"
 SPEC=$(grep -v '^#' tracks/polyopt/solutions/its-a-trap/hpc/cells.txt \
