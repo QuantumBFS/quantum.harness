@@ -161,4 +161,17 @@ Updated: 2026-07-29 UTC.
 - The additional exact representation has passed its gamma=0 numerical
   equivalence gate. Gamma=1/2 is authorized next with the same runner and
   solver settings.
+- Spin-axis gamma=1/2 attempt r1, Slurm job `22988479`, passed every preflight
+  and returned `OPTIMAL` with primal and dual feasible points. Normalization
+  was exactly 1, maximum affine residual and worst PSD violation were 0, and
+  the smallest eigenvalue across the 12 reconstructed blocks was
+  `0.07937511269712764`. Solver wall was 21.650 s, total runner wall 38.496 s,
+  process peak RSS 2,449,480 KiB, and the factor had 41.2 million nonzeros
+  after factorization. `result.toml` SHA-256 is
+  `63e1f7bcc6d6bde6d9de84e226aac448941e1d1b3680e2db0364a0665f2fe50b`.
+- The current best exact gamma=1/2 representation cuts process peak RSS by
+  18.2x and total wall by 11.1x relative to the original Hermitian bridge,
+  and by 2.45x / 2.54x relative to the conjugation-only real model. The
+  scientific decision remains that this exact `d=2` relaxation is feasible at
+  gamma=1/2; it does not prove a physical bulk gap.
 - No decision-changing user or resource need is open.

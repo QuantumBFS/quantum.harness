@@ -241,3 +241,18 @@ was 40.568 s, and process peak RSS was 2,602,300 KiB. The preserved
 `68d145b91ba34bec17d3c5ca5088a5a8419ee37caaaa39b60e68ab5e9d66465c`.
 This passes the required gamma=0 numerical equivalence gate and authorizes
 gamma=1/2 without a setup or tolerance change.
+
+## 2026-07-29 — spin-axis gamma=1/2 remains feasible at 2.45 GiB
+
+Slurm job `22988479` passed all fail-closed gates and returned `OPTIMAL` with
+primal and dual feasible points. Independent reconstruction gave
+normalization 1, zero affine and PSD violations, and minimum block eigenvalue
+`0.07937511269712764`. No infeasibility ray or replay branch is applicable.
+
+The factor had 41.2 million nonzeros after factorization, total runner wall
+was 38.496 s, and process peak RSS was 2,449,480 KiB. `result.toml` SHA-256 is
+`63e1f7bcc6d6bde6d9de84e226aac448941e1d1b3680e2db0364a0665f2fe50b`.
+Relative to the original exact Hermitian bridge, this is an 18.2x RSS and
+11.1x total-wall reduction; relative to conjugation-only realification it is
+2.45x and 2.54x. The exact finite-relaxation feasibility decision is
+unchanged.

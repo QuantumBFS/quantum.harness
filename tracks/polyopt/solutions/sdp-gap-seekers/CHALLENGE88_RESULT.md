@@ -91,3 +91,45 @@ Additional preserved artifacts:
   `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-conjugation-real-g0p8-gamma0p5-xh5-20260729-r1/`
   (`result.toml` SHA-256
   `3c5bd696a41a35939df1cd305f52d89be4b6088c5b1cc14590d9223579d6fb38`).
+
+## Exact spin-axis involution result
+
+The global π spin rotation about `(x+z)/sqrt(2)` acts as
+`X↔Z, Y↦−Y` and commutes with the conjugation realification. Exact averaging
+reduces 16,660 real moments to 8,803. It splits the stable V4 blocks into
+involution eigenspaces and retains one representative of each exchanged X--Z
+block pair. The resulting equivalent model has 12 real PSD blocks, maximum
+side 81, and 16,707 packed triangle entries.
+
+| gamma | Slurm job | status/audit | minimum block eigenvalue | total wall | peak process RSS | factor nonzeros |
+|---|---:|---|---:|---:|---:|---:|
+| 0 | 22988457 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.11159895759531112 | 40.568 s | 2,602,300 KiB | 4.14e7 |
+| 1/2 | 22988479 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.07937511269712764 | 38.496 s | 2,449,480 KiB | 4.12e7 |
+
+For gamma=1/2 this is an 18.2x reduction in process peak RSS and an 11.1x
+reduction in total wall relative to the original exact Hermitian-bridge solve.
+It is also a 2.45x RSS and 2.54x total-wall reduction relative to the
+conjugation-only real model. The exact finite-relaxation decision is
+unchanged: gamma=1/2 is feasible and therefore not excluded by this `d=2`
+outer relaxation. This is not a proof of a physical bulk gap.
+
+Additional preserved artifacts:
+
+- Exact spin-axis proof:
+  `EXACT_SPIN_AXIS_INVOLUTION.md`.
+- Passing exact truth gate:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-spin-axis-truth-xh5-20260729-r2/`
+  (`test.log` SHA-256
+  `f286d48a89b462b11dfbd199d22339e403b167c0672b2ac34c76ed816b39d66d`).
+- Gamma=0 spin-axis solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-spin-axis-real-g0p8-gamma0-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `68d145b91ba34bec17d3c5ca5088a5a8419ee37caaaa39b60e68ab5e9d66465c`).
+- Gamma=1/2 spin-axis solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-spin-axis-real-g0p8-gamma0p5-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `63e1f7bcc6d6bde6d9de84e226aac448941e1d1b3680e2db0364a0665f2fe50b`).
+- Immutable gamma=0 and gamma=1/2 input model SHA-256 values are
+  `9b9519a2059e718651af52a7b98e75dc046eab57be33ca3ea9d2325ba28d7fb2`
+  and
+  `f12eaa63e64d8643e4b361d245669d013bdf853d83bda8c35499e8f42dbde485`.
