@@ -35,3 +35,4 @@ end
 include("finite_bath_purification.jl")
 include("finite_bath_observables.jl")
 include("finite_bath_mps_runner.jl")
+include("finite_bath_checkpoint.jl")

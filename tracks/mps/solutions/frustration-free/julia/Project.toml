@@ -1,10 +1,12 @@
 [deps]
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"
 ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
 
 [compat]
+HDF5 = "=0.17.3"
 ITensorMPS = "=0.4.1"
 ITensors = "=0.9.30"
 JSON3 = "=1.14.3"
