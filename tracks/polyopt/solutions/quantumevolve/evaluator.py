@@ -82,6 +82,7 @@ class BellCertificateEvaluator:
                 "problem_id",
                 "certificate_valid",
                 "sandwich_valid",
+                "closed",
                 "upper_bound",
                 "lower_bound",
                 "sandwich_gap",
@@ -98,7 +99,9 @@ class BellCertificateEvaluator:
             metrics=metrics,
             passed=passed,
             confidence=1.0,
-            failure_reason=None if passed else "exact certificate valid but sandwich not closed",
+            failure_reason=None
+            if passed
+            else "invalid certificate or inconsistent Bell sandwich",
         )
 
     def get_baseline(self) -> float:

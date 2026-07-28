@@ -11,7 +11,8 @@ def test_seed_has_exact_certificate_and_improvable_gap() -> None:
     result = evaluate(build_candidate())
     assert result["certificate_valid"] is True
     assert result["sandwich_valid"] is True
-    assert result["passed"] is False
+    assert result["passed"] is True
+    assert result["closed"] is False
     assert 0.8 < result["score"] < 1.0
     assert 0.01 < result["sandwich_gap"] < 0.1
 
@@ -21,6 +22,7 @@ def test_optimal_strategy_closes_known_sandwich() -> None:
     candidate["strategy"]["bob_angles"] = [math.pi / 4.0, -math.pi / 4.0]
     result = evaluate(candidate)
     assert result["passed"] is True
+    assert result["closed"] is True
     assert result["score"] > 0.999999
     assert abs(result["sandwich_gap"]) < 1e-12
 

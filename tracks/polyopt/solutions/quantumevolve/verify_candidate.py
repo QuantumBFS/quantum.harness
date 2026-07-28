@@ -233,10 +233,12 @@ def evaluate(candidate: dict[str, object]) -> dict[str, object]:
     signature = hashlib.sha256(
         json.dumps(signature_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()[:16]
-    passed = sandwich_valid and gap <= 1e-8
+    closed = sandwich_valid and gap <= 1e-8
     return {
         "valid": True,
-        "passed": passed,
+        # A valid sandwich may remain a parent even before the gap is closed.
+        "passed": sandwich_valid,
+        "closed": closed,
         "score": score,
         "problem_id": PROBLEM_ID,
         "certificate_valid": certificate_valid,

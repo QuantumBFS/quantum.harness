@@ -17,6 +17,9 @@ from __future__ import annotations
 
 PROBLEM_ID = "chsh-smoke-v1"
 
+# IMMUTABLE INTERFACE: the verifier imports this file and calls
+# build_candidate() with no arguments. Never rename or remove that function.
+
 
 def qsqrt2(rational: str = "0", sqrt2: str = "0") -> dict[str, str]:
     """Represent ``rational + sqrt2 * √2`` using exact rational strings."""

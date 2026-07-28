@@ -80,7 +80,7 @@ language = "python"
 
 [storage]
 code_backend = "cas"
-db_path = ".omnievolve/bell_certificate_fast_qwen38_v1.db"
+db_path = ".omnievolve/bell_certificate_fast_qwen38_v2.db"
 vector_dir = ".omnievolve/vectors"
 artifact_dir = ".omnievolve/artifacts"
 export_dir = ".omnievolve/exports"

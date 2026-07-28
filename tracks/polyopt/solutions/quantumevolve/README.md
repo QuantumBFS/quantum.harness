@@ -22,6 +22,10 @@ state-polynomial Bell constant.  Numerical solver status alone will never count
 as success: promoted results require an exact rational SOHS identity and an
 explicit matching finite-dimensional strategy.
 
+Evaluator `passed` means a candidate is a valid sandwich and may remain an
+evolutionary parent. The separate `closed` metric is the research success gate
+(`upper - lower <= 1e-8`).
+
 ## Fast verification
 
 From this directory:
