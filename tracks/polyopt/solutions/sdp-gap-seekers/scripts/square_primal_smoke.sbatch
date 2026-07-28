@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --partition=xhacnormalb
 #SBATCH --job-name=square-primal-g0
-#SBATCH --time=00:30:00
-#SBATCH --cpus-per-task=16
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=64
 #SBATCH --mem-per-cpu=3800M
 #SBATCH --output=slurm-square-primal-%j.out
 #SBATCH --error=slurm-square-primal-%j.err
@@ -12,7 +12,7 @@ set -euo pipefail
 export PATH="$HOME/julia-1.11.5/bin:$PATH"
 export MOSEKBINDIR="$HOME/mosek/mosek/11.2/tools/platform/linux64x86/bin"
 export LD_LIBRARY_PATH="$HOME/julia-1.11.5/lib/julia:${LD_LIBRARY_PATH:-}"
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-16}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-64}"
 
 cd "$SLURM_SUBMIT_DIR"
 
@@ -61,12 +61,29 @@ julia \
     --model "${SOURCE_POINT}/model.mof.json" \
     --runmeta "${SOURCE_POINT}/runmeta.toml" \
     --output "$RESULT_PATH" \
-    --time-limit-seconds 1800 \
-    --threads "${SLURM_CPUS_PER_TASK:-16}"
+    --time-limit-seconds 3600 \
+    --threads "${SLURM_CPUS_PER_TASK:-64}"
 solver_exit=$?
 set -e
 
 echo "$solver_exit" > "${RUN_DIR}/solver-exit-code.txt"
+checksum_files=(
+    input-runmeta.toml
+    input-SHA256SUMS
+    harness-commit.txt
+    git-status.txt
+    environment.txt
+    solver-exit-code.txt
+    sacct-provisional.txt
+)
+if test -f "$RESULT_PATH"; then
+    checksum_files=(result.toml "${checksum_files[@]}")
+else
+    printf '%s\n' \
+        "solver exited ${solver_exit} without producing result.toml" \
+        > "${RUN_DIR}/result-missing.txt"
+    checksum_files=(result-missing.txt "${checksum_files[@]}")
+fi
 sacct \
     -j "$SLURM_JOB_ID" \
     --format=JobID,State,ExitCode,MaxRSS,Elapsed,AllocCPUS \
@@ -74,15 +91,7 @@ sacct \
 
 (
     cd "$RUN_DIR"
-    sha256sum \
-        result.toml \
-        input-runmeta.toml \
-        input-SHA256SUMS \
-        harness-commit.txt \
-        git-status.txt \
-        environment.txt \
-        solver-exit-code.txt \
-        sacct-provisional.txt > SHA256SUMS
+    sha256sum "${checksum_files[@]}" > SHA256SUMS
 )
 
 echo "[square-primal-sbatch] solver_exit=${solver_exit}"
