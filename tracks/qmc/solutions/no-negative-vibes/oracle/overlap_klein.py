@@ -368,12 +368,22 @@ def _reconstruct_float(
 ) -> sp.Expr:
     if not math.isfinite(value):
         raise ArithmeticError("cannot reconstruct a nonfinite coefficient")
-    candidate = sp.nsimplify(
-        value,
-        [sp.sqrt(2)],
-        tolerance=1e-10,
-        full=True,
-    )
+    tolerance = 1e-10
+    nearest_integer = round(value)
+    if abs(value - nearest_integer) <= tolerance:
+        candidate = sp.Integer(nearest_integer)
+    else:
+        try:
+            candidate = sp.nsimplify(
+                value,
+                [sp.sqrt(2)],
+                tolerance=tolerance,
+                full=True,
+            )
+        except Exception as error:
+            raise ArithmeticError(
+                "SymPy failed to reconstruct the coefficient in Q(sqrt(2))"
+            ) from error
     try:
         normalized = _normalized_q_sqrt_two(
             candidate, max_denominator=max_denominator
