@@ -133,7 +133,12 @@ Manifest plus `convergence.py`, `convergence.schema.json`, `bath.py`,
 `acceptance.py`, and all finite-bath Julia sources. A per-cell advisory lock covers validation, execution, and
 atomic publication. A valid completed cell is skipped on resume; stale,
 partial, mismatched, or concurrently attempted output cannot be treated as
-complete. Draft 2020-12 validation covers plans, resource estimates, completed
+complete. Resumable state lives outside immutable results at
+`RUN/checkpoints/<cell-id>/` under the same lock. Only hash-valid checkpoint
+trees bound to a planned cell are resumed. Invalid checkpoint trees are
+archived and fail closed; a checkpoint is removed only after the completed
+cell directory has been validated and atomically published. Draft 2020-12
+validation covers plans, resource estimates, checkpoint cursors, completed
 cells, and analyses using `convergence.schema.json`.
 
 Create a tiny local pilot run bundle and run it with an explicit runtime Julia
@@ -189,13 +194,13 @@ uv run --python 3.12.13 --with numpy==2.5.1 --with jsonschema python \
 
 For a cluster, select resources from the active cluster profile and submit the
 profile-neutral wrapper as a zero-based array. It contains no partition,
-hostname, or credentials:
+account, hostname, credentials, memory, or wall-time policy:
 
 ```bash
-sbatch --array=0,3-7,10-13 --mem=8G --time=00:30:00 \
+sbatch --signal=B:USR1@300 --array=0,3-7,10-13 \
   --export=ALL,HARNESS_SOLUTION_DIR="$PWD/tracks/mps/solutions/frustration-free",HARNESS_RUN_SPEC="$RUN/plan.json",HARNESS_RESOURCES="$RUN/resources.json",HARNESS_RESOURCE_ACK="$RESOURCE_ACK",HARNESS_RUN_DIR="$RUN",JULIA_PROJECT="$PWD/tracks/mps/solutions/frustration-free/julia" \
   tracks/mps/solutions/frustration-free/convergence_slurm_array.sh
-sbatch --array=1,8 --mem=24G --time=01:30:00 \
+sbatch --signal=B:USR1@300 --array=1,8 \
   --export=ALL,HARNESS_SOLUTION_DIR="$PWD/tracks/mps/solutions/frustration-free",HARNESS_RUN_SPEC="$RUN/plan.json",HARNESS_RESOURCES="$RUN/resources.json",HARNESS_RESOURCE_ACK="$RESOURCE_ACK",HARNESS_RUN_DIR="$RUN",JULIA_PROJECT="$PWD/tracks/mps/solutions/frustration-free/julia" \
   tracks/mps/solutions/frustration-free/convergence_slurm_array.sh
 ```
@@ -216,6 +221,13 @@ optimization must first be implemented and validated. The direct star MPO has
 grows with bath size, so the current path is not considered feasible at
 `N_b=48`. Operational failures are classified separately as bath-discretization, timestep,
 maxdim/truncation, runtime/memory, input-validation, or solver-runtime errors.
+The wrapper forwards Slurm `SIGUSR1` and `SIGTERM` to Python, which forwards
+them to Julia's process group. Julia publishes and reload-validates a
+checkpoint before returning exit 75; Python accepts 75 only when it
+independently observes a newly hash-valid checkpoint. The wrapper preserves
+that status for scheduler requeue policy. Exit 75 without a fresh validated
+checkpoint is a hard failure. RSS limits and scientific/diagnostic failures
+remain nonretryable.
 
 **Neither beta=16 nor beta=32 is accepted from one setting.** Results remain
 unaccepted until controlled bath-size, timestep, and maxdim comparisons all
@@ -289,7 +301,10 @@ silently deleted.
 Every MPS result records request-validation, context/evolution, and result
 assembly timings; actual MPO/MPS link dimensions; Julia and BLAS thread counts
 and versions; and peak RSS where the platform exposes it. Local child
-processes are killed at the declared 600-second or 16-GiB policy boundary.
+processes that reach the declared 600-second boundary first receive a
+cooperative checkpoint request, then are process-group killed after a bounded
+grace period if they do not stop. A 16-GiB RSS breach remains an immediate,
+nonretryable process-group kill.
 Cluster results record the actual Julia/BLAS settings seen by the runner.
 
 The reusable `FiniteBathContext` API constructs one identity-purification

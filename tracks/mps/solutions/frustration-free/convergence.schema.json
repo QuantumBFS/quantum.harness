@@ -49,6 +49,53 @@
         "mps-result.json": {"$ref": "#/$defs/sha256"}
       }
     },
+    "checkpointPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "generation", "completed_steps",
+        "metadata_sha256", "state_sha256", "completion_sha256"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "completed_steps": {"type": "integer", "minimum": 0},
+        "metadata_sha256": {"$ref": "#/$defs/sha256"},
+        "state_sha256": {"$ref": "#/$defs/sha256"},
+        "completion_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointCompletion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "generation",
+        "metadata_sha256", "state_sha256"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "generation": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{64}$"},
+        "metadata_sha256": {"$ref": "#/$defs/sha256"},
+        "state_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_schema", "writer_version", "identity",
+        "completed_steps", "resume_state"
+      ],
+      "properties": {
+        "checkpoint_schema": {"const": 1},
+        "writer_version": {"const": "1.0.0"},
+        "identity": {"type": "object"},
+        "completed_steps": {"type": "integer", "minimum": 0},
+        "resume_state": {"type": "object"}
+      }
+    },
     "namedLimit": {
       "type": "object",
       "additionalProperties": false,
@@ -386,13 +433,14 @@
     },
     "solverProvenance": {
       "type": "object", "additionalProperties": false,
-      "required": ["runner", "runner_version", "julia_version", "itensors_version", "itensormps_version", "active_project_path", "manifest_path", "project_toml_sha256", "manifest_toml_sha256", "runner_source_sha256", "purification_source_sha256", "observables_source_sha256", "model_definition_sha256", "bath_artifact_file_sha256", "krylov_expansion_dim", "expansion_policy"],
+      "required": ["runner", "runner_version", "julia_version", "itensors_version", "itensormps_version", "active_project_path", "manifest_path", "project_toml_sha256", "manifest_toml_sha256", "runner_source_sha256", "checkpoint_source_sha256", "purification_source_sha256", "observables_source_sha256", "model_definition_sha256", "bath_artifact_file_sha256", "krylov_expansion_dim", "expansion_policy"],
       "properties": {
         "runner": {"type": "string"}, "runner_version": {"type": "string"},
         "julia_version": {"type": "string"}, "itensors_version": {"type": "string"},
         "itensormps_version": {"type": "string"}, "active_project_path": {"type": "string"},
         "manifest_path": {"type": "string"}, "project_toml_sha256": {"$ref": "#/$defs/sha256"},
         "manifest_toml_sha256": {"$ref": "#/$defs/sha256"}, "runner_source_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_source_sha256": {"$ref": "#/$defs/sha256"},
         "purification_source_sha256": {"$ref": "#/$defs/sha256"}, "observables_source_sha256": {"$ref": "#/$defs/sha256"},
         "model_definition_sha256": {"$ref": "#/$defs/sha256"},
         "bath_artifact_file_sha256": {"$ref": "#/$defs/sha256"}, "krylov_expansion_dim": {"const": 0},

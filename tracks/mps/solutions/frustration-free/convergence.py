@@ -9,23 +9,26 @@ import copy
 import fcntl
 import hashlib
 import importlib.util
+import inspect
 import json
 import math
 import numbers
 import os
 from pathlib import Path
 import platform
+import signal
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 from typing import Any, Callable, Sequence
 
 from jsonschema import Draft202012Validator
 
 
-MODULE_VERSION = "3.0.0"
-SOFTWARE_VERSION = "challenge81-frustration-free-1"
+MODULE_VERSION = "4.0.0"
+SOFTWARE_VERSION = "challenge81-frustration-free-2"
 PLAN_SCHEMA_VERSION = 1
 CELL_SCHEMA_VERSION = 1
 ANALYSIS_SCHEMA_VERSION = 1
@@ -37,6 +40,9 @@ JULIA_DIR = SOLUTION_DIR / "julia"
 JULIA_RUNNER = JULIA_DIR / "finite_bath_mps_runner.jl"
 LOCAL_WALL_LIMIT_SECONDS = 600
 LOCAL_RSS_LIMIT_BYTES = 16 * 1024**3
+CHECKPOINT_GRACE_SECONDS = 30.0
+CHECKPOINT_SCHEMA_VERSION = 1
+CHECKPOINT_WRITER_VERSION = "1.0.0"
 JULIA_PROCESS_STARTUP_SECONDS = 35.0
 JULIA_PROCESS_BASE_RSS_BYTES = 1024**3
 MEMORY_SAFETY_FACTOR = 1.5
@@ -59,6 +65,14 @@ DEFAULT_GRID = {
 }
 STAGED_ANCHOR = {"n_bath": 12, "time_step": 0.05, "maxdim": 512}
 SCHEMA_PATH = SOLUTION_DIR / "convergence.schema.json"
+
+
+class ContinuationAvailable(RuntimeError):
+    """A runner stopped cooperatively after publishing a fresh checkpoint."""
+
+    def __init__(self, checkpoint: Any):
+        super().__init__("validated continuation checkpoint is available")
+        self.checkpoint = checkpoint
 
 
 def _load_local_module(name: str, filename: str):
@@ -144,6 +158,7 @@ def _source_hashes(julia_project: Path = JULIA_DIR) -> dict[str, str]:
         "pyproject.toml": SOLUTION_DIR / "pyproject.toml",
         "uv.lock": SOLUTION_DIR / "uv.lock",
         "finite_bath_mps_runner.jl": source_root / "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl": source_root / "finite_bath_checkpoint.jl",
         "finite_bath_observables.jl": source_root / "finite_bath_observables.jl",
         "finite_bath_purification.jl": source_root / "finite_bath_purification.jl",
     }
@@ -737,6 +752,7 @@ def validate_solver_provenance(
     expected = {
         "runner": "finite_bath_mps_runner",
         "runner_source_sha256": source["finite_bath_mps_runner.jl"],
+        "checkpoint_source_sha256": source["finite_bath_checkpoint.jl"],
         "purification_source_sha256": source["finite_bath_purification.jl"],
         "observables_source_sha256": source["finite_bath_observables.jl"],
         "model_definition_sha256": source["model.json"],
@@ -1150,42 +1166,315 @@ def process_rss_monitoring_method() -> str | None:
     )
 
 
+def _runner_request_for_cell(cell: dict[str, Any]) -> dict[str, Any]:
+    beta = cell["parameters"]["beta"]
+    fixture = {
+        "model": {
+            "U": MODEL["U"],
+            "epsilon_d": MODEL["epsilon_d"],
+            "mu": MODEL["mu"],
+            "beta": beta,
+        },
+        "tau": [beta * value for value in cell["tau_fractions"]],
+        "solver_settings": copy.deepcopy(cell["solver_settings"]),
+    }
+    bath_json = (
+        _canonical_json(cell["bath_artifact"]) + b"\n"
+    ).decode("utf-8")
+    return acceptance._make_mps_request(bath_json, fixture)
+
+
+def _strict_canonical_json_file(path: Path, name: str) -> Any:
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(f"{name} must be a regular non-symlink file")
+    raw = path.read_bytes()
+    value = acceptance.strict_json_loads(raw.decode("utf-8"), name=name)
+    if raw != _canonical_json(value) + b"\n":
+        raise ValueError(f"{name} must use canonical JSON")
+    return value
+
+
+def validate_checkpoint_root(
+    checkpoint_root: str | os.PathLike[str],
+    *,
+    cell: dict[str, Any],
+) -> str:
+    """Validate a Task 3 checkpoint tree and return its current fingerprint."""
+
+    root = Path(checkpoint_root)
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("checkpoint root must be a real directory")
+    if {path.name for path in root.iterdir()} != {"current.json", "generations"}:
+        raise ValueError("checkpoint root entries do not match schema")
+    generations = root / "generations"
+    if not generations.is_dir() or generations.is_symlink():
+        raise ValueError("checkpoint generations must be a real directory")
+    pointer_path = root / "current.json"
+    pointer = _strict_canonical_json_file(pointer_path, "checkpoint current pointer")
+    validate_artifact_schema(pointer, "checkpointPointer")
+    pointer_keys = {
+        "checkpoint_schema",
+        "writer_version",
+        "generation",
+        "completed_steps",
+        "metadata_sha256",
+        "state_sha256",
+        "completion_sha256",
+    }
+    if not isinstance(pointer, dict) or set(pointer) != pointer_keys:
+        raise ValueError("checkpoint current pointer keys do not match schema")
+    if (
+        pointer["checkpoint_schema"] != CHECKPOINT_SCHEMA_VERSION
+        or pointer["writer_version"] != CHECKPOINT_WRITER_VERSION
+    ):
+        raise ValueError("checkpoint current pointer version mismatch")
+    generation_name = pointer["generation"]
+    metadata_digest = _digest(
+        pointer["metadata_sha256"], "checkpoint metadata SHA256"
+    )
+    if generation_name != f"checkpoint-{metadata_digest}":
+        raise ValueError("checkpoint generation does not bind metadata SHA256")
+    if (
+        isinstance(pointer["completed_steps"], bool)
+        or not isinstance(pointer["completed_steps"], int)
+        or pointer["completed_steps"] < 0
+    ):
+        raise ValueError("checkpoint completed_steps must be nonnegative")
+    state_digest = _digest(pointer["state_sha256"], "checkpoint state SHA256")
+    completion_digest = _digest(
+        pointer["completion_sha256"], "checkpoint completion SHA256"
+    )
+
+    request = _runner_request_for_cell(cell)
+    payload = acceptance.strict_json_loads(
+        request["payload_json"], name="checkpoint-bound request payload"
+    )
+    checkpoint_request = payload["checkpoint"]
+    expected_identity = {
+        "request_sha256": _sha256(_canonical_json(request) + b"\n"),
+        "input_payload_sha256": request["sha256"],
+        "bath_sha256": cell["bath_artifact"]["sha256"],
+        "solver_settings": {
+            "beta": cell["parameters"]["beta"],
+            "tau": [
+                cell["parameters"]["beta"] * value
+                for value in cell["tau_fractions"]
+            ],
+            "time_step": cell["solver_settings"]["time_step"],
+            "cutoff": cell["solver_settings"]["cutoff"],
+            "maxdim": cell["solver_settings"]["maxdim"],
+            "krylov_expansion_dim": cell["solver_settings"][
+                "krylov_expansion_dim"
+            ],
+        },
+        "source_hashes": checkpoint_request["source_hashes"],
+        "project_toml_sha256": checkpoint_request["project_toml_sha256"],
+        "manifest_toml_sha256": checkpoint_request["manifest_toml_sha256"],
+        "checkpoint_schema": CHECKPOINT_SCHEMA_VERSION,
+        "writer_version": CHECKPOINT_WRITER_VERSION,
+    }
+    identity_keys = {
+        *expected_identity,
+        "julia_version",
+        "itensors_version",
+        "itensormps_version",
+        "hdf5_version",
+    }
+    generation_entries = list(generations.iterdir())
+    if not generation_entries:
+        raise ValueError("checkpoint generations must not be empty")
+    current_validated = False
+    for generation in generation_entries:
+        if (
+            not generation.is_dir()
+            or generation.is_symlink()
+            or not generation.name.startswith("checkpoint-")
+            or len(generation.name) != len("checkpoint-") + 64
+        ):
+            raise ValueError("checkpoint generation entry is invalid")
+        if {path.name for path in generation.iterdir()} != {
+            "metadata.json",
+            "state.h5",
+            "completion.json",
+        }:
+            raise ValueError("checkpoint generation entries do not match schema")
+        metadata_path = generation / "metadata.json"
+        state_path = generation / "state.h5"
+        completion_path = generation / "completion.json"
+        metadata = _strict_canonical_json_file(
+            metadata_path, "checkpoint metadata"
+        )
+        completion = _strict_canonical_json_file(
+            completion_path, "checkpoint completion"
+        )
+        validate_artifact_schema(metadata, "checkpointMetadata")
+        validate_artifact_schema(completion, "checkpointCompletion")
+        if not state_path.is_file() or state_path.is_symlink():
+            raise ValueError("checkpoint state must be a regular non-symlink file")
+        if not isinstance(metadata, dict) or set(metadata) != {
+            "checkpoint_schema",
+            "writer_version",
+            "identity",
+            "completed_steps",
+            "resume_state",
+        }:
+            raise ValueError("checkpoint metadata keys do not match schema")
+        identity = metadata["identity"]
+        if not isinstance(identity, dict) or set(identity) != identity_keys:
+            raise ValueError("checkpoint identity keys do not match schema")
+        for name, expected in expected_identity.items():
+            if identity[name] != expected:
+                raise ValueError(f"checkpoint identity mismatch: {name}")
+        for name in (
+            "julia_version",
+            "itensors_version",
+            "itensormps_version",
+            "hdf5_version",
+        ):
+            if not isinstance(identity[name], str) or not identity[name]:
+                raise ValueError(f"checkpoint identity {name} is invalid")
+        generation_metadata_digest = _sha256_file(metadata_path)
+        if generation.name != f"checkpoint-{generation_metadata_digest}":
+            raise ValueError("checkpoint generation name hash mismatch")
+        if not isinstance(completion, dict) or set(completion) != {
+            "checkpoint_schema",
+            "writer_version",
+            "generation",
+            "metadata_sha256",
+            "state_sha256",
+        }:
+            raise ValueError("checkpoint completion keys do not match schema")
+        expected_completion = {
+            "checkpoint_schema": CHECKPOINT_SCHEMA_VERSION,
+            "writer_version": CHECKPOINT_WRITER_VERSION,
+            "generation": generation.name,
+            "metadata_sha256": generation_metadata_digest,
+            "state_sha256": _sha256_file(state_path),
+        }
+        if completion != expected_completion:
+            raise ValueError("checkpoint completion bindings mismatch")
+        if generation.name == generation_name:
+            if (
+                metadata["completed_steps"] != pointer["completed_steps"]
+                or generation_metadata_digest != metadata_digest
+                or expected_completion["state_sha256"] != state_digest
+                or _sha256_file(completion_path) != completion_digest
+            ):
+                raise ValueError("checkpoint current pointer bindings mismatch")
+            current_validated = True
+    if not current_validated:
+        raise ValueError("checkpoint current generation is missing")
+    return _sha256_file(pointer_path)
+
+
 def invoke_julia_runner_monitored(
     command: Sequence[str],
     *,
     output_path: Path,
     timeout_seconds: float | None = None,
     max_rss_bytes: int | None = None,
+    checkpoint_validator: Callable[[], Any | None] | None = None,
+    checkpoint_grace_period: Callable[[], float] | None = None,
 ) -> dict[str, Any]:
     if output_path.exists() or output_path.is_symlink():
         raise ValueError("refusing pre-existing Julia output as stale")
-    process = subprocess.Popen(list(command), cwd=SOLUTION_DIR)
+    previous_checkpoint = (
+        checkpoint_validator() if checkpoint_validator is not None else None
+    )
+    process = subprocess.Popen(
+        list(command), cwd=SOLUTION_DIR, start_new_session=True
+    )
     started = time.monotonic()
     peak = None
     method = process_rss_monitoring_method()
-    while process.poll() is None:
-        if method is not None:
-            observed = read_linux_process_peak_rss(process.pid)
-            if observed is not None:
-                peak = observed if peak is None else max(peak, observed)
-                if max_rss_bytes is not None and peak > max_rss_bytes:
-                    process.kill()
-                    process.wait()
-                    raise MemoryError(
-                        f"subprocess peak RSS exceeded {max_rss_bytes} bytes"
-                    )
-        if (
-            timeout_seconds is not None
-            and time.monotonic() - started > timeout_seconds
-        ):
-            process.kill()
+    grace_deadline = None
+    timed_out = False
+    old_handlers: dict[int, Any] = {}
+
+    def forward(signum, _frame):
+        if process.poll() is None:
+            try:
+                os.killpg(process.pid, signum)
+            except ProcessLookupError:
+                pass
+
+    if threading.current_thread() is threading.main_thread():
+        for signum in (signal.SIGUSR1, signal.SIGTERM):
+            old_handlers[signum] = signal.getsignal(signum)
+            signal.signal(signum, forward)
+    try:
+        while process.poll() is None:
+            if method is not None:
+                observed = read_linux_process_peak_rss(process.pid)
+                if observed is not None:
+                    peak = observed if peak is None else max(peak, observed)
+                    if max_rss_bytes is not None and peak > max_rss_bytes:
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        process.wait()
+                        raise MemoryError(
+                            f"subprocess peak RSS exceeded {max_rss_bytes} bytes"
+                        )
+            now = time.monotonic()
+            if (
+                timeout_seconds is not None
+                and not timed_out
+                and now - started > timeout_seconds
+            ):
+                timed_out = True
+                grace = (
+                    checkpoint_grace_period()
+                    if checkpoint_grace_period is not None
+                    else CHECKPOINT_GRACE_SECONDS
+                )
+                grace = _real(grace, "checkpoint grace period")
+                if grace < 0:
+                    raise ValueError("checkpoint grace period must be nonnegative")
+                grace_deadline = now + grace
+                try:
+                    os.killpg(process.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            if (
+                grace_deadline is not None
+                and process.poll() is None
+                and now >= grace_deadline
+            ):
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait()
+                raise subprocess.TimeoutExpired(list(command), timeout_seconds)
+            time.sleep(0.05)
+    except BaseException:
+        if process.poll() is None:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             process.wait()
-            raise subprocess.TimeoutExpired(list(command), timeout_seconds)
-        time.sleep(0.05)
+        raise
+    finally:
+        for signum, handler in old_handlers.items():
+            signal.signal(signum, handler)
     if method is not None:
         observed = read_linux_process_peak_rss(process.pid)
         if observed is not None:
             peak = observed if peak is None else max(peak, observed)
+    if process.returncode == 75:
+        current_checkpoint = (
+            checkpoint_validator() if checkpoint_validator is not None else None
+        )
+        if (
+            current_checkpoint is not None
+            and current_checkpoint != previous_checkpoint
+        ):
+            raise ContinuationAvailable(current_checkpoint)
+    if timed_out and process.returncode not in (0, 75):
+        raise subprocess.TimeoutExpired(list(command), timeout_seconds)
     if process.returncode != 0:
         raise subprocess.CalledProcessError(process.returncode, list(command))
     if not output_path.is_file() or output_path.is_symlink():
@@ -1196,6 +1485,7 @@ def invoke_julia_runner_monitored(
 def _default_executor(
     cell: dict[str, Any],
     staging: Path,
+    checkpoint_root: Path,
     *,
     julia_executable: str | os.PathLike[str] | None = None,
     julia_project: str | os.PathLike[str] = JULIA_DIR,
@@ -1208,19 +1498,7 @@ def _default_executor(
     input_path = staging / "mps-input.json"
     output_path = staging / "mps-result.json"
     _write_canonical(bath_path, cell["bath_artifact"])
-    bath_json = bath_path.read_text(encoding="utf-8")
-    beta = cell["parameters"]["beta"]
-    fixture = {
-        "model": {
-            "U": MODEL["U"],
-            "epsilon_d": MODEL["epsilon_d"],
-            "mu": MODEL["mu"],
-            "beta": beta,
-        },
-        "tau": [beta * value for value in cell["tau_fractions"]],
-        "solver_settings": copy.deepcopy(cell["solver_settings"]),
-    }
-    request = acceptance._make_mps_request(bath_json, fixture)
+    request = _runner_request_for_cell(cell)
     acceptance.atomic_write_json(input_path, request)
     payload = acceptance.strict_json_loads(
         request["payload_json"], name="cell MPS request"
@@ -1236,12 +1514,18 @@ def _default_executor(
         str(JULIA_RUNNER),
         str(input_path),
         str(output_path),
+        str(checkpoint_root),
     ]
     measurement = invoke_julia_runner_monitored(
         command,
         output_path=output_path,
         timeout_seconds=timeout_seconds,
         max_rss_bytes=max_rss_bytes,
+        checkpoint_validator=lambda: (
+            validate_checkpoint_root(checkpoint_root, cell=cell)
+            if checkpoint_root.exists() or checkpoint_root.is_symlink()
+            else None
+        ),
     )
     output = acceptance.strict_json_loads(
         output_path.read_text(encoding="utf-8"), name="cell MPS result"
@@ -1251,7 +1535,10 @@ def _default_executor(
         expected_input_sha256=_sha256(input_path.read_bytes()),
         expected_input_payload_sha256=request["sha256"],
         expected_settings=cell["solver_settings"],
-        expected_tau=fixture["tau"],
+        expected_tau=[
+            cell["parameters"]["beta"] * value
+            for value in cell["tau_fractions"]
+        ],
         expected_provenance=expected_provenance,
     )
     return output, measurement
@@ -1274,7 +1561,7 @@ def run_cell(
     cell_index: int,
     run_directory: str | os.PathLike[str],
     *,
-    executor: Callable[[dict[str, Any], Path], dict[str, Any]] | None = None,
+    executor: Callable[..., dict[str, Any]] | None = None,
     julia_executable: str | os.PathLike[str] | None = None,
     julia_project: str | os.PathLike[str] | None = None,
     resources: dict[str, Any] | None = None,
@@ -1308,6 +1595,11 @@ def run_cell(
     run_root = Path(run_directory).resolve()
     cells_root = run_root / "cells"
     cells_root.mkdir(parents=True, exist_ok=True)
+    checkpoints_root = run_root / "checkpoints"
+    if checkpoints_root.exists() or checkpoints_root.is_symlink():
+        if not checkpoints_root.is_dir() or checkpoints_root.is_symlink():
+            raise ValueError("checkpoints must be a real directory")
+    checkpoint_root = checkpoints_root / cell["cell_id"]
     destination = cells_root / cell["cell_id"]
     with cell_advisory_lock(cells_root, cell["cell_id"]):
         recover_abandoned_cell_state(cells_root, cell["cell_id"])
@@ -1327,6 +1619,12 @@ def run_cell(
             except (OSError, TypeError, ValueError):
                 existing_valid = False
         if existing_valid:
+            if checkpoint_root.exists() or checkpoint_root.is_symlink():
+                if checkpoint_root.is_dir() and not checkpoint_root.is_symlink():
+                    shutil.rmtree(checkpoint_root)
+                else:
+                    checkpoint_root.unlink()
+                _fsync_directory(checkpoints_root)
             return {"action": "skipped", "cell": existing, "path": destination}
         if destination.exists() or destination.is_symlink():
             archived = archive_superseded_directory(destination)
@@ -1334,6 +1632,26 @@ def run_cell(
                 "stale or invalid immutable cell was archived at "
                 f"{archived}; generate a new content-addressed plan"
             )
+        if checkpoint_root.exists() or checkpoint_root.is_symlink():
+            try:
+                validate_checkpoint_root(checkpoint_root, cell=cell)
+            except (OSError, TypeError, ValueError) as error:
+                if (
+                    checkpoint_root.is_dir()
+                    and not checkpoint_root.is_symlink()
+                ):
+                    archived = archive_superseded_directory(checkpoint_root)
+                else:
+                    checkpoints_root.mkdir(parents=True, exist_ok=True)
+                    archived = _unused_sibling(
+                        checkpoints_root,
+                        f".{cell['cell_id']}.superseded-",
+                    )
+                    os.replace(checkpoint_root, archived)
+                    _fsync_directory(checkpoints_root)
+                raise ValueError(
+                    f"invalid checkpoint was archived at {archived}: {error}"
+                ) from error
         action = "completed"
         staging = Path(
             tempfile.mkdtemp(dir=cells_root, prefix=f".{cell['cell_id']}.stage-")
@@ -1345,6 +1663,7 @@ def run_cell(
                 solver_output, measurement = _default_executor(
                     cell,
                     staging,
+                    checkpoint_root,
                     julia_executable=julia_executable,
                     julia_project=selected_project,
                     timeout_seconds=(
@@ -1359,7 +1678,30 @@ def run_cell(
                     ),
                 )
             else:
-                executed = executor(cell, staging)
+                parameters = inspect.signature(executor).parameters.values()
+                accepts_checkpoint = any(
+                    parameter.kind
+                    in (
+                        inspect.Parameter.VAR_POSITIONAL,
+                        inspect.Parameter.VAR_KEYWORD,
+                    )
+                    for parameter in parameters
+                ) or len(
+                    [
+                        parameter
+                        for parameter in parameters
+                        if parameter.kind
+                        in (
+                            inspect.Parameter.POSITIONAL_ONLY,
+                            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        )
+                    ]
+                ) >= 3
+                executed = (
+                    executor(cell, staging, checkpoint_root)
+                    if accepts_checkpoint
+                    else executor(cell, staging)
+                )
                 if isinstance(executed, tuple):
                     solver_output, measurement = executed
                 else:
@@ -1401,6 +1743,12 @@ def run_cell(
             _write_canonical(staging / "cell.json", artifact)
             _fsync_directory(staging)
             atomic_publish_directory(staging, destination)
+            if checkpoint_root.exists() or checkpoint_root.is_symlink():
+                if checkpoint_root.is_dir() and not checkpoint_root.is_symlink():
+                    shutil.rmtree(checkpoint_root)
+                else:
+                    checkpoint_root.unlink()
+                _fsync_directory(checkpoints_root)
             return {"action": action, "cell": artifact, "path": destination}
         finally:
             if staging.exists():
@@ -1882,7 +2230,12 @@ def _load_json(path: Path, name: str) -> Any:
 
 
 PLAN_RUN_CORE_FILES = {"plan.json", "resources.json", "completion.json"}
-PLAN_RUN_ALLOWED_ENTRIES = {*PLAN_RUN_CORE_FILES, "cells", "analysis.json"}
+PLAN_RUN_ALLOWED_ENTRIES = {
+    *PLAN_RUN_CORE_FILES,
+    "cells",
+    "checkpoints",
+    "analysis.json",
+}
 
 
 def _plan_completion_sha256(completion: dict[str, Any]) -> str:
@@ -2065,7 +2418,9 @@ def validate_existing(
         "plan": True,
         "resources": False,
         "cells": 0,
+        "checkpoints": 0,
         "archived_cells": 0,
+        "archived_checkpoints": 0,
         "analysis": False,
     }
     if resources_path is not None:
@@ -2096,7 +2451,8 @@ def validate_existing(
                 raise ValueError("bundled resources changed during validation")
         plan = published_plan
         cells_root = root / "cells"
-        expected_ids = {cell["cell_id"] for cell in plan["cells"]}
+        expected_cells = {cell["cell_id"]: cell for cell in plan["cells"]}
+        expected_ids = set(expected_cells)
         if cells_root.exists():
             if not cells_root.is_dir() or cells_root.is_symlink():
                 raise ValueError("cells must be a real directory")
@@ -2128,6 +2484,41 @@ def validate_existing(
                     checked["archived_cells"] += 1
                     continue
                 raise ValueError(f"unexpected stale cell entry: {name}")
+        checkpoints_root = root / "checkpoints"
+        if checkpoints_root.exists() or checkpoints_root.is_symlink():
+            if (
+                not checkpoints_root.is_dir()
+                or checkpoints_root.is_symlink()
+            ):
+                raise ValueError("checkpoints must be a real directory")
+            for entry in list(checkpoints_root.iterdir()):
+                name = entry.name
+                if name in expected_ids:
+                    with cell_advisory_lock(cells_root, name):
+                        try:
+                            validate_checkpoint_root(
+                                entry, cell=expected_cells[name]
+                            )
+                        except (OSError, TypeError, ValueError) as error:
+                            archived = archive_superseded_directory(entry)
+                            raise ValueError(
+                                "invalid checkpoint was archived at "
+                                f"{archived}: {error}"
+                            ) from error
+                    checked["checkpoints"] += 1
+                    continue
+                if any(
+                    name.startswith(f".{cell_id}.superseded-")
+                    for cell_id in expected_ids
+                ):
+                    if not entry.is_dir() or entry.is_symlink():
+                        raise ValueError(
+                            "checkpoint archive must be a real directory: "
+                            f"{name}"
+                        )
+                    checked["archived_checkpoints"] += 1
+                    continue
+                raise ValueError(f"unexpected checkpoint entry: {name}")
         artifacts = []
         for cell in plan["cells"]:
             directory = root / "cells" / cell["cell_id"]
@@ -2381,6 +2772,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                     f"action={result['action']}",
                     flush=True,
                 )
+            except ContinuationAvailable as continuation:
+                print(
+                    f"progress cell={index} id={cell_id} "
+                    f"action=continuation checkpoint={continuation.checkpoint}",
+                    flush=True,
+                )
+                if args.command == "run-cell":
+                    return 75
+                return 75
             except BaseException as error:
                 failures += 1
                 print(

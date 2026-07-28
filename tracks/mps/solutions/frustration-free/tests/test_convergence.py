@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import signal
 import subprocess
 import sys
 import threading
@@ -232,6 +233,9 @@ def _solver_result(cell, shift=0.0):
             "runner_source_sha256": cell["provenance"]["source_sha256"][
                 "finite_bath_mps_runner.jl"
             ],
+            "checkpoint_source_sha256": cell["provenance"]["source_sha256"][
+                "finite_bath_checkpoint.jl"
+            ],
             "purification_source_sha256": cell["provenance"]["source_sha256"][
                 "finite_bath_purification.jl"
             ],
@@ -369,6 +373,7 @@ def test_plan_binds_selected_julia_project_and_all_sources(tmp_path):
     shutil.copy(SOLUTION_DIR / "julia" / "Manifest.toml", project / "Manifest.toml")
     for name in (
         "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
         "finite_bath_observables.jl",
         "finite_bath_purification.jl",
     ):
@@ -397,6 +402,7 @@ def test_plan_binds_selected_julia_project_and_all_sources(tmp_path):
         "pyproject.toml",
         "uv.lock",
         "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
         "finite_bath_observables.jl",
         "finite_bath_purification.jl",
     }
@@ -440,12 +446,17 @@ def test_completed_cell_is_skipped_but_stale_cell_fails_closed(tmp_path):
     first = convergence.run_cell(
         plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
     )
+    checkpoint_root = (
+        tmp_path / "checkpoints" / plan["cells"][0]["cell_id"]
+    )
+    _write_python_validated_checkpoint(checkpoint_root, plan["cells"][0])
     second = convergence.run_cell(
         plan, 0, tmp_path, executor=executor, julia_project=SOLUTION_DIR / "julia"
     )
 
     assert first["action"] == "completed"
     assert second["action"] == "skipped"
+    assert not checkpoint_root.exists()
     assert calls == [plan["cells"][0]["cell_id"]]
 
     cell_path = tmp_path / "cells" / plan["cells"][0]["cell_id"] / "cell.json"
@@ -942,6 +953,7 @@ def test_cell_artifact_records_required_diagnostics_and_rejects_mismatch():
         "pyproject.toml",
         "uv.lock",
         "finite_bath_mps_runner.jl",
+        "finite_bath_checkpoint.jl",
         "finite_bath_observables.jl",
         "finite_bath_purification.jl",
     }
@@ -1124,6 +1136,449 @@ def test_local_subprocess_timeout_is_enforced(tmp_path):
             max_rss_bytes=convergence.LOCAL_RSS_LIMIT_BYTES,
         )
     assert not output.exists()
+
+
+def test_monitored_runner_starts_new_process_group(tmp_path):
+    output = tmp_path / "result.json"
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, os, sys; "
+                "json.dump({'pid': os.getpid(), 'pgid': os.getpgrp()}, "
+                "open(sys.argv[1], 'w'))"
+            ),
+            str(output),
+        ],
+        output_path=output,
+    )
+
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert result["pid"] == result["pgid"]
+    assert result["pgid"] != os.getpgrp()
+
+
+def test_parent_sigusr1_is_forwarded_to_runner_process_group(tmp_path):
+    output = tmp_path / "result.json"
+
+    def signal_parent():
+        time.sleep(0.2)
+        os.kill(os.getpid(), signal.SIGUSR1)
+
+    sender = threading.Thread(target=signal_parent)
+    sender.start()
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, signal, sys, time; "
+                "signal.signal(signal.SIGUSR1, "
+                "lambda *_: (json.dump({'signal': 'SIGUSR1'}, "
+                "open(sys.argv[1], 'w')), sys.exit(0))); "
+                "time.sleep(5)"
+            ),
+            str(output),
+        ],
+        output_path=output,
+        timeout_seconds=2,
+    )
+    sender.join(timeout=2)
+
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "signal": "SIGUSR1"
+    }
+
+
+def test_parent_sigterm_is_forwarded_to_runner_process_group(tmp_path):
+    output = tmp_path / "result.json"
+
+    def signal_parent():
+        time.sleep(0.2)
+        os.kill(os.getpid(), signal.SIGTERM)
+
+    sender = threading.Thread(target=signal_parent)
+    sender.start()
+    convergence.invoke_julia_runner_monitored(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import json, signal, sys, time; "
+                "signal.signal(signal.SIGTERM, "
+                "lambda *_: (json.dump({'signal': 'SIGTERM'}, "
+                "open(sys.argv[1], 'w')), sys.exit(0))); "
+                "time.sleep(5)"
+            ),
+            str(output),
+        ],
+        output_path=output,
+        timeout_seconds=2,
+    )
+    sender.join(timeout=2)
+
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "signal": "SIGTERM"
+    }
+
+
+def test_timeout_requests_checkpoint_and_accepts_only_new_valid_exit_75(tmp_path):
+    output = tmp_path / "result.json"
+    checkpoint = tmp_path / "checkpoint"
+    grace_calls = []
+
+    def validate_checkpoint():
+        if not checkpoint.exists():
+            return None
+        value = checkpoint.read_text(encoding="utf-8")
+        if value != "valid\n":
+            raise ValueError("invalid checkpoint")
+        return convergence._sha256(checkpoint.read_bytes())
+
+    with pytest.raises(convergence.ContinuationAvailable):
+        convergence.invoke_julia_runner_monitored(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import pathlib, signal, sys, time; "
+                    "signal.signal(signal.SIGTERM, "
+                    "lambda *_: (pathlib.Path(sys.argv[1]).write_text('valid\\n'), "
+                    "sys.exit(75))); "
+                    "time.sleep(5)"
+                ),
+                str(checkpoint),
+            ],
+            output_path=output,
+            timeout_seconds=0.2,
+            checkpoint_validator=validate_checkpoint,
+            checkpoint_grace_period=lambda: grace_calls.append(True) or 1.0,
+        )
+
+    assert grace_calls == [True]
+    assert validate_checkpoint() is not None
+
+
+def test_timeout_kills_process_group_after_bounded_checkpoint_grace(tmp_path):
+    output = tmp_path / "result.json"
+    started = time.monotonic()
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        convergence.invoke_julia_runner_monitored(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import signal, time; "
+                    "signal.signal(signal.SIGTERM, lambda *_: None); "
+                    "time.sleep(5)"
+                ),
+            ],
+            output_path=output,
+            timeout_seconds=0.1,
+            checkpoint_grace_period=lambda: 0.1,
+        )
+
+    assert time.monotonic() - started < 2
+
+
+def test_exit_75_without_new_valid_checkpoint_is_hard_failure(tmp_path):
+    output = tmp_path / "result.json"
+    checkpoint = tmp_path / "checkpoint"
+    checkpoint.write_text("valid\n", encoding="utf-8")
+
+    with pytest.raises(subprocess.CalledProcessError) as caught:
+        convergence.invoke_julia_runner_monitored(
+            [sys.executable, "-c", "raise SystemExit(75)"],
+            output_path=output,
+            checkpoint_validator=lambda: convergence._sha256(
+                checkpoint.read_bytes()
+            ),
+        )
+
+    assert caught.value.returncode == 75
+
+
+def test_rss_breach_remains_nonretryable(tmp_path, monkeypatch):
+    output = tmp_path / "result.json"
+    monkeypatch.setattr(
+        convergence, "read_linux_process_peak_rss", lambda _pid: 1024
+    )
+
+    with pytest.raises(MemoryError):
+        convergence.invoke_julia_runner_monitored(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            output_path=output,
+            max_rss_bytes=1,
+            checkpoint_validator=lambda: "f" * 64,
+        )
+
+
+def test_run_cell_uses_durable_checkpoint_namespace_and_cleans_after_publish(
+    tmp_path,
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    cell = plan["cells"][0]
+    observed = []
+
+    def executor(item, _staging, checkpoint_root):
+        observed.append(checkpoint_root)
+        checkpoint_root.mkdir(parents=True)
+        (checkpoint_root / "partial").write_text("resume", encoding="utf-8")
+        return _solver_result(item)
+
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=executor,
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert observed == [tmp_path / "checkpoints" / cell["cell_id"]]
+    assert result["action"] == "completed"
+    assert not observed[0].exists()
+    assert set(path.name for path in result["path"].iterdir()) == {
+        "bath.json",
+        "mps-input.json",
+        "mps-result.json",
+        "cell.json",
+    }
+
+
+def test_run_cell_preserves_checkpoint_on_continuation_and_cli_maps_75(
+    tmp_path, monkeypatch, capsys
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    checkpoint_root = (
+        tmp_path / "run" / "checkpoints" / plan["cells"][0]["cell_id"]
+    )
+
+    def continued(*_args, **_kwargs):
+        checkpoint_root.mkdir(parents=True, exist_ok=True)
+        raise convergence.ContinuationAvailable(checkpoint_root)
+
+    monkeypatch.setattr(convergence, "_default_executor", continued)
+    status = convergence.main(
+        [
+            "run-cell",
+            "--plan",
+            str(plan_path),
+            "--run-directory",
+            str(tmp_path / "run"),
+            "--cell-index",
+            "0",
+            "--julia-project",
+            str(SOLUTION_DIR / "julia"),
+        ]
+    )
+
+    assert status == 75
+    assert checkpoint_root.is_dir()
+    output = capsys.readouterr().out
+    assert "action=continuation" in output
+    assert "action=failed" not in output
+
+
+def test_validate_existing_rejects_unplanned_or_invalid_checkpoint_roots(
+    tmp_path,
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    checkpoints = run / "checkpoints"
+    checkpoints.mkdir()
+    (checkpoints / "unplanned-cell").mkdir()
+
+    with pytest.raises(ValueError, match="checkpoint"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+
+
+def _write_python_validated_checkpoint(root, cell):
+    request = convergence._runner_request_for_cell(cell)
+    payload = json.loads(request["payload_json"])
+    identity = {
+        "request_sha256": convergence._sha256(
+            convergence._canonical_json(request) + b"\n"
+        ),
+        "input_payload_sha256": request["sha256"],
+        "bath_sha256": cell["bath_artifact"]["sha256"],
+        "solver_settings": {
+            "beta": cell["parameters"]["beta"],
+            "tau": [
+                cell["parameters"]["beta"] * fraction
+                for fraction in cell["tau_fractions"]
+            ],
+            **cell["solver_settings"],
+        },
+        "source_hashes": payload["checkpoint"]["source_hashes"],
+        "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],
+        "manifest_toml_sha256": payload["checkpoint"]["manifest_toml_sha256"],
+        "julia_version": "test",
+        "itensors_version": "test",
+        "itensormps_version": "test",
+        "hdf5_version": "test",
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+    }
+    metadata = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "identity": identity,
+        "completed_steps": 1,
+        "resume_state": {"kind": "test"},
+    }
+    metadata_bytes = convergence._canonical_json(metadata) + b"\n"
+    metadata_sha = convergence._sha256(metadata_bytes)
+    generation_name = f"checkpoint-{metadata_sha}"
+    generation = root / "generations" / generation_name
+    generation.mkdir(parents=True)
+    (generation / "metadata.json").write_bytes(metadata_bytes)
+    state = b"test-hdf5-state"
+    (generation / "state.h5").write_bytes(state)
+    completion = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha,
+        "state_sha256": convergence._sha256(state),
+    }
+    completion_bytes = convergence._canonical_json(completion) + b"\n"
+    (generation / "completion.json").write_bytes(completion_bytes)
+    current = {
+        **completion,
+        "completed_steps": 1,
+        "completion_sha256": convergence._sha256(completion_bytes),
+    }
+    (root / "current.json").write_bytes(
+        convergence._canonical_json(current) + b"\n"
+    )
+
+
+def test_validate_existing_accepts_only_hash_valid_planned_checkpoint(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    checkpoint = run / "checkpoints" / plan["cells"][0]["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, plan["cells"][0])
+
+    checked = convergence.validate_existing(
+        plan_path=plan_path,
+        resources_path=run / "resources.json",
+        run_directory=run,
+    )
+
+    assert checked["checkpoints"] == 1
+    (checkpoint / "current.json").write_text("{}\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="checkpoint"):
+        convergence.validate_existing(
+            plan_path=plan_path,
+            resources_path=run / "resources.json",
+            run_directory=run,
+        )
+    assert not checkpoint.exists()
+    assert any(
+        entry.name.startswith(f".{plan['cells'][0]['cell_id']}.superseded-")
+        for entry in checkpoint.parent.iterdir()
+    )
+
+
+def test_schema_defines_strict_checkpoint_pointer():
+    schema = json.loads(
+        (SOLUTION_DIR / "convergence.schema.json").read_text(encoding="utf-8")
+    )
+    pointer = schema["$defs"]["checkpointPointer"]
+    assert pointer["additionalProperties"] is False
+    assert set(pointer["required"]) == {
+        "checkpoint_schema",
+        "writer_version",
+        "generation",
+        "completed_steps",
+        "metadata_sha256",
+        "state_sha256",
+        "completion_sha256",
+    }
+
+
+def test_slurm_wrapper_forwards_signals_and_preserves_python_status():
+    script = (SOLUTION_DIR / "convergence_slurm_array.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "trap" in script
+    assert "SIGUSR1" in script or "USR1" in script
+    assert "SIGTERM" in script or "TERM" in script
+    assert "wait" in script
+    assert "exit \"${status}\"" in script
+    assert "#SBATCH --signal" not in script
+
+
+def test_slurm_wrapper_waits_after_forwarded_signal_and_preserves_exit_75(
+    tmp_path,
+):
+    solution_dir = tmp_path / "solution"
+    solution_dir.mkdir()
+    marker = tmp_path / "forwarded"
+    (solution_dir / "convergence.py").write_text(
+        "import os, pathlib, signal, time\n"
+        "def stop(*_):\n"
+        "    pathlib.Path(os.environ['SIGNAL_MARKER']).write_text('USR1\\n')\n"
+        "    raise SystemExit(75)\n"
+        "signal.signal(signal.SIGUSR1, stop)\n"
+        "time.sleep(10)\n",
+        encoding="utf-8",
+    )
+    environment = {
+        **os.environ,
+        "HARNESS_SOLUTION_DIR": str(solution_dir),
+        "HARNESS_RUN_SPEC": "/run/plan.json",
+        "HARNESS_RUN_DIR": "/run",
+        "HARNESS_RESOURCES": "/run/resources.json",
+        "HARNESS_RESOURCE_ACK": "resource-sha256",
+        "SLURM_ARRAY_TASK_ID": "0",
+        "JULIA_PROJECT": "/runtime/julia",
+        "PYTHON": sys.executable,
+        "SIGNAL_MARKER": str(marker),
+    }
+    wrapper = subprocess.Popen(
+        ["bash", str(SOLUTION_DIR / "convergence_slurm_array.sh")],
+        env=environment,
+    )
+    time.sleep(0.2)
+    wrapper.send_signal(signal.SIGUSR1)
+
+    assert wrapper.wait(timeout=5) == 75
+    assert marker.read_text(encoding="utf-8") == "USR1\n"
 
 
 def test_resources_are_hashed_bound_and_required_for_production(tmp_path):
