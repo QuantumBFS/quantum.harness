@@ -43,6 +43,13 @@ interface. Exact true fidelity is used only by the audit layer for scoring and
 stopping-accounting diagnostics; the optimizer receives only finite-shot scalar
 infidelity estimates.
 
+The hardware-readiness layer keeps the same separation at a batch boundary:
+candidate pulses are exported as payloads, a backend returns shot-count results,
+and objectives are reconstructed from counts as success-probability infidelity.
+The dry-run backend uses the existing query-only device to mimic finite-shot
+hardware batches, but it does not expose exact simulator fidelity to the
+candidate-selection path.
+
 The adaptive method uses the same black-box boundary as the other closed-loop
 methods. It starts at `k=3` for both systems, then may widen to a safety subspace
 of `k=8` for the one-qubit target or `k=32` for the two-qubit target. The widen
@@ -166,6 +173,31 @@ two-qubit large-gap case. That residual failure is the clearest evidence that
 some mismatch rotates or adds relevant directions beyond what a fixed model
 subspace captures.
 
+## Hardware Readiness
+
+The committed hardware-style workflow is deliberately modest: it prepares the
+software interface needed for real-device testing, but it does not claim that a
+real processor was used.
+
+`hardware_adapter.py` defines backend-neutral candidates, jobs, count results,
+and count-derived evaluations. `run_hardware_dry_run.py` runs a short one-qubit
+calibration setup, exports a center pulse plus plus/minus candidates along the
+top three Hessian directions, submits them through the dry-run backend, and
+writes:
+
+- `batch_manifest.json`
+- `candidates.csv`
+- `pulse_payloads.jsonl`
+- `hardware_results.jsonl`
+- `hardware_summary.json`
+
+This makes the real-hardware swap point concrete. A future lab/cloud run can
+consume `pulse_payloads.jsonl` and write measured counts back to
+`hardware_results.jsonl`; the same ingestion and objective-reconstruction code
+can then summarize the run. The summary carries `real_hardware: false` for the
+current dry run so generated local evidence cannot be mistaken for hardware
+evidence.
+
 ## Adaptive Recovery
 
 A focused adaptive CPU sweep tested the actual query-only widening rule at 2048
@@ -208,6 +240,8 @@ the useful resource for this attempt.
 - Differentiable model, open-loop optimizer, dense Hessian, HVP, and eigenspace:
   implemented.
 - Strict query-only finite-shot device with query and shot counters: implemented.
+- Batch hardware adapter, exported pulse payloads, count ingestion, and dry-run
+  hardware-style summary: implemented and tested.
 - Model-only, full-space, random-subspace, and Hessian-subspace methods:
   implemented.
 - Adaptive query-only Hessian recovery method with budget-preserving widening:
@@ -232,13 +266,16 @@ the useful resource for this attempt.
 
 ## Verification
 
-Local verification after the adaptive recovery addition:
+Local verification after the hardware-readiness addition:
 
 - Focused red/green reachability test: passing.
-- Attempt-004 tests: passing (`21 passed`).
-- Broader YueYuan attempt tests: passing (`35 passed`).
+- Focused hardware adapter and dry-run tests: passing (`4 passed`).
+- Attempt-004 tests: passing (`25 passed`).
+- Broader YueYuan attempt tests: passing (`39 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 15 groups).
+- Hardware dry run: passing (7 candidates, 1,792 total shots,
+  `real_hardware: false`).
 - Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
   five CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
