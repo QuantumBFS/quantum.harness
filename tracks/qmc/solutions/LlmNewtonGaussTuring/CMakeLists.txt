@@ -20,6 +20,7 @@ set(LIB_SOURCES
     src/lattice.cpp
     src/ed.cpp
     src/sse.cpp
+    src/berry.cpp
 )
 
 # Static library
@@ -40,6 +41,11 @@ add_test(NAME test_ed COMMAND test_ed)
 add_executable(test_sse tests/test_sse.cpp)
 target_link_libraries(test_sse PRIVATE cm148)
 add_test(NAME test_sse COMMAND test_sse)
+
+# Test: Berry phase
+add_executable(test_berry tests/test_berry.cpp)
+target_link_libraries(test_berry PRIVATE cm148)
+add_test(NAME test_berry COMMAND test_berry)
 
 # Diagnostic driver (not part of the test suite)
 add_executable(debug_sse tools/debug_sse.cpp)
