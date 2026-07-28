@@ -38,7 +38,7 @@ Columns: model | (N, d, symmetry) | certified Δ ≤ | reference | solver | runt
 | # | model | config | certified Δ ≤ | reference / expected | solver | runtime/case | status |
 |---|---|---|---|---|---|---|---|
 | 1 | 1D TFIM (transverse-field Ising) | N=9, g=0.5, d=2, sign-symmetric | **≤ 0.26** | 0.258 (example.jl / legacy-inventory-spec) | Mosek 11.2.2 | 4–25 s | **VALIDATED (Gate 5 ✓)** |
-| 2 | Kagome Heisenberg (frustrated, #88) | N=13, d=3, sign-symmetric | — (running) | ~1.28 (example.jl) | Mosek 11.2.2 | ~220 s | running (job 22970838) |
+| 2 | Kagome Heisenberg (frustrated, #88) | N=13, d=3, sign-symmetric | **≤ 1.28** | ~1.28 (example.jl) ✓ | Mosek 11.2.2 | ~290 s | **VALIDATED (matches ref)** |
 | 3 | Kagome Heisenberg (frustrated, #88) | N=27, d=3, sign-symmetric | — (queued) | ~1.15 (example.jl) | Mosek 11.2.2 | — | queued (Config 2) |
 | 4 | Kagome Heisenberg (frustrated, #88) | N=13, d=4, sign-symmetric | — (queued) | < 1.28 (tighter) | Mosek 11.2.2 | — | queued (Config 3) |
 
