@@ -30,7 +30,15 @@ def test_protocol_freezes_route_capacity_and_n8_smoke() -> None:
     p = load_protocol()
     assert p.capacity["max_trainable_parameters"] == 262_144
     assert set(p.capacity["routes"]) == {
-        "occupation_autoregressive", "continuous_holomorphic", "cf_flow_l2"
+        "occupation_autoregressive",
+        "continuous_holomorphic",
+        "cf_flow_l2",
+        "analytic_seed_correlator",
+    }
+    assert p.capacity["routes"]["analytic_seed_correlator"] == {
+        "operator_layers": 2,
+        "density_ranks": [2, 3, 4],
+        "hidden_width": 64,
     }
     assert p.smoke_n8["n_electrons"] == 8
     assert p.smoke_n8["two_q"] == 21
