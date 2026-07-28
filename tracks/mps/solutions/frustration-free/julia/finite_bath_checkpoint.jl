@@ -16,11 +16,94 @@ using ..FiniteBathPurification: EvolutionResumeState
 export CheckpointIdentity,
     CheckpointCursor,
     EvolutionResumeState,
+    ObservableCursor,
+    ObservableResumeState,
     write_checkpoint_generation,
     load_current_checkpoint
 
 const SHA256_PATTERN = r"^[0-9a-f]{64}$"
 const GENERATION_PATTERN = r"^checkpoint-[0-9a-f]{64}$"
+
+struct ObservableCursor
+    phase::Symbol
+    tau_index::Int
+    spin::Symbol
+    segment::Symbol
+
+    function ObservableCursor(phase, tau_index, spin, segment)
+        phase isa Symbol ||
+            throw(ArgumentError("observable cursor phase must be a symbol"))
+        tau_index isa Integer && !(tau_index isa Bool) ||
+            throw(ArgumentError("observable cursor tau_index must be an integer"))
+        spin isa Symbol ||
+            throw(ArgumentError("observable cursor spin must be a symbol"))
+        segment isa Symbol ||
+            throw(ArgumentError("observable cursor segment must be a symbol"))
+        if phase === :thermal || phase === :complete
+            tau_index == 0 && spin === :none && segment === :none ||
+                throw(ArgumentError("thermal and complete cursors have no branch coordinates"))
+        elseif phase === :green
+            tau_index > 0 ||
+                throw(ArgumentError("green cursor tau_index must be positive"))
+            spin in (:up, :dn) ||
+                throw(ArgumentError("green cursor spin must be :up or :dn"))
+            segment in (:before, :after) ||
+                throw(ArgumentError("green cursor segment must be :before or :after"))
+        else
+            throw(ArgumentError("observable cursor phase is invalid"))
+        end
+        return new(phase, Int(tau_index), spin, segment)
+    end
+end
+
+struct ObservableResumeState
+    cursor::ObservableCursor
+    evolution_state::Union{Nothing,EvolutionResumeState}
+    thermal_psi::Union{Nothing,MPS}
+    data::NamedTuple
+
+    function ObservableResumeState(
+        cursor,
+        evolution_state,
+        thermal_psi,
+        data,
+    )
+        nameof(typeof(cursor)) == :ObservableCursor &&
+            fieldnames(typeof(cursor)) == fieldnames(ObservableCursor) ||
+            throw(ArgumentError("observable cursor is invalid"))
+        normalized_cursor = ObservableCursor(
+            cursor.phase, cursor.tau_index, cursor.spin, cursor.segment
+        )
+        evolution_state === nothing ||
+            (
+                nameof(typeof(evolution_state)) == :EvolutionResumeState &&
+                fieldnames(typeof(evolution_state)) ==
+                fieldnames(EvolutionResumeState)
+            ) ||
+            throw(ArgumentError("observable evolution_state is invalid"))
+        normalized_evolution =
+            evolution_state === nothing ?
+            nothing : EvolutionResumeState(;
+                completed_steps = evolution_state.completed_steps,
+                beta_endpoint = evolution_state.beta_endpoint,
+                log_unnormalized_norm =
+                    evolution_state.log_unnormalized_norm,
+                maximum_link_dimensions_by_bond =
+                    evolution_state.maximum_link_dimensions_by_bond,
+                step_history = evolution_state.step_history,
+                expansion_applied = evolution_state.expansion_applied,
+            )
+        thermal_psi === nothing || thermal_psi isa MPS ||
+            throw(ArgumentError("observable thermal_psi is invalid"))
+        data isa NamedTuple ||
+            throw(ArgumentError("observable data must be a named tuple"))
+        normalized_cursor.phase === :thermal && thermal_psi !== nothing &&
+            throw(ArgumentError("thermal cursor cannot carry a completed thermal state"))
+        normalized_cursor.phase !== :thermal && thermal_psi === nothing &&
+            throw(ArgumentError("post-thermal cursor requires the thermal state"))
+        return new(normalized_cursor, normalized_evolution, thermal_psi, data)
+    end
+end
 
 struct CheckpointIdentity
     request_sha256::String
@@ -147,6 +230,16 @@ function write_checkpoint_generation(
         cursor isa CheckpointCursor ? cursor.completed_steps :
         cursor isa Integer && !(cursor isa Bool) ? Int(cursor) :
         throw(ArgumentError("cursor must be a CheckpointCursor or integer"))
+    if nameof(typeof(resume_state)) == :ObservableResumeState &&
+       fieldnames(typeof(resume_state)) == fieldnames(ObservableResumeState) &&
+       !(resume_state isa ObservableResumeState)
+        resume_state = ObservableResumeState(
+            resume_state.cursor,
+            resume_state.evolution_state,
+            resume_state.thermal_psi,
+            resume_state.data,
+        )
+    end
     _validate_resume_state(resume_state, completed_steps)
     root_path = abspath(String(root))
     _ensure_directory(root_path, "checkpoint root"; create = true)
@@ -173,6 +266,9 @@ function write_checkpoint_generation(
         try
             h5open(state_path, "w") do file
                 write(file, "psi", psi)
+                resume_state isa ObservableResumeState &&
+                    resume_state.thermal_psi !== nothing &&
+                    write(file, "thermal_psi", resume_state.thermal_psi)
             end
         catch error
             throw(ArgumentError("could not write checkpoint MPS: $(sprint(showerror, error))"))
@@ -312,19 +408,23 @@ function _load_generation(
         throw(ArgumentError("checkpoint identity mismatch"))
     metadata["completed_steps"] == cursor.completed_steps ||
         throw(ArgumentError("checkpoint cursor mismatch"))
-    resume_state = _resume_state_from_dict(metadata["resume_state"])
-    _validate_resume_state(resume_state, cursor.completed_steps)
-
-    psi = try
+    psi, thermal_psi = try
         h5open(state_path, "r") do file
             haskey(file, "psi") ||
                 throw(ArgumentError("checkpoint state does not contain psi"))
-            read(file, "psi", MPS)
+            active = read(file, "psi", MPS)
+            thermal =
+                haskey(file, "thermal_psi") ?
+                read(file, "thermal_psi", MPS) : nothing
+            (active, thermal)
         end
     catch error
         error isa ArgumentError && rethrow()
         throw(ArgumentError("could not read checkpoint MPS: $(sprint(showerror, error))"))
     end
+    resume_state =
+        _resume_state_from_dict(metadata["resume_state"], thermal_psi)
+    _validate_resume_state(resume_state, cursor.completed_steps)
     return (; identity, cursor, psi, resume_state)
 end
 
@@ -384,6 +484,22 @@ function _identity_from_dict(value)
 end
 
 function _resume_state_dict(state)
+    if state isa ObservableResumeState
+        return Dict{String,Any}(
+            "kind" => "observable",
+            "cursor" => Dict{String,Any}(
+                "phase" => String(state.cursor.phase),
+                "tau_index" => state.cursor.tau_index,
+                "spin" => String(state.cursor.spin),
+                "segment" => String(state.cursor.segment),
+            ),
+            "evolution_state" =>
+                state.evolution_state === nothing ?
+                nothing : _resume_state_dict(state.evolution_state),
+            "thermal_psi" => state.thermal_psi !== nothing,
+            "data" => _typed_json_value(state.data),
+        )
+    end
     history = [
         Dict{String,Any}(
             "keys" => String.(collect(keys(entry))),
@@ -401,7 +517,37 @@ function _resume_state_dict(state)
     )
 end
 
-function _resume_state_from_dict(value)
+function _resume_state_from_dict(value, thermal_psi = nothing)
+    if value isa AbstractDict && get(value, "kind", nothing) == "observable"
+        _require_exact_keys(
+            value,
+            ["kind", "cursor", "evolution_state", "thermal_psi", "data"],
+            "observable resume state",
+        )
+        cursor_value = value["cursor"]
+        _require_exact_keys(
+            cursor_value,
+            ["phase", "tau_index", "spin", "segment"],
+            "observable cursor",
+        )
+        cursor = ObservableCursor(
+            Symbol(cursor_value["phase"]),
+            cursor_value["tau_index"],
+            Symbol(cursor_value["spin"]),
+            Symbol(cursor_value["segment"]),
+        )
+        value["thermal_psi"] isa Bool ||
+            throw(ArgumentError("observable thermal-state marker is invalid"))
+        (thermal_psi !== nothing) == value["thermal_psi"] ||
+            throw(ArgumentError("observable thermal-state binding mismatch"))
+        evolution =
+            value["evolution_state"] === nothing ?
+            nothing : _resume_state_from_dict(value["evolution_state"])
+        data = _typed_json_restore(value["data"])
+        data isa NamedTuple ||
+            throw(ArgumentError("observable checkpoint data is invalid"))
+        return ObservableResumeState(cursor, evolution, thermal_psi, data)
+    end
     _require_exact_keys(
         value,
         [
@@ -448,6 +594,16 @@ function _resume_state_from_dict(value)
 end
 
 function _validate_resume_state(state, completed_steps)
+    if state isa ObservableResumeState
+        state_steps =
+            state.evolution_state === nothing ?
+            0 : state.evolution_state.completed_steps
+        state_steps == completed_steps ||
+            throw(ArgumentError("cursor does not match observable evolution state"))
+        state.evolution_state === nothing ||
+            _validate_resume_state(state.evolution_state, completed_steps)
+        return nothing
+    end
     nameof(typeof(state)) == :EvolutionResumeState &&
         fieldnames(typeof(state)) == fieldnames(EvolutionResumeState) ||
         throw(ArgumentError("resume_state must be an EvolutionResumeState"))
@@ -464,6 +620,72 @@ function _validate_resume_state(state, completed_steps)
     all(dimension -> dimension >= 0, state.maximum_link_dimensions_by_bond) ||
         throw(ArgumentError("resume state link dimensions are invalid"))
     return nothing
+end
+
+function _typed_json_value(value)
+    if value isa Symbol
+        return Dict{String,Any}("__type__" => "symbol", "value" => String(value))
+    elseif value isa NamedTuple
+        return Dict{String,Any}(
+            "__type__" => "named_tuple",
+            "keys" => String.(collect(keys(value))),
+            "values" => [_typed_json_value(item) for item in values(value)],
+        )
+    elseif value isa Tuple
+        return Dict{String,Any}(
+            "__type__" => "tuple",
+            "values" => [_typed_json_value(item) for item in value],
+        )
+    elseif value isa AbstractVector
+        return [_typed_json_value(item) for item in value]
+    elseif value isa AbstractFloat && !isfinite(value)
+        return Dict{String,Any}(
+            "__type__" => "nonfinite",
+            "value" => isnan(value) ? "nan" : signbit(value) ? "-inf" : "inf",
+        )
+    elseif value === nothing || value isa Bool || value isa Integer ||
+           value isa AbstractFloat || value isa AbstractString
+        return value
+    end
+    throw(ArgumentError("observable checkpoint data contains unsupported value $(typeof(value))"))
+end
+
+function _typed_json_restore(value)
+    if value isa AbstractVector
+        return Any[_typed_json_restore(item) for item in value]
+    elseif value isa AbstractDict && haskey(value, "__type__")
+        kind = value["__type__"]
+        if kind == "symbol"
+            _require_exact_keys(value, ["__type__", "value"], "typed symbol")
+            return Symbol(value["value"])
+        elseif kind == "named_tuple"
+            _require_exact_keys(
+                value, ["__type__", "keys", "values"], "typed named tuple"
+            )
+            keys_value = Symbol.(value["keys"])
+            length(keys_value) == length(value["values"]) ||
+                throw(ArgumentError("typed named tuple length mismatch"))
+            length(unique(keys_value)) == length(keys_value) ||
+                throw(ArgumentError("typed named tuple contains duplicate keys"))
+            return NamedTuple{Tuple(keys_value)}(
+                Tuple(_typed_json_restore(item) for item in value["values"])
+            )
+        elseif kind == "tuple"
+            _require_exact_keys(value, ["__type__", "values"], "typed tuple")
+            return Tuple(_typed_json_restore(item) for item in value["values"])
+        elseif kind == "nonfinite"
+            _require_exact_keys(value, ["__type__", "value"], "typed nonfinite")
+            value["value"] == "-inf" && return -Inf
+            value["value"] == "inf" && return Inf
+            value["value"] == "nan" && return NaN
+            throw(ArgumentError("typed nonfinite value is invalid"))
+        end
+        throw(ArgumentError("observable checkpoint data type is invalid"))
+    elseif value === nothing || value isa Bool || value isa Integer ||
+           value isa AbstractFloat || value isa AbstractString
+        return value
+    end
+    throw(ArgumentError("observable checkpoint data is invalid"))
 end
 
 function _cursor_dict(cursor::CheckpointCursor, identity::CheckpointIdentity)

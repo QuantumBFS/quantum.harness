@@ -9,6 +9,8 @@ using .FiniteBathCheckpoint:
     CheckpointCursor,
     CheckpointIdentity,
     EvolutionResumeState,
+    ObservableCursor,
+    ObservableResumeState,
     load_current_checkpoint,
     write_checkpoint_generation
 
@@ -84,7 +86,66 @@ function same_resume_state(left, right)
     )
 end
 
+function same_observable_cursor(left, right)
+    return all(
+        getfield(left, field) == getfield(right, field) for
+        field in fieldnames(typeof(left))
+    )
+end
+
+@testset "observable cursor validation" begin
+    legal = [
+        ObservableCursor(:thermal, 0, :none, :none),
+        ObservableCursor(:green, 1, :up, :before),
+        ObservableCursor(:green, 1, :up, :after),
+        ObservableCursor(:green, 1, :dn, :before),
+        ObservableCursor(:green, 1, :dn, :after),
+        ObservableCursor(:complete, 0, :none, :none),
+    ]
+    @test length(unique(legal)) == length(legal)
+    @test legal[2] == ObservableCursor(:green, 1, :up, :before)
+    @test_throws ArgumentError ObservableCursor(:thermal, 1, :none, :none)
+    @test_throws ArgumentError ObservableCursor(:green, 0, :up, :before)
+    @test_throws ArgumentError ObservableCursor(:green, 1, :sideways, :before)
+    @test_throws ArgumentError ObservableCursor(:green, 1, :up, :middle)
+    @test_throws ArgumentError ObservableCursor(:complete, 1, :none, :none)
+end
+
 @testset "atomic version-bound MPS checkpoints" begin
+    @testset "observable workflow state round trip" begin
+        mktempdir() do root
+            identity = checkpoint_identity()
+            psi, evolution = checkpoint_fixture()
+            workflow = ObservableResumeState(
+                ObservableCursor(:green, 2, :dn, :after),
+                evolution,
+                deepcopy(psi),
+                (;
+                    tau = [0.2, 0.1, 0.1],
+                    G_up = [-0.4, nothing, nothing],
+                    G_dn = [-0.6, nothing, nothing],
+                    diagnostics_up = [(; spin = :up, insertion = :creation)],
+                    diagnostics_dn = NamedTuple[],
+                    operator_log_norm = -0.25,
+                ),
+            )
+
+            write_checkpoint_generation(
+                root, identity, CheckpointCursor(2), psi, workflow
+            )
+            loaded = load_current_checkpoint(root, identity)
+
+            @test same_observable_cursor(
+                loaded.resume_state.cursor, workflow.cursor
+            )
+            @test same_resume_state(
+                loaded.resume_state.evolution_state, evolution
+            )
+            @test loaded.resume_state.data == workflow.data
+            @test abs(inner(loaded.resume_state.thermal_psi, psi)) ≈ 1.0 atol = 1.0e-12
+        end
+    end
+
     @testset "exact metadata and MPS round trip" begin
         mktempdir() do root
             identity = checkpoint_identity()

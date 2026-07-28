@@ -3,9 +3,16 @@ using LinearAlgebra
 
 include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
 using .FiniteBathObservables:
+    ObservableCursor,
+    ObservableInterrupted,
     build_finite_bath_context,
     finite_bath_observables,
     impurity_green_function
+using .FiniteBathCheckpoint:
+    CheckpointCursor,
+    CheckpointIdentity,
+    load_current_checkpoint,
+    write_checkpoint_generation
 
 function observables_dense_annihilation(n_modes::Int, mode::Int)
     dimension = 1 << n_modes
@@ -19,6 +26,18 @@ function observables_dense_annihilation(n_modes::Int, mode::Int)
         operator[target + 1, source + 1] = sign
     end
     return operator
+end
+
+function assert_observable_equivalence(actual, expected)
+    @test actual.n_d ≈ expected.n_d atol = 1.0e-10
+    @test actual.double_occupancy ≈ expected.double_occupancy atol = 1.0e-10
+    @test actual.G_up ≈ expected.G_up atol = 1.0e-10
+    @test actual.G_dn ≈ expected.G_dn atol = 1.0e-10
+    @test actual.tau == expected.tau
+    @test actual.diagnostics.green_up == expected.diagnostics.green_up
+    @test actual.diagnostics.green_dn == expected.diagnostics.green_dn
+    @test actual.diagnostics.log_partition ≈
+          expected.diagnostics.log_partition atol = 1.0e-10
 end
 
 """
@@ -212,6 +231,184 @@ end
                  entry.settings.after_steps == 0,
         vcat(result.diagnostics.green_up, result.diagnostics.green_dn),
     )
+end
+
+@testset "resumable thermal and Green-function workflow" begin
+    beta = 0.06
+    tau = [beta, 0.02, 0.0, 0.04, 0.02]
+    parameters = FiniteBathParameters(
+        [0.13], [0.17]; U = 0.61, epsilon_d = -0.27, mu = 0.03
+    )
+    common = (;
+        beta,
+        tau,
+        time_step = 0.02,
+        cutoff = 1.0e-14,
+        maxdim = 128,
+        krylov_expansion_dim = 0,
+    )
+    uninterrupted = finite_bath_observables(parameters; common...)
+    snapshots = NamedTuple[]
+    managed = finite_bath_observables(
+        parameters;
+        common...,
+        checkpoint_manager = (psi, state) ->
+            push!(snapshots, (; psi = copy(psi), resume_state = state)),
+    )
+    assert_observable_equivalence(managed, uninterrupted)
+
+    selectors = [
+        snapshot ->
+            snapshot.resume_state.cursor.phase === :thermal &&
+            snapshot.resume_state.evolution_state.completed_steps == 1,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :up, :before) &&
+            snapshot.resume_state.evolution_state !== nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :up, :after) &&
+            snapshot.resume_state.evolution_state === nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :up, :after) &&
+            snapshot.resume_state.evolution_state !== nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :dn, :before) &&
+            snapshot.resume_state.evolution_state === nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :dn, :before) &&
+            snapshot.resume_state.evolution_state !== nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :dn, :after) &&
+            snapshot.resume_state.evolution_state === nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 2, :dn, :after) &&
+            snapshot.resume_state.evolution_state !== nothing,
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 3, :up, :before),
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 1, :up, :before),
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 1, :up, :after),
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 1, :dn, :before),
+        snapshot ->
+            snapshot.resume_state.cursor ==
+            ObservableCursor(:green, 1, :dn, :after),
+    ]
+    for selector in selectors
+        target = findfirst(selector, snapshots)
+        @test target !== nothing
+        published = Ref{Any}(nothing)
+        seen = Ref(0)
+        interruption = try
+            finite_bath_observables(
+                parameters;
+                common...,
+                checkpoint_manager = (psi, state) -> begin
+                    seen[] += 1
+                    published[] = (; psi = copy(psi), resume_state = state)
+                end,
+                stop_requested = () -> seen[] == target,
+            )
+            nothing
+        catch error
+            error
+        end
+        @test interruption isa ObservableInterrupted
+        @test published[] !== nothing
+        resumed = finite_bath_observables(
+            parameters; common..., resume = published[]
+        )
+        assert_observable_equivalence(resumed, uninterrupted)
+    end
+    @test tau[2] == tau[5]
+    @test uninterrupted.G_up[2] == uninterrupted.G_up[5]
+    @test uninterrupted.G_dn[2] == uninterrupted.G_dn[5]
+
+    inconsistent = snapshots[findfirst(selectors[3], snapshots)]
+    bad_state = FiniteBathCheckpoint.ObservableResumeState(
+        ObservableCursor(:green, 2, :dn, :after),
+        inconsistent.resume_state.evolution_state,
+        inconsistent.resume_state.thermal_psi,
+        inconsistent.resume_state.data,
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters;
+        common...,
+        resume = (; psi = inconsistent.psi, resume_state = bad_state),
+    )
+end
+
+@testset "durable observable checkpoint resumes through Task 3 manager" begin
+    beta = 0.02
+    tau = [0.01, 0.01]
+    parameters =
+        FiniteBathParameters([0.1], [0.12]; U = 0.5, epsilon_d = -0.2)
+    common = (;
+        beta,
+        tau,
+        time_step = 0.02,
+        cutoff = 1.0e-14,
+        maxdim = 64,
+    )
+    uninterrupted = finite_bath_observables(parameters; common...)
+    identity = CheckpointIdentity(;
+        request_sha256 = repeat("1", 64),
+        input_payload_sha256 = repeat("2", 64),
+        bath_sha256 = repeat("3", 64),
+        solver_settings = Dict("beta" => beta),
+        source_hashes = Dict("observables" => repeat("4", 64)),
+        project_toml_sha256 = repeat("5", 64),
+        manifest_toml_sha256 = repeat("6", 64),
+        julia_version = string(VERSION),
+        itensors_version = string(Base.pkgversion(ITensors)),
+        itensormps_version = string(Base.pkgversion(ITensorMPS)),
+        hdf5_version = "0.17.3",
+        checkpoint_schema = 1,
+        writer_version = "1.0.0",
+    )
+    mktempdir() do root
+        publications = Ref(0)
+        interruption = try
+            finite_bath_observables(
+                parameters;
+                common...,
+                checkpoint_manager = (psi, state) -> begin
+                    publications[] += 1
+                    completed_steps =
+                        state.evolution_state === nothing ?
+                        0 : state.evolution_state.completed_steps
+                    write_checkpoint_generation(
+                        root,
+                        identity,
+                        CheckpointCursor(completed_steps),
+                        psi,
+                        state,
+                    )
+                end,
+                stop_requested = () -> publications[] == 4,
+            )
+            nothing
+        catch error
+            error
+        end
+        @test interruption isa ObservableInterrupted
+        loaded = load_current_checkpoint(root, identity)
+        resumed = finite_bath_observables(
+            parameters; common..., resume = loaded
+        )
+        assert_observable_equivalence(resumed, uninterrupted)
+    end
 end
 
 @testset "observable progress remains quiet by default" begin
