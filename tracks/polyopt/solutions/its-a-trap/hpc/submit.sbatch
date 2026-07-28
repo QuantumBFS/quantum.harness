@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=t1q-scnet
-#SBATCH --partition=hx1hdnormal01
+#SBATCH --partition=xhhgnormal
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=120G
 #SBATCH --time=12:00:00
-#SBATCH --array=1-22
+#SBATCH --array=1-23%4
 #SBATCH --output=slurm-%A_%a.out
 # One overnight_harness cell per array task; cells.txt line = task id.
 # Every cell writes its OWN outdir (results.csv append is not concurrency-safe)
