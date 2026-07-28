@@ -30,11 +30,23 @@ end
     @test paper_values ≈ values atol=1e-12
 end
 
+@testset "period-resolved Redfield drive distinguishes Fig. 2 frequencies" begin
+    model = SpinBosonModel()
+    low_frequency = zeros(49)
+    high_frequency = zeros(49)
+    redfield_magnus!(low_frequency, model, 2.5, π / 60)
+    redfield_magnus!(high_frequency, model, 10.0, π / 60)
+    @test maximum(abs.(low_frequency .- high_frequency)) > 1e-4
+
+    oracle = redfield_magnus_paper_formula(model, 2.5, π / 60, length(low_frequency))
+    @test low_frequency ≈ oracle atol=1e-12
+end
+
 @testset "quick Fig. 2 baseline records strict error metrics" begin
     mktempdir() do dir
         grid = period_grid(2.5, π / 60)
         times = collect(0:4) .* grid.dt
-        values = redfield_magnus_paper_formula(SpinBosonModel(), grid.dt, length(times))
+        values = redfield_magnus_paper_formula(SpinBosonModel(), 2.5, grid.dt, length(times))
         path = joinpath(dir, "redfield.csv")
         open(path, "w") do io
             for (t, value) in zip(times, values)

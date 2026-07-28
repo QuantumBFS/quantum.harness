@@ -28,7 +28,7 @@ function run_fig2(config::RunConfig, reference_paths::AbstractDict; exact_solver
         if paths isa AbstractString
             reference = load_reference_curve(paths, times)
             values = zeros(length(times))
-            redfield_magnus!(values, model, grid.dt)
+            redfield_magnus!(values, model, ωd, grid.dt)
             metrics = error_metrics(values, reference)
             results[ωd] = (; times, grid, metrics..., max_error=metrics.max_error, rmse=metrics.rmse)
             continue
@@ -36,7 +36,7 @@ function run_fig2(config::RunConfig, reference_paths::AbstractDict; exact_solver
 
         redfield_reference = load_reference_curve(paths.redfield, times)
         redfield_values = zeros(length(times))
-        redfield_magnus!(redfield_values, model, grid.dt)
+        redfield_magnus!(redfield_values, model, ωd, grid.dt)
         redfield = error_metrics(redfield_values, redfield_reference)
 
         exact_reference = load_reference_curve(paths.exact, times)
