@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
+import json
+from pathlib import Path
 
 import pytest
 import sympy as sp
@@ -12,16 +14,19 @@ from oracle.overlap_klein import (
     ExactDualCertificate,
     ExactPrimalCertificate,
     bridge_labels,
+    build_system,
     certificate_from_json,
     certificate_to_json,
     find_zero_dual,
     overlap_geometry,
     quadratic_basis,
     reconstruct_exact_primal,
+    run_anchor_scan,
     solve_anchor,
     support_edges,
     verify_primal,
     verify_zero_dual,
+    write_result,
 )
 
 
@@ -532,3 +537,96 @@ def test_certificate_json_serializer_enforces_the_parser_length_limit() -> None:
         certificate_from_json(
             payload, _synthetic_system([[1, 0], [0, 1]])
         )
+
+
+def test_build_system_uses_the_fixed_overlap_klein_geometry() -> None:
+    """Catches a runner that compiles a different transform or basis."""
+    system = build_system("number-conserving", "rings-bridges")
+
+    assert system.labels == tuple(
+        item.label
+        for item in quadratic_basis("number-conserving", "rings-bridges")
+    )
+    assert system.coefficients.shape == (992, 24)
+
+
+def test_anchor_scan_is_deterministic_across_worker_counts() -> None:
+    """Catches completion-order output or execution metadata in the payload."""
+    one = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=1,
+        source_commit="a" * 40,
+    )
+    two = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=2,
+        source_commit="a" * 40,
+    )
+    assert one == two
+    assert one["schema_version"] == 1
+    assert one["protocol"] == "overlap-klein-v1"
+    assert one["source_commit"] == "a" * 40
+    assert one["anchor_count"] == len(bridge_labels("number-conserving"))
+
+
+def test_result_payload_contains_replayable_terminal_evidence() -> None:
+    """Catches omitted solver diagnostics or certificate classifications."""
+    result = run_anchor_scan(
+        "number-conserving",
+        "rings-bridges",
+        workers=1,
+        source_commit="b" * 40,
+    )
+    for anchor in result["anchors"]:
+        assert set(anchor) >= {"label", "positive", "negative", "classification"}
+        assert set(anchor["positive"]) >= {"status", "solver_message"}
+        assert set(anchor["negative"]) >= {"status", "solver_message"}
+        assert anchor["classification"] in {
+            "certified-feasible",
+            "certified-zero",
+            "numerical-only",
+        }
+
+
+@pytest.mark.parametrize("workers", (0, -1, True))
+def test_anchor_scan_rejects_nonpositive_or_boolean_worker_counts(
+    workers: int,
+) -> None:
+    """Catches accepting invalid worker counts before starting processes."""
+    with pytest.raises(ValueError, match="workers"):
+        run_anchor_scan(
+            "number-conserving",
+            "rings-bridges",
+            workers=workers,
+            source_commit="c" * 40,
+        )
+
+
+@pytest.mark.parametrize("source_commit", ("A" * 39, "g" * 40, "a" * 41))
+def test_anchor_scan_requires_a_canonical_full_git_commit(
+    source_commit: str,
+) -> None:
+    """Catches accepting abbreviated or non-hex source provenance."""
+    with pytest.raises(ValueError, match="source_commit"):
+        run_anchor_scan(
+            "number-conserving",
+            "rings-bridges",
+            workers=1,
+            source_commit=source_commit,
+        )
+
+
+def test_write_result_creates_sorted_utf8_json_at_the_requested_path(
+    tmp_path: Path,
+) -> None:
+    """Catches writing an unstable encoding or a sibling instead of output."""
+    output = tmp_path / "nested" / "result.json"
+    write_result({"z": "\u221a2", "a": {"b": 1}}, output)
+
+    assert output.read_bytes() == b'{\n  "a": {\n    "b": 1\n  },\n  "z": "\xe2\x88\x9a2"\n}\n'
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "a": {"b": 1},
+        "z": "\u221a2",
+    }
