@@ -1,5 +1,11 @@
 # BoundGSEnergy — coarse-grained NPA certification for quantum spin systems
 
+> **2026-07-27 — work moved.** With the organizers' blessing, this team's
+> research now lives in the standalone repo
+> [**wangfh5/BoundGSEnergy**](https://github.com/wangfh5/BoundGSEnergy)
+> (scripts, results, survey library, plan; skills pinned via Ion remote
+> deps). This folder keeps only the registration README and PLAN.md.
+
 ## Team
 
 | | |
