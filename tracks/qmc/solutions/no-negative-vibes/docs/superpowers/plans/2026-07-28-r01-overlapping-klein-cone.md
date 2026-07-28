@@ -921,7 +921,7 @@ git status --short
 
 Expected: the exact pushed commit and an empty status.
 
-- [ ] **Step 2: Run a one-worker smoke cell**
+- [ ] **Step 2: Run a matching one-worker smoke for each production cell**
 
 From the solution directory:
 
@@ -933,15 +933,27 @@ python -m oracle.overlap_klein \
   --mask rings-bridges \
   --workers 1 \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke.json
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-bridges-attempt-01.json
+
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
+python -m oracle.overlap_klein \
+  --family number-conserving \
+  --mask rings-diagonals-bridges \
+  --workers 1 \
+  --source-commit "$SOURCE_COMMIT" \
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-diagonals-bridges-attempt-01.json
 ```
 
 Verify that `SOURCE_COMMIT` is the same value already checked before the run;
-do not use a branch name as provenance.
+do not use a branch name as provenance.  A smoke is valid only for the same
+family, mask, and source commit as its production cell.  Use a new
+`attempt-NN` path for every retry because the atomic writer otherwise replaces
+an existing result.
 
-Expected operational result: exit code zero, every anchor classified, and
-every embedded exact certificate replays. The scientific classification is
-intentionally determined by the run.
+Expected operational result for both smokes: exit code zero, every anchor
+classified, no solver branch has `status="error"`, and every embedded exact
+certificate replays.  The scientific classification is intentionally
+determined by the run.
 
 - [ ] **Step 3: Run the full number-conserving mask pair**
 
@@ -955,7 +967,7 @@ python -m oracle.overlap_klein \
   --mask rings-bridges \
   --workers 14 \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges.json
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges-attempt-01.json
 
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONPATH=. \
 python -m oracle.overlap_klein \
@@ -963,41 +975,87 @@ python -m oracle.overlap_klein \
   --mask rings-diagonals-bridges \
   --workers 14 \
   --source-commit "$SOURCE_COMMIT" \
-  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges.json
+  --output ../../results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges-attempt-01.json
 ```
 
 The two cells are distinct experiments within `R01-E001`; do not also send
-them to the CPU worker.
+them to the CPU worker.  For each cell, require equality of the complete
+scientific payload between its one-worker smoke and production result after
+removing only the top-level `execution` object.
 
 - [ ] **Step 4: Add fixture replay before interpretation**
 
-Copy only compact exact certificates and summaries into
-`fixtures/overlap_klein_r01.json`. Add:
+Copy only compact exact certificates, classifications, raw-result hashes, and
+reproducibility metadata into `fixtures/overlap_klein_r01.json`.  The compact
+fixture schema intentionally renames raw branch field
+`exact_primal_certificate` to `certificate`; make that conversion explicit
+rather than treating the raw and fixture schemas as identical.  Add coverage
+and replay tests:
 
 ```python
-def test_committed_r01_fixture_replays_every_number_conserving_certificate() -> None:
+def test_r01_fixture_covers_both_number_conserving_cells_without_duplicates() -> None:
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
-    for cell in payload["cells"]:
-        if cell["family"] != "number-conserving":
-            continue
+    cells = [
+        cell for cell in payload["cells"]
+        if cell["family"] == "number-conserving"
+    ]
+    assert [cell["mask"] for cell in cells] == [
+        "rings-bridges",
+        "rings-diagonals-bridges",
+    ]
+    for cell in cells:
+        system = build_system(cell["family"], cell["mask"])
+        expected_labels = bridge_labels(cell["family"])
+        assert cell["system_shape"] == list(system.coefficients.shape)
+        assert cell["anchor_count"] == len(expected_labels)
+        assert [anchor["label"] for anchor in cell["anchors"]] == expected_labels
+
+
+def test_r01_fixture_classifications_are_consistent_and_all_certificates_replay() -> None:
+    payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    cells = [
+        cell for cell in payload["cells"]
+        if cell["family"] == "number-conserving"
+    ]
+    assert len(cells) == 2
+    for cell in cells:
         system = build_system(cell["family"], cell["mask"])
         for anchor in cell["anchors"]:
             if anchor["classification"] == "certified-feasible":
+                replayed = 0
                 for sign_name in ("positive", "negative"):
                     branch = anchor[sign_name]
                     if "certificate" in branch:
                         certificate = certificate_from_json(branch["certificate"], system)
                         assert verify_primal(system, certificate)
+                        assert certificate.anchor_label == anchor["label"]
+                        assert certificate.anchor_sign == (
+                            1 if sign_name == "positive" else -1
+                        )
+                        replayed += 1
+                assert replayed >= 1
             elif anchor["classification"] == "certified-zero":
+                assert anchor["positive"]["status"] == "infeasible"
+                assert anchor["negative"]["status"] == "infeasible"
                 certificate = certificate_from_json(anchor["zero_certificate"], system)
                 assert verify_zero_dual(system, certificate)
+                assert certificate.anchor_label == anchor["label"]
+            elif anchor["classification"] == "numerical-only":
+                assert "zero_certificate" not in anchor
+            else:
+                raise AssertionError(anchor["classification"])
 ```
 
 - [ ] **Step 5: Record the result and transferable lesson**
 
 Append `R01-E001` with source commit, commands, CPU/RAM/workers, system
 dimensions, every anchor classification, certificate paths, interpretation,
-and next decision. State explicitly whether cross-cluster hopping survives.
+and next decision.  Record every smoke and production path plus SHA-256,
+package versions, and the scientific-payload equality check.  Record failed
+attempts even when no JSON was produced.  State explicitly, for every directed
+bridge and each anchor sign, whether cross-cluster hopping survives; do not
+promote a single feasible anchor into a claim about the full Hermitian
+Hamiltonian, an open cone, or a positive-coefficient HS decomposition.
 
 - [ ] **Step 6: Verify, commit, and push the interpreted experiment**
 
