@@ -90,3 +90,31 @@ First inventory the exact pivot count under Slurm. Build and solve derived
 MOFs only if the quotient is substantial enough to be decision-relevant.
 Because the earlier 8,803-to-3,250 moment quotient increased factor fill, a
 smaller variable count alone is not evidence of a memory improvement.
+
+If the moment gate passes, test one additional cone theorem separately.
+The degree-at-most-two positive-row space decomposes under `SO(3)` as
+
+```text
+centered: l=0 multiplicity 36, l=1 multiplicity 45, l=2 multiplicity 36
+scalar:   l=0 multiplicity 37, l=1 multiplicity 45, l=2 multiplicity 36.
+```
+
+The current discrete-isotypic representation carries two 36-side copies per
+family for the two octahedral pieces of the same `l=2` irrep. Continuous-spin
+invariance predicts that the S3-standard 36-side block and the retained
+nontrivial-character 36-side block are exactly congruent up to fixed rational
+row normalization. This could reduce the positive cone sides from
+
+```text
+[36,36,36,45,37,36,36,45]
+```
+
+to
+
+```text
+[36,36,45,37,36,45],
+```
+
+or 4,772 packed coordinates including the gap scalar. Do not remove either
+copy until every substituted upper-triangle coefficient and the row-map rank
+have been replayed exactly.
