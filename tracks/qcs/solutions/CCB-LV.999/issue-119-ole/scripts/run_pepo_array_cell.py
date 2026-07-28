@@ -41,12 +41,23 @@ def confined_run_root(run_dir: object, workspace_root: Path) -> Path:
         or RUN_ROOT_PATTERN.fullmatch(requested.parts[1]) is None
     ):
         raise ValueError("run_dir must match results/issue119-pepo-*")
-    resolved = (workspace_root / requested).resolve()
-    results_root = (workspace_root / "results").resolve()
+    workspace = workspace_root.resolve()
+    declared_results_root = workspace / "results"
+    results_root = declared_results_root.resolve()
+    if results_root != declared_results_root:
+        raise ValueError("run_dir results root must not be a symlink")
+    resolved = (workspace / requested).resolve()
     try:
         resolved.relative_to(results_root)
     except ValueError as error:
         raise ValueError("run_dir must remain under repo-root results/") from error
+    if (
+        resolved.parent != results_root
+        or RUN_ROOT_PATTERN.fullmatch(resolved.name) is None
+    ):
+        raise ValueError(
+            "run_dir resolved root must match results/issue119-pepo-*"
+        )
     return resolved
 
 
@@ -54,6 +65,23 @@ def safe_cell_id(cell_id: object) -> str:
     if not isinstance(cell_id, str) or CELL_ID_PATTERN.fullmatch(cell_id) is None:
         raise ValueError("cell_id must be one safe relative path component")
     return cell_id
+
+
+def confined_cell_dir(run_root: Path, cell_id: str, workspace_root: Path) -> Path:
+    results_root = (workspace_root.resolve() / "results").resolve()
+    resolved = (run_root / "cells" / cell_id).resolve()
+    try:
+        relative_to_run = resolved.relative_to(run_root)
+        resolved.relative_to(results_root)
+    except ValueError as error:
+        raise ValueError(
+            "cell path must remain under the selected resolved run root"
+        ) from error
+    if relative_to_run == Path("."):
+        raise ValueError(
+            "cell path must remain below the selected resolved run root"
+        )
+    return resolved
 
 
 def selected_payload(run_spec: dict, selector: int) -> dict:
@@ -153,7 +181,7 @@ def run_cell(
     direct_runner = runner or OLE_ROOT / "scripts" / "run_pepo.py"
     run_root = confined_run_root(payload["run_dir"], workspace_root)
     cell_id = safe_cell_id(payload["cell_id"])
-    cell_dir = (run_root / "cells" / cell_id).resolve()
+    cell_dir = confined_cell_dir(run_root, cell_id, workspace_root)
     source_result = cell_dir / "pepo-result.json"
     command = [
         str(python_bin),

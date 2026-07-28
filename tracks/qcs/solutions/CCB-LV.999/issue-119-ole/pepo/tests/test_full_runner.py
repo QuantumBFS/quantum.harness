@@ -617,6 +617,69 @@ args.output.write_text(json.dumps(document), encoding="utf-8")
     )
 
 
+def _write_marker_runner(path: Path, marker: Path) -> None:
+    path.write_text(
+        f"""#!/usr/bin/env python3
+from pathlib import Path
+
+Path({str(marker)!r}).write_text("invoked", encoding="utf-8")
+print("confirmation_token=0123456789abcdef")
+""",
+        encoding="utf-8",
+    )
+
+
+def test_array_run_rejects_run_root_symlink_before_subprocess(tmp_path: Path):
+    """Breaks if a textual PEPO run root can resolve to a different results identity."""
+    payload = ARRAY_RUNNER.selected_payload(_run_spec(), 1)
+    results_root = tmp_path / "results"
+    results_root.mkdir()
+    redirected = results_root / "not-a-pepo-run"
+    redirected.mkdir()
+    (results_root / "issue119-pepo-test").symlink_to(
+        redirected,
+        target_is_directory=True,
+    )
+    marker = tmp_path / "runner-invoked"
+    fake_runner = tmp_path / "fake-run-pepo.py"
+    _write_marker_runner(fake_runner, marker)
+
+    with pytest.raises(ValueError, match="run_dir"):
+        ARRAY_RUNNER.run_cell(
+            payload,
+            workspace_root=tmp_path,
+            python_bin=Path(sys.executable),
+            runner=fake_runner,
+        )
+
+    assert not marker.exists()
+    assert list(redirected.iterdir()) == []
+
+
+def test_array_run_rejects_cells_symlink_escape_before_subprocess(tmp_path: Path):
+    """Breaks if a pre-existing cells symlink can redirect a selected cell outside its run."""
+    payload = ARRAY_RUNNER.selected_payload(_run_spec(), 1)
+    run_root = tmp_path / "results" / "issue119-pepo-test"
+    run_root.mkdir(parents=True)
+    escaped = tmp_path / "escaped-cells"
+    escaped.mkdir()
+    (run_root / "cells").symlink_to(escaped, target_is_directory=True)
+    marker = tmp_path / "runner-invoked"
+    fake_runner = tmp_path / "fake-run-pepo.py"
+    _write_marker_runner(fake_runner, marker)
+
+    with pytest.raises(ValueError, match="cell path"):
+        ARRAY_RUNNER.run_cell(
+            payload,
+            workspace_root=tmp_path,
+            python_bin=Path(sys.executable),
+            runner=fake_runner,
+        )
+
+    assert not marker.exists()
+    assert list(escaped.iterdir()) == []
+
+
 def test_array_run_stores_direct_document_and_atomic_scan_manifest(tmp_path: Path):
     """Breaks if the adapter loses the direct document, output path, or declared payload."""
     payload = ARRAY_RUNNER.selected_payload(_run_spec(), 2)
