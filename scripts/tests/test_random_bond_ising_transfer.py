@@ -79,5 +79,47 @@ class RandomBondRowActionTests(unittest.TestCase):
             operator.apply(np.ones(8), np.array([1, 0, 1]), np.ones(3))
 
 
+class RandomStripTests(unittest.TestCase):
+    def test_random_strip_is_seed_reproducible_and_blocked(self):
+        """Catches lost RNG control, burn-in leakage, or malformed blocks."""
+        module = _load_module()
+        self.assertTrue(hasattr(module, "run_random_strip"), "run_random_strip is missing")
+        arguments = dict(
+            L=3,
+            p=0.1092212,
+            seed=122,
+            burn_in=6,
+            retained_rows=24,
+            block_length=8,
+            progress=False,
+        )
+
+        first = module.run_random_strip(**arguments)
+        second = module.run_random_strip(**arguments)
+
+        np.testing.assert_array_equal(
+            first["block_log_norm_means"], second["block_log_norm_means"]
+        )
+        self.assertEqual(len(first["block_log_norm_means"]), 3)
+        self.assertTrue(math.isfinite(first["lyapunov"]))
+        self.assertTrue(math.isfinite(first["free_energy"]))
+        self.assertGreaterEqual(first["free_energy_se"], 0.0)
+
+    def test_random_strip_rejects_incomplete_blocks(self):
+        """Catches silently dropping retained rows from the error estimate."""
+        module = _load_module()
+        self.assertTrue(hasattr(module, "run_random_strip"), "run_random_strip is missing")
+        with self.assertRaises(ValueError):
+            module.run_random_strip(
+                L=3,
+                p=0.1,
+                seed=1,
+                burn_in=2,
+                retained_rows=10,
+                block_length=6,
+                progress=False,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

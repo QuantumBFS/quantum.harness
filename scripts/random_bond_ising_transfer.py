@@ -2,6 +2,7 @@
 """Matrix-free spin-basis row transfers for the bimodal random-bond Ising model."""
 
 import math
+import time
 
 import numpy as np
 
@@ -70,3 +71,86 @@ class RandomBondRowTransfer:
         horizontal_energy = horizontal_bonds @ self.spin_products
         source *= np.exp(self.coupling * horizontal_energy)
         return source
+
+
+def sample_bond_signs(rng, L, p):
+    """Sample independent +/-1 bonds using p as the antiferromagnetic fraction."""
+    return np.where(rng.random(int(L)) < float(p), -1, 1).astype(np.int8)
+
+
+def run_random_strip(
+    L,
+    p,
+    seed,
+    burn_in,
+    retained_rows,
+    block_length,
+    progress=True,
+):
+    """Estimate the leading Lyapunov exponent of an IID random transfer strip."""
+    L = int(L)
+    burn_in = int(burn_in)
+    retained_rows = int(retained_rows)
+    block_length = int(block_length)
+    if burn_in < 0 or retained_rows <= 0 or block_length <= 0:
+        raise ValueError("row counts must be positive and burn_in nonnegative")
+    if retained_rows % block_length:
+        raise ValueError("retained_rows must be a multiple of block_length")
+
+    coupling = nishimori_coupling(p)
+    operator = RandomBondRowTransfer(L, coupling)
+    rng = np.random.default_rng(seed)
+    vector = np.ones(operator.dimension, dtype=np.float64)
+    vector /= np.linalg.norm(vector)
+    block_means = []
+    block_sum = 0.0
+    retained = 0
+    started = time.perf_counter()
+
+    for row in range(burn_in + retained_rows):
+        horizontal = sample_bond_signs(rng, L, p)
+        vertical = sample_bond_signs(rng, L, p)
+        vector = operator.apply(vector, horizontal, vertical)
+        norm = float(np.linalg.norm(vector))
+        if not math.isfinite(norm) or norm <= 0.0:
+            raise RuntimeError(f"invalid transfer norm at row {row}")
+        vector /= norm
+        if row < burn_in:
+            continue
+
+        block_sum += math.log(norm)
+        retained += 1
+        if retained % block_length == 0:
+            block_means.append(block_sum / block_length)
+            block_sum = 0.0
+            if progress:
+                print(
+                    f"L={L}: block={len(block_means)}, "
+                    f"Lambda0={np.mean(block_means):.10f}",
+                    flush=True,
+                )
+
+    runtime_seconds = time.perf_counter() - started
+    blocks = np.asarray(block_means, dtype=float)
+    lyapunov = float(np.mean(blocks))
+    lyapunov_se = (
+        float(np.std(blocks, ddof=1) / math.sqrt(len(blocks)))
+        if len(blocks) > 1
+        else math.nan
+    )
+    return {
+        "L": L,
+        "p": float(p),
+        "coupling": coupling,
+        "seed": int(seed),
+        "burn_in": burn_in,
+        "retained_rows": retained_rows,
+        "block_length": block_length,
+        "block_log_norm_means": blocks,
+        "lyapunov": lyapunov,
+        "lyapunov_se": lyapunov_se,
+        "free_energy": -lyapunov / L,
+        "free_energy_se": lyapunov_se / L,
+        "runtime_seconds": runtime_seconds,
+        "rows_per_second": (burn_in + retained_rows) / runtime_seconds,
+    }
