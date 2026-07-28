@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=xhacnormalb
 #SBATCH --job-name=gap_kagome
-#SBATCH --time=03:00:00
+#SBATCH --time=06:00:00
 #SBATCH --cpus-per-task=32
 #SBATCH --mem-per-cpu=3800M
 #SBATCH --output=gap_kagome.out
@@ -83,7 +83,10 @@ function scan_gamma_kagome(tag, N, H, triples, edges, triples0, edges0, d, gamma
     end
 end
 
-# ---------- Config 1: N=13, d=2 (expected Delta <= ~1.31) ----------
+# ---------- Config 1: N=13, d=3 (example.jl's working param; expected Delta <= ~1.28) ----------
+# NOTE: d=2 is structurally invalid for kagome -- the degree-1 bulk/gap basis is
+# empty, producing a 0-dimension PSD block (MosekError 20401). d=3 (degree-2
+# bulk basis) is the minimum working order, matching example.jl.
 N = 13
 triples = [[1,2,3],[1,4,5],[2,6,7],[3,8,9],[4,10,11],[5,12,13]]
 edges = []
@@ -92,14 +95,10 @@ edges0 = []
 H13 = kagome_H(triples)
 println("N=13 H built. |triples|=", length(triples), " |supp|=", length(H13.supp))
 flush(stdout)
-scan_gamma_kagome("Kagome-N13-d2", N, H13, triples, edges, triples0, edges0, 2,
-                  [0.8, 1.0, 1.2, 1.28, 1.30, 1.31, 1.32, 1.34, 1.4, 1.6])
-
-# ---------- Config 2: N=13, d=3 (expected Delta <= ~1.28, tighter) ----------
 scan_gamma_kagome("Kagome-N13-d3", N, H13, triples, edges, triples0, edges0, 3,
-                  [0.8, 1.0, 1.2, 1.26, 1.28, 1.29, 1.30, 1.32, 1.4, 1.6])
+                  [1.0, 1.2, 1.26, 1.28, 1.29, 1.30, 1.32, 1.35, 1.4, 1.6])
 
-# ---------- Config 3: N=27, d=2 (expected Delta <= ~1.24, bigger patch) ----------
+# ---------- Config 2: N=27, d=3 (expected Delta <= ~1.15, bigger patch) ----------
 N = 27
 triples = [[1,2,3],[1,4,5],[2,6,7],[3,8,9],[4,10,11],[5,12,13],[6,14,27],
            [7,15,16],[8,17,18],[9,19,20],[10,20,21],[11,22,23],[12,24,25],[13,26,27]]
@@ -109,8 +108,14 @@ edges0 = []
 H27 = kagome_H(triples)
 println("N=27 H built. |triples|=", length(triples), " |supp|=", length(H27.supp))
 flush(stdout)
-scan_gamma_kagome("Kagome-N27-d2", N, H27, triples, edges, triples0, edges0, 2,
-                  [0.8, 1.0, 1.15, 1.20, 1.22, 1.24, 1.25, 1.26, 1.30, 1.4])
+scan_gamma_kagome("Kagome-N27-d3", N, H27, triples, edges, triples0, edges0, 3,
+                  [1.0, 1.1, 1.13, 1.15, 1.16, 1.17, 1.18, 1.20, 1.25, 1.4])
+
+# ---------- Config 3: N=13, d=4 (tighter than d=3, if affordable) ----------
+scan_gamma_kagome("Kagome-N13-d4", 13, H13,
+                  [[1,2,3],[1,4,5],[2,6,7],[3,8,9],[4,10,11],[5,12,13]], [],
+                  [[1,2,3],[1,4,5]], [], 4,
+                  [1.0, 1.2, 1.25, 1.27, 1.28, 1.29, 1.30, 1.32, 1.4, 1.6])
 
 println("\n=== ALL DONE ===  ", Dates.format(now(), "HH:MM:SS"))
 flush(stdout)
