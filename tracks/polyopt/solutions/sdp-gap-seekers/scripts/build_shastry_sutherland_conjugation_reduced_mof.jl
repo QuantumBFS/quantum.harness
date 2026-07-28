@@ -281,8 +281,9 @@ function main(arguments::Vector{String}=ARGS)
         conjugation_reduced_assembly_report(real_assembly)
 
     progress("optimizer-free real-cone JuMP model")
-    jump_measurement = @timed
-        build_conjugation_reduced_jump_primal(real_assembly)
+    jump_measurement = @timed build_conjugation_reduced_jump_primal(
+        real_assembly,
+    )
     jump_model = jump_measurement.value
 
     mof_path = joinpath(options.output, "model.mof.json")

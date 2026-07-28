@@ -51,4 +51,13 @@ Updated: 2026-07-29 UTC.
   finite relaxation uses real PSD blocks with 31,807 positive-cone
   coordinates, plus three scalar gap blocks. No immutable source file or
   supplied MOF is modified.
+- Conjugation truth attempt r1, Slurm job `22988127`, passed all 58 assertions
+  in the exact M/K/V4 testset in 102.2 s. The broader wrapper was then
+  canceled during an unrelated dense-ED tail after 12:34; its truth-log
+  SHA-256 is
+  `db7d0326ad6079cad348cfc8c504e3841545a76237742fc7c21feae5cd78b70f`.
+- Derived-MOF build attempt r1, Slurm job `22988179`, failed before assembly
+  because a line-broken `@timed` macro call did not expand. Peak RSS was
+  532,916 KiB. The corrected builder places the macro argument on the same
+  expression and receives a local load/`--help` check before r2.
 - No decision-changing user or resource need is open.

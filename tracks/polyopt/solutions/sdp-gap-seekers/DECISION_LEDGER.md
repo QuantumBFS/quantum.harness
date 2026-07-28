@@ -81,3 +81,19 @@ gauge makes every remaining block real symmetric. The predicted positive-cone
 coordinate count is 31,807. This route must pass exhaustive exact coefficient
 and equality-space tests under Slurm before any derived MOF is generated or
 solved.
+
+## 2026-07-29 — conjugation truth gate passed; full-suite tail dropped
+
+Slurm job `22988127` passed all 58 assertions in the exact M/K/V4 testset,
+including the exhaustive 31,810-entry coefficient gate, in 102.2 s. The same
+wrapper then spent more than ten minutes in an unrelated dense-ED oracle.
+Because that tail cannot change the conjugation theorem, the job was canceled
+at 12:34 and the passed test log was preserved. Subsequent jobs target only
+the exact reduction build/reload path instead of repeating the bottleneck.
+
+## 2026-07-29 — derived-MOF build r1 stopped before assembly
+
+Slurm job `22988179` stopped during Julia macro expansion: a line break left
+`@timed` without its expression. No source assembly, model, MOF, or solve ran.
+The next attempt moves the macro argument into the same expression and first
+loads the complete script through its `--help` path.
