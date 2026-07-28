@@ -1,10 +1,10 @@
-# Graded monomial crossing：首轮结果
+# Graded monomial crossing：结果与已知类排重
 
 日期：2026-07-28
 
 ## 一句话结果
 
-我们找到了纯 TN 之外的一个严格正性机制：
+我们证明了纯 TN 之外的一个严格 graded determinant 恒等式：
 
 > 允许单粒子网络出现 permutation crossing，并让每个 crossing 携带它的置换奇偶
 > 标量符号，则这个符号会在任意长历史中精确抵消 determinant 的符号。
@@ -12,9 +12,18 @@
 它反推出一个局域、Hermitian、真正含相互作用的 spinless-fermion 模型；在三角形等
 奇环上，该模型不能靠站点 `+/-` gauge 变成固定 Fock 基 stoquastic hopping。
 
-这已经是 `physical-candidate`，但不是 `challenge-ready`：`r=1` 边界与 graded
-permutation / `su(1|1)` 模型有关，符号重组也与 meron/loop 思想相邻，文献优先权和
-已知机制排重尚未完成。
+但文献排重改变了新颖性判断：
+
+- `r=1` 时局部算符**精确等于**已知的 `su(1|1)` graded permutation；
+- `r>1` 物理 Hamiltonian 可严格写成 Majorana reflection positivity 已覆盖的
+  “负半定一体核 + 吸引密度相互作用”；
+- 所以它不是一个新的无符号 Hamiltonian 类，也不能作为 challenge 的最终新类；
+- monomial cycle factorization 本身也是已知矩阵事实，grade 不等式是它的直接推论；
+- 保留下来的是把这些已知事实组织成逐历史 QMC 正权的一种特殊 CT 展开和可执行证书。
+
+当前状态应降为
+`known-monomial-factorization / known-majorana-subclass / useful-reformulation`。
+不再主张新的矩阵正性定理或新的无符号 Hamiltonian 类。
 
 ## 最直观的理解
 
@@ -120,6 +129,57 @@ U_e/t_e = r_e - 1/r_e
 都有唯一 `r_e>1`，所以 hopping 与 attraction 可独立指定；额外的边化学势是
 `-q_e(n_i+n_j)`。
 
+## 为什么物理模型属于已知 Majorana 正性类
+
+“不能做站点符号 gauge”不等于“超出所有已知无符号机制”。把每条边的密度相互作用
+改写为半填充形式，令
+
+```text
+t_e = q_e r_e,
+U_e = q_e(r_e^2-1),
+a_e = q_e + U_e/2 = q_e(r_e^2+1)/2.
+```
+
+则
+
+```text
+q_e Gamma(B_e)
+ = t_e(c_i^dag c_j+h.c.)
+   - U_e(n_i-1/2)(n_j-1/2)
+   - a_e(n_i+n_j)
+   + q_e + U_e/4.                                  (5)
+```
+
+忽略常数后，一体 kernel 在边 `(i,j)` 上的块是
+
+```text
+K_e = [[-a_e, t_e],
+       [ t_e,-a_e]].
+```
+
+它的两个本征值恰为
+
+```text
+-q_e(r_e-1)^2/2,   -q_e(r_e+1)^2/2,
+```
+
+所以每个 `K_e` 都负半定，任意图上求和后的 `K=sum_e K_e` 仍负半定。另一方面，
+所有 centered density coupling 都是 `V_ij=-U_e<0`。把所有 site 放在 Majorana
+reflection decomposition 的同一部分，便得到
+
+```text
+H_0 = -c^dag B_1 c,       B_1=-K >= 0,
+V_ij <= 0                 (same reflection part).
+```
+
+这正是
+[Wei et al., 2016](https://arxiv.org/abs/1601.01994) Eq. (7)--(10) 的
+Majorana-reflection-positive 充分条件。它允许同一分区内的吸引作用和半正定的一体
+块，因此不要求物理 hopping 图本身是二分图。
+
+`majorana_reflection_certificate()` 现在直接构造 `K`、`B_1=-K` 和负的
+`V_ij`，测试还逐 Fock 矩阵验证了式 `(5)`。这不是仅凭文献语言相似做出的归类。
+
 ## 为什么三角模型不是原来的 stoquastic TN 模型
 
 在一粒子 sector，三角形三条边的 hopping matrix element 全为正。站点符号规范
@@ -201,7 +261,7 @@ constraint 是下一道物理问题。
 当前结果：
 
 ```text
-19 targeted tests passed
+20 targeted tests passed
 ```
 
 全 solution suite 将在提交前重新运行。
@@ -210,22 +270,33 @@ constraint 是下一道物理问题。
 
 必须主动保守：
 
-1. `r=1` 的局部算符是 fermionic/graded permutation 的近亲；`su(1|1)`
-   permutation chain 本身已有系统研究，例如
+1. `r=1` 的局部算符**就是** fermionic/graded permutation：
+   `1-n_i-n_j+c_i^dag c_j+c_j^dag c_i`；`su(1|1)` permutation chain
+   已有系统研究，例如
    [Carrasco et al., 2016](https://arxiv.org/abs/1603.03668)。
 2. 把 fermion permutation sign 通过构型重组消掉是 meron-cluster 的核心思想之一，
    见 [Chandrasekharan and Wiese, 1999](https://arxiv.org/abs/cond-mat/9902128)。
-3. 初步检索尚未找到与这里完全相同的 `r>1` monomial determinant grade、奇环吸引
-   模型和单-mode real-log lift；这只能算“尚未找到”，不能替代完整引用链。
-4. 仍需检查它是否可重新解释成已知 meron/loop、fermion-bag、Majorana 或 split
-   机制。
+3. 连续时间 fermion-bag 也使用“指数化键算符的乘积迹逐构型为正”，见
+   [Huffman and Chandrasekharan, 2017](https://arxiv.org/abs/1709.03578)；
+   其标准键矩阵是 determinant `+1` 的 hyperbolic block，示例是二分晶格上的
+   staggered/repulsive `t-V` 模型，并非这里的 dilated transposition。
+4. 决定性的排重是
+   [Wei et al., 2016](https://arxiv.org/abs/1601.01994)：式 `(5)` 给出了对其
+   Majorana reflection positivity 类的显式包含证书。
+5. [Wei, 2024 version](https://arxiv.org/abs/1712.09412) 又说明 Majorana
+   reflection positivity 等价于其 contraction-semigroup 框架中的一类，因此不能因
+   我们的 matrix history 写法不同就把物理模型重新称为新类。
+6. monomial 矩阵的特征多项式按置换循环分解也是已知结果：
+   [Egan et al., 2019](https://ajc.maths.uq.edu.au/pdf/73/ajc_v73_p501.pdf)
+   Proposition 3.3 给出
+   `chi_M(x)=product_C (x^|C|-c_C)`。本文的 determinant cycle factor 是代入
+   `x=-1` 后的直接推论；再用 `c_C>=1` 判断偶循环符号即可得到 grade 不等式。
 
 因此当前可以说：
 
-> 找到并证明了一个不同于纯 TN 正和的 graded crossing 正性构造，并给出受挫局域
-> 相互作用模型与实指数 ancilla lift。
+> 给出了一个不同于 pure-TN 表述的 graded crossing CT 展开、局域模型、实指数
+> ancilla lift，以及对已知 monomial factorization 和 Majorana 正性类的显式约化。
 
 当前还不能说：
 
-> 发现了文献史上全新的无符号 QMC 类。
-
+> 发现了新的矩阵正性定理或新的无符号 Hamiltonian 类。

@@ -66,6 +66,23 @@ class GradedBondParameters:
 
 
 @dataclass(frozen=True)
+class MajoranaReflectionCertificate:
+    """Known-class certificate for the graded-transposition Hamiltonian.
+
+    After centering every density interaction, the one-body kernel is
+    negative semidefinite and every interaction coupling is attractive.
+    Thus the model is contained in the Majorana-reflection-positive class of
+    Wei et al., Phys. Rev. Lett. 116, 250601 (2016).
+    """
+
+    one_body_kernel: np.ndarray
+    majorana_positive_block: np.ndarray
+    interaction_couplings: tuple[float, ...]
+    constant_shift: float
+    minimum_positive_block_eigenvalue: float
+
+
+@dataclass(frozen=True)
 class AncillaGradedHistoryWeight:
     """Positive weight after storing the crossing grade in one extra mode."""
 
@@ -372,6 +389,88 @@ def parameters_from_hopping_and_attraction(
         dilation=dilation,
         hopping=coupling * dilation,
         attraction=coupling * (dilation * dilation - 1.0),
+    )
+
+
+def majorana_reflection_certificate(
+    edges: Sequence[tuple[int, int]],
+    *,
+    sites: int,
+    dilations: Sequence[float],
+    couplings: Sequence[float],
+    tolerance: float = 1e-12,
+) -> MajoranaReflectionCertificate:
+    """Certify containment in the known Majorana-reflection-positive class.
+
+    For one edge, with ``t=q*r`` and ``U=q*(r**2-1)``, the physical vertex
+    can be written as
+
+    ``t hop - U(ni-1/2)(nj-1/2) - a(ni+nj) + constant``,
+
+    where ``a=q*(r**2+1)/2``.  The edge contribution to the one-body kernel
+    has eigenvalues ``-q*(r-1)**2/2`` and ``-q*(r+1)**2/2``.  Its sum is
+    therefore negative semidefinite, while all centered density couplings
+    are negative.  Taking every site in the same Majorana reflection part
+    gives Eqs. (7)--(10) of Wei et al. (2016), with ``B1=-K >= 0``.
+    """
+
+    edge_sequence = tuple((int(left), int(right)) for left, right in edges)
+    dilation_sequence = tuple(float(value) for value in dilations)
+    coupling_sequence = tuple(float(value) for value in couplings)
+    if not (
+        len(edge_sequence)
+        == len(dilation_sequence)
+        == len(coupling_sequence)
+    ):
+        raise ValueError("edges, dilations, and couplings must have equal length")
+    if sites < 1:
+        raise ValueError("sites must be positive")
+    if tolerance < 0.0:
+        raise ValueError("tolerance must be nonnegative")
+
+    kernel = np.zeros((sites, sites), dtype=float)
+    interaction_couplings: list[float] = []
+    constant_shift = 0.0
+    for (first_mode, second_mode), dilation, coupling in zip(
+        edge_sequence,
+        dilation_sequence,
+        coupling_sequence,
+        strict=True,
+    ):
+        # Reuse the field validation, including r>1 and valid distinct sites.
+        dilated_transposition_propagator(
+            sites=sites,
+            first_mode=first_mode,
+            second_mode=second_mode,
+            dilation=dilation,
+        )
+        if coupling <= 0.0:
+            raise ValueError("couplings must be positive")
+
+        hopping = coupling * dilation
+        attraction = coupling * (dilation * dilation - 1.0)
+        centered_chemical_shift = coupling + 0.5 * attraction
+        kernel[first_mode, first_mode] -= centered_chemical_shift
+        kernel[second_mode, second_mode] -= centered_chemical_shift
+        kernel[first_mode, second_mode] += hopping
+        kernel[second_mode, first_mode] += hopping
+        interaction_couplings.append(-attraction)
+        constant_shift += coupling + 0.25 * attraction
+
+    positive_block = -kernel
+    minimum_eigenvalue = float(np.linalg.eigvalsh(positive_block).min())
+    if minimum_eigenvalue < -tolerance:
+        raise ArithmeticError(
+            "centered one-body kernel is not negative semidefinite"
+        )
+    if any(value > tolerance for value in interaction_couplings):
+        raise ArithmeticError("centered density interactions are not attractive")
+    return MajoranaReflectionCertificate(
+        one_body_kernel=kernel,
+        majorana_positive_block=positive_block,
+        interaction_couplings=tuple(interaction_couplings),
+        constant_shift=constant_shift,
+        minimum_positive_block_eigenvalue=max(0.0, minimum_eigenvalue),
     )
 
 

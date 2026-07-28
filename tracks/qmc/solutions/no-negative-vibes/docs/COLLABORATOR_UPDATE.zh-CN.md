@@ -42,8 +42,8 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
    - `az-survivor-cones-v1`：560 格、140,000 个行列式。
    - `speculative-structures-v1`：960 格、192,000 个行列式。
    - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
-4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现和精确非对称键门
-   分解；199 个自动测试全通过。
+4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现、精确非对称键门
+   分解和 graded-monomial 的 Majorana 包含证书；219 个自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -143,6 +143,21 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
   204 个 float64 负权。这个 convention-dependent 猜想尚无证明，互补负例也尚未做
   任意精度重放。
 
+### Graded monomial crossing：正确，但不是新物理类
+
+- 已证明 `D_ii>=1` 时 `sgn(P) det(I+P D)>=0`，并构造 dilated transposition
+  的逐历史正权、局域吸引 spinless 模型和单 grade-ancilla 实指数 lift；
+- 三角形模型不能靠站点 `+/-` gauge 变成固定 Fock 基 stoquastic，这说明它不是原
+  pure-TN 路径模型；
+- 但 `r=1` 局部顶点精确等于已知 `su(1|1)` graded permutation；
+- 更决定性的是，centered 后每条边的一体 kernel 本征值为
+  `-q(r-1)^2/2`、`-q(r+1)^2/2`，且相互作用为负，因此整个 Hamiltonian 明确属于
+  Wei et al. 2016 的 Majorana reflection positivity 类；
+- monomial 矩阵的 cycle-factor 又是已知特征多项式公式的直接推论；
+- 结论降为 `known-monomial-factorization / known-majorana-subclass /
+  useful-reformulation`：保留特殊 CT 展开和可执行证书，不声称新的矩阵定理或
+  无符号 Hamiltonian 类。
+
 ## 我们没有声称什么
 
 - 没有声称随机扫描能证明非负；
@@ -155,10 +170,9 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 不再重复扫描整个命名群、普通 AZ 类、自然数守恒 AZ metric cone 或同分布双锥。下一步
 围绕两个新候选闭环：
 
-1. 查 `P0`/monomial matrix semigroup 文献，确认奇数阶路由的新颖性边界；
-2. 为 odd monomial / block-TN grade 构造局域、可采样的 HS 分解；
-3. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
-4. 若两条都不能物理闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
+1. 把 graded monomial 作为已知类约化案例存档，不再投入新物理类的主线资源；
+2. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
+3. 若该方向不能闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
    编码。
 
 任何新候选按以下漏斗处理：
@@ -186,6 +200,7 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 - [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [AZ 幸存类半群锥](AZ_SURVIVOR_CONE_RESULTS.md)
 - [激进候选首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)
+- [graded monomial 结果与排重](GRADED_MONOMIAL_RESULTS.md)
 - [激进候选清单](SPECULATIVE_CANDIDATE_BATCH.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)

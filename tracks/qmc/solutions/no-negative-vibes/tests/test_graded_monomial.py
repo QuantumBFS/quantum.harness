@@ -12,8 +12,10 @@ from oracle.graded_monomial import (
     ancilla_extended_transposition_propagator,
     ancilla_graded_history_weight,
     dilated_transposition_propagator,
+    fermion_annihilation_operator,
     graded_monomial_certificate,
     graded_transposition_history_weight,
+    majorana_reflection_certificate,
     parameters_from_hopping_and_attraction,
     permutation_grade,
     positive_monomial_decomposition,
@@ -251,6 +253,65 @@ def test_any_positive_hopping_and_attraction_can_be_realized(
     assert parameters.dilation > 1.0
     assert math.isclose(parameters.hopping, hopping, rel_tol=1e-13)
     assert math.isclose(parameters.attraction, attraction, rel_tol=1e-13)
+
+
+def test_physical_model_has_a_majorana_reflection_positivity_certificate() -> None:
+    sites = 3
+    edge_types = (
+        ((0, 1), 1.2, 0.7),
+        ((1, 2), 1.5, 1.1),
+        ((0, 2), 2.0, 0.4),
+    )
+    certificate = majorana_reflection_certificate(
+        tuple(edge[0] for edge in edge_types),
+        sites=sites,
+        dilations=tuple(edge[1] for edge in edge_types),
+        couplings=tuple(edge[2] for edge in edge_types),
+    )
+
+    assert np.allclose(
+        certificate.majorana_positive_block,
+        -certificate.one_body_kernel,
+    )
+    assert np.linalg.eigvalsh(certificate.majorana_positive_block).min() >= -1e-12
+    assert all(value < 0.0 for value in certificate.interaction_couplings)
+
+    annihilators = [
+        fermion_annihilation_operator(sites=sites, mode=mode)
+        for mode in range(sites)
+    ]
+    creators = [operator.T for operator in annihilators]
+    identity = np.eye(1 << sites)
+    centered = certificate.constant_shift * identity
+    for left in range(sites):
+        for right in range(sites):
+            centered += (
+                certificate.one_body_kernel[left, right]
+                * creators[left]
+                @ annihilators[right]
+            )
+    for edge_index, (edge, _, _) in enumerate(edge_types):
+        first_number = creators[edge[0]] @ annihilators[edge[0]]
+        second_number = creators[edge[1]] @ annihilators[edge[1]]
+        centered += certificate.interaction_couplings[edge_index] * (
+            (first_number - 0.5 * identity)
+            @ (second_number - 0.5 * identity)
+        )
+
+    direct = sum(
+        (
+            coupling
+            * transposition_vertex_operator(
+                sites=sites,
+                first_mode=edge[0],
+                second_mode=edge[1],
+                dilation=dilation,
+            )
+            for edge, dilation, coupling in edge_types
+        ),
+        start=np.zeros((1 << sites, 1 << sites), dtype=float),
+    )
+    assert np.allclose(centered, direct, atol=1e-12)
 
 
 def test_auxiliary_histories_equal_physical_taylor_coefficients() -> None:
