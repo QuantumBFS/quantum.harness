@@ -16,6 +16,7 @@ download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)
 parameter-scan = { type = "local" }     # multi-axis sweeps (subsumes finite-size-scan)
+phase-diagram = { type = "local" }       # finite-size phase-boundary mapping and refinement
 scaling-fit = { type = "local" }
 cross-method-check = { type = "local" }
 using-slurm = { type = "local" }        # cluster mechanism (agent-does-ssh)
