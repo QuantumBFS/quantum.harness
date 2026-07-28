@@ -78,3 +78,17 @@ def test_attempt_004_candidate_export_has_challenge_methods(tmp_path):
         "random_subspace_nelder_mead",
         "hessian_subspace_nelder_mead",
     } <= methods
+
+
+def test_attempt_004_slurm_scripts_are_capped_and_secret_free():
+    slurm_dir = ATTEMPT / "slurm"
+    cpu = (slurm_dir / "cpu_sweep.sbatch").read_text()
+    gpu = (slurm_dir / "gpu_verify.sbatch").read_text()
+    combined = cpu + "\n" + gpu
+
+    assert "#SBATCH --cpus-per-task=4" in cpu
+    assert "%25" in cpu
+    assert "#SBATCH --gres=gpu:1" in gpu
+    assert "%1" in gpu
+    forbidden = ["password", "ssh ", "IdentityFile", "id_ed25519", "HostName", "User "]
+    assert not any(marker in combined for marker in forbidden)
