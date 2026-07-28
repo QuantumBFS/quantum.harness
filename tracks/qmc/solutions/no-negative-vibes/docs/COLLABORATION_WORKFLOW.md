@@ -1,6 +1,6 @@
 # No Negative Vibes shared-research collaboration design
 
-Date: 2026-07-28  
+Date: 2026-07-28
 Status: approved conversational design, pending written-spec review
 
 ## Objective
