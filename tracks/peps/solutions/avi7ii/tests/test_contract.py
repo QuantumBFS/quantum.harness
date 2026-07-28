@@ -4,7 +4,7 @@ import pytest
 from qh147.contract import BoundaryContractor
 from qh147.model import tfim_dense
 from qh147.pepo import FinitePEPO
-from qh147.trotter import X, Z, second_order_gates
+from qh147.trotter import second_order_gates
 
 
 def _one_trotter_step(lx: int, ly: int) -> FinitePEPO:
@@ -30,7 +30,9 @@ def test_trace_and_operator_insertion_match_dense(shape, evolved):
 
     assert np.allclose(contractor.trace(pepo), np.trace(dense))
 
-    operator = X if evolved else Z
+    operator = np.array(
+        [[1.0 + 2.0j, -3.0j], [0.5 + 1.0j, -2.0 + 0.25j]]
+    )
     inserted = contractor.expectation_numerator(pepo, {(0, 0): operator})
     full_operator = np.kron(operator, np.eye(1 << (lx * ly - 1)))
     assert np.allclose(inserted, np.trace(dense @ full_operator))
@@ -53,6 +55,22 @@ def test_overlap_and_relative_frobenius_loss_match_dense(shape):
     assert np.allclose(contractor.overlap(student, teacher), expected_overlap)
     assert np.allclose(
         contractor.relative_frobenius_loss(student, teacher), expected_loss
+    )
+
+
+def test_operator_insertion_contracts_input_then_output_indices():
+    pepo = FinitePEPO.identity(1, 1)
+    pepo.tn["I0,0"].modify(
+        data=np.array([[1.0 + 0.5j, 2.0j], [3.0 - 1.0j, -4.0]])
+    )
+    operator = np.array(
+        [[2.0 - 1.0j, -3.0j], [0.25 + 2.0j, 1.0 + 0.5j]]
+    )
+    contractor = BoundaryContractor(chi=4, cutoff=1e-12)
+
+    assert np.allclose(
+        contractor.expectation_numerator(pepo, {(0, 0): operator}),
+        np.trace(pepo.to_dense() @ operator),
     )
 
 
