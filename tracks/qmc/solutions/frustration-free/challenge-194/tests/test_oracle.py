@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import long_range_percolation as lrp
 from long_range_percolation.model import ModelSpec
 from long_range_percolation.oracle import (
     expected_open_edges,
@@ -53,3 +54,17 @@ def test_no_edge_probability_uses_total_kernel_weight():
         ]
     )
     assert observed == pytest.approx(no_edge_probability(spec), abs=0.01)
+
+
+@pytest.mark.parametrize(
+    ("name", "symbol"),
+    [
+        ("sample_quadratic", sample_quadratic),
+        ("expected_open_edges", expected_open_edges),
+        ("variance_open_edges", variance_open_edges),
+        ("no_edge_probability", no_edge_probability),
+    ],
+)
+def test_package_root_exports_oracle_public_symbols(name: str, symbol: object):
+    assert getattr(lrp, name) is symbol
+    assert name in lrp.__all__

@@ -50,6 +50,30 @@ def test_global_kernel_sum_identity():
         assert measured == pytest.approx(expected, rel=2e-13)
 
 
+def test_kernel_weight_sum_matches_periodic_kernel_table():
+    for length, sigma in [(4, 0.8), (12, 1.0), (32, 1.1)]:
+        values = periodic_kernel(length, sigma)
+        measured = sum(
+            item.multiplicity * values[item.distance - 1]
+            for item in distance_classes(length)
+        )
+        assert kernel_weight_sum(length, sigma) == pytest.approx(measured, rel=2e-13)
+
+
+def test_periodic_kernel_uses_full_periodic_image_convention():
+    length = 12
+    sigma = 0.8
+    distance = 3
+    exponent = 1.0 + sigma
+    value = periodic_kernel(length, sigma)[distance - 1]
+    bare_minimum_image = distance ** (-exponent)
+    hurwitz_value = length ** (-exponent) * (
+        zeta(exponent, distance / length) + zeta(exponent, 1.0 - distance / length)
+    )
+    assert value == pytest.approx(hurwitz_value, rel=2e-13)
+    assert value > bare_minimum_image
+
+
 def test_edge_probabilities_use_stable_exponential_form():
     spec = ModelSpec(length=4, sigma=1.0, kappa=1e-16)
     probability = edge_probabilities(spec, periodic_kernel(4, 1.0))[0]

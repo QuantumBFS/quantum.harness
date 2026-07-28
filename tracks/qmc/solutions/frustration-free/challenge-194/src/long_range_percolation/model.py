@@ -21,13 +21,19 @@ class ModelSpec:
         length = _strict_int(self.length, "length")
         if length < 2 or length % 2:
             raise ValueError("length must be even and at least two")
+        sigma = float(self.sigma)
+        exponent = 1.0 + sigma
         if (
             isinstance(self.sigma, bool)
             or not isinstance(self.sigma, (int, float))
-            or not math.isfinite(float(self.sigma))
-            or float(self.sigma) <= 0.0
+            or not math.isfinite(sigma)
+            or sigma <= 0.0
+            or not math.isfinite(exponent)
+            or exponent <= 1.0
         ):
-            raise ValueError("sigma must be finite and positive")
+            raise ValueError(
+                "sigma must be finite, positive, and satisfy 1.0 + sigma > 1.0"
+            )
         if (
             isinstance(self.kappa, bool)
             or not isinstance(self.kappa, (int, float))
