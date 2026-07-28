@@ -303,4 +303,11 @@ Updated: 2026-07-29 UTC.
   model retains nine cones but reduces packed PSD entries from 10,064 to
   6,104 and maximum side from 73 to 45. It is not accepted until its
   exhaustive Slurm truth gate passes.
+- A subsequent independent candidate is now source-complete but unproved:
+  the anti-diagonal site reflection `(x,y)->(-y,-x)` is the only nonidentity
+  D4 map that preserves the actual level-1 Shastry--Sutherland Hamiltonian
+  term multiset. A separate exact gate checks its site/moment involution,
+  all 6,104 isotypic coefficients, equality space, eigenspace ranks, and
+  every spatial plus/minus cross entry. It will not be submitted ahead of
+  the queued isotypic proof.
 - No decision-changing user or resource need is open.

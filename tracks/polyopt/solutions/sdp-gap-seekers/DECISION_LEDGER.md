@@ -440,3 +440,21 @@ This would change positive block sides from
 to 6,104 and maximum side from 73 to 45. The route is mathematically exact,
 but no solver model may rely on it until the dedicated Slurm truth gate
 passes all 7,848 cross-entry and 1,332 proportionality checks.
+
+## 2026-07-29 — prepare the fixed-window spatial involution as a later gate
+
+A direct source-level enumeration of all eight D4 maps found exactly one
+nonidentity symmetry of the fixed level-1 term set:
+`(x,y)->(-y,-x)`. It preserves the 3-by-3 patch, central inner site, both
+instantiated dimer bonds, and all square-nearest-neighbor bonds. The other
+axis/diagonal reflections and 90/180/270-degree rotations do not preserve the
+finite term multiset and are rejected.
+
+Prepare a separate order-two quotient after the full-spin isotypic layer. Its
+truth gate must establish moment closure, signed row closure within every
+retained block, covariance of all 6,104 isotypic coefficients, equality-space
+invariance, exact full-rank spatial eigenspace bases, and zero plus/minus
+cross blocks. The first run is an inventory gate and will harden its exact
+moment and block counts only after all theorem conditions pass. Keep it behind
+the already-queued isotypic proof so an unproved downstream route cannot
+obscure that result.
