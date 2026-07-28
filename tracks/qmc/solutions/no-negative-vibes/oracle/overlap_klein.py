@@ -518,6 +518,20 @@ def _validate_system_field(system: ExactMetzlerSystem) -> None:
         _q_sqrt_two_coefficients(value)
 
 
+def _numeric_coefficients_without_bitcount_warning(
+    system: ExactMetzlerSystem,
+) -> np.ndarray:
+    """Convert exact coefficients while silencing one third-party deprecation."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=".*bitcount function is deprecated.*",
+            category=DeprecationWarning,
+            module=r"mpmath\.libmp\.libintmath",
+        )
+        return numeric_coefficients(system)
+
+
 def _empty_anchor_result(
     label: str, sign: int, status: str, message: str
 ) -> AnchorSolve:
@@ -540,7 +554,7 @@ def solve_anchor(
     _validate_system_field(system)
 
     try:
-        matrix = numeric_coefficients(system)
+        matrix = _numeric_coefficients_without_bitcount_warning(system)
         variables = len(system.labels)
         equality = np.zeros((1, variables), dtype=float)
         equality[0, anchor] = 1.0
@@ -634,19 +648,12 @@ def _reconstruct_float(
         candidate = sp.Integer(nearest_integer)
     else:
         try:
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore",
-                    message=".*bitcount function is deprecated.*",
-                    category=DeprecationWarning,
-                    module=r"mpmath\.libmp\.libintmath",
-                )
-                candidate = sp.nsimplify(
-                    value,
-                    [sp.sqrt(2)],
-                    tolerance=tolerance,
-                    full=True,
-                )
+            candidate = sp.nsimplify(
+                value,
+                [sp.sqrt(2)],
+                tolerance=tolerance,
+                full=True,
+            )
         except Exception as error:
             raise ArithmeticError(
                 "SymPy failed to reconstruct the coefficient in Q(sqrt(2))"
@@ -763,7 +770,7 @@ def _numeric_dual(
     anchor: int,
     sign: int,
 ) -> np.ndarray:
-    matrix = numeric_coefficients(system)
+    matrix = _numeric_coefficients_without_bitcount_warning(system)
     row_count = len(system.rows)
     target = np.zeros(len(system.labels), dtype=float)
     target[anchor] = float(sign)

@@ -25,7 +25,6 @@ from oracle.overlap_klein import (
     overlap_geometry,
     quadratic_basis,
     reconstruct_exact_primal,
-    _reconstruct_float,
     run_anchor_scan,
     solve_anchor,
     support_edges,
@@ -623,7 +622,7 @@ def test_result_payload_contains_replayable_terminal_evidence(
 
 def test_classifier_keeps_two_feasible_sign_certificates_separate() -> None:
     """Catches collapsing two exact primal witnesses into one ambiguous field."""
-    system = _synthetic_system([[1, 0], [0, 1]])
+    system = _synthetic_system([[0, 1]])
     anchor = classify_anchor(
         system,
         "x",
@@ -718,8 +717,9 @@ def test_execution_metadata_records_validated_threads_and_spawn() -> None:
     }
 
 
-def test_noninteger_q_sqrt_two_reconstruction_does_not_emit_bitcount_warning() -> None:
-    """Catches broad or missing suppression around SymPy's exact reconstruction."""
+def test_q_sqrt_two_numeric_solves_do_not_emit_bitcount_warning() -> None:
+    """Catches a warning leak from either numeric coefficient conversion path."""
+    system = _synthetic_system([[sp.sqrt(2), 0], [-sp.sqrt(2), 0]])
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "error",
@@ -727,7 +727,9 @@ def test_noninteger_q_sqrt_two_reconstruction_does_not_emit_bitcount_warning() -
             category=DeprecationWarning,
             module=r"mpmath\\.libmp\\.libintmath",
         )
-        assert _reconstruct_float(math.sqrt(2), max_denominator=10000) == sp.sqrt(2)
+        assert solve_anchor(system, "x", 1).status == "infeasible"
+        certificate = find_zero_dual(system, "x")
+    assert verify_zero_dual(system, certificate)
 
 
 @pytest.mark.parametrize("workers", (0, -1, True))
