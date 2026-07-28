@@ -7,6 +7,7 @@ from qh147.compress import (
     CompressionObjective,
     ThermodynamicTolerances,
     ThermodynamicWeights,
+    VariationalCompressor,
 )
 from qh147.contract import BoundaryContractor
 from qh147.pepo import FinitePEPO
@@ -127,3 +128,65 @@ def test_objective_api_has_no_specific_heat_or_external_reference_inputs():
         "tolerances",
         "weights",
     }
+
+
+def _two_site_objective() -> tuple[FinitePEPO, CompressionObjective]:
+    teacher = FinitePEPO.identity(2, 1)
+    for gate in second_order_gates(
+        2,
+        1,
+        j=1.0,
+        h=0.7,
+        delta_beta=0.1,
+    ):
+        teacher.apply_gate(gate, max_bond=8)
+    objective = CompressionObjective(
+        BoundaryContractor(chi=8, cutoff=1e-10),
+        j=1.0,
+        h=0.7,
+        tolerances=ThermodynamicTolerances(
+            z=5e-2,
+            u=5e-2,
+            contraction_noise=1e-7,
+        ),
+        weights=ThermodynamicWeights(z=1.0, u=1.0, hermiticity=1.0),
+    )
+    return teacher, objective
+
+
+@pytest.mark.parametrize("mode", ["ordinary", "thermodynamic"])
+def test_variational_compression_reduces_its_loss_and_keeps_fixed_bond(mode):
+    teacher, objective = _two_site_objective()
+    result = VariationalCompressor(
+        objective,
+        max_iterations=3,
+        optimizer="L-BFGS-B",
+    ).compress(teacher, max_bond=1, mode=mode)
+
+    assert result.max_bond <= 1
+    assert result.final.total <= result.initial.total + 1e-10
+    assert result.loss_history[-1] <= result.loss_history[0] + 1e-10
+    assert np.isfinite(result.final.as_floats().total)
+    assert result.mode == mode
+
+
+def test_compression_modes_record_the_same_compute_budget():
+    teacher, objective = _two_site_objective()
+    compressor = VariationalCompressor(
+        objective,
+        max_iterations=1,
+        optimizer="L-BFGS-B",
+    )
+
+    ordinary = compressor.compress(teacher, max_bond=1, mode="ordinary")
+    thermodynamic = compressor.compress(
+        teacher,
+        max_bond=1,
+        mode="thermodynamic",
+    )
+
+    assert ordinary.budget == thermodynamic.budget
+    assert ordinary.budget.chi == objective.contractor.chi
+    assert ordinary.budget.cutoff == objective.contractor.cutoff
+    assert ordinary.budget.max_iterations == 1
+    assert ordinary.budget.optimizer == "L-BFGS-B"
