@@ -71,6 +71,16 @@ recorded as `ENV-0001`.
 - Run one deterministic smoke cell before allocating the full worker pool.
 - Assign disjoint cell ranges to the WSL and CPU workers; use independent
   seeds only when the purpose is cross-verification.
+- The current WSL worker has 16 logical CPUs / 31 GiB RAM; cap it at 14
+  processes. The current CPU worker has 64 logical CPUs / 503 GiB RAM; cap it
+  at 62 processes.
+- On a worker without `python3-venv` or direct GitHub access, do not require
+  sudo and do not keep retrying GitHub. Use a checksum-verified user-space
+  Miniforge installer from a reachable institutional mirror, override conda
+  channels to a reachable conda-forge mirror, and transfer source as a
+  verified Git bundle.
+- Verify a new worker with an exact commit SHA and one focused test before
+  assigning parameter cells.
 
 ## Experiment closure
 

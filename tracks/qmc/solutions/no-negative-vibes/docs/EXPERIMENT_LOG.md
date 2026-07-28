@@ -181,3 +181,73 @@ Decision / next experiment:
   an interactive `ssh-copy-id`, then re-run a password-disabled probe.
 - Decision / next experiment: continue exact compiler work on WSL; before the
   first broad parameter scan, complete the one-time interactive key install.
+
+## ENV-0004 — nested CPU-worker scientific-environment bootstrap
+
+- Proposal ID: infrastructure prerequisite
+- Question: Can the nested CPU worker become a reproducible, unattended second
+  compute environment without administrator privileges or direct GitHub
+  access?
+- Prediction: dedicated key authentication, a checksum-verified user-space
+  Python distribution, a mirrored scientific environment, and exact Git
+  bundle transport reproduce a committed focused test.
+- Source commit: `550b629f87e1882ea1195ab9fff3d546703bdd32`
+- Protocol/config: password entered once through an interactive
+  `ssh-copy-id`; strict host-key and password-disabled verification; Miniforge
+  `26.3.2-3` downloaded from the NJU release mirror; packages from the TUNA
+  conda-forge mirror; one BLAS thread.
+- Host role and resources: CPU worker, 64 logical CPUs and 503 GiB RAM; future
+  process limit 62.
+- Command: key-authentication probe, installer SHA-256 comparison, isolated
+  environment creation, bundle clone, and
+  `pytest tests/test_overlap_klein.py -q`.
+- Result: public-key login succeeded; installer digest matched
+  `848194851a98903134187fbb4ab50efe87b003e0c0f808f97644b7524a62bf2c`;
+  Python 3.11.15 environment created; exact clone HEAD `550b629`; focused
+  smoke test `16 passed in 0.78s`.
+- Evidence paths and hashes: active goal transcript and private handoff; no
+  credentials or private host data are committed.
+- Interpretation: both authorized machines are now usable. The CPU worker can
+  run 62 independent cells while WSL retains two logical CPUs for system
+  responsiveness.
+- Transferable lesson: the system Python lacked `ensurepip`, and direct GitHub
+  timed out. Avoid sudo and repeated network retries: install a
+  checksum-verified user-space distribution through a reachable mirror, use
+  `--override-channels` for conda, and move exact commits as Git bundles.
+- Decision / next experiment: replay exact compiler tests on both machines,
+  then allocate disjoint Task 8 parameter cells.
+
+## ALG-0004 — exact six-mode Metzler inequality compilation
+
+- Proposal ID: `R01`
+- Question: Can the overlapping six-mode transform and each allowed quadratic
+  basis be compiled into a complete, provenance-preserving system of exact
+  within-parity Metzler inequalities over `Q(sqrt(2))`?
+- Prediction: exact and independent floating conjugations agree; the
+  number-conserving `rings-bridges` basis has 24 labels and exactly 560
+  nonzero ordered off-diagonal constraint rows.
+- Source commit: `55205c2505534e0c15bcd198caac5c1f11b49934`
+- Protocol/config: exact transform/basis/parity validation, hand-derived
+  two-mode fixture, exact algebraic sign cases, unsupported-domain rejection,
+  empty-system shape, six-mode NumPy value cross-check, and an independent
+  exact all-row provenance audit.
+- Host role and resources: WSL primary verification plus CPU-worker
+  cross-environment verification; one pytest process and one BLAS thread on
+  each.
+- Command: `python -m pytest tests/test_metzler_system.py -q`, followed on WSL
+  by `python -m pytest tests -q`.
+- Result: final WSL focused `35 passed, 624 warnings in 6.91s`; WSL full
+  `296 passed, 1003 warnings in 10.29s`; CPU production-HEAD focused replay
+  `34 passed, 624 warnings in 4.66s`.
+- Evidence paths and hashes: `oracle/metzler_system.py` and
+  `tests/test_metzler_system.py` at `55205c2`; final independent review:
+  specification, production, and quality APPROVED with zero findings.
+- Interpretation: the exact linear-inequality oracle is complete for the fixed
+  support and transform conventions. The count `560` is a compiler invariant,
+  not evidence that the anchored cone is feasible.
+- Transferable lesson: a numerical comparison over compiler-retained rows
+  cannot detect omitted constraints. Independently enumerate all direct
+  within-parity nonzero rows, lock their provenance and count, then compare
+  values.
+- Decision / next experiment: solve anchored number-conserving and BdG LPs,
+  rationalize candidate rays, and replay exact primal or dual certificates.
