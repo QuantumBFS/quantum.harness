@@ -1,6 +1,6 @@
 # Challenge #15 Scalable NQS v1 Design
 
-> Status: approved; Step 1 protocol/evaluator implemented
+> Status: parallel amendment approved; Step 1 protocol/evaluator implemented
 >
 > Date: 2026-07-28
 >
@@ -17,11 +17,12 @@ physical target without using a complete many-body basis, a complete
 Hamiltonian, an exact angular-momentum projector, or ED-derived variational
 coefficients in the candidate path.
 
-The immediate outcome is a fair comparison of three bounded candidates:
+The immediate outcome is a fair, parallel comparison of three bounded
+candidates developed in isolated repository lanes:
 
-1. occupation-space autoregressive NQS;
-2. continuous, fixed-degree holomorphic NQS;
-3. an `L=2` CF-Flow-style prototype.
+1. Route A, occupation-space autoregressive NQS, owned by `TensorSpicyJ`;
+2. Route B, continuous fixed-degree holomorphic NQS, owned by `AroundPeking`;
+3. Route C, an `L=2` CF-Flow-style prototype, owned by `bhjia-phys`.
 
 One candidate advances only if it passes the frozen `N=6` gates through a
 scalable code path. The winner is then trained at `N=8`; successful `N=8`
@@ -121,31 +122,37 @@ resource_metrics() -> wall, peak RSS/VRAM, throughput, ESS/s
 ```
 
 `config_batch` is a typed native representation: fixed-particle-number orbital
-occupations for route 1 and sphere spinor coordinates for routes 2 and 3. The
+occupations for Route A and sphere spinor coordinates for Routes B and C. The
 evaluator never assumes a route's internal network architecture. Training is a
 route-specific command, but it must consume `PhysicsSpec` and `ProtocolConfig`
 and produce the same frozen-checkpoint manifest.
 
 ```mermaid
 flowchart LR
-    A["PhysicsSpec + ProtocolConfig"] --> B["route-specific blind trainer"]
-    B --> C["frozen checkpoint + manifest hash"]
-    C --> D["CandidateAdapter"]
-    D --> E["symmetry and VMC evaluator"]
-    D --> F["resource and N=8 smoke evaluator"]
-    E --> G["post-freeze N=6 ED comparison"]
-    F --> H["common run.json"]
-    G --> H
+    P["frozen PhysicsSpec + ProtocolConfig"] --> A["Route A blind trainer + adapter"]
+    P --> B["Route B blind trainer + adapter"]
+    P --> C["Route C blind trainer + adapter"]
+    A --> FA["A checkpoint + logs + hashes"]
+    B --> FB["B checkpoint + logs + hashes"]
+    C --> FC["C checkpoint + logs + hashes"]
+    FA --> Z["synchronized freeze barrier"]
+    FB --> Z
+    FC --> Z
+    Z --> U["common audit and hash verification"]
+    U --> R["one N=6 ED reveal"]
+    R --> W["common run.json + winner selection"]
 ```
 
 ## 5. Candidate routes
 
-### Route 1: occupation-space autoregressive NQS
+### Route A: occupation-space autoregressive NQS
 
-This is the recommended first route. It samples fixed-`N`, fixed-`M` orbital
-occupations with an autoregressive amplitude/phase model. Occupation states are
-Slater determinants of the `2Q+1` monopole orbitals, so LLL membership and
-fermionic antisymmetry are exact by construction.
+Owner: `TensorSpicyJ`.
+
+This route samples fixed-`N`, fixed-`M` orbital occupations with an
+autoregressive amplitude/phase model. Occupation states are Slater determinants
+of the `2Q+1` monopole orbitals, so LLL membership and fermionic antisymmetry
+are exact by construction.
 
 The `L=0,M=0` and `L=2,M=0` states share the autoregressive trunk and use
 sector-specific heads. Training uses energy plus stochastic `L^2` mean and
@@ -166,7 +173,9 @@ Primary risk: a flexible fixed-`M` model can lower its energy while retaining
 unwanted `L` admixture. The deciding evidence is therefore `Var(L^2)` and the
 finite-rotation five-component covariance test, not energy alone.
 
-### Route 2: continuous fixed-degree holomorphic NQS
+### Route B: continuous fixed-degree holomorphic NQS
+
+Owner: `AroundPeking`.
 
 This route evaluates the wavefunction directly on sphere spinors. It uses a
 polynomial-width sum of antisymmetrized determinants whose single-particle
@@ -185,7 +194,9 @@ Primary risk: a polynomial-rank determinant expansion may be too weak to reach
 the Laughlin correlations at a useful cost. Rank is therefore a declared model
 capacity, and both energy variance and peak memory are reported as it changes.
 
-### Route 3: `L=2` CF-Flow-style prototype
+### Route C: `L=2` CF-Flow-style prototype
+
+Owner: `bhjia-phys`.
 
 This route starts from a Clebsch-Gordan-coupled composite-fermion particle-hole
 seed in the `L=2` sector, rather than the paper's maximally separated `L=N`
@@ -204,7 +215,35 @@ Primary risk: the paper's useful expressivity may rely on higher-Landau-level
 content. A hard-gate failure is still a useful result because it identifies the
 precise obstruction to using CF-Flow as the Challenge #15 final ansatz.
 
-## 6. Oracle-isolated training and reveal
+## 6. Parallel collaboration, freeze, and oracle-isolated reveal
+
+### Shared starting point and lane ownership
+
+All route work starts from the same public collaboration baseline:
+
+```text
+repository: https://github.com/TensorSpicyJ/quantum.harness-collab
+branch:     collab/challenge-15-scalable-v1
+base SHA:   78577cd8f70adf918648fb02962e3b7bc09255e8
+```
+
+Route A uses the collaboration repository itself; Routes B and C use their own
+forks of that repository. Each owner creates only their assigned route branch,
+worktree, logs, and artifacts. If a GitHub fork does not expose the collaboration
+branch, the owner fetches it from the repository above and creates the route
+branch directly at the fixed base SHA. The exact SHA, rather than a moving
+branch name, is the comparison authority.
+
+Route code and result artifacts must not be merged or imported across lanes
+before the synchronized freeze. Public visibility means the people are not
+blind to one another's code; the enforceable fairness claim is only that no
+route's training or selection pipeline consumes another route's code, weights,
+metrics, or ED-derived information. A critical defect in the common protocol or
+evaluator pauses all three lanes. Fixing it requires a documented common
+amendment, a new shared base SHA, and fresh attempts in every affected lane;
+one lane may not receive a private common-contract fix.
+
+### Pipeline blinding and synchronized reveal
 
 True human blinding is impossible: Benchmark v0 values are already committed
 and have been inspected. Scalable v1 therefore makes a narrower, auditable
@@ -216,11 +255,24 @@ claim called **pipeline blinding**:
 - the legacy summary field `blind_training_valid` is true only when
   `oracle_isolated=true` and the frozen-manifest audit passes.
 
-Before reveal, a route writes and hashes its checkpoint, optimizer state,
-training log, selected capacity, and manifest. The evaluator verifies the hash
-and forbidden-dependency audit before loading the `N=6` ED reference. Any
-post-reveal retraining is a new attempt with `blind_training_valid=false` unless
-it uses a newly frozen protocol that does not encode the revealed discrepancy.
+Before reveal, every route writes and hashes its checkpoint, optimizer state,
+training log, selected capacity, and manifest. Large artifacts remain outside
+Git. A small tracked freeze receipt records the route, attempt, source commit,
+protocol hash, logical artifact names, byte sizes, and SHA-256 digests; the
+transport location stays in the out-of-band handoff. The coordinator copies
+each bundle into a route-labelled immutable location, recomputes every digest,
+and records receipt before any ED artifact is opened. The storage backend and
+transfer mechanism do not enter the route score.
+
+The ED evaluator remains disabled until A, B, and C have each produced either a
+verified freeze receipt or a terminal five-attempt stop report. It then audits
+all three terminal records first and loads the `N=6` ED reference once for the
+common comparison. A stopped or unverifiable lane is ineligible rather than
+allowed to delay or weaken the other routes. Post-reveal retraining cannot enter
+the same comparison; it requires a new protocol version and comparison cycle
+and records `blind_training_valid=false` for the revealed cycle.
+
+### Frozen common protocol
 
 Step 1 produces and commits the exact `ProtocolConfig` before any route code is
 implemented. It fixes:
@@ -301,8 +353,8 @@ Selection is lexicographic rather than a hand-tuned weighted score:
 4. if still tied, prefer better `N=8` smoke growth, then higher ESS/s and lower
    peak memory.
 
-Exactly one survivor advances. If no route passes, Step 4 closes with a failure
-comparison and Step 5 does not start. The evaluator may identify the strongest
+Exactly one survivor advances. If no route passes, Step 3 closes with a failure
+comparison and Step 4 does not start. The evaluator may identify the strongest
 failed route, but it is not called a winner and is not promoted to larger
 systems.
 
@@ -312,65 +364,91 @@ The project has **five research steps**, not five total attempts:
 
 1. freeze the common oracle-isolated protocol, evaluator, schema, budgets, and
    failure-report format;
-2. implement and evaluate the occupation-space autoregressive route;
-3. implement and evaluate the continuous holomorphic route;
-4. implement and evaluate the CF-Flow `L=2` route, then select the winner;
-5. run the winner at `N=8`; after it passes, run `N=10` and `N=12` on SCNet.
+2. run three implementation lanes concurrently:
+   - Step 2A: Route A, occupation-space autoregressive NQS;
+   - Step 2B: Route B, continuous fixed-degree holomorphic NQS;
+   - Step 2C: Route C, CF-Flow `L=2` prototype;
+3. cross-fork audit, synchronized freeze, one ED reveal, and winner selection;
+4. train and evaluate the winner at `N=8`;
+5. after `N=8` passes, run the winner at `N=10` and `N=12` on SCNet.
 
-Each step has its own attempt counter `a01` through `a05`. An attempt tests one
-explicit technical hypothesis, receives at most 90 minutes of active
-implementation time, and runs in its own branch and worktree:
+Steps 1, 3, 4, and 5 each have an attempt counter `a01` through `a05`. The
+three Step 2 lanes have independent counters: `s02a-a01` through `s02a-a05`,
+`s02b-a01` through `s02b-a05`, and `s02c-a01` through `s02c-a05`. An attempt
+tests one explicit technical hypothesis, receives at most 90 minutes of active
+implementation time, and runs in its own branch and worktree. The recommended
+first-attempt names are:
 
 ```text
-label:    scalable-v1-s02-a01
-branch:   challenge/qmc-chiral-graviton-scalable-v1-s02-a01
-worktree: D:/Playground/worktrees/quantum.harness/
-          challenge-qmc-chiral-graviton-scalable-v1-s02-a01
+Route A branch: challenge/qmc-chiral-graviton-scalable-v1-s02a-a01
+Route B branch: challenge/qmc-chiral-graviton-scalable-v1-s02b-a01
+Route C branch: challenge/qmc-chiral-graviton-scalable-v1-s02c-a01
+
+worktree example:
+D:/Playground/worktrees/quantum.harness/
+challenge-qmc-chiral-graviton-scalable-v1-s02a-a01
 ```
 
-The counter resets to `a01` at the next research step. `slice-pass`, `failed`,
-and `inconclusive` closures consume an attempt; `step-pass` completes the step.
-If `a05` closes without `step-pass`, all scalable-v1 implementation stops and a
-five-attempt step report is produced. A later step never starts from an
-incomplete prior step.
+Every first route attempt starts at the fixed collaboration base SHA. Later
+attempts in one lane start from that lane's last terminal commit and may not
+merge another lane. `slice-pass`, `failed`, and `inconclusive` closures consume
+an attempt; `step-pass` completes the step or route lane. An infrastructure
+retry with identical commit and configuration remains inside the same attempt.
+The next implementation attempt must change one named technical hypothesis,
+not only its random seed.
+
+If `a05` closes without `step-pass` in Step 2, only that route stops and writes
+a terminal five-attempt report; the other two routes continue. Step 3 begins
+only after all three lanes are terminal as either `route-frozen` or
+`route-stopped`. For Steps 1, 3, 4, or 5, exhaustion at `a05` stops every
+downstream step and produces the corresponding five-attempt report. Thus the
+old serial rule does not apply between Steps 2A, 2B, and 2C, but the freeze
+barrier and Steps 3 to 5 remain ordered.
 
 `step-pass` means that the step's evidence target is complete, not that a
 candidate necessarily passed the physics gates. The exit criteria are:
 
 - Step 1: the common protocol, evaluator, schema, and guard tests are committed
   and pass;
-- Steps 2 and 3: the route produces a complete, reproducible evaluation with a
-  decisive gate classification; a well-demonstrated hard-gate failure is a
-  completed comparison result;
-- Step 4: the CF-Flow route has the same decisive evaluation and the winner
-  rule has been applied to all three routes;
-- Step 5: `N=8` first closes as `slice-pass` after all non-ED physics and
-  resource gates pass; the step reaches `step-pass` only after both `N=10` and
-  `N=12` produce complete non-ED evaluation records on SCNet.
+- Steps 2A, 2B, and 2C: the route produces a complete reproducible pre-reveal
+  evaluation and verified freeze receipt with a decisive non-ED gate
+  classification; a well-demonstrated hard-gate failure is a completed route
+  result;
+- Step 3: the three terminal records pass the hash and forbidden-dependency
+  audit where applicable, the ED oracle is revealed once, and the winner rule
+  is applied to all eligible routes;
+- Step 4: the winner's full `N=8` run passes all applicable non-ED physics and
+  resource gates and produces a complete evaluation record;
+- Step 5: both `N=10` and `N=12` produce complete non-ED evaluation records on
+  SCNet.
 
 An optional post-freeze `N=8` ED check may be reported if it remains feasible,
 but it is evaluator-only and is not required to unlock `N=10` and `N=12`.
 At those larger sizes `ed_crosscheck_valid` is recorded as `not_applicable`, not
 silently set to true.
 
-An infrastructure retry with identical commit and configuration remains inside
-the same attempt. It does not create a new attempt merely because a Slurm queue
-or transport error required resubmission. The next implementation attempt must
-change one named technical hypothesis, not only its random seed.
+Before the Step 3 reveal, audit failures may be repaired only in coordinator
+code or bookkeeping and may not change a frozen route artifact. After the ED
+oracle has been loaded, any rerun must use the same three verified hash sets;
+Step 3 cannot substitute a newly trained checkpoint under a later attempt.
 
-The design/specification work in this document occurs before Step 1 and does
-not consume an implementation attempt.
+The original design preceded Step 1. This approved parallel amendment changes
+only post-Step-1 orchestration and does not consume an implementation attempt.
 
 ## 9. Logging and failure handling
 
 Each attempt has two evidence layers:
 
 ```text
-tracked:
-  tracks/qmc/solutions/BOTS-848/logs/scalable-v1/sXX-aYY.md
+tracked route journal:
+  tracks/qmc/solutions/BOTS-848/logs/scalable-v1/s02[a|b|c]-aYY.md
 
-ignored raw artifacts:
-  tracks/qmc/results/BOTS-848-scalable-v1-sXX-aYY/
+tracked freeze receipt:
+  tracks/qmc/solutions/BOTS-848/logs/scalable-v1/freezes/
+    s02[a|b|c]-aYY.json
+
+ignored or externally transferred raw artifacts:
+  tracks/qmc/results/BOTS-848-scalable-v1-s02[a|b|c]-aYY/
     commands.log
     environment.txt
     stdout.log
@@ -381,10 +459,12 @@ ignored raw artifacts:
     checkpoints/
 ```
 
-The tracked journal records the hypothesis, starting commit, physics contract,
-budget, exact commands, exit codes, result classification, failure mechanism,
-and the single changed assumption recommended for the next attempt. Raw logs
-record progress and retain the last valid checkpoint.
+The tracked journal records the hypothesis, fixed base and starting commits,
+physics contract, budget, exact commands, exit codes, result classification,
+failure mechanism, and the single changed assumption recommended for the next
+attempt. The tracked freeze receipt contains no model data: it commits only the
+identity, size, and SHA-256 digest of every immutable external artifact. Raw
+logs record progress and retain the last valid checkpoint.
 
 NaN/Inf, complex local-energy drift, low ESS, failed symmetry gates, resource
 exhaustion, timeout, and scheduler failure are explicit result states. The run
@@ -400,8 +480,8 @@ may enter either evidence layer.
 - Every route instantiates its `N=8` shape through the same committed capacity
   mapping and performs the same fixed no-training smoke batch for growth
   evidence. No `N=6` checkpoint is assumed to be shape-compatible. Full `N=8`
-  optimization is reserved for the selected winner and is placed locally or
-  remotely from a fresh cost estimate.
+  optimization is reserved for the Step 3 winner and runs in Step 4, placed
+  locally or remotely from a fresh cost estimate.
 - `N=10` and `N=12` production runs use the `scnet` Slurm profile. The current
   profile exposes `hx1hdnormal01` with 128 CPU cores, about 510 GB memory, and
   Hygon DCUs, but live partition state and the exact job request must be probed
@@ -446,4 +526,5 @@ Scalable v1 does not yet implement:
 - a new cluster environment before the winning route identifies its actual
   dependencies.
 
-These are eligible only after the winning scalable route passes `N=8`.
+These are eligible only after the winning scalable route passes Step 4 at
+`N=8`.
