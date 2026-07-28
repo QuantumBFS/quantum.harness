@@ -1,0 +1,24 @@
+flag=0 term=SLOW_PROGRESS primal=INFEASIBILITY_CERTIFICATE
+cert_ray=(lambda = 0.005075589019312096, pos_min_eig = [0.001092150054973211, 0.0011398212827560972], gpos_min_eig = [-5.238064825067924e-19, 0.001589883715412656], cons_residual = 1.3062034093236363e-13)
+artifact serialized to tfim_cert_N9_g0.26.jls  (affine_map entries=14360)
+
+=== Step 2: independent verifier (no JuMP/Mosek) ===
+-rw-r--r-- 1 iint_sjds giggleliu 915405 Jul 28 15:55 tfim_cert_N9_g0.26.jls
+=== Independent certificate audit ===
+artifact: tfim_cert_N9_g0.26.jls
+N=9 gamma=0.26 d=2 lso=6
+solver statuses (recorded): termination=SLOW_PROGRESS primal=INFEASIBILITY_CERTIFICATE dual=NO_SOLUTION
+block sizes: pos=[211, 50] gap=[11, 14]
+affine map entries: 14360
+--- residuals (recomputed by THIS verifier) ---
+  max|cons| residual = 1.3062034093236363e-13  (<1.0e-6? true)
+  pos min eig  = [0.001092, 0.00114]  (all >= -1.0e-6? true)
+  gpos min eig = [-0.0, 0.00159]  (all >= -1.0e-6? true)
+  lambda       = 0.005075589019312096  (>1.0e-6? true)
+==================================================
+RESULT: certificate AUDITS (independent verifier, no JuMP/Mosek)
+  NOTE: solver termination was SLOW_PROGRESS (not a decisive DUAL_INFEASIBLE);
+        an audited ray here is a numerical candidate, not yet a rigorous proof
+        (rational/interval post-processing still needed for strict certification).
+verifier exit: 0
+Finished: Tue Jul 28 15:55:18 CST 2026

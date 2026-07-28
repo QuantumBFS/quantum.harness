@@ -112,17 +112,22 @@ verification) and is reverted above. The four stages, honestly:
    `value.(pos/gpos/λ)`, reports λ>0, Gram min-eigs, and `value.(cons)` residual
    (= 0) within the originating JuMP model. Independent of the legacy `flag`, NOT
    independent of the model/solve.
-2. **Complete certificate serialization — NOT DONE.** Need to export the full
-   normalized ray (all Gram matrices + stationarity multipliers + sparse affine
-   map + ordered basis/support manifest + normalization metadata + hash).
-3. **Independent verification — NOT DONE.** Need a separate checker that does NOT
-   call JuMP, Mosek, or the original constraint-construction; it reconstructs the
-   affine identity from the exported artifact and re-audits PSD/residual with
-   scale-aware tolerances (rational/interval preferred).
-4. **Decisive solver status or rigorous post-processing — NOT DONE.** Current
-   termination is `SLOW_PROGRESS`; need either a decisive `DUAL_INFEASIBLE` or
-   rational/interval certification.
+2. **Complete certificate serialization — DONE (commit `a54448d`+).** `certify_Ising_gap`
+   returns `cert_artifact` = full primal ray (pos/gpos Gram matrices, λ) + the
+   sparse affine map (14,360 entries, extracted from the assembled `AffExpr`
+   terms) + statuses + block inventory. Driver serializes it; artifact committed
+   at `evidence/tfim_cert_N9_g0.26.jls`.
+3. **Independent verification — DONE.** `scripts/verify_certificate.jl` uses only
+   `Serialization`+`LinearAlgebra` (no JuMP/Mosek/construction). It reconstructs
+   `cons[k] = Σ coef·ray_value[var]` from the exported map + re-audits PSD/residual/λ.
+   **TFIM N=9 γ=0.26: PASSES** — reconstructed max|cons| = 1.3e-13 (machine precision),
+   pos/gpos PSD, λ=0.00508>0. Verifier output: `evidence/tfim_N9_g0.26_verifier_output.txt`.
+4. **Decisive solver status or rigorous post-processing — NOT DONE.** Termination
+   is `SLOW_PROGRESS` (not a decisive `DUAL_INFEASIBLE`). The independently-audited
+   ray is a numerical candidate; strict certification needs rational/interval
+   post-processing (or a decisive solve).
 
 **Current defensible claim:** "TFIM N=9 γ=0.26: a candidate primal improving ray
-was read from variable values and passed same-model floating-point checks
-(λ>0, Gram PSD, cons residual=0). Numerical candidate, not a certified bound."
+was exported as a portable artifact and an independent verifier (no JuMP/Mosek)
+reconstructed the affine identity (residual 1.3e-13) and confirmed all Gram blocks
+PSD + λ>0. Numerical candidate (SLOW_PROGRESS), not a rigorous proof."
