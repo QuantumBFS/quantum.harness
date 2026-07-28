@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
 """Finite-size central-charge analysis for random-bond Ising transfer strips."""
 
+import argparse
+import csv
+import json
 import math
+from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np
+
+try:
+    from random_bond_ising_transfer import run_random_strip
+except ImportError:  # imported from the repository root during tests
+    from scripts.random_bond_ising_transfer import run_random_strip
 
 
 def fit_central_charge(
@@ -120,3 +133,232 @@ def central_charge_summary(strip_results, bootstrap_samples, seed):
         "bootstrap_samples": bootstrap_samples,
     }
     return fits
+
+
+def write_analysis_artifacts(
+    strip_results,
+    summary,
+    projections,
+    runtime,
+    output_dir,
+):
+    """Write raw blocks, width statistics, fit metadata, runtime, and plot."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    with (output_dir / "blocks.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=("L", "block_index", "block_log_norm_mean"),
+        )
+        writer.writeheader()
+        for item in strip_results:
+            for block_index, block_mean in enumerate(
+                item["block_log_norm_means"], start=1
+            ):
+                writer.writerow(
+                    {
+                        "L": item["L"],
+                        "block_index": block_index,
+                        "block_log_norm_mean": float(block_mean),
+                    }
+                )
+
+    width_fields = (
+        "L",
+        "p",
+        "coupling",
+        "seed",
+        "burn_in",
+        "retained_rows",
+        "block_length",
+        "lyapunov",
+        "lyapunov_se",
+        "free_energy",
+        "free_energy_se",
+        "runtime_seconds",
+        "rows_per_second",
+    )
+    with (output_dir / "width_summary.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.DictWriter(handle, fieldnames=width_fields)
+        writer.writeheader()
+        for item in strip_results:
+            writer.writerow({field: item[field] for field in width_fields})
+
+    with (output_dir / "central_charge_fit.json").open(
+        "w", encoding="utf-8"
+    ) as handle:
+        json.dump(summary, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+    runtime_document = dict(runtime)
+    runtime_document["width_projections"] = projections
+    with (output_dir / "runtime_projection.json").open(
+        "w", encoding="utf-8"
+    ) as handle:
+        json.dump(runtime_document, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+    sizes = np.asarray([item["L"] for item in strip_results], dtype=float)
+    values = np.asarray([item["free_energy"] for item in strip_results], dtype=float)
+    errors = np.asarray([item["free_energy_se"] for item in strip_results], dtype=float)
+    primary = summary["primary_L8_l24"]
+    coefficients = primary["coefficients"]
+    grid = np.linspace(float(np.min(sizes)), float(np.max(sizes)), 400)
+    fitted = coefficients[0] + coefficients[1] / grid**2
+    if primary["include_l4"]:
+        fitted += coefficients[2] / grid**4
+
+    figure, axis = plt.subplots(figsize=(6.4, 4.4))
+    axis.errorbar(
+        1.0 / sizes**2,
+        values,
+        yerr=errors,
+        fmt="o",
+        color="tab:blue",
+        capsize=3,
+        label="quenched strip data",
+    )
+    axis.plot(
+        1.0 / grid**2,
+        fitted,
+        color="tab:orange",
+        label=r"fit: $L^{-2}+L^{-4}$",
+    )
+    reported = summary["reported"]
+    axis.set_xlabel(r"$1/L^2$")
+    axis.set_ylabel(r"$f_L=-\Lambda_0/L$")
+    axis.set_title("RBIM Nishimori-point effective central charge")
+    axis.grid(alpha=0.25)
+    axis.legend()
+    axis.text(
+        0.04,
+        0.08,
+        rf"$c_{{\rm eff}}={reported['central_charge']:.4f}"
+        + "\n"
+        + rf"bootstrap SE $={reported['bootstrap_se']:.3g}$",
+        transform=axis.transAxes,
+    )
+    figure.tight_layout()
+    figure.savefig(output_dir / "central_charge_fit.png", dpi=180)
+    plt.close(figure)
+
+
+def run_workflow(
+    sizes,
+    p,
+    seed,
+    pilot_blocks,
+    target_se,
+    max_local_seconds,
+    bootstrap_samples,
+    output_dir,
+    strip_runner=None,
+):
+    """Run a five-width pilot and continue only when its measured cost fits."""
+    if strip_runner is None:
+        strip_runner = run_random_strip
+    pilot_blocks = int(pilot_blocks)
+    if pilot_blocks < 2:
+        raise ValueError("pilot_blocks must be at least two")
+
+    pilots = []
+    for L in sizes:
+        L = int(L)
+        block_length = 100 * L
+        pilots.append(
+            strip_runner(
+                L=L,
+                p=p,
+                seed=int(seed) + L,
+                burn_in=50 * L,
+                retained_rows=pilot_blocks * block_length,
+                block_length=block_length,
+                progress=True,
+            )
+        )
+
+    projections = [estimate_required_rows(item, target_se) for item in pilots]
+    projected_total = float(
+        sum(item["projected_runtime_seconds"] for item in projections)
+    )
+    production_launched = projected_total <= float(max_local_seconds)
+    if production_launched:
+        selected = []
+        for pilot, projection in zip(pilots, projections):
+            L = pilot["L"]
+            selected.append(
+                strip_runner(
+                    L=L,
+                    p=p,
+                    seed=int(seed) + 10000 + L,
+                    burn_in=50 * L,
+                    retained_rows=projection["required_retained_rows"],
+                    block_length=100 * L,
+                    progress=True,
+                )
+            )
+    else:
+        selected = pilots
+
+    summary = central_charge_summary(
+        selected, bootstrap_samples=bootstrap_samples, seed=int(seed) + 20000
+    )
+    runtime = {
+        "production_launched": production_launched,
+        "projected_total_seconds": projected_total,
+        "target_free_energy_se": float(target_se),
+        "max_local_seconds": float(max_local_seconds),
+        "achieved_target_all": bool(
+            all(item["free_energy_se"] <= target_se for item in selected)
+        ),
+    }
+    write_analysis_artifacts(
+        selected, summary, projections, runtime, output_dir
+    )
+    reported = summary["reported"]
+    print(
+        f"c_eff={reported['central_charge']:.8f} +/- "
+        f"{reported['bootstrap_se']:.3e} (bootstrap); "
+        f"production_launched={production_launched}",
+        flush=True,
+    )
+    return selected, summary, runtime
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--sizes", nargs="+", type=int, default=[8, 10, 12, 16, 20])
+    parser.add_argument("--p", type=float, default=0.1092212)
+    parser.add_argument("--seed", type=int, default=1221092212)
+    parser.add_argument("--pilot-blocks", type=int, default=2)
+    parser.add_argument("--target-se", type=float, default=1e-4)
+    parser.add_argument("--max-local-seconds", type=float, default=600.0)
+    parser.add_argument("--bootstrap-samples", type=int, default=2000)
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("results/random_bond_ising_nishimori"),
+    )
+    return parser
+
+
+def main(argv=None):
+    arguments = build_parser().parse_args(argv)
+    run_workflow(
+        sizes=arguments.sizes,
+        p=arguments.p,
+        seed=arguments.seed,
+        pilot_blocks=arguments.pilot_blocks,
+        target_se=arguments.target_se,
+        max_local_seconds=arguments.max_local_seconds,
+        bootstrap_samples=arguments.bootstrap_samples,
+        output_dir=arguments.output_dir,
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

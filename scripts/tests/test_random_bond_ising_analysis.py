@@ -1,8 +1,10 @@
 """Tests for Nishimori-point free-energy and central-charge analysis."""
 
 import importlib.util
+import json
 import math
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -111,6 +113,79 @@ class CentralChargeFitTests(unittest.TestCase):
             result["reported"]["fit_envelope_lower"],
             result["reported"]["fit_envelope_upper"],
         )
+
+
+class ArtifactWorkflowTests(unittest.TestCase):
+    def test_artifacts_include_blocks_widths_fit_projection_and_plot(self):
+        """Catches incomplete or non-machine-readable RBIM output."""
+        module = _load_module()
+        self.assertTrue(
+            hasattr(module, "write_analysis_artifacts"),
+            "write_analysis_artifacts is missing",
+        )
+        results = _synthetic_strip_results()
+        summary = module.central_charge_summary(
+            results, bootstrap_samples=20, seed=7
+        )
+        projections = [
+            module.estimate_required_rows(item, 1e-4) for item in results
+        ]
+        runtime = {
+            "production_launched": False,
+            "projected_total_seconds": 1000.0,
+            "target_free_energy_se": 1e-4,
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output_dir = Path(temporary)
+            module.write_analysis_artifacts(
+                results, summary, projections, runtime, output_dir
+            )
+
+            for name in (
+                "blocks.csv",
+                "width_summary.csv",
+                "central_charge_fit.json",
+                "runtime_projection.json",
+                "central_charge_fit.png",
+            ):
+                path = output_dir / name
+                self.assertTrue(path.exists(), name)
+                self.assertGreater(path.stat().st_size, 0)
+            with (output_dir / "runtime_projection.json").open() as handle:
+                saved_runtime = json.load(handle)
+            self.assertFalse(saved_runtime["production_launched"])
+
+    def test_workflow_cost_gate_keeps_pilot_when_budget_is_zero(self):
+        """Catches an unbounded production rerun after the measured pilot."""
+        module = _load_module()
+        self.assertTrue(hasattr(module, "run_workflow"), "run_workflow is missing")
+        synthetic = {item["L"]: item for item in _synthetic_strip_results()}
+        calls = []
+
+        def fake_runner(**kwargs):
+            calls.append(dict(kwargs))
+            result = dict(synthetic[kwargs["L"]])
+            result["seed"] = kwargs["seed"]
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            selected, summary, runtime = module.run_workflow(
+                sizes=[8, 10, 12, 16, 20],
+                p=0.1092212,
+                seed=122,
+                pilot_blocks=2,
+                target_se=1e-4,
+                max_local_seconds=0.0,
+                bootstrap_samples=20,
+                output_dir=Path(temporary),
+                strip_runner=fake_runner,
+            )
+
+        self.assertEqual(len(calls), 5)
+        self.assertEqual([item["L"] for item in selected], [8, 10, 12, 16, 20])
+        self.assertFalse(runtime["production_launched"])
+        self.assertTrue(math.isfinite(summary["reported"]["central_charge"]))
 
 
 if __name__ == "__main__":
