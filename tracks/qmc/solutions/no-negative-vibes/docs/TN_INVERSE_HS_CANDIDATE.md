@@ -3,7 +3,7 @@
 日期：2026-07-28  
 负责人：`xianzhipan`  
 分支：`work/xianzhi/tn-inverse-hs`  
-状态：`physical-candidate`
+状态：`known-mechanism`（精确物理 witness；因 stoquastic 等价而降级）
 
 ## 1. 研究问题与候选定义
 
@@ -131,3 +131,17 @@ Z = sum_C (product of positive scalar coefficients)
 若第一候选因最后一条降级，将把结论保留为“positive-TN inverse HS 的
 stoquastic 边界”，并另开候选研究 signed/graded TN；不在本分支悄悄
 扩大研究范围。
+
+## 7. 首轮结案
+
+第一候选的局部恒等式、任意历史正性和物理 Hamiltonian 已全部完成，
+详见 [TN_NETWORK_PHYSICAL_MODEL.md](TN_NETWORK_PHYSICAL_MODEL.md)。
+
+Jordan--Wigner 逐矩阵元审计表明它精确等价于 ferromagnetic
+hard-core-boson/XY 最近邻加次近邻 hopping。更一般地，任何固定
+Fock 基下的正系数 TN Gaussian 正和都会使 `-v` 逐元非负，因此物理
+顶点已经 stoquastic。
+
+这触发了本卡的降级条件。四模式 pair-hopping 即使成立也不能越过同一
+一般命题，所以不再为寻找新 sign-free 机制而继续枚举；后续 signed/
+graded TN 必须单独认领。

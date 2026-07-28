@@ -25,6 +25,9 @@
   no-go、排斥 `t-V` 键门的精确非对称辅助场分解，以及新矩阵机制与新物理模型的边界；
 - [TN_INVERSE_HS_CANDIDATE.md](TN_INVERSE_HS_CANDIDATE.md)：从 TN Jacobi/平面网络因子
   反向构造宇称串相关 hopping 与局域物理顶点的候选卡、证据标准和停止条件；
+- [TN_NETWORK_PHYSICAL_MODEL.md](TN_NETWORK_PHYSICAL_MODEL.md)：四场 TN 平面网络的
+  精确三站点 correlated-hopping Hamiltonian、任意历史证明、Jordan--Wigner 物理解释
+  和正 TN Gaussian 正和必然 stoquastic 的一般边界；
 - [COMPOUND_GAUGE_NO_GO.md](COMPOUND_GAUGE_NO_GO.md)：比 TN 更宽的逐粒子数符号规范、
   普通 hopping 图只有开放路径幸存的图论结论，以及 2–6 站点全连通图穷举；
 - [FRONTIER_SEMIGROUP_RESULTS.md](FRONTIER_SEMIGROUP_RESULTS.md)：15 族广扫、压力扫描、
