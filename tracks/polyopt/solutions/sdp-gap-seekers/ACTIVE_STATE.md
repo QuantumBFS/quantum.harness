@@ -91,4 +91,15 @@ Updated: 2026-07-29 UTC.
   `de1b023911579f1952d7585524730c2e77b248997b98d467b9f0c9b58d50dc36`.
 - The exact real representation has therefore passed its independent
   gamma=0 numerical equivalence gate; gamma=1/2 is authorized next.
+- Real-cone gamma=1/2 passed on attempt r1, Slurm job `22988295`.
+  Mosek returned `OPTIMAL` with primal and dual feasible points;
+  normalization was exactly 1, worst PSD violation was 0, and the smallest
+  independently reconstructed block eigenvalue was 0.07713795086656225.
+  Total runner wall was 97.869 s and peak process RSS was 6,001,456 KiB.
+  The factor had 112 million nonzeros after factorization, versus 1.51
+  billion in the Hermitian-bridge run. `result.toml` SHA-256 is
+  `3c5bd696a41a35939df1cd305f52d89be4b6088c5b1cc14590d9223579d6fb38`.
+- Current best exact representation cuts gamma=1/2 process peak RSS by
+  7.4x and total wall by 4.3x without changing the finite relaxation or its
+  feasibility decision.
 - No decision-changing user or resource need is open.

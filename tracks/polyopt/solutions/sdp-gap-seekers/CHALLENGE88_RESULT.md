@@ -55,3 +55,39 @@ The scientific runner code is commit `40b1f02035413bac724b2eb32156ce199bde84bd`
 on branch `bohr/challenge88-ss-reduced-runner`. Gamma=1/2 ran at branch commit
 `fb4dd43e757b8b8d4cb97c758215ac21bf447585`, whose only later change was the
 gamma=0 state record.
+
+## Exact real-cone implementation result
+
+Computational-basis conjugation is an exact antiunitary symmetry of the fixed
+Hamiltonian and finite relaxation. Averaging the unrestricted functional with
+its conjugate removes 2,448 conjugation-odd moments. A fixed diagonal phase
+then maps every remaining Hermitian block to a real symmetric block without
+changing PSD feasibility.
+
+The resulting immutable models have 16,660 moments, zero surviving affine
+equalities, and 11 real PSD blocks with the same side dimensions. Mosek sees
+31,807 scalarized semidefinite coordinates instead of 126,525.
+
+| gamma | Slurm job | status/audit | minimum block eigenvalue | total wall | peak process RSS | factor nonzeros |
+|---|---:|---|---:|---:|---:|---:|
+| 0 | 22988279 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.09561232145445703 | 93.057 s | 5,917,112 KiB | 1.11e8 |
+| 1/2 | 22988295 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.07713795086656225 | 97.869 s | 6,001,456 KiB | 1.12e8 |
+
+For gamma=1/2 this is a 7.4x reduction in process peak RSS and a 4.3x
+reduction in total wall relative to the exact Hermitian-bridge solve. The
+scientific conclusion is unchanged: the exact `d=2` finite relaxation is
+feasible at gamma=1/2 and therefore does not exclude that candidate gap; this
+is not a proof of a physical bulk gap.
+
+Additional preserved artifacts:
+
+- Exact conjugation proof and gates:
+  `EXACT_CONJUGATION_REDUCTION.md`.
+- Gamma=0 real solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-conjugation-real-g0p8-gamma0-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `de1b023911579f1952d7585524730c2e77b248997b98d467b9f0c9b58d50dc36`).
+- Gamma=1/2 real solve:
+  `tracks/polyopt/solutions/sdp-gap-seekers/results/ss-conjugation-real-g0p8-gamma0p5-xh5-20260729-r1/`
+  (`result.toml` SHA-256
+  `3c5bd696a41a35939df1cd305f52d89be4b6088c5b1cc14590d9223579d6fb38`).

@@ -141,3 +141,15 @@ nonzeros and the run from 46,385,640 KiB / 462.4 s to 5,917,112 KiB /
 93.1 s process peak / total wall. This validates the exact realification
 numerically at gamma=0 and authorizes the gamma=1/2 run without changing the
 physical or relaxation setup.
+
+## 2026-07-29 — real-cone gamma=1/2 passed with a 7.4x RSS reduction
+
+Slurm job `22988295` returned `OPTIMAL` with primal and dual feasible points.
+Independent reconstruction gave normalization 1, zero PSD violation, and
+minimum eigenvalue 0.07713795086656225. No infeasibility ray is applicable.
+
+Relative to the exact Hermitian-bridge gamma=1/2 run, process peak RSS fell
+from 44,494,548 to 6,001,456 KiB, total wall from 425.4 to 97.9 s, and
+post-factor nonzeros from 1.51 billion to 112 million. The finite-relaxation
+decision is unchanged: gamma=1/2 is feasible, while the exact implementation
+now fits comfortably inside a 32 GiB allocation.
