@@ -54,6 +54,7 @@ end
 largest_feasible = 0.0
 smallest_infeasible = Inf
 for gamma in gammas
+    global largest_feasible, smallest_infeasible
     t = @elapsed begin
         flag = try
             certify_Ising_gap(N, H, gamma, d, QUIET=true)
