@@ -1,8 +1,8 @@
 # Challenge 148 Frozen Production Protocol
 
-Protocol identifier: `c148-prereg-v1+rev1+rev2`.
+Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3`.
 
-This is the clean-checkout copy of the preregistration and two append-only
+This is the clean-checkout copy of the preregistration and three append-only
 clarifications. Pilot evidence may select final sizes and sampling budgets, but
 may not change the Hamiltonian, primary estimator, fit family, uncertainty
 rules, blinding rule, or verdict gate without a new protocol identifier.
@@ -48,6 +48,15 @@ Every production point contains at least two hot and two cold independently
 seeded chains. Gates cover start agreement, additional-prefix discard, bin
 growth, autocorrelation, effective sample size, chain spread, and the
 $c_\tau=1$ versus $c_\tau=2$ shift.
+
+Protocol Revision 3 freezes the sampling-test calibration before any corrected
+triangular or honeycomb data were generated. Hot/cold agreement and first-half
+versus second-half stationarity are tested on blocks of length
+$\lceil2\max\tau_{\rm int}\rceil$. Each chain must contain at least eight such
+blocks. The maximum standardized difference over the five raw observables must
+not exceed 5.0. This family-wise threshold replaces the unregistered pilot
+implementation's per-comparison 3.5 cutoff, which produced the expected false
+flags when maximized over roughly two thousand square-calibration comparisons.
 
 ## Frozen fit family
 

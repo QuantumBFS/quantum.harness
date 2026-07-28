@@ -17,6 +17,9 @@ import numpy as np
 NU = 0.629971
 OMEGA = 0.83
 REGISTERED_OMEGAS = (0.80, 0.83, 0.86)
+MIN_INDEPENDENT_BLOCKS = 8
+SAMPLING_Z_MAX = 5.0
+FIT_GRID_POINTS = 201
 GEOMETRY_VERSIONS = {
     "square": "square-v1",
     "triangular": "triangular-v1",
@@ -324,7 +327,6 @@ def sampling_diagnostics(cells):
         stationarity = []
         minimum_blocks = np.inf
         for (initial_state, _), values in sorted(chain_map.items()):
-            starts[initial_state].append(values.mean(axis=0))
             tau = float(np.max(chain_taus(values)))
             block = max(1, int(np.ceil(2.0 * tau)))
             minimum_blocks = min(minimum_blocks, len(values) // block)
@@ -332,6 +334,7 @@ def sampling_diagnostics(cells):
                 values[index:index + block].mean(axis=0)
                 for index in range(0, len(values) - block + 1, block)
             ])
+            starts[initial_state].append(block_means)
             midpoint = len(block_means) // 2
             if midpoint >= 2 and len(block_means) - midpoint >= 2:
                 stationarity.append(
@@ -339,12 +342,16 @@ def sampling_diagnostics(cells):
                 )
         start_z = np.nan
         if set(starts) == {"hot", "cold"}:
-            start_z = _difference_z(np.asarray(starts["hot"]), np.asarray(starts["cold"]))
+            start_z = _difference_z(
+                np.concatenate(starts["hot"]), np.concatenate(starts["cold"])
+            )
         stationarity_z = max(stationarity, default=np.nan)
         starts_ok = set(starts) == {"hot", "cold"} and min(map(len, starts.values())) >= 2
-        blocks_ok = minimum_blocks >= 8
-        start_ok = np.isfinite(start_z) and start_z <= 3.5
-        stationarity_ok = np.isfinite(stationarity_z) and stationarity_z <= 3.5
+        blocks_ok = minimum_blocks >= MIN_INDEPENDENT_BLOCKS
+        start_ok = np.isfinite(start_z) and start_z <= SAMPLING_Z_MAX
+        stationarity_ok = (
+            np.isfinite(stationarity_z) and stationarity_z <= SAMPLING_Z_MAX
+        )
         passed = starts_ok and blocks_ok and start_ok and stationarity_ok
         rows.append((
             L, h, len(starts.get("hot", [])), len(starts.get("cold", [])),
@@ -407,7 +414,7 @@ def fit_hc(L, h, y, error, omega=OMEGA, include_mixed=True):
     if not lo < hi:
         raise ValueError("field window is too narrow for the registered fit")
 
-    grid = np.linspace(lo, hi, 1001)
+    grid = np.linspace(lo, hi, FIT_GRID_POINTS)
     scores = np.asarray(
         [fit_at_hc(L, h, y, error, value, omega, include_mixed)[0] for value in grid]
     )
