@@ -149,3 +149,71 @@ import or inspect Fock ED, ED matrices, eigenvalues, or saved ED artifacts.
 Local slice result: `slice-pass`.  External specification review is still
 required before declaring try 2 spec-compliant or starting any later route
 item.
+
+## External specification review — try 2 failed
+
+This section supersedes the local `slice-pass` disposition above.  The final
+external review conclusion was:
+
+> Not Spec compliant — 2 Important issues; quality review must be blocked.
+
+The three prior review regressions, 64 focused tests, 279 full tests, static
+isolation checks, and performance measurements remain factual.  They are not
+sufficient to establish specification compliance against the following new
+finite-result counterexamples.
+
+### Important 1 — signed cancellation discards the finite small term
+
+Use sampled source logpsi `0`, coefficients `{2: +1, 3: -1, 4: +1}`, and
+target logpsi values `{2: 1e308, 3: 1e308, 4: 0}`.  The mathematical row is
+
+`exp(1e308) - exp(1e308) + 1 = 1`.
+
+All six permutations of the three neighbors return `0j` instead.
+
+Root-cause evidence: max-shifting first converts the small term's relative
+log-magnitude to `-inf` and saturates it to zero.  The two dominant signed terms
+then cancel exactly, but the already discarded finite remainder cannot be
+recovered.  Negative log-difference saturation is therefore not generally safe
+for a signed or complex row.  This is an architecture-level finite-result
+error, not a neighbor-ordering edge case.
+
+### Important 2 — near-maximum restoration fails in both directions
+
+The component restoration boundary has both a false rejection and a false
+acceptance:
+
+1. With coefficient `1e-300`, target logpsi `1400.5582407915977`, and sampled
+   source logpsi `0`, the high-precision reference is
+   `0.9999999999999527 * max_float`, which is finite and representable.  The
+   current implementation raises `OverflowError`.  A coefficient equal to the
+   minimum subnormal with target logpsi `1454.2227848147652` has the same false
+   rejection.
+2. With coefficient `1e300`, target logpsi `19.00718499517029`, and sampled
+   source logpsi `0`, the high-precision result exceeds `max_float` by about
+   `1.006` ulp and the direct float reference is `inf`.  The current
+   implementation fails to report overflow and instead returns the finite
+   value `1.797693134862315e308`.
+
+Root-cause evidence: the direct-product and decomposed binary restoration paths
+make inconsistent decisions around the rounded `log(max_float)` boundary.
+Neither the comparison against the rounded log threshold nor the fallback
+mantissa/exponent reconstruction provides a correctly rounded, bidirectional
+representability test for the underlying coefficient-times-exponential value.
+
+### Terminal disposition and next-attempt boundary
+
+- Try 2 result: `failed`.
+- Reviewer disposition: `Not Spec compliant`; quality review is blocked by two
+  Important architecture-level finite-result errors.
+- Try 2 active implementation time remains approximately `00:12`.  Activity
+  after final external review was documentation-only closeout; no additional
+  implementation interval was started or inferred.
+- The commit containing this section is the terminal commit for try 2.
+- Any next rescue must start from this terminal commit in a new, independent
+  worktree.  This try 2 worktree must not receive further production or test
+  patches.
+- No try 3 or A03 work was started, no production code or tests were changed
+  after review, and no push was performed.
+
+Final try 2 disposition: `failed / terminal`.
