@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from numbers import Integral, Real
 from types import MappingProxyType
 
@@ -18,8 +18,9 @@ LogAmplitude = Callable[[int], complex]
 # The maximum-norm Hermitian defect is compared with this fraction of the
 # maximum matrix-element magnitude. A zero matrix therefore has zero tolerance.
 HERMITIAN_RELATIVE_TOLERANCE = 1.0e-12
-_LOG_MAX_FLOAT = math.log(np.finfo(np.float64).max)
-_LOG_TWO = math.log(2.0)
+_MAX_FLOAT = float(np.finfo(np.float64).max)
+_DECIMAL_RESTORE_THRESHOLD = _MAX_FLOAT / 16.0
+_LOG_HALF_MIN_SUBNORMAL = math.log(math.ldexp(1.0, -1074)) - math.log(2.0)
 
 
 def _integer(name: str, value: object) -> int:
@@ -396,18 +397,7 @@ def _phase_direction(target_phase: float, source_phase: float) -> complex:
     return complex(math.cos(reduced), math.sin(reduced))
 
 
-def _log_difference(
-    coefficient_logabs: float,
-    target_logabs: float,
-    anchor_coefficient_logabs: float,
-    anchor_target_logabs: float,
-) -> float:
-    values = (
-        coefficient_logabs,
-        target_logabs,
-        -anchor_coefficient_logabs,
-        -anchor_target_logabs,
-    )
+def _overflow_safe_fsum(values: Sequence[float]) -> float:
     try:
         return math.fsum(values)
     except OverflowError:
@@ -418,46 +408,44 @@ def _log_difference(
         return float(exact)
 
 
-def _scaled_exp_product(scale: float, relative_logabs: float) -> float:
-    """Return ``scale * exp(relative_logabs)`` without intermediate overflow."""
+def _log_parts_difference(
+    left: Sequence[float],
+    right: Sequence[float],
+) -> float:
+    return _overflow_safe_fsum((*left, *(-value for value in right)))
+
+
+def _decimal_exp_product(scale: float, relative_logabs: float) -> float:
+    """Restore a boundary component from its exact float scale."""
 
     if relative_logabs == -math.inf:
         return 0.0
     if relative_logabs == math.inf:
         raise OverflowError("local estimator result is outside complex128 range")
-
-    mantissa, exponent = math.frexp(scale)
-    shift = math.floor(relative_logabs / _LOG_TWO)
-    combined_exponent = exponent + shift
-    if combined_exponent > 1024:
+    if relative_logabs > 4096.0:
         raise OverflowError("local estimator result is outside complex128 range")
-    if combined_exponent < -1075:
+    if relative_logabs < -4096.0:
         return 0.0
 
-    residual = math.fsum((relative_logabs, -shift * _LOG_TWO))
-    if residual < 0.0:
-        shift -= 1
-        residual += _LOG_TWO
-    elif residual >= _LOG_TWO:
-        shift += 1
-        residual -= _LOG_TWO
-    try:
-        result = math.ldexp(
-            mantissa * math.exp(residual),
-            exponent + shift,
-        )
-    except OverflowError as error:
-        raise OverflowError(
-            "local estimator result is outside complex128 range"
-        ) from error
+    with localcontext() as context:
+        context.prec = 100
+        context.Emax = 999_999
+        context.Emin = -999_999
+        exact = Decimal.from_float(scale) * Decimal.from_float(
+            relative_logabs
+        ).exp()
+        if exact > Decimal.from_float(_MAX_FLOAT):
+            raise OverflowError(
+                "local estimator result is outside complex128 range"
+            )
+        result = float(exact)
     if not math.isfinite(result):
         raise OverflowError("local estimator result is outside complex128 range")
     return result
 
 
 def _restore_component(
-    anchor_scale: float,
-    anchor_logscale: float,
+    scale: float,
     relative_logabs: float,
     sign: float,
 ) -> float:
@@ -470,26 +458,113 @@ def _restore_component(
     except OverflowError:
         relative_magnitude = math.inf
     if math.isfinite(relative_magnitude):
-        candidate = anchor_scale * relative_magnitude
-        if math.isfinite(candidate) and candidate != 0.0:
+        candidate = scale * relative_magnitude
+        if (
+            math.isfinite(candidate)
+            and candidate != 0.0
+            and candidate < _DECIMAL_RESTORE_THRESHOLD
+        ):
             return math.copysign(candidate, sign)
-    full_logabs = _log_difference(
-        anchor_logscale,
-        relative_logabs,
-        0.0,
-        0.0,
-    )
-    if full_logabs == -math.inf:
-        return math.copysign(0.0, sign)
-    if full_logabs < _LOG_MAX_FLOAT:
-        magnitude = math.exp(full_logabs)
-    elif full_logabs > _LOG_MAX_FLOAT:
-        raise OverflowError(
-            "local estimator result is outside complex128 range"
-        )
-    else:
-        magnitude = _scaled_exp_product(anchor_scale, relative_logabs)
+    magnitude = _decimal_exp_product(scale, relative_logabs)
     return math.copysign(magnitude, sign)
+
+
+@dataclass(frozen=True, slots=True)
+class _LogComponentTerm:
+    log_parts: tuple[float, ...]
+    sign: float
+    scale: float
+    log_scale: float
+
+
+def _largest_component_index(terms: Sequence[_LogComponentTerm]) -> int:
+    anchor_index = 0
+    for index in range(1, len(terms)):
+        difference = _log_parts_difference(
+            terms[index].log_parts,
+            terms[anchor_index].log_parts,
+        )
+        if difference > 0.0 or (
+            difference == 0.0
+            and terms[index].scale > terms[anchor_index].scale
+        ):
+            anchor_index = index
+    return anchor_index
+
+
+def _restore_log_component(
+    term: _LogComponentTerm,
+    source_logabs: float,
+) -> float:
+    relative_logabs = _log_parts_difference(
+        term.log_parts,
+        (term.log_scale, source_logabs),
+    )
+    return _restore_component(term.scale, relative_logabs, term.sign)
+
+
+def _sum_log_component(
+    terms: Sequence[tuple[float, float, complex, float, float]],
+    source_logabs: float,
+    *,
+    imaginary: bool,
+) -> float:
+    remaining: list[_LogComponentTerm] = []
+    for coefficient_logabs, target_logabs, direction, scale, log_scale in terms:
+        component = direction.imag if imaginary else direction.real
+        if component == 0.0:
+            continue
+        remaining.append(
+            _LogComponentTerm(
+                log_parts=(
+                    coefficient_logabs,
+                    target_logabs,
+                    math.log(abs(component)),
+                ),
+                sign=math.copysign(1.0, component),
+                scale=scale,
+                log_scale=log_scale,
+            )
+        )
+
+    while remaining:
+        anchor_index = _largest_component_index(remaining)
+        anchor = remaining[anchor_index]
+        band: list[tuple[_LogComponentTerm, float]] = []
+        lower: list[_LogComponentTerm] = []
+        for term in remaining:
+            delta = _log_parts_difference(term.log_parts, anchor.log_parts)
+            if delta == math.inf:
+                raise OverflowError(
+                    "local estimator log scale is outside the supported range"
+                )
+            if delta > _LOG_HALF_MIN_SUBNORMAL:
+                band.append((term, delta))
+            else:
+                lower.append(term)
+
+        if len(band) == 1:
+            return _restore_log_component(band[0][0], source_logabs)
+
+        bounded = math.fsum(
+            math.exp(delta) * term.sign
+            for term, delta in band
+        )
+        if bounded == 0.0:
+            remaining = lower
+            continue
+
+        residual = _LogComponentTerm(
+            log_parts=(*anchor.log_parts, math.log(abs(bounded))),
+            sign=math.copysign(1.0, bounded),
+            scale=anchor.scale,
+            log_scale=anchor.log_scale,
+        )
+        if not lower:
+            return _restore_log_component(residual, source_logabs)
+        remaining = [*lower, residual]
+
+    return 0.0
 
 
 def local_from_log_neighbors(
@@ -553,88 +628,18 @@ def local_from_log_neighbors(
         )
     if not terms:
         return 0.0j
-
-    anchor_index = 0
-    for index in range(1, len(terms)):
-        coefficient_logabs, target_logabs, _, _, _ = terms[index]
-        anchor_coefficient_logabs, anchor_target_logabs, _, _, _ = terms[
-            anchor_index
-        ]
-        difference = _log_difference(
-            coefficient_logabs,
-            target_logabs,
-            anchor_coefficient_logabs,
-            anchor_target_logabs,
-        )
-        # Effective ties use the largest exact rectangular scale so the
-        # restoration path is independent of neighbor insertion order.
-        if difference > 0.0 or (
-            difference == 0.0
-            and terms[index][3] > terms[anchor_index][3]
-        ):
-            anchor_index = index
-
-    (
-        anchor_coefficient_logabs,
-        anchor_target_logabs,
-        _,
-        anchor_scale,
-        anchor_logscale,
-    ) = terms[anchor_index]
-    scaled_real: list[float] = []
-    scaled_imag: list[float] = []
-    for coefficient_logabs, target_logabs, direction, _, _ in terms:
-        delta = _log_difference(
-            coefficient_logabs,
-            target_logabs,
-            anchor_coefficient_logabs,
-            anchor_target_logabs,
-        )
-        if delta == math.inf:
-            raise OverflowError(
-                "local estimator log scale is outside the supported range"
-            )
-        scaled_magnitude = math.exp(delta) if delta > -math.inf else 0.0
-        scaled_real.append(scaled_magnitude * direction.real)
-        scaled_imag.append(scaled_magnitude * direction.imag)
-
-    bounded_real = math.fsum(scaled_real)
-    bounded_imag = math.fsum(scaled_imag)
-    if bounded_real == 0.0 and bounded_imag == 0.0:
-        return 0.0j
-    anchor_relative_logabs = _log_difference(
-        anchor_coefficient_logabs,
-        anchor_target_logabs,
-        anchor_logscale,
-        source_logpsi.real,
+    return complex(
+        _sum_log_component(
+            terms,
+            source_logpsi.real,
+            imaginary=False,
+        ),
+        _sum_log_component(
+            terms,
+            source_logpsi.real,
+            imaginary=True,
+        ),
     )
-    if anchor_relative_logabs == math.inf:
-        raise OverflowError(
-            "local estimator result is outside complex128 range"
-        )
-    if anchor_relative_logabs == -math.inf:
-        return 0.0j
-
-    components = []
-    for bounded_component in (bounded_real, bounded_imag):
-        if bounded_component == 0.0:
-            components.append(0.0)
-            continue
-        relative_logabs = _log_difference(
-            anchor_relative_logabs,
-            math.log(abs(bounded_component)),
-            0.0,
-            0.0,
-        )
-        components.append(
-            _restore_component(
-                anchor_scale,
-                anchor_logscale,
-                relative_logabs,
-                bounded_component,
-            )
-        )
-    return complex(*components)
 
 
 def local_energy(

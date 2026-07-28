@@ -415,7 +415,7 @@ def test_local_estimator_is_invariant_under_global_logpsi_shifts(
     assert observed == pytest.approx(expected, rel=2.0e-14, abs=2.0e-14)
 
 
-def test_local_estimator_is_order_invariant_at_maximum_finite_components() -> None:
+def test_local_estimator_is_order_invariant_for_true_near_maximum_overflow() -> None:
     maximum = np.finfo(np.float64).max
     limit = math.log(maximum)
     log_values = {
@@ -426,21 +426,39 @@ def test_local_estimator_is_order_invariant_at_maximum_finite_components() -> No
     term_a = (2, 1.0)
     term_b = (3, 1.0e300j)
 
+    for order in ((term_a, term_b), (term_b, term_a)):
+        with pytest.raises(OverflowError, match="outside complex128 range"):
+            local_from_log_neighbors(
+                1,
+                dict(order),
+                log_values.__getitem__,
+            )
+
+
+def test_local_estimator_is_order_invariant_at_finite_near_maximum() -> None:
+    maximum = np.finfo(np.float64).max
+    limit = math.log(maximum)
+    finite_imaginary_logabs = math.nextafter(
+        limit - math.log(1.0e300),
+        -math.inf,
+    )
+    log_values = {
+        1: 0.0j,
+        2: complex(limit, 0.0),
+        3: complex(finite_imaginary_logabs, 0.0),
+    }
+    term_a = (2, 1.0)
+    term_b = (3, 1.0e300j)
     observed = [
-        local_from_log_neighbors(
-            1,
-            dict(order),
-            log_values.__getitem__,
-        )
+        local_from_log_neighbors(1, dict(order), log_values.__getitem__)
         for order in ((term_a, term_b), (term_b, term_a))
     ]
 
     assert all(math.isfinite(value.real) for value in observed)
     assert all(math.isfinite(value.imag) for value in observed)
-    assert observed[0].real == pytest.approx(maximum, rel=3.0e-14)
-    assert observed[0].imag == pytest.approx(maximum, rel=3.0e-14)
-    assert observed[1].real == pytest.approx(observed[0].real, rel=1.0e-15)
-    assert observed[1].imag == pytest.approx(observed[0].imag, rel=1.0e-15)
+    assert observed[0].real == 1.7976931348622732e308
+    assert observed[0].imag == 1.7976931348623095e308
+    assert observed[1] == observed[0]
 
 
 def test_local_estimator_saturates_unrepresentable_negative_log_difference() -> None:
