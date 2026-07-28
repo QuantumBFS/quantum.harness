@@ -20,8 +20,12 @@ rsync -az --info=stats1 \
   --exclude '.knowledge/' --exclude '*.cov' \
   ./ scnet:quantum.harness/
 
-echo "== rsync Mosek licence (HOSTID=DEMO, not machine-locked)"
+echo "== rsync Mosek licence (HOSTID=DEMO, not machine-locked) + binaries"
+# login node cannot reach download.mosek.com — ship the local linux64x86
+# binary dir; bootstrap points MOSEKBINDIR at it
+MSKBIN=$(dirname "$(cat "$HOME/.julia/packages/Mosek/"*/deps/mosekbindir | head -1)")/bin
 ssh scnet 'mkdir -p ~/mosek'
 rsync -az "$HOME/mosek/mosek.lic" scnet:mosek/mosek.lic
+rsync -az "$MSKBIN/" scnet:mosek/bin/
 
 echo "SHIP OK — next: ssh scnet 'bash quantum.harness/tracks/polyopt/solutions/its-a-trap/hpc/bootstrap_remote.sh'"

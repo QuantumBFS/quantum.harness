@@ -11,7 +11,7 @@
 # — merge rows after fetch with merge_results.sh.
 set -u
 cd "$HOME/quantum.harness"
-export PATH="$HOME/.juliaup/bin:$PATH"
+export PATH="$HOME/julia/bin:$PATH"   # mirror-installed 1.12.6 (bootstrap_remote.sh)
 export MAX_WALL_S=42000 MAX_RSS_GB=55 MAX_PROC_SWAP_GB=2 MOSEK_THREADS=8
 
 RUN="${RUN_NAME:?set RUN_NAME via sbatch --export}"
