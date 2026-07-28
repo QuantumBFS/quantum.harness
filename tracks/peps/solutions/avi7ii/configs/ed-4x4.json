@@ -1,0 +1,10 @@
+{
+  "l": 4,
+  "j": 1.0,
+  "field": 3.0,
+  "boundary": "open",
+  "operator": "pauli",
+  "irreps": ["A1", "A2", "B1", "B2", "E"],
+  "parities": [1, -1],
+  "beta_grid": {"start": 0.025, "stop": 1.0, "step": 0.025}
+}
