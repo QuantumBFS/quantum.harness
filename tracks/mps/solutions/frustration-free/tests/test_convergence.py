@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager
 import importlib.util
 import json
 import math
@@ -1654,6 +1655,150 @@ def test_validate_existing_waits_for_concurrent_cell_publication(tmp_path):
         run / "checkpoints" / plan["cells"][0]["cell_id"],
         completed,
     )
+
+
+def test_validate_existing_does_not_reject_stage_created_after_cell_check(
+    tmp_path, monkeypatch
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1, 2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    plan_path = convergence.create_plan_run(tmp_path, plan)
+    run = plan_path.parent
+    first_cell_id = plan["cells"][0]["cell_id"]
+    first_validation_released = threading.Event()
+    stage_created = threading.Event()
+    release_runner = threading.Event()
+    real_lock = convergence.cell_advisory_lock
+    runner_errors = []
+    validation_errors = []
+    validation_results = []
+
+    @contextmanager
+    def observed_lock(cells_root, cell_id):
+        with real_lock(cells_root, cell_id):
+            yield
+        if (
+            threading.current_thread().name == "inverse-order-validator"
+            and cell_id == first_cell_id
+            and not first_validation_released.is_set()
+        ):
+            first_validation_released.set()
+            assert stage_created.wait(timeout=5)
+
+    monkeypatch.setattr(convergence, "cell_advisory_lock", observed_lock)
+
+    def executor(item, _stage, _checkpoint_root):
+        stage_created.set()
+        assert release_runner.wait(timeout=5)
+        return _solver_result(item)
+
+    def execute():
+        try:
+            convergence.run_cell(
+                plan,
+                0,
+                run,
+                executor=executor,
+                julia_project=SOLUTION_DIR / "julia",
+            )
+        except BaseException as error:
+            runner_errors.append(error)
+
+    def validate():
+        try:
+            validation_results.append(
+                convergence.validate_existing(
+                    plan_path=plan_path,
+                    resources_path=run / "resources.json",
+                    run_directory=run,
+                )
+            )
+        except BaseException as error:
+            validation_errors.append(error)
+
+    validator = threading.Thread(
+        target=validate, name="inverse-order-validator"
+    )
+    validator.start()
+    assert first_validation_released.wait(timeout=5)
+    runner = threading.Thread(target=execute, name="inverse-order-runner")
+    runner.start()
+    assert stage_created.wait(timeout=5)
+
+    validator.join(timeout=0.2)
+    release_runner.set()
+    runner.join(timeout=5)
+    validator.join(timeout=5)
+
+    assert not runner.is_alive()
+    assert not validator.is_alive()
+    assert runner_errors == []
+    assert validation_errors == []
+    assert len(validation_results) == 1
+    assert validation_results[0]["cells"] in {0, 1}
+    assert not any(
+        entry.name.startswith(f".{first_cell_id}.abandoned-")
+        for entry in (run / "cells").iterdir()
+    )
+
+
+@pytest.mark.parametrize(
+    "interruption_point",
+    ["pointer_moved_before_marker", "marker_written_before_pointer_removed"],
+)
+def test_retire_checkpoint_root_is_idempotent_across_interruption_points(
+    tmp_path, interruption_point
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[1],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+    )
+    cell = plan["cells"][0]
+    checkpoint = tmp_path / cell["cell_id"]
+    _write_python_validated_checkpoint(checkpoint, cell)
+    completed = _complete(cell)
+    generations = {
+        path.name for path in (checkpoint / "generations").iterdir()
+    }
+    fingerprint = convergence.validate_checkpoint_root(checkpoint, cell=cell)
+    retired = checkpoint / "retired"
+    retired.mkdir()
+    retired_pointer = retired / f"current-{fingerprint}.json"
+
+    if interruption_point == "pointer_moved_before_marker":
+        os.replace(checkpoint / "current.json", retired_pointer)
+    else:
+        shutil.copy2(checkpoint / "current.json", retired_pointer)
+        convergence._write_checkpoint_retirement(
+            checkpoint,
+            cell=cell,
+            completed_cell=completed,
+            retired_pointer=retired_pointer,
+        )
+
+    convergence.retire_checkpoint_root(
+        checkpoint,
+        cell=cell,
+        completed_cell=completed,
+    )
+    convergence.retire_checkpoint_root(
+        checkpoint,
+        cell=cell,
+        completed_cell=completed,
+    )
+
+    _assert_retired_checkpoint(checkpoint, completed)
+    assert {
+        path.name for path in (checkpoint / "generations").iterdir()
+    } == generations
 
 
 def test_schema_defines_strict_checkpoint_pointer():

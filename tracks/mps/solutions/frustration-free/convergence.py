@@ -2617,6 +2617,54 @@ def validate_existing(
                 or checkpoints_root.is_symlink()
             ):
                 raise ValueError("checkpoints must be a real directory")
+        cell_state_prefixes = (
+            "stage-",
+            "backup-",
+            "failed-",
+            "superseded-",
+            "abandoned-",
+        )
+
+        def planned_cell_owner(
+            name: str, *, prefixes: tuple[str, ...]
+        ) -> str | None:
+            if name in expected_ids:
+                return name
+            for cell_id in expected_ids:
+                if any(
+                    name.startswith(f".{cell_id}.{prefix}")
+                    for prefix in prefixes
+                ):
+                    return cell_id
+            return None
+
+        if cells_root.exists():
+            for entry in cells_root.iterdir():
+                name = entry.name
+                if name == ".locks":
+                    if not entry.is_dir() or entry.is_symlink():
+                        raise ValueError("cell locks must be a real directory")
+                    expected_locks = {f"{cell_id}.lock" for cell_id in expected_ids}
+                    unexpected_locks = {
+                        path.name for path in entry.iterdir()
+                    } - expected_locks
+                    if unexpected_locks:
+                        raise ValueError(
+                            f"unexpected stale cell locks: {sorted(unexpected_locks)}"
+                        )
+                    continue
+                if planned_cell_owner(
+                    name, prefixes=cell_state_prefixes
+                ) is None:
+                    raise ValueError(f"unexpected stale cell entry: {name}")
+        if checkpoints_root.exists():
+            for entry in checkpoints_root.iterdir():
+                if planned_cell_owner(
+                    entry.name, prefixes=("superseded-",)
+                ) is None:
+                    raise ValueError(
+                        f"unexpected checkpoint entry: {entry.name}"
+                    )
         artifacts = []
         for cell in plan["cells"]:
             cell_id = cell["cell_id"]
@@ -2656,63 +2704,36 @@ def validate_existing(
                             "invalid checkpoint was archived at "
                             f"{archived}: {error}"
                         ) from error
+                for entry in cells_root.iterdir():
+                    name = entry.name
+                    if name.startswith(f".{cell_id}.superseded-") or (
+                        name.startswith(f".{cell_id}.abandoned-")
+                    ):
+                        if not entry.is_dir() or entry.is_symlink():
+                            raise ValueError(
+                                f"cell archive must be a real directory: {name}"
+                            )
+                        checked["archived_cells"] += 1
+                    elif any(
+                        name.startswith(f".{cell_id}.{prefix}")
+                        for prefix in ("stage-", "backup-", "failed-")
+                    ):
+                        raise ValueError(
+                            f"unrecovered transient cell entry: {name}"
+                        )
+                if checkpoints_root.exists():
+                    for entry in checkpoints_root.iterdir():
+                        name = entry.name
+                        if name.startswith(f".{cell_id}.superseded-"):
+                            if not entry.is_dir() or entry.is_symlink():
+                                raise ValueError(
+                                    "checkpoint archive must be a real "
+                                    f"directory: {name}"
+                                )
+                            checked["archived_checkpoints"] += 1
                 if artifact is not None:
                     artifacts.append(artifact)
                     checked["cells"] += 1
-        if cells_root.exists():
-            for entry in cells_root.iterdir():
-                name = entry.name
-                if name in expected_ids:
-                    if not entry.is_dir() or entry.is_symlink():
-                        raise ValueError(
-                            f"completed cell must be a real directory: {name}"
-                        )
-                    continue
-                if name == ".locks":
-                    if not entry.is_dir() or entry.is_symlink():
-                        raise ValueError("cell locks must be a real directory")
-                    expected_locks = {f"{cell_id}.lock" for cell_id in expected_ids}
-                    unexpected_locks = {
-                        path.name for path in entry.iterdir()
-                    } - expected_locks
-                    if unexpected_locks:
-                        raise ValueError(
-                            f"unexpected stale cell locks: {sorted(unexpected_locks)}"
-                        )
-                    continue
-                if any(
-                    name.startswith(f".{cell_id}.superseded-")
-                    or name.startswith(f".{cell_id}.abandoned-")
-                    for cell_id in expected_ids
-                ):
-                    if not entry.is_dir() or entry.is_symlink():
-                        raise ValueError(
-                            f"cell archive must be a real directory: {name}"
-                        )
-                    checked["archived_cells"] += 1
-                    continue
-                raise ValueError(f"unexpected stale cell entry: {name}")
-        if checkpoints_root.exists():
-            for entry in checkpoints_root.iterdir():
-                name = entry.name
-                if name in expected_ids:
-                    if not entry.is_dir() or entry.is_symlink():
-                        raise ValueError(
-                            f"checkpoint must be a real directory: {name}"
-                        )
-                    continue
-                if any(
-                    name.startswith(f".{cell_id}.superseded-")
-                    for cell_id in expected_ids
-                ):
-                    if not entry.is_dir() or entry.is_symlink():
-                        raise ValueError(
-                            "checkpoint archive must be a real directory: "
-                            f"{name}"
-                        )
-                    checked["archived_checkpoints"] += 1
-                    continue
-                raise ValueError(f"unexpected checkpoint entry: {name}")
         analysis_path = root / "analysis.json"
         if analysis_path.exists() or analysis_path.is_symlink():
             validate_analysis_artifact(
