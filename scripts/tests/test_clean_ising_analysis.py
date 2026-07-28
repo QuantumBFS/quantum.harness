@@ -73,6 +73,53 @@ class CleanLyapunovTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.leading_lyapunov_iteration(4, steps=10, burn_in=10)
 
+    def test_transfer_energy_fit_recovers_known_central_charge(self):
+        """Catches a wrong CFT sign, normalization, or finite-size basis."""
+        module = _load_module()
+        if not hasattr(module, "fit_transfer_energy"):
+            self.fail("fit_transfer_energy is missing")
+        sizes = np.array([8, 10, 12, 16, 20], dtype=float)
+        expected_c = 0.5
+        energies = (
+            -0.93 * sizes
+            - math.pi * expected_c / (6.0 * sizes)
+            + 0.15 / sizes**3
+        )
+
+        result = module.fit_transfer_energy(sizes, energies, powers=(1, 3), lmin=8)
+
+        self.assertAlmostEqual(result["central_charge"], expected_c, places=11)
+        self.assertEqual(result["sizes"], [8, 10, 12, 16, 20])
+        self.assertLess(result["residual_norm"], 1e-12)
+
+    def test_central_charge_summary_builds_stability_envelope(self):
+        """Catches omitted stability fits or a malformed deterministic envelope."""
+        module = _load_module()
+        if not hasattr(module, "central_charge_summary"):
+            self.fail("central_charge_summary is missing")
+        sizes = np.array([8, 10, 12, 16, 20], dtype=float)
+        energies = -0.93 * sizes - math.pi * 0.5 / (6.0 * sizes) + 0.15 / sizes**3
+
+        result = module.central_charge_summary(sizes, energies)
+
+        self.assertEqual(
+            set(result),
+            {"primary_L8_p13", "drop_L8_p13", "all_L_p135", "reported"},
+        )
+        reported = result["reported"]
+        self.assertLessEqual(reported["lower"], 0.5)
+        self.assertGreaterEqual(reported["upper"], 0.5)
+        self.assertAlmostEqual(
+            reported["midpoint"],
+            0.5 * (reported["lower"] + reported["upper"]),
+            places=14,
+        )
+        self.assertAlmostEqual(
+            reported["half_width"],
+            0.5 * (reported["upper"] - reported["lower"]),
+            places=14,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
