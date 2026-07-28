@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import FrozenInstanceError
 import json
 import math
+import os
 from pathlib import Path
+import subprocess
+import sys
 import warnings
 
 import pytest
@@ -24,6 +27,7 @@ from oracle.overlap_klein import (
     execution_metadata,
     overlap_geometry,
     quadratic_basis,
+    _q_sqrt_two_to_float,
     reconstruct_exact_primal,
     run_anchor_scan,
     solve_anchor,
@@ -730,6 +734,81 @@ def test_q_sqrt_two_numeric_solves_do_not_emit_bitcount_warning() -> None:
         assert solve_anchor(system, "x", 1).status == "infeasible"
         certificate = find_zero_dual(system, "x")
         assert verify_zero_dual(system, certificate)
+
+
+def test_q_sqrt_two_to_float_uses_the_exact_field_decomposition() -> None:
+    """Catches restoring SymPy/mpmath float conversion for exact coefficients."""
+    expression = sp.Rational(3, 2) - sp.sqrt(2) / 3
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "error",
+            message=".*bitcount function is deprecated.*",
+            category=DeprecationWarning,
+            module=r"mpmath\.libmp\.libintmath",
+        )
+        observed = _q_sqrt_two_to_float(expression)
+        assert solve_anchor(
+            _synthetic_system([[sp.sqrt(2), 0], [-sp.sqrt(2), 0]]),
+            "x",
+            1,
+        ).status == "infeasible"
+
+    assert observed == pytest.approx(1.5 - math.sqrt(2.0) / 3.0)
+
+
+def _runner_environment_without_blas_limits() -> dict[str, str]:
+    environment = dict(os.environ)
+    for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        environment.pop(name, None)
+    return environment
+
+
+def test_runner_help_succeeds_without_blas_environment() -> None:
+    """Catches validating BLAS before argparse can serve --help."""
+    result = subprocess.run(
+        [sys.executable, "-m", "oracle.overlap_klein", "--help"],
+        cwd=Path(__file__).resolve().parents[1],
+        env=_runner_environment_without_blas_limits(),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "usage:" in result.stdout
+    assert "Traceback" not in result.stderr
+
+
+def test_runner_missing_blas_limit_is_a_clean_argument_error(tmp_path: Path) -> None:
+    """Catches a missing required thread limit leaking a traceback or output."""
+    output = tmp_path / "result.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "oracle.overlap_klein",
+            "--family",
+            "number-conserving",
+            "--mask",
+            "rings-bridges",
+            "--workers",
+            "1",
+            "--source-commit",
+            "a" * 40,
+            "--output",
+            str(output),
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        env=_runner_environment_without_blas_limits(),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "OMP_NUM_THREADS must be set to the string '1'" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert not output.exists()
 
 
 @pytest.mark.parametrize("workers", (0, -1, True))
