@@ -1,5 +1,8 @@
 import json
+import os
 from pathlib import Path
+
+import pytest
 
 from scalable_v1.audit import freeze_manifest, sha256_file, verify_manifest
 from scalable_v1.protocol import DEFAULT_PROTOCOL_PATH, load_protocol
@@ -39,7 +42,12 @@ def test_clean_manifest_freezes_and_verifies_candidate_artifacts(tmp_path: Path)
         artifact_files=artifacts,
     )
 
-    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest_bytes = manifest_path.read_bytes()
+    assert manifest_bytes.endswith(b"}\n")
+    assert not manifest_bytes.endswith(b"\r\n")
+    assert b"NaN" not in manifest_bytes
+    assert b"Infinity" not in manifest_bytes
+    payload = json.loads(manifest_bytes.decode("utf-8"))
     assert payload["schema_version"] == "challenge-15-frozen-manifest-v1"
     assert payload["route"] == "occupation_autoregressive"
     assert payload["attempt"] == "scalable-v1-s01-a01"
@@ -63,6 +71,35 @@ def test_clean_manifest_freezes_and_verifies_candidate_artifacts(tmp_path: Path)
     assert result.issues == ()
     assert result.manifest_sha256 == sha256_file(manifest_path)
     assert result.artifact_bytes == sum(path.stat().st_size for path in artifacts.values())
+
+
+def test_freeze_manifest_preserves_old_target_when_atomic_replace_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project_root, run_dir, candidate, artifacts = make_files(tmp_path)
+    manifest_path = run_dir / "training-manifest.json"
+    manifest_path.write_bytes(b"old")
+    original_entries = {path.name for path in run_dir.iterdir()}
+
+    def fail_replace(source: object, target: object) -> None:
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated replace failure"):
+        freeze_manifest(
+            run_dir=run_dir,
+            project_root=project_root,
+            route="occupation_autoregressive",
+            attempt="scalable-v1-s01-a01",
+            protocol=load_protocol(),
+            selected_update=2048,
+            training_seed=848,
+            source_files=[candidate],
+            artifact_files=artifacts,
+        )
+
+    assert manifest_path.read_bytes() == b"old"
+    assert {path.name for path in run_dir.iterdir()} == original_entries
 
 
 def test_forbidden_candidate_import_and_artifact_tamper_are_rejected(

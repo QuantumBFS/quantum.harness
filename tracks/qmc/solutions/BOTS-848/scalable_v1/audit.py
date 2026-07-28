@@ -3,6 +3,8 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -92,10 +94,30 @@ def freeze_manifest(
         "artifacts": artifacts,
     }
     manifest_path = run_dir / "training-manifest.json"
-    manifest_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    serialized = json.dumps(
+        payload,
+        indent=2,
+        sort_keys=True,
+        allow_nan=False,
+    ) + "\n"
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=run_dir,
+        prefix=f".{manifest_path.name}.",
+        suffix=".tmp",
     )
+    temporary_path = Path(temporary_name)
+    try:
+        handle = os.fdopen(descriptor, "w", encoding="utf-8", newline="\n")
+        descriptor = -1
+        with handle:
+            handle.write(serialized)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, manifest_path)
+    finally:
+        if descriptor != -1:
+            os.close(descriptor)
+        temporary_path.unlink(missing_ok=True)
     return manifest_path
 
 
