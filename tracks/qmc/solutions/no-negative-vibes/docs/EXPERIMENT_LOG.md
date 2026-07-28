@@ -576,3 +576,70 @@ The tracked documentation update that records this chronology is a later
 docs-only commit. Its exact SHA and any final bundle/replay evidence belong in
 the Task 8 implementation report so the commit does not claim to contain its
 own hash.
+
+### Review-fix candidate gate
+
+Final review found that the tracked fixture test trusted the recorded
+`scientific_payload_equal_after_removing_only_top_level_execution` boolean
+without independently opening the ignored raws. The review fix adds a
+separate candidate gate; the ordinary suite remains hermetic and uses only
+synthetic `tmp_path` raw pairs.
+
+| Attempt | Result |
+|---|---|
+| candidate-gate RED 1 | VALID RED at `1fc9342`: the five happy/hash/execution/scientific/CLI nodes exited 1 with `5 failed in 0.74s`, each solely because `oracle.r01_evidence` was absent. |
+| exact-inclusion characterization | PASS before production changes: both support masks passed the exact ordered BdG-to-number-conserving row/column restriction, `2 passed in 19.20s`. This was characterization evidence, not RED. |
+| candidate-gate RED 2 | VALID RED before the implementation was restored: the four containment/missing-file/role/incomplete-provenance nodes exited 1 with `4 failed in 0.69s`, each at the missing validator assertion. The expanded contract was committed at `b049bed`. |
+| candidate-gate GREEN 1 | PASS: the original five nodes reported `5 passed in 0.64s`. |
+| candidate-gate GREEN 2 | PASS: the complete hermetic module reported `11 passed in 18.64s`. |
+| real ignored-raw candidate gate | PASS: all eight local raw files were required, contained, byte-hashed, provenance-matched, and paired; stdout was `validated R01 evidence: experiments=2 cells=4 raw_results=8`. |
+| independent local raw check | PASS: a read-only PowerShell hash/execution/payload comparison reported `powershell-independent-gate raw_results=8`. |
+
+The WSL commands, run from
+`tracks/qmc/solutions/no-negative-vibes`, were:
+
+```text
+pytest -q tests/test_r01_evidence.py::test_raw_evidence_validator_accepts_a_complete_matching_pair tests/test_r01_evidence.py::test_raw_evidence_cli_accepts_explicit_repository_and_fixture_paths tests/test_r01_evidence.py::test_raw_evidence_validator_recomputes_each_raw_sha256 tests/test_r01_evidence.py::test_raw_evidence_validator_requires_exact_execution_provenance tests/test_r01_evidence.py::test_raw_evidence_validator_compares_payloads_after_only_execution_removal
+
+pytest -q tests/test_r01_evidence.py::test_raw_evidence_validator_rejects_a_raw_path_outside_repository_root tests/test_r01_evidence.py::test_raw_evidence_validator_requires_every_referenced_raw_file tests/test_r01_evidence.py::test_raw_evidence_validator_requires_one_smoke_and_one_production_role tests/test_r01_evidence.py::test_raw_evidence_validator_rejects_incomplete_raw_provenance
+
+pytest -q tests/test_r01_evidence.py::test_bdg_system_contains_number_conserving_rows_without_mixed_support
+
+pytest -q tests/test_r01_evidence.py
+
+python -m oracle.r01_evidence --repository-root ../../../.. --fixture fixtures/overlap_klein_r01.json
+```
+
+The validator does not accept the fixture boolean as evidence. It resolves
+every referenced path within an explicit repository root, requires the file,
+recomputes SHA-256 from its bytes, enforces exact raw/record/execution schemas,
+checks experiment/cell/raw identity and the complete execution object, and
+then deletes exactly the top-level `execution` member before deep equality.
+The eight tracked `wall_time_seconds` values were restored to the exact JSON
+literals in their corresponding raw files. No scientific runner was started,
+no raw was changed, and the R01-E001/E002 conclusions are unchanged.
+
+A second controller review found that raw-pair validation alone did not yet
+bind the compact fixture anchors or top-level transform metadata to those
+raws, and that two different path spellings could name one canonical file.
+That gap was closed in a separate RED/GREEN cycle:
+
+| Attempt | Result |
+|---|---|
+| fixture-binding RED | VALID RED: fixture-anchor mutation, `exact_field`, `transform`, canonical path alias, and missing raw-system key produced `FFFFF`, exit 1, `5 failed in 0.77s`. The first four did not raise; the missing `geometry` case reached only the later generic scientific-payload mismatch. |
+| fixture-binding GREEN | PASS: the full expanded hermetic module reported `16 passed in 18.73s`. |
+| fixture-binding real gate | PASS: exit 0 with exact stdout `validated R01 evidence: experiments=2 cells=4 raw_results=8`. |
+
+The additional RED command was:
+
+```text
+pytest -q tests/test_r01_evidence.py::test_raw_evidence_validator_binds_fixture_anchors_to_raw_anchors tests/test_r01_evidence.py::test_raw_evidence_validator_binds_fixture_metadata_to_raw_system tests/test_r01_evidence.py::test_raw_evidence_validator_rejects_two_paths_to_the_same_raw_file tests/test_r01_evidence.py::test_raw_evidence_validator_requires_exact_raw_system_keys
+```
+
+The final validator requires exact raw-system keys, binds
+`system.exact_field` and `system.transform` to fixture scope, rejects canonical
+raw-path aliases, and mechanically converts the common raw anchors to the
+compact fixture schema before exact comparison. The conversion adds the
+derived anchor kind, retains sign statuses, maps raw
+`exact_primal_certificate` to compact `certificate`, and retains the exact
+zero certificate or numerical-only diagnostics as applicable.

@@ -194,3 +194,34 @@ An experiment is not closed when the program exits. It is closed after:
   runner is an operational failure, not a new scientific attempt. Preserve
   the original raw file, verify its hash, record the mechanical lesson here,
   and continue with a new helper invocation rather than rerunning the cell.
+
+## Raw-backed fixture candidate gates
+
+- A tracked boolean saying that smoke and production payloads matched is an
+  audit record, not validation evidence. Before accepting a candidate, open
+  every referenced ignored raw and recompute the comparison.
+- Keep ordinary tests hermetic with synthetic raw pairs under a temporary
+  repository. Run the real-raw gate separately and explicitly at candidate
+  time; missing ignored raws must fail that gate rather than skip it.
+- Resolve each raw path against an explicit repository root, require the
+  resolved file to remain inside that root, hash the bytes actually parsed,
+  and reject missing, extra, duplicated, or malformed provenance fields.
+- Require exactly one smoke and one production role per cell. Match the full
+  raw execution object to the fixture, including the complete BLAS-thread map,
+  process start method, workers, and exact parsed wall time.
+- For deterministic smoke/production comparison, shallow-copy each top-level
+  payload, delete exactly `execution`, and deep-compare everything remaining.
+  Do not recursively strip timing-like fields or compare only summaries.
+- JSON reserialization can shorten decimal spellings even when the parsed
+  binary float remains usable. When raw literals are part of recorded
+  provenance, preserve their original decimal text and let the raw-backed gate
+  enforce parsed execution equality.
+- Track resolved canonical raw paths in addition to fixture path strings.
+  Distinct spellings such as an inserted `./` must not let smoke and production
+  alias the same file.
+- Require the raw system object's exact schema before using selected fields.
+  Bind its exact field and transform to fixture scope rather than validating
+  only `system_shape`.
+- A raw-pair match does not prove that a compact tracked fixture came from that
+  pair. Mechanically project the common raw anchors through the documented
+  schema conversion and require exact equality with the fixture anchors.

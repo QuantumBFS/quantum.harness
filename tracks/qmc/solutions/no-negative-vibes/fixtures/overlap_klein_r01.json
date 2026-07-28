@@ -4581,7 +4581,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 34.5008176999982,
+                "wall_time_seconds" : 34.50081769999815,
                 "workers" : 1
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-bridges-attempt-01.json",
@@ -4596,7 +4596,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 29.2986468000017,
+                "wall_time_seconds" : 29.298646800001734,
                 "workers" : 14
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-bridges-attempt-01.json",
@@ -10692,7 +10692,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 59.9634122999996,
+                "wall_time_seconds" : 59.96341229999962,
                 "workers" : 1
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-smoke-rings-diagonals-bridges-attempt-01.json",
@@ -10707,7 +10707,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 46.0725901000042,
+                "wall_time_seconds" : 46.07259010000416,
                 "workers" : 14
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E001-rings-diagonals-bridges-attempt-01.json",
@@ -27733,7 +27733,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 197.248500900001,
+                "wall_time_seconds" : 197.2485009000011,
                 "workers" : 1
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-bridges-attempt-01.json",
@@ -27748,7 +27748,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 137.9217603,
+                "wall_time_seconds" : 137.92176029999973,
                 "workers" : 14
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-bridges-attempt-01.json",
@@ -51232,7 +51232,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 563.797210445628,
+                "wall_time_seconds" : 563.7972104456276,
                 "workers" : 1
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-smoke-rings-diagonals-bridges-attempt-01.json",
@@ -51247,7 +51247,7 @@
                   "OPENBLAS_NUM_THREADS" : "1"
                 },
                 "process_start_method" : "spawn",
-                "wall_time_seconds" : 384.171042892151,
+                "wall_time_seconds" : 384.1710428921506,
                 "workers" : 62
               },
               "path" : "tracks/qmc/results/no-negative-vibes/overlap-klein-v1/R01-E002-rings-diagonals-bridges-attempt-01.json",
