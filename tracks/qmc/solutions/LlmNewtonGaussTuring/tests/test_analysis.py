@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import csv
+import sys
 import tempfile
 from pathlib import Path
 
@@ -21,6 +22,14 @@ SPEC = importlib.util.spec_from_file_location(
 ANALYSIS = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(ANALYSIS)
+sys.modules["analyze_stage4"] = ANALYSIS
+
+CTAU_SPEC = importlib.util.spec_from_file_location(
+    "compare_ctau", ROOT / "tools" / "compare_ctau.py"
+)
+CTAU = importlib.util.module_from_spec(CTAU_SPEC)
+assert CTAU_SPEC.loader is not None
+CTAU_SPEC.loader.exec_module(CTAU)
 
 
 def require(condition: bool, message: str) -> None:
@@ -197,8 +206,10 @@ def test_sampling_gates() -> None:
         cells, metadata, 20, np.random.default_rng(1234)
     )
     require((8, 3.04) in points and len(diagnostics) == 4, "valid chains were not analyzed")
-    _, failures = ANALYSIS.sampling_diagnostics(cells)
+    rows, failures = ANALYSIS.sampling_diagnostics(cells)
     require(not failures, f"stationary hot/cold chains failed gates: {failures}")
+    require(len(rows[0]) == 11, "sampling diagnostics omitted registered columns")
+    require(rows[0][-1] == 1, "valid sampling diagnostics did not pass")
 
     shifted = {key: values.copy() for key, values in chain_map.items()}
     for key in shifted:
@@ -206,6 +217,37 @@ def test_sampling_gates() -> None:
             shifted[key][:, 0] += 0.2
     _, failures = ANALYSIS.sampling_diagnostics({(8, 3.04): shifted})
     require(failures, "a large hot/cold split was not rejected")
+
+    shortened = ANALYSIS.discard_chain_prefix(cells, 0.20)
+    require(
+        all(len(values) == 52 for values in shortened[(8, 3.04)].values()),
+        "discarded-prefix analysis retained the wrong number of bins",
+    )
+    expect_value_error(
+        lambda: ANALYSIS.discard_chain_prefix(cells, 0.0),
+        "a zero discarded-prefix fraction must be rejected",
+    )
+
+
+def test_ctau_comparison() -> None:
+    points = {
+        (8, 3.04): {
+            "Q": 0.5, "Q_err": 0.01, "xi": 0.4, "xi_err": 0.01,
+        }
+    }
+    rows, failures = CTAU.compare_points(points, points)
+    require(len(rows) == 2 and not failures, "equal c_tau points must agree")
+    fits = {
+        "Q": {"hc": 3.04438, "error": 1e-7},
+        "xi": {"hc": 3.04438, "error": 1e-7},
+    }
+    rows, failures = CTAU.compare_fits(fits, fits, 1e-6)
+    require(len(rows) == 2 and not failures, "resolved equal c_tau fits must pass")
+    rows, failures = CTAU.compare_fits(fits, fits, 1e-8)
+    require(
+        len(failures) == 2 and all(row[-1] == 0 for row in rows),
+        "an unresolved c_tau shift budget must fail",
+    )
 
 
 def synthetic_protocol_data():
@@ -255,6 +297,7 @@ def synthetic_protocol_data():
                 "initial_states": ("cold", "hot"),
                 "config_checked": True,
                 "consistency_failures": 0,
+                "sweeps_per_bin": 5,
             }
     return points, cells, metadata
 
@@ -299,6 +342,22 @@ def test_protocol_and_robustness(directory: Path) -> None:
         "robustness CSV omitted an observable",
     )
 
+    keys = ANALYSIS.select_keys(points, 3.03, 3.06, 4)
+    fits = ANALYSIS.fit_observables(
+        keys, points, cells, metadata, 10, 20260729, 0.83, True
+    )
+    prefix_rows, prefix_failures = ANALYSIS.prefix_fit_diagnostics(
+        keys, fits, cells, metadata, 10, 20260729, 0.83, True
+    )
+    require(
+        len(prefix_rows) == 2 * len(ANALYSIS.PREFIX_FRACTIONS),
+        "discarded-prefix diagnostics omitted a registered variant",
+    )
+    require(
+        len(prefix_failures) == sum(row[-1] == 0 for row in prefix_rows),
+        "discarded-prefix failures and rows disagree",
+    )
+
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as directory:
@@ -307,6 +366,7 @@ def main() -> None:
         test_protocol_and_robustness(path)
     test_scaling_fit()
     test_sampling_gates()
+    test_ctau_comparison()
     print("All Stage 4 analysis tests passed.")
 
 

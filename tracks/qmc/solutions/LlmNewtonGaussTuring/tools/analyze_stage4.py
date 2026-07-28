@@ -19,6 +19,8 @@ OMEGA = 0.83
 REGISTERED_OMEGAS = (0.80, 0.83, 0.86)
 MIN_INDEPENDENT_BLOCKS = 8
 SAMPLING_Z_MAX = 5.0
+BIN_ERROR_RATIO_MAX = 2.0
+PREFIX_FRACTIONS = (0.10, 0.20)
 FIT_GRID_POINTS = 201
 GEOMETRY_VERSIONS = {
     "square": "square-v1",
@@ -319,22 +321,55 @@ def _difference_z(first: np.ndarray, second: np.ndarray) -> float:
     return float(np.max(z))
 
 
+def _blocked_means(values: np.ndarray, block: int) -> np.ndarray:
+    block = max(1, int(block))
+    return np.asarray([
+        values[index:index + block].mean(axis=0)
+        for index in range(0, len(values) - block + 1, block)
+    ])
+
+
+def _standard_error(values: np.ndarray) -> np.ndarray:
+    if len(values) < 2:
+        return np.full(values.shape[1], np.nan)
+    return np.std(values, axis=0, ddof=1) / np.sqrt(len(values))
+
+
+def _error_ratio(first: np.ndarray, second: np.ndarray) -> float:
+    ratios = []
+    for left, right in zip(first, second):
+        if not np.isfinite(left) or not np.isfinite(right):
+            return np.inf
+        if left <= 0.0 and right <= 0.0:
+            ratios.append(1.0)
+        elif left <= 0.0 or right <= 0.0:
+            return np.inf
+        else:
+            ratios.append(max(left / right, right / left))
+    return float(max(ratios, default=np.inf))
+
+
 def sampling_diagnostics(cells):
     rows = []
     failures = []
     for (L, h), chain_map in sorted(cells.items()):
         starts = defaultdict(list)
         stationarity = []
+        base_blocks = []
+        grown_blocks = []
+        chains = []
         minimum_blocks = np.inf
-        for (initial_state, _), values in sorted(chain_map.items()):
+        for chain_key, values in sorted(chain_map.items()):
+            initial_state, _ = chain_key
             tau = float(np.max(chain_taus(values)))
             block = max(1, int(np.ceil(2.0 * tau)))
             minimum_blocks = min(minimum_blocks, len(values) // block)
-            block_means = np.asarray([
-                values[index:index + block].mean(axis=0)
-                for index in range(0, len(values) - block + 1, block)
-            ])
+            block_means = _blocked_means(values, block)
+            doubled_means = _blocked_means(values, 2 * block)
             starts[initial_state].append(block_means)
+            base_blocks.append(block_means)
+            grown_blocks.append(doubled_means)
+            chains.append((chain_key, block_means))
             midpoint = len(block_means) // 2
             if midpoint >= 2 and len(block_means) - midpoint >= 2:
                 stationarity.append(
@@ -346,24 +381,76 @@ def sampling_diagnostics(cells):
                 np.concatenate(starts["hot"]), np.concatenate(starts["cold"])
             )
         stationarity_z = max(stationarity, default=np.nan)
+        combined_base = np.concatenate(base_blocks)
+        combined_grown = np.concatenate(grown_blocks)
+        bin_growth_z = _difference_z(combined_base, combined_grown)
+        bin_error_ratio = _error_ratio(
+            _standard_error(combined_base), _standard_error(combined_grown)
+        )
+        chain_spread_z = max(
+            (
+                _difference_z(
+                    block_means,
+                    np.concatenate([
+                        other_blocks
+                        for other_key, other_blocks in chains
+                        if other_key != chain_key
+                    ]),
+                )
+                for chain_key, block_means in chains
+            ),
+            default=np.nan,
+        )
         starts_ok = set(starts) == {"hot", "cold"} and min(map(len, starts.values())) >= 2
         blocks_ok = minimum_blocks >= MIN_INDEPENDENT_BLOCKS
         start_ok = np.isfinite(start_z) and start_z <= SAMPLING_Z_MAX
         stationarity_ok = (
             np.isfinite(stationarity_z) and stationarity_z <= SAMPLING_Z_MAX
         )
-        passed = starts_ok and blocks_ok and start_ok and stationarity_ok
+        bin_growth_ok = (
+            np.isfinite(bin_growth_z) and bin_growth_z <= SAMPLING_Z_MAX
+            and np.isfinite(bin_error_ratio)
+            and bin_error_ratio <= BIN_ERROR_RATIO_MAX
+        )
+        chain_spread_ok = (
+            np.isfinite(chain_spread_z) and chain_spread_z <= SAMPLING_Z_MAX
+        )
+        passed = (
+            starts_ok and blocks_ok and start_ok and stationarity_ok
+            and bin_growth_ok and chain_spread_ok
+        )
         rows.append((
             L, h, len(starts.get("hot", [])), len(starts.get("cold", [])),
-            int(minimum_blocks), start_z, stationarity_z, int(passed),
+            int(minimum_blocks), start_z, stationarity_z, bin_growth_z,
+            bin_error_ratio, chain_spread_z, int(passed),
         ))
         if not passed:
             failures.append(
                 f"L={L} h={h}: hot/cold={dict((k, len(v)) for k, v in starts.items())} "
                 f"min_blocks={int(minimum_blocks)} start_z={start_z:.3g} "
-                f"stationarity_z={stationarity_z:.3g}"
+                f"stationarity_z={stationarity_z:.3g} "
+                f"bin_growth_z={bin_growth_z:.3g} "
+                f"bin_error_ratio={bin_error_ratio:.3g} "
+                f"chain_spread_z={chain_spread_z:.3g}"
             )
     return rows, failures
+
+
+def discard_chain_prefix(cells, fraction: float):
+    if not 0.0 < fraction < 0.5:
+        raise ValueError("discarded-prefix fraction must lie between zero and one half")
+    discarded = {}
+    for key, chain_map in cells.items():
+        discarded[key] = {}
+        for chain_key, values in chain_map.items():
+            count = int(np.floor(fraction * len(values)))
+            if len(values) - count < 2 * MIN_INDEPENDENT_BLOCKS:
+                raise ValueError(
+                    f"chain {chain_key} in cell {key} is too short after discarding "
+                    f"{fraction:.0%}"
+                )
+            discarded[key][chain_key] = values[count:]
+    return discarded
 
 
 def design_matrix(L, h, hc, omega=OMEGA, include_mixed=True):
@@ -534,6 +621,65 @@ def fit_observables(keys, points, cells, metadata, n_boot, seed, omega, include_
     }
 
 
+def prefix_fit_diagnostics(
+    keys, fits, cells, metadata, n_boot, seed, omega, include_mixed
+):
+    rows = []
+    failures = []
+    for index, fraction in enumerate(PREFIX_FRACTIONS):
+        try:
+            discarded_cells = discard_chain_prefix(cells, fraction)
+            discarded_points, _ = point_estimates(
+                discarded_cells,
+                metadata,
+                n_boot,
+                np.random.default_rng(seed + 1000 + index),
+            )
+            discarded_fits = fit_observables(
+                keys,
+                discarded_points,
+                discarded_cells,
+                metadata,
+                n_boot,
+                seed + 2000 + 10 * index,
+                omega,
+                include_mixed,
+            )
+        except ValueError as error:
+            for observable in ("Q", "xi"):
+                rows.append((
+                    fraction, observable, "failed", str(error),
+                    fits[observable]["hc"], fits[observable]["error"],
+                    *(np.nan,) * 5, 0,
+                ))
+                failures.append(
+                    f"discard_prefix={fraction:.0%} observable={observable}: {error}"
+                )
+            continue
+        for observable in ("Q", "xi"):
+            reference = fits[observable]
+            discarded = discarded_fits[observable]
+            shift = discarded["hc"] - reference["hc"]
+            combined_error = float(np.hypot(
+                reference["error"], discarded["error"]
+            ))
+            shift_z = (
+                abs(shift) / combined_error if combined_error > 0.0 else np.inf
+            )
+            passed = np.isfinite(shift_z) and shift_z <= SAMPLING_Z_MAX
+            rows.append((
+                fraction, observable, "ok", "", reference["hc"],
+                reference["error"], discarded["hc"], discarded["error"],
+                shift, combined_error, shift_z, int(passed),
+            ))
+            if not passed:
+                failures.append(
+                    f"discard_prefix={fraction:.0%} observable={observable}: "
+                    f"shift_z={shift_z:.3g}"
+                )
+    return rows, failures
+
+
 def select_keys(points, h_min, h_max, l_min):
     keys = sorted(
         key for key in points
@@ -647,7 +793,8 @@ def crossings(points, observable):
 
 
 def write_outputs(
-    input_path, points, diagnostics, sampling_rows, fits, crossing_rows, suffix=""
+    input_path, points, diagnostics, sampling_rows, prefix_rows, fits,
+    crossing_rows, suffix=""
 ):
     stem = input_path.with_name(input_path.stem.removesuffix("_bins") + suffix)
     with stem.with_name(stem.name + "_autocorrelation.csv").open("w", newline="") as handle:
@@ -662,9 +809,21 @@ def write_outputs(
         writer = csv.writer(handle)
         writer.writerow([
             "L", "h", "hot_chains", "cold_chains", "minimum_independent_blocks",
-            "hot_cold_z_max", "stationarity_z_max", "passed",
+            "hot_cold_z_max", "stationarity_z_max", "bin_growth_z_max",
+            "bin_error_ratio_max", "chain_spread_z_max", "passed",
         ])
         writer.writerows(sampling_rows)
+    with stem.with_name(stem.name + "_prefix_stability.csv").open(
+        "w", newline=""
+    ) as handle:
+        writer = csv.writer(handle)
+        writer.writerow([
+            "discard_fraction", "observable", "status", "failure",
+            "reference_hc", "reference_hc_err", "discarded_hc",
+            "discarded_hc_err", "hc_shift", "combined_error", "shift_z",
+            "passed",
+        ])
+        writer.writerows(prefix_rows)
     with stem.with_name(stem.name + "_points.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["L", "h", "Q", "Q_err", "xi_over_L", "xi_err", "block_bins", "block_sweeps", "chains"])
@@ -809,6 +968,10 @@ def main():
         keys, points, cells, metadata, args.bootstrap, args.seed, args.omega,
         not args.omit_mixed,
     )
+    prefix_rows, prefix_failures = prefix_fit_diagnostics(
+        keys, fits, cells, metadata, args.bootstrap, args.seed, args.omega,
+        not args.omit_mixed,
+    )
 
     selected_points = {key: points[key] for key in keys}
     crossing_rows = []
@@ -816,7 +979,8 @@ def main():
         crossing_rows.extend((observable, first, second, value) for first, second, value in crossings(selected_points, observable))
     suffix = f"_{args.label}" if args.label else ""
     write_outputs(
-        args.bins, selected_points, diagnostics, sampling_rows, fits, crossing_rows, suffix
+        args.bins, selected_points, diagnostics, sampling_rows, prefix_rows, fits,
+        crossing_rows, suffix
     )
 
     matrix_failures = []
@@ -846,6 +1010,10 @@ def main():
         f"sampling_gates={'pass' if not sampling_failures else 'fail'} "
         f"failed_cells={len(sampling_failures)}/{len(sampling_rows)}"
     )
+    print(
+        f"prefix_stability={'pass' if not prefix_failures else 'fail'} "
+        f"failed_variants={len(prefix_failures)}/{len(prefix_rows)}"
+    )
     for observable, result in fits.items():
         print(
             f"{observable}: hc={result['hc']:.8f} +/- {result['error']:.8f} "
@@ -853,8 +1021,11 @@ def main():
             f"condition={result['condition']:.3e} "
         f"bootstrap_failed={result['bootstrap_failed']}/{args.bootstrap}"
         )
-    if (args.enforce_sampling_gates or args.enforce_protocol) and sampling_failures:
-        raise ValueError("sampling gates failed:\n" + "\n".join(sampling_failures))
+    if (args.enforce_sampling_gates or args.enforce_protocol) and (
+        sampling_failures or prefix_failures
+    ):
+        failures = sampling_failures + prefix_failures
+        raise ValueError("sampling gates failed:\n" + "\n".join(failures))
     if args.enforce_protocol and matrix_failures:
         raise ValueError(
             "registered robustness variants failed:\n" + "\n".join(matrix_failures)

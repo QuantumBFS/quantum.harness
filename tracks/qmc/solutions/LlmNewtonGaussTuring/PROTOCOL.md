@@ -1,8 +1,8 @@
 # Challenge 148 Frozen Production Protocol
 
-Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3`.
+Protocol identifier: `c148-prereg-v1+rev1+rev2+rev3+rev4`.
 
-This is the clean-checkout copy of the preregistration and three append-only
+This is the clean-checkout copy of the preregistration and four append-only
 clarifications. Pilot evidence may select final sizes and sampling budgets, but
 may not change the Hamiltonian, primary estimator, fit family, uncertainty
 rules, blinding rule, or verdict gate without a new protocol identifier.
@@ -57,6 +57,24 @@ blocks. The maximum standardized difference over the five raw observables must
 not exceed 5.0. This family-wise threshold replaces the unregistered pilot
 implementation's per-comparison 3.5 cutoff, which produced the expected false
 flags when maximized over roughly two thousand square-calibration comparisons.
+
+Protocol Revision 4 freezes the remaining sampling diagnostics before any
+doubled-$c_\tau$ or larger-size Stage 5 data are generated. Reblocking uses the
+Revision 3 base block and twice that block; the maximum raw-observable mean
+difference must be at most 5.0 standard errors and every standard-error ratio
+must lie in $[1/2,2]$. The maximum single-chain versus all-other-chains raw-
+observable difference must be at most 5.0 standard errors. Registered
+additional-prefix refits discard 10% and 20% of every measured chain, and each
+$h_c$ shift must be at most 5.0 combined standard errors. These checks use all
+five stored raw observables and failures remain explicit.
+
+The direct $c_\tau=1$ versus $c_\tau=2$ comparison requires both dimensionless
+observables to be statistically consistent at every common point under the
+same 5.0 threshold. For the fitted critical field, the two-sided 95% upper
+bound $|\Delta h_c|+1.96\sigma_{\Delta h_c}$ must not exceed one quarter of
+the total target uncertainty: $4.5\times10^{-6}$ for triangular and
+$2.0\times10^{-6}$ for honeycomb. A comparison may therefore be consistent
+but unresolved; unresolved is a failed final systematic gate.
 
 ## Frozen fit family
 

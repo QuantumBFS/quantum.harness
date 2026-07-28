@@ -107,6 +107,22 @@ robustness command writes every registered window/$L_{\min}$/$\omega$/mixed-
 term result, including explicit failed variants, to one CSV. The companion
 crossing and standardized-residual figures are written beside the fit tables.
 
+The analysis also writes bin-growth, independent-chain-spread, and 10%/20%
+discarded-prefix diagnostics. Compare matched finite-temperature runs with:
+
+```bash
+uv run --script tools/compare_ctau.py \
+  ../../../../results/<c-tau-1>/<c-tau-1>_bins.csv \
+  ../../../../results/<c-tau-2>/<c-tau-2>_bins.csv \
+  --output-prefix ../../../../results/<comparison>/<comparison> \
+  --protocol-window narrow --l-min <registered-L-min> \
+  --hc-shift-budget <registered-budget> --enforce
+```
+
+This gate distinguishes statistical consistency from sufficient resolution:
+the 95% upper bound on the fitted shift must fit inside the registered absolute
+finite-temperature budget.
+
 Generated data remain Git-ignored. Historical Stage 3/4 pilot uncertainties
 are invalid because those runs reused seeds across fields and resampled bins as
 independent. New claims must come from freshly generated manifests and raw bins
