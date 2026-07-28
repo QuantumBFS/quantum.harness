@@ -6,6 +6,9 @@ Base.@kwdef struct RunConfig
     steps::Int = 120
     compression_tolerance::Float64 = 1e-7
     run_exact::Bool = false
+    cache_dir::String = "output/cache"
+    rebuild_cache::Bool = false
+    uniformtempo_revision::String = "432f48822c6d463698bf7617ac04732b83cb71a9"
 end
 
 """Construct a Floquet grid whose last point closes the drive period exactly."""

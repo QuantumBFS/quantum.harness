@@ -4,5 +4,8 @@ frequencies = [2.5]
 steps = 4
 compression_tolerance = 1.0e-7
 run_exact = false
+cache_dir = "output/cache"
+rebuild_cache = false
+uniformtempo_revision = "432f48822c6d463698bf7617ac04732b83cb71a9"
 
 # A quick run requires a grid-matched fixture; it never claims paper accuracy.
