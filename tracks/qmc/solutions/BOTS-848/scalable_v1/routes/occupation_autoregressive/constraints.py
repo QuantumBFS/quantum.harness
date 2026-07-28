@@ -1,15 +1,38 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import InitVar, dataclass
 from numbers import Integral
+from types import MappingProxyType
 
 import numpy as np
+
+
+MAX_ENUMERATED_SUPPORT = 100_000
+_CONSTRUCTION_TOKEN = object()
 
 
 def _integer(name: str, value: object) -> int:
     if isinstance(value, bool) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
     return int(value)
+
+
+def _randbelow(rng: np.random.Generator, upper: int) -> int:
+    """Draw uniformly from ``range(upper)`` for an arbitrary-size integer."""
+
+    bound = _integer("upper", upper)
+    if bound <= 0:
+        raise ValueError("upper must be positive")
+    bit_count = (bound - 1).bit_length()
+    if bit_count == 0:
+        return 0
+    byte_count = (bit_count + 7) // 8
+    mask = (1 << bit_count) - 1
+    while True:
+        candidate = int.from_bytes(rng.bytes(byte_count), "little") & mask
+        if candidate < bound:
+            return candidate
 
 
 def occupation_m2(bitset: int, two_q: int) -> int:
@@ -37,7 +60,29 @@ class FeasibilityTable:
     n_electrons: int
     two_q: int
     target_m2: int
-    counts: dict[tuple[int, int, int], int]
+    counts: Mapping[tuple[int, int, int], int]
+    _construction_token: InitVar[object | None] = None
+
+    def __post_init__(self, _construction_token: object | None) -> None:
+        if _construction_token is not _CONSTRUCTION_TOKEN:
+            raise TypeError("FeasibilityTable instances must be created with build()")
+        object.__setattr__(self, "counts", MappingProxyType(dict(self.counts)))
+
+    @classmethod
+    def _from_counts(
+        cls,
+        n_electrons: int,
+        two_q: int,
+        target_m2: int,
+        counts: Mapping[tuple[int, int, int], int],
+    ) -> FeasibilityTable:
+        return cls(
+            n_electrons,
+            two_q,
+            target_m2,
+            counts,
+            _construction_token=_CONSTRUCTION_TOKEN,
+        )
 
     @classmethod
     def build(
@@ -80,7 +125,7 @@ class FeasibilityTable:
 
         if counts.get((0, particles, target), 0) == 0:
             raise ValueError("empty fixed-N fixed-M sector")
-        return cls(particles, orbital_limit, target, counts)
+        return cls._from_counts(particles, orbital_limit, target, counts)
 
     def allowed(
         self,
@@ -146,7 +191,7 @@ class FeasibilityTable:
                 if total == 0:
                     raise RuntimeError("feasibility table has no valid continuation")
                 choose_one = zero_count == 0 or (
-                    one_count > 0 and int(rng.integers(total)) >= zero_count
+                    one_count > 0 and _randbelow(rng, total) >= zero_count
                 )
                 if choose_one:
                     state |= 1 << orbital
@@ -162,30 +207,32 @@ class FeasibilityTable:
 
         if self.n_electrons > 4:
             raise ValueError("enumerate_support supports at most 4 electrons")
+        support_count = self.counts[(0, self.n_electrons, self.target_m2)]
+        if support_count > MAX_ENUMERATED_SUPPORT:
+            raise ValueError(
+                f"support size {support_count} exceeds enumerate_support limit "
+                f"{MAX_ENUMERATED_SUPPORT}"
+            )
 
         support: list[int] = []
-
-        def visit(
-            orbital: int,
-            remaining: int,
-            target_left: int,
-            state: int,
-        ) -> None:
+        stack = [(0, self.n_electrons, self.target_m2, 0)]
+        while stack:
+            orbital, remaining, target_left, state = stack.pop()
             if orbital == self.two_q + 1:
                 if remaining == 0 and target_left == 0:
                     support.append(state)
-                return
+                continue
             zero, one = self.allowed(orbital, remaining, target_left)
-            if zero:
-                visit(orbital + 1, remaining, target_left, state)
             if one:
                 m2 = -self.two_q + 2 * orbital
-                visit(
-                    orbital + 1,
-                    remaining - 1,
-                    target_left - m2,
-                    state | (1 << orbital),
+                stack.append(
+                    (
+                        orbital + 1,
+                        remaining - 1,
+                        target_left - m2,
+                        state | (1 << orbital),
+                    )
                 )
-
-        visit(0, self.n_electrons, self.target_m2, 0)
+            if zero:
+                stack.append((orbital + 1, remaining, target_left, state))
         return tuple(support)
