@@ -193,23 +193,16 @@ bool SSE::verifyConfig() {
 // ------------------------------------------------------------
 SSEResult SSE::run() {
     const double qmin = lat_.smallest_momentum();
-    std::vector<std::array<double, 3>> qvecs;
-    if (params_.stage4_estimators)
-        qvecs = lat_.smallest_momentum_vectors();
-    else
-        qvecs.push_back({qmin, 0.0, 0.0});
+    const std::array<double, 3> qvec = {qmin, 0.0, 0.0};
 
     // precompute the q_min phase factors
-    std::vector<std::vector<double>> cosq(qvecs.size(), std::vector<double>(N_));
-    std::vector<std::vector<double>> sinq(qvecs.size(), std::vector<double>(N_));
-    for (std::size_t q = 0; q < qvecs.size(); ++q) {
-        for (int i = 0; i < N_; ++i) {
-            double qr = qvecs[q][0] * lat_.site_coords[i][0]
-                      + qvecs[q][1] * lat_.site_coords[i][1]
-                      + qvecs[q][2] * lat_.site_coords[i][2];
-            cosq[q][i] = std::cos(qr);
-            sinq[q][i] = std::sin(qr);
-        }
+    std::vector<double> cosq(N_), sinq(N_);
+    for (int i = 0; i < N_; ++i) {
+        double qr = qvec[0] * lat_.site_coords[i][0]
+                  + qvec[1] * lat_.site_coords[i][1]
+                  + qvec[2] * lat_.site_coords[i][2];
+        cosq[i] = std::cos(qr);
+        sinq[i] = std::sin(qr);
     }
 
     SSEResult res;
@@ -218,11 +211,8 @@ SSEResult SSE::run() {
     res.bin_m4.reserve(params_.n_bins);
     res.bin_S0.reserve(params_.n_bins);
     res.bin_Sq.reserve(params_.n_bins);
-    res.bin_spacetime_m2.reserve(params_.n_bins);
-    res.bin_spacetime_m4.reserve(params_.n_bins);
 
     double sE = 0, sn = 0, sn2 = 0, sm = 0, sm2 = 0, sm4 = 0, sS0 = 0, sSq = 0;
-    double sTm2 = 0, sTm4 = 0;
     double sDtH = 0;
     double sNc = 0, sNb = 0, sNf = 0;
     int nm = 0, nbad = 0;
@@ -234,7 +224,7 @@ SSEResult SSE::run() {
 
     const double invBin = 1.0 / std::max(params_.sweeps_per_bin, 1);
     for (int bin = 0; bin < params_.n_bins; ++bin) {
-        double bE = 0, bm2 = 0, bm4 = 0, bS0 = 0, bSq = 0, bTm2 = 0, bTm4 = 0;
+        double bE = 0, bm2 = 0, bm4 = 0, bS0 = 0, bSq = 0;
 
         for (int s = 0; s < params_.sweeps_per_bin; ++s) {
             diagonalUpdate();
@@ -256,117 +246,20 @@ SSEResult SSE::run() {
             double E = (-static_cast<double>(n_) / beta_ + h_ * N_ + J_ * Nb_) / N_;
             sn += n_; sn2 += static_cast<double>(n_) * n_;
 
-            // Legacy path measures on |alpha(0)>.  Stage 4 instead averages
-            // equal-time observables over propagated states and separately
-            // samples the continuous imaginary-time magnetisation.
-            double Mz = 0.0;
+            // magnetisation moments and structure factors on |alpha(0)>
+            double Mz = 0.0, re = 0.0, im = 0.0;
             for (int i = 0; i < N_; ++i) {
                 Mz += spin_[i];
+                re += spin_[i] * cosq[i];
+                im += spin_[i] * sinq[i];
             }
-            double mm = Mz / N_, mm2 = 0.0, mm4 = 0.0, S0 = 0.0, Sq = 0.0;
-            double tm2 = mm * mm, tm4 = tm2 * tm2;
+            double mm = Mz / N_, mm2 = mm * mm;
+            double S0 = mm2;
+            double Sq = (re * re + im * im) / (static_cast<double>(N_) * N_);
 
-            if (params_.stage4_estimators) {
-                std::vector<std::int8_t> propagated = spin_;
-                double current_Mz = Mz;
-                double equal_m2 = 0.0, equal_m4 = 0.0, equal_Sq = 0.0;
-                int propagated_count = 0;
-                double current_m = current_Mz / N_;
-                double p1 = current_m;
-                double p2 = current_m * current_m;
-                double p3 = p2 * current_m;
-                double p4 = p2 * p2;
-                std::size_t interval_count = 1;
-                std::vector<double> q_re(qvecs.size(), 0.0), q_im(qvecs.size(), 0.0);
-                for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                    for (int i = 0; i < N_; ++i) {
-                        q_re[q] += propagated[i] * cosq[q][i];
-                        q_im[q] += propagated[i] * sinq[q][i];
-                    }
-                }
-                for (int pidx = 0; pidx < M_; ++pidx) {
-                    if (opType_[pidx] == Op::NONE) continue;
-
-                    current_m = current_Mz / N_;
-                    const double current_m_squared = current_m * current_m;
-                    equal_m2 += current_m_squared;
-                    equal_m4 += current_m_squared * current_m_squared;
-                    double qsum = 0.0;
-                    for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                        qsum += (q_re[q] * q_re[q] + q_im[q] * q_im[q])
-                              / (static_cast<double>(N_) * N_);
-                    }
-                    equal_Sq += qsum / std::max<std::size_t>(qvecs.size(), 1);
-                    ++propagated_count;
-
-                    if (opType_[pidx] == Op::FLIP_SITE) {
-                        const int site = opIdx_[pidx];
-                        const double delta = -2.0 * propagated[site];
-                        current_Mz += delta;
-                        for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                            q_re[q] += delta * cosq[q][site];
-                            q_im[q] += delta * sinq[q][site];
-                        }
-                        propagated[site] = -propagated[site];
-                    }
-                    current_m = current_Mz / N_;
-                    const double current_m_squared_after = current_m * current_m;
-                    p1 += current_m;
-                    p2 += current_m_squared_after;
-                    p3 += current_m_squared_after * current_m;
-                    p4 += current_m_squared_after * current_m_squared_after;
-                    ++interval_count;
-                }
-
-                // Conditional on the operator sequence, its n ordered times
-                // have Dirichlet(1,...,1) spacings.  These closed forms are
-                // the exact spacing averages of mbar^2 and mbar^4.
-                const double K = static_cast<double>(interval_count);
-                tm2 = (p1 * p1 + p2) / (K * (K + 1.0));
-                tm4 = (std::pow(p1, 4) + 6.0 * p1 * p1 * p2 + 3.0 * p2 * p2
-                     + 8.0 * p1 * p3 + 6.0 * p4)
-                    / (K * (K + 1.0) * (K + 2.0) * (K + 3.0));
-
-                if (propagated_count == 0) {
-                    equal_m2 = mm * mm;
-                    equal_m4 = equal_m2 * equal_m2;
-                    double qsum = 0.0;
-                    for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                        double re = 0.0, im = 0.0;
-                        for (int i = 0; i < N_; ++i) {
-                            re += spin_[i] * cosq[q][i];
-                            im += spin_[i] * sinq[q][i];
-                        }
-                        qsum += (re * re + im * im) / (static_cast<double>(N_) * N_);
-                    }
-                    equal_Sq = qsum / std::max<std::size_t>(qvecs.size(), 1);
-                    propagated_count = 1;
-                }
-                mm2 = equal_m2 / propagated_count;
-                mm4 = equal_m4 / propagated_count;
-                S0 = mm2;
-                Sq = equal_Sq / propagated_count;
-            } else {
-                double qsum = 0.0;
-                for (std::size_t q = 0; q < qvecs.size(); ++q) {
-                    double re = 0.0, im = 0.0;
-                    for (int i = 0; i < N_; ++i) {
-                        re += spin_[i] * cosq[q][i];
-                        im += spin_[i] * sinq[q][i];
-                    }
-                    qsum += (re * re + im * im) / (static_cast<double>(N_) * N_);
-                }
-                mm2 = mm * mm;
-                mm4 = mm2 * mm2;
-                S0 = mm2;
-                Sq = qsum / std::max<std::size_t>(qvecs.size(), 1);
-            }
-
-            sE += E; sm += std::abs(mm); sm2 += mm2; sm4 += mm4;
+            sE += E; sm += std::abs(mm); sm2 += mm2; sm4 += mm2 * mm2;
             sS0 += S0; sSq += Sq;
-            sTm2 += tm2; sTm4 += tm4;
 
-            // ∂θH diagonal estimator: J sin(2θ) Σ_{bonds} ZZ / N
             if (params_.measure_dthetah) {
                 double sum_zz = 0;
                 for (int b = 0; b < Nb_; ++b) {
@@ -377,8 +270,7 @@ SSEResult SSE::run() {
                 sDtH += J_ * std::sin(2 * params_.theta_berry) * sum_zz / N_;
             }
 
-            bE += E; bm2 += mm2; bm4 += mm4; bS0 += S0; bSq += Sq;
-            bTm2 += tm2; bTm4 += tm4;
+            bE += E; bm2 += mm2; bm4 += mm2 * mm2; bS0 += S0; bSq += Sq;
         }
 
         res.bin_E.push_back(bE * invBin);
@@ -386,8 +278,6 @@ SSEResult SSE::run() {
         res.bin_m4.push_back(bm4 * invBin);
         res.bin_S0.push_back(bS0 * invBin);
         res.bin_Sq.push_back(bSq * invBin);
-        res.bin_spacetime_m2.push_back(bTm2 * invBin);
-        res.bin_spacetime_m4.push_back(bTm4 * invBin);
     }
 
     double inv = 1.0 / std::max(nm, 1);
@@ -397,10 +287,6 @@ SSEResult SSE::run() {
     res.m = sm * inv; res.m2 = sm2 * inv; res.m4 = sm4 * inv;
     res.Q = (res.m2 > 1e-30) ? res.m2 * res.m2 / res.m4 : 0.0;
     res.Sq0 = sS0 * inv; res.Sqmin = sSq * inv;
-    res.spacetime_m2 = sTm2 * inv;
-    res.spacetime_m4 = sTm4 * inv;
-    res.spacetime_Q = res.spacetime_m2 * res.spacetime_m2
-                    / std::max(res.spacetime_m4, 1e-30);
     res.dthetah_diag = sDtH * inv;
 
     // second-moment correlation length, same convention as the ED oracle

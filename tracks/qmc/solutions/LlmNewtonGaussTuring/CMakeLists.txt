@@ -69,11 +69,6 @@ find_package(Threads REQUIRED)
 add_executable(scan_square tools/scan_square.cpp)
 target_link_libraries(scan_square PRIVATE cm148 Threads::Threads)
 
-# Stage 4 target-lattice reproduction.  Kept separate from scan_square so the
-# Stage 3 benchmark remains exactly rerunnable.
-add_executable(scan_stage4 tools/scan_stage4.cpp)
-target_link_libraries(scan_stage4 PRIVATE cm148 Threads::Threads)
-
 # Stage 1: Berry curvature scan tools
 add_executable(scan_berry_chain tools/scan_berry_chain.cpp)
 target_link_libraries(scan_berry_chain PRIVATE cm148)
