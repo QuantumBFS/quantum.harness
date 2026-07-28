@@ -5,9 +5,9 @@
 #SBATCH --error=results/20260729-floquet-fig3-quick/slurm-%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=32G
-#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=8G
+#SBATCH --time=00:30:00
 #SBATCH --partition=xhacnormalb
 
 set -euo pipefail
@@ -21,7 +21,7 @@ mkdir -p "${result_dir}"
 cd "${project_dir}"
 
 export OPENBLAS_NUM_THREADS=1
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-16}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
 printf 'Fig. 3 stable quick start: commit=%s threads=%s host=%s\n' \
     "$(git rev-parse --short HEAD)" "${JULIA_NUM_THREADS}" "$(hostname)"
