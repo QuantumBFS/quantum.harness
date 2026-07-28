@@ -46,7 +46,8 @@ function audit(a; tol::Float64=1e-6)
     ncons = a.nconstraints
     length(a.ray_values) == nvars || return AuditResult(false, "SCHEMA_FAIL", NaN, NaN, Float64[], Float64[],
         ["ray_values length $(length(a.ray_values)) != nvars $nvars"])
-    all(isfinite, a.ray_values) || push!(notes, "non-finite entry in ray_values")
+    all(isfinite, a.ray_values) || return AuditResult(false, "SCHEMA_FAIL", NaN, NaN, Float64[], Float64[],
+        ["non-finite entry in ray_values"])
     length(a.affine_constants) == ncons || return AuditResult(false, "SCHEMA_FAIL", NaN, NaN, Float64[], Float64[],
         ["affine_constants length $(length(a.affine_constants)) != ncons $ncons"])
     length(a.c) == nvars || push!(notes, "objective c length != nvars")
