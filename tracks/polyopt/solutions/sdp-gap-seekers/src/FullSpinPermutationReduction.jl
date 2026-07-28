@@ -1,14 +1,19 @@
 module FullSpinPermutationReduction
 
+using SHA
 using ..SquareJ1J2Prototype:
     PauliWord
 using ..PrimalGapSymbolics:
     ExactLinearPolynomial,
     MomentKey,
     add_term!,
-    moment_degree
+    moment_key,
+    moment_degree,
+    canonical_polynomial_string,
+    polynomial_sha256
 using ..ExactSymmetryReduction:
-    V4Character
+    V4Character,
+    canonical_real_equalities
 using ..ReducedPrimalGapAssembly:
     ReducedPSDBlock,
     reduced_block_entry
@@ -16,17 +21,29 @@ using ..ConjugationSymmetryReduction:
     ConjugationReducedPrimalAssembly,
     conjugation_odd,
     polynomial_row_rank
+using ..SpinAxisInvolutionReduction:
+    SpinAxisReducedPSDBlock,
+    SpinAxisReducedPrimalAssembly,
+    spin_axis_block_entry
 
-export SpinAxisPermutation,
+export FULL_SPIN_PERMUTATION_SCHEMA,
+       SpinAxisPermutation,
        SPIN_AXIS_PERMUTATIONS,
        FullSpinMomentQuotient,
+       FullSpinReducedPrimalAssembly,
        permutation_sign,
        full_spin_permutation,
        full_spin_character,
        full_spin_polynomial_action,
        full_spin_quotient_projection,
        build_full_spin_moment_quotient,
-       full_spin_permutation_truth
+       full_spin_permutation_truth,
+       full_spin_block_entry,
+       assemble_full_spin_reduced_primal,
+       full_spin_reduced_assembly_report
+
+const FULL_SPIN_PERMUTATION_SCHEMA =
+    "primal-gap-exact-v4-conjugation-real-full-spin-permutation-v1"
 
 const SpinAxisPermutation = NTuple{3,UInt8}
 const SPIN_AXIS_PERMUTATIONS = SpinAxisPermutation[
@@ -377,6 +394,202 @@ function full_spin_permutation_truth(
         eliminated_moment_count=
             length(source.moments) - length(quotient.moments),
         quotient=quotient,
+    )
+end
+
+"""
+Exact full-S3 moment quotient of the proved spin-axis cone model.
+
+All current PSD blocks are retained. Only scalar moment coordinates are
+identified by the six-element physical spin-rotation action.
+"""
+struct FullSpinReducedPrimalAssembly{A}
+    schema::String
+    source::A
+    quotient::FullSpinMomentQuotient
+    equalities::Vector{ExactLinearPolynomial}
+    moments::Vector{MomentKey}
+    coefficient_map_sha256::String
+    assembly_sha256::String
+end
+
+function full_spin_block_entry(
+    assembly,
+    block::SpinAxisReducedPSDBlock,
+    left,
+    right,
+)
+    base = spin_axis_block_entry(
+        assembly.source,
+        block,
+        left,
+        right,
+    )
+    projected = full_spin_quotient_projection(
+        base,
+        assembly.quotient,
+    )
+    all(iszero ∘ imag, values(projected.terms)) ||
+        error("full-spin block entry is not exactly real")
+    return projected
+end
+
+function write_framed!(io::IO, value)
+    serialized = string(value)
+    write(io, string(ncodeunits(serialized)), ":", serialized)
+    return io
+end
+
+function fingerprint_records(schema::String, records)
+    io = IOBuffer()
+    write_framed!(io, schema)
+    for record in records
+        write_framed!(io, record)
+    end
+    return bytes2hex(sha256(take!(io)))
+end
+
+function source_block_label(block::SpinAxisReducedPSDBlock)
+    source = block.source_block
+    return join(
+        (
+            source.role,
+            source.family,
+            "rx" * string(Int(source.character.rx)),
+            "ry" * string(Int(source.character.ry)),
+            block.kind,
+        ),
+        ":",
+    )
+end
+
+function assemble_full_spin_reduced_primal(
+    source::SpinAxisReducedPrimalAssembly;
+    verify_truth::Bool=true,
+)
+    truth = verify_truth ?
+        full_spin_permutation_truth(source.source) :
+        nothing
+    if verify_truth
+        something(truth).exact ||
+            error("full spin-permutation truth check failed")
+    end
+    quotient = verify_truth ?
+        something(truth).quotient :
+        build_full_spin_moment_quotient(source.source.moments)
+    equalities = canonical_real_equalities(ExactLinearPolynomial[
+        full_spin_quotient_projection(equality, quotient)
+        for equality in source.equalities
+    ])
+    provisional = FullSpinReducedPrimalAssembly(
+        FULL_SPIN_PERMUTATION_SCHEMA,
+        source,
+        quotient,
+        equalities,
+        quotient.moments,
+        "",
+        "",
+    )
+
+    used_moments = Set{MomentKey}([moment_key()])
+    coefficient_records = String[]
+    for block in [source.positive_blocks; source.gap_blocks]
+        for row in eachindex(block.rows), column in row:length(block.rows)
+            polynomial = full_spin_block_entry(
+                provisional,
+                block,
+                block.rows[row],
+                block.rows[column],
+            )
+            union!(used_moments, keys(polynomial.terms))
+            push!(
+                coefficient_records,
+                join(
+                    (
+                        source_block_label(block),
+                        row,
+                        column,
+                        polynomial_sha256(polynomial),
+                    ),
+                    ":",
+                ),
+            )
+        end
+    end
+    for equality in equalities
+        union!(used_moments, keys(equality.terms))
+    end
+    used_moments == Set(quotient.moments) ||
+        error("full-spin coefficient maps do not reproduce the orbit inventory")
+
+    coefficient_sha256 = fingerprint_records(
+        "full-spin-real-upper-triangle-coefficients-v1",
+        coefficient_records,
+    )
+    equality_sha256 = fingerprint_records(
+        "full-spin-real-equalities-v1",
+        canonical_polynomial_string.(equalities),
+    )
+    block_records = String[
+        source_block_label(block) * ":" * string(length(block.rows))
+        for block in [source.positive_blocks; source.gap_blocks]
+    ]
+    final_sha256 = fingerprint_records(
+        FULL_SPIN_PERMUTATION_SCHEMA,
+        [
+            "source=" * source.assembly_sha256,
+            "equalities=" * equality_sha256,
+            "moments=" * join(
+                (key.canonical for key in quotient.moments),
+                "\n",
+            ),
+            "blocks=" * join(block_records, "\n"),
+            "coefficients=" * coefficient_sha256,
+        ],
+    )
+    return FullSpinReducedPrimalAssembly(
+        FULL_SPIN_PERMUTATION_SCHEMA,
+        source,
+        quotient,
+        equalities,
+        quotient.moments,
+        coefficient_sha256,
+        final_sha256,
+    )
+end
+
+triangle_count(dimension::Int) =
+    dimension * (dimension + 1) ÷ 2
+
+function full_spin_reduced_assembly_report(
+    assembly::FullSpinReducedPrimalAssembly,
+)
+    positive_dimensions =
+        length.(getfield.(assembly.source.positive_blocks, :rows))
+    gap_dimensions =
+        length.(getfield.(assembly.source.gap_blocks, :rows))
+    all_dimensions = [positive_dimensions; gap_dimensions]
+    conjugation_moments = length(assembly.source.source.moments)
+    spin_axis_moments = length(assembly.source.moments)
+    return (
+        source_moments=
+            length(assembly.source.source.source.source.moments),
+        v4_moments=
+            length(assembly.source.source.source.moments),
+        conjugation_real_moments=conjugation_moments,
+        spin_axis_moments=spin_axis_moments,
+        full_spin_moments=length(assembly.moments),
+        eliminated_from_conjugation=
+            conjugation_moments - length(assembly.moments),
+        eliminated_from_spin_axis=
+            spin_axis_moments - length(assembly.moments),
+        positive_block_dimensions=positive_dimensions,
+        gap_block_dimensions=gap_dimensions,
+        equality_count=length(assembly.equalities),
+        real_psd_triangle_entries=sum(triangle_count, all_dimensions),
+        maximum_psd_side_dimension=maximum(all_dimensions),
+        coefficient_map_sha256=assembly.coefficient_map_sha256,
+        assembly_sha256=assembly.assembly_sha256,
     )
 end
 

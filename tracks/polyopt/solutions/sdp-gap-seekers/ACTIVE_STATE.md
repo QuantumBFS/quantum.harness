@@ -174,4 +174,16 @@ Updated: 2026-07-29 UTC.
   and by 2.45x / 2.54x relative to the conjugation-only real model. The
   scientific decision remains that this exact `d=2` relaxation is feasible at
   gamma=1/2; it does not prove a physical bulk gap.
+- Full spin-permutation truth attempt r1, Slurm job `22988498`, passed all 126
+  assertions. All six proper-rotation lifts preserve the Hamiltonian,
+  conjugation-even inventory, and equality space; all 190,860 source
+  coefficient covariance identities passed. The exact S3 orbit inventory has
+  3,250 moments, eliminating 13,410 from conjugation-only and 5,553 from the
+  current spin-axis representation. Peak process RSS was 876,108 KiB;
+  `test.log` SHA-256 is
+  `8f443154dedca10ced1026770f32cfab90591e829fa119f2abea9673a58a2c56`.
+- Active route: retain all 12 already-proved spin-axis PSD cones and restrict
+  only their scalar coefficient maps to the 3,250 full-permutation orbit
+  variables. This is an exact feasible-set quotient and avoids assuming a new
+  complex phase-gauge block congruence.
 - No decision-changing user or resource need is open.

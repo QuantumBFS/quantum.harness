@@ -39,6 +39,13 @@ include(joinpath(
     "FullSpinPermutationReduction.jl",
 ))
 using .FullSpinPermutationReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullSpinPermutationPrimalGapJuMP.jl",
+))
+using .FullSpinPermutationPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -244,6 +251,51 @@ using JuMP
         full_spin_truth.coefficient_check_count,
     )
     flush(stdout)
+
+    full_spin_reduced = assemble_full_spin_reduced_primal(
+        spin_axis_reduced;
+        verify_truth=false,
+    )
+    full_spin_repeated = assemble_full_spin_reduced_primal(
+        spin_axis_reduced;
+        verify_truth=false,
+    )
+    full_spin_report =
+        full_spin_reduced_assembly_report(full_spin_reduced)
+    @test full_spin_report.source_moments == 74_602
+    @test full_spin_report.v4_moments == 19_108
+    @test full_spin_report.conjugation_real_moments == 16_660
+    @test full_spin_report.spin_axis_moments == 8_803
+    @test full_spin_report.full_spin_moments == 3_250
+    @test full_spin_report.eliminated_from_conjugation == 13_410
+    @test full_spin_report.eliminated_from_spin_axis == 5_553
+    @test full_spin_report.positive_block_dimensions ==
+          spin_axis_report.positive_block_dimensions
+    @test full_spin_report.gap_block_dimensions == [1, 1]
+    @test full_spin_report.equality_count == 0
+    @test full_spin_report.real_psd_triangle_entries == 16_707
+    @test full_spin_report.maximum_psd_side_dimension == 81
+    @test full_spin_reduced.coefficient_map_sha256 ==
+          full_spin_repeated.coefficient_map_sha256
+    @test full_spin_reduced.assembly_sha256 ==
+          full_spin_repeated.assembly_sha256
+
+    full_spin_jump_model =
+        build_full_spin_reduced_jump_primal(full_spin_reduced)
+    @test JuMP.num_variables(full_spin_jump_model.model) == 3_250
+    @test isempty(full_spin_jump_model.equality_constraints)
+    @test length(full_spin_jump_model.psd_constraints) == 12
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in full_spin_jump_model.psd_constraints
+    )) == [1, 1, 36, 36, 36, 36, 45, 45, 72, 73, 81, 81]
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in full_spin_jump_model.psd_constraints
+    )
+    @test full_spin_jump_model.assembly_sha256 ==
+          full_spin_reduced.assembly_sha256
 end
 
 @testset "V4 character multiplication and projection" begin

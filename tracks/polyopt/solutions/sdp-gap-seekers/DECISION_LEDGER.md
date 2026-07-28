@@ -256,3 +256,22 @@ Relative to the original exact Hermitian bridge, this is an 18.2x RSS and
 11.1x total-wall reduction; relative to conjugation-only realification it is
 2.45x and 2.54x. The exact finite-relaxation feasibility decision is
 unchanged.
+
+## 2026-07-29 — full spin-permutation truth gate passes
+
+Slurm job `22988498` passed all 126 assertions, including 190,860 exact
+coefficient covariance identities: all six proper-rotation lifts applied to
+all 31,810 V4 block entries. Hamiltonian invariance, the complete equality
+row space, conjugation-inventory closure, and the unsigned retained-moment
+action also passed.
+
+The full S3 orbit quotient has 3,250 moments, removing 5,553 more variables
+than the current 8,803-moment model. The passing `test.log` SHA-256 is
+`8f443154dedca10ced1026770f32cfab90591e829fa119f2abea9673a58a2c56`;
+peak process RSS was 876,108 KiB.
+
+Proceed by retaining every already-proved spin-axis PSD cone and projecting
+only its exact scalar coefficient maps onto the full S3 orbit inventory. This
+is sufficient for equivalence by group averaging and avoids making an
+unproved relation between conjugation phase gauges under permutations that
+move the Y axis.
