@@ -63,6 +63,7 @@ using JuMP
     @test truth.source_moment_count == length(isotypic.moments)
     @test truth.quotient_moment_count <= truth.source_moment_count
     @test truth.eliminated_moment_count >= 0
+    @test truth.raw_nonrepresentative_count > 0
     @test truth.coefficient_covariant
     @test truth.coefficient_count == 6_104
     @test truth.equality_space_invariant

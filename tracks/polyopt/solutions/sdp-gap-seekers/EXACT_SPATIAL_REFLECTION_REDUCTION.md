@@ -31,3 +31,11 @@ isotypic model. Before it may produce a solver input, it must verify:
 The first Slurm truth attempt is an inventory run: it records the exact moment
 count, split block dimensions, packed-coordinate count, and cross-check count.
 Those counts are hardened only after the mathematical gates pass.
+
+The first inventory attempt exposed one necessary composition in step 2.
+The full-spin moment inventory stores one lexicographic representative per
+spin-axis orbit. Reflecting such a representative need not itself be the
+lexicographic representative of the reflected orbit. The spatial action must
+therefore apply the site reflection and then the already-proved full-spin
+representative map. This composition is exact because the two group actions
+commute.

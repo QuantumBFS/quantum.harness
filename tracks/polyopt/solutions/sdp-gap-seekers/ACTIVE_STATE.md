@@ -330,6 +330,15 @@ Updated: 2026-07-29 UTC.
   all 6,104 isotypic coefficients, equality space, eigenspace ranks, and
   every spatial plus/minus cross entry. It remains behind the authorized
   nine-cone gamma=1/2 decision run, which is now complete.
+- Spatial-reflection truth attempt r1, Slurm job `22988821`, stopped after
+  1:18 at the moment-closure gate, before any coefficient, cone, or model
+  claim. A reflected full-spin orbit representative need not itself be the
+  lexicographic representative of the reflected spin orbit. The corrected
+  action composes site reflection with the already-proved full-spin
+  representative map and explicitly requires a positive count of such
+  re-representations on r2. Peak Slurm RSS was 713,484 KiB; `test.log`
+  SHA-256 is
+  `a7e2e3ff6d9240bcbaedb5a49df7624737d1ab68277b60bfc44a7938d60982f4`.
 - While the spatial truth and isotypic builder jobs wait/run under the shared
   association cap, a later exact continuous-spin route has been derived for
   the rank-at-most-four moment inventory. It parameterizes rank-two moments

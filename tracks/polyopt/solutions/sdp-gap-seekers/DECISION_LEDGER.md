@@ -523,3 +523,19 @@ row reduction, choose existing moment pivots, and verify the substitution
 under the rational infinite-order rotation with cosine `3/5`. Do not build or
 solve a derived MOF until this separate truth gate passes and the pivot count
 is decision-relevant.
+
+## 2026-07-29 — spatial truth r1 requires orbit re-representation
+
+Slurm job `22988821` stopped at the first moment-closure check, before any
+coefficient covariance, cross-block, or model assertion. The local
+site-reflection map is valid, but the full-spin moment inventory stores only
+the lexicographically first member of each spin-axis orbit. Reflecting that
+stored member can produce a noncanonical member of the reflected orbit.
+
+Because spatial and global spin actions commute, the exact induced action on
+the quotient is site reflection followed by the already-proved full-spin
+representative map. R2 makes that composition explicit and requires that its
+nontrivial use count be positive. This is a consequential action correction,
+not an identical repeat. The failed log SHA-256 is
+`a7e2e3ff6d9240bcbaedb5a49df7624737d1ab68277b60bfc44a7938d60982f4`;
+Slurm MaxRSS was 713,484 KiB.

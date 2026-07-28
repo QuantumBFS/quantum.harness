@@ -120,15 +120,23 @@ struct SpatialReflectionMomentQuotient
 end
 
 function build_spatial_reflection_moment_quotient(
-    moments::Vector{MomentKey},
+    assembly::FullSpinIsotypicReducedPrimalAssembly,
     site_map::Vector{Int},
 )
+    moments = assembly.moments
     length(unique(moments)) == length(moments) ||
         throw(ArgumentError("source moment inventory contains duplicates"))
     inventory = Set(moments)
+    full_spin_representatives =
+        assembly.source.source.quotient.representatives
     action = Dict{MomentKey,MomentKey}()
     for key in moments
-        target = spatial_reflection_moment(key, site_map)
+        reflected = spatial_reflection_moment(key, site_map)
+        haskey(full_spin_representatives, reflected) ||
+            error(
+                "reflected moment is outside the full-spin source inventory",
+            )
+        target = full_spin_representatives[reflected]
         target in inventory ||
             error("moment inventory is not closed under spatial reflection")
         action[key] = target
@@ -555,7 +563,7 @@ function spatial_reflection_reduction_truth(
 )
     site_map = spatial_reflection_site_map(assembly)
     quotient = build_spatial_reflection_moment_quotient(
-        assembly.moments,
+        assembly,
         site_map,
     )
     hamiltonian_invariant = hamiltonian_is_invariant(assembly, site_map)
@@ -563,6 +571,12 @@ function spatial_reflection_reduction_truth(
         coefficient_covariance(assembly, quotient, site_map)
     equality_invariant =
         equality_space_is_invariant(assembly, quotient)
+    raw_nonrepresentative_count = count(
+        key ->
+            spatial_reflection_moment(key, site_map) !=
+            quotient.action[key],
+        assembly.moments,
+    )
     split = spatial_cross_blocks_zero(
         assembly,
         quotient,
@@ -586,6 +600,7 @@ function spatial_reflection_reduction_truth(
         quotient_moment_count=length(quotient.moments),
         eliminated_moment_count=
             length(assembly.moments) - length(quotient.moments),
+        raw_nonrepresentative_count=raw_nonrepresentative_count,
         coefficient_covariant=covariance_exact,
         coefficient_count=coefficient_count,
         equality_space_invariant=equality_invariant,
@@ -669,7 +684,7 @@ function assemble_spatial_reflection_reduced_primal(
         spatial_reflection_site_map(source)
     quotient = verify_truth ?
         something(truth).quotient :
-        build_spatial_reflection_moment_quotient(source.moments, site_map)
+        build_spatial_reflection_moment_quotient(source, site_map)
     if verify_truth
         something(truth).exact ||
             error("spatial-reflection truth check failed")
