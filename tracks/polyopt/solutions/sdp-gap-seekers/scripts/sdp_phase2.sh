@@ -3,7 +3,7 @@
 #SBATCH --job-name=sdp_phase2
 #SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=64
-#SBATCH --mem-per-cpu=5000M
+#SBATCH --mem-per-cpu=3800M
 #SBATCH --output=sdp_phase2.out
 #SBATCH --error=sdp_phase2.err
 
