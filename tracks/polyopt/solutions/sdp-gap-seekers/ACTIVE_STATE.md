@@ -381,4 +381,10 @@ Updated: 2026-07-29 UTC.
   norm, and signed-permutation assertions locally. A clean, solver-free
   two-gamma MOF builder is also prepared with every preceding exact truth
   gate and independent named-cone reload, but it remains unsubmitted.
+- If both the continuous-spin and corrected spatial gates pass, the next
+  route is their exact commuting composition. The induced reflection on
+  continuous pivots is `T(y)=q_c(r(y))`; its rational fixed space, complete
+  intertwining test, and spatial cone cross-zero proof are specified in
+  `EXACT_CONTINUOUS_SPIN_REDUCTION_PLAN.md`. No combined source or job is
+  authorized yet.
 - No decision-changing user or resource need is open.

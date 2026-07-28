@@ -118,3 +118,53 @@ to
 or 4,772 packed coordinates including the gap scalar. Do not remove either
 copy until every substituted upper-triangle coefficient and the row-map rank
 have been replayed exactly.
+
+## Composition with the spatial reflection
+
+The anti-diagonal site reflection commutes with every global spin rotation.
+If both independent truth gates pass, their invariant restrictions may
+therefore be composed without changing the feasible/nonempty decision.
+Because the continuous-spin coordinates are selected source moments rather
+than abstract tensor parameters, the induced spatial action need not be a
+permutation of those pivots. It is nevertheless an exact rational
+involution.
+
+Let `q_c(x)` be the exact continuous-spin substitution of an isotypic moment
+`x`, and let `r(x)` be the corrected spatial action (site reflection followed
+by full-spin orbit re-representation). For every continuous pivot `y`, define
+
+```text
+T(y) = q_c(r(y)).
+```
+
+The combined route must prove `T^2=I` over the rationals and the intertwining
+identity
+
+```text
+T(q_c(x)) = q_c(r(x))
+```
+
+for every source isotypic moment. The fixed space is then found from the
+exact row-reduced system `(I-T)y=0`, with existing free pivot moments kept as
+coordinates. Every continuous-spin cone coefficient and equality is
+projected through that substitution.
+
+On the row side, reuse the already-proved signed spatial involution on each
+isotypic block. Split only the six positive `SO(3)` multiplicity cones and
+the scalar gap cone, require full rank of every plus/minus row basis, and
+replay all spatial cross entries as exact zeros after the combined moment
+projection. The combined model is authorized only if:
+
+- both standalone continuous-spin and corrected spatial gates have passed;
+- the rational pivot action is an involution and the full intertwining test
+  passes;
+- the fixed-coordinate substitution is deterministic across two builds;
+- every retained pivot remains used by a cone coefficient or equality;
+- every spatial row basis has full source rank and every cross block is
+  exactly zero; and
+- optimizer-free JuMP construction and MOF reload reproduce all named cone
+  dimensions.
+
+This route should be considered only after the six-cone continuous-spin
+model is measured. A smaller packed coordinate count is not by itself
+evidence of lower Mosek factor fill or peak RSS.

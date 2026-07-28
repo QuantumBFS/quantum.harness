@@ -585,3 +585,20 @@ solver-free builder that replays the complete reduction chain for gamma 0
 and then gamma 1/2, records every source hash and layer schema, and
 independently reloads all named cones. Keep it unsubmitted until both new
 truth gates pass.
+
+## 2026-07-29 — define the combined spin/spatial exact route
+
+The shared Slurm association cap is delaying all three active jobs before
+launch, so do not create an identical submission. Instead, record the
+mathematically next route behind the existing gates. Global spin rotations
+commute with the anti-diagonal site reflection. On continuous-spin pivot
+coordinates the corrected reflection induces the exact rational map
+`T(y)=q_c(r(y))`; the combined invariant coordinates are the exact fixed
+space of `(I-T)y=0`.
+
+Require `T^2=I`, exhaustive intertwining on every isotypic moment,
+deterministic rational fixed-space coordinates, full-rank spatial row
+splits, and exact zero cross blocks after projection. Do not implement or
+submit this combined model until the standalone continuous-spin and spatial
+truth gates both pass, and do not assume that its smaller cone inventory
+will reduce solver fill before measuring the six-cone model.
