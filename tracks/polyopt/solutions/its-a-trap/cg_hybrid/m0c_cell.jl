@@ -29,7 +29,7 @@ wall = time() - t0
 rss_gb = Sys.maxrss() / 2^30
 
 # provenance (per final-plan §R6)
-wt = normpath(joinpath(@__DIR__, "..", "..", "..", ".."))
+wt = normpath(joinpath(@__DIR__, "..", "..", "..", "..", ".."))
 git(args...) = strip(read(Cmd(`git -C $wt $(collect(args))`), String))
 jstr(x::String) = "\"" * x * "\""
 jstr(x) = string(x)
