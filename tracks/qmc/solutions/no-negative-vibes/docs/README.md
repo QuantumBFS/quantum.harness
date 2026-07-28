@@ -27,6 +27,8 @@
   普通 hopping 图只有开放路径幸存的图论结论，以及 2–6 站点全连通图穷举；
 - [FRONTIER_SEMIGROUP_RESULTS.md](FRONTIER_SEMIGROUP_RESULTS.md)：15 族广扫、压力扫描、
   高精度反例和混合 split-cone 解析关闭；
+- [AZ_SURVIVOR_CONE_RESULTS.md](AZ_SURVIVOR_CONE_RESULTS.md)：BDI/AII/DIII/CII 七个自然
+  数守恒半群锥的 14 万权重筛选、80 位反例和完整 BdG 边界；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；

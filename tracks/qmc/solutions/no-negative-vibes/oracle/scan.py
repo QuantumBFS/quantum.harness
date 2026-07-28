@@ -11,7 +11,7 @@ import time
 import numpy as np
 
 from . import __version__
-from . import az_families, families, frontier_candidates
+from . import az_families, az_semigroup_cones, families, frontier_candidates
 from .weights import classify_product, product_exponentials
 
 
@@ -22,6 +22,7 @@ def _available_cases() -> dict[str, object]:
     groups = [
         families.available_cases(),
         az_families.available_cases(),
+        az_semigroup_cones.available_cases(),
         frontier_candidates.available_cases(),
     ]
     overlap = set()
@@ -35,6 +36,8 @@ def _available_cases() -> dict[str, object]:
 
 
 def _candidate_module(case: str):
+    if case in az_semigroup_cones.available_cases():
+        return az_semigroup_cones
     if case in frontier_candidates.available_cases():
         return frontier_candidates
     if case in az_families.available_cases():
