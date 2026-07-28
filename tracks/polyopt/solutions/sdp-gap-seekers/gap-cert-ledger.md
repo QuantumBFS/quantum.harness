@@ -117,17 +117,30 @@ verification) and is reverted above. The four stages, honestly:
    sparse affine map (14,360 entries, extracted from the assembled `AffExpr`
    terms) + statuses + block inventory. Driver serializes it; artifact committed
    at `evidence/tfim_cert_N9_g0.26.jls`.
-3. **Independent verification — DONE.** `scripts/verify_certificate.jl` uses only
-   `Serialization`+`LinearAlgebra` (no JuMP/Mosek/construction). It reconstructs
-   `cons[k] = Σ coef·ray_value[var]` from the exported map + re-audits PSD/residual/λ.
-   **TFIM N=9 γ=0.26: PASSES** — reconstructed max|cons| = 1.3e-13 (machine precision),
-   pos/gpos PSD, λ=0.00508>0. Verifier output: `evidence/tfim_N9_g0.26_verifier_output.txt`.
+3. **Sound standalone verification — DONE (commit `6beea4e`).** `scripts/verify_certificate.jl`
+   uses only `Serialization`+`LinearAlgebra` (no JuMP/Mosek/assembly). It treats
+   **one vector `x` = ray_values** as the sole source of truth: it rebuilds every
+   pos/gpos Gram matrix from `x` via the exported index maps (`pos_var_positions`,
+   `gap_var_positions`), checks matrix symmetry (aliasing), PSD, the affine
+   identity `A·x + constants = 0`, the homogeneous-constants claim, and the
+   objective `c·x > 0` with the binding check `c·x == x[lambda_var_position]`.
+   Schema guards reject out-of-range indices, wrong dims, non-finite `x`,
+   asymmetry. **TFIM N=9 γ=0.26: PASSES** — residual 1.3e-13, `c·x=0.00508 ==
+   x[lambda_pos]`, all rebuilt Gram blocks PSD. Label is
+   `NUMERICALLY_AUDITED_CANDIDATE` (not "certified"). Output:
+   `evidence/tfim_N9_g0.26_verifier_output.txt`; artifact SHA-256
+   `7b6fa98c…`.
+   **Soundness self-test (advisor Priority 0):** `scripts/test_verifier_corruption.jl`
+   corrupts the artifact 5 ways (affine coef, psd index-map, objective, ray NaN,
+   lambda_pos); the verifier **rejects every one** (`ok=false`). So the binding
+   is real, not a three-copies coincidence.
 4. **Decisive solver status or rigorous post-processing — NOT DONE.** Termination
    is `SLOW_PROGRESS` (not a decisive `DUAL_INFEASIBLE`). The independently-audited
    ray is a numerical candidate; strict certification needs rational/interval
    post-processing (or a decisive solve).
 
 **Current defensible claim:** "TFIM N=9 γ=0.26: a candidate primal improving ray
-was exported as a portable artifact and an independent verifier (no JuMP/Mosek)
-reconstructed the affine identity (residual 1.3e-13) and confirmed all Gram blocks
-PSD + λ>0. Numerical candidate (SLOW_PROGRESS), not a rigorous proof."
+was exported as an artifact binding all checks to one vector x; a standalone
+verifier (no JuMP/Mosek) reconstructed the affine identity (residual 1.3e-13),
+confirmed `c·x>0` and every Gram block PSD from x, and rejects 5/5 deliberate
+corruptions. Numerical candidate (SLOW_PROGRESS), not a rigorous proof."
