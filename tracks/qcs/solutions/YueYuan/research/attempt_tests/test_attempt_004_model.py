@@ -44,3 +44,35 @@ def test_attempt_004_default_sweeps_have_required_axes():
     assert full.seeds == tuple(range(8))
     assert max(full.cpu_array_cores_per_task * full.cpu_array_max_concurrent_tasks, 1) <= 200
     assert full.gpu_array_max_concurrent_tasks == 1
+
+
+def test_attempt_004_systems_have_required_dimensions():
+    config = load_module("config")
+    systems = load_module("systems")
+
+    one = systems.build_system(config.ONE_QUBIT_X)
+    two = systems.build_system(config.TWO_QUBIT_CZ)
+
+    assert one.target.shape == (2, 2)
+    assert len(one.control_hamiltonians) == 2
+    assert one.config.raw_dim == 16
+    assert two.target.shape == (4, 4)
+    assert len(two.control_hamiltonians) == 4
+    assert two.config.raw_dim == 48
+
+
+def test_attempt_004_dynamics_are_unitary_and_phase_invariant():
+    config = load_module("config")
+    systems = load_module("systems")
+    pulses = load_module("pulses")
+    dynamics = load_module("dynamics")
+
+    system = systems.build_system(config.ONE_QUBIT_X)
+    theta = pulses.initial_pulse(config.ONE_QUBIT_X, seed=2)
+    unitary = dynamics.propagator(theta, system)
+    identity = unitary.conj().T @ unitary
+
+    assert float(abs(identity[0, 0] - 1.0)) < 1e-9
+    assert float(abs(identity[1, 1] - 1.0)) < 1e-9
+    assert float(dynamics.unitary_infidelity(system.target, system.target)) < 1e-12
+    assert float(dynamics.unitary_infidelity(1j * system.target, system.target)) < 1e-12
