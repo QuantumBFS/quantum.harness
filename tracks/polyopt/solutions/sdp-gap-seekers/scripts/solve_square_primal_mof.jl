@@ -9,6 +9,7 @@ using Mosek
 using MosekTools
 
 const RESULT_SCHEMA = "square-primal-smoke-result-v1"
+const MOSEK_NUM_THREADS_ATTRIBUTE = "MSK_IPAR_NUM_THREADS"
 
 function progress(message::AbstractString)
     println("[square-primal-solve] ", message)
@@ -153,6 +154,17 @@ function classify_status(
     return "unknown"
 end
 
+function set_mosek_num_threads!(model::JuMP.Model, threads::Int)
+    threads > 0 ||
+        throw(ArgumentError("Mosek thread count must be positive"))
+    JuMP.set_optimizer_attribute(
+        model,
+        MOSEK_NUM_THREADS_ATTRIBUTE,
+        threads,
+    )
+    return nothing
+end
+
 function validate_input(
     model_path::String,
     runmeta_path::String,
@@ -259,11 +271,7 @@ function main(args::Vector{String}=ARGS)
         )
         JuMP.set_optimizer(model, MosekTools.Optimizer)
         JuMP.set_time_limit_sec(model, Float64(options.time_limit_seconds))
-        JuMP.set_optimizer_attribute(
-            model,
-            Mosek.MSK_IPAR_NUM_THREADS,
-            options.threads,
-        )
+        set_mosek_num_threads!(model, options.threads)
 
         progress("optimize! started")
         solve_start = time()

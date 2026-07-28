@@ -4,7 +4,8 @@
 #SBATCH --time=00:30:00
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=3800M
-#SBATCH --output=results/slurm-square-primal-%j.out
+#SBATCH --output=slurm-square-primal-%j.out
+#SBATCH --error=slurm-square-primal-%j.err
 
 set -euo pipefail
 
@@ -20,8 +21,12 @@ SOURCE_POINT="${SOURCE_BUNDLE}/gamma-0"
 RUN_ID="square-primal-smoke-${SLURM_JOB_ID}"
 RUN_DIR="results/${RUN_ID}"
 RESULT_PATH="${RUN_DIR}/result.toml"
+SUBMIT_STDOUT="slurm-square-primal-${SLURM_JOB_ID}.out"
+SUBMIT_STDERR="slurm-square-primal-${SLURM_JOB_ID}.err"
 
 mkdir -p "$RUN_DIR"
+mv "$SUBMIT_STDOUT" "${RUN_DIR}/slurm.out"
+mv "$SUBMIT_STDERR" "${RUN_DIR}/slurm.err"
 
 echo "[square-primal-sbatch] run_id=${RUN_ID}"
 echo "[square-primal-sbatch] host=$(hostname)"

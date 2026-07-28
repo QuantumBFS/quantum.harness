@@ -3,6 +3,8 @@ using Test
 include(joinpath(@__DIR__, "..", "src", "SquareJ1J2Prototype.jl"))
 using .SquareJ1J2Prototype
 
+include(joinpath(@__DIR__, "smoke_runner_tests.jl"))
+
 @testset "square patch geometry" begin
     for L in 1:4
         patch = square_patch(L; g=1//2)
