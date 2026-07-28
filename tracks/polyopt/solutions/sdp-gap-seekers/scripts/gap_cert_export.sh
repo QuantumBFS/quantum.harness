@@ -14,7 +14,7 @@ set -euo pipefail
 
 export PATH="$HOME/julia-1.11.5/bin:$PATH"
 export MOSEKBINDIR="$HOME/mosek/mosek/11.2/tools/platform/linux64x86/bin"
-export LD_LIBRARY_PATH="$HOME/julia-1.11.5/lib/julia:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$HOME/julia-1.11.5/lib/julia:${LD_LIBRARY_PATH:-}"
 export JULIA_NUM_THREADS=4
 
 cd ~/quantum.harness
