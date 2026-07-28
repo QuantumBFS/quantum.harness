@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+import hashlib
 from hashlib import sha256
 from pathlib import Path
 import math
 import re
+import struct
 
 import numpy as np
 
@@ -44,6 +46,27 @@ class OLEProtocol:
     @property
     def gates(self) -> tuple[QASMGate, ...]:
         return tuple(gate for layer in self.layers for gate in layer)
+
+
+def _angle_bits(angle: float | None) -> str:
+    if angle is None:
+        return "-"
+    return struct.pack(">d", float(angle)).hex()
+
+
+def canonical_gate_records(protocol: OLEProtocol) -> tuple[str, ...]:
+    return tuple(
+        (
+            f"{gate.layer_index}|{gate.gate_index}|{gate.name}|"
+            f"{','.join(map(str, gate.qubits))}|{_angle_bits(gate.angle)}"
+        )
+        for gate in protocol.gates
+    )
+
+
+def canonical_gate_digest(protocol: OLEProtocol) -> str:
+    payload = "\n".join(canonical_gate_records(protocol)) + "\n"
+    return hashlib.sha256(payload.encode("ascii")).hexdigest()
 
 
 def _unsupported(line_number: int, statement: str) -> ValueError:
