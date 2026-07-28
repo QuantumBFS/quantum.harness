@@ -3,6 +3,7 @@ from long_range_percolation.enumeration import (
     enumerate_graphs,
     exact_partition_distribution,
 )
+from long_range_percolation.geometric import sample_geometric
 from long_range_percolation.kernel import (
     edge_probabilities,
     kernel_weight_sum,
@@ -42,6 +43,7 @@ __all__ = [
     "no_edge_probability",
     "periodic_kernel",
     "periodic_kernel_reference",
+    "sample_geometric",
     "sample_quadratic",
     "variance_open_edges",
 ]
