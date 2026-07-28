@@ -33,6 +33,7 @@ RAW_KEYS = {
     "source_commit",
     "system",
 }
+SYSTEM_KEYS = {"exact_field", "geometry", "system_shape", "transform"}
 PACKAGE_VERSIONS = {
     "numpy": "2.4.6",
     "oracle": "0.1.0",
@@ -68,8 +69,20 @@ def _raw_payload(*, workers: int, wall_time_seconds: float) -> dict[str, Any]:
             {
                 "classification": "certified-zero",
                 "label": "h0<-4",
-                "negative": {"status": "infeasible"},
-                "positive": {"status": "infeasible"},
+                "negative": {
+                    "min_slack": None,
+                    "solver_message": "synthetic infeasible",
+                    "status": "infeasible",
+                },
+                "positive": {
+                    "min_slack": None,
+                    "solver_message": "synthetic infeasible",
+                    "status": "infeasible",
+                },
+                "zero_certificate": {
+                    "anchor_label": "h0<-4",
+                    "kind": "dual",
+                },
             }
         ],
         "execution": _execution(
@@ -84,11 +97,13 @@ def _raw_payload(*, workers: int, wall_time_seconds: float) -> dict[str, Any]:
         "source_commit": "1" * 40,
         "system": {
             "exact_field": "Q(sqrt(2))",
+            "geometry": {"modes": 6},
             "system_shape": [1, 1],
             "transform": {"name": "synthetic-overlap-klein"},
         },
     }
     assert set(payload) == RAW_KEYS
+    assert set(payload["system"]) == SYSTEM_KEYS
     return payload
 
 
@@ -142,7 +157,18 @@ def _build_evidence_tree(
                 "cells": [
                     {
                         "anchor_count": 1,
-                        "anchors": raw_payloads["smoke"]["anchors"],
+                        "anchors": [
+                            {
+                                "anchor_kind": "hopping",
+                                "classification": "certified-zero",
+                                "label": "h0<-4",
+                                "negative": {"status": "infeasible"},
+                                "positive": {"status": "infeasible"},
+                                "zero_certificate": raw_payloads["smoke"][
+                                    "anchors"
+                                ][0]["zero_certificate"],
+                            }
+                        ],
                         "family": "bdg",
                         "host_role": "TEST",
                         "mask": "rings-bridges",
@@ -348,6 +374,97 @@ def test_raw_evidence_validator_rejects_incomplete_raw_provenance(
     _write_json(fixture_path, fixture)
 
     with pytest.raises(ValueError, match="source_commit"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_binds_fixture_anchors_to_raw_anchors(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, _ = _build_evidence_tree(
+        tmp_path
+    )
+    fixture["experiments"][0]["cells"][0]["anchors"][0][
+        "classification"
+    ] = "certified-feasible"
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="anchors"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "mutated_value"),
+    (
+        ("exact_field", "Q"),
+        ("transform", {"name": "different-transform"}),
+    ),
+)
+def test_raw_evidence_validator_binds_fixture_metadata_to_raw_system(
+    tmp_path: Path,
+    field: str,
+    mutated_value: Any,
+) -> None:
+    repository_root, fixture_path, fixture, _ = _build_evidence_tree(
+        tmp_path
+    )
+    fixture[field] = mutated_value
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match=field):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_rejects_two_paths_to_the_same_raw_file(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, _ = _build_evidence_tree(
+        tmp_path
+    )
+    raw_records = fixture["experiments"][0]["cells"][0]["raw_results"]
+    smoke_record = raw_records[0]
+    production_record = raw_records[1]
+    production_record["path"] = smoke_record["path"].replace(
+        "synthetic-smoke.json",
+        "./synthetic-smoke.json",
+    )
+    production_record["sha256"] = smoke_record["sha256"]
+    production_record["execution"] = smoke_record["execution"]
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="same raw file"):
+        _validator()(
+            repository_root=repository_root,
+            fixture_path=fixture_path,
+        )
+
+
+def test_raw_evidence_validator_requires_exact_raw_system_keys(
+    tmp_path: Path,
+) -> None:
+    repository_root, fixture_path, fixture, raw_payloads = (
+        _build_evidence_tree(tmp_path)
+    )
+    production = raw_payloads["production"]
+    del production["system"]["geometry"]
+    production_record = fixture["experiments"][0]["cells"][0][
+        "raw_results"
+    ][1]
+    production_record["sha256"] = _write_json(
+        repository_root / production_record["path"],
+        production,
+    )
+    _write_json(fixture_path, fixture)
+
+    with pytest.raises(ValueError, match="geometry"):
         _validator()(
             repository_root=repository_root,
             fixture_path=fixture_path,
