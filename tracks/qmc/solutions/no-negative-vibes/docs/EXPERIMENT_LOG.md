@@ -553,3 +553,26 @@ pairing anchors are independently zero as well.
   fixed-structure no-go and change structure rather than inventing a survivor.
   A later task may update the proposal status; this experiment does not launch
   an `N=8` scan or claim a general BdG/HS no-go.
+
+### Candidate verification chronology
+
+The first tracked candidate was
+`8ad45535644743e3c3826ae6dbb3be21e46762a4`. Its complete bundle
+`r01-task8-candidate-8ad4553.bundle` had SHA-256
+`6c19183f54a5f4959fba5ed09918e43f7dfc057036553aeaf4e11d14f859223b`.
+The hash matched at the local, gateway, WSL, and CPU stages; both workers
+verified complete bundle history, fast-forwarded to the exact full SHA, and
+were clean before tests.
+
+| Attempt | Result |
+|---|---|
+| candidate verification 1 | INVALID/no verdict: both long-lived outer SSH controls reset at about 300 s after printing only partial pytest dots. The WSL and CPU pytest processes remained active; they were not duplicated and were allowed to exit naturally. |
+| candidate monitor poll 1 | FAIL in the poll only: a combined nested `bash -lc` command lost quoting and raised a shell syntax error. No pytest process or candidate state changed. |
+| candidate verification 2 / WSL focused | PASS through a detached fail-closed wrapper with unique atomic log/status artifacts: `71 passed in 538.41s (0:08:58)`. |
+| candidate verification 2 / CPU fixture | PASS through the same wrapper protocol: the five committed schema/provenance/replay/inclusion tests reported `5 passed in 690.35s (0:11:30)`. |
+| candidate verification 2 / WSL full | PASS through the same wrapper protocol: `351 passed, 1003 warnings in 542.14s (0:09:02)`. The warnings were the known mpmath bit-count deprecations from exact fixtures (101), Majorana exact tests (278), and Metzler-system tests (624). |
+
+The tracked documentation update that records this chronology is a later
+docs-only commit. Its exact SHA and any final bundle/replay evidence belong in
+the Task 8 implementation report so the commit does not claim to contain its
+own hash.

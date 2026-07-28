@@ -184,6 +184,12 @@ An experiment is not closed when the program exits. It is closed after:
   making CPU progress. On timeout, check the specific remote PID and wait for
   it to exit before retrying with a longer keepalive/timeout; never stack a
   duplicate replay or mistake exit 124 for a certificate verdict.
+- For remote pytest runs that can outlive the connection, use a hash-matched
+  detached wrapper that writes stdout/stderr to a unique log and writes the
+  numeric exit code to a unique status `.part` before atomically renaming it.
+  Poll the status path with simple argv-only commands. Partial pytest dots,
+  disappearance of the controller connection, and a missing status marker are
+  all non-verdicts.
 - A quoting or transfer-helper failure that never started the scientific
   runner is an operational failure, not a new scientific attempt. Preserve
   the original raw file, verify its hash, record the mechanical lesson here,
