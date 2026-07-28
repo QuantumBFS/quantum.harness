@@ -489,6 +489,73 @@ Submit this resized gamma-zero point once. If 243.2 GB also OOMs, stop before
 requesting the full 486.4 GB node and inspect formulation/bridge sparsity and
 Mosek memory diagnostics. `gamma=1/4` remains gated.
 
+## 8.6 The 243.2 GB gate also OOMs
+
+The memory-resized job was:
+
+```text
+job_id    = 22986943
+source    = 4dc3a322a83963ed43315fc42d0a1b5616324363
+CPUs      = 64
+ReqMem    = 237.50 GiB, 243,200 MB
+node      = a01r05n08
+elapsed   = 00:02:36
+```
+
+It again passed all input gates, attached Mosek, and reached
+`optimize! started`. Slurm then reported:
+
+```text
+State       = OUT_OF_MEMORY
+ExitCode    = 0:125
+batch MaxRSS = 231,682,520 KiB, approximately 220.95 GiB
+solver exit = 137
+```
+
+Unlike the coarse measurement from job `22986777`, this peak is close enough
+to the 237.50 GiB cgroup limit to establish that the solver path genuinely
+needs more than the 243.2 GB allocation in its current form.
+
+The complete hard-kill bundle was fetched to:
+
+```text
+results/square-primal-smoke-22986943/
+```
+
+Its `result-missing.txt` and all other entries in `SHA256SUMS` verify. There is
+still no returned solver status or feasibility evidence.
+
+### Formulation diagnostic before any larger allocation
+
+Do not proceed directly to 128 CPUs/486.4 GB. Commit `8bd21a8` instruments the
+same model at the MOI/Mosek boundary:
+
+- explicitly copies the bridged JuMP model into the Mosek task before calling
+  `optimize!`;
+- records scalar variables, linear constraints, scalar-matrix nonzeros,
+  semidefinite block dimensions/nonzeros, attach wall time, and RSS in
+  checksum-bound `preopt.toml`;
+- flushes Mosek's own log incrementally to checksum-bound `mosek.log`;
+- forces `MSK_IPAR_INTPNT_SOLVE_FORM=MSK_SOLVE_DUAL`, which is the candidate
+  lower-memory form when the bridged model has many more affine PSD rows than
+  free scalar moments;
+- leaves the exact MOF, scientific setup, feasibility target, and status
+  policy unchanged.
+
+The helper was exercised against a real locally constructed Mosek task without
+optimizing. The full suite passes:
+
+```text
+576 passed, 0 failed, 0 errored
+```
+
+Run this instrumented dual-form diagnostic once at the same 243.2 GB limit.
+If model attachment itself OOMs, the MOI bridge/encoding is the target for
+redesign. If attachment completes but the dual interior point still OOMs, use
+the retained task dimensions and Mosek log to decide between basis reduction,
+block/chordal structure, or a larger machine. Do not infer that a 486.4 GB
+retry is sufficient without this evidence.
+
 ## 9. Claim boundary
 
 Gate B proves a deterministic, replayable solver input for the declared
