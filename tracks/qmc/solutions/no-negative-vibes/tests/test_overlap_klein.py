@@ -91,6 +91,21 @@ def test_basis_labels_map_to_the_intended_exact_quadratic_terms() -> None:
         assert item.fock == quadratic_term(6, kind, i, j)
 
 
+def test_bdg_bridge_pairing_has_hand_derived_jordan_wigner_signs() -> None:
+    basis = {
+        item.label: item
+        for item in quadratic_basis("bdg", "rings-bridges")
+    }
+    pair_creation = basis["pc0,4"].fock
+    pair_annihilation = basis["pa0,4"].fock
+
+    assert pair_creation[0b010001, 0] == 1
+    assert pair_creation[0b010101, 0b000100] == -1
+    assert pair_annihilation[0, 0b010001] == 1
+    assert pair_annihilation[0b000100, 0b010101] == -1
+    assert pair_annihilation == pair_creation.T
+
+
 def test_bdg_basis_adds_independent_creation_and_annihilation_terms() -> None:
     number = quadratic_basis("number-conserving", "rings-bridges")
     bdg = quadratic_basis("bdg", "rings-bridges")
@@ -125,6 +140,11 @@ def test_number_conserving_bridge_labels_exclude_pairing_terms() -> None:
 def test_unknown_support_masks_are_rejected(mask: str) -> None:
     with pytest.raises(ValueError, match="unknown support mask"):
         support_edges(mask)
+
+
+def test_bdg_basis_rejects_an_unknown_support_mask() -> None:
+    with pytest.raises(ValueError, match="unknown support mask"):
+        quadratic_basis("bdg", "complete")
 
 
 @pytest.mark.parametrize("family", ("", "hopping", "pairing"))
