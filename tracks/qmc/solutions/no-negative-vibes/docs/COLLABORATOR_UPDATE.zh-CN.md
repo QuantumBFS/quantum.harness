@@ -26,7 +26,7 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
    - `az-tenfold-hermitian-v1`：720 格、720,000 个乘积。
    - `majorana-shared-reality-cones-v2`：1,792 格、448,000 个直接 Fock 迹；
    - `majorana-small-angle-stress-v1`：840 格、252,000 个直接 Fock 迹。
-4. 建立 18 组精确 SymPy 证书和 49 个自动测试。
+4. 建立 18 组精确 SymPy 证书和 53 个自动测试。
 
 ## 当前最重要的结果
 
@@ -34,6 +34,8 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
 
 - 精确或数值排除：`SL(2/3,R)`、`Sp(2/4,R)`、`SU(1,1)`、`SU(2,1)`、`SU(3)`；
 - `U(2)`、`U(1,1)` 的单 flavor determinant 一般为复数；
+- `U(p,q)` 相位已经理论分类：
+  `arg det(I+D)=arg det(D)/2 mod pi`，连续中心相位之外只剩二值正负号；
 - 零负例项都能约化到已知 split-orthogonal、共轭配对或 Kramers/Majorana 机制。
 
 ### AZ 十类
@@ -94,6 +96,7 @@ Hermitian AZ 十类和共享实结构 Majorana 双锥的系统排查。目前没
 
 - [总入口](../START_HERE.md)
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
+- [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)
 - [经典群基线](BASELINE_RESULTS.md)

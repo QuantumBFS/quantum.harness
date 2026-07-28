@@ -24,8 +24,10 @@
   共同实结构只保证实权，不能保证非负；相反锥已有 `p=2-2*cosh(1)<0` 的深度二精确证书。
 - 已找到任意小非零夹角的两层解析反例
   `p(theta,q)=-4*sin(theta)*sinh(q)^2<0`，完整旋转双锥并集方向已关闭。
-- 主办方候选并未全部完成：经典群和标准 Hermitian AZ 已完成第一轮，但 `U(n,n)` 相位、
-  幸存类半群推广、复 Majorana 简洁矩阵定理和物理 HS 映射仍开放。
+- `U(p,q)` 连续相位已经理论闭合：
+  `arg det(I+D)=arg det(D)/2 mod pi`，但剩余正负号不受保护，因此不是新无符号类。
+- 主办方候选并未全部完成：经典群和标准 Hermitian AZ 已完成第一轮，但幸存类半群推广、
+  复 Majorana 简洁矩阵定理和物理 HS 映射仍开放。
 - 下一步不是重复普通 AZ 或双锥宽扫，而是转向物理可达受限子集、公共收缩度量和具体
   DQMC 映射。
 
@@ -35,12 +37,14 @@
 2. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：先看本轮最重要的新结果和直观。
 3. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
 4. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
-5. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-6. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-7. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-8. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-9. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
-10. [明日开工板](docs/KICKOFF.md)：组队后直接照此确定主候选、分工和第一轮交付。
+5. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
+6. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
+7. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+8. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+9. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+10. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+11. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+12. [明日开工板](docs/KICKOFF.md)：组队后直接照此确定主候选、分工和第一轮交付。
 
 不需要阅读 `quantum.harness` 的其他 track、skill 或主办方开发文件。
 
