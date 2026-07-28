@@ -1,0 +1,58 @@
+Node: a01r02n07, Start: Tue Jul 28 20:15:27 CST 2026
+Julia: julia version 1.11.5, repo: 4b89b1a
+patch SHA-256: 3bdd31f7bc228af87d673d99df9b7afd36675564bc0e38fc0929b66386490f81
+=== Step 1: certify TFIM N=9 gamma=0.26 (returns cert_artifact) ===
+0.5
+ncpoly([[3, 6], [6, 9], [9, 12], [12, 15], [15, 18], [18, 21], [21, 24], [24, 27], [1], [4], [7], [10], [13], [16], [19], [22], [25]], [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+certify start=20:15:34
+********************************** SpectralGap **********************************
+SpectralGap is launching...
+status = MathOptInterface.SLOW_PROGRESS
+[line 11 was the auto-displayed certify_Ising_gap return tuple -- 1.2MB of nvars=23949 ray_values, 2705 affine_constants (all 0.0), 14360 affine_map entries, and block index maps. Suppressed in the fixed driver via trailing semicolons. Key fields: objective=0.005075589019312096, cert_ray.lambda=0.005075589019312096, cons_residual=1.3062034093236363e-13.]
+flag=0 term=SLOW_PROGRESS primal=INFEASIBILITY_CERTIFICATE
+versions: julia=1.11.5 JuMP=v1.31.1 MosekTools=v0.15.10
+artifact serialized: tracks/polyopt/solutions/sdp-gap-seekers/evidence/tfim_cert_N9_g0.26.jls  (nvars=23949, ncons=2705, affmap=14360)
+
+=== Step 2: SOUND verifier (one-x binding, no JuMP/Mosek) ===
+-rw-r--r-- 1 iint_sjds giggleliu 1128758 Jul 28 20:16 tracks/polyopt/solutions/sdp-gap-seekers/evidence/tfim_cert_N9_g0.26.jls
+=== Sound certificate audit (one-x binding, schema-complete) ===
+artifact: tracks/polyopt/solutions/sdp-gap-seekers/evidence/tfim_cert_N9_g0.26.jls
+N=9 gamma=0.26 d=2  | nvars=23949 ncons=2705
+solver: SLOW_PROGRESS / INFEASIBILITY_CERTIFICATE / NO_SOLUTION
+affine_map entries: 14360  declared blocks: pos=[211, 50] gap=[11, 14]
+--- checks (reconstructed from the single ray x) ---
+  (1) ||A*x+const||_inf       = 1.3062034093236363e-13  (<1.0e-6? true)
+  (2) max|const| (homogeneous)= 0.0  (<1.0e-6? true)
+  (3) c'x (objective)         = 0.005075589019312096  (>1.0e-6? true)  [== x[lambda_pos]]
+  (4) pos min eig (rebuilt)   = [0.001092, 0.00114]
+      gap min eig (rebuilt)   = [-0.0, 0.00159]
+==================================================
+RESULT: NUMERICALLY_AUDITED_CANDIDATE
+  (floating-point + SLOW_PROGRESS: numerical candidate, NOT a rigorous proof;
+   rational/interval post-processing needed for strict certification.)
+verifier exit: 0
+
+=== Step 3: corruption self-tests (verifier must reject each) ===
+BASELINE (uncorrupted): ok=true label=NUMERICALLY_AUDITED_CANDIDATE  [expect ok=true]
+  corrupt affine coef: ok=false label=AUDIT_FAIL  [expect ok=false]
+  corrupt psd index (asymmetry): ok=false label=AUDIT_FAIL  [expect ok=false]
+  corrupt objective (zero c): ok=false label=AUDIT_FAIL  [expect ok=false]
+  corrupt ray NaN: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  corrupt lambda_pos: ok=false label=AUDIT_FAIL  [expect ok=false]
+  delete pos map (count mismatch): ok=false label=SCHEMA_FAIL  [expect ok=false]
+  delete gap map (count mismatch): ok=false label=SCHEMA_FAIL  [expect ok=false]
+  empty map for positive declared size: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  rectangular map: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  extra pos block (count mismatch): ok=false label=SCHEMA_FAIL  [expect ok=false]
+  affine row out-of-range: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  affine var out-of-range: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  objective length mismatch: ok=false label=SCHEMA_FAIL  [expect ok=false]
+  schema_version mismatch: ok=false label=SCHEMA_FAIL  [expect ok=false]
+==================================================
+executed 14 / 14 corruption tests
+ALL CORRUPTION TESTS PASS: verifier rejects every inconsistency (sound)
+corruption-test exit: 0
+
+=== Epilogue: artifact hash ===
+7b6fa98ca8d2a9aaf15984b7b7e107c6b45376b85b12e570f93895c239904e68  tracks/polyopt/solutions/sdp-gap-seekers/evidence/tfim_cert_N9_g0.26.jls
+Finished: Tue Jul 28 20:16:28 CST 2026

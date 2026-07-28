@@ -31,9 +31,9 @@ echo "=== Step 1: certify TFIM N=9 gamma=0.26 (returns cert_artifact) ==="
 julia --project=julia-env << JLEOF
 using SpectralGap, MosekTools, Serialization, Dates
 N=9; g=0.5
-H = ncpoly([[3*[i; i+1] for i = 1:N-1]; [[3i-2] for i = 1:N]], [-ones(N-1); g*ones(N)])
+H = ncpoly([[3*[i; i+1] for i = 1:N-1]; [[3i-2] for i = 1:N]], [-ones(N-1); g*ones(N)]);
 println("certify start=", Dates.format(now(),"HH:MM:SS")); flush(stdout)
-r = certify_Ising_gap(N, H, 0.26, 2, QUIET=true)
+r = certify_Ising_gap(N, H, 0.26, 2, QUIET=true);
 println("flag=", r.flag, " term=", r.termination, " primal=", r.primal); flush(stdout)
 using JuMP, MosekTools
 println("versions: julia=", VERSION, " JuMP=v", pkgversion(JuMP), " MosekTools=v", pkgversion(MosekTools)); flush(stdout)
