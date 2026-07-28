@@ -76,6 +76,9 @@ def test_sync_references_downloads_and_verifies_paper_and_pinned_repo(tmp_path):
         encoding="utf-8",
     )
     output_dir = tmp_path / "downloads"
+    stale_repo = output_dir / "code" / "reference-code"
+    stale_repo.mkdir(parents=True)
+    (stale_repo / "USER-NOTE.txt").write_text("preserve me", encoding="utf-8")
 
     downloaded = download_references.sync_references(manifest_path, output_dir)
 
@@ -84,6 +87,11 @@ def test_sync_references_downloads_and_verifies_paper_and_pinned_repo(tmp_path):
         output_dir / "code" / "reference-code",
     ]
     assert download_references.verify_manifest(manifest_path, output_dir) == []
+    archived = list((output_dir / "code").glob(".reference-code.superseded-*"))
+    assert len(archived) == 1
+    assert (archived[0] / "USER-NOTE.txt").read_text(encoding="utf-8") == (
+        "preserve me"
+    )
     assert (
         subprocess.run(
             [
@@ -98,6 +106,13 @@ def test_sync_references_downloads_and_verifies_paper_and_pinned_repo(tmp_path):
             text=True,
         ).stdout.strip()
         == commit
+    )
+    (output_dir / "code" / "reference-code" / "UNTRACKED").write_text(
+        "dirty", encoding="utf-8"
+    )
+    assert not download_references.verify_repository(
+        output_dir / "code" / "reference-code",
+        {"commit": commit},
     )
 
 

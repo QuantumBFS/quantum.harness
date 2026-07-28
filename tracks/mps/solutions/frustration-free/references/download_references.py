@@ -6,9 +6,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 from typing import Any
 import urllib.request
 
@@ -61,7 +63,22 @@ def _repository_head(path: Path) -> str | None:
 
 
 def verify_repository(path: str | Path, entry: dict[str, Any]) -> bool:
-    return _repository_head(Path(path)) == entry["commit"]
+    path = Path(path)
+    if _repository_head(path) != entry["commit"]:
+        return False
+    status = subprocess.run(
+        ["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"],
+        capture_output=True,
+        text=True,
+    )
+    return status.returncode == 0 and not status.stdout
+
+
+def _unused_path(parent: Path, prefix: str) -> Path:
+    descriptor, name = tempfile.mkstemp(dir=parent, prefix=prefix)
+    os.close(descriptor)
+    os.unlink(name)
+    return Path(name)
 
 
 def download_paper(entry: dict[str, Any], output_dir: Path) -> Path:
@@ -72,7 +89,8 @@ def download_paper(entry: dict[str, Any], output_dir: Path) -> Path:
         print(f"verified paper {name}")
         return destination
 
-    partial = destination.with_suffix(destination.suffix + ".part")
+    partial = _unused_path(output_dir, f".{name}.stage-")
+    archived = None
     request = urllib.request.Request(entry["url"], headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=600) as response:
@@ -80,7 +98,17 @@ def download_paper(entry: dict[str, Any], output_dir: Path) -> Path:
                 shutil.copyfileobj(response, handle, length=1024 * 1024)
         if not verify_paper(partial, entry):
             raise RuntimeError(f"paper checksum mismatch: {name}")
-        partial.replace(destination)
+        if destination.exists() or destination.is_symlink():
+            archived = _unused_path(
+                output_dir, f".{name}.superseded-"
+            )
+            os.replace(destination, archived)
+        try:
+            os.replace(partial, destination)
+        except BaseException:
+            if archived is not None and archived.exists():
+                os.replace(archived, destination)
+            raise
     finally:
         partial.unlink(missing_ok=True)
     print(f"downloaded paper {name}")
@@ -95,11 +123,8 @@ def sync_repository(entry: dict[str, Any], output_dir: Path) -> Path:
         print(f"verified repository {name}@{entry['commit']}")
         return destination
 
-    partial = output_dir / f".{name}.partial"
-    if partial.exists():
-        shutil.rmtree(partial)
-    if destination.exists():
-        shutil.rmtree(destination)
+    partial = _unused_path(output_dir, f".{name}.stage-")
+    archived = None
     try:
         subprocess.run(
             ["git", "clone", "--quiet", "--no-checkout", entry["url"], str(partial)],
@@ -119,7 +144,17 @@ def sync_repository(entry: dict[str, Any], output_dir: Path) -> Path:
         )
         if not verify_repository(partial, entry):
             raise RuntimeError(f"repository revision mismatch: {name}")
-        partial.replace(destination)
+        if destination.exists() or destination.is_symlink():
+            archived = _unused_path(
+                output_dir, f".{name}.superseded-"
+            )
+            os.replace(destination, archived)
+        try:
+            os.replace(partial, destination)
+        except BaseException:
+            if archived is not None and archived.exists():
+                os.replace(archived, destination)
+            raise
     finally:
         if partial.exists():
             shutil.rmtree(partial)

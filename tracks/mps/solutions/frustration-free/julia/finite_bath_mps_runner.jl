@@ -1,0 +1,614 @@
+#!/usr/bin/env julia
+
+using JSON3
+using SHA
+using LinearAlgebra
+using ITensors
+using ITensorMPS
+
+include(joinpath(@__DIR__, "finite_bath_purification.jl"))
+using .FiniteBathPurification: FiniteBathParameters
+include(joinpath(@__DIR__, "finite_bath_observables.jl"))
+using .FiniteBathObservables: finite_bath_observables
+
+const RUNNER_SCHEMA_VERSION = 1
+const RUNNER_VERSION = "2.0.0"
+
+function strict_json_value(value, name)
+    if value isa JSON3.Object
+        converted = Dict{String,Any}()
+        for (key, item) in pairs(value)
+            string_key = String(key)
+            haskey(converted, string_key) &&
+                throw(ArgumentError("$name contains duplicate key $string_key"))
+            converted[string_key] = strict_json_value(
+                item, "$name.$string_key"
+            )
+        end
+        return converted
+    elseif value isa JSON3.Array
+        return [
+            strict_json_value(item, "$name[$index]")
+            for (index, item) in enumerate(value)
+        ]
+    elseif value isa AbstractFloat
+        isfinite(value) ||
+            throw(ArgumentError("$name contains a non-finite float"))
+        return Float64(value)
+    elseif value === nothing || value isa Bool || value isa Integer ||
+           value isa AbstractString
+        return value
+    end
+    throw(ArgumentError("$name contains unsupported JSON value $(typeof(value))"))
+end
+
+function strict_json_read(raw, name)
+    parsed = try
+        JSON3.read(raw)
+    catch error
+        throw(ArgumentError("$name is invalid JSON: $(sprint(showerror, error))"))
+    end
+    return strict_json_value(parsed, name)
+end
+
+function canonical_request_json(value)
+    if value === nothing
+        return "null"
+    elseif value isa AbstractFloat
+        isfinite(value) ||
+            throw(ArgumentError("request payload contains non-finite float"))
+        isinteger(value) && return string(Int(value))
+        return String(JSON3.write(value))
+    elseif value isa Bool || value isa Integer || value isa AbstractString
+        return String(JSON3.write(value))
+    elseif value isa AbstractVector
+        return "[" * join(canonical_request_json.(value), ",") * "]"
+    elseif value isa AbstractDict
+        keys_sorted = sort!(String.(collect(keys(value))))
+        entries = [
+            canonical_request_json(key) * ":" *
+            canonical_request_json(value[key]) for key in keys_sorted
+        ]
+        return "{" * join(entries, ",") * "}"
+    end
+    throw(ArgumentError("request payload contains unsupported value"))
+end
+
+function canonical_artifact_json(value)
+    if value === nothing || value isa Bool || value isa Integer ||
+       value isa AbstractString || value isa AbstractFloat
+        value isa AbstractFloat && !isfinite(value) &&
+            throw(ArgumentError("artifact contains non-finite float"))
+        return String(JSON3.write(value))
+    elseif value isa AbstractVector
+        return "[" * join(canonical_artifact_json.(value), ",") * "]"
+    elseif value isa AbstractDict
+        keys_sorted = sort!(String.(collect(keys(value))))
+        entries = [
+            canonical_artifact_json(key) * ":" *
+            canonical_artifact_json(value[key]) for key in keys_sorted
+        ]
+        return "{" * join(entries, ",") * "}"
+    end
+    throw(ArgumentError("artifact contains unsupported value"))
+end
+
+function require_exact_keys(value, expected, name)
+    value isa AbstractDict || throw(ArgumentError("$name must be a JSON object"))
+    actual = Set(String.(keys(value)))
+    actual == Set(expected) ||
+        throw(ArgumentError("$name keys do not match the supported schema"))
+    return value
+end
+
+function finite_number(value, name)
+    value isa Real && !(value isa Bool) ||
+        throw(ArgumentError("$name must be a real number"))
+    converted = Float64(value)
+    isfinite(converted) || throw(ArgumentError("$name must be finite"))
+    return converted
+end
+
+function positive_integer(value, name)
+    value isa Integer && !(value isa Bool) && value > 0 ||
+        throw(ArgumentError("$name must be a positive integer"))
+    return Int(value)
+end
+
+function validate_digest(value, name)
+    value isa AbstractString && occursin(r"^[0-9a-f]{64}$", value) ||
+        throw(ArgumentError("$name must be 64 lowercase hexadecimal digits"))
+    return String(value)
+end
+
+function validate_finite_tree(value, name = "result")
+    if value === nothing || value isa Bool || value isa AbstractString ||
+       value isa Integer
+        return nothing
+    elseif value isa AbstractFloat
+        isfinite(value) || error("$name contains a non-finite float")
+    elseif value isa AbstractVector
+        foreach(item -> validate_finite_tree(item, name), value)
+    elseif value isa NamedTuple
+        foreach(item -> validate_finite_tree(item, name), values(value))
+    elseif value isa AbstractDict
+        foreach(item -> validate_finite_tree(item, name), values(value))
+    else
+        error("$name contains a non-JSON value of type $(typeof(value))")
+    end
+    return nothing
+end
+
+function authoritative_model_definition()
+    path = joinpath(@__DIR__, "..", "model.json")
+    filesize(path) <= 64 * 1024 ||
+        throw(ArgumentError("model definition exceeds 64 KiB"))
+    model = strict_json_read(read(path), "model definition")
+    require_exact_keys(
+        model,
+        ["schema_version", "model_id", "parameters", "assertions", "conventions"],
+        "model definition",
+    )
+    model["schema_version"] == 1 ||
+        throw(ArgumentError("unsupported model definition schema"))
+    model["model_id"] == "challenge-81-spinful-anderson-semicircular" ||
+        throw(ArgumentError("unsupported model identity"))
+    return model
+end
+
+function validate_bath_artifact(bath_artifact, bath_json, model_definition)
+    require_exact_keys(bath_artifact, ["payload", "sha256"], "bath artifact")
+    digest = validate_digest(bath_artifact["sha256"], "bath payload SHA256")
+    bath = bath_artifact["payload"]
+    require_exact_keys(
+        bath,
+        [
+            "V", "broadening", "broadened_finite_bath_hybridization",
+            "conventions", "epsilon", "frequency_grid", "parameters",
+            "provenance", "schema_version", "target_continuum_hybridization",
+        ],
+        "bath payload",
+    )
+    canonical_file = strip(String(bath_json))
+    prefix = "{\"payload\":"
+    suffix = ",\"sha256\":\"$digest\"}"
+    startswith(canonical_file, prefix) && endswith(canonical_file, suffix) ||
+        throw(ArgumentError("bath artifact file is not canonical"))
+    payload_start = ncodeunits(prefix) + 1
+    payload_stop = ncodeunits(canonical_file) - ncodeunits(suffix)
+    payload_bytes = codeunits(canonical_file)[payload_start:payload_stop]
+    bytes2hex(sha256(payload_bytes)) == digest ||
+        throw(ArgumentError("bath payload SHA256 mismatch"))
+    bath["schema_version"] == 2 ||
+        throw(ArgumentError("unsupported bath schema version"))
+    parameters = require_exact_keys(
+        bath["parameters"], ["bandwidth", "gamma", "n_bath"], "bath parameters"
+    )
+    bandwidth = finite_number(parameters["bandwidth"], "bandwidth")
+    gamma = finite_number(parameters["gamma"], "gamma")
+    n_bath = positive_integer(parameters["n_bath"], "n_bath")
+    bandwidth > 0 || throw(ArgumentError("bandwidth must be positive"))
+    gamma >= 0 || throw(ArgumentError("gamma must be nonnegative"))
+    expected_model = model_definition["parameters"]
+    bandwidth == finite_number(expected_model["D"], "model D") ||
+        throw(ArgumentError("bath bandwidth does not match model D"))
+    gamma == finite_number(expected_model["Gamma"], "model Gamma") ||
+        throw(ArgumentError("bath gamma does not match model Gamma"))
+
+    conventions = require_exact_keys(
+        bath["conventions"],
+        ["hybridization", "quadrature", "target_continuum", "ordering", "epsilon", "V_squared"],
+        "bath conventions",
+    )
+    for name in keys(conventions)
+        conventions[name] == model_definition["conventions"][name] ||
+            throw(ArgumentError("unsupported bath $name convention"))
+    end
+    provenance = require_exact_keys(
+        bath["provenance"],
+        ["module", "module_version", "python_version", "numpy_version", "schema_version"],
+        "bath provenance",
+    )
+    provenance["module"] == "bath" && provenance["schema_version"] == 2 ||
+        throw(ArgumentError("unsupported bath provenance"))
+
+    epsilon = [finite_number(value, "epsilon") for value in bath["epsilon"]]
+    coupling = [finite_number(value, "V") for value in bath["V"]]
+    length(epsilon) == n_bath == length(coupling) ||
+        throw(ArgumentError("bath arrays must have n_bath entries"))
+    all(>=(0.0), coupling) || throw(ArgumentError("V must be nonnegative"))
+    expected_epsilon = [
+        bandwidth * cos(k * pi / (n_bath + 1)) for k in 1:n_bath
+    ]
+    expected_coupling = [
+        sqrt(
+            gamma * bandwidth / (n_bath + 1) *
+            sin(k * pi / (n_bath + 1))^2
+        ) for k in 1:n_bath
+    ]
+    all(isapprox.(epsilon, expected_epsilon; rtol = 1e-13, atol = 1e-15)) ||
+        throw(ArgumentError("epsilon does not match quadrature"))
+    all(isapprox.(coupling, expected_coupling; rtol = 1e-13, atol = 1e-15)) ||
+        throw(ArgumentError("V does not match quadrature"))
+    isapprox(
+        pi * sum(abs2, coupling),
+        pi * gamma * bandwidth / 2;
+        rtol = 1e-13,
+        atol = 1e-15,
+    ) || throw(ArgumentError("gamma normalization failed"))
+
+    grid = [finite_number(value, "frequency grid") for value in bath["frequency_grid"]]
+    length(grid) >= 2 && all(diff(grid) .> 0) ||
+        throw(ArgumentError("frequency grid must be strictly increasing"))
+    target = [
+        finite_number(value, "target hybridization")
+        for value in bath["target_continuum_hybridization"]
+    ]
+    broadened = [
+        finite_number(value, "broadened hybridization")
+        for value in bath["broadened_finite_bath_hybridization"]
+    ]
+    length(target) == length(grid) == length(broadened) ||
+        throw(ArgumentError("hybridization arrays must match frequency grid"))
+    expected_target = [
+        abs(omega) <= bandwidth ?
+        gamma * sqrt(max(0.0, 1 - (omega / bandwidth)^2)) : 0.0
+        for omega in grid
+    ]
+    all(isapprox.(target, expected_target; rtol = 1e-13, atol = 1e-15)) ||
+        throw(ArgumentError("target hybridization does not match model"))
+    broadening = require_exact_keys(
+        bath["broadening"],
+        ["kernel", "width", "width_rule", "interpretation"],
+        "bath broadening",
+    )
+    width = finite_number(broadening["width"], "broadening width")
+    broadening["kernel"] == "normalized_gaussian" &&
+        broadening["width_rule"] == "bandwidth / (n_bath + 1)" &&
+        broadening["interpretation"] ==
+            "broadened finite-bath realization; not the fitted continuum" &&
+        width == bandwidth / (n_bath + 1) ||
+        throw(ArgumentError("unsupported bath broadening"))
+    expected_broadened = [
+        pi * sum(
+            coupling[index]^2 *
+            exp(-0.5 * ((omega - epsilon[index]) / width)^2) /
+            (sqrt(2pi) * width) for index in eachindex(epsilon)
+        ) for omega in grid
+    ]
+    all(isapprox.(broadened, expected_broadened; rtol = 1e-13, atol = 1e-15)) ||
+        throw(ArgumentError("broadened hybridization does not match bath"))
+    return (; bath, epsilon, coupling)
+end
+
+function read_request(path)
+    raw = read(path)
+    request = strict_json_read(raw, "request")
+    require_exact_keys(request, ["payload_json", "sha256"], "request")
+    reported_payload_digest =
+        validate_digest(request["sha256"], "request payload SHA256")
+    payload_json = request["payload_json"]
+    payload_json isa AbstractString ||
+        throw(ArgumentError("request payload_json must be a string"))
+    payload_digest = bytes2hex(sha256(codeunits(payload_json)))
+    payload_digest == reported_payload_digest ||
+        throw(
+            ArgumentError(
+                "request payload SHA256 mismatch: reported=" *
+                "$reported_payload_digest recomputed=$payload_digest"
+            ),
+        )
+    payload = strict_json_read(payload_json, "request payload")
+    payload = require_exact_keys(
+        payload,
+        [
+            "schema_version",
+            "bath_artifact_json",
+            "bath_artifact_file_sha256",
+            "model",
+            "tau",
+            "solver_settings",
+        ],
+        "request payload",
+    )
+    canonical_request_json(payload) == payload_json ||
+        throw(ArgumentError("request payload_json is not canonical"))
+    payload["schema_version"] == RUNNER_SCHEMA_VERSION ||
+        throw(ArgumentError("unsupported request schema version"))
+
+    bath_json = payload["bath_artifact_json"]
+    bath_json isa AbstractString ||
+        throw(ArgumentError("bath_artifact_json must be a string"))
+    bath_file_digest =
+        validate_digest(payload["bath_artifact_file_sha256"], "bath artifact file SHA256")
+    bytes2hex(sha256(codeunits(bath_json))) == bath_file_digest ||
+        throw(ArgumentError("bath artifact file SHA256 mismatch"))
+    bath_artifact = strict_json_read(bath_json, "bath artifact")
+    model_definition = authoritative_model_definition()
+    validated_bath =
+        validate_bath_artifact(bath_artifact, bath_json, model_definition)
+    epsilon = validated_bath.epsilon
+    coupling = validated_bath.coupling
+
+    model = require_exact_keys(
+        payload["model"], ["U", "beta", "epsilon_d", "mu"], "model"
+    )
+    U = finite_number(model["U"], "U")
+    beta = finite_number(model["beta"], "beta")
+    epsilon_d = finite_number(model["epsilon_d"], "epsilon_d")
+    mu = finite_number(model["mu"], "mu")
+    U >= 0 || throw(ArgumentError("U must be nonnegative"))
+    beta > 0 || throw(ArgumentError("beta must be positive"))
+    expected_model = model_definition["parameters"]
+    U == expected_model["U"] &&
+        epsilon_d == expected_model["epsilon_d"] &&
+        mu == expected_model["mu"] ||
+        throw(ArgumentError("request model does not match authoritative model"))
+
+    tau = [finite_number(value, "tau") for value in payload["tau"]]
+    isempty(tau) && throw(ArgumentError("tau must not be empty"))
+    all(point -> 0 <= point <= beta, tau) ||
+        throw(ArgumentError("tau must lie in [0, beta]"))
+
+    settings = require_exact_keys(
+        payload["solver_settings"],
+        ["cutoff", "krylov_expansion_dim", "maxdim", "time_step"],
+        "solver settings",
+    )
+    time_step = finite_number(settings["time_step"], "time_step")
+    cutoff = finite_number(settings["cutoff"], "cutoff")
+    maxdim = positive_integer(settings["maxdim"], "maxdim")
+    krylov_expansion_dim = settings["krylov_expansion_dim"]
+    krylov_expansion_dim isa Integer &&
+        !(krylov_expansion_dim isa Bool) &&
+        krylov_expansion_dim >= 0 ||
+        throw(
+            ArgumentError(
+                "krylov_expansion_dim must be a nonnegative integer"
+            ),
+        )
+    krylov_expansion_dim = Int(krylov_expansion_dim)
+    time_step > 0 || throw(ArgumentError("time_step must be positive"))
+    cutoff >= 0 || throw(ArgumentError("cutoff must be nonnegative"))
+
+    parameters = FiniteBathParameters(
+        epsilon, coupling; U, epsilon_d, mu
+    )
+    return (;
+        raw,
+        request,
+        payload,
+        payload_digest,
+        parameters,
+        beta,
+        tau,
+        settings = (; time_step, cutoff, maxdim, krylov_expansion_dim),
+    )
+end
+
+function branch_diagnostics(entries)
+    return [
+        (;
+            tau = entry.tau,
+            spin = String(entry.spin),
+            insertion = String(entry.insertion),
+            branch_status = String(entry.branch_status),
+            max_link_dimension = entry.max_link_dimension,
+            maximum_link_dimensions_by_bond =
+                entry.maximum_link_dimensions_by_bond,
+            truncation_max_error = entry.truncation.max_error,
+            krylov_all_converged = entry.krylov.all_converged,
+            krylov_max_error_estimate = entry.krylov.max_error_estimate,
+            krylov_num_operations = entry.krylov.num_operations,
+            krylov_num_iterations = entry.krylov.num_iterations,
+            krylov_local_updates = entry.krylov.local_updates,
+        ) for entry in entries
+    ]
+end
+
+function thermal_diagnostics_summary(history, maximum_link_dimensions_by_bond)
+    return (;
+        steps = length(history),
+        max_link_dimension = maximum(
+            maximum_link_dimensions_by_bond; init = 1
+        ),
+        maximum_link_dimensions_by_bond,
+        truncation_max_error = maximum(
+            (entry.max_truncation_error for entry in history); init = 0.0
+        ),
+        krylov_all_converged = all(
+            entry.krylov_all_converged for entry in history
+        ),
+        krylov_max_error_estimate = maximum(
+            (entry.krylov_max_error_estimate for entry in history);
+            init = 0.0,
+        ),
+        krylov_num_operations = sum(
+            entry.krylov_num_operations for entry in history; init = 0
+        ),
+        krylov_num_iterations = sum(
+            entry.krylov_num_iterations for entry in history; init = 0
+        ),
+        krylov_local_updates = sum(
+            entry.krylov_local_updates for entry in history; init = 0
+        ),
+    )
+end
+
+function source_sha256(path)
+    return bytes2hex(sha256(read(path)))
+end
+
+function make_output(request, result, profiling)
+    settings = request.settings
+    active_project = Base.active_project()
+    active_project === nothing &&
+        error("Julia has no active project")
+    active_project = abspath(active_project)
+    manifest = joinpath(dirname(active_project), "Manifest.toml")
+    isfile(manifest) || error("active Julia project has no Manifest.toml")
+    return (;
+        schema_version = RUNNER_SCHEMA_VERSION,
+        input_sha256 = bytes2hex(sha256(request.raw)),
+        input_payload_sha256 = request.payload_digest,
+        solver = (;
+            name = "finite_bath_mps",
+            settings = (;
+                time_step = settings.time_step,
+                cutoff = settings.cutoff,
+                maxdim = settings.maxdim,
+                krylov_expansion_dim = settings.krylov_expansion_dim,
+            ),
+        ),
+        tau = result.tau,
+        observables = (;
+            n_d = result.n_d,
+            double_occupancy = result.double_occupancy,
+            G_up = result.G_up,
+            G_down = result.G_dn,
+        ),
+        diagnostics = (;
+            finite = true,
+            profiling,
+            log_partition = result.diagnostics.log_partition,
+            thermal_log_norm = result.diagnostics.thermal_log_norm,
+            thermal_max_link_dimension =
+                result.diagnostics.thermal_max_link_dimension,
+            maximum_link_dimensions_by_bond =
+                result.diagnostics.maximum_link_dimensions_by_bond,
+            thermal = thermal_diagnostics_summary(
+                result.thermal_state.diagnostics.step_history,
+                result.thermal_state.diagnostics.maximum_link_dimensions_by_bond,
+            ),
+            krylov_expansion_dim = settings.krylov_expansion_dim,
+            expansion_policy =
+                settings.krylov_expansion_dim == 0 ?
+                "tdvp_only" : "explicit_global_krylov",
+            green_up = branch_diagnostics(result.diagnostics.green_up),
+            green_down = branch_diagnostics(result.diagnostics.green_dn),
+            disclaimer = result.diagnostics.disclaimer,
+        ),
+        provenance = (;
+            runner = "finite_bath_mps_runner",
+            runner_version = RUNNER_VERSION,
+            julia_version = string(VERSION),
+            itensors_version = string(Base.pkgversion(ITensors)),
+            itensormps_version = string(Base.pkgversion(ITensorMPS)),
+            active_project_path = active_project,
+            manifest_path = manifest,
+            project_toml_sha256 = source_sha256(active_project),
+            manifest_toml_sha256 = source_sha256(manifest),
+            runner_source_sha256 = source_sha256(@__FILE__),
+            purification_source_sha256 =
+                source_sha256(joinpath(@__DIR__, "finite_bath_purification.jl")),
+            observables_source_sha256 =
+                source_sha256(joinpath(@__DIR__, "finite_bath_observables.jl")),
+            model_definition_sha256 =
+                source_sha256(joinpath(@__DIR__, "..", "model.json")),
+            bath_artifact_file_sha256 =
+                String(request.payload["bath_artifact_file_sha256"]),
+            krylov_expansion_dim = settings.krylov_expansion_dim,
+            expansion_policy =
+                settings.krylov_expansion_dim == 0 ?
+                "tdvp_only" : "explicit_global_krylov",
+        ),
+    )
+end
+
+function atomic_write_json(path, value)
+    directory = dirname(abspath(path))
+    isdir(directory) || throw(ArgumentError("output directory does not exist"))
+    temporary, io = mktemp(directory; cleanup = false)
+    published = false
+    try
+        JSON3.write(io, value)
+        write(io, '\n')
+        flush(io)
+        ccall(:fsync, Cint, (Cint,), fd(io)) == 0 ||
+            error("fsync failed for temporary result")
+        close(io)
+        Base.Filesystem.rename(temporary, path)
+        published = true
+        directory_fd = ccall(:open, Cint, (Cstring, Cint), directory, 0)
+        directory_fd >= 0 || error("cannot open output directory for fsync")
+        try
+            ccall(:fsync, Cint, (Cint,), directory_fd) == 0 ||
+                error("fsync failed for output directory")
+        finally
+            ccall(:close, Cint, (Cint,), directory_fd)
+        end
+    finally
+        isopen(io) && close(io)
+        !published && ispath(temporary) && rm(temporary; force = true)
+    end
+    return nothing
+end
+
+function main(args = ARGS)
+    length(args) == 2 ||
+        throw(ArgumentError("usage: finite_bath_mps_runner.jl INPUT.json OUTPUT.json"))
+    input_path, output_path = abspath.(args)
+    println("Reading validated MPS request: $input_path")
+    flush(stdout)
+    request_started = time_ns()
+    request = read_request(input_path)
+    request_finished = time_ns()
+    println(
+        "Running finite-bath MPS: n_bath=$(length(request.parameters.epsilon)), " *
+        "beta=$(request.beta), tau_points=$(length(request.tau))",
+    )
+    flush(stdout)
+    settings = request.settings
+    result = finite_bath_observables(
+        request.parameters;
+        beta = request.beta,
+        tau = request.tau,
+        time_step = settings.time_step,
+        cutoff = settings.cutoff,
+        maxdim = settings.maxdim,
+        krylov_expansion_dim = settings.krylov_expansion_dim,
+        progress = true,
+    )
+    evolution_finished = time_ns()
+    base_profile = (;
+        phase_timings_seconds = (;
+            request_validation =
+                (request_finished - request_started) / 1.0e9,
+            context_and_evolution =
+                (evolution_finished - request_finished) / 1.0e9,
+            result_serialization = 0.0,
+        ),
+        julia_threads = Threads.nthreads(),
+        blas_threads = BLAS.get_num_threads(),
+        blas_vendor = string(BLAS.vendor()),
+        julia_version = string(VERSION),
+        peak_rss_bytes = Sys.maxrss(),
+        actual_mpo_link_dimensions =
+            result.diagnostics.mpo_link_dimensions,
+    )
+    assembly_started = time_ns()
+    output = make_output(request, result, base_profile)
+    assembly_finished = time_ns()
+    profiling = merge(
+        base_profile,
+        (;
+            phase_timings_seconds = merge(
+                base_profile.phase_timings_seconds,
+                (;
+                    result_serialization =
+                        (assembly_finished - assembly_started) / 1.0e9,
+                ),
+            ),
+        ),
+    )
+    output = make_output(request, result, profiling)
+    validate_finite_tree(output)
+    atomic_write_json(output_path, output)
+    println("Published validated MPS result: $output_path")
+    flush(stdout)
+    return nothing
+end
+
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    main()
+end

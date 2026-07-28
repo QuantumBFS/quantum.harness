@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "model_id": "challenge-81-spinful-anderson-semicircular",
+  "parameters": {
+    "D": 1.0,
+    "U": 0.8,
+    "Gamma": 0.1,
+    "epsilon_d": -0.4,
+    "mu": 0.0
+  },
+  "assertions": {
+    "spin_symmetric": true,
+    "grand_canonical": true,
+    "spin_qn_enabled": false
+  },
+  "conventions": {
+    "hamiltonian": "K = (epsilon_d-mu) sum_sigma n_dsigma + U n_dup n_ddown + sum_k,sigma (epsilon_k-mu) n_ksigma + sum_k,sigma V_k (d_sigma^dag c_ksigma + h.c.)",
+    "green_function": "G_sigma(tau) = -Tr[exp(-(beta-tau)K) d_sigma exp(-tau K) d_sigma^dag] / Z",
+    "hybridization": "Gamma(omega) = pi * sum_k V_k^2 * delta(omega - epsilon_k)",
+    "quadrature": "Gauss-Chebyshev quadrature of the second kind",
+    "target_continuum": "Gamma_target(omega) = gamma * sqrt(1 - (omega / bandwidth)^2) for |omega| <= bandwidth; 0 otherwise",
+    "ordering": "k = 1..n_bath; epsilon in descending order",
+    "epsilon": "bandwidth * cos(k * pi / (n_bath + 1))",
+    "V_squared": "gamma * bandwidth / (n_bath + 1) * sin(k * pi / (n_bath + 1))^2",
+    "gamma_normalization": "pi * sum_k V_k^2 = pi * gamma * bandwidth / 2"
+  }
+}

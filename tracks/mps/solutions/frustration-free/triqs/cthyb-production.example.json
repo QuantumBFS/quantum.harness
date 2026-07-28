@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "cthyb_production_configuration",
+  "production_ready": false,
+  "scientific_comparison": false,
+  "hybridization": {
+    "representation": "delta_iw_hdf5",
+    "file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "convention": "Gamma(omega) = -Im Delta^R(omega)"
+  },
+  "random": {
+    "master_seed": 810000,
+    "chain_seeds": [810001, 810002, 810003, 810004]
+  },
+  "monte_carlo": {
+    "warmup_cycles": 1000,
+    "measurement_cycles": 10000,
+    "cycle_length": 50,
+    "max_time_seconds": 3600
+  },
+  "autocorrelation": {
+    "method": "integrated_autocorrelation",
+    "minimum_effective_samples": 1000,
+    "maximum_integrated_time": 100.0
+  },
+  "tau_grid": [0.0, 4.0, 8.0, 12.0, 16.0],
+  "runtime": {
+    "mpi_ranks": 4,
+    "threads_per_rank": 1
+  }
+}
