@@ -1,5 +1,24 @@
 #pragma once
 
+// ============================================================
+// Two TFIM SSE decomposition strategies explored (git history):
+//
+// A) Standard Sandvik: bondWeight = J(1+σσ), no energy shift
+//    Operators: BOND + OFFDIAG (no CONST)
+//    Update: diagonal + cluster (union-find)
+//    Energy: E = J·Nb - ⟨n⟩/β
+//    Issue: OFFDIAG count explodes (no removal mechanism)
+//
+// B) Reference energy-shift (current): bondWeight = -(Jσσ+E_shift)
+//    Operators: BOND + CONST (diagonal) + OFFDIAG (line update toggle)
+//    Update: diagonal + line update (sse_new port)
+//    Energy: E = -⟨n⟩/β - E_shift·Nb + h·N     [matches ED <0.5%]
+//    Issue: m2 too low in ordered phase (shift inverts weight landscape)
+//    Rationale: Challenge 148 primary observable is critical field h_c
+//    from Q_L and ξ/L — energy accuracy is the key requirement.
+// ============================================================
+
+
 #include "lattice.hpp"
 #include <cstddef>
 #include <random>
