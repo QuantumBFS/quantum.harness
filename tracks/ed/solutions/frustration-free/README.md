@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Team name** | frustration-free |
-| **Members** | `jiangweiqi001`, `desitterf`, `ChS-YHWH` |
+| **Members** | 蒋玮琪 (`jiangweiqi001`), 陈硕 (`ChS-YHWH`), 马追景 (`desitterf`) |
 
 ## Challenge
 

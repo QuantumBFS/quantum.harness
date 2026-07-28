@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "papers": [
+    {
+      "name": "2606.02930v1.pdf",
+      "title": "Fast Tensor Network Imaginary Time Evolution by Implicit Stepping on Logarithmic Grids",
+      "url": "https://arxiv.org/pdf/2606.02930v1",
+      "size": 533730,
+      "sha256": "edf46c58060493e05bff05133f3d768c099576241ce8c65f672b89b18fa4eef8"
+    },
+    {
+      "name": "2107.13941v1.pdf",
+      "title": "Minimally Entangled Typical Thermal States Algorithms for Finite Temperature Matsubara Green Functions",
+      "url": "https://arxiv.org/pdf/2107.13941v1",
+      "size": 1542354,
+      "sha256": "f3afb4567cdaf4000eb96d76b65dfcd29bc764a9f43bd0c6bf6a9f15b6988f5f"
+    },
+    {
+      "name": "2208.10972v1.pdf",
+      "title": "Time-dependent variational principle with controlled bond expansion for matrix product states",
+      "url": "https://arxiv.org/pdf/2208.10972v1",
+      "size": 4014760,
+      "sha256": "4a4ba37d7e6dcfad569e671bb16286eb4facc8be6837b06ab27d5d03d996f93a"
+    },
+    {
+      "name": "2005.06104v3.pdf",
+      "title": "Time Dependent Variational Principle with Ancillary Krylov Subspace",
+      "url": "https://arxiv.org/pdf/2005.06104v3",
+      "size": 1329064,
+      "sha256": "6227f1e9e1768bba576429b79b91a8a3e173a80ef580276b79f1bc97d03f8f8c"
+    },
+    {
+      "name": "2012.01424v1.pdf",
+      "title": "Efficient mapping for Anderson impurity problems with matrix product states",
+      "url": "https://arxiv.org/pdf/2012.01424v1",
+      "size": 1169296,
+      "sha256": "f1a9e0fb5dec236667309788c4cb344b432ad649c97e92da1208c6a0e4994e07"
+    },
+    {
+      "name": "2507.05580v2.pdf",
+      "title": "Tensor Network Algorithm to Solve Polaron Impurity Problems",
+      "url": "https://arxiv.org/pdf/2507.05580v2",
+      "size": 926117,
+      "sha256": "ce61c6a9c09805e2cc08655b2b327e7f081fc393105b08df326612af528234a1"
+    },
+    {
+      "name": "1901.05824v3.pdf",
+      "title": "Time-evolution methods for matrix-product states",
+      "url": "https://arxiv.org/pdf/1901.05824v3",
+      "size": 5199320,
+      "sha256": "1ce466ed9ec3091ee1a8548cf42a84551584cd5d6f13b0d32a418fcdc981fbb9"
+    },
+    {
+      "name": "Grundner_2025.pdf",
+      "title": "Tensor Network Impurity Solvers: Simulating Quantum Materials",
+      "url": "https://edoc.ub.uni-muenchen.de/35102/1/Grundner_Martin.pdf",
+      "size": 4118680,
+      "sha256": "39dcaacfe1bf449da2977e6d8c03dd89b98cdc0e710bd549ed9594d19fd42d73"
+    }
+  ],
+  "repositories": [
+    {
+      "name": "ITensorMPS.jl",
+      "url": "https://github.com/ITensor/ITensorMPS.jl.git",
+      "commit": "7ce812c42bfedcb3da1c250fdd5f19cb20394d4d"
+    },
+    {
+      "name": "CBEAlgorithms",
+      "url": "https://github.com/ShimpeiGoto/CBEAlgorithms.git",
+      "commit": "2f04050d493b9a6174a2fc5ce3c9842f656aaf69"
+    },
+    {
+      "name": "MPSDynamics.jl",
+      "url": "https://github.com/shareloqs/MPSDynamics.jl.git",
+      "commit": "ba5593b593e519f6eaf1424694275283b49b851e"
+    },
+    {
+      "name": "triqs",
+      "url": "https://github.com/TRIQS/triqs.git",
+      "commit": "677f65c02bc6c2101c106dae74868e76876322bd"
+    },
+    {
+      "name": "cthyb",
+      "url": "https://github.com/TRIQS/cthyb.git",
+      "commit": "5140cd8332e37c93ba79b088f6771b35b9009023"
+    }
+  ]
+}
