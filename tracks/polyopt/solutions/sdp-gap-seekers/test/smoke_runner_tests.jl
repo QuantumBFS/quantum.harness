@@ -41,6 +41,8 @@ include(joinpath(
         "28",
         "--expected-gap-dimension",
         "4",
+        "--expected-gamma",
+        "1//4",
         "--time-limit-seconds",
         "600",
         "--threads",
@@ -49,6 +51,7 @@ include(joinpath(
     @test options.expected_basis_family == "bare_weight_one"
     @test options.expected_positive_dimension == 28
     @test options.expected_gap_dimension == 4
+    @test options.expected_gamma == "1//4"
     @test options.time_limit_seconds == 600
     @test options.threads == 4
     @test_throws ArgumentError parse_args([
@@ -59,4 +62,15 @@ include(joinpath(
         "--output",
         "result.toml",
     ])
+
+    gamma_runmeta = Dict(
+        "setup" => Dict(
+            "gamma" => Dict("canonical" => "1//4"),
+        ),
+    )
+    @test validate_expected_gamma(gamma_runmeta, "1//4") == "1//4"
+    @test_throws ErrorException validate_expected_gamma(
+        gamma_runmeta,
+        "2//1",
+    )
 end

@@ -28,6 +28,7 @@ function usage()
             --expected-basis-family <family> \\
             --expected-positive-dimension <n> \\
             --expected-gap-dimension <n> \\
+            --expected-gamma <canonical-rational> \\
             [--time-limit-seconds 1800] [--threads 16]
 
         Reads a previously verified Square direct-primal MOF, validates its
@@ -62,6 +63,7 @@ function parse_args(args::Vector{String})
             "--expected-basis-family",
             "--expected-positive-dimension",
             "--expected-gap-dimension",
+            "--expected-gamma",
             "--time-limit-seconds",
             "--threads",
         )
@@ -80,6 +82,7 @@ function parse_args(args::Vector{String})
         "--expected-basis-family",
         "--expected-positive-dimension",
         "--expected-gap-dimension",
+        "--expected-gamma",
     )
         haskey(values, required) ||
             throw(ArgumentError("$required is required"))
@@ -105,6 +108,7 @@ function parse_args(args::Vector{String})
             values["--expected-gap-dimension"],
             "--expected-gap-dimension",
         ),
+        expected_gamma=values["--expected-gamma"],
         time_limit_seconds=time_limit,
         threads=threads,
     )
@@ -229,6 +233,7 @@ function validate_input(
     expected_basis_family::String,
     expected_positive_dimension::Int,
     expected_gap_dimension::Int,
+    expected_gamma::String,
 )
     isfile(model_path) ||
         throw(ArgumentError("MOF does not exist: $model_path"))
@@ -245,8 +250,7 @@ function validate_input(
         error("MOF SHA-256 does not match runmeta")
     runmeta["setup"]["model"] == "square-j1-j2" ||
         error("runmeta model is not square-j1-j2")
-    runmeta["setup"]["gamma"]["canonical"] == "0//1" ||
-        error("first smoke solve is locked to gamma=0")
+    validate_expected_gamma(runmeta, expected_gamma)
     runmeta["setup"]["g_j2_over_j1"]["canonical"] == "1//2" ||
         error("smoke solve is locked to g=1/2")
     runmeta["setup"]["degree_d"] == 2 ||
@@ -269,6 +273,13 @@ function validate_input(
     basis["gap_dimension"] == expected_gap_dimension ||
         error("gap basis dimension differs from the explicit launch expectation")
     return runmeta, actual_sha256
+end
+
+function validate_expected_gamma(runmeta, expected_gamma::String)
+    actual_gamma = runmeta["setup"]["gamma"]["canonical"]
+    actual_gamma == expected_gamma ||
+        error("runmeta gamma differs from the explicit launch expectation")
+    return actual_gamma
 end
 
 function write_result(path::String, result)
@@ -298,6 +309,12 @@ function main(args::Vector{String}=ARGS)
         "runmeta_path" => options.runmeta,
         "time_limit_seconds" => options.time_limit_seconds,
         "threads" => options.threads,
+        "launch_expectation" => Dict(
+            "basis_family" => options.expected_basis_family,
+            "positive_dimension" => options.expected_positive_dimension,
+            "gap_dimension" => options.expected_gap_dimension,
+            "gamma_canonical" => options.expected_gamma,
+        ),
         "runtime" => Dict(
             "julia_version" => string(VERSION),
             "julia_executable" => Base.julia_cmd().exec[1],
@@ -323,6 +340,7 @@ function main(args::Vector{String}=ARGS)
             options.expected_basis_family,
             options.expected_positive_dimension,
             options.expected_gap_dimension,
+            options.expected_gamma,
         )
         result["mof_sha256"] = mof_sha256
         result["input_assembly_sha256"] =

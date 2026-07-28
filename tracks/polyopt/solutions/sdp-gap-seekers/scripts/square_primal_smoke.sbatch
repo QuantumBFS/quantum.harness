@@ -64,6 +64,7 @@ julia \
     --expected-basis-family one_symbol_lift \
     --expected-positive-dimension 703 \
     --expected-gap-dimension 7 \
+    --expected-gamma 0//1 \
     --time-limit-seconds 3600 \
     --threads "${SLURM_CPUS_PER_TASK:-64}"
 solver_exit=$?

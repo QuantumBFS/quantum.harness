@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=xhacnormalb
-#SBATCH --job-name=square-rung-a-g0
+#SBATCH --job-name=square-rung-a
 #SBATCH --time=00:10:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=3800M
@@ -16,9 +16,20 @@ export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 
 cd "$SLURM_SUBMIT_DIR"
 
-SOURCE_BUNDLE="tracks/polyopt/solutions/sdp-gap-seekers/results/square-rung-a-g0-20260728-r1"
-SOURCE_POINT="${SOURCE_BUNDLE}/gamma-0"
-RUN_ID="square-rung-a-smoke-${SLURM_JOB_ID}"
+RUNG_A_POINT="${RUNG_A_POINT:-}"
+RUNG_A_GAMMA_CANONICAL="${RUNG_A_GAMMA_CANONICAL:-}"
+case "${RUNG_A_POINT}:${RUNG_A_GAMMA_CANONICAL}" in
+    "gamma-0:0//1"|"gamma-0p25:1//4"|"gamma-2:2//1")
+        ;;
+    *)
+        echo "invalid or missing Rung A point/gamma pair" >&2
+        exit 2
+        ;;
+esac
+
+SOURCE_BUNDLE="tracks/polyopt/solutions/sdp-gap-seekers/results/square-rung-a-probes-20260728-r2"
+SOURCE_POINT="${SOURCE_BUNDLE}/${RUNG_A_POINT}"
+RUN_ID="square-rung-a-${RUNG_A_POINT}-${SLURM_JOB_ID}"
 RUN_DIR="results/${RUN_ID}"
 RESULT_PATH="${RUN_DIR}/result.toml"
 SUBMIT_STDOUT="slurm-square-rung-a-${SLURM_JOB_ID}.out"
@@ -32,6 +43,7 @@ echo "[square-rung-a-sbatch] run_id=${RUN_ID}"
 echo "[square-rung-a-sbatch] host=$(hostname)"
 echo "[square-rung-a-sbatch] started=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "[square-rung-a-sbatch] source_point=${SOURCE_POINT}"
+echo "[square-rung-a-sbatch] gamma=${RUNG_A_GAMMA_CANONICAL}"
 echo "[square-rung-a-sbatch] cpus=${SLURM_CPUS_PER_TASK:-unavailable}"
 flush_output() {
     sync
@@ -64,6 +76,7 @@ julia \
     --expected-basis-family bare_weight_one \
     --expected-positive-dimension 28 \
     --expected-gap-dimension 4 \
+    --expected-gamma "${RUNG_A_GAMMA_CANONICAL}" \
     --time-limit-seconds 600 \
     --threads "${SLURM_CPUS_PER_TASK:-4}"
 solver_exit=$?

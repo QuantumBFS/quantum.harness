@@ -3,7 +3,11 @@
 include(joinpath(@__DIR__, "build_square_primal_mof.jl"))
 
 const RUNG_A_BASIS_SPEC = StructuredBasisSpec(:bare_weight_one, 1)
-const RUNG_A_GAMMAS = (BigInt(0) // BigInt(1),)
+const RUNG_A_GAMMAS = (
+    BigInt(0) // BigInt(1),
+    BigInt(1) // BigInt(4),
+    BigInt(2) // BigInt(1),
+)
 const RUNG_A_BUILDER_RELATIVE_PATH =
     "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_square_rung_a_mof.jl"
 
@@ -16,7 +20,7 @@ function rung_a_usage()
             --output tracks/polyopt/solutions/sdp-gap-seekers/results/<run-id>
 
         Builds and independently reloads the solver-free Square J1-J2 Rung A
-        gamma=0 model:
+        models at gamma in {0,1/4,2}:
           g=1/2, L=1, d=2, unrestricted,
           positive basis = bare_weight_one/v1 (dimension 28),
           gap basis = bare_weight_one/v1 (dimension 4).

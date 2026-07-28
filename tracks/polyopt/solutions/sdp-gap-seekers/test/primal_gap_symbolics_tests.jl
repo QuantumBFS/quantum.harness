@@ -242,6 +242,49 @@ end
     @test JuMP.constraint_object(
         jump_model.gap_constraint,
     ).set.side_dimension == 4
+
+    for (
+        gamma,
+        expected_problem_sha256,
+        expected_coefficient_map_sha256,
+        expected_assembly_sha256,
+    ) in (
+        (
+            1//4,
+            "8ba2500719e5a95631146873a6dbb66f5c2add1fe03f09b8c85eb88df194b1d5",
+            "34b83db3b9520bebe5521696dc55f7be68faea8e88089f854488a809588be744",
+            "2b39589d6f06c6ae4c821ef07ec7529673065fb2f2f4b66afe9039f2b25ed034",
+        ),
+        (
+            2//1,
+            "a1cf3ae5128fa3b1b72d2277acb206b171d8932d0ac17ade52abcb984d73d2ab",
+            "a59c801946409c14240456c08f5e04b5e4fdaf4cbff8100dbdd7fe20589b13cd",
+            "581b6835a9543604889b01a6c5a3bae2d080d02705fd2641dd3ba135d4237243",
+        ),
+    )
+        positive_problem = GapProblem(
+            square_patch_geometry(1),
+            square_j1j2_model(1//2),
+            gamma,
+            2;
+            basis_mode=:structured,
+            basis_spec=StructuredBasisSpec(:bare_weight_one, 1),
+        )
+        positive_assembly = assemble_primal_gap(positive_problem)
+        @test length(positive_assembly.moments) == 358
+        @test positive_assembly.moments_sha256 ==
+              "2e54406141ab180f99002dcab8486c4552db05543656ed43c9553d41cd8a90f2"
+        @test positive_assembly.problem_sha256 ==
+              expected_problem_sha256
+        @test positive_assembly.coefficient_map_sha256 ==
+              expected_coefficient_map_sha256
+        @test positive_assembly.assembly_sha256 ==
+              expected_assembly_sha256
+        @test positive_assembly.positive_basis.sha256 ==
+              assembled.positive_basis.sha256
+        @test positive_assembly.gap_basis.sha256 ==
+              assembled.gap_basis.sha256
+    end
 end
 
 @testset "exactness and Hermitian matrix relations" begin

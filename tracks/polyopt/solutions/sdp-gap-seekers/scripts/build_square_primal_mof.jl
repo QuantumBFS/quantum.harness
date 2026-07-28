@@ -228,7 +228,8 @@ end
 function point_label(gamma::Rational)
     gamma == 0 && return "gamma-0"
     gamma == 1 // 4 && return "gamma-0p25"
-    error("unratified gamma reached point labelling")
+    gamma == 2 // 1 && return "gamma-2"
+    error("undeclared gamma reached point labelling")
 end
 
 function build_point(
