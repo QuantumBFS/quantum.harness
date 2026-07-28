@@ -178,3 +178,19 @@ preserved `result.toml` SHA-256 is
 Close this tuning route and move to an exact model-level involution:
 `X↔Z, Y↦−Y`, a π spin rotation that commutes with the already-proved
 conjugation symmetry.
+
+## 2026-07-29 — spin-axis truth r1 corrects a count assumption
+
+Slurm job `22988362` completed the dedicated exact test in 1:48 with 83 passes
+and one failed count expectation. Every mathematical gate passed, including
+31,810 source coefficient covariance checks, 8,460 stable plus/minus
+cross-entry zero checks, Hamiltonian and equality-space invariance, all
+predicted block splits, and the 16,707-entry JuMP cone reconstruction.
+
+The failed assertion expected at least one sign-odd fixed scalar moment.
+Computational-basis conjugation has already removed every odd-Y scalar moment,
+while the spin-axis sign is `(-1)^(number of Y factors)`, so the correct exact
+count is zero. Change only that expectation and add an explicit orbit-count
+progress line before r2. The r1 `test.log` SHA-256 is
+`6fd3e823ca20b335dbe779b4cd7d3b3be1993d93e5dfe0cbc32ffdd37746cba6`;
+peak process RSS was 839,724 KiB.

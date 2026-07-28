@@ -38,6 +38,12 @@ with `s(k)=-1` is exactly zero. The implementation constructs this signed
 orbit quotient over the complete 16,660-moment conjugation-even inventory and
 checks closure and `S²=identity` exactly.
 
+In this particular sequential quotient, all retained scalar moments already
+have even Y parity, so the exhaustive inventory contains zero sign-odd fixed
+moments. The implementation retains the signed fixed-point gate because it is
+part of the general exact action, but the reduction here comes from two-member
+X--Z orbits.
+
 This restriction preserves feasibility in both directions. A feasible
 unrestricted functional can be averaged with its S transform. Conversely,
 the signed-orbit coordinates reconstruct an S-invariant functional in the

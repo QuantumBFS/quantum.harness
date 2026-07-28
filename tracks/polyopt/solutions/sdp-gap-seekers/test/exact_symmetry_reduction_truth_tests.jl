@@ -175,7 +175,7 @@ using JuMP
     @test spin_axis_report.spin_axis_moments <
           spin_axis_report.conjugation_real_moments
     @test spin_axis_report.eliminated_spin_axis_moments > 0
-    @test spin_axis_report.forced_zero_moments > 0
+    @test spin_axis_report.forced_zero_moments == 0
     @test spin_axis_report.positive_block_dimensions ==
           [72, 36, 81, 36, 45, 73, 36, 81, 36, 45]
     @test spin_axis_report.gap_block_dimensions == [1, 1]
@@ -204,6 +204,17 @@ using JuMP
     )
     @test spin_axis_jump_model.assembly_sha256 ==
           spin_axis_reduced.assembly_sha256
+    println(
+        "[spin-axis-truth] moments=",
+        spin_axis_report.spin_axis_moments,
+        ", eliminated=",
+        spin_axis_report.eliminated_spin_axis_moments,
+        ", forced_zero=",
+        spin_axis_report.forced_zero_moments,
+        ", psd_entries=",
+        spin_axis_report.real_psd_triangle_entries,
+    )
+    flush(stdout)
 end
 
 @testset "V4 character multiplication and projection" begin

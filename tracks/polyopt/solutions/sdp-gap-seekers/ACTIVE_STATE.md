@@ -116,4 +116,14 @@ Updated: 2026-07-29 UTC.
   character blocks, and exactly splits every stable block into its
   involution eigenspaces. The next step is a source-only inventory of its
   moment orbits and row-space splits before implementing a new derived model.
+- Spin-axis truth attempt r1, Slurm job `22988362`, passed 83 of 84 assertions.
+  Hamiltonian invariance, all 31,810 coefficient covariance checks, all 8,460
+  stable cross-block zero checks, the predicted block dimensions, and the
+  JuMP cone reconstruction passed. The sole failure was a test expectation
+  that at least one scalar moment would be sign-odd and fixed; the exhaustive
+  result was zero because conjugation realification already retained only
+  even-Y scalar moments. No theorem or coefficient gate failed. The corrected
+  test requires zero and prints the exact orbit count on r2. Peak process RSS
+  was 839,724 KiB; `test.log` SHA-256 is
+  `6fd3e823ca20b335dbe779b4cd7d3b3be1993d93e5dfe0cbc32ffdd37746cba6`.
 - No decision-changing user or resource need is open.
