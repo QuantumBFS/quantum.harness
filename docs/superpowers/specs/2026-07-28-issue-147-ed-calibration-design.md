@@ -135,7 +135,7 @@ manifests, hashes, and the recovered total state count.
 ## Compute placement and execution order
 
 Native Windows runs only the small correctness tests. The 4x4 full spectrum
-runs on a CPU partition on SCNet; no GPU is requested.
+runs as a CPU-only job on a live-selected SCNet partition; no GPU is requested.
 
 Before submission, select the account-specific SCNet profile, run the SSH
 precheck, and probe live partitions. The partition is chosen only after that
