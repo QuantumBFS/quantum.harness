@@ -77,6 +77,22 @@ double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omeg
 double compute_berry_curvature_response_ed(const Lattice& lattice, double J,
                                            double Omega, double theta);
 
+// Rydberg laser-phase TFIM (complex Hermitian for φ≠0).
+// H = -J Σ ZZ - Ω Σ (cos φ X_i + sin φ Y_i).
+// At φ=0, reduces to standard real symmetric TFIM.
+std::vector<std::complex<double>> build_rydberg_hamiltonian(
+    const Lattice& lattice, double J, double Omega, double phi);
+
+// Rydberg-parameterised Lanczos solver.
+// Delegates to solve_ground_state_lanczos with the Rydberg builder.
+GroundState solve_ground_state_rydberg(const Lattice& lattice, double J,
+                                        double Omega, double phi);
+
+// Compute Berry curvature on full (phi, Omega) grid for Rydberg parameterisation.
+// Reinterprets ParamGrid.theta_values as phi_values.
+std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid_rydberg(
+    const Lattice& lattice, double J, const ParamGrid& grid);
+
 // Exact finite-size 1D oracle for an even periodic spin chain. The ground state
 // lies in the antiperiodic Jordan-Wigner sector k_m=(2m+1)pi/N.
 double tfim_chain_berry_curvature_density_finite(std::size_t sites, double J,

@@ -74,6 +74,57 @@ std::vector<cplx> build_kolodrubetz_hamiltonian(
 }
 
 // ──────────────────────────────────────────────────────────────
+// Rydberg laser-phase Hamiltonian builder
+// ──────────────────────────────────────────────────────────────
+
+std::vector<cplx> build_rydberg_hamiltonian(
+    const Lattice& lattice, double J, double Omega, double phi)
+{
+    if (!std::isfinite(J) || !std::isfinite(Omega) || !std::isfinite(phi))
+        throw std::invalid_argument(
+            "build_rydberg_hamiltonian: couplings and angle must be finite");
+    const int dim = checked_dimension(lattice, 65536, "build_rydberg_hamiltonian");
+    const int N = static_cast<int>(lattice.N);
+    const int Nb = static_cast<int>(lattice.bonds.size());
+
+    std::vector<cplx> H(static_cast<std::size_t>(dim) * dim, cplx(0, 0));
+
+    // Diagonal: -J Σ ZZ
+    for (int st = 0; st < dim; ++st) {
+        for (int bi = 0; bi < Nb; ++bi) {
+            int i = static_cast<int>(lattice.bonds[bi].i);
+            int j = static_cast<int>(lattice.bonds[bi].j);
+            int si = (st >> i) & 1, sj = (st >> j) & 1;
+            H[st*dim + st] += -J * (1 - 2*si) * (1 - 2*sj);
+        }
+    }
+
+    // Off-diagonal: -Ω Σ (cos φ X_i + sin φ Y_i)
+    // X: connects |s⟩ ↔ |s⊕e_i⟩ with real amplitude 1
+    // Y: connects with ±i depending on spin:
+    //   s_i=0: ⟨1|Y|0⟩ = i   → -iΩ sin φ
+    //   s_i=1: ⟨0|Y|1⟩ = -i  → +iΩ sin φ
+    // Total: -Ω (cos φ + i·(-1)^{s_i}·sin φ) = -Ω exp(i·(-1)^{s_i}·φ)
+    double cphi = std::cos(phi), sphi = std::sin(phi);
+    for (int si_idx = 0; si_idx < N; ++si_idx) {
+        int m = 1 << si_idx;
+        for (int st = 0; st < dim; ++st) {
+            int si = (st >> si_idx) & 1;
+            cplx amplitude;
+            if (si == 0) {
+                // s_i=0 → ⟨1|H|0⟩ = -Ω(cos φ + i sin φ) = -Ω exp(i·φ)
+                amplitude = cplx(-Omega * cphi, -Omega * sphi);
+            } else {
+                // s_i=1 → ⟨0|H|1⟩ = -Ω(cos φ - i sin φ) = -Ω exp(-i·φ)
+                amplitude = cplx(-Omega * cphi, Omega * sphi);
+            }
+            H[(st ^ m)*dim + st] += amplitude;
+        }
+    }
+    return H;
+}
+
+// ──────────────────────────────────────────────────────────────
 // Linear algebra helpers
 // ──────────────────────────────────────────────────────────────
 
@@ -361,6 +412,122 @@ GroundState solve_ground_state(
     const Lattice& lattice, double J, double Omega, double theta)
 {
     return solve_ground_state_lanczos(lattice, J, Omega, theta);
+}
+
+// ──────────────────────────────────────────────────────────────
+// Rydberg solver and grid
+// ──────────────────────────────────────────────────────────────
+
+GroundState solve_ground_state_rydberg(
+    const Lattice& lattice, double J, double Omega, double phi)
+{
+    const int dim = checked_dimension(lattice, 1024, "solve_ground_state_rydberg");
+    auto Hmat = build_rydberg_hamiltonian(lattice, J, Omega, phi);
+
+    // Dense Lanczos (same algorithm as Kolodrubetz dense path)
+    int m_max = 150;
+    if (m_max > dim) m_max = dim;
+
+    std::vector<std::vector<cplx>> Q;
+    Q.reserve(m_max + 1);
+    std::mt19937 rng(42);
+    std::uniform_real_distribution<double> dist(-1, 1);
+    Q.push_back(std::vector<cplx>(dim));
+    double nr = 0;
+    for (int i = 0; i < dim; ++i) {
+        Q[0][i] = cplx(dist(rng), dist(rng));
+        nr += std::norm(Q[0][i]);
+    }
+    nr = std::sqrt(nr);
+    for (auto& z : Q[0]) z /= nr;
+
+    std::vector<double> alpha, beta;
+    alpha.reserve(m_max); beta.reserve(m_max);
+    beta.push_back(0);
+    std::vector<cplx> w(dim);
+    int m = 0;
+    bool converged = false;
+
+    for (int k = 0; k < m_max; ++k) {
+        cplx_matvec(Hmat.data(), dim, Q[k].data(), w.data());
+        double ak = std::real(cplx_dot(Q[k], w, dim));
+        alpha.push_back(ak);
+        if (k > 0)
+            for (int i = 0; i < dim; ++i) w[i] -= beta[k] * Q[k-1][i];
+        for (int i = 0; i < dim; ++i) w[i] -= ak * Q[k][i];
+        for (int pass = 0; pass < 2; ++pass)
+            for (int j = 0; j <= k; ++j) {
+                cplx proj = cplx_dot(Q[j], w, dim);
+                for (int i = 0; i < dim; ++i) w[i] -= proj * Q[j][i];
+            }
+        double bkp1 = std::sqrt(cplx_abs_sq(w, dim));
+        beta.push_back(bkp1);
+        m = k + 1;
+        const bool breakdown = bkp1 <= 1e-14;
+        if (m >= 2 && (m % 5 == 0 || breakdown || m == m_max)) {
+            DenseSymMatrix T(static_cast<std::size_t>(m));
+            for (int i = 0; i < m; ++i) {
+                T(i, i) = alpha[i];
+                if (i > 0) { T(i, i-1) = beta[i]; T(i-1, i) = beta[i]; }
+            }
+            auto eigsys = jacobi_eigen(T, 50, 1e-12);
+            double residual = bkp1 * std::abs(eigsys.eigenvectors[(m-1) * m]);
+            converged = residual <= 1e-11 * (1.0 + std::abs(eigsys.eigenvalues[0]));
+        }
+        if (converged || breakdown) break;
+        Q.push_back(std::vector<cplx>(dim));
+        for (int i = 0; i < dim; ++i) Q[k+1][i] = w[i] / bkp1;
+    }
+
+    DenseSymMatrix Tm(static_cast<std::size_t>(m));
+    for (int i = 0; i < m; ++i) {
+        Tm(i, i) = alpha[i];
+        if (i > 0) { Tm(i, i-1) = beta[i]; Tm(i-1, i) = beta[i]; }
+    }
+    auto eigsys = jacobi_eigen(Tm, 50, 1e-12);
+    double E0 = eigsys.eigenvalues[0];
+    std::vector<cplx> psi0(dim, cplx(0,0));
+    for (int j = 0; j < m; ++j) {
+        double y0j = eigsys.eigenvectors[j * m];
+        for (int i = 0; i < dim; ++i) psi0[i] += y0j * Q[j][i];
+    }
+    nr = std::sqrt(cplx_abs_sq(psi0, dim));
+    if (nr > 1e-30)
+        for (auto& z : psi0) z /= nr;
+    std::vector<cplx> Hpsi(dim);
+    cplx_matvec(Hmat.data(), dim, psi0.data(), Hpsi.data());
+    E0 = std::real(cplx_dot(psi0, Hpsi, dim));
+    double residual2 = 0.0;
+    for (int i = 0; i < dim; ++i) residual2 += std::norm(Hpsi[i] - E0 * psi0[i]);
+
+    GroundState result;
+    result.eigenvector = std::move(psi0);
+    result.dim = dim; result.E0 = E0;
+    result.residual = std::sqrt(residual2);
+    result.converged = result.residual <= 1e-10 * (1.0 + std::abs(E0));
+    return result;
+}
+
+std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid_rydberg(
+    const Lattice& lattice, double J, const ParamGrid& grid)
+{
+    const int n1 = static_cast<int>(grid.theta_values.size()); // interpreted as phi
+    const int n2 = static_cast<int>(grid.omega_values.size());
+    if (n1 < 2 || n2 < 2)
+        throw std::invalid_argument(
+            "compute_berry_curvature_grid_rydberg: each axis needs at least two points");
+    std::vector<std::vector<GroundState>> gs(n1, std::vector<GroundState>(n2));
+    for (int i = 0; i < n1; ++i) for (int j = 0; j < n2; ++j)
+        gs[i][j] = solve_ground_state_rydberg(
+            lattice, J, grid.omega_values[j], grid.theta_values[i]);
+    std::vector<std::vector<BerryCurvature>> r(n1-1, std::vector<BerryCurvature>(n2-1));
+    for (int i = 0; i < n1-1; ++i) for (int j = 0; j < n2-1; ++j) {
+        const double dphi     = grid.theta_values[i + 1] - grid.theta_values[i];
+        const double dOmega   = grid.omega_values[j + 1] - grid.omega_values[j];
+        r[i][j] = fhs_curvature(gs[i][j], gs[i+1][j], gs[i+1][j+1], gs[i][j+1],
+                                dphi, dOmega);
+    }
+    return r;
 }
 
 // ──────────────────────────────────────────────────────────────
