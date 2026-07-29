@@ -10,7 +10,8 @@ automatic Gamma extension, or new susceptibility method is included.
 The primary deliverables are:
 
 1. reproduce `Gamma_c(sigma=1.75)`;
-2. extract `z` with explicit finite-size correction sensitivity;
+2. extract `z` from five common-field gap sizes with explicit finite-size
+   correction sensitivity;
 3. keep MPO, MPS, and finite-size uncertainties quantitatively separate.
 
 ## Locked physics convention
@@ -146,8 +147,10 @@ stated explicitly as a limitation.
 ## Gap calculations and diagnostics
 
 At `Gamma_c_power`, optimize both parity sectors at `chi=128` for
-`L=32,64,128`. Historical states may seed initialization only after the
-existing provenance audit. Each sector records independently:
+`L=16,32,64,96,128`. The added `L=16` and `L=96` states turn the gap
+analysis into a genuine multi-size regression while retaining `L=32,64,128`
+as the original scaling backbone. Historical states may seed initialization
+only after the existing provenance audit. Each sector records independently:
 
 - energy and variance;
 - relative variance;
@@ -180,35 +183,55 @@ common-field values.
 
 ## Dynamical-exponent analysis
 
-The two-size diagnostics are
+For the five ordered sizes
 
 ```text
-z_eff(32,64)  = -log[Delta(64)/Delta(32)]/log(2),
-z_eff(64,128) = -log[Delta(128)/Delta(64)]/log(2).
+L_i = 16,32,64,96,128,
 ```
 
-These are reported separately from extrapolated sensitivities. With
-`z32=z_eff(32,64)` and `z64=z_eff(64,128)`, the power-correction result is an
-exact two-point sensitivity extrapolation of
+define four adjacent-pair effective exponents
 
 ```text
-z_eff(L,2L) = z_power + a/L,
-z_power = 2*z64 - z32.
+z_eff(L_i,L_(i+1))
+  = -log[Delta(L_(i+1))/Delta(L_i)] / log[L_(i+1)/L_i].
 ```
 
-The logarithmic result is an exact two-point sensitivity extrapolation of
+Associate each effective exponent with the geometric-mean scale
 
 ```text
-z_eff(L,2L) = z_log + a/log(L).
-
-t32 = 1/log(32), t64 = 1/log(64),
-z_log = (z64*t32 - z32*t64)/(t32-t64).
+L_eff,i = sqrt[L_i L_(i+1)].
 ```
 
-As for the critical-field drift, these are exact two-point evaluations with
-no residual degrees of freedom. The report gives `z_power`, `z_log`, their
-absolute spread, the two raw `z_eff` values, and all underlying gaps. It
-makes no correction-form selection or statistical-inference claim.
+This gives four `z_eff` values from all five gaps, including the non-doubling
+pairs `(64,96)` and `(96,128)`. The original doubling diagnostics
+`z_eff(16,32)`, `z_eff(32,64)`, and `z_eff(64,128)` remain explicitly
+identifiable.
+
+The primary power-correction regression is
+
+```text
+z_eff(L_eff) = z_power + a/L_eff.
+```
+
+The alternative logarithmic-correction regression is
+
+```text
+z_eff(L_eff) = z_log + a/log(L_eff).
+```
+
+Each two-parameter regression uses four effective-exponent points and has
+two residual degrees of freedom. The report gives `z_power`, `z_log`, their
+absolute spread, all four raw `z_eff` values, all five underlying gaps, and
+the residual RMS for each coordinate. A leave-`L=16`-out regression is
+reported as a small-size sensitivity check, not used to select a preferred
+form.
+
+Adjacent `z_eff` values share one underlying gap and are therefore
+correlated. In the absence of statistically calibrated per-gap error bars,
+the regressions are deterministic finite-size sensitivity analyses, not
+independent-sample statistical inference. No correction form is selected by
+agreement with literature.
+
 It also compares the two sensitivity values with Shiratani--Todo's published
 `sigma=7/4` power- and logarithmic-correction extrapolations, using a cited
 source value. Because Phase 8 reaches only `L=128`, this is a qualitative
@@ -247,7 +270,8 @@ These numerical errors are reported separately from:
 - crossing grid/interpolation resolution;
 - power-versus-log critical-field sensitivity;
 - power-versus-log `z` sensitivity;
-- the change from `z_eff(32,64)` to `z_eff(64,128)`.
+- the drift across all four adjacent-pair `z_eff` values and the
+  leave-`L=16`-out regression.
 
 No new `K=32` or `chi=256` calculation is automatic. A failed numerical
 gate stops for review rather than being absorbed into finite-size error.
@@ -285,17 +309,17 @@ The final analysis produces:
 
 The measured `L=64`, odd-sector, `chi=128` median is about five minutes.
 The earlier linear-size projection estimated roughly sixteen minutes per
-`L=128`, `chi=128` sector and about 3.6 GiB peak memory. Each sigma therefore
-contains:
+`L=128`, `chi=128` sector and about 3.6 GiB peak memory. The sigma=1.75 stage
+therefore contains:
 
 - two exploratory `L=128`, even, `chi=64` crossing cells;
-- six common-field `chi=128` cells across three sizes and two sectors.
+- ten common-field `chi=128` cells across five sizes and two sectors.
 
-This exceeds the harness's normal ten-minute local-compute threshold when
-serialized. Before execution, the planner must use the measured
-`sigma=1.75` crossing cells to update the estimate, run at bounded
-single-thread concurrency below 16 GiB, and stop after `sigma=1.75` for the
-required review.
+The projected serialized common-field campaign is roughly 1.5--2 local
+hours, dominated by `L=96,128`. This is an explicit local-only deviation from
+the harness's normal ten-minute threshold. Before execution, the planner
+must update the estimate from completed cells, run at bounded single-thread
+concurrency below 16 GiB, and preserve each checkpoint before proceeding.
 
 ## Acceptance
 
@@ -303,8 +327,9 @@ Phase 8 succeeds for a sigma only if:
 
 1. the fixed L=64/128 endpoints have a strict sign change;
 2. interpolation uses only those two endpoints;
-3. all six common-field parity-sector states pass the locked diagnostics;
-4. all three gaps are positive;
-5. both raw `z_eff` values and both correction sensitivities are reported;
+3. all ten common-field parity-sector states pass the locked diagnostics;
+4. all five gaps are positive;
+5. all four adjacent-pair `z_eff` values and both correction regressions are
+   reported;
 6. MPO, MPS, and finite-size uncertainties are reported separately;
 7. no unapproved Gamma, sigma, K, chi, or size is introduced.
