@@ -22,6 +22,9 @@ from .tower import (
 
 _M_VALUES = (-2, -1, 0, 1, 2)
 _LOG_COMPLEX128_MAX = math.log(np.finfo(np.float64).max)
+_BLOCK_MEAN_SAMPLE_THRESHOLD = 8
+_MAX_BLOCK_MEANS = 8
+_ROTATION_CONFIDENCE_SIGMAS = 5.0
 
 
 def _integer(name: str, value: object) -> int:
@@ -79,27 +82,58 @@ def _validated_tiny_states(
     return MappingProxyType(validated)
 
 
+def _next_sampling_seed(
+    rng: np.random.Generator,
+    used_seeds: set[int],
+) -> int:
+    for _attempt in range(1024):
+        seed = int(rng.integers(0, np.iinfo(np.int64).max))
+        if seed not in used_seeds:
+            used_seeds.add(seed)
+            return seed
+    raise RuntimeError("could not derive a unique deterministic sampling seed")
+
+
+def _sample_chain(
+    tower: LadderTower,
+    *,
+    target_m: int,
+    rng: np.random.Generator,
+    used_seeds: set[int],
+    burn_in_steps: int,
+    sample_count: int,
+) -> tuple[int, ...]:
+    batch = FixedMMetropolisSampler(tower, target_m=target_m).sample(
+        n_samples=sample_count,
+        burn_in_steps=burn_in_steps,
+        seed=_next_sampling_seed(rng, used_seeds),
+    )
+    states = tuple(int(state) for state in batch.configs)
+    for state in states:
+        value = _amplitude(tower[target_m], state)
+        if value == 0.0:
+            raise ValueError("sampled tower amplitude must be finite and nonzero")
+    return states
+
+
 def _sampled_states(
     tower: LadderTower,
     *,
     rng: np.random.Generator,
+    used_seeds: set[int],
     burn_in_steps: int,
     sample_count: int,
 ) -> Mapping[int, tuple[int, ...]]:
     sampled: dict[int, tuple[int, ...]] = {}
     for m in _M_VALUES:
-        sector_seed = int(rng.integers(0, np.iinfo(np.int64).max))
-        batch = FixedMMetropolisSampler(tower, target_m=m).sample(
-            n_samples=sample_count,
+        sampled[m] = _sample_chain(
+            tower,
+            target_m=m,
+            rng=rng,
+            used_seeds=used_seeds,
             burn_in_steps=burn_in_steps,
-            seed=sector_seed,
+            sample_count=sample_count,
         )
-        states = tuple(int(state) for state in batch.configs)
-        for state in states:
-            value = _amplitude(tower[m], state)
-            if value == 0.0:
-                raise ValueError("sampled tower amplitude must be finite and nonzero")
-        sampled[m] = states
     return MappingProxyType(sampled)
 
 
@@ -182,22 +216,92 @@ def _rotation_minor(
     return value
 
 
+def _block_mean_summary(
+    values: list[complex],
+) -> tuple[complex, float, float]:
+    sample_count = len(values)
+    if sample_count < _BLOCK_MEAN_SAMPLE_THRESHOLD:
+        raise ValueError(
+            "production rotation sample_count is too small for block means"
+        )
+    block_count = min(
+        _MAX_BLOCK_MEANS,
+        max(4, math.isqrt(sample_count)),
+    )
+    blocks = np.array_split(
+        np.asarray(values, dtype=np.complex128),
+        block_count,
+    )
+    block_means = [
+        _complex_sum([complex(value) for value in block]) / len(block)
+        for block in blocks
+    ]
+    sample_mean = _complex_sum(values) / sample_count
+    center = _complex_sum(block_means) / block_count
+    squared_deviations = [
+        abs(block_mean - center) ** 2 for block_mean in block_means
+    ]
+    standard_error = math.sqrt(
+        math.fsum(squared_deviations)
+        / (block_count * (block_count - 1))
+    )
+    if not math.isfinite(standard_error):
+        raise FloatingPointError("rotation block-mean error is non-finite")
+    midpoint = block_count // 2
+    early_mean = _complex_sum(block_means[:midpoint]) / midpoint
+    late_count = block_count - midpoint
+    late_mean = _complex_sum(block_means[midpoint:]) / late_count
+    drift = float(abs(early_mean - late_mean))
+    if not math.isfinite(drift):
+        raise FloatingPointError("rotation block drift is non-finite")
+    return sample_mean, standard_error, drift
+
+
 def _finite_rotation_residual(
     tower: LadderTower,
     sector_states: Mapping[int, tuple[int, ...]],
     *,
     rng: np.random.Generator,
+    used_seeds: set[int],
+    burn_in_steps: int,
+    sample_count: int,
     rotation_probes: int,
     exact_tiny: bool,
 ) -> float:
     residuals: list[float] = []
     source_m = 0
     source_component = tower[source_m]
-    source_states = sector_states[source_m]
     for probe_index in range(rotation_probes):
         target_m = _M_VALUES[probe_index % len(_M_VALUES)]
-        target_states = sector_states[target_m]
-        target = target_states[int(rng.integers(0, len(target_states)))]
+        if exact_tiny:
+            source_states = sector_states[source_m]
+            target_states = sector_states[target_m]
+            target = target_states[int(rng.integers(0, len(target_states)))]
+        else:
+            replica_count = (
+                2
+                if sample_count >= _BLOCK_MEAN_SAMPLE_THRESHOLD
+                else 4
+            )
+            source_chains = tuple(
+                _sample_chain(
+                    tower,
+                    target_m=source_m,
+                    rng=rng,
+                    used_seeds=used_seeds,
+                    burn_in_steps=burn_in_steps,
+                    sample_count=sample_count,
+                )
+                for _replica in range(replica_count)
+            )
+            target = _sample_chain(
+                tower,
+                target_m=target_m,
+                rng=rng,
+                used_seeds=used_seeds,
+                burn_in_steps=burn_in_steps,
+                sample_count=1,
+            )[0]
 
         spin_two_rotation: np.ndarray | None = None
         one_body_rotation: np.ndarray | None = None
@@ -234,33 +338,89 @@ def _finite_rotation_residual(
                     for source in source_states
                 ]
             )
+            standard_error = 0.0
+            drift_allowance = 0.0
         else:
-            importance_terms: list[complex] = []
-            for source in source_states:
-                amplitude = _amplitude(source_component, source)
-                probability = abs(amplitude) ** 2
-                if probability == 0.0 or not math.isfinite(probability):
-                    raise ValueError(
-                        "importance samples require finite nonzero amplitudes"
+            chain_summaries: list[tuple[complex, float, float]] = []
+            for source_states in source_chains:
+                importance_terms: list[complex] = []
+                for source in source_states:
+                    amplitude = _amplitude(source_component, source)
+                    probability = abs(amplitude) ** 2
+                    if probability == 0.0 or not math.isfinite(probability):
+                        raise ValueError(
+                            "importance samples require finite nonzero amplitudes"
+                        )
+                    importance_terms.append(
+                        _rotation_minor(
+                            one_body_rotation,
+                            target,
+                            source,
+                            source_component.two_q,
+                        )
+                        * amplitude
+                        / probability
                     )
-                importance_terms.append(
-                    _rotation_minor(
-                        one_body_rotation,
-                        target,
-                        source,
-                        source_component.two_q,
+                if len(importance_terms) >= _BLOCK_MEAN_SAMPLE_THRESHOLD:
+                    summary = _block_mean_summary(importance_terms)
+                else:
+                    summary = (
+                        _complex_sum(importance_terms)
+                        / len(importance_terms),
+                        0.0,
+                        0.0,
                     )
-                    * amplitude
-                    / probability
-                )
-            rotated = _complex_sum(importance_terms) / len(importance_terms)
+                chain_summaries.append(summary)
+            chain_means = [summary[0] for summary in chain_summaries]
+            rotated = _complex_sum(chain_means) / len(chain_means)
+            within_chain_error = math.sqrt(
+                math.fsum(summary[1] ** 2 for summary in chain_summaries)
+            ) / len(chain_summaries)
+            between_chain_error = math.sqrt(
+                math.fsum(abs(mean - rotated) ** 2 for mean in chain_means)
+                / (len(chain_means) * (len(chain_means) - 1))
+            )
+            standard_error = math.hypot(
+                within_chain_error,
+                between_chain_error,
+            )
+            maximum_chain_disagreement = max(
+                (
+                    abs(left - right)
+                    for index, left in enumerate(chain_means)
+                    for right in chain_means[index + 1 :]
+                ),
+                default=0.0,
+            )
+            drift_allowance = math.fsum(
+                summary[2] for summary in chain_summaries
+            ) + maximum_chain_disagreement
 
         predicted = (
             spin_two_rotation[target_m + 2, source_m + 2]
             * _amplitude(tower[target_m], target)
         )
-        scale = max(np.finfo(np.float64).eps, abs(rotated), abs(predicted))
-        residuals.append(abs(rotated - predicted) / scale)
+        scale = float(
+            max(np.finfo(np.float64).eps, abs(rotated), abs(predicted))
+        )
+        raw_difference = float(abs(rotated - predicted))
+        if exact_tiny:
+            residual = raw_difference / scale
+        else:
+            roundoff = (
+                64.0
+                * np.finfo(np.float64).eps
+                * max(1.0, abs(rotated), abs(predicted))
+            )
+            excess = max(
+                0.0,
+                raw_difference
+                - _ROTATION_CONFIDENCE_SIGMAS * standard_error
+                - drift_allowance
+                - float(roundoff),
+            )
+            residual = excess / scale
+        residuals.append(float(residual))
     result = max(residuals, default=0.0)
     if not math.isfinite(result):
         raise FloatingPointError("finite rotation residual is non-finite")
@@ -276,7 +436,12 @@ def evaluate_tower_diagnostics(
     rotation_probes: int,
     tiny_support_by_m: Mapping[int, object] | None = None,
 ) -> Mapping[str, float]:
-    """Evaluate four frozen residuals without allocating a physical support."""
+    """Evaluate four residuals without allocating a physical support.
+
+    Tiny-support rotations retain their raw deterministic residual.  The
+    production rotation field is the conservative excess left after seeded
+    replica-chain sampling error and drift allowances are subtracted.
+    """
 
     if not isinstance(tower, LadderTower):
         raise TypeError("tower must be a LadderTower")
@@ -292,13 +457,14 @@ def evaluate_tower_diagnostics(
         raise ValueError("sample_count must be positive")
     if probes <= 0:
         raise ValueError("rotation_probes must be positive")
-
     rng = np.random.default_rng(random_seed)
+    used_seeds: set[int] = set()
     exact_tiny = tiny_support_by_m is not None
     if tiny_support_by_m is None:
         sector_states = _sampled_states(
             tower,
             rng=rng,
+            used_seeds=used_seeds,
             burn_in_steps=burn_in,
             sample_count=samples,
         )
@@ -314,6 +480,9 @@ def evaluate_tower_diagnostics(
             tower,
             sector_states,
             rng=rng,
+            used_seeds=used_seeds,
+            burn_in_steps=burn_in,
+            sample_count=samples,
             rotation_probes=probes,
             exact_tiny=exact_tiny,
         ),

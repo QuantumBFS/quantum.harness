@@ -688,16 +688,21 @@ class LadderTower(Mapping[int, LadderComponent]):
         return len(_SPIN_TWO_M_VALUES)
 
 
+def _validated_current_logpsi(current_logpsi: object) -> complex:
+    current = _scalar_complex(current_logpsi, label="current logpsi")
+    if current.real == -math.inf:
+        raise ValueError("current logpsi must be finite and nonzero")
+    return current
+
+
 def stable_metropolis_acceptance(
     current_logpsi: object,
     proposed_logpsi: object,
 ) -> float:
     """Return the stable ``|psi_new / psi_old|**2`` acceptance factor."""
 
-    current = _scalar_complex(current_logpsi, label="current logpsi")
+    current = _validated_current_logpsi(current_logpsi)
     proposed = _scalar_complex(proposed_logpsi, label="proposed logpsi")
-    if current.real == -math.inf:
-        raise ValueError("current logpsi must be finite and nonzero")
     if proposed.real == -math.inf:
         return 0.0
     if proposed.real >= current.real:
@@ -822,7 +827,9 @@ class FixedMMetropolisSampler:
         """Return one exact row without enumerating the fixed-``M`` support."""
 
         source = self._component._validated_state(state)
-        current_log = self._component.logpsi(source)
+        current_log = _validated_current_logpsi(
+            self._component.logpsi(source)
+        )
         proposal_row = self._proposal.probabilities(source)
         transition_terms: dict[int, list[float]] = {source: []}
         for candidate, proposal_probability in proposal_row.items():
@@ -873,17 +880,21 @@ class FixedMMetropolisSampler:
         state: int,
         rng: np.random.Generator,
     ) -> tuple[int, bool]:
-        proposed = self._proposal.propose(state, rng)
-        if proposed == state:
-            return state, False
+        source = self._component._validated_state(state)
+        current_log = _validated_current_logpsi(
+            self._component.logpsi(source)
+        )
+        proposed = self._proposal.propose(source, rng)
+        if proposed == source:
+            return source, False
         candidate = self._component._validated_state(proposed)
         acceptance = stable_metropolis_acceptance(
-            self._component.logpsi(state),
+            current_log,
             self._component.logpsi(candidate),
         )
         if acceptance == 1.0 or rng.random() < acceptance:
             return candidate, True
-        return state, False
+        return source, False
 
     def sample(
         self,

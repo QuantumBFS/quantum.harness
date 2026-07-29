@@ -554,6 +554,19 @@ def _unequal_tiny_m0_tower() -> LadderTower:
     )
 
 
+def _exact_zero_derived_tower() -> LadderTower:
+    coefficient = 1.0 / math.sqrt(2.0)
+    return LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes(
+            {M0_LEFT: coefficient, M0_RIGHT: -coefficient}
+        ),
+        log_score=_zero_score(width=1),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+
 def _larger_m0_tower() -> LadderTower:
     n_electrons = 3
     two_q = 6
@@ -616,6 +629,21 @@ def test_stable_metropolis_acceptance_handles_extreme_logs_and_zeros() -> None:
         acceptance(complex(-math.inf, 0.0), 0.0j)
     with pytest.raises(ValueError, match="proposed logpsi"):
         acceptance(0.0j, complex(math.nan, 0.0))
+
+
+def test_exact_zero_current_fails_closed_even_for_proposal_self_loop() -> None:
+    sampler_type, _acceptance = _a04_2_sampler_api()
+    tower = _exact_zero_derived_tower()
+    support = _fixed_m_support(2)
+    assert len(support) == 1
+    state = support[0]
+    assert _amplitude(tower[2], state) == 0.0j
+    sampler = sampler_type(tower, target_m=2)
+
+    with pytest.raises(ValueError, match="current logpsi"):
+        sampler.transition_probabilities(state)
+    with pytest.raises(ValueError, match="current logpsi"):
+        sampler._step(state, np.random.default_rng(848))
 
 
 def test_all_five_fixed_m_sectors_sample_with_frozen_burn_in_reporting() -> None:
@@ -765,6 +793,71 @@ def test_production_diagnostics_never_enumerate_a_support(
         "tower_ladder_residual",
     }
     assert all(math.isfinite(value) for value in observed.values())
+
+
+def test_production_rotation_residual_discards_insignificant_mc_noise() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+
+    observed = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=25,
+        rotation_probes=8,
+    )
+
+    assert observed["finite_rotation_residual"] == 0.0
+
+
+def test_production_rotation_probes_use_independent_deterministic_chains(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    diagnostics = _a04_2_diagnostics_module()
+    sampler_type, _acceptance = _a04_2_sampler_api()
+    original_sample = sampler_type.sample
+    calls: list[tuple[int, int, int, int]] = []
+
+    def recording_sample(
+        sampler: object,
+        *,
+        n_samples: int,
+        burn_in_steps: int,
+        seed: int,
+    ) -> object:
+        target_m = int(getattr(sampler, "target_m"))
+        calls.append((target_m, n_samples, burn_in_steps, seed))
+        return original_sample(
+            sampler,
+            n_samples=n_samples,
+            burn_in_steps=burn_in_steps,
+            seed=seed,
+        )
+
+    monkeypatch.setattr(sampler_type, "sample", recording_sample)
+    arguments = {
+        "seed": 852,
+        "burn_in_steps": 5,
+        "sample_count": 25,
+        "rotation_probes": 8,
+    }
+
+    first = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(), **arguments
+    )
+    first_calls = tuple(calls)
+    calls.clear()
+    repeat = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(), **arguments
+    )
+
+    assert first == repeat
+    assert tuple(calls) == first_calls
+    seeds = tuple(seed for _m, _count, _burn_in, seed in first_calls)
+    assert len(seeds) == len(set(seeds))
+    m0_seeds = tuple(
+        seed for m, _count, _burn_in, seed in first_calls if m == 0
+    )
+    assert len(m0_seeds) >= 1 + arguments["rotation_probes"]
 
 
 @pytest.mark.parametrize(
