@@ -18,7 +18,8 @@ if str(RESEARCH) not in sys.path:
 from candidate.reducer import reduce_invariant_hermitian
 
 ROOT = RESEARCH.parent
-DEFAULT_PRIVATE = Path("/home/hzxiaxz/quantum.harness/research/benchmark/private")
+DEFAULT_PRIVATE = ROOT / "research" / "benchmark" / "private"
+DEFAULT_OPERATIONAL = ROOT / "research" / "benchmark" / "nc-moment-sdp-operational.json"
 DEFAULT_JSON = ROOT / "research" / "benchmark" / "issue-229-evidence.json"
 DEFAULT_HTML = ROOT / "docs" / "discussion" / "issue-229-final.html"
 
@@ -180,12 +181,14 @@ def compute_su2_case(length: int, projection_tolerance: float = 1e-8) -> dict:
     }
 
 
-def build_evidence(dev_dir: Path, private_dir: Path) -> dict:
+def build_evidence(dev_dir: Path, private_dir: Path, operational_path: Path = DEFAULT_OPERATIONAL) -> dict:
     baseline = compute_abelian_corpus(dev_dir, "development")
     baseline.extend(compute_abelian_corpus(private_dir, "private"))
+    operational = json.loads(operational_path.read_text())
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_by": "research/issue_229_report.py",
+        "nc_moment_sdp_operational": operational,
         "finite_abelian_baseline": {
             "description": "Matrix-only finite-Abelian character-projector baseline; not an NC moment SDP or non-Abelian result.",
             "instances": baseline,
@@ -199,6 +202,36 @@ def build_evidence(dev_dir: Path, private_dir: Path) -> dict:
 
 def _number(value: float) -> str:
     return f"{value:.3e}"
+
+
+def _operational_rows(instances: list[dict]) -> str:
+    pairs = {
+        (item["name"], item["order"], item["formulation"]): item
+        for item in instances
+    }
+    rows = []
+    dense_keys = sorted(
+        ((name, order) for name, order, formulation in pairs if formulation == "dense"),
+        key=lambda item: (item[0], item[1]),
+    )
+    for name, order in dense_keys:
+        dense = pairs[(name, order, "dense")]
+        reduced = pairs.get((name, order, "symmetry"))
+        if reduced is None:
+            continue
+        gap = abs(dense["objective"] - reduced["objective"])
+        rows.append(
+            "<tr data-operational-instance><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{} → {}</td><td>{:.3e}</td><td>{:.2f}x</td><td>{:.3f} → {:.3f}</td>"
+            "<td>{} → {}</td></tr>".format(
+                html.escape(name), order, dense["moment_cone_sizes"], reduced["moment_cone_sizes"],
+                dense["real_coordinate_count"], reduced["real_coordinate_count"], gap,
+                reduced["block_cubic_proxy"], 1000 * dense["solver_solve_seconds"],
+                1000 * reduced["solver_solve_seconds"], dense["barrier_iterations"],
+                reduced["barrier_iterations"],
+            )
+        )
+    return "\n".join(rows)
 
 
 def _baseline_rows(instances: list[dict]) -> str:
@@ -273,6 +306,7 @@ def _su2_sections(cases: list[dict]) -> str:
 
 
 def render_html(evidence: dict) -> str:
+    operational = evidence["nc_moment_sdp_operational"]["instances"]
     baseline = evidence["finite_abelian_baseline"]["instances"]
     cases = evidence["su2_evidence"]["cases"]
     worst_spectrum = max(item["spectrum_max_error"] for item in baseline)
@@ -282,24 +316,26 @@ def render_html(evidence: dict) -> str:
 <title>Issue #229 finite-Abelian baseline and SU(2) evidence</title>
 <style>body{{margin:0;background:#f7f7f4;color:#171717;font:15px/1.5 system-ui,sans-serif}}main{{max-width:1120px;margin:auto;padding:30px 22px 55px}}h1{{font-size:25px}}h2{{margin-top:30px;border-bottom:1px solid #ccc}}h3{{margin-top:24px}}.kpis{{display:flex;gap:12px;flex-wrap:wrap}}.kpi{{background:white;border:1px solid #ddd;border-radius:7px;padding:12px;min-width:190px}}.value{{font-size:24px;font-weight:700}}.note{{color:#555}}table{{border-collapse:collapse;width:100%;background:white;font-size:13px}}th,td{{padding:7px 8px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}}th{{position:sticky;top:0;background:#eee}}details{{border:1px solid #ddd;border-radius:7px;padding:10px;background:#fff;overflow:auto}}code{{background:#eee;padding:2px 4px}}svg{{max-width:100%;height:auto;background:#fff;border:1px solid #ddd;border-radius:7px;margin:10px 0}}.bar{{fill:#276fbf}}.axis{{stroke:#999}}.label{{font:12px system-ui,sans-serif;fill:#444}}.number{{font:12px system-ui,sans-serif;font-weight:700;fill:#111}}</style></head>
 <body><main><h1>Issue #229: finite-Abelian baseline and SU(2) evidence</h1>
-<p class="note">Generated reproducibly with NumPy 2.5.1. The three evidence layers below are explicitly distinct.</p>
+<p class="note">Generated reproducibly with NumPy {np.__version__}. The three evidence layers below are explicitly distinct.</p>
 <div class="kpis"><div class="kpi"><div>Finite-Abelian baseline</div><div class="value">30 dev + 20 private</div></div>
 <div class="kpi"><div>Baseline worst spectrum error</div><div class="value">{_number(worst_spectrum)}</div></div>
 <div class="kpi"><div>Baseline worst reconstruction</div><div class="value">{_number(worst_reconstruction)}</div></div>
 <div class="kpi"><div>New SU(2) cases</div><div class="value">L=4, 6, 8</div></div></div>
-<h2>1. Existing NC moment-SDP evidence</h2>
-<p>This prior finite-Abelian optimization result remains separate: CHSH Z₂ order 1 had dense/reduced optimum gap 1.33e-15 and 1.92x cubic cone proxy; the Pauli-style Z₂xZ₂ order-2 case had gap 2.74e-9 and 8.48x proxy. <strong>An NC moment SDP is not identified with non-Abelian symmetry.</strong></p>
+<h2>1. Operational Z₂ʳ NC moment-SDP reduction</h2>
+<p>JuMP/Mosek receives separate PSD cones for every character sector, including localizers. Dense and symmetry formulations use independent compilation paths. Solver time is Mosek-reported single-run time; it is descriptive rather than a statistically stable benchmark.</p>
+<table><thead><tr><th>Instance</th><th>Order</th><th>Dense cones</th><th>Reduced cones</th><th>Coordinates</th><th>Objective gap</th><th>Cubic proxy</th><th>Solver ms</th><th>Barrier iterations</th></tr></thead><tbody>
+{_operational_rows(operational)}</tbody></table>
 <h2>2. Finite-Abelian matrix baseline (recomputed)</h2>
 <p>These 50 matrix instances test character-projector reduction only. Residuals use Frobenius norms (reconstruction, leakage, and commutator relative to max(1, ‖H‖_F)); cubic proxy is D³ / Σ_k d_k³.</p>
 <details open><summary><strong>All 50 baseline instances</strong> (collapse/expand)</summary><table><thead><tr><th>ID</th><th>Corpus</th><th>Family</th><th>D</th><th>Blocks</th><th>Spectrum error</th><th>Reconstruction</th><th>Orthogonality</th><th>Leakage</th><th>Symmetry commutator</th><th>Cubic proxy</th></tr></thead><tbody>
 {_baseline_rows(baseline)}</tbody></table></details>
-<h2>3. New true SU(2) irrep/multiplicity reduction</h2>
+<h2>3. SU(2) Hilbert-space irrep/multiplicity evidence</h2>
 <p>Spin-1/2 antiferromagnetic Heisenberg open chain H=Σ_i S_i·S_(i+1), J=+1. In fixed M=S, S² projection selects one highest-weight vector per irrep copy, producing an m_S by m_S multiplicity block. Each block eigenvalue is repeated 2S+1 times to reconstruct the full spectrum. Cubic proxy is D³ / Σ_S m_S³.</p>
 {_su2_plot(cases)}
 {_su2_sections(cases)}
-<h2>Reproduce</h2><p><code>/home/hzxiaxz/quantum.harness/.venv/bin/python research/issue_229_report.py --private-dir /home/hzxiaxz/quantum.harness/research/benchmark/private</code></p>
-<p>Machine-readable artifact: <code>research/benchmark/issue-229-evidence.json</code>.</p>
-<h2>Scope</h2><p>The 50-case baseline establishes finite-Abelian matrix reduction. The three Heisenberg-chain cases add genuine non-Abelian SU(2) evidence at L=4,6,8. Neither statement upgrades the finite-Abelian NC moment-SDP implementation itself into a non-Abelian SDP implementation.</p>
+<h2>Reproduce</h2><p><code>julia --startup-file=no --project=julia-env research/nc_moment_sdp/run.jl research/benchmark/nc-moment-sdp-operational.json</code><br><code>.venv/bin/python research/issue_229_report.py --private-dir /path/to/private/corpus</code></p>
+<p>Machine-readable artifacts: <code>research/benchmark/nc-moment-sdp-operational.json</code> and <code>research/benchmark/issue-229-evidence.json</code>.</p>
+<h2>Scope</h2><p>The Z₂ʳ NC moment-SDP implementation now performs operational moment and localizer cone reduction. The 50-case baseline establishes general finite-Abelian matrix reduction. The Heisenberg-chain cases validate SU(2) representation decomposition only; SU(2) has not yet been applied to the NC moment/localizing PSD cones.</p>
 </main></body></html>"""
 
 
@@ -307,10 +343,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev-dir", type=Path, default=ROOT / "research" / "benchmark" / "dev")
     parser.add_argument("--private-dir", type=Path, default=DEFAULT_PRIVATE)
+    parser.add_argument("--operational-input", type=Path, default=DEFAULT_OPERATIONAL)
     parser.add_argument("--json-output", type=Path, default=DEFAULT_JSON)
     parser.add_argument("--html-output", type=Path, default=DEFAULT_HTML)
     args = parser.parse_args()
-    evidence = build_evidence(args.dev_dir, args.private_dir)
+    evidence = build_evidence(args.dev_dir, args.private_dir, args.operational_input)
     args.json_output.write_text(json.dumps(evidence, indent=2) + "\n")
     args.html_output.write_text(render_html(evidence))
     print(f"wrote {args.json_output} and {args.html_output}", flush=True)

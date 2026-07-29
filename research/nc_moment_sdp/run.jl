@@ -21,6 +21,13 @@ function result_record(problem, result; complex_probe=nothing)
         "moment_cone_sizes" => result.moment_cone_sizes,
         "localizer_cone_sizes" => result.localizer_cone_sizes,
         "block_cubic_proxy" => result.block_cubic_proxy,
+        "compile_seconds" => result.compile_seconds,
+        "model_build_seconds" => result.model_build_seconds,
+        "optimize_seconds" => result.optimize_seconds,
+        "solver_solve_seconds" => result.solver_solve_seconds,
+        "barrier_iterations" => result.barrier_iterations,
+        "jump_variable_count" => result.jump_variable_count,
+        "jump_constraint_count" => result.jump_constraint_count,
     )
     if complex_probe !== nothing
         value = evaluate_moment(result, problem.backend, complex_probe)
@@ -36,6 +43,10 @@ function main(arguments)
         (equality_localizer_benchmark(), :dense, nothing),
         (chsh_z2(order=1), :dense, nothing),
         (chsh_z2(order=1), :symmetry, nothing),
+        (chsh_z2(order=2), :dense, nothing),
+        (chsh_z2(order=2), :symmetry, nothing),
+        (chsh_z2(order=3), :dense, nothing),
+        (chsh_z2(order=3), :symmetry, nothing),
         (pauli_z2xz2(order=2), :dense, nothing),
         (pauli_z2xz2(order=2), :symmetry, nothing),
         (equality_localizer_benchmark(symmetry=true), :dense, nothing),

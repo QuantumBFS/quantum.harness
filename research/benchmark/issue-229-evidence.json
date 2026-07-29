@@ -1,6 +1,378 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "generated_by": "research/issue_229_report.py",
+  "nc_moment_sdp_operational": {
+    "formulation": "dense and finite-Abelian block complex Hermitian moment/localizing pencils with strict realification",
+    "instances": [
+      {
+        "barrier_iterations": 4,
+        "basis_size": 4,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 0.399379793,
+        "complex_moment_count": 4,
+        "complex_probe": {
+          "imaginary": 0.9999999999992024,
+          "real": 0.0
+        },
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 3,
+        "jump_variable_count": 4,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 7.977174476536659e-13,
+        "model_build_seconds": 5.644920908,
+        "moment_cone_sizes": [
+          4
+        ],
+        "name": "complex Pauli imaginary moment",
+        "objective": 0.9999999999992024,
+        "objective_residual": 0.0,
+        "optimize_seconds": 4.157968304,
+        "order": 1,
+        "real_coordinate_count": 4,
+        "solver_solve_seconds": 0.004259187997377012
+      },
+      {
+        "barrier_iterations": 5,
+        "basis_size": 4,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 1.762731803,
+        "complex_moment_count": 4,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 34,
+        "jump_variable_count": 4,
+        "localizer_cone_sizes": [
+          [
+            3
+          ]
+        ],
+        "localizer_residual": 1.0313365730736006e-15,
+        "minimum_localizer_eigenvalues": [
+          -1.0313365730736006e-15
+        ],
+        "minimum_moment_matrix_eigenvalue": 5.042829929932812e-17,
+        "model_build_seconds": 0.004027251,
+        "moment_cone_sizes": [
+          4
+        ],
+        "name": "equality and localizer",
+        "objective": 0.9999999999999909,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.006577768,
+        "order": 2,
+        "real_coordinate_count": 4,
+        "solver_solve_seconds": 0.005992663998767966
+      },
+      {
+        "barrier_iterations": 4,
+        "basis_size": 5,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 0.305806047,
+        "complex_moment_count": 13,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 3,
+        "jump_variable_count": 13,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 7.097201157588198e-14,
+        "model_build_seconds": 0.003632292,
+        "moment_cone_sizes": [
+          5
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.8284271247459882,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.003917877,
+        "order": 1,
+        "real_coordinate_count": 13,
+        "solver_solve_seconds": 0.003383537998161046
+      },
+      {
+        "barrier_iterations": 4,
+        "basis_size": 5,
+        "block_cubic_proxy": 1.9230769230769231,
+        "compile_seconds": 0.769031612,
+        "complex_moment_count": 9,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "symmetry",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 4,
+        "jump_variable_count": 9,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 4.3715693079287224e-14,
+        "model_build_seconds": 0.033942044,
+        "moment_cone_sizes": [
+          1,
+          4
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.8284271247460655,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.001511938,
+        "order": 1,
+        "real_coordinate_count": 9,
+        "solver_solve_seconds": 0.0009133159983321093
+      },
+      {
+        "barrier_iterations": 6,
+        "basis_size": 13,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 2.453449331,
+        "complex_moment_count": 41,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 3,
+        "jump_variable_count": 41,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 2.2507509746720022e-11,
+        "model_build_seconds": 0.005399869,
+        "moment_cone_sizes": [
+          13
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.828427124508509,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.032101416,
+        "order": 2,
+        "real_coordinate_count": 41,
+        "solver_solve_seconds": 0.031450042999495054
+      },
+      {
+        "barrier_iterations": 7,
+        "basis_size": 13,
+        "block_cubic_proxy": 2.7704918032786887,
+        "compile_seconds": 5.475025304,
+        "complex_moment_count": 25,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "symmetry",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 4,
+        "jump_variable_count": 25,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 4.517528955381169e-12,
+        "model_build_seconds": 0.321013885,
+        "moment_cone_sizes": [
+          9,
+          4
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.8284271246124093,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.007242492,
+        "order": 2,
+        "real_coordinate_count": 25,
+        "solver_solve_seconds": 0.006777835002139909
+      },
+      {
+        "barrier_iterations": 5,
+        "basis_size": 25,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 10.040018695,
+        "complex_moment_count": 85,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 3,
+        "jump_variable_count": 85,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": -5.595324869885825e-12,
+        "model_build_seconds": 0.05522408,
+        "moment_cone_sizes": [
+          25
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.828427124724926,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.288864776,
+        "order": 3,
+        "real_coordinate_count": 85,
+        "solver_solve_seconds": 0.28807569299897295
+      },
+      {
+        "barrier_iterations": 5,
+        "basis_size": 25,
+        "block_cubic_proxy": 3.238341968911917,
+        "compile_seconds": 29.079654837,
+        "complex_moment_count": 49,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "symmetry",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 4,
+        "jump_variable_count": 49,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 5.715696325728567e-12,
+        "model_build_seconds": 1.091392506,
+        "moment_cone_sizes": [
+          9,
+          16
+        ],
+        "name": "CHSH / Z2",
+        "objective": 2.8284271246831088,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.061371889,
+        "order": 3,
+        "real_coordinate_count": 49,
+        "solver_solve_seconds": 0.06068548000257579
+      },
+      {
+        "barrier_iterations": 4,
+        "basis_size": 16,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 0.058800384,
+        "complex_moment_count": 16,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 3,
+        "jump_variable_count": 16,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 1.6711247748892637e-09,
+        "model_build_seconds": 0.003749334,
+        "moment_cone_sizes": [
+          16
+        ],
+        "name": "two-site Pauli / Z2xZ2",
+        "objective": 1.9999999947833529,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.081401596,
+        "order": 2,
+        "real_coordinate_count": 16,
+        "solver_solve_seconds": 0.08065154199721292
+      },
+      {
+        "barrier_iterations": 5,
+        "basis_size": 16,
+        "block_cubic_proxy": 16.0,
+        "compile_seconds": 6.641085608,
+        "complex_moment_count": 4,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "symmetry",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 6,
+        "jump_variable_count": 4,
+        "localizer_cone_sizes": [],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [],
+        "minimum_moment_matrix_eigenvalue": 5.0682650337529244e-11,
+        "model_build_seconds": 0.004917051,
+        "moment_cone_sizes": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "name": "two-site Pauli / Z2xZ2",
+        "objective": 1.9999999998462261,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.002722704,
+        "order": 2,
+        "real_coordinate_count": 4,
+        "solver_solve_seconds": 0.0021766080026281998
+      },
+      {
+        "barrier_iterations": 3,
+        "basis_size": 4,
+        "block_cubic_proxy": 1.0,
+        "compile_seconds": 0.000658666,
+        "complex_moment_count": 4,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "dense",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 26,
+        "jump_variable_count": 4,
+        "localizer_cone_sizes": [
+          [
+            3
+          ]
+        ],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [
+          4.440892098501259e-17
+        ],
+        "minimum_moment_matrix_eigenvalue": -7.494005416218544e-17,
+        "model_build_seconds": 0.003802975,
+        "moment_cone_sizes": [
+          4
+        ],
+        "name": "equality and localizer / Z2",
+        "objective": 1.0,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.001968774,
+        "order": 2,
+        "real_coordinate_count": 4,
+        "solver_solve_seconds": 0.0012352340017969254
+      },
+      {
+        "barrier_iterations": 4,
+        "basis_size": 4,
+        "block_cubic_proxy": 3.64,
+        "compile_seconds": 1.194759149,
+        "complex_moment_count": 2,
+        "coordinate_consistency_residual": 0.0,
+        "equality_residual": 0.0,
+        "formulation": "symmetry",
+        "hermiticity_residual": 0.0,
+        "jump_constraint_count": 20,
+        "jump_variable_count": 2,
+        "localizer_cone_sizes": [
+          [
+            1,
+            2
+          ]
+        ],
+        "localizer_residual": 0.0,
+        "minimum_localizer_eigenvalues": [
+          4.440892098501259e-17
+        ],
+        "minimum_moment_matrix_eigenvalue": -7.494005416218544e-17,
+        "model_build_seconds": 0.003581028,
+        "moment_cone_sizes": [
+          2,
+          2
+        ],
+        "name": "equality and localizer / Z2",
+        "objective": 1.0,
+        "objective_residual": 0.0,
+        "optimize_seconds": 0.001908396,
+        "order": 2,
+        "real_coordinate_count": 2,
+        "solver_solve_seconds": 0.0013613699993584305
+      }
+    ],
+    "solver": "Mosek via JuMP/MosekTools"
+  },
   "finite_abelian_baseline": {
     "description": "Matrix-only finite-Abelian character-projector baseline; not an NC moment SDP or non-Abelian result.",
     "instances": [

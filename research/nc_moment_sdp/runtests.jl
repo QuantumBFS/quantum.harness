@@ -70,6 +70,12 @@ end
     @test result.hermiticity_residual <= 1.0e-10
     @test result.equality_residual <= 1.0e-9
     @test result.objective_residual <= 1.0e-8
+    @test result.compile_seconds >= 0.0
+    @test result.model_build_seconds >= 0.0
+    @test result.optimize_seconds >= result.solver_solve_seconds >= 0.0
+    @test result.barrier_iterations >= 0
+    @test result.jump_variable_count == result.coordinate_count
+    @test result.jump_constraint_count > 0
 end
 
 @testset "equalities and inequality localizers" begin
@@ -100,6 +106,15 @@ end
         @test reduced.equality_residual <= 1.0e-8
         @test reduced.localizer_residual <= 1.0e-8
         @test reduced.objective_residual <= 1.0e-7
+    end
+
+    for order in 1:3
+        dense = solve_moment_sdp(chsh_z2(order=order); formulation=:dense)
+        reduced = solve_moment_sdp(chsh_z2(order=order); formulation=:symmetry)
+        @test dense.objective ≈ reduced.objective atol=1.0e-7
+        @test maximum(reduced.moment_cone_sizes) < only(dense.moment_cone_sizes)
+        @test reduced.coordinate_count < dense.coordinate_count
+        @test reduced.block_cubic_proxy > 1.0
     end
 
     constrained = solve_moment_sdp(equality_localizer_benchmark(symmetry=true);

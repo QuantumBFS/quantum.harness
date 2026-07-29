@@ -51,16 +51,21 @@ def test_heisenberg_operator_is_open_antiferromagnetic_chain():
 
 def test_committed_artifact_and_report_have_all_cases():
     evidence = json.loads(ARTIFACT.read_text())
+    operational = evidence["nc_moment_sdp_operational"]["instances"]
     baseline = evidence["finite_abelian_baseline"]["instances"]
     su2_cases = evidence["su2_evidence"]["cases"]
     document = REPORT.read_text()
     assert len(baseline) == 50
+    assert len(operational) == 12
     assert sum(item["corpus"] == "development" for item in baseline) == 30
     assert sum(item["corpus"] == "private" for item in baseline) == 20
     assert len(su2_cases) == 3
     assert [case["length"] for case in su2_cases] == [4, 6, 8]
+    assert document.count("data-operational-instance") == 5
     assert document.count("data-baseline-instance") == 50
     assert document.count("data-su2-case") == 3
     assert document.count("<svg") == 1
     assert "SU(2) cubic work proxy and spectrum reconstruction error" in document
-    assert "An NC moment SDP is not identified with non-Abelian symmetry" in document
+    assert "Operational Z₂ʳ NC moment-SDP reduction" in document
+    assert "SU(2) has not yet been applied to the NC moment/localizing PSD cones" in document
+    assert "/home/hzxiaxz" not in document
