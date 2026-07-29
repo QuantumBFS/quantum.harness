@@ -842,3 +842,8 @@ Updated: 2026-07-29 UTC.
   maximum-side-490 cone split is now authorized; this is an exact formulation
   result, not physics. Advance the idle cone checkout and run one split
   build-only coefficient fingerprint before any numerical solve.
+- Split build-only job `118190562` started on SCNet from immutable commit
+  `402e2ce`, 32 CPUs / 64000 MiB / three-hour limit. It repeats the exact
+  1,906,425-entry gate, streams the 490-side split cones through the validated
+  SO(3) rank-four moment projection, and cannot invoke the optimizer. Record
+  its exact inventory and coefficient SHA-256 before a separate solve.

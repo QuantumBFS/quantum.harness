@@ -1464,3 +1464,11 @@ while retaining all three V4 characters and both spin sectors. It is not a
 feasibility or gap result. Next changed action: independently stream and hash
 the split+SO(3)-moment coefficients in build-only mode, then use that exact
 hash in a separate numerical reconstruction.
+
+The independent split build is SCNet job `118190562`, immutable source commit
+`402e2ce`, 32 CPUs / 64000 MiB / three-hour limit. Its runner requires the
+exact stabilizer coefficient gate, enables the stabilizer cone split and the
+already-validated SO(3) rank-four moment projection, fingerprints every
+retained coefficient, and sets solver execution to build-only. It cannot
+produce feasibility evidence. Next action is conditional on its exact
+inventory/hash; do not update `ss-remote-cone-dev` while it runs.

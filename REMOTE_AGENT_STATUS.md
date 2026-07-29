@@ -280,5 +280,9 @@ Updated: 2026-07-29T20:47:30Z
   28:58 at 6,016,104 KiB peak: all 1,906,425 cross entries were exactly zero.
   Runmeta SHA-256 is `ad7ba185…de7b`. The split is authorized structurally;
   next establish its independent split+SO(3) coefficient hash before solving.
+- SCNet split build-only job `118190562` is running from immutable commit
+  `402e2ce` on 32 CPUs / 64000 MiB. It repeats the exact cross gate and streams
+  the split+SO(3) coefficients with no optimizer. Keep its checkout unchanged
+  and use its eventual exact hash to gate the separate solve.
 
 No user input or new credential is currently required.
