@@ -148,12 +148,23 @@ struct ShastrySpatialMomentQuotient
     action::Dict{MomentKey,MomentKey}
     representatives::Dict{MomentKey,MomentKey}
     moments::Vector{MomentKey}
+    site_map::Vector{Int}
 end
 
 function build_spatial_moment_quotient(
     assembly::FullStateRealReducedPrimalAssembly,
     site_map::Vector{Int},
+    ;
+    materialize::Bool=true,
 )
+    if !materialize
+        return ShastrySpatialMomentQuotient(
+            Dict{MomentKey,MomentKey}(),
+            Dict{MomentKey,MomentKey}(),
+            MomentKey[],
+            copy(site_map),
+        )
+    end
     moments = assembly.moments
     inventory = Set(moments)
     action = Dict{MomentKey,MomentKey}()
@@ -184,7 +195,29 @@ function build_spatial_moment_quotient(
         action,
         representatives,
         ordered,
+        copy(site_map),
     )
+end
+
+function spatial_action_key(
+    quotient::ShastrySpatialMomentQuotient,
+    key::MomentKey,
+)
+    haskey(quotient.action, key) &&
+        return quotient.action[key]
+    isempty(quotient.site_map) &&
+        error("polynomial moment is outside the spatial action")
+    return shastry_spatial_moment(key, quotient.site_map)
+end
+
+function spatial_representative(
+    quotient::ShastrySpatialMomentQuotient,
+    key::MomentKey,
+)
+    haskey(quotient.representatives, key) &&
+        return quotient.representatives[key]
+    target = spatial_action_key(quotient, key)
+    return isless(target, key) ? target : key
 end
 
 function spatial_polynomial_action(
@@ -193,9 +226,7 @@ function spatial_polynomial_action(
 )
     result = ExactLinearPolynomial()
     for (key, coefficient) in polynomial.terms
-        haskey(quotient.action, key) ||
-            error("polynomial moment is outside the spatial action")
-        add_term!(result, quotient.action[key], coefficient)
+        add_term!(result, spatial_action_key(quotient, key), coefficient)
     end
     return result
 end
@@ -206,11 +237,9 @@ function spatial_quotient_projection(
 )
     result = ExactLinearPolynomial()
     for (key, coefficient) in polynomial.terms
-        haskey(quotient.representatives, key) ||
-            error("polynomial moment is outside the spatial quotient")
         add_term!(
             result,
-            quotient.representatives[key],
+            spatial_representative(quotient, key),
             coefficient,
         )
     end
@@ -535,7 +564,11 @@ function assemble_shastry_full_state_spatial_reduced_primal(
     verify_truth && !something(truth).exact &&
         error("Shastry full-state spatial truth gate failed")
     site_map = shastry_spatial_site_map(source)
-    quotient = build_spatial_moment_quotient(source, site_map)
+    quotient = build_spatial_moment_quotient(
+        source,
+        site_map;
+        materialize=materialize_coefficients || verify_truth,
+    )
 
     positive_blocks = ShastrySpatialPSDBlock[]
     for block in source.positive_blocks

@@ -133,6 +133,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         basis_mode=:structured,
         basis_spec=StructuredBasisSpec(:full_state_polynomial, 1),
     )
+    on_demand_moments =
+        options.patch_level > 1 ||
+        get(ENV, "SHASTRY_ON_DEMAND_MOMENTS", "0") == "1"
     primal_measurement = @timed assemble_primal_gap(
         problem;
         stationarity_spec=StationaritySpec(:full_inner_state, 1),
@@ -150,6 +153,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                                  ) == "1" ?
                                  :v4_conjugation_even :
                                  :all,
+        materialize_moment_inventory=!on_demand_moments,
     )
     primal = primal_measurement.value
     metadata["stages"]["primal"] = measurement_dict(primal_measurement)
@@ -159,6 +163,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         "positive_dimension" => length(primal.positive_basis.entries),
         "gap_dimension" => length(primal.gap_basis.entries),
         "moment_count" => length(primal.moments),
+        "moment_inventory" => on_demand_moments ?
+            "deferred-on-demand-v1" :
+            "materialized-v1",
         "stationarity_equality_count" =>
             length(primal.stationarity_equalities),
     )

@@ -313,7 +313,14 @@ function assemble_primal_gap(
     stationarity_spec::StationaritySpec=StationaritySpec(),
     materialize_coefficients::Bool=true,
     structural_moment_filter::Symbol=:all,
+    materialize_moment_inventory::Bool=true,
 )
+    materialize_coefficients && !materialize_moment_inventory &&
+        throw(
+            ArgumentError(
+                "a materialized coefficient map requires a moment inventory",
+            ),
+        )
     problem.basis_mode == :structured ||
         throw(ArgumentError("exact primal assembly requires :structured mode"))
     problem.symmetry isa NoStateSymmetry ||
@@ -349,13 +356,21 @@ function assemble_primal_gap(
     )
 
     if !materialize_coefficients
-        ordered_moments =
-            structural_moment_inventory(problem, structural_moment_filter)
-        length(unique(ordered_moments)) == length(ordered_moments) ||
-            error("structural moment inventory contains duplicates")
-        first(ordered_moments) == moment_key() ||
-            error("identity moment must be first")
-        moments_sha256 = moment_inventory_sha256(ordered_moments)
+        # The deferred inventory mode is only for downstream exact quotients
+        # that canonicalize every encountered coefficient moment on demand.
+        # Identity remains as a normalization placeholder.
+        ordered_moments = materialize_moment_inventory ?
+            structural_moment_inventory(problem, structural_moment_filter) :
+            MomentKey[moment_key()]
+        if materialize_moment_inventory
+            length(unique(ordered_moments)) == length(ordered_moments) ||
+                error("structural moment inventory contains duplicates")
+            first(ordered_moments) == moment_key() ||
+                error("identity moment must be first")
+        end
+        moments_sha256 = materialize_moment_inventory ?
+            moment_inventory_sha256(ordered_moments) :
+            "deferred-on-demand-v1/" * string(structural_moment_filter)
         coefficient_map_sha256 =
             "deferred-structural-v1/" * string(structural_moment_filter)
         final_sha256 = assembly_fingerprint(

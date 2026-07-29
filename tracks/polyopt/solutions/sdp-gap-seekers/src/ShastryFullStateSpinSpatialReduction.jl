@@ -24,9 +24,11 @@ using ..FullStateSymmetryReduction:
     FullStateV4ReducedPrimalAssembly,
     full_state_v4_block_entry
 using ..ShastryFullStateSpatialReduction:
+    ShastrySpatialMomentQuotient,
     ShastrySpatialPSDBlock,
     ShastryFullStateSpatialReducedPrimalAssembly,
     parse_moment_word,
+    spatial_representative,
     shastry_spatial_block_entry
 
 export SHASTRY_FULL_STATE_SPIN_SPATIAL_REDUCTION_SCHEMA,
@@ -298,6 +300,17 @@ struct ShastrySpinSpatialMomentQuotient
     actions::Vector{Dict{MomentKey,MomentKey}}
     representatives::Dict{MomentKey,MomentKey}
     moments::Vector{MomentKey}
+    spatial_quotient::ShastrySpatialMomentQuotient
+    representative_cache::Vector{Dict{MomentKey,MomentKey}}
+    cache_locks::Vector{ReentrantLock}
+end
+
+function representative_cache()
+    bucket_count = max(64, 8Threads.nthreads())
+    return (
+        [Dict{MomentKey,MomentKey}() for _ in 1:bucket_count],
+        [ReentrantLock() for _ in 1:bucket_count],
+    )
 end
 
 function build_spin_spatial_actions(
@@ -314,9 +327,7 @@ function build_spin_spatial_actions(
                 error("V4-invariant spatial moment acquired a spin sign")
             transformed in source_inventory ||
                 error("pre-spatial inventory is not spin closed")
-            haskey(source.quotient.representatives, transformed) ||
-                error("spin target has no spatial representative")
-            target = source.quotient.representatives[transformed]
+            target = spatial_representative(source.quotient, transformed)
             target in inventory ||
                 error("spin-spatial action leaves the spatial inventory")
             action[key] = target
@@ -330,7 +341,20 @@ end
 
 function build_spin_spatial_moment_quotient(
     source::ShastryFullStateSpatialReducedPrimalAssembly,
+    ;
+    materialize::Bool=true,
 )
+    if !materialize
+        cache, locks = representative_cache()
+        return ShastrySpinSpatialMomentQuotient(
+            Vector{Dict{MomentKey,MomentKey}}(),
+            Dict{MomentKey,MomentKey}(),
+            MomentKey[],
+            source.quotient,
+            cache,
+            locks,
+        )
+    end
     actions = build_spin_spatial_actions(source)
     representatives = Dict{MomentKey,MomentKey}()
     representative_set = Set{MomentKey}()
@@ -346,11 +370,50 @@ function build_spin_spatial_moment_quotient(
     )
     first(ordered) == moment_key() ||
         error("identity moment is not first after spin-spatial quotient")
+    cache, locks = representative_cache()
     return ShastrySpinSpatialMomentQuotient(
         actions,
         representatives,
         ordered,
+        source.quotient,
+        cache,
+        locks,
     )
+end
+
+function spin_spatial_representative(
+    quotient::ShastrySpinSpatialMomentQuotient,
+    key::MomentKey,
+)
+    haskey(quotient.representatives, key) &&
+        return quotient.representatives[key]
+    isempty(quotient.spatial_quotient.site_map) &&
+        error("polynomial moment is outside the spin-spatial quotient")
+    bucket_index =
+        mod(hash(key), UInt(length(quotient.representative_cache))) + 1
+    bucket = quotient.representative_cache[bucket_index]
+    cache_lock = quotient.cache_locks[bucket_index]
+    cached = lock(cache_lock) do
+        get(bucket, key, nothing)
+    end
+    isnothing(cached) || return cached
+    representatives = MomentKey[]
+    for permutation in SPIN_AXIS_PERMUTATIONS
+        sign, transformed = spin_moment(key, permutation)
+        sign == 1 ||
+            error("V4-invariant spatial moment acquired a spin sign")
+        push!(
+            representatives,
+            spatial_representative(
+                quotient.spatial_quotient,
+                transformed,
+            ),
+        )
+    end
+    representative = minimum(representatives)
+    return lock(cache_lock) do
+        get!(bucket, key, representative)
+    end
 end
 
 function spin_spatial_polynomial_action(
@@ -372,11 +435,9 @@ function spin_spatial_quotient_projection(
 )
     result = ExactLinearPolynomial()
     for (key, coefficient) in polynomial.terms
-        haskey(quotient.representatives, key) ||
-            error("polynomial moment is outside the spin-spatial quotient")
         add_term!(
             result,
-            quotient.representatives[key],
+            spin_spatial_representative(quotient, key),
             coefficient,
         )
     end
@@ -486,7 +547,10 @@ function assemble_shastry_full_state_spin_spatial_reduced_primal(
     verify_source_covariance::Bool=true,
     materialize_coefficients::Bool=true,
 )
-    quotient = build_spin_spatial_moment_quotient(source)
+    quotient = build_spin_spatial_moment_quotient(
+        source;
+        materialize=materialize_coefficients || verify_truth,
+    )
     truth = verify_truth ?
         shastry_spin_spatial_reduction_truth(
             source;

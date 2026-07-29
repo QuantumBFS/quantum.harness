@@ -449,9 +449,11 @@ function assemble_full_state_v4_reduced_primal(
     verify_truth::Bool=true,
     materialize_coefficients::Bool=true,
 )
-    truth = full_state_v4_reduction_truth(source)
-    verify_truth && !truth.exact &&
-        error("full-state V4 reduction truth check failed")
+    if verify_truth
+        truth = full_state_v4_reduction_truth(source)
+        truth.exact ||
+            error("full-state V4 reduction truth check failed")
+    end
 
     positive_entries = source.positive_basis.entries
     centered_rows = FullStateReducedRow[
@@ -635,9 +637,11 @@ function assemble_full_state_real_reduced_primal(
     verify_truth::Bool=true,
     materialize_coefficients::Bool=true,
 )
-    truth = full_state_conjugation_reduction_truth(source)
-    verify_truth && !truth.exact &&
-        error("full-state conjugation reduction truth check failed")
+    if verify_truth
+        truth = full_state_conjugation_reduction_truth(source)
+        truth.exact ||
+            error("full-state conjugation reduction truth check failed")
+    end
 
     equalities = canonical_real_equalities(ExactLinearPolynomial[
         conjugation_invariant_projection(polynomial)

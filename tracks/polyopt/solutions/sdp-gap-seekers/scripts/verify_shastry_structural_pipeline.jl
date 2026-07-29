@@ -57,6 +57,7 @@ primal = measured("structural primal") do
         stationarity_spec=StationaritySpec(:full_inner_state, 1),
         materialize_coefficients=false,
         structural_moment_filter=:v4_conjugation_even,
+        materialize_moment_inventory=false,
     )
 end
 v4 = measured("structural V4") do
