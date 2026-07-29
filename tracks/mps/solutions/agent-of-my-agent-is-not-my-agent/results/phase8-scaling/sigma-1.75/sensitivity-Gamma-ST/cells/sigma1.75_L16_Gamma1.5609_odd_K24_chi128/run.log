@@ -1,0 +1,8 @@
+Script started on 2026-07-29 21:29:50+08:00 [COMMAND="env PYTHONPATH=src:. OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 NUMEXPR_NUM_THREADS=4 /usr/bin/time -v -o results/phase8-scaling/sigma-1.75/sensitivity-Gamma-ST/cells/sigma1.75_L16_Gamma1.5609_odd_K24_chi128/resources.txt conda run -n mps python -u scripts/benchmark_phase6_optimizations.py --fit-summary results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json --length 16 --gamma 1.5609 --num-exponentials 24 --alpha 0.5 --r-fit 2048 --chi-schedule 128 --direct-only --sectors odd --output-dir results/phase8-scaling/sigma-1.75/sensitivity-Gamma-ST/cells/sigma1.75_L16_Gamma1.5609_odd_K24_chi128" <not executed on terminal>]
+starting direct odd DMRG
+direct odd complete
+wrote results/phase8-scaling/sigma-1.75/sensitivity-Gamma-ST/cells/sigma1.75_L16_Gamma1.5609_odd_K24_chi128/summary.json
+/home/zyz/tenpy/tenpy/networks/mps.py:1629: UserWarning: unit_cell_width is a new argument for MPS and similar classes. It is optional for now, but will become mandatory in a future release. The default value (unit_cell_width=len(sites)) is correct, iff the lattice is a Chain. For other lattices, it is incorrect. It is used for dipolar charges and correlation_function2.
+  super().__init__(sites, bc, unit_cell_width)
+
+Script done on 2026-07-29 21:30:13+08:00 [COMMAND_EXIT_CODE="0"]
