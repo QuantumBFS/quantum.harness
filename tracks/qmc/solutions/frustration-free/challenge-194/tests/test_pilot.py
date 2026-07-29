@@ -422,7 +422,11 @@ def test_cell_root_replacement_after_descriptor_open_fails_closed(
 
     def swapping_flock(descriptor: int, operation: int) -> None:
         nonlocal swapped
-        if operation == pilot.fcntl.LOCK_EX and not swapped:
+        if (
+            operation == pilot.fcntl.LOCK_EX
+            and not swapped
+            and cell_root.exists()
+        ):
             swapped = True
             cell_root.rename(path.parent / "detached-cell")
             cell_root.mkdir()
@@ -440,6 +444,116 @@ def test_approval_registry_rejects_symlink(tmp_path: Path, monkeypatch: pytest.M
     monkeypatch.setattr(pilot, "_approval_registry_path", lambda: linked)
     with pytest.raises(RuntimeError, match="symlink"):
         pilot._load_approval_registry()
+
+
+def test_approval_registry_digest_is_independently_pinned_after_clean_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    fabricated = json.loads(pilot._approval_registry_path().read_text())
+    fabricated["report_sha256"] = "a" * 64
+    fabricated["run_spec_sha256"] = "b" * 64
+    replacement = tmp_path / "approval.json"
+    replacement.write_bytes(pilot._canonical_bytes(fabricated))
+    monkeypatch.setattr(pilot, "_approval_registry_path", lambda: replacement)
+    monkeypatch.setattr(
+        pilot,
+        "_repository_state",
+        lambda: {
+            "source_revision": "f" * 40,
+            "clean_tree": True,
+            "provenance_error": None,
+        },
+    )
+
+    pilot._current_source(require_clean=True)
+    with pytest.raises(RuntimeError, match="pinned SHA256"):
+        pilot._load_approval_registry()
+
+
+def test_descriptor_hash_rejects_same_size_source_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    source = tmp_path / "source.py"
+    source.write_bytes(b"original\n")
+    replacement = tmp_path / "replacement.py"
+    replacement.write_bytes(b"changed!\n")
+    assert source.stat().st_size == replacement.stat().st_size
+    real_hash = pilot._artifacts._hash_descriptor
+
+    def swapping_hash(descriptor: int, description: str) -> tuple[str, int]:
+        result = real_hash(descriptor, description)
+        os.replace(replacement, source)
+        return result
+
+    monkeypatch.setattr(pilot, "_hash_descriptor", swapping_hash, raising=False)
+    with pytest.raises(RuntimeError, match="identity|generation|changed"):
+        pilot._file_hash(source)
+
+
+def test_publication_rejects_ancestor_replacement_before_descriptor_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    ancestor = tmp_path / "ancestor"
+    parent = ancestor / "parent"
+    parent.mkdir(parents=True)
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    swapped = False
+
+    def swapping_open(name: str, parent_fd: int) -> int:
+        nonlocal swapped
+        if name == "ancestor" and not swapped:
+            swapped = True
+            ancestor.rename(tmp_path / "detached-ancestor")
+            (ancestor / "parent").mkdir(parents=True)
+        return os.open(name, flags, dir_fd=parent_fd)
+
+    monkeypatch.setattr(
+        pilot, "_open_directory_at", swapping_open, raising=False
+    )
+    with pytest.raises(RuntimeError, match="ancestor|generation|identity"):
+        pilot._publish_once(parent / "marker.json", {"schema_version": "test"})
+
+
+def test_cell_swap_and_restore_during_work_fails_closed(
+    tmp_path: Path,
+):
+    path = _tiny_spec(tmp_path)
+    cell = PilotCell.from_document(json.loads(path.read_text())["cells"][0])
+    cell_root = path.parent / cell.cell_path
+
+    def swap_and_restore(stage: str) -> None:
+        if stage == "after-trajectory":
+            detached = path.parent / "detached-cell"
+            cell_root.rename(detached)
+            detached.rename(cell_root)
+
+    with pytest.raises(RuntimeError, match="generation changed"):
+        pilot._run_test_pilot_cell(path, 0, crash_hook=swap_and_restore)
+
+
+def test_download_verification_requires_merged_progress(tmp_path: Path):
+    path = _tiny_spec(tmp_path)
+    pilot._run_test_pilot_cell(path, 0)
+    assert not (path.parent / pilot.MERGED_NAME).exists()
+    with pytest.raises(RuntimeError, match="merged pilot progress is missing"):
+        pilot._verify_test_pilot_download(path)
+
+
+def test_public_download_verifier_rejects_missing_merged_progress(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    run_spec = tmp_path / pilot.RUN_SPEC_NAME
+    monkeypatch.setattr(
+        pilot,
+        "_merged_document",
+        lambda *_args, **_kwargs: {"schema_version": pilot.MERGED_SCHEMA},
+    )
+    with pytest.raises(RuntimeError, match="merged pilot progress is missing"):
+        pilot.verify_pilot_download(run_spec)
 
 
 @pytest.mark.parametrize("kind", ("source", "runtime", "engine", "analysis"))

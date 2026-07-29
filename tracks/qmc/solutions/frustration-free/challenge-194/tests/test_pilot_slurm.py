@@ -155,3 +155,22 @@ def test_wrapper_rejects_symlink_cache_root(
     linked.symlink_to(target, target_is_directory=True)
     result = _run(tmp_path, "1", cache_root=linked)
     assert result.returncode == 73
+
+
+@pytest.mark.parametrize("kind", ("empty", "nonempty", "symlink"))
+def test_wrapper_requires_uniquely_created_owned_cache_directory(
+    tmp_path: Path, kind: str
+):
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    cache = cache_root / "challenge-194-pilot-991-1"
+    if kind == "symlink":
+        target = tmp_path / "hostile-cache"
+        target.mkdir()
+        cache.symlink_to(target, target_is_directory=True)
+    else:
+        cache.mkdir()
+        if kind == "nonempty":
+            (cache / "hostile").write_text("data", encoding="utf-8")
+    result = _run(tmp_path, "1", cache_root=cache_root)
+    assert result.returncode == 73

@@ -50,7 +50,10 @@ check-registry SHA256
 `6e25ea41899544f2a9de3589beb1ee94b1f3dc505638b8f8e5164a4322b56a1d`,
 and scientific-module aggregate
 `a5fe99d23de9003eda565a4de71aaabf1393b909fc9feb57b5b7dff92ff95dab`.
-No merely structurally valid alternate report can authorize Pilot.
+The registry's canonical bytes are independently pinned in code to SHA256
+`8ef77104299bdf8e0355cf23d3215f560e1773332a5face9c79ea7a261ac33e8`;
+the registry cannot redefine its own trusted digest. No merely structurally
+valid alternate report can authorize Pilot.
 
 The frozen scientific whitelist is:
 
@@ -97,8 +100,36 @@ environment contract. Before Python starts, inherited `NUMBA_*`, `PYTHONHOME`,
 `OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=NUMEXPR_NUM_THREADS=VECLIB_MAXIMUM_THREADS=1`
 are pinned. The only restored `PYTHONPATH` is the absolute committed `src`
 directory. Build deployment must apply that exact cleanup/pinning fragment,
-using a private node-local absolute non-symlink `NUMBA_CACHE_DIR`; the Slurm
-wrapper applies it independently to every worker.
+using a private node-local absolute non-symlink `NUMBA_CACHE_DIR`. Each cache
+leaf must be absent before launch, created exactly once with mode restricted by
+`umask 077`, owned by the task user, writable, canonical, and empty immediately
+after creation; pre-existing empty directories are rejected as well as
+non-empty directories and symlinks. The Slurm wrapper applies these rules
+independently to every worker, and the documented build-spec command must do
+the same.
+
+The compute-node build command uses a numeric Slurm job ID and the same
+single-owner creation rule (after the environment cleanup above):
+
+```bash
+[[ "${SLURM_JOB_ID}" =~ ^[0-9]+$ ]] || exit 64
+CACHE_BASE="${SLURM_TMPDIR:?}"
+[[ "${CACHE_BASE}" == /* && ! -L "${CACHE_BASE}" &&
+   -d "${CACHE_BASE}" && -w "${CACHE_BASE}" ]] || exit 73
+[[ "$(realpath -s -- "${CACHE_BASE}")" == "$(realpath -e -- "${CACHE_BASE}")" ]] ||
+  exit 73
+export NUMBA_CACHE_DIR="${CACHE_BASE%/}/challenge-194-pilot-build-${SLURM_JOB_ID}"
+umask 077
+mkdir -- "${NUMBA_CACHE_DIR}" || exit 73
+[[ ! -L "${NUMBA_CACHE_DIR}" && -O "${NUMBA_CACHE_DIR}" &&
+   -d "${NUMBA_CACHE_DIR}" && -w "${NUMBA_CACHE_DIR}" &&
+   "$(realpath -e -- "${NUMBA_CACHE_DIR}")" == "${NUMBA_CACHE_DIR}" ]] ||
+  exit 73
+shopt -s nullglob dotglob
+CACHE_ENTRIES=("${NUMBA_CACHE_DIR}"/*)
+shopt -u nullglob dotglob
+(( ${#CACHE_ENTRIES[@]} == 0 )) || exit 73
+```
 
 ## Restart and publication
 

@@ -50,6 +50,9 @@ CELL_MANIFEST_SCHEMA = "challenge-194-pilot-cell-manifest-v1"
 MERGED_SCHEMA = "challenge-194-pilot-progress-v1"
 APPROVAL_SCHEMA = "challenge-194-pilot-correctness-approval-v1"
 CORRECTNESS_APPROVAL_REVISION = "fd0aa314f324dc357918926e80f93f4356083fc0"
+APPROVAL_REGISTRY_SHA256 = (
+    "8ef77104299bdf8e0355cf23d3215f560e1773332a5face9c79ea7a261ac33e8"
+)
 PILOT_SIGMAS = (0.8, 0.9, 1.0, 1.1)
 PILOT_LENGTHS = (2**10, 2**14, 2**18)
 PILOT_REPLICAS = tuple(range(8))
@@ -72,12 +75,9 @@ PILOT_JSON_MAX_CONTAINER = 100_000
 PILOT_JSON_MAX_NODES = 20_000_000
 PILOT_CELL_MAX_ENTRIES = 64
 
-_open_regular = _artifacts._open_regular
 _read_descriptor_bounded = _artifacts._read_descriptor_bounded
-_require_stable_descriptor = _artifacts._require_stable_descriptor
-_require_path_identity = _artifacts._require_path_identity
 _generation_tuple = _artifacts._generation_tuple
-_check_existing_path_chain = _artifacts._check_existing_path_chain
+_hash_descriptor = _artifacts._hash_descriptor
 
 # This is intentionally narrower than validation's implementation inventory.
 # Drift in any module that defines the model, RNG, trajectory, or production
@@ -156,24 +156,249 @@ def _validate_json_bounds(value: object) -> None:
             stack.extend((child, depth + 1) for child in item)
 
 
+DirectoryEntry = tuple[Path, int, os.stat_result]
+
+
+def _directory_flags() -> int:
+    return (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+
+
+def _open_directory_at(name: str, parent_fd: int) -> int:
+    return os.open(name, _directory_flags(), dir_fd=parent_fd)
+
+
+def _snapshot_existing_directories(path: Path) -> dict[Path, os.stat_result]:
+    absolute = path.absolute()
+    current = Path(absolute.anchor)
+    snapshots: dict[Path, os.stat_result] = {}
+    for component in absolute.parts:
+        if component == absolute.anchor:
+            candidate = current
+        else:
+            current = current / component
+            candidate = current
+        try:
+            metadata = candidate.lstat()
+        except FileNotFoundError:
+            break
+        except OSError as error:
+            raise RuntimeError("unable to inspect directory ancestry") from error
+        if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
+            raise RuntimeError("directory ancestry must contain only directories")
+        snapshots[candidate] = metadata
+    return snapshots
+
+
+def _open_directory_chain(path: Path, *, create: bool) -> list[DirectoryEntry]:
+    absolute = path.absolute()
+    snapshots = _snapshot_existing_directories(absolute)
+    entries: list[DirectoryEntry] = []
+    current_path = Path(absolute.anchor)
+    try:
+        descriptor = os.open(absolute.anchor, _directory_flags())
+        root_status = os.fstat(descriptor)
+        entries.append((current_path, descriptor, root_status))
+        for component in absolute.parts[1:]:
+            parent_fd = entries[-1][1]
+            current_path = current_path / component
+            try:
+                descriptor = _open_directory_at(component, parent_fd)
+            except FileNotFoundError:
+                if not create:
+                    raise RuntimeError("directory ancestry is missing")
+                try:
+                    os.mkdir(component, 0o755, dir_fd=parent_fd)
+                except FileExistsError:
+                    pass
+                descriptor = _open_directory_at(component, parent_fd)
+            status = os.fstat(descriptor)
+            if not stat.S_ISDIR(status.st_mode):
+                os.close(descriptor)
+                raise RuntimeError("directory ancestry contains a non-directory")
+            original = snapshots.get(current_path)
+            if original is not None and _generation_tuple(status) != _generation_tuple(
+                original
+            ):
+                os.close(descriptor)
+                raise RuntimeError(
+                    "directory ancestor generation changed before descriptor open"
+                )
+            entries.append((current_path, descriptor, status))
+        if create:
+            entries = [
+                (entry_path, entry_fd, os.fstat(entry_fd))
+                for entry_path, entry_fd, _ in entries
+            ]
+        _require_directory_chain(entries, allow_final_mutation=False)
+        return entries
+    except BaseException:
+        _close_directory_chain(entries)
+        raise
+
+
+def _close_directory_chain(entries: Sequence[DirectoryEntry]) -> None:
+    for _, descriptor, _ in reversed(entries):
+        os.close(descriptor)
+
+
+def _open_cell_directory_chain(root: Path, cell_id: str) -> list[DirectoryEntry]:
+    entries = _open_directory_chain(root, create=False)
+    root_fd = entries[-1][1]
+    cell_locked = False
+    try:
+        fcntl.flock(root_fd, fcntl.LOCK_EX)
+        try:
+            _require_directory_chain(entries, allow_final_mutation=True)
+            parent_path = root
+            parent_fd = root_fd
+            for name in ("cells", cell_id):
+                child_path = parent_path / name
+                try:
+                    child_fd = _open_directory_at(name, parent_fd)
+                except FileNotFoundError:
+                    try:
+                        os.mkdir(name, 0o755, dir_fd=parent_fd)
+                    except FileExistsError:
+                        pass
+                    child_fd = _open_directory_at(name, parent_fd)
+                child_status = os.fstat(child_fd)
+                entries.append((child_path, child_fd, child_status))
+                parent_path = child_path
+                parent_fd = child_fd
+            fcntl.flock(parent_fd, fcntl.LOCK_EX)
+            cell_locked = True
+            entries = [
+                (entry_path, entry_fd, os.fstat(entry_fd))
+                for entry_path, entry_fd, _ in entries
+            ]
+            _require_directory_chain(entries, allow_final_mutation=False)
+            return entries
+        finally:
+            fcntl.flock(root_fd, fcntl.LOCK_UN)
+    except BaseException:
+        if cell_locked:
+            fcntl.flock(entries[-1][1], fcntl.LOCK_UN)
+        _close_directory_chain(entries)
+        raise
+
+
+def _require_directory_chain(
+    entries: Sequence[DirectoryEntry], *, allow_final_mutation: bool
+) -> None:
+    for index, (path, descriptor, original) in enumerate(entries):
+        try:
+            path_status = path.lstat()
+            descriptor_status = os.fstat(descriptor)
+        except OSError as error:
+            raise RuntimeError("directory ancestor identity changed") from error
+        if (
+            stat.S_ISLNK(path_status.st_mode)
+            or not stat.S_ISDIR(path_status.st_mode)
+            or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
+            or (
+                (index != len(entries) - 1 or not allow_final_mutation)
+                and _generation_tuple(descriptor_status)
+                != _generation_tuple(original)
+            )
+        ):
+            raise RuntimeError(
+                "directory identity changed: ancestor generation or identity changed"
+            )
+
+
+def _directory_generation(path: Path, descriptor: int) -> tuple[int, ...]:
+    try:
+        path_status = path.lstat()
+        descriptor_status = os.fstat(descriptor)
+    except OSError as error:
+        raise RuntimeError("pilot cell directory identity changed") from error
+    if _generation_tuple(path_status) != _generation_tuple(descriptor_status):
+        raise RuntimeError("pilot cell directory identity changed")
+    return _generation_tuple(descriptor_status)
+
+
+def _require_directory_generation(
+    path: Path, descriptor: int, expected: tuple[int, ...]
+) -> None:
+    if _directory_generation(path, descriptor) != expected:
+        raise RuntimeError("pilot cell directory generation changed during work")
+
+
+def _open_regular_at(
+    name: str,
+    parent_fd: int,
+    description: str,
+    *,
+    maximum_size: int | None = None,
+) -> tuple[int, os.stat_result]:
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+    )
+    try:
+        before = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        if stat.S_ISLNK(before.st_mode):
+            raise RuntimeError(f"{description} must not be a symlink")
+        descriptor = os.open(name, flags, dir_fd=parent_fd)
+        opened = os.fstat(descriptor)
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError(f"unable to open {description}") from error
+    if (
+        stat.S_ISLNK(before.st_mode)
+        or not stat.S_ISREG(opened.st_mode)
+        or _generation_tuple(before) != _generation_tuple(opened)
+    ):
+        os.close(descriptor)
+        raise RuntimeError(f"{description} identity changed before descriptor open")
+    if maximum_size is not None and opened.st_size > maximum_size:
+        os.close(descriptor)
+        raise RuntimeError(f"{description} exceeds the byte-size limit")
+    return descriptor, opened
+
+
+def _require_regular_at_identity(
+    name: str,
+    parent_fd: int,
+    descriptor: int,
+    original: os.stat_result,
+    description: str,
+) -> None:
+    try:
+        path_status = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        descriptor_status = os.fstat(descriptor)
+    except OSError as error:
+        raise RuntimeError(f"{description} pathname identity changed") from error
+    if (
+        not stat.S_ISREG(path_status.st_mode)
+        or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
+        or _generation_tuple(descriptor_status) != _generation_tuple(original)
+    ):
+        raise RuntimeError(f"{description} generation or identity changed")
+
+
 def _read_canonical(
     path: Path,
     description: str,
     *,
     maximum_size: int,
 ) -> tuple[dict[str, object], bytes]:
+    parent_chain = _open_directory_chain(path.parent, create=False)
+    parent_fd = parent_chain[-1][1]
+    descriptor, original = _open_regular_at(
+        path.name, parent_fd, description, maximum_size=maximum_size
+    )
     try:
-        _check_existing_path_chain(path)
-        descriptor, original = _open_regular(
-            path, description, maximum_size=maximum_size
-        )
-    except (_artifacts.ArtifactIntegrityError, OSError) as error:
-        raise RuntimeError(str(error)) from error
-    try:
-        before = _generation_tuple(original)
         payload = _read_descriptor_bounded(descriptor, maximum_size, description)
-        _require_stable_descriptor(descriptor, original, description)
-        _require_path_identity(path, original, description)
+        _require_regular_at_identity(
+            path.name, parent_fd, descriptor, original, description
+        )
         try:
             document = json.loads(payload)
         except (
@@ -188,61 +413,14 @@ def _read_canonical(
         _validate_json_bounds(document)
         if not isinstance(document, dict) or payload != _canonical_bytes(document):
             raise RuntimeError(f"{description} is not canonical JSON")
-        current = os.fstat(descriptor)
-        if _generation_tuple(current) != before:
-            raise RuntimeError(f"{description} generation changed during read")
-        _require_path_identity(path, original, description)
+        _require_regular_at_identity(
+            path.name, parent_fd, descriptor, original, description
+        )
+        _require_directory_chain(parent_chain, allow_final_mutation=False)
         return document, payload
-    except _artifacts.ArtifactIntegrityError as error:
-        raise RuntimeError(str(error)) from error
     finally:
         os.close(descriptor)
-
-
-def _stable_parent(path: Path) -> tuple[int, os.stat_result]:
-    _check_existing_path_chain(path.parent)
-    flags = (
-        os.O_RDONLY
-        | getattr(os, "O_DIRECTORY", 0)
-        | getattr(os, "O_NOFOLLOW", 0)
-    )
-    try:
-        descriptor = os.open(path.parent, flags)
-        original = os.fstat(descriptor)
-    except OSError as error:
-        raise RuntimeError("unable to open immutable output parent") from error
-    return descriptor, original
-
-
-def _require_parent_identity(
-    path: Path, descriptor: int, original: os.stat_result
-) -> None:
-    try:
-        path_current = path.parent.lstat()
-        descriptor_current = os.fstat(descriptor)
-    except OSError as error:
-        raise RuntimeError("immutable output parent identity changed") from error
-    if (
-        descriptor_current.st_dev != original.st_dev
-        or descriptor_current.st_ino != original.st_ino
-        or _generation_tuple(path_current)
-        != _generation_tuple(descriptor_current)
-    ):
-        raise RuntimeError("immutable output parent identity changed")
-
-
-def _require_directory_identity(path: Path, descriptor: int) -> None:
-    try:
-        path_status = path.lstat()
-        descriptor_status = os.fstat(descriptor)
-    except OSError as error:
-        raise RuntimeError("pilot cell directory identity changed") from error
-    if (
-        stat.S_ISLNK(path_status.st_mode)
-        or not stat.S_ISDIR(path_status.st_mode)
-        or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
-    ):
-        raise RuntimeError("pilot cell directory identity changed")
+        _close_directory_chain(parent_chain)
 
 
 def _link_at(
@@ -259,8 +437,8 @@ def _link_at(
 
 def _publish_once(path: Path, document: Mapping[str, object]) -> None:
     payload = _canonical_bytes(document)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    parent_fd, parent_original = _stable_parent(path)
+    parent_chain = _open_directory_chain(path.parent, create=True)
+    parent_fd = parent_chain[-1][1]
     temporary = f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
     descriptor = os.open(
         temporary,
@@ -286,20 +464,40 @@ def _publish_once(path: Path, document: Mapping[str, object]) -> None:
         os.unlink(temporary, dir_fd=parent_fd)
         temporary = ""
         os.fsync(parent_fd)
-        _require_parent_identity(path, parent_fd, parent_original)
+        _require_directory_chain(parent_chain, allow_final_mutation=True)
     finally:
         if temporary:
             try:
                 os.unlink(temporary, dir_fd=parent_fd)
             except FileNotFoundError:
                 pass
-        os.close(parent_fd)
+        _close_directory_chain(parent_chain)
 
 
 def _file_hash(path: Path) -> str:
-    if path.is_symlink() or not path.is_file():
-        raise RuntimeError(f"required regular file is missing: {path}")
-    return _sha256(path.read_bytes())
+    parent_chain = _open_directory_chain(path.parent, create=False)
+    parent_fd = parent_chain[-1][1]
+    descriptor, original = _open_regular_at(
+        path.name, parent_fd, f"required source file {path}"
+    )
+    try:
+        digest, size = _hash_descriptor(
+            descriptor, f"required source file {path}"
+        )
+        if size != original.st_size:
+            raise RuntimeError(f"required source file size changed: {path}")
+        _require_regular_at_identity(
+            path.name,
+            parent_fd,
+            descriptor,
+            original,
+            f"required source file {path}",
+        )
+        _require_directory_chain(parent_chain, allow_final_mutation=False)
+        return digest
+    finally:
+        os.close(descriptor)
+        _close_directory_chain(parent_chain)
 
 
 def _lock_hash() -> str:
@@ -371,11 +569,15 @@ def _check_registry_document(
 
 
 def _load_approval_registry() -> dict[str, object]:
-    document, _ = _read_canonical(
+    document, payload = _read_canonical(
         _approval_registry_path(),
         "Pilot correctness approval registry",
         maximum_size=APPROVAL_MAX_BYTES,
     )
+    if _sha256(payload) != APPROVAL_REGISTRY_SHA256:
+        raise RuntimeError(
+            "Pilot correctness approval registry does not match pinned SHA256"
+        )
     expected = {
         "schema_version",
         "approval_revision",
@@ -413,7 +615,8 @@ def _load_approval_registry() -> dict[str, object]:
 
 
 def _approval_registry_digest() -> str:
-    return _sha256(_canonical_bytes(_load_approval_registry()))
+    _load_approval_registry()
+    return APPROVAL_REGISTRY_SHA256
 
 
 def _validation_spec_path(report: Path) -> Path:
@@ -1072,14 +1275,18 @@ def _provenance(spec: Mapping[str, object]) -> dict[str, object]:
 def _reject_markers(cell_root: Path) -> None:
     if not cell_root.exists():
         return
-    _check_existing_path_chain(cell_root)
-    for count, path in enumerate(cell_root.rglob("*"), start=1):
-        if count > PILOT_CELL_MAX_ENTRIES:
-            raise RuntimeError("pilot cell artifact count exceeds frozen bound")
-        if path.is_symlink():
-            raise RuntimeError("pilot cell contains a symlink")
-        if path.name.endswith((".partial", ".intent")):
-            raise RuntimeError(f"surviving publication marker: {path.name}")
+    chain = _open_directory_chain(cell_root, create=False)
+    try:
+        for count, path in enumerate(cell_root.rglob("*"), start=1):
+            if count > PILOT_CELL_MAX_ENTRIES:
+                raise RuntimeError("pilot cell artifact count exceeds frozen bound")
+            if path.is_symlink():
+                raise RuntimeError("pilot cell contains a symlink")
+            if path.name.endswith((".partial", ".intent")):
+                raise RuntimeError(f"surviving publication marker: {path.name}")
+        _require_directory_chain(chain, allow_final_mutation=False)
+    finally:
+        _close_directory_chain(chain)
 
 
 def _initialize_run(
@@ -1223,20 +1430,19 @@ def _run_cell(
     cell = PilotCell.from_document(cells[cell_index])
     root = run_spec_path.parent
     cell_root = _relative_path(root, cell.cell_path, "cells")
-    cell_root.mkdir(parents=True, exist_ok=True)
-    _check_existing_path_chain(cell_root)
-    _reject_markers(cell_root)
-    descriptor = os.open(
-        cell_root, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    )
+    cell_chain = _open_cell_directory_chain(root, cell.cell_id)
+    descriptor = cell_chain[-1][1]
+    locked = True
     try:
-        _require_directory_identity(cell_root, descriptor)
-        fcntl.flock(descriptor, fcntl.LOCK_EX)
-        _require_directory_identity(cell_root, descriptor)
+        _require_directory_chain(cell_chain, allow_final_mutation=True)
+        generation = _directory_generation(cell_root, descriptor)
+        _reject_markers(cell_root)
+        _require_directory_generation(cell_root, descriptor, generation)
         marker = _relative_path(root, cell.manifest_path, "cells")
         if marker.exists():
             manifest = _verify_success_cell(root, spec, cell)
-            _require_directory_identity(cell_root, descriptor)
+            _require_directory_generation(cell_root, descriptor, generation)
+            _require_directory_chain(cell_chain, allow_final_mutation=True)
             return {
                 "cell_index": cell_index,
                 "cell_id": cell.cell_id,
@@ -1252,6 +1458,7 @@ def _run_cell(
             raise RuntimeError("reconstructed kernel hash mismatch")
         run = _relative_path(root, cell.run_path, "cells")
         _initialize_run(run, spec, cell, kernel)
+        generation = _directory_generation(cell_root, descriptor)
         expected = _expected(spec, cell)
         trajectory = _trajectory_path(run, cell)
         if trajectory.exists():
@@ -1270,6 +1477,7 @@ def _run_cell(
             )
         if crash_hook is not None:
             crash_hook("after-trajectory")
+        _require_directory_generation(cell_root, descriptor, generation)
         batch = run / "batches" / f"batch-cell-{cell.cell_index:03d}.json"
         if not batch.exists():
             if (run / "batches").exists() and any((run / "batches").iterdir()):
@@ -1280,10 +1488,13 @@ def _run_cell(
         reconstruct_progress(run, expected)
         if crash_hook is not None:
             crash_hook("after-progress")
+        _require_directory_generation(cell_root, descriptor, generation)
         manifest = _cell_manifest_document(spec, cell, run)
         _publish_once(marker, manifest)
+        generation = _directory_generation(cell_root, descriptor)
         verified = _verify_success_cell(root, spec, cell)
-        _require_directory_identity(cell_root, descriptor)
+        _require_directory_generation(cell_root, descriptor, generation)
+        _require_directory_chain(cell_chain, allow_final_mutation=True)
         return {
             "cell_index": cell_index,
             "cell_id": cell.cell_id,
@@ -1291,8 +1502,9 @@ def _run_cell(
             "trajectory_sha256": verified["trajectory_sha256"],
         }
     finally:
-        fcntl.flock(descriptor, fcntl.LOCK_UN)
-        os.close(descriptor)
+        if locked:
+            fcntl.flock(descriptor, fcntl.LOCK_UN)
+        _close_directory_chain(cell_chain)
 
 
 def run_pilot_cell(
@@ -1338,35 +1550,49 @@ def _merged_document(
     root = run_spec_path.parent
     cells_root = root / "cells"
     expected_names = {PilotCell.from_document(raw).cell_id for raw in spec["cells"]}
-    actual_names: set[str] = set()
-    if cells_root.is_dir():
-        for count, path in enumerate(cells_root.iterdir(), start=1):
-            if count > len(expected_names) + 1:
-                raise RuntimeError("pilot cell directory count exceeds frozen bound")
-            if path.is_symlink() or not path.is_dir():
-                raise RuntimeError("pilot cells root contains a non-directory")
-            actual_names.add(path.name)
-    missing = sorted(expected_names - actual_names)
-    extra = sorted(actual_names - expected_names)
-    if missing or extra:
-        raise RuntimeError(f"pilot cell set mismatch; missing={missing}, extra={extra}")
-    records = []
-    requests: set[str] = set()
-    for raw in spec["cells"]:
-        cell = PilotCell.from_document(raw)
-        manifest = _verify_success_cell(root, spec, cell)
-        if cell.request_sha256 in requests:
-            raise RuntimeError("merged pilot contains duplicate request identity")
-        requests.add(cell.request_sha256)
-        records.append(
-            {
-                "cell_index": cell.cell_index,
-                "cell_id": cell.cell_id,
-                "manifest_path": cell.manifest_path,
-                "request_sha256": cell.request_sha256,
-                "trajectory_sha256": manifest["trajectory_sha256"],
-            }
-        )
+    cells_chain = _open_directory_chain(cells_root, create=False)
+    try:
+        actual_names: set[str] = set()
+        with os.scandir(cells_chain[-1][1]) as stream:
+            for count, entry in enumerate(stream, start=1):
+                if count > len(expected_names) + 1:
+                    raise RuntimeError(
+                        "pilot cell directory count exceeds frozen bound"
+                    )
+                metadata = entry.stat(follow_symlinks=False)
+                if not stat.S_ISDIR(metadata.st_mode):
+                    raise RuntimeError(
+                        "pilot cells root contains a non-directory"
+                    )
+                actual_names.add(entry.name)
+        missing = sorted(expected_names - actual_names)
+        extra = sorted(actual_names - expected_names)
+        if missing or extra:
+            raise RuntimeError(
+                f"pilot cell set mismatch; missing={missing}, extra={extra}"
+            )
+        records = []
+        requests: set[str] = set()
+        for raw in spec["cells"]:
+            cell = PilotCell.from_document(raw)
+            manifest = _verify_success_cell(root, spec, cell)
+            if cell.request_sha256 in requests:
+                raise RuntimeError(
+                    "merged pilot contains duplicate request identity"
+                )
+            requests.add(cell.request_sha256)
+            records.append(
+                {
+                    "cell_index": cell.cell_index,
+                    "cell_id": cell.cell_id,
+                    "manifest_path": cell.manifest_path,
+                    "request_sha256": cell.request_sha256,
+                    "trajectory_sha256": manifest["trajectory_sha256"],
+                }
+            )
+        _require_directory_chain(cells_chain, allow_final_mutation=False)
+    finally:
+        _close_directory_chain(cells_chain)
     return {
         "schema_version": MERGED_SCHEMA,
         "run_spec_sha256": spec["run_spec_sha256"],
@@ -1400,14 +1626,15 @@ def verify_pilot_download(run_spec_path: Path) -> dict[str, object]:
         production=True,
     )
     progress = run_spec_path.parent / MERGED_NAME
-    if progress.exists():
-        existing, _ = _read_canonical(
-            progress,
-            "merged pilot progress",
-            maximum_size=PILOT_PROGRESS_MAX_BYTES,
-        )
-        if existing != document:
-            raise RuntimeError("merged pilot progress is stale or corrupt")
+    if not progress.exists():
+        raise RuntimeError("merged pilot progress is missing")
+    existing, _ = _read_canonical(
+        progress,
+        "merged pilot progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
+    if existing != document:
+        raise RuntimeError("merged pilot progress is stale or corrupt")
     return document
 
 
@@ -1532,14 +1759,15 @@ def _verify_test_pilot_download(run_spec_path: Path) -> dict[str, object]:
         production=False,
     )
     progress = run_spec_path.parent / MERGED_NAME
-    if progress.exists():
-        existing, _ = _read_canonical(
-            progress,
-            "test merged pilot progress",
-            maximum_size=PILOT_PROGRESS_MAX_BYTES,
-        )
-        if existing != document:
-            raise RuntimeError("merged test pilot progress is stale or corrupt")
+    if not progress.exists():
+        raise RuntimeError("merged pilot progress is missing")
+    existing, _ = _read_canonical(
+        progress,
+        "test merged pilot progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
+    if existing != document:
+        raise RuntimeError("merged test pilot progress is stale or corrupt")
     return document
 
 

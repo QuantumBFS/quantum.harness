@@ -119,9 +119,22 @@ case "$(realpath -m -- "${NUMBA_CACHE_DIR}")" in
         exit 73
         ;;
 esac
-mkdir -p -- "${NUMBA_CACHE_DIR}"
-if [[ -L "${NUMBA_CACHE_DIR}" || ! -d "${NUMBA_CACHE_DIR}" || ! -w "${NUMBA_CACHE_DIR}" ]]; then
+umask 077
+if ! mkdir -- "${NUMBA_CACHE_DIR}"; then
+    echo "NUMBA cache directory must be uniquely created by this task" >&2
+    exit 73
+fi
+if [[ -L "${NUMBA_CACHE_DIR}" || ! -d "${NUMBA_CACHE_DIR}" || \
+      ! -O "${NUMBA_CACHE_DIR}" || ! -w "${NUMBA_CACHE_DIR}" || \
+      "$(realpath -e -- "${NUMBA_CACHE_DIR}")" != "${NUMBA_CACHE_DIR}" ]]; then
     echo "NUMBA cache directory is not a safe writable directory" >&2
+    exit 73
+fi
+shopt -s nullglob dotglob
+CACHE_ENTRIES=("${NUMBA_CACHE_DIR}"/*)
+shopt -u nullglob dotglob
+if (( ${#CACHE_ENTRIES[@]} != 0 )); then
+    echo "new NUMBA cache directory is unexpectedly non-empty" >&2
     exit 73
 fi
 
