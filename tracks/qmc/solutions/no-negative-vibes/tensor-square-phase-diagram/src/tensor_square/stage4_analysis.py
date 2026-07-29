@@ -404,3 +404,53 @@ def classify_stage4_candidate(
         }
     )
     return result
+
+
+def classify_numerical_sentinel(
+    cell_rows: Iterable[Mapping[str, object]],
+    *,
+    beta: float,
+) -> dict[str, object]:
+    """Select a large-size numerical sentinel without making a phase claim."""
+    rows = [
+        row
+        for row in cell_rows
+        if float(row.get("beta", math.nan)) == beta
+        and row.get("audit_status") == "PASS"
+    ]
+    lookup = {int(row["m"]): row for row in rows}
+    if set(lookup) != {4, 6, 8}:
+        return {
+            "sentinel_classification": "STOP",
+            "inference_scope": "statistical_only",
+            "sentinel_reason": (
+                "m=4,6,8 audited endpoint set is incomplete; "
+                "no numerical sentinel release"
+            ),
+            "sentinel_ranking_score": -1.0e9,
+        }
+    size = metric_trend(lookup[4], lookup[8], metric="q_combined")
+    monotone = _monotone_with_errors([lookup[m] for m in (4, 6, 8)])
+    diag_strict, _, diag_names, best_diag_z = _diagnostic_support(
+        lookup[4], lookup[8]
+    )
+    eligible = bool(size["strict_positive"]) and monotone and diag_strict
+    return {
+        "sentinel_classification": "ELIGIBLE" if eligible else "STOP",
+        "inference_scope": "numerical_only",
+        "sentinel_reason": (
+            "same frozen size and independent-diagnostic gates pass"
+            if eligible
+            else "frozen size or independent-diagnostic gate does not pass"
+        ),
+        "sentinel_primary_size_delta": size["delta"],
+        "sentinel_primary_size_relative_delta": size["relative_delta"],
+        "sentinel_primary_size_z": size["z"],
+        "sentinel_size_monotone_with_errors": monotone,
+        "sentinel_supporting_diagnostics": diag_names,
+        "sentinel_best_diagnostic_z": best_diag_z,
+        "sentinel_ranking_score": (
+            min(float(size["z"]), 20.0)
+            + min(max(best_diag_z, 0.0), 20.0)
+        ),
+    }

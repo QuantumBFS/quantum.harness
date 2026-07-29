@@ -81,9 +81,16 @@ def _git_metadata(project_root: Path) -> dict[str, object]:
 
 
 def _run_replica(
-    task: tuple[ReplicaSpec, str, str, str, str | None],
+    task: tuple[ReplicaSpec, str, str, str, str | None, str],
 ) -> dict[str, object]:
-    spec, output_dir_text, machine, source_revision, plan_digest = task
+    (
+        spec,
+        output_dir_text,
+        machine,
+        source_revision,
+        plan_digest,
+        experiment_id,
+    ) = task
     policy = Stage4Policy()
     cell = spec.cell
     output_dir = Path(output_dir_text)
@@ -96,7 +103,7 @@ def _run_replica(
     )
     summary_path = replica_dir / "summary.json"
     run_spec: dict[str, object] = {
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": experiment_id,
         "cell_id": cell.cell_id,
         "cell_index": cell.index,
         "cohort": cell.cohort,
@@ -191,7 +198,7 @@ def _run_replica(
             break
         payload: dict[str, object] = {
             "status": final_status,
-            "experiment_id": EXPERIMENT_ID,
+            "experiment_id": experiment_id,
             "cell_id": cell.cell_id,
             "cell_index": cell.index,
             "cohort": cell.cohort,
@@ -227,7 +234,7 @@ def _run_replica(
     except Exception as error:
         payload = {
             "status": "ERROR",
-            "experiment_id": EXPERIMENT_ID,
+            "experiment_id": experiment_id,
             "cell_id": cell.cell_id,
             "cell_index": cell.index,
             "machine": machine,
@@ -354,6 +361,7 @@ def main() -> None:
             args.machine,
             str(git_metadata["commit"]),
             plan_digest,
+            EXPERIMENT_ID,
         )
         for spec in specs
     ]

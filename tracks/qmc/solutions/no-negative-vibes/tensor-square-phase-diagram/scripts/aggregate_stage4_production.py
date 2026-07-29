@@ -6,14 +6,21 @@ from __future__ import annotations
 import argparse
 import csv
 from datetime import datetime, timezone
+import hashlib
 import json
 import math
 from pathlib import Path
 from typing import Iterable
 
-from tensor_square.stage4 import assigned_grid, EXPERIMENT_ID, Stage4Policy
+from tensor_square.stage4 import (
+    assigned_grid,
+    EXPERIMENT_ID,
+    MONITORED_TAU_KEYS,
+    Stage4Policy,
+)
 from tensor_square.stage4_analysis import (
     aggregate_production_cell,
+    classify_numerical_sentinel,
     classify_stage4_candidate,
 )
 
@@ -235,6 +242,14 @@ def main() -> None:
         grouped_specs.setdefault(key, []).append(cell)
 
     candidates: list[dict[str, object]] = []
+    competition_budget_verified = _pair_budget_verified(
+        [
+            cell
+            for cell in cells
+            if cell.cohort == "paired_competition"
+        ],
+        decisions,
+    )
     for key, rows in sorted(grouped_cells.items()):
         cohort, g_ratio, t, mu = key
         classification = classify_stage4_candidate(rows, cohort=cohort)
@@ -246,7 +261,7 @@ def main() -> None:
                 "t": t,
                 "mu": mu,
                 "paired_budget_verified": (
-                    _pair_budget_verified(grouped_specs[key], decisions)
+                    competition_budget_verified
                     if cohort == "paired_competition"
                     else True
                 ),
@@ -330,6 +345,113 @@ def main() -> None:
 
     ranked = _rank(candidates)
     shortlist = _m10_shortlist(ranked)
+    sentinel_candidates: list[dict[str, object]] = []
+    for g_ratio in (0.25, 0.5, 1.0):
+        for t in (0.25, 0.5, 1.0):
+            key = ("half_filled_core", g_ratio, t, 0.0)
+            result = classify_numerical_sentinel(
+                grouped_cells[key],
+                beta=4.0,
+            )
+            sentinel_candidates.append(
+                {
+                    "candidate_id": _candidate_id(
+                        "half_filled_core", g_ratio, t, 0.0
+                    ),
+                    "cohort": "half_filled_core",
+                    "g_b_over_g_a": g_ratio,
+                    "t": t,
+                    "mu": 0.0,
+                    "beta": 4.0,
+                    **result,
+                }
+            )
+    sentinel_candidates.sort(
+        key=lambda row: (
+            row["sentinel_classification"] != "ELIGIBLE",
+            -float(row["sentinel_ranking_score"]),
+            str(row["candidate_id"]),
+        )
+    )
+    numerical_sentinel = next(
+        (
+            dict(row)
+            for row in sentinel_candidates
+            if row["sentinel_classification"] == "ELIGIBLE"
+        ),
+        None,
+    )
+    if numerical_sentinel is not None:
+        sentinel_cell = next(
+            cell
+            for cell in cells
+            if cell.cohort == "half_filled_core"
+            and cell.config.m == 8
+            and cell.config.beta == 4.0
+            and cell.config.g_b_over_g_a
+            == numerical_sentinel["g_b_over_g_a"]
+            and cell.config.t == numerical_sentinel["t"]
+            and cell.config.mu == numerical_sentinel["mu"]
+        )
+        sentinel_replicas = summaries_by_cell[sentinel_cell.cell_id]
+        worst_tau = max(
+            float(row[key])
+            for row in sentinel_replicas
+            for key in MONITORED_TAU_KEYS
+        )
+        numerical_sentinel.update(
+            {
+                "m": 10,
+                "dt": 0.2,
+                "proposal_scale": 0.5,
+                "selection_source_cell": sentinel_cell.cell_id,
+                "m8_worst_tau_int": worst_tau,
+                "initial_warmup_sweeps": max(
+                    policy.min_warmup_sweeps,
+                    math.ceil(policy.warmup_tau_multiples * worst_tau)
+                    * policy.measure_every,
+                ),
+                "initial_measurement_sweeps": max(
+                    policy.min_measurement_sweeps,
+                    math.ceil(
+                        2.0 * worst_tau * policy.target_ess_per_replica
+                    )
+                    * policy.measure_every,
+                ),
+                "measure_every": policy.measure_every,
+                "target_ess_per_replica": policy.target_ess_per_replica,
+                "production_replicas": policy.production_replicas,
+                "maximum_measurement_sweeps": (
+                    policy.max_measurement_sweeps
+                ),
+                "physics_claim_permitted": False,
+            }
+        )
+    evidence_records = [
+        row
+        for cell_id in sorted(summaries_by_cell)
+        for row in sorted(
+            summaries_by_cell[cell_id],
+            key=lambda item: int(item["replica"]),
+        )
+    ]
+    evidence_digest = hashlib.sha256(
+        json.dumps(
+            evidence_records,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    sentinel_release = {
+        "experiment_id": "stage4-m10-numerical-sentinel-20260729-v1",
+        "selection_policy": (
+            "beta=4 numerical-only sentinel; frozen 2-sigma/5-percent "
+            "size gate, monotonic m=4,6,8, and independent diagnostic"
+        ),
+        "stage4_source_revision": plan["source_revision"],
+        "production_evidence_digest": evidence_digest,
+        "selected": numerical_sentinel,
+    }
     counts = {
         label: sum(row["classification"] == label for row in ranked)
         for label in ("SURVIVE", "EXTEND", "STOP")
@@ -361,6 +483,8 @@ def main() -> None:
         "classification_counts": counts,
         "m10_shortlist_count": len(shortlist),
         "m10_shortlist": shortlist,
+        "m10_numerical_sentinel_released": numerical_sentinel is not None,
+        "m10_numerical_sentinel": numerical_sentinel,
         "minimum_ess": min(
             (float(row["minimum_ess"]) for row in passing_cells),
             default=None,
@@ -386,7 +510,15 @@ def main() -> None:
     _write_csv(args.output_dir / "production_cells.csv", cell_rows)
     _write_csv(args.output_dir / "candidate_ranking.csv", ranked)
     _write_csv(args.output_dir / "m10_shortlist.csv", shortlist)
+    _write_csv(
+        args.output_dir / "m10_numerical_sentinel_candidates.csv",
+        sentinel_candidates,
+    )
     _atomic_json(args.output_dir / "candidate_ranking.json", ranked)
+    _atomic_json(
+        args.output_dir / "m10_numerical_sentinel_release.json",
+        sentinel_release,
+    )
     _atomic_json(args.output_dir / "production_summary.json", summary)
     lines = [
         "# Stage 4 production audit",
@@ -406,6 +538,10 @@ def main() -> None:
             f"EXTEND={counts['EXTEND']}, STOP={counts['STOP']}"
         ),
         f"- m=10 sentinel shortlist: {len(shortlist)}",
+        (
+            "- Numerical-only beta=4 m=10 sentinel released: "
+            f"{numerical_sentinel is not None}"
+        ),
         f"- Validation errors: {len(validation_errors)}",
         "",
         "A statistical-only STOP is not a physical no-go statement.",

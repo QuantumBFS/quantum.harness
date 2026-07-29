@@ -5,6 +5,7 @@ import pytest
 from tensor_square.stage4_analysis import (
     aggregate_production_cell,
     aggregate_replica_estimate,
+    classify_numerical_sentinel,
     classify_stage4_candidate,
     metric_trend,
     PRODUCTION_METRICS,
@@ -185,3 +186,28 @@ def test_competing_candidate_requires_size_trend_and_diagnostic() -> None:
     assert result["classification"] == "SURVIVE"
     assert result["primary_size_strict"] is True
     assert result["independent_diagnostic_support"] is True
+
+
+def test_beta4_numerical_sentinel_uses_same_size_and_diagnostic_gates() -> None:
+    rows = [
+        _cell(m=4, beta=4.0, q=1.0, xi=0.1),
+        _cell(m=6, beta=4.0, q=1.3, xi=0.15),
+        _cell(m=8, beta=4.0, q=1.7, xi=0.2),
+    ]
+
+    result = classify_numerical_sentinel(rows, beta=4.0)
+
+    assert result["sentinel_classification"] == "ELIGIBLE"
+    assert result["inference_scope"] == "numerical_only"
+
+
+def test_numerical_sentinel_does_not_release_incomplete_endpoint_set() -> None:
+    rows = [
+        _cell(m=4, beta=4.0, q=1.0, xi=0.1),
+        _cell(m=8, beta=4.0, q=1.7, xi=0.2),
+    ]
+
+    result = classify_numerical_sentinel(rows, beta=4.0)
+
+    assert result["sentinel_classification"] == "STOP"
+    assert result["inference_scope"] == "statistical_only"
