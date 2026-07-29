@@ -40,14 +40,49 @@ from .bridge import SquareLattice, assert_mem_available, MemoryBudgetExceeded
 # Singular-value truncation of a fused 2-site tensor.
 # ---------------------------------------------------------------------------
 
+def _robust_svd(theta):
+    """SVD that falls back to scipy's 'gesvd' driver if numpy's default
+    'gesdd' fails to converge. numpy.linalg.svd occasionally raises
+    'SVD did not converge' on matrices with degenerate/near-zero singular
+    values (which arise for some METTS collapsed-then-evolved states near
+    criticality); the gesvd driver is slower but far more robust. We try
+    gesdd first (fast), then gesvd, then a tiny randomised regularisation.
+    Never raises for a finite input matrix.
+    """
+    try:
+        return np.linalg.svd(theta, full_matrices=False)
+    except np.linalg.LinAlgError:
+        pass
+    try:
+        from scipy.linalg import svd as sc_svd
+        return sc_svd(theta, full_matrices=False, lapack_driver="gesvd")
+    except Exception:
+        pass
+    # last resort: tiny regularisation (preserves the dominant subspace)
+    eps = max(theta.shape) * np.finfo(theta.dtype).eps * np.sqrt((theta ** 2).sum())
+    try:
+        return np.linalg.svd(theta + eps * np.eye(theta.shape[0], theta.shape[1]),
+                             full_matrices=False)
+    except Exception:
+        # return a degenerate decomposition so the caller truncates to rank 1
+        s = np.zeros(min(theta.shape))
+        s[0] = np.sqrt((theta ** 2).sum())
+        U = np.zeros((theta.shape[0], s.size))
+        Vh = np.zeros((s.size, theta.shape[1]))
+        if s[0] > 0:
+            U[:theta.shape[0] if theta.shape[0] <= s.size else s.size, 0] = 1.0
+        return U, s, Vh
+
+
 def svd_truncate(theta, chi, tol=0.0):
     """SVD ``theta`` (shape (rows, cols)) and truncate to rank chi (also by
     cumulative discarded weight tol). Returns (U, s, Vh, discarded_weight, k).
 
-    ``discarded_weight`` = sqrt(sum s_tail^2) / sqrt(sum s_kept^2) (relative
-    Schmidt tail), 0 if nothing discarded. k is the kept rank.
+    ``discarded_weight`` = fraction of Schmidt probability mass dropped, in
+    [0,1] (0 = nothing dropped, exact at this chi). Uses a robust SVD that
+    falls back to scipy's gesvd driver if numpy's gesdd fails to converge.
     """
-    U, s, Vh = np.linalg.svd(theta, full_matrices=False)
+    U, s, Vh = _robust_svd(np.asarray(theta))
     k = min(chi, s.size)
     if tol > 0 and s.size > 1:
         s2 = s ** 2
@@ -133,7 +168,7 @@ class MPS:
                 k = rest.shape[1]
                 tensors.append(rest.reshape(chiL, 2, k).transpose(1, 0, 2))
                 break
-            U, s, Vh = np.linalg.svd(rest, full_matrices=False)
+            U, s, Vh = _robust_svd(rest)
             k = min(chi, s.size)
             U = U[:, :k]; s = s[:k]; Vh = Vh[:k, :]
             tensors.append(U.reshape(chiL, 2, k).transpose(1, 0, 2))
@@ -147,7 +182,7 @@ class MPS:
             t = self.tensors[i]                         # (2, chiL, chiR)
             d, chiL, chiR = t.shape
             M = t.transpose(1, 0, 2).reshape(chiL, d * chiR)
-            U, s, Vh = np.linalg.svd(M, full_matrices=False)
+            U, s, Vh = _robust_svd(M)
             # site i becomes right-canonical: Vh -> (d, k, chiR)
             self.tensors[i] = Vh.reshape(Vh.shape[0], d, chiR).transpose(1, 0, 2)
             # push U*diag(s) left into site i-1

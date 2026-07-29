@@ -361,7 +361,8 @@ class MPSBackend:
         t = mps.tensors[pos]                          # (2, chiL, chiR)
         d, chiL, chiR = t.shape
         M = t.transpose(1, 0, 2).reshape(chiL * d, chiR)
-        U, s, Vh = np.linalg.svd(M, full_matrices=False)
+        from .mps import _robust_svd
+        U, s, Vh = _robust_svd(M)
         k = min(self.chi, s.size)
         U = U[:, :k]; s = s[:k]; Vh = Vh[:k, :]
         mps.tensors[pos] = U.reshape(chiL, d, k).transpose(1, 0, 2)  # left-unitary
