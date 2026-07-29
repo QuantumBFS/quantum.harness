@@ -532,3 +532,228 @@ def test_collection_validates_ownership_detects_duplicates_and_clears_retries(
     stale = thin.collect_run(tmp_path)
     assert stale["terminal"] == 0
     assert stale["stale"] >= 1
+
+
+def _write_parent_terminal_manifests(
+    parent: Path,
+    *,
+    survivors: set[int],
+) -> dict[str, object]:
+    """Hand-build a complete Stage-1 terminal fixture for survivor planning."""
+
+    thin.plan_run(run_dir=parent, source_commit=SOURCE_COMMIT, run_id="parent")
+    plan = json.loads((parent / "plan-summary.json").read_text(encoding="utf-8"))
+    for index, entry in enumerate(plan["candidates"]):
+        role = "wsl" if entry["shard"] < 14 else "cpu"
+        status = (
+            "survivor-shallow-zero-failure"
+            if index in survivors
+            else "rejected-negative"
+        )
+        manifest = {
+            "schema_version": thin.SCHEMA_VERSION,
+            "run_id": "parent",
+            "protocol_hash": plan["protocol_hash"],
+            "source_commit": SOURCE_COMMIT,
+            "candidate_id": entry["candidate_id"],
+            "card_sha256": entry["card_sha256"],
+            "status": status,
+            "tested_words": 22 if status.startswith("survivor") else 1,
+            "template": entry["template"],
+            "dimension": entry["dimension"],
+            "machine_role": role,
+            "shard": entry["shard"],
+            "runtime_seconds": 0.1,
+            "oracle": "oracle.weights.classify_product",
+            "oracle_version": thin.ORACLE_VERSION,
+            "word_order": thin.WORD_ORDER,
+            "depths": [2, 3, 4],
+            "minimum_sigma_min_I_plus_D": 0.5,
+            "minimum_sigma_word_indices": [0, 1],
+            "first_failure": None if status.startswith("survivor") else {
+                "classification": "negative",
+                "word_indices": [0, 1],
+                "depth": 2,
+                "sigma_min_I_plus_D": 0.5,
+                "condition_number_I_plus_D": 2.0,
+            },
+        }
+        path = parent / "candidates" / entry["candidate_id"] / "manifest.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+    return plan
+
+
+def test_pressure_words_are_complete_and_ordered() -> None:
+    # A missing mixed word, or an added pure repeat, would weaken the pressure run.
+    words = thin.mixed_words(2, depths=thin.PRESSURE_DEPTHS)
+    assert len(words) == len(set(words)) == 472
+    assert words == tuple(sorted(words, key=lambda word: (len(word), word)))
+    for depth in thin.PRESSURE_DEPTHS:
+        at_depth = [word for word in words if len(word) == depth]
+        assert len(at_depth) == 2**depth - 2
+        assert (0,) * depth not in at_depth
+        assert (1,) * depth not in at_depth
+
+
+def test_survivor_plan_selects_only_validated_parent_survivors(tmp_path: Path) -> None:
+    # Accepting rejected cards here would change a Stage-2 scientific claim.
+    parent = tmp_path / "stage-1"
+    parent_plan = _write_parent_terminal_manifests(parent, survivors={0, 37})
+
+    summary = thin.plan_survivor_run(
+        parent_run_dir=parent,
+        run_dir=tmp_path / "stage-2",
+        source_commit=SOURCE_COMMIT,
+        run_id="pressure",
+    )
+
+    stage2 = json.loads(
+        (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
+    )
+    selected = [parent_plan["candidates"][index] for index in (0, 37)]
+    assert summary["planned"] == 2
+    assert stage2["candidates"] == selected
+    assert stage2["depths"] == [5, 6, 7, 8]
+    assert stage2["survivor_status"] == "survivor-pressure-zero-failure"
+    assert stage2["parent_run_id"] == "parent"
+    assert stage2["parent_protocol_hash"] == parent_plan["protocol_hash"]
+
+
+@pytest.mark.parametrize("breakage", ("missing", "stale", "duplicate", "unresolved"))
+def test_survivor_planning_fails_closed_on_incomplete_parent_collection(
+    tmp_path: Path,
+    breakage: str,
+) -> None:
+    # Treating operational uncertainty as a survivor would promote an unvalidated card.
+    parent = tmp_path / "stage-1"
+    plan = _write_parent_terminal_manifests(parent, survivors={0})
+    entry = plan["candidates"][1]
+    manifest_path = parent / "candidates" / entry["candidate_id"] / "manifest.json"
+    if breakage == "missing":
+        manifest_path.unlink()
+    elif breakage == "stale":
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["machine_role"] = "cpu" if manifest["machine_role"] == "wsl" else "wsl"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    elif breakage == "duplicate":
+        (manifest_path.parent / "manifest-returned.json").write_text(
+            manifest_path.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+    else:
+        logs = parent / "logs"
+        logs.mkdir()
+        (logs / "retry.json").write_text(
+            json.dumps({"errors": [{"candidate_id": entry["candidate_id"]}]}),
+            encoding="utf-8",
+        )
+
+    with pytest.raises(RuntimeError, match="missing|stale|duplicate|unresolved|parent"):
+        thin.plan_survivor_run(
+            parent_run_dir=parent,
+            run_dir=tmp_path / "stage-2",
+            source_commit=SOURCE_COMMIT,
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("run_id", "protocol_hash", "source_commit", "card_sha256", "status"),
+)
+def test_survivor_planning_rejects_tampered_parent_provenance(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    # Parent identity tampering must not be able to manufacture a pressure candidate.
+    parent = tmp_path / "stage-1"
+    plan = _write_parent_terminal_manifests(parent, survivors={0})
+    if field in {"run_id", "protocol_hash", "source_commit"}:
+        path = parent / "plan-summary.json"
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload[field] = "2" * 40 if field == "source_commit" else "tampered"
+    else:
+        entry = plan["candidates"][0]
+        path = parent / "candidates" / entry["candidate_id"] / "manifest.json"
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload[field] = "f" * 64 if field == "card_sha256" else "rejected-negative"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="hash|protocol|stale|parent|card"):
+        thin.plan_survivor_run(
+            parent_run_dir=parent,
+            run_dir=tmp_path / "stage-2",
+            source_commit=SOURCE_COMMIT,
+        )
+
+
+def test_pressure_protocol_binds_parent_and_stage_one_plan_remains_thin(
+    tmp_path: Path,
+) -> None:
+    # Omitting provenance or changing thin defaults would permit cross-run substitution.
+    parent = tmp_path / "stage-1"
+    _write_parent_terminal_manifests(parent, survivors={0})
+    thin.plan_survivor_run(
+        parent_run_dir=parent,
+        run_dir=tmp_path / "stage-2",
+        source_commit=SOURCE_COMMIT,
+    )
+    pressure = json.loads(
+        (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
+    )
+    spec = json.loads((tmp_path / "stage-2" / "specs" / "shard-00.json").read_text())
+    assert pressure["plan_hash"] != pressure["parent_plan_hash"]
+    assert pressure["parent_plan_hash"] in thin._canonical_json(pressure)
+    assert spec["depths"] == [5, 6, 7, 8]
+    assert spec["parent_protocol_hash"] == pressure["parent_protocol_hash"]
+
+    thin.plan_run(run_dir=tmp_path / "thin", source_commit=SOURCE_COMMIT, run_id="full")
+    thin_plan = json.loads((tmp_path / "thin" / "plan-summary.json").read_text())
+    thin_spec = json.loads((tmp_path / "thin" / "specs" / "shard-00.json").read_text())
+    assert thin_plan["depths"] == [2, 3, 4]
+    assert thin_spec["depths"] == [2, 3, 4]
+    assert "parent_plan_hash" not in thin_plan
+    assert "parent_protocol_hash" not in thin_spec
+
+
+@pytest.mark.parametrize(
+    ("classifications", "status", "tested"),
+    (
+        (["positive"] * 472, "survivor-pressure-zero-failure", 472),
+        (["positive", "negative"], "rejected-negative", 2),
+        (["complex"], "rejected-complex", 1),
+        (["uncertain"], "uncertain-high-precision", 1),
+    ),
+)
+def test_pressure_run_uses_hash_bound_words_and_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    classifications: list[str],
+    status: str,
+    tested: int,
+) -> None:
+    # Falling back to shallow words or status would mislabel the Stage-2 result.
+    parent = tmp_path / "stage-1"
+    _write_parent_terminal_manifests(parent, survivors={0})
+    thin.plan_survivor_run(
+        parent_run_dir=parent,
+        run_dir=tmp_path / "stage-2",
+        source_commit=SOURCE_COMMIT,
+    )
+    spec_path = tmp_path / "stage-2" / "specs" / "shard-00.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    if not spec["candidates"]:
+        spec_path = next((tmp_path / "stage-2" / "specs").glob("shard-*.json"))
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["candidates"] = spec["candidates"][:1]
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+    iterator = iter(classifications)
+    monkeypatch.setattr(thin.weights, "classify_product", lambda _: _result(next(iterator)))
+
+    assert thin.run_spec(spec_path) == {"completed": 1, "reused": 0, "errors": 0}
+    entry = spec["candidates"][0]
+    manifest = json.loads(
+        (tmp_path / "stage-2" / "candidates" / entry["candidate_id"] / "manifest.json").read_text()
+    )
+    assert manifest["status"] == status
+    assert manifest["planned_words"] == 472
+    assert manifest["tested_words"] == tested
