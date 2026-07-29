@@ -266,6 +266,123 @@ end
     end
 end
 
+@testset "non-QN zero terminal resumes through public HDF5 path" begin
+    parameters = FiniteBathParameters(
+        [0.0], [0.2]; U = 0.8, epsilon_d = -0.4, mu = 0.0
+    )
+    common = (;
+        beta = 0.04,
+        tau = [0.02],
+        green_insertion = :creation,
+        time_step = 0.02,
+        cutoff = 1.0e-12,
+        maxdim = 32,
+    )
+    identity = CheckpointIdentity(;
+        request_sha256 = repeat("1", 64),
+        input_payload_sha256 = repeat("2", 64),
+        bath_sha256 = repeat("3", 64),
+        solver_settings = Dict("beta" => common.beta),
+        source_hashes = Dict("observables" => repeat("4", 64)),
+        project_toml_sha256 = repeat("5", 64),
+        manifest_toml_sha256 = repeat("6", 64),
+        julia_version = string(VERSION),
+        itensors_version = string(Base.pkgversion(ITensors)),
+        itensormps_version = string(Base.pkgversion(ITensorMPS)),
+        hdf5_version = "0.17.3",
+        checkpoint_schema = 1,
+        writer_version = "1.0.0",
+    )
+    mktempdir() do before_root
+        before_written = Ref(false)
+        interruption = try
+            finite_bath_observables(
+                parameters;
+                common...,
+                checkpoint_manager = (psi, state) -> begin
+                    completed_steps =
+                        state.evolution_state === nothing ?
+                        0 :
+                        state.evolution_state.completed_steps
+                    write_checkpoint_generation(
+                        before_root,
+                        identity,
+                        CheckpointCursor(completed_steps),
+                        psi,
+                        state,
+                    )
+                    cursor = state.cursor
+                    before_written[] =
+                        cursor.phase === :green &&
+                        cursor.tau_index == 1 &&
+                        cursor.spin === :up &&
+                        cursor.segment === :before &&
+                        state.evolution_state !== nothing &&
+                        state.evolution_state.completed_steps == 1
+                end,
+                stop_requested = () -> before_written[],
+            )
+            nothing
+        catch error
+            error
+        end
+        @test interruption isa ObservableInterrupted
+        before_loaded =
+            load_current_checkpoint(before_root, identity)
+        blocked = MPS(
+            siteinds(before_loaded.psi),
+            ["Up", "Emp", "Emp", "Emp"],
+        )
+
+        mktempdir() do terminal_root
+            terminal_written = Ref(false)
+            terminal_interruption = try
+                finite_bath_observables(
+                    parameters;
+                    common...,
+                    resume = (;
+                        psi = blocked,
+                        resume_state = before_loaded.resume_state,
+                    ),
+                    checkpoint_manager = (psi, state) -> begin
+                        completed_steps =
+                            state.evolution_state === nothing ?
+                            0 :
+                            state.evolution_state.completed_steps
+                        write_checkpoint_generation(
+                            terminal_root,
+                            identity,
+                            CheckpointCursor(completed_steps),
+                            psi,
+                            state,
+                        )
+                        terminal_written[] =
+                            state.cursor.segment === :terminal
+                    end,
+                    stop_requested = () -> terminal_written[],
+                )
+                nothing
+            catch error
+                error
+            end
+            @test terminal_interruption isa ObservableInterrupted
+            @test terminal_interruption.psi === nothing
+            terminal_loaded =
+                load_current_checkpoint(terminal_root, identity)
+            @test terminal_loaded.psi === nothing
+            @test terminal_loaded.resume_state.cursor.segment === :terminal
+            @test terminal_loaded.resume_state.data.branch_status === :zero
+            @test terminal_loaded.resume_state.data.expected_sector === nothing
+
+            result = finite_bath_observables(
+                parameters; common..., resume = terminal_loaded
+            )
+            @test result.G_up[1] == -0.0
+            @test result.diagnostics.green_up[1].settings.after_steps == 0
+        end
+    end
+end
+
 function observables_dense_annihilation(n_modes::Int, mode::Int)
     dimension = 1 << n_modes
     operator = zeros(Float64, dimension, dimension)

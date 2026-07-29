@@ -1054,8 +1054,7 @@ function _validate_observable_resume(state::ObservableResumeState)
                 state.evolution_state.completed_steps > 0 ||
                 throw(ArgumentError("after cursor evolution state has no completed step"))
         else
-            data.branch_status === :zero &&
-                data.expected_sector !== nothing ||
+            data.branch_status === :zero ||
                 throw(ArgumentError("terminal cursor lacks zero-branch state"))
             state.evolution_state === nothing ||
                 throw(ArgumentError("terminal cursor cannot carry evolution state"))
