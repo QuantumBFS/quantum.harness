@@ -1,0 +1,43 @@
+Problem
+  Name                   :                 
+  Objective sense        : minimize        
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 4               
+  Affine conic cons.     : 6 (75888 rows)
+  Disjunctive cons.      : 0               
+  Cones                  : 0               
+  Scalar variables       : 1831            
+  Matrix variables       : 0               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.01            
+Lin. dep.  - primal attempts        : 1                 successes              : 1               
+Lin. dep.  - dual attempts          : 0                 successes              : 0               
+Lin. dep.  - primal deps.           : 0                 dual deps.             : 0               
+Presolve terminated. Time: 0.03    
+Optimizer  - threads                : 32              
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 75891           
+Optimizer  - Cones                  : 1               
+Optimizer  - Scalar variables       : 1831              conic                  : 1831            
+Optimizer  - Semi-definite variables: 6                 scalarized             : 75888           
+Factor     - setup time             : 736.50          
+Factor     - dense det. time        : 333.54            GP order time          : 2.37            
+Factor     - nonzeros before factor : 1.67e+09          after factor           : 2.17e+09        
+Factor     - dense dim.             : 20                flops                  : 8.20e+13        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   1.0e+00  1.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  736.63
+1   4.0e-01  4.0e-01  2.4e-01  3.84e+00   0.000000000e+00   1.557996271e-01   4.0e-01  968.53
+2   1.9e-02  1.9e-02  2.4e-03  1.74e+00   0.000000000e+00   9.990308126e-03   1.9e-02  1233.44
+3   3.8e-07  3.8e-07  1.9e-10  1.04e+00   0.000000000e+00   1.205551942e-07   3.8e-07  1476.62
+4   4.0e-12  2.0e-13  1.0e-16  1.00e+00   0.000000000e+00   -4.505336346e-14  2.0e-13  1699.66
+Optimizer terminated. Time: 1700.50 
+
