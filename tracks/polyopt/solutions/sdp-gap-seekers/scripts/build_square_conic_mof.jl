@@ -143,7 +143,7 @@ function source_metadata()
     return Dict(
         "git_commit" => git_output("rev-parse", "HEAD"),
         "git_tree" => git_output("rev-parse", "HEAD^{tree}"),
-        "git_branch" => git_output("branch", "--show-current"),
+        "git_branch" => git_output("rev-parse", "--abbrev-ref", "HEAD"),
         "dirty_paths_at_build" => dirty_paths,
         "files_sha256" => Dict(
             path => file_sha256(joinpath(REPOSITORY_ROOT, path))
