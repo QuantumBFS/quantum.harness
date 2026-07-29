@@ -76,6 +76,20 @@ function spin_isotypic_truth_dict(truth)
     )
 end
 
+function spin_stabilizer_structure_dict(structure)
+    return Dict(
+        "exact" => structure.exact,
+        "dimensions_match" => structure.dimensions_match,
+        "records" => [
+            Dict(
+                string(key) => value isa Symbol ? string(value) : value
+                for (key, value) in pairs(record)
+            )
+            for record in structure.records
+        ],
+    )
+end
+
 function verify_reloaded_spin_isotypic_model(
     model::JuMP.Model,
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
@@ -764,10 +778,16 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             materialize_coefficients=materialize_isotypic_coefficients,
         )
     isotypic = isotypic_measurement.value
+    spin_stabilizer_structure =
+        shastry_spin_stabilizer_structure(spin_spatial)
+    spin_stabilizer_structure.exact ||
+        error("spin-stabilizer structural gate failed")
     report =
         shastry_full_state_spin_isotypic_reduced_assembly_report(isotypic)
     metadata["stages"]["spin_isotypic"] =
         measurement_dict(isotypic_measurement)
+    metadata["spin_stabilizer_structure"] =
+        spin_stabilizer_structure_dict(spin_stabilizer_structure)
     metadata["reduced"] = spin_isotypic_report_dict(report)
     metadata["reduced"]["positive_block_labels"] = String[
         ShastryFullStateSpinIsotypicReduction.block_label(block)

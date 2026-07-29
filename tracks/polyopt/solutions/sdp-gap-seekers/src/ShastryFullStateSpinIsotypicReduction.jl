@@ -15,6 +15,7 @@ using ..ExactSymmetryReduction:
 using ..ShastryFullStateSpatialReduction:
     ShastrySpatialPSDBlock
 using ..ShastryFullStateSpinSpatialReduction:
+    SpinAxisPermutation,
     SPIN_AXIS_PERMUTATIONS,
     ShastryFullStateSpinSpatialReducedPrimalAssembly,
     spin_character,
@@ -26,6 +27,7 @@ export SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
        ShastrySpinIsotypicPSDBlock,
        ShastryFullStateSpinIsotypicReducedPrimalAssembly,
        shastry_spin_isotypic_truth,
+       shastry_spin_stabilizer_structure,
        shastry_spin_isotypic_block_entry,
        assemble_shastry_full_state_spin_isotypic_reduced_primal,
        shastry_full_state_spin_isotypic_reduced_assembly_report
@@ -266,6 +268,110 @@ function identity_rows(block::ShastrySpatialPSDBlock)
         ShastrySpinIsotypicRow([index], [1])
         for index in eachindex(block.rows)
     ]
+end
+
+function nontrivial_character_stabilizer(block::ShastrySpatialPSDBlock)
+    character = block.source_block.character
+    character == TRIVIAL_CHARACTER &&
+        throw(ArgumentError("the trivial character has no selected stabilizer"))
+    identity = first(SPIN_AXIS_PERMUTATIONS)
+    candidates = SpinAxisPermutation[
+        permutation
+        for permutation in SPIN_AXIS_PERMUTATIONS
+        if permutation != identity &&
+           spin_character(character, permutation) == character
+    ]
+    length(candidates) == 1 ||
+        error("a nontrivial V4 character does not have one S3 stabilizer")
+    return only(candidates)
+end
+
+"""
+Split one nontrivial-V4 row space under its order-two S3 stabilizer.
+
+The plus rows carry the off-diagonal component of spin `l=2`; the minus rows
+carry spin `l=1`. This routine proves only the signed-involution row
+decomposition. Coefficient cross-zero and continuous-spin cone congruence are
+separate truth gates.
+"""
+function stabilizer_isotypic_rows(block::ShastrySpatialPSDBlock)
+    permutation = nontrivial_character_stabilizer(block)
+    targets, signs = spatial_row_action(block, block, permutation)
+    all(targets[targets[index]] == index for index in eachindex(targets)) ||
+        error("nontrivial-character stabilizer is not an involution")
+    all(
+        signs[index] * signs[targets[index]] == 1
+        for index in eachindex(signs)
+    ) || error("nontrivial-character stabilizer has inconsistent signs")
+
+    visited = falses(length(block.rows))
+    plus = ShastrySpinIsotypicRow[]
+    minus = ShastrySpinIsotypicRow[]
+    for start in eachindex(block.rows)
+        visited[start] && continue
+        target = targets[start]
+        if target == start
+            destination = signs[start] == 1 ? plus : minus
+            push!(destination, ShastrySpinIsotypicRow([start], [1]))
+            visited[start] = true
+            continue
+        end
+        visited[target] && error("stabilizer row orbits overlap")
+        gauge = signs[start]
+        push!(
+            plus,
+            ShastrySpinIsotypicRow([start, target], [1, gauge]),
+        )
+        push!(
+            minus,
+            ShastrySpinIsotypicRow([start, target], [1, -gauge]),
+        )
+        visited[start] = true
+        visited[target] = true
+    end
+    length(block.rows) == length(plus) + length(minus) ||
+        error("stabilizer eigenspace dimensions do not span the source")
+    return (plus=plus, minus=minus, permutation=permutation)
+end
+
+"""Inventory the exact S3-stabilizer split before coefficient work."""
+function shastry_spin_stabilizer_structure(
+    assembly::ShastryFullStateSpinSpatialReducedPrimalAssembly,
+)
+    standard_dimensions = Dict{Tuple{Symbol,Symbol,Symbol},Int}()
+    for block in [assembly.positive_blocks; assembly.gap_blocks]
+        block.source_block.character == TRIVIAL_CHARACTER || continue
+        decomposition = trivial_isotypic_rows(block)
+        standard_dimensions[block_group_key(block)] =
+            length(decomposition.standard_minus)
+    end
+
+    records = NamedTuple[]
+    dimensions_match = true
+    for block in [assembly.positive_blocks; assembly.gap_blocks]
+        block.source_block.character == TRIVIAL_CHARACTER && continue
+        decomposition = stabilizer_isotypic_rows(block)
+        key = block_group_key(block)
+        standard_dimension = get(standard_dimensions, key, 0)
+        dimensions_match &= length(decomposition.plus) == standard_dimension
+        character = block.source_block.character
+        push!(records, (
+            role=block.source_block.role,
+            family=block.source_block.family,
+            character_rx=character.rx,
+            character_ry=character.ry,
+            spatial_parity=block.parity,
+            source_dimension=length(block.rows),
+            spin_l2_plus_dimension=length(decomposition.plus),
+            spin_l1_minus_dimension=length(decomposition.minus),
+            standard_l2_dimension=standard_dimension,
+        ))
+    end
+    return (
+        exact=dimensions_match && !isempty(records),
+        dimensions_match=dimensions_match,
+        records=records,
+    )
 end
 
 function combined_block_entry(
