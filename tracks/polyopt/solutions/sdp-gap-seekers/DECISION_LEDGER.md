@@ -1356,3 +1356,20 @@ projection, native bar dual, 32 CPUs, 114000 MiB, and `1e-9` audit. The runner
 requires hash `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
 Next action: monitor exact reconstruction, factorization, and an audited
 terminal result; do not alter its shared checkout while running.
+
+Job `118185571` passed the second exact construction gate: its checkpoint
+contains the required SHA-256
+`fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`,
+343,761 constraints, 26 PSD blocks / 4,446,492 packed entries, and 16,647,108
+terms. It then ended `OUT_OF_MEMORY` after 37:56, just after presolve and
+before any interior-point iteration. Slurm measured 112,077,220 KiB MaxRSS;
+`/usr/bin/time` measured 113,680,612 KiB. The exact formulation is reproduced,
+but no feasibility or gap conclusion follows. Do not repeat this normal-node
+signature.
+
+Meanwhile, preserved unreduced high-memory job `118178932` started at
+2026-07-29T19:43:26Z from immutable commit `a77fc0e`. It reached the same
+post-presolve boundary with 461,186 constraints and used 135,791,748 KiB at
+25:32 on a 250-GiB allocation. Continue monitoring it. A reduced high-memory
+solve is authorized only as the changed fallback after this existing route
+terminates or yields a decision; it is not launched concurrently.

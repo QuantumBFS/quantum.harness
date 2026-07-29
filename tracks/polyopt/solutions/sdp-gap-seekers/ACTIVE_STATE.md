@@ -771,3 +771,16 @@ Updated: 2026-07-29 UTC.
   `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
   and uses audit tolerance `1e-9`. Monitor through the hash gate and either a
   residual-checked terminal status or fresh-task certificate replay.
+- Reduced solve `118185571` exactly reproduced the independent 343,761-row
+  hash and entered Mosek, but ended `OUT_OF_MEMORY` after 37:56 immediately
+  after presolve and before an interior-point iteration. Slurm MaxRSS was
+  112,077,220 KiB (`/usr/bin/time`: 113,680,612 KiB) against 114000 MiB. This
+  proves the second construction gate, but it is not feasibility or gap
+  evidence and the same normal-node signature must not be repeated.
+- Preserved unreduced high-memory job `118178932` started at
+  2026-07-29T19:43:26Z from immutable commit `a77fc0e`. It independently
+  rebuilt 461,186 constraints / 26 PSD blocks, entered Mosek, completed
+  presolve, and at 25:32 used 135,791,748 KiB on its 250-GiB allocation.
+  Monitor it through factorization. If it fails operationally or remains
+  undetermined, the changed next solve is the 343,761-row SO(3) formulation on
+  a high-memory node, not another 114000-MiB attempt.

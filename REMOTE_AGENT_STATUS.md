@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T19:29:51Z
+Updated: 2026-07-29T20:09:53Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -227,5 +227,16 @@ Updated: 2026-07-29T19:29:51Z
   `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
   and audit tolerance `1e-9`. Monitor through exact reconstruction and the
   first solver evidence; do not update its checkout while running.
+- Reduced solve `118185571` matched the required 343,761-row coefficient hash,
+  then ended `OUT_OF_MEMORY` after 37:56 immediately after presolve and before
+  an iteration. Slurm MaxRSS was 112,077,220 KiB (`/usr/bin/time`:
+  113,680,612 KiB) against 114000 MiB. This supplies the second construction
+  match but no numerical or physical result; do not repeat the signature.
+- Preserved unreduced high-memory job `118178932` started at
+  2026-07-29T19:43:26Z from immutable commit `a77fc0e`. It has built the exact
+  461,186-constraint task, completed presolve, and used 135,791,748 KiB at
+  25:32 on its 250-GiB allocation. It is the active decision route. If it
+  fails or is numerically undetermined, launch the reduced formulation on high
+  memory as the changed fallback.
 
 No user input or new credential is currently required.
