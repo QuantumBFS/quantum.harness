@@ -340,18 +340,20 @@ function write_mosek_task_artifact(
     backend = JuMP.unsafe_backend(model)
     backend isa MosekTools.Optimizer ||
         error("direct solve does not expose a MosekTools backend")
-    temporary = replace(path, r"(\.task\.gz)$" => s".tmp\1")
+    endswith(path, ".task") ||
+        error("Mosek binary task artifact must end in .task")
+    temporary = replace(path, r"(\.task)$" => s".tmp\1")
     ispath(path) && error("refusing existing Mosek task artifact: $path")
     ispath(temporary) &&
         error("refusing existing Mosek task temporary artifact: $temporary")
-    Mosek.writedata(backend.task, temporary)
+    Mosek.writetask(backend.task, temporary)
     mv(temporary, path)
     return Dict(
         "available" => true,
         "filename" => basename(path),
         "bytes" => filesize(path),
         "sha256" => file_sha256(path),
-        "format" => "mosek-task-gzip",
+        "format" => "mosek-binary-task",
     )
 end
 
@@ -645,7 +647,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             progress("preserve the complete Mosek task for ray replay")
             metadata["mosek_infeasibility_task"] =
                 write_mosek_task_artifact(
-                    joinpath(options.output, "mosek-infeasibility.task.gz"),
+                    joinpath(options.output, "mosek-infeasibility.task"),
                     jump_model.model,
                 )
         end

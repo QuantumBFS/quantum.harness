@@ -15,7 +15,7 @@ end
 function replay_usage()
     println(
         "Usage: julia replay_mosek_infeasibility_artifact.jl " *
-        "--task TASK.task.gz --solution SOLUTIONS.bsol.gz --output REPORT.toml " *
+        "--task TASK.task --solution SOLUTIONS.bsol.gz --output REPORT.toml " *
         "--expected-task-sha256 HEX --expected-solution-sha256 HEX " *
         "[--tolerance 1e-7]",
     )
