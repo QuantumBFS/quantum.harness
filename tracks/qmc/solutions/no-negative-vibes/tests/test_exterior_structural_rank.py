@@ -108,7 +108,7 @@ def test_sector_trace_gate_separates_known_exact5_residue() -> None:
         candidate_card(template="exact5-oddcycle-block-pair", seed=13)
     )
     obstructed = sector_trace_gate(
-        candidate_card(template="exact5-oddcycle-block-pair", seed=14)
+        candidate_card(template="exact5-oddcycle-block-pair", seed=0)
     )
 
     assert trace_clean["status"] == "trace-clean-depth4"
