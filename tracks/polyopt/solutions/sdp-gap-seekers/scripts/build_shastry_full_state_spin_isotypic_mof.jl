@@ -19,6 +19,12 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
 ))
 using .ShastryFullStateSpinIsotypicDualCertificateJuMP
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
+))
+using .ShastryFullStateSpinIsotypicDualCertificateMosek
 using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
@@ -30,6 +36,7 @@ function spin_isotypic_source_dict()
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicReduction.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spin_isotypic_mof.jl",
     )
         source["files_sha256"][file] =
@@ -273,23 +280,15 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         )
         log_level =
             parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
-        certificate_model = JuMP.direct_model(MosekTools.Optimizer())
-        JuMP.set_time_limit_sec(certificate_model, time_limit_seconds)
-        JuMP.set_optimizer_attribute(
-            certificate_model,
-            "MSK_IPAR_NUM_THREADS",
-            threads,
-        )
-        JuMP.set_optimizer_attribute(
-            certificate_model,
-            "MSK_IPAR_LOG",
-            log_level,
-        )
-        progress("build native dual infeasibility certificate")
+        progress("build low-level native Mosek dual certificate")
         certificate_measurement = @timed(
-            build_shastry_full_state_spin_isotypic_dual_certificate(
+            build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
                 isotypic;
-                model=certificate_model,
+                threads=threads,
+                time_limit_seconds=time_limit_seconds,
+                log_level=log_level,
+                progress_callback=progress,
+                fingerprint_coefficients=options.patch_level == 1,
             )
         )
         certificate = certificate_measurement.value
@@ -299,51 +298,35 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             "moment_matching_equalities" =>
                 length(certificate.moment_constraints),
             "native_psd_blocks" =>
-                length(certificate.psd_constraint_indices),
+                certificate.native_psd_blocks,
             "equality_multipliers" =>
-                length(certificate.equality_multiplier_variables),
+                certificate.equality_multipliers,
             "scalar_coefficient_terms" =>
-                certificate.scalar_term_count,
+                certificate.scalar_coefficient_terms,
+            "coefficient_map_sha256" =>
+                certificate.coefficient_map_sha256,
         )
         write_checkpoint(checkpoint_path, metadata)
         progress(
             "optimize native dual certificate; threads=$threads, " *
             "time_limit=$(time_limit_seconds)s",
         )
-        solve_measurement =
-            @timed JuMP.optimize!(certificate.model)
+        solve_measurement = @timed(
+            optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!(
+                certificate,
+            )
+        )
         metadata["stages"]["solve"] =
             measurement_dict(solve_measurement)
-        termination = JuMP.termination_status(certificate.model)
-        primal_status = JuMP.primal_status(certificate.model)
-        classification = if termination == JuMP.MOI.OPTIMAL &&
-                            primal_status in (
-                                JuMP.MOI.FEASIBLE_POINT,
-                                JuMP.MOI.NEARLY_FEASIBLE_POINT,
-                            )
-            "primal_infeasibility_certificate_found"
-        elseif termination in (
-            JuMP.MOI.INFEASIBLE,
-            JuMP.MOI.INFEASIBLE_OR_UNBOUNDED,
-        )
-            "no_dual_certificate_at_this_relaxation"
-        else
-            "dual_certificate_numerically_undetermined"
-        end
+        solve_result = solve_measurement.value
         metadata["solve"] = Dict(
-            "formulation" => "native-dual-farkas-certificate-v1",
-            "classification" => classification,
-            "termination_status" => string(termination),
-            "primal_status" => string(primal_status),
-            "dual_status" =>
-                string(JuMP.dual_status(certificate.model)),
-            "raw_status" => try
-                JuMP.raw_status(certificate.model)
-            catch exception
-                "unavailable: " * sprint(showerror, exception)
-            end,
-            "result_count" => JuMP.result_count(certificate.model),
-            "has_values" => JuMP.has_values(certificate.model),
+            "formulation" =>
+                "low-level-native-mosek-dual-farkas-certificate-v2",
+            "classification" => solve_result.classification,
+            "problem_status" =>
+                sprint(show, solve_result.problem_status),
+            "solution_status" =>
+                sprint(show, solve_result.solution_status),
             "threads" => threads,
             "time_limit_seconds" => time_limit_seconds,
         )
