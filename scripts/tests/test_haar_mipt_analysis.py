@@ -52,15 +52,22 @@ def _synthetic_records(seed, central_charge, per_family):
     return records
 
 
-def _exact_width_rows():
-    # y = 2 - 0.45/L^2 + 1.2/L^4, with deliberately unequal errors.
+def _weighted_l4_rows():
+    # Six non-collinear observations make the three-parameter fit overdetermined.
     return [
         {
             "L": L,
-            "tilde_f": 2.0 - 0.45 / L**2 + 1.2 / L**4,
-            "tilde_f_se": 0.001 * (1 + L / 10),
+            "tilde_f": value,
+            "tilde_f_se": error,
         }
-        for L in (8, 10, 12, 14, 16, 18)
+        for L, value, error in (
+            (2, 1.940, 0.004),
+            (3, 1.972, 0.012),
+            (4, 1.981, 0.006),
+            (5, 1.988, 0.020),
+            (6, 1.989, 0.008),
+            (8, 1.995, 0.005),
+        )
     ]
 
 
@@ -111,17 +118,19 @@ def test_aggregation_requires_two_trajectories_per_family(records):
         module.aggregate_trajectory_records(records)
 
 
-def test_weighted_l2_fit_recovers_hand_derived_line():
+def test_weighted_l2_fit_uses_inverse_variance_weights():
     module = _load_module()
+    # Literal coefficients come from solving (X^T W X)b = X^T W y by hand.
     rows = [
-        {"L": 8, "tilde_f": 1.996875, "tilde_f_se": 0.001},
-        {"L": 10, "tilde_f": 1.998, "tilde_f_se": 0.003},
-        {"L": 20, "tilde_f": 1.9995, "tilde_f_se": 0.002},
+        {"L": 1, "tilde_f": 3.0, "tilde_f_se": 0.10},
+        {"L": 2, "tilde_f": 2.2, "tilde_f_se": 0.20},
+        {"L": 4, "tilde_f": 2.0, "tilde_f_se": 0.40},
+        {"L": 8, "tilde_f": 2.1, "tilde_f_se": 0.05},
     ]
-    result = module.weighted_l2_fit(rows, lmin=10)
-    assert result["intercept"] == pytest.approx(2.0, abs=2e-13)
-    assert result["slope"] == pytest.approx(-0.2, abs=2e-13)
-    assert result["widths"] == [10, 20]
+    result = module.weighted_l2_fit(rows, lmin=1)
+    assert result["intercept"] == pytest.approx(2.078582202111614, abs=2e-13)
+    assert result["slope"] == pytest.approx(0.9146304675716435, abs=2e-13)
+    assert result["widths"] == [1, 2, 4, 8]
 
 
 def test_slope_extrapolation_recovers_known_central_charge():
@@ -136,13 +145,20 @@ def test_slope_extrapolation_recovers_known_central_charge():
     assert result["central_charge"] == pytest.approx(expected_c, abs=2e-13)
 
 
-def test_l4_stability_fit_recovers_hand_derived_coefficients():
+def test_l4_stability_fit_uses_inverse_variance_weights():
     module = _load_module()
-    result = module.l4_stability_fit(_exact_width_rows(), alpha=0.9)
-    assert result["intercept"] == pytest.approx(2.0, abs=2e-12)
-    assert result["l2_coefficient"] == pytest.approx(-0.45, abs=2e-10)
-    assert result["l4_coefficient"] == pytest.approx(1.2, abs=2e-8)
-    assert result["central_charge"] == pytest.approx(3 / np.pi, abs=5e-10)
+    # Literal coefficients independently solve weighted normal equations.
+    result = module.l4_stability_fit(_weighted_l4_rows(), alpha=0.9)
+    assert result["intercept"] == pytest.approx(1.998621121206348, abs=2e-12)
+    assert result["l2_coefficient"] == pytest.approx(
+        -0.2841864320769388, abs=2e-11
+    )
+    assert result["l4_coefficient"] == pytest.approx(
+        0.19934495009559716, abs=2e-10
+    )
+    assert result["central_charge"] == pytest.approx(
+        0.6030623389959197, abs=5e-11
+    )
 
 
 def test_summary_honors_alpha_and_is_json_serializable():
