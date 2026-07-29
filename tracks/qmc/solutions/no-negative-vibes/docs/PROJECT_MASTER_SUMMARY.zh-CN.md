@@ -2,7 +2,7 @@
 
 更新时间：2026-07-29  
 籼至方向结果基线：`26b0d98`
-ZiboJin 方向结果基线：`2ae03be`
+ZiboJin 方向结果基线：`10bfc6a`
 当前分支：`work/xianzhi/bottom-up-positive-cones`
 
 ## 这份文档解决什么问题
@@ -38,7 +38,7 @@ w = det(I + B_L ... B_1)
 - 保存了精确符号反例、80 位高精度重放和一般解析证明；
 - 当前总集成分支完整自动回归为 `370 passed`；
 - ZiboJin 的独立 exterior-cone 草稿分支除一个尚未实现的 R01 classifier 测试模块外，
-  其余 `470 passed`；
+  其余 `471 passed`；
 - 得到三套直接 determinant 恒正构造族：
   TN 路径、odd monomial/block-TN、tensor-square；
 - 得到一套额外的 graded 符号补偿机制；
@@ -131,6 +131,10 @@ mixed-word 穷举和高精度/整数接受门，而不是同一套随机 determi
 | seed61 | exact spectral/sector/cone 审计后进行长词搜索 | 找到长度 150 的精确负 determinant；该候选永久关闭 |
 | oddcycle seeds 117/132/147 | 每个 seed 穷尽全部非空二进制 words 到长度 23 | 每个覆盖 `16,777,214` 个 raw words，全部严格正 |
 | 第一轮长词对抗 | 长度 60/80/100/150，共 304 个 exact winners | 全部严格正，但仍只是有限证据，不是任意深度定理 |
+
+最新提交 `10bfc6a` 另外解除 Python 对超长十进制整数序列化的默认位数限制，并增加
+长度 600 exact replay 回归测试；这是让更长词搜索可以可靠落盘的工程修复，没有改变
+上述科学结论。
 
 其中最容易误报的是 seed61：它曾有 shared exterior cone、长深度零负例和 inverse-HS
 模型，但最终仍被一个 2,223 位整数 numerator 的长度 150 精确反例击穿。这说明
@@ -636,7 +640,7 @@ python -m pytest -q
 ```
 
 ZiboJin 的草稿 PR #3 在独立 worktree 中复核：忽略尚未实现
-`classify_r01_fixture` 的 `tests/test_overlap_klein.py` 后为 `470 passed`；完整收集会
+`classify_r01_fixture` 的 `tests/test_overlap_klein.py` 后为 `471 passed`；完整收集会
 因该缺失函数报错。因此它的科学结果已经写入本文，但代码 PR 仍正确地保持 draft，
 不能标成完整回归通过。
 

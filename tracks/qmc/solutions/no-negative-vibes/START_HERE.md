@@ -101,7 +101,7 @@
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
 - 当前总集成分支完整自动测试为 `370 passed`。ZiboJin 的草稿 PR #3 除一个尚未实现的
-  R01 classifier 测试模块外为 `470 passed`，因此仍保持 draft。
+  R01 classifier 测试模块外为 `471 passed`，因此仍保持 draft。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
