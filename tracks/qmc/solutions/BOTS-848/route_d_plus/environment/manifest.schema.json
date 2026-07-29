@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-environment-v1",
+  "title": "Route D+ environment manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "python_version",
+    "python_executable",
+    "jax_version",
+    "jaxlib_version",
+    "jax_enable_x64",
+    "requested_platform",
+    "device_platforms",
+    "device_kinds",
+    "device_count",
+    "git_commit",
+    "git_dirty",
+    "requirements_lock_sha256",
+    "requirements_lock_path",
+    "hostname",
+    "machine",
+    "system"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-environment-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "python_version": {"type": "string"},
+    "python_executable": {"type": "string"},
+    "jax_version": {"type": "string"},
+    "jaxlib_version": {"type": "string"},
+    "jax_enable_x64": {"const": true},
+    "requested_platform": {"enum": ["cpu", "gpu"]},
+    "device_platforms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "device_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "device_count": {"type": "integer", "minimum": 1},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "requirements_lock_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "requirements_lock_path": {"type": "string"},
+    "hostname": {"type": "string"},
+    "machine": {"type": "string"},
+    "system": {"type": "string"},
+    "cuda_visible_devices": {"type": ["string", "null"]},
+    "slurm_job_id": {"type": ["string", "null"]},
+    "slurm_cluster_name": {"type": ["string", "null"]}
+  }
+}
+

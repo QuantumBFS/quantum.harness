@@ -1,0 +1,34 @@
+schema_version = "challenge-15-route-d-plus-phase1-v1"
+
+[physics]
+geometry = "Haldane sphere"
+filling_numerator = 1
+filling_denominator = 3
+n_electrons = 6
+two_q = 15
+polarization = "fully polarized fermions"
+landau_level = 0
+ground_l = 0
+excited_l = 2
+
+[energy]
+interaction = "pair_only_chord"
+units = "e^2/(epsilon*l_B)"
+background = "omitted_same_N_two_q_gap_cancels"
+pair_estimator = "1/(2*sqrt(Q)*abs(u_i*v_j-u_j*v_i))"
+
+[numeric]
+python_major = 3
+python_minor = 11
+jax_enable_x64 = true
+real_dtype = "float64"
+complex_dtype = "complex128"
+production_platform = "gpu"
+allow_production_cpu_fallback = false
+
+[phase_gate]
+required_manifest_schema = "challenge-15-route-d-plus-environment-v1"
+require_clean_git = true
+require_lock_digest = true
+require_requested_platform = true
+

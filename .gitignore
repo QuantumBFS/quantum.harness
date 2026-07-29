@@ -58,6 +58,7 @@ scripts/_*
 /results/
 /tmp/
 /.external/
+.venv/
 .venv-tenpy/
 .pytest_cache/
 .coverage
