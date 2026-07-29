@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T20:09:53Z
+Updated: 2026-07-29T20:12:00Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -238,5 +238,11 @@ Updated: 2026-07-29T20:09:53Z
   25:32 on its 250-GiB allocation. It is the active decision route. If it
   fails or is numerically undetermined, launch the reduced formulation on high
   memory as the changed fallback.
+- Unreduced high-memory job `118178932` ended `OUT_OF_MEMORY` after 26:30,
+  post-presolve and before an iteration. `/usr/bin/time` measured 262,191,096
+  KiB against 256000 MiB; it produced no numerical decision. The authorized
+  next route is one high-memory run of the independently reproduced 343,761-
+  constraint SO(3) formulation, requiring hash `fac50bcc…bed9a8` and a
+  `1e-9` audit.
 
 No user input or new credential is currently required.

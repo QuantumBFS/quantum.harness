@@ -1373,3 +1373,17 @@ post-presolve boundary with 461,186 constraints and used 135,791,748 KiB at
 25:32 on a 250-GiB allocation. Continue monitoring it. A reduced high-memory
 solve is authorized only as the changed fallback after this existing route
 terminates or yields a decision; it is not launched concurrently.
+
+Job `118178932` ended `OUT_OF_MEMORY` after 26:30, after presolve and before
+an interior-point iteration. Slurm's sampled MaxRSS was 186,906,872 KiB;
+`/usr/bin/time` measured 262,191,096 KiB, essentially the 256000-MiB cgroup
+limit. This closes the unreduced high-memory signature without feasibility or
+gap evidence.
+
+The changed fallback is now authorized: run the independently hash-validated
+343,761-constraint SO(3) dual on the same 256000-MiB partition. Its
+normal-node process peak at optimizer entry was 113,680,612 KiB, and it removes
+25.4615% of the moment constraints, so this directly targets the failed
+factorization. Require hash
+`fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`,
+audit at `1e-9`, and use command-line `--gres-flags=disable-binding`.

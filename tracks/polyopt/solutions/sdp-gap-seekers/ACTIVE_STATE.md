@@ -784,3 +784,11 @@ Updated: 2026-07-29 UTC.
   Monitor it through factorization. If it fails operationally or remains
   undetermined, the changed next solve is the 343,761-row SO(3) formulation on
   a high-memory node, not another 114000-MiB attempt.
+- Unreduced high-memory job `118178932` also ended `OUT_OF_MEMORY`, after
+  26:30 and before an iteration. Slurm sampled 186,906,872 KiB, while
+  `/usr/bin/time` measured 262,191,096 KiB against the 256000-MiB cgroup; no
+  physics result exists. The exact SO(3) fallback is now decision-relevant:
+  submit its already-reproduced 343,761-row task once at 256000 MiB with the
+  required reduced hash and `1e-9` audit. Its normal-node optimizer-entry peak
+  was 113,680,612 KiB versus 262,191,096 KiB for the unreduced task, so this is
+  a materially changed factorization signature, not a duplicate.
