@@ -132,11 +132,15 @@ JuMP.optimize!(infeasible_model)
             joinpath(directory, "infeasible.task"),
             infeasible_model,
         )
+        infeasible_ray = write_mosek_infeasibility_ray_artifact(
+            joinpath(directory, "infeasible.ray.bin"),
+            infeasible_model,
+        )
         replay = mosek_ray_replay_report(
             joinpath(directory, "infeasible.task"),
-            joinpath(directory, "infeasible.bsol.gz");
+            joinpath(directory, "infeasible.ray.bin");
             expected_task_sha256=infeasible_task["sha256"],
-            expected_solution_sha256=infeasible_solution["sha256"],
+            expected_ray_sha256=infeasible_ray["sha256"],
         )
         println("synthetic infeasibility replay audit: ", replay["audit"])
         flush(stdout)
@@ -146,6 +150,6 @@ JuMP.optimize!(infeasible_model)
         @test replay["audit"]["separation_passed"]
         @test replay["audit"]["passed"]
         @test replay["classification"] ==
-              "mosek_native_infeasibility_ray_replayed_float"
+              "mosek_infeasibility_ray_replayed_float"
     end
 end

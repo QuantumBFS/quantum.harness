@@ -357,6 +357,92 @@ function write_mosek_task_artifact(
     )
 end
 
+const MOSEK_INFEASIBILITY_RAY_MAGIC =
+    collect(codeunits("SSMOSEKRAYV1\n"))
+
+function write_ray_u64(io::IO, value::Integer)
+    write(io, htol(UInt64(value)))
+end
+
+function write_ray_float64_vector(io::IO, values::Vector{Float64})
+    write_ray_u64(io, length(values))
+    for value in values
+        write(io, htol(reinterpret(UInt64, value)))
+    end
+end
+
+function write_mosek_infeasibility_ray_artifact(
+    path::AbstractString,
+    model::JuMP.Model,
+)
+    backend = JuMP.unsafe_backend(model)
+    backend isa MosekTools.Optimizer ||
+        error("direct solve does not expose a MosekTools backend")
+    task = backend.task
+    problem_status = Mosek.getprosta(task, Mosek.MSK_SOL_ITR)
+    solution_status = Mosek.getsolsta(task, Mosek.MSK_SOL_ITR)
+    problem_status == Mosek.MSK_PRO_STA_PRIM_INFEAS ||
+        error("refusing ray export without primal-infeasible problem status")
+    solution_status == Mosek.MSK_SOL_STA_PRIM_INFEAS_CER ||
+        error("refusing ray export without a primal-infeasibility certificate")
+
+    y = Mosek.gety(task, Mosek.MSK_SOL_ITR)
+    slc = Mosek.getslc(task, Mosek.MSK_SOL_ITR)
+    suc = Mosek.getsuc(task, Mosek.MSK_SOL_ITR)
+    slx = Mosek.getslx(task, Mosek.MSK_SOL_ITR)
+    sux = Mosek.getsux(task, Mosek.MSK_SOL_ITR)
+    snx = Mosek.getsnx(task, Mosek.MSK_SOL_ITR)
+    doty = Mosek.getaccdotys(task, Mosek.MSK_SOL_ITR)
+    bar_duals = [
+        Mosek.getbarsj(task, Mosek.MSK_SOL_ITR, index)
+        for index in 1:Int(Mosek.getnumbarvar(task))
+    ]
+    all(
+        isfinite,
+        Iterators.flatten((y, slc, suc, slx, sux, snx, doty, bar_duals...)),
+    ) || error("refusing nonfinite Mosek infeasibility ray")
+
+    endswith(path, ".ray.bin") ||
+        error("Mosek ray artifact must end in .ray.bin")
+    temporary = path * ".tmp"
+    ispath(path) && error("refusing existing Mosek ray artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing Mosek ray temporary artifact: $temporary")
+    open(temporary, "w") do io
+        write(io, MOSEK_INFEASIBILITY_RAY_MAGIC)
+        write_ray_u64(io, Int(problem_status))
+        write_ray_u64(io, Int(solution_status))
+        write_ray_u64(io, Int(Mosek.getnumcon(task)))
+        write_ray_u64(io, Int(Mosek.getnumvar(task)))
+        write_ray_u64(io, Int(Mosek.getnumcone(task)))
+        write_ray_u64(io, Int(Mosek.getnumbarvar(task)))
+        for values in (y, slc, suc, slx, sux, snx, doty)
+            write_ray_float64_vector(io, values)
+        end
+        write_ray_u64(io, length(bar_duals))
+        for (index, values) in enumerate(bar_duals)
+            write_ray_u64(io, Int(Mosek.getdimbarvarj(task, index)))
+            write_ray_float64_vector(io, values)
+        end
+    end
+    mv(temporary, path)
+    return Dict(
+        "available" => true,
+        "schema_version" => "shastry-mosek-infeasibility-ray-v1",
+        "filename" => basename(path),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "endianness" => "little",
+        "problem_status" => sprint(show, problem_status),
+        "solution_status" => sprint(show, solution_status),
+        "constraint_count" => length(y),
+        "scalar_variable_count" => length(slx),
+        "affine_conic_dual_count" => length(doty),
+        "semidefinite_variable_count" => length(bar_duals),
+        "semidefinite_packed_value_count" => sum(length, bar_duals),
+    )
+end
+
 function spin_isotypic_main(arguments::Vector{String}=ARGS)
     options = parse_args(arguments)
     isnothing(options) && return
@@ -648,6 +734,11 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             metadata["mosek_infeasibility_task"] =
                 write_mosek_task_artifact(
                     joinpath(options.output, "mosek-infeasibility.task"),
+                    jump_model.model,
+                )
+            metadata["mosek_infeasibility_ray"] =
+                write_mosek_infeasibility_ray_artifact(
+                    joinpath(options.output, "mosek-infeasibility.ray.bin"),
                     jump_model.model,
                 )
         end
