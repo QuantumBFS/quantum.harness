@@ -1735,3 +1735,36 @@ the CPU archive SHA-256 is
 `05618ca1e16f3f4a6d12ca6b1f97a5e90106917b4c9f63ae704d7f6e693dce3b`.
 With no rejection, the next independent campaign advances to lengths
 800/1200/1800 at 4500/6500/9500 digits on 12 WSL plus 60 CPU processes.
+
+## 2026-07-29 -- Symmetric-oddcycle cone branch
+
+A deliberately symmetric two-parameter pattern was tested with generators
+`{B(x,y), B(x,y)^T}`.  The broad conjecture `x>y>0` is false: at `y=1`,
+the exact word `000000110011` is negative for the interval between the
+positive roots approximately `0.9995421691` and `1.0847617744`.  The
+parameter-chamber claim is retired, while the fixed integer point
+`(x,y)=(2,1)` remains a survivor.
+
+Commit `b4e2185` freezes three exact results for this fixed point:
+
+- a symbolic signed-monomial cone proving `chi_4(W)>=0`;
+- a rational 10-dimensional common cone proving
+  `chi_1(W)+chi_4(W)>=0`;
+- a rational 15-dimensional common cone proving
+  `chi_2(W)+chi_4(W)>=0`.
+
+The compact certificate SHA-256 values are
+`f13915705d792899cb36580f67bc36dae691ee33f6fba989e090f979cef81f5a`
+and
+`af9b881a5cc6e6065d58f4588e2631fc46a692391feb829a25757b90334f4264`.
+Both stored transforms are independently replayed as exact rational
+similarities with entrywise-nonnegative transformed generators; the
+focused tests report 2/2 passes.
+
+These are partial lemmas, not a sign-free theorem.  The tempting
+complementary cone on grades `{2,3}` is exactly impossible already at
+`W=B^7`, where `chi_2=13875`, `chi_3=-171633`, and their sum is `-157758`.
+Since `det(B)=8`, the active complete target paired with the first cone is
+instead `chi_0+chi_2+chi_3+chi_5>=0`, retaining the positive
+`chi_5=8^n` sector.  Search is redirected to a coupled cone for grades
+`{0,2,3,5}` or a finite-depth exact check plus a grade-five tail bound.
