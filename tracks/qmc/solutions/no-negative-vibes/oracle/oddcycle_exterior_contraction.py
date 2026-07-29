@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 import warnings
-from collections.abc import Sequence
-from math import isfinite, sqrt
+from collections.abc import Mapping, Sequence
+from math import isfinite, lcm, sqrt
 
 import numpy as np
 
@@ -60,11 +60,28 @@ def _direct_gamma(
     return sqrt(max(0.0, maximum))
 
 
+def _word_products(
+    atoms: tuple[np.ndarray, ...],
+    length: int,
+) -> tuple[np.ndarray, ...]:
+    """Enumerate all normalized products of one fixed word length."""
+
+    dimension = atoms[0].shape[0]
+    products = (np.eye(dimension),)
+    for _ in range(length):
+        products = tuple(
+            atom @ product for atom in atoms for product in products
+        )
+    return products
+
+
 def _solve_grade(
     cp,
-    atoms: tuple[np.ndarray, ...],
+    base_atoms: tuple[np.ndarray, ...],
+    block_atoms: tuple[np.ndarray, ...],
     *,
     grade: int,
+    block_length: int,
     solver: str,
     epsilon: float,
     gamma_tolerance: float,
@@ -72,7 +89,7 @@ def _solve_grade(
     max_bisection_steps: int,
     solver_options: dict[str, object],
 ) -> dict[str, object]:
-    dimension = atoms[0].shape[0]
+    dimension = base_atoms[0].shape[0]
     identity = np.eye(dimension)
     metric_variable = cp.Variable((dimension, dimension), symmetric=True)
     gamma_squared = cp.Parameter(nonneg=True)
@@ -85,7 +102,7 @@ def _solve_grade(
         - atom.T @ metric_variable @ atom
         - epsilon * identity
         >> 0
-        for atom in atoms
+        for atom in block_atoms
     )
     problem = cp.Problem(cp.Minimize(0.0), constraints)
 
@@ -105,6 +122,10 @@ def _solve_grade(
                 )
         except cp.error.SolverError:
             return False, None, "solver-error", float("-inf")
+        except BaseException as error:
+            if error.__class__.__name__ != "PanicException":
+                raise
+            return False, None, "solver-panic", float("-inf")
         status = str(problem.status)
         if metric_variable.value is None:
             return False, None, status, float("-inf")
@@ -117,7 +138,7 @@ def _solve_grade(
         metric_minimum = float(np.linalg.eigvalsh(metric)[0])
         gaps = tuple(
             gamma * gamma * metric - atom.T @ metric @ atom
-            for atom in atoms
+            for atom in block_atoms
         )
         minimum_gap = min(
             float(np.linalg.eigvalsh(0.5 * (gap + gap.T))[0])
@@ -130,7 +151,7 @@ def _solve_grade(
         )
         return feasible, metric if feasible else None, status, minimum_gap
 
-    upper = max(float(np.linalg.norm(atom, ord=2)) for atom in atoms)
+    upper = max(float(np.linalg.norm(atom, ord=2)) for atom in block_atoms)
     upper = sqrt(upper * upper + dimension * epsilon) + 1.0e-3
     feasible, best_metric, solver_status, _ = solve_at(upper)
     expansion_steps = 0
@@ -143,7 +164,9 @@ def _solve_grade(
             "status": "solver-inconclusive",
             "grade": grade,
             "dimension": dimension,
-            "atom_count": len(atoms),
+            "atom_count": len(base_atoms),
+            "block_length": block_length,
+            "block_atom_count": len(block_atoms),
             "solver": solver,
             "solver_status": solver_status,
         }
@@ -171,30 +194,53 @@ def _solve_grade(
     metric /= float(np.trace(metric))
     metric_eigenvalues = np.linalg.eigvalsh(metric)
     metric_condition = float(metric_eigenvalues[-1] / metric_eigenvalues[0])
-    direct_gamma = _direct_gamma(atoms, metric)
-    gamma_upper = max(float(upper), direct_gamma)
+    direct_block_gamma = _direct_gamma(block_atoms, metric)
+    gamma_block_upper = max(float(upper), direct_block_gamma)
     verified_gaps = tuple(
-        gamma_upper * gamma_upper * metric - atom.T @ metric @ atom
-        for atom in atoms
+        gamma_block_upper * gamma_block_upper * metric
+        - atom.T @ metric @ atom
+        for atom in block_atoms
     )
     minimum_gap = min(
         float(np.linalg.eigvalsh(0.5 * (gap + gap.T))[0])
         for gap in verified_gaps
     )
     prefactor = float(dimension * sqrt(metric_condition))
+    residue_bounds = []
+    for residue in range(block_length):
+        residue_atoms = _word_products(base_atoms, residue)
+        residue_norm = _direct_gamma(residue_atoms, metric)
+        residue_bounds.append(
+            {
+                "residue": residue,
+                "word_count": len(residue_atoms),
+                "maximum_p_induced_norm": residue_norm,
+                "trace_prefactor": prefactor * residue_norm,
+            }
+        )
+    effective_gamma = gamma_block_upper ** (1.0 / block_length)
+    effective_lower = float(lower) ** (1.0 / block_length)
     return {
         "status": "numerical-feasible-common-metric",
         "grade": grade,
         "dimension": dimension,
-        "atom_count": len(atoms),
+        "atom_count": len(base_atoms),
+        "block_length": block_length,
+        "block_atom_count": len(block_atoms),
         "normalization_per_letter": 8.0,
         "solver": solver,
         "solver_status": best_solver_status,
         "epsilon": epsilon,
         "gamma_tolerance": gamma_tolerance,
-        "gamma_lower": float(lower),
-        "gamma_upper": gamma_upper,
-        "direct_metric_gamma": direct_gamma,
+        "gamma_lower": effective_lower,
+        "gamma_upper": effective_gamma,
+        "gamma_block_lower": float(lower),
+        "gamma_block_upper": gamma_block_upper,
+        "effective_per_letter_gamma": effective_gamma,
+        "direct_metric_gamma": (
+            direct_block_gamma ** (1.0 / block_length)
+        ),
+        "direct_metric_block_gamma": direct_block_gamma,
         "bisection_steps": bisection_steps,
         "upper_expansion_steps": expansion_steps,
         "minimum_verified_gap_eigenvalue": minimum_gap,
@@ -204,6 +250,7 @@ def _solve_grade(
         "metric_condition_number": metric_condition,
         "metric": _float_rows(metric),
         "prefactor": prefactor,
+        "residue_bounds": residue_bounds,
     }
 
 
@@ -211,6 +258,7 @@ def common_quadratic_exterior_contraction(
     points: Sequence[Sequence[float]],
     *,
     grades: Sequence[int] = (1, 2, 3),
+    block_lengths: Mapping[int, int] | None = None,
     solver: str = "CLARABEL",
     epsilon: float = 1.0e-7,
     gamma_tolerance: float = 2.0e-3,
@@ -229,6 +277,23 @@ def common_quadratic_exterior_contraction(
         or any(grade not in {1, 2, 3} for grade in selected_grades)
     ):
         raise ValueError("grades must be a nonempty subset of (1, 2, 3)")
+    selected_block_lengths = {
+        grade: 1 for grade in selected_grades
+    }
+    if block_lengths is not None:
+        for grade, length in block_lengths.items():
+            if (
+                not isinstance(grade, int)
+                or isinstance(grade, bool)
+                or grade not in selected_block_lengths
+                or not isinstance(length, int)
+                or isinstance(length, bool)
+                or length < 1
+            ):
+                raise ValueError(
+                    "block_lengths must map selected grades to positive integers"
+                )
+            selected_block_lengths[grade] = length
     if (
         not isfinite(epsilon)
         or not 0.0 < epsilon < 0.1
@@ -267,10 +332,14 @@ def common_quadratic_exterior_contraction(
             compound_matrix(atom, grade) / 8.0
             for atom in one_particle_alphabet
         )
+        block_length = selected_block_lengths[grade]
+        block_atoms = _word_products(normalized_atoms, block_length)
         grade_results[str(grade)] = _solve_grade(
             cp,
             normalized_atoms,
+            block_atoms,
             grade=grade,
+            block_length=block_length,
             solver=solver,
             epsilon=epsilon,
             gamma_tolerance=gamma_tolerance,
@@ -289,29 +358,35 @@ def common_quadratic_exterior_contraction(
     minimum_length: int | None = None
     bound_at_length: float | None = None
     bound_at_previous: float | None = None
+    tail_period = lcm(
+        *(selected_block_lengths[grade] for grade in selected_grades)
+    )
+
+    def trace_bound(length: int) -> float:
+        total = 0.0
+        for record in feasible_records:
+            block_length = int(record["block_length"])
+            quotient, residue = divmod(length, block_length)
+            residue_record = record["residue_bounds"][residue]
+            total += (
+                float(residue_record["trace_prefactor"])
+                * float(record["gamma_block_upper"]) ** quotient
+            )
+        return float(total)
+
     if all_feasible and all(
-        float(record["gamma_upper"]) < 1.0
+        float(record["gamma_block_upper"]) < 1.0
         for record in feasible_records
     ):
+        last_failure = 0
         for length in range(1, max_tail_length + 1):
-            bound = float(
-                sum(
-                    float(record["prefactor"])
-                    * float(record["gamma_upper"]) ** length
-                    for record in feasible_records
-                )
-            )
-            if bound < 2.0:
-                minimum_length = length
-                bound_at_length = bound
-                if length > 1:
-                    bound_at_previous = float(
-                        sum(
-                            float(record["prefactor"])
-                            * float(record["gamma_upper"]) ** (length - 1)
-                            for record in feasible_records
-                        )
-                    )
+            if trace_bound(length) >= 2.0:
+                last_failure = length
+            if length - last_failure >= tail_period:
+                minimum_length = last_failure + 1
+                bound_at_length = trace_bound(minimum_length)
+                if minimum_length > 1:
+                    bound_at_previous = trace_bound(minimum_length - 1)
                 break
 
     return {
@@ -326,9 +401,17 @@ def common_quadratic_exterior_contraction(
         "alphabet_size": len(one_particle_alphabet),
         "alphabet": "each B(p,q,r) and its transpose",
         "determinant_growth_normalization": 8.0,
+        "block_lengths": {
+            str(grade): selected_block_lengths[grade]
+            for grade in selected_grades
+        },
         "grades": grade_results,
         "tail_bound": {
             "criterion": "sum_k prefactor_k * gamma_k**N < 2",
+            "residue_aware_criterion": (
+                "for n=q_k*L_k+r_k, sum_k "
+                "trace_prefactor_k[r_k] * gamma_block_k**q_k < 2"
+            ),
             "interpretation": (
                 "grade1+grade2+grade3 bounded by grade4 loop "
                 "plus determinant sector"
@@ -336,6 +419,7 @@ def common_quadratic_exterior_contraction(
             "minimum_integer_N": minimum_length,
             "bound_at_N": bound_at_length,
             "bound_at_previous_N": bound_at_previous,
+            "period": tail_period,
             "max_tail_length": max_tail_length,
         },
     }
