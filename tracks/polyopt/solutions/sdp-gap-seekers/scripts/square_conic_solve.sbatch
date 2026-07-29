@@ -31,8 +31,8 @@ for var in CONIC_BASIS CONIC_G CONIC_GAMMA CONIC_POS_DIM CONIC_GAP_DIM CONIC_LAB
 done
 
 case "$CONIC_BASIS" in
-    bare_weight_one|one_symbol_lift) ;;
-    *) echo "CONIC_BASIS must be bare_weight_one or one_symbol_lift" >&2; exit 2 ;;
+    bare_weight_one|one_symbol_lift|bare_operator) ;;
+    *) echo "CONIC_BASIS must be bare_weight_one, one_symbol_lift, or bare_operator" >&2; exit 2 ;;
 esac
 
 RUN_ID="square-conic-${CONIC_LABEL}-${SLURM_JOB_ID}"
