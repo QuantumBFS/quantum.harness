@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import inspect
 import json
 from types import SimpleNamespace
@@ -199,6 +199,30 @@ def test_search_space_has_array_aware_equality_and_canonical_round_trip(
     assert not first.basis.flags.writeable
     assert not first.lower_bounds.flags.writeable
     assert not first.upper_bounds.flags.writeable
+
+
+def test_search_space_bytes_backing_prevents_mutation_and_stabilizes_hash(
+    origin: np.ndarray,
+) -> None:
+    space = SearchSpace(origin, np.eye(origin.size)[:, :3], bound=0.7)
+    equal_space = SearchSpace(origin.copy(), np.eye(origin.size)[:, :3], bound=0.7)
+    original_hash = hash(space)
+    mapping = {space: "stable"}
+    members = {space}
+
+    for array in (
+        space.origin,
+        space.basis,
+        space.lower_bounds,
+        space.upper_bounds,
+    ):
+        with pytest.raises(ValueError):
+            array.setflags(write=True)
+
+    assert space == equal_space
+    assert hash(space) == original_hash == hash(equal_space)
+    assert mapping[equal_space] == "stable"
+    assert equal_space in members
 
 
 def test_all_candidate_spaces_share_origin_bounds_and_coordinate_scaling(
@@ -416,6 +440,106 @@ def test_closed_loop_result_is_comparable_and_json_round_trips_complete_history(
         replayed.validation_result
         == replayed.validation_attempts[1].validation_observation
     )
+
+
+def _integrity_result(kind: str) -> ClosedLoopResult:
+    if kind == "certified":
+        return run_closed_loop(
+            _ScriptedValidationDevice((0.9991, 0.9992)),
+            make_full_space(np.zeros(3)),
+            budget=5,
+            seed=7,
+        )
+    budget_result = run_closed_loop(
+        _SyntheticDevice(target=np.zeros(3), allow_certification=False),
+        make_full_space(np.zeros(3)),
+        budget=5,
+        seed=7,
+    )
+    if kind == "budget":
+        return budget_result
+    assert kind == "optimizer_stopped"
+    return replace(
+        budget_result,
+        observations=budget_result.observations[:4],
+        evaluations=4,
+        budget_exhausted=False,
+        stop_reason="optimizer_stopped",
+    )
+
+
+@pytest.mark.parametrize(
+    ("kind", "changes"),
+    [
+        ("certified", {"certified": False}),
+        ("certified", {"stop_reason": "budget"}),
+        ("certified", {"budget_exhausted": True}),
+        ("certified", {"evaluations": 6}),
+        ("budget", {"budget_exhausted": False}),
+        ("budget", {"stop_reason": "optimizer_stopped"}),
+        ("optimizer_stopped", {"certified": True}),
+        ("optimizer_stopped", {"budget_exhausted": True}),
+        ("optimizer_stopped", {"stop_reason": "budget"}),
+        ("optimizer_stopped", {"stop_reason": "certified"}),
+    ],
+)
+def test_closed_loop_result_rejects_contradictory_direct_states(
+    kind: str,
+    changes: dict[str, object],
+) -> None:
+    with pytest.raises(ValueError):
+        replace(_integrity_result(kind), **changes)
+
+
+@pytest.mark.parametrize(
+    ("kind", "changes"),
+    [
+        ("certified", {"certified": False}),
+        ("certified", {"stop_reason": "budget"}),
+        ("certified", {"budget_exhausted": True}),
+        ("certified", {"evaluations": 6}),
+        ("budget", {"budget_exhausted": False}),
+        ("budget", {"stop_reason": "optimizer_stopped"}),
+        ("optimizer_stopped", {"certified": True}),
+        ("optimizer_stopped", {"budget_exhausted": True}),
+        ("optimizer_stopped", {"stop_reason": "budget"}),
+        ("optimizer_stopped", {"stop_reason": "certified"}),
+    ],
+)
+def test_closed_loop_result_rejects_json_state_tampering(
+    kind: str,
+    changes: dict[str, object],
+) -> None:
+    payload = json.loads(
+        json.dumps(_integrity_result(kind).canonical_dict(), allow_nan=False)
+    )
+    payload.update(changes)
+
+    with pytest.raises(ValueError):
+        ClosedLoopResult.from_canonical_dict(payload)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("provisional_crossings", [999]),
+        ("validation_result", None),
+    ],
+)
+def test_closed_loop_result_rejects_tampered_derived_validation_fields(
+    field: str,
+    value: object,
+) -> None:
+    payload = json.loads(
+        json.dumps(
+            _integrity_result("certified").canonical_dict(),
+            allow_nan=False,
+        )
+    )
+    payload[field] = value
+
+    with pytest.raises(ValueError):
+        ClosedLoopResult.from_canonical_dict(payload)
 
 
 def test_closed_loop_imports_only_query_boundary() -> None:

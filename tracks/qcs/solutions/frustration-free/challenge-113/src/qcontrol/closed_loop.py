@@ -84,9 +84,13 @@ def _coordinate_bound(value: object, dimension: int) -> NDArray[np.float64]:
 
 
 def _readonly(array: NDArray[np.float64]) -> NDArray[np.float64]:
-    result = np.ascontiguousarray(array, dtype=np.float64)
-    result.setflags(write=False)
-    return result
+    copied = np.array(array, dtype=np.float64, copy=True, order="C")
+    immutable = np.frombuffer(
+        copied.tobytes(),
+        dtype=np.dtype(np.float64),
+    ).reshape(copied.shape)
+    immutable.setflags(write=False)
+    return immutable
 
 
 @dataclass(frozen=True, slots=True, init=False, eq=False)
@@ -95,6 +99,7 @@ class SearchSpace:
     basis: NDArray[np.float64]
     lower_bounds: NDArray[np.float64]
     upper_bounds: NDArray[np.float64]
+    _hash_value: int
 
     def __init__(
         self,
@@ -138,10 +143,29 @@ class SearchSpace:
             if np.any(lower_array > 0.0) or np.any(upper_array < 0.0):
                 raise ValueError("coordinate bounds must contain the zero origin")
 
-        object.__setattr__(self, "origin", _readonly(origin_array))
-        object.__setattr__(self, "basis", _readonly(basis_array))
-        object.__setattr__(self, "lower_bounds", _readonly(lower_array))
-        object.__setattr__(self, "upper_bounds", _readonly(upper_array))
+        immutable_origin = _readonly(origin_array)
+        immutable_basis = _readonly(basis_array)
+        immutable_lower = _readonly(lower_array)
+        immutable_upper = _readonly(upper_array)
+        object.__setattr__(self, "origin", immutable_origin)
+        object.__setattr__(self, "basis", immutable_basis)
+        object.__setattr__(self, "lower_bounds", immutable_lower)
+        object.__setattr__(self, "upper_bounds", immutable_upper)
+        object.__setattr__(
+            self,
+            "_hash_value",
+            hash(
+                (
+                    tuple(float(value) for value in immutable_origin),
+                    tuple(
+                        tuple(float(value) for value in row)
+                        for row in immutable_basis
+                    ),
+                    tuple(float(value) for value in immutable_lower),
+                    tuple(float(value) for value in immutable_upper),
+                )
+            ),
+        )
 
     @property
     def dimension(self) -> int:
@@ -169,17 +193,7 @@ class SearchSpace:
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (
-                tuple(float(value) for value in self.origin),
-                tuple(
-                    tuple(float(value) for value in row)
-                    for row in self.basis
-                ),
-                tuple(float(value) for value in self.lower_bounds),
-                tuple(float(value) for value in self.upper_bounds),
-            )
-        )
+        return self._hash_value
 
     def canonical_dict(self) -> dict[str, object]:
         return {
@@ -604,8 +618,20 @@ class ClosedLoopResult:
             )
         if bool(certified_attempts) != bool(self.certified):
             raise ValueError("certified must match validation_attempts")
-        if self.certified and self.stop_reason != "certified":
-            raise ValueError("certified results must stop immediately")
+        if self.certified:
+            if self.stop_reason != "certified" or self.budget_exhausted:
+                raise ValueError(
+                    "certified results must stop without budget exhaustion"
+                )
+        elif evaluations == budget:
+            if self.stop_reason != "budget" or not self.budget_exhausted:
+                raise ValueError(
+                    "budget exhaustion must match evaluations and stop reason"
+                )
+        elif self.stop_reason != "optimizer_stopped" or self.budget_exhausted:
+            raise ValueError(
+                "early uncertified results must be optimizer-stopped"
+            )
 
         object.__setattr__(self, "best_pulse", best_pulse)
         object.__setattr__(self, "observations", observations)
