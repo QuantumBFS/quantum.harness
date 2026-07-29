@@ -1678,3 +1678,43 @@ false rejection, and identical restarts are stopped.  The next campaign
 must rank words with a high-precision objective before exploring lengths
 250, 400, and 600.  In parallel, proof search now targets the common
 coupled oddcycle structure rather than independent exterior-grade cones.
+
+### Complete exact depths 24--27
+
+The exact short-word continuation completed for all three leading seeds.
+For each seed it checked 4,800,038 safe cyclic/transpose-reversal classes,
+covering all 251,658,240 binary words of lengths 24 through 27, and found
+no nonpositive determinant.  Combined with the preceding round, each seed
+is therefore exactly positive on all 268,435,454 nonempty binary words
+through length 27.  The minimum at every newly checked length is a pure
+word.  The continuation `collect.json` SHA-256 values are:
+
+- seed 117:
+  `79b415d12265df85da46d564ddbd0a70ea3991cbf739bc25f2106c5ede4c825c`;
+- seed 132:
+  `1a334bc291c0ba40aa9ad9e9455a28908aed1274c1416510efcf03368f014041`;
+- seed 147:
+  `9bbbb65b3cb3a9d41053d92219a0eae92a4efee0baa94b1731cc2d1a3387b620`.
+
+The CPU shard archive SHA-256 is
+`e8a263d1f7f19f7829978324f3d1bb1e0031516c03f3701781fb8f4a62e09218`.
+This is finite-depth evidence, not an arbitrary-word theorem.
+
+### High-precision long-word serialization incident
+
+Commit `2ae03be` changed long-word discovery to use float search only as a
+prefilter, rerank finalists with `mpmath`, and retain the exact rational
+determinant as the sole hit gate.  The first 72-run production plan used
+lengths 250/400/600, 32 restarts, 16 search rounds, 8 proposals per round,
+and 1400/2200/3200 decimal digits respectively.
+
+All length-250 and length-400 jobs completed, but every length-600 job
+failed only while converting the already-computed exact integer numerator
+to a decimal JSON string.  Python 3.11's default 4,300-digit conversion
+guard was the cause; no numerical or oracle result was lost or accepted.
+Commit `10bfc6a` disables that guard in this trusted standalone research
+CLI and adds a length-600 regression replay.  The focused verification is
+3/3 passing.  Only the 24 failed length-600 shards are being rerun; all
+successful 250/400 outputs are preserved.  Operational lesson: exact gates
+must be tested through final artifact serialization at the largest planned
+word length, not merely through determinant evaluation.
