@@ -14,6 +14,7 @@ include(joinpath(
 ))
 using .ShastryFullStateSpinIsotypicPrimalGapJuMP
 using LinearAlgebra
+using Mosek
 using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
@@ -298,6 +299,55 @@ function write_spin_isotypic_primal_values(
     )
 end
 
+function write_mosek_solution_artifact(
+    path::AbstractString,
+    model::JuMP.Model,
+)
+    backend = JuMP.unsafe_backend(model)
+    backend isa MosekTools.Optimizer ||
+        error("direct solve does not expose a MosekTools backend")
+    Mosek.solutiondef(backend.task, Mosek.MSK_SOL_ITR) ||
+        return Dict(
+            "available" => false,
+            "reason" => "mosek_interior_solution_not_defined",
+        )
+    temporary = replace(path, r"(\.[^.]+)$" => s".tmp\1")
+    ispath(path) && error("refusing existing Mosek solution artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing Mosek solution temporary artifact: $temporary")
+    Mosek.writesolution(backend.task, Mosek.MSK_SOL_ITR, temporary)
+    mv(temporary, path)
+    return Dict(
+        "available" => true,
+        "filename" => basename(path),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "mosek_solution_type" => "MSK_SOL_ITR",
+    )
+end
+
+function write_mosek_task_artifact(
+    path::AbstractString,
+    model::JuMP.Model,
+)
+    backend = JuMP.unsafe_backend(model)
+    backend isa MosekTools.Optimizer ||
+        error("direct solve does not expose a MosekTools backend")
+    temporary = replace(path, r"(\.task\.gz)$" => s".tmp\1")
+    ispath(path) && error("refusing existing Mosek task artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing Mosek task temporary artifact: $temporary")
+    Mosek.writedata(backend.task, temporary)
+    mv(temporary, path)
+    return Dict(
+        "available" => true,
+        "filename" => basename(path),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "format" => "mosek-task-gzip",
+    )
+end
+
 function spin_isotypic_main(arguments::Vector{String}=ARGS)
     options = parse_args(arguments)
     isnothing(options) && return
@@ -572,13 +622,26 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             )
         end
         metadata["solution_diagnostics"] = diagnostics
-        metadata["solve"]["classification"] =
-            classify_spin_isotypic_result(
-                termination,
-                primal,
-                dual,
-                diagnostics,
-            )
+        classification = classify_spin_isotypic_result(
+            termination,
+            primal,
+            dual,
+            diagnostics,
+        )
+        metadata["solve"]["classification"] = classification
+        metadata["mosek_solution"] = write_mosek_solution_artifact(
+            joinpath(options.output, "mosek-interior.sol"),
+            jump_model.model,
+        )
+        if classification ==
+           "infeasibility_candidate_requires_independent_ray_replay"
+            progress("preserve the complete Mosek task for ray replay")
+            metadata["mosek_infeasibility_task"] =
+                write_mosek_task_artifact(
+                    joinpath(options.output, "mosek-infeasibility.task.gz"),
+                    jump_model.model,
+                )
+        end
         write_checkpoint(checkpoint_path, metadata)
     end
 

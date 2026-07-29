@@ -49,6 +49,13 @@ synthetic_assembly = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
     "synthetic-audit-v1",
 )
 
+infeasible_model = JuMP.Model(MosekTools.Optimizer)
+JuMP.set_silent(infeasible_model)
+z = JuMP.@variable(infeasible_model, base_name="infeasible_moment")
+JuMP.@constraint(infeasible_model, z == 1.0)
+JuMP.@constraint(infeasible_model, z <= 0.0)
+JuMP.optimize!(infeasible_model)
+
 @testset "direct spin-isotypic solve audit" begin
     @test JuMP.termination_status(model) == JuMP.MOI.OPTIMAL
     @test diagnostics["available"]
@@ -74,6 +81,13 @@ synthetic_assembly = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
         JuMP.MOI.NO_SOLUTION,
         Dict{String,Any}(),
     ) == "unknown"
+    @test JuMP.termination_status(infeasible_model) == JuMP.MOI.INFEASIBLE
+    @test classify_spin_isotypic_result(
+        JuMP.termination_status(infeasible_model),
+        JuMP.primal_status(infeasible_model),
+        JuMP.dual_status(infeasible_model),
+        Dict{String,Any}(),
+    ) == "infeasibility_candidate_requires_independent_ray_replay"
     mktempdir() do directory
         path = joinpath(directory, "primal-values.tsv")
         artifact = write_spin_isotypic_primal_values(
@@ -87,5 +101,26 @@ synthetic_assembly = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
         @test lines[3] == "index\tmoment_canonical\tfloat64_bits"
         @test endswith(lines[4], bitstring(JuMP.value(y[1])))
         @test endswith(lines[5], bitstring(JuMP.value(y[2])))
+        mosek_solution = write_mosek_solution_artifact(
+            joinpath(directory, "synthetic.sol"),
+            model,
+        )
+        @test mosek_solution["available"]
+        @test mosek_solution["bytes"] > 0
+        @test mosek_solution["sha256"] ==
+              file_sha256(joinpath(directory, "synthetic.sol"))
+        mosek_task = write_mosek_task_artifact(
+            joinpath(directory, "synthetic.task.gz"),
+            model,
+        )
+        @test mosek_task["bytes"] > 0
+        @test mosek_task["sha256"] ==
+              file_sha256(joinpath(directory, "synthetic.task.gz"))
+        infeasible_solution = write_mosek_solution_artifact(
+            joinpath(directory, "infeasible.sol"),
+            infeasible_model,
+        )
+        @test infeasible_solution["available"]
+        @test infeasible_solution["bytes"] > 0
     end
 end
