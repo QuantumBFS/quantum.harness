@@ -336,6 +336,120 @@ def test_public_xh5_profile_is_safe_complete_and_parseable(capsys):
     )
 
 
+def test_public_wuzh02_profile_is_safe_complete_and_parseable(capsys):
+    root = cp.Path(__file__).resolve().parents[2]
+    path = root / "skills/using-slurm/profiles/wuzh02-jiangweiqi.toml"
+    mirror_path = root / ".agents/skills/using-slurm/profiles/wuzh02-jiangweiqi.toml"
+    profile = cp.load_profile(path)
+
+    assert cp.validate(profile) == []
+    assert mirror_path.read_bytes() == path.read_bytes()
+    assert profile["identity"] == {
+        "name": "wuzh02-jiangweiqi",
+        "purpose": "Wuzh02 CPU compute service",
+        "maintainer": "QuantumBFS",
+    }
+    assert profile["connection"] == {
+        "repo_path_remote": (
+            "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+        ),
+        "login_shell": False,
+        "ssh": {"alias": "wuzh02-jiangweiqi"},
+    }
+    assert profile["scheduler"] == {
+        "type": "slurm",
+        "default_partition": "wzacnormal03",
+        "account": "giggleliu",
+        "qos": "user_jiangweiqi",
+    }
+    assert profile["partitions"] == [
+        {
+            "name": "wzacnormal03",
+            "class": "default-cpu",
+            "cores": 128,
+            "memory": "255500M",
+            "def_mem_per_cpu": "1916M",
+            "max_wall": "333-00:00:00",
+        }
+    ]
+    assert profile["filesystem"] == {
+        "home": "/work/home/jiangweiqi",
+        "scratch": "/work/share/giggleliu/jiangweiqi/results",
+        "project": (
+            "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+        ),
+        "quota": "",
+    }
+    assert profile["network"] == {
+        "internet_from_login": False,
+        "internet_from_compute": False,
+    }
+    assert profile["region"] == {"region": "mainland_china"}
+
+    limits = cp.get_limits(profile)
+    assert limits.hard == {
+        "max_walltime": "24:00:00",
+        "max_nodes": 1,
+        "max_cpus": 128,
+        "max_array_size": 200,
+    }
+    assert limits.soft == {
+        "warn_walltime": "08:00:00",
+        "warn_cpus": 64,
+        "unusual_partitions": [],
+    }
+    assert limits.allowed_roots == [
+        "/work/share/giggleliu/jiangweiqi/results",
+        (
+            "/work/share/giggleliu/jiangweiqi/"
+            "quantum.harness-challenge-194/results"
+        ),
+    ]
+
+    rc = cp.main(
+        [
+            "--partition",
+            "wzacnormal03",
+            "--field",
+            "def_mem_per_cpu",
+            "--profile",
+            str(path),
+        ]
+    )
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == "1916M"
+
+    forbidden_keys = {
+        "host",
+        "hostname",
+        "user",
+        "username",
+        "port",
+        "key",
+        "key_path",
+        "identity_file",
+        "password",
+        "token",
+        "secret",
+    }
+
+    def all_keys(value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                yield key.lower()
+                yield from all_keys(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from all_keys(child)
+
+    assert forbidden_keys.isdisjoint(all_keys(profile))
+    raw = path.read_text(encoding="utf-8").lower()
+    for forbidden_fragment in ("~/.ssh", "private key", "identityfile"):
+        assert forbidden_fragment not in raw
+    for required_fragment in ("portable cpython 3.12", "manylinux2014", "1800m"):
+        assert required_fragment in raw
+
+
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #

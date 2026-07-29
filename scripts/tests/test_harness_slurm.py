@@ -162,6 +162,31 @@ def test_xh5_profile_precheck_dry_run_shape():
     assert "ssh_ok:    dryrun" in result.stdout
 
 
+def test_wuzh02_profile_precheck_dry_run_shape():
+    profile = (
+        REPO
+        / "skills"
+        / "using-slurm"
+        / "profiles"
+        / "wuzh02-jiangweiqi.toml"
+    )
+    result = run(
+        ["precheck"],
+        env={
+            "HARNESS_PROFILE_FILE": str(profile),
+            "HARNESS_SLURM_DRYRUN": "1",
+        },
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"profile:   {profile}" in result.stdout
+    assert "alias:     wuzh02-jiangweiqi" in result.stdout
+    assert (
+        "repo:      "
+        "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+    ) in result.stdout
+    assert "ssh_ok:    dryrun" in result.stdout
+
+
 # --------------------------------------------------------------------------- #
 # smoke-verdict
 # --------------------------------------------------------------------------- #
