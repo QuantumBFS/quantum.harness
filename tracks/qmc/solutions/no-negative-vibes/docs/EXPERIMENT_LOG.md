@@ -36,6 +36,46 @@ and interpret them.
 - Decision / next experiment: implement only the requested exterior-cone
   functions, then replay focused and weight/scan regression tests.
 
+## DEV-EXTCONE-GREEN-001 -- replayable numeric certificate boundary
+
+- Proposal ID: exterior-cone-throughput-loop / Task 1 review amendment
+- Question: Does the numerical exterior-cone oracle reject a serialized
+  singular real transform and nonfinite multiplication/solve intermediates
+  while still enforcing one transform for every atom at a grade?
+- Prediction: the first implementation exposes both false-certificate
+  boundaries; the hardened implementation rejects them without regressing the
+  frozen weight/scan tests.
+- Source commits: characterization `d5b5fa6110af212264b9cb20427f1a801344d629`;
+  fix `ea616ea3580731d315e3c95c92342f2b8ba3d74b`.
+- Protocol/config: WSL Python 3.11, absolute solution `PYTHONPATH`, one pytest
+  process, and `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`.
+- RED result: exit 1, `2 failed, 12 passed, 1 warning in 0.13s`. The failures
+  were exactly an overflow reported as an infinite margin and a
+  tolerance-small complex transform whose serialized real projection was
+  singular. The discriminating shared-transform I/H case already passed.
+- GREEN result: focused exterior module `14 passed in 0.10s`; frozen
+  weight/scan regression `11 passed in 0.38s`.
+- Evidence hashes: final implementation SHA-256
+  `60855BE4275A954B1BDB6C679E3190C8BA462BBC3506FEDE8D0B78E12E5E71A8`;
+  amended tests SHA-256
+  `66A850EC9C4057A315EBCE899E3D49134C15AE9955A0BA7163A6C16F2F8F9B7C`.
+- Independent review: PASS. The reviewer replayed all three counterexamples
+  and independently obtained `14 passed in 0.08s` plus
+  `11 passed in 0.28s`.
+- Repository-wide boundary: the whole solution test directory was attempted
+  once after the first GREEN and stopped during collection with exit 1,
+  `1 error in 1.29s`, because `tests/test_overlap_klein.py` imports the
+  intentionally absent Task 9 RED interface `classify_r01_fixture`. This is
+  the pre-existing frozen R01 RED, not a Task 1 regression; it is not repaired
+  in this discovery loop.
+- Interpretation: Task 1 is accepted only as a replayable
+  `numeric-cone-fit` oracle. It is not an exact arbitrary-depth theorem.
+- Transferable lesson: validate the exact object that will be serialized and
+  fail closed on every nonfinite intermediate; finite inputs do not imply
+  finite linear-algebra outputs.
+- Decision / next experiment: construct float-free exact atom cards, then run
+  the shallow mixed-word scan before building the larger certificate pipeline.
+
 ## Required entry schema
 
 ```text
