@@ -1003,3 +1003,15 @@ The source parses under Julia 1.11, and a direct old-vs-streaming check passes
 for mixed UTF-8/string/integer records. Next gate: run the existing L=1
 coefficient-hash regression in the configured remote Julia environment; only
 then use the route for a larger build.
+
+The full existing regression subsequently passed locally with eight Julia
+threads. The exact coefficient stage took 225.425 s and returned 7,231 moments,
+75,967 PSD triangle entries, and the required unchanged SHA-256
+`2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+This authorizes the bounded-memory fingerprint implementation for future
+builds. It does not authorize duplicating either running L=2 solve.
+
+xH5 baseline job `23011251` started at 2026-07-29T14:49:17Z from its original
+commit `2de1678` on 64 CPUs / 240 GB and entered the same exact coefficient
+pass. SCNet job `118171391` remains on commit `87be317`. Preserve both as
+independent resource/solver comparisons.

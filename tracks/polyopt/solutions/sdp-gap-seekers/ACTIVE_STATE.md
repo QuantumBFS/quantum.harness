@@ -592,3 +592,12 @@ Updated: 2026-07-29 UTC.
   continue, audit a single-pass solver export and add a fail-closed numerical
   result audit so any terminal feasibility or infeasibility statement is tied
   to residual/certificate evidence.
+- Bounded-memory coefficient fingerprinting is verified locally on the exact
+  `L=1,d=2` regression: the coefficient stage completed in 225.425 s with
+  7,231 moments, 75,967 PSD entries, and unchanged SHA-256
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+  The new route removes the all-entry diagnostic-string inventory without
+  changing exact coefficients or their provenance fingerprint.
+- xH5 job `23011251` began running at 2026-07-29T14:49:17Z from immutable
+  commit `2de1678`; both it and SCNet job `118171391` remain in their original
+  coefficient pass and have not been modified.

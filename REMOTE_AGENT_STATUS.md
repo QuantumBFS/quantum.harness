@@ -26,7 +26,12 @@ Updated: 2026-07-29T14:48:39Z
   fingerprints bounded batches of row payloads through an incremental SHA-256
   context. It preserves the byte framing and coefficient hash while removing
   the all-entries `Vector{String}` and whole-stream `IOBuffer`. Julia syntax and
-  a direct old-vs-streaming UTF-8 framing check pass locally; the full L=1 hash
-  regression still requires the configured remote Julia environment.
+  a direct old-vs-streaming UTF-8 framing check pass locally. The full L=1
+  structural pipeline also passes locally in 225.425 s for its coefficient
+  stage: 7,231 moments, 75,967 PSD entries, and the unchanged regression hash
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+- xH5 baseline job `23011251` entered `RUNNING` at 2026-07-29T14:49:17Z from
+  its immutable older commit `2de1678`; it is in the same first coefficient
+  pass as SCNet. Both baseline jobs remain untouched.
 
 No user input or new credential is currently required.
