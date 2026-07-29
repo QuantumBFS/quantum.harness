@@ -9,7 +9,7 @@
 - Oracle boundary: no common evaluator, real ED reveal, overlap, or candidate
   selection may be run; the mandatory complete operator test may execute its
   historical test-only Fock-ED/dense fixtures
-- Current disposition: `review-fix complete / external-spec-review-pending`
+- Current disposition: `reviewed slice-pass`
 
 ## Phase 1/2 root-cause hypothesis
 
@@ -215,3 +215,41 @@ selection, A03 work, push, deletion, or move was performed.
 
 Final review-fix disposition: `review-fix complete /
 external-spec-review-pending`; no specification-compliance claim is made.
+
+## External reviews and main-agent closeout
+
+Specification review passed with no remaining blocker.  It independently
+verified the operation-count gamma bound, the 24-digit directed outward
+endpoints, raw IEEE signed-zero RN-cell identity, explicit
+`ROUND_HALF_EVEN`, canonical-zero grouping/cache behavior, all scoped
+regressions, the historical test-only ED disclosure, and the production
+forbidden-path boundary.  Quality review then reported no Critical or Important
+issue.  Its only Minor was to measure post-fallback N=6 wall time.
+
+At reviewed implementation terminal
+`77dd4825ced2bdcfd462b8bfad595545ae671699`, fresh main-agent verification
+reported `12 passed, 86 deselected in 1.19s` for the original focused set,
+`98 passed in 35.91s` for the complete operator file, and
+`313 passed in 58.63s` for the complete BOTS-848 suite.  Compileall exited `0`;
+the required and extended production forbidden scans exited `1` with no
+matches; the protocol hash was
+`2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38`;
+`git diff --check` exited `0`; and the worktree was clean before this
+documentation closeout.  Historical test-only ED/dense fixtures ran inside the
+complete suites, but no common evaluator or candidate-state ED reveal ran.
+
+The fresh N=6 performance audit used a new explicitly archived callback rather
+than guessing the lost try-5 formula.  For 256 seed-848 rows, one warm-up, and
+seven alternating repetitions, accepted median time was
+`28.35994453125 ms/row`, raw-parent median time was
+`0.673766796875 ms/row`, and the ratio was `42.09163268772868x`.  Warm-up used
+one failed row certificate and two fallback components; timed repetitions used
+seven failed row certificates and 14 fallback components.  The maximum
+accepted/raw difference remained `1.7763602275288083e-15`.  The raw JSON is
+`challenge15-a02-performance-fresh-77dd482.json`, SHA-256
+`84293e113cde2b943ec3079c3b44caff4a229ed0bdb606eb4f7d5222e644c396`.
+
+The callback-specific `42.09163268772868x` ratio is a non-blocking resource
+metric and optimization backlog item under the approved contract.  Final try 1
+disposition after both reviews and fresh verification: `reviewed slice-pass`.
+A03 was not started during this attempt, and no push was performed.

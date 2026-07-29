@@ -10,6 +10,7 @@
   through the production verification and commit; documentation and final
   repository-state audit followed
 - Route boundary: A02 occupation estimators only; A03 was not started
+- Reviewed implementation terminal: `77dd4825ced2bdcfd462b8bfad595545ae671699`
 - Final disposition: `slice-pass`
 
 ## Revised acceptance contract
@@ -228,3 +229,53 @@ deletion, or move occurred.
 
 Post-review-fix local result: `review-fix complete /
 external-spec-review-pending`; no specification-compliance claim is made.
+
+## Independent review and fresh closeout
+
+The specification review passed with no remaining blocker after verifying the
+operation-count gamma bound, 24-digit directed outward endpoints, raw IEEE
+signed-zero certificate cells, explicit `ROUND_HALF_EVEN`, the original 12
+regressions, and the absence of a production ED path.  The subsequent quality
+review found no Critical or Important issue.  Its sole Minor requested a fresh
+N=6 wall-time measurement after the physical fallback path was introduced.
+
+The main-agent verification at reviewed implementation terminal
+`77dd4825ced2bdcfd462b8bfad595545ae671699` produced:
+
+| Check | Fresh result |
+|---|---|
+| Original focused regressions | `12 passed, 86 deselected in 1.19s` |
+| Complete occupation-operator file | `98 passed in 35.91s` |
+| Complete BOTS-848 suite | `313 passed in 58.63s` |
+| Python compileall | exit `0` |
+| Required and extended production forbidden scans | exit `1`; no matches |
+| Protocol SHA-256 | `2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38` |
+| `git diff --check` | exit `0` |
+| Worktree before documentation closeout | clean |
+
+The complete operator and BOTS-848 suites include historical test-only
+Fock-ED/full-basis/dense fixtures.  No common scalable evaluator was run and no
+Route A candidate received an ED reveal, overlap, or ED-based selection.
+
+The requested fresh N=6 cost audit used a newly archived deterministic callback
+definition because the exact try-5 callback formula was not preserved.  It is
+therefore a new same-framework audit, not a claim of exact try-5 reproduction.
+The definition was N=6, 2Q=15, M2=0, 338-state support, 256 seed-848 rows, one
+warm-up, and seven alternating 256-row repetitions.  The raw JSON evidence is
+`challenge15-a02-performance-fresh-77dd482.json`, SHA-256
+`84293e113cde2b943ec3079c3b44caff4a229ed0bdb606eb4f7d5222e644c396`.
+
+| Fresh cost quantity | Observed value |
+|---|---:|
+| Accepted median per row | `28.35994453125 ms` |
+| Raw-parent median per row | `0.673766796875 ms` |
+| Accepted / raw parent | `42.09163268772868x` |
+| Warm-up certifier failures / fallback components | `1 / 2` |
+| Timed certifier failures / fallback components | `7 / 14` |
+| Maximum accepted/raw absolute difference | `1.7763602275288083e-15` |
+
+This large callback-specific slowdown is retained as an explicit optimization
+backlog and resource-planning input.  Under the approved acceptance amendment,
+it does not override the hard numerical-correctness gate or the two independent
+reviews.  Final reviewed A02 result: `slice-pass`; A03 remained unstarted during
+this closeout, and no push was performed.
