@@ -23,6 +23,7 @@ from long_range_percolation.oracle import (
     sample_quadratic,
     variance_open_edges,
 )
+from long_range_percolation.poisson_sweep import run_poisson_numba
 from long_range_percolation.sample import GraphSample
 from long_range_percolation.union_find import UnionFind
 
@@ -43,6 +44,7 @@ __all__ = [
     "no_edge_probability",
     "periodic_kernel",
     "periodic_kernel_reference",
+    "run_poisson_numba",
     "sample_geometric",
     "sample_quadratic",
     "variance_open_edges",
