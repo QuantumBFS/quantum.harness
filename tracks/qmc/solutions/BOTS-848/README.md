@@ -48,5 +48,10 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
 - No scalable candidate route has been implemented. Before Step 2, the additive Route D admission creates one shared A/B/C/D base; then the four `s02a`-`s02d` lanes may proceed independently from that exact SHA.
-- Route D+ Phase 1 static scaffolding is present under `route_d_plus/environment/`. The local WSL2 host fails the Python 3.11/GPU requirements, so no local test or repository execution has been performed and Phase 2 remains gated on a remote environment manifest.
-- The current AITP Research Memory runtime is active at `/home/bhjia/physics/vmc_nqs`; the linked import source is pinned by canonical environment Entries and a working Note. Phase 1 remains gated on a successful remote environment manifest.
+- Route D+ Phase 1 passed on Slurm job `23005815`: the pinned Python
+  3.11/JAX 0.4.38 CUDA12 environment produced a schema-valid RTX 3090
+  manifest. Phase 2 one-particle LLL code and its certificate contract are
+  present and await remote Slurm validation.
+- The current AITP Research Memory runtime is active at
+  `/home/bhjia/physics/vmc_nqs`; the Phase 1 result is pinned by a canonical
+  Entry and closeout Note. No project code or tests have run on the local host.
