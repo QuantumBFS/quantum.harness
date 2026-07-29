@@ -1590,3 +1590,35 @@ Only cyclic rotation and transpose-reversal are quotiented; a concrete
 six-letter mismatch rejects the tempting but invalid bit-complement
 quotient.  Its protocol is being generalized to the next surviving
 candidates rather than spending production time on the now-retired seed.
+
+## 2026-07-29 — Final Stage-4 HP suffix continuation
+
+The two-machine continuation completed all 179 planned cards with no
+missing or stale result.  It tested 21,771,547 suffix words, invoked
+3,675,889 exact fallbacks, reused all 179 parent HP proofs, and returned:
+
+- 176 `survivor-depth16-hp-continuation`;
+- 1 `rejected-negative-exact-fallback`;
+- 2 `rejected-negative-stable`.
+
+The three new rejections are:
+
+- `exact5-oddcycle-block-pair:58`, stable negative at depth 16 on
+  `0000000000000001`;
+- `exact4-block-shear-pair:238`, exact negative at depth 16 on
+  `0001010101010101`, with numerator
+  `-106234836889408659473558270533318603945192755703060019561657739`;
+- `exact4-block-shear-pair:49`, stable negative at depth 15 on
+  `000010101010101`.
+
+The continuation plan hash is
+`92b07019f51d65e6427b55aea99aeee21d2c1a464d9bff68abeb5eff32887d5c`.
+Final `collect.json` SHA-256 is
+`3cd82533cc3601adb104fe0e0c831c2f79b82755e22c2cc8bd0d2a0e8e11a726`;
+the Markdown summary SHA-256 is
+`a3b3c36ad3460d27708e26e45b0f72543e59a76ddfb7381aba159fe5d89130e7`;
+the CPU candidate archive SHA-256 is
+`2f43bc4103390e959cfe41398e7a265a5d92ad9308f2b3ee2c4e67ac51de203a`.
+
+Operationally, the full 76-core budget is now reassigned to complete
+depth-23 exact scans for oddcycle seeds 117, 132, and 147 in parallel.
