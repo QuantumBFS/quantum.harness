@@ -418,13 +418,42 @@ def _cross_grade_simplicial_search(
         if margin < -tolerance or condition > 1.0e10:
             continue
         for denominator in (256, 4096, 65536, max_denominator):
-            certificate = exact_simplicial_certificate(
+            simplicial = exact_simplicial_certificate(
                 checked,
                 transform,
                 max_denominator=min(denominator, max_denominator),
             )
-            if certificate is not None:
+            if simplicial is not None:
+                payload = simplicial["transform"]
+                assert isinstance(payload, Sequence)
+                rationalized = sp.ImmutableMatrix(
+                    [
+                        [
+                            sp.Rational(
+                                entry["numerator"],
+                                entry["denominator"],
+                            )
+                            for entry in row
+                        ]
+                        for row in payload
+                    ]
+                )
+                rays = tuple(
+                    sp.ImmutableMatrix(rationalized[:, column])
+                    for column in range(dimension)
+                )
+                certificate = exact_trace_compatible_certificate(
+                    checked,
+                    rays,
+                    max_denominator=max_denominator,
+                    tolerance=tolerance,
+                )
+                if certificate is None:
+                    raise RuntimeError(
+                        "exact simplicial replay failed the trace gate"
+                    )
                 certificate["cross_grade_columns"] = coupled_columns
+                certificate["simplicial_discovery"] = simplicial
                 return certificate
     return {
         "status": "no-exact-certificate-found",
@@ -471,20 +500,22 @@ def _trace_compatible_column_generation(
     terminal_reason = "ray-budget-exhausted"
     while len(rays) <= counts[-1]:
         maximum, aggregate, worst, failures = _cone_residuals(float_matrices, rays)
-        if len(rays) in counts:
-            certificate = None
-            if maximum <= max(1.0e-8, 100.0 * tolerance):
-                certificate = exact_trace_compatible_certificate(
-                    checked,
-                    rays,
-                    max_denominator=max_denominator,
-                    tolerance=tolerance,
-                )
+        certificate = None
+        if maximum <= max(1.0e-8, 100.0 * tolerance):
+            certificate = exact_trace_compatible_certificate(
+                checked,
+                rays,
+                max_denominator=max_denominator,
+                tolerance=tolerance,
+            )
+        if len(rays) in counts or certificate is not None:
             milestone = {
                 "ray_count": len(rays),
                 "maximum_relative_residual": maximum,
                 "aggregate_relative_residual": aggregate,
                 "violations": failures,
+                "worst_atom": worst[0],
+                "worst_ray": worst[1],
                 "exact_trace_status": (
                     "exact-trace-compatible-certificate"
                     if certificate is not None
@@ -492,6 +523,7 @@ def _trace_compatible_column_generation(
                 ),
             }
             milestones.append(milestone)
+            print(json.dumps(milestone, sort_keys=True), flush=True)
             if certificate is not None:
                 return {
                     "status": "exact-trace-compatible-certificate",
@@ -514,8 +546,10 @@ def _trace_compatible_column_generation(
     }
 
 
-def search_seed61_combined(
+def search_candidate_cone(
     *,
+    template: str,
+    seed: int,
     grades: Sequence[int] = (2, 4),
     attempts: int = 2,
     maxiter: int = 250,
@@ -524,9 +558,10 @@ def search_seed61_combined(
     tolerance: float = 1.0e-9,
     max_denominator: int = 65536,
 ) -> dict[str, object]:
-    """Run the light exact5 seed-61 cross-grade search."""
+    """Search one exact candidate and grade selection with exact promotion."""
 
-    card = candidate_card(template="exact5-shear-loop-pair", seed=61)
+    card = candidate_card(template=template, seed=seed)
+    candidate = f"{template}:{seed}"
     atoms = exact_atoms_from_card(card)
     selected = tuple(int(grade) for grade in grades)
     matrices = tuple(combined_grade_lift(atom, selected) for atom in atoms)
@@ -537,7 +572,7 @@ def search_seed61_combined(
     if int(combined_trace["numerator"]) < 0:
         return {
             "schema_version": SCHEMA_VERSION,
-            "candidate": "exact5-shear-loop-pair:61",
+            "candidate": candidate,
             "grades": list(selected),
             "status": "exact-negative-trace-obstruction",
             "route": "diagnostic-word-early-stop",
@@ -545,12 +580,29 @@ def search_seed61_combined(
         }
     restricted = diagnostics["signed_monomial"]
     if isinstance(restricted, Mapping) and restricted["status"] == "exact-certificate":
+        diagonal = restricted["diagonal"]
+        assert isinstance(diagonal, Sequence)
+        transform = sp.ImmutableMatrix(sp.diag(*(int(sign) for sign in diagonal)))
+        rays = tuple(
+            sp.ImmutableMatrix(transform[:, column])
+            for column in range(transform.cols)
+        )
+        certificate = exact_trace_compatible_certificate(
+            matrices,
+            rays,
+            max_denominator=max_denominator,
+            tolerance=tolerance,
+        )
+        if certificate is None:
+            raise RuntimeError("signed exact replay failed the trace gate")
         return {
             "schema_version": SCHEMA_VERSION,
+            "candidate": candidate,
+            "grades": list(selected),
             "status": "exact-trace-compatible-certificate",
             "route": "shared-signed-monomial",
             "diagnostics": diagnostics,
-            "certificate": restricted,
+            "certificate": certificate,
         }
 
     simplicial = _cross_grade_simplicial_search(
@@ -562,9 +614,11 @@ def search_seed61_combined(
         tolerance=tolerance,
         max_denominator=max_denominator,
     )
-    if simplicial["status"] == "exact-certificate":
+    if simplicial["status"] == "exact-trace-compatible-certificate":
         return {
             "schema_version": SCHEMA_VERSION,
+            "candidate": candidate,
+            "grades": list(selected),
             "status": "exact-trace-compatible-certificate",
             "route": "cross-grade-simplicial",
             "diagnostics": diagnostics,
@@ -587,7 +641,7 @@ def search_seed61_combined(
         )
     return {
         "schema_version": SCHEMA_VERSION,
-        "candidate": "exact5-shear-loop-pair:61",
+        "candidate": candidate,
         "grades": list(selected),
         "status": (
             "exact-trace-compatible-certificate"
@@ -600,13 +654,54 @@ def search_seed61_combined(
     }
 
 
+def search_seed61_combined(
+    *,
+    grades: Sequence[int] = (2, 4),
+    attempts: int = 2,
+    maxiter: int = 250,
+    rng_seed: int = 610121,
+    ray_counts: Sequence[int] = (15, 18, 21),
+    tolerance: float = 1.0e-9,
+    max_denominator: int = 65536,
+) -> dict[str, object]:
+    """Retain the original seed-61 API as a compatibility wrapper."""
+
+    return search_candidate_cone(
+        template="exact5-shear-loop-pair",
+        seed=61,
+        grades=grades,
+        attempts=attempts,
+        maxiter=maxiter,
+        rng_seed=rng_seed,
+        ray_counts=ray_counts,
+        tolerance=tolerance,
+        max_denominator=max_denominator,
+    )
+
+
 def _parse_ints(value: str) -> tuple[int, ...]:
     return tuple(int(item) for item in value.split(","))
 
 
+def _parse_target(value: str) -> tuple[str, int]:
+    template, separator, seed_text = value.rpartition(":")
+    if not separator or not template:
+        raise argparse.ArgumentTypeError("target must be TEMPLATE:SEED")
+    try:
+        return template, int(seed_text)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("target seed must be an integer") from error
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--grades", type=_parse_ints, default=(2, 4))
+    parser.add_argument(
+        "--target",
+        type=_parse_target,
+        default=("exact5-shear-loop-pair", 61),
+        help="candidate as TEMPLATE:SEED",
+    )
+    parser.add_argument("--grades", "--grade", type=_parse_ints, default=(2, 4))
     parser.add_argument("--attempts", type=int, default=2)
     parser.add_argument("--maxiter", type=int, default=250)
     parser.add_argument("--rng-seed", type=int, default=610121)
@@ -615,7 +710,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--max-denominator", type=int, default=65536)
     parser.add_argument("--output")
     args = parser.parse_args(argv)
-    result = search_seed61_combined(
+    result = search_candidate_cone(
+        template=args.target[0],
+        seed=args.target[1],
         grades=args.grades,
         attempts=args.attempts,
         maxiter=args.maxiter,
@@ -648,5 +745,6 @@ __all__ = [
     "exact_trace_compatible_certificate",
     "fast_full_fock_diagnostics",
     "particle_hole_pair_lift",
+    "search_candidate_cone",
     "search_seed61_combined",
 ]

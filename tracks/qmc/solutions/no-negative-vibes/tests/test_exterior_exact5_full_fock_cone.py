@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import json
+
 import sympy as sp
 
 from oracle.exterior_exact5_full_fock_cone import (
+    _trace_compatible_column_generation,
     exact_fock_lift,
     exact_trace_compatible_certificate,
+    main,
     particle_hole_pair_lift,
 )
 
@@ -50,3 +54,45 @@ def test_trace_gate_requires_exact_positive_retract_not_only_invariance() -> Non
         (sp.ImmutableMatrix([1]), sp.ImmutableMatrix([-1])),
     )
     assert rejected is None
+
+
+def test_cli_promotes_arbitrary_target_grade_only_through_trace_gate(
+    capsys: object,
+) -> None:
+    exit_code = main(
+        [
+            "--target",
+            "exact5-oddcycle-block-pair:132",
+            "--grades",
+            "4",
+            "--attempts",
+            "0",
+            "--maxiter",
+            "1",
+            "--ray-counts",
+            "5",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["candidate"] == "exact5-oddcycle-block-pair:132"
+    assert payload["grades"] == [4]
+    assert payload["status"] == "exact-trace-compatible-certificate"
+    assert payload["certificate"]["right_inverse_replay"] is True
+    assert payload["certificate"]["positive_retract_replay"] is True
+
+
+def test_column_generation_promotes_exact_closure_between_milestones() -> None:
+    atoms = (sp.ImmutableMatrix([[1, 0], [0, 0]]),)
+
+    result = _trace_compatible_column_generation(
+        atoms,
+        [[1.0, 0.0], [1.0, 1.0]],
+        ray_counts=(2, 4),
+        tolerance=1.0e-9,
+        max_denominator=32,
+    )
+
+    assert result["status"] == "exact-trace-compatible-certificate"
+    assert result["certificate"]["ray_count"] == 3
