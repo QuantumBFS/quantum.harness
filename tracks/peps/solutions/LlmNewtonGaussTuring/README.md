@@ -15,6 +15,12 @@
 
 ## Implementation status
 
+**Overall challenge status: `gate-pending`.** Stage 4 passed its small-system
+validation gate. The later Stage 5 checkpoint adds matrix-free ED, scaling, and
+iPEPS ground-state scaffolding, but does not yet implement mixed-iPEPS overlap
+contraction or an iPEPS FHS Berry-curvature production pipeline. See
+`STAGE5_REPORT.md`.
+
 ### Stage 4 (2026-07-29): Pure-NumPy PEPS-FHS engine
 
 Core engine (`peps_fhs.py`) provides:
@@ -34,5 +40,16 @@ Validated properties:
 - Near-critical curvature enhancement visible
 
 Limitations: quimb unavailable (network); MPS uses 1D bonds only. Full 2D PEPS with vertical virtual bonds and SimpleUpdate optimization requires quimb — planned for Stage 5.
+
+### Stage 5 (2026-07-29): large-ED and iPEPS readiness
+
+- Matrix-free complex Lanczos extends the square-lattice ED oracle through
+  `N=16`; a finite-size scaling script and Rydberg laser-phase parameterization
+  are present.
+- PEPSKit/TensorKit scripts provide iPEPS ground-state and `D, chi` convergence
+  scaffolding.
+- Remaining software gate: normalized mixed-iPEPS overlaps and the four-link
+  FHS plaquette observable have not been connected to the optimized iPEPS
+  states. No iPEPS curvature production result exists yet.
 
 See `STAGE4_REPORT.md` for full details.
