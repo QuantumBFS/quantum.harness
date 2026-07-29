@@ -100,29 +100,74 @@ static void cplx_matvec(const cplx* H, int dim,
 }
 
 // ──────────────────────────────────────────────────────────────
-// Complex Hermitian Lanczos with full reorthogonalisation
+// Matrix-free H(θ)·v via R_x(θ) H_0 R_x^†(θ)
 // ──────────────────────────────────────────────────────────────
 
-GroundState solve_ground_state_lanczos(
-    const Lattice& lattice, double J, double Omega, double theta,
-    int m_max)
-{
-    const int dim = checked_dimension(lattice, 1024, "solve_ground_state_lanczos");
+static void apply_rx(double theta, cplx* vec, int dim, int N) {
+    if (theta == 0.0) return;
+    double c = std::cos(theta * 0.5);
+    double s = std::sin(theta * 0.5);
+    cplx neg_is(0.0, -s);
+    for (int q = 0; q < N; ++q) {
+        int mask = 1 << q;
+        for (int st = 0; st < dim; ++st) {
+            if ((st >> q) & 1) continue;
+            int st1 = st | mask;
+            cplx a = vec[st], b = vec[st1];
+            vec[st]  = c * a + neg_is * b;
+            vec[st1] = neg_is * a + c * b;
+        }
+    }
+}
+
+static void apply_h0(const Lattice& lattice, double J, double Omega,
+                     const cplx* src, cplx* dst, int dim) {
+    int N = static_cast<int>(lattice.N);
+    int Nb = static_cast<int>(lattice.bonds.size());
+    for (int st = 0; st < dim; ++st) dst[st] = cplx(0, 0);
+
+    // Diagonal ZZ terms: H0_ii * src[i]
+    for (int st = 0; st < dim; ++st) {
+        double zz_sum = 0.0;
+        for (int bi = 0; bi < Nb; ++bi) {
+            int i = static_cast<int>(lattice.bonds[bi].i);
+            int j = static_cast<int>(lattice.bonds[bi].j);
+            zz_sum += (1 - 2 * ((st >> i) & 1)) * (1 - 2 * ((st >> j) & 1));
+        }
+        dst[st] += cplx(-J * zz_sum, 0.0) * src[st];
+    }
+
+    // Off-diagonal X terms: -Omega * src[st ^ (1<<si)]
+    for (int st = 0; st < dim; ++st) {
+        for (int si = 0; si < N; ++si)
+            dst[st] += cplx(-Omega, 0.0) * src[st ^ (1 << si)];
+    }
+}
+
+static void kolodrubetz_matvec(const Lattice& lattice, double J,
+                                double Omega, double theta,
+                                const cplx* v, cplx* w, int dim) {
+    int N = static_cast<int>(lattice.N);
+    std::vector<cplx> tmp(v, v + dim);
+    apply_rx(-theta, tmp.data(), dim, N);       // R_x^† v
+    std::vector<cplx> h0tmp(dim);
+    apply_h0(lattice, J, Omega, tmp.data(), h0tmp.data(), dim); // H_0 (R_x^† v)
+    std::copy(h0tmp.begin(), h0tmp.end(), w);
+    apply_rx(theta, w, dim, N);                 // R_x (H_0 R_x^† v)
+}
+
+using MatvecFn = std::function<void(const cplx* v, cplx* w)>;
+
+static GroundState matrix_free_lanczos(int dim, const MatvecFn& matvec, int m_max) {
     if (m_max <= 0)
-        throw std::invalid_argument("solve_ground_state_lanczos: m_max must be positive");
-
-    auto Hmat = build_kolodrubetz_hamiltonian(lattice, J, Omega, theta);
-
-    // Adaptive m_max for small dim
+        throw std::invalid_argument("matrix_free_lanczos: m_max must be positive");
     if (m_max > dim) m_max = dim;
 
-    std::vector<std::vector<cplx>> Q;  // Lanczos vectors
+    std::vector<std::vector<cplx>> Q;
     Q.reserve(m_max + 1);
 
-    // Deterministic random initial vector
     std::mt19937 rng(42);
     std::uniform_real_distribution<double> dist(-1, 1);
-
     Q.push_back(std::vector<cplx>(dim));
     double nr = 0;
     for (int i = 0; i < dim; ++i) {
@@ -130,12 +175,11 @@ GroundState solve_ground_state_lanczos(
         nr += std::norm(Q[0][i]);
     }
     nr = std::sqrt(nr);
+    if (nr < 1e-30) { Q[0][0] = cplx(1, 0); nr = 1.0; }
     for (auto& z : Q[0]) z /= nr;
 
-    std::vector<double> alpha;
-    std::vector<double> beta;
-    alpha.reserve(m_max);
-    beta.reserve(m_max);
+    std::vector<double> alpha, beta;
+    alpha.reserve(m_max); beta.reserve(m_max);
     beta.push_back(0);
 
     std::vector<cplx> w(dim);
@@ -143,50 +187,36 @@ GroundState solve_ground_state_lanczos(
     bool converged = false;
 
     for (int k = 0; k < m_max; ++k) {
-        cplx_matvec(Hmat.data(), dim, Q[k].data(), w.data());
+        matvec(Q[k].data(), w.data());
         double ak = std::real(cplx_dot(Q[k], w, dim));
         alpha.push_back(ak);
-
-        if (k > 0) {
-            for (int i = 0; i < dim; ++i)
-                w[i] -= beta[k] * Q[k-1][i];
-        }
-        for (int i = 0; i < dim; ++i)
-            w[i] -= ak * Q[k][i];
-
-        // Two-pass full reorthogonalisation keeps the Krylov basis stable near
-        // small gaps and makes the Ritz residual meaningful.
+        if (k > 0)
+            for (int i = 0; i < dim; ++i) w[i] -= beta[k] * Q[k-1][i];
+        for (int i = 0; i < dim; ++i) w[i] -= ak * Q[k][i];
         for (int pass = 0; pass < 2; ++pass)
             for (int j = 0; j <= k; ++j) {
                 cplx proj = cplx_dot(Q[j], w, dim);
                 for (int i = 0; i < dim; ++i) w[i] -= proj * Q[j][i];
             }
-
         double bkp1 = std::sqrt(cplx_abs_sq(w, dim));
         beta.push_back(bkp1);
-
         m = k + 1;
-        const bool breakdown = bkp1 <= 1e-14;
-        const bool check_now = m >= 2 && (m % 5 == 0 || breakdown || m == m_max);
-        if (check_now) {
-            int curr_m = m;
-            DenseSymMatrix T(static_cast<std::size_t>(curr_m));
-            for (int i = 0; i < curr_m; ++i) {
+        bool breakdown = bkp1 <= 1e-14;
+        if (m >= 2 && (m % 5 == 0 || breakdown || m == m_max)) {
+            DenseSymMatrix T(static_cast<std::size_t>(m));
+            for (int i = 0; i < m; ++i) {
                 T(i, i) = alpha[i];
                 if (i > 0) { T(i, i-1) = beta[i]; T(i-1, i) = beta[i]; }
             }
             auto eigsys = jacobi_eigen(T, 50, 1e-12);
-            const double last_component = eigsys.eigenvectors[(curr_m - 1) * curr_m];
-            const double residual = bkp1 * std::abs(last_component);
+            double residual = bkp1 * std::abs(eigsys.eigenvectors[(m-1) * m]);
             converged = residual <= 1e-11 * (1.0 + std::abs(eigsys.eigenvalues[0]));
         }
         if (converged || breakdown) break;
-
         Q.push_back(std::vector<cplx>(dim));
         for (int i = 0; i < dim; ++i) Q[k+1][i] = w[i] / bkp1;
     }
 
-    // Diagonalise final T_m
     DenseSymMatrix Tm(static_cast<std::size_t>(m));
     for (int i = 0; i < m; ++i) {
         Tm(i, i) = alpha[i];
@@ -195,20 +225,17 @@ GroundState solve_ground_state_lanczos(
     auto eigsys = jacobi_eigen(Tm, 50, 1e-12);
     double E0 = eigsys.eigenvalues[0];
 
-    // Reconstruct ground-state eigenvector
-    std::vector<cplx> psi0(dim, cplx(0, 0));
+    std::vector<cplx> psi0(dim, cplx(0,0));
     for (int j = 0; j < m; ++j) {
         double y0j = eigsys.eigenvectors[j * m];
-        for (int i = 0; i < dim; ++i)
-            psi0[i] += y0j * Q[j][i];
+        for (int i = 0; i < dim; ++i) psi0[i] += y0j * Q[j][i];
     }
-
     nr = std::sqrt(cplx_abs_sq(psi0, dim));
     if (nr > 1e-30)
         for (auto& z : psi0) z /= nr;
 
     std::vector<cplx> Hpsi(dim);
-    cplx_matvec(Hmat.data(), dim, psi0.data(), Hpsi.data());
+    matvec(psi0.data(), Hpsi.data());
     E0 = std::real(cplx_dot(psi0, Hpsi, dim));
     double residual2 = 0.0;
     for (int i = 0; i < dim; ++i) residual2 += std::norm(Hpsi[i] - E0 * psi0[i]);
@@ -220,6 +247,110 @@ GroundState solve_ground_state_lanczos(
     result.residual = std::sqrt(residual2);
     result.converged = result.residual <= 1e-10 * (1.0 + std::abs(E0));
     return result;
+}
+
+// ──────────────────────────────────────────────────────────────
+// Complex Hermitian Lanczos with auto-dispatch
+// ──────────────────────────────────────────────────────────────
+
+GroundState solve_ground_state_lanczos(
+    const Lattice& lattice, double J, double Omega, double theta,
+    int m_max)
+{
+    const int dim = checked_dimension(lattice, 65536, "solve_ground_state_lanczos");
+    if (m_max <= 0)
+        throw std::invalid_argument("solve_ground_state_lanczos: m_max must be positive");
+
+    if (dim <= 1024) {
+        // Dense complex Hermitian Lanczos (N ≤ 10)
+        auto Hmat = build_kolodrubetz_hamiltonian(lattice, J, Omega, theta);
+        if (m_max > dim) m_max = dim;
+
+        std::vector<std::vector<cplx>> Q;
+        Q.reserve(m_max + 1);
+        std::mt19937 rng(42);
+        std::uniform_real_distribution<double> dist(-1, 1);
+        Q.push_back(std::vector<cplx>(dim));
+        double nr = 0;
+        for (int i = 0; i < dim; ++i) {
+            Q[0][i] = cplx(dist(rng), dist(rng));
+            nr += std::norm(Q[0][i]);
+        }
+        nr = std::sqrt(nr);
+        for (auto& z : Q[0]) z /= nr;
+
+        std::vector<double> alpha, beta;
+        alpha.reserve(m_max); beta.reserve(m_max);
+        beta.push_back(0);
+        std::vector<cplx> w(dim);
+        int m = 0;
+        bool converged = false;
+
+        for (int k = 0; k < m_max; ++k) {
+            cplx_matvec(Hmat.data(), dim, Q[k].data(), w.data());
+            double ak = std::real(cplx_dot(Q[k], w, dim));
+            alpha.push_back(ak);
+            if (k > 0)
+                for (int i = 0; i < dim; ++i) w[i] -= beta[k] * Q[k-1][i];
+            for (int i = 0; i < dim; ++i) w[i] -= ak * Q[k][i];
+            for (int pass = 0; pass < 2; ++pass)
+                for (int j = 0; j <= k; ++j) {
+                    cplx proj = cplx_dot(Q[j], w, dim);
+                    for (int i = 0; i < dim; ++i) w[i] -= proj * Q[j][i];
+                }
+            double bkp1 = std::sqrt(cplx_abs_sq(w, dim));
+            beta.push_back(bkp1);
+            m = k + 1;
+            const bool breakdown = bkp1 <= 1e-14;
+            if (m >= 2 && (m % 5 == 0 || breakdown || m == m_max)) {
+                DenseSymMatrix T(static_cast<std::size_t>(m));
+                for (int i = 0; i < m; ++i) {
+                    T(i, i) = alpha[i];
+                    if (i > 0) { T(i, i-1) = beta[i]; T(i-1, i) = beta[i]; }
+                }
+                auto eigsys = jacobi_eigen(T, 50, 1e-12);
+                double residual = bkp1 * std::abs(eigsys.eigenvectors[(m-1) * m]);
+                converged = residual <= 1e-11 * (1.0 + std::abs(eigsys.eigenvalues[0]));
+            }
+            if (converged || breakdown) break;
+            Q.push_back(std::vector<cplx>(dim));
+            for (int i = 0; i < dim; ++i) Q[k+1][i] = w[i] / bkp1;
+        }
+
+        DenseSymMatrix Tm(static_cast<std::size_t>(m));
+        for (int i = 0; i < m; ++i) {
+            Tm(i, i) = alpha[i];
+            if (i > 0) { Tm(i, i-1) = beta[i]; Tm(i-1, i) = beta[i]; }
+        }
+        auto eigsys = jacobi_eigen(Tm, 50, 1e-12);
+        double E0 = eigsys.eigenvalues[0];
+        std::vector<cplx> psi0(dim, cplx(0,0));
+        for (int j = 0; j < m; ++j) {
+            double y0j = eigsys.eigenvectors[j * m];
+            for (int i = 0; i < dim; ++i) psi0[i] += y0j * Q[j][i];
+        }
+        nr = std::sqrt(cplx_abs_sq(psi0, dim));
+        if (nr > 1e-30)
+            for (auto& z : psi0) z /= nr;
+        std::vector<cplx> Hpsi(dim);
+        cplx_matvec(Hmat.data(), dim, psi0.data(), Hpsi.data());
+        E0 = std::real(cplx_dot(psi0, Hpsi, dim));
+        double residual2 = 0.0;
+        for (int i = 0; i < dim; ++i) residual2 += std::norm(Hpsi[i] - E0 * psi0[i]);
+
+        GroundState result;
+        result.eigenvector = std::move(psi0);
+        result.dim = dim; result.E0 = E0;
+        result.residual = std::sqrt(residual2);
+        result.converged = result.residual <= 1e-10 * (1.0 + std::abs(E0));
+        return result;
+    }
+
+    // Matrix-free path (N ≥ 11, dim > 1024)
+    MatvecFn matvec = [&](const cplx* v, cplx* w) {
+        kolodrubetz_matvec(lattice, J, Omega, theta, v, w, dim);
+    };
+    return matrix_free_lanczos(dim, matvec, m_max);
 }
 
 // ──────────────────────────────────────────────────────────────
