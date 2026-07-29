@@ -37,9 +37,9 @@ end
 struct ValidatedChainMappingCapability
     source_bath_sha256::String
     mapping_sha256::String
-    epsilon::Vector{Float64}
-    chain_onsite::Vector{Float64}
-    chain_hopping::Vector{Float64}
+    epsilon::Tuple{Vararg{Float64}}
+    chain_onsite::Tuple{Vararg{Float64}}
+    chain_hopping::Tuple{Vararg{Float64}}
     lambda::Float64
 
     function ValidatedChainMappingCapability(
@@ -73,13 +73,16 @@ struct ValidatedChainMappingCapability
         new(
             source,
             mapping,
-            star_energies,
-            onsite,
-            hopping,
+            Tuple(star_energies),
+            Tuple(onsite),
+            Tuple(hopping),
             hybridization,
         )
     end
 end
+
+struct PurificationConstructionSeal end
+const _PURIFICATION_CONSTRUCTION_SEAL = PurificationConstructionSeal()
 
 struct PurificationSpec
     mode::Symbol
@@ -87,10 +90,36 @@ struct PurificationSpec
     qn_gauge_version::Union{Nothing,Int}
     base_sector_nf::Union{Nothing,Int}
     base_sector_sz::Union{Nothing,Int}
+
+    function PurificationSpec(
+        seal::PurificationConstructionSeal;
+        mode,
+        qn_gauge,
+        qn_gauge_version,
+        base_sector_nf,
+        base_sector_sz,
+    )
+        seal === _PURIFICATION_CONSTRUCTION_SEAL ||
+            throw(ArgumentError("invalid purification construction seal"))
+        new(
+            mode,
+            qn_gauge,
+            qn_gauge_version,
+            base_sector_nf,
+            base_sector_sz,
+        )
+    end
 end
 
 non_qn_purification() =
-    PurificationSpec(:non_qn, nothing, nothing, nothing, nothing)
+    PurificationSpec(
+        _PURIFICATION_CONSTRUCTION_SEAL;
+        mode = :non_qn,
+        qn_gauge = nothing,
+        qn_gauge_version = nothing,
+        base_sector_nf = nothing,
+        base_sector_sz = nothing,
+    )
 
 """
 Maximum number of inverse-temperature increments accepted by
@@ -180,6 +209,37 @@ struct FiniteBathParameters
     lambda::Float64
     source_bath_sha256::Union{Nothing,String}
     mapping_sha256::Union{Nothing,String}
+
+    function FiniteBathParameters(
+        seal::ChainMappingValidationSeal;
+        epsilon,
+        V,
+        U,
+        epsilon_d,
+        mu,
+        bath_representation,
+        chain_onsite,
+        chain_hopping,
+        lambda,
+        source_bath_sha256,
+        mapping_sha256,
+    )
+        seal === _CHAIN_MAPPING_VALIDATION_SEAL ||
+            throw(ArgumentError("invalid finite-bath construction seal"))
+        new(
+            copy(epsilon),
+            copy(V),
+            U,
+            epsilon_d,
+            mu,
+            bath_representation,
+            copy(chain_onsite),
+            copy(chain_hopping),
+            lambda,
+            source_bath_sha256,
+            mapping_sha256,
+        )
+    end
 end
 
 struct PurificationResult{SiteVector, Diagnostics}
@@ -287,17 +347,18 @@ function FiniteBathParameters(
     impurity_energy = _finite_real(epsilon_d, "epsilon_d")
     chemical_potential = _finite_real(mu, "mu")
     return FiniteBathParameters(
-        energies,
-        couplings,
-        interaction,
-        impurity_energy,
-        chemical_potential,
-        :direct_star,
-        copy(energies),
-        zeros(max(0, length(energies) - 1)),
-        sqrt(sum(abs2, couplings)),
-        nothing,
-        nothing,
+        _CHAIN_MAPPING_VALIDATION_SEAL;
+        epsilon = energies,
+        V = couplings,
+        U = interaction,
+        epsilon_d = impurity_energy,
+        mu = chemical_potential,
+        bath_representation = :direct_star,
+        chain_onsite = energies,
+        chain_hopping = zeros(max(0, length(energies) - 1)),
+        lambda = sqrt(sum(abs2, couplings)),
+        source_bath_sha256 = nothing,
+        mapping_sha256 = nothing,
     )
 end
 
@@ -311,20 +372,21 @@ function FiniteBathParameters(
     interaction >= 0 || throw(ArgumentError("U must be nonnegative"))
     impurity_energy = _finite_real(epsilon_d, "epsilon_d")
     chemical_potential = _finite_real(mu, "mu")
-    energies = copy(validated.epsilon)
+    energies = collect(validated.epsilon)
     couplings = [validated.lambda; zeros(length(energies) - 1)]
     return FiniteBathParameters(
-        energies,
-        couplings,
-        interaction,
-        impurity_energy,
-        chemical_potential,
-        :chain,
-        copy(validated.chain_onsite),
-        copy(validated.chain_hopping),
-        validated.lambda,
-        validated.source_bath_sha256,
-        validated.mapping_sha256,
+        _CHAIN_MAPPING_VALIDATION_SEAL;
+        epsilon = energies,
+        V = couplings,
+        U = interaction,
+        epsilon_d = impurity_energy,
+        mu = chemical_potential,
+        bath_representation = :chain,
+        chain_onsite = collect(validated.chain_onsite),
+        chain_hopping = collect(validated.chain_hopping),
+        lambda = validated.lambda,
+        source_bath_sha256 = validated.source_bath_sha256,
+        mapping_sha256 = validated.mapping_sha256,
     )
 end
 
@@ -336,9 +398,9 @@ function qn_dual_purification(
         throw(ArgumentError("QN dual purification requires chain parameters"))
     parameters.source_bath_sha256 == validated.source_bath_sha256 &&
         parameters.mapping_sha256 == validated.mapping_sha256 &&
-        parameters.epsilon == validated.epsilon &&
-        parameters.chain_onsite == validated.chain_onsite &&
-        parameters.chain_hopping == validated.chain_hopping &&
+        Tuple(parameters.epsilon) == validated.epsilon &&
+        Tuple(parameters.chain_onsite) == validated.chain_onsite &&
+        Tuple(parameters.chain_hopping) == validated.chain_hopping &&
         parameters.lambda == validated.lambda ||
         throw(
             ArgumentError(
@@ -347,11 +409,12 @@ function qn_dual_purification(
         )
     n_orbitals = length(parameters.epsilon) + 1
     return PurificationSpec(
-        :qn_dual,
-        QN_GAUGE,
-        QN_GAUGE_VERSION,
-        2 * n_orbitals,
-        0,
+        _PURIFICATION_CONSTRUCTION_SEAL;
+        mode = :qn_dual,
+        qn_gauge = QN_GAUGE,
+        qn_gauge_version = QN_GAUGE_VERSION,
+        base_sector_nf = 2 * n_orbitals,
+        base_sector_sz = 0,
     )
 end
 

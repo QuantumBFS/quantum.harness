@@ -397,6 +397,62 @@ end
     )
 end
 
+@testset "validated capability coefficients are immutable snapshots" begin
+    validated = validated_chain_fixture(; n_bath = 2)
+    epsilon = collect(validated.epsilon)
+    onsite = collect(validated.chain_onsite)
+    hopping = collect(validated.chain_hopping)
+
+    @test_throws MethodError setindex!(
+        validated.epsilon, validated.epsilon[1] + 1, 1
+    )
+    @test_throws MethodError setindex!(
+        validated.chain_onsite, validated.chain_onsite[1] + 1, 1
+    )
+    @test_throws MethodError setindex!(
+        validated.chain_hopping, validated.chain_hopping[1] + 1, 1
+    )
+
+    parameters = FiniteBathParameters(validated)
+    @test parameters.epsilon == epsilon
+    @test parameters.chain_onsite == onsite
+    @test parameters.chain_hopping == hopping
+    @test FiniteBathPurification.qn_dual_purification(
+        parameters, validated
+    ).mode === :qn_dual
+end
+
+@testset "validated constructors have no positional fabrication bypass" begin
+    @test_throws MethodError FiniteBathPurification.ValidatedChainMappingCapability(
+        repeat("a", 64),
+        repeat("b", 64),
+        [0.0],
+        [0.0],
+        Float64[],
+        0.1,
+    )
+    @test_throws MethodError FiniteBathParameters(
+        [0.0],
+        [0.1],
+        0.8,
+        -0.4,
+        0.0,
+        :chain,
+        [0.0],
+        Float64[],
+        0.1,
+        repeat("a", 64),
+        repeat("b", 64),
+    )
+    @test_throws MethodError FiniteBathPurification.PurificationSpec(
+        :qn_dual,
+        "electron_nf_sz_ancilla_particle_hole",
+        1,
+        4,
+        0,
+    )
+end
+
 @testset "QN Electron labels and complementary dual identity" begin
     validated = validated_chain_fixture(; n_bath = 1)
     chain = FiniteBathParameters(validated)

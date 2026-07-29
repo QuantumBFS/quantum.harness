@@ -336,6 +336,35 @@ end
     @test returned_parameters[] === nothing
 end
 
+@testset "runner capability snapshots validated source arrays" begin
+    request = chain_runner_request(; n_bath = 2)
+    payload = strict_json_read(request["payload_json"], "snapshot request")
+    bath_artifact =
+        strict_json_read(payload["bath_artifact_json"], "snapshot bath")
+    mapping_json =
+        payload["bath_geometry"]["chain_mapping_artifact_json"]
+    mapping_artifact =
+        strict_json_read(mapping_json, "snapshot chain mapping")
+    validated = validate_chain_mapping_artifact(
+        mapping_artifact, mapping_json, bath_artifact
+    )
+    epsilon = collect(validated.epsilon)
+    onsite = collect(validated.chain_onsite)
+    hopping = collect(validated.chain_hopping)
+
+    bath_artifact["payload"]["epsilon"][1] += 1
+    mapping_artifact["payload"]["chain_onsite"][1] += 1
+    mapping_artifact["payload"]["chain_hopping"][1] += 1
+
+    @test collect(validated.epsilon) == epsilon
+    @test collect(validated.chain_onsite) == onsite
+    @test collect(validated.chain_hopping) == hopping
+    parameters = FiniteBathParameters(validated)
+    @test parameters.epsilon == epsilon
+    @test parameters.chain_onsite == onsite
+    @test parameters.chain_hopping == hopping
+end
+
 @testset "runner checkpoint identity uses validated geometry" begin
     direct_request =
         write_and_read_request(resign_runner_request!(minimal_runner_request()))
