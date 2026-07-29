@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T19:27:00Z
+Updated: 2026-07-29T19:29:51Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -221,5 +221,11 @@ Updated: 2026-07-29T19:27:00Z
   `kshcnormal` caps memory at `DefMemPerCPU=3569` MiB (114208 MiB for 32
   CPUs). The runner now requests 114000 MiB. Repeat test-only and submit once;
   the scientific formulation and exact hash are unchanged.
+- Corrected preflight passed. Reduced L=2 solve `118185571` is running on
+  SCNet from immutable commit `738268d`, 32 CPUs / 114000 MiB, with exact
+  expected hash
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
+  and audit tolerance `1e-9`. Monitor through exact reconstruction and the
+  first solver evidence; do not update its checkout while running.
 
 No user input or new credential is currently required.

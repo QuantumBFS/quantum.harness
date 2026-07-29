@@ -1347,3 +1347,12 @@ test-only gate. This changes only Slurm resources; the model, exact hash,
 solver form, and `1e-9` audit remain fixed. The 25.4615% moment reduction is
 the concrete reason this reduced dual may fit where the 114000-MiB unreduced
 primal did not.
+
+The 114000-MiB preflight passed and SCNet job `118185571` started at
+2026-07-29T19:29:29Z from immutable commit `738268d`. Its complete signature
+is unrestricted Shastry--Sutherland `L=2,d=2,g=4/5,gamma=2`, no-boundary
+window, complete basis and inner-state stationarity, exact SO(3) rank-four
+projection, native bar dual, 32 CPUs, 114000 MiB, and `1e-9` audit. The runner
+requires hash `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+Next action: monitor exact reconstruction, factorization, and an audited
+terminal result; do not alter its shared checkout while running.

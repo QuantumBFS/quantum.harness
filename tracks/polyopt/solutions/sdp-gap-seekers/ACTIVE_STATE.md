@@ -765,3 +765,9 @@ Updated: 2026-07-29 UTC.
   most 114208 MiB. Change the reproducible runner to 114000 MiB and repeat
   test-only once. This is a scheduler-policy correction, not a numerical
   attempt; the exact model/hash/audit signature is unchanged.
+- The corrected 114000-MiB preflight passed. Reduced L=2 numerical job
+  `118185571` started on SCNet at 2026-07-29T19:29:29Z from immutable commit
+  `738268d`, 32 CPUs, 12-hour limit. It requires exact coefficient hash
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
+  and uses audit tolerance `1e-9`. Monitor through the hash gate and either a
+  residual-checked terminal status or fresh-task certificate replay.
