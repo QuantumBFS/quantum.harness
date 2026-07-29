@@ -63,8 +63,14 @@ def checked_run_dir(repo_root: Path, declared: str) -> Path:
     return run_dir
 
 
-def validate_settings(settings: dict[str, Any]) -> None:
+def validate_settings(
+    settings: dict[str, Any],
+    *,
+    cell_time_step: bool = False,
+) -> None:
     for key, expected in EXPECTED_SETTINGS.items():
+        if cell_time_step and key == "FixedDltau":
+            continue
         actual = settings.get(key)
         if actual != expected:
             raise ValueError(
@@ -89,7 +95,7 @@ def select_cell(
         raise ValueError(f"unsupported lattice {lattice!r}")
 
     settings = spec["settings"]
-    validate_settings(settings)
+    validate_settings(settings, cell_time_step=role == "scan")
     if role == "scan":
         required = ("L", "hTrfd", "FixedDltau", "scan_kind", "seed")
         missing = [name for name in required if name not in params]

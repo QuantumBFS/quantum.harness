@@ -1,6 +1,6 @@
 # Challenge #148 current status
 
-Status time: 2026-07-30 00:40 CST
+Status time: 2026-07-30 07:42 CST
 
 This is the single entry point for the current scientific and operational
 state. Earlier design, submission, and analysis documents remain dated
@@ -50,9 +50,9 @@ The 66-cell recovery scan uses 32 MPI ranks per cell,
 - Honeycomb: `L=24,28,32`; requested `Δτ=0.010,0.016`; 21 cells.
 - Slurm arrays `23012200` and `23012219` provide 20 simultaneous 32-core
   allocations.
-- At 00:40 CST all 20 allocations were running with no scheduler failure.
-  Their current cells had completed 9–29 of 32 bins. The estimated last
-  bundle completion is approximately 06:20 CST.
+- Slurm arrays `23012200` and `23012219` completed all 20 bundles with
+  scheduler exit code zero. Their 66 cells still require collection and the
+  standard manifest-level audit before entering a fit.
 
 The exact field grids and rationale are recorded in
 `PRECISION_RECOVERY_PLAN.md`.
@@ -66,16 +66,24 @@ The requested `Δτ=0.004` scan contains 30 cells:
 | triangular | 32, 40, 48 | 4.7677, 4.7682, 4.7687, 4.7692, 4.7697 |
 | honeycomb | 24, 28, 32 | 2.1317, 2.1322, 2.1327, 2.1332, 2.1337 |
 
-Jobs `23013840`–`23013846` and `23013848` form 20 isolated 32-core
-calculation lanes across four 96-core and four 64-core allocations, for 640
-cores in total. At 00:40 CST they were pending with
-`AssocGrpCpuLimit`, as expected while the 66-cell scan occupied the account's
-640-core allowance. They are designed to start as those allocations finish.
-The conservative completion window remains 16:00–17:30 CST, before the
-18:00 analysis cutoff.
+The final layout uses 20 independent 32-core allocations, one per calculation
+lane, for 640 cores in total. Jobs `23015225`–`23015236` and
+`23015238`–`23015245` were all running at 07:42 CST. Every job had established
+its 32-rank MPI step, and all 20 active configurations were verified to use
+`FixedDltau=0.004`, `nLocal=1`, and `nWolff=5`.
 
-The earlier pending jobs `23013562` and `23013563` were cancelled before
-running and were replaced by this balanced layout; they consumed no measured
+Earlier startup attempts exposed three wrapper/specification faults before
+scientific sampling: two generated shell runners lacked execute permission,
+the scan-level time step was checked against an unrelated default, and the
+time-step scan label was outside the accepted categories. The first three
+attempts produced no manifests. A subsequent packed-allocation check showed
+that nested Slurm steps serialized; those eight jobs were cancelled after
+about three minutes, and their eight incomplete directories were moved to
+`failed-startup-attempts/23015155-23015162/` for audit rather than deleted.
+The independent-job layout removes the nested-step dependency.
+
+Pending jobs `23013562` and `23013563` were also cancelled before execution
+when the original allocation layout was superseded. They consumed no measured
 runtime and produced no cell manifests.
 
 Scheduler state alone is not scientific evidence. Active runs will enter the

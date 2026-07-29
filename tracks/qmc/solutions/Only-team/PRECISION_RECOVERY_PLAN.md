@@ -95,7 +95,7 @@ budget.
 
 ## Submission status
 
-Status time: 2026-07-30 00:40 CST
+Status time: 2026-07-30 07:42 CST
 
 The approved 66 cells are running as 12 triangular and 8 honeycomb sequential
 bundles, with one 32-core allocation per bundle:
@@ -105,9 +105,9 @@ bundles, with one 32-core allocation per bundle:
 | triangular | 23012200 | 12 × 32 cores | all running |
 | honeycomb | 23012219 | 8 × 32 cores | all running |
 
-At the status time, the active cells had completed 9–29 of 32 bins with no
-scheduler failure. The estimated last bundle completion is approximately
-06:20 CST.
+All 20 bundles subsequently completed with scheduler exit code zero. Their
+66 cells require collection and the standard manifest-level audit before
+entering a fit.
 
 An additional `Δτ=0.004` anchor contains five fields at each of three sizes:
 
@@ -116,13 +116,19 @@ An additional `Δτ=0.004` anchor contains five fields at each of three sizes:
 | triangular | 32, 40, 48 | 4.7677, 4.7682, 4.7687, 4.7692, 4.7697 |
 | honeycomb | 24, 28, 32 | 2.1317, 2.1322, 2.1327, 2.1332, 2.1337 |
 
-The 30 cells use 20 isolated 32-core lanes distributed across Slurm jobs
-`23013840`–`23013846` and `23013848`: four 96-core allocations with three
-lanes each and four 64-core allocations with two lanes each. The total
-request is 640 cores. These jobs were pending with `AssocGrpCpuLimit` while
-the 66-cell scan occupied the account allowance and are designed to start as
-those allocations finish. Their conservative completion window is
-16:00–17:30 CST.
+The 30 cells now use 20 independent 32-core allocations, each running one or
+two cells sequentially. Jobs `23015225`–`23015236` and
+`23015238`–`23015245` were all running at the status time, using the full
+640-core allowance. Each job had established its MPI step, all 20 first-cell
+directories existed, and their configurations retained
+`FixedDltau=0.004`, `nLocal=1`, and `nWolff=5`.
+
+The independent layout replaces an eight-job packed layout whose nested
+Slurm steps did not run concurrently. Startup diagnostics also found and
+corrected generated-runner permissions, scan-level time-step validation, and
+the time-step scan category before any successful manifest was produced.
+Eight incomplete warmup directories from the packed-layout check were moved
+to `failed-startup-attempts/23015155-23015162/` for audit rather than deleted.
 
 Pending jobs `23013562` and `23013563` were cancelled before execution and
 superseded by the balanced 20-lane layout. They consumed no measured runtime

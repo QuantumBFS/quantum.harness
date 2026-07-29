@@ -1323,7 +1323,7 @@ if run_group("driver")
                         "J1": -1.0,
                         "J2": 0.0,
                         "IfSetDltau": true,
-                        "FixedDltau": 0.013,
+                        "FixedDltau": 0.004,
                         "nLocal": 1,
                         "nWolff": 5,
                         "nWarm": 10000,
