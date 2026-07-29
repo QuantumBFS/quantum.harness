@@ -403,9 +403,8 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
         "printf '%s\\n' \"$*\" >> \"${FAKE_APPTAINER_LOG}\"\n"
         "if [[ \"$*\" == *'uv sync --frozen'* ]]; then\n"
         "  mkdir -p \"${CHALLENGE113_DEPLOYMENT}/.venv/bin\"\n"
-        "  printf '#!/usr/bin/env bash\\nexit 0\\n' > "
+        "  ln -s /opt/container-python/bin/python "
         "\"${CHALLENGE113_DEPLOYMENT}/.venv/bin/python\"\n"
-        "  chmod +x \"${CHALLENGE113_DEPLOYMENT}/.venv/bin/python\"\n"
         "fi\n"
         "if [[ \"$*\" == *'--write-marker'* ]]; then\n"
         "  mkdir -p \"${CHALLENGE113_DEPLOYMENT}/.runtime\"\n"
@@ -449,8 +448,13 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     rejected = subprocess.run(
         ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
         env=mismatched,
+        capture_output=True,
+        text=True,
     )
     assert rejected.returncode != 0
+    assert "CHALLENGE113_DEPLOYMENT_METADATA_SHA256 mismatch" in rejected.stderr
+    assert f"expected={'0' * 64}" in rejected.stderr
+    assert "actual=" in rejected.stderr
     assert not log.exists()
     malicious_archive = tmp_path / "--evil.tar.gz"
     malicious_archive.write_bytes(b"archive")
@@ -540,11 +544,53 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
         ["bash", spooled_pilot],
         env=environment,
         cwd=spool,
+        capture_output=True,
+        text=True,
     )
     assert rejected.returncode != 0
+    assert "deployment job gate must be a regular non-symlink file" in rejected.stderr
     assert log.read_text() == ""
     gate.unlink()
     real_gate.rename(gate)
+
+    for digest_name in (
+        "CHALLENGE113_ARCHIVE_SHA256",
+        "CHALLENGE113_DEPLOYMENT_METADATA_SHA256",
+        "CHALLENGE113_PYPROJECT_SHA256",
+        "CHALLENGE113_SIF_SHA256",
+        "CHALLENGE113_UV_LOCK_SHA256",
+    ):
+        truncated = {
+            **environment,
+            digest_name: environment[digest_name][:-1],
+        }
+        rejected = subprocess.run(
+            ["bash", spooled_pilot],
+            env=truncated,
+            cwd=spool,
+            capture_output=True,
+            text=True,
+        )
+        assert rejected.returncode != 0
+        assert (
+            f"{digest_name} must be exactly 64 lowercase hex"
+            in rejected.stderr
+        )
+        assert log.read_text() == ""
+
+    python_entry = deployment / ".venv" / "bin" / "python"
+    python_entry.unlink()
+    rejected = subprocess.run(
+        ["bash", spooled_pilot],
+        env=environment,
+        cwd=spool,
+        capture_output=True,
+        text=True,
+    )
+    assert rejected.returncode != 0
+    assert "runtime Python path entry is missing" in rejected.stderr
+    assert log.read_text() == ""
+    python_entry.symlink_to("/opt/container-python/bin/python")
 
     rejected = subprocess.run(
         ["bash", spooled_pilot],
@@ -562,8 +608,12 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     )
     pilot_log = log.read_text()
     assert "uv sync" not in pilot_log
-    assert pilot_log.count("--no-home") == 4
-    assert pilot_log.count("--cleanenv --net --network none") == 4
+    assert pilot_log.count("--no-home") == 5
+    assert pilot_log.count("--cleanenv --net --network none") == 5
+    assert "test -x /workspace/.venv/bin/python" in pilot_log
+    assert pilot_log.index("test -x /workspace/.venv/bin/python") < pilot_log.index(
+        "run.py trial"
+    )
     assert "--env JAX_ENABLE_X64=1 --env JAX_PLATFORMS=cpu" in pilot_log
     assert f"{archive}:{container_archive}:ro" in pilot_log
     assert f"--archive {container_archive}" in pilot_log
@@ -599,6 +649,8 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
     assert "CHALLENGE113_DEPLOYMENT_METADATA" in inspected
     assert "CHALLENGE113_DEPLOYMENT_METADATA_SHA256" in inspected
     assert "CHALLENGE113_EVIDENCE_REVISION" in inspected
+    assert "^[0-9a-f]{64}$" in inspected
+    assert "mismatch: expected=" in inspected
     assert "sbatch" not in inspected
     if name.startswith("slurm_"):
         assert "CHALLENGE113_SIF_PATH" in inspected

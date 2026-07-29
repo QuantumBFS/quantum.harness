@@ -18,6 +18,26 @@ if [[ -z "${CHALLENGE113_APPTAINER:-}" ]]; then
 fi
 APPTAINER="${CHALLENGE113_APPTAINER:-apptainer}"
 
+verify_sha256_file() {
+  local name="$1"
+  local path="$2"
+  local expected="${!name}"
+  local actual
+  if [[ ! "${expected}" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "${name} must be exactly 64 lowercase hex: expected=64-lowercase-hex actual=${expected}" >&2
+    return 2
+  fi
+  if [[ ! -f "${path}" || -L "${path}" ]]; then
+    echo "${name} path must be a regular non-symlink file: ${path}" >&2
+    return 2
+  fi
+  actual="$(sha256sum -- "${path}" | awk '{print $1}')"
+  if [[ "${actual}" != "${expected}" ]]; then
+    echo "${name} mismatch: expected=${expected} actual=${actual} path=${path}" >&2
+    return 2
+  fi
+}
+
 test "${CHALLENGE113_CLUSTER_PROFILE}" = "lasg02-cpu-v1"
 ARCHIVE_BASENAME="${CHALLENGE113_ARCHIVE_PATH##*/}"
 EXPECTED_ARCHIVE_BASENAME="challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
@@ -27,12 +47,21 @@ if [[ ! "${ARCHIVE_BASENAME}" =~ ^challenge-113-[0-9a-f]{7}\.tar\.gz$ ]] \
   exit 2
 fi
 CONTAINER_ARCHIVE="/${ARCHIVE_BASENAME}"
-test "$(<"${CHALLENGE113_DEPLOYMENT}/.source-revision")" = "${CHALLENGE113_EXPECTED_REVISION}"
-test "$(sha256sum "${CHALLENGE113_SIF_PATH}" | awk '{print $1}')" = "${CHALLENGE113_SIF_SHA256}"
-test "$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')" = "${CHALLENGE113_ARCHIVE_SHA256}"
-test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/pyproject.toml" | awk '{print $1}')" = "${CHALLENGE113_PYPROJECT_SHA256}"
-test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/uv.lock" | awk '{print $1}')" = "${CHALLENGE113_UV_LOCK_SHA256}"
-test "$(sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')" = "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}"
+SOURCE_REVISION_PATH="${CHALLENGE113_DEPLOYMENT}/.source-revision"
+if [[ ! -f "${SOURCE_REVISION_PATH}" || -L "${SOURCE_REVISION_PATH}" ]]; then
+  echo "source revision path must be a regular non-symlink file: ${SOURCE_REVISION_PATH}" >&2
+  exit 2
+fi
+ACTUAL_SOURCE_REVISION="$(<"${SOURCE_REVISION_PATH}")"
+if [[ "${ACTUAL_SOURCE_REVISION}" != "${CHALLENGE113_EXPECTED_REVISION}" ]]; then
+  echo "source revision mismatch: expected=${CHALLENGE113_EXPECTED_REVISION} actual=${ACTUAL_SOURCE_REVISION}" >&2
+  exit 2
+fi
+verify_sha256_file CHALLENGE113_SIF_SHA256 "${CHALLENGE113_SIF_PATH}"
+verify_sha256_file CHALLENGE113_ARCHIVE_SHA256 "${CHALLENGE113_ARCHIVE_PATH}"
+verify_sha256_file CHALLENGE113_PYPROJECT_SHA256 "${CHALLENGE113_DEPLOYMENT}/pyproject.toml"
+verify_sha256_file CHALLENGE113_UV_LOCK_SHA256 "${CHALLENGE113_DEPLOYMENT}/uv.lock"
+verify_sha256_file CHALLENGE113_DEPLOYMENT_METADATA_SHA256 "${CHALLENGE113_DEPLOYMENT_METADATA}"
 if [[ "${CHALLENGE113_ACK_NETWORKED_PREPARE:-}" != "1" ]]; then
   echo "set CHALLENGE113_ACK_NETWORKED_PREPARE=1 for the one-time frozen sync" >&2
   exit 2

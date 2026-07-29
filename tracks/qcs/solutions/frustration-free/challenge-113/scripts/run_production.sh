@@ -14,6 +14,25 @@ test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_UV_LOCK_SHA256:?set expected uv.lock SHA256}"
 : "${CHALLENGE113_CLUSTER_PROFILE:?set approved cluster profile}"
 
+require_sha256_env() {
+  local name="$1"
+  local value="${!name}"
+  if [[ ! "${value}" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "${name} must be exactly 64 lowercase hex: expected=64-lowercase-hex actual=${value}" >&2
+    return 2
+  fi
+}
+
+for SHA_NAME in \
+  CHALLENGE113_ARCHIVE_SHA256 \
+  CHALLENGE113_DEPLOYMENT_METADATA_SHA256 \
+  CHALLENGE113_SIF_SHA256 \
+  CHALLENGE113_PYPROJECT_SHA256 \
+  CHALLENGE113_UV_LOCK_SHA256
+do
+  require_sha256_env "${SHA_NAME}"
+done
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
 
@@ -27,7 +46,15 @@ else
   exit 2
 fi
 test "${SOURCE_REVISION}" = "${CHALLENGE113_EXPECTED_REVISION}"
-test "$(sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')" = "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}"
+if [[ ! -f "${CHALLENGE113_DEPLOYMENT_METADATA}" || -L "${CHALLENGE113_DEPLOYMENT_METADATA}" ]]; then
+  echo "CHALLENGE113_DEPLOYMENT_METADATA_SHA256 path must be a regular non-symlink file: ${CHALLENGE113_DEPLOYMENT_METADATA}" >&2
+  exit 2
+fi
+ACTUAL_METADATA_SHA256="$(sha256sum -- "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')"
+if [[ "${ACTUAL_METADATA_SHA256}" != "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}" ]]; then
+  echo "CHALLENGE113_DEPLOYMENT_METADATA_SHA256 mismatch: expected=${CHALLENGE113_DEPLOYMENT_METADATA_SHA256} actual=${ACTUAL_METADATA_SHA256} path=${CHALLENGE113_DEPLOYMENT_METADATA}" >&2
+  exit 2
+fi
 
 export JAX_ENABLE_X64=1
 : "${CHALLENGE113_JAX_PLATFORM:?set CHALLENGE113_JAX_PLATFORM explicitly}"

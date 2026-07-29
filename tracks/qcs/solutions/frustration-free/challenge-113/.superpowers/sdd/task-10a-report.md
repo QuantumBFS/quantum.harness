@@ -154,3 +154,19 @@ or Slurm submission was made.
 - Integration tests copy both launchers to an unrelated simulated Slurm spool.
   Correct deployment succeeds; relative, missing, and symlinked gate paths fail
   before any container command. No job was submitted.
+
+## Compute-gate correction
+
+- RED: traced pilot 2818000 rejected `.venv/bin/python` on the host because uv
+  created an absolute, container-owned symlink whose target exists only inside
+  the SIF. A manually truncated expected digest also failed without identifying
+  the malformed variable.
+- GREEN: the host now checks only that the Python path entry exists beneath the
+  canonical deployment; executable resolution occurs first inside the same
+  network-none Apptainer environment used by the runtime gate and physics.
+  Every required SHA input must be exactly 64 lowercase hex, and path/format/
+  content failures name the variable plus expected and actual values where
+  applicable.
+- Compute-like tests use an absolute container-only Python symlink, exercise
+  every truncated SHA variable, and require actionable gate/path diagnostics
+  before any container call. No job was submitted.

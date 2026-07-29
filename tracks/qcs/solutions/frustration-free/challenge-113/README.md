@@ -57,6 +57,12 @@ export CHALLENGE113_UV_LOCK_SHA256=1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fca
 bash scripts/run_production.sh
 ```
 
+`write_deployment_metadata.py` is the supported helper for creating the
+authoritative archive, SIF, project, lock, evidence, and report bindings;
+`verify_deployment.py` checks those values before use. Do not manually shorten
+or normalize digests: every supplied SHA must be exactly 64 lowercase hex, and
+the gate reports the named expected/actual mismatch.
+
 The production plan contains 9,500 canonical trials. `run.py sweep` also
 accepts `--shard-index I --shard-count N`; each shard binds the complete plan
 but runs only positions whose canonical zero-based index is congruent to `I`
