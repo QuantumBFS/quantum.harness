@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import replace
 import hashlib
 import json
+import multiprocessing
 import os
-import socket
+from pathlib import Path
+import threading
 import time
 
 import pytest
@@ -12,6 +14,7 @@ import pytest
 import qcontrol.artifacts as artifacts_module
 from qcontrol.artifacts import (
     ArtifactConflict,
+    ArtifactDurabilityError,
     ArtifactStore,
     TrialClaimConflict,
 )
@@ -27,6 +30,35 @@ def config() -> ExperimentConfig:
         search=SearchConfig("model_hessian", 2, 200),
         trial_seed=11,
     )
+
+
+def _claim_worker(root: str, queue: multiprocessing.Queue) -> None:
+    store = ArtifactStore(root, stale_lock_seconds=0.0)
+    try:
+        with store.claim_trial("trial-race"):
+            queue.put(("acquired", os.getpid()))
+            time.sleep(0.4)
+    except TrialClaimConflict:
+        queue.put(("conflict", os.getpid()))
+
+
+def _initialize_worker(
+    root: str,
+    trial_seed: int,
+    queue: multiprocessing.Queue,
+) -> None:
+    store = ArtifactStore(root)
+    plan = {
+        "run_kind": "development",
+        "schema_version": 1,
+        "trials": [{"seed": trial_seed}],
+    }
+    try:
+        store.initialize_run({"seed": trial_seed}, plan)
+    except ArtifactConflict:
+        queue.put(("conflict", trial_seed))
+    else:
+        queue.put(("winner", trial_seed))
 
 
 def test_failed_publish_preserves_previous_artifact(tmp_path, monkeypatch) -> None:
@@ -126,7 +158,11 @@ def test_manifest_contains_complete_public_provenance(tmp_path, config) -> None:
         "scipy",
     }
     assert set(provenance["jax"]) == {"platform", "x64_enabled"}
-    assert set(provenance["git"]) == {"dirty", "revision"}
+    assert set(provenance["git"]) == {
+        "dirty",
+        "revision",
+        "worktree_sha256",
+    }
     assert len(provenance["uv_lock_sha256"]) == 64
     assert "truth" not in json.dumps(provenance).lower()
 
@@ -147,31 +183,19 @@ def test_stale_claim_requires_explicit_dead_owner_metadata(tmp_path) -> None:
     store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
     lock_path = tmp_path / "claims" / "trial-1.lock"
     lock_path.parent.mkdir()
-    lock_path.write_text(
-        json.dumps(
-            {
-                "hostname": socket.gethostname(),
-                "pid": 999_999_999,
-                "started_at": time.time() - 60,
-                "token": "prior-owner",
-            }
-        )
-    )
+    owner = store.owner_identity(lease_seconds=-1.0)
+    owner["pid"] = 999_999_999
+    owner["process_start_id"] = "dead-process-start"
+    prior_nonce = owner["nonce"]
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(owner))
 
     with store.claim_trial("trial-1") as claim:
-        assert claim.owner["token"] != "prior-owner"
+        assert claim.owner["nonce"] != prior_nonce
 
-    lock_path.write_text(
-        json.dumps(
-            {
-                "hostname": "remote-host",
-                "pid": 999_999_999,
-                "started_at": time.time() - 60,
-                "token": "remote-owner",
-            }
-        )
-    )
-    with pytest.raises(TrialClaimConflict, match="cannot prove stale"):
+    remote = store.owner_identity(lease_seconds=60.0)
+    remote["hostname"] = "remote-host"
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(remote))
+    with pytest.raises(TrialClaimConflict, match="active"):
         store.claim_trial("trial-1")
 
 
@@ -182,3 +206,288 @@ def test_completed_trial_is_verified_before_skip(tmp_path) -> None:
 
     with pytest.raises(ArtifactConflict, match="hash"):
         store.completed_trial_ids()
+
+
+def test_two_reclaimers_have_exactly_one_winner(tmp_path) -> None:
+    store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
+    lock_path = tmp_path / "claims" / "trial-race.lock"
+    lock_path.parent.mkdir()
+    owner = store.owner_identity(lease_seconds=-1.0)
+    owner["pid"] = 999_999_999
+    owner["process_start_id"] = "dead-process-start"
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(owner))
+
+    context = multiprocessing.get_context("spawn")
+    queue = context.Queue()
+    workers = [
+        context.Process(target=_claim_worker, args=(str(tmp_path), queue))
+        for _ in range(2)
+    ]
+    for worker in workers:
+        worker.start()
+    results = [queue.get(timeout=5) for _ in workers]
+    for worker in workers:
+        worker.join(timeout=5)
+        assert worker.exitcode == 0
+
+    assert sorted(kind for kind, _ in results) == ["acquired", "conflict"]
+
+
+def test_pid_reuse_requires_matching_process_start_identity(tmp_path) -> None:
+    store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
+    lock_path = tmp_path / "claims" / "trial-1.lock"
+    lock_path.parent.mkdir()
+    reused = store.owner_identity(lease_seconds=-1.0)
+    reused["process_start_id"] = f"{reused['process_start_id']}-different"
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(reused))
+
+    with store.claim_trial("trial-1"):
+        pass
+
+    active = store.owner_identity(lease_seconds=-1.0)
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(active))
+    with pytest.raises(TrialClaimConflict, match="cannot prove stale"):
+        store.claim_trial("trial-1")
+
+
+def test_foreign_host_uses_explicit_lease_expiry(tmp_path) -> None:
+    store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
+    lock_path = tmp_path / "claims" / "trial-1.lock"
+    lock_path.parent.mkdir()
+    foreign = store.owner_identity(lease_seconds=60.0)
+    foreign["hostname"] = "other-host"
+    foreign["pid"] = os.getpid()
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(foreign))
+    with pytest.raises(TrialClaimConflict, match="active"):
+        store.claim_trial("trial-1")
+
+    foreign["lease_expires_at"] = time.time() - 1.0
+    lock_path.write_bytes(artifacts_module.canonical_json_bytes(foreign))
+    with store.claim_trial("trial-1"):
+        pass
+
+
+def test_concurrent_different_immutable_writers_have_one_winner(tmp_path) -> None:
+    results: list[str] = []
+    barrier = threading.Barrier(2)
+
+    def publish(value: int) -> None:
+        store = ArtifactStore(tmp_path)
+        barrier.wait()
+        try:
+            store.publish_json("manifest.json", {"value": value}, immutable=True)
+        except ArtifactConflict:
+            results.append("conflict")
+        else:
+            results.append("winner")
+
+    threads = [threading.Thread(target=publish, args=(value,)) for value in (1, 2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=5)
+
+    assert sorted(results) == ["conflict", "winner"]
+    assert json.loads((tmp_path / "manifest.json").read_text()) in (
+        {"value": 1},
+        {"value": 2},
+    )
+
+
+def test_concurrent_initialization_has_self_consistent_winner(tmp_path) -> None:
+    context = multiprocessing.get_context("spawn")
+    queue = context.Queue()
+    workers = [
+        context.Process(
+            target=_initialize_worker,
+            args=(str(tmp_path), seed, queue),
+        )
+        for seed in (1, 2)
+    ]
+    for worker in workers:
+        worker.start()
+    results = [queue.get(timeout=10) for _ in workers]
+    for worker in workers:
+        worker.join(timeout=5)
+        assert worker.exitcode == 0
+
+    assert sorted(kind for kind, _ in results) == ["conflict", "winner"]
+    winner = next(seed for kind, seed in results if kind == "winner")
+    ready = json.loads((tmp_path / "ready.json").read_text())
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    plan = json.loads((tmp_path / "plan.json").read_text())
+    assert manifest["provenance"]["config"] == {"seed": winner}
+    assert plan["trials"] == [{"seed": winner}]
+    assert ready["manifest_sha256"] == hashlib.sha256(
+        (tmp_path / "manifest.json").read_bytes()
+    ).hexdigest()
+    assert ready["plan_sha256"] == hashlib.sha256(
+        (tmp_path / "plan.json").read_bytes()
+    ).hexdigest()
+
+
+def test_partial_initialization_is_not_resumable_until_ready(
+    tmp_path,
+    config,
+    monkeypatch,
+) -> None:
+    store = ArtifactStore(tmp_path)
+    real_publish = store._publish_bytes_locked
+
+    def crash_on_ready(relative, data, *, immutable):
+        if relative == Path("ready.json"):
+            raise KeyboardInterrupt()
+        return real_publish(relative, data, immutable=immutable)
+
+    monkeypatch.setattr(store, "_publish_bytes_locked", crash_on_ready)
+    with pytest.raises(KeyboardInterrupt):
+        store.initialize_run(config.canonical_dict(), {"schema_version": 1})
+
+    assert (tmp_path / "manifest.json").exists()
+    assert not (tmp_path / "ready.json").exists()
+    with pytest.raises(ArtifactConflict):
+        ArtifactStore.resume(tmp_path, config)
+
+    monkeypatch.setattr(store, "_publish_bytes_locked", real_publish)
+    store.initialize_run(config.canonical_dict(), {"schema_version": 1})
+    assert (tmp_path / "ready.json").exists()
+
+
+@pytest.mark.parametrize(
+    "token",
+    ("", "..", "../x", "x/y", "/absolute", "UPPER", "white space"),
+)
+def test_trial_id_rejects_unsafe_tokens(tmp_path, token) -> None:
+    store = ArtifactStore(tmp_path)
+    with pytest.raises(ValueError, match="token"):
+        store.claim_trial(token)
+    with pytest.raises(ValueError, match="token"):
+        store.publish_trial(token, {"trial_id": token})
+
+
+def test_store_rejects_symlink_root_parent_and_final(tmp_path) -> None:
+    real = tmp_path / "real"
+    real.mkdir()
+    root_link = tmp_path / "root-link"
+    root_link.symlink_to(real, target_is_directory=True)
+    with pytest.raises(ArtifactConflict, match="symlink"):
+        ArtifactStore(root_link)
+    parent_link = tmp_path / "parent-link"
+    parent_link.symlink_to(real, target_is_directory=True)
+    with pytest.raises(ArtifactConflict, match="symlink"):
+        ArtifactStore(parent_link / "child")
+
+    store = ArtifactStore(tmp_path / "store")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (store.root / "linked").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ArtifactConflict, match="symlink"):
+        store.publish_json("linked/value.json", {"value": 1})
+
+    target = outside / "target.json"
+    target.write_text("{}")
+    (store.root / "final.json").symlink_to(target)
+    with pytest.raises(ArtifactConflict, match="symlink"):
+        store.read_json("final.json")
+    with pytest.raises(ArtifactConflict, match="symlink"):
+        store.publish_json("final.json", {"value": 1})
+
+
+def test_store_rejects_traversal_and_absolute_artifact_paths(tmp_path) -> None:
+    store = ArtifactStore(tmp_path)
+    for path in (
+        "../escape.json",
+        "/tmp/escape.json",
+        "a/../../escape.json",
+        r"..\escape.json",
+        r"C:\absolute.json",
+    ):
+        with pytest.raises(ValueError, match="relative"):
+            store.publish_json(path, {"value": 1})
+        with pytest.raises(ValueError, match="relative"):
+            store.read_json(path)
+
+
+def test_cleanup_failure_after_durable_replace_does_not_report_failure(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    store = ArtifactStore(tmp_path)
+    store.publish_json("summary.json", {"version": 1})
+    monkeypatch.setattr(
+        store,
+        "_unlink",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("cleanup")),
+    )
+
+    digest = store.publish_json("summary.json", {"version": 2})
+
+    assert digest == hashlib.sha256(b'{"version":2}\n').hexdigest()
+    assert json.loads((tmp_path / "summary.json").read_text()) == {"version": 2}
+
+
+def test_directory_fsync_failure_reports_verified_bytes(tmp_path, monkeypatch) -> None:
+    store = ArtifactStore(tmp_path)
+    store.publish_json("summary.json", {"version": 1})
+    calls = 0
+    real_fsync = store._fsync_directory
+
+    def fail_once(path: Path) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise OSError("fsync")
+        real_fsync(path)
+
+    monkeypatch.setattr(store, "_fsync_directory", fail_once)
+    with pytest.raises(ArtifactDurabilityError) as raised:
+        store.publish_json("summary.json", {"version": 2})
+
+    assert raised.value.present == "old"
+    assert json.loads((tmp_path / "summary.json").read_text()) == {"version": 1}
+
+
+def test_rollback_failure_reports_actual_new_bytes(tmp_path, monkeypatch) -> None:
+    store = ArtifactStore(tmp_path)
+    store.publish_json("summary.json", {"version": 1})
+    real_replace = store._replace
+    replaces = 0
+
+    def fail_rollback(source: Path, destination: Path) -> None:
+        nonlocal replaces
+        replaces += 1
+        if replaces == 2:
+            raise OSError("rollback")
+        real_replace(source, destination)
+
+    monkeypatch.setattr(store, "_replace", fail_rollback)
+    monkeypatch.setattr(
+        store,
+        "_fsync_directory",
+        lambda *_: (_ for _ in ()).throw(OSError("fsync")),
+    )
+    with pytest.raises(ArtifactDurabilityError) as raised:
+        store.publish_json("summary.json", {"version": 2})
+
+    assert raised.value.present == "new"
+    assert json.loads((tmp_path / "summary.json").read_text()) == {"version": 2}
+
+
+def test_write_failure_closes_descriptor_and_removes_temp(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    store = ArtifactStore(tmp_path)
+    before = len(list(Path("/proc/self/fd").iterdir()))
+    monkeypatch.setattr(
+        os,
+        "write",
+        lambda *_: (_ for _ in ()).throw(OSError("write failed")),
+    )
+
+    with pytest.raises(OSError, match="write failed"):
+        store.publish_json("value.json", {"value": 1})
+
+    after = len(list(Path("/proc/self/fd").iterdir()))
+    assert after <= before
+    assert not list(tmp_path.glob(".artifact.tmp-*"))

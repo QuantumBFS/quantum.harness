@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import copy
 import json
 from pathlib import Path
 import subprocess
@@ -8,13 +9,17 @@ import sys
 
 import pytest
 
+import qcontrol.artifacts as artifacts_module
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
 from qcontrol.experiments import (
     SweepStatus,
     TrialResult,
+    TrialSpec,
+    default_sweep_configs,
     generate_paired_trials,
     run_sweep,
+    run_trial,
     validate_sweep,
 )
 
@@ -77,6 +82,17 @@ def test_trial_ids_bind_every_pairing_dimension() -> None:
     )
 
 
+@pytest.mark.parametrize("identity", ("", "../trial", "trial/path", "UPPER", "a b"))
+def test_trial_spec_rejects_unsafe_identity_tokens(identity) -> None:
+    config = _config("random", 1)
+    with pytest.raises(ValueError, match="token"):
+        TrialSpec(identity, "device-1", "stream-1", config)
+    with pytest.raises(ValueError, match="token"):
+        TrialSpec("trial-1", identity, "stream-1", config)
+    with pytest.raises(ValueError, match="token"):
+        TrialSpec("trial-1", "device-1", identity, config)
+
+
 def test_full_space_occurs_once_per_device_shot_seed_not_per_k() -> None:
     configs = []
     for dimension in (1, 2, 3):
@@ -109,12 +125,12 @@ def _result(spec, execution: int) -> TrialResult:
         observation_stream_id=spec.observation_stream_id,
         config=spec.config.canonical_dict(),
         result={
-            "schema_version": 1,
-            "space": {
-                "origin": [0.0] * 6,
-                "basis": [[1.0], [0.0], [0.0], [0.0], [0.0], [0.0]],
-                "lower_bounds": [-1.0],
-                "upper_bounds": [1.0],
+            "schema_version": 2,
+            "search": {
+                "basis_sha256": "1" * 64,
+                "dimension": spec.config.search.dimension,
+                "method": spec.config.search.method,
+                "origin_sha256": "2" * 64,
             },
             "best_pulse": [0.0] * 6,
             "best_observation": None,
@@ -137,6 +153,21 @@ def _result(spec, execution: int) -> TrialResult:
             "total_queries": 2,
             "total_shots": 2_000,
         },
+        attempts=(
+            {
+                "attempt_index": index,
+                "charged_shots": 1_000,
+                "error_category": "sampling_failure",
+                "estimate": None,
+                "observation_seed": index,
+                "optimizer_query_index": index,
+                "requested_shots": 1_000,
+                "seed_digest": f"{index:064x}",
+                "status": "failed",
+                "validation": False,
+            }
+            for index in (1, 2)
+        ),
         execution=execution,
     )
 
@@ -254,3 +285,218 @@ def test_cli_exposes_strict_modes_and_status_smoke(tmp_path) -> None:
         text=True,
     )
     assert invalid.returncode != 0
+
+
+def test_crash_after_trial_publish_adopts_without_rerunning_physics(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    store = ArtifactStore(tmp_path)
+    calls = 0
+    real_update = store._update_index_locked
+
+    def execute(item) -> TrialResult:
+        nonlocal calls
+        calls += 1
+        return _result(item, calls)
+
+    def crash_before_index(*_args, **_kwargs) -> None:
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(store, "_update_index_locked", crash_before_index)
+    with pytest.raises(KeyboardInterrupt):
+        run_sweep([spec], store, executor=execute)
+    assert calls == 1
+    assert (tmp_path / "trials" / f"{spec.trial_id}.json").is_file()
+    assert spec.trial_id not in store.trial_hashes()
+
+    monkeypatch.setattr(store, "_update_index_locked", real_update)
+    status = run_sweep([spec], store, executor=execute)
+
+    assert status == SweepStatus(expected=1, completed=1, pending=0)
+    assert calls == 1
+    assert spec.trial_id in store.trial_hashes()
+
+
+def test_source_change_during_trial_aborts_before_publication(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    store = ArtifactStore(tmp_path)
+    calls = 0
+    real_collect = artifacts_module._collect_provenance
+    collections = 0
+
+    def changing_provenance(payload):
+        nonlocal collections
+        collections += 1
+        provenance = real_collect(payload)
+        if collections > 1:
+            provenance["source_hashes"] = {
+                **provenance["source_hashes"],
+                "src/qcontrol/changed.py": "0" * 64,
+            }
+        return provenance
+
+    monkeypatch.setattr(
+        artifacts_module,
+        "_collect_provenance",
+        changing_provenance,
+    )
+
+    def execute(item) -> TrialResult:
+        nonlocal calls
+        calls += 1
+        return _result(item, calls)
+
+    with pytest.raises(ArtifactConflict, match="provenance"):
+        run_sweep([spec], store, executor=execute)
+
+    assert calls == 1
+    assert not (tmp_path / "trials" / f"{spec.trial_id}.json").exists()
+
+
+def _walk_keys(value):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield key
+            yield from _walk_keys(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _walk_keys(item)
+
+
+@pytest.mark.parametrize("method", ("model_hessian", "random", "oracle"))
+def test_trial_artifact_structurally_excludes_numeric_search_bases(
+    tmp_path,
+    method,
+) -> None:
+    spec = generate_paired_trials([_config(method, 1)])[0]
+    store = ArtifactStore(tmp_path)
+    run_sweep([spec], store, executor=lambda item: _result(item, 1))
+    payload = json.loads(
+        (tmp_path / "trials" / f"{spec.trial_id}.json").read_text()
+    )
+
+    keys = set(_walk_keys(payload))
+    assert "basis" not in keys
+    assert "origin" not in keys
+    assert "drift_direction" not in keys
+    assert "control_gain_deltas" not in keys
+    assert "unmodeled_direction" not in keys
+    assert payload["result"]["search"] == {
+        "basis_sha256": "1" * 64,
+        "dimension": 1,
+        "method": method,
+        "origin_sha256": "2" * 64,
+    }
+
+
+@pytest.mark.integration
+def test_real_trial_uses_public_search_identity_without_numeric_basis(
+    tmp_path,
+) -> None:
+    config = ExperimentConfig(
+        run_kind="development",
+        system=SystemConfig("one_qubit", 6, 4.0),
+        device=DeviceConfig(gap=0.0, shots=None, perturbation_seed=5),
+        search=SearchConfig("random", 3, 200),
+        trial_seed=5,
+    )
+
+    result = run_trial(config, ArtifactStore(tmp_path))
+    payload = result.canonical_dict()
+
+    assert "space" not in payload["result"]
+    assert "basis" not in set(_walk_keys(payload))
+    assert payload["result"]["search"]["method"] == "random"
+    assert len(payload["result"]["search"]["basis_sha256"]) == 64
+    assert len(payload["attempts"]) == payload["ledger"]["total_queries"]
+
+
+def test_production_matrix_has_exact_design_coverage() -> None:
+    specs = generate_paired_trials(default_sweep_configs("production"))
+
+    assert len(specs) == 9_500
+    by_system = {
+        name: [spec for spec in specs if spec.config.system.name == name]
+        for name in ("one_qubit", "two_qubit")
+    }
+    assert len(by_system["two_qubit"]) == 5_700
+    assert len(by_system["one_qubit"]) == 3_800
+
+    for name, dimensions, shots in (
+        ("two_qubit", {5, 10, 15, 20, 30, 80}, {None, 1_000, 10_000}),
+        ("one_qubit", {1, 2, 3, 4, 6, 24}, {None, 1_000}),
+    ):
+        subset = by_system[name]
+        assert {spec.config.device.gap for spec in subset} == {
+            0.0,
+            0.02,
+            0.05,
+            0.10,
+            0.20,
+        }
+        assert {spec.config.device.shots for spec in subset} == shots
+        assert {spec.config.trial_seed for spec in subset} == set(range(20))
+        assert {
+            spec.config.search.dimension
+            for spec in subset
+            if spec.config.search.method != "full"
+        } == dimensions
+        full = [spec for spec in subset if spec.config.search.method == "full"]
+        assert len(full) == 5 * len(shots) * 20
+
+
+@pytest.mark.parametrize("invalid", (True, 1.0, "1"))
+def test_trial_result_rejects_coerced_ledger_integers(invalid) -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    payload = _result(spec, 1).canonical_dict()
+    payload["ledger"]["optimizer_queries"] = invalid
+
+    with pytest.raises(ValueError, match="invalid trial-result"):
+        TrialResult.from_canonical_dict(payload)
+
+
+def test_trial_result_rejects_missing_extra_and_duplicate_attempts() -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    canonical = _result(spec, 1).canonical_dict()
+    mutations = []
+
+    missing = copy.deepcopy(canonical)
+    del missing["ledger"]["total_queries"]
+    mutations.append(missing)
+
+    extra = copy.deepcopy(canonical)
+    extra["ledger"]["extra"] = 0
+    mutations.append(extra)
+
+    extra_result = copy.deepcopy(canonical)
+    extra_result["result"]["private_basis"] = [[1.0]]
+    mutations.append(extra_result)
+
+    missing_attempt_field = copy.deepcopy(canonical)
+    del missing_attempt_field["attempts"][0]["requested_shots"]
+    mutations.append(missing_attempt_field)
+
+    duplicate = copy.deepcopy(canonical)
+    duplicate["attempts"][1]["attempt_index"] = 1
+    mutations.append(duplicate)
+
+    inconsistent = copy.deepcopy(canonical)
+    inconsistent["attempts"][0]["validation"] = True
+    mutations.append(inconsistent)
+
+    wrong_requested = copy.deepcopy(canonical)
+    wrong_requested["attempts"][0]["requested_shots"] = 999
+    mutations.append(wrong_requested)
+
+    false_success = copy.deepcopy(canonical)
+    false_success["attempts"][0]["status"] = "succeeded"
+    mutations.append(false_success)
+
+    for payload in mutations:
+        with pytest.raises(ValueError):
+            TrialResult.from_canonical_dict(payload)
