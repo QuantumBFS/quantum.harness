@@ -647,6 +647,9 @@ def test_survivor_planning_fails_closed_on_incomplete_parent_collection(
             json.dumps({"errors": [{"candidate_id": entry["candidate_id"]}]}),
             encoding="utf-8",
         )
+        # A returned terminal result clears a historical retry; remove it to
+        # model an actually unresolved operational candidate.
+        manifest_path.unlink()
 
     with pytest.raises(RuntimeError, match="missing|stale|duplicate|unresolved|parent"):
         thin.plan_survivor_run(
@@ -739,11 +742,12 @@ def test_pressure_run_uses_hash_bound_words_and_status(
         run_dir=tmp_path / "stage-2",
         source_commit=SOURCE_COMMIT,
     )
-    spec_path = tmp_path / "stage-2" / "specs" / "shard-00.json"
+    stage2_plan = json.loads(
+        (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
+    )
+    selected = stage2_plan["candidates"][0]
+    spec_path = tmp_path / "stage-2" / "specs" / f"shard-{selected['shard']:02d}.json"
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
-    if not spec["candidates"]:
-        spec_path = next((tmp_path / "stage-2" / "specs").glob("shard-*.json"))
-        spec = json.loads(spec_path.read_text(encoding="utf-8"))
     spec["candidates"] = spec["candidates"][:1]
     spec_path.write_text(json.dumps(spec), encoding="utf-8")
     iterator = iter(classifications)
