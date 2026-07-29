@@ -1,0 +1,109 @@
+host=node21 job_id=410810 cpus=16 start=2026-07-28T02:46:29+08:00
+problem=operator_loschmidt_echo_49x648
+qasm_sha256=1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455 qreg=156 active=49 layers=73 cz=648
+convention=OpenQASM/Qiskit Rx(theta)=exp(-i*theta*X/2), Rz(theta)=exp(-i*theta*Z/2); S/SX translated to equivalent rotations up to global phase
+L=3 b=0.25 delta=0.15 observable=Z52 Z59 Z72
+seed=1 namespace=issue119-ole-v1 chi=512 dtype=ComplexF64 cutoff=1.0e-12
+bp_maxiter=25 bp_tolerance=1.0e-8 normalize=true
+resource_cpu=znver4 julia_threads=1 blas_threads=16 total_memory_bytes=1623026487296
+confirmation_token=0a7122006cfc2ef0
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+layer=1/73 gates=80 bond=1 trunc=0.0 bp_residual=0.0 norm_defect=NaN wall_s=6.683
+layer=2/73 gates=20 bond=2 trunc=0.0 bp_residual=2.05596856412066e-18 norm_defect=NaN wall_s=28.035
+layer=3/73 gates=104 bond=2 trunc=0.0 bp_residual=6.1679056923619804e-18 norm_defect=NaN wall_s=0.05
+layer=4/73 gates=16 bond=2 trunc=3.3477205799894075e-33 bp_residual=2.4671622769447922e-17 norm_defect=NaN wall_s=1.123
+layer=5/73 gates=104 bond=2 trunc=0.0 bp_residual=1.439177994884462e-17 norm_defect=NaN wall_s=0.037
+layer=6/73 gates=18 bond=2 trunc=4.8541074759032656e-33 bp_residual=6.990293118010245e-17 norm_defect=NaN wall_s=0.044
+layer=7/73 gates=116 bond=2 trunc=0.0 bp_residual=6.167905692361981e-17 norm_defect=NaN wall_s=0.054
+layer=8/73 gates=20 bond=4 trunc=0.0 bp_residual=8.840664825718839e-17 norm_defect=NaN wall_s=0.044
+layer=9/73 gates=104 bond=4 trunc=0.0 bp_residual=7.812680543658509e-17 norm_defect=NaN wall_s=0.037
+layer=10/73 gates=16 bond=4 trunc=8.088729596156901e-33 bp_residual=1.1513423959075697e-16 norm_defect=NaN wall_s=0.051
+layer=11/73 gates=104 bond=4 trunc=0.0 bp_residual=9.868649107779169e-17 norm_defect=NaN wall_s=0.042
+layer=12/73 gates=18 bond=4 trunc=7.101536395961695e-33 bp_residual=9.251858538542972e-17 norm_defect=NaN wall_s=0.045
+layer=13/73 gates=116 bond=4 trunc=0.0 bp_residual=8.635067969306773e-17 norm_defect=NaN wall_s=0.043
+layer=14/73 gates=20 bond=8 trunc=0.0 bp_residual=7.607083687246443e-17 norm_defect=NaN wall_s=0.052
+layer=15/73 gates=104 bond=8 trunc=0.0 bp_residual=8.22387425648264e-17 norm_defect=NaN wall_s=0.042
+layer=16/73 gates=16 bond=8 trunc=8.370811662985662e-33 bp_residual=1.1719020815487764e-16 norm_defect=NaN wall_s=0.05
+layer=17/73 gates=104 bond=8 trunc=0.0 bp_residual=7.812680543658509e-17 norm_defect=NaN wall_s=0.042
+layer=18/73 gates=18 bond=8 trunc=6.954371306424532e-33 bp_residual=1.2747005097548094e-16 norm_defect=NaN wall_s=0.059
+layer=19/73 gates=72 bond=8 trunc=0.0 bp_residual=1.0485439677015367e-16 norm_defect=NaN wall_s=0.047
+layer=20/73 gates=18 bond=8 trunc=4.918285269888287e-30 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.055
+layer=21/73 gates=104 bond=8 trunc=0.0 bp_residual=1.0074245964191236e-16 norm_defect=NaN wall_s=0.042
+layer=22/73 gates=16 bond=8 trunc=5.848942970412443e-30 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.05
+layer=23/73 gates=104 bond=8 trunc=0.0 bp_residual=1.2747005097548094e-16 norm_defect=NaN wall_s=0.042
+layer=24/73 gates=20 bond=8 trunc=3.1968233000417134e-29 bp_residual=1.0279842820603301e-16 norm_defect=NaN wall_s=0.051
+layer=25/73 gates=116 bond=8 trunc=0.0 bp_residual=7.812680543658509e-17 norm_defect=NaN wall_s=0.044
+layer=26/73 gates=18 bond=8 trunc=3.1802847848598625e-29 bp_residual=8.22387425648264e-17 norm_defect=NaN wall_s=0.052
+layer=27/73 gates=104 bond=8 trunc=0.0 bp_residual=1.3774989379608423e-16 norm_defect=NaN wall_s=0.042
+layer=28/73 gates=16 bond=12 trunc=1.9828307937643842e-29 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.05
+layer=29/73 gates=104 bond=12 trunc=0.0 bp_residual=9.663052251367103e-17 norm_defect=NaN wall_s=0.042
+layer=30/73 gates=20 bond=16 trunc=7.45404941536738e-30 bp_residual=9.046261682130905e-17 norm_defect=NaN wall_s=0.058
+layer=31/73 gates=116 bond=16 trunc=0.0 bp_residual=1.0074245964191236e-16 norm_defect=NaN wall_s=0.043
+layer=32/73 gates=18 bond=16 trunc=8.145538586720118e-30 bp_residual=1.0074245964191236e-16 norm_defect=NaN wall_s=0.055
+layer=33/73 gates=104 bond=16 trunc=0.0 bp_residual=6.990293118010245e-17 norm_defect=NaN wall_s=0.046
+layer=34/73 gates=16 bond=24 trunc=1.462458981085579e-29 bp_residual=1.1513423959075697e-16 norm_defect=NaN wall_s=0.393
+layer=35/73 gates=104 bond=24 trunc=0.0 bp_residual=7.812680543658509e-17 norm_defect=NaN wall_s=0.047
+layer=36/73 gates=20 bond=32 trunc=0.0 bp_residual=1.1307827102663632e-16 norm_defect=NaN wall_s=0.091
+layer=37/73 gates=380 bond=32 trunc=0.0 bp_residual=1.2335811384723962e-16 norm_defect=NaN wall_s=0.079
+layer=38/73 gates=20 bond=32 trunc=4.521769497337624e-31 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.082
+layer=39/73 gates=104 bond=32 trunc=0.0 bp_residual=7.812680543658509e-17 norm_defect=NaN wall_s=0.054
+layer=40/73 gates=16 bond=32 trunc=6.8316468124061e-30 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.077
+layer=41/73 gates=104 bond=32 trunc=0.0 bp_residual=9.457455394955037e-17 norm_defect=NaN wall_s=0.054
+layer=42/73 gates=18 bond=32 trunc=2.0014602806133878e-29 bp_residual=7.401486830834377e-17 norm_defect=NaN wall_s=0.081
+layer=43/73 gates=116 bond=32 trunc=0.0 bp_residual=1.0279842820603301e-16 norm_defect=NaN wall_s=0.062
+layer=44/73 gates=20 bond=64 trunc=1.175768409563867e-29 bp_residual=7.401486830834377e-17 norm_defect=NaN wall_s=0.118
+layer=45/73 gates=104 bond=64 trunc=0.0 bp_residual=6.579099405186112e-17 norm_defect=NaN wall_s=0.086
+layer=46/73 gates=16 bond=64 trunc=6.066788826581968e-30 bp_residual=1.0074245964191236e-16 norm_defect=NaN wall_s=0.165
+layer=47/73 gates=104 bond=64 trunc=0.0 bp_residual=1.0074245964191236e-16 norm_defect=NaN wall_s=0.129
+layer=48/73 gates=18 bond=64 trunc=3.1156666044442946e-29 bp_residual=9.663052251367103e-17 norm_defect=NaN wall_s=0.222
+layer=49/73 gates=116 bond=64 trunc=0.0 bp_residual=9.868649107779169e-17 norm_defect=NaN wall_s=0.198
+layer=50/73 gates=20 bond=128 trunc=1.9689421777076815e-13 bp_residual=1.9531701359146273e-16 norm_defect=NaN wall_s=0.821
+layer=51/73 gates=104 bond=128 trunc=0.0 bp_residual=1.9737298215558337e-16 norm_defect=NaN wall_s=0.232
+layer=52/73 gates=16 bond=128 trunc=4.4680602323182856e-13 bp_residual=2.0148491928382471e-16 norm_defect=NaN wall_s=0.563
+layer=53/73 gates=104 bond=128 trunc=0.0 bp_residual=2.7755575615628914e-16 norm_defect=NaN wall_s=0.876
+layer=54/73 gates=18 bond=128 trunc=6.780711809321733e-13 bp_residual=2.3438041630975528e-16 norm_defect=NaN wall_s=1.217
+layer=55/73 gates=72 bond=128 trunc=0.0 bp_residual=2.0148491928382471e-16 norm_defect=NaN wall_s=1.116
+layer=56/73 gates=18 bond=128 trunc=4.65375941353877e-13 bp_residual=2.1998863636091064e-16 norm_defect=NaN wall_s=0.865
+layer=57/73 gates=104 bond=128 trunc=0.0 bp_residual=2.713878504639272e-16 norm_defect=NaN wall_s=0.731
+layer=58/73 gates=16 bond=128 trunc=2.4797181847381497e-13 bp_residual=1.7681329651437678e-16 norm_defect=NaN wall_s=0.686
+layer=59/73 gates=104 bond=128 trunc=0.0 bp_residual=1.8298120220673876e-16 norm_defect=NaN wall_s=0.354
+layer=60/73 gates=20 bond=128 trunc=4.414815535612824e-13 bp_residual=1.0691036533427433e-16 norm_defect=NaN wall_s=0.808
+layer=61/73 gates=116 bond=128 trunc=0.0 bp_residual=1.5830957943729083e-16 norm_defect=NaN wall_s=0.253
+layer=62/73 gates=18 bond=128 trunc=9.92036057201439e-13 bp_residual=1.192461767189983e-16 norm_defect=NaN wall_s=0.405
+layer=63/73 gates=104 bond=128 trunc=0.0 bp_residual=1.0485439677015367e-16 norm_defect=NaN wall_s=0.615
+layer=64/73 gates=16 bond=128 trunc=7.505521110319766e-13 bp_residual=1.644774851296528e-16 norm_defect=NaN wall_s=0.548
+layer=65/73 gates=104 bond=128 trunc=0.0 bp_residual=1.2130214528311895e-16 norm_defect=NaN wall_s=0.41
+layer=66/73 gates=20 bond=256 trunc=5.404512467062191e-13 bp_residual=1.5830957943729083e-16 norm_defect=NaN wall_s=1.452
+layer=67/73 gates=116 bond=256 trunc=0.0 bp_residual=1.2335811384723962e-16 norm_defect=NaN wall_s=0.644
+layer=68/73 gates=18 bond=256 trunc=7.43751652520049e-13 bp_residual=8.840664825718839e-17 norm_defect=NaN wall_s=2.073
+layer=69/73 gates=104 bond=256 trunc=0.0 bp_residual=1.1719020815487764e-16 norm_defect=NaN wall_s=2.115
+layer=70/73 gates=16 bond=256 trunc=9.41998779470813e-13 bp_residual=2.0559685641206603e-16 norm_defect=NaN wall_s=4.394
+layer=71/73 gates=104 bond=256 trunc=0.0 bp_residual=1.644774851296528e-16 norm_defect=NaN wall_s=4.918
+layer=72/73 gates=20 bond=512 trunc=8.691453351952804e-13 bp_residual=2.837236618486511e-16 norm_defect=NaN wall_s=9.275
+layer=73/73 gates=80 bond=512 trunc=0.0 bp_residual=2.1587669923266932e-16 norm_defect=NaN wall_s=10.868
+result=/home/zyli/quantum.harness/tracks/qcs/solutions/CCB-LV.999/issue-119-ole/runs/baseline-49x648/delta-0p15/chi-512/seed-0001.toml sample_value=0.8255150290375448 wall_s=124.171921239 peak_rss_bytes=3464626176
+	Command being timed: "/home/zyli/.juliaup/bin/julia --project=. scripts/run_bp.jl --seed 1 --chi 512 --delta 0.15 --execute --confirm 0a7122006cfc2ef0"
+	User time (seconds): 689.65
+	System time (seconds): 29.59
+	Percent of CPU this job got: 487%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:27.60
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 3383424
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 3744
+	Minor (reclaiming a frame) page faults: 7286022
+	Voluntary context switches: 14436
+	Involuntary context switches: 2501
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 2728
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+finish=2026-07-28T02:48:56+08:00

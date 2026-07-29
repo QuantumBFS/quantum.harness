@@ -65,6 +65,40 @@ def test_assess_convergence_uses_last_two_axis_displacements():
     assert assessment["comparison_status"] == "agreement"
 
 
+def test_assess_convergence_uses_latest_complete_chi_cut_for_sparse_largest_dop(
+    tmp_path: Path,
+):
+    """Breaks if a high-Dop/χmax-only extension cannot retain the last χ scan."""
+
+    records = _records() + [{"dop": 16, "chi_env": 64, "value": 0.8186}]
+
+    assessment = ANALYZER.assess_convergence(
+        records,
+        bp_mean=BP_MEAN,
+        bp_budget=BP_BUDGET,
+        target=TARGET,
+    )
+
+    assert assessment["corner"] == {"dop": 16, "chi_env": 64, "value": 0.8186}
+    assert assessment["delta_dop"] == pytest.approx(0.0001)
+    assert assessment["delta_chi_env"] == pytest.approx(0.0002)
+    assert assessment["chi_env_reference_dop"] == 8
+    assert assessment["chi_env_at_corner"] is False
+    assert assessment["internally_converged"] is False
+    assert assessment["comparison_status"] == "diagnostic"
+    report = ANALYZER._write_report(
+        assessment
+        | {
+            "failed_or_incomplete_cells": [],
+            "successful_record_count": len(records),
+        },
+        tmp_path,
+    )
+    assert "χenv cut evaluated at Dop=8, below the Dop=16 corner" in report.read_text(
+        encoding="utf-8"
+    )
+
+
 def test_assess_convergence_refuses_missing_completed_corner():
     """Breaks if an absent Dmax/χmax cell can be silently analyzed as a corner."""
 
@@ -168,6 +202,46 @@ def _write_run(tmp_path: Path, *, changed_quimb: bool = False) -> Path:
     return run_dir
 
 
+def _write_duplicate_run(
+    tmp_path: Path,
+    *,
+    value: float,
+) -> Path:
+    run_dir = tmp_path / "results" / "issue119-pepo-analysis-duplicate"
+    record = {"dop": 8, "chi_env": 64, "value": value}
+    cell_id = "cell-0001"
+    settings = {
+        "delta": 0.15,
+        "observable_sites": [52, 59, 72],
+        "evolution_cutoff": 1e-12,
+        "contraction_cutoff": 1e-12,
+    }
+    provenance = {
+        "qasm_sha256": "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455",
+        "quimb_commit": "3c89529fe0a3487133a3928201691161e110abdf",
+    }
+    _write_json(
+        run_dir / "run_spec.json",
+        {
+            "run_id": "issue119-pepo-analysis-duplicate",
+            "run_dir": str(run_dir),
+            "settings": settings,
+            "provenance": provenance,
+            "cells": [
+                {
+                    "cell_id": cell_id,
+                    "params": {"dop": 8, "chi_env": 64},
+                }
+            ],
+        },
+    )
+    _write_json(
+        run_dir / "cells" / cell_id / "manifest.json",
+        _manifest(record),
+    )
+    return run_dir
+
+
 def test_analyze_run_writes_auditable_records_report_and_two_cut_figure(tmp_path: Path):
     """Breaks if failed cells vanish or the declared analysis artifacts are absent."""
 
@@ -201,6 +275,55 @@ def test_analyze_run_writes_auditable_records_report_and_two_cut_figure(tmp_path
     assert (output_dir / "PEPO_49Q_VALIDATION.md").read_text(encoding="utf-8").count("empirical") >= 1
     assert (output_dir / "pepo-convergence.png").read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
     assert (output_dir / "pepo-convergence.pdf").read_bytes().startswith(b"%PDF")
+
+
+def test_analyze_run_uses_matching_duplicate_corner_as_determinism_check(
+    tmp_path: Path,
+):
+    """Breaks if the planned cross-run duplicate cannot certify determinism."""
+
+    run_dir = _write_run(tmp_path)
+    duplicate_dir = _write_duplicate_run(tmp_path, value=0.8185)
+
+    assessment = ANALYZER.analyze_run_directories(
+        [run_dir, duplicate_dir],
+        output_dir=tmp_path / "analysis",
+        bp_mean=BP_MEAN,
+        bp_budget=BP_BUDGET,
+        target=TARGET,
+    )
+
+    assert assessment["successful_record_count"] == 6
+    assert assessment["unique_coordinate_count"] == 5
+    assert assessment["duplicate_checks"] == [
+        {
+            "dop": 8,
+            "chi_env": 64,
+            "values": [0.8185, 0.8185],
+            "max_absolute_difference": 0.0,
+            "tolerance": 1e-12,
+            "sources": [
+                {"run_dir": str(run_dir), "cell_id": "cell-0005"},
+                {"run_dir": str(duplicate_dir), "cell_id": "cell-0001"},
+            ],
+        }
+    ]
+
+
+def test_analyze_run_rejects_disagreeing_duplicate_corner(tmp_path: Path):
+    """Breaks if a failed determinism check can enter a convergence estimate."""
+
+    run_dir = _write_run(tmp_path)
+    duplicate_dir = _write_duplicate_run(tmp_path, value=0.8186)
+
+    with pytest.raises(ValueError, match="duplicate.*disagree"):
+        ANALYZER.analyze_run_directories(
+            [run_dir, duplicate_dir],
+            output_dir=tmp_path / "analysis",
+            bp_mean=BP_MEAN,
+            bp_budget=BP_BUDGET,
+            target=TARGET,
+        )
 
 
 def test_analyze_run_rejects_inconsistent_successful_provenance(tmp_path: Path):

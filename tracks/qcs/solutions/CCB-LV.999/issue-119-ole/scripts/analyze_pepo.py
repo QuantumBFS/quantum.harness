@@ -27,6 +27,7 @@ import parameter_scan as parameter_scan  # noqa: E402
 DEFAULT_BP_MEAN = 0.8183229131612796
 DEFAULT_BP_BUDGET = 0.0044
 DEFAULT_TARGET = 0.001
+DUPLICATE_TOLERANCE = 1.0e-12
 APPROVED_QASM_SHA256 = "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
 APPROVED_QUIMB_COMMIT = "3c89529fe0a3487133a3928201691161e110abdf"
 APPROVED_OBSERVABLE_SITES = [52, 59, 72]
@@ -113,16 +114,25 @@ def assess_convergence(
         ) from error
 
     dop_cut = _cut(normalized, "dop", "chi_env", max_chi_env)
-    chi_cut = _cut(normalized, "chi_env", "dop", max_dop)
+    complete_chi_cuts = [
+        (dop, cut)
+        for dop in dop_levels
+        if len(cut := _cut(normalized, "chi_env", "dop", dop)) >= 3
+        and cut[-1]["chi_env"] == max_chi_env
+    ]
+    if not complete_chi_cuts:
+        raise ValueError("no Dop level has three completed chi_env levels ending at chi_env max")
+    chi_reference_dop, chi_cut = complete_chi_cuts[-1]
+    chi_env_at_corner = chi_reference_dop == max_dop
     dop_trend = _trend(dop_cut, "dop")
     chi_trend = _trend(chi_cut, "chi_env")
     previous_dop = dop_cut[-2]
     previous_chi_env = chi_cut[-2]
     delta_dop = abs(corner["value"] - previous_dop["value"])
-    delta_chi_env = abs(corner["value"] - previous_chi_env["value"])
+    delta_chi_env = abs(chi_cut[-1]["value"] - previous_chi_env["value"])
     epsilon_pepo = delta_dop + delta_chi_env
     trend_resolved = not dop_trend["growing"] and not chi_trend["growing"]
-    internally_converged = epsilon_pepo <= target and trend_resolved
+    internally_converged = epsilon_pepo <= target and trend_resolved and chi_env_at_corner
     bp_difference = abs(corner["value"] - bp_mean)
     agreement_limit = epsilon_pepo + bp_budget
     within_budget = bp_difference <= agreement_limit
@@ -135,6 +145,8 @@ def assess_convergence(
         "corner": corner,
         "dop_cut": dop_cut,
         "chi_env_cut": chi_cut,
+        "chi_env_reference_dop": chi_reference_dop,
+        "chi_env_at_corner": chi_env_at_corner,
         "delta_dop": delta_dop,
         "delta_chi_env": delta_chi_env,
         "epsilon_pepo": epsilon_pepo,
@@ -269,6 +281,48 @@ def _validate_consensus(records: list[dict[str, Any]]) -> None:
             raise ValueError(f"inconsistent {label} across successful PEPO manifests")
 
 
+def _reconcile_duplicate_records(
+    records: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    grouped: dict[tuple[int, int], list[dict[str, Any]]] = {}
+    for record in records:
+        coordinate = (record["dop"], record["chi_env"])
+        grouped.setdefault(coordinate, []).append(record)
+
+    unique: list[dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
+    for (dop, chi_env), group in grouped.items():
+        unique.append(group[0])
+        if len(group) == 1:
+            continue
+        values = [record["value"] for record in group]
+        difference = max(values) - min(values)
+        if difference > DUPLICATE_TOLERANCE:
+            raise ValueError(
+                "duplicate successful PEPO cells disagree at "
+                f"Dop={dop}, chi_env={chi_env}: "
+                f"max absolute difference {difference:.6g} exceeds "
+                f"{DUPLICATE_TOLERANCE:.6g}"
+            )
+        checks.append(
+            {
+                "dop": dop,
+                "chi_env": chi_env,
+                "values": values,
+                "max_absolute_difference": difference,
+                "tolerance": DUPLICATE_TOLERANCE,
+                "sources": [
+                    {
+                        "run_dir": record["run_dir"],
+                        "cell_id": record["cell_id"],
+                    }
+                    for record in group
+                ],
+            }
+        )
+    return unique, checks
+
+
 def _load_run(run_dir: Path) -> tuple[list[dict[str, Any]], dict[str, int], list[dict[str, Any]]]:
     spec_path = run_dir / "run_spec.json"
     try:
@@ -386,6 +440,17 @@ def _write_report(assessment: dict[str, Any], output_dir: Path) -> Path:
         f"Successful cells: {assessment['successful_record_count']}; failed/missing/pending planned cells: {len(unavailable)}.",
         f"ΔDop = {assessment['delta_dop']:.6g}; Δχenv = {assessment['delta_chi_env']:.6g}; target = {assessment['target']:.6g}.",
     ]
+    if not assessment["chi_env_at_corner"]:
+        lines.extend(
+            [
+                "",
+                (
+                    f"χenv cut evaluated at Dop={assessment['chi_env_reference_dop']}, "
+                    f"below the Dop={corner['dop']} corner; this inherited χenv proxy "
+                    "cannot by itself certify internal convergence at the corner."
+                ),
+            ]
+        )
     if unavailable:
         lines.extend(["", "Unavailable cells are retained in assessment.json:"])
         lines.extend(
@@ -418,11 +483,14 @@ def analyze_run_directories(
         all_unavailable.extend(unavailable)
         counts.append(status_counts)
     _validate_consensus(all_records)
-    assessment = assess_convergence(all_records, bp_mean, bp_budget, target)
+    unique_records, duplicate_checks = _reconcile_duplicate_records(all_records)
+    assessment = assess_convergence(unique_records, bp_mean, bp_budget, target)
     assessment["records"] = all_records
     assessment["run_dirs"] = [str(path) for path in paths]
     assessment["status_counts"] = _sum_status_counts(counts)
     assessment["successful_record_count"] = len(all_records)
+    assessment["unique_coordinate_count"] = len(unique_records)
+    assessment["duplicate_checks"] = duplicate_checks
     assessment["failed_or_incomplete_cells"] = all_unavailable
     destination = Path(output_dir)
     assessment["figure"] = _render_plot(assessment, all_unavailable, destination)

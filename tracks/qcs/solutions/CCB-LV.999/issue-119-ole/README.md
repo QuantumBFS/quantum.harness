@@ -89,12 +89,12 @@ whereas `χenv` is the maximum intermediate bond retained while contracting the
 closed final tensor network. They control distinct approximations and should
 not be reported as one generic PEPO bond dimension.
 
-With the currently stale small-oracle certificate, this command exits nonzero
-at the certificate gate *before* printing a setup or confirmation token, and
-it starts no PEPO evolution. After the certificate has been refreshed, the
-same command is a side-effect-free full-system inspection: it prints the
-confirmed setup and token but still starts no PEPO evolution. It deliberately
-has no `--seed` option because the PEPO trace is deterministic.
+If the small-oracle certificate is stale, this command exits nonzero at the
+certificate gate *before* printing a setup or confirmation token, and it
+starts no PEPO evolution. With the current certificate, the same command is a
+side-effect-free full-system inspection: it prints the confirmed setup and
+token but still starts no PEPO evolution. It deliberately has no `--seed`
+option because the PEPO trace is deterministic.
 
 ```bash
 uv run --project "$OLE_ROOT/pepo" \
@@ -141,6 +141,8 @@ uv run --project "$OLE_ROOT/pepo" \
 ```
 
 The durable reports are `PEPO_SMALL_VALIDATION.md` for the seven-site exact
-oracle and `PEPO_49Q_VALIDATION.md` in the scan output directory for the
-49-qubit convergence and BP-TN comparison. The latter is accompanied by
-`assessment.json`, `parameter-scan.csv`, and `pepo-convergence.{png,pdf}`.
+oracle and `PEPO_49Q_VALIDATION.md` for the completed 49-qubit remote scan.
+The latter records the `Dop=512,χenv=64` result: the operator-bond error proxy
+is below `10⁻³`, while full two-axis convergence remains diagnostic until a
+direct `χenv` cut is computed at `Dop=512`. Machine-readable assessment and
+figures live under `results/issue119-pepo-49q-dop512-analysis/`.

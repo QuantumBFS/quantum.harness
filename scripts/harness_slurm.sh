@@ -282,7 +282,9 @@ cmd_submit() {
   [[ -n "$cpus" ]]      && sbatch="$sbatch --cpus-per-task=$cpus"
   [[ -n "$array" ]]     && sbatch="$sbatch --array=1-$array"
   [[ -n "$extra" ]]     && sbatch="$sbatch $extra"
-  sbatch="$sbatch --export=$exports $script"
+  local quoted_exports
+  printf -v quoted_exports '%q' "$exports"
+  sbatch="$sbatch --export=$quoted_exports $script"
 
   local out
   out="$(remote "$alias" "cd $repo && $sbatch")"

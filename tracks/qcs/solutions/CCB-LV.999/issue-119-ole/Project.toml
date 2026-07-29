@@ -1,0 +1,17 @@
+name = "Issue119OLE"
+uuid = "6ce9fa2e-7c9d-46a3-b412-d010d717f6c0"
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+TensorNetworkQuantumSimulator = "4de3b72a-362e-43dd-83ff-3f381eda9f9c"
+
+[compat]
+TensorNetworkQuantumSimulator = "0.4.4"
+julia = "1.10"
+
+[sources]
+TensorNetworkQuantumSimulator = {url = "https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl.git", rev = "b5d4089849de1cc23806aa8325e8db56a55f2e0b"}

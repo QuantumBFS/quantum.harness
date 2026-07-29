@@ -1,0 +1,1549 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.11.1"
+manifest_format = "2.0"
+project_hash = "485db00ad8d56d54ff5c75e6397f43eb4e44dcd0"
+
+[[deps.ADTypes]]
+git-tree-sha1 = "ec6be48a85c93d995563b84bff8a86bc98df45ce"
+uuid = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
+version = "1.22.2"
+
+    [deps.ADTypes.extensions]
+    ADTypesChainRulesCoreExt = "ChainRulesCore"
+    ADTypesConstructionBaseExt = "ConstructionBase"
+    ADTypesEnzymeCoreExt = "EnzymeCore"
+
+    [deps.ADTypes.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
+
+[[deps.AbstractLattices]]
+git-tree-sha1 = "763b6f3f6bfabd72c7e262cbb5ddfd43fd5c6398"
+uuid = "398f06c4-4d28-53ec-89ca-5b2656b7603d"
+version = "0.3.1"
+
+[[deps.AbstractTrees]]
+git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
+uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+version = "0.4.5"
+
+[[deps.Accessors]]
+deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
+git-tree-sha1 = "7063ad1083578215c7c4bf410368150abe8d5524"
+uuid = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
+version = "0.1.45"
+
+    [deps.Accessors.extensions]
+    AxisKeysExt = "AxisKeys"
+    IntervalSetsExt = "IntervalSets"
+    LinearAlgebraExt = "LinearAlgebra"
+    StaticArraysExt = "StaticArrays"
+    StructArraysExt = "StructArrays"
+    TestExt = "Test"
+    UnitfulExt = "Unitful"
+
+    [deps.Accessors.weakdeps]
+    AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
+    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+    StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[[deps.Adapt]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "daa72978cd7a624246e894a4f4f067706d4e17e2"
+uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+version = "4.7.0"
+weakdeps = ["SparseArrays", "StaticArrays"]
+
+    [deps.Adapt.extensions]
+    AdaptSparseArraysExt = "SparseArrays"
+    AdaptStaticArraysExt = "StaticArrays"
+
+[[deps.AliasTables]]
+deps = ["PtrArrays", "Random"]
+git-tree-sha1 = "9876e1e164b144ca45e9e3198d0b689cadfed9ff"
+uuid = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
+version = "1.1.3"
+
+[[deps.ArgCheck]]
+git-tree-sha1 = "f9e9a66c9b7be1ad7372bbd9b062d9230c30c5ce"
+uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+version = "2.5.0"
+
+[[deps.ArgTools]]
+uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.2"
+
+[[deps.ArnoldiMethod]]
+deps = ["LinearAlgebra", "Random", "StaticArrays"]
+git-tree-sha1 = "d57bd3762d308bded22c3b82d033bff85f6195c6"
+uuid = "ec485272-7323-5ecc-a04f-4719b315124d"
+version = "0.4.0"
+
+[[deps.ArrayInterface]]
+deps = ["Adapt", "LinearAlgebra"]
+git-tree-sha1 = "60f11b38ebeabd984f5535838d91e197d97202f0"
+uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
+version = "7.28.1"
+
+    [deps.ArrayInterface.extensions]
+    ArrayInterfaceAMDGPUExt = "AMDGPU"
+    ArrayInterfaceBandedMatricesExt = "BandedMatrices"
+    ArrayInterfaceBlockBandedMatricesExt = "BlockBandedMatrices"
+    ArrayInterfaceCUDAExt = "CUDA"
+    ArrayInterfaceCUDSSExt = ["CUDSS", "CUDA"]
+    ArrayInterfaceChainRulesCoreExt = "ChainRulesCore"
+    ArrayInterfaceChainRulesExt = "ChainRules"
+    ArrayInterfaceFillArraysExt = "FillArrays"
+    ArrayInterfaceGPUArraysCoreExt = "GPUArraysCore"
+    ArrayInterfaceMetalExt = "Metal"
+    ArrayInterfaceReverseDiffExt = "ReverseDiff"
+    ArrayInterfaceSparseArraysExt = "SparseArrays"
+    ArrayInterfaceStaticArraysCoreExt = "StaticArraysCore"
+    ArrayInterfaceTrackerExt = "Tracker"
+
+    [deps.ArrayInterface.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+    BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    CUDSS = "45b445bb-4962-46a0-9369-b4df9d0f772e"
+    ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+    GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
+    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+    Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
+
+[[deps.ArrayLayouts]]
+deps = ["FillArrays", "LinearAlgebra", "StaticArrays"]
+git-tree-sha1 = "e0b47732a192dd59b9d079a06d04235e2f833963"
+uuid = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
+version = "1.12.2"
+weakdeps = ["SparseArrays"]
+
+    [deps.ArrayLayouts.extensions]
+    ArrayLayoutsSparseArraysExt = "SparseArrays"
+
+[[deps.Artifacts]]
+uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+version = "1.11.0"
+
+[[deps.BangBang]]
+deps = ["Accessors", "ConstructionBase", "InitialValues", "LinearAlgebra"]
+git-tree-sha1 = "cceb62468025be98d42a5dc581b163c20896b040"
+uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+version = "0.4.9"
+
+    [deps.BangBang.extensions]
+    BangBangChainRulesCoreExt = "ChainRulesCore"
+    BangBangDataFramesExt = "DataFrames"
+    BangBangStaticArraysExt = "StaticArrays"
+    BangBangStructArraysExt = "StructArrays"
+    BangBangTablesExt = "Tables"
+    BangBangTypedTablesExt = "TypedTables"
+
+    [deps.BangBang.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+    StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
+    Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+    TypedTables = "9d95f2ec-7b3d-5a63-8d20-e2491e220bb9"
+
+[[deps.Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+version = "1.11.0"
+
+[[deps.Baselet]]
+git-tree-sha1 = "aebf55e6d7795e02ca500a689d326ac979aaf89e"
+uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
+version = "0.1.1"
+
+[[deps.BitBasis]]
+deps = ["LinearAlgebra", "StaticArrays"]
+git-tree-sha1 = "89dc08420d4f593ff30f02611d136b475a5eb43d"
+uuid = "50ba71b6-fa0f-514d-ae9a-0916efc90dcf"
+version = "0.9.10"
+
+[[deps.BitIntegers]]
+deps = ["Random"]
+git-tree-sha1 = "091d591a060e43df1dd35faab3ca284925c48e46"
+uuid = "c3b6d118-76ef-56ca-8cc7-ebb389d030a1"
+version = "0.3.7"
+
+[[deps.BlockArrays]]
+deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra"]
+git-tree-sha1 = "75c9c4d41f387b58ac7ecac17a02062f4cf8e92a"
+uuid = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
+version = "1.10.0"
+
+    [deps.BlockArrays.extensions]
+    BlockArraysAdaptExt = "Adapt"
+    BlockArraysBandedMatricesExt = "BandedMatrices"
+
+    [deps.BlockArrays.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+
+[[deps.Bzip2_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "1b96ea4a01afe0ea4090c5c8039690672dd13f2e"
+uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
+version = "1.0.9+0"
+
+[[deps.ChainRulesCore]]
+deps = ["Compat", "LinearAlgebra"]
+git-tree-sha1 = "12177ad6b3cad7fd50c8b3825ce24a99ad61c18f"
+uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+version = "1.26.1"
+weakdeps = ["SparseArrays"]
+
+    [deps.ChainRulesCore.extensions]
+    ChainRulesCoreSparseArraysExt = "SparseArrays"
+
+[[deps.ChooseOptimizer]]
+deps = ["HiGHS", "JuMP"]
+git-tree-sha1 = "39b8a40d2909b2a20c9ac1828db32c42df90127c"
+uuid = "858a232f-1959-5553-8cfc-91e1fd5304e2"
+version = "0.3.2"
+
+[[deps.CliqueTrees]]
+deps = ["AbstractTrees", "FillArrays", "FixedSizeArrays", "Graphs", "LinearAlgebra", "Random", "SparseArrays"]
+git-tree-sha1 = "5fa37aead6e5a276ec0dd81b5389fd5976873d6e"
+uuid = "60701a23-6482-424a-84db-faee86b9b1f8"
+version = "1.19.4"
+
+    [deps.CliqueTrees.extensions]
+    AMDExt = "AMD"
+    CatlabExt = "Catlab"
+    FlowCutterPACE17_jllExt = "FlowCutterPACE17_jll"
+    KaHyParExt = "KaHyPar"
+    KrylovExt = "Krylov"
+    LaplaciansExt = "Laplacians"
+    MetisExt = "Metis"
+    MooncakeExt = "Mooncake"
+    TreeWidthSolverExt = "TreeWidthSolver"
+
+    [deps.CliqueTrees.weakdeps]
+    AMD = "14f7f29c-3bd6-536c-9a0b-7339e30b5a3e"
+    Catlab = "134e5e36-593f-5add-ad60-77f754baafbe"
+    FlowCutterPACE17_jll = "008204e2-cd5c-5c6d-9360-d31f32b5f6c2"
+    KaHyPar = "2a6221f6-aa48-11e9-3542-2d9e0ef01880"
+    Krylov = "ba0b0d4f-ebba-5204-a429-3ac8c609bfb7"
+    Laplacians = "6f8e5838-0efe-5de0-80a3-5fb4f8dbb1de"
+    Metis = "2679e427-3c69-5b7f-982b-ece356f1e94b"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+    TreeWidthSolver = "7d267fc5-9ace-409f-a54c-cd2374872a55"
+
+[[deps.CodecBzip2]]
+deps = ["Bzip2_jll", "TranscodingStreams"]
+git-tree-sha1 = "84990fa864b7f2b4901901ca12736e45ee79068c"
+uuid = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
+version = "0.8.5"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "962834c22b66e32aa10f7611c08c8ca4e20749a9"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.8"
+
+[[deps.Collects]]
+git-tree-sha1 = "d0b504dbd9ea6a0142845a6f9b4c58b3627c718f"
+uuid = "08986516-18db-4a8b-8eaa-f5ef1828d8f1"
+version = "1.1.0"
+
+[[deps.Combinatorics]]
+git-tree-sha1 = "c761b00e7755700f9cdf5b02039939d1359330e1"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.1.0"
+
+[[deps.CommonSolve]]
+git-tree-sha1 = "eeaad7cef88554c2fa56b5a3f71cfd5cb708c662"
+uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+version = "0.2.11"
+
+[[deps.CommonSubexpressions]]
+deps = ["MacroTools"]
+git-tree-sha1 = "cda2cfaebb4be89c9084adaca7dd7333369715c5"
+uuid = "bbf7d656-a473-5ed7-a52c-81e309532950"
+version = "0.3.1"
+
+[[deps.Compat]]
+deps = ["TOML", "UUIDs"]
+git-tree-sha1 = "9d8a54ce4b17aa5bdce0ea5c34bc5e7c340d16ad"
+uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
+version = "4.18.1"
+weakdeps = ["Dates", "LinearAlgebra"]
+
+    [deps.Compat.extensions]
+    CompatLinearAlgebraExt = "LinearAlgebra"
+
+[[deps.CompilerSupportLibraries_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "1.1.1+0"
+
+[[deps.CompositionsBase]]
+git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
+uuid = "a33af91c-f02d-484b-be07-31d278c5ca2b"
+version = "0.1.2"
+weakdeps = ["InverseFunctions"]
+
+    [deps.CompositionsBase.extensions]
+    CompositionsBaseInverseFunctionsExt = "InverseFunctions"
+
+[[deps.ConstructionBase]]
+git-tree-sha1 = "b4b092499347b18a015186eae3042f72267106cb"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.6.0"
+
+    [deps.ConstructionBase.extensions]
+    ConstructionBaseIntervalSetsExt = "IntervalSets"
+    ConstructionBaseLinearAlgebraExt = "LinearAlgebra"
+    ConstructionBaseStaticArraysExt = "StaticArrays"
+
+    [deps.ConstructionBase.weakdeps]
+    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[[deps.DataAPI]]
+git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
+uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
+version = "1.16.0"
+
+[[deps.DataStructures]]
+deps = ["OrderedCollections"]
+git-tree-sha1 = "b0bc6d2cad1fed8b7fd59a1551a991cb3d2809e6"
+uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+version = "0.19.6"
+
+[[deps.DataValueInterfaces]]
+git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
+uuid = "e2d170a0-9d28-54be-80f0-106bbe20a464"
+version = "1.0.0"
+
+[[deps.Dates]]
+deps = ["Printf"]
+uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+version = "1.11.0"
+
+[[deps.DefineSingletons]]
+git-tree-sha1 = "0fba8b706d0178b4dc7fd44a96a92382c9065c2c"
+uuid = "244e2a9f-e319-4986-a169-4d1fe445cd52"
+version = "0.1.2"
+
+[[deps.Dictionaries]]
+deps = ["Indexing", "Random", "Serialization"]
+git-tree-sha1 = "a55766a9c8f66cf19ffcdbdb1444e249bb4ace33"
+uuid = "85a47980-9c8c-11e8-2b9f-f7ca1fa99fb4"
+version = "0.4.6"
+
+[[deps.DiffResults]]
+deps = ["StaticArraysCore"]
+git-tree-sha1 = "782dd5f4561f5d267313f23853baaaa4c52ea621"
+uuid = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
+version = "1.1.0"
+
+[[deps.DiffRules]]
+deps = ["IrrationalConstants", "LogExpFunctions", "NaNMath", "Random", "SpecialFunctions"]
+git-tree-sha1 = "79a2aca180a85c690c58a020d47b426954b590f8"
+uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
+version = "1.16.0"
+
+[[deps.DifferentiationInterface]]
+deps = ["ADTypes", "LinearAlgebra"]
+git-tree-sha1 = "dbd46a5cd0e79a97438b0ebbec42e744e8f436fe"
+uuid = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+version = "0.7.20"
+
+    [deps.DifferentiationInterface.extensions]
+    DifferentiationInterfaceChainRulesCoreExt = "ChainRulesCore"
+    DifferentiationInterfaceDiffractorExt = "Diffractor"
+    DifferentiationInterfaceEnzymeExt = ["EnzymeCore", "Enzyme"]
+    DifferentiationInterfaceFastDifferentiationExt = "FastDifferentiation"
+    DifferentiationInterfaceFiniteDiffExt = "FiniteDiff"
+    DifferentiationInterfaceFiniteDifferencesExt = "FiniteDifferences"
+    DifferentiationInterfaceForwardDiffExt = ["ForwardDiff", "DiffResults"]
+    DifferentiationInterfaceGPUArraysCoreExt = ["GPUArraysCore", "Adapt"]
+    DifferentiationInterfaceGTPSAExt = "GTPSA"
+    DifferentiationInterfaceHyperHessiansExt = "HyperHessians"
+    DifferentiationInterfaceMooncakeExt = "Mooncake"
+    DifferentiationInterfacePolyesterForwardDiffExt = ["PolyesterForwardDiff", "ForwardDiff", "DiffResults"]
+    DifferentiationInterfaceReverseDiffExt = ["ReverseDiff", "DiffResults"]
+    DifferentiationInterfaceSparseArraysExt = "SparseArrays"
+    DifferentiationInterfaceSparseConnectivityTracerExt = "SparseConnectivityTracer"
+    DifferentiationInterfaceSparseMatrixColoringsExt = "SparseMatrixColorings"
+    DifferentiationInterfaceStaticArraysExt = "StaticArrays"
+    DifferentiationInterfaceSymbolicsExt = "Symbolics"
+    DifferentiationInterfaceTrackerExt = "Tracker"
+    DifferentiationInterfaceZygoteExt = ["Zygote", "ForwardDiff"]
+
+    [deps.DifferentiationInterface.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    DiffResults = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
+    Diffractor = "9f5e2b26-1114-432f-b630-d3fe2085c51c"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
+    FastDifferentiation = "eb9bf01b-bf85-4b60-bf87-ee5de06c00be"
+    FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
+    FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
+    GTPSA = "b27dd330-f138-47c5-815b-40db9dd9b6e8"
+    HyperHessians = "06b494a0-c8e0-40cc-ad32-d99506a00a6c"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+    PolyesterForwardDiff = "98d1487c-24ca-40b6-b7ab-df2af84e126b"
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
+    SparseMatrixColorings = "0a514795-09f3-496d-8182-132a7b665d35"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+    Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+    Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+
+[[deps.Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+version = "1.11.0"
+
+[[deps.Distributions]]
+deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "Roots", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
+git-tree-sha1 = "cd3c5ac74cd3923c8945c6a81518c46abd0e73a3"
+uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
+version = "0.25.129"
+
+    [deps.Distributions.extensions]
+    DistributionsChainRulesCoreExt = "ChainRulesCore"
+    DistributionsDensityInterfaceExt = "DensityInterface"
+    DistributionsSparseConnectivityTracerExt = "SparseConnectivityTracer"
+    DistributionsTestExt = "Test"
+
+    [deps.Distributions.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+    SparseConnectivityTracer = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[deps.DocStringExtensions]]
+git-tree-sha1 = "7442a5dfe1ebb773c29cc2962a8980f47221d76c"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.9.5"
+
+[[deps.Downloads]]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
+uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
+
+[[deps.EllipsisNotation]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "ec3ba254f91892ecf4eef0159f02e1af1e9449bf"
+uuid = "da5c29d0-fa7d-589e-88eb-ea29b0a81949"
+version = "1.10.3"
+
+    [deps.EllipsisNotation.extensions]
+    EllipsisNotationStaticArrayInterfaceExt = "StaticArrayInterface"
+
+    [deps.EllipsisNotation.weakdeps]
+    StaticArrayInterface = "0d7ed370-da01-4f52-bd93-41d350b8b718"
+
+[[deps.EnumX]]
+git-tree-sha1 = "c49898e8438c828577f04b92fc9368c388ac783c"
+uuid = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
+version = "1.0.7"
+
+[[deps.ExprTools]]
+git-tree-sha1 = "d2e49e7efd29719d6f28b891b0e0e159daa9d2b4"
+uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
+version = "0.1.11"
+
+[[deps.ExternalDocstrings]]
+git-tree-sha1 = "1224740fc4d07c989949e1c1b508ebd49a65a5f6"
+uuid = "e189563c-0753-4f5e-ad5c-be4293c83fb4"
+version = "0.1.1"
+
+[[deps.FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+version = "1.11.0"
+
+[[deps.FillArrays]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "5bad39456d9f0166184fce2248783dd9862645c1"
+uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
+version = "1.17.0"
+weakdeps = ["PDMats", "SparseArrays", "StaticArrays", "Statistics"]
+
+    [deps.FillArrays.extensions]
+    FillArraysPDMatsExt = "PDMats"
+    FillArraysSparseArraysExt = "SparseArrays"
+    FillArraysStaticArraysExt = "StaticArrays"
+    FillArraysStatisticsExt = "Statistics"
+
+[[deps.FiniteDiff]]
+deps = ["ArrayInterface", "LinearAlgebra", "Setfield"]
+git-tree-sha1 = "07e98e3f332ee60179813dd9cdf21412e3c0a96a"
+uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
+version = "2.32.0"
+
+    [deps.FiniteDiff.extensions]
+    FiniteDiffBandedMatricesExt = "BandedMatrices"
+    FiniteDiffBlockBandedMatricesExt = "BlockBandedMatrices"
+    FiniteDiffSparseArraysExt = "SparseArrays"
+    FiniteDiffStaticArraysExt = "StaticArrays"
+
+    [deps.FiniteDiff.weakdeps]
+    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+    BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[[deps.FixedSizeArrays]]
+deps = ["Collects"]
+git-tree-sha1 = "76bb6e6427ba47b22c97b7f2cddc1ae002e6a9ad"
+uuid = "3821ddf9-e5b5-40d5-8e25-6813ab96b5e2"
+version = "1.3.0"
+weakdeps = ["Adapt", "Random"]
+
+    [deps.FixedSizeArrays.extensions]
+    FixedSizeArraysAdaptExt = "Adapt"
+    FixedSizeArraysRandomExt = "Random"
+
+[[deps.Folds]]
+deps = ["Accessors", "BangBang", "Baselet", "DefineSingletons", "Distributed", "ExternalDocstrings", "InitialValues", "MicroCollections", "Referenceables", "Requires", "Test", "ThreadedScans", "Transducers"]
+git-tree-sha1 = "7eb4bc88d8295e387a667fd43d67c157ddee76cf"
+uuid = "41a02a25-b8f0-4f67-bc48-60067656b558"
+version = "0.2.10"
+
+    [deps.Folds.extensions]
+    FoldsOnlineStatsBaseExt = "OnlineStatsBase"
+
+    [deps.Folds.weakdeps]
+    OnlineStatsBase = "925886fa-5bf2-5e8e-b522-a9147a512338"
+
+[[deps.ForwardDiff]]
+deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions"]
+git-tree-sha1 = "2c5d0b0e12088cde2cf84afb2784415b1ea3dfee"
+uuid = "f6369f11-7733-5829-9624-2563aa707210"
+version = "1.4.1"
+weakdeps = ["StaticArrays"]
+
+    [deps.ForwardDiff.extensions]
+    ForwardDiffStaticArraysExt = "StaticArrays"
+
+[[deps.Functors]]
+deps = ["Compat", "ConstructionBase", "LinearAlgebra", "Random"]
+git-tree-sha1 = "60a0339f28a233601cb74468032b5c302d5067de"
+uuid = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
+version = "0.5.2"
+
+[[deps.Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+version = "1.11.0"
+
+[[deps.Gamma]]
+git-tree-sha1 = "86f86b6168a016ed88e4ae4e64577b98c3b59e8e"
+uuid = "a0844989-3bd2-4988-8bea-c9407ab0941b"
+version = "1.1.0"
+
+[[deps.Graphs]]
+deps = ["ArnoldiMethod", "DataStructures", "Inflate", "LinearAlgebra", "Random", "SimpleTraits", "SparseArrays", "Statistics"]
+git-tree-sha1 = "7eb45fe833a5b7c51cf6d89c5a841d5967e44be3"
+uuid = "86223c79-3864-5bf0-83f7-82e725a168b6"
+version = "1.14.0"
+
+    [deps.Graphs.extensions]
+    GraphsSharedArraysExt = "SharedArrays"
+
+    [deps.Graphs.weakdeps]
+    Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+    SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
+
+[[deps.HalfIntegers]]
+git-tree-sha1 = "9c3149243abb5bc0bad0431d6c4fcac0f4443c7c"
+uuid = "f0d1745a-41c9-11e9-1dd9-e5d34d218721"
+version = "1.6.0"
+
+[[deps.HiGHS]]
+deps = ["HiGHS_jll", "LinearAlgebra", "MathOptIIS", "MathOptInterface", "OpenBLAS32_jll", "PrecompileTools", "SparseArrays"]
+git-tree-sha1 = "01a5241985559c08a5baadbcebd6d87daaf84a84"
+uuid = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+version = "1.24.1"
+
+[[deps.HiGHS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Zlib_jll", "libblastrampoline_jll"]
+git-tree-sha1 = "2d9747b79d17c4320fe48048a3a768fe6d6d82de"
+uuid = "8fd58aa0-07eb-5a78-9b36-339c94fd15ea"
+version = "1.15.1+1"
+
+[[deps.HypergeometricFunctions]]
+deps = ["Gamma", "LinearAlgebra"]
+git-tree-sha1 = "18d7deab5fb0440dc6a7b6993c5c27b25420de10"
+uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+version = "0.3.29"
+
+[[deps.ITensors]]
+deps = ["Adapt", "BitIntegers", "ChainRulesCore", "Compat", "Dictionaries", "DocStringExtensions", "Functors", "IsApprox", "LinearAlgebra", "NDTensors", "Pkg", "Printf", "Random", "Requires", "SerializedElementArrays", "SimpleTraits", "SparseArrays", "StaticArrays", "Strided", "TimerOutputs", "TupleTools", "Zeros"]
+git-tree-sha1 = "9294fcfd772505110115c623aca48c72a202211f"
+uuid = "9136182c-28ba-11e9-034c-db9fb085ebd5"
+version = "0.9.30"
+
+    [deps.ITensors.extensions]
+    ITensorsHDF5Ext = "HDF5"
+    ITensorsTensorOperationsExt = "TensorOperations"
+    ITensorsVectorInterfaceExt = "VectorInterface"
+    ITensorsZygoteRulesExt = "ZygoteRules"
+
+    [deps.ITensors.weakdeps]
+    HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+    TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
+    VectorInterface = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
+    ZygoteRules = "700de1a5-db45-46bc-99cf-38207098b444"
+
+[[deps.Indexing]]
+git-tree-sha1 = "ce1566720fd6b19ff3411404d4b977acd4814f9f"
+uuid = "313cdc1a-70c2-5d6a-ae34-0150d3930a38"
+version = "1.1.1"
+
+[[deps.Inflate]]
+git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
+uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
+version = "0.1.5"
+
+[[deps.InitialValues]]
+git-tree-sha1 = "4da0f88e9a39111c2fa3add390ab15f3a44f3ca3"
+uuid = "22cec73e-a1b8-11e9-2c92-598750a2cf9c"
+version = "0.3.1"
+
+[[deps.InlineStrings]]
+git-tree-sha1 = "8f3d257792a522b4601c24a577954b0a8cd7334d"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.4.5"
+
+    [deps.InlineStrings.extensions]
+    ArrowTypesExt = "ArrowTypes"
+    ParsersExt = "Parsers"
+
+    [deps.InlineStrings.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+
+[[deps.IntegerMathUtils]]
+git-tree-sha1 = "c72458f1962faeb003bf23cbdb75164fe6280906"
+uuid = "18e54dd8-cb9d-406c-a71d-865a43cbb235"
+version = "0.1.4"
+
+[[deps.InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+version = "1.11.0"
+
+[[deps.InverseFunctions]]
+git-tree-sha1 = "a779299d77cd080bf77b97535acecd73e1c5e5cb"
+uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
+version = "0.1.17"
+weakdeps = ["Dates", "Test"]
+
+    [deps.InverseFunctions.extensions]
+    InverseFunctionsDatesExt = "Dates"
+    InverseFunctionsTestExt = "Test"
+
+[[deps.IrrationalConstants]]
+git-tree-sha1 = "b2d91fe939cae05960e760110b328288867b5758"
+uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
+version = "0.2.6"
+
+[[deps.IsApprox]]
+deps = ["Dictionaries", "LinearAlgebra"]
+git-tree-sha1 = "d1a10e34d7f2e163cc1ebb45824c0226a5b57e37"
+uuid = "28f27b66-4bd8-47e7-9110-e2746eb8bed7"
+version = "2.0.1"
+
+[[deps.IterTools]]
+git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
+uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+version = "1.10.0"
+
+[[deps.IteratorInterfaceExtensions]]
+git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
+uuid = "82899510-4779-5014-852e-03e436cf321d"
+version = "1.0.0"
+
+[[deps.JLLWrappers]]
+deps = ["Artifacts", "Preferences"]
+git-tree-sha1 = "7204148362dafe5fe6a273f855b8ccbe4df8173e"
+uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
+version = "1.8.0"
+
+[[deps.JSON]]
+deps = ["Dates", "Logging", "Parsers", "PrecompileTools", "StructUtils", "UUIDs", "Unicode"]
+git-tree-sha1 = "c89d196f5ffb64bfbf80985b699ea913b0d2c211"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "1.6.1"
+
+    [deps.JSON.extensions]
+    JSONArrowExt = ["ArrowTypes"]
+
+    [deps.JSON.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+
+[[deps.JuMP]]
+deps = ["LinearAlgebra", "MacroTools", "MathOptInterface", "MutableArithmetics", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays"]
+git-tree-sha1 = "614b22ff014355192982b1f9a12c61298ce6a908"
+uuid = "4076af6c-e467-56ae-b986-b466b2749572"
+version = "1.31.1"
+
+    [deps.JuMP.extensions]
+    JuMPDimensionalDataExt = "DimensionalData"
+
+    [deps.JuMP.weakdeps]
+    DimensionalData = "0703355e-b756-11e9-17c0-8b28908087d0"
+
+[[deps.KrylovKit]]
+deps = ["LinearAlgebra", "PackageExtensionCompat", "Printf", "Random", "VectorInterface"]
+git-tree-sha1 = "a3babd26e875e83b461e1c0f945bff52701e8181"
+uuid = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
+version = "0.10.4"
+weakdeps = ["ChainRulesCore"]
+
+    [deps.KrylovKit.extensions]
+    KrylovKitChainRulesCoreExt = "ChainRulesCore"
+
+[[deps.LibCURL]]
+deps = ["LibCURL_jll", "MozillaCACerts_jll"]
+uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.4"
+
+[[deps.LibCURL_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
+uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "8.6.0+0"
+
+[[deps.LibGit2]]
+deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
+uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+version = "1.11.0"
+
+[[deps.LibGit2_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
+uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
+version = "1.7.2+0"
+
+[[deps.LibSSH2_jll]]
+deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
+uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.11.0+1"
+
+[[deps.Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+version = "1.11.0"
+
+[[deps.Libiconv_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "be484f5c92fad0bd8acfef35fe017900b0b73809"
+uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
+version = "1.18.0+0"
+
+[[deps.LightXML]]
+deps = ["Libdl", "XML2_jll"]
+git-tree-sha1 = "aa971a09f0f1fe92fe772713a564aa48abe510df"
+uuid = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
+version = "0.9.3"
+
+[[deps.LineSearches]]
+deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Printf"]
+git-tree-sha1 = "cef1ba655e8c1f65af9d96c4fffe18bf1a3a3291"
+uuid = "d3d80556-e9d4-5f37-9878-2ab0fcc64255"
+version = "7.7.1"
+
+[[deps.LinearAlgebra]]
+deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
+uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+version = "1.11.0"
+
+[[deps.LinearAlgebraX]]
+deps = ["LinearAlgebra", "Mods", "Primes", "SimplePolynomials"]
+git-tree-sha1 = "81b61301d2881af967ad53b13c64f21421040d46"
+uuid = "9b3f67b0-2d00-526e-9884-9e4938f8fb88"
+version = "0.2.11"
+
+[[deps.LogExpFunctions]]
+deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
+git-tree-sha1 = "bba2d9aa057d8f126415de240573e86a8f39d2a1"
+uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
+version = "1.0.1"
+
+    [deps.LogExpFunctions.extensions]
+    LogExpFunctionsChainRulesCoreExt = "ChainRulesCore"
+    LogExpFunctionsChangesOfVariablesExt = "ChangesOfVariables"
+    LogExpFunctionsInverseFunctionsExt = "InverseFunctions"
+
+    [deps.LogExpFunctions.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ChangesOfVariables = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
+    InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
+
+[[deps.Logging]]
+uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+version = "1.11.0"
+
+[[deps.MacroTools]]
+git-tree-sha1 = "1e0228a030642014fe5cfe68c2c0a818f9e3f522"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.5.16"
+
+[[deps.Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+version = "1.11.0"
+
+[[deps.MathOptIIS]]
+deps = ["MathOptInterface"]
+git-tree-sha1 = "3b3d69130d8ab8c39d5fa4d30e20a8e6428c9d37"
+uuid = "8c4f8055-bd93-4160-a86b-a0c04941dbff"
+version = "0.2.0"
+
+[[deps.MathOptInterface]]
+deps = ["CodecBzip2", "CodecZlib", "ForwardDiff", "JSON", "LinearAlgebra", "MutableArithmetics", "NaNMath", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays", "SpecialFunctions", "Test"]
+git-tree-sha1 = "7b57dbe5d2c988a0c7a0ea977045e844e3d0b263"
+uuid = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+version = "1.51.2"
+
+    [deps.MathOptInterface.extensions]
+    MathOptInterfaceBenchmarkToolsExt = "BenchmarkTools"
+    MathOptInterfaceCliqueTreesExt = "CliqueTrees"
+
+    [deps.MathOptInterface.weakdeps]
+    BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+    CliqueTrees = "60701a23-6482-424a-84db-faee86b9b1f8"
+
+[[deps.MbedTLS_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.6+0"
+
+[[deps.MicroCollections]]
+deps = ["Accessors", "BangBang", "InitialValues"]
+git-tree-sha1 = "44d32db644e84c75dab479f1bc15ee76a1a3618f"
+uuid = "128add7d-3638-4c79-886c-908ea0c25c34"
+version = "0.2.0"
+
+[[deps.Missings]]
+deps = ["DataAPI"]
+git-tree-sha1 = "ec4f7fbeab05d7747bdf98eb74d130a2a2ed298d"
+uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
+version = "1.2.0"
+
+[[deps.Mods]]
+git-tree-sha1 = "0a3c164857cfc4defe0ac09e6b0123d61320abb1"
+uuid = "7475f97c-0381-53b1-977b-4c60186c8d62"
+version = "2.2.6"
+
+[[deps.MozillaCACerts_jll]]
+uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2023.12.12"
+
+[[deps.Multisets]]
+git-tree-sha1 = "f4205a002e2e0c4a10971ea313084ee212f761a4"
+uuid = "3b2b4ff1-bcff-5658-a3ee-dbcf1ce5ac09"
+version = "0.4.6"
+
+[[deps.MutableArithmetics]]
+deps = ["LinearAlgebra", "SparseArrays", "Test"]
+git-tree-sha1 = "dc5b2c4c111c46bc79ac4405eeb563523b39c004"
+uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
+version = "1.8.0"
+
+[[deps.NDTensors]]
+deps = ["Accessors", "Adapt", "ArrayLayouts", "BlockArrays", "Compat", "Dictionaries", "EllipsisNotation", "FillArrays", "Folds", "Functors", "HalfIntegers", "InlineStrings", "LinearAlgebra", "MacroTools", "Random", "SimpleTraits", "SparseArrays", "SplitApplyCombine", "StaticArrays", "Strided", "StridedViews", "TimerOutputs", "TupleTools", "TypeParameterAccessors", "VectorInterface"]
+git-tree-sha1 = "66d86c534d6887e0b89fec21dd96e58d0d3a312f"
+uuid = "23ae76d9-e61a-49c4-8f12-3f1a16adf9cf"
+version = "0.4.28"
+
+    [deps.NDTensors.extensions]
+    NDTensorsAMDGPUExt = ["AMDGPU", "GPUArraysCore"]
+    NDTensorsCUDAExt = ["CUDA", "GPUArraysCore"]
+    NDTensorsGPUArraysCoreExt = "GPUArraysCore"
+    NDTensorsHDF5Ext = "HDF5"
+    NDTensorsJLArraysExt = ["GPUArraysCore", "JLArrays"]
+    NDTensorsMappedArraysExt = ["MappedArrays"]
+    NDTensorsMetalExt = ["GPUArraysCore", "Metal"]
+    NDTensorsOctavianExt = "Octavian"
+    NDTensorsTBLISExt = "TBLIS"
+    NDTensorscuTENSORExt = "cuTENSOR"
+
+    [deps.NDTensors.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
+    HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+    JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
+    MappedArrays = "dbb5928d-eab1-5f90-85c2-b9b0edb7c900"
+    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+    Octavian = "6fd5a793-0b7e-452c-907f-f8bfe9c57db4"
+    TBLIS = "48530278-0828-4a49-9772-0f3830dfa1e9"
+    cuTENSOR = "011b41b2-24ef-40a8-b3eb-fa098493e9e1"
+
+[[deps.NLSolversBase]]
+deps = ["ADTypes", "DifferentiationInterface", "FiniteDiff", "LinearAlgebra"]
+git-tree-sha1 = "b3f76b463c7998473062992b246045e6961a074e"
+uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
+version = "8.0.0"
+
+[[deps.NaNMath]]
+deps = ["OpenLibm_jll"]
+git-tree-sha1 = "dbd2e8cd2c1c27f0b584f6661b4309609c5a685e"
+uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+version = "1.1.4"
+
+[[deps.NamedGraphs]]
+deps = ["AbstractTrees", "Combinatorics", "Dictionaries", "Graphs", "LinearAlgebra", "PackageExtensionCompat", "Random", "SimpleGraphConverter", "SimpleTraits", "SparseArrays", "SplitApplyCombine", "Suppressor"]
+git-tree-sha1 = "65fbb7f62f209844bf1e03fafc8b978a69c73ded"
+uuid = "678767b0-92e7-4007-89e4-4527a8725b19"
+version = "0.13.0"
+
+    [deps.NamedGraphs.extensions]
+    NamedGraphsGraphsFlowsExt = "GraphsFlows"
+    NamedGraphsITensorVisualizationBaseExt = "ITensorVisualizationBase"
+    NamedGraphsKaHyParExt = "KaHyPar"
+    NamedGraphsMetisExt = "Metis"
+    NamedGraphsSimpleGraphAlgorithmsExt = "SimpleGraphAlgorithms"
+    NamedGraphsSymRCMExt = "SymRCM"
+
+    [deps.NamedGraphs.weakdeps]
+    GraphsFlows = "06909019-6f44-4949-96fc-b9d9aaa02889"
+    ITensorVisualizationBase = "cd2553d2-8bef-4d93-8a38-c62f17d5ad23"
+    KaHyPar = "2a6221f6-aa48-11e9-3542-2d9e0ef01880"
+    Metis = "2679e427-3c69-5b7f-982b-ece356f1e94b"
+    SimpleGraphAlgorithms = "41400c72-0c58-5c16-8579-4ecbce768449"
+    SymRCM = "286e6d88-80af-4590-acc9-0001b223b9bd"
+
+[[deps.NetworkOptions]]
+uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
+
+[[deps.OMEinsumContractionOrders]]
+deps = ["AbstractTrees", "CliqueTrees", "DataStructures", "JSON", "SparseArrays", "StatsBase", "Suppressor", "TreeWidthSolver"]
+git-tree-sha1 = "318826781ce17989079d07fbf620113d4de0a732"
+uuid = "6f22d1fd-8eed-4bb7-9776-e7d684900715"
+version = "1.3.0"
+
+    [deps.OMEinsumContractionOrders.extensions]
+    KaHyParExt = ["KaHyPar"]
+    LuxorTensorPlot = ["LuxorGraphPlot"]
+
+    [deps.OMEinsumContractionOrders.weakdeps]
+    KaHyPar = "2a6221f6-aa48-11e9-3542-2d9e0ef01880"
+    LuxorGraphPlot = "1f49bdf2-22a7-4bc4-978b-948dc219fbbc"
+
+[[deps.OpenBLAS32_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "libblastrampoline_jll"]
+git-tree-sha1 = "30870d0f2dc0b2dba76b10df1c58c7f018413e56"
+uuid = "656ef2d0-ae68-5445-9ca0-591084a874a2"
+version = "0.3.34+0"
+
+[[deps.OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.27+1"
+
+[[deps.OpenLibm_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+2"
+
+[[deps.OpenSpecFun_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "1346c9208249809840c91b26703912dff463d335"
+uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
+version = "0.5.6+0"
+
+[[deps.Optim]]
+deps = ["ADTypes", "EnumX", "FillArrays", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "PositiveFactorizations", "Printf", "SparseArrays", "Statistics"]
+git-tree-sha1 = "6fe140aab6c042a73c9d5dc280b87b32eee44f9f"
+uuid = "429524aa-4258-5aef-a3af-852621145aeb"
+version = "2.2.1"
+weakdeps = ["MathOptInterface"]
+
+    [deps.Optim.extensions]
+    OptimMOIExt = "MathOptInterface"
+
+[[deps.OrderedCollections]]
+git-tree-sha1 = "94ba93778373a53bfd5a0caaf7d809c445292ff4"
+uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+version = "1.8.2"
+
+[[deps.PDMats]]
+deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
+git-tree-sha1 = "26766d4b5f1a410c218a19b85a672c6edb693c65"
+uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
+version = "0.11.40"
+weakdeps = ["StatsBase"]
+
+    [deps.PDMats.extensions]
+    StatsBaseExt = "StatsBase"
+
+[[deps.PackageExtensionCompat]]
+git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
+uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+version = "1.0.2"
+weakdeps = ["Requires", "TOML"]
+
+[[deps.Parsers]]
+deps = ["Dates", "PrecompileTools", "UUIDs"]
+git-tree-sha1 = "32a4e09c5f29402573d673901778a0e03b0807b9"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "2.8.6"
+
+[[deps.Permutations]]
+deps = ["Combinatorics", "LinearAlgebra", "Random"]
+git-tree-sha1 = "b1f03a4943c62552a12c7f95965b76c3f91cf5b7"
+uuid = "2ae35dd2-176d-5d53-8349-f30d82d94d4f"
+version = "0.4.23"
+
+[[deps.Pkg]]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.11.0"
+
+    [deps.Pkg.extensions]
+    REPLExt = "REPL"
+
+    [deps.Pkg.weakdeps]
+    REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+
+[[deps.Polynomials]]
+deps = ["LinearAlgebra", "OrderedCollections", "Setfield", "SparseArrays"]
+git-tree-sha1 = "2d99b4c8a7845ab1342921733fa29366dae28b24"
+uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
+version = "4.1.1"
+
+    [deps.Polynomials.extensions]
+    PolynomialsChainRulesCoreExt = "ChainRulesCore"
+    PolynomialsFFTWExt = "FFTW"
+    PolynomialsMakieExt = "Makie"
+    PolynomialsMutableArithmeticsExt = "MutableArithmetics"
+    PolynomialsRecipesBaseExt = "RecipesBase"
+
+    [deps.Polynomials.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    MutableArithmetics = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+
+[[deps.PositiveFactorizations]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
+uuid = "85a6dd25-e78a-55b7-8502-1745935b8125"
+version = "0.2.4"
+
+[[deps.PrecompileTools]]
+deps = ["Preferences"]
+git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
+uuid = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+version = "1.2.1"
+
+[[deps.Preferences]]
+deps = ["TOML"]
+git-tree-sha1 = "8b770b60760d4451834fe79dd483e318eee709c4"
+uuid = "21216c6a-2e73-6563-6e65-726566657250"
+version = "1.5.2"
+
+[[deps.Primes]]
+deps = ["IntegerMathUtils"]
+git-tree-sha1 = "25cdd1d20cd005b52fc12cb6be3f75faaf59bb9b"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.7"
+
+[[deps.Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+version = "1.11.0"
+
+[[deps.PtrArrays]]
+git-tree-sha1 = "4fbbafbc6251b883f4d2705356f3641f3652a7fe"
+uuid = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+version = "1.4.0"
+
+[[deps.QuadGK]]
+deps = ["DataStructures", "LinearAlgebra"]
+git-tree-sha1 = "5e8e8b0ab68215d7a2b14b9921a946fee794749e"
+uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
+version = "2.11.3"
+
+    [deps.QuadGK.extensions]
+    QuadGKEnzymeExt = "Enzyme"
+
+    [deps.QuadGK.weakdeps]
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+
+[[deps.Random]]
+deps = ["SHA"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+version = "1.11.0"
+
+[[deps.Reexport]]
+git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
+uuid = "189a3867-3050-52da-a836-e630ba90ab69"
+version = "1.2.2"
+
+[[deps.Referenceables]]
+deps = ["Adapt"]
+git-tree-sha1 = "02d31ad62838181c1a3a5fd23a1ce5914a643601"
+uuid = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
+version = "0.1.3"
+
+[[deps.Requires]]
+deps = ["UUIDs"]
+git-tree-sha1 = "62389eeff14780bfe55195b7204c0d8738436d64"
+uuid = "ae029012-a4dd-5104-9daa-d747884805df"
+version = "1.3.1"
+
+[[deps.RingLists]]
+deps = ["Random"]
+git-tree-sha1 = "70d8d52c6d4238cace6ae1a7dd2c0c4d43acdf0b"
+uuid = "286e9d63-9694-5540-9e3c-4e6708fa07b2"
+version = "0.2.9"
+
+[[deps.Rmath]]
+deps = ["Random", "Rmath_jll"]
+git-tree-sha1 = "5b3d50eb374cea306873b371d3f8d3915a018f0b"
+uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
+version = "0.9.0"
+
+[[deps.Rmath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "58cdd8fb2201a6267e1db87ff148dd6c1dbd8ad8"
+uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
+version = "0.5.1+0"
+
+[[deps.Roots]]
+deps = ["Accessors", "CommonSolve", "Printf"]
+git-tree-sha1 = "7fb25a964849d90a0446366cdefca822e0e84900"
+uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+version = "3.0.6"
+
+    [deps.Roots.extensions]
+    RootsChainRulesCoreExt = "ChainRulesCore"
+    RootsForwardDiffExt = "ForwardDiff"
+    RootsIntervalRootFindingExt = "IntervalRootFinding"
+    RootsSymPyExt = "SymPy"
+    RootsSymPyPythonCallExt = "SymPyPythonCall"
+    RootsUnitfulExt = "Unitful"
+
+    [deps.Roots.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    IntervalRootFinding = "d2bf35a9-74e0-55ec-b149-d360ff49b807"
+    SymPy = "24249f21-da20-56a4-8eb1-6a02cf4ae2e6"
+    SymPyPythonCall = "bc8888f7-b21e-4b7c-a06a-5d9c9496438c"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[[deps.SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
+
+[[deps.Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+version = "1.11.0"
+
+[[deps.SerializedElementArrays]]
+deps = ["Serialization"]
+git-tree-sha1 = "8e73e49eaebf73486446a3c1eede403bff259826"
+uuid = "d3ce8812-9567-47e9-a7b5-65a6d70a3065"
+version = "0.1.0"
+
+[[deps.Setfield]]
+deps = ["ConstructionBase", "Future", "MacroTools", "StaticArraysCore"]
+git-tree-sha1 = "c5391c6ace3bc430ca630251d02ea9687169ca68"
+uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+version = "1.1.2"
+
+[[deps.SimpleGraphAlgorithms]]
+deps = ["ChooseOptimizer", "JuMP", "LinearAlgebra", "SimpleGraphs", "SimplePartitions", "SimplePolynomials"]
+git-tree-sha1 = "e333fd8f96c9e61b3beac3968b06c87d5f849d99"
+uuid = "41400c72-0c58-5c16-8579-4ecbce768449"
+version = "0.6.0"
+
+[[deps.SimpleGraphConverter]]
+deps = ["Graphs", "SimpleGraphs"]
+git-tree-sha1 = "30b6ee355f4fb9a79db85300f2d96e1582eb89aa"
+uuid = "205b04f2-f585-4877-a239-566270b3f673"
+version = "0.1.0"
+
+[[deps.SimpleGraphs]]
+deps = ["AbstractLattices", "Combinatorics", "DataStructures", "IterTools", "LightXML", "LinearAlgebra", "LinearAlgebraX", "Optim", "Primes", "Random", "RingLists", "SimplePartitions", "SimplePolynomials", "SimpleRandom", "SparseArrays", "Statistics"]
+git-tree-sha1 = "34ce9c7e74b4d326a964dd68d73bec61b52c2bbe"
+uuid = "55797a34-41de-5266-9ec1-32ac4eb504d3"
+version = "0.8.10"
+
+[[deps.SimplePartitions]]
+deps = ["AbstractLattices", "DataStructures", "Permutations"]
+git-tree-sha1 = "76cdce94e07849d1172ccb8f3a60a0bbbebe58b3"
+uuid = "ec83eff0-a5b5-5643-ae32-5cbf6eedec9d"
+version = "0.3.3"
+
+[[deps.SimplePolynomials]]
+deps = ["Mods", "Multisets", "Polynomials", "Primes"]
+git-tree-sha1 = "77b2c5e731f7e50bbd088ccc2810232e06c1afa3"
+uuid = "cc47b68c-3164-5771-a705-2bc0097375a0"
+version = "0.2.18"
+
+[[deps.SimpleRandom]]
+deps = ["Distributions", "LinearAlgebra", "Random"]
+git-tree-sha1 = "bb4f42b25b87f124478207a82f5b02dfafdb3e63"
+uuid = "a6525b86-64cd-54fa-8f65-62fc48bdc0e8"
+version = "0.3.2"
+
+[[deps.SimpleTraits]]
+deps = ["InteractiveUtils", "MacroTools"]
+git-tree-sha1 = "7ddb0b49c109481b046972c0e4ab02b2127d6a75"
+uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
+version = "0.9.6"
+
+[[deps.Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+version = "1.11.0"
+
+[[deps.SortingAlgorithms]]
+deps = ["DataStructures"]
+git-tree-sha1 = "13cd91cc9be159e3f4d95b857fa2aa383b53772a"
+uuid = "a2af1166-a08f-5f64-846c-94a0d3cef48c"
+version = "1.2.3"
+
+[[deps.SparseArrays]]
+deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
+uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+version = "1.11.0"
+
+[[deps.SpecialFunctions]]
+deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
+git-tree-sha1 = "6547cbdd8ce32efba0d21c5a40fa96d1a3548f9f"
+uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
+version = "2.8.0"
+weakdeps = ["ChainRulesCore"]
+
+    [deps.SpecialFunctions.extensions]
+    SpecialFunctionsChainRulesCoreExt = "ChainRulesCore"
+
+[[deps.SplitApplyCombine]]
+deps = ["Dictionaries", "Indexing"]
+git-tree-sha1 = "55db78e829cf726162fc4fc1b30d05f92092f3f6"
+uuid = "03a91e81-4c3e-53e1-a0a4-9c0c8f19dd66"
+version = "1.3.0"
+
+[[deps.SplittablesBase]]
+deps = ["Setfield", "Test"]
+git-tree-sha1 = "e08a62abc517eb79667d0a29dc08a3b589516bb5"
+uuid = "171d559e-b47b-412a-8079-5efa626c420e"
+version = "0.1.15"
+
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
+git-tree-sha1 = "246a8bb2e6667f832eea063c3a56aef96429a3db"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.9.18"
+weakdeps = ["ChainRulesCore", "Statistics"]
+
+    [deps.StaticArrays.extensions]
+    StaticArraysChainRulesCoreExt = "ChainRulesCore"
+    StaticArraysStatisticsExt = "Statistics"
+
+[[deps.StaticArraysCore]]
+git-tree-sha1 = "6ab403037779dae8c514bad259f32a447262455a"
+uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+version = "1.4.4"
+
+[[deps.Statistics]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "ae3bb1eb3bba077cd276bc5cfc337cc65c3075c0"
+uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+version = "1.11.1"
+weakdeps = ["SparseArrays"]
+
+    [deps.Statistics.extensions]
+    SparseArraysExt = ["SparseArrays"]
+
+[[deps.StatsAPI]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "178ed29fd5b2a2cfc3bd31c13375ae925623ff36"
+uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
+version = "1.8.0"
+
+[[deps.StatsBase]]
+deps = ["AliasTables", "DataAPI", "DataStructures", "IrrationalConstants", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
+git-tree-sha1 = "e4d7a1a0edc20af42689ea6f4f3587a2175d50ee"
+uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+version = "0.34.12"
+
+[[deps.StatsFuns]]
+deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "770240df9a3b8888065046948f7a09b4e0f997d5"
+uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+version = "2.2.0"
+weakdeps = ["ChainRulesCore", "InverseFunctions"]
+
+    [deps.StatsFuns.extensions]
+    StatsFunsChainRulesCoreExt = "ChainRulesCore"
+    StatsFunsInverseFunctionsExt = "InverseFunctions"
+
+[[deps.Strided]]
+deps = ["LinearAlgebra", "PrecompileTools", "StridedViews", "TupleTools"]
+git-tree-sha1 = "f04d5b5bbb39943ce28695f9f97ebee298c8ee1a"
+uuid = "5e0ebb24-38b0-5f93-81fe-25c709ecae67"
+version = "2.6.3"
+
+    [deps.Strided.extensions]
+    StridedAMDGPUExt = "AMDGPU"
+    StridedGPUArraysExt = "GPUArrays"
+    StridedcuBLASExt = "cuBLAS"
+
+    [deps.Strided.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    GPUArrays = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
+    cuBLAS = "182d3088-87b7-4494-8cad-fc6afaa545bc"
+
+[[deps.StridedViews]]
+deps = ["LinearAlgebra", "PrecompileTools"]
+git-tree-sha1 = "21dc3942c478661f72c527ff5d67baa98e555372"
+uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
+version = "0.5.2"
+
+    [deps.StridedViews.extensions]
+    StridedViewsAMDGPUExt = "AMDGPU"
+    StridedViewsAdaptExt = "Adapt"
+    StridedViewsCUDACoreExt = "CUDACore"
+    StridedViewsJLArraysExt = "JLArrays"
+    StridedViewsPtrArraysExt = "PtrArrays"
+
+    [deps.StridedViews.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    CUDACore = "bd0ed864-bdfe-4181-a5ed-ce625a5fdea2"
+    JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
+    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+    PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+
+[[deps.StructUtils]]
+deps = ["Dates", "UUIDs"]
+git-tree-sha1 = "82bee338d650aa515f31866c460cb7e3bcef90b8"
+uuid = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
+version = "2.8.2"
+
+    [deps.StructUtils.extensions]
+    StructUtilsMeasurementsExt = ["Measurements"]
+    StructUtilsStaticArraysCoreExt = ["StaticArraysCore"]
+    StructUtilsTablesExt = ["Tables"]
+
+    [deps.StructUtils.weakdeps]
+    Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+    StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+    Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+
+[[deps.SuiteSparse]]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
+uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
+
+[[deps.SuiteSparse_jll]]
+deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
+uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
+version = "7.7.0+0"
+
+[[deps.Suppressor]]
+deps = ["Logging"]
+git-tree-sha1 = "6dbb5b635c5437c68c28c2ac9e39b87138f37c0a"
+uuid = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
+version = "0.2.8"
+
+[[deps.TOML]]
+deps = ["Dates"]
+uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.3"
+
+[[deps.TableTraits]]
+deps = ["IteratorInterfaceExtensions"]
+git-tree-sha1 = "c06b2f539df1c6efa794486abfb6ed2022561a39"
+uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
+version = "1.0.1"
+
+[[deps.Tables]]
+deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "OrderedCollections", "TableTraits"]
+git-tree-sha1 = "0f38a06c83f0007bbab3cf911262841c9a0f07e0"
+uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+version = "1.13.0"
+
+[[deps.Tar]]
+deps = ["ArgTools", "SHA"]
+uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
+
+[[deps.TensorNetworkQuantumSimulator]]
+deps = ["Adapt", "Dictionaries", "Graphs", "ITensors", "KrylovKit", "LinearAlgebra", "NamedGraphs", "OMEinsumContractionOrders", "SimpleGraphAlgorithms", "SimpleGraphConverter", "SplitApplyCombine", "StatsBase", "TypeParameterAccessors"]
+git-tree-sha1 = "a4b16b794d03ce01406adc9cf8049e336191688c"
+repo-rev = "b5d4089849de1cc23806aa8325e8db56a55f2e0b"
+repo-url = "https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl.git"
+uuid = "4de3b72a-362e-43dd-83ff-3f381eda9f9c"
+version = "0.4.4"
+
+[[deps.Test]]
+deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+version = "1.11.0"
+
+[[deps.ThreadedScans]]
+deps = ["ArgCheck"]
+git-tree-sha1 = "ca1ba3000289eacba571aaa4efcefb642e7a1de6"
+uuid = "24d252fe-5d94-4a69-83ea-56a14333d47a"
+version = "0.1.0"
+
+[[deps.TimerOutputs]]
+deps = ["ExprTools", "Printf"]
+git-tree-sha1 = "3748bd928e68c7c346b52125cf41fff0de6937d0"
+uuid = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
+version = "0.5.29"
+
+    [deps.TimerOutputs.extensions]
+    FlameGraphsExt = "FlameGraphs"
+
+    [deps.TimerOutputs.weakdeps]
+    FlameGraphs = "08572546-2f56-4bcf-ba4e-bab62c3a3f89"
+
+[[deps.TranscodingStreams]]
+git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
+uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
+version = "0.11.3"
+
+[[deps.Transducers]]
+deps = ["Accessors", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "ConstructionBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "SplittablesBase", "Tables"]
+git-tree-sha1 = "4aa1fdf6c1da74661f6f5d3edfd96648321dade9"
+uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
+version = "0.4.85"
+
+    [deps.Transducers.extensions]
+    TransducersAdaptExt = "Adapt"
+    TransducersBlockArraysExt = "BlockArrays"
+    TransducersDataFramesExt = "DataFrames"
+    TransducersLazyArraysExt = "LazyArrays"
+    TransducersOnlineStatsBaseExt = "OnlineStatsBase"
+    TransducersReferenceablesExt = "Referenceables"
+
+    [deps.Transducers.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
+    DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+    LazyArrays = "5078a376-72f3-5289-bfd5-ec5146d43c02"
+    OnlineStatsBase = "925886fa-5bf2-5e8e-b522-a9147a512338"
+    Referenceables = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
+
+[[deps.TreeWidthSolver]]
+deps = ["AbstractTrees", "BitBasis", "Combinatorics", "Graphs", "SparseArrays"]
+git-tree-sha1 = "6738f4a82bba556df9c42aed0f8642ea7344033a"
+uuid = "7d267fc5-9ace-409f-a54c-cd2374872a55"
+version = "0.3.5"
+
+[[deps.TupleTools]]
+git-tree-sha1 = "41e43b9dc950775eac654b9f845c839cd2f1821e"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.6.0"
+
+[[deps.TypeParameterAccessors]]
+deps = ["LinearAlgebra", "SimpleTraits"]
+git-tree-sha1 = "15553df00a2e5ddac528c859f356aa866f32e44d"
+uuid = "7e5a90cf-f82e-492e-a09b-e3e26432c138"
+version = "0.4.23"
+
+    [deps.TypeParameterAccessors.extensions]
+    TypeParameterAccessorsAMDGPUExt = "AMDGPU"
+    TypeParameterAccessorsCUDAExt = "CUDA"
+    TypeParameterAccessorsFillArraysExt = "FillArrays"
+    TypeParameterAccessorsJLArraysExt = "JLArrays"
+    TypeParameterAccessorsMetalExt = "Metal"
+    TypeParameterAccessorsStridedViewsExt = "StridedViews"
+    TypeParameterAccessorsoneAPIExt = "oneAPI"
+
+    [deps.TypeParameterAccessors.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+    JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
+    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+    StridedViews = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
+    oneAPI = "8f75cd03-7ff8-4ecb-9b8f-daf728133b1b"
+
+[[deps.UUIDs]]
+deps = ["Random", "SHA"]
+uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+version = "1.11.0"
+
+[[deps.Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+version = "1.11.0"
+
+[[deps.VectorInterface]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "949dd28df19a5bf0973214e4a9d36c19079d4d45"
+uuid = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
+version = "0.6.0"
+
+    [deps.VectorInterface.extensions]
+    VectorInterfaceChainRulesCoreExt = "ChainRulesCore"
+    VectorInterfaceEnzymeExt = "Enzyme"
+    VectorInterfaceMooncakeExt = "Mooncake"
+    VectorInterfaceStaticArraysExt = "StaticArrays"
+
+    [deps.VectorInterface.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[[deps.XML2_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
+git-tree-sha1 = "3f3315d89fc954a28f5b471bce698ed6e27481be"
+uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
+version = "2.15.3+0"
+
+[[deps.Zeros]]
+git-tree-sha1 = "3286921ca285adecd40313c375540421be5fffeb"
+uuid = "bd1ec220-6eb4-527a-9b49-e79c3db6233b"
+version = "0.5.0"
+
+    [deps.Zeros.extensions]
+    ZerosRandomExt = "Random"
+    ZerosSIMDExt = "SIMD"
+
+    [deps.Zeros.weakdeps]
+    Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+    SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
+
+[[deps.Zlib_jll]]
+deps = ["Libdl"]
+uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.13+1"
+
+[[deps.libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.11.0+0"
+
+[[deps.nghttp2_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.59.0+0"
+
+[[deps.p7zip_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+2"
