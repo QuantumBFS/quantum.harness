@@ -82,13 +82,20 @@ runner_path() {
   runner=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
 }
 
-install_shim() {
+validate_shim_path() {
   runner_path
-  shim_path="${1:-$HOME/.local/bin/julia}"
-  case "$shim_path" in /*) ;; *) shim_path="$PWD/$shim_path";; esac
-  if [ -e "$shim_path" ] && [ "$shim_path" -ef "$runner" ]; then
+  validated_shim_path="${1:-$HOME/.local/bin/julia}"
+  case "$validated_shim_path" in
+    /*) ;;
+    *) validated_shim_path="$PWD/$validated_shim_path";;
+  esac
+  if [ -e "$validated_shim_path" ] && [ "$validated_shim_path" -ef "$runner" ]; then
     fail "refusing to replace the daemon runner itself"
   fi
+}
+
+install_shim() {
+  shim_path="$1"
   resolve_real_julia
   if [ -e "$shim_path" ]; then
     first_line=$(IFS= read -r line <"$shim_path" && printf '%s' "$line")
@@ -388,8 +395,9 @@ case "$cmd" in
     ;;
   install-shim)
     [ $# -le 1 ] || fail "install-shim accepts at most one path"
+    validate_shim_path "${1:-}"
     install_daemonmode
-    install_shim "${1:-}"
+    install_shim "$validated_shim_path"
     ;;
   alias)
     [ $# -eq 0 ] || fail "alias takes no arguments"
