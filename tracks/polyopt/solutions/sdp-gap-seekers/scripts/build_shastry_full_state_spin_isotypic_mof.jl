@@ -794,10 +794,31 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 time_limit_seconds=time_limit_seconds,
                 log_level=log_level,
                 progress_callback=progress,
-                fingerprint_coefficients=options.patch_level == 1,
+                fingerprint_coefficients=
+                    options.patch_level == 1 ||
+                    get(
+                        ENV,
+                        "SHASTRY_NATIVE_FINGERPRINT",
+                        "0",
+                    ) == "1",
             )
         )
         native_primal = native_measurement.value
+        expected_coefficient_map_sha256 = get(
+            ENV,
+            "SS_EXPECTED_COEFFICIENT_MAP_SHA256",
+            "",
+        )
+        coefficient_regression_passed =
+            isempty(expected_coefficient_map_sha256) ||
+            native_primal.coefficient_map_sha256 ==
+            expected_coefficient_map_sha256
+        coefficient_regression_passed || error(
+            "native coefficient-map regression failed: expected " *
+            expected_coefficient_map_sha256 *
+            ", observed " *
+            native_primal.coefficient_map_sha256,
+        )
         metadata["stages"]["native_primal"] =
             measurement_dict(native_measurement)
         metadata["native_primal"] = Dict(
@@ -811,7 +832,17 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 native_primal.scalar_coefficient_terms,
             "coefficient_map_sha256" =>
                 native_primal.coefficient_map_sha256,
+            "expected_coefficient_map_sha256" =>
+                expected_coefficient_map_sha256,
+            "coefficient_regression_passed" =>
+                coefficient_regression_passed,
         )
+        metadata["reduced"]["spin_isotypic_moments"] =
+            length(native_primal.moment_variables)
+        metadata["reduced"]["coefficient_map_sha256"] =
+            native_primal.coefficient_map_sha256
+        metadata["coefficient_inventory"] =
+            "streamed-native-mosek-v1"
         write_checkpoint(checkpoint_path, metadata)
         progress(
             "optimize native Mosek primal; threads=$threads, " *

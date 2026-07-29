@@ -18,6 +18,8 @@ export SS_MOSEK_TIME_LIMIT_SECONDS=28800
 export SS_MOSEK_LOG_LEVEL=2
 export SS_AUDIT_TOLERANCE=1e-7
 export SHASTRY_STREAM_ROW_BATCH="${SLURM_CPUS_PER_TASK:-32}"
+export SHASTRY_NATIVE_FINGERPRINT=1
+export SS_EXPECTED_COEFFICIENT_MAP_SHA256="935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4"
 
 readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/public/home/sihhu/quantum-hackson/checkouts/ss-remote-terminal-solve}"
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
