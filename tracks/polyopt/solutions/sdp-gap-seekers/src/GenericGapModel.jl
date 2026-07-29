@@ -30,6 +30,7 @@ export PauliInteractionTemplate,
        assembly_plan,
        basis_manifest,
        validate_basis_manifest,
+       full_state_scalar_multisets,
        full_state_entries,
        state_monomial_degree,
        state_monomial_string,
@@ -696,14 +697,10 @@ function one_symbol_entries(site_ids::Vector{Int}, max_degree::Int)
     return entries
 end
 
-"""
-Materialize the complete state-polynomial row inventory through `max_degree`.
-
-The recursive state-symbol enumeration uses nondecreasing canonical word
-indices, so commuting products are emitted exactly once. The final ordering is
-the same deterministic degree/serialization ordering used by manifests.
-"""
-function full_state_entries(site_ids::Vector{Int}, max_degree::Int)
+function full_state_words_and_scalar_multisets(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
     isempty(site_ids) && throw(ArgumentError("full basis needs at least one site"))
     issorted(site_ids) || throw(ArgumentError("full basis site IDs must be sorted"))
     length(unique(site_ids)) == length(site_ids) ||
@@ -739,7 +736,32 @@ function full_state_entries(site_ids::Vector{Int}, max_degree::Int)
         return nothing
     end
     enumerate_scalar_multisets!(PauliWord[], 1, 0)
+    return words, scalar_multisets
+end
 
+"""
+Materialize every canonical commuting state-symbol multiset through
+`max_degree`, without also materializing the operator-row inventory.
+"""
+function full_state_scalar_multisets(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    _, scalar_multisets =
+        full_state_words_and_scalar_multisets(site_ids, max_degree)
+    return scalar_multisets
+end
+
+"""
+Materialize the complete state-polynomial row inventory through `max_degree`.
+
+The recursive state-symbol enumeration uses nondecreasing canonical word
+indices, so commuting products are emitted exactly once. The final ordering is
+the same deterministic degree/serialization ordering used by manifests.
+"""
+function full_state_entries(site_ids::Vector{Int}, max_degree::Int)
+    words, scalar_multisets =
+        full_state_words_and_scalar_multisets(site_ids, max_degree)
     entries = StateMonomial[]
     for symbols in scalar_multisets
         scalar_degree = sum(length, symbols; init=0)

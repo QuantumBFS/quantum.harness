@@ -11,6 +11,7 @@ using ..GenericGapModel:
     NoStateSymmetry,
     basis_manifest,
     validate_basis_manifest,
+    full_state_scalar_multisets,
     full_state_entries,
     instantiate_terms,
     assembly_plan,
@@ -239,6 +240,7 @@ matrix entry is visited once.
 function assemble_primal_gap(
     problem::GapProblem;
     stationarity_spec::StationaritySpec=StationaritySpec(),
+    materialize_coefficients::Bool=true,
 )
     problem.basis_mode == :structured ||
         throw(ArgumentError("exact primal assembly requires :structured mode"))
@@ -273,6 +275,57 @@ function assemble_primal_gap(
         "stationarity-real-equalities-v1",
         equality_records,
     )
+
+    if !materialize_coefficients
+        ordered_moments = MomentKey[
+            moment_key(symbols)
+            for symbols in full_state_scalar_multisets(
+                collect(eachindex(problem.patch.sites)),
+                2problem.d,
+            )
+        ]
+        sort!(
+            ordered_moments;
+            by=key -> (moment_degree(key), key.canonical),
+        )
+        length(unique(ordered_moments)) == length(ordered_moments) ||
+            error("structural moment inventory contains duplicates")
+        first(ordered_moments) == moment_key() ||
+            error("identity moment must be first")
+        moments_sha256 = moment_inventory_sha256(ordered_moments)
+        coefficient_map_sha256 = "deferred-structural-v1"
+        final_sha256 = assembly_fingerprint(
+            plan.problem_sha256,
+            positive_basis.sha256,
+            gap_basis.sha256,
+            stationarity_spec,
+            candidates_sha256,
+            equalities_sha256,
+            moments_sha256,
+            coefficient_map_sha256,
+        )
+        term_type = eltype(hamiltonian_terms)
+        return PrimalAssembly{
+            typeof(problem),
+            term_type,
+        }(
+            PRIMAL_ASSEMBLY_SCHEMA,
+            problem,
+            plan.problem_sha256,
+            positive_basis,
+            gap_basis,
+            hamiltonian_terms,
+            stationarity_spec,
+            stationarity_selection_rule(stationarity_spec),
+            candidates_sha256,
+            equalities,
+            equalities_sha256,
+            ordered_moments,
+            moments_sha256,
+            coefficient_map_sha256,
+            final_sha256,
+        )
+    end
 
     moments = Set{MomentKey}([moment_key()])
     coefficient_records = String[]

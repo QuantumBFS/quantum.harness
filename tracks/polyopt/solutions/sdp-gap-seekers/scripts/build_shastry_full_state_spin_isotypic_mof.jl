@@ -136,6 +136,12 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     primal_measurement = @timed assemble_primal_gap(
         problem;
         stationarity_spec=StationaritySpec(:full_inner_state, 1),
+        materialize_coefficients=options.patch_level == 1 &&
+                                 get(
+                                     ENV,
+                                     "SHASTRY_STRUCTURAL_PRIMAL",
+                                     "0",
+                                 ) != "1",
     )
     primal = primal_measurement.value
     metadata["stages"]["primal"] = measurement_dict(primal_measurement)
