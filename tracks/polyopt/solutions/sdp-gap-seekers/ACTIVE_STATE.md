@@ -829,3 +829,10 @@ Updated: 2026-07-29 UTC.
   commit `49bd9ea`, 32 CPUs / 64000 MiB. It rebuilds the same L=2 setup with
   no optimizer and checks all 1,906,425 within-character `l=1/l=2` cross
   entries. Do not update its `ss-remote-cone-dev` checkout while it runs.
+- Decision job `118189392` passed the reduced hash, completed presolve, then
+  ended `OUT_OF_MEMORY` after 38:16 before iteration 0. `/usr/bin/time`
+  measured 512,036,704 KiB at the 500000-MiB cgroup (Slurm sampled
+  505,842,856 KiB). It produced no numerical or physical result. Do not raise
+  memory again: the next solve must use the exact stabilizer-split cones after
+  job `118189871` authorizes them and a new independent coefficient hash is
+  established.

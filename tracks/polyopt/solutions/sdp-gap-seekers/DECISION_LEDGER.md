@@ -1443,3 +1443,13 @@ The exact cross-coefficient gate is SCNet job `118189871`, source commit
 `L=2,d=2,g=4/5,gamma=2` structural assembly, invokes no optimizer, and replays
 all predicted 1,906,425 within-character `l=1/l=2` cross entries. Its result
 must be exact zero entrywise before the 2,540,067-row cone split is built.
+
+SCNet decision job `118189392` closed operationally, not scientifically. It
+reproduced exact hash `fac50bcc…bed9a8`, entered Mosek, completed presolve, and
+then was cgroup-killed before iteration 0 after 38:16. `/usr/bin/time` measured
+512,036,704 KiB peak RSS against the 500000-MiB request; Slurm's sampled peak
+was 505,842,856 KiB. There is no feasibility, infeasibility, or gap evidence.
+The unchanged 975-side cones have now hit 114000, 256000, and 500000 MiB
+ceilings. A larger memory-only rerun is not decision-relevant. Continue the
+already-launched exact stabilizer coefficient gate, then hash and solve the
+490-side formulation if and only if it passes.

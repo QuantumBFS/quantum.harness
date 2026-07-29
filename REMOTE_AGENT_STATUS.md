@@ -271,5 +271,10 @@ Updated: 2026-07-29T20:47:30Z
 - SCNet job `118189871` is running the exact 1,906,425-entry stabilizer
   cross-zero gate from immutable commit `49bd9ea` on 32 CPUs / 64000 MiB. It
   has no optimizer. Keep `ss-remote-cone-dev` unchanged until it completes.
+- SCNet decision solve `118189392` ended `OUT_OF_MEMORY` after 38:16, after
+  exact hash match and presolve but before iteration 0. Peak process RSS was
+  512,036,704 KiB at the 500000-MiB cgroup. This is no physics result and must
+  not be repeated at a larger memory tier; the active changed route is the
+  exact 490-side stabilizer split pending job `118189871`.
 
 No user input or new credential is currently required.
