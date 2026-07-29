@@ -1130,3 +1130,9 @@ identical rerun signature. SCNet job `118174488` started at
 2026-07-29T16:13:27Z on 32 CPUs / 114000 MiB. Next action: monitor through the
 hash gate and first Mosek iteration, then audit either its primal residuals or
 its independently replayed Farkas ray before drawing a scientific conclusion.
+
+Job `118174488` exited before model construction because deployment had left
+the isolated checkout at a detached Git `HEAD`; the source-provenance guard's
+`git symbolic-ref` check rejected it. No coefficient, SDP, or solver work ran.
+One unchanged-signature resubmission is justified after reattaching the clean
+`remote/challenge88-terminal-solve` branch and verifying its commit/status.

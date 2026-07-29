@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T16:14:34Z
+Updated: 2026-07-29T16:16:30Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -92,5 +92,10 @@ Updated: 2026-07-29T16:14:34Z
   after 1:39 with 8,377,328 KiB MaxRSS, and protected xH5 baseline `23011251`
   after 1:25 with 10,432,348 KiB MaxRSS. Both logs still ended at JuMP model
   materialization; neither was cancelled, modified, or interpreted.
+- Native launch job `118174488` failed before constructing the model because
+  deployment had left the isolated checkout at detached `HEAD`; its source
+  provenance guard rejected `git symbolic-ref`. The branch will be reattached
+  cleanly and the same decision signature submitted once. This is an
+  operational launch failure, not evidence about feasibility or the gap.
 
 No user input or new credential is currently required.

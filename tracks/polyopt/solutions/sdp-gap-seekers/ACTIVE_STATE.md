@@ -642,3 +642,7 @@ Updated: 2026-07-29 UTC.
   114000 MiB. It is decision-relevant because it streams directly into Mosek
   in one coefficient pass; protected JuMP jobs `118171391` and `23011251`
   remain untouched and had still not entered optimization at 16:14Z.
+- Native launch r1, job `118174488`, stopped before model construction because
+  the isolated checkout was detached and the provenance guard requires a
+  symbolic branch. Reattach the same clean branch and resubmit once; this was
+  not a scientific run and does not change the planned signature.
