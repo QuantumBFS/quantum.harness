@@ -270,3 +270,39 @@ each coefficient is a fixed-cardinality average over endpoint assignments,
 and one negative assignment need not make that average negative.  The
 remaining proof target must preserve this symmetrization instead of
 dropping to the full four-generator semigroup.
+
+## Two arbitrary-length positive word classes
+
+Two infinite word families admit direct proofs independent of a cone.
+First, the exact characteristic polynomial of \(B\) is
+
+\[
+p(\lambda)=\lambda^5-2\lambda^4+\lambda^3-7\lambda^2+16\lambda-8.
+\]
+
+Exact Sturm counting gives one positive real root, no negative real root,
+and two nonreal conjugate pairs.  Moreover, the exact gcd of \(p\) and its
+reciprocal polynomial has degree zero, so no nonreal root lies on the unit
+circle.  Therefore, for every \(n\geq1\),
+
+\[
+\det(I+B^n)=(1+r^n)
+|1+z_1^n|^2|1+z_2^n|^2>0.
+\]
+
+The same statement holds for \((B^{\mathsf T})^n\).
+
+Second, let \(\bar u^{\,R}\) denote reverse order together with exchanging
+`0` and `1`, so that \(B_0^{\mathsf T}=B_1\).  With the word-product
+convention used by the oracle,
+
+\[
+W(u\bar u^{\,R})=W(u)^{\mathsf T}W(u).
+\]
+
+This matrix is positive semidefinite, hence every transpose-reflection
+square word has
+\(\det(I+W)>0\), at arbitrary length.  These lemmas cover all pure words,
+all alternating even powers, and every cyclic representative admitting
+the displayed reflection-square cut.  They do not yet cover a generic
+binary necklace, which remains the full-Fock cone or domination target.

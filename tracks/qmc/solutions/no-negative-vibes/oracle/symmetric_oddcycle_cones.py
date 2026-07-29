@@ -785,12 +785,71 @@ def search_fixed_unit_winding_full_fock_cone(
     }
 
 
+def exact_pure_power_spectral_lemma() -> dict[str, object]:
+    """Certify that every nonempty pure power has positive determinant."""
+
+    characteristic = fixed_candidate_matrix().charpoly().as_poly()
+    variable = characteristic.gens[0]
+    reciprocal = sp.Poly(
+        sp.expand(
+            variable ** characteristic.degree()
+            * characteristic.as_expr().subs(variable, 1 / variable)
+        ),
+        variable,
+    )
+    reciprocal_gcd_degree = sp.gcd(characteristic, reciprocal).degree()
+    positive_real_roots = int(characteristic.count_roots(0, sp.oo))
+    negative_real_roots = int(characteristic.count_roots(-sp.oo, 0))
+    return {
+        "characteristic_coefficients": tuple(
+            int(coefficient) for coefficient in characteristic.all_coeffs()
+        ),
+        "positive_real_root_count": positive_real_roots,
+        "negative_real_root_count": negative_real_roots,
+        "reciprocal_gcd_degree": reciprocal_gcd_degree,
+        "nonreal_conjugate_pair_count": (
+            characteristic.degree()
+            - positive_real_roots
+            - negative_real_roots
+        )
+        // 2,
+        "conclusion": "det(I+B^n)>0 for every integer n>=1",
+    }
+
+
+def exact_reflection_square_replay(word: str) -> dict[str, object]:
+    """Replay ``W(word + reflected(word)) = X.T X`` exactly."""
+
+    if not word or any(symbol not in {"0", "1"} for symbol in word):
+        raise ValueError("word must be a nonempty binary string")
+    reflected = "".join(
+        "1" if symbol == "0" else "0" for symbol in reversed(word)
+    )
+    matrix = _word_matrix(word)
+    full_word = word + reflected
+    product = _word_matrix(full_word)
+    gram = sp.ImmutableMatrix(matrix.T * matrix)
+    if product != gram:
+        raise RuntimeError("transpose-reflection square identity failed")
+    determinant = int((sp.eye(5) + product).det())
+    return {
+        "word": word,
+        "reflected_word": reflected,
+        "full_word": full_word,
+        "identity": "W=X.T*X",
+        "full_determinant": determinant,
+        "strictly_positive": determinant > 0,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
     "exact_complementary_sector_audit",
     "exact_grade4_formula_replay",
     "exact_invariant_chamber_obstruction",
+    "exact_pure_power_spectral_lemma",
+    "exact_reflection_square_replay",
     "exact_unit_winding_bernstein_audit",
     "exact_unit_winding_endpoint_obstruction",
     "fixed_candidate_matrix",

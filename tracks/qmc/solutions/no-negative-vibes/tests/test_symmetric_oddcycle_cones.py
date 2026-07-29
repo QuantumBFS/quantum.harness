@@ -5,6 +5,8 @@ from oracle.symmetric_oddcycle_cones import (
     exact_complementary_sector_audit,
     exact_grade4_formula_replay,
     exact_invariant_chamber_obstruction,
+    exact_pure_power_spectral_lemma,
+    exact_reflection_square_replay,
     exact_unit_winding_bernstein_audit,
     exact_unit_winding_endpoint_obstruction,
     load_certificate,
@@ -225,3 +227,22 @@ def test_fixed_full_fock_search_api_replays_split_words_without_optimization():
         },
     )
     assert result["redundant"]["status"] == "no-numerical-transform"
+
+
+def test_pure_powers_and_reflection_square_words_are_positive_at_all_lengths():
+    pure = exact_pure_power_spectral_lemma()
+    assert pure == {
+        "characteristic_coefficients": (1, -2, 1, -7, 16, -8),
+        "positive_real_root_count": 1,
+        "negative_real_root_count": 0,
+        "reciprocal_gcd_degree": 0,
+        "nonreal_conjugate_pair_count": 2,
+        "conclusion": "det(I+B^n)>0 for every integer n>=1",
+    }
+
+    reflected = exact_reflection_square_replay("00101")
+    assert reflected["reflected_word"] == "01011"
+    assert reflected["full_word"] == "0010101011"
+    assert reflected["identity"] == "W=X.T*X"
+    assert reflected["full_determinant"] > 0
+    assert reflected["strictly_positive"] is True
