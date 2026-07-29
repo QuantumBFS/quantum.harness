@@ -16,7 +16,7 @@ SOURCE_COMMIT = "1" * 40
 PARENT_SOURCE_COMMIT = "b90a506d0aaa38a87163be06b83f6de380a3e970"
 PRESSURE_SOURCE_COMMIT = "2" * 40
 PARENT_RUN_ID = "exterior-thin-first-v1"
-PARENT_PLAN_HASH = "b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97"
+PARENT_PLAN_HASH = "debbc510ac886ed26b7640bf0b09de5672f529c34c30aa21cdcd1e430564595a"
 PARENT_PROTOCOL_HASH = "e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43"
 PRESSURE_RUN_ID = "exterior-survivor-pressure-v1"
 
@@ -848,6 +848,30 @@ def test_parent_survivor_requires_complete_shallow_evidence(tmp_path: Path) -> N
     })
     path.write_text(json.dumps(manifest), encoding="utf-8")
 
+    with pytest.raises(RuntimeError, match="parent|terminal|survivor"):
+        thin.plan_survivor_run(
+            parent_run_dir=parent,
+            run_dir=tmp_path / "stage-2",
+            source_commit=PRESSURE_SOURCE_COMMIT,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("minimum_sigma_word_indices", [0, 0]),
+        ("minimum_sigma_min_I_plus_D", float("inf")),
+    ),
+)
+def test_parent_survivor_rejects_invalid_minimum_evidence(
+    tmp_path: Path, field: str, value: object,
+) -> None:
+    parent = tmp_path / "stage-1"
+    plan = _write_parent_terminal_manifests(parent, survivors={0})
+    path = parent / "candidates" / plan["candidates"][0]["candidate_id"] / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest[field] = value
+    path.write_text(json.dumps(manifest), encoding="utf-8")
     with pytest.raises(RuntimeError, match="parent|terminal|survivor"):
         thin.plan_survivor_run(
             parent_run_dir=parent,
