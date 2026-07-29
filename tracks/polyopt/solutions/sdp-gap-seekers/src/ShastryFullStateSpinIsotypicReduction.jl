@@ -71,7 +71,13 @@ struct ShastrySpinIsotypicPSDBlock
         kind::Symbol,
         rows::Vector{ShastrySpinIsotypicRow},
     )
-        kind in (:s3_trivial, :s3_standard, :v4_orbit_representative) ||
+        kind in (
+            :s3_trivial,
+            :s3_standard,
+            :v4_orbit_representative,
+            :s3_stabilizer_plus_l2,
+            :s3_stabilizer_minus_l1,
+        ) ||
             throw(ArgumentError("unsupported spin-isotypic block kind"))
         isempty(rows) &&
             throw(ArgumentError("empty spin-isotypic PSD block"))
@@ -485,7 +491,10 @@ function block_group_key(block::ShastrySpatialPSDBlock)
     return (source.role, source.family, block.parity)
 end
 
-function retained_blocks(blocks::Vector{ShastrySpatialPSDBlock})
+function retained_blocks(
+    blocks::Vector{ShastrySpatialPSDBlock};
+    stabilizer_split::Bool=false,
+)
     result = ShastrySpinIsotypicPSDBlock[]
     for block in blocks
         if block.source_block.character == TRIVIAL_CHARACTER
@@ -504,6 +513,24 @@ function retained_blocks(blocks::Vector{ShastrySpatialPSDBlock})
                     block,
                     :s3_standard,
                     decomposition.standard_minus,
+                ),
+            )
+        elseif stabilizer_split
+            decomposition = stabilizer_isotypic_rows(block)
+            isempty(decomposition.plus) || push!(
+                result,
+                ShastrySpinIsotypicPSDBlock(
+                    block,
+                    :s3_stabilizer_plus_l2,
+                    decomposition.plus,
+                ),
+            )
+            isempty(decomposition.minus) || push!(
+                result,
+                ShastrySpinIsotypicPSDBlock(
+                    block,
+                    :s3_stabilizer_minus_l1,
+                    decomposition.minus,
                 ),
             )
         else
@@ -762,13 +789,24 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     source::ShastryFullStateSpinSpatialReducedPrimalAssembly;
     verify_truth::Bool=true,
     materialize_coefficients::Bool=true,
+    stabilizer_split::Bool=false,
 )
     truth = verify_truth ? shastry_spin_isotypic_truth(source) : nothing
     verify_truth && !something(truth).exact &&
         error("Shastry spin-isotypic truth gate failed")
-    positive_blocks = retained_blocks(source.positive_blocks)
-    gap_blocks = retained_blocks(source.gap_blocks)
+    positive_blocks = retained_blocks(
+        source.positive_blocks;
+        stabilizer_split=stabilizer_split,
+    )
+    gap_blocks = retained_blocks(
+        source.gap_blocks;
+        stabilizer_split=stabilizer_split,
+    )
     equalities = canonical_real_equalities(copy(source.equalities))
+    schema = stabilizer_split ?
+        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA *
+        "-nontrivial-stabilizer-v1" :
+        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA
     if !materialize_coefficients
         block_records = String[
             string(
@@ -779,7 +817,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
             for block in [positive_blocks; gap_blocks]
         ]
         assembly_sha256 = fingerprint_records(
-            SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+            schema,
             [
                 "source=" * source.assembly_sha256,
                 "coefficient_map=deferred-structural-v1",
@@ -791,7 +829,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
             ],
         )
         return ShastryFullStateSpinIsotypicReducedPrimalAssembly(
-            SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+            schema,
             source,
             truth,
             positive_blocks,
@@ -803,7 +841,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
         )
     end
     provisional = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
-        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+        schema,
         source,
         truth,
         positive_blocks,
@@ -856,7 +894,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
         error("identity moment is not first after spin-isotypic reduction")
     coefficient_sha256 = bytes2hex(digest!(coefficient_context))
     assembly_sha256 = fingerprint_records(
-        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+        schema,
         [
             "source=" * source.assembly_sha256,
             "coefficient_map=" * coefficient_sha256,
@@ -868,7 +906,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
         ],
     )
     return ShastryFullStateSpinIsotypicReducedPrimalAssembly(
-        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+        schema,
         source,
         truth,
         positive_blocks,

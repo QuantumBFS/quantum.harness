@@ -781,6 +781,15 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
 
     materialize_isotypic_coefficients =
         options.mode in (:preflight, :mof)
+    stabilizer_split =
+        get(ENV, "SHASTRY_STABILIZER_CONE_SPLIT", "0") == "1"
+    if stabilizer_split &&
+       get(ENV, "SHASTRY_STABILIZER_COEFFICIENT_TRUTH", "0") != "1"
+        error(
+            "SHASTRY_STABILIZER_CONE_SPLIT requires the exact " *
+            "stabilizer coefficient truth gate",
+        )
+    end
     progress(
         !materialize_isotypic_coefficients ?
         "exact S3 structural cone blocking" :
@@ -791,6 +800,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             spin_spatial,
             verify_truth=exhaustive_intermediate_truth,
             materialize_coefficients=materialize_isotypic_coefficients,
+            stabilizer_split=stabilizer_split,
         )
     isotypic = isotypic_measurement.value
     spin_stabilizer_structure =
@@ -825,6 +835,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         for block in isotypic.gap_blocks
     ]
     metadata["reduced"]["assembly_sha256"] = isotypic.assembly_sha256
+    metadata["reduced"]["stabilizer_cone_split"] = stabilizer_split
     metadata["reduced"]["coefficient_map_sha256"] =
         isotypic.coefficient_map_sha256
     metadata["coefficient_inventory"] = !materialize_isotypic_coefficients ?
