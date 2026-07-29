@@ -733,7 +733,7 @@ function foreach_full_state_scalar_multiset(
         for index in first_index:length(state_words)
             word = state_words[index]
             next_degree = degree + length(word)
-            next_degree > max_degree && continue
+            next_degree > max_degree && break
             push!(selected, word)
             enumerate_scalar_multisets!(
                 selected,

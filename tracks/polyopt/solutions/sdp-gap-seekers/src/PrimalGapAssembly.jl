@@ -229,7 +229,30 @@ function assembly_fingerprint(
     return fingerprint_records(PRIMAL_ASSEMBLY_SCHEMA, records)
 end
 
-function structural_moment_inventory(problem::GapProblem)
+function keep_structural_moment(
+    symbols::Vector{PauliWord},
+    moment_filter::Symbol,
+)
+    moment_filter == :all && return true
+    moment_filter == :v4_conjugation_even ||
+        throw(ArgumentError("unsupported structural moment filter"))
+    x_odd = false
+    y_odd = false
+    z_odd = false
+    for word in symbols
+        for (_, axis) in word.ops
+            axis == 1 && (x_odd = !x_odd)
+            axis == 2 && (y_odd = !y_odd)
+            axis == 3 && (z_odd = !z_odd)
+        end
+    end
+    return !x_odd && !y_odd && !z_odd
+end
+
+function structural_moment_inventory(
+    problem::GapProblem,
+    moment_filter::Symbol,
+)
     site_ids = collect(eachindex(problem.patch.sites))
     max_degree = 2problem.d
     local_words = enumerate_pauli_words(length(site_ids), max_degree)
@@ -251,11 +274,12 @@ function structural_moment_inventory(problem::GapProblem)
                 first_index::Int,
                 degree::Int,
             )
-                push!(bucket, moment_key(selected))
+                keep_structural_moment(selected, moment_filter) &&
+                    push!(bucket, moment_key(selected))
                 for index in first_index:length(state_words)
                     word = state_words[index]
                     next_degree = degree + length(word)
-                    next_degree > max_degree && continue
+                    next_degree > max_degree && break
                     push!(selected, word)
                     enumerate_from!(index, next_degree)
                     pop!(selected)
@@ -288,6 +312,7 @@ function assemble_primal_gap(
     problem::GapProblem;
     stationarity_spec::StationaritySpec=StationaritySpec(),
     materialize_coefficients::Bool=true,
+    structural_moment_filter::Symbol=:all,
 )
     problem.basis_mode == :structured ||
         throw(ArgumentError("exact primal assembly requires :structured mode"))
@@ -324,13 +349,15 @@ function assemble_primal_gap(
     )
 
     if !materialize_coefficients
-        ordered_moments = structural_moment_inventory(problem)
+        ordered_moments =
+            structural_moment_inventory(problem, structural_moment_filter)
         length(unique(ordered_moments)) == length(ordered_moments) ||
             error("structural moment inventory contains duplicates")
         first(ordered_moments) == moment_key() ||
             error("identity moment must be first")
         moments_sha256 = moment_inventory_sha256(ordered_moments)
-        coefficient_map_sha256 = "deferred-structural-v1"
+        coefficient_map_sha256 =
+            "deferred-structural-v1/" * string(structural_moment_filter)
         final_sha256 = assembly_fingerprint(
             plan.problem_sha256,
             positive_basis.sha256,

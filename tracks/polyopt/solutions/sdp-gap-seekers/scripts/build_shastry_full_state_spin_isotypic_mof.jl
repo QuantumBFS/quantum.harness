@@ -142,6 +142,14 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                                      "SHASTRY_STRUCTURAL_PRIMAL",
                                      "0",
                                  ) != "1",
+        structural_moment_filter=options.patch_level > 1 ||
+                                 get(
+                                     ENV,
+                                     "SHASTRY_FILTER_PRIMAL_MOMENTS",
+                                     "0",
+                                 ) == "1" ?
+                                 :v4_conjugation_even :
+                                 :all,
     )
     primal = primal_measurement.value
     metadata["stages"]["primal"] = measurement_dict(primal_measurement)
