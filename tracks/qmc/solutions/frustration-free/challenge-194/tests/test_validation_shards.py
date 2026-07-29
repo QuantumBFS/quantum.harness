@@ -323,6 +323,7 @@ def test_generated_shard_results_are_ignored(tmp_path: Path):
     candidate = (
         repository
         / "tracks"
+        / "qmc"
         / "results"
         / "frustration-free"
         / "challenge-194"
