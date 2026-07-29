@@ -238,6 +238,155 @@ def test_dominant_cancellation_preserves_finite_lower_log_band_and_score(
     )
 
 
+def test_score_cancellation_preserves_a_finite_lower_effective_log_band(
+) -> None:
+    n_electrons = 3
+    two_q = 6
+    target = (1 << 1) | (1 << 3) | (1 << 6)
+    leading = (1 << 0) | (1 << 3) | (1 << 6)
+    lower_band = (1 << 1) | (1 << 2) | (1 << 6)
+    cancelling = (1 << 1) | (1 << 3) | (1 << 5)
+    inverse = tower_module.ladder_neighbors(target, two_q, direction=-1)
+
+    assert tuple(inverse) == (leading, lower_band, cancelling)
+    assert inverse[leading] == pytest.approx(math.sqrt(6.0))
+    assert inverse[lower_band] == pytest.approx(math.sqrt(12.0))
+    assert inverse[cancelling] == pytest.approx(math.sqrt(6.0))
+
+    effective_logs = {
+        leading: 0.0,
+        lower_band: -700.0,
+        cancelling: -1.0,
+    }
+    logs = {
+        state: complex(
+            effective_logs[state] - math.log(abs(inverse[state])),
+            0.0,
+        )
+        for state in inverse
+    }
+    scores = {
+        leading: np.array([1.0], dtype=np.complex128),
+        lower_band: np.array([1.0], dtype=np.complex128),
+        cancelling: np.array([-math.e], dtype=np.complex128),
+    }
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: logs[state],
+        log_score=lambda state: scores[state],
+        n_electrons=n_electrons,
+        two_q=two_q,
+        l=2,
+    )
+
+    observed = tower[1].log_score(target)
+    denominator = math.fsum((1.0, math.exp(-700.0), math.exp(-1.0)))
+    expected = math.exp(-700.0) / denominator
+
+    assert observed.shape == (1,)
+    assert math.isfinite(observed[0].real)
+    assert math.isfinite(observed[0].imag)
+    assert observed[0].real > 0.0
+    assert observed[0].imag == pytest.approx(0.0, abs=0.0)
+    assert observed[0].real / expected == pytest.approx(
+        1.0,
+        rel=2.0e-13,
+        abs=0.0,
+    )
+
+
+def test_score_arithmetic_overflow_from_finite_inputs_fails_closed() -> None:
+    n_electrons = 3
+    two_q = 6
+    target = (1 << 1) | (1 << 3) | (1 << 6)
+    low_reference = (1 << 0) | (1 << 3) | (1 << 6)
+    positive_high = (1 << 1) | (1 << 2) | (1 << 6)
+    negative_high = (1 << 1) | (1 << 3) | (1 << 5)
+    inverse = tower_module.ladder_neighbors(target, two_q, direction=-1)
+
+    assert tuple(inverse) == (low_reference, positive_high, negative_high)
+    effective_logs = {
+        low_reference: -700.0,
+        positive_high: 0.0,
+        negative_high: 0.0,
+    }
+    phases = {
+        low_reference: 0.0,
+        positive_high: math.pi / 4.0,
+        negative_high: -3.0 * math.pi / 4.0,
+    }
+    logs = {
+        state: complex(
+            effective_logs[state] - math.log(abs(inverse[state])),
+            phases[state],
+        )
+        for state in inverse
+    }
+    maximum = np.finfo(np.float64).max
+    large_finite = complex(maximum, maximum)
+    scores = {
+        low_reference: np.zeros(1, dtype=np.complex128),
+        positive_high: np.array([large_finite], dtype=np.complex128),
+        negative_high: np.array([large_finite], dtype=np.complex128),
+    }
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: logs[state],
+        log_score=lambda state: scores[state],
+        n_electrons=n_electrons,
+        two_q=two_q,
+        l=2,
+    )
+
+    with pytest.raises((FloatingPointError, ValueError)):
+        tower[1].log_score(target)
+
+
+def test_near_antipodal_parents_preserve_a_finite_ladder_residual() -> None:
+    logs = {
+        M0_LEFT: complex(0.0, 0.0),
+        M0_RIGHT: complex(0.0, math.pi + 2.0 * math.ulp(math.pi)),
+    }
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: logs[state],
+        log_score=_zero_score(),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+    observed = tower[1].logpsi(M_PLUS_ONE)
+
+    assert observed.real != -math.inf
+    assert math.isfinite(observed.real)
+    assert math.isfinite(observed.imag)
+
+
+def test_single_log_score_call_reuses_parent_terms_with_a_local_memo() -> None:
+    coefficient = 1.0 / math.sqrt(2.0)
+    base_logpsi = _logpsi_from_amplitudes(
+        {M0_LEFT: coefficient, M0_RIGHT: coefficient}
+    )
+    logpsi_calls: dict[int, int] = {}
+
+    def counted_logpsi(state: int) -> complex:
+        logpsi_calls[state] = logpsi_calls.get(state, 0) + 1
+        return base_logpsi(state)
+
+    tower = LadderTower.from_m0(
+        logpsi=counted_logpsi,
+        log_score=_zero_score(width=1),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+    m_plus_two = (1 << 2) | (1 << 3)
+
+    observed = tower[2].log_score(m_plus_two)
+
+    assert np.all(np.isfinite(observed.real))
+    assert np.all(np.isfinite(observed.imag))
+    assert logpsi_calls == {M0_LEFT: 1, M0_RIGHT: 1}
+
+
 def test_exact_node_is_invariant_under_nonaxial_global_phase() -> None:
     coefficient = 1.0 / math.sqrt(2.0)
     global_phase = cmath.exp(0.371j)

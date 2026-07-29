@@ -56,6 +56,12 @@ def _score_vector(raw_value: object, *, label: str) -> np.ndarray:
         np.isfinite(score.imag)
     ):
         raise ValueError(f"{label} must contain only finite values")
+    with np.errstate(over="ignore", invalid="ignore"):
+        magnitudes = np.hypot(score.real, score.imag)
+    if not np.all(np.isfinite(magnitudes)):
+        raise FloatingPointError(
+            f"{label} magnitude is outside complex128 range"
+        )
     return score
 
 
@@ -63,7 +69,7 @@ def _phase_factor(phase: float) -> complex:
     reduced = math.remainder(phase, 2.0 * math.pi)
     quadrant = int(round(reduced / (math.pi / 2.0)))
     snapped = quadrant * (math.pi / 2.0)
-    if abs(reduced - snapped) <= 8.0 * math.ulp(math.pi):
+    if reduced == snapped:
         axial = quadrant % 4
         if axial == 0:
             return 1.0 + 0.0j
@@ -174,6 +180,111 @@ def _reduce_log_terms(terms: tuple[_LogTerm, ...]) -> _LogPolar | None:
     )
 
 
+def _neumaier_sum_rows(values: np.ndarray) -> np.ndarray:
+    if values.ndim != 2:
+        raise AssertionError("Neumaier input must be two-dimensional")
+    total = np.zeros(values.shape[1], dtype=np.float64)
+    correction = np.zeros_like(total)
+    for row in values:
+        updated = total + row
+        correction += np.where(
+            np.abs(total) >= np.abs(row),
+            (total - updated) + row,
+            (row - updated) + total,
+        )
+        total = updated
+    result = total + correction
+    if not np.all(np.isfinite(result)):
+        raise FloatingPointError("derived log score sum is non-finite")
+    return result
+
+
+def _neumaier_complex_sum_rows(values: np.ndarray) -> np.ndarray:
+    return _neumaier_sum_rows(values.real) + 1.0j * _neumaier_sum_rows(
+        values.imag
+    )
+
+
+def _collapse_equal_score_log_bands(
+    raw_logs: np.ndarray,
+    normalized_logs: np.ndarray,
+    unit_phases: np.ndarray,
+    active: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    band_count, parameter_count = raw_logs.shape
+    for _iteration in range(band_count + 1):
+        next_raw_logs = np.full_like(raw_logs, -math.inf)
+        next_normalized_logs = np.full_like(normalized_logs, -math.inf)
+        next_unit_phases = np.zeros_like(unit_phases)
+        next_active = np.zeros_like(active)
+        merged = False
+        for band_index in range(band_count):
+            if band_index == 0:
+                already_led = np.zeros(parameter_count, dtype=np.bool_)
+            else:
+                already_led = np.any(
+                    active[:band_index]
+                    & (
+                        raw_logs[:band_index]
+                        == raw_logs[band_index][None, :]
+                    ),
+                    axis=0,
+                )
+            leader = active[band_index] & ~already_led
+            if not np.any(leader):
+                continue
+            same_band = (
+                active
+                & leader[None, :]
+                & (raw_logs == raw_logs[band_index][None, :])
+            )
+            multiplicity = np.sum(same_band, axis=0)
+            if np.any(multiplicity > 1):
+                merged = True
+            selected_phases = np.where(
+                same_band,
+                unit_phases,
+                0.0j,
+            )
+            summed = _neumaier_complex_sum_rows(selected_phases)
+            magnitudes = np.hypot(summed.real, summed.imag)
+            if not np.all(np.isfinite(magnitudes)):
+                raise FloatingPointError(
+                    "derived log score band is non-finite"
+                )
+            nonzero = leader & (magnitudes > 0.0)
+            if not np.any(nonzero):
+                continue
+            log_magnitudes = np.log(magnitudes[nonzero])
+            collapsed_raw = (
+                raw_logs[band_index, nonzero] + log_magnitudes
+            )
+            collapsed_normalized = (
+                normalized_logs[band_index, nonzero] + log_magnitudes
+            )
+            if not np.all(np.isfinite(collapsed_raw)) or not np.all(
+                np.isfinite(collapsed_normalized)
+            ):
+                raise FloatingPointError(
+                    "derived log score band is non-finite"
+                )
+            next_raw_logs[band_index, nonzero] = collapsed_raw
+            next_normalized_logs[band_index, nonzero] = (
+                collapsed_normalized
+            )
+            next_unit_phases[band_index, nonzero] = (
+                summed[nonzero] / magnitudes[nonzero]
+            )
+            next_active[band_index, nonzero] = True
+        raw_logs = next_raw_logs
+        normalized_logs = next_normalized_logs
+        unit_phases = next_unit_phases
+        active = next_active
+        if not merged:
+            return raw_logs, normalized_logs, unit_phases, active
+    raise AssertionError("score log-band collapse did not converge")
+
+
 def _score_ratio_from_log_terms(
     terms: tuple[_LogTerm, ...],
     scores: tuple[np.ndarray, ...],
@@ -188,45 +299,91 @@ def _score_ratio_from_log_terms(
         return np.empty(0, dtype=np.complex128)
 
     reference = terms[0]
-    grouped: dict[float, list[np.ndarray]] = {}
-    for term, score in zip(terms, scores, strict=True):
-        grouped.setdefault(term.log_abs, []).append(
-            _relative_phase_factor(term, reference) * score
-        )
-    band_logs = np.asarray(tuple(grouped), dtype=np.float64)
-    band_values = np.stack(
-        [
-            np.sum(np.stack(grouped[log_abs], axis=0), axis=0)
-            for log_abs in grouped
-        ],
-        axis=0,
+    band_count = len(terms)
+    raw_logs = np.full(
+        (band_count, parameter_count),
+        -math.inf,
+        dtype=np.float64,
     )
-    magnitudes = np.abs(band_values)
-    valid = magnitudes > 0.0
-    effective_logs = np.full(magnitudes.shape, -math.inf, dtype=np.float64)
-    log_magnitudes = np.zeros_like(magnitudes)
-    np.log(magnitudes, where=valid, out=log_magnitudes)
-    unmasked_effective_logs = (
-        band_logs[:, None] - denominator.log_abs + log_magnitudes
+    normalized_logs = np.full_like(raw_logs, -math.inf)
+    unit_phases = np.zeros(
+        (band_count, parameter_count),
+        dtype=np.complex128,
     )
-    effective_logs[valid] = unmasked_effective_logs[valid]
-    has_numerator = np.any(valid, axis=0)
-    shifts = np.max(effective_logs, axis=0)
-    scaled = np.zeros(parameter_count, dtype=np.complex128)
-    for band_index in range(band_values.shape[0]):
-        active = valid[band_index] & has_numerator
-        if not np.any(active):
+    active = np.zeros((band_count, parameter_count), dtype=np.bool_)
+    for band_index, (term, score) in enumerate(
+        zip(terms, scores, strict=True)
+    ):
+        magnitudes = np.hypot(score.real, score.imag)
+        nonzero_score = magnitudes > 0.0
+        if not np.any(nonzero_score):
             continue
-        unit_phase = band_values[band_index, active] / magnitudes[band_index, active]
-        scaled[active] += unit_phase * np.exp(
-            effective_logs[band_index, active] - shifts[active]
+        log_score_magnitudes = np.log(magnitudes[nonzero_score])
+        raw = term.log_abs + log_score_magnitudes
+        term_relative_log = math.fsum(
+            (term.log_abs, -denominator.log_abs)
         )
+        normalized = term_relative_log + log_score_magnitudes
+        phase = (
+            _relative_phase_factor(term, reference)
+            * (score[nonzero_score] / magnitudes[nonzero_score])
+        )
+        if (
+            not np.all(np.isfinite(raw))
+            or not np.all(np.isfinite(normalized))
+            or not np.all(np.isfinite(phase.real))
+            or not np.all(np.isfinite(phase.imag))
+        ):
+            raise FloatingPointError(
+                "derived log score term is non-finite"
+            )
+        raw_logs[band_index, nonzero_score] = raw
+        normalized_logs[band_index, nonzero_score] = normalized
+        unit_phases[band_index, nonzero_score] = phase
+        active[band_index, nonzero_score] = True
 
-    nonzero = has_numerator & (scaled != 0.0)
+    raw_logs, normalized_logs, unit_phases, active = (
+        _collapse_equal_score_log_bands(
+            raw_logs,
+            normalized_logs,
+            unit_phases,
+            active,
+        )
+    )
+    has_numerator = np.any(active, axis=0)
     result = np.zeros(parameter_count, dtype=np.complex128)
+    if not np.any(has_numerator):
+        return result
+
+    shifts = np.zeros(parameter_count, dtype=np.float64)
+    active_logs = np.where(active, normalized_logs, -math.inf)
+    shifts[has_numerator] = np.max(active_logs, axis=0)[has_numerator]
+    scaled_terms = np.zeros_like(unit_phases)
+    with np.errstate(under="ignore"):
+        for band_index in range(band_count):
+            selected = active[band_index]
+            scaled_terms[band_index, selected] = (
+                unit_phases[band_index, selected]
+                * np.exp(
+                    normalized_logs[band_index, selected]
+                    - shifts[selected]
+                )
+            )
+    if not np.all(np.isfinite(scaled_terms.real)) or not np.all(
+        np.isfinite(scaled_terms.imag)
+    ):
+        raise FloatingPointError("derived log score sum is non-finite")
+    scaled = _neumaier_complex_sum_rows(scaled_terms)
+    scaled_magnitudes = np.hypot(scaled.real, scaled.imag)
+    if not np.all(np.isfinite(scaled_magnitudes)):
+        raise FloatingPointError("derived log score sum is non-finite")
+
+    nonzero = has_numerator & (scaled_magnitudes > 0.0)
     if not np.any(nonzero):
         return result
-    ratio_logs = shifts[nonzero] + np.log(np.abs(scaled[nonzero]))
+    ratio_logs = shifts[nonzero] + np.log(scaled_magnitudes[nonzero])
+    if not np.all(np.isfinite(ratio_logs)):
+        raise FloatingPointError("derived log score is non-finite")
     if np.any(ratio_logs > _LOG_COMPLEX128_MAX):
         raise FloatingPointError("derived log score is outside complex128 range")
     ratio_phases = (
@@ -291,11 +448,18 @@ class LadderComponent:
             raise ValueError("state is not in the fixed-N fixed-M sector")
         return configuration
 
-    def _derived_terms(self, state: int) -> _DerivedTerms:
+    def _derived_terms(
+        self,
+        state: int,
+        memo: dict[tuple[int, int], _DerivedTerms],
+    ) -> _DerivedTerms:
         parent = self._parent
         direction = self._direction
         if parent is None or direction is None:
             raise AssertionError("base component has no derived terms")
+        key = (self.m, state)
+        if key in memo:
+            return memo[key]
 
         inverse = ladder_neighbors(
             state,
@@ -305,7 +469,7 @@ class LadderComponent:
         active_terms: list[_LogTerm] = []
         for source, coefficient_raw in inverse.items():
             parent_log = _scalar_complex(
-                parent.logpsi(source),
+                parent._logpsi(parent._validated_state(source), memo),
                 label="parent logpsi",
             )
             if parent_log.real == -math.inf:
@@ -339,15 +503,18 @@ class LadderComponent:
                 )
             )
         terms = tuple(active_terms)
-        return _DerivedTerms(
+        derived = _DerivedTerms(
             terms=terms,
             amplitude=_reduce_log_terms(terms),
         )
+        memo[key] = derived
+        return derived
 
-    def logpsi(self, state: int) -> complex:
-        """Evaluate this component without expanding a fixed-``M`` support."""
-
-        configuration = self._validated_state(state)
+    def _logpsi(
+        self,
+        configuration: int,
+        memo: dict[tuple[int, int], _DerivedTerms],
+    ) -> complex:
         if self.m == 0:
             if self._base_logpsi is None:
                 raise AssertionError("M=0 component is missing its callback")
@@ -356,7 +523,7 @@ class LadderComponent:
                 label="base logpsi",
             )
 
-        terms = self._derived_terms(configuration)
+        terms = self._derived_terms(configuration, memo)
         if terms.amplitude is None:
             return complex(-math.inf, 0.0)
         if self._parent is None or self._direction is None:
@@ -370,10 +537,17 @@ class LadderComponent:
             terms.amplitude.phase,
         )
 
-    def log_score(self, state: int) -> np.ndarray:
-        """Return the analytic parameter derivative of this log amplitude."""
+    def logpsi(self, state: int) -> complex:
+        """Evaluate this component without expanding a fixed-``M`` support."""
 
         configuration = self._validated_state(state)
+        return self._logpsi(configuration, {})
+
+    def _log_score(
+        self,
+        configuration: int,
+        memo: dict[tuple[int, int], _DerivedTerms],
+    ) -> np.ndarray:
         if self.m == 0:
             if self._base_log_score is None:
                 raise AssertionError("M=0 component is missing its score callback")
@@ -382,7 +556,7 @@ class LadderComponent:
                 label="base log score",
             )
 
-        terms = self._derived_terms(configuration)
+        terms = self._derived_terms(configuration, memo)
         if terms.amplitude is None:
             raise ValueError("log score is undefined for an exact zero amplitude")
         if self._parent is None:
@@ -392,7 +566,10 @@ class LadderComponent:
         parameter_count: int | None = None
         for term in terms.terms:
             score = _score_vector(
-                self._parent.log_score(term.source),
+                self._parent._log_score(
+                    self._parent._validated_state(term.source),
+                    memo,
+                ),
                 label="parent log score",
             )
             if parameter_count is None:
@@ -413,6 +590,12 @@ class LadderComponent:
         ):
             raise FloatingPointError("derived log score is non-finite")
         return result
+
+    def log_score(self, state: int) -> np.ndarray:
+        """Return the analytic parameter derivative of this log amplitude."""
+
+        configuration = self._validated_state(state)
+        return self._log_score(configuration, {})
 
 
 class LadderTower(Mapping[int, LadderComponent]):
