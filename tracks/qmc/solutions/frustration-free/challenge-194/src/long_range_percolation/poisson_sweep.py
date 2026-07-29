@@ -104,6 +104,49 @@ _RECORD_SIGNATURE = numba.int64(
 
 
 @numba.njit(
+    numba.types.UniTuple(numba.float64, 2)(
+        numba.float64, numba.float64, numba.float64
+    ),
+    cache=True,
+    fastmath=False,
+)
+def _compensated_hazard_add(
+    high: float, low: float, increment: float
+) -> tuple[float, float]:
+    summed = high + increment
+    virtual_increment = summed - high
+    error = (high - (summed - virtual_increment)) + (
+        increment - virtual_increment
+    )
+    residual = low + error
+    next_high = summed + residual
+    next_low = residual - (next_high - summed)
+    return next_high, next_low
+
+
+@numba.njit(
+    numba.boolean(numba.float64, numba.float64, numba.float64),
+    cache=True,
+    fastmath=False,
+)
+def _hazard_pair_greater_than_scalar(
+    high: float, low: float, scalar: float
+) -> bool:
+    return high > scalar or (high == scalar and low > 0.0)
+
+
+@numba.njit(
+    numba.boolean(numba.float64, numba.float64, numba.float64),
+    cache=True,
+    fastmath=False,
+)
+def _hazard_pair_at_least_scalar(
+    high: float, low: float, scalar: float
+) -> bool:
+    return high > scalar or (high == scalar and low >= 0.0)
+
+
+@numba.njit(
     _RECORD_SIGNATURE, cache=True, boundscheck=True, fastmath=False
 )
 def _record_checkpoint(
@@ -180,10 +223,12 @@ def _run_poisson_kernel(
     output: F64,
 ) -> tuple[int, int, int]:
     checkpoint = 0
-    current_kappa = 0.0
+    current_hazard_high = 0.0
+    current_hazard_low = 0.0
     event_count = 0
     duplicate_count = 0
     kappa_max = kappas[len(kappas) - 1]
+    maximum_hazard = kappa_max * total_rate
     class_count = len(alias_probability)
 
     while checkpoint < len(kappas) and kappas[checkpoint] == 0.0:
@@ -211,32 +256,27 @@ def _run_poisson_kernel(
                 draw_counts[STREAM_EXPONENTIAL],
             )
             hazard = -math.log(exponential_uniform)
-            remaining_kappa = kappa_max - current_kappa
-            terminal_hazard = remaining_kappa * total_rate
+            next_hazard_high, next_hazard_low = _compensated_hazard_add(
+                current_hazard_high, current_hazard_low, hazard
+            )
             if (
                 not math.isfinite(hazard)
                 or hazard <= 0.0
-                or not math.isfinite(terminal_hazard)
-                or terminal_hazard < 0.0
+                or not math.isfinite(next_hazard_high)
             ):
                 return 1, event_count, duplicate_count
-            if hazard > terminal_hazard:
-                break
-
-            delta = hazard / total_rate
-            next_kappa = current_kappa + delta
-            if (
-                not math.isfinite(delta)
-                or delta <= 0.0
-                or not math.isfinite(next_kappa)
-                or next_kappa <= current_kappa
-                or next_kappa > kappa_max
+            if _hazard_pair_greater_than_scalar(
+                next_hazard_high, next_hazard_low, maximum_hazard
             ):
-                return 2, event_count, duplicate_count
+                break
 
             while (
                 checkpoint < len(kappas)
-                and kappas[checkpoint] < next_kappa
+                and _hazard_pair_greater_than_scalar(
+                    next_hazard_high,
+                    next_hazard_low,
+                    kappas[checkpoint] * total_rate,
+                )
             ):
                 status = _record_checkpoint(
                     length,
@@ -324,11 +364,16 @@ def _run_poisson_kernel(
                     left,
                     right,
                 )
-            current_kappa = next_kappa
+            current_hazard_high = next_hazard_high
+            current_hazard_low = next_hazard_low
 
             while (
                 checkpoint < len(kappas)
-                and kappas[checkpoint] <= current_kappa
+                and _hazard_pair_at_least_scalar(
+                    current_hazard_high,
+                    current_hazard_low,
+                    kappas[checkpoint] * total_rate,
+                )
             ):
                 status = _record_checkpoint(
                     length,
@@ -469,7 +514,17 @@ def _validate_alias(
             represented[target] = combined
     represented += correction
     expected_probability = expected_weight / expected_total
-    tolerance = 32.0 * np.finfo(np.float64).eps * np.maximum(
+    unit_roundoff = 0.5 * np.finfo(np.float64).eps
+    fan_in = np.bincount(alias.alias, minlength=class_count).astype(
+        np.float64, copy=False
+    )
+    scaled_error = (2.0 * fan_in + 8.0) * unit_roundoff
+    if np.any(scaled_error >= 1.0):
+        raise ValueError("alias semantic error bound exceeds float64 capacity")
+    gamma = scaled_error / (1.0 - scaled_error)
+    tolerance = gamma * (
+        np.abs(expected_probability) + np.abs(represented)
+    ) + 8.0 * unit_roundoff * np.maximum(
         expected_probability, inverse_count
     )
     if np.any(~np.isfinite(represented)) or np.any(
@@ -580,7 +635,7 @@ def run_poisson_numba(
     if status != 0:
         details = {
             1: "nonfinite exponential terminal comparison",
-            2: "event time failed finite strict advancement",
+            2: "event hazard failed finite strict advancement",
             3: "alias rejection accounting overflow",
             4: "event counter overflow",
             5: "duplicate counter overflow",

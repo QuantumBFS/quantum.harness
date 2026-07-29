@@ -834,6 +834,15 @@ def test_alias_semantic_preflight_rejects_subtle_in_range_bias_before_rng_state(
         run_poisson_numba(request, kernel, malformed)
 
 
+def test_alias_semantic_preflight_accepts_production_size_roundoff():
+    request, kernel, table = _case(
+        length=2**18,
+        sigma=1.0,
+        kappas=(0.0,),
+    )
+    poisson_sweep_module._validate_alias(request, kernel, table)
+
+
 @pytest.mark.parametrize(
     "mutation",
     (
@@ -863,8 +872,20 @@ def test_tiny_and_huge_rates_have_stable_preflight():
 
     huge = np.asarray((np.finfo(np.float64).max / 2.0,), dtype=np.float64)
     request, _, table = _case(length=2, kappas=(1e-100,), kernel=huge)
-    with pytest.raises(ValueError, match="event ordering"):
+    with pytest.raises(ValueError, match="event count"):
         run_poisson_numba(request, huge, table)
+
+
+def test_compensated_hazard_clock_retains_sub_ulp_increment():
+    add = getattr(poisson_sweep_module, "_compensated_hazard_add", None)
+    assert add is not None
+    high = float(2**21)
+    minimum_hazard = -math.log(
+        (float(np.iinfo(np.uint32).max) + 0.5) * (2.0**-32)
+    )
+    next_high, next_low = add(high, 0.0, minimum_hazard)
+    assert next_high == high
+    assert 0.0 < next_low < math.ulp(high)
 
 
 def test_open_edge_means_pass_registered_simultaneous_analytic_bounds():

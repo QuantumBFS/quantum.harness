@@ -265,12 +265,9 @@ def validate_event_time_resolution(
     terminal_hazard = kappa_max * total_rate
     if not math.isfinite(terminal_hazard):
         raise ValueError("largest coupling times total rate must be finite")
-    if terminal_hazard < minimum_hazard:
-        return
-    minimum_delta = minimum_hazard / total_rate
-    if minimum_delta == 0.0 or minimum_delta <= math.ulp(kappa_max):
+    if terminal_hazard > float((1 << 63) - 1):
         raise ValueError(
-            "total rate is too large to preserve float64 event ordering"
+            "expected event count exceeds the int64 engine range"
         )
 
 

@@ -285,6 +285,32 @@ def _checked_stream_arrays(streams: _Streams) -> tuple[U32, U64]:
     return terminal, counts
 
 
+def _compensated_hazard_add(
+    high: float, low: float, increment: float
+) -> tuple[float, float]:
+    summed = high + increment
+    virtual_increment = summed - high
+    error = (high - (summed - virtual_increment)) + (
+        increment - virtual_increment
+    )
+    residual = low + error
+    next_high = summed + residual
+    next_low = residual - (next_high - summed)
+    return next_high, next_low
+
+
+def _hazard_pair_greater_than_scalar(
+    high: float, low: float, scalar: float
+) -> bool:
+    return high > scalar or (high == scalar and low > 0.0)
+
+
+def _hazard_pair_at_least_scalar(
+    high: float, low: float, scalar: float
+) -> bool:
+    return high > scalar or (high == scalar and low >= 0.0)
+
+
 def _run_poisson_with_streams(
     request: TrajectoryRequest,
     kernel: F64,
@@ -314,7 +340,9 @@ def _run_poisson_with_streams(
     event_count = 0
     duplicate_count = 0
     checkpoint_index = 0
-    current_kappa = 0.0
+    current_hazard_high = 0.0
+    current_hazard_low = 0.0
+    terminal_hazard = kappa_max * total_rate
 
     while (
         checkpoint_index < request.kappas.size
@@ -330,23 +358,27 @@ def _run_poisson_with_streams(
             if not 0.0 < exponential_uniform < 1.0:
                 raise ValueError("exponential stream must produce open uniforms")
             hazard = -math.log(exponential_uniform)
-            remaining_kappa = kappa_max - current_kappa
-            terminal_hazard = remaining_kappa * total_rate
-            if hazard > terminal_hazard:
-                break
-            delta = hazard / total_rate
-            next_kappa = current_kappa + delta
+            next_hazard_high, next_hazard_low = _compensated_hazard_add(
+                current_hazard_high, current_hazard_low, hazard
+            )
             if (
-                not math.isfinite(delta)
-                or delta <= 0.0
-                or not math.isfinite(next_kappa)
-                or next_kappa <= current_kappa
+                not math.isfinite(hazard)
+                or hazard <= 0.0
+                or not math.isfinite(next_hazard_high)
             ):
-                raise ValueError("event time failed finite strict advancement")
+                raise ValueError("event hazard failed finite strict advancement")
+            if _hazard_pair_greater_than_scalar(
+                next_hazard_high, next_hazard_low, terminal_hazard
+            ):
+                break
 
             while (
                 checkpoint_index < request.kappas.size
-                and request.kappas[checkpoint_index] < next_kappa
+                and _hazard_pair_greater_than_scalar(
+                    next_hazard_high,
+                    next_hazard_low,
+                    float(request.kappas[checkpoint_index]) * total_rate,
+                )
             ):
                 rows.append(_checkpoint(request.length, open_edge_ids, starts))
                 snapshots.append(frozenset(open_edge_ids))
@@ -369,16 +401,24 @@ def _run_poisson_with_streams(
                 raise ValueError("offset stream returned an out-of-range value")
             edge_id = starts[class_index] + offset
             event_count += 1
-            event_times.append(next_kappa)
+            event_times.append(
+                next_hazard_high / total_rate
+                + next_hazard_low / total_rate
+            )
             if edge_id in open_edge_ids:
                 duplicate_count += 1
             else:
                 open_edge_ids.add(edge_id)
-            current_kappa = next_kappa
+            current_hazard_high = next_hazard_high
+            current_hazard_low = next_hazard_low
 
             while (
                 checkpoint_index < request.kappas.size
-                and request.kappas[checkpoint_index] <= current_kappa
+                and _hazard_pair_at_least_scalar(
+                    current_hazard_high,
+                    current_hazard_low,
+                    float(request.kappas[checkpoint_index]) * total_rate,
+                )
             ):
                 rows.append(_checkpoint(request.length, open_edge_ids, starts))
                 snapshots.append(frozenset(open_edge_ids))

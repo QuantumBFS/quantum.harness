@@ -217,15 +217,15 @@ def union_incremental(
     merged_size = size_left + size_right
     left_float = float(size_left)
     right_float = float(size_right)
-    merged_float = float(merged_size)
-    new_sum_sq = moments[0] + (
-        merged_float * merged_float
-        - left_float * left_float
-        - right_float * right_float
+    product = left_float * right_float
+    delta_sum_sq = 2.0 * product
+    delta_sum_fourth = 2.0 * product * (
+        2.0 * left_float * left_float
+        + 3.0 * product
+        + 2.0 * right_float * right_float
     )
-    new_sum_fourth = moments[1] + (
-        merged_float**4 - left_float**4 - right_float**4
-    )
+    new_sum_sq = moments[0] + delta_sum_sq
+    new_sum_fourth = moments[1] + delta_sum_fourth
     if not math.isfinite(new_sum_sq) or not math.isfinite(new_sum_fourth):
         raise OverflowError("component moments exceed float64")
     if counts[1] <= 1:
@@ -287,8 +287,20 @@ def _scan_basic_observables_kernel(
         return (3, 0, 0, 0, 0, 0.0, 0.0, 0.0, False)
     if largest_size != counts[2]:
         return (4, 0, 0, 0, 0, 0.0, 0.0, 0.0, False)
-    tolerance_sq = 32.0 * _EPSILON * max(1.0, sum_size_sq)
-    tolerance_fourth = 32.0 * _EPSILON * max(1.0, sum_size_fourth)
+    successful_joins = length - component_count
+    unit_roundoff = 0.5 * _EPSILON
+    sq_steps = 4 * successful_joins + component_count + 32
+    fourth_steps = 10 * successful_joins + 2 * component_count + 32
+    sq_scaled = float(sq_steps) * unit_roundoff
+    fourth_scaled = float(fourth_steps) * unit_roundoff
+    if sq_scaled >= 1.0 or fourth_scaled >= 1.0:
+        return (5, 0, 0, 0, 0, 0.0, 0.0, 0.0, False)
+    sq_gamma = sq_scaled / (1.0 - sq_scaled)
+    fourth_gamma = fourth_scaled / (1.0 - fourth_scaled)
+    tolerance_sq = sq_gamma * max(1.0, abs(moments[0]), sum_size_sq)
+    tolerance_fourth = fourth_gamma * max(
+        1.0, abs(moments[1]), sum_size_fourth
+    )
     if (
         not math.isfinite(moments[0])
         or abs(moments[0] - sum_size_sq) > tolerance_sq

@@ -113,6 +113,15 @@ def test_incremental_state_matches_day0_after_every_unique_edge():
         assert summary.open_edges == index
 
 
+def test_large_star_merge_keeps_incremental_moments_within_forward_error():
+    length = 10_529
+    state = allocate_union_find(length)
+    for vertex in range(1, length):
+        assert union_incremental(*state, 0, vertex) is True
+
+    assert _scan_basic_observables_kernel(*state)[0] == 0
+
+
 def test_duplicate_accounting_is_owned_by_the_unique_insertion_caller():
     state = allocate_union_find(4)
     state[4][0] += 1

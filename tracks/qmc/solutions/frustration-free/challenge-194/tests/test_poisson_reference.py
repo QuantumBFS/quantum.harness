@@ -426,14 +426,26 @@ def test_terminal_hazard_neighbors_choose_strictly_correct_side():
     )
 
 
-def test_huge_finite_rate_fails_preflight_before_consuming_streams():
+def test_huge_finite_rate_fails_event_count_preflight_before_consuming_streams():
     kernel = np.asarray([np.finfo(np.float64).max / 2.0], dtype=np.float64)
     request = make_request(length=2, kappas=[1e-100], kernel=kernel)
     streams = ScriptedStreams(exponential=[])
-    with pytest.raises(ValueError, match="event ordering"):
+    with pytest.raises(ValueError, match="event count"):
         _run_poisson_with_streams(request, kernel, streams)
     assert not np.any(streams.draw_counts)
     assert not np.any(streams.terminal_counters)
+
+
+def test_reference_compensated_hazard_clock_retains_sub_ulp_increment():
+    add = getattr(poisson_reference, "_compensated_hazard_add", None)
+    assert add is not None
+    high = float(2**21)
+    minimum_hazard = -math.log(
+        (float(np.iinfo(np.uint32).max) + 0.5) * (2.0**-32)
+    )
+    next_high, next_low = add(high, 0.0, minimum_hazard)
+    assert next_high == high
+    assert 0.0 < next_low < math.ulp(high)
 
 
 def test_huge_rate_tiny_terminal_hazard_overshoots_without_dividing():
