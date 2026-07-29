@@ -178,6 +178,14 @@ convergence passed. The accepted threshold is now `1e-7`; the variance
 threshold is unchanged, and previously accepted cells are not rerun. The
 final uncertainty budget records both thresholds and the triggering result.
 
+The `L=128` even `chi=128` state is accepted with a separate diagnostic
+warning after an audited continuation: the nominal relative-variance target
+is `1e-10`, the observed value remains `1.05e-10`, and 21 additional sweeps
+shift the energy by only `6.82e-13`. No even-sector `chi=256` calculation is
+introduced. The `L=96` and `L=128` odd sectors are selectively refined from
+their recorded `chi=128` states to `chi=256`; both baseline and refined
+diagnostics enter the final truncation-uncertainty table.
+
 For each size,
 
 ```text

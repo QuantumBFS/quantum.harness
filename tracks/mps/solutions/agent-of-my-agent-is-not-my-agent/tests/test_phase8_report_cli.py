@@ -4,6 +4,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = PROJECT_ROOT / "scripts" / "report_phase8_scaling.py"
@@ -17,8 +19,11 @@ def _write_state(
     gamma: float,
     energy: float,
     discarded_weight: float = 1.0e-10,
+    variance: float = 1.0e-10,
+    chi: int = 128,
+    label: str | None = None,
 ) -> None:
-    path = root / f"L{length}-{sector}"
+    path = root / (label or f"L{length}-{sector}")
     path.mkdir(parents=True)
     raw = {}
     if sector == "even":
@@ -40,7 +45,7 @@ def _write_state(
                     "num_exponentials": 24,
                     "alpha": 0.5,
                     "r_fit": 2048,
-                    "chi_schedule": [128],
+                    "chi_schedule": [chi],
                     "max_sweeps": 30,
                     "sectors": [sector],
                     "direct_only": True,
@@ -52,10 +57,10 @@ def _write_state(
                 "direct": {
                     sector: {
                         "energy": energy,
-                        "variance": 1.0e-10,
+                        "variance": variance,
                         "discarded_weight": discarded_weight,
-                        "requested_chi": 128,
-                        "reached_chi": 120,
+                        "requested_chi": chi,
+                        "reached_chi": chi,
                         "sweeps": 12,
                         "wall_seconds": 5.0,
                     }
@@ -129,13 +134,14 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
         )
     )
     gap_root = tmp_path / "gaps"
-    for length, gap in (
+    gaps = (
         (16, 0.34),
         (32, 0.20),
         (64, 0.12),
         (96, 0.082),
         (128, 0.065),
-    ):
+    )
+    for length, gap in gaps:
         even_energy = -2.0 * length
         _write_state(
             gap_root,
@@ -151,7 +157,18 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
             gamma=gamma,
             energy=even_energy + gap,
             discarded_weight=5.49e-8 if length == 64 else 1.0e-10,
+            variance=7.0e-6 if length == 128 else 1.0e-10,
         )
+        if length in (96, 128):
+            _write_state(
+                gap_root,
+                length=length,
+                sector="odd",
+                gamma=gamma,
+                energy=even_energy + gap - 2.0e-7,
+                chi=256,
+                label=f"L{length}-odd-chi256",
+            )
     uncertainty = tmp_path / "phase6-analysis.json"
     uncertainty.write_text(
         json.dumps(
@@ -221,17 +238,26 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
         "finite_size",
         "critical_field_propagation",
         "phase8_acceptance_protocol",
+        "phase8_targeted_refinement",
     }
     protocol = analysis["uncertainty"]["phase8_acceptance_protocol"]
     assert protocol["relative_variance_limit"] == 1.0e-10
     assert protocol["discarded_weight_limit"] == 1.0e-7
     assert protocol["changed_after_L64_odd_observation"] is True
+    refinement = analysis["uncertainty"]["phase8_targeted_refinement"]
+    assert set(refinement["by_size"]) == {"96", "128"}
+    assert refinement["by_size"]["96"]["chi128_gap"] == pytest.approx(0.082)
+    assert refinement["by_size"]["96"]["chi256_gap"] == pytest.approx(
+        0.0819998
+    )
+    assert analysis["gaps"]["96"] == pytest.approx(0.0819998)
     assert analysis["published_comparison"]["z_power"] == 0.91
     assert analysis["published_comparison"]["z_log"] == 0.98
     for name in (
         "crossings.csv",
         "critical-field-sensitivity.csv",
         "gap-diagnostics.csv",
+        "refinement-diagnostics.csv",
         "z-sensitivity.csv",
         "equal-time-diagnostics.csv",
         "uncertainty-budget.csv",

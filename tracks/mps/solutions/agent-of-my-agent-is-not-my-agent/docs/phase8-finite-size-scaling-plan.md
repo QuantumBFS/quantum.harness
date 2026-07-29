@@ -1039,6 +1039,13 @@ from `1e-8` to `1e-7`. It follows the `L=64` odd-sector result
 previously accepted states; record this amendment in the uncertainty
 budget.
 
+The reviewed exception accepts the continued `L=128` even `chi=128` state
+with a warning: observed relative variance `1.05e-10` versus the nominal
+`1e-10` target, and energy shift `6.82e-13` after 21 additional sweeps.
+Do not increase even-sector chi. Refine only the `L=96` and `L=128` odd
+states from audited `chi=128` checkpoints to `chi=256`, retaining both
+baseline and refined gap diagnostics in the uncertainty budget.
+
 Require all five gaps positive. Stop for review on failure; do not
 automatically increase chi.
 

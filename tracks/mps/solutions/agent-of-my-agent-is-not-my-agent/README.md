@@ -203,6 +203,14 @@ variance gate remains `1e-10`. This is a documented post-observation
 protocol amendment; accepted states are not rerun, and the change is
 carried into the final uncertainty budget.
 
+For the final five-size gap analysis, the `L=128` even `chi=128` state is
+accepted with a diagnostic warning: its relative variance is `1.05e-10`
+against the nominal `1e-10` target, while 21 additional checkpointed
+sweeps change the energy by only `6.82e-13`. The state is not promoted to
+`chi=256`. Only the `L=96` and `L=128` odd sectors are selectively refined
+from audited `chi=128` checkpoints to `chi=256`; the report preserves both
+baseline and refined energies, gaps, and truncation diagnostics.
+
 The final report will compare the resulting `z` sensitivities with
 Shiratani--Todo's published `sigma=7/4` values, `z=0.91(2)` for power
 corrections and `z=0.98(3)` for logarithmic corrections
