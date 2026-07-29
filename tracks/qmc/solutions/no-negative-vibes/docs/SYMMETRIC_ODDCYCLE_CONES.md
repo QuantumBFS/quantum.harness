@@ -157,3 +157,31 @@ Therefore the cycle signs, their shared vertex, and the strict inequality
 fixed \(z=1\) atom must use a quantitatively smaller negative-winding
 margin (or an equivalent stronger inequality), not only the two invariant
 signs.
+
+### Exact unit-winding Bernstein lemma through depth 12
+
+There is nevertheless a sharper finite exact statement at the fixed
+negative-edge scale.  Give every letter the same variable negative edge
+\(-z\), \(0\leq z\leq1\), and call the resulting complementary character
+\(F_w(z)\).  Every compound atom is affine in the negative-edge amplitude
+of its own time layer: a minor can use that one matrix entry at most once.
+After setting all layer amplitudes equal to \(z\), write
+
+\[
+F_w(z)=\sum_{k=0}^{n} b_{w,k}
+\binom{n}{k}z^k(1-z)^{n-k}.
+\]
+
+Pure integer-polynomial enumeration of every nonempty binary orientation
+word through length 12 checked 8,190 words and 98,304 coefficients.  Every
+\(b_{w,k}\) is nonnegative; the exact global minimum is \(17\), attained
+at the one-letter word `0`, coefficient index 1.  Hence every tested word
+is positive throughout the complete interval \(0\leq z\leq1\), rather
+than only at the endpoint \(z=1\).
+
+This is a finite-depth lemma, not the arbitrary-word theorem.  Its useful
+structural content is that \(b_{w,k}\) averages the four endpoint atoms
+(orientation \(B/B^{\mathsf T}\), winding amplitude \(0/1\)) over choices
+of \(k\) active negative edges.  An invariant trace-compatible cone for
+those four endpoint atoms would promote the Bernstein pattern to all
+depths and even allow independent layer amplitudes in \([0,1]\).

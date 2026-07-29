@@ -5,7 +5,9 @@ from oracle.symmetric_oddcycle_cones import (
     exact_complementary_sector_audit,
     exact_grade4_formula_replay,
     exact_invariant_chamber_obstruction,
+    exact_unit_winding_bernstein_audit,
     load_certificate,
+    unit_winding_endpoint_lifts,
     verify_compact_certificate,
 )
 from oracle.exterior_seed61_short_words import scan_shard
@@ -91,3 +93,28 @@ def test_cycle_invariant_sign_chamber_is_not_sufficient():
     assert result["F_at_z4"] == -1310
     assert result["z3_inside_chamber"] is True
     assert result["z4_inside_chamber"] is True
+
+
+def test_unit_winding_bernstein_coefficients_are_exactly_nonnegative_to_12():
+    result = exact_unit_winding_bernstein_audit(max_depth=12)
+
+    assert result["status"] == "all-bernstein-coefficients-nonnegative"
+    assert result["interval"] == (0, 1)
+    assert result["word_count"] == 8190
+    assert result["coefficient_count"] == 98304
+    assert result["minimum"] == {"numerator": 17, "denominator": 1}
+    assert result["minimum_witness"] == {
+        "depth": 1,
+        "word": "0",
+        "index": 1,
+    }
+
+
+def test_unit_winding_endpoint_lifts_are_four_exact_transpose_paired_atoms():
+    atoms = unit_winding_endpoint_lifts()
+
+    assert len(atoms) == 4
+    assert all(atom.shape == (22, 22) for atom in atoms)
+    assert atoms[1] == atoms[0].T
+    assert atoms[3] == atoms[2].T
+    assert all(atom.det() != 0 for atom in atoms)

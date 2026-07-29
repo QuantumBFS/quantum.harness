@@ -16,11 +16,18 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
+from fractions import Fraction
+from itertools import combinations
+from math import comb
 from pathlib import Path
 
 import sympy as sp
 
-from .exterior_exact5_full_fock_cone import combined_grade_lift
+from .exterior_exact5_full_fock_cone import (
+    _cross_grade_simplicial_search,
+    _trace_compatible_column_generation,
+    combined_grade_lift,
+)
 from .exterior_exact5_shared_cone import exact_compound_matrix
 
 
@@ -289,14 +296,332 @@ def exact_invariant_chamber_obstruction() -> dict[str, object]:
     }
 
 
+_Polynomial = tuple[int, ...]
+_PolynomialMatrix = tuple[tuple[_Polynomial, ...], ...]
+
+
+def _poly_trim(coefficients: Sequence[int]) -> _Polynomial:
+    result = list(coefficients)
+    while len(result) > 1 and result[-1] == 0:
+        result.pop()
+    return tuple(result)
+
+
+def _poly_add(left: _Polynomial, right: _Polynomial) -> _Polynomial:
+    length = max(len(left), len(right))
+    return _poly_trim(
+        tuple(
+            (left[index] if index < len(left) else 0)
+            + (right[index] if index < len(right) else 0)
+            for index in range(length)
+        )
+    )
+
+
+def _poly_scale(polynomial: _Polynomial, scale: int) -> _Polynomial:
+    return _poly_trim(tuple(scale * coefficient for coefficient in polynomial))
+
+
+def _poly_multiply(left: _Polynomial, right: _Polynomial) -> _Polynomial:
+    result = [0] * (len(left) + len(right) - 1)
+    for left_index, left_value in enumerate(left):
+        for right_index, right_value in enumerate(right):
+            result[left_index + right_index] += left_value * right_value
+    return _poly_trim(result)
+
+
+def _poly_identity_matrix() -> _PolynomialMatrix:
+    return tuple(
+        tuple(((1,) if row == column else (0,)) for column in range(5))
+        for row in range(5)
+    )
+
+
+def _poly_left_atom(
+    matrix: _PolynomialMatrix,
+    *,
+    transpose: bool,
+) -> _PolynomialMatrix:
+    """Multiply by ``B(z)`` or ``B(z).T`` using its sparse exact rows."""
+
+    rows = matrix
+    if not transpose:
+        result = (
+            tuple(_poly_scale(entry, 2) for entry in rows[2]),
+            tuple(_poly_scale(entry, 2) for entry in rows[0]),
+            tuple(
+                _poly_add(_poly_scale(rows[1][column], 2), rows[3][column])
+                for column in range(5)
+            ),
+            tuple(
+                _poly_add(rows[3][column], rows[4][column])
+                for column in range(5)
+            ),
+            tuple(
+                _poly_add(
+                    (0,) + _poly_scale(rows[2][column], -1),
+                    rows[4][column],
+                )
+                for column in range(5)
+            ),
+        )
+    else:
+        result = (
+            tuple(_poly_scale(entry, 2) for entry in rows[1]),
+            tuple(_poly_scale(entry, 2) for entry in rows[2]),
+            tuple(
+                _poly_add(
+                    _poly_scale(rows[0][column], 2),
+                    (0,) + _poly_scale(rows[4][column], -1),
+                )
+                for column in range(5)
+            ),
+            tuple(
+                _poly_add(rows[2][column], rows[3][column])
+                for column in range(5)
+            ),
+            tuple(
+                _poly_add(rows[3][column], rows[4][column])
+                for column in range(5)
+            ),
+        )
+    return tuple(tuple(entry for entry in row) for row in result)
+
+
+def _poly_minor(
+    matrix: _PolynomialMatrix,
+    indices: tuple[int, ...],
+) -> _Polynomial:
+    if len(indices) == 2:
+        i, j = indices
+        return _poly_add(
+            _poly_multiply(matrix[i][i], matrix[j][j]),
+            _poly_scale(_poly_multiply(matrix[i][j], matrix[j][i]), -1),
+        )
+    if len(indices) == 3:
+        total = (0,)
+        for permutation, sign in (
+            ((0, 1, 2), 1),
+            ((1, 2, 0), 1),
+            ((2, 0, 1), 1),
+            ((2, 1, 0), -1),
+            ((1, 0, 2), -1),
+            ((0, 2, 1), -1),
+        ):
+            term = (1,)
+            for row_index, column_index in enumerate(permutation):
+                term = _poly_multiply(
+                    term,
+                    matrix[indices[row_index]][indices[column_index]],
+                )
+            total = _poly_add(total, _poly_scale(term, sign))
+        return total
+    raise ValueError("only grade-two and grade-three minors are used")
+
+
+def _complementary_polynomial(
+    matrix: _PolynomialMatrix,
+    *,
+    depth: int,
+) -> _Polynomial:
+    result = (1 + 8**depth,)
+    for grade in (2, 3):
+        for indices in combinations(range(5), grade):
+            result = _poly_add(result, _poly_minor(matrix, indices))
+    return result
+
+
+def _bernstein_coefficients(
+    coefficients: _Polynomial,
+    *,
+    degree: int,
+) -> tuple[Fraction, ...]:
+    return tuple(
+        sum(
+            (
+                Fraction(
+                    coefficients[power] * comb(index, power),
+                    comb(degree, power),
+                )
+                for power in range(min(index, len(coefficients) - 1) + 1)
+            ),
+            start=Fraction(0),
+        )
+        for index in range(degree + 1)
+    )
+
+
+def exact_unit_winding_bernstein_audit(
+    *,
+    max_depth: int = 12,
+) -> dict[str, object]:
+    """Exhaust all orientation words and replay ``F_W(z)`` on ``0<=z<=1``.
+
+    Each compound atom is affine in the independent negative-edge amplitude
+    of one time layer.  Nonnegative Bernstein coefficients of the diagonal
+    specialization therefore give a finite exact positivity certificate for
+    each tested word throughout the unit interval.
+    """
+
+    if not 1 <= max_depth <= 12:
+        raise ValueError("max_depth must lie between 1 and 12")
+
+    word_count = 0
+    coefficient_count = 0
+    minimum: Fraction | None = None
+    minimum_witness: dict[str, object] | None = None
+    per_depth = []
+
+    def visit(
+        matrix: _PolynomialMatrix,
+        word: str,
+        remaining: int,
+    ) -> None:
+        nonlocal coefficient_count, minimum, minimum_witness, word_count
+        if word:
+            depth = len(word)
+            polynomial = _complementary_polynomial(matrix, depth=depth)
+            bernstein = _bernstein_coefficients(polynomial, degree=depth)
+            word_count += 1
+            coefficient_count += len(bernstein)
+            for index, value in enumerate(bernstein):
+                if minimum is None or value < minimum:
+                    minimum = value
+                    minimum_witness = {
+                        "depth": depth,
+                        "word": word,
+                        "index": index,
+                    }
+        if remaining == 0:
+            return
+        visit(
+            _poly_left_atom(matrix, transpose=False),
+            word + "0",
+            remaining - 1,
+        )
+        visit(
+            _poly_left_atom(matrix, transpose=True),
+            word + "1",
+            remaining - 1,
+        )
+
+    visit(_poly_identity_matrix(), "", max_depth)
+    assert minimum is not None and minimum_witness is not None
+    for depth in range(1, max_depth + 1):
+        per_depth.append(
+            {
+                "depth": depth,
+                "word_count": 2**depth,
+                "coefficient_count": 2**depth * (depth + 1),
+            }
+        )
+    return {
+        "status": (
+            "all-bernstein-coefficients-nonnegative"
+            if minimum >= 0
+            else "negative-bernstein-coefficient"
+        ),
+        "interval": (0, 1),
+        "max_depth": max_depth,
+        "word_count": word_count,
+        "coefficient_count": coefficient_count,
+        "minimum": {
+            "numerator": minimum.numerator,
+            "denominator": minimum.denominator,
+        },
+        "minimum_witness": minimum_witness,
+        "per_depth": per_depth,
+    }
+
+
+def unit_winding_endpoint_lifts() -> tuple[sp.ImmutableMatrix, ...]:
+    """Return the four endpoint atoms on grades ``0,2,3,5``.
+
+    The ordering is ``B(0), B(0).T, B(1), B(1).T``.  A common
+    trace-compatible cone for these atoms proves the complementary
+    character for independently varying layer amplitudes in ``[0,1]``.
+    """
+
+    zero = sp.Matrix(fixed_candidate_matrix())
+    zero[4, 2] = 0
+    one = fixed_candidate_matrix()
+    grades = (0, 2, 3, 5)
+    return tuple(
+        combined_grade_lift(atom, grades)
+        for atom in (sp.ImmutableMatrix(zero), zero.T, one, one.T)
+    )
+
+
+def search_unit_winding_endpoint_cone(
+    *,
+    attempts: int = 64,
+    maxiter: int = 2000,
+    rng_seed: int = 817231,
+    ray_counts: Sequence[int] = (22, 28, 34, 40),
+    tolerance: float = 1.0e-9,
+    max_denominator: int = 65536,
+) -> dict[str, object]:
+    """Search the four endpoint atoms, promoting only by exact replay."""
+
+    matrices = unit_winding_endpoint_lifts()
+    simplicial = _cross_grade_simplicial_search(
+        matrices,
+        split=11,
+        attempts=attempts,
+        maxiter=maxiter,
+        rng_seed=rng_seed,
+        tolerance=tolerance,
+        max_denominator=max_denominator,
+    )
+    if simplicial["status"] == "exact-trace-compatible-certificate":
+        return {
+            "status": "exact-trace-compatible-certificate",
+            "route": "four-endpoint-simplicial",
+            "grades": (0, 2, 3, 5),
+            "endpoint_order": ("B0", "B0T", "B1", "B1T"),
+            "simplicial": simplicial,
+        }
+
+    best = simplicial.get("best")
+    transform = best.get("transform") if isinstance(best, Mapping) else None
+    if transform is None:
+        redundant = {
+            "status": "no-numerical-transform",
+            "milestones": [],
+        }
+    else:
+        redundant = _trace_compatible_column_generation(
+            matrices,
+            transform,
+            ray_counts=ray_counts,
+            tolerance=tolerance,
+            max_denominator=max_denominator,
+        )
+    return {
+        "status": (
+            "exact-trace-compatible-certificate"
+            if redundant["status"] == "exact-trace-compatible-certificate"
+            else "no-exact-certificate-found"
+        ),
+        "route": "four-endpoint-redundant",
+        "grades": (0, 2, 3, 5),
+        "endpoint_order": ("B0", "B0T", "B1", "B1T"),
+        "simplicial": simplicial,
+        "redundant": redundant,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
     "exact_complementary_sector_audit",
     "exact_grade4_formula_replay",
     "exact_invariant_chamber_obstruction",
+    "exact_unit_winding_bernstein_audit",
     "fixed_candidate_matrix",
     "load_certificate",
+    "search_unit_winding_endpoint_cone",
     "symbolic_grade4_positive_atoms",
+    "unit_winding_endpoint_lifts",
     "verify_compact_certificate",
 ]
