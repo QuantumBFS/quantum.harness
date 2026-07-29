@@ -1,7 +1,11 @@
+import math
+
 import pytest
 
 from lrtfim.phase8_scaling import (
+    adjacent_effective_exponents,
     gap_scaling_summary,
+    sensitivity_regression,
     strict_endpoint_crossing,
     two_point_sensitivity,
 )
@@ -52,18 +56,72 @@ def test_power_and_log_sensitivities_are_explicit_two_point_evaluations():
     assert log["known_correction_exponent_assumed"] is False
 
 
-def test_gap_summary_keeps_effective_and_sensitivity_values_separate():
-    result = gap_scaling_summary([32, 64, 128], [0.20, 0.12, 0.073])
-    assert set(result["z_eff"]) == {"32_64", "64_128"}
-    assert set(result["sensitivity"]) == {"power", "log", "spread"}
-    assert result["sensitivity"]["power"]["residual_degrees_of_freedom"] == 0
+def _gaps_from_adjacent_z(lengths, z_values, first_gap=0.4):
+    gaps = [first_gap]
+    for left, right, z_eff in zip(lengths, lengths[1:], z_values):
+        gaps.append(gaps[-1] * (right / left) ** (-z_eff))
+    return gaps
 
 
-def test_gap_summary_rejects_nonpositive_or_nondoubling_inputs():
+def test_adjacent_effective_exponents_support_five_nondoubling_sizes():
+    lengths = [16, 32, 64, 96, 128]
+    effective_lengths = [
+        math.sqrt(left * right) for left, right in zip(lengths, lengths[1:])
+    ]
+    expected = [0.94 + 1.7 / length for length in effective_lengths]
+    gaps = _gaps_from_adjacent_z(lengths, expected)
+
+    result = adjacent_effective_exponents(lengths, gaps)
+
+    assert result["pairs"] == ["16_32", "32_64", "64_96", "96_128"]
+    assert result["effective_lengths"] == pytest.approx(effective_lengths)
+    assert result["values"] == pytest.approx(expected)
+
+
+def test_five_size_gap_summary_reports_regressions_and_leave_l16_out():
+    lengths = [16, 32, 64, 96, 128]
+    effective_lengths = [
+        math.sqrt(left * right) for left, right in zip(lengths, lengths[1:])
+    ]
+    expected = [0.94 + 1.7 / length for length in effective_lengths]
+    gaps = _gaps_from_adjacent_z(lengths, expected)
+
+    result = gap_scaling_summary(lengths, gaps)
+
+    assert result["z_eff"]["values"] == pytest.approx(expected)
+    assert result["regression"]["power"]["estimate"] == pytest.approx(0.94)
+    assert result["regression"]["power"]["residual_degrees_of_freedom"] == 2
+    assert result["regression"]["log"]["residual_degrees_of_freedom"] == 2
+    assert (
+        result["regression"]["leave_L16_out"]["power"][
+            "residual_degrees_of_freedom"
+        ]
+        == 1
+    )
+    assert result["regression"]["shared_gap_correlations_ignored"] is True
+    assert result["regression"]["interpretation"] == (
+        "deterministic_finite_size_sensitivity_regression"
+    )
+
+
+def test_sensitivity_regression_rejects_invalid_inputs():
+    with pytest.raises(ValueError, match="at least three"):
+        sensitivity_regression([0.9, 0.8], [20.0, 40.0], "power")
+    with pytest.raises(ValueError, match="strictly increasing"):
+        sensitivity_regression([0.9, 0.8, 0.7], [20.0, 20.0, 40.0], "power")
+    with pytest.raises(ValueError, match="form"):
+        sensitivity_regression([0.9, 0.8, 0.7], [20.0, 30.0, 40.0], "other")
+
+
+def test_gap_summary_rejects_nonpositive_or_nonincreasing_inputs():
     with pytest.raises(ValueError, match="positive"):
-        gap_scaling_summary([32, 64, 128], [0.20, 0.0, 0.073])
-    with pytest.raises(ValueError, match="doubling"):
-        gap_scaling_summary([32, 60, 128], [0.20, 0.12, 0.073])
+        gap_scaling_summary(
+            [16, 32, 64, 96, 128], [0.30, 0.20, 0.0, 0.09, 0.07]
+        )
+    with pytest.raises(ValueError, match="strictly increasing"):
+        gap_scaling_summary(
+            [16, 32, 64, 64, 128], [0.30, 0.20, 0.13, 0.09, 0.07]
+        )
 
 
 def test_phase8_scaling_rejects_nonfinite_inputs():
@@ -76,4 +134,7 @@ def test_phase8_scaling_rejects_nonfinite_inputs():
     with pytest.raises(ValueError, match="finite"):
         two_point_sensitivity([1.56, float("inf")], [32, 64], "power")
     with pytest.raises(ValueError, match="finite"):
-        gap_scaling_summary([32, 64, 128], [0.20, float("nan"), 0.073])
+        gap_scaling_summary(
+            [16, 32, 64, 96, 128],
+            [0.30, 0.20, float("nan"), 0.09, 0.07],
+        )

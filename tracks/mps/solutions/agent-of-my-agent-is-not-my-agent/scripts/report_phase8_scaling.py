@@ -15,7 +15,7 @@ from lrtfim.phase8_scaling import gap_scaling_summary
 
 
 SIGMA = 1.75
-SIZES = (32, 64, 128)
+SIZES = (16, 32, 64, 96, 128)
 SECTORS = ("even", "odd")
 K = 24
 CHI = 128
@@ -148,7 +148,7 @@ def _uncertainty_summary(phase6: dict, finite_spread: float) -> dict:
             "max_abs_R_xi_shift": _max_absolute(mps, "r_xi", "absolute"),
         },
         "finite_size": {
-            "source": "Phase 8 two-point correction-coordinate sensitivity",
+            "source": "Phase 8 five-size correction-coordinate sensitivity",
             "z_power_log_spread": float(finite_spread),
         },
         "critical_field_propagation": {
@@ -227,29 +227,30 @@ def _rows_and_analysis(decision: dict, states: dict, phase6: dict) -> tuple:
     z = gap_scaling_summary(SIZES, gaps)
     z_rows = [
         {
-            "quantity": "z_eff_32_64",
-            "value": z["z_eff"]["32_64"],
-            "role": "two_size_diagnostic",
-        },
-        {
-            "quantity": "z_eff_64_128",
-            "value": z["z_eff"]["64_128"],
-            "role": "two_size_diagnostic",
-        },
-        {
-            "quantity": "z_power",
-            "value": z["sensitivity"]["power"]["estimate"],
-            "role": "two_point_sensitivity_extrapolation",
-        },
-        {
-            "quantity": "z_log",
-            "value": z["sensitivity"]["log"]["estimate"],
-            "role": "two_point_sensitivity_extrapolation",
-        },
+            "quantity": f"z_eff_{pair}",
+            "value": value,
+            "role": "adjacent_size_diagnostic",
+        }
+        for pair, value in zip(z["z_eff"]["pairs"], z["z_eff"]["values"])
     ]
+    for form in ("power", "log"):
+        z_rows.append(
+            {
+                "quantity": f"z_{form}",
+                "value": z["regression"][form]["estimate"],
+                "role": "five_size_sensitivity_regression",
+            }
+        )
+        z_rows.append(
+            {
+                "quantity": f"z_{form}_leave_L16_out",
+                "value": z["regression"]["leave_L16_out"][form]["estimate"],
+                "role": "leave_smallest_size_sensitivity",
+            }
+        )
     uncertainty = _uncertainty_summary(
         phase6,
-        z["sensitivity"]["spread"],
+        z["regression"]["spread"],
     )
     analysis = {
         "sigma": SIGMA,
@@ -304,21 +305,28 @@ def _plot(output: Path, analysis: dict) -> None:
     )
     axes[0].set(xlabel="1/L sensitivity coordinate", ylabel="Gamma crossing")
 
-    z_eff = [z["z_eff"]["32_64"], z["z_eff"]["64_128"]]
-    axes[1].plot([32, 64], z_eff, "o-", color=orange, label="z_eff")
-    axes[1].axhline(
-        z["sensitivity"]["power"]["estimate"],
+    effective_lengths = np.asarray(z["z_eff"]["effective_lengths"])
+    z_eff = np.asarray(z["z_eff"]["values"])
+    axes[1].plot(effective_lengths, z_eff, "o", color=orange, label="z_eff")
+    dense_lengths = np.linspace(effective_lengths[0], 140.0, 200)
+    power = z["regression"]["power"]
+    axes[1].plot(
+        dense_lengths,
+        power["estimate"] + power["coefficient"] / dense_lengths,
+        "--",
         color=blue,
-        linestyle="--",
-        label="power sensitivity",
+        label="power regression",
     )
-    axes[1].axhline(
-        z["sensitivity"]["log"]["estimate"],
+    log = z["regression"]["log"]
+    axes[1].plot(
+        dense_lengths,
+        log["estimate"] + log["coefficient"] / np.log(dense_lengths),
+        ":",
         color=green,
-        linestyle=":",
-        label="log sensitivity",
+        label="log regression",
     )
-    axes[1].set(xlabel="base L", ylabel="z")
+    axes[1].set_xlim(0.0, 140.0)
+    axes[1].set(xlabel="effective L", ylabel="z")
     axes[1].legend(frameon=False, fontsize=7)
 
     axes[2].loglog(SIZES, gaps, "o-", color=green)
@@ -332,15 +340,24 @@ def _plot(output: Path, analysis: dict) -> None:
 def _write_report(path: Path, analysis: dict) -> None:
     z = analysis["z"]
     published = analysis["published_comparison"]
+    diagnostics = ", ".join(
+        f"z_eff({pair.replace('_', ',')})={value:.8g}"
+        for pair, value in zip(z["z_eff"]["pairs"], z["z_eff"]["values"])
+    )
     text = f"""# Phase 8 sigma=1.75 finite-size scaling
 
-The direct two-size diagnostics are z_eff(32,64) =
-{z['z_eff']['32_64']:.8g} and z_eff(64,128) =
-{z['z_eff']['64_128']:.8g}. The power and logarithmic results,
-{z['sensitivity']['power']['estimate']:.8g} and
-{z['sensitivity']['log']['estimate']:.8g}, are exact two-point sensitivity
-extrapolations, not statistical regressions. The 1/L and 1/log(L)
-coordinates do not assume a known leading correction exponent.
+The adjacent-size diagnostics are {diagnostics}. The five-size power and
+logarithmic sensitivity regressions give
+z={z['regression']['power']['estimate']:.8g} and
+z={z['regression']['log']['estimate']:.8g}. These deterministic regressions
+have two residual degrees of freedom. Adjacent z_eff values share gap
+estimates, so their residuals are correlated and are not treated as
+independent statistical samples. The 1/L_eff and 1/log(L_eff) coordinates
+do not assume a known leading correction exponent.
+
+Leaving L=16 out gives z={z['regression']['leave_L16_out']['power']['estimate']:.8g}
+and z={z['regression']['leave_L16_out']['log']['estimate']:.8g} for the
+power and logarithmic coordinates, respectively.
 
 Shiratani--Todo report z={published['z_power']}({int(100*published['z_power_uncertainty']):d})
 for the power correction and z={published['z_log']}({int(100*published['z_log_uncertainty']):d})

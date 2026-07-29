@@ -1,8 +1,6 @@
-"""Strict Phase 8 crossing and two-point sensitivity evaluations."""
+"""Strict Phase 8 crossing and finite-size sensitivity evaluations."""
 
 from __future__ import annotations
-
-import math
 
 import numpy as np
 
@@ -74,29 +72,115 @@ def two_point_sensitivity(values, base_lengths, form: str) -> dict:
     }
 
 
-def gap_scaling_summary(lengths, gaps) -> dict:
-    """Keep two-size effective exponents separate from sensitivity values."""
-    sizes = np.asarray(lengths, dtype=int)
+def adjacent_effective_exponents(lengths, gaps) -> dict:
+    """Return generalized adjacent-size z_eff values and geometric scales."""
+    sizes = np.asarray(lengths, dtype=float)
     values = np.asarray(gaps, dtype=float)
-    if sizes.shape != (3,) or np.any(sizes[1:] != 2 * sizes[:-1]):
-        raise ValueError("sizes must be three consecutive doubling values")
-    if values.shape != (3,):
-        raise ValueError("gaps must contain three positive values")
-    _require_finite(values)
+    if sizes.ndim != 1 or values.ndim != 1 or sizes.size != values.size:
+        raise ValueError("sizes and gaps must be one-dimensional and equal-length")
+    if sizes.size < 2:
+        raise ValueError("at least two sizes and gaps are required")
+    _require_finite(sizes, values)
+    if np.any(sizes <= 0.0) or np.any(np.diff(sizes) <= 0.0):
+        raise ValueError("sizes must be positive and strictly increasing")
     if np.any(values <= 0.0):
-        raise ValueError("gaps must contain three positive values")
+        raise ValueError("gaps must contain positive values")
 
-    z32 = float(math.log(values[0] / values[1]) / math.log(2.0))
-    z64 = float(math.log(values[1] / values[2]) / math.log(2.0))
-    power = two_point_sensitivity([z32, z64], sizes[:2], "power")
-    log = two_point_sensitivity([z32, z64], sizes[:2], "log")
+    z_eff = -np.log(values[1:] / values[:-1]) / np.log(
+        sizes[1:] / sizes[:-1]
+    )
+    effective_lengths = np.sqrt(sizes[:-1] * sizes[1:])
+    pairs = [
+        f"{int(left)}_{int(right)}"
+        for left, right in zip(sizes[:-1], sizes[1:])
+    ]
     return {
-        "lengths": sizes.tolist(),
+        "pairs": pairs,
+        "effective_lengths": effective_lengths.tolist(),
+        "values": z_eff.tolist(),
+    }
+
+
+def sensitivity_regression(z_values, effective_lengths, form: str) -> dict:
+    """Regress z_eff against a declared finite-size sensitivity coordinate."""
+    values = np.asarray(z_values, dtype=float)
+    lengths = np.asarray(effective_lengths, dtype=float)
+    if values.ndim != 1 or lengths.ndim != 1 or values.size != lengths.size:
+        raise ValueError(
+            "z values and effective lengths must be one-dimensional and equal-length"
+        )
+    if values.size < 3:
+        raise ValueError("at least three z values are required")
+    _require_finite(values, lengths)
+    if np.any(lengths <= 1.0) or np.any(np.diff(lengths) <= 0.0):
+        raise ValueError(
+            "effective lengths must be strictly increasing and exceed one"
+        )
+
+    if form == "power":
+        coordinate = 1.0 / lengths
+    elif form == "log":
+        coordinate = 1.0 / np.log(lengths)
+    else:
+        raise ValueError("form must be power or log")
+
+    design = np.column_stack([np.ones_like(coordinate), coordinate])
+    coefficients, _, _, _ = np.linalg.lstsq(design, values, rcond=None)
+    estimate, coefficient = coefficients
+    predicted = design @ coefficients
+    residuals = values - predicted
+    return {
+        "form": form,
+        "estimate": float(estimate),
+        "coefficient": float(coefficient),
+        "coordinate_values": coordinate.tolist(),
+        "predicted_values": predicted.tolist(),
+        "residuals": residuals.tolist(),
+        "residual_sum_squares": float(residuals @ residuals),
+        "residual_rms": float(np.sqrt(np.mean(residuals**2))),
+        "residual_degrees_of_freedom": int(values.size - 2),
+        "coordinate_role": "sensitivity_only",
+        "known_correction_exponent_assumed": False,
+    }
+
+
+def gap_scaling_summary(lengths, gaps) -> dict:
+    """Separate adjacent z_eff diagnostics from sensitivity regressions."""
+    sizes = np.asarray(lengths, dtype=float)
+    values = np.asarray(gaps, dtype=float)
+    if sizes.shape != (5,) or values.shape != (5,):
+        raise ValueError("exactly five sizes and gaps are required")
+    adjacent = adjacent_effective_exponents(sizes, values)
+    power = sensitivity_regression(
+        adjacent["values"], adjacent["effective_lengths"], "power"
+    )
+    log = sensitivity_regression(
+        adjacent["values"], adjacent["effective_lengths"], "log"
+    )
+    leave_power = sensitivity_regression(
+        adjacent["values"][1:], adjacent["effective_lengths"][1:], "power"
+    )
+    leave_log = sensitivity_regression(
+        adjacent["values"][1:], adjacent["effective_lengths"][1:], "log"
+    )
+    return {
+        "lengths": sizes.astype(int).tolist(),
         "gaps": values.tolist(),
-        "z_eff": {"32_64": z32, "64_128": z64},
-        "sensitivity": {
+        "z_eff": adjacent,
+        "regression": {
             "power": power,
             "log": log,
             "spread": abs(power["estimate"] - log["estimate"]),
+            "leave_L16_out": {
+                "power": leave_power,
+                "log": leave_log,
+                "spread": abs(
+                    leave_power["estimate"] - leave_log["estimate"]
+                ),
+            },
+            "interpretation": (
+                "deterministic_finite_size_sensitivity_regression"
+            ),
+            "shared_gap_correlations_ignored": True,
         },
     }

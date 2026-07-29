@@ -12,7 +12,7 @@ from .phase8_scaling import strict_endpoint_crossing, two_point_sensitivity
 
 SIGMA = 1.75
 ENDPOINTS = (1.55, 1.60)
-SIZES = (32, 64, 128)
+SIZES = (16, 32, 64, 96, 128)
 K = 24
 CROSSING_CHI = 64
 GAP_CHI = 128
@@ -181,7 +181,7 @@ def decide_crossing(
 
 
 def build_gap_spec(decision: Mapping, output_dir: str | Path) -> dict:
-    """Create six common-field states only after a resolved crossing."""
+    """Create ten ordered common-field states after a resolved crossing."""
     if decision.get("status") != "resolved":
         raise ValueError("a resolved Phase 8 crossing is required")
     if not np.isclose(float(decision.get("sigma", np.nan)), SIGMA):

@@ -6,7 +6,7 @@
 
 **Goal:** Resolve the fixed `L=64,128` correlation-ratio crossing at
 `sigma=1.75`, evaluate direct `chi=128` gaps at one common primary critical
-field for `L=16,32,64,96,128`, and report the two-point finite-size
+field for `L=16,32,64,96,128`, and report the multi-size finite-size
 sensitivity for `Gamma_c` plus four-point power/log correction regressions
 for `z`.
 

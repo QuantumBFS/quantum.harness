@@ -78,7 +78,7 @@ def test_common_field_records_power_and_log_without_model_selection():
     assert result["correction_coordinates_are_sensitivity_only"] is True
 
 
-def test_gap_spec_is_six_chi128_states_only_after_resolved_crossing(
+def test_gap_spec_is_ten_ordered_chi128_states_only_after_resolved_crossing(
     tmp_path: Path,
 ):
     decision = {
@@ -87,9 +87,21 @@ def test_gap_spec_is_six_chi128_states_only_after_resolved_crossing(
         "common_field": {"gap_field": 1.5609},
     }
     spec = build_gap_spec(decision, tmp_path)
-    assert len(spec["cells"]) == 6
-    assert {cell["L"] for cell in spec["cells"]} == {32, 64, 128}
-    assert {cell["sector"] for cell in spec["cells"]} == {"even", "odd"}
+    assert len(spec["cells"]) == 10
+    assert [
+        (cell["L"], cell["sector"]) for cell in spec["cells"]
+    ] == [
+        (16, "even"),
+        (16, "odd"),
+        (32, "even"),
+        (32, "odd"),
+        (64, "even"),
+        (64, "odd"),
+        (96, "even"),
+        (96, "odd"),
+        (128, "even"),
+        (128, "odd"),
+    ]
     assert {cell["chi"] for cell in spec["cells"]} == {128}
     assert {cell["Gamma"] for cell in spec["cells"]} == {1.5609}
 

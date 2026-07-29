@@ -178,7 +178,8 @@ Phase 8 stops the broad sigma scan and first extends only `sigma=1.75` to
 `Gamma={1.55,1.60}`, even parity, `K=24`, and `chi=64`. Phase 7 found
 `chi=64 -> 128` changes in `R_xi` below `4e-6`, smaller than the relevant
 crossing-resolution uncertainty. Final common-field even/odd gap states use
-`chi=128`.
+`chi=128` at the single resolved primary field
+`Gamma_c_power=1.5738504887054727`.
 
 The two crossings define exact two-point sensitivity extrapolations in the
 coordinates `1/L` and `1/log(L)`. These coordinates test correction-form
@@ -186,6 +187,14 @@ sensitivity; they do not assume that a leading correction exponent is known
 and are not statistical regressions. The power/log critical-field spread is
 reported separately and is not fully propagated into the gaps because only
 two crossings are available.
+
+The gap campaign uses `L={16,32,64,96,128}`. Four generalized adjacent-size
+`z_eff` values are associated with geometric-mean sizes and analyzed with
+the approved sensitivity coordinates `z_eff=z+a/L_eff` and
+`z_eff=z+a/log(L_eff)`. Both are deterministic five-size regressions; a
+leave-`L=16`-out result measures sensitivity to the smallest size. Adjacent
+values share gap estimates and are therefore not treated as independent
+statistical samples.
 
 The final report will compare the resulting `z` sensitivities with
 Shiratani--Todo's published `sigma=7/4` values, `z=0.91(2)` for power

@@ -128,7 +128,13 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
         )
     )
     gap_root = tmp_path / "gaps"
-    for length, gap in ((32, 0.20), (64, 0.12), (128, 0.073)):
+    for length, gap in (
+        (16, 0.34),
+        (32, 0.20),
+        (64, 0.12),
+        (96, 0.082),
+        (128, 0.065),
+    ):
         even_energy = -2.0 * length
         _write_state(
             gap_root,
@@ -177,10 +183,28 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
 
     assert completed.returncode == 0, completed.stderr
     analysis = json.loads((output / "analysis.json").read_text())
-    assert set(analysis["z"]["z_eff"]) == {"32_64", "64_128"}
+    assert analysis["z"]["z_eff"]["pairs"] == [
+        "16_32",
+        "32_64",
+        "64_96",
+        "96_128",
+    ]
     assert (
-        analysis["z"]["sensitivity"]["power"]["interpretation"]
-        == "two_point_sensitivity_extrapolation"
+        analysis["z"]["regression"]["power"]["residual_degrees_of_freedom"]
+        == 2
+    )
+    assert (
+        analysis["z"]["regression"]["leave_L16_out"]["power"][
+            "residual_degrees_of_freedom"
+        ]
+        == 1
+    )
+    assert (
+        analysis["z"]["regression"]["interpretation"]
+        == "deterministic_finite_size_sensitivity_regression"
+    )
+    assert (
+        analysis["z"]["regression"]["shared_gap_correlations_ignored"] is True
     )
     assert (
         analysis["critical_field"]["propagated_to_gap_uncertainty"] is False
