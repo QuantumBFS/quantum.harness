@@ -50,6 +50,33 @@ if mode == "g1"
     gate!("G1c orbits", g1c_ok, join(msgs, " | "))
 end
 
+if mode == "g2"
+    include(joinpath(@__DIR__, "src", "functional_rg.jl"))
+    # G2a lossless oracle: fresh subprocess run of the validated standalone
+    # gate battery (χ=4 explicit unitary, W†W=I asserted inside)
+    tj = joinpath(@__DIR__, "..", "cg_hybrid", "tower.jl")
+    out = read(`julia -t 2 --project=$(Base.active_project()) $tj /tmp/g2_oracle`, String)
+    okA = occursin("ALL GATES", out) || occursin("PASS", out) && !occursin("FAIL", out)
+    oline = something(findfirst(l -> occursin("strict oracle", l), split(out, "\n")), 0)
+    gate!("G2a oracle", okA, oline == 0 ? "tower gates rerun (see /tmp/g2_oracle)" :
+          split(out, "\n")[oline])
+    # G2b compatibility identity with the D=4 pair
+    As = load_D4()
+    res = compat_residual(As)
+    gate!("G2b compat", res <= 1e-12, @sprintf("‖flow composition‖max = %.2e (D=4, both parities, k≤4)", res))
+    # G2c sandwich at N=14, BASE_CONFIG, same builder path
+    E0_14, _ = heis_ground(14)
+    base = build_rg_selection_model(14; vspace = :stock)
+    rg9 = build_rg_selection_model(14; rg = rg_spec(14, 6, As), vspace = :auto)  # n_rg=6 frozen (local memory frontier; same n at all N)
+    εc = base.resid.mu + rg9.resid.mu + 0.75 * (base.resid.pfeas + base.resid.dfeas + rg9.resid.pfeas + rg9.resid.dfeas)
+    gate!("G2c sandwich", rg9.E >= base.E - εc && rg9.E <= E0_14 / 14 + εc,
+        @sprintf("L_base=%.10f ≤ L_RG,D4=%.10f ≤ E_ED/N=%.10f (ε_cmp=%.1e, Δ_RG=%+.2e)",
+                 base.E, rg9.E, E0_14 / 14, εc, rg9.E - base.E))
+    push!(report, "    DEVIATION (documented): the in-builder uncompressed-level-3")
+    push!(report, "    middle bound is realized in the standalone oracle context only;")
+    push!(report, "    sandwich here is L_base ≤ L_RG,D4 ≤ E_ED. Map hash " * d4_hash())
+end
+
 open(joinpath(@__DIR__, "results", "g1_report.txt"), "w") do io
     println(io, "run_small.jl $(mode)  ", ok ? "PASS" : "FAIL")
     foreach(l -> println(io, l), report)
