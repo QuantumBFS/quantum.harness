@@ -54,7 +54,99 @@ def _synthetic_strip_results(expected_c=0.464):
     return results
 
 
+def _synthetic_sample_records(expected_c=0.464):
+    sizes = (4, 5, 6, 8, 9, 10, 12)
+    offsets = (-6e-5, -2e-5, 2e-5, 6e-5)
+    records = []
+    for L in sizes:
+        center = -1.27 - math.pi * expected_c / (6.0 * L**2) + 0.8 / L**4
+        for sample_index, offset in enumerate(offsets):
+            records.append(
+                {
+                    "L": L,
+                    "p": 0.1092212,
+                    "coupling": 1.0493604763,
+                    "sample_index": sample_index,
+                    "seed": 1000 * L + sample_index,
+                    "burn_in": 1000,
+                    "retained_rows": 100000,
+                    "block_length": 1000,
+                    "free_energy": center + offset,
+                    "runtime_seconds": 1.0,
+                    "antiferromagnetic_bonds": round(0.1092212 * 2 * L * 100000),
+                    "total_retained_bonds": 2 * L * 100000,
+                    "disorder_ensemble": "fixed_count",
+                }
+            )
+    return records
+
+
 class CentralChargeFitTests(unittest.TestCase):
+    def test_charge_annotation_is_valid_mathtext(self):
+        """Catches doubled raw-string slashes that render as literal TeX."""
+        module = _load_module()
+
+        annotation = module.format_charge_annotation(
+            {"central_charge": 0.458463, "bootstrap_se": 0.005165}
+        )
+
+        self.assertEqual(
+            annotation,
+            "$c_{\\mathit{eff}}=0.4585$\nbootstrap SE $=0.00517$",
+        )
+
+    def test_ensemble_aggregation_uses_independent_sample_error(self):
+        """Catches block statistics being mistaken for independent samples."""
+        module = _load_module()
+        records = _synthetic_sample_records()
+
+        widths = module.aggregate_sample_records(records)
+
+        self.assertEqual([item["L"] for item in widths], [4, 5, 6, 8, 9, 10, 12])
+        first_values = np.asarray(
+            [item["free_energy"] for item in records if item["L"] == 4]
+        )
+        self.assertEqual(widths[0]["sample_count"], 4)
+        self.assertAlmostEqual(widths[0]["free_energy"], np.mean(first_values))
+        self.assertAlmostEqual(
+            widths[0]["free_energy_se"],
+            np.std(first_values, ddof=1) / math.sqrt(len(first_values)),
+        )
+
+    def test_ensemble_aggregation_rejects_duplicates_and_singletons(self):
+        """Catches invalid resume records entering disorder averages."""
+        module = _load_module()
+        records = _synthetic_sample_records()
+        with self.assertRaises(ValueError):
+            module.aggregate_sample_records(records + [dict(records[0])])
+        with self.assertRaises(ValueError):
+            module.aggregate_sample_records([dict(records[0])])
+
+    def test_ensemble_fit_family_recovers_synthetic_charge(self):
+        """Catches wrong fit windows or bootstrapping the wrong sampling unit."""
+        module = _load_module()
+        widths = module.aggregate_sample_records(_synthetic_sample_records())
+
+        summary = module.central_charge_ensemble_summary(
+            widths, bootstrap_samples=40, seed=77
+        )
+
+        expected_keys = {
+            *(f"l2_Lmin{lmin}" for lmin in (4, 5, 6, 8)),
+            *(f"l4_Lmin{lmin}" for lmin in (4, 5, 6, 8)),
+            "reported",
+        }
+        self.assertEqual(set(summary), expected_keys)
+        self.assertAlmostEqual(
+            summary["l4_Lmin4"]["central_charge"], 0.464, places=9
+        )
+        self.assertEqual(summary["reported"]["primary_fit"], "l4_Lmin4")
+        self.assertGreaterEqual(summary["reported"]["bootstrap_se"], 0.0)
+        self.assertLessEqual(
+            summary["reported"]["fit_envelope_lower"],
+            summary["reported"]["fit_envelope_upper"],
+        )
+
     def test_weighted_fit_recovers_synthetic_central_charge(self):
         """Catches a wrong cylinder sign, factor of six, or correction basis."""
         module = _load_module()
@@ -136,6 +228,103 @@ class CentralChargeFitTests(unittest.TestCase):
 
 
 class ArtifactWorkflowTests(unittest.TestCase):
+    def test_ensemble_figure_uses_requested_style(self):
+        """Catches regressions to orange fits or undersized opaque markers."""
+        module = _load_module()
+        widths = module.aggregate_sample_records(_synthetic_sample_records())
+        summary = module.central_charge_ensemble_summary(
+            widths, bootstrap_samples=20, seed=7
+        )
+
+        figure, axis = module.make_ensemble_central_charge_figure(widths, summary)
+        try:
+            data_line = axis.lines[0]
+            fit_line = axis.lines[-1]
+            self.assertAlmostEqual(data_line.get_markersize(), math.sqrt(72.0))
+            self.assertAlmostEqual(data_line.get_alpha(), 0.78)
+            self.assertEqual(fit_line.get_color(), "red")
+            self.assertEqual(fit_line.get_linestyle(), "-")
+            self.assertAlmostEqual(fit_line.get_alpha(), 0.78)
+            self.assertEqual(axis.title.get_fontstyle(), "italic")
+            self.assertTrue(
+                all(label.get_fontstyle() == "italic" for label in axis.get_xticklabels())
+            )
+            self.assertTrue(
+                all(text.get_fontstyle() == "italic" for text in axis.get_legend().get_texts())
+            )
+        finally:
+            module.plt.close(figure)
+
+    def test_ensemble_plot_regeneration_preserves_source_artifacts(self):
+        """Catches accidental rewriting of completed disorder data or fit JSON."""
+        module = _load_module()
+        records = _synthetic_sample_records()
+        widths = module.aggregate_sample_records(records)
+        summary = module.central_charge_ensemble_summary(
+            widths, bootstrap_samples=20, seed=7
+        )
+        config = {"preliminary": True, "actual_counts": {"4": 4}}
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output_dir = Path(temporary)
+            module.write_ensemble_artifacts(
+                records, widths, summary, config, output_dir
+            )
+            protected_names = (
+                "samples.csv",
+                "width_summary.csv",
+                "central_charge_fit.json",
+                "run_config.json",
+            )
+            before = {
+                name: (output_dir / name).read_bytes() for name in protected_names
+            }
+            plot_path = output_dir / "central_charge_fit.png"
+            plot_path.unlink()
+
+            returned = module.regenerate_ensemble_plot_from_artifacts(output_dir)
+
+            self.assertEqual(returned, plot_path)
+            self.assertGreater(plot_path.stat().st_size, 1000)
+            after = {
+                name: (output_dir / name).read_bytes() for name in protected_names
+            }
+            self.assertEqual(after, before)
+
+    def test_ensemble_artifacts_include_samples_widths_fit_and_config(self):
+        """Catches a two-hour run without reproducible machine-readable outputs."""
+        module = _load_module()
+        records = _synthetic_sample_records()
+        widths = module.aggregate_sample_records(records)
+        summary = module.central_charge_ensemble_summary(
+            widths, bootstrap_samples=20, seed=7
+        )
+        config = {
+            "sizes": [4, 5, 6, 8, 9, 10, 12],
+            "sample_counts": {"4": 192},
+            "actual_counts": {"4": 4},
+            "preliminary": True,
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output_dir = Path(temporary)
+            module.write_ensemble_artifacts(
+                records, widths, summary, config, output_dir
+            )
+
+            for name in (
+                "samples.csv",
+                "width_summary.csv",
+                "central_charge_fit.json",
+                "run_config.json",
+                "central_charge_fit.png",
+            ):
+                path = output_dir / name
+                self.assertTrue(path.exists(), name)
+                self.assertGreater(path.stat().st_size, 0)
+            with (output_dir / "run_config.json").open() as handle:
+                self.assertEqual(json.load(handle)["actual_counts"], {"4": 4})
+
     def test_artifacts_include_blocks_widths_fit_projection_and_plot(self):
         """Catches incomplete or non-machine-readable RBIM output."""
         module = _load_module()

@@ -50,7 +50,11 @@ class IsingTransferOperator(LinearOperator):
         super().__init__(dtype=np.dtype(np.float64), shape=(self.dimension, self.dimension))
 
     def _matvec(self, vector):
-        vector = np.asarray(vector, dtype=np.float64)
+        vector = np.asarray(vector, dtype=np.float64).reshape(-1)
+        if vector.size != self.dimension:
+            raise ValueError(
+                f"vector has size {vector.size}, expected {self.dimension}"
+            )
         source = self._dhalf * vector
         target = np.empty_like(source)
 
@@ -69,6 +73,34 @@ class IsingTransferOperator(LinearOperator):
             source, target = target, source
 
         source *= self._dhalf
+        return source
+
+    def _matmat(self, matrix):
+        """Apply the transfer operator to a block without column broadcasting."""
+        matrix = np.asarray(matrix, dtype=np.float64)
+        if matrix.ndim != 2 or matrix.shape[0] != self.dimension:
+            raise ValueError(
+                f"matrix has shape {matrix.shape}, expected ({self.dimension}, k)"
+            )
+        block_size = matrix.shape[1]
+        source = self._dhalf[:, None] * matrix
+        target = np.empty_like(source)
+
+        for site in range(self.L):
+            stride = 1 << site
+            source_blocks = source.reshape(-1, 2, stride, block_size)
+            target_blocks = target.reshape(-1, 2, stride, block_size)
+            lower = source_blocks[:, 0, :, :]
+            upper = source_blocks[:, 1, :, :]
+            target_blocks[:, 0, :, :] = (
+                self._parallel * lower + self._antiparallel * upper
+            )
+            target_blocks[:, 1, :, :] = (
+                self._antiparallel * lower + self._parallel * upper
+            )
+            source, target = target, source
+
+        source *= self._dhalf[:, None]
         return source
 
 

@@ -54,6 +54,18 @@ class TransferActionTests(unittest.TestCase):
 
         np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
 
+    def test_matrix_free_block_action_matches_dense_columns(self):
+        """Catches column-vector broadcasting that breaks block eigensolvers."""
+        module = _load_module()
+        L = 4
+        k = module.critical_coupling()
+        dense = _dense_transfer(L, k, k)
+        matrix = np.arange(1, (1 << L) * 3 + 1, dtype=float).reshape(1 << L, 3)
+
+        actual = module.IsingTransferOperator(L, k, k) @ matrix
+
+        np.testing.assert_allclose(actual, dense @ matrix, rtol=1e-12, atol=1e-12)
+
     def test_rejects_width_below_two(self):
         """Catches accidental construction of an ill-defined periodic row."""
         if not _SCRIPT.exists():

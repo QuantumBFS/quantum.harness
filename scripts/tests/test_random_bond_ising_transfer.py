@@ -80,6 +80,54 @@ class RandomBondRowActionTests(unittest.TestCase):
 
 
 class RandomStripTests(unittest.TestCase):
+    def test_fixed_count_rows_have_exact_antiferromagnetic_count(self):
+        """Catches an IID sampler accidentally used for retained disorder."""
+        module = _load_module()
+        rng = np.random.default_rng(19)
+
+        horizontal, vertical, antiferromagnetic = module.fixed_count_bond_rows(
+            rng, L=5, retained_rows=37, p=0.1092212
+        )
+
+        self.assertEqual(horizontal.shape, (37, 5))
+        self.assertEqual(vertical.shape, (37, 5))
+        self.assertEqual(antiferromagnetic, round(0.1092212 * 2 * 5 * 37))
+        self.assertEqual(
+            int(
+                np.count_nonzero(horizontal == -1)
+                + np.count_nonzero(vertical == -1)
+            ),
+            antiferromagnetic,
+        )
+        self.assertTrue(np.all(np.isin(horizontal, (-1, 1))))
+        self.assertTrue(np.all(np.isin(vertical, (-1, 1))))
+
+    def test_fixed_count_strip_is_reproducible_and_reports_ensemble(self):
+        """Catches lost seeds, wrong retained counts, or missing metadata."""
+        module = _load_module()
+        arguments = dict(
+            L=4,
+            p=0.1092212,
+            seed=31,
+            burn_in=8,
+            retained_rows=40,
+            block_length=10,
+            progress=False,
+        )
+
+        first = module.run_fixed_count_strip(**arguments)
+        second = module.run_fixed_count_strip(**arguments)
+
+        np.testing.assert_array_equal(
+            first["block_log_norm_means"], second["block_log_norm_means"]
+        )
+        self.assertEqual(first["disorder_ensemble"], "fixed_count")
+        self.assertEqual(
+            first["antiferromagnetic_bonds"],
+            round(0.1092212 * 2 * 4 * 40),
+        )
+        self.assertEqual(first["total_retained_bonds"], 2 * 4 * 40)
+
     def test_random_strip_is_seed_reproducible_and_blocked(self):
         """Catches lost RNG control, burn-in leakage, or malformed blocks."""
         module = _load_module()

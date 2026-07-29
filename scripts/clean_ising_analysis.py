@@ -12,12 +12,199 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.sparse.linalg import eigsh
+from scipy.sparse.linalg import eigsh, lobpcg
 
 try:
     from clean_ising_transfer import IsingTransferOperator, critical_coupling
 except ImportError:  # imported from the repository root during tests
     from scripts.clean_ising_transfer import IsingTransferOperator, critical_coupling
+
+
+EXACT_ISING_SCALING_DIMENSIONS = np.asarray(
+    [1 / 8, 1, 9 / 8, 9 / 8, 2, 2, 2, 2, 17 / 8, 17 / 8, 17 / 8],
+    dtype=float,
+)
+PLOT_ALPHA = 0.78
+MARKER_AREA = 72.0
+FIT_COLOR = "red"
+FIT_LINESTYLE = "-"
+
+
+def exact_ising_scaling_dimensions():
+    """Return the ordered low-lying Ising CFT dimensions with degeneracies."""
+    return EXACT_ISING_SCALING_DIMENSIONS.copy()
+
+
+def scaling_dimension_rows(rows):
+    """Convert clean transfer-matrix exponent gaps into scaling dimensions."""
+    output = []
+    exact = exact_ising_scaling_dimensions()
+    for row in rows:
+        L = int(row["L"])
+        ell0 = float(row["ell_1"])
+        for rank, target in enumerate(exact, start=1):
+            numerical = L * (
+                ell0 - float(row[f"ell_{rank + 1}"])
+            ) / (2.0 * math.pi)
+            output.append(
+                {
+                    "L": L,
+                    "excitation_rank": rank,
+                    "numerical_dimension": numerical,
+                    "exact_dimension": float(target),
+                    "deviation": numerical - float(target),
+                }
+            )
+    return output
+
+
+def _apply_italic_axis_style(axis):
+    """Apply the requested italic typography to every axis text artist."""
+    text_artists = [
+        axis.title,
+        axis.xaxis.label,
+        axis.yaxis.label,
+        axis.xaxis.get_offset_text(),
+        axis.yaxis.get_offset_text(),
+        *axis.get_xticklabels(),
+        *axis.get_yticklabels(),
+        *axis.texts,
+    ]
+    legend = axis.get_legend()
+    if legend is not None:
+        text_artists.extend(legend.get_texts())
+        if legend.get_title() is not None:
+            text_artists.append(legend.get_title())
+    for artist in text_artists:
+        artist.set_fontstyle("italic")
+
+
+def make_clean_central_charge_figure(sizes, energies, summary):
+    """Build the styled clean-Ising finite-size central-charge figure."""
+    sizes = np.asarray(sizes, dtype=float)
+    energies = np.asarray(energies, dtype=float)
+    primary = summary["primary_L8_p13"]
+    coefficients = primary["coefficients"]
+    grid = np.linspace(float(np.min(sizes)), float(np.max(sizes)), 400)
+    fitted_energy = sum(
+        coefficient * column
+        for coefficient, column in zip(
+            coefficients,
+            [grid] + [grid ** (-power) for power in primary["powers"]],
+        )
+    )
+    reported = summary["reported"]
+
+    figure, axis = plt.subplots(figsize=(6.4, 4.4))
+    axis.scatter(
+        1.0 / sizes**2,
+        energies / sizes,
+        s=MARKER_AREA,
+        color="tab:blue",
+        alpha=PLOT_ALPHA,
+        zorder=3,
+        label="matrix-free data",
+    )
+    axis.plot(
+        1.0 / grid**2,
+        fitted_energy / grid,
+        color=FIT_COLOR,
+        linestyle=FIT_LINESTYLE,
+        alpha=PLOT_ALPHA,
+        label=r"fit: $L^{-1}+L^{-3}$",
+    )
+    axis.set_xlabel(r"$1/L^2$")
+    axis.set_ylabel(r"$\epsilon_0(L)/L$")
+    axis.set_title("Critical clean Ising central charge")
+    axis.grid(alpha=0.25)
+    axis.legend()
+    axis.text(
+        0.04,
+        0.08,
+        rf"$c={reported['midpoint']:.7f}\pm{reported['half_width']:.1e}$"
+        + "\n(fit envelope)",
+        transform=axis.transAxes,
+    )
+    _apply_italic_axis_style(axis)
+    figure.tight_layout()
+    return figure, axis
+
+
+def make_scaling_dimension_figure(dimension_rows):
+    """Build numerical-versus-CFT spectrum and finite-size-deviation panels."""
+    if not dimension_rows:
+        raise ValueError("dimension_rows must not be empty")
+    sizes = sorted({int(row["L"]) for row in dimension_rows})
+    colors = plt.cm.Blues(np.linspace(0.40, 0.90, len(sizes)))
+    offsets = np.linspace(-0.24, 0.24, len(sizes))
+
+    figure, (upper, lower) = plt.subplots(
+        2,
+        1,
+        figsize=(7.2, 7.2),
+        sharex=True,
+        constrained_layout=True,
+        gridspec_kw={"height_ratios": [2.1, 1.0]},
+    )
+    for L, color, offset in zip(sizes, colors, offsets):
+        selected = sorted(
+            (row for row in dimension_rows if int(row["L"]) == L),
+            key=lambda row: int(row["excitation_rank"]),
+        )
+        ranks = np.asarray([row["excitation_rank"] for row in selected], dtype=float)
+        numerical = np.asarray(
+            [row["numerical_dimension"] for row in selected], dtype=float
+        )
+        deviations = np.asarray([row["deviation"] for row in selected], dtype=float)
+        upper.scatter(
+            ranks + offset,
+            numerical,
+            s=MARKER_AREA,
+            color=color,
+            alpha=PLOT_ALPHA,
+            zorder=3,
+            label=rf"$L={L}$",
+        )
+        lower.scatter(
+            ranks + offset,
+            deviations,
+            s=MARKER_AREA,
+            color=color,
+            alpha=PLOT_ALPHA,
+            zorder=3,
+        )
+
+    exact = exact_ising_scaling_dimensions()
+    for rank, target in enumerate(exact, start=1):
+        upper.plot(
+            [rank - 0.32, rank + 0.32],
+            [target, target],
+            color=FIT_COLOR,
+            linestyle=FIT_LINESTYLE,
+            alpha=PLOT_ALPHA,
+            linewidth=2.0,
+            label="exact Ising CFT" if rank == 1 else None,
+            zorder=2,
+        )
+    lower.axhline(
+        0.0,
+        color=FIT_COLOR,
+        linestyle=FIT_LINESTYLE,
+        alpha=PLOT_ALPHA,
+        linewidth=1.6,
+    )
+
+    upper.set_ylabel(r"scaling dimension $x_a(L)$")
+    upper.set_title("Clean Ising Lyapunov scaling spectrum")
+    upper.legend(ncol=2)
+    lower.set_xlabel("excitation rank")
+    lower.set_ylabel(r"$x_a(L)-x_a^{\mathit{CFT}}$")
+    lower.set_xticks(np.arange(1, 12))
+    lower.set_xlim(0.4, 11.6)
+    for axis in (upper, lower):
+        axis.grid(alpha=0.25)
+        _apply_italic_axis_style(axis)
+    return figure, (upper, lower)
 
 
 def clean_lyapunov_spectrum(L, count=4, tol=1e-11):
@@ -31,14 +218,36 @@ def clean_lyapunov_spectrum(L, count=4, tol=1e-11):
     ncv = min(max(2 * count + 1, 16), operator.dimension - 1)
 
     start = time.perf_counter()
-    values, vectors = eigsh(
-        operator,
-        k=count,
-        which="LA",
-        v0=start_vector,
-        ncv=ncv,
-        tol=tol,
-    )
+    if count <= 4:
+        values, vectors = eigsh(
+            operator,
+            k=count,
+            which="LA",
+            v0=start_vector,
+            ncv=ncv,
+            tol=tol,
+        )
+    else:
+        leading_values, leading_vectors = eigsh(
+            operator,
+            k=1,
+            which="LA",
+            v0=start_vector,
+            ncv=ncv,
+            tol=tol,
+        )
+        scale = float(leading_values[0])
+        start_block = rng.standard_normal((operator.dimension, count))
+        start_block[:, 0] = leading_vectors[:, 0]
+        start_block, _ = np.linalg.qr(start_block, mode="reduced")
+        scaled_values, vectors = lobpcg(
+            operator / scale,
+            start_block,
+            largest=True,
+            tol=tol,
+            maxiter=200,
+        )
+        values = np.asarray(scaled_values, dtype=float) * scale
     runtime_seconds = time.perf_counter() - start
 
     order = np.argsort(values)[::-1]
@@ -149,7 +358,7 @@ def central_charge_summary(sizes, energies):
 
 
 def write_analysis_artifacts(rows, output_dir):
-    """Write the spectrum table, central-charge fits, and finite-size plot."""
+    """Write clean spectra, central-charge fit, and optional CFT comparison."""
     if not rows:
         raise ValueError("rows must not be empty")
     output_dir = Path(output_dir)
@@ -169,39 +378,42 @@ def write_analysis_artifacts(rows, output_dir):
         json.dump(summary, handle, indent=2, sort_keys=True)
         handle.write("\n")
 
-    primary = summary["primary_L8_p13"]
-    coefficients = primary["coefficients"]
-    grid = np.linspace(float(np.min(sizes)), float(np.max(sizes)), 400)
-    fitted_energy = sum(
-        coefficient * column
-        for coefficient, column in zip(
-            coefficients,
-            [grid] + [grid ** (-power) for power in primary["powers"]],
-        )
-    )
-    reported = summary["reported"]
-
-    figure, axis = plt.subplots(figsize=(6.4, 4.4))
-    axis.scatter(1.0 / sizes**2, energies / sizes, color="tab:blue", zorder=3, label="matrix-free data")
-    axis.plot(1.0 / grid**2, fitted_energy / grid, color="tab:orange", label=r"fit: $L^{-1}+L^{-3}$")
-    axis.set_xlabel(r"$1/L^2$")
-    axis.set_ylabel(r"$\epsilon_0(L)/L$")
-    axis.set_title("Critical clean Ising central charge")
-    axis.grid(alpha=0.25)
-    axis.legend()
-    axis.text(
-        0.04,
-        0.08,
-        rf"$c={reported['midpoint']:.7f}\pm{reported['half_width']:.1e}$" + "\n(fit envelope)",
-        transform=axis.transAxes,
-    )
-    figure.tight_layout()
+    figure, _ = make_clean_central_charge_figure(sizes, energies, summary)
     figure.savefig(output_dir / "central_charge_fit.png", dpi=180)
     plt.close(figure)
+
+    has_scaling_spectrum = all(
+        all(f"ell_{index}" in row for index in range(1, 13)) for row in rows
+    )
+    if has_scaling_spectrum:
+        dimension_rows = scaling_dimension_rows(rows)
+        scaling_csv_path = output_dir / "lyapunov_scaling_dimensions.csv"
+        scaling_fields = (
+            "L",
+            "excitation_rank",
+            "numerical_dimension",
+            "exact_dimension",
+            "deviation",
+        )
+        with scaling_csv_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=scaling_fields)
+            writer.writeheader()
+            writer.writerows(dimension_rows)
+        spectrum_figure, _ = make_scaling_dimension_figure(dimension_rows)
+        spectrum_figure.savefig(
+            output_dir / "lyapunov_scaling_dimensions.png", dpi=180
+        )
+        plt.close(spectrum_figure)
+    else:
+        for name in (
+            "lyapunov_scaling_dimensions.csv",
+            "lyapunov_scaling_dimensions.png",
+        ):
+            (output_dir / name).unlink(missing_ok=True)
     return summary
 
 
-def run_analysis(sizes, count=4, tol=1e-11, qr_steps=120, qr_burn_in=40, output_dir=None):
+def run_analysis(sizes, count=12, tol=1e-11, qr_steps=120, qr_burn_in=40, output_dir=None):
     """Compute clean spectra and write all analysis artifacts."""
     rows = []
     for L in sizes:
@@ -248,7 +460,7 @@ def run_analysis(sizes, count=4, tol=1e-11, qr_steps=120, qr_burn_in=40, output_
 def _parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sizes", nargs="+", type=int, default=[8, 10, 12, 16, 20])
-    parser.add_argument("--count", type=int, default=4)
+    parser.add_argument("--count", type=int, default=12)
     parser.add_argument("--tol", type=float, default=1e-11)
     parser.add_argument("--qr-steps", type=int, default=120)
     parser.add_argument("--qr-burn-in", type=int, default=40)
