@@ -60,6 +60,57 @@ using DelimitedFiles
         @test getfield.(clipped, :n) == [1, 2]
     end
 
+    @testset "delta coefficients agree with an independent harmonic fit" begin
+        M = 48
+        phases = 2π .* (0:(M - 1)) ./ M
+        signal = @. 0.3 + 0.4cos(phases) - 0.2sin(phases) +
+                     0.1cos(2phases) + 0.05sin(2phases)
+        asymptotic = ComplexF64.(periodic_autocorrelation_direct(
+            signal; lag_count=2M))
+        decomposition = decompose_correlation(
+            asymptotic, signal;
+            tail_count=M,
+            tail_norm_tolerance=1e-12,
+            tail_mean_tolerance=1e-12,
+            tail_slope_tolerance=1e-12)
+
+        # Independent real least-squares Fourier fit, without using FFT.
+        design = hcat(
+            ones(M), cos.(phases), sin.(phases),
+            cos.(2phases), sin.(2phases))
+        fitted = design \ signal
+        expected = [
+            fitted[1]^2,
+            (fitted[2]^2 + fitted[3]^2) / 2,
+            (fitted[4]^2 + fitted[5]^2) / 2,
+        ]
+        @test decomposition.delta_coefficients[1:3] ≈ expected atol=2e-14
+        @test maximum(abs, decomposition.delta_coefficients[4:end]) < 2e-28
+    end
+
+    @testset "undriven zero-temperature ground state carries no heat" begin
+        Ω = 1.0
+        periods = 16
+        samples_per_period = 128
+        dt = 2π / (Ω * samples_per_period)
+        times = dt .* (0:(periods * samples_per_period))
+        # For H=Ωσx/2 in its ground state and S=σz, the ordered
+        # equilibrium correlator has support only at negative frequency.
+        correlation = ComplexF64.(exp.(-im .* Ω .* times))
+        frequencies = Ω .* collect(0:6)
+        continuous = zeros(Float64, length(frequencies))
+        continuous_current_direct!(
+            continuous, frequencies, correlation, dt, model; block_size=3)
+        peaks = delta_peak_weights(
+            model, Ω, zeros(4);
+            nmax=3, omega_max=6Ω, weight_tolerance=1e-15)
+        total = integrated_current(frequencies, continuous, peaks)
+
+        @test maximum(abs, continuous) < 2e-13
+        @test isempty(peaks)
+        @test abs(total.total) < 2e-13
+    end
+
     @testset "invalid grids and hidden windowing fail closed" begin
         correlation = ones(ComplexF64, 8)
         @test_throws ArgumentError continuous_current_fft(

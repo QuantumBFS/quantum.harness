@@ -150,6 +150,27 @@ end
     @test failed.nonconvergence_reason == :maximum_iterations
 end
 
+@testset "period iteration forgets distinct initial states" begin
+    matrix, expected_right, _ = nonnormal_stationary_map()
+    floquet = one_phase_floquet(matrix)
+    initial_a = ComplexF64[1, 1, 1, 1]
+    initial_b = ComplexF64[0.2, -0.7im, 0.4, 1.3]
+    result_a = solve_floquet_steady_state(floquet;
+        backend=:period_iteration, tolerance=1e-10,
+        max_iterations=500, initial_vector=initial_a)
+    result_b = solve_floquet_steady_state(floquet;
+        backend=:period_iteration, tolerance=1e-10,
+        max_iterations=500, initial_vector=initial_b)
+
+    @test result_a.converged
+    @test result_b.converged
+    state_a = result_a.right_vector / result_a.right_vector[1]
+    state_b = result_b.right_vector / result_b.right_vector[1]
+    expected = expected_right / expected_right[1]
+    @test norm(state_a - state_b) < 1e-8
+    @test norm(state_a - expected) < 1e-8
+end
+
 @testset "period iteration never certifies an unphysical dominant mode" begin
     unphysical = one_phase_floquet(
         Diagonal(ComplexF64[1.02, 1.0, 0.8, 0.5]))
