@@ -1186,3 +1186,93 @@ Local result SHA-256:
   `68b6bef1f6bff956991e2c82d932e64b1bf10641b10377d2919f188c4ea829de`;
 - shear-loop seed-61 deep simplicial search:
   `c3fd3dba2c8571c00a0ccf87fce9c7d95fbed47e21aa35214fdc3e8a3a927d39`.
+
+## 2026-07-29 — Exact non-simplicial cone hit for shear-loop seed 61
+
+The high-condition-number simplicial optimum was used as a seed for a
+redundant-ray invariant-cone search in the unresolved grade-2 sector of
+`exact5-shear-loop-pair:61`. Worst-image/word-orbit column generation found
+an exact rational certificate with twelve rays in the ten-dimensional
+sector.
+
+- search commit:
+  `e786783`;
+- normalization fix:
+  `f47ef2e`;
+- exact ray matrix:
+  `R in Q^(10 x 12)`, `rank(R) = 10`;
+- two exact action matrices:
+  `P_0,P_1 in Q_+^(12 x 12)`;
+- exact replay:
+  `A_i R = R P_i` for both grade-2 atoms;
+- minimum action entry: zero;
+- serialized result SHA-256:
+  `42bda8a820d6f3edf5fe0bac069a84da995684396637f67fc815f5672cda18eb`.
+
+This is the first exact shared non-simplicial exterior-cone hit in the
+search. Together with the already exact grade-3 shared signed gauge
+`diag(1,1,1,-1,-1,-1,-1,-1,-1,1)`, it closes the *invariance* search in
+both middle exterior sectors for the same seed. A redundant positive lift
+does not automatically preserve trace: from `A R = R P` with rectangular
+`R`, `P >= 0` alone does not yet imply `tr(A_w) >= 0`. An independent audit
+must additionally find a trace-compatible positive lift/dual frame (or
+control the action on `ker(R)`) before binding the certificate to
+arbitrary-word `det(I + B_{s_1}...B_{s_L}) >= 0` and promoting it to the
+paper's main theorem.
+
+Transferable numerical lesson: the near-singular simplicial transform was
+not a dead end; it encoded a cone needing redundant rays. Each tiny transform
+column must be normalized before bounded-denominator rationalization.
+Otherwise a whole valid ray rounds to zero and the exact replay falsely
+misses the certificate.
+
+### Independent trace audit — invariant cone is not yet a sign-free theorem
+
+Independent exact reconstruction confirms the serialized grade-2 equations,
+the rank of `R`, and nonnegativity of both `P_i`. It also identifies two
+decisive promotion blockers:
+
+1. the linear program over every right inverse `C` satisfying `R C = I`
+   cannot make `C R` entrywise nonnegative; its best numerical margin is
+   approximately `-0.2100681259`. Thus the sufficient identity
+   `tr(A_w) = tr(C R P_w) >= 0` is unavailable for this lift;
+2. the grade-4 atom pair has no shared signed gauge, and the exact single-atom
+   word `B^6` already has `tr(wedge^4 B^6) < 0`.
+
+Therefore the rectangular grade-2 invariant cone plus the grade-3 gauge
+cannot be promoted to a sector-by-sector arbitrary-depth determinant proof.
+The hit remains useful structure rather than a failed experiment: finite
+determinants survive through depth 16 despite a negative grade-4 sector, so
+the next success-oriented search must allow cancellations between exterior
+grades. The immediate replacement target is a trace-compatible cone/lift on
+the combined complete-Fock direct sum
+`Gamma(B) = direct_sum_k wedge^k B`, with rays allowed to couple grades.
+
+## 2026-07-29 — Exact-aware depth-12 continuation of 488 survivors
+
+The 488 fully adjudicated depth-8 exact-fallback survivors completed the
+entire depth-9--12 tranche with exact fallback on every conditioning-limited
+word.
+
+- source commit:
+  `8f4a388d44d073c40c0241c1f49851f892cd6b88`;
+- continuation plan:
+  `ff201d576c16547ec7088702cc91f5875acaa027da9799a07ef4f63f8e126ec2`;
+- 488/488 terminal, zero missing or stale;
+- 3,654,713 tested words and 3,012,064 exact fallbacks;
+- 12 exact-fallback negatives, 2 stable negatives, and 474 complete
+  `survivor-depth12-exact-fallback` cards.
+
+The very high exact-fallback fraction validates the exact-aware branch:
+ordinary floating conditioning gates would have discarded most of this
+population. These 474 survivors can now join the 692 ordinary depth-12
+survivors for structural ranking, while remaining distinct in provenance.
+
+Local evidence SHA-256:
+
+- Markdown summary:
+  `c9af3a1a754cde1623e8051ec36326a58866dbfb4619de47be0f140fe9f23705`;
+- collection JSON:
+  `4e1908f32f92ab596acea6f5acba3b55627fe14c40d785cc727786036d0f8b11`;
+- CPU archive:
+  `e871413c097991dac50dcbce7514070c994b8efd611f79a200d4a5ad058d61aa`.
