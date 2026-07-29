@@ -422,6 +422,128 @@ double adaptive_simpson(const std::function<double(double)>& function,
 
 } // namespace
 
+// ──────────────────────────────────────────────────────────────
+// Direct ED spectral-response Berry curvature
+// ──────────────────────────────────────────────────────────────
+
+double compute_berry_curvature_response_ed(const Lattice& lattice, double J,
+                                           double Omega, double /*theta*/)
+{
+    // F_{θΩ} is independent of θ by the unitary-rotation argument:
+    // H(θ) = R_x(θ) H_0 R_x^†(θ) → ⟨ψ(θ)|∂H(θ)|ψ(θ)⟩ = ⟨ψ(0)|∂H(0)|ψ(0)⟩.
+    // We therefore work in the real symmetric H_0 = -J Σ ZZ - Ω Σ X.
+    const int dim = checked_dimension(lattice, 64, "compute_berry_curvature_response_ed");
+    if (dim < 2) return 0.0; // single site has no curvature
+    const int N = static_cast<int>(lattice.N);
+
+    // Build H_0 as real symmetric matrix (same as ED infrastructure)
+    DenseSymMatrix H0(static_cast<std::size_t>(dim));
+    for (int st = 0; st < dim; ++st) {
+        for (int bi = 0; bi < static_cast<int>(lattice.bonds.size()); ++bi) {
+            int i = static_cast<int>(lattice.bonds[bi].i);
+            int j = static_cast<int>(lattice.bonds[bi].j);
+            int si = (st >> i) & 1, sj = (st >> j) & 1;
+            H0(st, st) += -J * (1 - 2*si) * (1 - 2*sj);
+        }
+        for (int si = 0; si < N; ++si)
+            H0(st, st ^ (1 << si)) += -Omega;
+    }
+
+    auto eigsys = jacobi_eigen(H0, 50, 1e-12);
+    const double E0 = eigsys.eigenvalues[0];
+
+    // Precompute degree (number of neighbours) for each site
+    std::vector<int> neighbour_count(N, 0);
+    for (const auto& bond : lattice.bonds) {
+        neighbour_count[static_cast<int>(bond.i)]++;
+        neighbour_count[static_cast<int>(bond.j)]++;
+    }
+
+    // Reserve work arrays
+    std::vector<int> degree(N, 0);
+    for (int s = 0; s < N; ++s)
+        degree[s] = neighbour_count[s];
+
+    // Sum over excited states n ≥ 1
+    double F_total = 0.0;
+    for (int n = 1; n < dim; ++n) {
+        const double dE = eigsys.eigenvalues[n] - E0;
+        if (std::abs(dE) < 1e-14) continue;
+
+        // ── Compute ⟨ψ₀|∂_θ H|ψ_n⟩ / i  (real, anti-symmetric) ──
+        //
+        // ∂_θ H(0) = J Σ_{⟨i,j⟩} (Y_i Z_j + Z_i Y_j)
+        // Each bond (i,j) contributes to pairs (a,b) that differ at i or j
+        // with amplitude  iJ·(1-2b_i)·(1-2b_j).
+        //
+        // We accumulate the anti-symmetrised real matrix element:
+        //   ⟨ψ₀|∂_θ H/i|ψ_n⟩ = Σ_{a<b} dtheta_real(a,b)·(ψ₀(a)ψ_n(b)-ψ₀(b)ψ_n(a))
+        double dtheta_over_i = 0.0;
+        for (const auto& bond : lattice.bonds) {
+            const int i = static_cast<int>(bond.i);
+            const int j = static_cast<int>(bond.j);
+            const int mi = 1 << i, mj = 1 << j;
+
+            for (int b = 0; b < dim; ++b) {
+                const int bi_spin = (b >> i) & 1;
+                const int bj_spin = (b >> j) & 1;
+                const double pre = J * (1 - 2*bi_spin) * (1 - 2*bj_spin);
+
+                // Y_i Z_j term: flips i
+                {
+                    const int a = b ^ mi;
+                    if (a > b) { // count each unordered pair once (a > b)
+                        // Pair (a,b) where a has bit i flipped relative to b
+                        dtheta_over_i += pre * (eigsys.eigenvectors[a * dim]
+                            * eigsys.eigenvectors[b * dim + n]
+                            - eigsys.eigenvectors[b * dim]
+                            * eigsys.eigenvectors[a * dim + n]);
+                    }
+                }
+                // Z_i Y_j term: flips j
+                {
+                    const int a = b ^ mj;
+                    if (a > b) {
+                        dtheta_over_i += pre * (eigsys.eigenvectors[a * dim]
+                            * eigsys.eigenvectors[b * dim + n]
+                            - eigsys.eigenvectors[b * dim]
+                            * eigsys.eigenvectors[a * dim + n]);
+                    }
+                }
+            }
+        }
+
+        // ── Compute ⟨ψ_n|∂_Ω H|ψ₀⟩  (real, symmetric) ──
+        //
+        // ∂_Ω H(0) = -Σ_s X_s.  X_s connects |b⟩ ↔ |b⊕e_s⟩ with amplitude 1.
+        // Anti-symmetrise because ∂_Ω H is real symmetric but we use
+        // the same anti-symmetric pair-sum form.
+        double domega = 0.0;
+        for (int s = 0; s < N; ++s) {
+            const int m = 1 << s;
+            for (int b = 0; b < dim; ++b) {
+                const int a = b ^ m;
+                if (a > b) {
+                    // ∂_Ω H = -Σ X_i is real SYMMETRIC (diagonal-free).
+                    // Symmetric form: ψ_n(a)ψ₀(b) + ψ_n(b)ψ₀(a).
+                    const double val = -1.0;
+                    domega += val * (eigsys.eigenvectors[a * dim + n]
+                        * eigsys.eigenvectors[b * dim]
+                        + eigsys.eigenvectors[b * dim + n]
+                        * eigsys.eigenvectors[a * dim]);
+                }
+            }
+        }
+
+        // F_{θΩ} = -2 Im Σ ⟨ψ₀|∂_θ H|ψ_n⟩⟨ψ_n|∂_Ω H|ψ₀⟩ / (E_n-E₀)^2
+        // ⟨ψ₀|∂_θ H|ψ_n⟩ = i·dtheta_over_i, ⟨ψ_n|∂_Ω H|ψ₀⟩ = domega (real)
+        // product = i·dtheta_over_i·domega → Im(product) = dtheta_over_i·domega
+        F_total -= 2.0 * dtheta_over_i * domega / (dE * dE);
+    }
+
+    return F_total / static_cast<double>(N);
+}
+
 double tfim_chain_berry_curvature_density_finite(std::size_t sites, double J,
                                                  double Omega) {
     if (sites < 2 || sites % 2 != 0)

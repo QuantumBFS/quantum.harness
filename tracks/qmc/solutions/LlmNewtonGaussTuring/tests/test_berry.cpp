@@ -238,6 +238,63 @@ void test_jordan_wigner_oracle() {
                        64, 1.0, 1.5) - exact) < 1e-10);
 }
 
+void test_response_cross_validation() {
+    std::cout << "--- response cross-validation: FHS vs ED response vs JW oracle ---" << std::endl;
+
+    // 1D: ED response must match finite-size JW oracle to machine precision
+    for (int N : {4, 6}) {
+        auto lat = make_chain(N);
+        for (double Omega : {0.5, 1.0, 1.5, 2.0}) {
+            double resp = compute_berry_curvature_response_ed(lat, 1.0, Omega, 0.1);
+            double jw = tfim_chain_berry_curvature_density_finite(N, 1.0, Omega);
+            approx_equal("1D N=" + std::to_string(N) + " Omega=" + std::to_string(Omega)
+                         + " ED-response vs JW",
+                         resp, jw, 1e-12);
+
+            double dtheta = 0.05, dOmega = 0.05;
+            auto bc = fhs_curvature_single(lat, 1.0, 0.1, Omega, dtheta, dOmega);
+            double fhs = bc.F12 / static_cast<double>(N);
+            double diff = std::abs(fhs - resp);
+            check("1D N=" + std::to_string(N) + " Omega=" + std::to_string(Omega)
+                  + " FHS vs ED-response within discretisation budget",
+                  diff < 2e-2, "diff=" + std::to_string(diff));
+        }
+    }
+
+    // 2D square L=2: FHS vs ED response agreement
+    auto sq2 = make_square(2, 2);
+    for (double Omega : {1.0, 2.0, 3.0}) {
+        double resp = compute_berry_curvature_response_ed(sq2, 1.0, Omega, 0.1);
+        double dtheta = 0.05, dOmega = 0.05;
+        auto bc = fhs_curvature_single(sq2, 1.0, 0.1, Omega, dtheta, dOmega);
+        double fhs = bc.F12 / static_cast<double>(4);
+        double diff = std::abs(fhs - resp);
+        check("2D L=2 Omega=" + std::to_string(Omega)
+              + " FHS vs ED-response within discretisation budget",
+              diff < 1e-2, "FHS=" + std::to_string(fhs)
+              + " RSP=" + std::to_string(resp) + " diff=" + std::to_string(diff));
+    }
+
+    // Theta-independence: F_{θΩ} must be independent of rotation angle
+    auto lat4 = make_chain(4);
+    double ref = compute_berry_curvature_response_ed(lat4, 1.0, 1.0, 0.0);
+    for (double theta : {0.0, 0.3, 0.7, 1.0}) {
+        double resp = compute_berry_curvature_response_ed(lat4, 1.0, 1.0, theta);
+        approx_equal("theta-independence theta=" + std::to_string(theta),
+                     resp, ref, 1e-14);
+    }
+
+    // Large system: verify solver correctly rejects N > 6 (dim > 64)
+    bool large_rejected = false;
+    try {
+        auto lat8 = make_chain(8);
+        (void)compute_berry_curvature_response_ed(lat8, 1.0, 1.0, 0.0);
+    } catch (const std::length_error&) {
+        large_rejected = true;
+    }
+    check("N=8 correctly rejected by ED response solver", large_rejected);
+}
+
 void test_berry_input_guards() {
     const auto lattice = make_chain(4);
     bool coupling_rejected = false;
@@ -279,6 +336,7 @@ int main() {
         test_rotated_hamiltonian_identity();
         test_grid_order_and_magnetization_response();
         test_jordan_wigner_oracle();
+        test_response_cross_validation();
         test_berry_input_guards();
     } catch (const std::exception& error) {
         std::cerr << "Exception: " << error.what() << std::endl;

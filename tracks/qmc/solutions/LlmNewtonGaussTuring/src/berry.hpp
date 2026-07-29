@@ -69,6 +69,14 @@ std::vector<std::vector<BerryCurvature>> compute_berry_curvature_grid(
 double compute_dthetah_diagonal_ed(const Lattice& lattice, double J, double Omega,
                                    double theta, double beta);
 
+// Direct ED spectral-response Berry curvature via sum-over-states.
+// Uses the full real-symmetric eigensystem of H_0 (Jacobi diagonalisation)
+// and explicit ∂_θ H, ∂_Ω H matrix elements. The unitary rotation argument
+// shows F_{θΩ} is independent of θ, so the theta parameter is ignored.
+// Limited to N ≤ 6 (dim ≤ 64) for dense eigensystem.
+double compute_berry_curvature_response_ed(const Lattice& lattice, double J,
+                                           double Omega, double theta);
+
 // Exact finite-size 1D oracle for an even periodic spin chain. The ground state
 // lies in the antiperiodic Jordan-Wigner sector k_m=(2m+1)pi/N.
 double tfim_chain_berry_curvature_density_finite(std::size_t sites, double J,
