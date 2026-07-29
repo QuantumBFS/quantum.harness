@@ -9,10 +9,10 @@ from .algebra import to_dense
 from .hamiltonian import four_matching_fragments, fragment_from_bonds
 from .higher_order import fourth_order_suzuki_stages
 from .lattice import SquareLattice
-# A short outward-rounded summary of the schema-v3 bound at N=144, r=136.
+# A short outward-rounded summary of the schema-v3 bound at N=144, r=116.
 # The exact rational value remains in certificates/issue128-certificate.json.
-REFINED_BOUND_N144_R136 = Fraction(992, 10**9)
-REFINED_STEPS = 136
+REFINED_BOUND_N144 = Fraction(973, 10**9)
+REFINED_STEPS = 116
 
 
 def small_exact_crosscheck(
@@ -44,12 +44,12 @@ def small_exact_crosscheck(
     approximation = np.linalg.matrix_power(one_step, steps)
     exact = expm(-1j * hamiltonian)
     error = float(np.linalg.norm(approximation - exact, ord=2))
-    bound = float(REFINED_BOUND_N144_R136 * Fraction(n_sites, 144))
+    bound = float(REFINED_BOUND_N144 * Fraction(n_sites, 144))
     return {
         "length": length,
         "n_sites": n_sites,
         "model_note": (
-            "degenerate 2x2 periodic algebra sanity check for schema-v3 r=136"
+            "degenerate 2x2 periodic algebra sanity check for schema-v3 r=116"
             if length == 2
             else "periodic square lattice"
         ),

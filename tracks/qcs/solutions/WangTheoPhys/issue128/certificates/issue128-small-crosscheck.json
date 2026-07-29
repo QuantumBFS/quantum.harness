@@ -1,10 +1,10 @@
 {
   "length": 2,
   "n_sites": 4,
-  "model_note": "degenerate 2x2 periodic algebra sanity check for schema-v3 r=136",
-  "steps": 136,
-  "empirical_operator_norm_error": 2.3625152178806053e-10,
-  "certified_upper_bound": 2.7555555555555555e-08,
+  "model_note": "degenerate 2x2 periodic algebra sanity check for schema-v3 r=116",
+  "steps": 116,
+  "empirical_operator_norm_error": 4.463500595491358e-10,
+  "certified_upper_bound": 2.7027777777777777e-08,
   "requested_tolerance": 1e-06,
   "bound_dominates_empirical_error": true,
   "bound_meets_tolerance": true

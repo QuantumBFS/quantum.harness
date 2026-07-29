@@ -68,5 +68,5 @@ def test_v3_deliverable_fast_verifies() -> None:
         root / "certificates" / "issue128-certificate.json"
     )
     assert result["global_twofold_target_met"]
-    assert result["candidate_steps"] == 136
+    assert result["candidate_steps"] == 116
     assert result["published_steps"] == 393

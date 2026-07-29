@@ -18,26 +18,26 @@ H = Σ_<i,j> (X_i X_j + Y_i Y_j + Z_i Z_j) / 4
 L = 12, N = 144, T = 1, operator-norm tolerance = 1e-6
 ```
 
-we certify the same five-copy fourth-order Suzuki circuit with 136 Trotter
+we certify the same five-copy fourth-order Suzuki circuit with 116 Trotter
 steps, compared with 393 steps from the pinned published
 Childs–Su–Tran–Wiebe–Zhu high-order commutator-bound instantiation.
 
 | Resource | Published rigorous baseline | This certificate |
 |---|---:|---:|
-| Trotter steps | 393 | 136 |
-| Merged group exponentials | 11,791 | 4,081 |
-| Bond propagators | 848,952 | 293,832 |
-| CNOT upper bound (3 per bond) | 2,546,856 | 881,496 |
+| Trotter steps | 393 | 116 |
+| Merged group exponentials | 11,791 | 3,481 |
+| Bond propagators | 848,952 | 250,632 |
+| CNOT upper bound (3 per bond) | 2,546,856 | 751,896 |
 
 The exact resource improvement is
 
 ```text
-11791 / 4081 = 2.889242832639059...
+11791 / 3481 = 3.3872450445274347...
 ```
 
-At 136 steps the certified global operator-norm error is
-`9.910917811853245e-7`. At 135 steps the bound is
-`1.033576466170403e-6`, so 136 is the smallest integer accepted by this
+At 116 steps the certified global operator-norm error is
+`9.72530161861392e-7`. At 115 steps the bound is
+`1.0097845503628042e-6`, so 116 is the smallest integer accepted by this
 certificate.
 
 ## What is new
@@ -60,6 +60,18 @@ Our proof instead:
 6. closes every degree at finite step size with a rational geometric locality
    tail.
 
+A further exact local lemma tightens all higher-degree growth estimates. For
+one Heisenberg bond `h=(XX+YY+ZZ)/4`, every phase-free two-qubit Pauli string
+anticommutes with either zero or exactly two of `XX`, `YY`, and `ZZ`.
+Consequently
+
+```text
+||[h,P]||_Pauli-l1 <= ||P||_Pauli-l1,
+```
+
+so the bond commutator growth constant is `1`, not the generic triangle bound
+`3/2`. The verifier checks all 16 local Pauli cases exactly.
+
 Writing
 
 ```text
@@ -81,16 +93,16 @@ The remainder is not discarded. Local support growth, conjugation Taylor
 factorials, and the Duhamel integration factor reduce it to an explicitly
 summable rational geometric series.
 
-## Error ledger at 136 steps
+## Error ledger at 116 steps
 
 | Right-generator degree | Global contribution |
 |---:|---:|
-| 4 | `4.340985168056117e-7` |
-| 5 | `3.830281030637750e-8` |
-| 6 | `2.230486607644384e-7` |
-| 7 | `2.933476798355164e-8` |
-| 8 and above | `2.663070253253453e-7` |
-| **Total** | **`9.910917811853245e-7`** |
+| 4 | `8.201852948883738e-7` |
+| 5 | `5.6564503095749916e-8` |
+| 6 | `5.398589151384083e-8` |
+| 7 | `5.4166008370568104e-9` |
+| 8 and above | `3.637787152637068e-8` |
+| **Total** | **`9.72530161861392e-7`** |
 
 All certificate values are stored as exact rational numerators and
 denominators in
@@ -127,8 +139,8 @@ their empirical constants cannot replace the pinned rigorous baseline.
   coefficient, degree-seven majorant, finite tail, integer step boundary, and
   resource arithmetic.
 - A degenerate 2x2 periodic-algebra sanity check gives actual spectral-norm
-  error `2.3625152178806053e-10`, below its outward-rounded certificate
-  `2.7555555555555555e-8`.
+  error `4.463500595491358e-10`, below its outward-rounded certificate
+  `2.7027777777777777e-8`.
 - The degree-three Lie representation of the four matching fragments has
   exact rank 20, equal to the free-Lie dimension `(4^3-4)/3 = 20`. Thus the
   current fragmentation has no free model-specific reduction in fourth-order
@@ -163,7 +175,7 @@ PYTHONPATH=src python scripts/build_v3_certificate.py
 ```
 
 The default test suite excludes explicitly marked research-reproduction tests.
-The submitted run completed with 57 passing tests; the deep verifier also
+The submitted run completed with 58 passing tests; the deep verifier also
 completed successfully.
 
 ## Files

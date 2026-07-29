@@ -16,6 +16,11 @@ from .rigorous_fourth import (
 IntervalWord = tuple[int, ...]
 IntervalWordSeries = list[dict[IntervalWord, RationalInterval]]
 
+# For h=(XX+YY+ZZ)/4 and any phase-free Pauli string P, either zero or
+# exactly two of XX, YY, ZZ anticommute with P.  Each nonzero commutator
+# contributes l1 weight 2/4, hence ||[h,P]||_{P,1} <= 1.
+HEISENBERG_BOND_PAULI_L1_GROWTH = Fraction(1)
+
 
 def _interval_series_identity(order: int) -> IntervalWordSeries:
     result = [{} for _ in range(order + 1)]
@@ -153,10 +158,14 @@ def certified_e7_cell_l1_majorant(
         Fraction(),
     )
     # A length-seven right-nested commutator starts from the 3/2 l1 cell
-    # density and gains at most (3/2)*s at support size s=2,...,7.
+    # density and gains at most s at support size s=2,...,7.  A matching
+    # contains at most one overlapping bond per support site, and one bond
+    # has exact Pauli-l1 growth constant one.
     nested_max = Fraction(3, 2)
     for support_size in range(2, 8):
-        nested_max *= Fraction(3 * support_size, 2)
+        nested_max *= (
+            HEISENBERG_BOND_PAULI_L1_GROWTH * support_size
+        )
     return word_l1 * nested_max / 7
 
 
@@ -175,7 +184,7 @@ def defect_tail_site_bound(
     A cell starts with Pauli-l1 density 3/2.  After ``q`` local adjoints,
     support counting gives at most
 
-        (3/2) * (3/2)**q * (q+1)!
+        (3/2) * (q+1)!
 
     per cell.  The conjugation Taylor coefficient contributes ``1/q!``;
     the Duhamel time integral contributes ``1/(q+1)``.  Those factorial
@@ -187,7 +196,9 @@ def defect_tail_site_bound(
     total = Fraction()
     for stage in stages:
         coefficient = _abs_upper(stage.coefficient)
-        ratio = Fraction(3, 2) * prefix / steps
+        ratio = (
+            HEISENBERG_BOND_PAULI_L1_GROWTH * prefix / steps
+        )
         if ratio >= 1:
             raise ValueError("step count is outside the convergence region")
         total += coefficient * ratio**first_omitted_degree / (1 - ratio)
@@ -235,12 +246,12 @@ def build_refined_fourth_order_constants(
     ) / 4
     e7_site = certified_e7_cell_l1_majorant(stages) / 4
 
-    # ad_H on an s-site Pauli term has at most 4s overlapping lattice bonds;
-    # each bond commutator multiplies l1 by at most 3/2.
-    h_e5 = 36 * e5_site
-    hh_e5 = 42 * h_e5
-    hhh_e5 = 48 * hh_e5
-    h_e7 = 48 * e7_site
+    # ad_H on an s-site Pauli term has at most 4s overlapping square-lattice
+    # bonds.  The exact single-bond Pauli-l1 growth constant is one.
+    h_e5 = 24 * e5_site
+    hh_e5 = 28 * h_e5
+    hhh_e5 = 32 * hh_e5
+    h_e7 = 32 * e7_site
 
     return RefinedFourthOrderConstants(
         stages=tuple(stages),
