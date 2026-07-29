@@ -276,5 +276,9 @@ Updated: 2026-07-29T20:47:30Z
   512,036,704 KiB at the 500000-MiB cgroup. This is no physics result and must
   not be repeated at a larger memory tier; the active changed route is the
   exact 490-side stabilizer split pending job `118189871`.
+- Exact stabilizer coefficient job `118189871` completed successfully in
+  28:58 at 6,016,104 KiB peak: all 1,906,425 cross entries were exactly zero.
+  Runmeta SHA-256 is `ad7ba185…de7b`. The split is authorized structurally;
+  next establish its independent split+SO(3) coefficient hash before solving.
 
 No user input or new credential is currently required.

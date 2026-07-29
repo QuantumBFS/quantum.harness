@@ -66,3 +66,15 @@ Before the split formulation is hashed or solved, the implementation must:
 
 SCNet job `118189871`, source commit `49bd9ea`, is the coefficient gate. A
 solver status, matching dimension, or floating residual cannot replace it.
+
+## Passing coefficient result
+
+Job `118189871` completed in 28:58 with 6,016,104 KiB peak process RSS. All
+1,906,425 cross entries were exactly zero, including 237,650/202,400 centered
+and 105,525/89,900 scalar entries per nontrivial character. Its runmeta
+SHA-256 is
+`ad7ba185507b80404b3056ae220e0346e110a256b4acaa501f93f4e35a96de7b`.
+
+The stabilizer split is therefore authorized. The next independent gate is a
+build-only fingerprint of every retained split-cone coefficient after the
+separate exact SO(3) rank-four moment projection.

@@ -1453,3 +1453,14 @@ The unchanged 975-side cones have now hit 114000, 256000, and 500000 MiB
 ceilings. A larger memory-only rerun is not decision-relevant. Continue the
 already-launched exact stabilizer coefficient gate, then hash and solve the
 490-side formulation if and only if it passes.
+
+SCNet job `118189871` passed the exact coefficient gate from commit `49bd9ea`.
+All 1,906,425 predicted within-character plus/minus entries reconstructed as
+exact zero; every per-block record is true. Wall time was 28:58 and peak
+process RSS was 6,016,104 KiB. The immutable runmeta SHA-256 is
+`ad7ba185507b80404b3056ae220e0346e110a256b4acaa501f93f4e35a96de7b`.
+This authorizes the 2,540,067-packed-entry / maximum-side-490 stabilizer split
+while retaining all three V4 characters and both spin sectors. It is not a
+feasibility or gap result. Next changed action: independently stream and hash
+the split+SO(3)-moment coefficients in build-only mode, then use that exact
+hash in a separate numerical reconstruction.

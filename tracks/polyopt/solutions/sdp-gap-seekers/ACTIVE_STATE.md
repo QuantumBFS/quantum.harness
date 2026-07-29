@@ -836,3 +836,9 @@ Updated: 2026-07-29 UTC.
   memory again: the next solve must use the exact stabilizer-split cones after
   job `118189871` authorizes them and a new independent coefficient hash is
   established.
+- Stabilizer coefficient job `118189871` completed in 28:58 at 6,016,104 KiB
+  peak and proved all 1,906,425 within-character `l=1/l=2` cross entries are
+  exactly zero. Runmeta SHA-256 is `ad7ba185…de7b`. The 2,540,067-row,
+  maximum-side-490 cone split is now authorized; this is an exact formulation
+  result, not physics. Advance the idle cone checkout and run one split
+  build-only coefficient fingerprint before any numerical solve.
