@@ -383,6 +383,48 @@ def test_local_l2_matches_tiny_exact_matrix_for_complex_amplitudes(
         ) == pytest.approx(expected[index] / values[index], abs=1.0e-12)
 
 
+def test_l2_neighbors_is_the_canonical_exact_nonzero_m_sparse_row() -> None:
+    two_q = 6
+    target_m = 1.0
+    basis = fixed_m_basis(3, two_q, target_m)
+    matrix = l_squared_matrix(basis, two_q=two_q, target_m=target_m)
+    basis_index = {state: index for index, state in enumerate(basis)}
+
+    for column, state in enumerate(basis):
+        observed = operators.l2_neighbors(
+            state,
+            two_q=two_q,
+            target_m=target_m,
+        )
+        observed_column = np.zeros(len(basis), dtype=np.complex128)
+        for target, coefficient in observed.items():
+            observed_column[basis_index[target]] += coefficient
+        np.testing.assert_allclose(observed_column, matrix[:, column], atol=1.0e-14)
+        assert observed[state] == pytest.approx(
+            compose_ladders(state, two_q).get(state, 0.0j) + 2.0
+        )
+
+
+def test_l2_neighbors_rejects_coercible_states_before_canonical_int() -> None:
+    source = (1 << 0) | (1 << 5)
+
+    for state in (True, source + 0.75, str(source)):
+        with pytest.raises(TypeError, match="state must be an integer"):
+            operators.l2_neighbors(state, two_q=5, target_m=0.0)
+
+
+def test_l2_neighbors_rejects_invalid_determinants_consistently() -> None:
+    cases = (
+        (-1, "non-negative"),
+        (1 << 6, "outside the orbital range"),
+        ((1 << 0) | (1 << 4), "requested target_m sector"),
+    )
+
+    for state, message in cases:
+        with pytest.raises(ValueError, match=message):
+            operators.l2_neighbors(state, two_q=5, target_m=0.0)
+
+
 @pytest.mark.parametrize(
     "value",
     [

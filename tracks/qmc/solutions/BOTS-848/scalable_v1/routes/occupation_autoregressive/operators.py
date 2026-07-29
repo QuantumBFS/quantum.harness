@@ -1063,13 +1063,12 @@ def _target_m2(target_m: object) -> int:
     return rounded
 
 
-def local_l2(
+def l2_neighbors(
     state: int,
     two_q: int,
     target_m: float,
-    logpsi: LogAmplitude,
-) -> complex:
-    """Evaluate ``L_- L_+ + M(M+1)`` locally in a fixed-M sector."""
+) -> NeighborMap:
+    """Return one validated sparse row of L2 in a fixed-M sector."""
 
     source, orbital_limit = _validated_state(state, two_q)
     target_m2 = _target_m2(target_m)
@@ -1085,4 +1084,21 @@ def local_l2(
     diagonal = (target_m2 / 2.0) * (target_m2 / 2.0 + 1.0)
     if diagonal != 0.0:
         neighbors[source] = neighbors.get(source, 0.0j) + diagonal
+    return {
+        target: coefficient
+        for target, coefficient in neighbors.items()
+        if coefficient != 0.0
+    }
+
+
+def local_l2(
+    state: int,
+    two_q: int,
+    target_m: float,
+    logpsi: LogAmplitude,
+) -> complex:
+    """Evaluate ``L_- L_+ + M(M+1)`` locally in a fixed-M sector."""
+
+    source, _orbital_limit = _validated_state(state, two_q)
+    neighbors = l2_neighbors(source, two_q, target_m)
     return local_from_log_neighbors(source, neighbors, logpsi)

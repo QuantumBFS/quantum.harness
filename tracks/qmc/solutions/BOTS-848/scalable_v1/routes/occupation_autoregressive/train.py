@@ -9,6 +9,7 @@ import math
 import os
 import tempfile
 import zipfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from numbers import Integral, Real
 from pathlib import Path
@@ -19,10 +20,9 @@ import numpy as np
 from .model import AutoregressiveNQS
 from .operators import (
     PreparedPairOperator,
-    compose_ladders,
+    l2_neighbors,
     local_energy,
     local_from_log_neighbors,
-    local_l2,
 )
 
 
@@ -48,6 +48,12 @@ def _finite_real(name: str, value: object, *, positive: bool = False) -> float:
     if positive and result <= 0.0:
         raise ValueError(f"{name} must be positive")
     return result
+
+
+def _state_integer(state: object) -> int:
+    if isinstance(state, bool) or not isinstance(state, Integral):
+        raise TypeError("state must be an integer")
+    return int(state)
 
 
 def _finite_vector(name: str, values: object) -> np.ndarray:
@@ -95,8 +101,41 @@ def _complex_sample_vector(name: str, values: object) -> np.ndarray:
     return array
 
 
+def _complex_score_matrix(name: str, scores: object) -> np.ndarray:
+    try:
+        array = np.asarray(scores, dtype=np.complex128)
+    except (TypeError, ValueError) as error:
+        raise TypeError(f"{name} must contain numeric values") from error
+    if array.ndim != 2:
+        raise ValueError(f"{name} must have shape (samples, parameters)")
+    if not np.all(np.isfinite(array.real)) or not np.all(np.isfinite(array.imag)):
+        raise ValueError(f"{name} must contain only finite values")
+    return array
+
+
 def _hermitian_expectation(values: np.ndarray, weights: np.ndarray) -> float:
     return float(np.sum(weights * values).real)
+
+
+def _score_covariance_from_arrays(
+    scores: np.ndarray,
+    local_values: np.ndarray,
+    weights: np.ndarray,
+) -> np.ndarray:
+    conjugate_scores = scores.conj()
+    centered_scores = conjugate_scores - np.sum(
+        weights[:, None] * conjugate_scores,
+        axis=0,
+    )
+    centered_values = local_values - np.sum(weights * local_values)
+    covariance = np.sum(
+        weights[:, None] * centered_scores * centered_values[:, None],
+        axis=0,
+    )
+    gradient = np.asarray(2.0 * np.real(covariance), dtype=np.float64)
+    if not np.all(np.isfinite(gradient)):
+        raise FloatingPointError("non-finite VMC score covariance")
+    return gradient
 
 
 def score_covariance(
@@ -107,37 +146,19 @@ def score_covariance(
 ) -> np.ndarray:
     """Return ``2 Re Cov(conj(d log psi), local)`` for real parameters."""
 
-    try:
-        score_array = np.asarray(scores, dtype=np.complex128)
-        value_array = np.asarray(local_values, dtype=np.complex128)
-    except (TypeError, ValueError) as error:
-        raise TypeError("scores and local_values must be numeric") from error
-    if score_array.ndim != 2:
-        raise ValueError("scores must have shape (samples, parameters)")
+    score_array = _complex_score_matrix("scores", scores)
+    value_array = _complex_sample_vector("local_values", local_values)
     if value_array.ndim != 1 or value_array.shape[0] != score_array.shape[0]:
         raise ValueError("local_values must contain one value per score row")
     sample_count = score_array.shape[0]
     if sample_count == 0:
         raise ValueError("score covariance requires at least one sample")
-    if not (
-        np.all(np.isfinite(score_array.real))
-        and np.all(np.isfinite(score_array.imag))
-        and np.all(np.isfinite(value_array.real))
-        and np.all(np.isfinite(value_array.imag))
-    ):
-        raise ValueError("score covariance inputs must be finite")
     normalized_weights = _normalized_weights(weights, sample_count)
-    conjugate_scores = score_array.conj()
-    mean_scores = np.sum(normalized_weights[:, None] * conjugate_scores, axis=0)
-    mean_values = np.sum(normalized_weights * value_array)
-    covariance = np.sum(
-        normalized_weights[:, None] * conjugate_scores * value_array[:, None],
-        axis=0,
-    ) - mean_scores * mean_values
-    gradient = np.asarray(2.0 * np.real(covariance), dtype=np.float64)
-    if not np.all(np.isfinite(gradient)):
-        raise FloatingPointError("non-finite VMC score covariance")
-    return gradient
+    return _score_covariance_from_arrays(
+        score_array,
+        value_array,
+        normalized_weights,
+    )
 
 
 def physical_l2_variance(
@@ -161,25 +182,22 @@ def physical_l2_variance(
     return variance
 
 
-def _l2_neighbors(state: int, two_q: int, target_m: float) -> dict[int, complex]:
-    neighbors = compose_ladders(state, two_q)
-    if isinstance(target_m, bool) or not isinstance(target_m, Real):
-        raise TypeError("target_m must be a finite integer or half-integer")
-    value = float(target_m)
-    if not math.isfinite(value) or 2.0 * value != round(2.0 * value):
-        raise ValueError("target_m must be a finite integer or half-integer")
-    source = int(state)
-    actual_m2 = sum(
-        -int(two_q) + 2 * orbital
-        for orbital in range(int(two_q) + 1)
-        if source & (1 << orbital)
-    )
-    if actual_m2 != round(2.0 * value):
-        raise ValueError("state is not in the requested target_m sector")
-    diagonal = value * (value + 1.0)
-    if diagonal != 0.0:
-        neighbors[source] = neighbors.get(source, 0.0j) + diagonal
-    return neighbors
+def _compose_l2_rows(
+    source_row: Mapping[int, complex],
+    l2_row: Callable[[int], Mapping[int, complex]],
+) -> dict[int, complex]:
+    final_row: dict[int, complex] = {}
+    for intermediate, first_coefficient in source_row.items():
+        for final, second_coefficient in l2_row(intermediate).items():
+            final_row[final] = (
+                final_row.get(final, 0.0j)
+                + first_coefficient * second_coefficient
+            )
+    return {
+        target: coefficient
+        for target, coefficient in final_row.items()
+        if coefficient != 0.0
+    }
 
 
 def local_l4(
@@ -190,27 +208,18 @@ def local_l4(
 ) -> complex:
     """Evaluate L4 by sparse composition of two L2 rows."""
 
-    source = int(state)
-    final_row: dict[int, complex] = {}
-    for intermediate, first_coefficient in _l2_neighbors(
-        source,
-        two_q,
-        target_m,
-    ).items():
-        for final, second_coefficient in _l2_neighbors(
-            intermediate,
-            two_q,
-            target_m,
-        ).items():
-            final_row[final] = (
-                final_row.get(final, 0.0j)
-                + first_coefficient * second_coefficient
-            )
-    final_row = {
-        target: coefficient
-        for target, coefficient in final_row.items()
-        if coefficient != 0.0
-    }
+    source = _state_integer(state)
+    row_cache: dict[int, dict[int, complex]] = {}
+
+    def row(raw_state: int) -> dict[int, complex]:
+        configuration = _state_integer(raw_state)
+        cached = row_cache.get(configuration)
+        if cached is None:
+            cached = l2_neighbors(configuration, two_q, target_m)
+            row_cache[configuration] = cached
+        return cached
+
+    final_row = _compose_l2_rows(row(source), row)
     return local_from_log_neighbors(source, final_row, logpsi)
 
 
@@ -231,14 +240,19 @@ def reduced_objective_and_gradient(
 
     ground_energy_array = _complex_sample_vector("ground_energy", ground_energy)
     ground_l2_array = _complex_sample_vector("ground_l2", ground_l2)
-    ground_l4_array = _complex_sample_vector("ground_l4", ground_l4)
+    ground_l4_array = (
+        None
+        if ground_l4 is None
+        else _complex_sample_vector("ground_l4", ground_l4)
+    )
     excited_energy_array = _complex_sample_vector("excited_energy", excited_energy)
     excited_l2_array = _complex_sample_vector("excited_l2", excited_l2)
     excited_l4_array = _complex_sample_vector("excited_l4", excited_l4)
-    if not (
-        ground_energy_array.shape
-        == ground_l2_array.shape
-        == ground_l4_array.shape
+    ground_score_array = _complex_score_matrix("ground_scores", ground_scores)
+    excited_score_array = _complex_score_matrix("excited_scores", excited_scores)
+    if ground_energy_array.shape != ground_l2_array.shape or (
+        ground_l4_array is not None
+        and ground_l4_array.shape != ground_energy_array.shape
     ):
         raise ValueError("ground local estimators must have the same shape")
     if not (
@@ -247,6 +261,14 @@ def reduced_objective_and_gradient(
         == excited_l4_array.shape
     ):
         raise ValueError("excited local estimators must have the same shape")
+    if ground_score_array.shape[0] != ground_energy_array.shape[0]:
+        raise ValueError("ground_scores must contain one row per ground sample")
+    if excited_score_array.shape[0] != excited_energy_array.shape[0]:
+        raise ValueError("excited_scores must contain one row per excited sample")
+    if ground_score_array.shape[1] != excited_score_array.shape[1]:
+        raise ValueError(
+            "ground_scores and excited_scores must have the same parameter count"
+        )
     ground_normalized_weights = _normalized_weights(
         ground_weights,
         ground_energy_array.shape[0],
@@ -289,35 +311,35 @@ def reduced_objective_and_gradient(
         + 0.05 * variance_l2_excited
     )
 
-    ground_l2_gradient = score_covariance(
-        ground_scores,
+    ground_l2_gradient = _score_covariance_from_arrays(
+        ground_score_array,
         ground_l2_array,
-        weights=ground_normalized_weights,
+        ground_normalized_weights,
     )
-    excited_l2_gradient = score_covariance(
-        excited_scores,
+    excited_l2_gradient = _score_covariance_from_arrays(
+        excited_score_array,
         excited_l2_array,
-        weights=excited_normalized_weights,
+        excited_normalized_weights,
     )
     gradient = (
-        score_covariance(
-            ground_scores,
+        _score_covariance_from_arrays(
+            ground_score_array,
             ground_energy_array,
-            weights=ground_normalized_weights,
+            ground_normalized_weights,
         )
-        + score_covariance(
-            excited_scores,
+        + _score_covariance_from_arrays(
+            excited_score_array,
             excited_energy_array,
-            weights=excited_normalized_weights,
+            excited_normalized_weights,
         )
         + 0.5 * mean_l2_ground * ground_l2_gradient
         + 0.5 * (mean_l2_excited - 6.0) * excited_l2_gradient
         + 0.05
         * (
-            score_covariance(
-                excited_scores,
+            _score_covariance_from_arrays(
+                excited_score_array,
                 excited_l4_array,
-                weights=excited_normalized_weights,
+                excited_normalized_weights,
             )
             - 2.0 * mean_l2_excited * excited_l2_gradient
         )
@@ -551,59 +573,82 @@ def _sector_estimators(
     operator: PreparedPairOperator,
     states: np.ndarray,
     sector: str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    *,
+    include_l4: bool = True,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray]:
+    if not isinstance(include_l4, bool):
+        raise TypeError("include_l4 must be a boolean")
     logpsi_cache: dict[int, complex] = {}
+    l2_row_cache: dict[int, dict[int, complex]] = {}
 
     def logpsi(raw_state: int) -> complex:
-        state = int(raw_state)
+        state = _state_integer(raw_state)
         value = logpsi_cache.get(state)
         if value is None:
             value = model.logpsi(state, sector)
             logpsi_cache[state] = value
         return value
 
-    cache: dict[int, tuple[complex, complex, complex, np.ndarray]] = {}
+    def l2_row(raw_state: int) -> dict[int, complex]:
+        state = _state_integer(raw_state)
+        row = l2_row_cache.get(state)
+        if row is None:
+            row = l2_neighbors(state, two_q=model.two_q, target_m=0.0)
+            l2_row_cache[state] = row
+        return row
+
+    cache: dict[int, tuple[complex, complex, complex | None, np.ndarray]] = {}
     energies: list[complex] = []
     l2_values: list[complex] = []
     l4_values: list[complex] = []
     scores: list[np.ndarray] = []
     for raw_state in states:
-        state = int(raw_state)
+        state = _state_integer(raw_state)
         evaluated = cache.get(state)
         if evaluated is None:
+            source_row = l2_row(state)
+            l4_value = (
+                local_from_log_neighbors(
+                    state,
+                    _compose_l2_rows(source_row, l2_row),
+                    logpsi,
+                )
+                if include_l4
+                else None
+            )
             evaluated = (
                 local_energy(state, operator=operator, logpsi=logpsi),
-                local_l2(
+                local_from_log_neighbors(
                     state,
-                    two_q=model.two_q,
-                    target_m=0.0,
-                    logpsi=logpsi,
+                    source_row,
+                    logpsi,
                 ),
-                local_l4(
-                    state,
-                    two_q=model.two_q,
-                    target_m=0.0,
-                    logpsi=logpsi,
-                ),
+                l4_value,
                 model.log_derivative(state, sector),
             )
             cache[state] = evaluated
         energy, l2_value, l4_value, score = evaluated
         energies.append(energy)
         l2_values.append(l2_value)
-        l4_values.append(l4_value)
+        if l4_value is not None:
+            l4_values.append(l4_value)
         scores.append(score)
     energy_array = np.asarray(energies, dtype=np.complex128)
     l2_array = np.asarray(l2_values, dtype=np.complex128)
-    l4_array = np.asarray(l4_values, dtype=np.complex128)
+    l4_array = (
+        np.asarray(l4_values, dtype=np.complex128) if include_l4 else None
+    )
     score_array = np.asarray(scores, dtype=np.complex128)
     if not (
         np.all(np.isfinite(energy_array.real))
         and np.all(np.isfinite(energy_array.imag))
         and np.all(np.isfinite(l2_array.real))
         and np.all(np.isfinite(l2_array.imag))
-        and np.all(np.isfinite(l4_array.real))
-        and np.all(np.isfinite(l4_array.imag))
+        and (
+            l4_array is None
+            or np.all(np.isfinite(l4_array.real))
+            and np.all(np.isfinite(l4_array.imag))
+        )
         and np.all(np.isfinite(score_array.real))
         and np.all(np.isfinite(score_array.imag))
     ):
@@ -693,17 +738,23 @@ def run_reduced_training(
                 "excited",
                 seed=excited_seed,
             )
-            ground_energy, ground_l2, ground_l4, ground_scores = _sector_estimators(
-                model,
-                operator,
-                ground_states,
-                "ground",
+            ground_energy, ground_l2, ground_l4, ground_scores = (
+                _sector_estimators(
+                    model,
+                    operator,
+                    ground_states,
+                    "ground",
+                    include_l4=False,
+                )
             )
-            excited_energy, excited_l2, excited_l4, excited_scores = _sector_estimators(
-                model,
-                operator,
-                excited_states,
-                "excited",
+            excited_energy, excited_l2, excited_l4, excited_scores = (
+                _sector_estimators(
+                    model,
+                    operator,
+                    excited_states,
+                    "excited",
+                    include_l4=True,
+                )
             )
             objective, gradient, metrics = reduced_objective_and_gradient(
                 ground_energy=ground_energy,

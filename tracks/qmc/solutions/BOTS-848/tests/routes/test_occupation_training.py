@@ -452,7 +452,11 @@ def _zero_pair_operator(two_q: int) -> PreparedPairOperator:
     )
 
 
-def _tiny_l2_matrix(support: tuple[int, ...], two_q: int) -> np.ndarray:
+def _tiny_l2_matrix(
+    support: tuple[int, ...],
+    two_q: int,
+    target_m: float = 0.0,
+) -> np.ndarray:
     """Build a dense tiny-support reference in test code only."""
 
     index = {state: position for position, state in enumerate(support)}
@@ -460,6 +464,7 @@ def _tiny_l2_matrix(support: tuple[int, ...], two_q: int) -> np.ndarray:
     for column, state in enumerate(support):
         for target, coefficient in compose_ladders(state, two_q).items():
             matrix[index[target], column] += coefficient
+        matrix[column, column] += target_m * (target_m + 1.0)
     return matrix
 
 
@@ -560,6 +565,65 @@ def test_score_covariance_matches_explicit_complex_vmc_expression() -> None:
     np.testing.assert_allclose(observed, expected, rtol=0.0, atol=1.0e-15)
 
 
+@pytest.mark.parametrize(
+    "weights",
+    [
+        np.asarray([0.5, -0.25, 0.75]),
+        np.zeros(3),
+        np.asarray([0.2 + 0.0j, 0.3 + 0.0j, 0.5 + 0.0j]),
+        np.asarray([0.4, 0.6]),
+        np.asarray([0.5, np.inf, 0.5]),
+    ],
+    ids=("negative", "zero-sum", "complex", "wrong-length", "nonfinite"),
+)
+def test_score_covariance_rejects_invalid_weights(weights: np.ndarray) -> None:
+    scores = np.ones((3, 2), dtype=np.complex128)
+    local_values = np.ones(3, dtype=np.complex128)
+
+    with pytest.raises(ValueError, match="weights"):
+        score_covariance(scores, local_values, weights=weights)
+
+
+def test_weighted_score_covariance_is_stable_for_large_common_offsets() -> None:
+    offset = float(2**40)
+    scores = np.asarray(
+        [
+            [offset + 1.0 + 1.0j, -offset + 2.0 - 3.0j],
+            [offset - 2.0 + 4.0j, -offset - 1.0 + 2.0j],
+            [offset + 3.0 - 2.0j, -offset + 4.0 + 1.0j],
+            [offset - 4.0 + 3.0j, -offset - 3.0 - 4.0j],
+        ],
+        dtype=np.complex128,
+    )
+    local_values = np.asarray(
+        [
+            offset + 2.0 - 1.0j,
+            offset - 3.0 + 2.0j,
+            offset + 5.0,
+            offset - 1.0 - 3.0j,
+        ],
+        dtype=np.complex128,
+    )
+    weights = np.asarray([1.0, 2.0, 3.0, 4.0], dtype=np.float64)
+    normalized = weights / np.sum(weights)
+    conjugate_scores = scores.conj()
+    centered_scores = conjugate_scores - np.sum(
+        normalized[:, None] * conjugate_scores,
+        axis=0,
+    )
+    centered_values = local_values - np.sum(normalized * local_values)
+    expected = 2.0 * np.real(
+        np.sum(
+            normalized[:, None] * centered_scores * centered_values[:, None],
+            axis=0,
+        )
+    )
+
+    observed = score_covariance(scores, local_values, weights=weights)
+
+    np.testing.assert_allclose(observed, expected, rtol=0.0, atol=1.0e-12)
+
+
 def test_physical_l2_variance_differs_from_real_local_value_variance() -> None:
     model = _tiny_model(width=2)
     support = tuple(model.feasibility.enumerate_support())
@@ -624,6 +688,71 @@ def test_sparse_local_l4_matches_exact_two_hop_row_with_zero_intermediate() -> N
     assert observed == pytest.approx(expected, abs=1.0e-12)
 
 
+def test_sparse_local_l4_matches_exact_nonzero_m_two_hop_row() -> None:
+    two_q = 6
+    target_m = 1.0
+    support = FeasibilityTable.build(
+        n_electrons=3,
+        two_q=two_q,
+        target_m2=2,
+    ).enumerate_support()
+    l2_matrix = _tiny_l2_matrix(support, two_q, target_m)
+    amplitudes = np.asarray(
+        [
+            complex(1.0 + 0.15 * index, (-1) ** index * (0.2 + 0.05 * index))
+            for index in range(len(support))
+        ],
+        dtype=np.complex128,
+    )
+    source_index = next(
+        column
+        for column in range(len(support))
+        if np.count_nonzero(l2_matrix[:, column]) > 1
+    )
+    expected = (l2_matrix @ (l2_matrix @ amplitudes))[source_index] / amplitudes[
+        source_index
+    ]
+
+    observed = train.local_l4(
+        support[source_index],
+        two_q=two_q,
+        target_m=target_m,
+        logpsi=_exact_logpsi(support, amplitudes),
+    )
+
+    assert observed == pytest.approx(expected, abs=1.0e-12)
+
+
+def test_local_l4_rejects_coercible_states_before_canonical_int() -> None:
+    source = (1 << 0) | (1 << 5)
+
+    for state in (True, source + 0.75, str(source)):
+        with pytest.raises(TypeError, match="state must be an integer"):
+            train.local_l4(
+                state,
+                two_q=5,
+                target_m=0.0,
+                logpsi=lambda _state: 0.0j,
+            )
+
+
+def test_local_l4_rejects_invalid_determinants_consistently() -> None:
+    cases = (
+        (-1, "non-negative"),
+        (1 << 6, "outside the orbital range"),
+        ((1 << 0) | (1 << 4), "requested target_m sector"),
+    )
+
+    for state, message in cases:
+        with pytest.raises(ValueError, match=message):
+            train.local_l4(
+                state,
+                two_q=5,
+                target_m=0.0,
+                logpsi=lambda _state: 0.0j,
+            )
+
+
 def test_exact_reduced_objective_gradient_matches_central_difference() -> None:
     model = _tiny_model(seed=848, width=2)
     support = tuple(model.feasibility.enumerate_support())
@@ -649,7 +778,7 @@ def test_exact_reduced_objective_gradient_matches_central_difference() -> None:
     objective, analytic_gradient, metrics = train.reduced_objective_and_gradient(
         ground_energy=ground[0],
         ground_l2=ground[1],
-        ground_l4=ground[2],
+        ground_l4=None,
         ground_scores=ground[3],
         excited_energy=excited[0],
         excited_l2=excited[1],
@@ -701,6 +830,23 @@ def test_exact_reduced_objective_gradient_matches_central_difference() -> None:
     )
 
 
+def test_reduced_objective_rejects_score_parameter_width_mismatch() -> None:
+    ground_values = np.asarray([0.25, -0.5], dtype=np.complex128)
+    excited_values = np.asarray([0.75, 0.5], dtype=np.complex128)
+
+    with pytest.raises(ValueError, match="same parameter count"):
+        train.reduced_objective_and_gradient(
+            ground_energy=ground_values,
+            ground_l2=ground_values,
+            ground_l4=ground_values,
+            ground_scores=np.ones((2, 1), dtype=np.complex128),
+            excited_energy=excited_values,
+            excited_l2=excited_values,
+            excited_l4=excited_values,
+            excited_scores=np.ones((2, 2), dtype=np.complex128),
+        )
+
+
 def test_global_gradient_clipping_uses_the_l2_norm() -> None:
     clipped, before, after = clip_gradient(np.array([3.0, 4.0]), max_norm=2.0)
 
@@ -731,6 +877,64 @@ def test_sector_estimators_memoize_logpsi_only_within_one_update(
 
     assert calls
     assert set(calls.values()) == {1}
+
+
+@pytest.mark.parametrize("state", [True, 33.75, "33"])
+def test_sector_estimators_reject_coercible_states_before_canonical_int(
+    state: object,
+) -> None:
+    model = _tiny_model(width=3)
+
+    with pytest.raises(TypeError, match="state must be an integer"):
+        _sector_estimators(
+            model,
+            _zero_pair_operator(model.two_q),
+            np.asarray([state], dtype=object),
+            "ground",
+        )
+
+
+def test_sector_estimators_reuse_real_l2_rows_and_omit_ground_l4(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model(width=3)
+    source = (1 << 0) | (1 << 5)
+    states = np.asarray([source, source, source], dtype=object)
+    original_l2_neighbors = train.l2_neighbors
+    calls: Counter[int] = Counter()
+
+    def recording_l2_neighbors(
+        state: int,
+        two_q: int,
+        target_m: float,
+    ) -> dict[int, complex]:
+        calls[state] += 1
+        return original_l2_neighbors(state, two_q, target_m)
+
+    monkeypatch.setattr(train, "l2_neighbors", recording_l2_neighbors)
+
+    _energy, _l2, ground_l4, _scores = _sector_estimators(
+        model,
+        _zero_pair_operator(model.two_q),
+        states,
+        "ground",
+        include_l4=False,
+    )
+
+    assert ground_l4 is None
+    assert calls == Counter({source: 1})
+
+    calls.clear()
+    source_row = original_l2_neighbors(source, model.two_q, 0.0)
+    _sector_estimators(
+        model,
+        _zero_pair_operator(model.two_q),
+        states,
+        "excited",
+        include_l4=True,
+    )
+
+    assert calls == Counter({state: 1 for state in {source, *source_row}})
 
 
 def test_one_adam_step_matches_hand_calculated_fixture() -> None:
