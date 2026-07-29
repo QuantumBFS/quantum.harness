@@ -13,7 +13,7 @@ import pytest
 import qcontrol.artifacts as artifacts_module
 import qcontrol.experiments as experiments_module
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore
-from qcontrol.closed_loop import make_model_hessian_space
+from qcontrol.closed_loop import make_model_hessian_space, make_search_space
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
 from qcontrol.device import Observation
 from qcontrol.experiments import (
@@ -82,6 +82,29 @@ def test_model_preparation_is_bitwise_shared_across_statistical_seeds() -> None:
         prepared_first.landscape.model_basis,
         prepared_second.landscape.model_basis,
     )
+    truth_first = perturb_system(
+        prepared_first.model,
+        first.device.gap,
+        first.device.perturbation_seed,
+    )
+    truth_second = perturb_system(
+        prepared_second.model,
+        second.device.gap,
+        second.device.perturbation_seed,
+    )
+    assert not np.array_equal(truth_first.drift, truth_second.drift)
+    random_search = SearchConfig("random", 1, 200)
+    search_first = make_search_space(
+        random_search,
+        prepared_first.origin,
+        seed=first.trial_seed,
+    )
+    search_second = make_search_space(
+        random_search,
+        prepared_second.origin,
+        seed=second.trial_seed,
+    )
+    assert not np.array_equal(search_first.basis, search_second.basis)
     first_spec = generate_paired_trials([first])[0]
     second_spec = generate_paired_trials([second])[0]
     assert first_spec.device_id != second_spec.device_id
