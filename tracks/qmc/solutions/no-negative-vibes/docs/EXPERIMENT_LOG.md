@@ -713,6 +713,57 @@ derived anchor kind, retains sign statuses, maps raw
 `exact_primal_certificate` to compact `certificate`, and retains the exact
 zero certificate or numerical-only diagnostics as applicable.
 
+## 2026-07-29 — Exterior exact-card Stage 1
+
+The immutable run `exterior-thin-first-v1` screened all 2,304 exact rational
+two-atom cards with the unchanged determinant oracle.  It exhaustively tested
+all mixed words at depths 2, 3, and 4 (22 words for a zero-failure card) and
+stopped at the first stable negative, complex, or uncertain result.
+
+- source commit:
+  `b90a506d0aaa38a87163be06b83f6de380a3e970`;
+- protocol hash:
+  `e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43`;
+- plan hash:
+  `b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97`;
+- execution: WSL shards 00--13 with 14 processes and CPU shards 14--75
+  with 62 processes, all BLAS thread limits one;
+- terminal accounting: 2,304 terminal, zero missing, stale, duplicate, or
+  unresolved operational candidates.
+
+| N | planned | stable negative | uncertain | shallow survivor |
+|---:|---:|---:|---:|---:|
+| 3 | 512 | 18 | 9 | 485 |
+| 4 | 1,024 | 249 | 104 | 671 |
+| 5 | 512 | 111 | 17 | 384 |
+| 6 | 256 | 76 | 7 | 173 |
+| total | 2,304 | 454 | 137 | 1,713 |
+
+There were zero complex classifications.  Stable failures concentrated at
+depth-3 word `[0,0,1]`, with a smaller depth-4 `[0,0,0,1]` population.
+Uncertain results often appeared at alternating word `[0,1,0,1]`.  The
+diagonal odd-cycle template was a known control and passed 256/256; it is not
+a novelty promotion.  The strongest discovery-yield templates were
+`exact4-graded-shear-pair` (199 survivors, no stable negatives, 57 uncertain)
+and `exact5-oddcycle-block-pair` (218 survivors, 25 stable negatives,
+13 uncertain).
+
+Interpretation: Stage 1 was an efficient falsifier but not a theorem.  The
+1,713 zero-failure cards are only finite-depth survivors, while all 137
+uncertain cards require exact-card high-precision replay and cannot be counted
+as survivors.  The transferable lesson is to preserve exact candidate
+identity and widen word depth before spending on random histories: the
+complete depth-5..8 mixed-word tranche costs only 808,536 classifications and
+fits one 76-process pass.
+
+Decision: freeze `exterior-survivor-pressure-v1`, select exactly the 1,713
+parent survivors, enumerate all mixed words at depths `[5,6,7,8]`, and retain
+the same first-failure early stop.  Run the 137 uncertain candidates in a
+disjoint high-precision replay queue.  In parallel, prioritize exact
+shared-exterior-cone search for the graded-shear and odd-cycle-block survivor
+families; exact certificates promote immediately, while finite-depth survival
+never supports an arbitrary-depth claim.
+
 ## 2026-07-29 — Task 9 exact R01 classifier
 
 ### Plan amendment and RED
