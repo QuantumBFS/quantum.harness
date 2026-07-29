@@ -1,0 +1,18 @@
+[project]
+name = "challenge-113-sim-to-real"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "cma",
+  "jax",
+  "matplotlib",
+  "numpy",
+  "scipy",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
