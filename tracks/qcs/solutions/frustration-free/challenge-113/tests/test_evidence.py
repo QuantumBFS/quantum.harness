@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 from qcontrol.evidence import (
+    REQUIRED_EVIDENCE_FILES,
     validate_deployment,
+    validate_evidence_directory,
 )
 
 
@@ -25,6 +27,13 @@ def _write_json(path: Path, payload: object) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return hashlib.sha256(data).hexdigest()
+
+
+def test_tracked_task10a_evidence_is_independently_schema_valid() -> None:
+    hashes = validate_evidence_directory(ROOT / "evidence" / "task10a")
+
+    assert set(hashes) == set(REQUIRED_EVIDENCE_FILES)
+    assert all(len(value) == 64 for value in hashes.values())
 
 
 def test_calibration_uses_canonical_representative_model_seed() -> None:

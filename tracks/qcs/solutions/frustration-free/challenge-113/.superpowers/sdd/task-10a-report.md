@@ -64,3 +64,43 @@ array manifest selects 32-way concurrency but records submission as blocked.
    authorized cluster advertises Apptainer/Singularity, so an exact locked
    execution environment is unavailable without an explicit environment
    decision outside Task 10A.
+
+## Reproducibility correction append (Task 10A findings 1/5/6/8/9)
+
+This section is append-only and supersedes the earlier seed-risk and selected
+resource-class statements above.
+
+### RED/GREEN record
+
+- RED: configuration tests failed because `ExperimentConfig` had no canonical
+  `model_seed`; model-preparation tests failed because no physics-keyed cache
+  existed.
+- GREEN: `model_seed=5` is serialized in every config/provenance payload.
+  Model optimization and landscape preparation are cached only by canonical
+  system physics plus model seed. Two-qubit `trial_seed=0` now reuses the
+  accepted seed-five model and passes.
+- RED: canonical production partition tests failed because there was no pure
+  shard-selection interface.
+- GREEN: shard counts 1, 7, 32, and 9,500 partition all 9,500 IDs exactly once
+  in stable order; invalid coordinates fail closed and full-comparator pairing
+  remains unchanged.
+- RED: evidence tests failed on the absent schema module and absent tracked
+  evidence directory; deployment-entry tests showed no archive/evidence/report
+  freshness checks.
+- GREEN: compact canonical evidence is validated independently, indexed by
+  SHA256, and bound to measured source revision
+  `f1f5ed17c576f63d23420a304bfd712af1ddf419`. Production entry points require
+  canonical deployment metadata and reject stale revision, archive, evidence,
+  or report bindings.
+
+### Corrected local gate
+
+The canonical 20-query calibration and full pilot use
+`model_seed=5`, `perturbation_seed=0`, and `trial_seed=0`. The full pilot
+completed 881 exact queries in 20.22 s wall with 860,776 KiB peak RSS and
+strict validation `valid=true`. The seed-zero model acceptance issue is closed.
+
+The direct 9,500-trial projection is provisional: 53.4 trial-hours, 427
+core-hours only if eight cores were later selected, and 5.00 GB. Resource-class
+and concurrency pilots are explicitly deferred to Task 10C. The cluster glibc
+blocker remains unchanged, and production was not submitted.
