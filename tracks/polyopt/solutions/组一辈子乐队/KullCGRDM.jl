@@ -13,6 +13,24 @@ const Sz = ComplexF64[1 0; 0 -1] / 2
 const HEISENBERG_H = kron(Sx, Sx) + kron(Sy, Sy) + kron(Sz, Sz)
 const EXACT_ENERGY = 1 / 4 - log(2)
 
+"Two-site spin-1/2 XXZ interaction in the convention SˣSˣ + SʸSʸ + ΔSᶻSᶻ."
+xxz_hamiltonian(delta::Real) = kron(Sx, Sx) + kron(Sy, Sy) + delta * kron(Sz, Sz)
+
+"Nearest-neighbour XXZ energy per two-spin cell, acting on two adjacent cells."
+function blocked_xxz_hamiltonian(delta::Real)
+    h = xxz_hamiltonian(delta)
+    identity2 = Matrix{ComplexF64}(I, 2, 2)
+    0.5 * kron(h, identity2, identity2) +
+        kron(identity2, h, identity2) +
+        0.5 * kron(identity2, identity2, h)
+end
+
+"U(1) basis charges for one physical site and one virtual bond."
+struct U1Symmetry
+    physical_charges::Vector{Int}
+    virtual_charges::Vector{Int}
+end
+
 const AXIS_CONTRACT = (
     A = (:virtual_left, :physical, :virtual_right),
     omega = (:physical_left, :virtual_left, :virtual_right, :physical_right),
@@ -408,6 +426,74 @@ function _add_hermitian_equalities!(model::JuMP.Model, lhs, rhs)
     refs
 end
 
+"Total additive charge of every tensor-product basis state, in column-major order."
+function product_charges(charges::Vararg{AbstractVector})
+    dims = Tuple(length(q) for q in charges)
+    vec([sum(charges[axis][state[axis]] for axis in eachindex(charges))
+        for state in CartesianIndices(dims)])
+end
+
+"Group basis indices by U(1) charge."
+function charge_sectors(charges::AbstractVector{<:Integer})
+    sectors = Dict{Int,Vector{Int}}()
+    for (index, charge) in pairs(charges)
+        push!(get!(sectors, Int(charge), Int[]), index)
+    end
+    sort(collect(sectors); by=first)
+end
+
+"Largest matrix element violating output_charge == input_charge."
+function equivariance_residual(K::AbstractMatrix, output_charges, input_charges)
+    size(K) == (length(output_charges), length(input_charges)) ||
+        throw(DimensionMismatch("map and charge dimensions differ"))
+    maximum((abs(K[i,j]) for i in axes(K,1), j in axes(K,2)
+        if output_charges[i] != input_charges[j]); init=0.0)
+end
+
+function mps_charge_residual(frozen::FrozenUniformMPS, symmetry::U1Symmetry)
+    frozen.physical_dimension == length(symmetry.physical_charges) ||
+        throw(DimensionMismatch("physical charge count does not match MPS"))
+    D = _uniform_bond_dimension(frozen)
+    D == length(symmetry.virtual_charges) ||
+        throw(DimensionMismatch("virtual charge count does not match MPS"))
+    maximum((abs(A[left, physical, right])
+        for A in frozen.tensors, left in 1:D, physical in 1:frozen.physical_dimension, right in 1:D
+        if symmetry.virtual_charges[right] != symmetry.virtual_charges[left] + symmetry.physical_charges[physical]); init=0.0)
+end
+
+function _block_psd_matrix(model::JuMP.Model, charges::AbstractVector{<:Integer}, base_name::String)
+    dimension = length(charges)
+    matrix = Matrix{Any}(zeros(ComplexF64, dimension, dimension))
+    blocks = Dict{Int,Any}()
+    for (charge, indices) in charge_sectors(charges)
+        n = length(indices)
+        block = @variable(model, [1:n, 1:n] in HermitianPSDCone(),
+            base_name="$(base_name)_q$(charge)")
+        blocks[charge] = block
+        for local_j in 1:n, local_i in 1:n
+            matrix[indices[local_i], indices[local_j]] = block[local_i,local_j]
+        end
+    end
+    matrix, blocks
+end
+
+function _embed_charge_blocks(blocks::AbstractDict, charges::AbstractVector{<:Integer}, transform)
+    full = zeros(ComplexF64, length(charges), length(charges))
+    for (charge, indices) in charge_sectors(charges)
+        block = transform(blocks[charge])
+        full[indices, indices] = block
+    end
+    full
+end
+
+function _project_charge_algebra(X::AbstractMatrix, charges::AbstractVector{<:Integer})
+    projected = zeros(ComplexF64, size(X))
+    for (_, indices) in charge_sectors(charges)
+        projected[indices, indices] = X[indices, indices]
+    end
+    projected
+end
+
 function _uniform_bond_dimension(frozen::FrozenUniformMPS)
     dimensions = unique(vcat([[left, right] for (left, right) in frozen.bond_dimensions]...))
     length(dimensions) == 1 || throw(ArgumentError("coarse levels require one fixed virtual bond dimension"))
@@ -481,7 +567,8 @@ end
 "Build the independent Hermitian Kull primal without running VUMPS or `optimize!`."
 function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUniformMPS}=nothing,
         depth::Int=3, k0::Union{Nothing,Int}=nothing, optimizer=nothing,
-        solver_settings=Dict{String,Any}(), vumps_upper_endpoint::Real=NaN)
+        solver_settings=Dict{String,Any}(), vumps_upper_endpoint::Real=NaN,
+        symmetry::Union{Nothing,U1Symmetry}=nothing)
     size(h, 1) == size(h, 2) || throw(DimensionMismatch("h must be square"))
     d = isqrt(size(h, 1))
     d^2 == size(h, 1) || throw(DimensionMismatch("h must act on two equal-dimensional sites"))
@@ -499,11 +586,28 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     rho_support = selected_k0 + 1
     rho_dims = ntuple(_ -> d, rho_support)
     rho_dimension = d^rho_support
+    if !isnothing(symmetry)
+        length(symmetry.physical_charges) == d ||
+            throw(DimensionMismatch("physical charge count must equal d"))
+        hcharges = product_charges(symmetry.physical_charges, symmetry.physical_charges)
+        equivariance_residual(h, hcharges, hcharges) <= 1e-12 ||
+            throw(ArgumentError("Hamiltonian does not conserve the supplied U(1) charge"))
+        !isnothing(frozen) && mps_charge_residual(frozen, symmetry) > 1e-12 &&
+            throw(ArgumentError("frozen MPS is not an intertwiner for the supplied U(1) charges"))
+    end
     model = isnothing(optimizer) ? Model() : Model(optimizer)
     for (attribute, value) in solver_settings
         set_optimizer_attribute(model, attribute, value)
     end
-    @variable(model, rho3[1:rho_dimension, 1:rho_dimension] in HermitianPSDCone())
+    symmetry_blocks = Dict{String,Any}()
+    symmetry_charges = Dict{String,Vector{Int}}()
+    if isnothing(symmetry)
+        @variable(model, rho3[1:rho_dimension, 1:rho_dimension] in HermitianPSDCone())
+    else
+        rho_charges = product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...)
+        rho3, symmetry_blocks["rho3"] = _block_psd_matrix(model, rho_charges, "rho")
+        symmetry_charges["rho3"] = rho_charges
+    end
     constraints = Dict{Symbol,Vector{Any}}(
         :normalization => Any[], :lti => Any[], :bottom => Any[], :flow => Any[])
     push!(constraints[:normalization], @constraint(model,
@@ -520,7 +624,16 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         q = d^2 * D^2
         omega_dims = (d, D, D, d)
         for m in selected_k0:depth
-            omegas[m] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name="omega_$m")
+            if isnothing(symmetry)
+                omegas[m] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name="omega_$m")
+            else
+                omega_charges = product_charges(symmetry.physical_charges,
+                    -symmetry.virtual_charges, symmetry.virtual_charges,
+                    symmetry.physical_charges)
+                omegas[m], symmetry_blocks["omega_$m"] =
+                    _block_psd_matrix(model, omega_charges, "omega_$(m)")
+                symmetry_charges["omega_$m"] = omega_charges
+            end
         end
         bridge = bottom_bridge_operators(frozen; k0=selected_k0)
         append!(constraints[:bottom], _add_hermitian_equalities!(model,
@@ -541,13 +654,26 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     end
 
     inventory = resource_inventory(d, D, depth; k0=selected_k0)
+    if !isnothing(symmetry)
+        rho_sizes = last.(charge_sectors(product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...))) .|> length
+        omega_sizes = isnothing(D) ? Int[] :
+            last.(charge_sectors(product_charges(symmetry.physical_charges,
+                -symmetry.virtual_charges, symmetry.virtual_charges,
+                symmetry.physical_charges))) .|> length
+        block_sizes = [rho_sizes; repeat(omega_sizes, depth - selected_k0 + 1)]
+        inventory = KullResourceInventory(block_sizes, length(block_sizes), sum(abs2, block_sizes),
+            inventory.linear_equalities, inventory.coefficient_storage_bytes,
+            inventory.peak_memory_bytes, inventory.estimated_wall_seconds, inventory.local_feasible)
+    end
     metadata = Dict{String,Any}(
         "depth" => depth, "n" => depth, "k0" => selected_k0,
         "rho_support" => rho_support, "omega_physical_support_offset" => 2,
         "physical_dimension" => d, "bond_dimension" => D, "hamiltonian" => Matrix{ComplexF64}(h),
         "map_fingerprint" => isnothing(frozen) ? nothing : frozen.fingerprint,
         "frozen_map" => frozen, "vumps_upper_endpoint" => Float64(vumps_upper_endpoint),
-        "representation" => "JuMP HermitianPSDCone", "optimized" => false,
+        "representation" => isnothing(symmetry) ? "JuMP HermitianPSDCone" : "U(1) block HermitianPSDCone",
+        "symmetry" => symmetry, "symmetry_blocks" => symmetry_blocks,
+        "symmetry_charges" => symmetry_charges, "optimized" => false,
         "coefficient_policy" => isnothing(frozen) ?
             Dict{String,Any}("mode" => "exact-hamiltonian-only", "complete_interval_enclosure" => true) :
             coefficient_enclosure_policy(frozen))
@@ -675,10 +801,19 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
         cursor == length(refs) || error("unconsumed flow multipliers")
     end
 
-    psd_duals = Dict{String,Matrix{ComplexF64}}(
-        "rho3" => Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.rho3))))
-    for m in sort(collect(keys(problem.omegas)))
-        psd_duals["omega_$m"] = Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.omegas[m])))
+    symmetry = problem.metadata["symmetry"]
+    if isnothing(symmetry)
+        psd_duals = Dict{String,Matrix{ComplexF64}}(
+            "rho3" => Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.rho3))))
+        for m in sort(collect(keys(problem.omegas)))
+            psd_duals["omega_$m"] = Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.omegas[m])))
+        end
+    else
+        blocks = problem.metadata["symmetry_blocks"]
+        charges = problem.metadata["symmetry_charges"]
+        psd_duals = Dict(name => _embed_charge_blocks(blocks[name], charges[name],
+                block -> Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(block))))
+            for name in keys(blocks))
     end
     projected = Dict(name => _project_psd(slack) for (name, slack) in psd_duals)
 
@@ -705,10 +840,17 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
                 partial_trace_adjoint(multipliers["flow_$(m)_right"], dims, 4)
         end
     end
-    residuals = Dict{String,Matrix{ComplexF64}}("rho3" => rho_stationarity - projected["rho3"])
+    affine_slacks = Dict{String,Matrix{ComplexF64}}("rho3" => rho_stationarity)
     for m in sort(collect(keys(omega_stationarity)))
-        residuals["omega_$m"] = omega_stationarity[m] - projected["omega_$m"]
+        affine_slacks["omega_$m"] = omega_stationarity[m]
     end
+    if !isnothing(symmetry)
+        charges = problem.metadata["symmetry_charges"]
+        affine_slacks = Dict(name => _project_charge_algebra(slack, charges[name])
+            for (name, slack) in affine_slacks)
+    end
+    projected = Dict(name => _project_psd(slack) for (name, slack) in affine_slacks)
+    residuals = Dict(name => affine_slacks[name] - projected[name] for name in keys(affine_slacks))
     residual_norms = Dict(name => opnorm(Hermitian((R + R') / 2)) for (name,R) in residuals)
     trace_ok, trace_envelope, _ = _trace_nonincreasing_diagnostic(problem)
     trace_bounds = _trace_bounds(problem)
@@ -785,7 +927,8 @@ function solve_kull_primal!(problem::KullPrimalProblem; clean_tolerance::Real=1e
         clean, clean ? "numerical-clean-optimal" : "diagnostic-only")
 end
 
-export Sx, Sy, Sz, HEISENBERG_H, EXACT_ENERGY
+export Sx, Sy, Sz, HEISENBERG_H, EXACT_ENERGY, xxz_hamiltonian, blocked_xxz_hamiltonian
+export U1Symmetry, product_charges, charge_sectors, equivariance_residual, mps_charge_residual
 export FrozenUniformMPS, frozen_fingerprint, product_frozen_mps, random_canonical_frozen_mps
 export AXIS_CONTRACT, flatten_ket, unflatten_ket, matrix_to_named_operator, named_operator_to_matrix
 export site_tensor, direct_Wm, W2, left_absorption, right_absorption, recursive_Wm

@@ -174,9 +174,74 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         @test isfinite(certificate.residual_correction)
         @test certificate.residual_correction >= 0
         @test certificate.corrected_lower_bound <= shifted_result.lower_bound_candidate + 1e-7
-        @test certificate.maximum_stationarity_residual >= 0
+        @test certificate.maximum_stationarity_residual < 1e-7
+        @test !certificate.trace_nonincreasing
+        @test certificate.trace_envelope > 1
         @test isfinite(certificate.corrected_lower_bound)
         @test certificate.map_fingerprint == map_d2.fingerprint
+    end
+
+    @testset "XXZ U(1) block-PSD regression" begin
+        delta = 0.5
+        physical_charges = [2, 0, 0, -2]
+        virtual_charges = [-1, 1]
+        symmetry = U1Symmetry(physical_charges, virtual_charges)
+        A = zeros(ComplexF64, 2, 4, 2)
+        A[1,1,2] = sqrt(0.3)
+        A[2,2,2] = sqrt(0.7)
+        A[1,3,1] = sqrt(0.7)
+        A[2,4,1] = sqrt(0.3)
+        symmetric_map = FrozenUniformMPS([A]; canonical_gauge=:left,
+            canonical_residual=norm(sum(A[:,s,:]' * A[:,s,:] for s in 1:4) - I))
+        h = blocked_xxz_hamiltonian(delta)
+
+        @test mps_charge_residual(symmetric_map, symmetry) == 0
+        @test equivariance_residual(h,
+            product_charges(physical_charges, physical_charges),
+            product_charges(physical_charges, physical_charges)) == 0
+        coarse_charges = product_charges(-virtual_charges, virtual_charges)
+        @test equivariance_residual(direct_Wm(symmetric_map, 2), coarse_charges,
+            product_charges(physical_charges, physical_charges)) == 0
+        bridge = bottom_bridge_operators(symmetric_map; k0=2)
+        @test equivariance_residual(bridge.to_trace_physical_left,
+            product_charges(-virtual_charges, virtual_charges, physical_charges),
+            product_charges(physical_charges, physical_charges, physical_charges)) == 0
+        @test equivariance_residual(bridge.to_trace_physical_right,
+            product_charges(physical_charges, -virtual_charges, virtual_charges),
+            product_charges(physical_charges, physical_charges, physical_charges)) == 0
+        flow = flow_operators(symmetric_map, 2)
+        omega_charges = product_charges(physical_charges, -virtual_charges,
+            virtual_charges, physical_charges)
+        @test equivariance_residual(flow.to_trace_physical_left,
+            product_charges(-virtual_charges, virtual_charges, physical_charges),
+            omega_charges) == 0
+        @test equivariance_residual(flow.to_trace_physical_right,
+            product_charges(physical_charges, -virtual_charges, virtual_charges),
+            omega_charges) == 0
+        @test sort(length.(last.(charge_sectors(product_charges(
+            physical_charges, physical_charges, physical_charges))))) ==
+            [1, 1, 6, 6, 15, 15, 20]
+
+        dense = build_kull_primal(h; frozen=symmetric_map, depth=2, k0=2,
+            optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        blocked = build_kull_primal(h; frozen=symmetric_map, depth=2, k0=2,
+            symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        @test dense.inventory.psd_block_dimensions == [64, 64]
+        @test blocked.inventory.psd_block_dimensions ==
+            [1, 6, 15, 20, 15, 6, 1, 1, 6, 15, 20, 15, 6, 1]
+        @test blocked.inventory.real_scalar_variables == 1848
+        @test blocked.inventory.real_scalar_variables < dense.inventory.real_scalar_variables / 4
+
+        dense_result = solve_kull_primal!(dense; print_inventory=false)
+        blocked_result = solve_kull_primal!(blocked; print_inventory=false)
+        @test dense_result.clean
+        @test blocked_result.clean
+        @test blocked_result.lower_bound_candidate ≈ dense_result.lower_bound_candidate atol=2e-7 rtol=0
+        certificate = reconstruct_dual_certificate(blocked)
+        @test certificate.maximum_stationarity_residual < 2e-7
+        @test certificate.corrected_lower_bound <= blocked_result.lower_bound_candidate + 2e-7
+        @test all(norm(certificate.psd_duals[name] -
+            certificate.psd_duals[name]') < 1e-10 for name in keys(certificate.psd_duals))
     end
 
     @testset "MATLAB D=2 regression benchmark" begin
