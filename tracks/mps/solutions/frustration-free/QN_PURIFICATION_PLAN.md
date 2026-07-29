@@ -887,4 +887,3 @@ Stop the phase without claiming completion if any of these is false:
 6. local pilot and one bounded cluster pilot satisfy named limits;
 7. QN small-bath capability is explicit and no scalable claim is made;
 8. every `N_b=48` local/cluster attempt is still refused.
-

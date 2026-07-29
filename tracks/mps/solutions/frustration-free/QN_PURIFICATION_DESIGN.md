@@ -562,4 +562,3 @@ The QN implementation phase is complete only when:
 4. direct-star/non-QN remains the default;
 5. local and cluster pilot stopping criteria in the implementation plan pass;
 6. `N_b=48` remains rejected on every target and the allowlist remains empty.
-
