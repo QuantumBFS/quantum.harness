@@ -165,5 +165,174 @@
       "summary_sha256": "30d8b09fc840c5213e6377adbfc572ee3a1161ef1db966b2bc78d4cb57468020"
     },
     "interpretation": "Five Pareto leaders replay as exact rational Gordan-Stiemke certificates excluding a one-state common quadratic metric. This does not exclude a common nonquadratic cone or the full Wei/Majorana framework."
+  },
+  "best_candidate_promotion": {
+    "schema": "oddcycle-pair-exact-promotion-result-v1",
+    "cell_id": "cell-4321",
+    "exact_points": [
+      [
+        "1/2000",
+        "11/10",
+        "9/10"
+      ],
+      [
+        "49/40",
+        "11/10",
+        "9/10"
+      ]
+    ],
+    "alphabet": [
+      "B(1/2000,11/10,9/10)",
+      "B(1/2000,11/10,9/10)^T",
+      "B(49/40,11/10,9/10)",
+      "B(49/40,11/10,9/10)^T"
+    ],
+    "path_and_orientation": {
+      "host_role": "WSL worker",
+      "source_commit": "8969305f04e0de3c24365749c2354924ed19f8fe",
+      "solver": "CLARABEL",
+      "solver_status": "optimal",
+      "rational_denominator": 1000000000,
+      "objective_margin": 2.2173650396732567e-05,
+      "verified_margin": 2.2173353992083533e-05,
+      "split_inertias_passed": 4,
+      "transition_gaps_passed": 16,
+      "time_vectors": [
+        [
+          -4,
+          -1,
+          -1,
+          8,
+          -8
+        ],
+        [
+          4,
+          1,
+          2,
+          -8,
+          6
+        ],
+        [
+          -4,
+          -2,
+          -1,
+          8,
+          -7
+        ],
+        [
+          4,
+          5,
+          1,
+          -8,
+          7
+        ]
+      ],
+      "orientation_signs": [
+        1,
+        -1,
+        1,
+        -1
+      ],
+      "time_like_vectors_passed": 4,
+      "future_preserving_transitions_passed": 16,
+      "atom_determinants": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "exact_arbitrary_word_determinant_positive": true,
+      "runtime_seconds": 1.3361,
+      "remote_summary": "/home/zibojin/code/nnv-final-verify/tracks/qmc/results/no-negative-vibes/oddcycle-pair-frontier-v1-20260729/cell-4321-path-promotion-v1/path-promotion-summary.json",
+      "summary_sha256": "edb6ef0ba9bbda6e86668a4d979c6cd71a9f07d0183d7eecb3d6309ae369b46c",
+      "script_sha256": "a1b54b982f6bdf56c2ae3d9881cc967de17acbdd0ce50f25bd68027b6252ac47"
+    },
+    "common_quadratic_exclusion": {
+      "rational_denominator": 100000000,
+      "exact_cancellation_zero": true,
+      "exact_normalization_one": true,
+      "all_four_multiplier_psd_gates_passed": true,
+      "certificate_artifact_sha256": "7cf00b71abef42f23c39d17930334247cf546cbe84cbdd883851458e5e6d1ee0"
+    },
+    "physical_transfer": {
+      "host_role": "CPU machine via WSL",
+      "source_commit": "84d757e4a5c40e96126b37fe2b4d6694b37f9856",
+      "source_worktree_preexisting_untracked_files": [
+        "oracle/oddcycle_contraction_sdp.py",
+        "oracle/oddcycle_joint_words.py",
+        "oracle/symmetric_oddcycle_discovery.py",
+        "oracle/symmetric_oddcycle_domain_runner.py"
+      ],
+      "artifact_schema": "cell-4321-exact-physical-promotion-v1",
+      "artifact_status": "exact-physical-promotion-passed",
+      "final_replay_started_utc": "2026-07-29T17:13:53.065872+00:00",
+      "final_replay_finished_utc": "2026-07-29T17:13:53.339041+00:00",
+      "fock_dimension": 32,
+      "shift": 37,
+      "shift_minus_one_minimum_row_margin": "-2051/10000",
+      "minimum_row_margin": "7949/10000",
+      "exact_symmetric_positive_definite": true,
+      "normalized_field_coefficients": [
+        "37/41",
+        "1/41",
+        "1/41",
+        "1/41",
+        "1/41"
+      ],
+      "all_field_coefficients_positive": true,
+      "negative_real_eigenvalue_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "real_log_proof_method": "descartes-zero-sign-changes",
+      "p_minus_t_coefficients": [
+        [
+          "-1",
+          "-2",
+          "-1",
+          "-1599901/200000",
+          "-16",
+          "-8"
+        ],
+        [
+          "-1",
+          "-2",
+          "-1",
+          "-1599901/200000",
+          "-16",
+          "-8"
+        ],
+        [
+          "-1",
+          "-2",
+          "-1",
+          "-27149/4000",
+          "-16",
+          "-8"
+        ],
+        [
+          "-1",
+          "-2",
+          "-1",
+          "-27149/4000",
+          "-16",
+          "-8"
+        ]
+      ],
+      "real_principal_logs_exist": true,
+      "non_gaussian_mismatch_entries": 58,
+      "first_non_gaussian_entry_zero_based": [
+        0,
+        0,
+        "4/41"
+      ],
+      "hermitian_number_conserving_interacting_hamiltonian": true,
+      "remote_result": "/home/jzb/code/nnv-longadv-hp-2ae03be/tracks/qmc/results/no-negative-vibes/cell-4321-physical-v1/result.json",
+      "result_sha256": "4661a61dc8c5d0779cdb8ca80880d1cc883d0e59b3a68d69488637656651877f"
+    },
+    "status": "exact-arbitrary-word-hermitian-interacting-candidate-promoted",
+    "interpretation": "The candidate is exactly sign-free at arbitrary auxiliary-field depth, exactly separated from a one-state common quadratic metric, and realized by a positive-field Hermitian interacting five-mode transfer. The result does not exclude a common nonquadratic cone or the full Wei/Majorana framework."
   }
 }

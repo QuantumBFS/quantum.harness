@@ -2458,6 +2458,83 @@ physical Hermitian-transfer certificates for the best robust point, then
 compare certificate complexity and presentation value against the existing
 exact candidate.
 
+### Cell-4321 exact theorem and physical promotion
+
+The best dual-interior point was promoted with two independent remote jobs:
+WSL handled the arbitrary-word Lorentz theorem and the CPU machine, reached
+only through WSL, handled the physical Fock transfer.  No scientific
+calculation ran on the local Windows machine.
+
+For the exact points
+`(p_low,q,r)=(1/2000,11/10,9/10)` and
+`(p_high,q,r)=(49/40,11/10,9/10)`, the WSL promotion solved the four-state
+path SDP once with CLARABEL and rationalized at denominator `10^9`.
+The first denominator passed: all four metrics have inertia `(1,4)` and all
+16 exact Stein gaps are positive definite.  The verified floating margin is
+`2.2173353992083533e-5`.  Four integer time vectors with scale eight,
+
+```
+(-4,-1,-1, 8,-8)
+( 4, 1, 2,-8, 6)
+(-4,-2,-1, 8,-7)
+( 4, 5, 1,-8, 7)
+```
+
+passed all four exact time-like gates and all 16 inverse-transition
+future-sheet gates with orientation signs `(1,-1,1,-1)`.  Every letter has
+determinant eight.  The Stein-inertia and coherent-time-orientation argument
+therefore gives `det(I+W)>0` for every nonempty word in the four-letter
+alphabet.  The path/orientation run took 1.336 seconds; its summary SHA-256
+is `edb6ef0ba9bbda6e86668a4d979c6cd71a9f07d0183d7eecb3d6309ae369b46c`.
+
+The independent CPU job built the 32-dimensional exact Fock lifts and found
+the minimum strictly row-dominant integer shift `c=37`.  At `c=36` the
+minimum row margin is `-2051/10000`; at `c=37` it is `7949/10000`.
+Consequently
+
+`T/41 = (37 I + Gamma(B0) + Gamma(B0)^T + Gamma(B1) + Gamma(B1)^T)/41`
+
+is real symmetric positive definite and has positive field coefficients
+`(37,1,1,1,1)/41`.  Exact characteristic-polynomial checks give zero
+negative real eigenvalues for all four letters, so their real principal
+logs exist.  The normalized grade-two Gaussian identity fails in 58
+entries, first at zero-based `(0,0)` by `4/41`; hence
+`H=-Log(T/41)` is Hermitian, number conserving, and interacting.  An
+independent exact rerun reproduced the result.  The physical result SHA-256
+is `4661a61dc8c5d0779cdb8ca80880d1cc883d0e59b3a68d69488637656651877f`.
+The CPU source commit was
+`84d757e4a5c40e96126b37fe2b4d6694b37f9856`; four pre-existing untracked
+oddcycle oracle files were present and are recorded in the protocol result,
+but the experiment neither read them as dependencies nor modified
+production code.
+
+Combined with the already exact denominator-`10^8` Gordan--Stiemke dual,
+`cell-4321` is a second complete four-letter publication candidate:
+arbitrary-word determinant positivity, exact separation from a one-state
+common quadratic metric, and a positive-field Hermitian interacting
+five-mode realization all hold for the same rational alphabet.  The safe
+boundary is unchanged: the result does not exclude the common nonquadratic
+cone, full Wei/Majorana mechanisms, or establish novelty without the
+control-to-QMC comparison.
+
+Two operational failures were retained rather than hidden.  The first WSL
+launch passed a rational string directly to `float`, and a later Windows-to-
+WSL command acquired a carriage return; both failed before the solver
+started.  On the CPU job, a matrix-sum initializer and then two SymPy symbols
+with different assumptions caused implementation exceptions after the
+already-passing Fock gates.  Minimal corrections followed by clean,
+independent reruns resolved all four issues.  Reusable lesson: keep exact
+rational inputs as `Fraction` until conversion, avoid shell-nested script
+launches across Windows/WSL, give symbolic variables one canonical
+assumption set, and distinguish pre-compute implementation errors from
+scientific gate failures.
+
+Decision: retain the original candidate as the frozen publication control
+and use `cell-4321` as the robust promoted comparison.  The next paper task
+is to compare exact integer sizes, row margins, and exposition complexity;
+the stronger dual interior alone is not a reason to replace a simpler
+frozen theorem statement.
+
 ### Non-induced exterior-grade pilot
 
 The strict-TP/non-induced exterior runner was remotely verified at commit
