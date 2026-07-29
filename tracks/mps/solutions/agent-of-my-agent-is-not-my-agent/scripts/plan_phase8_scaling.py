@@ -89,11 +89,18 @@ def _cell_command(cell: dict, fit_path: Path, run_dir: str) -> list[str]:
     ]
 
 
-def _load_summaries(root: Path) -> dict[tuple[int, float], dict]:
+def _load_summaries(
+    root: Path,
+    *,
+    sigma: float,
+) -> dict[tuple[int, float], dict]:
     summaries = {}
     for path in sorted(root.rglob("summary.json")):
         summary = json.loads(path.read_text())
         settings = summary.get("settings", {})
+        summary_sigma = settings.get("sigma")
+        if summary_sigma is None or float(summary_sigma) != sigma:
+            continue
         length = settings.get("length")
         gamma = settings.get("gamma")
         if length is None or gamma is None:
@@ -124,8 +131,8 @@ def command_decide(args: argparse.Namespace) -> None:
     if len(crossing_spec.get("cells", [])) != 2:
         raise ValueError("crossing specification must contain exactly two cells")
     phase7_decision = json.loads(args.phase7_decision.read_text())
-    summaries = _load_summaries(args.phase7_summary_root)
-    summaries.update(_load_summaries(args.summary_root))
+    summaries = _load_summaries(args.phase7_summary_root, sigma=1.75)
+    summaries.update(_load_summaries(args.summary_root, sigma=1.75))
     decision = decide_crossing(phase7_decision, summaries)
     decision["inputs"] = {
         "crossing_spec": str(args.crossing_spec),

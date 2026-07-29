@@ -638,7 +638,7 @@ git commit -m "docs: document phase8 sigma175 scaling"
 - Consumes: Task 4 crossing run spec.
 - Produces: two successful L=128 even summaries or an unresolved stop record.
 
-- [ ] **Step 1: Reconfirm compute setup**
+- [x] **Step 1: Reconfirm compute setup**
 
 Before launching, surface:
 
@@ -649,7 +649,7 @@ K=24; chi=64; rotated physical Z=Sigmax; target R_xi.
 
 Obtain explicit confirm-or-correct.
 
-- [ ] **Step 2: Confirm the local cost gate**
+- [x] **Step 2: Confirm the local cost gate**
 
 Use the measured `L=64` timing and memory provenance to estimate the two
 `L=128`, `chi=64` endpoint cells. Do not launch unless the projected wall
@@ -657,7 +657,7 @@ time is acceptable for the local campaign and the projected combined
 resident memory is below 16 GiB. If either threshold is not satisfied,
 report the estimate and stop for review.
 
-- [ ] **Step 3: Execute only the two crossing commands**
+- [x] **Step 3: Execute only the two crossing commands**
 
 Run each `cell["command"]` from the run specification with:
 
@@ -669,7 +669,7 @@ PYTHONPATH=src:. conda run -n mps <cell command>
 Use at most two concurrent processes under the confirmed memory estimate.
 Preserve each cell log and do not delete a running or failed summary.
 
-- [ ] **Step 4: Inspect convergence and update the measured cost**
+- [x] **Step 4: Inspect convergence and update the measured cost**
 
 Record for each endpoint:
 
@@ -680,7 +680,7 @@ Record for each endpoint:
 
 If either cell fails, stop.
 
-- [ ] **Step 5: Apply the strict crossing decision**
+- [x] **Step 5: Apply the strict crossing decision**
 
 Run:
 

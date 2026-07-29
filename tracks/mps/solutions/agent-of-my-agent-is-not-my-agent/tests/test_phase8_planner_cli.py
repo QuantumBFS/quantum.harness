@@ -46,14 +46,21 @@ def _fit_summary(path: Path) -> None:
     )
 
 
-def _summary(path: Path, length: int, gamma: float, r_xi: float) -> None:
+def _summary(
+    path: Path,
+    length: int,
+    gamma: float,
+    r_xi: float,
+    *,
+    sigma: float = 1.75,
+) -> None:
     path.mkdir(parents=True)
     (path / "summary.json").write_text(
         json.dumps(
             {
                 "status": "success",
                 "settings": {
-                    "sigma": 1.75,
+                    "sigma": sigma,
                     "length": length,
                     "gamma": gamma,
                     "num_exponentials": 24,
@@ -137,6 +144,13 @@ def test_decide_cli_records_unresolved_without_writing_gap_spec(
         (1.60, 0.43, 0.45),
     ):
         _summary(phase7_root / f"L64-Gamma{gamma}", 64, gamma, r64)
+        _summary(
+            phase7_root / f"sigma1.80-L64-Gamma{gamma}",
+            64,
+            gamma,
+            r64 + 0.1,
+            sigma=1.80,
+        )
         _summary(phase8_root / f"L128-Gamma{gamma}", 128, gamma, r128)
 
     decision_path = tmp_path / "analysis" / "crossing-decision.json"
