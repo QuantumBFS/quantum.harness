@@ -3,10 +3,9 @@ using JSON3
 
 include(joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl"))
 
-function minimal_runner_request()
+function minimal_runner_request(; n_bath = 2)
     gamma = 0.1
     bandwidth = 1.0
-    n_bath = 2
     epsilon = [
         bandwidth * cos(k * pi / (n_bath + 1)) for k in 1:n_bath
     ]
@@ -157,8 +156,8 @@ chain_mapping.write_chain_mapping_json(
     end
 end
 
-function chain_runner_request()
-    request = minimal_runner_request()
+function chain_runner_request(; n_bath = 2)
+    request = minimal_runner_request(; n_bath)
     payload = strict_json_read(request["payload_json"], "test request")
     mapping_json = python_chain_mapping(payload["bath_artifact_json"])
     payload["bath_geometry"] = Dict(
@@ -197,6 +196,57 @@ function mutate_mapping!(request, mutation; rehash_payload = true)
         bytes2hex(sha256(codeunits(mapping_json)))
     request["payload_json"] = canonical_request_json(payload)
     return resign_runner_request!(request)
+end
+
+function mutate_mapping_python!(request, path, replacement)
+    payload = strict_json_read(request["payload_json"], "test request")
+    geometry = payload["bath_geometry"]
+    solution_dir = normpath(joinpath(@__DIR__, "..", ".."))
+    mapping_json = mktempdir() do directory
+        input_path = joinpath(directory, "mapping.json")
+        output_path = joinpath(directory, "mutated.json")
+        write(input_path, geometry["chain_mapping_artifact_json"])
+        script = """
+import hashlib
+import json
+import pathlib
+import sys
+sys.path.insert(0, sys.argv[1])
+import chain_mapping
+mapping = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+path = json.loads(sys.argv[4])
+replacement = json.loads(sys.argv[5])
+target = mapping
+for key in path[:-1]:
+    target = target[key]
+target[path[-1]] = replacement
+mapping["sha256"] = hashlib.sha256(
+    chain_mapping._canonical_json(mapping["payload"])
+).hexdigest()
+pathlib.Path(sys.argv[3]).write_bytes(
+    chain_mapping._canonical_json(mapping) + b"\\n"
+)
+"""
+        command = `uv run --project=$solution_dir --frozen python -c $script $solution_dir $input_path $output_path $(canonical_request_json(path)) $(canonical_artifact_json(replacement))`
+        run(command)
+        read(output_path, String)
+    end
+    geometry["chain_mapping_artifact_json"] = mapping_json
+    geometry["chain_mapping_artifact_file_sha256"] =
+        bytes2hex(sha256(codeunits(mapping_json)))
+    request["payload_json"] = canonical_request_json(payload)
+    return resign_runner_request!(request)
+end
+
+function semantic_rejection_message(request)
+    try
+        write_and_read_request(request)
+    catch error
+        @test error isa ArgumentError
+        return sprint(showerror, error)
+    end
+    @test false
+    return ""
 end
 
 function mapping_output_fixture(request)
@@ -358,6 +408,81 @@ end
     for mutation in mutations
         request = mutate_mapping!(chain_runner_request(), mutation)
         @test_throws ArgumentError write_and_read_request(request)
+    end
+end
+
+@testset "runner replays every diagnostic and locks producer provenance" begin
+    for n_bath in 1:6
+        request = write_and_read_request(chain_runner_request(; n_bath))
+        @test length(request.parameters.epsilon) == n_bath
+        @test request.parameters.bath_representation === :chain
+    end
+
+    numeric_corruptions = [
+        (
+            ["payload", "numerics", "algorithm"],
+            "tampered algorithm",
+            "algorithm",
+        ),
+        (
+            ["payload", "numerics", "breakdown_tolerance"],
+            0.0,
+            "breakdown_tolerance",
+        ),
+        (
+            ["payload", "numerics", "breakdown_tolerance_rule"],
+            "tampered rule",
+            "breakdown_tolerance_rule",
+        ),
+        (
+            ["payload", "numerics", "orthogonality_max_error"],
+            0.0,
+            "orthogonality_max_error",
+        ),
+        (
+            ["payload", "numerics", "off_tridiagonal_max_abs"],
+            1.5e-30,
+            "off_tridiagonal_max_abs",
+        ),
+        (
+            ["payload", "numerics", "coupling_max_error"],
+            0.0,
+            "coupling_max_error",
+        ),
+    ]
+    for (path, replacement, field) in numeric_corruptions
+        request = mutate_mapping_python!(
+            chain_runner_request(), path, replacement
+        )
+        mapping_json = strict_json_read(
+            request["payload_json"], "test request"
+        )["bath_geometry"]["chain_mapping_artifact_json"]
+        mapping = strict_json_read(mapping_json, "mutated mapping")
+        @test canonical_chain_mapping_json(mapping) == mapping_json
+        message = semantic_rejection_message(request)
+        @test occursin(field, message)
+    end
+
+    provenance_corruptions = [
+        ("module", "not_chain_mapping"),
+        ("module_version", "9.9.9"),
+        ("python_version", "3.12.12"),
+        ("numpy_version", "2.5.0"),
+        ("schema_version", 2),
+    ]
+    for (field, replacement) in provenance_corruptions
+        request = mutate_mapping_python!(
+            chain_runner_request(),
+            ["payload", "provenance", field],
+            replacement,
+        )
+        mapping_json = strict_json_read(
+            request["payload_json"], "test request"
+        )["bath_geometry"]["chain_mapping_artifact_json"]
+        mapping = strict_json_read(mapping_json, "mutated mapping")
+        @test canonical_chain_mapping_json(mapping) == mapping_json
+        message = semantic_rejection_message(request)
+        @test occursin(field, message)
     end
 end
 

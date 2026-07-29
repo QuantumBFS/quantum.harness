@@ -400,8 +400,62 @@ const CHAIN_MAPPING_PROVENANCE_KEYS = [
     "python_version",
     "schema_version",
 ]
+const CHAIN_MAPPING_PROVENANCE = Dict(
+    "module" => "chain_mapping",
+    "module_version" => "1.0.0",
+    "numpy_version" => "2.5.1",
+    "python_version" => "3.12.13",
+    "schema_version" => 1,
+)
 const CHAIN_MAPPING_TOLERANCE_RULE =
     "64 * eps(float64) * max(1, norm(E, inf)) * n_bath"
+const CHAIN_MAPPING_DIAGNOSTIC_REPLAY_SCRIPT = raw"""
+import json
+import pathlib
+import platform
+import sys
+
+sys.path.insert(0, sys.argv[1])
+import chain_mapping
+import numpy as np
+
+if platform.python_version() != "3.12.13":
+    raise RuntimeError("chain mapping replay requires Python 3.12.13")
+if np.__version__ != "2.5.1":
+    raise RuntimeError("chain mapping replay requires NumPy 2.5.1")
+
+inputs = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+epsilon = np.asarray(inputs["epsilon"], dtype=np.float64)
+coupling = np.asarray(inputs["coupling"], dtype=np.float64)
+Q = np.asarray(inputs["Q"], dtype=np.float64)
+transformed = chain_mapping._transformed_matrix(epsilon, Q)
+off_tridiagonal = transformed.copy()
+for index in range(epsilon.size):
+    off_tridiagonal[
+        index, max(0, index - 1) : index + 2
+    ] = 0.0
+hybridization = float(np.linalg.norm(coupling))
+target = np.zeros(epsilon.size, dtype=np.float64)
+target[0] = hybridization
+diagnostics = {
+    "breakdown_tolerance": chain_mapping._breakdown_tolerance(epsilon),
+    "coupling_max_error": float(
+        np.max(np.abs(Q.T @ coupling - target), initial=0.0)
+    ),
+    "off_tridiagonal_max_abs": float(
+        np.max(np.abs(off_tridiagonal), initial=0.0)
+    ),
+    "orthogonality_max_error": float(
+        np.max(
+            np.abs(Q.T @ Q - np.eye(epsilon.size)),
+            initial=0.0,
+        )
+    ),
+}
+pathlib.Path(sys.argv[3]).write_bytes(
+    chain_mapping._canonical_json(diagnostics) + b"\n"
+)
+"""
 
 function finite_vector(value, name)
     value isa AbstractVector ||
@@ -439,6 +493,53 @@ function canonical_chain_mapping_json(mapping_artifact)
         numerics[key] = finite_number(numerics[key], "chain mapping $key")
     end
     return canonical_artifact_json(canonical) * "\n"
+end
+
+function replay_chain_mapping_diagnostics(epsilon, coupling, Q)
+    # NumPy and Julia BLAS produce observably different last-bit residuals.
+    # Replaying only the four diagnostic scalars with the source-hash-bound
+    # producer and its exact locked runtime avoids trusting self-attestation or
+    # accepting false values through a broad cross-language tolerance. Julia
+    # still independently validates every scientific invariant below.
+    solution_dir = normpath(joinpath(@__DIR__, ".."))
+    return mktempdir() do directory
+        input_path = joinpath(directory, "diagnostic-input.json")
+        output_path = joinpath(directory, "diagnostic-output.json")
+        write(
+            input_path,
+            canonical_artifact_json(
+                Dict(
+                    "epsilon" => epsilon,
+                    "coupling" => coupling,
+                    "Q" => [collect(Q[row, :]) for row in axes(Q, 1)],
+                )
+            ),
+        )
+        command = `uv run --project=$solution_dir --frozen python -c $CHAIN_MAPPING_DIAGNOSTIC_REPLAY_SCRIPT $solution_dir $input_path $output_path`
+        try
+            run(command)
+        catch error
+            throw(
+                ArgumentError(
+                    "chain mapping diagnostic replay failed: " *
+                    sprint(showerror, error)
+                ),
+            )
+        end
+        replayed = strict_json_read(
+            read(output_path), "chain mapping diagnostic replay"
+        )
+        return require_exact_keys(
+            replayed,
+            [
+                "breakdown_tolerance",
+                "coupling_max_error",
+                "off_tridiagonal_max_abs",
+                "orthogonality_max_error",
+            ],
+            "chain mapping diagnostic replay",
+        )
+    end
 end
 
 function validate_chain_mapping_artifact(
@@ -499,16 +600,12 @@ function validate_chain_mapping_artifact(
     conventions == CHAIN_MAPPING_CONVENTIONS ||
         throw(ArgumentError("unsupported chain mapping conventions"))
     numerics["algorithm"] == "two-pass fully reorthogonalized Lanczos" ||
-        throw(ArgumentError("unsupported chain mapping algorithm"))
+        throw(ArgumentError("chain mapping algorithm mismatch"))
     numerics["breakdown_tolerance_rule"] == CHAIN_MAPPING_TOLERANCE_RULE ||
-        throw(ArgumentError("unsupported chain mapping tolerance rule"))
-    provenance["module"] == "chain_mapping" &&
-        provenance["module_version"] == "1.0.0" &&
-        provenance["schema_version"] == 1 ||
-        throw(ArgumentError("unsupported chain mapping provenance"))
-    for key in ("python_version", "numpy_version")
-        provenance[key] isa AbstractString && !isempty(provenance[key]) ||
-            throw(ArgumentError("chain mapping provenance $key must be nonempty"))
+        throw(ArgumentError("chain mapping breakdown_tolerance_rule mismatch"))
+    for (key, expected) in CHAIN_MAPPING_PROVENANCE
+        provenance[key] == expected ||
+            throw(ArgumentError("chain mapping provenance $key mismatch"))
     end
 
     epsilon = finite_vector(bath_artifact["payload"]["epsilon"], "bath epsilon")
@@ -552,23 +649,28 @@ function validate_chain_mapping_artifact(
     issorted(boundaries) && allunique(boundaries) ||
         throw(ArgumentError("deflation boundaries must be sorted and unique"))
 
-    expected_tolerance =
-        64 * eps(Float64) * max(1.0, norm(epsilon, Inf)) * n_bath
-    reported_tolerance = finite_number(
-        numerics["breakdown_tolerance"], "chain mapping breakdown tolerance"
-    )
-    reported_tolerance == expected_tolerance ||
-        throw(ArgumentError("chain mapping breakdown tolerance mismatch"))
-    validation_tolerance = 4 * expected_tolerance
+    replayed_diagnostics =
+        replay_chain_mapping_diagnostics(epsilon, coupling, Q)
     for key in (
+        "breakdown_tolerance",
         "orthogonality_max_error",
         "off_tridiagonal_max_abs",
         "coupling_max_error",
     )
         reported = finite_number(numerics[key], "chain mapping $key")
-        0 <= reported <= validation_tolerance ||
-            throw(ArgumentError("chain mapping $key is outside tolerance"))
+        replayed = finite_number(
+            replayed_diagnostics[key], "replayed chain mapping $key"
+        )
+        reported == replayed ||
+            throw(ArgumentError("chain mapping $key mismatch"))
     end
+    expected_tolerance =
+        64 * eps(Float64) * max(1.0, norm(epsilon, Inf)) * n_bath
+    finite_number(
+        numerics["breakdown_tolerance"], "chain mapping breakdown tolerance"
+    ) == expected_tolerance ||
+        throw(ArgumentError("chain mapping breakdown_tolerance mismatch"))
+    validation_tolerance = 4 * expected_tolerance
 
     identity_error = maximum_absolute(Q' * Q - I)
     identity_error <= validation_tolerance ||
