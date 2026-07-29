@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
+import math
+from numbers import Integral, Real
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,13 +13,87 @@ from qcontrol.config import SystemConfig
 ComplexMatrix = NDArray[np.complex128]
 
 
-@dataclass(frozen=True)
+def _immutable_array(
+    value: object,
+    dtype: np.dtype[np.complex128] | np.dtype[np.float64],
+) -> NDArray[np.complex128] | NDArray[np.float64]:
+    copied = np.array(value, dtype=dtype, copy=True, order="C")
+    immutable = np.frombuffer(copied.tobytes(), dtype=dtype).reshape(copied.shape)
+    immutable.setflags(write=False)
+    return immutable
+
+
+def _immutable_complex_matrix(value: object) -> ComplexMatrix:
+    return np.asarray(_immutable_array(value, np.dtype(np.complex128)))
+
+
+def _immutable_real_vector(value: object) -> NDArray[np.float64]:
+    return np.asarray(_immutable_array(value, np.dtype(np.float64)))
+
+
+@dataclass(frozen=True, eq=False)
+class _PerturbationDescriptor:
+    drift_direction: ComplexMatrix
+    control_gain_deltas: NDArray[np.float64]
+    unmodeled_direction: ComplexMatrix
+    gap: float
+    seed: int
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "drift_direction",
+            _immutable_complex_matrix(self.drift_direction),
+        )
+        object.__setattr__(
+            self,
+            "control_gain_deltas",
+            _immutable_real_vector(self.control_gain_deltas),
+        )
+        object.__setattr__(
+            self,
+            "unmodeled_direction",
+            _immutable_complex_matrix(self.unmodeled_direction),
+        )
+        object.__setattr__(self, "gap", float(self.gap))
+        object.__setattr__(self, "seed", int(self.seed))
+
+
+@dataclass(frozen=True, eq=False)
 class ControlSystem:
     drift: ComplexMatrix
     controls: tuple[ComplexMatrix, ...]
     target: ComplexMatrix
     amplitude_scales: tuple[float, ...]
     name: str
+    _perturbation: _PerturbationDescriptor | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "drift", _immutable_complex_matrix(self.drift))
+        object.__setattr__(
+            self,
+            "controls",
+            tuple(_immutable_complex_matrix(control) for control in self.controls),
+        )
+        object.__setattr__(self, "target", _immutable_complex_matrix(self.target))
+        object.__setattr__(
+            self,
+            "amplitude_scales",
+            tuple(float(scale) for scale in self.amplitude_scales),
+        )
+        if self._perturbation is not None:
+            descriptor = self._perturbation
+            object.__setattr__(
+                self,
+                "_perturbation",
+                _PerturbationDescriptor(
+                    descriptor.drift_direction,
+                    descriptor.control_gain_deltas,
+                    descriptor.unmodeled_direction,
+                    descriptor.gap,
+                    descriptor.seed,
+                ),
+            )
 
     @property
     def dimension(self) -> int:
@@ -70,7 +145,7 @@ def make_system(config: SystemConfig) -> ControlSystem:
             [[1.0, 1.0], [1.0, -1.0]],
             dtype=np.complex128,
         ) / np.sqrt(2.0)
-    else:
+    elif config.name == "two_qubit":
         zi = np.kron(z, identity)
         iz = np.kron(identity, z)
         zz = np.kron(z, z)
@@ -90,6 +165,8 @@ def make_system(config: SystemConfig) -> ControlSystem:
             ],
             dtype=np.complex128,
         )
+    else:
+        raise ValueError("system name must be 'one_qubit' or 'two_qubit'")
 
     system = ControlSystem(
         drift=drift,
@@ -137,7 +214,7 @@ def _orthogonal_residual(
 
 
 def lie_algebra_dimension(system: ControlSystem, tolerance: float = 1e-10) -> int:
-    if not isinstance(tolerance, (int, float)) or isinstance(tolerance, bool):
+    if isinstance(tolerance, (bool, np.bool_)) or not isinstance(tolerance, Real):
         raise ValueError("tolerance must be a positive finite number")
     tolerance = float(tolerance)
     if not math.isfinite(tolerance) or tolerance <= 0.0:
@@ -200,13 +277,14 @@ def _random_traceless_hermitian(
 
 
 def perturb_system(system: ControlSystem, gap: float, seed: int) -> ControlSystem:
-    if isinstance(gap, bool) or not isinstance(gap, (int, float)):
+    if isinstance(gap, (bool, np.bool_)) or not isinstance(gap, Real):
         raise ValueError("gap must be a finite nonnegative number")
     gap = float(gap)
     if not math.isfinite(gap) or gap < 0.0:
         raise ValueError("gap must be a finite nonnegative number")
-    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+    if isinstance(seed, (bool, np.bool_)) or not isinstance(seed, Integral) or seed < 0:
         raise ValueError("seed must be a nonnegative integer")
+    seed = int(seed)
     _validate_system(system)
 
     if gap == 0.0:
@@ -216,23 +294,38 @@ def perturb_system(system: ControlSystem, gap: float, seed: int) -> ControlSyste
             target=system.target.copy(),
             amplitude_scales=system.amplitude_scales,
             name=system.name,
+            _perturbation=None,
         )
+
+    model_drift_norm = float(np.linalg.norm(system.drift, "fro"))
+    if model_drift_norm == 0.0:
+        raise ValueError("positive gap requires a nonzero drift Frobenius norm")
 
     rng = np.random.default_rng(seed)
     drift_direction = _random_traceless_hermitian(rng, system.dimension)
     unmodeled_direction = _random_traceless_hermitian(rng, system.dimension)
     aggregate = np.asarray(drift_direction + unmodeled_direction, dtype=np.complex128)
     aggregate /= np.linalg.norm(aggregate, "fro")
-    perturbation_norm = gap * float(np.linalg.norm(system.drift, "fro"))
+    perturbation_norm = gap * model_drift_norm
     perturbed_drift = np.asarray(
         system.drift + perturbation_norm * aggregate,
         dtype=np.complex128,
     )
 
-    gain_changes = 1.0 + gap * rng.standard_normal(len(system.controls))
+    control_gain_deltas = np.asarray(
+        gap * rng.standard_normal(len(system.controls)),
+        dtype=np.float64,
+    )
     perturbed_controls = tuple(
-        np.asarray(gain * control, dtype=np.complex128)
-        for gain, control in zip(gain_changes, system.controls, strict=True)
+        np.asarray((1.0 + delta) * control, dtype=np.complex128)
+        for delta, control in zip(control_gain_deltas, system.controls, strict=True)
+    )
+    descriptor = _PerturbationDescriptor(
+        drift_direction=drift_direction,
+        control_gain_deltas=control_gain_deltas,
+        unmodeled_direction=unmodeled_direction,
+        gap=gap,
+        seed=seed,
     )
     truth = ControlSystem(
         drift=perturbed_drift,
@@ -240,6 +333,7 @@ def perturb_system(system: ControlSystem, gap: float, seed: int) -> ControlSyste
         target=system.target.copy(),
         amplitude_scales=system.amplitude_scales,
         name=system.name,
+        _perturbation=descriptor,
     )
     _validate_system(truth)
     return truth
