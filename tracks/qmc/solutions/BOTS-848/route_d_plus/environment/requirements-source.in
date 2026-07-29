@@ -1,0 +1,3 @@
+# Kept separate so all other dependencies are required to resolve to wheels
+# compatible with the target cluster's glibc 2.17 runtime.
+pywigxjpf==1.13.3

@@ -36,6 +36,8 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 | [Route B plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-b-continuous-holomorphic.md) | Continuous fixed-degree holomorphic NQS in five bounded attempts. |
 | [Route C plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-c-cf-flow-l2.md) | CG-coupled CF-Flow `L=2` prototype and explicit LLL-leakage decision. |
 | [Route D plan](../../../../docs/superpowers/plans/2026-07-28-challenge-15-route-d-analytic-seed-neural-correlator.md) | Analytic `L=2` projected-density mother dressed by a scalar neural correlator. |
+| [Route D+ Phase 1](docs/route-d-plus-phase1.md) | Final physics-first workflow: fixed conventions, remote JAX x64/GPU gate, and reproducible environment manifest. |
+| [AITP import source](docs/aitp-2-migration-handoff.md) | Pinned source imported into the current AITP Research Memory Entries and working Note. |
 
 ## Status
 
@@ -46,3 +48,5 @@ Larger systems, thermodynamic extrapolation, chiral-metric response, and Landau-
 - Every frozen Benchmark v0 gate passes. The candidate uses ED-sized exact `L^2` projection and Ritz optimization, so larger-N scalability and the final challenge research contribution remain future work rather than part of the v0 claim.
 - Scalable v1 Step 1 is complete: the audit-first evaluator is available through [run_scalable_evaluator.py](run_scalable_evaluator.py).
 - No scalable candidate route has been implemented. Before Step 2, the additive Route D admission creates one shared A/B/C/D base; then the four `s02a`-`s02d` lanes may proceed independently from that exact SHA.
+- Route D+ Phase 1 static scaffolding is present under `route_d_plus/environment/`. The local WSL2 host fails the Python 3.11/GPU requirements, so no local test or repository execution has been performed and Phase 2 remains gated on a remote environment manifest.
+- The current AITP Research Memory runtime is active at `/home/bhjia/physics/vmc_nqs`; the linked import source is pinned by canonical environment Entries and a working Note. Phase 1 remains gated on a successful remote environment manifest.
