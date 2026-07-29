@@ -42,6 +42,16 @@ impl CovarianceState {
         Ok(Self { width, matrix })
     }
 
+    pub fn from_matrix(width: usize, matrix: DMatrix<f64>) -> Result<Self> {
+        if width == 0 || matrix.nrows() != 2 * width || matrix.ncols() != 2 * width {
+            bail!("covariance matrix shape must be 2L by 2L");
+        }
+        if matrix.iter().any(|value| !value.is_finite()) {
+            bail!("covariance matrix entries must be finite");
+        }
+        Ok(Self { width, matrix })
+    }
+
     pub fn width(&self) -> usize {
         self.width
     }
