@@ -1946,3 +1946,45 @@ This is the desired structured set rather than an isolated survivor.
 The proof is stronger than a shared-coupling statement: it allows
 time-slice-dependent auxiliary fields `z_i`.  Focused independent replay
 of the interval-family and fixed-point tests reports 13/13 passing.
+
+### Hermitian interacting transfer and minimal novelty filter
+
+Commit `b54837c` gives an exact physical realization at the fixed member.
+In the orthonormal occupation basis let
+`Gamma(B)=directsum_{k=0}^5 Lambda^k(B)`.  Exact row arithmetic for
+`S=Gamma(B)+Gamma(B)^T` gives maximum diagonal-dominance requirement 18,
+attained at zero-based rows 19, 23, 29, and 30.  Therefore
+
+`T=19 I+Gamma(B)+Gamma(B)^T`
+
+is real symmetric positive definite with minimum exact row margin 1.
+The normalized transfer
+
+`exp(-H)=T/21`
+
+defines a Hermitian, number-conserving five-mode Hamiltonian and has the
+positive three-field decomposition with coefficients `(19,1,1)/21` and
+one-particle propagators `{I,B,B^T}`.  For every integer time depth, its
+Fock trace expands into positive scalar coefficients times the already
+proved determinant weights.  The characteristic polynomial has no root
+on the nonpositive real axis, so `A=Log(B)` is real and each nontrivial
+field is an exponential of a real one-body bilinear.
+
+The model is strictly interacting, not a disguised quadratic Hamiltonian:
+a Gaussian transfer would obey `(c+2)T_2=Lambda^2(T_1)`, whereas the exact
+difference has 58 nonzero entries and first entry 42.  The construction is
+grand-canonical and generally nonlocal with up to five-body terms; no
+canonical fixed-filling or connected-lattice claim is made.
+
+Commit `bb44271` freezes a deliberately conservative novelty audit.  Exact
+invariants exclude a split-orthogonal group reduction
+(`det(B)=8`, common bilinear-invariant nullity zero), standard
+five-dimensional Kramers pairing (odd dimension and scalar-only common
+commutant), simultaneous block decomposition (words through length five
+span all 25 dimensions of `M_5(R)`), diagonal sign/positive gauges (a
+directed cycle has invariant product `-1`), and similarity to a totally
+nonnegative alphabet (four eigenvalues are nonreal).  It does not yet
+exclude the most general 10-Majorana Wei-2024 contraction condition,
+complex Majorana reflection positivity, or a literature-level
+fermion-bag/loop equivalence.  These open checks must be resolved before
+claiming novelty beyond every known Majorana/semigroup class.
