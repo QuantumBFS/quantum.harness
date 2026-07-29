@@ -17,24 +17,26 @@ class BootstrapResult:
     widths: np.ndarray
     k_values: np.ndarray
     mean_energy: np.ndarray
-    g_mean_33: np.ndarray
-    g_mean_17: np.ndarray
-    g_draws_33: np.ndarray
-    g_draws_17: np.ndarray
-    c_draws_33: Dict[int, np.ndarray]
-    c_draws_17: Dict[int, np.ndarray]
+    g_mean_primary: np.ndarray
+    g_mean_nested: np.ndarray
+    g_draws_primary: np.ndarray
+    g_draws_nested: np.ndarray
+    c_draws_primary: Dict[int, np.ndarray]
+    c_draws_nested: Dict[int, np.ndarray]
+    primary_grid_points: int
+    nested_grid_points: int
     diagnostics: Dict[str, Any]
     seed: int
 
     @property
     def primary_standard_error(self) -> float:
-        return float(np.std(self.c_draws_33[6], ddof=1))
+        return float(np.std(self.c_draws_primary[6], ddof=1))
 
     @property
     def integration_shift(self) -> float:
         return abs(
-            float(np.mean(self.c_draws_33[6]))
-            - float(np.mean(self.c_draws_17[6]))
+            float(np.mean(self.c_draws_primary[6]))
+            - float(np.mean(self.c_draws_nested[6]))
         )
 
 
@@ -49,11 +51,11 @@ def bootstrap_mc(
     config = manifest["config"]
     mc = config["mc"]
     widths = np.asarray(config["widths"], dtype=float)
-    grid_points = mc["grid_intervals"] + 1
+    primary_grid_points = mc["grid_intervals"] + 1
     replicas = mc["replicas"]
     blocks_per_replica = mc["measurement_sweeps"] // mc["block_sweeps"]
     energies = np.full(
-        (widths.size, grid_points, replicas, blocks_per_replica),
+        (widths.size, primary_grid_points, replicas, blocks_per_replica),
         np.nan,
         dtype=float,
     )
@@ -69,9 +71,9 @@ def bootstrap_mc(
         raise ValueError("bootstrap input is missing blocks or contains non-finite values")
 
     rng = np.random.default_rng(seed)
-    energy_draws = np.empty((draws, widths.size, grid_points), dtype=float)
+    energy_draws = np.empty((draws, widths.size, primary_grid_points), dtype=float)
     for width_position in range(widths.size):
-        for k_index in range(grid_points):
+        for k_index in range(primary_grid_points):
             replica_means = np.empty((draws, replicas), dtype=float)
             for replica in range(replicas):
                 values = energies[width_position, k_index, replica]
@@ -83,36 +85,40 @@ def bootstrap_mc(
                 replica_means[:, replica] = values[indices].mean(axis=1)
             energy_draws[:, width_position, k_index] = replica_means.mean(axis=1)
 
-    k_values = np.linspace(0.0, config["critical_k"], grid_points)
-    g_draws_33 = _integrate_draws(
+    k_values = np.linspace(0.0, config["critical_k"], primary_grid_points)
+    nested_indices = slice(None, None, 2)
+    nested_grid_points = (primary_grid_points + 1) // 2
+    g_draws_primary = _integrate_draws(
         energy_draws,
         k_values,
         widths,
         config["aspect_ratio"],
     )
-    g_draws_17 = _integrate_draws(
-        energy_draws[:, :, ::2],
-        k_values[::2],
+    g_draws_nested = _integrate_draws(
+        energy_draws[:, :, nested_indices],
+        k_values[nested_indices],
         widths,
         config["aspect_ratio"],
     )
-    c_draws_33 = {
-        l_min: fit_draws(widths, g_draws_33, l_min) for l_min in FIT_WINDOWS
+    c_draws_primary = {
+        l_min: fit_draws(widths, g_draws_primary, l_min) for l_min in FIT_WINDOWS
     }
-    c_draws_17 = {
-        l_min: fit_draws(widths, g_draws_17, l_min) for l_min in FIT_WINDOWS
+    c_draws_nested = {
+        l_min: fit_draws(widths, g_draws_nested, l_min) for l_min in FIT_WINDOWS
     }
-    diagnostics = _diagnostics(energies, c_draws_33, c_draws_17)
+    diagnostics = _diagnostics(energies, c_draws_primary, c_draws_nested)
     return BootstrapResult(
         widths=widths,
         k_values=k_values,
         mean_energy=energies.mean(axis=(2, 3)),
-        g_mean_33=g_draws_33.mean(axis=0),
-        g_mean_17=g_draws_17.mean(axis=0),
-        g_draws_33=g_draws_33,
-        g_draws_17=g_draws_17,
-        c_draws_33=c_draws_33,
-        c_draws_17=c_draws_17,
+        g_mean_primary=g_draws_primary.mean(axis=0),
+        g_mean_nested=g_draws_nested.mean(axis=0),
+        g_draws_primary=g_draws_primary,
+        g_draws_nested=g_draws_nested,
+        c_draws_primary=c_draws_primary,
+        c_draws_nested=c_draws_nested,
+        primary_grid_points=primary_grid_points,
+        nested_grid_points=nested_grid_points,
         diagnostics=diagnostics,
         seed=seed,
     )
@@ -146,8 +152,8 @@ def _simpson_weights(x_values: np.ndarray) -> np.ndarray:
 
 def _diagnostics(
     energies: np.ndarray,
-    c_draws_33: Mapping[int, np.ndarray],
-    c_draws_17: Mapping[int, np.ndarray],
+    c_draws_primary: Mapping[int, np.ndarray],
+    c_draws_nested: Mapping[int, np.ndarray],
 ) -> Dict[str, Any]:
     half_z_scores = []
     replica_z_scores = []
@@ -162,17 +168,19 @@ def _diagnostics(
             for left, right in combinations(replica_blocks, 2):
                 replica_z_scores.append(_difference_z(left, right))
 
-    primary = c_draws_33[6]
+    primary = c_draws_primary[6]
     standard_error = float(np.std(primary, ddof=1))
     integration_shift = abs(
-        float(np.mean(primary)) - float(np.mean(c_draws_17[6]))
+        float(np.mean(primary)) - float(np.mean(c_draws_nested[6]))
     )
     window_stability = {}
     for l_min in (4, 8):
-        difference = abs(float(np.mean(c_draws_33[l_min])) - float(np.mean(primary)))
+        difference = abs(
+            float(np.mean(c_draws_primary[l_min])) - float(np.mean(primary))
+        )
         combined = float(
             np.sqrt(
-                np.var(c_draws_33[l_min], ddof=1)
+                np.var(c_draws_primary[l_min], ddof=1)
                 + np.var(primary, ddof=1)
             )
         )
@@ -197,6 +205,8 @@ def _diagnostics(
 
 def _difference_z(left: np.ndarray, right: np.ndarray) -> float:
     difference = abs(float(np.mean(left)) - float(np.mean(right)))
+    if left.size < 2 or right.size < 2:
+        return 0.0 if difference == 0.0 else float("inf")
     variance = float(np.var(left, ddof=1) / left.size + np.var(right, ddof=1) / right.size)
     if variance == 0.0:
         return 0.0 if difference == 0.0 else float("inf")

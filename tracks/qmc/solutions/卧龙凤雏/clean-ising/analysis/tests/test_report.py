@@ -14,6 +14,12 @@ def test_report_contains_required_sections_and_embeds_all_figures(tmp_path):
     results = synthetic_results()
     build_all_figures(results, tmp_path / "figures")
     document = build_report_document(results, tmp_path)
+    report_text = json.dumps(document, ensure_ascii=False)
+    assert "c_65−c_33" in report_text
+    assert "65-point K grid" in report_text
+    assert "33- and 65-point Simpson estimates" in report_text
+    assert "c_33−c_17" not in report_text
+    assert "17-point" not in report_text
     titles = [section["title"] for section in document["sections"]]
     assert titles == [
         "Setup",
@@ -53,7 +59,7 @@ def test_report_contains_required_sections_and_embeds_all_figures(tmp_path):
 
 def synthetic_results():
     widths = np.array([4.0, 6.0, 8.0, 10.0, 12.0, 16.0])
-    k_values = np.linspace(0.0, 0.44068679350977147, 33)
+    k_values = np.linspace(0.0, 0.44068679350977147, 65)
     exact_g = -0.9297 * widths - np.pi * 0.5 / (6.0 * widths)
     mc_g = exact_g + np.array([0.0010, -0.0005, 0.0003, -0.0002, 0.0001, 0.0002])
     mean_energy = np.asarray(
@@ -80,7 +86,9 @@ def synthetic_results():
             6: {"c": 0.503, "se": 0.014, "low": 0.477, "high": 0.530},
             8: {"c": 0.498, "se": 0.020, "low": 0.460, "high": 0.537},
         },
-        "mc_c_17": 0.501,
+        "mc_c_nested": 0.501,
+        "primary_grid_points": 65,
+        "nested_grid_points": 33,
         "diagnostics": {
             "max_half_z": 1.8,
             "max_replica_z": 2.1,

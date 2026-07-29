@@ -64,7 +64,7 @@ def analyze_run(run_dir: Path, renderer: Path, draws: int = None) -> bool:
     }
     mc_fits = {}
     for l_min in FIT_WINDOWS:
-        values = bootstrap.c_draws_33[l_min]
+        values = bootstrap.c_draws_primary[l_min]
         low, high = np.percentile(values, [2.5, 97.5])
         mc_fits[l_min] = {
             "c": float(np.mean(values)),
@@ -108,11 +108,13 @@ def analyze_run(run_dir: Path, renderer: Path, draws: int = None) -> bool:
         "k_values": bootstrap.k_values,
         "mean_energy": bootstrap.mean_energy,
         "exact_g": exact_g,
-        "mc_g": bootstrap.g_mean_33,
-        "mc_g_se": np.std(bootstrap.g_draws_33, axis=0, ddof=1),
+        "mc_g": bootstrap.g_mean_primary,
+        "mc_g_se": np.std(bootstrap.g_draws_primary, axis=0, ddof=1),
         "exact_fits": exact_fits,
         "mc_fits": mc_fits,
-        "mc_c_17": float(np.mean(bootstrap.c_draws_17[6])),
+        "mc_c_nested": float(np.mean(bootstrap.c_draws_nested[6])),
+        "primary_grid_points": bootstrap.primary_grid_points,
+        "nested_grid_points": bootstrap.nested_grid_points,
         "diagnostics": diagnostics,
         "gates": gates,
         "manifest": manifest,
@@ -134,16 +136,24 @@ def _write_processed(run_dir: Path, results: Mapping[str, Any], bootstrap) -> No
     processed = run_dir / "processed"
     processed.mkdir(parents=True, exist_ok=True)
     widths = np.asarray(results["widths"])
+    primary = results["primary_grid_points"]
+    nested = results["nested_grid_points"]
     _write_csv(
         processed / "free_energies.csv",
-        ["L", "g_exact", "g_mc_33", "g_mc_33_se", "g_mc_17"],
+        [
+            "L",
+            "g_exact",
+            f"g_mc_{primary}",
+            f"g_mc_{primary}_se",
+            f"g_mc_{nested}",
+        ],
         [
             [
                 int(width),
                 results["exact_g"][index],
                 results["mc_g"][index],
                 results["mc_g_se"][index],
-                bootstrap.g_mean_17[index],
+                bootstrap.g_mean_nested[index],
             ]
             for index, width in enumerate(widths)
         ],
@@ -204,7 +214,9 @@ def _write_processed(run_dir: Path, results: Mapping[str, Any], bootstrap) -> No
         processed / "analysis_metadata.json",
         {
             "bootstrap_seed": results["bootstrap_seed"],
-            "bootstrap_draws": int(bootstrap.g_draws_33.shape[0]),
+            "bootstrap_draws": int(bootstrap.g_draws_primary.shape[0]),
+            "primary_grid_points": bootstrap.primary_grid_points,
+            "nested_grid_points": bootstrap.nested_grid_points,
             "fit_windows": list(FIT_WINDOWS),
             "primary_fit_window": 6,
             "gates": results["gates"],

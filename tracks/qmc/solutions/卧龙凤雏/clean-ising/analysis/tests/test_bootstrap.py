@@ -7,9 +7,13 @@ def test_bootstrap_is_reproducible_and_contains_injected_half_charge():
     blocks, manifest = synthetic_blocks()
     first = bootstrap_mc(blocks, manifest, draws=200, seed=731)
     second = bootstrap_mc(blocks, manifest, draws=200, seed=731)
-    np.testing.assert_array_equal(first.g_draws_33, second.g_draws_33)
-    np.testing.assert_array_equal(first.c_draws_33[6], second.c_draws_33[6])
-    low, high = np.percentile(first.c_draws_33[6], [2.5, 97.5])
+    np.testing.assert_array_equal(first.g_draws_primary, second.g_draws_primary)
+    np.testing.assert_array_equal(
+        first.c_draws_primary[6], second.c_draws_primary[6]
+    )
+    assert first.primary_grid_points == 5
+    assert first.nested_grid_points == 3
+    low, high = np.percentile(first.c_draws_primary[6], [2.5, 97.5])
     assert low <= 0.5 <= high
     assert first.integration_shift < first.primary_standard_error
 

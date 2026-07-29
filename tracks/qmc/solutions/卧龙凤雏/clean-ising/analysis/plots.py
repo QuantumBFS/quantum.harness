@@ -91,19 +91,23 @@ def _energy_vs_k(results: Mapping[str, Any], path: Path) -> None:
 
 
 def _integration_convergence(results: Mapping[str, Any], path: Path) -> None:
-    mc_33 = results["mc_fits"][6]
-    mc_17 = float(results["mc_c_17"])
+    mc_primary = results["mc_fits"][6]
+    grid_sizes = [
+        int(results["nested_grid_points"]),
+        int(results["primary_grid_points"]),
+    ]
+    central_charges = [float(results["mc_c_nested"]), mc_primary["c"]]
     fig, axis = _figure()
     axis.errorbar(
-        [17, 33],
-        [mc_17, mc_33["c"]],
-        yerr=[mc_33["se"], mc_33["se"]],
+        grid_sizes,
+        central_charges,
+        yerr=[mc_primary["se"], mc_primary["se"]],
         fmt="o-",
         capsize=4,
         color="#377eb8",
     )
     axis.axhline(0.5, color="black", linestyle="--", linewidth=1)
-    axis.set_xticks([17, 33])
+    axis.set_xticks(grid_sizes)
     axis.set_xlabel("Integration grid points")
     axis.set_ylabel("Primary-fit central charge c")
     axis.set_title("Nested Simpson-grid convergence")
