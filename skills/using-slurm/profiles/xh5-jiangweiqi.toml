@@ -1,0 +1,79 @@
+[identity]
+name = "xh5-jiangweiqi"
+purpose = "XH5 CPU compute service"
+maintainer = "QuantumBFS"
+
+[connection]
+repo_path_remote = "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+login_shell = false
+
+[connection.ssh]
+alias = "xh5-jiangweiqi"
+
+[scheduler]
+type = "slurm"
+default_partition = "xhacnormalb"
+account = "giggleliu"
+qos = "user_jiangweiqi"
+
+[[partitions]]
+name = "xhacnormalb"
+class = "default-cpu"
+cores = 128
+memory = "513500M"
+def_mem_per_cpu = "3931M"
+max_wall = "333-00:00:00"
+
+[filesystem]
+home = "/work/home/jiangweiqi"
+scratch = "/work/share/giggleliu/jiangweiqi/results"
+project = "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194"
+quota = ""
+
+[network]
+internet_from_login = false
+internet_from_compute = false
+
+[region]
+region = "mainland_china"
+
+[limits.hard]
+max_walltime = "24:00:00"
+max_nodes = 1
+max_cpus = 128
+max_array_size = 200
+
+[limits.soft]
+warn_walltime = "08:00:00"
+warn_cpus = 64
+unusual_partitions = []
+
+[limits.paths]
+allowed_roots = [
+  "/work/share/giggleliu/jiangweiqi/results",
+  "/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/results",
+]
+
+[[gotchas]]
+symptom = "The cluster has the approved scientific Python packages but no uv or internet"
+cause = "XH5 login and compute nodes are offline"
+fix = "pass /work/share/giggleliu/jiangweiqi/quantum.harness/.venv/bin/python through harness --command"
+
+[[gotchas]]
+symptom = "Source or wheel synchronization attempts contact the public internet"
+cause = "Neither login nor compute nodes have internet access"
+fix = "transfer source with a git bundle and stage dependencies as offline wheels"
+
+[[gotchas]]
+symptom = "The Challenge 194 validation array exceeds the intended CPU service request"
+cause = "Generic site defaults do not encode the frozen validation cell resources"
+fix = "use 120 array cells with one CPU and 3800M per cell, below the 3931M DefMemPerCPU"
+
+[commands]
+squeue = "squeue -u $USER"
+sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"
+sinfo = "sinfo -o '%P %a %.10l %.6D %.6t'"
+quota_command = "sacctmgr -n -P show assoc where user=$USER format=Account,Partition,QOS,GrpTRES,MaxTRES"
+
+[notes]
+text = "Use xhacnormalb for the 120-cell Challenge 194 CPU array: one CPU, 3800M, and ten minutes per cell. Use the shared offline Python runtime and dedicated challenge repository."
