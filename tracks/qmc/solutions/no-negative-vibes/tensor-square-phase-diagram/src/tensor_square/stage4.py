@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 import hashlib
+import hmac
+import json
 import math
 from typing import Iterable
 
 from .dqmc import DQMCConfig
+from .scan import run_fingerprint
 
 
 EXPERIMENT_ID = "stage4-dense-20260729-v1"
@@ -73,6 +76,93 @@ def validate_blas_environment(environment: dict[str, str]) -> None:
     for name in BLAS_THREAD_VARIABLES:
         if environment.get(name) != "1":
             raise ValueError(f"{name} must be exactly 1 for production scans")
+
+
+def _summary_audit_failure(
+    summary: dict[str, object],
+    *,
+    policy: Stage4Policy,
+    phase: str,
+) -> str | None:
+    acceptance = float(summary.get("acceptance", float("nan")))
+    if (
+        not math.isfinite(acceptance)
+        or acceptance < policy.min_acceptance
+        or acceptance > policy.max_acceptance
+    ):
+        return f"{phase} acceptance outside audit window"
+    stability = (
+        float(summary.get("direct_sign_min", float("nan"))),
+        float(summary.get("weight_log_error_max", float("nan"))),
+        float(summary.get("density_min", float("nan"))),
+        float(summary.get("density_max", float("nan"))),
+    )
+    if (
+        not all(math.isfinite(value) for value in stability)
+        or stability[0] < 1.0 - 1.0e-8
+        or stability[1] > policy.max_weight_log_error
+        or stability[2] < -policy.density_tolerance
+        or stability[3] > 1.0 + policy.density_tolerance
+    ):
+        return f"{phase} determinant or stability audit failed"
+    return None
+
+
+def production_audit(
+    summary: dict[str, object],
+    *,
+    current_measurement_sweeps: int,
+    policy: Stage4Policy,
+) -> dict[str, object]:
+    failure = _summary_audit_failure(
+        summary, policy=policy, phase="production"
+    )
+    if failure is not None:
+        return {"status": "STOP", "reason": failure}
+    tau_values = [
+        float(summary.get(key, float("nan"))) for key in MONITORED_TAU_KEYS
+    ]
+    if any(
+        not math.isfinite(value) or value < 0.5 for value in tau_values
+    ):
+        return {
+            "status": "STOP",
+            "reason": "production autocorrelation estimate unavailable",
+        }
+    measurements = int(summary.get("measurements", 0))
+    worst_tau = max(tau_values)
+    achieved_ess = measurements / (2.0 * worst_tau)
+    audit = {
+        "worst_tau_int": worst_tau,
+        "achieved_ess": achieved_ess,
+        "measurement_sweeps": current_measurement_sweeps,
+    }
+    if achieved_ess >= policy.target_ess_per_replica:
+        return {
+            "status": "PASS",
+            "reason": "production ESS and numerical audits passed",
+            **audit,
+        }
+    required = (
+        math.ceil(2.0 * worst_tau * policy.target_ess_per_replica)
+        * policy.measure_every
+    )
+    next_measurement = max(
+        required, current_measurement_sweeps + policy.measure_every
+    )
+    if next_measurement > policy.max_measurement_sweeps:
+        return {
+            "status": "STOP",
+            "reason": "production autocorrelation cap exceeded",
+            "required_measurement_sweeps": next_measurement,
+            **audit,
+        }
+    return {
+        "status": "EXTEND",
+        "reason": "production ESS below target",
+        "next_measurement_sweeps": next_measurement,
+        **audit,
+    }
 
 
 def _scaled_label(value: float) -> str:
@@ -377,3 +467,117 @@ def replica_specs(
                 )
             )
     return specs
+
+
+def validate_pilot_replicas(
+    cell: DenseCell,
+    summaries: Iterable[dict[str, object]],
+    *,
+    policy: Stage4Policy,
+) -> str:
+    rows = list(summaries)
+    expected_specs = {
+        spec.replica: spec
+        for spec in replica_specs([cell], phase="pilot", policy=policy)
+    }
+    replicas = [int(row.get("replica", -1)) for row in rows]
+    if len(rows) != policy.pilot_replicas or set(replicas) != set(
+        expected_specs
+    ):
+        raise ValueError("pilot replica set is incomplete or duplicated")
+    source_revisions: set[str] = set()
+    for row in rows:
+        replica = int(row["replica"])
+        spec = expected_specs[replica]
+        run_spec = row.get("run_spec")
+        if not isinstance(run_spec, dict):
+            raise ValueError("pilot run_spec is missing")
+        stored_fingerprint = str(row.get("run_fingerprint", ""))
+        expected_fingerprint = run_fingerprint(run_spec)
+        if not hmac.compare_digest(stored_fingerprint, expected_fingerprint):
+            raise ValueError("pilot run fingerprint mismatch")
+        expected_fields = {
+            "experiment_id": EXPERIMENT_ID,
+            "cell_id": cell.cell_id,
+            "cell_index": cell.index,
+            "cohort": cell.cohort,
+            "pair_id": cell.pair_id,
+            "worker_id": cell.worker_id,
+            "phase": "pilot",
+            "replica": replica,
+            "seed": spec.seed,
+            "config": cell.config.as_dict(),
+            "warmup_sweeps": spec.warmup_sweeps,
+            "measurement_sweeps": spec.measurement_sweeps,
+            "measure_every": spec.measure_every,
+        }
+        if any(run_spec.get(key) != value for key, value in expected_fields.items()):
+            raise ValueError("pilot run_spec does not match frozen replica")
+        if (
+            row.get("status") != "COMPLETE"
+            or row.get("experiment_id") != EXPERIMENT_ID
+            or row.get("cell_id") != cell.cell_id
+            or row.get("phase") != "pilot"
+        ):
+            raise ValueError("pilot summary identity mismatch")
+        source_revision = str(run_spec.get("source_revision", ""))
+        if not source_revision or source_revision == "unknown":
+            raise ValueError("pilot source revision is unavailable")
+        source_revisions.add(source_revision)
+    if len(source_revisions) != 1:
+        raise ValueError("pilot replicas use different source revisions")
+    return source_revisions.pop()
+
+
+def pilot_release_digest(
+    summaries: Iterable[dict[str, object]],
+) -> str:
+    records = sorted(
+        (
+            str(row["cell_id"]),
+            int(row["replica"]),
+            str(row["run_fingerprint"]),
+        )
+        for row in summaries
+    )
+    encoded = json.dumps(
+        records, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_budget_plan(
+    plan: dict[str, object],
+    *,
+    source_revision: str,
+    policy: Stage4Policy,
+) -> None:
+    if plan.get("experiment_id") != EXPERIMENT_ID:
+        raise ValueError("budget plan experiment_id mismatch")
+    if plan.get("released") is not True:
+        raise ValueError("budget plan is not released")
+    if plan.get("source_revision") != source_revision:
+        raise ValueError("budget plan source revision mismatch")
+    if plan.get("policy") != asdict(policy):
+        raise ValueError("budget plan policy mismatch")
+    digest = str(plan.get("pilot_digest", ""))
+    if len(digest) != 64 or any(
+        character not in "0123456789abcdef" for character in digest
+    ):
+        raise ValueError("budget plan pilot digest is invalid")
+    decisions = plan.get("decisions")
+    if not isinstance(decisions, dict):
+        raise ValueError("budget plan decisions are missing")
+    expected_cells = {cell.cell_id for cell in dense_grid()}
+    if set(decisions) != expected_cells:
+        raise ValueError("budget plan does not cover the frozen grid")
+    if any(
+        not isinstance(decision, dict)
+        or decision.get("status") not in {"RUN", "STOP"}
+        for decision in decisions.values()
+    ):
+        raise ValueError("budget plan contains an invalid decision")
+
+
+def shard_exit_code(results: Iterable[dict[str, object]]) -> int:
+    return int(any(result.get("status") == "ERROR" for result in results))

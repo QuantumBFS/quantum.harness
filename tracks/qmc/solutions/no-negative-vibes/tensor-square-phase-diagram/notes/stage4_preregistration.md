@@ -68,6 +68,10 @@ Falsifiers:
 - Target ESS is at least 40 per production replica. Production uses at least
   240 warmup and 640 measurement sweeps, and at most 1600 warmup and 3200
   measurement sweeps.
+- Every production replica is re-audited with its own measured worst-case
+  autocorrelation time. A replica below target is resumed from its fingerprinted
+  checkpoint to the newly required budget; pilot tau is not treated as proof of
+  production convergence.
 - Required cost above either cap is an autocorrelation early stop, not evidence
   against the phase.
 - Acceptance must lie in `[0.05, 0.995]`; direct determinant sign must remain
@@ -75,6 +79,10 @@ Falsifiers:
   must remain within `1e-7` of its physical interval.
 - WSL uses at most 14 processes, the CPU machine at most 62. OMP, OpenBLAS,
   MKL, and NumExpr are each forced to one thread.
+- A production budget is released only after the exact two pilot replicas for
+  all 90 cells pass identity, fingerprint, config, seed, and common-source
+  validation. The released pilot digest and budget-plan digest are retained in
+  production provenance.
 
 ## Interpretation gates
 

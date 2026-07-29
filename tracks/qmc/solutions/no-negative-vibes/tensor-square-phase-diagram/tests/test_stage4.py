@@ -2,6 +2,11 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+from dataclasses import asdict
+
+import pytest
+
+from tensor_square.scan import run_fingerprint
 
 
 def _stage4():
@@ -230,3 +235,146 @@ def test_production_requires_every_blas_backend_to_be_single_threaded() -> None:
             assert name in str(error)
         else:
             raise AssertionError(f"{name}=2 was accepted")
+
+
+def test_production_audit_extends_to_achieved_ess_and_stops_at_cap() -> None:
+    stage4 = _stage4()
+    policy = stage4.Stage4Policy()
+    summary = {
+        **_pilot_summary(tau=5.0),
+        "measurements": 160,
+    }
+
+    extend = stage4.production_audit(
+        summary,
+        current_measurement_sweeps=320,
+        policy=policy,
+    )
+    passed = stage4.production_audit(
+        {**summary, "measurements": 400},
+        current_measurement_sweeps=800,
+        policy=policy,
+    )
+    capped = stage4.production_audit(
+        {
+            **_pilot_summary(tau=25.0),
+            "measurements": 1600,
+        },
+        current_measurement_sweeps=3200,
+        policy=policy,
+    )
+
+    assert extend["status"] == "EXTEND"
+    assert extend["next_measurement_sweeps"] == 800
+    assert passed["status"] == "PASS"
+    assert passed["achieved_ess"] == 40.0
+    assert capped["status"] == "STOP"
+    assert capped["reason"] == "production autocorrelation cap exceeded"
+
+
+def test_production_audit_rejects_acceptance_before_complete() -> None:
+    stage4 = _stage4()
+    decision = stage4.production_audit(
+        {
+            **_pilot_summary(acceptance=0.01),
+            "measurements": 400,
+        },
+        current_measurement_sweeps=800,
+        policy=stage4.Stage4Policy(),
+    )
+    assert decision["status"] == "STOP"
+    assert decision["reason"] == "production acceptance outside audit window"
+
+
+def _pilot_payload(stage4, cell, replica: int, *, source: str = "abc123"):
+    spec = stage4.replica_specs(
+        [cell],
+        phase="pilot",
+        policy=stage4.Stage4Policy(),
+    )[replica]
+    run_spec = {
+        "experiment_id": stage4.EXPERIMENT_ID,
+        "cell_id": cell.cell_id,
+        "cell_index": cell.index,
+        "cohort": cell.cohort,
+        "pair_id": cell.pair_id,
+        "machine": "wsl",
+        "worker_id": cell.worker_id,
+        "phase": "pilot",
+        "replica": replica,
+        "seed": spec.seed,
+        "config": cell.config.as_dict(),
+        "warmup_sweeps": spec.warmup_sweeps,
+        "measurement_sweeps": spec.measurement_sweeps,
+        "measure_every": spec.measure_every,
+        "source_revision": source,
+    }
+    return {
+        "status": "COMPLETE",
+        "experiment_id": stage4.EXPERIMENT_ID,
+        "cell_id": cell.cell_id,
+        "phase": "pilot",
+        "replica": replica,
+        "run_spec": run_spec,
+        "run_fingerprint": run_fingerprint(run_spec),
+    }
+
+
+def test_pilot_release_validates_exact_replicas_fingerprints_and_source() -> None:
+    stage4 = _stage4()
+    cell = stage4.select_shard(stage4.dense_grid(), "wsl")[0]
+    rows = [_pilot_payload(stage4, cell, replica) for replica in (0, 1)]
+
+    assert stage4.validate_pilot_replicas(
+        cell, rows, policy=stage4.Stage4Policy()
+    ) == "abc123"
+
+    edited = [dict(row) for row in rows]
+    edited[1]["run_fingerprint"] = "edited"
+    with pytest.raises(ValueError, match="fingerprint"):
+        stage4.validate_pilot_replicas(
+            cell, edited, policy=stage4.Stage4Policy()
+        )
+    with pytest.raises(ValueError, match="replica"):
+        stage4.validate_pilot_replicas(
+            cell, rows[:1], policy=stage4.Stage4Policy()
+        )
+
+
+def test_budget_plan_requires_release_policy_full_grid_and_source_match() -> None:
+    stage4 = _stage4()
+    policy = stage4.Stage4Policy()
+    decisions = {
+        cell.cell_id: {"status": "STOP"} for cell in stage4.dense_grid()
+    }
+    plan = {
+        "experiment_id": stage4.EXPERIMENT_ID,
+        "released": True,
+        "source_revision": "abc123",
+        "pilot_digest": "a" * 64,
+        "policy": asdict(policy),
+        "decisions": decisions,
+    }
+
+    stage4.validate_budget_plan(
+        plan, source_revision="abc123", policy=policy
+    )
+
+    for broken in (
+        {**plan, "released": False},
+        {**plan, "source_revision": "other"},
+        {**plan, "decisions": {}},
+    ):
+        with pytest.raises(ValueError):
+            stage4.validate_budget_plan(
+                broken, source_revision="abc123", policy=policy
+            )
+
+
+def test_shard_exit_code_distinguishes_early_stop_from_worker_error() -> None:
+    stage4 = _stage4()
+    assert stage4.shard_exit_code([{"status": "COMPLETE"}]) == 0
+    assert stage4.shard_exit_code([{"status": "EARLY_STOP"}]) == 0
+    assert stage4.shard_exit_code(
+        [{"status": "COMPLETE"}, {"status": "ERROR"}]
+    ) == 1

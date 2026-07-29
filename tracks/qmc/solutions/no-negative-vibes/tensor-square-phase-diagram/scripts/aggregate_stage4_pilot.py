@@ -13,8 +13,10 @@ from tensor_square.stage4 import (
     adaptive_budget,
     dense_grid,
     EXPERIMENT_ID,
+    pilot_release_digest,
     Stage4Policy,
     synchronize_pair_budgets,
+    validate_pilot_replicas,
 )
 
 
@@ -44,16 +46,62 @@ def main() -> None:
 
     policy = Stage4Policy()
     cells = dense_grid()
+    cells_by_id = {cell.cell_id: cell for cell in cells}
     summaries_by_cell: dict[str, list[dict[str, object]]] = {}
-    errors: list[str] = []
+    validation_errors: list[str] = []
     for summary_path in sorted(
         args.output_dir.glob("cells/*/pilot/replica_*/summary.json")
     ):
         row = json.loads(summary_path.read_text(encoding="utf-8"))
         if row.get("status") != "COMPLETE":
-            errors.append(str(summary_path))
+            validation_errors.append(f"non-COMPLETE summary: {summary_path}")
             continue
-        summaries_by_cell.setdefault(str(row["cell_id"]), []).append(row)
+        path_cell_id = summary_path.parents[2].name
+        path_replica = summary_path.parent.name
+        embedded_cell_id = str(row.get("cell_id", ""))
+        embedded_replica = int(row.get("replica", -1))
+        if (
+            path_cell_id != embedded_cell_id
+            or path_replica != f"replica_{embedded_replica:02d}"
+            or embedded_cell_id not in cells_by_id
+        ):
+            validation_errors.append(f"path/identity mismatch: {summary_path}")
+            continue
+        summaries_by_cell.setdefault(embedded_cell_id, []).append(row)
+
+    source_revisions: set[str] = set()
+    for cell in cells:
+        try:
+            source_revisions.add(
+                validate_pilot_replicas(
+                    cell,
+                    summaries_by_cell.get(cell.cell_id, []),
+                    policy=policy,
+                )
+            )
+        except ValueError as error:
+            validation_errors.append(f"{cell.cell_id}: {error}")
+    if len(source_revisions) != 1:
+        validation_errors.append(
+            "pilot grid does not have one common source revision"
+        )
+    aggregate_dir = args.output_dir / "aggregate"
+    complete_replicas = sum(len(rows) for rows in summaries_by_cell.values())
+    if validation_errors:
+        budget_path = aggregate_dir / "budget_plan.json"
+        if budget_path.exists():
+            budget_path.unlink()
+        summary = {
+            "experiment_id": EXPERIMENT_ID,
+            "released": False,
+            "expected_cells": len(cells),
+            "expected_replicas": len(cells) * policy.pilot_replicas,
+            "complete_replicas": complete_replicas,
+            "validation_errors": validation_errors,
+        }
+        _atomic_json(aggregate_dir / "pilot_summary.json", summary)
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        raise RuntimeError("pilot provenance validation failed")
 
     raw_decisions = {
         cell.cell_id: adaptive_budget(
@@ -92,19 +140,28 @@ def main() -> None:
             }
         )
 
-    aggregate_dir = args.output_dir / "aggregate"
     _write_csv(aggregate_dir / "pilot_table.csv", table)
+    all_summaries = [
+        row
+        for cell in cells
+        for row in summaries_by_cell[cell.cell_id]
+    ]
+    source_revision = source_revisions.pop()
     _atomic_json(
         aggregate_dir / "budget_plan.json",
         {
             "experiment_id": EXPERIMENT_ID,
+            "released": True,
+            "source_revision": source_revision,
+            "pilot_digest": pilot_release_digest(all_summaries),
             "policy": asdict(policy),
             "decisions": decisions,
         },
     )
-    complete_replicas = sum(len(rows) for rows in summaries_by_cell.values())
     summary = {
         "experiment_id": EXPERIMENT_ID,
+        "released": True,
+        "source_revision": source_revision,
         "expected_cells": len(cells),
         "expected_replicas": len(cells) * policy.pilot_replicas,
         "complete_replicas": complete_replicas,
@@ -114,12 +171,10 @@ def main() -> None:
         "stop_cells": sum(
             decision["status"] == "STOP" for decision in decisions.values()
         ),
-        "error_summaries": errors,
+        "validation_errors": [],
     }
     _atomic_json(aggregate_dir / "pilot_summary.json", summary)
     print(json.dumps(summary, indent=2, sort_keys=True))
-    if complete_replicas != summary["expected_replicas"] or errors:
-        raise RuntimeError("pilot aggregation incomplete; production not released")
 
 
 if __name__ == "__main__":
