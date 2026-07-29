@@ -8,6 +8,12 @@ include(joinpath(
     "scripts",
     "build_shastry_full_state_spin_isotypic_mof.jl",
 ))
+include(joinpath(
+    @__DIR__,
+    "..",
+    "scripts",
+    "replay_mosek_infeasibility_artifact.jl",
+))
 
 model = JuMP.Model(MosekTools.Optimizer)
 JuMP.set_silent(model)
@@ -122,5 +128,22 @@ JuMP.optimize!(infeasible_model)
         )
         @test infeasible_solution["available"]
         @test infeasible_solution["bytes"] > 0
+        infeasible_task = write_mosek_task_artifact(
+            joinpath(directory, "infeasible.task.gz"),
+            infeasible_model,
+        )
+        replay = mosek_ray_replay_report(
+            joinpath(directory, "infeasible.task.gz"),
+            joinpath(directory, "infeasible.sol");
+            expected_task_sha256=infeasible_task["sha256"],
+            expected_solution_sha256=infeasible_solution["sha256"],
+        )
+        @test replay["audit"]["status_passed"]
+        @test replay["audit"]["finite"]
+        @test replay["audit"]["residual_passed"]
+        @test replay["audit"]["separation_passed"]
+        @test replay["audit"]["passed"]
+        @test replay["classification"] ==
+              "mosek_native_infeasibility_ray_replayed_float"
     end
 end
