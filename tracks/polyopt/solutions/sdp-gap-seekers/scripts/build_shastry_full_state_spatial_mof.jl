@@ -43,6 +43,20 @@ include(joinpath(
     "ShastryFullStateSpatialPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpatialPrimalGapJuMP
+include(joinpath(TRACK_ROOT, "src", "ShastrySutherlandOracle.jl"))
+using .ShastrySutherlandOracle
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastrySutherlandPrimalOracle.jl",
+))
+using .ShastrySutherlandPrimalOracle
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpatialOracle.jl",
+))
+using .ShastryFullStateSpatialOracle
 
 const RUNMETA_SCHEMA = "shastry-l1d2-full-state-spatial-mof-v1"
 const ALLOWED_COUPLINGS = (
@@ -169,6 +183,9 @@ function source_dict()
         "tracks/polyopt/solutions/sdp-gap-seekers/src/FullStateSymmetryReduction.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpatialReduction.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpatialPrimalGapJuMP.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastrySutherlandOracle.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastrySutherlandPrimalOracle.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpatialOracle.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spatial_mof.jl",
     ]
     dirty = git_output("status", "--porcelain", "--untracked-files=all")
@@ -324,6 +341,29 @@ function main(arguments::Vector{String}=ARGS)
     metadata["reduced"]["coefficient_map_sha256"] =
         spatial.coefficient_map_sha256
     write_checkpoint(checkpoint_path, metadata)
+
+    if iszero(options.coupling)
+        progress("analytic g=0 dimer truth on every final PSD block")
+        oracle_measurement =
+            @timed evaluate_shastry_spatial_dimer_primal(spatial)
+        oracle = oracle_measurement.value
+        oracle.equalities_exact_zero ||
+            error("g=0 dimer oracle violates a reduced equality")
+        oracle.positive_minimum >= -1e-9 ||
+            error("g=0 dimer oracle violates the positive cone")
+        oracle.gap_minimum >= -1e-9 ||
+            error("g=0 dimer oracle violates the gap cone")
+        metadata["stages"]["dimer_oracle"] =
+            measurement_dict(oracle_measurement)
+        metadata["dimer_oracle"] = Dict(
+            "equalities_exact_zero" => oracle.equalities_exact_zero,
+            "positive_minimum" => oracle.positive_minimum,
+            "gap_minimum" => oracle.gap_minimum,
+            "positive_block_minima" => oracle.positive_minima,
+            "gap_block_minima" => oracle.gap_minima,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+    end
 
     if options.mode == :mof
         progress("materialize optimizer-free real PSD JuMP model")
