@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=112G
+#SBATCH --mem=114000M
 #SBATCH --time=03:00:00
 #SBATCH --array=0-1
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-full-state-g0p8-solve-%A_%a.out
