@@ -1434,6 +1434,21 @@ def test_validate_existing_rejects_unplanned_or_invalid_checkpoint_roots(
         )
 
 
+def test_checkpoint_validator_accepts_julia_float_canonicalization(tmp_path):
+    metadata = tmp_path / "metadata.json"
+    metadata.write_bytes(
+        '{"beta":4.0,"cutoff":1.0e-12,"label":"β"}\n'.encode("utf-8")
+    )
+
+    assert convergence._strict_checkpoint_canonical_json_file(
+        metadata, "checkpoint metadata"
+    ) == {
+        "beta": 4.0,
+        "cutoff": 1.0e-12,
+        "label": "β",
+    }
+
+
 def _write_python_validated_checkpoint(root, cell):
     request = convergence._runner_request_for_cell(cell)
     payload = json.loads(request["payload_json"])
@@ -1468,7 +1483,7 @@ def _write_python_validated_checkpoint(root, cell):
         "completed_steps": 1,
         "resume_state": {"kind": "test"},
     }
-    metadata_bytes = convergence._canonical_json(metadata) + b"\n"
+    metadata_bytes = convergence._checkpoint_canonical_json(metadata) + b"\n"
     metadata_sha = convergence._sha256(metadata_bytes)
     generation_name = f"checkpoint-{metadata_sha}"
     generation = root / "generations" / generation_name
@@ -2393,7 +2408,7 @@ def _write_calibration_generation(
             "expansion_applied": False,
         },
     }
-    metadata_bytes = convergence._canonical_json(metadata) + b"\n"
+    metadata_bytes = convergence._checkpoint_canonical_json(metadata) + b"\n"
     metadata_sha256 = convergence._sha256(metadata_bytes)
     generation_name = f"checkpoint-{metadata_sha256}"
     generation = root / "generations" / generation_name

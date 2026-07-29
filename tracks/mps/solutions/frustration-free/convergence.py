@@ -98,6 +98,57 @@ def _canonical_json(value: Any) -> bytes:
     ).encode("utf-8")
 
 
+def _checkpoint_float(value: float) -> str:
+    if not math.isfinite(value):
+        raise ValueError("checkpoint canonical JSON contains a nonfinite number")
+    encoded = repr(value).lower()
+    if "e" in encoded:
+        mantissa, exponent = encoded.split("e")
+        if "." not in mantissa:
+            mantissa += ".0"
+        encoded = f"{mantissa}e{int(exponent)}"
+    return encoded
+
+
+def _checkpoint_canonical_text(value: Any) -> str:
+    """Match the canonical JSON emitted by the locked Julia checkpoint writer."""
+
+    if value is None:
+        return "null"
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    if isinstance(value, int) and not isinstance(value, bool):
+        return str(value)
+    if isinstance(value, float):
+        return _checkpoint_float(value)
+    if isinstance(value, list):
+        return "[" + ",".join(_checkpoint_canonical_text(item) for item in value) + "]"
+    if isinstance(value, dict):
+        if not all(isinstance(key, str) for key in value):
+            raise TypeError("checkpoint canonical JSON object keys must be strings")
+        return (
+            "{"
+            + ",".join(
+                f"{_checkpoint_canonical_text(key)}:"
+                f"{_checkpoint_canonical_text(value[key])}"
+                for key in sorted(value)
+            )
+            + "}"
+        )
+    raise TypeError(
+        f"checkpoint canonical JSON contains unsupported type "
+        f"{type(value).__name__}"
+    )
+
+
+def _checkpoint_canonical_json(value: Any) -> bytes:
+    return _checkpoint_canonical_text(value).encode("utf-8")
+
+
 def _sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
@@ -1231,6 +1282,16 @@ def _strict_canonical_json_file(path: Path, name: str) -> Any:
     return value
 
 
+def _strict_checkpoint_canonical_json_file(path: Path, name: str) -> Any:
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(f"{name} must be a regular non-symlink file")
+    raw = path.read_bytes()
+    value = acceptance.strict_json_loads(raw.decode("utf-8"), name=name)
+    if raw != _checkpoint_canonical_json(value) + b"\n":
+        raise ValueError(f"{name} must use canonical JSON")
+    return value
+
+
 def _validate_checkpoint_pointer(
     root: Path,
     pointer_path: Path,
@@ -1240,7 +1301,9 @@ def _validate_checkpoint_pointer(
     generations = root / "generations"
     if not generations.is_dir() or generations.is_symlink():
         raise ValueError("checkpoint generations must be a real directory")
-    pointer = _strict_canonical_json_file(pointer_path, "checkpoint current pointer")
+    pointer = _strict_checkpoint_canonical_json_file(
+        pointer_path, "checkpoint current pointer"
+    )
     validate_artifact_schema(pointer, "checkpointPointer")
     pointer_keys = {
         "checkpoint_schema",
@@ -1331,10 +1394,10 @@ def _validate_checkpoint_pointer(
         metadata_path = generation / "metadata.json"
         state_path = generation / "state.h5"
         completion_path = generation / "completion.json"
-        metadata = _strict_canonical_json_file(
+        metadata = _strict_checkpoint_canonical_json_file(
             metadata_path, "checkpoint metadata"
         )
-        completion = _strict_canonical_json_file(
+        completion = _strict_checkpoint_canonical_json_file(
             completion_path, "checkpoint completion"
         )
         validate_artifact_schema(metadata, "checkpointMetadata")
@@ -2503,10 +2566,10 @@ def _load_calibration_generation(
     metadata_path = generation / "metadata.json"
     state_path = generation / "state.h5"
     completion_path = generation / "completion.json"
-    metadata = _strict_canonical_json_file(
+    metadata = _strict_checkpoint_canonical_json_file(
         metadata_path, "calibration checkpoint metadata"
     )
-    completion = _strict_canonical_json_file(
+    completion = _strict_checkpoint_canonical_json_file(
         completion_path, "calibration checkpoint completion"
     )
     if (
@@ -2607,7 +2670,7 @@ def _validate_calibration_telemetry(
         end = _load_calibration_generation(
             root, cell=cell, reference=sample["end_generation"]
         )
-        current = _strict_canonical_json_file(
+        current = _strict_checkpoint_canonical_json_file(
             root / "current.json", "calibration checkpoint current pointer"
         )
         if current["generation"] != sample["end_generation"]["generation"]:
