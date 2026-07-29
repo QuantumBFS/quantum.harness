@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 
 pub const ANTIFERROMAGNETIC_PROBABILITY: f64 = 0.109_221_2;
-pub const NISHIMORI_K: f64 = 1.049_360_476_302_568_35;
+pub const NISHIMORI_K: f64 = 1.049_360_476_302_568_3;
 pub const PRODUCTION_WIDTHS: [usize; 6] = [4, 6, 8, 10, 12, 14];
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
