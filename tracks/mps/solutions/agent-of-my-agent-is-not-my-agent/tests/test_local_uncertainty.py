@@ -10,6 +10,7 @@ import pytest
 from lrtfim.local_uncertainty import (
     compare_chi,
     compare_k_crossing,
+    merge_sector_summaries,
     numeric_shift,
 )
 
@@ -82,6 +83,9 @@ def test_compare_chi_keeps_mps_uncertainty_separate() -> None:
         odd_energy=-9.805,
         r_xi=0.351,
     )
+    for sector in ("even", "odd"):
+        baseline["direct"][sector]["reached_chi"] = 128
+        baseline["direct"][sector].pop("requested_chi")
 
     result = compare_chi(baseline, refined)
 
@@ -90,6 +94,51 @@ def test_compare_chi_keeps_mps_uncertainty_separate() -> None:
     assert result["gap"]["candidate"] == pytest.approx(0.205)
     assert result["r_xi"]["absolute"] == pytest.approx(0.001)
     assert result["runtime_seconds"]["candidate_total"] == pytest.approx(21.0)
+
+
+def test_merge_sector_summaries_reconstructs_gap_without_copying_odd_rxi() -> None:
+    combined = _summary(
+        gamma=1.56,
+        chi=256,
+        k=24,
+        even_energy=-10.01,
+        odd_energy=-9.805,
+        r_xi=0.351,
+    )
+    even = {**combined, "direct": {"even": combined["direct"]["even"]}}
+    even["raw_observables"] = {
+        key: value
+        for key, value in combined["raw_observables"].items()
+        if key != "gap"
+    }
+    odd = {**combined, "direct": {"odd": combined["direct"]["odd"]}}
+    odd["raw_observables"] = {}
+    for summary in (even, odd):
+        summary["settings"] = dict(summary["settings"])
+        for field in ("num_exponentials", "alpha", "r_fit"):
+            summary["settings"].pop(field)
+
+    merged = merge_sector_summaries(even, odd)
+
+    assert set(merged["direct"]) == {"even", "odd"}
+    assert merged["raw_observables"]["gap"] == pytest.approx(0.205)
+    assert merged["raw_observables"]["r_xi"] == pytest.approx(0.351)
+
+
+def test_merge_sector_summaries_accepts_combined_legacy_source() -> None:
+    combined = _summary(
+        gamma=1.56,
+        chi=128,
+        k=24,
+        even_energy=-10.0,
+        odd_energy=-9.8,
+        r_xi=0.35,
+    )
+
+    merged = merge_sector_summaries(combined, combined)
+
+    assert set(merged["direct"]) == {"even", "odd"}
+    assert merged["raw_observables"]["gap"] == pytest.approx(0.2)
 
 
 def test_k_crossing_uses_same_signed_difference_for_each_k() -> None:
@@ -143,20 +192,34 @@ def test_analysis_cli_writes_mps_uncertainty_outputs(tmp_path: Path) -> None:
         odd_energy=-9.805,
         r_xi=0.351,
     )
-    baseline_path = tmp_path / "baseline.json"
-    refined_path = tmp_path / "refined.json"
-    baseline_path.write_text(json.dumps(baseline))
-    refined_path.write_text(json.dumps(refined))
+    paths = {}
+    for label, summary in (("chi128", baseline), ("chi256", refined)):
+        for sector in ("even", "odd"):
+            split = {**summary, "direct": {sector: summary["direct"][sector]}}
+            split["raw_observables"] = (
+                {
+                    key: value
+                    for key, value in summary["raw_observables"].items()
+                    if key != "gap"
+                }
+                if sector == "even"
+                else {}
+            )
+            path = tmp_path / f"{label}_{sector}.json"
+            path.write_text(json.dumps(split))
+            paths[(label, sector)] = path
     spec_path = tmp_path / "comparison-spec.json"
     spec_path.write_text(
         json.dumps(
             {
                 "mps_pairs": [
-                    {
-                        "gamma": 1.56,
-                        "chi128": str(baseline_path),
-                        "chi256": str(refined_path),
-                    }
+                        {
+                            "gamma": 1.56,
+                            "chi128_even": str(paths[("chi128", "even")]),
+                            "chi128_odd": str(paths[("chi128", "odd")]),
+                            "chi256_even": str(paths[("chi256", "even")]),
+                            "chi256_odd": str(paths[("chi256", "odd")]),
+                        }
                 ],
                 "k_cells": [],
             }
@@ -212,14 +275,37 @@ def test_analysis_cli_assembles_complete_k_crossing(tmp_path: Path) -> None:
                     r_xi=r_xi,
                 )
                 summary["settings"]["length"] = length
-                path = tmp_path / f"K{k}_L{length}_G{gamma}.json"
-                path.write_text(json.dumps(summary))
+                paths = {}
+                for sector in ("even", "odd"):
+                    split = {
+                        **summary,
+                        "direct": {sector: summary["direct"][sector]},
+                        "raw_observables": (
+                            {
+                                key: value
+                                for key, value in summary[
+                                    "raw_observables"
+                                ].items()
+                                if key != "gap"
+                            }
+                            if sector == "even"
+                            else {}
+                        ),
+                    }
+                    if k == 24:
+                        split["settings"] = dict(split["settings"])
+                        for field in ("num_exponentials", "alpha", "r_fit"):
+                            split["settings"].pop(field)
+                    path = tmp_path / f"K{k}_L{length}_G{gamma}_{sector}.json"
+                    path.write_text(json.dumps(split))
+                    paths[sector] = path
                 k_cells.append(
                     {
                         "K": k,
                         "L": length,
                         "Gamma": gamma,
-                        "summary": str(path),
+                        "even": str(paths["even"]),
+                        "odd": str(paths["odd"]),
                     }
                 )
     spec_path = tmp_path / "comparison-spec.json"

@@ -11,6 +11,7 @@ from pathlib import Path
 from lrtfim.local_uncertainty import (
     compare_chi,
     compare_k_crossing,
+    merge_sector_summaries,
     numeric_shift,
 )
 
@@ -43,15 +44,28 @@ def main() -> None:
     spec = json.loads(args.comparison_spec.read_text())
     comparisons = []
     for pair in spec.get("mps_pairs", []):
-        reference = json.loads(Path(pair["chi128"]).read_text())
-        candidate = json.loads(Path(pair["chi256"]).read_text())
+        reference = merge_sector_summaries(
+            json.loads(Path(pair["chi128_even"]).read_text()),
+            json.loads(Path(pair["chi128_odd"]).read_text()),
+        )
+        candidate = merge_sector_summaries(
+            json.loads(Path(pair["chi256_even"]).read_text()),
+            json.loads(Path(pair["chi256_odd"]).read_text()),
+        )
         comparisons.append(compare_chi(reference, candidate))
 
     k_records = {}
     for cell in spec.get("k_cells", []):
-        summary = json.loads(Path(cell["summary"]).read_text())
+        summary = merge_sector_summaries(
+            json.loads(Path(cell["even"]).read_text()),
+            json.loads(Path(cell["odd"]).read_text()),
+        )
         key = (int(cell["K"]), int(cell["L"]), float(cell["Gamma"]))
-        if int(summary["settings"]["num_exponentials"]) != key[0]:
+        summary_k = summary["settings"].get(
+            "num_exponentials",
+            summary["fit"]["K"],
+        )
+        if int(summary_k) != key[0]:
             raise ValueError(f"K provenance mismatch for {key}")
         if int(summary["settings"]["length"]) != key[1]:
             raise ValueError(f"L provenance mismatch for {key}")
@@ -207,7 +221,10 @@ def main() -> None:
         rxi_rows.append(
             {
                 "K": k,
-                "chi": summary["direct"]["even"]["requested_chi"],
+                "chi": summary["direct"]["even"].get(
+                    "requested_chi",
+                    summary["direct"]["even"].get("reached_chi"),
+                ),
                 "length": length,
                 "gamma": gamma,
                 "r_xi": summary["raw_observables"]["r_xi"],

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from copy import deepcopy
 
 from .crossing_analysis import linear_crossing
 
@@ -26,13 +27,58 @@ def _require_same_settings(
     candidate: Mapping,
     fields: Sequence[str],
 ) -> None:
+    fit_names = {
+        "num_exponentials": "K",
+        "alpha": "alpha",
+        "r_fit": "r_fit",
+    }
+
+    def value(record, field):
+        if field in record["settings"]:
+            return record["settings"][field]
+        return record["fit"][fit_names[field]]
+
     for field in fields:
-        left = reference["settings"][field]
-        right = candidate["settings"][field]
+        left = value(reference, field)
+        right = value(candidate, field)
         if left != right:
             raise ValueError(
                 f"settings mismatch for {field}: {left!r} != {right!r}"
             )
+
+
+def merge_sector_summaries(even: Mapping, odd: Mapping) -> dict:
+    """Merge independently checkpointed sectors into one analysis record."""
+    if "even" not in even["direct"] or "odd" not in odd["direct"]:
+        raise ValueError("expected an even source and an odd source")
+    _require_same_settings(
+        even,
+        odd,
+        (
+            "sigma",
+            "length",
+            "gamma",
+            "num_exponentials",
+            "alpha",
+            "r_fit",
+        ),
+    )
+    if even["fit"]["K"] != odd["fit"]["K"]:
+        raise ValueError("fit K mismatch between parity sectors")
+    merged = deepcopy(dict(even))
+    merged["direct"] = {"even": deepcopy(even["direct"]["even"])}
+    merged["direct"]["odd"] = deepcopy(odd["direct"]["odd"])
+    merged["raw_observables"]["gap"] = (
+        merged["direct"]["odd"]["energy"]
+        - merged["direct"]["even"]["energy"]
+    )
+    merged["sector_sources"] = {
+        "even_code_hash": even.get("code_hash"),
+        "odd_code_hash": odd.get("code_hash"),
+        "even_fit_hash": even["fit"].get("fit_hash"),
+        "odd_fit_hash": odd["fit"].get("fit_hash"),
+    }
+    return merged
 
 
 def compare_chi(reference: Mapping, candidate: Mapping) -> dict:
@@ -54,8 +100,14 @@ def compare_chi(reference: Mapping, candidate: Mapping) -> dict:
         "length": reference["settings"]["length"],
         "gamma": reference["settings"]["gamma"],
         "chi": {
-            "reference": reference["direct"]["even"]["requested_chi"],
-            "candidate": candidate["direct"]["even"]["requested_chi"],
+            "reference": reference["direct"]["even"].get(
+                "requested_chi",
+                reference["direct"]["even"].get("reached_chi"),
+            ),
+            "candidate": candidate["direct"]["even"].get(
+                "requested_chi",
+                candidate["direct"]["even"].get("reached_chi"),
+            ),
         },
         "energy": {},
     }
