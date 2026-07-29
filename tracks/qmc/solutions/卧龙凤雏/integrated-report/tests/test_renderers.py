@@ -1,4 +1,5 @@
 import re
+import time
 
 from pypdf import PdfReader
 
@@ -59,6 +60,42 @@ def test_pdf_has_expected_length_and_content(report, tmp_path):
     assert "TBD" not in text
     assert all(page.mediabox.width > 590 for page in reader.pages)
     assert all(page.mediabox.height > 840 for page in reader.pages)
+
+
+def test_pdf_does_not_orphan_major_chapter_headings(report, tmp_path):
+    reader = PdfReader(render_pdf(report, tmp_path / "report.pdf"))
+
+    for title in (
+        "Clean Ising Model",
+        "Nishimori Random-Bond Ising Model",
+        "Weak Self-Dual Majorana Network",
+        "Appendices",
+    ):
+        page_text = next(
+            page.extract_text() or ""
+            for page in reader.pages[1:]
+            if title in (page.extract_text() or "")
+        )
+        following_text = page_text.split(title, 1)[1]
+        assert len(following_text.split()) >= 20, title
+
+
+def test_pdf_code_blocks_preserve_lines_without_html_artifacts(report, tmp_path):
+    reader = PdfReader(render_pdf(report, tmp_path / "report.pdf"))
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
+
+    assert "<br/>" not in text
+    assert "for site in 0..L:" in text
+    assert "for replica in disorder_replicas:" in text
+    assert "Gamma = vacuum_covariance(L)" in text
+
+
+def test_pdf_rendering_is_byte_deterministic(report, tmp_path):
+    first = render_pdf(report, tmp_path / "first.pdf")
+    time.sleep(1.1)
+    second = render_pdf(report, tmp_path / "second.pdf")
+
+    assert first.read_bytes() == second.read_bytes()
 
 
 def test_build_writes_stable_outputs(repo_root):

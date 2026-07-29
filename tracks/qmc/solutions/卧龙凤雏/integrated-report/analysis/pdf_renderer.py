@@ -79,6 +79,7 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
         subject="Integrated central-charge verification report",
         creator="Quantum Harness integrated report generator",
         pageCompression=1,
+        invariant=1,
     )
     document.addPageTemplates(
         PageTemplate(id="body", frames=(frame,), onPage=_header_footer)
@@ -88,14 +89,20 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
     figure_number = 0
     table_number = 0
     for section_number, section in enumerate(report.sections, start=1):
-        if section_number > 1:
+        section_blocks = list(section.blocks)
+        starts_new_page = bool(section_blocks) and isinstance(section_blocks[0], PageBreak)
+        if starts_new_page:
+            if story and not isinstance(story[-1], PdfPageBreak):
+                story.append(PdfPageBreak())
+            section_blocks = section_blocks[1:]
+        elif section_number > 1:
             story.append(Spacer(1, 4 * mm))
         story.append(
             PdfParagraph(f"SECTION {section_number:02d}", styles["section_kicker"])
         )
         story.append(PdfParagraph(_escape(section.title), styles["h1"]))
         story.append(Spacer(1, 2.5 * mm))
-        for block in section.blocks:
+        for block in section_blocks:
             if isinstance(block, Paragraph):
                 story.append(PdfParagraph(_escape(block.text), styles["body"]))
             elif isinstance(block, Equation):
@@ -280,6 +287,14 @@ def _styles(fonts: Dict[str, str]) -> Dict[str, ParagraphStyle]:
             fontSize=6.7,
             leading=8.2,
             textColor=colors.HexColor("#DCEAF0"),
+        ),
+        "code_explanation": ParagraphStyle(
+            "CodeExplanation",
+            fontName=fonts["italic"],
+            fontSize=6.7,
+            leading=8.5,
+            textColor=colors.HexColor("#B8CCD5"),
+            spaceBefore=4,
         ),
         "toc": ParagraphStyle(
             "TOC",
@@ -516,11 +531,16 @@ def _callout(block: Callout, styles: Dict[str, ParagraphStyle]) -> List[object]:
 
 
 def _code(block: CodeBlock, styles: Dict[str, ParagraphStyle]) -> List[object]:
-    code = Preformatted(_escape(block.code), styles["code"])
+    code = Preformatted(
+        block.code,
+        styles["code"],
+        maxLineLength=82,
+        splitChars=" ,()=",
+    )
     content = [
         PdfParagraph(_escape(block.title).upper(), styles["code_title"]),
         code,
-        PdfParagraph(_escape(block.explanation), styles["table_note"]),
+        PdfParagraph(_escape(block.explanation), styles["code_explanation"]),
     ]
     table = PdfTable([[content]], colWidths=[FRAME_WIDTH])
     table.setStyle(
