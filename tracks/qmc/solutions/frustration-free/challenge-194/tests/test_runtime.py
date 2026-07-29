@@ -236,6 +236,51 @@ def test_runtime_provenance_reports_git_execution_failures(tmp_path, monkeypatch
         runtime_provenance(repository)
 
 
+def test_readme_documents_exact_p0_p1_collaborator_boundary():
+    readme = Path("README.md").read_text(encoding="utf-8")
+    required = (
+        "scripts/download_pilot.sh",
+        "scripts/run_pilot.py verify --run-spec",
+        "scripts/analyze_pilot.py analyze --run-spec",
+        "--output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json",
+        "scripts/analyze_pilot.py build-p1 --analysis",
+        "--output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json",
+        "scripts/analyze_pilot.py verify --analysis",
+        "--p1-protocol",
+        "sha256sum",
+        "e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8",
+        "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b",
+        "P0 extension required before P1 publication: 0.9, 1.0",
+        "No extension-generation command is implemented",
+        "p1_protocol.json does not exist",
+        "P1 has not been published or executed",
+        "verified-existing",
+    )
+    for text in required:
+        assert text in readme
+    assert "P1 was executed" not in readme
+    assert "P1 was published" not in readme
+
+
+def test_pilot_plan_freezes_selector_and_exploratory_boundary():
+    plan = Path("PILOT_PLAN.md").read_text(encoding="utf-8")
+    required = (
+        "Use the two largest P0 sizes",
+        "sign change",
+        "[0.25, 0.75]",
+        "narrowest",
+        "lower coupling",
+        "maximum absolute",
+        "sigma `1.1`",
+        "P0 extension",
+        "P0 and P1 remain exploratory",
+        "confirmatory",
+        "No extension-generation command is implemented",
+    )
+    for text in required:
+        assert text in plan
+
+
 @pytest.mark.parametrize(
     "invalid_value",
     [{1, 2}, ("not", "canonical")],

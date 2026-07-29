@@ -84,6 +84,67 @@ before either normal source or completion state is published. Failed legacy
 verification writes only a read-only diagnostic under the external state
 directory; retries verify again without invoking `rsync`.
 
+## P0 analysis and P1 publication boundary
+
+Run the following commands from the solution directory. The paths below are
+the current verified local evidence, not placeholders:
+
+```bash
+cd /home/footman/code/quantum.harness-challenge-194/tracks/qmc/solutions/frustration-free/challenge-194
+
+uv run python scripts/run_pilot.py verify --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json
+
+uv run python scripts/analyze_pilot.py analyze --run-spec \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/pilot-p0-739880d/run_spec.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+```
+
+The immutable analysis exists. Its embedded analysis-document SHA256 is
+`e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`;
+the SHA256 of the complete canonical file is
+`44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`.
+Inspect both without changing the artifact:
+
+```bash
+sha256sum /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+uv run python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["analysis_document_sha256"])' \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json
+```
+
+The implemented P1 build command is:
+
+```bash
+uv run python scripts/analyze_pilot.py build-p1 --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --output /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+For the current P0 evidence it exits nonzero with
+`P0 extension required before P1 publication: 0.9, 1.0`.
+`p1_protocol.json does not exist`; P1 has not been published or executed.
+Do not run the verifier until a future successful build has created the
+protocol. After that successful build, the implemented verification command
+is:
+
+```bash
+uv run python scripts/analyze_pilot.py verify --analysis \
+  /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p0_analysis.json \
+  --p1-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
+```
+
+No extension-generation command is implemented. A collaborator must first
+define and run a new versioned exploratory P0 extension outside this CLI, then
+download, verify, and analyze that immutable evidence before retrying
+`build-p1`; brackets must never be fabricated or relaxed.
+
+Publication is no-clobber. Repeating `analyze` or a future successful
+`build-p1` against byte-identical output returns `verified-existing`.
+Different installed bytes fail closed rather than being replaced. Pilot cell
+restart preserves `.partial` and `.intent` diagnostics, resumes only verified
+immutable batches, and deeply verifies an existing completed cell. A completed
+download is reverified without rerunning `rsync`.
+
 ## Design and references
 
 - `DESIGN.md` pins the scientific and statistical protocol.

@@ -153,11 +153,38 @@ and inode while its legitimate child-count and timestamp metadata may change.
 Immutable ancestors and each exact target cell retain strict generation
 binding; shared-directory substitution and cell swap/restore still fail.
 
-## Deterministic P1 outline
+## Deterministic P1 selection and boundary
 
-P1 may be defined only after P0 is downloaded and verified. For each sigma, a
-deterministic rule documented before execution will select a narrower kappa
-window from nonzero P0 checkpoints, add exact binary64 refinement points, and
-assign fresh replica identities in a separately hashed protocol. P1 remains
-exploratory unless a later, preregistered confirmatory phase uses a disjoint
-phase namespace and untouched data.
+P1 may be defined only after P0 is downloaded, verified, and aggregated into a
+source-hash-bound analysis document. The frozen selector is:
+
+1. Use the two largest P0 sizes.
+2. Mark each adjacent nonzero-coupling interval containing a sign change in
+   the difference of the two sizes' mean `Q_G`.
+3. Independently mark an interval when either size's four-sector crossing
+   probability spans the closed range `[0.25, 0.75]`.
+4. For sigma at most one, retain only intervals marked by both estimators,
+   select the narrowest interval, and break equal-width ties by lower coupling.
+   No common interval requires a new versioned P0 extension; it never permits
+   post-hoc interpolation or a fabricated bracket.
+5. For sigma `1.1`, select the interval with maximum absolute finite-difference
+   slope of the largest-size crossing probability, breaking ties by lower
+   coupling. This is labeled only as crossover refinement.
+
+Every selected window would produce nine ordered binary64 points: the exact
+endpoints and seven recursively bisected interior points. The separately
+hashed P1 protocol uses master seed `19_420_261_729`, the existing `"pilot"`
+phase, a new `pilot-p1-v1` grid identity, and fresh replicas `8..23`. P0
+replicas are not reused.
+
+P0 and P1 remain exploratory. Neither can enter confirmatory likelihoods or
+authorize transition, critical-point, exponent, scaling, or universality
+claims. Any later confirmatory phase must be preregistered, use a disjoint RNG
+phase namespace, and use untouched data.
+
+The current immutable P0 analysis selects windows for sigma `0.8` and the
+sigma `1.1` crossover control, but sigma `0.9` and `1.0` have no common
+nonzero interval. Therefore P1 publication and execution are blocked.
+No extension-generation command is implemented. A new versioned exploratory
+P0 request must be defined, executed, downloaded, and verified before
+selection can be retried.
