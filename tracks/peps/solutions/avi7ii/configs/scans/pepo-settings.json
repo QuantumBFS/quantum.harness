@@ -1,0 +1,13 @@
+{
+  "lx": 10,
+  "ly": 10,
+  "J": 1.0,
+  "h": 3.0,
+  "boundary": "open",
+  "operator": "pauli",
+  "D": 4,
+  "delta_beta": 0.025,
+  "beta_stop": 1.0,
+  "evolution_chi": 16,
+  "measurement_chis": [16, 32]
+}
