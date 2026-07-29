@@ -25,9 +25,15 @@ The two workstreams are maintained separately in the team repository:
 
 ## Interim submission — 2026-07-30
 
-This is a reviewable intermediate snapshot. The registration PR intentionally
-remains a draft, and later results will be added to this same PR before the
-final deadline.
+This is a reviewable intermediate snapshot, not a claim that both challenges
+are complete. The registration PR is ready for interim review, and later
+results may be added to this same PR before the final deadline.
+
+| Workstream | Current status | What remains open |
+|---|---|---|
+| Required paper reproduction | Reproducible CPMC package completed at this snapshot; 19 tests passed. | The package reproduces the selected Figure 4(a) target, not every result in the paper. |
+| Challenge #15 | The strict antisymmetric, LLL-preserving, \(SO(3)\)-equivariant construction and an \(N=4\) ED/VMC validation loop are complete. | Thermodynamic-limit extrapolation, helicity separation, and production large-\(N\) training remain open. |
+| Challenge #121 | A local \(PGL(2,7)\) HS identity with 49 non-identity Gaussian fields plus the identity term has an exact proof and exhaustive finite-group validation. | Active hopping has exact negative-weight counterexamples, so a new sign-free propagating lattice model has not yet been obtained. |
 
 The immutable source snapshot is
 [`e98148a54b35`](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/e98148a54b35b9bdb7ad0b2672f027790a0f1603).
