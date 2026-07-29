@@ -490,6 +490,30 @@ def test_writer_existing_destination_success_cleans_backup_and_fsyncs_cleanup(
     assert destination.read_bytes() == _canonical_json(mapping) + b"\n"
 
 
+def test_writer_cleanup_fsync_failure_preserves_published_mapping(
+    tmp_path, monkeypatch
+):
+    destination = _existing_mapping_destination(tmp_path)
+    star = _writer_star()
+    expected = chain.derive_chain_mapping(star)
+    directory_fsync_calls = []
+
+    def fail_cleanup_fsync(directory):
+        directory_fsync_calls.append(Path(directory))
+        if len(directory_fsync_calls) == 2:
+            raise OSError("injected mapping cleanup fsync failure")
+
+    monkeypatch.setattr(chain, "_fsync_directory", fail_cleanup_fsync)
+    with pytest.raises(OSError, match="injected mapping cleanup fsync failure"):
+        chain.write_chain_mapping_json(destination, bath_artifact=star)
+
+    assert destination.read_bytes() == _canonical_json(expected) + b"\n"
+    persisted = json.loads(destination.read_text(encoding="utf-8"))
+    assert chain.verify_chain_mapping_artifact(persisted, star) is None
+    assert directory_fsync_calls == [tmp_path, tmp_path]
+    assert list(tmp_path.iterdir()) == [destination]
+
+
 @pytest.mark.parametrize("destination_kind", ["directory", "symlink"])
 def test_writer_rejects_directory_and_symlink_destinations(
     tmp_path, destination_kind

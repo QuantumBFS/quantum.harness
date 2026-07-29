@@ -362,6 +362,7 @@ def write_chain_mapping_json(
     temporary_path: Path | None = None
     backup_path: Path | None = None
     published = False
+    publication_irreversible = False
     try:
         try:
             destination_status = destination.lstat()
@@ -392,9 +393,10 @@ def write_chain_mapping_json(
         if backup_path is not None:
             backup_path.unlink()
             backup_path = None
+            publication_irreversible = True
             _fsync_directory(destination.parent)
     except BaseException:
-        if published:
+        if published and not publication_irreversible:
             try:
                 if backup_path is not None:
                     os.replace(backup_path, destination)
