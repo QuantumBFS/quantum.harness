@@ -57,7 +57,8 @@ git branch = work/zibojin/tensor-square-phase-diagram
 | DQMC low-T convergence | `m=4, β=4,8, Δτ=0.1` | PASS；β=8: `E=-17.879(122)` vs ED `-17.8512`；`Q²=1.2348(124)` vs ED `1.2377` | 4 replicas；稳定化 direct/structured log-weight 差 `1.35e-14` | 同上 |
 | Weight-path benchmark | `m=3,4,6,8`，500 repeats | tensor-square 路径在 `m=8` 才打平 Python 直接路径；内存节省 `3.0–4.5×` | BLAS 单线程 | `results/stage2_weight_benchmark/aggregate/summary.json` |
 | Coarse-grid completeness | `m=4,6,8` × `β=2,4,8` × 5 `g_B/g_A` × 5 `t/g_A` × 3 `μ/g_A` | PASS；`675/675` complete，0 missing/error/duplicate | WSL 135 + CPU 540 cells | `results/stage3_coarse_20260729/aggregate/summary.json` |
-| Coarse-grid determinant audit | 同上 | PASS；minimum direct sign `+1`，0 BROKEN | max direct/structured log-weight error `5.56e-7`；10 个 β=2 cell 稳定化复跑 | 同上 |
+| Coarse-grid determinant audit | 同上 | PASS；minimum direct sign `+1`，0 BROKEN | max per-sample direct/structured log-weight error `9.86e-7`；17 个 β=2 cell 稳定化复跑；density range `[5.54e-9, 1+3.33e-8]` | 同上 |
+| Coarse-grid provenance | 同上 | PASS；675 个 cell 均绑定同一干净源码 `b4459ae0d1c64ba021ffce634d26402362575171` | 每个 summary/checkpoint 含运行指纹；两机 manifest 均 `dirty=false` | `results/stage3_coarse_20260729/manifest_{wsl,cpu}.json` |
 | Rough-map screen | 75 个 `(g_B/g_A,t/g_A,μ/g_A)` region | 14 SURVIVE，27 EXTEND，34 STOP，0 BROKEN | 每 region 含 3 尺寸 × 3 温度短链 | `results/stage3_coarse_20260729/aggregate/survivors.json` |
 
 ## 正面结果
@@ -79,6 +80,7 @@ git branch = work/zibojin/tensor-square-phase-diagram
 | 2026-07-29 | `stage2-weight-python-small-m` | Python 实现中 `m≤6` 的结构化 determinant 未提供 wall-time 加速 | 500 repeats：direct/structured speedup `0.70,0.75,0.83`（m=3,4,6） | 不以小 m 速度作为正面结论；只利用内存优势并在 m=8 以上复测 |
 | 2026-07-29 | `stage3-control-lines` | `g_B=0` 单通道线和 `t=0` 线只作为基准，不进入密集预算 | 全部 30 个对应 region/cell-group 已计算；Stage 1 已对 `t=0` 早停 | 粗图继续显示控制数据，但分类强制 STOP；不重复扩展 |
 | 2026-07-29 | `stage3-short-chain-low-ESS` | 27 个 region 只有 EXTEND；部分 β=8,m=8 有效样本 `<4` 或接受率 `>0.995` | 代表点 `(g,t,μ)=(0.5,1,0)` 有强趋势但 ESS `2.97` | 只选择与核心候选带相邻的少数 EXTEND 加长，不给全部 27 点预算 |
+| 2026-07-29 | `stage3-density-audit-roundoff` | 稳定化 `t=0` 对照点出现单样本密度 `1+3.33e-8`，属于双精度舍入而非物理越界 | 同点平均密度 `0.999874`、log-weight error `5.68e-14`、direct sign `+1`；回归测试保留 `2e-6` 越界拦截 | 密度审计容差统一为 `1e-7`；不把纳米级舍入误标为 BROKEN，也不放宽权重/符号审计 |
 
 ## 运行中任务
 
@@ -100,3 +102,6 @@ git branch = work/zibojin/tensor-square-phase-diagram
 | `9f1a13a` | `work/zibojin/tensor-square-phase-diagram` | Stage 0 oracle 与 Hamiltonian 回归 | `8 passed` |
 | `08a9c42` | 同上 | `m=3,4` ED 侦察与候选点 | `11 passed` |
 | `efb2e18` | 同上 | 稳定化 DQMC/ED 交叉验证与权重基准 | `13 passed` |
+| `5e8cefb` | 同上 | 双机粗扫代码、首轮聚合与候选分类 | `26 passed`；675/675 |
+| `37ae584` | 同上 | 运行指纹、干净源码约束与逐样本审计 | `26 passed` |
+| `b4459ae` | 同上 | 密度舍入容差与聚合源码溯源 | `27 passed`；两机干净重跑 |

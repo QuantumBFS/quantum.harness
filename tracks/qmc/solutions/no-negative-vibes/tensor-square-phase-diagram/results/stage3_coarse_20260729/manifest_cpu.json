@@ -15,12 +15,12 @@
     "--workers",
     "62"
   ],
-  "created_utc": "2026-07-29T11:50:50.703433+00:00",
+  "created_utc": "2026-07-29T12:42:42.964756+00:00",
   "experiment_id": "stage3-coarse-20260729",
   "full_grid_cells": 675,
   "git": {
-    "commit": "unknown",
-    "dirty": true
+    "commit": "b4459ae0d1c64ba021ffce634d26402362575171",
+    "dirty": false
   },
   "grid": {
     "beta": [

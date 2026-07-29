@@ -6,7 +6,7 @@
     "SURVIVE": 14
   },
   "complete_cells": 675,
-  "created_utc": "2026-07-29T11:58:05.980199+00:00",
+  "created_utc": "2026-07-29T12:46:02.218400+00:00",
   "duplicate_cells": [],
   "error_cells": [],
   "expected_cells": 675,
@@ -569,11 +569,16 @@
       "thermal_z": -0.15051287456526025
     }
   ],
-  "maximum_weight_log_error": 5.558820527440389e-07,
+  "maximum_density": 1.0000000333067347,
+  "maximum_weight_log_error": 9.863852312719246e-07,
+  "minimum_density": 5.544824564773787e-09,
   "minimum_direct_sign": 1.0,
   "missing_cells": [],
   "regions": 75,
-  "stability_retries": 10,
+  "source_revisions": [
+    "b4459ae0d1c64ba021ffce634d26402362575171"
+  ],
+  "stability_retries": 17,
   "survivors": [
     {
       "acceptance_beta8_m8": 0.7727083333333333,

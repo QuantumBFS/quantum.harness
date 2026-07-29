@@ -27,13 +27,24 @@ expected / complete cells  = 675 / 675
 missing / error / duplicate = 0 / 0 / 0
 BROKEN regions             = 0
 minimum direct sign        = +1
-maximum log-weight error   = 5.5588e-7
-β=2 stabilized retries     = 10
+maximum log-weight error   = 9.8639e-7
+β=2 stabilized retries     = 17
 ```
 
-`β=4,8` 从开始即使用 SVD 缩放长乘积。10 个 `β=2` cell 的朴素审计达到
+`β=4,8` 从开始即使用 SVD 缩放长乘积。17 个 `β=2` cell 的逐样本审计达到
 重跑阈值后，以同一确定性 seed 走稳定化路径并通过。checkpoint 和运行
 日志保留在计算机上；Git 只保存约 640 KiB 的聚合表、图和 manifest。
+
+最终生产结果从干净提交
+`b4459ae0d1c64ba021ffce634d26402362575171` 在两台机器重新完整运行。
+675 个 cell 的 fingerprint 均包含该源码 revision、参数、seed 与采样日程；
+两机 manifest 均记录 `dirty=false`。逐样本最大 log-weight error 实际为
+`9.8639e-7`，密度范围为 `[5.5448e-9, 1+3.3307e-8]`。
+
+唯一触及旧密度阈值的点是稳定化 `t=0` 对照
+`(g_B/g_A,t/g_A,μ/g_A,m,β)=(2,0,1.5,4,8)`；其平均密度 `0.999874`、
+log-weight error `5.68e-14`、direct sign `+1`，确认是双精度舍入。
+密度审计容差因此经 Red→Green 回归统一为 `1e-7`，而 `2e-6` 越界仍会失败。
 
 ## 首轮分类
 
@@ -84,4 +95,4 @@ BROKEN  = 0
 - `results/stage3_coarse_20260729/aggregate/regions.csv`
 - `results/stage3_coarse_20260729/aggregate/survivors.csv`
 - `results/stage3_coarse_20260729/aggregate/survivors.json`
-- `results/stage3_coarse_20260729/aggregate/figures/rough_phase_diagram.png`
+- `results/stage3_coarse_20260729/figures/rough_phase_map.png`
