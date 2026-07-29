@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import math
 from pathlib import Path
-from typing import Any
 
 from jsonschema import Draft202012Validator
 
@@ -26,8 +25,8 @@ COMMON_REAL_FREQUENCY = {
     "omega": [-1.0, 0.0, 1.0],
     "Gamma": [0.0, 0.1, 0.0],
 }
-COMMON_REAL_FREQUENCY_SHA256 = (
-    "d424a7438f1b7da8938256f2cae9812a2b52c737d34f6026453ca4aa15f55b0f"
+COMMON_REAL_FREQUENCY_SHA256 = sha256_bytes(
+    canonical_json(COMMON_REAL_FREQUENCY)
 )
 _MODEL = {
     "model_id": "challenge-81-spinful-anderson-semicircular",
@@ -38,22 +37,40 @@ _MODEL = {
     "mu": 0.0,
     "beta": BETA,
 }
-_CONVENTIONS = {
+_MODEL_ASSERTIONS = {
+    "spin_symmetric": True,
+    "grand_canonical": True,
+    "spin_qn_enabled": False,
+}
+_MODEL_CONVENTIONS = {
+    "hamiltonian": (
+        "K = (epsilon_d-mu) sum_sigma n_dsigma + U n_dup n_ddown + "
+        "sum_k,sigma (epsilon_k-mu) n_ksigma + sum_k,sigma V_k "
+        "(d_sigma^dag c_ksigma + h.c.)"
+    ),
     "green_function": (
         "G_sigma(tau) = -Tr[exp(-(beta-tau)K) d_sigma exp(-tau K) "
         "d_sigma^dag] / Z"
     ),
-    "hybridization_spectrum": "Gamma(omega) = -Im Delta^R(omega)",
-    "matsubara_transform": (
-        "Delta(z) = integral_-D^D d epsilon Gamma(epsilon) / "
-        "(pi * (z-epsilon))"
+    "hybridization": (
+        "Gamma(omega) = pi * sum_k V_k^2 * delta(omega - epsilon_k)"
     ),
-    "noninteracting_inverse": (
-        "G0_sigma^-1(z) = z + mu - epsilon_d - Delta(z)"
+    "quadrature": "Gauss-Chebyshev quadrature of the second kind",
+    "target_continuum": (
+        "Gamma_target(omega) = gamma * sqrt(1 - (omega / bandwidth)^2) "
+        "for |omega| <= bandwidth; 0 otherwise"
+    ),
+    "ordering": "k = 1..n_bath; epsilon in descending order",
+    "epsilon": "bandwidth * cos(k * pi / (n_bath + 1))",
+    "V_squared": (
+        "gamma * bandwidth / (n_bath + 1) * "
+        "sin(k * pi / (n_bath + 1))^2"
+    ),
+    "gamma_normalization": (
+        "pi * sum_k V_k^2 = pi * gamma * bandwidth / 2"
     ),
 }
 _TRIQS_RELATIVE = Path("tracks/mps/solutions/frustration-free/triqs")
-_MODEL_RELATIVE = Path("tracks/mps/solutions/frustration-free/model.json")
 
 
 def _repository_root(solution_dir: Path) -> Path:
@@ -63,33 +80,44 @@ def _repository_root(solution_dir: Path) -> Path:
     raise ValueError(f"unexpected CT-HYB solution directory: {solution_dir}")
 
 
-def _load_model(solution_dir: Path) -> dict[str, object]:
+def _load_model(solution_dir: Path) -> tuple[dict[str, object], dict[str, str]]:
     model_path = solution_dir.parent / "model.json"
     value = strict_json_load(model_path)
-    if not isinstance(value, dict) or set(value) != {
-        "schema_version",
-        "model_id",
-        "parameters",
-        "assertions",
-        "conventions",
-    }:
-        raise ValueError("model.json has an unexpected contract")
-    parameters = value.get("parameters")
-    if (
-        value.get("schema_version") != 1
-        or value.get("model_id") != _MODEL["model_id"]
-        or not isinstance(parameters, dict)
-        or parameters
-        != {
+    expected = {
+        "schema_version": 1,
+        "model_id": _MODEL["model_id"],
+        "parameters": {
             "D": 1.0,
             "U": 0.8,
             "Gamma": 0.1,
             "epsilon_d": -0.4,
             "mu": 0.0,
-        }
-    ):
-        raise ValueError("model.json disagrees with the production physics")
-    return dict(_MODEL)
+        },
+        "assertions": _MODEL_ASSERTIONS,
+        "conventions": _MODEL_CONVENTIONS,
+    }
+    if canonical_json(value) != canonical_json(expected):
+        raise ValueError(
+            "model.json physics, assertions, or conventions disagree with "
+            "the authoritative production model"
+        )
+    return dict(_MODEL), dict(_MODEL_CONVENTIONS)
+
+
+def _production_conventions(
+    model_conventions: dict[str, str],
+) -> dict[str, str]:
+    return {
+        "green_function": model_conventions["green_function"],
+        "hybridization_spectrum": "Gamma(omega) = -Im Delta^R(omega)",
+        "matsubara_transform": (
+            "Delta(z) = integral_-D^D d epsilon Gamma(epsilon) / "
+            "(pi * (z-epsilon))"
+        ),
+        "noninteracting_inverse": (
+            "G0_sigma^-1(z) = z + mu - epsilon_d - Delta(z)"
+        ),
+    }
 
 
 def _matsubara_data() -> tuple[list[float], dict[str, object]]:
@@ -140,8 +168,9 @@ def _validate_calibration(
         payload["artifact_type"] != "cthyb_calibration"
         or payload["schema_version"] != 2
         or payload["status"] != "accepted"
-        or payload["model"] != _MODEL
-        or payload["source_manifest"] != source_manifest
+        or canonical_json(payload["model"]) != canonical_json(_MODEL)
+        or canonical_json(payload["source_manifest"])
+        != canonical_json(source_manifest)
         or payload["source_manifest_sha256"]
         != sha256_bytes(canonical_json(source_manifest))
     ):
@@ -174,7 +203,7 @@ def _build_input(
     calibration: object,
 ) -> dict[str, object]:
     repository_root = _repository_root(solution_dir)
-    model = _load_model(solution_dir)
+    model, model_conventions = _load_model(solution_dir)
     source_manifest = build_source_manifest(repository_root)
     calibration_sha256 = _validate_calibration(
         calibration,
@@ -189,7 +218,7 @@ def _build_input(
         "artifact_type": "cthyb_production_input",
         "schema_version": SCHEMA_VERSION,
         "model": model,
-        "conventions": dict(_CONVENTIONS),
+        "conventions": _production_conventions(model_conventions),
         "hybridization": {
             "kind": "analytic_semicircle",
             "formula": (
@@ -247,11 +276,9 @@ def _build_input(
 
 def make_production_input(solution_dir: Path) -> dict[str, object]:
     calibration_path = solution_dir / "calibration.json"
-    if not calibration_path.exists():
-        # Manifest construction intentionally happens first, so the real tree
-        # fails on absent later-task sources before anyone can create input.
-        build_source_manifest(_repository_root(solution_dir))
-        raise FileNotFoundError(f"accepted calibration is absent: {calibration_path}")
+    # Manifest construction intentionally happens first, so the real tree
+    # fails on absent later-task sources before anyone can create input.
+    build_source_manifest(_repository_root(solution_dir))
     return _build_input(solution_dir, strict_json_load(calibration_path))
 
 
@@ -291,9 +318,7 @@ def verify_input(
         raise ValueError("production input payload hash mismatch")
 
     repository_root = _repository_root(directory)
-    model = _load_model(directory)
-    if payload["model"] != model:
-        raise ValueError("production input model binding mismatch")
+    model, model_conventions = _load_model(directory)
     provenance = payload["provenance_inputs"]
     assert isinstance(provenance, dict)
     manifest = provenance["source_manifest"]
@@ -304,15 +329,65 @@ def verify_input(
         raise ValueError("production input provenance hash mismatch")
 
     expected_omega, expected_delta = _matsubara_data()
-    hybridization = payload["hybridization"]
-    assert isinstance(hybridization, dict)
-    if (
-        hybridization["matsubara_omega"] != expected_omega
-        or hybridization["delta_iw"] != expected_delta
-        or hybridization["common_real_frequency"]
-        != {**COMMON_REAL_FREQUENCY, "sha256": COMMON_REAL_FREQUENCY_SHA256}
-    ):
-        raise ValueError("production input hybridization binding mismatch")
+    expected_payload = {
+        "artifact_type": "cthyb_production_input",
+        "schema_version": SCHEMA_VERSION,
+        "model": model,
+        "conventions": _production_conventions(model_conventions),
+        "hybridization": {
+            "kind": "analytic_semicircle",
+            "formula": (
+                "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+            ),
+            "dtype": "complex128",
+            "n_iw": N_IW,
+            "matsubara_omega": expected_omega,
+            "delta_iw": expected_delta,
+            "common_real_frequency": {
+                **COMMON_REAL_FREQUENCY,
+                "sha256": sha256_bytes(canonical_json(COMMON_REAL_FREQUENCY)),
+            },
+        },
+        "meshes": {
+            "n_tau": N_TAU,
+            "reported_tau": [0.0, 4.0, 8.0, 12.0, 16.0],
+        },
+        "chains": {
+            "count": 4,
+            "random_generator": "mt19937",
+            "master_seed": 810000,
+            "seeds": [810001, 810002, 810003, 810004],
+        },
+        "monte_carlo": {
+            "warmup_cycles": 50000,
+            "measurement_cycles": 1000000,
+            "cycle_length": 50,
+            "measure_G_tau": True,
+            "measure_density_matrix": True,
+            "use_norm_as_weight": True,
+            "measure_pert_order": True,
+        },
+        "gates": {
+            "minimum_average_sign": 0.99,
+            "require_autocorrelation_converged": True,
+            "maximum_integrated_autocorrelation_cycles": 5.0,
+            "minimum_effective_samples_per_chain": 100000,
+            "minimum_effective_samples_total": 400000,
+            "maximum_spin_asymmetry": 0.005,
+            "maximum_half_filling_error": 0.005,
+            "minimum_completed_chains": 4,
+        },
+        "runtime": {
+            "mpi_ranks_per_chain": 1,
+            "threads_per_rank": 1,
+        },
+        "calibration": payload["calibration"],
+        "provenance_inputs": expected_provenance,
+    }
+    if canonical_json(payload) != canonical_json(expected_payload):
+        raise ValueError(
+            "production input differs from canonical intended values or encodings"
+        )
     return payload
 
 
@@ -323,19 +398,6 @@ def _publish_input(
 ) -> dict[str, object]:
     artifact = _build_input(solution_dir, calibration)
     encoded = canonical_json(artifact) + b"\n"
-    if path.is_symlink():
-        raise ValueError(f"symlink destination is forbidden: {path}")
-    if path.exists():
-        if not path.is_file():
-            raise ValueError(f"regular file destination required: {path}")
-        try:
-            existing = path.read_bytes()
-        except OSError as error:
-            raise ValueError(f"cannot read existing input: {path}") from error
-        if existing != encoded:
-            raise FileExistsError(f"existing production input has different content: {path}")
-        verify_input(strict_json_load(path), solution_dir)
-        return artifact
     atomic_write_bytes(path, encoded)
     verify_input(strict_json_load(path), solution_dir)
     return artifact

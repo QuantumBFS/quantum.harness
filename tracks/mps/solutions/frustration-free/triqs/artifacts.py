@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import errno
+import fcntl
 from hashlib import sha256
 import json
 import os
 from pathlib import Path
+import secrets
 import stat
-import tempfile
 from typing import Any
 
 
@@ -31,11 +33,13 @@ def sha256_bytes(value: bytes) -> str:
 
 
 def sha256_file(path: Path) -> str:
-    _require_regular_file(path)
     digest = sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+    descriptor = _open_regular_file(path)
+    try:
+        while chunk := os.read(descriptor, 1024 * 1024):
             digest.update(chunk)
+    finally:
+        os.close(descriptor)
     return digest.hexdigest()
 
 
@@ -53,51 +57,187 @@ def _reject_constant(value: str) -> None:
 
 
 def strict_json_load(path: Path) -> object:
-    _require_regular_file(path)
     try:
-        return json.loads(
-            path.read_text(encoding="utf-8"),
-            object_pairs_hook=_reject_duplicate_pairs,
-            parse_constant=_reject_constant,
-        )
+        text = _read_regular_file(path).decode("utf-8")
     except UnicodeDecodeError as error:
         raise ValueError(f"JSON is not UTF-8: {path}") from error
+    return json.loads(
+        text,
+        object_pairs_hook=_reject_duplicate_pairs,
+        parse_constant=_reject_constant,
+    )
 
 
-def _require_regular_file(path: Path) -> None:
+def _directory_descriptor(path: Path, *, create: bool = False) -> int:
+    absolute = path.absolute()
+    descriptor = os.open(
+        "/",
+        os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC,
+    )
     try:
-        metadata = path.lstat()
-    except FileNotFoundError:
+        for component in absolute.parts[1:]:
+            try:
+                child = os.open(
+                    component,
+                    os.O_RDONLY
+                    | os.O_DIRECTORY
+                    | os.O_CLOEXEC
+                    | os.O_NOFOLLOW,
+                    dir_fd=descriptor,
+                )
+            except FileNotFoundError:
+                if not create:
+                    raise
+                os.mkdir(component, mode=0o700, dir_fd=descriptor)
+                os.fsync(descriptor)
+                child = os.open(
+                    component,
+                    os.O_RDONLY
+                    | os.O_DIRECTORY
+                    | os.O_CLOEXEC
+                    | os.O_NOFOLLOW,
+                    dir_fd=descriptor,
+                )
+            os.close(descriptor)
+            descriptor = child
+        return descriptor
+    except BaseException:
+        os.close(descriptor)
         raise
-    if stat.S_ISLNK(metadata.st_mode):
-        raise ValueError(f"symlink is forbidden: {path}")
-    if not stat.S_ISREG(metadata.st_mode):
+
+
+def _open_regular_at(directory_descriptor: int, name: str, path: Path) -> int:
+    try:
+        descriptor = os.open(
+            name,
+            os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW,
+            dir_fd=directory_descriptor,
+        )
+    except OSError as error:
+        if error.errno in (errno.ELOOP, errno.ENOTDIR):
+            raise ValueError(f"symlink is forbidden: {path}") from error
+        raise
+    if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+        os.close(descriptor)
         raise ValueError(f"regular file required: {path}")
+    return descriptor
+
+
+def _open_regular_file(path: Path) -> int:
+    directory_descriptor = _directory_descriptor(path.parent)
+    try:
+        return _open_regular_at(directory_descriptor, path.name, path)
+    finally:
+        os.close(directory_descriptor)
+
+
+def _read_regular_at(directory_descriptor: int, name: str, path: Path) -> bytes:
+    descriptor = _open_regular_at(directory_descriptor, name, path)
+    chunks: list[bytes] = []
+    try:
+        while chunk := os.read(descriptor, 1024 * 1024):
+            chunks.append(chunk)
+    finally:
+        os.close(descriptor)
+    return b"".join(chunks)
+
+
+def _read_regular_file(path: Path) -> bytes:
+    directory_descriptor = _directory_descriptor(path.parent)
+    try:
+        return _read_regular_at(directory_descriptor, path.name, path)
+    finally:
+        os.close(directory_descriptor)
+
+
+def _write_all(descriptor: int, value: bytes) -> None:
+    view = memoryview(value)
+    while view:
+        written = os.write(descriptor, view)
+        view = view[written:]
 
 
 def atomic_write_bytes(path: Path, value: bytes) -> None:
-    """Durably replace a file using a same-directory temporary file."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() or path.is_symlink():
-        _require_regular_file(path)
-
-    descriptor, temporary_name = tempfile.mkstemp(
-        dir=path.parent,
-        prefix=f".{path.name}.",
-        suffix=".tmp",
-    )
-    temporary = Path(temporary_name)
+    """Durably publish bytes once; identical content is reusable."""
+    directory_descriptor = _directory_descriptor(path.parent, create=True)
+    lock_name = f".{path.name}.lock"
+    temporary_name: str | None = None
+    lock_descriptor = -1
     try:
-        with os.fdopen(descriptor, "wb") as handle:
-            handle.write(value)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-        directory_descriptor = os.open(path.parent, os.O_RDONLY)
         try:
-            os.fsync(directory_descriptor)
+            lock_descriptor = os.open(
+                lock_name,
+                os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW,
+                0o600,
+                dir_fd=directory_descriptor,
+            )
+        except OSError as error:
+            if error.errno == errno.ELOOP:
+                raise ValueError(f"symlink lock is forbidden: {path}") from error
+            raise
+        if not stat.S_ISREG(os.fstat(lock_descriptor).st_mode):
+            raise ValueError(f"regular lock file required: {path}")
+        fcntl.flock(lock_descriptor, fcntl.LOCK_EX)
+
+        try:
+            existing = _read_regular_at(directory_descriptor, path.name, path)
+        except FileNotFoundError:
+            existing = None
+        if existing is not None:
+            if existing == value:
+                return
+            raise FileExistsError(f"existing artifact has different content: {path}")
+
+        for _ in range(100):
+            candidate = f".{path.name}.{secrets.token_hex(16)}.tmp"
+            try:
+                temporary_descriptor = os.open(
+                    candidate,
+                    os.O_WRONLY
+                    | os.O_CREAT
+                    | os.O_EXCL
+                    | os.O_CLOEXEC
+                    | os.O_NOFOLLOW,
+                    0o600,
+                    dir_fd=directory_descriptor,
+                )
+            except FileExistsError:
+                continue
+            temporary_name = candidate
+            break
+        else:
+            raise FileExistsError(f"cannot allocate staging file for: {path}")
+
+        try:
+            _write_all(temporary_descriptor, value)
+            os.fsync(temporary_descriptor)
         finally:
-            os.close(directory_descriptor)
+            os.close(temporary_descriptor)
+
+        try:
+            os.link(
+                temporary_name,
+                path.name,
+                src_dir_fd=directory_descriptor,
+                dst_dir_fd=directory_descriptor,
+                follow_symlinks=False,
+            )
+        except FileExistsError:
+            existing = _read_regular_at(directory_descriptor, path.name, path)
+            if existing != value:
+                raise FileExistsError(
+                    f"concurrent artifact has different content: {path}"
+                )
+        os.fsync(directory_descriptor)
     except BaseException:
-        temporary.unlink(missing_ok=True)
         raise
+    finally:
+        if temporary_name is not None:
+            try:
+                os.unlink(temporary_name, dir_fd=directory_descriptor)
+                os.fsync(directory_descriptor)
+            except FileNotFoundError:
+                pass
+        if lock_descriptor >= 0:
+            os.close(lock_descriptor)
+        os.close(directory_descriptor)

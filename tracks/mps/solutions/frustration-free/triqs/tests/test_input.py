@@ -1,16 +1,25 @@
 import copy
+from hashlib import sha256
 import json
 from pathlib import Path
 import sys
-
-import pytest
+import tempfile
+import threading
+import unittest
+from unittest import mock
 
 
 TRIQS_DIR = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = TRIQS_DIR.parents[4]
 sys.path.insert(0, str(TRIQS_DIR))
 
-from artifacts import canonical_json, sha256_bytes, strict_json_load
+from artifacts import (
+    atomic_write_bytes,
+    canonical_json,
+    sha256_bytes,
+    sha256_file,
+    strict_json_load,
+)
 from make_input import (
     COMMON_REAL_FREQUENCY,
     COMMON_REAL_FREQUENCY_SHA256,
@@ -19,6 +28,9 @@ from make_input import (
     write_production_input,
 )
 from source_manifest import REQUIRED_SOURCE_PATHS, build_source_manifest
+
+
+_ASSERTIONS = unittest.TestCase()
 
 
 def _write(path: Path, data: bytes) -> None:
@@ -75,21 +87,21 @@ def _complete_repository(tmp_path: Path) -> tuple[Path, dict[str, object]]:
 
 def test_canonical_json_is_sorted_compact_finite_and_has_no_newline():
     assert canonical_json({"z": 1, "a": [2.0]}) == b'{"a":[2.0],"z":1}'
-    with pytest.raises(ValueError, match="finite"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "finite"):
         canonical_json({"bad": float("nan")})
-    with pytest.raises(ValueError, match="finite"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "finite"):
         canonical_json({"bad": float("inf")})
 
 
 def test_strict_json_rejects_duplicate_keys_and_nonstandard_numbers(tmp_path):
     duplicate = tmp_path / "duplicate.json"
     duplicate.write_text('{"a":1,"a":2}\n', encoding="utf-8")
-    with pytest.raises(ValueError, match="duplicate"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "duplicate"):
         strict_json_load(duplicate)
 
     nonfinite = tmp_path / "nonfinite.json"
     nonfinite.write_text('{"a":NaN}\n', encoding="utf-8")
-    with pytest.raises(ValueError, match="non-finite"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "non-finite"):
         strict_json_load(nonfinite)
 
 
@@ -149,28 +161,25 @@ def test_two_clean_generations_are_identical_and_fully_bound(tmp_path):
     )
 
 
-@pytest.mark.parametrize(
-    ("path", "value"),
-    [
+def test_verifier_rejects_schema_seed_boolean_and_placeholder_mutations(tmp_path):
+    mutations = [
         (("schema_version",), 1),
         (("chains", "count"), True),
         (("chains", "seeds"), [810004, 810003, 810002, 810001]),
         (("provenance_inputs", "conda_lock_sha256"), "0" * 64),
-    ],
-)
-def test_verifier_rejects_schema_seed_boolean_and_placeholder_mutations(
-    tmp_path, path, value
-):
+    ]
     solution_dir, _ = _complete_repository(tmp_path)
     artifact = make_production_input(solution_dir)
-    mutated = copy.deepcopy(artifact)
-    target = mutated["payload"]
-    for key in path[:-1]:
-        target = target[key]
-    target[path[-1]] = value
-    mutated["sha256"] = sha256_bytes(canonical_json(mutated["payload"]))
-    with pytest.raises(ValueError):
-        verify_input(mutated, solution_dir)
+    for path, value in mutations:
+        mutated = copy.deepcopy(artifact)
+        target = mutated["payload"]
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        mutated["sha256"] = sha256_bytes(canonical_json(mutated["payload"]))
+        with _ASSERTIONS.subTest(path=path):
+            with _ASSERTIONS.assertRaises(ValueError):
+                verify_input(mutated, solution_dir)
 
 
 def test_verifier_rejects_unknown_keys_and_changed_model(tmp_path):
@@ -183,7 +192,7 @@ def test_verifier_rejects_unknown_keys_and_changed_model(tmp_path):
         changed = copy.deepcopy(artifact)
         mutate(changed)
         changed["sha256"] = sha256_bytes(canonical_json(changed["payload"]))
-        with pytest.raises(ValueError):
+        with _ASSERTIONS.assertRaises(ValueError):
             verify_input(changed, solution_dir)
 
 
@@ -197,17 +206,17 @@ def test_manifest_rejects_missing_extra_and_changed_sources(tmp_path):
         REQUIRED_SOURCE_PATHS[0]
     )
     missing["sha256"] = sha256_bytes(canonical_json(missing["payload"]))
-    with pytest.raises(ValueError, match="manifest"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "manifest"):
         verify_input(missing, solution_dir)
 
     extra = copy.deepcopy(artifact)
     extra["payload"]["provenance_inputs"]["source_manifest"]["extra.py"] = "1" * 64
     extra["sha256"] = sha256_bytes(canonical_json(extra["payload"]))
-    with pytest.raises(ValueError, match="manifest"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "manifest"):
         verify_input(extra, solution_dir)
 
     (root / REQUIRED_SOURCE_PATHS[0]).write_bytes(b"changed\n")
-    with pytest.raises(ValueError, match="hash"):
+    with _ASSERTIONS.assertRaisesRegex(ValueError, "hash"):
         verify_input(artifact, solution_dir)
 
 
@@ -217,7 +226,7 @@ def test_atomic_publication_reuses_identical_and_rejects_different(tmp_path):
     artifact = write_production_input(output, solution_dir)
     assert write_production_input(output, solution_dir) == artifact
     output.write_text("{}\n", encoding="utf-8")
-    with pytest.raises(FileExistsError, match="different"):
+    with _ASSERTIONS.assertRaisesRegex(FileExistsError, "different"):
         write_production_input(output, solution_dir)
 
 
@@ -228,7 +237,7 @@ def test_real_generation_fails_until_transitive_sources_exist():
         if not (REPOSITORY_ROOT / relative).is_file()
     ]
     assert missing
-    with pytest.raises(FileNotFoundError, match="required source"):
+    with _ASSERTIONS.assertRaisesRegex(FileNotFoundError, "required source"):
         make_production_input(TRIQS_DIR)
 
 
@@ -237,3 +246,233 @@ def test_schema_one_remains_permanently_nonproduction():
     assert "non-production" in schema["$comment"].lower()
     assert schema["properties"]["production_ready"] == {"const": False}
     assert schema["properties"]["scientific_comparison"] == {"const": False}
+
+
+def _refresh_calibration(solution_dir: Path) -> None:
+    manifest = build_source_manifest(solution_dir.parents[4])
+    model = json.loads((solution_dir.parent / "model.json").read_text(encoding="utf-8"))
+    payload = {
+        "artifact_type": "cthyb_calibration",
+        "schema_version": 2,
+        "status": "accepted",
+        "model": {
+            "model_id": model["model_id"],
+            **model["parameters"],
+            "beta": 16.0,
+        },
+        "source_manifest": manifest,
+        "source_manifest_sha256": sha256_bytes(canonical_json(manifest)),
+        "conda_lock_sha256": manifest[
+            "tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock"
+        ],
+        "environment_yml_sha256": manifest[
+            "tracks/mps/solutions/frustration-free/triqs/environment.yml"
+        ],
+        "model_json_sha256": manifest[
+            "tracks/mps/solutions/frustration-free/model.json"
+        ],
+    }
+    artifact = {"payload": payload, "sha256": sha256_bytes(canonical_json(payload))}
+    _write(solution_dir / "calibration.json", canonical_json(artifact) + b"\n")
+
+
+class InputHardeningTests(unittest.TestCase):
+    def test_numeric_aliases_do_not_bypass_exact_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            solution_dir, _ = _complete_repository(Path(temporary))
+            artifact = make_production_input(solution_dir)
+            for path, replacement in (
+                (("model", "D"), 1),
+                (("model", "mu"), 0),
+                (("meshes", "reported_tau"), [0, 4, 8, 12, 16]),
+                (
+                    ("hybridization", "common_real_frequency", "omega"),
+                    [-1, 0, 1],
+                ),
+            ):
+                with self.subTest(path=path):
+                    changed = copy.deepcopy(artifact)
+                    target = changed["payload"]
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = replacement
+                    changed["sha256"] = sha256_bytes(canonical_json(changed["payload"]))
+                    with self.assertRaises(ValueError):
+                        verify_input(changed, solution_dir)
+
+    def test_all_embedded_digests_are_recomputed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            solution_dir, _ = _complete_repository(Path(temporary))
+            artifact = make_production_input(solution_dir)
+            stale_top_level = copy.deepcopy(artifact)
+            stale_top_level["sha256"] = "1" * 64
+            with self.assertRaises(ValueError):
+                verify_input(stale_top_level, solution_dir)
+
+            digest_paths = (
+                ("hybridization", "delta_iw", "sha256"),
+                ("hybridization", "common_real_frequency", "sha256"),
+                ("provenance_inputs", "source_manifest_sha256"),
+                ("provenance_inputs", "conda_lock_sha256"),
+                ("provenance_inputs", "environment_yml_sha256"),
+                ("provenance_inputs", "model_json_sha256"),
+            )
+            for path in digest_paths:
+                with self.subTest(path=path):
+                    changed = copy.deepcopy(artifact)
+                    target = changed["payload"]
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = "1" * 64
+                    changed["sha256"] = sha256_bytes(canonical_json(changed["payload"]))
+                    with self.assertRaises(ValueError):
+                        verify_input(changed, solution_dir)
+
+            alternate_delta = copy.deepcopy(artifact)
+            split = alternate_delta["payload"]["hybridization"]["delta_iw"]
+            split["real"] = [0] * len(split["real"])
+            split["sha256"] = sha256_bytes(
+                canonical_json({"real": split["real"], "imag": split["imag"]})
+            )
+            alternate_delta["sha256"] = sha256_bytes(
+                canonical_json(alternate_delta["payload"])
+            )
+            with self.assertRaises(ValueError):
+                verify_input(alternate_delta, solution_dir)
+
+    def test_model_assertions_and_conventions_are_authoritative(self):
+        mutations = (
+            ("assertions", "spin_symmetric", False),
+            ("assertions", "grand_canonical", False),
+            ("assertions", "spin_qn_enabled", True),
+            ("conventions", "green_function", "conflicting"),
+            ("conventions", "hybridization", "conflicting"),
+            ("conventions", "hamiltonian", "conflicting"),
+        )
+        for section, key, value in mutations:
+            with self.subTest(section=section, key=key):
+                with tempfile.TemporaryDirectory() as temporary:
+                    solution_dir, _ = _complete_repository(Path(temporary))
+                    model_path = solution_dir.parent / "model.json"
+                    model = json.loads(model_path.read_text(encoding="utf-8"))
+                    model[section][key] = value
+                    model_path.write_text(json.dumps(model), encoding="utf-8")
+                    _refresh_calibration(solution_dir)
+                    with self.assertRaises(ValueError):
+                        make_production_input(solution_dir)
+
+    def test_schema_change_after_generation_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            solution_dir, _ = _complete_repository(Path(temporary))
+            artifact = make_production_input(solution_dir)
+            schema = solution_dir / "cthyb-production-input.schema.json"
+            schema.write_text(
+                '{"$schema":"https://json-schema.org/draft/2020-12/schema"}\n',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "hash"):
+                verify_input(artifact, solution_dir)
+
+    def test_descriptor_read_rejects_lstat_open_symlink_swap(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            victim = root / "victim"
+            attacker = root / "attacker"
+            victim.write_bytes(b"trusted")
+            attacker.write_bytes(b"attacker")
+            original_open = Path.open
+
+            def swap_then_open(path, *args, **kwargs):
+                if path == victim:
+                    victim.unlink()
+                    victim.symlink_to(attacker)
+                return original_open(path, *args, **kwargs)
+
+            with mock.patch.object(Path, "open", swap_then_open):
+                self.assertEqual(
+                    sha256_file(victim),
+                    sha256(b"trusted").hexdigest(),
+                )
+            self.assertFalse(victim.is_symlink())
+
+    def test_descriptor_reads_and_publication_reject_symlinks(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attacker = root / "attacker"
+            attacker.write_bytes(b"attacker")
+            victim = root / "victim"
+            victim.symlink_to(attacker)
+            with self.assertRaises(ValueError):
+                sha256_file(victim)
+            with self.assertRaises(ValueError):
+                atomic_write_bytes(victim, b"trusted")
+            self.assertEqual(attacker.read_bytes(), b"attacker")
+
+    def test_atomic_publication_never_overwrites_different_content(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "artifact.json"
+            atomic_write_bytes(output, b"first")
+            with self.assertRaises(FileExistsError):
+                atomic_write_bytes(output, b"second")
+            self.assertEqual(output.read_bytes(), b"first")
+
+    def test_concurrent_publication_has_one_winner_and_no_clobber(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "artifact.json"
+            barrier = threading.Barrier(2)
+            outcomes = []
+
+            def publish(value):
+                barrier.wait()
+                try:
+                    atomic_write_bytes(output, value)
+                    outcomes.append(("published", value))
+                except FileExistsError:
+                    outcomes.append(("rejected", value))
+
+            threads = [
+                threading.Thread(target=publish, args=(b"first",)),
+                threading.Thread(target=publish, args=(b"second",)),
+            ]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+
+            self.assertEqual(
+                sorted(outcome for outcome, _ in outcomes),
+                ["published", "rejected"],
+            )
+            winner = next(value for outcome, value in outcomes if outcome == "published")
+            self.assertEqual(output.read_bytes(), winner)
+
+
+def load_tests(loader, tests, pattern):
+    del loader, pattern
+    no_fixture = (
+        test_canonical_json_is_sorted_compact_finite_and_has_no_newline,
+        test_real_generation_fails_until_transitive_sources_exist,
+        test_schema_one_remains_permanently_nonproduction,
+    )
+    temporary_fixture = (
+        test_strict_json_rejects_duplicate_keys_and_nonstandard_numbers,
+        test_two_clean_generations_are_identical_and_fully_bound,
+        test_verifier_rejects_schema_seed_boolean_and_placeholder_mutations,
+        test_verifier_rejects_unknown_keys_and_changed_model,
+        test_manifest_rejects_missing_extra_and_changed_sources,
+        test_atomic_publication_reuses_identical_and_rejects_different,
+    )
+    for function in no_fixture:
+        tests.addTest(unittest.FunctionTestCase(function))
+    for function in temporary_fixture:
+        def run_with_temporary_directory(function=function):
+            with tempfile.TemporaryDirectory() as temporary:
+                function(Path(temporary))
+
+        tests.addTest(
+            unittest.FunctionTestCase(
+                run_with_temporary_directory,
+                description=function.__name__,
+            )
+        )
+    return tests

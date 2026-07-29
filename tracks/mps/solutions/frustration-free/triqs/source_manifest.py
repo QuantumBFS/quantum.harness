@@ -59,9 +59,12 @@ def build_source_manifest(repository_root: Path) -> dict[str, str]:
     manifest: dict[str, str] = {}
     for relative in REQUIRED_SOURCE_PATHS:
         path = _safe_repository_path(repository_root, relative)
-        if not path.exists():
-            raise FileNotFoundError(f"required source is absent: {relative}")
-        manifest[relative] = sha256_file(path)
+        try:
+            manifest[relative] = sha256_file(path)
+        except FileNotFoundError as error:
+            raise FileNotFoundError(
+                f"required source is absent: {relative}"
+            ) from error
     return manifest
 
 
