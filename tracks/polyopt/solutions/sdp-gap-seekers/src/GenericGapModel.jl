@@ -1071,6 +1071,62 @@ function assembly_plan(problem::GapProblem)
 end
 
 """
+Build the structured plan from manifests created immediately for `problem`.
+
+This avoids rebuilding the complete state-polynomial inventories several
+times inside one assembly. The contextual fields are checked here; the
+constructors that produced the fresh manifests already checked exact counts,
+ordering, uniqueness, and their deterministic hashes.
+"""
+function fresh_structured_assembly_plan(
+    problem::GapProblem,
+    positive_manifest::BasisManifest,
+    gap_manifest::BasisManifest,
+)
+    problem.basis_mode == :structured ||
+        throw(ArgumentError("fresh manifests require structured mode"))
+    spec = something(problem.basis_spec)
+    positive_manifest.role == :positive ||
+        throw(ArgumentError("positive manifest has the wrong role"))
+    gap_manifest.role == :gap ||
+        throw(ArgumentError("gap manifest has the wrong role"))
+    all(
+        manifest.family == spec.family &&
+        manifest.family_version == spec.version
+        for manifest in (positive_manifest, gap_manifest)
+    ) || throw(ArgumentError("fresh manifest basis family changed"))
+    positive_manifest.site_ids ==
+        collect(eachindex(problem.patch.sites)) ||
+        throw(ArgumentError("positive manifest has the wrong sites"))
+    gap_manifest.site_ids == problem.patch.inner_ids ||
+        throw(ArgumentError("gap manifest has the wrong sites"))
+    positive_manifest.max_degree == problem.d ||
+        throw(ArgumentError("positive manifest has the wrong degree"))
+    gap_manifest.max_degree == problem.d - 1 ||
+        throw(ArgumentError("gap manifest has the wrong degree"))
+
+    terms = instantiate_terms(problem.model, problem.patch)
+    return AssemblyPlan(
+        length(problem.patch.sites),
+        length(problem.patch.inner_ids),
+        length(terms),
+        BigInt(length(positive_manifest.entries)),
+        BigInt(length(gap_manifest.entries)),
+        problem.basis_mode,
+        positive_manifest.is_complete && gap_manifest.is_complete,
+        positive_manifest.sha256,
+        gap_manifest.sha256,
+        !(problem.symmetry isa NoStateSymmetry),
+        problem_fingerprint(
+            problem,
+            terms;
+            positive_basis_sha256=positive_manifest.sha256,
+            gap_basis_sha256=gap_manifest.sha256,
+        ),
+    )
+end
+
+"""
 Produce the support/coefficient arrays expected by upstream `ncpoly` without
 loading SpectralGap or a solver.
 

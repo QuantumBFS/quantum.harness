@@ -10,10 +10,9 @@ using ..GenericGapModel:
     StateMonomial,
     NoStateSymmetry,
     basis_manifest,
-    validate_basis_manifest,
     full_state_entries,
     instantiate_terms,
-    assembly_plan,
+    fresh_structured_assembly_plan,
     state_monomial_string
 using ..PrimalGapSymbolics:
     ExactLinearPolynomial,
@@ -332,11 +331,11 @@ function assemble_primal_gap(
 
     positive_basis = basis_manifest(problem, :positive)
     gap_basis = basis_manifest(problem, :gap)
-    validate_basis_manifest(positive_basis, problem, :positive) ||
-        error("positive basis failed contextual validation")
-    validate_basis_manifest(gap_basis, problem, :gap) ||
-        error("gap basis failed contextual validation")
-    plan = assembly_plan(problem)
+    plan = fresh_structured_assembly_plan(
+        problem,
+        positive_basis,
+        gap_basis,
+    )
     hamiltonian_terms = instantiate_terms(problem.model, problem.patch)
 
     candidates = stationarity_candidates(problem, stationarity_spec)
