@@ -398,10 +398,12 @@ def _cross_grade_simplicial_search(
         condition = float(np.linalg.cond(transform))
         transformed = tuple(np.linalg.solve(transform, matrix @ transform) for matrix in floats)
         margin = float(min(np.min(matrix) for matrix in transformed))
-        coupled_columns = sum(
-            np.linalg.norm(transform[:split, column]) > 1.0e-10
-            and np.linalg.norm(transform[split:, column]) > 1.0e-10
-            for column in range(dimension)
+        coupled_columns = int(
+            sum(
+                np.linalg.norm(transform[:split, column]) > 1.0e-10
+                and np.linalg.norm(transform[split:, column]) > 1.0e-10
+                for column in range(dimension)
+            )
         )
         record = {
             "attempt": attempt_index,
