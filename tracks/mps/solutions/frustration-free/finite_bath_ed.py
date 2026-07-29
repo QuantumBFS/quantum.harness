@@ -735,7 +735,6 @@ def solve_finite_bath(
 def _solve_consumed_bath(
     *,
     consumed_bath: dict[str, Any],
-    geometry: FiniteBathGeometry,
     U: Any,
     beta: Any,
     tau: Any,
@@ -743,10 +742,13 @@ def _solve_consumed_bath(
     mu: Any,
     max_dimension: Any,
     max_dense_bytes: Any,
+    geometry: FiniteBathGeometry | None = None,
 ) -> dict[str, Any]:
     epsilon = consumed_bath["epsilon"]
     coupling = consumed_bath["V"]
-    n_bath = consumed_bath["n_bath"]
+    n_bath = _validate_integer(
+        consumed_bath["n_bath"], "consumed bath n_bath", positive=True
+    )
     beta = _validate_real(beta, "beta")
     if beta < 0.0:
         raise ValueError("beta must be finite and nonnegative")
@@ -769,6 +771,16 @@ def _solve_consumed_bath(
         max_dimension=max_dimension,
         max_dense_bytes=max_dense_bytes,
     )
+    if len(epsilon) != n_bath:
+        raise ValueError("consumed bath arrays must have length n_bath")
+    if geometry is None:
+        geometry = FiniteBathGeometry(
+            representation="direct_star",
+            onsite_matrix=np.diag(epsilon),
+            impurity_coupling=np.asarray(coupling, dtype=np.float64),
+            source_bath_sha256=consumed_bath.get("sha256", ""),
+            mapping_sha256=None,
+        )
     hamiltonian = _build_geometry_hamiltonian(
         geometry=geometry,
         U=U,

@@ -243,6 +243,37 @@ def test_solver_and_oracle_bind_explicit_chain_geometry(tmp_path):
     assert written == artifact
 
 
+def test_internal_consumed_bath_call_defaults_to_validated_direct_star_geometry():
+    star = _bath_artifact(n_bath=2, gamma=0.13, bandwidth=1.2)
+    consumed = {
+        "epsilon": star["payload"]["epsilon"],
+        "V": star["payload"]["V"],
+        "n_bath": star["payload"]["parameters"]["n_bath"],
+    }
+    common = {
+        "U": 0.83,
+        "epsilon_d": -0.31,
+        "mu": 0.07,
+        "beta": 1.3,
+        "tau": [0.0, 1.3],
+        "max_dimension": ed.MAX_DENSE_DIMENSION,
+        "max_dense_bytes": ed.MAX_DENSE_BYTES,
+    }
+
+    internal = ed._solve_consumed_bath(consumed_bath=consumed, **common)
+    public = ed.solve_finite_bath(bath_artifact=star, **common)
+
+    assert internal["bath_representation"] == "direct_star"
+    assert internal["chain_mapping_sha256"] is None
+    assert internal["logZ"] == pytest.approx(public["logZ"], abs=2e-13)
+    assert internal["occupancy"] == pytest.approx(
+        public["occupancy"], abs=2e-13
+    )
+    assert internal["green_function"] == pytest.approx(
+        public["green_function"], abs=2e-13
+    )
+
+
 def test_dense_guard_runs_before_many_body_geometry_construction(monkeypatch):
     star = _bath_artifact(n_bath=6, gamma=0.13, bandwidth=1.2)
 
