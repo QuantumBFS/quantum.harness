@@ -727,3 +727,18 @@ Updated: 2026-07-29 UTC.
   not specifically the SO(3) relation. Next gate: solve the 5,314-coordinate
   SO(3)-reduced primal directly, require the same reduced hash, and audit its
   affine-cone residuals at `1e-9`.
+- The decisive reduced-primal control passed. SCNet job `118181379`, source
+  commit `4de8fc4`, completed in 17:39 at 24,548,328 KiB Slurm MaxRSS. It
+  reproduced 5,314 moments, 23 affine PSD cones / 75,967 packed rows, 241,903
+  scalar terms, 1,917 eliminated rank-four coordinates, and exact reduced
+  coefficient hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+  Mosek returned primal-and-dual feasible; its saved native-primal audit is
+  `feasible_residual_checked_float` at `1e-9`, with maximum affine-cone and
+  equality violations both recorded as zero. This authorizes the exact SO(3)
+  rank-four quotient for L=2 without restricting the state sector.
+- Next changed action: run the L=2 reduced construction in exact build-only
+  mode to establish its moment count and coefficient hash. Only then may the
+  independently rebuilt solve run, guarded by that exact hash and a `1e-9`
+  residual/certificate audit. High-memory unreduced job `118178932` remains
+  queued and must not be cancelled or duplicated.

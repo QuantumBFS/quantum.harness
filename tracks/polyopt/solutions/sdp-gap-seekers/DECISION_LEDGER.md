@@ -1298,3 +1298,22 @@ coordinates in the original affine-PSD orientation, require reduced hash
 `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`,
 and demand residual-checked feasibility at `1e-9`. This directly tests the
 projection without relying on the weak bar certificate system.
+
+## 2026-07-29 — reduced-primal control authorizes the SO(3) quotient
+
+SCNet job `118181379` completed from clean commit `4de8fc4` in 17:39 with
+24,548,328 KiB Slurm MaxRSS. The direct affine-PSD primal exactly reproduced
+the reduced 5,314-coordinate coefficient hash
+`7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`,
+all 23 PSD blocks / 75,967 packed rows, 241,903 scalar terms, and 1,917
+eliminated rank-four moments. Mosek reported primal-and-dual feasibility, and
+the saved audit classified the point as `feasible_residual_checked_float` at
+`1e-9`; maximum affine-cone and equality violations were both recorded as
+zero. The exact SO(3) projection therefore preserves the established feasible
+L=1 control in the original primal orientation and is authorized for L=2.
+
+This is a formulation-validation result, not a physical gap result. The next
+attempt changes both size and purpose: first construct the complete L=2 SO(3)
+task with solving disabled and record its exact structural inventory/hash;
+then rebuild it in a separate hash-gated solve. Keep unreduced high-memory job
+`118178932` queued as an independent route.

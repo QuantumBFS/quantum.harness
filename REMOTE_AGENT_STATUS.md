@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T18:21:05Z
+Updated: 2026-07-29T18:43:30Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -188,5 +188,19 @@ Updated: 2026-07-29T18:21:05Z
   numerical false positive on a known-feasible model. The next discriminator
   is a hash-gated SO(3)-reduced native-primal solve and `1e-9` residual audit;
   reduced L=2 remains unlaunched until that passes.
+- Reduced native-primal control `118181379` completed from clean commit
+  `4de8fc4` in 17:39 at 24,548,328 KiB Slurm MaxRSS. It reproduced the exact
+  reduced hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`,
+  5,314 moments, 23 PSD cones / 75,967 packed rows, 241,903 scalar terms, and
+  1,917 eliminated rank-four coordinates. Mosek returned primal-and-dual
+  feasible; the saved audit is `feasible_residual_checked_float` at `1e-9`,
+  with maximum affine-cone and equality violations both zero. The SO(3)
+  rank-four quotient is now authorized for L=2; this is not itself a gap
+  result.
+- Immediate action: commit this gate, update the now-idle isolated checkout,
+  and submit one exact build-only L=2 SO(3) construction. Use its hash as a
+  mandatory input to a separate numerical solve. Unreduced high-memory job
+  `118178932` remains pending and untouched.
 
 No user input or new credential is currently required.

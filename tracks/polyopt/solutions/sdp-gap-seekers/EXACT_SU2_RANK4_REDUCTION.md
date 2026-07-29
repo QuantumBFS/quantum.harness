@@ -45,8 +45,8 @@ coefficient fingerprint are assembled. It is intended only for independent
 structural/hash reproduction and is recorded as `not_run_exact_build_only`;
 it produces no numerical feasibility statement.
 
-This route remains provisional. L=1 job `118179614` reduced the 7,231 moment
-equations to 5,314 (1,917 eliminated; 26.5%) with coefficient SHA-256
+The native-dual route alone was inconclusive. L=1 job `118179614` reduced the
+7,231 moment equations to 5,314 (1,917 eliminated; 26.5%) with coefficient SHA-256
 `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
 Its native certificate task returned `OPTIMAL`, although the unreduced L=1
 relaxation is known feasible. The fresh-task replay passes at `1e-7` with
@@ -55,12 +55,19 @@ contradiction is not a certificate. Unreduced control `118180537` reproduced
 the established coefficient hash but also returned approximate `OPTIMAL`;
 its `1.053194864653051e-9` violation fails the declared `1e-9` audit. Thus the
 explicit bar system is weakly/numerically feasible even for the known-feasible
-control, and status is not a valid discriminator. L=2 use remains blocked
-pending a residual-checked reduced-primal feasibility comparison.
+control, and status is not a valid discriminator.
 
-Authorization requires both gates:
+The decisive native-primal comparison passed. SCNet job `118181379`, from
+clean commit `4de8fc4`, reproduced the reduced hash and all 23 PSD blocks,
+then returned a primal-and-dual feasible point classified
+`feasible_residual_checked_float` at `1e-9`. Mosek's recomputed maximum
+affine-cone and equality violations were both zero. The run used 5,314 moment
+variables, 75,967 packed PSD rows, 241,903 scalar terms, and 24,548,328 KiB
+Slurm MaxRSS. The exact rank-four quotient is therefore authorized for L=2.
 
-1. a residual-checked L=1 reduced-primal solve that reproduces the reduced
-   coefficient hash and the established unrestricted feasibility decision; and
-2. two independent L=2 constructions with the same exact coefficient hash
-   before its result is interpreted.
+Interpretation still requires the second gate:
+
+1. completed: residual-checked L=1 reduced-primal feasibility with the exact
+   reduced coefficient hash; and
+2. pending: two independent L=2 constructions with the same exact coefficient
+   hash before any numerical result is interpreted.
