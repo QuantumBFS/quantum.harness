@@ -517,9 +517,10 @@ Runner schema 4 adds `green_insertion` to exact solver settings with values
 `ObservableResumeState.data`, checkpoint metadata, output solver settings, and
 provenance. Resume rejects an insertion different from the request or cursor.
 
-`_apply_impurity_operator` computes the expected sector before application and
-validates branch flux after application, before normalization or checkpoint
-publication. The public production convention is:
+`_apply_impurity_operator` computes the expected sector before application in
+QN mode and uses `nothing` in non-QN mode. It validates QN branch flux after
+application, before normalization or checkpoint publication. The public
+production convention is:
 
 - endpoint tau values use occupancy identities and create no shifted branch;
 - interior tau values use the explicitly selected creation or cyclic
@@ -527,10 +528,12 @@ publication. The public production convention is:
 - both forms are executable, resumable scientific branches with distinct
   sectors.
 
-The branch sector and insertion are carried in point diagnostics and resumable
-data. A `before` cursor has the base sector; an `after` cursor must have the
-operator sector. A mismatch between cursor, spin, insertion, reported sector,
-and actual MPS flux is corruption and fails before evolution resumes.
+The insertion is carried in every branch's point diagnostics and resumable
+data. In QN mode, a `before` cursor has the base sector and an `after` cursor
+must have the operator sector. A mismatch between cursor, spin, insertion,
+reported sector, and actual MPS flux is corruption and fails before evolution
+resumes. Non-QN branches carry null base, active, operator, and expected-sector
+metadata; they never claim a QN sector.
 
 ### Zero-amplitude terminal semantics
 
@@ -539,22 +542,25 @@ The operator result has exact shape:
 ```julia
 struct AppliedOperatorBranch
     psi::Union{Nothing,MPS}
-    expected_sector::OperatorSector
+    expected_sector::Union{Nothing,OperatorSector}
     log_norm::Float64
     status::Symbol
 end
 ```
 
 For nonzero norm, `psi` is normalized, `log_norm` is finite, and
-`status=:finite`; its flux must match `expected_sector`. For zero norm,
-`psi=nothing`, `log_norm=-Inf`, and `status=:zero`. The expected sector remains
-bound in diagnostics and terminal checkpoint data because it follows from the
-requested operator, but no MPS flux is claimed and no fictitious normalized
-zero state is created. A zero branch performs no after-operator TDVP. It
-publishes one atomic terminal checkpoint with the same Green cursor,
-`segment=:terminal`, insertion/spin/expected sector, `branch_status=:zero`, and
-no active MPS; resume validates that terminal record and advances directly to
-the next branch. `:terminal` is valid only for `status=:zero`.
+`status=:finite`. In QN mode, `expected_sector` is always the derived
+`OperatorSector` and the MPS flux must match it; in non-QN mode,
+`expected_sector=nothing` and no flux is claimed. For zero norm,
+`psi=nothing`, `log_norm=-Inf`, and `status=:zero`. A QN zero branch retains its
+derived expected sector in diagnostics and terminal checkpoint data, while a
+non-QN zero branch retains null expected-sector metadata. No mode creates a
+fictitious normalized zero state. A zero branch performs no after-operator
+TDVP. It publishes one atomic terminal checkpoint with the same Green cursor,
+`segment=:terminal`, insertion/spin, mode-appropriate expected sector,
+`branch_status=:zero`, and no active MPS; resume validates that terminal record
+and advances directly to the next branch. `:terminal` is valid only for
+`status=:zero`.
 
 ## Checkpoint, output, and provenance identity
 
@@ -732,8 +738,8 @@ separate scalable gate is passed.
       "observables": {
         "n_d": 1.0,
         "double_occupancy": 0.25,
-        "G_up": [-0.5],
-        "G_down": [-0.5]
+        "G_up": [-0.5, -0.49, -0.48, -0.47, -0.46],
+        "G_down": [-0.5, -0.49, -0.48, -0.47, -0.46]
       }
     },
     "qn_dual": {
@@ -758,8 +764,8 @@ separate scalable gate is passed.
       "observables": {
         "n_d": 1.0,
         "double_occupancy": 0.25,
-        "G_up": [-0.5],
-        "G_down": [-0.5]
+        "G_up": [-0.5, -0.49, -0.48, -0.47, -0.46],
+        "G_down": [-0.5, -0.49, -0.48, -0.47, -0.46]
       }
     }
   },

@@ -57,6 +57,7 @@
 - Create: `tracks/mps/solutions/frustration-free/julia/test/validated_chain_fixture.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl`
+- Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl`
 
 **Interfaces:**
 - Produces:
@@ -73,6 +74,11 @@
 - Replaces `FiniteBathParameters(:chain; raw coefficients and mapping SHA)`
   with `FiniteBathParameters(validated::ValidatedChainMappingCapability;
   U=0.8, epsilon_d=-Float64(U)/2, mu=0.0)`.
+- Migrates every existing production, helper, fixture, and test setup that calls
+  the raw chain constructor, including
+  `julia/test/finite_bath_observables.jl`. A repository-wide
+  `FiniteBathParameters(:chain` search must leave only the deliberate
+  `MethodError` assertion proving that the removed public seam stays closed.
 
 - [ ] **Step 1: Add failing specification and label tests**
 
@@ -149,10 +155,15 @@ zero, so a valid reduced identity with wrong permutation or phases fails.
 ```bash
 julia --project=tracks/mps/solutions/frustration-free/julia \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl
 ```
 
 Expected: fail because the validated capability and `PurificationSpec` APIs do
-not exist and the raw chain constructor still accepts a fabricated SHA.
+not exist, the raw chain constructor still accepts a fabricated SHA, and all
+three suites still contain callers that have not migrated to the validator.
 
 - [ ] **Step 4: Implement the minimum QN pair constructor**
 
@@ -161,6 +172,9 @@ Add `ChainMappingValidationSeal`, its private singleton,
 in `QN_PURIFICATION_DESIGN.md`. The runner validator calls the sealed inner
 constructor only after every existing scientific/provenance check. Remove the
 raw chain constructor; no test-only bypass is permitted.
+Migrate every raw chain caller found in the runner and all Julia tests through
+the production validator-backed fixture. Do not preserve a raw constructor
+helper under another name.
 
 Add the exact purification type:
 
@@ -182,7 +196,8 @@ between pairs. Assert normalized MPS flux equals the specification.
 
 - [ ] **Step 5: Run GREEN and commit**
 
-Run the Step 3 command. Expected: all purification tests pass.
+Run all three Step 3 commands. Expected: purification, runner, and observables
+tests pass.
 
 ```bash
 git add \
@@ -190,7 +205,8 @@ git add \
   tracks/mps/solutions/frustration-free/julia/finite_bath_mps_runner.jl \
   tracks/mps/solutions/frustration-free/julia/test/validated_chain_fixture.jl \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl \
-  tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl
 git commit -m "Add QN dual identity purification"
 ```
 
@@ -269,7 +285,8 @@ git commit -m "Validate QN Electron MPO capability"
 **Interfaces:**
 - Produces:
   `OperatorSector`,
-  `AppliedOperatorBranch`,
+  `AppliedOperatorBranch` with
+  `expected_sector::Union{Nothing,OperatorSector}`,
   `operator_sector(spec, insertion, spin)`,
   QN-aware `build_finite_bath_context(parameters::FiniteBathParameters;
   purification::PurificationSpec=non_qn_purification())`, and
@@ -296,9 +313,10 @@ For `M=3`, assert:
 ```
 
 Apply each operator to a thermal QN state and compare actual MPS flux with the
-expected sector.
+expected sector. For both finite- and zero-norm QN branches, assert
+`expected_sector == expected`.
 
-For an exactly empty creation or annihilation branch, assert:
+For exactly empty QN and non-QN creation or annihilation branches, assert:
 
 ```julia
 result = FiniteBathObservables._apply_impurity_operator(
@@ -308,12 +326,19 @@ result = FiniteBathObservables._apply_impurity_operator(
 @test result.psi === nothing
 @test result.log_norm == -Inf
 @test result.expected_sector == expected
+@test non_qn_zero.status === :zero
+@test non_qn_zero.psi === nothing
+@test non_qn_zero.expected_sector === nothing
 ```
 
-The zero branch must publish a `segment=:terminal` checkpoint with expected
-sector metadata, `active_state_present=false`, and no active MPS dataset. It
-must perform zero after-operator TDVP steps. Reload/resume validates the
-terminal record and advances to the next branch without claiming MPS flux.
+Also assert `non_qn_finite.expected_sector === nothing`; non-QN finite and zero
+branches never acquire QN metadata. The QN zero branch must publish a
+`segment=:terminal` checkpoint with its expected sector,
+`active_state_present=false`, and no active MPS dataset. The corresponding
+non-QN terminal record has null expected-sector metadata. Both perform zero
+after-operator TDVP steps. Reload/resume validates each terminal record and
+advances to the next branch without claiming flux for non-QN or a nonexistent
+MPS.
 
 - [ ] **Step 2: Add failing creation/annihilation equivalence tests**
 
@@ -347,7 +372,9 @@ immediately after operator application, and include nullable
 through validation, branch duration selection, cursors, resumable data, and
 checkpoint serialization. Creation remains the default; annihilation is an
 equally executable resumable mode. Implement the zero-amplitude terminal
-semantics from the design without constructing or serializing a fictitious MPS.
+semantics from the design without constructing or serializing a fictitious
+MPS. Set `expected_sector=nothing` for every non-QN branch regardless of norm;
+derive and retain it for every QN branch, including zero-norm terminals.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -1093,6 +1120,7 @@ git commit -m "Document QN purification pilots"
 - [ ] **Step 1: Validate local artifacts before submission**
 
 ```bash
+RUN="$QN_RUN"
 uv run --project tracks/mps/solutions/frustration-free --frozen python \
   tracks/mps/solutions/frustration-free/convergence.py validate-existing \
   --plan "$RUN/plan.json" --resources "$RUN/resources.json" \
