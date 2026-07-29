@@ -80,6 +80,37 @@ def _stored_matrix(value: object) -> sp.ImmutableMatrix:
     return sp.ImmutableMatrix(rows)
 
 
+def _encoded_matrix(matrix: sp.MatrixBase) -> list[list[dict[str, int]]]:
+    encoded: list[list[dict[str, int]]] = []
+    for row in range(matrix.rows):
+        encoded_row: list[dict[str, int]] = []
+        for column in range(matrix.cols):
+            numerator, denominator = sp.Rational(
+                matrix[row, column]
+            ).as_numer_denom()
+            encoded_row.append(
+                {
+                    "numerator": int(numerator),
+                    "denominator": int(denominator),
+                }
+            )
+        encoded.append(encoded_row)
+    return encoded
+
+
+def _screening_payload(card: Mapping[str, object]) -> dict[str, object]:
+    return {
+        "dimension": card["dimension"],
+        "atoms": [
+            {
+                "matrix": atom["matrix"],
+                "factors": atom["factors"],
+            }
+            for atom in card["atoms"]
+        ],
+    }
+
+
 def _factor_matrix(factor: Mapping[str, object]) -> sp.ImmutableMatrix:
     dimension = factor["dimension"]
     assert isinstance(dimension, int) and not isinstance(dimension, bool)
@@ -226,6 +257,26 @@ def test_all_first_tranche_cards_have_frozen_counts_and_unique_ids() -> None:
         assert len(set(template_ids)) == 256
 
 
+def test_all_first_tranche_screening_fingerprints_are_unique() -> None:
+    """Catches scheduling distinct seed labels for the same exact atom alphabet."""
+    fingerprints = [
+        exterior_candidates.screening_fingerprint(card) for card in _all_cards()
+    ]
+
+    assert len(fingerprints) == 2304
+    assert len(set(fingerprints)) == 2304
+
+
+def test_screening_fingerprint_hashes_exact_atoms_without_provenance() -> None:
+    """Catches hashing seed labels or coefficient metadata instead of screen inputs."""
+    card = candidate_card(template="exact4-shear-loop-pair", seed=137)
+    expected = hashlib.sha256(
+        _canonical_bytes(_screening_payload(card))
+    ).hexdigest()
+
+    assert exterior_candidates.screening_fingerprint(card) == expected
+
+
 def test_cards_are_deterministic_canonical_json_and_sha256_identified() -> None:
     """Catches nondeterministic data or hashing anything except the complete card."""
     first = candidate_card(template="exact5-shear-loop-pair", seed=173)
@@ -350,6 +401,22 @@ def test_all_cards_pass_exact_structure_audit() -> None:
         assert audit["finite_real_microword"] is True
 
 
+def test_cross_block_cards_declare_the_partition_used_by_their_feature() -> None:
+    """Catches claiming a cross-block edge without declaring the two blocks."""
+    for template in (
+        "exact4-graded-shear-pair",
+        "exact4-block-shear-pair",
+    ):
+        card = candidate_card(template=template, seed=31)
+        assert card["block_partition"] == [[0, 1], [2, 3]]
+    assert (
+        candidate_card(template="exact5-shear-loop-pair", seed=31)[
+            "block_partition"
+        ]
+        is None
+    )
+
+
 def test_known_odd_monomial_control_replays_minimal_n3_example() -> None:
     """Catches losing the explicit P0 reduction control or its exact anchor."""
     card = candidate_card(template="exact3-diagonal-oddcycle-pair", seed=0)
@@ -442,6 +509,64 @@ def test_invalid_mutated_cards_fail_closed(mutation: str) -> None:
 
     with pytest.raises(ValueError):
         candidate_structure_audit(mutated)
+
+
+def test_seed_relabel_with_coherent_tier_and_coefficient_fails_closed() -> None:
+    """Catches attaching exact atoms to a different seed provenance."""
+    template = "exact4-diagonal-loop-pair"
+    forged = candidate_card(template=template, seed=37)
+    canonical_seed_38 = candidate_card(template=template, seed=38)
+    forged["seed"] = 38
+    forged["magnitude_tier"] = canonical_seed_38["magnitude_tier"]
+    forged["orbits"][0]["coefficient"] = canonical_seed_38["orbits"][0][
+        "coefficient"
+    ]
+
+    with pytest.raises(ValueError):
+        candidate_structure_audit(forged)
+
+
+def test_positive_but_wrong_orbit_coefficient_fails_closed() -> None:
+    """Catches accepting a physical vertex coefficient not fixed by the card seed."""
+    forged = candidate_card(template="exact5-shear-loop-pair", seed=73)
+    canonical = _fraction(forged["orbits"][0]["coefficient"])
+    wrong = canonical + Fraction(1, 97)
+    forged["orbits"][0]["coefficient"] = {
+        "numerator": wrong.numerator,
+        "denominator": wrong.denominator,
+    }
+
+    with pytest.raises(ValueError):
+        candidate_structure_audit(forged)
+
+
+def test_coherent_degree_three_feature_forgery_fails_closed() -> None:
+    """Catches trusting a feature label when the exact factor graph is only a path."""
+    forged = candidate_card(template="exact6-graded-shear-pair", seed=109)
+    original_factors = forged["atoms"][0]["factors"]
+    path_factors: list[dict[str, object]] = []
+    for edge_index, (i, j) in enumerate(
+        ((0, 1), (1, 2), (2, 3), (3, 4), (4, 5))
+    ):
+        factor = copy.deepcopy(original_factors[edge_index])
+        factor["i"] = i
+        factor["j"] = j
+        factor["support"] = [i, j]
+        path_factors.append(factor)
+    partner_factors = [
+        _transpose_factor(factor) for factor in reversed(path_factors)
+    ]
+    primary = _macro_product(tuple(path_factors))
+    partner = _macro_product(tuple(partner_factors))
+    assert partner == primary.T
+
+    forged["atoms"][0]["factors"] = path_factors
+    forged["atoms"][0]["matrix"] = _encoded_matrix(primary)
+    forged["atoms"][1]["factors"] = partner_factors
+    forged["atoms"][1]["matrix"] = _encoded_matrix(partner)
+
+    with pytest.raises(ValueError):
+        candidate_structure_audit(forged)
 
 
 @pytest.mark.parametrize(
