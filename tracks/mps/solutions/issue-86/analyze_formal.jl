@@ -11,6 +11,8 @@ const REFERENCES = Dict(
     1.75 => (value = 1.5609, error = 0.0003),
     2.0 => (value = 1.4208, error = 0.0002),
 )
+const NORMALIZED_VARIANCE_TOLERANCE = 1.0e-10
+const CONVERGENCE_RESIDUAL_TOLERANCE = 1.0e-8
 
 function write_json(path, payload)
     mkpath(dirname(path))
@@ -25,6 +27,28 @@ function result_key(row)
         row["model"], row["sigma"], Int(row["L"]), Float64(row["Gamma"]),
         Int(row["chi"]), row["poles"], get(row, "excited", !isnothing(row["gap"])),
     )
+end
+
+function normalized_ground_variance(row)
+    return haskey(row, "normalized_ground_variance") ?
+        Float64(row["normalized_ground_variance"]) :
+        normalized_energy_variance(
+            Float64(row["ground_variance"]), Float64(row["E0"])
+        )
+end
+
+function passes_convergence_gate(row)
+    return normalized_ground_variance(row) < NORMALIZED_VARIANCE_TOLERANCE &&
+        Float64(row["convergence_residual"]) < CONVERGENCE_RESIDUAL_TOLERANCE
+end
+
+function prefer_result(candidate, current)
+    candidate_passes = passes_convergence_gate(candidate)
+    current_passes = passes_convergence_gate(current)
+    candidate_passes != current_passes && return candidate_passes
+    candidate_residual = Float64(get(candidate, "convergence_residual", Inf))
+    current_residual = Float64(get(current, "convergence_residual", Inf))
+    return candidate_residual < current_residual
 end
 
 function load_rows(inputs)
@@ -44,9 +68,7 @@ function load_rows(inputs)
                 selected[key] = row
                 continue
             end
-            old_residual = Float64(get(selected[key], "convergence_residual", Inf))
-            new_residual = Float64(get(row, "convergence_residual", Inf))
-            new_residual < old_residual && (selected[key] = row)
+            prefer_result(row, selected[key]) && (selected[key] = row)
         end
     end
     return collect(values(selected))
@@ -277,27 +299,29 @@ function convergence_audit(rows)
     failures = Dict{String, Any}[]
     for row in rows
         Int(row["chi"]) >= 64 || continue
-        normalized = haskey(row, "normalized_ground_variance") ?
-            Float64(row["normalized_ground_variance"]) :
-            normalized_energy_variance(
-                Float64(row["ground_variance"]), Float64(row["E0"])
-            )
+        normalized = normalized_ground_variance(row)
         residual = Float64(row["convergence_residual"])
-        normalized < 1.0e-10 && residual < 1.0e-8 && continue
+        passes_convergence_gate(row) && continue
         push!(failures, Dict(
+            "cell_id" => get(row, "cell_id", nothing),
+            "stage" => get(row, "stage", nothing),
+            "resource_class" => get(row, "resource_class", nothing),
             "model" => row["model"],
             "sigma" => row["sigma"],
             "L" => row["L"],
             "Gamma" => row["Gamma"],
             "chi" => row["chi"],
             "poles" => row["poles"],
+            "excited" => get(
+                row, "excited", !isnothing(get(row, "gap", nothing))
+            ),
             "normalized_ground_variance" => normalized,
             "convergence_residual" => residual,
         ))
     end
     return Dict(
-        "normalized_variance_tolerance" => 1.0e-10,
-        "residual_tolerance" => 1.0e-8,
+        "normalized_variance_tolerance" => NORMALIZED_VARIANCE_TOLERANCE,
+        "residual_tolerance" => CONVERGENCE_RESIDUAL_TOLERANCE,
         "passes" => isempty(failures),
         "failures" => failures,
     )

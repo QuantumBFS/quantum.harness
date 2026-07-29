@@ -195,6 +195,32 @@ packed-worker script. A formal claim is emitted only after the finite-size,
 bond-dimension, and MPO components are all present and the combined interval
 overlaps the published error bar.
 
+## Quality-aware follow-up and scoped finalization
+
+`generate_followup_spec.jl` combines unresolved adaptive points with unique
+variance or residual failures. Strict retries preserve the physical
+parameters and use `tolerance=1e-11`, `maxiter=80`, and `seed=86`. When an old
+result and a strict retry describe the same physical point,
+`analyze_formal.jl` selects a result that passes both quality gates before
+comparing residuals.
+
+After the merged analysis completes, `finalize_track_b.jl` compares it with
+the preceding formal-analysis round and writes:
+
+- `validation_summary.json`, containing each numerical gate and the scoped
+  scientific status;
+- `next-recommendations.json` plus run specs and a reason map for any
+  remaining adaptive work, a `chi=128` retry, an `L=128` contingency, and a
+  last-level `chi=256` check;
+- `run.json` and `report.json`, the semantic and presentation sources for the
+  offline challenge report.
+
+Recommendation specs always carry `automatic_submission=false`. The
+finalizer can certify the two published critical-point anchors as the Track B
+validation floor. It also records that the complete Track B boundary still
+requires long-range `z`, `gamma/nu`, and the `sigma=1.6` and `sigma=1.8`
+rows.
+
 ## First local smoke result
 
 The 2026-07-27 seven-job `L=6`, `chi=16` run is a pipeline validation, not a

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
@@ -101,6 +103,7 @@ def _run_fake_packed_worker(tmp_path: Path, *, fail_index: int | None = None):
                 handle.seek(0)
                 handle.truncate()
                 json.dump(state, handle)
+                handle.flush()
                 fcntl.flock(handle, fcntl.LOCK_UN)
 
         update(1)
@@ -115,12 +118,13 @@ def _run_fake_packed_worker(tmp_path: Path, *, fail_index: int | None = None):
     spec.write_text("{}")
     output = tmp_path / "results"
     state_path = tmp_path / "srun-state.json"
-    env = os.environ | {
+    env = dict(os.environ)
+    env.update({
         "PATH": f"{fake_bin}:{os.environ['PATH']}",
         "SLURM_CPUS_PER_TASK": "8",
         "SLURM_MEM_PER_NODE": "12288",
         "FAKE_SRUN_STATE": str(state_path),
-    }
+    })
     if fail_index is not None:
         env["FAKE_FAIL_INDEX"] = str(fail_index)
     result = subprocess.run(
@@ -170,11 +174,12 @@ def test_calibration_uses_one_worker_with_every_allocated_cpu(tmp_path):
 
     for threads in ("4", "8"):
         capture = tmp_path / f"capture-{threads}"
-        env = os.environ | {
+        env = dict(os.environ)
+        env.update({
             "PATH": f"{fake_bin}:{os.environ['PATH']}",
             "SLURM_CPUS_PER_TASK": threads,
             "CALIBRATION_CAPTURE": str(capture),
-        }
+        })
         result = subprocess.run(
             ["/bin/bash", str(CALIBRATION_SBATCH)],
             cwd=ROOT,
@@ -222,13 +227,14 @@ def _capture_full_run_layout(
     run_spec = run_directory / "run_spec.json"
     run_spec.write_text('{"cells":[]}')
     capture = tmp_path / "class-a.args"
-    env = os.environ | {
+    env = dict(os.environ)
+    env.update({
         "PATH": f"{fake_bin}:{os.environ['PATH']}",
         "HARNESS_RUN_SPEC": str(run_spec),
         "HARNESS_COMMAND": f"stage1:{resource_class}",
         "SLURM_CPUS_PER_TASK": str(allocated_cpus),
         "CLASS_A_CAPTURE": str(capture),
-    }
+    })
 
     result = subprocess.run(
         ["/bin/bash", str(SBATCH)],
