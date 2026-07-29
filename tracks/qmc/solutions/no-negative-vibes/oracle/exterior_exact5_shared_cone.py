@@ -377,6 +377,7 @@ def numerical_simplicial_search(
                 "attempt": attempt_index,
                 "optimizer_success": bool(result.success),
                 "optimizer_message": str(result.message),
+                "transform": transform.tolist(),
             }
         if (
             margin is None
