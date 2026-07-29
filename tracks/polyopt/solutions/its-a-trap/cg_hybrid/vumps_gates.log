@@ -1,5 +1,5 @@
 vumps_tensor.jl  PASS  (2-site, two-parity tower)
-V1  PASS  VUMPS D=2 2-site: e=-0.4279080104 (E∞=-0.4431471806, ΔvsE∞=+1.52e-02) ‖B‖=5.05e-12
-V2  PASS  left-canonical residual (worst of 2) 5.09e-16
-V3  PASS  two-parity oracle: reduce 1.0e-15 reconstruct 3.5e-16 rows 4.2e-16
-V4  PASS  ΔCG8(n=6)=+1.773e-08 ΔCG8(n=9)=-2.940e-09 (base -0.4515446246, E0/N -0.4515446354)
+V1  PASS  VUMPS D=2 2-site: e=-0.4410581979 (E∞=-0.4431471806, ΔvsE∞=+2.09e-03) ‖B‖=7.93e-12
+V2  PASS  left-canonical residual (worst of 2) 1.54e-15
+V3  PASS  two-parity oracle: reduce 1.0e-15 reconstruct 3.5e-16 rows 5.6e-16
+V4 SKIPPED (SKIP_V4 set; m2_arms is the real measurement)

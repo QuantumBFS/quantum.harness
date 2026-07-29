@@ -11,17 +11,18 @@ include(joinpath(@__DIR__, "gsb_cg.jl"))
 include(joinpath(@__DIR__, "tower_gen.jl"))
 
 const N = 14
+const TENSOR = length(ARGS) >= 1 ? ARGS[1] : "vumps_A_D2.json"
 const S_TOWER = 4e-16          # generator assembly residual (oracle rows, V3)
 const B10E = -0.447396368481   # M0-C configA stock N=14 (fresh, isolated)
 
 # ---- load the VUMPS tensor exactly as persisted --------------------------------
 function load_As()
-    s = read(joinpath(@__DIR__, "vumps_A_D2.json"), String)
+    s = read(joinpath(@__DIR__, TENSOR), String)
     grab(key) = begin
         m = match(Regex("\"$key\":\\[\\[(.*?)\\],\\[(.*?)\\]\\]"), s)
         [parse.(Float64, split(m.captures[i], ",")) for i in 1:2]
     end
-    [[Matrix{ComplexF64}(reshape(grab("A$(i)_re")[μ] .+ 1im .* grab("A$(i)_im")[μ], 2, 2))
+    [[Matrix{ComplexF64}(begin v = grab("A$(i)_re")[μ] .+ 1im .* grab("A$(i)_im")[μ]; m = Int(sqrt(length(v))); reshape(v, m, m) end)
       for μ in 1:2] for i in 1:2]
 end
 A = load_As()
@@ -32,10 +33,12 @@ supp = [[1, 4]]; coe = [3 / 4]
 function arm(label; tower = nothing)
     log = joinpath(@__DIR__, "m2_$(label).mosek.log")
     t0 = time()
-    E = redirect_stdout(open(log, "w")) do
+    io = open(log, "w")
+    E = redirect_stdout(io) do
         GSB_cg(supp, coe, N, 4; extra = 4, rdm = 8, pso = 0, lso = false,
-               QUIET = true, tower = tower)[1]
+               QUIET = false, tower = tower)[1]
     end
+    close(io)                      # flush BEFORE parsing (NaN bug otherwise)
     wall = time() - t0
     # last interior-point iteration line: ITE PFEAS DFEAS GFEAS PRSTATUS POBJ DOBJ MU TIME
     pfeas = dfeas = mu = NaN
@@ -52,7 +55,7 @@ end
 κ = maximum(abs, coe)  # problem-scale factor, code-generated from coefficients
 εc(a, b) = (a.mu + b.mu) + κ * (a.pfeas + a.dfeas + b.pfeas + b.dfeas) + (a.s + b.s)
 
-println("== M2 arms, N=$N, tensor=vumps_A_D2 (D=2) ==")
+println("== M2 arms, N=$N, tensor=$TENSOR ==")
 B8  = arm("B8")
 A6  = arm("A6";  tower = build_tower(N, 6, A))
 A9  = arm("A9";  tower = build_tower(N, 9, A))
@@ -79,7 +82,7 @@ push!(out, @sprintf("Δreplace = E(A13) − E(B10-E) = %+.3e  (B10-E=%.12f; NO s
 push!(out, @sprintf("context: E(B8)=%.12f  B10E−B8 = %.3e (what rdm=10 adds over rdm=8)",
     B8.E, B10E - B8.E))
 foreach(println, out)
-open(joinpath(@__DIR__, "m2_results.txt"), "w") do io
-    println(io, "M2 arms N=$N seedless(VUMPS json) ", "julia $(VERSION)")
+open(joinpath(@__DIR__, "m2_results_" * replace(TENSOR, ".json"=>"") * ".txt"), "w") do io
+    println(io, "M2 arms N=$N tensor=$TENSOR julia $(VERSION)")
     foreach(l -> println(io, l), out)
 end

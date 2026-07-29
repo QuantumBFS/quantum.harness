@@ -1,0 +1,8 @@
+M2 arms N=14 tensor=vumps_A_D2.json julia 1.12.6
+ΔCG8(A6) = +3.726e-09  ε_cmp=2.6e-07  -> unresolved
+ΔCG8(A9) = +6.692e-09  ε_cmp=1.5e-07  -> unresolved
+ΔCG8(A13) = +7.027e-09  ε_cmp=1.4e-07  -> unresolved
+monotonicity E6≤E9≤E13: PASS
+per-level gains g(6→9)=9.88e-10 g(9→13)=8.37e-11 thr=5.00e-08 -> saturated at n*≤6
+Δreplace = E(A13) − E(B10-E) = -1.410e-05  (B10-E=-0.447396368481; NO sign rule)
+context: E(B8)=-0.447410477101  B10E−B8 = 1.411e-05 (what rdm=10 adds over rdm=8)
