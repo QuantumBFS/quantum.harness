@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T20:47:30Z
+Updated: 2026-07-29T23:01:51Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -287,5 +287,15 @@ Updated: 2026-07-29T20:47:30Z
 - The eventual split decision runner targets 500000 MiB: packed-row scaling
   predicts about 292.5 GB from the measured full-cone peak, so 114000 MiB is
   not a credible first numerical tier. It remains hash-gated and unsubmitted.
+- Split build-only job `118190562` completed successfully from immutable
+  commit `402e2ce` in 1:14:17, with 14,248,044 KiB Slurm peak RSS. It repeated
+  the exact cross-zero gate and produced the independent split fingerprint:
+  343,761 moment equations, 38 PSD blocks, 2,540,067 packed entries, maximum
+  side 490, 16,110,543 scalar terms, coefficient SHA-256
+  `b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`.
+  Solver classification is `not_run_exact_build_only`; no physics result has
+  been claimed. Next: advance the idle split checkout, preflight, and submit
+  one 500000-MiB hash-gated numerical decision solve with GRES binding
+  disabled.
 
 No user input or new credential is currently required.

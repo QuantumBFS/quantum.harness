@@ -852,3 +852,14 @@ Updated: 2026-07-29 UTC.
   about 292.5 GB. Use one 500000-MiB high-memory run after the hash gate, not a
   likely-failing 114000-MiB normal-node reconstruction; submit with explicit
   `--gres-flags=disable-binding`.
+- Split build-only job `118190562` completed successfully from immutable
+  commit `402e2ce` in 1:14:17 with 14,248,044 KiB Slurm peak RSS. The repeated
+  1,906,425-entry exact cross-zero gate passed. The independently streamed
+  formulation has 343,761 moment equations, 38 PSD blocks, 2,540,067 packed
+  entries, maximum side 490, and 16,110,543 scalar coefficient terms. Its
+  exact coefficient SHA-256 is
+  `b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`.
+  Classification is `not_run_exact_build_only`; this is the required
+  formulation fingerprint, not physics evidence. Advance the now-idle split
+  checkout, preflight one 500000-MiB hash-gated decision solve, and submit it
+  with GRES binding disabled.

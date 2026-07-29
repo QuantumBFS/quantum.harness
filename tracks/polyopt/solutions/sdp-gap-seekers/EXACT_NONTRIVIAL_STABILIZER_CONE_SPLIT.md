@@ -78,3 +78,17 @@ SHA-256 is
 The stabilizer split is therefore authorized. The next independent gate is a
 build-only fingerprint of every retained split-cone coefficient after the
 separate exact SO(3) rank-four moment projection.
+
+## Passing split-build result
+
+SCNet job `118190562`, immutable source commit `402e2ce`, completed the
+independent build-only gate in 1:14:17 with 14,248,044 KiB Slurm peak RSS. It
+repeated the exact 1,906,425-entry cross-zero test and streamed every retained
+coefficient. The final formulation contains 343,761 moment-matching
+equations, 38 PSD blocks, 2,540,067 packed entries, maximum side 490, and
+16,110,543 scalar coefficient terms. Its coefficient-map SHA-256 is
+`b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`.
+
+The run deliberately reports `not_run_exact_build_only`. It authorizes a
+separate numerical reconstruction guarded by this hash; it is not a
+feasibility or spectral-gap result.

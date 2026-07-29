@@ -1480,3 +1480,16 @@ factorization peak gives about 292.5 GB; nonlinear fill is uncertain. A
 independent hash passes, use one 500000-MiB `ksagnormal01` run with GRES
 binding disabled. This is a changed 490-side factorization, not a larger-memory
 repeat of the closed 975-side formulation.
+
+SCNet split build-only job `118190562` completed successfully from immutable
+source commit `402e2ce` in 1:14:17. Slurm measured 14,248,044 KiB peak RSS.
+The job repeated the exact 1,906,425-entry stabilizer cross-zero proof, then
+streamed the complete split+SO(3) coefficient system without invoking an
+optimizer. The result is 343,761 moment-matching equations, 38 PSD blocks,
+2,540,067 packed entries, maximum side 490, and 16,110,543 scalar terms. The
+exact coefficient-map SHA-256 is
+`b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`;
+runmeta reports `not_run_exact_build_only`. This closes the formulation gate,
+not the scientific question. The next changed action is one 500000-MiB
+`ksagnormal01` decision solve that requires this exact hash and audits any
+candidate at `1e-9`; do not infer feasibility from the passing build.
