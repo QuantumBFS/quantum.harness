@@ -695,3 +695,50 @@ spatial-build, or continuous-spin-cone job and no result directory. This is
 the same shared-account resource signature seen earlier, so an identical
 submission is not repeated while the count remains saturated. Continue with
 source-only preparation, then re-probe immediately before the next attempt.
+
+## 2026-07-29 — isotypic gamma=1/2 solve and primal export pass
+
+Slurm later accepted isotypic gamma=1/2 job `22988996`. It completed from
+runner commit `5f933515f3eebbec0a4685f55df5fd20a6460773` with the allowlisted
+model/runmeta SHA-256 values
+`22aa6d169fabbe6b9f41eeba4ddc7d37fb1f8b769427714875760ae94dc559f9`
+and
+`8e84bde7043d0023cbd82181d83f1a70622f222b6a706d0a36b9f45283e94e99`.
+
+Every fixed-setup, six-layer exact-reduction, source-file, model-count, and
+named-cone check passed before optimization. Mosek returned `OPTIMAL` with
+primal and dual feasible points. Independent reconstruction gave
+normalization 1, zero affine and PSD violations, and minimum block eigenvalue
+`0.08228797924548609`. Solver wall was 7.804 s, total runner wall 26.510 s,
+process peak RSS 1,138,120 KiB, and Slurm MaxRSS 1,124,340 KiB. The result
+SHA-256 is
+`84ef32c708b7d26871b868faf9afdc0ef75a06d9cb8f929f79d98909407d158a`.
+
+The runner also exported all 3,250 primal variables by exact IEEE-754 bits;
+the table SHA-256 is
+`8ccbb186f7c0b66e2dafa5d0e28782757b88afadba4982f1532dbb4ca77ff1be`.
+The numerical conclusion remains that this exact `d=2` finite relaxation is
+feasible at gamma=1/2. It does not prove a physical bulk gap.
+
+The exported table makes the next decision gate possible: run the prepared
+exact rational replay, which accepts only a common-denominator witness with
+strictly positive exact LDL pivots in all nine cones.
+
+## 2026-07-29 — remote-agent results synchronized and main agent takes over
+
+Both remote research agents were stopped after their Codex credentials became
+invalid. No Slurm job remains active. The Shastry--Sutherland branch was
+fast-forwarded locally from `5e844225...` to `5f933515...`; its two immutable
+isotypic MOF inputs, gamma-zero and gamma-half solve bundles, and the
+isotypic/spatial/continuous exact-truth bundles all pass their copied
+`SHA256SUMS`.
+
+The independent Kagome certificate branch is preserved locally at
+`1dbbb9fa0da68a4abd1c92b35ade2c944c6bbcb4`. Its canonical envelope, source
+MOF, exact ray, source audit, and independent PSD audit were copied to
+`background/challenge-88/remote-results/kagome-certificate-20260729/` and
+match the five hashes embedded in the envelope.
+
+Future work is performed by the main agent. The next scientific action is the
+xH5-only exact rational replay of the isotypic gamma=1/2 witness; do not
+restart either remote agent.

@@ -434,3 +434,27 @@ Updated: 2026-07-29 UTC.
   use the interval for source work and probe the account before the next
   submission.
 - No decision-changing user or resource need is open.
+- Isotypic gamma=1/2 attempt r1, Slurm job `22988996`, completed after the
+  remote research agent stopped. Every immutable-input, six-layer reduction,
+  source-hash, and nine-cone reload gate passed. Mosek returned `OPTIMAL`
+  with primal and dual feasible points. Normalization was exactly 1, maximum
+  affine residual and worst PSD violation were 0, and the smallest
+  reconstructed block eigenvalue was `0.08228797924548609`. Solver wall was
+  7.804 s, total runner wall 26.510 s, process peak RSS 1,138,120 KiB, and
+  Slurm MaxRSS 1,124,340 KiB. The result and exported 3,250-value IEEE-754
+  table have SHA-256 values
+  `84ef32c708b7d26871b868faf9afdc0ef75a06d9cb8f929f79d98909407d158a`
+  and
+  `8ccbb186f7c0b66e2dafa5d0e28782757b88afadba4982f1532dbb4ca77ff1be`.
+- The isotypic gamma=1/2 representation reduces measured process peak RSS by
+  39.1x and solver wall by 52.2x relative to the original exact Hermitian
+  bridge while preserving the same finite-relaxation feasibility decision.
+- The main/local agent has taken over execution. Both remote research agents
+  are stopped. Private branch `5f933515f3eebbec0a4685f55df5fd20a6460773`
+  and all seven decision-relevant isotypic/spatial/continuous result bundles
+  are synchronized locally and their manifests pass.
+- Exact next action: submit the prepared isotypic rational-witness replay on
+  xH5. It must rebuild all six exact reduction layers, round the exported
+  point to a common rational denominator, and accept only if every one of the
+  nine reconstructed rational matrices has strictly positive exact LDL
+  pivots. This step may exceed 1 GiB and must not run locally.

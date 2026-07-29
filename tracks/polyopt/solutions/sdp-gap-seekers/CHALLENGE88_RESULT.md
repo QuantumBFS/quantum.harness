@@ -209,3 +209,43 @@ Additional preserved artifacts:
   `a34c629a502b515fc615467bc876f691c0494d523c32f4e1dc5323d84b235d26`
   and
   `ce3f4030afdc19d90b0f3a1bd2e8a2d6f3f06c19aad6c61e3b0bbbfe68de17a9`.
+
+## Exact full-spin isotypic result
+
+The remaining trivial-character blocks contain one S3-trivial component and
+two equivalent copies of the S3-standard component. Exact integer
+isotypic bases remove one standard copy without changing the finite
+relaxation. The resulting representation has 3,250 moments, nine real PSD
+cones, 6,104 packed triangle entries, and maximum side 45.
+
+| gamma | Slurm job | status/audit | minimum block eigenvalue | solver wall | peak process RSS |
+|---|---:|---|---:|---:|---:|
+| 0 | 22988910 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.11113568782699743 | 6.624 s | 1,016,136 KiB |
+| 1/2 | 22988996 | `OPTIMAL`; primal/dual feasible; residual audit passed | 0.08228797924548609 | 7.804 s | 1,138,120 KiB |
+
+For gamma=1/2 this exact representation reduces process peak RSS by 39.1x
+and solver wall by 52.2x relative to the original Hermitian bridge. The
+result SHA-256 is
+`84ef32c708b7d26871b868faf9afdc0ef75a06d9cb8f929f79d98909407d158a`.
+All 3,250 primal values were exported by exact IEEE-754 bit pattern under
+SHA-256
+`8ccbb186f7c0b66e2dafa5d0e28782757b88afadba4982f1532dbb4ca77ff1be`
+for a separate exact rational positive-definiteness replay.
+
+The scientific decision remains limited but now inexpensive to reproduce:
+the exact `d=2` finite relaxation is feasible at gamma=1/2 and therefore does
+not exclude that candidate gap. This is not a proof of the physical bulk
+gap.
+
+Additional preserved artifacts:
+
+- Exact isotypic proof:
+  `EXACT_FULL_SPIN_ISOTYPIC_REDUCTION.md`.
+- Gamma=0 input/solve:
+  `results/ss-full-spin-isotypic-real-g0p8-gamma0-builder-20260729-r1/`
+  and
+  `results/ss-full-spin-isotypic-real-g0p8-gamma0-solve-xh5-20260729-r1/`.
+- Gamma=1/2 input/solve:
+  `results/ss-full-spin-isotypic-real-g0p8-gamma0p5-builder-20260729-r1/`
+  and
+  `results/ss-full-spin-isotypic-real-g0p8-gamma0p5-solve-xh5-20260729-r1/`.
