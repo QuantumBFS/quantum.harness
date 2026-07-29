@@ -11,7 +11,6 @@ using ..GenericGapModel:
     NoStateSymmetry,
     basis_manifest,
     validate_basis_manifest,
-    foreach_full_state_scalar_multiset,
     full_state_entries,
     instantiate_terms,
     assembly_plan,
@@ -230,6 +229,54 @@ function assembly_fingerprint(
     return fingerprint_records(PRIMAL_ASSEMBLY_SCHEMA, records)
 end
 
+function structural_moment_inventory(problem::GapProblem)
+    site_ids = collect(eachindex(problem.patch.sites))
+    max_degree = 2problem.d
+    local_words = enumerate_pauli_words(length(site_ids), max_degree)
+    state_words = PauliWord[
+        remap_word(word, site_ids)
+        for word in local_words
+        if !isempty(word.ops)
+    ]
+
+    bucket_count = max(1, 8Threads.nthreads())
+    buckets = [MomentKey[] for _ in 1:bucket_count]
+    Threads.@threads :dynamic for bucket_index in eachindex(buckets)
+        bucket = buckets[bucket_index]
+        for root_index in
+            bucket_index:bucket_count:length(state_words)
+            root = state_words[root_index]
+            selected = PauliWord[root]
+            function enumerate_from!(
+                first_index::Int,
+                degree::Int,
+            )
+                push!(bucket, moment_key(selected))
+                for index in first_index:length(state_words)
+                    word = state_words[index]
+                    next_degree = degree + length(word)
+                    next_degree > max_degree && continue
+                    push!(selected, word)
+                    enumerate_from!(index, next_degree)
+                    pop!(selected)
+                end
+                return nothing
+            end
+            enumerate_from!(root_index, length(root))
+        end
+    end
+
+    ordered_moments = MomentKey[moment_key()]
+    for bucket in buckets
+        append!(ordered_moments, bucket)
+    end
+    sort!(
+        ordered_moments;
+        by=key -> (moment_degree(key), key.canonical),
+    )
+    return ordered_moments
+end
+
 """
 Build the exact scalar-moment inventory and canonical coefficient-map hashes.
 
@@ -277,17 +324,7 @@ function assemble_primal_gap(
     )
 
     if !materialize_coefficients
-        ordered_moments = MomentKey[]
-        foreach_full_state_scalar_multiset(
-            collect(eachindex(problem.patch.sites)),
-            2problem.d,
-        ) do symbols
-            push!(ordered_moments, moment_key(symbols))
-        end
-        sort!(
-            ordered_moments;
-            by=key -> (moment_degree(key), key.canonical),
-        )
+        ordered_moments = structural_moment_inventory(problem)
         length(unique(ordered_moments)) == length(ordered_moments) ||
             error("structural moment inventory contains duplicates")
         first(ordered_moments) == moment_key() ||
