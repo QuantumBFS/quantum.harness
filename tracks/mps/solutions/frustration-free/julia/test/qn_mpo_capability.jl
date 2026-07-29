@@ -64,11 +64,44 @@ function compare_qn_and_non_qn_sector(
 end
 
 @testset "probe requires validated runner capability and fails closed" begin
-    validated = validated_chain_fixture(; n_bath = 1)
+    validated, result = mktempdir() do empty_path
+        withenv("PATH" => empty_path) do
+            offline_validated = validated_chain_fixture(; n_bath = 1)
+            offline_result =
+                probe_qn_purification_capability(offline_validated)
+            return offline_validated, offline_result
+        end
+    end
     @test !hasmethod(probe_qn_purification_capability, Tuple{})
-    result = probe_qn_purification_capability(validated)
     @test result.supported
     @test result.failure === nothing
+
+    bath_artifact = _fixture_bath_artifact(1, 0.1, 1.0)
+    mapping_artifact, mapping_json =
+        _fixture_chain_mapping_artifact(bath_artifact)
+    @test bath_artifact["sha256"] ==
+          bytes2hex(
+              sha256(
+                  codeunits(
+                      canonical_artifact_json(bath_artifact["payload"])
+                  ),
+              ),
+          )
+    @test mapping_artifact["sha256"] ==
+          bytes2hex(
+              sha256(
+                  codeunits(
+                      canonical_artifact_json(mapping_artifact["payload"])
+                  ),
+              ),
+          )
+    @test mapping_artifact["payload"]["source_bath_sha256"] ==
+          bath_artifact["sha256"]
+    corrupted = deepcopy(mapping_artifact)
+    corrupted["payload"]["Q"][1][1] = 0.0
+    @test_throws ArgumentError validate_chain_mapping_artifact(
+        corrupted, mapping_json, bath_artifact
+    )
 
     mandatory = (
         :site_labels_valid,
