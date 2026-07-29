@@ -67,10 +67,15 @@ scripts/download_pilot.sh \
   /absolute/path/to/challenge-194/.venv/bin/python
 ```
 
-The local destination must be absent, empty, or the same resumable download.
-The script never deletes source or destination files. Its source marker and
-append-only transfer log are siblings named `<local-root>.download-source` and
-`<local-root>.transfer.log`, so the downloaded Pilot root remains immutable.
+The local destination's real non-symlink parent must already exist, and the
+destination must be absent, empty, or the same resumable download.
+The script never deletes source or destination files. It atomically claims a
+sibling `<local-root>.download-claim` directory and stores no-clobber source,
+verified-completion, and uniquely created transfer-log files under the real
+non-symlink sibling `<local-root>.download-state` directory. A completed root
+is only reverified: `rsync` is never invoked again. Unexpected claims are
+preserved for diagnosis, and all transfer-generated logs remain outside the
+immutable Pilot root.
 
 ## Design and references
 
