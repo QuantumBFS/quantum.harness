@@ -16,6 +16,7 @@ download-ref = { type = "local" }
 
 # Problem-solving primitives (generic; topic-agnostic)
 parameter-scan = { type = "local" }     # multi-axis sweeps (subsumes finite-size-scan)
+phase-diagram = { type = "local" }       # finite-size phase-boundary mapping and refinement
 scaling-fit = { type = "local" }
 cross-method-check = { type = "local" }
 using-slurm = { type = "local" }        # cluster mechanism (agent-does-ssh)
@@ -23,6 +24,7 @@ cluster-jobs = { type = "local" }       # student-facing safe submit/manage/down
 setup-cluster = { type = "local" }      # build unified TOML profile + probe resources + seed safety limits
 build-apptainer-image = { type = "local", path = "skills/build-apptainer-image" }  # containerize a stack for cluster runs
 setup-julia = { type = "local" }        # Julia install + mirror + project env (local or remote)
+reuse-julia-daemon = { type = "local" } # optional local DaemonMode runner for repeated Julia TTFX
 reproduce-paper = { type = "local" }    # beginner-facing paper reproduction (brainstorm-first)
 beginner-training = { type = "local" }  # 5-track guided training; Track 2 absorbs the old track-starter flow
 report = { type = "local" }             # render report.json into a self-contained HTML report (stdlib only)
