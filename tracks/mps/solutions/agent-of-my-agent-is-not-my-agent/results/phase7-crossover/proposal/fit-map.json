@@ -1,0 +1,65 @@
+{
+  "1.50": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.50/fit-summary.json",
+    "fit_hash": "51fb5b03116f01a530f258801731a774a954951a0fbce75d07c563108a15a9e4",
+    "coefficient_hash": "6b8a9cbf476098b2f8a4e906c3e89cf424d5ab500dde6dbe90914d64589a82a1",
+    "sigma": 1.5,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "1.60": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.60/fit-summary.json",
+    "fit_hash": "8d40ef404c01ca81a69d42baf3c03acabee39ec9c25b109f45ce02de64de4e97",
+    "coefficient_hash": "ba8d9c3a270ae0eb99393c8bff6a8bb7c55ad1bc7c2163a315037318a79eafce",
+    "sigma": 1.6,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "1.70": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.70/fit-summary.json",
+    "fit_hash": "14d4dc1d0b09b9dcf41853a523974dc1a7d7510dac00d500f287ece8b4aa4c19",
+    "coefficient_hash": "0db98f5a7a05ba242ed09d66e84c6b59c3ea8ea4422253568f54bfbc5b973575",
+    "sigma": 1.7,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "1.75": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json",
+    "fit_hash": "29d3af435a2e66d28c13d56065f15f955772c1ec7c4a5c05fbc99fd03315a590",
+    "coefficient_hash": "611100a44366a6b521d289940086967c3a9ce5c6fe23d6352ccb332594178cae",
+    "sigma": 1.75,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "1.80": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.80/fit-summary.json",
+    "fit_hash": "19ab09df247debadbc75aaaa3d77cd9418e00f7ffbf1b397ecb944d8e539d54a",
+    "coefficient_hash": "d3bf813422395f7e588529cf984e1fa6168bda15e7e374f1d4abdea429d02ec6",
+    "sigma": 1.8,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "1.90": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-1.90/fit-summary.json",
+    "fit_hash": "e8d49d82a8352deecfc46e0def42accbecd83d17cc07611c3bd9f3401665f4d0",
+    "coefficient_hash": "10bb561ca0f2b835028d1c3435f070abcdc7d37475259c8fc71094033f0ae37a",
+    "sigma": 1.9,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  },
+  "2.00": {
+    "path": "results/phase7-crossover/proposal/fits/sigma-2.00/fit-summary.json",
+    "fit_hash": "32259665461044e659025baa61b8aaae9404fcc307e3b8ee7eb9b658d772e986",
+    "coefficient_hash": "25678fe7762185ea77a566dd0612b0d0672631de1d272aad093b3638a49eb748",
+    "sigma": 2.0,
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048
+  }
+}

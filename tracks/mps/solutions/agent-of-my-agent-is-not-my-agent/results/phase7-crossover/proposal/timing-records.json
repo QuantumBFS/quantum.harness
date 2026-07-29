@@ -1,0 +1,58 @@
+[
+  {
+    "L": 32,
+    "sector": "even",
+    "chi": 128,
+    "wall_seconds": 179.244418258,
+    "peak_memory_gib": 1.3,
+    "path": "results/phase6_sigma1.75/local-campaign/L32_Gamma1.565_even/summary.json",
+    "code_hash": "1730eb8c57655114672a301a08d5224b95424b3cf1df960398516b292d8b7294",
+    "hardware": {
+      "mode": "local",
+      "memory_bound_source": "validated-local-reproduction/report.md",
+      "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+    }
+  },
+  {
+    "L": 32,
+    "sector": "odd",
+    "chi": 128,
+    "wall_seconds": 214.88426135999907,
+    "peak_memory_gib": 1.3,
+    "path": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L32_Gamma1.565_odd/summary.json",
+    "code_hash": "485ce654123c6b1ff4ea9530c9f0a0b4537511075f5c462cbd7d223bd5bef91c",
+    "hardware": {
+      "mode": "local",
+      "memory_bound_source": "validated-local-reproduction/report.md",
+      "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+    }
+  },
+  {
+    "L": 64,
+    "sector": "even",
+    "chi": 128,
+    "wall_seconds": 590.9019505119995,
+    "peak_memory_gib": 1.3,
+    "path": "results/phase6_sigma1.75/local-campaign/L64_Gamma1.565_even/summary.json",
+    "code_hash": "1730eb8c57655114672a301a08d5224b95424b3cf1df960398516b292d8b7294",
+    "hardware": {
+      "mode": "local",
+      "memory_bound_source": "validated-local-reproduction/report.md",
+      "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+    }
+  },
+  {
+    "L": 64,
+    "sector": "odd",
+    "chi": 128,
+    "wall_seconds": 566.0645565489995,
+    "peak_memory_gib": 1.3,
+    "path": "results/phase6_sigma1.75/validated-local-reproduction/K24_chi128/L64_Gamma1.565_odd/summary.json",
+    "code_hash": "3b610791d046f23c45f415be294a2f9b9dc512e38037a68696879f886a215307",
+    "hardware": {
+      "mode": "local",
+      "memory_bound_source": "validated-local-reproduction/report.md",
+      "memory_bound_note": "conservative chi=128 campaign-wide peak bound"
+    }
+  }
+]
