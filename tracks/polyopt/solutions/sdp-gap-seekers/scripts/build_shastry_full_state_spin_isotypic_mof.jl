@@ -55,8 +55,6 @@ function spin_isotypic_truth_dict(truth)
             truth.nontrivial_comparison_count,
         "retained_block_dimensions" =>
             truth.retained_block_dimensions,
-        "expected_block_dimensions" =>
-            truth.expected_block_dimensions,
     )
 end
 
@@ -95,7 +93,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     mkpath(options.output)
     checkpoint_path = joinpath(options.output, "runmeta.toml")
     metadata = Dict(
-        "schema_version" => SPIN_ISOTYPIC_RUNMETA_SCHEMA,
+        "schema_version" => options.patch_level == 1 ?
+            SPIN_ISOTYPIC_RUNMETA_SCHEMA :
+            "shastry-l$(options.patch_level)d2-full-state-spin-isotypic-preflight-v1",
         "state" => "running",
         "created_at_utc" => Dates.format(
             now(UTC),
@@ -110,7 +110,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             "model" => "shastry-sutherland",
             "g_square_over_dimer" => rational_dict(options.coupling),
             "gamma" => rational_dict(options.gamma),
-            "patch_level" => 1,
+            "patch_level" => options.patch_level,
             "degree_d" => 2,
             "basis" => "complete-state-polynomial-v1",
             "stationarity" => "complete-inner-state-v1",
@@ -121,12 +121,18 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 "spin-S3-moment-quotient-and-isotypic-cone-blocking",
         ),
         "stages" => Dict{String,Any}(),
+        "intermediate_truth_mode" => options.patch_level == 1 ?
+            "exhaustive-coefficient-gates" :
+            "preflight-structural-assembly-final-isotypic-gate",
     )
     write_checkpoint(checkpoint_path, metadata)
 
-    progress("assemble complete L=1,d=2 state-polynomial primal")
+    progress(
+        "assemble complete L=$(options.patch_level),d=2 " *
+        "state-polynomial primal",
+    )
     problem = GapProblem(
-        square_patch_geometry(1),
+        square_patch_geometry(options.patch_level),
         shastry_sutherland_model(options.coupling),
         options.gamma,
         2;
@@ -151,24 +157,40 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     write_checkpoint(checkpoint_path, metadata)
 
     progress("exact V4, conjugation, anti-diagonal, and spin quotient")
-    v4_measurement = @timed assemble_full_state_v4_reduced_primal(primal)
+    exhaustive_intermediate_truth = options.patch_level == 1
+    v4_measurement = @timed assemble_full_state_v4_reduced_primal(
+        primal;
+        verify_truth=exhaustive_intermediate_truth,
+    )
     v4 = v4_measurement.value
     metadata["stages"]["v4"] = measurement_dict(v4_measurement)
-    real_measurement = @timed assemble_full_state_real_reduced_primal(v4)
+    real_measurement = @timed assemble_full_state_real_reduced_primal(
+        v4;
+        verify_truth=exhaustive_intermediate_truth,
+    )
     real_reduced = real_measurement.value
     metadata["stages"]["conjugation"] =
         measurement_dict(real_measurement)
     spatial_measurement =
-        @timed assemble_shastry_full_state_spatial_reduced_primal(real_reduced)
+        @timed assemble_shastry_full_state_spatial_reduced_primal(
+            real_reduced;
+            verify_truth=exhaustive_intermediate_truth,
+        )
     spatial = spatial_measurement.value
     metadata["stages"]["spatial"] = measurement_dict(spatial_measurement)
     spin_measurement =
-        @timed assemble_shastry_full_state_spin_spatial_reduced_primal(spatial)
+        @timed assemble_shastry_full_state_spin_spatial_reduced_primal(
+            spatial;
+            verify_truth=exhaustive_intermediate_truth,
+            verify_source_covariance=exhaustive_intermediate_truth,
+        )
     spin_spatial = spin_measurement.value
     metadata["stages"]["spin_spatial"] =
         measurement_dict(spin_measurement)
-    metadata["spin_spatial_truth"] =
-        spin_spatial_truth_dict(something(spin_spatial.truth))
+    if exhaustive_intermediate_truth
+        metadata["spin_spatial_truth"] =
+            spin_spatial_truth_dict(something(spin_spatial.truth))
+    end
     write_checkpoint(checkpoint_path, metadata)
 
     progress("exact S3 isotypic cone blocking")

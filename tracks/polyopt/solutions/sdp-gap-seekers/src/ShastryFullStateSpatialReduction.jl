@@ -45,14 +45,12 @@ source_primal(assembly::FullStateRealReducedPrimalAssembly) =
 
 shastry_spatial_site(site::Site) = Site(-site.y, -site.x)
 
-function require_shastry_l1d2(
+function require_shastry_d2(
     assembly::FullStateRealReducedPrimalAssembly,
 )
     primal = source_primal(assembly)
     primal.problem.model.name == "shastry-sutherland" ||
         throw(ArgumentError("spatial reducer is restricted to Shastry-Sutherland"))
-    primal.problem.patch.level == 1 ||
-        throw(ArgumentError("spatial reducer is restricted to L=1"))
     primal.problem.d == 2 ||
         throw(ArgumentError("spatial reducer is restricted to d=2"))
     return primal
@@ -61,12 +59,12 @@ end
 function shastry_spatial_site_map(
     assembly::FullStateRealReducedPrimalAssembly,
 )
-    patch = require_shastry_l1d2(assembly).problem.patch
+    patch = require_shastry_d2(assembly).problem.patch
     site_map = Int[]
     for site in patch.sites
         reflected = shastry_spatial_site(site)
         haskey(patch.site_to_id, reflected) ||
-            error("anti-diagonal reflection leaves the L=1 window")
+            error("anti-diagonal reflection leaves the square window")
         push!(site_map, patch.site_to_id[reflected])
     end
     all(site_map[site_map[index]] == index for index in eachindex(site_map)) ||

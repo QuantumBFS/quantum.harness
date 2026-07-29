@@ -86,7 +86,13 @@ function parse_args(arguments::Vector{String})
     index = 1
     while index <= length(arguments)
         argument = arguments[index]
-        if argument in ("--coupling", "--gamma", "--output", "--mode")
+        if argument in (
+            "--coupling",
+            "--gamma",
+            "--output",
+            "--mode",
+            "--patch-level",
+        )
             index < length(arguments) ||
                 throw(ArgumentError("$argument requires a value"))
             haskey(values, argument) &&
@@ -97,7 +103,8 @@ function parse_args(arguments::Vector{String})
             println(
                 "usage: build_shastry_full_state_spatial_mof.jl " *
                 "--coupling 0|4/5 --gamma P/Q " *
-                "--mode preflight|mof --output REPOSITORY_RELATIVE_PATH",
+                "--mode preflight|mof --output REPOSITORY_RELATIVE_PATH " *
+                "[--patch-level L]",
             )
             return nothing
         else
@@ -116,6 +123,9 @@ function parse_args(arguments::Vector{String})
     mode = Symbol(values["--mode"])
     mode in (:preflight, :mof) ||
         throw(ArgumentError("mode must be preflight or mof"))
+    patch_level = parse(Int, get(values, "--patch-level", "1"))
+    patch_level >= 1 ||
+        throw(ArgumentError("--patch-level must be positive"))
 
     output = values["--output"]
     isabspath(output) &&
@@ -131,6 +141,7 @@ function parse_args(arguments::Vector{String})
     return (
         coupling=coupling,
         gamma=gamma,
+        patch_level=patch_level,
         mode=mode,
         output=output_path,
         output_relative=relative,

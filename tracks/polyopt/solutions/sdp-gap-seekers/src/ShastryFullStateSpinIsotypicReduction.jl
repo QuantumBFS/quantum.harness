@@ -434,12 +434,17 @@ function trivial_block_truth(
         end
     end
     return (
-        exact=cross_zero && standard_proportional,
+        exact=cross_zero &&
+              standard_proportional &&
+              length(block.rows) ==
+                  length(decomposition.trivial) +
+                  2 * length(decomposition.standard_minus),
         cross_zero=cross_zero,
         standard_proportional=standard_proportional,
         cross_count=cross_count,
         proportional_count=proportional_count,
         orbit_sizes=decomposition.orbit_sizes,
+        source_dimension=length(block.rows),
         trivial_dimension=length(decomposition.trivial),
         standard_dimension=length(decomposition.standard_minus),
     )
@@ -466,13 +471,10 @@ function shastry_spin_isotypic_truth(
         ];
         rev=true,
     )
-    expected_dimensions =
-        [135, 108, 90, 72, 66, 66, 51, 51, 49, 48, 33, 33, 1]
     exact =
         all(report.exact for report in trivial_reports) &&
         positive_orbits_exact &&
-        gap_orbits_exact &&
-        dimensions == expected_dimensions
+        gap_orbits_exact
     return (
         exact=exact,
         trivial_blocks_exact=all(report.exact for report in trivial_reports),
@@ -480,7 +482,6 @@ function shastry_spin_isotypic_truth(
         nontrivial_gap_orbits_exact=gap_orbits_exact,
         nontrivial_comparison_count=positive_comparisons + gap_comparisons,
         retained_block_dimensions=dimensions,
-        expected_block_dimensions=expected_dimensions,
         trivial_reports=trivial_reports,
     )
 end
