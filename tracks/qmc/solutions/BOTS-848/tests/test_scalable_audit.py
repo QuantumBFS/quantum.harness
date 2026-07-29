@@ -60,6 +60,9 @@ def test_clean_manifest_freezes_and_verifies_candidate_artifacts(tmp_path: Path)
     assert payload["oracle_accesses"] == []
     assert len(payload["source_files"]) == 1
     assert {item["role"] for item in payload["artifacts"]} == set(artifacts)
+    assert {
+        item["role"]: item["bytes"] for item in payload["artifacts"]
+    } == {role: path.stat().st_size for role, path in artifacts.items()}
 
     result = verify_manifest(
         manifest_path,
@@ -71,6 +74,38 @@ def test_clean_manifest_freezes_and_verifies_candidate_artifacts(tmp_path: Path)
     assert result.issues == ()
     assert result.manifest_sha256 == sha256_file(manifest_path)
     assert result.artifact_bytes == sum(path.stat().st_size for path in artifacts.values())
+
+
+def test_manifest_rejects_tampered_artifact_byte_binding(tmp_path: Path) -> None:
+    project_root, run_dir, candidate, artifacts = make_files(tmp_path)
+    protocol = load_protocol()
+    manifest_path = freeze_manifest(
+        run_dir=run_dir,
+        project_root=project_root,
+        route="occupation_autoregressive",
+        attempt="scalable-v1-s01-a01",
+        protocol=protocol,
+        selected_update=2048,
+        training_seed=848,
+        source_files=[candidate],
+        artifact_files=artifacts,
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    payload["artifacts"][0]["bytes"] += 1
+    manifest_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    result = verify_manifest(
+        manifest_path,
+        project_root=project_root,
+        protocol=protocol,
+    )
+
+    assert not result.valid
+    assert any("artifact byte size mismatch" in issue for issue in result.issues)
 
 
 def test_freeze_manifest_preserves_old_target_when_atomic_replace_fails(
