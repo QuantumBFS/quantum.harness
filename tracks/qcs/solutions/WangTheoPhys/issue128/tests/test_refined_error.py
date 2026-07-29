@@ -27,6 +27,43 @@ def test_defect_tail_decreases_with_steps() -> None:
     assert defect_tail_site_bound(stages, 200) < defect_tail_site_bound(stages, 100)
 
 
+def test_grouped_d4_override_must_tighten_the_existing_constant() -> None:
+    from trottercert.refined_error import (
+        build_refined_fourth_order_constants,
+        evaluate_refined_fourth_order_bound,
+    )
+
+    constants = build_refined_fourth_order_constants(
+        decimal_digits=8,
+        quantization_digits=8,
+    )
+    tightened = constants.d4_site / 2
+    original = evaluate_refined_fourth_order_bound(constants, 144, 116)
+    grouped = evaluate_refined_fourth_order_bound(
+        constants,
+        144,
+        116,
+        d4_site_override=tightened,
+    )
+    assert grouped.degree_four_contribution == (
+        original.degree_four_contribution / 2
+    )
+    with pytest.raises(ValueError, match="nonnegative"):
+        evaluate_refined_fourth_order_bound(
+            constants,
+            144,
+            116,
+            d4_site_override=Fraction(-1),
+        )
+    with pytest.raises(ValueError, match="cannot exceed"):
+        evaluate_refined_fourth_order_bound(
+            constants,
+            144,
+            116,
+            d4_site_override=constants.d4_site + 1,
+        )
+
+
 def test_colored_unit_cell_canonicalization_merges_translates() -> None:
     registry = CoordinateRegistry()
     left = symplectic_pauli_from_coordinates(
@@ -104,3 +141,50 @@ def test_refined_bound_crosses_global_twofold_target() -> None:
     previous = evaluate_refined_fourth_order_bound(constants, 144, 115)
     assert bound.global_error_bound <= Fraction(1, 10**6)
     assert previous.global_error_bound > Fraction(1, 10**6)
+
+
+@pytest.mark.slow
+def test_grouped_d4_bound_crosses_global_fourfold_target() -> None:
+    from trottercert.anticommuting import (
+        certify_anticommuting_partition,
+        discover_anticommuting_partition,
+    )
+    from trottercert.refined_error import (
+        build_refined_fourth_order_constants,
+        evaluate_refined_fourth_order_bound,
+    )
+
+    stages, _ = fourth_order_suzuki_interval_stages(
+        4,
+        decimal_digits=12,
+    )
+    coefficients = certified_d4_cell_coefficients(
+        stages,
+        quantization_digits=18,
+    )
+    groups = discover_anticommuting_partition(
+        coefficients,
+        max_group_size=10,
+    )
+    certificate = certify_anticommuting_partition(
+        coefficients,
+        groups,
+    )
+    constants = build_refined_fourth_order_constants()
+    d4_site = certificate.bound / 4
+    accepted = evaluate_refined_fourth_order_bound(
+        constants,
+        144,
+        97,
+        d4_site_override=d4_site,
+    )
+    rejected = evaluate_refined_fourth_order_bound(
+        constants,
+        144,
+        96,
+        d4_site_override=d4_site,
+    )
+    assert len(certificate.paulis) == 75_324
+    assert len(certificate.groups) == 7_576
+    assert accepted.global_error_bound <= Fraction(1, 10**6)
+    assert rejected.global_error_bound > Fraction(1, 10**6)
