@@ -25,6 +25,12 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
 ))
 using .ShastryFullStateSpinIsotypicDualCertificateMosek
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicPrimalGapMosek.jl",
+))
+using .ShastryFullStateSpinIsotypicPrimalGapMosek
 using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
@@ -37,6 +43,7 @@ function spin_isotypic_source_dict()
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapMosek.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spin_isotypic_mof.jl",
     )
         source["files_sha256"][file] =
@@ -327,6 +334,78 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 sprint(show, solve_result.problem_status),
             "solution_status" =>
                 sprint(show, solve_result.solution_status),
+            "threads" => threads,
+            "time_limit_seconds" => time_limit_seconds,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+    end
+
+    if options.mode == :native
+        threads = parse(
+            Int,
+            get(
+                ENV,
+                "SS_MOSEK_THREADS",
+                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+            ),
+        )
+        time_limit_seconds = parse(
+            Float64,
+            get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"),
+        )
+        log_level =
+            parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+        progress("build low-level native Mosek primal")
+        native_measurement = @timed(
+            build_shastry_full_state_spin_isotypic_mosek_primal(
+                isotypic;
+                threads=threads,
+                time_limit_seconds=time_limit_seconds,
+                log_level=log_level,
+                progress_callback=progress,
+                fingerprint_coefficients=options.patch_level == 1,
+            )
+        )
+        native_primal = native_measurement.value
+        metadata["stages"]["native_primal"] =
+            measurement_dict(native_measurement)
+        metadata["native_primal"] = Dict(
+            "moment_variables" =>
+                length(native_primal.moment_variables),
+            "native_psd_blocks" =>
+                native_primal.native_psd_blocks,
+            "equality_constraints" =>
+                native_primal.equality_constraints,
+            "scalar_coefficient_terms" =>
+                native_primal.scalar_coefficient_terms,
+            "coefficient_map_sha256" =>
+                native_primal.coefficient_map_sha256,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+        progress(
+            "optimize native Mosek primal; threads=$threads, " *
+            "time_limit=$(time_limit_seconds)s",
+        )
+        solve_measurement = @timed(
+            optimize_shastry_full_state_spin_isotypic_mosek_primal!(
+                native_primal,
+            )
+        )
+        metadata["stages"]["solve"] =
+            measurement_dict(solve_measurement)
+        solve_result = solve_measurement.value
+        metadata["solve"] = Dict(
+            "formulation" =>
+                "low-level-native-mosek-affine-psd-primal-v1",
+            "classification" => solve_result.classification,
+            "problem_status" =>
+                sprint(show, solve_result.problem_status),
+            "solution_status" =>
+                sprint(show, solve_result.solution_status),
+            "maximum_acc_violation" =>
+                solve_result.maximum_acc_violation,
+            "maximum_equality_violation" =>
+                solve_result.maximum_equality_violation,
             "threads" => threads,
             "time_limit_seconds" => time_limit_seconds,
         )
