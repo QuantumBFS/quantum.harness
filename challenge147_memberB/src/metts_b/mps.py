@@ -60,9 +60,13 @@ def svd_truncate(theta, chi, tol=0.0):
                     k = kk
                     break
     k = max(1, k)
-    kept = np.sqrt((s[:k] ** 2).sum()) if k > 0 else 0.0
-    tail = np.sqrt((s[k:] ** 2).sum()) if k < s.size else 0.0
-    disc = float(tail / (kept + 1e-300)) if kept > 0 else 0.0
+    kept_w = float((s[:k] ** 2).sum()) if k > 0 else 0.0
+    tail_w = float((s[k:] ** 2).sum()) if k < s.size else 0.0
+    tot = kept_w + tail_w
+    # discarded weight = fraction of the Schmidt probability mass dropped,
+    # in [0, 1]. (The earlier tail/kept ratio was unbounded and meaningless
+    # for a flat spectrum.) 0 = nothing dropped (exact at this chi).
+    disc = float(tail_w / tot) if tot > 0 else 0.0
     return U[:, :k], s[:k], Vh[:k, :], disc, k
 
 
@@ -71,13 +75,16 @@ def svd_truncate(theta, chi, tol=0.0):
 # ---------------------------------------------------------------------------
 
 class MPS:
-    def __init__(self, tensors, chi=None, tol=0.0):
+    def __init__(self, tensors, chi=None, tol=0.0, snake=None):
         self.tensors = [np.array(t, dtype=np.complex128, copy=True)
                         for t in tensors]
         self.N = len(self.tensors)
         self.chi = chi
         self.tol = tol
         self.discarded = []      # per-gate discarded weights during evolution
+        # snake[pos] = physical site at MPS position pos. None = identity
+        # (MPS site pos == physical site pos).
+        self.snake = (None if snake is None else np.asarray(snake, dtype=int))
 
     @classmethod
     def from_product_state(cls, spins, chi=64, tol=0.0):
@@ -90,6 +97,49 @@ class MPS:
             t[1 if spins[i] == 1 else 0, 0, 0] = 1.0   # 1=up, 0=down
             tensors.append(t)
         return cls(tensors, chi=chi, tol=tol)          # already canonical
+
+    @classmethod
+    def from_dense_vector(cls, vec, chi=64, tol=0.0, snake=None):
+        """Decompose a dense state vector (length 2**N) into an MPS by
+        sequential SVD (left-to-right), in **snake order**.
+
+        The MPS site at position ``pos`` represents physical site
+        ``snake[pos]`` (row-major serpentine). ``snake`` defaults to the
+        identity map (physical order), which is what the dense cross-check
+        tests use when they build the MPS directly from a dense vector in
+        physical-site axis order.
+
+        The physical leg convention matches product_state_vector: bit k =
+        site (N-1-k), i.e. axis 0 of the reshaped vector is site 0. We first
+        transpose the reshaped vector's axes into snake order, then sweep.
+        Truncates to chi. Singular values are pushed right (left-canonical);
+        the final residual is kept on the last site so the input norm is
+        preserved exactly (to_vector reconstructs the input to machine
+        precision).
+        """
+        vec = np.asarray(vec, dtype=np.complex128).ravel()
+        N = int(round(np.log2(vec.size)))
+        psi = vec.reshape([2] * N)                     # axis i = physical site i
+        if snake is not None:
+            snake = np.asarray(snake, dtype=int)
+            psi = np.transpose(psi, snake)             # axis pos -> site snake[pos]
+        tensors = []
+        chiL = 1
+        rest = psi
+        for i in range(N):
+            last = (i == N - 1)
+            rest = rest.reshape(chiL * 2, -1)          # (chiL*2, 2^(N-i-1))
+            if last:
+                k = rest.shape[1]
+                tensors.append(rest.reshape(chiL, 2, k).transpose(1, 0, 2))
+                break
+            U, s, Vh = np.linalg.svd(rest, full_matrices=False)
+            k = min(chi, s.size)
+            U = U[:, :k]; s = s[:k]; Vh = Vh[:k, :]
+            tensors.append(U.reshape(chiL, 2, k).transpose(1, 0, 2))
+            rest = (np.diag(s) @ Vh)
+            chiL = k
+        return cls(tensors, chi=chi, tol=tol, snake=snake)
 
     # -- canonicalisation (right-canonical, sweep R->L) --------------------
     def right_canonical(self):
@@ -128,13 +178,18 @@ class MPS:
         return float(E.real.item())
 
     def to_vector(self):
-        """Dense state vector (length 2**N) by contracting all tensors. Only
-        for small N (tests / dense cross-check)."""
+        """Dense state vector (length 2**N) by contracting all tensors, in
+        **physical site** axis order (inverse snake if set). Only for small N
+        (tests / dense cross-check)."""
         full = self.tensors[0]
         for t in self.tensors[1:]:
             full = np.tensordot(full, t, axes=([-1], [1]))
-        full = full.reshape(-1)
-        return full
+        full = full.reshape([2] * self.N)              # axis pos = MPS pos
+        if self.snake is not None:
+            inv = np.empty_like(self.snake)
+            inv[self.snake] = np.arange(self.N)        # inverse permutation
+            full = np.transpose(full, inv)             # axis -> physical site
+        return full.reshape(-1)
 
     # -- environments ------------------------------------------------------
     def left_envs(self, upto):
@@ -149,13 +204,20 @@ class MPS:
 
     def right_envs(self, from_):
         """R[k] for k=from_..N: contraction of sites k..N-1, shape
-        (chiL_k, chiL_k). R[N] = [[1]]."""
-        R = [np.ones((1, 1), dtype=np.complex128)]          # R[N]
+        (chiL_k, chiL_k) (the LEFT bond of site k). R[N] = [[1]].
+
+        Built right-to-left: starting from the (1,1) right boundary, fold in
+        site k by contracting t_k and t_k.conj over the physical leg and the
+        RIGHT bond, leaving the LEFT bond as the new env index.
+        """
+        R = [np.ones((1, 1), dtype=np.complex128)]          # R[N] (right of last)
         for k in range(self.N - 1, from_ - 1, -1):
-            t = self.tensors[k]
-            E = np.tensordot(t, R[-1], axes=([2], [0]))     # (s, a, b)
-            R.append(np.tensordot(E, t.conj(), axes=([1, 2], [1, 0])))  # (a, a')
-        R.reverse()                                         # index by site
+            t = self.tensors[k]                             # (2, chiL, chiR)
+            # E = t_{s,a,b} R_{b,b'} -> (s, a, b'); then * conj(t)_{s,a',b'} over
+            # (physical s, right b') -> (a, a') = left bond env
+            E = np.tensordot(t, R[-1], axes=([2], [0]))     # (s, a, b')
+            R.append(np.tensordot(E, t.conj(), axes=([0, 2], [0, 2])))  # (a, a')
+        R.reverse()                                         # index by site k
         return R
 
     # -- 1-site and 2-site local expectation values ------------------------
@@ -184,9 +246,11 @@ class MPS:
         op = op2.reshape(si, sj, si, sj)
         top = np.tensordot(op, theta, axes=([2, 3], [0, 2]))  # (si, sj, chiL, chiR)
         # contract L_{a,a'} theta*_{si,a,sj,b} top_{si,a',sj,b'} R_{b,b'}
+        # thc: (si, chiL=a, sj, chiR=b); top: (si, sj, chiL=a', chiR=b')
         thc = theta.conj()                                  # (si, chiL, sj, chiR)
         E = np.tensordot(L, thc, axes=([1], [1]))           # (a', si, sj, b)
-        E = np.tensordot(E, top, axes=([0, 1, 2], [1, 0, 2]))  # (b, b')
+        # pair E's (a', si, sj) = axes [0,1,2] with top's (chiL, si, sj) = axes [2,0,1]
+        E = np.tensordot(E, top, axes=([0, 1, 2], [2, 0, 1]))  # (b, b')
         E = np.tensordot(E, R, axes=([0, 1], [0, 1]))
         return float((E / self.norm2()).real)
 

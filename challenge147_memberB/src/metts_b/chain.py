@@ -185,7 +185,8 @@ def run_chain(backend, beta, n_warmup, n_production, seed,
         })
         if trace["status_code"] == status.OK and not is_warmup:
             res.E_samples.append(float(trace["energy"]))
-            res.E2_samples.append(float(trace["energy2"]))
+            e2 = trace.get("energy2")
+            res.E2_samples.append(float(e2) if e2 is not None else float("nan"))
             res.n_production += 1
         elif is_warmup and trace["status_code"] == status.OK:
             res.n_warmup += 1
@@ -211,28 +212,28 @@ def run_chain(backend, beta, n_warmup, n_production, seed,
         E2s = np.array(res.E2_samples)
         meanE = float(Es.mean())
         res.u = meanE / N
-        # Specific heat = beta^2 ( <H^2> - <H>^2 ) / N  (report "方案 A",
-        # fluctuation formula). In METTS <H^2>_beta = mean(E2_sigma) and
-        # <H>_beta = mean(E_sigma), so the thermal variance of H is
-        #   Var_beta(H) = mean(E2_sigma) - mean(E_sigma)^2
-        # NOT Var_sigma(E_sigma) (the between-sample variance alone). The two
-        # differ by the within-sample variance E[E2_sigma - E_sigma^2] >= 0,
-        # which METTS typical states carry and which is essential at low T.
-        # (Law of total variance: Var_beta(H) = E[Var_phi(H)] + Var_sigma(E).)
-        varH = float(E2s.mean()) - meanE * meanE
-        if varH < 0:                      # numerical guard; should not happen
-            varH = 0.0
-        res.C = float(beta * beta) * varH / N
         res.u_err = binning_sem(Es) / N
-        # SEM on C via the delta-method linearisation of V = mean(E2) - meanE^2
-        # around the sample mean: g_sigma = E2_sigma - 2*meanE*E_sigma is the
-        # linear part, V = mean(g) + meanE^2, so SEM(V) = SEM(mean(g)) (the
-        # constant meanE^2 does not contribute). Binning absorbs autocorrelation.
-        if res.n_production > 1:
-            g = E2s - 2.0 * meanE * Es
-            res.C_err = float(beta * beta) / N * binning_sem(g)
+        # Specific heat: 方案 A (fluctuation formula) needs per-sample E2 =
+        # <phi|H^2|phi>. The dense backend provides it; the MPS backend does
+        # NOT (returns nan) because <H^2> on an MPS is expensive and
+        # cancellation-prone. When E2 is unavailable, C is left as nan here and
+        # filled by the scan via 方案 B (numerical derivative of the u(beta)
+        # curve, C = -beta^2 du/dbeta), which the report spec explicitly allows
+        # as a cross-check.
+        e2_ok = np.isfinite(E2s).all() and not np.all(E2s == 0.0)
+        if e2_ok:
+            varH = float(E2s.mean()) - meanE * meanE
+            if varH < 0:
+                varH = 0.0
+            res.C = float(beta * beta) * varH / N
+            if res.n_production > 1:
+                g = E2s - 2.0 * meanE * Es
+                res.C_err = float(beta * beta) / N * binning_sem(g)
+            else:
+                res.C_err = 0.0
         else:
-            res.C_err = 0.0
+            res.C = float("nan")
+            res.C_err = float("nan")
     if write_traces and trace_dir and summary_rows:
         write_csv(os.path.join(trace_dir, "chain_summary.csv"), summary_rows,
                   ["sample_id", "step", "warmup", "beta", "energy",
@@ -296,13 +297,6 @@ def metts_scan(backend, beta_list, n_warmup, n_production, seed,
         N = good[0].N
         meanE = float(allE.mean())
         u = meanE / N
-        # specific heat via the fluctuation formula (see run_chain): thermal
-        # variance of H = mean(E2_sigma) - mean(E_sigma)^2, including the
-        # within-sample variance carried by each METTS typical state.
-        varH = float(allE2.mean()) - meanE * meanE
-        if varH < 0:
-            varH = 0.0
-        C = float(b * b) * varH / N
         # SEM: chain means' spread / sqrt(n_chains) (between-chain) pooled with
         # within-chain binning SEM (conservative max). For a single chain this
         # reduces to the binning SEM.
@@ -311,16 +305,27 @@ def metts_scan(backend, beta_list, n_warmup, n_production, seed,
             between = float(np.std(chain_means, ddof=1) / np.sqrt(len(good)))
             within = float(np.mean([binning_sem(c.E_samples) for c in good]))
             u_err = max(between, within) / N
-            # Gelman-Rubin Rhat on E (not u; scale cancels)
             rhat = _gelman_rubin([np.array(c.E_samples) for c in good])
         else:
             u_err = binning_sem(allE) / N
             rhat = float("nan")
-        if allE.size > 1:
-            g = allE2 - 2.0 * meanE * allE        # delta-method for Var(H)
-            C_err = float(b * b) / N * binning_sem(g)
+        # specific heat: 方案 A (fluctuation formula) when per-sample E2 is
+        # available (dense backend); else defer to 方案 B (post-loop, from the
+        # u(beta) curve) for the MPS backend.
+        e2_ok = np.isfinite(allE2).all() and not np.all(allE2 == 0.0)
+        if e2_ok:
+            varH = float(allE2.mean()) - meanE * meanE
+            if varH < 0:
+                varH = 0.0
+            C = float(b * b) * varH / N
+            if allE.size > 1:
+                g = allE2 - 2.0 * meanE * allE
+                C_err = float(b * b) / N * binning_sem(g)
+            else:
+                C_err = 0.0
         else:
-            C_err = 0.0
+            C = float("nan")
+            C_err = float("nan")
         per_beta.append({
             "beta": float(b), "u": float(u), "u_err": float(u_err),
             "C": float(C), "C_err": float(C_err), "f": float("nan"),
@@ -331,8 +336,32 @@ def metts_scan(backend, beta_list, n_warmup, n_production, seed,
         us.append(u)
     # free energy from the u(beta) curve (thermodynamic integration)
     fs = free_energy_from_u(beta_list, us)
-    for row, fv in zip(per_beta, fs):
-        row["f"] = float(fv) if np.isfinite(fv) else float("nan")
+    # 方案 B: specific heat from the u(beta) curve, C = -beta^2 du/dbeta, for
+    # any beta whose 方案 A C is nan (MPS backend). Central difference on the
+    # (sorted) beta grid; the SEM propagates from the u SEMs in quadrature.
+    beta_arr = np.array(beta_list, dtype=float)
+    for idx, row in enumerate(per_beta):
+        row["f"] = float(fs[idx]) if np.isfinite(fs[idx]) else float("nan")
+        if not np.isfinite(row["C"]) and len(beta_list) >= 2:
+            b = beta_arr[idx]
+            # central / forward / backward difference of u
+            if 0 < idx < len(beta_list) - 1:
+                bl, bh = beta_arr[idx - 1], beta_arr[idx + 1]
+                ul, uh = per_beta[idx - 1]["u"], per_beta[idx + 1]["u"]
+                dul, duh = per_beta[idx - 1]["u_err"], per_beta[idx + 1]["u_err"]
+                dudb = (uh - ul) / (bh - bl)
+                cerr = (np.sqrt(dul**2 + duh**2) / (bh - bl)) if (np.isfinite(dul) and np.isfinite(duh)) else float("nan")
+            elif idx == 0:
+                b1 = beta_arr[1]; dudb = (per_beta[1]["u"] - row["u"]) / (b1 - b)
+                cerr = (np.sqrt(row["u_err"]**2 + per_beta[1]["u_err"]**2) / (b1 - b)) if np.isfinite(per_beta[1]["u_err"]) else float("nan")
+            else:
+                b1 = beta_arr[-2]; dudb = (row["u"] - per_beta[-2]["u"]) / (b - b1)
+                cerr = (np.sqrt(row["u_err"]**2 + per_beta[-2]["u_err"]**2) / (b - b1)) if np.isfinite(per_beta[-2]["u_err"]) else float("nan")
+            row["C"] = float(-b * b * dudb)
+            row["C_err"] = float(b * b * cerr) if np.isfinite(cerr) else float("nan")
+            row["C_method"] = "derivative_u"
+        else:
+            row["C_method"] = "fluctuation"
     return per_beta
 
 

@@ -250,12 +250,16 @@ def run_one_sample(backend, spins_in, beta, rng, sample_id, step,
             return trace, spins_in
         # energy
         E, E2, phi2 = backend.energy_moments(psi)
-        if not (np.isfinite(E) and np.isfinite(E2)):
+        # E must be finite. E2 is OPTIONAL: the dense backend returns
+        # <phi|H^2|phi> (used for the 方案 A specific heat); the MPS backend
+        # returns nan by design (C is obtained from the u(beta) curve via
+        # 方案 B instead). A nan E2 is therefore NOT an error.
+        if not np.isfinite(E):
             trace["status_code"] = status.ENERGY_ERROR
-            trace["error_message"] = f"E={E} E2={E2} phi2={phi2}"
+            trace["error_message"] = f"E={E} phi2={phi2}"
             return trace, spins_in
         trace["energy"] = float(E)
-        trace["energy2"] = float(E2)            # extra field for C estimator
+        trace["energy2"] = float(E2) if np.isfinite(E2) else None
         # collapse
         try:
             probs, spins_out, mass = backend.conditional_prob_and_collapse(

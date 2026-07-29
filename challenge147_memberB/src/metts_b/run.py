@@ -102,6 +102,7 @@ def run(cfg: METTSConfig):
         row = {
             "beta": beta, "u_metts": r["u"], "u_err": r["u_err"],
             "C_metts": r["C"], "C_err": r["C_err"], "f_metts": r["f"],
+            "C_method": r.get("C_method", "fluctuation"),
             "n_samples": r["n_samples"], "n_chains": r["n_chains"],
             "rhat_u": r["rhat_u"], "n_failed": r.get("n_failed", 0),
             "status": r["status"],
@@ -122,18 +123,20 @@ def run(cfg: METTSConfig):
         comp_rows.append(row)
         thermo_rows.append({
             "beta": beta, "f": r["f"], "u": r["u"], "C": r["C"],
+            "C_method": r.get("C_method", "fluctuation"),
             "u_err": r["u_err"], "C_err": r["C_err"],
             "n_samples": r["n_samples"], "rhat_u": r["rhat_u"],
         })
 
     comp_fields = ["beta", "u_metts", "u_err", "C_metts", "C_err", "f_metts",
-                   "n_samples", "n_chains", "rhat_u", "n_failed", "status",
-                   "u_ed", "C_ed", "f_ed", "u_abs_err", "u_rel_err",
+                   "C_method", "n_samples", "n_chains", "rhat_u", "n_failed",
+                   "status", "u_ed", "C_ed", "f_ed", "u_abs_err", "u_rel_err",
                    "C_abs_err", "C_rel_err", "f_abs_err", "f_rel_err"]
     write_csv(os.path.join(comparisons, "metts_vs_ed.csv"), comp_rows,
               comp_fields)
     write_csv(os.path.join(cfg.out_dir, "thermodynamics.csv"), thermo_rows,
-              ["beta", "f", "u", "C", "u_err", "C_err", "n_samples", "rhat_u"])
+              ["beta", "f", "u", "C", "C_method", "u_err", "C_err",
+               "n_samples", "rhat_u"])
 
     manifest = {
         "run_id": cfg.run_id(), "label": cfg.label,
