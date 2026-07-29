@@ -8,12 +8,18 @@ import os
 from pathlib import Path
 import traceback
 
-from qh147 import qmc, run
+from qh147 import qmc
 
 
 SOLUTION_ROOT = Path(__file__).resolve().parents[1]
 QMC_CONFIG = SOLUTION_ROOT / "configs" / "qmc-reference.json"
 PEPO_CONFIG = SOLUTION_ROOT / "configs" / "pepo-h3-d4.json"
+
+
+def _load_pepo_stack():
+    from qh147 import run
+
+    return run
 
 
 def _cell(spec: dict) -> dict:
@@ -86,6 +92,7 @@ def _dry_run(kind: str, params: dict) -> dict:
             seed,
         )
     else:
+        run = _load_pepo_stack()
         production = run.load_production_config(PEPO_CONFIG)
         if kind == "pepo":
             if params["compression_mode"] not in {"ordinary", "thermodynamic"}:
@@ -121,6 +128,7 @@ def _run_qmc(params: dict, output: Path) -> dict:
 
 
 def _run_pepo(params: dict, output: Path) -> dict:
+    run = _load_pepo_stack()
     production = run.load_production_config(PEPO_CONFIG)
     mode = params["compression_mode"]
     code = run.main(
@@ -150,6 +158,7 @@ def _run_pepo(params: dict, output: Path) -> dict:
 
 
 def _run_pepo_measure(params: dict, settings: dict) -> dict:
+    run = _load_pepo_stack()
     evolution_run_dir = Path(settings["evolution_run_dir"])
     source = evolution_run_dir / "cells" / params["source_cell"]
     source_manifest_path = source / "manifest.json"

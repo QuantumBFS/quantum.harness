@@ -13,6 +13,13 @@ def _load_module():
     return module
 
 
+def test_dispatcher_does_not_import_pepo_stack_at_module_load():
+    source = SCRIPT.read_text(encoding="utf-8")
+
+    assert "from qh147 import qmc, run" not in source
+    assert "from qh147 import run" not in source.split("def _load_pepo_stack", 1)[0]
+
+
 def _spec(tmp_path):
     return {
         "run_id": "fixture",

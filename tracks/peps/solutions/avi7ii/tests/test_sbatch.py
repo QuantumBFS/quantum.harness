@@ -24,6 +24,8 @@ def test_array_scripts_declare_resources_without_a_partition():
         assert "#SBATCH --gres=gpu:A800:1" in script
     assert "#SBATCH --cpus-per-task=1" in qmc
     assert "NUMBA_NUM_THREADS=1" in qmc
+    assert 'HARNESS_PYTHON="${HARNESS_PYTHON:-python}"' in qmc
+    assert '"$HARNESS_PYTHON" -u' in qmc
     assert "--kind qmc" in qmc
     assert "#SBATCH --cpus-per-task=8" in pepo
     assert "JAX_PLATFORM_NAME=gpu" in pepo
