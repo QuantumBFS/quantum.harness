@@ -1,59 +1,75 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Issue #229 finite-Abelian NC moment-SDP milestone</title>
-<style>
-body{margin:0;background:#f8f8f5;color:#151515;font:15px/1.55 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:32px 22px 56px}h1{font-size:24px;margin-bottom:4px}h2{font-size:18px;margin-top:28px;border-bottom:1px solid #ddd;padding-bottom:5px}.meta,.note{color:#666}.kpis{display:flex;flex-wrap:wrap;gap:12px}.kpi{flex:1 1 180px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px}.value{font-size:26px;font-weight:650}.pass{color:#086b26}table{border-collapse:collapse;width:100%;background:#fff}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #ddd}th{color:#555}code{background:#eee;padding:1px 4px;border-radius:3px}svg{max-width:100%;height:auto;background:#fff;border:1px solid #ddd;border-radius:6px}.bar{fill:#2a78d6}.threshold{stroke:#777;stroke-width:1.5;stroke-dasharray:5 4}.axis{stroke:#aaa}.label{font:12px system-ui,sans-serif;fill:#444}.number{font:12px system-ui,sans-serif;font-weight:650;fill:#111}
-</style>
-</head>
-<body><main>
-<h1>Finite-Abelian NC moment-SDP milestone</h1>
-<p class="meta">2026-07-28 · narrowed issue #229 scope · Julia + JuMP + Mosek</p>
-<div class="kpis">
-<div class="kpi"><div>NC moment milestone</div><div class="value pass">PASS</div><div>order-1 Z₂ + order-2 Z₂×Z₂</div></div>
-<div class="kpi"><div>Worst optimum gap</div><div class="value">2.74×10⁻⁹</div><div>dense versus reduced; limit 10⁻⁷</div></div>
-<div class="kpi"><div>Worst PSD margin</div><div class="value">4.96×10⁻¹⁴</div><div>minimum eigenvalue; limit −10⁻⁷</div></div>
-<div class="kpi"><div>Precursor corpus</div><div class="value pass">50</div><div>matrix-only cases still pass separately</div></div>
-</div>
-<h2>Moment-SDP block structure</h2>
-<svg viewBox="0 0 760 290" role="img" aria-label="Cubic work proxy reduction by symmetry family">
-<line x1="70" y1="235" x2="720" y2="235" class="axis"/>
-<line x1="70" y1="40" x2="70" y2="235" class="axis"/>
-<rect x="175" y="191" width="150" height="44" class="bar"/><text x="250" y="184" text-anchor="middle" class="number">1.92×</text><text x="250" y="258" text-anchor="middle" class="label">CHSH Z₂, order 1</text>
-<rect x="455" y="40" width="150" height="195" class="bar"/><text x="530" y="33" text-anchor="middle" class="number">8.48×</text><text x="530" y="258" text-anchor="middle" class="label">Pauli-style Z₂×Z₂, order 2</text>
-<text x="20" y="145" transform="rotate(-90 20 145)" text-anchor="middle" class="label">D³ / Σₖdₖ³</text>
-</svg>
-<p class="note">The proxy compares one dense PSD cone with the character-sector cone dimensions. CHSH uses blocks 4+1 from a five-word order-1 basis; the Z₂×Z₂ instance uses 6+3+2+2 from a 13-word order-2 basis.</p>
-<h2>What was implemented now</h2>
-<ul>
-<li>An independent Julia NC specification for self-adjoint ±1 generators with explicitly declared cross-site commutations.</li>
-<li>Word enumeration and normalization, moment keys, and the affine pencil Mᵤᵥ(y)=y<sub>normalize(reverse(u)v)</sub>.</li>
-<li>Automatic lifting of Z₂<sup>k</sup> generator signs to word characters and rejection of non-invariant Hamiltonians. The dense hierarchy creates every real moment key and does not impose symmetry zeros in advance; only the reduced hierarchy group-averages non-invariant moments to zero.</li>
-<li>JuMP/Mosek dense and reduced formulations use the same affine rule M<sub>uv</sub>(y)=y<sub>normalize(reverse(u)v)</sub>. Dense constrains the complete affine PSD pencil, while reduced constrains its character-sector affine PSD blocks.</li>
-<li>Deterministic CHSH order-1 and two-site Pauli-style order-2 tests, reconstructed-matrix PSD checks, and Python integration into <code>make test</code>.</li>
-</ul>
-<h2>NC moment-SDP evidence</h2>
-<table><thead><tr><th>Instance</th><th>Dense free moments</th><th>Reduced free moments</th><th>Dense optimum</th><th>Reduced optimum</th><th>Gap</th><th>PSD proxy</th></tr></thead><tbody>
-<tr><td>CHSH / Z₂, order 1</td><td>11</td><td>7</td><td>2.828427124746048</td><td>2.828427124746046</td><td>1.33×10⁻¹⁵</td><td>1.92×</td></tr>
-<tr><td>Pauli-style / Z₂×Z₂, order 2</td><td>31</td><td>11</td><td>1.999999999358</td><td>1.999999996615</td><td>2.74×10⁻⁹</td><td>8.48×</td></tr>
-</tbody></table>
-<p class="note">Maximum normalization/equality and objective-reconstruction residuals were 0 at reported precision. All reconstructed moment matrices had λ<sub>min</sub> ≥4.96×10⁻¹⁴.</p>
-<h2>Earlier precursor, kept distinct</h2>
-<table><thead><tr><th>Check</th><th>Required</th><th>Observed</th></tr></thead><tbody>
-<tr><td>Development corpus</td><td>30 cases + runtime probe</td><td class="pass">31/31 passed</td></tr>
-<tr><td>Sealed corpus</td><td>20 cases + runtime probe</td><td class="pass">21/21 passed</td></tr>
-<tr><td>Spectral equivalence</td><td>≤10⁻⁷(1+|reference|)</td><td>≤1.07×10⁻¹⁴ on development</td></tr>
-<tr><td>Certificate residual</td><td>≤10⁻¹⁰</td><td>≤2.09×10⁻¹⁴ on development</td></tr>
-<tr><td>Z₂ work proxy</td><td>≥3×</td><td>4×</td></tr>
-<tr><td>Product-cyclic work proxy</td><td>≥10×</td><td>16×–81×</td></tr>
-<tr><td>Negative controls</td><td>all rejected</td><td class="pass">5/5 rejected</td></tr>
-</tbody></table>
-<h2>Reproduce</h2>
-<p><code>julia --project=julia-env research/nc_moment_sdp/runtests.jl</code></p>
-<p><code>julia --project=julia-env research/nc_moment_sdp/run.jl /tmp/issue-229-nc-moment.json</code></p>
-<p><code>PATH="$PWD/.venv/bin:$PATH" make test</code></p>
-<h2>Scope</h2>
-<p><strong>The narrowed finite-Abelian NC moment-SDP milestone is complete; the general issue #229 is not claimed complete.</strong> The implementation covers real order-1/2 moment matrices for self-adjoint ±1 generators and Z₂<sup>k</sup> sign actions. It does not yet provide general polynomial localizing matrices, complex moment data, non-Abelian permutation symmetry, SU(2), or a higher-order scalable hierarchy.</p>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Issue #229 finite-Abelian baseline and SU(2) evidence</title>
+<style>body{margin:0;background:#f7f7f4;color:#171717;font:15px/1.5 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:30px 22px 55px}h1{font-size:25px}h2{margin-top:30px;border-bottom:1px solid #ccc}h3{margin-top:24px}.kpis{display:flex;gap:12px;flex-wrap:wrap}.kpi{background:white;border:1px solid #ddd;border-radius:7px;padding:12px;min-width:190px}.value{font-size:24px;font-weight:700}.note{color:#555}table{border-collapse:collapse;width:100%;background:white;font-size:13px}th,td{padding:7px 8px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#eee}details{border:1px solid #ddd;border-radius:7px;padding:10px;background:#fff;overflow:auto}code{background:#eee;padding:2px 4px}svg{max-width:100%;height:auto;background:#fff;border:1px solid #ddd;border-radius:7px;margin:10px 0}.bar{fill:#276fbf}.axis{stroke:#999}.label{font:12px system-ui,sans-serif;fill:#444}.number{font:12px system-ui,sans-serif;font-weight:700;fill:#111}</style></head>
+<body><main><h1>Issue #229: finite-Abelian baseline and SU(2) evidence</h1>
+<p class="note">Generated reproducibly with NumPy 2.5.1. The three evidence layers below are explicitly distinct.</p>
+<div class="kpis"><div class="kpi"><div>Finite-Abelian baseline</div><div class="value">30 dev + 20 private</div></div>
+<div class="kpi"><div>Baseline worst spectrum error</div><div class="value">1.643e-14</div></div>
+<div class="kpi"><div>Baseline worst reconstruction</div><div class="value">1.726e-15</div></div>
+<div class="kpi"><div>New SU(2) cases</div><div class="value">L=4, 6, 8</div></div></div>
+<h2>1. Existing NC moment-SDP evidence</h2>
+<p>This prior finite-Abelian optimization result remains separate: CHSH Z₂ order 1 had dense/reduced optimum gap 1.33e-15 and 1.92x cubic cone proxy; the Pauli-style Z₂xZ₂ order-2 case had gap 2.74e-9 and 8.48x proxy. <strong>An NC moment SDP is not identified with non-Abelian symmetry.</strong></p>
+<h2>2. Finite-Abelian matrix baseline (recomputed)</h2>
+<p>These 50 matrix instances test character-projector reduction only. Residuals use Frobenius norms (reconstruction, leakage, and commutator relative to max(1, ‖H‖_F)); cubic proxy is D³ / Σ_k d_k³.</p>
+<details open><summary><strong>All 50 baseline instances</strong> (collapse/expand)</summary><table><thead><tr><th>ID</th><th>Corpus</th><th>Family</th><th>D</th><th>Blocks</th><th>Spectrum error</th><th>Reconstruction</th><th>Orthogonality</th><th>Leakage</th><th>Symmetry commutator</th><th>Cubic proxy</th></tr></thead><tbody>
+<tr data-baseline-instance><td>z2-000</td><td>development</td><td>z2</td><td>16</td><td>8+8</td><td>2.887e-15</td><td>1.033e-15</td><td>3.802e-15</td><td>7.268e-16</td><td>7.804e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-001</td><td>development</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>2.665e-15</td><td>8.943e-16</td><td>2.738e-15</td><td>7.386e-16</td><td>7.555e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-002</td><td>development</td><td>z2</td><td>20</td><td>10+10</td><td>1.066e-14</td><td>1.381e-15</td><td>4.469e-15</td><td>6.929e-16</td><td>9.420e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-003</td><td>development</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>3.997e-15</td><td>1.024e-15</td><td>4.269e-15</td><td>8.646e-16</td><td>1.006e-15</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-004</td><td>development</td><td>z2</td><td>18</td><td>9+9</td><td>5.329e-15</td><td>1.265e-15</td><td>3.954e-15</td><td>7.312e-16</td><td>8.560e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-005</td><td>development</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>4.441e-15</td><td>1.010e-15</td><td>5.469e-15</td><td>1.001e-15</td><td>1.023e-15</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-006</td><td>development</td><td>z2</td><td>16</td><td>8+8</td><td>8.438e-15</td><td>1.161e-15</td><td>3.639e-15</td><td>6.185e-16</td><td>7.373e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-007</td><td>development</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>3.553e-15</td><td>1.034e-15</td><td>4.703e-15</td><td>9.076e-16</td><td>9.962e-16</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-008</td><td>development</td><td>z2</td><td>20</td><td>10+10</td><td>9.770e-15</td><td>1.148e-15</td><td>3.977e-15</td><td>7.817e-16</td><td>8.388e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-009</td><td>development</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>1.776e-15</td><td>7.787e-16</td><td>2.719e-15</td><td>7.658e-16</td><td>8.463e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-010</td><td>development</td><td>z2</td><td>18</td><td>9+9</td><td>4.441e-15</td><td>1.152e-15</td><td>3.417e-15</td><td>6.286e-16</td><td>8.563e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-011</td><td>development</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>2.665e-15</td><td>9.236e-16</td><td>3.660e-15</td><td>7.458e-16</td><td>9.049e-16</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-012</td><td>development</td><td>z2</td><td>16</td><td>8+8</td><td>5.329e-15</td><td>1.069e-15</td><td>2.807e-15</td><td>5.821e-16</td><td>8.206e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-013</td><td>development</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>3.109e-15</td><td>1.100e-15</td><td>5.282e-15</td><td>9.935e-16</td><td>1.102e-15</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-014</td><td>development</td><td>z2</td><td>20</td><td>10+10</td><td>3.553e-15</td><td>1.201e-15</td><td>4.098e-15</td><td>6.666e-16</td><td>9.184e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-015</td><td>development</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>3.997e-15</td><td>9.368e-16</td><td>4.992e-15</td><td>9.455e-16</td><td>1.055e-15</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-016</td><td>development</td><td>z2</td><td>18</td><td>9+9</td><td>3.109e-15</td><td>9.965e-16</td><td>3.514e-15</td><td>7.092e-16</td><td>7.899e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-017</td><td>development</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>3.553e-15</td><td>1.026e-15</td><td>3.353e-15</td><td>7.427e-16</td><td>8.996e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-018</td><td>development</td><td>z2</td><td>16</td><td>8+8</td><td>3.109e-15</td><td>1.048e-15</td><td>3.751e-15</td><td>7.378e-16</td><td>8.763e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-019</td><td>development</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>2.387e-15</td><td>9.669e-16</td><td>4.059e-15</td><td>8.452e-16</td><td>8.921e-16</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-020</td><td>development</td><td>z2</td><td>20</td><td>10+10</td><td>7.105e-15</td><td>1.281e-15</td><td>4.122e-15</td><td>7.545e-16</td><td>8.334e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-021</td><td>development</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>3.997e-15</td><td>1.070e-15</td><td>5.114e-15</td><td>9.299e-16</td><td>1.058e-15</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-022</td><td>development</td><td>z2</td><td>18</td><td>9+9</td><td>7.994e-15</td><td>1.394e-15</td><td>3.865e-15</td><td>6.817e-16</td><td>9.841e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-023</td><td>development</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>2.887e-15</td><td>1.069e-15</td><td>4.842e-15</td><td>8.897e-16</td><td>1.039e-15</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-024</td><td>development</td><td>z2</td><td>16</td><td>8+8</td><td>3.553e-15</td><td>1.242e-15</td><td>3.880e-15</td><td>6.571e-16</td><td>7.408e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-025</td><td>development</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>5.773e-15</td><td>8.032e-16</td><td>2.618e-15</td><td>6.096e-16</td><td>7.944e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-026</td><td>development</td><td>z2</td><td>20</td><td>10+10</td><td>4.441e-15</td><td>1.215e-15</td><td>4.406e-15</td><td>7.396e-16</td><td>8.810e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-027</td><td>development</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>3.553e-15</td><td>8.911e-16</td><td>3.650e-15</td><td>7.529e-16</td><td>8.931e-16</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-028</td><td>development</td><td>z2</td><td>18</td><td>9+9</td><td>4.441e-15</td><td>1.132e-15</td><td>3.264e-15</td><td>6.385e-16</td><td>9.200e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-029</td><td>development</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>3.553e-15</td><td>1.200e-15</td><td>5.409e-15</td><td>9.667e-16</td><td>9.517e-16</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-030</td><td>private</td><td>z2</td><td>16</td><td>8+8</td><td>5.329e-15</td><td>1.215e-15</td><td>3.298e-15</td><td>5.160e-16</td><td>7.840e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-031</td><td>private</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>2.220e-15</td><td>1.020e-15</td><td>4.823e-15</td><td>9.157e-16</td><td>1.059e-15</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-032</td><td>private</td><td>z2</td><td>20</td><td>10+10</td><td>4.718e-15</td><td>1.063e-15</td><td>3.784e-15</td><td>6.868e-16</td><td>8.600e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-033</td><td>private</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>3.109e-15</td><td>1.007e-15</td><td>2.932e-15</td><td>7.176e-16</td><td>6.963e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-034</td><td>private</td><td>z2</td><td>18</td><td>9+9</td><td>4.441e-15</td><td>1.358e-15</td><td>3.882e-15</td><td>7.611e-16</td><td>8.539e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-035</td><td>private</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>3.109e-15</td><td>1.403e-15</td><td>4.504e-15</td><td>8.202e-16</td><td>9.212e-16</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-036</td><td>private</td><td>z2</td><td>16</td><td>8+8</td><td>3.553e-15</td><td>1.230e-15</td><td>3.935e-15</td><td>7.217e-16</td><td>7.904e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-037</td><td>private</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>4.441e-15</td><td>1.170e-15</td><td>5.730e-15</td><td>9.787e-16</td><td>1.010e-15</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-038</td><td>private</td><td>z2</td><td>20</td><td>10+10</td><td>6.217e-15</td><td>1.186e-15</td><td>4.184e-15</td><td>7.716e-16</td><td>9.148e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-039</td><td>private</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>3.109e-15</td><td>9.432e-16</td><td>4.709e-15</td><td>9.096e-16</td><td>9.923e-16</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-040</td><td>private</td><td>z2</td><td>18</td><td>9+9</td><td>6.217e-15</td><td>1.467e-15</td><td>4.544e-15</td><td>7.864e-16</td><td>7.048e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-041</td><td>private</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>2.220e-15</td><td>8.339e-16</td><td>2.640e-15</td><td>6.397e-16</td><td>7.629e-16</td><td>16.00x</td></tr>
+<tr data-baseline-instance><td>z2-042</td><td>private</td><td>z2</td><td>16</td><td>8+8</td><td>5.329e-15</td><td>1.726e-15</td><td>4.539e-15</td><td>8.187e-16</td><td>9.460e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-043</td><td>private</td><td>product-cyclic</td><td>24</td><td>4+4+4+4+4+4</td><td>1.776e-15</td><td>1.153e-15</td><td>3.835e-15</td><td>8.881e-16</td><td>1.040e-15</td><td>36.00x</td></tr>
+<tr data-baseline-instance><td>z2-044</td><td>private</td><td>z2</td><td>20</td><td>10+10</td><td>7.994e-15</td><td>1.111e-15</td><td>3.796e-15</td><td>6.395e-16</td><td>8.173e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-045</td><td>private</td><td>product-cyclic</td><td>36</td><td>4+4+4+4+4+4+4+4+4</td><td>7.105e-15</td><td>1.257e-15</td><td>6.091e-15</td><td>1.009e-15</td><td>1.093e-15</td><td>81.00x</td></tr>
+<tr data-baseline-instance><td>z2-046</td><td>private</td><td>z2</td><td>18</td><td>9+9</td><td>1.643e-14</td><td>1.087e-15</td><td>3.487e-15</td><td>6.358e-16</td><td>8.112e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-047</td><td>private</td><td>product-cyclic</td><td>32</td><td>4+4+4+4+4+4+4+4</td><td>2.331e-15</td><td>9.546e-16</td><td>4.617e-15</td><td>8.639e-16</td><td>9.982e-16</td><td>64.00x</td></tr>
+<tr data-baseline-instance><td>z2-048</td><td>private</td><td>z2</td><td>16</td><td>8+8</td><td>6.217e-15</td><td>1.288e-15</td><td>3.709e-15</td><td>7.103e-16</td><td>9.700e-16</td><td>4.00x</td></tr>
+<tr data-baseline-instance><td>product-049</td><td>private</td><td>product-cyclic</td><td>16</td><td>4+4+4+4</td><td>2.220e-15</td><td>7.484e-16</td><td>2.448e-15</td><td>6.441e-16</td><td>6.924e-16</td><td>16.00x</td></tr></tbody></table></details>
+<h2>3. New true SU(2) irrep/multiplicity reduction</h2>
+<p>Spin-1/2 antiferromagnetic Heisenberg open chain H=Σ_i S_i·S_(i+1), J=+1. In fixed M=S, S² projection selects one highest-weight vector per irrep copy, producing an m_S by m_S multiplicity block. Each block eigenvalue is repeated 2S+1 times to reconstruct the full spectrum. Cubic proxy is D³ / Σ_S m_S³.</p>
+<svg viewBox="0 0 760 280" role="img" aria-label="SU(2) cubic work proxy and spectrum reconstruction error"><line x1="70" y1="225" x2="720" y2="225" class="axis"/><rect x="123.3" y="182.4" width="110" height="42.6" class="bar"/><text x="178.3" y="174.4" text-anchor="middle" class="number">113.78x</text><text x="178.3" y="248" text-anchor="middle" class="label">L=4, error=8.9e-16</text><rect x="340.0" y="124.9" width="110" height="100.1" class="bar"/><text x="395.0" y="116.9" text-anchor="middle" class="number">267.49x</text><text x="395.0" y="248" text-anchor="middle" class="label">L=6, error=2.7e-15</text><rect x="556.7" y="35.0" width="110" height="190.0" class="bar"/><text x="611.7" y="27.0" text-anchor="middle" class="number">507.78x</text><text x="611.7" y="248" text-anchor="middle" class="label">L=8, error=9.5e-15</text><text x="22" y="140" transform="rotate(-90 22 140)" text-anchor="middle" class="label">D³ / Σ_S m_S³</text></svg>
+<section data-su2-case><h3>L=4: D=16</h3><p>Spectrum error <b>8.882e-16</b>; [H,S²] residual <b>0.000e+00</b>; ground energy <b>-1.61602540378444</b>; cubic proxy <b>113.78x</b>; completeness <b>16=16</b>.</p><table><thead><tr><th>S</th><th>Multiplicity m_S</th><th>Reduced block</th><th>Irrep dimension</th><th>Leakage</th><th>Orthogonality</th><th>Block eigenvalues</th></tr></thead><tbody><tr><td>0</td><td>2</td><td>2</td><td>1</td><td>1.839e-16</td><td>5.615e-16</td><td>-1.61602540378, 0.116025403784</td></tr><tr><td>1</td><td>3</td><td>3</td><td>3</td><td>6.928e-17</td><td>3.498e-16</td><td>-0.957106781187, -0.25, 0.457106781187</td></tr><tr><td>2</td><td>1</td><td>1</td><td>5</td><td>0.000e+00</td><td>0.000e+00</td><td>0.75</td></tr></tbody></table></section>
+<section data-su2-case><h3>L=6: D=64</h3><p>Spectrum error <b>2.665e-15</b>; [H,S²] residual <b>0.000e+00</b>; ground energy <b>-2.49357713388793</b>; cubic proxy <b>267.49x</b>; completeness <b>64=64</b>.</p><table><thead><tr><th>S</th><th>Multiplicity m_S</th><th>Reduced block</th><th>Irrep dimension</th><th>Leakage</th><th>Orthogonality</th><th>Block eigenvalues</th></tr></thead><tbody><tr><td>0</td><td>5</td><td>5</td><td>1</td><td>5.641e-16</td><td>2.931e-15</td><td>-2.49357713389, -1.18522691899, -0.75, -0.106088016528, 0.784892069403</td></tr><tr><td>1</td><td>9</td><td>9</td><td>3</td><td>3.280e-16</td><td>1.985e-15</td><td>-2.0019953569, -1.42146154139, -1.01420702762, -0.872788750526, -0.485341709936, 0.0429988903954, 0.382357147695, 0.656803251324, 0.963635096951</td></tr><tr><td>2</td><td>5</td><td>5</td><td>5</td><td>1.020e-16</td><td>1.208e-15</td><td>-0.616025403784, -0.25, 0.25, 0.75, 1.11602540378</td></tr><tr><td>3</td><td>1</td><td>1</td><td>7</td><td>0.000e+00</td><td>0.000e+00</td><td>1.25</td></tr></tbody></table></section>
+<section data-su2-case><h3>L=8: D=256</h3><p>Spectrum error <b>9.548e-15</b>; [H,S²] residual <b>0.000e+00</b>; ground energy <b>-3.37493259868788</b>; cubic proxy <b>507.78x</b>; completeness <b>256=256</b>.</p><table><thead><tr><th>S</th><th>Multiplicity m_S</th><th>Reduced block</th><th>Irrep dimension</th><th>Leakage</th><th>Orthogonality</th><th>Block eigenvalues</th></tr></thead><tbody><tr><td>0</td><td>14</td><td>14</td><td>1</td><td>4.588e-16</td><td>3.024e-15</td><td>-3.37493259869, -2.3338038645, -1.91720710917, -1.64520463032, -1.39501087461, -1.12098189215, -0.698427196482, -0.621288487662, -0.379018107849, -0.0155351024939, 0.347841134393, 0.417207109169, 0.853847229206, 1.38251439116</td></tr><tr><td>1</td><td>28</td><td>28</td><td>3</td><td>4.696e-16</td><td>4.273e-15</td><td>-2.98224048776, -2.50372906938, -2.10812935627, -2.05675760177, -1.84883361813, -1.67470636644, -1.4244152608, -1.22827398154, -0.996691622026, -0.982762657352, -0.729185358152, -0.727450148581, -0.616641852581, -0.485993963407, -0.447203352835, -0.316753460121, -0.217034795187, -0.120257751515, 0.127694219782, 0.168054953125, 0.320823696094, 0.535351085516, 0.599496425689, 0.777124999885, 0.95091982486, 1.17046790501, 1.3234287262, 1.49369886768</td></tr><tr><td>2</td><td>20</td><td>20</td><td>5</td><td>2.259e-16</td><td>3.233e-15</td><td>-1.83161349981, -1.46566636011, -1.22563298104, -1.03810411886, -0.802420014225, -0.621768069429, -0.451066895171, -0.391702814032, -0.30093324457, -0.0785661532178, -0.0479974335937, 0.254230368682, 0.355315836215, 0.646790717547, 0.814509057854, 0.976286342028, 1.03932600134, 1.18631930904, 1.393340971, 1.58935298036</td></tr><tr><td>3</td><td>7</td><td>7</td><td>7</td><td>7.335e-17</td><td>1.524e-15</td><td>-0.173879532511, 0.0428932188135, 0.367316567635, 0.75, 1.13268343237, 1.45710678119, 1.67387953251</td></tr><tr><td>4</td><td>1</td><td>1</td><td>9</td><td>0.000e+00</td><td>0.000e+00</td><td>1.75</td></tr></tbody></table></section>
+<h2>Reproduce</h2><p><code>/home/hzxiaxz/quantum.harness/.venv/bin/python research/issue_229_report.py --private-dir /home/hzxiaxz/quantum.harness/research/benchmark/private</code></p>
+<p>Machine-readable artifact: <code>research/benchmark/issue-229-evidence.json</code>.</p>
+<h2>Scope</h2><p>The 50-case baseline establishes finite-Abelian matrix reduction. The three Heisenberg-chain cases add genuine non-Abelian SU(2) evidence at L=4,6,8. Neither statement upgrades the finite-Abelian NC moment-SDP implementation itself into a non-Abelian SDP implementation.</p>
 </main></body></html>

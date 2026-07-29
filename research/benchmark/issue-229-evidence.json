@@ -1,0 +1,3047 @@
+{
+  "schema_version": 1,
+  "generated_by": "research/issue_229_report.py",
+  "finite_abelian_baseline": {
+    "description": "Matrix-only finite-Abelian character-projector baseline; not an NC moment SDP or non-Abelian result.",
+    "instances": [
+      {
+        "id": "z2-000",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 2.886579864025407e-15,
+        "reconstruction_residual": 1.0334261664696297e-15,
+        "orthogonality_residual": 3.80213124333363e-15,
+        "block_leakage_residual": 7.267790876181069e-16,
+        "symmetry_commutator_residual": 7.804178226779251e-16,
+        "ground_energy": -4.378794250453118,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-001",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.6645352591003757e-15,
+        "reconstruction_residual": 8.943123278060075e-16,
+        "orthogonality_residual": 2.7381006636375547e-15,
+        "block_leakage_residual": 7.386093105759649e-16,
+        "symmetry_commutator_residual": 7.555349120682389e-16,
+        "ground_energy": -2.7165471147357256,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-002",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 1.0658141036401503e-14,
+        "reconstruction_residual": 1.380772573005419e-15,
+        "orthogonality_residual": 4.469336284494965e-15,
+        "block_leakage_residual": 6.929469300687555e-16,
+        "symmetry_commutator_residual": 9.420082997014836e-16,
+        "ground_energy": -5.292033603044749,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-003",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.9968028886505635e-15,
+        "reconstruction_residual": 1.024217620436315e-15,
+        "orthogonality_residual": 4.268894796064952e-15,
+        "block_leakage_residual": 8.645726023945452e-16,
+        "symmetry_commutator_residual": 1.0057168649294528e-15,
+        "ground_energy": -3.2781093214708945,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-004",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 5.329070518200751e-15,
+        "reconstruction_residual": 1.2652324166290889e-15,
+        "orthogonality_residual": 3.954109904635933e-15,
+        "block_leakage_residual": 7.311912229406e-16,
+        "symmetry_commutator_residual": 8.559902299361694e-16,
+        "ground_energy": -5.365522472688042,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-005",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.009740891761055e-15,
+        "orthogonality_residual": 5.469266088521112e-15,
+        "block_leakage_residual": 1.000658478399405e-15,
+        "symmetry_commutator_residual": 1.0225181442797655e-15,
+        "ground_energy": -3.552838162029473,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-006",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 8.43769498715119e-15,
+        "reconstruction_residual": 1.1612771113529822e-15,
+        "orthogonality_residual": 3.6391703071166805e-15,
+        "block_leakage_residual": 6.184939115181249e-16,
+        "symmetry_commutator_residual": 7.373107865095662e-16,
+        "ground_energy": -4.187953195531031,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-007",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.0337438770292335e-15,
+        "orthogonality_residual": 4.703029486993116e-15,
+        "block_leakage_residual": 9.075781193424754e-16,
+        "symmetry_commutator_residual": 9.962214857862918e-16,
+        "ground_energy": -3.0024442337448596,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-008",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 9.769962616701378e-15,
+        "reconstruction_residual": 1.147814321447931e-15,
+        "orthogonality_residual": 3.976556578881043e-15,
+        "block_leakage_residual": 7.817211898066628e-16,
+        "symmetry_commutator_residual": 8.387827528867909e-16,
+        "ground_energy": -5.757286065588066,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-009",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 1.7763568394002505e-15,
+        "reconstruction_residual": 7.787019166305882e-16,
+        "orthogonality_residual": 2.7194152972459355e-15,
+        "block_leakage_residual": 7.658222709562439e-16,
+        "symmetry_commutator_residual": 8.46301171728489e-16,
+        "ground_energy": -4.521035272407309,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-010",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.1516780168698202e-15,
+        "orthogonality_residual": 3.4169112520972426e-15,
+        "block_leakage_residual": 6.285839489405947e-16,
+        "symmetry_commutator_residual": 8.562613110593853e-16,
+        "ground_energy": -5.439913086328996,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-011",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.6645352591003757e-15,
+        "reconstruction_residual": 9.236421590296192e-16,
+        "orthogonality_residual": 3.660060049678403e-15,
+        "block_leakage_residual": 7.45766056306599e-16,
+        "symmetry_commutator_residual": 9.048850441498806e-16,
+        "ground_energy": -3.4390498623552883,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-012",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 5.329070518200751e-15,
+        "reconstruction_residual": 1.0685686142852003e-15,
+        "orthogonality_residual": 2.806917989667639e-15,
+        "block_leakage_residual": 5.821085784413605e-16,
+        "symmetry_commutator_residual": 8.20631112102268e-16,
+        "ground_energy": -4.7316253507074695,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-013",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 1.099550805966944e-15,
+        "orthogonality_residual": 5.282322160498877e-15,
+        "block_leakage_residual": 9.935193505197145e-16,
+        "symmetry_commutator_residual": 1.1024486662239365e-15,
+        "ground_energy": -3.1541911496444417,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-014",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.2013398525584317e-15,
+        "orthogonality_residual": 4.097939255315637e-15,
+        "block_leakage_residual": 6.665672679783324e-16,
+        "symmetry_commutator_residual": 9.18417092376315e-16,
+        "ground_energy": -5.20899292029962,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-015",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.9968028886505635e-15,
+        "reconstruction_residual": 9.368316381749839e-16,
+        "orthogonality_residual": 4.992468073148606e-15,
+        "block_leakage_residual": 9.454826353091438e-16,
+        "symmetry_commutator_residual": 1.054511591654931e-15,
+        "ground_energy": -4.068486250829178,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-016",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 9.965303828946624e-16,
+        "orthogonality_residual": 3.5141183387941085e-15,
+        "block_leakage_residual": 7.091601907671205e-16,
+        "symmetry_commutator_residual": 7.899020762848716e-16,
+        "ground_energy": -4.565326074273418,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-017",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.0255426543932942e-15,
+        "orthogonality_residual": 3.3525022211273445e-15,
+        "block_leakage_residual": 7.427243400462786e-16,
+        "symmetry_commutator_residual": 8.996196109709889e-16,
+        "ground_energy": -3.660772348015432,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-018",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 1.0483122260995077e-15,
+        "orthogonality_residual": 3.7508545711411194e-15,
+        "block_leakage_residual": 7.377790648376814e-16,
+        "symmetry_commutator_residual": 8.763248597620208e-16,
+        "ground_energy": -5.117741084461822,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-019",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.3869795029440866e-15,
+        "reconstruction_residual": 9.668917581489362e-16,
+        "orthogonality_residual": 4.058600284751203e-15,
+        "block_leakage_residual": 8.451922315010743e-16,
+        "symmetry_commutator_residual": 8.920860148819856e-16,
+        "ground_energy": -2.76535585783025,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-020",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 7.105427357601002e-15,
+        "reconstruction_residual": 1.2812136998410058e-15,
+        "orthogonality_residual": 4.121855219324566e-15,
+        "block_leakage_residual": 7.545316910166147e-16,
+        "symmetry_commutator_residual": 8.333604045053108e-16,
+        "ground_energy": -4.573672741452553,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-021",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.9968028886505635e-15,
+        "reconstruction_residual": 1.0700660905892063e-15,
+        "orthogonality_residual": 5.114022453486351e-15,
+        "block_leakage_residual": 9.298644802866875e-16,
+        "symmetry_commutator_residual": 1.0580793349167536e-15,
+        "ground_energy": -3.3519493493805075,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-022",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 7.993605777301127e-15,
+        "reconstruction_residual": 1.3937717982387699e-15,
+        "orthogonality_residual": 3.8650992740316225e-15,
+        "block_leakage_residual": 6.817343325547874e-16,
+        "symmetry_commutator_residual": 9.840673302508603e-16,
+        "ground_energy": -5.88446227817543,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-023",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.886579864025407e-15,
+        "reconstruction_residual": 1.0691689212267325e-15,
+        "orthogonality_residual": 4.841881781017918e-15,
+        "block_leakage_residual": 8.897139397101675e-16,
+        "symmetry_commutator_residual": 1.039006237186632e-15,
+        "ground_energy": -2.8073708047987544,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-024",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.2423632460190132e-15,
+        "orthogonality_residual": 3.880049342937311e-15,
+        "block_leakage_residual": 6.570662378361801e-16,
+        "symmetry_commutator_residual": 7.407554931295801e-16,
+        "ground_energy": -4.2458951761099755,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-025",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 5.773159728050814e-15,
+        "reconstruction_residual": 8.032237787538642e-16,
+        "orthogonality_residual": 2.6184810017257797e-15,
+        "block_leakage_residual": 6.095570358841965e-16,
+        "symmetry_commutator_residual": 7.94395526238868e-16,
+        "ground_energy": -2.9204156010067397,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-026",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.2148562358679328e-15,
+        "orthogonality_residual": 4.405788274786555e-15,
+        "block_leakage_residual": 7.396240330426256e-16,
+        "symmetry_commutator_residual": 8.809903205384778e-16,
+        "ground_energy": -4.50709779305532,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-027",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 8.910733414764471e-16,
+        "orthogonality_residual": 3.649903901847766e-15,
+        "block_leakage_residual": 7.528952260378501e-16,
+        "symmetry_commutator_residual": 8.930644962039143e-16,
+        "ground_energy": -4.397577485246784,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-028",
+        "corpus": "development",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.1321011442194134e-15,
+        "orthogonality_residual": 3.2636885999009323e-15,
+        "block_leakage_residual": 6.385423520977216e-16,
+        "symmetry_commutator_residual": 9.199903032642642e-16,
+        "ground_energy": -5.229546693039651,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-029",
+        "corpus": "development",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.200029030796649e-15,
+        "orthogonality_residual": 5.408777656446489e-15,
+        "block_leakage_residual": 9.666986744182156e-16,
+        "symmetry_commutator_residual": 9.517165583906343e-16,
+        "ground_energy": -3.7952979100001674,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-030",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 5.329070518200751e-15,
+        "reconstruction_residual": 1.2150682218750237e-15,
+        "orthogonality_residual": 3.2980462073615667e-15,
+        "block_leakage_residual": 5.159513009299582e-16,
+        "symmetry_commutator_residual": 7.840189214189805e-16,
+        "ground_energy": -5.137069920684532,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-031",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.220446049250313e-15,
+        "reconstruction_residual": 1.020277556916744e-15,
+        "orthogonality_residual": 4.823372658323323e-15,
+        "block_leakage_residual": 9.15742732822783e-16,
+        "symmetry_commutator_residual": 1.0593142257698546e-15,
+        "ground_energy": -3.5685402490866487,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-032",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 4.718447854656915e-15,
+        "reconstruction_residual": 1.0632949025120176e-15,
+        "orthogonality_residual": 3.784217120055553e-15,
+        "block_leakage_residual": 6.867817048336468e-16,
+        "symmetry_commutator_residual": 8.599743723246837e-16,
+        "ground_energy": -5.81280946481934,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-033",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 1.0071059111930488e-15,
+        "orthogonality_residual": 2.9317359493466904e-15,
+        "block_leakage_residual": 7.176118514996792e-16,
+        "symmetry_commutator_residual": 6.962728207694648e-16,
+        "ground_energy": -2.8919005970192533,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-034",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.3575937747796094e-15,
+        "orthogonality_residual": 3.881600454895222e-15,
+        "block_leakage_residual": 7.6111245458346725e-16,
+        "symmetry_commutator_residual": 8.538647297354082e-16,
+        "ground_energy": -4.607999706006365,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-035",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 1.4028045919634273e-15,
+        "orthogonality_residual": 4.503673615490126e-15,
+        "block_leakage_residual": 8.202164939304776e-16,
+        "symmetry_commutator_residual": 9.211822488609745e-16,
+        "ground_energy": -2.75167301320238,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-036",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 3.552713678800501e-15,
+        "reconstruction_residual": 1.2301877390634186e-15,
+        "orthogonality_residual": 3.934863087571746e-15,
+        "block_leakage_residual": 7.217214116268391e-16,
+        "symmetry_commutator_residual": 7.904308063257414e-16,
+        "ground_energy": -4.295187200073981,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-037",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 4.440892098500626e-15,
+        "reconstruction_residual": 1.1701750827064225e-15,
+        "orthogonality_residual": 5.729953566643804e-15,
+        "block_leakage_residual": 9.787052555439472e-16,
+        "symmetry_commutator_residual": 1.0098420783649504e-15,
+        "ground_energy": -3.91540922358245,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-038",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 6.217248937900877e-15,
+        "reconstruction_residual": 1.1863575435166473e-15,
+        "orthogonality_residual": 4.184240276967344e-15,
+        "block_leakage_residual": 7.716050829839015e-16,
+        "symmetry_commutator_residual": 9.148079979231934e-16,
+        "ground_energy": -5.695946439350591,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-039",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 3.1086244689504383e-15,
+        "reconstruction_residual": 9.432253246371366e-16,
+        "orthogonality_residual": 4.709120394491082e-15,
+        "block_leakage_residual": 9.095636263218107e-16,
+        "symmetry_commutator_residual": 9.92267218726688e-16,
+        "ground_energy": -4.270481730258913,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-040",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 6.217248937900877e-15,
+        "reconstruction_residual": 1.4672305674966892e-15,
+        "orthogonality_residual": 4.54354432342096e-15,
+        "block_leakage_residual": 7.863911280574041e-16,
+        "symmetry_commutator_residual": 7.04771226633185e-16,
+        "ground_energy": -6.89564358571715,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-041",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.220446049250313e-15,
+        "reconstruction_residual": 8.33942705785656e-16,
+        "orthogonality_residual": 2.6404270516601222e-15,
+        "block_leakage_residual": 6.39738758009793e-16,
+        "symmetry_commutator_residual": 7.629358479077807e-16,
+        "ground_energy": -3.038380820038072,
+        "cubic_work_proxy": 16.0
+      },
+      {
+        "id": "z2-042",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 5.329070518200751e-15,
+        "reconstruction_residual": 1.7259715813625328e-15,
+        "orthogonality_residual": 4.539166239813368e-15,
+        "block_leakage_residual": 8.187033584795866e-16,
+        "symmetry_commutator_residual": 9.460147706823531e-16,
+        "ground_energy": -4.124558752009524,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-043",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 24,
+        "moduli": [
+          2,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 1.7763568394002505e-15,
+        "reconstruction_residual": 1.1533160044474766e-15,
+        "orthogonality_residual": 3.835120758625336e-15,
+        "block_leakage_residual": 8.881214412820733e-16,
+        "symmetry_commutator_residual": 1.0404155219365601e-15,
+        "ground_energy": -2.945184194601605,
+        "cubic_work_proxy": 36.0
+      },
+      {
+        "id": "z2-044",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 20,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          10,
+          10
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 10
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 10
+          }
+        ],
+        "spectrum_max_error": 7.993605777301127e-15,
+        "reconstruction_residual": 1.1111735803563642e-15,
+        "orthogonality_residual": 3.795538675333839e-15,
+        "block_leakage_residual": 6.39484941992259e-16,
+        "symmetry_commutator_residual": 8.173139779253767e-16,
+        "ground_energy": -5.0139389517820465,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-045",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 36,
+        "moduli": [
+          3,
+          3
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              2
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              2,
+              2
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 7.105427357601002e-15,
+        "reconstruction_residual": 1.2565696777013004e-15,
+        "orthogonality_residual": 6.090624412921439e-15,
+        "block_leakage_residual": 1.0094461644474465e-15,
+        "symmetry_commutator_residual": 1.0927625594447093e-15,
+        "ground_energy": -4.71625811560917,
+        "cubic_work_proxy": 81.0
+      },
+      {
+        "id": "z2-046",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 18,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          9,
+          9
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 9
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 9
+          }
+        ],
+        "spectrum_max_error": 1.6431300764452317e-14,
+        "reconstruction_residual": 1.0869157476769593e-15,
+        "orthogonality_residual": 3.486689635679867e-15,
+        "block_leakage_residual": 6.357868189288807e-16,
+        "symmetry_commutator_residual": 8.111634008444798e-16,
+        "ground_energy": -5.784203654939739,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-047",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 32,
+        "moduli": [
+          2,
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.3314683517128287e-15,
+        "reconstruction_residual": 9.54593155715567e-16,
+        "orthogonality_residual": 4.617313795225926e-15,
+        "block_leakage_residual": 8.639073963531314e-16,
+        "symmetry_commutator_residual": 9.982311426243103e-16,
+        "ground_energy": -3.5216056323362803,
+        "cubic_work_proxy": 64.0
+      },
+      {
+        "id": "z2-048",
+        "corpus": "private",
+        "family": "z2",
+        "dimension": 16,
+        "moduli": [
+          2
+        ],
+        "sector_dimensions": [
+          8,
+          8
+        ],
+        "sectors": [
+          {
+            "character": [
+              0
+            ],
+            "dimension": 8
+          },
+          {
+            "character": [
+              1
+            ],
+            "dimension": 8
+          }
+        ],
+        "spectrum_max_error": 6.217248937900877e-15,
+        "reconstruction_residual": 1.2877309388946068e-15,
+        "orthogonality_residual": 3.709393543806375e-15,
+        "block_leakage_residual": 7.102819856787178e-16,
+        "symmetry_commutator_residual": 9.70020586450277e-16,
+        "ground_energy": -4.903925168442121,
+        "cubic_work_proxy": 4.0
+      },
+      {
+        "id": "product-049",
+        "corpus": "private",
+        "family": "product-cyclic",
+        "dimension": 16,
+        "moduli": [
+          2,
+          2
+        ],
+        "sector_dimensions": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "sectors": [
+          {
+            "character": [
+              0,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              0,
+              1
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              0
+            ],
+            "dimension": 4
+          },
+          {
+            "character": [
+              1,
+              1
+            ],
+            "dimension": 4
+          }
+        ],
+        "spectrum_max_error": 2.220446049250313e-15,
+        "reconstruction_residual": 7.484010474815947e-16,
+        "orthogonality_residual": 2.447984695030771e-15,
+        "block_leakage_residual": 6.44133497413872e-16,
+        "symmetry_commutator_residual": 6.924217507318731e-16,
+        "ground_energy": -3.2115936914309717,
+        "cubic_work_proxy": 16.0
+      }
+    ]
+  },
+  "su2_evidence": {
+    "description": "Spin-1/2 antiferromagnetic Heisenberg open chain, H=sum_i S_i.S_(i+1), J=+1; true SU(2) irrep/multiplicity reduction.",
+    "cases": [
+      {
+        "length": 4,
+        "boundary": "open",
+        "coupling": 1.0,
+        "dense_dimension": 16,
+        "sectors": [
+          {
+            "spin": 0,
+            "multiplicity": 2,
+            "block_dimension": 2,
+            "irrep_dimension": 1,
+            "eigenvalues": [
+              -1.6160254037844384,
+              0.1160254037844386
+            ],
+            "block_leakage_residual": 1.8391099209690352e-16,
+            "orthogonality_residual": 5.6151763648290165e-16,
+            "s2_projection_residual": 8.679012619367782e-17
+          },
+          {
+            "spin": 1,
+            "multiplicity": 3,
+            "block_dimension": 3,
+            "irrep_dimension": 3,
+            "eigenvalues": [
+              -0.9571067811865474,
+              -0.24999999999999992,
+              0.4571067811865472
+            ],
+            "block_leakage_residual": 6.927521534683379e-17,
+            "orthogonality_residual": 3.4983697664168165e-16,
+            "s2_projection_residual": 3.312024490519474e-17
+          },
+          {
+            "spin": 2,
+            "multiplicity": 1,
+            "block_dimension": 1,
+            "irrep_dimension": 5,
+            "eigenvalues": [
+              0.75
+            ],
+            "block_leakage_residual": 0.0,
+            "orthogonality_residual": 0.0,
+            "s2_projection_residual": 0.0
+          }
+        ],
+        "multiplicity_completeness": 16,
+        "spectrum_max_error": 8.881784197001252e-16,
+        "commutator_residual": 0.0,
+        "block_leakage_residual": 1.8391099209690352e-16,
+        "orthogonality_residual": 5.6151763648290165e-16,
+        "s2_projection_residual": 8.679012619367782e-17,
+        "ground_energy": -1.616025403784438,
+        "cubic_work_proxy": 113.77777777777777
+      },
+      {
+        "length": 6,
+        "boundary": "open",
+        "coupling": 1.0,
+        "dense_dimension": 64,
+        "sectors": [
+          {
+            "spin": 0,
+            "multiplicity": 5,
+            "block_dimension": 5,
+            "irrep_dimension": 1,
+            "eigenvalues": [
+              -2.493577133887924,
+              -1.1852269189861486,
+              -0.7499999999999986,
+              -0.10608801652842707,
+              0.7848920694025021
+            ],
+            "block_leakage_residual": 5.64119094005009e-16,
+            "orthogonality_residual": 2.930920876910866e-15,
+            "s2_projection_residual": 9.786766271581529e-17
+          },
+          {
+            "spin": 1,
+            "multiplicity": 9,
+            "block_dimension": 9,
+            "irrep_dimension": 3,
+            "eigenvalues": [
+              -2.001995356898532,
+              -1.4214615413885845,
+              -1.0142070276172719,
+              -0.872788750525591,
+              -0.48534170993558035,
+              0.04299889039539831,
+              0.3823571476950155,
+              0.6568032513241651,
+              0.9636350969509817
+            ],
+            "block_leakage_residual": 3.279976582067459e-16,
+            "orthogonality_residual": 1.984556431959188e-15,
+            "s2_projection_residual": 1.1924498436078296e-16
+          },
+          {
+            "spin": 2,
+            "multiplicity": 5,
+            "block_dimension": 5,
+            "irrep_dimension": 5,
+            "eigenvalues": [
+              -0.6160254037844387,
+              -0.2499999999999999,
+              0.24999999999999994,
+              0.7500000000000004,
+              1.116025403784439
+            ],
+            "block_leakage_residual": 1.0200783563110364e-16,
+            "orthogonality_residual": 1.2083326155381662e-15,
+            "s2_projection_residual": 4.61807504296226e-17
+          },
+          {
+            "spin": 3,
+            "multiplicity": 1,
+            "block_dimension": 1,
+            "irrep_dimension": 7,
+            "eigenvalues": [
+              1.25
+            ],
+            "block_leakage_residual": 0.0,
+            "orthogonality_residual": 0.0,
+            "s2_projection_residual": 0.0
+          }
+        ],
+        "multiplicity_completeness": 64,
+        "spectrum_max_error": 2.6645352591003757e-15,
+        "commutator_residual": 0.0,
+        "block_leakage_residual": 5.64119094005009e-16,
+        "orthogonality_residual": 2.930920876910866e-15,
+        "s2_projection_residual": 1.1924498436078296e-16,
+        "ground_energy": -2.4935771338879262,
+        "cubic_work_proxy": 267.49387755102043
+      },
+      {
+        "length": 8,
+        "boundary": "open",
+        "coupling": 1.0,
+        "dense_dimension": 256,
+        "sectors": [
+          {
+            "spin": 0,
+            "multiplicity": 14,
+            "block_dimension": 14,
+            "irrep_dimension": 1,
+            "eigenvalues": [
+              -3.3749325986878893,
+              -2.3338038644955668,
+              -1.9172071091694904,
+              -1.6452046303221652,
+              -1.3950108746138365,
+              -1.1209818921513641,
+              -0.698427196481737,
+              -0.6212884876624364,
+              -0.37901810784863726,
+              -0.015535102493894977,
+              0.3478411343932699,
+              0.41720710916948894,
+              0.8538472292061553,
+              1.3825143911581057
+            ],
+            "block_leakage_residual": 4.588179668784963e-16,
+            "orthogonality_residual": 3.024417538613541e-15,
+            "s2_projection_residual": 1.2241832216976698e-16
+          },
+          {
+            "spin": 1,
+            "multiplicity": 28,
+            "block_dimension": 28,
+            "irrep_dimension": 3,
+            "eigenvalues": [
+              -2.9822404877628808,
+              -2.5037290693778136,
+              -2.108129356271908,
+              -2.056757601771838,
+              -1.848833618128111,
+              -1.6747063664381667,
+              -1.4244152608024958,
+              -1.2282739815439956,
+              -0.9966916220262572,
+              -0.9827626573515912,
+              -0.7291853581518408,
+              -0.7274501485811231,
+              -0.6166418525807188,
+              -0.48599396340674017,
+              -0.4472033528351522,
+              -0.31675346012079225,
+              -0.21703479518695099,
+              -0.12025775151494812,
+              0.12769421978189185,
+              0.16805495312451504,
+              0.3208236960936437,
+              0.5353510855162604,
+              0.5994964256889518,
+              0.777124999884837,
+              0.9509198248595007,
+              1.1704679050138385,
+              1.3234287262049318,
+              1.4936988676849579
+            ],
+            "block_leakage_residual": 4.696130934919011e-16,
+            "orthogonality_residual": 4.272641735053346e-15,
+            "s2_projection_residual": 1.4232243993667554e-16
+          },
+          {
+            "spin": 2,
+            "multiplicity": 20,
+            "block_dimension": 20,
+            "irrep_dimension": 5,
+            "eigenvalues": [
+              -1.8316134998124587,
+              -1.465666360107643,
+              -1.2256329810399271,
+              -1.038104118857871,
+              -0.8024200142248548,
+              -0.6217680694286126,
+              -0.4510668951708421,
+              -0.3917028140323204,
+              -0.3009332445701172,
+              -0.07856615321784015,
+              -0.04799743359366711,
+              0.25423036868175924,
+              0.3553158362147752,
+              0.6467907175468771,
+              0.8145090578536417,
+              0.9762863420279472,
+              1.039326001336094,
+              1.1863193090409645,
+              1.393340970997793,
+              1.5893529803563018
+            ],
+            "block_leakage_residual": 2.25939833100767e-16,
+            "orthogonality_residual": 3.2327467135503246e-15,
+            "s2_projection_residual": 1.1551074134613546e-16
+          },
+          {
+            "spin": 3,
+            "multiplicity": 7,
+            "block_dimension": 7,
+            "irrep_dimension": 7,
+            "eigenvalues": [
+              -0.17387953251128674,
+              0.042893218813452365,
+              0.36731656763491033,
+              0.749999999999999,
+              1.13268343236509,
+              1.457106781186548,
+              1.673879532511287
+            ],
+            "block_leakage_residual": 7.335395596057943e-17,
+            "orthogonality_residual": 1.5241646701080377e-15,
+            "s2_projection_residual": 3.498074467949138e-17
+          },
+          {
+            "spin": 4,
+            "multiplicity": 1,
+            "block_dimension": 1,
+            "irrep_dimension": 9,
+            "eigenvalues": [
+              1.75
+            ],
+            "block_leakage_residual": 0.0,
+            "orthogonality_residual": 0.0,
+            "s2_projection_residual": 0.0
+          }
+        ],
+        "multiplicity_completeness": 256,
+        "spectrum_max_error": 9.547918011776346e-15,
+        "commutator_residual": 0.0,
+        "block_leakage_residual": 4.696130934919011e-16,
+        "orthogonality_residual": 4.272641735053346e-15,
+        "s2_projection_residual": 1.4232243993667554e-16,
+        "ground_energy": -3.374932598687883,
+        "cubic_work_proxy": 507.78498789346247
+      }
+    ]
+  }
+}
