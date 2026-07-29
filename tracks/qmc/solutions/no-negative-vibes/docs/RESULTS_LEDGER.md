@@ -142,6 +142,11 @@ Fock/spinor 表示锥。
 非诱导 exterior cone 和真正改变 Hilbert 空间的 gauge/cocycle 编码。候选定义和最小
 实验见 [自底向上正性候选](BOTTOM_UP_POSITIVITY_CANDIDATES.md)。
 
+Fock–CP 的第一批自然变换也已完成：identity 与所有深度不超过 2 的连续
+Klein–Hodge 电路，在 20 种 tensorization、数守恒/BdG 两族共 520 个单元中，
+所有 bridge 都在 Hermiticity-preserving 线性门被迫为零。该有限库已关闭；一般
+non-Klein Choi 锥仍开放。见 [Fock–CP 首轮结果](FOCK_CP_SCREEN_RESULTS.md)。
+
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。
 

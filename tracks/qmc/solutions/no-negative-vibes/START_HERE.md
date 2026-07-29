@@ -165,8 +165,10 @@ cd /home/volper/harness_quantum/signfree-qmc
 
 1. graded monomial、odd block-TN 和 R01 fixed Klein-Hodge 都转为已知类或
    exact no-go 回归，不再作为新物理主线；
-2. 立即测试六模式 Fock–CP/Choi 正锥，并把 tensor-square 严格矩阵类接到局域 HS；
-3. 若不能物理闭环，进入四/六模式 gauge-cocycle 和 non-induced exterior cone；
+2. 六模式 Fock–CP 的 13 个 depth-2 Klein 电路首轮已完成，520 个单元都没有
+   Hermiticity-preserving bridge；一般 non-Klein Choi 锥仍开放；
+3. 立即把 tensor-square 严格矩阵类接到局域 HS，失败后进入四/六模式
+   gauge-cocycle 和 non-induced exterior cone；
 4. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
@@ -175,3 +177,5 @@ TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍
 
 本轮候选定义、严格恒等式、已知反例和停止条件见
 [自底向上正性候选](docs/BOTTOM_UP_POSITIVITY_CANDIDATES.md)。
+Fock–CP 第一批 520 个线性系统见
+[六模式 Fock–CP 首轮结果](docs/FOCK_CP_SCREEN_RESULTS.md)。

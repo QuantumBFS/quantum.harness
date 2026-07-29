@@ -3,6 +3,10 @@
 更新时间：2026-07-29
 状态：候选与最小实验设计；除明确标注的恒等式外，不能当作新发现。
 
+首轮更新：identity 与全部深度不超过 2 的连续 Klein–Hodge 电路已经完成 520 个
+六模式 Fock–CP 线性系统；所有 bridge 在 Hermiticity-preserving 门即被迫为零。
+详见 [Fock–CP 首轮结果](FOCK_CP_SCREEN_RESULTS.md)。一般非 Klein Fock–CP 锥仍开放。
+
 ## 为什么换搜索方式
 
 此前多条路线都是先在四模式单块中找到正锥，再检查两个局域块重叠后能否共用同一
@@ -241,8 +245,8 @@ exterior-Metzler 仍保留为备线，但必须直接从六模式重叠块开始
 ## 执行优先级
 
 ```text
-1. 六模式 Fock–CP 固定变换枚举 + Choi SDP
-2. tensor-square 的局域 HS 可达性与已知类排重
+1. tensor-square 的局域 HS 可达性与已知类排重
+2. 非 Klein Fock–CP 固定变换或正乘法代数诱导的 Choi basis
 3. 四/六模式 gauge-cocycle GF(2) 可行性
 4. graded positive-character 文献排重
 5. non-induced complementary exterior cone

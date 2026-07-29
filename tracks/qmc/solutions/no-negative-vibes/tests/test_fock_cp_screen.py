@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -11,6 +14,8 @@ from oracle.fock_cp_screen import (
     quadratic_directions,
     support_edges,
 )
+
+SOLUTION_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_overlap_geometry_contains_two_declared_bridge_edges() -> None:
@@ -97,3 +102,26 @@ def test_identity_screen_returns_a_deterministic_hp_subspace_report() -> None:
     assert 0 <= first.drift_dimension <= first.hp_dimension
     assert first.conditional_span_rank + first.drift_dimension == first.hp_dimension
     assert first.maximum_bridge_hp_projection >= 0.0
+
+
+def test_committed_depth_two_screen_fixture_records_the_closed_finite_catalog() -> None:
+    fixture = json.loads(
+        (
+            SOLUTION_ROOT
+            / "fixtures"
+            / "fock_cp_overlap_screen.json"
+        ).read_text()
+    )
+
+    assert fixture["protocol"] == "fock-cp-overlap-v1"
+    assert fixture["summary"] == {
+        "cells": 520,
+        "families": 2,
+        "maximum_bridge_nullspace_projection": 6.980656370442376e-15,
+        "sampled_bridge_ccp_cells": 0,
+        "surviving_bridge_cells": 0,
+        "tensorizations": 20,
+        "transforms": 13,
+    }
+    assert fixture["interpretation"]["closed"].endswith("depth at most two")
+    assert fixture["interpretation"]["open"].startswith("general non-Klein")

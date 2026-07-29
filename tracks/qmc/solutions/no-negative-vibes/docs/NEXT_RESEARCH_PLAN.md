@@ -59,7 +59,8 @@ fixed transform 均已得到明确边界。新主线从定义开始要求重叠�
 
 1. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
    tensorization/Klein/Clifford 变换；对固定变换编译条件完全正 SDP，并逐个锚定 R01
-   的 bridge hopping/pairing 坐标；
+   的 bridge hopping/pairing 坐标；**identity 与深度不超过 2 的连续 Klein 电路已
+   完成，520 个单元的 bridge 全部在线性 Hermiticity 门归零，一般 non-Klein 变换开放**；
 2. **tensor-square 表示提升半群**：利用 `B=X tensor X` 的任意深度严格正性，判断
    `v_i+v_j` 绑定 HS 场能否来自局域、非平凡相互作用，并排除已知 Majorana/模平方约化；
 3. **局域 gauge 投影与 overlap 2-cocycle**：在四格方环和两个共享边方环上，把费米
@@ -212,21 +213,23 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
    以及其自然局域 crossed-partition 闭包的精确 `-2` 反例。
 4. **协作完成**：R01 fixed Klein-Hodge/Fock 的六模式数守恒和 BdG bridge 坐标由
    exact-zero 证书关闭。
-5. **立即开始**：六模式 Fock–CP 固定变换枚举与 Choi SDP；同时把 tensor-square
-   恒正定理接到局域 HS 可达性检查。
-6. **随后进行**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
+5. **已完成第一轮**：六模式 Fock–CP 的 13 个 depth-2 Klein 电路、20 种切分和
+   数守恒/BdG 两族共 520 个单元；所有 bridge 在进入 SDP 前已归零。
+6. **立即开始**：把 tensor-square 恒正定理接到局域 HS 可达性检查；Fock–CP 只继续
+   结构上不同的 non-Klein 变换。
+7. **随后进行**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
    尝试同时越过
    连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-7. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
-8. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-9. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+8. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
+9. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
+10. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
 近期精力分配：
 
 ```text
-40%  Fock–CP/Choi 六模式可行性
-25%  tensor-square 的局域 HS 闭环和已知类排重
-20%  gauge/exterior 新候选
+40%  tensor-square 的局域 HS 闭环和已知类排重
+25%  gauge/exterior 新候选
+20%  non-Klein Fock–CP/Choi 结构
 15%  Majorana 宇称与 Pfaffian/Spin-trace 支撑工具
 ```
 

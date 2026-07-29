@@ -61,6 +61,8 @@
   spinor/exterior-cone 候选的定义、排重与停止条件；
 - [BOTTOM_UP_POSITIVITY_CANDIDATES.md](BOTTOM_UP_POSITIVITY_CANDIDATES.md)：把重叠闭包
   写进定义的 Fock–CP、tensor-square、gauge/cocycle 和正字符候选；
+- [FOCK_CP_SCREEN_RESULTS.md](FOCK_CP_SCREEN_RESULTS.md)：六模式 13 个 depth-2
+  Klein 电路、20 种 tensorization 与数守恒/BdG 两族的首轮 Choi 线性 no-go；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity；物理模型排重后已降为已知 Majorana 正性子类；
