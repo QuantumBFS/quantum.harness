@@ -16,8 +16,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections.abc import Mapping, Sequence
 from fractions import Fraction
+from pathlib import Path
 
 import numpy as np
 import sympy as sp
@@ -515,6 +517,17 @@ def search_seed61_combined(
     matrices = tuple(combined_grade_lift(atom, selected) for atom in atoms)
     split = exact_compound_matrix(atoms[0], selected[0]).rows
     diagnostics = fast_full_fock_diagnostics(card, search_grades=selected)
+    combined_trace = diagnostics["combined_word_trace"]
+    assert isinstance(combined_trace, Mapping)
+    if int(combined_trace["numerator"]) < 0:
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "candidate": "exact5-shear-loop-pair:61",
+            "grades": list(selected),
+            "status": "exact-negative-trace-obstruction",
+            "route": "diagnostic-word-early-stop",
+            "diagnostics": diagnostics,
+        }
     restricted = diagnostics["signed_monomial"]
     if isinstance(restricted, Mapping) and restricted["status"] == "exact-certificate":
         return {
@@ -597,9 +610,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_denominator=args.max_denominator,
     )
     if args.output:
-        with open(args.output, "w", encoding="utf-8") as stream:
-            json.dump(result, stream, allow_nan=False, indent=2, sort_keys=True)
-            stream.write("\n")
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(result, allow_nan=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        os.replace(temporary, output)
     print(json.dumps(result, allow_nan=False, sort_keys=True), flush=True)
     return 0
 
