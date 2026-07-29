@@ -146,6 +146,15 @@ def test_unstable_direct_audit_requests_stabilized_retry() -> None:
         {**healthy, "weight_log_error_max": 2.0e-5}
     )
     assert needs_stable_retry({**healthy, "density_max": 1.01})
+    assert not needs_stable_retry(
+        {
+            **healthy,
+            "density_min": -5.0e-8,
+            "density_max": 1.0 + 5.0e-8,
+        }
+    )
+    assert needs_stable_retry({**healthy, "density_min": -2.0e-6})
+    assert needs_stable_retry({**healthy, "density_max": 1.0 + 2.0e-6})
 
 
 def test_single_channel_and_zero_kinetic_controls_do_not_survive() -> None:

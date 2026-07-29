@@ -14,6 +14,7 @@ from .dqmc import DQMCConfig
 
 
 EXPERIMENT_ID = "stage3-coarse-20260729"
+DENSITY_AUDIT_TOL = 1.0e-7
 
 
 @dataclass(frozen=True)
@@ -169,8 +170,8 @@ def needs_stable_retry(summary: dict[str, object]) -> bool:
     return (
         sign < 1.0 - 1.0e-8
         or log_error > 1.0e-6
-        or density_min < -1.0e-8
-        or density_max > 1.0 + 1.0e-8
+        or density_min < -DENSITY_AUDIT_TOL
+        or density_max > 1.0 + DENSITY_AUDIT_TOL
     )
 
 

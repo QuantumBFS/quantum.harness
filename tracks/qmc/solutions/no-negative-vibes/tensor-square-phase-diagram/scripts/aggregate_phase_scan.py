@@ -47,12 +47,14 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
 
 def _flatten(payload: dict[str, object]) -> dict[str, object]:
     config = dict(payload["config"])
+    run_spec = dict(payload["run_spec"])
     row = {
         "cell_id": payload["cell_id"],
         "cell_index": payload["cell_index"],
         "machine": payload["machine"],
         "worker_id": payload["worker_id"],
         "seed": payload["seed"],
+        "source_revision": run_spec["source_revision"],
         "stability_retry": payload["stability_retry"],
         "stabilized": payload["stabilized"],
         **config,
@@ -90,6 +92,7 @@ def main() -> None:
         if payload.get("status") == "COMPLETE"
     ]
     rows.sort(key=lambda row: int(row["cell_index"]))
+    source_revisions = sorted({str(row["source_revision"]) for row in rows})
     regions = classify_regions(rows)
     survivors = [
         row for row in regions if row["classification"] == "SURVIVE"
@@ -143,6 +146,7 @@ def main() -> None:
         "maximum_weight_log_error": maximum_log_error,
         "minimum_density": minimum_density,
         "maximum_density": maximum_density,
+        "source_revisions": source_revisions,
         "regions": len(regions),
         "classification_counts": {
             "SURVIVE": len(survivors),
