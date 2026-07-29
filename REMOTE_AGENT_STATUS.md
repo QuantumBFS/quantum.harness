@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T14:48:39Z
+Updated: 2026-07-29T15:19:28Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -50,5 +50,12 @@ Updated: 2026-07-29T14:48:39Z
   hashing: 14/14 assertions in 55 seconds (517,356 KiB MaxRSS). The audit path
   is authorized for the next decision-relevant solve, not as a duplicate of
   either running baseline.
+- Artifact regression r4, SCNet job `118172817`, passed 23/23 assertions in
+  41 seconds (509,788 KiB MaxRSS). The direct path can now write hashed Mosek
+  interior-solution and compressed task artifacts for later infeasibility-ray
+  replay; solver-reported infeasibility still remains only a candidate until
+  that independent replay succeeds.
+- SCNet baseline job `118171391` was still `RUNNING` at 2026-07-29T15:19Z,
+  44:46 elapsed, in its first coefficient pass. It remains untouched.
 
 No user input or new credential is currently required.

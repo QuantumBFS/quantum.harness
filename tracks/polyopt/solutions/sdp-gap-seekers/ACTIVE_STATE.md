@@ -607,3 +607,8 @@ Updated: 2026-07-29 UTC.
   changed source is commit `4227ec2` (with its import fix in `1c339e5`). Use it
   only for the next decision-relevant solve or independent audit rerun; do not
   duplicate the two immutable L=2 baselines while they are active.
+- Raw solver-artifact regression job `118172817` passed 23/23 assertions in
+  41 seconds with 509,788 KiB MaxRSS. Commit `c0b2c64` therefore preserves a
+  hashed Mosek interior solution after every solve and a compressed task for
+  an infeasibility candidate. These files make an independent ray replay
+  possible; their existence alone is not a certificate.

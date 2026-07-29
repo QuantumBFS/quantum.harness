@@ -1048,3 +1048,18 @@ export, canonical moment labels, and artifact SHA-256 checks; all 14 assertions
 passed in 55 seconds with 517,356 KiB MaxRSS. The direct audit/export path is
 therefore software-verified. It is authorized for a future decision solve but
 does not justify duplicating either active L=2 baseline.
+
+## 2026-07-29 — preserve raw solver evidence before interpreting infeasibility
+
+A solver-reported infeasible status cannot be reconstructed from the primal
+moment export because it is carried by a dual ray. Commit `c0b2c64` therefore
+writes Mosek's interior-solution artifact whenever it exists and, for an
+infeasibility candidate, the compressed solver task that fixes the exact
+floating conic instance. Files are written atomically and recorded by SHA-256.
+
+Synthetic artifact job `118172817` passed 23/23 assertions in 41 seconds with
+509,788 KiB MaxRSS, including both solution and task writes for feasible and
+infeasible toy instances. This verifies preservation, not the ray itself. The
+next changed action is an independent read/replay audit of the stored task and
+ray; until that passes, keep the scientific classification
+`infeasibility_candidate_requires_independent_ray_replay`.
