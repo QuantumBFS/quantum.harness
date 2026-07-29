@@ -36,6 +36,9 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
 4. The shared variational family must represent the `L=0` tower and all five
    `L=2` components. Phase 2 cannot begin before the Phase 1 manifest passes.
 5. Nontrivial execution is restricted to the `hpccube-xh5` Slurm cluster.
+6. Because compute nodes are offline and login-node bandwidth is limited, the
+   pinned Python 3.11/manylinux2014 wheelhouse is staged outside Git and used
+   with `--no-index`; its installed lock digest remains the durable evidence.
 
 ## Environment observations
 

@@ -63,3 +63,8 @@ The cluster uses glibc 2.17 and its visible CUDA package set ends at cuDNN
 installation. SciPy is pinned to the compatible 1.16.3 wheel. The sole source
 dependency, `pywigxjpf==1.13.3`, is installed in a separate transaction only
 after the binary environment is complete.
+
+For the bandwidth-limited login node, the same requirements may be staged as a
+target-specific wheelhouse. `ROUTE_D_PLUS_WHEELHOUSE` switches bootstrap to
+`--no-index --find-links`, so installation cannot silently consult a different
+package source. The wheelhouse itself is a runtime artifact and is not tracked.

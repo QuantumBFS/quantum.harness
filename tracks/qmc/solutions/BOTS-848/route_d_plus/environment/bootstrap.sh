@@ -13,6 +13,16 @@ python_bin="${PYTHON_BIN:-python3.11}"
 venv_dir="${ROUTE_D_PLUS_VENV:-${repo_root}/.venv}"
 run_dir="${ROUTE_D_PLUS_RUN_DIR}"
 mode="${ROUTE_D_PLUS_MODE:-all}"
+wheelhouse="${ROUTE_D_PLUS_WHEELHOUSE:-}"
+pip_index_args=()
+
+if [[ -n "${wheelhouse}" ]]; then
+  if [[ ! -d "${wheelhouse}" ]]; then
+    echo "ROUTE_D_PLUS_WHEELHOUSE does not exist: ${wheelhouse}" >&2
+    exit 2
+  fi
+  pip_index_args=(--no-index --find-links "${wheelhouse}")
+fi
 
 case "${mode}" in
   all|install|validate) ;;
@@ -47,10 +57,12 @@ esac
 
 if [[ "${mode}" != "validate" ]]; then
   "${python_bin}" -m venv "${venv_dir}"
-  "${venv_dir}/bin/python" -m pip install --upgrade pip setuptools wheel
-  "${venv_dir}/bin/python" -m pip install --upgrade --only-binary=:all: \
+  "${venv_dir}/bin/python" -m pip install "${pip_index_args[@]}" \
+    --upgrade pip setuptools wheel
+  "${venv_dir}/bin/python" -m pip install "${pip_index_args[@]}" \
+    --upgrade --only-binary=:all: \
     "${jax_requirement}" --requirement "${requirements}"
-  "${venv_dir}/bin/python" -m pip install \
+  "${venv_dir}/bin/python" -m pip install "${pip_index_args[@]}" \
     --requirement "${source_requirements}"
 
   mkdir -p "${run_dir}"

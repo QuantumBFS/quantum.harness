@@ -68,6 +68,8 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "ROUTE_D_PLUS_RUN_DIR:?" in bootstrap
     assert "tracks/qmc/results/" in bootstrap
     assert "all|install|validate" in bootstrap
+    assert "ROUTE_D_PLUS_WHEELHOUSE" in bootstrap
+    assert "--no-index" in bootstrap
     assert "jax[cuda12]==0.4.38" in bootstrap
     assert '"${jax_requirement}" --requirement "${requirements}"' in bootstrap
     assert "--only-binary=:all:" in bootstrap
