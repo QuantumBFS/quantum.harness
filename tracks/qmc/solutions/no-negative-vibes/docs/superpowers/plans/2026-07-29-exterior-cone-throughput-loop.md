@@ -4,6 +4,11 @@
 > superpowers:subagent-driven-development (recommended) or
 > superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
+>
+> **Prelaunch amendment:** Before Task 2, read
+> `2026-07-29-exterior-cone-throughput-loop-prelaunch-amendment.md`.
+> Its exact-atom, exact-first, transform-union, promotion, and protocol-count
+> clauses override conflicting text in Tasks 2--9 below.
 
 **Goal:** Launch a resumable 76-shard WSL/CPU discovery loop that rapidly
 falsifies fixed local Gaussian atom sets, searches survivors for non-induced
