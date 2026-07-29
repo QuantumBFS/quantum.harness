@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T16:17:45Z
+Updated: 2026-07-29T16:50:54Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -100,5 +100,15 @@ Updated: 2026-07-29T16:17:45Z
 - The isolated checkout is now attached and clean at commit `4f33981`.
   Replacement native L=2 job `118174638` started at
   2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.
+- Native job `118174638` passed the full exact construction gate in 1,733.452
+  s with 13,829,968 KiB stage RSS: 461,186 moments, 26 affine PSD cones /
+  4,446,492 rows, 15,802,343 scalar terms, zero remaining equalities, and the
+  required coefficient-map hash
+  `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  Mosek started and completed presolve in 6.28 s. A terminal numerical status
+  and residual or independently replayed ray are still required.
+- Protected xH5 baseline `23011251` printed its `attach Mosek and optimize`
+  marker after about 1:40, but had not yet emitted a Mosek iteration log at
+  2026-07-29T16:50Z. Treat it as model transfer/bridging, not a result.
 
 No user input or new credential is currently required.

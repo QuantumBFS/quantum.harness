@@ -1138,3 +1138,14 @@ One unchanged-signature resubmission is justified after reattaching the clean
 `remote/challenge88-terminal-solve` branch and verifying its commit/status.
 The branch was reattached and clean at commit `4f33981`; replacement job
 `118174638` started at 2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.
+
+The replacement passed its full construction gate. Native assembly took
+1,733.452 s with 13,829,968 KiB process RSS after the stage and produced
+exactly 461,186 scalar moment variables, 26 affine PSD cones / 4,446,492
+packed rows, zero residual equalities, and 15,802,343 scalar coefficient
+terms. Its independently known coefficient-map SHA-256 matched exactly:
+`935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+Mosek optimization then started and completed presolve in 6.28 s with no
+dependencies or eliminated constraints. This establishes an exact structural
+match and a numerically instantiated task, but not yet feasibility or a gap
+bound; wait for a terminal status and the corresponding residual/ray audit.

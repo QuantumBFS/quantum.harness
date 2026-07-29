@@ -648,3 +648,9 @@ Updated: 2026-07-29 UTC.
   not a scientific run and does not change the planned signature.
 - The branch was reattached and verified clean at `4f33981`; native L=2 r2 is
   SCNet job `118174638`, started 2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.
+- Job `118174638` passed its complete native construction gate in 1,733.452 s:
+  461,186 moments, 26 affine PSD cones / 4,446,492 packed rows, 15,802,343
+  scalar terms, zero remaining equalities, and exact expected coefficient hash
+  `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  Stage RSS was 13,829,968 KiB. Mosek is now running; presolve took 6.28 s.
+  No feasibility or spectral-gap conclusion is available yet.
