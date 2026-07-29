@@ -1,4 +1,5 @@
 import csv
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -8,6 +9,36 @@ SCRIPT = (
     Path(__file__).parents[2]
     / "tracks/mps/solutions/reproduction/floquet_spin_boson/scripts/plot_results.py"
 )
+
+
+def _plot_module():
+    spec = importlib.util.spec_from_file_location("floquet_plot_results", SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_fig3_drive_windows_apply_to_spectrum_and_delta_axes() -> None:
+    """Catch clipping the two rows differently or retaining the broad 0–15 view."""
+    module = _plot_module()
+
+    class Axis:
+        def __init__(self) -> None:
+            self.limits = None
+
+        def set_xlim(self, left: float, right: float) -> None:
+            self.limits = (left, right)
+
+    for drive, expected in (
+        ("longitudinal", (0.0, 10.0)),
+        ("transversal", (0.0, 4.0)),
+    ):
+        spectrum = Axis()
+        delta = Axis()
+        module._apply_fig3_xlim((spectrum, delta), drive)
+        assert spectrum.limits == expected
+        assert delta.limits == expected
 
 
 def _write_csv(path: Path, header: tuple[str, ...], rows: list[tuple]) -> None:

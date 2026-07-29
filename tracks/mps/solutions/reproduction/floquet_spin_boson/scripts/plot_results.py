@@ -19,6 +19,10 @@ FIG3_POINTS = {
     "longitudinal": (10.0, 5.0, 2.5),
     "transversal": (2.0, 1.5, 1.0),
 }
+FIG3_X_LIMITS = {
+    "longitudinal": (0.0, 10.0),
+    "transversal": (0.0, 4.0),
+}
 COLORS = ("#0C7BDC", "#fb6d72", "#00bf7d")
 
 
@@ -81,6 +85,12 @@ def _fig3_point(root: Path, drive: str, frequency: float) -> Path | None:
         ),
         None,
     )
+
+
+def _apply_fig3_xlim(axes, drive: str) -> None:
+    limits = FIG3_X_LIMITS[drive]
+    for axis in axes:
+        axis.set_xlim(*limits)
 
 
 def plot_fig3(args: argparse.Namespace) -> None:
@@ -150,6 +160,7 @@ def plot_fig3(args: argparse.Namespace) -> None:
         delta_axis.set_xlabel("bath frequency ω/Ω")
         delta_axis.set_ylabel("delta weight")
         delta_axis.grid(alpha=0.16)
+        _apply_fig3_xlim((spectrum_axis, delta_axis), drive)
     figure.suptitle("Fig. 3 checkpoint — solid: ours; dashed: Zenodo")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.output, dpi=180)
