@@ -160,5 +160,5 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
   WSL/CPU machines. The local Windows control host ran no numerical job.
 - Artifacts: `results/stage4_20260729/`; scientific note:
   `notes/stage4_dense_results.md`.
-- Code commits prepared: `3a3fce2` and `dc87c6c`. HTTPS push is pending after
-  repeated transport resets; PR #178 was not modified.
+- Code/result commits `3a3fce2`, `dc87c6c`, and `b1c2b88` were pushed to
+  `work/zibojin/tensor-square-phase-diagram`; PR #178 was not modified.
