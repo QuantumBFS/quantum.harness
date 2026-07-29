@@ -409,53 +409,6 @@ const CHAIN_MAPPING_PROVENANCE = Dict(
 )
 const CHAIN_MAPPING_TOLERANCE_RULE =
     "64 * eps(float64) * max(1, norm(E, inf)) * n_bath"
-const CHAIN_MAPPING_DIAGNOSTIC_REPLAY_SCRIPT = raw"""
-import json
-import pathlib
-import platform
-import sys
-
-sys.path.insert(0, sys.argv[1])
-import chain_mapping
-import numpy as np
-
-if platform.python_version() != "3.12.13":
-    raise RuntimeError("chain mapping replay requires Python 3.12.13")
-if np.__version__ != "2.5.1":
-    raise RuntimeError("chain mapping replay requires NumPy 2.5.1")
-
-inputs = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
-epsilon = np.asarray(inputs["epsilon"], dtype=np.float64)
-coupling = np.asarray(inputs["coupling"], dtype=np.float64)
-Q = np.asarray(inputs["Q"], dtype=np.float64)
-transformed = chain_mapping._transformed_matrix(epsilon, Q)
-off_tridiagonal = transformed.copy()
-for index in range(epsilon.size):
-    off_tridiagonal[
-        index, max(0, index - 1) : index + 2
-    ] = 0.0
-hybridization = float(np.linalg.norm(coupling))
-target = np.zeros(epsilon.size, dtype=np.float64)
-target[0] = hybridization
-diagnostics = {
-    "breakdown_tolerance": chain_mapping._breakdown_tolerance(epsilon),
-    "coupling_max_error": float(
-        np.max(np.abs(Q.T @ coupling - target), initial=0.0)
-    ),
-    "off_tridiagonal_max_abs": float(
-        np.max(np.abs(off_tridiagonal), initial=0.0)
-    ),
-    "orthogonality_max_error": float(
-        np.max(
-            np.abs(Q.T @ Q - np.eye(epsilon.size)),
-            initial=0.0,
-        )
-    ),
-}
-pathlib.Path(sys.argv[3]).write_bytes(
-    chain_mapping._canonical_json(diagnostics) + b"\n"
-)
-"""
 
 function finite_vector(value, name)
     value isa AbstractVector ||
@@ -495,51 +448,55 @@ function canonical_chain_mapping_json(mapping_artifact)
     return canonical_artifact_json(canonical) * "\n"
 end
 
-function replay_chain_mapping_diagnostics(epsilon, coupling, Q)
-    # NumPy and Julia BLAS produce observably different last-bit residuals.
-    # Replaying only the four diagnostic scalars with the source-hash-bound
-    # producer and its exact locked runtime avoids trusting self-attestation or
-    # accepting false values through a broad cross-language tolerance. Julia
-    # still independently validates every scientific invariant below.
-    solution_dir = normpath(joinpath(@__DIR__, ".."))
-    return mktempdir() do directory
-        input_path = joinpath(directory, "diagnostic-input.json")
-        output_path = joinpath(directory, "diagnostic-output.json")
-        write(
-            input_path,
-            canonical_artifact_json(
-                Dict(
-                    "epsilon" => epsilon,
-                    "coupling" => coupling,
-                    "Q" => [collect(Q[row, :]) for row in axes(Q, 1)],
-                )
-            ),
-        )
-        command = `uv run --project=$solution_dir --frozen python -c $CHAIN_MAPPING_DIAGNOSTIC_REPLAY_SCRIPT $solution_dir $input_path $output_path`
-        try
-            run(command)
-        catch error
-            throw(
-                ArgumentError(
-                    "chain mapping diagnostic replay failed: " *
-                    sprint(showerror, error)
-                ),
-            )
+function fixed_order_chain_mapping_diagnostics(epsilon, coupling, Q, lambda)
+    # This is the one-based Julia transcription of chain_mapping.py's
+    # zero-based fixed-order scalar convention. Keep every loop ascending and
+    # every product/addition split exactly as written: no BLAS, reductions,
+    # muladd, @fastmath, or reassociation is allowed in this replay.
+    n_bath = length(epsilon)
+    orthogonality_error = 0.0
+    for left in 1:n_bath, right in 1:n_bath
+        overlap = 0.0
+        for row in 1:n_bath
+            product = Q[row, left] * Q[row, right]
+            overlap = overlap + product
         end
-        replayed = strict_json_read(
-            read(output_path), "chain mapping diagnostic replay"
-        )
-        return require_exact_keys(
-            replayed,
-            [
-                "breakdown_tolerance",
-                "coupling_max_error",
-                "off_tridiagonal_max_abs",
-                "orthogonality_max_error",
-            ],
-            "chain mapping diagnostic replay",
-        )
+        left == right && (overlap = overlap - 1.0)
+        orthogonality_error = max(orthogonality_error, abs(overlap))
     end
+
+    off_tridiagonal_error = 0.0
+    for left in 1:n_bath, right in 1:n_bath
+        abs(left - right) <= 1 && continue
+        forward = 0.0
+        reverse = 0.0
+        for row in 1:n_bath
+            weighted_left = Q[row, left] * epsilon[row]
+            forward = forward + weighted_left * Q[row, right]
+            weighted_right = Q[row, right] * epsilon[row]
+            reverse = reverse + weighted_right * Q[row, left]
+        end
+        symmetrized = (forward + reverse) / 2.0
+        off_tridiagonal_error =
+            max(off_tridiagonal_error, abs(symmetrized))
+    end
+
+    coupling_error = 0.0
+    for column in 1:n_bath
+        transformed_coupling = 0.0
+        for row in 1:n_bath
+            product = Q[row, column] * coupling[row]
+            transformed_coupling = transformed_coupling + product
+        end
+        target = column == 1 ? lambda : 0.0
+        coupling_error =
+            max(coupling_error, abs(transformed_coupling - target))
+    end
+    return Dict(
+        "orthogonality_max_error" => orthogonality_error,
+        "off_tridiagonal_max_abs" => off_tridiagonal_error,
+        "coupling_max_error" => coupling_error,
+    )
 end
 
 function validate_chain_mapping_artifact(
@@ -650,9 +607,8 @@ function validate_chain_mapping_artifact(
         throw(ArgumentError("deflation boundaries must be sorted and unique"))
 
     replayed_diagnostics =
-        replay_chain_mapping_diagnostics(epsilon, coupling, Q)
+        fixed_order_chain_mapping_diagnostics(epsilon, coupling, Q, lambda)
     for key in (
-        "breakdown_tolerance",
         "orthogonality_max_error",
         "off_tridiagonal_max_abs",
         "coupling_max_error",

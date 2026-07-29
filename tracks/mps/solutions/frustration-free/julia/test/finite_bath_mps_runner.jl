@@ -418,6 +418,21 @@ end
         @test request.parameters.bath_representation === :chain
     end
 
+    runner_source = read(
+        joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl"), String
+    )
+    @test !occursin("CHAIN_MAPPING_DIAGNOSTIC_REPLAY_SCRIPT", runner_source)
+    @test !occursin("uv run", runner_source)
+    portable_request = chain_runner_request()
+    mktempdir() do spool
+        withenv("PATH" => spool) do
+            cd(spool) do
+                validated = write_and_read_request(portable_request)
+                @test validated.parameters.bath_representation === :chain
+            end
+        end
+    end
+
     numeric_corruptions = [
         (
             ["payload", "numerics", "algorithm"],

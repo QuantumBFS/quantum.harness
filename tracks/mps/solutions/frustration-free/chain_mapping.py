@@ -130,6 +130,61 @@ def _transformed_matrix(epsilon: np.ndarray, Q: np.ndarray) -> np.ndarray:
     return (transformed + transformed.T) / 2.0
 
 
+def _fixed_order_diagnostics(
+    epsilon: np.ndarray,
+    coupling: np.ndarray,
+    Q: np.ndarray,
+    hybridization: float,
+) -> tuple[float, float, float]:
+    """Replay diagnostic scalars in a cross-language fixed float64 order.
+
+    Python and Julia must use these exact zero-based loop nests and operation
+    groupings. Every input scalar is converted to binary64 before arithmetic;
+    each sum starts at +0.0 and advances in ascending index order. No BLAS,
+    vector reduction, fused multiply-add, or reassociation is permitted.
+    """
+    size = epsilon.size
+    orthogonality_error = 0.0
+    for left in range(size):
+        for right in range(size):
+            overlap = 0.0
+            for row in range(size):
+                product = float(Q[row, left]) * float(Q[row, right])
+                overlap = overlap + product
+            if left == right:
+                overlap = overlap - 1.0
+            orthogonality_error = max(orthogonality_error, abs(overlap))
+
+    off_tridiagonal_error = 0.0
+    for left in range(size):
+        for right in range(size):
+            if abs(left - right) <= 1:
+                continue
+            forward = 0.0
+            reverse = 0.0
+            for row in range(size):
+                weighted_left = float(Q[row, left]) * float(epsilon[row])
+                forward = forward + weighted_left * float(Q[row, right])
+                weighted_right = float(Q[row, right]) * float(epsilon[row])
+                reverse = reverse + weighted_right * float(Q[row, left])
+            symmetrized = (forward + reverse) / 2.0
+            off_tridiagonal_error = max(
+                off_tridiagonal_error, abs(symmetrized)
+            )
+
+    coupling_error = 0.0
+    for column in range(size):
+        transformed_coupling = 0.0
+        for row in range(size):
+            product = float(Q[row, column]) * float(coupling[row])
+            transformed_coupling = transformed_coupling + product
+        target = hybridization if column == 0 else 0.0
+        coupling_error = max(
+            coupling_error, abs(transformed_coupling - target)
+        )
+    return orthogonality_error, off_tridiagonal_error, coupling_error
+
+
 def _lanczos(
     epsilon: np.ndarray, coupling: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, float, list[int], float]:
@@ -208,17 +263,15 @@ def _mapping_payload(bath_artifact: dict[str, Any]) -> dict[str, Any]:
         epsilon, coupling
     )
     size = epsilon.size
-    off_tridiagonal = transformed.copy()
-    for index in range(size):
-        off_tridiagonal[index, max(0, index - 1) : index + 2] = 0.0
     validation_tolerance = 4.0 * tolerance
-    off_error = float(np.max(np.abs(off_tridiagonal), initial=0.0))
-    orthogonality_error = float(
-        np.max(np.abs(Q.T @ Q - np.eye(size)), initial=0.0)
+    orthogonality_error, off_error, coupling_error = (
+        _fixed_order_diagnostics(
+            epsilon,
+            coupling,
+            Q,
+            hybridization,
+        )
     )
-    target = np.zeros(size, dtype=np.float64)
-    target[0] = hybridization
-    coupling_error = float(np.max(np.abs(Q.T @ coupling - target), initial=0.0))
     if max(off_error, orthogonality_error, coupling_error) > validation_tolerance:
         raise ValueError("Lanczos mapping failed numerical validation")
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import ast
 import copy
 import hashlib
 import importlib.util
+import inspect
 import json
 import math
 import os
 from pathlib import Path
+import textwrap
 
 import numpy as np
 import pytest
@@ -76,6 +79,90 @@ def continued_fraction(z, onsite, hopping):
     for index in range(len(onsite) - 2, -1, -1):
         result = 1.0 / (z - onsite[index] - hopping[index] ** 2 * result)
     return result
+
+
+def fixed_order_diagnostics(epsilon, coupling, Q, hybridization):
+    size = len(epsilon)
+    orthogonality_error = 0.0
+    for left in range(size):
+        for right in range(size):
+            overlap = 0.0
+            for row in range(size):
+                product = float(Q[row][left]) * float(Q[row][right])
+                overlap = overlap + product
+            if left == right:
+                overlap = overlap - 1.0
+            orthogonality_error = max(orthogonality_error, abs(overlap))
+
+    off_tridiagonal_error = 0.0
+    for left in range(size):
+        for right in range(size):
+            if abs(left - right) <= 1:
+                continue
+            forward = 0.0
+            reverse = 0.0
+            for row in range(size):
+                weighted_left = float(Q[row][left]) * float(epsilon[row])
+                forward = forward + weighted_left * float(Q[row][right])
+                weighted_right = float(Q[row][right]) * float(epsilon[row])
+                reverse = reverse + weighted_right * float(Q[row][left])
+            symmetrized = (forward + reverse) / 2.0
+            off_tridiagonal_error = max(
+                off_tridiagonal_error, abs(symmetrized)
+            )
+
+    coupling_error = 0.0
+    for column in range(size):
+        transformed = 0.0
+        for row in range(size):
+            product = float(Q[row][column]) * float(coupling[row])
+            transformed = transformed + product
+        target = hybridization if column == 0 else 0.0
+        coupling_error = max(coupling_error, abs(transformed - target))
+
+    return {
+        "orthogonality_max_error": orthogonality_error,
+        "off_tridiagonal_max_abs": off_tridiagonal_error,
+        "coupling_max_error": coupling_error,
+    }
+
+
+@pytest.mark.parametrize("n_bath", range(1, 7))
+def test_diagnostic_fields_use_documented_fixed_scalar_order(n_bath):
+    star = bath.make_bath_artifact(
+        gamma=0.13,
+        bandwidth=1.2,
+        n_bath=n_bath,
+        frequency_grid=[-1.2, 0.0, 1.2],
+    )
+    payload = chain.derive_chain_mapping(star)["payload"]
+    expected = fixed_order_diagnostics(
+        star["payload"]["epsilon"],
+        star["payload"]["V"],
+        payload["Q"],
+        payload["lambda"],
+    )
+
+    for name, value in expected.items():
+        assert payload["numerics"][name] == value
+
+
+def test_fixed_scalar_diagnostics_do_not_dispatch_array_reductions():
+    tree = ast.parse(
+        textwrap.dedent(inspect.getsource(chain._fixed_order_diagnostics))
+    )
+
+    assert not any(
+        isinstance(node, ast.BinOp) and isinstance(node.op, ast.MatMult)
+        for node in ast.walk(tree)
+    )
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "np"
+        for node in ast.walk(tree)
+    )
 
 
 @pytest.mark.parametrize("n_bath", range(1, 7))
