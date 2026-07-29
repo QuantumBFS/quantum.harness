@@ -426,7 +426,7 @@ Hamiltonian is globally spin-rotation invariant, so the full-spin isotypic
 reduction transfers exactly.
 """
 function triangular_heisenberg_model(j1::Rational=1//1)
-    C = typeof(j1 // 4)
+    C = Rational{BigInt}
     converted_j1 = convert(C, j1)
     templates = PauliInteractionTemplate{C}[]
     for (tag, displacement, coupling) in (
