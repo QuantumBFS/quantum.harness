@@ -18,6 +18,16 @@ failure signatures and changed actions, not credentials or routine logs.
 
 ## Submission state
 
+- On `xhacnormalb`, `DefMemPerCPU=3931M` is enforced at submission:
+  `--mem=64G --cpus-per-task=16` is rejected even though a node has about
+  513 GB. Request at least 17 CPUs for 64 GB; the verified conservative
+  request is 20 CPUs / 64 GB. Always run `sbatch --test-only` because this
+  failure occurs before a job ID exists.
+- `sbatch --test-only` may report a far-future estimated start even while
+  `sinfo` shows idle or mixed nodes. A real submission can still be throttled
+  by `AssocGrpJobsLimit`; inspect the actual pending reason and do not submit a
+  duplicate. GPU partition `xhhgnormal` is not a CPU-only escape hatch:
+  its QOS rejects jobs without a GPU GRES request.
 - `AssocGrpSubmitJobsLimit` can reject `sbatch` before a job ID exists. That
   attempt is not submitted and must not be reported as queued.
 - `AssocGrpJobsLimit` can leave an accepted job pending. A real job ID exists,
