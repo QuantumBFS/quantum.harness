@@ -30,10 +30,13 @@ file.
 ## Correctness and provenance
 
 Pilot construction requires the passing immutable production-v1 correctness
-report generated at revision `fd0aa314f324dc357918926e80f93f4356083fc0`,
-its exact 120-cell validation run spec and check registry, runtime evidence,
-and lock hash. Orchestration commits are allowed to change the current clean
-revision without changing scientific semantics.
+package approved at orchestration revision
+`fd0aa314f324dc357918926e80f93f4356083fc0`: its report, exact 120-cell
+validation run spec and check registry, embedded historical validation-source
+revision, runtime evidence, and lock hash. The report source must exactly match
+the validation run spec; it is not falsely rewritten to the approval revision.
+Later orchestration commits may change the current clean revision without
+changing scientific semantics.
 
 The frozen scientific whitelist is:
 

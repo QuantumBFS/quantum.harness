@@ -45,7 +45,7 @@ from .validation_shards import validate_run_spec as validate_validation_run_spec
 RUN_SPEC_SCHEMA = "challenge-194-pilot-run-spec-v1"
 CELL_MANIFEST_SCHEMA = "challenge-194-pilot-cell-manifest-v1"
 MERGED_SCHEMA = "challenge-194-pilot-progress-v1"
-BASE_VALIDATION_REVISION = "fd0aa314f324dc357918926e80f93f4356083fc0"
+CORRECTNESS_APPROVAL_REVISION = "fd0aa314f324dc357918926e80f93f4356083fc0"
 PILOT_SIGMAS = (0.8, 0.9, 1.0, 1.1)
 PILOT_LENGTHS = (2**10, 2**14, 2**18)
 PILOT_REPLICAS = tuple(range(8))
@@ -211,9 +211,13 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
     if report.get("passed") is not True:
         raise RuntimeError("correctness report did not pass")
     source = report.get("source")
+    validation_source_revision = (
+        source.get("source_revision") if isinstance(source, Mapping) else None
+    )
     if (
         not isinstance(source, Mapping)
-        or source.get("source_revision") != BASE_VALIDATION_REVISION
+        or not isinstance(validation_source_revision, str)
+        or _HEX40.fullmatch(validation_source_revision) is None
         or source.get("clean_tree") is not True
         or source.get("provenance_error") is not None
     ):
@@ -228,7 +232,7 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
     if not isinstance(cells, list) or len(cells) != 120:
         raise RuntimeError("correctness run spec must contain exactly 120 cells")
     if (
-        validation_spec.get("source_revision") != BASE_VALIDATION_REVISION
+        validation_spec.get("source_revision") != validation_source_revision
         or validation_spec.get("uv_lock_sha256") != _lock_hash()
         or validation_spec.get("runtime_capability") != report.get("runtime_capability")
     ):
@@ -260,6 +264,7 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
     return {
         "correctness_report_sha256": _sha256(report_payload),
         "correctness_run_spec_sha256": _sha256(validation_spec_payload),
+        "validation_source_revision": validation_source_revision,
         "validated_engine_modules": current,
         "validated_engine_sha256": _aggregate_hash(current),
         "validation_runtime_capability_sha256": validation_spec[
@@ -425,6 +430,8 @@ def _build_document(
         "correctness_run_spec_sha256": correctness[
             "correctness_run_spec_sha256"
         ],
+        "correctness_approval_revision": CORRECTNESS_APPROVAL_REVISION,
+        "validation_source_revision": correctness["validation_source_revision"],
         "validated_engine_modules": engine_modules,
         "validated_engine_sha256": correctness["validated_engine_sha256"],
         "validation_runtime_capability_sha256": correctness[
@@ -502,6 +509,8 @@ def _validate_pilot_spec(
         "cell_count",
         "correctness_report_sha256",
         "correctness_run_spec_sha256",
+        "correctness_approval_revision",
+        "validation_source_revision",
         "validated_engine_modules",
         "validated_engine_sha256",
         "validation_runtime_capability_sha256",
@@ -540,6 +549,10 @@ def _validate_pilot_spec(
         document.get("clean_tree") is not True
         or not isinstance(document.get("orchestration_revision"), str)
         or _HEX40.fullmatch(str(document["orchestration_revision"])) is None
+        or document.get("correctness_approval_revision")
+        != CORRECTNESS_APPROVAL_REVISION
+        or not isinstance(document.get("validation_source_revision"), str)
+        or _HEX40.fullmatch(str(document["validation_source_revision"])) is None
     ):
         raise RuntimeError("pilot orchestration source evidence is invalid")
     runtime = document.get("runtime_capability")
@@ -1042,6 +1055,7 @@ def _build_test_pilot_run_spec(
     correctness = {
         "correctness_report_sha256": "1" * 64,
         "correctness_run_spec_sha256": "2" * 64,
+        "validation_source_revision": "b" * 40,
         "validated_engine_modules": modules,
         "validated_engine_sha256": _aggregate_hash(modules),
         "validation_runtime_capability_sha256": "3" * 64,

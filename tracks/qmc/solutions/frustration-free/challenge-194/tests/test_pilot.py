@@ -151,6 +151,42 @@ def test_spec_loader_rejects_provenance_drift(tmp_path: Path):
         pilot.load_pilot_run_spec(path, verify_current_environment=False)
 
 
+def test_correctness_evidence_accepts_historical_source_only_with_exact_bindings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    historical = "b" * 40
+    modules = pilot._scientific_hashes()
+    report_path = tmp_path / "report.json"
+    report = {
+        "passed": True,
+        "source": {
+            "source_revision": historical,
+            "clean_tree": True,
+            "provenance_error": None,
+        },
+        "runtime_capability": {"node": "validated"},
+        "checks": [],
+    }
+    report_path.write_bytes(pilot._canonical_bytes(report))
+    validation_spec_path = tmp_path / "validation_run_spec.json"
+    validation_spec = {
+        "source_revision": historical,
+        "uv_lock_sha256": pilot._lock_hash(),
+        "runtime_capability": report["runtime_capability"],
+        "runtime_capability_sha256": "3" * 64,
+        "implementation_modules": modules,
+        "global_expected_checks": [],
+        "cells": [{"expected_checks": []} for _ in range(120)],
+    }
+    validation_spec_path.write_bytes(pilot._canonical_bytes(validation_spec))
+    monkeypatch.setattr(pilot, "validate_report_payload", lambda *_: None)
+    monkeypatch.setattr(pilot, "validate_validation_run_spec", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(pilot, "_validation_spec_path", lambda _: validation_spec_path)
+    evidence = pilot._verified_correctness(report_path)
+    assert evidence["validation_source_revision"] == historical
+    assert evidence["validated_engine_modules"] == modules
+
+
 @pytest.mark.parametrize("kind", ("source", "runtime", "engine", "analysis"))
 def test_current_environment_rejects_every_bound_provenance_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
