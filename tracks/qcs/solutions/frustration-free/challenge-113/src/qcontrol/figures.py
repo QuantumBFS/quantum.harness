@@ -88,6 +88,8 @@ _RC = {
     "axes.grid.axis": "y",
     "axes.spines.right": False,
     "axes.spines.top": False,
+    "font.family": "DejaVu Sans",
+    "font.sans-serif": ["DejaVu Sans"],
     "font.size": 8,
     "figure.dpi": 120,
     "savefig.dpi": 120,
@@ -236,8 +238,16 @@ def _plot_interval_series(
     label: str | None = None,
 ) -> None:
     style = _STYLES[method]
-    axis.plot(x, center, label=label or _DISPLAY[method], **style)
-    axis.fill_between(x, low, high, color=style["color"], alpha=0.16)
+    series_label = label or _DISPLAY[method]
+    axis.plot(x, center, label=series_label, **style)
+    axis.fill_between(
+        x,
+        low,
+        high,
+        color=style["color"],
+        alpha=0.16,
+        label=f"{series_label} confidence interval",
+    )
 
 
 def _plot_error_series(
@@ -259,6 +269,13 @@ def _plot_error_series(
         capsize=3,
         **_STYLES[method],
     )
+
+
+def _method_legend(axis: matplotlib.axes.Axes) -> None:
+    handles = [
+        line for line in axis.lines if line.get_label() in _DISPLAY.values()
+    ]
+    axis.legend(handles=handles)
 
 
 def _queries_figure(
@@ -393,7 +410,7 @@ def _advantage_figure(
                 "normalized gap |device gap| / amplitude bound [dimensionless]"
             )
             axes[row, column].set_ylabel(ylabel)
-            axes[row, column].legend()
+            _method_legend(axes[row, column])
     figure.suptitle("Paired Model-Hessian advantage versus normalized gap")
     _finish_figure(figure, caption)
     return figure, tuple(panel_strata)
@@ -735,7 +752,9 @@ def render_publication_figures(
         ),
     )
     entries: list[FigureManifestEntry] = []
-    with matplotlib.rc_context(_RC):
+    with matplotlib.rc_context():
+        matplotlib.rcdefaults()
+        matplotlib.rcParams.update(_RC)
         for filename, builder in builders:
             existing_numbers = set(plt.get_fignums())
             try:

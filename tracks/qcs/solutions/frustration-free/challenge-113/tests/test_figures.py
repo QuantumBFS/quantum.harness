@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 import hashlib
+import json
 from pathlib import Path
+import struct
 
 import matplotlib
 import matplotlib.figure
@@ -36,6 +38,23 @@ FILENAMES = (
     "rank_invariant_d2_d4.png",
     "failure_case.png",
 )
+GOLDEN_PNG_SHA256 = {
+    "queries_vs_dimension.png": (
+        "f114f76ec10dd5068bd1a3e0994778069a3a2ad7e187f477cd4ba0b8f10a90da"
+    ),
+    "advantage_vs_gap.png": (
+        "738d875c86d779ccdfb65d5b37d227c5c3bf01c54f51428861b158ff9edecccf"
+    ),
+    "subspace_rotation_and_floor.png": (
+        "2588603ade7d3ef501f1c46e1ee4649a1ad6b126ce20ebf6525540a003336f27"
+    ),
+    "rank_invariant_d2_d4.png": (
+        "f3d613ae09f9ec9f9e9a623d132b52a85f8c2cb94c5f8eba564da64612fe4de2"
+    ),
+    "failure_case.png": (
+        "fe004c0ecf459c618d1a84d63a938161b5747af0c6b5f9e5e75fdbc4c45c6d57"
+    ),
+}
 
 
 def _interval(estimate: float, *, seed: int = 7) -> BootstrapInterval:
@@ -280,6 +299,41 @@ def _method_line(axis, label: str):
     )
 
 
+def _confidence_band(axis, label: str):
+    return next(item for item in axis.collections if item.get_label() == label)
+
+
+def _band_y_bounds(axis, label: str) -> tuple[float, float]:
+    band = _confidence_band(axis, label)
+    y_values = np.concatenate([path.vertices[:, 1] for path in band.get_paths()])
+    return float(np.min(y_values)), float(np.max(y_values))
+
+
+def _png_chunks(payload: bytes) -> tuple[str, ...]:
+    assert payload.startswith(b"\x89PNG\r\n\x1a\n")
+    chunks: list[str] = []
+    offset = 8
+    while offset < len(payload):
+        length = struct.unpack(">I", payload[offset : offset + 4])[0]
+        chunk = payload[offset + 4 : offset + 8].decode("ascii")
+        chunks.append(chunk)
+        offset += length + 12
+        if chunk == "IEND":
+            assert offset == len(payload)
+            break
+    return tuple(chunks)
+
+
+def _fixture_stratum_id(stratum: StratumSummary) -> str:
+    key = stratum.key
+    return (
+        f"system={key.system_name}|d={key.hilbert_dimension}|"
+        f"segments={key.segments}|amplitude_bound={key.amplitude_bound:g}|"
+        f"duration={key.duration:g}|k={key.search_dimension}|gap={key.gap:g}|"
+        f"shots={'exact' if key.shots is None else key.shots}"
+    )
+
+
 def _render(summary: Summary, output: Path):
     return render_publication_figures(
         summary,
@@ -366,19 +420,55 @@ def test_axes_expose_required_definitions_scales_legends_and_methods(
     assert all(figure.texts for figure in figures)
 
 
-def test_hashes_are_deterministic_and_pngs_have_no_text_metadata(
+def test_artifacts_match_golden_hashes_canonical_manifest_and_png_contract(
     tmp_path: Path,
 ) -> None:
-    first = _render(production_summary(), tmp_path / "first")
-    second = _render(production_summary(), tmp_path / "second")
+    summary = production_summary()
+    first_directory = tmp_path / "first"
+    second_directory = tmp_path / "second"
+    first = _render(summary, first_directory)
+    with matplotlib.rc_context({"font.family": "monospace"}):
+        second = _render(summary, second_directory)
 
-    assert [item.sha256 for item in first.figures] == [
-        item.sha256 for item in second.figures
-    ]
-    for item in first.figures:
-        payload = (tmp_path / "first" / item.filename).read_bytes()
-        assert b"tEXt" not in payload
-        assert b"tIME" not in payload
+    assert matplotlib.get_backend().lower() == "agg"
+    assert {item.filename: item.sha256 for item in first.figures} == (
+        GOLDEN_PNG_SHA256
+    )
+    assert first.summary_sha256 == hashlib.sha256(
+        canonical_json_bytes(summary.canonical_dict())
+    ).hexdigest()
+    assert first.source == "strict Summary fixture"
+    assert first.config == "production fixture"
+    assert first.run_id == "fixture-001"
+    assert first.matplotlib_version == matplotlib.__version__
+    assert first.numpy_version == np.__version__
+    expected_strata = {_fixture_stratum_id(item) for item in summary.strata}
+    for entry in first.figures[:4]:
+        assert set(entry.panel_strata) == expected_strata
+    assert first.figures[4].panel_strata == (
+        "system=two_qubit|d=4|segments=10|amplitude_bound=4|"
+        "duration=1|k=2|gap=0.02|shots=1000",
+    )
+
+    first_manifest = (first_directory / "figure_manifest.json").read_bytes()
+    assert first_manifest == canonical_json_bytes(first.canonical_dict())
+    assert json.loads(first_manifest) == first.canonical_dict()
+    assert first_manifest == (
+        second_directory / "figure_manifest.json"
+    ).read_bytes()
+    assert first == second
+
+    for entry in first.figures:
+        first_payload = (first_directory / entry.filename).read_bytes()
+        second_payload = (second_directory / entry.filename).read_bytes()
+        assert first_payload == second_payload
+        assert hashlib.sha256(first_payload).hexdigest() == entry.sha256
+        chunks = _png_chunks(first_payload)
+        assert chunks[0] == "IHDR"
+        assert chunks[-1] == "IEND"
+        assert chunks.count("IHDR") == chunks.count("IEND") == 1
+        assert "IDAT" in chunks
+        assert set(chunks) <= {"IHDR", "IDAT", "IEND"}
 
 
 def test_selects_and_labels_real_failure_case(tmp_path: Path) -> None:
@@ -493,6 +583,15 @@ def test_primary_query_series_uses_censored_failures_and_all_failure_point(
     )
     segments = model_errors.lines[2][0].get_segments()
     assert segments[0].tolist() == [[1.0, 40.0], [1.0, 40.0]]
+    success_errors = next(
+        container
+        for container in success_axis.containers
+        if container.get_label() == "Model Hessian"
+    )
+    assert success_errors.lines[2][0].get_segments()[0].tolist() == [
+        [1.0, 0.0],
+        [1.0, _probability(0.0, 0).high],
+    ]
     random_query = _method_line(query_axis, "Random")
     assert random_query.get_ydata().tolist() == [40.0, 27.0]
     random_errors = next(
@@ -549,57 +648,165 @@ def test_exact_artist_data_and_method_styles(
 ) -> None:
     figures = _capture_figures(monkeypatch)
     _render(production_summary(), tmp_path)
-    query, advantage, subspace, rank, failure = figures
-
-    first_advantage = advantage.axes[0:3]
-    assert _method_line(first_advantage[0], "Full space").get_ydata().tolist() == [
+    by_title = {
+        figure._suptitle.get_text().splitlines()[0]: figure
+        for figure in figures
+    }
+    advantage = by_title[
+        "Paired Model-Hessian advantage versus normalized gap"
+    ]
+    subspace = by_title[
+        "Target-k subspace rotation and restricted fidelity floor"
+    ]
+    rank = by_title["d=2 and d=4 Hessian rank invariants"]
+    failure = next(
+        figure
+        for title, figure in by_title.items()
+        if title.startswith("Observed production failure:")
+    )
+    advantage_axes = {
+        "query": next(
+            axis
+            for axis in advantage.axes
+            if "one_qubit" in axis.get_title()
+            and "k=1" in axis.get_title()
+            and "query advantage" in axis.get_ylabel()
+        ),
+        "shot": next(
+            axis
+            for axis in advantage.axes
+            if "one_qubit" in axis.get_title()
+            and "k=1" in axis.get_title()
+            and "shot advantage" in axis.get_ylabel()
+        ),
+        "success": next(
+            axis
+            for axis in advantage.axes
+            if "one_qubit" in axis.get_title()
+            and "k=1" in axis.get_title()
+            and "success advantage" in axis.get_ylabel()
+        ),
+    }
+    assert _method_line(
+        advantage_axes["query"], "Full space"
+    ).get_ydata().tolist() == [
         4.0,
         4.0,
     ]
-    assert _method_line(first_advantage[1], "Full space").get_ydata().tolist() == [
+    assert _method_line(
+        advantage_axes["shot"], "Full space"
+    ).get_ydata().tolist() == [
         4000.0,
         4000.0,
     ]
-    assert _method_line(first_advantage[2], "Full space").get_ydata().tolist() == [
+    assert _method_line(
+        advantage_axes["success"], "Full space"
+    ).get_ydata().tolist() == [
         0.25,
         0.25,
     ]
+    assert _band_y_bounds(
+        advantage_axes["query"], "Full space confidence interval"
+    ) == (
+        3.9,
+        4.1,
+    )
+    assert _band_y_bounds(
+        advantage_axes["shot"], "Full space confidence interval"
+    ) == (
+        3999.9,
+        4000.1,
+    )
+    assert _band_y_bounds(
+        advantage_axes["success"], "Full space confidence interval"
+    ) == (
+        0.15,
+        0.35,
+    )
 
-    first_angles = subspace.axes[0]
-    assert _method_line(first_angles, "Model Hessian θ1").get_xdata().tolist() == [
-        0.0025,
-        0.005,
-    ]
-    assert _method_line(first_angles, "Model Hessian θ1").get_ydata().tolist() == [
-        0.03,
-        0.04,
-    ]
+    k2_angles = next(
+        axis
+        for axis in subspace.axes
+        if "one_qubit" in axis.get_title()
+        and "k=2" in axis.get_title()
+        and "principal angles" in axis.get_ylabel()
+    )
+    for method in ("Full space", "Model Hessian", "Oracle", "Random"):
+        assert _method_line(k2_angles, f"{method} θ1").get_xdata().tolist() == [
+            0.0025,
+            0.005,
+        ]
+        assert _method_line(k2_angles, f"{method} θ1").get_ydata().tolist() == [
+            0.03,
+            0.04,
+        ]
+        assert _method_line(k2_angles, f"{method} θ2").get_ydata().tolist() == [
+            0.05,
+            0.06,
+        ]
 
-    d2_rank = next(axis for axis in rank.axes if "|d=2|" in axis.get_title())
-    assert _method_line(d2_rank, "Model Hessian model rank").get_xdata().tolist() == [
-        1e-6,
-        1e-8,
-        1e-10,
-    ]
-    assert _method_line(d2_rank, "Model Hessian model rank").get_ydata().tolist() == [
-        3.0,
-        3.0,
-        3.0,
-    ]
-    assert list(_method_line(d2_rank, "Expected invariant rank 3").get_ydata()) == [
-        3,
-        3,
-    ]
-    d4_rank = next(axis for axis in rank.axes if "|d=4|" in axis.get_title())
-    assert list(_method_line(d4_rank, "Expected invariant rank 15").get_ydata()) == [
-        15,
-        15,
-    ]
+    summary = production_summary()
+    for stratum in summary.strata:
+        identity = _fixture_stratum_id(stratum)
+        rank_axis = next(
+            axis
+            for axis in rank.axes
+            if axis.get_title() == identity
+            and "effective Hessian rank" in axis.get_ylabel()
+        )
+        gap_axis = next(
+            axis
+            for axis in rank.axes
+            if axis.get_title() == identity
+            and "signed leading" in axis.get_ylabel()
+        )
+        expected_rank = 3.0 if stratum.key.hilbert_dimension == 2 else 15.0
+        for label in (
+            "Model Hessian model rank",
+            "Model Hessian truth rank",
+        ):
+            assert _method_line(rank_axis, label).get_xdata().tolist() == [
+                1e-6,
+                1e-8,
+                1e-10,
+            ]
+            assert _method_line(rank_axis, label).get_ydata().tolist() == [
+                expected_rank,
+                expected_rank,
+                expected_rank,
+            ]
+        reference = f"Expected invariant rank {int(expected_rank)}"
+        assert list(_method_line(rank_axis, reference).get_ydata()) == [
+            expected_rank,
+            expected_rank,
+        ]
+        expected_gaps = [
+            ((-1.0) ** index) * stratum.key.gap
+            for index in range(stratum.key.search_dimension)
+        ]
+        signed_gap = _method_line(
+            gap_axis,
+            "Model Hessian signed leading gaps",
+        )
+        assert signed_gap.get_xdata().tolist() == list(
+            range(1, stratum.key.search_dimension + 1)
+        )
+        assert signed_gap.get_ydata().tolist() == expected_gaps
 
-    assert [
-        _method_line(axis, "Model Hessian").get_ydata().item()
-        for axis in failure.axes
-    ] == [25.5, 11000.0, 0.5, 0.002]
+    expected_failure_values = {
+        "right-censored first certified query": 25.5,
+        "total optimizer + validation shots": 11000.0,
+        "success probability within budget": 0.5,
+        "restricted infidelity": 0.002,
+    }
+    for ylabel, expected_value in expected_failure_values.items():
+        axis = next(
+            item for item in failure.axes if ylabel in item.get_ylabel()
+        )
+        assert _method_line(
+            axis,
+            "Model Hessian",
+        ).get_ydata().item() == expected_value
 
     expected = {
         "Full space": ("#000000", "s", "-"),
@@ -634,9 +841,6 @@ def test_exact_artist_data_and_method_styles(
                 assert line.get_color().lower() == color.lower()
                 assert line.get_marker() == marker
                 assert line.get_linestyle() == linestyle
-
-    assert query.axes
-
 
 def test_builder_exception_closes_only_new_figures_and_restores_rc(
     tmp_path: Path,
