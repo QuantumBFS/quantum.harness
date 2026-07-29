@@ -3,7 +3,7 @@
 #SBATCH --partition=kshcnormal
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=20
+#SBATCH --cpus-per-task=32
 #SBATCH --mem=112G
 #SBATCH --time=03:00:00
 #SBATCH --array=0-1
@@ -13,7 +13,7 @@ set -euo pipefail
 
 export LC_ALL=C
 export LANG=C
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-20}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-32}"
 
 readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
@@ -98,7 +98,7 @@ printf 'host=%s cpus=%s array_task=%s gamma=%s start=%s\n' \
     --repository-root "$PWD" \
     --output "$SOLVE_DIR/result.toml" \
     --time-limit-seconds 9000 \
-    --threads "${SLURM_CPUS_PER_TASK:-20}" \
+    --threads "${SLURM_CPUS_PER_TASK:-32}" \
     --audit-tolerance 1e-7
 
 (
