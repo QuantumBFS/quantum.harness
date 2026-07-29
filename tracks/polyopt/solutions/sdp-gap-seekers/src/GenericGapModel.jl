@@ -30,6 +30,7 @@ export PauliInteractionTemplate,
        assembly_plan,
        basis_manifest,
        validate_basis_manifest,
+       full_state_entries,
        state_monomial_degree,
        state_monomial_string,
        legacy_ncpoly_data
@@ -161,21 +162,22 @@ struct ExplicitStateSymmetry <: AbstractStateSymmetry
 end
 
 """
-Versioned selection rule for a materialized structured basis.
+Versioned selection rule for a materialized basis.
 
-The first supported family, `:one_symbol_lift` version 1, contains every bare
-Pauli word through the requested degree and one pure scalar row `ζ(w)` for
-every nonidentity word. It is deterministic and nested in degree, but it is
-not a complete state-polynomial hierarchy and applies no symmetry quotient.
-An individual low-degree manifest can nevertheless equal the full finite
-inventory; `BasisManifest.is_complete` records that finite-level fact.
+`:one_symbol_lift` version 1 contains every bare Pauli word through the
+requested degree and one pure scalar row `ζ(w)` for every nonidentity word.
+It is deterministic and nested in degree, but generally incomplete.
+
+`:full_state_polynomial` version 1 materializes every canonical
+`ζ(w₁)…ζ(wₖ)v` row through the requested total degree. It is the complete
+finite state-polynomial basis before symmetry quotienting.
 """
 struct StructuredBasisSpec
     family::Symbol
     version::Int
 
     function StructuredBasisSpec(family::Symbol, version::Int)
-        family == :one_symbol_lift ||
+        family in (:one_symbol_lift, :full_state_polynomial) ||
             throw(ArgumentError("unsupported structured basis family"))
         version == 1 ||
             throw(ArgumentError("unsupported structured basis family version"))
@@ -694,10 +696,76 @@ function one_symbol_entries(site_ids::Vector{Int}, max_degree::Int)
     return entries
 end
 
+"""
+Materialize the complete state-polynomial row inventory through `max_degree`.
+
+The recursive state-symbol enumeration uses nondecreasing canonical word
+indices, so commuting products are emitted exactly once. The final ordering is
+the same deterministic degree/serialization ordering used by manifests.
+"""
+function full_state_entries(site_ids::Vector{Int}, max_degree::Int)
+    isempty(site_ids) && throw(ArgumentError("full basis needs at least one site"))
+    issorted(site_ids) || throw(ArgumentError("full basis site IDs must be sorted"))
+    length(unique(site_ids)) == length(site_ids) ||
+        throw(ArgumentError("full basis site IDs must be unique"))
+    all(site -> site > 0, site_ids) ||
+        throw(ArgumentError("full basis site IDs must be positive"))
+    max_degree >= 0 || throw(ArgumentError("basis degree must be nonnegative"))
+
+    local_words = enumerate_pauli_words(length(site_ids), max_degree)
+    words = [remap_word(word, site_ids) for word in local_words]
+    sort!(words; by=word -> (length(word), canonical_word_string(word)))
+    state_words = filter(word -> !isempty(word.ops), words)
+
+    scalar_multisets = Vector{Vector{PauliWord}}()
+    function enumerate_scalar_multisets!(
+        selected::Vector{PauliWord},
+        first_index::Int,
+        degree::Int,
+    )
+        push!(scalar_multisets, copy(selected))
+        for index in first_index:length(state_words)
+            word = state_words[index]
+            next_degree = degree + length(word)
+            next_degree > max_degree && continue
+            push!(selected, word)
+            enumerate_scalar_multisets!(
+                selected,
+                index,
+                next_degree,
+            )
+            pop!(selected)
+        end
+        return nothing
+    end
+    enumerate_scalar_multisets!(PauliWord[], 1, 0)
+
+    entries = StateMonomial[]
+    for symbols in scalar_multisets
+        scalar_degree = sum(length, symbols; init=0)
+        for word in words
+            scalar_degree + length(word) <= max_degree || continue
+            push!(entries, StateMonomial(symbols, word))
+        end
+    end
+    sort!(entries; by=state_monomial_sort_key)
+    length(unique(entries)) == length(entries) ||
+        error("full state-polynomial materialization emitted duplicate rows")
+    expected = full_state_basis_count(length(site_ids), max_degree)
+    BigInt(length(entries)) == expected ||
+        error(
+            "full state-polynomial materialization disagrees with its exact count",
+        )
+    return entries
+end
+
 const ONE_SYMBOL_LIFT_V1_SELECTION_RULE =
     "all bare Pauli words through max_degree plus one pure scalar " *
     "zeta(w) row for each nonidentity word; no multi-zeta rows; " *
     "no symmetry quotient"
+const FULL_STATE_POLYNOMIAL_V1_SELECTION_RULE =
+    "all canonical zeta(w1)...zeta(wk)v rows through total max_degree; " *
+    "commuting state symbols stored as a sorted multiset; no symmetry quotient"
 
 function structured_basis_contents(
     spec::StructuredBasisSpec,
@@ -722,6 +790,13 @@ function structured_basis_contents(
             entries,
             is_complete,
             ONE_SYMBOL_LIFT_V1_SELECTION_RULE,
+        )
+    elseif spec.family == :full_state_polynomial && spec.version == 1
+        entries = full_state_entries(site_ids, max_degree)
+        return (
+            entries,
+            true,
+            FULL_STATE_POLYNOMIAL_V1_SELECTION_RULE,
         )
     end
     error("validated structured basis spec has no implementation")

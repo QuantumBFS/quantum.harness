@@ -106,6 +106,37 @@ using JuMP
     )
 end
 
+@testset "complete inner-state stationarity selection" begin
+    patch = square_patch_geometry(1)
+    model = shastry_sutherland_model(0//1)
+    problem = GapProblem(
+        patch,
+        model,
+        1//1,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:full_state_polynomial, 1),
+    )
+    bare_spec = StationaritySpec(:bare_inner_pauli, 1)
+    full_spec = StationaritySpec(:full_inner_state, 1)
+    bare = stationarity_candidates(problem, bare_spec)
+    full = stationarity_candidates(problem, full_spec)
+
+    @test length(bare) == 4
+    @test length(full) == 22
+    @test issubset(Set(bare), Set(full))
+    @test length(unique(full)) == length(full)
+    @test issorted(state_monomial_degree.(full))
+    @test all(entry -> state_monomial_degree(entry) <= 2, full)
+    @test any(length(entry.state_symbols) == 2 for entry in full)
+    @test any(
+        length(entry.state_symbols) == 1 &&
+        !isempty(entry.operator_word.ops)
+        for entry in full
+    )
+    @test_throws ArgumentError StationaritySpec(:unknown_stationarity, 1)
+end
+
 @testset "small exact primal assembly manifest" begin
     site = Site(0, 0)
     patch = LocalPatch(
@@ -184,6 +215,52 @@ end
     @test JuMP.constraint_object(
         jump_model.gap_constraint,
     ).set.side_dimension == 7
+end
+
+@testset "small complete primal assembly manifest" begin
+    site = Site(0, 0)
+    patch = LocalPatch(
+        "one-site-complete-test",
+        0,
+        [site],
+        Dict(site => 1),
+        [1],
+    )
+    template = PauliInteractionTemplate(
+        [site],
+        [:Z],
+        1//1,
+        :test,
+    )
+    model = TranslationInvariantPauliModel(
+        "one-site-complete-z-test",
+        [template],
+    )
+    problem = GapProblem(
+        patch,
+        model,
+        1//3,
+        2;
+        basis_mode=:structured,
+        basis_spec=StructuredBasisSpec(:full_state_polynomial, 1),
+    )
+    spec = StationaritySpec(:full_inner_state, 1)
+    assembled = assemble_primal_gap(problem; stationarity_spec=spec)
+    repeated = assemble_primal_gap(problem; stationarity_spec=spec)
+
+    @test length(assembled.positive_basis.entries) == 22
+    @test length(assembled.gap_basis.entries) == 7
+    @test assembled.positive_basis.is_complete
+    @test assembled.gap_basis.is_complete
+    @test assembled.stationarity_spec.family == :full_inner_state
+    @test occursin(
+        "all canonical state-polynomial monomials",
+        assembled.stationarity_selection_rule,
+    )
+    @test assembled.moments_sha256 == repeated.moments_sha256
+    @test assembled.coefficient_map_sha256 ==
+          repeated.coefficient_map_sha256
+    @test assembled.assembly_sha256 == repeated.assembly_sha256
 end
 
 @testset "exactness and Hermitian matrix relations" begin

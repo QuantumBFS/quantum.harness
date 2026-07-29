@@ -11,6 +11,7 @@ using ..GenericGapModel:
     NoStateSymmetry,
     basis_manifest,
     validate_basis_manifest,
+    full_state_entries,
     instantiate_terms,
     assembly_plan,
     state_monomial_string
@@ -41,12 +42,20 @@ const BARE_INNER_STATIONARITY_RULE =
     "patch; identity and exact-zero commutators removed; complex equations " *
     "split into normalized real and imaginary equations; no scalar " *
     "state-symbol multipliers; no symmetry quotient"
+const FULL_INNER_STATE_STATIONARITY_RULE =
+    "all canonical state-polynomial monomials through degree 2d-2 on the " *
+    "inner patch; identity and exact-zero commutators removed; complex " *
+    "equations split into normalized real and imaginary equations; no " *
+    "symmetry quotient"
 
 """
 Versioned selector for stationarity test monomials.
 
-Version 1 deliberately uses only bare operator words. This is a sound subset
-of the full stationarity family, but is not declared complete.
+`:bare_inner_pauli` version 1 deliberately uses only bare operator words. This
+is a sound subset of the full stationarity family, but is not complete.
+
+`:full_inner_state` version 1 uses every canonical state-polynomial monomial
+through degree `2d-2` on the inner patch.
 """
 struct StationaritySpec
     family::Symbol
@@ -56,7 +65,7 @@ struct StationaritySpec
         family::Symbol=:bare_inner_pauli,
         version::Int=1,
     )
-        family == :bare_inner_pauli ||
+        family in (:bare_inner_pauli, :full_inner_state) ||
             throw(ArgumentError("unsupported stationarity family"))
         version == 1 ||
             throw(ArgumentError("unsupported stationarity family version"))
@@ -112,20 +121,28 @@ function stationarity_candidates(
     problem::GapProblem,
     spec::StationaritySpec=StationaritySpec(),
 )
-    spec.family == :bare_inner_pauli && spec.version == 1 ||
-        error("validated stationarity spec has no implementation")
     site_ids = sort!(copy(problem.patch.inner_ids))
     isempty(site_ids) &&
         throw(ArgumentError("stationarity needs at least one inner site"))
-    local_words = enumerate_pauli_words(
-        length(site_ids),
-        2problem.d - 2,
-    )
-    return StateMonomial[
-        StateMonomial(PauliWord[], remap_word(word, site_ids))
-        for word in local_words
-    ]
+    if spec.family == :bare_inner_pauli && spec.version == 1
+        local_words = enumerate_pauli_words(
+            length(site_ids),
+            2problem.d - 2,
+        )
+        return StateMonomial[
+            StateMonomial(PauliWord[], remap_word(word, site_ids))
+            for word in local_words
+        ]
+    elseif spec.family == :full_inner_state && spec.version == 1
+        return full_state_entries(site_ids, 2problem.d - 2)
+    end
+    error("validated stationarity spec has no implementation")
 end
+
+stationarity_selection_rule(spec::StationaritySpec) =
+    spec.family == :bare_inner_pauli ?
+    BARE_INNER_STATIONARITY_RULE :
+    FULL_INNER_STATE_STATIONARITY_RULE
 
 """
 Split complex stationarity expressions into real equations, discard exact
@@ -332,7 +349,7 @@ function assemble_primal_gap(
         gap_basis,
         hamiltonian_terms,
         stationarity_spec,
-        BARE_INNER_STATIONARITY_RULE,
+        stationarity_selection_rule(stationarity_spec),
         candidates_sha256,
         equalities,
         equalities_sha256,

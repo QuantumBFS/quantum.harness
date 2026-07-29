@@ -516,6 +516,72 @@ end
     @test_throws ArgumentError basis_manifest(invalid_problem, :gap)
 end
 
+@testset "complete state-polynomial basis manifests" begin
+    patch = square_patch_geometry(1)
+    model = square_j1j2_model(1//2)
+    full_spec = StructuredBasisSpec(:full_state_polynomial, 1)
+    one_symbol_spec = StructuredBasisSpec(:one_symbol_lift, 1)
+    problem = GapProblem(
+        patch,
+        model,
+        1//10,
+        2;
+        basis_mode=:structured,
+        basis_spec=full_spec,
+    )
+    one_symbol_problem = GapProblem(
+        patch,
+        model,
+        1//10,
+        2;
+        basis_mode=:structured,
+        basis_spec=one_symbol_spec,
+    )
+
+    positive = basis_manifest(problem, :positive)
+    gap = basis_manifest(problem, :gap)
+    one_symbol_positive = basis_manifest(one_symbol_problem, :positive)
+    one_symbol_gap = basis_manifest(one_symbol_problem, :gap)
+    plan = assembly_plan(problem)
+
+    @test positive.family == gap.family == :full_state_polynomial
+    @test positive.family_version == gap.family_version == 1
+    @test positive.is_complete
+    @test gap.is_complete
+    @test plan.is_complete
+    @test length(positive.entries) == 1_810
+    @test length(gap.entries) == 7
+    @test positive.entries ==
+          full_state_entries(collect(eachindex(patch.sites)), 2)
+    @test gap.entries == full_state_entries(patch.inner_ids, 1)
+    @test gap.entries == one_symbol_gap.entries
+    @test issubset(Set(one_symbol_positive.entries), Set(positive.entries))
+    @test length(setdiff(
+        Set(positive.entries),
+        Set(one_symbol_positive.entries),
+    )) ==
+          1_107
+    @test validate_basis_manifest(positive)
+    @test validate_basis_manifest(gap)
+    @test validate_basis_manifest(positive, problem, :positive)
+    @test validate_basis_manifest(gap, problem, :gap)
+    @test positive.sha256 == basis_manifest(problem, :positive).sha256
+    @test gap.sha256 == basis_manifest(problem, :gap).sha256
+
+    _, x1 = pauli_word([(1, :X)])
+    _, y2 = pauli_word([(2, :Y)])
+    mixed_row = StateMonomial([x1], y2)
+    two_symbol_row = StateMonomial([x1, y2], PauliWord())
+    @test mixed_row in positive.entries
+    @test two_symbol_row in positive.entries
+    @test !(mixed_row in one_symbol_positive.entries)
+    @test !(two_symbol_row in one_symbol_positive.entries)
+
+    @test_throws ArgumentError StructuredBasisSpec(:unknown_complete, 1)
+    @test_throws ArgumentError full_state_entries([2, 1], 2)
+    @test_throws ArgumentError full_state_entries([1, 1], 2)
+end
+
 include(joinpath(@__DIR__, "primal_gap_symbolics_tests.jl"))
 
 include(joinpath(@__DIR__, "exact_symmetry_reduction_truth_tests.jl"))
