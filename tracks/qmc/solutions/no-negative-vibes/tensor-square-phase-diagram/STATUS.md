@@ -255,3 +255,26 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
 - Next action: stop adding ad hoc global proposals. Re-rank the remaining
   healthy beta=4 numerical sentinels and test the next pre-registered candidate
   with the original validated sampler, while treating beta=8 as censored.
+
+## Channel-reflection round closeout at user budget boundary (2026-07-29)
+
+- The user closed the current round after the independent review, mandatory
+  m=3 ED gate and sole pre-registered m=8,beta=8 A/B. No new sampler, m=10,
+  m=12, Stage 5 calculation or literature search is authorized in this
+  session.
+- Final numerical outcome is unchanged: m=3 **PASS**, m=8 A/B **STOP**, and
+  Stage 5 is not released. This is an algorithm stop, not a physics no-go.
+- Large/raw state and checkpoints remain off Git. Exact experiment ID, source
+  revision, all 12 run fingerprints, retained remote directories and
+  same-revision recovery commands are recorded in
+  `notes/channel_reflection_closeout.md`.
+- At `2026-07-29T17:23:44Z`, read-only process audits found zero relevant
+  compute processes on both WSL and the CPU machine. Both retained numerical
+  source trees were clean at `db0d114`.
+- The WSL m=3 release artifact and its CPU recovery copy have identical
+  SHA-256
+  `572a663b7a2d17852c1a44995e535bb40cf98cf7d5c0e09cdaf559cd99fb2ec6`.
+- The Windows control host performed no numerical calculation.
+- Sole next entry: pull the final closeout commit, verify remote source
+  revisions, checkpoints, frozen fingerprints and release digest, and do not
+  rerun any complete point.
