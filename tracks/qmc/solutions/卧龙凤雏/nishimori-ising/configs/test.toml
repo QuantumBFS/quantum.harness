@@ -3,6 +3,7 @@ antiferromagnetic_probability = 0.1092212
 nishimori_k = 1.04936047630256835
 base_seed = 122464
 production_gates = false
+refinement_level = 0
 
 [disorder]
 replicas = 8

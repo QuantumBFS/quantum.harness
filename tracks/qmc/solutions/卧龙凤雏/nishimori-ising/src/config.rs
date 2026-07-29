@@ -15,6 +15,8 @@ pub struct RunConfig {
     pub nishimori_k: f64,
     pub base_seed: u64,
     pub production_gates: bool,
+    #[serde(default)]
+    pub refinement_level: usize,
     pub disorder: DisorderConfig,
 }
 
@@ -88,14 +90,20 @@ impl RunConfig {
             if self.widths != PRODUCTION_WIDTHS {
                 bail!("production run requires widths {PRODUCTION_WIDTHS:?}");
             }
+            if self.refinement_level > 1 {
+                bail!("only the approved refinement levels 0 and 1 are allowed");
+            }
+            let expected_rows = 1_048_576_usize << self.refinement_level;
             if disorder.replicas != 8
                 || disorder.burn_in_rows != 4_096
-                || disorder.measurement_rows != 1_048_576
+                || disorder.measurement_rows != expected_rows
                 || disorder.block_rows != 16_384
             {
                 bail!(
-                    "production sampling requires 8 replicas, 4,096 burn-in rows, \
-                     1,048,576 measurement rows, and 16,384-row blocks"
+                    "production sampling at refinement level {} requires 8 replicas, \
+                     4,096 burn-in rows, {expected_rows} measurement rows, and \
+                     16,384-row blocks",
+                    self.refinement_level
                 );
             }
         }
@@ -111,6 +119,7 @@ impl RunConfig {
             && fixed_float(self.nishimori_k, other.nishimori_k)
             && self.base_seed == other.base_seed
             && self.production_gates == other.production_gates
+            && self.refinement_level == other.refinement_level
             && self.disorder.replicas == other.disorder.replicas
             && self.disorder.burn_in_rows == other.disorder.burn_in_rows
             && self.disorder.measurement_rows == other.disorder.measurement_rows

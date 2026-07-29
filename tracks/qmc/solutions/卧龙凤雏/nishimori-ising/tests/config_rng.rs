@@ -20,6 +20,35 @@ fn production_configuration_is_the_frozen_scientific_contract() {
     assert_eq!(config.disorder.burn_in_rows, 4_096);
     assert_eq!(config.disorder.measurement_rows, 1_048_576);
     assert_eq!(config.disorder.block_rows, 16_384);
+    assert_eq!(config.refinement_level, 0);
+}
+
+#[test]
+fn approved_level_one_refinement_only_doubles_measurement_rows() {
+    let baseline = RunConfig::load(Path::new("configs/production.toml")).unwrap();
+    let refinement = RunConfig::load(Path::new("configs/refinement-1.toml")).unwrap();
+    refinement.validate().unwrap();
+
+    assert_eq!(refinement.refinement_level, 1);
+    assert_eq!(
+        refinement.disorder.measurement_rows,
+        2 * baseline.disorder.measurement_rows
+    );
+    assert_eq!(refinement.disorder.block_rows, baseline.disorder.block_rows);
+    assert_eq!(refinement.widths, baseline.widths);
+    assert_eq!(refinement.base_seed, baseline.base_seed);
+    assert_eq!(refinement.disorder.replicas, baseline.disorder.replicas);
+    assert_eq!(
+        refinement.disorder.burn_in_rows,
+        baseline.disorder.burn_in_rows
+    );
+}
+
+#[test]
+fn production_rows_cannot_change_without_matching_refinement_level() {
+    let mut config = RunConfig::load(Path::new("configs/production.toml")).unwrap();
+    config.disorder.measurement_rows *= 2;
+    assert!(config.validate().is_err());
 }
 
 #[test]
