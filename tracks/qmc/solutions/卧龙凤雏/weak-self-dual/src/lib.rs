@@ -4,3 +4,4 @@ pub mod network;
 pub mod oracles;
 pub mod rng;
 pub mod sampler;
+pub mod schema;
