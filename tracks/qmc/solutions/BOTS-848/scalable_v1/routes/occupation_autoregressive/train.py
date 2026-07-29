@@ -17,7 +17,13 @@ from typing import Mapping
 import numpy as np
 
 from .model import AutoregressiveNQS
-from .operators import PreparedPairOperator, local_energy, local_l2
+from .operators import (
+    PreparedPairOperator,
+    compose_ladders,
+    local_energy,
+    local_from_log_neighbors,
+    local_l2,
+)
 
 
 class FeatureStateError(RuntimeError):
@@ -57,7 +63,48 @@ def _finite_vector(name: str, values: object) -> np.ndarray:
     return vector
 
 
-def score_covariance(scores: object, local_values: object) -> np.ndarray:
+def _normalized_weights(weights: object | None, sample_count: int) -> np.ndarray:
+    if sample_count <= 0:
+        raise ValueError("weighted expectation requires at least one sample")
+    if weights is None:
+        return np.full(sample_count, 1.0 / sample_count, dtype=np.float64)
+    raw = np.asarray(weights)
+    if raw.ndim != 1 or raw.shape[0] != sample_count or np.iscomplexobj(raw):
+        raise ValueError("weights must contain one real value per sample")
+    try:
+        values = np.asarray(raw, dtype=np.float64)
+    except (TypeError, ValueError) as error:
+        raise TypeError("weights must contain real numeric values") from error
+    if not np.all(np.isfinite(values)) or np.any(values < 0.0):
+        raise ValueError("weights must be finite and non-negative")
+    total = float(np.sum(values))
+    if not math.isfinite(total) or total <= 0.0:
+        raise ValueError("weights must have a positive finite sum")
+    return values / total
+
+
+def _complex_sample_vector(name: str, values: object) -> np.ndarray:
+    try:
+        array = np.asarray(values, dtype=np.complex128)
+    except (TypeError, ValueError) as error:
+        raise TypeError(f"{name} must contain numeric values") from error
+    if array.ndim != 1 or array.shape[0] == 0:
+        raise ValueError(f"{name} must be a non-empty one-dimensional vector")
+    if not np.all(np.isfinite(array.real)) or not np.all(np.isfinite(array.imag)):
+        raise ValueError(f"{name} must contain only finite values")
+    return array
+
+
+def _hermitian_expectation(values: np.ndarray, weights: np.ndarray) -> float:
+    return float(np.sum(weights * values).real)
+
+
+def score_covariance(
+    scores: object,
+    local_values: object,
+    *,
+    weights: object | None = None,
+) -> np.ndarray:
     """Return ``2 Re Cov(conj(d log psi), local)`` for real parameters."""
 
     try:
@@ -69,7 +116,8 @@ def score_covariance(scores: object, local_values: object) -> np.ndarray:
         raise ValueError("scores must have shape (samples, parameters)")
     if value_array.ndim != 1 or value_array.shape[0] != score_array.shape[0]:
         raise ValueError("local_values must contain one value per score row")
-    if score_array.shape[0] == 0:
+    sample_count = score_array.shape[0]
+    if sample_count == 0:
         raise ValueError("score covariance requires at least one sample")
     if not (
         np.all(np.isfinite(score_array.real))
@@ -78,15 +126,213 @@ def score_covariance(scores: object, local_values: object) -> np.ndarray:
         and np.all(np.isfinite(value_array.imag))
     ):
         raise ValueError("score covariance inputs must be finite")
+    normalized_weights = _normalized_weights(weights, sample_count)
     conjugate_scores = score_array.conj()
-    covariance = np.mean(
-        conjugate_scores * value_array[:, None],
+    mean_scores = np.sum(normalized_weights[:, None] * conjugate_scores, axis=0)
+    mean_values = np.sum(normalized_weights * value_array)
+    covariance = np.sum(
+        normalized_weights[:, None] * conjugate_scores * value_array[:, None],
         axis=0,
-    ) - np.mean(conjugate_scores, axis=0) * np.mean(value_array)
+    ) - mean_scores * mean_values
     gradient = np.asarray(2.0 * np.real(covariance), dtype=np.float64)
     if not np.all(np.isfinite(gradient)):
         raise FloatingPointError("non-finite VMC score covariance")
     return gradient
+
+
+def physical_l2_variance(
+    l2_local: object,
+    l4_local: object,
+    *,
+    weights: object | None = None,
+) -> float:
+    """Return the Hermitian variance ``<L4> - <L2>**2``."""
+
+    l2_array = _complex_sample_vector("l2_local", l2_local)
+    l4_array = _complex_sample_vector("l4_local", l4_local)
+    if l4_array.shape != l2_array.shape:
+        raise ValueError("l2_local and l4_local must have the same shape")
+    normalized_weights = _normalized_weights(weights, l2_array.shape[0])
+    mean_l2 = _hermitian_expectation(l2_array, normalized_weights)
+    mean_l4 = _hermitian_expectation(l4_array, normalized_weights)
+    variance = mean_l4 - mean_l2**2
+    if not math.isfinite(variance):
+        raise FloatingPointError("non-finite physical L2 variance")
+    return variance
+
+
+def _l2_neighbors(state: int, two_q: int, target_m: float) -> dict[int, complex]:
+    neighbors = compose_ladders(state, two_q)
+    if isinstance(target_m, bool) or not isinstance(target_m, Real):
+        raise TypeError("target_m must be a finite integer or half-integer")
+    value = float(target_m)
+    if not math.isfinite(value) or 2.0 * value != round(2.0 * value):
+        raise ValueError("target_m must be a finite integer or half-integer")
+    source = int(state)
+    actual_m2 = sum(
+        -int(two_q) + 2 * orbital
+        for orbital in range(int(two_q) + 1)
+        if source & (1 << orbital)
+    )
+    if actual_m2 != round(2.0 * value):
+        raise ValueError("state is not in the requested target_m sector")
+    diagonal = value * (value + 1.0)
+    if diagonal != 0.0:
+        neighbors[source] = neighbors.get(source, 0.0j) + diagonal
+    return neighbors
+
+
+def local_l4(
+    state: int,
+    two_q: int,
+    target_m: float,
+    logpsi: object,
+) -> complex:
+    """Evaluate L4 by sparse composition of two L2 rows."""
+
+    source = int(state)
+    final_row: dict[int, complex] = {}
+    for intermediate, first_coefficient in _l2_neighbors(
+        source,
+        two_q,
+        target_m,
+    ).items():
+        for final, second_coefficient in _l2_neighbors(
+            intermediate,
+            two_q,
+            target_m,
+        ).items():
+            final_row[final] = (
+                final_row.get(final, 0.0j)
+                + first_coefficient * second_coefficient
+            )
+    final_row = {
+        target: coefficient
+        for target, coefficient in final_row.items()
+        if coefficient != 0.0
+    }
+    return local_from_log_neighbors(source, final_row, logpsi)
+
+
+def reduced_objective_and_gradient(
+    *,
+    ground_energy: object,
+    ground_l2: object,
+    ground_l4: object,
+    ground_scores: object,
+    excited_energy: object,
+    excited_l2: object,
+    excited_l4: object,
+    excited_scores: object,
+    ground_weights: object | None = None,
+    excited_weights: object | None = None,
+) -> tuple[float, np.ndarray, dict[str, float]]:
+    """Evaluate the reduced A03 objective and its real-parameter gradient."""
+
+    ground_energy_array = _complex_sample_vector("ground_energy", ground_energy)
+    ground_l2_array = _complex_sample_vector("ground_l2", ground_l2)
+    ground_l4_array = _complex_sample_vector("ground_l4", ground_l4)
+    excited_energy_array = _complex_sample_vector("excited_energy", excited_energy)
+    excited_l2_array = _complex_sample_vector("excited_l2", excited_l2)
+    excited_l4_array = _complex_sample_vector("excited_l4", excited_l4)
+    if not (
+        ground_energy_array.shape
+        == ground_l2_array.shape
+        == ground_l4_array.shape
+    ):
+        raise ValueError("ground local estimators must have the same shape")
+    if not (
+        excited_energy_array.shape
+        == excited_l2_array.shape
+        == excited_l4_array.shape
+    ):
+        raise ValueError("excited local estimators must have the same shape")
+    ground_normalized_weights = _normalized_weights(
+        ground_weights,
+        ground_energy_array.shape[0],
+    )
+    excited_normalized_weights = _normalized_weights(
+        excited_weights,
+        excited_energy_array.shape[0],
+    )
+
+    mean_energy_ground = _hermitian_expectation(
+        ground_energy_array,
+        ground_normalized_weights,
+    )
+    mean_energy_excited = _hermitian_expectation(
+        excited_energy_array,
+        excited_normalized_weights,
+    )
+    mean_l2_ground = _hermitian_expectation(
+        ground_l2_array,
+        ground_normalized_weights,
+    )
+    mean_l2_excited = _hermitian_expectation(
+        excited_l2_array,
+        excited_normalized_weights,
+    )
+    mean_l4_excited = _hermitian_expectation(
+        excited_l4_array,
+        excited_normalized_weights,
+    )
+    variance_l2_excited = physical_l2_variance(
+        excited_l2_array,
+        excited_l4_array,
+        weights=excited_normalized_weights,
+    )
+    objective = (
+        mean_energy_ground
+        + mean_energy_excited
+        + 0.25 * mean_l2_ground**2
+        + 0.25 * (mean_l2_excited - 6.0) ** 2
+        + 0.05 * variance_l2_excited
+    )
+
+    ground_l2_gradient = score_covariance(
+        ground_scores,
+        ground_l2_array,
+        weights=ground_normalized_weights,
+    )
+    excited_l2_gradient = score_covariance(
+        excited_scores,
+        excited_l2_array,
+        weights=excited_normalized_weights,
+    )
+    gradient = (
+        score_covariance(
+            ground_scores,
+            ground_energy_array,
+            weights=ground_normalized_weights,
+        )
+        + score_covariance(
+            excited_scores,
+            excited_energy_array,
+            weights=excited_normalized_weights,
+        )
+        + 0.5 * mean_l2_ground * ground_l2_gradient
+        + 0.5 * (mean_l2_excited - 6.0) * excited_l2_gradient
+        + 0.05
+        * (
+            score_covariance(
+                excited_scores,
+                excited_l4_array,
+                weights=excited_normalized_weights,
+            )
+            - 2.0 * mean_l2_excited * excited_l2_gradient
+        )
+    )
+    if not math.isfinite(objective) or not np.all(np.isfinite(gradient)):
+        raise FloatingPointError("non-finite reduced VMC objective or gradient")
+    metrics = {
+        "energy_ground": mean_energy_ground,
+        "energy_excited_m0": mean_energy_excited,
+        "mean_l2_ground": mean_l2_ground,
+        "mean_l2_excited_m0": mean_l2_excited,
+        "mean_l4_excited_m0": mean_l4_excited,
+        "variance_l2_excited_m0": variance_l2_excited,
+    }
+    return objective, np.asarray(gradient, dtype=np.float64), metrics
 
 
 def clip_gradient(
@@ -305,7 +551,7 @@ def _sector_estimators(
     operator: PreparedPairOperator,
     states: np.ndarray,
     sector: str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     logpsi_cache: dict[int, complex] = {}
 
     def logpsi(raw_state: int) -> complex:
@@ -316,9 +562,10 @@ def _sector_estimators(
             logpsi_cache[state] = value
         return value
 
-    cache: dict[int, tuple[complex, complex, np.ndarray]] = {}
+    cache: dict[int, tuple[complex, complex, complex, np.ndarray]] = {}
     energies: list[complex] = []
     l2_values: list[complex] = []
+    l4_values: list[complex] = []
     scores: list[np.ndarray] = []
     for raw_state in states:
         state = int(raw_state)
@@ -332,26 +579,36 @@ def _sector_estimators(
                     target_m=0.0,
                     logpsi=logpsi,
                 ),
+                local_l4(
+                    state,
+                    two_q=model.two_q,
+                    target_m=0.0,
+                    logpsi=logpsi,
+                ),
                 model.log_derivative(state, sector),
             )
             cache[state] = evaluated
-        energy, l2_value, score = evaluated
+        energy, l2_value, l4_value, score = evaluated
         energies.append(energy)
         l2_values.append(l2_value)
+        l4_values.append(l4_value)
         scores.append(score)
     energy_array = np.asarray(energies, dtype=np.complex128)
     l2_array = np.asarray(l2_values, dtype=np.complex128)
+    l4_array = np.asarray(l4_values, dtype=np.complex128)
     score_array = np.asarray(scores, dtype=np.complex128)
     if not (
         np.all(np.isfinite(energy_array.real))
         and np.all(np.isfinite(energy_array.imag))
         and np.all(np.isfinite(l2_array.real))
         and np.all(np.isfinite(l2_array.imag))
+        and np.all(np.isfinite(l4_array.real))
+        and np.all(np.isfinite(l4_array.imag))
         and np.all(np.isfinite(score_array.real))
         and np.all(np.isfinite(score_array.imag))
     ):
         raise FloatingPointError("non-finite reduced-state estimator")
-    return energy_array, l2_array, score_array
+    return energy_array, l2_array, l4_array, score_array
 
 
 def _checkpoint(
@@ -404,6 +661,8 @@ def run_reduced_training(
 
     if not isinstance(model, AutoregressiveNQS):
         raise TypeError("model must be an AutoregressiveNQS")
+    if model.target_m2 != 0:
+        raise ValueError("model.target_m2 must be 0 for reduced training")
     if not isinstance(operator, PreparedPairOperator):
         raise TypeError("operator must be a PreparedPairOperator")
     if operator.two_q != model.two_q:
@@ -434,50 +693,28 @@ def run_reduced_training(
                 "excited",
                 seed=excited_seed,
             )
-            ground_energy, ground_l2, ground_scores = _sector_estimators(
+            ground_energy, ground_l2, ground_l4, ground_scores = _sector_estimators(
                 model,
                 operator,
                 ground_states,
                 "ground",
             )
-            excited_energy, excited_l2, excited_scores = _sector_estimators(
+            excited_energy, excited_l2, excited_l4, excited_scores = _sector_estimators(
                 model,
                 operator,
                 excited_states,
                 "excited",
             )
-            mean_energy_ground = float(np.mean(ground_energy).real)
-            mean_energy_excited = float(np.mean(excited_energy).real)
-            ground_l2_real = ground_l2.real
-            excited_l2_real = excited_l2.real
-            mean_l2_ground = float(np.mean(ground_l2_real))
-            mean_l2_excited = float(np.mean(excited_l2_real))
-            variance_l2_excited = float(
-                np.mean((excited_l2_real - mean_l2_excited) ** 2)
+            objective, gradient, metrics = reduced_objective_and_gradient(
+                ground_energy=ground_energy,
+                ground_l2=ground_l2,
+                ground_l4=ground_l4,
+                ground_scores=ground_scores,
+                excited_energy=excited_energy,
+                excited_l2=excited_l2,
+                excited_l4=excited_l4,
+                excited_scores=excited_scores,
             )
-            objective = (
-                mean_energy_ground
-                + mean_energy_excited
-                + 0.25 * mean_l2_ground**2
-                + 0.25 * (mean_l2_excited - 6.0) ** 2
-                + 0.05 * variance_l2_excited
-            )
-
-            ground_l2_gradient = score_covariance(ground_scores, ground_l2_real)
-            excited_l2_gradient = score_covariance(excited_scores, excited_l2_real)
-            gradient = (
-                score_covariance(ground_scores, ground_energy)
-                + score_covariance(excited_scores, excited_energy)
-                + 0.5 * mean_l2_ground * ground_l2_gradient
-                + 0.5 * (mean_l2_excited - 6.0) * excited_l2_gradient
-                + 0.05
-                * (
-                    score_covariance(excited_scores, excited_l2_real**2)
-                    - 2.0 * mean_l2_excited * excited_l2_gradient
-                )
-            )
-            if not math.isfinite(objective) or not np.all(np.isfinite(gradient)):
-                raise FloatingPointError("non-finite reduced VMC objective or gradient")
             parameters, adam_state, gradient_before, gradient_after = adam_update(
                 model.flat_parameters(),
                 gradient,
@@ -499,11 +736,7 @@ def run_reduced_training(
                 "excited_m0_samples": config.batch_size_per_sector,
                 "total_samples": 2 * config.batch_size_per_sector,
                 "objective": objective,
-                "energy_ground": mean_energy_ground,
-                "energy_excited_m0": mean_energy_excited,
-                "mean_l2_ground": mean_l2_ground,
-                "mean_l2_excited_m0": mean_l2_excited,
-                "variance_l2_excited_m0": variance_l2_excited,
+                **metrics,
                 "maximum_local_energy_imaginary_part": float(
                     max(
                         np.max(np.abs(ground_energy.imag), initial=0.0),

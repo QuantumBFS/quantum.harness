@@ -17,6 +17,7 @@ from scalable_v1.routes.occupation_autoregressive.constraints import (
 from scalable_v1.routes.occupation_autoregressive.model import AutoregressiveNQS
 from scalable_v1.routes.occupation_autoregressive.operators import (
     PreparedPairOperator,
+    compose_ladders,
 )
 from scalable_v1.routes.occupation_autoregressive import train
 from scalable_v1.routes.occupation_autoregressive.train import (
@@ -451,6 +452,86 @@ def _zero_pair_operator(two_q: int) -> PreparedPairOperator:
     )
 
 
+def _tiny_l2_matrix(support: tuple[int, ...], two_q: int) -> np.ndarray:
+    """Build a dense tiny-support reference in test code only."""
+
+    index = {state: position for position, state in enumerate(support)}
+    matrix = np.zeros((len(support), len(support)), dtype=np.complex128)
+    for column, state in enumerate(support):
+        for target, coefficient in compose_ladders(state, two_q).items():
+            matrix[index[target], column] += coefficient
+    return matrix
+
+
+def _exact_logpsi(
+    support: tuple[int, ...],
+    amplitudes: np.ndarray,
+):
+    table = dict(zip(support, amplitudes, strict=True))
+
+    def logpsi(state: int) -> complex:
+        value = complex(table[state])
+        if value == 0.0:
+            return complex(-np.inf, 0.0)
+        return complex(np.log(abs(value)), np.angle(value))
+
+    return logpsi
+
+
+def _exact_sector_arrays(
+    model: AutoregressiveNQS,
+    sector: str,
+    support: tuple[int, ...],
+    hamiltonian: np.ndarray,
+    l2_matrix: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    log_values = np.asarray(
+        [model.logpsi(state, sector) for state in support],
+        dtype=np.complex128,
+    )
+    wavefunction = np.exp(log_values)
+    probabilities = np.abs(wavefunction) ** 2
+    probabilities /= np.sum(probabilities)
+    scores = np.asarray(
+        [model.log_derivative(state, sector) for state in support],
+        dtype=np.complex128,
+    )
+    energy_local = hamiltonian @ wavefunction / wavefunction
+    l2_local = l2_matrix @ wavefunction / wavefunction
+    l4_local = l2_matrix @ (l2_matrix @ wavefunction) / wavefunction
+    return energy_local, l2_local, l4_local, scores, probabilities
+
+
+def _exact_reduced_objective(
+    model: AutoregressiveNQS,
+    support: tuple[int, ...],
+    hamiltonian: np.ndarray,
+    l2_matrix: np.ndarray,
+) -> float:
+    moments: dict[str, tuple[float, float, float]] = {}
+    l4_matrix = l2_matrix @ l2_matrix
+    for sector in ("ground", "excited"):
+        wavefunction = np.asarray(
+            [np.exp(model.logpsi(state, sector)) for state in support],
+            dtype=np.complex128,
+        )
+        norm = float(np.vdot(wavefunction, wavefunction).real)
+        moments[sector] = (
+            float(np.vdot(wavefunction, hamiltonian @ wavefunction).real / norm),
+            float(np.vdot(wavefunction, l2_matrix @ wavefunction).real / norm),
+            float(np.vdot(wavefunction, l4_matrix @ wavefunction).real / norm),
+        )
+    energy_ground, l2_ground, _l4_ground = moments["ground"]
+    energy_excited, l2_excited, l4_excited = moments["excited"]
+    return (
+        energy_ground
+        + energy_excited
+        + 0.25 * l2_ground**2
+        + 0.25 * (l2_excited - 6.0) ** 2
+        + 0.05 * (l4_excited - l2_excited**2)
+    )
+
+
 def _jsonl_records(path: Path) -> list[dict[str, object]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
@@ -477,6 +558,147 @@ def test_score_covariance_matches_explicit_complex_vmc_expression() -> None:
     observed = score_covariance(scores, local_values)
 
     np.testing.assert_allclose(observed, expected, rtol=0.0, atol=1.0e-15)
+
+
+def test_physical_l2_variance_differs_from_real_local_value_variance() -> None:
+    model = _tiny_model(width=2)
+    support = tuple(model.feasibility.enumerate_support())
+    l2_matrix = _tiny_l2_matrix(support, model.two_q)
+    amplitudes = np.asarray(
+        [1.0 + 0.2j, -0.7 + 0.9j, 0.4 - 0.3j],
+        dtype=np.complex128,
+    )
+    probabilities = np.abs(amplitudes) ** 2
+    probabilities /= np.sum(probabilities)
+    l2_local = l2_matrix @ amplitudes / amplitudes
+    l4_local = l2_matrix @ (l2_matrix @ amplitudes) / amplitudes
+    mean_l2 = float(np.sum(probabilities * l2_local).real)
+    physical_variance = float(np.sum(probabilities * l4_local).real - mean_l2**2)
+    rejected_surrogate = float(
+        np.sum(probabilities * (l2_local.real - mean_l2) ** 2)
+    )
+
+    assert physical_variance >= -1.0e-12
+    assert physical_variance != pytest.approx(rejected_surrogate, abs=1.0e-8)
+    assert train.physical_l2_variance(
+        l2_local,
+        l4_local,
+        weights=probabilities,
+    ) == pytest.approx(physical_variance, abs=1.0e-12)
+
+
+def test_sparse_local_l4_matches_exact_two_hop_row_with_zero_intermediate() -> None:
+    model = _tiny_model(width=2)
+    support = tuple(model.feasibility.enumerate_support())
+    l2_matrix = _tiny_l2_matrix(support, model.two_q)
+    source_index = next(
+        column
+        for column in range(len(support))
+        if np.any(
+            (l2_matrix[:, column] != 0.0)
+            & (np.arange(len(support)) != column)
+        )
+    )
+    intermediate_index = next(
+        row
+        for row in range(len(support))
+        if row != source_index and l2_matrix[row, source_index] != 0.0
+    )
+    amplitudes = np.asarray(
+        [1.0 + 0.25j, -0.6 + 0.8j, 0.35 - 0.4j],
+        dtype=np.complex128,
+    )
+    amplitudes[intermediate_index] = 0.0
+    assert amplitudes[source_index] != 0.0
+    expected = (l2_matrix @ (l2_matrix @ amplitudes))[source_index] / amplitudes[
+        source_index
+    ]
+
+    observed = train.local_l4(
+        support[source_index],
+        two_q=model.two_q,
+        target_m=0.0,
+        logpsi=_exact_logpsi(support, amplitudes),
+    )
+
+    assert observed == pytest.approx(expected, abs=1.0e-12)
+
+
+def test_exact_reduced_objective_gradient_matches_central_difference() -> None:
+    model = _tiny_model(seed=848, width=2)
+    support = tuple(model.feasibility.enumerate_support())
+    l2_matrix = _tiny_l2_matrix(support, model.two_q)
+    hamiltonian = np.diag(np.linspace(-0.4, 0.7, len(support))).astype(
+        np.complex128
+    )
+    ground = _exact_sector_arrays(
+        model,
+        "ground",
+        support,
+        hamiltonian,
+        l2_matrix,
+    )
+    excited = _exact_sector_arrays(
+        model,
+        "excited",
+        support,
+        hamiltonian,
+        l2_matrix,
+    )
+
+    objective, analytic_gradient, metrics = train.reduced_objective_and_gradient(
+        ground_energy=ground[0],
+        ground_l2=ground[1],
+        ground_l4=ground[2],
+        ground_scores=ground[3],
+        excited_energy=excited[0],
+        excited_l2=excited[1],
+        excited_l4=excited[2],
+        excited_scores=excited[3],
+        ground_weights=ground[4],
+        excited_weights=excited[4],
+    )
+    baseline = model.flat_parameters()
+    step = 2.0e-6
+    central = np.empty_like(baseline)
+    try:
+        for index in range(baseline.size):
+            plus = baseline.copy()
+            minus = baseline.copy()
+            plus[index] += step
+            minus[index] -= step
+            model.set_flat_parameters(plus)
+            upper = _exact_reduced_objective(
+                model,
+                support,
+                hamiltonian,
+                l2_matrix,
+            )
+            model.set_flat_parameters(minus)
+            lower = _exact_reduced_objective(
+                model,
+                support,
+                hamiltonian,
+                l2_matrix,
+            )
+            central[index] = (upper - lower) / (2.0 * step)
+    finally:
+        model.set_flat_parameters(baseline)
+
+    assert objective == pytest.approx(
+        _exact_reduced_objective(model, support, hamiltonian, l2_matrix),
+        abs=1.0e-12,
+    )
+    assert metrics["variance_l2_excited_m0"] == pytest.approx(
+        metrics["mean_l4_excited_m0"] - metrics["mean_l2_excited_m0"] ** 2,
+        abs=1.0e-12,
+    )
+    np.testing.assert_allclose(
+        analytic_gradient,
+        central,
+        rtol=2.0e-5,
+        atol=2.0e-6,
+    )
 
 
 def test_global_gradient_clipping_uses_the_l2_norm() -> None:
@@ -571,6 +793,31 @@ def test_each_update_draws_the_exact_ground_and_excited_m0_budget(
     assert [record["ground_m0_samples"] for record in records] == [5, 5, 5]
     assert [record["excited_m0_samples"] for record in records] == [5, 5, 5]
     assert [record["total_samples"] for record in records] == [10, 10, 10]
+
+
+def test_reduced_training_rejects_nonzero_model_target_m2_before_writing(
+    tmp_path: Path,
+) -> None:
+    model = AutoregressiveNQS.initialize(
+        n_electrons=2,
+        two_q=5,
+        target_m2=2,
+        width=2,
+        layers=2,
+        seed=848,
+        max_trainable_parameters=262_144,
+    )
+    run_dir = tmp_path / "wrong-sector"
+
+    with pytest.raises(ValueError, match="target_m2 must be 0"):
+        run_reduced_training(
+            model=model,
+            operator=_zero_pair_operator(model.two_q),
+            config=_tiny_training_config(updates=1),
+            run_dir=run_dir,
+        )
+
+    assert not run_dir.exists()
 
 
 def test_seed_848_smoke_writes_updates_1_through_16_and_selects_only_final(
