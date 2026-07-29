@@ -81,8 +81,9 @@ The public capsule contains:
 - [`fixtures/regenerate.py`](fixtures/regenerate.py): deterministic
   regeneration of every synthetic artifact and digest.
 - [`calibration/`](calibration/): the public input manifest, five blind
-  generator outputs, and deterministic report for the registered
-  QuantumBFS #124–#128 calibration. Sealed issue statements are excluded.
+  generator outputs, weak controls, and deterministic report for the
+  registered QuantumBFS #124–#128 calibration. Sealed issue statements are
+  excluded.
 
 The schemas are useful for editors and other agents. `gate.py` is the
 executable semantic authority: JSON Schema alone does not compare two
@@ -266,7 +267,7 @@ records so the growth curve is auditable.
 | Provenance and reproducible evidence identities | **Implemented at contract/artifact level; trusted execution identity is not implemented** |
 | Accumulating heuristics Library | **Schema, append protocol, validator, and seed records implemented** |
 | Literature-mining problem generator | **Implemented in the AGPL-3.0-only TN-Agent control plane; this capsule publishes its registered calibration evidence, not the runtime** |
-| Calibration against challenges #124–#128 | **Passed the registered blind calibration: gap 1.0, executable gate 1.0, strong/weak separation 0.7877, hidden match 0.8** |
+| Calibration against challenges #124–#128 | **Passed the registered self-report/grouping metrics: gap 1.0, executable gate 1.0, strong/weak separation 0.7877, and 4 of 5 literature groups recovered for 0.8** |
 | Five new human-accepted challenge problems (Tier 1) | **Not claimed** |
 | Five fresh solved gates (Tier 2) | **Not claimed** |
 | Refereed publication (Tier 3) | **Not claimed** |
@@ -275,6 +276,14 @@ records so the growth curve is auditable.
 contract, fixture evaluator, and a passed registered calibration that can
 support a future independently executed candidate; it does not claim a fresh
 solve, an accepted new problem, or a publication result.
+
+The calibration's meaningful-gap, executable-gate, attack-pass, novelty, and
+publishability inputs are self-reported candidate fields; the deterministic
+evaluator checks their schema and arithmetic rather than independently
+adjudicating the summaries. The public artifacts reproduce all file/semantic
+digests and scores, but they do not independently prove the operator-recorded
+blind chronology or generator isolation because no external signed or
+timestamped blind-run receipt is included.
 
 The next scientifically meaningful milestone is an approved live campaign:
 freeze each generated problem and gate before solving, publish every

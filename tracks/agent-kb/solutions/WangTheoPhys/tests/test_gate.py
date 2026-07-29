@@ -1622,6 +1622,7 @@ assert parameters["hz"] == unit_request.field_h
     def test_public_calibration_evidence_is_digest_bound(self) -> None:
         calibration_root = SOLUTION_ROOT / "calibration"
         candidate_path = calibration_root / "blind-candidates.json"
+        controls_path = calibration_root / "weak-controls.json"
         self.assertEqual(
             hashlib.sha256(candidate_path.read_bytes()).hexdigest(),
             "101bf35d22607b08ad0b160b893392e021bf7f8ac9d54aaefce91007f3b37be8",
@@ -1637,6 +1638,11 @@ assert parameters["hz"] == unit_request.field_h
         manifest = json.loads(
             (calibration_root / "manifest.json").read_text(encoding="utf-8")
         )
+        controls = json.loads(controls_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            "sha256:" + hashlib.sha256(controls_path.read_bytes()).hexdigest(),
+            manifest["weak_controls_digest"],
+        )
         self.assertEqual(
             report["candidate_digests"],
             [gate.canonical_digest(candidate) for candidate in candidates],
@@ -1651,7 +1657,112 @@ assert parameters["hz"] == unit_request.field_h
 
         self.assertTrue(report["passed"])
         self.assertEqual(report["manifest_digest"], manifest["digest"])
-        self.assertEqual(report["scores"]["hidden_target_match"], 0.8)
+        self.assertEqual(
+            report["sealed_target_digests"],
+            [target["statement_digest"] for target in manifest["targets"]],
+        )
+
+        candidate_count = len(candidates)
+        self.assertEqual(
+            report["scores"]["meaningful_gap_recovery"],
+            sum(bool(candidate["meaningful_gap"]) for candidate in candidates)
+            / candidate_count,
+        )
+        self.assertEqual(
+            report["scores"]["executable_gate"],
+            sum(
+                bool(candidate["gate_executable"])
+                and bool(candidate["gate_attack_passed"])
+                for candidate in candidates
+            )
+            / candidate_count,
+        )
+        candidate_strength = (
+            sum(
+                (
+                    float(candidate["novelty_score"])
+                    + float(candidate["publishability_score"])
+                )
+                / 2
+                for candidate in candidates
+            )
+            / candidate_count
+        )
+        control_strength = sum(
+            (float(control["novelty_score"]) + float(control["publishability_score"]))
+            / 2
+            for control in controls
+        ) / len(controls)
+        self.assertEqual(
+            report["scores"]["strong_weak_separation"],
+            candidate_strength - control_strength,
+        )
+
+        available = set(range(candidate_count))
+        matched = 0
+        minimum = float(manifest["thresholds"]["minimum_match_similarity"])
+        for target in sorted(manifest["targets"], key=lambda item: item["target_id"]):
+            target_literature = set(target["literature_ids"])
+            ranked = sorted(
+                (
+                    (
+                        len(
+                            target_literature.intersection(
+                                candidates[index]["literature_ids"]
+                            )
+                        )
+                        / len(
+                            target_literature.union(candidates[index]["literature_ids"])
+                        ),
+                        index,
+                    )
+                    for index in available
+                ),
+                key=lambda item: (-item[0], candidates[item[1]]["candidate_id"]),
+            )
+            similarity, candidate_index = ranked[0]
+            if similarity >= minimum:
+                available.remove(candidate_index)
+                matched += 1
+        self.assertEqual(matched, 4)
+        self.assertEqual(
+            report["scores"]["hidden_target_match"],
+            matched / len(manifest["targets"]),
+        )
+
+    def test_public_calibration_excludes_sealed_payloads_and_states_limits(
+        self,
+    ) -> None:
+        calibration_root = SOLUTION_ROOT / "calibration"
+        self.assertEqual(
+            {
+                path.relative_to(calibration_root).as_posix()
+                for path in calibration_root.rglob("*")
+                if path.is_file()
+            },
+            {
+                ".gitignore",
+                "README.md",
+                "blind-candidates.json",
+                "manifest.json",
+                "report.json",
+                "weak-controls.json",
+            },
+        )
+        ignore_rules = (
+            (calibration_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+        )
+        self.assertIn("sealed/*", ignore_rules)
+        self.assertIn("!sealed/README.md", ignore_rules)
+        documents = "\n".join(
+            (
+                (calibration_root / "README.md").read_text(encoding="utf-8"),
+                (SOLUTION_ROOT / "README.md").read_text(encoding="utf-8"),
+            )
+        )
+        self.assertIn("4 of 5", documents)
+        self.assertIn("self-reported", documents)
+        self.assertIn("do not independently prove", documents)
 
     def test_fixture_provenance_digests_bind_repository_sources(self) -> None:
         experiment = self.load("valid-finite/experiment.json")
