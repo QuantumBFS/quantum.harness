@@ -54,6 +54,7 @@
 **Files:**
 - Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_purification.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_mps_runner.jl`
+- Create: `tracks/mps/solutions/frustration-free/julia/test/validated_chain_fixture.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl`
 
@@ -104,6 +105,12 @@ spec = qn_dual_purification(chain, validated)
     mapping_sha256 = repeat("a", 64),
 )
 ```
+
+`validated_chain_fixture.jl` owns that test seam. It creates `bath.json` and
+`chain-mapping.json` in `mktempdir` by invoking the locked Python project,
+parses both with runner `strict_json_read`, calls the production validator, and
+returns only its `ValidatedChainMappingCapability`. It contains no capability
+constructor call and no digest/array shortcut.
 
 For every QN site assert `hasqns(site)`, exact `Nf`/`Sz` charges for
 `Emp,Up,Dn,UpDn`, and absence of `NfParity`.
@@ -181,6 +188,7 @@ Run the Step 3 command. Expected: all purification tests pass.
 git add \
   tracks/mps/solutions/frustration-free/julia/finite_bath_purification.jl \
   tracks/mps/solutions/frustration-free/julia/finite_bath_mps_runner.jl \
+  tracks/mps/solutions/frustration-free/julia/test/validated_chain_fixture.jl \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl
 git commit -m "Add QN dual identity purification"
@@ -476,7 +484,11 @@ Expected: unknown identity/active-sector fields.
 Set checkpoint schema to `2` and writer version to `2.0.0`. Update constructor,
 dictionary conversion, exact keys, typed resume serialization, write-time
 validation, load-time validation, and HDF5 MPS flux checks. Validate both
-active `psi` and stored `thermal_psi`.
+active `psi` and stored `thermal_psi`. Change
+`write_checkpoint_generation(root, identity, cursor,
+psi::Union{Nothing,MPS}, resume_state)` so `nothing` is accepted only for a
+zero terminal branch; `state.h5` then omits `psi` but must contain
+`thermal_psi`.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -1142,10 +1154,13 @@ exact mode/gauge/sector/mapping identity after reload; and telemetry proving
 the resumed generation equals the forced generation. Any failure blocks
 further cluster sizes.
 
-- [ ] **Step 4: Record, but do not allowlist, the benchmark**
+- [ ] **Step 4: Record cluster telemetry without fabricating a pair**
 
-Create and validate the `qnBenchmark` record with
-`status="small_bath_validation_only"`. Confirm:
+Retain the validated QN cell and forced/resumed generation telemetry as a raw
+cluster pilot sample. Do not publish a `qnPairedBenchmark` with
+`execution_target="cluster"` unless a separately executed non-QN cluster cell
+has the exact matched identity and work required by Task 10. The local paired
+benchmark remains the QN-phase comparison artifact. Confirm:
 
 ```text
 scalable_chain_qn_benchmark_validated == false

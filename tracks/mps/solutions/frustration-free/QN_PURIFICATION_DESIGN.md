@@ -600,6 +600,11 @@ For a zero-amplitude terminal branch, `active_sector` contains the expected
 operator sector, `active_state_present=false`, and `branch_status="zero"`.
 The HDF5 generation contains no active branch MPS. Loader validation requires
 that exact combination and never calls `flux` on a nonexistent state.
+Accordingly,
+`write_checkpoint_generation(root, identity, cursor,
+psi::Union{Nothing,MPS}, resume_state)` accepts `nothing` only for this
+terminal combination. `state.h5` still stores `thermal_psi`, so the generation
+remains resumable and hash-bound.
 
 Runner output solver settings, diagnostics, and provenance add:
 
