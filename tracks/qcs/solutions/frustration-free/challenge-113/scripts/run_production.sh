@@ -8,6 +8,10 @@ test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_ARCHIVE_SHA256:?set the deployed archive SHA256}"
 : "${CHALLENGE113_DEPLOYMENT_METADATA:?set external deployment metadata path}"
 : "${CHALLENGE113_EVIDENCE_REVISION:?set the measured evidence revision}"
+: "${CHALLENGE113_SIF_SHA256:?set expected Apptainer SIF SHA256}"
+: "${CHALLENGE113_PYPROJECT_SHA256:?set expected pyproject.toml SHA256}"
+: "${CHALLENGE113_UV_LOCK_SHA256:?set expected uv.lock SHA256}"
+: "${CHALLENGE113_CLUSTER_PROFILE:?set approved cluster profile}"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
@@ -38,7 +42,11 @@ uv run python scripts/verify_deployment.py \
   --deployment-metadata "${CHALLENGE113_DEPLOYMENT_METADATA}" \
   --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
-  --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
+  --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}" \
+  --expected-sif-sha256 "${CHALLENGE113_SIF_SHA256}" \
+  --expected-pyproject-sha256 "${CHALLENGE113_PYPROJECT_SHA256}" \
+  --expected-uv-lock-sha256 "${CHALLENGE113_UV_LOCK_SHA256}" \
+  --expected-cluster-profile "${CHALLENGE113_CLUSTER_PROFILE}"
 uv run python -c 'import jax; expected = __import__("os").environ["JAX_PLATFORMS"]; actual = jax.devices()[0].platform; assert jax.config.x64_enabled; assert actual == expected, (actual, expected)'
 if [[ "${CHALLENGE113_CHECK_ONLY:-0}" == "1" ]]; then
   printf '%s\n' '{"production_gate":"ready"}'

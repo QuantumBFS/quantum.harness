@@ -343,6 +343,10 @@ def validate_deployment(
     expected_revision: str,
     expected_archive_sha256: str,
     expected_evidence_revision: str,
+    expected_sif_sha256: str,
+    expected_pyproject_sha256: str,
+    expected_uv_lock_sha256: str,
+    expected_cluster_profile: str,
 ) -> None:
     directory = Path(root)
     archive = Path(archive_path)
@@ -359,16 +363,43 @@ def validate_deployment(
     if set(deployment) != {
         "archive_name",
         "archive_sha256",
+        "cluster_profile",
+        "critical_packages",
         "evidence_index_sha256",
+        "pyproject_sha256",
+        "python_version",
         "report_sha256",
         "revision",
         "schema_version",
+        "sif_name",
+        "sif_sha256",
+        "uv_lock_sha256",
+        "uv_version",
     } or deployment.get("schema_version") != 1:
         raise ValueError("deployment metadata is noncanonical")
     if deployment.get("revision") != expected_revision:
         raise ValueError("deployment revision is stale")
     if deployment.get("archive_sha256") != expected_archive_sha256:
         raise ValueError("deployment archive is stale")
+    if (
+        deployment.get("sif_sha256") != expected_sif_sha256
+        or deployment.get("pyproject_sha256") != expected_pyproject_sha256
+        or deployment.get("uv_lock_sha256") != expected_uv_lock_sha256
+        or deployment.get("cluster_profile") != expected_cluster_profile
+    ):
+        raise ValueError("deployment runtime binding is stale")
+    expected_packages = {
+        "jax": "0.11.0",
+        "jaxlib": "0.11.0",
+        "numpy": "2.5.1",
+        "scipy": "1.18.0",
+    }
+    if (
+        deployment.get("python_version") != "3.12.12"
+        or deployment.get("uv_version") != "0.9.9"
+        or deployment.get("critical_packages") != expected_packages
+    ):
+        raise ValueError("deployment runtime versions are stale")
     archive_name = deployment.get("archive_name")
     if (
         not isinstance(archive_name, str)
@@ -380,6 +411,15 @@ def validate_deployment(
         raise ValueError("deployment archive name is invalid")
     if _sha256(archive.read_bytes()) != expected_archive_sha256:
         raise ValueError("deployment archive bytes are stale")
+    if deployment.get("sif_name") != "uv-0.9.9-python3.12-bookworm-slim.sif":
+        raise ValueError("deployment SIF identity is stale")
+    if (
+        _sha256((directory / "pyproject.toml").read_bytes())
+        != expected_pyproject_sha256
+        or _sha256((directory / "uv.lock").read_bytes())
+        != expected_uv_lock_sha256
+    ):
+        raise ValueError("deployment lock inputs are stale")
     evidence_directory = directory / "evidence" / "task10a"
     hashes = validate_evidence_directory(evidence_directory)
     index, index_data = _read_canonical(evidence_directory / "index.json")

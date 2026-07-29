@@ -79,3 +79,19 @@ or Slurm submission was made.
   symlinks and in-tree metadata, and hash that exact regular file's bindings.
   The documented check-only workflow supplies every mandatory input, reaches
   `{"production_gate":"ready"}`, and leaves a Git checkout clean.
+
+## Task 10C frozen-runtime integration
+
+- The LASG02 compute-verified SIF is pinned by filename and SHA256; metadata
+  also binds Python 3.12.12, uv 0.9.9, JAX/JAXLIB 0.11.0, NumPy 2.5.1,
+  SciPy 1.18.0, pyproject, lock, archive, evidence, report, source revision,
+  and the separate `lasg02-cpu-v1` scheduler profile.
+- `prepare_apptainer_runtime.sh` performs the sole frozen sync in
+  `apptainer exec --no-home`, runs the deterministic runtime gate, and writes
+  a hash-bound readiness marker.
+- Pilot and production scripts are LASG02-only, offline/no-sync, rehash the
+  actual SIF/archive/project/lock, revalidate metadata and the runtime marker,
+  and force JAX CPU x64 before physics.
+- No representative pilot or production array was submitted. The next action
+  is to stage the final committed source beside the verified SIF, prepare the
+  runtime once, then submit only the representative pilot.

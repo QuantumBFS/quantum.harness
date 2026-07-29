@@ -20,51 +20,37 @@ only to `results/development`. Override the device only by setting
 
 ## Production safety gate
 
-Local production requires a clean checkout, an exact revision match, an
-explicit JAX platform, acknowledgement, an exact archive, and external
-deployment metadata. The following check-only workflow is executable from this
-challenge directory and reaches the final gate without writing into the source
-tree:
+The approved runtime is the immutable LASG02 SIF
+`uv-0.9.9-python3.12-bookworm-slim.sif`, SHA256
+`2405a769d520e6d0f680c0f1dff0d9f92083724f1ffd85ea0c26b5e36defa323`.
+It provides Python 3.12.12, uv 0.9.9, and glibc 2.36. The unchanged lock
+resolves JAX/JAXLIB 0.11.0, NumPy 2.5.1, and SciPy 1.18.0.
+
+Create a revision archive and external metadata from a clean challenge checkout:
 
 ```bash
-export CHALLENGE113_ACK_PRODUCTION=1
 export CHALLENGE113_EXPECTED_REVISION="$(git rev-parse HEAD)"
-export CHALLENGE113_EVIDENCE_REVISION=dd16192953c130d738716238525760de73343e09
-export CHALLENGE113_JAX_PLATFORM=cpu
-export CHALLENGE113_CHECK_ONLY=1
 RUNTIME_DIR="$(mktemp -d)"
 export CHALLENGE113_ARCHIVE_PATH="${RUNTIME_DIR}/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
 export CHALLENGE113_DEPLOYMENT_METADATA="${RUNTIME_DIR}/deployment.json"
-export CHALLENGE113_PRODUCTION_OUTPUT="${RUNTIME_DIR}/production"
 git archive --format=tar.gz -o "${CHALLENGE113_ARCHIVE_PATH}" \
   "${CHALLENGE113_EXPECTED_REVISION}" \
   tracks/qcs/solutions/frustration-free/challenge-113
-export CHALLENGE113_ARCHIVE_SHA256="$(
-  sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}'
-)"
-export CHALLENGE113_EVIDENCE_INDEX_SHA256="$(
-  sha256sum evidence/task10a/index.json | awk '{print $1}'
-)"
-export CHALLENGE113_REPORT_SHA256="$(
-  sha256sum REPORT.md | awk '{print $1}'
-)"
-uv run python - <<'PY'
-import json
-import os
-from pathlib import Path
-
-payload = {
-    "archive_name": Path(os.environ["CHALLENGE113_ARCHIVE_PATH"]).name,
-    "archive_sha256": os.environ["CHALLENGE113_ARCHIVE_SHA256"],
-    "evidence_index_sha256": os.environ["CHALLENGE113_EVIDENCE_INDEX_SHA256"],
-    "report_sha256": os.environ["CHALLENGE113_REPORT_SHA256"],
-    "revision": os.environ["CHALLENGE113_EXPECTED_REVISION"],
-    "schema_version": 1,
-}
-Path(os.environ["CHALLENGE113_DEPLOYMENT_METADATA"]).write_text(
-    json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n"
-)
-PY
+uv run python scripts/write_deployment_metadata.py \
+  --root . \
+  --archive "${CHALLENGE113_ARCHIVE_PATH}" \
+  --revision "${CHALLENGE113_EXPECTED_REVISION}" \
+  --output "${CHALLENGE113_DEPLOYMENT_METADATA}"
+export CHALLENGE113_ACK_PRODUCTION=1
+export CHALLENGE113_ARCHIVE_SHA256="$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')"
+export CHALLENGE113_CHECK_ONLY=1
+export CHALLENGE113_CLUSTER_PROFILE=lasg02-cpu-v1
+export CHALLENGE113_EVIDENCE_REVISION=dd16192953c130d738716238525760de73343e09
+export CHALLENGE113_JAX_PLATFORM=cpu
+export CHALLENGE113_PRODUCTION_OUTPUT="${RUNTIME_DIR}/production"
+export CHALLENGE113_PYPROJECT_SHA256=a51151c7947bc44ded698c9081df99b1b84a60ea51fcb041553c7cbfd60e4ecc
+export CHALLENGE113_SIF_SHA256=2405a769d520e6d0f680c0f1dff0d9f92083724f1ffd85ea0c26b5e36defa323
+export CHALLENGE113_UV_LOCK_SHA256=1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fcae6a277334e1614a35dc
 bash scripts/run_production.sh
 ```
 
@@ -73,7 +59,7 @@ accepts `--shard-index I --shard-count N`; each shard binds the complete plan
 but runs only positions whose canonical zero-based index is congruent to `I`
 modulo `N`. Task 8 claims and atomic publication make retries restartable.
 
-## Cluster gate
+## LASG02 Apptainer gate
 
 `scripts/calibrate_pilot.py` measures the representative two-qubit, 80-parameter
 setup with a bounded 20–100-query sample. The current canonical local evidence
@@ -89,34 +75,48 @@ uv run python -m pytest tests/test_evidence.py -q
 ```
 
 Compact, tracked summaries and hashes are under `evidence/task10a/`; bulky raw
-results remain ignored. `scripts/slurm_pilot.sh` runs one full budget-2,000
-representative trial. Only after that artifact validates should
-`scripts/slurm_production_array.sh` be submitted with an explicitly measured
-array concurrency and resource class:
+results remain ignored. Stage the current source into a new revision directory;
+the old `ch113-runtime-d15818c` source tree must not be reused. The already
+verified SIF may be referenced only by its exact path and hash:
 
 ```bash
-sbatch --array=0-9499%CONCURRENCY \
-  --account=ACCOUNT --qos=QOS --partition=PARTITION \
-  --export=ALL,CHALLENGE113_ACK_PRODUCTION=1,CHALLENGE113_DEPLOYMENT=DEPLOYMENT,CHALLENGE113_DEPLOYMENT_METADATA=DEPLOYMENT_METADATA,CHALLENGE113_RUN_ROOT=RUN_ROOT,CHALLENGE113_EXPECTED_REVISION=REVISION,CHALLENGE113_ARCHIVE_PATH=ARCHIVE_PATH,CHALLENGE113_ARCHIVE_SHA256=ARCHIVE_SHA256,CHALLENGE113_EVIDENCE_REVISION=EVIDENCE_REVISION,CHALLENGE113_UV=UV \
-  scripts/slurm_production_array.sh
+scp "${CHALLENGE113_ARCHIVE_PATH}" "${CHALLENGE113_DEPLOYMENT_METADATA}" \
+  lasg02-student090:~/.scratch/
+ssh lasg02-student090
+export CHALLENGE113_EXPECTED_REVISION=REVISION_FROM_LOCAL_GIT
+export CHALLENGE113_ARCHIVE_PATH="$HOME/.scratch/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
+export CHALLENGE113_DEPLOYMENT_METADATA="$HOME/.scratch/deployment.json"
+export CHALLENGE113_DEPLOYMENT="$HOME/.scratch/ch113-runtime-${CHALLENGE113_EXPECTED_REVISION:0:7}/tracks/qcs/solutions/frustration-free/challenge-113"
+mkdir -p "$HOME/.scratch/ch113-runtime-${CHALLENGE113_EXPECTED_REVISION:0:7}"
+tar -xzf "${CHALLENGE113_ARCHIVE_PATH}" \
+  -C "$HOME/.scratch/ch113-runtime-${CHALLENGE113_EXPECTED_REVISION:0:7}"
+printf '%s\n' "${CHALLENGE113_EXPECTED_REVISION}" \
+  > "${CHALLENGE113_DEPLOYMENT}/.source-revision"
+export CHALLENGE113_SIF_PATH="$HOME/.scratch/ch113-runtime-d15818c/uv-0.9.9-python3.12-bookworm-slim.sif"
+export CHALLENGE113_SIF_SHA256=2405a769d520e6d0f680c0f1dff0d9f92083724f1ffd85ea0c26b5e36defa323
+export CHALLENGE113_ARCHIVE_SHA256="$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')"
+export CHALLENGE113_PYPROJECT_SHA256=a51151c7947bc44ded698c9081df99b1b84a60ea51fcb041553c7cbfd60e4ecc
+export CHALLENGE113_UV_LOCK_SHA256=1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fcae6a277334e1614a35dc
+export CHALLENGE113_EVIDENCE_REVISION=dd16192953c130d738716238525760de73343e09
+export CHALLENGE113_CLUSTER_PROFILE=lasg02-cpu-v1
+bash "${CHALLENGE113_DEPLOYMENT}/scripts/prepare_apptainer_runtime.sh"
 ```
 
-Deploy only `git archive` output from a committed revision, then add a
-runtime-only canonical `.deployment.json` containing revision, archive,
-evidence-index, and report SHA256 bindings. Keep the actual archive available
-to every production entry point through `CHALLENGE113_ARCHIVE_PATH`. This local
-verification supplies every required value:
+Preparation is the only step that runs `uv sync --frozen`. Pilot and array jobs
+are offline/no-sync, use `apptainer exec --no-home`, bind source explicitly,
+and fail unless `.venv` plus the hash-bound pre-submit marker are current.
+The separate scheduler profile is `scripts/lasg02_profile.env`:
+account `chenkun2025`, QOS `user_student090`, partition `ihicnormal`.
 
 ```bash
-uv run python scripts/verify_deployment.py \
-  --root "${CHALLENGE113_DEPLOYMENT}" \
-  --archive "${CHALLENGE113_ARCHIVE_PATH}" \
-  --deployment-metadata "${CHALLENGE113_DEPLOYMENT_METADATA}" \
-  --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
-  --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
-  --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
+# Future Task 10C pilot only; do not submit the array before this validates.
+export CHALLENGE113_RUN_ROOT="$HOME/.scratch/ch113-runs/${CHALLENGE113_EXPECTED_REVISION:0:7}/pilot-001"
+sbatch "${CHALLENGE113_DEPLOYMENT}/scripts/slurm_pilot.sh"
+
+# Production remains withheld pending pilot timing/resource review:
+# CHALLENGE113_ACK_PRODUCTION=1 sbatch --array=0-9499%MEASURED_CONCURRENCY \
+#   "${CHALLENGE113_DEPLOYMENT}/scripts/slurm_production_array.sh"
 ```
 
-Use a revision/run-ID output directory shared by all array elements. Production
-entry points reject stale evidence/report/archive metadata. Deployment and
-output paths are runtime inputs and are intentionally not committed.
+No mutable image tag, source directory, package resolution, or platform
+fallback is accepted by these gates.

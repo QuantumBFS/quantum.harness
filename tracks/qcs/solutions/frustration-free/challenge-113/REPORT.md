@@ -38,15 +38,25 @@ selected; those require Task 10C resource pilots.
 Historical preliminary measurements are superseded by this rerun and are kept
 only in Git history.
 
-## Remaining Task 10C blocker
+## Task 10C runtime gate
 
-Both authorized clusters expose glibc 2.17, while frozen `jaxlib==0.11.0`
-requires `manylinux_2_27_x86_64`. Frozen sync therefore fails closed before
-Slurm submission. No older JAX, source build, container, or platform fallback
-has been substituted. The final candidate archive is local-only until an exact
-runtime-compatible cluster environment is approved. Deployment metadata is
-passed as an external regular file, so validating a clean checkout does not
-write runtime state into the source tree.
+The host glibc 2.17 incompatibility is resolved by the compute-verified LASG02
+Apptainer image `uv-0.9.9-python3.12-bookworm-slim.sif` at SHA256
+`2405a769d520e6d0f680c0f1dff0d9f92083724f1ffd85ea0c26b5e36defa323`.
+The image provides Python 3.12.12, uv 0.9.9, and glibc 2.36; the unchanged
+frozen lock installs JAX/JAXLIB 0.11.0 on CPU with x64 enabled. A LASG02
+compute smoke has passed, but no representative pilot for the current source
+candidate has run.
+
+Runtime preparation now verifies source/archive/evidence/report/SIF/project/lock
+hashes, exact package versions, finite propagation, and a deterministic
+objective before writing a hash-bound readiness marker. Slurm jobs use
+`apptainer exec --no-home`, never sync packages, and fail closed on an absent
+or stale marker. Deployment metadata remains external to the source tree.
+
+The remaining Task 10C gate is operational measurement: stage the final source,
+run one representative pilot on LASG02, validate its artifact, measure the
+resource class, and approve concurrency/cost before any production array.
 
 ## Interpretation and production claims
 

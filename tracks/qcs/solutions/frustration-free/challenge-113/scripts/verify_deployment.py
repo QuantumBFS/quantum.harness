@@ -18,6 +18,10 @@ def main() -> None:
     parser.add_argument("--expected-revision", required=True)
     parser.add_argument("--expected-archive-sha256", required=True)
     parser.add_argument("--expected-evidence-revision", required=True)
+    parser.add_argument("--expected-sif-sha256", required=True)
+    parser.add_argument("--expected-pyproject-sha256", required=True)
+    parser.add_argument("--expected-uv-lock-sha256", required=True)
+    parser.add_argument("--expected-cluster-profile", required=True)
     args = parser.parse_args()
     validate_deployment(
         args.root,
@@ -26,6 +30,10 @@ def main() -> None:
         expected_revision=args.expected_revision,
         expected_archive_sha256=args.expected_archive_sha256,
         expected_evidence_revision=args.expected_evidence_revision,
+        expected_sif_sha256=args.expected_sif_sha256,
+        expected_pyproject_sha256=args.expected_pyproject_sha256,
+        expected_uv_lock_sha256=args.expected_uv_lock_sha256,
+        expected_cluster_profile=args.expected_cluster_profile,
     )
     print('{"deployment_valid":true}', flush=True)
 
