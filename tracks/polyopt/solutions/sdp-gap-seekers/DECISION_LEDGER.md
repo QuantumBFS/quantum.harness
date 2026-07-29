@@ -1101,3 +1101,32 @@ zero dual violation. This validates scalar Farkas replay. Job `118173766` adds
   separation 0.5981688276525166, and zero recomputed dual violation. This
   authorizes the portable floating Farkas replay for all cone representations
   present in the intended Shastry--Sutherland task.
+
+## 2026-07-29 — authorize the single-pass native L=2 decision solve
+
+The two protected `L=2,d=2,g=4/5,gamma=2` baselines are not being repeated:
+SCNet job `118171391` and xH5 job `23011251` remain on their immutable older
+commits and, at 2026-07-29T16:14Z, were still materializing the JuMP model
+after about 1:39 and 1:25 respectively. Neither had entered `optimize!`.
+
+Commit `e50da6c` integrates the independently developed single-pass native
+Mosek primal, which streams exact coefficients directly into affine PSD cone
+rows and does not retain the all-entry inventory or perform JuMP's second
+coefficient pass. Post-merge Farkas replay job `118174144` passed the existing
+36-test scalar/PSD audit. Native L=1 truth job `118174162` reproduced all
+7,231 moments and the required coefficient hash but stopped on an incorrect
+test expectation of 26 cones; the source reported the correct 23 L=1 cones.
+After correcting only that fixture, job `118174309` completed in 1:12 at
+1,468,728 KiB MaxRSS and passed: 7,231 moments, 23 cones, 75,967 packed affine
+entries, 233,206 scalar terms, and exact hash
+`2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+
+Commit `6aa430b` makes the scientific L=2 native run fail closed on the known
+coefficient-map SHA-256
+`935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`
+before optimization and records streamed moment/count provenance. This is a
+changed formulation with a separately verified construction route, not an
+identical rerun signature. SCNet job `118174488` started at
+2026-07-29T16:13:27Z on 32 CPUs / 114000 MiB. Next action: monitor through the
+hash gate and first Mosek iteration, then audit either its primal residuals or
+its independently replayed Farkas ray before drawing a scientific conclusion.

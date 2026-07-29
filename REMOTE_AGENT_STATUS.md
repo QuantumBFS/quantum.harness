@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T15:56:14Z
+Updated: 2026-07-29T16:14:34Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -75,5 +75,22 @@ Updated: 2026-07-29T15:56:14Z
   not a bar variable. Corrected r16, job `118173855`, passed 36/36 tests: its
   three-component PSD dual replayed with dual objective 0.7526914264,
   normalized separation 0.5981688277, and zero dual violation.
+- Integrated the single-pass native Mosek primal at `e50da6c`. Post-merge ray
+  replay job `118174144` passed 36/36 tests. Corrected native L=1 truth job
+  `118174309` passed in 1:12 with 1,468,728 KiB MaxRSS, reproducing 7,231
+  moments, 23 PSD cones, 75,967 packed entries, 233,206 scalar coefficient
+  terms, and required hash
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+- Target native commit `6aa430b` adds a fail-closed check for the exact L=2
+  coefficient-map hash
+  `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  SCNet job `118174488` started at 2026-07-29T16:13:27Z on 32 CPUs / 114000
+  MiB. It is the current decision solve: one streamed coefficient pass into
+  native Mosek, followed by residual-checked primal export or explicit Farkas
+  ray preservation/replay.
+- At 2026-07-29T16:14Z protected SCNet baseline `118171391` was still running
+  after 1:39 with 8,377,328 KiB MaxRSS, and protected xH5 baseline `23011251`
+  after 1:25 with 10,432,348 KiB MaxRSS. Both logs still ended at JuMP model
+  materialization; neither was cancelled, modified, or interpreted.
 
 No user input or new credential is currently required.

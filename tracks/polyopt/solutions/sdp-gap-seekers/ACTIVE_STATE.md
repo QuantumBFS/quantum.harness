@@ -629,3 +629,16 @@ Updated: 2026-07-29 UTC.
   objective 0.7526914264023223, normalized separation
   0.5981688276525166, and zero recomputed dual violation. The floating ray
   preservation/replay path is now authorized for the scientific model.
+- The native direct-Mosek route merged at `e50da6c` passed the post-merge
+  scalar/PSD Farkas replay in job `118174144` (36/36). Its corrected L=1
+  construction truth gate, job `118174309`, passed in 1:12 with 1,468,728 KiB
+  MaxRSS: 7,231 moments, 23 affine PSD cones, 75,967 packed entries, 233,206
+  scalar terms, and exact coefficient SHA-256
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+- Commit `6aa430b` enables bounded native coefficient fingerprinting for the
+  target L=2 solve and aborts unless it reproduces the known exact coefficient
+  SHA-256 `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
+  SCNet native job `118174488` started at 2026-07-29T16:13:27Z on 32 CPUs /
+  114000 MiB. It is decision-relevant because it streams directly into Mosek
+  in one coefficient pass; protected JuMP jobs `118171391` and `23011251`
+  remain untouched and had still not entered optimization at 16:14Z.
