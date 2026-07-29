@@ -12,6 +12,7 @@ import itertools
 import json
 from collections.abc import Mapping, Sequence
 
+import mpmath as mp
 import numpy as np
 
 from .exterior_candidates import (
@@ -167,6 +168,97 @@ def _rescaled_determinant_discovery(
     }
 
 
+def _mpmath_rescaled_determinant_discovery(
+    atoms: tuple[mp.matrix, ...],
+    word: tuple[int, ...],
+    *,
+    dps: int,
+    float_prefilter: Mapping[str, object],
+) -> dict[str, object]:
+    """Re-rank one float finalist with a high-precision determinant."""
+
+    dimension = atoms[0].rows
+    matrix = mp.eye(dimension)
+    log_scale = mp.mpf("0")
+    for symbol in word:
+        matrix *= atoms[symbol]
+        scale = max(
+            mp.fsum(abs(matrix[row, column]) for column in range(dimension))
+            for row in range(dimension)
+        )
+        scale = max(mp.mpf("1"), scale)
+        matrix /= scale
+        log_scale += mp.log(scale)
+    identity_scale = mp.exp(-log_scale)
+    shifted = matrix + identity_scale * mp.eye(dimension)
+    value = mp.det(shifted)
+    sign = int(mp.sign(value))
+    if value:
+        logabs = mp.log(abs(value))
+        finite_logabs = float(
+            max(mp.mpf("-100000"), min(mp.mpf("100000"), logabs))
+        )
+    else:
+        logabs = mp.ninf
+        finite_logabs = -100_000.0
+    score = (
+        -1_000_000.0 - finite_logabs
+        if sign < 0
+        else -999_999.0
+        if sign == 0
+        else finite_logabs
+    )
+    return {
+        "method": "mpmath-rescaled-determinant",
+        "score": float(score),
+        "objective_dps": dps,
+        "high_precision_sign": sign,
+        "rescaled_value": mp.nstr(value, min(dps, 80)),
+        "rescaled_logabs": mp.nstr(logabs, min(dps, 80)),
+        "log_scale": mp.nstr(log_scale, min(dps, 80)),
+        "suggests_negative": sign < 0,
+        "float_prefilter": dict(float_prefilter),
+    }
+
+
+def _rerank_with_mpmath(
+    exact_atoms: Sequence[object],
+    finalists: Sequence[
+        tuple[float, tuple[int, ...], Mapping[str, object]]
+    ],
+    *,
+    dps: int,
+) -> tuple[float, tuple[int, ...], dict[str, object]]:
+    unique: dict[tuple[int, ...], Mapping[str, object]] = {}
+    for _, word, discovery in finalists:
+        unique.setdefault(word, discovery)
+    with mp.workdps(dps):
+        atoms = tuple(
+            mp.matrix(
+                [
+                    [
+                        mp.mpf(str(value.p)) / mp.mpf(str(value.q))
+                        for value in atom.row(row)
+                    ]
+                    for row in range(atom.rows)
+                ]
+            )
+            for atom in exact_atoms
+        )
+        ranked = []
+        for word, float_prefilter in unique.items():
+            discovery = _mpmath_rescaled_determinant_discovery(
+                atoms,
+                word,
+                dps=dps,
+                float_prefilter=float_prefilter,
+            )
+            ranked.append((float(discovery["score"]), word, discovery))
+    if not ranked:
+        raise ArithmeticError("high-precision reranking received no finalists")
+    return min(ranked, key=lambda item: item[0])
+
+
 def exact_replay_candidate(
     *,
     target: str,
@@ -206,6 +298,7 @@ def search_adversarial_words(
     rng_seed: int,
     rounds: int = 12,
     proposals_per_round: int = 8,
+    objective_dps: int = 80,
 ) -> dict[str, object]:
     """Run deterministic discrete local search and exactly replay each winner."""
 
@@ -227,8 +320,15 @@ def search_adversarial_words(
             raise ValueError(f"{name} must be a positive integer")
     if not isinstance(rng_seed, int) or isinstance(rng_seed, bool):
         raise ValueError("rng_seed must be an integer")
+    if (
+        not isinstance(objective_dps, int)
+        or isinstance(objective_dps, bool)
+        or objective_dps < 30
+    ):
+        raise ValueError("objective_dps must be an integer of at least 30")
 
     float_atoms = float_atoms_from_card(card)
+    exact_atoms = exact_atoms_from_card(card)
     gauged = _positive_grade13_gauge(float_atoms)
     if gauged is not None:
         objective_atoms: object = (
@@ -248,6 +348,9 @@ def search_adversarial_words(
 
     for length in checked_lengths:
         best: tuple[float, tuple[int, ...], dict[str, object]] | None = None
+        finalists: list[
+            tuple[float, tuple[int, ...], dict[str, object]]
+        ] = []
         for _ in range(restarts):
             current_word = tuple(
                 int(symbol)
@@ -270,11 +373,18 @@ def search_adversarial_words(
                 if proposal[0] < current_score:
                     current_score, current_word, current_discovery = proposal
             current = (current_score, current_word, current_discovery)
+            finalists.append(current)
             if best is None or current[0] < best[0]:
                 best = current
 
         if best is None:
             raise ArithmeticError("adversarial search produced no candidate")
+        if gauged is None:
+            best = _rerank_with_mpmath(
+                exact_atoms,
+                finalists,
+                dps=objective_dps,
+            )
         record = exact_replay_candidate(
             target=target,
             word=best[1],
@@ -293,8 +403,11 @@ def search_adversarial_words(
         "rng_seed": rng_seed,
         "rounds": rounds,
         "proposals_per_round": proposals_per_round,
+        "objective_dps": objective_dps,
         "discovery_method": (
-            "compound-ratio" if gauged is not None else "rescaled-determinant"
+            "compound-ratio"
+            if gauged is not None
+            else "mpmath-rescaled-determinant"
         ),
         "candidates": candidates,
         "hit": hit,
@@ -314,6 +427,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--rng-seed", type=int, default=0)
     parser.add_argument("--rounds", type=int, default=12)
     parser.add_argument("--proposals-per-round", type=int, default=8)
+    parser.add_argument("--objective-dps", type=int, default=80)
     return parser
 
 
@@ -326,6 +440,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         rng_seed=args.rng_seed,
         rounds=args.rounds,
         proposals_per_round=args.proposals_per_round,
+        objective_dps=args.objective_dps,
     )
     print(json.dumps(result, allow_nan=False, sort_keys=True), flush=True)
     return 0
