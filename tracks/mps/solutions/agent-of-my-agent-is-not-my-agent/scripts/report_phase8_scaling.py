@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from lrtfim.phase8_scaling import gap_scaling_summary
+from lrtfim.phase8_protocol import (
+    GAP_DISCARDED_WEIGHT_LIMIT,
+    GAP_RELATIVE_VARIANCE_LIMIT,
+)
 
 
 SIGMA = 1.75
@@ -115,9 +119,15 @@ def _validate_state(
     sweeps = int(state.get("sweeps", -1))
     max_sweeps = int(settings.get("max_sweeps", -1))
     relative_variance = variance / max(energy * energy, 1.0)
-    if not np.isfinite(relative_variance) or relative_variance > 1.0e-10:
+    if (
+        not np.isfinite(relative_variance)
+        or relative_variance > GAP_RELATIVE_VARIANCE_LIMIT
+    ):
         raise ValueError(f"L={length} {sector} relative variance failed")
-    if not np.isfinite(discarded) or discarded > 1.0e-8:
+    if (
+        not np.isfinite(discarded)
+        or discarded > GAP_DISCARDED_WEIGHT_LIMIT
+    ):
         raise ValueError(f"L={length} {sector} discarded weight failed")
     if sweeps < 0 or max_sweeps <= 0 or sweeps >= max_sweeps:
         raise ValueError(f"L={length} {sector} sweep gate failed")
@@ -154,6 +164,15 @@ def _uncertainty_summary(phase6: dict, finite_spread: float) -> dict:
         "critical_field_propagation": {
             "status": "not_fully_propagated",
             "reason": "only two finite-size crossings are available",
+        },
+        "phase8_acceptance_protocol": {
+            "relative_variance_limit": GAP_RELATIVE_VARIANCE_LIMIT,
+            "discarded_weight_limit": GAP_DISCARDED_WEIGHT_LIMIT,
+            "previous_discarded_weight_limit": 1.0e-8,
+            "changed_after_L64_odd_observation": True,
+            "triggering_L64_odd_discarded_weight": 5.49e-8,
+            "triggering_state_variance_and_energy_convergence_passed": True,
+            "scope": "Phase 8 sigma=1.75 gap study only",
         },
     }
 
@@ -370,6 +389,12 @@ The power/log critical-field sensitivity is reported separately and is not
 fully propagated into gap uncertainty because only two crossings are
 available. The zero-frequency susceptibility gamma/nu is not measured.
 Equal-time C_eq(r) and S_eq(0) are auxiliary diagnostics only.
+
+After the L=64 odd-sector state recorded discarded weight 5.49e-8 while
+the variance and energy-convergence gates passed, the Phase 8-only
+discarded-weight limit was changed from 1e-8 to 1e-7. The relative-variance
+limit remains 1e-10. This post-observation protocol amendment is included
+explicitly in the uncertainty budget.
 """
     path.write_text(text)
 

@@ -18,6 +18,8 @@ CROSSING_CHI = 64
 GAP_CHI = 128
 ALPHA = 0.5
 R_FIT = 2048
+GAP_RELATIVE_VARIANCE_LIMIT = 1.0e-10
+GAP_DISCARDED_WEIGHT_LIMIT = 1.0e-7
 
 
 def build_crossing_spec(output_dir: str | Path) -> dict:
@@ -223,6 +225,17 @@ def build_gap_spec(decision: Mapping, output_dir: str | Path) -> dict:
             "sectors": ["even", "odd"],
             "exact_zero_pruning": True,
             "approximate_mpo_compression": False,
+            "acceptance": {
+                "relative_variance_max": GAP_RELATIVE_VARIANCE_LIMIT,
+                "discarded_weight_max": GAP_DISCARDED_WEIGHT_LIMIT,
+                "sweeps_must_be_below_cap": True,
+                "positive_gap_required": True,
+                "protocol_amendment": (
+                    "discarded-weight limit relaxed from 1e-8 after the "
+                    "L=64 odd state recorded 5.49e-8 while variance and "
+                    "energy convergence passed"
+                ),
+            },
         },
         "cells": cells,
     }

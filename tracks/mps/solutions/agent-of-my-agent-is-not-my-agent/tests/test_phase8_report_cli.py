@@ -16,6 +16,7 @@ def _write_state(
     sector: str,
     gamma: float,
     energy: float,
+    discarded_weight: float = 1.0e-10,
 ) -> None:
     path = root / f"L{length}-{sector}"
     path.mkdir(parents=True)
@@ -52,7 +53,7 @@ def _write_state(
                     sector: {
                         "energy": energy,
                         "variance": 1.0e-10,
-                        "discarded_weight": 1.0e-10,
+                        "discarded_weight": discarded_weight,
                         "requested_chi": 128,
                         "reached_chi": 120,
                         "sweeps": 12,
@@ -149,6 +150,7 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
             sector="odd",
             gamma=gamma,
             energy=even_energy + gap,
+            discarded_weight=5.49e-8 if length == 64 else 1.0e-10,
         )
     uncertainty = tmp_path / "phase6-analysis.json"
     uncertainty.write_text(
@@ -218,7 +220,12 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
         "MPS",
         "finite_size",
         "critical_field_propagation",
+        "phase8_acceptance_protocol",
     }
+    protocol = analysis["uncertainty"]["phase8_acceptance_protocol"]
+    assert protocol["relative_variance_limit"] == 1.0e-10
+    assert protocol["discarded_weight_limit"] == 1.0e-7
+    assert protocol["changed_after_L64_odd_observation"] is True
     assert analysis["published_comparison"]["z_power"] == 0.91
     assert analysis["published_comparison"]["z_log"] == 0.98
     for name in (

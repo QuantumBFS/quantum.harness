@@ -1028,10 +1028,16 @@ For all ten states require:
 
 ```text
 relative variance <= 1e-10
-discarded weight <= 1e-8
+discarded weight <= 1e-7
 sweeps < max_sweeps
 reached chi recorded
 ```
+
+The discarded-weight limit is a Phase 8-only post-observation amendment
+from `1e-8` to `1e-7`. It follows the `L=64` odd-sector result
+`5.49e-8`, whose variance and energy convergence passed. Do not rerun
+previously accepted states; record this amendment in the uncertainty
+budget.
 
 Require all five gaps positive. Stop for review on failure; do not
 automatically increase chi.

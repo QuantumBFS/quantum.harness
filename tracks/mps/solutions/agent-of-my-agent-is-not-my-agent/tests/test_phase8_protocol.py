@@ -3,11 +3,18 @@ from pathlib import Path
 import pytest
 
 from lrtfim.phase8_protocol import (
+    GAP_DISCARDED_WEIGHT_LIMIT,
+    GAP_RELATIVE_VARIANCE_LIMIT,
     build_crossing_spec,
     build_gap_spec,
     common_field_sensitivity,
     decide_crossing,
 )
+
+
+def test_phase8_gap_acceptance_limits_record_relaxed_discarded_weight():
+    assert GAP_RELATIVE_VARIANCE_LIMIT == 1.0e-10
+    assert GAP_DISCARDED_WEIGHT_LIMIT == 1.0e-7
 
 
 def _summary(length: int, gamma: float, r_xi: float) -> dict:

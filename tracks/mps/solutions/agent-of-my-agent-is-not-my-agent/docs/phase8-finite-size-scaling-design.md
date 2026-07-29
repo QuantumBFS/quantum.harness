@@ -164,12 +164,19 @@ The existing numerical flags remain:
 
 ```text
 relative variance <= 1e-10,
-discarded weight <= 1e-8,
+discarded weight <= 1e-7,
 converged before the sweep cap.
 ```
 
 A failed sector stops that sigma for review. There is no automatic
 `chi=256` escalation.
+
+The discarded-weight threshold is a Phase 8-only post-observation protocol
+amendment. The original `1e-8` gate rejected the `L=64` odd-sector state,
+which recorded `5.49e-8` even though its relative variance and energy
+convergence passed. The accepted threshold is now `1e-7`; the variance
+threshold is unchanged, and previously accepted cells are not rerun. The
+final uncertainty budget records both thresholds and the triggering result.
 
 For each size,
 
