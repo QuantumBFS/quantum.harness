@@ -135,6 +135,40 @@ even though \(\chi_3(B^7)=-171633\) and
 therefore pair signed paths across different principal minors and particle
 numbers; local nonnegativity is exactly obstructed by the examples above.
 
+The exact grade-\((2,4)\) cone does not permit a smaller independent
+odd-sector proof.  For the length-30 word
+
+```text
+101010110111111111111110101010
+```
+
+the exact odd complement is
+
+\[
+\chi_1+\chi_3+\chi_5
+=-2247244599871205847393995794<0,
+\]
+
+with
+
+\[
+\begin{aligned}
+\chi_1&=-5189582451,\\
+\chi_3&=-3485184639156586117103537567,\\
+\chi_5&=1237940039285380274899124224.
+\end{aligned}
+\]
+
+The even part
+\(\chi_0+\chi_2+\chi_4
+=4272808041188297984567253760751379\)
+still dominates, giving the positive full determinant
+\(4272805793943698113361406366755585\).
+Thus the existing grade-\((2,4)\) certificate plus a separate
+grade-\((1,3,5)\) cone is impossible.  A successful certificate must
+couple the even and odd parities (or prove a quantitative domination
+inequality between them).
+
 ### The invariant sign chamber is not sufficient
 
 The two directed triangles have cycle invariants \(D=8\) and \(T=-z\)

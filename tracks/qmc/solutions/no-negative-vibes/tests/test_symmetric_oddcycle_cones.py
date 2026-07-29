@@ -8,6 +8,7 @@ from oracle.symmetric_oddcycle_cones import (
     exact_unit_winding_bernstein_audit,
     exact_unit_winding_endpoint_obstruction,
     load_certificate,
+    search_fixed_unit_winding_pair_cone,
     unit_winding_endpoint_lifts,
     verify_compact_certificate,
 )
@@ -67,6 +68,15 @@ def test_complementary_sector_identity_and_local_obstructions_replay_exactly():
         "chi3": 5656076689,
         "determinant": 1073741824,
         "F": 6728511154,
+    }
+    assert result["grade24_odd135_split_obstruction"] == {
+        "word": "101010110111111111111110101010",
+        "chi1": -5189582451,
+        "chi3": -3485184639156586117103537567,
+        "chi5": 1237940039285380274899124224,
+        "odd135": -2247244599871205847393995794,
+        "even024": 4272808041188297984567253760751379,
+        "full_determinant": 4272805793943698113361406366755585,
     }
     assert result["pure_power_values"] == {
         7: {
@@ -142,3 +152,24 @@ def test_independently_varying_endpoint_cone_has_exact_negative_obstruction():
     assert result["F"] == -int(
         "18190120474553014207724320230898068534479316268000740547152031056720819382678784187176552826802467629600079871"
     )
+
+
+def test_fixed_pair_cone_search_api_runs_exact_diagnostics_without_optimization():
+    result = search_fixed_unit_winding_pair_cone(
+        attempts=0,
+        maxiter=1,
+        ray_counts=(22,),
+        diagnostic_word_powers=(1, 7),
+    )
+
+    assert result["status"] == "no-exact-certificate-found"
+    assert result["route"] == "fixed-pair-redundant"
+    assert result["grades"] == (0, 2, 3, 5)
+    assert result["endpoint_order"] == ("B1", "B1T")
+    assert result["dimension"] == 22
+    assert result["atom_count"] == 2
+    assert result["diagnostic_pure_word_traces"] == (
+        {"word_power": 1, "exact_trace": 17},
+        {"word_power": 7, "exact_trace": 1939395},
+    )
+    assert result["redundant"]["status"] == "no-numerical-transform"

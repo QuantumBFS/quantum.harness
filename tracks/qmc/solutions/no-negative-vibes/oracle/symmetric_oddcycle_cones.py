@@ -25,6 +25,8 @@ from pathlib import Path
 import sympy as sp
 
 from .exterior_exact5_full_fock_cone import (
+    _cross_grade_simplicial_search,
+    _trace_compatible_column_generation,
     combined_grade_lift,
 )
 from .exterior_exact5_shared_cone import exact_compound_matrix
@@ -224,6 +226,15 @@ def exact_complementary_sector_audit() -> dict[str, object]:
     mixed_chi3 = int(sp.trace(exact_compound_matrix(mixed, 3)))
     mixed_det = int(mixed.det())
 
+    odd_split_word = "101010110111111111111110101010"
+    odd_split_matrix = _word_matrix(odd_split_word)
+    odd_split_traces = {
+        grade: int(
+            sp.trace(exact_compound_matrix(odd_split_matrix, grade))
+        )
+        for grade in range(matrix.rows + 1)
+    }
+
     pure_values = {}
     for power in (7, 10):
         pure = matrix**power
@@ -263,6 +274,17 @@ def exact_complementary_sector_audit() -> dict[str, object]:
             "chi3": mixed_chi3,
             "determinant": mixed_det,
             "F": 1 + mixed_chi2 + mixed_chi3 + mixed_det,
+        },
+        "grade24_odd135_split_obstruction": {
+            "word": odd_split_word,
+            "chi1": odd_split_traces[1],
+            "chi3": odd_split_traces[3],
+            "chi5": odd_split_traces[5],
+            "odd135": sum(odd_split_traces[grade] for grade in (1, 3, 5)),
+            "even024": sum(
+                odd_split_traces[grade] for grade in (0, 2, 4)
+            ),
+            "full_determinant": sum(odd_split_traces.values()),
         },
         "pure_power_values": pure_values,
     }
@@ -606,6 +628,93 @@ def search_unit_winding_endpoint_cone(
     }
 
 
+def search_fixed_unit_winding_pair_cone(
+    *,
+    attempts: int = 64,
+    maxiter: int = 2000,
+    rng_seed: int = 817231,
+    ray_counts: Sequence[int] = (22, 28, 34, 40),
+    diagnostic_word_powers: Sequence[int] = tuple(range(1, 13)),
+    tolerance: float = 1.0e-9,
+    max_denominator: int = 65536,
+) -> dict[str, object]:
+    """Search the fixed ``B(1),B(1).T`` pair with exact promotion gates."""
+
+    matrices = unit_winding_endpoint_lifts()[2:]
+    powers = tuple(dict.fromkeys(int(power) for power in diagnostic_word_powers))
+    if not powers or any(power < 1 for power in powers):
+        raise ValueError("diagnostic word powers must be positive")
+    traces = tuple(
+        {
+            "word_power": power,
+            "exact_trace": int(sp.trace(matrices[0] ** power)),
+        }
+        for power in powers
+    )
+    obstruction = next(
+        (entry for entry in traces if int(entry["exact_trace"]) < 0),
+        None,
+    )
+    common = {
+        "grades": (0, 2, 3, 5),
+        "endpoint_order": ("B1", "B1T"),
+        "dimension": matrices[0].rows,
+        "atom_count": len(matrices),
+        "diagnostic_pure_word_traces": traces,
+    }
+    if obstruction is not None:
+        return {
+            **common,
+            "status": "exact-negative-trace-obstruction",
+            "route": "diagnostic-pure-word-early-stop",
+            "obstruction": obstruction,
+        }
+
+    simplicial = _cross_grade_simplicial_search(
+        matrices,
+        split=11,
+        attempts=attempts,
+        maxiter=maxiter,
+        rng_seed=rng_seed,
+        tolerance=tolerance,
+        max_denominator=max_denominator,
+    )
+    if simplicial["status"] == "exact-trace-compatible-certificate":
+        return {
+            **common,
+            "status": "exact-trace-compatible-certificate",
+            "route": "fixed-pair-simplicial",
+            "simplicial": simplicial,
+        }
+
+    best = simplicial.get("best")
+    transform = best.get("transform") if isinstance(best, Mapping) else None
+    if transform is None:
+        redundant = {
+            "status": "no-numerical-transform",
+            "milestones": [],
+        }
+    else:
+        redundant = _trace_compatible_column_generation(
+            matrices,
+            transform,
+            ray_counts=ray_counts,
+            tolerance=tolerance,
+            max_denominator=max_denominator,
+        )
+    return {
+        **common,
+        "status": (
+            "exact-trace-compatible-certificate"
+            if redundant["status"] == "exact-trace-compatible-certificate"
+            else "no-exact-certificate-found"
+        ),
+        "route": "fixed-pair-redundant",
+        "simplicial": simplicial,
+        "redundant": redundant,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
@@ -616,6 +725,7 @@ __all__ = [
     "exact_unit_winding_endpoint_obstruction",
     "fixed_candidate_matrix",
     "load_certificate",
+    "search_fixed_unit_winding_pair_cone",
     "search_unit_winding_endpoint_cone",
     "symbolic_grade4_positive_atoms",
     "unit_winding_endpoint_lifts",
