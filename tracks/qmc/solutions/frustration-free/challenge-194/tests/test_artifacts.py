@@ -193,7 +193,7 @@ def test_hdf5_schema_is_exact_and_little_endian(
         assert stream["result/draw_counts"].dtype.str == "<u8"
         assert stream["result/hash_diagnostics"].dtype.str == "<u8"
         attrs = dict(stream.attrs)
-        assert attrs["schema_version"] == "challenge-194-trajectory-artifact-v1"
+        assert attrs["schema_version"] == artifacts.TRAJECTORY_SCHEMA
         assert attrs["rng_version"] == RNG_VERSION
         assert attrs["conversion_version"] == provenance["conversion_version"]
         assert attrs["request_sha256"] == request_digest(request)
@@ -236,7 +236,7 @@ def test_hdf5_schema_is_exact_and_little_endian(
     payload = path.read_bytes()
     assert sidecar == {
         "artifact_size": len(payload),
-        "schema_version": "challenge-194-trajectory-digest-v1",
+        "schema_version": artifacts.TRAJECTORY_DIGEST_SCHEMA,
         "trajectory_id": request_digest(request),
         "trajectory_sha256": hashlib.sha256(payload).hexdigest(),
     }
@@ -1179,13 +1179,15 @@ def test_oversized_json_sidecar_and_manifest_are_rejected_before_parse(
 ):
     request, _, _ = sample
     path = publish_trajectory(tmp_path / "sidecar", *sample)
-    path.with_suffix(".sha256.json").write_bytes(b" " * (1_048_576 + 1))
+    path.with_suffix(".sha256.json").write_bytes(
+        b" " * (artifacts.MAX_JSON_BYTES + 1)
+    )
     with pytest.raises(ArtifactIntegrityError, match="size|large|limit"):
         load_verified_trajectory(path, expected(request))
 
     root = tmp_path / "manifest"
     _, batch, hashes = _publish_valid_run(root, sample)
-    batch.write_bytes(b" " * (1_048_576 + 1))
+    batch.write_bytes(b" " * (artifacts.MAX_JSON_BYTES + 1))
     with pytest.raises(ArtifactIntegrityError, match="size|large|limit"):
         reconstruct_progress(root, hashes)
 
@@ -1265,4 +1267,354 @@ def test_hdf5_scalar_attribute_dtype_confusion_is_rejected(
         stream.attrs.create(attribute, value)
     _refresh_digest(path)
     with pytest.raises(ArtifactIntegrityError, match="dtype|representation"):
+        load_verified_trajectory(path, expected(request))
+
+
+def _rewrite_json(path: Path, document: object) -> None:
+    path.write_bytes(artifacts._canonical_json_bytes(document))
+
+
+def test_request_json_hash_is_authoritative_for_changed_request_same_kernel(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    changed = TrajectoryRequest(
+        length=request.length,
+        sigma=request.sigma,
+        sigma_grid_id=request.sigma_grid_id,
+        kappas=request.kappas,
+        master_seed=request.master_seed,
+        phase=request.phase,
+        replica=request.replica + 1,
+        kernel_sha256=request.kernel_sha256,
+    )
+    with pytest.raises(ArtifactIntegrityError, match="request_sha256|request"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(changed))
+
+
+@pytest.mark.parametrize(
+    "variant",
+    ("missing", "nested-decoy", "ambiguous", "duplicate-key", "wrong-type"),
+)
+def test_request_json_requires_unambiguous_top_level_request_hash(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    variant: str,
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    path = tmp_path / "request.json"
+    document = json.loads(path.read_bytes())
+    authoritative = document["request_sha256"]
+    if variant == "missing":
+        del document["request_sha256"]
+    elif variant == "nested-decoy":
+        document["request_sha256"] = "f" * 64
+        document["decoy"] = {"request_sha256": authoritative}
+    elif variant == "ambiguous":
+        document["decoy"] = {"request_sha256": "f" * 64}
+    elif variant == "duplicate-key":
+        path.write_bytes(
+            (
+                "{"
+                f'"kernel_sha256":"{request.kernel_sha256}",'
+                f'"request_sha256":"{"f" * 64}",'
+                f'"request_sha256":"{authoritative}",'
+                '"schema_version":"test-request-v1"'
+                "}\n"
+            ).encode()
+        )
+    else:
+        document["request_sha256"] = 17
+    if variant != "duplicate-key":
+        _rewrite_json(path, document)
+    with pytest.raises(ArtifactIntegrityError, match="request_sha256|request|ambiguous"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+
+
+@pytest.mark.parametrize(
+    ("name", "field"),
+    (
+        ("request.json", "kernel_sha256"),
+        ("environment.json", "clean_tree"),
+        ("environment.json", "conversion_version"),
+        ("environment.json", "rng_version"),
+        ("environment.json", "runtime_capability_sha256"),
+        ("environment.json", "source_revision"),
+        ("environment.json", "uv_lock_sha256"),
+        ("seed-manifest.json", "rng_sha256"),
+        ("capability.json", "runtime_capability_sha256"),
+        ("manifest.json", "analysis_plan_sha256"),
+        ("manifest.json", "source_revision"),
+    ),
+)
+def test_nested_decoy_never_satisfies_authoritative_metadata_path(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    name: str,
+    field: str,
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    path = tmp_path / name
+    document = json.loads(path.read_bytes())
+    authoritative = document[field]
+    document[field] = False if field == "clean_tree" else "f" * 64
+    document["decoy"] = {field: authoritative}
+    _rewrite_json(path, document)
+    with pytest.raises(ArtifactIntegrityError, match=field):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+
+
+@pytest.mark.parametrize("replacement_kind", ("identical-inode", "same-inode-mutation"))
+def test_aggregate_metadata_rechecks_first_file_after_later_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    replacement_kind: str,
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    first = tmp_path / "capability.json"
+    replacement = tmp_path.parent / f"{tmp_path.name}-capability-replacement.json"
+    replacement.write_bytes(first.read_bytes())
+    original = artifacts._read_descriptor_bounded
+    changed = False
+
+    def mutate_first_during_later_read(
+        descriptor: int,
+        maximum_size: int,
+        description: str,
+    ) -> bytes:
+        nonlocal changed
+        payload = original(descriptor, maximum_size, description)
+        if description == "upstream metadata request.json" and not changed:
+            if replacement_kind == "identical-inode":
+                os.replace(replacement, first)
+            else:
+                document = json.loads(first.read_bytes())
+                document["runtime_capability_sha256"] = "5" * 64
+                _rewrite_json(first, document)
+            changed = True
+        return payload
+
+    monkeypatch.setattr(
+        artifacts, "_read_descriptor_bounded", mutate_first_during_later_read
+    )
+    with pytest.raises(ArtifactIntegrityError, match="identity|mutat|snapshot|metadata"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert changed
+
+
+def test_aggregate_metadata_rechecks_first_kernel_member_after_later_member(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    first = tmp_path / "kernel" / "kernel.bin"
+    (tmp_path / "kernel" / "zz.bin").write_bytes(b"later-kernel-member")
+    original = artifacts._hash_descriptor
+    kernel_hash_calls = 0
+    changed = False
+
+    def mutate_first_during_later_hash(
+        descriptor: int,
+        description: str,
+    ) -> tuple[str, int]:
+        nonlocal kernel_hash_calls, changed
+        result = original(descriptor, description)
+        if description == "kernel metadata file":
+            kernel_hash_calls += 1
+            if kernel_hash_calls == 2:
+                with first.open("r+b") as stream:
+                    stream.seek(0)
+                    stream.write(b"mutated!")
+                changed = True
+        return result
+
+    monkeypatch.setattr(artifacts, "_hash_descriptor", mutate_first_during_later_hash)
+    with pytest.raises(ArtifactIntegrityError, match="mutat|snapshot|metadata|digest"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert changed
+    assert kernel_hash_calls >= 2
+
+
+@pytest.mark.parametrize("replacement_kind", ("identical-inode", "same-inode-mutation"))
+def test_aggregate_final_sweep_catches_first_file_changed_during_second_pass(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    replacement_kind: str,
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    first = tmp_path / "capability.json"
+    replacement = tmp_path.parent / f"{tmp_path.name}-final-replacement.json"
+    replacement.write_bytes(first.read_bytes())
+    original = artifacts._read_descriptor_bounded
+    request_reads = 0
+    changed = False
+
+    def mutate_after_first_was_second_pass_checked(
+        descriptor: int,
+        maximum_size: int,
+        description: str,
+    ) -> bytes:
+        nonlocal request_reads, changed
+        payload = original(descriptor, maximum_size, description)
+        if description == "upstream metadata request.json":
+            request_reads += 1
+            if request_reads == 2:
+                if replacement_kind == "identical-inode":
+                    os.replace(replacement, first)
+                else:
+                    document = json.loads(first.read_bytes())
+                    document["runtime_capability_sha256"] = "5" * 64
+                    _rewrite_json(first, document)
+                changed = True
+        return payload
+
+    monkeypatch.setattr(
+        artifacts,
+        "_read_descriptor_bounded",
+        mutate_after_first_was_second_pass_checked,
+    )
+    with pytest.raises(ArtifactIntegrityError, match="identity|mutat|snapshot|metadata"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert changed
+    assert request_reads >= 2
+
+
+def test_aggregate_final_sweep_catches_kernel_changed_during_second_pass(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    first = tmp_path / "kernel" / "kernel.bin"
+    (tmp_path / "kernel" / "zz.bin").write_bytes(b"later-kernel-member")
+    original = artifacts._hash_descriptor
+    kernel_hash_calls = 0
+    changed = False
+
+    def mutate_after_first_was_second_pass_checked(
+        descriptor: int,
+        description: str,
+    ) -> tuple[str, int]:
+        nonlocal kernel_hash_calls, changed
+        result = original(descriptor, description)
+        if description == "kernel metadata file":
+            kernel_hash_calls += 1
+            if kernel_hash_calls == 4:
+                with first.open("r+b") as stream:
+                    stream.seek(0)
+                    stream.write(b"mutated!")
+                changed = True
+        return result
+
+    monkeypatch.setattr(
+        artifacts, "_hash_descriptor", mutate_after_first_was_second_pass_checked
+    )
+    with pytest.raises(ArtifactIntegrityError, match="mutat|snapshot|metadata|digest"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert changed
+    assert kernel_hash_calls >= 4
+
+
+def test_frozen_json_limit_fits_worst_case_batch_and_progress():
+    ids = [f"{index:064x}" for index in range(artifacts.MAX_BATCH_MEMBERS)]
+    members = [
+        {
+            "path": f"trajectories/trajectory-{trajectory_id}.h5",
+            "trajectory_id": trajectory_id,
+            "trajectory_sha256": "f" * 64,
+        }
+        for trajectory_id in ids
+    ]
+    batch = {
+        "batch_id": "b" * 128,
+        "members": members,
+        "schema_version": artifacts.BATCH_SCHEMA,
+    }
+    trajectories = list(members)
+    batches = [
+        {
+            "batch_id": f"{index:0128x}",
+            "path": f"batches/batch-{index:0128x}.json",
+            "trajectory_count": 1,
+        }
+        for index in range(artifacts.MAX_BATCH_MEMBERS)
+    ]
+    progress = {
+        "batch_count": len(batches),
+        "batches": batches,
+        "schema_version": artifacts.PROGRESS_SCHEMA,
+        "trajectory_count": len(trajectories),
+        "trajectories": trajectories,
+    }
+    worst_case = max(
+        len(artifacts._canonical_json_bytes(batch)),
+        len(artifacts._canonical_json_bytes(progress)),
+    )
+    assert worst_case + artifacts.MAX_JSON_SAFETY_BYTES <= artifacts.MAX_JSON_BYTES
+
+
+def test_reconstruction_rejects_global_trajectory_count_over_frozen_limit(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    trajectories = tmp_path / "trajectories"
+    trajectories.mkdir()
+    (tmp_path / "batches").mkdir()
+    for index in range(artifacts.MAX_BATCH_MEMBERS + 1):
+        (trajectories / f"trajectory-{index:064x}.h5").touch()
+    with pytest.raises(ArtifactIntegrityError, match="count|limit"):
+        reconstruct_progress(tmp_path, expected(request))
+
+
+def test_json_publication_accepts_exact_limit_and_rejects_limit_plus_one(
+    tmp_path: Path,
+):
+    schema = "test-json-boundary-v1"
+    base = {"padding": "", "schema_version": schema}
+    overhead = len(artifacts._canonical_json_bytes(base))
+    accepted_document = {
+        "padding": "x" * (artifacts.MAX_JSON_BYTES - overhead),
+        "schema_version": schema,
+    }
+    accepted = tmp_path / "accepted.json"
+    artifacts._publish_json_once(accepted, accepted_document, schema)
+    assert accepted.stat().st_size == artifacts.MAX_JSON_BYTES
+
+    rejected_document = {
+        "padding": "x" * (artifacts.MAX_JSON_BYTES - overhead + 1),
+        "schema_version": schema,
+    }
+    rejected = tmp_path / "rejected.json"
+    with pytest.raises(ArtifactIntegrityError, match="size|limit"):
+        artifacts._publish_json_once(rejected, rejected_document, schema)
+    assert not rejected.exists()
+
+
+def test_v2_schema_registry_and_v1_trajectory_rejection(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    assert artifacts.TRAJECTORY_SCHEMA.endswith("-v2")
+    assert artifacts.TRAJECTORY_DIGEST_SCHEMA.endswith("-v2")
+    assert artifacts.BATCH_SCHEMA.endswith("-v2")
+    assert artifacts.PROGRESS_SCHEMA.endswith("-v2")
+    path = publish_trajectory(tmp_path, *sample)
+    with h5py.File(path, "r+") as stream:
+        stream.attrs["schema_version"] = "challenge-194-trajectory-artifact-v1"
+    _refresh_digest(path)
+    with pytest.raises(ArtifactIntegrityError, match="schema|stale"):
         load_verified_trajectory(path, expected(request))

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import fcntl
 import hashlib
 import json
@@ -29,17 +29,23 @@ from .trajectory import (
 )
 
 
-TRAJECTORY_SCHEMA = "challenge-194-trajectory-artifact-v1"
-TRAJECTORY_DIGEST_SCHEMA = "challenge-194-trajectory-digest-v1"
-BATCH_SCHEMA = "challenge-194-batch-manifest-v1"
-PROGRESS_SCHEMA = "challenge-194-progress-v1"
+TRAJECTORY_SCHEMA = "challenge-194-trajectory-artifact-v2"
+TRAJECTORY_DIGEST_SCHEMA = "challenge-194-trajectory-digest-v2"
+BATCH_SCHEMA = "challenge-194-batch-manifest-v2"
+PROGRESS_SCHEMA = "challenge-194-progress-v2"
 CONVERSION_VERSION = "challenge-194-artifact-conversion-v1"
-MAX_JSON_BYTES = 1_048_576
 MAX_HDF5_BYTES = 67_108_864
 MAX_KAPPA_COUNT = 4096
 MAX_DATASET_BYTES = 1_048_576
 MAX_BATCH_MEMBERS = 4096
 MAX_KERNEL_FILES = 128
+MAX_CANONICAL_TRAJECTORY_RECORD_BYTES = 273
+MAX_CANONICAL_BATCH_PROGRESS_RECORD_BYTES = 322
+MAX_JSON_SAFETY_BYTES = 65_536
+# Worst progress is 4,096 trajectory records plus 4,096 one-member batch
+# summaries: 2,437,120 bytes, plus bounded structural/version/count fields.
+# Four MiB therefore retains more than the explicit 65,536-byte safety margin.
+MAX_JSON_BYTES = 4_194_304
 
 _HEX256 = re.compile(r"[0-9a-f]{64}")
 _HEX160 = re.compile(r"[0-9a-f]{40}")
@@ -1003,18 +1009,9 @@ def _semantic_reload(
     return result, digest, size
 
 
-def _read_canonical_json(path: Path, description: str) -> object:
-    descriptor, original = _open_regular(
-        path, description, maximum_size=MAX_JSON_BYTES
-    )
+def _decode_json_payload(payload: bytes, description: str) -> object:
     try:
-        payload = _read_descriptor_bounded(descriptor, MAX_JSON_BYTES, description)
-        _require_path_identity(path, original, description)
-        document = json.loads(payload)
-        _require_path_identity(path, original, description)
-        canonical = _canonical_json_bytes(document)
-        _require_path_identity(path, original, description)
-        _require_stable_descriptor(descriptor, original, description)
+        return json.loads(payload)
     except (
         UnicodeDecodeError,
         json.JSONDecodeError,
@@ -1025,10 +1022,32 @@ def _read_canonical_json(path: Path, description: str) -> object:
         raise ArtifactIntegrityError(
             f"unable to parse JSON for {description}"
         ) from error
-    finally:
-        os.close(descriptor)
+
+
+def _parse_canonical_json_payload(payload: bytes, description: str) -> object:
+    document = _decode_json_payload(payload, description)
+    canonical = _canonical_json_bytes(document)
     if payload != canonical:
         raise ArtifactIntegrityError(f"{description} is not canonical JSON")
+    return document
+
+
+def _read_canonical_json(path: Path, description: str) -> object:
+    descriptor, original = _open_regular(
+        path, description, maximum_size=MAX_JSON_BYTES
+    )
+    try:
+        payload = _read_descriptor_bounded(descriptor, MAX_JSON_BYTES, description)
+        _require_path_identity(path, original, description)
+        document = _decode_json_payload(payload, description)
+        _require_path_identity(path, original, description)
+        canonical = _canonical_json_bytes(document)
+        _require_path_identity(path, original, description)
+        if payload != canonical:
+            raise ArtifactIntegrityError(f"{description} is not canonical JSON")
+        _require_stable_descriptor(descriptor, original, description)
+    finally:
+        os.close(descriptor)
     return document
 
 
@@ -1286,50 +1305,12 @@ def _directory_entries(directory: Path) -> list[Path]:
         raise ArtifactIntegrityError("unable to inspect artifact directory") from error
 
 
-def _document_contains(document: object, key: str, value: object) -> bool:
-    if isinstance(document, dict):
-        if document.get(key) == value:
-            return True
-        return any(
-            _document_contains(child, key, value) for child in document.values()
-        )
-    if isinstance(document, list):
-        return any(_document_contains(child, key, value) for child in document)
-    return False
-
-
-def _verify_upstream_metadata(
-    run_dir: Path,
+def _authoritative_metadata_bindings(
     expected: dict[str, str],
-) -> str:
-    _validate_expected(expected)
-    documents: dict[str, object] = {}
-    file_hashes: dict[str, str] = {}
-    identities: set[tuple[int, int]] = set()
-    for name in sorted(_UPSTREAM_FILES):
-        path = run_dir / name
-        metadata = _checked_regular(path, f"upstream metadata {name}")
-        if metadata.st_nlink != 1:
-            raise ArtifactIntegrityError("upstream metadata contains a hard-link alias")
-        identity = (metadata.st_dev, metadata.st_ino)
-        if identity in identities:
-            raise ArtifactIntegrityError("upstream metadata contains inode aliases")
-        identities.add(identity)
-        document = _read_canonical_json(path, f"upstream metadata {name}")
-        if (
-            not isinstance(document, dict)
-            or not isinstance(document.get("schema_version"), str)
-            or not document["schema_version"]
-        ):
-            raise ArtifactIntegrityError(
-                f"upstream metadata {name} lacks a canonical schema identity"
-            )
-        documents[name] = document
-        file_hashes[name] = hashlib.sha256(
-            _canonical_json_bytes(document)
-        ).hexdigest()
-    bindings = {
+) -> dict[str, tuple[tuple[str, object], ...]]:
+    return {
         "request.json": (
+            ("request_sha256", expected["request_sha256"]),
             ("kernel_sha256", expected["kernel_sha256"]),
         ),
         "environment.json": (
@@ -1349,50 +1330,230 @@ def _verify_upstream_metadata(
             ("source_revision", expected["source_revision"]),
         ),
     }
-    for name, required in bindings.items():
-        for key, value in required:
-            if not _document_contains(documents[name], key, value):
+
+
+def _reject_nested_authoritative_fields(
+    value: object,
+    authoritative_fields: frozenset[str],
+    description: str,
+) -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if key in authoritative_fields:
                 raise ArtifactIntegrityError(
-                    f"upstream metadata {name} does not bind {key}"
+                    f"{description} contains ambiguous nested {key}"
                 )
-    kernel = run_dir / "kernel"
-    try:
-        kernel_stat = kernel.lstat()
-    except OSError as error:
-        raise ArtifactIntegrityError("kernel metadata directory is missing") from error
-    if stat.S_ISLNK(kernel_stat.st_mode) or not stat.S_ISDIR(kernel_stat.st_mode):
-        raise ArtifactIntegrityError("kernel metadata has the wrong kind")
-    kernel_files = _directory_entries(kernel)
-    if not kernel_files or len(kernel_files) > MAX_KERNEL_FILES:
-        raise ArtifactIntegrityError("kernel metadata file count is invalid")
-    kernel_hashes: dict[str, str] = {}
-    for path in kernel_files:
-        metadata = _checked_regular(path, "kernel metadata file")
-        if metadata.st_nlink != 1:
-            raise ArtifactIntegrityError("kernel metadata contains a hard-link alias")
-        identity = (metadata.st_dev, metadata.st_ino)
-        if identity in identities:
-            raise ArtifactIntegrityError("kernel metadata contains inode aliases")
-        identities.add(identity)
-        descriptor, original = _open_regular(
-            path, "kernel metadata file", maximum_size=MAX_HDF5_BYTES
-        )
-        try:
-            digest, _ = _hash_descriptor(descriptor, "kernel metadata file")
-            _require_stable_descriptor(
-                descriptor, original, "kernel metadata file"
+            _reject_nested_authoritative_fields(
+                child, authoritative_fields, description
             )
-            _require_path_identity(path, original, "kernel metadata file")
-        finally:
-            os.close(descriptor)
-        kernel_hashes[path.name] = digest
-    if expected["kernel_sha256"] not in kernel_hashes.values():
-        raise ArtifactIntegrityError("kernel metadata does not contain the request digest")
-    metadata_index = {
-        "files": file_hashes,
-        "kernel_files": kernel_hashes,
-    }
-    return hashlib.sha256(_canonical_json_bytes(metadata_index)).hexdigest()
+    elif isinstance(value, list):
+        for child in value:
+            _reject_nested_authoritative_fields(
+                child, authoritative_fields, description
+            )
+
+
+def _validate_authoritative_metadata(
+    documents: dict[str, object],
+    expected: dict[str, str],
+) -> None:
+    bindings = _authoritative_metadata_bindings(expected)
+    authoritative_fields = frozenset(
+        key for required in bindings.values() for key, _ in required
+    )
+    for name, required in bindings.items():
+        document = documents[name]
+        if (
+            not isinstance(document, dict)
+            or type(document.get("schema_version")) is not str
+            or not document["schema_version"]
+        ):
+            raise ArtifactIntegrityError(
+                f"upstream metadata {name} lacks a canonical schema identity"
+            )
+        for key, child in document.items():
+            if key != "schema_version" and key not in authoritative_fields:
+                _reject_nested_authoritative_fields(
+                    child,
+                    authoritative_fields,
+                    f"upstream metadata {name}",
+                )
+            elif key in authoritative_fields:
+                _reject_nested_authoritative_fields(
+                    child,
+                    authoritative_fields,
+                    f"upstream metadata {name}",
+                )
+        for key, required_value in required:
+            if key not in document:
+                raise ArtifactIntegrityError(
+                    f"upstream metadata {name} is missing top-level {key}"
+                )
+            actual = document[key]
+            if type(actual) is not type(required_value) or actual != required_value:
+                raise ArtifactIntegrityError(
+                    f"upstream metadata {name} has invalid top-level {key}"
+                )
+
+
+def _verify_upstream_metadata(
+    run_dir: Path,
+    expected: dict[str, str],
+) -> str:
+    _validate_expected(expected)
+    kernel = run_dir / "kernel"
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    try:
+        kernel_descriptor = os.open(kernel, flags)
+    except OSError as error:
+        raise ArtifactIntegrityError("unable to open kernel metadata directory") from error
+    with ExitStack() as stack:
+        stack.callback(os.close, kernel_descriptor)
+        kernel_original = os.fstat(kernel_descriptor)
+        if not stat.S_ISDIR(kernel_original.st_mode):
+            raise ArtifactIntegrityError("kernel metadata has the wrong kind")
+        kernel_files = _directory_entries(kernel)
+        if not kernel_files or len(kernel_files) > MAX_KERNEL_FILES:
+            raise ArtifactIntegrityError("kernel metadata file count is invalid")
+        expected_kernel_names = tuple(path.name for path in kernel_files)
+        entries: list[
+            tuple[Path, str, int, os.stat_result, bool]
+        ] = []
+        identities: set[tuple[int, int]] = set()
+        for name in sorted(_UPSTREAM_FILES):
+            path = run_dir / name
+            description = f"upstream metadata {name}"
+            descriptor, original = _open_regular(
+                path, description, maximum_size=MAX_JSON_BYTES
+            )
+            stack.callback(os.close, descriptor)
+            entries.append((path, description, descriptor, original, True))
+        for path in kernel_files:
+            descriptor, original = _open_regular(
+                path, "kernel metadata file", maximum_size=MAX_HDF5_BYTES
+            )
+            stack.callback(os.close, descriptor)
+            entries.append(
+                (path, "kernel metadata file", descriptor, original, False)
+            )
+        for _, _, _, original, _ in entries:
+            if original.st_nlink != 1:
+                raise ArtifactIntegrityError(
+                    "upstream metadata contains a hard-link alias"
+                )
+            identity = (original.st_dev, original.st_ino)
+            if identity in identities:
+                raise ArtifactIntegrityError(
+                    "upstream metadata contains inode aliases"
+                )
+            identities.add(identity)
+
+        first_documents: dict[str, object] = {}
+        first_file_hashes: dict[str, str] = {}
+        first_kernel_hashes: dict[str, str] = {}
+        for path, description, descriptor, original, is_json in entries:
+            if is_json:
+                payload = _read_descriptor_bounded(
+                    descriptor, MAX_JSON_BYTES, description
+                )
+                document = _parse_canonical_json_payload(payload, description)
+                first_documents[path.name] = document
+                first_file_hashes[path.name] = hashlib.sha256(payload).hexdigest()
+            else:
+                digest, _ = _hash_descriptor(descriptor, description)
+                first_kernel_hashes[path.name] = digest
+            _require_stable_descriptor(descriptor, original, description)
+            _require_path_identity(path, original, description)
+        _validate_authoritative_metadata(first_documents, expected)
+        if expected["kernel_sha256"] not in first_kernel_hashes.values():
+            raise ArtifactIntegrityError(
+                "kernel metadata does not contain the request digest"
+            )
+        first_index = {
+            "files": first_file_hashes,
+            "kernel_files": first_kernel_hashes,
+        }
+
+        second_documents: dict[str, object] = {}
+        second_file_hashes: dict[str, str] = {}
+        second_kernel_hashes: dict[str, str] = {}
+        for path, description, descriptor, original, is_json in entries:
+            _require_stable_descriptor(descriptor, original, description)
+            _require_path_identity(path, original, description)
+            if is_json:
+                payload = _read_descriptor_bounded(
+                    descriptor, MAX_JSON_BYTES, description
+                )
+                document = _parse_canonical_json_payload(payload, description)
+                second_documents[path.name] = document
+                second_file_hashes[path.name] = hashlib.sha256(payload).hexdigest()
+            else:
+                digest, _ = _hash_descriptor(descriptor, description)
+                second_kernel_hashes[path.name] = digest
+            _require_stable_descriptor(descriptor, original, description)
+            _require_path_identity(path, original, description)
+        _validate_authoritative_metadata(second_documents, expected)
+        second_index = {
+            "files": second_file_hashes,
+            "kernel_files": second_kernel_hashes,
+        }
+        if first_documents != second_documents or first_index != second_index:
+            raise ArtifactIntegrityError(
+                "upstream metadata aggregate snapshot mutated"
+            )
+        # A mutation of an early entry while a later entry is undergoing its
+        # second read must not escape merely because the early entry's second
+        # hash already completed. Re-read exact bytes rather than relying on
+        # filesystem timestamp granularity.
+        final_documents: dict[str, object] = {}
+        final_file_hashes: dict[str, str] = {}
+        final_kernel_hashes: dict[str, str] = {}
+        for path, description, descriptor, original, is_json in entries:
+            _require_stable_descriptor(descriptor, original, description)
+            _require_path_identity(path, original, description)
+            if is_json:
+                payload = _read_descriptor_bounded(
+                    descriptor, MAX_JSON_BYTES, description
+                )
+                final_documents[path.name] = _parse_canonical_json_payload(
+                    payload, description
+                )
+                final_file_hashes[path.name] = hashlib.sha256(payload).hexdigest()
+            else:
+                digest, _ = _hash_descriptor(descriptor, description)
+                final_kernel_hashes[path.name] = digest
+            _require_stable_descriptor(descriptor, original, description)
+            _require_path_identity(path, original, description)
+        _validate_authoritative_metadata(final_documents, expected)
+        final_index = {
+            "files": final_file_hashes,
+            "kernel_files": final_kernel_hashes,
+        }
+        if final_documents != second_documents or final_index != second_index:
+            raise ArtifactIntegrityError(
+                "upstream metadata aggregate snapshot mutated after second pass"
+            )
+        kernel_current = os.fstat(kernel_descriptor)
+        if _file_identity(kernel_current) != _file_identity(kernel_original):
+            raise ArtifactIntegrityError("kernel metadata directory mutated")
+        try:
+            kernel_path_current = kernel.lstat()
+        except OSError as error:
+            raise ArtifactIntegrityError(
+                "kernel metadata pathname identity changed"
+            ) from error
+        if (
+            kernel_path_current.st_dev != kernel_original.st_dev
+            or kernel_path_current.st_ino != kernel_original.st_ino
+            or tuple(path.name for path in _directory_entries(kernel))
+            != expected_kernel_names
+        ):
+            raise ArtifactIntegrityError("kernel metadata membership mutated")
+        return hashlib.sha256(_canonical_json_bytes(second_index)).hexdigest()
 
 
 def _verify_run_layout(
@@ -1484,6 +1645,13 @@ def reconstruct_progress(
             raise ArtifactIntegrityError("stale partial trajectory artifact")
         else:
             raise ArtifactIntegrityError(f"unknown trajectory artifact: {path.name}")
+    if (
+        len(trajectory_files) > MAX_BATCH_MEMBERS
+        or len(sidecar_ids) > MAX_BATCH_MEMBERS
+    ):
+        raise ArtifactIntegrityError(
+            "trajectory artifact count exceeds the frozen limit"
+        )
     trajectory_records: dict[str, dict[str, str]] = {}
     file_ids: set[str] = set()
     if not trajectory_files:
@@ -1512,6 +1680,8 @@ def reconstruct_progress(
     batch_paths = _directory_entries(batches)
     if not batch_paths:
         raise ArtifactIntegrityError("run layout has no batch manifests")
+    if len(batch_paths) > MAX_BATCH_MEMBERS:
+        raise ArtifactIntegrityError("batch manifest count exceeds the frozen limit")
     for path in batch_paths:
         if path.is_symlink():
             raise ArtifactIntegrityError("batch entries must not be symlinks")
