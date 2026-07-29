@@ -68,3 +68,8 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
   dependency or project execution. Slurm spooled the batch script, so deriving
   the repository from `BASH_SOURCE[0]` produced `fatal: Not a git repository`.
   The entrypoint now requires an explicit absolute `ROUTE_D_PLUS_REPO_ROOT`.
+- Slurm job `23001017` ran for 3 minutes 35 seconds on `e01r03`. The compute
+  node could not resolve the package index host, so `pip` could not upgrade
+  itself. The job was cancelled after the final retry to release the GPU. This
+  establishes that environment installation must run on the internet-enabled
+  login node and the compute allocation must only validate the locked venv.

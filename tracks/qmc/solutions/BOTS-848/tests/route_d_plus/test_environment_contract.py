@@ -62,10 +62,12 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "JAX_PROFILE:?" in bootstrap
     assert "ROUTE_D_PLUS_RUN_DIR:?" in bootstrap
     assert "tracks/qmc/results/" in bootstrap
+    assert "all|install|validate" in bootstrap
     assert "jax[cuda12]" in bootstrap
     assert "jax[cuda13]" in bootstrap
     assert "--require-platform" in bootstrap
     assert "ROUTE_D_PLUS_REPO_ROOT:?" in batch
+    assert 'ROUTE_D_PLUS_MODE="validate"' in batch
     assert "BASH_SOURCE[0]" not in batch
     assert "jsonschema" in requirements
     assert "validate_manifest(manifest)" in capture

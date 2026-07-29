@@ -18,5 +18,6 @@ if [[ ! -d "${repo_root}/.git" ]]; then
 fi
 
 export ROUTE_D_PLUS_RUN_DIR="${repo_root}/tracks/qmc/results/${ROUTE_D_PLUS_RUN_ID}"
+export ROUTE_D_PLUS_MODE="validate"
 
 bash "${script_dir}/bootstrap.sh"
