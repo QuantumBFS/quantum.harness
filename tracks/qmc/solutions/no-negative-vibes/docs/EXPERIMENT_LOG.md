@@ -1653,3 +1653,28 @@ The CPU shard archive SHA-256 is
 These are now the leading finite-depth survivors.  All 76 cores immediately
 continue with independent exact-gated adversarial searches at lengths
 60, 80, 100, and 150.
+
+### First long-word adversarial campaign
+
+Commit `4daabad` supplied a generic discovery scanner whose acceptance gate
+is always the frozen exact rational determinant.  The 76 independent runs
+used 128 restarts each at lengths 60, 80, 100, and 150, split
+25/25/26 across seeds 117/132/147.  The resulting 304 exact replays were
+all strictly positive:
+
+- seed 117: 25/25 runs, 100 exact winners, no negative;
+- seed 132: 25/25 runs, 100 exact winners, no negative;
+- seed 147: 26/26 runs, 104 exact winners, no negative.
+
+The complete merged result archive SHA-256 is
+`9d9a0d3fd48687ee1cdf9b6a9dee61d9d43a40924feec937b6833d9e351a3920`
+(the CPU-only archive is
+`33225234d71dcecf2ff00f74e8175b5470a993191dd651d1bcbbf212ed950a23`).
+
+This campaign also exposed a useful numerical failure mode: the
+double-precision rescaled-determinant fallback marked many winning words as
+negative, but every exact replay was positive.  The exact gate prevented a
+false rejection, and identical restarts are stopped.  The next campaign
+must rank words with a high-precision objective before exploring lengths
+250, 400, and 600.  In parallel, proof search now targets the common
+coupled oddcycle structure rather than independent exterior-grade cones.
