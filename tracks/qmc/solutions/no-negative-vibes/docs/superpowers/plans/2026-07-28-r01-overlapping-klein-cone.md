@@ -1313,125 +1313,415 @@ git push shared work/zibo/representation-cones
 
 ---
 
-### Task 9: Noncommutativity, topology, and known-reduction audit
+### Task 9: Exact fixture classifier and fixed-structure bridge no-go
+
+**Task 9 base:** start only from the reviewed and shared Task 8 candidate
+`408266c3c85bc8466683364f545a16e0d79559f0`. Do not run a new scientific
+scan. Task 9 aggregates and exactly replays the committed R01 evidence.
 
 **Files:**
 
-- Modify: `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
-- Modify: `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
-- Create: `tracks/qmc/solutions/no-negative-vibes/docs/OVERLAPPING_KLEIN_RESULTS.md`
+- Modify:
+  `tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py`
+- Modify:
+  `tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py`
+- Create:
+  `tracks/qmc/solutions/no-negative-vibes/docs/OVERLAPPING_KLEIN_RESULTS.md`
+- Modify:
+  `tracks/qmc/solutions/no-negative-vibes/docs/EXPERIMENT_LOG.md`
+- Modify `docs/RESEARCH_OPERATIONS.md` only if a genuinely new reusable
+  operational lesson appears.
 
-**Interfaces:**
+The fixture and all ignored raw JSON files are read-only. Task 10, not Task 9,
+owns the proposal ledger, README, collaborator update, and protocol terminal
+routing.
 
-- Produces:
-  - `certificate_operator(system, certificate) -> sympy.ImmutableSparseMatrix`
-  - `commutator_is_nonzero(left, right) -> bool`
-  - `support_graph_invariants(nonzero_coefficients: Mapping[str, str | sympy.Expr]) -> dict[str, int | bool]`
-  - `common_bilinear_forms(one_particle_generators) -> tuple[sympy.ImmutableMatrix, ...]`
-  - `parity_word_trace_audit(rays, *, depths: tuple[int, ...], seed: int) -> dict[str, object]`
-  - `classify_r01_fixture(payload) -> dict[str, object]`
-
-- [ ] **Step 1: Write failing audit tests**
+**Only public interface added in Task 9:**
 
 ```python
-def test_commutator_audit_is_exact() -> None:
-    left = sp.Matrix([[0, 1], [0, 0]])
-    right = sp.Matrix([[0, 0], [1, 0]])
-    assert commutator_is_nonzero(left, right)
-    assert not commutator_is_nonzero(left, 2 * left)
-
-
-def test_support_graph_detects_loop_and_degree_three() -> None:
-    certificate = {
-        "h0<-1": "1",
-        "h1<-2": "1",
-        "h2<-0": "1",
-        "h2<-3": "1",
-    }
-    invariants = support_graph_invariants(certificate)
-    assert invariants["cycle_rank"] >= 1
-    assert invariants["max_degree"] >= 3
-
-
-def test_common_bilinear_form_solver_replays_every_returned_form() -> None:
-    generators = (
-        sp.Matrix([[0, 1], [0, 0]]),
-        sp.Matrix([[0, 0], [1, 0]]),
-    )
-    for form in common_bilinear_forms(generators):
-        for generator in generators:
-            assert generator.T * form + form * generator == sp.zeros(2)
-
-
-def test_word_trace_audit_checks_both_parities_at_requested_depths() -> None:
-    rays = (
-        sp.diag(0, 1, 2, 3),
-        sp.diag(3, 2, 1, 0),
-    )
-    result = parity_word_trace_audit(rays, depths=(2, 5), seed=20260728)
-    assert [cell["depth"] for cell in result["cells"]] == [2, 5]
-    assert all(cell["even_trace"] > 0 for cell in result["cells"])
-    assert all(cell["odd_trace"] > 0 for cell in result["cells"])
+def classify_r01_fixture(
+    payload: Mapping[str, object],
+) -> dict[str, object]:
+    """Validate and exactly classify the overlap-klein-v1 R01 fixture."""
 ```
 
-- [ ] **Step 2: Implement exact audits**
+The classifier must not mutate `payload`. Malformed schema, incomplete
+registered coverage, inconsistent provenance/evidence, a missing required
+exact certificate, or an exact replay failure raises `ValueError`.
 
-Build graph invariants from nonzero hopping/pairing labels. For
-number-conserving certificates, reconstruct the one-particle matrices and
-solve the homogeneous linear system
-`A_i.T * eta + eta * A_i = 0` over symmetric `eta`. Report nullity, ranks, and
-signatures of exact/numerical basis combinations; do not claim “not split”
-merely because one chosen `eta` is singular.
+Do **not** implement, export, or test the following survivor-only helpers on
+the current all-zero fixture:
 
-For BdG certificates, document the Fock/Spin branch as primary and mark the
-full arbitrary-similarity MTR/reflection classification as unresolved unless a
-constructive common form is found. The result document must distinguish
-proved exclusions from numerical/structural evidence.
+```text
+certificate_operator
+commutator_is_nonzero
+support_graph_invariants
+common_bilinear_forms
+parity_word_trace_audit
+```
 
-For every selected ray pair, run deterministic alternating and seeded words at
-depths `2,3,4,8,12`. Compute the even and odd Fock traces directly after
-positive rescaling. This audits representation conventions only; the exact
-Metzler cone argument remains the proof.
+The fixture contains no exact primal ray. A dual certificate lives in
+inequality-row dual space and cannot be treated as a coefficient vector,
+operator, or support graph. Therefore commutator, topology, common-form,
+known-reduction, and word-trace audits are preempted, not failed.
 
-- [ ] **Step 3: Select two exact feasible rays or close by no-go**
+The old common-form test was also vacuous: iterating over an empty result
+checked nothing. If a future exact survivor justifies that helper, its initial
+RED test must require a complete nonempty canonical basis, for example the
+single generator `diag(1,-1)` returning exactly the nonsingular symmetric form
+`[[0,1],[1,0]]`, with exact invariance and signature `(1,1)`.
 
-If any bridge anchor survives, search exact fixture rays for a pair with
-nonzero commutator and the required graph topology. If none exists, state the
-strongest exact result actually proved:
+**Branch gate:**
 
-- all bridge coefficients vanish;
-- only one bridge type survives;
-- all feasible recorded rays commute;
-- or evidence is incomplete because a certificate stayed `numerical-only`.
+```text
+validate fixture-v2 structure and complete registered anchor coverage
+  |
+  +-- any replayed exact F --> survivor-branch-required
+  |                           (future survivor audits require a new amendment)
+  |
+  +-- no F, any N ----------> evidence-incomplete
+  |
+  +-- all 24 exact Z -------> exact-bridge-coordinate-no-go
+```
 
-Do not upgrade beyond the fixture.
+Here `F` means `certified-feasible` with a replaying exact primal, `N` means
+`numerical-only`, and `Z` means `certified-zero` with both signs infeasible
+and one replaying exact double-dual certificate. The committed fixture has
+2 experiments, 4 cells, 24 anchors, 24 `Z`, zero `F`, and zero `N`.
 
-- [ ] **Step 4: Write the human-readable result**
+- [ ] **Step 1: Review and publish this plan amendment alone**
 
-`OVERLAPPING_KLEIN_RESULTS.md` must contain:
+Have a fresh theory/spec reviewer check the branch gate, deferred interfaces,
+certificate semantics, non-overclaim boundaries, TDD order, and dual-host
+verification. Fix every finding, run `git diff --check`, then commit and push
+only this plan:
 
-- exact transform and basis conventions;
-- system dimensions and support masks;
-- R01-E001/E002 tables;
-- explicit primal rays or dual identities;
-- noncommutativity/topology audit;
-- known-reduction status;
-- arbitrary-depth trace proof if a cone survives;
-- exact no-go statement if bridges vanish;
-- physical consequence for R02;
-- reproducibility commands and fixture links.
+```text
+docs: amend Task 9 for the exact no-go branch
+```
 
-- [ ] **Step 5: Run tests, commit, and push**
+Confirm by read-only remote query that the shared topic branch resolves to the
+exact amendment SHA before writing the RED tests.
+
+- [ ] **Step 2: RED — specify the committed-fixture outcome**
+
+Import `copy` and `classify_r01_fixture`. Add module-scoped fixtures that load
+the JSON once and call the classifier on a deep copy once. The happy-path test
+must require:
+
+```python
+{
+    "outcome": "exact-bridge-coordinate-no-go",
+    "fixture_schema_version": 2,
+    "protocol": "overlap-klein-v1",
+    "totals": {
+        "experiments": 2,
+        "cells": 4,
+        "anchors": 24,
+        "certified_zero": 24,
+        "certified_feasible": 0,
+        "numerical_only": 0,
+        "dual_certificates": 24,
+        "primal_certificates": 0,
+    },
+}
+```
+
+It must require the four ordered cell summaries:
+
+```text
+R01-E001 number-conserving rings-bridges
+  [560,24]: h0<-4 h1<-5 h4<-0 h5<-1
+R01-E001 number-conserving rings-diagonals-bridges
+  [748,32]: h0<-4 h1<-5 h4<-0 h5<-1
+R01-E002 bdg rings-bridges
+  [1052,42]: h0<-4 h1<-5 h4<-0 h5<-1 pa0,4 pa1,5 pc0,4 pc1,5
+R01-E002 bdg rings-diagonals-bridges
+  [1456,58]: h0<-4 h1<-5 h4<-0 h5<-1 pa0,4 pa1,5 pc0,4 pc1,5
+```
+
+Every cell has an empty `unresolved_labels` list. The audits are exactly:
+
+```python
+{
+    "noncommutativity": "not-applicable-no-bridge-primal",
+    "topology": "preempted-by-exact-bridge-no-go",
+    "known_reduction": "not-applicable-empty-survivor-set",
+    "word_trace": "skipped-no-survivor-rays",
+}
+```
+
+Forbid top-level keys `rays`, `operators`, `commutators`, `support_graph`,
+`forms`, `word_traces`, and `known_mechanism`. The valid RED is the missing
+`classify_r01_fixture` import, not an unrelated collection/environment error.
+Keep this failure together with the fail-closed mutation failures in Step 3
+before making the RED commit.
+
+Add a non-mutation test that keeps the exact object passed to the classifier,
+compares it with a pre-call deep copy after a successful return, and requires
+equality. Passing a deep copy of the module fixture alone does not prove this
+contract.
+
+- [ ] **Step 3: RED — specify fail-closed mutation behavior**
+
+All mutations use `copy.deepcopy`; never write the committed fixture. Tests
+must prove structural rejection happens before `build_system` for:
+
+- missing/extra/duplicate or reordered registered anchors;
+- wrong anchor kind;
+- wrong experiment/source commit/family/mask/system shape;
+- wrong transform/exact field/schema/protocol;
+- wrong raw path, SHA, host role, role order, workers, packages, BLAS strings,
+  spawn method, payload-equality flag, or nonpositive wall time;
+- `certified-zero` without both infeasible statuses or a dual-shaped
+  `zero_certificate`;
+- `certified-feasible` without at least one sign-local exact primal payload;
+- `numerical-only` carrying a zero certificate.
+
+Also require:
+
+- replacing the first `Z` by well-formed `N` returns only
+  `evidence-incomplete` and does not call `build_system`;
+- corrupting the first double dual raises an exact replay error;
+- a false or sign-mismatched primal raises rather than becoming a survivor.
+
+Add a fast instrumented call-count test with monkeypatched shape-compatible
+systems and parsed-certificate objects. On the all-`Z` fixture it must observe
+exactly four `build_system` calls (one per ordered cell) and exactly 24
+`certificate_from_json` calls (one per dual), with no direct
+`verify_zero_dual`/`verify_primal` calls. This protects the single-replay
+architecture without adding a second expensive exact replay to the normal
+module run.
+
+Run the happy-path and every mutation node while the public interface is still
+absent. Preserve the valid missing-interface failure for the complete RED
+surface, then commit all RED tests together:
+
+```text
+test: specify exact R01 no-go classification
+```
+
+The structural pass pins exactly:
+
+```text
+R01-E001 @ 24c80c4e1c1f182278e799b7f5de53deb65bf2f4
+R01-E002 @ d42786ae8a47899c90ac4811424c66aad2910713
+```
+
+and the reviewed fixture-v2 metadata for all eight raw records: exact relative
+path and byte SHA-256, WSL/CPU public host role, smoke then production, workers
+`1/14`, `1/14`, `1/14`, `1/62`, package versions
+`numpy=2.4.6`, `scipy=1.17.1`, `sympy=1.14.0`, `oracle=0.1.0`, all three BLAS
+thread strings `"1"`, process start method `spawn`, and positive exact stored
+wall times. This is a structural classification gate; Task 8's
+`oracle.r01_evidence` remains the byte/raw-content validation gate.
+
+- [ ] **Step 4: GREEN — implement one structural path and one replay path**
+
+Add private immutable expected metadata and private helpers in
+`overlap_klein.py`. Before compiling any system, validate the complete
+classification pattern and select `N`, `F`, or all-`Z`.
+
+- `N` branch returns only outcome/schema/protocol and the ordered unresolved
+  experiment/family/mask/label records. It does not report verified-zero
+  totals because those other duals were intentionally not replayed.
+- `F` branch parses every returned sign-local primal exactly once and returns
+  `survivor-branch-required`, `replayed_primals`, and unresolved records.
+  Fixture input and returned JSON both use the sign-local key `certificate`;
+  do not substitute the legacy key `exact_primal_certificate` or return
+  dataclass/SymPy objects. A mere `certified-feasible` string is never
+  sufficient.
+- all-`Z` builds each `(family, mask)` system once, checks its stored shape,
+  parses every double dual once, and returns the exact no-go summary.
+
+The alternate outputs are exactly:
+
+```python
+{
+    "outcome": "evidence-incomplete",
+    "fixture_schema_version": 2,
+    "protocol": "overlap-klein-v1",
+    "unresolved": [
+        {
+            "experiment_id": str,
+            "family": str,
+            "mask": str,
+            "label": str,
+        },
+    ],
+}
+```
+
+and:
+
+```python
+{
+    "outcome": "survivor-branch-required",
+    "fixture_schema_version": 2,
+    "protocol": "overlap-klein-v1",
+    "replayed_primals": [
+        {
+            "experiment_id": str,
+            "family": str,
+            "mask": str,
+            "label": str,
+            "sign": int,  # exactly +1 or -1
+            "certificate": Mapping[str, object],
+        },
+    ],
+    "unresolved": [
+        {
+            "experiment_id": str,
+            "family": str,
+            "mask": str,
+            "label": str,
+        },
+    ],
+}
+```
+
+`certificate_from_json` already verifies the exact identity. Do not call
+`verify_zero_dual` or `verify_primal` again after it succeeds. Check the parsed
+type, anchor label, and sign binding. Do not create zero rays or invoke any
+deferred audit.
+
+Refactor
+`test_r01_fixture_classifications_are_consistent_and_all_certificates_replay`
+to consume the same module-scoped verified summary. One normal module run must
+replay all 24 duals once, not twice.
+
+Commit GREEN:
+
+```text
+research: classify the exact R01 bridge no-go
+```
+
+- [ ] **Step 5: Write the exact result document**
+
+Create `OVERLAPPING_KLEIN_RESULTS.md` only after GREEN. It must contain:
+
+1. status `exact-bridge-coordinate-no-go` and strict fixed scope;
+2. transform `U = U_[2,3,4,5] U_[0,1,2,3]`, even/odd Fock convention,
+   exact field `Q(sqrt(2))`, and fixed basis/label order;
+3. the 2/4/24/24/0/0 evidence inventory and all four system shapes;
+4. a per-coordinate table pointing to each fixture `zero_certificate`;
+5. proof: for every registered coordinate `a`,
+   `A^T y_+ = e_a`, `A^T y_- = -e_a`, and `y_+,y_- >= 0`, hence
+   `x_a = 0` for every exact cone element;
+6. the two-mask conclusions
+   `projection_B_NC(K_NC(M)) = {0}` and
+   `projection_B_BdG(K_BdG(M)) = {0}`;
+7. Hermitian hopping and `pc=pa` corollaries because each directed coordinate
+   is already zero;
+8. coordinate-subcone monotonicity: additional exact coordinate restrictions
+   inherit the result, but adding basis directions is not covered;
+9. the four preempted audit statuses above;
+10. physical consequence: close only this fixed six-mode `U_6` route, not the
+    four-mode positive-coefficient HS target;
+11. fixture/protocol/source/raw provenance and reproducibility commands.
+
+The document must explicitly state that it does **not** prove:
+
+- the whole cone is `{0}`;
+- all feasible internal rays commute or lack graph topology;
+- a split, contraction, Kramers, Majorana, MTR, or other known reduction;
+- failure of another transform, support, basis, nonlinear micro-word,
+  gauge/ancilla, `N=8`, general BdG, Hamiltonian, or HS construction.
+
+Forbidden unqualified phrases include “full BdG no-go”, “all feasible rays
+commute”, “no loop topology survives”, “not split”, “novel mechanism”, and
+“dual weights are generator coefficients”.
+
+The strongest terminal sentence is:
+
+```text
+For the fixed six-mode overlap_klein_circuit, exact field Q(sqrt(2)),
+the tested real number-conserving/BdG basis spans, and the two preregistered
+masks, every registered cross-cluster hopping/pairing coordinate vanishes
+identically in the exact Metzler cone.
+```
+
+Record the exact aggregation and every implementation/replay attempt that
+occurs before candidate freeze in `EXPERIMENT_LOG.md`. Commit the result
+document/log after implementation and preserve the separate RED commit.
+Post-freeze WSL/CPU/review evidence belongs to the ignored immutable Task 9
+SDD report described below, so recording a successful final gate cannot
+mutate the candidate it verifies.
+
+- [ ] **Step 6: Freeze and verify the exact candidate on both hosts**
+
+From the solution directory, with `PYTHONPATH=.` and all three BLAS thread
+limits equal to `1`, run the new mutation nodes, then in one pytest process:
 
 ```bash
-PYTHONPATH=. python -m pytest tests/test_overlap_klein.py -q
-PYTHONPATH=. python -m pytest tests -q
-git add tracks/qmc/solutions/no-negative-vibes/oracle/overlap_klein.py \
-        tracks/qmc/solutions/no-negative-vibes/tests/test_overlap_klein.py \
-        tracks/qmc/solutions/no-negative-vibes/docs/OVERLAPPING_KLEIN_RESULTS.md
-git commit -m "research: close overlapping Klein cone audit"
-git push shared work/zibo/representation-cones
+python -m pytest \
+  tests/test_overlap_klein.py::test_r01_fixture_classifies_exact_bridge_coordinate_no_go \
+  tests/test_overlap_klein.py::test_r01_fixture_classifications_are_consistent_and_all_certificates_replay \
+  -q
 ```
+
+Commit all tracked candidate changes and logs, require a clean worktree,
+create/verify/hash a complete bundle, transfer it by unique `.part` paths, and
+fast-forward the clean WSL and CPU clones to the exact candidate SHA.
+
+Use detached status-last wrappers. WSL runs the focused Task 9 nodes and then
+the full solution suite. CPU runs in one process:
+
+```bash
+python -m pytest \
+  tests/test_overlap_klein.py::test_r01_fixture_classifies_exact_bridge_coordinate_no_go \
+  tests/test_overlap_klein.py::test_r01_fixture_classifications_are_consistent_and_all_certificates_replay \
+  tests/test_overlap_klein.py::test_r01_classifier_rejects_a_corrupted_exact_double_dual \
+  -q
+```
+
+Require explicit zero exit codes, final pytest summaries, exact candidate
+SHAs, clean remote worktrees, and hashes of final log/status files. A dropped
+SSH connection is an operational attempt, not a verdict. Record every
+post-freeze wrapper, transport, WSL/CPU test, and review attempt in an ignored
+append-only Markdown report under
+`.superpowers/sdd/2026-07-28-r01-overlapping-klein-cone/`, with hashes pointing
+to the immutable remote log/status artifacts. If a failure requires a tracked
+code, test, claim, or reusable-operations fix, first add that failure and fix
+to the tracked Markdown, commit a new candidate, and restart both-host
+verification. A successful final gate never causes a tracked edit.
+
+- [ ] **Step 7: Independent final review and push**
+
+A fresh reviewer must inspect the complete base-to-candidate diff and verify:
+
+- only `classify_r01_fixture` was added; all five ray-only helpers are absent;
+- structural validation precedes exact replay and the `N` shortcut;
+- the four systems are built once and 24 duals replay once per normal module
+  invocation;
+- parser success is not followed by duplicate certificate verification;
+- no dual is interpreted as a primal/operator/graph;
+- fixture pointers, counts, shapes, commits, raw hashes, and claim scope;
+- no secret, ignored raw, `.superpowers`, or `AGENT_HANDOFF.md` is tracked;
+- WSL/CPU evidence belongs to the exact clean candidate.
+
+Fix every finding and repeat all verification/review gates. Push only the
+zero-finding candidate to `work/zibo/representation-cones`, then use a
+read-only remote query to confirm the exact SHA. Do not merge internal PR #3,
+touch the organizer branch, or update PR #178.
+
+The ignored Task 9 report is the final verification manifest: it records all
+post-freeze attempts, exact candidate and bundle SHA-256, WSL/CPU log/status
+hashes, reviewer identity/verdict, push output, and read-only remote SHA.
+This satisfies the Markdown experiment-memory requirement without creating
+the self-invalidating cycle “test candidate -> edit tracked log -> retest”.
+
+Task 9 hands Task 10 exactly this terminal state:
+
+```text
+falsified — for overlap-klein-v1's fixed six-mode transform and the tested
+number-conserving/BdG basis spans on the two preregistered masks, exact
+double-dual certificates force every registered cross-cluster coordinate to
+zero.
+```
+
+It must not hand off `known-reduction`, `proof-candidate`,
+`physical-candidate`, “all rays commute,” or “full BdG no-go.”
 
 ---
 
