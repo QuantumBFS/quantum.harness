@@ -872,3 +872,80 @@ then ask whether a similarity transform maps that nonlocal Hermitian model to
 a local non-Hermitian Hamiltonian with real spectrum. This enlarges the
 constructive search space without weakening the required Hermiticity of the
 primary Hamiltonian or the positivity of the auxiliary-field weights.
+
+## 2026-07-29 — Stage-2 high-precision first-failure replay
+
+The 514 Stage-2 `uncertain-high-precision` first-failure words were replayed
+from exact rational cards with an 80/120/180 precision ladder, conditional
+260-digit escalation, and exact rational determinant adjudication.
+
+- source commit:
+  `216e1bb8185ef17193f8c29ee924b16793b8cfed`;
+- run id:
+  `exterior-survivor-pressure-v1-high-precision-v1`;
+- replay plan hash:
+  `43c137244b5ae67d5d35240def5166d056e78a3c053665db7493e0a53bd6656c`;
+- WSL workers 0--13 and CPU workers 14--75, one BLAS thread each;
+- terminal 514/514, zero missing or stale.
+
+| adjudication | count |
+|---|---:|
+| confirmed nonnegative | 511 |
+| confirmed negative | 3 |
+| unresolved high precision | 0 |
+
+Interpretation: the conditioning gate was conservative and correctly avoided
+false numerical claims. The 511 confirmed-nonnegative records prove only the
+sign of the first word that stopped the Stage-2 float scan; they are not yet
+depth-8 survivors because the remaining words were never visited. They enter
+a separate exact-fallback continuation over the full depth-5--8 tranche. The
+three exact negatives are terminal rejections.
+
+Local evidence SHA-256:
+
+- replay plan:
+  `55671ca5181a6dc09dfc229658b43d98377b54342b0761df6d07c31d4e7a01da`;
+- compact summary:
+  `bdc6c107729660315324b56756fff7c33444d88f3da7f66febbed7ced5ceb53a`;
+- CPU candidate archive:
+  `e83e34a44fa7771ca49952d7fad8465f9d980c2a4a7c97aeb046e9f7a68d5326`.
+
+## 2026-07-29 — Exterior survivor depth-12 Stage 3
+
+The 1,051 candidates that had completed every Stage-2 word without a failure
+were screened over every mixed two-atom word at depths 9, 10, 11, and 12.
+There are 7,672 words per complete candidate and 8,063,272 possible
+classifications before early stopping.
+
+- source commit:
+  `30f6df97bb0f9152ddd615e977d713e23b284c59`;
+- run id:
+  `exterior-survivor-depth12-v1`;
+- protocol hash:
+  `3f6a44131b03c58e5e3006bff678e41c7b59e35676c4324606e657543aa4ce26`;
+- parent protocol hash:
+  `29c578cd44f453fa27855bc22406968d5435585b7d01f3bf5d07c4f7df63e880`;
+- WSL workers 0--13 and CPU workers 14--75, one BLAS thread each;
+- 1,051/1,051 terminal, zero missing or stale, 5,830,398 words actually
+  evaluated after early stopping.
+
+| status | count |
+|---|---:|
+| stable negative | 52 |
+| uncertain, exact replay required | 307 |
+| depth-12 zero-failure survivor | 692 |
+
+The 692 zero-failure cards advance to a deeper word tranche and exact
+shared-cone/certificate search. The 307 uncertain first failures enter a
+disjoint high-precision replay; they are not survivors. Local evidence
+SHA-256 is
+`5b41795ca29e84ab5bad4ec326ce10d29de6501a6736897817e1ee8a0a0cc8d1`
+for the Markdown summary and
+`eaf062df9f8b3dee430b5bdd4ef96da06955c8e611e23ddce3cfb715a065dd05`
+for the complete JSON summary.
+
+Transferable scientific lesson: alternating and near-alternating long words
+dominate the conditioning-limited queue, while stable negatives still appear
+as late as depth 12. Finite survival must therefore be paired with exact cone
+structure; simply extending random histories is less informative than
+exhaustive mixed-word tranches plus exact replay.
