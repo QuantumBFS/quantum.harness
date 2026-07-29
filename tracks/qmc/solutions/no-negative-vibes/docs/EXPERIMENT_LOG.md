@@ -1317,3 +1317,47 @@ Local evidence SHA-256:
   `f19ff959d72d97d5e8e7d7cf763934ca2150ca8350b5e98ad92f102e0d1e3de9`;
 - CPU archive:
   `7f2e36d96a4f393940cd136d36e9a870dd3c28ef2ed574705b8a7f1c2a7ecb55`.
+
+## 2026-07-29 — Structural ranking of the two depth-12 continuations
+
+The continuation-aware ranker at commits `d8dc6f4`, `a06a1c5`, and
+`82bdf48` applied the same exact structural gates to both newly completed
+populations. Two focused tests passed on WSL.
+
+- Exact-fallback population: 474 survivors, of which 351 already require
+  cancellation between exterior sectors, 122 are known controls, and only
+  seeds 132 and 147 are exact5 trace-clean non-control candidates.
+  Result SHA-256:
+  `285e2e26b11a0c54c625deae55c66fe1dbefa98ebedcd0b077f787c5e0fc02f8`.
+- Stage-3-HP continuation: 303 survivors, of which 201 already require
+  cancellation, 97 are known controls, and seed 117 is the only exact5
+  trace-clean non-control candidate.
+  Result SHA-256:
+  `34c6ee1836c8f211baa391849ba739de2b12b43d6dfea24f6c10352ff7e53ece`.
+
+Most cancellation witnesses occur at depth one or two. This changes the
+search policy: do not spend arbitrary-depth cone effort on every numerical
+survivor. Keep seeds 132, 147, and 117 as the small trace-clean comparison
+set, while using seed 61 as the primary full-Fock cancellation target.
+
+## 2026-07-29 — Seed-61 positive rational-series audit
+
+Commit `40ad5c4` probes the exact series
+`f(w) = det(I + B_w)` through its two-letter Hankel matrices. Two focused
+tests passed on WSL.
+
+- exact Hankel ranks through total lengths 0, 2, 4, 6, and 8 are
+  `1, 3, 7, 15, 31`, confirmed over two large prime fields;
+- every square Hankel matrix is strictly positive and full rank, so its
+  nonnegative rank is also exactly `1, 3, 7, 15, 31`;
+- the exact transpose-reversal/complement symmetry holds;
+- both canonical rank-31 exact-NMF gauges fail one-symbol nonnegative
+  closure, with hundreds of robustly negative transition entries and NNLS
+  relative residuals between about 2.1% and 3.3%.
+
+This is a successful early stop, not a no-go theorem: it rules out spending
+time on positive realizations below dimension 31 and rejects the two
+canonical gauges, but it does not exclude a larger positive dilation. The
+next numerical target is therefore a coupled dimension-32 or dimension-40
+realization with transpose-reversal tying, promoted only if its residual
+reaches machine zero and an exact rational replay succeeds.
