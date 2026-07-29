@@ -104,9 +104,28 @@ using .FiniteBathCheckpoint:
         )
     @test resumed_active === nothing
     @test resumed_state === terminal_state
+    @test FiniteBathObservables._validate_resume_sectors(
+        context, terminal_state, nothing
+    ) === nothing
+    forged_terminal = ObservableResumeState(
+        terminal_state.cursor,
+        nothing,
+        qn_blocked,
+        merge(
+            terminal_state.data,
+            (;
+                expected_sector =
+                    operator_sector(purification, :creation, :dn),
+            ),
+        ),
+    )
+    @test_throws ArgumentError FiniteBathObservables._validate_resume_sectors(
+        context, forged_terminal, nothing
+    )
 
     direct = FiniteBathParameters(parameters.epsilon, parameters.V)
-    direct_sites, _ = identity_purification(direct)
+    direct_context = build_finite_bath_context(direct)
+    direct_sites = direct_context.sites
     non_qn_blocked = MPS(
         direct_sites,
         ["Up", "Emp", "Emp", "Emp", "Emp", "Emp"],
@@ -121,6 +140,29 @@ using .FiniteBathCheckpoint:
     @test non_qn_zero.status === :zero
     @test non_qn_zero.psi === nothing
     @test non_qn_zero.expected_sector === nothing
+    direct_terminal = ObservableResumeState(
+        ObservableCursor(
+            :green, 1, :up, :creation, :terminal
+        ),
+        nothing,
+        direct_context.identity,
+        (; branch_status = :zero, expected_sector = nothing),
+    )
+    @test FiniteBathObservables._validate_resume_sectors(
+        direct_context, direct_terminal, nothing
+    ) === nothing
+    forged_direct_terminal = ObservableResumeState(
+        direct_terminal.cursor,
+        nothing,
+        direct_terminal.thermal_psi,
+        merge(
+            direct_terminal.data,
+            (; expected_sector = blocked_sector),
+        ),
+    )
+    @test_throws ArgumentError FiniteBathObservables._validate_resume_sectors(
+        direct_context, forged_direct_terminal, nothing
+    )
     @test_throws ArgumentError FiniteBathObservables._apply_impurity_operator(
         non_qn_blocked,
         direct_sites[1],
@@ -205,9 +247,16 @@ end
         )
         mktempdir() do root
             write_checkpoint_generation(
-                root, identity, CheckpointCursor(0), branch.psi, state
+                root,
+                identity,
+                CheckpointCursor(0),
+                branch.psi,
+                state;
+                purification,
             )
-            loaded = load_current_checkpoint(root, identity)
+            loaded = load_current_checkpoint(
+                root, identity; purification
+            )
             @test loaded.resume_state.cursor.insertion === insertion
             @test loaded.resume_state.data.expected_sector == expected
             @test flux(loaded.psi) ==
@@ -985,6 +1034,246 @@ end
             parameters; common..., resume = loaded
         )
         assert_observable_equivalence(resumed, uninterrupted)
+    end
+end
+
+function phase_aligned_mps_error(reference, candidate)
+    overlap = inner(reference, candidate)
+    abs(overlap) > eps(Float64) || return Inf
+    aligned = copy(candidate)
+    aligned[1] *= conj(overlap / abs(overlap))
+    return norm(aligned - reference)
+end
+
+@testset "QN shifted branches resume from genuine HDF5 interruptions" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    parameters = FiniteBathParameters(
+        validated; U = 0.8, epsilon_d = -0.4, mu = 0.0
+    )
+    purification = qn_dual_purification(parameters, validated)
+    for insertion in (:creation, :annihilation)
+        common = (;
+            beta = 0.04,
+            tau = [0.02],
+            purification,
+            green_insertion = insertion,
+            time_step = 0.02,
+            cutoff = 1.0e-12,
+            maxdim = 32,
+        )
+        uninterrupted = finite_bath_observables(parameters; common...)
+        identity = CheckpointIdentity(;
+            request_sha256 = repeat("1", 64),
+            input_payload_sha256 = repeat("2", 64),
+            bath_sha256 = validated.source_bath_sha256,
+            bath_representation = "chain",
+            chain_mapping_sha256 = validated.mapping_sha256,
+            solver_settings = Dict(
+                "beta" => common.beta,
+                "green_insertion" => String(insertion),
+            ),
+            source_hashes = Dict(
+                "observables" => repeat("3", 64)
+            ),
+            project_toml_sha256 = repeat("4", 64),
+            manifest_toml_sha256 = repeat("5", 64),
+            julia_version = string(VERSION),
+            itensors_version = string(Base.pkgversion(ITensors)),
+            itensormps_version = string(Base.pkgversion(ITensorMPS)),
+            hdf5_version = "0.17.3",
+            checkpoint_schema = 1,
+            writer_version = "1.0.0",
+        )
+        mktempdir() do root
+            target_written = Ref(false)
+            target_psi = Ref{Any}(nothing)
+            interruption = try
+                finite_bath_observables(
+                    parameters;
+                    common...,
+                    checkpoint_manager = (psi, state) -> begin
+                        completed_steps =
+                            state.evolution_state === nothing ?
+                            0 :
+                            state.evolution_state.completed_steps
+                        write_checkpoint_generation(
+                            root,
+                            identity,
+                            CheckpointCursor(completed_steps),
+                            psi,
+                            state;
+                            purification,
+                        )
+                        cursor = state.cursor
+                        if cursor.phase === :green &&
+                           cursor.tau_index == 1 &&
+                           cursor.spin === :up &&
+                           cursor.insertion === insertion &&
+                           cursor.segment === :after &&
+                           state.evolution_state === nothing
+                            target_psi[] = copy(psi)
+                            target_written[] = true
+                        end
+                    end,
+                    stop_requested = () -> target_written[],
+                )
+                nothing
+            catch error
+                error
+            end
+            @test interruption isa ObservableInterrupted
+            @test target_written[]
+
+            loaded = load_current_checkpoint(
+                root, identity; purification
+            )
+            expected =
+                operator_sector(purification, insertion, :up)
+            @test loaded.resume_state.cursor ==
+                  ObservableCursor(
+                :green, 1, :up, insertion, :after
+            )
+            @test loaded.resume_state.data.expected_sector == expected
+            @test flux(loaded.psi) ==
+                  QN(("Nf", expected.nf, -1), ("Sz", expected.sz))
+            @test siteinds(loaded.psi) == siteinds(target_psi[])
+            @test all(
+                inds(loaded.psi[index]) == inds(target_psi[][index])
+                for index in eachindex(loaded.psi)
+            )
+            @test phase_aligned_mps_error(
+                target_psi[], loaded.psi
+            ) <= 1.0e-11
+
+            resumed_cursors = ObservableCursor[]
+            resumed = finite_bath_observables(
+                parameters;
+                common...,
+                resume = loaded,
+                checkpoint_manager = (_, state) ->
+                    push!(resumed_cursors, state.cursor),
+            )
+            assert_observable_equivalence(resumed, uninterrupted)
+            @test !any(
+                cursor ->
+                    cursor.phase === :green &&
+                    cursor.tau_index == 1 &&
+                    cursor.spin === :up &&
+                    cursor.segment === :before,
+                resumed_cursors,
+            )
+            @test resumed.diagnostics.green_up[1].settings.before_steps ==
+                  uninterrupted.diagnostics.green_up[1].settings.before_steps
+            @test resumed.diagnostics.green_up[1].settings.after_steps ==
+                  uninterrupted.diagnostics.green_up[1].settings.after_steps
+
+            forged_sector = operator_sector(
+                purification,
+                insertion,
+                :dn,
+            )
+            forged_data = merge(
+                loaded.resume_state.data,
+                (; expected_sector = forged_sector),
+            )
+            forged_state = ObservableResumeState(
+                loaded.resume_state.cursor,
+                loaded.resume_state.evolution_state,
+                loaded.resume_state.thermal_psi,
+                forged_data,
+            )
+            mktempdir() do forged_root
+                @test_throws ArgumentError write_checkpoint_generation(
+                    forged_root,
+                    identity,
+                    CheckpointCursor(0),
+                    loaded.psi,
+                    forged_state;
+                    purification,
+                )
+            end
+            @test_throws ArgumentError finite_bath_observables(
+                parameters;
+                common...,
+                resume = (; psi = loaded.psi, resume_state = forged_state),
+            )
+            @test_throws ArgumentError finite_bath_observables(
+                parameters;
+                common...,
+                resume = (;
+                    psi = loaded.resume_state.thermal_psi,
+                    resume_state = loaded.resume_state,
+                ),
+            )
+
+            terminal_data = merge(
+                loaded.resume_state.data,
+                (;
+                    operator_log_norm = -Inf,
+                    expected_sector = expected,
+                    branch_status = :zero,
+                ),
+            )
+            terminal_state = ObservableResumeState(
+                ObservableCursor(
+                    :green, 1, :up, insertion, :terminal
+                ),
+                nothing,
+                loaded.resume_state.thermal_psi,
+                terminal_data,
+            )
+            mktempdir() do terminal_root
+                write_checkpoint_generation(
+                    terminal_root,
+                    identity,
+                    CheckpointCursor(0),
+                    nothing,
+                    terminal_state;
+                    purification,
+                )
+                terminal_loaded =
+                    load_current_checkpoint(
+                        terminal_root, identity; purification
+                    )
+                @test terminal_loaded.psi === nothing
+                terminal_result = finite_bath_observables(
+                    parameters;
+                    common...,
+                    resume = terminal_loaded,
+                )
+                @test terminal_result.G_up[1] == -0.0
+                @test terminal_result.diagnostics.green_up[1].settings.after_steps ==
+                      0
+
+                forged_terminal_state = ObservableResumeState(
+                    terminal_loaded.resume_state.cursor,
+                    nothing,
+                    terminal_loaded.resume_state.thermal_psi,
+                    merge(
+                        terminal_loaded.resume_state.data,
+                        (; expected_sector = forged_sector),
+                    ),
+                )
+                mktempdir() do forged_terminal_root
+                    @test_throws ArgumentError write_checkpoint_generation(
+                        forged_terminal_root,
+                        identity,
+                        CheckpointCursor(0),
+                        nothing,
+                        forged_terminal_state;
+                        purification,
+                    )
+                end
+                @test_throws ArgumentError finite_bath_observables(
+                    parameters;
+                    common...,
+                    resume = (;
+                        psi = nothing,
+                        resume_state = forged_terminal_state,
+                    ),
+                )
+            end
+        end
     end
 end
 

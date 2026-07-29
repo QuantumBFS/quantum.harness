@@ -11,7 +11,10 @@ isdefined(PARENT_MODULE, :FiniteBathPurification) ||
     Base.include(
         PARENT_MODULE, joinpath(@__DIR__, "finite_bath_purification.jl")
     )
-using ..FiniteBathPurification: EvolutionResumeState
+using ..FiniteBathPurification:
+    EvolutionResumeState,
+    PurificationSpec,
+    non_qn_purification
 
 export CheckpointIdentity,
     CheckpointCursor,
@@ -255,6 +258,8 @@ function write_checkpoint_generation(
     cursor,
     psi::Union{Nothing,MPS},
     resume_state,
+    ;
+    purification::PurificationSpec = non_qn_purification(),
 )
     completed_steps =
         cursor isa CheckpointCursor ? cursor.completed_steps :
@@ -271,13 +276,15 @@ function write_checkpoint_generation(
         )
     end
     _validate_resume_state(resume_state, completed_steps)
+    _validate_observable_sector_contract(
+        resume_state, psi, purification
+    )
     terminal_zero =
         resume_state isa ObservableResumeState &&
         resume_state.cursor.segment === :terminal &&
         haskey(resume_state.data, :branch_status) &&
         resume_state.data.branch_status === :zero &&
-        haskey(resume_state.data, :expected_sector) &&
-        resume_state.data.expected_sector !== nothing
+        haskey(resume_state.data, :expected_sector)
     (psi !== nothing || terminal_zero) ||
         throw(ArgumentError("only zero terminal checkpoints may omit active MPS"))
     (psi === nothing || !terminal_zero) ||
@@ -336,11 +343,15 @@ function write_checkpoint_generation(
             completion_sha256,
         )
 
-        _load_generation(stage, cursor_bound, identity)
+        _load_generation(
+            stage, cursor_bound, identity, purification
+        )
         destination = joinpath(generations, generation_name)
         if ispath(destination)
             _require_directory(destination, "generation")
-            _load_generation(destination, cursor_bound, identity)
+            _load_generation(
+                destination, cursor_bound, identity, purification
+            )
             rm(stage; recursive = true)
         else
             Base.Filesystem.rename(stage, destination)
@@ -357,7 +368,11 @@ function write_checkpoint_generation(
     end
 end
 
-function load_current_checkpoint(root, expected_identity::CheckpointIdentity)
+function load_current_checkpoint(
+    root,
+    expected_identity::CheckpointIdentity;
+    purification::PurificationSpec = non_qn_purification(),
+)
     root_path = abspath(String(root))
     _require_directory(root_path, "checkpoint root")
     generations = joinpath(root_path, "generations")
@@ -389,13 +404,16 @@ function load_current_checkpoint(root, expected_identity::CheckpointIdentity)
         completion_sha256 = pointer["completion_sha256"],
     )
     generation = joinpath(generations, cursor.generation)
-    return _load_generation(generation, cursor, expected_identity)
+    return _load_generation(
+        generation, cursor, expected_identity, purification
+    )
 end
 
 function _load_generation(
     generation_path,
     cursor::CheckpointCursor,
     expected_identity::CheckpointIdentity,
+    purification::PurificationSpec,
 )
     _require_directory(generation_path, "generation")
     metadata_path = joinpath(generation_path, "metadata.json")
@@ -465,13 +483,15 @@ function _load_generation(
     resume_state =
         _resume_state_from_dict(metadata["resume_state"], thermal_psi)
     _validate_resume_state(resume_state, cursor.completed_steps)
+    _validate_observable_sector_contract(
+        resume_state, psi, purification
+    )
     terminal_zero =
         resume_state isa ObservableResumeState &&
         resume_state.cursor.segment === :terminal &&
         haskey(resume_state.data, :branch_status) &&
         resume_state.data.branch_status === :zero &&
-        haskey(resume_state.data, :expected_sector) &&
-        resume_state.data.expected_sector !== nothing
+        haskey(resume_state.data, :expected_sector)
     (psi !== nothing || terminal_zero) ||
         throw(ArgumentError("checkpoint state does not contain psi"))
     (psi === nothing || !terminal_zero) ||
@@ -650,6 +670,111 @@ function _resume_state_from_dict(value, thermal_psi = nothing)
     catch error
         throw(ArgumentError("invalid checkpoint resume state: $(sprint(showerror, error))"))
     end
+end
+
+function _operator_sector_coordinates(value, name)
+    nameof(typeof(value)) == :OperatorSector &&
+        fieldnames(typeof(value)) == (:insertion, :spin, :nf, :sz) ||
+        throw(ArgumentError("$name is not an operator sector"))
+    return (
+        insertion = value.insertion,
+        spin = value.spin,
+        nf = value.nf,
+        sz = value.sz,
+    )
+end
+
+function _validate_observable_sector_contract(
+    state,
+    active::Union{Nothing,MPS},
+    purification::PurificationSpec,
+)
+    state isa ObservableResumeState || return nothing
+    cursor = state.cursor
+    qn_enabled = purification.mode === :qn_dual
+    base_flux =
+        qn_enabled ?
+        QN(
+            ("Nf", purification.base_sector_nf, -1),
+            ("Sz", purification.base_sector_sz),
+        ) : nothing
+
+    if state.thermal_psi !== nothing
+        if qn_enabled
+            flux(state.thermal_psi) == base_flux ||
+                throw(ArgumentError(
+                    "checkpoint thermal state has the wrong base sector"
+                ))
+        else
+            all(!hasqns(site) for site in siteinds(state.thermal_psi)) ||
+                throw(ArgumentError(
+                    "non-QN checkpoint thermal state contains QNs"
+                ))
+        end
+    end
+
+    shifted =
+        cursor.phase === :green &&
+        cursor.segment in (:after, :terminal)
+    reported_sector = get(state.data, :expected_sector, nothing)
+    if shifted && qn_enabled
+        delta_nf = cursor.insertion === :creation ? 1 : -1
+        delta_sz =
+            (cursor.insertion, cursor.spin) in
+            ((:creation, :up), (:annihilation, :dn)) ? 1 : -1
+        expected = (
+            insertion = cursor.insertion,
+            spin = cursor.spin,
+            nf = purification.base_sector_nf + delta_nf,
+            sz = delta_sz,
+        )
+        _operator_sector_coordinates(
+            reported_sector, "checkpoint expected sector"
+        ) == expected ||
+            throw(ArgumentError(
+                "checkpoint expected sector disagrees with purification"
+            ))
+    else
+        reported_sector === nothing ||
+            throw(ArgumentError(
+                "checkpoint cannot claim an operator sector"
+            ))
+    end
+
+    if cursor.segment === :terminal
+        active === nothing ||
+            throw(ArgumentError(
+                "zero terminal checkpoint cannot contain active MPS"
+            ))
+        return nothing
+    end
+
+    active !== nothing ||
+        throw(ArgumentError("checkpoint is missing active MPS"))
+    if shifted && qn_enabled
+        coordinates = _operator_sector_coordinates(
+            reported_sector, "checkpoint expected sector"
+        )
+        flux(active) ==
+            QN(
+                ("Nf", coordinates.nf, -1),
+                ("Sz", coordinates.sz),
+            ) ||
+            throw(ArgumentError(
+                "checkpoint active state has the wrong operator sector"
+            ))
+    elseif qn_enabled
+        flux(active) == base_flux ||
+            throw(ArgumentError(
+                "checkpoint active state has the wrong base sector"
+            ))
+    else
+        all(!hasqns(site) for site in siteinds(active)) ||
+            throw(ArgumentError(
+                "non-QN checkpoint active state contains QNs"
+            ))
+    end
+    return nothing
 end
 
 function _validate_resume_state(state, completed_steps)

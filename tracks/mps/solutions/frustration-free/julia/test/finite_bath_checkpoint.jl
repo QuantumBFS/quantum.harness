@@ -158,7 +158,7 @@ end
     )
 end
 
-@testset "zero Green terminal checkpoints omit active MPS" begin
+@testset "non-QN zero Green terminal omits active MPS" begin
     mktempdir() do root
         identity = checkpoint_identity()
         thermal, _ = checkpoint_fixture()
@@ -170,8 +170,7 @@ end
             thermal,
             (;
                 branch_status = :zero,
-                expected_sector =
-                    (; insertion = :creation, spin = :up, nf = 3, sz = 1),
+                expected_sector = nothing,
             ),
         )
         written = write_checkpoint_generation(

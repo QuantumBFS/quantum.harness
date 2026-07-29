@@ -791,12 +791,121 @@ function _resume_parts(resume)
     throw(ArgumentError("resume must be an ObservableInterrupted or loaded checkpoint"))
 end
 
+function _validate_resume_sectors(
+    context::FiniteBathContext,
+    state::ObservableResumeState,
+    active::Union{Nothing,MPS},
+)
+    cursor = state.cursor
+    qn_enabled = context.purification.mode === :qn_dual
+    base_flux =
+        qn_enabled ?
+        QN(
+            ("Nf", context.purification.base_sector_nf, -1),
+            ("Sz", context.purification.base_sector_sz),
+        ) : nothing
+    expected_sector =
+        qn_enabled && cursor.phase === :green ?
+        operator_sector(
+            context.purification, cursor.insertion, cursor.spin
+        ) : nothing
+
+    if state.thermal_psi !== nothing
+        siteinds(state.thermal_psi) == context.sites ||
+            throw(ArgumentError(
+                "resume thermal-state sites do not match current context"
+            ))
+        if qn_enabled
+            flux(state.thermal_psi) == base_flux ||
+                throw(ArgumentError(
+                    "resume thermal state has the wrong base sector"
+                ))
+        else
+            all(!hasqns(site) for site in siteinds(state.thermal_psi)) ||
+                throw(ArgumentError(
+                    "non-QN resume thermal state contains QNs"
+                ))
+        end
+    end
+
+    if active !== nothing
+        siteinds(active) == context.sites ||
+            throw(ArgumentError(
+                "resume active-state sites do not match current context"
+            ))
+    end
+
+    if cursor.phase === :green &&
+       cursor.segment in (:after, :terminal)
+        state.data.expected_sector == expected_sector ||
+            throw(ArgumentError(
+                "resume operator-sector metadata mismatch"
+            ))
+        if cursor.segment === :terminal
+            active === nothing ||
+                throw(ArgumentError(
+                    "zero terminal resume cannot carry active MPS"
+                ))
+            state.data.branch_status === :zero ||
+                throw(ArgumentError(
+                    "terminal resume must be a zero branch"
+                ))
+        else
+            active !== nothing ||
+                throw(ArgumentError(
+                    "shifted resume requires active MPS"
+                ))
+            state.data.branch_status === :finite ||
+                throw(ArgumentError(
+                    "shifted resume must be a finite branch"
+                ))
+            if qn_enabled
+                expected_flux = QN(
+                    ("Nf", expected_sector.nf, -1),
+                    ("Sz", expected_sector.sz),
+                )
+                flux(active) == expected_flux ||
+                    throw(ArgumentError(
+                        "resume active state has the wrong operator sector"
+                    ))
+            else
+                all(!hasqns(site) for site in siteinds(active)) ||
+                    throw(ArgumentError(
+                        "non-QN resume active state contains QNs"
+                    ))
+            end
+        end
+    else
+        state.data.expected_sector === nothing ||
+            throw(ArgumentError(
+                "base-state resume cannot claim an operator sector"
+            ))
+        active !== nothing ||
+            throw(ArgumentError("base-state resume requires active MPS")
+        )
+        if qn_enabled
+            flux(active) == base_flux ||
+                throw(ArgumentError(
+                    "resume active state has the wrong base sector"
+                ))
+        else
+            all(!hasqns(site) for site in siteinds(active)) ||
+                throw(ArgumentError(
+                    "non-QN resume active state contains QNs"
+                ))
+        end
+    end
+    return nothing
+end
+
 function _publish_observable_checkpoint(
     checkpoint_manager,
     stop_requested,
+    context::FiniteBathContext,
     psi::Union{Nothing,MPS},
     state::ObservableResumeState,
 )
+    _validate_resume_sectors(context, state, psi)
     if checkpoint_manager !== nothing
         if applicable(checkpoint_manager, psi, state)
             checkpoint_manager(psi, state)
@@ -1166,6 +1275,7 @@ function _finite_bath_observables_resumable(
         context = _context_on_sites(
             parameters, resume_sites; purification
         )
+        _validate_resume_sectors(context, state, active)
     end
 
     if cursor.phase === :thermal
@@ -1174,7 +1284,7 @@ function _finite_bath_observables_resumable(
                 cursor, evolution, nothing, data
             )
             _publish_observable_checkpoint(
-                checkpoint_manager, stop_requested, psi, state
+                checkpoint_manager, stop_requested, context, psi, state
             )
         end
         active, thermal_diagnostics = _evolve_normalized_state(
@@ -1225,7 +1335,7 @@ function _finite_bath_observables_resumable(
         active = copy_identity_purification(context)
         state = _observable_state(cursor, nothing, thermal_psi, data)
         _publish_observable_checkpoint(
-            checkpoint_manager, stop_requested, active, state
+            checkpoint_manager, stop_requested, context, active, state
         )
     end
 
@@ -1270,7 +1380,11 @@ function _finite_bath_observables_resumable(
                         cursor, evolution, thermal_psi, data
                     )
                     _publish_observable_checkpoint(
-                        checkpoint_manager, stop_requested, psi, state
+                        checkpoint_manager,
+                        stop_requested,
+                        context,
+                        psi,
+                        state,
                     )
                 end
                 active, before = _evolve_normalized_state(
@@ -1323,6 +1437,7 @@ function _finite_bath_observables_resumable(
                     _publish_observable_checkpoint(
                         checkpoint_manager,
                         stop_requested,
+                        context,
                         nothing,
                         state,
                     )
@@ -1340,6 +1455,7 @@ function _finite_bath_observables_resumable(
                     _publish_observable_checkpoint(
                         checkpoint_manager,
                         stop_requested,
+                        context,
                         active,
                         state,
                     )
@@ -1387,7 +1503,11 @@ function _finite_bath_observables_resumable(
                         cursor, evolution, thermal_psi, data
                     )
                     _publish_observable_checkpoint(
-                        checkpoint_manager, stop_requested, psi, state
+                        checkpoint_manager,
+                        stop_requested,
+                        context,
+                        psi,
+                        state,
                     )
                 end
                 active, after = _evolve_normalized_state(
@@ -1448,7 +1568,7 @@ function _finite_bath_observables_resumable(
             copy_identity_purification(context) : copy(thermal_psi)
         state = _observable_state(cursor, nothing, thermal_psi, data)
         _publish_observable_checkpoint(
-            checkpoint_manager, stop_requested, active, state
+            checkpoint_manager, stop_requested, context, active, state
         )
     end
     return _finish_observable_result(context, thermal, data, settings)
