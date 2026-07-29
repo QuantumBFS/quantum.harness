@@ -17,7 +17,7 @@ export SS_MOSEK_THREADS="${SLURM_CPUS_PER_TASK:-32}"
 export SS_MOSEK_TIME_LIMIT_SECONDS=28800
 export SS_MOSEK_LOG_LEVEL=2
 
-readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction}"
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
 readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"

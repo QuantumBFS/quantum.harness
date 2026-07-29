@@ -9,7 +9,8 @@ using ..PrimalGapSymbolics:
     MomentKey,
     canonical_polynomial_string,
     moment_degree,
-    moment_key
+    moment_key,
+    polynomial_sha256
 using ..PrimalGapJuMP:
     checked_float,
     jump_affine_expression
@@ -211,45 +212,81 @@ function add_streaming_real_psd_constraint!(
     triangle_entries = dimension * (dimension + 1) ÷ 2
     terms = JuMP.MOI.VectorAffineTerm{Float64}[]
     constants = zeros(Float64, triangle_entries)
-    for row in 1:dimension
-        for column in row:dimension
-            output_index = column * (column - 1) ÷ 2 + row
-            polynomial = shastry_spin_isotypic_block_entry(
-                assembly,
-                block,
-                block.rows[row],
-                block.rows[column],
-            )
-            all(iszero ∘ imag, values(polynomial.terms)) ||
-                error("streaming PSD block retained an imaginary coefficient")
-            for (key, coefficient) in polynomial.terms
-                variable =
-                    streaming_moment_variable!(model, variables, key)
-                push!(
-                    terms,
-                    JuMP.MOI.VectorAffineTerm(
-                        output_index,
-                        JuMP.MOI.ScalarAffineTerm(
-                            checked_float(real(coefficient)),
-                            JuMP.index(variable),
+    row_batch_size = max(
+        1,
+        parse(
+            Int,
+            get(
+                ENV,
+                "SHASTRY_STREAM_ROW_BATCH",
+                string(Threads.nthreads()),
+            ),
+        ),
+    )
+    for first_row in 1:row_batch_size:dimension
+        last_row = min(dimension, first_row + row_batch_size - 1)
+        rows = collect(first_row:last_row)
+        batch_polynomials = [
+            Vector{ExactLinearPolynomial}(undef, dimension - row + 1)
+            for row in rows
+        ]
+        batch_hashes = [
+            Vector{String}(undef, dimension - row + 1)
+            for row in rows
+        ]
+        Threads.@threads :dynamic for batch_index in eachindex(rows)
+            row = rows[batch_index]
+            for column in row:dimension
+                local_index = column - row + 1
+                polynomial = shastry_spin_isotypic_block_entry(
+                    assembly,
+                    block,
+                    block.rows[row],
+                    block.rows[column],
+                )
+                all(iszero ∘ imag, values(polynomial.terms)) ||
+                    error(
+                        "streaming PSD block retained an imaginary coefficient",
+                    )
+                batch_polynomials[batch_index][local_index] =
+                    polynomial
+                batch_hashes[batch_index][local_index] =
+                    polynomial_sha256(polynomial)
+            end
+        end
+        for (batch_index, row) in enumerate(rows)
+            for column in row:dimension
+                local_index = column - row + 1
+                polynomial =
+                    batch_polynomials[batch_index][local_index]
+                output_index = column * (column - 1) ÷ 2 + row
+                for (key, coefficient) in polynomial.terms
+                    variable =
+                        streaming_moment_variable!(model, variables, key)
+                    push!(
+                        terms,
+                        JuMP.MOI.VectorAffineTerm(
+                            output_index,
+                            JuMP.MOI.ScalarAffineTerm(
+                                checked_float(real(coefficient)),
+                                JuMP.index(variable),
+                            ),
                         ),
+                    )
+                end
+                update_fingerprint!(
+                    coefficient_fingerprint,
+                    string(
+                        block_label(block),
+                        "[",
+                        row,
+                        ",",
+                        column,
+                        "]=",
+                        batch_hashes[batch_index][local_index],
                     ),
                 )
             end
-            update_fingerprint!(
-                coefficient_fingerprint,
-                string(
-                    block_label(block),
-                    "[",
-                    row,
-                    ",",
-                    column,
-                    "]=",
-                    bytes2hex(sha256(
-                        canonical_polynomial_string(polynomial),
-                    )),
-                ),
-            )
         end
     end
     function_object =

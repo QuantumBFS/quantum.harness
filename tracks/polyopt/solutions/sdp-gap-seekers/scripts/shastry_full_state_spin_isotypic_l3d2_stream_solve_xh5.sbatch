@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=ss-l2d2-real-solve
+#SBATCH --job-name=ss-l3d2-stream-solve
 #SBATCH --partition=xhacnormalb
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
-#SBATCH --mem=240G
-#SBATCH --time=12:00:00
-#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/xh5-ss-l2d2-real-solve-%j.out
+#SBATCH --cpus-per-task=128
+#SBATCH --mem=480G
+#SBATCH --time=20:00:00
+#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/xh5-ss-l3d2-stream-solve-%j.out
 
 set -euo pipefail
 
 export LC_ALL=C
 export LANG=C
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-64}"
-export SS_MOSEK_THREADS="${SLURM_CPUS_PER_TASK:-64}"
-export SS_MOSEK_TIME_LIMIT_SECONDS=28800
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-128}"
+export SS_MOSEK_THREADS="${SLURM_CPUS_PER_TASK:-128}"
+export SS_MOSEK_TIME_LIMIT_SECONDS=57600
 export SS_MOSEK_LOG_LEVEL=2
 
-readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction}"
+readonly EXPECTED_ROOT="${SS_EXPECTED_ROOT:-/work/home/sihhu/quantum-hackson/challenge-88/checkouts/ss-streaming}"
 readonly JULIA_ROOT="/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
 readonly JULIA_PROJECT="/work/home/sihhu/quantum-hackson/challenge-88/repo-cb725ac3/julia-env"
 readonly MOSEK_BIN_DIR="/work/home/sihhu/quantum-hackson/toolchains/mosek-11.2/mosek/11.2/tools/platform/linux64x86/bin"
 readonly MOSEK_LICENSE="/work/home/sihhu/mosek/mosek.lic"
-readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-solve-xh5-${SLURM_JOB_ID}"
+readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l3d2-g0p8-gamma2-stream-solve-xh5-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"
 [[ "$PWD" == "$EXPECTED_ROOT" ]] || {
@@ -52,7 +52,7 @@ printf 'host=%s cpus=%s start=%s\n' \
     tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spin_isotypic_mof.jl \
     --coupling 4/5 \
     --gamma 2 \
-    --patch-level 2 \
+    --patch-level 3 \
     --mode solve \
     --output "$OUTPUT_DIR"
 
