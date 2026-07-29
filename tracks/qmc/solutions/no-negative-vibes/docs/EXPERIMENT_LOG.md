@@ -2308,16 +2308,18 @@ disk, and `det(W)=8^n>0`, hence
 
 `det(I+W)>0`
 
-for every nonempty word.  This is the first exact arbitrary-depth theorem
-for the genuinely joint four-letter candidate.  It is a finite-state,
-indefinite/path-complete extension of the common split-contraction
-certificate; the coherent time-orientation determinant lemma is essential,
-because contraction plus positive determinant alone does not fix the sign.
+for every nonempty word.  This is an exact arbitrary-depth theorem for the
+joint four-letter candidate.  The path-complete dominance and positivity
+architecture is known control-theory prior art; the QMC contribution is
+the determinant corollary and the exact physical realization.  The
+coherent time-orientation determinant lemma is essential, because
+contraction plus positive determinant alone does not fix the sign.
 
 The Gordan--Stiemke exclusion and physical transfer were then regenerated
 for this final pair, replacing the earlier lead's frozen constants.  Four
-exact positive-definite dual multipliers cancel the common-metric adjoint
-map and have total trace one, so no strict common symmetric metric exists.
+exact positive-definite dual multipliers cancel the common-quadratic-metric
+adjoint map and have total trace one, so no strict common symmetric
+quadratic metric of the tested form exists.
 On the 32-dimensional Fock space the new symmetric transfer needs only
 the shift `c=37`: its maximum row requirement is 36 and its minimum strict
 margin is one.  Thus
@@ -2330,3 +2332,40 @@ first by 164, so the Hermitian number-conserving Hamiltonian is genuinely
 interacting.  Together with the arbitrary-word theorem, the sign-free and
 physical-realizability gates are both closed for the same rational
 alphabet.
+
+### Prior-art correction and clean publication replay
+
+A focused literature audit changed the novelty boundary without changing
+the exact determinant theorem or the physical construction:
+
+- the 16 edge LMIs are path-complete `p=4` dominance for the forward
+  alphabet, equivalently path-complete `p=1` dominance for the inverse
+  alphabet;
+- the oriented Lorentz sheets are an instance of strict path-complete
+  positivity;
+- because every ordered edge is present, the inverse letters strongly
+  preserve the common nonquadratic proper cone
+  `K = intersection_i closure(C_i^+)`;
+- the Gordan--Stiemke dual excludes only one common *quadratic* metric,
+  not this common cone and not the full 10-Majorana Wei framework.
+
+The safe paper claim is therefore a control-to-QMC determinant bridge,
+an exact four-letter separation from one-state quadratic certificates,
+and an exact positive-field interacting five-mode transfer.  Full
+Wei/Majorana equivalence remains open.
+
+The corrected package was committed as `6cf0bf2` and pushed to the shared
+team branch.  Before the user restricted compute to remote machines, the
+Windows Python 3.11.15 environment completed the exact publication gates
+and focused oddcycle regressions with `21 passed`.  The one-command replay
+returned `all-exact-gates-passed`, source commit `6cf0bf2`, digest
+`dbc5e23ea15e3840e756e888bc8a6f0b795fdea14c405a90da117de73e43817e`,
+and wall time about `0.58 s`.  No further numerical compute is to run on
+the local machine.
+
+Both WSL and the 64-core CPU machine remained reachable by SSH, but neither
+could reach GitHub port 443.  A task-specific archive transfer was blocked
+by the data-egress approval gate.  Reusable lesson: keep code
+synchronization, mathematical verification, and production compute as
+separate gates; after the user's remote-only instruction, all verification
+and scanning must run on WSL or the CPU machine.
