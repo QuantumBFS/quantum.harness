@@ -408,6 +408,22 @@ def test_plan_defaults_to_direct_star_and_chain_is_explicit():
     }
 
 
+def test_documentation_states_finite_chain_execution_contract():
+    readme = (SOLUTION_DIR / "README.md").read_text(encoding="utf-8")
+    chain_pilot_command = """uv run --project tracks/mps/solutions/frustration-free --frozen python \\
+  tracks/mps/solutions/frustration-free/convergence.py plan \\
+  --stage pilot --betas 0.2 --bath-sizes 2 --time-steps 0.1 \\
+  --maxdims 32 --bath-representation chain \\
+  --output-root /tmp/challenge81-chain-pilot"""
+
+    assert "`direct_star` is the default" in readme
+    assert "bath_representation chain" in readme
+    assert "--bath-representation chain" in readme
+    assert chain_pilot_command in readme
+    assert "QN purification is not implemented" in readme
+    assert "does not unlock N_b=48" in readme
+
+
 def test_chain_mapping_and_capability_schemas_are_recursively_closed():
     plan = _plan(
         betas=[0.2],

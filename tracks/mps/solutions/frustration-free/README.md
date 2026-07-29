@@ -145,21 +145,54 @@ accepted simultaneously. Draft 2020-12 validation covers plans, resource
 estimates, checkpoint cursors and retirement records, completed cells, and
 analyses using `convergence.schema.json`.
 
-Create a tiny local pilot run bundle and run it with an explicit runtime Julia
-project:
+### Finite-bath representation architecture
+
+**`direct_star` is the default.** It consumes the authoritative schema-2 star
+bath artifact directly and binds no chain mapping. The optional finite-chain
+path is selected only with `--bath-representation chain` (the
+`bath_representation chain` selection in plan terminology). Python derives one
+canonical schema-1 mapping artifact from the requested star bath; both the ED
+oracle and Julia runner consume that same transform. Julia changes only the
+bath one-body geometry. The identity purification, TDVP evolution, thermal and
+Green-function branches, and observable measurement are shared by both
+representations.
+
+The mapping artifact records the source bath payload SHA256, transform matrix,
+chain onsite and hopping coefficients, conventions, numerical diagnostics,
+module/runtime provenance, and its own payload SHA256. Chain plans bind the
+artifact and digest to each cell. Runner schema 3 carries the canonical mapping
+bytes and file digest; solver settings, completed-cell artifacts, result
+provenance, and checkpoint identity also record the representation and mapping
+SHA256. Direct-star requests reject mapping bytes. Chain requests reject a
+missing, stale, noncanonical, rehashed-but-semantically-invalid, or
+wrong-source mapping, and checkpoints cannot cross representation boundaries.
+
+Create a tiny direct-star pilot run bundle. No representation flag is needed
+because `direct_star` is the default:
 
 ```bash
-uv run --python 3.12.13 --with numpy==2.5.1 --with jsonschema python \
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
   tracks/mps/solutions/frustration-free/convergence.py plan \
   --stage pilot --betas 0.2 --bath-sizes 1 --time-steps 0.1 \
   --cutoffs 1e-12 --maxdims 32 --tau-fractions 0,0.5,1 \
-  --output-root tracks/mps/solutions/frustration-free/results/convergence-pilot
-# Resolve RUN from convergence-pilot/current.json before execution.
-uv run --python 3.12.13 --with numpy==2.5.1 --with jsonschema python \
-  tracks/mps/solutions/frustration-free/convergence.py run \
-  --plan "$RUN/plan.json" --run-directory "$RUN" \
-  --julia-project "$PWD/tracks/mps/solutions/frustration-free/julia"
+  --output-root /tmp/challenge81-direct-star-pilot
 ```
+
+Create an explicit finite-chain pilot run bundle:
+
+```bash
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py plan \
+  --stage pilot --betas 0.2 --bath-sizes 2 --time-steps 0.1 \
+  --maxdims 32 --bath-representation chain \
+  --output-root /tmp/challenge81-chain-pilot
+```
+
+The chain command derives and binds the finite mapping artifact in the planned
+cell; it does not execute the cell or establish a production result.
+QN purification is not implemented. The `spin_qn_enabled == false` assertion
+remains binding. Finite-chain validation does not unlock N_b=48. Both local
+and cluster `N_b=48` execution remain fail-closed.
 
 Generate the production plan without running computation:
 
@@ -219,12 +252,13 @@ excluded `N_b=48` indices (2 and 9) cannot execute on any target. The runner
 requires a plan-bound, schema-validated solver capability whose evidence is
 also present in its compiled allowlist; no such capability exists yet.
 Accidentally submitting the full array therefore fails those cells before
-starting Julia. A star-to-chain mapping or equivalent compressed-MPO
-optimization must first be implemented and validated. The direct star MPO has
-98 interleaved sites and an MPO width that
+starting Julia. The finite star-to-chain mapping is implemented and validated
+only through `N_b=6`; it supplies no QN or scalable `N_b=48` capability
+evidence. The direct star MPO has 98 interleaved sites and an MPO width that
 grows with bath size, so the current path is not considered feasible at
-`N_b=48`. Operational failures are classified separately as bath-discretization, timestep,
-maxdim/truncation, runtime/memory, input-validation, or solver-runtime errors.
+`N_b=48`. Operational failures are classified separately as
+bath-discretization, timestep, maxdim/truncation, runtime/memory,
+input-validation, or solver-runtime errors.
 The wrapper forwards Slurm `SIGUSR1` and `SIGTERM` to Python, which forwards
 them to Julia's process group. Julia publishes and reload-validates a
 checkpoint before returning exit 75; Python accepts 75 only when it
@@ -358,6 +392,33 @@ uv run --project tracks/mps/solutions/frustration-free --frozen \
   python -m pytest tracks/mps/solutions/frustration-free/tests
 ```
 
+For complete local verification without acceptance execution, convergence
+pilots, or result generation, run from the repository root:
+
+```bash
+git diff --check
+python3 - <<'PY'
+from pathlib import Path
+for name in ("CHAIN_QN_DESIGN.md", "CHAIN_QN_PLAN.md", "README.md"):
+    text = (
+        Path("tracks/mps/solutions/frustration-free") / name
+    ).read_text(encoding="utf-8")
+    assert "\t" not in text
+    assert text.endswith("\n")
+print("documentation checks passed")
+PY
+SKIP_CHALLENGE81_ACCEPTANCE=1 \
+SKIP_CHALLENGE81_CONVERGENCE_PILOT=1 \
+uv run --project tracks/mps/solutions/frustration-free --frozen \
+  python -m pytest tracks/mps/solutions/frustration-free/tests -q
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  tracks/mps/solutions/frustration-free/julia/test/runtests.jl
+```
+
+These commands verify the checked-in contracts and implementations; they do
+not create acceptance or convergence result bundles and do not support a
+beta=16/32 production claim.
+
 Plans carry generator, schema, solution-software, model, source, Julia project,
 and Manifest identities. New automation should use `convergence.py plan
 --output-root ROOT`, which atomically creates a complete
@@ -398,11 +459,11 @@ Before any `N_b=48` execution, both of these are mandatory:
 
 1. implement and dense-ED validate a QN-conserving purification, including
    thermal and both Green branches; benchmark memory/time and observable error;
-2. implement and validate star-to-chain (or equivalently compressed-MPO)
-   mapping, including hybridization reconstruction and small-bath MPS-versus-ED
-   equivalence.
+2. extend finite-chain and resource validation beyond the current `N_b<=6`
+   evidence and produce allowlisted scalable capability evidence.
 
-Neither optimization is claimed implemented. The direct-star `N_b=48` cells
+The finite star-to-chain mapping is implemented; the separate QN and scalable
+capability gates are not. The direct-star and finite-chain `N_b=48` cells
 remain fail-closed on local and cluster targets.
 
 ## Platform boundary
