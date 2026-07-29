@@ -3,7 +3,9 @@ set -euo pipefail
 
 : "${HARNESS_RUN_SPEC:?Set HARNESS_RUN_SPEC to the immutable run_spec.json}"
 : "${SLURM_ARRAY_TASK_ID:?Run as a Slurm array task}"
-: "${CHALLENGE_194_REPO_ROOT:?Set the explicit shared repository path}"
+
+REPO_ROOT="${CHALLENGE_194_REPO_ROOT:-${HARNESS_ENTRYPOINT:-}}"
+: "${REPO_ROOT:?Set CHALLENGE_194_REPO_ROOT or the harness entrypoint to the explicit shared repository path}"
 
 if [[ "${SLURM_CPUS_PER_TASK:-1}" != "1" ]]; then
     echo "Challenge 194 validation cells require exactly one CPU" >&2
@@ -15,7 +17,7 @@ if [[ ! "${SLURM_ARRAY_TASK_ID}" =~ ^[0-9]+$ ]]; then
 fi
 
 SOLUTION_RELATIVE="tracks/qmc/solutions/frustration-free/challenge-194"
-SOLUTION_ROOT="${CHALLENGE_194_REPO_ROOT%/}/${SOLUTION_RELATIVE}"
+SOLUTION_ROOT="${REPO_ROOT%/}/${SOLUTION_RELATIVE}"
 if [[ ! -f "${SOLUTION_ROOT}/scripts/validation_shard.py" ]]; then
     echo "Explicit Challenge 194 solution path is invalid: ${SOLUTION_ROOT}" >&2
     exit 66

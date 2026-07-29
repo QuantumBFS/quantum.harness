@@ -299,8 +299,8 @@ def test_spool_copied_slurm_wrapper_uses_explicit_solution_root(tmp_path: Path):
         **os.environ,
         "PATH": f"{bindir}:{os.environ['PATH']}",
         "HARNESS_RUN_SPEC": str(tmp_path / "run_spec.json"),
+        "HARNESS_ENTRYPOINT": str(Path(__file__).parents[6]),
         "SLURM_ARRAY_TASK_ID": "17",
-        "CHALLENGE_194_REPO_ROOT": str(Path(__file__).parents[6]),
     }
     completed = subprocess.run(
         ["/bin/bash", str(spool)],
