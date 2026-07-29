@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import fcntl
 import hashlib
 import json
 import multiprocessing
@@ -59,6 +60,15 @@ def _initialize_worker(
         queue.put(("conflict", trial_seed))
     else:
         queue.put(("winner", trial_seed))
+
+
+def _crash_claim_worker(root: str, queue: multiprocessing.Queue) -> None:
+    store = ArtifactStore(root)
+    claim = store.claim_trial("trial-crash")
+    queue.put((claim.owner, claim.lock_path))
+    queue.close()
+    queue.join_thread()
+    os._exit(0)
 
 
 def test_failed_publish_preserves_previous_artifact(tmp_path, monkeypatch) -> None:
@@ -172,7 +182,7 @@ def test_live_claim_prevents_duplicate_trial_execution(tmp_path) -> None:
     claim = store.claim_trial("trial-1")
 
     with claim:
-        with pytest.raises(TrialClaimConflict, match="claimed"):
+        with pytest.raises(TrialClaimConflict, match="kernel lock"):
             store.claim_trial("trial-1")
 
     with store.claim_trial("trial-1") as replacement:
@@ -181,7 +191,7 @@ def test_live_claim_prevents_duplicate_trial_execution(tmp_path) -> None:
 
 def test_stale_claim_requires_explicit_dead_owner_metadata(tmp_path) -> None:
     store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
-    lock_path = tmp_path / "claims" / "trial-1.lock"
+    lock_path = tmp_path / "claims" / "trial-1.owner.json"
     lock_path.parent.mkdir()
     owner = store.owner_identity(lease_seconds=-1.0)
     owner["pid"] = 999_999_999
@@ -210,7 +220,7 @@ def test_completed_trial_is_verified_before_skip(tmp_path) -> None:
 
 def test_two_reclaimers_have_exactly_one_winner(tmp_path) -> None:
     store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
-    lock_path = tmp_path / "claims" / "trial-race.lock"
+    lock_path = tmp_path / "claims" / "trial-race.owner.json"
     lock_path.parent.mkdir()
     owner = store.owner_identity(lease_seconds=-1.0)
     owner["pid"] = 999_999_999
@@ -235,7 +245,7 @@ def test_two_reclaimers_have_exactly_one_winner(tmp_path) -> None:
 
 def test_pid_reuse_requires_matching_process_start_identity(tmp_path) -> None:
     store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
-    lock_path = tmp_path / "claims" / "trial-1.lock"
+    lock_path = tmp_path / "claims" / "trial-1.owner.json"
     lock_path.parent.mkdir()
     reused = store.owner_identity(lease_seconds=-1.0)
     reused["process_start_id"] = f"{reused['process_start_id']}-different"
@@ -252,7 +262,7 @@ def test_pid_reuse_requires_matching_process_start_identity(tmp_path) -> None:
 
 def test_foreign_host_uses_explicit_lease_expiry(tmp_path) -> None:
     store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
-    lock_path = tmp_path / "claims" / "trial-1.lock"
+    lock_path = tmp_path / "claims" / "trial-1.owner.json"
     lock_path.parent.mkdir()
     foreign = store.owner_identity(lease_seconds=60.0)
     foreign["hostname"] = "other-host"
@@ -265,6 +275,61 @@ def test_foreign_host_uses_explicit_lease_expiry(tmp_path) -> None:
     lock_path.write_bytes(artifacts_module.canonical_json_bytes(foreign))
     with store.claim_trial("trial-1"):
         pass
+
+
+def test_held_trial_flock_blocks_expired_foreign_reclaim_then_allows_it(
+    tmp_path,
+) -> None:
+    store = ArtifactStore(tmp_path, stale_lock_seconds=0.0)
+    claims = tmp_path / "claims"
+    claims.mkdir()
+    lock_path = claims / "trial-foreign.flock"
+    descriptor = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+    fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    owner = store.owner_identity(lease_seconds=-1.0)
+    owner["hostname"] = "foreign-container"
+    (claims / "trial-foreign.owner.json").write_bytes(
+        artifacts_module.canonical_json_bytes(owner)
+    )
+
+    with pytest.raises(TrialClaimConflict, match="kernel lock"):
+        store.claim_trial("trial-foreign")
+
+    fcntl.flock(descriptor, fcntl.LOCK_UN)
+    os.close(descriptor)
+    with store.claim_trial("trial-foreign"):
+        pass
+
+
+def test_crashed_claim_releases_kernel_lock_and_can_be_reclaimed(tmp_path) -> None:
+    context = multiprocessing.get_context("spawn")
+    queue = context.Queue()
+    worker = context.Process(
+        target=_crash_claim_worker,
+        args=(str(tmp_path), queue),
+    )
+    worker.start()
+    owner, lock_path = queue.get(timeout=10)
+    worker.join(timeout=10)
+    assert worker.exitcode == 0
+    assert Path(lock_path).exists()
+
+    store = ArtifactStore(tmp_path)
+    with store.claim_trial("trial-crash") as replacement:
+        assert replacement.owner["nonce"] != owner["nonce"]
+
+
+def test_claim_release_closes_dedicated_descriptor(tmp_path) -> None:
+    store = ArtifactStore(tmp_path)
+    before = len(list(Path("/proc/self/fd").iterdir()))
+
+    claim = store.claim_trial("trial-fd")
+    assert claim.lock_descriptor >= 0
+    claim.release()
+
+    with pytest.raises(OSError):
+        os.fstat(claim.lock_descriptor)
+    assert len(list(Path("/proc/self/fd").iterdir())) <= before
 
 
 def test_concurrent_different_immutable_writers_have_one_winner(tmp_path) -> None:
@@ -491,3 +556,27 @@ def test_write_failure_closes_descriptor_and_removes_temp(
     after = len(list(Path("/proc/self/fd").iterdir()))
     assert after <= before
     assert not list(tmp_path.glob(".artifact.tmp-*"))
+
+
+def test_post_replace_hash_read_failure_reports_unknown_durability(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    store = ArtifactStore(tmp_path)
+    store.publish_json("summary.json", {"version": 1})
+    real_hash = artifacts_module._file_sha256
+    calls = 0
+
+    def fail_new_hash(path: Path) -> str:
+        nonlocal calls
+        calls += 1
+        if calls >= 2:
+            raise OSError("read failed")
+        return real_hash(path)
+
+    monkeypatch.setattr(artifacts_module, "_file_sha256", fail_new_hash)
+    with pytest.raises(ArtifactDurabilityError) as raised:
+        store.publish_json("summary.json", {"version": 2})
+
+    assert raised.value.present == "unreadable"
+    assert json.loads((tmp_path / "summary.json").read_text()) == {"version": 2}

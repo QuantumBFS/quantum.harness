@@ -78,6 +78,38 @@ def canonical_json_bytes(payload: object) -> bytes:
     ).encode("utf-8")
 
 
+class _DuplicateJSONKey(ValueError):
+    pass
+
+
+def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise _DuplicateJSONKey(key)
+        result[key] = value
+    return result
+
+
+def _parse_canonical_json_bytes(data: bytes) -> object:
+    try:
+        text = data.decode("utf-8")
+        payload = json.loads(text, object_pairs_hook=_unique_object)
+    except _DuplicateJSONKey as error:
+        raise ArtifactConflict(
+            f"orphan trial JSON contains duplicate key {error.args[0]!r}"
+        ) from None
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        raise ArtifactConflict("orphan trial JSON is noncanonical") from None
+    try:
+        canonical = canonical_json_bytes(payload)
+    except (TypeError, ValueError):
+        raise ArtifactConflict("orphan trial JSON is noncanonical") from None
+    if data != canonical:
+        raise ArtifactConflict("orphan trial JSON bytes are noncanonical")
+    return payload
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -232,6 +264,8 @@ class TrialClaim(AbstractContextManager["TrialClaim"]):
     store: ArtifactStore
     trial_id: str
     path: Path
+    lock_path: Path
+    lock_descriptor: int
     owner: dict[str, object]
     _released: bool = False
 
@@ -241,8 +275,10 @@ class TrialClaim(AbstractContextManager["TrialClaim"]):
     def release(self) -> None:
         if self._released:
             return
-        self.store._release_claim(self)
-        self._released = True
+        try:
+            self.store._release_claim(self)
+        finally:
+            self._released = True
 
     def __exit__(self, *exc_info: object) -> None:
         self.release()
@@ -615,7 +651,20 @@ class ArtifactStore:
                     new_digest=digest,
                     cause=error,
                 )
-            if _file_sha256(destination) != digest:
+            try:
+                published_digest = _file_sha256(destination)
+            except OSError as error:
+                raise ArtifactDurabilityError(
+                    "durable publication could not be read for verification",
+                    old_sha256=old_digest,
+                    new_sha256=digest,
+                    present=self._present_state(
+                        destination,
+                        old_digest,
+                        digest,
+                    ),
+                ) from error
+            if published_digest != digest:
                 try:
                     if backup is None:
                         self._unlink(destination)
@@ -742,11 +791,20 @@ class ArtifactStore:
             path = self._path(Path("trials") / f"{token}.json", create=False)
             if not path.exists():
                 return False
-            payload = self._read_json_locked(
-                Path("trials") / f"{token}.json"
-            )
-            validator(payload)
-            digest = _file_sha256(path)
+            try:
+                raw = path.read_bytes()
+            except OSError as error:
+                raise ArtifactConflict(
+                    f"orphan trial cannot be read: {token}"
+                ) from error
+            payload = _parse_canonical_json_bytes(raw)
+            try:
+                validator(payload)
+            except (TypeError, ValueError) as error:
+                raise ArtifactConflict(
+                    f"orphan trial has invalid strict schema: {token}: {error}"
+                ) from error
+            digest = _sha256(raw)
             self._update_index_locked(token, digest)
             return True
 
@@ -804,10 +862,8 @@ class ArtifactStore:
             or re.fullmatch(r"[0-9a-f]{32}", owner["nonce"], re.ASCII) is None
         ):
             return False
-        if time.time() <= float(owner["lease_expires_at"]):
-            return False
         if owner["hostname"] != socket.gethostname():
-            return True
+            return time.time() > float(owner["lease_expires_at"])
         if owner["boot_id"] != _boot_id():
             return True
         current_start = _process_start_identity(int(owner["pid"]))
@@ -816,61 +872,102 @@ class ArtifactStore:
     def claim_trial(self, trial_id: str) -> TrialClaim:
         token = _strict_token(trial_id, name="trial ID token")
         owner = self.owner_identity()
-        relative = Path("claims") / f"{token}.lock"
+        owner_relative = Path("claims") / f"{token}.owner.json"
+        lock_relative = Path("claims") / f"{token}.flock"
         with self._exclusive():
-            path = self._path(relative, create=True)
-            if path.exists():
-                try:
-                    existing = self._read_json_locked(relative)
-                except ArtifactConflict:
-                    raise TrialClaimConflict(
-                        f"trial {token} claim cannot prove stale"
-                    ) from None
-                if not self._owner_is_stale(existing):
-                    detail = (
-                        "claimed by active owner"
-                        if isinstance(existing, dict)
-                        and type(existing.get("lease_expires_at")) in {int, float}
-                        and time.time() <= float(existing["lease_expires_at"])
-                        else "claim cannot prove stale"
-                    )
-                    raise TrialClaimConflict(f"trial {token} {detail}")
-                reread = self._read_json_locked(relative)
-                if (
-                    reread != existing
-                    or not isinstance(reread, dict)
-                    or reread.get("nonce") != existing.get("nonce")
-                    or not self._owner_is_stale(reread)
-                ):
-                    raise TrialClaimConflict(
-                        f"trial {token} stale owner changed during reclamation"
-                    )
-                self._unlink(path)
-                self._fsync_directory(path.parent)
-            self._publish_bytes_locked(
-                relative,
-                canonical_json_bytes(owner),
-                immutable=True,
+            lock_path = self._path(lock_relative, create=True)
+            lock_descriptor = os.open(
+                lock_path,
+                os.O_RDWR
+                | os.O_CREAT
+                | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
             )
-            return TrialClaim(self, token, path, owner)
+            try:
+                try:
+                    fcntl.flock(
+                        lock_descriptor,
+                        fcntl.LOCK_EX | fcntl.LOCK_NB,
+                    )
+                except BlockingIOError:
+                    raise TrialClaimConflict(
+                        f"trial {token} kernel lock is held"
+                    ) from None
+                owner_path = self._path(owner_relative, create=True)
+                if owner_path.exists():
+                    try:
+                        existing = self._read_json_locked(owner_relative)
+                    except ArtifactConflict:
+                        raise TrialClaimConflict(
+                            f"trial {token} claim cannot prove stale"
+                        ) from None
+                    if not self._owner_is_stale(existing):
+                        detail = (
+                            "claimed by active owner"
+                            if isinstance(existing, dict)
+                            and type(existing.get("lease_expires_at"))
+                            in {int, float}
+                            and time.time()
+                            <= float(existing["lease_expires_at"])
+                            else "claim cannot prove stale"
+                        )
+                        raise TrialClaimConflict(f"trial {token} {detail}")
+                    reread = self._read_json_locked(owner_relative)
+                    if (
+                        reread != existing
+                        or not isinstance(reread, dict)
+                        or reread.get("nonce") != existing.get("nonce")
+                        or not self._owner_is_stale(reread)
+                    ):
+                        raise TrialClaimConflict(
+                            f"trial {token} stale owner changed during reclamation"
+                        )
+                    self._unlink(owner_path)
+                    self._fsync_directory(owner_path.parent)
+                self._publish_bytes_locked(
+                    owner_relative,
+                    canonical_json_bytes(owner),
+                    immutable=True,
+                )
+                return TrialClaim(
+                    self,
+                    token,
+                    owner_path,
+                    lock_path,
+                    lock_descriptor,
+                    owner,
+                )
+            except BaseException:
+                try:
+                    fcntl.flock(lock_descriptor, fcntl.LOCK_UN)
+                finally:
+                    os.close(lock_descriptor)
+                raise
 
     def _release_claim(self, claim: TrialClaim) -> None:
-        with self._exclusive():
+        try:
+            with self._exclusive():
+                try:
+                    current = self._read_json_locked(
+                        Path("claims")
+                        / f"{claim.trial_id}.owner.json"
+                    )
+                except ArtifactConflict as error:
+                    raise TrialClaimConflict(
+                        "trial claim disappeared or became unreadable before release"
+                    ) from error
+                if (
+                    current != claim.owner
+                    or not isinstance(current, dict)
+                    or current.get("nonce") != claim.owner.get("nonce")
+                ):
+                    raise TrialClaimConflict(
+                        "trial claim owner changed before release"
+                    )
+                self._unlink(claim.path)
+                self._fsync_directory(claim.path.parent)
+        finally:
             try:
-                current = self._read_json_locked(
-                    Path("claims") / f"{claim.trial_id}.lock"
-                )
-            except ArtifactConflict as error:
-                raise TrialClaimConflict(
-                    "trial claim disappeared or became unreadable before release"
-                ) from error
-            if (
-                current != claim.owner
-                or not isinstance(current, dict)
-                or current.get("nonce") != claim.owner.get("nonce")
-            ):
-                raise TrialClaimConflict(
-                    "trial claim owner changed before release"
-                )
-            self._unlink(claim.path)
-            self._fsync_directory(claim.path.parent)
+                fcntl.flock(claim.lock_descriptor, fcntl.LOCK_UN)
+            finally:
+                os.close(claim.lock_descriptor)

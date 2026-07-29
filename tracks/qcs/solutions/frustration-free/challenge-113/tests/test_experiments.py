@@ -172,6 +172,111 @@ def _result(spec, execution: int) -> TrialResult:
     )
 
 
+def _result_with_two_validations(spec) -> TrialResult:
+    def observation(
+        attempt_index: int,
+        optimizer_query_index: int,
+        estimate: float,
+        *,
+        validation: bool,
+        shots: int,
+    ) -> dict[str, object]:
+        return {
+            "attempt_index": attempt_index,
+            "estimate": estimate,
+            "observation_seed": attempt_index,
+            "optimizer_query_index": optimizer_query_index,
+            "seed_digest": f"{attempt_index:064x}",
+            "shots": shots,
+            "validation": validation,
+        }
+
+    optimizer_one = observation(1, 1, 0.9991, validation=False, shots=1_000)
+    validation_one = observation(2, 1, 0.998, validation=True, shots=100_000)
+    optimizer_two = observation(3, 2, 0.9992, validation=False, shots=1_000)
+    validation_two = observation(4, 2, 1.0, validation=True, shots=100_000)
+    attempts = tuple(
+        {
+            "attempt_index": item["attempt_index"],
+            "charged_shots": item["shots"],
+            "error_category": None,
+            "estimate": item["estimate"],
+            "observation_seed": item["observation_seed"],
+            "optimizer_query_index": item["optimizer_query_index"],
+            "requested_shots": item["shots"],
+            "seed_digest": item["seed_digest"],
+            "status": "succeeded",
+            "validation": item["validation"],
+        }
+        for item in (
+            optimizer_one,
+            validation_one,
+            optimizer_two,
+            validation_two,
+        )
+    )
+    pulse = [0.0] * 6
+    validation_attempts = [
+        {
+            "best_observation": optimizer_one,
+            "certified": False,
+            "device_attempt_index": 2,
+            "failure_category": None,
+            "optimizer_query_index": 1,
+            "pulse": pulse,
+            "status": "rejected",
+            "validation_observation": validation_one,
+        },
+        {
+            "best_observation": optimizer_two,
+            "certified": True,
+            "device_attempt_index": 4,
+            "failure_category": None,
+            "optimizer_query_index": 2,
+            "pulse": pulse,
+            "status": "certified",
+            "validation_observation": validation_two,
+        },
+    ]
+    return TrialResult(
+        trial_id=spec.trial_id,
+        device_id=spec.device_id,
+        observation_stream_id=spec.observation_stream_id,
+        config=spec.config.canonical_dict(),
+        result={
+            "best_observation": optimizer_two,
+            "best_pulse": pulse,
+            "budget": 200,
+            "budget_exhausted": False,
+            "certified": True,
+            "evaluations": 2,
+            "first_certified_query": 2,
+            "observations": [optimizer_one, optimizer_two],
+            "provisional_crossings": [1, 2],
+            "schema_version": 2,
+            "search": {
+                "basis_sha256": "1" * 64,
+                "dimension": 1,
+                "method": "random",
+                "origin_sha256": "2" * 64,
+            },
+            "stop_reason": "certified",
+            "validation_attempts": validation_attempts,
+            "validation_result": validation_two,
+        },
+        ledger={
+            "optimizer_queries": 2,
+            "optimizer_shots": 2_000,
+            "validation_queries": 2,
+            "validation_shots": 200_000,
+            "total_queries": 4,
+            "total_shots": 202_000,
+        },
+        attempts=attempts,
+        execution=1,
+    )
+
+
 def test_interrupted_sweep_resumes_without_duplicate_ledgers(tmp_path) -> None:
     specs = generate_paired_trials(
         [
@@ -317,6 +422,62 @@ def test_crash_after_trial_publish_adopts_without_rerunning_physics(
     assert status == SweepStatus(expected=1, completed=1, pending=0)
     assert calls == 1
     assert spec.trial_id in store.trial_hashes()
+
+
+@pytest.mark.parametrize(
+    ("variant", "message"),
+    (
+        ("whitespace", "noncanonical"),
+        ("alternate-number", "noncanonical"),
+        ("bom", "noncanonical"),
+        ("trailing", "noncanonical"),
+        ("duplicate-known", "duplicate"),
+        ("duplicate-private", "duplicate"),
+    ),
+)
+def test_orphan_adoption_rejects_noncanonical_or_duplicate_json(
+    tmp_path,
+    variant,
+    message,
+) -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    store = ArtifactStore(tmp_path)
+    run_sweep([spec], store, executor=lambda item: _result(item, 1), stop_after=0)
+    payload = _result(spec, 1).canonical_dict()
+    canonical = artifacts_module.canonical_json_bytes(payload)
+    if variant == "whitespace":
+        raw = canonical.replace(b'{"attempts"', b'{ "attempts"', 1)
+    elif variant == "alternate-number":
+        raw = canonical.replace(b'"charged_shots":1000', b'"charged_shots":1e3', 1)
+    elif variant == "bom":
+        raw = b"\xef\xbb\xbf" + canonical
+    elif variant == "trailing":
+        raw = canonical + b"trailing"
+    elif variant == "duplicate-known":
+        raw = canonical[:-2] + (
+            f',"trial_id":"{spec.trial_id}"'.encode("ascii")
+        ) + b"}\n"
+    else:
+        raw = (
+            b'{"private_basis":[1],"private_basis":[2],'
+            + canonical[1:]
+        )
+    trial_path = tmp_path / "trials" / f"{spec.trial_id}.json"
+    trial_path.parent.mkdir(exist_ok=True)
+    trial_path.write_bytes(raw)
+    calls = 0
+
+    def execute(item) -> TrialResult:
+        nonlocal calls
+        calls += 1
+        return _result(item, calls)
+
+    with pytest.raises(ArtifactConflict, match=message):
+        run_sweep([spec], store, executor=execute)
+
+    assert calls == 0
+    assert trial_path.read_bytes() == raw
+    assert spec.trial_id not in store.trial_hashes()
 
 
 def test_source_change_during_trial_aborts_before_publication(
@@ -500,3 +661,27 @@ def test_trial_result_rejects_missing_extra_and_duplicate_attempts() -> None:
     for payload in mutations:
         with pytest.raises(ValueError):
             TrialResult.from_canonical_dict(payload)
+
+
+def test_trial_result_rejects_decreasing_validation_crossings() -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    payload = _result_with_two_validations(spec).canonical_dict()
+    payload["result"]["validation_attempts"].reverse()
+    payload["result"]["provisional_crossings"] = [2, 1]
+
+    with pytest.raises(ValueError, match="increasing"):
+        TrialResult.from_canonical_dict(payload)
+
+
+def test_trial_result_requires_certified_attempt_to_be_final() -> None:
+    spec = generate_paired_trials([_config("random", 1)])[0]
+    payload = _result_with_two_validations(spec).canonical_dict()
+    first, second = payload["result"]["validation_attempts"]
+    first["certified"] = True
+    first["status"] = "certified"
+    second["certified"] = False
+    second["status"] = "rejected"
+    payload["result"]["first_certified_query"] = 1
+
+    with pytest.raises(ValueError, match="final"):
+        TrialResult.from_canonical_dict(payload)

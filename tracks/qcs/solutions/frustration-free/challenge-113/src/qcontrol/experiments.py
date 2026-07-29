@@ -500,6 +500,13 @@ def _validate_result_and_attempts(
         raise ValueError("validation history does not cover all attempts")
     if used_validation_attempts != set(validation_by_attempt):
         raise ValueError("validation ledger attempts are not covered exactly once")
+    if any(
+        current <= previous
+        for previous, current in zip(crossings, crossings[1:])
+    ):
+        raise ValueError(
+            "validation optimizer queries must be strictly increasing"
+        )
     if result["provisional_crossings"] != crossings:
         raise ValueError("provisional crossings do not match validation history")
     latest_validation = (
@@ -516,6 +523,8 @@ def _validate_result_and_attempts(
         or first_certified != expected_first
     ):
         raise ValueError("certification history is inconsistent")
+    if certified_crossings and certified_crossings[0] != crossings[-1]:
+        raise ValueError("certified validation attempt must be final")
 
 
 @dataclass(frozen=True, slots=True)
@@ -629,7 +638,7 @@ class TrialResult:
                 execution=payload.get("execution"),
             )
         except (KeyError, TypeError, ValueError) as error:
-            raise ValueError("invalid trial-result payload") from error
+            raise ValueError(f"invalid trial-result payload: {error}") from error
         return result
 
 
@@ -969,6 +978,13 @@ def _allowed_files(store: ArtifactStore, specs: Sequence[TrialSpec]) -> set[Path
         Path("ready.json"),
     }
     allowed.update(Path("trials") / f"{spec.trial_id}.json" for spec in specs)
+    claims = store.root / "claims"
+    if claims.is_dir():
+        allowed.update(
+            path.relative_to(store.root)
+            for path in claims.glob("*.flock")
+            if path.is_file() and not path.is_symlink()
+        )
     return allowed
 
 
@@ -1014,7 +1030,11 @@ def validate_sweep(
         if not path.is_file():
             continue
         relative = path.relative_to(store.root)
-        if relative.parts and relative.parts[0] == "claims":
+        if (
+            relative.parts
+            and relative.parts[0] == "claims"
+            and relative.suffixes[-2:] == [".owner", ".json"]
+        ):
             errors.append(f"unexpected active claim: {relative.as_posix()}")
         elif relative not in allowed:
             errors.append(f"unexpected file: {relative.as_posix()}")
