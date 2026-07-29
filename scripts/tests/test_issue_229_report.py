@@ -63,7 +63,9 @@ def test_committed_artifact_and_report_have_all_cases():
     assert [case["length"] for case in su2_cases] == [4, 6, 8]
     assert document.count("data-operational-instance") == 5
     assert document.count("data-baseline-instance") == 50
+    assert document.count("data-su2-summary") == 3
     assert document.count("data-su2-case") == 3
+    assert "S=0: 14, S=1: 28, S=2: 20, S=3: 7, S=4: 1" in document
     assert document.count("<svg") == 1
     assert "SU(2) cubic work proxy and spectrum reconstruction error" in document
     assert "Operational Z₂ʳ NC moment-SDP reduction" in document

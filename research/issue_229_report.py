@@ -279,6 +279,25 @@ def _su2_plot(cases: list[dict]) -> str:
     )
 
 
+def _su2_summary_rows(cases: list[dict]) -> str:
+    rows = []
+    for case in cases:
+        multiplicities = ", ".join(
+            f'S={sector["spin"]}: {sector["multiplicity"]}' for sector in case["sectors"]
+        )
+        largest_block = max(sector["block_dimension"] for sector in case["sectors"])
+        rows.append(
+            "<tr data-su2-summary><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{:.15g}</td><td>{}</td><td>{:.2f}x</td><td>{}</td></tr>".format(
+                case["length"], case["dense_dimension"], html.escape(multiplicities),
+                largest_block, case["ground_energy"], _number(case["spectrum_max_error"]),
+                case["cubic_work_proxy"],
+                f'{case["multiplicity_completeness"]}={case["dense_dimension"]}',
+            )
+        )
+    return "\n".join(rows)
+
+
 def _su2_sections(cases: list[dict]) -> str:
     sections = []
     for case in cases:
@@ -331,6 +350,8 @@ def render_html(evidence: dict) -> str:
 {_baseline_rows(baseline)}</tbody></table></details>
 <h2>3. SU(2) Hilbert-space irrep/multiplicity evidence</h2>
 <p>Spin-1/2 antiferromagnetic Heisenberg open chain H=Σ_i S_i·S_(i+1), J=+1. In fixed M=S, S² projection selects one highest-weight vector per irrep copy, producing an m_S by m_S multiplicity block. Each block eigenvalue is repeated 2S+1 times to reconstruct the full spectrum. Cubic proxy is D³ / Σ_S m_S³.</p>
+<table><thead><tr><th>L</th><th>Dense D</th><th>SU(2) multiplicities m_S</th><th>Largest block</th><th>Ground energy</th><th>Spectrum error</th><th>Cubic proxy</th><th>Completeness</th></tr></thead><tbody>
+{_su2_summary_rows(cases)}</tbody></table>
 {_su2_plot(cases)}
 {_su2_sections(cases)}
 <h2>Reproduce</h2><p><code>julia --startup-file=no --project=julia-env research/nc_moment_sdp/run.jl research/benchmark/nc-moment-sdp-operational.json</code><br><code>.venv/bin/python research/issue_229_report.py --private-dir /path/to/private/corpus</code></p>
