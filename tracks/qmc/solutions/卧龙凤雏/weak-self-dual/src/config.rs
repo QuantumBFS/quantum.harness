@@ -113,6 +113,18 @@ impl RunConfig {
                     bail!("production refinement level 1 does not match the frozen contract");
                 }
             }
+            2 => {
+                let mut expected = PRODUCTION_WIDTHS.to_vec();
+                expected.push(32);
+                if self.widths != expected
+                    || sampling.streams_per_width != 128
+                    || sampling.burn_in_layers_per_width != 20
+                    || sampling.measurement_layers_per_width != 200
+                    || sampling.block_layers_per_width != 5
+                {
+                    bail!("production refinement level 2 does not match the frozen contract");
+                }
+            }
             level => bail!("unsupported production refinement level {level}"),
         }
         if sampling.stabilize_every_layers != 4

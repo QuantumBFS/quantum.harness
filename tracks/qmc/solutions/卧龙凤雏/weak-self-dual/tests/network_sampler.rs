@@ -1,6 +1,6 @@
 use weak_self_dual::config::{RunConfig, SamplingConfig, SELF_DUAL_BETA, SELF_DUAL_THETA};
 use weak_self_dual::network::{BoundarySector, LayerOutcomes, SelfDualNetwork};
-use weak_self_dual::sampler::estimate_stream;
+use weak_self_dual::sampler::{binary_entropy, entropy_rate_per_measurement_row, estimate_stream};
 
 fn tiny_config(width: usize, burn_in: usize, measurement: usize, block: usize) -> RunConfig {
     RunConfig {
@@ -83,7 +83,28 @@ fn one_majorana_translation_exchanges_vortex_species() {
 }
 
 #[test]
-fn gamma_is_born_surprise_per_complete_layer() {
+fn binary_entropy_is_the_expected_born_surprise() {
+    let probability: f64 = 0.8;
+    let expected =
+        probability * -probability.ln() + (1.0 - probability) * -(1.0 - probability).ln();
+    assert!((binary_entropy(probability).unwrap() - expected).abs() < 1.0e-15);
+    assert_eq!(binary_entropy(0.0).unwrap(), 0.0);
+    assert_eq!(binary_entropy(1.0).unwrap(), 0.0);
+    assert!(binary_entropy(-0.1).is_err());
+}
+
+#[test]
+fn entropy_rate_counts_two_measurement_rows_per_period() {
+    let total_entropy = 8.0 * std::f64::consts::LN_2;
+    assert_eq!(
+        entropy_rate_per_measurement_row(total_entropy, 2).unwrap(),
+        2.0 * std::f64::consts::LN_2
+    );
+    assert!(entropy_rate_per_measurement_row(1.0, 0).is_err());
+}
+
+#[test]
+fn gamma_is_conditional_entropy_per_measurement_row() {
     let config = tiny_config(2, 0, 4, 2);
     let estimate = estimate_stream(&config, 2, 0).unwrap();
     assert_eq!(estimate.blocks.len(), 2);

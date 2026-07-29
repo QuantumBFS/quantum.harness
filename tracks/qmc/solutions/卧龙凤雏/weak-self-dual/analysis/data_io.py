@@ -35,8 +35,8 @@ def write_json_atomic(path: Path, value: dict) -> None:
 def load_run(run_dir: Path) -> LoadedRun:
     run_dir = Path(run_dir)
     manifest = _read_json(run_dir / "manifest.json")
-    if manifest.get("schema_version") != 1:
-        raise ValueError("manifest schema_version must equal 1")
+    if manifest.get("schema_version") != 3:
+        raise ValueError("manifest schema_version must equal 3")
     config = manifest["config"]
     widths = np.asarray(config["widths"], dtype=int)
     if len(widths) == 0 or np.any(np.diff(widths) <= 0):
@@ -47,7 +47,7 @@ def load_run(run_dir: Path) -> LoadedRun:
     oracle_path = run_dir / "raw/oracles.json"
     _verify_hash(oracle_path, hashes.get("oracles"), "oracles")
     oracle = _read_json(oracle_path)
-    if oracle.get("schema_version") != 1 or oracle.get("config") != config:
+    if oracle.get("schema_version") != 3 or oracle.get("config") != config:
         raise ValueError("oracle artifact is incompatible with the manifest")
 
     fields = {
@@ -68,7 +68,7 @@ def load_run(run_dir: Path) -> LoadedRun:
             artifact = _read_json(path)
             estimate = artifact.get("estimate", {})
             if (
-                artifact.get("schema_version") != 1
+                artifact.get("schema_version") != 3
                 or artifact.get("config") != config
                 or estimate.get("width") != int(width)
                 or estimate.get("stream") != stream

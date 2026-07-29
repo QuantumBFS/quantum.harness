@@ -1,4 +1,5 @@
 use rand_xoshiro::rand_core::Rng;
+use std::path::Path;
 use weak_self_dual::config::{
     RunConfig, SamplingConfig, SELF_DUAL_BETA, SELF_DUAL_THETA, TARGET_CENTRAL_CHARGE,
 };
@@ -63,4 +64,14 @@ fn incomplete_blocks_are_rejected() {
         .unwrap_err()
         .to_string()
         .contains("complete blocks"));
+}
+
+#[test]
+fn final_precision_refinement_matches_the_frozen_contract() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("configs/refinement-2.toml");
+    let config = RunConfig::load(&path).unwrap();
+    config.validate().unwrap();
+    assert!(config.production_gates);
+    assert_eq!(config.refinement_level, 2);
+    assert_eq!(config.sampling.streams_per_width, 128);
 }

@@ -69,7 +69,7 @@ pub fn estimate_stream(config: &RunConfig, width: usize, stream: usize) -> Resul
     let block_count = measurement_layers / block_layers;
     let mut blocks = Vec::with_capacity(block_count);
     for block_index in 0..block_count {
-        let mut surprise_sum = 0.0;
+        let mut conditional_entropy_sum = 0.0;
         let mut electric_count = 0;
         let mut magnetic_count = 0;
         let mut faces_per_species = 0;
@@ -84,7 +84,7 @@ pub fn estimate_stream(config: &RunConfig, width: usize, stream: usize) -> Resul
                 stream,
                 absolute_layer,
             )?;
-            surprise_sum += sampled.surprise;
+            conditional_entropy_sum += sampled.conditional_entropy;
             min_probability = min_probability.min(sampled.min_probability);
             if let Some(prior) = &previous {
                 let vortices = network.vortices_between(prior, &sampled.outcomes)?;
@@ -99,7 +99,7 @@ pub fn estimate_stream(config: &RunConfig, width: usize, stream: usize) -> Resul
         }
         blocks.push(BlockEstimate {
             block_index,
-            gamma: surprise_sum / block_layers as f64,
+            gamma: entropy_rate_per_measurement_row(conditional_entropy_sum, block_layers)?,
             electric_count,
             magnetic_count,
             faces_per_species,
@@ -124,7 +124,7 @@ pub fn estimate_stream(config: &RunConfig, width: usize, stream: usize) -> Resul
 
 struct SampledLayer {
     outcomes: LayerOutcomes,
-    surprise: f64,
+    conditional_entropy: f64,
     min_probability: f64,
 }
 
@@ -138,14 +138,14 @@ fn sample_layer(
 ) -> Result<SampledLayer> {
     let mut onsite = Vec::with_capacity(width);
     let mut bond = Vec::with_capacity(width);
-    let mut surprise = 0.0;
+    let mut conditional_entropy = 0.0;
     let mut min_probability = 1.0_f64;
     for (gate_kind, measurements, outcomes) in [
         ("onsite", network.onsite_measurements(), &mut onsite),
         ("bond", network.bond_measurements(), &mut bond),
     ] {
         for (gate_index, &measurement) in measurements.iter().enumerate() {
-            let (outcome, probability, gate_surprise) = sample_measurement(state, measurement, rng)
+            let (outcome, probability, gate_entropy) = sample_measurement(state, measurement, rng)
                 .with_context(|| {
                     format!(
                         "sampling failed at width={width} stream={stream} layer={layer} \
@@ -153,13 +153,13 @@ fn sample_layer(
                     )
                 })?;
             outcomes.push(outcome);
-            surprise += gate_surprise;
+            conditional_entropy += gate_entropy;
             min_probability = min_probability.min(probability);
         }
     }
     Ok(SampledLayer {
         outcomes: LayerOutcomes { onsite, bond },
-        surprise,
+        conditional_entropy,
         min_probability,
     })
 }
@@ -170,10 +170,35 @@ fn sample_measurement(
     rng: &mut Xoshiro256PlusPlus,
 ) -> Result<(i8, f64, f64)> {
     let plus_probability = state.outcome_probability(measurement, 1)?;
+    let entropy = binary_entropy(plus_probability)?;
     let uniform = ((rng.next_u64() >> 11) as f64) * (1.0 / ((1_u64 << 53) as f64));
     let outcome = if uniform < plus_probability { 1 } else { -1 };
     let stats = state.apply_outcome(measurement, outcome)?;
-    Ok((outcome, stats.probability, stats.surprise))
+    Ok((outcome, stats.probability, entropy))
+}
+
+pub fn binary_entropy(probability: f64) -> Result<f64> {
+    if !probability.is_finite() || !(0.0..=1.0).contains(&probability) {
+        bail!("binary-entropy probability must lie in [0,1]");
+    }
+    let term = |value: f64| {
+        if value == 0.0 {
+            0.0
+        } else {
+            -value * value.ln()
+        }
+    };
+    Ok(term(probability) + term(1.0 - probability))
+}
+
+pub fn entropy_rate_per_measurement_row(total_entropy: f64, periods: usize) -> Result<f64> {
+    if !total_entropy.is_finite() || total_entropy < 0.0 {
+        bail!("total conditional entropy must be finite and non-negative");
+    }
+    if periods == 0 {
+        bail!("entropy rate requires at least one complete circuit period");
+    }
+    Ok(total_entropy / (2 * periods) as f64)
 }
 
 fn stabilize_and_check(

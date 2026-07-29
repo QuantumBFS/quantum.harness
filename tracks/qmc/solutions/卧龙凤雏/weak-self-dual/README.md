@@ -24,8 +24,12 @@ a different replica limit and universality class.
 
 ## Estimator and fit
 
-The accumulated surprise `−Σ log P(s|Γ)` divided by complete cylinder layers
-is the trajectory estimator `γ₁(L)`. Python fits
+At every sampled gate, Rust accumulates the conditional binary entropy
+`−p log p − (1−p) log(1−p)`. Its trajectory mean is exactly the Shannon
+entropy `−Σ_s P(s) log P(s)` by the chain rule, while avoiding the extra
+variance of realized `−log P(s|Γ)` values. Each circuit period contains an
+onsite and a bond measurement row, so division by twice the number of periods
+gives the per-row rate `γ₁(L)` used in the cylinder depth `L_y`. Python fits
 
 `γ₁(L) = f∞ L − π c_eff/(6L) + a/L³`.
 
@@ -46,7 +50,10 @@ fits, plots, and renders the report.
 
 Production uses `L=6,8,…,30`, eight independent streams, `20L` burn-in layers,
 `100L` measured layers, and `5L` blocks. The predeclared refinement adds
-`L=32`, doubles streams, and uses `200L` measured layers.
+`L=32`, doubles streams, and uses `200L` measured layers. If its precision
+gate alone fails, `configs/refinement-2.toml` retains those widths and lengths
+while increasing to 128 streams, as determined from the observed
+`1/sqrt(N)` uncertainty scaling.
 
 ## Commands
 

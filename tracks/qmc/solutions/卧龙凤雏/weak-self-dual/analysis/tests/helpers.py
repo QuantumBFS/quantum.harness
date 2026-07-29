@@ -40,7 +40,7 @@ def make_synthetic_run(root: Path, widths=(6, 8, 10), streams=2, blocks=4) -> Pa
                 + 1.2 / width**3
             )
             artifact = {
-                "schema_version": 1,
+                "schema_version": 3,
                 "config": config,
                 "estimate": {
                     "width": width,
@@ -71,7 +71,7 @@ def make_synthetic_run(root: Path, widths=(6, 8, 10), streams=2, blocks=4) -> Pa
             _write_json(path, artifact)
             hashes[key] = _sha256(path)
     oracle = {
-        "schema_version": 1,
+        "schema_version": 3,
         "config": config,
         "born_enumeration": {
             "max_probability_error": 1e-14,
@@ -89,7 +89,7 @@ def make_synthetic_run(root: Path, widths=(6, 8, 10), streams=2, blocks=4) -> Pa
     _write_json(oracle_path, oracle)
     hashes["oracles"] = _sha256(oracle_path)
     manifest = {
-        "schema_version": 1,
+        "schema_version": 3,
         "config": config,
         "artifact_sha256": hashes,
         "oracle_elapsed_s": 0.1,

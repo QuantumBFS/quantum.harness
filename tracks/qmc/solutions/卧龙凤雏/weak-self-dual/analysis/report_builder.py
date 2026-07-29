@@ -57,7 +57,9 @@ def _method(summary):
         "title": "Born-correlated Gaussian evolution",
         "note": (
             "Rust samples every binary outcome from the current covariance matrix. "
-            "The accumulated Born surprise is the vacuum Lyapunov/free-energy estimator."
+            "The accumulated conditional binary entropy is a Rao–Blackwellized "
+            "estimator of the vacuum Shannon free energy. Rates are normalized "
+            "per measurement row (two rows per circuit period)."
         ),
         "blocks": [
             {

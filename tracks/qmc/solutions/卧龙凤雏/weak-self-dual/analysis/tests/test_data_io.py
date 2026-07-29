@@ -13,7 +13,7 @@ def test_loader_assembles_width_keyed_stream_block_arrays(tmp_path):
     np.testing.assert_array_equal(loaded.widths, [6, 8, 10])
     assert loaded.gamma_blocks[6].shape == (2, 4)
     assert loaded.electric_counts[8].shape == (2, 4)
-    assert loaded.oracle["schema_version"] == 1
+    assert loaded.oracle["schema_version"] == 3
 
 
 def test_loader_rejects_a_tampered_stream(tmp_path):
