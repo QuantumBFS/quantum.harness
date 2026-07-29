@@ -67,6 +67,13 @@ For each qualified sigma, run only the two `L=128`, even-sector, `chi=64`
 endpoint cells. Reuse compatible checkpoints only as initialization and
 fully reoptimize with the current code.
 
+`chi=64` is restricted to this crossing stage. In Phase 7, the targeted
+`chi=64` to `chi=128` checks changed `R_xi` by less than `4e-6` and preserved
+every tested crossing bracket and endpoint sign. This makes `chi=64`
+appropriate for resolving the much coarser fixed Gamma bracket without
+promoting it to the final gap accuracy. All common-field gap states remain
+`chi=128`.
+
 At each endpoint define
 
 ```text
@@ -93,7 +100,8 @@ x32 = Gamma_x(32,64),
 x64 = Gamma_x(64,128).
 ```
 
-The primary common field is the intercept of the preregistered power drift
+The primary common field is the exact two-point sensitivity extrapolation
+of the preregistered power drift
 
 ```text
 Gamma_x(L,2L) = Gamma_c_power + a/L.
@@ -105,7 +113,8 @@ With only the two available crossings,
 Gamma_c_power = 2*x64 - x32.
 ```
 
-The sensitivity field is the intercept of
+The alternative common field is the exact two-point sensitivity
+extrapolation of
 
 ```text
 Gamma_x(L,2L) = Gamma_c_log + a/log(L).
@@ -117,7 +126,7 @@ Gamma_c_log = (x64*t32 - x32*t64)/(t32-t64).
 Both two-parameter forms pass exactly through two points. Consequently:
 
 - neither has residual degrees of freedom;
-- no goodness-of-fit or model selection is reported;
+- neither supports statistical inference or model selection;
 - their difference is a correction-form sensitivity, not a statistical
   confidence interval;
 - neither form may be chosen based on agreement with the published
@@ -126,6 +135,11 @@ Both two-parameter forms pass exactly through two points. Consequently:
 All direct gap calculations use the single common primary field
 `Gamma_c_power`. `Gamma_c_log` is reported as sensitivity context rather
 than as a second production field, avoiding a second full gap campaign.
+The power/log critical-field sensitivity is reported separately and is not
+fully propagated into the gap uncertainty because the design has only two
+crossings. Gap uncertainties therefore contain numerical state diagnostics
+and finite-size correction sensitivity, with this missing propagation
+stated explicitly as a limitation.
 
 ## Gap calculations and diagnostics
 
@@ -172,15 +186,15 @@ z_eff(64,128) = -log[Delta(128)/Delta(64)]/log(2).
 ```
 
 These are reported separately from extrapolated sensitivities. With
-`z32=z_eff(32,64)` and `z64=z_eff(64,128)`, the power-correction
-sensitivity is the exact two-point intercept of
+`z32=z_eff(32,64)` and `z64=z_eff(64,128)`, the power-correction result is an
+exact two-point sensitivity extrapolation of
 
 ```text
 z_eff(L,2L) = z_power + a/L,
 z_power = 2*z64 - z32.
 ```
 
-The logarithmic sensitivity is the exact two-point intercept of
+The logarithmic result is an exact two-point sensitivity extrapolation of
 
 ```text
 z_eff(L,2L) = z_log + a/log(L).
@@ -189,10 +203,23 @@ t32 = 1/log(32), t64 = 1/log(64),
 z_log = (z64*t32 - z32*t64)/(t32-t64).
 ```
 
-As for the critical-field drift, these are not statistically distinguishable
-fits. The report gives `z_power`, `z_log`, their absolute spread, the two raw
-`z_eff` values, and all underlying gaps. It makes no correction-form
-selection.
+As for the critical-field drift, these are exact two-point evaluations with
+no residual degrees of freedom. The report gives `z_power`, `z_log`, their
+absolute spread, the two raw `z_eff` values, and all underlying gaps. It
+makes no correction-form selection or statistical-inference claim.
+
+## Equal-time structure-factor diagnostics
+
+The even-sector states continue to record the full equal-time `C_eq(r)` and
+
+```text
+S_eq(0,L) = sum_r C_eq(r).
+```
+
+Phase 8 reports these raw equal-time diagnostics by size. They are not used
+to estimate or label a susceptibility exponent. In particular, no Phase 8
+quantity is called `gamma/nu`; the required imaginary-time-integrated
+susceptibility remains outside the DMRG scope.
 
 ## Numerical uncertainty budget
 
@@ -242,6 +269,8 @@ The final analysis produces:
 - common-field power/log sensitivity table;
 - sector-separated gap diagnostic CSV;
 - `z_eff` and power/log sensitivity table and plot;
+- equal-time `C_eq(r)` and `S_eq(0,L)` diagnostics without a susceptibility
+  exponent;
 - MPO/MPS/finite-size uncertainty table;
 - a report that states susceptibility `gamma/nu` is outside the DMRG scope.
 
