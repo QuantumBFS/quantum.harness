@@ -462,6 +462,47 @@ end
         FiniteBathPurification.qn_dual_purification(parameters, validated)
     sites = interleaved_sites(parameters; purification = spec)
 
+    binding_function_defined = isdefined(
+        FiniteBathPurification,
+        :_purification_identity_binding_sha256,
+    )
+    @test binding_function_defined
+    if binding_function_defined
+        identity = (;
+            mode = :qn_dual,
+            qn_gauge = "electron_nf_sz_ancilla_particle_hole",
+            qn_gauge_version = 1,
+            binding_domain = "finite_bath_qn_purification_identity",
+            binding_version = 1,
+            base_sector_nf = 6,
+            base_sector_sz = 0,
+        )
+        binding =
+            FiniteBathPurification._purification_identity_binding_sha256(
+                parameters, identity
+            )
+        @test binding == spec.parameter_binding_sha256
+        @test spec.parameter_binding_domain == identity.binding_domain
+        @test spec.parameter_binding_version == identity.binding_version
+        mutations = (
+            (; mode = :non_qn),
+            (; qn_gauge = "other_gauge"),
+            (; qn_gauge_version = 2),
+            (; binding_domain = "other_domain"),
+            (; binding_version = 2),
+            (; base_sector_nf = 8),
+            (; base_sector_sz = 2),
+        )
+        for mutation in mutations
+            changed_identity = merge(identity, mutation)
+            changed_binding =
+                FiniteBathPurification._purification_identity_binding_sha256(
+                    parameters, changed_identity
+                )
+            @test changed_binding != binding
+        end
+    end
+
     changed_before_spec = deepcopy(parameters)
     changed_before_spec.V[1] += 0.125
     @test_throws ArgumentError FiniteBathPurification.qn_dual_purification(

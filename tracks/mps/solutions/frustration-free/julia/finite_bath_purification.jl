@@ -25,6 +25,9 @@ export FiniteBathParameters,
 const ELECTRON_DIMENSION = 4
 const QN_GAUGE = "electron_nf_sz_ancilla_particle_hole"
 const QN_GAUGE_VERSION = 1
+const QN_PURIFICATION_BINDING_DOMAIN =
+    "finite_bath_qn_purification_identity"
+const QN_PURIFICATION_BINDING_VERSION = 1
 
 struct ChainMappingValidationSeal end
 const _CHAIN_MAPPING_VALIDATION_SEAL = ChainMappingValidationSeal()
@@ -91,6 +94,8 @@ struct PurificationSpec
     qn_gauge_version::Union{Nothing,Int}
     base_sector_nf::Union{Nothing,Int}
     base_sector_sz::Union{Nothing,Int}
+    parameter_binding_domain::Union{Nothing,String}
+    parameter_binding_version::Union{Nothing,Int}
     parameter_binding_sha256::Union{Nothing,String}
 
     function PurificationSpec(
@@ -100,6 +105,8 @@ struct PurificationSpec
         qn_gauge_version,
         base_sector_nf,
         base_sector_sz,
+        parameter_binding_domain,
+        parameter_binding_version,
         parameter_binding_sha256,
     )
         seal === _PURIFICATION_CONSTRUCTION_SEAL ||
@@ -110,6 +117,8 @@ struct PurificationSpec
             qn_gauge_version,
             base_sector_nf,
             base_sector_sz,
+            parameter_binding_domain,
+            parameter_binding_version,
             parameter_binding_sha256,
         )
     end
@@ -123,6 +132,8 @@ non_qn_purification() =
         qn_gauge_version = nothing,
         base_sector_nf = nothing,
         base_sector_sz = nothing,
+        parameter_binding_domain = nothing,
+        parameter_binding_version = nothing,
         parameter_binding_sha256 = nothing,
     )
 
@@ -265,10 +276,37 @@ function _binding_string(value)
     return "$(ncodeunits(text)):$text"
 end
 
-function _parameter_binding_sha256(parameters::FiniteBathParameters)
+_binding_integer(value::Integer) = string(
+    reinterpret(UInt64, Int64(value)); base = 16, pad = 16
+)
+
+const _PURIFICATION_IDENTITY_KEYS = (
+    :mode,
+    :qn_gauge,
+    :qn_gauge_version,
+    :binding_domain,
+    :binding_version,
+    :base_sector_nf,
+    :base_sector_sz,
+)
+
+function _purification_identity_binding_sha256(
+    parameters::FiniteBathParameters, identity::NamedTuple
+)
+    keys(identity) == _PURIFICATION_IDENTITY_KEYS ||
+        throw(ArgumentError("invalid purification binding identity"))
     canonical = join(
         (
-            "finite_bath_parameter_binding_v1",
+            "binding_domain=" * _binding_string(identity.binding_domain),
+            "binding_version=" * _binding_integer(identity.binding_version),
+            "mode=" * _binding_string(identity.mode),
+            "qn_gauge=" * _binding_string(identity.qn_gauge),
+            "qn_gauge_version=" *
+                _binding_integer(identity.qn_gauge_version),
+            "base_target_sector_nf=" *
+                _binding_integer(identity.base_sector_nf),
+            "base_target_sector_sz=" *
+                _binding_integer(identity.base_sector_sz),
             "epsilon=" * _binding_float_vector(parameters.epsilon),
             "V=" * _binding_float_vector(parameters.V),
             "U=" * _binding_float(parameters.U),
@@ -289,6 +327,31 @@ function _parameter_binding_sha256(parameters::FiniteBathParameters)
         "\n",
     )
     return bytes2hex(sha256(codeunits(canonical)))
+end
+
+function _qn_purification_identity(parameters::FiniteBathParameters)
+    n_orbitals = length(parameters.epsilon) + 1
+    return (;
+        mode = :qn_dual,
+        qn_gauge = QN_GAUGE,
+        qn_gauge_version = QN_GAUGE_VERSION,
+        binding_domain = QN_PURIFICATION_BINDING_DOMAIN,
+        binding_version = QN_PURIFICATION_BINDING_VERSION,
+        base_sector_nf = 2 * n_orbitals,
+        base_sector_sz = 0,
+    )
+end
+
+function _purification_identity(purification::PurificationSpec)
+    return (;
+        mode = purification.mode,
+        qn_gauge = purification.qn_gauge,
+        qn_gauge_version = purification.qn_gauge_version,
+        binding_domain = purification.parameter_binding_domain,
+        binding_version = purification.parameter_binding_version,
+        base_sector_nf = purification.base_sector_nf,
+        base_sector_sz = purification.base_sector_sz,
+    )
 end
 
 struct PurificationResult{SiteVector, Diagnostics}
@@ -458,16 +521,18 @@ function qn_dual_purification(
                 "QN dual purification capability does not match chain parameters"
             ),
         )
-    n_orbitals = length(parameters.epsilon) + 1
+    identity = _qn_purification_identity(parameters)
     return PurificationSpec(
         _PURIFICATION_CONSTRUCTION_SEAL;
-        mode = :qn_dual,
-        qn_gauge = QN_GAUGE,
-        qn_gauge_version = QN_GAUGE_VERSION,
-        base_sector_nf = 2 * n_orbitals,
-        base_sector_sz = 0,
+        mode = identity.mode,
+        qn_gauge = identity.qn_gauge,
+        qn_gauge_version = identity.qn_gauge_version,
+        base_sector_nf = identity.base_sector_nf,
+        base_sector_sz = identity.base_sector_sz,
+        parameter_binding_domain = identity.binding_domain,
+        parameter_binding_version = identity.binding_version,
         parameter_binding_sha256 =
-            _parameter_binding_sha256(parameters),
+            _purification_identity_binding_sha256(parameters, identity),
     )
 end
 
@@ -477,14 +542,11 @@ function _validate_purification_spec(
     if purification == non_qn_purification()
         return purification
     end
-    n_orbitals = length(parameters.epsilon) + 1
-    purification.mode === :qn_dual &&
-        purification.qn_gauge == QN_GAUGE &&
-        purification.qn_gauge_version == QN_GAUGE_VERSION &&
-        purification.base_sector_nf == 2 * n_orbitals &&
-        purification.base_sector_sz == 0 &&
+    expected_identity = _qn_purification_identity(parameters)
+    identity = _purification_identity(purification)
+    identity == expected_identity &&
         purification.parameter_binding_sha256 ==
-            _parameter_binding_sha256(parameters) &&
+            _purification_identity_binding_sha256(parameters, identity) &&
         parameters.bath_representation === :chain &&
         parameters.source_bath_sha256 !== nothing &&
         parameters.mapping_sha256 !== nothing ||
