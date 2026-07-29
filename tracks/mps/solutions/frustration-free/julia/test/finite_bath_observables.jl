@@ -1,5 +1,12 @@
 using Test
 using LinearAlgebra
+using JSON3
+using ITensors
+using ITensorMPS
+
+isdefined(Main, :FiniteBathPurification) ||
+    include(joinpath(@__DIR__, "..", "finite_bath_purification.jl"))
+using .FiniteBathPurification: FiniteBathParameters
 
 include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
 using .FiniteBathObservables:
@@ -108,6 +115,219 @@ function independent_observables_trace(parameters, beta, tau)
         ]
     end
     return (; n_up, n_dn, n_d = n_up + n_dn, double_occupancy, green)
+end
+
+function python_chain_fixtures()
+    solution_dir = normpath(joinpath(@__DIR__, "..", ".."))
+    script = """
+import json
+import sys
+sys.path.insert(0, sys.argv[1])
+import bath
+import chain_mapping
+
+fixtures = []
+for n_bath in range(1, 7):
+    star = bath.make_bath_artifact(
+        gamma=0.1,
+        bandwidth=1.0,
+        n_bath=n_bath,
+        frequency_grid=[-1.0, 0.0, 1.0],
+    )
+    mapping = chain_mapping.derive_chain_mapping(star)
+    fixtures.append({
+        "n_bath": n_bath,
+        "epsilon": star["payload"]["epsilon"],
+        "coupling": star["payload"]["V"],
+        "lambda": mapping["payload"]["lambda"],
+        "chain_onsite": mapping["payload"]["chain_onsite"],
+        "chain_hopping": mapping["payload"]["chain_hopping"],
+        "mapping_sha256": mapping["sha256"],
+        "spin_transform": mapping["payload"]["conventions"]["spin_transform"],
+    })
+print(json.dumps(fixtures, sort_keys=True, separators=(",", ":")))
+"""
+    command =
+        `uv run --project=$solution_dir --frozen python -c $script $solution_dir`
+    return JSON3.read(read(command, String))
+end
+
+function mapped_observable_parameters(fixture)
+    epsilon = Float64.(fixture["epsilon"])
+    coupling = Float64.(fixture["coupling"])
+    n_bath = Int(fixture["n_bath"])
+    common = (; U = 0.8, epsilon_d = -0.4, mu = 0.0)
+    direct = FiniteBathParameters(epsilon, coupling; common...)
+    chain = FiniteBathParameters(
+        :chain;
+        epsilon,
+        V = [Float64(fixture["lambda"]); zeros(n_bath - 1)],
+        chain_onsite = Float64.(fixture["chain_onsite"]),
+        chain_hopping = Float64.(fixture["chain_hopping"]),
+        lambda = Float64(fixture["lambda"]),
+        mapping_sha256 = String(fixture["mapping_sha256"]),
+        common...,
+    )
+    return direct, chain
+end
+
+function assert_geometry_diagnostics(result, context, representation, mapping_sha256)
+    @test context.spin_qn_enabled == false
+    @test context.bath_representation === representation
+    @test context.chain_mapping_sha256 == mapping_sha256
+    @test context.spin_transform == "the same real Q is used for up and down"
+    @test all(!hasqns(site) for site in context.sites)
+    @test result.diagnostics.bath_representation === representation
+    @test result.diagnostics.chain_mapping_sha256 == mapping_sha256
+    @test result.diagnostics.spin_qn_enabled == false
+    @test result.diagnostics.spin_transform == context.spin_transform
+    @test result.provenance.bath_representation === representation
+    @test result.provenance.chain_mapping_sha256 == mapping_sha256
+    @test result.provenance.spin_transform == context.spin_transform
+end
+
+function assert_star_chain_observables(chain, direct; atol)
+    @test chain.n_d ≈ direct.n_d atol = atol
+    @test chain.double_occupancy ≈ direct.double_occupancy atol = atol
+    average_chain = (chain.G_up .+ chain.G_dn) ./ 2
+    average_direct = (direct.G_up .+ direct.G_dn) ./ 2
+    @test maximum(abs.(chain.G_up .- direct.G_up); init = 0.0) <= atol
+    @test maximum(abs.(chain.G_dn .- direct.G_dn); init = 0.0) <= atol
+    @test maximum(abs.(average_chain .- average_direct); init = 0.0) <= atol
+    @test maximum(
+        abs.(chain.G_up[[1, end]] .- direct.G_up[[1, end]]);
+        init = 0.0,
+    ) <= atol
+    @test maximum(
+        abs.(chain.G_dn[[1, end]] .- direct.G_dn[[1, end]]);
+        init = 0.0,
+    ) <= atol
+    @test maximum(
+        abs.(chain.G_up[2:(end - 1)] .- direct.G_up[2:(end - 1)]);
+        init = 0.0,
+    ) <= atol
+    @test maximum(
+        abs.(chain.G_dn[2:(end - 1)] .- direct.G_dn[2:(end - 1)]);
+        init = 0.0,
+    ) <= atol
+end
+
+const CHAIN_FIXTURES = python_chain_fixtures()
+
+@testset "geometry diagnostics preserve mapped spin convention without QNs" begin
+    fixture = CHAIN_FIXTURES[2]
+    direct, chain = mapped_observable_parameters(fixture)
+    direct_context = build_finite_bath_context(direct)
+    chain_context = build_finite_bath_context(chain)
+
+    @test fixture["spin_transform"] ==
+          "the same real Q is used for up and down"
+    @test direct_context.bath_representation === :direct_star
+    @test chain_context.bath_representation === :chain
+    @test direct_context.chain_mapping_sha256 === nothing
+    @test chain_context.chain_mapping_sha256 == fixture["mapping_sha256"]
+    @test direct_context.spin_qn_enabled == false
+    @test chain_context.spin_qn_enabled == false
+    @test direct_context.spin_transform == chain_context.spin_transform
+end
+
+@testset "direct star and mapped finite chain MPS observables agree for N_b=1:6" begin
+    beta = 0.04
+    tau = [0.0, beta / 4, beta / 2, 3 * beta / 4, beta]
+    settings = (;
+        beta,
+        tau,
+        time_step = 0.04,
+        cutoff = 1.0e-14,
+        maxdim = 128,
+        krylov_expansion_dim = 0,
+    )
+    for fixture in CHAIN_FIXTURES
+        direct, chain = mapped_observable_parameters(fixture)
+        direct_context = build_finite_bath_context(direct)
+        chain_context = build_finite_bath_context(chain)
+        star_result = finite_bath_observables(direct; settings...)
+        chain_result = finite_bath_observables(chain; settings...)
+
+        # A single unexpanded two-site TDVP step is intentionally bounded but
+        # not basis invariant. The stricter expanded fixture below retains the
+        # established 1e-6 acceptance threshold.
+        assert_star_chain_observables(chain_result, star_result; atol = 5.0e-6)
+        assert_geometry_diagnostics(
+            star_result, direct_context, :direct_star, nothing
+        )
+        assert_geometry_diagnostics(
+            chain_result,
+            chain_context,
+            :chain,
+            String(fixture["mapping_sha256"]),
+        )
+    end
+end
+
+@testset "mapped two-site chain retains stricter acceptance settings" begin
+    fixture = CHAIN_FIXTURES[2]
+    direct, chain = mapped_observable_parameters(fixture)
+    beta = 0.5
+    settings = (;
+        beta,
+        tau = [0.0, 0.125, 0.25, 0.375, beta],
+        time_step = 0.02,
+        cutoff = 1.0e-14,
+        maxdim = 128,
+        krylov_expansion_dim = 32,
+    )
+    star_result = finite_bath_observables(direct; settings...)
+    chain_result = finite_bath_observables(chain; settings...)
+    assert_star_chain_observables(chain_result, star_result; atol = 1.0e-6)
+end
+
+@testset "direct and chain interruption resume preserve geometry equivalence" begin
+    fixture = CHAIN_FIXTURES[1]
+    direct, chain = mapped_observable_parameters(fixture)
+    beta = 0.04
+    common = (;
+        beta,
+        tau = [0.0, beta / 2, beta],
+        time_step = 0.02,
+        cutoff = 1.0e-14,
+        maxdim = 128,
+        krylov_expansion_dim = 0,
+    )
+    resumed = Dict{Symbol,Any}()
+    uninterrupted = Dict{Symbol,Any}()
+    for (representation, parameters) in
+        ((:direct_star, direct), (:chain, chain))
+        uninterrupted[representation] =
+            finite_bath_observables(parameters; common...)
+        published = Ref{Any}(nothing)
+        publications = Ref(0)
+        interruption = try
+            finite_bath_observables(
+                parameters;
+                common...,
+                checkpoint_manager = (psi, state) -> begin
+                    publications[] += 1
+                    published[] = (; psi = copy(psi), resume_state = state)
+                end,
+                stop_requested = () -> publications[] == 2,
+            )
+            nothing
+        catch error
+            error
+        end
+        @test interruption isa ObservableInterrupted
+        @test published[] !== nothing
+        resumed[representation] = finite_bath_observables(
+            parameters; common..., resume = published[]
+        )
+        assert_observable_equivalence(
+            resumed[representation], uninterrupted[representation]
+        )
+    end
+    assert_star_chain_observables(
+        resumed[:chain], resumed[:direct_star]; atol = 1.0e-6
+    )
 end
 
 @testset "finite-bath observable input validation" begin

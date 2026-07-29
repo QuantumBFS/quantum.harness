@@ -33,6 +33,9 @@ export FiniteBathContext,
 
 const GREEN_FUNCTION_CONVENTION =
     "G_sigma(tau) = -Tr[exp(-(beta-tau)K) d_sigma exp(-tau K) d_sigma^dag] / Z"
+const MODULE_VERSION = "1.1.0"
+const SPIN_TRANSFORM_CONVENTION =
+    "the same real Q is used for up and down"
 
 struct ObservableInterrupted <: Exception
     psi::MPS
@@ -48,6 +51,9 @@ struct FiniteBathContext{P,S,I,H}
     hamiltonian::H
     hamiltonian_norm_bound::Float64
     spin_qn_enabled::Bool
+    bath_representation::Symbol
+    chain_mapping_sha256::Union{Nothing,String}
+    spin_transform::String
     reuse_policy::String
 end
 
@@ -61,6 +67,9 @@ function build_finite_bath_context(parameters::FiniteBathParameters)
         hamiltonian,
         _hamiltonian_norm_bound(parameters),
         false,
+        parameters.bath_representation,
+        parameters.mapping_sha256,
+        SPIN_TRANSFORM_CONVENTION,
         "identity template and immutable MPO may be deep-copied across branches",
     )
 end
@@ -84,6 +93,9 @@ function _context_on_sites(
         physical_hamiltonian_mpo(sites, parameters),
         _hamiltonian_norm_bound(parameters),
         false,
+        parameters.bath_representation,
+        parameters.mapping_sha256,
+        SPIN_TRANSFORM_CONVENTION,
         "identity template and immutable MPO may be deep-copied across branches",
     )
 end
@@ -567,6 +579,10 @@ function _finite_bath_observables_uninterrupted(
         )
     end
     diagnostics = (;
+        bath_representation = context.bath_representation,
+        chain_mapping_sha256 = context.chain_mapping_sha256,
+        spin_qn_enabled = context.spin_qn_enabled,
+        spin_transform = context.spin_transform,
         log_partition,
         mpo_link_dimensions = linkdims(context.hamiltonian),
         thermal_log_norm = thermal.diagnostics.log_unnormalized_norm,
@@ -586,7 +602,10 @@ function _finite_bath_observables_uninterrupted(
     )
     provenance = (;
         module_name = "FiniteBathObservables",
-        module_version = "1.0.0",
+        module_version = MODULE_VERSION,
+        bath_representation = context.bath_representation,
+        chain_mapping_sha256 = context.chain_mapping_sha256,
+        spin_transform = context.spin_transform,
         julia_version = string(VERSION),
         itensors_version = string(Base.pkgversion(ITensors)),
         itensormps_version = string(Base.pkgversion(ITensorMPS)),
@@ -856,6 +875,10 @@ function _finish_observable_result(context, thermal, data, settings)
         dimensions = max.(dimensions, entry.maximum_link_dimensions_by_bond)
     end
     diagnostics = (;
+        bath_representation = context.bath_representation,
+        chain_mapping_sha256 = context.chain_mapping_sha256,
+        spin_qn_enabled = context.spin_qn_enabled,
+        spin_transform = context.spin_transform,
         log_partition,
         mpo_link_dimensions = linkdims(context.hamiltonian),
         thermal_log_norm = thermal.diagnostics.log_unnormalized_norm,
@@ -874,7 +897,10 @@ function _finish_observable_result(context, thermal, data, settings)
     )
     provenance = (;
         module_name = "FiniteBathObservables",
-        module_version = "1.0.0",
+        module_version = MODULE_VERSION,
+        bath_representation = context.bath_representation,
+        chain_mapping_sha256 = context.chain_mapping_sha256,
+        spin_transform = context.spin_transform,
         julia_version = string(VERSION),
         itensors_version = string(Base.pkgversion(ITensors)),
         itensormps_version = string(Base.pkgversion(ITensorMPS)),
