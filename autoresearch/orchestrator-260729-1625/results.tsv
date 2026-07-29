@@ -1,0 +1,4 @@
+# metric_direction: higher_is_better
+iteration	timestamp	commit	metric	delta	guard	guard-metric	status	description
+0	2026-07-29T16:25:00+08:00	a86db7b	0	0.0	pytest	23 passed	baseline	before chirality and matrix-free projection enhancements
+1	2026-07-29T16:59:06+08:00	a24ddc2	6	6.0	pytest	35 passed	keep	parent-channel chirality, NQS tower, and sparse N=9 projection
