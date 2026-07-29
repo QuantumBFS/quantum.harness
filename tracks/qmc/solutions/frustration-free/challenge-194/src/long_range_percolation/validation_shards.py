@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+import ctypes
+import errno
 import hashlib
 import json
 import math
@@ -27,7 +29,6 @@ RUN_SPEC_SCHEMA = "challenge-194-validation-run-spec-v1"
 CELL_SCHEMA = "challenge-194-validation-cell-v1"
 GLOBAL_SCHEMA = "challenge-194-validation-global-v1"
 MANIFEST_SCHEMA = "challenge-194-validation-shard-manifest-v1"
-_HEX256 = frozenset("0123456789abcdef")
 
 
 def _canonical_bytes(document: Mapping[str, object]) -> bytes:
@@ -45,6 +46,40 @@ def _canonical_bytes(document: Mapping[str, object]) -> bytes:
 
 def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
+
+
+def _rename_no_replace(source: Path, destination: Path) -> None:
+    try:
+        renameat2 = ctypes.CDLL(None, use_errno=True).renameat2
+    except AttributeError:
+        os.link(source, destination)
+        source.unlink()
+        return
+    renameat2.argtypes = (
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_uint,
+    )
+    renameat2.restype = ctypes.c_int
+    result = renameat2(
+        -100,
+        os.fsencode(source),
+        -100,
+        os.fsencode(destination),
+        1,
+    )
+    if result == 0:
+        return
+    error_number = ctypes.get_errno()
+    if error_number == errno.EEXIST:
+        raise FileExistsError(error_number, os.strerror(error_number), destination)
+    if error_number in (errno.ENOSYS, errno.EINVAL):
+        os.link(source, destination)
+        source.unlink()
+        return
+    raise OSError(error_number, os.strerror(error_number), destination)
 
 
 def _document_hash(document: Mapping[str, object], hash_field: str) -> str:
@@ -275,6 +310,38 @@ def _write_atomic(path: Path, payload: bytes) -> None:
             pass
 
 
+def _write_once(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise RuntimeError("refusing to publish through a symlink")
+    temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
+    try:
+        descriptor = os.open(
+            temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644
+        )
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            _rename_no_replace(temporary, path)
+        except FileExistsError:
+            if path.is_symlink() or not path.is_file():
+                raise RuntimeError("immutable output is not a regular file")
+            if path.read_bytes() != payload:
+                raise RuntimeError("immutable output already exists with other bytes")
+        directory = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
 def write_validation_run_spec(
     protocol: ValidationProtocol,
     output_root: Path,
@@ -287,7 +354,7 @@ def write_validation_run_spec(
             raise RuntimeError("existing run spec differs from requested spec")
         return existing
     document = build_validation_run_spec(protocol, output_root)
-    _write_atomic(run_spec_path, _canonical_bytes(document))
+    _write_once(run_spec_path, _canonical_bytes(document))
     reloaded, _ = _load_run_spec(run_spec_path)
     return reloaded
 
@@ -406,7 +473,7 @@ def _reuse_shard_if_present(
         _validate_manifest(manifest, spec, artifact_relative, payload)
         return manifest
     manifest = _manifest_document(spec, artifact_relative, payload)
-    _write_atomic(manifest_path, _canonical_bytes(manifest))
+    _write_once(manifest_path, _canonical_bytes(manifest))
     return manifest
 
 
@@ -438,7 +505,7 @@ def _publish_shard(
         manifest = _manifest_document(
             spec, artifact_relative, existing_payload
         )
-        _write_atomic(manifest_path, _canonical_bytes(manifest))
+        _write_once(manifest_path, _canonical_bytes(manifest))
         return manifest
     if manifest_path.exists():
         raise RuntimeError("success manifest exists without its artifact")
@@ -463,7 +530,12 @@ def _publish_shard(
         )
         if crash_hook is not None:
             crash_hook("before-artifact-rename")
-        os.replace(temporary, artifact_path)
+        try:
+            _rename_no_replace(temporary, artifact_path)
+        except FileExistsError:
+            # A concurrent duplicate task won publication. Never overwrite it;
+            # the semantic/hash checks below decide whether it is reusable.
+            pass
         directory = os.open(artifact_path.parent, os.O_RDONLY)
         try:
             os.fsync(directory)
@@ -474,8 +546,20 @@ def _publish_shard(
             temporary.unlink()
         except FileNotFoundError:
             pass
-    manifest = _manifest_document(spec, artifact_relative, payload)
-    _write_atomic(manifest_path, _canonical_bytes(manifest))
+    published, published_payload = _load_json_payload(artifact_path)
+    _validate_shard_document(
+        published, spec, schema=schema, case=case
+    )
+    manifest = _manifest_document(
+        spec, artifact_relative, published_payload
+    )
+    if manifest_path.exists():
+        existing_manifest, _ = _load_json_payload(manifest_path)
+        _validate_manifest(
+            existing_manifest, spec, artifact_relative, published_payload
+        )
+        return existing_manifest
+    _write_once(manifest_path, _canonical_bytes(manifest))
     return manifest
 
 
