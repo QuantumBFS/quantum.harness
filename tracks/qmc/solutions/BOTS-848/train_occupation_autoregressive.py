@@ -11,6 +11,7 @@ import platform
 import socket
 import tempfile
 import time
+from numbers import Integral
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -60,6 +61,155 @@ def _route_source_files() -> list[Path]:
     return [Path(__file__).resolve(), *sorted(package.glob("*.py"))]
 
 
+def _terminal_npz(path: Path, label: str) -> dict[str, np.ndarray]:
+    try:
+        with np.load(path, allow_pickle=False) as archive:
+            if len(archive.files) != len(set(archive.files)):
+                raise ValueError(f"{label} contains duplicate fields")
+            return {
+                name: np.asarray(archive[name]).copy()
+                for name in archive.files
+            }
+    except (OSError, ValueError) as error:
+        raise ValueError(f"invalid {label} NPZ artifact") from error
+
+
+def _terminal_scalar(
+    archive: dict[str, np.ndarray],
+    *,
+    label: str,
+    field: str,
+    kind: str,
+) -> int | str:
+    if field not in archive:
+        raise ValueError(f"{label} {field} is missing")
+    array = np.asarray(archive[field])
+    if array.shape != ():
+        raise ValueError(f"{label} {field} must be a scalar")
+    value = array.item()
+    if kind == "integer":
+        if isinstance(value, bool) or not isinstance(value, Integral):
+            raise ValueError(f"{label} {field} must be a finite integer scalar")
+        return int(value)
+    if kind == "string":
+        if not isinstance(value, str):
+            raise ValueError(f"{label} {field} must be a string scalar")
+        return value
+    raise AssertionError(f"unsupported terminal scalar kind: {kind}")
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError(f"duplicate training log JSON key: {key}")
+        value[key] = item
+    return value
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite training log JSON constant: {value}")
+
+
+def _terminal_training_records(path: Path) -> list[dict[str, Any]]:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as error:
+        raise ValueError("invalid training log artifact") from error
+    if not lines or any(not line.strip() for line in lines):
+        raise ValueError("training log must contain non-empty JSONL records")
+    records: list[dict[str, Any]] = []
+    for line in lines:
+        try:
+            record = json.loads(
+                line,
+                object_pairs_hook=_unique_json_object,
+                parse_constant=_reject_json_constant,
+            )
+        except (json.JSONDecodeError, ValueError) as error:
+            raise ValueError("invalid training log JSONL") from error
+        if not isinstance(record, dict):
+            raise ValueError("training log records must be JSON objects")
+        records.append(record)
+    return records
+
+
+def _validate_terminal_training_artifacts(
+    *,
+    artifacts: TrainingArtifacts,
+    observed: dict[str, Path],
+    final_update: int,
+    training_seed: int,
+    protocol_sha256: str,
+) -> None:
+    wrapper_hashes = (
+        ("checkpoint", observed["checkpoint"], artifacts.checkpoint_sha256),
+        (
+            "optimizer state",
+            observed["optimizer_state"],
+            artifacts.optimizer_state_sha256,
+        ),
+        ("training log", observed["training_log"], artifacts.training_log_sha256),
+    )
+    for label, path, expected_hash in wrapper_hashes:
+        if not path.is_file():
+            raise ValueError(f"{label} artifact is missing")
+        if sha256_file(path) != expected_hash:
+            raise ValueError(f"{label} SHA-256 mismatch")
+
+    checkpoint = _terminal_npz(observed["checkpoint"], "checkpoint")
+    checkpoint_expected = {
+        "selected_update": ("integer", final_update),
+        "completed_update": ("integer", final_update),
+        "selection_rule": ("string", "final_update"),
+        "training_seed": ("integer", training_seed),
+        "protocol_sha256": ("string", protocol_sha256),
+    }
+    for field, (kind, expected) in checkpoint_expected.items():
+        value = _terminal_scalar(
+            checkpoint,
+            label="checkpoint",
+            field=field,
+            kind=kind,
+        )
+        if value != expected:
+            raise ValueError(f"checkpoint {field} mismatch")
+
+    optimizer = _terminal_npz(observed["optimizer_state"], "optimizer")
+    optimizer_expected = {
+        "update": ("integer", final_update),
+        "training_seed": ("integer", training_seed),
+        "protocol_sha256": ("string", protocol_sha256),
+    }
+    for field, (kind, expected) in optimizer_expected.items():
+        value = _terminal_scalar(
+            optimizer,
+            label="optimizer",
+            field=field,
+            kind=kind,
+        )
+        if value != expected:
+            raise ValueError(f"optimizer {field} mismatch")
+
+    records = _terminal_training_records(observed["training_log"])
+    selected = [record for record in records if record.get("selected") is True]
+    if len(selected) != 1 or selected[0] is not records[-1]:
+        raise ValueError("training log selected final record mismatch")
+    final_record = selected[0]
+    update = final_record.get("update")
+    if isinstance(update, bool) or not isinstance(update, int) or update != final_update:
+        raise ValueError("training log final update mismatch")
+    record_seed = final_record.get("training_seed")
+    if (
+        isinstance(record_seed, bool)
+        or not isinstance(record_seed, int)
+        or record_seed != training_seed
+    ):
+        raise ValueError("training log training_seed mismatch")
+    if final_record.get("selection_rule") != "final_update":
+        raise ValueError("training log selection_rule mismatch")
+
+
 def freeze_training_run(
     *,
     run_dir: Path,
@@ -72,8 +222,19 @@ def freeze_training_run(
     if not isinstance(artifacts, TrainingArtifacts):
         raise TypeError("artifacts must be TrainingArtifacts")
     final_update = int(protocol.training["optimizer_updates"])
-    if artifacts.selected_update != final_update:
+    if (
+        isinstance(artifacts.selected_update, bool)
+        or not isinstance(artifacts.selected_update, Integral)
+        or int(artifacts.selected_update) != final_update
+    ):
         raise ValueError("only the frozen final update may receive a manifest")
+    if (
+        isinstance(training_seed, bool)
+        or not isinstance(training_seed, Integral)
+        or int(training_seed) not in protocol.training["seeds"]
+    ):
+        raise ValueError("training_seed must be frozen by the protocol")
+    training_seed = int(training_seed)
     output_dir = Path(run_dir).resolve()
     expected = {
         "checkpoint": output_dir / "checkpoint.npz",
@@ -87,6 +248,13 @@ def freeze_training_run(
     }
     if observed != expected:
         raise ValueError("training artifact paths do not match the frozen names")
+    _validate_terminal_training_artifacts(
+        artifacts=artifacts,
+        observed=observed,
+        final_update=final_update,
+        training_seed=training_seed,
+        protocol_sha256=protocol.sha256,
+    )
     return freeze_manifest(
         run_dir=output_dir,
         project_root=SOLUTION_ROOT,
