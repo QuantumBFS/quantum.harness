@@ -86,3 +86,20 @@ The array scripts intentionally contain no partition. Probe the live queue and
 pass the ratified partition at submission time. Use `HARNESS_KIND=pepo-measure`
 with `issue147-pepo.sbatch` for the four measurement cells after both evolution
 manifests report success.
+
+## Final h=3 evidence assembly
+
+After fetching successful manifests and artifacts, assemble the QMC reference,
+both PEPO compression modes, chi convergence, resources, and the optional 4x4
+ED diagnostic with one command:
+
+```text
+python -m qh147.validate --qmc tracks/peps/results/issue147-qmc --pepo tracks/peps/results/issue147-pepo --pepo-measure tracks/peps/results/issue147-pepo-measure --ed tracks/peps/results/issue147-ed/assembled --output tracks/peps/results/issue147-validation
+```
+
+Omit `--ed` when the assembled 4x4 diagnostic is unavailable. The command
+rejects rehearsed, failed, missing, or convention-mismatched cells. It writes
+`thermodynamics.csv`, `convergence.csv`, `resources.csv`, `summary.json`, and
+PNG/PDF comparison and convergence figures. Because the current production
+scope fixes `D=4` and `delta_beta=0.025`, those two convergence errors remain
+explicitly unassessed rather than being reported as passed.

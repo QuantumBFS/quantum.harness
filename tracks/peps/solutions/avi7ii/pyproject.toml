@@ -13,6 +13,7 @@ dependencies = [
   "quimb>=1.11",
   "cotengra>=0.7",
   "jax>=0.4",
+  "matplotlib>=3.9",
   "psutil>=6.0",
 ]
 
