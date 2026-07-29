@@ -37,9 +37,18 @@ def test_calibration_uses_canonical_representative_model_seed() -> None:
     config = module.representative_config()
 
     assert config.model_seed == 5
-    assert config.trial_seed == 5
+    assert config.trial_seed == 0
+    assert config.device.perturbation_seed == 0
     assert config.system.parameter_count == 80
     assert config.search.dimension == 4
+
+
+def test_slurm_pilot_decouples_model_and_statistical_seeds() -> None:
+    script = (ROOT / "scripts" / "slurm_pilot.sh").read_text()
+
+    assert "--model-seed 5" in script
+    assert "--perturbation-seed 0" in script
+    assert "--seed 0" in script
 
 
 def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:

@@ -36,6 +36,7 @@ test "$(<.source-revision)" = "${CHALLENGE113_EXPECTED_REVISION}"
 mkdir -p "${CHALLENGE113_RUN_ROOT}"
 /usr/bin/time -v "${CHALLENGE113_UV}" run python -u run.py trial \
   --kind production --system two_qubit --segments 20 --gap 0.05 --shots exact \
-  --perturbation-seed 5 --method model_hessian --dimension 4 --seed 5 \
+  --perturbation-seed 0 --method model_hessian --dimension 4 \
+  --model-seed 5 --seed 0 \
   --output "${CHALLENGE113_RUN_ROOT}/pilot"
 "${CHALLENGE113_UV}" run python -u run.py validate --output "${CHALLENGE113_RUN_ROOT}/pilot"

@@ -38,9 +38,9 @@ def representative_config() -> ExperimentConfig:
     return ExperimentConfig(
         run_kind="production",
         system=SystemConfig("two_qubit", 20, 4.0),
-        device=DeviceConfig(gap=0.05, shots=None, perturbation_seed=5),
+        device=DeviceConfig(gap=0.05, shots=None, perturbation_seed=0),
         search=SearchConfig("model_hessian", 4, 2_000),
-        trial_seed=5,
+        trial_seed=0,
         model_seed=5,
     )
 
@@ -85,7 +85,7 @@ def main() -> None:
         model_basis=landscape.model_basis,
         seed=config.trial_seed,
     )
-    rng = np.random.default_rng(5)
+    rng = np.random.default_rng(config.trial_seed)
     pulses = [
         search_space.to_pulse(rng.uniform(-0.2, 0.2, search_space.dimension))
         for _ in range(args.queries)
