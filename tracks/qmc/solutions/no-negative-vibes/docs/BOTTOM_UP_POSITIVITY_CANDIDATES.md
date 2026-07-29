@@ -7,6 +7,10 @@
 六模式 Fock–CP 线性系统；所有 bridge 在 Hermiticity-preserving 门即被迫为零。
 详见 [Fock–CP 首轮结果](FOCK_CP_SCREEN_RESULTS.md)。一般非 Klein Fock–CP 锥仍开放。
 
+Tensor-square 更新：任意深度矩阵定理和四模式正系数 HS 均已完成；四模式模型严格
+约化到 split `O(2,2)`，而 `m>=3` 直接提升产生随系统长度增长的行列条带。
+详见 [tensor-square 结果](TENSOR_SQUARE_RESULTS.md)。
+
 ## 为什么换搜索方式
 
 此前多条路线都是先在四模式单块中找到正锥，再检查两个局域块重叠后能否共用同一
@@ -245,9 +249,9 @@ exterior-Metzler 仍保留为备线，但必须直接从六模式重叠块开始
 ## 执行优先级
 
 ```text
-1. tensor-square 的局域 HS 可达性与已知类排重
+1. 四/六模式 gauge-cocycle GF(2) 可行性
 2. 非 Klein Fock–CP 固定变换或正乘法代数诱导的 Choi basis
-3. 四/六模式 gauge-cocycle GF(2) 可行性
+3. tensor-square 的非条带局域拼接（只有出现新结构才重开）
 4. graded positive-character 文献排重
 5. non-induced complementary exterior cone
 ```

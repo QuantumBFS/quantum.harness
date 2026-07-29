@@ -30,11 +30,12 @@
 - R01 fixed Klein-Hodge/Fock 变换的六模式重叠锥已由 24 个 bridge 坐标的 exact-zero
   证书关闭；结论只针对该固定变换和双 parity-block Metzler 条件。
 
-接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN 和 R01
-fixed transform 均已得到明确边界。新主线从定义开始要求重叠闭包，立即测试
-**Fock–CP/Choi 锥**，并行完成 **tensor-square 半群的物理 HS 闭环**；若两者失败，
-进入非平凡 gauge/cocycle 编码和 non-induced exterior cone。Majorana 宇称猜想保留为
-独立支线，不再阻塞新机制搜索。
+接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN、R01
+fixed transform、有限 Klein-circuit Fock–CP 和 tensor-square 直接物理提升均已得到
+明确边界。下一主线进入 **局域 gauge/cocycle 编码**：先在最小重叠方环上求解
+`GF(2)` 符号抵消条件，再判断能否形成不等价于固定全局换基的局域闭包。
+non-induced exterior cone 为下一备选。Majorana 宇称猜想保留为独立支线，不再阻塞
+新机制搜索。
 “复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
 分支和检验候选。
 
@@ -63,6 +64,7 @@ fixed transform 均已得到明确边界。新主线从定义开始要求重叠�
    完成，520 个单元的 bridge 全部在线性 Hermiticity 门归零，一般 non-Klein 变换开放**；
 2. **tensor-square 表示提升半群**：利用 `B=X tensor X` 的任意深度严格正性，判断
    `v_i+v_j` 绑定 HS 场能否来自局域、非平凡相互作用，并排除已知 Majorana/模平方约化；
+   **四模式 HS 已完成但约化到 split `O(2,2)`，`m>=3` 直接提升因行列条带而降级**；
 3. **局域 gauge 投影与 overlap 2-cocycle**：在四格方环和两个共享边方环上，把费米
    交换符号的局域抵消写成 `GF(2)` 可行性问题；
 4. **Majorana 宇称分辨半群**：把当前 period-4 数值规律写成精确命题，重放互补扇区
@@ -215,9 +217,9 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
    exact-zero 证书关闭。
 5. **已完成第一轮**：六模式 Fock–CP 的 13 个 depth-2 Klein 电路、20 种切分和
    数守恒/BdG 两族共 520 个单元；所有 bridge 在进入 SDP 前已归零。
-6. **立即开始**：把 tensor-square 恒正定理接到局域 HS 可达性检查；Fock–CP 只继续
-   结构上不同的 non-Klein 变换。
-7. **随后进行**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
+6. **已完成物理闭环**：tensor-square 得到四模式方形 hopping 加排斥作用的正系数
+   HS；最小模型属于 split `O(2,2)`，一般维数有条带非局域障碍。
+7. **立即开始**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
    尝试同时越过
    连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
 8. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
@@ -227,8 +229,8 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 近期精力分配：
 
 ```text
-40%  tensor-square 的局域 HS 闭环和已知类排重
-25%  gauge/exterior 新候选
+40%  gauge/cocycle 局域补偿可行性
+25%  non-induced exterior cone
 20%  non-Klein Fock–CP/Choi 结构
 15%  Majorana 宇称与 Pfaffian/Spin-trace 支撑工具
 ```

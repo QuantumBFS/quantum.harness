@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from itertools import product
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import sympy as sp
@@ -21,6 +23,9 @@ from oracle.tensor_square import (
     two_by_two_weight_formula,
 )
 from oracle.tn_bond_hs import number_conserving_gaussian_fock_matrix
+
+
+SOLUTION_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_tensor_square_history_is_closed_under_arbitrary_products() -> None:
@@ -195,3 +200,84 @@ def test_local_base_operations_lift_to_system_size_strips() -> None:
 
         assert undirected_edges == 2 * base_dimension
         assert np.count_nonzero(diagonal) == 4 * base_dimension - 6
+
+
+def test_checked_in_tensor_square_certificate_matches_oracle() -> None:
+    certificate_path = (
+        SOLUTION_ROOT / "fixtures" / "tensor_square_certificates.json"
+    )
+    certificate = json.loads(certificate_path.read_text(encoding="utf-8"))
+    counterexample = independent_field_counterexample_exact()
+    decomposition = plaquette_trotter_decomposition(
+        time_step=certificate["plaquette"]["time_step"],
+        hopping=certificate["plaquette"]["hopping"],
+        field_coupling=certificate["plaquette"]["field_coupling"],
+    )
+    density_fields = tensor_square_density_fields(
+        certificate["plaquette"]["field_coupling"]
+    )
+    first, second = decomposition.base_field_propagators
+    commutator_norm = np.linalg.norm(first @ second - second @ first)
+    lifted = decomposition.lifted_field_propagators[0]
+    minimum_second_order_minor = min(
+        np.linalg.det(lifted[np.ix_(rows, columns)])
+        for rows in product(range(4), repeat=2)
+        for columns in product(range(4), repeat=2)
+        if rows[0] < rows[1] and columns[0] < columns[1]
+    )
+    short_history_weights = [
+        tensor_square_history(
+            tuple(
+                decomposition.base_field_propagators[index]
+                for index in history
+            )
+        ).weight
+        for depth in range(1, 9)
+        for history in product(range(2), repeat=depth)
+    ]
+
+    assert certificate["protocol"] == "tensor-square-plaquette-v1"
+    assert certificate["source_commit"] == (
+        "37f69a3992925b598b8c2a75428185012678af7c"
+    )
+    assert sp.Rational(
+        certificate["exact_independent_field_counterexample"]["weight"]
+    ) == counterexample.weight
+    assert math.isclose(
+        certificate["plaquette"]["kappa"],
+        density_fields.kappa,
+        rel_tol=0.0,
+        abs_tol=1e-14,
+    )
+    assert math.isclose(
+        certificate["plaquette"]["repulsive_gate_coupling"],
+        density_fields.repulsive_coupling,
+        rel_tol=0.0,
+        abs_tol=1e-14,
+    )
+    assert math.isclose(
+        certificate["plaquette"]["commutator_norm"],
+        commutator_norm,
+        rel_tol=0.0,
+        abs_tol=1e-14,
+    )
+    assert math.isclose(
+        certificate["plaquette"]["minimum_second_order_minor"],
+        minimum_second_order_minor,
+        rel_tol=0.0,
+        abs_tol=1e-14,
+    )
+    assert certificate["plaquette"]["short_histories"] == len(
+        short_history_weights
+    )
+    assert certificate["plaquette"]["short_history_negative_count"] == sum(
+        weight < 0.0 for weight in short_history_weights
+    )
+    assert certificate["locality_counts"] == [
+        {
+            "base_dimension": dimension,
+            "lifted_diagonal_support": 4 * dimension - 6,
+            "lifted_hopping_edges": 2 * dimension,
+        }
+        for dimension in (2, 3, 5, 8)
+    ]

@@ -147,6 +147,14 @@ Klein–Hodge 电路，在 20 种 tensorization、数守恒/BdG 两族共 520 �
 所有 bridge 都在 Hermiticity-preserving 线性门被迫为零。该有限库已关闭；一般
 non-Klein Choi 锥仍开放。见 [Fock–CP 首轮结果](FOCK_CP_SCREEN_RESULTS.md)。
 
+Tensor-square 已完成一般恒正证明和四模式物理闭环：
+`det(I+X tensor X)>=0` 对任意实 `X` 成立，且存在非交换、ordinary TN 之外的
+两值正系数 HS，产生方形 hopping 加排斥对角作用。但 `m=2` 严格保存
+`eta=epsilon tensor epsilon`，属于已知 split `O(2,2)`；`m>=3` 的直接局域操作
+提升为随系统长度增长的行列条带，独立 onsite 场又有精确负例 `-155085/32`。
+因此保留矩阵定理，不增加“新无符号物理类”计数。见
+[tensor-square 结果](TENSOR_SQUARE_RESULTS.md)。
+
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。
 

@@ -167,8 +167,9 @@ cd /home/volper/harness_quantum/signfree-qmc
    exact no-go 回归，不再作为新物理主线；
 2. 六模式 Fock–CP 的 13 个 depth-2 Klein 电路首轮已完成，520 个单元都没有
    Hermiticity-preserving bridge；一般 non-Klein Choi 锥仍开放；
-3. 立即把 tensor-square 严格矩阵类接到局域 HS，失败后进入四/六模式
-   gauge-cocycle 和 non-induced exterior cone；
+3. tensor-square 已得到四模式局域 HS，但该模型属于 split `O(2,2)`；一般维数的
+   直接提升又产生非局域行列条带，因此现在进入四/六模式 gauge-cocycle 和
+   non-induced exterior cone；
 4. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
@@ -179,3 +180,5 @@ TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍
 [自底向上正性候选](docs/BOTTOM_UP_POSITIVITY_CANDIDATES.md)。
 Fock–CP 第一批 520 个线性系统见
 [六模式 Fock–CP 首轮结果](docs/FOCK_CP_SCREEN_RESULTS.md)。
+Tensor-square 的严格定理、四模式 HS、split 约化和局域性障碍见
+[tensor-square 结果](docs/TENSOR_SQUARE_RESULTS.md)。
