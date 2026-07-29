@@ -1,7 +1,7 @@
 # Clean Ising Production Expansion Design
 
-**Date:** 2026-07-29  
-**Challenge:** Quantum Harness issue #122  
+**Date:** 2026-07-29
+**Challenge:** Quantum Harness issue #122
 **Team:** 卧龙凤雏
 
 ## Context
