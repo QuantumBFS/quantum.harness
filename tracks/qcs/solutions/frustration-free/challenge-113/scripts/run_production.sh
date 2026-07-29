@@ -7,6 +7,7 @@ test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_ARCHIVE_PATH:?set the immutable deployment archive path}"
 : "${CHALLENGE113_ARCHIVE_SHA256:?set the deployed archive SHA256}"
 : "${CHALLENGE113_DEPLOYMENT_METADATA:?set external deployment metadata path}"
+: "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256:?set expected deployment metadata SHA256}"
 : "${CHALLENGE113_EVIDENCE_REVISION:?set the measured evidence revision}"
 : "${CHALLENGE113_SIF_SHA256:?set expected Apptainer SIF SHA256}"
 : "${CHALLENGE113_PYPROJECT_SHA256:?set expected pyproject.toml SHA256}"
@@ -26,6 +27,7 @@ else
   exit 2
 fi
 test "${SOURCE_REVISION}" = "${CHALLENGE113_EXPECTED_REVISION}"
+test "$(sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')" = "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}"
 
 export JAX_ENABLE_X64=1
 : "${CHALLENGE113_JAX_PLATFORM:?set CHALLENGE113_JAX_PLATFORM explicitly}"
@@ -44,6 +46,7 @@ uv run python scripts/verify_deployment.py \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
   --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}" \
   --expected-sif-sha256 "${CHALLENGE113_SIF_SHA256}" \
+  --expected-deployment-metadata-sha256 "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}" \
   --expected-pyproject-sha256 "${CHALLENGE113_PYPROJECT_SHA256}" \
   --expected-uv-lock-sha256 "${CHALLENGE113_UV_LOCK_SHA256}" \
   --expected-cluster-profile "${CHALLENGE113_CLUSTER_PROFILE}"

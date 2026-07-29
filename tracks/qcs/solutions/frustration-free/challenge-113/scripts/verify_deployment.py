@@ -19,6 +19,7 @@ def main() -> None:
     parser.add_argument("--expected-archive-sha256", required=True)
     parser.add_argument("--expected-evidence-revision", required=True)
     parser.add_argument("--expected-sif-sha256", required=True)
+    parser.add_argument("--expected-deployment-metadata-sha256", required=True)
     parser.add_argument("--expected-pyproject-sha256", required=True)
     parser.add_argument("--expected-uv-lock-sha256", required=True)
     parser.add_argument("--expected-cluster-profile", required=True)
@@ -31,6 +32,9 @@ def main() -> None:
         expected_archive_sha256=args.expected_archive_sha256,
         expected_evidence_revision=args.expected_evidence_revision,
         expected_sif_sha256=args.expected_sif_sha256,
+        expected_deployment_metadata_sha256=(
+            args.expected_deployment_metadata_sha256
+        ),
         expected_pyproject_sha256=args.expected_pyproject_sha256,
         expected_uv_lock_sha256=args.expected_uv_lock_sha256,
         expected_cluster_profile=args.expected_cluster_profile,

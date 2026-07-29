@@ -131,7 +131,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
     sif.write_bytes(b"exact sif bytes")
     sif_sha256 = hashlib.sha256(sif.read_bytes()).hexdigest()
     metadata = tmp_path.parent / f"{tmp_path.name}-deployment.json"
-    _write_json(
+    metadata_sha256 = _write_json(
         metadata,
         {
             "archive_name": archive.name,
@@ -161,6 +161,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
         archive_path=archive,
         deployment_metadata_path=metadata,
         expected_sif_sha256=sif_sha256,
+        expected_deployment_metadata_sha256=metadata_sha256,
         expected_cluster_profile="lasg02-cpu-v1",
         expected_pyproject_sha256=pyproject_sha256,
         expected_uv_lock_sha256=uv_lock_sha256,
@@ -174,6 +175,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
             archive_path=archive,
             deployment_metadata_path=metadata,
             expected_sif_sha256=sif_sha256,
+            expected_deployment_metadata_sha256=metadata_sha256,
             expected_cluster_profile="lasg02-cpu-v1",
             expected_pyproject_sha256=pyproject_sha256,
             expected_uv_lock_sha256=uv_lock_sha256,
@@ -187,6 +189,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
             archive_path=archive,
             deployment_metadata_path=metadata,
             expected_sif_sha256=sif_sha256,
+            expected_deployment_metadata_sha256=metadata_sha256,
             expected_cluster_profile="lasg02-cpu-v1",
             expected_pyproject_sha256=pyproject_sha256,
             expected_uv_lock_sha256=uv_lock_sha256,
@@ -201,6 +204,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
             archive_path=archive,
             deployment_metadata_path=metadata,
             expected_sif_sha256=sif_sha256,
+            expected_deployment_metadata_sha256=metadata_sha256,
             expected_cluster_profile="lasg02-cpu-v1",
             expected_pyproject_sha256=pyproject_sha256,
             expected_uv_lock_sha256=uv_lock_sha256,
@@ -216,6 +220,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
             archive_path=archive,
             deployment_metadata_path=metadata,
             expected_sif_sha256=sif_sha256,
+            expected_deployment_metadata_sha256=metadata_sha256,
             expected_cluster_profile="lasg02-cpu-v1",
             expected_pyproject_sha256=pyproject_sha256,
             expected_uv_lock_sha256=uv_lock_sha256,
@@ -282,7 +287,7 @@ def test_documented_clean_production_check_reaches_ready_gate(tmp_path) -> None:
     ).hexdigest()
     uv_lock_sha256 = hashlib.sha256((source / "uv.lock").read_bytes()).hexdigest()
     sif_sha256 = "2" * 64
-    _write_json(
+    metadata_sha256 = _write_json(
         metadata,
         {
             "archive_name": archive.name,
@@ -321,6 +326,7 @@ def test_documented_clean_production_check_reaches_ready_gate(tmp_path) -> None:
             "CHALLENGE113_CHECK_ONLY": "1",
             "CHALLENGE113_CLUSTER_PROFILE": "lasg02-cpu-v1",
             "CHALLENGE113_DEPLOYMENT_METADATA": str(metadata),
+            "CHALLENGE113_DEPLOYMENT_METADATA_SHA256": metadata_sha256,
             "CHALLENGE113_EVIDENCE_REVISION": evidence_revision,
             "CHALLENGE113_EXPECTED_REVISION": revision,
             "CHALLENGE113_JAX_PLATFORM": "cpu",
@@ -389,6 +395,9 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
         "CHALLENGE113_CLUSTER_PROFILE": "lasg02-cpu-v1",
         "CHALLENGE113_DEPLOYMENT": str(deployment),
         "CHALLENGE113_DEPLOYMENT_METADATA": str(metadata),
+        "CHALLENGE113_DEPLOYMENT_METADATA_SHA256": hashlib.sha256(
+            metadata.read_bytes()
+        ).hexdigest(),
         "CHALLENGE113_EVIDENCE_REVISION": "b" * 40,
         "CHALLENGE113_EXPECTED_REVISION": revision,
         "CHALLENGE113_PYPROJECT_SHA256": hashlib.sha256(
@@ -403,6 +412,17 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
         "FAKE_APPTAINER_LOG": str(log),
         "SLURM_CPUS_PER_TASK": "8",
     }
+    mismatched = {
+        **environment,
+        "CHALLENGE113_DEPLOYMENT_METADATA_SHA256": "0" * 64,
+    }
+    rejected = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
+        env=mismatched,
+    )
+    assert rejected.returncode != 0
+    assert not log.exists()
+
     subprocess.run(
         ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
         env=environment,
@@ -411,6 +431,7 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     prepare_log = log.read_text()
     assert prepare_log.count("uv sync --frozen") == 1
     assert prepare_log.count("--no-home") == 3
+    assert prepare_log.count("--cleanenv --net --network none") == 3
 
     log.write_text("")
     subprocess.run(
@@ -421,6 +442,7 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     pilot_log = log.read_text()
     assert "uv sync" not in pilot_log
     assert pilot_log.count("--no-home") == 4
+    assert pilot_log.count("--cleanenv --net --network none") == 4
     assert "--env JAX_ENABLE_X64=1 --env JAX_PLATFORMS=cpu" in pilot_log
 
 
@@ -438,6 +460,7 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
     assert "CHALLENGE113_ARCHIVE_SHA256" in inspected
     assert "CHALLENGE113_ARCHIVE_PATH" in inspected
     assert "CHALLENGE113_DEPLOYMENT_METADATA" in inspected
+    assert "CHALLENGE113_DEPLOYMENT_METADATA_SHA256" in inspected
     assert "CHALLENGE113_EVIDENCE_REVISION" in inspected
     if name.startswith("slurm_"):
         assert "CHALLENGE113_SIF_PATH" in inspected
@@ -445,6 +468,8 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
         assert "CHALLENGE113_PYPROJECT_SHA256" in inspected
         assert "CHALLENGE113_UV_LOCK_SHA256" in inspected
         assert "exec" in inspected and "--no-home" in inspected
+        assert "--cleanenv" in inspected
+        assert "--net" in inspected and "--network" in inspected and "none" in inspected
         assert "uv sync" not in script
 
 
@@ -456,6 +481,7 @@ def test_readme_clean_gate_supplies_every_required_variable() -> None:
         "CHALLENGE113_ARCHIVE_SHA256",
         "CHALLENGE113_CHECK_ONLY",
         "CHALLENGE113_DEPLOYMENT_METADATA",
+        "CHALLENGE113_DEPLOYMENT_METADATA_SHA256",
         "CHALLENGE113_EVIDENCE_REVISION",
         "CHALLENGE113_EXPECTED_REVISION",
         "CHALLENGE113_JAX_PLATFORM",

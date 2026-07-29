@@ -49,10 +49,14 @@ compute smoke has passed, but no representative pilot for the current source
 candidate has run.
 
 Runtime preparation now verifies source/archive/evidence/report/SIF/project/lock
-hashes, exact package versions, finite propagation, and a deterministic
-objective before writing a hash-bound readiness marker. Slurm jobs use
-`apptainer exec --no-home`, never sync packages, and fail closed on an absent
-or stale marker. Deployment metadata remains external to the source tree.
+hashes, the exact external deployment-metadata byte hash, exact package
+versions, finite propagation, and a deterministic objective before writing a
+hash-bound readiness marker. Slurm jobs use
+`apptainer exec --no-home --cleanenv --net --network none`, never sync
+packages, and fail closed before entering the container on a metadata mismatch
+or on an absent/stale marker. Deployment metadata remains external to the
+source tree. An unprivileged no-physics probe verified this network-isolation
+mode with LASG02 Apptainer 1.3.4 on 2026-07-30.
 
 The remaining Task 10C gate is operational measurement: stage the final source,
 run one representative pilot on LASG02, validate its artifact, measure the

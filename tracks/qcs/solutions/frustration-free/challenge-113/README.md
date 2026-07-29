@@ -41,6 +41,9 @@ uv run python scripts/write_deployment_metadata.py \
   --archive "${CHALLENGE113_ARCHIVE_PATH}" \
   --revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --output "${CHALLENGE113_DEPLOYMENT_METADATA}"
+export CHALLENGE113_DEPLOYMENT_METADATA_SHA256="$(
+  sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}'
+)"
 export CHALLENGE113_ACK_PRODUCTION=1
 export CHALLENGE113_ARCHIVE_SHA256="$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')"
 export CHALLENGE113_CHECK_ONLY=1
@@ -80,12 +83,16 @@ the old `ch113-runtime-d15818c` source tree must not be reused. The already
 verified SIF may be referenced only by its exact path and hash:
 
 ```bash
-scp "${CHALLENGE113_ARCHIVE_PATH}" "${CHALLENGE113_DEPLOYMENT_METADATA}" \
-  lasg02-student090:~/.scratch/
+scp "${CHALLENGE113_ARCHIVE_PATH}" lasg02-student090:~/.scratch/
+scp "${CHALLENGE113_DEPLOYMENT_METADATA}" \
+  "lasg02-student090:~/.scratch/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.deployment.json"
 ssh lasg02-student090
 export CHALLENGE113_EXPECTED_REVISION=REVISION_FROM_LOCAL_GIT
 export CHALLENGE113_ARCHIVE_PATH="$HOME/.scratch/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
-export CHALLENGE113_DEPLOYMENT_METADATA="$HOME/.scratch/deployment.json"
+export CHALLENGE113_DEPLOYMENT_METADATA="$HOME/.scratch/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.deployment.json"
+export CHALLENGE113_DEPLOYMENT_METADATA_SHA256="$(
+  sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}'
+)"
 export CHALLENGE113_DEPLOYMENT="$HOME/.scratch/ch113-runtime-${CHALLENGE113_EXPECTED_REVISION:0:7}/tracks/qcs/solutions/frustration-free/challenge-113"
 mkdir -p "$HOME/.scratch/ch113-runtime-${CHALLENGE113_EXPECTED_REVISION:0:7}"
 tar -xzf "${CHALLENGE113_ARCHIVE_PATH}" \
@@ -103,8 +110,11 @@ bash "${CHALLENGE113_DEPLOYMENT}/scripts/prepare_apptainer_runtime.sh"
 ```
 
 Preparation is the only step that runs `uv sync --frozen`. Pilot and array jobs
-are offline/no-sync, use `apptainer exec --no-home`, bind source explicitly,
-and fail unless `.venv` plus the hash-bound pre-submit marker are current.
+are network-isolated and no-sync, use
+`apptainer exec --no-home --cleanenv --net --network none`, bind source
+explicitly, and fail unless `.venv` plus the hash-bound pre-submit marker are
+current. LASG02 Apptainer 1.3.4 accepted this unprivileged network namespace in
+a hash-verified Python 3.12.12 no-physics probe on 2026-07-30.
 The separate scheduler profile is `scripts/lasg02_profile.env`:
 account `chenkun2025`, QOS `user_student090`, partition `ihicnormal`.
 

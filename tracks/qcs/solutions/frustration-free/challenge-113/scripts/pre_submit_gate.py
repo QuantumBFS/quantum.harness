@@ -6,6 +6,7 @@ import importlib.metadata
 import json
 import math
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -129,10 +130,22 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--deployment-metadata", type=Path, required=True)
+    parser.add_argument("--expected-deployment-metadata-sha256", required=True)
     marker = parser.add_mutually_exclusive_group(required=True)
     marker.add_argument("--write-marker", type=Path)
     marker.add_argument("--check-marker", type=Path)
     args = parser.parse_args()
+    if (
+        re.fullmatch(
+            r"[0-9a-f]{64}",
+            args.expected_deployment_metadata_sha256,
+            re.ASCII,
+        )
+        is None
+        or sha256(args.deployment_metadata)
+        != args.expected_deployment_metadata_sha256
+    ):
+        raise RuntimeError("deployment metadata SHA256 mismatch")
     deployment = read_canonical(args.deployment_metadata)
     observation = runtime_observation()
     validate_runtime(observation, deployment)

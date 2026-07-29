@@ -344,6 +344,7 @@ def validate_deployment(
     expected_archive_sha256: str,
     expected_evidence_revision: str,
     expected_sif_sha256: str,
+    expected_deployment_metadata_sha256: str,
     expected_pyproject_sha256: str,
     expected_uv_lock_sha256: str,
     expected_cluster_profile: str,
@@ -359,7 +360,14 @@ def validate_deployment(
         pass
     else:
         raise ValueError("deployment metadata must live outside the source tree")
-    deployment, _ = _read_canonical(metadata)
+    if (
+        not isinstance(expected_deployment_metadata_sha256, str)
+        or _SHA256.fullmatch(expected_deployment_metadata_sha256) is None
+    ):
+        raise ValueError("expected deployment metadata SHA256 is invalid")
+    deployment, metadata_bytes = _read_canonical(metadata)
+    if _sha256(metadata_bytes) != expected_deployment_metadata_sha256:
+        raise ValueError("deployment metadata bytes are stale")
     if set(deployment) != {
         "archive_name",
         "archive_sha256",

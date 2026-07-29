@@ -95,3 +95,17 @@ or Slurm submission was made.
 - No representative pilot or production array was submitted. The next action
   is to stage the final committed source beside the verified SIF, prepare the
   runtime once, then submit only the representative pilot.
+
+## Final pilot-blocker correction
+
+- Deployment metadata now has a separately supplied, exact 64-character
+  lowercase SHA256. Preparation checks those bytes before its first Apptainer
+  call; jobs do the same before container entry. The readiness marker persists
+  the metadata hash and the pre-submit gate rechecks it.
+- LASG02 was probed read-only after loading Apptainer 1.3.4. The hash-verified
+  SIF successfully ran a Python 3.12.12 no-physics command with unprivileged
+  `--cleanenv --net --network none`; all preparation, smoke, pilot, and
+  production container commands now require those flags.
+- Fake-container integration tests prove a metadata mismatch exits before the
+  first runtime call and that prepared jobs contain no sync or package-manager
+  operation. No pilot or array was submitted.

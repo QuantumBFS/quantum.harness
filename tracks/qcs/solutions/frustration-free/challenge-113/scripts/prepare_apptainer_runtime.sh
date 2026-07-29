@@ -6,12 +6,16 @@ set -euo pipefail
 : "${CHALLENGE113_ARCHIVE_PATH:?set current source archive path}"
 : "${CHALLENGE113_ARCHIVE_SHA256:?set current source archive SHA256}"
 : "${CHALLENGE113_DEPLOYMENT_METADATA:?set external deployment metadata path}"
+: "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256:?set expected deployment metadata SHA256}"
 : "${CHALLENGE113_EVIDENCE_REVISION:?set measured evidence revision}"
 : "${CHALLENGE113_SIF_PATH:?set immutable Apptainer SIF path}"
 : "${CHALLENGE113_SIF_SHA256:?set expected SIF SHA256}"
 : "${CHALLENGE113_PYPROJECT_SHA256:?set expected pyproject.toml SHA256}"
 : "${CHALLENGE113_UV_LOCK_SHA256:?set expected uv.lock SHA256}"
 : "${CHALLENGE113_CLUSTER_PROFILE:?set approved cluster profile}"
+if [[ -z "${CHALLENGE113_APPTAINER:-}" ]]; then
+  module load apptainer/1.3.4
+fi
 APPTAINER="${CHALLENGE113_APPTAINER:-apptainer}"
 
 test "${CHALLENGE113_CLUSTER_PROFILE}" = "lasg02-cpu-v1"
@@ -20,10 +24,14 @@ test "$(sha256sum "${CHALLENGE113_SIF_PATH}" | awk '{print $1}')" = "${CHALLENGE
 test "$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')" = "${CHALLENGE113_ARCHIVE_SHA256}"
 test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/pyproject.toml" | awk '{print $1}')" = "${CHALLENGE113_PYPROJECT_SHA256}"
 test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/uv.lock" | awk '{print $1}')" = "${CHALLENGE113_UV_LOCK_SHA256}"
+test "$(sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')" = "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}"
 
 CONTAINER_ARGS=(
   exec
   --no-home
+  --cleanenv
+  --net
+  --network none
   --bind "${CHALLENGE113_DEPLOYMENT}:/workspace"
   --bind "${CHALLENGE113_ARCHIVE_PATH}:/challenge113-archive.tar.gz:ro"
   --bind "${CHALLENGE113_DEPLOYMENT_METADATA}:/challenge113-deployment.json:ro"
@@ -40,6 +48,7 @@ CONTAINER_ARGS=(
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
   --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}" \
   --expected-sif-sha256 "${CHALLENGE113_SIF_SHA256}" \
+  --expected-deployment-metadata-sha256 "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}" \
   --expected-pyproject-sha256 "${CHALLENGE113_PYPROJECT_SHA256}" \
   --expected-uv-lock-sha256 "${CHALLENGE113_UV_LOCK_SHA256}" \
   --expected-cluster-profile "${CHALLENGE113_CLUSTER_PROFILE}"
@@ -49,4 +58,5 @@ CONTAINER_ARGS=(
   /workspace/scripts/pre_submit_gate.py \
   --root /workspace \
   --deployment-metadata /challenge113-deployment.json \
+  --expected-deployment-metadata-sha256 "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}" \
   --write-marker /workspace/.runtime/task10c-ready.json
