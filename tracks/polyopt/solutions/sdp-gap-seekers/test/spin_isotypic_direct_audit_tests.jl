@@ -62,6 +62,16 @@ JuMP.@constraint(infeasible_model, z == 1.0)
 JuMP.@constraint(infeasible_model, z <= 0.0)
 JuMP.optimize!(infeasible_model)
 
+infeasible_sdp_model = JuMP.Model(MosekTools.Optimizer)
+JuMP.set_silent(infeasible_sdp_model)
+q = JuMP.@variable(infeasible_sdp_model, base_name="infeasible_sdp_moment")
+JuMP.@constraint(infeasible_sdp_model, q == 1.0)
+JuMP.@constraint(
+    infeasible_sdp_model,
+    Symmetric([-q 0.0; 0.0 1.0]) in JuMP.PSDCone(),
+)
+JuMP.optimize!(infeasible_sdp_model)
+
 @testset "direct spin-isotypic solve audit" begin
     @test JuMP.termination_status(model) == JuMP.MOI.OPTIMAL
     @test diagnostics["available"]
@@ -88,6 +98,8 @@ JuMP.optimize!(infeasible_model)
         Dict{String,Any}(),
     ) == "unknown"
     @test JuMP.termination_status(infeasible_model) == JuMP.MOI.INFEASIBLE
+    @test JuMP.termination_status(infeasible_sdp_model) ==
+          JuMP.MOI.INFEASIBLE
     @test classify_spin_isotypic_result(
         JuMP.termination_status(infeasible_model),
         JuMP.primal_status(infeasible_model),
@@ -151,5 +163,27 @@ JuMP.optimize!(infeasible_model)
         @test replay["audit"]["passed"]
         @test replay["classification"] ==
               "mosek_infeasibility_ray_replayed_float"
+
+        infeasible_sdp_task = write_mosek_task_artifact(
+            joinpath(directory, "infeasible-sdp.task"),
+            infeasible_sdp_model,
+        )
+        infeasible_sdp_ray = write_mosek_infeasibility_ray_artifact(
+            joinpath(directory, "infeasible-sdp.ray.bin"),
+            infeasible_sdp_model,
+        )
+        sdp_replay = mosek_ray_replay_report(
+            joinpath(directory, "infeasible-sdp.task"),
+            joinpath(directory, "infeasible-sdp.ray.bin");
+            expected_task_sha256=infeasible_sdp_task["sha256"],
+            expected_ray_sha256=infeasible_sdp_ray["sha256"],
+        )
+        println("synthetic SDP infeasibility replay audit: ", sdp_replay["audit"])
+        flush(stdout)
+        @test sdp_replay["audit"]["semidefinite_variable_count"] > 0
+        @test sdp_replay["audit"]["status_passed"]
+        @test sdp_replay["audit"]["residual_passed"]
+        @test sdp_replay["audit"]["separation_passed"]
+        @test sdp_replay["audit"]["passed"]
     end
 end
