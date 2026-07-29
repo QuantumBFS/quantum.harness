@@ -206,11 +206,12 @@ cmd_probe_partitions() {
 }
 
 cmd_submit() {
-  local array="" run_spec="" command="" entrypoint="" partition="" walltime="" cpus="" \
+  local array="" max_concurrent="" run_spec="" command="" entrypoint="" partition="" walltime="" cpus="" \
         script="scripts/harness_array_sbatch.sh" extra="" test_only="false"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --array) array="$2"; shift 2 ;;
+      --max-concurrent) max_concurrent="$2"; shift 2 ;;
       --run-spec) run_spec="$2"; shift 2 ;;
       --command) command="$2"; shift 2 ;;
       --entrypoint) entrypoint="$2"; shift 2 ;;
@@ -223,6 +224,16 @@ cmd_submit() {
       *) die "submit: unknown flag $1" ;;
     esac
   done
+  if [[ -n "$array" && ! "$array" =~ ^[1-9][0-9]*$ ]]; then
+    die "submit: array size must be a positive integer"
+  fi
+  if [[ -n "$max_concurrent" ]]; then
+    [[ -n "$array" ]] || die "submit: --max-concurrent requires --array"
+    [[ "$max_concurrent" =~ ^[1-9][0-9]*$ ]] || \
+      die "submit: array concurrency must be a positive integer"
+    (( max_concurrent <= array )) || \
+      die "submit: array concurrency cannot exceed array size"
+  fi
   [[ -n "$script" ]] || die "submit: --script is required"
   [[ -f "$script" && -r "$script" ]] || die "submit: --script must be a locally readable file: $script"
   # Two paths: a harness array/run-spec job, or a plain single-script job
@@ -280,7 +291,13 @@ cmd_submit() {
   [[ -n "$gres" ]]      && sbatch="$sbatch --gres=$gres"
   [[ -n "$walltime" ]]  && sbatch="$sbatch --time=$walltime"
   [[ -n "$cpus" ]]      && sbatch="$sbatch --cpus-per-task=$cpus"
-  [[ -n "$array" ]]     && sbatch="$sbatch --array=1-$array"
+  if [[ -n "$array" ]]; then
+    if [[ -n "$max_concurrent" ]]; then
+      sbatch="$sbatch --array=1-$array%$max_concurrent"
+    else
+      sbatch="$sbatch --array=1-$array"
+    fi
+  fi
   [[ -n "$extra" ]]     && sbatch="$sbatch $extra"
   sbatch="$sbatch --export=$exports $script"
 
