@@ -1,0 +1,47 @@
+{
+  "schema": "oddcycle-pair-frontier-result-v1",
+  "source_commit": "0fbfee1c57834541994097ba3b006d459e22c453",
+  "run_id": "oddcycle-pair-frontier-v1-20260729",
+  "run_spec_sha256": "fb53bb4d8571f56d447480de603846f45a773921ebd45c7b05bee4bee1b4c8a1",
+  "planned_cells": 12325,
+  "unique_manifests": 12325,
+  "virtual_workers": 76,
+  "initial_classification": {
+    "candidate-survivor": 6266,
+    "joint-common-metric": 6055,
+    "compute-error": 4
+  },
+  "solver_retry": {
+    "solver": "SCS",
+    "retried_cells": [
+      "cell-1618",
+      "cell-2333",
+      "cell-3059",
+      "cell-3070"
+    ],
+    "compute_errors": 0,
+    "classification": {
+      "joint-common-metric": 4
+    }
+  },
+  "resolved_classification": {
+    "candidate-survivor": 6266,
+    "joint-common-metric": 6059,
+    "compute-error": 0
+  },
+  "performance": {
+    "active_wave_wall_seconds": 167.0,
+    "cells_per_second": 73.8
+  },
+  "promotion_probe": {
+    "survivors_ranked": 6266,
+    "control_cell": "cell-4613",
+    "control_rank": 2964,
+    "top_candidates_checked": 3,
+    "exact_path_metric_replay_passed": 3,
+    "numerical_time_orientation_passed": 3,
+    "dual_exact_cancellation_passed": 3,
+    "dual_positive_semidefinite_gate_passed": 0,
+    "interpretation": "arbitrary-word positivity promoted, but a new exact common-quadratic-metric exclusion was not obtained"
+  }
+}

@@ -2369,3 +2369,53 @@ by the data-egress approval gate.  Reusable lesson: keep code
 synchronization, mathematical verification, and production compute as
 separate gates; after the user's remote-only instruction, all verification
 and scanning must run on WSL or the CPU machine.
+
+### Remote oddcycle pair frontier scan
+
+After the shared branch became reachable from WSL, the new pair runner was
+verified remotely at commit `0fbfee1`: 31 focused tests passed and the exact
+publication certificate replayed with digest
+`dbc5e23ea15e3840e756e888bc8a6f0b795fdea14c405a90da117de73e43817e`.
+
+The frozen 12,325-cell pair grid then ran entirely on WSL in 76 virtual
+shards, with at most 14 single-threaded processes active at once.  Every
+planned cell produced one unique manifest.  The first pass found:
+
+- 6,266 `candidate-survivor` cells;
+- 6,055 `joint-common-metric` controls;
+- four CLARABEL operational errors in the joint-metric gate.
+
+The four errors were retried only at their parameter points with SCS.  All
+four completed and were classified `joint-common-metric`, leaving zero
+unresolved cells.  Active compute time was about 167 seconds, or 73.8 cells
+per second.  This validates the early-stop/sharding infrastructure and maps
+a large robust path-metric region instead of one isolated point.
+
+The 6,266 survivors were ranked by path-certificate margin.  The existing
+exact pair ranked 2,964, confirming that the scan found a broad family with
+larger floating margins.  For the top three new points, denominator `10^9`
+path metrics replayed exactly and numerical time orientation passed.
+However, denominator `10^8` common-quadratic duals had exact cancellation
+but failed positive-semidefiniteness.  They therefore prove arbitrary-word
+positivity but do not yet improve the narrow novelty certificate.  Reusable
+lesson: rank path robustness and no-common-quadratic dual interior
+separately; a strong primal path margin does not predict a rationalizable
+dual no-go.
+
+### Non-induced exterior-grade pilot
+
+The strict-TP/non-induced exterior runner was remotely verified at commit
+`8969305`: 35 tests passed, and its zero-shear/zero-angle control completed
+as `known-tn-control`.  A deterministic 256-cell pilot then produced:
+
+- 228 `structural-compound-failed`;
+- 28 `known-tn-or-minor-failed`;
+- zero compute errors and zero promoted hits.
+
+Mean cell time was 0.237 seconds (4.22 cells/s).  The coarse 51,840-cell grid
+was not launched because the pilot already showed poor hit efficiency.
+The next loop should move toward the TP boundary: add Jacobi strengths below
+`1/4` and choose signed-shear magnitudes adaptively around the first raw
+minor sign crossing, while testing transformed compound positivity on both
+sides.  This preserves the success-first policy: search the narrow overlap
+directly rather than spend the full budget on a coarse empty grid.
