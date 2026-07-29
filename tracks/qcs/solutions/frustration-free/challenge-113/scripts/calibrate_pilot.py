@@ -14,7 +14,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from qcontrol.closed_loop import make_search_space
-from qcontrol.config import DeviceConfig, SearchConfig, SystemConfig
+from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
 from qcontrol.device import make_query_device
 from qcontrol.landscape import analyze_landscape
 from qcontrol.offline import (
@@ -34,6 +34,17 @@ def timed(callable_):
     return result, time.perf_counter() - started
 
 
+def representative_config() -> ExperimentConfig:
+    return ExperimentConfig(
+        run_kind="production",
+        system=SystemConfig("two_qubit", 20, 4.0),
+        device=DeviceConfig(gap=0.05, shots=None, perturbation_seed=5),
+        search=SearchConfig("model_hessian", 4, 2_000),
+        trial_seed=5,
+        model_seed=5,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--queries", type=int, default=32)
@@ -42,18 +53,18 @@ def main() -> None:
     if not 20 <= args.queries <= 100:
         parser.error("--queries must be between 20 and 100")
 
-    system_config = SystemConfig("two_qubit", 20, 4.0)
-    model = make_system(system_config)
-    pulse_space = PulseSpace.from_system(model, system_config.segments)
+    config = representative_config()
+    model = make_system(config.system)
+    pulse_space = PulseSpace.from_system(model, config.system.segments)
     open_loop, open_loop_seconds = timed(
-        lambda: optimize_open_loop(model, pulse_space, seed=5)
+        lambda: optimize_open_loop(model, pulse_space, seed=config.model_seed)
     )
     landscape, landscape_seconds = timed(
         lambda: analyze_landscape(
             model,
             pulse_space,
             open_loop,
-            leading_count=15,
+            leading_count=pulse_space.parameter_count - 1,
             dense_validation=True,
         )
     )
@@ -63,12 +74,16 @@ def main() -> None:
         else open_loop.normalized_pulse,
         dtype=np.float64,
     )
-    truth = perturb_system(model, 0.05, 5)
+    truth = perturb_system(
+        model,
+        config.device.gap,
+        config.device.perturbation_seed,
+    )
     search_space = make_search_space(
-        SearchConfig("model_hessian", 4, 2_000),
+        config.search,
         origin,
         model_basis=landscape.model_basis,
-        seed=5,
+        seed=config.trial_seed,
     )
     rng = np.random.default_rng(5)
     pulses = [
@@ -78,8 +93,8 @@ def main() -> None:
     device = make_query_device(
         truth,
         pulse_space,
-        DeviceConfig(gap=0.05, shots=None, perturbation_seed=5),
-        seed=5,
+        config.device,
+        seed=config.trial_seed,
     )
     first, compilation_seconds = timed(lambda: device.query(pulses[0]))
     observations, warm_seconds = timed(
@@ -105,6 +120,7 @@ def main() -> None:
     )
     warm_queries = args.queries - 1
     payload = {
+        "config": config.canonical_dict(),
         "cpu_count": os.cpu_count(),
         "exact_trajectory_seconds": exact_seconds,
         "first_query_compilation_inclusive_seconds": compilation_seconds,

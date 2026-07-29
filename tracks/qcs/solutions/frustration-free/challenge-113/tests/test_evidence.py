@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 
@@ -24,6 +25,21 @@ def _write_json(path: Path, payload: object) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return hashlib.sha256(data).hexdigest()
+
+
+def test_calibration_uses_canonical_representative_model_seed() -> None:
+    path = ROOT / "scripts" / "calibrate_pilot.py"
+    spec = importlib.util.spec_from_file_location("calibrate_pilot", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    config = module.representative_config()
+
+    assert config.model_seed == 5
+    assert config.trial_seed == 5
+    assert config.system.parameter_count == 80
+    assert config.search.dimension == 4
 
 
 def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
