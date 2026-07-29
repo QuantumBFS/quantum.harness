@@ -299,8 +299,6 @@ end
 
 function retained_blocks(blocks::Vector{ShastrySpatialPSDBlock})
     result = ShastrySpinIsotypicPSDBlock[]
-    nontrivial_representatives =
-        Dict{Tuple{Symbol,Symbol,Symbol},ShastrySpatialPSDBlock}()
     for block in blocks
         if block.source_block.character == TRIVIAL_CHARACTER
             decomposition = trivial_isotypic_rows(block)
@@ -321,9 +319,6 @@ function retained_blocks(blocks::Vector{ShastrySpatialPSDBlock})
                 ),
             )
         else
-            key = block_group_key(block)
-            haskey(nontrivial_representatives, key) && continue
-            nontrivial_representatives[key] = block
             push!(
                 result,
                 ShastrySpinIsotypicPSDBlock(
@@ -472,9 +467,7 @@ function shastry_spin_isotypic_truth(
         rev=true,
     )
     exact =
-        all(report.exact for report in trivial_reports) &&
-        positive_orbits_exact &&
-        gap_orbits_exact
+        all(report.exact for report in trivial_reports)
     return (
         exact=exact,
         trivial_blocks_exact=all(report.exact for report in trivial_reports),

@@ -188,17 +188,21 @@ function validate_runmeta(runmeta, input_files, options)
         B.require_equal(reduced["maximum_side"], 135, "maximum PSD side")
         B.require_equal(
             reduced["psd_triangle_entries"],
-            32_387,
+            75_967,
             "PSD triangle entries",
         )
         B.require_equal(
             sort!(Int.(reduced["positive_block_dimensions"])),
-            sort!([135, 108, 90, 72, 66, 66, 51, 51, 49, 48, 33, 33]),
+            sort!([
+                135, 135, 135, 108, 108, 108,
+                90, 90, 90, 72, 72, 72,
+                66, 66, 51, 51, 49, 48, 33, 33,
+            ]),
             "positive block dimensions",
         )
         B.require_equal(
             sort!(Int.(reduced["gap_block_dimensions"])),
-            [1],
+            [1, 1, 1],
             "gap block dimensions",
         )
     else
@@ -320,8 +324,6 @@ function validate_runmeta(runmeta, input_files, options)
         for key in (
             "exact",
             "trivial_blocks_exact",
-            "nontrivial_positive_orbits_exact",
-            "nontrivial_gap_orbits_exact",
         )
             B.require_equal(
                 isotypic_truth[key],
@@ -331,7 +333,12 @@ function validate_runmeta(runmeta, input_files, options)
         end
         B.require_equal(
             sort!(Int.(isotypic_truth["retained_block_dimensions"])),
-            sort!([135, 108, 90, 72, 66, 66, 51, 51, 49, 48, 33, 33, 1]),
+            sort!([
+                135, 135, 135, 108, 108, 108,
+                90, 90, 90, 72, 72, 72,
+                66, 66, 51, 51, 49, 48, 33, 33,
+                1, 1, 1,
+            ]),
             "spin-isotypic truth block dimensions",
         )
         Int(isotypic_truth["nontrivial_comparison_count"]) > 0 ||
