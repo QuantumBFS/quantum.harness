@@ -646,3 +646,5 @@ Updated: 2026-07-29 UTC.
   the isolated checkout was detached and the provenance guard requires a
   symbolic branch. Reattach the same clean branch and resubmit once; this was
   not a scientific run and does not change the planned signature.
+- The branch was reattached and verified clean at `4f33981`; native L=2 r2 is
+  SCNet job `118174638`, started 2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.

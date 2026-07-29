@@ -1136,3 +1136,5 @@ the isolated checkout at a detached Git `HEAD`; the source-provenance guard's
 `git symbolic-ref` check rejected it. No coefficient, SDP, or solver work ran.
 One unchanged-signature resubmission is justified after reattaching the clean
 `remote/challenge88-terminal-solve` branch and verifying its commit/status.
+The branch was reattached and clean at commit `4f33981`; replacement job
+`118174638` started at 2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.

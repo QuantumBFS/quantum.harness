@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T16:16:30Z
+Updated: 2026-07-29T16:17:45Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -97,5 +97,8 @@ Updated: 2026-07-29T16:16:30Z
   provenance guard rejected `git symbolic-ref`. The branch will be reattached
   cleanly and the same decision signature submitted once. This is an
   operational launch failure, not evidence about feasibility or the gap.
+- The isolated checkout is now attached and clean at commit `4f33981`.
+  Replacement native L=2 job `118174638` started at
+  2026-07-29T16:17:15Z on 32 CPUs / 114000 MiB.
 
 No user input or new credential is currently required.
