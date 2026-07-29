@@ -2402,6 +2402,62 @@ lesson: rank path robustness and no-common-quadratic dual interior
 separately; a strong primal path margin does not predict a rationalizable
 dual no-go.
 
+### Full survivor dual-interior ranking
+
+All scientific computation in this experiment ran on the WSL worker.  The
+Windows workspace was used only for Git, static review, and documentation.
+The frozen question was whether ranking all 6,266 path-metric survivors by
+the interior of a normalized Gordan--Stiemke dual, rather than by the primal
+path margin alone, would expose robust rationalizable certificates.  A
+stratified 1,024-point pilot was required to justify the full scan; exact
+rationalization was intentionally left as an uncertain promotion gate.
+
+The pilot found 666 threshold-qualified interiors among 1,024 points.  The
+remaining 5,242 points then ran in 26.26 seconds using 14 processes with one
+BLAS thread each.  Strict merge and identity audits produced 6,266 unique
+records: 4,302 solver successes, 1,964 explicit CLARABEL `SolverError`
+records, and no fatal loss.  Of the successful records, 4,183 passed both
+the `10^-8` minimum-eigenvalue and `10^-7` cancellation-residual thresholds.
+The two-objective ordering by path margin and dual interior produced 118
+Pareto fronts, with 37 cells on the first front.  Solver errors remain
+inconclusive operational outcomes and are not negative mathematical
+evidence.
+
+The first five Pareto leaders were replayed with denominator `10^8`.
+All five had exact cancellation, exact trace normalization one, and all four
+positive-semidefinite multiplier gates.  Therefore each supplies an exact
+Gordan--Stiemke exclusion of a one-state common symmetric quadratic metric
+for its four-letter alphabet.  The leading dual-interior point was
+`cell-4321`, with
+`(p_low,p_high,q,r)=(0.0005,1.225,1.1,0.9)`, path margin
+`2.2173353992083533e-5`, floating dual minimum eigenvalue
+`1.3117821208870293e-4`, and cancellation residual
+`3.4965920282035296e-10`.
+
+The immutable merged records have SHA-256
+`f6011ae5623b28c354c000cb82a8b3f66ffdfe853d132a80446eb323e75d9eea`;
+the Pareto ranking has SHA-256
+`bc6219f741cd00b87eccc394769a10fbf2a168ffd2e1ff087ba11e43b48acdcb`;
+the exact top-five evidence has SHA-256
+`7cf00b71abef42f23c39d17930334247cf546cbe84cbdd883851458e5e6d1ee0`;
+and the final summary has SHA-256
+`30d8b09fc840c5213e6377adbfc572ee3a1161ef1db966b2bc78d4cb57468020`.
+The complete artifacts and all 14 original shards remain under
+`tracks/qmc/results/no-negative-vibes/oddcycle-pair-frontier-v1-20260729/`
+`dual-interior-ranking-v1` on the WSL worker.
+
+Reusable lesson: the failed path-margin promotion was a ranking failure, not
+evidence that the scanned family lacked exact dual certificates.  A cheap
+floating dual-interior objective separated robust exactifiable points, and
+the 1,024-point pilot made the full scan an evidence-based 26-second
+decision.  The result strengthens the exact four-letter separation from a
+one-state quadratic certificate; it does not exclude the known common
+nonquadratic cone, the full Wei/Majorana framework, or establish novelty by
+itself.  The next promotion step is to replay the full arbitrary-word and
+physical Hermitian-transfer certificates for the best robust point, then
+compare certificate complexity and presentation value against the existing
+exact candidate.
+
 ### Non-induced exterior-grade pilot
 
 The strict-TP/non-induced exterior runner was remotely verified at commit

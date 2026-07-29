@@ -1,5 +1,5 @@
 {
-  "schema": "oddcycle-pair-frontier-result-v1",
+  "schema": "oddcycle-pair-frontier-result-v2",
   "source_commit": "0fbfee1c57834541994097ba3b006d459e22c453",
   "run_id": "oddcycle-pair-frontier-v1-20260729",
   "run_spec_sha256": "fb53bb4d8571f56d447480de603846f45a773921ebd45c7b05bee4bee1b4c8a1",
@@ -42,6 +42,128 @@
     "numerical_time_orientation_passed": 3,
     "dual_exact_cancellation_passed": 3,
     "dual_positive_semidefinite_gate_passed": 0,
-    "interpretation": "arbitrary-word positivity promoted, but a new exact common-quadratic-metric exclusion was not obtained"
+    "interpretation": "path-margin ranking alone promoted arbitrary-word positivity but did not produce a rationalizable dual exclusion"
+  },
+  "dual_interior_full_scan": {
+    "schema": "oddcycle-dual-interior-ranking-result-v1",
+    "source_commit": "8969305f04e0de3c24365749c2354924ed19f8fe",
+    "dirty_worktree": false,
+    "parent_run_id": "oddcycle-pair-frontier-v1-20260729",
+    "parent_run_spec_sha256": "fb53bb4d8571f56d447480de603846f45a773921ebd45c7b05bee4bee1b4c8a1",
+    "input_survivor_count": 6266,
+    "settings": {
+      "solver": "CLARABEL",
+      "objective_seed": -1,
+      "floating_rational_denominator": 0,
+      "interior_eigenvalue_threshold": 1e-08,
+      "cancellation_residual_threshold": 1e-07,
+      "exact_replay_rational_denominator": 100000000,
+      "workers": 14,
+      "blas_threads_per_worker": 1
+    },
+    "completion": {
+      "records": 6266,
+      "solver_success": 4302,
+      "explicit_solver_error": 1964,
+      "qualifying_floating_interiors": 4183,
+      "successful_but_below_threshold": 119,
+      "fatal_errors": 0
+    },
+    "performance": {
+      "pilot_cells": 1024,
+      "production_remaining_cells": 5242,
+      "production_wall_seconds": 26.26,
+      "production_cells_per_second": 199.63
+    },
+    "pareto_ranking": {
+      "fronts": 118,
+      "front_1_cells": 37,
+      "objectives": [
+        "path_metric_margin",
+        "dual_minimum_multiplier_eigenvalue"
+      ]
+    },
+    "exact_replay": {
+      "attempted": 5,
+      "exact_cancellation_zero": 5,
+      "exact_normalization_one": 5,
+      "all_four_multiplier_psd_gates_passed": 5,
+      "exact_common_quadratic_metric_exclusions": 5
+    },
+    "top_candidates": [
+      {
+        "cell_id": "cell-4321",
+        "params": {
+          "p_low": 0.0005,
+          "p_high": 1.225,
+          "q": 1.1,
+          "r": 0.9
+        },
+        "path_margin": 2.2173353992083533e-05,
+        "dual_minimum_multiplier_eigenvalue": 0.00013117821208870293,
+        "cancellation_frobenius_residual": 3.4965920282035296e-10
+      },
+      {
+        "cell_id": "cell-5051",
+        "params": {
+          "p_low": 0.001,
+          "p_high": 1.25,
+          "q": 0.9,
+          "r": 0.9
+        },
+        "path_margin": 4.3619518545162786e-05,
+        "dual_minimum_multiplier_eigenvalue": 0.00011627143178116329,
+        "cancellation_frobenius_residual": 4.3510694736043143e-13
+      },
+      {
+        "cell_id": "cell-5776",
+        "params": {
+          "p_low": 0.002,
+          "p_high": 1.25,
+          "q": 0.9,
+          "r": 0.9
+        },
+        "path_margin": 8.72249515596246e-05,
+        "dual_minimum_multiplier_eigenvalue": 0.0001161354990756643,
+        "cancellation_frobenius_residual": 1.026935785640425e-16
+      },
+      {
+        "cell_id": "cell-6501",
+        "params": {
+          "p_low": 0.003,
+          "p_high": 1.25,
+          "q": 0.9,
+          "r": 0.9
+        },
+        "path_margin": 0.00013081559365400917,
+        "dual_minimum_multiplier_eigenvalue": 0.00011482962477415955,
+        "cancellation_frobenius_residual": 1.5041913197671163e-16
+      },
+      {
+        "cell_id": "cell-7226",
+        "params": {
+          "p_low": 0.005,
+          "p_high": 1.25,
+          "q": 0.9,
+          "r": 0.9
+        },
+        "path_margin": 0.0002179550095254089,
+        "dual_minimum_multiplier_eigenvalue": 0.00011223562680036732,
+        "cancellation_frobenius_residual": 1.5911183115622034e-16
+      }
+    ],
+    "artifacts": {
+      "remote_base": "/home/zibojin/code/nnv-final-verify/tracks/qmc/results/no-negative-vibes/oddcycle-pair-frontier-v1-20260729/dual-interior-ranking-v1",
+      "scanner_sha256": "4135224ff83729b392eae863523615b4f766ca5d6cf546429c3521379c40c246",
+      "merged_records_sha256": "f6011ae5623b28c354c000cb82a8b3f66ffdfe853d132a80446eb323e75d9eea",
+      "merged_audit_sha256": "2d60caa7873cdf2e91023cb7505633bbf65ea2843c9b56c4d5fec058349c9b3b",
+      "pareto_ranking_sha256": "bc6219f741cd00b87eccc394769a10fbf2a168ffd2e1ff087ba11e43b48acdcb",
+      "pareto_audit_sha256": "7bb0831e6587617246b04bc0a9c24d4ee56f5a9dcf82a1216ac96623069b87da",
+      "top5_leaders_sha256": "029bf0cbee48f5dd331d02ece507bcfcf2874a8d1e7429b784ed858034dc5a17",
+      "top5_exact_sha256": "7cf00b71abef42f23c39d17930334247cf546cbe84cbdd883851458e5e6d1ee0",
+      "final_stats_sha256": "bfdcfe9813c67bd5da1515424c8abdac3397eaf31ae46ddb54d8829ecc3bfb61",
+      "summary_sha256": "30d8b09fc840c5213e6377adbfc572ee3a1161ef1db966b2bc78d4cb57468020"
+    },
+    "interpretation": "Five Pareto leaders replay as exact rational Gordan-Stiemke certificates excluding a one-state common quadratic metric. This does not exclude a common nonquadratic cone or the full Wei/Majorana framework."
   }
 }
