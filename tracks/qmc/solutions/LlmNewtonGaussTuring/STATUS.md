@@ -38,13 +38,12 @@ at $h=3$, $\beta=4$ gave SSE $\xi/L=0.3461983990$ and exact ED
 $\xi/L=0.3461010817$, a relative difference of $2.81\times10^{-4}$. This
 supports retaining the current estimator implementation.
 
-## Remaining software gate
+## Software gate
 
-The ParaToric analyzer requires an accepted Revision 7 direct-SSE summary, but
-the repository does not yet contain the final producer for that accepted
-`summary.json` contract. Implement and test that producer before either
-independent critical field can be accepted. This is separate from the remote
-compute-resource gate.
+The direct-SSE summary producer and guarded four-summary unsealer are now
+implemented. They do not make the current physics result accepted: the real
+large-size smoke correctly remains rejected because fit, finite-temperature,
+and precision gates are still open.
 
 ## Deferred cluster work
 

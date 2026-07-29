@@ -265,3 +265,20 @@ data-collapse` is not interchangeable with this fit because it lacks the
 registered correction terms and chain-plus-circular-block resampling. The
 analysis summary always records `ratio_computed=false`; cross-lattice unsealing
 remains outside the independent-route acceptance step.
+
+Finalize each direct-SSE lattice only after its fit, sampling, finite-
+temperature, and precision artifacts exist:
+
+```bash
+python3 tools/finalize_direct_route.py \
+  --run-id <accepted-direct-run> --target-lattice <triangular|honeycomb> \
+  --bins <bins.csv> --fits <fits.csv> --sampling-gates <sampling.csv> \
+  --prefix-stability <prefix.csv> --robustness <robustness.csv> \
+  --ctau-gate <ctau-gate.json> --ctau-fits <ctau-fits.csv> \
+  --output <summary.json> --enforce
+```
+
+After both direct summaries and both ParaToric summaries are accepted, run
+`tools/unseal_challenge148.py --help` for the four-input unsealing command.
+The independent fields are acceptance checks and are not averaged into the
+ratio.

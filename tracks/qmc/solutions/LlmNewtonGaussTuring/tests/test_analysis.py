@@ -72,6 +72,21 @@ PARATORIC_ANALYSIS = importlib.util.module_from_spec(PARATORIC_ANALYSIS_SPEC)
 assert PARATORIC_ANALYSIS_SPEC.loader is not None
 PARATORIC_ANALYSIS_SPEC.loader.exec_module(PARATORIC_ANALYSIS)
 
+DIRECT_SPEC = importlib.util.spec_from_file_location(
+    "finalize_direct_route", ROOT / "tools" / "finalize_direct_route.py"
+)
+DIRECT = importlib.util.module_from_spec(DIRECT_SPEC)
+assert DIRECT_SPEC.loader is not None
+sys.modules[DIRECT_SPEC.name] = DIRECT
+DIRECT_SPEC.loader.exec_module(DIRECT)
+
+UNSEAL_SPEC = importlib.util.spec_from_file_location(
+    "unseal_challenge148", ROOT / "tools" / "unseal_challenge148.py"
+)
+UNSEAL = importlib.util.module_from_spec(UNSEAL_SPEC)
+assert UNSEAL_SPEC.loader is not None
+UNSEAL_SPEC.loader.exec_module(UNSEAL)
+
 
 def require(condition: bool, message: str) -> None:
     if not condition:
@@ -84,6 +99,13 @@ def expect_value_error(function, message: str) -> None:
     except ValueError:
         return
     raise AssertionError(message)
+
+
+def write_dict_csv(path: Path, rows: list[dict]) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 HEADER = (
@@ -765,12 +787,112 @@ def test_protocol_and_robustness(directory: Path) -> None:
     )
 
 
+def direct_artifacts(directory: Path, target: str, hc: float) -> dict[str, Path]:
+    prefix = directory / target
+    paths = {
+        name: prefix.with_name(prefix.name + "-" + name + suffix)
+        for name, suffix in {
+            "bins": ".csv", "fits": ".csv", "sampling": ".csv",
+            "prefix": ".csv", "robustness": ".csv", "ctau_fits": ".csv",
+            "ctau_gate": ".json",
+        }.items()
+    }
+    write_dict_csv(paths["bins"], [{
+        "raw_schema": "challenge148-raw-v1", "lattice": target,
+        "sign_avg": 1.0, "L": 10,
+        "h": hc, "seed": 148, "bin": 0,
+    }])
+    fit_rows = [{
+        "observable": observable, "hc": hc + (1e-7 if observable == "xi" else 0.0),
+        "hc_boot_err": 1e-6, "chi2_per_dof": 1.0, "condition": 10.0,
+        "omega": 0.83, "include_mixed": 1, "bootstrap_failure_rate": 0.0,
+    } for observable in DIRECT.OBSERVABLES]
+    write_dict_csv(paths["fits"], fit_rows)
+    write_dict_csv(paths["sampling"], [{"L": 12, "h": hc, "passed": 1}])
+    write_dict_csv(paths["prefix"], [
+        {"discard_fraction": fraction, "observable": observable,
+         "status": "ok", "passed": 1}
+        for fraction in (0.1, 0.2) for observable in DIRECT.OBSERVABLES
+    ])
+    robustness = []
+    for observable in DIRECT.OBSERVABLES:
+        robustness.append({
+            "window": "narrow", "L_min": 10, "omega": 0.83,
+            "include_mixed": 1, "observable": observable,
+            "status": "ok", "hc": hc,
+            "chi2_per_dof": 1.0, "condition": 10.0,
+            "bootstrap_failure_rate": 0.0,
+        })
+    write_dict_csv(paths["robustness"], robustness)
+    write_dict_csv(paths["ctau_fits"], [{
+        "observable": observable, "shift_upper_95": 1e-6, "passed": 1,
+    } for observable in DIRECT.OBSERVABLES])
+    paths["ctau_gate"].write_text(json.dumps({
+        "schema_version": "challenge148-ctau-gate-v2", "lattice": target,
+        "passed": True, "failures": [],
+    }), encoding="utf-8")
+    return paths
+
+
+def make_direct_summary(directory: Path, target: str, hc: float) -> tuple[dict, Path]:
+    artifacts = direct_artifacts(directory, target, hc)
+    summary = DIRECT.build_summary(
+        run_id=f"accepted-{target}", target=target, bins=artifacts["bins"],
+        fits_path=artifacts["fits"], sampling_path=artifacts["sampling"],
+        prefix_path=artifacts["prefix"], robustness_path=artifacts["robustness"],
+        ctau_gate_path=artifacts["ctau_gate"], ctau_fits_path=artifacts["ctau_fits"],
+    )
+    path = directory / f"{target}-direct-summary.json"
+    DIRECT.atomic_json(path, summary)
+    return summary, path
+
+
+def test_direct_summary_and_unsealing(directory: Path) -> None:
+    triangular, triangular_path = make_direct_summary(directory, "triangular", 4.768)
+    honeycomb, honeycomb_path = make_direct_summary(directory, "honeycomb", 2.1325)
+    require(triangular["accepted"] and honeycomb["accepted"],
+            "valid direct-route evidence did not produce accepted summaries")
+    require(
+        PARATORIC_ANALYSIS.load_direct_summary(triangular_path, "triangular")["accepted"],
+        "ParaToric adapter rejected the produced direct-summary contract",
+    )
+
+    independent_paths = {}
+    for target in ("triangular", "honeycomb"):
+        path = directory / f"{target}-independent-summary.json"
+        path.write_text(json.dumps({
+            "schema_version": UNSEAL.INDEPENDENT_SCHEMA,
+            "protocol_id": DIRECT.PROTOCOL_ID, "target_lattice": target,
+            "independent_route_accepted": True, "ratio_computed": False,
+        }), encoding="utf-8")
+        independent_paths[target] = path
+    verdict = UNSEAL.build_verdict(
+        triangular_path, honeycomb_path,
+        independent_paths["triangular"], independent_paths["honeycomb"],
+    )
+    require(verdict["ratio_computed"] and verdict["ratio_error"] > 0.0,
+            "accepted summaries did not produce an unsealed ratio")
+    blocked = json.loads(independent_paths["honeycomb"].read_text(encoding="utf-8"))
+    blocked["independent_route_accepted"] = False
+    independent_paths["honeycomb"].write_text(json.dumps(blocked), encoding="utf-8")
+    expect_value_error(
+        lambda: UNSEAL.build_verdict(
+            triangular_path, honeycomb_path,
+            independent_paths["triangular"], independent_paths["honeycomb"],
+        ),
+        "unsealer computed a ratio with a failed independent route",
+    )
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory)
         test_input_validation(path)
         test_protocol_and_robustness(path)
         test_paratoric_manifest_contract(path)
+        direct_path = path / "direct"
+        direct_path.mkdir()
+        test_direct_summary_and_unsealing(direct_path)
     test_scaling_fit()
     test_sampling_gates()
     test_ctau_comparison()

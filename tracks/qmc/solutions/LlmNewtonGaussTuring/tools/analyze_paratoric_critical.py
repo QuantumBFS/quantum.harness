@@ -580,16 +580,23 @@ def load_direct_summary(path: Path | None, target: str) -> dict[str, Any]:
         return {"provided": False, "accepted": False, "reason": "not provided"}
     path = path.resolve()
     payload = _json(path)
-    required = {"protocol_id", "target_lattice", "hc", "total_error", "accepted"}
+    required = {
+        "schema_version", "protocol_id", "target_lattice", "run_id", "hc",
+        "total_error", "accepted", "ratio_computed",
+    }
     missing = required - set(payload)
     if missing:
         raise ValueError(f"direct summary is missing {sorted(missing)}")
     if payload["protocol_id"] != critical.PROTOCOL_ID:
         raise ValueError("direct summary uses the wrong protocol identifier")
+    if payload["schema_version"] != "challenge148-direct-summary-v1":
+        raise ValueError("direct summary uses an unsupported schema")
     if payload["target_lattice"] != target:
         raise ValueError("direct summary target differs from ParaToric production")
     if not isinstance(payload["accepted"], bool):
         raise ValueError("direct summary accepted field must be a JSON boolean")
+    if payload["ratio_computed"] is not False:
+        raise ValueError("direct summary computed the sealed ratio prematurely")
     hc = float(payload["hc"])
     error = float(payload["total_error"])
     if not math.isfinite(hc) or not math.isfinite(error) or error <= 0.0:
