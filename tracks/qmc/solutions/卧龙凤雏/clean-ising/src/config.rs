@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 
 pub const CRITICAL_K: f64 = 0.440_686_793_509_771_47;
-const PRODUCTION_WIDTHS: [usize; 6] = [4, 6, 8, 10, 12, 16];
+const PRODUCTION_WIDTHS: [usize; 9] = [4, 6, 8, 10, 12, 14, 16, 18, 20];
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RunConfig {
@@ -93,18 +93,36 @@ impl RunConfig {
             if self.mc.replicas != 4 {
                 bail!("production run requires four replicas");
             }
-            if self.mc.grid_intervals != 32
+            if self.mc.grid_intervals != 64
                 || self.mc.thermal_sweeps != 200
-                || self.mc.measurement_sweeps != 800
-                || self.mc.block_sweeps != 20
+                || self.mc.measurement_sweeps != 12_800
+                || self.mc.block_sweeps != 320
             {
                 bail!(
-                    "production sampling requires 32 intervals, 200 thermal sweeps, \
-                     800 measurement sweeps, and 20-sweep blocks"
+                    "production sampling requires 64 intervals, 200 thermal sweeps, \
+                     12,800 measurement sweeps, and 320-sweep blocks"
                 );
             }
         }
         Ok(())
+    }
+
+    pub fn compatible_with(&self, other: &Self) -> bool {
+        self.widths == other.widths
+            && self.aspect_ratio == other.aspect_ratio
+            && floats_roundtrip_equal(self.critical_k, other.critical_k)
+            && self.base_seed == other.base_seed
+            && self.production_gates == other.production_gates
+            && self.exact.max_iterations == other.exact.max_iterations
+            && floats_roundtrip_equal(
+                self.exact.eigenvalue_tolerance,
+                other.exact.eigenvalue_tolerance,
+            )
+            && floats_roundtrip_equal(
+                self.exact.residual_tolerance,
+                other.exact.residual_tolerance,
+            )
+            && self.mc == other.mc
     }
 }
 
@@ -116,4 +134,9 @@ impl ExactConfig {
             residual_tolerance: 1.0e-11,
         }
     }
+}
+
+fn floats_roundtrip_equal(left: f64, right: f64) -> bool {
+    let scale = left.abs().max(right.abs()).max(f64::MIN_POSITIVE);
+    (left - right).abs() <= 16.0 * f64::EPSILON * scale
 }
