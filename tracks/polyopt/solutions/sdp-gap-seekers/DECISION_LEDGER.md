@@ -1387,3 +1387,10 @@ normal-node process peak at optimizer entry was 113,680,612 KiB, and it removes
 factorization. Require hash
 `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`,
 audit at `1e-9`, and use command-line `--gres-flags=disable-binding`.
+
+The exact request passed test-only and created SCNet job `118188038`. It
+started at 2026-07-29T20:14:12Z from immutable commit `001fc6f` on 32 CPUs /
+256000 MiB / one admission GPU with GRES binding disabled. Its required hash
+is `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
+and audit tolerance is `1e-9`. This is the single high-memory reduced
+signature; do not duplicate or modify its shared checkout while it runs.

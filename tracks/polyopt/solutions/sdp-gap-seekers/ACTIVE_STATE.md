@@ -792,3 +792,9 @@ Updated: 2026-07-29 UTC.
   required reduced hash and `1e-9` audit. Its normal-node optimizer-entry peak
   was 113,680,612 KiB versus 262,191,096 KiB for the unreduced task, so this is
   a materially changed factorization signature, not a duplicate.
+- Reduced high-memory decision job `118188038` started on SCNet at
+  2026-07-29T20:14:12Z from immutable commit `001fc6f`, using 32 CPUs,
+  256000 MiB, one partition-admission GPU with binding disabled, and a
+  12-hour limit. It requires exact hash `fac50bcc…bed9a8` and audits at
+  `1e-9`. Monitor through reconstruction, factorization, and independently
+  replay any candidate before interpretation.
