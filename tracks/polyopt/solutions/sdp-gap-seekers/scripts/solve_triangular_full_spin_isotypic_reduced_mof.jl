@@ -196,7 +196,8 @@ end
 
 function validate_setup(setup, expected_gamma::AbstractString)
     B.require_equal(setup["model"], "triangular-heisenberg", "model")
-    B.require_equal(setup["patch_level"], 1, "patch level")
+    setup["patch_level"] >= 1 ||
+        error("patch level must be a positive integer (got $(setup["patch_level"]))")
     B.require_equal(setup["degree_d"], 2, "polynomial degree")
     B.require_equal(setup["state_class"], "unrestricted", "state class")
     B.require_equal(

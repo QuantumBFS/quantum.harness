@@ -3,9 +3,9 @@
 #SBATCH --partition=xhacnormalb
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=24G
-#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=100G
+#SBATCH --time=08:00:00
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/slurm-%j.out
 
 set -euo pipefail
@@ -91,7 +91,7 @@ for gamma in "${gammas[@]}"; do
 
     echo "[tri-gamma-scan] gamma=$gamma build started"
     set +e
-    "${builder[@]}" --gamma "$gamma" --output "$input_dir" 2>&1 | tee "$point_dir/build.log"
+    "${builder[@]}" --gamma "$gamma" --patch-level "${TRI_PATCH_LEVEL:-1}" --output "$input_dir" 2>&1 | tee "$point_dir/build.log"
     build_exit="${PIPESTATUS[0]}"
     set -e
     printf '%s\n' "$build_exit" > "$point_dir/build-exit-code.txt"
