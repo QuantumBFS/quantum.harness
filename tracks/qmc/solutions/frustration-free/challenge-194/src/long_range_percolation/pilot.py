@@ -73,6 +73,7 @@ PILOT_JSON_MAX_DEPTH = 32
 PILOT_JSON_MAX_STRING = 4096
 PILOT_JSON_MAX_CONTAINER = 100_000
 PILOT_JSON_MAX_NODES = 20_000_000
+CORRECTNESS_JSON_MAX_NODES = 64_000_000
 PILOT_CELL_MAX_ENTRIES = 64
 
 _read_descriptor_bounded = _artifacts._read_descriptor_bounded
@@ -130,13 +131,15 @@ def _repo_root() -> Path:
     return _solution_root().parents[4]
 
 
-def _validate_json_bounds(value: object) -> None:
+def _validate_json_bounds(
+    value: object, *, maximum_nodes: int = PILOT_JSON_MAX_NODES
+) -> None:
     stack: list[tuple[object, int]] = [(value, 1)]
     nodes = 0
     while stack:
         item, depth = stack.pop()
         nodes += 1
-        if nodes > PILOT_JSON_MAX_NODES:
+        if nodes > maximum_nodes:
             raise RuntimeError("JSON node count exceeds the frozen limit")
         if depth > PILOT_JSON_MAX_DEPTH:
             raise RuntimeError("JSON depth exceeds the frozen limit")
@@ -452,6 +455,7 @@ def _read_canonical(
     description: str,
     *,
     maximum_size: int,
+    maximum_nodes: int = PILOT_JSON_MAX_NODES,
 ) -> tuple[dict[str, object], bytes]:
     parent_chain = _open_directory_chain(path.parent, create=False)
     parent_fd = parent_chain[-1][1]
@@ -474,7 +478,7 @@ def _read_canonical(
             ValueError,
         ) as error:
             raise RuntimeError(f"{description} is not valid JSON") from error
-        _validate_json_bounds(document)
+        _validate_json_bounds(document, maximum_nodes=maximum_nodes)
         if not isinstance(document, dict) or payload != _canonical_bytes(document):
             raise RuntimeError(f"{description} is not canonical JSON")
         _require_regular_at_identity(
@@ -696,6 +700,7 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
         report_path,
         "correctness report",
         maximum_size=CORRECTNESS_REPORT_MAX_BYTES,
+        maximum_nodes=CORRECTNESS_JSON_MAX_NODES,
     )
     if _sha256(report_payload) != approval["report_sha256"]:
         raise RuntimeError("approved correctness report SHA256 mismatch")
@@ -721,6 +726,7 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
         validation_spec_path,
         "correctness run spec",
         maximum_size=CORRECTNESS_RUN_SPEC_MAX_BYTES,
+        maximum_nodes=CORRECTNESS_JSON_MAX_NODES,
     )
     if _sha256(validation_spec_payload) != approval["run_spec_sha256"]:
         raise RuntimeError("approved correctness run spec SHA256 mismatch")

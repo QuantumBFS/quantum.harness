@@ -372,14 +372,31 @@ def test_bounded_json_reader_rejects_limit_plus_one_malformed_and_deep(
         pilot._validate_json_bounds(
             [None] * (pilot.PILOT_JSON_MAX_CONTAINER + 1)
         )
-    monkeypatch_nodes = pilot.PILOT_JSON_MAX_NODES
-    try:
-        pilot.PILOT_JSON_MAX_NODES = 3
-        pilot._validate_json_bounds([None, None])
-        with pytest.raises(RuntimeError, match="node"):
-            pilot._validate_json_bounds([None, None, None])
-    finally:
-        pilot.PILOT_JSON_MAX_NODES = monkeypatch_nodes
+    pilot._validate_json_bounds([None, None], maximum_nodes=3)
+    with pytest.raises(RuntimeError, match="node"):
+        pilot._validate_json_bounds([None, None, None], maximum_nodes=3)
+
+
+def test_correctness_documents_use_their_larger_frozen_node_budget(
+    tmp_path: Path,
+):
+    document = {"values": [None, None, None]}
+    path = tmp_path / "correctness.json"
+    path.write_bytes(pilot._canonical_bytes(document))
+    with pytest.raises(RuntimeError, match="node"):
+        pilot._read_canonical(
+            path,
+            "ordinary document",
+            maximum_size=path.stat().st_size,
+            maximum_nodes=3,
+        )
+    loaded, _ = pilot._read_canonical(
+        path,
+        "correctness document",
+        maximum_size=path.stat().st_size,
+        maximum_nodes=pilot.CORRECTNESS_JSON_MAX_NODES,
+    )
+    assert loaded == document
 
 
 def test_descriptor_read_rejects_file_replacement_and_same_size_mutation(
