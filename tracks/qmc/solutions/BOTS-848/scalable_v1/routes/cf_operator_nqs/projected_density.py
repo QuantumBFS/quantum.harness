@@ -14,81 +14,17 @@ algebra, LLL closure, or the scalar contractions used by this route.
 from __future__ import annotations
 
 import math
+from decimal import Decimal, localcontext
 from functools import lru_cache
+from numbers import Integral
 
 import numpy as np
 
 
 def _require_integer(name: str, value: object) -> int:
-    if type(value) is not int:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
-    return value
-
-
-def _factorial(value: float) -> int:
-    integer = round(value)
-    if not math.isclose(value, integer, rel_tol=0.0, abs_tol=1.0e-12) or integer < 0:
-        raise ValueError("invalid angular-momentum factorial")
-    return math.factorial(integer)
-
-
-@lru_cache(maxsize=None)
-def _clebsch_gordan(
-    j1: float,
-    m1: float,
-    j2: float,
-    m2: float,
-    total_j: float,
-    total_m: float,
-) -> float:
-    """Return a Condon--Shortley Clebsch--Gordan coefficient.
-
-    The finite Racah sum is sufficient here because all supported angular
-    momenta are integer or half-integer and Route C uses modest electronic
-    fluxes.  Factorial arguments are integral by the selection rules.
-    """
-
-    if not math.isclose(m1 + m2, total_m, rel_tol=0.0, abs_tol=1.0e-12):
-        return 0.0
-    if total_j < abs(j1 - j2) or total_j > j1 + j2:
-        return 0.0
-    if abs(m1) > j1 or abs(m2) > j2 or abs(total_m) > total_j:
-        return 0.0
-
-    prefactor_triangle = math.sqrt(
-        (2.0 * total_j + 1.0)
-        * _factorial(total_j + j1 - j2)
-        * _factorial(total_j - j1 + j2)
-        * _factorial(j1 + j2 - total_j)
-        / _factorial(j1 + j2 + total_j + 1.0)
-    )
-    prefactor_m = math.sqrt(
-        _factorial(total_j + total_m)
-        * _factorial(total_j - total_m)
-        * _factorial(j1 - m1)
-        * _factorial(j1 + m1)
-        * _factorial(j2 - m2)
-        * _factorial(j2 + m2)
-    )
-
-    k_min = max(0, round(j2 - total_j - m1), round(j1 + m2 - total_j))
-    k_max = min(
-        round(j1 + j2 - total_j),
-        round(j1 - m1),
-        round(j2 + m2),
-    )
-    total = 0.0
-    for k in range(k_min, k_max + 1):
-        denominator = (
-            _factorial(float(k))
-            * _factorial(j1 + j2 - total_j - k)
-            * _factorial(j1 - m1 - k)
-            * _factorial(j2 + m2 - k)
-            * _factorial(total_j - j2 + m1 + k)
-            * _factorial(total_j - j1 - m2 + k)
-        )
-        total += (-1) ** k / denominator
-    return prefactor_triangle * prefactor_m * total
+    return int(value)
 
 
 def _validate_density_inputs(two_q: object, ell: object, m: object) -> tuple[int, int, int]:
@@ -104,18 +40,113 @@ def _validate_density_inputs(two_q: object, ell: object, m: object) -> tuple[int
     return checked_two_q, checked_ell, checked_m
 
 
+_CG_DECIMAL_PRECISION = 80
+
+
+def _factorial_argument(value: float) -> int:
+    integer = round(value)
+    if not math.isclose(value, integer, rel_tol=0.0, abs_tol=1.0e-12) or integer < 0:
+        raise ValueError("invalid angular-momentum factorial")
+    return integer
+
+
+@lru_cache(maxsize=None)
+def _log_factorial(integer: int) -> Decimal:
+    with localcontext() as context:
+        context.prec = _CG_DECIMAL_PRECISION
+        return Decimal(math.factorial(integer)).ln()
+
+
+@lru_cache(maxsize=None)
+def _clebsch_gordan(
+    j1: float,
+    m1: float,
+    j2: float,
+    m2: float,
+    total_j: float,
+    total_m: float,
+) -> float:
+    """Return a log-scaled Condon--Shortley CG coefficient."""
+
+    if not math.isclose(m1 + m2, total_m, rel_tol=0.0, abs_tol=1.0e-12):
+        return 0.0
+    if total_j < abs(j1 - j2) or total_j > j1 + j2:
+        return 0.0
+    if abs(m1) > j1 or abs(m2) > j2 or abs(total_m) > total_j:
+        return 0.0
+
+    with localcontext() as context:
+        context.prec = _CG_DECIMAL_PRECISION
+        log_prefactor = (
+            Decimal(_factorial_argument(2.0 * total_j + 1.0)).ln()
+            + _log_factorial(_factorial_argument(total_j + j1 - j2))
+            + _log_factorial(_factorial_argument(total_j - j1 + j2))
+            + _log_factorial(_factorial_argument(j1 + j2 - total_j))
+            - _log_factorial(_factorial_argument(j1 + j2 + total_j + 1.0))
+            + _log_factorial(_factorial_argument(total_j + total_m))
+            + _log_factorial(_factorial_argument(total_j - total_m))
+            + _log_factorial(_factorial_argument(j1 - m1))
+            + _log_factorial(_factorial_argument(j1 + m1))
+            + _log_factorial(_factorial_argument(j2 - m2))
+            + _log_factorial(_factorial_argument(j2 + m2))
+        ) / 2
+
+        k_min = max(0, round(j2 - total_j - m1), round(j1 + m2 - total_j))
+        k_max = min(
+            round(j1 + j2 - total_j),
+            round(j1 - m1),
+            round(j2 + m2),
+        )
+        signed_logs: list[tuple[int, Decimal]] = []
+        for k in range(k_min, k_max + 1):
+            log_denominator = sum(
+                (
+                    _log_factorial(_factorial_argument(argument))
+                    for argument in (
+                        float(k),
+                        j1 + j2 - total_j - k,
+                        j1 - m1 - k,
+                        j2 + m2 - k,
+                        total_j - j2 + m1 + k,
+                        total_j - j1 - m2 + k,
+                    )
+                ),
+                Decimal(0),
+            )
+            signed_logs.append(((-1) ** k, -log_denominator))
+        if not signed_logs:
+            return 0.0
+        common_scale = max(log_term for _, log_term in signed_logs)
+        scaled_sum = sum(
+            (
+                Decimal(sign) * (log_term - common_scale).exp()
+                for sign, log_term in signed_logs
+            ),
+            Decimal(0),
+        )
+        if scaled_sum == 0:
+            return 0.0
+        magnitude = (
+            log_prefactor + common_scale + abs(scaled_sum).ln()
+        ).exp()
+        return math.copysign(float(magnitude), float(scaled_sum))
+
+
 @lru_cache(maxsize=None)
 def _projected_density_tensor(two_q: int, ell: int, m: int) -> np.ndarray:
     j = 0.5 * two_q
     matrix = np.zeros((two_q + 1, two_q + 1), dtype=np.complex128)
     normalization = math.sqrt(2 * ell + 1)
     for source in range(two_q + 1):
-        source_m = source - j
         target = source + m
         if 0 <= target <= two_q:
-            target_m = target - j
             matrix[target, source] = normalization * _clebsch_gordan(
-                j, source_m, float(ell), float(m), j, target_m
+                j,
+                source - j,
+                float(ell),
+                float(m),
+                j,
+                target - j,
             )
     matrix.setflags(write=False)
     return matrix
@@ -126,7 +157,9 @@ def projected_density_tensor(*, two_q: int, ell: int, m: int) -> np.ndarray:
 
     The matrix acts only among the ``two_q+1`` electronic LLL orbitals.  It
     therefore cannot change flux or create a higher-Landau-level component.
-    Returned arrays are immutable because they are shared cached tensors.
+    This tensor-only interface is not constrained by the signed-``int64``
+    occupation backend's ``two_q <= 62`` limit.  Returned arrays are immutable
+    because they are shared cached tensors.
     """
 
     checked = _validate_density_inputs(two_q, ell, m)

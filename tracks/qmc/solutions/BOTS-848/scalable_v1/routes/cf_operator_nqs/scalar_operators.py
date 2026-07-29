@@ -10,10 +10,9 @@ state hook documented by :meth:`ScalarOperator.connected_action`.
 
 from __future__ import annotations
 
-import itertools
-import math
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
+from numbers import Integral
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -21,22 +20,46 @@ from ...contracts import StateHandle
 from .projected_density import projected_density_tensor
 
 
+@runtime_checkable
+class ConnectedScalarActionProvider(Protocol):
+    """Optional state hook for representation-native scalar neighborhoods.
+
+    ``weights.shape`` gives the batch/neighborhood axes.  ``connected`` must
+    start with exactly those axes and may append representation axes, e.g.
+    ``(B, K, N, 2)`` spinors paired with ``(B, K)`` weights.
+    """
+
+    def connected_scalar_action(
+        self,
+        *,
+        two_q: int,
+        ell: int,
+        depth: int,
+        configs: object,
+    ) -> tuple[np.ndarray, np.ndarray]: ...
+
+
 def _validate_operator_inputs(
     two_q: object, ell: object, depth: object
 ) -> tuple[int, int, int]:
-    if type(two_q) is not int:
+    if isinstance(two_q, (bool, np.bool_)) or not isinstance(two_q, Integral):
         raise TypeError("two_q must be an integer")
-    if two_q <= 0:
+    checked_two_q = int(two_q)
+    if checked_two_q <= 0:
         raise ValueError("two_q must be positive")
-    if type(ell) is not int:
+    if checked_two_q > 62:
+        raise ValueError("two_q must be <= 62 for the signed-int64 bitset backend")
+    if isinstance(ell, (bool, np.bool_)) or not isinstance(ell, Integral):
         raise TypeError("ell must be an integer")
-    if not 0 <= ell <= two_q:
+    checked_ell = int(ell)
+    if not 0 <= checked_ell <= checked_two_q:
         raise ValueError("ell must satisfy 0 <= ell <= two_q")
-    if type(depth) is not int:
+    if isinstance(depth, (bool, np.bool_)) or not isinstance(depth, Integral):
         raise TypeError("depth must be an integer")
-    if depth <= 0:
+    checked_depth = int(depth)
+    if checked_depth <= 0:
         raise ValueError("depth must be positive")
-    return two_q, ell, depth
+    return checked_two_q, checked_ell, checked_depth
 
 
 def _apply_annihilation(config: int, orbital: int) -> tuple[int, int] | None:
@@ -90,7 +113,7 @@ def _scalar_once(two_q: int, ell: int, config: int) -> dict[int, complex]:
 
 
 def _validate_config(config: object, *, two_q: int) -> int:
-    if isinstance(config, (bool, np.bool_)) or not isinstance(config, (int, np.integer)):
+    if isinstance(config, (bool, np.bool_)) or not isinstance(config, Integral):
         raise TypeError("occupation configurations must be integer bitsets")
     checked = int(config)
     if checked < 0 or checked >> (two_q + 1):
@@ -130,7 +153,7 @@ def connected_scalar_action(
     checked_two_q, checked_ell, checked_depth = _validate_operator_inputs(
         two_q, ell, depth
     )
-    scalar_input = isinstance(configs, (int, np.integer)) and not isinstance(
+    scalar_input = isinstance(configs, Integral) and not isinstance(
         configs, (bool, np.bool_)
     )
     if scalar_input:
@@ -166,75 +189,39 @@ def connected_scalar_action(
     return connected, weights
 
 
-def _fixture_basis(two_q: int) -> tuple[int, ...]:
-    """Return the exact two-electron certification fixture, never a runtime basis."""
-
-    return tuple(
-        (1 << first) | (1 << second)
-        for first, second in itertools.combinations(range(two_q + 1), 2)
-    )
-
-
-def _second_quantized_fixture(
-    one_body: np.ndarray, basis: tuple[int, ...]
-) -> np.ndarray:
-    index = {config: row for row, config in enumerate(basis)}
-    matrix = np.zeros((len(basis), len(basis)), dtype=np.complex128)
-    for column, source in enumerate(basis):
-        for target, value in _one_body_action(one_body, source).items():
-            matrix[index[target], column] += value
-    return matrix
-
-
-def _fixture_l2(two_q: int, basis: tuple[int, ...]) -> np.ndarray:
-    n_orbitals = two_q + 1
-    l_plus = np.zeros((n_orbitals, n_orbitals), dtype=np.complex128)
-    for orbital in range(two_q):
-        l_plus[orbital + 1, orbital] = math.sqrt(
-            (two_q - orbital) * (orbital + 1)
+def _validate_hook_result(result: object) -> tuple[np.ndarray, np.ndarray]:
+    if not isinstance(result, tuple) or len(result) != 2:
+        raise TypeError("connected_scalar_action hook must return an ndarray pair")
+    connected, weights = result
+    if not isinstance(connected, np.ndarray):
+        raise TypeError("hook connected configurations must be an ndarray")
+    if not isinstance(weights, np.ndarray):
+        raise TypeError("hook weights must be an ndarray")
+    if weights.ndim == 0:
+        raise ValueError("hook weights must be non-scalar")
+    if not np.issubdtype(connected.dtype, np.number):
+        raise TypeError("hook connected configurations must have numeric dtype")
+    if not np.issubdtype(weights.dtype, np.number):
+        raise TypeError("hook weights must have numeric dtype")
+    if not np.all(np.isfinite(connected)) or not np.all(np.isfinite(weights)):
+        raise ValueError("hook connected configurations and weights must be finite")
+    if (
+        connected.ndim < weights.ndim
+        or connected.shape[: weights.ndim] != weights.shape
+    ):
+        raise ValueError(
+            "hook connected leading dimensions must exactly match weights.shape"
         )
-    l_minus = l_plus.T.conj()
-    l_z = np.diag(np.arange(n_orbitals, dtype=float) - 0.5 * two_q)
-    total_plus = _second_quantized_fixture(l_plus, basis)
-    total_minus = _second_quantized_fixture(l_minus, basis)
-    total_z = _second_quantized_fixture(l_z, basis)
-    return (
-        total_z @ total_z
-        + 0.5 * (total_plus @ total_minus + total_minus @ total_plus)
-    )
-
-
-def _fixture_scalar_matrix(
-    two_q: int, ell: int, depth: int, basis: tuple[int, ...]
-) -> tuple[np.ndarray, bool]:
-    index = {config: row for row, config in enumerate(basis)}
-    matrix = np.zeros((len(basis), len(basis)), dtype=np.complex128)
-    strict_lll = True
-    mask = (1 << (two_q + 1)) - 1
-    for column, source in enumerate(basis):
-        connected, weights = _connected_for_config(
-            two_q=two_q, ell=ell, depth=depth, config=source
-        )
-        for target, value in zip(connected, weights, strict=True):
-            target_int = int(target)
-            strict_lll &= (
-                target_int & ~mask == 0
-                and target_int.bit_count() == source.bit_count()
-                and target_int in index
-            )
-            if target_int in index:
-                matrix[index[target_int], column] += value
-    return matrix, strict_lll
+    return connected, weights.astype(np.complex128, copy=False)
 
 
 @dataclass(frozen=True)
 class ScalarOperator:
-    """A fixed-rank, fixed-depth LLL scalar with an exact N=2 certificate.
+    """A fixed-rank, fixed-depth electronic-LLL scalar certificate.
 
-    ``matrix`` is deliberately only the exact two-electron fixture matrix used
-    to certify Hermiticity and rotational covariance.  Production evaluation
-    must use :meth:`connected_action`, which never builds a full many-body
-    basis.  Coordinate/spinor states may implement
+    The construction flags follow from contracting two fixed-LLL irreducible
+    tensors to rank zero; construction never builds or stores a many-body
+    matrix.  Coordinate/spinor states may implement
     ``connected_scalar_action(*, two_q, ell, depth, configs)``; otherwise the
     built-in occupation-bitset backend is selected.
     """
@@ -244,20 +231,19 @@ class ScalarOperator:
     ell: int
     strict_lll: bool
     commutes_with_l2: bool
-    matrix: np.ndarray = field(repr=False, compare=False)
 
     def connected_action(
         self, state: StateHandle, configs: object
     ) -> tuple[object, np.ndarray]:
-        hook = getattr(state, "connected_scalar_action", None)
-        if callable(hook):
-            connected, weights = hook(
-                two_q=self.two_q,
-                ell=self.ell,
-                depth=self.depth,
-                configs=configs,
+        if isinstance(state, ConnectedScalarActionProvider):
+            return _validate_hook_result(
+                state.connected_scalar_action(
+                    two_q=self.two_q,
+                    ell=self.ell,
+                    depth=self.depth,
+                    configs=configs,
+                )
             )
-            return connected, np.asarray(weights, dtype=np.complex128)
         return connected_scalar_action(
             two_q=self.two_q,
             ell=self.ell,
@@ -269,30 +255,22 @@ class ScalarOperator:
 def build_scalar_operator(
     *, two_q: int, ell: int, depth: int = 1
 ) -> ScalarOperator:
-    """Build a strict-LLL scalar and its independent small-fixture certificate."""
+    """Build a parameter-only strict-LLL scalar construction certificate."""
 
     checked_two_q, checked_ell, checked_depth = _validate_operator_inputs(
         two_q, ell, depth
     )
-    basis = _fixture_basis(checked_two_q)
-    matrix, strict_lll = _fixture_scalar_matrix(
-        checked_two_q, checked_ell, checked_depth, basis
-    )
-    l2 = _fixture_l2(checked_two_q, basis)
-    scale = max(np.linalg.norm(matrix), np.finfo(float).tiny)
-    commutator_residual = np.linalg.norm(matrix @ l2 - l2 @ matrix) / scale
-    matrix.setflags(write=False)
     return ScalarOperator(
         two_q=checked_two_q,
         depth=checked_depth,
         ell=checked_ell,
-        strict_lll=bool(strict_lll),
-        commutes_with_l2=bool(commutator_residual < 1.0e-12),
-        matrix=matrix,
+        strict_lll=True,
+        commutes_with_l2=True,
     )
 
 
 __all__ = [
+    "ConnectedScalarActionProvider",
     "ScalarOperator",
     "build_scalar_operator",
     "connected_scalar_action",

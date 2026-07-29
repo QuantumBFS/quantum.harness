@@ -13,6 +13,7 @@ from benchmark_v0.fock_ed import apply_annihilation, apply_creation
 from scalable_v1.routes.cf_operator_nqs.projected_density import (
     projected_density_tensor,
 )
+from scalable_v1.routes.cf_operator_nqs import scalar_operators
 from scalable_v1.routes.cf_operator_nqs.scalar_operators import (
     build_scalar_operator,
     connected_scalar_action,
@@ -82,6 +83,19 @@ def _many_body_l2(two_q: int, basis: tuple[int, ...]) -> np.ndarray:
     )
 
 
+def _connected_matrix(operator: object, basis: tuple[int, ...]) -> np.ndarray:
+    connected, weights = operator.connected_action(  # type: ignore[attr-defined]
+        _BitsetState(), np.asarray(basis, dtype=np.int64)
+    )
+    matrix = np.zeros((len(basis), len(basis)), dtype=np.complex128)
+    index = {config: row for row, config in enumerate(basis)}
+    for column in range(len(basis)):
+        for target, weight in zip(connected[column], weights[column], strict=True):
+            if weight != 0.0:
+                matrix[index[int(target)], column] += weight
+    return matrix
+
+
 @pytest.mark.parametrize("ell", range(4))
 def test_projected_density_tensors_have_hermitian_condon_shortley_phases(
     ell: int,
@@ -116,6 +130,67 @@ def test_projected_density_tensors_obey_rank_ell_ladder_identity(ell: int) -> No
         assert residual / scale < 1.0e-13
 
 
+@pytest.mark.parametrize(("two_q", "ell"), ((33, 2), (33, 4), (127, 4)))
+def test_projected_density_is_stable_at_protocol_and_larger_flux(
+    two_q: int, ell: int
+) -> None:
+    n_orbitals = two_q + 1
+    l_plus = np.zeros((n_orbitals, n_orbitals), dtype=np.complex128)
+    for orbital in range(two_q):
+        l_plus[orbital + 1, orbital] = math.sqrt(
+            (two_q - orbital) * (orbital + 1)
+        )
+    tensors = {
+        m: projected_density_tensor(two_q=two_q, ell=ell, m=m)
+        for m in range(-ell, ell + 1)
+    }
+
+    assert all(np.all(np.isfinite(tensor)) for tensor in tensors.values())
+    for m, tensor in tensors.items():
+        scale = max(np.linalg.norm(tensor), np.finfo(float).tiny)
+        hermitian_residual = np.linalg.norm(
+            tensor.T.conj() - (-1) ** m * tensors[-m]
+        ) / scale
+        assert hermitian_residual < 1.0e-12
+        if m < ell:
+            expected = math.sqrt((ell - m) * (ell + m + 1)) * tensors[m + 1]
+            ladder_residual = np.linalg.norm(
+                l_plus @ tensor - tensor @ l_plus - expected
+            ) / max(np.linalg.norm(expected), np.finfo(float).tiny)
+            assert ladder_residual < 1.0e-12
+
+
+def test_numpy_integral_inputs_are_accepted_consistently() -> None:
+    tensor = projected_density_tensor(
+        two_q=np.int64(33), ell=np.int32(4), m=np.int64(0)
+    )
+    operator = build_scalar_operator(
+        two_q=np.int64(21), ell=np.int32(4), depth=np.int64(2)
+    )
+    connected, weights = connected_scalar_action(
+        two_q=np.int64(21),
+        ell=np.int32(4),
+        depth=np.int64(1),
+        configs=np.int64((1 << 0) | (1 << 20)),
+    )
+
+    assert tensor.shape == (34, 34)
+    assert (operator.two_q, operator.ell, operator.depth) == (21, 4, 2)
+    assert connected.dtype == np.int64
+    assert weights.dtype == np.complex128
+
+
+@pytest.mark.parametrize("entrypoint", ("build", "connected"))
+def test_bitset_scalar_backend_rejects_two_q_above_signed_int64_limit(
+    entrypoint: str,
+) -> None:
+    with pytest.raises(ValueError, match=r"two_q.*62"):
+        if entrypoint == "build":
+            build_scalar_operator(two_q=63, ell=4)
+        else:
+            connected_scalar_action(two_q=63, ell=4, configs=1)
+
+
 def test_scalar_operator_is_the_exact_signed_density_contraction() -> None:
     two_q = 3
     ell = 2
@@ -132,11 +207,11 @@ def test_scalar_operator_is_the_exact_signed_density_contraction() -> None:
     )
 
     operator = build_scalar_operator(two_q=two_q, ell=ell)
+    matrix = _connected_matrix(operator, basis)
 
-    np.testing.assert_allclose(operator.matrix, expected, rtol=2.0e-15, atol=2.0e-15)
+    np.testing.assert_allclose(matrix, expected, rtol=2.0e-15, atol=2.0e-15)
     assert np.linalg.norm(
-        operator.matrix
-        - np.trace(operator.matrix) / len(basis) * np.eye(len(basis))
+        matrix - np.trace(matrix) / len(basis) * np.eye(len(basis))
     ) > 1.0
 
 
@@ -145,14 +220,13 @@ def test_scalar_operator_is_hermitian_and_commutes_with_total_l2(ell: int) -> No
     basis = _fixed_n_basis(n_electrons=2, two_q=3)
     l2 = _many_body_l2(two_q=3, basis=basis)
     operator = build_scalar_operator(two_q=3, ell=ell)
+    matrix = _connected_matrix(operator, basis)
 
-    commutator = operator.matrix @ l2 - l2 @ operator.matrix
-    commutator_residual = np.linalg.norm(commutator) / np.linalg.norm(
-        operator.matrix
+    commutator = matrix @ l2 - l2 @ matrix
+    commutator_residual = np.linalg.norm(commutator) / np.linalg.norm(matrix)
+    hermitian_residual = np.linalg.norm(matrix - matrix.T.conj()) / np.linalg.norm(
+        matrix
     )
-    hermitian_residual = np.linalg.norm(
-        operator.matrix - operator.matrix.T.conj()
-    ) / np.linalg.norm(operator.matrix)
 
     assert operator.strict_lll
     assert operator.commutes_with_l2
@@ -180,6 +254,34 @@ class _BitsetState:
         raise NotImplementedError
 
 
+def test_build_scalar_operator_does_not_construct_or_retain_fixture_matrix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden_fixture(*args: object, **kwargs: object) -> object:
+        pytest.fail("production constructor called an exact-basis fixture helper")
+
+    for helper_name in (
+        "_fixture_basis",
+        "_fixture_l2",
+        "_fixture_scalar_matrix",
+        "_second_quantized_fixture",
+    ):
+        monkeypatch.setattr(
+            scalar_operators, helper_name, forbidden_fixture, raising=False
+        )
+
+    operator = build_scalar_operator(two_q=21, ell=4)
+
+    assert not hasattr(operator, "matrix")
+    assert vars(operator) == {
+        "two_q": 21,
+        "depth": 1,
+        "ell": 4,
+        "strict_lll": True,
+        "commutes_with_l2": True,
+    }
+
+
 def test_bitset_connected_action_matches_exact_fixture_matrix() -> None:
     basis = _fixed_n_basis(n_electrons=2, two_q=3)
     operator = build_scalar_operator(two_q=3, ell=2)
@@ -190,13 +292,27 @@ def test_bitset_connected_action_matches_exact_fixture_matrix() -> None:
 
     assert connected.ndim == weights.ndim == 2
     assert connected.shape == weights.shape
-    reconstructed = np.zeros_like(operator.matrix)
+    reconstructed = np.zeros((len(basis), len(basis)), dtype=np.complex128)
     index = {config: row for row, config in enumerate(basis)}
     for column in range(len(basis)):
         for target, weight in zip(connected[column], weights[column], strict=True):
             if weight != 0.0:
                 reconstructed[index[int(target)], column] += weight
-    np.testing.assert_allclose(reconstructed, operator.matrix, rtol=2.0e-15, atol=2.0e-15)
+    densities = {
+        m: _second_quantize(
+            projected_density_tensor(two_q=3, ell=2, m=m), basis
+        )
+        for m in range(-2, 3)
+    }
+    expected = sum(
+        ((-1) ** m) * densities[m] @ densities[-m] for m in range(-2, 3)
+    )
+    np.testing.assert_allclose(
+        reconstructed,
+        expected,
+        rtol=2.0e-15,
+        atol=2.0e-15,
+    )
 
 
 def test_connected_action_has_fixed_lll_polynomial_neighborhood_bound() -> None:
@@ -221,9 +337,15 @@ class _HookState(_BitsetState):
     def __init__(self) -> None:
         self.received: dict[str, Any] | None = None
 
-    def connected_scalar_action(self, **kwargs: Any) -> tuple[object, np.ndarray]:
+    def connected_scalar_action(self, **kwargs: Any) -> tuple[np.ndarray, np.ndarray]:
         self.received = kwargs
-        return "coordinate-neighborhood", np.asarray([1.0 + 2.0j])
+        configs = np.asarray(kwargs["configs"])
+        connected = np.repeat(configs[:, np.newaxis, :, :], 3, axis=1)
+        weights = np.asarray(
+            [[1.0 + 2.0j, 0.5, -0.25j], [0.25, -0.5j, 2.0]],
+            dtype=np.complex128,
+        )
+        return connected, weights
 
 
 def test_scalar_operator_delegates_representation_generic_state_hook() -> None:
@@ -233,14 +355,58 @@ def test_scalar_operator_delegates_representation_generic_state_hook() -> None:
 
     connected, weights = operator.connected_action(state, configs)
 
-    assert connected == "coordinate-neighborhood"
-    np.testing.assert_array_equal(weights, np.asarray([1.0 + 2.0j]))
+    assert isinstance(state, scalar_operators.ConnectedScalarActionProvider)
+    assert connected.shape == (2, 3, 2, 2)
+    assert weights.shape == (2, 3)
+    np.testing.assert_array_equal(connected[:, 0], configs)
     assert state.received == {
         "two_q": 3,
         "ell": 2,
         "depth": 2,
         "configs": configs,
     }
+
+
+class _MalformedHookState(_BitsetState):
+    def __init__(self, result: object) -> None:
+        self.result = result
+
+    def connected_scalar_action(self, **kwargs: Any) -> object:
+        return self.result
+
+
+@pytest.mark.parametrize(
+    ("result", "message"),
+    [
+        ("junk", "pair"),
+        (([1], np.ones(1)), "connected.*ndarray"),
+        ((np.ones((1, 1)), [1.0]), "weights.*ndarray"),
+        ((np.ones((1, 1)), np.asarray(1.0)), "non-scalar"),
+        (
+            (np.ones((2, 3, 2, 2)), np.ones((2, 4))),
+            "leading dimensions",
+        ),
+        (
+            (np.asarray([["junk"]], dtype=object), np.ones((1, 1))),
+            "connected.*numeric",
+        ),
+        (
+            (np.ones((1, 1)), np.asarray([["junk"]], dtype=object)),
+            "weights.*numeric",
+        ),
+        ((np.ones((1, 1)), np.asarray([[np.nan]])), "finite"),
+        ((np.ones((1, 1)), np.asarray([[np.inf]])), "finite"),
+    ],
+)
+def test_scalar_operator_rejects_malformed_coordinate_hook_results(
+    result: object, message: str
+) -> None:
+    operator = build_scalar_operator(two_q=3, ell=2)
+
+    with pytest.raises((TypeError, ValueError), match=message):
+        operator.connected_action(
+            _MalformedHookState(result), np.zeros((1, 2, 2), dtype=np.complex128)
+        )
 
 
 def test_spinor_configs_require_a_projected_density_state_hook() -> None:
@@ -277,7 +443,6 @@ def test_projected_density_rejects_invalid_component(m: float) -> None:
 
 
 def test_runtime_operator_modules_do_not_import_ed_implementations() -> None:
-    forbidden = {"benchmark_v0.fock_ed", "benchmark_v0.ed_oracle"}
     imported: set[str] = set()
     for module_path in RUNTIME_MODULES:
         tree = ast.parse(module_path.read_text(encoding="utf-8"), filename=str(module_path))
@@ -287,4 +452,7 @@ def test_runtime_operator_modules_do_not_import_ed_implementations() -> None:
             elif isinstance(node, ast.ImportFrom) and node.module is not None:
                 imported.add(node.module)
 
-    assert imported.isdisjoint(forbidden)
+    assert not any(
+        module == "benchmark_v0" or module.startswith("benchmark_v0.")
+        for module in imported
+    )
