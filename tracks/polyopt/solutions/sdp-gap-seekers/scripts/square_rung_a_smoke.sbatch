@@ -77,7 +77,7 @@ julia \
     --expected-positive-dimension 28 \
     --expected-gap-dimension 4 \
     --expected-gamma "${RUNG_A_GAMMA_CANONICAL}" \
-    --time-limit-seconds 600 \
+    --time-limit-seconds 480 \
     --threads "${SLURM_CPUS_PER_TASK:-4}"
 solver_exit=$?
 set -e

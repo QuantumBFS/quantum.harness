@@ -12,6 +12,14 @@ const RESULT_SCHEMA = "square-primal-smoke-result-v1"
 const MOSEK_NUM_THREADS_ATTRIBUTE = "MSK_IPAR_NUM_THREADS"
 const MOSEK_SOLVE_FORM_ATTRIBUTE = "MSK_IPAR_INTPNT_SOLVE_FORM"
 
+# Forced MSK_SOLVE_DUAL is OPT-IN (env var). Default lets Mosek choose its own
+# form, which is what the γ=0 run actually used (Mosek picked primal after
+# presolve, see LEAD_RUNG_A_GAMMA_ZERO_RESULT_AND_NEXT_PROBES). Forcing dual was
+# observed to hang nondeterministically past the solver time-limit on γ=0 (job
+# 22990714) -- see notes/worker-gamma-quarter-attempt-and-feishu-landscape-2026-07-29.md.
+forced_dual_solve_form() =
+    lowercase(get(ENV, "RUNG_FORCE_DUAL_SOLVE_FORM", "")) in ("1", "true", "yes")
+
 function progress(message::AbstractString)
     println("[square-primal-solve] ", message)
     flush(stdout)
@@ -222,8 +230,9 @@ function mosek_task_summary(
         ],
         "semidefinite_constraint_nonzero_count" =>
             Mosek.getnumbaranz(task),
-        "solve_form" => "dual",
-        "solve_form_parameter" => Int(Mosek.MSK_SOLVE_DUAL.value),
+        "solve_form" => forced_dual_solve_form() ? "dual_forced" : "mosek_default",
+        "solve_form_parameter" =>
+            forced_dual_solve_form() ? Int(Mosek.MSK_SOLVE_DUAL.value) : -1,
     )
 end
 
@@ -367,7 +376,7 @@ function main(args::Vector{String}=ARGS)
         JuMP.set_optimizer(model, MosekTools.Optimizer)
         JuMP.set_time_limit_sec(model, Float64(options.time_limit_seconds))
         set_mosek_num_threads!(model, options.threads)
-        set_mosek_dual_solve_form!(model)
+        forced_dual_solve_form() && set_mosek_dual_solve_form!(model)
 
         progress("copying bridged model to Mosek")
         attach_start = time()
