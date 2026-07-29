@@ -453,6 +453,87 @@ end
     )
 end
 
+@testset "QN specifications bind every validated parameter" begin
+    validated = validated_chain_fixture(; n_bath = 2)
+    parameters = FiniteBathParameters(
+        validated; U = 0.8, epsilon_d = -0.4, mu = 0.0
+    )
+    spec =
+        FiniteBathPurification.qn_dual_purification(parameters, validated)
+    sites = interleaved_sites(parameters; purification = spec)
+
+    changed_before_spec = deepcopy(parameters)
+    changed_before_spec.V[1] += 0.125
+    @test_throws ArgumentError FiniteBathPurification.qn_dual_purification(
+        changed_before_spec, validated
+    )
+
+    for field in (:epsilon, :V, :chain_onsite, :chain_hopping)
+        changed = deepcopy(parameters)
+        values = getfield(changed, field)
+        values[1] += 0.125
+        @test_throws ArgumentError identity_purification(
+            changed; purification = spec
+        )
+        @test_throws ArgumentError physical_hamiltonian_mpo(
+            sites, changed; purification = spec
+        )
+    end
+
+    for changed_model in (
+        FiniteBathParameters(
+            validated; U = 0.9, epsilon_d = -0.4, mu = 0.0
+        ),
+        FiniteBathParameters(
+            validated; U = 0.8, epsilon_d = -0.3, mu = 0.0
+        ),
+        FiniteBathParameters(
+            validated; U = 0.8, epsilon_d = -0.4, mu = 0.1
+        ),
+    )
+        @test_throws ArgumentError identity_purification(
+            changed_model; purification = spec
+        )
+        @test_throws ArgumentError physical_hamiltonian_mpo(
+            sites, changed_model; purification = spec
+        )
+    end
+
+    direct = FiniteBathParameters(parameters.epsilon, parameters.V)
+    @test_throws ArgumentError identity_purification(
+        direct; purification = spec
+    )
+    @test_throws ArgumentError physical_hamiltonian_mpo(
+        sites, direct; purification = spec
+    )
+
+    other_validated = validated_chain_fixture(
+        ; n_bath = 2, gamma = 0.17, bandwidth = 1.3
+    )
+    other_parameters = FiniteBathParameters(other_validated)
+    other_spec = FiniteBathPurification.qn_dual_purification(
+        other_parameters, other_validated
+    )
+    @test other_parameters.lambda != parameters.lambda
+    @test other_parameters.mapping_sha256 != parameters.mapping_sha256
+    other_sites =
+        interleaved_sites(other_parameters; purification = other_spec)
+    @test_throws ArgumentError identity_purification(
+        parameters; purification = other_spec
+    )
+    @test_throws ArgumentError identity_purification(
+        other_parameters; purification = spec
+    )
+    @test_throws ArgumentError physical_hamiltonian_mpo(
+        other_sites, other_parameters; purification = spec
+    )
+
+    qn_hamiltonian = physical_hamiltonian_mpo(
+        sites, parameters; purification = spec
+    )
+    @test length(qn_hamiltonian) == length(sites)
+end
+
 @testset "QN Electron labels and complementary dual identity" begin
     validated = validated_chain_fixture(; n_bath = 1)
     chain = FiniteBathParameters(validated)

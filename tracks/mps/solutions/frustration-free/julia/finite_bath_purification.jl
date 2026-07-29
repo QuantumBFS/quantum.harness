@@ -3,6 +3,7 @@ module FiniteBathPurification
 using ITensors
 using ITensorMPS
 using KrylovKit: exponentiate
+using SHA: sha256
 import ITensorMPS: measure!
 
 export FiniteBathParameters,
@@ -90,6 +91,7 @@ struct PurificationSpec
     qn_gauge_version::Union{Nothing,Int}
     base_sector_nf::Union{Nothing,Int}
     base_sector_sz::Union{Nothing,Int}
+    parameter_binding_sha256::Union{Nothing,String}
 
     function PurificationSpec(
         seal::PurificationConstructionSeal;
@@ -98,6 +100,7 @@ struct PurificationSpec
         qn_gauge_version,
         base_sector_nf,
         base_sector_sz,
+        parameter_binding_sha256,
     )
         seal === _PURIFICATION_CONSTRUCTION_SEAL ||
             throw(ArgumentError("invalid purification construction seal"))
@@ -107,6 +110,7 @@ struct PurificationSpec
             qn_gauge_version,
             base_sector_nf,
             base_sector_sz,
+            parameter_binding_sha256,
         )
     end
 end
@@ -119,6 +123,7 @@ non_qn_purification() =
         qn_gauge_version = nothing,
         base_sector_nf = nothing,
         base_sector_sz = nothing,
+        parameter_binding_sha256 = nothing,
     )
 
 """
@@ -240,6 +245,50 @@ struct FiniteBathParameters
             mapping_sha256,
         )
     end
+end
+
+_binding_float(value) = string(
+    reinterpret(UInt64, Float64(value)); base = 16, pad = 16
+)
+
+function _binding_float_vector(values)
+    return string(
+        length(values),
+        ":",
+        join((_binding_float(value) for value in values), ","),
+    )
+end
+
+function _binding_string(value)
+    value === nothing && return "nothing"
+    text = String(value)
+    return "$(ncodeunits(text)):$text"
+end
+
+function _parameter_binding_sha256(parameters::FiniteBathParameters)
+    canonical = join(
+        (
+            "finite_bath_parameter_binding_v1",
+            "epsilon=" * _binding_float_vector(parameters.epsilon),
+            "V=" * _binding_float_vector(parameters.V),
+            "U=" * _binding_float(parameters.U),
+            "epsilon_d=" * _binding_float(parameters.epsilon_d),
+            "mu=" * _binding_float(parameters.mu),
+            "bath_representation=" *
+                _binding_string(parameters.bath_representation),
+            "chain_onsite=" *
+                _binding_float_vector(parameters.chain_onsite),
+            "chain_hopping=" *
+                _binding_float_vector(parameters.chain_hopping),
+            "lambda=" * _binding_float(parameters.lambda),
+            "source_bath_sha256=" *
+                _binding_string(parameters.source_bath_sha256),
+            "mapping_sha256=" *
+                _binding_string(parameters.mapping_sha256),
+        ),
+        "\n",
+    )
+    return bytes2hex(sha256(codeunits(canonical)))
 end
 
 struct PurificationResult{SiteVector, Diagnostics}
@@ -399,6 +448,8 @@ function qn_dual_purification(
     parameters.source_bath_sha256 == validated.source_bath_sha256 &&
         parameters.mapping_sha256 == validated.mapping_sha256 &&
         Tuple(parameters.epsilon) == validated.epsilon &&
+        Tuple(parameters.V) ==
+            (validated.lambda, zeros(length(validated.epsilon) - 1)...) &&
         Tuple(parameters.chain_onsite) == validated.chain_onsite &&
         Tuple(parameters.chain_hopping) == validated.chain_hopping &&
         parameters.lambda == validated.lambda ||
@@ -415,6 +466,8 @@ function qn_dual_purification(
         qn_gauge_version = QN_GAUGE_VERSION,
         base_sector_nf = 2 * n_orbitals,
         base_sector_sz = 0,
+        parameter_binding_sha256 =
+            _parameter_binding_sha256(parameters),
     )
 end
 
@@ -430,6 +483,8 @@ function _validate_purification_spec(
         purification.qn_gauge_version == QN_GAUGE_VERSION &&
         purification.base_sector_nf == 2 * n_orbitals &&
         purification.base_sector_sz == 0 &&
+        purification.parameter_binding_sha256 ==
+            _parameter_binding_sha256(parameters) &&
         parameters.bath_representation === :chain &&
         parameters.source_bath_sha256 !== nothing &&
         parameters.mapping_sha256 !== nothing ||
@@ -582,7 +637,12 @@ function identity_purification(
     return sites, psi
 end
 
-function _validate_sites(sites, parameters::FiniteBathParameters)
+function _validate_sites(
+    sites,
+    parameters::FiniteBathParameters,
+    purification::PurificationSpec,
+)
+    _validate_purification_spec(parameters, purification)
     sites isa AbstractVector ||
         throw(ArgumentError("sites must be a vector of Electron site indices"))
     expected_length = 2 * (length(parameters.epsilon) + 1)
@@ -598,6 +658,13 @@ function _validate_sites(sites, parameters::FiniteBathParameters)
         throw(ArgumentError("site indices must be unique"))
     all(site -> hastags(site, "Electron") && hastags(site, "Site"), sites) ||
         throw(ArgumentError("all sites must carry Electron and Site tags"))
+    qn_enabled = purification.mode === :qn_dual
+    all(site -> hasqns(site) == qn_enabled, sites) ||
+        throw(
+            ArgumentError(
+                "site QN structure does not match purification specification"
+            ),
+        )
     site_tags = string.(tags.(sites))
     allunique(site_tags) ||
         throw(ArgumentError("Electron site tag sets must be unique"))
@@ -611,9 +678,11 @@ Fermionic `Cdag*`/`C*` operators let `OpSum` insert Jordan-Wigner parity
 strings across every intervening site, including interleaved ancillas.
 """
 function physical_hamiltonian_mpo(
-    sites::AbstractVector{<:Index}, parameters::FiniteBathParameters
+    sites::AbstractVector{<:Index},
+    parameters::FiniteBathParameters;
+    purification::PurificationSpec = non_qn_purification(),
 )
-    _validate_sites(sites, parameters)
+    _validate_sites(sites, parameters, purification)
     terms = OpSum()
     impurity = 1
     terms += parameters.epsilon_d - parameters.mu, "Ntot", impurity
