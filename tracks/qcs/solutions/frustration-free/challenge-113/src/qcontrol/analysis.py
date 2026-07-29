@@ -212,6 +212,7 @@ class MethodSummary:
     total_shots_by_trial: tuple[int, ...]
     median_best_observed_infidelity_trajectory: tuple[float, ...]
     metric_availability: MetricAvailability
+    principal_angle_availability: MetricAvailability
     exact_infidelity_trajectory: TrajectoryBand | None
     median_attained_infidelity_upper_bound: float | None
     median_principal_angles: tuple[float, ...] | None
@@ -261,6 +262,9 @@ class MethodSummary:
             ),
             "method": self.method,
             "metric_availability": self.metric_availability.canonical_dict(),
+            "principal_angle_availability": (
+                self.principal_angle_availability.canonical_dict()
+            ),
             "success_probability": self.success_probability.canonical_dict(),
             "total_shots": self.total_shots,
             "total_shots_by_trial": list(self.total_shots_by_trial),
@@ -721,10 +725,70 @@ def _trajectory_band(
     )
 
 
+def _geometry_records_agree(
+    left: Mapping[str, object],
+    right: Mapping[str, object],
+) -> bool:
+    if set(left) != set(right):
+        return False
+    for name in (
+        "model_effective_ranks",
+        "principal_angles_radians",
+        "rank_thresholds",
+        "signed_leading_eigenvalue_gaps",
+        "truth_effective_ranks",
+    ):
+        left_values = left[name]
+        right_values = right[name]
+        if (
+            not isinstance(left_values, list)
+            or not isinstance(right_values, list)
+            or len(left_values) != len(right_values)
+            or any(
+                abs(float(first) - float(second)) > _CANONICAL_TOLERANCE
+                for first, second in zip(left_values, right_values, strict=True)
+            )
+        ):
+            return False
+    return all(
+        left[name] == right[name]
+        for name in (
+            "model_top_subspace_sha256",
+            "truth_top_subspace_sha256",
+        )
+    )
+
+
+def _target_geometry_records(
+    records: Sequence[TrialResult],
+    *,
+    target_dimension: int,
+) -> dict[tuple[object, ...], Mapping[str, object]]:
+    by_cluster: dict[tuple[object, ...], Mapping[str, object]] = {}
+    for item in records:
+        if (
+            item.config["search"]["method"] == "full"
+            or item.config["search"]["dimension"] != target_dimension
+            or "derived_metrics" not in item.result
+        ):
+            continue
+        geometry = item.result["derived_metrics"]["geometry"]
+        identity = _cluster_identity(item)
+        existing = by_cluster.get(identity)
+        if existing is not None and not _geometry_records_agree(existing, geometry):
+            raise AnalysisError("target-k geometry conflict within paired cluster")
+        by_cluster[identity] = geometry
+    return by_cluster
+
+
 def _method_summary(
     records: Sequence[TrialResult],
     *,
     target_dimension: int,
+    target_geometry_records: Mapping[
+        tuple[object, ...],
+        Mapping[str, object],
+    ],
     bootstrap_seed: int,
     bootstrap_samples: int,
     confidence: float,
@@ -743,6 +807,10 @@ def _method_summary(
         if any(item.config["run_kind"] == "production" for item in records):
             raise AnalysisError("production trials require schema-v3 derived metrics")
         availability = MetricAvailability(
+            "unavailable",
+            "schema_v3_metrics_not_available",
+        )
+        angle_availability = MetricAvailability(
             "unavailable",
             "schema_v3_metrics_not_available",
         )
@@ -784,12 +852,45 @@ def _method_summary(
                 ]
             )
         )
-        angles = _median_rows(
-            [
-                item["principal_angles_radians"][:target_dimension]
-                for item in geometry
+        if method == "full":
+            matched_angles = [
+                (
+                    None
+                    if (record := target_geometry_records.get(
+                        _cluster_identity(item)
+                    ))
+                    is None
+                    else tuple(
+                        float(value)
+                        for value in record["principal_angles_radians"]
+                    )
+                )
+                for item in records
             ]
-        )
+            if any(item is None for item in matched_angles):
+                if any(item.config["run_kind"] == "production" for item in records):
+                    raise AnalysisError(
+                        "missing target-k principal angles for full comparator"
+                    )
+                angle_availability = MetricAvailability(
+                    "unavailable",
+                    "target_k_geometry_not_available",
+                )
+                angles = None
+            else:
+                angle_availability = MetricAvailability("available", None)
+                angles = _median_rows(
+                    [
+                        item
+                        for item in matched_angles
+                        if item is not None
+                    ]
+                )
+        else:
+            angle_availability = MetricAvailability("available", None)
+            angles = _median_rows(
+                [item["principal_angles_radians"] for item in geometry]
+            )
         model_ranks = _median_rows(
             [item["model_effective_ranks"] for item in geometry]
         )
@@ -822,6 +923,7 @@ def _method_summary(
         total_shots_by_trial=shots_by_trial,
         median_best_observed_infidelity_trajectory=observed,
         metric_availability=availability,
+        principal_angle_availability=angle_availability,
         exact_infidelity_trajectory=exact_band,
         median_attained_infidelity_upper_bound=attained,
         median_principal_angles=angles,
@@ -954,6 +1056,10 @@ def analyze_trials(
         raise AnalysisError("bootstrap confidence must be interior")
     summaries: list[StratumSummary] = []
     for key, selected in _stratify(records):
+        target_geometry = _target_geometry_records(
+            selected,
+            target_dimension=key.search_dimension,
+        )
         grouped: dict[str, list[TrialResult]] = {}
         for item in selected:
             grouped.setdefault(str(item.config["search"]["method"]), []).append(item)
@@ -966,6 +1072,7 @@ def analyze_trials(
                     )
                 ),
                 target_dimension=key.search_dimension,
+                target_geometry_records=target_geometry,
                 bootstrap_seed=_derived_seed(seed, key.canonical_dict(), method),
                 bootstrap_samples=samples,
                 confidence=confidence,
@@ -1196,6 +1303,7 @@ def _parse_method(value: object) -> MethodSummary:
         "median_truth_effective_ranks",
         "method",
         "metric_availability",
+        "principal_angle_availability",
         "success_probability",
         "total_shots",
         "total_shots_by_trial",
@@ -1212,6 +1320,9 @@ def _parse_method(value: object) -> MethodSummary:
     )
     probability = _parse_probability(payload["success_probability"])
     availability = _parse_availability(payload["metric_availability"])
+    angle_availability = _parse_availability(
+        payload["principal_angle_availability"]
+    )
     exact = (
         None
         if payload["exact_infidelity_trajectory"] is None
@@ -1226,7 +1337,6 @@ def _parse_method(value: object) -> MethodSummary:
     optional = (
         exact,
         attained,
-        payload["median_principal_angles"],
         payload["median_model_effective_ranks"],
         payload["median_truth_effective_ranks"],
         payload["median_signed_eigenvalue_gaps"],
@@ -1271,6 +1381,14 @@ def _parse_method(value: object) -> MethodSummary:
         payload["median_principal_angles"],
         name="principal angles",
     )
+    if (
+        (angle_availability.state == "available") != (angles is not None)
+        or (
+            availability.state == "unavailable"
+            and angle_availability.state != "unavailable"
+        )
+    ):
+        raise AnalysisError("principal-angle availability is inconsistent")
     model_ranks = _optional_tuple(
         payload["median_model_effective_ranks"],
         name="model ranks",
@@ -1286,14 +1404,16 @@ def _parse_method(value: object) -> MethodSummary:
     if availability.state == "available" and (
         exact is None
         or len(exact.median) != len(observed)
-        or angles is None
         or model_ranks is None
         or truth_ranks is None
         or gaps is None
         or len(model_ranks) != 3
         or len(truth_ranks) != 3
         or any(item < 0.0 for item in (*model_ranks, *truth_ranks))
-        or any(not 0.0 <= item <= math.pi / 2.0 for item in angles)
+        or (
+            angles is not None
+            and any(not 0.0 <= item <= math.pi / 2.0 for item in angles)
+        )
     ):
         raise AnalysisError("available metric dimensions are inconsistent")
     total_shots = _strict_nonnegative_int(payload["total_shots"], name="total_shots")
@@ -1310,6 +1430,7 @@ def _parse_method(value: object) -> MethodSummary:
         shots_by_trial,
         observed,
         availability,
+        angle_availability,
         exact,
         attained,
         angles,
@@ -1377,12 +1498,20 @@ def _parse_stratum(value: object) -> StratumSummary:
         raise AnalysisError("paired differences must be sorted")
     key = _parse_key(payload["key"])
     if any(
-        item.metric_availability.state == "available"
-        and (
-            item.median_principal_angles is None
-            or len(item.median_principal_angles) != key.search_dimension
-            or item.median_signed_eigenvalue_gaps is None
-            or len(item.median_signed_eigenvalue_gaps) != key.search_dimension
+        (
+            item.metric_availability.state == "available"
+            and (
+                item.median_signed_eigenvalue_gaps is None
+                or len(item.median_signed_eigenvalue_gaps)
+                != key.search_dimension
+            )
+        )
+        or (
+            item.principal_angle_availability.state == "available"
+            and (
+                item.median_principal_angles is None
+                or len(item.median_principal_angles) != key.search_dimension
+            )
         )
         for item in methods
     ):

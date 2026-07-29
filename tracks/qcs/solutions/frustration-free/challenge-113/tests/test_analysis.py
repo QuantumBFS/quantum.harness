@@ -687,10 +687,15 @@ def test_full_schema_v3_geometry_is_sliced_to_target_k_and_round_trips(
             dimension=target_dimension,
         ),
         certified_query=2,
-        principal_angles=tuple(0.01 * index for index in range(target_dimension)),
+        principal_angles=tuple(
+            0.2 + 0.01 * index for index in range(target_dimension)
+        ),
         signed_gaps=tuple(-0.02 * index for index in range(target_dimension)),
     )
-    full_angles = tuple(0.01 * index for index in range(full_dimension))
+    target_angles = tuple(
+        0.2 + 0.01 * index for index in range(target_dimension)
+    )
+    full_angles = (0.0,) * full_dimension
     full_gaps = tuple(-0.02 * index for index in range(full_dimension))
     full = _trial(
         _config(
@@ -711,13 +716,80 @@ def test_full_schema_v3_geometry_is_sliced_to_target_k_and_round_trips(
     summary = analyze_trials([model, full], bootstrap_samples=20)
     full_method = _method(summary, 0, "full")
 
-    assert full_method.median_principal_angles == full_angles[:target_dimension]
+    assert full_method.median_principal_angles == target_angles
+    assert full_method.principal_angle_availability.state == "available"
     assert full_method.median_signed_eigenvalue_gaps == full_gaps[:target_dimension]
     assert full_method.median_model_effective_ranks == (7.0, 8.0, 9.0)
     assert len(
         full.result["derived_metrics"]["geometry"]["principal_angles_radians"]
     ) == full_dimension
     assert Summary.from_canonical_dict(summary.canonical_dict()) == summary
+
+
+def test_conflicting_target_k_principal_angles_are_rejected() -> None:
+    records = [
+        _trial(
+            _config("model_hessian", seed=1, kind="production"),
+            certified_query=2,
+            principal_angles=(0.2, 0.3),
+        ),
+        _trial(
+            _config("random", seed=1, kind="production"),
+            certified_query=2,
+            principal_angles=(0.2, 0.4),
+        ),
+        _trial(
+            _config("full", seed=1, kind="production", dimension=6),
+            certified_query=2,
+            principal_angles=(0.0,) * 6,
+        ),
+    ]
+
+    with pytest.raises(AnalysisError, match="target-k geometry conflict"):
+        analyze_trials(records, bootstrap_samples=20)
+
+
+def test_missing_target_k_principal_angles_are_rejected_in_production() -> None:
+    model = _trial(
+        _config("model_hessian", seed=1, kind="production"),
+        certified_query=2,
+        principal_angles=(0.2, 0.3),
+    )
+    full = _trial(
+        _config(
+            "full",
+            seed=1,
+            kind="production",
+            dimension=6,
+            perturbation_seed=8,
+        ),
+        certified_query=2,
+        principal_angles=(0.0,) * 6,
+    )
+
+    with pytest.raises(AnalysisError, match="missing target-k principal angles"):
+        analyze_trials([model, full], bootstrap_samples=20)
+
+
+def test_development_full_angles_have_explicit_unavailability_reason() -> None:
+    model = _trial(
+        _config("model_hessian", seed=1),
+        certified_query=2,
+    )
+    full = _trial(
+        _config("full", seed=1, dimension=3),
+        certified_query=2,
+    )
+
+    summary = analyze_trials([model, full], bootstrap_samples=20)
+    full_method = _method(summary, 0, "full")
+
+    assert full_method.principal_angle_availability.state == "unavailable"
+    assert (
+        full_method.principal_angle_availability.reason
+        == "schema_v3_metrics_not_available"
+    )
+    assert full_method.median_principal_angles is None
 
 
 @pytest.mark.parametrize(
