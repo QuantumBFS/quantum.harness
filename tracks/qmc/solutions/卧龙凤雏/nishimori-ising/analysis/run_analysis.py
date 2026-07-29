@@ -32,15 +32,20 @@ def analyze_run(run_dir: Path, bootstrap_samples: int, bootstrap_seed: int) -> d
     )
     primary_bootstrap = _fit_samples(widths, phi_bootstrap, minimum_width=4)
     diagnostic_bootstrap = _fit_samples(widths, phi_bootstrap, minimum_width=6)
+    central_charge = float(np.mean(primary_bootstrap))
     primary_se = float(np.std(primary_bootstrap, ddof=1))
     ci_low, ci_high = np.percentile(primary_bootstrap, [2.5, 97.5])
+    fit_window_difference = primary_bootstrap - diagnostic_bootstrap
+    fit_window_ci_low, fit_window_ci_high = np.percentile(
+        fit_window_difference, [2.5, 97.5]
+    )
 
     stability = _stability_diagnostics(
         tensor=tensor,
         widths=widths,
         samples=bootstrap_samples,
         seed=bootstrap_seed + 100,
-        primary_c=primary_fit.central_charge,
+        primary_c=central_charge,
         primary_se=primary_se,
     )
     identity = loaded.oracle["nishimori_energy_identity"]
@@ -70,11 +75,12 @@ def analyze_run(run_dir: Path, bootstrap_samples: int, bootstrap_seed: int) -> d
     analysis_elapsed = time.monotonic() - start
     runtime_s = runtime_before_analysis + analysis_elapsed
     gates = evaluate_gates(
-        central_charge=primary_fit.central_charge,
+        central_charge=central_charge,
         standard_error=primary_se,
         ci_low=float(ci_low),
         ci_high=float(ci_high),
-        diagnostic_central_charge=diagnostic_fit.central_charge,
+        fit_window_ci_low=float(fit_window_ci_low),
+        fit_window_ci_high=float(fit_window_ci_high),
         half_stability_z=stability["half_stability_z"],
         replica_stability_z=stability["replica_stability_z"],
         identity_error=float(identity["absolute_error"]),
@@ -92,10 +98,15 @@ def analyze_run(run_dir: Path, bootstrap_samples: int, bootstrap_seed: int) -> d
         "blocks_per_replica": int(tensor.shape[1]),
         "bootstrap_samples": bootstrap_samples,
         "bootstrap_seed": bootstrap_seed,
+        "central_charge": central_charge,
         "phi": [float(value) for value in phi],
         "phi_standard_error": [float(value) for value in phi_se],
         "primary_fit": primary_fit.to_dict(),
         "diagnostic_fit": diagnostic_fit.to_dict(),
+        "fit_window_difference_ci95": [
+            float(fit_window_ci_low),
+            float(fit_window_ci_high),
+        ],
         "central_charge_standard_error": primary_se,
         "central_charge_ci95": [float(ci_low), float(ci_high)],
         "stability": stability,
@@ -285,7 +296,7 @@ def main() -> None:
     fit = summary["primary_fit"]
     interval = summary["central_charge_ci95"]
     print(
-        f"c_eff={fit['central_charge']:.6f} "
+        f"c_eff={summary['central_charge']:.6f} "
         f"SE={summary['central_charge_standard_error']:.6f} "
         f"CI95=[{interval[0]:.6f}, {interval[1]:.6f}] "
         f"required_gates_pass={summary['gates']['all_required_pass']}"

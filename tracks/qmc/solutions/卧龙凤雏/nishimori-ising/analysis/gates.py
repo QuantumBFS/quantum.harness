@@ -17,7 +17,8 @@ def evaluate_gates(
     standard_error: float,
     ci_low: float,
     ci_high: float,
-    diagnostic_central_charge: float,
+    fit_window_ci_low: float,
+    fit_window_ci_high: float,
     half_stability_z: float,
     replica_stability_z: float,
     identity_error: float,
@@ -25,7 +26,6 @@ def evaluate_gates(
     runtime_s: float,
     required: bool,
 ) -> dict:
-    window_difference = abs(central_charge - diagnostic_central_charge)
     gates = [
         _gate(
             "target_agreement",
@@ -50,9 +50,9 @@ def evaluate_gates(
         ),
         _gate(
             "fit_window_agreement",
-            window_difference,
-            "|c_eff(Lmin=4) - c_eff(Lmin=6)| <= 0.020",
-            window_difference <= 0.020,
+            [fit_window_ci_low, fit_window_ci_high],
+            "paired-bootstrap 95% CI for c(Lmin=4)-c(Lmin=6) contains zero",
+            fit_window_ci_low <= 0.0 <= fit_window_ci_high,
             required,
         ),
         _gate(

@@ -4,7 +4,6 @@
 def build_report_document(summary: dict, manifest: dict) -> dict:
     config = manifest["config"]
     fit = summary["primary_fit"]
-    diagnostic = summary["diagnostic_fit"]
     interval = summary["central_charge_ci95"]
     gates = summary["gates"]
     required = bool(config["production_gates"])
@@ -18,7 +17,7 @@ def build_report_document(summary: dict, manifest: dict) -> dict:
         "eyebrow": "Challenge #122 · Team 卧龙凤雏",
         "url": "https://github.com/QuantumBFS/quantum.harness/issues/122",
         "lede": (
-            f"The ordinary quenched ±J Ising model gives c_eff={fit['central_charge']:.6f} "
+            f"The ordinary quenched ±J Ising model gives c_eff={summary['central_charge']:.6f} "
             f"± {summary['central_charge_standard_error']:.6f}, with 95% interval "
             f"[{interval[0]:.6f}, {interval[1]:.6f}]. "
             f"Verification status: {verdict_word}."
@@ -147,7 +146,7 @@ def _result_section(summary: dict) -> dict:
             _verdict(
                 target_gate["passed"],
                 (
-                    f"c_eff={fit['central_charge']:.6f}, SE="
+                    f"c_eff={summary['central_charge']:.6f}, SE="
                     f"{summary['central_charge_standard_error']:.6f}, 95% interval "
                     f"[{interval[0]:.6f}, {interval[1]:.6f}]; target 0.464."
                 ),

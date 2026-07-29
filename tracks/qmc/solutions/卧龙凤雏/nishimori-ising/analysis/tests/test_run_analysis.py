@@ -1,4 +1,6 @@
 import json
+import csv
+import statistics
 
 import pytest
 
@@ -13,6 +15,11 @@ def test_analysis_writes_data_gates_and_six_plots(tmp_path):
     assert summary["primary_fit"]["central_charge"] == pytest.approx(
         0.464, abs=1.0e-10
     )
+    with (run_dir / "processed" / "central_charge_bootstrap.csv").open() as handle:
+        bootstrap_mean = statistics.mean(
+            float(row["c_lmin4"]) for row in csv.DictReader(handle)
+        )
+    assert summary["central_charge"] == pytest.approx(bootstrap_mean, abs=1.0e-15)
     assert summary["central_charge_ci95"][0] < 0.464
     assert summary["central_charge_ci95"][1] > 0.464
     assert len(summary["gates"]["gates"]) == 9
