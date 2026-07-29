@@ -1,0 +1,257 @@
+[
+  {
+    "Gamma_crossing": 1.5684815545751685,
+    "Gamma_high": 1.58,
+    "Gamma_low": 1.56,
+    "L": 16,
+    "L_pair": [
+      16,
+      32
+    ],
+    "chi": 32,
+    "interpolation_half_width": 0.010000000000000009,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.5637356502249102,
+    "Gamma_high": 1.57,
+    "Gamma_low": 1.56,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 12,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.5857245949346217,
+    "Gamma_high": 1.6,
+    "Gamma_low": 1.58,
+    "L": 8,
+    "L_pair": [
+      8,
+      16
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.010000000000000009,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.56809952636659,
+    "Gamma_high": 1.57,
+    "Gamma_low": 1.56,
+    "L": 16,
+    "L_pair": [
+      16,
+      32
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.5649502192338622,
+    "Gamma_high": 1.57,
+    "Gamma_low": 1.56,
+    "L": 24,
+    "L_pair": [
+      24,
+      48
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.563584148264277,
+    "Gamma_high": 1.565,
+    "Gamma_low": 1.56,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0024999999999999467,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.5635527530282631,
+    "Gamma_high": 1.56395,
+    "Gamma_low": 1.5609,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 128,
+    "interpolation_half_width": 0.0015249999999999986,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 1.75
+  },
+  {
+    "Gamma_crossing": 1.4272250660349701,
+    "Gamma_high": 1.44,
+    "Gamma_low": 1.42,
+    "L": 16,
+    "L_pair": [
+      16,
+      32
+    ],
+    "chi": 32,
+    "interpolation_half_width": 0.010000000000000009,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.423350819424096,
+    "Gamma_high": 1.43,
+    "Gamma_low": 1.42,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 12,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.4411197878696254,
+    "Gamma_high": 1.46,
+    "Gamma_low": 1.44,
+    "L": 8,
+    "L_pair": [
+      8,
+      16
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.010000000000000009,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.4268735696798858,
+    "Gamma_high": 1.43,
+    "Gamma_low": 1.42,
+    "L": 16,
+    "L_pair": [
+      16,
+      32
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.4243296163896693,
+    "Gamma_high": 1.43,
+    "Gamma_low": 1.42,
+    "L": 24,
+    "L_pair": [
+      24,
+      48
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.4232026087899308,
+    "Gamma_high": 1.4249999999999998,
+    "Gamma_low": 1.42,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0024999999999999467,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 1.4231683893557967,
+    "Gamma_high": 1.4239000000000002,
+    "Gamma_low": 1.4208,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 128,
+    "interpolation_half_width": 0.0015500000000000513,
+    "model": "long_range",
+    "poles": 16,
+    "sigma": 2.0
+  },
+  {
+    "Gamma_crossing": 0.9979780577490796,
+    "Gamma_high": 1.0,
+    "Gamma_low": 0.99,
+    "L": 16,
+    "L_pair": [
+      16,
+      32
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "nn",
+    "poles": null,
+    "sigma": null
+  },
+  {
+    "Gamma_crossing": 0.9989289575804409,
+    "Gamma_high": 1.0,
+    "Gamma_low": 0.99,
+    "L": 24,
+    "L_pair": [
+      24,
+      48
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "nn",
+    "poles": null,
+    "sigma": null
+  },
+  {
+    "Gamma_crossing": 0.9993397770454178,
+    "Gamma_high": 1.0,
+    "Gamma_low": 0.99,
+    "L": 32,
+    "L_pair": [
+      32,
+      64
+    ],
+    "chi": 64,
+    "interpolation_half_width": 0.0050000000000000044,
+    "model": "nn",
+    "poles": null,
+    "sigma": null
+  }
+]

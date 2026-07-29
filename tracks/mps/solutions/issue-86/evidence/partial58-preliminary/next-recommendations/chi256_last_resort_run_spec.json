@@ -1,0 +1,14 @@
+{
+  "cells": [],
+  "metadata": {
+    "automatic_submission": false,
+    "boundary": "periodic image sum via Hurwitz zeta",
+    "code_commit": "486b2673baa11d44a1048fbf9fd36751189889d7",
+    "created_utc": "2026-07-29T19:08:58.015",
+    "hamiltonian": "-sum_{i<j} J_L(|i-j|) Z_i Z_j - Gamma sum_i X_i",
+    "jobs_total": 0,
+    "run_id": "issue-86-chi256-last-resort",
+    "schema_version": 1,
+    "stage": "chi256-last-resort"
+  }
+}

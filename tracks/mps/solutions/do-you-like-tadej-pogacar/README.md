@@ -24,3 +24,15 @@ the report does not claim the complete Track B universality boundary.
 
 The reproducible workflow, analyzer, tests, and result entry points live in
 [`../issue-86/`](../issue-86/).
+
+## Current result
+
+The completed school-scale run is labeled
+`pipeline validation / finite-size preliminary result`. It reproduces the
+two published critical-field intervals at \(\sigma=1.75\) and
+\(\sigma=2.0\) within a conservative finite-size error budget, while the
+largest crossing brackets and normalized-variance audit remain outside the
+formal gates.
+
+The compact public evidence and offline challenge report are available at
+[`../issue-86/evidence/partial58-preliminary/`](../issue-86/evidence/partial58-preliminary/).

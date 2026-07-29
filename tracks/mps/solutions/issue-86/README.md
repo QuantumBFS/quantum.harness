@@ -198,28 +198,51 @@ overlaps the published error bar.
 ## Quality-aware follow-up and scoped finalization
 
 `generate_followup_spec.jl` combines unresolved adaptive points with unique
-variance or residual failures. Strict retries preserve the physical
-parameters and use `tolerance=1e-11`, `maxiter=80`, and `seed=86`. When an old
-result and a strict retry describe the same physical point,
-`analyze_formal.jl` selects a result that passes both quality gates before
-comparing residuals.
+residual failures. Strict retries preserve the physical parameters and use
+`tolerance=1e-11`, `maxiter=80`, and `seed=86`. A point that already passes
+the residual gate but misses the normalized-variance gate is recorded in
+`deferred_quality.csv` as a finite-`chi` limitation; it does not trigger
+another same-parameter retry. When an old result and a strict retry describe
+the same physical point, `analyze_formal.jl` selects a result that passes both
+quality gates before comparing residuals.
 
 After the merged analysis completes, `finalize_track_b.jl` compares it with
 the preceding formal-analysis round and writes:
 
 - `validation_summary.json`, containing each numerical gate and the scoped
   scientific status;
-- `next-recommendations.json` plus run specs and a reason map for any
-  remaining adaptive work, a `chi=128` retry, an `L=128` contingency, and a
-  last-level `chi=256` check;
+- `next-recommendations.json` plus run specs and a reason map for a compact
+  largest-pair crossing review: midpoint refinement at `chi=64` and manual
+  endpoint checks at `chi=128`;
 - `run.json` and `report.json`, the semantic and presentation sources for the
   offline challenge report.
 
 Recommendation specs always carry `automatic_submission=false`. The
-finalizer can certify the two published critical-point anchors as the Track B
-validation floor. It also records that the complete Track B boundary still
-requires long-range `z`, `gamma/nu`, and the `sigma=1.6` and `sigma=1.8`
-rows.
+resource advice uses per-cell Slurm arrays with at most four concurrent
+elements: class A requests 8 CPUs and 16 GB per cell, while class B requests
+16 CPUs and 32 GB per cell; both use a four-hour wall limit. The preliminary
+closeout leaves the `L=128` and `chi=256` specifications empty. The finalizer
+also records that the complete Track B boundary still requires long-range
+`z`, `gamma/nu`, and the `sigma=1.6` and `sigma=1.8` rows.
+
+## Partial58 preliminary result
+
+The Stage 2 follow-up completed 58 of 69 planned cells: class A reached
+54/65 and class B reached 4/4. All 38 completed strict `chi=64` retries pass
+the residual gate, while none passes the normalized-variance gate. All four
+adaptive `chi=128` points pass both quality gates.
+
+The merged analysis covers the published intervals for
+`Gamma_c(sigma=1.75)=1.5609(3)` and
+`Gamma_c(sigma=2.0)=1.4208(2)`. Its largest crossing brackets retain width
+`0.005`, and their movement from the preceding analysis round remains above
+`1e-4`. The scientific label is therefore
+`pipeline validation / finite-size preliminary result`.
+
+The compact public evidence, figures, semantic JSON, and self-contained
+report are in
+[`evidence/partial58-preliminary/`](evidence/partial58-preliminary/).
+The full raw-manifest handback and scheduler logs are kept outside Git.
 
 ## First local smoke result
 

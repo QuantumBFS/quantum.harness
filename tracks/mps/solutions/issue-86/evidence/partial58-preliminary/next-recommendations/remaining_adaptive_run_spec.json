@@ -1,0 +1,83 @@
+{
+  "cells": [
+    {
+      "cell_id": "remaining-adaptive-08ad2003f47747fc3df6358df60a7cf2",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4224999999999999,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "remaining-adaptive"
+    },
+    {
+      "cell_id": "remaining-adaptive-8260b2c973379e5adb0b30bfbc16d5da",
+      "params": {
+        "L": 32,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.5625,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "remaining-adaptive"
+    },
+    {
+      "cell_id": "remaining-adaptive-58c59a7e9b181fdc561c41f3a875b457",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.4224999999999999,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 2.0,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "remaining-adaptive"
+    },
+    {
+      "cell_id": "remaining-adaptive-7c18b0679911fa1ba82f9eda73c624cf",
+      "params": {
+        "L": 64,
+        "chi": 64,
+        "excited": false,
+        "gamma": 1.5625,
+        "maxiter": 50,
+        "model": "long_range",
+        "poles": 16,
+        "seed": 86,
+        "sigma": 1.75,
+        "tolerance": 1.0e-9
+      },
+      "resource_class": "A",
+      "stage": "remaining-adaptive"
+    }
+  ],
+  "metadata": {
+    "automatic_submission": false,
+    "boundary": "periodic image sum via Hurwitz zeta",
+    "code_commit": "486b2673baa11d44a1048fbf9fd36751189889d7",
+    "created_utc": "2026-07-29T19:08:56.408",
+    "hamiltonian": "-sum_{i<j} J_L(|i-j|) Z_i Z_j - Gamma sum_i X_i",
+    "jobs_total": 4,
+    "run_id": "issue-86-largest-crossing-midpoints",
+    "schema_version": 1,
+    "stage": "remaining-adaptive"
+  }
+}
