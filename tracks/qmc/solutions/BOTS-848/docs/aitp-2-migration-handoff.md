@@ -49,6 +49,9 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
   `/work/home/jiabohan5/quantum.harness-collab`.
 - The remote login environment has no default Python 3 interpreter. A
   project-scoped Python 3.11 environment is required.
+- The cluster has glibc 2.17. The compatible binary environment is pinned to
+  JAX/JAXLIB/CUDA plugin 0.4.38, NumPy 2.0.2, `ml_dtypes` 0.5.1, and Optax
+  0.2.4; the visible CUDA dependency set provides cuDNN 9.5.
 
 ## Evidence to attach after Phase 1
 
@@ -73,3 +76,9 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
   itself. The job was cancelled after the final retry to release the GPU. This
   establishes that environment installation must run on the internet-enabled
   login node and the compute allocation must only validate the locked venv.
+- The first login-node dependency resolution did not produce a lock. An
+  unconstrained `jax[cuda12]` backtracked to JAX 0.7.0 because newer wheels
+  require a newer glibc; that stack then required cuDNN 9.8, which is absent,
+  and attempted an `ml_dtypes` source build whose isolated NumPy dependency
+  could not be satisfied. A binary-only dry-run identified the pinned 0.4.38
+  stack before the next install attempt.

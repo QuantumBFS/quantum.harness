@@ -23,19 +23,15 @@ esac
 
 case "${JAX_PROFILE}" in
   cpu)
-    jax_requirement="jax"
+    jax_requirement="jax==0.4.38"
     required_platform="cpu"
     ;;
   cuda12)
-    jax_requirement="jax[cuda12]"
-    required_platform="gpu"
-    ;;
-  cuda13)
-    jax_requirement="jax[cuda13]"
+    jax_requirement="jax[cuda12]==0.4.38"
     required_platform="gpu"
     ;;
   *)
-    echo "unsupported JAX_PROFILE=${JAX_PROFILE}; choose cpu, cuda12, or cuda13" >&2
+    echo "unsupported JAX_PROFILE=${JAX_PROFILE}; choose cpu or cuda12" >&2
     exit 2
     ;;
 esac

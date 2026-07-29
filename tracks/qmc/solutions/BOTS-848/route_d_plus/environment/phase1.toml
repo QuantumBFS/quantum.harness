@@ -20,6 +20,8 @@ pair_estimator = "1/(2*sqrt(Q)*abs(u_i*v_j-u_j*v_i))"
 [numeric]
 python_major = 3
 python_minor = 11
+jax_profile = "cuda12"
+jax_version = "0.4.38"
 jax_enable_x64 = true
 real_dtype = "float64"
 complex_dtype = "complex128"
@@ -31,4 +33,3 @@ required_manifest_schema = "challenge-15-route-d-plus-environment-v1"
 require_clean_git = true
 require_lock_digest = true
 require_requested_platform = true
-

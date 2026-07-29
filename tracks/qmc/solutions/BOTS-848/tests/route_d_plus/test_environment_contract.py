@@ -22,6 +22,8 @@ def test_phase1_freezes_challenge_15_physics_and_numeric_conventions() -> None:
     assert config["energy"]["interaction"] == "pair_only_chord"
     assert config["numeric"]["python_major"] == 3
     assert config["numeric"]["python_minor"] == 11
+    assert config["numeric"]["jax_profile"] == "cuda12"
+    assert config["numeric"]["jax_version"] == "0.4.38"
     assert config["numeric"]["jax_enable_x64"] is True
     assert config["numeric"]["production_platform"] == "gpu"
     assert config["numeric"]["allow_production_cpu_fallback"] is False
@@ -63,8 +65,10 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "ROUTE_D_PLUS_RUN_DIR:?" in bootstrap
     assert "tracks/qmc/results/" in bootstrap
     assert "all|install|validate" in bootstrap
-    assert "jax[cuda12]" in bootstrap
-    assert "jax[cuda13]" in bootstrap
+    assert "jax[cuda12]==0.4.38" in bootstrap
+    assert "numpy==2.0.2" in requirements
+    assert "ml_dtypes==0.5.1" in requirements
+    assert "optax==0.2.4" in requirements
     assert "--require-platform" in bootstrap
     assert "ROUTE_D_PLUS_REPO_ROOT:?" in batch
     assert 'ROUTE_D_PLUS_MODE="validate"' in batch
