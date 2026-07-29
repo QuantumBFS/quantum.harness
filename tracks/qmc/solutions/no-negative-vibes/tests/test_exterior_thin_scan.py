@@ -13,6 +13,12 @@ from oracle.weights import WeightResult
 
 
 SOURCE_COMMIT = "1" * 40
+PARENT_SOURCE_COMMIT = "b90a506d0aaa38a87163be06b83f6de380a3e970"
+PRESSURE_SOURCE_COMMIT = "2" * 40
+PARENT_RUN_ID = "exterior-thin-first-v1"
+PARENT_PLAN_HASH = "b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97"
+PARENT_PROTOCOL_HASH = "e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43"
+PRESSURE_RUN_ID = "exterior-survivor-pressure-v1"
 
 
 def _result(classification: str) -> WeightResult:
@@ -538,27 +544,38 @@ def _write_parent_terminal_manifests(
     parent: Path,
     *,
     survivors: set[int],
+    outcomes: dict[int, str] | None = None,
 ) -> dict[str, object]:
     """Hand-build a complete Stage-1 terminal fixture for survivor planning."""
 
-    thin.plan_run(run_dir=parent, source_commit=SOURCE_COMMIT, run_id="parent")
+    thin.plan_run(
+        run_dir=parent,
+        source_commit=PARENT_SOURCE_COMMIT,
+        run_id=PARENT_RUN_ID,
+    )
     plan = json.loads((parent / "plan-summary.json").read_text(encoding="utf-8"))
     for index, entry in enumerate(plan["candidates"]):
         role = "wsl" if entry["shard"] < 14 else "cpu"
-        status = (
-            "survivor-shallow-zero-failure"
-            if index in survivors
-            else "rejected-negative"
-        )
+        status = outcomes.get(index, "rejected-negative") if outcomes else "rejected-negative"
+        if index in survivors:
+            status = "survivor-shallow-zero-failure"
+        classification = {
+            "rejected-negative": "negative",
+            "rejected-complex": "complex",
+            "uncertain-high-precision": "uncertain",
+        }.get(status)
+        is_survivor = status == "survivor-shallow-zero-failure"
         manifest = {
             "schema_version": thin.SCHEMA_VERSION,
-            "run_id": "parent",
+            "run_id": PARENT_RUN_ID,
             "protocol_hash": plan["protocol_hash"],
-            "source_commit": SOURCE_COMMIT,
+            "source_commit": PARENT_SOURCE_COMMIT,
             "candidate_id": entry["candidate_id"],
             "card_sha256": entry["card_sha256"],
             "status": status,
-            "tested_words": 22 if status.startswith("survivor") else 1,
+            "planned_words": 22,
+            "tested_words": 22 if is_survivor else 1,
+            "counts": {"positive": 22} if is_survivor else {classification: 1},
             "template": entry["template"],
             "dimension": entry["dimension"],
             "machine_role": role,
@@ -570,8 +587,8 @@ def _write_parent_terminal_manifests(
             "depths": [2, 3, 4],
             "minimum_sigma_min_I_plus_D": 0.5,
             "minimum_sigma_word_indices": [0, 1],
-            "first_failure": None if status.startswith("survivor") else {
-                "classification": "negative",
+            "first_failure": None if is_survivor else {
+                "classification": classification,
                 "word_indices": [0, 1],
                 "depth": 2,
                 "sigma_min_I_plus_D": 0.5,
@@ -604,8 +621,8 @@ def test_survivor_plan_selects_only_validated_parent_survivors(tmp_path: Path) -
     summary = thin.plan_survivor_run(
         parent_run_dir=parent,
         run_dir=tmp_path / "stage-2",
-        source_commit=SOURCE_COMMIT,
-        run_id="pressure",
+        source_commit=PRESSURE_SOURCE_COMMIT,
+        run_id=PRESSURE_RUN_ID,
     )
 
     stage2 = json.loads(
@@ -616,8 +633,9 @@ def test_survivor_plan_selects_only_validated_parent_survivors(tmp_path: Path) -
     assert stage2["candidates"] == selected
     assert stage2["depths"] == [5, 6, 7, 8]
     assert stage2["survivor_status"] == "survivor-pressure-zero-failure"
-    assert stage2["parent_run_id"] == "parent"
-    assert stage2["parent_protocol_hash"] == parent_plan["protocol_hash"]
+    assert stage2["parent_run_id"] == PARENT_RUN_ID
+    assert stage2["parent_plan_hash"] == PARENT_PLAN_HASH
+    assert stage2["parent_protocol_hash"] == PARENT_PROTOCOL_HASH
 
 
 @pytest.mark.parametrize("breakage", ("missing", "stale", "duplicate", "unresolved"))
@@ -655,7 +673,7 @@ def test_survivor_planning_fails_closed_on_incomplete_parent_collection(
         thin.plan_survivor_run(
             parent_run_dir=parent,
             run_dir=tmp_path / "stage-2",
-            source_commit=SOURCE_COMMIT,
+            source_commit=PRESSURE_SOURCE_COMMIT,
         )
 
 
@@ -685,7 +703,7 @@ def test_survivor_planning_rejects_tampered_parent_provenance(
         thin.plan_survivor_run(
             parent_run_dir=parent,
             run_dir=tmp_path / "stage-2",
-            source_commit=SOURCE_COMMIT,
+            source_commit=PRESSURE_SOURCE_COMMIT,
         )
 
 
@@ -698,7 +716,7 @@ def test_pressure_protocol_binds_parent_and_stage_one_plan_remains_thin(
     thin.plan_survivor_run(
         parent_run_dir=parent,
         run_dir=tmp_path / "stage-2",
-        source_commit=SOURCE_COMMIT,
+        source_commit=PRESSURE_SOURCE_COMMIT,
     )
     pressure = json.loads(
         (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
@@ -716,6 +734,126 @@ def test_pressure_protocol_binds_parent_and_stage_one_plan_remains_thin(
     assert thin_spec["depths"] == [2, 3, 4]
     assert "parent_plan_hash" not in thin_plan
     assert "parent_protocol_hash" not in thin_spec
+    assert thin_plan["plan_hash"] != PARENT_PLAN_HASH
+
+
+def test_survivor_planning_requires_the_frozen_parent_lineage_and_run_id(
+    tmp_path: Path,
+) -> None:
+    # A self-consistent replacement parent must not become a pressure lineage.
+    parent = tmp_path / "stage-1"
+    plan = _write_parent_terminal_manifests(parent, survivors={0})
+    assert plan["plan_hash"] == PARENT_PLAN_HASH
+    assert plan["protocol_hash"] == PARENT_PROTOCOL_HASH
+    result = thin.plan_survivor_run(
+        parent_run_dir=parent,
+        run_dir=tmp_path / "stage-2",
+        source_commit=PRESSURE_SOURCE_COMMIT,
+        run_id=PRESSURE_RUN_ID,
+    )
+    assert result["planned"] == 1
+
+    replacement = tmp_path / "replacement"
+    thin.plan_run(
+        run_dir=replacement,
+        source_commit=PARENT_SOURCE_COMMIT,
+        run_id="not-the-frozen-parent",
+    )
+    with pytest.raises(RuntimeError, match="parent|lineage|run"):
+        thin.plan_survivor_run(
+            parent_run_dir=replacement,
+            run_dir=tmp_path / "bad-stage-2",
+            source_commit=PRESSURE_SOURCE_COMMIT,
+        )
+    with pytest.raises(ValueError, match="run_id"):
+        thin.plan_survivor_run(
+            parent_run_dir=parent,
+            run_dir=tmp_path / "bad-run-id",
+            source_commit=PRESSURE_SOURCE_COMMIT,
+            run_id="pressure",
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("depths", "survivor_status", "parent_protocol_hash"),
+)
+def test_pressure_spec_cannot_be_detached_from_its_plan_after_rehashing(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    # Public SHA-256 recomputation must not authorize a weaker spec.
+    parent = tmp_path / "stage-1"
+    _write_parent_terminal_manifests(parent, survivors={0})
+    thin.plan_survivor_run(
+        parent_run_dir=parent,
+        run_dir=tmp_path / "stage-2",
+        source_commit=PRESSURE_SOURCE_COMMIT,
+    )
+    stage2 = json.loads(
+        (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
+    )
+    entry = stage2["candidates"][0]
+    path = tmp_path / "stage-2" / "specs" / f"shard-{entry['shard']:02d}.json"
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    if field == "depths":
+        spec["depths"] = [2, 3, 4]
+        spec.pop("survivor_status")
+        spec.pop("parent_run_id")
+        spec.pop("parent_plan_hash")
+        spec.pop("parent_protocol_hash")
+    elif field == "survivor_status":
+        spec["survivor_status"] = "survivor-shallow-zero-failure"
+    else:
+        spec[field] = "f" * 64
+    spec["protocol_hash"] = thin._hash_payload(
+        thin._run_protocol_payload(
+            plan_hash=spec["plan_hash"],
+            run_id=spec["run_id"],
+            source_commit=spec["source_commit"],
+            depths=tuple(spec["depths"]),
+            survivor_status=spec.get(
+                "survivor_status", "survivor-shallow-zero-failure"
+            ),
+            parent_provenance=(
+                {
+                    key: spec[key]
+                    for key in (
+                        "parent_run_id", "parent_plan_hash", "parent_protocol_hash",
+                    )
+                }
+                if "parent_run_id" in spec
+                else None
+            ),
+        )
+    )
+    path.write_text(json.dumps(spec), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="plan|protocol|provenance|depths|status"):
+        thin.run_spec(path)
+
+
+def test_parent_survivor_requires_complete_shallow_evidence(tmp_path: Path) -> None:
+    # A zero-word status rewrite must never promote a card to Stage 2.
+    parent = tmp_path / "stage-1"
+    plan = _write_parent_terminal_manifests(parent, survivors={0})
+    entry = plan["candidates"][0]
+    path = parent / "candidates" / entry["candidate_id"] / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest.update({
+        "planned_words": 0,
+        "tested_words": 0,
+        "counts": {},
+        "minimum_sigma_word_indices": None,
+    })
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="parent|terminal|survivor"):
+        thin.plan_survivor_run(
+            parent_run_dir=parent,
+            run_dir=tmp_path / "stage-2",
+            source_commit=PRESSURE_SOURCE_COMMIT,
+        )
 
 
 @pytest.mark.parametrize(
@@ -740,7 +878,7 @@ def test_pressure_run_uses_hash_bound_words_and_status(
     thin.plan_survivor_run(
         parent_run_dir=parent,
         run_dir=tmp_path / "stage-2",
-        source_commit=SOURCE_COMMIT,
+        source_commit=PRESSURE_SOURCE_COMMIT,
     )
     stage2_plan = json.loads(
         (tmp_path / "stage-2" / "plan-summary.json").read_text(encoding="utf-8")
@@ -761,3 +899,11 @@ def test_pressure_run_uses_hash_bound_words_and_status(
     assert manifest["status"] == status
     assert manifest["planned_words"] == 472
     assert manifest["tested_words"] == tested
+    if status == "survivor-pressure-zero-failure":
+        # Resume must reject a survivor status from the other protocol.
+        manifest["status"] = "survivor-shallow-zero-failure"
+        (
+            tmp_path / "stage-2" / "candidates" / entry["candidate_id"] / "manifest.json"
+        ).write_text(json.dumps(manifest), encoding="utf-8")
+        with pytest.raises(RuntimeError, match="terminal|mismatch"):
+            thin.run_spec(spec_path)
