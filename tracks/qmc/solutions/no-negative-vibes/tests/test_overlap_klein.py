@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import FrozenInstanceError
 import json
 import math
@@ -24,6 +25,7 @@ from oracle.overlap_klein import (
     bridge_labels,
     build_system,
     classify_anchor,
+    classify_r01_fixture,
     certificate_from_json,
     certificate_to_json,
     find_zero_dual,
@@ -851,6 +853,749 @@ def test_r01_fixture_v2_records_exact_raw_provenance_per_host() -> None:
             ],
         ),
     ]
+
+
+@pytest.fixture(scope="module")
+def r01_fixture_payload() -> dict[str, object]:
+    return json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def r01_classification_run(
+    r01_fixture_payload: dict[str, object],
+) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
+    payload = copy.deepcopy(r01_fixture_payload)
+    before = copy.deepcopy(payload)
+    summary = classify_r01_fixture(payload)
+    return payload, before, summary
+
+
+@pytest.fixture(scope="module")
+def verified_r01_summary(
+    r01_classification_run: tuple[
+        dict[str, object],
+        dict[str, object],
+        dict[str, object],
+    ],
+) -> dict[str, object]:
+    return r01_classification_run[2]
+
+
+def _first_r01_anchor(payload: dict[str, object]) -> dict[str, object]:
+    return payload["experiments"][0]["cells"][0]["anchors"][0]
+
+
+def _set_r01_path(
+    payload: dict[str, object],
+    path: tuple[str | int, ...],
+    value: object,
+) -> None:
+    current: object = payload
+    for key in path[:-1]:
+        if isinstance(key, int):
+            assert isinstance(current, list)
+            current = current[key]
+        else:
+            assert isinstance(current, dict)
+            current = current[key]
+    final = path[-1]
+    if isinstance(final, int):
+        assert isinstance(current, list)
+        current[final] = value
+    else:
+        assert isinstance(current, dict)
+        current[final] = value
+
+
+def _forbid_r01_build_system(
+    *args: object,
+    **kwargs: object,
+) -> object:
+    raise AssertionError("exact replay started before structural classification")
+
+
+def test_r01_fixture_classifies_exact_bridge_coordinate_no_go(
+    verified_r01_summary: dict[str, object],
+) -> None:
+    expected = {
+        "outcome": "exact-bridge-coordinate-no-go",
+        "fixture_schema_version": 2,
+        "protocol": "overlap-klein-v1",
+        "totals": {
+            "experiments": 2,
+            "cells": 4,
+            "anchors": 24,
+            "certified_zero": 24,
+            "certified_feasible": 0,
+            "numerical_only": 0,
+            "dual_certificates": 24,
+            "primal_certificates": 0,
+        },
+        "cells": [
+            {
+                "experiment_id": "R01-E001",
+                "family": "number-conserving",
+                "mask": "rings-bridges",
+                "system_shape": [560, 24],
+                "zero_labels": [
+                    "h0<-4",
+                    "h1<-5",
+                    "h4<-0",
+                    "h5<-1",
+                ],
+                "unresolved_labels": [],
+            },
+            {
+                "experiment_id": "R01-E001",
+                "family": "number-conserving",
+                "mask": "rings-diagonals-bridges",
+                "system_shape": [748, 32],
+                "zero_labels": [
+                    "h0<-4",
+                    "h1<-5",
+                    "h4<-0",
+                    "h5<-1",
+                ],
+                "unresolved_labels": [],
+            },
+            {
+                "experiment_id": "R01-E002",
+                "family": "bdg",
+                "mask": "rings-bridges",
+                "system_shape": [1052, 42],
+                "zero_labels": [
+                    "h0<-4",
+                    "h1<-5",
+                    "h4<-0",
+                    "h5<-1",
+                    "pa0,4",
+                    "pa1,5",
+                    "pc0,4",
+                    "pc1,5",
+                ],
+                "unresolved_labels": [],
+            },
+            {
+                "experiment_id": "R01-E002",
+                "family": "bdg",
+                "mask": "rings-diagonals-bridges",
+                "system_shape": [1456, 58],
+                "zero_labels": [
+                    "h0<-4",
+                    "h1<-5",
+                    "h4<-0",
+                    "h5<-1",
+                    "pa0,4",
+                    "pa1,5",
+                    "pc0,4",
+                    "pc1,5",
+                ],
+                "unresolved_labels": [],
+            },
+        ],
+        "audits": {
+            "noncommutativity": "not-applicable-no-bridge-primal",
+            "topology": "preempted-by-exact-bridge-no-go",
+            "known_reduction": "not-applicable-empty-survivor-set",
+            "word_trace": "skipped-no-survivor-rays",
+        },
+    }
+
+    assert verified_r01_summary == expected
+    forbidden = {
+        "rays",
+        "operators",
+        "commutators",
+        "support_graph",
+        "forms",
+        "word_traces",
+        "known_mechanism",
+    }
+    assert forbidden.isdisjoint(verified_r01_summary)
+
+
+def test_r01_classifier_does_not_mutate_the_exact_payload_it_receives(
+    r01_classification_run: tuple[
+        dict[str, object],
+        dict[str, object],
+        dict[str, object],
+    ],
+) -> None:
+    payload, before, _ = r01_classification_run
+    assert payload == before
+
+
+def test_r01_classifier_rejects_a_nonmapping_payload_before_replay(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+    with pytest.raises(ValueError, match="mapping|JSON object"):
+        classify_r01_fixture([])  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("path", "replacement", "message"),
+    [
+        (("fixture_schema_version",), 1, "fixture schema"),
+        (("protocol",), "other-protocol", "protocol"),
+        (("raw_schema_version",), 2, "raw schema"),
+        (("exact_field",), "R", "exact field"),
+        (
+            ("transform", "name"),
+            "other-transform",
+            "transform",
+        ),
+        (
+            ("transform", "formula"),
+            "U = I",
+            "transform",
+        ),
+        (
+            ("transform", "convention"),
+            "left composed after right",
+            "transform",
+        ),
+        (
+            ("experiments", 0, "experiment_id"),
+            "R01-E999",
+            "experiment",
+        ),
+        (
+            ("experiments", 0, "source_commit"),
+            "0" * 40,
+            "source commit",
+        ),
+        (
+            ("experiments", 1, "source_commit"),
+            "f" * 40,
+            "source commit",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "family"),
+            "bdg",
+            "family|cell",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "mask"),
+            "rings",
+            "mask|cell",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "system_shape"),
+            [1, 1],
+            "system shape",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "host_role"),
+            "PRIVATE",
+            "host role|provenance",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "package_versions"),
+            {
+                "numpy": "0",
+                "oracle": "0.1.0",
+                "scipy": "1.17.1",
+                "sympy": "1.14.0",
+            },
+            "package",
+        ),
+        (
+            ("experiments", 1, "cells", 1, "package_versions"),
+            {
+                "numpy": "2.4.6",
+                "oracle": "0.1.0",
+                "scipy": "1.17.1",
+                "sympy": "0",
+            },
+            "package",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "scientific_payload_equal_after_removing_only_top_level_execution",
+            ),
+            False,
+            "payload equality|scientific payload",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "path",
+            ),
+            "tracks/qmc/results/no-negative-vibes/wrong.json",
+            "raw provenance|raw path",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "sha256",
+            ),
+            "0" * 64,
+            "raw provenance|SHA",
+        ),
+        (
+            (
+                "experiments",
+                1,
+                "cells",
+                1,
+                "raw_results",
+                1,
+                "sha256",
+            ),
+            "f" * 64,
+            "raw provenance|SHA",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "role",
+            ),
+            "archive",
+            "raw provenance|role",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "execution",
+                "workers",
+            ),
+            2,
+            "worker|raw provenance",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "execution",
+                "blas_threads",
+                "OMP_NUM_THREADS",
+            ),
+            "2",
+            "BLAS|thread",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "execution",
+                "process_start_method",
+            ),
+            "fork",
+            "spawn|start method",
+        ),
+        (
+            (
+                "experiments",
+                0,
+                "cells",
+                0,
+                "raw_results",
+                0,
+                "execution",
+                "wall_time_seconds",
+            ),
+            0,
+            "wall time",
+        ),
+        (
+            ("experiments", 0, "cells", 0, "anchors", 0, "anchor_kind"),
+            "pair-creation",
+            "anchor kind",
+        ),
+    ],
+    ids=[
+        "fixture-schema",
+        "protocol",
+        "raw-schema",
+        "exact-field",
+        "transform-name",
+        "transform-formula",
+        "transform-convention",
+        "experiment-id",
+        "source-commit",
+        "second-source-commit",
+        "family",
+        "mask",
+        "system-shape",
+        "host-role",
+        "packages",
+        "last-cell-packages",
+        "scientific-payload-equality",
+        "raw-path",
+        "raw-sha",
+        "last-raw-sha",
+        "raw-role",
+        "workers",
+        "blas-threads",
+        "spawn-method",
+        "wall-time",
+        "anchor-kind",
+    ],
+)
+def test_r01_classifier_rejects_wrong_fixed_metadata_before_replay(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+    path: tuple[str | int, ...],
+    replacement: object,
+    message: str,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    _set_r01_path(payload, path, replacement)
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+
+    with pytest.raises(ValueError, match=message):
+        classify_r01_fixture(payload)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing-anchor",
+        "extra-anchor",
+        "duplicate-anchor",
+        "reordered-anchors",
+        "wrong-anchor-count",
+        "reordered-experiments",
+        "reordered-cells",
+        "reordered-raw-roles",
+    ],
+)
+def test_r01_classifier_rejects_incomplete_or_reordered_coverage_before_replay(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: str,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    experiments = payload["experiments"]
+    first_cell = experiments[0]["cells"][0]
+    anchors = first_cell["anchors"]
+
+    if mutation == "missing-anchor":
+        anchors.pop()
+    elif mutation == "extra-anchor":
+        extra = copy.deepcopy(anchors[0])
+        extra["label"] = "h9<-9"
+        extra["zero_certificate"]["anchor_label"] = "h9<-9"
+        anchors.append(extra)
+    elif mutation == "duplicate-anchor":
+        anchors[-1] = copy.deepcopy(anchors[0])
+    elif mutation == "reordered-anchors":
+        anchors[0], anchors[1] = anchors[1], anchors[0]
+    elif mutation == "wrong-anchor-count":
+        first_cell["anchor_count"] = 99
+    elif mutation == "reordered-experiments":
+        experiments[0], experiments[1] = experiments[1], experiments[0]
+    elif mutation == "reordered-cells":
+        cells = experiments[0]["cells"]
+        cells[0], cells[1] = cells[1], cells[0]
+    elif mutation == "reordered-raw-roles":
+        raw_results = first_cell["raw_results"]
+        raw_results[0], raw_results[1] = raw_results[1], raw_results[0]
+    else:
+        raise AssertionError(mutation)
+
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+    with pytest.raises(
+        ValueError,
+        match="coverage|order|experiment|cell|raw provenance",
+    ):
+        classify_r01_fixture(payload)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "zero-with-feasible-status",
+        "zero-without-certificate",
+        "zero-with-primal-shaped-certificate",
+        "feasible-without-primal",
+        "numerical-only-with-zero-certificate",
+        "unknown-classification",
+    ],
+)
+def test_r01_classifier_rejects_inconsistent_evidence_before_replay(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+    mutation: str,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    anchor = _first_r01_anchor(payload)
+
+    if mutation == "zero-with-feasible-status":
+        anchor["positive"]["status"] = "feasible"
+    elif mutation == "zero-without-certificate":
+        anchor.pop("zero_certificate")
+    elif mutation == "zero-with-primal-shaped-certificate":
+        anchor["zero_certificate"] = {
+            "kind": "primal",
+            "anchor_label": anchor["label"],
+            "anchor_sign": 1,
+            "coefficients": ["0"] * 24,
+        }
+    elif mutation == "feasible-without-primal":
+        anchor["classification"] = "certified-feasible"
+        anchor["positive"] = {"status": "feasible"}
+        anchor["negative"] = {"status": "infeasible"}
+        anchor.pop("zero_certificate")
+    elif mutation == "numerical-only-with-zero-certificate":
+        anchor["classification"] = "numerical-only"
+    elif mutation == "unknown-classification":
+        anchor["classification"] = "unknown"
+    else:
+        raise AssertionError(mutation)
+
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+    with pytest.raises(
+        ValueError,
+        match="classification|certified-zero|zero certificate|replayable primal",
+    ):
+        classify_r01_fixture(payload)
+
+
+def test_r01_classifier_returns_incomplete_without_replaying_other_duals(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    anchor = _first_r01_anchor(payload)
+    anchor["classification"] = "numerical-only"
+    anchor.pop("zero_certificate")
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+
+    assert classify_r01_fixture(payload) == {
+        "outcome": "evidence-incomplete",
+        "fixture_schema_version": 2,
+        "protocol": "overlap-klein-v1",
+        "unresolved": [
+            {
+                "experiment_id": "R01-E001",
+                "family": "number-conserving",
+                "mask": "rings-bridges",
+                "label": "h0<-4",
+            }
+        ],
+    }
+
+
+def test_r01_classifier_rejects_a_corrupted_exact_double_dual(
+    r01_fixture_payload: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    certificate = _first_r01_anchor(payload)["zero_certificate"]
+    certificate["plus_weights"] = ["0"] * len(certificate["plus_weights"])
+
+    with pytest.raises(ValueError, match="dual certificate does not verify"):
+        classify_r01_fixture(payload)
+
+
+def test_r01_classifier_rejects_certified_feasible_without_a_primal(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    anchor = _first_r01_anchor(payload)
+    anchor["classification"] = "certified-feasible"
+    anchor["positive"] = {"status": "feasible"}
+    anchor["negative"] = {"status": "infeasible"}
+    anchor.pop("zero_certificate")
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        _forbid_r01_build_system,
+    )
+
+    with pytest.raises(ValueError, match="replayable primal"):
+        classify_r01_fixture(payload)
+
+
+def test_r01_classifier_rejects_a_false_exact_primal(
+    r01_fixture_payload: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    anchor = _first_r01_anchor(payload)
+    anchor["classification"] = "certified-feasible"
+    anchor["positive"] = {
+        "status": "feasible",
+        "certificate": {
+            "kind": "primal",
+            "anchor_label": "h0<-4",
+            "anchor_sign": 1,
+            "coefficients": ["0"] * 24,
+        },
+    }
+    anchor["negative"] = {"status": "infeasible"}
+    anchor.pop("zero_certificate")
+
+    with pytest.raises(ValueError, match="primal certificate does not verify"):
+        classify_r01_fixture(payload)
+
+
+def test_r01_classifier_rejects_a_sign_mismatched_replayed_primal(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = copy.deepcopy(r01_fixture_payload)
+    anchor = _first_r01_anchor(payload)
+    anchor["classification"] = "certified-feasible"
+    anchor["positive"] = {
+        "status": "feasible",
+        "certificate": {
+            "kind": "primal",
+            "anchor_label": "h0<-4",
+            "anchor_sign": 1,
+            "coefficients": ["0"] * 24,
+        },
+    }
+    anchor["negative"] = {"status": "infeasible"}
+    anchor.pop("zero_certificate")
+    real_system = build_system("number-conserving", "rings-bridges")
+    monkeypatch.setattr(
+        overlap_klein,
+        "build_system",
+        lambda family, mask: real_system,
+    )
+    monkeypatch.setattr(
+        overlap_klein,
+        "certificate_from_json",
+        lambda certificate, system: ExactPrimalCertificate(
+            anchor_label="h0<-4",
+            anchor_sign=-1,
+            coefficients=tuple(sp.zeros(len(system.labels), 1)),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="sign"):
+        classify_r01_fixture(payload)
+
+
+def test_r01_classifier_builds_four_systems_and_parses_each_dual_once(
+    r01_fixture_payload: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected_shapes = {
+        ("number-conserving", "rings-bridges"): (560, 24),
+        ("number-conserving", "rings-diagonals-bridges"): (748, 32),
+        ("bdg", "rings-bridges"): (1052, 42),
+        ("bdg", "rings-diagonals-bridges"): (1456, 58),
+    }
+    build_calls: list[tuple[str, str]] = []
+    parsed_labels: list[str] = []
+
+    def fake_build_system(family: str, mask: str) -> ExactMetzlerSystem:
+        build_calls.append((family, mask))
+        row_count, column_count = expected_shapes[(family, mask)]
+        rows = (MetzlerRow("even", 1, 0),) * row_count
+        labels = tuple(f"x{index}" for index in range(column_count))
+        return ExactMetzlerSystem(
+            labels=labels,
+            rows=rows,
+            coefficients=sp.ImmutableSparseMatrix(
+                row_count,
+                column_count,
+                {},
+            ),
+        )
+
+    def fake_certificate_from_json(
+        certificate: dict[str, object],
+        system: ExactMetzlerSystem,
+    ) -> ExactDualCertificate:
+        assert system.coefficients.shape in expected_shapes.values()
+        label = certificate["anchor_label"]
+        assert isinstance(label, str)
+        parsed_labels.append(label)
+        return ExactDualCertificate(
+            anchor_label=label,
+            plus_weights=(),
+            minus_weights=(),
+        )
+
+    def forbid_direct_verification(
+        *args: object,
+        **kwargs: object,
+    ) -> bool:
+        raise AssertionError("classifier duplicated exact certificate replay")
+
+    monkeypatch.setattr(overlap_klein, "build_system", fake_build_system)
+    monkeypatch.setattr(
+        overlap_klein,
+        "certificate_from_json",
+        fake_certificate_from_json,
+    )
+    monkeypatch.setattr(
+        overlap_klein,
+        "verify_zero_dual",
+        forbid_direct_verification,
+    )
+    monkeypatch.setattr(
+        overlap_klein,
+        "verify_primal",
+        forbid_direct_verification,
+    )
+
+    summary = classify_r01_fixture(copy.deepcopy(r01_fixture_payload))
+
+    assert summary["outcome"] == "exact-bridge-coordinate-no-go"
+    assert build_calls == [
+        ("number-conserving", "rings-bridges"),
+        ("number-conserving", "rings-diagonals-bridges"),
+        ("bdg", "rings-bridges"),
+        ("bdg", "rings-diagonals-bridges"),
+    ]
+    assert len(parsed_labels) == 24
 
 
 def test_r01_fixture_classifications_are_consistent_and_all_certificates_replay() -> None:

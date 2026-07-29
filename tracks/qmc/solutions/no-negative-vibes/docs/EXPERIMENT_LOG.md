@@ -643,3 +643,46 @@ compact fixture schema before exact comparison. The conversion adds the
 derived anchor kind, retains sign statuses, maps raw
 `exact_primal_certificate` to compact `certificate`, and retains the exact
 zero certificate or numerical-only diagnostics as applicable.
+
+## 2026-07-29 — Task 9 exact R01 classifier
+
+### Plan amendment and RED
+
+- Task 9 base:
+  `408266c3c85bc8466683364f545a16e0d79559f0`.
+- The branch-gated classifier plan was independently reviewed. Three
+  Important defects were corrected before implementation: incomplete RED
+  ordering, missing exact `N`/`F` output schemas, and a self-invalidating
+  tracked-log/final-verification cycle. The final amendment was committed and
+  shared as
+  `6a608c10e078802e36639a4c3ace8a12694e9ed4`.
+- Local Windows RED probe: no pytest process started because `python` was not
+  installed on the outer client. This is an environment/operational attempt,
+  not a scientific or test verdict.
+- First combined gateway/WSL preflight: INVALID/no scientific verdict. Remote
+  PowerShell pipeline quoting made `ForEach-Object` reach `cmd.exe`, and a
+  shell-composed WSL `git -C` probe lost its command boundary. No repository
+  or test state changed. The retry used one argv-only command per probe and
+  confirmed WSL at clean `408266c`.
+- Synchronization: a complete bundle for the plan commit had SHA-256
+  `f19b213e983ddfe0114e9a3c3c18ed7e15f50d9852c910f87a598ba32d6df7c8`.
+  The local and WSL hashes matched, bundle fetch/fast-forward put the WSL
+  clone at exact `6a608c10e078802e36639a4c3ace8a12694e9ed4`, and the only dirty
+  tracked file was the transferred RED test module. Its end-to-end SHA-256
+  was
+  `49fd85247ab7f65bf95453698f4fbd1584e4f9ca28132c8da87e24a70078ee0b`.
+- RED command, using Python 3.11 with `PYTHONPATH` equal to the absolute
+  solution directory and all three BLAS limits set to one:
+
+  ```text
+  python -m pytest tests/test_overlap_klein.py -q
+  ```
+
+- RED result: VALID, exit `1`, `1 error in 0.83s`. Collection failed only at
+  `from oracle.overlap_klein import classify_r01_fixture` because that public
+  interface did not yet exist. This is the preregistered failure for the
+  complete happy-path, fail-closed mutation, non-mutation, incomplete,
+  primal/dual corruption, and four-build/24-parse call-count test surface.
+- Interpretation: implementation may now add only the fixture classifier and
+  private helpers. It must not weaken the structural failures, implement
+  survivor-only audits, or interpret any exact dual as a primal ray.
