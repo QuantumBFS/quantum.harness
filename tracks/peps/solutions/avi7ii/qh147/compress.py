@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import math
+import time
 
 import autoray as ar
 import jax
@@ -187,6 +189,17 @@ def _maximum_virtual_bond(pepo: FinitePEPO) -> int:
     return max(pepo.tn.ind_size(index) for index in inner)
 
 
+def _emit_stage(stage: str, **values) -> None:
+    print(
+        json.dumps(
+            {"event": "compression_stage", "stage": stage, **values},
+            sort_keys=True,
+            allow_nan=False,
+        ),
+        flush=True,
+    )
+
+
 class VariationalCompressor:
     def __init__(
         self,
@@ -212,18 +225,40 @@ class VariationalCompressor:
         if max_bond < 1:
             raise ValueError("max_bond must be positive")
 
+        started = time.perf_counter()
+        _emit_stage("seed_start", mode=mode, max_bond=max_bond)
         student = teacher.copy()
         student.tn.compress_all_(max_bond=max_bond, cutoff=0.0)
         seeded_bond = _maximum_virtual_bond(student)
         if seeded_bond > max_bond:
             raise RuntimeError("fixed-bond seed exceeds requested maximum")
+        _emit_stage(
+            "seed_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
+            seeded_bond=seeded_bond,
+        )
 
+        started = time.perf_counter()
+        _emit_stage("teacher_point_start", mode=mode)
         teacher_point = self.objective.teacher_point(teacher)
+        _emit_stage(
+            "teacher_point_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
+        )
+        started = time.perf_counter()
+        _emit_stage("initial_diagnostics_start", mode=mode)
         initial = self.objective.diagnostics(
             student,
             teacher,
             teacher_point=teacher_point,
             mode=mode,
+        )
+        _emit_stage(
+            "initial_diagnostics_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
         )
 
         lx = teacher.lx
@@ -238,6 +273,22 @@ class VariationalCompressor:
                 mode=mode,
             )
 
+        def optimizer_progress(tnopt):
+            loss = float(tnopt.loss)
+            _emit_stage(
+                "optimizer_progress",
+                mode=mode,
+                evaluation=int(tnopt.nevals),
+                loss=loss if math.isfinite(loss) else None,
+                finite=math.isfinite(loss),
+            )
+
+        _emit_stage(
+            "optimizer_start",
+            mode=mode,
+            max_iterations=self.max_iterations,
+        )
+        started = time.perf_counter()
         optimizer = qtn.TNOptimizer(
             student.tn,
             loss_fn=loss_fn,
@@ -245,18 +296,32 @@ class VariationalCompressor:
             optimizer=self.optimizer,
             progbar=False,
             autodiff_backend="jax",
+            callback=optimizer_progress,
         )
         optimized_tn = optimizer.optimize(self.max_iterations)
+        _emit_stage(
+            "optimizer_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
+            evaluations=int(optimizer.nevals),
+        )
         optimized = FinitePEPO(lx=lx, ly=ly, tn=optimized_tn)
         final_bond = _maximum_virtual_bond(optimized)
         if final_bond > max_bond:
             raise RuntimeError("optimizer changed the fixed PEPO bond dimension")
 
+        started = time.perf_counter()
+        _emit_stage("final_diagnostics_start", mode=mode)
         final = self.objective.diagnostics(
             optimized,
             teacher,
             teacher_point=teacher_point,
             mode=mode,
+        )
+        _emit_stage(
+            "final_diagnostics_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
         )
         history = tuple(
             value

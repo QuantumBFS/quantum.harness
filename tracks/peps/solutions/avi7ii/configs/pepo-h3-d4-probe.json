@@ -1,0 +1,40 @@
+{
+  "model": {
+    "lx": 10,
+    "ly": 10,
+    "j": 1.0,
+    "h": 3.0
+  },
+  "conventions": {
+    "boundary": "open",
+    "operator": "pauli"
+  },
+  "evolution": {
+    "delta_beta": 0.025,
+    "beta_stop": 0.025,
+    "max_bond": 4,
+    "teacher_bond": 16
+  },
+  "compression": {
+    "chi": 16,
+    "cutoff": 1e-10,
+    "max_iterations": 1,
+    "optimizer": "L-BFGS-B",
+    "tolerances": {
+      "z": 1e-5,
+      "u": 1e-4,
+      "contraction_noise": 1e-7
+    },
+    "weights": {
+      "z": 1.0,
+      "u": 1.0,
+      "hermiticity": 1.0
+    },
+    "hermiticity_tolerance": 1e-6,
+    "loss_acceptance_tolerance": 1e-10
+  },
+  "measurement": {
+    "chis": [16, 32],
+    "public_step": 0.1
+  }
+}

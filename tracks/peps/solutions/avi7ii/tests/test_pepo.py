@@ -26,6 +26,25 @@ def test_two_site_gate_matches_dense_matrix():
     assert np.allclose(pepo.to_dense(), gate.matrix.reshape(4, 4))
 
 
+def test_gate_cutoff_discards_numerical_null_singular_values():
+    pepo = FinitePEPO.identity(2, 1)
+    gate = next(
+        gate
+        for gate in second_order_gates(
+            2,
+            1,
+            j=1.0,
+            h=0.0,
+            delta_beta=0.025,
+        )
+        if len(gate.sites) == 2
+    )
+
+    pepo.apply_gate(gate, max_bond=16, cutoff=1e-10)
+
+    assert pepo.tn.ind_size("hx0,0") == 2
+
+
 def test_adjoint_swaps_operator_legs():
     pepo = FinitePEPO.identity(1, 1)
     tensor = pepo.tn["I0,0"]

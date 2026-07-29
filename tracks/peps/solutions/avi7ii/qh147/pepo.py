@@ -75,7 +75,13 @@ class FinitePEPO:
         x, y = self._coords(site)
         return f"ki{x},{y}"
 
-    def apply_gate(self, gate: Gate, *, max_bond: int) -> None:
+    def apply_gate(
+        self,
+        gate: Gate,
+        *,
+        max_bond: int,
+        cutoff: float = 0.0,
+    ) -> None:
         out_inds = tuple(self.out_ind(site) for site in gate.sites)
         contract = True if len(out_inds) == 1 else "split"
         self.tn.gate_inds_(
@@ -83,7 +89,7 @@ class FinitePEPO:
             out_inds,
             contract=contract,
             max_bond=max_bond,
-            cutoff=0.0,
+            cutoff=cutoff,
         )
 
     def to_dense(self) -> np.ndarray:

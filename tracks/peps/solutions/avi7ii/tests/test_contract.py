@@ -149,3 +149,50 @@ def test_boundary_contraction_does_not_require_optional_kahypar():
             category=UserWarning,
         )
         assert np.isclose(contractor.trace(pepo), 16.0)
+
+
+def test_thermodynamic_point_reuses_plaquette_environments():
+    class CountingContractor(BoundaryContractor):
+        def __init__(self):
+            super().__init__(chi=16, cutoff=1e-12)
+            self.full_contractions = 0
+
+        def _contract(self, network):
+            self.full_contractions += 1
+            return super()._contract(network)
+
+    pepo = _one_trotter_step(2, 2)
+    contractor = CountingContractor()
+
+    point = contractor.thermodynamic_point(
+        pepo,
+        j=1.0,
+        h=3.0,
+        log_scale=0.0,
+    ).as_floats()
+
+    assert np.isfinite(point.u)
+    assert contractor.full_contractions == 1
+
+
+def test_batched_energy_remains_jax_differentiable():
+    jax = pytest.importorskip("jax")
+    jnp = pytest.importorskip("jax.numpy")
+    pepo = FinitePEPO.identity(2, 2)
+    site = pepo.tn["I0,0"]
+    base = jnp.asarray(site.data)
+    perturbation = jnp.zeros_like(base).at[0, 1].set(1.0)
+    contractor = BoundaryContractor(chi=8, cutoff=1e-12)
+
+    def energy_at(scale):
+        site.modify(data=base + scale * perturbation)
+        return contractor.thermodynamic_point(
+            pepo,
+            j=1.0,
+            h=3.0,
+            log_scale=0.0,
+        ).u
+
+    derivative = jax.grad(energy_at)(jnp.array(0.0))
+
+    assert np.isfinite(float(derivative))

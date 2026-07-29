@@ -40,4 +40,5 @@ def test_pepo_probe_is_one_thermodynamic_step_on_the_production_source():
     assert "JAX_PLATFORM_NAME=gpu" in probe
     assert "--compression-mode thermodynamic" in probe
     assert "--stop-after-steps 1" in probe
-    assert "issue147-pepo/cells/cell-0002" in probe
+    assert "configs/pepo-h3-d4-probe.json" in probe
+    assert "issue147-pepo-probe-batched" in probe

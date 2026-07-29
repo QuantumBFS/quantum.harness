@@ -261,9 +261,39 @@ def run_chain(
         beta = round(step * config.delta_beta, 12)
         started = time.perf_counter()
         try:
+            print(
+                json.dumps(
+                    {
+                        "event": "evolution_stage",
+                        "stage": "teacher_gates_start",
+                        "mode": mode,
+                        "beta": beta,
+                        "gate_count": len(gates),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             teacher = pepo.copy()
             for gate in gates:
-                teacher.apply_gate(gate, max_bond=config.teacher_bond)
+                teacher.apply_gate(
+                    gate,
+                    max_bond=config.teacher_bond,
+                    cutoff=config.cutoff,
+                )
+            print(
+                json.dumps(
+                    {
+                        "event": "evolution_stage",
+                        "stage": "teacher_gates_complete",
+                        "mode": mode,
+                        "beta": beta,
+                        "elapsed_seconds": time.perf_counter() - started,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             result = compressor.compress(
                 teacher,
                 max_bond=config.max_bond,
@@ -312,6 +342,18 @@ def run_chain(
                 "peak_memory_bytes": psutil.Process().memory_info().rss,
             }
             path = checkpoint_root / f"beta-{beta:.6f}"
+            print(
+                json.dumps(
+                    {
+                        "event": "evolution_stage",
+                        "stage": "checkpoint_start",
+                        "mode": mode,
+                        "beta": beta,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             latest = save_checkpoint(
                 path,
                 result.pepo,
@@ -320,6 +362,18 @@ def run_chain(
                 log_scale=candidate_log_scale,
                 config_sha256=config_hash,
                 diagnostics=diagnostics,
+            )
+            print(
+                json.dumps(
+                    {
+                        "event": "evolution_stage",
+                        "stage": "checkpoint_complete",
+                        "mode": mode,
+                        "beta": beta,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
             )
             pepo = latest.pepo
             log_scale = candidate_log_scale

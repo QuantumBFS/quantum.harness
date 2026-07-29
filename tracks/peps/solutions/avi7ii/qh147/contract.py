@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from string import ascii_letters
 
 import autoray as ar
 import quimb.tensor as qtn
+from quimb.tensor.tn2d.core import calc_plaquette_map, plaquette_to_sites
 
 from .model import obc_bonds
 from .pepo import FinitePEPO
@@ -70,6 +72,29 @@ class BoundaryContractor:
             raise ValueError("scalar tensor has too many virtual indices")
         return labels[:count]
 
+    def _scalar_site_data(
+        self,
+        pepo: FinitePEPO,
+        x: int,
+        y: int,
+        operator=None,
+    ):
+        data, virtual_inds = self._physical_data(
+            self._site_tensor(pepo, x, y)
+        )
+        if operator is None:
+            scalar_data = ar.do("trace", data, axis1=0, axis2=1)
+        else:
+            operator = ar.do("asarray", operator, like=data)
+            labels = "".join(self._einsum_labels(len(virtual_inds)))
+            scalar_data = ar.do(
+                "einsum",
+                f"oi{labels},io->{labels}",
+                data,
+                operator,
+            )
+        return scalar_data, virtual_inds
+
     def _scalar_network(
         self,
         pepo: FinitePEPO,
@@ -85,26 +110,18 @@ class BoundaryContractor:
         tensors = []
         for x in range(pepo.lx):
             for y in range(pepo.ly):
-                data, virtual_inds = self._physical_data(
-                    self._site_tensor(pepo, x, y)
-                )
                 operator = insertions.get((x, y))
-                if operator is None:
-                    scalar_data = ar.do("trace", data, axis1=0, axis2=1)
-                else:
-                    operator = ar.do("asarray", operator, like=data)
-                    labels = "".join(self._einsum_labels(len(virtual_inds)))
-                    scalar_data = ar.do(
-                        "einsum",
-                        f"oi{labels},io->{labels}",
-                        data,
-                        operator,
-                    )
+                scalar_data, virtual_inds = self._scalar_site_data(
+                    pepo,
+                    x,
+                    y,
+                    operator,
+                )
                 tensors.append(
                     qtn.Tensor(
                         scalar_data,
                         inds=virtual_inds,
-                        tags={f"I{x},{y}"},
+                        tags={f"I{x},{y}", f"X{x}", f"Y{y}"},
                     )
                 )
 
@@ -208,6 +225,109 @@ class BoundaryContractor:
         )
         return self._contract(network)
 
+    def _direct_energy_expectation(
+        self,
+        pepo: FinitePEPO,
+        *,
+        partition,
+        j: float,
+        h: float,
+    ):
+        numerator = 0
+        for first, second in obc_bonds(pepo.lx, pepo.ly):
+            numerator = numerator - j * self.expectation_numerator(
+                pepo,
+                {
+                    divmod(first, pepo.ly): Z,
+                    divmod(second, pepo.ly): Z,
+                },
+            )
+        for site in range(pepo.lx * pepo.ly):
+            numerator = numerator - h * self.expectation_numerator(
+                pepo,
+                {divmod(site, pepo.ly): X},
+            )
+        return numerator / partition
+
+    def _batched_energy_expectation(
+        self,
+        pepo: FinitePEPO,
+        scalar_network: qtn.TensorNetwork2D,
+        *,
+        partition,
+        j: float,
+        h: float,
+    ):
+        if pepo.lx < 2 or pepo.ly < 2:
+            return self._direct_energy_expectation(
+                pepo,
+                partition=partition,
+                j=j,
+                h=h,
+            )
+
+        environments = {}
+        for x_bsz, y_bsz in ((1, 2), (2, 1)):
+            environments.update(
+                scalar_network.compute_plaquette_environments(
+                    x_bsz=x_bsz,
+                    y_bsz=y_bsz,
+                    max_bond=self.chi,
+                    cutoff=self.cutoff,
+                    canonize=True,
+                )
+            )
+        plaquette_map = calc_plaquette_map(environments)
+
+        terms = []
+        for first, second in obc_bonds(pepo.lx, pepo.ly):
+            first_xy = divmod(first, pepo.ly)
+            second_xy = divmod(second, pepo.ly)
+            terms.append(
+                (
+                    (first_xy, second_xy),
+                    {first_xy: Z, second_xy: Z},
+                    -j,
+                )
+            )
+        for site in range(pepo.lx * pepo.ly):
+            coordinates = divmod(site, pepo.ly)
+            terms.append((coordinates, {coordinates: X}, -h))
+
+        grouped = defaultdict(list)
+        for where, insertions, coefficient in terms:
+            grouped[plaquette_map[where]].append((insertions, coefficient))
+
+        energy = 0
+        for plaquette, local_terms in grouped.items():
+            site_tags = tuple(
+                f"I{x},{y}" for x, y in plaquette_to_sites(plaquette)
+            )
+            base_local = scalar_network.select_any(site_tags)
+            environment = environments[plaquette]
+            local_partition = (base_local | environment).contract(
+                all,
+                optimize="greedy",
+            )
+            for insertions, coefficient in local_terms:
+                inserted_local = base_local.copy()
+                for (x, y), operator in insertions.items():
+                    scalar_data, _ = self._scalar_site_data(
+                        pepo,
+                        x,
+                        y,
+                        operator,
+                    )
+                    inserted_local[f"I{x},{y}"].modify(data=scalar_data)
+                local_numerator = (inserted_local | environment).contract(
+                    all,
+                    optimize="greedy",
+                )
+                energy = energy + coefficient * (
+                    local_numerator / local_partition
+                )
+        return energy
+
     def relative_frobenius_loss(self, student: FinitePEPO, teacher: FinitePEPO):
         student_norm = ar.do("real", self.overlap(student, student))
         teacher_norm = ar.do("real", self.overlap(teacher, teacher))
@@ -222,25 +342,20 @@ class BoundaryContractor:
         h: float,
         log_scale: object,
     ) -> ThermodynamicPoint:
-        partition = self.trace(pepo)
-        energy_numerator = 0
-        for first, second in obc_bonds(pepo.lx, pepo.ly):
-            first_xy = divmod(first, pepo.ly)
-            second_xy = divmod(second, pepo.ly)
-            energy_numerator = energy_numerator - j * self.expectation_numerator(
-                pepo,
-                {first_xy: Z, second_xy: Z},
-            )
-        for site in range(pepo.lx * pepo.ly):
-            energy_numerator = energy_numerator - h * self.expectation_numerator(
-                pepo,
-                {divmod(site, pepo.ly): X},
-            )
+        scalar_network = self._scalar_network(pepo)
+        partition = self._contract(scalar_network)
+        energy = self._batched_energy_expectation(
+            pepo,
+            scalar_network,
+            partition=partition,
+            j=j,
+            h=h,
+        )
 
         nsites = pepo.lx * pepo.ly
         real_partition = ar.do("real", partition)
         z = (log_scale + ar.do("log", real_partition)) / nsites
-        u = ar.do("real", energy_numerator / partition) / nsites
+        u = ar.do("real", energy) / nsites
         return ThermodynamicPoint(z=z, u=u, _partition=partition)
 
     def hermiticity_residual(self, pepo: FinitePEPO):

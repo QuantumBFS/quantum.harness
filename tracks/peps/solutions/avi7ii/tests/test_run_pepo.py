@@ -9,6 +9,7 @@ from qh147.run import load_production_config, main
 
 
 CONFIG = Path(__file__).parents[1] / "configs" / "pepo-h3-d4.json"
+PROBE_CONFIG = Path(__file__).parents[1] / "configs" / "pepo-h3-d4-probe.json"
 
 
 def test_production_configuration_is_the_ratified_setup():
@@ -35,6 +36,16 @@ def test_production_configuration_is_the_ratified_setup():
     assert chain.hermiticity_tolerance == 1e-6
     assert chain.loss_acceptance_tolerance == 1e-10
     assert production.public_step == 0.1
+
+
+def test_probe_configuration_is_isolated_and_bounded():
+    probe = load_production_config(PROBE_CONFIG)
+
+    assert (probe.chain.lx, probe.chain.ly, probe.chain.h) == (10, 10, 3.0)
+    assert (probe.chain.delta_beta, probe.chain.beta_stop) == (0.025, 0.025)
+    assert (probe.chain.max_bond, probe.chain.teacher_bond) == (4, 16)
+    assert probe.chain.chi == 16
+    assert probe.chain.max_iterations == 1
 
 
 def test_production_configuration_rejects_unknown_keys(tmp_path):
