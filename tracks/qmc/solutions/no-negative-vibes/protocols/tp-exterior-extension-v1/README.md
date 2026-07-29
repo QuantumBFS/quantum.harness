@@ -95,6 +95,23 @@ list. Each cell requires `cell_id` and all seven parameter fields from
 `axes.json`. The selected virtual shard satisfies
 `cell_position % worker_count == worker_index`.
 
+`axes.json` is not expanded by the runner. Materialize the Cartesian product
+with axes in this exact outer-to-inner order:
+`jacobi_strength`, `diagonal_condition_ratio`, `chord_shear_magnitude`,
+`chord_pattern`, `givens_half_angle`, `givens_plane`,
+`two_atom_scale_ratio`, preserving every stored axis array's order. The
+serialized list is authoritative and is never sorted; reordering cells changes
+virtual-shard ownership.
+
+A deployment-side whole-file checksum is SHA-256 of the exact UTF-8
+`run_spec.json` bytes, so formatting and object-key order affect that checksum;
+the runner does not consume or verify a checksum sidecar. Per-cell resume uses
+a different stable checksum: canonical JSON over the manifest schema, safe
+single-component cell ID, reduced exact rational parameters, and fully
+resolved settings. It is independent of source whitespace, object-key order,
+equivalent rational spelling, and omitted defaults. Provenance, `run_dir`, and
+cell position are excluded.
+
 On the 64-core CPU host, reserve two logical cores and launch virtual workers
 `0..61`, one single-threaded process per worker:
 
@@ -110,5 +127,12 @@ manifest is an object with the exact schema, cell ID, and cell fingerprint
 and has `compute_success: true`. The fingerprint covers the schema, safe
 single-component cell ID, canonical exact parameters, and fully resolved
 settings. Malformed or stale manifests are replaced. A mixed-word resource
-limit is an incomplete computation (`compute_success: false`) and is retried
-rather than cached as a scientific rejection.
+limit, nonfinite result, malformed result, unknown status, or positive result
+that did not complete the requested depth is incomplete
+(`compute_success: false`) and is retried. Only `nonpositive-word-found` is a
+terminal scientific stress failure. A survivor requires both
+`status: all-tested-words-positive` and `completed_requested_depth: true`.
+
+The CLI prints flushed progress to standard error and its final JSON summary
+to standard output. It exits nonzero when any selected cell finishes with
+`compute_success: false`.

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import sys
 import tempfile
 import time
 from collections.abc import Callable, Mapping, Sequence
@@ -19,10 +21,14 @@ from .oddcycle_joint_words import exhaustive_joint_short_words, joint_alphabet
 from .oddcycle_path_metric import last_letter_path_metric_sdp
 
 
+SCHEMA = "oddcycle-pair-domain-cell-v1"
+_PARAMETER_KEYS = {"p_low", "p_high", "q", "r"}
+
 JointWordsFunction = Callable[..., dict[str, object]]
 MetricFunction = Callable[..., dict[str, object]]
 PathMetricFunction = Callable[..., dict[str, object]]
 OrientationFunction = Callable[..., dict[str, object]]
+ProgressFunction = Callable[[str], None]
 
 
 def _json_safe(value: Any) -> Any:
@@ -70,14 +76,135 @@ def _write_json_atomic(path: Path, payload: Mapping[str, object]) -> None:
         raise
 
 
-def _successful_manifest(path: Path) -> bool:
+def _canonical_json(payload: Mapping[str, object]) -> str:
+    return json.dumps(
+        payload,
+        allow_nan=False,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+
+
+def _validated_cell_id(cell_id: object) -> str:
+    if not isinstance(cell_id, str):
+        raise TypeError("cell_id must be a string")
+    if (
+        not cell_id
+        or cell_id == "."
+        or ".." in cell_id
+        or "/" in cell_id
+        or "\\" in cell_id
+        or ":" in cell_id
+        or "\x00" in cell_id
+    ):
+        raise ValueError("cell_id must be one safe path component")
+    return cell_id
+
+
+def _canonical_parameters(params: Mapping[str, object]) -> dict[str, float]:
+    if not isinstance(params, Mapping):
+        raise TypeError("params must be an object")
+    if set(params) != _PARAMETER_KEYS:
+        raise ValueError(
+            "params must contain exactly " + ", ".join(sorted(_PARAMETER_KEYS))
+        )
+    result = {
+        key: _finite_float(params, key)
+        for key in ("p_low", "p_high", "q", "r")
+    }
+    if not result["p_low"] < result["p_high"]:
+        raise ValueError("p_low must be strictly below p_high")
+    return result
+
+
+def _validated_settings(settings: Mapping[str, object]) -> dict[str, object]:
+    if not isinstance(settings, Mapping):
+        raise TypeError("settings must be an object")
+    result = dict(settings)
+    depth = result.get("short_word_depth", 6)
+    if isinstance(depth, bool) or depth != 6:
+        raise ValueError("short_word_depth must be exactly 6 for this protocol")
+    result["short_word_depth"] = 6
+
+    level_limit = result.get("max_level_matrices", 2_000_000)
+    if (
+        not isinstance(level_limit, int)
+        or isinstance(level_limit, bool)
+        or level_limit < 1
+    ):
+        raise ValueError("max_level_matrices must be a positive integer")
+    result["max_level_matrices"] = level_limit
+
+    for name, default in (
+        ("determinant_tolerance", 1.0e-10),
+        ("sdp_validation_tolerance", 1.0e-7),
+        ("time_orientation_tolerance", 1.0e-7),
+    ):
+        value = float(result.get(name, default))
+        if not math.isfinite(value) or value < 0.0:
+            raise ValueError(f"{name} must be finite and nonnegative")
+        result[name] = value
+
+    solver = result.get("sdp_solver", "CLARABEL")
+    if not isinstance(solver, str) or not solver:
+        raise ValueError("sdp_solver must be a nonempty string")
+    result["sdp_solver"] = solver
+
+    solver_options = result.get("sdp_solver_options", {})
+    if not isinstance(solver_options, Mapping):
+        raise ValueError("sdp_solver_options must be an object")
+    result["sdp_solver_options"] = dict(solver_options)
+    return result
+
+
+def _fingerprint_from_canonical(
+    cell_id: str,
+    canonical_params: Mapping[str, object],
+    resolved_settings: Mapping[str, object],
+) -> str:
+    payload = {
+        "schema": SCHEMA,
+        "cell_id": _validated_cell_id(cell_id),
+        "parameters": dict(canonical_params),
+        "resolved_settings": dict(resolved_settings),
+    }
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+def cell_fingerprint(
+    cell_id: str,
+    params: Mapping[str, object],
+    settings: Mapping[str, object],
+) -> str:
+    """Hash the complete resume identity for one resolved pair cell."""
+
+    return _fingerprint_from_canonical(
+        _validated_cell_id(cell_id),
+        _canonical_parameters(params),
+        _validated_settings(settings),
+    )
+
+
+def _successful_manifest(
+    path: Path,
+    *,
+    cell_id: str,
+    cell_fingerprint_value: str,
+) -> bool:
     if not path.is_file():
         return False
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return False
-    return payload.get("compute_success") is True
+    return (
+        isinstance(payload, Mapping)
+        and payload.get("schema") == SCHEMA
+        and payload.get("cell_id") == cell_id
+        and payload.get("cell_fingerprint") == cell_fingerprint_value
+        and payload.get("compute_success") is True
+    )
 
 
 def _error_record(error: Exception) -> dict[str, object]:
@@ -113,12 +240,11 @@ def _finite_float(params: Mapping[str, object], key: str) -> float:
 def _points_from_params(
     params: Mapping[str, object],
 ) -> tuple[tuple[float, float, float], ...]:
-    p_low = _finite_float(params, "p_low")
-    p_high = _finite_float(params, "p_high")
-    q = _finite_float(params, "q")
-    r = _finite_float(params, "r")
-    if not p_low < p_high:
-        raise ValueError("p_low must be strictly below p_high")
+    canonical = _canonical_parameters(params)
+    p_low = canonical["p_low"]
+    p_high = canonical["p_high"]
+    q = canonical["q"]
+    r = canonical["r"]
     return ((p_low, q, r), (p_high, q, r))
 
 
@@ -144,17 +270,12 @@ def _path_metric_options(settings: Mapping[str, object]) -> dict[str, object]:
 
 
 def _short_word_options(settings: Mapping[str, object]) -> dict[str, object]:
-    depth = settings.get("short_word_depth", 6)
-    if isinstance(depth, bool) or depth != 6:
-        raise ValueError("short_word_depth must be exactly 6 for this protocol")
-    options: dict[str, object] = {
-        "max_depth": 6
+    resolved = _validated_settings(settings)
+    return {
+        "max_depth": 6,
+        "max_level_matrices": resolved["max_level_matrices"],
+        "determinant_tolerance": resolved["determinant_tolerance"],
     }
-    if "max_level_matrices" in settings:
-        options["max_level_matrices"] = settings["max_level_matrices"]
-    if "determinant_tolerance" in settings:
-        options["determinant_tolerance"] = settings["determinant_tolerance"]
-    return options
 
 
 def numerical_time_orientation(
@@ -226,26 +347,39 @@ def numerical_time_orientation(
         float(np.min(oriented_scalars)) if finite_scalars else float("nan")
     )
     determinant_values = tuple(float(np.linalg.det(atom)) for atom in atoms)
-    time_like = all(norm > tolerance for norm in norms)
+    finite_norms = all(math.isfinite(norm) for norm in norms)
+    finite_determinants = all(
+        math.isfinite(determinant) for determinant in determinant_values
+    )
+    time_like = finite_norms and all(norm > tolerance for norm in norms)
     future_preserving = (
         valid_inertia
         and time_like
         and finite_scalars
+        and finite_determinants
         and minimum_scalar > tolerance
         and all(determinant > tolerance for determinant in determinant_values)
     )
-    return {
-        "status": (
+    status = (
+        "nonfinite"
+        if not (finite_scalars and finite_norms and finite_determinants)
+        else (
             "time-orientation-passed"
             if future_preserving
             else "time-orientation-failed"
-        ),
+        )
+    )
+    return {
+        "status": status,
         "points": [list(point) for point in points],
         "metric_inertias": list(inertias),
         "time_vectors": [vector.tolist() for vector in time_vectors],
         "orientation_signs": [int(sign) for sign in signs],
         "time_like_norms": list(norms),
         "minimum_oriented_scalar": minimum_scalar,
+        "finite_orientation_data": (
+            finite_scalars and finite_norms and finite_determinants
+        ),
         "all_inverse_transitions_future_preserving": future_preserving,
         "atom_determinants": list(determinant_values),
     }
@@ -282,6 +416,15 @@ def _candidate_score(manifest: Mapping[str, object]) -> dict[str, float | None]:
     }
 
 
+def _result_record(result: object) -> dict[str, object]:
+    if isinstance(result, Mapping):
+        return dict(result)
+    return {
+        "status": "malformed-result",
+        "returned_type": type(result).__name__,
+    }
+
+
 def run_cell(
     cell_id: str,
     params: Mapping[str, object],
@@ -297,11 +440,13 @@ def run_cell(
     """Run one pair cell, stopping at its first scientific failed gate."""
 
     started = time.perf_counter()
+    validated_cell_id = _validated_cell_id(cell_id)
     manifest: dict[str, object] = {
-        "cell_id": str(cell_id),
-        "params": dict(params),
-        "settings": dict(settings),
-        "provenance": dict(provenance),
+        "schema": SCHEMA,
+        "cell_id": validated_cell_id,
+        "params": _json_safe(dict(params)),
+        "settings": _json_safe(dict(settings)),
+        "provenance": _json_safe(dict(provenance)),
         "points": None,
         "short_words": {"status": "not-run"},
         "endpoint_metrics": {
@@ -313,7 +458,19 @@ def run_cell(
         "time_orientation": {"status": "not-run"},
     }
     try:
-        points = _points_from_params(params)
+        resolved_settings = _validated_settings(settings)
+    except Exception as error:
+        manifest["settings_validation"] = _error_record(error)
+        manifest["candidate_score"] = _candidate_score(manifest)
+        return _finish(
+            manifest,
+            started,
+            classification="compute-error",
+            compute_success=False,
+            first_failure="settings-error",
+        )
+    try:
+        canonical_params = _canonical_parameters(params)
     except Exception as error:
         manifest["short_words"] = _error_record(error)
         manifest["candidate_score"] = _candidate_score(manifest)
@@ -324,10 +481,20 @@ def run_cell(
             compute_success=False,
             first_failure="parameter-error",
         )
+    manifest["canonical_params"] = canonical_params
+    manifest["resolved_settings"] = _json_safe(resolved_settings)
+    manifest["cell_fingerprint"] = _fingerprint_from_canonical(
+        validated_cell_id,
+        canonical_params,
+        resolved_settings,
+    )
+    points = _points_from_params(canonical_params)
     manifest["points"] = [list(point) for point in points]
 
     try:
-        short_words = joint_words_fn(points, **_short_word_options(settings))
+        short_words = _result_record(
+            joint_words_fn(points, **_short_word_options(resolved_settings))
+        )
     except Exception as error:
         manifest["short_words"] = _error_record(error)
         manifest["candidate_score"] = _candidate_score(manifest)
@@ -340,19 +507,22 @@ def run_cell(
         )
     manifest["short_words"] = short_words
     if short_words.get("status") != "all-tested-words-positive":
+        terminal = short_words.get("status") == "exact-nonpositive-word-found"
         manifest["candidate_score"] = _candidate_score(manifest)
         return _finish(
             manifest,
             started,
-            classification="short-word-failed",
-            compute_success=True,
+            classification=(
+                "short-word-failed" if terminal else "short-word-incomplete"
+            ),
+            compute_success=terminal,
             first_failure="short-word-gate",
         )
 
-    sdp_options = _sdp_options(settings)
+    sdp_options = _sdp_options(resolved_settings)
     for label, point in zip(("p_low", "p_high"), points, strict=True):
         try:
-            endpoint = endpoint_metric_fn(*point, **sdp_options)
+            endpoint = _result_record(endpoint_metric_fn(*point, **sdp_options))
         except Exception as error:
             manifest["endpoint_metrics"][label] = _error_record(error)
             manifest["candidate_score"] = _candidate_score(manifest)
@@ -365,17 +535,25 @@ def run_cell(
             )
         manifest["endpoint_metrics"][label] = endpoint
         if endpoint.get("status") != "strict-common-metric-found":
+            terminal = (
+                endpoint.get("status")
+                == "no-strict-common-metric-numerically"
+            )
             manifest["candidate_score"] = _candidate_score(manifest)
             return _finish(
                 manifest,
                 started,
-                classification="endpoint-metric-failed",
-                compute_success=True,
+                classification=(
+                    "endpoint-metric-failed"
+                    if terminal
+                    else "endpoint-metric-inconclusive"
+                ),
+                compute_success=terminal,
                 first_failure="endpoint-metric-gate",
             )
 
     try:
-        joint_metric = joint_metric_fn(points, **sdp_options)
+        joint_metric = _result_record(joint_metric_fn(points, **sdp_options))
     except Exception as error:
         manifest["joint_metric"] = _error_record(error)
         manifest["candidate_score"] = _candidate_score(manifest)
@@ -404,12 +582,14 @@ def run_cell(
             manifest,
             started,
             classification="joint-metric-inconclusive",
-            compute_success=True,
+            compute_success=False,
             first_failure="joint-metric-gate",
         )
 
     try:
-        path_metric = path_metric_fn(points, **_path_metric_options(settings))
+        path_metric = _result_record(
+            path_metric_fn(points, **_path_metric_options(resolved_settings))
+        )
     except Exception as error:
         manifest["path_metric"] = _error_record(error)
         manifest["candidate_score"] = _candidate_score(manifest)
@@ -422,23 +602,34 @@ def run_cell(
         path_metric.get("status") != "strict-last-letter-path-metric-found"
         or path_metric.get("correct_split_inertia") is not True
     ):
+        terminal = (
+            path_metric.get("status")
+            == "no-strict-path-metric-numerically"
+        )
         manifest["candidate_score"] = _candidate_score(manifest)
         return _finish(
             manifest,
             started,
-            classification="path-metric-failed",
-            compute_success=True,
+            classification=(
+                "path-metric-failed"
+                if terminal
+                else "path-metric-inconclusive"
+            ),
+            compute_success=terminal,
             first_failure="path-metric-gate",
         )
 
     try:
         orientation_options: dict[str, object] = {}
-        if "time_orientation_tolerance" in settings:
-            orientation_options["tolerance"] = settings["time_orientation_tolerance"]
-        orientation = orientation_fn(
-            points,
-            path_metric["metrics"],
-            **orientation_options,
+        orientation_options["tolerance"] = resolved_settings[
+            "time_orientation_tolerance"
+        ]
+        orientation = _result_record(
+            orientation_fn(
+                points,
+                path_metric["metrics"],
+                **orientation_options,
+            )
         )
     except Exception as error:
         manifest["time_orientation"] = _error_record(error)
@@ -452,12 +643,17 @@ def run_cell(
         orientation.get("status") != "time-orientation-passed"
         or orientation.get("all_inverse_transitions_future_preserving") is not True
     ):
+        terminal = orientation.get("status") == "time-orientation-failed"
         manifest["candidate_score"] = _candidate_score(manifest)
         return _finish(
             manifest,
             started,
-            classification="time-orientation-failed",
-            compute_success=True,
+            classification=(
+                "time-orientation-failed"
+                if terminal
+                else "time-orientation-inconclusive"
+            ),
+            compute_success=terminal,
             first_failure="time-orientation-gate",
         )
 
@@ -466,6 +662,18 @@ def run_cell(
         manifest, started, classification="candidate-survivor", compute_success=True,
         first_failure=None,
     )
+
+
+def _manifest_path(run_dir: Path, cell_id: str) -> Path:
+    safe_cell_id = _validated_cell_id(cell_id)
+    resolved_run_dir = run_dir.resolve()
+    cells_root = (resolved_run_dir / "cells").resolve()
+    if cells_root.parent != resolved_run_dir:
+        raise ValueError("resolved cells directory must remain under run_dir")
+    cell_directory = (cells_root / safe_cell_id).resolve()
+    if cell_directory.parent != cells_root:
+        raise ValueError("resolved cell manifest must remain under run_dir/cells")
+    return cell_directory / "manifest.json"
 
 
 def run_spec(
@@ -479,6 +687,7 @@ def run_spec(
     joint_metric_fn: MetricFunction = common_metric_sdp_for_points,
     path_metric_fn: PathMetricFunction = last_letter_path_metric_sdp,
     orientation_fn: OrientationFunction = numerical_time_orientation,
+    progress_fn: ProgressFunction | None = None,
 ) -> dict[str, int]:
     """Execute the deterministic virtual-worker shard declared by a spec."""
 
@@ -495,12 +704,20 @@ def run_spec(
         raise ValueError("require 0 <= worker_index < worker_count")
     spec_path = Path(path)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    if not isinstance(spec, Mapping):
+        raise ValueError("run_spec.json must contain an object")
     cells = spec.get("cells")
     if not isinstance(cells, list):
         raise ValueError("run_spec.json requires a cells list")
-    shared_settings = dict(spec.get("settings", {}))
-    shared_provenance = dict(spec.get("provenance", {}))
+    shared_settings = spec.get("settings", {})
+    shared_provenance = spec.get("provenance", {})
+    if not isinstance(shared_settings, Mapping):
+        raise ValueError("shared settings must be an object")
+    if not isinstance(shared_provenance, Mapping):
+        raise ValueError("shared provenance must be an object")
+    _validated_settings(shared_settings)
     cell_ids: set[str] = set()
+    fingerprints: dict[str, str] = {}
     for cell in cells:
         if (
             not isinstance(cell, Mapping)
@@ -508,20 +725,35 @@ def run_spec(
             or "params" not in cell
         ):
             raise ValueError("each cell requires cell_id and params")
-        cell_id = str(cell["cell_id"])
+        cell_id = _validated_cell_id(cell["cell_id"])
         if cell_id in cell_ids:
             raise ValueError(f"duplicate cell_id: {cell_id}")
         cell_ids.add(cell_id)
         cell_settings = cell.get("settings", {})
+        cell_provenance = cell.get("provenance", {})
         if not isinstance(cell_settings, Mapping):
             raise ValueError("cell settings must be an object")
-        _short_word_options({**shared_settings, **dict(cell_settings)})
-    declared_run_dir = Path(spec.get("run_dir", spec_path.parent))
-    run_dir = (
-        declared_run_dir
-        if declared_run_dir.is_absolute()
-        else spec_path.parent / declared_run_dir
-    )
+        if not isinstance(cell_provenance, Mapping):
+            raise ValueError("cell provenance must be an object")
+        resolved_settings = _validated_settings(
+            {**shared_settings, **dict(cell_settings)}
+        )
+        canonical_params = _canonical_parameters(cell["params"])
+        fingerprints[cell_id] = _fingerprint_from_canonical(
+            cell_id,
+            canonical_params,
+            resolved_settings,
+        )
+    run_dir_value = spec.get("run_dir")
+    if run_dir_value is None:
+        run_dir = spec_path.parent
+    else:
+        declared_run_dir = Path(run_dir_value)
+        run_dir = (
+            declared_run_dir
+            if declared_run_dir.is_absolute()
+            else spec_path.parent / declared_run_dir
+        )
     selected = [
         cell for position, cell in enumerate(cells)
         if position % worker_count == worker_index
@@ -529,18 +761,24 @@ def run_spec(
     pending: list[Mapping[str, object]] = []
     reused = 0
     for cell in selected:
-        manifest_path = run_dir / "cells" / str(cell["cell_id"]) / "manifest.json"
-        if _successful_manifest(manifest_path):
+        cell_id = _validated_cell_id(cell["cell_id"])
+        manifest_path = _manifest_path(run_dir, cell_id)
+        if _successful_manifest(
+            manifest_path,
+            cell_id=cell_id,
+            cell_fingerprint_value=fingerprints[cell_id],
+        ):
             reused += 1
         else:
             pending.append(cell)
 
     def execute(cell: Mapping[str, object]) -> dict[str, object]:
+        cell_id = _validated_cell_id(cell["cell_id"])
         manifest = run_cell(
-            str(cell["cell_id"]),
-            dict(cell["params"]),
-            {**shared_settings, **dict(cell.get("settings", {}))},
-            {**shared_provenance, **dict(cell.get("provenance", {}))},
+            cell_id,
+            cell["params"],
+            {**dict(shared_settings), **dict(cell.get("settings", {}))},
+            {**dict(shared_provenance), **dict(cell.get("provenance", {}))},
             joint_words_fn=joint_words_fn,
             endpoint_metric_fn=endpoint_metric_fn,
             joint_metric_fn=joint_metric_fn,
@@ -548,13 +786,32 @@ def run_spec(
             orientation_fn=orientation_fn,
         )
         _write_json_atomic(
-            run_dir / "cells" / str(cell["cell_id"]) / "manifest.json",
+            _manifest_path(run_dir, cell_id),
             manifest,
         )
         return manifest
 
     completed = 0
     compute_errors = 0
+    progress_interval = max(1, len(selected) // 25)
+
+    def report_progress() -> None:
+        processed = reused + completed
+        if (
+            progress_fn is not None
+            and (
+                processed == len(selected)
+                or processed % progress_interval == 0
+            )
+        ):
+            progress_fn(
+                "oddcycle pair runner: "
+                f"{processed}/{len(selected)} processed, "
+                f"{reused} reused, {compute_errors} compute errors"
+            )
+
+    if reused:
+        report_progress()
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = [executor.submit(execute, cell) for cell in pending]
         for future in as_completed(futures):
@@ -562,6 +819,7 @@ def run_spec(
             completed += 1
             if manifest["compute_success"] is not True:
                 compute_errors += 1
+            report_progress()
     return {
         "selected": len(selected),
         "completed": completed,
@@ -577,22 +835,31 @@ def main() -> None:
     parser.add_argument("--worker-index", type=int, default=0)
     parser.add_argument("--worker-count", type=int, default=1)
     arguments = parser.parse_args()
-    print(
-        json.dumps(
-            run_spec(
-                arguments.run_spec,
-                workers=arguments.workers,
-                worker_index=arguments.worker_index,
-                worker_count=arguments.worker_count,
-            ),
-            sort_keys=True,
+    summary = run_spec(
+        arguments.run_spec,
+        workers=arguments.workers,
+        worker_index=arguments.worker_index,
+        worker_count=arguments.worker_count,
+        progress_fn=lambda message: print(
+            message,
+            file=sys.stderr,
+            flush=True,
         ),
-        flush=True,
     )
+    print(json.dumps(summary, sort_keys=True), flush=True)
+    if summary["compute_errors"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
     main()
 
 
-__all__ = ["main", "numerical_time_orientation", "run_cell", "run_spec"]
+__all__ = [
+    "SCHEMA",
+    "cell_fingerprint",
+    "main",
+    "numerical_time_orientation",
+    "run_cell",
+    "run_spec",
+]

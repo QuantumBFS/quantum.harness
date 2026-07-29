@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import math
+import sys
 import tempfile
 import time
 from collections.abc import Callable, Mapping, Sequence
@@ -75,6 +76,7 @@ _BINDING_THRESHOLDS = {
 
 
 StressFunction = Callable[..., dict[str, object]]
+ProgressFunction = Callable[[str], None]
 
 
 def _parse_rational(value: object, *, name: str) -> Fraction:
@@ -1092,22 +1094,34 @@ def run_cell(
             compute_success=False,
             first_failure="mixed-word-stress-error",
         )
+    if not isinstance(stress, Mapping):
+        stress = {
+            "status": "malformed-result",
+            "returned_type": type(stress).__name__,
+        }
+    else:
+        stress = dict(stress)
     manifest["mixed_word_stress"] = stress
-    if stress.get("status") == "resource-limit":
-        return _finish(
-            manifest,
-            started,
-            classification="mixed-word-stress-incomplete",
-            compute_success=False,
-            first_failure="mixed-word-stress-incomplete",
-        )
-    if stress.get("passed") is not True:
+    status = stress.get("status")
+    completed_requested_depth = stress.get("completed_requested_depth")
+    if status == "nonpositive-word-found":
         return _finish(
             manifest,
             started,
             classification="determinant-stress-failed",
             compute_success=True,
             first_failure="mixed-word-stress-gate",
+        )
+    if not (
+        status == "all-tested-words-positive"
+        and completed_requested_depth is True
+    ):
+        return _finish(
+            manifest,
+            started,
+            classification="mixed-word-stress-incomplete",
+            compute_success=False,
+            first_failure="mixed-word-stress-incomplete",
         )
     return _finish(
         manifest,
@@ -1187,6 +1201,7 @@ def run_spec(
     worker_index: int = 0,
     worker_count: int = 1,
     stress_fn: StressFunction = mixed_word_determinant_stress,
+    progress_fn: ProgressFunction | None = None,
 ) -> dict[str, int]:
     """Execute one deterministic positional virtual-worker shard."""
 
@@ -1298,6 +1313,25 @@ def run_spec(
 
     completed = 0
     compute_errors = 0
+    progress_interval = max(1, len(selected) // 25)
+
+    def report_progress() -> None:
+        processed = reused + completed
+        if (
+            progress_fn is not None
+            and (
+                processed == len(selected)
+                or processed % progress_interval == 0
+            )
+        ):
+            progress_fn(
+                "TP exterior runner: "
+                f"{processed}/{len(selected)} processed, "
+                f"{reused} reused, {compute_errors} compute errors"
+            )
+
+    if reused:
+        report_progress()
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = [executor.submit(execute, cell) for cell in pending]
         for future in as_completed(futures):
@@ -1305,6 +1339,7 @@ def run_spec(
             completed += 1
             if manifest["compute_success"] is not True:
                 compute_errors += 1
+            report_progress()
     return {
         "selected": len(selected),
         "completed": completed,
@@ -1320,18 +1355,20 @@ def main() -> None:
     parser.add_argument("--worker-index", type=int, default=0)
     parser.add_argument("--worker-count", type=int, default=1)
     arguments = parser.parse_args()
-    print(
-        json.dumps(
-            run_spec(
-                arguments.run_spec,
-                workers=arguments.workers,
-                worker_index=arguments.worker_index,
-                worker_count=arguments.worker_count,
-            ),
-            sort_keys=True,
+    summary = run_spec(
+        arguments.run_spec,
+        workers=arguments.workers,
+        worker_index=arguments.worker_index,
+        worker_count=arguments.worker_count,
+        progress_fn=lambda message: print(
+            message,
+            file=sys.stderr,
+            flush=True,
         ),
-        flush=True,
     )
+    print(json.dumps(summary, sort_keys=True), flush=True)
+    if summary["compute_errors"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":  # pragma: no cover - remote CLI entry point

@@ -70,6 +70,7 @@ def _passed_gauge_gate(_gauge, _settings):
 def _passed_stress(_atoms, **options):
     return {
         "passed": True,
+        "completed_requested_depth": True,
         "status": "all-tested-words-positive",
         "minimum_determinant": 1.25,
         "settings_seen": options,
@@ -327,6 +328,96 @@ def test_resource_limited_stress_is_an_incomplete_retryable_cell(monkeypatch):
     assert manifest["classification"] == "mixed-word-stress-incomplete"
     assert manifest["compute_success"] is False
     assert manifest["first_failure"] == "mixed-word-stress-incomplete"
+
+
+@pytest.mark.parametrize(
+    ("stress_result", "classification", "compute_success"),
+    [
+        (
+            {
+                "passed": True,
+                "completed_requested_depth": True,
+                "status": "all-tested-words-positive",
+            },
+            "candidate-survivor",
+            True,
+        ),
+        (
+            {
+                "passed": True,
+                "completed_requested_depth": False,
+                "status": "all-tested-words-positive",
+            },
+            "mixed-word-stress-incomplete",
+            False,
+        ),
+        (
+            {
+                "passed": False,
+                "completed_requested_depth": False,
+                "status": "nonpositive-word-found",
+            },
+            "determinant-stress-failed",
+            True,
+        ),
+        (
+            {
+                "passed": False,
+                "completed_requested_depth": False,
+                "status": "nonfinite-or-complex",
+            },
+            "mixed-word-stress-incomplete",
+            False,
+        ),
+        (
+            {
+                "passed": False,
+                "completed_requested_depth": False,
+                "status": "resource-limit",
+            },
+            "mixed-word-stress-incomplete",
+            False,
+        ),
+        (
+            {
+                "passed": False,
+                "completed_requested_depth": False,
+                "status": "unrecognized-status",
+            },
+            "mixed-word-stress-incomplete",
+            False,
+        ),
+        ({}, "mixed-word-stress-incomplete", False),
+        ([], "mixed-word-stress-incomplete", False),
+    ],
+)
+def test_run_cell_classifies_stress_status_before_declaring_a_survivor(
+    monkeypatch,
+    stress_result,
+    classification,
+    compute_success,
+):
+    _patch_pre_stress_gates(monkeypatch)
+
+    manifest = run_cell(
+        f"stress-{classification}",
+        BASE_PARAMS,
+        {},
+        {},
+        stress_fn=lambda *_args, **_kwargs: stress_result,
+    )
+
+    assert manifest["classification"] == classification
+    assert manifest["compute_success"] is compute_success
+    assert manifest["first_failure"] == (
+        None
+        if classification == "candidate-survivor"
+        else (
+            "mixed-word-stress-gate"
+            if classification == "determinant-stress-failed"
+            else "mixed-word-stress-incomplete"
+        )
+    )
 
 
 @pytest.mark.parametrize(
