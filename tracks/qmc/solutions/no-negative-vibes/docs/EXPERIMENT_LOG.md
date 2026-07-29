@@ -2552,3 +2552,21 @@ The next loop should move toward the TP boundary: add Jacobi strengths below
 minor sign crossing, while testing transformed compound positivity on both
 sides.  This preserves the success-first policy: search the narrow overlap
 directly rather than spend the full budget on a coarse empty grid.
+
+### Recoverable pause checkpoint
+
+The authorized search round is now closed.  No next-round search was
+launched, and all remote scientific processes exited.  Results, shards,
+scripts, environments, repositories, worktrees, and ignored artifact
+directories were retained.  Complete parameters, deterministic-seed
+statements, operational failures, output paths, hashes, read-only audit
+commands, recorded launch commands, and non-repeating resume instructions
+are frozen in `docs/REMOTE_SEARCH_CHECKPOINT_2026-07-29.md`.
+
+On a future `继续`, begin with SHA audits and Git synchronization.  The
+12,325-cell frontier, 6,266-cell dual ranking, and both `cell-4321`
+promotions are complete and must not be repeated.  The next authorized work
+should package the robust candidate into a production one-command
+certificate and compare it with the simpler frozen theorem before deciding
+whether to retry inconclusive dual cells or begin the adaptive TP boundary
+scan.
