@@ -95,6 +95,20 @@ include(joinpath(
     "ShastryFullStateSpatialPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpatialPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpinSpatialReduction.jl",
+))
+using .ShastryFullStateSpinSpatialReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpinSpatialPrimalGapJuMP.jl",
+))
+using .ShastryFullStateSpinSpatialPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin

@@ -21,6 +21,32 @@ function progress(message::AbstractString)
     flush(stdout)
 end
 
+function requested_solve_form()
+    label = lowercase(get(ENV, "SS_MOSEK_SOLVE_FORM", "free"))
+    forms = Dict(
+        "free" => Mosek.MSK_SOLVE_FREE,
+        "primal" => Mosek.MSK_SOLVE_PRIMAL,
+        "dual" => Mosek.MSK_SOLVE_DUAL,
+    )
+    haskey(forms, label) ||
+        throw(
+            ArgumentError(
+                "SS_MOSEK_SOLVE_FORM must be free, primal, or dual",
+            ),
+        )
+    return (label=label, value=forms[label])
+end
+
+function requested_log_level()
+    text = get(ENV, "SS_MOSEK_LOG_LEVEL", "1")
+    value = tryparse(Int, text)
+    isnothing(value) &&
+        throw(ArgumentError("SS_MOSEK_LOG_LEVEL must be an integer"))
+    0 <= value <= 10 ||
+        throw(ArgumentError("SS_MOSEK_LOG_LEVEL must be between 0 and 10"))
+    return value
+end
+
 function canonical_parts(canonical::AbstractString)
     fields = split(canonical, "//")
     length(fields) == 2 ||
@@ -381,6 +407,8 @@ end
 function main(arguments::Vector{String}=ARGS)
     options = B.parse_args(arguments)
     isnothing(options) && return 0
+    solve_form = requested_solve_form()
+    log_level = requested_log_level()
     wall_start = time()
     result = Dict(
         "schema_version" => RESULT_SCHEMA,
@@ -397,6 +425,8 @@ function main(arguments::Vector{String}=ARGS)
         "audit_tolerance" => options.audit_tolerance,
         "time_limit_seconds" => options.time_limit_seconds,
         "threads" => options.threads,
+        "requested_solve_form" => solve_form.label,
+        "mosek_log_level" => log_level,
         "runtime" => Dict(
             "julia_version" => string(VERSION),
             "julia_executable" => Base.julia_cmd().exec[1],
@@ -448,8 +478,21 @@ function main(arguments::Vector{String}=ARGS)
             "MSK_IPAR_NUM_THREADS",
             options.threads,
         )
+        JuMP.set_optimizer_attribute(
+            model,
+            "MSK_IPAR_INTPNT_SOLVE_FORM",
+            solve_form.value,
+        )
+        JuMP.set_optimizer_attribute(
+            model,
+            "MSK_IPAR_LOG",
+            log_level,
+        )
 
-        progress("optimize! started")
+        progress(
+            "optimize! started; solve_form=$(solve_form.label), " *
+            "log_level=$log_level",
+        )
         solve_start = time()
         JuMP.optimize!(model)
         solve_wall_seconds = time() - solve_start

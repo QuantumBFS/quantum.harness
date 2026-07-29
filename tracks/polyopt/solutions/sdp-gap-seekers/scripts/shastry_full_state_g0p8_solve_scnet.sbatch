@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=114000M
+#SBATCH --mem=96000M
 #SBATCH --time=03:00:00
 #SBATCH --array=0-1
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-full-state-g0p8-solve-%A_%a.out
@@ -14,6 +14,8 @@ set -euo pipefail
 export LC_ALL=C
 export LANG=C
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-32}"
+export SS_MOSEK_SOLVE_FORM="${SS_MOSEK_SOLVE_FORM:-free}"
+export SS_MOSEK_LOG_LEVEL="${SS_MOSEK_LOG_LEVEL:-1}"
 
 readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
