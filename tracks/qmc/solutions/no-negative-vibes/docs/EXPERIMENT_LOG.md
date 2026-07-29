@@ -1469,3 +1469,21 @@ and
 Seeds 132 and 147 now receive a 128-start simplicial continuation in
 parallel with a generalized redundant-ray search. Any rectangular hit must
 also pass exact `RC=I, CR>=0`; `AR=RP, P>=0` alone is not promotable.
+
+### 128-start simplicial continuation
+
+The deeper seed-132 and seed-147 runs finished without a complete exact
+certificate.  This is an early stop for the simplicial route, not evidence
+against a larger polyhedral cone:
+
+- seed 132 best grade-1/2/3 objectives:
+  `1.079102e-7 / 9.843185e-6 / 1.813196e-6`;
+- seed 147 best grade-1/2/3 objectives:
+  `3.670594e-7 / 3.941678e-5 / 4.083955e-7`.
+
+The result JSON SHA-256 values are
+`85bbc11d9cae40a063e8c1fa6f8bfcf0b3acafd83f6acc8fa3572237b5de28ee`
+and
+`ff4b3b90e33e2977e472778826aa92cecedcd413d1716856d5e593febeb4f909`.
+Further simplicial restarts are stopped; the active continuation is the
+trace-compatible redundant-cone search with exact replay.
