@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import multiprocessing
 import shutil
 import weakref
 from dataclasses import FrozenInstanceError
@@ -280,6 +281,73 @@ def _private_snapshot_parent(tmp_path: Path) -> Path:
     return parent
 
 
+def _snapshot_window_owner(
+    parent_value: str,
+    window: str,
+    ready: object,
+    finish: object,
+) -> None:
+    parent = Path(parent_value)
+    process_identity = pilot._snapshot_process_identity()
+    token = ("a" if window == "mkdir-before-marker" else "b") * 32
+    name = pilot._snapshot_directory_name(process_identity, token)
+    candidate = parent / name
+    candidate.mkdir(mode=0o700)
+    if window == "marker-last-before-rmdir":
+        marker = candidate / pilot.PILOT_SNAPSHOT_MARKER
+        marker.write_bytes(
+            pilot._canonical_bytes(
+                pilot._snapshot_marker_document(
+                    name,
+                    token,
+                    process_identity,
+                )
+            )
+        )
+        marker.unlink()
+    ready.send((name, candidate.stat().st_ino))
+    finish.recv()
+    candidate.rmdir()
+    ready.send("completed")
+
+
+def _assert_active_snapshot_window_survives(
+    parent: Path,
+    window: str,
+) -> None:
+    context = multiprocessing.get_context("fork")
+    owner_ready, cleaner_ready = context.Pipe()
+    cleaner_finish, owner_finish = context.Pipe()
+    owner = context.Process(
+        target=_snapshot_window_owner,
+        args=(str(parent), window, cleaner_ready, owner_finish),
+    )
+    owner.start()
+    try:
+        assert owner_ready.poll(10), "snapshot owner did not reach cleanup window"
+        name, inode = owner_ready.recv()
+        candidate = parent / name
+        parent_fd = pilot._open_validated_snapshot_parent(parent)
+        try:
+            pilot._cleanup_stale_owned_snapshots(parent_fd)
+        finally:
+            pilot.os.close(parent_fd)
+        assert candidate.stat().st_ino == inode
+        cleaner_finish.send("finish")
+        assert owner_ready.poll(10), "snapshot owner did not complete"
+        assert owner_ready.recv() == "completed"
+        owner.join(10)
+        assert owner.exitcode == 0
+        assert not candidate.exists()
+    finally:
+        if owner.is_alive():
+            cleaner_finish.send("finish")
+            owner.join(10)
+        if owner.is_alive():
+            owner.kill()
+            owner.join(10)
+
+
 def test_snapshot_preflight_rejects_aggregate_over_budget_before_payload_copy(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -417,6 +485,65 @@ def test_snapshot_cleanup_removes_ownership_marker_last(
 
     assert removed_names[-1] == pilot.PILOT_SNAPSHOT_MARKER
     assert list(parent.iterdir()) == []
+
+
+def test_stale_cleanup_preserves_active_mkdir_before_marker_window(
+    tmp_path: Path,
+):
+    parent = _private_snapshot_parent(tmp_path)
+    _assert_active_snapshot_window_survives(parent, "mkdir-before-marker")
+
+
+def test_stale_cleanup_preserves_active_marker_last_before_rmdir_window(
+    tmp_path: Path,
+):
+    parent = _private_snapshot_parent(tmp_path)
+    _assert_active_snapshot_window_survives(
+        parent,
+        "marker-last-before-rmdir",
+    )
+
+
+def test_stale_cleanup_removes_proven_dead_markerless_snapshot(
+    tmp_path: Path,
+):
+    parent = _private_snapshot_parent(tmp_path)
+    name = pilot._snapshot_directory_name(
+        (2_147_483_647, f"linux-{'0' * 32}-1"),
+        "c" * 32,
+    )
+    candidate = parent / name
+    candidate.mkdir(mode=0o700)
+
+    parent_fd = pilot._open_validated_snapshot_parent(parent)
+    try:
+        pilot._cleanup_stale_owned_snapshots(parent_fd)
+    finally:
+        pilot.os.close(parent_fd)
+
+    assert not candidate.exists()
+
+
+def test_stale_cleanup_leaves_unverifiable_markerless_snapshot(
+    tmp_path: Path,
+):
+    parent = _private_snapshot_parent(tmp_path)
+    name = pilot._snapshot_directory_name(
+        (pilot.os.getpid(), None),
+        "d" * 32,
+    )
+    candidate = parent / name
+    candidate.mkdir(mode=0o700)
+    inode = candidate.stat().st_ino
+
+    parent_fd = pilot._open_validated_snapshot_parent(parent)
+    try:
+        pilot._cleanup_stale_owned_snapshots(parent_fd)
+    finally:
+        pilot.os.close(parent_fd)
+
+    assert candidate.stat().st_ino == inode
+    candidate.rmdir()
 
 
 def test_pilot_estimate_is_immutable():

@@ -2076,24 +2076,137 @@ def _open_validated_snapshot_parent(path: Path) -> int:
     return descriptor
 
 
-def _snapshot_process_is_alive(pid: int) -> bool:
+SnapshotProcessIdentity = tuple[int, str | None]
+
+
+def _read_linux_process_birth_token(pid: int) -> str | None:
     if pid <= 0:
-        return False
+        return None
+    try:
+        boot_id = (
+            Path("/proc/sys/kernel/random/boot_id").read_text(encoding="ascii").strip()
+        )
+        stat_payload = Path(f"/proc/{pid}/stat").read_bytes()
+    except (OSError, UnicodeError):
+        return None
+    compact_boot_id = boot_id.replace("-", "")
+    closing_parenthesis = stat_payload.rfind(b")")
+    if (
+        re.fullmatch(r"[0-9a-f]{32}", compact_boot_id) is None
+        or closing_parenthesis < 0
+        or len(stat_payload) > 4096
+    ):
+        return None
+    fields = stat_payload[closing_parenthesis + 1 :].split()
+    if len(fields) <= 19:
+        return None
+    try:
+        start_ticks = int(fields[19])
+    except ValueError:
+        return None
+    if start_ticks <= 0:
+        return None
+    return f"linux-{compact_boot_id}-{start_ticks}"
+
+
+def _snapshot_process_identity(pid: int | None = None) -> SnapshotProcessIdentity:
+    process_id = os.getpid() if pid is None else pid
+    if (
+        isinstance(process_id, bool)
+        or not isinstance(process_id, int)
+        or process_id <= 0
+    ):
+        raise RuntimeError("pilot snapshot process PID is invalid")
+    return process_id, _read_linux_process_birth_token(process_id)
+
+
+def _snapshot_birth_name(token: str | None) -> str:
+    if token is None:
+        return "unverifiable"
+    if re.fullmatch(r"linux-[0-9a-f]{32}-[1-9][0-9]*", token) is None:
+        raise RuntimeError("pilot snapshot process birth token is malformed")
+    return token
+
+
+def _snapshot_directory_name(
+    process_identity: SnapshotProcessIdentity,
+    uniqueness: str,
+) -> str:
+    pid, birth_token = process_identity
+    if (
+        isinstance(pid, bool)
+        or not isinstance(pid, int)
+        or pid <= 0
+        or re.fullmatch(r"[0-9a-f]{32}", uniqueness) is None
+    ):
+        raise RuntimeError("pilot snapshot directory identity is malformed")
+    return (
+        f"{PILOT_SNAPSHOT_PREFIX}{pid}-{_snapshot_birth_name(birth_token)}-{uniqueness}"
+    )
+
+
+def _parse_snapshot_directory_name(
+    name: str,
+) -> tuple[SnapshotProcessIdentity, str] | None:
+    match = re.fullmatch(
+        re.escape(PILOT_SNAPSHOT_PREFIX)
+        + r"([1-9][0-9]*)-"
+        + r"(linux-[0-9a-f]{32}-[1-9][0-9]*|unverifiable)-"
+        + r"([0-9a-f]{32})",
+        name,
+    )
+    if match is None:
+        return None
+    birth_name = match.group(2)
+    return (
+        (
+            int(match.group(1)),
+            None if birth_name == "unverifiable" else birth_name,
+        ),
+        match.group(3),
+    )
+
+
+def _snapshot_pid_exists(pid: int) -> bool | None:
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
         return False
     except PermissionError:
         return True
+    except OSError:
+        return None
     return True
 
 
-def _snapshot_marker_document(name: str, token: str) -> dict[str, object]:
+def _snapshot_identity_liveness(
+    process_identity: SnapshotProcessIdentity,
+) -> bool | None:
+    pid, expected_birth = process_identity
+    observed_birth = _read_linux_process_birth_token(pid)
+    if expected_birth is not None and observed_birth is not None:
+        return observed_birth == expected_birth
+    exists = _snapshot_pid_exists(pid)
+    if exists is False:
+        return False
+    return None
+
+
+def _snapshot_marker_document(
+    name: str,
+    token: str,
+    process_identity: SnapshotProcessIdentity,
+) -> dict[str, object]:
+    parsed = _parse_snapshot_directory_name(name)
+    if parsed != (process_identity, token):
+        raise RuntimeError("pilot snapshot name and process identity differ")
+    pid, birth_token = process_identity
     return {
-        "schema_version": "challenge-194-p0-snapshot-owner-v1",
+        "schema_version": "challenge-194-p0-snapshot-owner-v2",
         "directory_name": name,
         "owner_uid": os.geteuid(),
-        "owner_pid": os.getpid(),
+        "owner_pid": pid,
+        "owner_birth_token": birth_token,
         "token": token,
     }
 
@@ -2128,6 +2241,7 @@ def _read_snapshot_marker(directory_fd: int) -> dict[str, object]:
                 "directory_name",
                 "owner_uid",
                 "owner_pid",
+                "owner_birth_token",
                 "token",
             }
         ):
@@ -2260,7 +2374,11 @@ def _cleanup_stale_owned_snapshots(parent_fd: int) -> None:
         description="pilot snapshot parent",
     )
     for name in names:
-        if not name.startswith(PILOT_SNAPSHOT_PREFIX):
+        parsed_name = _parse_snapshot_directory_name(name)
+        if parsed_name is None:
+            continue
+        process_identity, token = parsed_name
+        if _snapshot_identity_liveness(process_identity) is not False:
             continue
         try:
             directory_fd = _open_directory_at(name, parent_fd)
@@ -2268,17 +2386,14 @@ def _cleanup_stale_owned_snapshots(parent_fd: int) -> None:
             continue
         try:
             marker = _read_snapshot_marker(directory_fd)
-            if (
-                marker.get("schema_version") != "challenge-194-p0-snapshot-owner-v1"
-                or marker.get("directory_name") != name
-                or marker.get("owner_uid") != os.geteuid()
-                or not isinstance(marker.get("owner_pid"), int)
-                or not isinstance(marker.get("token"), str)
-                or not re.fullmatch(r"[0-9a-f]{32}", str(marker["token"]))
-                or _snapshot_process_is_alive(int(marker["owner_pid"]))
-            ):
+            expected_marker = _snapshot_marker_document(
+                name,
+                token,
+                process_identity,
+            )
+            if marker != expected_marker:
                 continue
-            _remove_owned_snapshot(parent_fd, name, directory_fd, marker)
+            _remove_owned_snapshot(parent_fd, name, directory_fd, expected_marker)
         except (OSError, RuntimeError, ValueError):
             try:
                 _remove_empty_owned_snapshot(parent_fd, name, directory_fd)
@@ -2321,8 +2436,9 @@ def _owned_pilot_snapshot_directory(parent: Path) -> Iterator[Path]:
     try:
         _cleanup_stale_owned_snapshots(parent_fd)
         token = uuid.uuid4().hex
-        name = f"{PILOT_SNAPSHOT_PREFIX}{os.getpid()}-{token}"
-        marker = _snapshot_marker_document(name, token)
+        process_identity = _snapshot_process_identity()
+        name = _snapshot_directory_name(process_identity, token)
+        marker = _snapshot_marker_document(name, token, process_identity)
         directory_fd: int | None = None
         directory_created = False
         marker_complete = False
