@@ -99,6 +99,11 @@ def test_help_describes_isolation_and_security_boundary(tmp_path: Path) -> None:
     assert "not another wrapper" in result.stdout
     assert "install-shim" in result.stdout
     assert "eval" in result.stdout
+    assert "out-of-memory (OOM)" in result.stdout
+    assert "retains compiled code" in result.stdout
+    assert "state left by an earlier call" in result.stdout
+    assert "stop [--port N]" in result.stdout
+    assert "restart after dependency" in result.stdout
 
 
 @requires_daemonmode

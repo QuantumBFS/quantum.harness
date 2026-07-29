@@ -53,7 +53,7 @@ skills: ## Install or sync Ion-managed skills
 	fi; \
 	ion add
 
-julia-daemon: ## Install isolated DaemonMode runner; add SHIM=1 to replace julia via PATH
+julia-daemon: ## Install opt-in persistent Julia runner (SHIM=1); may retain memory/state
 	@scripts/julia-daemon.sh $(if $(SHIM),install-shim,install)
 
 # Stable KEY=VALUE contract for the zlp-harness plugin's zlp-onboard skill.

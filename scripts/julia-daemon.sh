@@ -42,6 +42,14 @@ service and is only for trusted, single-user workstations; do not use it on
 shared login or compute nodes. The optional shim lets normal `julia --project`
 commands use the daemon when compatible and otherwise executes real Julia.
 Set JULIA_REAL_BIN to the real Julia executable (not another wrapper).
+
+WARNING: The daemon retains compiled code, loaded modules, task-local/global
+state, and allocations between calls. Resident memory can keep growing and may
+cause an out-of-memory (OOM) kill during large or varied workloads. Results can
+also depend on state left by an earlier call, and source or environment changes
+may not be visible in the already-running process. Run
+`scripts/julia-daemon.sh stop [--port N]` to release memory and reset state;
+restart after dependency, environment, or substantial source changes.
 EOF
 }
 
