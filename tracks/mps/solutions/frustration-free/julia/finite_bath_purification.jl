@@ -1230,18 +1230,6 @@ function validate_purification_fluxes(
     return nothing
 end
 
-function _locked_probe_mapping_capability()
-    return ValidatedChainMappingCapability(
-        _CHAIN_MAPPING_VALIDATION_SEAL;
-        source_bath_sha256 = bytes2hex(sha256("locked-qn-probe-bath")),
-        mapping_sha256 = bytes2hex(sha256("locked-qn-probe-mapping")),
-        epsilon = [0.0],
-        chain_onsite = [0.0],
-        chain_hopping = Float64[],
-        lambda = 0.1,
-    )
-end
-
 function _probe_operator_sectors(sites, psi, purification)
     expected = (
         ("Cdagup", purification.base_sector_nf + 1, 1),
@@ -1261,8 +1249,93 @@ function _probe_operator_sectors(sites, psi, purification)
     return true
 end
 
-function _run_qn_purification_capability_probe()
-    validated = _locked_probe_mapping_capability()
+function _normalized_probe_branch(psi, site, operator_name)
+    branch = deepcopy(psi)
+    orthogonalize!(branch, 1)
+    branch[1] = noprime(op(operator_name, site) * branch[1])
+    amplitude = norm(branch)
+    amplitude > 0 ||
+        error("locked QN probe operator branch unexpectedly vanished")
+    branch[1] /= amplitude
+    return branch
+end
+
+function _probe_state_roundtrips(
+    directory, sites, psi, hamiltonian, purification, parameters
+)
+    base_nf = purification.base_sector_nf
+    states = (
+        (
+            "base",
+            copy(psi),
+            QN(("Nf", base_nf, -1), ("Sz", 0)),
+        ),
+        (
+            "creation_up",
+            _normalized_probe_branch(psi, sites[1], "Cdagup"),
+            QN(("Nf", base_nf + 1, -1), ("Sz", 1)),
+        ),
+        (
+            "creation_dn",
+            _normalized_probe_branch(psi, sites[1], "Cdagdn"),
+            QN(("Nf", base_nf + 1, -1), ("Sz", -1)),
+        ),
+        (
+            "annihilation_up",
+            _normalized_probe_branch(psi, sites[1], "Cup"),
+            QN(("Nf", base_nf - 1, -1), ("Sz", -1)),
+        ),
+        (
+            "annihilation_dn",
+            _normalized_probe_branch(psi, sites[1], "Cdn"),
+            QN(("Nf", base_nf - 1, -1), ("Sz", 1)),
+        ),
+    )
+    expected_site_indices = siteinds(psi)
+    expected_site_spaces = space.(expected_site_indices)
+    for (name, initial, expected_flux) in states
+        flux(initial) == expected_flux ||
+            error("locked QN probe initial $name sector mismatch")
+        evolved, _ = _evolve_normalized_state(
+            initial,
+            hamiltonian;
+            beta = 0.02,
+            time_step = 0.02,
+            cutoff = 1.0e-12,
+            maxdim = 16,
+            krylov_expansion_dim = 0,
+            hamiltonian_norm_bound = _hamiltonian_norm_bound(parameters),
+        )
+        flux(evolved) == expected_flux ||
+            error("locked QN probe TDVP changed the $name sector")
+
+        path = joinpath(directory, "$name.h5")
+        h5open(path, "w") do file
+            write(file, "psi", evolved)
+        end
+        restored = h5open(path, "r") do file
+            read(file, "psi", MPS)
+        end
+        restored_sites = siteinds(restored)
+        restored_sites == expected_site_indices ||
+            error("locked QN probe HDF5 changed $name site indices")
+        space.(restored_sites) == expected_site_spaces ||
+            error("locked QN probe HDF5 changed $name site spaces")
+        flux(restored) == expected_flux ||
+            error("locked QN probe HDF5 changed the $name sector")
+        isapprox(norm(restored), norm(evolved); atol = 1.0e-12) ||
+            error("locked QN probe HDF5 changed the $name norm")
+        overlap = abs(inner(restored, evolved))
+        target_overlap = norm(restored) * norm(evolved)
+        isapprox(overlap, target_overlap; atol = 1.0e-11) ||
+            error("locked QN probe HDF5 changed the $name state")
+    end
+    return (; tdvp_step_valid = true, hdf5_roundtrip_valid = true)
+end
+
+function _run_qn_purification_capability_probe(
+    validated::ValidatedChainMappingCapability,
+)
     parameters = FiniteBathParameters(
         validated; U = 0.8, epsilon_d = -0.4, mu = 0.0
     )
@@ -1276,46 +1349,47 @@ function _run_qn_purification_capability_probe()
 
     operator_sectors_valid =
         _probe_operator_sectors(sites, psi, purification)
-    evolved, _ = _evolve_normalized_state(
-        copy(psi),
-        hamiltonian;
-        beta = 0.02,
-        time_step = 0.02,
-        cutoff = 1.0e-12,
-        maxdim = 16,
-        krylov_expansion_dim = 0,
-        hamiltonian_norm_bound = _hamiltonian_norm_bound(parameters),
-    )
-    flux(evolved) == flux(psi) ||
-        error("locked QN probe TDVP step changed the base sector")
-
-    hdf5_roundtrip_valid = mktempdir() do directory
-        path = joinpath(directory, "qn-probe.h5")
-        h5open(path, "w") do file
-            write(file, "psi", evolved)
-        end
-        restored = h5open(path, "r") do file
-            read(file, "psi", MPS)
-        end
-        flux(restored) == flux(evolved) &&
-            isapprox(norm(restored), norm(evolved); atol = 1.0e-12)
+    roundtrips = mktempdir() do directory
+        _probe_state_roundtrips(
+            directory,
+            sites,
+            psi,
+            hamiltonian,
+            purification,
+            parameters,
+        )
     end
-    hdf5_roundtrip_valid ||
-        error("locked QN probe HDF5 round trip changed the state")
 
     return (;
         site_labels_valid = true,
         identity_sector_valid = true,
         mpo_zero_flux_valid = true,
         operator_sectors_valid,
-        tdvp_step_valid = true,
-        hdf5_roundtrip_valid,
+        tdvp_step_valid = roundtrips.tdvp_step_valid,
+        hdf5_roundtrip_valid = roundtrips.hdf5_roundtrip_valid,
     )
 end
 
-function _probe_qn_purification_capability(stage::Function)
+const _MANDATORY_QN_PROBE_CHECKS = (
+    :site_labels_valid,
+    :identity_sector_valid,
+    :mpo_zero_flux_valid,
+    :operator_sectors_valid,
+    :tdvp_step_valid,
+    :hdf5_roundtrip_valid,
+)
+
+function _probe_qn_purification_capability(
+    validated::ValidatedChainMappingCapability, stage::Function
+)
     try
-        checks = stage()
+        checks = stage(validated)
+        all(
+            field ->
+                hasproperty(checks, field) &&
+                    getproperty(checks, field) === true,
+            _MANDATORY_QN_PROBE_CHECKS,
+        ) || error("mandatory QN capability check did not return exactly true")
         return (;
             supported = true,
             qn_gauge = QN_GAUGE,
@@ -1350,7 +1424,10 @@ function _probe_qn_purification_capability(stage::Function)
     end
 end
 
-probe_qn_purification_capability() =
-    _probe_qn_purification_capability(_run_qn_purification_capability_probe)
+probe_qn_purification_capability(
+    validated::ValidatedChainMappingCapability,
+) = _probe_qn_purification_capability(
+    validated, _run_qn_purification_capability_probe
+)
 
 end

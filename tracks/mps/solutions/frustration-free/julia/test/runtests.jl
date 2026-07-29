@@ -35,4 +35,5 @@ end
 include("finite_bath_purification.jl")
 include("finite_bath_observables.jl")
 include("finite_bath_mps_runner.jl")
+include("qn_mpo_capability.jl")
 include("finite_bath_checkpoint.jl")

@@ -691,6 +691,7 @@ end
 end
 
 @testset "locked QN purification capability probe" begin
+    validated = validated_chain_fixture(; n_bath = 1)
     expected_fields = (
         :supported,
         :qn_gauge,
@@ -706,7 +707,7 @@ end
         :hdf5_roundtrip_valid,
         :failure,
     )
-    result = probe_qn_purification_capability()
+    result = probe_qn_purification_capability(validated)
     @test result isa NamedTuple
     @test propertynames(result) == expected_fields
     @test result.supported
@@ -727,7 +728,7 @@ end
 
     failed =
         FiniteBathPurification._probe_qn_purification_capability(
-            () -> error("injected capability failure")
+            validated, _ -> error("injected capability failure")
         )
     @test !failed.supported
     @test failed.failure isa String
