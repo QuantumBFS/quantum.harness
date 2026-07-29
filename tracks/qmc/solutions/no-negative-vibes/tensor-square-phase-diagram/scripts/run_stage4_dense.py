@@ -263,6 +263,7 @@ def main() -> None:
     parser.add_argument("--workers", required=True, type=int)
     parser.add_argument("--phase", required=True, choices=("pilot", "production"))
     parser.add_argument("--budget-plan", type=Path)
+    parser.add_argument("--pilot-results-dir", type=Path)
     parser.add_argument("--limit-cells", type=int)
     args = parser.parse_args()
 
@@ -286,14 +287,26 @@ def main() -> None:
     decisions = None
     plan_digest = None
     if args.phase == "production":
-        if args.budget_plan is None:
-            raise ValueError("production phase requires --budget-plan")
+        if args.budget_plan is None or args.pilot_results_dir is None:
+            raise ValueError(
+                "production phase requires --budget-plan and "
+                "--pilot-results-dir"
+            )
         plan_bytes = args.budget_plan.read_bytes()
         plan = json.loads(plan_bytes)
+        pilot_summaries = [
+            json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted(
+                args.pilot_results_dir.glob(
+                    "cells/*/pilot/replica_*/summary.json"
+                )
+            )
+        ]
         validate_budget_plan(
             plan,
             source_revision=str(git_metadata["commit"]),
             policy=policy,
+            pilot_summaries=pilot_summaries,
         )
         decisions = plan["decisions"]
         plan_digest = hashlib.sha256(plan_bytes).hexdigest()

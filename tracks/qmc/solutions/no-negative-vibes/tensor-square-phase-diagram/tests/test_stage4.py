@@ -298,7 +298,7 @@ def _pilot_payload(stage4, cell, replica: int, *, source: str = "abc123"):
         "cell_index": cell.index,
         "cohort": cell.cohort,
         "pair_id": cell.pair_id,
-        "machine": "wsl",
+        "machine": "wsl" if cell.worker_id < 14 else "cpu",
         "worker_id": cell.worker_id,
         "phase": "pilot",
         "replica": replica,
@@ -310,6 +310,7 @@ def _pilot_payload(stage4, cell, replica: int, *, source: str = "abc123"):
         "source_revision": source,
     }
     return {
+        **_pilot_summary(),
         "status": "COMPLETE",
         "experiment_id": stage4.EXPERIMENT_ID,
         "cell_id": cell.cell_id,
@@ -344,20 +345,40 @@ def test_pilot_release_validates_exact_replicas_fingerprints_and_source() -> Non
 def test_budget_plan_requires_release_policy_full_grid_and_source_match() -> None:
     stage4 = _stage4()
     policy = stage4.Stage4Policy()
+    cells = stage4.assigned_grid()
+    pilot_rows = [
+        _pilot_payload(stage4, cell, replica)
+        for cell in cells
+        for replica in (0, 1)
+    ]
     decisions = {
-        cell.cell_id: {"status": "STOP"} for cell in stage4.dense_grid()
+        cell.cell_id: {
+            "status": "RUN",
+            "reason": "pilot audit passed",
+            "worst_tau_int": 5.0,
+            "warmup_sweeps": 240,
+            "measurement_sweeps": 800,
+            "measure_every": 2,
+            "production_replicas": 4,
+            "projected_ess_per_replica": 40.0,
+            **({"paired_budget": True} if cell.pair_id is not None else {}),
+        }
+        for cell in cells
     }
     plan = {
         "experiment_id": stage4.EXPERIMENT_ID,
         "released": True,
         "source_revision": "abc123",
-        "pilot_digest": "a" * 64,
+        "pilot_digest": stage4.pilot_release_digest(pilot_rows),
         "policy": asdict(policy),
         "decisions": decisions,
     }
 
     stage4.validate_budget_plan(
-        plan, source_revision="abc123", policy=policy
+        plan,
+        source_revision="abc123",
+        policy=policy,
+        pilot_summaries=pilot_rows,
     )
 
     for broken in (
@@ -367,8 +388,33 @@ def test_budget_plan_requires_release_policy_full_grid_and_source_match() -> Non
     ):
         with pytest.raises(ValueError):
             stage4.validate_budget_plan(
-                broken, source_revision="abc123", policy=policy
+                broken,
+                source_revision="abc123",
+                policy=policy,
+                pilot_summaries=pilot_rows,
             )
+
+    tampered_decisions = {
+        cell_id: dict(decision) for cell_id, decision in decisions.items()
+    }
+    tampered_decisions[cells[0].cell_id]["measurement_sweeps"] = 100
+    with pytest.raises(ValueError, match="decisions"):
+        stage4.validate_budget_plan(
+            {**plan, "decisions": tampered_decisions},
+            source_revision="abc123",
+            policy=policy,
+            pilot_summaries=pilot_rows,
+        )
+
+    tampered_rows = [dict(row) for row in pilot_rows]
+    tampered_rows[0]["q_combined_tau_int"] = 6.0
+    with pytest.raises(ValueError, match="digest"):
+        stage4.validate_budget_plan(
+            plan,
+            source_revision="abc123",
+            policy=policy,
+            pilot_summaries=tampered_rows,
+        )
 
 
 def test_shard_exit_code_distinguishes_early_stop_from_worker_error() -> None:

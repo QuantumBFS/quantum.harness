@@ -272,6 +272,14 @@ def select_shard(
     ]
 
 
+def assigned_grid() -> list[DenseCell]:
+    return sorted(
+        select_shard(dense_grid(), "wsl")
+        + select_shard(dense_grid(), "cpu"),
+        key=lambda cell: cell.index,
+    )
+
+
 def replica_seed(
     cell_id: str,
     phase: str,
@@ -502,6 +510,7 @@ def validate_pilot_replicas(
             "cell_index": cell.index,
             "cohort": cell.cohort,
             "pair_id": cell.pair_id,
+            "machine": "wsl" if cell.worker_id < 14 else "cpu",
             "worker_id": cell.worker_id,
             "phase": "pilot",
             "replica": replica,
@@ -533,12 +542,8 @@ def pilot_release_digest(
     summaries: Iterable[dict[str, object]],
 ) -> str:
     records = sorted(
-        (
-            str(row["cell_id"]),
-            int(row["replica"]),
-            str(row["run_fingerprint"]),
-        )
-        for row in summaries
+        summaries,
+        key=lambda row: (str(row["cell_id"]), int(row["replica"])),
     )
     encoded = json.dumps(
         records, sort_keys=True, separators=(",", ":")
@@ -551,6 +556,7 @@ def validate_budget_plan(
     *,
     source_revision: str,
     policy: Stage4Policy,
+    pilot_summaries: Iterable[dict[str, object]],
 ) -> None:
     if plan.get("experiment_id") != EXPERIMENT_ID:
         raise ValueError("budget plan experiment_id mismatch")
@@ -568,7 +574,8 @@ def validate_budget_plan(
     decisions = plan.get("decisions")
     if not isinstance(decisions, dict):
         raise ValueError("budget plan decisions are missing")
-    expected_cells = {cell.cell_id for cell in dense_grid()}
+    cells = assigned_grid()
+    expected_cells = {cell.cell_id for cell in cells}
     if set(decisions) != expected_cells:
         raise ValueError("budget plan does not cover the frozen grid")
     if any(
@@ -577,6 +584,36 @@ def validate_budget_plan(
         for decision in decisions.values()
     ):
         raise ValueError("budget plan contains an invalid decision")
+    rows = list(pilot_summaries)
+    summaries_by_cell: dict[str, list[dict[str, object]]] = {}
+    for row in rows:
+        cell_id = str(row.get("cell_id", ""))
+        if cell_id not in expected_cells:
+            raise ValueError("pilot evidence contains an unknown cell")
+        summaries_by_cell.setdefault(cell_id, []).append(row)
+    source_revisions = {
+        validate_pilot_replicas(
+            cell,
+            summaries_by_cell.get(cell.cell_id, []),
+            policy=policy,
+        )
+        for cell in cells
+    }
+    if source_revisions != {source_revision}:
+        raise ValueError("pilot evidence source revision mismatch")
+    expected_digest = pilot_release_digest(rows)
+    if not hmac.compare_digest(digest, expected_digest):
+        raise ValueError("budget plan pilot digest mismatch")
+    raw_decisions = {
+        cell.cell_id: adaptive_budget(
+            summaries_by_cell[cell.cell_id],
+            policy=policy,
+        )
+        for cell in cells
+    }
+    expected_decisions = synchronize_pair_budgets(cells, raw_decisions)
+    if decisions != expected_decisions:
+        raise ValueError("budget plan decisions do not match pilot evidence")
 
 
 def shard_exit_code(results: Iterable[dict[str, object]]) -> int:

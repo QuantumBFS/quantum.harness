@@ -11,7 +11,7 @@ from pathlib import Path
 
 from tensor_square.stage4 import (
     adaptive_budget,
-    dense_grid,
+    assigned_grid,
     EXPERIMENT_ID,
     pilot_release_digest,
     Stage4Policy,
@@ -45,7 +45,7 @@ def main() -> None:
     args = parser.parse_args()
 
     policy = Stage4Policy()
-    cells = dense_grid()
+    cells = assigned_grid()
     cells_by_id = {cell.cell_id: cell for cell in cells}
     summaries_by_cell: dict[str, list[dict[str, object]]] = {}
     validation_errors: list[str] = []
