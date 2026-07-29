@@ -6,6 +6,7 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=256000M
 #SBATCH --gres=gpu:1
+#SBATCH --gres-flags=disable-binding
 #SBATCH --time=12:00:00
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-native-dual-hm-%j.out
 

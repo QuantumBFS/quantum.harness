@@ -685,3 +685,13 @@ Updated: 2026-07-29 UTC.
 - SCNet test-only requires `--gres=gpu:1` on that partition (`QOSMinGRES`).
   Add the required reservation explicitly, then repeat test-only; no job was
   created by the rejected request.
+- Protected SCNet JuMP baseline `118171391` ended naturally `OUT_OF_MEMORY`
+  after 2:27:56 during JuMP→Mosek transfer, before any solver iteration. Its
+  Slurm batch MaxRSS was 105,617,508 KiB and `/usr/bin/time` measured
+  114,714,824 KiB against 114000 MiB. It was not cancelled and is not gap or
+  feasibility evidence. Both conservative JuMP baselines are now closed OOM.
+- High-memory job `118178575` was rejected at time zero as `BadConstraints`:
+  the partition enforces GPU-to-CPU topology binding, but one admission GPU
+  cannot bind 32 CPU cores. Since Mosek is CPU-only, add
+  `--gres-flags=disable-binding`; `sbatch --test-only` then accepts the exact
+  32-CPU / 256000-MiB / one-GPU request. Submit this changed runner once.

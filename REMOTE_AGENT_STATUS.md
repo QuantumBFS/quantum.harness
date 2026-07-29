@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:27:16Z
+Updated: 2026-07-29T17:33:31Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -149,5 +149,16 @@ Updated: 2026-07-29T17:27:16Z
 - SCNet test-only created no job and returned `QOSMinGRES`: high-memory
   `ksagnormal01` requires at least one GPU allocation. The runner now requests
   one GPU explicitly; the measured high-memory need justifies the reservation.
+- Protected SCNet baseline `118171391` ended naturally `OUT_OF_MEMORY`
+  (`0:125`) after 2:27:56 while transferring/bridging the JuMP model into
+  Mosek, before an iteration. Slurm batch MaxRSS was 105,617,508 KiB and
+  `/usr/bin/time` measured 114,714,824 KiB against 114000 MiB. It was not
+  cancelled and supplies no feasibility evidence; both protected baselines
+  are now closed OOM.
+- First one-GPU high-memory submission `118178575` was rejected at time zero
+  as `BadConstraints`: enforced GPU/CPU locality could not bind 32 CPUs to one
+  GPU. The CPU-only solve now explicitly disables GRES binding while retaining
+  the admission GPU. `sbatch --test-only` accepts that exact 32-CPU /
+  256000-MiB request; next action is one real submission and live monitoring.
 
 No user input or new credential is currently required.

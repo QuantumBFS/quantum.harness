@@ -1214,3 +1214,21 @@ The first SCNet high-memory `sbatch --test-only` created no job and returned
 `--gres=gpu:1` explicitly. Reserving it is justified here by the established
 high-memory need; the computation remains CPU-only. Re-run test-only before
 submitting.
+
+The protected SCNet JuMP baseline `118171391` also ended naturally as
+`OUT_OF_MEMORY` (`0:125`), after 2:27:56; it was never cancelled. It reached
+the `attach Mosek and optimize` marker but emitted no Mosek iteration. Slurm's
+batch step measured 105,617,508 KiB MaxRSS and `/usr/bin/time` measured
+114,714,824 KiB against 114000 MiB. Like xH5 `23011251`, this closes an old
+JuMP→Mosek route as an operational failure and supplies no feasibility or
+spectral-gap evidence.
+
+Adding the required GPU exposed a second scheduler condition. Submission
+`118178575` ended at time zero with `BadConstraints`: SCNet's
+`GresEnforceBind=Yes` tried to bind the 32 requested CPU cores to one GPU's
+local socket. This is inappropriate for a CPU-only Mosek calculation whose
+GPU is only a partition-admission token. Add
+`--gres-flags=disable-binding`; the scheduler's test-only check then accepts
+the same 32-CPU / 256000-MiB / one-GPU runner. This is a launch-policy repair,
+not a repeated numerical signature. Submit the repaired native dual once and
+monitor through its exact construction hash gate.
