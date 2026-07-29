@@ -73,7 +73,8 @@ U_{n+1} = e^{-i H_n\Delta t}U_n.
 
 All Hamiltonians are Hermitian and all amplitudes are real. The propagator is
 the ordered product from the identity. JAX x64 is mandatory for rank and
-curvature measurements.
+curvature measurements. Total gate duration is part of the immutable system
+configuration and therefore part of every artifact hash.
 
 ### Objective
 
@@ -116,13 +117,19 @@ regularity checks explain it.
 
 Use a nonzero drift proportional to \(Z\), independent \(X\) and \(Y\)
 controls, and a noncommuting target gate. Use 12 segments per control
-(\(p=24\)) so the pulse is clearly overparameterized relative to rank 3.
+(\(p=24\)) and total duration \(T=1\) so the pulse is clearly
+overparameterized relative to rank 3.
 
 ### Two qubits
 
 Use a coupled drift containing \(ZZ\) and unequal local \(Z\) terms, with local
 \(X/Y\) controls on both qubits. The target is CNOT up to global phase. Use
-20 segments per control (\(p=80\)), well above rank 15.
+20 segments per control (\(p=80\)), well above rank 15, and total duration
+\(T=8\). With the normalized Pauli convention the configured `0.23 ZZ` term
+has effective nonlocal strength \(J=0.115\), so a CNOT-class gate requires at
+least \(\pi/(4J)\approx6.83\) under ideal instantaneous local controls.
+The original \(T=1\) proposal is physically unreachable; a controlled duration
+sweep reached \(10^{-8}\) only at \(T=8\).
 
 Before optimization, compute the dynamical Lie closure and verify dimensions 3
 and 15 respectively. Failure to reach the expected Lie dimension is a

@@ -13,6 +13,8 @@
 - All files created by this plan remain under `tracks/qcs/solutions/frustration-free/challenge-113/`.
 - Do not modify repository-root lockfiles, shared skills, or another challenge directory.
 - Use JAX x64 for all geometry, rank, and scientific-acceptance runs.
+- System duration is immutable and hashed: one-qubit defaults to `1.0`;
+  two-qubit defaults to `8.0`.
 - Use process infidelity `1 - |Tr(U_target† U)|² / d²` without regularization for landscape rank.
 - Hard amplitude bounds replace fluence/smoothness penalties in the rank objective.
 - Model open-loop acceptance is infidelity at most `1e-8`.
@@ -35,7 +37,7 @@
 - Create: `tracks/qcs/solutions/frustration-free/challenge-113/tests/test_runtime.py`
 
 **Interfaces:**
-- Produces: `SystemConfig(name: str, segments: int, amplitude_bound: float)`.
+- Produces: `SystemConfig(name: str, segments: int, amplitude_bound: float, duration: float | None = None)`.
 - Produces: `DeviceConfig(gap: float = 0.0, shots: int | None = None, perturbation_seed: int = 0)`.
 - Produces: `SearchConfig(method: str, dimension: int, budget: int)`.
 - Produces: `ExperimentConfig(run_kind, system, device, search, trial_seed)`.
@@ -143,6 +145,8 @@ Validation must enforce:
 - systems are `one_qubit` or `two_qubit`;
 - segments and budgets are positive integers;
 - amplitude bounds are finite and positive;
+- explicit durations are finite and positive; `None` resolves canonically to
+  `1.0` for one qubit and `8.0` for two qubits;
 - gaps are finite and nonnegative;
 - shots are either `None` for exact mode or a positive integer;
 - search methods are `full`, `model_hessian`, `random`, or `oracle`;
@@ -183,7 +187,7 @@ Expected: all tests pass. Commit with `Build isolated Challenge 113 runtime`.
 
 **Interfaces:**
 - Consumes: `SystemConfig`.
-- Produces: `ControlSystem(drift, controls, target, amplitude_scales, name)`.
+- Produces: `ControlSystem(drift, controls, target, amplitude_scales, name, duration)`.
 - Produces: `make_system(config: SystemConfig) -> ControlSystem`.
 - Produces: `lie_algebra_dimension(system: ControlSystem, tolerance=1e-10) -> int`.
 - Produces: `perturb_system(system, gap, seed) -> ControlSystem`.
@@ -200,6 +204,7 @@ from qcontrol.systems import lie_algebra_dimension, make_system, perturb_system
 def test_one_qubit_system_is_su2_controllable() -> None:
     system = make_system(SystemConfig("one_qubit", 12, 4.0))
     assert system.dimension == 2
+    assert system.duration == 1.0
     assert len(system.controls) == 2
     assert lie_algebra_dimension(system) == 3
 
@@ -207,6 +212,7 @@ def test_one_qubit_system_is_su2_controllable() -> None:
 def test_two_qubit_system_is_su4_controllable() -> None:
     system = make_system(SystemConfig("two_qubit", 20, 4.0))
     assert system.dimension == 4
+    assert system.duration == 8.0
     assert len(system.controls) == 4
     assert lie_algebra_dimension(system) == 15
 
@@ -289,7 +295,8 @@ Expected: all tests pass. Commit with `Add controllable gate-control systems`.
 - Produces: `PulseSpace(control_count, segments, amplitude_scales, bound)`.
 - Produces: `PulseSpace.to_physical(normalized) -> jax.Array`.
 - Produces: `PulseSpace.to_normalized(physical) -> jax.Array`.
-- Produces: `propagate(system, physical_pulse, duration=1.0) -> jax.Array`.
+- Produces: `propagate(system, physical_pulse, duration=None) -> jax.Array`;
+  `None` uses the immutable system duration.
 - Produces: `process_infidelity_from_unitary(unitary, target) -> jax.Array`.
 - Produces: `normalized_infidelity(normalized, system, space) -> jax.Array`.
 
@@ -363,7 +370,8 @@ nonfinite values, and normalized amplitudes outside `[-1, 1]`.
 Use `jax.lax.scan` over segment Hamiltonians and
 `jax.scipy.linalg.expm(-1j * dt * hamiltonian)`. JIT a stable-shape kernel.
 Do not project the result back to a unitary matrix; projection would hide
-numerical errors.
+numerical errors. The total duration defaults to `system.duration`; an explicit
+override is permitted only for resolution and reachability diagnostics.
 
 - [ ] **Step 5: Implement the smooth phase-insensitive objective**
 
@@ -399,6 +407,13 @@ Expected: all tests pass. Commit with `Add differentiable unitary propagation`.
 - Consumes: `ControlSystem`, `PulseSpace`.
 - Produces: `OpenLoopResult(normalized_pulse, loss, gradient_norm, starts, evaluations)`.
 - Produces: `optimize_open_loop(system, space, seed, starts=5) -> OpenLoopResult`.
+
+The accepted two-qubit system uses total duration `8.0`. This is not a tuning
+convenience: with normalized Pauli products, the configured `0.23 ZZ` term has
+effective nonlocal strength `0.115`, giving the ideal-local CNOT lower bound
+`pi / (4 * 0.115) = 6.82955`. Controlled diagnostics found losses `0.4422`,
+`0.3273`, `0.1814`, `0.1472`, `0.00868`, and `1.03e-13` at durations
+`1`, `2`, `3.5`, `4`, `7`, and `8`, respectively.
 
 - [ ] **Step 1: Write open-loop acceptance tests**
 
