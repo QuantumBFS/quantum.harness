@@ -56,6 +56,22 @@ uv run scripts/run_pilot.py verify --run-spec /downloaded/pilot-p0/run_spec.json
 waived after correctness validation. The benchmark status is
 `cancelled-without-capability-report`; this is not a passed performance gate.
 
+Download a completed Pilot root with checksummed, partial-safe `rsync`, then
+run the local semantic verifier:
+
+```bash
+scripts/download_pilot.sh \
+  wuzh02-jiangweiqi \
+  /work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-739880d \
+  /absolute/local/results/challenge-194/pilot-p0-739880d \
+  /absolute/path/to/challenge-194/.venv/bin/python
+```
+
+The local destination must be absent, empty, or the same resumable download.
+The script never deletes source or destination files. Its source marker and
+append-only transfer log are siblings named `<local-root>.download-source` and
+`<local-root>.transfer.log`, so the downloaded Pilot root remains immutable.
+
 ## Design and references
 
 - `DESIGN.md` pins the scientific and statistical protocol.
