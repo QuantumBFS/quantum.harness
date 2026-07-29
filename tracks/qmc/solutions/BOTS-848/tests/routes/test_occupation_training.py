@@ -100,6 +100,35 @@ def test_parameter_view_identities_survive_flat_updates() -> None:
             )
 
 
+def test_sector_head_parameters_use_one_authoritative_lookup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model()
+
+    assert "_heads" not in vars(model)
+    original = model._parameter
+    accessed: list[str] = []
+
+    def recording_parameter(name: str) -> np.ndarray:
+        value = original(name)
+        assert value is model._parameters[name]
+        accessed.append(name)
+        return value
+
+    monkeypatch.setattr(model, "_parameter", recording_parameter)
+    state = (1 << 0) | (1 << 5)
+
+    model.logpsi(state, "ground")
+    model.log_derivative(state, "ground")
+
+    assert {
+        "ground.amplitude_W",
+        "ground.amplitude_b",
+        "ground.phase_W",
+        "ground.phase_b",
+    }.issubset(accessed)
+
+
 @pytest.mark.parametrize("name", ["W1", "b1", "W2", "b2"])
 def test_shared_trunk_public_rebinding_is_rejected(name: str) -> None:
     model = _tiny_model()
@@ -161,6 +190,27 @@ def test_non_finite_conditionals_are_rejected_without_runtime_warnings(
     model.set_flat_parameters(
         np.full(model.parameter_count, np.finfo(np.float64).max)
     )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with pytest.raises(FloatingPointError, match="non-finite.*conditional"):
+            if operation == "logpsi":
+                model.logpsi((1 << 0) | (1 << 5), "ground")
+            else:
+                model.sample(size=8, sector="ground", seed=848)
+
+
+@pytest.mark.parametrize("operation", ["logpsi", "sample"])
+def test_finite_extreme_logits_are_rejected_without_normalization_warnings(
+    operation: str,
+) -> None:
+    model = _tiny_model()
+    parameters = np.zeros(model.parameter_count, dtype=np.float64)
+    parameters[model.parameter_slices["ground.amplitude_b"]] = (
+        -np.finfo(np.float64).max,
+        np.finfo(np.float64).max,
+    )
+    model.set_flat_parameters(parameters)
 
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
@@ -250,15 +300,15 @@ def test_sampling_uses_one_batched_amplitude_call_per_orbital(
     model = _tiny_model()
     sample_count = 17
     calls: list[tuple[int, tuple[int, ...]]] = []
+    parameter_calls: list[str] = []
+    original_batch = model._conditional_batch
+    original_parameter = model._parameter
 
-    class PhasePoison(dict[str, np.ndarray]):
-        def __getitem__(self, key: str) -> np.ndarray:
-            if key.startswith("phase"):
-                raise AssertionError("sampling must not access phase heads")
-            return super().__getitem__(key)
-
-    model._heads["ground"] = PhasePoison(model._heads["ground"])
-    original = model._conditional_batch
+    def phase_poison(name: str) -> np.ndarray:
+        parameter_calls.append(name)
+        if name.startswith("ground.phase_"):
+            raise AssertionError("sampling must not access phase heads")
+        return original_parameter(name)
 
     def recording_batch(
         prefixes: np.ndarray,
@@ -268,7 +318,7 @@ def test_sampling_uses_one_batched_amplitude_call_per_orbital(
         sector: str,
     ) -> np.ndarray:
         calls.append((orbital, prefixes.shape))
-        result = original(prefixes, orbital, remaining, remaining_m2, sector)
+        result = original_batch(prefixes, orbital, remaining, remaining_m2, sector)
         assert isinstance(result, np.ndarray)
         assert result.shape == (sample_count, 2)
         return result
@@ -278,6 +328,7 @@ def test_sampling_uses_one_batched_amplitude_call_per_orbital(
             "sample must not use scalar conditional evaluation or its derivative cache"
         )
 
+    monkeypatch.setattr(model, "_parameter", phase_poison)
     monkeypatch.setattr(model, "_conditional_batch", recording_batch)
     monkeypatch.setattr(model, "_conditional", forbidden_scalar_path)
 
@@ -286,6 +337,11 @@ def test_sampling_uses_one_batched_amplitude_call_per_orbital(
     assert calls == [
         (orbital, (sample_count, model.n_orbitals))
         for orbital in range(model.n_orbitals)
+    ]
+    assert parameter_calls == [
+        name
+        for _ in range(model.n_orbitals)
+        for name in ("ground.amplitude_W", "ground.amplitude_b")
     ]
     assert all(state.bit_count() == model.n_electrons for state in draws)
     assert all(

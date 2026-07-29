@@ -41,15 +41,6 @@ class AutoregressiveNQS:
         by_name = dict(parameters)
         self._parameters: Mapping[str, np.ndarray] = MappingProxyType(by_name)
         self._parameter_names = tuple(name for name, _ in parameters)
-        self._heads = {
-            sector: {
-                "amplitude_W": by_name[f"{sector}.amplitude_W"],
-                "amplitude_b": by_name[f"{sector}.amplitude_b"],
-                "phase_W": by_name[f"{sector}.phase_W"],
-                "phase_b": by_name[f"{sector}.phase_b"],
-            }
-            for sector in _SECTORS
-        }
 
         offset = 0
         slices: dict[str, slice] = {}
@@ -98,6 +89,11 @@ class AutoregressiveNQS:
         )
         view.setflags(write=False)
         return view
+
+    def _parameter(self, name: str) -> np.ndarray:
+        """Resolve one parameter from the sole authoritative parameter tree."""
+
+        return self._parameters[name]
 
     @property
     def W1(self) -> np.ndarray:
@@ -314,9 +310,14 @@ class AutoregressiveNQS:
                 + self._parameters["trunk.b2"]
             )
             hidden2 = np.tanh(preactivation2)
-            heads = self._heads[sector]
-            logits = heads["amplitude_W"] @ hidden2 + heads["amplitude_b"]
-            phases = heads["phase_W"] @ hidden2 + heads["phase_b"]
+            logits = (
+                self._parameter(f"{sector}.amplitude_W") @ hidden2
+                + self._parameter(f"{sector}.amplitude_b")
+            )
+            phases = (
+                self._parameter(f"{sector}.phase_W") @ hidden2
+                + self._parameter(f"{sector}.phase_b")
+            )
         self._require_finite_conditional(
             "scalar network evaluation",
             preactivation1,
@@ -334,11 +335,14 @@ class AutoregressiveNQS:
         allowed_logits = logits[allowed]
         if allowed_logits.size == 0:
             raise RuntimeError("feasibility table has no valid continuation")
-        log_probabilities = np.full(2, -np.inf, dtype=np.float64)
-        log_probabilities[allowed] = allowed_logits - logsumexp(allowed_logits)
-        probabilities = np.zeros(2, dtype=np.float64)
-        probabilities[allowed] = np.exp(log_probabilities[allowed])
-        probability_mass = float(np.sum(probabilities[allowed]))
+        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+            log_probabilities = np.full(2, -np.inf, dtype=np.float64)
+            log_probabilities[allowed] = allowed_logits - logsumexp(
+                allowed_logits
+            )
+            probabilities = np.zeros(2, dtype=np.float64)
+            probabilities[allowed] = np.exp(log_probabilities[allowed])
+            probability_mass = float(np.sum(probabilities[allowed]))
         if (
             not np.all(np.isfinite(log_probabilities[allowed]))
             or not np.all(np.isfinite(probabilities[allowed]))
@@ -384,7 +388,8 @@ class AutoregressiveNQS:
             )
         )
         inputs = np.concatenate((prefixes, contexts), axis=1)
-        heads = self._heads[sector]
+        amplitude_W = self._parameter(f"{sector}.amplitude_W")
+        amplitude_b = self._parameter(f"{sector}.amplitude_b")
         with np.errstate(over="ignore", invalid="ignore"):
             preactivation1 = (
                 inputs @ self._parameters["trunk.W1"].T
@@ -397,8 +402,8 @@ class AutoregressiveNQS:
             )
             hidden2 = np.tanh(preactivation2)
             logits = (
-                hidden2 @ heads["amplitude_W"].T
-                + heads["amplitude_b"]
+                hidden2 @ amplitude_W.T
+                + amplitude_b
             )
         self._require_finite_conditional(
             "batched network evaluation",
@@ -426,14 +431,15 @@ class AutoregressiveNQS:
         )
         if np.any(~np.any(allowed, axis=1)):
             raise RuntimeError("feasibility table has no valid continuation")
-        masked_logits = np.where(allowed, logits, -np.inf)
-        log_probabilities = masked_logits - logsumexp(
-            masked_logits,
-            axis=1,
-        )[:, None]
-        probabilities = np.zeros_like(log_probabilities)
-        probabilities[allowed] = np.exp(log_probabilities[allowed])
-        probability_mass = np.sum(probabilities, axis=1)
+        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+            masked_logits = np.where(allowed, logits, -np.inf)
+            log_probabilities = masked_logits - logsumexp(
+                masked_logits,
+                axis=1,
+            )[:, None]
+            probabilities = np.zeros_like(log_probabilities)
+            probabilities[allowed] = np.exp(log_probabilities[allowed])
+            probability_mass = np.sum(probabilities, axis=1)
         if (
             not np.all(np.isfinite(log_probabilities[allowed]))
             or not np.all(np.isfinite(probabilities[allowed]))
@@ -503,7 +509,8 @@ class AutoregressiveNQS:
             name: np.zeros(self._parameters[name].shape, dtype=np.complex128)
             for name in self._parameter_names
         }
-        heads = self._heads[selected_sector]
+        amplitude_W = self._parameter(f"{selected_sector}.amplitude_W")
+        phase_W = self._parameter(f"{selected_sector}.phase_W")
         for selected, inputs, hidden1, hidden2, probabilities in caches:
             logit_gradient = -0.5 * probabilities.astype(np.complex128)
             logit_gradient[selected] += 0.5
@@ -522,8 +529,8 @@ class AutoregressiveNQS:
             gradients[f"{selected_sector}.phase_b"] += phase_gradient
 
             hidden2_gradient = (
-                heads["amplitude_W"].T @ logit_gradient
-                + heads["phase_W"].T @ phase_gradient
+                amplitude_W.T @ logit_gradient
+                + phase_W.T @ phase_gradient
             )
             preactivation2_gradient = hidden2_gradient * (1.0 - hidden2**2)
             gradients["trunk.W2"] += np.outer(
