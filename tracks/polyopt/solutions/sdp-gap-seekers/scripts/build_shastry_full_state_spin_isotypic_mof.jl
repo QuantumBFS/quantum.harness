@@ -151,16 +151,25 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     write_checkpoint(checkpoint_path, metadata)
 
     progress("exact V4, conjugation, anti-diagonal, and spin quotient")
-    exhaustive_intermediate_truth = options.patch_level == 1
+    structural_intermediate =
+        options.patch_level > 1 ||
+        get(ENV, "SHASTRY_STRUCTURAL_INTERMEDIATE", "0") == "1"
+    exhaustive_intermediate_truth =
+        options.patch_level == 1 && !structural_intermediate
+    metadata["intermediate_assembly"] = structural_intermediate ?
+        "structural-deferred-coefficients-v1" :
+        "materialized-coefficients-v1"
     v4_measurement = @timed assemble_full_state_v4_reduced_primal(
         primal;
         verify_truth=exhaustive_intermediate_truth,
+        materialize_coefficients=!structural_intermediate,
     )
     v4 = v4_measurement.value
     metadata["stages"]["v4"] = measurement_dict(v4_measurement)
     real_measurement = @timed assemble_full_state_real_reduced_primal(
         v4;
         verify_truth=exhaustive_intermediate_truth,
+        materialize_coefficients=!structural_intermediate,
     )
     real_reduced = real_measurement.value
     metadata["stages"]["conjugation"] =
@@ -169,6 +178,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         @timed assemble_shastry_full_state_spatial_reduced_primal(
             real_reduced;
             verify_truth=exhaustive_intermediate_truth,
+            materialize_coefficients=!structural_intermediate,
         )
     spatial = spatial_measurement.value
     metadata["stages"]["spatial"] = measurement_dict(spatial_measurement)
@@ -177,6 +187,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             spatial;
             verify_truth=exhaustive_intermediate_truth,
             verify_source_covariance=exhaustive_intermediate_truth,
+            materialize_coefficients=!structural_intermediate,
         )
     spin_spatial = spin_measurement.value
     metadata["stages"]["spin_spatial"] =

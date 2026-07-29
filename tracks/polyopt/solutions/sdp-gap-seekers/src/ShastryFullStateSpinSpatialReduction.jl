@@ -484,6 +484,7 @@ function assemble_shastry_full_state_spin_spatial_reduced_primal(
     source::ShastryFullStateSpatialReducedPrimalAssembly;
     verify_truth::Bool=true,
     verify_source_covariance::Bool=true,
+    materialize_coefficients::Bool=true,
 )
     quotient = build_spin_spatial_moment_quotient(source)
     truth = verify_truth ?
@@ -499,6 +500,41 @@ function assemble_shastry_full_state_spin_spatial_reduced_primal(
         spin_spatial_quotient_projection(polynomial, quotient)
         for polynomial in source.equalities
     ])
+    if !materialize_coefficients
+        ordered = quotient.moments
+        coefficient_sha256 = "deferred-structural-v1"
+        final_sha256 = fingerprint_records(
+            SHASTRY_FULL_STATE_SPIN_SPATIAL_REDUCTION_SCHEMA,
+            [
+                "source=" * source.assembly_sha256,
+                "coefficient_map=" * coefficient_sha256,
+                "moments=" * fingerprint_records(
+                    "shastry-full-state-spin-spatial-moments-v1",
+                    (key.canonical for key in ordered),
+                ),
+                "equalities=" * fingerprint_records(
+                    "shastry-full-state-spin-spatial-equalities-v1",
+                    (
+                        canonical_polynomial_string(polynomial)
+                        for polynomial in equalities
+                    ),
+                ),
+            ],
+        )
+        return ShastryFullStateSpinSpatialReducedPrimalAssembly(
+            SHASTRY_FULL_STATE_SPIN_SPATIAL_REDUCTION_SCHEMA,
+            source,
+            quotient,
+            truth,
+            source.positive_blocks,
+            source.gap_blocks,
+            equalities,
+            ordered,
+            coefficient_sha256,
+            final_sha256,
+        )
+    end
+
     provisional = ShastryFullStateSpinSpatialReducedPrimalAssembly(
         SHASTRY_FULL_STATE_SPIN_SPATIAL_REDUCTION_SCHEMA,
         source,

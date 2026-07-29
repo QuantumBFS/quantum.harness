@@ -25,6 +25,7 @@ using ..ExactSymmetryReduction:
     v4_invariant_projection,
     canonical_real_equalities
 using ..ConjugationSymmetryReduction:
+    conjugation_odd,
     conjugation_action,
     conjugation_invariant_projection,
     equality_space_is_invariant
@@ -446,6 +447,7 @@ end
 function assemble_full_state_v4_reduced_primal(
     source::PrimalAssembly;
     verify_truth::Bool=true,
+    materialize_coefficients::Bool=true,
 )
     truth = full_state_v4_reduction_truth(source)
     verify_truth && !truth.exact &&
@@ -481,6 +483,32 @@ function assemble_full_state_v4_reduced_primal(
         )
     ]
     equalities = canonical_real_equalities(projected_equalities)
+
+    if !materialize_coefficients
+        ordered = filter(
+            key -> v4_character(key) == V4Character(false, false),
+            source.moments,
+        )
+        coefficient_sha256 = "deferred-structural-v1"
+        final_sha256 = assembly_fingerprint(
+            FULL_STATE_V4_REDUCTION_SCHEMA,
+            source.assembly_sha256,
+            [positive_blocks; gap_blocks],
+            equalities,
+            ordered,
+            coefficient_sha256,
+        )
+        return FullStateV4ReducedPrimalAssembly(
+            FULL_STATE_V4_REDUCTION_SCHEMA,
+            source,
+            positive_blocks,
+            gap_blocks,
+            equalities,
+            ordered,
+            coefficient_sha256,
+            final_sha256,
+        )
+    end
 
     moments = Set{MomentKey}([moment_key()])
     coefficient_records = String[]
@@ -605,6 +633,7 @@ end
 function assemble_full_state_real_reduced_primal(
     source::FullStateV4ReducedPrimalAssembly;
     verify_truth::Bool=true,
+    materialize_coefficients::Bool=true,
 )
     truth = full_state_conjugation_reduction_truth(source)
     verify_truth && !truth.exact &&
@@ -614,6 +643,29 @@ function assemble_full_state_real_reduced_primal(
         conjugation_invariant_projection(polynomial)
         for polynomial in source.equalities
     ])
+    if !materialize_coefficients
+        ordered = filter(key -> !conjugation_odd(key), source.moments)
+        coefficient_sha256 = "deferred-structural-v1"
+        final_sha256 = assembly_fingerprint(
+            FULL_STATE_REAL_REDUCTION_SCHEMA,
+            source.assembly_sha256,
+            [source.positive_blocks; source.gap_blocks],
+            equalities,
+            ordered,
+            coefficient_sha256,
+        )
+        return FullStateRealReducedPrimalAssembly(
+            FULL_STATE_REAL_REDUCTION_SCHEMA,
+            source,
+            source.positive_blocks,
+            source.gap_blocks,
+            equalities,
+            ordered,
+            coefficient_sha256,
+            final_sha256,
+        )
+    end
+
     moments = Set{MomentKey}([moment_key()])
     coefficient_records = String[]
     provisional = FullStateRealReducedPrimalAssembly(
