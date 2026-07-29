@@ -303,22 +303,50 @@ def _write_width_summary(width_rows: Sequence[Mapping], path: Path) -> None:
 def _plot_central_charge(
     width_rows: Sequence[Mapping], summary: Mapping, path: Path
 ) -> None:
-    primary = double_fit_central_charge(width_rows, alpha=summary["alpha"])
     x = np.asarray([1.0 / int(row["L"]) ** 2 for row in width_rows])
     y = np.asarray([float(row["tilde_f"]) for row in width_rows])
     sigma = np.asarray([float(row["tilde_f_se"]) for row in width_rows])
-    line_x = np.linspace(0.0, 1.05 * x.max(), 200)
-    line_y = primary["windows"][0]["intercept"] + primary["m0_inf"] * line_x
+    line = _central_charge_plot_line(width_rows, lmin=8)
 
     figure, axis = plt.subplots(figsize=(6.4, 4.5))
-    axis.errorbar(x, y, yerr=sigma, fmt="o", capsize=3, label="equal-family mean")
-    axis.plot(line_x, line_y, label="asymptotic $L^{-2}$ line")
+    axis.errorbar(
+        x,
+        y,
+        yerr=sigma,
+        fmt="o",
+        markersize=10,
+        alpha=0.78,
+        capsize=3,
+        label="equal-family mean",
+    )
+    axis.plot(
+        line["x"],
+        line["y"],
+        color="red",
+        linestyle="-",
+        label=r"weighted $L_{\min}=8$ fit",
+    )
     axis.set_xlabel("$1/L^2$")
     axis.set_ylabel(r"$\widetilde{f}_L$")
     axis.legend(frameon=False)
     figure.tight_layout()
     figure.savefig(path, dpi=180)
     plt.close(figure)
+
+
+def _central_charge_plot_line(
+    width_rows: Sequence[Mapping], lmin: int = 8
+) -> dict:
+    """Return a display line whose intercept and slope come from one fit."""
+    x = np.asarray([1.0 / int(row["L"]) ** 2 for row in width_rows])
+    fit = weighted_l2_fit(width_rows, lmin=lmin)
+    line_x = np.linspace(0.0, 1.05 * x.max(), 200)
+    return {
+        "x": line_x,
+        "y": fit["intercept"] + fit["slope"] * line_x,
+        "intercept": fit["intercept"],
+        "slope": fit["slope"],
+    }
 
 
 def _plot_record_growth(records: Sequence[Mapping], path: Path) -> None:

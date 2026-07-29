@@ -217,3 +217,18 @@ def test_bootstrap_and_artifacts_are_reproducible(tmp_path):
         assert json.load(handle) == first
     assert (tmp_path / "central_charge_fit.png").stat().st_size > 0
     assert (tmp_path / "record_entropy_growth.png").stat().st_size > 0
+
+
+def test_central_charge_plot_line_uses_a_single_weighted_window():
+    module = _load_module()
+    records = _synthetic_records(seed=11, central_charge=0.25, per_family=20)
+    widths = module.aggregate_trajectory_records(records)
+    expected = module.weighted_l2_fit(widths, lmin=8)
+
+    line = module._central_charge_plot_line(widths, lmin=8)
+
+    assert line["intercept"] == pytest.approx(expected["intercept"])
+    assert line["slope"] == pytest.approx(expected["slope"])
+    np.testing.assert_allclose(
+        line["y"], line["intercept"] + line["slope"] * line["x"]
+    )
