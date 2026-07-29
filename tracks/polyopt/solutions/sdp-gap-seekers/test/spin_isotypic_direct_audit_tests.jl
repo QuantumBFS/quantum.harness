@@ -34,6 +34,20 @@ wrapped = ShastryFullStateSpinIsotypicJuMPPrimalModel(
     "synthetic-audit-v1",
 )
 diagnostics = spin_isotypic_solution_diagnostics(wrapped, 1e-7)
+synthetic_assembly = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
+    "synthetic-audit-v1",
+    nothing,
+    nothing,
+    ShastrySpinIsotypicPSDBlock[],
+    ShastrySpinIsotypicPSDBlock[],
+    ExactLinearPolynomial[],
+    [
+        moment_key(),
+        moment_key([PauliWord([(1, UInt8(1))])]),
+    ],
+    "synthetic-coefficients",
+    "synthetic-audit-v1",
+)
 
 @testset "direct spin-isotypic solve audit" begin
     @test JuMP.termination_status(model) == JuMP.MOI.OPTIMAL
@@ -60,4 +74,18 @@ diagnostics = spin_isotypic_solution_diagnostics(wrapped, 1e-7)
         JuMP.MOI.NO_SOLUTION,
         Dict{String,Any}(),
     ) == "unknown"
+    mktempdir() do directory
+        path = joinpath(directory, "primal-values.tsv")
+        artifact = write_spin_isotypic_primal_values(
+            path,
+            wrapped,
+            synthetic_assembly,
+        )
+        @test artifact["variable_count"] == 2
+        @test artifact["sha256"] == file_sha256(path)
+        lines = readlines(path)
+        @test lines[3] == "index\tmoment_canonical\tfloat64_bits"
+        @test endswith(lines[4], bitstring(JuMP.value(y[1])))
+        @test endswith(lines[5], bitstring(JuMP.value(y[2])))
+    end
 end
