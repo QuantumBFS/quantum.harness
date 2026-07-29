@@ -183,11 +183,11 @@ schema-2 schemas, `smoke_test.py`, `model.json`, `environment.yml`,
 `conda-linux-64.lock`, permanent scaffold
 `cthyb-production.schema.json`, `bath.py`, `chain_mapping.py`,
 `finite_bath_ed.py`, `acceptance.py`, `convergence.py`,
-`convergence.schema.json`, Julia `Project.toml` and `Manifest.toml`, and the
-finite-bath Julia runner, checkpoint, purification, and observables sources
-that `acceptance.py` authenticates. The manifest maps repository-relative
-POSIX paths to file-byte SHA256 values. Its own digest is over canonical map
-bytes.
+`convergence.schema.json`, `triqs/tests/test_lock.py`, Julia `Project.toml` and
+`Manifest.toml`, and the finite-bath Julia runner, checkpoint, purification,
+and observables sources that `acceptance.py` authenticates. The manifest maps
+repository-relative POSIX paths to file-byte SHA256 values. Its own digest is
+over canonical map bytes.
 Production input generation fails if any required path is absent; downstream
 validation recomputes the complete map and rejects additions, omissions, or
 changed bytes.
@@ -311,11 +311,28 @@ The fixed production values above are admitted only after a calibration
 artifact passes:
 
 1. Run four chains with 100,000 measurement cycles at warmups 12,500, 25,000,
-   and 50,000 cycles.
-2. For \(n_d\), double occupancy, and every reported \(G_\sigma(\tau)\), the
-   absolute shift between the 25,000- and 50,000-warmup four-chain means must
-   be no larger than the larger of \(2\) pooled standard errors and
-   \(5\times10^{-4}\).
+   and 50,000 cycles. Each warmup level uses a distinct independent seed set;
+   no chain is paired across levels.
+2. For each static scalar and genuine-interior spin Green-function point, let
+   \(\Delta=\bar x_{50k}-\bar x_{25k}\). If
+   \(\mathrm{SE}_{25k}\) and \(\mathrm{SE}_{50k}\) are the standard errors of
+   the two independent four-chain means, the difference error is exactly
+   \[
+   \mathrm{SE}_{\Delta}=
+   \sqrt{\mathrm{SE}_{25k}^2+\mathrm{SE}_{50k}^2}.
+   \]
+   With \(a=\mathrm{SE}_{25k}^2\) and
+   \(b=\mathrm{SE}_{50k}^2\), use Welch degrees of freedom
+   \(\nu=(a+b)^2/(a^2/3+b^2/3)\). A simultaneous two-sided family-wise 99%
+   Bonferroni interval
+   \[
+   \Delta\ \pm\ t_{1-0.01/(2m),\nu}\,\mathrm{SE}_{\Delta}
+   \]
+   must lie wholly inside `[-5e-4,+5e-4]` for `n_d` and double occupancy and
+   inside `[-1e-3,+1e-3]` for every genuine-interior spin Green value, where
+   \(m=8\): two static scalars plus three interior tau points for each of two
+   spins. Zero-variance identical means pass only when their degenerate
+   interval lies inside the bound.
 3. Run four 100,000-cycle pilots at cycle lengths 10, 25, 50, and 100. Select
    the smallest candidate for which every chain reports converged
    autocorrelation time no larger than 5 cycles. The production artifact is
@@ -329,10 +346,17 @@ artifact passes:
    cumulative estimators.
 5. Use the 32 direct increment means for batch-means uncertainty. For each
    scalar, compare each group's first-half and second-half means as four paired
-   differences. A two-sided family-wise 99% Bonferroni Student interval must
-   contain zero; the family includes `n_d`, double occupancy, and every
-   genuine-interior spin Green-function value. This detects drift without
-   requiring every noisy standard-error estimate to decrease.
+   differences \(d_c\). With
+   \(\bar d=\sum_c d_c/4\),
+   \(\mathrm{SE}_{d}=s_d/\sqrt{4}\), and three degrees of freedom, construct
+   the simultaneous two-sided family-wise 99% Bonferroni interval
+   \[
+   \bar d\ \pm\ t_{1-0.01/(2m),3}\,\mathrm{SE}_{d}.
+   \]
+   The complete interval must lie wholly inside `[-5e-4,+5e-4]` for `n_d` and
+   double occupancy and `[-1e-3,+1e-3]` for every genuine-interior spin Green
+   value, again with \(m=8\). Merely containing zero is insufficient. This is
+   an equivalence gate, not a failure-to-reject-drift gate.
 6. Estimate the variance of a 62,500-cycle batch separately within each group,
    pool those four variances without pooling chain means, and project the
    standard error of the final four-chain mean at 1,000,000 cycles per chain.
@@ -543,11 +567,15 @@ The currently committed explicit lock contains the solver runtime, but it does
 Therefore it supports the existing smoke test only. This design does not claim
 that the current lock can execute the planned test suite.
 
-The first implementation change adds unversioned `pytest`, `jsonschema`, and
-`mpmath` dependencies to `environment.yml`, lets conda-forge solve them with
-the already exact Python/TRIQS/cthyb constraints, and regenerates the complete
-explicit lock on Linux x86-64. No package URL, build, or hash is written by
-hand:
+Task 0 has exactly three implementation files:
+`environment.yml`, regenerated `conda-linux-64.lock`, and new
+`triqs/tests/test_lock.py`. The test imports `jsonschema`, `mpmath`, `pytest`,
+`triqs`, and `triqs_cthyb`, reads the active prefix's `conda-meta` JSON, and
+asserts the TRIQS and cthyb package versions are 4.0.0. Task 0 adds the three
+missing direct dependencies to
+`environment.yml`, lets conda-forge solve them with the already exact
+Python/TRIQS/cthyb constraints, and regenerates the complete explicit lock on
+Linux x86-64. No package URL, build, or hash is written by hand:
 
 ```bash
 export MAMBA_ROOT_PREFIX="$PWD/tracks/mps/results/frustration-free/lockgen-mamba-root"
@@ -556,7 +584,9 @@ rm -rf "$LOCK_ENV"
 ./micromamba create --yes --platform linux-64 --prefix "$LOCK_ENV" \
   --file tracks/mps/solutions/frustration-free/triqs/environment.yml
 ./micromamba run --prefix "$LOCK_ENV" \
-  python -c 'import jsonschema, mpmath, pytest, triqs, triqs_cthyb'
+  python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
+./micromamba run --prefix "$LOCK_ENV" python -m pytest \
+  tracks/mps/solutions/frustration-free/triqs/tests/test_lock.py -q
 ./micromamba list --prefix "$LOCK_ENV" --explicit --md5 \
   > tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock.tmp
 python3 - <<'PY'
@@ -586,14 +616,15 @@ rm -rf "$LOCK_VERIFY_ENV"
 ./micromamba create --yes --prefix "$LOCK_VERIFY_ENV" \
   --file tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
 ./micromamba run --prefix "$LOCK_VERIFY_ENV" \
-  python -c 'import jsonschema, mpmath, pytest, triqs, triqs_cthyb'
+  python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
 ./micromamba run --prefix "$LOCK_VERIFY_ENV" python -m pytest \
-  tracks/mps/solutions/frustration-free/triqs/tests -q
+  tracks/mps/solutions/frustration-free/triqs/tests/test_lock.py -q
 ```
 
 Only the solver constraints in the current lock are authoritative until this
-regeneration task is committed. The regenerated `environment.yml` and lock
-must be reviewed and committed together.
+regeneration task is committed. `environment.yml`, the generated lock, and
+`test_lock.py` must be reviewed and committed together; no other implementation
+file belongs to Task 0.
 
 ### 9.2 Runtime bootstrap
 

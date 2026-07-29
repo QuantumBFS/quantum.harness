@@ -96,32 +96,72 @@ Modify:
 * Modify: `tracks/mps/solutions/frustration-free/triqs/environment.yml`
 * Regenerate:
   `tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock`
+* Create:
+  `tracks/mps/solutions/frustration-free/triqs/tests/test_lock.py`
 
-- [ ] **Step 1: Add test-only direct dependencies to the human-readable spec**
+- [ ] **Step 1: Create the lock test owned by Task 0**
+
+`test_lock.py` imports `jsonschema`, `mpmath`, `pytest`, `triqs`, and
+`triqs_cthyb`. It reads JSON records from `Path(sys.prefix) / "conda-meta"`,
+requires package names `pytest`, `jsonschema`, and `mpmath`, and requires exact
+versions `triqs=4.0.0` and `triqs_cthyb=4.0.0`. It contains no production
+schema, solver, calibration, or publication test.
+
+```python
+import json
+from pathlib import Path
+import sys
+
+
+def test_locked_runtime_imports_and_versions():
+    import jsonschema
+    import mpmath
+    import pytest
+    import triqs
+    import triqs_cthyb
+
+    modules = (jsonschema, mpmath, pytest, triqs, triqs_cthyb)
+    assert all(module.__file__ for module in modules)
+    records = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted((Path(sys.prefix) / "conda-meta").glob("*.json"))
+    ]
+    versions = {record["name"]: record["version"] for record in records}
+    assert versions["triqs"] == "4.0.0"
+    assert versions["triqs_cthyb"] == "4.0.0"
+    for name in ("pytest", "jsonschema", "mpmath"):
+        assert name in versions
+```
+
+- [ ] **Step 2: Add test-only direct dependencies to the human-readable spec**
 
 Add `pytest`, `jsonschema`, and `mpmath` without fabricated versions. Keep
 `python=3.12`, `triqs=4.0.0`, and `triqs_cthyb=4.0.0` exact.
 
-- [ ] **Step 2: Regenerate; never hand-edit package records**
+- [ ] **Step 3: Regenerate; never hand-edit package records**
 
 Run the lock-generation commands in `PRODUCTION_DESIGN.md` section 9.1 on
 Linux x86-64. `micromamba list --explicit --md5` must produce every package
 URL/build/hash. No reviewer or implementation agent may invent a package URL,
 build number, or MD5.
 
-- [ ] **Step 3: Verify from a second empty prefix**
+- [ ] **Step 4: Verify only the owned checks from two fresh prefixes**
 
-Create the second environment from the generated explicit lock, import
-`jsonschema`, `mpmath`, `pytest`, `triqs`, and `triqs_cthyb`, run
-`smoke_test.py`, and run a one-test pytest probe. Preserve the command output
-in the implementation report.
+The lock-generation prefix is fresh because the workflow removes it before
+creation. In that prefix, run only `smoke_test.py` and
+`triqs/tests/test_lock.py`. Then create the second empty prefix from the
+generated explicit lock and run exactly the same two checks. Do not invoke the
+future `triqs/tests` suite in Task 0. Preserve all four command outputs in the
+implementation report.
 
-- [ ] **Step 4: Commit spec and generated lock together**
+- [ ] **Step 5: Commit the exact three-file scope together**
 
 ```bash
 git diff --check
 git add tracks/mps/solutions/frustration-free/triqs/environment.yml \
-  tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
+  tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock \
+  tracks/mps/solutions/frustration-free/triqs/tests/test_lock.py
+test "$(git diff --cached --name-only | wc -l)" -eq 3
 git commit -m "build(cthyb): regenerate executable test lock"
 ```
 
@@ -383,16 +423,28 @@ git commit -m "feat(cthyb): retain validated raw chain evidence"
 
 - [ ] **Step 1: Write failing synthetic-statistics tests**
 
-Construct deterministic fixtures for warmup shifts, pooled errors,
-autocorrelation convergence, exact cycle-length selection, direct fixed-size
-increment means, paired first-half/second-half differences,
-family-wise 99% Bonferroni Student intervals, pooled within-chain batch
-variance, and upper 99% chi-square confidence bounds on projected production
-error. Test exact boundaries `5e-4`, `1e-3`, and `5.0`. Reject reused increment
-seeds, calibration seeds reused by production, reconstructed increments from
-subtracted normalized cumulative means, missing/extra/duplicate cells, mixed
-input identities, and an attempted silent change from cycle length 50. No test
-requires every point estimate of SE to decrease.
+Construct deterministic fixtures for warmup shifts from independent seed sets
+and assert exactly
+`SE_delta = sqrt(SE_25k**2 + SE_50k**2)`, with Welch degrees of freedom
+`(a+b)**2 / (a**2/3 + b**2/3)` for
+`a=SE_25k**2`, `b=SE_50k**2`. Test the simultaneous family-wise 99%
+Bonferroni warmup interval and its zero-variance case.
+
+For fixed-size increment means, test paired first-half/second-half differences
+with `SE_d = sample_std(d) / 2`, three degrees of freedom, and the exact
+Bonferroni quantile `t_(1-0.01/(2m),3)` with `m=8`. Both warmup and drift
+intervals must lie wholly inside `[-5e-4,+5e-4]` for static values or
+`[-1e-3,+1e-3]` for genuine-interior Green values. Include a regression
+fixture whose interval contains zero but crosses an equivalence bound and must
+fail.
+
+Also test pooled within-group batch variance and upper 99% chi-square
+confidence bounds on projected production error, including exact boundaries
+`5e-4`, `1e-3`, and `5.0`. Reject reused increment seeds, calibration seeds
+reused by production, reconstructed increments from subtracted normalized
+cumulative means, missing/extra/duplicate cells, mixed input identities, and
+an attempted silent change from cycle length 50. No test requires every point
+estimate of SE to decrease.
 
 - [ ] **Step 2: Implement canonical calibration plans and analysis**
 
@@ -695,13 +747,17 @@ one-rank jobs. Re-run full validation before analysis.
 
 Proceed only if:
 
-* 25,000-to-50,000 warmup shifts satisfy the pooled-SE/`5e-4` bound;
+* independent-seed 25,000-to-50,000 warmup differences use
+  `sqrt(SE_25k**2 + SE_50k**2)` and their simultaneous family-wise 99%
+  Bonferroni intervals lie wholly inside the predefined static/interior-G
+  equivalence bounds;
 * cycle length 50 has converged autocorrelation no larger than 5 for all four
   chains;
 * all 32 fixed-size increments use unique nonproduction seeds, full warmup,
   exact pairing, and directly measured means;
 * every family-wise 99% Bonferroni paired first-half/second-half drift interval
-  contains zero;
+  lies wholly inside `[-5e-4,+5e-4]` for static values or
+  `[-1e-3,+1e-3]` for genuine-interior Green values;
 * upper 99% projected production-error bounds are at most `5e-4` for `n_d`
   and double occupancy and `1e-3` for each genuine-interior spin Green value.
 
