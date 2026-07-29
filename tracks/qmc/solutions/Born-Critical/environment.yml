@@ -1,0 +1,7 @@
+name: born-critical
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.26,<3
+  - pip

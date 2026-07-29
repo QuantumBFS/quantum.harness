@@ -1,0 +1,10 @@
+{
+  "p": 0.1092212,
+  "base_seed": 202607270302,
+  "qr_interval": 5,
+  "burn_in_rows_per_size": 20,
+  "output_block_size": 2500,
+  "measurement_rows_by_size": {
+    "6": 1000000
+  }
+}

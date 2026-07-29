@@ -1,0 +1,54 @@
+{
+  "acceptance": {
+    "density_maximum_distance_standard_errors": 4.0,
+    "maximum_bootstrap_failures": 0,
+    "maximum_probability_normalization_error": 1e-12,
+    "maximum_qr_orthogonality_error": 1e-9,
+    "maximum_stability_distance_combined_sigma": 1.5,
+    "maximum_standard_error": 2e-6,
+    "minimum_largest_size_signal_to_noise": 5.0,
+    "target_interval": [
+      0.446,
+      0.448
+    ]
+  },
+  "acceptance_m0_reference_lmin": 16,
+  "alpha": 1.0,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 422607280101,
+  "main_candidates_lmin": [
+    6,
+    8,
+    10,
+    12,
+    16
+  ],
+  "main_model": "M1",
+  "notes": [
+    "Frozen after Stage-4C pilot and before production aggregation.",
+    "Select the first residual-qualified M1 window without consulting the target central charge.",
+    "Bootstrap resamples complete independent trajectory replicas within each circumference.",
+    "All declared M0/M1 windows are retained, including failed quality windows."
+  ],
+  "primary_selection_rule": {
+    "maximum_absolute_standardized_residual": 3.0,
+    "maximum_design_condition_number": 10000000000.0,
+    "maximum_reduced_chi_squared": 2.0,
+    "maximum_same_sign_residual_run": 3
+  },
+  "quantity": "shannon",
+  "schema_version": 1,
+  "stability_m0_lmin": [
+    10,
+    12,
+    16,
+    20
+  ],
+  "stability_m1_lmin": [
+    6,
+    8,
+    10,
+    12,
+    16
+  ]
+}
