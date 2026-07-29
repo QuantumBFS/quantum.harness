@@ -32,6 +32,9 @@ def test_phase2_batch_requires_remote_phase1_evidence() -> None:
     assert "ROUTE_D_PLUS_PHASE1_MANIFEST:?" in batch
     assert "ROUTE_D_PLUS_RUN_ID:?" in batch
     assert ".venv/bin/python" in batch
+    assert "-m ruff check" in batch
+    assert "-m pytest" in batch
+    assert "tests/route_d_plus -q" in batch
     assert "-m route_d_plus.certify_phase2" in batch
     assert "--two-q 15" in batch
     assert "require_phase1_manifest" in certificate

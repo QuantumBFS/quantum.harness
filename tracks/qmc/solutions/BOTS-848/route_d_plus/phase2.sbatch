@@ -22,7 +22,11 @@ fi
 
 mkdir -p "${run_dir}"
 cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
-exec "${repo_root}/.venv/bin/python" -u \
+"${repo_root}/.venv/bin/python" -m ruff check \
+  route_d_plus tests/route_d_plus
+"${repo_root}/.venv/bin/python" -m pytest \
+  tests/route_d_plus -q
+"${repo_root}/.venv/bin/python" -u \
   -m route_d_plus.certify_phase2 \
   --repo-root "${repo_root}" \
   --phase1-manifest "${ROUTE_D_PLUS_PHASE1_MANIFEST}" \
