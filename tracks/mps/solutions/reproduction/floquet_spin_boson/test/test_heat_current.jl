@@ -4,6 +4,13 @@ using DelimitedFiles
 @testset "frequency-resolved zero-temperature heat current" begin
     model = SpinBosonModel(alpha=0.05, omega_c=2.5)
 
+    @testset "physical Floquet eigenvalue tolerance is explicit" begin
+        config = Fig3Config(physical_eigenvalue_tolerance=2e-6)
+        @test config.physical_eigenvalue_tolerance == 2e-6
+        @test_throws ArgumentError FloquetSpinBoson._validate_fig3_config(
+            Fig3Config(physical_eigenvalue_tolerance=0.0))
+    end
+
     @testset "direct quadrature matches analytic decaying exponential" begin
         decay_rate = 0.7
         dt = 0.0025

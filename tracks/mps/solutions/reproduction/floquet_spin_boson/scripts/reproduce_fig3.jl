@@ -35,6 +35,9 @@ function fig3_config_from_toml(path::AbstractString)
         eigensolver_tolerance=Float64(get(
             raw, "eigensolver_tolerance",
             defaults.eigensolver_tolerance)),
+        physical_eigenvalue_tolerance=Float64(get(
+            raw, "physical_eigenvalue_tolerance",
+            defaults.physical_eigenvalue_tolerance)),
         eigensolver_max_iterations=Int(get(
             raw, "eigensolver_max_iterations",
             defaults.eigensolver_max_iterations)))

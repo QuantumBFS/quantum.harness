@@ -64,6 +64,21 @@ function _validate_correlation_inputs(C, floquet, phase_states, v_left,
     return M
 end
 
+function _physical_step_scale(period_eigenvalue::Number, M::Integer)
+    value = ComplexF64(period_eigenvalue)
+    isfinite(value) && abs(value) > sqrt(eps(Float64)) ||
+        throw(ArgumentError(
+            "period eigenvalue must be finite and nonzero"))
+    return exp(-log(value) / M)
+end
+
+@inline function _scale_correlation_state!(state::AbstractVector, scale)
+    @inbounds @simd for index in eachindex(state)
+        state[index] *= scale
+    end
+    return state
+end
+
 """
 Compute `(1/M) Σₘ ⟨S(tₘ+k dt)S(tₘ)⟩` in the full augmented space.
 
@@ -76,12 +91,14 @@ function floquet_correlation_serial!(C::AbstractVector,
                                      operator::AbstractMatrix,
                                      v_left::AbstractVector;
                                      convention::InsertionConvention=
-                                         InsertionConvention(operator))
+                                         InsertionConvention(operator),
+                                     period_eigenvalue::Number=1 + 0im)
     convention.side === :left ||
         throw(ArgumentError("ordered correlation requires left insertion Sρ"))
     convention.operator == ComplexF64.(operator) ||
         throw(ArgumentError("insertion convention does not match operator"))
     M = _validate_correlation_inputs(C, floquet, phase_states, v_left, convention)
+    step_scale = _physical_step_scale(period_eigenvalue, M)
     fill!(C, zero(ComplexF64))
     max_lag = length(C) - 1
     work = StepWorkspace(floquet)
@@ -97,6 +114,7 @@ function floquet_correlation_serial!(C::AbstractVector,
             phase = mod1(start_phase + lag - 1, M)
             _apply_phase!(destination, source, floquet, phase, work)
             source, destination = destination, source
+            _scale_correlation_state!(source, step_scale)
             C[lag + 1] += _late_observable_contraction(
                 source, v_left, convention.late_trace_vector, floquet.layout)
         end
@@ -115,7 +133,8 @@ function _accumulate_correlation_phase!(
     phase_states::AbstractVector,
     v_left::AbstractVector,
     convention::InsertionConvention,
-    work::StepWorkspace)
+    work::StepWorkspace,
+    step_scale::ComplexF64)
 
     M = length(floquet.left_channels)
     _apply_system_channel!(
@@ -129,6 +148,7 @@ function _accumulate_correlation_phase!(
         phase = mod1(start_phase + lag - 1, M)
         _apply_phase!(destination, source, floquet, phase, work)
         source, destination = destination, source
+        _scale_correlation_state!(source, step_scale)
         accumulator[lag + 1] += _late_observable_contraction(
             source, v_left, convention.late_trace_vector, floquet.layout)
     end
@@ -168,6 +188,7 @@ function floquet_correlation_threaded!(
     batch_size::Integer=max(1, Threads.nthreads()),
     resume::Bool=false,
     parallel_mode::Symbol=:phases,
+    period_eigenvalue::Number=1 + 0im,
     after_batch::Function=(_ -> nothing))
 
     parallel_mode in (:phases, :none) ||
@@ -184,6 +205,7 @@ function floquet_correlation_threaded!(
         throw(ArgumentError("insertion convention does not match operator"))
     M = _validate_correlation_inputs(
         C, floquet, phase_states, v_left, convention)
+    step_scale = _physical_step_scale(period_eigenvalue, M)
 
     LinearAlgebra.BLAS.set_num_threads(1)
     completed = 0
@@ -214,13 +236,13 @@ function floquet_correlation_threaded!(
                 thread_index = Threads.threadid()
                 _accumulate_correlation_phase!(
                     partials[thread_index], start_phase, floquet, phase_states,
-                    v_left, convention, workspaces[thread_index])
+                    v_left, convention, workspaces[thread_index], step_scale)
             end
         else
             for start_phase in (completed + 1):batch_stop
                 _accumulate_correlation_phase!(
                     partials[1], start_phase, floquet, phase_states,
-                    v_left, convention, workspaces[1])
+                    v_left, convention, workspaces[1], step_scale)
             end
         end
         for partial in partials
@@ -374,7 +396,10 @@ function decompose_correlation(
         abs(diagnostics.tail_slope) <= tail_slope_tolerance
     accepted ||
         throw(ArgumentError(
-            "decaying correlation tail did not satisfy configured tolerances"))
+            "decaying correlation tail did not satisfy configured tolerances: " *
+            "tail_norm=$(diagnostics.tail_norm), " *
+            "tail_mean=$(diagnostics.tail_mean), " *
+            "tail_slope=$(diagnostics.tail_slope)"))
     return (;
         c_asym,
         c_decay,

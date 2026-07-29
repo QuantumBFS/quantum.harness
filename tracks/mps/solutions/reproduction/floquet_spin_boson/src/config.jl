@@ -34,6 +34,7 @@ Base.@kwdef struct Fig3Config
     nmax::Int = 20
     weight_tolerance::Float64 = 0.0
     eigensolver_tolerance::Float64 = 1e-10
+    physical_eigenvalue_tolerance::Float64 = 1e-6
     eigensolver_max_iterations::Int = 1000
 end
 
@@ -52,6 +53,7 @@ Base.@kwdef struct Fig5Config
     nmax::Int = 20
     weight_tolerance::Float64 = 0.0
     eigensolver_tolerance::Float64 = 1e-10
+    physical_eigenvalue_tolerance::Float64 = 1e-6
     eigensolver_max_iterations::Int = 1000
     energy_balance_tolerance::Float64 = 1e-3
     energy_balance_floor::Float64 = 1e-12

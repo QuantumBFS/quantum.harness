@@ -117,6 +117,26 @@ end
         @test C ≈ ones(ComplexF64, 9)
     end
 
+    @testset "physical period eigenvalue removes artificial long-time decay" begin
+        numerical_lambda = 0.99 + 0im
+        scaled_identity = numerical_lambda .* Matrix{ComplexF64}(I, 4, 4)
+        identity4 = Matrix{ComplexF64}(I, 4, 4)
+        floquet = FloquetOperator(
+            reshape(scaled_identity, 1, 4, 1, 4),
+            [identity4], [identity4])
+        rho = ComplexF64[1, 0, 0, 0]
+        raw = zeros(ComplexF64, 21)
+        physical = similar(raw)
+        floquet_correlation_serial!(
+            raw, floquet, [rho], SIGMA_Z, ComplexF64[1])
+        floquet_correlation_serial!(
+            physical, floquet, [rho], SIGMA_Z, ComplexF64[1];
+            period_eigenvalue=numerical_lambda)
+
+        @test raw ≈ numerical_lambda .^ (0:20)
+        @test physical ≈ ones(ComplexF64, 21) atol=2e-14
+    end
+
     @testset "epsilon_d=0 exact closed-system correlation" begin
         M = 16
         omega_d = 1.0

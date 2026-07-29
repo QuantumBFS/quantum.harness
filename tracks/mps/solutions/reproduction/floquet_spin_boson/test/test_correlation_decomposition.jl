@@ -67,6 +67,9 @@ using LinearAlgebra
         end
         @test error isa ArgumentError
         @test occursin("decaying correlation tail", sprint(showerror, error))
+        @test occursin("tail_norm=", sprint(showerror, error))
+        @test occursin("tail_mean=", sprint(showerror, error))
+        @test occursin("tail_slope=", sprint(showerror, error))
     end
 
     @testset "invalid signal and tolerance inputs fail closed" begin

@@ -269,6 +269,9 @@ function _validate_fig3_config(config::Fig3Config)
         throw(ArgumentError("Fig. 3 tail count is incompatible with correlation length"))
     config.eigensolver_tolerance > 0 ||
         throw(ArgumentError("Fig. 3 eigensolver tolerance must be positive"))
+    config.physical_eigenvalue_tolerance > 0 ||
+        throw(ArgumentError(
+            "Fig. 3 physical eigenvalue tolerance must be positive"))
     config.eigensolver_max_iterations > 0 ||
         throw(ArgumentError("Fig. 3 eigensolver iterations must be positive"))
     for tolerance in (
@@ -312,6 +315,9 @@ function _write_fig3_config(path, config, model, omega_d, grid, chi)
             ",\"period_steps\":", grid.M,
             ",\"correlation_lag_steps\":", config.correlation_lag_steps,
             ",\"c0_tolerance\":", config.c0_tolerance,
+            ",\"eigensolver_tolerance\":", config.eigensolver_tolerance,
+            ",\"physical_eigenvalue_tolerance\":",
+            config.physical_eigenvalue_tolerance,
             ",\"bond_dimension\":", chi, "}")
     end
 end
@@ -443,6 +449,7 @@ function _run_fig3_point(config::Fig3Config, output_dir::AbstractString,
     steady = solve_floquet_steady_state(
         floquet;
         tolerance=config.eigensolver_tolerance,
+        physical_eigenvalue_tolerance=config.physical_eigenvalue_tolerance,
         max_iterations=config.eigensolver_max_iterations,
         initial_vector=isnothing(warm_start) ? initial : nothing,
         warm_start,
@@ -466,14 +473,17 @@ function _run_fig3_point(config::Fig3Config, output_dir::AbstractString,
     checkpoint_path = joinpath(point_dir, "correlation.checkpoint.jld2")
     config_hash = bytes2hex(sha256(
         string(uniform_if_key(adapter.metadata), "|", drive, "|", omega_d,
-               "|", grid.dt, "|", config.correlation_lag_steps)))
+               "|", grid.dt, "|", config.correlation_lag_steps, "|",
+               bitstring(real(steady.eigenvalue)), "|",
+               bitstring(imag(steady.eigenvalue)))))
     started = time_ns()
     floquet_correlation_threaded!(
         correlation, floquet, micromotion.phase_states,
         model.coupling_operator, adapter.v_left;
         config_hash, checkpoint_path, batch_size=max(1, Threads.nthreads()),
         resume=(resume && isfile(checkpoint_path)),
-        parallel_mode)
+        parallel_mode,
+        period_eigenvalue=steady.eigenvalue)
     correlation_seconds = (time_ns() - started) / 1e9
     c0_error = abs(correlation[1] - 1)
     c0_error <= config.c0_tolerance ||
@@ -618,6 +628,7 @@ function _fig3_config(config::Fig5Config)
         nmax=config.nmax,
         weight_tolerance=config.weight_tolerance,
         eigensolver_tolerance=config.eigensolver_tolerance,
+        physical_eigenvalue_tolerance=config.physical_eigenvalue_tolerance,
         eigensolver_max_iterations=config.eigensolver_max_iterations)
 end
 
@@ -648,7 +659,8 @@ function fig5_config_hash(config::Fig5Config,
         config.tail_norm_tolerance, config.tail_mean_tolerance,
         config.tail_slope_tolerance, config.c0_tolerance,
         config.omega_max, config.nmax, config.weight_tolerance,
-        config.eigensolver_tolerance, config.eigensolver_max_iterations,
+        config.eigensolver_tolerance, config.physical_eigenvalue_tolerance,
+        config.eigensolver_max_iterations,
         config.energy_balance_tolerance, config.energy_balance_floor,
         String(run_identity), string(VERSION),
         _FIG5_UNIFORMTEMPO_REVISION, _fig5_source_fingerprint())
@@ -698,6 +710,8 @@ function _fig5_settings_json(config::Fig5Config, exact_dt::Real)
         _fig3_json_number(config.weight_tolerance),
         ",\"eigensolver_tolerance\":",
         _fig3_json_number(config.eigensolver_tolerance),
+        ",\"physical_eigenvalue_tolerance\":",
+        _fig3_json_number(config.physical_eigenvalue_tolerance),
         ",\"eigensolver_max_iterations\":",
         config.eigensolver_max_iterations,
         ",\"energy_balance_tolerance\":",
