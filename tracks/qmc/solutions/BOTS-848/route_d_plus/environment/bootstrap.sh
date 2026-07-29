@@ -47,8 +47,8 @@ esac
 if [[ "${mode}" != "validate" ]]; then
   "${python_bin}" -m venv "${venv_dir}"
   "${venv_dir}/bin/python" -m pip install --upgrade pip setuptools wheel
-  "${venv_dir}/bin/python" -m pip install --upgrade "${jax_requirement}"
-  "${venv_dir}/bin/python" -m pip install --requirement "${requirements}"
+  "${venv_dir}/bin/python" -m pip install --upgrade \
+    "${jax_requirement}" --requirement "${requirements}"
 
   mkdir -p "${run_dir}"
   "${venv_dir}/bin/python" -m pip freeze --all > "${run_dir}/requirements-lock.txt"

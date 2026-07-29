@@ -82,3 +82,7 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
   and attempted an `ml_dtypes` source build whose isolated NumPy dependency
   could not be satisfied. A binary-only dry-run identified the pinned 0.4.38
   stack before the next install attempt.
+- The first pinned install was stopped before compilation because the script
+  installed the JAX extra in a separate pip transaction, before the
+  `ml_dtypes==0.5.1` constraint was visible. The bootstrap now resolves the
+  JAX extra and the complete requirements file in one transaction.

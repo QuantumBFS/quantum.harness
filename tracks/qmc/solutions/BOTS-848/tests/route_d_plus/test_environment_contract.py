@@ -66,6 +66,7 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "tracks/qmc/results/" in bootstrap
     assert "all|install|validate" in bootstrap
     assert "jax[cuda12]==0.4.38" in bootstrap
+    assert '"${jax_requirement}" --requirement "${requirements}"' in bootstrap
     assert "numpy==2.0.2" in requirements
     assert "ml_dtypes==0.5.1" in requirements
     assert "optax==0.2.4" in requirements
