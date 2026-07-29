@@ -6,7 +6,7 @@
 |---|---|
 | Team | Ranger |
 | Members | Chenxi Wan, Yedi Shen, Junkai Wang |
-| Challenge | [#15 — Symmetric neural-network ansatz for the chiral graviton at ν = 1/3](https://github.com/QuantumBFS/quantum.harness/issues/15) |
+| Challenge | `Addresses #15` — [Symmetric neural-network ansatz for the chiral graviton at ν = 1/3](https://github.com/QuantumBFS/quantum.harness/issues/15), released by Lei Wang (Institute of Physics, CAS) |
 | Track | `qmc` — from the issue's `Variational Monte Carlo / Neural Quantum States` method |
 | Public implementation | [`JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton`](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/competition-showcase) |
 | License | AGPL-3.0-only |
