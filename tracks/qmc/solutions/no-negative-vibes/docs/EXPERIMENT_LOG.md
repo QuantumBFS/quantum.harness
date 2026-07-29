@@ -1918,3 +1918,31 @@ definite, then `H=-log(T_c)` is Hermitian and generally nonlocal, while
 the expansion of `Tr(T_c^N)` has positive coefficients and every
 configuration weight reduces to the proved `{I,B,B^T}` determinant
 semigroup.  This route is being checked before any further cone polishing.
+
+### Explicit continuum alphabet
+
+Commit `a39f59d` upgrades the fixed theorem to the continuum alphabet
+
+`A={B(z),B(z)^T : 99/100<=z<=101/100}`,
+
+where every letter may choose its orientation and parameter `z_i`
+independently.  Exact rational interval propagation proves
+`det(I+W)>0` for every finite word in this uncountable alphabet.
+
+The finite verifier covers all 8,190 nonempty binary orientation words
+through length 12 simultaneously over all independent parameter choices;
+the global full-determinant lower bound is `3499/100`.  The length-13
+grade-three/four block certificate covers all 8,192 orientations.  Its
+worst word is `0000001111111`, and its strict raw interval numerator is
+`17885432888260091992976094678617191678771759066816123079705733862324608427900`
+over denominator `100^26`.  Every nonempty short remainder has positive
+margin, while the empty remainder saturates the allowed factor 10.
+Uniform interval Sylvester gates retain lower leading-minor bounds 2 and
+13, so the same low-sector tail starts at length 6 with margin 17,174.
+The real-log gate also holds throughout the interval because the
+characteristic polynomial has no negative real root for `z<8`.
+
+This is the desired structured set rather than an isolated survivor.
+The proof is stronger than a shared-coupling statement: it allows
+time-slice-dependent auxiliary fields `z_i`.  Focused independent replay
+of the interval-family and fixed-point tests reports 13/13 passing.
