@@ -1,0 +1,863 @@
+{
+  "classification_counts": {
+    "BROKEN": 0,
+    "EXTEND": 27,
+    "STOP": 34,
+    "SURVIVE": 14
+  },
+  "complete_cells": 675,
+  "created_utc": "2026-07-29T11:58:05.980199+00:00",
+  "duplicate_cells": [],
+  "error_cells": [],
+  "expected_cells": 675,
+  "experiment_id": "stage3-coarse-20260729",
+  "extensions": [
+    {
+      "acceptance_beta8_m8": 0.9977083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.009016462235744122,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 4.042528646837741,
+      "g_b_over_g_a": 0.25,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 0.6360275383144544,
+      "q_combined_beta8_m4": 0.11081880701008051,
+      "q_combined_beta8_m8": 0.0017330060818656265,
+      "reasons": [
+        "effective sample or acceptance threshold not met"
+      ],
+      "size_delta": -0.10908580092821489,
+      "size_z": -11.166658511715596,
+      "t": 0.25,
+      "thermal_delta": -0.6342945322325887,
+      "thermal_z": -4.763576984616645
+    },
+    {
+      "acceptance_beta8_m8": 0.9964583333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.0280567328833847,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 5.475939549691042,
+      "g_b_over_g_a": 0.25,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 0.5734015248985034,
+      "q_combined_beta8_m4": 0.0854979897644037,
+      "q_combined_beta8_m8": 0.0005815363006118422,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": -0.08491645346379185,
+      "size_z": -6.277454377135945,
+      "t": 0.25,
+      "thermal_delta": -0.5728199885978915,
+      "thermal_z": -5.626896511799585
+    },
+    {
+      "acceptance_beta8_m8": 0.8435416666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.487433739247696,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.632535677496472,
+      "g_b_over_g_a": 0.25,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 1.7827296119999112,
+      "q_combined_beta8_m4": 0.6023041457234781,
+      "q_combined_beta8_m8": 1.3572739655461894,
+      "reasons": [
+        "effective sample or acceptance threshold not met"
+      ],
+      "size_delta": 0.7549698198227113,
+      "size_z": 4.717961850604277,
+      "t": 0.5,
+      "thermal_delta": -0.4254556464537218,
+      "thermal_z": -3.0207147704396236
+    },
+    {
+      "acceptance_beta8_m8": 0.84,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.6001285573354609,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.4285761996430955,
+      "g_b_over_g_a": 0.25,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 1.5582971545028912,
+      "q_combined_beta8_m4": 0.7786106098107302,
+      "q_combined_beta8_m8": 1.4771488185089434,
+      "reasons": [
+        "effective sample or acceptance threshold not met"
+      ],
+      "size_delta": 0.6985382086982133,
+      "size_z": 4.198762266953846,
+      "t": 0.5,
+      "thermal_delta": -0.08114833599394777,
+      "thermal_z": -0.48315748632043587
+    },
+    {
+      "acceptance_beta8_m8": 0.8152083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.2780310118479924,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 4.664467370646772,
+      "g_b_over_g_a": 0.25,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.054415382068508,
+      "q_combined_beta8_m4": 1.1564941106776359,
+      "q_combined_beta8_m8": 2.1053756678789832,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 0.9488815572013474,
+      "size_z": 20.718371730790818,
+      "t": 1.0,
+      "thermal_delta": 0.05096028581047518,
+      "thermal_z": 1.2850367251766233
+    },
+    {
+      "acceptance_beta8_m8": 0.8029166666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.3350008860050802,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 5.562734512898099,
+      "g_b_over_g_a": 0.25,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.0469506805377766,
+      "q_combined_beta8_m4": 1.1199796801188355,
+      "q_combined_beta8_m8": 2.110567120988713,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 0.9905874408698774,
+      "size_z": 53.00850860735356,
+      "t": 1.0,
+      "thermal_delta": 0.06361644045093628,
+      "thermal_z": 3.0553578229920517
+    },
+    {
+      "acceptance_beta8_m8": 0.8002083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.15784344425831004,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.4467187642878048,
+      "g_b_over_g_a": 0.25,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.3884078461816896,
+      "q_combined_beta8_m4": 1.1663583179615586,
+      "q_combined_beta8_m8": 2.398239239085054,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.2318809211234956,
+      "size_z": 52.53847333314877,
+      "t": 2.0,
+      "thermal_delta": 0.009831392903364655,
+      "thermal_z": 1.206183603779285
+    },
+    {
+      "acceptance_beta8_m8": 0.7922916666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.20691181645417567,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.6663173204624173,
+      "g_b_over_g_a": 0.25,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.525384391226659,
+      "q_combined_beta8_m4": 1.2484924110881939,
+      "q_combined_beta8_m8": 2.5695116299847034,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.3210192188965095,
+      "size_z": 97.5369613115863,
+      "t": 2.0,
+      "thermal_delta": 0.044127238758044474,
+      "thermal_z": 3.2775370837702487
+    },
+    {
+      "acceptance_beta8_m8": 0.7920833333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.06504510640602486,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 7.632213980929571,
+      "g_b_over_g_a": 0.25,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.3962187494660334,
+      "q_combined_beta8_m4": 1.1251098210232908,
+      "q_combined_beta8_m8": 2.410232617020069,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.2851227959967781,
+      "size_z": 231.53897451725825,
+      "t": 2.0,
+      "thermal_delta": 0.014013867554035553,
+      "thermal_z": 2.3016407033965307
+    },
+    {
+      "acceptance_beta8_m8": 0.99625,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.10051196266389244,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 4.024438442105261,
+      "g_b_over_g_a": 0.5,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 0.5615881697584714,
+      "q_combined_beta8_m4": 0.0014646571536954616,
+      "q_combined_beta8_m8": 0.004301709048727117,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 0.0028370518950316553,
+      "size_z": 1.5253348710042625,
+      "t": 0.25,
+      "thermal_delta": -0.5572864607097443,
+      "thermal_z": -5.093247413779918
+    },
+    {
+      "acceptance_beta8_m8": 0.8102083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.6200453690389971,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 5.441545843881736,
+      "g_b_over_g_a": 0.5,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 1.6267592554330803,
+      "q_combined_beta8_m4": 0.9240659490780352,
+      "q_combined_beta8_m8": 1.742120580611715,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 0.8180546315336799,
+      "size_z": 14.74122597664432,
+      "t": 0.5,
+      "thermal_delta": 0.11536132517863473,
+      "thermal_z": 1.295507361459762
+    },
+    {
+      "acceptance_beta8_m8": 0.83625,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.08466293740618953,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.236853278705885,
+      "g_b_over_g_a": 0.5,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 1.5894702436466681,
+      "q_combined_beta8_m4": 0.8514604776785653,
+      "q_combined_beta8_m8": 1.3671554993845179,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 0.5156950217059526,
+      "size_z": 3.4872925940031863,
+      "t": 0.5,
+      "thermal_delta": -0.22231474426215025,
+      "thermal_z": -1.4308319972261208
+    },
+    {
+      "acceptance_beta8_m8": 0.7985416666666667,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.041241193761719905,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.6053551181240606,
+      "g_b_over_g_a": 0.5,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.0741520103529694,
+      "q_combined_beta8_m4": 1.1628551128020919,
+      "q_combined_beta8_m8": 2.2449279127288886,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.0820727999267967,
+      "size_z": 55.70494858851064,
+      "t": 1.0,
+      "thermal_delta": 0.17077590237591922,
+      "thermal_z": 5.309033535318304
+    },
+    {
+      "acceptance_beta8_m8": 0.7764583333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.3034800743855194,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.9738087800416313,
+      "g_b_over_g_a": 0.5,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.4293507154993454,
+      "q_combined_beta8_m4": 1.2568069966066064,
+      "q_combined_beta8_m8": 2.566080983633251,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.3092739870266448,
+      "size_z": 58.74405632274482,
+      "t": 1.0,
+      "thermal_delta": 0.13673026813390576,
+      "thermal_z": 14.866259179805665
+    },
+    {
+      "acceptance_beta8_m8": 0.7791666666666667,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.2825845020014055,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 4.844419637558591,
+      "g_b_over_g_a": 0.5,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.5204031089178103,
+      "q_combined_beta8_m4": 1.2611576647795415,
+      "q_combined_beta8_m8": 2.561150943472685,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.2999932786931434,
+      "size_z": 122.42405640841127,
+      "t": 2.0,
+      "thermal_delta": 0.04074783455487463,
+      "thermal_z": 7.834501380599771
+    },
+    {
+      "acceptance_beta8_m8": 0.79,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.13071371620074856,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.065755223097778,
+      "g_b_over_g_a": 0.5,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.3966618751428808,
+      "q_combined_beta8_m4": 1.126627768903673,
+      "q_combined_beta8_m8": 2.4170542307032905,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.2904264617996175,
+      "size_z": 166.85702905998116,
+      "t": 2.0,
+      "thermal_delta": 0.020392355560409747,
+      "thermal_z": 2.3194851022345078
+    },
+    {
+      "acceptance_beta8_m8": 0.9095833333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.1891798266188842,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.7908466612245504,
+      "g_b_over_g_a": 1.0,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 0.9113504288202868,
+      "q_combined_beta8_m4": 0.6004784493305734,
+      "q_combined_beta8_m8": 0.3892127759331564,
+      "reasons": [
+        "effective sample or acceptance threshold not met"
+      ],
+      "size_delta": -0.21126567339741698,
+      "size_z": -1.0357716341956178,
+      "t": 0.25,
+      "thermal_delta": -0.5221376528871304,
+      "thermal_z": -3.336272791963384
+    },
+    {
+      "acceptance_beta8_m8": 0.8129166666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.166619716191703,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.3438614348505826,
+      "g_b_over_g_a": 1.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 1.7528348126490438,
+      "q_combined_beta8_m4": 1.2852360554856574,
+      "q_combined_beta8_m8": 1.6059874629859159,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 0.32075140750025843,
+      "size_z": 3.014195260250458,
+      "t": 0.5,
+      "thermal_delta": -0.14684734966312796,
+      "thermal_z": -1.7030081441541847
+    },
+    {
+      "acceptance_beta8_m8": 0.74875,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.1032473424769054,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.2691957751506298,
+      "g_b_over_g_a": 1.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.342269237817282,
+      "q_combined_beta8_m4": 1.2304150377230663,
+      "q_combined_beta8_m8": 2.5165056365202525,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.2860905987971862,
+      "size_z": 36.25403458254961,
+      "t": 0.5,
+      "thermal_delta": 0.1742363987029707,
+      "thermal_z": 8.148036334571664
+    },
+    {
+      "acceptance_beta8_m8": 0.7527083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.08150346704712907,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.3381651512043016,
+      "g_b_over_g_a": 1.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.4872906144377227,
+      "q_combined_beta8_m4": 1.2322021061991397,
+      "q_combined_beta8_m8": 2.5495580143383187,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.317355908139179,
+      "size_z": 48.07453221094731,
+      "t": 1.0,
+      "thermal_delta": 0.06226739990059604,
+      "thermal_z": 6.403469000304546
+    },
+    {
+      "acceptance_beta8_m8": 0.6852083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.35273099752146087,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.395382048470819,
+      "g_b_over_g_a": 2.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 1.54222401763389,
+      "q_combined_beta8_m4": 1.1204126413179563,
+      "q_combined_beta8_m8": 1.5523253642723536,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 0.4319127229543973,
+      "size_z": 4.454192556963928,
+      "t": 0.25,
+      "thermal_delta": 0.010101346638463626,
+      "thermal_z": 0.1083681047834073
+    },
+    {
+      "acceptance_beta8_m8": 0.708125,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.7471799475878012,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 2.8849136922619794,
+      "g_b_over_g_a": 2.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.037293614610571,
+      "q_combined_beta8_m4": 1.1335184386054564,
+      "q_combined_beta8_m8": 2.043582097686113,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 0.9100636590806568,
+      "size_z": 13.039032396526073,
+      "t": 0.5,
+      "thermal_delta": 0.006288483075542306,
+      "thermal_z": 0.3909799346194887
+    },
+    {
+      "acceptance_beta8_m8": 0.6860416666666667,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.6240995489284039,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.1296164314694166,
+      "g_b_over_g_a": 2.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.3421120446524326,
+      "q_combined_beta8_m4": 1.061955730488505,
+      "q_combined_beta8_m8": 2.309846448388074,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.247890717899569,
+      "size_z": 20.780837216111784,
+      "t": 0.5,
+      "thermal_delta": -0.03226559626435854,
+      "thermal_z": -0.4496988571420575
+    },
+    {
+      "acceptance_beta8_m8": 0.708125,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.2943374455122123,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.3808486082375504,
+      "g_b_over_g_a": 2.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.231675418094536,
+      "q_combined_beta8_m4": 1.0893010163898171,
+      "q_combined_beta8_m8": 2.3105806982790424,
+      "reasons": [
+        "sub-threshold positive size/temperature trend"
+      ],
+      "size_delta": 1.2212796818892253,
+      "size_z": 109.59745861329097,
+      "t": 1.0,
+      "thermal_delta": 0.07890528018450649,
+      "thermal_z": 3.0148161007486443
+    },
+    {
+      "acceptance_beta8_m8": 0.715,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.07169177547666264,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.2008251762708726,
+      "g_b_over_g_a": 2.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.45796983531541,
+      "q_combined_beta8_m4": 1.0961387595331469,
+      "q_combined_beta8_m8": 2.458336170743732,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.3621974112105852,
+      "size_z": 74.980618825319,
+      "t": 2.0,
+      "thermal_delta": 0.0003663354283220954,
+      "thermal_z": 0.020202157230269517
+    },
+    {
+      "acceptance_beta8_m8": 0.7027083333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.2782677491646575,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.748190475418918,
+      "g_b_over_g_a": 2.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.53826528529731,
+      "q_combined_beta8_m4": 1.2228786013785904,
+      "q_combined_beta8_m8": 2.5558149041004334,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.332936302721843,
+      "size_z": 211.86489656188724,
+      "t": 2.0,
+      "thermal_delta": 0.017549618803123224,
+      "thermal_z": 2.0936647441992298
+    },
+    {
+      "acceptance_beta8_m8": 0.7172916666666667,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.1629825568864221,
+      "classification": "EXTEND",
+      "effective_samples_beta8_m8": 3.5341434039500075,
+      "g_b_over_g_a": 2.0,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.440649201736765,
+      "q_combined_beta8_m4": 1.1182201185708984,
+      "q_combined_beta8_m8": 2.434792083155089,
+      "reasons": [
+        "competing-channel reordering",
+        "signal present but short-chain quality is marginal"
+      ],
+      "size_delta": 1.3165719645841905,
+      "size_z": 36.08723993690778,
+      "t": 2.0,
+      "thermal_delta": -0.005857118581676257,
+      "thermal_z": -0.15051287456526025
+    }
+  ],
+  "maximum_weight_log_error": 5.558820527440389e-07,
+  "minimum_direct_sign": 1.0,
+  "missing_cells": [],
+  "regions": 75,
+  "stability_retries": 10,
+  "survivors": [
+    {
+      "acceptance_beta8_m8": 0.7727083333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.5679157296451735,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 6.111842839913559,
+      "g_b_over_g_a": 0.25,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 1.948303667069506,
+      "q_combined_beta8_m4": 1.170143712944903,
+      "q_combined_beta8_m8": 2.360840148636687,
+      "reasons": [
+        "size-and-temperature enhancement"
+      ],
+      "size_delta": 1.190696435691784,
+      "size_z": 28.72117851735851,
+      "t": 0.25,
+      "thermal_delta": 0.41253648156718103,
+      "thermal_z": 10.813541546504782
+    },
+    {
+      "acceptance_beta8_m8": 0.7922916666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.4098826201009819,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 5.565125475451568,
+      "g_b_over_g_a": 0.25,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.1618315056922106,
+      "q_combined_beta8_m4": 1.3071085903721287,
+      "q_combined_beta8_m8": 2.4855359545169557,
+      "reasons": [
+        "size-and-temperature enhancement"
+      ],
+      "size_delta": 1.178427364144827,
+      "size_z": 16.08917359246981,
+      "t": 0.5,
+      "thermal_delta": 0.32370444882474514,
+      "thermal_z": 5.263842066182745
+    },
+    {
+      "acceptance_beta8_m8": 0.7814583333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.21632640262940878,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 4.645962517069416,
+      "g_b_over_g_a": 0.25,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.4179443850236213,
+      "q_combined_beta8_m4": 1.2616729216882656,
+      "q_combined_beta8_m8": 2.5716364638792726,
+      "reasons": [
+        "size-and-temperature enhancement"
+      ],
+      "size_delta": 1.309963542191007,
+      "size_z": 37.17389327534058,
+      "t": 1.0,
+      "thermal_delta": 0.15369207885565128,
+      "thermal_z": 7.423761303217417
+    },
+    {
+      "acceptance_beta8_m8": 0.76875,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.3968657404400682,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 6.407979626975485,
+      "g_b_over_g_a": 0.5,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 1.9261007686471736,
+      "q_combined_beta8_m4": 1.2363062906538282,
+      "q_combined_beta8_m8": 2.4448601701330537,
+      "reasons": [
+        "size-and-temperature enhancement"
+      ],
+      "size_delta": 1.2085538794792254,
+      "size_z": 18.27502074592404,
+      "t": 0.25,
+      "thermal_delta": 0.5187594014858801,
+      "thermal_z": 7.223631808173654
+    },
+    {
+      "acceptance_beta8_m8": 0.7670833333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.3351997115529185,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 7.100234230064475,
+      "g_b_over_g_a": 0.5,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.2195920440099415,
+      "q_combined_beta8_m4": 1.2631493576947381,
+      "q_combined_beta8_m8": 2.5151097607063364,
+      "reasons": [
+        "size-and-temperature enhancement"
+      ],
+      "size_delta": 1.2519604030115983,
+      "size_z": 39.5258541368326,
+      "t": 0.5,
+      "thermal_delta": 0.2955177166963949,
+      "thermal_z": 8.748556641615174
+    },
+    {
+      "acceptance_beta8_m8": 0.7845833333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.2121234273356598,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 7.965308470848172,
+      "g_b_over_g_a": 0.5,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.098785788129983,
+      "q_combined_beta8_m4": 1.1269667143248658,
+      "q_combined_beta8_m8": 2.2678468308104285,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.1408801164855626,
+      "size_z": 66.39984915767579,
+      "t": 1.0,
+      "thermal_delta": 0.16906104268044553,
+      "thermal_z": 13.117899434208896
+    },
+    {
+      "acceptance_beta8_m8": 0.7472916666666667,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.37990132219773304,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 11.884468522948556,
+      "g_b_over_g_a": 1.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 1.8019801607715913,
+      "q_combined_beta8_m4": 1.0409620218688886,
+      "q_combined_beta8_m8": 2.327061224245385,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.2860992023764963,
+      "size_z": 31.42239066587546,
+      "t": 0.25,
+      "thermal_delta": 0.5250810634737937,
+      "thermal_z": 4.834721026765566
+    },
+    {
+      "acceptance_beta8_m8": 0.7864583333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.40464932621812383,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 8.151813375553031,
+      "g_b_over_g_a": 1.0,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 1.8130692294227835,
+      "q_combined_beta8_m4": 1.0615379470114636,
+      "q_combined_beta8_m8": 1.7856935357183996,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 0.724155588706936,
+      "size_z": 10.343407762427985,
+      "t": 0.5,
+      "thermal_delta": -0.027375693704383863,
+      "thermal_z": -0.2858978947319457
+    },
+    {
+      "acceptance_beta8_m8": 0.7597916666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.11114811570038252,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 4.770441492857778,
+      "g_b_over_g_a": 1.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.1953720100007663,
+      "q_combined_beta8_m4": 1.1209353254505472,
+      "q_combined_beta8_m8": 2.3305484984298652,
+      "reasons": [
+        "size-and-temperature enhancement",
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.209613172979318,
+      "size_z": 88.41164914853763,
+      "t": 1.0,
+      "thermal_delta": 0.1351764884290989,
+      "thermal_z": 11.595033080885463
+    },
+    {
+      "acceptance_beta8_m8": 0.74375,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.07829848596937447,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 4.4781396307517305,
+      "g_b_over_g_a": 1.0,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.2206614353273464,
+      "q_combined_beta8_m4": 0.9354542334805153,
+      "q_combined_beta8_m8": 2.306723218719392,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.3712689852388764,
+      "size_z": 28.990035835261697,
+      "t": 1.0,
+      "thermal_delta": 0.0860617833920454,
+      "thermal_z": 3.0010026529740728
+    },
+    {
+      "acceptance_beta8_m8": 0.7714583333333334,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.06582682217317266,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 4.173191108136353,
+      "g_b_over_g_a": 1.0,
+      "mu": -1.5,
+      "q_combined_beta2_m8": 2.43383899515525,
+      "q_combined_beta8_m4": 1.0832699120587965,
+      "q_combined_beta8_m8": 2.4621460788686176,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.378876166809821,
+      "size_z": 61.12060613187391,
+      "t": 2.0,
+      "thermal_delta": 0.028307083713367653,
+      "thermal_z": 1.7769399098867327
+    },
+    {
+      "acceptance_beta8_m8": 0.7458333333333333,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.007916141374789399,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 5.412536369821211,
+      "g_b_over_g_a": 1.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.5269953684413258,
+      "q_combined_beta8_m4": 1.2445331435877869,
+      "q_combined_beta8_m8": 2.54799150833374,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.3034583647459532,
+      "size_z": 51.32262098020094,
+      "t": 2.0,
+      "thermal_delta": 0.020996139892414334,
+      "thermal_z": 2.4098020183369986
+    },
+    {
+      "acceptance_beta8_m8": 0.7397916666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": -0.0054489924679528585,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 5.42015450531815,
+      "g_b_over_g_a": 1.0,
+      "mu": 1.5,
+      "q_combined_beta2_m8": 2.438152057951776,
+      "q_combined_beta8_m4": 1.1279382430036886,
+      "q_combined_beta8_m8": 2.4775826904566127,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.3496444474529241,
+      "size_z": 147.9840374732943,
+      "t": 2.0,
+      "thermal_delta": 0.039430632504836804,
+      "thermal_z": 3.4845802819901275
+    },
+    {
+      "acceptance_beta8_m8": 0.6816666666666666,
+      "cells": 9,
+      "channel_balance_beta8_m8": 0.25721175937893886,
+      "classification": "SURVIVE",
+      "effective_samples_beta8_m8": 4.924060567055664,
+      "g_b_over_g_a": 2.0,
+      "mu": 0.0,
+      "q_combined_beta2_m8": 2.4400568954508897,
+      "q_combined_beta8_m4": 1.2521926760907676,
+      "q_combined_beta8_m8": 2.5105414288378776,
+      "reasons": [
+        "competing-channel reordering"
+      ],
+      "size_delta": 1.25834875274711,
+      "size_z": 29.12693621055764,
+      "t": 1.0,
+      "thermal_delta": 0.0704845333869879,
+      "thermal_z": 4.151340965634152
+    }
+  ],
+  "unexpected_cells": []
+}

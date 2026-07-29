@@ -25,6 +25,7 @@ class DQMCConfig:
     v_asymmetry: float = 0.0
     g_a: float = 1.0
     proposal_scale: float = 0.75
+    stabilize: bool | None = None
 
     @property
     def slices(self) -> int:
@@ -35,7 +36,10 @@ class DQMCConfig:
         return rounded
 
     def as_dict(self) -> dict[str, float | int]:
-        return {**asdict(self), "slices": self.slices}
+        data = asdict(self)
+        if data["stabilize"] is None:
+            del data["stabilize"]
+        return {**data, "slices": self.slices}
 
 
 @dataclass(frozen=True)
@@ -385,7 +389,11 @@ def run_chain(
         )
         for index in range(config.slices)
     ]
-    use_stabilization = config.beta >= 6.0
+    use_stabilization = (
+        config.beta >= 6.0
+        if config.stabilize is None
+        else config.stabilize
+    )
     total = (
         stabilized_history_product(slices)
         if use_stabilization

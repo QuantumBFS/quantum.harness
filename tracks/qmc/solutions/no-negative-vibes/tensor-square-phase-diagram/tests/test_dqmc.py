@@ -139,3 +139,26 @@ def test_stabilized_tensor_product_spans_sixty_log_units() -> None:
         expected[index] = value / (1.0 + value)
     assert np.diag(rho) == pytest.approx(expected, abs=2e-12)
     assert np.all(np.isfinite(rho))
+
+
+def test_chain_honors_explicit_stabilization_below_default_beta() -> None:
+    from tensor_square.dqmc import run_chain
+
+    config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+        proposal_scale=0.4,
+        stabilize=True,
+    )
+    summary = run_chain(
+        config,
+        seed=732,
+        warmup_sweeps=0,
+        measurement_sweeps=1,
+        measure_every=1,
+        progress_every=2,
+    )
+    assert summary["stabilized"] is True
