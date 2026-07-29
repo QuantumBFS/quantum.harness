@@ -2205,3 +2205,29 @@ admit real one-particle logarithms.  The Gaussian block identity fails in
 interacting.  This closes the physical and positive-field gates
 conditionally; sign-freeness still requires the independent arbitrary-word
 determinant theorem.
+
+### Exact Hodge reduction of the coupled tail
+
+The signed grade-three sector is not an independent 10-state process.
+For the common nonnegative grade-four gauge
+`P=D wedge^4(B) D`, exact symbolic algebra found one fixed signed
+permutation `H` such that, for every positive `p` and either orientation,
+
+`wedge^2(P)=8 H wedge^3(B) H^T`.
+
+Consequently every length-`n` word satisfies
+
+`wedge^2(P_w)=8^n H wedge^3(W) H^T`
+
+and
+
+`chi3(W)+chi4(W)=8^(-n)[e2(P_w)+8^n trace(P_w)]`.
+
+The symbolic atom identity and a mixed four-letter word replay both pass
+exactly.  This replaces the loose Frobenius comparison by a five-state
+nonnegative path problem.  A direct diagonal sign gauge of the equivalent
+15-dimensional atoms `wedge^2(diag(P_i,8))` was tested and rejected:
+the signed support graph contains inconsistent cycles (including a
+negative diagonal entry), so a richer polyhedral/path-complete cone or a
+path injection is required.  The reduction itself is exact and remains
+the basis of subsequent tail searches.
