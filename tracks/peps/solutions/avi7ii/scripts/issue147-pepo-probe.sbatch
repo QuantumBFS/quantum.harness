@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
 #SBATCH --gres=gpu:A800:1
 #SBATCH --time=04:00:00
