@@ -255,8 +255,143 @@ def wick_product(m_left: np.ndarray, m_right: np.ndarray, rho: np.ndarray) -> fl
     return float(np.real_if_close(value).real)
 
 
+def quadratic_moments(
+    matrix: np.ndarray, rho: np.ndarray
+) -> tuple[float, float, float, float]:
+    """Return the first four raw moments of dGamma(matrix)."""
+    a1 = matrix @ rho
+    a2 = matrix @ matrix @ rho
+    a3 = matrix @ matrix @ matrix @ rho
+    a4 = matrix @ matrix @ matrix @ matrix @ rho
+    kappa1 = np.trace(a1)
+    kappa2 = np.trace(a2 - a1 @ a1)
+    kappa3 = np.trace(a3 - 3.0 * a2 @ a1 + 2.0 * a1 @ a1 @ a1)
+    kappa4 = np.trace(
+        a4
+        - 4.0 * a3 @ a1
+        - 3.0 * a2 @ a2
+        + 12.0 * a2 @ a1 @ a1
+        - 6.0 * a1 @ a1 @ a1 @ a1
+    )
+    raw = (
+        kappa1,
+        kappa2 + kappa1**2,
+        kappa3 + 3.0 * kappa2 * kappa1 + kappa1**3,
+        (
+            kappa4
+            + 4.0 * kappa3 * kappa1
+            + 3.0 * kappa2**2
+            + 6.0 * kappa2 * kappa1**2
+            + kappa1**4
+        ),
+    )
+    return tuple(float(np.real_if_close(value).real) for value in raw)
+
+
+def static_susceptibility(
+    hs_order: np.ndarray,
+    *,
+    beta: float,
+    contact: float,
+    normalization: float,
+) -> float:
+    """Static response from the HS covariance with its exact contact term."""
+    values = np.asarray(hs_order, dtype=np.float64)
+    variance = float(np.var(values, ddof=1)) if len(values) > 1 else 0.0
+    return (beta * variance - contact) / normalization
+
+
+def second_moment_correlation_length(
+    structure_peak: float,
+    structure_neighbor: float,
+    q_min: float,
+) -> float:
+    """Finite-size second-moment correlation-length proxy."""
+    if structure_neighbor <= 0.0:
+        return float("nan")
+    ratio_excess = max(0.0, structure_peak / structure_neighbor - 1.0)
+    return float(
+        np.sqrt(ratio_excess) / (2.0 * np.sin(0.5 * q_min))
+    )
+
+
+def hs_order_estimators(
+    fields: np.ndarray,
+    *,
+    model: OneBodyModel,
+    dt: float,
+) -> dict[str, float]:
+    """Return HS estimators and exact response normalization metadata."""
+    values: dict[str, float] = {
+        "response_beta": float(dt * fields.shape[0])
+    }
+    modes = model.m * model.m
+    for label, group in (("q_a", model.group_a), ("q_b", model.group_b)):
+        couplings = np.asarray(
+            [model.couplings[index] for index in group], dtype=np.float64
+        )
+        if len(group) == 0 or np.any(couplings <= 0.0):
+            continue
+        alpha = np.sqrt(dt * couplings / model.m)
+        scaled = fields[:, group] / alpha[None, :]
+        values[f"hs_{label}"] = float(np.mean(np.sum(scaled, axis=1)))
+        values[f"{label}_susceptibility_contact"] = float(
+            np.sum(model.m / couplings)
+        )
+        values[f"{label}_response_normalization"] = float(len(group) * modes)
+    return values
+
+
+def spatial_structure_observables(
+    q_matrices: list[np.ndarray],
+    rho: np.ndarray,
+    *,
+    system_size: int,
+) -> dict[str, float]:
+    """Open-chain staggered and adjacent-wavevector structure factors."""
+    edge_count = len(q_matrices)
+    if edge_count < 2:
+        return {}
+    edge = np.arange(edge_count, dtype=np.float64)
+    q_min = 2.0 * np.pi / edge_count
+    neighbor_wavevector = np.pi - q_min
+
+    def weighted(weights: np.ndarray) -> np.ndarray:
+        return sum(
+            (
+                weight * matrix
+                for weight, matrix in zip(
+                    weights, q_matrices, strict=True
+                )
+            ),
+            start=np.zeros_like(q_matrices[0]),
+        )
+
+    staggered = weighted((-1.0) ** edge)
+    neighbor_cos = weighted(np.cos(neighbor_wavevector * edge))
+    neighbor_sin = weighted(np.sin(neighbor_wavevector * edge))
+    normalization = edge_count * q_matrices[0].shape[0]
+    staggered_structure = (
+        quadratic_moments(staggered, rho)[1] / normalization
+    )
+    near_staggered_structure = (
+        quadratic_moments(neighbor_cos, rho)[1]
+        + quadratic_moments(neighbor_sin, rho)[1]
+    ) / normalization
+    return {
+        "staggered_structure": staggered_structure,
+        "near_staggered_structure": near_staggered_structure,
+        "correlation_q_min": float(q_min),
+        "correlation_system_size": float(system_size),
+    }
+
+
 def measure_configuration(
-    x: np.ndarray | StabilizedProduct, model: OneBodyModel
+    x: np.ndarray | StabilizedProduct,
+    model: OneBodyModel,
+    *,
+    fields: np.ndarray | None = None,
+    dt: float | None = None,
 ) -> dict[str, float]:
     if isinstance(x, StabilizedProduct):
         rho = stabilized_density_matrix(x)
@@ -287,22 +422,52 @@ def measure_configuration(
         (q_matrices[index] for index in model.group_b),
         start=np.zeros((modes, modes)),
     )
-    qa2 = wick_product(q_a, q_a, rho) / (len(model.group_a) * modes)
-    qb2 = wick_product(q_b, q_b, rho) / (len(model.group_b) * modes)
+    norm_a = np.sqrt(len(model.group_a) * modes)
+    norm_b = np.sqrt(len(model.group_b) * modes)
+    qa_moments = tuple(
+        value / norm_a**power
+        for power, value in enumerate(
+            quadratic_moments(q_a, rho), start=1
+        )
+    )
+    qb_moments = tuple(
+        value / norm_b**power
+        for power, value in enumerate(
+            quadratic_moments(q_b, rho), start=1
+        )
+    )
+    qa2 = qa_moments[1]
+    qb2 = qb_moments[1]
     nematic = kron_sum(model.nematic)
-    return {
+    measured = {
         "energy": energy_kinetic + energy_interaction,
         "energy_kinetic": energy_kinetic,
         "energy_interaction": energy_interaction,
         "density": float(np.trace(rho).real / modes),
+        "q_a_mean": qa_moments[0],
         "q_a_sq": qa2,
+        "q_a_cube": qa_moments[2],
+        "q_a_fourth": qa_moments[3],
+        "q_b_mean": qb_moments[0],
         "q_b_sq": qb2,
+        "q_b_cube": qb_moments[2],
+        "q_b_fourth": qb_moments[3],
         "q_combined": 0.5 * (qa2 + qb2),
         "channel_balance": (qb2 - qa2) / max(1.0e-14, qb2 + qa2),
         "nematic_sq": wick_product(nematic, nematic, rho) / (modes * modes),
         "direct_sign": sign,
         "weight_log_error": abs(direct_log - structured_log),
     }
+    measured.update(
+        spatial_structure_observables(
+            q_matrices, rho, system_size=model.m
+        )
+    )
+    if fields is not None:
+        if dt is None:
+            raise ValueError("dt is required with auxiliary fields")
+        measured.update(hs_order_estimators(fields, model=model, dt=dt))
+    return measured
 
 
 def integrated_autocorrelation(values: np.ndarray) -> float:
@@ -341,7 +506,17 @@ def summarize_measurements(
             if len(values) > 1
             else 0.0
         )
-        if key in {"energy", "density", "q_a_sq"}:
+        if key in {
+            "energy",
+            "density",
+            "q_a_sq",
+            "q_b_sq",
+            "q_combined",
+            "channel_balance",
+            "hs_q_a",
+            "hs_q_b",
+            "staggered_structure",
+        }:
             summary[f"{key}_tau_int"] = tau
     summary["direct_sign_min"] = float(
         min(measurement["direct_sign"] for measurement in measurements)
@@ -355,6 +530,65 @@ def summarize_measurements(
     summary["density_max"] = float(
         max(measurement["density"] for measurement in measurements)
     )
+    for prefix in ("q_a", "q_b"):
+        required = (
+            f"{prefix}_mean_mean",
+            f"{prefix}_sq_mean",
+            f"{prefix}_cube_mean",
+            f"{prefix}_fourth_mean",
+        )
+        if not all(key in summary for key in required):
+            continue
+        mean = float(summary[f"{prefix}_mean_mean"])
+        raw_second = float(summary[f"{prefix}_sq_mean"])
+        raw_third = float(summary[f"{prefix}_cube_mean"])
+        raw_fourth = float(summary[f"{prefix}_fourth_mean"])
+        central_second = raw_second - mean**2
+        central_fourth = (
+            raw_fourth
+            - 4.0 * mean * raw_third
+            + 6.0 * mean**2 * raw_second
+            - 3.0 * mean**4
+        )
+        summary[f"{prefix}_central_sq"] = central_second
+        summary[f"{prefix}_central_fourth"] = central_fourth
+        summary[f"{prefix}_binder"] = (
+            1.0
+            - central_fourth / (3.0 * central_second**2)
+            if central_second > 0.0
+            else float("nan")
+        )
+    for prefix in ("q_a", "q_b"):
+        hs_key = f"hs_{prefix}"
+        if hs_key not in measurements[0]:
+            continue
+        summary[f"{prefix}_susceptibility"] = static_susceptibility(
+            np.asarray(
+                [measurement[hs_key] for measurement in measurements]
+            ),
+            beta=float(measurements[0]["response_beta"]),
+            contact=float(
+                measurements[0][f"{prefix}_susceptibility_contact"]
+            ),
+            normalization=float(
+                measurements[0][f"{prefix}_response_normalization"]
+            ),
+        )
+    if {
+        "staggered_structure_mean",
+        "near_staggered_structure_mean",
+        "correlation_q_min_mean",
+        "correlation_system_size_mean",
+    } <= summary.keys():
+        correlation_length = second_moment_correlation_length(
+            float(summary["staggered_structure_mean"]),
+            float(summary["near_staggered_structure_mean"]),
+            float(summary["correlation_q_min_mean"]),
+        )
+        summary["correlation_length_proxy"] = correlation_length
+        summary["correlation_length_over_m"] = correlation_length / float(
+            summary["correlation_system_size_mean"]
+        )
     return summary
 
 
@@ -466,7 +700,14 @@ def run_chain(
             sweep >= warmup_sweeps
             and (sweep - warmup_sweeps) % measure_every == 0
         ):
-            measurements.append(measure_configuration(total, model))
+            measurements.append(
+                measure_configuration(
+                    total,
+                    model,
+                    fields=fields,
+                    dt=config.dt,
+                )
+            )
         if (sweep + 1) % progress_every == 0 or sweep + 1 == total_sweeps:
             print(
                 f"seed={seed} sweep={sweep + 1}/{total_sweeps} "

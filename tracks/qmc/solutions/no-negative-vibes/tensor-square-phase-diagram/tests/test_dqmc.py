@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from scipy.linalg import expm
 
+from tensor_square import dqmc
 from tensor_square.algebra import kron_sum
 from tensor_square.dqmc import (
     DQMCConfig,
@@ -63,6 +64,39 @@ def test_wick_q_square_matches_explicit_fock_trace() -> None:
     )
 
 
+def test_quadratic_moments_match_explicit_fock_trace_through_fourth_order() -> None:
+    beta = 0.6
+    one_body_h = np.array(
+        [
+            [0.3, -0.2, 0.1],
+            [-0.2, -0.4, 0.25],
+            [0.1, 0.25, 0.2],
+        ]
+    )
+    probe = np.array(
+        [
+            [0.2, 0.35, -0.1],
+            [0.35, -0.3, 0.15],
+            [-0.1, 0.15, 0.45],
+        ]
+    )
+    x = expm(-beta * one_body_h)
+    rho = np.eye(3) - np.linalg.inv(np.eye(3) + x).T
+    basis = basis_states(3)
+    h_fock = d_gamma(one_body_h, basis).toarray()
+    q_fock = d_gamma(probe, basis).toarray()
+    thermal = expm(-beta * h_fock)
+    partition = np.trace(thermal)
+
+    measured = dqmc.quadratic_moments(probe, rho)
+
+    for power, value in enumerate(measured, start=1):
+        explicit = np.trace(
+            thermal @ np.linalg.matrix_power(q_fock, power)
+        ) / partition
+        assert value == pytest.approx(explicit.real, abs=3e-12)
+
+
 def test_noninteracting_measurement_matches_one_body_thermodynamics() -> None:
     config = DQMCConfig(
         m=3,
@@ -80,6 +114,137 @@ def test_noninteracting_measurement_matches_one_body_thermodynamics() -> None:
     full_h = kron_sum(model.k)
     occupations = 1.0 / (1.0 + np.exp(config.beta * np.linalg.eigvalsh(full_h)))
     assert measured["density"] == pytest.approx(np.mean(occupations), abs=2e-12)
+
+
+def test_measurement_reports_normalized_channel_moments() -> None:
+    beta = 0.7
+    model = dqmc.OneBodyModel(
+        m=1,
+        k=np.array([[0.3]]),
+        channels=(np.array([[1.0]]), np.array([[2.0]])),
+        couplings=(1.0, 0.5),
+        group_a=(0,),
+        group_b=(1,),
+        nematic=np.array([[1.0]]),
+    )
+    x = np.array([[np.exp(-beta * 0.3)]])
+    occupation = x.item() ** 2 / (1.0 + x.item() ** 2)
+
+    measured = measure_configuration(x, model)
+
+    assert measured["q_a_mean"] == pytest.approx(2.0 * occupation)
+    assert measured["q_a_sq"] == pytest.approx(4.0 * occupation)
+    assert measured["q_a_cube"] == pytest.approx(8.0 * occupation)
+    assert measured["q_a_fourth"] == pytest.approx(16.0 * occupation)
+    assert measured["q_b_mean"] == pytest.approx(4.0 * occupation)
+    assert measured["q_b_fourth"] == pytest.approx(256.0 * occupation)
+    assert measured["staggered_structure"] == pytest.approx(2.0 * occupation)
+    assert measured["near_staggered_structure"] == pytest.approx(
+        18.0 * occupation
+    )
+
+
+def test_summary_uses_central_moments_for_binder_ratio() -> None:
+    measurements = [
+        {
+            "q_a_mean": value,
+            "q_a_sq": value**2,
+            "q_a_cube": value**3,
+            "q_a_fourth": value**4,
+            "direct_sign": 1.0,
+            "weight_log_error": 0.0,
+            "density": 0.5,
+        }
+        for value in (0.0, 1.0, 2.0, 3.0)
+    ]
+
+    summary = summarize_measurements(measurements)
+
+    assert summary["q_a_central_sq"] == pytest.approx(1.25)
+    assert summary["q_a_central_fourth"] == pytest.approx(2.5625)
+    assert summary["q_a_binder"] == pytest.approx(0.45333333333333337)
+
+
+def test_hs_static_susceptibility_subtracts_contact_term() -> None:
+    value = dqmc.static_susceptibility(
+        np.array([-2.0, -1.0, 1.0, 2.0]),
+        beta=2.0,
+        contact=3.0,
+        normalization=5.0,
+    )
+    assert value == pytest.approx(11.0 / 15.0)
+
+
+def test_hs_order_estimator_uses_each_channel_coupling_and_time_average() -> None:
+    config = DQMCConfig(
+        m=3,
+        beta=0.4,
+        dt=0.2,
+        t=0.5,
+        g_b_over_g_a=0.25,
+    )
+    model = make_one_body_model(config)
+    fields = np.array([[1.0, 2.0], [3.0, 4.0]])
+
+    measured = dqmc.hs_order_estimators(fields, model=model, dt=config.dt)
+
+    assert measured["hs_q_a"] == pytest.approx(
+        2.0 / np.sqrt(0.2 / 3.0)
+    )
+    assert measured["hs_q_b"] == pytest.approx(
+        3.0 / np.sqrt(0.05 / 3.0)
+    )
+    assert measured["response_beta"] == pytest.approx(0.4)
+    assert measured["q_a_susceptibility_contact"] == pytest.approx(3.0)
+    assert measured["q_b_susceptibility_contact"] == pytest.approx(12.0)
+    assert measured["q_a_response_normalization"] == pytest.approx(9.0)
+    assert measured["q_b_response_normalization"] == pytest.approx(9.0)
+
+
+def test_summary_integrates_hs_static_susceptibility() -> None:
+    measurements = [
+        {
+            "hs_q_a": value,
+            "response_beta": 2.0,
+            "q_a_susceptibility_contact": 3.0,
+            "q_a_response_normalization": 5.0,
+            "direct_sign": 1.0,
+            "weight_log_error": 0.0,
+            "density": 0.5,
+        }
+        for value in (-2.0, -1.0, 1.0, 2.0)
+    ]
+
+    summary = summarize_measurements(measurements)
+
+    assert summary["q_a_susceptibility"] == pytest.approx(11.0 / 15.0)
+
+
+def test_second_moment_correlation_length_clamps_flat_ratio() -> None:
+    assert dqmc.second_moment_correlation_length(5.0, 1.0, np.pi / 3.0) == (
+        pytest.approx(2.0)
+    )
+    assert dqmc.second_moment_correlation_length(0.5, 1.0, np.pi / 3.0) == 0.0
+
+
+def test_summary_builds_correlation_length_from_averaged_structure() -> None:
+    measurements = [
+        {
+            "staggered_structure": 5.0,
+            "near_staggered_structure": 1.0,
+            "correlation_q_min": np.pi / 3.0,
+            "correlation_system_size": 6.0,
+            "direct_sign": 1.0,
+            "weight_log_error": 0.0,
+            "density": 0.5,
+        }
+        for _ in range(4)
+    ]
+
+    summary = summarize_measurements(measurements)
+
+    assert summary["correlation_length_proxy"] == pytest.approx(2.0)
+    assert summary["correlation_length_over_m"] == pytest.approx(1.0 / 3.0)
 
 
 def test_checkpoint_resume_is_bitwise_reproducible(tmp_path) -> None:
