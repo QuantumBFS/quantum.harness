@@ -8,6 +8,7 @@ import sys
 from long_range_percolation.validation import (
     ValidationProtocol,
     run_production_validation,
+    validate_report_payload,
 )
 
 
@@ -45,7 +46,12 @@ def main(argv: list[str] | None = None) -> int:
     protocol.require_production()
     try:
         report = run_production_validation(protocol, arguments.output)
+        validate_report_payload(report, protocol)
     except Exception as error:
+        try:
+            arguments.output.unlink()
+        except FileNotFoundError:
+            pass
         print(
             f"validation infrastructure failure: {type(error).__name__}: {error}",
             file=sys.stderr,

@@ -3,12 +3,21 @@ from __future__ import annotations
 import ast
 from dataclasses import replace
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
+from types import SimpleNamespace
 
 import pytest
 import numpy as np
 
 import long_range_percolation.validation as validation
+from long_range_percolation.trajectory import (
+    TrajectoryDiagnostics,
+    TrajectoryRequest,
+    TrajectoryResult,
+)
 from long_range_percolation.validation import (
     FAMILYWISE_ALPHA,
     KAPPAS,
@@ -185,8 +194,44 @@ def test_sampler_modules_are_structurally_independent():
     assert imports["oracle"] == set()
     assert imports["geometric"] == set()
     assert imports["poisson_reference"] == set()
-    assert imports["poisson_sweep"] == {"poisson_reference"}
+    assert imports["poisson_sweep"] == set()
     assert validation.assert_sampler_structure() is None
+
+
+def test_sampler_import_graph_has_no_sampler_specific_paths():
+    root = Path(validation.__file__).parent
+    samplers = {"oracle", "geometric", "poisson_reference", "poisson_sweep"}
+    module_names = {item.stem for item in root.glob("*.py")}
+    graph: dict[str, set[str]] = {}
+    for source in root.glob("*.py"):
+        imported: set[str] = set()
+        tree = ast.parse(source.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                imported.add(node.module.rsplit(".", 1)[-1])
+        graph[source.stem] = imported & module_names
+    for source in samplers:
+        pending = list(graph.get(source, ()))
+        visited: set[str] = set()
+        while pending:
+            target = pending.pop()
+            if target in visited:
+                continue
+            visited.add(target)
+            assert target not in samplers - {source}
+            pending.extend(graph.get(target, ()))
+
+
+def test_neutral_trajectory_contracts_preserve_reference_reexports():
+    from long_range_percolation.poisson_reference import (
+        TrajectoryDiagnostics as ReferenceDiagnostics,
+        TrajectoryRequest as ReferenceRequest,
+        TrajectoryResult as ReferenceResult,
+    )
+
+    assert ReferenceRequest is TrajectoryRequest
+    assert ReferenceResult is TrajectoryResult
+    assert ReferenceDiagnostics is TrajectoryDiagnostics
 
 
 def test_validation_observables_ignore_absent_union_find_labels():
@@ -196,3 +241,282 @@ def test_validation_observables_ignore_absent_union_find_labels():
     assert observed[1] == 2.0
     assert observed[2] == 3.0
     assert observed[3] == 1.0
+
+
+def test_four_backends_are_frozen_into_every_applicable_family(tmp_path: Path):
+    protocol = ValidationProtocol.reduced(
+        lengths=(4,),
+        sigmas=(1.0,),
+        kappas=(0.25,),
+        samples=8,
+        replicates=31,
+    )
+    report = run_production_validation(protocol, tmp_path / "four-way.json")
+    assert report["passed"]
+    assert len(validation.PAIR_NAMES) == 6
+    assert {
+        pair
+        for pair in validation.PAIR_NAMES
+        if "poisson-reference" in pair
+    } == {
+        ("quadratic", "poisson-reference"),
+        ("geometric", "poisson-reference"),
+        ("poisson-reference", "poisson-numba"),
+    }
+    for family in (
+        "all-graph-probability",
+        "edge-class-frequency",
+        "no-edge",
+    ):
+        case_ids = {
+            check["case_id"]
+            for check in report["checks"]
+            if check["family"] == family
+        }
+        assert all(any(f"/{sampler}" in case_id for case_id in case_ids) for sampler in SAMPLERS)
+    for family in (
+        "bond-length",
+        "component-partition",
+        "open-count",
+        "S1",
+        "S2",
+        "QG",
+        "four-sector",
+        "normalized-second-moment",
+        "normalized-fourth-moment",
+    ):
+        checks = [check for check in report["checks"] if check["family"] == family]
+        assert len(checks) == 6
+        assert any("poisson-reference" in check["case_id"] for check in checks)
+
+
+def test_component_partition_records_actual_descending_tuples(tmp_path: Path):
+    protocol = ValidationProtocol.reduced(
+        lengths=(4,),
+        sigmas=(1.0,),
+        kappas=(0.25,),
+        samples=8,
+        replicates=31,
+    )
+    report = run_production_validation(protocol, tmp_path / "partitions.json")
+    checks = [
+        check
+        for check in report["checks"]
+        if check["family"] == "component-partition"
+    ]
+    assert checks
+    for check in checks:
+        raw = check["raw"]
+        assert raw["bins"]
+        assert all(
+            isinstance(item, list)
+            and item == sorted(item, reverse=True)
+            and sum(item) == 4
+            for item in raw["bins"]
+        )
+        assert sum(raw["left_counts"]) == 8
+        assert sum(raw["right_counts"]) == 8
+
+
+def test_normalized_moment_schema_and_values_are_exact(tmp_path: Path):
+    schema = validation.OBSERVABLE_SCHEMA
+    assert schema["normalized-second-moment"] == {
+        "formula": "sum_C(|C|^2)/L^2",
+        "source_column": 6,
+        "normalization_power": 2,
+    }
+    assert schema["normalized-fourth-moment"] == {
+        "formula": "sum_C(|C|^4)/L^4",
+        "source_column": 7,
+        "normalization_power": 4,
+    }
+    raw = np.asarray((2.0, 0.0, 3.0, 1.0, 0.75, 0.25, 10.0, 82.0, 0.82, 0.0))
+    assert validation._scalar_values(
+        raw.reshape(1, -1), "normalized-second-moment", 4
+    ).tolist() == [10.0 / 16.0]
+    assert validation._scalar_values(
+        raw.reshape(1, -1), "normalized-fourth-moment", 4
+    ).tolist() == [82.0 / 256.0]
+    report = run_production_validation(
+        ValidationProtocol.reduced(
+            lengths=(4,),
+            sigmas=(1.0,),
+            kappas=(0.25,),
+            samples=4,
+            replicates=7,
+        ),
+        tmp_path / "moments.json",
+    )
+    assert report["protocol"]["observable_schema"] == schema
+    moment_check = next(
+        check
+        for check in report["checks"]
+        if check["family"] == "normalized-second-moment"
+    )
+    assert "left_raw_sum" in moment_check["raw"]
+    assert "right_raw_sum" in moment_check["raw"]
+
+
+def test_malformed_python_reference_diagnostics_fail_closed(monkeypatch, tmp_path: Path):
+    protocol = ValidationProtocol.reduced(
+        lengths=(4,),
+        sigmas=(1.0,),
+        kappas=(0.25,),
+        samples=2,
+        replicates=3,
+    )
+
+    def malformed(*args, **kwargs):
+        return SimpleNamespace(
+            result=SimpleNamespace(
+                observables=np.zeros((1, 9), dtype=np.float64),
+                event_count=0,
+                duplicate_count=0,
+            ),
+            edge_ids_by_checkpoint=(frozenset(),),
+            event_times=(),
+        )
+
+    monkeypatch.setattr(
+        validation, "run_poisson_reference_with_diagnostics", malformed
+    )
+    report = run_production_validation(protocol, tmp_path / "malformed-reference.json")
+    assert not report["passed"]
+    assert any(
+        check["family"] == "backend-integrity"
+        and "Python reference" in check["raw"]["error"]
+        for check in report["checks"]
+    )
+
+
+def test_all_graph_exact_coverage_is_per_graph_and_four_backend(tmp_path: Path):
+    report = run_production_validation(
+        ValidationProtocol.reduced(
+            lengths=(4,),
+            sigmas=(1.0,),
+            kappas=(0.25,),
+            samples=8,
+            replicates=31,
+        ),
+        tmp_path / "coverage.json",
+    )
+    exact = next(
+        check
+        for check in report["checks"]
+        if check["family"] == "all-graph-exact"
+    )
+    assert exact["raw"]["coverage"]["L4"]["graph_count"] == 64
+    assert exact["raw"]["coverage"]["L4"]["probabilities_compared"] == 64
+    assert exact["raw"]["coverage"]["L4"]["maximum_product_error"] >= 0.0
+    coverage = report["coverage"]["all_graph_probability"]
+    assert coverage["backends"] == list(SAMPLERS)
+    assert coverage["lengths"] == [4]
+    assert coverage["comparison"] == "per-mask exact product-measure binomial"
+
+
+def _minimal_cli_report(passed: bool = True) -> dict[str, object]:
+    protocol = ValidationProtocol.production_v1()
+    families = sorted(
+        set(validation.EXACT_FAMILIES) | set(validation.STATISTICAL_FAMILIES)
+    )
+    checks = [
+        {
+            "family": family,
+            "case_id": "cli-fixture",
+            "raw": {"count": 1},
+            "expected": {"count": 1},
+            "threshold": 0.0,
+            "margin": 0.0 if passed else -1.0,
+            "passed": passed,
+        }
+        for family in families
+    ]
+    return {
+        "schema_version": validation.VALIDATION_PROTOCOL_VERSION,
+        "protocol": validation._protocol_document(protocol),
+        "runtime_capability": {},
+        "source": {},
+        "coverage": {
+            "all_graph_probability": {
+                "backends": list(SAMPLERS),
+                "lengths": [4, 6],
+                "comparison": "per-mask exact product-measure binomial",
+            }
+        },
+        "checks": checks,
+        "family_count": len(families),
+        "minimum_margin": 0.0 if passed else -1.0,
+        "passed": passed,
+        "elapsed_seconds": 0.0,
+    }
+
+
+def _run_cli_fixture(
+    tmp_path: Path,
+    report: dict[str, object] | None,
+    *,
+    backend_exception: bool = False,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
+    fixture = tmp_path / "fixture.json"
+    if report is not None:
+        fixture.write_bytes(validation.canonical_report_bytes(report))
+    output = tmp_path / "cli-report.json"
+    script = Path(__file__).parents[1] / "scripts" / "validate_production.py"
+    code = """
+import json
+from pathlib import Path
+import runpy
+import sys
+import long_range_percolation.validation as validation
+fixture = Path(sys.argv[2])
+backend_exception = sys.argv[4] == "1"
+def fake(protocol, output):
+    if backend_exception:
+        raise RuntimeError("backend exploded")
+    report = json.loads(fixture.read_text(encoding="utf-8"))
+    output.write_bytes(validation.canonical_report_bytes(report))
+    return report
+validation.run_production_validation = fake
+sys.argv = [sys.argv[1], "--protocol", "production-v1", "--jobs", "1", "--output", sys.argv[3]]
+runpy.run_path(sys.argv[0], run_name="__main__")
+"""
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            code,
+            str(script),
+            str(fixture),
+            str(output),
+            "1" if backend_exception else "0",
+        ],
+        cwd=script.parents[1],
+        env=dict(os.environ),
+        capture_output=True,
+        text=True,
+    )
+    return completed, output
+
+
+def test_cli_subprocess_exit_zero_only_for_valid_passing_report(tmp_path: Path):
+    completed, output = _run_cli_fixture(tmp_path, _minimal_cli_report())
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(output.read_text(encoding="utf-8"))["passed"] is True
+
+
+@pytest.mark.parametrize("failure", ("failed", "missing", "schema", "backend"))
+def test_cli_subprocess_fails_closed_for_invalid_evidence(tmp_path: Path, failure: str):
+    report = _minimal_cli_report(passed=failure != "failed")
+    if failure == "missing":
+        report["checks"] = report["checks"][1:]
+        report["family_count"] -= 1
+    elif failure == "schema":
+        report["schema_version"] = "corrupt"
+    completed, output = _run_cli_fixture(
+        tmp_path,
+        report,
+        backend_exception=failure == "backend",
+    )
+    assert completed.returncode != 0
+    if output.exists():
+        assert json.loads(output.read_text(encoding="utf-8")).get("passed") is not True

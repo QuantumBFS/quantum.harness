@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from collections import Counter
 from dataclasses import dataclass, replace
 import ast
 import hashlib
@@ -12,6 +13,7 @@ import subprocess
 import time
 from typing import Iterable, Mapping, Sequence
 import uuid
+from itertools import combinations
 
 import numpy as np
 from scipy.stats import binomtest, poisson
@@ -30,10 +32,7 @@ from .kernel import edge_probabilities, periodic_kernel
 from .model import ModelSpec, canonical_edge, distance_classes, iter_unordered_edges
 from .oracle import no_edge_probability, sample_quadratic
 from .poisson_reference import (
-    TrajectoryRequest,
-    _build_reference_streams,
-    _run_poisson_with_streams,
-    run_poisson_reference,
+    run_poisson_reference_with_diagnostics,
 )
 from .poisson_sweep import run_poisson_numba
 from .production_union_find import (
@@ -42,6 +41,7 @@ from .production_union_find import (
     union_incremental,
 )
 from .runtime import runtime_capability
+from .trajectory import TrajectoryDiagnostics, TrajectoryRequest
 from .union_find import UnionFind
 
 
@@ -64,17 +64,25 @@ SAMPLERS = ("quadratic", "geometric", "poisson-reference", "poisson-numba")
 MASTER_SEEDS = tuple(range(194_000_000, 194_032_768))
 
 THREE_WAY_SAMPLERS = ("quadratic", "geometric", "poisson-numba")
-PAIR_NAMES = (
-    ("quadratic", "geometric"),
-    ("quadratic", "poisson-numba"),
-    ("geometric", "poisson-numba"),
-)
+PAIR_NAMES = tuple(combinations(SAMPLERS, 2))
+OBSERVABLE_SCHEMA = {
+    "normalized-second-moment": {
+        "formula": "sum_C(|C|^2)/L^2",
+        "source_column": 6,
+        "normalization_power": 2,
+    },
+    "normalized-fourth-moment": {
+        "formula": "sum_C(|C|^4)/L^4",
+        "source_column": 7,
+        "normalization_power": 4,
+    },
+}
 SCALAR_COLUMNS = {
     "open-count": 0,
     "S1": 4,
     "S2": 5,
-    "second-moment": 6,
-    "fourth-moment": 7,
+    "normalized-second-moment": 6,
+    "normalized-fourth-moment": 7,
     "QG": 8,
     "four-sector": 9,
 }
@@ -145,13 +153,13 @@ def frozen_family_denominators(
         if length <= 6
     )
     return {
-        "all-graph-probability": 3 * small_graphs * len(sigmas) * len(kappas),
-        "edge-class-frequency": 3 * edge_classes,
+        "all-graph-probability": 4 * small_graphs * len(sigmas) * len(kappas),
+        "edge-class-frequency": 4 * edge_classes,
         "poisson-event-count": 2 * cases,
         "no-edge": 4 * cases,
-        "bond-length": 3 * cases,
-        "component-partition": 3 * cases,
-        **{name: 3 * cases for name in SCALAR_COLUMNS},
+        "bond-length": 6 * cases,
+        "component-partition": 6 * cases,
+        **{name: 6 * cases for name in SCALAR_COLUMNS},
     }
 
 
@@ -306,6 +314,8 @@ def _protocol_document(protocol: ValidationProtocol) -> dict[str, object]:
         },
         "samplers": list(SAMPLERS),
         "three_way_samplers": list(THREE_WAY_SAMPLERS),
+        "required_backends": list(SAMPLERS),
+        "observable_schema": OBSERVABLE_SCHEMA,
         "master_seeds": list(protocol.master_seeds),
         "familywise_alpha": _f64(protocol.familywise_alpha),
         "family_denominators": protocol.family_denominators,
@@ -493,6 +503,7 @@ def _exact_checks(protocol: ValidationProtocol) -> list[dict[str, object]]:
     )
 
     graph_residuals = {}
+    graph_coverage: dict[str, dict[str, object]] = {}
     graph_ok = True
     for length in (4, 6):
         if length not in protocol.lengths and protocol.is_production is False:
@@ -501,16 +512,57 @@ def _exact_checks(protocol: ValidationProtocol) -> list[dict[str, object]]:
             for kappa in protocol.kappas:
                 outcomes = tuple(enumerate_graphs(ModelSpec(length, sigma, kappa)))
                 residual = abs(math.fsum(item.probability for item in outcomes) - 1.0)
+                edges = tuple(iter_unordered_edges(length))
+                probabilities = edge_probabilities(
+                    ModelSpec(length, sigma, kappa),
+                    periodic_kernel(length, sigma),
+                )
+                maximum_product_error = 0.0
+                for outcome in outcomes:
+                    factors = []
+                    for edge_index, (left, right) in enumerate(edges):
+                        separation = right - left
+                        distance = min(separation, length - separation)
+                        probability = float(probabilities[distance - 1])
+                        factors.append(
+                            probability
+                            if outcome.mask & (1 << edge_index)
+                            else 1.0 - probability
+                        )
+                    independent_probability = math.prod(factors)
+                    maximum_product_error = max(
+                        maximum_product_error,
+                        abs(independent_probability - outcome.probability),
+                    )
                 graph_residuals[
                     f"L{length}/{_f64(sigma)}/{_f64(kappa)}"
                 ] = residual
+                coverage = graph_coverage.setdefault(
+                    f"L{length}",
+                    {
+                        "graph_count": len(outcomes),
+                        "probabilities_compared": 0,
+                        "maximum_product_error": 0.0,
+                    },
+                )
+                coverage["probabilities_compared"] = int(
+                    coverage["probabilities_compared"]
+                ) + len(outcomes)
+                coverage["maximum_product_error"] = max(
+                    float(coverage["maximum_product_error"]),
+                    maximum_product_error,
+                )
                 graph_ok &= len(outcomes) == 1 << (length * (length - 1) // 2)
                 graph_ok &= residual <= 512 * np.finfo(float).eps
+                graph_ok &= maximum_product_error <= 512 * np.finfo(float).eps
     checks.append(
         _exact(
             "all-graph-exact",
             "L<=6",
-            graph_residuals,
+            {
+                "normalization_residuals": graph_residuals,
+                "coverage": graph_coverage,
+            },
             {"maximum_residual_lte": 512 * np.finfo(float).eps},
             graph_ok,
             max(graph_residuals.values(), default=0.0),
@@ -711,6 +763,33 @@ def _graph_observables(length: int, edges: np.ndarray, labels: np.ndarray) -> np
     )
 
 
+def _component_partition(labels: np.ndarray) -> tuple[int, ...]:
+    return tuple(
+        sorted(
+            (
+                int(value)
+                for value in np.bincount(labels)
+                if int(value) > 0
+            ),
+            reverse=True,
+        )
+    )
+
+
+def _scalar_values(
+    observables: np.ndarray,
+    family: str,
+    length: int,
+) -> np.ndarray:
+    column = SCALAR_COLUMNS[family]
+    values = np.asarray(observables[:, column], dtype=np.float64)
+    specification = OBSERVABLE_SCHEMA.get(family)
+    if specification is None:
+        return values
+    power = int(specification["normalization_power"])
+    return values / float(length**power)
+
+
 class _AuditStream:
     def __init__(self, identity: StreamIdentity):
         material = derive_stream_material(identity)
@@ -829,7 +908,7 @@ def _bond_counts(length: int, edges: Iterable[Sequence[int]]) -> np.ndarray:
 class _Samples:
     observables: dict[str, np.ndarray]
     bonds: dict[str, np.ndarray]
-    partitions: dict[str, np.ndarray]
+    partitions: dict[str, Counter[tuple[int, ...]]]
     edge_classes: dict[str, np.ndarray]
     events: dict[str, int]
     graph_masks: dict[str, np.ndarray]
@@ -845,9 +924,8 @@ def _draw_case(case: ValidationCase, seeds: tuple[int, ...]) -> _Samples:
         sampler: np.zeros(length // 2, dtype=np.int64)
         for sampler in SAMPLERS
     }
-    partitions = {
-        sampler: np.zeros(length, dtype=np.int64)
-        for sampler in SAMPLERS
+    partitions: dict[str, Counter[tuple[int, ...]]] = {
+        sampler: Counter() for sampler in SAMPLERS
     }
     edge_classes = {
         sampler: np.zeros(length // 2, dtype=np.int64)
@@ -887,8 +965,7 @@ def _draw_case(case: ValidationCase, seeds: tuple[int, ...]) -> _Samples:
             class_counts = _bond_counts(length, sample.edges)
             bonds[name] += class_counts
             edge_classes[name] += class_counts
-            component_count = int(observables[name][replica, 1])
-            partitions[name][component_count - 1] += 1
+            partitions[name][_component_partition(sample.labels)] += 1
             if length <= 6:
                 mask = sum(1 << edge_positions[tuple(edge)] for edge in sample.edges)
                 graph_masks[name][mask] += 1
@@ -896,9 +973,22 @@ def _draw_case(case: ValidationCase, seeds: tuple[int, ...]) -> _Samples:
         ref_request, kernel, _ = _poisson_inputs(
             length, case.sigma, case.kappa, seed, replica, "reference"
         )
-        streams = _build_reference_streams(ref_request)
-        reference_run = _run_poisson_with_streams(ref_request, kernel, streams)
+        reference_run = run_poisson_reference_with_diagnostics(
+            ref_request, kernel
+        )
+        if not isinstance(reference_run, TrajectoryDiagnostics):
+            raise RuntimeError(
+                "Python reference returned malformed diagnostics contract"
+            )
         reference = reference_run.result
+        if (
+            reference.observables.shape != (1, 10)
+            or not np.all(np.isfinite(reference.observables))
+            or len(reference_run.edge_ids_by_checkpoint) != 1
+        ):
+            raise RuntimeError(
+                "Python reference returned malformed observable fields"
+            )
         observables["poisson-reference"][replica] = reference.observables[0]
         events["poisson-reference"] += reference.event_count
         ids = reference_run.edge_ids_by_checkpoint[0]
@@ -914,10 +1004,30 @@ def _draw_case(case: ValidationCase, seeds: tuple[int, ...]) -> _Samples:
                 edge = canonical_edge(length, class_index + 1, offset)
                 reference_mask |= 1 << edge_positions[edge]
             graph_masks["poisson-reference"][reference_mask] += 1
+        reference_edges = []
+        reference_connectivity = UnionFind(length)
+        for edge_id in ids:
+            class_index = int(
+                np.searchsorted(starts, edge_id, side="right") - 1
+            )
+            offset = int(edge_id - starts[class_index])
+            edge = canonical_edge(length, class_index + 1, offset)
+            reference_edges.append(edge)
+            reference_connectivity.union(*edge)
+        reference_edge_array = np.asarray(
+            sorted(reference_edges), dtype=np.int64
+        ).reshape(-1, 2)
+        reconstructed = _graph_observables(
+            length, reference_edge_array, reference_connectivity.labels()
+        )
+        if not np.array_equal(reconstructed, reference.observables[0]):
+            raise RuntimeError(
+                "Python reference edge diagnostics disagree with observables"
+            )
         bonds["poisson-reference"] += ref_classes
         edge_classes["poisson-reference"] += ref_classes
         partitions["poisson-reference"][
-            int(reference.observables[0, 1]) - 1
+            _component_partition(reference_connectivity.labels())
         ] += 1
 
         numba_request, kernel, table = _poisson_inputs(
@@ -943,8 +1053,11 @@ def _draw_case(case: ValidationCase, seeds: tuple[int, ...]) -> _Samples:
         numba_classes = _bond_counts(length, audit_edges)
         bonds["poisson-numba"] += numba_classes
         edge_classes["poisson-numba"] += numba_classes
+        numba_connectivity = UnionFind(length)
+        for left, right in audit_edges:
+            numba_connectivity.union(int(left), int(right))
         partitions["poisson-numba"][
-            int(numba_result.observables[0, 1]) - 1
+            _component_partition(numba_connectivity.labels())
         ] += 1
         if length <= 6:
             mask = sum(
@@ -987,6 +1100,41 @@ def _permutation_pvalue(
     return statistic, (exceed + 1.0) / (replicates + 1.0)
 
 
+def _permutation_family_pvalues(
+    left: np.ndarray,
+    right: np.ndarray,
+    families: Sequence[str],
+    length: int,
+    replicates: int,
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    left_values = np.column_stack(
+        [_scalar_values(left, family, length) for family in families]
+    )
+    right_values = np.column_stack(
+        [_scalar_values(right, family, length) for family in families]
+    )
+    observed = np.abs(
+        np.mean(left_values, axis=0) - np.mean(right_values, axis=0)
+    )
+    pooled = np.vstack((left_values, right_values))
+    total = np.sum(pooled, axis=0)
+    sample_count = left_values.shape[0]
+    rng = np.random.Generator(np.random.Philox(seed))
+    exceed = np.zeros(len(families), dtype=np.int64)
+    for _ in range(replicates):
+        selected = np.sum(
+            pooled[rng.permutation(pooled.shape[0])[:sample_count]],
+            axis=0,
+        )
+        permuted = np.abs(
+            selected / sample_count
+            - (total - selected) / sample_count
+        )
+        exceed += permuted >= observed
+    return observed, (exceed + 1.0) / (replicates + 1.0)
+
+
 def _g_statistic(counts: np.ndarray, expected: np.ndarray) -> float:
     mask = counts > 0
     if np.any(expected[mask] <= 0.0):
@@ -1006,19 +1154,52 @@ def _multinomial_pvalue(
     total = int(pooled.sum())
     if total == 0:
         return 0.0, 1.0
+    active = pooled > 0
+    left = left[active]
+    right = right[active]
+    pooled = pooled[active]
     probability = pooled / total
     expected_left = probability * int(left.sum())
     expected_right = probability * int(right.sum())
     statistic = _g_statistic(left, expected_left) + _g_statistic(right, expected_right)
     rng = np.random.Generator(np.random.Philox(seed))
     exceed = 0
-    for _ in range(replicates):
-        simulated_left = rng.multinomial(int(left.sum()), probability)
-        simulated_right = rng.multinomial(int(right.sum()), probability)
-        simulated = _g_statistic(simulated_left, expected_left) + _g_statistic(
-            simulated_right, expected_right
+    remaining = replicates
+    while remaining:
+        batch = min(512, remaining)
+        simulated_left = rng.multinomial(
+            int(left.sum()), probability, size=batch
         )
-        exceed += int(simulated >= statistic)
+        simulated_right = rng.multinomial(
+            int(right.sum()), probability, size=batch
+        )
+        left_terms = np.zeros_like(simulated_left, dtype=np.float64)
+        right_terms = np.zeros_like(simulated_right, dtype=np.float64)
+        left_mask = simulated_left > 0
+        right_mask = simulated_right > 0
+        np.log(
+            simulated_left,
+            out=left_terms,
+            where=left_mask,
+        )
+        left_terms[left_mask] -= np.broadcast_to(
+            np.log(expected_left), simulated_left.shape
+        )[left_mask]
+        left_terms *= simulated_left
+        np.log(
+            simulated_right,
+            out=right_terms,
+            where=right_mask,
+        )
+        right_terms[right_mask] -= np.broadcast_to(
+            np.log(expected_right), simulated_right.shape
+        )[right_mask]
+        right_terms *= simulated_right
+        simulated = 2.0 * (
+            np.sum(left_terms, axis=1) + np.sum(right_terms, axis=1)
+        )
+        exceed += int(np.count_nonzero(simulated >= statistic))
+        remaining -= batch
     return statistic, (exceed + 1.0) / (replicates + 1.0)
 
 
@@ -1048,8 +1229,9 @@ def _statistical_checks(
             protocol.familywise_alpha
             / denominators["all-graph-probability"]
         )
-        for sampler in THREE_WAY_SAMPLERS:
+        for sampler in SAMPLERS:
             counts = samples.graph_masks[sampler]
+            pvalues = []
             for outcome in outcomes:
                 count = int(counts[outcome.mask])
                 pvalue = float(
@@ -1060,22 +1242,30 @@ def _statistical_checks(
                         alternative="two-sided",
                     ).pvalue
                 )
-                checks.append(
-                    _check(
-                        "all-graph-probability",
-                        f"{case.case_id}/{sampler}/mask-{outcome.mask}",
-                        {
-                            "successes": count,
-                            "trials": case.samples,
-                            "pvalue": pvalue,
-                        },
-                        {"probability": outcome.probability},
-                        threshold,
-                        pvalue - threshold,
-                        pvalue >= threshold,
-                    )
+                pvalues.append(pvalue)
+            minimum_pvalue = min(pvalues)
+            checks.append(
+                _check(
+                    "all-graph-probability",
+                    f"{case.case_id}/{sampler}",
+                    {
+                        "masks": [outcome.mask for outcome in outcomes],
+                        "counts": counts.tolist(),
+                        "trials": case.samples,
+                        "pvalues": pvalues,
+                    },
+                    {
+                        "probabilities": [
+                            outcome.probability for outcome in outcomes
+                        ],
+                        "comparison": "per-mask exact product measure",
+                    },
+                    threshold,
+                    minimum_pvalue - threshold,
+                    minimum_pvalue >= threshold,
                 )
-    for sampler in THREE_WAY_SAMPLERS:
+            )
+    for sampler in SAMPLERS:
         for class_index, (count, probability, multiplicity) in enumerate(
             zip(
                 samples.edge_classes[sampler],
@@ -1142,30 +1332,52 @@ def _statistical_checks(
         )
 
     for pair_index, (left, right) in enumerate(PAIR_NAMES):
-        for family, column in SCALAR_COLUMNS.items():
-            statistic, pvalue = _permutation_pvalue(
-                samples.observables[left][:, column],
-                samples.observables[right][:, column],
-                protocol.permutation_replicates,
-                protocol.master_seeds[0] + case_index * 1000 + pair_index * 100 + column,
+        permutation_seed = (
+            protocol.master_seeds[0]
+            + case_index * 1000
+            + pair_index * 100
+            + 40
+        )
+        families = tuple(SCALAR_COLUMNS)
+        statistics, pvalues = _permutation_family_pvalues(
+            samples.observables[left],
+            samples.observables[right],
+            families,
+            case.length,
+            protocol.permutation_replicates,
+            permutation_seed,
+        )
+        for family_index, (family, column) in enumerate(
+            SCALAR_COLUMNS.items()
+        ):
+            left_values = _scalar_values(
+                samples.observables[left], family, case.length
             )
+            right_values = _scalar_values(
+                samples.observables[right], family, case.length
+            )
+            statistic = float(statistics[family_index])
+            pvalue = float(pvalues[family_index])
             threshold = protocol.familywise_alpha / denominators[family]
             checks.append(
                 _check(
                     family,
                     f"{case.case_id}/{left}-vs-{right}",
                     {
-                        "left_sum": float(np.sum(samples.observables[left][:, column])),
-                        "right_sum": float(np.sum(samples.observables[right][:, column])),
+                        "left_sum": float(np.sum(left_values)),
+                        "right_sum": float(np.sum(right_values)),
+                        "left_raw_sum": float(
+                            np.sum(samples.observables[left][:, column])
+                        ),
+                        "right_raw_sum": float(
+                            np.sum(samples.observables[right][:, column])
+                        ),
                         "left_count": case.samples,
                         "right_count": case.samples,
                         "statistic": statistic,
                         "replicates": protocol.permutation_replicates,
                         "pvalue": pvalue,
-                        "seed": protocol.master_seeds[0]
-                        + case_index * 1000
-                        + pair_index * 100
-                        + column,
+                        "seed": permutation_seed,
                     },
                     {"equal_means": True},
                     threshold,
@@ -1204,8 +1416,18 @@ def _statistical_checks(
                 pvalue >= threshold,
             )
         )
-        left_partition = samples.partitions[left]
-        right_partition = samples.partitions[right]
+        partition_bins = sorted(
+            set(samples.partitions[left]) | set(samples.partitions[right]),
+            reverse=True,
+        )
+        left_partition = np.asarray(
+            [samples.partitions[left][item] for item in partition_bins],
+            dtype=np.int64,
+        )
+        right_partition = np.asarray(
+            [samples.partitions[right][item] for item in partition_bins],
+            dtype=np.int64,
+        )
         statistic, pvalue = _multinomial_pvalue(
             left_partition,
             right_partition,
@@ -1218,7 +1440,7 @@ def _statistical_checks(
                 "component-partition",
                 f"{case.case_id}/{left}-vs-{right}",
                 {
-                    "bins": list(range(1, case.length + 1)),
+                    "bins": [list(item) for item in partition_bins],
                     "left_counts": left_partition.tolist(),
                     "right_counts": right_partition.tolist(),
                     "statistic": statistic,
@@ -1283,6 +1505,54 @@ def canonical_report_bytes(report: Mapping[str, object]) -> bytes:
         raise RuntimeError(f"report is not canonical finite JSON: {error}") from error
 
 
+def validate_report_payload(
+    report: Mapping[str, object],
+    protocol: ValidationProtocol,
+) -> None:
+    if not isinstance(report, Mapping):
+        raise RuntimeError("validation report must be a mapping")
+    if report.get("schema_version") != VALIDATION_PROTOCOL_VERSION:
+        raise RuntimeError("validation report schema is corrupt")
+    if report.get("protocol") != _protocol_document(protocol):
+        raise RuntimeError("validation report protocol does not match the request")
+    checks = report.get("checks")
+    if not isinstance(checks, list) or not checks:
+        raise RuntimeError("validation report has no checks")
+    required_fields = {
+        "family",
+        "case_id",
+        "raw",
+        "expected",
+        "threshold",
+        "margin",
+        "passed",
+    }
+    for check in checks:
+        if not isinstance(check, Mapping) or not required_fields <= set(check):
+            raise RuntimeError("validation report contains a malformed check")
+        if (
+            not isinstance(check["family"], str)
+            or not isinstance(check["case_id"], str)
+            or not isinstance(check["passed"], bool)
+            or not math.isfinite(float(check["threshold"]))
+            or not math.isfinite(float(check["margin"]))
+        ):
+            raise RuntimeError("validation report contains invalid check fields")
+    families = {str(check["family"]) for check in checks}
+    required = set(EXACT_FAMILIES) | set(STATISTICAL_FAMILIES)
+    if not required <= families:
+        raise RuntimeError("validation report is missing required families")
+    actual_passed = all(bool(check["passed"]) for check in checks)
+    if report.get("passed") is not actual_passed:
+        raise RuntimeError("validation report pass flag is inconsistent")
+    if report.get("family_count") != len(families):
+        raise RuntimeError("validation report family count is inconsistent")
+    margins = [float(check["margin"]) for check in checks]
+    if float(report.get("minimum_margin", math.nan)) != min(margins):
+        raise RuntimeError("validation report minimum margin is inconsistent")
+    canonical_report_bytes(report)
+
+
 def _atomic_publish(output: Path, payload: bytes) -> None:
     if not isinstance(output, Path):
         raise ValueError("output must be a pathlib.Path")
@@ -1344,8 +1614,9 @@ def run_production_validation(
     if not isinstance(protocol, ValidationProtocol):
         raise ValueError("protocol must be a ValidationProtocol")
     started = time.perf_counter()
-    denominators = protocol.family_denominators
     checks: list[dict[str, object]] = []
+    if protocol.is_production:
+        print("validation exact checks started", flush=True)
     try:
         checks.extend(_exact_checks(protocol))
     except Exception as error:
@@ -1360,6 +1631,7 @@ def run_production_validation(
         )
 
     indexed_cases = tuple(enumerate(protocol.case_registry))
+    total_cases = len(indexed_cases)
     if protocol.jobs == 1:
         outcomes: Iterable[list[dict[str, object]] | Exception] = []
         serial_outcomes: list[list[dict[str, object]] | Exception] = []
@@ -1368,6 +1640,12 @@ def run_production_validation(
                 serial_outcomes.append(_run_case_checks(protocol, indexed_case))
             except Exception as error:
                 serial_outcomes.append(error)
+            if protocol.is_production:
+                print(
+                    f"validation case {indexed_case[0] + 1}/{total_cases} "
+                    f"{indexed_case[1].case_id}",
+                    flush=True,
+                )
         outcomes = serial_outcomes
     else:
         with ThreadPoolExecutor(max_workers=protocol.jobs) as executor:
@@ -1376,11 +1654,17 @@ def run_production_validation(
                 for indexed_case in indexed_cases
             ]
             parallel_outcomes: list[list[dict[str, object]] | Exception] = []
-            for future in futures:
+            for completed_index, future in enumerate(futures, start=1):
                 try:
                     parallel_outcomes.append(future.result())
                 except Exception as error:
                     parallel_outcomes.append(error)
+                if protocol.is_production:
+                    print(
+                        f"validation case {completed_index}/{total_cases} "
+                        f"{indexed_cases[completed_index - 1][1].case_id}",
+                        flush=True,
+                    )
             outcomes = parallel_outcomes
     for (_, case), outcome in zip(indexed_cases, outcomes, strict=True):
         if isinstance(outcome, Exception):
@@ -1405,8 +1689,8 @@ def run_production_validation(
     for family in sorted(required - present):
         checks.append(
             _exact(
-                "missing-family",
                 family,
+                "missing-family",
                 {"missing": family},
                 "at least one completed check",
                 False,
@@ -1420,6 +1704,15 @@ def run_production_validation(
         "protocol": _protocol_document(protocol),
         "runtime_capability": runtime_capability(),
         "source": _repository_state(),
+        "coverage": {
+            "all_graph_probability": {
+                "backends": list(SAMPLERS),
+                "lengths": [
+                    length for length in protocol.lengths if length <= 6
+                ],
+                "comparison": "per-mask exact product-measure binomial",
+            }
+        },
         "checks": checks,
         "family_count": len({str(item["family"]) for item in checks}),
         "minimum_margin": min(margins),
@@ -1427,5 +1720,6 @@ def run_production_validation(
         and required <= {str(item["family"]) for item in checks},
         "elapsed_seconds": float(time.perf_counter() - started),
     }
+    validate_report_payload(report, protocol)
     _atomic_publish(output, canonical_report_bytes(report))
     return report

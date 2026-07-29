@@ -25,7 +25,7 @@ from .edge_set import (
     build_class_start,
     edge_set_insert_kernel,
 )
-from .poisson_reference import (
+from .trajectory import (
     TrajectoryRequest,
     TrajectoryResult,
     _request_digest,
