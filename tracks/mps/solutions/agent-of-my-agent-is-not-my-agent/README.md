@@ -65,14 +65,129 @@ Hurwitz-zeta values enter only after fitting, when the exponential sum is
 periodized analytically. The command writes maximum/RMS error summaries and
 distance-resolved CSV profiles for both validation layers.
 
+Phase 3 periodized-MPO validation:
+
+Phase 3 converts the fitted exponential representation into a compact
+finite-ring MPO. Each exponential uses a **direct channel** for
+`λ_k^(j-i)` and a **wrapped channel** for `λ_k^(L-j+i)`, so the periodic image
+contribution is represented within a finite OBC MPO/MPS framework. The
+uncompressed MPO bond dimension is
+
+```text
+χ_MPO = 2K + 2 = 50  for K=24.
+```
+
+Small-system tests reconstruct every pair coefficient from the contracted MPO,
+verify it against the intended periodized-exponential table, and compare the
+resulting coefficient table with the exact Hurwitz-zeta coupling `J_L(r)`.
+This phase validates the Hamiltonian representation—including direct,
+wrapped, and transverse-field channels—and does **not** run DMRG.
+
+Phase 4 nearest-neighbor benchmark:
+
+```bash
+conda run -n mps env PYTHONPATH=src python scripts/benchmark_tfim.py \
+  --lengths 8 10 12 --gamma 1 --chi-max 128 \
+  --output-dir results/phase4_nn_tfim
+```
+
+This is a strict ED gate for E₀, E₁, the gap, correlations, variance below
+`1e-10`, and excited-state overlap below `1e-10`. It also plots Δ(L) and
+LΔ(L), whose finite-size stability at Γ=1 verifies the expected z=1
+benchmark. The variance threshold is specific to this small-system
+qualification; later production runs must report variance, discarded weight,
+and χ convergence without treating `1e-10` as an unconditional cutoff.
+
+Phase 5 compact-MPO validation:
+
+```bash
+conda run -n mps env PYTHONPATH=src python \
+  scripts/validate_long_range_mpo.py \
+  --lengths 8 10 12 --gammas 1.2 1.56 2.0 \
+  --sigma 1.75 --k 24 --alpha 0.5 --r-fit 2048 \
+  --output-dir results/phase5_mpo_validation
+```
+
+This command separates exact-pair ED → compact-MPO ED error from
+compact-MPO ED → DMRG error. It reports absolute and relative errors in E₀,
+E₁, and Δ, together with translation-averaged periodic C(r). The dense
+Frobenius error is retained only as a small-system implementation diagnostic;
+the distance-resolved coupling profile is the scalable MPO metric.
+
+Phase 6 is a **validated local reproduction**, not an L=256 production
+scaling campaign. It uses the rotated basis `X_phys = Sigmaz`,
+`Z_phys = Sigmax`, with explicit even/odd spin-flip parity. The full
+correlation function without connected-correlation subtraction is evaluated
+as `Sigmax-Sigmax`. Every cell preserves C(r), S(0), S(k_min), ξ, R_ξ,
+variance, discarded weight, sweeps, runtime, and checkpoint provenance.
+
+The local crossing bracket is fixed to `Gamma={1.560,1.565}` at `L=32,64`.
+The two-size crossing is obtained from the same linear interpolation of
+`R_xi(32,Gamma)-R_xi(64,Gamma)` for every K. The MPS uncertainty is measured
+at `L=64`, `K=24` by comparing direct `chi=128` with fully reoptimized
+`chi=256` states. The MPO uncertainty compares `K=24` with `K=32` at direct
+`chi=128` for both sizes and both bracket points. No `L>64`, `chi>256`,
+adaptive Gamma point, Slurm job, or approximate MPO compression is used.
+
+The achieved local result is:
+
+| validation axis | observed change |
+|---|---:|
+| `K=24 -> 32` crossing, `L=32,64` | `Gamma_x: 1.5633075241 -> 1.5633070351` |
+| `K=24 -> 32` relative gap, `L=64` | `5.35e-6 ... 5.57e-6` |
+| `chi=128 -> 256` R_xi, `L=64` | `4.82e-8 ... 5.00e-8` |
+| `chi=128 -> 256` relative gap, `L=64` | `2.45e-8 ... 3.36e-8` |
+
+These numbers establish stable critical-region behavior under the tested MPO
+and MPS variations. They are not a thermodynamic-limit estimate of
+`Gamma_c` or `z`.
+
+## Phase 7: crossover exploration
+
+Phase 7 builds on the validated local reproduction and changes the target
+from one high-precision point to an efficient sigma trend. The exploration
+grid is `sigma=1.50,1.60,1.70,1.75,1.80,1.90,2.00`, with `K=24`, `chi=64`,
+and `L=32,64`. Every sigma first uses the identical
+`Gamma=1.20:0.05:1.90` grid. A unique observed R_xi sign-change bracket
+generates a fixed `0.01` refinement grid; missing or multiple brackets remain
+unresolved and never trigger automatic Gamma expansion.
+
+The planner records the broad-grid hash, bracket decision, interpolation
+points, crossing resolution, provenance, and selective `chi=128` validation
+flags. This exploration makes no thermodynamic-limit `Gamma_c`, `z`, or
+crossover-location claim. It preserves exact-zero MPO pruning, checkpoint
+resumability, full raw observables, and the separation of MPO, MPS, and
+finite-size uncertainty.
+
+Prepare the focused K comparison:
+
+```bash
+PYTHONPATH=src:. conda run -n mps python \
+  scripts/prepare_local_k_comparison.py \
+  --k24-summary results/phase2_tail_stable/rfit_2048/alpha_05/summary_K24.json \
+  --sigma 1.75 --lengths 32 64 --l-max 256 \
+  --output-dir results/phase6_sigma1.75/validated-local-reproduction/fits
+```
+
+Assemble the completed local comparison:
+
+```bash
+PYTHONPATH=src:. conda run -n mps python \
+  scripts/analyze_local_reproduction.py \
+  --comparison-spec \
+    results/phase6_sigma1.75/validated-local-reproduction/comparison-spec.json \
+  --output-dir \
+    results/phase6_sigma1.75/validated-local-reproduction
+```
+
 ## Development milestones
 
 1. **Exact Hurwitz-zeta coupling validation** — compare the finite-ring formula
    with converged direct image sums and verify positivity, periodic symmetry,
    and pair-counting conventions.
 2. **Exponential fitting validation** — fit the infinite-line power law for
-   `K = 8, 12, 16` and report distance-resolved coupling errors after analytic
-   periodization.
+   `K = 8, 12, 16, 20, 24` and report distance-resolved coupling errors after
+   analytic periodization.
 3. **Periodized MPO construction** — encode forward and wrapped exponential
    channels and verify that the MPO reconstructs the intended coefficient
    table.
@@ -91,8 +206,8 @@ distance-resolved CSV profiles for both validation layers.
 | `scripts/` | Runnable validation and production entry points. |
 | `tests/` | Deterministic unit, regression, and small-system tests. |
 | `docs/methodology.md` | Mathematical conventions, algorithms, and error budget. |
-| `results/phase2/` | Phase 2 JSON summaries and distance-resolved CSV profiles. |
+| `results/phase*/` | Phase-scoped validation data, summaries, tables, and plots, including `phase2_tail_stable/` and future phase outputs. |
 
 Later production data, plots, and reports belong under
-`tracks/mps/results/<timestamped-run>/`; the small Phase 2 validation artifacts
-are kept locally in this solution folder for review.
+`tracks/mps/results/<timestamped-run>/`; phase-level validation artifacts are
+kept locally in this solution folder for review.

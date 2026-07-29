@@ -135,6 +135,29 @@ stage, with `alpha=0.5` as the preferred tail constraint. The full
 lambda/rate spectra must remain part of every run record; the scalar coupling
 error alone cannot diagnose a mode approaching lambda one.
 
+## Periodized exponential MPO
+
+The finite TeNPy MPO uses open virtual boundaries; the ring geometry is
+encoded entirely in the pair coefficients. For zero-based `i<j`, each
+exponential contributes two graph states:
+
+- direct: open with `lambda_k Sigmaz`, propagate with `lambda_k Id`, and
+  close with `-A_k Sigmaz`;
+- wrapped: open with `lambda_k^i Sigmaz`, propagate with `Id`, and close with
+  `-A_k lambda_k^(L-j) Sigmaz`.
+
+Here `A_k=c_k/(1-lambda_k^L)`. The wrapped factorization avoids both inverse
+lambda propagation and products of huge and tiny numbers. The transverse
+field is the direct graph edge `-Gamma Sigmax`. Pauli operators are required:
+using TeNPy's `Sx` or `Sz` would change the normalization.
+
+The uncompressed bulk MPO bond dimension is `2K+2`, equal to 50 for K=24.
+Before any DMRG, small-L tests contract the actual MPO to a dense matrix and
+recover every pair coefficient with the Pauli Hilbert-Schmidt projection
+`Tr(H Sigmaz_i Sigmaz_j)/2^L`. This independently validates the direct and
+wrapped paths, signs, field normalization, and the complete fitted
+periodized coupling table.
+
 ## Planned validation layers
 
 1. Exact periodic Hurwitz-zeta coupling.
@@ -143,4 +166,83 @@ error alone cannot diagnose a mode approaching lambda one.
 4. Small-system observable comparison.
 5. Independent `K` and `χ` convergence in DMRG scaling.
 
-No TeNPy API, MPO, DMRG, or many-body observable is included at this stage.
+No DMRG or many-body observable calculation is included at this stage.
+## Phase 4 DMRG qualification
+
+The DMRG implementation is qualified first on the periodic nearest-neighbor
+Pauli TFIM, `H = -Σ_i Z_i Z_(i+1) - Γ Σ_i X_i`, at `Γ=1`. A compact finite
+MPO carries the closing `(L-1,0)` bond while the MPS remains open-boundary.
+The same two-site sweep settings and diagnostic collection are used later for
+the periodized long-range MPO.
+
+At `L=8,10,12`, sparse ED supplies strict references for `E0`, `E1`, the gap,
+and `ZZ` correlations. Ground-state DMRG uses both z- and +x-polarized starts.
+The first excited state is optimized separately with TeNPy's
+`orthogonal_to=[psi0]`; its energy, positive ordering, overlap, variance, and
+ED agreement must all pass before scaling work begins. The benchmark also
+plots `L Delta(L)` at `Gamma=1`, which should approach a constant for `z=1`.
+
+Variance below `1e-10` is a small-system benchmark acceptance criterion, not
+a universal production cutoff. Large systems will instead report variance,
+maximum discarded weight, and convergence under increasing `chi` together.
+
+## Phase 5 three-layer MPO validation
+
+At `sigma=1.75`, the fixed `K=24`, `alpha=0.5`, `r_fit=2048` MPO is checked
+for `L=8,10,12` and `Gamma=1.2,1.56,2.0`. Exact Hurwitz-pair ED is compared
+first with ED of the actual dense-expanded MPO, isolating Hamiltonian
+compression error. The latter is then compared with DMRG on that same MPO,
+isolating MPS optimization and truncation error.
+
+Both absolute and reference-relative errors are retained for `E0`, `E1`, and
+the gap. The ground-state correlation is translation averaged around the
+ring, `C(r)=(1/L) sum_i <Z_i Z_(i+r)>`, in all three layers. The primary MPO
+diagnostics are the distance-resolved coupling residual, low-energy spectrum,
+and `C(r)`. Relative Frobenius matrix error is reported only for these small
+dense systems and is not used as a production-scale accuracy measure.
+
+## Phase 6 validated local reproduction
+
+The local campaign fixes `sigma=1.75`, `L=32,64`, and the two-point crossing
+bracket `Gamma=1.560,1.565`. It uses the rotated parity basis, the full
+physical correlation function without connected-correlation subtraction,
+exact-zero MPO pruning, and HDF5 checkpoints. It does not extrapolate to the
+thermodynamic limit.
+
+MPS uncertainty is isolated at `L=64`, `K=24` by fully reoptimizing the even
+and odd states at `chi=256` from audited `chi=128` initialization tensors.
+The historical and current code hashes are both recorded. Hamiltonian
+parameters, fit-file and coefficient hashes, active MPO channels, operator
+convention, parity, and serialized lattice structure must match before an
+old MPS can seed optimization. Historical energies and observables are never
+promoted to current-code results.
+
+MPO uncertainty is isolated at common `chi=128` by independently optimizing
+`K=24` and `K=32` states. The Hamiltonian-level comparison retains the full
+distance-resolved Hurwitz-zeta residual. The physics-level comparison uses
+the same signed differences
+`R_xi(32,Gamma)-R_xi(64,Gamma)` and the same neighboring-point linear
+interpolation for both K values, together with gap comparisons at both sizes
+and both Gamma values.
+
+The qualitative stability criterion is internal: the single fixed-bracket
+crossing must persist, gaps must remain positive, and the measured chi/K
+shifts must be reported separately. Agreement with a published
+thermodynamic-limit critical field or dynamic exponent is not an acceptance
+condition.
+
+## Phase 7 crossover exploration
+
+The validated local reproduction motivates an inexpensive first map over
+`sigma=1.50,1.60,1.70,1.75,1.80,1.90,2.00`. Exploration fixes `K=24`,
+`chi=64`, and `L=32,64`. All sigma values share the preregistered broad grid
+`Gamma=1.20:0.05:1.90`. Only a unique observed R_xi crossing bracket can
+produce the deterministic `0.01` refinement grid. The interpolated crossing
+records half the final endpoint spacing as a grid-resolution indicator.
+
+Unresolved brackets remain unresolved. Cells with failed convergence,
+excess relative variance or discarded weight, invalid second-moment data,
+or nonpositive gap behavior are marked for selective `chi=128` validation
+without being silently replaced. The scan provides no thermodynamic-limit
+claim; its purpose is to identify where additional sigma resolution is
+scientifically useful.
