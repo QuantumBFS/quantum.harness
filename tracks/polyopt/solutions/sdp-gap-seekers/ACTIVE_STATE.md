@@ -670,3 +670,11 @@ Updated: 2026-07-29 UTC.
   certificate had valid source status and RHS structure, but fresh-task
   violation was 1.0 because the artifact omitted constraint activities. The
   artifact now stores their exact Float64 bits for a complete replay in r4.
+- Corrected dual audit r4 `118177811` passed 46/46 in 1:07 at 514,500 KiB
+  MaxRSS. Fresh-task native bar-certificate replay has exact RHS structure and
+  zero recomputed primal violation.
+- Native primal `118174638` ended `OUT_OF_MEMORY` after 52:21 during
+  post-presolve factorization, before iterations: 104,717,420 KiB Slurm MaxRSS
+  (`/usr/bin/time`: 116,125,540 KiB) versus 114000 MiB. It is not a physics
+  result. Next changed solve: native bar-variable dual on xH5, 64 CPUs /
+  240 GB, with hash gate and replayable output.

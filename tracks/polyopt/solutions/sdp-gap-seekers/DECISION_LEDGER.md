@@ -1183,3 +1183,19 @@ had inserted scalar and bar-variable values but omitted Mosek's constraint
 activity vector. Extend the exact-bit artifact with that vector and let
 `updatesolutioninfo` recheck the complete primal tuple before r4. This is a
 changed artifact schema/test, not a repeated failure signature.
+
+Corrected dual-artifact audit r4, SCNet job `118177811`, passed 46/46 tests
+in 1:07 with 514,500 KiB MaxRSS. The fresh-task native bar-matrix certificate
+has one `-1` identity RHS, all other RHS values zero, source statuses
+primal/dual feasible plus optimal, and maximum recomputed primal violation
+zero. This authorizes the exact-bit floating dual-certificate replay.
+
+Native primal decision job `118174638` then ended naturally as
+`OUT_OF_MEMORY` (`0:125`) after 52:21, during silent post-presolve system
+formation and before any interior-point iteration. Slurm recorded 104,717,420
+KiB MaxRSS and `/usr/bin/time` 116,125,540 KiB against the 114000 MiB request.
+Its exact construction/hash gate remains valid, but it produced no feasibility
+status. Do not repeat this affine-conic primal signature at the same memory.
+The changed next action is the native bar-variable dual formulation on xH5,
+with 64 CPUs / 240 GB, the exact L=2 hash gate, residual audit, and replayable
+certificate export.

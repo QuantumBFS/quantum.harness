@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:12:58Z
+Updated: 2026-07-29T17:17:14Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -131,5 +131,14 @@ Updated: 2026-07-29T17:12:58Z
   fresh-task primal violation was 1.0 because constraint activities were not
   inserted. The revised artifact stores those exact-bit activities so Mosek
   can recheck the complete primal solution tuple in r4.
+- Corrected dual audit r4 `118177811` passed all 46 tests in 1:07 at 514,500
+  KiB MaxRSS. Its fresh-task native bar-matrix certificate replay has correct
+  one-minus-one/all-other-zero RHS structure and maximum primal violation 0.
+- Native primal job `118174638` ended naturally `OUT_OF_MEMORY` (`0:125`) after
+  52:21 during post-presolve system formation and before iterations. Slurm
+  MaxRSS was 104,717,420 KiB; `/usr/bin/time` measured 116,125,540 KiB against
+  114000 MiB. Exact construction/hash evidence remains valid, but this is not
+  a feasibility result. The next changed action is the native bar-variable
+  dual solve on xH5 (64 CPUs / 240 GB) with fail-closed hash and replay output.
 
 No user input or new credential is currently required.
