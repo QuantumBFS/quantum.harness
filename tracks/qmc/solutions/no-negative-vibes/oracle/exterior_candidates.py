@@ -14,8 +14,6 @@ import re
 from collections.abc import Mapping
 from fractions import Fraction
 from functools import lru_cache
-from typing import Any
-
 import numpy as np
 import sympy as sp
 
@@ -59,6 +57,15 @@ def _promotion_status(template: str) -> str:
     if template == "exact3-diagonal-oddcycle-pair":
         return "known-odd-monomial-p0-control"
     return "discovery-eligible"
+
+
+def _block_partition(template: str) -> list[list[int]] | None:
+    if template in {
+        "exact4-graded-shear-pair",
+        "exact4-block-shear-pair",
+    }:
+        return [[0, 1], [2, 3]]
+    return None
 
 
 def _encode_rational(value: Fraction | int) -> dict[str, int]:
@@ -191,26 +198,48 @@ def _odd_cycle(
     }
 
 
-def _strength(seed: int, offset: int, attempt: int) -> Fraction:
+def _stream_fraction(
+    template: str,
+    seed: int,
+    attempt: int,
+    slot: int,
+) -> Fraction:
+    digest = hashlib.sha256(
+        f"{_SCHEMA}|{template}|{seed}|{attempt}|{slot}".encode("ascii")
+    ).digest()
+    numerator = 1 + int.from_bytes(digest[0:4], "big") % 97
+    denominator = 1 + int.from_bytes(digest[4:8], "big") % 31
+    sign = -1 if digest[8] & 1 else 1
+    return Fraction(sign * numerator, denominator)
+
+
+def _strength(
+    template: str,
+    seed: int,
+    offset: int,
+    attempt: int,
+) -> Fraction:
     tier = _magnitude_tier(seed)
-    numerator = 1 + ((17 * seed + 11 * offset + 7 * attempt) % 9)
-    denominator = 1 + ((5 * seed + 3 * offset + attempt) % 5)
-    sign = -1 if (seed + offset + attempt) % 2 else 1
-    return _TIER_MULTIPLIERS[tier] * Fraction(sign * numerator, denominator)
+    return _TIER_MULTIPLIERS[tier] * _stream_fraction(
+        template,
+        seed,
+        attempt,
+        offset,
+    )
 
 
 def _positive_diagonal_values(
+    template: str,
     seed: int,
     dimension: int,
     attempt: int,
 ) -> tuple[Fraction, ...]:
-    primes = (2, 3, 5, 7, 11, 13)
     multiplier = _TIER_MULTIPLIERS[_magnitude_tier(seed)]
     return tuple(
         multiplier
         * (
-            Fraction(primes[index], 1)
-            + Fraction((seed * (index + 1) + attempt) % 5, index + 2)
+            Fraction(index + 2, 1)
+            + abs(_stream_fraction(template, seed, attempt, 100 + index))
         )
         for index in range(dimension)
     )
@@ -222,10 +251,10 @@ def _template_factors(
     attempt: int,
 ) -> tuple[dict[str, object], ...]:
     dimension, _ = _TEMPLATE_SPECS[template]
-    q = tuple(_strength(seed, index, attempt) for index in range(8))
+    q = tuple(_strength(template, seed, index, attempt) for index in range(8))
 
     if template == "exact3-oddcycle-shear-pair":
-        diagonal = _positive_diagonal_values(seed, 3, attempt)
+        diagonal = _positive_diagonal_values(template, seed, 3, attempt)
         return (
             _shear(3, 0, 1, q[0]),
             _odd_cycle(3, (0, 1, 2), diagonal),
@@ -237,10 +266,16 @@ def _template_factors(
             odd_diagonal = (Fraction(2), Fraction(3), Fraction(5))
         else:
             first_diagonal = tuple(
-                Fraction(1) + abs(_strength(seed, index + 3, attempt))
+                Fraction(1)
+                + abs(_strength(template, seed, index + 3, attempt))
                 for index in range(3)
             )
-            odd_diagonal = _positive_diagonal_values(seed, 3, attempt)
+            odd_diagonal = _positive_diagonal_values(
+                template,
+                seed,
+                3,
+                attempt,
+            )
         return (
             _diagonal(3, first_diagonal),
             _odd_cycle(3, (0, 1, 2), odd_diagonal),
@@ -257,7 +292,10 @@ def _template_factors(
             _shear(4, 0, 1, q[0]),
             _shear(4, 1, 2, q[1]),
             _shear(4, 2, 3, q[2]),
-            _diagonal(4, _positive_diagonal_values(seed, 4, attempt)),
+            _diagonal(
+                4,
+                _positive_diagonal_values(template, seed, 4, attempt),
+            ),
         )
 
     if template == "exact4-block-shear-pair":
@@ -268,7 +306,10 @@ def _template_factors(
 
     if template == "exact4-diagonal-loop-pair":
         return (
-            _diagonal(4, _positive_diagonal_values(seed, 4, attempt)),
+            _diagonal(
+                4,
+                _positive_diagonal_values(template, seed, 4, attempt),
+            ),
             *(
                 _shear(4, i, j, q[index])
                 for index, (i, j) in enumerate(
@@ -290,7 +331,7 @@ def _template_factors(
             _odd_cycle(
                 5,
                 (0, 1, 2),
-                _positive_diagonal_values(seed, 3, attempt),
+                _positive_diagonal_values(template, seed, 3, attempt),
             ),
             _shear(5, 2, 3, q[1]),
             _shear(5, 3, 4, q[2]),
@@ -522,9 +563,10 @@ def _parse_matrix(value: object, *, dimension: int, path: str) -> sp.ImmutableMa
     return sp.ImmutableMatrix(rows)
 
 
-def _coefficient(seed: int) -> Fraction:
-    base = Fraction(1 + seed % 7, 1 + (seed // 7) % 5)
-    return _TIER_MULTIPLIERS[_magnitude_tier(seed)] * base
+def _coefficient(template: str, seed: int) -> Fraction:
+    return _TIER_MULTIPLIERS[_magnitude_tier(seed)] * abs(
+        _stream_fraction(template, seed, 0, 900)
+    )
 
 
 def _connected_support(
@@ -555,6 +597,92 @@ def _connected_support(
             reached.add(neighbor)
             frontier.append(neighbor)
     return reached == set(range(dimension))
+
+
+def _factor_edges(
+    factorization: tuple[dict[str, object], ...],
+) -> set[tuple[int, int]]:
+    edges: set[tuple[int, int]] = set()
+    for factor in factorization:
+        if factor["kind"] == "rational-shear":
+            i = int(factor["i"])
+            j = int(factor["j"])
+            edges.add(tuple(sorted((i, j))))
+        elif factor["kind"] == "positive-odd-cycle":
+            cycle = factor["cycle"]
+            assert isinstance(cycle, list)
+            for i, j in zip(cycle, cycle[1:] + cycle[:1]):
+                edges.add(tuple(sorted((int(i), int(j)))))
+    return edges
+
+
+def _has_undirected_cycle(
+    edges: set[tuple[int, int]],
+    *,
+    dimension: int,
+) -> bool:
+    adjacency = {index: set() for index in range(dimension)}
+    for i, j in edges:
+        adjacency[i].add(j)
+        adjacency[j].add(i)
+    visited: set[int] = set()
+    for start in range(dimension):
+        if start in visited:
+            continue
+        stack = [(start, -1)]
+        while stack:
+            current, parent = stack.pop()
+            if current in visited:
+                return True
+            visited.add(current)
+            for neighbor in adjacency[current]:
+                if neighbor != parent:
+                    stack.append((neighbor, current))
+    return False
+
+
+def _supports_structural_feature(
+    feature: object,
+    factorization: tuple[dict[str, object], ...],
+    *,
+    dimension: int,
+    block_partition: object,
+) -> bool:
+    edges = _factor_edges(factorization)
+    if feature == "odd-cycle-routing":
+        return any(
+            factor["kind"] == "positive-odd-cycle"
+            for factor in factorization
+        )
+    if feature == "loop":
+        return _has_undirected_cycle(edges, dimension=dimension)
+    if feature == "degree-three":
+        degrees = {index: 0 for index in range(dimension)}
+        for i, j in edges:
+            degrees[i] += 1
+            degrees[j] += 1
+        return max(degrees.values(), default=0) >= 3
+    if feature == "cross-block-edge":
+        if (
+            not isinstance(block_partition, list)
+            or len(block_partition) != 2
+            or any(not isinstance(block, list) for block in block_partition)
+        ):
+            return False
+        left = set(block_partition[0])
+        right = set(block_partition[1])
+        if (
+            not left
+            or not right
+            or left & right
+            or left | right != set(range(dimension))
+        ):
+            return False
+        return any(
+            (i in left and j in right) or (i in right and j in left)
+            for i, j in edges
+        )
+    return False
 
 
 def _build_card(template: str, seed: int) -> dict[str, object]:
@@ -588,6 +716,7 @@ def _build_card(template: str, seed: int) -> dict[str, object]:
             "dimension": dimension,
             "magnitude_tier": _magnitude_tier(seed),
             "support": list(range(dimension)),
+            "block_partition": _block_partition(template),
             "structural_feature": structural_feature,
             "promotion_status": _promotion_status(template),
             "atoms": [
@@ -609,7 +738,7 @@ def _build_card(template: str, seed: int) -> dict[str, object]:
                     "orbit_id": "orbit-0",
                     "atom_indices": [0, 1],
                     "relation": "transpose",
-                    "coefficient": _encode_rational(_coefficient(seed)),
+                    "coefficient": _encode_rational(_coefficient(template, seed)),
                 }
             ],
         }
@@ -661,6 +790,7 @@ def _validated_components(
         "dimension",
         "magnitude_tier",
         "support",
+        "block_partition",
         "structural_feature",
         "promotion_status",
         "atoms",
@@ -693,6 +823,8 @@ def _validated_components(
         raise ValueError("card magnitude tier does not match its seed")
     if card["support"] != list(range(dimension)):
         raise ValueError("card support must be the complete ordered local support")
+    if card["block_partition"] != _block_partition(template):
+        raise ValueError("card block partition does not match its template")
     if card["structural_feature"] != expected_feature:
         raise ValueError("card structural feature does not match its template")
     if card["promotion_status"] != _promotion_status(template):
@@ -756,8 +888,14 @@ def _validated_components(
         or orbit["relation"] != "transpose"
     ):
         raise ValueError("coefficient orbit does not pair both transpose atoms")
-    if _parse_rational(orbit["coefficient"], path="orbits[0].coefficient") <= 0:
+    coefficient = _parse_rational(
+        orbit["coefficient"],
+        path="orbits[0].coefficient",
+    )
+    if coefficient <= 0:
         raise ValueError("orbit coefficient must be strictly positive")
+    if coefficient != _coefficient(template, seed):
+        raise ValueError("orbit coefficient does not match its template and seed")
 
     if exact_atoms[0] * exact_atoms[1] == exact_atoms[1] * exact_atoms[0]:
         raise ValueError("candidate atoms must be noncommuting")
@@ -766,6 +904,13 @@ def _validated_components(
         dimension=dimension,
     ):
         raise ValueError("candidate support is disconnected")
+    if not _supports_structural_feature(
+        card["structural_feature"],
+        exact_factorizations[0],
+        dimension=dimension,
+        block_partition=card["block_partition"],
+    ):
+        raise ValueError("candidate factors do not realize the declared feature")
     for atom_index, atom in enumerate(exact_atoms):
         determinant = sp.det(atom)
         if determinant <= 0:
@@ -773,7 +918,29 @@ def _validated_components(
                 f"atoms[{atom_index}] must be invertible with positive determinant"
             )
 
+    if _canonical_json(card) != _cached_card_json(template, seed):
+        raise ValueError("v1 semantic payload is not canonical for template and seed")
+
     return tuple(exact_atoms), tuple(exact_factorizations)
+
+
+def screening_fingerprint(card: Mapping[str, object]) -> str:
+    """Hash only the exact atom/factor payload consumed by the first screen."""
+
+    _validated_components(card)
+    atoms = card["atoms"]
+    assert isinstance(atoms, list)
+    payload = {
+        "dimension": card["dimension"],
+        "atoms": [
+            {
+                "matrix": atom["matrix"],
+                "factors": atom["factors"],
+            }
+            for atom in atoms
+        ],
+    }
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
 
 
 def exact_atoms_from_card(
@@ -842,6 +1009,7 @@ __all__ = [
     "candidate_card",
     "candidate_id",
     "candidate_structure_audit",
+    "screening_fingerprint",
     "exact_atoms_from_card",
     "exact_factorizations_from_card",
     "float_atoms_from_card",
