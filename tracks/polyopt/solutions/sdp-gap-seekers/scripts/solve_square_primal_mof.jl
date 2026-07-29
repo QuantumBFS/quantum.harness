@@ -412,7 +412,11 @@ function main(args::Vector{String}=ARGS)
             end,
         )
 
-        progress("optimize! started with forced dual solve form")
+        progress(
+            forced_dual_solve_form() ?
+            "optimize! started (solve form forced to dual)" :
+            "optimize! started (solve form left to Mosek default)",
+        )
         solve_start = time()
         try
             JuMP.optimize!(model)
