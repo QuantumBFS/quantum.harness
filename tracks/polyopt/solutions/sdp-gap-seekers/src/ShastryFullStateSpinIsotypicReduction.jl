@@ -448,11 +448,15 @@ end
 function shastry_spin_isotypic_truth(
     assembly::ShastryFullStateSpinSpatialReducedPrimalAssembly,
 )
-    trivial_reports = [
-        trivial_block_truth(assembly, block)
-        for block in [assembly.positive_blocks; assembly.gap_blocks]
-        if block.source_block.character == TRIVIAL_CHARACTER
-    ]
+    trivial_blocks = filter(
+        block -> block.source_block.character == TRIVIAL_CHARACTER,
+        [assembly.positive_blocks; assembly.gap_blocks],
+    )
+    trivial_reports = Vector{Any}(undef, length(trivial_blocks))
+    Threads.@threads :dynamic for index in eachindex(trivial_blocks)
+        trivial_reports[index] =
+            trivial_block_truth(assembly, trivial_blocks[index])
+    end
     positive_blocks = retained_blocks(assembly.positive_blocks)
     gap_blocks = retained_blocks(assembly.gap_blocks)
     dimensions = sort!(
@@ -544,8 +548,14 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
         "",
     )
     used_moments = Set{MomentKey}([moment_key()])
-    coefficient_records = String[]
-    for block in [positive_blocks; gap_blocks]
+    all_blocks = [positive_blocks; gap_blocks]
+    block_moments =
+        [Set{MomentKey}() for _ in eachindex(all_blocks)]
+    block_records = [String[] for _ in eachindex(all_blocks)]
+    Threads.@threads :dynamic for block_index in eachindex(all_blocks)
+        block = all_blocks[block_index]
+        local_moments = block_moments[block_index]
+        local_records = block_records[block_index]
         for row in eachindex(block.rows), column in row:length(block.rows)
             polynomial = shastry_spin_isotypic_block_entry(
                 provisional,
@@ -553,9 +563,9 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
                 block.rows[row],
                 block.rows[column],
             )
-            union!(used_moments, keys(polynomial.terms))
+            union!(local_moments, keys(polynomial.terms))
             push!(
-                coefficient_records,
+                local_records,
                 string(
                     block_label(block),
                     "[",
@@ -567,6 +577,11 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
                 ),
             )
         end
+    end
+    coefficient_records = String[]
+    for block_index in eachindex(all_blocks)
+        union!(used_moments, block_moments[block_index])
+        append!(coefficient_records, block_records[block_index])
     end
     for equality in equalities
         union!(used_moments, keys(equality.terms))
