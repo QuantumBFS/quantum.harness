@@ -11,7 +11,7 @@ using ..GenericGapModel:
     NoStateSymmetry,
     basis_manifest,
     validate_basis_manifest,
-    full_state_scalar_multisets,
+    foreach_full_state_scalar_multiset,
     full_state_entries,
     instantiate_terms,
     assembly_plan,
@@ -277,13 +277,13 @@ function assemble_primal_gap(
     )
 
     if !materialize_coefficients
-        ordered_moments = MomentKey[
-            moment_key(symbols)
-            for symbols in full_state_scalar_multisets(
-                collect(eachindex(problem.patch.sites)),
-                2problem.d,
-            )
-        ]
+        ordered_moments = MomentKey[]
+        foreach_full_state_scalar_multiset(
+            collect(eachindex(problem.patch.sites)),
+            2problem.d,
+        ) do symbols
+            push!(ordered_moments, moment_key(symbols))
+        end
         sort!(
             ordered_moments;
             by=key -> (moment_degree(key), key.canonical),

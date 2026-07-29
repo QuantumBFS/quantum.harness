@@ -30,6 +30,7 @@ export PauliInteractionTemplate,
        assembly_plan,
        basis_manifest,
        validate_basis_manifest,
+       foreach_full_state_scalar_multiset,
        full_state_scalar_multisets,
        full_state_entries,
        state_monomial_degree,
@@ -697,7 +698,7 @@ function one_symbol_entries(site_ids::Vector{Int}, max_degree::Int)
     return entries
 end
 
-function full_state_words_and_scalar_multisets(
+function full_state_words(
     site_ids::Vector{Int},
     max_degree::Int,
 )
@@ -712,15 +713,23 @@ function full_state_words_and_scalar_multisets(
     local_words = enumerate_pauli_words(length(site_ids), max_degree)
     words = [remap_word(word, site_ids) for word in local_words]
     sort!(words; by=word -> (length(word), canonical_word_string(word)))
+    return words
+end
+
+function foreach_full_state_scalar_multiset(
+    callback::F,
+    site_ids::Vector{Int},
+    max_degree::Int,
+) where {F}
+    words = full_state_words(site_ids, max_degree)
     state_words = filter(word -> !isempty(word.ops), words)
 
-    scalar_multisets = Vector{Vector{PauliWord}}()
     function enumerate_scalar_multisets!(
         selected::Vector{PauliWord},
         first_index::Int,
         degree::Int,
     )
-        push!(scalar_multisets, copy(selected))
+        callback(selected)
         for index in first_index:length(state_words)
             word = state_words[index]
             next_degree = degree + length(word)
@@ -736,6 +745,18 @@ function full_state_words_and_scalar_multisets(
         return nothing
     end
     enumerate_scalar_multisets!(PauliWord[], 1, 0)
+    return nothing
+end
+
+function full_state_words_and_scalar_multisets(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    words = full_state_words(site_ids, max_degree)
+    scalar_multisets = Vector{Vector{PauliWord}}()
+    foreach_full_state_scalar_multiset(site_ids, max_degree) do selected
+        push!(scalar_multisets, copy(selected))
+    end
     return words, scalar_multisets
 end
 
