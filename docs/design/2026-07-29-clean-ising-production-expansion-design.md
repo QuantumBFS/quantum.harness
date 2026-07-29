@@ -23,9 +23,9 @@ weakening any acceptance threshold.
 - Simulate every even circumference from `L = 4` through `L = 20`:
   `4, 6, 8, 10, 12, 14, 16, 18, 20`.
 - Keep the torus length at `M = 8L`.
-- Use 65 uniformly spaced coupling points from `K = 0` through `K_c`, giving
-  64 Simpson intervals.
-- Compare the primary 65-point integration with its nested 33-point subset.
+- Use 129 uniformly spaced coupling points from `K = 0` through `K_c`, giving
+  128 Simpson intervals.
+- Compare the primary 129-point integration with its nested 65-point subset.
 - Keep four independent replicas, 200 burn-in sweeps, 12,800 measurement
   sweeps, and 320-sweep blocks.
 - Keep `rand_xoshiro 0.8.1` `Xoshiro256++`, deterministic seed derivation,
@@ -36,7 +36,7 @@ weakening any acceptance threshold.
 
 Rust remains responsible for the exact transfer-matrix calculation and all
 Monte Carlo sampling. Python validates the expanded raw records, performs
-the nested 65/33-point Simpson integrations, propagates block-bootstrap
+the nested 129/65-point Simpson integrations, propagates block-bootstrap
 uncertainty through the finite-size fits, and regenerates the same six plots
 and self-contained HTML report.
 
@@ -47,12 +47,12 @@ manifest rather than hard-coding `17` and `33`.
 ## Verification and Failure Handling
 
 Contract tests must reject any production configuration other than the
-approved widths, 64 intervals, and sampling depth. Analysis tests must prove
+approved widths, 128 intervals, and sampling depth. Analysis tests must prove
 that the nested-grid selector uses every second point and reports the actual
 grid sizes. The full Rust and Python suites run before production.
 
-The projected Monte Carlo wall time is about four minutes, based on the
-measured 48.17-second run scaled by the number of lattice sites and coupling
-points. The existing 600-second runtime gate remains unchanged. A scientific
+The projected Monte Carlo wall time is about 525 seconds, based on the
+measured 259.38-second 65-point run scaled to 129 points. The existing
+600-second runtime gate remains unchanged. A scientific
 gate failure still produces a complete report with an explicit failure
 verdict and finalized total runtime.

@@ -48,7 +48,7 @@ is the stable SplitMix-style derivation of
 `(base_seed, L, K_index, replica)` implemented in `src/rng.rs` and recorded in
 the manifest.
 
-The production run uses nine even widths from `L=4` through `L=20`, 65 nested
+The production run uses nine even widths from `L=4` through `L=20`, 129 nested
 coupling points, four replicas, 200 burn-in
 sweeps, 12,800 measurement sweeps, and 320-sweep blocks. Burn-in first calibrates
 an integer number of cluster updates per lattice volume; that count is then
@@ -63,7 +63,7 @@ frozen before measurements, avoiding state-dependent stopping-time bias.
   count, energy sums, and cluster diagnostics.
 - `manifest.json`: full configuration, commands, dependency hashes, versions,
   threads, seeds, and stage timings.
-- `processed/free_energies.csv`: exact and 33/65-point integrated free energies.
+- `processed/free_energies.csv`: exact and 65/129-point integrated free energies.
 - `processed/central_charge_fits.csv`: all methods and predeclared fit windows.
 - `processed/energy_vs_k.csv` and `diagnostics.csv`: integration and chain
   diagnostics.
@@ -75,7 +75,7 @@ Generated raw data, processed tables, figures, and the self-contained
 
 - exact `|c-0.5| ≤ 0.005`;
 - Monte Carlo `|c-0.5| ≤ 0.03`, with its 95% interval containing `0.5`;
-- 33/65-point shift below the 65-point bootstrap standard error;
+- 65/129-point shift below the 129-point bootstrap standard error;
 - declared fit-window, half-chain, and replica checks pass;
 - total local runtime below 600 seconds.
 

@@ -93,13 +93,13 @@ impl RunConfig {
             if self.mc.replicas != 4 {
                 bail!("production run requires four replicas");
             }
-            if self.mc.grid_intervals != 64
+            if self.mc.grid_intervals != 128
                 || self.mc.thermal_sweeps != 200
                 || self.mc.measurement_sweeps != 12_800
                 || self.mc.block_sweeps != 320
             {
                 bail!(
-                    "production sampling requires 64 intervals, 200 thermal sweeps, \
+                    "production sampling requires 128 intervals, 200 thermal sweeps, \
                      12,800 measurement sweeps, and 320-sweep blocks"
                 );
             }

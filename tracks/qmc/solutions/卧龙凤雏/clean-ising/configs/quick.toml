@@ -11,7 +11,7 @@ residual_tolerance = 1.0e-11
 
 [mc]
 replicas = 4
-grid_intervals = 64
+grid_intervals = 128
 thermal_sweeps = 200
 measurement_sweeps = 12800
 block_sweeps = 320
