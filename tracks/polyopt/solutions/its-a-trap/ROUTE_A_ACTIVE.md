@@ -35,13 +35,31 @@ two-body-basis reach undercoverage (r = extra+1 = 5 fixed vs paper r≈⌈N/2⌉
    on the rdm=8 screening relaxation; the hypothesis was not escalated to
    the rdm=10 test" — a resource decision, never "H_reach rejected".
 
-## A3 confirm (after arbiter sees the A2 table)
+## A3 confirm (after arbiter sees the A2 table) — AMENDMENT 3 pricing
 
-- MANDATORY construction-only probe first: log m, PSD block signature,
-  constraint nnz, build RSS; abort if build alone nears the node limit.
+- m²-scaling pricing RETIRED. Estimator:
+  RSS(10, r*) ≈ RSS(e49) + [RSS(v100hi) − RSS(e4b)], second term ≤ 3 GB by
+  constraint monotonicity.
+- MANDATORY construction-only probe first, REPURPOSED: verify block-family
+  additivity (print nnz per family), log m, PSD block signature, build RSS;
+  abort if build alone nears the node limit.
 - Then ONE cell: N=100, rdm=10, extra = r*−1.
 - Readout: 3-point rdm=10 reach curve (r = 5, 9, r*) vs 8.3e-6.
 - Language: consistency-only (LAW.md Route A pre-written sentences).
+
+## Knob-ablation twin (Amendment 3) — SUBMITTED 22992924
+
+rA_e49p0: N=100, rdm=8, extra=49, pso=0, lso unchanged — "screen, minus
+pso, per Remark 6.1 precedent". Measures the pso accuracy marginal AND the
+memory saving at N=100. Joins the reach table as a knob-ablation row (not a
+new family). One knob per cell: lso is the SECOND ablation candidate, never
+bundled with the pso twin.
+If Δ(pso) ≤ ε_cmp at N=100 → the N=200 assault config becomes
+rdm=10 + extra=r*_200 + pso=0 (additive pricing); PRE-POSITIONED cellspec:
+  v200ra:200:extra=<r*_200-1>,pso=0    (rdm=10 default; arbiter GO tonight)
+Timing columns are NOT comparable across node tiers (32c/64c/128c) — every
+reach-table row carries a node-tier flag; wall/solve comparisons only
+within a tier.
 
 ## A4 N=200
 
