@@ -63,6 +63,9 @@ const eigen_circmat    = QMBCertify.eigen_circmat
 const generate_mons    = QMBCertify.generate_mons
 import QMBCertify: reduce!, mosek_para, qmb_data
 const MOI = JuMP.MOI
+# explicit binding: TensorKit (loaded by the VUMPS scripts) also exports
+# `dual`, which would make the fork body's `dual(con)` ambiguous in Main
+const dual = JuMP.dual
 
 # ------------------------------------------------------- the dual extension --
 """Insert the ω-tower's dual terms (THEOREM_CONTRACT §4) into the SOHS model.
