@@ -5,6 +5,10 @@ def test_exact_dual_excludes_a_common_strict_metric_for_the_leading_pair():
     result = exact_no_common_metric_certificate()
 
     assert result["status"] == "exact-no-common-metric-certificate"
+    assert result["points"] == [
+        {"p": "1/1000", "q": "1", "r": "1"},
+        {"p": "4/5", "q": "1", "r": "1"},
+    ]
     assert result["cancellation_exact_zero"] is True
     assert result["all_multipliers_positive_definite"] is True
     assert result["normalization_trace"] == {

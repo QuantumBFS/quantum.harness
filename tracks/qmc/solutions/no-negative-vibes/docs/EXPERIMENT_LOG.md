@@ -2313,3 +2313,20 @@ for the genuinely joint four-letter candidate.  It is a finite-state,
 indefinite/path-complete extension of the common split-contraction
 certificate; the coherent time-orientation determinant lemma is essential,
 because contraction plus positive determinant alone does not fix the sign.
+
+The Gordan--Stiemke exclusion and physical transfer were then regenerated
+for this final pair, replacing the earlier lead's frozen constants.  Four
+exact positive-definite dual multipliers cancel the common-metric adjoint
+map and have total trace one, so no strict common symmetric metric exists.
+On the 32-dimensional Fock space the new symmetric transfer needs only
+the shift `c=37`: its maximum row requirement is 36 and its minimum strict
+margin is one.  Thus
+
+`T/41 = exp(-H)`
+
+has positive auxiliary-field coefficients
+`(37,1,1,1,1)/41`.  The Gaussian block identity fails in 58 entries,
+first by 164, so the Hermitian number-conserving Hamiltonian is genuinely
+interacting.  Together with the arbitrary-word theorem, the sign-free and
+physical-realizability gates are both closed for the same rational
+alphabet.

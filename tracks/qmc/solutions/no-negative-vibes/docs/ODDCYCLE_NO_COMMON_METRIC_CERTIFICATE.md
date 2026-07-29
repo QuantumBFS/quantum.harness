@@ -3,8 +3,8 @@
 Consider the two rational matrices
 
 ```text
-B0 = B(3/10, 1, 1)
-B1 = B(5/2, 1, 1)
+B0 = B(1/1000, 1, 1)
+B1 = B(4/5, 1, 1)
 ```
 
 and the four-letter alphabet
@@ -43,9 +43,11 @@ zero matrix above, a contradiction.  Therefore no such common `R`
 exists.
 
 This excludes the specific common split-contraction/Wei mechanism tested
-by the metric inequalities.  It does not by itself prove arbitrary-word
-determinant positivity or exclude every sign-free mechanism; those are
-separate gates.
+by the metric inequalities.  Arbitrary-word determinant positivity is
+proved independently by the four-state certificate in
+`ODDCYCLE_PATH_METRIC_CERTIFICATE.md`; the combination shows that the
+finite-state construction is strictly more expressive than a common
+metric for this alphabet.
 
 ## Exact replay
 

@@ -6,9 +6,9 @@ def test_leading_pair_has_a_positive_field_hermitian_interacting_target():
 
     assert result["status"] == "exact-hermitian-interacting-transfer"
     assert result["fock_dimension"] == 32
-    assert result["c"] == 45
+    assert result["c"] == 37
     assert result["strict_diagonal_dominance"] == {
-        "maximum_requirement": "44",
+        "maximum_requirement": "36",
         "minimum_row_margin": "1",
         "conclusion": "T is real symmetric positive definite",
     }
@@ -18,15 +18,16 @@ def test_leading_pair_has_a_positive_field_hermitian_interacting_target():
         atom["real_log_exists"] for atom in result["auxiliary_atoms"]
     )
     assert result["normalized_auxiliary_fields"]["coefficients"] == (
-        "45/49",
-        "1/49",
-        "1/49",
-        "1/49",
-        "1/49",
+        "37/41",
+        "1/41",
+        "1/41",
+        "1/41",
+        "1/41",
     )
     assert result["non_gaussian_gate"]["nonzero_entry_count"] == 58
     assert result["non_gaussian_gate"]["first_nonzero_entry"] == (
         0,
         0,
-        "196",
+        "164",
     )
+    assert result["sign_free_gate"].startswith("closed by")

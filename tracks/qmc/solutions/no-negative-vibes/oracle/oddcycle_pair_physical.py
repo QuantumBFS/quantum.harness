@@ -15,7 +15,7 @@ SCHEMA = "oddcycle-pair-physical-transfer-v1"
 
 
 def leading_pair_matrices() -> tuple[sp.ImmutableMatrix, sp.ImmutableMatrix]:
-    """Return ``B(3/10,1,1)`` and ``B(5/2,1,1)`` exactly."""
+    """Return ``B(1/1000,1,1)`` and ``B(4/5,1,1)`` exactly."""
 
     def matrix(p: sp.Rational) -> sp.ImmutableMatrix:
         return sp.ImmutableMatrix(
@@ -28,15 +28,14 @@ def leading_pair_matrices() -> tuple[sp.ImmutableMatrix, sp.ImmutableMatrix]:
             ]
         )
 
-    return matrix(sp.Rational(3, 10)), matrix(sp.Rational(5, 2))
+    return matrix(sp.Rational(1, 1000)), matrix(sp.Rational(4, 5))
 
 
 def exact_pair_physical_certificate() -> dict[str, object]:
     """Certify a positive-field Hermitian interacting transfer.
 
-    Arbitrary-word determinant positivity is intentionally a separate
-    theorem gate.  This function proves that, once that gate is closed, the
-    same four-letter alphabet has an exact physical auxiliary-field target.
+    Arbitrary-word determinant positivity is proved by the independent
+    exact last-letter path-metric certificate for the same four letters.
     """
 
     matrices = leading_pair_matrices()
@@ -95,7 +94,11 @@ def exact_pair_physical_certificate() -> dict[str, object]:
         raise RuntimeError("pair transfer unexpectedly passed the Gaussian gate")
 
     spectral_records = []
-    for p, matrix in zip((sp.Rational(3, 10), sp.Rational(5, 2)), matrices):
+    for p, matrix in zip(
+        (sp.Rational(1, 1000), sp.Rational(4, 5)),
+        matrices,
+        strict=True,
+    ):
         coefficients = tuple(matrix.charpoly().all_coeffs())
         p_minus_t_coefficients = (
             -1,
@@ -156,8 +159,8 @@ def exact_pair_physical_certificate() -> dict[str, object]:
             ),
         },
         "sign_free_gate": (
-            "conditional only on the separate arbitrary-word determinant "
-            "positivity theorem for {B0,B0.T,B1,B1.T}"
+            "closed by the exact arbitrary-word theorem in "
+            "oddcycle_path_metric for {B0,B0.T,B1,B1.T}"
         ),
     }
 
