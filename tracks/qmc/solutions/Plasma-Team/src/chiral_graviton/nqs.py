@@ -58,6 +58,17 @@ class NQSTrainingResult:
     parameters: np.ndarray
 
 
+@dataclass(frozen=True)
+class MonteCarloEstimate:
+    """Direct |psi|^2 sampling estimate in a finite Fock sector."""
+
+    mean: float
+    standard_error: float
+    variance: float
+    n_samples: int
+    seed: int
+
+
 class SharedProjectedMLP:
     """One-hidden-layer real NQS with exact angular-momentum projection.
 
@@ -238,3 +249,41 @@ class SharedProjectedMLP:
             estimate = self.estimate(parameters, total_l)
             errors.append(abs(estimate.l2_expectation - total_l * (total_l + 1)))
         return max(errors)
+
+    def sample_energy(
+        self,
+        parameters: np.ndarray,
+        total_l: int,
+        *,
+        n_samples: int = 50_000,
+        seed: int = 1729,
+    ) -> MonteCarloEstimate:
+        """Estimate energy by independent sampling from the enumerated NQS.
+
+        This is a small-system VMC validation path. It draws exact independent
+        samples from |psi|^2, so no burn-in or autocorrelation correction is
+        needed. Larger, non-enumerated systems require an autoregressive or
+        Markov-chain sampler.
+        """
+
+        if n_samples < 2:
+            raise ValueError("n_samples must be at least two")
+        sector = self.sectors[total_l]
+        vector = self.vector(parameters, total_l)
+        probabilities = np.abs(vector) ** 2
+        probabilities /= probabilities.sum()
+        h_vector = sector.hamiltonian @ vector
+        support = vector != 0.0
+        local_energy = np.zeros_like(vector, dtype=np.float64)
+        local_energy[support] = np.real(h_vector[support] / vector[support])
+        rng = np.random.default_rng(seed)
+        indices = rng.choice(vector.size, size=n_samples, replace=True, p=probabilities)
+        samples = local_energy[indices]
+        variance = float(np.var(samples, ddof=1))
+        return MonteCarloEstimate(
+            mean=float(np.mean(samples)),
+            standard_error=float(np.sqrt(variance / n_samples)),
+            variance=variance,
+            n_samples=n_samples,
+            seed=seed,
+        )

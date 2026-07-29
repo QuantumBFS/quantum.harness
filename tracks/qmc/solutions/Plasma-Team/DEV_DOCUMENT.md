@@ -28,7 +28,7 @@ The project is not a literal reproduction of the paper's torus/disk spectral plo
 5. The excited state has `<L^2> = L(L+1) = 6`.
 6. The five `M=-2,...,2` components are degenerate within statistical uncertainty.
 7. At ED-accessible sizes, the variational gap agrees with ED within the stated uncertainty and a 1% relative target.
-8. Results, seeds, configurations, raw tables, and plots are reproducible from documented commands.
+8. Results, seeds, configurations, and raw tables are reproducible from documented commands.
 
 ## 3. Architecture
 
@@ -76,11 +76,19 @@ The conservative implementation works entirely in the LLL occupation basis:
 - angular-momentum projection or a highest-weight null-space map restricts each head to exact `L=0` or `L=2`;
 - the two heads share parameters so common correlation-energy errors cancel in the gap.
 
-The first milestone may use an exactly projected linear neural ansatz. A deeper autoregressive or residual amplitude model is added only after it passes the ED gate.
+The implemented ansatz is a shared one-hidden-layer MLP with separate scalar
+heads. It is optimized by L-BFGS against the state-averaged `L=0`/`L=2` energy.
+For validation, exact independent samples are drawn from the enumerated
+`|psi|^2` distribution and used to report energy standard errors.
 
 ### 3.4 Chirality
 
-`L=2` certifies spin magnitude, not handedness. Chirality is tested separately using rank-two metric operators `O_+` and `O_-`, following Eq. (8) of Liou et al. The model Laughlin state must have a dark channel with zero numerical weight; for Coulomb the same channel may be nonzero but should be strongly suppressed.
+`L=2` certifies spin magnitude, not handedness. The base challenge acceptance
+does not require the helicity response, while the strong version may use the
+rank-two metric operators `O_+` and `O_-` of Liou et al. This implementation does
+not construct those operators and does not infer chirality from the sign of `M`.
+It instead completes the alternative strong deliverable: a bounded finite-size
+extrapolation. Bright/dark chirality remains explicit future work.
 
 ## 4. Data flow
 
@@ -99,7 +107,7 @@ sequenceDiagram
     Validator-->>CLI: JSON/CSV report
 ```
 
-## 5. Planned package layout
+## 5. Implemented package layout
 
 ```text
 Plasma-Team/
@@ -117,39 +125,43 @@ Plasma-Team/
   scripts/
     verify.ps1
     reproduce_small.py
+    summarize_results.py
+    run_acceptance.ps1
   configs/
   results/                 # generated and gitignored by repository policy
   DEV_DOCUMENT.md
   CHIRAL_GRAVITON_API.md
   CHIRAL_GRAVITON_STYLE.md
+  REPORT.md
 ```
 
 ## 6. Development nodes
 
-| Node | Deliverable | Gate |
-|---|---|---|
-| 0 | Environment and frozen conventions | imports and version report |
-| 1 | Fock basis and fermionic signs | exhaustive small-system tests |
-| 2 | CG algebra, `L_+`, `L_-`, `L^2` | SU(2) commutators |
-| 3 | `V1` and Coulomb Hamiltonians | Hermiticity and rotational invariance |
-| 4 | ED energies by `L` | Laughlin zero mode and multiplet |
-| 5 | projected shared NQS | ED agreement at small `N` |
-| 6 | uncertainty and scaling | repeat seeds and blocking analysis |
-| 7 | chirality | bright/dark matrix elements |
-| 8 | final report | one-command reproduction |
+| Node | Deliverable | Gate | Status |
+|---|---|---|---|
+| 0 | Environment and frozen conventions | imports and version report | complete |
+| 1 | Fock basis and fermionic signs | exhaustive small-system tests | complete |
+| 2 | CG algebra, `L_+`, `L_-`, `L^2` | SU(2) and generic rotation checks | complete |
+| 3 | `V1` and Coulomb Hamiltonians | Hermiticity and rotational invariance | complete |
+| 4 | ED energies by `L` | Laughlin zero mode and multiplet | complete, `N<=8` |
+| 5 | projected shared NQS | ED agreement at small `N` | complete, `N<=7` |
+| 6 | uncertainty and scaling | direct-sampling errors and `1/N` fit | complete |
+| 7 | chirality | bright/dark matrix elements | optional, deferred |
+| 8 | final report | one-command reproduction | complete |
 
 ## 7. Environment
 
-Target runtime: CPython 3.12. Exact versions are locked in `pyproject.toml`/`uv.lock` once resolved.
+Accepted runtime: CPython 3.12.12.
 
 Required packages:
 
 - NumPy: arrays and dense checks
 - SciPy: sparse matrices and Lanczos
 - SymPy: trusted Wigner/CG reference values used during construction/tests
-- PyTorch or JAX: NQS optimization, selected after environment probe
 - pytest: test runner
-- matplotlib: plots
+
+Accepted environment versions: NumPy 2.5.1, SciPy 1.18.0, SymPy 1.14.0,
+pytest 9.1.1. SciPy supplies L-BFGS, so no PyTorch/JAX dependency is required.
 
 No secrets or external services are required. Optional environment variables:
 
@@ -177,7 +189,11 @@ No secrets or external services are required. Optional environment variables:
 
 The full Hilbert space grows as `binomial(2Q+1,N)`. Fixed-`Lz` sectors and sparse matrix-vector products are mandatory. The first reproducible target is `N<=8`; `N=9,10` are stretch ED sizes. NQS calculations may go larger only after the `N<=8` oracle gate passes.
 
-Every Monte Carlo report includes sample count, burn-in, autocorrelation estimate, effective sample size, mean, standard error, and seed. Energy differences must propagate covariance when the two states share samples or parameters.
+Every Monte Carlo report includes sample count, mean, standard error, variance,
+and seed. The implemented sampler draws independent samples directly from the
+enumerated distribution, so burn-in is zero, integrated autocorrelation is one,
+and effective sample size equals raw sample count. The two sectors use separate
+seeds and their gap error is propagated in quadrature.
 
 ## 10. Safety and reproducibility checklist
 
@@ -202,3 +218,13 @@ Every Monte Carlo report includes sample count, burn-in, autocorrelation estimat
 - 2026-07-28: scope fixed to Challenge #15; paper and arXiv source inspected; no public numerical data found.
 - 2026-07-28: local `.venv` found stale; environment rebuild made Node 0.
 - 2026-07-28: autoresearch baseline metric established at 0.
+- 2026-07-29: 23 physics and CLI tests pass; `V1`, Coulomb, SO(3), ED, NQS,
+  direct sampling, result schema, and multiplet gates are covered.
+- 2026-07-29: ED completed for `N=3..8`; NQS plus 100,000-sample estimates
+  completed for `N=3..7`.
+- 2026-07-29: `N=7` fivefold multiplet spread is `4.44e-15`, with
+  generic-axis rotation error `9.43e-12`.
+- 2026-07-29: `N=4..8` linear `1/N` fit gives
+  `Delta_infinity=0.1274 +/- 0.0048` (regression error only).
+- 2026-07-29: final artifacts written to
+  `tracks/qmc/results/20260729-chiral-graviton-final/`; report completed.

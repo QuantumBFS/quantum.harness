@@ -13,6 +13,7 @@ def test_l2_multiplet_has_five_degenerate_components():
     assert report.m_values == (2, 1, 0, -1, -2)
     assert report.energy_spread < 1e-10
     np.testing.assert_allclose(report.l2_expectations, [6.0] * 5, atol=1e-9)
+    assert report.rotation_equivariance_error < 1e-10
 
 
 def test_chirality_ratio_handles_dark_channel():

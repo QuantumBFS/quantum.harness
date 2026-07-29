@@ -42,3 +42,15 @@ def test_nqs_matches_ed_when_projected_sector_is_one_dimensional():
     graviton = model.estimate(model.initial_parameters, 2)
     np.testing.assert_allclose(ground.energy, reference.e_l0, atol=1e-10)
     np.testing.assert_allclose(graviton.energy, reference.e_l2, atol=1e-10)
+
+
+def test_direct_vmc_sampling_is_reproducible_and_has_error_bar():
+    system = SphereSystem.from_electron_count(3)
+    model = SharedProjectedMLP.build(system, "coulomb", hidden_width=6, seed=31)
+    first = model.sample_energy(model.initial_parameters, 2, n_samples=2000, seed=99)
+    second = model.sample_energy(model.initial_parameters, 2, n_samples=2000, seed=99)
+    assert first == second
+    assert first.standard_error >= 0.0
+    np.testing.assert_allclose(
+        first.mean, model.estimate(model.initial_parameters, 2).energy, atol=1e-12
+    )

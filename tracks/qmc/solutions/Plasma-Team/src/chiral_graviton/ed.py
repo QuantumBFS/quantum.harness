@@ -77,6 +77,7 @@ def solve_fixed_l(
     interaction: str = "coulomb",
     *,
     pair_table: PairTable | None = None,
+    projection_threshold: int = 2500,
 ) -> FixedLSpectrum:
     """Solve the lowest state of exact total angular momentum ``total_l``."""
 
@@ -91,15 +92,33 @@ def solve_fixed_l(
     if hermiticity > 1e-10:
         raise ValueError(f"CG003: Hamiltonian Hermiticity error {hermiticity:.3e}")
 
-    highest = highest_weight_basis(basis)
-    projected = highest.T @ (hamiltonian @ highest)
-    projected = 0.5 * (projected + projected.T)
-    energy, reduced_vector = _smallest_eigenpair(projected)
-    vector = highest @ reduced_vector
-    vector /= np.linalg.norm(vector)
-    residual = float(np.linalg.norm(hamiltonian @ vector - energy * vector))
     l2 = l2_operator(basis)
+    if basis.dimension <= projection_threshold:
+        highest = highest_weight_basis(basis)
+        projected = highest.T @ (hamiltonian @ highest)
+        projected = 0.5 * (projected + projected.T)
+        energy, reduced_vector = _smallest_eigenpair(projected)
+        vector = highest @ reduced_vector
+        vector /= np.linalg.norm(vector)
+    else:
+        # Dense null-space construction scales cubically and becomes the ED
+        # bottleneck near N=8. In the M=L sector no total angular momentum
+        # below L is present, so adding a positive L^2 penalty selects the
+        # desired irrep without changing its physical energy.
+        target_l2 = float(total_l * (total_l + 1))
+        identity = sparse.identity(basis.dimension, dtype=np.float64, format="csr")
+        penalty_strength = 10.0
+        effective = hamiltonian + penalty_strength * (l2 - target_l2 * identity)
+        _, vector = _smallest_eigenpair(effective)
+        vector /= np.linalg.norm(vector)
+        energy = float(vector @ (hamiltonian @ vector))
+        highest = np.empty((basis.dimension, 0), dtype=np.float64)
+    residual = float(np.linalg.norm(hamiltonian @ vector - energy * vector))
     l2_expectation = float(np.real(vector.conjugate() @ (l2 @ vector)))
+    if abs(l2_expectation - total_l * (total_l + 1)) > 1e-7:
+        raise ValueError(
+            f"CG004: fixed-L solver returned <L^2>={l2_expectation:.12g} for L={total_l}"
+        )
     return FixedLSpectrum(
         total_l=total_l,
         energy=energy,

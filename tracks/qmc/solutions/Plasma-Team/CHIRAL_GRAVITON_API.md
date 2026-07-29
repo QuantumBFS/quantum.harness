@@ -92,31 +92,38 @@ neutral_gap(system: SphereSystem, interaction: str = "coulomb") -> GapResult
 ### NQS
 
 ```python
-ProjectedNQS(
-    basis: FockBasis,
-    total_l: int,
-    shared_model,
-    projection_tolerance: float = 1e-10,
-)
+SharedProjectedMLP.build(
+    system: SphereSystem,
+    interaction: str = "coulomb",
+    hidden_width: int = 24,
+    seed: int = 1729,
+) -> SharedProjectedMLP
 ```
 
-Required methods:
+Core methods:
 
 ```python
-model.log_amplitude(states) -> complex_array
-model.energy(parameters, hamiltonian) -> Estimate
-model.l2(parameters) -> Estimate
-model.equivariance_error(parameters, rotations) -> float
+model.fit(max_iterations=400) -> NQSTrainingResult
+model.vector(parameters, total_l) -> numpy.ndarray
+model.estimate(parameters, total_l) -> NQSEstimate
+model.sample_energy(parameters, total_l, n_samples=50000, seed=1729) -> MonteCarloEstimate
+model.equivariance_error(parameters) -> float
 ```
+
+Allowed `total_l` values are `0` and `2`. The final vectors are exact
+highest-weight projections, not penalty-constrained approximations.
 
 ### Observables
 
 ```python
-metric_response(state0, state2, helicity: int) -> complex
-multiplet_report(highest_weight_state, hamiltonian) -> MultipletReport
+multiplet_report(highest_basis, highest_vector, total_l, pair_table) -> MultipletReport
+transition_weight(initial, final, operator) -> float
+chirality_ratio(bright_weight, dark_weight) -> float
 ```
 
-Allowed helicities: `-2`, `+2`.
+`multiplet_report` returns all `M` values, their energies and `<L^2>`, the energy
+spread, and a generic-axis rotation-equivariance error. The package does not yet
+construct the paper's helicity-resolved metric operator.
 
 ## Command-line API
 
@@ -129,7 +136,13 @@ python -m chiral_graviton ed --n 6 --interaction coulomb --output RESULT.json
 ### Train/solve projected NQS
 
 ```text
-python -m chiral_graviton nqs --n 6 --config configs/nqs-small.toml --output RESULT.json
+python -m chiral_graviton nqs --n 6 --samples 100000 --output RESULT.json
+```
+
+### Certify the spin-2 multiplet
+
+```text
+python -m chiral_graviton multiplet --n 7 --output MULTIPLET.json
 ```
 
 ### Validate a result
@@ -143,6 +156,9 @@ python -m chiral_graviton validate RESULT.json
 ```text
 python scripts/reproduce_small.py --n 4 5 6 7 8 --output-dir OUTPUT_DIR
 ```
+
+The complete acceptance suite is available as
+`powershell -File scripts/run_acceptance.ps1`.
 
 ## JSON result schema
 

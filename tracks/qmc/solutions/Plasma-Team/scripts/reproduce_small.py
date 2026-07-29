@@ -18,6 +18,7 @@ def main() -> int:
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--hidden-width", type=int, default=24)
     parser.add_argument("--max-iterations", type=int, default=400)
+    parser.add_argument("--samples", type=int, default=50_000)
     parser.add_argument("--seed", type=int, default=1729)
     args = parser.parse_args()
 
@@ -31,6 +32,12 @@ def main() -> int:
             system, "coulomb", hidden_width=args.hidden_width, seed=args.seed
         )
         nqs = model.fit(max_iterations=args.max_iterations)
+        sample_l0 = model.sample_energy(
+            nqs.parameters, 0, n_samples=args.samples, seed=args.seed
+        )
+        sample_l2 = model.sample_energy(
+            nqs.parameters, 2, n_samples=args.samples, seed=args.seed + 1
+        )
         row = {
             "n_electrons": n_electrons,
             "two_q": system.two_q,
@@ -44,6 +51,11 @@ def main() -> int:
             "nqs_l2": nqs.graviton.l2_expectation,
             "nqs_variance_l0": nqs.ground.variance,
             "nqs_variance_l2": nqs.graviton.variance,
+            "sample_count": args.samples,
+            "sampled_gap": sample_l2.mean - sample_l0.mean,
+            "sampled_gap_standard_error": (
+                sample_l0.standard_error**2 + sample_l2.standard_error**2
+            ) ** 0.5,
             "optimizer_success": nqs.success,
             "optimizer_iterations": nqs.iterations,
             "seed": args.seed,

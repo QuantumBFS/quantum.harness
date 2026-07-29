@@ -1,3 +1,4 @@
 # metric_direction: higher_is_better
 iteration	timestamp	commit	metric	delta	guard	guard-metric	status	description
 0	2026-07-28T17:57:57+08:00	56fe57f	0	0.0	n/a	-	baseline	initial state
+1	2026-07-29T15:06:58+08:00	9fa9466	8	8.0	full pytest	23 passed	keep	symmetry-resolved ED, exactly projected shared NQS, reproducible acceptance suite

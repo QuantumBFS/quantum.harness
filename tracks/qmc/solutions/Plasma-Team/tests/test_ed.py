@@ -32,3 +32,14 @@ def test_coulomb_graviton_gap_is_positive_and_spin_two():
     np.testing.assert_allclose(result.l2_excited, 6.0, atol=1e-9)
     assert result.residual_l0 < 1e-8
     assert result.residual_l2 < 1e-8
+
+
+def test_sparse_l2_penalty_matches_highest_weight_projection():
+    system = SphereSystem.from_electron_count(4)
+    reference = solve_fixed_l(system, total_l=2, interaction="coulomb")
+    penalized = solve_fixed_l(
+        system, total_l=2, interaction="coulomb", projection_threshold=0
+    )
+    np.testing.assert_allclose(penalized.energy, reference.energy, atol=1e-10)
+    np.testing.assert_allclose(penalized.l2_expectation, 6.0, atol=1e-9)
+    assert penalized.residual_norm < 1e-8

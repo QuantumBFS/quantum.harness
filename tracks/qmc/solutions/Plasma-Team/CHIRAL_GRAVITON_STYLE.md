@@ -47,16 +47,15 @@ Tests must fail with an explanation naming the violated physical invariant.
 
 ## 6. Monte Carlo reporting
 
-Every estimate records:
+Every estimate records raw sample count, seed, mean, standard error, and energy
+variance. The current enumerated sampler produces independent draws: burn-in is
+zero, integrated autocorrelation is one, and effective sample size equals raw
+sample count. If a future Markov-chain sampler is added, it must additionally
+record chain count, burn-in, autocorrelation, and effective sample size.
 
-- raw sample count and burn-in;
-- chain count and seed;
-- integrated autocorrelation estimate;
-- effective sample size;
-- mean, standard error, and energy variance;
-- optimizer settings and checkpoint hash.
-
-Do not call independent samples correlated. When estimating a shared-model gap, retain covariance or use paired/bootstrap resampling.
+Do not call correlated samples independent. Separate-sector samples use separate
+seeds and independent-error propagation; a future paired estimator must retain
+the covariance or use bootstrap resampling.
 
 ## 7. Configuration style
 
