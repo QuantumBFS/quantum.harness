@@ -1,6 +1,9 @@
 # Challenge extreme-size scan results
 
-This is a pre-submission run record.  It is intentionally not committed.
+This record describes the completed extreme-size scan. It was initially kept
+outside Git while verification was in progress and was subsequently included
+in verified commit `9048612`. See `CURRENT_STATUS.md` for the latest overall
+state.
 
 ## Reliability basis
 
@@ -146,4 +149,5 @@ extreme_size_crossings.png
 extreme_size_crossings.pdf
 ```
 
-No Git commit, push, or PR was performed for this scan.
+At the scan checkpoint no Git operation was performed. This verified record
+was subsequently included in commit `9048612`.

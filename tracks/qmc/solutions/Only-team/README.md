@@ -13,6 +13,9 @@
 | **Catalog issue** | Addresses #148 — released by Xiao-Yan Xu, Shanghai Jiao Tong University. |
 | **Track** | `qmc` — selected from the issue's `Method: Quantum Monte Carlo` field. |
 
+The latest verified result and active calculation status are maintained in
+`CURRENT_STATUS.md`.
+
 ## Method
 
 The calculation uses discrete-imaginary-time cluster Monte Carlo for the
@@ -26,8 +29,10 @@ with `J1=-1`, `J2=0`, periodic boundaries, and `BetaT=L/hTrfd`.  Each of 32
 MPI ranks runs a complete independent Markov chain with deterministic rank
 seeds.  Measurements use `Q=<m²>²/<m⁴>`.
 
-The challenge scan contains triangular sizes through `L=48`, honeycomb sizes
-through `L=32`, and requested time steps `0.013`, `0.016`, and `0.020`.
+The audited 177-cell data set contains triangular sizes through `L=48`,
+honeycomb sizes through `L=32`, and requested time steps `0.013`, `0.016`,
+and `0.020`. Active recovery scans add better-bracketed
+`0.010`, `0.013`, and `0.016` windows plus a focused `0.004` anchor.
 Finite-size fits fix `yt=1.587` and `yi=-0.815`; time-step fits use each
 cell's actual `Dltau²`, including the even-`LTrot` rounding.
 
@@ -38,16 +43,18 @@ validate both lattices and the measured Binder ratio; see `VALIDATION.md`.
 The post-run audit additionally verifies all 177 manifests, file hashes,
 32-bin sequences, rank seeds, finite observables, and per-bin Binder formulas.
 
-The completed scan is statistically compatible with `√5`, but it does not
-reach the requested fifth-decimal precision.  In particular, the largest
-triangular cells miss the declared Binder-error target, step-specific
+The audited 177-cell estimate is statistically compatible with `√5`, but it
+does not reach the requested fifth-decimal precision. In particular, the
+largest triangular cells miss the declared Binder-error target, step-specific
 triangular critical fields lie beyond the measured field windows, and the
-two-stage and joint time-step fits differ beyond the target tolerance.  These
+two-stage and joint time-step fits differ beyond the target tolerance. These
 limitations are reported rather than absorbed into a smaller error bar.
+Active recovery calculations are not included in the scientific claim until
+their files pass the same audit.
 
 ## Reproducible post-run analysis
 
-From the repository root, with the four completed raw result directories
+From the repository root, with the four audited 177-cell result directories
 available under `tracks/qmc/results/Only-team/`, run:
 
 ```bash

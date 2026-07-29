@@ -1,5 +1,11 @@
 # Challenge #148 Post-run Analysis Implementation Plan
 
+> **Execution status:** completed for the audited 177-cell data set. The
+> generated report is
+> `tracks/qmc/results/Only-team/challenge-analysis-20260729/report.html`.
+> Active recovery scans will reuse this workflow after collection and audit;
+> see `CURRENT_STATUS.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: use
 > `superpowers:executing-plans` to execute this plan task by task in the
 > current session.  Do not delegate work unless the user explicitly requests

@@ -1,5 +1,9 @@
 # Challenge #148 production-run design
 
+> **Record status:** approved design snapshot. The initial production scan is
+> complete; see `CURRENT_STATUS.md` for the latest result and active recovery
+> calculations.
+
 ## Objective
 
 Determine whether

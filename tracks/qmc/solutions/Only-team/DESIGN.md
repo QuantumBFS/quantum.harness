@@ -1,5 +1,8 @@
 # Minimal discrete-imaginary-time cluster Monte Carlo design
 
+> **Execution status:** implemented and verified. See `VALIDATION.md` for the
+> small-system checks and `CURRENT_STATUS.md` for the current challenge state.
+
 ## Objective and scope
 
 Implement a minimal, independent, verifiable Julia program for the

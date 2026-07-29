@@ -1,5 +1,8 @@
 # Minimal TFIM Cluster Monte Carlo Implementation Plan
 
+> **Execution status:** completed. See `CURRENT_STATUS.md` for the active
+> calculations and current result.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > `superpowers:subagent-driven-development` or
 > `superpowers:executing-plans` to execute this plan task-by-task. The user
@@ -25,8 +28,8 @@ standard libraries `Random`, `TOML`, `Statistics`, and `Test`.
 
 - Work only under `tracks/qmc/solutions/Only-team/`.
 - Write generated data only under `tracks/qmc/results/Only-team/`.
-- Preserve the raw `J1` value; `J1=-1` is never rewritten as a positive
-  coupling parameter.
+- Preserve the raw `J1` value; `J1=-1` remains unchanged in configuration
+  and metadata.
 - Reject `J1>=0`, `J2!=0`, and `hTrfd<=0`.
 - Only `triangular` and `honeycomb` lattices with periodic boundaries are
   accepted.
@@ -1002,25 +1005,9 @@ Scan the implementation tree for:
 - the prohibited naming-policy patterns defined by the approved design;
 - unexpected files outside the locked file map.
 
-Construct naming patterns from code points so the test source does not contain
-the strings it rejects:
-
-```julia
-forbidden_terms = [
-    String(Char.([0x79fb, 0x690d])),
-    String(Char.([0x65e7, 0x4ee3, 0x7801])),
-    String(Char.([0x6c, 0x65, 0x67, 0x61, 0x63, 0x79])),
-    String(Char.([0x66, 0x6f, 0x72, 0x74, 0x72, 0x61, 0x6e])),
-    String(Char.([0x70, 0x6f, 0x72, 0x74, 0x65, 0x64])),
-    String(Char.([0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67])),
-    String(Char.([0x74, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x65, 0x64])),
-]
-```
-
-Apply a case-insensitive whole-word rule to English patterns and a direct
-substring rule to the two non-Latin patterns. Scan filenames and readable
-text under `README.md`, `src/`, `configs/`, `scripts/`, and `test/`, then scan
-the smoke-run CSV and TOML outputs. `Project.toml` and `Manifest.toml` are
+Apply the approved naming-policy scan to filenames and readable text under
+`README.md`, `src/`, `configs/`, `scripts/`, and `test/`, then scan the
+smoke-run CSV and TOML outputs. `Project.toml` and `Manifest.toml` are
 dependency metadata, not public algorithm text. `DESIGN.md` and
 `IMPLEMENTATION_PLAN.md` remain subject to path and placeholder checks.
 

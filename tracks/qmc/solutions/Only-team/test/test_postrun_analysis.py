@@ -823,5 +823,113 @@ class ChallengeRunRecordTests(unittest.TestCase):
         json.dumps(report, allow_nan=False)
 
 
+class PrecisionRecoverySpecificationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.generator = importlib.import_module(
+            "generate_precision_recovery_specs"
+        )
+
+    def test_exact_approved_cells_are_unique_and_longest_first(self) -> None:
+        expected_counts = {"triangular": 45, "honeycomb": 21}
+        expected_sizes = {
+            "triangular": {32, 40, 48},
+            "honeycomb": {24, 28, 32},
+        }
+        expected_steps = {
+            "triangular": {0.010, 0.013, 0.016},
+            "honeycomb": {0.010, 0.016},
+        }
+        for lattice in ("triangular", "honeycomb"):
+            spec = self.generator.build_spec(lattice)
+            cells = spec["cells"]
+            self.assertEqual(len(cells), expected_counts[lattice])
+            keys = {
+                (
+                    cell["params"]["L"],
+                    cell["params"]["hTrfd"],
+                    cell["params"]["FixedDltau"],
+                )
+                for cell in cells
+            }
+            self.assertEqual(len(keys), expected_counts[lattice])
+            self.assertEqual(
+                {key[0] for key in keys},
+                expected_sizes[lattice],
+            )
+            self.assertEqual(
+                {key[2] for key in keys},
+                expected_steps[lattice],
+            )
+            seeds = [cell["params"]["seed"] for cell in cells]
+            self.assertEqual(len(seeds), len(set(seeds)))
+            costs = [
+                self.generator.cost_proxy(cell["params"])
+                for cell in cells
+            ]
+            self.assertEqual(costs, sorted(costs, reverse=True))
+
+            bundles = spec["execution"]["bundles"]
+            expected_bundle_count = 12 if lattice == "triangular" else 8
+            self.assertEqual(len(bundles), expected_bundle_count)
+            covered = [
+                index
+                for bundle in bundles
+                for index in bundle["cell_indices"]
+            ]
+            self.assertEqual(
+                sorted(covered),
+                list(range(1, expected_counts[lattice] + 1)),
+            )
+            self.assertEqual(len(covered), len(set(covered)))
+            loads = [bundle["cost_proxy_sum"] for bundle in bundles]
+            self.assertLessEqual(max(loads) / min(loads), 1.25)
+
+    def test_array_scripts_request_32_ranks_and_six_hours(self) -> None:
+        for lattice, count in (("triangular", 45), ("honeycomb", 21)):
+            script = (
+                PROJECT_ROOT
+                / "scripts"
+                / f"scnet-precision-recovery-{lattice}.sbatch"
+            )
+            source = script.read_text(encoding="utf-8")
+            self.assertIn("#SBATCH --partition=xhacnormalb", source)
+            self.assertIn("#SBATCH --nodes=1", source)
+            self.assertIn("#SBATCH --ntasks=32", source)
+            self.assertIn("#SBATCH --mem=64G", source)
+            self.assertIn("#SBATCH --time=06:00:00", source)
+            self.assertIn(f"#SBATCH --array=1-{count}%8", source)
+            self.assertIn(
+                f"challenge-precision-recovery-{lattice}-20260729/"
+                "run_spec.json",
+                source,
+            )
+
+    def test_bundle_scripts_fit_the_group_submission_limit(self) -> None:
+        runner = (
+            PROJECT_ROOT / "scripts" / "run_precision_recovery_bundle.sh"
+        )
+        runner_source = runner.read_text(encoding="utf-8")
+        self.assertIn("execution", runner_source)
+        self.assertIn("cell_indices", runner_source)
+        self.assertIn("run_challenge_scan_cell.sh", runner_source)
+        for lattice, count in (("triangular", 12), ("honeycomb", 8)):
+            script = (
+                PROJECT_ROOT
+                / "scripts"
+                / f"scnet-precision-recovery-{lattice}-bundle.sbatch"
+            )
+            source = script.read_text(encoding="utf-8")
+            self.assertIn("#SBATCH --partition=xhacnormalb", source)
+            self.assertIn("#SBATCH --ntasks=32", source)
+            self.assertIn("#SBATCH --mem=64G", source)
+            self.assertIn("#SBATCH --time=10:00:00", source)
+            self.assertIn(f"#SBATCH --array=1-{count}%{count}", source)
+            self.assertIn(
+                "run_precision_recovery_bundle.sh",
+                source,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -2,6 +2,11 @@
 
 Submission date: 2026-07-29
 
+This is the submission-time snapshot. All 149 submitted cells later
+completed; together with 28 extreme-size cells they form the audited
+177-cell data set. See `CURRENT_STATUS.md` for the latest result and active
+recovery calculations.
+
 ## Physical and statistical setup
 
 ```text
@@ -73,7 +78,7 @@ binder_Q_error = 0.0002827249083401224
 wall time = 164.60963582992554 s
 ```
 
-No Git commit, push, or pull request was created.
+At the submission checkpoint, no Git operation was performed.
 
 ## Handoff for a later commit
 
@@ -99,3 +104,6 @@ The production-specific additions to retain are the explicit scan-cell
 interface, scan-spec generator, normal and bundled Slurm runners, their
 tests, and this submission record.  At the time of this handoff the Git
 staging area is empty.
+
+The verified workflow and this record were subsequently included in commit
+`9048612`.

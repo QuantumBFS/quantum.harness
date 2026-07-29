@@ -1,6 +1,8 @@
 # Challenge extreme-size scan implementation plan
 
-> **Execution:** inline in the current session. No Git commit, push, or PR.
+> **Record status:** completed planning snapshot. The verified execution
+> result is in `EXTREME_SCAN_RESULTS.md`; the latest overall state is in
+> `CURRENT_STATUS.md`.
 
 **Goal:** Submit the seven-field scans at the smallest and largest approved
 sizes for both supported lattices, and finish every cell well before the
@@ -30,7 +32,7 @@ SCNet `xhacnormalb`.
 - Each array has concurrency limit eight.
 - Ship only `tracks/qmc/solutions/Only-team/` and the two ignored run
   directories.  Do not ship `.knowledge/`.
-- Do not commit, push, or create a PR.
+- At this checkpoint, do not commit, push, or create a PR.
 
 ---
 

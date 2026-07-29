@@ -92,3 +92,43 @@ queueing, collection, and re-analysis inside the 20-hour deadline.
 This scan is designed to make the continuum extrapolation better controlled.
 It cannot guarantee the fifth-decimal target with the available measurement
 budget.
+
+## Submission status
+
+Status time: 2026-07-30 00:40 CST
+
+The approved 66 cells are running as 12 triangular and 8 honeycomb sequential
+bundles, with one 32-core allocation per bundle:
+
+| Lattice | Slurm array | Allocations | State |
+|---|---:|---:|---|
+| triangular | 23012200 | 12 × 32 cores | all running |
+| honeycomb | 23012219 | 8 × 32 cores | all running |
+
+At the status time, the active cells had completed 9–29 of 32 bins with no
+scheduler failure. The estimated last bundle completion is approximately
+06:20 CST.
+
+An additional `Δτ=0.004` anchor contains five fields at each of three sizes:
+
+| Lattice | Sizes | Fields |
+|---|---|---|
+| triangular | 32, 40, 48 | 4.7677, 4.7682, 4.7687, 4.7692, 4.7697 |
+| honeycomb | 24, 28, 32 | 2.1317, 2.1322, 2.1327, 2.1332, 2.1337 |
+
+The 30 cells use 20 isolated 32-core lanes distributed across Slurm jobs
+`23013840`–`23013846` and `23013848`: four 96-core allocations with three
+lanes each and four 64-core allocations with two lanes each. The total
+request is 640 cores. These jobs were pending with `AssocGrpCpuLimit` while
+the 66-cell scan occupied the account allowance and are designed to start as
+those allocations finish. Their conservative completion window is
+16:00–17:30 CST.
+
+Pending jobs `23013562` and `23013563` were cancelled before execution and
+superseded by the balanced 20-lane layout. They consumed no measured runtime
+and produced no cell manifests.
+
+Generated run specifications, logs, manifests, data, and figures remain in
+`tracks/qmc/results/Only-team/` and are not added to Git. Scheduler states
+will not be treated as scientific results; every completed cell must pass the
+post-run audit before entering a fit.
