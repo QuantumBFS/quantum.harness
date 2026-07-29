@@ -987,3 +987,19 @@ inspect single-pass coefficient-to-solver construction and a fail-closed
 post-solve residual/certificate export. A feasible point will be described
 only as finite-relaxation feasibility; any solver-reported infeasibility will
 remain a candidate until independently replayed.
+
+## 2026-07-29 — bound the coefficient-fingerprint memory before the next build
+
+The `L=2,d=2` coefficient inventory contains 4,446,492 PSD triangle entries.
+Commit `87be317` retained one diagnostic `String` per entry and then copied the
+entire framed stream into an `IOBuffer` to compute SHA-256. This data is used
+only for provenance and is not solver input.
+
+The changed route preserves the exact record order and byte framing but
+computes row payloads in bounded batches, feeds them incrementally to SHA-256,
+and releases each batch. Moment discovery remains exact and parallel. This is
+not a repeated solve signature and does not alter either running baseline job.
+The source parses under Julia 1.11, and a direct old-vs-streaming check passes
+for mixed UTF-8/string/integer records. Next gate: run the existing L=1
+coefficient-hash regression in the configured remote Julia environment; only
+then use the route for a larger build.

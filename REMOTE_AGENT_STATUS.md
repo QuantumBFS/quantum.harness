@@ -22,5 +22,11 @@ Updated: 2026-07-29T14:48:39Z
 - Immediate changed action: audit the single-pass construction opportunity and
   the missing post-solve numerical residual export while both immutable
   baseline jobs continue.
+- Source-prepared improvement: the exact isotypic coefficient inventory now
+  fingerprints bounded batches of row payloads through an incremental SHA-256
+  context. It preserves the byte framing and coefficient hash while removing
+  the all-entries `Vector{String}` and whole-stream `IOBuffer`. Julia syntax and
+  a direct old-vs-streaming UTF-8 framing check pass locally; the full L=1 hash
+  regression still requires the configured remote Julia environment.
 
 No user input or new credential is currently required.

@@ -33,6 +33,10 @@ export SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
 const SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA =
     "shastry-sutherland-full-state-spin-isotypic-v1"
 const TRIVIAL_CHARACTER = V4Character(false, false)
+const CoefficientRowPayload = NamedTuple{
+    (:moments, :bytes),
+    Tuple{Set{MomentKey},Vector{UInt8}},
+}
 
 struct ShastrySpinIsotypicRow
     source_indices::Vector{Int}
@@ -503,12 +507,56 @@ function shastry_spin_isotypic_block_entry(
 end
 
 function fingerprint_records(schema::String, records)
-    io = IOBuffer()
-    for record in (schema, records...)
-        serialized = string(record)
-        write(io, string(ncodeunits(serialized)), ":", serialized)
+    context = SHA2_256_CTX()
+    update_framed!(context, schema)
+    for record in records
+        update_framed!(context, record)
     end
-    return bytes2hex(sha256(take!(io)))
+    return bytes2hex(digest!(context))
+end
+
+function write_framed_record!(io::IO, value)
+    serialized = string(value)
+    write(io, string(ncodeunits(serialized)), ":", serialized)
+    return io
+end
+
+function update_framed!(context::SHA2_256_CTX, value)
+    io = IOBuffer()
+    write_framed_record!(io, value)
+    update!(context, take!(io))
+    return context
+end
+
+function coefficient_row_payload(
+    assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
+    block::ShastrySpinIsotypicPSDBlock,
+    row::Int,
+)
+    moments = Set{MomentKey}()
+    payload = IOBuffer()
+    for column in row:length(block.rows)
+        polynomial = shastry_spin_isotypic_block_entry(
+            assembly,
+            block,
+            block.rows[row],
+            block.rows[column],
+        )
+        union!(moments, keys(polynomial.terms))
+        write_framed_record!(
+            payload,
+            string(
+                block_label(block),
+                "[",
+                row,
+                ",",
+                column,
+                "]=",
+                polynomial_sha256(polynomial),
+            ),
+        )
+    end
+    return (moments=moments, bytes=take!(payload))
 end
 
 function block_label(block::ShastrySpinIsotypicPSDBlock)
@@ -583,56 +631,34 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     )
     used_moments = Set{MomentKey}([moment_key()])
     all_blocks = [positive_blocks; gap_blocks]
-    block_row_records = [
-        [String[] for _ in eachindex(block.rows)]
-        for block in all_blocks
-    ]
     work = Tuple{Int,Int}[
         (block_index, row)
         for (block_index, block) in enumerate(all_blocks)
         for row in eachindex(block.rows)
     ]
-    thread_moments = [
-        Set{MomentKey}()
-        for _ in 1:Threads.nthreads()
-    ]
-    Threads.@threads :dynamic for work_index in eachindex(work)
-        block_index, row = work[work_index]
-        block = all_blocks[block_index]
-        local_records = block_row_records[block_index][row]
-        sizehint!(local_records, length(block.rows) - row + 1)
-        for column in row:length(block.rows)
-            polynomial = shastry_spin_isotypic_block_entry(
+    coefficient_context = SHA2_256_CTX()
+    update_framed!(
+        coefficient_context,
+        "shastry-full-state-spin-isotypic-coefficients-v1",
+    )
+    batch_size = max(64, 4 * Threads.nthreads())
+    for batch_start in firstindex(work):batch_size:lastindex(work)
+        batch_stop = min(batch_start + batch_size - 1, lastindex(work))
+        payloads = Vector{CoefficientRowPayload}(
+            undef,
+            batch_stop - batch_start + 1,
+        )
+        Threads.@threads :dynamic for offset in eachindex(payloads)
+            block_index, row = work[batch_start + offset - 1]
+            payloads[offset] = coefficient_row_payload(
                 provisional,
-                block,
-                block.rows[row],
-                block.rows[column],
-            )
-            union!(
-                thread_moments[Threads.threadid()],
-                keys(polynomial.terms),
-            )
-            push!(
-                local_records,
-                string(
-                    block_label(block),
-                    "[",
-                    row,
-                    ",",
-                    column,
-                    "]=",
-                    polynomial_sha256(polynomial),
-                ),
+                all_blocks[block_index],
+                row,
             )
         end
-    end
-    coefficient_records = String[]
-    for local_moments in thread_moments
-        union!(used_moments, local_moments)
-    end
-    for block_index in eachindex(all_blocks)
-        for row_records in block_row_records[block_index]
-            append!(coefficient_records, row_records)
+        for payload in payloads
+            union!(used_moments, payload.moments)
+            update!(coefficient_context, payload.bytes)
         end
     end
     for equality in equalities
@@ -644,10 +670,7 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     )
     first(moments) == moment_key() ||
         error("identity moment is not first after spin-isotypic reduction")
-    coefficient_sha256 = fingerprint_records(
-        "shastry-full-state-spin-isotypic-coefficients-v1",
-        coefficient_records,
-    )
+    coefficient_sha256 = bytes2hex(digest!(coefficient_context))
     assembly_sha256 = fingerprint_records(
         SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
         [
