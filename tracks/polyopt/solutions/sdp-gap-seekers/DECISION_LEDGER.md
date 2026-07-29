@@ -1015,3 +1015,20 @@ xH5 baseline job `23011251` started at 2026-07-29T14:49:17Z from its original
 commit `2de1678` on 64 CPUs / 240 GB and entered the same exact coefficient
 pass. SCNet job `118171391` remains on commit `87be317`. Preserve both as
 independent resource/solver comparisons.
+
+## 2026-07-29 — make the direct solve fail closed on scientific status
+
+The baseline `--mode solve` path records Mosek statuses but does not export the
+primal moment vector or independently reconstruct its PSD blocks. Therefore a
+completed baseline is operational evidence, not yet the residual-audited
+finite-relaxation decision required by this track.
+
+The changed path exports every moment as an exact IEEE-754 bit string, audits
+normalization and all affine equalities, reconstructs all named real PSD cones,
+computes their minimum eigenvalues and scale-normalized violations, and emits
+one of three classifications: `feasible_residual_checked_float`,
+`infeasibility_candidate_requires_independent_ray_replay`, or `unknown`.
+Timeout and generic non-optimal statuses remain unknown. A standalone 2x2
+Mosek regression covers shaped-cone reconstruction and all three classifier
+branches. The next gate is that test under Slurm in the configured SCNet Julia
+environment; no L=2 rerun is authorized merely to test plumbing.

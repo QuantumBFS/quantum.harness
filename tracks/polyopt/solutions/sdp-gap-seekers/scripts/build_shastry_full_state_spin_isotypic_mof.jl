@@ -81,6 +81,222 @@ function verify_reloaded_spin_isotypic_model(
     return true
 end
 
+function affine_residual(reference::JuMP.ConstraintRef)
+    object = JuMP.constraint_object(reference)
+    object.set isa JuMP.MOI.EqualTo{Float64} ||
+        error("affine residual requested for a non-equality constraint")
+    function_value = Float64(JuMP.value(reference))
+    target = Float64(object.set.value)
+    residual = abs(function_value - target)
+    expression = JuMP.jump_function(object)
+    scale = max(1.0, abs(target))
+    if expression isa JuMP.GenericAffExpr
+        term_magnitude = abs(Float64(expression.constant))
+        for (variable, coefficient) in expression.terms
+            term_magnitude +=
+                abs(Float64(coefficient) * Float64(JuMP.value(variable)))
+        end
+        scale = max(scale, term_magnitude)
+    else
+        scale = max(scale, abs(function_value))
+    end
+    return Dict(
+        "value" => function_value,
+        "target" => target,
+        "absolute_residual" => residual,
+        "scale" => scale,
+        "normalized_residual" => residual / scale,
+    )
+end
+
+function reconstruct_symmetric_constraint(
+    reference::JuMP.ConstraintRef,
+    dimension::Int,
+)
+    raw_value = JuMP.value(reference)
+    if raw_value isa Symmetric || raw_value isa AbstractMatrix
+        matrix = Matrix{Float64}(raw_value)
+        size(matrix) == (dimension, dimension) ||
+            error("matrix-shaped cone value has the wrong size")
+        return matrix
+    end
+    raw_value isa AbstractVector ||
+        error("unsupported real PSD cone value shape $(typeof(raw_value))")
+    expected_length = dimension * (dimension + 1) ÷ 2
+    length(raw_value) == expected_length ||
+        error(
+            "packed real PSD value has length $(length(raw_value)); " *
+            "expected $expected_length",
+        )
+    matrix = zeros(Float64, dimension, dimension)
+    index = 0
+    for column in 1:dimension
+        for row in 1:column
+            index += 1
+            value = Float64(raw_value[index])
+            matrix[row, column] = value
+            matrix[column, row] = value
+        end
+    end
+    return matrix
+end
+
+function spin_isotypic_solution_diagnostics(
+    jump_model::ShastryFullStateSpinIsotypicJuMPPrimalModel,
+    audit_tolerance::Float64,
+)
+    normalization = affine_residual(jump_model.normalization_constraint)
+    equalities = Dict{String,Any}()
+    maximum_absolute_equality_residual = 0.0
+    maximum_normalized_equality_residual = 0.0
+    for reference in jump_model.equality_constraints
+        diagnostic = affine_residual(reference)
+        name = JuMP.name(reference)
+        equalities[name] = diagnostic
+        maximum_absolute_equality_residual = max(
+            maximum_absolute_equality_residual,
+            diagnostic["absolute_residual"],
+        )
+        maximum_normalized_equality_residual = max(
+            maximum_normalized_equality_residual,
+            diagnostic["normalized_residual"],
+        )
+    end
+
+    blocks = Dict{String,Any}()
+    worst_psd_violation = 0.0
+    worst_normalized_psd_violation = 0.0
+    for reference in jump_model.psd_constraints
+        object = JuMP.constraint_object(reference)
+        dimension = object.set.side_dimension
+        reconstructed = reconstruct_symmetric_constraint(
+            reference,
+            dimension,
+        )
+        symmetry_residual = maximum(
+            abs,
+            reconstructed - transpose(reconstructed),
+        )
+        eigenvalues = eigvals(Symmetric(reconstructed))
+        minimum_eigenvalue = Float64(minimum(eigenvalues))
+        maximum_absolute_eigenvalue = Float64(maximum(abs, eigenvalues))
+        spectral_scale = max(1.0, maximum_absolute_eigenvalue)
+        violation = max(0.0, -minimum_eigenvalue)
+        normalized_violation = violation / spectral_scale
+        worst_psd_violation = max(worst_psd_violation, violation)
+        worst_normalized_psd_violation = max(
+            worst_normalized_psd_violation,
+            normalized_violation,
+        )
+        blocks[JuMP.name(reference)] = Dict(
+            "dimension" => dimension,
+            "minimum_eigenvalue" => minimum_eigenvalue,
+            "maximum_absolute_eigenvalue" => maximum_absolute_eigenvalue,
+            "symmetry_residual" => Float64(symmetry_residual),
+            "psd_violation" => violation,
+            "spectral_scale" => spectral_scale,
+            "normalized_psd_violation" => normalized_violation,
+        )
+    end
+    passed =
+        normalization["normalized_residual"] <= audit_tolerance &&
+        maximum_normalized_equality_residual <= audit_tolerance &&
+        worst_normalized_psd_violation <= audit_tolerance &&
+        all(
+            block["symmetry_residual"] <= audit_tolerance
+            for block in values(blocks)
+        )
+    return Dict(
+        "available" => true,
+        "passed" => passed,
+        "audit_tolerance" => audit_tolerance,
+        "normalization" => normalization,
+        "affine_equalities" => equalities,
+        "maximum_absolute_affine_equality_residual" =>
+            maximum_absolute_equality_residual,
+        "maximum_normalized_affine_equality_residual" =>
+            maximum_normalized_equality_residual,
+        "psd_blocks" => blocks,
+        "worst_psd_violation" => worst_psd_violation,
+        "worst_normalized_psd_violation" =>
+            worst_normalized_psd_violation,
+    )
+end
+
+function classify_spin_isotypic_result(
+    termination,
+    primal,
+    dual,
+    diagnostics,
+)
+    feasible_termination = termination in (
+        JuMP.MOI.OPTIMAL,
+        JuMP.MOI.LOCALLY_SOLVED,
+        JuMP.MOI.ALMOST_OPTIMAL,
+    )
+    feasible_primal = primal in (
+        JuMP.MOI.FEASIBLE_POINT,
+        JuMP.MOI.NEARLY_FEASIBLE_POINT,
+    )
+    if feasible_termination && feasible_primal
+        return diagnostics["passed"] ?
+               "feasible_residual_checked_float" :
+               "feasible_status_failed_residual_audit"
+    end
+    if termination in (
+        JuMP.MOI.INFEASIBLE,
+        JuMP.MOI.ALMOST_INFEASIBLE,
+        JuMP.MOI.INFEASIBLE_OR_UNBOUNDED,
+    ) || primal in (
+        JuMP.MOI.INFEASIBILITY_CERTIFICATE,
+        JuMP.MOI.NEARLY_INFEASIBILITY_CERTIFICATE,
+    ) || dual in (
+        JuMP.MOI.INFEASIBILITY_CERTIFICATE,
+        JuMP.MOI.NEARLY_INFEASIBILITY_CERTIFICATE,
+    )
+        return "infeasibility_candidate_requires_independent_ray_replay"
+    end
+    return "unknown"
+end
+
+function write_spin_isotypic_primal_values(
+    path::AbstractString,
+    jump_model::ShastryFullStateSpinIsotypicJuMPPrimalModel,
+    assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
+)
+    length(jump_model.moment_variables) == length(assembly.moments) ||
+        error("primal variable and exact moment inventories differ")
+    values = JuMP.value.(jump_model.moment_variables)
+    all(isfinite, values) ||
+        error("solver returned a nonfinite primal variable")
+    temporary = path * ".tmp"
+    ispath(path) && error("refusing existing primal-value artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing primal-value temporary artifact: $temporary")
+    open(temporary, "w") do io
+        println(
+            io,
+            "# schema=shastry-full-state-spin-isotypic-primal-values-v1",
+        )
+        println(io, "# assembly_sha256=", assembly.assembly_sha256)
+        println(io, "index\tmoment_canonical\tfloat64_bits")
+        for (index, (key, value)) in
+            enumerate(zip(assembly.moments, values))
+            println(io, index, '\t', key.canonical, '\t', bitstring(value))
+        end
+    end
+    mv(temporary, path)
+    return Dict(
+        "schema_version" =>
+            "shastry-full-state-spin-isotypic-primal-values-v1",
+        "filename" => basename(path),
+        "variable_count" => length(values),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "encoding" => "index-tab-canonical-moment-tab-ieee754-binary64-bits",
+    )
+end
+
 function spin_isotypic_main(arguments::Vector{String}=ARGS)
     options = parse_args(arguments)
     isnothing(options) && return
@@ -309,11 +525,14 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         )
         solve_measurement = @timed JuMP.optimize!(jump_model.model)
         metadata["stages"]["solve"] = measurement_dict(solve_measurement)
+        termination = JuMP.termination_status(jump_model.model)
+        primal = JuMP.primal_status(jump_model.model)
+        dual = JuMP.dual_status(jump_model.model)
         metadata["solve"] = Dict(
             "termination_status" =>
-                string(JuMP.termination_status(jump_model.model)),
-            "primal_status" => string(JuMP.primal_status(jump_model.model)),
-            "dual_status" => string(JuMP.dual_status(jump_model.model)),
+                string(termination),
+            "primal_status" => string(primal),
+            "dual_status" => string(dual),
             "raw_status" => try
                 JuMP.raw_status(jump_model.model)
             catch exception
@@ -330,6 +549,35 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             "threads" => threads,
             "time_limit_seconds" => time_limit_seconds,
         )
+        audit_tolerance = parse(
+            Float64,
+            get(ENV, "SS_AUDIT_TOLERANCE", "1e-7"),
+        )
+        diagnostics = if JuMP.has_values(jump_model.model)
+            progress("export primal values and audit every PSD block")
+            metadata["primal_values"] = write_spin_isotypic_primal_values(
+                joinpath(options.output, "primal-values.tsv"),
+                jump_model,
+                isotypic,
+            )
+            spin_isotypic_solution_diagnostics(
+                jump_model,
+                audit_tolerance,
+            )
+        else
+            Dict(
+                "available" => false,
+                "reason" => "solver_returned_no_primal_values",
+            )
+        end
+        metadata["solution_diagnostics"] = diagnostics
+        metadata["solve"]["classification"] =
+            classify_spin_isotypic_result(
+                termination,
+                primal,
+                dual,
+                diagnostics,
+            )
         write_checkpoint(checkpoint_path, metadata)
     end
 

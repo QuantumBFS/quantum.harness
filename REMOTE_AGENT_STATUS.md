@@ -33,5 +33,11 @@ Updated: 2026-07-29T14:48:39Z
 - xH5 baseline job `23011251` entered `RUNNING` at 2026-07-29T14:49:17Z from
   its immutable older commit `2de1678`; it is in the same first coefficient
   pass as SCNet. Both baseline jobs remain untouched.
+- Source-prepared audit change: direct solves now export every primal moment by
+  exact Float64 bits, reconstruct and diagonalize every named real PSD block,
+  measure normalization/equality/PSD residuals, and classify results as
+  residual-checked feasible, infeasibility-candidate-needing-ray-replay, or
+  unknown. A standalone synthetic Mosek regression is included; its remote
+  Slurm run is the next software gate.
 
 No user input or new credential is currently required.
