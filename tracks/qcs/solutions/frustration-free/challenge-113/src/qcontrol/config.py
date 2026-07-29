@@ -19,7 +19,10 @@ def _require_nonnegative_integer(name: str, value: object) -> None:
 def _require_finite_number(name: str, value: object, *, positive: bool) -> None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} must be a finite number")
-    numeric_value = float(value)
+    try:
+        numeric_value = float(value)
+    except OverflowError:
+        raise ValueError(f"{name} must be a finite number") from None
     if not math.isfinite(numeric_value) or (numeric_value <= 0 if positive else numeric_value < 0):
         qualifier = "positive" if positive else "nonnegative"
         raise ValueError(f"{name} must be finite and {qualifier}")
@@ -51,6 +54,8 @@ class DeviceConfig:
 
     def __post_init__(self) -> None:
         _require_finite_number("gap", self.gap, positive=False)
+        if self.gap == 0:
+            object.__setattr__(self, "gap", 0.0)
         if self.shots is not None:
             _require_positive_integer("shots", self.shots)
         _require_nonnegative_integer("perturbation_seed", self.perturbation_seed)

@@ -1,4 +1,6 @@
-from dataclasses import replace
+import math
+from collections.abc import Callable
+from dataclasses import FrozenInstanceError, replace
 
 import pytest
 
@@ -19,6 +21,190 @@ def test_config_id_is_stable_and_semantic() -> None:
     config = valid_config()
     assert config.content_id() == config.content_id()
     assert replace(config, trial_seed=12).content_id() != config.content_id()
+    assert len(config.content_id()) == 20
+    assert int(config.content_id(), 16) >= 0
+
+
+def test_negative_zero_gap_is_normalized_for_semantic_ids() -> None:
+    config = valid_config()
+    negative_zero_device = DeviceConfig(
+        gap=-0.0,
+        shots=config.device.shots,
+        perturbation_seed=config.device.perturbation_seed,
+    )
+    positive_zero_device = replace(negative_zero_device, gap=0.0)
+    normalized = replace(config, device=negative_zero_device)
+    positive_zero = replace(config, device=positive_zero_device)
+
+    assert math.copysign(1.0, normalized.device.gap) == 1.0
+    assert normalized.canonical_dict() == positive_zero.canonical_dict()
+    assert normalized.content_id() == positive_zero.content_id()
+
+
+def test_configuration_instances_are_frozen() -> None:
+    instances = [
+        valid_config(),
+        valid_config().system,
+        valid_config().device,
+        valid_config().search,
+    ]
+    for instance in instances:
+        with pytest.raises(FrozenInstanceError):
+            setattr(instance, next(iter(instance.__dataclass_fields__)), "changed")
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: SystemConfig("one_qubit", True, 1.0),
+        lambda: DeviceConfig(shots=True),
+        lambda: DeviceConfig(perturbation_seed=True),
+        lambda: SearchConfig("full", True, 200),
+        lambda: SearchConfig("full", 1, True),
+        lambda: replace(valid_config(), trial_seed=True),
+    ],
+)
+def test_boolean_integer_fields_are_rejected(factory: Callable[[], object]) -> None:
+    with pytest.raises(ValueError):
+        factory()
+
+
+@pytest.mark.parametrize("name", ["", "three_qubit"])
+def test_invalid_system_names_are_rejected(name: str) -> None:
+    with pytest.raises(ValueError):
+        SystemConfig(name, 1, 1.0)
+
+
+@pytest.mark.parametrize("method", ["", "gradient"])
+def test_invalid_search_methods_are_rejected(method: str) -> None:
+    with pytest.raises(ValueError):
+        SearchConfig(method, 1, 200)
+
+
+@pytest.mark.parametrize("method", ["full", "model_hessian", "random", "oracle"])
+def test_supported_search_methods_are_accepted(method: str) -> None:
+    assert SearchConfig(method, 1, 200).method == method
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+@pytest.mark.parametrize("field", ["amplitude_bound", "gap"])
+def test_nonfinite_numeric_values_are_rejected(field: str, value: float) -> None:
+    with pytest.raises(ValueError):
+        if field == "amplitude_bound":
+            SystemConfig("one_qubit", 1, value)
+        else:
+            DeviceConfig(gap=value)
+
+
+@pytest.mark.parametrize("field", ["amplitude_bound", "gap"])
+def test_huge_integers_raise_value_error(field: str) -> None:
+    huge = 10**10_000
+    with pytest.raises(ValueError):
+        if field == "amplitude_bound":
+            SystemConfig("one_qubit", 1, huge)
+        else:
+            DeviceConfig(gap=huge)
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: SystemConfig("one_qubit", 0, 1.0),
+        lambda: SystemConfig("one_qubit", -1, 1.0),
+        lambda: SystemConfig("one_qubit", 1, 0.0),
+        lambda: SystemConfig("one_qubit", 1, -1.0),
+        lambda: SearchConfig("full", 0, 200),
+        lambda: SearchConfig("full", -1, 200),
+        lambda: SearchConfig("full", 1, 0),
+        lambda: SearchConfig("full", 1, -1),
+    ],
+)
+def test_nonpositive_required_values_are_rejected(factory: Callable[[], object]) -> None:
+    with pytest.raises(ValueError):
+        factory()
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: DeviceConfig(shots=0),
+        lambda: DeviceConfig(perturbation_seed=-1),
+        lambda: replace(valid_config(), trial_seed=-1),
+    ],
+)
+def test_invalid_shots_and_seeds_are_rejected(factory: Callable[[], object]) -> None:
+    with pytest.raises(ValueError):
+        factory()
+
+
+def test_dimension_cannot_exceed_system_parameter_count() -> None:
+    with pytest.raises(ValueError, match="parameter count"):
+        ExperimentConfig(
+            run_kind="development",
+            system=SystemConfig("one_qubit", 1, 1.0),
+            device=DeviceConfig(),
+            search=SearchConfig("full", 3, 200),
+            trial_seed=0,
+        )
+
+
+@pytest.mark.parametrize(
+    ("system", "dimension"),
+    [
+        (SystemConfig("one_qubit", 1, 1.0), 2),
+        (SystemConfig("two_qubit", 1, 1.0), 4),
+    ],
+)
+def test_dimension_can_equal_system_parameter_count(
+    system: SystemConfig,
+    dimension: int,
+) -> None:
+    config = ExperimentConfig(
+        run_kind="development",
+        system=system,
+        device=DeviceConfig(),
+        search=SearchConfig("full", dimension, 200),
+        trial_seed=0,
+    )
+    assert config.search.dimension == system.parameter_count
+
+
+def test_exact_development_and_production_budgets_are_accepted() -> None:
+    development = valid_config()
+    production = replace(
+        development,
+        run_kind="production",
+        search=replace(development.search, budget=2000),
+    )
+
+    assert development.search.budget == 200
+    assert production.search.budget == 2000
+
+
+def test_invalid_run_kind_is_rejected() -> None:
+    with pytest.raises(ValueError, match="run_kind"):
+        replace(valid_config(), run_kind="staging")
+
+
+@pytest.mark.parametrize(
+    ("run_kind", "budget", "message"),
+    [
+        ("development", 2000, "development budget"),
+        ("production", 200, "production budget"),
+    ],
+)
+def test_run_kinds_reject_the_other_budget(
+    run_kind: str,
+    budget: int,
+    message: str,
+) -> None:
+    config = valid_config()
+    with pytest.raises(ValueError, match=message):
+        replace(
+            config,
+            run_kind=run_kind,
+            search=replace(config.search, budget=budget),
+        )
 
 
 @pytest.mark.parametrize(
