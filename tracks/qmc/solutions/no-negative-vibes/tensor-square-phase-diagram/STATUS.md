@@ -229,3 +229,29 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
   physics chain has run yet.
 - Next action: independent code review, clean commit/push, then the frozen
   eight-chain m=3 gate on WSL.
+
+## Stage 4 round 7 — channel-reflection early stop (2026-07-29)
+
+- Clean source `db0d114` passed `73` tests on both WSL and CPU machine.
+- The m=3 ED gate passed decisively. Maximum ED displacement was
+  `0.393 sigma`, maximum two-arm displacement was `0.545 sigma`, reflection
+  acceptance was `0.136-0.153`, and all sign/stability gates passed.
+- The same-revision PASS digest released exactly one
+  `(m,beta,g_B/g_A,t/g_A,mu)=(8,8,0.25,0.5,0)` A/B on CPU machine, with two
+  paired-seed replicas per arm and the frozen 240/640 budget.
+- At m=8 all five observables agree between arms (maximum `0.992 sigma`), direct
+  sign is `+1`, and maximum log-weight error is `1.71e-13`.
+- Pre-registered decision: **STOP channel reflection**. One reflection replica
+  has acceptance `0.0413<0.05`; median worst tau worsens by `8.77%` instead of
+  improving by 25%; CPU seconds per effective sample increase by `81.7%`.
+- Minimum fixed-budget ESS is only `4.98-5.83`, so this is an algorithm stop,
+  not a physics no-go. No Stage 5 release, longer reflection run or broader
+  reflection scan is authorized.
+- Artifacts: `results/stage4_20260729/channel_reflection/`; scientific note:
+  `notes/channel_reflection_results.md`.
+- GitHub HTTPS was unavailable during this round. `db0d114` is committed in
+  the D-drive branch and fixed clean clones; the personal-branch push remains
+  pending and will be retried without changing credentials or remote target.
+- Next action: stop adding ad hoc global proposals. Re-rank the remaining
+  healthy beta=4 numerical sentinels and test the next pre-registered candidate
+  with the original validated sampler, while treating beta=8 as censored.
