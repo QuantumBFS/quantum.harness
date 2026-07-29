@@ -314,7 +314,14 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
             optimizer=MosekTools.Optimizer, solver_settings=QUIET)
         blocked = build_kull_primal(h; frozen=symmetric_map, depth=3, k0=2,
             symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        deep_blocked = build_kull_primal(h; frozen=symmetric_map, depth=8, k0=2,
+            symmetry)
         @test sort(collect(keys(blocked.omegas))) == [2, 3]
+        @test sort(collect(keys(deep_blocked.omegas))) == collect(2:8)
+        @test length(deep_blocked.constraints[:lti]) == 70
+        @test length(deep_blocked.constraints[:bottom]) == 140
+        @test length(deep_blocked.constraints[:flow]) == 6 * 140
+        @test deep_blocked.inventory.linear_equalities == 1051
         @test dense.inventory.psd_block_dimensions == [64, 64, 64]
         @test blocked.inventory.psd_block_dimensions == repeat(
             [1, 6, 15, 20, 15, 6, 1], 3)

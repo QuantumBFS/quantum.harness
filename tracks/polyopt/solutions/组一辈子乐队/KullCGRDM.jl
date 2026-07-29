@@ -388,11 +388,51 @@ function _jump_partial_trace(X, dims::Tuple, axis::Int)
     Y
 end
 
+"Trace one axis while materializing only charge-preserving output entries."
+function _jump_charge_partial_trace(X, dims::Tuple, axis::Int,
+        output_charges::AbstractVector{<:Integer})
+    kept = Tuple(i for i in eachindex(dims) if i != axis)
+    output_dims = Tuple(dims[i] for i in kept)
+    length(output_charges) == prod(output_dims) ||
+        throw(DimensionMismatch("output charge count does not match partial trace"))
+    full_linear = LinearIndices(dims)
+    output_linear = LinearIndices(output_dims)
+    Y = Matrix{Any}(zeros(ComplexF64, prod(output_dims), prod(output_dims)))
+    for ket_kept in CartesianIndices(output_dims), bra_kept in CartesianIndices(output_dims)
+        ket_linear = output_linear[ket_kept]
+        bra_linear = output_linear[bra_kept]
+        output_charges[ket_linear] == output_charges[bra_linear] || continue
+        ket_tuple, bra_tuple = Tuple(ket_kept), Tuple(bra_kept)
+        Y[ket_linear,bra_linear] = sum(begin
+            ket = ntuple(i -> i == axis ? traced : ket_tuple[findfirst(==(i), kept)], length(dims))
+            bra = ntuple(i -> i == axis ? traced : bra_tuple[findfirst(==(i), kept)], length(dims))
+            X[full_linear[ket...], full_linear[bra...]]
+        end for traced in 1:dims[axis])
+    end
+    Y
+end
+
 function _jump_congruence(K::AbstractMatrix, X)
     rows, cols = size(K)
     size(X) == (cols, cols) || throw(DimensionMismatch("congruence input has the wrong size"))
     [sum(K[i,a] * conj(K[j,b]) * X[a,b] for a in 1:cols, b in 1:cols)
         for i in 1:rows, j in 1:rows]
+end
+
+"Apply a numerical congruence using only the nonzero support of an equivariant map."
+function _jump_sparse_congruence(K::AbstractMatrix, X, output_charges::AbstractVector{<:Integer})
+    rows, cols = size(K)
+    size(X) == (cols, cols) || throw(DimensionMismatch("congruence input has the wrong size"))
+    length(output_charges) == rows || throw(DimensionMismatch("output charge count does not match map"))
+    support = [[(column, K[row,column]) for column in 1:cols if !iszero(K[row,column])]
+        for row in 1:rows]
+    Y = Matrix{Any}(zeros(ComplexF64, rows, rows))
+    for j in 1:rows, i in 1:rows
+        output_charges[i] == output_charges[j] || continue
+        Y[i,j] = sum(value_i * conj(value_j) * X[column_i,column_j]
+            for (column_i,value_i) in support[i], (column_j,value_j) in support[j])
+    end
+    Y
 end
 
 "Convert scalar real/imag equality duals back to one Hermitian multiplier."
@@ -414,6 +454,27 @@ function _hermitian_multiplier(refs::AbstractVector, dimension::Int, offset::Int
     Y, cursor
 end
 
+"Reconstruct a Hermitian equality multiplier from charge-sector constraints."
+function _charge_hermitian_multiplier(refs::AbstractVector,
+        charges::AbstractVector{<:Integer}, offset::Int=0)
+    Y = zeros(ComplexF64, length(charges), length(charges))
+    cursor = offset
+    for (_, indices) in charge_sectors(charges)
+        for local_j in eachindex(indices), local_i in 1:local_j
+            i, j = indices[local_i], indices[local_j]
+            yr = Float64(dual(refs[cursor += 1]))
+            if i == j
+                Y[i,j] = yr
+            else
+                yi = Float64(dual(refs[cursor += 1]))
+                Y[i,j] = (yr + im * yi) / 2
+                Y[j,i] = conj(Y[i,j])
+            end
+        end
+    end
+    Y, cursor
+end
+
 function _add_hermitian_equalities!(model::JuMP.Model, lhs, rhs)
     size(lhs) == size(rhs) || throw(DimensionMismatch("Hermitian equality dimensions differ"))
     size(lhs, 1) == size(lhs, 2) || throw(DimensionMismatch("Hermitian equality must be square"))
@@ -422,6 +483,24 @@ function _add_hermitian_equalities!(model::JuMP.Model, lhs, rhs)
         difference = lhs[i,j] - rhs[i,j]
         push!(refs, @constraint(model, real(difference) == 0))
         i == j || push!(refs, @constraint(model, imag(difference) == 0))
+    end
+    refs
+end
+
+"Add only the charge-preserving Hermitian equalities and retain their sector layout."
+function _add_charge_equalities!(model::JuMP.Model, lhs, rhs,
+        charges::AbstractVector{<:Integer})
+    size(lhs) == size(rhs) || throw(DimensionMismatch("Hermitian equality dimensions differ"))
+    size(lhs) == (length(charges), length(charges)) ||
+        throw(DimensionMismatch("charge count does not match Hermitian equality"))
+    refs = Any[]
+    for (_, indices) in charge_sectors(charges)
+        for local_j in eachindex(indices), local_i in 1:local_j
+            i, j = indices[local_i], indices[local_j]
+            difference = lhs[i,j] - rhs[i,j]
+            push!(refs, @constraint(model, real(difference) == 0))
+            i == j || push!(refs, @constraint(model, imag(difference) == 0))
+        end
     end
     refs
 end
@@ -541,6 +620,20 @@ function _jump_edge_marginal(X, dims::Tuple, keep::Int, side::Symbol)
     Y
 end
 
+"Charge-sparse edge marginal for a tensor product with explicit subsystem charges."
+function _jump_charge_edge_marginal(X, subsystem_charges::Tuple, keep::Int, side::Symbol)
+    Y = X
+    current = subsystem_charges
+    while length(current) > keep
+        axis = side === :right ? 1 : length(current)
+        dims = Tuple(length(charges) for charges in current)
+        remaining = Tuple(current[i] for i in eachindex(current) if i != axis)
+        Y = _jump_charge_partial_trace(Y, dims, axis, product_charges(remaining...))
+        current = remaining
+    end
+    Y
+end
+
 function _edge_marginal(X::AbstractMatrix, dims::Tuple, keep::Int, side::Symbol)
     Y, current_dims = X, dims
     while length(current_dims) > keep
@@ -616,6 +709,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     end
     symmetry_blocks = Dict{String,Any}()
     symmetry_charges = Dict{String,Vector{Int}}()
+    rho_charges = Int[]
     if isnothing(symmetry)
         @variable(model, rho3[1:rho_dimension, 1:rho_dimension] in HermitianPSDCone())
     else
@@ -627,10 +721,24 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         :normalization => Any[], :lti => Any[], :bottom => Any[], :flow => Any[])
     push!(constraints[:normalization], @constraint(model,
         real(sum(rho3[i,i] for i in 1:rho_dimension)) == 1))
-    left_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :left)
-    right_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :right)
-    append!(constraints[:lti], _add_hermitian_equalities!(model, left_marginal, right_marginal))
-    objective_marginal = _jump_edge_marginal(rho3, rho_dims, 2, :right)
+    if isnothing(symmetry)
+        left_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :left)
+        right_marginal = _jump_edge_marginal(rho3, rho_dims, selected_k0, :right)
+        append!(constraints[:lti], _add_hermitian_equalities!(model,
+            left_marginal, right_marginal))
+        objective_marginal = _jump_edge_marginal(rho3, rho_dims, 2, :right)
+    else
+        rho_subsystems = ntuple(_ -> symmetry.physical_charges, rho_support)
+        marginal_charges = product_charges(ntuple(_ -> symmetry.physical_charges,
+            selected_k0)...)
+        left_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems,
+            selected_k0, :left)
+        right_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems,
+            selected_k0, :right)
+        append!(constraints[:lti], _add_charge_equalities!(model,
+            left_marginal, right_marginal, marginal_charges))
+        objective_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems, 2, :right)
+    end
     @objective(model, Min, real(sum(h[i,j] * objective_marginal[j,i]
         for i in 1:d^2, j in 1:d^2)))
 
@@ -654,12 +762,27 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         for parity in parities
             key = _omega_key(frozen, selected_k0, parity)
             bridge = bottom_bridge_operators(frozen; k0=selected_k0, start_site=parity)
-            append!(constraints[:bottom], _add_hermitian_equalities!(model,
-                _jump_congruence(bridge.to_trace_physical_left, rho3),
-                _jump_partial_trace(omegas[key], omega_dims, 1)))
-            append!(constraints[:bottom], _add_hermitian_equalities!(model,
-                _jump_congruence(bridge.to_trace_physical_right, rho3),
-                _jump_partial_trace(omegas[key], omega_dims, 4)))
+            if isnothing(symmetry)
+                append!(constraints[:bottom], _add_hermitian_equalities!(model,
+                    _jump_congruence(bridge.to_trace_physical_left, rho3),
+                    _jump_partial_trace(omegas[key], omega_dims, 1)))
+                append!(constraints[:bottom], _add_hermitian_equalities!(model,
+                    _jump_congruence(bridge.to_trace_physical_right, rho3),
+                    _jump_partial_trace(omegas[key], omega_dims, 4)))
+            else
+                left_charges = product_charges(-symmetry.virtual_charges,
+                    symmetry.virtual_charges, symmetry.physical_charges)
+                right_charges = product_charges(symmetry.physical_charges,
+                    -symmetry.virtual_charges, symmetry.virtual_charges)
+                append!(constraints[:bottom], _add_charge_equalities!(model,
+                    _jump_sparse_congruence(bridge.to_trace_physical_left, rho3, left_charges),
+                    _jump_charge_partial_trace(omegas[key], omega_dims, 1, left_charges),
+                    left_charges))
+                append!(constraints[:bottom], _add_charge_equalities!(model,
+                    _jump_sparse_congruence(bridge.to_trace_physical_right, rho3, right_charges),
+                    _jump_charge_partial_trace(omegas[key], omega_dims, 4, right_charges),
+                    right_charges))
+            end
         end
         for m in selected_k0:depth-1, parity in parities
             next_key = _omega_key(frozen, m + 1, parity)
@@ -667,12 +790,29 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
             left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
             left_source = _omega_key(frozen, m, left_parity)
             flow = flow_operators(frozen, m; start_site=parity)
-            append!(constraints[:flow], _add_hermitian_equalities!(model,
-                _jump_congruence(flow.to_trace_physical_left, omegas[left_source]),
-                _jump_partial_trace(omegas[next_key], omega_dims, 1)))
-            append!(constraints[:flow], _add_hermitian_equalities!(model,
-                _jump_congruence(flow.to_trace_physical_right, omegas[right_source]),
-                _jump_partial_trace(omegas[next_key], omega_dims, 4)))
+            if isnothing(symmetry)
+                append!(constraints[:flow], _add_hermitian_equalities!(model,
+                    _jump_congruence(flow.to_trace_physical_left, omegas[left_source]),
+                    _jump_partial_trace(omegas[next_key], omega_dims, 1)))
+                append!(constraints[:flow], _add_hermitian_equalities!(model,
+                    _jump_congruence(flow.to_trace_physical_right, omegas[right_source]),
+                    _jump_partial_trace(omegas[next_key], omega_dims, 4)))
+            else
+                left_charges = product_charges(-symmetry.virtual_charges,
+                    symmetry.virtual_charges, symmetry.physical_charges)
+                right_charges = product_charges(symmetry.physical_charges,
+                    -symmetry.virtual_charges, symmetry.virtual_charges)
+                append!(constraints[:flow], _add_charge_equalities!(model,
+                    _jump_sparse_congruence(flow.to_trace_physical_left,
+                        omegas[left_source], left_charges),
+                    _jump_charge_partial_trace(omegas[next_key], omega_dims, 1, left_charges),
+                    left_charges))
+                append!(constraints[:flow], _add_charge_equalities!(model,
+                    _jump_sparse_congruence(flow.to_trace_physical_right,
+                        omegas[right_source], right_charges),
+                    _jump_charge_partial_trace(omegas[next_key], omega_dims, 4, right_charges),
+                    right_charges))
+            end
         end
     end
 
@@ -687,15 +827,15 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         block_sizes = [rho_sizes; repeat(omega_sizes,
             length(parities) * (depth - selected_k0 + 1))]
         variables = sum(abs2, block_sizes)
-        # Equality maps are sparse structured contractions; treating their count as a dense
-        # cubic matrix grossly rejects block-SDPs that MOSEK solves in seconds.
+        sparse_equalities = sum(length, values(constraints))
+        coefficient_bytes = 16 * (variables + 8 * sparse_equalities)
+        peak_bytes = coefficient_bytes + 8 * sparse_equalities^2 + 16 * variables
         wall_seconds = max(1.0,
             sum(block^3 for block in block_sizes) / 2.0e7 +
-            inventory.linear_equalities^2 / 2.0e7)
-        local_feasible = inventory.peak_memory_bytes < 16 * 1024^3 && wall_seconds < 600
+            sparse_equalities^2 / 2.0e7)
+        local_feasible = peak_bytes < 16 * 1024^3 && wall_seconds < 600
         inventory = KullResourceInventory(block_sizes, length(block_sizes), variables,
-            inventory.linear_equalities, inventory.coefficient_storage_bytes,
-            inventory.peak_memory_bytes, wall_seconds, local_feasible)
+            sparse_equalities, coefficient_bytes, peak_bytes, wall_seconds, local_feasible)
     end
     metadata = Dict{String,Any}(
         "depth" => depth, "n" => depth, "k0" => selected_k0,
@@ -830,8 +970,15 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
     rho_support = problem.metadata["rho_support"]
     rho_dims = ntuple(_ -> d, rho_support)
     normalization = Float64(dual(only(problem.constraints[:normalization])))
+    symmetry = problem.metadata["symmetry"]
     multipliers = Dict{String,Matrix{ComplexF64}}()
-    multipliers["lti"], cursor = _hermitian_multiplier(problem.constraints[:lti], d^k0)
+    if isnothing(symmetry)
+        multipliers["lti"], cursor = _hermitian_multiplier(problem.constraints[:lti], d^k0)
+    else
+        lti_charges = product_charges(ntuple(_ -> symmetry.physical_charges, k0)...)
+        multipliers["lti"], cursor = _charge_hermitian_multiplier(
+            problem.constraints[:lti], lti_charges)
+    end
     cursor == length(problem.constraints[:lti]) || error("unconsumed LTI multipliers")
     if !isempty(problem.omegas)
         D = problem.metadata["bond_dimension"]
@@ -841,21 +988,46 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
         cursor = 0
         for parity in _start_parities(frozen)
             suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
-            multipliers["bottom_left$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
-            multipliers["bottom_right$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+            if isnothing(symmetry)
+                multipliers["bottom_left$suffix"], cursor = _hermitian_multiplier(
+                    refs, marginal_dimension, cursor)
+                multipliers["bottom_right$suffix"], cursor = _hermitian_multiplier(
+                    refs, marginal_dimension, cursor)
+            else
+                left_charges = product_charges(-symmetry.virtual_charges,
+                    symmetry.virtual_charges, symmetry.physical_charges)
+                right_charges = product_charges(symmetry.physical_charges,
+                    -symmetry.virtual_charges, symmetry.virtual_charges)
+                multipliers["bottom_left$suffix"], cursor = _charge_hermitian_multiplier(
+                    refs, left_charges, cursor)
+                multipliers["bottom_right$suffix"], cursor = _charge_hermitian_multiplier(
+                    refs, right_charges, cursor)
+            end
         end
         cursor == length(refs) || error("unconsumed bottom multipliers")
         refs = problem.constraints[:flow]
         cursor = 0
         for m in k0:depth-1, parity in _start_parities(frozen)
             suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
-            multipliers["flow_$(m)_left$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
-            multipliers["flow_$(m)_right$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+            if isnothing(symmetry)
+                multipliers["flow_$(m)_left$suffix"], cursor = _hermitian_multiplier(
+                    refs, marginal_dimension, cursor)
+                multipliers["flow_$(m)_right$suffix"], cursor = _hermitian_multiplier(
+                    refs, marginal_dimension, cursor)
+            else
+                left_charges = product_charges(-symmetry.virtual_charges,
+                    symmetry.virtual_charges, symmetry.physical_charges)
+                right_charges = product_charges(symmetry.physical_charges,
+                    -symmetry.virtual_charges, symmetry.virtual_charges)
+                multipliers["flow_$(m)_left$suffix"], cursor = _charge_hermitian_multiplier(
+                    refs, left_charges, cursor)
+                multipliers["flow_$(m)_right$suffix"], cursor = _charge_hermitian_multiplier(
+                    refs, right_charges, cursor)
+            end
         end
         cursor == length(refs) || error("unconsumed flow multipliers")
     end
 
-    symmetry = problem.metadata["symmetry"]
     if isnothing(symmetry)
         psd_duals = Dict{String,Matrix{ComplexF64}}(
             "rho3" => Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.rho3))))
