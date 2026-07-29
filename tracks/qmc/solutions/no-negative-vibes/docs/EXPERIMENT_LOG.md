@@ -949,3 +949,111 @@ dominate the conditioning-limited queue, while stable negatives still appear
 as late as depth 12. Finite survival must therefore be paired with exact cone
 structure; simply extending random histories is less informative than
 exhaustive mixed-word tranches plus exact replay.
+
+## 2026-07-29 — Depth-8 exact-fallback continuation
+
+The 511 candidates whose original Stage-2 stopping word was exactly confirmed
+nonnegative were restarted over the complete 472-word depth-5--8 tranche.
+Well-conditioned words used the frozen determinant classifier; every
+conditioning-limited word used the 80/120/180/260 ladder and exact rational
+determinant adjudication.
+
+- source commit:
+  `859347d4e1c2550b05626b44bbf49ec5a6892a86`;
+- run id:
+  `exterior-depth8-exact-fallback-v1`;
+- continuation plan hash:
+  `9ac22a1b7e7cbcf376f777906f0f89c9ecdd232886b33456c850a8b84f89eaff`;
+- parent high-precision plan hash:
+  `43c137244b5ae67d5d35240def5166d056e78a3c053665db7493e0a53bd6656c`;
+- 511/511 terminal, zero missing or stale;
+- 232,551 tested words and 114,666 exact fallbacks.
+
+| result | count |
+|---|---:|
+| exact-fallback negative | 13 |
+| stable negative | 10 |
+| depth-8 exact-fallback survivor | 488 |
+
+The continuation demonstrates why first-failure replay alone is insufficient:
+23 additional negatives appeared later in the same finite tranche. The 488
+complete survivors now form a second, disjoint depth-9--12 queue using the
+same exact-aware fallback. Together with the 1,051 ordinary Stage-2
+survivors, the fully adjudicated depth-8 survivor population is 1,539.
+
+Local evidence SHA-256:
+
+- Markdown summary:
+  `2acd155f16b1d660979462dd667094a61a36ce5dc897c6ff2a2b1816e9c16ca7`;
+- collection JSON:
+  `4afe95c7838b449391c8693b60bf75bbfe3caf1bf8a6224bcdaf9fa73e7c7a01`;
+- CPU result archive:
+  `2414c52b466d2345376fef7211c79bc58db6a3a032d31eb3689ca696f041e52b`.
+
+## 2026-07-29 — Stage-3 high-precision first-failure replay
+
+All 307 conditioning-limited first failures from the ordinary depth-9--12
+scan were reconstructed from their exact cards and replayed with the same
+precision ladder and exact rational determinant adjudication.
+
+- source commit:
+  `070cca4a6757a5aef7d275da7e99eb6f15aa9afe`;
+- run id:
+  `exterior-survivor-depth12-high-precision-v1`;
+- replay plan hash:
+  `173b2f436cdecf1827c14165a23a6c6ed5e234da6415dd172c5c1dea399f5a56`;
+- 307/307 terminal, zero missing or stale;
+- 307 confirmed nonnegative, zero confirmed negative, zero unresolved.
+
+As in the earlier replay, these verdicts apply to the saved stopping word,
+not to the unvisited suffix of the complete depth-9--12 tranche. All 307
+records therefore enter an exact-aware continuation rather than the survivor
+set. Local evidence SHA-256:
+
+- summary:
+  `1ffc24ccb18739853b08d82f7d77e1a8c605153b81a8f9c6b3b554449ab50255`;
+- replay plan:
+  `dc805c266cbc96e76fea76042a27695c7fb09b8b184bfd41553f47fa7cd066f0`;
+- CPU candidate archive:
+  `429b58ebd3175d76905e0d71d744bd9c662e52da8153c97c2bede8726a0b65ef`.
+
+## 2026-07-29 — Ordinary-survivor depth-16 Stage 4
+
+The 692 ordinary candidates that completed every depth-9--12 word without a
+failure were screened exhaustively over mixed two-atom words at depths 13,
+14, 15, and 16. The tranche contains 122,872 words per complete candidate;
+85,027,424 classifications were possible before early stopping.
+
+- source commit:
+  `77acaf21e28d55979682257b69102e1408dda972`;
+- run id:
+  `exterior-survivor-depth16-v1`;
+- WSL workers 0--13 and CPU workers 14--75, one BLAS thread each;
+- 692/692 terminal, zero missing or stale;
+- 64,617,517 words actually evaluated after early stopping.
+
+| status | count |
+|---|---:|
+| stable negative | 22 |
+| uncertain, high-precision replay required | 179 |
+| depth-16 zero-failure survivor | 491 |
+
+The 491 zero-failure cards advance immediately to structural certificate and
+targeted deeper-survivor tests. The 179 uncertain first failures enter a
+separate exact high-precision replay and are not counted as survivors.
+
+Local evidence SHA-256:
+
+- Markdown summary:
+  `770d803cdf149fc178fef77a1aba4f0646e00c4a24a25f1bc1b10bcb8b22394c`;
+- JSON summary:
+  `0c60fad79565e5b96cb9f1b9ddec32b5aaea94412bd1556aeb890b1f7e40ba53`;
+- CPU result archive:
+  `4939df58d81fcb1543d48d9a5e826f04cf684693d23e85d11f4cf9bb9c39adac`.
+
+Transferable lesson: exhaustive finite-word pressure remains productive at
+depth 16—22 stable counterexamples appeared after depth 12—but the survivor
+fraction remains large. The next high-value step is not a blind universal
+depth increase: replay the 179 conditioning-limited words, then rank the 491
+survivors by exact structural obstructions and concentrate deeper tests on
+the trace-clean, non-control subset.
