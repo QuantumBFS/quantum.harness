@@ -48,3 +48,16 @@ def test_small_oddcycle_search_is_deterministic_and_exactly_replayed() -> None:
     assert first["candidates"][0]["exact_weight"]["sign"] == 1
     assert first["candidates"][0]["hit"] is False
     assert first["status"] == "no-exact-negative-found"
+
+
+def test_exact_replay_serializes_weights_longer_than_python_digit_cap() -> None:
+    record = exact_replay_candidate(
+        target="exact5-oddcycle-block-pair:117",
+        word=(0,) * 600,
+        discovery={"method": "regression", "score": 0.0},
+    )
+
+    numerator = record["exact_weight"]["numerator"]
+    assert isinstance(numerator, str)
+    assert len(numerator) > 4300
+    assert record["exact_weight"]["sign"] == 1

@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import itertools
 import json
+import sys
 from collections.abc import Mapping, Sequence
 
 import mpmath as mp
@@ -24,6 +25,12 @@ from .exterior_seed61_positive_realization import exact_determinant_weight
 
 
 SCHEMA_VERSION = "exterior-longword-adversarial-v1"
+
+# Exact length-600 replays routinely exceed Python 3.11's default 4300-digit
+# conversion guard.  This standalone research CLI intentionally serializes
+# those trusted, locally computed integers as decimal JSON strings.
+if hasattr(sys, "set_int_max_str_digits"):
+    sys.set_int_max_str_digits(0)
 
 
 def _target_card(target: str) -> dict[str, object]:
