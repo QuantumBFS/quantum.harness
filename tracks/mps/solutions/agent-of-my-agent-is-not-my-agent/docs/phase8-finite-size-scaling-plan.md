@@ -456,7 +456,7 @@ git commit -m "feat: gate phase8 sigma175 scaling cells"
   - `phase8-sigma175.png` and `.pdf`
   - `report.md`
 
-- [ ] **Step 1: Write a failing fixture-based CLI test**
+- [x] **Step 1: Write a failing fixture-based CLI test**
 
 Build synthetic crossing/gap summaries under `tmp_path` and assert:
 
@@ -479,7 +479,7 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(tmp_path):
     assert (output / "phase8-sigma175.png").stat().st_size > 0
 ```
 
-- [ ] **Step 2: Run the report test and verify RED**
+- [x] **Step 2: Run the report test and verify RED**
 
 Run:
 
@@ -490,7 +490,7 @@ PYTHONPATH=src:. conda run -n mps \
 
 Expected: failure because `report_phase8_scaling.py` does not exist.
 
-- [ ] **Step 3: Implement strict input validation**
+- [x] **Step 3: Implement strict input validation**
 
 The report script must stop unless:
 
@@ -503,7 +503,7 @@ The report script must stop unless:
   rules;
 - all gaps are positive.
 
-- [ ] **Step 4: Implement tables and the report**
+- [x] **Step 4: Implement tables and the report**
 
 Use `gap_scaling_summary()` for z. Copy the previously measured maximum
 `K=24` to `K=32` coupling/crossing/gap shifts and `chi=128` to `chi=256`
@@ -531,7 +531,7 @@ The report must say:
   stating that the smaller `L<=128` range prevents a precision
   reproduction.
 
-- [ ] **Step 5: Run the report test and verify GREEN**
+- [x] **Step 5: Run the report test and verify GREEN**
 
 Run:
 
@@ -542,7 +542,7 @@ MPLCONFIGDIR=/tmp/mpl-phase8 PYTHONPATH=src:. conda run -n mps \
 
 Expected: test passes with nonempty CSV, JSON, PNG, and PDF artifacts.
 
-- [ ] **Step 6: Commit Task 3**
+- [x] **Step 6: Commit Task 3**
 
 ```bash
 git add \
