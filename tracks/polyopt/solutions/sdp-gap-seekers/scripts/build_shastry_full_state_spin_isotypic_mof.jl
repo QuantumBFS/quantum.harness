@@ -90,6 +90,21 @@ function spin_stabilizer_structure_dict(structure)
     )
 end
 
+function spin_stabilizer_coefficient_truth_dict(truth)
+    return Dict(
+        "exact" => truth.exact,
+        "cross_zero" => truth.cross_zero,
+        "cross_entry_count" => truth.cross_entry_count,
+        "records" => [
+            Dict(
+                string(key) => value isa Symbol ? string(value) : value
+                for (key, value) in pairs(record)
+            )
+            for record in truth.records
+        ],
+    )
+end
+
 function verify_reloaded_spin_isotypic_model(
     model::JuMP.Model,
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
@@ -788,6 +803,18 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         measurement_dict(isotypic_measurement)
     metadata["spin_stabilizer_structure"] =
         spin_stabilizer_structure_dict(spin_stabilizer_structure)
+    if get(ENV, "SHASTRY_STABILIZER_COEFFICIENT_TRUTH", "0") == "1"
+        progress("exact nontrivial-character stabilizer cross-zero gate")
+        stabilizer_truth_measurement =
+            @timed shastry_spin_stabilizer_coefficient_truth(spin_spatial)
+        stabilizer_truth = stabilizer_truth_measurement.value
+        stabilizer_truth.exact ||
+            error("spin-stabilizer coefficient truth gate failed")
+        metadata["stages"]["spin_stabilizer_coefficient_truth"] =
+            measurement_dict(stabilizer_truth_measurement)
+        metadata["spin_stabilizer_coefficient_truth"] =
+            spin_stabilizer_coefficient_truth_dict(stabilizer_truth)
+    end
     metadata["reduced"] = spin_isotypic_report_dict(report)
     metadata["reduced"]["positive_block_labels"] = String[
         ShastryFullStateSpinIsotypicReduction.block_label(block)

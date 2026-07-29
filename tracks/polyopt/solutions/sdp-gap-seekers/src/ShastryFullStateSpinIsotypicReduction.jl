@@ -28,6 +28,7 @@ export SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
        ShastryFullStateSpinIsotypicReducedPrimalAssembly,
        shastry_spin_isotypic_truth,
        shastry_spin_stabilizer_structure,
+       shastry_spin_stabilizer_coefficient_truth,
        shastry_spin_isotypic_block_entry,
        assemble_shastry_full_state_spin_isotypic_reduced_primal,
        shastry_full_state_spin_isotypic_reduced_assembly_report
@@ -370,6 +371,83 @@ function shastry_spin_stabilizer_structure(
     return (
         exact=dimensions_match && !isempty(records),
         dimensions_match=dimensions_match,
+        records=records,
+    )
+end
+
+"""
+Replay every `l=1`/`l=2` cross coefficient inside each nontrivial character.
+
+This is deliberately separate from the cheap row-structure gate: matching
+eigenspace dimensions does not authorize a PSD block split. A passing result
+proves the affine matrix is block diagonal after the existing exact
+spin/spatial moment quotient, without identifying different V4 characters.
+"""
+function shastry_spin_stabilizer_coefficient_truth(
+    assembly::ShastryFullStateSpinSpatialReducedPrimalAssembly,
+)
+    blocks = ShastrySpatialPSDBlock[
+        block
+        for block in [assembly.positive_blocks; assembly.gap_blocks]
+        if block.source_block.character != TRIVIAL_CHARACTER
+    ]
+    decompositions = stabilizer_isotypic_rows.(blocks)
+    work = Tuple{Int,Int}[
+        (block_index, plus_index)
+        for (block_index, decomposition) in enumerate(decompositions)
+        for plus_index in eachindex(decomposition.plus)
+    ]
+    row_results = Vector{NamedTuple{(:exact, :count),Tuple{Bool,Int}}}(
+        undef,
+        length(work),
+    )
+    Threads.@threads :dynamic for work_index in eachindex(work)
+        block_index, plus_index = work[work_index]
+        block = blocks[block_index]
+        decomposition = decompositions[block_index]
+        plus_row = decomposition.plus[plus_index]
+        exact = true
+        for minus_row in decomposition.minus
+            exact &= iszero(
+                combined_block_entry(
+                    assembly,
+                    block,
+                    plus_row,
+                    minus_row,
+                ),
+            )
+        end
+        row_results[work_index] = (
+            exact=exact,
+            count=length(decomposition.minus),
+        )
+    end
+
+    block_exact = trues(length(blocks))
+    block_counts = zeros(Int, length(blocks))
+    for (work_index, (block_index, _)) in enumerate(work)
+        result = row_results[work_index]
+        block_exact[block_index] &= result.exact
+        block_counts[block_index] += result.count
+    end
+    records = NamedTuple[]
+    for (block_index, block) in enumerate(blocks)
+        source = block.source_block
+        character = source.character
+        push!(records, (
+            role=source.role,
+            family=source.family,
+            character_rx=character.rx,
+            character_ry=character.ry,
+            spatial_parity=block.parity,
+            cross_zero=block_exact[block_index],
+            cross_entry_count=block_counts[block_index],
+        ))
+    end
+    return (
+        exact=all(block_exact),
+        cross_zero=all(block_exact),
+        cross_entry_count=sum(block_counts),
         records=records,
     )
 end
