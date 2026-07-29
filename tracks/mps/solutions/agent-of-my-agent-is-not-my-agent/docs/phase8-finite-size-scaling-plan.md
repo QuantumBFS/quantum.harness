@@ -263,7 +263,7 @@ git commit -m "feat: add phase8 two-point sensitivity analysis"
   - `build_gap_spec(decision, output_dir) -> dict`
   - CLI subcommands `crossing`, `decide`, and `gaps`.
 
-- [ ] **Step 1: Write failing protocol tests**
+- [x] **Step 1: Write failing protocol tests**
 
 ```python
 from lrtfim.phase8_protocol import (
@@ -314,7 +314,7 @@ def test_gap_spec_refuses_unresolved_crossing(tmp_path):
         )
 ```
 
-- [ ] **Step 2: Run the protocol tests and verify RED**
+- [x] **Step 2: Run the protocol tests and verify RED**
 
 Run:
 
@@ -325,7 +325,7 @@ PYTHONPATH=src:. conda run -n mps \
 
 Expected: import fails because `phase8_protocol.py` does not exist.
 
-- [ ] **Step 3: Implement the locked constants and specifications**
+- [x] **Step 3: Implement the locked constants and specifications**
 
 Create `phase8_protocol.py` with these immutable values:
 
@@ -350,7 +350,7 @@ R_FIT = 2048
 Cartesian product `L=(32,64,128)` by `sector=(even,odd)` at one identical
 Gamma.
 
-- [ ] **Step 4: Write failing CLI tests**
+- [x] **Step 4: Write failing CLI tests**
 
 ```python
 def test_crossing_cli_writes_two_resumable_commands(tmp_path):
@@ -379,7 +379,7 @@ def test_decide_cli_records_unresolved_without_writing_gap_spec(tmp_path):
     assert not (tmp_path / "gaps/run_spec.json").exists()
 ```
 
-- [ ] **Step 5: Implement `plan_phase8_scaling.py`**
+- [x] **Step 5: Implement `plan_phase8_scaling.py`**
 
 The CLI must:
 
@@ -408,7 +408,7 @@ Every gap command has:
 --chi-schedule 128 --direct-only --sectors <even|odd>
 ```
 
-- [ ] **Step 6: Run protocol and CLI tests**
+- [x] **Step 6: Run protocol and CLI tests**
 
 Run:
 
@@ -421,7 +421,7 @@ PYTHONPATH=src:. conda run -n mps pytest -q \
 
 Expected: all tests pass and no HDF5 file is created by planning tests.
 
-- [ ] **Step 7: Commit Task 2**
+- [x] **Step 7: Commit Task 2**
 
 ```bash
 git add \
