@@ -1,0 +1,14 @@
+widths = [2, 4]
+theta = 0.7853981633974483
+beta = 0.881373587019543
+base_seed = 122447
+production_gates = false
+refinement_level = 0
+
+[sampling]
+streams_per_width = 1
+burn_in_layers_per_width = 1
+measurement_layers_per_width = 4
+block_layers_per_width = 1
+stabilize_every_layers = 1
+invariant_tolerance = 1.0e-9
