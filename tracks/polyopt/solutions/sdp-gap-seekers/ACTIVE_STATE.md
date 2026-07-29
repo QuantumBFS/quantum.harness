@@ -513,7 +513,11 @@ Updated: 2026-07-29 UTC.
   `a3b5cc33067d130c02b14c3aa1abcae52cb9853c0906f05c724a97f686a5e337`.
   This does not imply a large physical gap: it shows that the present
   `L=1,d=2` relaxation is still too weak to exclude gamma 32.
-- Extended scan r5, job `22992662`, is queued for gamma `64`, `128`, and
-  `256`, stopping at the first infeasibility candidate. It is currently
-  pending under the shared-account `AssocGrpJobsLimit`; pending is not
-  scientific evidence.
+- Extended isotypic scan r5, job `22992662`, was submitted for gamma `64`,
+  `128`, and `256` but never started: it remained pending under the
+  shared-account `AssocGrpJobsLimit` and was cancelled at zero elapsed time
+  after the exact spatial representation became the authorized next compute
+  target. Do not spend additional solve capacity on the superseded
+  3,250-moment representation. First complete the spatial runner's
+  gamma-zero and gamma-half A/B gates, then continue the scan with its
+  1,711-moment/3,191-packed-entry/max-side-24 model.

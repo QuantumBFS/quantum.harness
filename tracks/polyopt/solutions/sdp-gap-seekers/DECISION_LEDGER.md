@@ -843,8 +843,12 @@ values are `0.01797420828848928`, `0.01368745758280987`, and
 Accept these as verified floating feasible points of the finite relaxation,
 not as lower bounds on the physical bulk gap. The decision-changing
 conclusion is that `L=1,d=2` has not produced an upper transition through
-gamma 32 and is likely very weak in this model. Continue one logarithmic scan
-at gamma `64`, `128`, and `256`; if it produces an infeasibility candidate,
-require independent ray replay. If it remains feasible or becomes
-numerically marginal without a ray, stop widening this relaxation and move
-compute to a stronger window/order after exact symmetry reduction.
+gamma 32 and is likely very weak in this model. An isotypic logarithmic scan
+at gamma `64`, `128`, and `256` was submitted as job `22992662`, but it
+remained pending and was cancelled at zero elapsed time once the exact
+spatial representation was selected for all follow-up compute. First require
+spatial gamma-zero and gamma-half A/B gates. Continue the same logarithmic
+scan only with that verified 1,711-moment model; if it produces an
+infeasibility candidate, require independent ray replay. If it remains
+feasible or becomes numerically marginal without a ray, stop widening this
+relaxation and move compute to a stronger window/order.
