@@ -31,6 +31,8 @@ function checkpoint_identity(; overrides...)
         ),
         project_toml_sha256 = repeat("6", 64),
         manifest_toml_sha256 = repeat("7", 64),
+        bath_representation = "direct_star",
+        chain_mapping_sha256 = nothing,
         julia_version = string(VERSION),
         itensors_version = string(Base.pkgversion(ITensors)),
         itensormps_version = string(Base.pkgversion(ITensorMPS)),
@@ -39,6 +41,35 @@ function checkpoint_identity(; overrides...)
         writer_version = "1.0.0",
     )
     return CheckpointIdentity(; merge(values, overrides)...)
+end
+
+@testset "checkpoint identity binds bath geometry" begin
+    direct = checkpoint_identity()
+    chain = checkpoint_identity(
+        bath_representation = "chain",
+        chain_mapping_sha256 = repeat("a", 64),
+    )
+
+    @test direct.bath_representation == "direct_star"
+    @test direct.chain_mapping_sha256 === nothing
+    @test chain.bath_representation == "chain"
+    @test chain.chain_mapping_sha256 == repeat("a", 64)
+    @test_throws ArgumentError checkpoint_identity(
+        bath_representation = "tree",
+        chain_mapping_sha256 = nothing,
+    )
+    @test_throws ArgumentError checkpoint_identity(
+        bath_representation = "direct_star",
+        chain_mapping_sha256 = repeat("a", 64),
+    )
+    @test_throws ArgumentError checkpoint_identity(
+        bath_representation = "chain",
+        chain_mapping_sha256 = nothing,
+    )
+    @test_throws ArgumentError checkpoint_identity(
+        bath_representation = "chain",
+        chain_mapping_sha256 = "not-a-sha256",
+    )
 end
 
 function checkpoint_fixture()
@@ -165,6 +196,117 @@ end
             @test abs(inner(psi, loaded.psi)) ≈ 1.0 atol = 1.0e-12
             @test basename(loaded.cursor.generation) ==
                   "checkpoint-$(loaded.cursor.metadata_sha256)"
+            metadata = parse_json(
+                joinpath(
+                    root,
+                    "generations",
+                    loaded.cursor.generation,
+                    "metadata.json",
+                )
+            )
+            @test Set(keys(metadata["identity"])) == Set([
+                "request_sha256",
+                "input_payload_sha256",
+                "bath_sha256",
+                "bath_representation",
+                "chain_mapping_sha256",
+                "solver_settings",
+                "source_hashes",
+                "project_toml_sha256",
+                "manifest_toml_sha256",
+                "julia_version",
+                "itensors_version",
+                "itensormps_version",
+                "hdf5_version",
+                "checkpoint_schema",
+                "writer_version",
+            ])
+            @test metadata["identity"]["bath_representation"] == "direct_star"
+            @test metadata["identity"]["chain_mapping_sha256"] === nothing
+        end
+    end
+
+    @testset "same geometry and digest resumes while cross geometry fails" begin
+        for (written, matching, mismatch) in (
+            (
+                checkpoint_identity(),
+                checkpoint_identity(),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
+            ),
+            (
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
+                checkpoint_identity(),
+            ),
+        )
+            mktempdir() do root
+                psi, state = checkpoint_fixture()
+                write_checkpoint_generation(root, written, 2, psi, state)
+                @test load_current_checkpoint(root, matching).identity == matching
+                error = try
+                    load_current_checkpoint(root, mismatch)
+                    nothing
+                catch caught
+                    caught
+                end
+                @test error isa ArgumentError
+                @test sprint(showerror, error) == "ArgumentError: checkpoint identity mismatch"
+            end
+        end
+    end
+
+    @testset "legacy identity metadata fails closed" begin
+        mktempdir() do root
+            identity = checkpoint_identity()
+            psi, state = checkpoint_fixture()
+            cursor = write_checkpoint_generation(root, identity, 2, psi, state)
+            generation = joinpath(root, "generations", cursor.generation)
+            metadata = parse_json(joinpath(generation, "metadata.json"))
+            delete!(metadata["identity"], "bath_representation")
+            delete!(metadata["identity"], "chain_mapping_sha256")
+            metadata_bytes = FiniteBathCheckpoint._canonical_bytes(metadata)
+            metadata_sha256 = bytes2hex(sha256(metadata_bytes))
+            state_sha256 = bytes2hex(
+                sha256(read(joinpath(generation, "state.h5")))
+            )
+            new_name = "checkpoint-$metadata_sha256"
+            write(joinpath(generation, "metadata.json"), metadata_bytes)
+            completion = Dict{String,Any}(
+                "checkpoint_schema" => identity.checkpoint_schema,
+                "writer_version" => identity.writer_version,
+                "generation" => new_name,
+                "metadata_sha256" => metadata_sha256,
+                "state_sha256" => state_sha256,
+            )
+            completion_bytes = FiniteBathCheckpoint._canonical_bytes(completion)
+            completion_sha256 = bytes2hex(sha256(completion_bytes))
+            write(joinpath(generation, "completion.json"), completion_bytes)
+            destination = joinpath(root, "generations", new_name)
+            mv(generation, destination)
+            pointer = Dict{String,Any}(
+                "checkpoint_schema" => identity.checkpoint_schema,
+                "writer_version" => identity.writer_version,
+                "generation" => new_name,
+                "completed_steps" => 2,
+                "metadata_sha256" => metadata_sha256,
+                "state_sha256" => state_sha256,
+                "completion_sha256" => completion_sha256,
+            )
+            write(
+                joinpath(root, "current.json"),
+                FiniteBathCheckpoint._canonical_bytes(pointer),
+            )
+
+            @test_throws ArgumentError load_current_checkpoint(root, identity)
         end
     end
 

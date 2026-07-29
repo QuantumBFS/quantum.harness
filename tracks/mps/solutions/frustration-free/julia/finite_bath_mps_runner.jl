@@ -951,6 +951,8 @@ function checkpoint_identity(request)
         request_sha256 = bytes2hex(sha256(request.raw)),
         input_payload_sha256 = request.payload_digest,
         bath_sha256 = request.bath_sha256,
+        bath_representation = request.bath_representation,
+        chain_mapping_sha256 = request.mapping_sha256,
         solver_settings = Dict(
             "beta" => request.beta,
             "tau" => request.tau,

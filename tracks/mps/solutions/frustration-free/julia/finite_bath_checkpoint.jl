@@ -109,6 +109,8 @@ struct CheckpointIdentity
     request_sha256::String
     input_payload_sha256::String
     bath_sha256::String
+    bath_representation::String
+    chain_mapping_sha256::Union{Nothing,String}
     solver_settings::Dict{String,Any}
     source_hashes::Dict{String,String}
     project_toml_sha256::String
@@ -131,6 +133,8 @@ function CheckpointIdentity(;
     request_sha256,
     input_payload_sha256,
     bath_sha256,
+    bath_representation = "direct_star",
+    chain_mapping_sha256 = nothing,
     solver_settings,
     source_hashes,
     project_toml_sha256,
@@ -152,10 +156,26 @@ function CheckpointIdentity(;
     checkpoint_schema isa Integer && !(checkpoint_schema isa Bool) &&
         checkpoint_schema > 0 ||
         throw(ArgumentError("checkpoint_schema must be a positive integer"))
+    bath_representation isa AbstractString ||
+        throw(ArgumentError("bath_representation must be a string"))
+    representation = String(bath_representation)
+    representation in ("direct_star", "chain") ||
+        throw(ArgumentError("bath_representation is unsupported"))
+    if representation == "direct_star"
+        chain_mapping_sha256 === nothing ||
+            throw(ArgumentError("direct_star identity requires null chain_mapping_sha256"))
+        mapping_sha256 = nothing
+    else
+        mapping_sha256 = _sha256(
+            chain_mapping_sha256, "chain_mapping_sha256"
+        )
+    end
     return CheckpointIdentity(
         _sha256(request_sha256, "request_sha256"),
         _sha256(input_payload_sha256, "input_payload_sha256"),
         _sha256(bath_sha256, "bath_sha256"),
+        representation,
+        mapping_sha256,
         settings,
         hashes,
         _sha256(project_toml_sha256, "project_toml_sha256"),
@@ -433,6 +453,8 @@ function _identity_dict(identity::CheckpointIdentity)
         "request_sha256" => identity.request_sha256,
         "input_payload_sha256" => identity.input_payload_sha256,
         "bath_sha256" => identity.bath_sha256,
+        "bath_representation" => identity.bath_representation,
+        "chain_mapping_sha256" => identity.chain_mapping_sha256,
         "solver_settings" => identity.solver_settings,
         "source_hashes" => identity.source_hashes,
         "project_toml_sha256" => identity.project_toml_sha256,
@@ -453,6 +475,8 @@ function _identity_from_dict(value)
             "request_sha256",
             "input_payload_sha256",
             "bath_sha256",
+            "bath_representation",
+            "chain_mapping_sha256",
             "solver_settings",
             "source_hashes",
             "project_toml_sha256",
@@ -470,6 +494,8 @@ function _identity_from_dict(value)
         request_sha256 = value["request_sha256"],
         input_payload_sha256 = value["input_payload_sha256"],
         bath_sha256 = value["bath_sha256"],
+        bath_representation = value["bath_representation"],
+        chain_mapping_sha256 = value["chain_mapping_sha256"],
         solver_settings = value["solver_settings"],
         source_hashes = value["source_hashes"],
         project_toml_sha256 = value["project_toml_sha256"],

@@ -309,6 +309,21 @@ end
     @test chain.parameters.mu == 0.0
 end
 
+@testset "runner checkpoint identity uses validated geometry" begin
+    direct_request =
+        write_and_read_request(resign_runner_request!(minimal_runner_request()))
+    chain_request = write_and_read_request(chain_runner_request())
+    direct = checkpoint_identity(direct_request)
+    chain = checkpoint_identity(chain_request)
+
+    @test direct.bath_representation == "direct_star"
+    @test direct.chain_mapping_sha256 === nothing
+    @test chain.bath_representation == "chain"
+    @test chain.chain_mapping_sha256 == chain_request.mapping_sha256
+    @test direct.request_sha256 == bytes2hex(sha256(direct_request.raw))
+    @test chain.request_sha256 == bytes2hex(sha256(chain_request.raw))
+end
+
 @testset "runner geometry requires exact representation and mapping pairing" begin
     direct_with_mapping = chain_runner_request()
     payload = strict_json_read(
