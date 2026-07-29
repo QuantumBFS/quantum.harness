@@ -13,8 +13,10 @@ using Mosek
 using MosekTools
 
 const B = BaselineRunnerUtilities
-const RESULT_SCHEMA = "shastry-l1d2-full-state-spatial-solve-result-v1"
+const RESULT_SCHEMA = "shastry-l1d2-full-state-solve-result-v2"
 const RUNMETA_SCHEMA = "shastry-l1d2-full-state-spatial-mof-v1"
+const SPIN_SPATIAL_RUNMETA_SCHEMA =
+    "shastry-l1d2-full-state-spin-spatial-mof-v1"
 
 function progress(message::AbstractString)
     println("[ss-full-state-spatial-solve] ", message)
@@ -111,11 +113,9 @@ function validate_input_files(options)
 end
 
 function validate_runmeta(runmeta, input_files, options)
-    B.require_equal(
-        runmeta["schema_version"],
-        RUNMETA_SCHEMA,
-        "runmeta schema",
-    )
+    runmeta_schema = runmeta["schema_version"]
+    runmeta_schema in (RUNMETA_SCHEMA, SPIN_SPATIAL_RUNMETA_SCHEMA) ||
+        error("unsupported runmeta schema: $runmeta_schema")
     B.require_equal(runmeta["state"], "complete", "runmeta state")
     B.require_equal(runmeta["mode"], "mof", "runmeta mode")
     B.require_equal(
@@ -178,8 +178,6 @@ function validate_runmeta(runmeta, input_files, options)
 
     reduced = runmeta["reduced"]
     B.require_equal(reduced["equality_count"], 0, "reduced equalities")
-    B.require_equal(reduced["source_moments"], 72_172, "source moments")
-    B.require_equal(reduced["spatial_moments"], 37_009, "spatial moments")
     B.require_equal(reduced["maximum_side"], 198, "maximum PSD side")
     B.require_equal(
         reduced["psd_triangle_entries"],
@@ -199,6 +197,65 @@ function validate_runmeta(runmeta, input_files, options)
         [1, 1, 1],
         "gap block dimensions",
     )
+    if runmeta_schema == RUNMETA_SCHEMA
+        B.require_equal(
+            reduced["source_moments"],
+            72_172,
+            "pre-spatial source moments",
+        )
+        B.require_equal(
+            reduced["spatial_moments"],
+            37_009,
+            "spatial moments",
+        )
+    else
+        B.require_equal(
+            setup["exact_additional_reduction"],
+            "proper-spin-axis-permutations-S3-after-anti-diagonal",
+            "spin-spatial reduction label",
+        )
+        B.require_equal(
+            reduced["source_moments"],
+            37_009,
+            "pre-spin spatial moments",
+        )
+        quotient_moments = Int(reduced["spin_spatial_moments"])
+        eliminated_moments = Int(reduced["eliminated_spin_moments"])
+        quotient_moments > 0 ||
+            error("spin-spatial quotient must retain at least one moment")
+        quotient_moments + eliminated_moments == 37_009 ||
+            error("spin-spatial moment accounting is inconsistent")
+
+        truth = runmeta["spin_spatial_truth"]
+        for key in (
+            "exact",
+            "source_covariance_exact",
+            "equality_space_invariant",
+            "hamiltonian_invariant",
+            "row_actions_close",
+            "coefficient_covariant",
+            "source_equality_space_invariant",
+        )
+            B.require_equal(truth[key], true, "spin-spatial truth $key")
+        end
+        B.require_equal(
+            truth["source_moments"],
+            37_009,
+            "truth source moments",
+        )
+        B.require_equal(
+            truth["quotient_moments"],
+            quotient_moments,
+            "truth quotient moments",
+        )
+        B.require_equal(
+            truth["eliminated_moments"],
+            eliminated_moments,
+            "truth eliminated moments",
+        )
+        Int(truth["coefficient_count"]) > 0 ||
+            error("spin-spatial truth checked no PSD coefficients")
+    end
 
     source = runmeta["source"]
     source_commit = source["git_commit"]
@@ -222,7 +279,7 @@ function validate_runmeta(runmeta, input_files, options)
     end
     return Dict(
         "passed" => true,
-        "schema" => RUNMETA_SCHEMA,
+        "schema" => runmeta_schema,
         "source_commit" => source_commit,
         "source_tree" => source["git_tree"],
         "source_file_sha256" => verified_hashes,
@@ -230,6 +287,17 @@ function validate_runmeta(runmeta, input_files, options)
         "reduced_assembly_sha256" => reduced["assembly_sha256"],
         "coefficient_map_sha256" => reduced["coefficient_map_sha256"],
     )
+end
+
+function reduced_moment_count(runmeta)
+    reduced = runmeta["reduced"]
+    schema = runmeta["schema_version"]
+    if schema == RUNMETA_SCHEMA
+        return Int(reduced["spatial_moments"])
+    elseif schema == SPIN_SPATIAL_RUNMETA_SCHEMA
+        return Int(reduced["spin_spatial_moments"])
+    end
+    error("unsupported runmeta schema: $schema")
 end
 
 function real_psd_constraints(model::JuMP.Model)
@@ -251,7 +319,7 @@ function validate_reloaded_model(model::JuMP.Model, runmeta)
     reduced = runmeta["reduced"]
     B.require_equal(
         JuMP.num_variables(model),
-        Int(reduced["spatial_moments"]),
+        reduced_moment_count(runmeta),
         "MOF variables",
     )
     B.require_equal(
@@ -285,7 +353,14 @@ function validate_reloaded_model(model::JuMP.Model, runmeta)
         sort!(expected_dimensions),
         "MOF PSD dimensions",
     )
-    B.require_equal(length(constraints), 19, "MOF PSD block count")
+    expected_psd_count =
+        length(reduced["positive_block_dimensions"]) +
+        length(reduced["gap_block_dimensions"])
+    B.require_equal(
+        length(constraints),
+        expected_psd_count,
+        "MOF PSD block count",
+    )
     triangle_entries =
         sum(dimension * (dimension + 1) ÷ 2 for dimension in values(dimensions))
     B.require_equal(
@@ -293,18 +368,21 @@ function validate_reloaded_model(model::JuMP.Model, runmeta)
         Int(reduced["psd_triangle_entries"]),
         "MOF PSD triangle entries",
     )
+    constraint_count = JuMP.num_constraints(
+        model;
+        count_variable_in_set_constraints=false,
+    )
+    expected_constraint_count =
+        1 + Int(reduced["equality_count"]) + expected_psd_count
     B.require_equal(
-        JuMP.num_constraints(
-            model;
-            count_variable_in_set_constraints=false,
-        ),
-        20,
+        constraint_count,
+        expected_constraint_count,
         "MOF constraint count excluding variable sets",
     )
     return Dict(
         "passed" => true,
         "variable_count" => JuMP.num_variables(model),
-        "constraint_count_excluding_variable_sets" => 20,
+        "constraint_count_excluding_variable_sets" => constraint_count,
         "psd_constraint_count" => length(constraints),
         "psd_block_dimensions" => dimensions,
         "max_psd_side_dimension" => maximum(values(dimensions)),
@@ -529,7 +607,7 @@ function main(arguments::Vector{String}=ARGS)
         )
 
         diagnostics = if JuMP.has_values(model)
-            progress("reconstructing and auditing all 19 real PSD blocks")
+            progress("reconstructing and auditing all real PSD blocks")
             solution_diagnostics(model, options.audit_tolerance)
         else
             Dict(
