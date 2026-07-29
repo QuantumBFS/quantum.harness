@@ -30,6 +30,7 @@ pub struct McBlockRecord {
     pub measurement_sweeps: usize,
     pub block_index: usize,
     pub block_sweeps: usize,
+    pub cluster_updates_per_sweep: usize,
     pub energy_sum: i64,
     pub energy_squared_sum: i64,
     pub measurement_count: usize,

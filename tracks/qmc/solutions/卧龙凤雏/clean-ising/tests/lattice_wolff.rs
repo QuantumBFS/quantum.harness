@@ -1,6 +1,6 @@
 use clean_ising::lattice::IsingLattice;
 use clean_ising::rng::make_rng;
-use clean_ising::wolff::{effective_sweep, wolff_update};
+use clean_ising::wolff::{effective_sweep, fixed_cluster_sweep, wolff_update};
 
 #[test]
 fn periodic_neighbors_wrap_both_axes() {
@@ -34,4 +34,14 @@ fn effective_sweep_flips_at_least_one_lattice_volume() {
     assert!(stats.total_flipped >= lattice.site_count());
     assert!(stats.updates > 0);
     assert!((1..=lattice.site_count()).contains(&stats.max_cluster_size));
+}
+
+#[test]
+fn fixed_cluster_sweep_applies_the_requested_transition_count() {
+    let mut rng = make_rng(29);
+    let mut lattice = IsingLattice::random(6, 8, &mut rng);
+    let stats = fixed_cluster_sweep(&mut lattice, 0.2, &mut rng, 7);
+    assert_eq!(stats.updates, 7);
+    assert!(stats.total_flipped >= 7);
+    assert_eq!(lattice.energy(), lattice.recompute_energy());
 }

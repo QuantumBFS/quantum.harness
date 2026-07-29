@@ -71,6 +71,30 @@ pub fn effective_sweep(
     stats
 }
 
+pub fn fixed_cluster_sweep(
+    lattice: &mut IsingLattice,
+    k: f64,
+    rng: &mut Xoshiro256PlusPlus,
+    updates: usize,
+) -> SweepStats {
+    assert!(
+        updates > 0,
+        "fixed cluster sweep requires at least one update"
+    );
+    let mut stats = SweepStats {
+        updates: 0,
+        total_flipped: 0,
+        max_cluster_size: 0,
+    };
+    for _ in 0..updates {
+        let cluster_size = wolff_update(lattice, k, rng);
+        stats.updates += 1;
+        stats.total_flipped += cluster_size;
+        stats.max_cluster_size = stats.max_cluster_size.max(cluster_size);
+    }
+    stats
+}
+
 fn begin_cluster(lattice: &mut IsingLattice) {
     lattice.mark_epoch = lattice.mark_epoch.wrapping_add(1);
     if lattice.mark_epoch == 0 {
