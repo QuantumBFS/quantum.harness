@@ -1622,3 +1622,34 @@ the CPU candidate archive SHA-256 is
 
 Operationally, the full 76-core budget is now reassigned to complete
 depth-23 exact scans for oddcycle seeds 117, 132, and 147 in parallel.
+
+## 2026-07-29 — Complete exact depth-23 oddcycle scan
+
+Commit `ffa609d` generalized the exact integer/Bareiss short-word verifier
+to arbitrary frozen transpose-paired candidate cards.  The 76 available
+single-threaded processes were split concurrently across
+`exact5-oddcycle-block-pair:{117,132,147}`.  All three collectors report:
+
+- `complete=true`;
+- `status=strictly-positive`;
+- 384,359 safe cyclic/transpose-reversal classes;
+- 16,777,214 covered raw words (every nonempty binary word through
+  length 23);
+- no nonpositive witness.
+
+For every seed, the global exact minimum occurs at the one-letter pure
+word; the depth-23 minimum within that length is likewise the pure word.
+The final `collect.json` SHA-256 values are:
+
+- seed 117:
+  `8a726c606f942d7300088c2eda5689bb67e13d616ba206c7773a50559c43dd82`;
+- seed 132:
+  `2d0cafe768a44e9847cada60360c3e7c2131aadc239f53a06a112024550367f0`;
+- seed 147:
+  `c7ee334574b4f098bb85d5a7d48b14378f96a11bf6757b2ead9b352ec2bf1a01`.
+
+The CPU shard archive SHA-256 is
+`b70e6dc0a76792e8c9f0c0a597402cb6454ae53b6b501edbc8620f29bb814921`.
+These are now the leading finite-depth survivors.  All 76 cores immediately
+continue with independent exact-gated adversarial searches at lengths
+60, 80, 100, and 150.
