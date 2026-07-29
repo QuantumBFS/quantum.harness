@@ -275,6 +275,46 @@ function independent_sector_spectrum(
     return eigvals(Hermitian(matrix))
 end
 
+function occupation_product_mps_basis(sites, n_up::Int, n_down::Int)
+    n_orbitals = length(sites) ÷ 2
+    up_basis = [
+        state for state in 0:((1 << n_orbitals) - 1) if
+        count_ones(state) == n_up
+    ]
+    down_basis = [
+        state for state in 0:((1 << n_orbitals) - 1) if
+        count_ones(state) == n_down
+    ]
+    basis = MPS[]
+    sizehint!(basis, length(up_basis) * length(down_basis))
+    for up_state in up_basis, down_state in down_basis
+        labels = fill("Emp", length(sites))
+        for orbital in 1:n_orbitals
+            mask = 1 << (orbital - 1)
+            occupied_up = !iszero(up_state & mask)
+            occupied_down = !iszero(down_state & mask)
+            labels[2 * orbital - 1] =
+                occupied_up ?
+                (occupied_down ? "UpDn" : "Up") :
+                (occupied_down ? "Dn" : "Emp")
+        end
+        push!(basis, MPS(sites, labels))
+    end
+    return basis
+end
+
+function production_mpo_sector_matrix(parameters, n_up::Int, n_down::Int)
+    sites = interleaved_sites(parameters)
+    hamiltonian = physical_hamiltonian_mpo(sites, parameters)
+    basis = occupation_product_mps_basis(sites, n_up, n_down)
+    matrix = Matrix{ComplexF64}(undef, length(basis), length(basis))
+    for source in eachindex(basis), target in eachindex(basis)
+        matrix[target, source] =
+            inner(basis[target]', hamiltonian, basis[source])
+    end
+    return matrix
+end
+
 function chain_parameters(n_bath::Int; U = 0.8, mu = 0.07)
     fixture = chain_equivalence_fixture(n_bath)
     return FiniteBathParameters(
@@ -379,29 +419,27 @@ end
     ]
     for (left, right, coefficient) in links
         for (spin, state) in (("up", "Up"), ("dn", "Dn"))
-            source_even = fill("Emp", length(sites))
-            target_even = fill("Emp", length(sites))
-            source_even[right] = state
-            target_even[left] = state
-            source_odd = copy(source_even)
-            target_odd = copy(target_even)
-            source_odd[left + 1] = "Up"
-            target_odd[left + 1] = "Up"
-
-            @test real(
-                inner(
-                    MPS(sites, target_even)',
-                    hamiltonian,
-                    MPS(sites, source_even),
-                ),
-            ) ≈ coefficient atol = 1.0e-14
-            @test real(
-                inner(
-                    MPS(sites, target_odd)',
-                    hamiltonian,
-                    MPS(sites, source_odd),
-                ),
-            ) ≈ -coefficient atol = 1.0e-14
+            for (parity_state, expected) in
+                (("Emp", coefficient), ("Up", -coefficient))
+                elements = ComplexF64[]
+                for (source_site, target_site) in
+                    ((right, left), (left, right))
+                    source = fill("Emp", length(sites))
+                    target = fill("Emp", length(sites))
+                    source[source_site] = state
+                    target[target_site] = state
+                    source[left + 1] = parity_state
+                    target[left + 1] = parity_state
+                    element = inner(
+                        MPS(sites, target)',
+                        hamiltonian,
+                        MPS(sites, source),
+                    )
+                    push!(elements, element)
+                    @test element ≈ expected atol = 1.0e-14
+                end
+                @test elements[1] ≈ conj(elements[2]) atol = 1.0e-14
+            end
         end
     end
 end
@@ -417,21 +455,26 @@ end
           expected atol = 0.0
 end
 
-@testset "independent dense star and chain one-up one-down spectra agree" begin
+@testset "production chain MPO one-up one-down spectra match direct star" begin
     for n_bath in 1:6, interaction in (0.0, 0.8)
         direct = direct_parameters(n_bath; U = interaction)
         chain = chain_parameters(n_bath; U = interaction)
-        @test independent_sector_spectrum(chain, 1, 1) ≈
+        matrix = production_mpo_sector_matrix(chain, 1, 1)
+        @test ishermitian(matrix)
+        @test eigvals(Hermitian(matrix)) ≈
               independent_sector_spectrum(direct, 1, 1) atol = 8.0e-12
     end
 end
 
-@testset "independent dense star and chain spectra agree in every small sector" begin
+@testset "production chain MPO spectra and Hermiticity in every small sector" begin
     for n_bath in 1:3, interaction in (0.0, 0.8)
         direct = direct_parameters(n_bath; U = interaction)
         chain = chain_parameters(n_bath; U = interaction)
         for n_up in 0:(n_bath + 1), n_down in 0:(n_bath + 1)
-            @test independent_sector_spectrum(chain, n_up, n_down) ≈
+            (n_up, n_down) == (1, 1) && continue
+            matrix = production_mpo_sector_matrix(chain, n_up, n_down)
+            @test ishermitian(matrix)
+            @test eigvals(Hermitian(matrix)) ≈
                   independent_sector_spectrum(direct, n_up, n_down) atol =
                 8.0e-12
         end
