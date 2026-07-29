@@ -1,6 +1,7 @@
 # [peps] anyon-correlator: anyon correlators from PEPS transfer matrices across the toric-code field transition
 
-**Status:** see [PROGRESS.md](PROGRESS.md) (current milestone M1) · plan: [PLAN.md](PLAN.md)
+**Status:** M2 random-init optimization objective complete; paused before M3. See
+[M2_REPORT.md](M2_REPORT.md), [PROGRESS.md](PROGRESS.md), and [PLAN.md](PLAN.md).
 
 ## Team
 

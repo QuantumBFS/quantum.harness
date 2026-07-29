@@ -121,3 +121,4 @@ include(joinpath(@__DIR__, "..", "scripts", "tc_peps.jl"))
     flush(stdout)
 end
 
+include(joinpath(@__DIR__, "tied_ad_core_tests.jl"))

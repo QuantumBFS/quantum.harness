@@ -44,16 +44,18 @@ Hamiltonian (issue convention):
   **1 = (0,+), e = (0,−), m = (1,+), ε = (1,−)**, subject to V1/V2 verification (§5).
 - **C6 Ground-state sector.** iPEPS converges to one topological sector; we accept and
   record it (initialization, seed), we do not control it.
-- **C7 Virtual-ℤ₂ symmetry — exact throughout the main workflow.** See §4 for the four
+- **C7 Virtual-ℤ₂ symmetry — exact throughout the production workflow.** See §4 for the four
   required distinctions. The local PEPS tensors remain **exactly virtual-ℤ₂ symmetric
-  (intertwiners) at every stage**: random initialization, simple update (or full
-  update), AD `fixedpoint` optimization, and adiabatic field continuation. This is an
-  exact ansatz constraint, never relaxed in the main workflow, so that the ordinary and
+  (intertwiners) throughout M3 and later production**: random initialization, simple
+  update (or full update), AD `fixedpoint` optimization, and adiabatic field
+  continuation. This is an exact production ansatz constraint so that the ordinary and
   twisted transfer operators retain well-defined (g, α) sectors. The symmetry pattern
   of the transfer-matrix **boundary fixed points is never imposed** (§4.4). The
-  dense/unconstrained (nonsymmetric ComplexF64) calculation is retained **only as a
-  limited validation comparison** (§5, M3): energy comparison at 1–2 field points,
-  small D — never the production path.
+  user-ratified M2 interim optimization is an explicit calibration exception: one
+  dense/unconstrained ComplexF64 `D=2` tensor was tied across the `(2,2)` cell and
+  optimized from random values to validate the AD/environment pipeline. It is not a
+  sector-resolved M3 production state. Dense calculations remain limited validation
+  comparisons after this M2 calibration.
 - **C8 Normalization.** Energies **per spin**, N = number of edge spins = 2 per unit
   cell. h=0 anchor: E₀/N = −(Jₑ+Jₘ)/2 = −1. Correlators normalized by the ⟨ψ|ψ⟩
   network value.
@@ -110,7 +112,8 @@ insertions at separation r where accessible.
    the cycle gas in the X basis = the cut gas in the Z basis = ∏ₛ(1+Aₛ)|0⟩.
    Verified: E_cell = −8 and ⟨Aₛ⟩ = ⟨B_p⟩ = 1 to 2e-16 by CTMRG with zero
    optimization. Maintained exactly through initialization, simple/full update,
-   AD optimization, and field continuation (C7).
+   AD optimization, and field continuation in the symmetry-preserving production
+   route (C7). The dense tied-tensor M2 calibration is the documented exception.
 3. **Pulling-through relations.** The operational content of the symmetry. For the
    composite rank-6 tensor (amended at M2): Z^{⊗4}·T = T on the virtual legs
    (virtual invariance), and a virtual Z on a single leg equals a physical Z on the
@@ -168,8 +171,8 @@ insertions at separation r where accessible.
   `TensorMap{T}(undef, cod, dom)` (no function-based form); iterate `blocks(t)`, access
   `block(t, c)`, list `blocksectors(t)`; `@tensor M[a; b]` — the semicolon is required,
   otherwise all free indices land in the codomain (V⊗V′ vector instead of an
-  endomorphism V→V). `julia-env/Project.toml` carries PEPSKit locally but stays
-  **uncommitted** (submission cleanliness: commits confined to this folder).
+   endomorphism V→V). `julia-env/Project.toml` records the direct PEPSKit, JLD2, and
+   Zygote dependencies required by the retained M2 scripts.
 
 ### M1 — Hamiltonian + required 2×2 ED unit test
 - **Purpose:** validate term construction independently of any PEPS machinery.
@@ -202,6 +205,10 @@ insertions at separation r where accessible.
 - **Files/outputs:** `scripts/groundstate_h0.jl`;
   `results/<run>/groundstate_h0.jld2` (tensors+env); `energy_convergence.csv`;
   `stabilizers_h0.csv`; `spectrum_h0.csv`; optimizer log (residuals, gradient norms).
+- **Interim outputs (2026-07-30):** `scripts/ad_tied_core.jl`,
+  `scripts/ad_tied_gd.jl`, `tests/tied_ad_core_tests.jl`, and
+  `M2_REPORT.md`; final local checkpoint
+  `results/20260730-m2-chi8-warm-continue-77-to100/random-continue_step086.jld2`.
 - **Acceptance:** |E₀/N + 1| ≤ 1e-6 (target 1e-8); ⟨Aₛ⟩=⟨B_p⟩=1 within the same
   tolerance site-resolved; spectrum shows the expected fixed-point structure;
   CTMRG/VUMPS cross-check agrees.
@@ -209,14 +216,15 @@ insertions at separation r where accessible.
   stabilizer sector, then grow the other — validated 2026-07-28, see FINDINGS.md §6)
   or product-state init; AD settings (gradient-solver/gauge mode, LBFGS memory);
   then the **exact-tensor fallback** (§5).
-- **Depends/status:** M0, M1 → **in progress (2026-07-28)** — machinery validated
-  (exact tensor: E_cell = −8, stabilizers = 1 to 2e-16; normalization anchored:
-  `expectation_value` = unit-cell total; SU gates exact per single-gate tanh(2dt)
-  check). **Key finding:** random-init full-circuit SU stalls at non-ground fixed
-  points at every D tested (2, 3, 4, 6); documented with mechanism and the validated
-  working routes (stage-wise SU, product-state init) in `FINDINGS.md`. SU-stage
-  schedule amendment (stage-wise SU: pin A sector → plaquette-only phase) proposed,
-  awaiting ratification; AD and spectrum/VUMPS stages pending.
+- **Depends/status:** M0, M1 → **random-init optimization objective completed
+  (2026-07-30)**. A random dense `D=2` tensor, tied across the `(2,2)` cell and
+  optimized by projected fixed-point AD with Armijo backtracking, reached
+  E_cell = −7.999999995072 (E/N = −0.999999999384) at χ=8. Maximum
+  site-resolved star/plaquette errors are 5.95e-10/6.38e-10. The exact tensor
+  was used only as an independent stationary benchmark. See `M2_REPORT.md` for
+  the route diagnosis and artifacts. The original χ=20, transfer-spectrum, and
+  VUMPS checks above are explicitly deferred at this interim boundary and are
+  not claimed as completed; M3 has not started.
 
 ### M3 — Adiabatic ground states along (hₓ, 0) (workflow step 4)
 - **Purpose:** production ground states on the MVP path.
