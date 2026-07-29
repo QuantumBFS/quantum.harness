@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T16:50:54Z
+Updated: 2026-07-29T16:58:02Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -110,5 +110,12 @@ Updated: 2026-07-29T16:50:54Z
 - Protected xH5 baseline `23011251` printed its `attach Mosek and optimize`
   marker after about 1:40, but had not yet emitted a Mosek iteration log at
   2026-07-29T16:50Z. Treat it as model transfer/bridging, not a result.
+- Protected xH5 baseline `23011251` subsequently ended naturally as
+  `OUT_OF_MEMORY` (`0:125`) after 1:48:50, before any Mosek iteration. Slurm
+  recorded 234,603,960 KiB MaxRSS and `/usr/bin/time` 251,835,816 KiB against
+  its 240 GB request. Exact coefficient assembly took 1,835.530 s and JuMP
+  construction 3,991.145 s; the OOM occurred during JuMP→Mosek transfer. It
+  was not cancelled, is not a feasibility result, and should not be rerun with
+  the same signature.
 
 No user input or new credential is currently required.

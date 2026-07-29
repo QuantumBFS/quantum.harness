@@ -1149,3 +1149,13 @@ Mosek optimization then started and completed presolve in 6.28 s with no
 dependencies or eliminated constraints. This establishes an exact structural
 match and a numerically instantiated task, but not yet feasibility or a gap
 bound; wait for a terminal status and the corresponding residual/ray audit.
+
+The protected xH5 JuMP baseline `23011251` ended naturally as
+`OUT_OF_MEMORY`, exit `0:125`, after 1:48:50; it was not cancelled. Its exact
+coefficient and JuMP stages completed (1,835.530 s and 3,991.145 s), then the
+process was killed while `JuMP.optimize!` copied/bridged the model into Mosek,
+before any Mosek iteration log. Slurm measured 234,603,960 KiB MaxRSS and
+`/usr/bin/time` measured 251,835,816 KiB, exhausting the 240 GB allocation.
+This closes the conservative xH5 baseline as an operational failure, not a
+feasibility result. Do not rerun the same JuMP signature; continue the exact
+native task, whose construction peak was about 15.6 GB including solver entry.

@@ -654,3 +654,9 @@ Updated: 2026-07-29 UTC.
   `935aab36220ec3f0b2bfaa92ea7527463c9dc1a2d579014798e4fe5534b6b1b4`.
   Stage RSS was 13,829,968 KiB. Mosek is now running; presolve took 6.28 s.
   No feasibility or spectral-gap conclusion is available yet.
+- Protected xH5 baseline `23011251` ended `OUT_OF_MEMORY` after 1:48:50 during
+  JuMP→Mosek transfer, before solver iterations. Slurm MaxRSS was 234,603,960
+  KiB (`/usr/bin/time`: 251,835,816 KiB) against 240 GB. Its coefficient and
+  JuMP stages had completed in 1,835.530 s and 3,991.145 s. This is not a
+  physics result; do not repeat that signature. Native job `118174638`
+  remains the active exact decision solve.
