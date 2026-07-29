@@ -1,0 +1,31 @@
+{
+  "schema": "oddcycle-path-metric-result-v1",
+  "status": "complete",
+  "points": [
+    [0.001, 1.0, 1.0],
+    [0.8, 1.0, 1.0]
+  ],
+  "exhaustive": {
+    "status": "all-tested-words-positive",
+    "max_depth_reached": 10,
+    "word_count": 1398100,
+    "minimum_determinant_float64": 35.199999999999996,
+    "minimum_determinant_exact": "176/5",
+    "witness": "2",
+    "witness_depth": 1
+  },
+  "random": {
+    "status": "all-tested-words-positive",
+    "samples": 100000,
+    "max_depth_reached": 40,
+    "evaluated_prefixes": 4000000,
+    "rng_seed": 923771,
+    "minimum_determinant_float64": 35.199999999999996,
+    "minimum_determinant_exact": "176/5",
+    "witness": "3",
+    "witness_depth": 1,
+    "witness_sample": 0,
+    "exact_nonpositive_replays": 0
+  },
+  "interpretation": "empirical regression evidence; exact theorem is independent"
+}

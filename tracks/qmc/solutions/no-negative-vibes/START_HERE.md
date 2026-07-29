@@ -7,6 +7,25 @@
 
 ## 现在做到哪里
 
+### 2026-07-29 当前论文主线
+
+- 最终候选：
+  `{B(1/1000), B(1/1000)^T, B(4/5), B(4/5)^T}`。
+- 任意深度定理：四状态有理 Lorentz 路径度量、16 个严格转移间隙和相干
+  时间定向精确证明 `det(I+W)>0`。
+- 严格排重：精确 Gordan–Stiemke 对偶证明不存在满足全部前向/转置间隙的
+  公共实对称度量。
+- 物理映射：`T/41=exp(-H)` 的五个辅助场系数为
+  `(37,1,1,1,1)/41`；`H` Hermitian、数守恒并且非 Gaussian，因此相互作用。
+- 一键重放：`python -m oracle.oddcycle_final_certificate`。
+- 阅读顺序：先看
+  [路径度量证书](docs/ODDCYCLE_PATH_METRIC_CERTIFICATE.md)、
+  [无公共度量证书](docs/ODDCYCLE_NO_COMMON_METRIC_CERTIFICATE.md)、
+  [物理 transfer](docs/ODDCYCLE_PAIR_PHYSICAL.md)，再看
+  [论文草稿](docs/ODDCYCLE_PAPER_DRAFT.md) 和
+  [挑战审计](docs/ODDCYCLE_CHALLENGE_AUDIT.md)。
+- 旧 continuum alphabet 已精确落入 common-metric 类，不再作为新发现。
+
 - 已完成题目拆解、主要已知定理和新颖性边界的调研。
 - determinant oracle、Majorana 直接 Fock/Spin 迹 oracle、25 个基线结构生成器、可恢复参数
   扫描和汇总绘图已经实现并通过自动测试。

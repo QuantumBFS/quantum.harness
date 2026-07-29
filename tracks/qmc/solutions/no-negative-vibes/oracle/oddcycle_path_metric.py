@@ -408,6 +408,13 @@ def _verify_exact_time_orientation(
     return {
         "time_vectors": [list(vector) for vector in time_vectors],
         "orientation_signs": [int(value) for value in orientation_signs],
+        "oriented_time_vectors": [
+            [
+                int(orientation_signs[index] * entry)
+                for entry in time_vectors[index]
+            ]
+            for index in range(len(time_vectors))
+        ],
         "time_like_norms": [
             {
                 "numerator": int(sp.numer(value)),
