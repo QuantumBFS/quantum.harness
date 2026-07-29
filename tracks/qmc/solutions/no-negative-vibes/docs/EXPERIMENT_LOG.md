@@ -1546,3 +1546,47 @@ straddle of `-1`; the smallest observed upper factor was about
 `25.8985028294`, at a cyclic representative such as `11011111111`, with
 roots about `-9.97367` and `-3.88605`.  This margin guides the next exact
 block certificate but is not itself used as proof.
+
+### Exact long-word counterexample and retirement of seed 61
+
+The unresolved `A=tr(W)-rho(W)<0` branch is not merely a proof gap.
+Commit `c98b913` freezes the following length-150 word:
+
+```text
+000000110010101100101011010101100101010101100101100101011001010100110100110011010101001010101010110101010010110010101101010011010011010011010010100000
+```
+
+Its word SHA-256 is
+`e36ea7ebf0c2038acc3f2a2e0cc97c5fed4a497c8fc9aafa12b61fb24ff4d072`.
+With `A=768 B` and integer product `M`, direct exact evaluation gives
+
+`det(I+B_w) = det(M+768^150 I)/768^750 < 0`.
+
+The unreduced integer numerator has 2,223 decimal digits and SHA-256
+`3ac8e5c102e147edfda33c646a43b1bef3118977f234f7c6a61996e056d69bfe`.
+An independent call through the frozen rational determinant oracle reduces
+to exactly the same fraction and also returns a negative numerator
+(reduced-numerator SHA-256
+`8b04e0cda7c1a8c7c0a12655db674cce4e66b7c6e315d84b53eaea6fde414956`).
+The two counterexample tests and the adjacent spectral-tail tests report
+4 passes.
+
+High-precision eigenvalues are diagnostic only: the straddling root is
+approximately `lambda_3=-0.9805654650`.  The exact acceptance gate is the
+integer determinant above.  Seed 61 is therefore permanently retired as
+an arbitrary-word sign-free candidate, and all 60 active full-Fock searches
+for it were stopped immediately.
+
+For provenance, commit `bf2aeef` also contains a correct exact conditional
+lemma: a five-letter weighted first/third-compound ratio
+`0.8899447041...<1` proves `lambda_2 lambda_3>1` for every length at least
+18, and together with the lower-band certificate proves positivity of the
+`A>=0` branch from length 24.  The counterexample lies exactly in the
+remaining `A<0` branch, so this lemma is retained as methodology but cannot
+rescue the candidate.
+
+Commit `38e04a5` adds an exact, safely symmetry-reduced short-word verifier.
+Only cyclic rotation and transpose-reversal are quotiented; a concrete
+six-letter mismatch rejects the tempting but invalid bit-complement
+quotient.  Its protocol is being generalized to the next surviving
+candidates rather than spending production time on the now-retired seed.
