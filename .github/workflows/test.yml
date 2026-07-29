@@ -31,3 +31,18 @@ jobs:
       - run: make install-pdf-render
       - run: test -f .venv/Scripts/python.exe
       - run: .venv/Scripts/python.exe -c "import pymupdf4llm; print('ok')"
+
+  floquet-julia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+      - name: Instantiate Floquet reproduction
+        working-directory: tracks/mps/solutions/reproduction/floquet_spin_boson
+        run: julia --project=envs/current -e 'import Pkg; Pkg.instantiate()'
+      - name: Run Floquet reproduction tests
+        working-directory: tracks/mps/solutions/reproduction/floquet_spin_boson
+        run: julia --project=envs/current test/runtests.jl

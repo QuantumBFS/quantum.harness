@@ -10,6 +10,7 @@ include("floquet_operator.jl")
 include("steady_state.jl")
 include("correlations.jl")
 include("heat_current.jl")
+include("convergence.jl")
 include("reference_data.jl")
 include("redfield_magnus.jl")
 include("diagnostics.jl")
@@ -37,6 +38,8 @@ export RunConfig, Fig3Config, Fig5Config, period_grid,
        DeltaPeak, delta_peak_weights, group_frequencies_by_dt,
        integrated_current, period_averaged_power, pending_fig5_points,
        fig5_config_hash,
+       REQUIRED_CONVERGENCE_AXES, require_convergence_evidence,
+       estimate_resources,
        run_fig3, run_fig5,
        floquet_eigen_diagnostics,
        load_reference_curve, fig3_reference_grid, load_fig3_reference,

@@ -1,0 +1,73 @@
+# Floquet spin-boson reproduction
+
+This directory implements the single-spin calculations for *Exact Floquet
+dynamics of strongly damped driven quantum systems* (arXiv:2511.08754v3).
+It extends PR #207 without treating the reduced 4×4 density-matrix channel as
+a non-Markovian Floquet map.
+
+## Physics and conventions
+
+Ω=1, S=σz, and Hsys(t)=σx/2+Hdrive(t). Longitudinal driving uses
+Hdrive=εd cos(ωd t)σx; transversal driving uses
+Hdrive=εd cos(ωd t)σz. The bath is J(ω)=αω exp(−ω/ωc), with α=0.05,
+ωc=2.5, εd=1, and temperature zero. Every Floquet period is discretized as
+T=M dt with integer M; no closing-step interpolation is used.
+
+## Environments and accuracy levels
+
+- `envs/current`: pinned, runnable Julia environment using the recorded
+  UniformTEMPO revision.
+- `envs/paper`: provenance placeholder. The exact paper-era UniformTEMPO
+  revision is unknown, so this environment must not be presented as resolved.
+- `quick`: smoke tests only; reduced rank and grids.
+- `validation`: development-scale numerical checks.
+- `production`: paper-scale settings, permitted only after all seven
+  convergence axes are recorded in a complete evidence file.
+
+The uniform influence-functional cache key includes bath settings, exact `dt`,
+compression controls, Julia version, and UniformTEMPO revision. Cache files are
+validated before reuse and replaced atomically.
+
+## Commands
+
+From the repository root:
+
+```bash
+PROJ=tracks/mps/solutions/reproduction/floquet_spin_boson
+julia --project="$PROJ/envs/current" "$PROJ/test/runtests.jl"
+julia --project="$PROJ/envs/current" "$PROJ/scripts/reproduce_fig2.jl" \
+  "$PROJ/configs/fig2.toml" /path/to/fig_2 output/fig2
+julia --project="$PROJ/envs/current" "$PROJ/scripts/reproduce_fig3.jl" \
+  --parallel phases --resume --reference-dir /path/to/fig_3 \
+  "$PROJ/configs/fig3.toml" output/fig3
+julia --project="$PROJ/envs/current" "$PROJ/scripts/reproduce_fig5.jl" \
+  --parallel frequencies --resume --reference-dir /path/to/fig_5 \
+  "$PROJ/configs/fig5.toml" output/fig5
+julia --project="$PROJ/envs/current" "$PROJ/scripts/run_convergence.jl" \
+  output/convergence
+julia --project="$PROJ/envs/current" "$PROJ/scripts/benchmark.jl" \
+  benchmark 32 20
+```
+
+Use `--rebuild-cache` only when the uniform influence tensor must be rebuilt.
+`--resume` accepts a checkpoint only when its complete configuration and source
+fingerprints match; incompatible partial output fails closed.
+
+## Outputs and validation
+
+Fig. 3 writes configuration, steady state, Floquet spectrum, micromotion,
+correlation and its periodic/decaying split, continuous heat current, separate
+delta-peak weights, diagnostics, and timing for each drive/frequency point.
+Fig. 5 writes one resumable manifest per point plus total current and
+period-averaged drive power. Delta peaks are compared by integrated weight,
+never by an arbitrary plotted height.
+
+Production evidence must cover `dt`, compression/rank, eigensolver tolerance,
+τmax, Δω, ωmax, and nmax. The benchmark report records matrix-free allocation
+and runtime; the original PR #207 baseline remains under
+`tracks/mps/results/20260728-floquet-task1-quick/output/baseline/`.
+
+Known limitation: the implementation and tests are complete through the
+validation workflow, but paper-precision Fig. 3/Fig. 5 numerical artifacts
+require a cluster run and convergence evidence. They must not be described as
+reproduced until those jobs finish and pass the physical diagnostics.

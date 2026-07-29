@@ -45,6 +45,7 @@ function _fig3_cli_options(args)
     rebuild = "--rebuild-cache" in args
     parallel = :phases
     reference_dir = nothing
+    convergence_evidence = nothing
     positional = String[]
     index = 1
     while index <= length(args)
@@ -61,6 +62,11 @@ function _fig3_cli_options(args)
                 error("--reference-dir requires the extracted Zenodo fig_3 directory")
             reference_dir = args[index + 1]
             index += 2
+        elseif argument == "--convergence-evidence"
+            index < length(args) ||
+                error("--convergence-evidence requires a TOML file")
+            convergence_evidence = args[index + 1]
+            index += 2
         elseif startswith(argument, "--")
             error("unknown Fig. 3 option: " * argument)
         else
@@ -69,9 +75,9 @@ function _fig3_cli_options(args)
         end
     end
     length(positional) == 2 ||
-        error("usage: reproduce_fig3.jl [--parallel phases|none] [--resume] [--rebuild-cache] [--reference-dir DIR] <config.toml> <output_dir>")
+        error("usage: reproduce_fig3.jl [--parallel phases|none] [--resume] [--rebuild-cache] [--reference-dir DIR] [--convergence-evidence FILE] <config.toml> <output_dir>")
     return (; config_path=positional[1], output_dir=positional[2],
-            resume, rebuild, parallel, reference_dir)
+            resume, rebuild, parallel, reference_dir, convergence_evidence)
 end
 
 function fig3_cli_main(args=ARGS;
@@ -83,6 +89,15 @@ function fig3_cli_main(args=ARGS;
         error("Fig. 3 currently implements only the paper's zero-temperature bath")
     fig3.mode !== :quick && isnothing(options.reference_dir) &&
         error("validation/production Fig. 3 runs require --reference-dir")
+    required = Dict(
+        "eigensolver" => fig3.eigensolver_tolerance,
+        "tail_norm" => fig3.tail_norm_tolerance,
+    )
+    require_convergence_evidence(
+        fig3.mode,
+        isnothing(options.convergence_evidence) ? "" : options.convergence_evidence,
+        required,
+    )
     adapter_provider = function (model, exact_dt)
         return build_or_load_uniform_if(
             run_config, run_config.cache_dir, pt_builder;
