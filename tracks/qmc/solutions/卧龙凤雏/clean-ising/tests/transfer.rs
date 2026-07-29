@@ -44,16 +44,16 @@ fn dominant_eigenvalues_match_direct_dense_power_iteration() {
 fn direct_apply(l: usize, k: f64, input: &[f64]) -> Vec<f64> {
     let dimension = 1_usize << l;
     let mut output = vec![0.0; dimension];
-    for target in 0..dimension {
+    for (target, destination) in output.iter_mut().enumerate() {
         let target_horizontal = horizontal_sum(target, l);
-        for source in 0..dimension {
+        for (source, source_value) in input.iter().enumerate() {
             let source_horizontal = horizontal_sum(source, l);
             let vertical: i32 = (0..l)
                 .map(|bit| spin(target, bit) * spin(source, bit))
                 .sum();
             let exponent =
                 k * (0.5 * f64::from(target_horizontal + source_horizontal) + f64::from(vertical));
-            output[target] += exponent.exp() * input[source];
+            *destination += exponent.exp() * source_value;
         }
     }
     output
