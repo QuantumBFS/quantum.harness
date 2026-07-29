@@ -583,21 +583,35 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     )
     used_moments = Set{MomentKey}([moment_key()])
     all_blocks = [positive_blocks; gap_blocks]
-    block_moments =
-        [Set{MomentKey}() for _ in eachindex(all_blocks)]
-    block_records = [String[] for _ in eachindex(all_blocks)]
-    Threads.@threads :dynamic for block_index in eachindex(all_blocks)
+    block_row_records = [
+        [String[] for _ in eachindex(block.rows)]
+        for block in all_blocks
+    ]
+    work = Tuple{Int,Int}[
+        (block_index, row)
+        for (block_index, block) in enumerate(all_blocks)
+        for row in eachindex(block.rows)
+    ]
+    thread_moments = [
+        Set{MomentKey}()
+        for _ in 1:Threads.nthreads()
+    ]
+    Threads.@threads :dynamic for work_index in eachindex(work)
+        block_index, row = work[work_index]
         block = all_blocks[block_index]
-        local_moments = block_moments[block_index]
-        local_records = block_records[block_index]
-        for row in eachindex(block.rows), column in row:length(block.rows)
+        local_records = block_row_records[block_index][row]
+        sizehint!(local_records, length(block.rows) - row + 1)
+        for column in row:length(block.rows)
             polynomial = shastry_spin_isotypic_block_entry(
                 provisional,
                 block,
                 block.rows[row],
                 block.rows[column],
             )
-            union!(local_moments, keys(polynomial.terms))
+            union!(
+                thread_moments[Threads.threadid()],
+                keys(polynomial.terms),
+            )
             push!(
                 local_records,
                 string(
@@ -613,9 +627,13 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
         end
     end
     coefficient_records = String[]
+    for local_moments in thread_moments
+        union!(used_moments, local_moments)
+    end
     for block_index in eachindex(all_blocks)
-        union!(used_moments, block_moments[block_index])
-        append!(coefficient_records, block_records[block_index])
+        for row_records in block_row_records[block_index]
+            append!(coefficient_records, row_records)
+        end
     end
     for equality in equalities
         union!(used_moments, keys(equality.terms))
