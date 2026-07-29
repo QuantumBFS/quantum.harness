@@ -809,3 +809,10 @@ Updated: 2026-07-29 UTC.
   MiB is justified by the two measured 256000-MiB OOMs; keep the exact reduced
   hash and `1e-9` audit. In parallel, treat continuous-spin cone blocking—not
   additional moment-only elimination—as the algorithmic shrink target.
+- The 500000-MiB preflight passed and SCNet job `118189392` started at
+  2026-07-29T20:50:14Z on `gnode37`, from immutable commit `01e341d`. Its
+  signature is the unrestricted `L=2,d=2,g=4/5,gamma=2` SO(3)-reduced native
+  dual, 32 CPUs, one admission GPU with binding disabled, exact required hash
+  `fac50bcc…bed9a8`, and `1e-9` audit. This is the only active decision solve;
+  do not alter its checkout or submit a duplicate. Monitor through the hash
+  gate, first interior-point iteration, and fresh replay of any candidate.

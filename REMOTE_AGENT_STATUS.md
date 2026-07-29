@@ -254,5 +254,12 @@ Updated: 2026-07-29T20:47:30Z
   permits 509,344 MiB for 32 CPUs; prepare one 500000-MiB rerun with the same
   exact hash and `1e-9` audit. If it fails, prioritize exact cone blocking or
   facial reduction because moment-only shrink did not change the ceiling.
+- SCNet job `118189392` is the active decision solve. It started on `gnode37`
+  at 2026-07-29T20:50:14Z from immutable commit `01e341d`, requesting 32 CPUs,
+  500000 MiB and one admission GPU with GRES binding disabled. It is the same
+  unrestricted `L=2,d=2,g=4/5,gamma=2` SO(3)-reduced native dual, guarded by
+  exact hash `fac50bcc…bed9a8` and audit tolerance `1e-9`. Do not modify the
+  shared checkout or submit a duplicate; monitor construction, factorization,
+  and replay any candidate independently before making a physics claim.
 
 No user input or new credential is currently required.

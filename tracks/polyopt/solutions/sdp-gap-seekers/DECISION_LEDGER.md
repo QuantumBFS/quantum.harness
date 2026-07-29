@@ -1408,3 +1408,14 @@ dual formulation, and `1e-9` audit. If that still fails, further moment-only
 reduction is not decision-relevant: the unchanged PSD sides dominate, so the
 next code route must block the cones under continuous spin symmetry or perform
 an exact facial/commutant reduction.
+
+The exact 500000-MiB request passed `sbatch --test-only` and created SCNet job
+`118189392`. It started on `gnode37` at 2026-07-29T20:50:14Z from clean,
+immutable commit `01e341d`, with 32 CPUs, one partition-admission GPU and GRES
+binding disabled. The model signature remains unrestricted Shastry--Sutherland
+`L=2,d=2,g=4/5,gamma=2`, complete basis and stationarity, no-boundary window,
+exact SO(3) rank-four projection, native bar dual, required coefficient hash
+`fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`, and
+audit tolerance `1e-9`. It is the sole active decision solve. Do not duplicate
+or update its checkout; next evidence gates are exact hash match, at least one
+interior-point iteration, and independent replay before interpretation.
