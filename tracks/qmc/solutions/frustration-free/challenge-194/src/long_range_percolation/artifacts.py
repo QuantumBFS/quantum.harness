@@ -54,6 +54,27 @@ MAX_TRAJECTORY_DIRECTORY_ENTRIES = 2 * MAX_BATCH_MEMBERS
 MAX_CANONICAL_TRAJECTORY_RECORD_BYTES = 273
 MAX_CANONICAL_BATCH_PROGRESS_RECORD_BYTES = 322
 MAX_JSON_SAFETY_BYTES = 65_536
+MAX_TRAJECTORY_NUMERICAL_BYTES = (
+    MAX_KAPPA_COUNT * 8
+    + MAX_KAPPA_COUNT * 10 * 8
+    + 4 * 4 * 4
+    + 4 * 3 * 8
+    + 5 * 8
+    + 4 * 4 * 4
+    + 4 * 2 * 8
+    + 4 * 64
+)
+MAX_PROGRESS_RECORD_BYTES = (
+    MAX_BATCH_MEMBERS
+    * (
+        MAX_CANONICAL_TRAJECTORY_RECORD_BYTES
+        + MAX_CANONICAL_BATCH_PROGRESS_RECORD_BYTES
+    )
+    + MAX_JSON_SAFETY_BYTES
+)
+MAX_RECONSTRUCTION_PEAK_BYTES = (
+    MAX_TRAJECTORY_NUMERICAL_BYTES + MAX_PROGRESS_RECORD_BYTES
+)
 # Worst progress is 4,096 trajectory records plus 4,096 one-member batch
 # summaries: 2,437,120 bytes, plus bounded structural/version/count fields.
 # Four MiB therefore retains more than the explicit 65,536-byte safety margin.
@@ -122,6 +143,9 @@ class ArtifactIntegrityError(RuntimeError):
     """An immutable artifact cannot be trusted or resumed."""
 
 
+_SNAPSHOT_IDENTITY_TOKEN = object()
+
+
 @dataclass(frozen=True)
 class _VerifiedMetadataSnapshot:
     run_dir: Path
@@ -131,6 +155,7 @@ class _VerifiedMetadataSnapshot:
     ]
     kernel_generation: tuple[int, int, int, int, int, int, int]
     kernel_names: tuple[str, ...]
+    _token: object
 
     def verify_final_boundary(self) -> None:
         for path, generation in self.file_generations:
@@ -167,6 +192,47 @@ class _VerifiedMetadataSnapshot:
             raise ArtifactIntegrityError(
                 "kernel metadata generation changed during reconstruction"
             )
+
+
+def _require_private_metadata_snapshot(
+    value: object,
+    run_dir: Path,
+) -> _VerifiedMetadataSnapshot:
+    if (
+        type(value) is not _VerifiedMetadataSnapshot
+        or value._token is not _SNAPSHOT_IDENTITY_TOKEN
+        or value.run_dir != run_dir
+        or _HEX256.fullmatch(value.digest) is None
+        or not 1 <= len(value.file_generations) <= 5 + MAX_KERNEL_FILES
+        or not 1 <= len(value.kernel_names) <= MAX_KERNEL_FILES
+        or tuple(sorted(value.kernel_names)) != value.kernel_names
+        or len(set(value.kernel_names)) != len(value.kernel_names)
+        or len(value.kernel_generation) != 7
+        or not all(type(item) is int for item in value.kernel_generation)
+    ):
+        raise ArtifactIntegrityError("invalid private metadata snapshot capability")
+    allowed_parents = {run_dir, run_dir / "kernel"}
+    expected_paths = {
+        *(run_dir / name for name in _UPSTREAM_FILES),
+        *(run_dir / "kernel" / name for name in value.kernel_names),
+    }
+    actual_paths = {path for path, _ in value.file_generations}
+    if (
+        actual_paths != expected_paths
+        or len(actual_paths) != len(value.file_generations)
+    ):
+        raise ArtifactIntegrityError("invalid private metadata snapshot paths")
+    for path, generation in value.file_generations:
+        if (
+            not isinstance(path, Path)
+            or path.parent not in allowed_parents
+            or len(generation) != 7
+            or not all(type(item) is int for item in generation)
+        ):
+            raise ArtifactIntegrityError(
+                "invalid private metadata snapshot generation"
+            )
+    return value
 
 
 def _canonical_json_bytes(document: object) -> bytes:
@@ -260,9 +326,25 @@ def _soft_fd_limit() -> int | None:
     return None if soft == resource.RLIM_INFINITY else int(soft)
 
 
+def _current_open_fd_count() -> int | None:
+    proc = Path("/proc/self/fd")
+    try:
+        count = 0
+        with os.scandir(proc) as stream:
+            for _ in stream:
+                count += 1
+                if count > 1_000_000:
+                    return None
+        return count
+    except OSError:
+        return None
+
+
 def _preflight_metadata_descriptors(required: int) -> None:
     soft = _soft_fd_limit()
-    if soft is not None and soft < required + FD_RESERVE:
+    current = _current_open_fd_count()
+    needed = required + FD_RESERVE + (current if current is not None else 0)
+    if soft is not None and soft < needed:
         raise ArtifactIntegrityError(
             "RLIMIT_NOFILE is insufficient for retained metadata descriptors"
         )
@@ -1076,12 +1158,10 @@ def _load_hdf5_verified(
             )
         run_root = path.parent.parent
         if metadata_snapshot is not None:
-            if (
-                type(metadata_snapshot) is not _VerifiedMetadataSnapshot
-                or metadata_snapshot.run_dir != run_root
-            ):
-                raise ArtifactIntegrityError("invalid private metadata snapshot")
-            metadata_digest = metadata_snapshot.digest
+            verified_snapshot = _require_private_metadata_snapshot(
+                metadata_snapshot, run_root
+            )
+            metadata_digest = verified_snapshot.digest
         else:
             metadata_digest = _verify_upstream_metadata(
                 run_root,
@@ -1752,6 +1832,7 @@ def _verify_upstream_metadata(
                 ),
                 kernel_generation=_generation_tuple(kernel_current),
                 kernel_names=expected_kernel_names,
+                _token=_SNAPSHOT_IDENTITY_TOKEN,
             )
         return digest
 
@@ -1818,21 +1899,37 @@ def _verify_reconstruction_trajectories(
     paths: Sequence[Path],
     expected: dict[str, str],
     metadata_snapshot: object,
-) -> list[object]:
-    verified: list[object] = []
+) -> dict[str, dict[str, str]]:
+    records: dict[str, dict[str, str]] = {}
+    internal_ids: set[str] = set()
     for path in paths:
         match = _TRAJECTORY_NAME.fullmatch(path.name)
         if match is None:
             raise ArtifactIntegrityError("trajectory filename is not canonical")
-        verified.append(
-            _verify_trajectory(
-                path,
-                match.group(1),
-                expected,
-                metadata_snapshot=metadata_snapshot,  # type: ignore[arg-type]
-            )
+        trajectory_id = match.group(1)
+        verified = _verify_trajectory(
+            path,
+            trajectory_id,
+            expected,
+            metadata_snapshot=metadata_snapshot,  # type: ignore[arg-type]
         )
-    return verified
+        result, _, digest, _ = verified
+        if result.request_sha256 in internal_ids:
+            raise ArtifactIntegrityError("duplicate trajectory ID")
+        internal_ids.add(result.request_sha256)
+        if result.request_sha256 != trajectory_id:
+            raise ArtifactIntegrityError(
+                "trajectory ID does not match filename"
+            )
+        if trajectory_id in records:
+            raise ArtifactIntegrityError("duplicate trajectory ID")
+        records[trajectory_id] = {
+            "path": f"trajectories/{path.name}",
+            "trajectory_id": trajectory_id,
+            "trajectory_sha256": digest,
+        }
+        del result, verified
+    return records
 
 
 def reconstruct_progress(
@@ -1874,31 +1971,11 @@ def reconstruct_progress(
         raise ArtifactIntegrityError(
             "trajectory artifact count exceeds the frozen limit"
         )
-    trajectory_records: dict[str, dict[str, str]] = {}
-    file_ids: set[str] = set()
     if not trajectory_files:
         raise ArtifactIntegrityError("run layout has no trajectory artifacts")
-    verified_trajectories = _verify_reconstruction_trajectories(
+    trajectory_records = _verify_reconstruction_trajectories(
         trajectory_files, expected, snapshot
     )
-    for path, verified in zip(
-        trajectory_files, verified_trajectories, strict=True
-    ):
-        filename_id_match = _TRAJECTORY_NAME.fullmatch(path.name)
-        assert filename_id_match is not None
-        filename_id = filename_id_match.group(1)
-        result, _, digest, _ = verified  # type: ignore[misc]
-        internal_id = result.request_sha256
-        if internal_id in file_ids:
-            raise ArtifactIntegrityError("duplicate trajectory ID")
-        file_ids.add(internal_id)
-        if result.request_sha256 != filename_id:
-            raise ArtifactIntegrityError("trajectory ID does not match filename")
-        trajectory_records[filename_id] = {
-            "path": f"trajectories/{path.name}",
-            "trajectory_id": filename_id,
-            "trajectory_sha256": digest,
-        }
     if sidecar_ids != set(trajectory_records):
         raise ArtifactIntegrityError("trajectory and digest membership differ")
 

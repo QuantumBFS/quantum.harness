@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
+import gc
 import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
 import stat
+import weakref
 
 import h5py
 import numpy as np
@@ -1817,11 +1819,15 @@ def test_reconstruction_uses_one_metadata_snapshot_and_verifies_every_trajectory
     snapshot = object()
     calls = 0
 
+    class Result:
+        def __init__(self, request_sha256: str):
+            self.request_sha256 = request_sha256
+
     def verify(path: Path, trajectory_id: str, expected, metadata_snapshot=None):
         nonlocal calls
         assert metadata_snapshot is snapshot
         calls += 1
-        return None
+        return Result(trajectory_id), {}, "f" * 64, 1
 
     monkeypatch.setattr(artifacts, "_verify_trajectory", verify)
     artifacts._verify_reconstruction_trajectories(paths, {}, snapshot)
@@ -1876,3 +1882,76 @@ def test_reconstruction_final_snapshot_boundary_rejects_metadata_mutation(
     with pytest.raises(ArtifactIntegrityError, match="generation|reconstruction"):
         reconstruct_progress(tmp_path, hashes)
     assert mutated
+
+
+def test_reconstruction_releases_result_before_verifying_next_trajectory(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    paths = [
+        Path(f"/run/trajectories/trajectory-{index:064x}.h5")
+        for index in range(3)
+    ]
+    references: list[weakref.ReferenceType[object]] = []
+
+    class Result:
+        def __init__(self, request_sha256: str):
+            self.request_sha256 = request_sha256
+
+    def verify(path: Path, trajectory_id: str, expected, metadata_snapshot=None):
+        gc.collect()
+        if references:
+            assert references[-1]() is None
+        result = Result(trajectory_id)
+        references.append(weakref.ref(result))
+        return result, {}, "f" * 64, 1
+
+    monkeypatch.setattr(artifacts, "_verify_trajectory", verify)
+    records = artifacts._verify_reconstruction_trajectories(paths, {}, object())
+    gc.collect()
+    assert references[-1]() is None
+    assert len(records) == 3
+
+
+def test_reconstruction_peak_memory_bound_is_analytical_and_small():
+    assert artifacts.MAX_TRAJECTORY_NUMERICAL_BYTES < 2 * 1024 * 1024
+    assert artifacts.MAX_PROGRESS_RECORD_BYTES < artifacts.MAX_JSON_BYTES
+    assert artifacts.MAX_RECONSTRUCTION_PEAK_BYTES == (
+        artifacts.MAX_TRAJECTORY_NUMERICAL_BYTES
+        + artifacts.MAX_PROGRESS_RECORD_BYTES
+    )
+    assert artifacts.MAX_RECONSTRUCTION_PEAK_BYTES < 6 * 1024 * 1024
+
+
+def test_directly_constructed_metadata_snapshot_is_rejected(
+    tmp_path: Path,
+):
+    forged = artifacts._VerifiedMetadataSnapshot(
+        run_dir=tmp_path,
+        digest="0" * 64,
+        file_generations=(),
+        kernel_generation=(0, 0, 0, 0, 0, 0, 0),
+        kernel_names=(),
+        _token=object(),
+    )
+    with pytest.raises(ArtifactIntegrityError, match="snapshot|capability"):
+        artifacts._require_private_metadata_snapshot(forged, tmp_path)
+
+
+def test_fd_preflight_accounts_for_current_open_descriptors(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(artifacts, "_soft_fd_limit", lambda: 100)
+    monkeypatch.setattr(artifacts, "_current_open_fd_count", lambda: 90)
+    with pytest.raises(ArtifactIntegrityError, match="descriptor|RLIMIT|limit"):
+        artifacts._preflight_metadata_descriptors(5)
+
+
+def test_fd_preflight_portable_fallback_uses_reserve(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(artifacts, "_current_open_fd_count", lambda: None)
+    monkeypatch.setattr(artifacts, "_soft_fd_limit", lambda: 100)
+    artifacts._preflight_metadata_descriptors(5)
+    monkeypatch.setattr(artifacts, "_soft_fd_limit", lambda: 30)
+    with pytest.raises(ArtifactIntegrityError, match="descriptor|RLIMIT|limit"):
+        artifacts._preflight_metadata_descriptors(5)
