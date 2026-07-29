@@ -80,3 +80,57 @@ The positive scalar sectors must therefore participate in the remaining
 bound.  With the first cone, the natural exact target is the complementary
 sum \(\chi_0+\chi_2+\chi_3+\chi_5\); with the second cone it is
 \(\chi_0+\chi_1+\chi_3+\chi_5\).
+
+## Lemma 3: exact self-dual form of the complementary sum
+
+For every invertible \(5\times5\) matrix \(W\), Jacobi's complementary
+minor identity gives
+
+\[
+\chi_3(W)=\det(W)\chi_2(W^{-1}).
+\]
+
+Every letter has determinant \(8\).  Thus a length-\(n\) word obeys
+
+\[
+F(W):=\chi_0+\chi_2+\chi_3+\chi_5
+=1+8^n+\chi_2(W)+8^n\chi_2(W^{-1}).
+\]
+
+Equivalently, \(F\) is the character of the determinant-normalized
+self-dual representation
+\(\wedge^0\oplus\wedge^2\oplus\wedge^3\oplus\wedge^5\).
+This is the exact form in which a global path pairing or a norm bound must
+use the vacuum and full sectors.
+
+A tempting stronger statement is false: the ten pairs of complementary
+principal minors are not individually nonnegative.  For \(W=B\), the
+\(\{0,1\}\) minor is \(0\) and its \(\{2,3,4\}\) complement is \(-1\).
+For \(W=B^2\), the pairs indexed by
+\(\{0,3\}\leftrightarrow\{1,2,4\}\) and
+\(\{1,4\}\leftrightarrow\{0,2,3\}\) both sum to \(-8\).
+Consequently, a proof cannot be a direct termwise complementary-minor or
+unsigned LGV pairing.
+
+The two middle sectors also cannot be separated.  Besides the pure-power
+grade-\((2,3)\) obstruction above, the mixed word `0001010101` has the
+exact values
+
+\[
+\chi_2=-1307360,\quad
+\chi_3=5656076689,\quad
+\chi_5=1073741824,\quad
+F=6728511154.
+\]
+
+For comparison, the global scalar compensation is visible already in pure
+powers:
+
+\[
+F(B^7)=1939395,\qquad F(B^{10})=882341964,
+\]
+
+even though \(\chi_3(B^7)=-171633\) and
+\(\chi_3(B^{10})=-192388191\).  Any successful network identity must
+therefore pair signed paths across different principal minors and particle
+numbers; local nonnegativity is exactly obstructed by the examples above.

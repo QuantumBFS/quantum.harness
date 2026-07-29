@@ -2,6 +2,7 @@ from pathlib import Path
 
 from oracle.symmetric_oddcycle_cones import (
     exact_chi23_obstruction,
+    exact_complementary_sector_audit,
     exact_grade4_formula_replay,
     load_certificate,
     verify_compact_certificate,
@@ -46,3 +47,34 @@ def test_fixed_candidate_uses_existing_exact_short_word_oracle():
     assert result["integer_atom_scale"] == 1
     assert result["status"] == "strictly-positive"
     assert sum(entry["global_word_count"] for entry in result["per_length"]) == 30
+
+
+def test_complementary_sector_identity_and_local_obstructions_replay_exactly():
+    result = exact_complementary_sector_audit()
+
+    assert result["determinant_per_letter"] == 8
+    assert all(result["jacobi_checks"].values())
+    assert [
+        item["sum"] for item in result["negative_complementary_minor_pairs"]
+    ] == [-1, -8, -8]
+    assert result["mixed_word"] == {
+        "word": "0001010101",
+        "chi2": -1307360,
+        "chi3": 5656076689,
+        "determinant": 1073741824,
+        "F": 6728511154,
+    }
+    assert result["pure_power_values"] == {
+        7: {
+            "chi2": 13875,
+            "chi3": -171633,
+            "determinant": 2097152,
+            "F": 1939395,
+        },
+        10: {
+            "chi2": 988330,
+            "chi3": -192388191,
+            "determinant": 1073741824,
+            "F": 882341964,
+        },
+    }

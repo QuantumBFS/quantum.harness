@@ -161,9 +161,111 @@ def exact_chi23_obstruction() -> dict[str, int]:
     return {"chi2": chi2, "chi3": chi3, "sum": chi2 + chi3}
 
 
+def _principal_minor(
+    matrix: sp.MatrixBase,
+    indices: tuple[int, ...],
+) -> sp.Expr:
+    return matrix.extract(indices, indices).det()
+
+
+def _word_matrix(word: str) -> sp.ImmutableMatrix:
+    matrix = fixed_candidate_matrix()
+    atoms = (matrix, matrix.T)
+    product = sp.eye(matrix.rows)
+    for symbol in word:
+        if symbol not in {"0", "1"}:
+            raise ValueError("word must contain only 0 and 1")
+        product = atoms[int(symbol)] * product
+    return sp.ImmutableMatrix(product)
+
+
+def exact_complementary_sector_audit() -> dict[str, object]:
+    """Replay exact identities and obstructions for the remaining sector sum.
+
+    For every invertible five-by-five matrix ``W``, Jacobi's complementary
+    minor identity gives ``chi3(W) = det(W) * chi2(W.inv())``.  The returned
+    examples show why individual complementary minor pairs cannot supply a
+    positive proof.
+    """
+
+    matrix = fixed_candidate_matrix()
+    minor_examples = []
+    for label, word, index_sets in (
+        ("B", "0", ((0, 1),)),
+        ("B^2", "00", ((0, 3), (1, 4))),
+    ):
+        word_matrix = _word_matrix(word)
+        for indices in index_sets:
+            complement = tuple(
+                index for index in range(matrix.rows) if index not in indices
+            )
+            left = _principal_minor(word_matrix, indices)
+            right = _principal_minor(word_matrix, complement)
+            minor_examples.append(
+                {
+                    "matrix": label,
+                    "indices": indices,
+                    "complement": complement,
+                    "left": int(left),
+                    "right": int(right),
+                    "sum": int(left + right),
+                }
+            )
+
+    word = "0001010101"
+    mixed = _word_matrix(word)
+    mixed_chi2 = int(sp.trace(exact_compound_matrix(mixed, 2)))
+    mixed_chi3 = int(sp.trace(exact_compound_matrix(mixed, 3)))
+    mixed_det = int(mixed.det())
+
+    pure_values = {}
+    for power in (7, 10):
+        pure = matrix**power
+        chi2 = int(sp.trace(exact_compound_matrix(pure, 2)))
+        chi3 = int(sp.trace(exact_compound_matrix(pure, 3)))
+        determinant = int(pure.det())
+        pure_values[power] = {
+            "chi2": chi2,
+            "chi3": chi3,
+            "determinant": determinant,
+            "F": 1 + chi2 + chi3 + determinant,
+        }
+
+    jacobi_checks = {}
+    for label, word_matrix in (
+        ("mixed", mixed),
+        ("B^7", matrix**7),
+        ("B^10", matrix**10),
+    ):
+        determinant = word_matrix.det()
+        chi3 = sp.trace(exact_compound_matrix(word_matrix, 3))
+        inverse_chi2 = sp.trace(
+            exact_compound_matrix(word_matrix.inv(), 2)
+        )
+        jacobi_checks[label] = bool(
+            sp.simplify(chi3 - determinant * inverse_chi2) == 0
+        )
+
+    return {
+        "identity": "chi3(W)=det(W)*chi2(W^-1)",
+        "determinant_per_letter": int(matrix.det()),
+        "jacobi_checks": jacobi_checks,
+        "negative_complementary_minor_pairs": minor_examples,
+        "mixed_word": {
+            "word": word,
+            "chi2": mixed_chi2,
+            "chi3": mixed_chi3,
+            "determinant": mixed_det,
+            "F": 1 + mixed_chi2 + mixed_chi3 + mixed_det,
+        },
+        "pure_power_values": pure_values,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
+    "exact_complementary_sector_audit",
     "exact_grade4_formula_replay",
     "fixed_candidate_matrix",
     "load_certificate",
