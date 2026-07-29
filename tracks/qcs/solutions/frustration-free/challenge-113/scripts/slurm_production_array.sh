@@ -13,8 +13,18 @@ set -euo pipefail
 : "${SLURM_ARRAY_TASK_ID:?submit this script as a Slurm array}"
 test "${CHALLENGE113_ACK_PRODUCTION:-}" = "1"
 
-SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "${SCRIPT_ROOT}/scripts/apptainer_job_gate.sh"
+: "${CHALLENGE113_DEPLOYMENT:?set absolute canonical deployment directory}"
+CANONICAL_DEPLOYMENT="$(realpath -e -- "${CHALLENGE113_DEPLOYMENT}")"
+if [[ "${CHALLENGE113_DEPLOYMENT}" != "${CANONICAL_DEPLOYMENT}" ]]; then
+  echo "CHALLENGE113_DEPLOYMENT must be an absolute canonical directory" >&2
+  exit 2
+fi
+GATE="${CANONICAL_DEPLOYMENT}/scripts/apptainer_job_gate.sh"
+if [[ ! -f "${GATE}" || -L "${GATE}" ]]; then
+  echo "deployment job gate must be a regular non-symlink file" >&2
+  exit 2
+fi
+source "${GATE}"
 
 "${APPTAINER}" "${CONTAINER_ARGS[@]}" /workspace/.venv/bin/python -u \
   /workspace/run.py sweep \

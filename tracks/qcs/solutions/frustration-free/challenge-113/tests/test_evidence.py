@@ -380,6 +380,11 @@ def test_documented_clean_production_check_reaches_ready_gate(tmp_path) -> None:
 def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> None:
     deployment = tmp_path / "source"
     deployment.mkdir()
+    (deployment / "scripts").mkdir()
+    shutil.copy(
+        ROOT / "scripts" / "apptainer_job_gate.sh",
+        deployment / "scripts" / "apptainer_job_gate.sh",
+    )
     shutil.copy(ROOT / "pyproject.toml", deployment / "pyproject.toml")
     shutil.copy(ROOT / "uv.lock", deployment / "uv.lock")
     revision = "a" * 40
@@ -502,16 +507,57 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     assert f"--archive {container_archive}" in prepare_log
 
     log.write_text("")
+    spool = tmp_path / "slurm-spool"
+    spool.mkdir()
+    spooled_pilot = shutil.copy(
+        ROOT / "scripts" / "slurm_pilot.sh",
+        spool / "pilot.sh",
+    )
+    spooled_array = shutil.copy(
+        ROOT / "scripts" / "slurm_production_array.sh",
+        spool / "array.sh",
+    )
+    for launcher in (spooled_pilot, spooled_array):
+        base_environment = dict(environment)
+        if launcher == spooled_array:
+            base_environment.update(
+                CHALLENGE113_ACK_PRODUCTION="1",
+                SLURM_ARRAY_TASK_ID="0",
+            )
+        for invalid_deployment in ("relative/source", str(tmp_path / "missing")):
+            invalid = {
+                **base_environment,
+                "CHALLENGE113_DEPLOYMENT": invalid_deployment,
+            }
+            rejected = subprocess.run(["bash", launcher], env=invalid, cwd=spool)
+            assert rejected.returncode != 0
+            assert log.read_text() == ""
+    gate = deployment / "scripts" / "apptainer_job_gate.sh"
+    real_gate = gate.with_name("apptainer_job_gate.real.sh")
+    gate.rename(real_gate)
+    gate.symlink_to(real_gate.name)
     rejected = subprocess.run(
-        ["bash", str(ROOT / "scripts" / "slurm_pilot.sh")],
+        ["bash", spooled_pilot],
+        env=environment,
+        cwd=spool,
+    )
+    assert rejected.returncode != 0
+    assert log.read_text() == ""
+    gate.unlink()
+    real_gate.rename(gate)
+
+    rejected = subprocess.run(
+        ["bash", spooled_pilot],
         env=malicious,
+        cwd=spool,
     )
     assert rejected.returncode != 0
     assert log.read_text() == ""
 
     subprocess.run(
-        ["bash", str(ROOT / "scripts" / "slurm_pilot.sh")],
+        ["bash", spooled_pilot],
         env=environment,
+        cwd=spool,
         check=True,
     )
     pilot_log = log.read_text()
@@ -521,6 +567,20 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     assert "--env JAX_ENABLE_X64=1 --env JAX_PLATFORMS=cpu" in pilot_log
     assert f"{archive}:{container_archive}:ro" in pilot_log
     assert f"--archive {container_archive}" in pilot_log
+
+    log.write_text("")
+    array_environment = {
+        **environment,
+        "CHALLENGE113_ACK_PRODUCTION": "1",
+        "SLURM_ARRAY_TASK_ID": "0",
+    }
+    subprocess.run(
+        ["bash", spooled_array],
+        env=array_environment,
+        cwd=spool,
+        check=True,
+    )
+    assert "run.py sweep" in log.read_text()
 
 
 @pytest.mark.parametrize(

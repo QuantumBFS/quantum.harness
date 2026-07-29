@@ -141,3 +141,16 @@ or Slurm submission was made.
 - Tests prove missing/wrong acknowledgement reaches no container, the sole sync
   command has no network-namespace flags, every later command has network-none,
   and no repository script submits a scheduler job.
+
+## Slurm spool-path correction
+
+- RED: pilot 2817990 resolved its shared gate relative to `BASH_SOURCE[0]`;
+  Slurm had copied that launcher into its private spool, so the gate path did
+  not exist and execution stopped before the runtime gate.
+- GREEN: pilot and array launchers now require an absolute, canonical
+  `CHALLENGE113_DEPLOYMENT`, reject a missing or symlinked gate, and source the
+  gate only from that deployment. The existing gate still verifies the source
+  revision, archive, evidence, runtime, and readiness marker before execution.
+- Integration tests copy both launchers to an unrelated simulated Slurm spool.
+  Correct deployment succeeds; relative, missing, and symlinked gate paths fail
+  before any container command. No job was submitted.
