@@ -11,14 +11,86 @@ export FiniteBathParameters,
     MAX_EVOLUTION_STEPS,
     MAX_IMAGINARY_TIME_STEPS,
     MAX_LOCAL_EXPONENT_MAGNITUDE,
+    PurificationSpec,
     PurificationResult,
     evolve_purification,
     identity_purification,
     impurity_observables,
     interleaved_sites,
-    physical_hamiltonian_mpo
+    non_qn_purification,
+    physical_hamiltonian_mpo,
+    qn_dual_purification
 
 const ELECTRON_DIMENSION = 4
+const QN_GAUGE = "electron_nf_sz_ancilla_particle_hole"
+const QN_GAUGE_VERSION = 1
+
+struct ChainMappingValidationSeal end
+const _CHAIN_MAPPING_VALIDATION_SEAL = ChainMappingValidationSeal()
+
+function _lowercase_sha256(value, name::AbstractString)
+    value isa AbstractString && occursin(r"^[0-9a-f]{64}$", value) ||
+        throw(ArgumentError("$name must be 64 lowercase hexadecimal digits"))
+    return String(value)
+end
+
+struct ValidatedChainMappingCapability
+    source_bath_sha256::String
+    mapping_sha256::String
+    epsilon::Vector{Float64}
+    chain_onsite::Vector{Float64}
+    chain_hopping::Vector{Float64}
+    lambda::Float64
+
+    function ValidatedChainMappingCapability(
+        seal::ChainMappingValidationSeal;
+        source_bath_sha256,
+        mapping_sha256,
+        epsilon,
+        chain_onsite,
+        chain_hopping,
+        lambda,
+    )
+        seal === _CHAIN_MAPPING_VALIDATION_SEAL ||
+            throw(ArgumentError("invalid chain mapping validation seal"))
+        source =
+            _lowercase_sha256(source_bath_sha256, "source bath SHA256")
+        mapping = _lowercase_sha256(mapping_sha256, "mapping SHA256")
+        star_energies = _finite_vector(epsilon, "epsilon")
+        isempty(star_energies) &&
+            throw(ArgumentError("chain epsilon must contain at least one orbital"))
+        onsite = _finite_vector(chain_onsite, "chain_onsite")
+        hopping = _finite_vector(
+            chain_hopping, "chain_hopping"; nonnegative = true
+        )
+        hybridization = _finite_real(lambda, "lambda")
+        hybridization >= 0 ||
+            throw(ArgumentError("lambda must be nonnegative"))
+        length(onsite) == length(star_energies) ||
+            throw(ArgumentError("chain onsite length mismatch"))
+        length(hopping) == max(0, length(star_energies) - 1) ||
+            throw(ArgumentError("chain hopping length mismatch"))
+        new(
+            source,
+            mapping,
+            star_energies,
+            onsite,
+            hopping,
+            hybridization,
+        )
+    end
+end
+
+struct PurificationSpec
+    mode::Symbol
+    qn_gauge::Union{Nothing,String}
+    qn_gauge_version::Union{Nothing,Int}
+    base_sector_nf::Union{Nothing,Int}
+    base_sector_sz::Union{Nothing,Int}
+end
+
+non_qn_purification() =
+    PurificationSpec(:non_qn, nothing, nothing, nothing, nothing)
 
 """
 Maximum number of inverse-temperature increments accepted by
@@ -106,6 +178,7 @@ struct FiniteBathParameters
     chain_onsite::Vector{Float64}
     chain_hopping::Vector{Float64}
     lambda::Float64
+    source_bath_sha256::Union{Nothing,String}
     mapping_sha256::Union{Nothing,String}
 end
 
@@ -224,56 +297,22 @@ function FiniteBathParameters(
         zeros(max(0, length(energies) - 1)),
         sqrt(sum(abs2, couplings)),
         nothing,
+        nothing,
     )
 end
 
 function FiniteBathParameters(
-    bath_representation::Symbol;
-    epsilon,
-    V,
-    chain_onsite,
-    chain_hopping,
-    lambda,
-    mapping_sha256,
+    validated::ValidatedChainMappingCapability;
     U = 0.8,
     epsilon_d = -Float64(U) / 2,
     mu = 0.0,
 )
-    bath_representation === :chain ||
-        throw(ArgumentError("bath_representation must be :chain"))
-    energies = _finite_vector(epsilon, "epsilon")
-    isempty(energies) &&
-        throw(ArgumentError("chain epsilon must contain at least one orbital"))
-    couplings = _finite_vector(V, "V"; nonnegative = true)
-    onsite = _finite_vector(chain_onsite, "chain_onsite")
-    hopping =
-        _finite_vector(chain_hopping, "chain_hopping"; nonnegative = true)
-    hybridization = _finite_real(lambda, "lambda")
-    hybridization >= 0 ||
-        throw(ArgumentError("lambda must be nonnegative"))
-    length(couplings) == length(energies) ||
-        throw(ArgumentError("V length must equal epsilon length"))
-    length(onsite) == length(energies) ||
-        throw(ArgumentError("chain_onsite length must equal epsilon length"))
-    length(hopping) == max(0, length(energies) - 1) ||
-        throw(
-            ArgumentError(
-                "chain_hopping length must equal epsilon length minus one"
-            ),
-        )
-    expected_couplings = [hybridization; zeros(length(couplings) - 1)]
-    couplings == expected_couplings ||
-        throw(
-            ArgumentError(
-                "chain V must equal [lambda; zeros(length(V) - 1)]"
-            ),
-        )
-    mapping_sha256 isa AbstractString ||
-        throw(ArgumentError("mapping_sha256 must be a string"))
     interaction = _finite_real(U, "U")
     interaction >= 0 || throw(ArgumentError("U must be nonnegative"))
     impurity_energy = _finite_real(epsilon_d, "epsilon_d")
     chemical_potential = _finite_real(mu, "mu")
+    energies = copy(validated.epsilon)
+    couplings = [validated.lambda; zeros(length(energies) - 1)]
     return FiniteBathParameters(
         energies,
         couplings,
@@ -281,18 +320,79 @@ function FiniteBathParameters(
         impurity_energy,
         chemical_potential,
         :chain,
-        onsite,
-        hopping,
-        hybridization,
-        String(mapping_sha256),
+        copy(validated.chain_onsite),
+        copy(validated.chain_hopping),
+        validated.lambda,
+        validated.source_bath_sha256,
+        validated.mapping_sha256,
     )
 end
 
-"""Return interleaved Electron sites `[d_phys,d_anc,c1_phys,c1_anc,...]`."""
-function interleaved_sites(parameters::FiniteBathParameters)
+function qn_dual_purification(
+    parameters::FiniteBathParameters,
+    validated::ValidatedChainMappingCapability,
+)
+    parameters.bath_representation === :chain ||
+        throw(ArgumentError("QN dual purification requires chain parameters"))
+    parameters.source_bath_sha256 == validated.source_bath_sha256 &&
+        parameters.mapping_sha256 == validated.mapping_sha256 &&
+        parameters.epsilon == validated.epsilon &&
+        parameters.chain_onsite == validated.chain_onsite &&
+        parameters.chain_hopping == validated.chain_hopping &&
+        parameters.lambda == validated.lambda ||
+        throw(
+            ArgumentError(
+                "QN dual purification capability does not match chain parameters"
+            ),
+        )
     n_orbitals = length(parameters.epsilon) + 1
+    return PurificationSpec(
+        :qn_dual,
+        QN_GAUGE,
+        QN_GAUGE_VERSION,
+        2 * n_orbitals,
+        0,
+    )
+end
+
+function _validate_purification_spec(
+    parameters::FiniteBathParameters, purification::PurificationSpec
+)
+    if purification == non_qn_purification()
+        return purification
+    end
+    n_orbitals = length(parameters.epsilon) + 1
+    purification.mode === :qn_dual &&
+        purification.qn_gauge == QN_GAUGE &&
+        purification.qn_gauge_version == QN_GAUGE_VERSION &&
+        purification.base_sector_nf == 2 * n_orbitals &&
+        purification.base_sector_sz == 0 &&
+        parameters.bath_representation === :chain &&
+        parameters.source_bath_sha256 !== nothing &&
+        parameters.mapping_sha256 !== nothing ||
+        throw(ArgumentError("invalid purification specification"))
+    return purification
+end
+
+"""Return interleaved Electron sites `[d_phys,d_anc,c1_phys,c1_anc,...]`."""
+function interleaved_sites(
+    parameters::FiniteBathParameters;
+    purification::PurificationSpec = non_qn_purification(),
+)
+    _validate_purification_spec(parameters, purification)
+    n_orbitals = length(parameters.epsilon) + 1
+    if purification.mode === :non_qn
+        return siteinds(
+            "Electron", 2 * n_orbitals; conserve_qns = false
+        )
+    end
     return siteinds(
-        "Electron", 2 * n_orbitals; conserve_qns = false
+        "Electron",
+        2 * n_orbitals;
+        conserve_qns = true,
+        conserve_nf = true,
+        conserve_sz = true,
+        conserve_nfparity = false,
     )
 end
 
@@ -316,38 +416,106 @@ function _identity_pair_tensors(
     return physical, ancilla
 end
 
+function _qn_identity_pair_tensors(
+    sites::AbstractVector{<:Index},
+    orbital::Int,
+    pair_link::Index,
+    left_link,
+    right_link,
+)
+    physical_site = sites[2 * orbital - 1]
+    ancilla_site = sites[2 * orbital]
+    physical = ITensor(physical_site, pair_link)
+    ancilla = ITensor(dag(pair_link), ancilla_site)
+    complementary_state = (4, 3, 2, 1)
+    for physical_state in 1:ELECTRON_DIMENSION
+        ancilla_state = complementary_state[physical_state]
+        physical[
+            physical_site => physical_state,
+            pair_link => physical_state,
+        ] = 1.0
+        ancilla[
+            dag(pair_link) => physical_state,
+            ancilla_site => ancilla_state,
+        ] = 0.5
+    end
+    left_link === nothing ||
+        (physical *= onehot(dag(left_link) => 1))
+    right_link === nothing ||
+        (ancilla *= onehot(right_link => 1))
+    return physical, ancilla
+end
+
 """
 Construct a product of normalized local identity pairs, one per physical
 orbital and its adjacent ancilla.
 """
-function identity_purification(parameters::FiniteBathParameters)
-    sites = interleaved_sites(parameters)
+function identity_purification(
+    parameters::FiniteBathParameters;
+    purification::PurificationSpec = non_qn_purification(),
+)
+    _validate_purification_spec(parameters, purification)
+    sites = interleaved_sites(parameters; purification)
     n_orbitals = length(parameters.epsilon) + 1
-    pair_links = [
-        Index(ELECTRON_DIMENSION, "Link,pair=$orbital")
-        for orbital in 1:n_orbitals
-    ]
-    interpair_links = [
-        Index(1, "Link,between=$orbital")
-        for orbital in 1:(n_orbitals - 1)
-    ]
+    if purification.mode === :non_qn
+        pair_links = [
+            Index(ELECTRON_DIMENSION, "Link,pair=$orbital")
+            for orbital in 1:n_orbitals
+        ]
+        interpair_links = [
+            Index(1, "Link,between=$orbital")
+            for orbital in 1:(n_orbitals - 1)
+        ]
+    else
+        pair_space = [
+            QN(("Nf", 2, -1), ("Sz", 0)) => 1,
+            QN(("Nf", 1, -1), ("Sz", -1)) => 1,
+            QN(("Nf", 1, -1), ("Sz", 1)) => 1,
+            QN(("Nf", 0, -1), ("Sz", 0)) => 1,
+        ]
+        pair_links = [
+            Index(pair_space; tags = "Link,pair=$orbital")
+            for orbital in 1:n_orbitals
+        ]
+        interpair_links = [
+            Index(QN() => 1; tags = "Link,between=$orbital")
+            for orbital in 1:(n_orbitals - 1)
+        ]
+    end
     tensors = Vector{ITensor}(undef, length(sites))
     for orbital in 1:n_orbitals
         left_link = orbital == 1 ? nothing : interpair_links[orbital - 1]
         right_link =
             orbital == n_orbitals ? nothing : interpair_links[orbital]
-        physical, ancilla = _identity_pair_tensors(
-            sites,
-            orbital,
-            pair_links[orbital],
-            left_link,
-            right_link,
-        )
+        physical, ancilla =
+            purification.mode === :non_qn ?
+            _identity_pair_tensors(
+                sites,
+                orbital,
+                pair_links[orbital],
+                left_link,
+                right_link,
+            ) :
+            _qn_identity_pair_tensors(
+                sites,
+                orbital,
+                pair_links[orbital],
+                left_link,
+                right_link,
+            )
         tensors[2 * orbital - 1] = physical
         tensors[2 * orbital] = ancilla
     end
     psi = MPS(tensors)
     normalize!(psi)
+    if purification.mode === :qn_dual
+        expected_flux = QN(
+            ("Nf", purification.base_sector_nf, -1),
+            ("Sz", purification.base_sector_sz),
+        )
+        flux(psi) == expected_flux ||
+            error("QN dual purification has unexpected global flux")
+    end
     return sites, psi
 end
 

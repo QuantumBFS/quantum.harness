@@ -1,7 +1,9 @@
 using Test
 using JSON3
 
-include(joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl"))
+isdefined(Main, :validate_chain_mapping_artifact) ||
+    include(joinpath(@__DIR__, "..", "finite_bath_mps_runner.jl"))
+include(joinpath(@__DIR__, "validated_chain_fixture.jl"))
 
 function minimal_runner_request(; n_bath = 2)
     gamma = 0.1
@@ -307,6 +309,31 @@ end
     @test chain.parameters.chain_onsite == mapping["payload"]["chain_onsite"]
     @test chain.parameters.chain_hopping == mapping["payload"]["chain_hopping"]
     @test chain.parameters.mu == 0.0
+end
+
+@testset "runner returns only sealed validated chain capabilities" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    @test nameof(typeof(validated)) == :ValidatedChainMappingCapability
+    @test validated.source_bath_sha256 != validated.mapping_sha256
+
+    corrupted = mutate_mapping_python!(
+        chain_runner_request(; n_bath = 1),
+        ["payload", "chain_onsite", 0],
+        0.123,
+    )
+    returned_capability = Ref{Any}(nothing)
+    returned_parameters = Ref{Any}(nothing)
+    error = try
+        result = write_and_read_request(corrupted)
+        returned_capability[] = result.validated_mapping
+        returned_parameters[] = result.parameters
+        nothing
+    catch caught
+        caught
+    end
+    @test error isa ArgumentError
+    @test returned_capability[] === nothing
+    @test returned_parameters[] === nothing
 end
 
 @testset "runner checkpoint identity uses validated geometry" begin

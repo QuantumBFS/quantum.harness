@@ -3,7 +3,7 @@ using LinearAlgebra
 using ITensors
 using ITensorMPS
 
-include(joinpath(@__DIR__, "..", "finite_bath_purification.jl"))
+include(joinpath(@__DIR__, "validated_chain_fixture.jl"))
 using .FiniteBathPurification:
     EvolutionInterrupted,
     EvolutionResumeState,
@@ -316,15 +316,11 @@ function production_mpo_sector_matrix(parameters, n_up::Int, n_down::Int)
 end
 
 function chain_parameters(n_bath::Int; U = 0.8, mu = 0.07)
-    fixture = chain_equivalence_fixture(n_bath)
+    validated = validated_chain_fixture(
+        ; n_bath, gamma = 0.13, bandwidth = 1.2
+    )
     return FiniteBathParameters(
-        :chain;
-        epsilon = fixture.epsilon,
-        V = [fixture.lambda; zeros(n_bath - 1)],
-        chain_onsite = fixture.chain_onsite,
-        chain_hopping = fixture.chain_hopping,
-        lambda = fixture.lambda,
-        mapping_sha256 = repeat(string(n_bath), 64)[1:64],
+        validated;
         U,
         epsilon_d = -0.31,
         mu,
@@ -342,18 +338,10 @@ function direct_parameters(n_bath::Int; U = 0.8, mu = 0.07)
     )
 end
 
-@testset "explicit finite chain parameters preserve non-QN sites" begin
+@testset "validated finite chain parameters preserve non-QN defaults" begin
+    validated = validated_chain_fixture(; n_bath = 3)
     parameters = FiniteBathParameters(
-        :chain;
-        epsilon = [-0.4, 0.2, 0.7],
-        V = [0.31, 0.0, 0.0],
-        chain_onsite = [-0.4, 0.2, 0.7],
-        chain_hopping = [0.13, 0.09],
-        lambda = 0.31,
-        mapping_sha256 = repeat("a", 64),
-        U = 0.8,
-        epsilon_d = -0.4,
-        mu = 0.07,
+        validated; U = 0.8, epsilon_d = -0.4, mu = 0.07
     )
     sites = interleaved_sites(parameters)
 
@@ -364,38 +352,112 @@ end
     @test length(identity_sites) == 8
     @test all(!hasqns(site) for site in identity_sites)
     @test norm(identity) ≈ 1.0 atol = 1.0e-13
-end
-
-@testset "finite chain parameters validate dimensions hopping and linkage" begin
-    common = (;
-        epsilon = [-0.4, 0.2, 0.7],
-        V = [0.31, 0.0, 0.0],
-        chain_onsite = [-0.4, 0.2, 0.7],
-        chain_hopping = [0.13, 0.09],
-        lambda = 0.31,
+    @test_throws MethodError FiniteBathParameters(
+        :chain;
+        epsilon = [0.0],
+        V = [0.1],
+        chain_onsite = [0.0],
+        chain_hopping = Float64[],
+        lambda = 0.1,
         mapping_sha256 = repeat("a", 64),
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :tree; common...
+end
+
+@testset "purification specification and validated chain capability" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    chain = FiniteBathParameters(
+        validated; U = 0.8, epsilon_d = -0.4, mu = 0.0
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., V = [0.31, 0.0])...
+    non_qn = FiniteBathPurification.non_qn_purification()
+    qn = FiniteBathPurification.qn_dual_purification(chain, validated)
+
+    @test non_qn.mode === :non_qn
+    @test non_qn.qn_gauge === nothing
+    @test non_qn.qn_gauge_version === nothing
+    @test non_qn.base_sector_nf === nothing
+    @test non_qn.base_sector_sz === nothing
+    @test qn.mode === :qn_dual
+    @test qn.qn_gauge == "electron_nf_sz_ancilla_particle_hole"
+    @test qn.qn_gauge_version == 1
+    @test (qn.base_sector_nf, qn.base_sector_sz) == (4, 0)
+    @test_throws ArgumentError FiniteBathPurification.qn_dual_purification(
+        FiniteBathParameters([0.0], [0.1]), validated
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., chain_onsite = [-0.4, 0.2])...
+    @test !(:ValidatedChainMappingCapability in
+            names(FiniteBathPurification))
+    @test !(:ChainMappingValidationSeal in names(FiniteBathPurification))
+    @test_throws MethodError FiniteBathPurification.ValidatedChainMappingCapability(
+        ;
+        source_bath_sha256 = repeat("a", 64),
+        mapping_sha256 = repeat("b", 64),
+        epsilon = [0.0],
+        chain_onsite = [0.0],
+        chain_hopping = Float64[],
+        lambda = 0.1,
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., chain_hopping = [0.13])...
+end
+
+@testset "QN Electron labels and complementary dual identity" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    chain = FiniteBathParameters(validated)
+    spec = FiniteBathPurification.qn_dual_purification(chain, validated)
+    sites = interleaved_sites(chain; purification = spec)
+    identity_sites, psi =
+        identity_purification(chain; purification = spec)
+
+    @test length(sites) == length(identity_sites)
+    @test space.(sites) == space.(identity_sites)
+    @test all(hasqns, sites)
+    @test all(
+        site -> !occursin("NfParity", sprint(show, space(site))),
+        sites,
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., chain_hopping = [0.13, -0.09])...
+    expected_qns = Dict(
+        "Emp" => QN(("Nf", 0, -1), ("Sz", 0)),
+        "Up" => QN(("Nf", 1, -1), ("Sz", 1)),
+        "Dn" => QN(("Nf", 1, -1), ("Sz", -1)),
+        "UpDn" => QN(("Nf", 2, -1), ("Sz", 0)),
     )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., V = [0.30, 0.0, 0.0])...
-    )
-    @test_throws ArgumentError FiniteBathParameters(
-        :chain; (; common..., V = [0.31, 0.01, 0.0])...
-    )
+    for site in sites, (label, expected) in expected_qns
+        @test flux(state(site, label)) == expected
+    end
+
+    pair = psi[1] * psi[2]
+    pair *= onehot(dag(linkind(psi, 2)) => 1)
+    @test flux(pair) == QN(("Nf", 2, -1), ("Sz", 0))
+    A = [
+        pair[identity_sites[1] => physical, identity_sites[2] => ancilla]
+        for physical in 1:4, ancilla in 1:4
+    ]
+    expected = [
+        0.0 0.0 0.0 0.5
+        0.0 0.0 0.5 0.0
+        0.0 0.5 0.0 0.0
+        0.5 0.0 0.0 0.0
+    ]
+    @test A == expected
+    for physical in 1:4, ancilla in 1:4
+        target = physical + ancilla == 5 ? 0.5 : 0.0
+        @test A[physical, ancilla] == target
+    end
+    @test A * A' ≈ Matrix{Float64}(I, 4, 4) / 4 atol = 1.0e-15
+    @test norm(psi) ≈ 1.0 atol = 1.0e-15
+    @test flux(psi) == QN(("Nf", 4, -1), ("Sz", 0))
+    terms = [
+        ("Emp", "UpDn", 0 + 2, 0 + 0),
+        ("Up", "Dn", 1 + 1, 1 - 1),
+        ("Dn", "Up", 1 + 1, -1 + 1),
+        ("UpDn", "Emp", 2 + 0, 0 + 0),
+    ]
+    @test all(term -> term[3] == 2 && term[4] == 0, terms)
+
+    larger_validated = validated_chain_fixture(; n_bath = 2)
+    larger = FiniteBathParameters(larger_validated)
+    larger_spec =
+        FiniteBathPurification.qn_dual_purification(larger, larger_validated)
+    _, larger_psi =
+        identity_purification(larger; purification = larger_spec)
+    @test flux(larger_psi) == QN(("Nf", 6, -1), ("Sz", 0))
 end
 
 @testset "direct star constructor remains backward compatible" begin

@@ -4,11 +4,11 @@ using JSON3
 using ITensors
 using ITensorMPS
 
-isdefined(Main, :FiniteBathPurification) ||
-    include(joinpath(@__DIR__, "..", "finite_bath_purification.jl"))
+include(joinpath(@__DIR__, "validated_chain_fixture.jl"))
 using .FiniteBathPurification: FiniteBathParameters
 
-include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
+isdefined(Main, :FiniteBathObservables) ||
+    include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
 using .FiniteBathObservables:
     ObservableCursor,
     ObservableInterrupted,
@@ -117,57 +117,34 @@ function independent_observables_trace(parameters, beta, tau)
     return (; n_up, n_dn, n_d = n_up + n_dn, double_occupancy, green)
 end
 
-function python_chain_fixtures()
-    solution_dir = normpath(joinpath(@__DIR__, "..", ".."))
-    script = """
-import json
-import sys
-sys.path.insert(0, sys.argv[1])
-import bath
-import chain_mapping
-
-fixtures = []
-for n_bath in range(1, 7):
-    star = bath.make_bath_artifact(
-        gamma=0.1,
-        bandwidth=1.0,
-        n_bath=n_bath,
-        frequency_grid=[-1.0, 0.0, 1.0],
-    )
-    mapping = chain_mapping.derive_chain_mapping(star)
-    fixtures.append({
-        "n_bath": n_bath,
-        "epsilon": star["payload"]["epsilon"],
-        "coupling": star["payload"]["V"],
-        "lambda": mapping["payload"]["lambda"],
-        "chain_onsite": mapping["payload"]["chain_onsite"],
-        "chain_hopping": mapping["payload"]["chain_hopping"],
-        "mapping_sha256": mapping["sha256"],
-        "spin_transform": mapping["payload"]["conventions"]["spin_transform"],
-    })
-print(json.dumps(fixtures, sort_keys=True, separators=(",", ":")))
-"""
-    command =
-        `uv run --project=$solution_dir --frozen python -c $script $solution_dir`
-    return JSON3.read(read(command, String))
+function validated_observable_chain_fixtures()
+    gamma = 0.1
+    bandwidth = 1.0
+    return [
+        (;
+            n_bath,
+            epsilon = [
+                bandwidth * cos(k * pi / (n_bath + 1))
+                for k in 1:n_bath
+            ],
+            coupling = [
+                sqrt(
+                    gamma * bandwidth / (n_bath + 1) *
+                    sin(k * pi / (n_bath + 1))^2
+                ) for k in 1:n_bath
+            ],
+            validated = validated_chain_fixture(
+                ; n_bath, gamma, bandwidth
+            ),
+        ) for n_bath in 1:6
+    ]
 end
 
 function mapped_observable_parameters(fixture)
-    epsilon = Float64.(fixture["epsilon"])
-    coupling = Float64.(fixture["coupling"])
-    n_bath = Int(fixture["n_bath"])
     common = (; U = 0.8, epsilon_d = -0.4, mu = 0.0)
-    direct = FiniteBathParameters(epsilon, coupling; common...)
-    chain = FiniteBathParameters(
-        :chain;
-        epsilon,
-        V = [Float64(fixture["lambda"]); zeros(n_bath - 1)],
-        chain_onsite = Float64.(fixture["chain_onsite"]),
-        chain_hopping = Float64.(fixture["chain_hopping"]),
-        lambda = Float64(fixture["lambda"]),
-        mapping_sha256 = String(fixture["mapping_sha256"]),
-        common...,
-    )
+    direct =
+        FiniteBathParameters(fixture.epsilon, fixture.coupling; common...)
+    chain = FiniteBathParameters(fixture.validated; common...)
     return direct, chain
 end
 
@@ -212,7 +189,7 @@ function assert_star_chain_observables(chain, direct; atol)
     ) <= atol
 end
 
-const CHAIN_FIXTURES = python_chain_fixtures()
+const CHAIN_FIXTURES = validated_observable_chain_fixtures()
 
 @testset "geometry diagnostics preserve mapped spin convention without QNs" begin
     fixture = CHAIN_FIXTURES[2]
@@ -220,12 +197,11 @@ const CHAIN_FIXTURES = python_chain_fixtures()
     direct_context = build_finite_bath_context(direct)
     chain_context = build_finite_bath_context(chain)
 
-    @test fixture["spin_transform"] ==
-          "the same real Q is used for up and down"
     @test direct_context.bath_representation === :direct_star
     @test chain_context.bath_representation === :chain
     @test direct_context.chain_mapping_sha256 === nothing
-    @test chain_context.chain_mapping_sha256 == fixture["mapping_sha256"]
+    @test chain_context.chain_mapping_sha256 ==
+          fixture.validated.mapping_sha256
     @test direct_context.spin_qn_enabled == false
     @test chain_context.spin_qn_enabled == false
     @test direct_context.spin_transform == chain_context.spin_transform
@@ -260,7 +236,7 @@ end
             chain_result,
             chain_context,
             :chain,
-            String(fixture["mapping_sha256"]),
+            fixture.validated.mapping_sha256,
         )
     end
 end

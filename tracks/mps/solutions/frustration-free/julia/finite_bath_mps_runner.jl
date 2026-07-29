@@ -669,9 +669,11 @@ function validate_chain_mapping_artifact(
             throw(ArgumentError("decoupled chain hopping must be zero"))
     end
 
-    return (;
-        mapping,
+    return FiniteBathPurification.ValidatedChainMappingCapability(
+        FiniteBathPurification._CHAIN_MAPPING_VALIDATION_SEAL;
+        source_bath_sha256 = source_digest,
         mapping_sha256 = mapping_digest,
+        epsilon,
         chain_onsite = onsite,
         chain_hopping = hopping,
         lambda,
@@ -864,18 +866,7 @@ function read_request(path)
     parameters =
         representation == "direct_star" ?
         FiniteBathParameters(epsilon, coupling; U, epsilon_d, mu) :
-        FiniteBathParameters(
-            :chain;
-            epsilon,
-            V = [validated_mapping.lambda; zeros(length(epsilon) - 1)],
-            chain_onsite = validated_mapping.chain_onsite,
-            chain_hopping = validated_mapping.chain_hopping,
-            lambda = validated_mapping.lambda,
-            mapping_sha256,
-            U,
-            epsilon_d,
-            mu,
-        )
+        FiniteBathParameters(validated_mapping; U, epsilon_d, mu)
     return (;
         raw,
         request,
