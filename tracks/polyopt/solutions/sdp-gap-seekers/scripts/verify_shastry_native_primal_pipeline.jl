@@ -107,11 +107,15 @@ native.coefficient_map_sha256 == EXPECTED_COEFFICIENT_SHA256 ||
     error("native coefficient fingerprint differs from the exact regression")
 length(native.moment_variables) == 7_231 ||
     error("native primal changed the L=1 moment count")
-native.native_psd_blocks == 26 ||
+expected_block_count =
+    length(isotypic.positive_blocks) + length(isotypic.gap_blocks)
+expected_block_count == 23 ||
+    error("exact L=1 structural cone count changed")
+native.native_psd_blocks == expected_block_count ||
     error("native primal changed the L=1 cone count")
 Int(Mosek.getnumvar(native.task)) == 7_231 ||
     error("native Mosek task changed the scalar-variable count")
-Int(Mosek.getnumacc(native.task)) == 26 ||
+Int(Mosek.getnumacc(native.task)) == expected_block_count ||
     error("native Mosek task changed the affine-cone count")
 Int(Mosek.getnumafe(native.task)) == report.psd_triangle_entries ||
     error("native Mosek task changed the PSD triangle inventory")
