@@ -128,6 +128,26 @@ def _integer_target_atoms(
     """Replay one frozen exact card and clear one common atom denominator."""
 
     template, seed, normalized_target = _parse_target(target)
+    if template == "symmetric-oddcycle-fixed":
+        if seed != 0:
+            raise ValueError("symmetric-oddcycle-fixed only defines seed 0")
+        from .symmetric_oddcycle_cones import fixed_candidate_matrix
+
+        exact = fixed_candidate_matrix()
+        integer = tuple(
+            tuple(int(value) for value in exact.row(row))
+            for row in range(exact.rows)
+        )
+        transpose = tuple(zip(*integer, strict=True))
+        return (
+            1,
+            exact.rows,
+            (integer, transpose),
+            "symmetric-oddcycle-fixed-v1",
+            template,
+            seed,
+            normalized_target,
+        )
     card = candidate_card(template=template, seed=seed)
     exact_atoms = exact_atoms_from_card(card)
     if len(exact_atoms) != 2 or exact_atoms[1] != exact_atoms[0].T:
