@@ -14,6 +14,8 @@ using ..ShastryFullStateSpinIsotypicReduction:
     ShastryFullStateSpinIsotypicReducedPrimalAssembly,
     block_label,
     shastry_spin_isotypic_block_entry
+using ..ShastryFullStateSpinIsotypicDualCertificateMosek:
+    su2_rank4_polynomial_projection
 
 export ShastryFullStateSpinIsotypicMosekPrimal,
        build_shastry_full_state_spin_isotypic_mosek_primal,
@@ -26,6 +28,8 @@ struct ShastryFullStateSpinIsotypicMosekPrimal
     equality_constraints::Int
     scalar_coefficient_terms::Int
     coefficient_map_sha256::String
+    su2_rank4_reduction::Bool
+    su2_rank4_eliminated_moments::Int
 end
 
 function update_fingerprint!(
@@ -96,6 +100,9 @@ function append_primal_block!(
     block_index::Int,
     progress_callback::Function,
     coefficient_fingerprint::Union{Nothing,SHA.SHA2_256_CTX},
+    su2_rank4_reduction::Bool,
+    su2_rank4_eliminated_moments::Set{MomentKey},
+    su2_rank4_projection_cache::Dict{MomentKey,ExactLinearPolynomial},
 )
     dimension = length(block.rows)
     triangle_entries = dimension * (dimension + 1) ÷ 2
@@ -135,6 +142,19 @@ function append_primal_block!(
                     )
                 batch_polynomials[batch_index][column - row + 1] =
                     polynomial
+            end
+        end
+
+        if su2_rank4_reduction
+            for polynomials in batch_polynomials
+                for index in eachindex(polynomials)
+                    polynomials[index] = su2_rank4_polynomial_projection(
+                        polynomials[index],
+                        assembly,
+                        su2_rank4_eliminated_moments,
+                        su2_rank4_projection_cache,
+                    )
+                end
             end
         end
 
@@ -215,7 +235,11 @@ end
 function append_primal_equalities!(
     task::Mosek.Task,
     moment_variables::Dict{MomentKey,Int32},
+    assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
     equalities,
+    su2_rank4_reduction::Bool,
+    su2_rank4_eliminated_moments::Set{MomentKey},
+    su2_rank4_projection_cache::Dict{MomentKey,ExactLinearPolynomial},
 )
     isempty(equalities) && return 0
     first_constraint = Int(Mosek.getnumcon(task)) + 1
@@ -233,14 +257,22 @@ function append_primal_equalities!(
     )
     scalar_term_count = 0
     for (offset, equality) in enumerate(equalities)
-        all(iszero ∘ imag, values(equality.terms)) ||
+        projected_equality = su2_rank4_reduction ?
+            su2_rank4_polynomial_projection(
+                equality,
+                assembly,
+                su2_rank4_eliminated_moments,
+                su2_rank4_projection_cache,
+            ) :
+            equality
+        all(iszero ∘ imag, values(projected_equality.terms)) ||
             error("native Mosek primal equality is not exactly real")
         ensure_moment_variables!(
             task,
             moment_variables,
-            keys(equality.terms),
+            keys(projected_equality.terms),
         )
-        keys_in_order = collect(keys(equality.terms))
+        keys_in_order = collect(keys(projected_equality.terms))
         Mosek.putaijlist(
             task,
             fill(
@@ -249,7 +281,7 @@ function append_primal_equalities!(
             ),
             Int32[moment_variables[key] for key in keys_in_order],
             Float64[
-                checked_float(real(equality.terms[key]))
+                checked_float(real(projected_equality.terms[key]))
                 for key in keys_in_order
             ],
         )
@@ -273,6 +305,7 @@ function build_shastry_full_state_spin_isotypic_mosek_primal(
     log_level::Int=1,
     progress_callback::Function=message -> nothing,
     fingerprint_coefficients::Bool=false,
+    su2_rank4_reduction::Bool=false,
 )
     task = Mosek.maketask()
     Mosek.putstreamfunc(
@@ -296,9 +329,14 @@ function build_shastry_full_state_spin_isotypic_mosek_primal(
     ensure_moment_variables!(task, moment_variables, (moment_key(),))
     coefficient_fingerprint =
         fingerprint_coefficients ? SHA.SHA2_256_CTX() : nothing
+    su2_rank4_eliminated_moments = Set{MomentKey}()
+    su2_rank4_projection_cache =
+        Dict{MomentKey,ExactLinearPolynomial}()
     if !isnothing(coefficient_fingerprint)
         update_fingerprint!(
             coefficient_fingerprint,
+            su2_rank4_reduction ?
+            "shastry-full-state-spin-isotypic-su2-rank4-coefficients-v1" :
             "shastry-full-state-spin-isotypic-coefficients-v1",
         )
     end
@@ -313,12 +351,19 @@ function build_shastry_full_state_spin_isotypic_mosek_primal(
             block_index,
             progress_callback,
             coefficient_fingerprint,
+            su2_rank4_reduction,
+            su2_rank4_eliminated_moments,
+            su2_rank4_projection_cache,
         )
     end
     scalar_term_count += append_primal_equalities!(
         task,
         moment_variables,
+        assembly,
         assembly.equalities,
+        su2_rank4_reduction,
+        su2_rank4_eliminated_moments,
+        su2_rank4_projection_cache,
     )
     coefficient_map_sha256 = isnothing(coefficient_fingerprint) ?
         "omitted-streaming-v1" :
@@ -330,6 +375,8 @@ function build_shastry_full_state_spin_isotypic_mosek_primal(
         length(assembly.equalities),
         scalar_term_count,
         coefficient_map_sha256,
+        su2_rank4_reduction,
+        length(su2_rank4_eliminated_moments),
     )
 end
 

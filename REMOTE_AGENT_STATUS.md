@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T18:04:26Z
+Updated: 2026-07-29T18:21:05Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -181,5 +181,12 @@ Updated: 2026-07-29T18:04:26Z
   relaxation. Fresh-task replay passes at `1e-7` and fails at `1e-9`; this is
   not scientific evidence. Reduced L=2 remains blocked pending an unreduced
   native-dual control and projection/scaling diagnosis.
+- Unreduced native-dual control `118180537` completed in 13:18 at 10,652,388
+  KiB, reproducing the exact established 7,231-moment hash. It too returned
+  approximate `OPTIMAL`; maximum violation `1.053194864653051e-9` failed the
+  required `1e-9` audit. This proves the bar-certificate status can be a weak
+  numerical false positive on a known-feasible model. The next discriminator
+  is a hash-gated SO(3)-reduced native-primal solve and `1e-9` residual audit;
+  reduced L=2 remains unlaunched until that passes.
 
 No user input or new credential is currently required.

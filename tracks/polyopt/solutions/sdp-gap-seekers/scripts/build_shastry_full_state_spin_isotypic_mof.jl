@@ -984,6 +984,8 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                         "SHASTRY_NATIVE_FINGERPRINT",
                         "0",
                     ) == "1",
+                su2_rank4_reduction=
+                    get(ENV, "SHASTRY_SU2_RANK4_REDUCTION", "0") == "1",
             )
         )
         native_primal = native_measurement.value
@@ -1015,6 +1017,10 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 native_primal.scalar_coefficient_terms,
             "coefficient_map_sha256" =>
                 native_primal.coefficient_map_sha256,
+            "su2_rank4_reduction" =>
+                native_primal.su2_rank4_reduction,
+            "su2_rank4_eliminated_moments" =>
+                native_primal.su2_rank4_eliminated_moments,
             "expected_coefficient_map_sha256" =>
                 expected_coefficient_map_sha256,
             "coefficient_regression_passed" =>
@@ -1025,6 +1031,8 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         metadata["reduced"]["coefficient_map_sha256"] =
             native_primal.coefficient_map_sha256
         metadata["coefficient_inventory"] =
+            native_primal.su2_rank4_reduction ?
+            "streamed-native-mosek-su2-rank4-v1" :
             "streamed-native-mosek-v1"
         write_checkpoint(checkpoint_path, metadata)
         progress(
@@ -1074,6 +1082,8 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         end
         metadata["solve"] = Dict(
             "formulation" =>
+                native_primal.su2_rank4_reduction ?
+                "low-level-native-mosek-affine-psd-primal-su2-rank4-v1" :
                 "low-level-native-mosek-affine-psd-primal-v1",
             "native_solver_classification" => solve_result.classification,
             "classification" => classification,

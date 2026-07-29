@@ -1278,3 +1278,23 @@ also returns an apparent certificate, repair the native dual formulation or
 scaling. If it correctly reports no certificate, audit the rank-four
 coordinate normalization and solve the reduced primal directly. No reduced
 L=2 job is authorized before this fork is resolved.
+
+Unreduced control `118180537` completed from clean commit `0e1682d` in 13:18
+with 10,652,388 KiB MaxRSS. It exactly reproduced 7,231 constraints, 23 PSD
+blocks, 233,206 coefficient terms, and the established SHA-256
+`2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`.
+Nevertheless, the native bar task also returned `OPTIMAL`; its maximum
+constraint violation was `1.053194864653051e-9`, just above the declared
+`1e-9` audit, so classification correctly became
+`infeasibility_certificate_failed_residual_audit` and no artifact was
+authorized. The explicit certificate system is therefore a weak/numerical
+false-positive source on a known-feasible control. Solver status must never
+classify the scientific L=2 result; residual replay needs a materially tighter
+margin than these L=1 controls.
+
+The rank-four relation remains mathematically plausible. The changed next
+action is a native reduced-primal L=1 solve: substitute the same exact
+coordinates in the original affine-PSD orientation, require reduced hash
+`7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`,
+and demand residual-checked feasibility at `1e-9`. This directly tests the
+projection without relying on the weak bar certificate system.

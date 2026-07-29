@@ -718,3 +718,12 @@ Updated: 2026-07-29 UTC.
   `1e-9`. Do not use this as evidence or launch reduced L=2 yet. Next changed
   action: run the identical unreduced native-dual control at `1e-9`; then
   distinguish dual-formulation error from projection/conditioning error.
+- Unreduced control `118180537` completed in 13:18 at 10,652,388 KiB MaxRSS.
+  It reproduced the established 7,231 moments and exact coefficient hash
+  `2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679`,
+  yet Mosek again returned approximate `OPTIMAL`; maximum constraint violation
+  `1.053194864653051e-9` correctly failed the `1e-9` audit. This localizes the
+  contradiction to weak/numerical feasibility of the explicit bar system,
+  not specifically the SO(3) relation. Next gate: solve the 5,314-coordinate
+  SO(3)-reduced primal directly, require the same reduced hash, and audit its
+  affine-cone residuals at `1e-9`.

@@ -51,12 +51,16 @@ equations to 5,314 (1,917 eliminated; 26.5%) with coefficient SHA-256
 Its native certificate task returned `OPTIMAL`, although the unreduced L=1
 relaxation is known feasible. The fresh-task replay passes at `1e-7` with
 maximum violation `2.3730706288915826e-8` but fails at `1e-9`. This numerical
-contradiction is not a certificate and blocks L=2 use pending an unreduced
-native-dual control and a projection-normalization audit.
+contradiction is not a certificate. Unreduced control `118180537` reproduced
+the established coefficient hash but also returned approximate `OPTIMAL`;
+its `1.053194864653051e-9` violation fails the declared `1e-9` audit. Thus the
+explicit bar system is weakly/numerically feasible even for the known-feasible
+control, and status is not a valid discriminator. L=2 use remains blocked
+pending a residual-checked reduced-primal feasibility comparison.
 
 Authorization requires both gates:
 
-1. an L=1 construction/solve comparison against the established unrestricted
-   finite-relaxation decision, including resolution of job `118179614`; and
+1. a residual-checked L=1 reduced-primal solve that reproduces the reduced
+   coefficient hash and the established unrestricted feasibility decision; and
 2. two independent L=2 constructions with the same exact coefficient hash
    before its result is interpreted.
