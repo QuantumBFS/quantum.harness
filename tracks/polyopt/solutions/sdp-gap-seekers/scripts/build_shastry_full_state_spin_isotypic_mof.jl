@@ -478,6 +478,76 @@ function write_mosek_infeasibility_ray_artifact(
     )
 end
 
+const MOSEK_DUAL_CERTIFICATE_MAGIC =
+    collect(codeunits("SSMOSEKCERTV1\n"))
+
+function write_mosek_dual_certificate_artifact(
+    path::AbstractString,
+    task::Mosek.Task,
+)
+    problem_status = Mosek.getprosta(task, Mosek.MSK_SOL_ITR)
+    solution_status = Mosek.getsolsta(task, Mosek.MSK_SOL_ITR)
+    solution_status == Mosek.MSK_SOL_STA_OPTIMAL ||
+        error("refusing dual-certificate export without an optimal solution")
+    Int(Mosek.getnumcone(task)) == 0 ||
+        error("dual-certificate artifact does not encode scalar cones")
+    Int(Mosek.getnumacc(task)) == 0 ||
+        error("dual-certificate artifact does not encode affine cones")
+
+    scalar_values = Mosek.getxx(task, Mosek.MSK_SOL_ITR)
+    semidefinite_values = [
+        Mosek.getbarxj(task, Mosek.MSK_SOL_ITR, index)
+        for index in 1:Int(Mosek.getnumbarvar(task))
+    ]
+    all(
+        isfinite,
+        Iterators.flatten((scalar_values, semidefinite_values...)),
+    ) || error("refusing nonfinite Mosek dual certificate")
+
+    endswith(path, ".certificate.bin") || error(
+        "Mosek dual-certificate artifact must end in .certificate.bin",
+    )
+    temporary = path * ".tmp"
+    ispath(path) &&
+        error("refusing existing Mosek dual-certificate artifact: $path")
+    ispath(temporary) && error(
+        "refusing existing Mosek dual-certificate temporary artifact: " *
+        temporary,
+    )
+    open(temporary, "w") do io
+        write(io, MOSEK_DUAL_CERTIFICATE_MAGIC)
+        write_ray_u64(io, problem_status.value)
+        write_ray_u64(io, solution_status.value)
+        write_ray_u64(io, Int(Mosek.getnumcon(task)))
+        write_ray_u64(io, Int(Mosek.getnumvar(task)))
+        write_ray_u64(io, Int(Mosek.getnumcone(task)))
+        write_ray_u64(io, Int(Mosek.getnumacc(task)))
+        write_ray_u64(io, Int(Mosek.getnumbarvar(task)))
+        write_ray_float64_vector(io, scalar_values)
+        write_ray_u64(io, length(semidefinite_values))
+        for (index, values) in enumerate(semidefinite_values)
+            write_ray_u64(io, Int(Mosek.getdimbarvarj(task, index)))
+            write_ray_float64_vector(io, values)
+        end
+    end
+    mv(temporary, path)
+    return Dict(
+        "available" => true,
+        "schema_version" => "shastry-mosek-dual-certificate-v1",
+        "filename" => basename(path),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "endianness" => "little",
+        "problem_status" => sprint(show, problem_status),
+        "solution_status" => sprint(show, solution_status),
+        "constraint_count" => Int(Mosek.getnumcon(task)),
+        "scalar_variable_count" => length(scalar_values),
+        "semidefinite_variable_count" => length(semidefinite_values),
+        "semidefinite_packed_value_count" =>
+            sum(length, semidefinite_values; init=0),
+    )
+end
+
 function write_native_mosek_primal_values(
     path::AbstractString,
     primal::ShastryFullStateSpinIsotypicMosekPrimal,
@@ -726,10 +796,31 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 time_limit_seconds=time_limit_seconds,
                 log_level=log_level,
                 progress_callback=progress,
-                fingerprint_coefficients=options.patch_level == 1,
+                fingerprint_coefficients=
+                    options.patch_level == 1 ||
+                    get(
+                        ENV,
+                        "SHASTRY_CERTIFICATE_FINGERPRINT",
+                        "0",
+                    ) == "1",
             )
         )
         certificate = certificate_measurement.value
+        expected_coefficient_map_sha256 = get(
+            ENV,
+            "SS_EXPECTED_COEFFICIENT_MAP_SHA256",
+            "",
+        )
+        coefficient_regression_passed =
+            isempty(expected_coefficient_map_sha256) ||
+            certificate.coefficient_map_sha256 ==
+            expected_coefficient_map_sha256
+        coefficient_regression_passed || error(
+            "native dual coefficient-map regression failed: expected " *
+            expected_coefficient_map_sha256 *
+            ", observed " *
+            certificate.coefficient_map_sha256,
+        )
         metadata["stages"]["dual_certificate"] =
             measurement_dict(certificate_measurement)
         metadata["dual_certificate"] = Dict(
@@ -743,7 +834,17 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 certificate.scalar_coefficient_terms,
             "coefficient_map_sha256" =>
                 certificate.coefficient_map_sha256,
+            "expected_coefficient_map_sha256" =>
+                expected_coefficient_map_sha256,
+            "coefficient_regression_passed" =>
+                coefficient_regression_passed,
         )
+        metadata["reduced"]["spin_isotypic_moments"] =
+            length(certificate.moment_constraints)
+        metadata["reduced"]["coefficient_map_sha256"] =
+            certificate.coefficient_map_sha256
+        metadata["coefficient_inventory"] =
+            "streamed-native-mosek-dual-v1"
         write_checkpoint(checkpoint_path, metadata)
         progress(
             "optimize native dual certificate; threads=$threads, " *
@@ -757,14 +858,62 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         metadata["stages"]["solve"] =
             measurement_dict(solve_measurement)
         solve_result = solve_measurement.value
+        audit_tolerance = parse(
+            Float64,
+            get(ENV, "SS_AUDIT_TOLERANCE", "1e-7"),
+        )
+        maximum_primal_violation = maximum((
+            solve_result.maximum_constraint_violation,
+            solve_result.maximum_scalar_variable_violation,
+            solve_result.maximum_semidefinite_variable_violation,
+        ))
+        classification = if solve_result.classification ==
+                            "primal_infeasibility_certificate_found"
+            if maximum_primal_violation <= audit_tolerance
+                progress(
+                    "preserve native dual task and exact-bit certificate",
+                )
+                metadata["mosek_dual_certificate_task"] =
+                    write_mosek_task_artifact(
+                        joinpath(
+                            options.output,
+                            "mosek-dual-certificate.task",
+                        ),
+                        certificate.task,
+                    )
+                metadata["mosek_dual_certificate"] =
+                    write_mosek_dual_certificate_artifact(
+                        joinpath(
+                            options.output,
+                            "mosek-dual-certificate.certificate.bin",
+                        ),
+                        certificate.task,
+                    )
+                "infeasibility_certificate_candidate_requires_independent_primal_replay"
+            else
+                "infeasibility_certificate_failed_residual_audit"
+            end
+        else
+            solve_result.classification
+        end
         metadata["solve"] = Dict(
             "formulation" =>
                 "low-level-native-mosek-dual-farkas-certificate-v2",
-            "classification" => solve_result.classification,
+            "native_solver_classification" =>
+                solve_result.classification,
+            "classification" => classification,
             "problem_status" =>
                 sprint(show, solve_result.problem_status),
             "solution_status" =>
                 sprint(show, solve_result.solution_status),
+            "maximum_constraint_violation" =>
+                solve_result.maximum_constraint_violation,
+            "maximum_scalar_variable_violation" =>
+                solve_result.maximum_scalar_variable_violation,
+            "maximum_semidefinite_variable_violation" =>
+                solve_result.maximum_semidefinite_variable_violation,
+            "maximum_primal_violation" => maximum_primal_violation,
+            "audit_tolerance" => audit_tolerance,
             "threads" => threads,
             "time_limit_seconds" => time_limit_seconds,
         )

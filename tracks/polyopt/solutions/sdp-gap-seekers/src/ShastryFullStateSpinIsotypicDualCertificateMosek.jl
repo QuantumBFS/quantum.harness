@@ -346,10 +346,51 @@ function optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!(
     else
         "dual_certificate_numerically_undetermined"
     end
+    has_primal_solution =
+        solution_status == Mosek.MSK_SOL_STA_OPTIMAL
+    constraint_count = Int(Mosek.getnumcon(certificate.task))
+    scalar_variable_count = Int(Mosek.getnumvar(certificate.task))
+    semidefinite_variable_count =
+        Int(Mosek.getnumbarvar(certificate.task))
+    maximum_constraint_violation = has_primal_solution &&
+                                   constraint_count > 0 ?
+        maximum(
+            Mosek.getpviolcon(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:constraint_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
+    maximum_scalar_variable_violation = has_primal_solution &&
+                                        scalar_variable_count > 0 ?
+        maximum(
+            Mosek.getpviolvar(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:scalar_variable_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
+    maximum_semidefinite_variable_violation = has_primal_solution &&
+                                              semidefinite_variable_count > 0 ?
+        maximum(
+            Mosek.getpviolbarvar(
+                certificate.task,
+                Mosek.MSK_SOL_ITR,
+                Int32.(1:semidefinite_variable_count),
+            ),
+        ) :
+        (has_primal_solution ? 0.0 : Inf)
     return (
         classification=classification,
         problem_status=problem_status,
         solution_status=solution_status,
+        maximum_constraint_violation=maximum_constraint_violation,
+        maximum_scalar_variable_violation=
+            maximum_scalar_variable_violation,
+        maximum_semidefinite_variable_violation=
+            maximum_semidefinite_variable_violation,
     )
 end
 

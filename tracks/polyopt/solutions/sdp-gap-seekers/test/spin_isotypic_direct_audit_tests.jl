@@ -14,6 +14,12 @@ include(joinpath(
     "scripts",
     "replay_mosek_infeasibility_artifact.jl",
 ))
+include(joinpath(
+    @__DIR__,
+    "..",
+    "scripts",
+    "replay_mosek_dual_certificate_artifact.jl",
+))
 
 model = JuMP.Model(MosekTools.Optimizer)
 JuMP.set_silent(model)
@@ -71,6 +77,35 @@ JuMP.@constraint(
     Symmetric([-q 0.0; 0.0 1.0]) in JuMP.PSDCone(),
 )
 JuMP.optimize!(infeasible_sdp_model)
+
+dual_certificate_task = Mosek.maketask()
+Mosek.putintparam(
+    dual_certificate_task,
+    Mosek.MSK_IPAR_LOG,
+    0,
+)
+Mosek.putobjsense(
+    dual_certificate_task,
+    Mosek.MSK_OBJECTIVE_SENSE_MINIMIZE,
+)
+Mosek.appendcons(dual_certificate_task, 1)
+Mosek.putconbound(
+    dual_certificate_task,
+    1,
+    Mosek.MSK_BK_FX,
+    -1.0,
+    -1.0,
+)
+Mosek.appendbarvars(dual_certificate_task, Int32[1])
+Mosek.putbarablocktriplet(
+    dual_certificate_task,
+    Int32[1],
+    Int32[1],
+    Int32[1],
+    Int32[1],
+    Float64[-1.0],
+)
+Mosek.optimize(dual_certificate_task)
 
 @testset "direct spin-isotypic solve audit" begin
     @test JuMP.termination_status(model) == JuMP.MOI.OPTIMAL
@@ -188,5 +223,52 @@ JuMP.optimize!(infeasible_sdp_model)
         @test sdp_replay["audit"]["residual_passed"]
         @test sdp_replay["audit"]["separation_passed"]
         @test sdp_replay["audit"]["passed"]
+
+        @test Mosek.getprosta(
+            dual_certificate_task,
+            Mosek.MSK_SOL_ITR,
+        ) == Mosek.MSK_PRO_STA_PRIM_AND_DUAL_FEAS
+        @test Mosek.getsolsta(
+            dual_certificate_task,
+            Mosek.MSK_SOL_ITR,
+        ) == Mosek.MSK_SOL_STA_OPTIMAL
+        dual_certificate_task_artifact = write_mosek_task_artifact(
+            joinpath(directory, "dual-certificate.task"),
+            dual_certificate_task,
+        )
+        dual_certificate_artifact =
+            write_mosek_dual_certificate_artifact(
+                joinpath(
+                    directory,
+                    "dual-certificate.certificate.bin",
+                ),
+                dual_certificate_task,
+            )
+        dual_certificate_replay =
+            mosek_dual_certificate_replay_report(
+                joinpath(directory, "dual-certificate.task"),
+                joinpath(
+                    directory,
+                    "dual-certificate.certificate.bin",
+                );
+                expected_task_sha256=
+                    dual_certificate_task_artifact["sha256"],
+                expected_certificate_sha256=
+                    dual_certificate_artifact["sha256"],
+            )
+        println(
+            "synthetic native dual certificate replay audit: ",
+            dual_certificate_replay["audit"],
+        )
+        flush(stdout)
+        @test dual_certificate_replay["audit"]["source_status_passed"]
+        @test dual_certificate_replay["audit"]["certificate_system_passed"]
+        @test dual_certificate_replay["audit"]["identity_rhs_count"] == 1
+        @test dual_certificate_replay["audit"]["zero_rhs_count"] == 0
+        @test dual_certificate_replay["audit"]["finite"]
+        @test dual_certificate_replay["audit"]["residual_passed"]
+        @test dual_certificate_replay["audit"]["passed"]
+        @test dual_certificate_replay["classification"] ==
+              "mosek_dual_certificate_replayed_float"
     end
 end
