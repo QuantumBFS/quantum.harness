@@ -102,6 +102,30 @@ def test_pre_submit_runtime_gate_checks_versions_platform_and_objective() -> Non
     }
 
     module.validate_runtime(observation, deployment)
+    marker = module.prepared_runtime_marker(
+        {
+            "archive_sha256": "1" * 64,
+            "cluster_profile": "lasg02-cpu-v1",
+            "deployment_metadata_sha256": "2" * 64,
+            "evidence_index_sha256": "3" * 64,
+            "pyproject_sha256": "4" * 64,
+            "report_sha256": "5" * 64,
+            "revision": "a" * 40,
+            "schema_version": 1,
+            "sif_sha256": "6" * 64,
+            "uv_lock_sha256": "7" * 64,
+        },
+        observation,
+    )
+    assert marker["preparation_mode"] == "one-time-frozen-networked-sync"
+    assert marker["execution_isolation"] == "cleanenv-network-none"
+    assert marker["runtime_versions"] == {
+        "critical_packages": deployment["critical_packages"],
+        "python_version": "3.12.12",
+        "uv_version": "0.9.9",
+    }
+    assert marker["isolated_smoke"]["objective"] == module.EXPECTED_OBJECTIVE
+    assert marker["isolated_smoke"]["propagation_finite"] is True
     observation["objective"] += 1e-10
     with pytest.raises(RuntimeError, match="objective"):
         module.validate_runtime(observation, deployment)
@@ -387,6 +411,7 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     fake.chmod(0o755)
     environment = {
         **os.environ,
+        "CHALLENGE113_ACK_NETWORKED_PREPARE": "1",
         "CHALLENGE113_APPTAINER": str(fake),
         "CHALLENGE113_ARCHIVE_PATH": str(archive),
         "CHALLENGE113_ARCHIVE_SHA256": hashlib.sha256(
@@ -437,6 +462,18 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     )
     assert rejected.returncode != 0
     assert not log.exists()
+    for acknowledgement in (None, "0"):
+        unacknowledged = dict(environment)
+        if acknowledgement is None:
+            unacknowledged.pop("CHALLENGE113_ACK_NETWORKED_PREPARE")
+        else:
+            unacknowledged["CHALLENGE113_ACK_NETWORKED_PREPARE"] = acknowledgement
+        rejected = subprocess.run(
+            ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
+            env=unacknowledged,
+        )
+        assert rejected.returncode != 0
+        assert not log.exists()
 
     subprocess.run(
         ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
@@ -446,7 +483,20 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     prepare_log = log.read_text()
     assert prepare_log.count("uv sync --frozen") == 1
     assert prepare_log.count("--no-home") == 3
-    assert prepare_log.count("--cleanenv --net --network none") == 3
+    prepare_commands = prepare_log.splitlines()
+    sync_command = next(
+        line for line in prepare_commands if "uv sync --frozen" in line
+    )
+    assert "--cleanenv" in sync_command
+    assert "--net" not in sync_command and "--network" not in sync_command
+    assert sync_command.endswith("uv sync --frozen --group dev --project /workspace")
+    isolated_commands = [
+        line for line in prepare_commands if line != sync_command
+    ]
+    assert len(isolated_commands) == 2
+    assert all(
+        "--cleanenv --net --network none" in line for line in isolated_commands
+    )
     container_archive = f"/{archive.name}"
     assert f"{archive}:{container_archive}:ro" in prepare_log
     assert f"--archive {container_archive}" in prepare_log
@@ -489,6 +539,7 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
     assert "CHALLENGE113_DEPLOYMENT_METADATA" in inspected
     assert "CHALLENGE113_DEPLOYMENT_METADATA_SHA256" in inspected
     assert "CHALLENGE113_EVIDENCE_REVISION" in inspected
+    assert "sbatch" not in inspected
     if name.startswith("slurm_"):
         assert "CHALLENGE113_SIF_PATH" in inspected
         assert "CHALLENGE113_SIF_SHA256" in inspected

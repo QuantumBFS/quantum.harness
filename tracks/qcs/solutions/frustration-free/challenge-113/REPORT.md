@@ -49,9 +49,17 @@ compute smoke has passed, but no representative pilot for the current source
 candidate has run.
 
 Runtime preparation now verifies source/archive/evidence/report/SIF/project/lock
-hashes, the exact external deployment-metadata byte hash, exact package
-versions, finite propagation, and a deterministic objective before writing a
-hash-bound readiness marker. Slurm jobs use
+hashes and the exact external deployment-metadata byte hash before requiring
+`CHALLENGE113_ACK_NETWORKED_PREPARE=1` for one command only: frozen uv sync in
+a clean, no-home container with normal cluster networking. No qcontrol code is
+executed in that network-enabled container, and no wheelhouse/offline
+preparation is claimed.
+
+The post-sync smoke returns to network-none isolation, validates exact package
+versions, finite propagation, and a deterministic objective, then writes a
+marker recording the networked preparation mode, isolated execution policy,
+runtime versions, lock/hash bindings, metadata digest, and successful smoke.
+Slurm jobs use
 `apptainer exec --no-home --cleanenv --net --network none`, never sync
 packages, and fail closed before entering the container on a metadata mismatch
 or on an absent/stale marker. Deployment metadata remains external to the

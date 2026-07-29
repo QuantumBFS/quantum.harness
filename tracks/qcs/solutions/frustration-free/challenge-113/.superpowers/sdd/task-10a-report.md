@@ -122,3 +122,22 @@ or Slurm submission was made.
   before the first Apptainer call.
 - Fake-container tests cover the exact realistic prepare/job argv and prove
   malicious names enter neither preparation nor pilot runtime execution.
+
+## Frozen networked preparation correction
+
+- RED: network-none preparation could not fetch locked NumPy because LASG02 had
+  no bound complete uv cache or wheelhouse.
+- GREEN: after all source/runtime hashes pass, preparation requires
+  `CHALLENGE113_ACK_NETWORKED_PREPARE=1` and runs exactly one network-enabled
+  command: `uv sync --frozen --group dev --project /workspace` under
+  `--no-home --cleanenv`. It runs no qcontrol, smoke, analysis, scheduler, or
+  physics entry point.
+- The post-sync runtime gate immediately returns to
+  `--cleanenv --net --network none`. Its marker records the one-time frozen
+  networked mode, strict execution isolation, exact runtime versions,
+  lock/source/runtime hashes, metadata digest, and isolated objective/
+  propagation smoke. Jobs reconstruct and compare that marker and never invoke
+  uv or a package manager.
+- Tests prove missing/wrong acknowledgement reaches no container, the sole sync
+  command has no network-namespace flags, every later command has network-none,
+  and no repository script submits a scheduler job.

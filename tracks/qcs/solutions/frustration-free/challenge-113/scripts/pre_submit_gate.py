@@ -98,7 +98,33 @@ def validate_runtime(
         raise RuntimeError("deterministic objective smoke does not match")
 
 
-def marker_payload(root: Path, metadata_path: Path) -> dict[str, object]:
+def prepared_runtime_marker(
+    bindings: dict[str, object],
+    observation: dict[str, object],
+) -> dict[str, object]:
+    return {
+        **bindings,
+        "execution_isolation": "cleanenv-network-none",
+        "isolated_smoke": {
+            "jax_platform": observation["jax_platform"],
+            "objective": observation["objective"],
+            "propagation_finite": observation["propagation_finite"],
+            "x64_enabled": observation["x64_enabled"],
+        },
+        "preparation_mode": "one-time-frozen-networked-sync",
+        "runtime_versions": {
+            "critical_packages": observation["critical_packages"],
+            "python_version": observation["python_version"],
+            "uv_version": observation["uv_version"],
+        },
+    }
+
+
+def marker_payload(
+    root: Path,
+    metadata_path: Path,
+    observation: dict[str, object],
+) -> dict[str, object]:
     deployment = read_canonical(metadata_path)
     source_revision = (root / ".source-revision").read_text().strip()
     if source_revision != deployment["revision"]:
@@ -123,7 +149,7 @@ def marker_payload(root: Path, metadata_path: Path) -> dict[str, object]:
     ):
         if bindings[name] != deployment[name]:
             raise RuntimeError(f"runtime {name} binding is stale")
-    return bindings
+    return prepared_runtime_marker(bindings, observation)
 
 
 def main() -> None:
@@ -149,7 +175,11 @@ def main() -> None:
     deployment = read_canonical(args.deployment_metadata)
     observation = runtime_observation()
     validate_runtime(observation, deployment)
-    expected_marker = marker_payload(args.root, args.deployment_metadata)
+    expected_marker = marker_payload(
+        args.root,
+        args.deployment_metadata,
+        observation,
+    )
     if args.check_marker is not None:
         if read_canonical(args.check_marker) != expected_marker:
             raise RuntimeError("prepared runtime marker is stale")

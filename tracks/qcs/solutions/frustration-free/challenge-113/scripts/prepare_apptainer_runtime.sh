@@ -33,8 +33,12 @@ test "$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')" = "${CHALL
 test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/pyproject.toml" | awk '{print $1}')" = "${CHALLENGE113_PYPROJECT_SHA256}"
 test "$(sha256sum "${CHALLENGE113_DEPLOYMENT}/uv.lock" | awk '{print $1}')" = "${CHALLENGE113_UV_LOCK_SHA256}"
 test "$(sha256sum "${CHALLENGE113_DEPLOYMENT_METADATA}" | awk '{print $1}')" = "${CHALLENGE113_DEPLOYMENT_METADATA_SHA256}"
+if [[ "${CHALLENGE113_ACK_NETWORKED_PREPARE:-}" != "1" ]]; then
+  echo "set CHALLENGE113_ACK_NETWORKED_PREPARE=1 for the one-time frozen sync" >&2
+  exit 2
+fi
 
-CONTAINER_ARGS=(
+ISOLATED_CONTAINER_ARGS=(
   exec
   --no-home
   --cleanenv
@@ -47,8 +51,15 @@ CONTAINER_ARGS=(
   --env JAX_PLATFORMS=cpu
   "${CHALLENGE113_SIF_PATH}"
 )
+NETWORKED_SYNC_ARGS=(
+  exec
+  --no-home
+  --cleanenv
+  --bind "${CHALLENGE113_DEPLOYMENT}:/workspace"
+  "${CHALLENGE113_SIF_PATH}"
+)
 
-"${APPTAINER}" "${CONTAINER_ARGS[@]}" python3 /workspace/scripts/verify_deployment.py \
+"${APPTAINER}" "${ISOLATED_CONTAINER_ARGS[@]}" python3 /workspace/scripts/verify_deployment.py \
   --root /workspace \
   --archive "${CONTAINER_ARCHIVE}" \
   --deployment-metadata /challenge113-deployment.json \
@@ -60,9 +71,9 @@ CONTAINER_ARGS=(
   --expected-pyproject-sha256 "${CHALLENGE113_PYPROJECT_SHA256}" \
   --expected-uv-lock-sha256 "${CHALLENGE113_UV_LOCK_SHA256}" \
   --expected-cluster-profile "${CHALLENGE113_CLUSTER_PROFILE}"
-"${APPTAINER}" "${CONTAINER_ARGS[@]}" sh -lc \
-  'cd /workspace && uv sync --frozen --group dev'
-"${APPTAINER}" "${CONTAINER_ARGS[@]}" /workspace/.venv/bin/python \
+"${APPTAINER}" "${NETWORKED_SYNC_ARGS[@]}" uv sync \
+  --frozen --group dev --project /workspace
+"${APPTAINER}" "${ISOLATED_CONTAINER_ARGS[@]}" /workspace/.venv/bin/python \
   /workspace/scripts/pre_submit_gate.py \
   --root /workspace \
   --deployment-metadata /challenge113-deployment.json \

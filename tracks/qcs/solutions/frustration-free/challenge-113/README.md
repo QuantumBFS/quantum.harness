@@ -106,11 +106,21 @@ export CHALLENGE113_PYPROJECT_SHA256=a51151c7947bc44ded698c9081df99b1b84a60ea51f
 export CHALLENGE113_UV_LOCK_SHA256=1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fcae6a277334e1614a35dc
 export CHALLENGE113_EVIDENCE_REVISION=dd16192953c130d738716238525760de73343e09
 export CHALLENGE113_CLUSTER_PROFILE=lasg02-cpu-v1
+export CHALLENGE113_ACK_NETWORKED_PREPARE=1
 bash "${CHALLENGE113_DEPLOYMENT}/scripts/prepare_apptainer_runtime.sh"
 ```
 
-Preparation is the only step that runs `uv sync --frozen`. Pilot and array jobs
-are network-isolated and no-sync, use
+Preparation first verifies every source/runtime hash, then requires the explicit
+acknowledgement above for the sole network-enabled container command:
+`uv sync --frozen --group dev --project /workspace`. That command uses
+`--no-home --cleanenv` but intentionally does not create a network namespace;
+it runs no qcontrol, smoke, analysis, scheduler, or physics code. This is a
+one-time frozen networked preparation, not a wheelhouse or offline preparation.
+uv 0.9.9 verifies distributions against the hashes in the unchanged frozen
+lock; `uv sync` has no separate sync-level `--require-hashes` option.
+
+The immediately following runtime smoke and all pilot/array calls are
+strictly network-isolated and no-sync, use
 `apptainer exec --no-home --cleanenv --net --network none`, bind source
 explicitly, and fail unless `.venv` plus the hash-bound pre-submit marker are
 current. LASG02 Apptainer 1.3.4 accepted this unprivileged network namespace in
