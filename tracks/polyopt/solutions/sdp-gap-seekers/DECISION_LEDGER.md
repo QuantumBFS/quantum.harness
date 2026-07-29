@@ -852,3 +852,107 @@ scan only with that verified 1,711-moment model; if it produces an
 infeasibility candidate, require independent ray replay. If it remains
 feasible or becomes numerically marginal without a ray, stop widening this
 relaxation and move compute to a stronger window/order.
+
+## 2026-07-29 — spatial representation passes deterministic A/B and gamma-half solve
+
+Spatial builder job `22992784` completed the immutable gamma-zero and
+gamma-half artifacts in 5:38 with 1,018,288 KiB Slurm MaxRSS. Independent
+local builds used about 1.02--1.05 GiB and produced the exact same MOF bytes
+as xH5:
+
+- gamma zero:
+  `5d770e3320ef9f2c6af7d3b763b7d05c2a316a245a114f98881c79007da2cf95`;
+- gamma one-half:
+  `526700018f93a1ee5bd4955f6e75a56669a805ca50e3b1671b341789409a899e`.
+
+This closes the deterministic-build gate for the 1,711-moment, 17-cone,
+3,191-packed-entry, max-side-24 spatial representation. The fail-closed
+runner's 21 focused assertions pass, including dynamic-result containment and
+canonical Git-blob provenance.
+
+Solve jobs `22993015` and `22993016` then passed immutable input hashes, the
+fixed physical setup, all seven exact-reduction inventories, source
+provenance, MOF reload, and all 17 named cone checks. Both points are
+`OPTIMAL` with primal and dual feasible points. Gamma zero solved in 8.382 s
+with minimum block eigenvalue `0.12925186655108384`; gamma one-half solved in
+6.993 s with minimum block eigenvalue `0.08286263095400265`. Both have exact
+normalization and zero reconstructed PSD violation.
+
+Accept this as an exact-equivalence and numerical-feasibility validation of
+the smaller representation. It does not prove a physical gap of one-half.
+Continue only with the spatial model. Scan r1, job `22993166`, failed in 16 s
+before assembly because the wrapper exported dynamic mode before running its
+canonical immutable-input tests. The gate correctly rejected that mode
+mismatch; no model or optimizer ran. Commit `f5fbb1d` moves the export after
+the 21-test regression. Corrected r2, job `22993230`, scans exact gamma values
+`32`, `64`, `128`, and `256`; gamma 32 must reproduce the earlier isotypic
+classification before later points are used. If all remain feasible, stop
+widening this weak `L=1,d=2` relaxation and redirect compute to a stronger
+window/order rather than interpreting arbitrarily large gamma as physics.
+
+## 2026-07-29 — close the fixed-level gamma scan at 256
+
+Corrected spatial scan r2, Slurm job `22993230`, passed the 21-test runner
+gate, rebuilt every exact input from clean source, reloaded all 17 named
+cones, and completed exact gamma values `32`, `64`, `128`, and `256`. All four
+returned `OPTIMAL` with primal and dual feasible points and were promoted to
+`feasible_residual_checked_float` only after zero affine and reconstructed
+PSD violations.
+
+Solve walls were `9.706`, `9.771`, `6.080`, and `6.197` seconds. Minimum
+block eigenvalues were `9.378288472522944e-6`,
+`9.554763007345435e-6`, `3.424375474403159e-6`, and
+`1.634994035355913e-6`; scalar gap-block values were
+`0.007962166397234682`, `0.0032291871095964098`,
+`0.0020950778859543107`, and `0.0007716043441519105`.
+The job used 18:37 and 1,092,064 KiB Slurm MaxRSS. Its bundle-manifest
+SHA-256 is
+`5ab5f415f117292a93f75b5232dff39dc1275decfb795ed4491052734c73ce67`.
+
+Gamma 32 reproduces the feasibility classification of the exactly equivalent
+isotypic representation. The scan therefore verifies the smaller spatial
+model but does not expose a finite upper transition. The declining margins
+suggest an asymptotic pseudo-moment escape face; they do not prove one and do
+not imply a large physical bulk gap.
+
+Close further gamma doubling at fixed `L=1,d=2`. Before spending compute on a
+stronger relaxation, decompose the scalar gap form as `e(y)-gamma*c(y)` and
+test the face `c(y)=0, e(y)>=0` under the remaining constraints. Then preflight
+both `(L=1,d=3)` and `(L=2,d=2)` with nested-basis checks and choose the route
+that removes the diagnosed escape face at acceptable cost.
+
+## 2026-07-29 — complete-state gamma two remains feasible; use only proven S3 blocks
+
+SCNet job `118147307` solved the 7,231-moment complete-state-polynomial
+`L=1,d=2` spin/spatial model at exact gamma `2`. Mosek returned `OPTIMAL`
+with primal and dual feasible points; the fail-closed residual audit promoted
+the result to `feasible_residual_checked_float`. Solve wall was 1,031.084 s,
+total runner wall 1,063.608 s, and peak process RSS 39,288,700 KiB. This is a
+decision result: feasibility is monotone toward smaller gamma, so no scan of
+`[0,2]` is useful at this hierarchy. Move to a stronger hierarchy.
+
+The S3 character probe predicted that deleting two copies of each nontrivial
+V4-character cone would reduce 112,387 packed entries to 32,387. Full truth
+job `118153034` rejected that stronger claim before MOF construction. A
+one-symbol anchor isolated the failure: every trivial-character isotypic
+cross block is exactly zero and its two standard blocks obey `W=3M`, while
+the proposed nontrivial positive-cone identification is not coefficientwise
+exact after the current spatial/spin moment quotient. Do not delete those
+cones.
+
+The corrected reduction retains all nontrivial-character cones and applies
+only the proven trivial-character decomposition. It is still exact and
+reduces packed entries from 112,387 to 75,967 (32.4%) and maximum side from
+198 to 135. Small truth job `118155030` passed in 1:34 with 717,092 KiB
+MaxRSS. Full benchmark job `118155251` now uses this frozen reduction.
+
+For the next hierarchy, row-only job `118155322` generated the complete
+14,026-row `L=2,d=2` positive basis in 41 s. The centered minus/plus
+trivial blocks have dimensions 1,320/1,455 and split into 440/485 size-three
+S3 orbits. The scalar minus/plus blocks have dimensions 870/1,006 and split
+into 290 size-three orbits and one singleton plus 335 triples. Thus no new
+size-six orbit case is required. Full preflight `118155664` was submitted at
+the maximum schedulable `kshcnormal` single-node shape, 32 CPUs and 114,000
+MiB. The two rejected submissions before it performed no compute: 120,000
+MiB with 32 CPUs exceeded `DefMemPerCPU=3569`, while 36 CPUs exceeded the
+32-core node shape. Preserve 32 CPUs/114,000 MiB as the partition ceiling.

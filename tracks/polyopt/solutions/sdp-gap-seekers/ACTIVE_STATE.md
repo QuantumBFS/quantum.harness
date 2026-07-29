@@ -521,3 +521,55 @@ Updated: 2026-07-29 UTC.
   3,250-moment representation. First complete the spatial runner's
   gamma-zero and gamma-half A/B gates, then continue the scan with its
   1,711-moment/3,191-packed-entry/max-side-24 model.
+- Spatial-reflection builder r3, job `22992784`, completed both immutable
+  gamma-zero and gamma-half inputs in 5:38 with 1,018,288 KiB Slurm MaxRSS.
+  Independent local builds used about 1.02--1.05 GiB and produced
+  byte-identical MOF hashes:
+  `5d770e3320ef9f2c6af7d3b763b7d05c2a316a245a114f98881c79007da2cf95`
+  and
+  `526700018f93a1ee5bd4955f6e75a56669a805ca50e3b1671b341789409a899e`.
+  The deterministic A/B gate and all exact spatial truth gates therefore pass.
+- Fail-closed spatial solve jobs `22993015` and `22993016` completed at gamma
+  zero and gamma one-half. Both are `OPTIMAL` with primal and dual feasible
+  points, exact normalization, zero reconstructed PSD violation, and
+  `feasible_residual_checked_float` classification. Solver walls were 8.382 s
+  and 6.993 s; minimum reconstructed block eigenvalues were
+  `0.12925186655108384` and `0.08286263095400265`. This verifies the exact
+  smaller representation but still does not exclude gamma one-half.
+- Spatial logarithmic scan r1, job `22993166`, failed in 16 s before any
+  model build because the wrapper exported dynamic mode before its canonical
+  immutable-input tests. The test correctly rejected the mode mismatch; no
+  physics code or solver ran. Commit `f5fbb1d` moves the export after the
+  21-test gate.
+- Corrected spatial scan r2, job `22993230`, completed gamma `32`, `64`,
+  `128`, and `256` in 18:37 with 1,092,064 KiB Slurm MaxRSS. All four points
+  are `feasible_residual_checked_float`, with zero audited affine and PSD
+  violations. Their minimum reconstructed block eigenvalues are
+  `9.378288472522944e-6`, `9.554763007345435e-6`,
+  `3.424375474403159e-6`, and `1.634994035355913e-6`; their scalar gap-block
+  values are `0.007962166397234682`, `0.0032291871095964098`,
+  `0.0020950778859543107`, and `0.0007716043441519105`.
+- Gamma 32 reproduces the earlier isotypic feasibility classification, so the
+  exact-representation control passes. The shrinking cone margins and gap
+  slack through gamma 256 show that fixed `L=1,d=2` is approaching a
+  pseudo-moment boundary rather than a useful finite transition. Stop widening
+  gamma at this level. The next decision is an asymptotic-face diagnostic,
+  followed by count/memory preflights for stronger `d` or `L`.
+- The complete-state-polynomial `L=1,d=2` spin/spatial model at gamma `2`
+  completed as SCNet job `118147307`: `OPTIMAL`, primal/dual feasible, and
+  `feasible_residual_checked_float`. Solve wall was 1,031.084 s, total runner
+  wall 1,063.608 s, and process peak RSS 39,288,700 KiB. Therefore this
+  stronger 7,231-moment relaxation also remains feasible at gamma `2`; do not
+  scan smaller gamma values at this level.
+- The first S3 cone attempt correctly failed its truth gate in job `118153034`.
+  A 1:35 small-instance diagnostic proved the trivial-character isotypic
+  blocks exactly but disproved the proposed deletion of nontrivial V4
+  character blocks. The corrected exact reduction keeps those blocks and
+  reduces packed real PSD entries from 112,387 to 75,967 (32.4%) and the
+  maximum side from 198 to 135. Small truth anchor job `118155030` passes.
+- `L=2,d=2` row-structure probe job `118155322` completed in 41 s at
+  488,780 KiB. The positive basis has 14,026 rows. All four target
+  trivial-character blocks contain only size-1/3 S3 row orbits, so the proven
+  exact isotypic reduction extends without a new orbit case. Full `L=1`
+  benchmark job `118155251` and `L=2,d=2` preflight job `118155664` are
+  running.
