@@ -4,6 +4,8 @@ set -euo pipefail
 : "${CHALLENGE113_ACK_PRODUCTION:?set CHALLENGE113_ACK_PRODUCTION=1}"
 test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_EXPECTED_REVISION:?set the deployed canonical git revision}"
+: "${CHALLENGE113_ARCHIVE_SHA256:?set the deployed archive SHA256}"
+: "${CHALLENGE113_EVIDENCE_REVISION:?set the measured evidence revision}"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
@@ -28,5 +30,10 @@ case "${OUTPUT}" in
 esac
 
 uv sync --frozen --group dev
+uv run python scripts/verify_deployment.py \
+  --root "${ROOT}" \
+  --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
+  --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
+  --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
 uv run python -c 'import jax; expected = __import__("os").environ["JAX_PLATFORMS"]; actual = jax.devices()[0].platform; assert jax.config.x64_enabled; assert actual == expected, (actual, expected)'
 /usr/bin/time -v uv run python -u run.py sweep --kind production --output "${OUTPUT}"

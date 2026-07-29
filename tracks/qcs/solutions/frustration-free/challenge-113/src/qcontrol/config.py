@@ -91,6 +91,7 @@ class ExperimentConfig:
     device: DeviceConfig
     search: SearchConfig
     trial_seed: int
+    model_seed: int = 5
 
     def __post_init__(self) -> None:
         self.validate()
@@ -104,6 +105,7 @@ class ExperimentConfig:
             raise ValueError("device must be a DeviceConfig")
         if not isinstance(self.search, SearchConfig):
             raise ValueError("search must be a SearchConfig")
+        _require_nonnegative_integer("model_seed", self.model_seed)
         _require_nonnegative_integer("trial_seed", self.trial_seed)
         if self.search.dimension > self.system.parameter_count:
             raise ValueError("search dimension exceeds the system parameter count")
@@ -120,6 +122,7 @@ class ExperimentConfig:
                 "shots": self.device.shots,
             },
             "run_kind": self.run_kind,
+            "model_seed": self.model_seed,
             "search": {
                 "budget": self.search.budget,
                 "dimension": self.search.dimension,

@@ -35,6 +35,7 @@ from qcontrol.systems import ControlSystem, make_system, perturb_system
 
 _DERIVED_CACHE_LOCK = threading.RLock()
 _DERIVED_STATIC_CACHE: dict[str, dict[tuple[object, ...], object]] = {}
+_MODEL_STATIC_CACHE: dict[tuple[bytes, int], ModelPreparation] = {}
 
 
 def _content_id(prefix: str, payload: object, length: int = 24) -> str:
@@ -62,7 +63,14 @@ def _array_sha256(value: object) -> str:
 def config_from_dict(payload: object) -> ExperimentConfig:
     if not isinstance(payload, Mapping):
         raise ValueError("configuration payload must be a mapping")
-    if set(payload) != {"device", "run_kind", "search", "system", "trial_seed"}:
+    if set(payload) != {
+        "device",
+        "model_seed",
+        "run_kind",
+        "search",
+        "system",
+        "trial_seed",
+    }:
         raise ValueError("configuration payload fields are not canonical")
     try:
         system = payload["system"]
@@ -104,6 +112,7 @@ def config_from_dict(payload: object) -> ExperimentConfig:
                 budget=search["budget"],
             ),
             trial_seed=payload["trial_seed"],
+            model_seed=payload["model_seed"],
         )
     except KeyError as error:
         raise ValueError(f"configuration payload missing {error.args[0]!r}") from None
@@ -160,6 +169,16 @@ class TrialSpec:
         if len(expected) != 1 or expected[0] != spec:
             raise ValueError("trial specification identities are not canonical")
         return spec
+
+
+@dataclass(frozen=True, slots=True)
+class ModelPreparation:
+    model_seed: int
+    model: ControlSystem
+    pulse_space: PulseSpace
+    open_loop: object
+    landscape: object
+    origin: np.ndarray
 
 
 _OBSERVATION_FIELDS = {
@@ -1005,6 +1024,7 @@ def _device_payload(config: ExperimentConfig) -> dict[str, object]:
     canonical = config.canonical_dict()
     return {
         "device": canonical["device"],
+        "model_seed": canonical["model_seed"],
         "run_kind": canonical["run_kind"],
         "system": canonical["system"],
         "trial_seed": canonical["trial_seed"],
@@ -1062,10 +1082,46 @@ def _landscape_leading_count(
     config: ExperimentConfig,
     model_dimension: int,
 ) -> int:
-    requested = model_dimension**2 - 1
-    if config.search.method != "full":
-        requested = max(requested, config.search.dimension)
-    return min(config.system.parameter_count - 1, requested)
+    del model_dimension
+    return config.system.parameter_count - 1
+
+
+def prepare_model(config: ExperimentConfig) -> ModelPreparation:
+    system_payload = config.canonical_dict()["system"]
+    key = (canonical_json_bytes(system_payload), config.model_seed)
+    with _DERIVED_CACHE_LOCK:
+        cached = _MODEL_STATIC_CACHE.get(key)
+        if cached is not None:
+            return cached
+        model = make_system(config.system)
+        pulse_space = PulseSpace.from_system(model, config.system.segments)
+        open_loop = optimize_open_loop(model, pulse_space, seed=config.model_seed)
+        landscape = analyze_landscape(
+            model,
+            pulse_space,
+            open_loop,
+            leading_count=_landscape_leading_count(config, model.dimension),
+            dense_validation=pulse_space.parameter_count <= 80,
+        )
+        origin = np.asarray(
+            (
+                landscape.polishing.normalized_pulse
+                if landscape.polishing is not None
+                else open_loop.normalized_pulse
+            ),
+            dtype=np.float64,
+        )
+        origin.setflags(write=False)
+        prepared = ModelPreparation(
+            model_seed=config.model_seed,
+            model=model,
+            pulse_space=pulse_space,
+            open_loop=open_loop,
+            landscape=landscape,
+            origin=origin,
+        )
+        _MODEL_STATIC_CACHE[key] = prepared
+        return prepared
 
 
 def _cached_derived_metrics(
@@ -1147,24 +1203,11 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
     spec = specs[0]
     config = spec.config
 
-    model = make_system(config.system)
-    pulse_space = PulseSpace.from_system(model, config.system.segments)
-    open_loop = optimize_open_loop(model, pulse_space, seed=config.trial_seed)
-    landscape = analyze_landscape(
-        model,
-        pulse_space,
-        open_loop,
-        leading_count=_landscape_leading_count(config, model.dimension),
-        dense_validation=pulse_space.parameter_count <= 80,
-    )
-    origin = np.asarray(
-        (
-            landscape.polishing.normalized_pulse
-            if landscape.polishing is not None
-            else open_loop.normalized_pulse
-        ),
-        dtype=np.float64,
-    )
+    prepared = prepare_model(config)
+    model = prepared.model
+    pulse_space = prepared.pulse_space
+    landscape = prepared.landscape
+    origin = prepared.origin
     truth = perturb_system(
         model,
         config.device.gap,
@@ -1327,6 +1370,21 @@ def _validated_result_for_spec(payload: object, spec: TrialSpec) -> TrialResult:
     return result
 
 
+def shard_specs(
+    specs: Sequence[TrialSpec],
+    shard_index: int,
+    shard_count: int,
+) -> tuple[TrialSpec, ...]:
+    if (
+        type(shard_index) is not int
+        or type(shard_count) is not int
+        or shard_count <= 0
+        or not 0 <= shard_index < shard_count
+    ):
+        raise ValueError("shard index must satisfy 0 <= index < shard count")
+    return tuple(specs[shard_index::shard_count])
+
+
 def run_sweep(
     specs: Sequence[TrialSpec],
     store: ArtifactStore,
@@ -1343,13 +1401,7 @@ def run_sweep(
         or stop_after < 0
     ):
         raise ValueError("stop_after must be a nonnegative integer or None")
-    if (
-        type(shard_index) is not int
-        or type(shard_count) is not int
-        or shard_count <= 0
-        or not 0 <= shard_index < shard_count
-    ):
-        raise ValueError("shard index must satisfy 0 <= index < shard count")
+    selected_specs = shard_specs(specs, shard_index, shard_count)
     _bind_plan(specs, store)
     completed = store.completed_trial_ids()
     expected = {spec.trial_id for spec in specs}
@@ -1358,9 +1410,7 @@ def run_sweep(
     execute = executor or (lambda spec: run_trial(spec.config, store))
     newly_executed = 0
 
-    for position, spec in enumerate(specs):
-        if position % shard_count != shard_index:
-            continue
+    for spec in selected_specs:
         if spec.trial_id in completed:
             continue
         if stop_after is not None and newly_executed >= stop_after:

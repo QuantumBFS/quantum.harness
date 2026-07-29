@@ -60,6 +60,51 @@ def test_paired_methods_share_device_but_not_observation_stream() -> None:
     assert len({spec.trial_id for spec in specs}) == len(specs)
 
 
+def test_model_preparation_is_bitwise_shared_across_statistical_seeds() -> None:
+    experiments_module._MODEL_STATIC_CACHE.clear()
+    first = _config("model_hessian", 1, seed=0)
+    second = replace(
+        first,
+        device=replace(first.device, perturbation_seed=9),
+        trial_seed=11,
+    )
+
+    prepared_first = experiments_module.prepare_model(first)
+    prepared_second = experiments_module.prepare_model(second)
+
+    assert prepared_first is prepared_second
+    np.testing.assert_array_equal(prepared_first.origin, prepared_second.origin)
+    np.testing.assert_array_equal(
+        prepared_first.landscape.leading_eigenvalues,
+        prepared_second.landscape.leading_eigenvalues,
+    )
+    np.testing.assert_array_equal(
+        prepared_first.landscape.model_basis,
+        prepared_second.landscape.model_basis,
+    )
+    first_spec = generate_paired_trials([first])[0]
+    second_spec = generate_paired_trials([second])[0]
+    assert first_spec.device_id != second_spec.device_id
+    assert first_spec.observation_stream_id != second_spec.observation_stream_id
+
+
+@pytest.mark.integration
+def test_two_qubit_trial_seed_zero_uses_accepted_model_seed_five() -> None:
+    experiments_module._MODEL_STATIC_CACHE.clear()
+    config = ExperimentConfig(
+        run_kind="production",
+        system=SystemConfig("two_qubit", 20, 4.0),
+        device=DeviceConfig(gap=0.05, shots=None, perturbation_seed=0),
+        search=SearchConfig("model_hessian", 4, 2_000),
+        trial_seed=0,
+    )
+
+    prepared = experiments_module.prepare_model(config)
+
+    assert prepared.open_loop.loss <= 1e-8
+    assert prepared.model_seed == 5
+
+
 def test_trial_ids_bind_every_pairing_dimension() -> None:
     baseline = generate_paired_trials([_config("random", 1)])[0]
     variants = [
@@ -120,7 +165,7 @@ def test_full_space_occurs_once_per_device_shot_seed_not_per_k() -> None:
 def test_full_space_landscape_count_stays_below_parameter_count() -> None:
     full = generate_paired_trials([_config("full", 1)])[0].config
 
-    assert experiments_module._landscape_leading_count(full, 2) == 3
+    assert experiments_module._landscape_leading_count(full, 2) == 5
 
 
 def test_development_and_production_cannot_mix() -> None:
@@ -385,6 +430,45 @@ def test_sweep_shards_bind_full_plan_and_execute_deterministic_subset(tmp_path) 
     ]
 
 
+@pytest.mark.parametrize("shard_count", [1, 7, 32, 9_500])
+def test_production_shards_partition_canonical_plan_exactly(shard_count) -> None:
+    specs = generate_paired_trials(default_sweep_configs("production"))
+    canonical_ids = tuple(spec.trial_id for spec in specs)
+    shards = [
+        experiments_module.shard_specs(specs, index, shard_count)
+        for index in range(shard_count)
+    ]
+
+    flattened = [spec.trial_id for shard in shards for spec in shard]
+    assert len(flattened) == len(canonical_ids) == 9_500
+    assert set(flattened) == set(canonical_ids)
+    assert len(flattened) == len(set(flattened))
+    assert all(
+        tuple(spec.trial_id for spec in shard)
+        == canonical_ids[index::shard_count]
+        for index, shard in enumerate(shards)
+    )
+
+
+def test_sharding_preserves_full_comparator_pairing() -> None:
+    specs = generate_paired_trials(default_sweep_configs("production"))
+    by_device = {}
+    for spec in specs:
+        by_device.setdefault(spec.device_id, []).append(spec)
+
+    shards = [
+        experiments_module.shard_specs(specs, index, 32)
+        for index in range(32)
+    ]
+    reconstructed = {spec.trial_id: spec for shard in shards for spec in shard}
+
+    assert set(reconstructed) == {spec.trial_id for spec in specs}
+    assert all(
+        sum(spec.config.search.method == "full" for spec in group) == 1
+        for group in by_device.values()
+    )
+
+
 @pytest.mark.parametrize(
     ("shard_index", "shard_count"),
     [(-1, 2), (2, 2), (0, 0), (True, 2), (0, True)],
@@ -497,6 +581,16 @@ def test_cli_exposes_strict_modes_and_status_smoke(tmp_path) -> None:
     assert shard_help.returncode == 0
     assert "--shard-index" in shard_help.stdout
     assert "--shard-count" in shard_help.stdout
+
+    trial_help = subprocess.run(
+        [sys.executable, "run.py", "trial", "--help"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert trial_help.returncode == 0
+    assert "--model-seed" in trial_help.stdout
 
 
 def test_crash_after_trial_publish_adopts_without_rerunning_physics(

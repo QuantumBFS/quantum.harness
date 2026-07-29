@@ -61,6 +61,7 @@ def _trial_config(args: argparse.Namespace) -> ExperimentConfig:
             200 if args.kind == "development" else 2_000,
         ),
         trial_seed=args.seed,
+        model_seed=args.model_seed,
     )
 
 
@@ -195,6 +196,7 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
     )
     trial.add_argument("--dimension", type=int, required=True)
+    trial.add_argument("--model-seed", type=int, default=5)
     trial.add_argument("--seed", type=int, required=True)
     trial.add_argument("--output", type=Path, required=True)
     trial.set_defaults(handler=_trial)

@@ -21,11 +21,19 @@ def test_config_id_is_stable_and_semantic() -> None:
     config = valid_config()
     assert config.content_id() == config.content_id()
     assert replace(config, trial_seed=12).content_id() != config.content_id()
+    assert replace(config, model_seed=6).content_id() != config.content_id()
     assert replace(config, system=replace(config.system, duration=9.0)).content_id() != (
         config.content_id()
     )
     assert len(config.content_id()) == 20
     assert int(config.content_id(), 16) >= 0
+
+
+def test_model_seed_is_explicit_canonical_and_defaults_to_five() -> None:
+    config = valid_config()
+
+    assert config.model_seed == 5
+    assert config.canonical_dict()["model_seed"] == 5
 
 
 def test_system_duration_defaults_are_canonical_and_serialized() -> None:
@@ -105,6 +113,7 @@ def test_configuration_instances_are_frozen() -> None:
         lambda: DeviceConfig(perturbation_seed=True),
         lambda: SearchConfig("full", True, 200),
         lambda: SearchConfig("full", 1, True),
+        lambda: replace(valid_config(), model_seed=True),
         lambda: replace(valid_config(), trial_seed=True),
     ],
 )
@@ -173,6 +182,7 @@ def test_nonpositive_required_values_are_rejected(factory: Callable[[], object])
     [
         lambda: DeviceConfig(shots=0),
         lambda: DeviceConfig(perturbation_seed=-1),
+        lambda: replace(valid_config(), model_seed=-1),
         lambda: replace(valid_config(), trial_seed=-1),
     ],
 )
