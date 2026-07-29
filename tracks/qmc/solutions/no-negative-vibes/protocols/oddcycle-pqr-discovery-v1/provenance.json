@@ -1,0 +1,11 @@
+{
+  "protocol": "oddcycle-pqr-discovery-v1",
+  "family": "B(p,q,r) and transpose",
+  "purpose": "map exterior-proof survivors and remove fixed-point common-metric reductions",
+  "claims": [
+    "float64 discovery only",
+    "scientific failures remain visible",
+    "positive SDP margin is a known-class reduction",
+    "zero SDP margin is not an exact novelty certificate"
+  ]
+}

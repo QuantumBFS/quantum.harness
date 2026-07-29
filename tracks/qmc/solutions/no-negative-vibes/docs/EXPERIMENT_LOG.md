@@ -2042,3 +2042,46 @@ metric near `p,q,r=0.3` or `2.8`: the feasible metric moves with the
 parameters.  Subsequent scans must retain only points where the *full* SDP
 margin collapses, and even those are discovery survivors rather than exact
 no-go theorems.
+
+### Dual-machine `(p,q,r)` scan and the multi-point pivot
+
+Protocol `oddcycle-pqr-discovery-v1` evaluated a 14-by-14-by-14 Cartesian
+grid, 2,744 cells total.  The WSL workstation ran one 1,372-cell shard with
+14 workers and the 64-core CPU machine ran the other 1,372-cell shard with
+62 workers, leaving two cores free on each host.  All 2,744 atomic manifests
+completed with zero compute errors; the generic collector found no failed,
+missing, or pending cells and confirmed constant settings.  The proof screen
+used exact word depth 12 numerically, a low-sector tail start of 12, and the
+frozen grade-three/four gates.
+
+Classification:
+
+- 2,729 points failed the current exterior sufficient certificate;
+- 15 points passed all exterior gates;
+- all 15 exterior survivors had a strict single-point common metric;
+- no single-point novelty survivor remained.
+
+Failure-stage counts were 1,734 at the grade-(3,4) short-remainder gate,
+783 at the length-13 block gate, 211 at a nonpositive short-word
+determinant, and one at the low-sector norm tail.  The strong certificate
+therefore defines a narrow region rather than evidence that all other points
+have a sign problem.
+
+The 15 exterior survivors range from `(0.7,1,1.4)` through
+`(1.4,1.4,1.4)`.  Their individual SDP margins range from about `0.1046`
+to `0.1889`.  Pair probes within this region, and even the joint alphabet
+containing all 15 points and their transposes, still share one strict metric;
+the 15-point joint normalized margin is approximately `0.07118979`.
+Therefore simply unioning points inside the present Frobenius certificate
+does not escape the known semigroup.
+
+A separate probe supplied the useful counter-direction: distant pairs such
+as `(0.1,1,1)` with `(4,1,1)`, the corresponding `q` and `r` pairs, and
+crossed pairs like `(0.2,4,1)` with `(4,0.2,1)` have full joint SDP margin
+numerically zero (about `1e-10` residual scale), even though each point
+separately has a strict metric.  These points do not pass the old
+grade-(3,4) Frobenius tail, so the next certificate must replace that loose
+norm.  The next route is a common quadratic contraction metric on exterior
+grades 1, 2, and 3, normalized by the positive grade-four loop of weight 8.
+This targets exactly the desired mechanism: stable exterior sectors without
+a common base-space Wei metric.
