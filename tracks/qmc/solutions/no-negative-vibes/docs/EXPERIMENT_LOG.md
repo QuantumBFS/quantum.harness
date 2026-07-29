@@ -1882,6 +1882,8 @@ cone: its best result was seed `950010048`, epsilon
 `0.009653059951179559`, objective `2.564980403020742e-8`, and minimum
 entry `-4.767167046731235e-4`.  This confirms the preconditioner while
 also showing that further identical basin polishing is lower priority.
+The complete 60-way JSON/log archive SHA-256 is
+`0b0fbb8c9448ff03157aeb8a8cf14a3adb7e9af30225bb324b801f8855a1a534`.
 
 More importantly, commit `84d757e` closes the fixed-pair arbitrary-word
 problem without a full-32 cone.  For every word `W in <B,B^T>`, it proves
