@@ -80,6 +80,9 @@ The public capsule contains:
   compact synthetic finite/infinite examples and negative contract tests.
 - [`fixtures/regenerate.py`](fixtures/regenerate.py): deterministic
   regeneration of every synthetic artifact and digest.
+- [`calibration/`](calibration/): the public input manifest, five blind
+  generator outputs, and deterministic report for the registered
+  QuantumBFS #124–#128 calibration. Sealed issue statements are excluded.
 
 The schemas are useful for editors and other agents. `gate.py` is the
 executable semantic authority: JSON Schema alone does not compare two
@@ -262,21 +265,22 @@ records so the growth curve is auditable.
 | Pre-registered, machine-checkable acceptance | **Implemented only for synthetic fixture contract closure, not a fresh candidate solve** |
 | Provenance and reproducible evidence identities | **Implemented at contract/artifact level; trusted execution identity is not implemented** |
 | Accumulating heuristics Library | **Schema, append protocol, validator, and seed records implemented** |
-| Literature-mining problem generator | **Not yet implemented here** |
-| Calibration against challenges #124–#128 | **Not run** |
+| Literature-mining problem generator | **Implemented in the AGPL-3.0-only TN-Agent control plane; this capsule publishes its registered calibration evidence, not the runtime** |
+| Calibration against challenges #124–#128 | **Passed the registered blind calibration: gap 1.0, executable gate 1.0, strong/weak separation 0.7877, hidden match 0.8** |
 | Five new human-accepted challenge problems (Tier 1) | **Not claimed** |
 | Five fresh solved gates (Tier 2) | **Not claimed** |
 | Refereed publication (Tier 3) | **Not claimed** |
 
 **This PR achieves no success tier of issue #133.** It supplies a fail-closed
-contract and fixture evaluator that can support a future independently
-executed candidate; it does not claim a fresh solve, an accepted new problem,
-or a publication result.
+contract, fixture evaluator, and a passed registered calibration that can
+support a future independently executed candidate; it does not claim a fresh
+solve, an accepted new problem, or a publication result.
 
-The next scientifically meaningful milestone is to use this contract to
-generate one real candidate, freeze its gate before solving, publish its
-generation/rejection log, and submit it for independent human review. Scaling
-to five candidates should follow only after that first calibration survives.
+The next scientifically meaningful milestone is an approved live campaign:
+freeze each generated problem and gate before solving, publish every
+generation/rejection record, and obtain independent human and GateAuthority
+receipts. The live counters remain `0/5` accepted problems and `0/5` fresh
+solved gates until those receipts exist.
 
 ## Scope and licensing
 

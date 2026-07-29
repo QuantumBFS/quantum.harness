@@ -1619,6 +1619,40 @@ assert parameters["hz"] == unit_request.field_h
                 mutation[section]["uri"] = "README.md"
                 self.assertFalse(library_validator.is_valid(mutation))
 
+    def test_public_calibration_evidence_is_digest_bound(self) -> None:
+        calibration_root = SOLUTION_ROOT / "calibration"
+        candidate_path = calibration_root / "blind-candidates.json"
+        self.assertEqual(
+            hashlib.sha256(candidate_path.read_bytes()).hexdigest(),
+            "101bf35d22607b08ad0b160b893392e021bf7f8ac9d54aaefce91007f3b37be8",
+        )
+
+        candidates = json.loads(candidate_path.read_text(encoding="utf-8"))
+        self.assertIsInstance(candidates, list)
+        self.assertEqual(len(candidates), 5)
+
+        report = json.loads(
+            (calibration_root / "report.json").read_text(encoding="utf-8")
+        )
+        manifest = json.loads(
+            (calibration_root / "manifest.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            report["candidate_digests"],
+            [gate.canonical_digest(candidate) for candidate in candidates],
+        )
+        for document in (manifest, report):
+            self.assertEqual(
+                document["digest"],
+                gate.canonical_digest(
+                    {key: value for key, value in document.items() if key != "digest"}
+                ),
+            )
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(report["manifest_digest"], manifest["digest"])
+        self.assertEqual(report["scores"]["hidden_target_match"], 0.8)
+
     def test_fixture_provenance_digests_bind_repository_sources(self) -> None:
         experiment = self.load("valid-finite/experiment.json")
         provenance = experiment["provenance"]
