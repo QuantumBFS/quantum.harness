@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
+from itertools import combinations
 from numbers import Integral
 from types import MappingProxyType
 
@@ -685,3 +686,244 @@ class LadderTower(Mapping[int, LadderComponent]):
 
     def __len__(self) -> int:
         return len(_SPIN_TWO_M_VALUES)
+
+
+def stable_metropolis_acceptance(
+    current_logpsi: object,
+    proposed_logpsi: object,
+) -> float:
+    """Return the stable ``|psi_new / psi_old|**2`` acceptance factor."""
+
+    current = _scalar_complex(current_logpsi, label="current logpsi")
+    proposed = _scalar_complex(proposed_logpsi, label="proposed logpsi")
+    if current.real == -math.inf:
+        raise ValueError("current logpsi must be finite and nonzero")
+    if proposed.real == -math.inf:
+        return 0.0
+    if proposed.real >= current.real:
+        return 1.0
+    log_ratio = 2.0 * (proposed.real - current.real)
+    if log_ratio == -math.inf:
+        return 0.0
+    acceptance = math.exp(log_ratio)
+    if not math.isfinite(acceptance) or not 0.0 <= acceptance <= 1.0:
+        raise FloatingPointError("Metropolis acceptance is non-finite")
+    return acceptance
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class MetropolisSampleBatch:
+    """Fixed-``M`` draws with disjoint burn-in and sampling counters."""
+
+    configs: np.ndarray
+    n_samples: int
+    burn_in_steps: int
+    seed: int
+    burn_in_proposals: int
+    burn_in_accepted_moves: int
+    sampling_proposals: int
+    sampling_accepted_moves: int
+
+    def __post_init__(self) -> None:
+        configs = np.asarray(self.configs, dtype=object).copy()
+        if configs.ndim != 1 or configs.size != self.n_samples:
+            raise ValueError("n_samples does not match configuration batch")
+        configs.setflags(write=False)
+        object.__setattr__(self, "configs", configs)
+
+
+@dataclass(frozen=True, slots=True)
+class _PairSwapProposal:
+    groups: tuple[tuple[tuple[int, int], ...], ...]
+
+    @classmethod
+    def build(cls, two_q: int) -> _PairSwapProposal:
+        orbital_limit = _integer("two_q", two_q)
+        if orbital_limit < 0:
+            raise ValueError("two_q must be non-negative")
+        grouped: dict[int, list[tuple[int, int]]] = {}
+        for left, right in combinations(range(orbital_limit + 1), 2):
+            grouped.setdefault(left + right, []).append((left, right))
+        groups = tuple(
+            tuple(grouped[pair_sum])
+            for pair_sum in sorted(grouped)
+            if len(grouped[pair_sum]) >= 2
+        )
+        if not groups:
+            raise ValueError("orbital range has no two-pair proposal group")
+        return cls(groups=groups)
+
+    @staticmethod
+    def _swap_if_active(
+        state: int,
+        first: tuple[int, int],
+        second: tuple[int, int],
+    ) -> int:
+        first_mask = (1 << first[0]) | (1 << first[1])
+        second_mask = (1 << second[0]) | (1 << second[1])
+        first_full = state & first_mask == first_mask
+        first_empty = state & first_mask == 0
+        second_full = state & second_mask == second_mask
+        second_empty = state & second_mask == 0
+        if (first_full and second_empty) or (second_full and first_empty):
+            return state ^ first_mask ^ second_mask
+        return state
+
+    def propose(self, state: int, rng: np.random.Generator) -> int:
+        group = self.groups[int(rng.integers(0, len(self.groups)))]
+        pair_choices = len(group) * (len(group) - 1) // 2
+        choice = int(rng.integers(0, pair_choices))
+        for index, pair_of_pairs in enumerate(combinations(group, 2)):
+            if index == choice:
+                return self._swap_if_active(state, *pair_of_pairs)
+        raise AssertionError("pair proposal index is outside its group")
+
+    def probabilities(self, state: int) -> Mapping[int, float]:
+        probabilities: dict[int, list[float]] = {}
+        group_probability = 1.0 / len(self.groups)
+        for group in self.groups:
+            choices = tuple(combinations(group, 2))
+            choice_probability = group_probability / len(choices)
+            for pair_of_pairs in choices:
+                candidate = self._swap_if_active(state, *pair_of_pairs)
+                probabilities.setdefault(candidate, []).append(
+                    choice_probability
+                )
+        reduced = {
+            candidate: math.fsum(weights)
+            for candidate, weights in probabilities.items()
+        }
+        total = math.fsum(reduced.values())
+        reduced[state] = reduced.get(state, 0.0) + (1.0 - total)
+        if any(value < 0.0 or not math.isfinite(value) for value in reduced.values()):
+            raise FloatingPointError("pair proposal probabilities are invalid")
+        return MappingProxyType(reduced)
+
+
+class FixedMMetropolisSampler:
+    """Reversible pair-swap Metropolis sampler for one tower component."""
+
+    __slots__ = ("_component", "_proposal", "_table", "target_m")
+
+    def __init__(self, tower: LadderTower, *, target_m: int) -> None:
+        if not isinstance(tower, LadderTower):
+            raise TypeError("tower must be a LadderTower")
+        component = tower.component(target_m)
+        self.target_m = component.m
+        self._component = component
+        self._table = FeasibilityTable.build(
+            n_electrons=component.n_electrons,
+            two_q=component.two_q,
+            target_m2=2 * component.m,
+        )
+        self._proposal = _PairSwapProposal.build(component.two_q)
+
+    def transition_probabilities(self, state: int) -> Mapping[int, float]:
+        """Return one exact row without enumerating the fixed-``M`` support."""
+
+        source = self._component._validated_state(state)
+        current_log = self._component.logpsi(source)
+        proposal_row = self._proposal.probabilities(source)
+        transition_terms: dict[int, list[float]] = {source: []}
+        for candidate, proposal_probability in proposal_row.items():
+            if candidate == source:
+                transition_terms[source].append(proposal_probability)
+                continue
+            target = self._component._validated_state(candidate)
+            acceptance = stable_metropolis_acceptance(
+                current_log,
+                self._component.logpsi(target),
+            )
+            transition_terms.setdefault(target, []).append(
+                proposal_probability * acceptance
+            )
+            transition_terms[source].append(
+                proposal_probability * (1.0 - acceptance)
+            )
+        transition = {
+            target: math.fsum(weights)
+            for target, weights in transition_terms.items()
+            if weights
+        }
+        total = math.fsum(transition.values())
+        transition[source] = transition.get(source, 0.0) + (1.0 - total)
+        if any(
+            probability < 0.0 or not math.isfinite(probability)
+            for probability in transition.values()
+        ):
+            raise FloatingPointError("Metropolis transition row is invalid")
+        return MappingProxyType(transition)
+
+    def _initial_state(
+        self,
+        rng: np.random.Generator,
+        *,
+        attempts: int = 1024,
+    ) -> int:
+        for _attempt in range(attempts):
+            draw_seed = int(rng.integers(0, np.iinfo(np.int64).max))
+            state = int(self._table.sample_uniform(1, seed=draw_seed)[0])
+            log_value = self._component.logpsi(state)
+            if log_value.real != -math.inf:
+                return state
+        raise ValueError("fixed-M component has no sampled nonzero amplitude")
+
+    def _step(
+        self,
+        state: int,
+        rng: np.random.Generator,
+    ) -> tuple[int, bool]:
+        proposed = self._proposal.propose(state, rng)
+        if proposed == state:
+            return state, False
+        candidate = self._component._validated_state(proposed)
+        acceptance = stable_metropolis_acceptance(
+            self._component.logpsi(state),
+            self._component.logpsi(candidate),
+        )
+        if acceptance == 1.0 or rng.random() < acceptance:
+            return candidate, True
+        return state, False
+
+    def sample(
+        self,
+        *,
+        n_samples: int,
+        burn_in_steps: int,
+        seed: int,
+    ) -> MetropolisSampleBatch:
+        """Draw after a separate frozen burn-in, with one proposal per draw."""
+
+        sample_count = _integer("n_samples", n_samples)
+        burn_in = _integer("burn_in_steps", burn_in_steps)
+        random_seed = _integer("seed", seed)
+        if sample_count <= 0:
+            raise ValueError("n_samples must be positive")
+        if burn_in < 0:
+            raise ValueError("burn_in_steps must be non-negative")
+        if random_seed < 0:
+            raise ValueError("seed must be non-negative")
+
+        rng = np.random.default_rng(random_seed)
+        state = self._initial_state(rng)
+        burn_in_accepted = 0
+        for _step_index in range(burn_in):
+            state, accepted = self._step(state, rng)
+            burn_in_accepted += int(accepted)
+
+        configs = np.empty(sample_count, dtype=object)
+        sampling_accepted = 0
+        for sample_index in range(sample_count):
+            state, accepted = self._step(state, rng)
+            sampling_accepted += int(accepted)
+            configs[sample_index] = state
+        return MetropolisSampleBatch(
+            configs=configs,
+            n_samples=sample_count,
+            burn_in_steps=burn_in,
+            seed=random_seed,
+            burn_in_proposals=burn_in,
+            burn_in_accepted_moves=burn_in_accepted,
+            sampling_proposals=sample_count,
+            sampling_accepted_moves=sampling_accepted,
+        )

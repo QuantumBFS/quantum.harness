@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import cmath
+import importlib
 import math
 from collections.abc import Callable, Mapping
 
@@ -10,6 +11,7 @@ import pytest
 import scalable_v1.routes.occupation_autoregressive.tower as tower_module
 from scalable_v1.routes.occupation_autoregressive.constraints import (
     FeasibilityTable,
+    occupation_m2,
 )
 from scalable_v1.routes.occupation_autoregressive.model import AutoregressiveNQS
 from scalable_v1.routes.occupation_autoregressive.operators import local_l2
@@ -522,3 +524,293 @@ def test_from_m0_fails_closed_on_invalid_construction_contract(
 
     with pytest.raises(error, match=message):
         LadderTower.from_m0(**arguments)  # type: ignore[arg-type]
+
+
+def _a04_2_sampler_api() -> tuple[type[object], Callable[..., float]]:
+    return (
+        getattr(tower_module, "FixedMMetropolisSampler"),
+        getattr(tower_module, "stable_metropolis_acceptance"),
+    )
+
+
+def _a04_2_diagnostics_module() -> object:
+    return importlib.import_module(
+        "scalable_v1.routes.occupation_autoregressive.diagnostics"
+    )
+
+
+def _unequal_tiny_m0_tower() -> LadderTower:
+    return LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes(
+            {
+                M0_LEFT: math.sqrt(0.8),
+                M0_RIGHT: -1.0j * math.sqrt(0.2),
+            }
+        ),
+        log_score=_zero_score(width=1),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+
+def _larger_m0_tower() -> LadderTower:
+    n_electrons = 3
+    two_q = 6
+    support = FeasibilityTable.build(
+        n_electrons=n_electrons,
+        two_q=two_q,
+        target_m2=0,
+    ).enumerate_support()
+    amplitudes = {
+        state: cmath.rect(
+            math.exp(-0.0125 * state),
+            0.03125 * state,
+        )
+        for state in support
+    }
+    norm = math.sqrt(sum(abs(value) ** 2 for value in amplitudes.values()))
+    return LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes(
+            {state: value / norm for state, value in amplitudes.items()}
+        ),
+        log_score=_zero_score(width=1),
+        n_electrons=n_electrons,
+        two_q=two_q,
+        l=2,
+    )
+
+
+def test_pair_swap_transition_matrix_satisfies_tiny_detailed_balance() -> None:
+    sampler_type, _acceptance = _a04_2_sampler_api()
+    tower = _unequal_tiny_m0_tower()
+    sampler = sampler_type(tower, target_m=0)
+    support = _fixed_m_support(0)
+    probabilities = np.array(
+        [abs(_amplitude(tower[0], state)) ** 2 for state in support]
+    )
+    transition = np.array(
+        [
+            [sampler.transition_probabilities(source).get(target, 0.0)
+             for target in support]
+            for source in support
+        ]
+    )
+
+    np.testing.assert_allclose(transition.sum(axis=1), 1.0, atol=2.0e-15)
+    np.testing.assert_allclose(
+        probabilities[:, None] * transition,
+        probabilities[None, :] * transition.T,
+        rtol=0.0,
+        atol=2.0e-15,
+    )
+
+
+def test_stable_metropolis_acceptance_handles_extreme_logs_and_zeros() -> None:
+    _sampler_type, acceptance = _a04_2_sampler_api()
+
+    assert acceptance(complex(-1.0e308, 0.0), complex(1.0e308, 1.0)) == 1.0
+    assert acceptance(complex(1.0e308, 0.0), complex(-1.0e308, 1.0)) == 0.0
+    assert acceptance(0.0j, complex(-math.inf, 0.0)) == 0.0
+    with pytest.raises(ValueError, match="current logpsi"):
+        acceptance(complex(-math.inf, 0.0), 0.0j)
+    with pytest.raises(ValueError, match="proposed logpsi"):
+        acceptance(0.0j, complex(math.nan, 0.0))
+
+
+def test_all_five_fixed_m_sectors_sample_with_frozen_burn_in_reporting() -> None:
+    sampler_type, _acceptance = _a04_2_sampler_api()
+    tower = _exact_l2_tower()
+
+    for m in tower:
+        batch = sampler_type(tower, target_m=m).sample(
+            n_samples=24,
+            burn_in_steps=7,
+            seed=848 + m,
+        )
+        assert batch.n_samples == 24
+        assert batch.burn_in_steps == 7
+        assert batch.seed == 848 + m
+        assert batch.burn_in_proposals == 7
+        assert batch.sampling_proposals == 24
+        assert 0 <= batch.burn_in_accepted_moves <= 7
+        assert 0 <= batch.sampling_accepted_moves <= 24
+        assert len(batch.configs) == 24
+        assert all(int(state).bit_count() == N_ELECTRONS for state in batch.configs)
+        assert all(
+            occupation_m2(int(state), TWO_Q) == 2 * m
+            for state in batch.configs
+        )
+
+
+def test_fixed_m_sampling_is_seed_deterministic_and_distinct() -> None:
+    sampler_type, _acceptance = _a04_2_sampler_api()
+    sampler = sampler_type(_larger_m0_tower(), target_m=0)
+
+    first = sampler.sample(n_samples=64, burn_in_steps=19, seed=848)
+    repeat = sampler.sample(n_samples=64, burn_in_steps=19, seed=848)
+    different = sampler.sample(n_samples=64, burn_in_steps=19, seed=1848)
+
+    np.testing.assert_array_equal(first.configs, repeat.configs)
+    assert first.n_samples == repeat.n_samples
+    assert first.burn_in_steps == repeat.burn_in_steps
+    assert first.seed == repeat.seed
+    assert first.burn_in_proposals == repeat.burn_in_proposals
+    assert first.burn_in_accepted_moves == repeat.burn_in_accepted_moves
+    assert first.sampling_proposals == repeat.sampling_proposals
+    assert first.sampling_accepted_moves == repeat.sampling_accepted_moves
+    assert not np.array_equal(first.configs, different.configs)
+
+
+@pytest.mark.parametrize(
+    ("operation", "error", "message"),
+    [
+        (lambda sampler_type: sampler_type(_exact_l2_tower(), target_m=3),
+         ValueError, "target_m"),
+        (lambda sampler_type: sampler_type(_exact_l2_tower(), target_m=0).sample(
+            n_samples=0, burn_in_steps=1, seed=848), ValueError, "n_samples"),
+        (lambda sampler_type: sampler_type(_exact_l2_tower(), target_m=0).sample(
+            n_samples=1, burn_in_steps=-1, seed=848), ValueError, "burn_in_steps"),
+        (lambda sampler_type: sampler_type(_exact_l2_tower(), target_m=0).sample(
+            n_samples=1, burn_in_steps=1, seed=-1), ValueError, "seed"),
+    ],
+)
+def test_fixed_m_sampler_fails_closed_on_invalid_contract(
+    operation: Callable[[type[object]], object],
+    error: type[Exception],
+    message: str,
+) -> None:
+    sampler_type, _acceptance = _a04_2_sampler_api()
+
+    with pytest.raises(error, match=message):
+        operation(sampler_type)
+
+
+def _tiny_support_by_m() -> dict[int, tuple[int, ...]]:
+    return {m: _fixed_m_support(m) for m in (-2, -1, 0, 1, 2)}
+
+
+def test_exact_fixture_diagnostics_have_only_four_keys_and_ladder_residual(
+) -> None:
+    diagnostics = _a04_2_diagnostics_module()
+    observed = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=24,
+        rotation_probes=8,
+        tiny_support_by_m=_tiny_support_by_m(),
+    )
+
+    assert tuple(observed) == (
+        "lll_residual",
+        "particle_swap_residual",
+        "finite_rotation_residual",
+        "tower_ladder_residual",
+    )
+    assert observed["lll_residual"] == 0.0
+    assert observed["particle_swap_residual"] == 0.0
+    assert observed["tower_ladder_residual"] < 1.0e-12
+
+
+def test_eight_seeded_finite_rotation_probes_close_on_exact_fixture() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+
+    first = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=24,
+        rotation_probes=8,
+        tiny_support_by_m=_tiny_support_by_m(),
+    )
+    repeat = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=24,
+        rotation_probes=8,
+        tiny_support_by_m=_tiny_support_by_m(),
+    )
+
+    assert first == repeat
+    assert first["finite_rotation_residual"] < 1.0e-10
+
+
+def test_production_diagnostics_never_enumerate_a_support(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    diagnostics = _a04_2_diagnostics_module()
+
+    def forbidden_enumeration(_self: FeasibilityTable) -> tuple[int, ...]:
+        raise AssertionError("production diagnostics enumerated a support")
+
+    monkeypatch.setattr(
+        FeasibilityTable,
+        "enumerate_support",
+        forbidden_enumeration,
+    )
+    observed = diagnostics.evaluate_tower_diagnostics(
+        _exact_l2_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=24,
+        rotation_probes=2,
+    )
+
+    assert set(observed) == {
+        "lll_residual",
+        "particle_swap_residual",
+        "finite_rotation_residual",
+        "tower_ladder_residual",
+    }
+    assert all(math.isfinite(value) for value in observed.values())
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"seed": -1}, "seed"),
+        ({"burn_in_steps": -1}, "burn_in_steps"),
+        ({"sample_count": 0}, "sample_count"),
+        ({"rotation_probes": 0}, "rotation_probes"),
+        ({"tiny_support_by_m": {0: (M0_LEFT, M0_RIGHT)}}, "five sectors"),
+    ],
+)
+def test_diagnostics_fail_closed_on_invalid_sampling_contract(
+    kwargs: dict[str, object],
+    message: str,
+) -> None:
+    diagnostics = _a04_2_diagnostics_module()
+    arguments: dict[str, object] = {
+        "seed": 852,
+        "burn_in_steps": 5,
+        "sample_count": 24,
+        "rotation_probes": 8,
+        "tiny_support_by_m": _tiny_support_by_m(),
+    }
+    arguments.update(kwargs)
+
+    with pytest.raises((TypeError, ValueError), match=message):
+        diagnostics.evaluate_tower_diagnostics(_exact_l2_tower(), **arguments)
+
+
+def test_diagnostics_reject_nonfinite_tower_amplitudes() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+    tower = LadderTower.from_m0(
+        logpsi=lambda _state: complex(math.nan, 0.0),
+        log_score=_zero_score(),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+    with pytest.raises(ValueError, match="finite|logpsi"):
+        diagnostics.evaluate_tower_diagnostics(
+            tower,
+            seed=852,
+            burn_in_steps=5,
+            sample_count=24,
+            rotation_probes=8,
+            tiny_support_by_m=_tiny_support_by_m(),
+        )
