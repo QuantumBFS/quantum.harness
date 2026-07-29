@@ -34,7 +34,7 @@ DEFAULT_DEPTHS = (2, 3, 4)
 PRESSURE_DEPTHS = (5, 6, 7, 8)
 PARENT_SOURCE_COMMIT = "b90a506d0aaa38a87163be06b83f6de380a3e970"
 PARENT_RUN_ID = "exterior-thin-first-v1"
-PARENT_PLAN_HASH = "b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97"
+PARENT_PLAN_HASH = "debbc510ac886ed26b7640bf0b09de5672f529c34c30aa21cdcd1e430564595a"
 PARENT_PROTOCOL_HASH = "e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43"
 PRESSURE_RUN_ID = "exterior-survivor-pressure-v1"
 TERMINAL_STATUSES = {
@@ -423,16 +423,12 @@ def plan_run(
         entries=entries,
     )
     plan_hash = _hash_payload(plan_payload)
-    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
-        plan_hash = PARENT_PLAN_HASH
     protocol = _run_protocol_payload(
         plan_hash=plan_hash,
         run_id=run_id,
         source_commit=source_commit,
     )
     protocol_hash = _hash_payload(protocol)
-    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
-        protocol_hash = PARENT_PROTOCOL_HASH
     smoke_run_id = "exterior-thin-first-v1-smoke"
     smoke_protocol_hash = _hash_payload(
         _run_protocol_payload(
@@ -730,10 +726,12 @@ def _parent_terminal_manifest_is_valid(
             and manifest.get("tested_words") == 22
             and isinstance(counts, Mapping)
             and set(counts) <= {"positive", "zero"}
+            and all(isinstance(value, int) and not isinstance(value, bool) for value in counts.values())
             and sum(counts.values()) == 22
             and isinstance(minimum_word, list)
-            and len(minimum_word) in DEFAULT_DEPTHS
-            and isinstance(minimum, (int, float))
+            and tuple(minimum_word) in mixed_words(2, depths=DEFAULT_DEPTHS)
+            and isinstance(minimum, (int, float)) and not isinstance(minimum, bool)
+            and math.isfinite(minimum)
         )
     expected_failure = {
         "rejected-negative": "negative",
@@ -822,10 +820,11 @@ def _validate_spec_plan_binding(
             plan.get("smoke_protocol_hash") if spec.get("shard") == "smoke"
             else plan.get("protocol_hash")
         ),
+        "artifact_root": "../smoke" if spec.get("shard") == "smoke" else "..",
     }
     for field in (
         "run_id", "source_commit", "protocol_hash", "depths", "survivor_status",
-        "parent_run_id", "parent_plan_hash", "parent_protocol_hash",
+        "parent_run_id", "parent_plan_hash", "parent_protocol_hash", "artifact_root",
     ):
         expected = expected_protocol.get(field, plan.get(field))
         if expected != spec.get(field):
@@ -997,8 +996,6 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             parent_provenance=provenance,
         )
     )
-    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
-        plan_hash = PARENT_PLAN_HASH
     if plan_hash != plan.get("plan_hash"):
         raise RuntimeError("plan protocol hash mismatch")
     protocol_hash = _hash_payload(
@@ -1011,10 +1008,27 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             parent_provenance=provenance,
         )
     )
-    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
-        protocol_hash = PARENT_PROTOCOL_HASH
     if protocol_hash != plan.get("protocol_hash"):
         raise RuntimeError("run protocol hash mismatch")
+    smoke_run_id = (
+        "exterior-survivor-pressure-v1-smoke"
+        if depths == PRESSURE_DEPTHS else "exterior-thin-first-v1-smoke"
+    )
+    smoke_protocol_hash = _hash_payload(
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=smoke_run_id,
+            source_commit=source_commit,
+            depths=depths,
+            survivor_status=survivor_status,
+            parent_provenance=provenance,
+        )
+    )
+    if (
+        plan.get("smoke_run_id") != smoke_run_id
+        or plan.get("smoke_protocol_hash") != smoke_protocol_hash
+    ):
+        raise RuntimeError("smoke protocol hash mismatch")
     identities: set[str] = set()
     for entry in entries:
         identity = entry.get("candidate_id")

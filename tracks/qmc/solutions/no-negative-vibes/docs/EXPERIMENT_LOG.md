@@ -725,7 +725,7 @@ stopped at the first stable negative, complex, or uncertain result.
 - protocol hash:
   `e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43`;
 - plan hash:
-  `b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97`;
+  `debbc510ac886ed26b7640bf0b09de5672f529c34c30aa21cdcd1e430564595a`;
 - execution: WSL shards 00--13 with 14 processes and CPU shards 14--75
   with 62 processes, all BLAS thread limits one;
 - terminal accounting: 2,304 terminal, zero missing, stale, duplicate, or
