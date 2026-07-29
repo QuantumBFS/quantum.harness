@@ -570,6 +570,15 @@ Updated: 2026-07-29 UTC.
 - `L=2,d=2` row-structure probe job `118155322` completed in 41 s at
   488,780 KiB. The positive basis has 14,026 rows. All four target
   trivial-character blocks contain only size-1/3 S3 row orbits, so the proven
-  exact isotypic reduction extends without a new orbit case. Full `L=1`
-  benchmark job `118155251` and `L=2,d=2` preflight job `118155664` are
-  running.
+  exact isotypic reduction extends without a new orbit case.
+- Full corrected isotypic benchmark job `118155251` passed all truth, MOF,
+  source-hash, named-cone, and residual gates. It is `OPTIMAL` and
+  `feasible_residual_checked_float` at gamma `2`. Versus the 7,231-moment
+  unsplit spin/spatial solve, peak process RSS fell from 39,288,700 to
+  23,861,984 KiB (39.3%), but solve wall increased from 1,031.084 to
+  1,064.326 s (3.2%). Treat this as a memory-enabling reduction, not a speed
+  optimization.
+- `L=2,d=2` preflight r1 job `118155664` was cancelled after 5:37 and
+  3,392,068 KiB MaxRSS because it still carried the disproven, unused
+  nontrivial-block diagnostic. Preflight r2 job `118156605` removes that
+  work and is running on 32 CPUs / 114,000 MiB.

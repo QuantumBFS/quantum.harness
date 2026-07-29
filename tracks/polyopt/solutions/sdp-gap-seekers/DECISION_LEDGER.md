@@ -944,7 +944,13 @@ The corrected reduction retains all nontrivial-character cones and applies
 only the proven trivial-character decomposition. It is still exact and
 reduces packed entries from 112,387 to 75,967 (32.4%) and maximum side from
 198 to 135. Small truth job `118155030` passed in 1:34 with 717,092 KiB
-MaxRSS. Full benchmark job `118155251` now uses this frozen reduction.
+MaxRSS. Full benchmark job `118155251` then passed the complete truth,
+immutable-input, MOF reload, and residual chain. It returned `OPTIMAL` and
+`feasible_residual_checked_float`. Peak process RSS fell from 39,288,700 to
+23,861,984 KiB, a 39.3% reduction. Solve wall changed from 1,031.084 to
+1,064.326 s, a 3.2% regression. The exact decomposition is therefore useful
+for fitting stronger models in memory, but it does not speed this `L=1`
+Mosek solve.
 
 For the next hierarchy, row-only job `118155322` generated the complete
 14,026-row `L=2,d=2` positive basis in 41 s. The centered minus/plus
@@ -956,3 +962,7 @@ the maximum schedulable `kshcnormal` single-node shape, 32 CPUs and 114,000
 MiB. The two rejected submissions before it performed no compute: 120,000
 MiB with 32 CPUs exceeded `DefMemPerCPU=3569`, while 36 CPUs exceeded the
 32-core node shape. Preserve 32 CPUs/114,000 MiB as the partition ceiling.
+Preflight r1 `118155664` was cancelled after 5:37 and 3,392,068 KiB MaxRSS
+because it still carried the already-disproven nontrivial-cone comparison.
+Commit `767037a` removes that irrelevant work; r2 job `118156605` is the
+active `L=2,d=2` preflight.
