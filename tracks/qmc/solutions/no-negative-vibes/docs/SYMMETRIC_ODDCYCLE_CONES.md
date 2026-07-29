@@ -182,6 +182,27 @@ than only at the endpoint \(z=1\).
 This is a finite-depth lemma, not the arbitrary-word theorem.  Its useful
 structural content is that \(b_{w,k}\) averages the four endpoint atoms
 (orientation \(B/B^{\mathsf T}\), winding amplitude \(0/1\)) over choices
-of \(k\) active negative edges.  An invariant trace-compatible cone for
-those four endpoint atoms would promote the Bernstein pattern to all
-depths and even allow independent layer amplitudes in \([0,1]\).
+of \(k\) active negative edges.
+
+The stronger four-endpoint semigroup needed for a direct common-cone
+promotion is, however, not positive.  In the alphabet
+`0=B(0)`, `1=B(0)^T`, `2=B(1)`, `3=B(1)^T`, the frozen length-120 word
+
+```text
+220221211213112031133303133331333331303330300330000231110032111102212011110300002311121210222331121112310311331323112101
+```
+
+has exact \(F<0\).  Its word SHA-256 is
+`c09e5facd6b822aad7f43b1fd5c16316a93680a55f129d30c4eb57d0569fa2e6`,
+and its exact value is
+
+```text
+-18190120474553014207724320230898068534479316268000740547152031056720819382678784187176552826802467629600079871
+```
+
+Thus no trace-compatible cone can contain all four independently varying
+endpoint generators.  This does not contradict the Bernstein lemma:
+each coefficient is a fixed-cardinality average over endpoint assignments,
+and one negative assignment need not make that average negative.  The
+remaining proof target must preserve this symmetrization instead of
+dropping to the full four-generator semigroup.

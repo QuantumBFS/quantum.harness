@@ -6,6 +6,7 @@ from oracle.symmetric_oddcycle_cones import (
     exact_grade4_formula_replay,
     exact_invariant_chamber_obstruction,
     exact_unit_winding_bernstein_audit,
+    exact_unit_winding_endpoint_obstruction,
     load_certificate,
     unit_winding_endpoint_lifts,
     verify_compact_certificate,
@@ -118,3 +119,26 @@ def test_unit_winding_endpoint_lifts_are_four_exact_transpose_paired_atoms():
     assert atoms[1] == atoms[0].T
     assert atoms[3] == atoms[2].T
     assert all(atom.det() != 0 for atom in atoms)
+
+
+def test_independently_varying_endpoint_cone_has_exact_negative_obstruction():
+    result = exact_unit_winding_endpoint_obstruction()
+
+    assert result["status"] == "exact-negative-trace-obstruction"
+    assert result["word_length"] == 120
+    assert (
+        result["word_sha256"]
+        == "c09e5facd6b822aad7f43b1fd5c16316a93680a55f129d30c4eb57d0569fa2e6"
+    )
+    assert result["chi2"] == int(
+        "24614177236100370041434232580007283279878745098611151771259234412971687936"
+    )
+    assert result["chi3"] == -int(
+        "20538663057326847435613800827687405586469176053009430459293554608260311687672137729251403596446470745603702784"
+    )
+    assert result["chi5"] == int(
+        "2348542582773833227889480596789337027375682548908319870707290971532209025114608443463698998384768703031934976"
+    )
+    assert result["F"] == -int(
+        "18190120474553014207724320230898068534479316268000740547152031056720819382678784187176552826802467629600079871"
+    )

@@ -14,6 +14,7 @@ discover the stored transforms, but it is not part of verification.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from fractions import Fraction
@@ -24,8 +25,6 @@ from pathlib import Path
 import sympy as sp
 
 from .exterior_exact5_full_fock_cone import (
-    _cross_grade_simplicial_search,
-    _trace_compatible_column_generation,
     combined_grade_lift,
 )
 from .exterior_exact5_shared_cone import exact_compound_matrix
@@ -552,6 +551,41 @@ def unit_winding_endpoint_lifts() -> tuple[sp.ImmutableMatrix, ...]:
     )
 
 
+_ENDPOINT_COUNTEREXAMPLE = (
+    "220221211213112031133303133331333331303330300330000231110032"
+    "111102212011110300002311121210222331121112310311331323112101"
+)
+
+
+def exact_unit_winding_endpoint_obstruction() -> dict[str, object]:
+    """Replay a negative word in the four independently varying endpoints."""
+
+    zero = sp.Matrix(fixed_candidate_matrix())
+    zero[4, 2] = 0
+    one = fixed_candidate_matrix()
+    atoms = (sp.ImmutableMatrix(zero), zero.T, one, one.T)
+    product = sp.eye(5)
+    for symbol in _ENDPOINT_COUNTEREXAMPLE:
+        product = atoms[int(symbol)] * product
+    chi2 = int(sp.trace(exact_compound_matrix(product, 2)))
+    chi3 = int(sp.trace(exact_compound_matrix(product, 3)))
+    determinant = int(product.det())
+    return {
+        "status": "exact-negative-trace-obstruction",
+        "endpoint_order": ("B0", "B0T", "B1", "B1T"),
+        "word": _ENDPOINT_COUNTEREXAMPLE,
+        "word_length": len(_ENDPOINT_COUNTEREXAMPLE),
+        "word_sha256": hashlib.sha256(
+            _ENDPOINT_COUNTEREXAMPLE.encode("ascii")
+        ).hexdigest(),
+        "chi0": 1,
+        "chi2": chi2,
+        "chi3": chi3,
+        "chi5": determinant,
+        "F": 1 + chi2 + chi3 + determinant,
+    }
+
+
 def search_unit_winding_endpoint_cone(
     *,
     attempts: int = 64,
@@ -561,53 +595,14 @@ def search_unit_winding_endpoint_cone(
     tolerance: float = 1.0e-9,
     max_denominator: int = 65536,
 ) -> dict[str, object]:
-    """Search the four endpoint atoms, promoting only by exact replay."""
+    """Stop the impossible four-endpoint cone before numerical work."""
 
-    matrices = unit_winding_endpoint_lifts()
-    simplicial = _cross_grade_simplicial_search(
-        matrices,
-        split=11,
-        attempts=attempts,
-        maxiter=maxiter,
-        rng_seed=rng_seed,
-        tolerance=tolerance,
-        max_denominator=max_denominator,
-    )
-    if simplicial["status"] == "exact-trace-compatible-certificate":
-        return {
-            "status": "exact-trace-compatible-certificate",
-            "route": "four-endpoint-simplicial",
-            "grades": (0, 2, 3, 5),
-            "endpoint_order": ("B0", "B0T", "B1", "B1T"),
-            "simplicial": simplicial,
-        }
-
-    best = simplicial.get("best")
-    transform = best.get("transform") if isinstance(best, Mapping) else None
-    if transform is None:
-        redundant = {
-            "status": "no-numerical-transform",
-            "milestones": [],
-        }
-    else:
-        redundant = _trace_compatible_column_generation(
-            matrices,
-            transform,
-            ray_counts=ray_counts,
-            tolerance=tolerance,
-            max_denominator=max_denominator,
-        )
+    del attempts, maxiter, rng_seed, ray_counts, tolerance, max_denominator
+    obstruction = exact_unit_winding_endpoint_obstruction()
     return {
-        "status": (
-            "exact-trace-compatible-certificate"
-            if redundant["status"] == "exact-trace-compatible-certificate"
-            else "no-exact-certificate-found"
-        ),
-        "route": "four-endpoint-redundant",
+        **obstruction,
+        "route": "frozen-exact-word-early-stop",
         "grades": (0, 2, 3, 5),
-        "endpoint_order": ("B0", "B0T", "B1", "B1T"),
-        "simplicial": simplicial,
-        "redundant": redundant,
     }
 
 
@@ -618,6 +613,7 @@ __all__ = [
     "exact_grade4_formula_replay",
     "exact_invariant_chamber_obstruction",
     "exact_unit_winding_bernstein_audit",
+    "exact_unit_winding_endpoint_obstruction",
     "fixed_candidate_matrix",
     "load_certificate",
     "search_unit_winding_endpoint_cone",
