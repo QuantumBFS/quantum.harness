@@ -275,6 +275,10 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
   SHA-256
   `572a663b7a2d17852c1a44995e535bb40cf98cf7d5c0e09cdaf559cd99fb2ec6`.
 - The Windows control host performed no numerical calculation.
+- GitHub connectivity recovered during closeout. The code, aggregate-result
+  and closeout commits were pushed to
+  `work/zibojin/tensor-square-phase-diagram`; the final branch SHA is verified
+  externally after the last documentation commit and reported in the handoff.
 - Sole next entry: pull the final closeout commit, verify remote source
   revisions, checkpoints, frozen fingerprints and release digest, and do not
   rerun any complete point.
