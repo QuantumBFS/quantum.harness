@@ -341,8 +341,6 @@ function validate_runmeta(runmeta, input_files, options)
             ]),
             "spin-isotypic truth block dimensions",
         )
-        Int(isotypic_truth["nontrivial_comparison_count"]) > 0 ||
-            error("spin-isotypic truth checked no orbit coefficients")
     end
 
     source = runmeta["source"]

@@ -18,7 +18,7 @@ readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-re
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
 readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
-readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-preflight-scnet-20260729-r1"
+readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-preflight-scnet-20260729-r2"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"
 [[ "$PWD" == "$EXPECTED_ROOT" ]] || {

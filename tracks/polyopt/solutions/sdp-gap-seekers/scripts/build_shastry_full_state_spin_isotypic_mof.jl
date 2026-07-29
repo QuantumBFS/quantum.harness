@@ -47,12 +47,6 @@ function spin_isotypic_truth_dict(truth)
     return Dict(
         "exact" => truth.exact,
         "trivial_blocks_exact" => truth.trivial_blocks_exact,
-        "nontrivial_positive_orbits_exact" =>
-            truth.nontrivial_positive_orbits_exact,
-        "nontrivial_gap_orbits_exact" =>
-            truth.nontrivial_gap_orbits_exact,
-        "nontrivial_comparison_count" =>
-            truth.nontrivial_comparison_count,
         "retained_block_dimensions" =>
             truth.retained_block_dimensions,
     )

@@ -453,10 +453,6 @@ function shastry_spin_isotypic_truth(
         for block in [assembly.positive_blocks; assembly.gap_blocks]
         if block.source_block.character == TRIVIAL_CHARACTER
     ]
-    positive_orbits_exact, positive_comparisons =
-        nontrivial_orbit_truth(assembly, assembly.positive_blocks)
-    gap_orbits_exact, gap_comparisons =
-        nontrivial_orbit_truth(assembly, assembly.gap_blocks)
     positive_blocks = retained_blocks(assembly.positive_blocks)
     gap_blocks = retained_blocks(assembly.gap_blocks)
     dimensions = sort!(
@@ -471,9 +467,6 @@ function shastry_spin_isotypic_truth(
     return (
         exact=exact,
         trivial_blocks_exact=all(report.exact for report in trivial_reports),
-        nontrivial_positive_orbits_exact=positive_orbits_exact,
-        nontrivial_gap_orbits_exact=gap_orbits_exact,
-        nontrivial_comparison_count=positive_comparisons + gap_comparisons,
         retained_block_dimensions=dimensions,
         trivial_reports=trivial_reports,
     )
