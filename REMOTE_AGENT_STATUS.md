@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:52:00Z
+Updated: 2026-07-29T18:04:26Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -173,5 +173,13 @@ Updated: 2026-07-29T17:52:00Z
   under a separate coefficient fingerprint. It preserves unrestricted-state
   semantics and is not yet authorized for L=2: next gate is an L=1 exact
   construction/solve comparison on the configured SCNet environment.
+- L=1 SO(3) job `118179614` completed in 13:40, peak 4,820,548 KiB. It
+  reduced 7,231 equations to 5,314 and established hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`,
+  but returned an apparent native-dual certificate with violation
+  `2.3730706288915826e-8`, contradicting the known feasible unreduced L=1
+  relaxation. Fresh-task replay passes at `1e-7` and fails at `1e-9`; this is
+  not scientific evidence. Reduced L=2 remains blocked pending an unreduced
+  native-dual control and projection/scaling diagnosis.
 
 No user input or new credential is currently required.

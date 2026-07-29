@@ -1259,3 +1259,22 @@ schema, and explicit eliminated-coordinate metadata. The established route is
 unchanged when the flag is absent. Do not launch L=2 from this source until an
 L=1 construction and decision comparison passes; then establish its new L=2
 hash twice before interpreting a solve.
+
+L=1 gate `118179614` did not authorize the reduction. It completed from clean
+commit `a18494f` in 13:40 with 4,820,548 KiB Slurm MaxRSS. Exact substitution
+removed 1,917 of 7,231 moment equations (5,314 remain, a 26.5% shrink), kept
+all 23 PSD cones / 75,967 packed entries, and gave coefficient SHA-256
+`7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+Mosek then reported the explicit bar-certificate problem `OPTIMAL`, with
+maximum constraint violation `2.3730706288915826e-8`. This contradicts the
+independently established feasible unreduced L=1 relaxation. The exact-bit
+artifact replays in a fresh task at tolerance `1e-7` but fails at `1e-9` with
+the same violation. Therefore it is a numerical/projection diagnostic, not an
+infeasibility certificate.
+
+The immediate discriminator is an otherwise identical native-dual L=1
+control with SO(3) substitution disabled and audit tolerance `1e-9`. If that
+also returns an apparent certificate, repair the native dual formulation or
+scaling. If it correctly reports no certificate, audit the rank-four
+coordinate normalization and solve the reduced primal directly. No reduced
+L=2 job is authorized before this fork is resolved.

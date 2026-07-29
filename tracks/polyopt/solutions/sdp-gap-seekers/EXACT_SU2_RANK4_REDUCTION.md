@@ -45,9 +45,18 @@ coefficient fingerprint are assembled. It is intended only for independent
 structural/hash reproduction and is recorded as `not_run_exact_build_only`;
 it produces no numerical feasibility statement.
 
-This route is provisional until it passes both gates:
+This route remains provisional. L=1 job `118179614` reduced the 7,231 moment
+equations to 5,314 (1,917 eliminated; 26.5%) with coefficient SHA-256
+`7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+Its native certificate task returned `OPTIMAL`, although the unreduced L=1
+relaxation is known feasible. The fresh-task replay passes at `1e-7` with
+maximum violation `2.3730706288915826e-8` but fails at `1e-9`. This numerical
+contradiction is not a certificate and blocks L=2 use pending an unreduced
+native-dual control and a projection-normalization audit.
+
+Authorization requires both gates:
 
 1. an L=1 construction/solve comparison against the established unrestricted
-   finite-relaxation decision; and
+   finite-relaxation decision, including resolution of job `118179614`; and
 2. two independent L=2 constructions with the same exact coefficient hash
    before its result is interpreted.

@@ -708,3 +708,13 @@ Updated: 2026-07-29 UTC.
   preserve the old hashes by default, and require an L=1 comparison before
   any L=2 solve. This is WLOG rotation averaging of an unrestricted state,
   not a total-spin sector restriction.
+- L=1 SO(3) gate `118179614` completed in 13:40 at 4,820,548 KiB Slurm
+  MaxRSS. It eliminated 1,917 of 7,231 moment equations (26.5%) and produced
+  coefficient hash
+  `7308c57ba6b515501fd1c0c00f753868c0bb8cb32531429398fd902b4d63231a`.
+  However, its native dual returned an apparent certificate with maximum
+  constraint violation `2.3730706288915826e-8`, contradicting the established
+  feasible unreduced L=1 model. Fresh-task replay passes at `1e-7` and fails at
+  `1e-9`. Do not use this as evidence or launch reduced L=2 yet. Next changed
+  action: run the identical unreduced native-dual control at `1e-9`; then
+  distinguish dual-formulation error from projection/conditioning error.
