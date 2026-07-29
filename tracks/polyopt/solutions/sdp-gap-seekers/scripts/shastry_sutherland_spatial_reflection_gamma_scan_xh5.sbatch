@@ -57,7 +57,6 @@ export PATH="${MOSEK_BIN_DIR}:${PATH}"
 export LD_LIBRARY_PATH="${MOSEK_BIN_DIR}:${LD_LIBRARY_PATH:-}"
 export MOSEKLM_LICENSE_FILE="$MOSEK_LICENSE"
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-16}"
-export SS_SCAN_DYNAMIC_INPUT=1
 
 git rev-parse HEAD > "$RUN_DIR/runner-commit.txt"
 git rev-parse 'HEAD^{tree}' > "$RUN_DIR/runner-tree.txt"
@@ -78,6 +77,8 @@ echo "[ss-spatial-scan] runner regression started"
     --history-file=no \
     tracks/polyopt/solutions/sdp-gap-seekers/test/spatial_reflection_runner_tests.jl \
     2>&1 | tee "$RUN_DIR/runner-tests.log"
+
+export SS_SCAN_DYNAMIC_INPUT=1
 
 builder=(
     "$JULIA_BIN"
