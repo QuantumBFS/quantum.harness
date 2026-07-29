@@ -3,7 +3,7 @@
 #SBATCH --partition=kshcnormal
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=36
 #SBATCH --mem=120000M
 #SBATCH --time=12:00:00
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-full-state-spin-isotypic-l2d2-preflight-%j.out
@@ -12,7 +12,7 @@ set -euo pipefail
 
 export LC_ALL=C
 export LANG=C
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-32}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-36}"
 
 readonly EXPECTED_ROOT="/public/home/sihhu/quantum-hackson/checkouts/ss-exact-reduction"
 readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
