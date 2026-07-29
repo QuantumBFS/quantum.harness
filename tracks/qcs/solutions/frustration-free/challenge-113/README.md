@@ -45,8 +45,8 @@ was measured from source revision
 ```bash
 JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu \
   uv run python scripts/calibrate_pilot.py --queries 20 \
-  --output results/task10a-f1f5ed1/calibration.raw.json
-uv run python run.py validate --output results/task10a-f1f5ed1/pilot
+  --output results/task10a-dd16192/calibration.raw.json
+uv run python run.py validate --output results/task10a-dd16192/pilot
 uv run python -m pytest tests/test_evidence.py -q
 ```
 
@@ -59,12 +59,25 @@ array concurrency and resource class:
 ```bash
 sbatch --array=0-9499%CONCURRENCY \
   --account=ACCOUNT --qos=QOS --partition=PARTITION \
-  --export=ALL,CHALLENGE113_ACK_PRODUCTION=1,CHALLENGE113_DEPLOYMENT=DEPLOYMENT,CHALLENGE113_RUN_ROOT=RUN_ROOT,CHALLENGE113_EXPECTED_REVISION=REVISION,CHALLENGE113_ARCHIVE_SHA256=ARCHIVE_SHA256,CHALLENGE113_EVIDENCE_REVISION=EVIDENCE_REVISION,CHALLENGE113_UV=UV \
+  --export=ALL,CHALLENGE113_ACK_PRODUCTION=1,CHALLENGE113_DEPLOYMENT=DEPLOYMENT,CHALLENGE113_RUN_ROOT=RUN_ROOT,CHALLENGE113_EXPECTED_REVISION=REVISION,CHALLENGE113_ARCHIVE_PATH=ARCHIVE_PATH,CHALLENGE113_ARCHIVE_SHA256=ARCHIVE_SHA256,CHALLENGE113_EVIDENCE_REVISION=EVIDENCE_REVISION,CHALLENGE113_UV=UV \
   scripts/slurm_production_array.sh
 ```
 
-Deploy only `git archive` output from a committed revision, add a
-canonical `.deployment.json` containing that revision and archive SHA256, and
-use a revision/run-ID output directory shared by all array elements. Production
-entry points also reject stale evidence/report metadata. The deployment and
+Deploy only `git archive` output from a committed revision, then add a
+runtime-only canonical `.deployment.json` containing revision, archive,
+evidence-index, and report SHA256 bindings. Keep the actual archive available
+to every production entry point through `CHALLENGE113_ARCHIVE_PATH`. This local
+verification supplies every required value:
+
+```bash
+uv run python scripts/verify_deployment.py \
+  --root "${CHALLENGE113_DEPLOYMENT}" \
+  --archive "${CHALLENGE113_ARCHIVE_PATH}" \
+  --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
+  --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
+  --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
+```
+
+Use a revision/run-ID output directory shared by all array elements. Production
+entry points reject stale evidence/report/archive metadata. Deployment and
 output paths are runtime inputs and are intentionally not committed.

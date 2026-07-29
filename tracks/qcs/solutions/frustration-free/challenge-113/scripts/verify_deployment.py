@@ -13,12 +13,14 @@ from qcontrol.evidence import validate_deployment
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--expected-revision", required=True)
     parser.add_argument("--expected-archive-sha256", required=True)
     parser.add_argument("--expected-evidence-revision", required=True)
     args = parser.parse_args()
     validate_deployment(
         args.root,
+        archive_path=args.archive,
         expected_revision=args.expected_revision,
         expected_archive_sha256=args.expected_archive_sha256,
         expected_evidence_revision=args.expected_evidence_revision,

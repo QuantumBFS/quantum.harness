@@ -1,106 +1,64 @@
-# Task 10A report: measured production gate
+# Task 10A controller report: current gate
 
 ## Status
 
-Task 10A adds deterministic restartable sweep shards, guarded local runners,
-Slurm pilot/array entry points, a representative calibration tool, and initial
-operator/scientific documentation. Preferred and fallback SSH aliases both
-passed read-only Slurm access checks; `xhacnormalb` on the preferred cluster was
-selected for the CPU pilot.
+The pre-Task10C scientific and reproducibility blockers are closed locally.
+Production was not submitted. The only execution blocker is frozen-runtime
+compatibility on both authorized clusters: glibc 2.17 cannot load the locked
+`jaxlib==0.11.0` manylinux 2.27 wheel.
 
-The broad 9,500-trial array is not submitted. The full local representative
-pilot passed, but the exact frozen runtime is incompatible with both authorized
-clusters and the discovered seed-coverage concern remains: mandatory
-two-qubit open-loop acceptance fails for seed 0, which is present in the
-canonical production plan.
+## RED/GREEN record
 
-## Local evidence
+- RED: effective Hessian rank was also used as the available model-Hessian
+  search basis, so approved high-k trials could not construct.
+- GREEN: dense `p<=80` landscapes retain all `p` exact-Hessian eigenvectors in
+  descending absolute-curvature order. Effective ranks remain 3 (`d=2`) and 15
+  (`d=4`) at `1e-8`. Matrix-free paths report their actual available column
+  count and never synthesize missing vectors.
+- RED: public artifacts hashed only the selected basis slice.
+- GREEN: model-Hessian artifacts additionally hash the complete source basis.
+  Real `d=2,k=24` and `d=4,k=20,30,80` fixtures prove orthonormality, nested
+  subspaces, unchanged ranks, and full-span `k=p` equivalence. Every canonical
+  production search-space configuration constructs without spending budgets.
+- RED: evidence accepted coercible JSON values, stale cross-document inputs,
+  an environment record with x64 disabled, and deployment metadata that did
+  not hash an actual archive file.
+- GREEN: evidence requires exact JSON types, finite ranges, x64, provisional
+  projection status, persisted-input arithmetic, config binding,
+  cross-document hashes, and pilot/timing/validation consistency. Deployment
+  verification hashes the supplied archive bytes, enforces revision naming,
+  validates the complete evidence directory, and binds report/evidence/archive
+  hashes.
 
-- Frozen sync: successful.
-- Full suite before final commit: 385 tests passed; final post-fix verification
-  is recorded with the commit.
-- Shell and Python syntax checks: successful.
-- Development sweep: 84/84 complete, strict validation valid, 175.0 s wall,
-  926,300 KiB peak RSS, 1,710,921 bytes.
-- Representative p=80 calibration: 0.212 s compilation-inclusive first query,
-  525 warm queries/s, 7.65 s open-loop, 5.83 s landscape, 0.0382 s exact
-  trajectory for 20 queries, 1.62 s geometry, 0.347 s restricted optimization,
-  848,664 KiB peak RSS, JAX CPU/x64.
-- Preliminary projection: 23.3 s/trial, 61.5 trial-hours or 492 core-hours at
-  eight cores/trial, and approximately 1.9 GB. The full local pilot supersedes
-  these preliminary estimates.
-- Full representative pilot: 929 exact queries, 19.12 s wall, 860,224 KiB peak
-  RSS, 551,237-byte canonical trial artifact, strict validation valid.
-- Full-pilot projection: 50.5 trial-hours, approximately 404 core-hours at eight
-  cores/trial, and 5.24 GB. Selected class: 8 CPU cores, 24 GiB, 12-hour limit,
-  concurrency 32.
+## Current local rerun
 
-## Cluster deployment
+Measured source revision: `dd16192953c130d738716238525760de73343e09`.
 
-The first clean Task 10 revision was deployed as an exact archive, with
-revision `5dc1ceb5cad54e3840d606761feb8770842d1fb5` and archive SHA256
-`8db29d3b421254933570da43d1cc27bdc093ffaab272a5441f0296c1a9dda5fc`.
-The remote archive hash matched before extraction. Runtime output is configured
-for a separate revision/run-ID directory; absolute host paths and credentials
-are not stored in the repository.
+- Calibration: first query 0.217 s; 19 warm queries 0.0338 s (562/s);
+  open-loop 7.75 s; dense landscape 5.81 s; exact trajectory 0.0340 s;
+  geometry 1.67 s; restricted optimization 0.430 s/8 evaluations.
+- Environment: JAX CPU, x64 enabled, 32 logical CPUs.
+- Full pilot: 881 exact queries, 21.91 s wall, 864,260 KiB peak RSS, strict
+  validation `valid=true`.
+- Projection: provisional only; computed directly from persisted pilot wall
+  time, artifact bytes, 9,500 trials, and eight cores as an arithmetic scenario.
+  No resource class or concurrency is selected before Task 10C pilots.
 
-No Slurm pilot or array job ID exists. Frozen sync stopped before submission:
-both the preferred and fallback clusters expose glibc 2.17, but locked
-`jaxlib==0.11.0` provides x86-64 wheels requiring manylinux 2.27. The final
-array manifest selects 32-way concurrency but records submission as blocked.
+The earlier calibration, seed-risk, and concurrency statements are superseded
+and remain available only in Git history.
 
-## Concerns
+## Deployment state
 
-1. A failed first development attempt exposed that full-space trials requested
-   an invalid `leading_count == parameter_count`. A regression now keeps the
-   full-space landscape request at the physical `d² - 1` count.
-2. Two-qubit seed 0 fails the existing hard open-loop acceptance threshold.
-   The accepted representative seed 5 is used for calibration and pilot, but
-   this does not establish feasibility for every production seed.
-3. Cluster login nodes do not provide a default Python 3 executable. Deployment
-   must use the existing shared CPython 3.12 runtime with a frozen uv sync; the
-   Slurm scripts require the uv executable path explicitly and never fall back.
-4. The shared CPython runtime does not solve the glibc ABI mismatch. Neither
-   authorized cluster advertises Apptainer/Singularity, so an exact locked
-   execution environment is unavailable without an explicit environment
-   decision outside Task 10A.
+The reviewed candidate is archived and validated locally after the final
+evidence/documentation commit. Deployment metadata is generated beside the
+extracted runtime rather than tracked in the source tree. No remote deployment
+or Slurm submission was made.
 
-## Reproducibility correction append (Task 10A findings 1/5/6/8/9)
+## Remaining Task 10C decisions
 
-This section is append-only and supersedes the earlier seed-risk and selected
-resource-class statements above.
-
-### RED/GREEN record
-
-- RED: configuration tests failed because `ExperimentConfig` had no canonical
-  `model_seed`; model-preparation tests failed because no physics-keyed cache
-  existed.
-- GREEN: `model_seed=5` is serialized in every config/provenance payload.
-  Model optimization and landscape preparation are cached only by canonical
-  system physics plus model seed. Two-qubit `trial_seed=0` now reuses the
-  accepted seed-five model and passes.
-- RED: canonical production partition tests failed because there was no pure
-  shard-selection interface.
-- GREEN: shard counts 1, 7, 32, and 9,500 partition all 9,500 IDs exactly once
-  in stable order; invalid coordinates fail closed and full-comparator pairing
-  remains unchanged.
-- RED: evidence tests failed on the absent schema module and absent tracked
-  evidence directory; deployment-entry tests showed no archive/evidence/report
-  freshness checks.
-- GREEN: compact canonical evidence is validated independently, indexed by
-  SHA256, and bound to measured source revision
-  `f1f5ed17c576f63d23420a304bfd712af1ddf419`. Production entry points require
-  canonical deployment metadata and reject stale revision, archive, evidence,
-  or report bindings.
-
-### Corrected local gate
-
-The canonical 20-query calibration and full pilot use
-`model_seed=5`, `perturbation_seed=0`, and `trial_seed=0`. The full pilot
-completed 881 exact queries in 20.22 s wall with 860,776 KiB peak RSS and
-strict validation `valid=true`. The seed-zero model acceptance issue is closed.
-
-The direct 9,500-trial projection is provisional: 53.4 trial-hours, 427
-core-hours only if eight cores were later selected, and 5.00 GB. Resource-class
-and concurrency pilots are explicitly deferred to Task 10C. The cluster glibc
-blocker remains unchanged, and production was not submitted.
+1. Approve an exact cluster runtime solution for the glibc 2.17 / manylinux
+   2.27 incompatibility.
+2. Run representative CPU-count, memory, and concurrency pilots in that exact
+   runtime.
+3. Recompute the measured allocation gate before submitting the 9,500-trial
+   array.

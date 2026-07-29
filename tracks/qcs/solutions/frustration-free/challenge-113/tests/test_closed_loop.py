@@ -659,7 +659,7 @@ def test_deterministic_small_gap_d2_fixture_orders_candidate_spaces() -> None:
     oracle_floor = restricted_floor(oracle_space)
 
     assert top.certified
-    assert top.first_certified_query == 55
+    assert top.first_certified_query == 4
     assert random.first_certified_query == 76
     assert oracle.first_certified_query == 4
     assert random.first_certified_query >= top.first_certified_query

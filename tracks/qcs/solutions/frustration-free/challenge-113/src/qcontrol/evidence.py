@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Mapping
 from pathlib import Path
 import re
@@ -43,6 +44,7 @@ _PAYLOAD_FIELDS = {
     },
     "pilot": {
         "artifact_bytes",
+        "config_sha256",
         "evaluations",
         "manifest_sha256",
         "plan_sha256",
@@ -130,6 +132,109 @@ def _require_hashes(value: object, *, name: str) -> dict[str, str]:
     return dict(value)
 
 
+def _exact(value: object, expected: type, name: str) -> object:
+    if type(value) is not expected:
+        raise ValueError(f"{name} has invalid JSON type")
+    return value
+
+
+def _integer(value: object, name: str, *, minimum: int = 0) -> int:
+    _exact(value, int, name)
+    if value < minimum:
+        raise ValueError(f"{name} is outside its valid range")
+    return value
+
+
+def _number(value: object, name: str, *, minimum: float = 0.0) -> float:
+    if type(value) not in {int, float} or not math.isfinite(value) or value < minimum:
+        raise ValueError(f"{name} must be finite and in range")
+    return float(value)
+
+
+def _validate_payload(evidence_type: str, detail: Mapping[str, object]) -> None:
+    hashes = {
+        "config_sha256",
+        "manifest_sha256",
+        "plan_sha256",
+        "ready_sha256",
+        "report_sha256",
+        "trial_sha256",
+        "uv_lock_sha256",
+        "command_sha256",
+    }
+    for name in hashes & set(detail):
+        _exact(detail[name], str, name)
+        if _SHA256.fullmatch(detail[name]) is None:
+            raise ValueError(f"{name} is not a SHA256 digest")
+    integer_fields = {
+        "artifact_bytes",
+        "completed",
+        "cpu_count",
+        "cpus_per_trial",
+        "evaluations",
+        "expected",
+        "exit_status",
+        "parameter_count",
+        "peak_rss_kib",
+        "pending",
+        "queries",
+        "restricted_nfev",
+        "search_dimension",
+        "total_queries",
+        "trial_count",
+    }
+    for name in integer_fields & set(detail):
+        _integer(detail[name], name)
+    number_fields = {
+        "cpu_percent",
+        "exact_trajectory_seconds",
+        "first_query_compilation_inclusive_seconds",
+        "geometry_seconds",
+        "landscape_seconds",
+        "open_loop_seconds",
+        "pilot_wall_seconds",
+        "projected_core_hours",
+        "projected_storage_bytes",
+        "projected_trial_hours",
+        "restricted_optimization_seconds",
+        "system_seconds",
+        "user_seconds",
+        "wall_seconds",
+        "warm_queries_per_second",
+        "warm_query_seconds",
+    }
+    for name in number_fields & set(detail):
+        _number(detail[name], name)
+    for name in ("x64_enabled", "provisional", "valid"):
+        if name in detail:
+            _exact(detail[name], bool, name)
+    if "errors" in detail and (
+        type(detail["errors"]) is not list
+        or any(type(item) is not str for item in detail["errors"])
+    ):
+        raise ValueError("errors must be a JSON string array")
+    for name in (
+        "formula",
+        "jax",
+        "jax_platform",
+        "jaxlib",
+        "numpy",
+        "platform",
+        "python",
+        "scipy",
+        "trial_id",
+    ):
+        if name in detail:
+            _exact(detail[name], str, name)
+    if evidence_type in {"calibration", "environment"}:
+        if detail["x64_enabled"] is not True:
+            raise ValueError("evidence must use the x64 runtime")
+        if detail["jax_platform"] not in {"cpu", "gpu", "tpu"}:
+            raise ValueError("JAX platform is invalid")
+    if evidence_type == "projection" and detail["provisional"] is not True:
+        raise ValueError("projection must remain provisional")
+
+
 def validate_evidence_document(payload: object) -> None:
     if not isinstance(payload, Mapping) or set(payload) != {
         "evidence_type",
@@ -142,7 +247,7 @@ def validate_evidence_document(payload: object) -> None:
     evidence_type = payload["evidence_type"]
     if evidence_type not in _PAYLOAD_FIELDS:
         raise ValueError("unsupported evidence type")
-    if payload["schema_version"] != 1:
+    if type(payload["schema_version"]) is not int or payload["schema_version"] != 1:
         raise ValueError("unsupported evidence schema")
     revision = payload["source_revision"]
     if not isinstance(revision, str) or _REVISION.fullmatch(revision) is None:
@@ -151,42 +256,101 @@ def validate_evidence_document(payload: object) -> None:
     detail = payload["payload"]
     if not isinstance(detail, Mapping) or set(detail) != _PAYLOAD_FIELDS[evidence_type]:
         raise ValueError(f"{evidence_type} payload fields are not canonical")
+    _validate_payload(str(evidence_type), detail)
 
 
 def validate_evidence_directory(root: str | Path) -> dict[str, str]:
     directory = Path(root)
     expected_documents = set(REQUIRED_EVIDENCE_FILES) - {"index.json"}
     document_hashes: dict[str, str] = {}
+    documents: dict[str, dict[str, object]] = {}
     revisions: set[str] = set()
     for name in sorted(expected_documents):
         payload, data = _read_canonical(directory / name)
         validate_evidence_document(payload)
         document_hashes[name] = _sha256(data)
         revisions.add(str(payload["source_revision"]))
+        documents[name] = payload
     index, index_data = _read_canonical(directory / "index.json")
     if (
         set(index) != {"documents", "schema_version", "source_revision"}
+        or type(index["schema_version"]) is not int
         or index["schema_version"] != 1
         or index["documents"] != document_hashes
         or len(revisions) != 1
         or index["source_revision"] not in revisions
     ):
         raise ValueError("evidence index is stale or noncanonical")
+    calibration = documents["calibration.json"]
+    environment = documents["environment.json"]
+    pilot = documents["pilot.json"]
+    projection = documents["projection.json"]
+    timing = documents["time.json"]
+    validation = documents["validation.json"]
+    for dependent_name, required in {
+        "projection.json": {"pilot": "pilot.json", "time": "time.json"},
+    }.items():
+        inputs = documents[dependent_name]["inputs"]
+        for key, source_name in required.items():
+            if inputs[key] != document_hashes[source_name]:
+                raise ValueError("cross-document evidence hash is stale")
+    calibration_payload = calibration["payload"]
+    environment_payload = environment["payload"]
+    pilot_payload = pilot["payload"]
+    projection_payload = projection["payload"]
+    timing_payload = timing["payload"]
+    validation_payload = validation["payload"]
+    if (
+        calibration_payload["jax_platform"] != environment_payload["jax_platform"]
+        or calibration_payload["x64_enabled"] != environment_payload["x64_enabled"]
+        or calibration["inputs"]["uv_lock"] != environment_payload["uv_lock_sha256"]
+        or environment["inputs"]["uv_lock"] != environment_payload["uv_lock_sha256"]
+        or pilot["inputs"]["uv_lock"] != environment_payload["uv_lock_sha256"]
+        or pilot["inputs"]["plan"] != pilot_payload["plan_sha256"]
+        or pilot["inputs"]["trial"] != pilot_payload["trial_sha256"]
+        or timing["inputs"]["trial"] != pilot_payload["trial_sha256"]
+        or validation["inputs"]["trial"] != pilot_payload["trial_sha256"]
+        or validation["inputs"]["ready"] != pilot_payload["ready_sha256"]
+        or pilot_payload["evaluations"] != pilot_payload["total_queries"]
+        or timing_payload["wall_seconds"] != projection_payload["pilot_wall_seconds"]
+        or validation_payload["valid"] is not True
+        or validation_payload["completed"] != validation_payload["expected"]
+        or validation_payload["pending"] != 0
+        or validation_payload["errors"] != []
+        or pilot_payload["config_sha256"] != calibration_payload["config_sha256"]
+    ):
+        raise ValueError("evidence documents are semantically inconsistent")
+    trial_count = projection_payload["trial_count"]
+    trial_hours = projection_payload["pilot_wall_seconds"] * trial_count / 3600
+    if (
+        projection_payload["projected_trial_hours"] != trial_hours
+        or projection_payload["projected_core_hours"]
+        != trial_hours * projection_payload["cpus_per_trial"]
+        or projection_payload["projected_storage_bytes"]
+        != projection_payload["pilot_artifact_bytes"] * trial_count
+        or projection_payload["pilot_artifact_bytes"]
+        != pilot_payload["artifact_bytes"]
+    ):
+        raise ValueError("projection arithmetic is inconsistent")
     return {**document_hashes, "index.json": _sha256(index_data)}
 
 
 def validate_deployment(
     root: str | Path,
     *,
+    archive_path: str | Path,
     expected_revision: str,
     expected_archive_sha256: str,
     expected_evidence_revision: str,
 ) -> None:
     directory = Path(root)
+    archive = Path(archive_path)
     deployment, _ = _read_canonical(directory / ".deployment.json")
     if set(deployment) != {
         "archive_name",
         "archive_sha256",
+        "evidence_index_sha256",
+        "report_sha256",
         "revision",
         "schema_version",
     } or deployment.get("schema_version") != 1:
@@ -200,15 +364,30 @@ def validate_deployment(
         not isinstance(archive_name, str)
         or not archive_name
         or Path(archive_name).name != archive_name
+        or archive.name != archive_name
+        or archive_name != f"challenge-113-{expected_revision[:7]}.tar.gz"
     ):
         raise ValueError("deployment archive name is invalid")
-    index, _ = _read_canonical(directory / "evidence" / "task10a" / "index.json")
+    if _sha256(archive.read_bytes()) != expected_archive_sha256:
+        raise ValueError("deployment archive bytes are stale")
+    evidence_directory = directory / "evidence" / "task10a"
+    hashes = validate_evidence_directory(evidence_directory)
+    index, index_data = _read_canonical(evidence_directory / "index.json")
     if index.get("source_revision") != expected_evidence_revision:
         raise ValueError("deployment evidence revision is stale")
+    if (
+        deployment.get("evidence_index_sha256") != hashes["index.json"]
+        or deployment.get("evidence_index_sha256") != _sha256(index_data)
+    ):
+        raise ValueError("deployment evidence binding is stale")
     report_metadata, _ = _read_canonical(
         directory / "evidence" / "task10a" / "report_metadata.json"
     )
     validate_evidence_document(report_metadata)
     expected_report = report_metadata["payload"]["report_sha256"]
-    if _sha256((directory / "REPORT.md").read_bytes()) != expected_report:
+    report_sha256 = _sha256((directory / "REPORT.md").read_bytes())
+    if (
+        report_sha256 != expected_report
+        or deployment.get("report_sha256") != report_sha256
+    ):
         raise ValueError("deployment report metadata is stale")

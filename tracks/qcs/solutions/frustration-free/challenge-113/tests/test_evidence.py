@@ -4,12 +4,14 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 
 import pytest
 
 from qcontrol.evidence import (
     REQUIRED_EVIDENCE_FILES,
     validate_deployment,
+    validate_evidence_document,
     validate_evidence_directory,
 )
 
@@ -74,34 +76,28 @@ def test_calibration_writer_creates_canonical_nested_output(tmp_path) -> None:
 
 
 def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
-    report = tmp_path / "REPORT.md"
-    report.write_text("measured report\n")
+    report = shutil.copy(ROOT / "REPORT.md", tmp_path / "REPORT.md")
     report_sha256 = hashlib.sha256(report.read_bytes()).hexdigest()
-    evidence_revision = "c" * 40
-    document = {
-        "evidence_type": "report_metadata",
-        "inputs": {"uv_lock": SHA256},
-        "payload": {"report_sha256": report_sha256},
-        "schema_version": 1,
-        "source_revision": evidence_revision,
-    }
-    document_sha256 = _write_json(
-        tmp_path / "evidence" / "task10a" / "report_metadata.json",
-        document,
+    evidence = shutil.copytree(
+        ROOT / "evidence" / "task10a",
+        tmp_path / "evidence" / "task10a",
     )
-    _write_json(
-        tmp_path / "evidence" / "task10a" / "index.json",
-        {
-            "documents": {"report_metadata.json": document_sha256},
-            "schema_version": 1,
-            "source_revision": evidence_revision,
-        },
-    )
+    evidence_revision = json.loads((evidence / "index.json").read_text())[
+        "source_revision"
+    ]
+    evidence_index_sha256 = hashlib.sha256(
+        (evidence / "index.json").read_bytes()
+    ).hexdigest()
+    archive = tmp_path / f"challenge-113-{REVISION[:7]}.tar.gz"
+    archive.write_bytes(b"exact archive bytes")
+    archive_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
     _write_json(
         tmp_path / ".deployment.json",
         {
-            "archive_name": "challenge-113.tar.gz",
-            "archive_sha256": SHA256,
+            "archive_name": archive.name,
+            "archive_sha256": archive_sha256,
+            "evidence_index_sha256": evidence_index_sha256,
+            "report_sha256": report_sha256,
             "revision": REVISION,
             "schema_version": 1,
         },
@@ -109,32 +105,59 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
 
     validate_deployment(
         tmp_path,
+        archive_path=archive,
         expected_revision=REVISION,
-        expected_archive_sha256=SHA256,
+        expected_archive_sha256=archive_sha256,
         expected_evidence_revision=evidence_revision,
     )
     with pytest.raises(ValueError, match="revision"):
         validate_deployment(
             tmp_path,
+            archive_path=archive,
             expected_revision="d" * 40,
-            expected_archive_sha256=SHA256,
+            expected_archive_sha256=archive_sha256,
             expected_evidence_revision=evidence_revision,
         )
     with pytest.raises(ValueError, match="archive"):
         validate_deployment(
             tmp_path,
+            archive_path=archive,
             expected_revision=REVISION,
             expected_archive_sha256="e" * 64,
             expected_evidence_revision=evidence_revision,
         )
+    archive.write_bytes(b"mutated archive bytes")
+    with pytest.raises(ValueError, match="archive bytes"):
+        validate_deployment(
+            tmp_path,
+            archive_path=archive,
+            expected_revision=REVISION,
+            expected_archive_sha256=archive_sha256,
+            expected_evidence_revision=evidence_revision,
+        )
+    archive.write_bytes(b"exact archive bytes")
     report.write_text("stale report\n")
     with pytest.raises(ValueError, match="report"):
         validate_deployment(
             tmp_path,
+            archive_path=archive,
             expected_revision=REVISION,
-            expected_archive_sha256=SHA256,
+            expected_archive_sha256=archive_sha256,
             expected_evidence_revision=evidence_revision,
         )
+
+
+def test_evidence_rejects_coerced_types_and_nonfinite_values() -> None:
+    calibration = json.loads(
+        (ROOT / "evidence" / "task10a" / "calibration.json").read_text()
+    )
+    calibration["payload"]["cpu_count"] = True
+    with pytest.raises(ValueError, match="JSON type"):
+        validate_evidence_document(calibration)
+    calibration["payload"]["cpu_count"] = 32
+    calibration["payload"]["warm_query_seconds"] = float("inf")
+    with pytest.raises(ValueError, match="finite"):
+        validate_evidence_document(calibration)
 
 
 @pytest.mark.parametrize(
@@ -146,4 +169,5 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
 
     assert "verify_deployment.py" in script
     assert "CHALLENGE113_ARCHIVE_SHA256" in script
+    assert "CHALLENGE113_ARCHIVE_PATH" in script
     assert "CHALLENGE113_EVIDENCE_REVISION" in script

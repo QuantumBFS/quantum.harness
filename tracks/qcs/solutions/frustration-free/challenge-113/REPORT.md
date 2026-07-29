@@ -1,100 +1,74 @@
-# Challenge 113 measured study report
+# Challenge 113 measured production-gate report
 
-## Scope and interpretation
+## Current status
 
-The experiment tests whether the leading model-Hessian subspace reduces
-closed-loop query and shot cost under a controlled model gap. The often quoted
-rank `d² − 1` is conditional: it is the regular, controllable pure-state
-landscape expectation, not an unconditional numerical identity. Results are
-therefore reported with rank-threshold sensitivity at `1e-6`, `1e-8`, and
-`1e-10`, signed eigenvalue gaps, principal angles, and restricted noiseless
-attainability.
+Production remains blocked and has not been submitted. The canonical 9,500
+paired trials all construct, including model-Hessian dimensions `k=24` for
+`d=2` and `k=20,30,80` for `d=4`. Dense landscapes retain a complete
+curvature-ordered orthonormal basis while effective Hessian ranks remain 3 and
+15 at the `1e-8` relative threshold. Matrix-free results expose only the
+columns actually computed.
 
-The finite-shot device in this repository is an abstract Bernoulli estimator.
-It is not randomized benchmarking and should not be interpreted as a hardware
-noise model. The official Colab requires an authenticated Google session, so
-the implementation is reconstructed from the challenge text and pinned author
-notebook rather than claimed as an exact export of that Colab.
+Model preparation uses canonical `model_seed=5`; `perturbation_seed` controls
+truth orientation and `trial_seed` controls search and measurement randomness.
+The seed-zero statistical pilot therefore shares the accepted canonical model
+without coupling statistical seeds to model acceptance.
 
-## Compute gate
+## Current measured gate
 
-The measured gate uses the representative two-qubit configuration with
-Hilbert-space dimension `d=4`, 20 segments, 80 pulse parameters, model-Hessian
-search dimension 4, model gap 0.05, exact observations, and budget 2,000. A
-bounded representative calibration records compilation-inclusive first query,
-warm throughput, exact-trajectory, restricted-optimization, geometry, peak RSS,
-CPU count, JAX platform, and x64 status. A full representative pilot must then
-pass strict artifact validation before the 9,500-trial array is eligible.
+Revision `dd16192953c130d738716238525760de73343e09` was rerun locally with the
+actual JAX CPU x64 runtime. The representative `d=4`, `p=80`, gap 0.05,
+model-Hessian `k=4`, exact-observation, budget-2,000 calibration measured:
 
-Cluster access was confirmed for the preferred CPU partition `xhacnormalb`
-under the authorized account/QOS. Production concurrency and projected
-core-hours/storage remain gated on the completed full pilot; no broad array is
-submitted from an unmeasured estimate.
+- compilation-inclusive first query: 0.217 s;
+- 19 warm queries: 0.0338 s (562 queries/s);
+- open-loop setup: 7.75 s; dense landscape: 5.81 s;
+- exact trajectory: 0.0340 s; geometry: 1.67 s;
+- restricted optimization: 0.430 s (8 evaluations);
+- peak RSS: 862,252 KiB; 32 logical CPUs; JAX CPU x64.
 
-The canonical seed-zero statistical calibration, with immutable
-`model_seed=5`, measured:
+The full representative pilot completed 881 exact queries and strict validation
+reported `valid=true`. Wall time was 21.91 s and peak RSS was 864,260 KiB.
+The compact evidence records the measured artifact size and an arithmetic,
+provisional 9,500-trial projection. No resource class or concurrency has been
+selected; those require Task 10C resource pilots.
 
-- first query, compilation-inclusive: 0.223 s;
-- 19 warm queries: 0.0326 s (583 queries/s);
-- open-loop setup: 7.94 s; landscape: 5.69 s;
-- exact trajectory: 0.0326 s; geometry: 1.44 s;
-- restricted optimization: 0.380 s (8 evaluations);
-- peak RSS: 853,924 KiB; 32 logical CPUs visible;
-- JAX CPU platform with x64 enabled.
+Historical preliminary measurements are superseded by this rerun and are kept
+only in Git history.
 
-The full seed-zero representative pilot completed 881 exact optimizer queries,
-strictly validated, in 20.22 s wall with 860,776 KiB peak RSS. Its canonical
-artifact store is 525,740 bytes. Direct scaling gives a provisional 53.4
-trial-hours, 427 core-hours if eight cores per trial were eventually selected,
-and 5.00 GB for 9,500 artifacts.
+## Remaining Task 10C blocker
 
-These figures are provisional single-trial estimates. Representative
-resource-class and concurrency pilots are pending Task 10C; no production
-resource class or concurrency is selected here.
+Both authorized clusters expose glibc 2.17, while frozen `jaxlib==0.11.0`
+requires `manylinux_2_27_x86_64`. Frozen sync therefore fails closed before
+Slurm submission. No older JAX, source build, container, or platform fallback
+has been substituted. The final candidate archive is local-only until an exact
+runtime-compatible cluster environment is approved.
 
-The exact locked environment cannot currently run on either authorized cluster:
-both expose glibc 2.17, while frozen `jaxlib==0.11.0` requires
-`manylinux_2_27_x86_64`. The preferred revision archive was transferred and its
-SHA256 verified, but frozen sync failed closed before any Slurm job was
-submitted. No older JAX, source build, container, or CPU/GPU fallback was
-silently substituted.
+## Interpretation and production claims
 
-## Development smoke
-
-The three-seed, budget-200 development sweep is written only to
-`results/development-task10a`. All 84 canonical trials completed and strict
-validation reported no errors. Wall time was 175.0 s, peak RSS was 926,300 KiB,
-and the artifact store occupied 1,710,921 bytes.
-
-Model preparation is now explicitly fixed at `model_seed=5` and cached by the
-physics system configuration. Statistical `trial_seed=0` no longer controls
-model optimization: the seed-zero full pilot passed strict validation. Truth
-orientation remains controlled by `perturbation_seed`; search and measurement
-randomness remain controlled by `trial_seed`.
-
-## Production findings
-
-The following claims remain intentionally unset until complete strict
-production validation: whether model-Hessian beats random dimensionality
-reduction, paired query and shot savings with 95% confidence intervals, the
-model-gap crossover, and the empirical failure case. Figures and claims are
-generated only from complete canonical artifacts; failed trials are retained.
+The rank `d²−1` is the regular controllable pure-state expectation, not an
+unconditional identity. Production comparisons, confidence intervals,
+model-gap crossover, and failure-case claims remain unset until the complete
+canonical artifacts pass strict validation. The finite-shot device is an
+abstract Bernoulli estimator, not a hardware noise model.
 
 ## Reproduction identity
 
-- Measured Task-10A source revision:
-  `f1f5ed17c576f63d23420a304bfd712af1ddf419`.
-- Frozen `uv.lock` SHA256:
-  `1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fcae6a277334e1614a35dc`.
-- Compact evidence schemas, source bindings, and artifact hashes:
-  `evidence/task10a/index.json`.
+- measured source revision: `dd16192953c130d738716238525760de73343e09`;
+- frozen `uv.lock` SHA256:
+  `1d16a82284cebf3ae050ee79bcba4f2c9166820cf5fcae6a277334e1614a35dc`;
+- canonical evidence index: `evidence/task10a/index.json`.
 
 ```bash
 uv sync --frozen --group dev
-uv run python -m pytest -q
-JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu \
-  uv run python scripts/calibrate_pilot.py --queries 20 \
-  --output results/task10a-f1f5ed1/calibration.raw.json
-uv run python run.py validate --output results/task10a-f1f5ed1/pilot
+JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu uv run python -m pytest -q
+JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu uv run python \
+  scripts/build_task10a_evidence.py \
+  --run-root results/task10a-dd16192 \
+  --time results/task10a-dd16192-pilot.time \
+  --validation results/task10a-dd16192-validation.json \
+  --output evidence/task10a \
+  --revision dd16192953c130d738716238525760de73343e09 \
+  --report REPORT.md
 uv run python -m pytest tests/test_evidence.py -q
 ```

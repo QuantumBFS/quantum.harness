@@ -4,6 +4,7 @@ set -euo pipefail
 : "${CHALLENGE113_ACK_PRODUCTION:?set CHALLENGE113_ACK_PRODUCTION=1}"
 test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_EXPECTED_REVISION:?set the deployed canonical git revision}"
+: "${CHALLENGE113_ARCHIVE_PATH:?set the immutable deployment archive path}"
 : "${CHALLENGE113_ARCHIVE_SHA256:?set the deployed archive SHA256}"
 : "${CHALLENGE113_EVIDENCE_REVISION:?set the measured evidence revision}"
 
@@ -32,6 +33,7 @@ esac
 uv sync --frozen --group dev
 uv run python scripts/verify_deployment.py \
   --root "${ROOT}" \
+  --archive "${CHALLENGE113_ARCHIVE_PATH}" \
   --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
   --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
