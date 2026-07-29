@@ -70,7 +70,7 @@ git branch = work/zibojin/tensor-square-phase-diagram
 | 2026-07-29 | `stage1-ed-m4` | `m=4,N=8` | C4 交替通道重现 gap 谷与通道换序 | `t=1`: gap `1.034→0.507→1.957`；局部 commutator² `O(1e-2)` | 信号不只属于 9 模式种子 | DQMC 验证 `t=1,g_B/g_A=1` |
 | 2026-07-29 | `stage2-dqmc-ed-m3` | `m=3,β=2` | 三个 Trotter 步长的热力学量均与有限温 ED 相容 | 最坏 `|z|=1.47`；direct sign 全为 `+1` | 连续高斯 HS、Wick 观测量和 checkpoint/resume 路径通过交叉验证 | 启动 `m=4,6,8` 粗扫 |
 | 2026-07-29 | `stage2-dqmc-ed-m4` | `m=4,β=4,8` | 降温后 E 与 combined-Q² 向 ED 基态值收敛 | β=8: `E=-17.879(122)`，`Q²=1.2348(124)` | 稳定化低温 DQMC 可用于 β=8 粗扫 | 粗扫中 β≥4 使用稳定化长乘积 |
-| 2026-07-29 | `stage3-coarse-half-filled-ridge` | `m=4,6,8`，`μ=0` | `g_B/g_A=0.25–0.5, t/g_A=0.25–0.5` 出现一致的尺寸/降温增强 | `m=8` 的 β8−β2 combined-Q² 增量 `0.296–0.519`（`5.26–8.75σ`）；m4→m8 增量 `1.18–1.25` | 首个稳健正面候选带；仍是短链筛选，不是相声明 | 加长 `(g,t)≈(0.25–1,0.25–1)` 半填充网格并做 susceptibility/Binder |
+| 2026-07-29 | `stage3-coarse-half-filled-ridge` | `m=4,6,8`，`μ=0` | `g_B/g_A=0.25–0.5, t/g_A=0.25–0.5` 出现一致的尺寸/降温增强 | `m=8` 的 β8−β2 combined-Q² 增量 `0.296–0.519`（`5.26–10.81σ`）；m4→m8 增量 `1.18–1.25` | 首个稳健正面候选带；仍是短链筛选，不是相声明 | 加长 `(g,t)≈(0.25–1,0.25–1)` 半填充网格并做 susceptibility/Binder |
 | 2026-07-29 | `stage3-coarse-channel-reordering` | `g_B/g_A≈1`，三个填充 | channel balance 在竞争区跨越零并与 ED 的 `g_B/g_A≈1` gap 谷相接 | 14 个 SURVIVE 中 8 个含 reordering 标记；代表点 `(g,t,μ)=(1,1,-1.5)` 同时有 β8−β2 `0.135`（`11.6σ`） | 次级候选：可能是竞争/混合响应，也可能受短链自相关影响 | 对 `μ=±1.5` 成对复测，排查粒子-空穴非对称的统计来源 |
 
 | Date | Experiment | Stop reason | Minimum evidence | Avoid repeating |
