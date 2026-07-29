@@ -102,6 +102,11 @@ struct FiniteBathParameters
     U::Float64
     epsilon_d::Float64
     mu::Float64
+    bath_representation::Symbol
+    chain_onsite::Vector{Float64}
+    chain_hopping::Vector{Float64}
+    lambda::Float64
+    mapping_sha256::Union{Nothing,String}
 end
 
 struct PurificationResult{SiteVector, Diagnostics}
@@ -209,7 +214,77 @@ function FiniteBathParameters(
     impurity_energy = _finite_real(epsilon_d, "epsilon_d")
     chemical_potential = _finite_real(mu, "mu")
     return FiniteBathParameters(
-        energies, couplings, interaction, impurity_energy, chemical_potential
+        energies,
+        couplings,
+        interaction,
+        impurity_energy,
+        chemical_potential,
+        :direct_star,
+        copy(energies),
+        zeros(max(0, length(energies) - 1)),
+        sqrt(sum(abs2, couplings)),
+        nothing,
+    )
+end
+
+function FiniteBathParameters(
+    bath_representation::Symbol;
+    epsilon,
+    V,
+    chain_onsite,
+    chain_hopping,
+    lambda,
+    mapping_sha256,
+    U = 0.8,
+    epsilon_d = -Float64(U) / 2,
+    mu = 0.0,
+)
+    bath_representation === :chain ||
+        throw(ArgumentError("bath_representation must be :chain"))
+    energies = _finite_vector(epsilon, "epsilon")
+    isempty(energies) &&
+        throw(ArgumentError("chain epsilon must contain at least one orbital"))
+    couplings = _finite_vector(V, "V"; nonnegative = true)
+    onsite = _finite_vector(chain_onsite, "chain_onsite")
+    hopping =
+        _finite_vector(chain_hopping, "chain_hopping"; nonnegative = true)
+    hybridization = _finite_real(lambda, "lambda")
+    hybridization >= 0 ||
+        throw(ArgumentError("lambda must be nonnegative"))
+    length(couplings) == length(energies) ||
+        throw(ArgumentError("V length must equal epsilon length"))
+    length(onsite) == length(energies) ||
+        throw(ArgumentError("chain_onsite length must equal epsilon length"))
+    length(hopping) == max(0, length(energies) - 1) ||
+        throw(
+            ArgumentError(
+                "chain_hopping length must equal epsilon length minus one"
+            ),
+        )
+    expected_couplings = [hybridization; zeros(length(couplings) - 1)]
+    couplings == expected_couplings ||
+        throw(
+            ArgumentError(
+                "chain V must equal [lambda; zeros(length(V) - 1)]"
+            ),
+        )
+    mapping_sha256 isa AbstractString ||
+        throw(ArgumentError("mapping_sha256 must be a string"))
+    interaction = _finite_real(U, "U")
+    interaction >= 0 || throw(ArgumentError("U must be nonnegative"))
+    impurity_energy = _finite_real(epsilon_d, "epsilon_d")
+    chemical_potential = _finite_real(mu, "mu")
+    return FiniteBathParameters(
+        energies,
+        couplings,
+        interaction,
+        impurity_energy,
+        chemical_potential,
+        :chain,
+        onsite,
+        hopping,
+        hybridization,
+        String(mapping_sha256),
     )
 end
 
@@ -314,22 +389,53 @@ function physical_hamiltonian_mpo(
     terms += parameters.U, "Nupdn", impurity
     for bath in eachindex(parameters.epsilon)
         bath_site = 2 * bath + 1
-        terms +=
-            parameters.epsilon[bath] - parameters.mu, "Ntot", bath_site
+        onsite =
+            parameters.bath_representation === :chain ?
+            parameters.chain_onsite[bath] : parameters.epsilon[bath]
+        terms += onsite - parameters.mu, "Ntot", bath_site
+    end
+    if parameters.bath_representation === :direct_star
+        for bath in eachindex(parameters.V), spin in ("up", "dn")
+            bath_site = 2 * bath + 1
+            terms += parameters.V[bath], "Cdag$spin", impurity, "C$spin", bath_site
+            terms += parameters.V[bath], "Cdag$spin", bath_site, "C$spin", impurity
+        end
+    elseif parameters.bath_representation === :chain
+        first_chain_site = 3
         for spin in ("up", "dn")
             terms +=
-                parameters.V[bath],
+                parameters.lambda,
                 "Cdag$spin",
                 impurity,
                 "C$spin",
-                bath_site
+                first_chain_site
             terms +=
-                parameters.V[bath],
+                parameters.lambda,
                 "Cdag$spin",
-                bath_site,
+                first_chain_site,
                 "C$spin",
                 impurity
         end
+        for link in eachindex(parameters.chain_hopping)
+            left_site = 2 * link + 1
+            right_site = left_site + 2
+            for spin in ("up", "dn")
+                terms +=
+                    parameters.chain_hopping[link],
+                    "Cdag$spin",
+                    left_site,
+                    "C$spin",
+                    right_site
+                terms +=
+                    parameters.chain_hopping[link],
+                    "Cdag$spin",
+                    right_site,
+                    "C$spin",
+                    left_site
+            end
+        end
+    else
+        error("unsupported bath representation")
     end
     return MPO(terms, sites)
 end
@@ -399,13 +505,21 @@ operator norm. Each hopping monomial is bounded separately.
 function _hamiltonian_norm_bound(parameters::FiniteBathParameters)
     bound =
         2 * abs(parameters.epsilon_d - parameters.mu) + parameters.U
-    for bath in eachindex(parameters.epsilon)
+    onsite =
+        parameters.bath_representation === :chain ?
+        parameters.chain_onsite : parameters.epsilon
+    hopping =
+        parameters.bath_representation === :chain ?
+        [parameters.lambda; parameters.chain_hopping] : parameters.V
+    for energy in onsite
         bound +=
-            2 * abs(parameters.epsilon[bath] - parameters.mu) +
-            4 * parameters.V[bath]
+            2 * abs(energy - parameters.mu)
         isfinite(bound) ||
             throw(ArgumentError("Hamiltonian norm bound must be finite"))
     end
+    bound += 4 * sum(hopping)
+    isfinite(bound) ||
+        throw(ArgumentError("Hamiltonian norm bound must be finite"))
     return bound
 end
 
