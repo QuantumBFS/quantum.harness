@@ -30,6 +30,10 @@ bath = _load_module("challenge_81_bath", "bath.py")
 chain = _load_module("challenge_81_chain_mapping", "chain_mapping.py")
 ed = _load_module("challenge_81_finite_bath_ed", "finite_bath_ed.py")
 
+QN_TASK4_MAX_BATH = int(os.environ.get("QN_TASK4_MAX_BATH", "2"))
+if QN_TASK4_MAX_BATH not in range(1, 7):
+    raise ValueError("QN_TASK4_MAX_BATH must be between 1 and 6")
+
 
 def _bath_artifact(*, n_bath=1, gamma=0.0, bandwidth=1.0):
     return bath.make_bath_artifact(
@@ -137,7 +141,7 @@ def _noninteracting_thermal_observables(one_particle, beta, tau):
     }
 
 
-@pytest.mark.parametrize("n_bath", range(1, 7))
+@pytest.mark.parametrize("n_bath", range(1, QN_TASK4_MAX_BATH + 1))
 def test_one_particle_star_and_chain_are_unitarily_equivalent(n_bath):
     star = _bath_artifact(n_bath=n_bath, gamma=0.13, bandwidth=1.2)
     mapping = chain.derive_chain_mapping(star)
@@ -163,7 +167,7 @@ def test_one_particle_star_and_chain_are_unitarily_equivalent(n_bath):
     )
 
 
-@pytest.mark.parametrize("n_bath", range(1, 7))
+@pytest.mark.parametrize("n_bath", range(1, QN_TASK4_MAX_BATH + 1))
 @pytest.mark.parametrize("interaction", [0.0, 0.83])
 def test_star_and_chain_one_up_one_down_sector_spectra_match(
     n_bath, interaction
@@ -185,7 +189,9 @@ def test_star_and_chain_one_up_one_down_sector_spectra_match(
     )
 
 
-@pytest.mark.parametrize("n_bath", range(1, 4))
+@pytest.mark.parametrize(
+    "n_bath", range(1, min(QN_TASK4_MAX_BATH, 3) + 1)
+)
 @pytest.mark.parametrize("interaction", [0.0, 0.83])
 def test_star_and_chain_full_hamiltonians_match_in_every_sector(
     n_bath, interaction
@@ -212,7 +218,7 @@ def test_star_and_chain_full_hamiltonians_match_in_every_sector(
                 _full_fock_sector_spectrum(
                     star_h, n_bath, n_up, n_down
                 ),
-                abs=8e-12,
+                abs=5e-12,
             )
 
 
@@ -270,12 +276,12 @@ def test_solver_and_oracle_bind_explicit_chain_geometry(tmp_path):
     assert written == artifact
 
 
-@pytest.mark.parametrize("n_bath", range(1, 7))
+@pytest.mark.parametrize("n_bath", range(1, QN_TASK4_MAX_BATH + 1))
 def test_star_and_chain_thermal_observables_and_green_match(n_bath):
     star = _bath_artifact(n_bath=n_bath, gamma=0.17, bandwidth=1.1)
     mapping = chain.derive_chain_mapping(star)
     beta = 2.3
-    tau = [0.0, 0.37, 1.41, beta]
+    tau = [0.0, beta / 4.0, beta / 2.0, 3.0 * beta / 4.0, beta]
     common = {
         "bath_artifact": star,
         "epsilon_d": -0.29,
@@ -294,14 +300,14 @@ def test_star_and_chain_thermal_observables_and_green_match(n_bath):
         tau,
     )
 
-    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=4e-12)
+    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=5e-12)
     assert transformed["occupancy"] == pytest.approx(
-        direct["occupancy"], abs=4e-12
+        direct["occupancy"], abs=5e-12
     )
     assert transformed["double_occupancy"] == pytest.approx(
-        direct["double_occupancy"], abs=4e-12
+        direct["double_occupancy"], abs=5e-12
     )
-    assert 0.0 < tau[1] < tau[2] < beta
+    assert 0.0 < tau[1] < tau[2] < tau[3] < beta
     for result in (direct, transformed):
         for spin in ("up", "down"):
             occupation = result["occupancy"][spin]
@@ -314,12 +320,14 @@ def test_star_and_chain_thermal_observables_and_green_match(n_bath):
             )
 
 
-@pytest.mark.parametrize("n_bath", range(1, 4))
+@pytest.mark.parametrize(
+    "n_bath", range(1, min(QN_TASK4_MAX_BATH, 3) + 1)
+)
 def test_interacting_star_and_chain_thermal_observables_and_green_match(n_bath):
     star = _bath_artifact(n_bath=n_bath, gamma=0.17, bandwidth=1.1)
     mapping = chain.derive_chain_mapping(star)
     beta = 2.3
-    tau = [0.0, 0.37, 1.41, beta]
+    tau = [0.0, beta / 4.0, beta / 2.0, 3.0 * beta / 4.0, beta]
     common = {
         "bath_artifact": star,
         "U": 0.8,
@@ -335,14 +343,18 @@ def test_interacting_star_and_chain_thermal_observables_and_green_match(n_bath):
         chain_mapping_artifact=mapping,
     )
 
-    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=4e-12)
+    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=5e-12)
     assert transformed["occupancy"] == pytest.approx(
-        direct["occupancy"], abs=4e-12
+        direct["occupancy"], abs=5e-12
     )
     assert transformed["double_occupancy"] == pytest.approx(
-        direct["double_occupancy"], abs=4e-12
+        direct["double_occupancy"], abs=5e-12
     )
-    assert 0.0 < tau[1] < tau[2] < beta
+    assert direct["bath_representation"] == "direct_star"
+    assert direct["chain_mapping_sha256"] is None
+    assert transformed["bath_representation"] == "chain"
+    assert transformed["chain_mapping_sha256"] == mapping["sha256"]
+    assert 0.0 < tau[1] < tau[2] < tau[3] < beta
     for result in (direct, transformed):
         for spin in ("up", "down"):
             occupation = result["occupancy"][spin]

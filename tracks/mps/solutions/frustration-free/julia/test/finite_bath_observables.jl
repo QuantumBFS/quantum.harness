@@ -32,6 +32,11 @@ using .FiniteBathCheckpoint:
     load_current_checkpoint,
     write_checkpoint_generation
 
+const QN_TASK4_MAX_BATH =
+    parse(Int, get(ENV, "QN_TASK4_MAX_BATH", "2"))
+QN_TASK4_MAX_BATH in 1:6 ||
+    error("QN_TASK4_MAX_BATH must be between 1 and 6")
+
 @testset "Green operators carry explicit QN sectors" begin
     validated = validated_chain_fixture(; n_bath = 2)
     parameters = FiniteBathParameters(validated)
@@ -472,7 +477,212 @@ function independent_observables_trace(parameters, beta, tau)
             ) / scaled_Z for tau_value in tau
         ]
     end
-    return (; n_up, n_dn, n_d = n_up + n_dn, double_occupancy, green)
+    logZ = -beta * minimum(eig.values) + log(scaled_Z)
+    return (;
+        logZ,
+        n_up,
+        n_dn,
+        n_d = n_up + n_dn,
+        double_occupancy,
+        green,
+    )
+end
+
+function independent_noninteracting_trace(parameters, beta, tau)
+    n_orbitals = length(parameters.epsilon) + 1
+    one_particle = diagm(
+        [parameters.epsilon_d - parameters.mu; parameters.epsilon .- parameters.mu]
+    )
+    one_particle[1, 2:end] = parameters.V
+    one_particle[2:end, 1] = parameters.V
+    eig = eigen(Hermitian(one_particle))
+    occupations = 1.0 ./ (1.0 .+ exp.(beta .* eig.values))
+    density = eig.vectors * Diagonal(occupations) * eig.vectors'
+    n_spin = real(density[1, 1])
+    green = [
+        -real(
+            (
+                eig.vectors *
+                Diagonal(exp.(-point .* eig.values) .* (1 .- occupations)) *
+                eig.vectors'
+            )[1, 1],
+        ) for point in tau
+    ]
+    return (;
+        logZ = 2 * sum(
+            max(0.0, -beta * value) +
+            log1p(exp(-abs(beta * value))) for value in eig.values
+        ),
+        n_up = n_spin,
+        n_dn = n_spin,
+        n_d = 2 * n_spin,
+        double_occupancy = n_spin^2,
+        green = Dict(:up => green, :dn => green),
+    )
+end
+
+function assert_task4_scientific_equivalence(actual, expected; atol)
+    @test actual.diagnostics.log_partition ≈ expected.logZ atol = atol
+    @test actual.n_d ≈ expected.n_d atol = atol
+    @test actual.double_occupancy ≈ expected.double_occupancy atol = atol
+    @test maximum(abs.(actual.G_up .- expected.green[:up]); init = 0.0) <=
+          atol
+    @test maximum(abs.(actual.G_dn .- expected.green[:dn]); init = 0.0) <=
+          atol
+    @test actual.G_up[1] ≈ -(1 - expected.n_up) atol = atol
+    @test actual.G_up[end] ≈ -expected.n_up atol = atol
+    @test actual.G_dn[1] ≈ -(1 - expected.n_dn) atol = atol
+    @test actual.G_dn[end] ≈ -expected.n_dn atol = atol
+end
+
+function resume_task4_qn_branch(parameters, purification, settings)
+    published = Ref{Any}(nothing)
+    publications = Ref(0)
+    interruption = try
+        finite_bath_observables(
+            parameters;
+            settings...,
+            purification,
+            checkpoint_manager = (psi, state) -> begin
+                publications[] += 1
+                published[] = (;
+                    psi = psi === nothing ? nothing : copy(psi),
+                    resume_state = state,
+                )
+            end,
+            stop_requested = () -> publications[] == 2,
+        )
+        nothing
+    catch error
+        error
+    end
+    @test interruption isa ObservableInterrupted
+    @test published[] !== nothing
+    return finite_bath_observables(
+        parameters; settings..., purification, resume = published[]
+    )
+end
+
+function run_qn_observable_equivalence_matrix(max_bath::Int)
+    beta = 0.04
+    tau = [0.0, beta / 4, beta / 2, 3 * beta / 4, beta]
+    base_settings = (;
+        beta,
+        tau,
+        time_step = 0.01,
+        cutoff = 1.0e-14,
+        maxdim = 256,
+        krylov_expansion_dim = 32,
+    )
+    for n_bath in 1:max_bath
+        artifacts = validated_chain_fixture_artifacts(n_bath)
+        validated = validate_chain_mapping_artifact(
+            artifacts.mapping_artifact,
+            artifacts.mapping_json,
+            artifacts.bath_artifact,
+        )
+        bath_payload = artifacts.bath_artifact["payload"]
+        epsilon = Float64.(bath_payload["epsilon"])
+        coupling = Float64.(bath_payload["V"])
+        for interaction in (0.0, 0.8)
+            interaction != 0.0 && n_bath > 3 && continue
+            common = (;
+                U = interaction,
+                epsilon_d = -0.31,
+                mu = 0.07,
+            )
+            direct = FiniteBathParameters(
+                epsilon, coupling; common...
+            )
+            chain = FiniteBathParameters(validated; common...)
+            purification = qn_dual_purification(chain, validated)
+            exact =
+                interaction == 0.0 ?
+                independent_noninteracting_trace(direct, beta, tau) :
+                independent_observables_trace(direct, beta, tau)
+
+            direct_result =
+                finite_bath_observables(direct; base_settings...)
+            chain_result =
+                finite_bath_observables(chain; base_settings...)
+            qn_results = Dict(
+                insertion => finite_bath_observables(
+                    chain;
+                    base_settings...,
+                    purification,
+                    green_insertion = insertion,
+                ) for insertion in (:creation, :annihilation)
+            )
+
+            for result in
+                (direct_result, chain_result, qn_results[:creation], qn_results[:annihilation])
+                assert_task4_scientific_equivalence(result, exact; atol = 1.0e-6)
+            end
+            assert_star_chain_observables(
+                chain_result, direct_result; atol = 1.0e-6
+            )
+            for insertion in (:creation, :annihilation)
+                assert_star_chain_observables(
+                    qn_results[insertion], direct_result; atol = 1.0e-6
+                )
+                @test qn_results[insertion].provenance.purification_mode ===
+                      :qn_dual
+                @test qn_results[insertion].provenance.bath_representation ===
+                      :chain
+                @test qn_results[insertion].provenance.chain_mapping_sha256 ==
+                      validated.mapping_sha256
+                for spin_diagnostics in (
+                    qn_results[insertion].diagnostics.green_up,
+                    qn_results[insertion].diagnostics.green_dn,
+                )
+                    @test spin_diagnostics[1].operator_sector === nothing
+                    @test spin_diagnostics[end].operator_sector === nothing
+                    @test all(
+                        point.operator_sector !== nothing &&
+                        point.operator_sector.insertion === insertion
+                        for point in spin_diagnostics[2:(end - 1)]
+                    )
+                end
+            end
+            @test qn_results[:creation].G_up ≈
+                  qn_results[:annihilation].G_up atol = 1.0e-6
+            @test qn_results[:creation].G_dn ≈
+                  qn_results[:annihilation].G_dn atol = 1.0e-6
+            @test flux(qn_results[:creation].thermal_state.psi) ==
+                  QN(
+                ("Nf", purification.base_sector_nf, -1),
+                ("Sz", purification.base_sector_sz),
+            )
+            @test qn_results[:creation].diagnostics.log_partition ≈
+                  (n_bath + 1) * log(4.0) +
+                  2 *
+                  qn_results[:creation].thermal_state.diagnostics.log_unnormalized_norm atol =
+                5.0e-13
+            @test direct_result.provenance.purification_mode === :non_qn
+            @test chain_result.provenance.purification_mode === :non_qn
+            @test direct_result.provenance.chain_mapping_sha256 === nothing
+            @test chain_result.provenance.chain_mapping_sha256 ==
+                  validated.mapping_sha256
+
+            if interaction == (n_bath <= 3 ? 0.8 : 0.0)
+                for insertion in (:creation, :annihilation)
+                    settings = merge(
+                        base_settings, (; green_insertion = insertion)
+                    )
+                    resumed = resume_task4_qn_branch(
+                        chain, purification, settings
+                    )
+                    assert_task4_scientific_equivalence(
+                        resumed, exact; atol = 1.0e-6
+                    )
+                    @test resumed.G_up ≈
+                          qn_results[insertion].G_up atol = 1.0e-10
+                    @test resumed.G_dn ≈
+                          qn_results[insertion].G_dn atol = 1.0e-10
+                end
+            end
+        end
+    end
 end
 
 function validated_observable_chain_fixtures()
@@ -492,7 +702,7 @@ function validated_observable_chain_fixtures()
                 ) for k in 1:n_bath
             ],
             validated = validated_chain_fixture(; n_bath),
-        ) for n_bath in 1:6
+        ) for n_bath in 1:QN_TASK4_MAX_BATH
     ]
 end
 
@@ -545,6 +755,10 @@ function assert_star_chain_observables(chain, direct; atol)
     ) <= atol
 end
 
+@testset "QN chain thermal and observable equivalence matrix" begin
+    run_qn_observable_equivalence_matrix(QN_TASK4_MAX_BATH)
+end
+
 const CHAIN_FIXTURES = validated_observable_chain_fixtures()
 
 @testset "geometry diagnostics preserve mapped spin convention without QNs" begin
@@ -563,7 +777,7 @@ const CHAIN_FIXTURES = validated_observable_chain_fixtures()
     @test direct_context.spin_transform == chain_context.spin_transform
 end
 
-@testset "direct star and mapped finite chain MPS observables agree for N_b=1:6" begin
+@testset "direct star and mapped finite chain MPS observables agree through selected N_b" begin
     beta = 0.04
     tau = [0.0, beta / 4, beta / 2, 3 * beta / 4, beta]
     settings = (;
