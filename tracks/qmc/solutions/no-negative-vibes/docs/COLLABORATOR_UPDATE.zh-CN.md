@@ -2,6 +2,38 @@
 
 更新时间：2026-07-29
 
+## 7 月 29 日后续更新
+
+ZiboJin 的两条独立分支出现实质进展：
+
+- `representation-cones@838f428`：symmetric-oddcycle continuum 已有任意深度严格
+  theorem 和五模相互作用 transfer；但完整共同度量
+  `R=2ww^T/83-I`、`w=(4,4,1,-5,5)^T` 又证明整个
+  `z in [0.99,1.01]` alphabet 属于已知 signature `(1,4)`
+  Wei indefinite-metric contraction semigroup。因此数学和模型结果保留，新机制判断关闭。
+- seeds `117/132/147` 分别完成全部 depth-27 words（每个 `268,435,454` 个）和
+  448 个长度 60–1800 对抗词，仍没有任意深度定理。
+- `(p,q,r)` 的 2,744 点扫描有 15 个 exterior-certificate 幸存者，但这 15 点连同
+  transpose 的联合 alphabet 仍共享严格 metric，没有该网格内单点或联合新颖性幸存者。
+- 网格外远距离 pair `{p=0.3,p=2.5}`（`q=r=1`，含转置）则不同：每个点单独有
+  metric，联合没有数值严格共同底层 metric；全部 22,369,620 个 depth<=12 words 和
+  十万条 depth<=40 随机词均严格正。现有 coupled exterior tail 到 depth 12 仍未进入
+  theorem gate，所以这是有限深度候选，不是新机制结论。
+- `tensor-square-phase-diagram@efb2e18`：`m=3,4` 的 DQMC/ED 首轮交叉验证完成；
+  低温 SVD 稳定化修复伪负号。`m=3` gap valley 是值得扩尺寸的信号，不是新相。
+
+独立回归：我方总集成 `370 passed`；ZiboJin exterior 分支忽略旧的未实现
+`test_overlap_klein.py` 后 `499 passed, 2 skipped`，两个 skip 都因缺可选 `cvxpy`；
+显式 common metric、22,369,620 个 joint words 和冻结的十万条随机词已另行独立重放；
+tensor-square phase 分支 `13 passed`。
+
+分工更新：tensor-square 相图、所有 untyped oddcycle joint alphabets、block exterior
+metric 和 coupled-tail certificate 由 ZiboJin 推进；籼至下一轮只做类型本质不可删除的
+typed exterior category 与真实 pairing Pfaffian/Spin 搜索，避免重复。
+
+> 下文从“7 月 29 日最新收缩”开始保留本日较早的阶段快照和历史数字，便于审计；
+> 若与上面的后续更新冲突，以上面的 `838f428` 状态和当前分工为准。
+
 ## 7 月 29 日最新收缩
 
 首批非常规模型的三个优先候选已完成解析排重：
@@ -19,7 +51,7 @@
 partner，所以该路线只作方法校准。总集成分支完整回归当前为 `370 passed`。详见
 [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
-## 一句话状态
+## 一句话状态（较早阶段快照）
 
 我们已经累计检查 4,044,000 个主权重，另做 640 条宇称分辨 Majorana 历史；每条历史
 分别计算 even、odd 和完整 Fock 迹。我们已完成经典群、标准 Hermitian AZ、Majorana 双锥、
@@ -63,7 +95,7 @@ Majorana 宇称分辨 period-4 数值猜想。
    - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
 4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现、精确非对称键门
    分解、graded-monomial 的 Majorana 包含证书、block-TN 局域闭包精确反例和最新三个
-   候选审计证书；358 个自动测试全通过。
+   候选审计证书；当前总集成 370 个自动测试全通过。
 
 ## 当前最重要的结果
 

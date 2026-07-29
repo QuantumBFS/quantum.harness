@@ -17,17 +17,25 @@
 - graded monomial 已约化到已知 Majorana 正性，odd block-TN 的自然局域化有精确负权；
 - tensor-square 四模式模型约化到 split `O(2,2)`，一般提升有条带非局域障碍；
 - 第一版 gauge/cocycle 能精确消号，但会形成随系统增长的 Wilson string；
-- ZiboJin 的独立 exterior-cone 分支已完成 R01 fixed-transform exact no-go、
-  seed61 长度 150 精确负例，以及 oddcycle seeds `117/132/147` 的完整 depth-23
-  穷举和 304 个长度 60–150 精确对抗重放；后三者仍缺任意深度证明；
-- 当前主线改为放开局域/Hermitian 限制，从已有严格正性类反推长程、多体、全局约束、
-  Wilson-string 和准 Hermitian 非常规模型。
+- ZiboJin 的独立 exterior-cone 分支把 oddcycle seeds `117/132/147` 分别精确推进到
+  全部 depth-27 words，并完成 448 个长度 60–1800 的对抗重放；它们仍是有限深度候选；
+- 另一套 symmetric-oddcycle 连续字母表已经有任意深度严格定理和五模相互作用
+  transfer，但最新 exact common-metric 证书又把整个区间归入已知
+  Wei 不定度量收缩半群（signature `(1,4)`），所以它是完整的已知类实例，不是新机制；
+- ZiboJin 随后找到一个新的 **untyped joint-alphabet 有限深度候选**：
+  `{p=0.3,p=2.5}`（`q=r=1`，含各自转置）。每个点单独有严格 metric，但联合 alphabet
+  没有数值严格共同底层 metric；全部 22,369,620 个 depth<=12 非空 words 和十万条
+  depth<=40 随机词都严格正。它还缺任意深度 tail certificate，不能称新机制；
 - 第一批已经得到一个通用 Hermitian 半群模型工厂和八种严格/精确可约化模型；
   后续排查已把 adjoint lift 归入已知 split-orthogonal 类，并证明 grade-charge
   full trace 只是静态 ancilla 扇区直和。
-- 当前有两条贡献归属独立的活跃候选线：籼至方向的 `m>=3` tensor-square 多通道
-  Hamiltonian，以及 ZiboJin 方向的 oddcycle exterior seeds `117/132/147`。
-  前者还缺 Majorana/Pfaffian 和物理排重，后者还缺任意深度 determinant 定理。
+- Tensor-square 的 `m=3` 已从 ED 异常推进到 DQMC/ED 定量交叉验证：三种 Trotter
+  步长下能量、密度和通道涨落均在 `1.5 sigma` 内一致，低温伪负号也已由 SVD
+  稳定化修复；这证明工具可用于相图扫描，但还没有发现新相。该相图线由 ZiboJin
+  的独立分支推进。
+- 籼至下一轮不重复 oddcycle 单字母表或 tensor-square 相图，而搜索真正多状态的
+  typed exterior 正锥范畴，以及含真实 pairing 的 Pfaffian/Spin 正性；完整共同度量
+  排重放在第一道门。types 必须本质不可删除，避免与上述 untyped joint alphabet 重合。
 - 单向 Stark 链的 Hermitian partner 不唯一：同一非厄米链既可对应对角模型，也可经
   任意 unitary 换基写成长程模型，所以它只保留为方法校准。
 - **确认的新无符号物理类仍为零。** 完整结论与贡献归属见
@@ -100,8 +108,10 @@
   independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
-- 当前总集成分支完整自动测试为 `370 passed`。ZiboJin 的草稿 PR #3 除一个尚未实现的
-  R01 classifier 测试模块外为 `471 passed`，因此仍保持 draft。
+- 当前总集成分支完整自动测试为 `370 passed`。ZiboJin 的
+  `representation-cones@838f428` 忽略一个旧的未实现 R01 classifier 测试模块后为
+  `499 passed, 2 skipped`；两个 skip 都因未安装可选 `cvxpy`。Tensor-square phase
+  分支 `efb2e18` 为 `13 passed`。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
@@ -184,7 +194,7 @@ cd /home/volper/harness_quantum/signfree-qmc
 
 ## 下一步
 
-外围宽扫和第一批激进结构筛选已完成，不需要重复。现在做三件事：
+外围宽扫和第一批激进结构筛选已完成，不需要重复。现在按以下收尾和开工顺序推进：
 
 1. graded monomial、odd block-TN 和 R01 fixed Klein-Hodge 都转为已知类或
    exact no-go 回归，不再作为新物理主线；
@@ -196,9 +206,12 @@ cd /home/volper/harness_quantum/signfree-qmc
    Wilson string；该对象现在作为允许的非常规模型来源，而不是立即淘汰；
 5. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 6. 非常规模型第一批和三个候选的首轮排重已经完成：adjoint lift 归入已知 split 类，
-   grade-charge 降为静态扇区直和；下一步只集中排查 `m>=3` tensor-square 多通道
-   Hamiltonian，并在幸存后接入实际 vertex-word 采样。统一结论见
-   [三个候选的排查结果](docs/THREE_CANDIDATE_AUDIT_RESULTS.md)。
+   grade-charge 降为静态扇区直和；tensor-square 的 ED/DQMC 相图线由 ZiboJin
+   继续推进，本分支不做重复扫描。
+7. 下一轮先搜索 typed exterior 正锥范畴，再以小预算并行搜索含真实 pairing 的
+   Pfaffian/Spin 正性；单 alphabet exterior metric、`B(p,q,r)` 和 tensor-square
+   都只作已知控制。设计见
+   [新搜索规格](../../../../docs/superpowers/specs/2026-07-29-exterior-positive-category-search-design.md)。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
 后者已明确约化到 Majorana reflection positivity。后续候选必须同时通过数学证明、
