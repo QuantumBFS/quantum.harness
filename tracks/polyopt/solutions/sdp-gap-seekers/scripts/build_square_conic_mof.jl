@@ -79,8 +79,8 @@ function parse_args(args::Vector{String})
         end
     end
     isnothing(basis) && throw(ArgumentError("--basis is required"))
-    basis in ("bare_weight_one", "one_symbol_lift") ||
-        throw(ArgumentError("--basis must be bare_weight_one or one_symbol_lift"))
+    basis in ("bare_weight_one", "one_symbol_lift", "bare_operator") ||
+        throw(ArgumentError("--basis must be bare_weight_one, one_symbol_lift, or bare_operator"))
     isnothing(g) && throw(ArgumentError("--g is required"))
     isnothing(gamma) && throw(ArgumentError("--gamma is required"))
     isnothing(output) && throw(ArgumentError("--output is required"))

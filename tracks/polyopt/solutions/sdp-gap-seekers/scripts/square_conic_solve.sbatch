@@ -89,7 +89,7 @@ julia \
     --expected-positive-dimension "$CONIC_POS_DIM" \
     --expected-gap-dimension "$CONIC_GAP_DIM" \
     --expected-gamma "$CONIC_GAMMA" \
-    --time-limit-seconds 480 \
+    --time-limit-seconds "${CONIC_TIME_LIMIT:-480}" \
     --threads "${SLURM_CPUS_PER_TASK:-4}"
 solver_exit=$?
 set -e

@@ -144,7 +144,7 @@ struct StructuredBasisSpec
     version::Int
 
     function StructuredBasisSpec(family::Symbol, version::Int)
-        family in (:one_symbol_lift, :bare_weight_one) ||
+        family in (:one_symbol_lift, :bare_weight_one, :bare_operator) ||
             throw(ArgumentError("unsupported structured basis family"))
         version == 1 ||
             throw(ArgumentError("unsupported structured basis family version"))
@@ -614,6 +614,34 @@ const BARE_WEIGHT_ONE_V1_SELECTION_RULE =
     "identity plus all bare Pauli words of support weight one when " *
     "max_degree is at least one; no state-symbol rows; no symmetry quotient"
 
+const BARE_OPERATOR_V1_SELECTION_RULE =
+    "all bare Pauli operator words through max_degree; no state-symbol " *
+    "rows; no symmetry quotient"
+
+function bare_operator_entries(
+    site_ids::Vector{Int},
+    max_degree::Int,
+)
+    isempty(site_ids) &&
+        throw(ArgumentError("structured basis needs at least one site"))
+    issorted(site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be sorted"))
+    length(unique(site_ids)) == length(site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be unique"))
+    all(site -> site > 0, site_ids) ||
+        throw(ArgumentError("structured basis site IDs must be positive"))
+    max_degree >= 0 ||
+        throw(ArgumentError("basis degree must be nonnegative"))
+
+    local_words = enumerate_pauli_words(length(site_ids), max_degree)
+    entries = StateMonomial[
+        StateMonomial(PauliWord[], remap_word(word, site_ids))
+        for word in local_words
+    ]
+    sort!(entries; by=state_monomial_sort_key)
+    return entries
+end
+
 function bare_weight_one_entries(
     site_ids::Vector{Int},
     max_degree::Int,
@@ -681,6 +709,21 @@ function structured_basis_contents(
             entries,
             is_complete,
             BARE_WEIGHT_ONE_V1_SELECTION_RULE,
+        )
+    elseif spec.family == :bare_operator && spec.version == 1
+        entries = bare_operator_entries(site_ids, max_degree)
+        selected_count = BigInt(length(entries))
+        expected_selected_count =
+            operator_word_count(length(site_ids), max_degree)
+        selected_count == expected_selected_count ||
+            error("bare-operator materialization disagrees with its exact count")
+        is_complete =
+            selected_count ==
+            full_state_basis_count(length(site_ids), max_degree)
+        return (
+            entries,
+            is_complete,
+            BARE_OPERATOR_V1_SELECTION_RULE,
         )
     end
     error("validated structured basis spec has no implementation")
