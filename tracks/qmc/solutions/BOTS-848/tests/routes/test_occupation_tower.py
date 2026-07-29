@@ -181,6 +181,87 @@ def test_exact_cancellation_remains_negative_infinity_in_logpsi() -> None:
         tower[1].log_score(M_PLUS_ONE)
 
 
+def test_dominant_cancellation_preserves_finite_lower_log_band_and_score(
+) -> None:
+    n_electrons = 3
+    two_q = 6
+    target = (1 << 1) | (1 << 3) | (1 << 6)
+    dominant_left = (1 << 0) | (1 << 3) | (1 << 6)
+    dominant_right = (1 << 1) | (1 << 3) | (1 << 5)
+    lower_band = (1 << 1) | (1 << 2) | (1 << 6)
+    inverse = tower_module.ladder_neighbors(target, two_q, direction=-1)
+
+    assert set(inverse) == {dominant_left, lower_band, dominant_right}
+    assert inverse[dominant_left] == pytest.approx(math.sqrt(6.0))
+    assert inverse[lower_band] == pytest.approx(math.sqrt(12.0))
+    assert inverse[dominant_right] == pytest.approx(math.sqrt(6.0))
+
+    dominant_log = -math.log(math.sqrt(6.0))
+    lower_log = -1000.0 - math.log(math.sqrt(12.0))
+    logs = {
+        dominant_left: complex(dominant_log, 0.0),
+        dominant_right: complex(dominant_log, math.pi),
+        lower_band: complex(lower_log, 0.0),
+    }
+    expected_score = np.array(
+        [1.25 - 0.5j, -0.75 + 0.125j],
+        dtype=np.complex128,
+    )
+    scores = {
+        dominant_left: np.zeros(2, dtype=np.complex128),
+        dominant_right: np.zeros(2, dtype=np.complex128),
+        lower_band: expected_score,
+    }
+    tower = LadderTower.from_m0(
+        logpsi=lambda state: logs[state],
+        log_score=lambda state: scores[state],
+        n_electrons=n_electrons,
+        two_q=two_q,
+        l=2,
+    )
+
+    observed = tower[1].logpsi(target)
+
+    assert observed.real == pytest.approx(
+        -1000.0 - math.log(math.sqrt(6.0)),
+        abs=2.0e-13,
+    )
+    assert math.remainder(observed.imag, 2.0 * math.pi) == pytest.approx(
+        0.0,
+        abs=2.0e-15,
+    )
+    np.testing.assert_allclose(
+        tower[1].log_score(target),
+        expected_score,
+        rtol=0.0,
+        atol=2.0e-15,
+    )
+
+
+def test_exact_node_is_invariant_under_nonaxial_global_phase() -> None:
+    coefficient = 1.0 / math.sqrt(2.0)
+    global_phase = cmath.exp(0.371j)
+    tower = LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes(
+            {
+                M0_LEFT: coefficient * global_phase,
+                M0_RIGHT: -coefficient * global_phase,
+            }
+        ),
+        log_score=_zero_score(),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+    observed = tower[1].logpsi(M_PLUS_ONE)
+
+    assert observed.real == -math.inf
+    assert math.isfinite(observed.imag)
+    with pytest.raises(ValueError, match="score is undefined.*zero amplitude"):
+        tower[1].log_score(M_PLUS_ONE)
+
+
 def test_every_analytic_derived_log_score_parameter_matches_central_difference(
 ) -> None:
     model = AutoregressiveNQS.initialize(

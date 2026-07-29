@@ -11,12 +11,13 @@ from types import MappingProxyType
 import numpy as np
 
 from .constraints import FeasibilityTable, occupation_m2
-from .operators import ladder_neighbors, local_from_log_neighbors
+from .operators import ladder_neighbors
 
 
 LogAmplitude = Callable[[int], complex]
 LogScore = Callable[[int], np.ndarray]
 _SPIN_TWO_M_VALUES = (-2, -1, 0, 1, 2)
+_LOG_COMPLEX128_MAX = math.log(np.finfo(np.float64).max)
 
 
 def _integer(name: str, value: object) -> int:
@@ -58,25 +59,190 @@ def _score_vector(raw_value: object, *, label: str) -> np.ndarray:
     return score
 
 
-def _log_of_complex(value: complex) -> complex:
-    if value == 0.0:
-        return complex(-math.inf, 0.0)
-    if not math.isfinite(value.real) or not math.isfinite(value.imag):
-        raise FloatingPointError("derived ladder amplitude is non-finite")
-    return complex(math.log(abs(value)), math.atan2(value.imag, value.real))
-
-
 def _phase_factor(phase: float) -> complex:
     reduced = math.remainder(phase, 2.0 * math.pi)
-    if reduced == 0.0:
-        return 1.0 + 0.0j
-    if abs(reduced) == math.pi:
-        return -1.0 + 0.0j
-    if reduced == math.pi / 2.0:
-        return 0.0 + 1.0j
-    if reduced == -math.pi / 2.0:
+    quadrant = int(round(reduced / (math.pi / 2.0)))
+    snapped = quadrant * (math.pi / 2.0)
+    if abs(reduced - snapped) <= 8.0 * math.ulp(math.pi):
+        axial = quadrant % 4
+        if axial == 0:
+            return 1.0 + 0.0j
+        if axial == 1:
+            return 0.0 + 1.0j
+        if axial == 2:
+            return -1.0 + 0.0j
         return 0.0 - 1.0j
     return complex(math.cos(reduced), math.sin(reduced))
+
+
+def _normalized_phase(*parts: float) -> float:
+    reduced = [math.remainder(part, 2.0 * math.pi) for part in parts]
+    return math.remainder(math.fsum(reduced), 2.0 * math.pi)
+
+
+@dataclass(frozen=True, slots=True)
+class _LogTerm:
+    source: int
+    log_abs: float
+    parent_phase: float
+    coefficient_phase: float
+
+
+@dataclass(frozen=True, slots=True)
+class _LogPolar:
+    log_abs: float
+    phase: float
+
+
+def _relative_phase_factor(term: _LogTerm, reference: _LogTerm) -> complex:
+    return _phase_factor(
+        _normalized_phase(
+            term.parent_phase,
+            term.coefficient_phase,
+            -reference.parent_phase,
+            -reference.coefficient_phase,
+        )
+    )
+
+
+def _collapse_equal_log_bands(
+    entries: list[tuple[float, complex]],
+) -> list[tuple[float, complex]]:
+    active = entries
+    for _iteration in range(len(entries) + 1):
+        grouped: dict[float, list[complex]] = {}
+        for log_abs, unit_phase in active:
+            grouped.setdefault(log_abs, []).append(unit_phase)
+        collapsed: list[tuple[float, complex]] = []
+        merged = False
+        for log_abs, phases in grouped.items():
+            merged = merged or len(phases) > 1
+            summed = complex(
+                math.fsum(value.real for value in phases),
+                math.fsum(value.imag for value in phases),
+            )
+            if summed == 0.0:
+                continue
+            magnitude = abs(summed)
+            collapsed.append(
+                (
+                    math.fsum((log_abs, math.log(magnitude))),
+                    summed / magnitude,
+                )
+            )
+        active = collapsed
+        if not merged:
+            return active
+    raise AssertionError("log-band collapse did not converge")
+
+
+def _reduce_log_terms(terms: tuple[_LogTerm, ...]) -> _LogPolar | None:
+    if not terms:
+        return None
+    reference = terms[0]
+    entries = _collapse_equal_log_bands(
+        [
+            (term.log_abs, _relative_phase_factor(term, reference))
+            for term in terms
+        ]
+    )
+    if not entries:
+        return None
+    shift = max(log_abs for log_abs, _unit_phase in entries)
+    scaled = complex(
+        math.fsum(
+            math.exp(log_abs - shift) * unit_phase.real
+            for log_abs, unit_phase in entries
+        ),
+        math.fsum(
+            math.exp(log_abs - shift) * unit_phase.imag
+            for log_abs, unit_phase in entries
+        ),
+    )
+    if scaled == 0.0:
+        return None
+    log_abs = math.fsum((shift, math.log(abs(scaled))))
+    if not math.isfinite(log_abs):
+        raise FloatingPointError("derived ladder log-magnitude is non-finite")
+    return _LogPolar(
+        log_abs=log_abs,
+        phase=_normalized_phase(
+            reference.parent_phase,
+            reference.coefficient_phase,
+            math.atan2(scaled.imag, scaled.real),
+        ),
+    )
+
+
+def _score_ratio_from_log_terms(
+    terms: tuple[_LogTerm, ...],
+    scores: tuple[np.ndarray, ...],
+    denominator: _LogPolar,
+) -> np.ndarray:
+    if len(terms) != len(scores):
+        raise AssertionError("derived terms and scores must align")
+    if not scores:
+        raise AssertionError("nonzero derived amplitude has no source scores")
+    parameter_count = scores[0].size
+    if parameter_count == 0:
+        return np.empty(0, dtype=np.complex128)
+
+    reference = terms[0]
+    grouped: dict[float, list[np.ndarray]] = {}
+    for term, score in zip(terms, scores, strict=True):
+        grouped.setdefault(term.log_abs, []).append(
+            _relative_phase_factor(term, reference) * score
+        )
+    band_logs = np.asarray(tuple(grouped), dtype=np.float64)
+    band_values = np.stack(
+        [
+            np.sum(np.stack(grouped[log_abs], axis=0), axis=0)
+            for log_abs in grouped
+        ],
+        axis=0,
+    )
+    magnitudes = np.abs(band_values)
+    valid = magnitudes > 0.0
+    effective_logs = np.full(magnitudes.shape, -math.inf, dtype=np.float64)
+    log_magnitudes = np.zeros_like(magnitudes)
+    np.log(magnitudes, where=valid, out=log_magnitudes)
+    unmasked_effective_logs = (
+        band_logs[:, None] - denominator.log_abs + log_magnitudes
+    )
+    effective_logs[valid] = unmasked_effective_logs[valid]
+    has_numerator = np.any(valid, axis=0)
+    shifts = np.max(effective_logs, axis=0)
+    scaled = np.zeros(parameter_count, dtype=np.complex128)
+    for band_index in range(band_values.shape[0]):
+        active = valid[band_index] & has_numerator
+        if not np.any(active):
+            continue
+        unit_phase = band_values[band_index, active] / magnitudes[band_index, active]
+        scaled[active] += unit_phase * np.exp(
+            effective_logs[band_index, active] - shifts[active]
+        )
+
+    nonzero = has_numerator & (scaled != 0.0)
+    result = np.zeros(parameter_count, dtype=np.complex128)
+    if not np.any(nonzero):
+        return result
+    ratio_logs = shifts[nonzero] + np.log(np.abs(scaled[nonzero]))
+    if np.any(ratio_logs > _LOG_COMPLEX128_MAX):
+        raise FloatingPointError("derived log score is outside complex128 range")
+    ratio_phases = (
+        np.angle(scaled[nonzero])
+        + _normalized_phase(reference.parent_phase, reference.coefficient_phase)
+        - denominator.phase
+    )
+    with np.errstate(under="ignore"):
+        result[nonzero] = np.exp(ratio_logs) * (
+            np.cos(ratio_phases) + 1.0j * np.sin(ratio_phases)
+        )
+    if not np.all(np.isfinite(result.real)) or not np.all(
+        np.isfinite(result.imag)
+    ):
+        raise FloatingPointError("derived log score is non-finite")
+    return result
 
 
 def spin2_ladder_coefficient(source_m: int, direction: int) -> float:
@@ -97,10 +263,8 @@ def spin2_ladder_coefficient(source_m: int, direction: int) -> float:
 
 @dataclass(frozen=True, slots=True)
 class _DerivedTerms:
-    parent_logs: Mapping[int, complex]
-    inverse_neighbors: Mapping[int, complex]
-    shift: float
-    scaled_sum: complex
+    terms: tuple[_LogTerm, ...]
+    amplitude: _LogPolar | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,40 +302,46 @@ class LadderComponent:
             self.two_q,
             direction=-direction,
         )
-        parent_logs: dict[int, complex] = {}
-        active_neighbors: dict[int, complex] = {}
-        for source, coefficient in inverse.items():
+        active_terms: list[_LogTerm] = []
+        for source, coefficient_raw in inverse.items():
             parent_log = _scalar_complex(
                 parent.logpsi(source),
                 label="parent logpsi",
             )
             if parent_log.real == -math.inf:
                 continue
-            parent_logs[source] = parent_log
-            active_neighbors[source] = coefficient * _phase_factor(
-                parent_log.imag
+            coefficient = _scalar_complex(
+                coefficient_raw,
+                label="ladder coefficient",
             )
-
-        shift = max(
-            (value.real for value in parent_logs.values()),
-            default=0.0,
-        )
-
-        def shifted_parent_logpsi(configuration: int) -> complex:
-            if configuration == state:
-                return complex(shift, 0.0)
-            return complex(parent_logs[configuration].real, 0.0)
-
-        scaled_sum = local_from_log_neighbors(
-            state,
-            active_neighbors,
-            shifted_parent_logpsi,
-        )
+            if not math.isfinite(coefficient.real) or not math.isfinite(
+                coefficient.imag
+            ):
+                raise ValueError("ladder coefficient must be finite")
+            if coefficient == 0.0:
+                continue
+            log_abs = math.fsum(
+                (parent_log.real, math.log(abs(coefficient)))
+            )
+            if not math.isfinite(log_abs):
+                raise FloatingPointError(
+                    "derived ladder term log-magnitude is non-finite"
+                )
+            active_terms.append(
+                _LogTerm(
+                    source=source,
+                    log_abs=log_abs,
+                    parent_phase=parent_log.imag,
+                    coefficient_phase=math.atan2(
+                        coefficient.imag,
+                        coefficient.real,
+                    ),
+                )
+            )
+        terms = tuple(active_terms)
         return _DerivedTerms(
-            parent_logs=MappingProxyType(parent_logs),
-            inverse_neighbors=MappingProxyType(active_neighbors),
-            shift=shift,
-            scaled_sum=scaled_sum,
+            terms=terms,
+            amplitude=_reduce_log_terms(terms),
         )
 
     def logpsi(self, state: int) -> complex:
@@ -187,7 +357,7 @@ class LadderComponent:
             )
 
         terms = self._derived_terms(configuration)
-        if terms.scaled_sum == 0.0:
+        if terms.amplitude is None:
             return complex(-math.inf, 0.0)
         if self._parent is None or self._direction is None:
             raise AssertionError("derived component is missing its parent")
@@ -195,10 +365,9 @@ class LadderComponent:
             self._parent.m,
             self._direction,
         )
-        scaled_log = _log_of_complex(terms.scaled_sum)
         return complex(
-            scaled_log.real + terms.shift - math.log(normalization),
-            scaled_log.imag,
+            terms.amplitude.log_abs - math.log(normalization),
+            terms.amplitude.phase,
         )
 
     def log_score(self, state: int) -> np.ndarray:
@@ -214,17 +383,16 @@ class LadderComponent:
             )
 
         terms = self._derived_terms(configuration)
-        if terms.scaled_sum == 0.0:
+        if terms.amplitude is None:
             raise ValueError("log score is undefined for an exact zero amplitude")
         if self._parent is None:
             raise AssertionError("derived component is missing its parent")
 
         scores: list[np.ndarray] = []
-        weights: list[complex] = []
         parameter_count: int | None = None
-        for source, coefficient in terms.inverse_neighbors.items():
+        for term in terms.terms:
             score = _score_vector(
-                self._parent.log_score(source),
+                self._parent.log_score(term.source),
                 label="parent log score",
             )
             if parameter_count is None:
@@ -233,17 +401,12 @@ class LadderComponent:
                 raise ValueError(
                     "parent log scores must have the same parameter count"
                 )
-            parent_log = terms.parent_logs[source]
-            term = coefficient * math.exp(parent_log.real - terms.shift)
-            weights.append(term / terms.scaled_sum)
             scores.append(score)
 
-        if not scores:
-            raise AssertionError("nonzero derived amplitude has no source terms")
-        result = np.sum(
-            np.asarray(weights, dtype=np.complex128)[:, None]
-            * np.stack(scores, axis=0),
-            axis=0,
+        result = _score_ratio_from_log_terms(
+            terms.terms,
+            tuple(scores),
+            terms.amplitude,
         )
         if not np.all(np.isfinite(result.real)) or not np.all(
             np.isfinite(result.imag)
