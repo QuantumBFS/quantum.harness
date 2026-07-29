@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:07:48Z
+Updated: 2026-07-29T17:09:43Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -122,5 +122,9 @@ Updated: 2026-07-29T17:07:48Z
   fresh-task replay. Synthetic SCNet job `118177325` ended immediately as
   `JobLaunchFailure` (`0:53`) on `a01r4n14`, with zero runtime and no log. One
   unchanged resubmission is authorized because no test process ran.
+- Audit r2 `118177473` repeated launch failure (`0:53`, two seconds) on a
+  different node. The verified common cause is a missing gitignored
+  `results/_slurm` directory in the fresh clone, preventing Slurm from opening
+  stdout. Create that exact directory and preflight it before r3.
 
 No user input or new credential is currently required.

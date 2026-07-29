@@ -1167,3 +1167,10 @@ coefficient hash gate for the dual formulation. Synthetic SCNet audit job
 `a01r4n14`; no batch process or test log existed. One unchanged test
 resubmission is justified because this was scheduler launch infrastructure,
 not a source or numerical failure.
+
+Audit r2 job `118177473` repeated `JobLaunchFailure` (`0:53`) with two seconds
+runtime on a different node, `a03r3n12`. The shared cause is now verified: the
+fresh clone omitted the gitignored `results/_slurm` directory, so Slurm could
+not open the configured stdout path. Create that exact directory and require
+it in the launch preflight before r3; this changes the failed launch condition
+and still performs no duplicate scientific compute.

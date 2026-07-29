@@ -663,3 +663,6 @@ Updated: 2026-07-29 UTC.
 - Dual-certificate replay code is committed at `09729d7`. Its first synthetic
   SCNet test, job `118177325`, never launched (`JobLaunchFailure`, zero
   runtime, no log). Resubmit this unchanged tiny test once on another node.
+- Audit r2 `118177473` exposed the actual common launch error: the new clone
+  lacks its gitignored `results/_slurm` output directory. Create only that
+  directory and use a fail-closed path preflight for r3.
