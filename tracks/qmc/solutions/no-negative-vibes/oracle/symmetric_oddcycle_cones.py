@@ -22,6 +22,7 @@ from itertools import combinations
 from math import comb
 from pathlib import Path
 
+import numpy as np
 import sympy as sp
 
 from .exterior_exact5_full_fock_cone import (
@@ -696,19 +697,92 @@ def search_fixed_unit_winding_pair_cone(
     }
 
 
+def _grade14_preconditioned_full_fock_initials(
+    *,
+    attempts: int,
+    rng_seed: int,
+    cross_scale: float,
+) -> tuple[np.ndarray, ...]:
+    if attempts < 0 or cross_scale < 0.0:
+        raise ValueError("attempts and cross scale must be nonnegative")
+    payload = load_certificate(
+        Path(__file__).parents[1]
+        / "fixtures"
+        / "symmetric_oddcycle_grade14_certificate.json"
+    )
+    transform_payload = payload.get("transform")
+    if not isinstance(transform_payload, Sequence):
+        raise ValueError("grade-(1,4) transform is missing")
+    grade14 = np.asarray(
+        _rational_matrix(transform_payload).tolist(),
+        dtype=float,
+    )
+    if grade14.shape != (10, 10):
+        raise ValueError("grade-(1,4) transform has the wrong dimension")
+
+    known = np.eye(12)
+    known[1:11, 1:11] = grade14
+    base = np.zeros((32, 32))
+    base[:12, :12] = known
+    base[12:, 12:] = np.eye(20)
+    norms = np.linalg.norm(base, axis=0)
+    if np.any(norms == 0.0):
+        raise RuntimeError("preconditioner has a zero column")
+    base = base / norms
+
+    rng = np.random.default_rng(rng_seed)
+    initials = []
+    for _ in range(attempts):
+        initial = np.array(base, copy=True)
+        initial[:12, 12:] += cross_scale * rng.normal(size=(12, 20))
+        initial[12:, :12] += cross_scale * rng.normal(size=(20, 12))
+        initial[12:, 12:] += (
+            0.25 * cross_scale * rng.normal(size=(20, 20))
+        )
+        initials.append(initial)
+    return tuple(initials)
+
+
 def search_fixed_unit_winding_full_fock_cone(
     *,
     attempts: int = 64,
     maxiter: int = 2000,
     rng_seed: int = 817232,
     ray_counts: Sequence[int] = (32, 40, 48, 56),
+    initialization: str = "grade14-preconditioned",
+    cross_scale: float = 0.05,
     tolerance: float = 1.0e-9,
     max_denominator: int = 65536,
 ) -> dict[str, object]:
     """Search the fixed pair on all six Fock grades with exact promotion."""
 
     matrix = fixed_candidate_matrix()
-    matrices = tuple(exact_fock_lift(atom) for atom in (matrix, matrix.T))
+    original_matrices = tuple(
+        exact_fock_lift(atom) for atom in (matrix, matrix.T)
+    )
+    basis_order = (
+        0,
+        *range(1, 6),
+        *range(26, 31),
+        31,
+        *range(6, 26),
+    )
+    matrices = tuple(
+        sp.ImmutableMatrix(atom.extract(basis_order, basis_order))
+        for atom in original_matrices
+    )
+    if initialization == "grade14-preconditioned":
+        initials = _grade14_preconditioned_full_fock_initials(
+            attempts=attempts,
+            rng_seed=rng_seed,
+            cross_scale=cross_scale,
+        )
+    elif initialization == "random":
+        initials = None
+    else:
+        raise ValueError(
+            "initialization must be grade14-preconditioned or random"
+        )
     audit = exact_complementary_sector_audit()
     split_replays = tuple(
         {
@@ -738,16 +812,20 @@ def search_fixed_unit_winding_full_fock_cone(
         "endpoint_order": ("B1", "B1T"),
         "dimension": matrices[0].rows,
         "atom_count": len(matrices),
+        "basis_order": basis_order,
+        "initialization": initialization,
+        "cross_scale": cross_scale,
         "split_obstruction_full_replays": split_replays,
     }
     simplicial = _cross_grade_simplicial_search(
         matrices,
-        split=16,
+        split=12,
         attempts=attempts,
         maxiter=maxiter,
         rng_seed=rng_seed,
         tolerance=tolerance,
         max_denominator=max_denominator,
+        initial_transforms=initials,
     )
     if simplicial["status"] == "exact-trace-compatible-certificate":
         return {

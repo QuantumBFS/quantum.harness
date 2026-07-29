@@ -358,6 +358,7 @@ def _cross_grade_simplicial_search(
     rng_seed: int,
     tolerance: float,
     max_denominator: int,
+    initial_transforms: Sequence[Sequence[Sequence[float]]] | None = None,
 ) -> dict[str, object]:
     """Search dense bases first so rays genuinely couple both grade blocks."""
 
@@ -369,9 +370,24 @@ def _cross_grade_simplicial_search(
     dimension = floats[0].shape[0]
     rng = np.random.default_rng(rng_seed)
     initials = []
-    for _ in range(attempts):
-        dense, _ = np.linalg.qr(rng.normal(size=(dimension, dimension)))
-        initials.append(dense @ (np.eye(dimension) + 0.2 * rng.normal(size=(dimension, dimension))))
+    if initial_transforms is None:
+        for _ in range(attempts):
+            dense, _ = np.linalg.qr(rng.normal(size=(dimension, dimension)))
+            initials.append(
+                dense
+                @ (
+                    np.eye(dimension)
+                    + 0.2 * rng.normal(size=(dimension, dimension))
+                )
+            )
+    else:
+        if len(initial_transforms) != attempts:
+            raise ValueError("initial transform count must equal attempts")
+        for transform in initial_transforms:
+            numerical = np.asarray(transform, dtype=float)
+            if numerical.shape != (dimension, dimension):
+                raise ValueError("initial transform has the wrong dimension")
+            initials.append(numerical)
     if not initials:
         return {
             "status": "no-exact-certificate-found",

@@ -214,6 +214,42 @@ def test_fixed_full_fock_search_api_replays_split_words_without_optimization():
     assert result["endpoint_order"] == ("B1", "B1T")
     assert result["dimension"] == 32
     assert result["atom_count"] == 2
+    assert result["basis_order"] == (
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+    )
+    assert result["initialization"] == "grade14-preconditioned"
+    assert result["cross_scale"] == 0.05
     assert result["split_obstruction_full_replays"] == (
         {
             "name": "grade24_odd135_split_obstruction",
