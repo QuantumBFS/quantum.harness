@@ -37,6 +37,10 @@ if isfile(GENERATOR)
                 "excited" => false,
                 "seed" => 86,
             )
+            variance_only_job = merge(
+                copy(source_job),
+                Dict{String, Any}("gamma" => 1.565),
+            )
             adaptive_job = Dict{String, Any}(
                 "model" => "long_range",
                 "sigma" => 2.0,
@@ -79,6 +83,12 @@ if isfile(GENERATOR)
                             "resource_class" => "A",
                             "params" => completed_adaptive_job,
                         ),
+                        Dict(
+                            "cell_id" => "variance-only-failure",
+                            "stage" => "stage1",
+                            "resource_class" => "A",
+                            "params" => variance_only_job,
+                        ),
                     ],
                 ),
             )
@@ -113,6 +123,21 @@ if isfile(GENERATOR)
                             "chi" => 64,
                             "poles" => 16,
                             "excited" => false,
+                            "normalized_ground_variance" => 2.0e-10,
+                            "convergence_residual" => 2.0e-8,
+                        ), Dict(
+                            "cell_id" => "variance-only-failure",
+                            "stage" => "stage1",
+                            "resource_class" => "A",
+                            "model" => "long_range",
+                            "sigma" => 1.75,
+                            "L" => 32,
+                            "Gamma" => 1.565,
+                            "chi" => 64,
+                            "poles" => 16,
+                            "excited" => false,
+                            "normalized_ground_variance" => 2.0e-10,
+                            "convergence_residual" => 2.0e-9,
                         )],
                     ),
                 ),
@@ -165,6 +190,9 @@ if isfile(GENERATOR)
             @test occursin("Gamma", spec["metadata"]["hamiltonian"])
             @test occursin("periodic", spec["metadata"]["boundary"])
             @test spec["metadata"]["completed_adaptive_cells_skipped"] == 1
+            @test spec["metadata"]["convergence_failure_source_cells"] == 2
+            @test spec["metadata"]["convergence_retry_source_cells"] == 1
+            @test spec["metadata"]["deferred_quality_source_cells"] == 1
             @test length(spec["cells"]) == 2
             @test count(cell -> cell["resource_class"] == "A", spec["cells"]) == 1
             @test count(cell -> cell["resource_class"] == "B", spec["cells"]) == 1
@@ -201,6 +229,23 @@ if isfile(GENERATOR)
                 line -> occursin("adaptive+convergence_retry", line),
                 reason_lines,
             ) == 1
+
+            deferred_csv = joinpath(
+                dirname(reason_csv), "deferred_quality.csv"
+            )
+            deferred_lines = readlines(deferred_csv)
+            @test length(deferred_lines) == 2
+            @test startswith(
+                deferred_lines[1],
+                "source_cell_id,model,sigma,L,Gamma,chi,poles,excited",
+            )
+            @test occursin("variance-only-failure", deferred_lines[2])
+            @test occursin("finite_chi_limit", deferred_lines[2])
+            @test occursin("chi128_manual_review", deferred_lines[2])
+            @test !any(
+                cell -> cell["params"]["gamma"] == 1.565,
+                spec["cells"],
+            )
         end
     end
 end

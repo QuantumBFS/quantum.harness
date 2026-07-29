@@ -82,6 +82,8 @@ function build_finalizer_fixture(
         bracket_width = 8.0e-4,
         movement = 5.0e-5,
         convergence_failures = Dict{String, Any}[],
+        raw_rows = Any[],
+        adaptive_cells = Any[],
     )
     formal_directory = joinpath(directory, "formal-v2")
     previous_directory = joinpath(directory, "formal-v1")
@@ -119,12 +121,42 @@ function build_finalizer_fixture(
                 "schema_version" => 1,
                 "run_id" => "issue-86-adaptive",
                 "stage" => "adaptive",
-                "jobs_total" => 0,
+                "jobs_total" => length(adaptive_cells),
             ),
-            "cells" => Any[],
+            "cells" => adaptive_cells,
         ),
     )
+    write_finalizer_fixture(
+        joinpath(formal_directory, "raw.json"),
+        Dict("rows" => raw_rows),
+    )
     return formal_directory, previous_directory
+end
+
+function execution_evidence_fixture()
+    return Dict{String, Any}(
+        "followup" => Dict(
+            "expected" => 69,
+            "successful" => 58,
+            "resource_classes" => Dict(
+                "A" => Dict("expected" => 65, "successful" => 54),
+                "B" => Dict("expected" => 4, "successful" => 4),
+            ),
+            "strict_retries" => Dict(
+                "completed" => 38,
+                "residual_passed" => 38,
+                "variance_passed" => 0,
+            ),
+            "chi128_adaptive" => Dict(
+                "completed" => 4,
+                "quality_passed" => 4,
+            ),
+        ),
+        "slurm" => Dict(
+            "timeouts" => [22994149, 23002669, 23005744],
+            "startup_configuration_failures" => [23004760],
+        ),
+    )
 end
 
 @testset "Issue 86 finalizer entrypoint exists" begin
@@ -204,7 +236,7 @@ if isfile(FINALIZER)
         end
     end
 
-    @testset "A remaining convergence failure creates a chi=128 retry" begin
+    @testset "Recommendations stay small, deduplicated, and manual" begin
         mktempdir() do directory
             failure = Dict{String, Any}(
                 "cell_id" => "failed-cell",
@@ -222,11 +254,16 @@ if isfile(FINALIZER)
                 build_finalizer_fixture(
                     directory; convergence_failures = [failure]
                 )
+            evidence_path = joinpath(directory, "execution-evidence.json")
+            write_finalizer_fixture(
+                evidence_path, execution_evidence_fixture()
+            )
             main([
                 formal_directory,
                 previous_directory,
                 "486b2673baa11d44a1048fbf9fd36751189889d7",
                 repeat("c", 64),
+                evidence_path,
             ])
 
             retry = JSON.parsefile(
@@ -236,20 +273,36 @@ if isfile(FINALIZER)
                     "chi128_retry_run_spec.json",
                 )
             )
-            @test retry["metadata"]["jobs_total"] == 1
-            params = only(retry["cells"])["params"]
-            @test params["chi"] == 128
-            @test params["tolerance"] == 1.0e-11
-            @test params["maxiter"] == 100
-            @test params["seed"] == 86
+            @test retry["metadata"]["jobs_total"] == 8
+            @test all(
+                cell -> cell["params"]["chi"] == 128,
+                retry["cells"],
+            )
+            @test all(
+                cell -> cell["params"]["L"] in (32, 64),
+                retry["cells"],
+            )
 
             recommendations = JSON.parsefile(
                 joinpath(formal_directory, "next-recommendations.json")
             )
             @test recommendations["automatic_submission"] == false
-            @test recommendations["tiers"]["chi128_retry"]["cells"] == 1
-            @test recommendations["tiers"]["l128_contingency"]["cells"] > 0
-            @test recommendations["tiers"]["chi256_last_resort"]["cells"] > 0
+            @test recommendations["tiers"]["remaining_adaptive"]["cells"] == 4
+            @test recommendations["tiers"]["chi128_retry"]["cells"] == 8
+            @test recommendations["tiers"]["l128_contingency"]["cells"] == 0
+            @test recommendations["tiers"]["chi256_last_resort"]["cells"] == 0
+            @test recommendations["resource_advice"]["A"] == Dict(
+                "cpus_per_cell" => 8,
+                "memory_gb_per_cell" => 16,
+                "wall_hours" => 4,
+                "array_concurrency" => 4,
+            )
+            @test recommendations["resource_advice"]["B"] == Dict(
+                "cpus_per_cell" => 16,
+                "memory_gb_per_cell" => 32,
+                "wall_hours" => 4,
+                "array_concurrency" => 4,
+            )
 
             reasons = readlines(
                 joinpath(
@@ -260,8 +313,56 @@ if isfile(FINALIZER)
             )
             @test startswith(reasons[1], "cell_id,tier,reason")
             @test any(line -> occursin("chi128_retry", line), reasons[2:end])
-            @test any(line -> occursin("l128_contingency", line), reasons[2:end])
-            @test any(line -> occursin("chi256_last_resort", line), reasons[2:end])
+            @test any(line -> occursin("remaining_adaptive", line), reasons[2:end])
+            @test !any(line -> occursin("l128_contingency", line), reasons[2:end])
+            @test !any(line -> occursin("chi256_last_resort", line), reasons[2:end])
+
+            report = JSON.parsefile(joinpath(formal_directory, "report.json"))
+            report_text = JSON.json(report)
+            @test occursin("58/69", report_text)
+            @test occursin("38", report_text)
+            @test occursin("22994149", report_text)
+            @test occursin("23002669", report_text)
+            @test occursin("23005744", report_text)
+            @test occursin("23004760", report_text)
+            @test occursin("preliminary", lowercase(report_text))
+        end
+    end
+
+    @testset "Successful parameters are excluded from recommendations" begin
+        mktempdir() do directory
+            existing = Dict{String, Any}(
+                "model" => "long_range",
+                "sigma" => 1.75,
+                "L" => 32,
+                "Gamma" => 1.5605,
+                "chi" => 128,
+                "poles" => 16,
+                "excited" => false,
+            )
+            formal_directory, previous_directory =
+                build_finalizer_fixture(directory; raw_rows = [existing])
+            main([
+                formal_directory,
+                previous_directory,
+                "486b2673baa11d44a1048fbf9fd36751189889d7",
+                repeat("d", 64),
+            ])
+            retry = JSON.parsefile(
+                joinpath(
+                    formal_directory,
+                    "next-recommendations",
+                    "chi128_retry_run_spec.json",
+                )
+            )
+            @test retry["metadata"]["jobs_total"] == 7
+            @test !any(
+                cell ->
+                    cell["params"]["sigma"] == 1.75 &&
+                    cell["params"]["L"] == 32 &&
+                    cell["params"]["gamma"] == 1.5605,
+                retry["cells"],
+            )
         end
     end
 end

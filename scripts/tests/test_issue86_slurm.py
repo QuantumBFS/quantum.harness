@@ -71,13 +71,17 @@ def _run_fake_packed_worker(tmp_path: Path, *, fail_index: int | None = None):
         import time
 
         path = os.environ["FAKE_SRUN_STATE"]
+        lock_path = f"{path}.lock"
         index = int(sys.argv[-2])
 
         def update(delta):
-            with open(path, "a+", encoding="utf-8") as handle:
-                fcntl.flock(handle, fcntl.LOCK_EX)
-                handle.seek(0)
-                raw = handle.read()
+            with open(lock_path, "a+", encoding="utf-8") as lock_handle:
+                fcntl.flock(lock_handle, fcntl.LOCK_EX)
+                try:
+                    with open(path, "r", encoding="utf-8") as handle:
+                        raw = handle.read()
+                except FileNotFoundError:
+                    raw = ""
                 state = json.loads(raw) if raw else {
                     "active": 0,
                     "maximum": 0,
@@ -100,11 +104,10 @@ def _run_fake_packed_worker(tmp_path: Path, *, fail_index: int | None = None):
                         os.environ.get("JULIA_NUM_THREADS"),
                         os.environ.get("OPENBLAS_NUM_THREADS"),
                     ])
-                handle.seek(0)
-                handle.truncate()
-                json.dump(state, handle)
-                handle.flush()
-                fcntl.flock(handle, fcntl.LOCK_UN)
+                with open(path, "w", encoding="utf-8") as handle:
+                    json.dump(state, handle)
+                    handle.flush()
+                fcntl.flock(lock_handle, fcntl.LOCK_UN)
 
         update(1)
         time.sleep(0.08)
@@ -154,10 +157,15 @@ def test_packed_worker_caps_concurrency_to_allocation_and_splits_memory(tmp_path
 
 
 def test_packed_worker_retains_progress_after_one_cell_fails(tmp_path):
-    result, state = _run_fake_packed_worker(tmp_path, fail_index=3)
+    for attempt in range(20):
+        attempt_path = tmp_path / f"attempt-{attempt}"
+        attempt_path.mkdir()
+        result, state = _run_fake_packed_worker(
+            attempt_path, fail_index=3
+        )
 
-    assert result.returncode != 0
-    assert sorted(state["seen"]) == [1, 2, 3, 4, 5, 6]
+        assert result.returncode != 0
+        assert sorted(state["seen"]) == [1, 2, 3, 4, 5, 6]
 
 
 def test_calibration_uses_one_worker_with_every_allocated_cpu(tmp_path):

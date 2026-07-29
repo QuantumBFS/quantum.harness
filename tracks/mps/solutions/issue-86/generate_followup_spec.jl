@@ -93,6 +93,8 @@ function build_followup_spec(
     params_by_id = source_params_by_cell_id(result_directories)
     successful_identities = successful_source_identities(result_directories)
     entries = Dict{Tuple, Dict{String, Any}}()
+    deferred_quality = Dict{String, Any}[]
+    convergence_retry_source_cells = 0
 
     for cell in adaptive["cells"]
         add_followup_entry!(
@@ -104,11 +106,35 @@ function build_followup_spec(
     end
 
     for failure in summary["convergence_audit"]["failures"]
+        residual = Float64(get(
+            failure, "convergence_residual", Inf
+        ))
+        variance = Float64(get(
+            failure, "normalized_ground_variance", Inf
+        ))
         source_cell_id = get(failure, "cell_id", nothing)
         isnothing(source_cell_id) &&
             error("convergence failure is missing cell_id provenance")
         haskey(params_by_id, source_cell_id) ||
             error("source cell id not found in run specs: $source_cell_id")
+        if residual < 1.0e-8 && variance >= 1.0e-10
+            push!(deferred_quality, Dict{String, Any}(
+                "source_cell_id" => source_cell_id,
+                "model" => get(failure, "model", nothing),
+                "sigma" => get(failure, "sigma", nothing),
+                "L" => get(failure, "L", nothing),
+                "Gamma" => get(failure, "Gamma", nothing),
+                "chi" => get(failure, "chi", nothing),
+                "poles" => get(failure, "poles", nothing),
+                "excited" => get(failure, "excited", false),
+                "normalized_ground_variance" => variance,
+                "convergence_residual" => residual,
+                "reason" => "finite_chi_limit",
+                "recommended_action" => "chi128_manual_review",
+            ))
+            continue
+        end
+        residual >= 1.0e-8 || continue
         params = copy(params_by_id[source_cell_id])
         params["tolerance"] = 1.0e-11
         params["maxiter"] = 80
@@ -116,6 +142,7 @@ function build_followup_spec(
         add_followup_entry!(
             entries, params, "convergence_retry", source_cell_id
         )
+        convergence_retry_source_cells += 1
     end
     completed_adaptive_cells_skipped = 0
     for key in collect(keys(entries))
@@ -181,12 +208,16 @@ function build_followup_spec(
             "adaptive_source_cells" => length(adaptive["cells"]),
             "completed_adaptive_cells_skipped" =>
                 completed_adaptive_cells_skipped,
-            "convergence_retry_source_cells" =>
+            "convergence_failure_source_cells" =>
                 length(summary["convergence_audit"]["failures"]),
+            "convergence_retry_source_cells" =>
+                convergence_retry_source_cells,
+            "deferred_quality_source_cells" => length(deferred_quality),
         ),
         "cells" => cells,
     )
-    return spec, reasons
+    sort!(deferred_quality; by = row -> String(row["source_cell_id"]))
+    return spec, reasons, deferred_quality
 end
 
 function csv_value(value)
@@ -213,6 +244,21 @@ function write_reason_csv(path, reasons)
     end
 end
 
+function write_deferred_quality_csv(path, rows)
+    columns = [
+        "source_cell_id", "model", "sigma", "L", "Gamma", "chi", "poles",
+        "excited", "normalized_ground_variance", "convergence_residual",
+        "reason", "recommended_action",
+    ]
+    mkpath(dirname(path))
+    open(path, "w") do io
+        println(io, join(columns, ","))
+        for row in rows
+            println(io, join((csv_value(row[column]) for column in columns), ","))
+        end
+    end
+end
+
 function main(args)
     length(args) >= 6 || error(
         "usage: generate_followup_spec.jl FORMAL_DIR RUN_SPEC.json " *
@@ -224,18 +270,22 @@ function main(args)
     run_id = args[4]
     stage = args[5]
     result_directories = abspath.(args[6:end])
-    spec, reasons = build_followup_spec(
+    spec, reasons, deferred_quality = build_followup_spec(
         formal_directory, result_directories; run_id, stage
     )
     write_json_atomic(output_spec, spec)
     write_reason_csv(reason_csv, reasons)
+    write_deferred_quality_csv(
+        joinpath(dirname(reason_csv), "deferred_quality.csv"),
+        deferred_quality,
+    )
     class_counts = Dict(
         class => count(cell -> cell["resource_class"] == class, spec["cells"])
         for class in ("A", "B", "C", "D")
     )
     println(
         "wrote $(length(spec["cells"])) follow-up cells to $output_spec; " *
-        "classes=$class_counts"
+        "classes=$class_counts; deferred_quality=$(length(deferred_quality))"
     )
     flush(stdout)
 end

@@ -216,36 +216,31 @@ function evaluate_validation(summary, current_crossings, previous_crossings)
     return status, gates, per_sigma
 end
 
-function retry_params(failure)
-    params = Dict{String, Any}(
-        "model" => String(failure["model"]),
-        "L" => Int(failure["L"]),
-        "gamma" => Float64(failure["Gamma"]),
-        "chi" => 128,
-        "tolerance" => 1.0e-11,
-        "maxiter" => 100,
-        "excited" => Bool(get(failure, "excited", false)),
-        "seed" => 86,
-    )
-    isnothing(get(failure, "sigma", nothing)) ||
-        (params["sigma"] = Float64(failure["sigma"]))
-    isnothing(get(failure, "poles", nothing)) ||
-        (params["poles"] = Int(failure["poles"]))
-    return params
-end
-
 function bracket_gammas(audit)
     crossing = audit["largest_crossing"]
     low = Float64(crossing["Gamma_low"])
     high = Float64(crossing["Gamma_high"])
-    return sort!(unique([low, (low + high) / 2, high]))
+    return sort!(unique([low, high]))
 end
 
-function contingency_params(summary; chi, lengths, maxiter)
+function largest_crossing_params(
+        summary;
+        chi,
+        gamma_mode,
+        tolerance,
+        maxiter,
+    )
     params = Dict{String, Any}[]
     for sigma in EXPECTED_SIGMAS
         audit = summary["sigma_audits"][string(sigma)]
-        for L in lengths, gamma in bracket_gammas(audit)
+        crossing = audit["largest_crossing"]
+        gammas = gamma_mode == :midpoint ?
+            [(
+                Float64(crossing["Gamma_low"]) +
+                Float64(crossing["Gamma_high"])
+            ) / 2] :
+            bracket_gammas(audit)
+        for L in (32, 64), gamma in gammas
             push!(params, Dict{String, Any}(
                 "model" => "long_range",
                 "sigma" => sigma,
@@ -253,7 +248,7 @@ function contingency_params(summary; chi, lengths, maxiter)
                 "gamma" => gamma,
                 "chi" => chi,
                 "poles" => 16,
-                "tolerance" => 1.0e-11,
+                "tolerance" => tolerance,
                 "maxiter" => maxiter,
                 "excited" => false,
                 "seed" => 86,
@@ -261,6 +256,68 @@ function contingency_params(summary; chi, lengths, maxiter)
         end
     end
     return params
+end
+
+function parameter_identity(params)
+    gamma = haskey(params, "gamma") ? params["gamma"] : params["Gamma"]
+    return (
+        String(params["model"]),
+        get(params, "sigma", nothing),
+        Int(params["L"]),
+        Float64(gamma),
+        Int(params["chi"]),
+        get(params, "poles", nothing),
+        Bool(get(params, "excited", false)),
+    )
+end
+
+function successful_parameter_identities(formal_directory)
+    raw_path = joinpath(formal_directory, "raw.json")
+    isfile(raw_path) || return Set{Tuple}()
+    payload = JSON.parsefile(raw_path)
+    rows = payload isa AbstractDict ? get(payload, "rows", Any[]) : payload
+    identities = Set{Tuple}()
+    for row in rows
+        all(haskey(row, key) for key in ("model", "L", "chi")) || continue
+        haskey(row, "Gamma") || haskey(row, "gamma") || continue
+        push!(identities, parameter_identity(row))
+    end
+    return identities
+end
+
+function exclude_successful(params_rows, successful_identities)
+    return [
+        params for params in params_rows
+        if !(parameter_identity(params) in successful_identities)
+    ]
+end
+
+function deferred_quality_rows(summary)
+    rows = Dict{String, Any}[]
+    for failure in summary["convergence_audit"]["failures"]
+        residual = Float64(get(failure, "convergence_residual", Inf))
+        variance = Float64(get(
+            failure, "normalized_ground_variance", Inf
+        ))
+        residual < COMPUTE_RESIDUAL_TOLERANCE || continue
+        variance >= COMPUTE_VARIANCE_TOLERANCE || continue
+        push!(rows, Dict{String, Any}(
+            "source_cell_id" => get(failure, "cell_id", nothing),
+            "model" => get(failure, "model", nothing),
+            "sigma" => get(failure, "sigma", nothing),
+            "L" => get(failure, "L", nothing),
+            "Gamma" => get(failure, "Gamma", nothing),
+            "chi" => get(failure, "chi", nothing),
+            "poles" => get(failure, "poles", nothing),
+            "excited" => get(failure, "excited", false),
+            "normalized_ground_variance" => variance,
+            "convergence_residual" => residual,
+            "reason" => "finite_chi_limit",
+            "recommended_action" => "chi128_manual_review",
+        ))
+    end
+    sort!(rows; by = row -> string(row["source_cell_id"]))
+    return rows
 end
 
 function reason_row(cell, tier, reason)
@@ -302,6 +359,21 @@ function write_reason_map(path, rows)
     end
 end
 
+function write_deferred_quality(path, rows)
+    columns = [
+        "source_cell_id", "model", "sigma", "L", "Gamma", "chi", "poles",
+        "excited", "normalized_ground_variance", "convergence_residual",
+        "reason", "recommended_action",
+    ]
+    mkpath(dirname(path))
+    open(path, "w") do io
+        println(io, join(columns, ","))
+        for row in rows
+            println(io, join((csv_value(row[column]) for column in columns), ","))
+        end
+    end
+end
+
 function build_recommendations(
         formal_directory,
         summary,
@@ -310,28 +382,48 @@ function build_recommendations(
     )
     output_directory = joinpath(formal_directory, "next-recommendations")
     mkpath(output_directory)
-    adaptive_copy = deepcopy(adaptive_spec)
-    adaptive_copy["metadata"]["automatic_submission"] = false
-    adaptive_copy["metadata"]["code_commit"] = compute_commit
-    adaptive_copy["metadata"]["jobs_total"] = length(adaptive_copy["cells"])
-
+    successful_identities =
+        successful_parameter_identities(formal_directory)
+    adaptive_copy = make_run_spec(
+        "issue-86-largest-crossing-midpoints",
+        "remaining-adaptive",
+        exclude_successful(
+            largest_crossing_params(
+                summary;
+                chi = 64,
+                gamma_mode = :midpoint,
+                tolerance = 1.0e-9,
+                maxiter = 50,
+            ),
+            successful_identities,
+        ),
+        compute_commit,
+    )
     retry = make_run_spec(
         "issue-86-chi128-retry",
         "chi128-retry",
-        [retry_params(failure) for failure in
-            summary["convergence_audit"]["failures"]],
+        exclude_successful(
+            largest_crossing_params(
+                summary;
+                chi = 128,
+                gamma_mode = :endpoints,
+                tolerance = 1.0e-11,
+                maxiter = 100,
+            ),
+            successful_identities,
+        ),
         compute_commit,
     )
     l128 = make_run_spec(
         "issue-86-l128-contingency",
         "l128-contingency",
-        contingency_params(summary; chi = 128, lengths = (64, 128), maxiter = 120),
+        Dict{String, Any}[],
         compute_commit,
     )
     chi256 = make_run_spec(
         "issue-86-chi256-last-resort",
         "chi256-last-resort",
-        contingency_params(summary; chi = 256, lengths = (64,), maxiter = 140),
+        Dict{String, Any}[],
         compute_commit,
     )
     specs = Dict(
@@ -349,13 +441,13 @@ function build_recommendations(
     reasons = Dict{String, Any}[]
     reason_text = Dict(
         "remaining_adaptive" =>
-            "refine a crossing bracket still wider than the formal gate",
+            "refine the current largest-size crossing midpoint",
         "chi128_retry" =>
-            "upgrade a remaining variance or residual failure after strict chi=64 retry",
+            "manually review bond-dimension drift at the current largest-size crossing endpoints",
         "l128_contingency" =>
-            "test finite-size drift at L=128 if the literature interval remains unresolved",
+            "disabled in the preliminary closeout scope",
         "chi256_last_resort" =>
-            "last-level bond-dimension check after lower-cost recommendations",
+            "disabled in the preliminary closeout scope",
     )
     for tier in keys(specs)
         write_json_atomic(
@@ -374,18 +466,16 @@ function build_recommendations(
 
     resource_advice = Dict{String, Any}(
         "A" => Dict(
-            "cpus" => 64, "memory_gb" => 240, "wall_hours" => 2,
-            "workers" => 8,
+            "cpus_per_cell" => 8,
+            "memory_gb_per_cell" => 16,
+            "wall_hours" => 4,
+            "array_concurrency" => 4,
         ),
         "B" => Dict(
-            "cpus" => 64, "memory_gb" => 240, "wall_hours" => 4,
-            "workers" => 4,
-        ),
-        "C" => Dict(
-            "status" => "requires a fresh resource preview before submission",
-        ),
-        "D" => Dict(
-            "status" => "last resort; requires a fresh resource preview before submission",
+            "cpus_per_cell" => 16,
+            "memory_gb_per_cell" => 32,
+            "wall_hours" => 4,
+            "array_concurrency" => 4,
         ),
     )
     tiers = Dict(
@@ -402,6 +492,12 @@ function build_recommendations(
         "tiers" => tiers,
         "resource_advice" => resource_advice,
         "reason_map" => joinpath("next-recommendations", "reason_map.csv"),
+        "source_adaptive_cells" => length(get(adaptive_spec, "cells", Any[])),
+        "successful_parameters_excluded" => true,
+        "deferred_quality" => Dict(
+            "cells" => length(deferred_quality_rows(summary)),
+            "file" => "deferred_quality.csv",
+        ),
     )
 end
 
@@ -422,7 +518,12 @@ function sigma_result_rows(summary, validation)
     return rows
 end
 
-function build_run_document(summary, validation, recommendations)
+function build_run_document(
+        summary,
+        validation,
+        recommendations,
+        execution_evidence,
+    )
     status = validation["status"]
     verdict = status == FORMAL_STATUS ? "pass" : "warn"
     return Dict{String, Any}(
@@ -453,7 +554,9 @@ function build_run_document(summary, validation, recommendations)
             "gates" => validation["gates"],
             "sigma_audits" => summary["sigma_audits"],
             "nn_audit" => summary["nn_audit"],
+            "convergence_audit" => summary["convergence_audit"],
         ),
+        "execution" => execution_evidence,
         "figures" => [
             Dict(
                 "id" => "finite-size-sigma-1.75",
@@ -492,7 +595,52 @@ function build_run_document(summary, validation, recommendations)
     )
 end
 
-function build_report_document(run, summary, validation)
+function execution_report_blocks(execution_evidence)
+    isempty(execution_evidence) && return Any[]
+    followup = get(execution_evidence, "followup", Dict{String, Any}())
+    classes = get(followup, "resource_classes", Dict{String, Any}())
+    class_a = get(classes, "A", Dict{String, Any}())
+    class_b = get(classes, "B", Dict{String, Any}())
+    strict = get(followup, "strict_retries", Dict{String, Any}())
+    adaptive = get(followup, "chi128_adaptive", Dict{String, Any}())
+    slurm = get(execution_evidence, "slurm", Dict{String, Any}())
+    timeouts = get(slurm, "timeouts", Any[])
+    startup = get(slurm, "startup_configuration_failures", Any[])
+    pairs = [
+        [
+            "Follow-up manifests",
+            "$(get(followup, "successful", 0))/$(get(followup, "expected", 0)) " *
+            "(A $(get(class_a, "successful", 0))/$(get(class_a, "expected", 0)); " *
+            "B $(get(class_b, "successful", 0))/$(get(class_b, "expected", 0)))",
+        ],
+        [
+            "Strict chi=64 retries",
+            "$(get(strict, "completed", 0)) completed; " *
+            "residual $(get(strict, "residual_passed", 0))/$(get(strict, "completed", 0)) pass; " *
+            "variance $(get(strict, "variance_passed", 0))/$(get(strict, "completed", 0)) pass",
+        ],
+        [
+            "chi=128 adaptive",
+            "$(get(adaptive, "quality_passed", 0))/$(get(adaptive, "completed", 0)) pass",
+        ],
+        [
+            "Slurm terminal incidents",
+            "TIMEOUT jobs $(join(string.(timeouts), ", ")); " *
+            "startup configuration failure $(join(string.(startup), ", "))",
+        ],
+    ]
+    return Any[Dict(
+        "kind" => "kv",
+        "pairs" => pairs,
+    )]
+end
+
+function build_report_document(
+        run,
+        summary,
+        validation,
+        execution_evidence,
+    )
     status = validation["status"]
     formal = status == FORMAL_STATUS
     verdict_style = formal ? "good" : "warn"
@@ -503,6 +651,7 @@ function build_report_document(run, summary, validation)
         "The sigma=1.6 and sigma=1.8 rows required for the full Track B boundary were not computed.",
         "Expansion recommendations are recorded without automatic submission.",
     ]
+    execution_blocks = execution_report_blocks(execution_evidence)
     return Dict{String, Any}(
         "title" => "Issue 86: Track B long-range TFIM critical points",
         "eyebrow" => "MPS Challenge · Track B validation floor",
@@ -588,6 +737,7 @@ function build_report_document(run, summary, validation)
                         "why" =>
                             "The label follows the recorded bracket, drift, reference, uncertainty, NN-anchor, convergence, and adaptive-queue gates.",
                     ),
+                    execution_blocks...,
                     Dict(
                         "kind" => "table",
                         "columns" => [
@@ -669,6 +819,7 @@ function finalize_track_b(
         previous_directory;
         compute_commit,
         analyzer_sha256,
+        execution_evidence = Dict{String, Any}(),
     )
     summary = JSON.parsefile(joinpath(formal_directory, "formal_summary.json"))
     current_crossings = JSON.parsefile(
@@ -694,6 +845,8 @@ function finalize_track_b(
         ),
         "gates" => gates,
         "per_sigma" => per_sigma,
+        "convergence_audit" => summary["convergence_audit"],
+        "execution_evidence" => execution_evidence,
         "scope" => Dict(
             "claim" => "Track B validation-floor reproduction",
             "full_track_b_complete" => false,
@@ -716,8 +869,16 @@ function finalize_track_b(
     recommendations = build_recommendations(
         formal_directory, summary, adaptive_spec, compute_commit
     )
-    run = build_run_document(summary, validation, recommendations)
-    report = build_report_document(run, summary, validation)
+    run = build_run_document(
+        summary, validation, recommendations, execution_evidence
+    )
+    report = build_report_document(
+        run, summary, validation, execution_evidence
+    )
+    write_deferred_quality(
+        joinpath(formal_directory, "deferred_quality.csv"),
+        deferred_quality_rows(summary),
+    )
     write_json_atomic(
         joinpath(formal_directory, "validation_summary.json"), validation
     )
@@ -731,17 +892,21 @@ function finalize_track_b(
 end
 
 function main(args)
-    length(args) == 4 || error(
+    length(args) in (4, 5) || error(
         "usage: finalize_track_b.jl FORMAL_DIR PREVIOUS_FORMAL_DIR " *
-        "COMPUTE_COMMIT ANALYZER_SHA256"
+        "COMPUTE_COMMIT ANALYZER_SHA256 [EXECUTION_EVIDENCE.json]"
     )
     formal_directory = abspath(args[1])
     previous_directory = abspath(args[2])
+    execution_evidence = length(args) == 5 ?
+        JSON.parsefile(abspath(args[5])) :
+        Dict{String, Any}()
     validation, recommendations, _, _ = finalize_track_b(
         formal_directory,
         previous_directory;
         compute_commit = args[3],
         analyzer_sha256 = args[4],
+        execution_evidence = execution_evidence,
     )
     println("scientific status: $(validation["status"])")
     println(
