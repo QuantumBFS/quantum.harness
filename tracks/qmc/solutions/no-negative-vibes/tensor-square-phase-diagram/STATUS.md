@@ -105,3 +105,28 @@ git branch = work/zibojin/tensor-square-phase-diagram
 | `5e8cefb` | 同上 | 双机粗扫代码、首轮聚合与候选分类 | `26 passed`；675/675 |
 | `37ae584` | 同上 | 运行指纹、干净源码约束与逐样本审计 | `26 passed` |
 | `b4459ae` | 同上 | 密度舍入容差与聚合源码溯源 | `27 passed`；两机干净重跑 |
+
+## Stage 4 round 0 — frozen production contract (2026-07-29)
+
+- Stage 3 delivery was re-verified at `3322167`; the 675 fingerprinted coarse
+  cells were not rerun.
+- Frozen Stage 4 pilot grid: 90 cells (54 half-filled core and 36 matched
+  `mu/g_A = +/-1.5` competition cells), two pilot replicas per cell.
+- Frozen production rule: four new replicas, worst-observable tau-driven
+  extension to ESS >= 40 per replica, with recoverable extension only up to the
+  preregistered caps.
+- New audited observables: exact Gaussian first-to-fourth channel moments,
+  central-moment Binder ratios, contact-subtracted HS static susceptibility,
+  staggered/neighbor structure factors, and an open-chain second-moment
+  correlation-length proxy.
+- Production cannot start from a self-asserted plan: it must revalidate all 180
+  pilot summaries, exact seeds/configs/fingerprints/common source, full-summary
+  digest, recomputed budgets, and equal matched-`mu` budgets.
+- Independent code review found four Important issues in the first
+  implementation; all were fixed. Final re-review: PASS, no remaining
+  Critical/Important findings.
+- Verification: `49 passed`; runner and pilot aggregator compile cleanly.
+- Commits: `4b7a0bb`, `8037e4a`, `bd0bcb0`, pushed to
+  `work/zibojin/tensor-square-phase-diagram`.
+- No Stage 4 physics result has been inspected yet. Next action is a one-cell
+  clean-commit smoke run, followed by the two-machine 180-replica pilot.
