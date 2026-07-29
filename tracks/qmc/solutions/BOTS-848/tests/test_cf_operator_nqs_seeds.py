@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from scipy.linalg import expm
 
 from scalable_v1.contracts import StateHandle
 
@@ -51,35 +52,72 @@ def _su2_matrix() -> np.ndarray:
     )
 
 
-def _symmetric_power_rotation(rotation: np.ndarray, ell: int) -> np.ndarray:
-    """Independent polynomial expansion of the spin-ell Wigner matrix."""
+def _spin2_rotation_from_generators(axis: np.ndarray, angle: float) -> np.ndarray:
+    """Independent spin-2 oracle in the ordered ``m=-2,...,2`` basis."""
 
-    components = tuple(range(-ell, ell + 1))
-    result = np.zeros((2 * ell + 1, 2 * ell + 1), dtype=np.complex128)
-    for row, m in enumerate(components):
-        a = ell + m
-        b = ell - m
-        source_normalization = math.sqrt(math.comb(2 * ell, a))
-        for r in range(a + 1):
-            for s in range(b + 1):
-                target_u_power = r + s
-                target_m = target_u_power - ell
-                column = components.index(target_m)
-                coefficient = (
-                    math.comb(a, r)
-                    * math.comb(b, s)
-                    * rotation[0, 0] ** r
-                    * rotation[0, 1] ** (a - r)
-                    * rotation[1, 0] ** s
-                    * rotation[1, 1] ** (b - s)
-                )
-                target_normalization = math.sqrt(
-                    math.comb(2 * ell, ell + target_m)
-                )
-                result[row, column] += (
-                    source_normalization / target_normalization * coefficient
-                )
-    return result
+    ell = 2
+    components = np.arange(-ell, ell + 1, dtype=float)
+    raising = np.zeros((2 * ell + 1, 2 * ell + 1), dtype=np.complex128)
+    for source, m in enumerate(components[:-1]):
+        raising[source + 1, source] = math.sqrt((ell - m) * (ell + m + 1.0))
+    lowering = raising.T.conj()
+    jx = 0.5 * (raising + lowering)
+    jy = (raising - lowering) / (2.0j)
+    jz = np.diag(components).astype(np.complex128)
+    generator = axis[0] * jx + axis[1] * jy + axis[2] * jz
+    return expm(-1j * angle * generator)
+
+
+def _quaternion_axis_angle(quaternion: np.ndarray) -> tuple[np.ndarray, float]:
+    vector_norm = float(np.linalg.norm(quaternion[1:]))
+    if vector_norm == 0.0:
+        return np.asarray([0.0, 0.0, 1.0]), 0.0
+    return quaternion[1:] / vector_norm, 2.0 * math.atan2(
+        vector_norm, float(quaternion[0])
+    )
+
+
+def _independent_log_rescaled_rotation_residual(
+    tower: Any, *, n_electrons: int, seed: int, probes: int
+) -> float:
+    rng = np.random.default_rng(seed)
+    maximum = 0.0
+    for _ in range(probes):
+        spinors = rng.normal(size=(n_electrons, 2)) + 1j * rng.normal(
+            size=(n_electrons, 2)
+        )
+        spinors /= np.linalg.norm(spinors, axis=1, keepdims=True)
+        quaternion = rng.normal(size=4)
+        quaternion /= np.linalg.norm(quaternion)
+        scalar, x, y, z = quaternion
+        rotation = np.asarray(
+            [
+                [scalar - 1j * z, -y - 1j * x],
+                [y - 1j * x, scalar + 1j * z],
+            ],
+            dtype=np.complex128,
+        )
+        rotated = np.einsum("ab,nb->na", rotation, spinors)
+        before_logs = np.asarray(
+            [complex(tower[m].logpsi(spinors)) for m in range(-2, 3)]
+        )
+        after_logs = np.asarray(
+            [complex(tower[m].logpsi(rotated)) for m in range(-2, 3)]
+        )
+        finite_real_logs = np.concatenate(
+            (before_logs.real[np.isfinite(before_logs.real)],
+             after_logs.real[np.isfinite(after_logs.real)])
+        )
+        assert finite_real_logs.size > 0
+        shared_shift = float(np.max(finite_real_logs))
+        before = np.exp(before_logs - shared_shift)
+        after = np.exp(after_logs - shared_shift)
+        axis, angle = _quaternion_axis_angle(quaternion)
+        expected = _spin2_rotation_from_generators(axis, angle) @ before
+        scale = max(np.linalg.norm(after), np.linalg.norm(expected))
+        assert scale > 0.0
+        maximum = max(maximum, float(np.linalg.norm(after - expected) / scale))
+    return maximum
 
 
 def _relative_residual(actual: complex, expected: complex) -> float:
@@ -307,13 +345,70 @@ def test_l2_tower_obeys_independent_finite_wigner_rotation_and_l0_is_invariant()
 
     before = np.asarray([tower[m].amplitude(spinors) for m in range(-2, 3)])
     after = np.asarray([tower[m].amplitude(rotated) for m in range(-2, 3)])
-    wigner = _symmetric_power_rotation(rotation, ell=2)
+    axis = np.asarray([0.31, -0.47, 0.826], dtype=float)
+    axis /= np.linalg.norm(axis)
+    wigner = _spin2_rotation_from_generators(axis, 0.713)
 
     np.testing.assert_allclose(after, wigner @ before, rtol=2.0e-9, atol=1.0e-25)
     ground = family.ground_state()
     assert ground.amplitude(rotated) == pytest.approx(
         ground.amplitude(spinors), rel=2.0e-11, abs=1.0e-300
     )
+
+
+def test_spin2_generator_oracle_matches_the_spinor_rotation_convention() -> None:
+    spinor = _normalized_spinors(18848, n_electrons=1)[0]
+    rotation = _su2_matrix()
+    rotated = rotation @ spinor
+    axis = np.asarray([0.31, -0.47, 0.826], dtype=float)
+    axis /= np.linalg.norm(axis)
+    wigner = _spin2_rotation_from_generators(axis, 0.713)
+
+    def spin2_polynomials(value: np.ndarray) -> np.ndarray:
+        u, v = value
+        return np.asarray(
+            [
+                math.sqrt(math.comb(4, 2 + m)) * u ** (2 + m) * v ** (2 - m)
+                for m in range(-2, 3)
+            ]
+        )
+
+    np.testing.assert_allclose(
+        spin2_polynomials(rotated),
+        wigner @ spin2_polynomials(spinor),
+        rtol=2.0e-14,
+        atol=2.0e-14,
+    )
+
+
+def test_rotation_residual_uses_log_amplitudes_without_large_n_false_zero() -> None:
+    api = _seed_api()
+    family = api.JKCFSeedFamily(n_electrons=40, two_q=117)
+    tower = family.generate_multiplet()
+    expected = _independent_log_rescaled_rotation_residual(
+        tower, n_electrons=40, seed=852, probes=1
+    )
+
+    actual = api.finite_rotation_residual(tower, seed=852, probes=1)
+
+    assert np.isfinite(expected) and expected > 0.0
+    assert np.isfinite(actual) and actual > 0.0
+    assert actual == pytest.approx(expected, rel=2.0e-8, abs=2.0e-12)
+
+
+def test_rotation_residual_never_accepts_all_zero_vectors_as_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api = _seed_api()
+    family = api.JKCFSeedFamily(n_electrons=6, two_q=15)
+    monkeypatch.setattr(
+        api.CFSeed,
+        "logpsi",
+        lambda self, configs: np.asarray(complex(-math.inf, 0.0)),
+    )
+
+    with pytest.raises(RuntimeError, match="valid nonzero rotation probe"):
+        api.finite_rotation_residual(family.generate_multiplet(), seed=3848, probes=1)
 
 
 def test_m_labels_have_the_independent_analytic_z_rotation_phases() -> None:

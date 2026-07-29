@@ -508,7 +508,13 @@ def _symmetric_power_rotation(rotation: np.ndarray, ell: int) -> np.ndarray:
 def finite_rotation_residual(
     tower: Mapping[int, CFSeed], *, seed: int = 3848, probes: int = 4
 ) -> float:
-    """Numerically test the five amplitudes against finite spin-2 rotations."""
+    """Test finite spin-2 covariance without raw-amplitude underflow.
+
+    Each comparison uses one real log-magnitude shift shared by the unrotated
+    and rotated five-component vectors.  A probe that is identically zero on
+    both sides is not symmetry evidence and is resampled with a bounded retry
+    count.
+    """
 
     family = _validated_tower(tower)
     checked_seed = _require_integer("seed", seed)
@@ -517,7 +523,11 @@ def finite_rotation_residual(
         raise ValueError("probes must be positive")
     rng = np.random.default_rng(checked_seed)
     maximum = 0.0
-    for _ in range(checked_probes):
+    valid_probes = 0
+    attempts = 0
+    maximum_attempts = max(8, 8 * checked_probes)
+    while valid_probes < checked_probes and attempts < maximum_attempts:
+        attempts += 1
         spinors = rng.normal(size=(family.n_electrons, 2)) + 1j * rng.normal(
             size=(family.n_electrons, 2)
         )
@@ -533,15 +543,43 @@ def finite_rotation_residual(
             dtype=np.complex128,
         )
         rotated_spinors = np.einsum("ab,nb->na", rotation, spinors)
-        before = np.asarray(
-            [tower[m].amplitude(spinors) for m in _L2_COMPONENTS]
+        before_logs = np.asarray(
+            [complex(tower[m].logpsi(spinors)) for m in _L2_COMPONENTS],
+            dtype=np.complex128,
         )
-        after = np.asarray(
-            [tower[m].amplitude(rotated_spinors) for m in _L2_COMPONENTS]
+        after_logs = np.asarray(
+            [complex(tower[m].logpsi(rotated_spinors)) for m in _L2_COMPONENTS],
+            dtype=np.complex128,
         )
+        if np.any(np.isnan(before_logs)) or np.any(np.isnan(after_logs)):
+            raise FloatingPointError("rotation probe produced a NaN log amplitude")
+        if np.any(np.isposinf(before_logs.real)) or np.any(
+            np.isposinf(after_logs.real)
+        ):
+            raise FloatingPointError("rotation probe produced an infinite amplitude")
+        before_finite = np.isfinite(before_logs.real)
+        after_finite = np.isfinite(after_logs.real)
+        finite_real_logs = np.concatenate(
+            (before_logs.real[before_finite], after_logs.real[after_finite])
+        )
+        if finite_real_logs.size == 0:
+            continue
+        shared_shift = float(np.max(finite_real_logs))
+        before = np.zeros(len(_L2_COMPONENTS), dtype=np.complex128)
+        after = np.zeros(len(_L2_COMPONENTS), dtype=np.complex128)
+        before[before_finite] = np.exp(before_logs[before_finite] - shared_shift)
+        after[after_finite] = np.exp(after_logs[after_finite] - shared_shift)
         expected = _symmetric_power_rotation(rotation, ell=2) @ before
-        scale = max(np.linalg.norm(after), np.linalg.norm(expected), np.finfo(float).tiny)
+        scale = max(np.linalg.norm(after), np.linalg.norm(expected))
+        if scale == 0.0:
+            continue
         maximum = max(maximum, float(np.linalg.norm(after - expected) / scale))
+        valid_probes += 1
+    if valid_probes < checked_probes:
+        raise RuntimeError(
+            "could not obtain a valid nonzero rotation probe within the bounded "
+            f"retry budget ({valid_probes}/{checked_probes})"
+        )
     return maximum
 
 
