@@ -155,6 +155,7 @@ def _production_compressor(config: ChainConfig, mode: str):
         objective,
         max_iterations=config.max_iterations,
         optimizer=config.optimizer,
+        skip_optimization_tolerance=config.loss_acceptance_tolerance,
     )
 
 

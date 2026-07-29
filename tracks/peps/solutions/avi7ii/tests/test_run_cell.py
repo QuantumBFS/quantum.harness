@@ -62,6 +62,22 @@ def test_exact_cell_id_overrides_array_index(tmp_path, monkeypatch):
     assert (tmp_path / "run" / "cells" / "cell-0001" / "manifest.json").is_file()
 
 
+def test_windows_run_dir_is_portable_on_cluster(tmp_path, monkeypatch):
+    module = _load_module()
+    payload = _spec(tmp_path)
+    payload["run_dir"] = "nested\\qmc-run"
+    run_spec = tmp_path / "run-spec.json"
+    run_spec.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("HARNESS_RUN_SPEC", str(run_spec))
+    monkeypatch.setenv("HARNESS_CELL_INDEX", "1")
+
+    assert module.main(["--kind", "qmc", "--dry-run"]) == 0
+    assert (
+        tmp_path / "nested" / "qmc-run" / "cells" / "cell-0001" / "manifest.json"
+    ).is_file()
+
+
 def test_success_manifest_is_never_replaced(tmp_path, monkeypatch):
     module = _load_module()
     payload = _spec(tmp_path)

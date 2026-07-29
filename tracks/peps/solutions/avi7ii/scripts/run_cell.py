@@ -50,6 +50,11 @@ def _atomic(path: Path, payload: dict) -> None:
     os.replace(temporary, path)
 
 
+def _portable_path(raw: object) -> Path:
+    """Interpret harness paths consistently on Windows and POSIX nodes."""
+    return Path(str(raw).replace("\\", "/"))
+
+
 def _echo_contract(
     manifest: dict, *, params: dict, settings: dict, provenance: dict
 ) -> dict:
@@ -159,7 +164,7 @@ def _run_pepo(params: dict, output: Path) -> dict:
 
 def _run_pepo_measure(params: dict, settings: dict) -> dict:
     run = _load_pepo_stack()
-    evolution_run_dir = Path(settings["evolution_run_dir"])
+    evolution_run_dir = _portable_path(settings["evolution_run_dir"])
     source = evolution_run_dir / "cells" / params["source_cell"]
     source_manifest_path = source / "manifest.json"
     source_manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
@@ -203,7 +208,7 @@ def main(argv=None) -> int:
     params = cell["params"]
     settings = {**spec.get("settings", {}), **cell.get("settings", {})}
     provenance = spec.get("provenance", {})
-    output = Path(spec["run_dir"]) / "cells" / cell["cell_id"]
+    output = _portable_path(spec["run_dir"]) / "cells" / cell["cell_id"]
     output.mkdir(parents=True, exist_ok=True)
     manifest_path = output / "manifest.json"
     if manifest_path.exists():

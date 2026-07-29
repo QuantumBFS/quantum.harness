@@ -78,6 +78,12 @@ class CompressionObjective:
         if not math.isfinite(j) or not math.isfinite(h):
             raise ValueError("Hamiltonian couplings must be finite")
         self.contractor = contractor
+        # JAX cannot trace Quimb's data-dependent singular-value cutoff.
+        # Keep the same chi, but use a fixed-rank contraction for gradients.
+        self.optimization_contractor = BoundaryContractor(
+            chi=contractor.chi,
+            cutoff=0.0,
+        )
         self.j = j
         self.h = h
         self.tolerances = tolerances
@@ -96,6 +102,17 @@ class CompressionObjective:
             log_scale=0.0,
         )
 
+    def optimization_teacher_point(
+        self,
+        teacher: FinitePEPO,
+    ) -> ThermodynamicPoint:
+        return self.optimization_contractor.thermodynamic_point(
+            teacher,
+            j=self.j,
+            h=self.h,
+            log_scale=0.0,
+        )
+
     def loss(
         self,
         student: FinitePEPO,
@@ -105,11 +122,12 @@ class CompressionObjective:
         mode: str,
     ):
         self._validate_mode(mode)
-        frobenius = self.contractor.relative_frobenius_loss(student, teacher)
+        contractor = self.optimization_contractor
+        frobenius = contractor.relative_frobenius_loss(student, teacher)
         if mode == "ordinary":
             return frobenius
 
-        student_point = self.contractor.thermodynamic_point(
+        student_point = contractor.thermodynamic_point(
             student,
             j=self.j,
             h=self.h,
@@ -117,7 +135,7 @@ class CompressionObjective:
         )
         z_difference = student_point.z - teacher_point.z
         u_difference = student_point.u - teacher_point.u
-        hermiticity = self.contractor.hermiticity_residual(student)
+        hermiticity = contractor.hermiticity_residual(student)
         return (
             frobenius
             + self.weights.z * (z_difference / self.tolerances.z) ** 2
@@ -207,12 +225,21 @@ class VariationalCompressor:
         *,
         max_iterations: int = 50,
         optimizer: str = "L-BFGS-B",
+        skip_optimization_tolerance: float | None = None,
     ) -> None:
         if max_iterations < 1:
             raise ValueError("max_iterations must be positive")
         self.objective = objective
         self.max_iterations = max_iterations
         self.optimizer = optimizer
+        if skip_optimization_tolerance is not None and (
+            not math.isfinite(skip_optimization_tolerance)
+            or skip_optimization_tolerance < 0
+        ):
+            raise ValueError(
+                "skip optimization tolerance must be finite and non-negative"
+            )
+        self.skip_optimization_tolerance = skip_optimization_tolerance
 
     def compress(
         self,
@@ -261,6 +288,46 @@ class VariationalCompressor:
             elapsed_seconds=time.perf_counter() - started,
         )
 
+        initial_loss = initial.as_floats().total
+        if (
+            self.skip_optimization_tolerance is not None
+            and initial_loss <= self.skip_optimization_tolerance
+        ):
+            _emit_stage(
+                "optimizer_skipped",
+                mode=mode,
+                initial_loss=initial_loss,
+                tolerance=self.skip_optimization_tolerance,
+            )
+            budget = CompressionBudget(
+                chi=self.objective.contractor.chi,
+                cutoff=self.objective.contractor.cutoff,
+                max_iterations=self.max_iterations,
+                optimizer=self.optimizer,
+                requested_bond=max_bond,
+            )
+            return CompressionResult(
+                pepo=student,
+                initial=initial,
+                final=initial,
+                iterations=0,
+                loss_history=(initial_loss,),
+                max_bond=seeded_bond,
+                mode=mode,
+                budget=budget,
+            )
+
+        started = time.perf_counter()
+        _emit_stage("optimization_teacher_point_start", mode=mode)
+        optimization_teacher_point = self.objective.optimization_teacher_point(
+            teacher
+        )
+        _emit_stage(
+            "optimization_teacher_point_complete",
+            mode=mode,
+            elapsed_seconds=time.perf_counter() - started,
+        )
+
         lx = teacher.lx
         ly = teacher.ly
 
@@ -269,7 +336,7 @@ class VariationalCompressor:
             return self.objective.loss(
                 candidate,
                 teacher,
-                teacher_point=teacher_point,
+                teacher_point=optimization_teacher_point,
                 mode=mode,
             )
 

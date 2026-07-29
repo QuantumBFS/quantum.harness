@@ -130,6 +130,14 @@ def test_objective_api_has_no_specific_heat_or_external_reference_inputs():
     }
 
 
+def test_optimization_contractor_uses_fixed_rank_cutoff():
+    objective = _objective()
+
+    assert objective.contractor.cutoff == 1e-12
+    assert objective.optimization_contractor.chi == objective.contractor.chi
+    assert objective.optimization_contractor.cutoff == 0.0
+
+
 def _two_site_objective() -> tuple[FinitePEPO, CompressionObjective]:
     teacher = FinitePEPO.identity(2, 1)
     for gate in second_order_gates(
@@ -190,6 +198,20 @@ def test_compression_modes_record_the_same_compute_budget():
     assert ordinary.budget.cutoff == objective.contractor.cutoff
     assert ordinary.budget.max_iterations == 1
     assert ordinary.budget.optimizer == "L-BFGS-B"
+
+
+def test_optimizer_is_skipped_when_seed_already_meets_tolerance():
+    teacher = FinitePEPO.identity(1, 1)
+    objective = _objective()
+    result = VariationalCompressor(
+        objective,
+        max_iterations=3,
+        skip_optimization_tolerance=1e-10,
+    ).compress(teacher, max_bond=1, mode="thermodynamic")
+
+    assert result.iterations == 0
+    assert result.loss_history == (result.initial.as_floats().total,)
+    assert result.final == result.initial
 
 
 def test_result_history_excludes_nonfinite_line_search_trials():
