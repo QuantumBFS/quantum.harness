@@ -81,14 +81,19 @@ heads. It is optimized by L-BFGS against the state-averaged `L=0`/`L=2` energy.
 For validation, exact independent samples are drawn from the enumerated
 `|psi|^2` distribution and used to report energy standard errors.
 
+For `N=8,9`, the exact projector is applied without a dense null-space basis:
+`P=I-L_+^dagger(L_+L_+^dagger)^(-1)L_+`. Sparse conjugate gradients provide a
+direct highest-weight residual certificate. This removes the dense projection
+bottleneck but retains full fixed-`M` enumeration and a sparse Hamiltonian.
+
 ### 3.4 Chirality
 
-`L=2` certifies spin magnitude, not handedness. The base challenge acceptance
-does not require the helicity response, while the strong version may use the
-rank-two metric operators `O_+` and `O_-` of Liou et al. This implementation does
-not construct those operators and does not infer chirality from the sign of `M`.
-It instead completes the alternative strong deliverable: a bounded finite-size
-extrapolation. Bright/dark chirality remains explicit future work.
+`L=2` certifies spin magnitude, not handedness. The implemented parent-channel
+operators follow Liou et al.: `O_+` maps pair `m=1` to `m=3`, while its adjoint
+`O_-` maps `m=3` to `m=1`. Their rank-two commutators and adjoint relation are
+tested. The `V1` Laughlin state has a numerically zero dark channel; Coulomb
+results report both integrated and lowest-`L=2` pole weights. This is not the
+full metric derivative of the finite-sphere Coulomb Hamiltonian.
 
 ## 4. Data flow
 
@@ -120,6 +125,8 @@ Plasma-Team/
     ed.py
     nqs.py
     observables.py
+    chirality.py
+    scalable_nqs.py
     cli.py
   tests/
   scripts/
@@ -144,9 +151,9 @@ Plasma-Team/
 | 2 | CG algebra, `L_+`, `L_-`, `L^2` | SU(2) and generic rotation checks | complete |
 | 3 | `V1` and Coulomb Hamiltonians | Hermiticity and rotational invariance | complete |
 | 4 | ED energies by `L` | Laughlin zero mode and multiplet | complete, `N<=8` |
-| 5 | projected shared NQS | ED agreement at small `N` | complete, `N<=7` |
-| 6 | uncertainty and scaling | direct-sampling errors and `1/N` fit | complete |
-| 7 | chirality | bright/dark matrix elements | optional, deferred |
+| 5 | projected shared NQS | ED agreement and sparse certificate | complete, `N<=9` |
+| 6 | uncertainty and scaling | direct-sampling errors and fit stability | complete, bounded |
+| 7 | chirality | bright/dark matrix elements and lowest pole | complete, parent channel |
 | 8 | final report | one-command reproduction | complete |
 
 ## 7. Environment
@@ -187,7 +194,10 @@ No secrets or external services are required. Optional environment variables:
 
 ## 9. Performance expectations
 
-The full Hilbert space grows as `binomial(2Q+1,N)`. Fixed-`Lz` sectors and sparse matrix-vector products are mandatory. The first reproducible target is `N<=8`; `N=9,10` are stretch ED sizes. NQS calculations may go larger only after the `N<=8` oracle gate passes.
+The full Hilbert space grows as `binomial(2Q+1,N)`. Fixed-`Lz` sectors and sparse
+matrix-vector products are mandatory. ED reaches `N=8`; the matrix-free
+projected NQS reaches `N=9`. Its remaining bottlenecks are Hamiltonian assembly
+and full-sector neural forward passes, not angular-momentum projection.
 
 Every Monte Carlo report includes sample count, mean, standard error, variance,
 and seed. The implemented sampler draws independent samples directly from the
@@ -218,7 +228,7 @@ seeds and their gap error is propagated in quadrature.
 - 2026-07-28: scope fixed to Challenge #15; paper and arXiv source inspected; no public numerical data found.
 - 2026-07-28: local `.venv` found stale; environment rebuild made Node 0.
 - 2026-07-28: autoresearch baseline metric established at 0.
-- 2026-07-29: 23 physics and CLI tests pass; `V1`, Coulomb, SO(3), ED, NQS,
+- 2026-07-29: 35 physics and CLI tests pass; `V1`, Coulomb, SO(3), ED, NQS,
   direct sampling, result schema, and multiplet gates are covered.
 - 2026-07-29: ED completed for `N=3..8`; NQS plus 100,000-sample estimates
   completed for `N=3..7`.
@@ -228,3 +238,11 @@ seeds and their gap error is propagated in quadrature.
   `Delta_infinity=0.1274 +/- 0.0048` (regression error only).
 - 2026-07-29: final artifacts written to
   `tracks/qmc/results/20260729-chiral-graviton-final/`; report completed.
+- 2026-07-29: sparse highest-weight projection reached `N=9`, giving
+  `Delta_9=0.1305092442` and a sampled error `6.64e-9`.
+- 2026-07-29: the `N=7` NQS tower has fivefold spread `1.78e-15` and generic
+  rotation error `8.16e-13`.
+- 2026-07-29: parent-channel chirality at `N=7` has integrated bright/dark ratio
+  `616`; the lowest `L=2` pole carries `77.4%` of the bright weight.
+- 2026-07-29: `N=4..9` fit comparison gives primary `Delta_infinity=0.1289`
+  with a `0.0134` small-size model envelope.

@@ -10,8 +10,16 @@ at flux `2Q=3(N-1)` with chord-distance Coulomb interaction and energies in
 
 ## Result
 
-ED was completed for `N=3..8`; the shared, exactly projected neural ansatz was
-validated for `N=3..7`. At `N=7`,
+ED was completed for `N=3..8`; the shared neural ansatz reaches `N=9` using a
+certified sparse highest-weight projector. At `N=9`,
+
+- NQS: `Delta_9 = 0.130509244209`;
+- direct `|psi|^2` sampling: `0.1305092418 +/- 0.0000000066` (one standard
+  error, 100,000 independent samples);
+- `<L^2> = 6`, with `||L_+ psi||/||psi|| = 4.05e-11` for the excited state.
+
+At the ED boundary `N=8`, the sparse NQS gap differs from ED by only
+`2.42e-12`. At `N=7`,
 
 - ED: `Delta_7 = 0.129198097822604`;
 - NQS: `Delta_7 = 0.129198097823100`;
@@ -21,9 +29,15 @@ validated for `N=3..7`. At `N=7`,
 - the five `M=-2,...,2` members have energy spread `4.44e-15`;
 - a generic-axis rotation agrees with the spin-2 representation to `9.43e-12`.
 
-A cautious linear fit in `1/N` for `N=4..8` gives
-`Delta_infinity = 0.1274 +/- 0.0048`; this regression error does not include the
-finite-size-fit systematic.
+A linear fit in `1/N` for `N=4..9` gives
+`Delta_infinity = 0.1289 +/- 0.0035`. Even/odd and quadratic alternatives imply
+a much larger `0.0134` small-size model envelope, so the extrapolation remains
+exploratory.
+
+The rank-two parent-channel metric probe resolves the predicted chirality. For
+`N=7` Coulomb, the integrated bright/dark ratio is `616`; the lowest `L=2` pole
+carries `77.4%` of the bright weight and has a bright/dark ratio of `1443`. For
+the `V1` Laughlin parent state the dark norm is zero to numerical precision.
 
 See [REPORT.md](REPORT.md) for the full table, interpretation, and limitations.
 
@@ -38,9 +52,10 @@ See [REPORT.md](REPORT.md) for the full table, interpretation, and limitations.
 - ED uses the same spherical Coulomb pseudopotentials and supplies an independent
   small-system oracle.
 
-This is an exact-enumeration, small-system NQS baseline. It validates the physics
-and acceptance criteria but does not claim the beyond-ED scaling of an
-autoregressive or Markov-chain NQS.
+The sparse projector removes the dense null-space bottleneck and reaches one
+size beyond the ED oracle. The implementation still enumerates the fixed-`M`
+Fock sector and explicitly builds the sparse Hamiltonian; it is therefore a
+certified `N=8--9` bridge, not a thermodynamic-scale autoregressive/MCMC NQS.
 
 ## Quick start
 
@@ -52,10 +67,13 @@ $env:PYTHONPATH = 'src'
 & '.venv\Scripts\python.exe' -m chiral_graviton ed --n 6 --output ed-n6.json
 & '.venv\Scripts\python.exe' -m chiral_graviton nqs --n 6 --samples 100000 --output nqs-n6.json
 & '.venv\Scripts\python.exe' -m chiral_graviton multiplet --n 7 --output multiplet-n7.json
+& '.venv\Scripts\python.exe' -m chiral_graviton nqs --n 9 --projection sparse --samples 100000 --output nqs-n9.json
+& '.venv\Scripts\python.exe' -m chiral_graviton chirality --n 7 --output chirality-n7.json
 ```
 
 To regenerate the complete acceptance suite, use
-`scripts/run_acceptance.ps1`; the `N=8` ED calculation is the slow step.
+`scripts/run_acceptance.ps1`; the `N=8` ED and `N=9` NQS calculations are the
+slow steps.
 
 ## Reference
 

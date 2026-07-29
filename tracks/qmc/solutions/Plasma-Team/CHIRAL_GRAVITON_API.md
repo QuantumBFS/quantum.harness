@@ -113,17 +113,30 @@ model.equivariance_error(parameters) -> float
 Allowed `total_l` values are `0` and `2`. The final vectors are exact
 highest-weight projections, not penalty-constrained approximations.
 
+For larger enumerated sectors:
+
+```python
+SparseProjectedMLP.build(system, interaction="coulomb") -> SparseProjectedMLP
+model.projection_certificate(parameters, total_l) -> ProjectionCertificate
+```
+
+`SparseHighestWeightProjector` applies
+`I-L_+^dagger(L_+L_+^dagger)^(-1)L_+` with sparse conjugate gradients and never
+constructs `highest_weight_basis`.
+
 ### Observables
 
 ```python
 multiplet_report(highest_basis, highest_vector, total_l, pair_table) -> MultipletReport
 transition_weight(initial, final, operator) -> float
 chirality_ratio(bright_weight, dark_weight) -> float
+chiral_weights(basis, state) -> ChiralWeights
+chiral_graviton_response(ground_basis, ground, graviton_basis, graviton) -> ChiralGravitonResponse
 ```
 
 `multiplet_report` returns all `M` values, their energies and `<L^2>`, the energy
-spread, and a generic-axis rotation-equivariance error. The package does not yet
-construct the paper's helicity-resolved metric operator.
+spread, and a generic-axis rotation-equivariance error. The chiral response uses
+the rank-two `m=1<->3` Laughlin parent-channel metric probe.
 
 ## Command-line API
 
@@ -139,10 +152,19 @@ python -m chiral_graviton ed --n 6 --interaction coulomb --output RESULT.json
 python -m chiral_graviton nqs --n 6 --samples 100000 --output RESULT.json
 ```
 
+Use `--projection sparse` for `N=8,9`.
+
 ### Certify the spin-2 multiplet
 
 ```text
 python -m chiral_graviton multiplet --n 7 --output MULTIPLET.json
+```
+
+### Certify the NQS tower and chirality
+
+```text
+python -m chiral_graviton nqs-multiplet --n 7 --projection sparse --output NQS_MULTIPLET.json
+python -m chiral_graviton chirality --n 7 --interaction coulomb --output CHIRALITY.json
 ```
 
 ### Validate a result

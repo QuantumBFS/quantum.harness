@@ -38,8 +38,27 @@ foreach ($n in 3..8) {
     }
 }
 
+foreach ($n in 8..9) {
+    $nqs = Join-Path $OutputDirectory "nqs-sparse-n$n.json"
+    & $python -m chiral_graviton nqs --n $n --projection sparse --samples 100000 --output $nqs
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $nqsFiles += $nqs
+}
+
 $multiplet = Join-Path $OutputDirectory 'multiplet-n7.json'
 & $python -m chiral_graviton multiplet --n 7 --output $multiplet
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+$nqsMultiplet = Join-Path $OutputDirectory 'nqs-multiplet-n7.json'
+& $python -m chiral_graviton nqs-multiplet --n 7 --projection sparse --output $nqsMultiplet
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+$chiralityV1 = Join-Path $OutputDirectory 'chirality-v1-n4.json'
+& $python -m chiral_graviton chirality --n 4 --interaction v1 --output $chiralityV1
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+$chiralityCoulomb = Join-Path $OutputDirectory 'chirality-coulomb-n7.json'
+& $python -m chiral_graviton chirality --n 7 --interaction coulomb --output $chiralityCoulomb
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & $python (Join-Path $PSScriptRoot 'summarize_results.py') `
