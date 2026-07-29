@@ -210,9 +210,9 @@ PYTHONPATH=src python -m metts_b.analyze --out metts_runs/analysis
 3. ✅ 完整运行配置 —— `configs/*.yaml` + `metts_runs/*/configs/run_config.yaml`
 4. ✅ 已知失败模式 —— §8
 5. ✅ 异常日志示例 —— `metts_runs/*/logs/`（失败样本 trace 内含 `error_message`/`status_code`）
-6. 中间状态/checkpoint —— 当前 `write_checkpoints=false`（可启用）；失败中间态由 trace 字段记录
-7. ✅ 10×10 单样本耗时估计 —— §9（~76 s）
-8. ✅ 10×10 单样本内存估计 —— §9（~0.063 GB）
+6. 中间状态/checkpoint —— 失败样本的中间态（`norm_before/after`、已采集的逐格点概率、能量、`error_message`、`status_code`、`step`、`seed`、初始/坍缩产品态）**完整记录在逐样本 trace JSON**（`metts_runs/*/traces/`），足以重建与复现失败点。`run_one_sample` 的 `checkpoint_dir` 参数与 `config.write_checkpoints` 标志已预留但当前不额外落盘（trace 已含等效信息）；如需独立 checkpoint 文件可在此扩展。
+7. ✅ 10×10 单样本耗时估计 —— §9（70–120 s，完整 smoke 734.5 s）
+8. ✅ 10×10 单样本内存估计 —— §9（~0.06 GB，χ=64）
 9. ✅ 当前代码版本 —— git commit `4de2dd9`（分支 `challenge-147-metts-implementation`）
 10. ✅ 复现命令 —— §10
 
