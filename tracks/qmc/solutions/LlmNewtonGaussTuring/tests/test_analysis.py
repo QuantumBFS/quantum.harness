@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import csv
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -362,6 +363,31 @@ def test_paratoric_comparison_statistics() -> None:
     )
 
 
+def paratoric_critical_rows(
+    params: dict, settings: dict
+) -> list[dict[str, str]]:
+    rows = []
+    size = int(params["L"])
+    field = float(params["field"])
+    for sample in range(int(settings["samples_per_chain"])):
+        rows.append({
+            "raw_schema": PARATORIC_CRITICAL.RAW_SCHEMA,
+            "target_lattice": str(params["target_lattice"]),
+            "gauge_lattice": "honeycomb", "L": str(size),
+            "beta": f"{size / field:.17g}", "field": f"{field:.17g}",
+            "mu": f"{float(settings['mu']):.17g}",
+            "seed": str(params["seed"]), "sample": str(sample),
+            "n_thermal": str(settings["n_thermal"]),
+            "n_samples": str(settings["samples_per_chain"]),
+            "updates_between": str(settings["updates_between"]),
+            "percolation_probability": str(sample % 2),
+            "staggered_imaginary_times": f"{0.1 * (-1) ** sample:.17g}",
+            "star_x": "1", "package_tau_percolation": "0.5",
+            "package_tau_sit": "0.75", "package_tau_star": "0.5",
+        })
+    return rows
+
+
 def test_paratoric_critical_contract() -> None:
     axes = PARATORIC_CRITICAL.plan_axes("triangular", "production")
     require(
@@ -399,20 +425,7 @@ def test_paratoric_critical_contract() -> None:
         "samples_per_chain": 8, "n_thermal": 256000,
         "updates_between": 4096, "mu": 64.0, "purpose": "pilot",
     }
-    rows = []
-    for sample in range(8):
-        rows.append({
-            "raw_schema": PARATORIC_CRITICAL.RAW_SCHEMA,
-            "target_lattice": "triangular", "gauge_lattice": "honeycomb",
-            "L": "8", "beta": f"{8 / 4.77:.17g}", "field": "4.77",
-            "mu": "64", "seed": "148700", "sample": str(sample),
-            "n_thermal": "256000", "n_samples": "8",
-            "updates_between": "4096",
-            "percolation_probability": str(sample % 2),
-            "staggered_imaginary_times": f"{0.1 * (-1) ** sample:.17g}",
-            "star_x": "1", "package_tau_percolation": "0.5",
-            "package_tau_sit": "0.75", "package_tau_star": "0.5",
-        })
+    rows = paratoric_critical_rows(params, settings)
     diagnostics = PARATORIC_CRITICAL.validate_rows(rows, params, settings)
     require(
         diagnostics["percolation_mean"] == 0.5
@@ -424,6 +437,35 @@ def test_paratoric_critical_contract() -> None:
     expect_value_error(
         lambda: PARATORIC_CRITICAL.validate_rows(bad_rows, params, settings),
         "ParaToric critical contract accepted a star-sector defect",
+    )
+    bad_rows = [dict(row) for row in rows]
+    bad_rows[0]["mu"] = "63"
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_rows(bad_rows, params, settings),
+        "ParaToric critical contract accepted the wrong charge penalty",
+    )
+    bad_rows = [dict(row) for row in rows]
+    bad_rows[1]["package_tau_sit"] = "0.8"
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_rows(bad_rows, params, settings),
+        "ParaToric critical contract accepted varying package tau values",
+    )
+    bad_rows = [dict(row) for row in rows]
+    bad_rows[0]["package_tau_percolation"] = "-0.5"
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_rows(bad_rows, params, settings),
+        "ParaToric critical contract accepted a negative package tau value",
+    )
+
+    planned = {"source_commit": "abc123", "source_dirty": False}
+    PARATORIC_CRITICAL.validate_source_provenance(
+        planned, {"source_commit": "abc123", "source_dirty": False}
+    )
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_source_provenance(
+            planned, {"source_commit": "def456", "source_dirty": False}
+        ),
+        "ParaToric execution accepted a source commit different from its plan",
     )
 
     manifests = []
@@ -438,6 +480,115 @@ def test_paratoric_critical_contract() -> None:
     require(
         cost["aggregate_cpu_seconds"] > cost["ideal_wall_seconds"] > 0.0,
         "ParaToric critical cost projection is invalid",
+    )
+
+
+def test_paratoric_manifest_contract(directory: Path) -> None:
+    run_dir = directory / "paratoric-contract"
+    cell_dir = run_dir / "cells" / "cell-0001"
+    cell_dir.mkdir(parents=True)
+    params = {
+        "target_lattice": "triangular", "L": 8, "field": 4.77,
+        "chain": 0, "seed": 148700,
+    }
+    settings = {
+        "samples_per_chain": 8, "n_thermal": 256000,
+        "updates_between": 4096, "mu": 64.0, "purpose": "pilot",
+        "sampler_sha256": "sampler-sha",
+    }
+    provenance = {
+        "protocol_id": PARATORIC_CRITICAL.PROTOCOL_ID,
+        "source_commit": "abc123", "source_dirty": False,
+        "source_dirty_paths": [],
+        "paratoric_commit": PARATORIC_CRITICAL.PARATORIC_COMMIT,
+        "paratoric_external_patch_sha256": (
+            PARATORIC_CRITICAL.PARATORIC_PATCH_SHA256
+        ),
+        "target_lattice": "triangular", "planned_at": "2026-07-29T00:00:00Z",
+    }
+    cell = {"cell_id": "cell-0001", "params": params}
+    spec = {
+        "run_id": "contract-test", "run_dir": str(run_dir),
+        "settings": settings, "provenance": provenance, "cells": [cell],
+    }
+    raw_path = cell_dir / "raw.csv"
+    rows = paratoric_critical_rows(params, settings)
+    with raw_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    diagnostics = PARATORIC_CRITICAL.validate_rows(rows, params, settings)
+    manifest = {
+        "schema_version": PARATORIC_CRITICAL.MANIFEST_SCHEMA,
+        "cell_id": cell["cell_id"], "status": "success",
+        "params": params, "settings": settings,
+        "provenance": {
+            **provenance, "observed_source_commit": provenance["source_commit"],
+            "observed_source_dirty": False, "sampler_sha256": "sampler-sha",
+            "host": "test", "platform": "test",
+        },
+        "wall_seconds": 1.0, "diagnostics": diagnostics,
+        "results": {
+            "percolation_mean": diagnostics["percolation_mean"],
+            "sit_mean": diagnostics["sit_mean"],
+        },
+        "artifacts": {"raw": {
+            "path": raw_path.name,
+            "sha256": PARATORIC_CRITICAL.sha256_file(raw_path),
+            "bytes": raw_path.stat().st_size,
+        }},
+    }
+    manifest_path = cell_dir / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    spec_path = run_dir / "run_spec.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+    PARATORIC_CRITICAL.validate_manifest(spec, cell, run_dir)
+
+    invalid = json.loads(json.dumps(manifest))
+    invalid["provenance"]["source_commit"] = "wrong"
+    manifest_path.write_text(json.dumps(invalid), encoding="utf-8")
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_manifest(spec, cell, run_dir),
+        "manifest validation accepted mismatched source provenance",
+    )
+    invalid = json.loads(json.dumps(manifest))
+    invalid["diagnostics"]["percolation_mean"] = 0.25
+    manifest_path.write_text(json.dumps(invalid), encoding="utf-8")
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.validate_manifest(spec, cell, run_dir),
+        "manifest validation accepted diagnostics inconsistent with raw data",
+    )
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with raw_path.open("a", encoding="utf-8") as handle:
+        handle.write("\n")
+    expect_value_error(
+        lambda: PARATORIC_CRITICAL.run_cell(spec_path, cell["cell_id"], False),
+        "resume accepted a successful manifest whose raw artifact was tampered",
+    )
+
+    reordered_path = directory / "paratoric-reordered.csv"
+    reversed_fields = list(reversed(rows[0]))
+    with reordered_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=reversed_fields)
+        writer.writeheader()
+        writer.writerows(rows)
+    values = PARATORIC_ANALYSIS.load_observable_columns(reordered_path)
+    require(
+        values.shape == (8, 3)
+        and values[1].tolist() == [1.0, -0.1, 1.0],
+        "ParaToric analysis did not resolve reordered observables by header name",
+    )
+
+    direct_path = directory / "direct-summary.json"
+    direct = {
+        "protocol_id": PARATORIC_CRITICAL.PROTOCOL_ID,
+        "target_lattice": "triangular", "hc": 4.768, "total_error": 1e-5,
+        "accepted": "false",
+    }
+    direct_path.write_text(json.dumps(direct), encoding="utf-8")
+    expect_value_error(
+        lambda: PARATORIC_ANALYSIS.load_direct_summary(direct_path, "triangular"),
+        "direct-route summary accepted a non-boolean acceptance field",
     )
 
 
@@ -619,6 +770,7 @@ def main() -> None:
         path = Path(directory)
         test_input_validation(path)
         test_protocol_and_robustness(path)
+        test_paratoric_manifest_contract(path)
     test_scaling_fit()
     test_sampling_gates()
     test_ctau_comparison()

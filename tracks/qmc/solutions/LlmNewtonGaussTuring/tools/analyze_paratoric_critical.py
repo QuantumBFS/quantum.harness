@@ -66,6 +66,23 @@ def _expected_cells(target: str) -> set[tuple[int, float, int]]:
     }
 
 
+def load_observable_columns(raw_path: Path) -> np.ndarray:
+    names = (
+        "percolation_probability", "staggered_imaginary_times", "star_x"
+    )
+    with raw_path.open(encoding="utf-8", newline="") as handle:
+        header = next(csv.reader(handle), None)
+    if header is None:
+        raise ValueError(f"raw file has no header: {raw_path}")
+    missing = [name for name in names if name not in header]
+    if missing:
+        raise ValueError(f"raw file is missing observable columns: {missing}")
+    indices = tuple(header.index(name) for name in names)
+    return np.loadtxt(
+        raw_path, delimiter=",", skiprows=1, usecols=indices, ndmin=2
+    )
+
+
 def load_production(
     spec_path: Path,
 ) -> tuple[dict[str, Any], dict[tuple[int, float], dict[int, np.ndarray]], dict]:
@@ -107,9 +124,7 @@ def load_production(
         if (int(actual.get("n_thermal", 0)) != expected_thermal
                 or int(actual.get("updates_between", 0)) != expected_between):
             raise ValueError(f"cell {(size, field, chain)} violates production cadence")
-        values = np.loadtxt(
-            raw_path, delimiter=",", skiprows=1, usecols=(12, 13, 14), ndmin=2
-        )
+        values = load_observable_columns(raw_path)
         if values.shape != (30000, 3) or not np.all(np.isfinite(values)):
             raise ValueError(f"cell {(size, field, chain)} has malformed raw values")
         if chain in cells[(size, field)]:
@@ -573,12 +588,14 @@ def load_direct_summary(path: Path | None, target: str) -> dict[str, Any]:
         raise ValueError("direct summary uses the wrong protocol identifier")
     if payload["target_lattice"] != target:
         raise ValueError("direct summary target differs from ParaToric production")
+    if not isinstance(payload["accepted"], bool):
+        raise ValueError("direct summary accepted field must be a JSON boolean")
     hc = float(payload["hc"])
     error = float(payload["total_error"])
     if not math.isfinite(hc) or not math.isfinite(error) or error <= 0.0:
         raise ValueError("direct summary contains an invalid field or uncertainty")
     return {
-        "provided": True, "accepted": bool(payload["accepted"]),
+        "provided": True, "accepted": payload["accepted"],
         "hc": hc, "total_error": error,
         "path": str(path), "sha256": critical.sha256_file(path),
     }

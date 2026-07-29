@@ -129,6 +129,20 @@ def source_provenance() -> dict[str, Any]:
     }
 
 
+def validate_source_provenance(
+    planned: dict[str, Any], observed: dict[str, Any]
+) -> None:
+    planned_commit = planned.get("source_commit")
+    if not isinstance(planned_commit, str) or not planned_commit:
+        raise ValueError("run spec has no planned source commit")
+    if planned.get("source_dirty") is not False:
+        raise ValueError("run spec was not planned from a clean scoped source tree")
+    if observed.get("source_dirty"):
+        raise ValueError("execution requires a clean scoped source tree")
+    if observed.get("source_commit") != planned_commit:
+        raise ValueError("current source commit differs from the planned commit")
+
+
 def stable_seed(run_id: str, params: dict[str, Any]) -> int:
     material = json.dumps(
         {"protocol_id": PROTOCOL_ID, "run_id": run_id, **params},
@@ -178,8 +192,8 @@ def cmd_plan(args: argparse.Namespace) -> None:
     inputs = run_dir / ".plan-inputs"
     inputs.mkdir(exist_ok=True)
     source = source_provenance()
-    if args.purpose == "production" and source["source_dirty"]:
-        raise ValueError("production planning requires a clean scoped source tree")
+    if source["source_dirty"]:
+        raise ValueError("planning requires a clean scoped source tree")
 
     axes = plan_axes(args.target, args.purpose)
     settings = {
@@ -221,12 +235,43 @@ def cmd_plan(args: argparse.Namespace) -> None:
             "status": {"type": "equality", "value": "success"},
             "diagnostics.max_star_defect": {"type": "bounds", "max": 1e-12},
             "artifacts.raw.sha256": {"type": "nonempty"},
+            "provenance.source_commit": {
+                "type": "equality", "value": source["source_commit"],
+            },
+            "provenance.source_dirty": {"type": "equality", "value": False},
+            "provenance.observed_source_commit": {
+                "type": "equality", "value": source["source_commit"],
+            },
+            "provenance.observed_source_dirty": {
+                "type": "equality", "value": False,
+            },
+            "provenance.sampler_sha256": {
+                "type": "equality", "value": settings["sampler_sha256"],
+            },
+            "provenance.paratoric_commit": {
+                "type": "equality", "value": PARATORIC_COMMIT,
+            },
+            "provenance.paratoric_external_patch_sha256": {
+                "type": "equality", "value": PARATORIC_PATCH_SHA256,
+            },
+            "provenance.target_lattice": {
+                "type": "equality", "value": args.target,
+            },
         },
         "consensus_fields": [
             "schema_version", "provenance.protocol_id",
-            "provenance.sampler_sha256",
+            "provenance.source_commit", "provenance.source_dirty",
+            "provenance.observed_source_commit", "provenance.observed_source_dirty",
+            "provenance.sampler_sha256", "provenance.paratoric_commit",
+            "provenance.paratoric_external_patch_sha256",
+            "provenance.target_lattice",
         ],
-        "provenance_fields": ["provenance.protocol_id"],
+        "provenance_fields": [
+            "provenance.protocol_id", "provenance.source_commit",
+            "provenance.source_dirty", "provenance.paratoric_commit",
+            "provenance.paratoric_external_patch_sha256",
+            "provenance.target_lattice",
+        ],
     }
     for cell in spec["cells"]:
         params = cell["params"]
@@ -260,7 +305,14 @@ def validate_rows(
     size = int(params["L"])
     field = float(params["field"])
     beta = size / field
+    mu = float(settings["mu"])
     star_defect = 0.0
+    tau_names = (
+        "package_tau_percolation", "package_tau_sit", "package_tau_star"
+    )
+    package_tau = {name: float(rows[0][name]) for name in tau_names}
+    if any(value < 0.0 for value in package_tau.values()):
+        raise ValueError("raw output contains a negative package autocorrelation time")
     for index, row in enumerate(rows):
         expected = {
             "raw_schema": RAW_SCHEMA,
@@ -285,6 +337,16 @@ def validate_rows(
             raise ValueError(f"sample {index} violates beta*field=L")
         if not math.isclose(float(row["field"]), field, rel_tol=1e-14):
             raise ValueError(f"sample {index} has the wrong target field")
+        if not math.isclose(float(row["mu"]), mu, rel_tol=1e-14):
+            raise ValueError(f"sample {index} has the wrong charge penalty")
+        for name in tau_names:
+            value = float(row[name])
+            if value < 0.0:
+                raise ValueError(
+                    f"sample {index} has a negative package autocorrelation time"
+                )
+            if not math.isclose(value, package_tau[name], rel_tol=1e-14):
+                raise ValueError(f"sample {index} has inconsistent {name}")
         if float(row["percolation_probability"]) not in (0.0, 1.0):
             raise ValueError(f"sample {index} has a nonbinary winding projector")
         if abs(float(row["staggered_imaginary_times"])) > 1.0 + 1e-12:
@@ -297,9 +359,9 @@ def validate_rows(
         return sum(float(row[name]) for row in rows) / len(rows)
 
     tau = {
-        "percolation": float(rows[0]["package_tau_percolation"]),
-        "sit": float(rows[0]["package_tau_sit"]),
-        "star": float(rows[0]["package_tau_star"]),
+        "percolation": package_tau["package_tau_percolation"],
+        "sit": package_tau["package_tau_sit"],
+        "star": package_tau["package_tau_star"],
     }
     effective = {
         key: samples / (2.0 * max(0.5, value)) for key, value in tau.items()
@@ -340,6 +402,7 @@ def run_cell(spec_path: Path, selector: str, retry_failed: bool) -> None:
     if manifest_path.exists() and not retry_failed:
         manifest = load_json(manifest_path)
         if manifest.get("status") == "success":
+            validate_manifest(spec, cell, run_dir)
             print(f"{cell_id}: already successful")
             return
     settings = {**spec["settings"], **cell.get("settings", {})}
@@ -347,8 +410,7 @@ def run_cell(spec_path: Path, selector: str, retry_failed: bool) -> None:
     if sha256_file(sampler) != settings["sampler_sha256"]:
         raise ValueError("sampler hash differs from the planned executable")
     source = source_provenance()
-    if settings["purpose"] == "production" and source["source_dirty"]:
-        raise ValueError("production execution requires a clean scoped source tree")
+    validate_source_provenance(spec.get("provenance", {}), source)
     params = cell["params"]
     raw_path = cell_dir / "raw.csv"
     started_at, start_clock = utc_now(), time.monotonic()
@@ -464,12 +526,47 @@ def validate_manifest(
     settings = {**spec["settings"], **cell.get("settings", {})}
     if manifest.get("settings") != settings:
         raise ValueError(f"{cell['cell_id']}: manifest settings differ from the plan")
+    provenance = manifest.get("provenance")
+    if not isinstance(provenance, dict):
+        raise ValueError(f"{cell['cell_id']}: manifest provenance is missing")
+    for key, expected in spec.get("provenance", {}).items():
+        if provenance.get(key) != expected:
+            raise ValueError(
+                f"{cell['cell_id']}: manifest provenance {key} differs from the plan"
+            )
+    planned_provenance = spec["provenance"]
+    if (provenance.get("observed_source_commit")
+            != planned_provenance.get("source_commit")
+            or provenance.get("observed_source_dirty")
+            is not planned_provenance.get("source_dirty")):
+        raise ValueError(f"{cell['cell_id']}: observed source provenance is invalid")
+    if provenance.get("sampler_sha256") != settings.get("sampler_sha256"):
+        raise ValueError(f"{cell['cell_id']}: manifest sampler hash differs from the plan")
     artifact = manifest.get("artifacts", {}).get("raw", {})
-    raw = manifest_path.parent / artifact.get("path", "")
-    if not raw.is_file() or artifact.get("sha256") != sha256_file(raw):
+    artifact_path = artifact.get("path")
+    if (not isinstance(artifact_path, str) or not artifact_path
+            or Path(artifact_path).is_absolute()
+            or Path(artifact_path).name != artifact_path):
+        raise ValueError(f"{cell['cell_id']}: raw artifact path is invalid")
+    raw = manifest_path.parent / artifact_path
+    if raw.resolve().parent != manifest_path.parent.resolve() or not raw.is_file():
+        raise ValueError(f"{cell['cell_id']}: raw artifact path is invalid")
+    if artifact.get("bytes") != raw.stat().st_size:
+        raise ValueError(f"{cell['cell_id']}: raw artifact size mismatch")
+    if artifact.get("sha256") != sha256_file(raw):
         raise ValueError(f"{cell['cell_id']}: raw hash mismatch")
     with raw.open(encoding="utf-8", newline="") as handle:
-        validate_rows(list(csv.DictReader(handle)), cell["params"], settings)
+        diagnostics = validate_rows(
+            list(csv.DictReader(handle)), cell["params"], settings
+        )
+    if manifest.get("diagnostics") != diagnostics:
+        raise ValueError(f"{cell['cell_id']}: manifest diagnostics differ from raw data")
+    expected_results = {
+        "percolation_mean": diagnostics["percolation_mean"],
+        "sit_mean": diagnostics["sit_mean"],
+    }
+    if manifest.get("results") != expected_results:
+        raise ValueError(f"{cell['cell_id']}: manifest results differ from raw data")
     return manifest, raw
 
 
