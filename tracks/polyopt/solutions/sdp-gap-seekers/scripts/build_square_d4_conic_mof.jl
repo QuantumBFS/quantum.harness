@@ -202,6 +202,30 @@ function main(args::Vector{String} = ARGS)
     quotient = d4_moment_quotient(assembly.moments, perms)
     progress("D4 JuMP model: blocks=$(length(d4model.positive_block_constraints)), variables=$expected_variables (orig moments=$(length(assembly.moments)), after D4 moment-orbit quotient)")
 
+    # P1.2: reduced-model semantic identity + quotient variable manifest.
+    # Hashes the D4 elements/perms, block structure, ordered quotient reps, and
+    # the full original-moment -> representative map, combined with the source
+    # assembly hash + schema. Distinct from the unreduced assembly_sha256.
+    quotient_manifest_lines = String[
+        "schema=square-d4-quotient-manifest-v1",
+        "source_assembly_sha256=$(assembly.assembly_sha256)",
+        "d4_elements=$(length(elements))",
+        ["perm\t$(join(perm, ","))" for perm in perms]...,
+        "blocks=$(block_label(sym))",
+        "quotient_variable_count=$(quotient.quotient_count)",
+        "orbit_size_histogram=$(sort!(collect(quotient.orbit_histogram)))",
+        ["rep[$i]=$(scalar_moment_string(r))" for (i, r) in enumerate(quotient.representative_moments)]...,
+        ["moment\t$(scalar_moment_string(m))\trep\t$(quotient.moment_to_variable[m])" for m in assembly.moments]...,
+    ]
+    quotient_manifest = join(quotient_manifest_lines, "\n")
+    reduced_model_sha256 = bytes2hex(sha256(quotient_manifest))
+    manifest_path = joinpath(output_path, "quotient-manifest.txt")
+    open(manifest_path, "w") do io
+        println(io, quotient_manifest)
+        println(io, "reduced_model_sha256\t", reduced_model_sha256)
+    end
+    progress("quotient manifest written: reduced_model_sha256=$reduced_model_sha256")
+
     mof_path = joinpath(output_path, "model.mof.json")
     GC.gc()
     exp_m = @timed JuMP.write_to_file(d4model.model, mof_path)
@@ -255,7 +279,9 @@ function main(args::Vector{String} = ARGS)
         "d4_moment_quotient" => Dict("original_moment_count" => quotient.original_count,
             "quotient_variable_count" => quotient.quotient_count,
             "reduction_fraction" => 1 - quotient.quotient_count / quotient.original_count,
-            "orbit_size_histogram" => Dict(string(k) => v for (k, v) in quotient.orbit_histogram)),
+            "orbit_size_histogram" => Dict(string(k) => v for (k, v) in quotient.orbit_histogram),
+            "reduced_model_sha256" => reduced_model_sha256,
+            "quotient_manifest_file" => "quotient-manifest.txt"),
         "mof" => Dict("filename" => "model.mof.json", "size_bytes" => filesize(mof_path),
             "sha256" => mof_sha, "variable_order_contract" => "moment[1]...moment[n]",
             "identity_variable" => "moment[1]", "normalization_constraint" => "normalization",
@@ -270,6 +296,7 @@ function main(args::Vector{String} = ARGS)
     open(joinpath(output_path, "SHA256SUMS"), "w") do io
         println(io, mof_sha, "  model.mof.json")
         println(io, file_sha256(runmeta_path), "  runmeta.toml")
+        println(io, file_sha256(manifest_path), "  quotient-manifest.txt")
     end
     progress("runmeta and checksums written; bundle complete")
     return 0
