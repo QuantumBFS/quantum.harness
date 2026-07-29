@@ -17,6 +17,9 @@
 - 合作者已在独立分支运行 non-induced exterior-cone 扫描；本分支不重复开发；
 - 当前主线改为放开局域/Hermitian 限制，从已有严格正性类反推长程、多体、全局约束、
   Wilson-string 和准 Hermitian 非常规模型。
+- 第一批已经得到一个通用 Hermitian 半群模型工厂和八种严格/精确可约化模型；
+  tensor-square 多通道、grade-charge full trace 和 adjoint lift 进入优先排重，
+  但确认的新无符号物理类仍为零。
 
 下面的长清单用于审计数字，日常不需要逐条阅读。
 
@@ -85,7 +88,7 @@
   independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
-- 当前完整自动测试为 `269 passed`。
+- 当前完整自动测试为 `350 passed`。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
@@ -178,6 +181,10 @@ cd /home/volper/harness_quantum/signfree-qmc
 4. edge-electric gauge/cocycle 在四/六模式上精确消号，但扩展后产生 system-size
    Wilson string；该对象现在作为允许的非常规模型来源，而不是立即淘汰；
 5. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
+6. 非常规模型第一批已经完成，下一步优先排重一般 `m>=3` tensor-square 多通道、
+   grade-charge full model 和 adjoint lift，并把一个幸存者接入实际 vertex-word
+   采样。统一结论见
+   [非常规模型第一批结果](docs/UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
 后者已明确约化到 Majorana reflection positivity。后续候选必须同时通过数学证明、

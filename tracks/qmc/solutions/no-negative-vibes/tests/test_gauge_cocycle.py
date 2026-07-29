@@ -3,14 +3,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
+import pytest
+
 from oracle.gauge_cocycle import (
     affine_phase_exponent,
     apply_gauge_hop,
     audit_all_legal_transitions,
+    audit_constrained_gauge_hamiltonian,
     central_rung_locality,
     closed_legal_word_counts,
     compensation_radius,
     compensation_support_edges,
+    constrained_gauge_hamiltonian,
     fermion_hop_sign_exponent,
     gauss_occupation_mask,
     hop_is_legal,
@@ -184,3 +189,71 @@ def test_checked_in_gauge_cocycle_certificate_matches_oracle() -> None:
         central_rung_locality(columns)
         for columns in range(2, 11)
     ]
+
+
+def test_square_constrained_hamiltonian_has_exact_link_basis_anchors() -> None:
+    instance = ladder_gauge_instance(2)
+    model = constrained_gauge_hamiltonian(
+        instance,
+        hopping_couplings=(2.0, 3.0, 5.0, 7.0),
+        plaquette_couplings=(11.0,),
+    )
+
+    assert instance.edges == ((0, 1), (0, 2), (1, 3), (2, 3))
+    assert model.matrix.shape == (16, 16)
+    assert model.gauge_basis == tuple(range(16))
+    assert model.occupation_basis[0] == 0
+    assert model.occupation_basis[1] == 0b0011
+
+    # The empty Gauss state has no legal matter hop, only the square flip.
+    assert model.matrix[15, 0] == -11.0
+    assert np.flatnonzero(model.matrix[:, 0]).tolist() == [15]
+
+    # With link (0,1) set, exactly the two rungs can hop.
+    assert model.matrix[3, 1] == -3.0
+    assert model.matrix[5, 1] == -5.0
+    assert model.matrix[14, 1] == -11.0
+    assert np.flatnonzero(model.matrix[:, 1]).tolist() == [3, 5, 14]
+
+
+def test_square_constrained_hamiltonian_is_exactly_stoquastic_and_reversible() -> None:
+    model = constrained_gauge_hamiltonian(
+        ladder_gauge_instance(2),
+        hopping_couplings=(0.5, 1.0, 1.5, 2.0),
+        plaquette_couplings=(0.75,),
+        diagonal_energies=tuple(float(index) for index in range(16)),
+    )
+    audit = audit_constrained_gauge_hamiltonian(model)
+
+    assert audit.basis_dimension == audit.expected_dimension == 16
+    assert audit.directed_hopping_transitions == 32
+    assert audit.directed_plaquette_transitions == 16
+    assert audit.gauss_law_failures == 0
+    assert audit.reverse_transition_failures == 0
+    assert audit.hermiticity_error == 0.0
+    assert audit.positive_offdiagonal_entries == 0
+    assert np.array_equal(model.matrix, model.matrix.T)
+    assert np.array_equal(np.diag(model.matrix), np.arange(16, dtype=float))
+
+
+def test_constrained_hamiltonian_requires_positive_complete_couplings() -> None:
+    instance = ladder_gauge_instance(2)
+
+    with pytest.raises(ValueError, match="exactly 4"):
+        constrained_gauge_hamiltonian(
+            instance,
+            hopping_couplings=(1.0,),
+            plaquette_couplings=(1.0,),
+        )
+    with pytest.raises(ValueError, match="strictly positive"):
+        constrained_gauge_hamiltonian(
+            instance,
+            hopping_couplings=(1.0, 1.0, 1.0, 0.0),
+            plaquette_couplings=(1.0,),
+        )
+    with pytest.raises(ValueError, match="strictly positive"):
+        constrained_gauge_hamiltonian(
+            instance,
+            hopping_couplings=(1.0, 1.0, 1.0, 1.0),
+            plaquette_couplings=(-1.0,),
+        )

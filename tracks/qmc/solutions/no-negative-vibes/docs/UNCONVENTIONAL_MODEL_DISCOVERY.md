@@ -2,7 +2,8 @@
 
 更新时间：2026-07-29
 
-状态：正式研究方向；本页定义范围和证据标准，不把候选设想当作结果。
+状态：正式研究方向与证据标准；第一批结果见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
 
 ## 一句话目标
 
@@ -196,9 +197,12 @@ Hamiltonian，再寻找低秩、稀疏、对称或准局域结构。
 
 ## 第一轮交付
 
-1. 至少六张非常规模型卡，覆盖 U1–U6；
-2. 至少两个完整的 Hamiltonian/transfer minimal working examples；
-3. 至少一个显式 pseudo-Hermitian metric 或相似变换证书；
-4. 每个模型的支持范围、体数、Hermiticity 和已知类标签；
-5. 一个机器可读 fixture 与自动测试；
-6. 一张“怪但严格 / 可约化 / 有物理希望 / 已知重述”的结果表。
+已完成并汇总到
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)：
+
+1. 八种非常规模型构造，覆盖 U1–U6；
+2. tensor-square、odd block-TN、grade-charge 等完整 Hamiltonian/transfer MWE；
+3. Stark 链的显式正 metric、相似变换和条件数证书；
+4. 每个模型的支持范围、体数、Hermiticity、L1/L2/L3 和已知类标签；
+5. 六个 oracle 模块和对应自动回归；
+6. “值得排重 / 已知约化 / 校准对象”的统一结果表。

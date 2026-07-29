@@ -17,6 +17,10 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
+import math
+from typing import Sequence
+
+import numpy as np
 
 
 Edge = tuple[int, int]
@@ -50,6 +54,40 @@ class TransitionAudit:
     sign_failures: int
     gauss_law_failures: int
     reverse_phase_failures: int
+
+
+@dataclass(frozen=True)
+class ConstrainedGaugeHamiltonian:
+    """Exact Hamiltonian in the Gauss-law link-bit basis.
+
+    This is the code-space form of the Wilson-compensated fermion-gauge
+    Hamiltonian.  It is a known L2/stoquastic reduction, not a new positivity
+    mechanism: after the Gauss constraint is solved, dressed hopping becomes
+    a kinetically constrained link flip.
+    """
+
+    instance: LadderGaugeInstance
+    background_charge_mask: int
+    gauge_basis: tuple[int, ...]
+    occupation_basis: tuple[int, ...]
+    hopping_couplings: tuple[float, ...]
+    plaquette_couplings: tuple[float, ...]
+    diagonal_energies: tuple[float, ...]
+    matrix: np.ndarray
+
+
+@dataclass(frozen=True)
+class ConstrainedHamiltonianAudit:
+    """Independent finite-basis checks for a constrained Hamiltonian."""
+
+    basis_dimension: int
+    expected_dimension: int
+    directed_hopping_transitions: int
+    directed_plaquette_transitions: int
+    gauss_law_failures: int
+    reverse_transition_failures: int
+    hermiticity_error: float
+    positive_offdiagonal_entries: int
 
 
 def ladder_gauge_instance(columns: int) -> LadderGaugeInstance:
@@ -456,3 +494,219 @@ def central_rung_locality(columns: int) -> dict[str, int]:
             compensation.coefficient_mask,
         ),
     }
+
+
+def _positive_couplings(
+    values: Sequence[float],
+    *,
+    count: int,
+    name: str,
+) -> tuple[float, ...]:
+    couplings = tuple(float(value) for value in values)
+    if len(couplings) != count:
+        raise ValueError(f"{name} must contain exactly {count} values")
+    if any(not math.isfinite(value) or value <= 0.0 for value in couplings):
+        raise ValueError(f"{name} must be finite and strictly positive")
+    return couplings
+
+
+def _plaquette_mask(
+    instance: LadderGaugeInstance,
+    plaquette_index: int,
+) -> int:
+    if not 0 <= plaquette_index < len(instance.plaquettes):
+        raise ValueError("plaquette_index is outside the instance")
+    return sum(
+        1 << edge_index
+        for edge_index in instance.plaquettes[plaquette_index]
+    )
+
+
+def constrained_gauge_hamiltonian(
+    instance: LadderGaugeInstance,
+    *,
+    hopping_couplings: Sequence[float],
+    plaquette_couplings: Sequence[float],
+    diagonal_energies: Sequence[float] | None = None,
+    background_charge_mask: int = 0,
+) -> ConstrainedGaugeHamiltonian:
+    """Build the Wilson-compensated Hamiltonian in the physical link basis.
+
+    Basis index ``a`` denotes the unique physical state
+    ``|n(a)>_F tensor |a>_Z`` fixed by Gauss' law.  A legal dressed hop has
+    matrix element ``-t_e`` and a plaquette flip has matrix element ``-K_p``.
+    The explicit fermion and Wilson exponents are multiplied here rather than
+    discarded, providing a direct executable anchor for their cancellation.
+
+    The resulting matrix is the known L2/stoquastic link-spin reduction of the
+    Wilson-string representation; this constructor does not claim a new
+    sign-free mechanism.
+    """
+
+    background = _validate_bit_mask(
+        background_charge_mask,
+        width=instance.sites,
+        name="background_charge_mask",
+    )
+    hopping = _positive_couplings(
+        hopping_couplings,
+        count=len(instance.edges),
+        name="hopping_couplings",
+    )
+    plaquette = _positive_couplings(
+        plaquette_couplings,
+        count=len(instance.plaquettes),
+        name="plaquette_couplings",
+    )
+    dimension = 1 << len(instance.edges)
+    if diagonal_energies is None:
+        diagonal = (0.0,) * dimension
+    else:
+        diagonal = tuple(float(value) for value in diagonal_energies)
+        if len(diagonal) != dimension:
+            raise ValueError(
+                f"diagonal_energies must contain exactly {dimension} values"
+            )
+        if any(not math.isfinite(value) for value in diagonal):
+            raise ValueError("diagonal_energies must be finite")
+
+    gauge_basis = tuple(range(dimension))
+    occupation_basis = tuple(
+        gauss_occupation_mask(
+            instance,
+            gauge_mask,
+            background_charge_mask=background,
+        )
+        for gauge_mask in gauge_basis
+    )
+    compensations = tuple(
+        minimum_legal_compensation(
+            instance,
+            edge_index,
+            background_charge_mask=background,
+        )
+        for edge_index in range(len(instance.edges))
+    )
+    matrix = np.diag(np.asarray(diagonal, dtype=float))
+    for gauge_mask, occupation in zip(
+        gauge_basis,
+        occupation_basis,
+        strict=True,
+    ):
+        for edge_index, edge in enumerate(instance.edges):
+            if not hop_is_legal(instance, occupation, edge_index):
+                continue
+            fermion_phase = fermion_hop_sign_exponent(occupation, edge)
+            wilson_phase = affine_phase_exponent(
+                compensations[edge_index],
+                gauge_mask,
+            )
+            compensated_amplitude = (
+                1.0 if fermion_phase == wilson_phase else -1.0
+            )
+            target = gauge_mask ^ (1 << edge_index)
+            matrix[target, gauge_mask] -= (
+                hopping[edge_index] * compensated_amplitude
+            )
+        for plaquette_index, coupling in enumerate(plaquette):
+            target = gauge_mask ^ _plaquette_mask(instance, plaquette_index)
+            matrix[target, gauge_mask] -= coupling
+
+    return ConstrainedGaugeHamiltonian(
+        instance=instance,
+        background_charge_mask=background,
+        gauge_basis=gauge_basis,
+        occupation_basis=occupation_basis,
+        hopping_couplings=hopping,
+        plaquette_couplings=plaquette,
+        diagonal_energies=diagonal,
+        matrix=matrix,
+    )
+
+
+def audit_constrained_gauge_hamiltonian(
+    model: ConstrainedGaugeHamiltonian,
+    *,
+    tolerance: float = 1e-12,
+) -> ConstrainedHamiltonianAudit:
+    """Audit Gauss preservation, reversibility, Hermiticity, and stoquasticity."""
+
+    if tolerance < 0.0:
+        raise ValueError("tolerance must be nonnegative")
+    instance = model.instance
+    compensations = tuple(
+        minimum_legal_compensation(
+            instance,
+            edge_index,
+            background_charge_mask=model.background_charge_mask,
+        )
+        for edge_index in range(len(instance.edges))
+    )
+    hopping_transitions = 0
+    plaquette_transitions = 0
+    gauss_failures = 0
+    reverse_failures = 0
+    for gauge_mask, occupation in zip(
+        model.gauge_basis,
+        model.occupation_basis,
+        strict=True,
+    ):
+        for edge_index, edge in enumerate(instance.edges):
+            if not hop_is_legal(instance, occupation, edge_index):
+                continue
+            hopping_transitions += 1
+            new_occupation, new_gauge = apply_gauge_hop(
+                instance,
+                occupation,
+                gauge_mask,
+                edge_index,
+            )
+            expected_occupation = gauss_occupation_mask(
+                instance,
+                new_gauge,
+                background_charge_mask=model.background_charge_mask,
+            )
+            if new_occupation != expected_occupation:
+                gauss_failures += 1
+            forward_phase = (
+                fermion_hop_sign_exponent(occupation, edge)
+                ^ affine_phase_exponent(
+                    compensations[edge_index],
+                    gauge_mask,
+                )
+            )
+            reverse_phase = (
+                fermion_hop_sign_exponent(new_occupation, edge)
+                ^ affine_phase_exponent(
+                    compensations[edge_index],
+                    new_gauge,
+                )
+            )
+            if (
+                not hop_is_legal(instance, new_occupation, edge_index)
+                or forward_phase != 0
+                or reverse_phase != forward_phase
+            ):
+                reverse_failures += 1
+        for plaquette_index in range(len(instance.plaquettes)):
+            plaquette_transitions += 1
+            target = gauge_mask ^ _plaquette_mask(instance, plaquette_index)
+            if target ^ _plaquette_mask(instance, plaquette_index) != gauge_mask:
+                reverse_failures += 1
+
+    matrix = np.asarray(model.matrix)
+    expected_dimension = 1 << len(instance.edges)
+    hermiticity_error = float(np.max(np.abs(matrix - matrix.T)))
+    offdiagonal = matrix - np.diag(np.diag(matrix))
+    return ConstrainedHamiltonianAudit(
+        basis_dimension=matrix.shape[0],
+        expected_dimension=expected_dimension,
+        directed_hopping_transitions=hopping_transitions,
+        directed_plaquette_transitions=plaquette_transitions,
+        gauss_law_failures=gauss_failures,
+        reverse_transition_failures=reverse_failures,
+        hermiticity_error=hermiticity_error,
+        positive_offdiagonal_entries=int(
+            np.count_nonzero(offdiagonal > tolerance)
+        ),
+    )

@@ -187,6 +187,20 @@ projected cone 仍开放，但只有给出逐构型正 transfer matrix 才重开
 尚未增加成果计数。见
 [非常规模型发现](UNCONVENTIONAL_MODEL_DISCOVERY.md)。
 
+第一批反推现已完成：我们证明了一个通用构造——任何乘法、转置封闭且历史
+`det(I+D)>=0` 的实矩阵半群，都可通过
+
+```text
+H = -sum_a q_a [Gamma(B_a)+Gamma(B_a)^dagger]
+```
+
+生成逐 Taylor word 非负的 Hermitian 相互作用模型。基于它和精确相似/投影变换，
+已经得到八种长程、全局、多体、ancilla、Wilson-string 或 pseudo-Hermitian 模型。
+其中 Wilson gauge、Stark similarity、star-to-chain 已明确降为 L2/已知校准；
+一般 tensor-square 多通道、grade-charge full trace 和 adjoint lift 仍待排重。
+这批结果增加的是 L1/L2 模型与研究基础，不增加“确认的新无符号物理类”计数。见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
+
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。
 

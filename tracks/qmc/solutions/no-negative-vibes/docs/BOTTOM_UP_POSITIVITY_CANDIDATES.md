@@ -16,6 +16,11 @@ exact-card/pressure 扫描，本分支不再重复。我们的执行主线改为
 Hermitian 限制，从本页已经严格成立的结构反推非常规模型，见
 [非常规模型发现](UNCONVENTIONAL_MODEL_DISCOVERY.md)。
 
+首批反推已经完成：一个通用 Hermitian 半群模型工厂和八种完整构造已经形成，核心
+对象已有 oracle 与自动回归，当前 L3 计数仍为零。统一证据、已知类风险和下一轮
+三项优先排重见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
+
 ## 为什么换搜索方式
 
 此前多条路线都是先在四模式单块中找到正锥，再检查两个局域块重叠后能否共用同一

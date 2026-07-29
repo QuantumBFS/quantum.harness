@@ -43,6 +43,12 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 “复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
 分支和检验候选。
 
+第一批反推已经交付一个通用 Hermitian 半群模型工厂与八种完整构造。它们没有增加
+L3 计数；下一步不再继续凑模型数量，而优先审计一般 `m>=3` tensor-square 多通道、
+grade-charge full trace 和 adjoint lift，并把一个幸存对象接到实际 vertex-word
+采样。详见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
+
 ## 主线 A：从严格正性类开采非常规模型
 
 这一主线不再把短程局域 Hermitian Hamiltonian 作为进入计算前的条件。候选可以先停在：
