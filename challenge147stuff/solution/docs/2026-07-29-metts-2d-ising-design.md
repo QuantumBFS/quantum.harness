@@ -3,7 +3,9 @@
 - **Challenge:** #147 (PEPS-based algorithm), released by Wei Li, ITP CAS.
 - **Date:** 2026-07-29
 - **Status:** Approved by user (architecture, two-version split, staged file outputs).
-- **Hardware context:** laptop = 8 cores / 3.7 GB RAM; a supercomputer will be available later. So we deliver a low-perf **v0** (runs on the laptop) and a higher-requirement **v1** (prepared for the supercomputer), sharing core code.
+- **Hardware context:** laptop = 4 cores (Intel i5-9300H), **4.4 GiB free RAM** (5.8 GiB total) + 8 GiB swap, verified on-machine 2026-07-29; a supercomputer will be available later. So we deliver a low-perf **v0** (runs on the laptop) and a higher-requirement **v1** (prepared for the supercomputer), sharing core code.
+- **Implementation stack:** **Python + NumPy/SciPy** (chosen for the lowest memory footprint and the strongest OOM control — no JIT warmup allocations, no library that pre-allocates large buffers). ED / QMC / snake-MPS METTS all run within the 4.4 GiB budget. Julia/ITensor is reserved for the v1 supercomputer path.
+- **Hard constraint:** *宁可损失效率，也一定不要崩溃* — prefer losing efficiency (smaller lattice, fewer samples, lower bond dim) over crashing. Every numerically heavy stage caps its own allocation and auto-degrades on OOM, recording the actual size in the manifest.
 
 ## 1. Objective
 
@@ -90,6 +92,6 @@ Each stage targets v0 first (files produced on the laptop), then promotes to v1 
 ## 7. Constraints & risk mitigations
 
 - **No MATLAB:** `QSpinTN.ml` is algorithm-reference only; nothing is run from it.
-- **3.7 GB RAM:** v0 snake-MPS keeps bond dims small; 2D contractions use boundary-MPS / truncation; OOM auto-degrades lattice size.
+- **4.4 GiB free RAM (laptop):** v0 snake-MPS keeps bond dims small; 2D contractions use boundary-MPS / truncation; OOM auto-degrades lattice size. Concretely: ED is capped at ≤4×4 (full 4×4 dense basis is 2^16 states ≈ 2.1 GiB for a real-symmetric eigensolve, so we use sparse/Lanczos and never materialize the full dense Hamiltonian); QMC uses O(N) spin config memory; snake-MPS METTS caps bond dim so the MPS tensors stay < ~1 GiB. An explicit memory budget guard (psutil RSS check before each heavy alloc) triggers graceful degradation before a MemoryError.
 - **METTS low-T variance:** reported via binning/SEM; sample-count target stated; honest reporting if not met within budget.
 - **Reproducibility:** every run writes a JSON manifest; `run_all.sh` reproduces from clean state.
