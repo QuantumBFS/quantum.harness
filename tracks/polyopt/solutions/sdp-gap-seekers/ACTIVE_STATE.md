@@ -847,3 +847,8 @@ Updated: 2026-07-29 UTC.
   1,906,425-entry gate, streams the 490-side split cones through the validated
   SO(3) rank-four moment projection, and cannot invoke the optimizer. Record
   its exact inventory and coefficient SHA-256 before a separate solve.
+- Decision-solve resource prechoice: the split keeps 57.13% of the packed
+  rows, so linear scaling from the measured 512,036,704-KiB full-cone peak is
+  about 292.5 GB. Use one 500000-MiB high-memory run after the hash gate, not a
+  likely-failing 114000-MiB normal-node reconstruction; submit with explicit
+  `--gres-flags=disable-binding`.

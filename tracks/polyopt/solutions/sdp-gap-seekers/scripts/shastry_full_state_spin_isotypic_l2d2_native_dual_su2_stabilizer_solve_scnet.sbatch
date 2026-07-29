@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=ss-l2-stab-su2-solve
-#SBATCH --partition=kshcnormal
+# Submit with `sbatch --gres-flags=disable-binding ...` because SCNet 22.05
+# does not honor that flag from an SBATCH directive.
+#SBATCH --job-name=ss-l2-stab-su2-hm500
+#SBATCH --partition=ksagnormal01
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=114000M
+#SBATCH --mem=500000M
+#SBATCH --gres=gpu:1
+#SBATCH --gres-flags=disable-binding
 #SBATCH --time=12:00:00
-#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-stabilizer-su2-solve-%j.out
+#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-stabilizer-su2-hm500-%j.out
 
 set -euo pipefail
 
@@ -30,7 +34,7 @@ readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
 readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
 readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
-readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-su2-stabilizer-solve-scnet-${SLURM_JOB_ID}"
+readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-su2-stabilizer-hm500-scnet-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"
 [[ "$PWD" == "$EXPECTED_ROOT" ]] || {

@@ -284,5 +284,8 @@ Updated: 2026-07-29T20:47:30Z
   `402e2ce` on 32 CPUs / 64000 MiB. It repeats the exact cross gate and streams
   the split+SO(3) coefficients with no optimizer. Keep its checkout unchanged
   and use its eventual exact hash to gate the separate solve.
+- The eventual split decision runner targets 500000 MiB: packed-row scaling
+  predicts about 292.5 GB from the measured full-cone peak, so 114000 MiB is
+  not a credible first numerical tier. It remains hash-gated and unsubmitted.
 
 No user input or new credential is currently required.

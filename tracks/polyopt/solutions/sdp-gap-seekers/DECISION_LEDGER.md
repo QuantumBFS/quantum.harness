@@ -1472,3 +1472,11 @@ already-validated SO(3) rank-four moment projection, fingerprints every
 retained coefficient, and sets solver execution to build-only. It cannot
 produce feasibility evidence. Next action is conditional on its exact
 inventory/hash; do not update `ss-remote-cone-dev` while it runs.
+
+Resource estimate before the split solve: 2,540,067 / 4,446,492 = 57.13% of
+the packed rows. Linear scaling of the measured 512,036,704-KiB full-cone
+factorization peak gives about 292.5 GB; nonlinear fill is uncertain. A
+114000-MiB solve would therefore be a likely operational repeat. After the
+independent hash passes, use one 500000-MiB `ksagnormal01` run with GRES
+binding disabled. This is a changed 490-side factorization, not a larger-memory
+repeat of the closed 975-side formulation.
