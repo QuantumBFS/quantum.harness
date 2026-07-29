@@ -452,7 +452,14 @@ def _trace_compatible_column_generation(
         _rationalize_ray(numerical[:, column], max_denominator=max_denominator)
         for column in range(dimension)
     ]
-    if sp.ImmutableMatrix.hstack(*rays).rank() != dimension:
+    # This is only a discovery seed gate.  Avoid an expensive exact rank on a
+    # large bounded-denominator matrix; the promotion function independently
+    # rechecks exact full row rank before emitting any certificate.
+    numerical_rays = np.asarray(
+        sp.ImmutableMatrix.hstack(*rays).tolist(),
+        dtype=float,
+    )
+    if np.linalg.matrix_rank(numerical_rays) != dimension:
         return {
             "status": "rank-deficient-rational-seed",
             "milestones": [],
