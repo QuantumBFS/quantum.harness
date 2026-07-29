@@ -439,7 +439,8 @@ function write_mosek_infeasibility_ray_artifact(
         "scalar_variable_count" => length(slx),
         "affine_conic_dual_count" => length(doty),
         "semidefinite_variable_count" => length(bar_duals),
-        "semidefinite_packed_value_count" => sum(length, bar_duals),
+        "semidefinite_packed_value_count" =>
+            sum(length, bar_duals; init=0),
     )
 end
 
