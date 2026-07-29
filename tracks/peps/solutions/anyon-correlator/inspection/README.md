@@ -3,11 +3,13 @@
 One-off investigative scripts from the M2 simple-update inspection (2026-07-28).
 They are **not** part of the main challenge pipeline; they document *why* simple
 update fails from random initialization and which routes do reach the toric-code
-ground state. Findings summary: [`../FINDINGS.md`](../FINDINGS.md).
+ground state. Findings summary:
+[`../M2_SU_FINDINGS.md`](../M2_SU_FINDINGS.md).
 
-Main pipeline files (unchanged roles): `../scripts/ed_checks.jl` (M1),
-`../scripts/tc_peps.jl` (M2 machinery), `../scripts/groundstate_h0.jl` (M2 driver),
-`../tests/runtests.jl` (fast unit tests).
+Main files: `../scripts/ed_checks.jl` (M1), `../scripts/tc_peps.jl` (shared
+machinery), `../scripts/ad_tied_gd.jl` (completed M2 driver),
+`../scripts/groundstate_h0.jl` (legacy SU route), and `../tests/runtests.jl`
+(unit tests).
 
 | Script | Purpose | Key result |
 |---|---|---|

@@ -3,7 +3,7 @@
 # site-resolved <A_s> = <B_p> = 1 mean SU + conventions are sound.
 #
 # Result: FAILED to reach the ground state (E_cell = -6.026) — the SU stall
-# documented in ../FINDINGS.md. Usage: julia --project=julia-env inspection/su_ungraded_test.jl [seed] [nstep]
+# documented in ../M2_SU_FINDINGS.md. Usage: julia --project=julia-env inspection/su_ungraded_test.jl [seed] [nstep]
 
 using LinearAlgebra, Printf, Dates, Random
 using TensorKit, PEPSKit, MPSKit

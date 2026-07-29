@@ -1,4 +1,4 @@
-# M2 Interim Report: Random-Start Toric-Code Ground State
+# M2 Report: Random-Start Toric-Code Ground State
 
 ## 1. Result
 
@@ -78,7 +78,8 @@ computed.
 
 The successful result therefore came from changing the **parameterization,
 optimizer, and environment handling**, not from changing the AD derivative
-formula.
+formula. The detailed simple-update investigation is recorded separately in
+`M2_SU_FINDINGS.md`.
 
 ## 5. Random-Start Convergence
 
@@ -159,12 +160,15 @@ removed. Shared cluster configuration was not changed during cleanup.
 - Run log:
   `tracks/peps/results/20260730-m2-chi8-warm-continue-77-to100/run.log`
 
-## 10. Interim Status
+## 10. M2 Status
 
 **M2's current goal is complete:** optimization from a random dense `D=2`
 tensor reached the zero-field toric-code ground-state energy and every
 site-resolved stabilizer within `1e-6`.
 
-No further optimization, M3 work, `chi=20` contraction, transfer-spectrum
-calculation, or VUMPS cross-check is included in this interim result. A fresh
-end-to-end rerun with the final warm-start implementation was not performed.
+M2 does not require a virtual-Z2 production state, `chi=20` contraction,
+transfer-spectrum calculation, or VUMPS sector cross-check. The
+symmetry-preserving production state belongs to future M3; transfer-spectrum
+and VUMPS sector validation belong to future M5. Neither milestone has started.
+A fresh end-to-end rerun with the final warm-start implementation was not
+required for M2 acceptance.

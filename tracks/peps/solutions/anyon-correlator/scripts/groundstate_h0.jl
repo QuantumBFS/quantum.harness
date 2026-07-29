@@ -1,14 +1,15 @@
-# M2 — toric-code ground state at h = 0 by optimization (PEPSKit driver).
-# Workflow: stage-0 exact-tensor machinery check → random Z₂ init → SU warm start
-# → CTMRG → AD fixedpoint polish → environment/stabilizer/spectrum gates.
+# Legacy M2 simple-update route retained for inspection and comparison.
+# This is not the completed random-start tied-AD driver; see ad_tied_gd.jl.
+# Historical workflow: exact-tensor machinery check → random Z₂ init → SU warm
+# start → CTMRG → AD fixedpoint polish → optional spectrum diagnostics.
 #
-# STATUS (2026-07-28, see FINDINGS.md): stage 0 passes (exact tensor gives
+# STATUS (2026-07-28, see M2_SU_FINDINGS.md): stage 0 passes (exact tensor gives
 # E_cell = −8, stabilizers = 1 to 2e-16). Random-init full-circuit SU stalls at
 # non-ground fixed points (product states / one-sector-pinned states), and AD from
 # such a point shows a spurious near-zero gradient. The SU stage will be amended
-# (stage-wise SU or product-state init — see FINDINGS.md §6); AD is currently
-# suspended pending that amendment. Spectrum (stage 7) and the VUMPS cross-check
-# (stage 8) are deferred; enable with the 4th CLI argument `true`.
+# (stage-wise SU or product-state init — see M2_SU_FINDINGS.md §6); AD is currently
+# suspended in this historical route. Optional spectrum/VUMPS diagnostics can be
+# enabled with the 4th CLI argument `true`; they are not M2 acceptance gates.
 #
 # Usage: julia --project=julia-env scripts/groundstate_h0.jl [seed] [su_nstep] [ad_maxiter] [do_spectrum]
 
@@ -188,7 +189,7 @@ function main()
     end
     write_csv(joinpath(rundir, "stabilizers_h0.csv"), stab, "kind,center,value")
 
-    # ---- stages 7+8: transfer spectrum + VUMPS cross-check (deferred per user) ----
+    # ---- stages 7+8: optional legacy transfer-spectrum and VUMPS diagnostics ----
     if do_spectrum
         logline("\n[stage 7] transfer spectrum (correlation_length, num_vals=8)")
         ξ_h, ξ_v, λ_h, λ_v = correlation_length(ψ, env; num_vals = 8)

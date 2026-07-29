@@ -29,29 +29,31 @@ Hamiltonian (issue convention):
   (east and north) → **2 physical spins per composite site** (fused dim-4 leg).
   **One PEPS tensor per composite site** (the vertex simplex V and the two edge
   projection tensors P_E, P_N contracted — the split V/P network is the parent
-  construction, see §4.2 note; on the split network the 4-body gates are not
-  applicable by simple update). Stored as a **(2,2) supercell** (4 composite sites =
-  8 physical spins), required by the SU cluster machinery. Stars are centered on
-  vertices, plaquettes on faces; both are **3-site L-shaped terms** on the composite
+  construction, see §4.2 note). Stored as a **(2,2) supercell** (4 composite sites =
+  8 physical spins) for Hamiltonian construction and finite-cell diagnostics; the
+  completed M2 calculation ties the same tensor across all four positions. Stars are
+  centered on vertices, plaquettes on faces; both are **3-site L-shaped terms** on the composite
   lattice: star (r,c) = {E(r,c), E(r,c−1), N(r,c), N(r+1,c)}, plaquette (r,c) =
   {E(r,c), E(r−1,c), N(r,c), N(r,c+1)} — incidence identical to M1's ED construction.
 - **C4 Environment contraction.** iPEPS in the thermodynamic limit. Default: CTMRG
-  (PEPSKit). Sanctioned alternative: boundary-MPS / VUMPS fixed points (MPSKit;
-  arXiv:1810.07006). Both share the environment bond dimension χ; one cross-check at a
-  fixed setting is required (M2). Finite periodic tori (2×2, optional 3×3) serve only
-  as ED references.
+  (PEPSKit). M2 uses χ=4 for the broad optimization and χ=8 near the ground state,
+  with a fresh χ=8 environment as a sensitivity check. Boundary-MPS / VUMPS fixed
+  points (MPSKit; arXiv:1810.07006) remain a future cross-check for transfer-sector
+  work in M5, not an M2 requirement. Finite periodic tori (2×2, optional 3×3) serve
+  only as ED references.
 - **C5 (g, α) anyon sectors.** See §3–§4. Provisional labeling
   **1 = (0,+), e = (0,−), m = (1,+), ε = (1,−)**, subject to V1/V2 verification (§5).
-- **C6 Ground-state sector.** iPEPS converges to one topological sector; we accept and
-  record it (initialization, seed), we do not control it.
-- **C7 Virtual-ℤ₂ symmetry — exact throughout the production workflow.** See §4 for the four
-  required distinctions. The local PEPS tensors remain **exactly virtual-ℤ₂ symmetric
+- **C6 Ground-state sector.** In the future symmetry-preserving M3/M5 workflow, iPEPS
+  converges to one topological sector; we accept and record it (initialization, seed),
+  we do not control it. The dense M2 calibration does not assign a virtual sector.
+- **C7 Virtual-ℤ₂ symmetry — exact throughout the production workflow.** See §4 for
+  the four required distinctions. The local PEPS tensors remain **exactly virtual-ℤ₂ symmetric
   (intertwiners) throughout M3 and later production**: random initialization, simple
   update (or full update), AD `fixedpoint` optimization, and adiabatic field
   continuation. This is an exact production ansatz constraint so that the ordinary and
   twisted transfer operators retain well-defined (g, α) sectors. The symmetry pattern
   of the transfer-matrix **boundary fixed points is never imposed** (§4.4). The
-  user-ratified M2 interim optimization is an explicit calibration exception: one
+  completed M2 optimization is an explicit calibration stage: one
   dense/unconstrained ComplexF64 `D=2` tensor was tied across the `(2,2)` cell and
   optimized from random values to validate the AD/environment pipeline. It is not a
   sector-resolved M3 production state. Dense calculations remain limited validation
@@ -129,27 +131,25 @@ insertions at separation r where accessible.
    form-factor structure diagnose anyon confinement vs condensation (Duivenvoorden
    2017). We measure them; we never constrain them.
 
-## 5. Verification protocol
+## 5. Verification protocol for future sector work
 
-- **V1 (machinery floor, h=0).** With the M2-optimized h=0 state, in every non-vacuum
-   sector the leading **form-factor-selected** eigenvalue (§3 selection rule) shows
-   |λ/λ₀| below a documented residual floor set by the optimization error (ideal
-   fixed point: ξ = 0). The boundary-parity partner of the vacuum — the (0,−)
-   dominant state whose endpoint form factor vanishes — is exempt by construction
-   (amended wording at M2). If the floor is too high for M5, tighten the h=0
-   optimization or trigger the exact-tensor fallback (below).
+- **V1 (M5 machinery floor, h=0).** Before accepting M5 sector results, use a
+   symmetry-preserving h=0 anchor. In every non-vacuum sector the leading
+   **form-factor-selected** eigenvalue (§3 selection rule) must show |λ/λ₀| below a
+   documented residual floor (ideal fixed point: ξ = 0). The boundary-parity partner
+   of the vacuum — the (0,−) dominant state whose endpoint form factor vanishes — is
+   exempt by construction. The dense M2 state is an optimizer calibration and is not
+   used for this sector test.
 - **V2 (e/m assignment).** Along (hₓ, 0): hₓ anticommutes with B_p = ∏Z, so it
   condenses plaquette violations — the sector assigned m = (1,+) must show growing ξ
   while e = (0,−) stays short-ranged. If observed reversed, swap e ↔ m labels for our
   basis convention and record the swap in run.json.
 - **V3 (optional).** Fusion consistency ε = e × m from the (1,−) sector; sanity only.
-- **Exact-tensor fallback — trigger.** Any of: (i) M2 acceptance not met after the
-  optimizer budget in M2-Fallback is exhausted; (ii) sector structure at h=0
-  unresolvable (vacuum degeneracy / parity blocks not identifiable); (iii) M5 requires
-  a cleaner ξ floor than optimization reached. Action: construct the analytic
-  ℤ₂-graded toric-code tensor of §4.2 (composite rank-6, X-basis copy), validate the
-  full machinery with it (E_cell = −8 exactly, ξ = 0 in all sectors), then use it as
-  the h=0 anchor and as the M3 initialization.
+- **Exact symmetry-preserving anchor.** If the h=0 sector structure is unresolvable or
+  M5 requires a cleaner ξ floor, use the analytic ℤ₂-graded toric-code tensor of §4.2
+  (composite rank-6, X-basis copy), validate the sector machinery with it
+  (E_cell = −8 exactly, ideal ξ = 0), and use it as the symmetry-preserving h=0
+  anchor. This is future M3/M5 setup, not part of completed M2.
 - **Dense/unconstrained validation comparison (limited).** One nonsymmetric ComplexF64
   energy comparison at 1–2 mid-field points, small D, quantifying the exact-ℤ₂ ansatz
   restriction; recorded in run.json. Never the production path.
@@ -195,36 +195,35 @@ insertions at separation r where accessible.
   windows (E₀/N = −5.5125 at (5,0); −7.3538 at (5,5) vs −√50 = −7.0711).
   CSV: `tracks/peps/results/20260728-114418-ed-checks/ed_2x2.csv`.
 
-### M2 — Ground state at h=0 by optimization (workflow steps 1–3)
-- **Purpose:** validate the full ground-state pipeline (random init → update → AD →
-  environment) end-to-end against the exact anchor.
-- **Tasks:** random-init D=2 ℤ₂-graded tensors; simple-update imaginary-time warm
-  start; AD `fixedpoint` polish; CTMRG environment (χ=20, tol 1e-8) with one
-  MPSKit/VUMPS boundary cross-check; measure E₀/N, site-resolved ⟨Aₛ⟩, ⟨B_p⟩, and the
-  h=0 transfer spectrum.
-- **Files/outputs:** `scripts/groundstate_h0.jl`;
-  `results/<run>/groundstate_h0.jld2` (tensors+env); `energy_convergence.csv`;
-  `stabilizers_h0.csv`; `spectrum_h0.csv`; optimizer log (residuals, gradient norms).
-- **Interim outputs (2026-07-30):** `scripts/ad_tied_core.jl`,
-  `scripts/ad_tied_gd.jl`, `tests/tied_ad_core_tests.jl`, and
-  `M2_REPORT.md`; final local checkpoint
-  `results/20260730-m2-chi8-warm-continue-77-to100/random-continue_step086.jld2`.
-- **Acceptance:** |E₀/N + 1| ≤ 1e-6 (target 1e-8); ⟨Aₛ⟩=⟨B_p⟩=1 within the same
-  tolerance site-resolved; spectrum shows the expected fixed-point structure;
-  CTMRG/VUMPS cross-check agrees.
-- **Failure/fallback (in order):** new random seed; stage-wise SU schedule (pin one
-  stabilizer sector, then grow the other — validated 2026-07-28, see FINDINGS.md §6)
-  or product-state init; AD settings (gradient-solver/gauge mode, LBFGS memory);
-  then the **exact-tensor fallback** (§5).
-- **Depends/status:** M0, M1 → **random-init optimization objective completed
-  (2026-07-30)**. A random dense `D=2` tensor, tied across the `(2,2)` cell and
-  optimized by projected fixed-point AD with Armijo backtracking, reached
-  E_cell = −7.999999995072 (E/N = −0.999999999384) at χ=8. Maximum
-  site-resolved star/plaquette errors are 5.95e-10/6.38e-10. The exact tensor
-  was used only as an independent stationary benchmark. See `M2_REPORT.md` for
-  the route diagnosis and artifacts. The original χ=20, transfer-spectrum, and
-  VUMPS checks above are explicitly deferred at this interim boundary and are
-  not claimed as completed; M3 has not started.
+### M2 — Random initialization to the h=0 ground state
+- **Purpose:** validate random tensor → fixed-point AD → CTMRG → ground-state
+  observables end-to-end against the exact h=0 anchor.
+- **Ansatz:** one random dense ComplexF64 `D=2` tensor copied to all four positions of
+  the `(2,2)` cell. No virtual ℤ₂ constraint and no exact-state initialization.
+- **Tasks:** optimize the shared tensor with fixed-point AD, average the four
+  positional gradients into the tied-tensor tangent direction, use normalized Armijo
+  backtracking, contract with CTMRG at χ=4 for the broad descent and χ=8 near the
+  target, and measure E₀/N plus all site-resolved ⟨Aₛ⟩ and ⟨B_p⟩. Evaluate the exact
+  tensor separately as a stationary code benchmark. Recontract the accepted final
+  tensor from a fresh χ=8 environment to record contraction sensitivity.
+- **Files/outputs:** `scripts/ad_tied_core.jl`, `scripts/ad_tied_gd.jl`,
+  `tests/tied_ad_core_tests.jl`, `M2_REPORT.md`, `M2_SU_FINDINGS.md`, and
+  `figures/m2_energy_convergence.svg`; local checkpoint and CSV artifacts under
+  `results/20260730-m2-chi8-warm-continue-77-to100/`.
+- **Acceptance:** using the accepted warm-started environment,
+  |E₀/N + 1| ≤ 1e-6 and every site-resolved |⟨Aₛ⟩−1| and |⟨B_p⟩−1| ≤ 1e-6;
+  E_cell ≥ −8−1e-6 and |⟨Aₛ⟩|,|⟨B_p⟩| ≤ 1+1e-6. Record a fresh χ=8 contraction of
+  the same tensor and require its energy/stabilizers to agree within 1e-6.
+- **Failure handling:** reject physical-bound violations; reduce the Armijo step after
+  a non-convergent trial environment; warm-start trial CTMRG from the accepted
+  environment; increase χ only after fixed-tensor diagnostics show that the smaller
+  environment is unreliable.
+- **Depends/status:** M0, M1 → **completed 2026-07-30**. The random-start step-86
+  tensor gives E_cell = −7.999999995072 (E/N = −0.999999999384), with maximum
+  star/plaquette errors 5.95e-10/6.38e-10 at χ=8. A fresh χ=8 contraction of the same
+  tensor differs in energy by 6.49e-9. The exact tensor is a separate stationary
+  benchmark. See `M2_REPORT.md` for the result and `M2_SU_FINDINGS.md` for the
+  superseded simple-update investigation.
 
 ### M3 — Adiabatic ground states along (hₓ, 0) (workflow step 4)
 - **Purpose:** production ground states on the MVP path.
@@ -241,7 +240,9 @@ insertions at separation r where accessible.
 - **Failure/fallback:** branch jump → refine h-grid locally; D=2 insufficient near
   transition → D=3 required, D=4 spot on cluster; dense comparison flags large
   ansatz-restriction error → record, and flag affected observables in the report.
-- **Depends/status:** M2 → **pending**.
+- **Depends/status:** M2 optimizer/environment machinery → **pending**. Before any
+  compute, ratify the symmetry-preserving ansatz and initialization required for M3;
+  the dense M2 tensor is not an M3 production state.
 
 ### M4 — Phase-line check (workflow step 5, MVP scope)
 - **Purpose:** locate and honestly report the transition on the MVP path.
@@ -270,9 +271,11 @@ insertions at separation r where accessible.
   provenance.
 - **Failure/fallback:** leading-state form factor zero → next eigenstate (by
   definition, §3); nonsymmetric eigensolver mixing → rely on graded sector blocks;
-  ξ floor too high → tighten h=0 optimization or exact-tensor fallback (§5); V2
+  ξ floor too high → tighten the symmetry-preserving h=0 anchor (§5); V2
   reversed → swap labels, record.
-- **Depends/status:** M2 (machinery), M3 (states) → **pending**.
+- **Depends/status:** M2 (optimizer/environment machinery), M3 (symmetry-preserving
+  states) → **pending**. Transfer-spectrum and VUMPS cross-checks begin here as part
+  of sector validation; they were not M2 acceptance gates.
 
 ### M6 — Handoff
 - **Purpose:** submission-ready run.
@@ -281,7 +284,8 @@ insertions at separation r where accessible.
   at representative h · **F3** semilog Cₑ(r), Cₘ(r) · **F4** ξₑ(h), ξₘ(h) with
   h_c ≈ 0.328 marked; then `/challenge-report`; PR #185 accumulates all commits.
 - **Files/outputs:** `results/<run>/run.json`; F1–F4 (PDF/PNG) in the results dir.
-- **Acceptance:** report renders; PR updated before Thu 20:00.
+- **Acceptance:** report renders and the PR contains the reviewed scripts, data
+  provenance, and figures.
 - **Failure/fallback:** time overrun → deliver F1–F4 + report; D=4, diagonal path,
   3×3/duality checks remain stretch.
 - **Depends/status:** M2–M5 → **pending**.
@@ -294,9 +298,10 @@ TFIM-duality as required tests; controlling the topological sector; imposing any
 symmetry on transfer-matrix boundary fixed points; nonsymmetric tensors in the
 production path.
 
-## 8. Timeline and compute budget
+## 8. Milestone state and compute policy
 
-M0–M1 Mon (setup ~1 h precompile; tests minutes) · M2 Mon–Tue (hours) · M3 Tue–Wed
-(hours; D=4 spot → `/using-slurm` candidate) · M4 byproduct of M3 · M5 Wed–Thu ·
-M6 Thu, report before 20:00. All scripts flush progress per harness norms; results
-written incrementally per field point.
+- M0 completed 2026-07-27; M1 completed 2026-07-28; M2 completed 2026-07-30.
+- M3–M6 are pending. No M3 setup or compute has started.
+- Before each future numerical milestone, confirm the Hamiltonian, lattice, boundary,
+  ansatz/symmetry, target observable, system size, and local-versus-cluster cost.
+- Future scripts must flush progress and write results incrementally per field point.

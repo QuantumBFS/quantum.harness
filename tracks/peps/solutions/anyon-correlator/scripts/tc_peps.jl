@@ -4,7 +4,7 @@
 # construction), the Hamiltonian as a PEPSKit LocalOperator, and the simple-update
 # (SU) circuit builder. Included by scripts/groundstate_h0.jl, tests/runtests.jl,
 # and the inspection/ probes. All quantities use the conventions below; do not
-# duplicate them elsewhere (see FINDINGS.md for the validation evidence).
+# duplicate them elsewhere (see M2_SU_FINDINGS.md for the validation evidence).
 #
 # Conventions (PLAN.md §2 as amended at M2):
 #   H = −Jₑ Σₛ Aₛ − Jₘ Σₚ B_p − hₓ Σᵢ Xᵢ − h_z Σᵢ Zᵢ ,  Jₑ = Jₘ = 1

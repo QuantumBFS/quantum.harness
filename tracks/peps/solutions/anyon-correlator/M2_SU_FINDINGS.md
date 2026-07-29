@@ -1,4 +1,4 @@
-# FINDINGS.md — simple-update behavior for the toric-code iPEPS at h = 0
+# M2_SU_FINDINGS.md — simple-update behavior for the toric-code iPEPS at h = 0
 
 > **Scope.** Working notes from the M2 inspection stage (2026-07-28): which parts of
 > the pipeline are validated, where simple update (SU) fails from random
