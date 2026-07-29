@@ -1842,3 +1842,26 @@ extend to independently varying endpoint amplitudes: a frozen length-120
 four-endpoint word has exact negative complementary trace.  The
 four-generator cone route therefore early-stops before numerical work,
 while the common fixed `z=1` pair remains the main theorem candidate.
+
+### Arbitrary-length subclasses and full-Fock search
+
+Commit `0aa0e3c` proves two infinite word subclasses exactly:
+
+- every pure power `B^n` and `(B^T)^n` has strictly positive determinant
+  weight; the characteristic polynomial has one positive real root, no
+  negative real root, two conjugate pairs, and an exact reciprocal-polynomial
+  gcd gate excludes roots on the unit circle;
+- every reflection-square word `u complement(reverse(u))` is exactly of
+  the form `X^T X`, hence has positive spectrum and positive
+  `det(I+X^T X)` for arbitrary length.
+
+These cover the zero-transition and a large reflection-symmetric part of
+the semigroup but not every word.  With every tested complementary
+partition now exactly obstructed, commit `9ca0c3d` exposes a fixed-pair
+full-32 Fock cone search that replays the known split-obstruction words as
+full-positive before optimization and emits a result only after exact
+trace-compatible promotion.  A first 12-start reconnaissance had no
+certificate (`best objective=0.0281503860`, minimum transformed entry
+about `-0.31275`).  Sixty independent one-start, 4000-iteration searches
+are now running; this is the first numerical cone campaign that has not
+already been invalidated by a negative subcharacter word.
