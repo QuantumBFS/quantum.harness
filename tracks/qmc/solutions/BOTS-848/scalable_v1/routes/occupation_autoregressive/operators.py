@@ -21,13 +21,13 @@ LogAmplitude = Callable[[int], complex]
 HERMITIAN_RELATIVE_TOLERANCE = 1.0e-12
 _MAX_FLOAT = float(np.finfo(np.float64).max)
 _MIN_SUBNORMAL = math.ldexp(1.0, -1074)
-_FAST_COMPONENT_MIN = math.ldexp(1.0, -900)
-_FAST_COMPONENT_MAX = _MAX_FLOAT / 32.0
 _LN_2 = math.log(2.0)
 _LOG_10_OF_2 = math.log10(2.0)
 _LOG_10_OF_5 = math.log10(5.0)
 _FALLBACK_BASE_PRECISION = 1600
 _FALLBACK_MAX_PRECISION = 6400
+_FAST_CERTIFIER_PRECISION = 22
+_FAST_CERTIFIER_GUARD_DIGITS = 2
 
 
 def _integer(name: str, value: object) -> int:
@@ -440,25 +440,72 @@ def _dyadic_logabs(value: _Dyadic) -> float:
     )
 
 
+def _round_integer_right_ties_even(value: int, shift: int) -> int:
+    if shift <= 0:
+        return value << (-shift)
+    quotient, remainder = divmod(value, 1 << shift)
+    halfway = 1 << (shift - 1)
+    if remainder > halfway or remainder == halfway and quotient & 1:
+        quotient += 1
+    return quotient
+
+
+def _binary64_from_bits(bits: int) -> float:
+    return struct.unpack(">d", struct.pack(">Q", bits))[0]
+
+
+def _dyadic_to_binary64(value: _Dyadic) -> float:
+    """Round an exact dyadic to binary64 with integer RN-even arithmetic."""
+
+    sign = 1 if value.mantissa < 0 else 0
+    magnitude = abs(value.mantissa)
+    sign_bits = sign << 63
+    if magnitude == 0:
+        return _binary64_from_bits(sign_bits)
+
+    top_exponent = magnitude.bit_length() - 1 + value.exponent
+    if top_exponent < -1022:
+        subnormal_shift = -(value.exponent + 1074)
+        fraction = _round_integer_right_ties_even(
+            magnitude,
+            subnormal_shift,
+        )
+        if fraction == 0:
+            return _binary64_from_bits(sign_bits)
+        if fraction < 1 << 52:
+            return _binary64_from_bits(sign_bits | fraction)
+        if fraction == 1 << 52:
+            return _binary64_from_bits(sign_bits | (1 << 52))
+        raise AssertionError("subnormal rounding exceeded the normal boundary")
+
+    significand_shift = magnitude.bit_length() - 53
+    significand = _round_integer_right_ties_even(
+        magnitude,
+        significand_shift,
+    )
+    unit_exponent = value.exponent + significand_shift
+    if significand.bit_length() > 53:
+        significand >>= 1
+        unit_exponent += 1
+    unbiased_exponent = unit_exponent + 52
+    if unbiased_exponent > 1023:
+        return _binary64_from_bits(sign_bits | (0x7FF << 52))
+    if unbiased_exponent < -1022:
+        raise AssertionError("normal rounding crossed below the normal boundary")
+    exponent_bits = unbiased_exponent + 1023
+    fraction_bits = significand - (1 << 52)
+    return _binary64_from_bits(
+        sign_bits | (exponent_bits << 52) | fraction_bits
+    )
+
+
 def _dyadic_to_float(value: _Dyadic) -> float | None:
-    try:
-        result = math.ldexp(float(value.mantissa), value.exponent)
-    except OverflowError:
-        return None
+    result = _dyadic_to_binary64(value)
     if not math.isfinite(result) or result == 0.0 and value.mantissa != 0:
         return None
+    if _dyadic_from_float(result) != value:
+        return None
     return result
-
-
-def _dyadic_ratio_float(left: _Dyadic, right: _Dyadic) -> float | None:
-    try:
-        ratio = float(left.mantissa) / float(right.mantissa)
-        ratio = math.ldexp(ratio, left.exponent - right.exponent)
-    except (OverflowError, ZeroDivisionError):
-        return None
-    if not math.isfinite(ratio) or ratio == 0.0 and left.mantissa != 0:
-        return None
-    return ratio
 
 
 @dataclass(frozen=True, slots=True)
@@ -486,54 +533,82 @@ def _try_fast_component(
     terms: Sequence[_DyadicLogTerm],
     source_logabs: float,
 ) -> float | None:
-    """Deterministic ordinary-row path using true dyadic component ratios."""
+    """Overridable gate; the shared Decimal interval is the fast result."""
 
-    anchor = max(terms, key=lambda term: (_effective_log(term), term.sort_key))
-    relative_terms: list[float] = []
-    for term in sorted(terms, key=lambda item: item.sort_key):
-        ratio = _dyadic_ratio_float(term.value, anchor.value)
-        if ratio is None:
-            return None
-        try:
-            target_delta = math.fsum(
-                (term.target_logabs, -anchor.target_logabs)
-            )
-        except OverflowError:
-            return None
-        if not math.isfinite(target_delta) or abs(target_delta) > 745.0:
-            return None
-        relative = ratio * math.exp(target_delta)
-        if not math.isfinite(relative) or relative == 0.0:
-            return None
-        relative_terms.append(relative)
+    return 0.0
 
-    try:
-        scaled = math.fsum(relative_terms)
-        absolute_sum = math.fsum(abs(value) for value in relative_terms)
-    except OverflowError:
-        return None
-    if scaled == 0.0 or not math.isfinite(scaled):
-        return None
-    if absolute_sum > abs(scaled) * math.ldexp(1.0, 20):
-        return None
 
-    anchor_value = _dyadic_to_float(anchor.value)
-    if anchor_value is None:
-        return None
-    try:
-        source_delta = math.fsum((anchor.target_logabs, -source_logabs))
-    except OverflowError:
-        return None
-    if not math.isfinite(source_delta) or abs(source_delta) > 700.0:
-        return None
-    base = anchor_value * math.exp(source_delta)
-    candidate = base * scaled
-    if not math.isfinite(candidate) or candidate == 0.0:
-        return None
-    magnitude = abs(candidate)
-    if not _FAST_COMPONENT_MIN <= magnitude <= _FAST_COMPONENT_MAX:
-        return None
-    return candidate
+def _certify_fast_components(
+    components: Sequence[Sequence[_DyadicLogTerm]],
+    source_logabs: float,
+) -> tuple[float, ...] | None:
+    """Certify complete ordinary components inside one binary64 RN cell."""
+
+    with localcontext() as context:
+        context.prec = _FAST_CERTIFIER_PRECISION
+        context.Emax = 999_999
+        context.Emin = -999_999
+        source = Decimal.from_float(source_logabs)
+        targets = sorted(
+            {
+                term.target_logabs
+                for terms in components
+                for term in terms
+            },
+            key=_float_bits,
+        )
+        for target in targets:
+            try:
+                source_delta = math.fsum((target, -source_logabs))
+            except OverflowError:
+                return None
+            if not math.isfinite(source_delta) or abs(source_delta) > 10_000.0:
+                return None
+        factors = {
+            target: (Decimal.from_float(target) - source).exp()
+            for target in targets
+        }
+        dyadic_values = {
+            term.value
+            for terms in components
+            for term in terms
+        }
+        powers = {
+            exponent: Decimal(2) ** exponent
+            for exponent in {value.exponent for value in dyadic_values}
+        }
+        decimal_values = {
+            value: Decimal(value.mantissa) * powers[value.exponent]
+            for value in dyadic_values
+        }
+        uncertainty_scale = Decimal(10) ** (
+            -_FAST_CERTIFIER_PRECISION + _FAST_CERTIFIER_GUARD_DIGITS
+        )
+        certified_values: list[float] = []
+        for terms in components:
+            central = Decimal(0)
+            absolute_sum = Decimal(0)
+            for term in terms:
+                contribution = (
+                    decimal_values[term.value]
+                    * factors[term.target_logabs]
+                )
+                central += contribution
+                absolute_sum += abs(contribution)
+            uncertainty = (
+                absolute_sum + abs(central) + Decimal.from_float(_MIN_SUBNORMAL)
+            ) * uncertainty_scale
+            candidate = float(central)
+            lower = float(central - uncertainty)
+            upper = float(central + uncertainty)
+            if (
+                not math.isfinite(candidate)
+                or _float_bits(candidate) != _float_bits(lower)
+                or _float_bits(candidate) != _float_bits(upper)
+            ):
+                return None
+            certified_values.append(candidate)
+        return tuple(certified_values)
 
 
 def _decimal_component_once(
@@ -571,9 +646,10 @@ def _decimal_component_once(
             scaled += contribution
             scaled_absolute_sum += abs(contribution)
 
+        guard_digits = min(64, max(12, precision // 25))
         rounding_uncertainty = (
             scaled_absolute_sum + abs(scaled) + Decimal(1)
-        ) * (Decimal(10) ** (-precision + 64))
+        ) * (Decimal(10) ** (-precision + guard_digits))
         lower_uncertainty = Decimal(len(lower)) * Decimal(
             -band_limit
         ).exp()
@@ -643,16 +719,50 @@ def _fallback_component(
     )
 
 
-def _sum_dyadic_component(
-    terms: Sequence[_DyadicLogTerm],
+def _sum_dyadic_row(
+    real_terms: Sequence[_DyadicLogTerm],
+    imaginary_terms: Sequence[_DyadicLogTerm],
     source_logabs: float,
-) -> float:
-    if not terms:
-        return 0.0
-    fast = _try_fast_component(terms, source_logabs)
-    if fast is not None:
-        return fast
-    return _fallback_component(terms, source_logabs)
+) -> tuple[float, float]:
+    components = (real_terms, imaginary_terms)
+    results: list[float | None] = [None, None]
+    pending_indices: list[int] = []
+    pending_components: list[Sequence[_DyadicLogTerm]] = []
+    for index, terms in enumerate(components):
+        if not terms:
+            results[index] = 0.0
+            continue
+        if len(terms) == 1 and terms[0].target_logabs == source_logabs:
+            exact = _dyadic_to_binary64(terms[0].value)
+            if not math.isfinite(exact):
+                raise OverflowError(
+                    "local estimator result is outside complex128 range"
+                )
+            results[index] = exact
+            continue
+        pending_indices.append(index)
+        pending_components.append(terms)
+
+    if pending_components:
+        combined = tuple(
+            term for terms in pending_components for term in terms
+        )
+        certified = None
+        if _try_fast_component(combined, source_logabs) is not None:
+            certified = _certify_fast_components(
+                pending_components,
+                source_logabs,
+            )
+        if certified is None:
+            certified = tuple(
+                _fallback_component(terms, source_logabs)
+                for terms in pending_components
+            )
+        for index, value in zip(pending_indices, certified, strict=True):
+            results[index] = value
+
+    assert results[0] is not None and results[1] is not None
+    return results[0], results[1]
 
 
 def local_from_log_neighbors(
@@ -771,16 +881,12 @@ def local_from_log_neighbors(
         for target_logabs, _real, imaginary in target_groups.values()
         if imaginary.mantissa != 0
     )
-    return complex(
-        _sum_dyadic_component(
-            real_terms,
-            source_logpsi.real,
-        ),
-        _sum_dyadic_component(
-            imaginary_terms,
-            source_logpsi.real,
-        ),
+    real, imaginary = _sum_dyadic_row(
+        real_terms,
+        imaginary_terms,
+        source_logpsi.real,
     )
+    return complex(real, imaginary)
 
 
 def local_energy(
