@@ -1,6 +1,7 @@
 using Test
 using JSON3
 using SHA
+using HDF5
 using ITensors
 using ITensorMPS
 
@@ -126,20 +127,69 @@ end
 
 @testset "observable cursor validation" begin
     legal = [
-        ObservableCursor(:thermal, 0, :none, :none),
-        ObservableCursor(:green, 1, :up, :before),
-        ObservableCursor(:green, 1, :up, :after),
-        ObservableCursor(:green, 1, :dn, :before),
-        ObservableCursor(:green, 1, :dn, :after),
-        ObservableCursor(:complete, 0, :none, :none),
+        ObservableCursor(:thermal, 0, :none, :none, :none),
+        ObservableCursor(:green, 1, :up, :creation, :before),
+        ObservableCursor(:green, 1, :up, :creation, :after),
+        ObservableCursor(:green, 1, :dn, :annihilation, :before),
+        ObservableCursor(:green, 1, :dn, :annihilation, :after),
+        ObservableCursor(:complete, 0, :none, :none, :none),
     ]
     @test length(unique(legal)) == length(legal)
-    @test legal[2] == ObservableCursor(:green, 1, :up, :before)
-    @test_throws ArgumentError ObservableCursor(:thermal, 1, :none, :none)
-    @test_throws ArgumentError ObservableCursor(:green, 0, :up, :before)
-    @test_throws ArgumentError ObservableCursor(:green, 1, :sideways, :before)
-    @test_throws ArgumentError ObservableCursor(:green, 1, :up, :middle)
-    @test_throws ArgumentError ObservableCursor(:complete, 1, :none, :none)
+    @test legal[2] ==
+          ObservableCursor(:green, 1, :up, :creation, :before)
+    @test_throws MethodError ObservableCursor(:green, 1, :up, :before)
+    @test_throws ArgumentError ObservableCursor(
+        :thermal, 1, :none, :none, :none
+    )
+    @test_throws ArgumentError ObservableCursor(
+        :green, 0, :up, :creation, :before
+    )
+    @test_throws ArgumentError ObservableCursor(
+        :green, 1, :sideways, :creation, :before
+    )
+    @test_throws ArgumentError ObservableCursor(
+        :green, 1, :up, :none, :before
+    )
+    @test_throws ArgumentError ObservableCursor(
+        :green, 1, :up, :creation, :middle
+    )
+    @test_throws ArgumentError ObservableCursor(
+        :complete, 1, :none, :none, :none
+    )
+end
+
+@testset "zero Green terminal checkpoints omit active MPS" begin
+    mktempdir() do root
+        identity = checkpoint_identity()
+        thermal, _ = checkpoint_fixture()
+        cursor =
+            ObservableCursor(:green, 2, :up, :creation, :terminal)
+        state = ObservableResumeState(
+            cursor,
+            nothing,
+            thermal,
+            (;
+                branch_status = :zero,
+                expected_sector =
+                    (; insertion = :creation, spin = :up, nf = 3, sz = 1),
+            ),
+        )
+        written = write_checkpoint_generation(
+            root, identity, CheckpointCursor(0), nothing, state
+        )
+        loaded = load_current_checkpoint(root, identity)
+        @test loaded.cursor == written
+        @test loaded.psi === nothing
+        @test loaded.resume_state.cursor == cursor
+        @test loaded.resume_state.data.branch_status === :zero
+        state_path = joinpath(
+            root, "generations", written.generation, "state.h5"
+        )
+        h5open(state_path, "r") do file
+            @test !haskey(file, "psi")
+            @test haskey(file, "thermal_psi")
+        end
+    end
 end
 
 @testset "atomic version-bound MPS checkpoints" begin
@@ -148,7 +198,7 @@ end
             identity = checkpoint_identity()
             psi, evolution = checkpoint_fixture()
             workflow = ObservableResumeState(
-                ObservableCursor(:green, 2, :dn, :after),
+                ObservableCursor(:green, 2, :dn, :creation, :after),
                 evolution,
                 deepcopy(psi),
                 (;

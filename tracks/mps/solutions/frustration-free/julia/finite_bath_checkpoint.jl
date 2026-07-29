@@ -28,31 +28,37 @@ struct ObservableCursor
     phase::Symbol
     tau_index::Int
     spin::Symbol
+    insertion::Symbol
     segment::Symbol
 
-    function ObservableCursor(phase, tau_index, spin, segment)
+    function ObservableCursor(phase, tau_index, spin, insertion, segment)
         phase isa Symbol ||
             throw(ArgumentError("observable cursor phase must be a symbol"))
         tau_index isa Integer && !(tau_index isa Bool) ||
             throw(ArgumentError("observable cursor tau_index must be an integer"))
         spin isa Symbol ||
             throw(ArgumentError("observable cursor spin must be a symbol"))
+        insertion isa Symbol ||
+            throw(ArgumentError("observable cursor insertion must be a symbol"))
         segment isa Symbol ||
             throw(ArgumentError("observable cursor segment must be a symbol"))
         if phase === :thermal || phase === :complete
-            tau_index == 0 && spin === :none && segment === :none ||
+            tau_index == 0 && spin === :none && insertion === :none &&
+                segment === :none ||
                 throw(ArgumentError("thermal and complete cursors have no branch coordinates"))
         elseif phase === :green
             tau_index > 0 ||
                 throw(ArgumentError("green cursor tau_index must be positive"))
             spin in (:up, :dn) ||
                 throw(ArgumentError("green cursor spin must be :up or :dn"))
-            segment in (:before, :after) ||
-                throw(ArgumentError("green cursor segment must be :before or :after"))
+            insertion in (:creation, :annihilation) ||
+                throw(ArgumentError("green cursor insertion is invalid"))
+            segment in (:before, :after, :terminal) ||
+                throw(ArgumentError("green cursor segment is invalid"))
         else
             throw(ArgumentError("observable cursor phase is invalid"))
         end
-        return new(phase, Int(tau_index), spin, segment)
+        return new(phase, Int(tau_index), spin, insertion, segment)
     end
 end
 
@@ -72,7 +78,11 @@ struct ObservableResumeState
             fieldnames(typeof(cursor)) == fieldnames(ObservableCursor) ||
             throw(ArgumentError("observable cursor is invalid"))
         normalized_cursor = ObservableCursor(
-            cursor.phase, cursor.tau_index, cursor.spin, cursor.segment
+            cursor.phase,
+            cursor.tau_index,
+            cursor.spin,
+            cursor.insertion,
+            cursor.segment,
         )
         evolution_state === nothing ||
             (
@@ -243,7 +253,7 @@ function write_checkpoint_generation(
     root,
     identity::CheckpointIdentity,
     cursor,
-    psi::MPS,
+    psi::Union{Nothing,MPS},
     resume_state,
 )
     completed_steps =
@@ -261,6 +271,17 @@ function write_checkpoint_generation(
         )
     end
     _validate_resume_state(resume_state, completed_steps)
+    terminal_zero =
+        resume_state isa ObservableResumeState &&
+        resume_state.cursor.segment === :terminal &&
+        haskey(resume_state.data, :branch_status) &&
+        resume_state.data.branch_status === :zero &&
+        haskey(resume_state.data, :expected_sector) &&
+        resume_state.data.expected_sector !== nothing
+    (psi !== nothing || terminal_zero) ||
+        throw(ArgumentError("only zero terminal checkpoints may omit active MPS"))
+    (psi === nothing || !terminal_zero) ||
+        throw(ArgumentError("zero terminal checkpoint must omit active MPS"))
     root_path = abspath(String(root))
     _ensure_directory(root_path, "checkpoint root"; create = true)
     generations = joinpath(root_path, "generations")
@@ -285,7 +306,7 @@ function write_checkpoint_generation(
         state_path = joinpath(stage, "state.h5")
         try
             h5open(state_path, "w") do file
-                write(file, "psi", psi)
+                psi !== nothing && write(file, "psi", psi)
                 resume_state isa ObservableResumeState &&
                     resume_state.thermal_psi !== nothing &&
                     write(file, "thermal_psi", resume_state.thermal_psi)
@@ -430,9 +451,8 @@ function _load_generation(
         throw(ArgumentError("checkpoint cursor mismatch"))
     psi, thermal_psi = try
         h5open(state_path, "r") do file
-            haskey(file, "psi") ||
-                throw(ArgumentError("checkpoint state does not contain psi"))
-            active = read(file, "psi", MPS)
+            active =
+                haskey(file, "psi") ? read(file, "psi", MPS) : nothing
             thermal =
                 haskey(file, "thermal_psi") ?
                 read(file, "thermal_psi", MPS) : nothing
@@ -445,6 +465,17 @@ function _load_generation(
     resume_state =
         _resume_state_from_dict(metadata["resume_state"], thermal_psi)
     _validate_resume_state(resume_state, cursor.completed_steps)
+    terminal_zero =
+        resume_state isa ObservableResumeState &&
+        resume_state.cursor.segment === :terminal &&
+        haskey(resume_state.data, :branch_status) &&
+        resume_state.data.branch_status === :zero &&
+        haskey(resume_state.data, :expected_sector) &&
+        resume_state.data.expected_sector !== nothing
+    (psi !== nothing || terminal_zero) ||
+        throw(ArgumentError("checkpoint state does not contain psi"))
+    (psi === nothing || !terminal_zero) ||
+        throw(ArgumentError("zero terminal checkpoint contains active MPS"))
     return (; identity, cursor, psi, resume_state)
 end
 
@@ -517,6 +548,7 @@ function _resume_state_dict(state)
                 "phase" => String(state.cursor.phase),
                 "tau_index" => state.cursor.tau_index,
                 "spin" => String(state.cursor.spin),
+                "insertion" => String(state.cursor.insertion),
                 "segment" => String(state.cursor.segment),
             ),
             "evolution_state" =>
@@ -553,13 +585,14 @@ function _resume_state_from_dict(value, thermal_psi = nothing)
         cursor_value = value["cursor"]
         _require_exact_keys(
             cursor_value,
-            ["phase", "tau_index", "spin", "segment"],
+            ["phase", "tau_index", "spin", "insertion", "segment"],
             "observable cursor",
         )
         cursor = ObservableCursor(
             Symbol(cursor_value["phase"]),
             cursor_value["tau_index"],
             Symbol(cursor_value["spin"]),
+            Symbol(cursor_value["insertion"]),
             Symbol(cursor_value["segment"]),
         )
         value["thermal_psi"] isa Bool ||
@@ -657,6 +690,15 @@ function _typed_json_value(value)
             "keys" => String.(collect(keys(value))),
             "values" => [_typed_json_value(item) for item in values(value)],
         )
+    elseif nameof(typeof(value)) == :OperatorSector &&
+           fieldnames(typeof(value)) == (:insertion, :spin, :nf, :sz)
+        return Dict{String,Any}(
+            "__type__" => "operator_sector",
+            "insertion" => String(value.insertion),
+            "spin" => String(value.spin),
+            "nf" => value.nf,
+            "sz" => value.sz,
+        )
     elseif value isa Tuple
         return Dict{String,Any}(
             "__type__" => "tuple",
@@ -705,6 +747,26 @@ function _typed_json_restore(value)
             value["value"] == "inf" && return Inf
             value["value"] == "nan" && return NaN
             throw(ArgumentError("typed nonfinite value is invalid"))
+        elseif kind == "operator_sector"
+            _require_exact_keys(
+                value,
+                ["__type__", "insertion", "spin", "nf", "sz"],
+                "typed operator sector",
+            )
+            isdefined(PARENT_MODULE, :FiniteBathObservables) ||
+                throw(ArgumentError(
+                    "operator sector type is unavailable"
+                ))
+            constructor = getfield(
+                getfield(PARENT_MODULE, :FiniteBathObservables),
+                :OperatorSector,
+            )
+            return constructor(
+                Symbol(value["insertion"]),
+                Symbol(value["spin"]),
+                value["nf"],
+                value["sz"],
+            )
         end
         throw(ArgumentError("observable checkpoint data type is invalid"))
     elseif value === nothing || value isa Bool || value isa Integer ||

@@ -5,18 +5,25 @@ using ITensors
 using ITensorMPS
 
 include(joinpath(@__DIR__, "validated_chain_fixture.jl"))
-using .FiniteBathPurification: FiniteBathParameters
+using .FiniteBathPurification:
+    FiniteBathParameters,
+    identity_purification,
+    non_qn_purification,
+    qn_dual_purification
 
 isdefined(Main, :FiniteBathObservables) ||
     include(joinpath(@__DIR__, "..", "finite_bath_observables.jl"))
 using .FiniteBathObservables:
+    AppliedOperatorBranch,
     ObservableCursor,
     ObservableInterrupted,
+    OperatorSector,
     _thermal_setup_maxima,
     build_finite_bath_context,
     copy_identity_purification,
     finite_bath_observables,
-    impurity_green_function
+    impurity_green_function,
+    operator_sector
 using .FiniteBathCheckpoint:
     CheckpointCursor,
     CheckpointIdentity,
@@ -24,6 +31,191 @@ using .FiniteBathCheckpoint:
     ObservableResumeState,
     load_current_checkpoint,
     write_checkpoint_generation
+
+@testset "Green operators carry explicit QN sectors" begin
+    validated = validated_chain_fixture(; n_bath = 2)
+    parameters = FiniteBathParameters(validated)
+    purification = qn_dual_purification(parameters, validated)
+    context =
+        build_finite_bath_context(parameters; purification)
+
+    expected = (
+        (:creation, :up, 7, 1),
+        (:creation, :dn, 7, -1),
+        (:annihilation, :up, 5, -1),
+        (:annihilation, :dn, 5, 1),
+    )
+    @test_throws ArgumentError OperatorSector(
+        :creation, :up, 7, -1
+    )
+    for (insertion, spin, nf, sz) in expected
+        sector = operator_sector(purification, insertion, spin)
+        @test sector == OperatorSector(insertion, spin, nf, sz)
+        branch = FiniteBathObservables._apply_impurity_operator(
+            context.identity,
+            context.sites[1],
+            spin,
+            insertion,
+            sector,
+        )
+        @test branch isa AppliedOperatorBranch
+        @test branch.status === :finite
+        @test branch.expected_sector == sector
+        @test flux(branch.psi) == QN(("Nf", nf, -1), ("Sz", sz))
+    end
+    @test_throws ArgumentError FiniteBathObservables._apply_impurity_operator(
+        context.identity,
+        context.sites[1],
+        :up,
+        :creation,
+        nothing,
+    )
+
+    qn_blocked = MPS(
+        context.sites,
+        ["Up", "Dn", "Emp", "UpDn", "Emp", "UpDn"],
+    )
+    blocked_sector = operator_sector(purification, :creation, :up)
+    qn_zero = FiniteBathObservables._apply_impurity_operator(
+        qn_blocked,
+        context.sites[1],
+        :up,
+        :creation,
+        blocked_sector,
+    )
+    @test qn_zero.status === :zero
+    @test qn_zero.psi === nothing
+    @test qn_zero.log_norm == -Inf
+    @test qn_zero.expected_sector == blocked_sector
+    terminal_state = ObservableResumeState(
+        ObservableCursor(
+            :green, 1, :up, :creation, :terminal
+        ),
+        nothing,
+        qn_blocked,
+        (;
+            branch_status = :zero,
+            expected_sector = blocked_sector,
+        ),
+    )
+    resumed_active, resumed_state =
+        FiniteBathObservables._resume_parts(
+            ObservableInterrupted(nothing, terminal_state)
+        )
+    @test resumed_active === nothing
+    @test resumed_state === terminal_state
+
+    direct = FiniteBathParameters(parameters.epsilon, parameters.V)
+    direct_sites, _ = identity_purification(direct)
+    non_qn_blocked = MPS(
+        direct_sites,
+        ["Up", "Emp", "Emp", "Emp", "Emp", "Emp"],
+    )
+    non_qn_zero = FiniteBathObservables._apply_impurity_operator(
+        non_qn_blocked,
+        direct_sites[1],
+        :up,
+        :creation,
+        nothing,
+    )
+    @test non_qn_zero.status === :zero
+    @test non_qn_zero.psi === nothing
+    @test non_qn_zero.expected_sector === nothing
+    @test_throws ArgumentError FiniteBathObservables._apply_impurity_operator(
+        non_qn_blocked,
+        direct_sites[1],
+        :up,
+        :creation,
+        blocked_sector,
+    )
+end
+
+@testset "creation and annihilation Green forms are explicit" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    parameters = FiniteBathParameters(validated)
+    purification = qn_dual_purification(parameters, validated)
+    common = (;
+        beta = 0.04,
+        tau = [0.01, 0.03],
+        purification,
+        time_step = 0.02,
+        cutoff = 1.0e-12,
+        maxdim = 32,
+    )
+    creation = finite_bath_observables(
+        parameters; common..., green_insertion = :creation
+    )
+    annihilation = finite_bath_observables(
+        parameters; common..., green_insertion = :annihilation
+    )
+    @test creation.G_up ≈ annihilation.G_up atol = 1.0e-10
+    @test creation.G_dn ≈ annihilation.G_dn atol = 1.0e-10
+    @test all(
+        diagnostic.insertion === :creation &&
+        diagnostic.operator_sector.insertion === :creation
+        for diagnostic in creation.diagnostics.green_up
+    )
+    @test all(
+        diagnostic.insertion === :annihilation &&
+        diagnostic.operator_sector.insertion === :annihilation
+        for diagnostic in annihilation.diagnostics.green_up
+    )
+    @test_throws ArgumentError finite_bath_observables(
+        parameters; common..., green_insertion = :sideways
+    )
+
+    context =
+        build_finite_bath_context(parameters; purification)
+    identity = CheckpointIdentity(;
+        request_sha256 = repeat("1", 64),
+        input_payload_sha256 = repeat("2", 64),
+        bath_sha256 = validated.source_bath_sha256,
+        bath_representation = "chain",
+        chain_mapping_sha256 = validated.mapping_sha256,
+        solver_settings = Dict("beta" => common.beta),
+        source_hashes = Dict("observables" => repeat("3", 64)),
+        project_toml_sha256 = repeat("4", 64),
+        manifest_toml_sha256 = repeat("5", 64),
+        julia_version = string(VERSION),
+        itensors_version = string(Base.pkgversion(ITensors)),
+        itensormps_version = string(Base.pkgversion(ITensorMPS)),
+        hdf5_version = "0.17.3",
+        checkpoint_schema = 1,
+        writer_version = "1.0.0",
+    )
+    for insertion in (:creation, :annihilation)
+        expected = operator_sector(purification, insertion, :up)
+        branch = FiniteBathObservables._apply_impurity_operator(
+            context.identity,
+            context.sites[1],
+            :up,
+            insertion,
+            expected,
+        )
+        state = ObservableResumeState(
+            ObservableCursor(
+                :green, 1, :up, insertion, :after
+            ),
+            nothing,
+            context.identity,
+            (;
+                branch_status = :finite,
+                expected_sector = expected,
+            ),
+        )
+        mktempdir() do root
+            write_checkpoint_generation(
+                root, identity, CheckpointCursor(0), branch.psi, state
+            )
+            loaded = load_current_checkpoint(root, identity)
+            @test loaded.resume_state.cursor.insertion === insertion
+            @test loaded.resume_state.data.expected_sector == expected
+            @test flux(loaded.psi) ==
+                  QN(("Nf", expected.nf, -1), ("Sz", expected.sz))
+            @test siteinds(loaded.psi) == siteinds(branch.psi)
+        end
+    end
+end
 
 function observables_dense_annihilation(n_modes::Int, mode::Int)
     dimension = 1 << n_modes
@@ -483,41 +675,41 @@ end
             snapshot.resume_state.evolution_state.completed_steps == 1,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :up, :before) &&
+            ObservableCursor(:green, 2, :up, :creation, :before) &&
             snapshot.resume_state.evolution_state !== nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :up, :after) &&
+            ObservableCursor(:green, 2, :up, :creation, :after) &&
             snapshot.resume_state.evolution_state === nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :up, :after) &&
+            ObservableCursor(:green, 2, :up, :creation, :after) &&
             snapshot.resume_state.evolution_state !== nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :dn, :before) &&
+            ObservableCursor(:green, 2, :dn, :creation, :before) &&
             snapshot.resume_state.evolution_state === nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :dn, :before) &&
+            ObservableCursor(:green, 2, :dn, :creation, :before) &&
             snapshot.resume_state.evolution_state !== nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :dn, :after) &&
+            ObservableCursor(:green, 2, :dn, :creation, :after) &&
             snapshot.resume_state.evolution_state === nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :dn, :after) &&
+            ObservableCursor(:green, 2, :dn, :creation, :after) &&
             snapshot.resume_state.evolution_state !== nothing,
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 3, :up, :before),
+            ObservableCursor(:green, 3, :up, :creation, :before),
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 1, :up, :before),
+            ObservableCursor(:green, 1, :up, :creation, :before),
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 1, :dn, :before),
+            ObservableCursor(:green, 1, :dn, :creation, :before),
     ]
     for selector in selectors
         target = findfirst(selector, snapshots)
@@ -551,7 +743,7 @@ end
 
     inconsistent = snapshots[findfirst(selectors[3], snapshots)]
     bad_state = FiniteBathCheckpoint.ObservableResumeState(
-        ObservableCursor(:green, 2, :dn, :after),
+        ObservableCursor(:green, 2, :dn, :creation, :after),
         inconsistent.resume_state.evolution_state,
         inconsistent.resume_state.thermal_psi,
         inconsistent.resume_state.data,
@@ -586,11 +778,11 @@ end
     endpoint_before = only(filter(
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 1, :up, :before),
+            ObservableCursor(:green, 1, :up, :creation, :before),
         snapshots,
     ))
     false_endpoint_after = ObservableResumeState(
-        ObservableCursor(:green, 1, :up, :after),
+        ObservableCursor(:green, 1, :up, :creation, :after),
         nothing,
         endpoint_before.resume_state.thermal_psi,
         endpoint_before.resume_state.data,
@@ -635,7 +827,7 @@ end
     interior_before = only(filter(
         snapshot ->
             snapshot.resume_state.cursor ==
-            ObservableCursor(:green, 2, :up, :before) &&
+            ObservableCursor(:green, 2, :up, :creation, :before) &&
             snapshot.resume_state.evolution_state === nothing,
         snapshots,
     ))

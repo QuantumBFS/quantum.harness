@@ -11,6 +11,7 @@ isdefined(PARENT_MODULE, :FiniteBathCheckpoint) ||
 
 using ..FiniteBathPurification:
     FiniteBathParameters,
+    PurificationSpec,
     PurificationResult,
     _evolve_normalized_state,
     _evolution_settings,
@@ -20,16 +21,21 @@ using ..FiniteBathPurification:
     evolve_purification,
     identity_purification,
     impurity_observables,
-    physical_hamiltonian_mpo
+    non_qn_purification,
+    physical_hamiltonian_mpo,
+    validate_purification_fluxes
 using ..FiniteBathCheckpoint: ObservableCursor, ObservableResumeState
 
 export FiniteBathContext,
+    AppliedOperatorBranch,
     ObservableCursor,
     ObservableInterrupted,
+    OperatorSector,
     build_finite_bath_context,
     copy_identity_purification,
     finite_bath_observables,
-    impurity_green_function
+    impurity_green_function,
+    operator_sector
 
 const GREEN_FUNCTION_CONVENTION =
     "G_sigma(tau) = -Tr[exp(-(beta-tau)K) d_sigma exp(-tau K) d_sigma^dag] / Z"
@@ -38,7 +44,7 @@ const SPIN_TRANSFORM_CONVENTION =
     "the same real Q is used for up and down"
 
 struct ObservableInterrupted <: Exception
-    psi::MPS
+    psi::Union{Nothing,MPS}
     state::ObservableResumeState
 end
 
@@ -46,6 +52,7 @@ const _NEVER_STOP = () -> false
 
 struct FiniteBathContext{P,S,I,H}
     parameters::P
+    purification::PurificationSpec
     sites::S
     identity::I
     hamiltonian::H
@@ -57,16 +64,75 @@ struct FiniteBathContext{P,S,I,H}
     reuse_policy::String
 end
 
-function build_finite_bath_context(parameters::FiniteBathParameters)
-    sites, identity = identity_purification(parameters)
-    hamiltonian = physical_hamiltonian_mpo(sites, parameters)
+struct OperatorSector
+    insertion::Symbol
+    spin::Symbol
+    nf::Int
+    sz::Int
+
+    function OperatorSector(insertion, spin, nf, sz)
+        insertion in (:creation, :annihilation) ||
+            throw(ArgumentError("operator sector insertion is invalid"))
+        spin in (:up, :dn) ||
+            throw(ArgumentError("operator sector spin is invalid"))
+        nf isa Integer && !(nf isa Bool) && nf >= 0 ||
+            throw(ArgumentError("operator sector Nf is invalid"))
+        expected_sz =
+            (insertion, spin) in
+            ((:creation, :up), (:annihilation, :dn)) ? 1 : -1
+        sz == expected_sz ||
+            throw(ArgumentError("operator sector Sz is invalid"))
+        return new(insertion, spin, Int(nf), expected_sz)
+    end
+end
+
+struct AppliedOperatorBranch
+    psi::Union{Nothing,MPS}
+    expected_sector::Union{Nothing,OperatorSector}
+    log_norm::Float64
+    status::Symbol
+end
+
+function operator_sector(
+    purification::PurificationSpec, insertion, spin
+)
+    purification.mode === :qn_dual ||
+        throw(ArgumentError("operator sectors require QN purification"))
+    insertion in (:creation, :annihilation) ||
+        throw(ArgumentError("insertion must be :creation or :annihilation"))
+    spin in (:up, :dn) ||
+        throw(ArgumentError("spin must be :up or :dn"))
+    delta_nf = insertion === :creation ? 1 : -1
+    delta_sz =
+        (insertion, spin) in ((:creation, :up), (:annihilation, :dn)) ?
+        1 : -1
+    return OperatorSector(
+        insertion,
+        spin,
+        purification.base_sector_nf + delta_nf,
+        delta_sz,
+    )
+end
+
+function build_finite_bath_context(
+    parameters::FiniteBathParameters;
+    purification::PurificationSpec = non_qn_purification(),
+)
+    sites, identity = identity_purification(parameters; purification)
+    hamiltonian =
+        physical_hamiltonian_mpo(sites, parameters; purification)
+    purification.mode === :qn_dual &&
+        validate_purification_fluxes(
+            sites, identity, hamiltonian, purification
+        )
     return FiniteBathContext(
         parameters,
+        purification,
         sites,
         identity,
         hamiltonian,
         _hamiltonian_norm_bound(parameters),
-        false,
+        purification.mode === :qn_dual,
         parameters.bath_representation,
         parameters.mapping_sha256,
         SPIN_TRANSFORM_CONVENTION,
@@ -78,9 +144,12 @@ copy_identity_purification(context::FiniteBathContext) =
     deepcopy(context.identity)
 
 function _context_on_sites(
-    parameters::FiniteBathParameters, sites::AbstractVector{<:Index}
+    parameters::FiniteBathParameters,
+    sites::AbstractVector{<:Index};
+    purification::PurificationSpec = non_qn_purification(),
 )
-    template_sites, identity = identity_purification(parameters)
+    template_sites, identity =
+        identity_purification(parameters; purification)
     for index in eachindex(identity)
         identity[index] = replaceind(
             identity[index], template_sites[index], sites[index]
@@ -88,11 +157,12 @@ function _context_on_sites(
     end
     return FiniteBathContext(
         parameters,
+        purification,
         collect(sites),
         identity,
-        physical_hamiltonian_mpo(sites, parameters),
+        physical_hamiltonian_mpo(sites, parameters; purification),
         _hamiltonian_norm_bound(parameters),
-        false,
+        purification.mode === :qn_dual,
         parameters.bath_representation,
         parameters.mapping_sha256,
         SPIN_TRANSFORM_CONVENTION,
@@ -158,8 +228,28 @@ _annihilation_name(::Val{:up}) = "Cup"
 _annihilation_name(::Val{:dn}) = "Cdn"
 
 function _apply_impurity_operator(
-    psi::MPS, physical_site::Index, spin::Symbol, insertion::Symbol
+    psi::MPS,
+    physical_site::Index,
+    spin::Symbol,
+    insertion::Symbol,
+    expected_sector::Union{Nothing,OperatorSector},
 )
+    if hasqns(physical_site)
+        expected_sector !== nothing ||
+            throw(ArgumentError(
+                "QN operator branch requires an expected sector"
+            ))
+        expected_sector.insertion === insertion &&
+            expected_sector.spin === spin ||
+            throw(ArgumentError(
+                "operator and expected sector coordinates disagree"
+            ))
+    else
+        expected_sector === nothing ||
+            throw(ArgumentError(
+                "non-QN operator branch cannot claim a sector"
+            ))
+    end
     branch = deepcopy(psi)
     orthogonalize!(branch, 1)
     operator_name =
@@ -172,10 +262,22 @@ function _apply_impurity_operator(
     isfinite(amplitude) ||
         error("impurity creation produced a non-finite branch amplitude")
     if iszero(amplitude)
-        return branch, -Inf, :zero
+        return AppliedOperatorBranch(
+            nothing, expected_sector, -Inf, :zero
+        )
+    end
+    if expected_sector !== nothing
+        expected_flux = QN(
+            ("Nf", expected_sector.nf, -1),
+            ("Sz", expected_sector.sz),
+        )
+        flux(branch) == expected_flux ||
+            error("impurity operator branch sector mismatch")
     end
     branch[1] /= amplitude
-    return branch, log(amplitude), :finite
+    return AppliedOperatorBranch(
+        branch, expected_sector, log(amplitude), :finite
+    )
 end
 
 function _bounded_summary(histories...)
@@ -222,6 +324,7 @@ function _green_branch(
     thermal::PurificationResult,
     tau::Float64,
     spin::Symbol;
+    insertion::Symbol,
     time_step::Float64,
     cutoff::Float64,
     maxdim::Int,
@@ -233,12 +336,11 @@ function _green_branch(
     branch = copy_identity_purification(context)
     hamiltonian = context.hamiltonian
     bound = context.hamiltonian_norm_bound
-    # At tau=beta, use the cyclically equivalent annihilation branch
-    # ||d exp(-beta*K/2)|I>||^2. It avoids starting odd-sector TDVP from
-    # the exactly rank-deficient beta=0 identity MPS.
-    insertion = tau == beta ? :annihilation : :creation
     before_duration = insertion === :creation ? beta - tau : tau
     after_duration = insertion === :creation ? tau : beta - tau
+    expected_sector =
+        context.spin_qn_enabled ?
+        operator_sector(context.purification, insertion, spin) : nothing
 
     branch, before = _evolve_normalized_state(
         branch,
@@ -252,17 +354,19 @@ function _green_branch(
         progress,
         progress_label = "Green-$(spin)-tau=$(tau)-before",
     )
-    branch, operator_log_norm, branch_status =
-        _apply_impurity_operator(branch, sites[1], spin, insertion)
-    if branch_status === :zero
+    applied = _apply_impurity_operator(
+        branch, sites[1], spin, insertion, expected_sector
+    )
+    if applied.status === :zero
         return -0.0, (;
             tau,
             spin,
             insertion,
-            branch_status,
+            branch_status = applied.status,
+            operator_sector = applied.expected_sector,
             branch_log_norms = (;
                 before_operator = before.log_unnormalized_norm,
-                operator = operator_log_norm,
+                operator = applied.log_norm,
                 after_operator = -Inf,
                 total = -Inf,
             ),
@@ -292,6 +396,7 @@ function _green_branch(
         )
     end
 
+    branch = applied.psi
     branch, after = _evolve_normalized_state(
         branch,
         hamiltonian;
@@ -306,7 +411,7 @@ function _green_branch(
     )
     branch_log_norm =
         before.log_unnormalized_norm +
-        operator_log_norm +
+        applied.log_norm +
         after.log_unnormalized_norm
     log_overlap = 2 * (
         branch_log_norm - thermal.diagnostics.log_unnormalized_norm
@@ -330,10 +435,11 @@ function _green_branch(
         tau,
         spin,
         insertion,
+        operator_sector = applied.expected_sector,
         branch_status,
         branch_log_norms = (;
             before_operator = before.log_unnormalized_norm,
-            operator = operator_log_norm,
+            operator = applied.log_norm,
             after_operator = after.log_unnormalized_norm,
             total = branch_log_norm,
         ),
@@ -361,7 +467,13 @@ function _green_branch(
 end
 
 function _validated_request(
-    beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim
+    beta,
+    tau,
+    green_insertion,
+    time_step,
+    cutoff,
+    maxdim,
+    krylov_expansion_dim,
 )
     inverse_temperature = _finite_real(beta, "beta")
     inverse_temperature >= 0 ||
@@ -377,7 +489,19 @@ function _validated_request(
     expansion = _nonnegative_integer(
         krylov_expansion_dim, "krylov_expansion_dim"
     )
-    return inverse_temperature, tau_values, step, truncation, Int(maxdim), expansion
+    green_insertion in (:creation, :annihilation) ||
+        throw(ArgumentError(
+            "green_insertion must be :creation or :annihilation"
+        ))
+    return (
+        inverse_temperature,
+        tau_values,
+        green_insertion,
+        step,
+        truncation,
+        Int(maxdim),
+        expansion,
+    )
 end
 
 function _endpoint_green_diagnostics(
@@ -391,12 +515,12 @@ function _endpoint_green_diagnostics(
     maxdim::Int,
     krylov_expansion_dim::Int,
 )
-    insertion = tau == beta ? :annihilation : :creation
     magnitude = -value
     return (;
         tau,
         spin,
-        insertion,
+        insertion = :none,
+        operator_sector = nothing,
         branch_status = :endpoint_identity,
         branch_log_norms = (;
             before_operator = 0.0,
@@ -442,6 +566,8 @@ function impurity_green_function(
     beta,
     tau,
     spin,
+    purification::PurificationSpec = non_qn_purification(),
+    green_insertion = :creation,
     time_step = 0.05,
     cutoff = 1.0e-12,
     maxdim = 256,
@@ -449,11 +575,17 @@ function impurity_green_function(
     progress = false,
 )
     spin_label = _spin_label(spin)
-    beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim =
+    beta, tau, green_insertion, time_step, cutoff, maxdim, krylov_expansion_dim =
         _validated_request(
-            beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim
+            beta,
+            tau,
+            green_insertion,
+            time_step,
+            cutoff,
+            maxdim,
+            krylov_expansion_dim,
         )
-    context = build_finite_bath_context(parameters)
+    context = build_finite_bath_context(parameters; purification)
     thermal = _evolve_context(
         context;
         beta,
@@ -472,6 +604,7 @@ function impurity_green_function(
             thermal,
             point,
             spin_label;
+            insertion = green_insertion,
             time_step,
             cutoff,
             maxdim,
@@ -492,17 +625,25 @@ function _finite_bath_observables_uninterrupted(
     parameters::FiniteBathParameters;
     beta,
     tau,
+    purification::PurificationSpec = non_qn_purification(),
+    green_insertion = :creation,
     time_step = 0.05,
     cutoff = 1.0e-12,
     maxdim = 256,
     krylov_expansion_dim = 0,
     progress = false,
 )
-    beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim =
+    beta, tau, green_insertion, time_step, cutoff, maxdim, krylov_expansion_dim =
         _validated_request(
-            beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim
+            beta,
+            tau,
+            green_insertion,
+            time_step,
+            cutoff,
+            maxdim,
+            krylov_expansion_dim,
         )
-    context = build_finite_bath_context(parameters)
+    context = build_finite_bath_context(parameters; purification)
     thermal = _evolve_context(
         context;
         beta,
@@ -554,6 +695,7 @@ function _finite_bath_observables_uninterrupted(
                 thermal,
                 point,
                 spin;
+                insertion = green_insertion,
                 time_step,
                 cutoff,
                 maxdim,
@@ -593,6 +735,7 @@ function _finite_bath_observables_uninterrupted(
         green_dn = diagnostics_dn,
         settings = (;
             beta,
+            green_insertion,
             time_step,
             cutoff,
             maxdim,
@@ -605,12 +748,13 @@ function _finite_bath_observables_uninterrupted(
         module_version = MODULE_VERSION,
         bath_representation = context.bath_representation,
         chain_mapping_sha256 = context.chain_mapping_sha256,
+        purification_mode = context.purification.mode,
         spin_transform = context.spin_transform,
         julia_version = string(VERSION),
         itensors_version = string(Base.pkgversion(ITensors)),
         itensormps_version = string(Base.pkgversion(ITensorMPS)),
         green_function = GREEN_FUNCTION_CONVENTION,
-        branch_identity = "creation norm identity, with its cyclic annihilation form at tau=beta",
+        branch_identity = "$(green_insertion) norm identity on interior tau",
         thermal_space = "full grand-canonical Fock space; no fixed-number projection",
         site_layout = "interleaved physical and ancilla Electron sites",
         impurity_physical_site = 1,
@@ -630,13 +774,19 @@ end
 
 function _resume_parts(resume)
     resume isa ObservableInterrupted &&
-        return copy(resume.psi), resume.state
+        return (
+            resume.psi === nothing ? nothing : copy(resume.psi),
+            resume.state,
+        )
     if resume isa NamedTuple
         haskey(resume, :psi) && haskey(resume, :resume_state) ||
             throw(ArgumentError("resume must contain psi and resume_state"))
         resume.resume_state isa ObservableResumeState ||
             throw(ArgumentError("resume_state must be an ObservableResumeState"))
-        return copy(resume.psi), resume.resume_state
+        return (
+            resume.psi === nothing ? nothing : copy(resume.psi),
+            resume.resume_state,
+        )
     end
     throw(ArgumentError("resume must be an ObservableInterrupted or loaded checkpoint"))
 end
@@ -644,7 +794,7 @@ end
 function _publish_observable_checkpoint(
     checkpoint_manager,
     stop_requested,
-    psi::MPS,
+    psi::Union{Nothing,MPS},
     state::ObservableResumeState,
 )
     if checkpoint_manager !== nothing
@@ -658,7 +808,8 @@ function _publish_observable_checkpoint(
     end
     stop_requested isa Function ||
         throw(ArgumentError("stop_requested must be callable"))
-    stop_requested() && throw(ObservableInterrupted(copy(psi), state))
+    stop_requested() &&
+        throw(ObservableInterrupted(psi === nothing ? nothing : copy(psi), state))
     return nothing
 end
 
@@ -701,6 +852,8 @@ function _empty_observable_data(tau, settings, thermal_setup_maxima)
         diagnostics_dn = Any[nothing for _ in 1:count],
         before = nothing,
         operator_log_norm = nothing,
+        expected_sector = nothing,
+        branch_status = nothing,
     )
 end
 
@@ -713,13 +866,17 @@ function _observable_state(cursor, evolution_state, thermal_psi, data)
     )
 end
 
-function _next_green_cursor(index, spin, count)
+function _next_green_cursor(index, spin, insertion, count)
     if spin === :up
-        return ObservableCursor(:green, index, :dn, :before)
+        return ObservableCursor(
+            :green, index, :dn, insertion, :before
+        )
     elseif index < count
-        return ObservableCursor(:green, index + 1, :up, :before)
+        return ObservableCursor(
+            :green, index + 1, :up, insertion, :before
+        )
     end
-    return ObservableCursor(:complete, 0, :none, :none)
+    return ObservableCursor(:complete, 0, :none, :none, :none)
 end
 
 function _validate_observable_resume(state::ObservableResumeState)
@@ -781,12 +938,18 @@ function _validate_observable_resume(state::ObservableResumeState)
             state.evolution_state === nothing ||
                 state.evolution_state.completed_steps > 0 ||
                 throw(ArgumentError("before cursor evolution state has no completed step"))
-        else
+        elseif cursor.segment === :after
             data.before !== nothing && data.operator_log_norm !== nothing ||
                 throw(ArgumentError("after cursor lacks operator state"))
             state.evolution_state === nothing ||
                 state.evolution_state.completed_steps > 0 ||
                 throw(ArgumentError("after cursor evolution state has no completed step"))
+        else
+            data.branch_status === :zero &&
+                data.expected_sector !== nothing ||
+                throw(ArgumentError("terminal cursor lacks zero-branch state"))
+            state.evolution_state === nothing ||
+                throw(ArgumentError("terminal cursor cannot carry evolution state"))
         end
     else
         all(completed) ||
@@ -806,6 +969,7 @@ function _branch_diagnostics(
     insertion,
     before,
     operator_log_norm,
+    expected_sector,
     after;
     time_step,
     cutoff,
@@ -833,6 +997,7 @@ function _branch_diagnostics(
         tau,
         spin,
         insertion,
+        operator_sector = expected_sector,
         branch_status,
         branch_log_norms = (;
             before_operator = before.log_unnormalized_norm,
@@ -888,6 +1053,7 @@ function _finish_observable_result(context, thermal, data, settings)
         green_dn = diagnostics_dn,
         settings = (;
             beta = settings.beta,
+            green_insertion = settings.green_insertion,
             time_step = settings.time_step,
             cutoff = settings.cutoff,
             maxdim = settings.maxdim,
@@ -900,12 +1066,13 @@ function _finish_observable_result(context, thermal, data, settings)
         module_version = MODULE_VERSION,
         bath_representation = context.bath_representation,
         chain_mapping_sha256 = context.chain_mapping_sha256,
+        purification_mode = context.purification.mode,
         spin_transform = context.spin_transform,
         julia_version = string(VERSION),
         itensors_version = string(Base.pkgversion(ITensors)),
         itensormps_version = string(Base.pkgversion(ITensorMPS)),
         green_function = GREEN_FUNCTION_CONVENTION,
-        branch_identity = "creation norm identity, with its cyclic annihilation form at tau=beta",
+        branch_identity = "$(settings.green_insertion) norm identity on interior tau",
         thermal_space = "full grand-canonical Fock space; no fixed-number projection",
         site_layout = "interleaved physical and ancilla Electron sites",
         impurity_physical_site = 1,
@@ -927,6 +1094,8 @@ function _finite_bath_observables_resumable(
     parameters::FiniteBathParameters;
     beta,
     tau,
+    purification,
+    green_insertion,
     time_step,
     cutoff,
     maxdim,
@@ -936,15 +1105,28 @@ function _finite_bath_observables_resumable(
     resume,
     stop_requested,
 )
-    beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim =
+    beta, tau, green_insertion, time_step, cutoff, maxdim, krylov_expansion_dim =
         _validated_request(
-            beta, tau, time_step, cutoff, maxdim, krylov_expansion_dim
+            beta,
+            tau,
+            green_insertion,
+            time_step,
+            cutoff,
+            maxdim,
+            krylov_expansion_dim,
         )
-    context = build_finite_bath_context(parameters)
-    settings = (; beta, time_step, cutoff, maxdim, krylov_expansion_dim)
+    context = build_finite_bath_context(parameters; purification)
+    settings = (;
+        beta,
+        green_insertion,
+        time_step,
+        cutoff,
+        maxdim,
+        krylov_expansion_dim,
+    )
     if resume === nothing
         active = copy_identity_purification(context)
-        cursor = ObservableCursor(:thermal, 0, :none, :none)
+        cursor = ObservableCursor(:thermal, 0, :none, :none, :none)
         evolution_state = nothing
         thermal_psi = nothing
         thermal_setup_maxima = _thermal_setup_maxima(
@@ -963,15 +1145,27 @@ function _finite_bath_observables_resumable(
             throw(ArgumentError("resume solver settings do not match the request"))
         _validate_observable_resume(state)
         cursor = state.cursor
+        active === nothing && cursor.segment !== :terminal &&
+            throw(ArgumentError(
+                "only a zero terminal resume may omit active MPS"
+            ))
+        cursor.phase === :green &&
+            cursor.insertion !== green_insertion &&
+            throw(ArgumentError(
+                "resume Green insertion does not match the request"
+            ))
         evolution_state = state.evolution_state
         thermal_psi = state.thermal_psi
         data = state.data
         resume_sites =
             thermal_psi === nothing ? siteinds(active) : siteinds(thermal_psi)
-        thermal_psi !== nothing &&
+        active !== nothing &&
+            thermal_psi !== nothing &&
             siteinds(active) != resume_sites &&
             throw(ArgumentError("active and thermal checkpoint sites do not match"))
-        context = _context_on_sites(parameters, resume_sites)
+        context = _context_on_sites(
+            parameters, resume_sites; purification
+        )
     end
 
     if cursor.phase === :thermal
@@ -1024,7 +1218,9 @@ function _finite_bath_observables_resumable(
                 n_dn = real(expect(thermal.psi, "Ndn")[1]),
             ),
         )
-        cursor = ObservableCursor(:green, 1, :up, :before)
+        cursor = ObservableCursor(
+            :green, 1, :up, green_insertion, :before
+        )
         evolution_state = nothing
         active = copy_identity_purification(context)
         state = _observable_state(cursor, nothing, thermal_psi, data)
@@ -1061,9 +1257,13 @@ function _finite_bath_observables_resumable(
                 krylov_expansion_dim,
             )
         else
-            insertion = :creation
+            insertion = cursor.insertion
             before_duration = beta - point
             after_duration = point
+            if insertion === :annihilation
+                before_duration, after_duration =
+                    point, beta - point
+            end
             if cursor.segment === :before
                 callback = function (psi, evolution)
                     state = _observable_state(
@@ -1088,61 +1288,140 @@ function _finite_bath_observables_resumable(
                     resume_state = evolution_state,
                     step_callback = callback,
                 )
-                active, operator_log_norm, branch_status =
-                    _apply_impurity_operator(
-                        active, context.sites[1], spin, insertion
-                    )
-                branch_status === :finite ||
-                    error("zero Green-function branches cannot be resumed")
+                expected_sector =
+                    context.spin_qn_enabled ?
+                    operator_sector(
+                        context.purification, insertion, spin
+                    ) : nothing
+                applied = _apply_impurity_operator(
+                    active,
+                    context.sites[1],
+                    spin,
+                    insertion,
+                    expected_sector,
+                )
                 data = merge(
                     data,
-                    (; before, operator_log_norm),
+                    (;
+                        before,
+                        operator_log_norm = applied.log_norm,
+                        expected_sector = applied.expected_sector,
+                        branch_status = applied.status,
+                    ),
                 )
-                cursor = ObservableCursor(:green, index, spin, :after)
+                if applied.status === :zero
+                    cursor = ObservableCursor(
+                        :green,
+                        index,
+                        spin,
+                        insertion,
+                        :terminal,
+                    )
+                    state = _observable_state(
+                        cursor, nothing, thermal_psi, data
+                    )
+                    _publish_observable_checkpoint(
+                        checkpoint_manager,
+                        stop_requested,
+                        nothing,
+                        state,
+                    )
+                else
+                    active = applied.psi
+                    cursor = ObservableCursor(
+                        :green, index, spin, insertion, :after
+                    )
+                end
                 evolution_state = nothing
-                state = _observable_state(
-                    cursor, nothing, thermal_psi, data
+                if applied.status === :finite
+                    state = _observable_state(
+                        cursor, nothing, thermal_psi, data
+                    )
+                    _publish_observable_checkpoint(
+                        checkpoint_manager,
+                        stop_requested,
+                        active,
+                        state,
+                    )
+                end
+            end
+            if cursor.segment === :terminal
+                value = -0.0
+                diagnostics = (;
+                    tau = point,
+                    spin,
+                    insertion,
+                    operator_sector = data.expected_sector,
+                    branch_status = :zero,
+                    branch_log_norms = (;
+                        before_operator =
+                            data.before.log_unnormalized_norm,
+                        operator = -Inf,
+                        after_operator = -Inf,
+                        total = -Inf,
+                    ),
+                    overlap_magnitude = 0.0,
+                    max_link_dimension = data.before.max_link_dimension,
+                    maximum_link_dimensions_by_bond =
+                        data.before.maximum_link_dimensions_by_bond,
+                    truncation = (; max_error = 0.0),
+                    krylov =
+                        _bounded_summary(data.before.step_history).krylov,
+                    settings = (;
+                        time_step,
+                        cutoff,
+                        maxdim,
+                        krylov_expansion_dim,
+                        hamiltonian_norm_bound =
+                            context.hamiltonian_norm_bound,
+                        before_steps = data.before.steps,
+                        after_steps = 0,
+                        before_effective_time_step =
+                            data.before.effective_time_step,
+                        after_effective_time_step = time_step,
+                    ),
                 )
-                _publish_observable_checkpoint(
-                    checkpoint_manager, stop_requested, active, state
+            else
+                callback = function (psi, evolution)
+                    state = _observable_state(
+                        cursor, evolution, thermal_psi, data
+                    )
+                    _publish_observable_checkpoint(
+                        checkpoint_manager, stop_requested, psi, state
+                    )
+                end
+                active, after = _evolve_normalized_state(
+                    active,
+                    context.hamiltonian;
+                    beta = after_duration,
+                    time_step,
+                    cutoff,
+                    maxdim,
+                    krylov_expansion_dim,
+                    hamiltonian_norm_bound =
+                        context.hamiltonian_norm_bound,
+                    progress,
+                    progress_label =
+                        "Green-$(spin)-tau=$(point)-after",
+                    resume_state = evolution_state,
+                    step_callback = callback,
+                )
+                value, diagnostics = _branch_diagnostics(
+                    thermal,
+                    point,
+                    spin,
+                    insertion,
+                    data.before,
+                    data.operator_log_norm,
+                    data.expected_sector,
+                    after;
+                    time_step,
+                    cutoff,
+                    maxdim,
+                    krylov_expansion_dim,
+                    bound = context.hamiltonian_norm_bound,
                 )
             end
-            callback = function (psi, evolution)
-                state = _observable_state(
-                    cursor, evolution, thermal_psi, data
-                )
-                _publish_observable_checkpoint(
-                    checkpoint_manager, stop_requested, psi, state
-                )
-            end
-            active, after = _evolve_normalized_state(
-                active,
-                context.hamiltonian;
-                beta = after_duration,
-                time_step,
-                cutoff,
-                maxdim,
-                krylov_expansion_dim,
-                hamiltonian_norm_bound = context.hamiltonian_norm_bound,
-                progress,
-                progress_label = "Green-$(spin)-tau=$(point)-after",
-                resume_state = evolution_state,
-                step_callback = callback,
-            )
-            value, diagnostics = _branch_diagnostics(
-                thermal,
-                point,
-                spin,
-                insertion,
-                data.before,
-                data.operator_log_norm,
-                after;
-                time_step,
-                cutoff,
-                maxdim,
-                krylov_expansion_dim,
-                bound = context.hamiltonian_norm_bound,
-            )
         end
         values = copy(getproperty(data, values_key))
         point_diagnostics = copy(getproperty(data, diagnostics_key))
@@ -1153,9 +1432,16 @@ function _finite_bath_observables_resumable(
             NamedTuple{(values_key, diagnostics_key)}(
                 (values, point_diagnostics)
             ),
-            (; before = nothing, operator_log_norm = nothing),
+            (;
+                before = nothing,
+                operator_log_norm = nothing,
+                expected_sector = nothing,
+                branch_status = nothing,
+            ),
         )
-        cursor = _next_green_cursor(index, spin, length(tau))
+        cursor = _next_green_cursor(
+            index, spin, green_insertion, length(tau)
+        )
         evolution_state = nothing
         active =
             cursor.phase === :green ?
@@ -1172,6 +1458,8 @@ function finite_bath_observables(
     parameters::FiniteBathParameters;
     beta,
     tau,
+    purification::PurificationSpec = non_qn_purification(),
+    green_insertion = :creation,
     time_step = 0.05,
     cutoff = 1.0e-12,
     maxdim = 256,
@@ -1187,6 +1475,8 @@ function finite_bath_observables(
             parameters;
             beta,
             tau,
+            purification,
+            green_insertion,
             time_step,
             cutoff,
             maxdim,
@@ -1198,6 +1488,8 @@ function finite_bath_observables(
         parameters;
         beta,
         tau,
+        purification,
+        green_insertion,
         time_step,
         cutoff,
         maxdim,
