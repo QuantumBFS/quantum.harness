@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 import hashlib
+import hmac
+import json
 import math
 from pathlib import Path
 from typing import Iterable
@@ -115,19 +117,60 @@ def portable_command(
     return command
 
 
+def run_fingerprint(run_spec: dict[str, object]) -> str:
+    encoded = json.dumps(
+        run_spec,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_run_fingerprint(stored: str, expected: str) -> None:
+    if not hmac.compare_digest(stored, expected):
+        raise ValueError("run fingerprint mismatch; refusing stale result")
+
+
+def validate_source_revision(commit: str, *, dirty: bool) -> None:
+    if not commit or commit == "unknown" or dirty:
+        raise ValueError(
+            "source revision must be known and clean for production scan"
+        )
+
+
 def needs_stable_retry(summary: dict[str, object]) -> bool:
-    values = (
-        float(summary.get("direct_sign_mean", float("nan"))),
-        float(summary.get("weight_log_error_mean", float("nan"))),
-        float(summary.get("density_mean", float("nan"))),
+    sign = float(
+        summary.get(
+            "direct_sign_min",
+            summary.get("direct_sign_mean", float("nan")),
+        )
     )
+    log_error = float(
+        summary.get(
+            "weight_log_error_max",
+            summary.get("weight_log_error_mean", float("nan")),
+        )
+    )
+    density_min = float(
+        summary.get(
+            "density_min",
+            summary.get("density_mean", float("nan")),
+        )
+    )
+    density_max = float(
+        summary.get(
+            "density_max",
+            summary.get("density_mean", float("nan")),
+        )
+    )
+    values = (sign, log_error, density_min, density_max)
     if not all(math.isfinite(value) for value in values):
         return True
-    sign, log_error, density = values
     return (
         sign < 1.0 - 1.0e-8
         or log_error > 1.0e-6
-        or not (-1.0e-8 <= density <= 1.0 + 1.0e-8)
+        or density_min < -1.0e-8
+        or density_max > 1.0 + 1.0e-8
     )
 
 

@@ -6,7 +6,10 @@ from tensor_square.scan import (
     deterministic_seed,
     needs_stable_retry,
     portable_command,
+    run_fingerprint,
     select_shard,
+    validate_run_fingerprint,
+    validate_source_revision,
 )
 
 
@@ -139,6 +142,10 @@ def test_unstable_direct_audit_requests_stabilized_retry() -> None:
     assert not needs_stable_retry(healthy)
     assert needs_stable_retry({**healthy, "direct_sign_mean": -1.0})
     assert needs_stable_retry({**healthy, "weight_log_error_mean": 2.0e-5})
+    assert needs_stable_retry(
+        {**healthy, "weight_log_error_max": 2.0e-5}
+    )
+    assert needs_stable_retry({**healthy, "density_max": 1.01})
 
 
 def test_single_channel_and_zero_kinetic_controls_do_not_survive() -> None:
@@ -189,3 +196,45 @@ def test_manifest_command_does_not_expose_absolute_home_paths() -> None:
         "cpu",
     ]
     assert "/home/" not in " ".join(command)
+
+
+def test_run_fingerprint_changes_with_schedule_seed_or_source() -> None:
+    base = {
+        "experiment_id": "stage3",
+        "cell_id": "cell-1",
+        "seed": 7,
+        "warmup_sweeps": 40,
+        "measurement_sweeps": 80,
+        "measure_every": 2,
+        "source_revision": "abc123",
+    }
+    fingerprint = run_fingerprint(base)
+    assert fingerprint == run_fingerprint(dict(reversed(list(base.items()))))
+    assert fingerprint != run_fingerprint({**base, "seed": 8})
+    assert fingerprint != run_fingerprint(
+        {**base, "measurement_sweeps": 160}
+    )
+    assert fingerprint != run_fingerprint(
+        {**base, "source_revision": "def456"}
+    )
+
+
+def test_incompatible_summary_fingerprint_is_refused() -> None:
+    validate_run_fingerprint("same", "same")
+    try:
+        validate_run_fingerprint("old", "new")
+    except ValueError as error:
+        assert "fingerprint" in str(error)
+    else:
+        raise AssertionError("mismatched fingerprint was silently reused")
+
+
+def test_production_scan_requires_clean_known_source_revision() -> None:
+    validate_source_revision("abc123", dirty=False)
+    for commit, dirty in (("unknown", False), ("abc123", True)):
+        try:
+            validate_source_revision(commit, dirty=dirty)
+        except ValueError as error:
+            assert "source revision" in str(error)
+        else:
+            raise AssertionError("non-reproducible source was accepted")

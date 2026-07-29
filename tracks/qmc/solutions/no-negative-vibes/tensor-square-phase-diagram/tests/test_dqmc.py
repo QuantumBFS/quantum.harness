@@ -16,6 +16,7 @@ from tensor_square.dqmc import (
     stabilized_density_matrix,
     stabilized_direct_log_weight,
     stabilized_structured_log_weight,
+    summarize_measurements,
     wick_product,
 )
 from tensor_square.fock import basis_states, d_gamma
@@ -162,3 +163,59 @@ def test_chain_honors_explicit_stabilization_below_default_beta() -> None:
         progress_every=2,
     )
     assert summary["stabilized"] is True
+
+
+def test_measurement_summary_preserves_audit_extrema() -> None:
+    measurements = [
+        {
+            "direct_sign": 1.0,
+            "weight_log_error": 1.0e-12,
+            "density": 0.25,
+        },
+        {
+            "direct_sign": -1.0,
+            "weight_log_error": 2.0e-4,
+            "density": 1.01,
+        },
+    ]
+    summary = summarize_measurements(measurements)
+    assert summary["direct_sign_min"] == -1.0
+    assert summary["weight_log_error_max"] == 2.0e-4
+    assert summary["density_min"] == 0.25
+    assert summary["density_max"] == 1.01
+
+
+def test_checkpoint_rejects_changed_run_fingerprint(tmp_path) -> None:
+    from tensor_square.dqmc import run_chain
+
+    config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+    )
+    checkpoint = tmp_path / "fingerprint.npz"
+    run_chain(
+        config,
+        seed=81,
+        warmup_sweeps=1,
+        measurement_sweeps=2,
+        measure_every=1,
+        progress_every=10,
+        checkpoint_path=checkpoint,
+        checkpoint_every=1,
+        run_fingerprint="run-a",
+    )
+    with pytest.raises(ValueError, match="fingerprint"):
+        run_chain(
+            config,
+            seed=81,
+            warmup_sweeps=1,
+            measurement_sweeps=2,
+            measure_every=1,
+            progress_every=10,
+            checkpoint_path=checkpoint,
+            checkpoint_every=1,
+            run_fingerprint="run-b",
+        )

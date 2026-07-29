@@ -103,11 +103,30 @@ def main() -> None:
     unexpected = sorted(payloads.keys() - expected)
     stability_retries = sum(bool(row["stability_retry"]) for row in rows)
     minimum_sign = min(
-        (float(row["direct_sign_mean"]) for row in rows),
+        (
+            float(row.get("direct_sign_min", row["direct_sign_mean"]))
+            for row in rows
+        ),
         default=float("nan"),
     )
     maximum_log_error = max(
-        (float(row["weight_log_error_mean"]) for row in rows),
+        (
+            float(
+                row.get(
+                    "weight_log_error_max",
+                    row["weight_log_error_mean"],
+                )
+            )
+            for row in rows
+        ),
+        default=float("nan"),
+    )
+    minimum_density = min(
+        (float(row.get("density_min", row["density_mean"])) for row in rows),
+        default=float("nan"),
+    )
+    maximum_density = max(
+        (float(row.get("density_max", row["density_mean"])) for row in rows),
         default=float("nan"),
     )
     summary = {
@@ -122,6 +141,8 @@ def main() -> None:
         "stability_retries": stability_retries,
         "minimum_direct_sign": minimum_sign,
         "maximum_weight_log_error": maximum_log_error,
+        "minimum_density": minimum_density,
+        "maximum_density": maximum_density,
         "regions": len(regions),
         "classification_counts": {
             "SURVIVE": len(survivors),

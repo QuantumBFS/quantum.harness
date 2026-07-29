@@ -26,8 +26,11 @@ from tensor_square.scan import (
     EXPERIMENT_ID,
     needs_stable_retry,
     portable_command,
+    run_fingerprint,
     ScanCell,
     select_shard,
+    validate_run_fingerprint,
+    validate_source_revision,
 )
 
 
@@ -65,19 +68,22 @@ def _git_metadata(project_root: Path) -> dict[str, object]:
 
 
 def _run_cell(
-    task: tuple[ScanCell, str, str, int, int, int],
+    task: tuple[ScanCell, str, str, int, int, int, str],
 ) -> dict[str, object]:
-    cell, output_dir_text, machine, warmup, measurement, measure_every = task
+    (
+        cell,
+        output_dir_text,
+        machine,
+        warmup,
+        measurement,
+        measure_every,
+        source_revision,
+    ) = task
     output_dir = Path(output_dir_text)
     cell_dir = output_dir / "cells" / cell.cell_id
     summary_path = cell_dir / "summary.json"
-    if summary_path.exists():
-        previous = json.loads(summary_path.read_text(encoding="utf-8"))
-        if previous.get("status") == "COMPLETE":
-            return previous
-
     seed = deterministic_seed(EXPERIMENT_ID, cell.cell_id, cell.worker_id)
-    config_payload = {
+    run_spec: dict[str, object] = {
         "experiment_id": EXPERIMENT_ID,
         "cell_id": cell.cell_id,
         "cell_index": cell.index,
@@ -88,6 +94,36 @@ def _run_cell(
         "warmup_sweeps": warmup,
         "measurement_sweeps": measurement,
         "measure_every": measure_every,
+        "source_revision": source_revision,
+    }
+    fingerprint = run_fingerprint(run_spec)
+    if summary_path.exists():
+        previous = json.loads(summary_path.read_text(encoding="utf-8"))
+        if previous.get("status") == "COMPLETE":
+            try:
+                validate_run_fingerprint(
+                    str(previous.get("run_fingerprint", "")),
+                    fingerprint,
+                )
+            except ValueError as error:
+                payload = {
+                    "status": "ERROR",
+                    "experiment_id": EXPERIMENT_ID,
+                    "cell_id": cell.cell_id,
+                    "cell_index": cell.index,
+                    "machine": machine,
+                    "worker_id": cell.worker_id,
+                    "seed": seed,
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                }
+                _atomic_json(cell_dir / "error.json", payload)
+                return payload
+            return previous
+
+    config_payload = {
+        "run_spec": run_spec,
+        "run_fingerprint": fingerprint,
     }
     _atomic_json(cell_dir / "config.json", config_payload)
     _append_progress(
@@ -109,13 +145,18 @@ def _run_cell(
             progress_every=warmup + measurement,
             checkpoint_path=checkpoint_dir / "chain.npz",
             checkpoint_every=max(20, (warmup + measurement) // 3),
+            run_fingerprint=fingerprint,
         )
         initial_audit = None
         if not bool(chain["stabilized"]) and needs_stable_retry(chain):
             initial_audit = {
                 "direct_sign_mean": chain["direct_sign_mean"],
+                "direct_sign_min": chain["direct_sign_min"],
                 "weight_log_error_mean": chain["weight_log_error_mean"],
+                "weight_log_error_max": chain["weight_log_error_max"],
                 "density_mean": chain["density_mean"],
+                "density_min": chain["density_min"],
+                "density_max": chain["density_max"],
             }
             stable_config = replace(cell.config, stabilize=True)
             chain = run_chain(
@@ -127,6 +168,7 @@ def _run_cell(
                 progress_every=warmup + measurement,
                 checkpoint_path=checkpoint_dir / "chain_stable.npz",
                 checkpoint_every=max(20, (warmup + measurement) // 3),
+                run_fingerprint=fingerprint,
             )
         payload: dict[str, object] = {
             "status": "COMPLETE",
@@ -137,6 +179,8 @@ def _run_cell(
             "worker_id": cell.worker_id,
             "stability_retry": initial_audit is not None,
             "initial_audit": initial_audit,
+            "run_spec": run_spec,
+            "run_fingerprint": fingerprint,
             **chain,
         }
         _atomic_json(summary_path, payload)
@@ -207,9 +251,14 @@ def main() -> None:
     cells = select_shard(coarse_grid(), args.machine)
     if args.limit is not None:
         cells = cells[: args.limit]
-    args.output_dir.mkdir(parents=True, exist_ok=True)
     study_root = Path(__file__).resolve().parents[1]
     project_root = Path(__file__).resolve().parents[6]
+    git_metadata = _git_metadata(project_root)
+    validate_source_revision(
+        str(git_metadata["commit"]),
+        dirty=bool(git_metadata["dirty"]),
+    )
+    args.output_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
         "experiment_id": EXPERIMENT_ID,
         "machine": args.machine,
@@ -248,7 +297,7 @@ def main() -> None:
             "numpy": np.__version__,
             "scipy": scipy.__version__,
         },
-        "git": _git_metadata(project_root),
+        "git": git_metadata,
     }
     _atomic_json(
         args.output_dir / f"manifest_{args.machine}.json",
@@ -264,6 +313,7 @@ def main() -> None:
             args.warmup,
             args.measurement,
             args.measure_every,
+            str(git_metadata["commit"]),
         )
         for cell in cells
     ]

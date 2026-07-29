@@ -343,6 +343,18 @@ def summarize_measurements(
         )
         if key in {"energy", "density", "q_a_sq"}:
             summary[f"{key}_tau_int"] = tau
+    summary["direct_sign_min"] = float(
+        min(measurement["direct_sign"] for measurement in measurements)
+    )
+    summary["weight_log_error_max"] = float(
+        max(measurement["weight_log_error"] for measurement in measurements)
+    )
+    summary["density_min"] = float(
+        min(measurement["density"] for measurement in measurements)
+    )
+    summary["density_max"] = float(
+        max(measurement["density"] for measurement in measurements)
+    )
     return summary
 
 
@@ -356,6 +368,7 @@ def run_chain(
     progress_every: int = 20,
     checkpoint_path: Path | None = None,
     checkpoint_every: int = 40,
+    run_fingerprint: str | None = None,
 ) -> dict[str, object]:
     rng = np.random.default_rng(seed)
     model = make_one_body_model(config)
@@ -370,6 +383,14 @@ def run_chain(
             stored_config = json.loads(str(checkpoint["config_json"].item()))
             if stored_config != config.as_dict():
                 raise ValueError("checkpoint config does not match requested config")
+            if run_fingerprint is not None:
+                if "run_fingerprint" not in checkpoint.files:
+                    raise ValueError("checkpoint has no run fingerprint")
+                stored_fingerprint = str(
+                    checkpoint["run_fingerprint"].item()
+                )
+                if stored_fingerprint != run_fingerprint:
+                    raise ValueError("checkpoint run fingerprint mismatch")
             fields = checkpoint["fields"]
             start_sweep = int(checkpoint["completed_sweeps"].item())
             accepted = int(checkpoint["accepted"].item())
@@ -459,16 +480,18 @@ def run_chain(
         ):
             checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
             temporary = checkpoint_path.with_suffix(".tmp.npz")
-            np.savez_compressed(
-                temporary,
-                config_json=json.dumps(config.as_dict(), sort_keys=True),
-                fields=fields,
-                completed_sweeps=sweep + 1,
-                accepted=accepted,
-                proposed=proposed,
-                measurements_json=json.dumps(measurements),
-                rng_state_json=json.dumps(rng.bit_generator.state),
-            )
+            checkpoint_payload: dict[str, object] = {
+                "config_json": json.dumps(config.as_dict(), sort_keys=True),
+                "fields": fields,
+                "completed_sweeps": sweep + 1,
+                "accepted": accepted,
+                "proposed": proposed,
+                "measurements_json": json.dumps(measurements),
+                "rng_state_json": json.dumps(rng.bit_generator.state),
+            }
+            if run_fingerprint is not None:
+                checkpoint_payload["run_fingerprint"] = run_fingerprint
+            np.savez_compressed(temporary, **checkpoint_payload)
             temporary.replace(checkpoint_path)
     summary = summarize_measurements(measurements)
     summary.update(
@@ -479,6 +502,7 @@ def run_chain(
             "proposed": proposed,
             "config": config.as_dict(),
             "stabilized": use_stabilization,
+            "run_fingerprint": run_fingerprint,
         }
     )
     return summary
