@@ -206,7 +206,7 @@ function add_streaming_real_psd_constraint!(
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
     block::ShastrySpinIsotypicPSDBlock,
     variables::Dict{MomentKey,JuMP.VariableRef},
-    coefficient_fingerprint::SHA.SHA2_256_CTX,
+    coefficient_fingerprint::Union{Nothing,SHA.SHA2_256_CTX},
 )
     dimension = length(block.rows)
     triangle_entries = dimension * (dimension + 1) ÷ 2
@@ -230,10 +230,12 @@ function add_streaming_real_psd_constraint!(
             Vector{ExactLinearPolynomial}(undef, dimension - row + 1)
             for row in rows
         ]
-        batch_hashes = [
-            Vector{String}(undef, dimension - row + 1)
-            for row in rows
-        ]
+        batch_hashes = isnothing(coefficient_fingerprint) ?
+            nothing :
+            [
+                Vector{String}(undef, dimension - row + 1)
+                for row in rows
+            ]
         Threads.@threads :dynamic for batch_index in eachindex(rows)
             row = rows[batch_index]
             for column in row:dimension
@@ -250,8 +252,10 @@ function add_streaming_real_psd_constraint!(
                     )
                 batch_polynomials[batch_index][local_index] =
                     polynomial
-                batch_hashes[batch_index][local_index] =
-                    polynomial_sha256(polynomial)
+                if !isnothing(batch_hashes)
+                    batch_hashes[batch_index][local_index] =
+                        polynomial_sha256(polynomial)
+                end
             end
         end
         for (batch_index, row) in enumerate(rows)
@@ -274,18 +278,20 @@ function add_streaming_real_psd_constraint!(
                         ),
                     )
                 end
-                update_fingerprint!(
-                    coefficient_fingerprint,
-                    string(
-                        block_label(block),
-                        "[",
-                        row,
-                        ",",
-                        column,
-                        "]=",
-                        batch_hashes[batch_index][local_index],
-                    ),
-                )
+                if !isnothing(coefficient_fingerprint)
+                    update_fingerprint!(
+                        coefficient_fingerprint,
+                        string(
+                            block_label(block),
+                            "[",
+                            row,
+                            ",",
+                            column,
+                            "]=",
+                            something(batch_hashes)[batch_index][local_index],
+                        ),
+                    )
+                end
             end
         end
     end
@@ -316,6 +322,7 @@ regression gate without retaining one String per triangle entry.
 function build_shastry_full_state_spin_isotypic_streaming_jump_primal(
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly;
     model::JuMP.Model=JuMP.Model(),
+    fingerprint_coefficients::Bool=true,
 )
     JuMP.num_variables(model) == 0 ||
         throw(ArgumentError("target JuMP model must be empty"))
@@ -343,11 +350,14 @@ function build_shastry_full_state_spin_isotypic_streaming_jump_primal(
         )
     end
 
-    coefficient_fingerprint = SHA.SHA2_256_CTX()
-    update_fingerprint!(
-        coefficient_fingerprint,
-        "shastry-full-state-spin-isotypic-coefficients-v1",
-    )
+    coefficient_fingerprint =
+        fingerprint_coefficients ? SHA.SHA2_256_CTX() : nothing
+    if !isnothing(coefficient_fingerprint)
+        update_fingerprint!(
+            coefficient_fingerprint,
+            "shastry-full-state-spin-isotypic-coefficients-v1",
+        )
+    end
     psd_indices = Any[]
     for block in [assembly.positive_blocks; assembly.gap_blocks]
         push!(
@@ -361,8 +371,9 @@ function build_shastry_full_state_spin_isotypic_streaming_jump_primal(
             ),
         )
     end
-    coefficient_sha256 =
-        bytes2hex(SHA.digest!(coefficient_fingerprint))
+    coefficient_sha256 = isnothing(coefficient_fingerprint) ?
+        "omitted-streaming-v1" :
+        bytes2hex(SHA.digest!(something(coefficient_fingerprint)))
     moments = sort!(
         collect(keys(variables));
         by=key -> (moment_degree(key), key.canonical),

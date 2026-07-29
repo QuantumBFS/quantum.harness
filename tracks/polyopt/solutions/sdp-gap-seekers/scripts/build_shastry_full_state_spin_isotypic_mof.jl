@@ -288,6 +288,13 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 build_shastry_full_state_spin_isotypic_streaming_jump_primal(
                     isotypic;
                     model=direct_model,
+                    fingerprint_coefficients=
+                        options.patch_level == 1 ||
+                        get(
+                            ENV,
+                            "SHASTRY_STREAM_FINGERPRINT",
+                            "0",
+                        ) == "1",
                 )
             )
         else
@@ -307,6 +314,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 jump_model.assembly_sha256
             metadata["coefficient_inventory"] =
                 "streamed-direct-to-solver-v1"
+            metadata["streamed_coefficient_fingerprint"] =
+                jump_model.coefficient_map_sha256 !=
+                "omitted-streaming-v1"
         end
         write_checkpoint(checkpoint_path, metadata)
     end
