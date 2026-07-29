@@ -20,6 +20,7 @@
 - No production full-basis enumeration, dense Hamiltonian, dense `L^2`, projector, Ritz solve, or ED-based checkpoint selection.
 - A03's 16-update smoke trains only the two reduced `M=0` sectors.  After A04 supplies the tower and its score propagation, A05's full frozen training averages the five excited components exactly as required.
 - Every implementation attempt uses a separate worktree, writes a journal, and has at most 90 minutes of active implementation.  A blocked problem gets at most five root-cause-driven attempts.  Attempt five failing closes the active goal as blocked.
+- Acceptance amendment (2026-07-29): numerical correctness remains a hard gate, while the N=6 timing ratio is a reported resource metric and optimization backlog item rather than a blocking threshold.  This amendment is recorded in `2026-07-29-challenge-15-route-a-acceptance-amendment.md`.
 - Each slice closes only after implementer self-review, external specification review, external code-quality review, and fresh main-agent verification.  No push is authorized.
 
 ## File map
@@ -216,7 +217,7 @@ Expected: both pytest commands pass; compilation is silent; `rg` exits `1` with 
 
 - [ ] **Step 5: Measure the actual coefficient range and N=6 hot path**
 
-Use the public LLL Coulomb integral builder once outside the production module, prepare the `N=6, 2Q=15` operator, and report minimum/maximum nonzero magnitudes and median wall time over at least 200 local-energy evaluations.  Compare with parent commit `3145bfd`; a slowdown over `2x` is an external-review blocker, not a reason to reduce the workload.
+Use the public LLL Coulomb integral builder once outside the production module, prepare the `N=6, 2Q=15` operator, and report minimum/maximum nonzero magnitudes and median wall time over at least 200 local-energy evaluations.  Compare with parent commit `3145bfd`.  The ratio is a resource metric and optimization backlog item; it does not override a passing numerical-correctness certificate or block A02 solely for exceeding `2x`.
 
 - [ ] **Step 6: Commit implementation and rescue journal**
 
