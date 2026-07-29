@@ -2231,3 +2231,85 @@ the signed support graph contains inconsistent cycles (including a
 negative diagonal entry), so a richer polyhedral/path-complete cone or a
 path injection is required.  The reduction itself is exact and remains
 the basis of subsequent tail searches.
+
+### Boundary-first joint scan and the new rational pair
+
+A boundary-focused two-point scan replaced the earlier
+`{p=3/10,p=5/2}` lead with
+
+`{(1/1000,1,1),(4/5,1,1)}`,
+
+again including both transposes.  Each endpoint separately has a strict
+common metric, but the four-letter joint common-metric optimum is
+numerically zero.  The pair survived all 22,369,620 nonempty words through
+depth 12; its exact minimum is `176/5`, already attained by the one-letter
+high atom.  Its coupled Frobenius ratios remain too large for the old
+single-norm tail proof, so that route was stopped.
+
+The Hodge scalar profile was then exhausted through depth 14.  Depths
+7--14 have relative minima
+
+`1.0123978, 1.0040135, 1.0053965, 0.9969818, 0.9972372, 0.9984097,
+0.9980791, 0.9986729`.
+
+Every minimizer is a pure high word, up to the exact transpose tie.  The
+depth-14 pass covered 268,435,456 words in about 304 seconds on ten
+single-threaded workers while leaving two logical cores free.  No negative
+Hodge scalar was found.
+
+The degenerate anchor `p=0` was also exhausted through depth 20 for the
+two-letter transpose alphabet.  Its determinant remained positive, and
+the grade-three/four relative margin approached one from above.  However,
+the lower-sector sum `chi1+chi2` is already negative at depth four for word
+`1000`; individual exterior-sector positivity is therefore false and was
+discarded as a proof route.
+
+### Failed finite positive-state tail cones
+
+Several cheap coupled-tail constructions were tested on the earlier
+two-point pair and rejected before further optimization:
+
+- one-letter and two-letter positive weighted-automaton simulations had
+  unusably large growth factors;
+- the direct 15-dimensional simplicial cone had negative entries;
+- a two-state parity cone was infeasible;
+- the exact chip factorization exposed a negative signed cycle, so no
+  diagonal sign gauge can make the compound dynamics nonnegative.
+
+These failures motivated metrics indexed by the current letter rather than
+another enlarged entrywise-positive cone.
+
+### Exact last-letter path metric and arbitrary-word positivity
+
+For the new rational pair, an SDP with four symmetric metrics found margin
+approximately `4.8273e-5` for all 16 labelled inequalities
+
+`R_i-A_j^T R_j A_j > 0`.
+
+Rounding every metric to denominator `10^9` preserved a wide exact
+interior.  The frozen solver-independent certificate verifies, using
+integer/rational arithmetic:
+
+- all four metrics have inertia `(1,4)`;
+- all 16 transition gaps are positive definite by Sylvester's criterion;
+- four stored rational time vectors are timelike;
+- all 16 inverse transitions preserve a coherent future orientation;
+- every letter has determinant eight.
+
+For a word `W=A_sn...A_s1`, the labelled inequalities telescope around the
+cycle beginning at state `sn`, giving
+
+`R_sn-W^T R_sn W > 0`.
+
+The strict Stein inertia theorem gives exactly one simple eigenvalue of
+`W` inside the unit disk.  Coherent Lorentz time orientation makes that
+eigenvalue positive.  The other four eigenvalues are outside the unit
+disk, and `det(W)=8^n>0`, hence
+
+`det(I+W)>0`
+
+for every nonempty word.  This is the first exact arbitrary-depth theorem
+for the genuinely joint four-letter candidate.  It is a finite-state,
+indefinite/path-complete extension of the common split-contraction
+certificate; the coherent time-orientation determinant lemma is essential,
+because contraction plus positive determinant alone does not fix the sign.
