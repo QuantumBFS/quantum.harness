@@ -20,6 +20,12 @@ tensor-square 五项；但 odd monomial 与 block-TN 是同一个循环机制的
 而 graded monomial 又不是普通的恒正 determinant 类。因此科研计数采用上表，不把
 名字数当发现数。
 
+贡献归属：除特别标注的协作 exterior/R01 外，本账中的经典群、AZ、Majorana、TN、
+graded、tensor-square、gauge 和非常规模型结果来自籼至
+（GitHub `xianzhipan`）分支；R01 和 exterior exact-card/long-word 结果来自
+ZiboJin 的[草稿 PR #3](https://github.com/no-negative-vibes/quantum.harness/pull/3)。
+完整分工表见[项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md)。
+
 ## 四套已证明机制
 
 | 机制 | 数学状态 | 物理映射 | 最终判定 |
@@ -158,7 +164,7 @@ canonical convention 下的 640 条历史支持一个 period-4 受保护宇称�
 
 ### R01 fixed Klein-Hodge 与后续表示锥
 
-合作者分支已完成 R01 的六模式重叠审计：数守恒和 BdG 两族、两个 support masks 中，
+ZiboJin 分支已完成 R01 的六模式重叠审计：数守恒和 BdG 两族、两个 support masks 中，
 24 个 bridge hopping/pairing 坐标全部由 exact double-dual/Farkas 证书判为
 `certified-zero`。这关闭的是固定 `U_6`、双 parity-block Metzler 的 R01，不是所有
 Fock/spinor 表示锥。
@@ -171,6 +177,14 @@ Fock–CP 的第一批自然变换也已完成：identity 与所有深度不超�
 Klein–Hodge 电路，在 20 种 tensorization、数守恒/BdG 两族共 520 个单元中，
 所有 bridge 都在 Hermiticity-preserving 线性门被迫为零。该有限库已关闭；一般
 non-Klein Choi 锥仍开放。见 [Fock–CP 首轮结果](FOCK_CP_SCREEN_RESULTS.md)。
+
+ZiboJin 随后完成了独立的 non-induced exterior exact-card/pressure 流水线。
+seed61 虽曾通过较浅锥检验，最终在长度 150 找到精确负 determinant，已永久关闭。
+oddcycle seeds `117/132/147` 则分别穷尽全部非空二进制 words 到长度 23：
+每个 `16,777,214` 个 raw words，三者合计 `50,331,642`；另有 304 个长度
+60、80、100、150 的精确对抗 winners 全部为正。它们目前是高质量有限深度候选，
+但没有任意深度定理，不能计作新的无符号类。实现与证据保留在
+[ZiboJin 草稿 PR #3](https://github.com/no-negative-vibes/quantum.harness/pull/3)。
 
 Tensor-square 已完成一般恒正证明和四模式物理闭环：
 `det(I+X tensor X)>=0` 对任意实 `X` 成立，且存在非交换、ordinary TN 之外的
@@ -207,7 +221,8 @@ H = -sum_a q_a [Gamma(B_a)+Gamma(B_a)^dagger]
 grade-charge full trace 是守恒 ancilla-bit 扇区的静态直和；tensor-square 权重可
 分解为 `|det(I+iX)|^2 det(I+Lambda^2 X)^2`，但 `m=3` 完整表示不存在固定
 pseudo-orthogonal 度量。现在只保留 tensor-square 多通道 Hamiltonian 的物理排重，
-仍不增加“确认的新无符号物理类”计数。见
+作为籼至方向的主候选；项目同时保留 ZiboJin 的 oddcycle exterior seeds
+`117/132/147` 有限深度候选。这两条线都仍不增加“确认的新无符号物理类”计数。见
 [非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)和
 [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 

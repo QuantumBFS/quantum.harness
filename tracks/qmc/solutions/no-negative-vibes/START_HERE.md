@@ -17,19 +17,21 @@
 - graded monomial 已约化到已知 Majorana 正性，odd block-TN 的自然局域化有精确负权；
 - tensor-square 四模式模型约化到 split `O(2,2)`，一般提升有条带非局域障碍；
 - 第一版 gauge/cocycle 能精确消号，但会形成随系统增长的 Wilson string；
-- 合作者已在独立分支运行 non-induced exterior-cone 扫描；本分支不重复开发；
+- ZiboJin 的独立 exterior-cone 分支已完成 R01 fixed-transform exact no-go、
+  seed61 长度 150 精确负例，以及 oddcycle seeds `117/132/147` 的完整 depth-23
+  穷举和 304 个长度 60–150 精确对抗重放；后三者仍缺任意深度证明；
 - 当前主线改为放开局域/Hermitian 限制，从已有严格正性类反推长程、多体、全局约束、
   Wilson-string 和准 Hermitian 非常规模型。
 - 第一批已经得到一个通用 Hermitian 半群模型工厂和八种严格/精确可约化模型；
   后续排查已把 adjoint lift 归入已知 split-orthogonal 类，并证明 grade-charge
   full trace 只是静态 ancilla 扇区直和。
-- 当前只保留 `m>=3` tensor-square 多通道 Hamiltonian 为模型主候选：它的 determinant
-  正性可分解成模平方与实平方，不能再称为新矩阵机制；但 `m=3` 又不存在固定
-  pseudo-orthogonal 度量，物理模型的 Majorana/Pfaffian 排重仍值得继续。
+- 当前有两条贡献归属独立的活跃候选线：籼至方向的 `m>=3` tensor-square 多通道
+  Hamiltonian，以及 ZiboJin 方向的 oddcycle exterior seeds `117/132/147`。
+  前者还缺 Majorana/Pfaffian 和物理排重，后者还缺任意深度 determinant 定理。
 - 单向 Stark 链的 Hermitian partner 不唯一：同一非厄米链既可对应对角模型，也可经
   任意 unitary 换基写成长程模型，所以它只保留为方法校准。
-- **确认的新无符号物理类仍为零。** 最新通俗结论见
-  [三个候选的排查结果](docs/THREE_CANDIDATE_AUDIT_RESULTS.md)。
+- **确认的新无符号物理类仍为零。** 完整结论与贡献归属见
+  [项目完整总结](docs/PROJECT_MASTER_SUMMARY.zh-CN.md)。
 
 下面的长清单用于审计数字，日常不需要逐条阅读。
 
@@ -98,7 +100,8 @@
   independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
-- 当前完整自动测试为 `358 passed`。
+- 当前总集成分支完整自动测试为 `370 passed`。ZiboJin 的草稿 PR #3 除一个尚未实现的
+  R01 classifier 测试模块外为 `470 passed`，因此仍保持 draft。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 

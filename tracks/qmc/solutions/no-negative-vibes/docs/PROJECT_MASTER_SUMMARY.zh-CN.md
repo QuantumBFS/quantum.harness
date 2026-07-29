@@ -1,7 +1,8 @@
 # 无符号 QMC 挑战项目完整总结
 
 更新时间：2026-07-29  
-科研结果基线提交：`26b0d98`  
+籼至方向结果基线：`26b0d98`
+ZiboJin 方向结果基线：`2ae03be`
 当前分支：`work/xianzhi/bottom-up-positive-cones`
 
 ## 这份文档解决什么问题
@@ -31,11 +32,13 @@ w = det(I + B_L ... B_1)
 
 截至现在：
 
-- 累计检查了 `4,044,000` 个 determinant 主权重；
+- 籼至方向累计检查了 `4,044,000` 个 determinant 主权重；
 - 另检查了 640 条 Majorana 历史，每条分别计算 even、odd 和完整 Fock 迹；
 - 建立了 59 个 determinant 结构生成器和 19 组机器可读精确证书；
 - 保存了精确符号反例、80 位高精度重放和一般解析证明；
-- 完整自动回归为 `358 passed`；
+- 当前总集成分支完整自动回归为 `370 passed`；
+- ZiboJin 的独立 exterior-cone 草稿分支除一个尚未实现的 R01 classifier 测试模块外，
+  其余 `470 passed`；
 - 得到三套直接 determinant 恒正构造族：
   TN 路径、odd monomial/block-TN、tensor-square；
 - 得到一套额外的 graded 符号补偿机制；
@@ -44,12 +47,15 @@ w = det(I + B_L ... B_1)
   **不能简单相加成十三个独立模型**；
 - 所有已完成物理映射目前都属于已知模型、已知正性类、静态扇区直和或基底/投影变换；
 - 因此**确认的新无符号物理类数量仍为零**；
-- 当前唯一保留的模型主候选是一般 `m>=3` 的 tensor-square 多通道 Hamiltonian。
+- 当前有两条不能混为一谈的活跃候选线：
+  籼至方向的一般 `m>=3` tensor-square 多通道 Hamiltonian，以及 ZiboJin 方向的
+  oddcycle exterior seeds `117/132/147` 有限深度幸存者。
 
 一句最诚实的话是：
 
 > 我们还没有交付一个新的无符号物理模型，但已经建立了可靠的搜索、反例、证明和
-> Hamiltonian 反推体系，并把大量貌似有希望的方向缩成了一个明确的主候选。
+> Hamiltonian 反推体系，并把大量貌似有希望的方向缩成了两条边界明确、贡献归属清楚的
+> 候选线。
 
 ## 1. “找到新东西”其实有三关
 
@@ -109,7 +115,51 @@ B_1,...,B_L in C
 
 另有 640 条 Majorana 宇称分辨历史。它们不是普通 determinant 样本，因此不并入上表。
 
-### 2.2 计算资源结论
+### 2.2 ZiboJin 的 exterior-cone 精确搜索
+
+这条线不并入上面的 `4,044,000`，因为它使用 exact rational candidate cards、分层
+mixed-word 穷举和高精度/整数接受门，而不是同一套随机 determinant 协议。
+
+| 阶段 | 实际完成 | 结论 |
+|---|---|---|
+| R01 overlapping Klein/Fock | 六模式、数守恒与 BdG、两个 support masks | 所有跨 cluster hopping、pair creation 和 pair annihilation 坐标均由 exact double-dual/Farkas 证书判为零；只关闭固定 transform |
+| exterior Stage 1 | 2,304 张 exact cards，深度 2–4 | 454 个稳定负例，137 个病态待重放，1,713 个浅层幸存者 |
+| depth 5–8 pressure | 553,261 个实际 word products | 再淘汰 148 个稳定负例；病态项进入高精度队列 |
+| depth 9–12 ordinary | 5,830,398 个实际 word products | 52 个稳定负例，692 个普通 depth-12 幸存者 |
+| exact-aware continuations | 3,654,713 + 2,331,133 个新 words | 474 与 303 个不同来源的 depth-12 幸存群；多数后来显示 sector cancellation |
+| depth-16 HP suffix | 21,771,547 个 suffix words | 176 个有限深度幸存者，另有三个新负例 |
+| seed61 | exact spectral/sector/cone 审计后进行长词搜索 | 找到长度 150 的精确负 determinant；该候选永久关闭 |
+| oddcycle seeds 117/132/147 | 每个 seed 穷尽全部非空二进制 words 到长度 23 | 每个覆盖 `16,777,214` 个 raw words，全部严格正 |
+| 第一轮长词对抗 | 长度 60/80/100/150，共 304 个 exact winners | 全部严格正，但仍只是有限证据，不是任意深度定理 |
+
+其中最容易误报的是 seed61：它曾有 shared exterior cone、长深度零负例和 inverse-HS
+模型，但最终仍被一个 2,223 位整数 numerator 的长度 150 精确反例击穿。这说明
+“有限深度幸存 + 某个 exterior sector cone”不能替代完整 determinant 定理。
+
+seeds `117/132/147` 是当前合作者方向的领先候选，但准确状态只能写成：
+
+```text
+全部 words 到 depth 23 严格正
++ 304 个 length 60–150 exact adversarial winners 严格正
++ 可反推出 Hermitian transpose-paired Hamiltonian
+- 没有 arbitrary-depth proof
+- 独立 grade cone 路线已有负 trace obstruction
+= 高质量有限深度候选，不是新的已证无符号类。
+```
+
+### 2.3 贡献归属
+
+| 贡献人 | 分支 / PR | 本文归属范围 |
+|---|---|---|
+| 籼至（GitHub `xianzhipan`，Codex 协助） | `work/xianzhi/bottom-up-positive-cones`；本轮总集成 PR | 经典群、AZ、Majorana 双锥、frontier 半群、TN、odd/graded monomial、Fock–CP、tensor-square、gauge/cocycle、非常规模型工厂、三个候选审计和本文整合 |
+| ZiboJin | `work/zibo/representation-cones`；[草稿 PR #3](https://github.com/no-negative-vibes/quantum.harness/pull/3) | R01 fixed Klein/Fock exact no-go、exterior exact-card/pressure/HP 流水线、inverse-HS、seed61 精确反例、oddcycle seeds `117/132/147` 深度 23 与长词对抗 |
+| 团队共享分支 | `research/no-negative-vibes` | 合并已审核 PR、协作基线和共同文档入口；不把某位成员独立分支的科学结果重新署名为“团队原创” |
+
+下文没有单独标作者的早期路线均来自籼至分支；`R01`、`exterior`、`seed61` 和
+oddcycle seeds `117/132/147` 的结果均来自 ZiboJin 分支。集成、复核或摘要不会改变
+原提交作者。
+
+### 2.4 计算资源结论
 
 139.2 万个 frontier 权重在本机累计约 15 单核分钟。当前瓶颈是候选定义、已知类排重和
 解析构造，不是算力。只有候选扩展到上万独立结构格、`10^8–10^9` 样本、百维以上矩阵
@@ -140,7 +190,7 @@ B_1,...,B_L in C
 | commuting dense algebra | 所有时间片在同一可交换代数 | 严格正但属于可积对照 |
 | near-commuting union | 不同但相近的可交换代数混用 | 846 个负权，关闭 |
 | `D_4` Lusztig/Chevalley 正锥 | 正/带符号根方向 | 归入已知 split `SO(4,4)` |
-| R01 fixed Klein–Hodge | 六模式重叠数守恒/BdG bridge | 24 个 bridge 坐标全部 exact-zero；只关闭该固定变换 |
+| R01 fixed Klein–Hodge（ZiboJin） | 六模式重叠数守恒/BdG、两个 support masks 的 exact Metzler/Farkas 审计 | 数守恒 8 个和 BdG 16 个定向 bridge anchors 全部 certified-zero；只关闭该固定 transform |
 | Fock–CP/Choi | 13 个 depth-2 Klein 电路、20 种切分、两族共 520 单元 | bridge 在线性 Hermiticity-preserving 条件就归零；关闭有限 Klein 库，一般 non-Klein 仍开放 |
 | tensor-square | 任意实 `X` 的 `X tensor X` 表示提升 | 任意深度严格正；`m=2` 属 split；`m=3` 不存在固定伪正交度量，物理排重仍开放 |
 | gauge/cocycle | `Z2` Gauss law、Wilson 补偿串、GF(2) 精确消号 | 四/六模式成功；`2 x L` 上补偿串长度随系统增长，简单局域 ansatz 关闭 |
@@ -148,7 +198,7 @@ B_1,...,B_L in C
 | star-to-chain | Lanczos/Krylov 把稠密 bath 变成链 | 精确且有用，但属于标准 chain mapping |
 | adjoint lift | `X tensor X^(-T)`、cosh gate、swap metric | 整个族在已知 `O(p,q)` 恒等分支，padding 后为 split 类；关闭为新机制 |
 | grade-charge full trace | 守恒 ancilla、局部三模式 vertex、full trace | 完整 Hamiltonian 是静态 ancilla-bit 扇区直和；降级为方法工具 |
-| 非诱导 exterior cone | 合作者独立分支负责 exact-card/pressure 扫描 | 本分支不重复；等待通过证书门的候选 |
+| 非诱导 exterior cone（ZiboJin） | 2,304 exact cards、深度 4/8/12/16 分层淘汰、高精度重放、结构 cone 与 inverse-HS | seed61 有长度 150 精确负例；oddcycle seeds `117/132/147` 严格通过全部 depth-23 words 和 304 个长度 60–150 对抗 winners，但仍缺任意深度证明 |
 | 复 Majorana/Pfaffian 完整矩阵定理 | 已有直接 Spin/Fock 迹 oracle 和部分规范表示 | 主办方要求的完整简洁定理尚未完成 |
 
 ## 4. 三套 determinant 恒正构造
@@ -256,7 +306,8 @@ det(I + X tensor X)
 
 这只排除了最简单的固定 `O(p,q)` 解释，尚未排除更一般 Majorana、Pfaffian 或
 contraction-semigroup 表示。因此 tensor-square 的矩阵正性不再主张新颖，但其
-`m>=3` 多通道 Hamiltonian 仍是当前唯一模型主候选。
+`m>=3` 多通道 Hamiltonian 仍是籼至方向的模型主候选；项目整体还并列保留
+ZiboJin 的 oddcycle exterior 有限深度候选，但两者尚无包含关系。
 
 ## 5. 一套 graded 正权机制
 
@@ -346,7 +397,7 @@ Tr Gamma(C_1...C_L)
 | 三站点 parity-string hopping | TN inverse-HS 顶点 | 局域 density-assisted/宇称串 hopping | Jordan–Wigner 后为 stoquastic XY/hard-core boson |
 | graded-monomial 奇环 | `H=sum_e q_e Gamma(B_e)` | 奇环上不能用简单站点 gauge 变成 stoquastic，但任意 history 正 | 已知 Majorana reflection-positive 类 |
 | tensor-square 四模式 plaquette | `B_s=X_s tensor X_s` 的两值正 HS | 方形 hopping 加一对对角模式排斥 | `m=2` 属 split `O(2,2)` |
-| tensor-square 连续模型（扩展） | `H=K-(1/2)sum_a g_a Q_a^2` | 集体密度、同步 bond、correlated pair hopping；多通道可不对易 | L1；`m>=3` 是当前唯一主候选 |
+| tensor-square 连续模型（扩展） | `H=K-(1/2)sum_a g_a Q_a^2` | 集体密度、同步 bond、correlated pair hopping；多通道可不对易 | L1；`m>=3` 是籼至方向主候选 |
 | tensor-square 正 transfer（扩展） | `T=T_K^(1/2)cosh(Q)T_K^(1/2)`，`H_eff=-log(T)/dt` | 精确 all-body 有效 Hamiltonian；`m=3` 最多可出现九体项 | L1；正性机制与上一项相同 |
 | odd block-TN 工厂模型（扩展） | `H=-sum q_a[Gamma(B_a)+h.c.]`，固定 partition | 同步三腿 synthetic ladder、六体 density 项 | 固定全局模型 L1；自然局域化有 `-2` 反例 |
 | adjoint lift | `B(X)=X tensor X^(-T)`，两场 cosh gate | difference-coordinate 相互作用模型接口 | 整体属于已知 `O(p,q)`/split 类 |
@@ -470,7 +521,7 @@ Majorana positivity。
 
 按优先级和责任边界整理如下：
 
-### 主线：`m>=3` tensor-square 多通道 Hamiltonian
+### 籼至主线：`m>=3` tensor-square 多通道 Hamiltonian
 
 已经有：
 
@@ -488,13 +539,31 @@ Majorana positivity。
 3. 判断它是否只是已知模型的换基或 flavor 重组；
 4. 若幸存，实现 vertex-word 采样和可观测量。
 
+### ZiboJin 协作主线：oddcycle exterior seeds `117/132/147`
+
+已经有：
+
+- 每个 seed 的全部非空二进制 histories 到长度 23 的精确正权；
+- 合计 `50,331,642` 个 raw words 的完整覆盖；
+- 304 个长度 60、80、100、150 的高精度选词和精确 determinant 重放，全部为正；
+- transpose-paired Hermitian inverse-HS
+  `H=-q[Gamma(B)+Gamma(B^T)]`；
+- sector cone、Hodge/spinor、trace-compatible cone 和长词搜索工具链。
+
+还缺：
+
+1. 任意历史深度证明；
+2. 第二轮使用高精度目标函数的更长词对抗重跑；
+3. 控制不同 exterior grades 之间 cancellation 的完整 determinant 定理；
+4. 对 inverse-HS Hamiltonian 的物理结构、新颖性和可扩展性解释。
+
+seed61 已有长度 150 精确反例，不能再作为候选复活。seeds `132/147` 的独立 grade-3
+trace 又有精确负值，所以未来证明必须直接控制完整 Fock determinant，不能把各 grade
+分别证明为正。
+
 ### 支线：复 Majorana/Pfaffian 工具
 
 只做到足以可靠审计 tensor-square 和合作者候选，不把重写全部已知理论无限扩张为主任务。
-
-### 协作线：non-induced exterior cone
-
-由合作者分支负责 exact-card/pressure 扫描。本分支只复核通过证书门的候选，避免重复。
 
 ### 低优先级开放项
 
@@ -544,8 +613,10 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 > 我们已经把经典群、AZ、旋转 Majorana/split 双锥、朴素图半群和多批激进候选做了
 > 系统筛选与精确闭合；得到三套严格 determinant 构造、一套 graded 正权机制和一个
 > 通用 Hermitian 模型工厂，但所有已完成物理映射目前仍可归入已知类或精确约化。
-> 最新排查后只保留 `m>=3` tensor-square 多通道 Hamiltonian 为主候选，确认的新
-> 无符号物理类仍为零。
+> 当前保留两条不同来源的候选线：籼至的 `m>=3` tensor-square 多通道 Hamiltonian，
+> 以及 ZiboJin 的 oddcycle exterior seeds `117/132/147`。后者已精确通过全部
+> depth-23 histories 和 304 个长度 60–150 对抗词，但两条线都尚未完成已知类排重、
+> 任意深度证明与新物理闭环；确认的新无符号物理类仍为零。
 
 ## 13. 复现与证据在哪里
 
@@ -561,8 +632,13 @@ positive character、物理受限锥交集等想法。它们没有全部进入�
 
 ```text
 python -m pytest -q
-358 passed
+370 passed
 ```
+
+ZiboJin 的草稿 PR #3 在独立 worktree 中复核：忽略尚未实现
+`classify_r01_fixture` 的 `tests/test_overlap_klein.py` 后为 `470 passed`；完整收集会
+因该缺失函数报错。因此它的科学结果已经写入本文，但代码 PR 仍正确地保持 draft，
+不能标成完整回归通过。
 
 最新三个候选额外有：
 

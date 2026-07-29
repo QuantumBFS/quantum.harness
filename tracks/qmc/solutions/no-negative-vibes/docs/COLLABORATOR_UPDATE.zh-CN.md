@@ -16,7 +16,7 @@
   `O(p,q)` 解释，故只保留其多通道 Hamiltonian 的物理和 Majorana/Pfaffian 排重。
 
 同一个 Stark 非厄米链既有对角 Hermitian partner，也可经任意 unitary 换基得到长程
-partner，所以该路线只作方法校准。完整回归当前为 `358 passed`。详见
+partner，所以该路线只作方法校准。总集成分支完整回归当前为 `370 passed`。详见
 [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
 ## 一句话状态

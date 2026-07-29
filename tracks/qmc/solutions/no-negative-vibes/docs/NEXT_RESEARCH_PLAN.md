@@ -33,8 +33,11 @@
 接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN、R01
 fixed transform、有限 Klein-circuit Fock–CP 和 tensor-square 直接物理提升均已得到
 明确边界。edge-electric gauge/cocycle 的 GF(2) 符号抵消虽然成立，却被迫形成
-system-size Wilson string。合作者已经在独立分支实现并运行 non-induced exterior
-cone 的 exact-card/pressure 扫描，本分支不重复该工作。我们的下一主线改为
+system-size Wilson string。ZiboJin 的独立分支已经完成 non-induced exterior cone
+的 exact-card/pressure 主扫描：seed61 被长度 150 的精确负 determinant 淘汰；
+oddcycle seeds `117/132/147` 则逐个穷尽全部非空二进制 words 到长度 23，并通过
+304 个长度 60–150 的精确对抗 winners，但仍缺任意深度证明。本分支不重复这些生成器
+和扫描，而只在需要时独立复核被提升的候选。籼至分支的下一主线改为
 **放宽物理形态后的非常规模型反推**：接受长程、多体、全局约束、Wilson string、
 准 Hermitian 和一般 nonunitary transfer models，先得到严格 L1 模型，再寻找相似
 变换、对偶、投影或低能约化。完整边界见
@@ -46,9 +49,10 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 第一批反推已经交付一个通用 Hermitian 半群模型工厂与八种完整构造。它们没有增加
 L3 计数。三个优先候选的首轮审计也已经完成：adjoint lift 精确归入已知
 split-orthogonal 机制，grade-charge full trace 是静态守恒扇区直和，tensor-square
-determinant 可分解为模平方乘实平方。现在不再三线并行，只保留一般 `m>=3`
+determinant 可分解为模平方乘实平方。籼至分支不再三线并行，只保留一般 `m>=3`
 tensor-square 多通道 Hamiltonian 的物理与 Majorana/Pfaffian 排重，并在幸存后接入
-实际 vertex-word 采样。详见
+实际 vertex-word 采样；ZiboJin 分支独立保留 oddcycle seeds `117/132/147` 的
+任意深度证明或反例搜索。详见
 [非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)和
 [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
@@ -252,8 +256,10 @@ Wilson-string 和非厄米 transfer 顶点，但仍检查：
    HS；最小模型属于 split `O(2,2)`，一般维数有条带非局域障碍。
 7. **已完成第一版**：四/六模式 edge-electric gauge-cocycle `GF(2)` 消号成功；
    `2 x L` 中央跳跃的 affine phase 含全部其他竖边，局域可扩展性失败。
-8. **协作者在做**：non-induced exterior cone exact-card/pressure 扫描；本分支只消费
-   其通过证书门的候选，不重复生成器和分布式筛选。
+8. **协作已推进**：ZiboJin 的 non-induced exterior cone exact-card/pressure 流水线
+   已淘汰 seed61，并把 oddcycle seeds `117/132/147` 精确推进到全部 depth-23 words
+   与 304 个长词对抗 winners；下一步是高精度长词反例搜索或任意深度证明。本分支只
+   消费通过证书门的候选，不重复生成器和分布式筛选。
 9. **已完成首批**：从 tensor-square、TN、odd block-TN、graded ancilla 和
    gauge/cocycle 反推 U1–U6 非常规模型，并完成三个优先候选的首轮解析排重。
 10. **立即开始**：固定最小 `m=3` tensor-square 多通道模型，完成逐时间片
@@ -262,7 +268,7 @@ Wilson-string 和非厄米 transfer 顶点，但仍检查：
 12. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
 13. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
-近期精力分配：
+籼至分支近期精力分配：
 
 ```text
 60%  m=3 tensor-square 多通道 Hamiltonian 的排重与采样
