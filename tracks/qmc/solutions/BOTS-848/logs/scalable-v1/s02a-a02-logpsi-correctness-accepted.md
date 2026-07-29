@@ -80,7 +80,7 @@ exit 0; no whitespace errors
 ```
 
 The host required the explicit existing interpreter path
-`C:\Users\TaiS\AppData\Local\Programs\Python\Python313\python.exe`; this did
+`%LOCALAPPDATA%\Programs\Python\Python313\python.exe`; this did
 not change the commands' modules, arguments, or selected tests.
 
 ## Root cause and implementation
@@ -161,3 +161,30 @@ an optimization backlog item; it does not override the hard correctness GREEN.
 - No push was performed.
 
 Final result: `slice-pass`.
+
+## Post-review amendment
+
+The obsolete monkeypatch-only fast gate was removed in
+`1600bbfbf9e01058a84de8365f8527c3ec931bd3`.  The oracle-scope correction in
+`914e695f1e0ad5268341119d2252b5bec5446fb1` is the parent of the independent
+certificate-bound review attempt.
+
+That review found the precision-22 fixed uncertainty scale did not grow with
+the number of rounded operations and formed its endpoints under
+round-to-nearest.  The tests-only RED is
+`dbfb60dbb00c30d04d8c45750512243b98f7769e`; the operation-count gamma bound
+and directed outward endpoints are in
+`e2f2efe9f60cd3dc093ca753daefe77306d4795e`.
+
+- Terminal production placeholder, resolved after the scoped production
+  commit: `e2f2efe9f60cd3dc093ca753daefe77306d4795e`.
+- Precision 22 and the two guard digits remain unchanged.
+- The 66-term strong-cancellation regression uses a 2,500-digit independent
+  oracle and requires the existing fallback when the enlarged interval crosses
+  adjacent binary64 rounding cells.
+- A 256-row N=6 sparse-route audit retained 252 fully fast rows; 4 rows used 8
+  fallback components out of 512 components spanning 32 through 50 terms.
+- No common evaluator, ED reveal, overlap, candidate selection, A03 work, push,
+  or full BOTS-848 suite was performed during the review attempt.
+
+Post-review local result: `slice-pass / external-spec-review-pending`.
