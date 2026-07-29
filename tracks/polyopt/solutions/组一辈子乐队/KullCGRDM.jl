@@ -457,7 +457,7 @@ end
 
 "Reconstruct a Hermitian equality multiplier from charge-sector constraints."
 function _charge_hermitian_multiplier(refs::AbstractVector,
-        charges::AbstractVector{<:Integer}, offset::Int=0)
+        charges::AbstractVector{<:Integer}, offset::Int=0; real_sdp::Bool=false)
     Y = zeros(ComplexF64, length(charges), length(charges))
     cursor = offset
     for (_, indices) in charge_sectors(charges)
@@ -466,6 +466,9 @@ function _charge_hermitian_multiplier(refs::AbstractVector,
             yr = Float64(dual(refs[cursor += 1]))
             if i == j
                 Y[i,j] = yr
+            elseif real_sdp
+                Y[i,j] = yr / 2
+                Y[j,i] = yr / 2
             else
                 yi = Float64(dual(refs[cursor += 1]))
                 Y[i,j] = (yr + im * yi) / 2
@@ -490,7 +493,7 @@ end
 
 "Add only the charge-preserving Hermitian equalities and retain their sector layout."
 function _add_charge_equalities!(model::JuMP.Model, lhs, rhs,
-        charges::AbstractVector{<:Integer})
+        charges::AbstractVector{<:Integer}; real_sdp::Bool=false)
     size(lhs) == size(rhs) || throw(DimensionMismatch("Hermitian equality dimensions differ"))
     size(lhs) == (length(charges), length(charges)) ||
         throw(DimensionMismatch("charge count does not match Hermitian equality"))
@@ -500,7 +503,7 @@ function _add_charge_equalities!(model::JuMP.Model, lhs, rhs,
             i, j = indices[local_i], indices[local_j]
             difference = lhs[i,j] - rhs[i,j]
             push!(refs, @constraint(model, real(difference) == 0))
-            i == j || push!(refs, @constraint(model, imag(difference) == 0))
+            !real_sdp && i != j && push!(refs, @constraint(model, imag(difference) == 0))
         end
     end
     refs
@@ -541,14 +544,18 @@ function mps_charge_residual(frozen::FrozenUniformMPS, symmetry::U1Symmetry)
         if symmetry.virtual_charges[right] != symmetry.virtual_charges[left] + symmetry.physical_charges[physical]); init=0.0)
 end
 
-function _block_psd_matrix(model::JuMP.Model, charges::AbstractVector{<:Integer}, base_name::String)
+function _block_psd_matrix(model::JuMP.Model, charges::AbstractVector{<:Integer}, base_name::String;
+        real_sdp::Bool=false)
     dimension = length(charges)
     matrix = Matrix{Any}(zeros(ComplexF64, dimension, dimension))
     blocks = Dict{Int,Any}()
     for (charge, indices) in charge_sectors(charges)
         n = length(indices)
-        block = @variable(model, [1:n, 1:n] in HermitianPSDCone(),
-            base_name="$(base_name)_q$(charge)")
+        block = real_sdp ?
+            @variable(model, [1:n, 1:n] in PSDCone(),
+                base_name="$(base_name)_q$(charge)") :
+            @variable(model, [1:n, 1:n] in HermitianPSDCone(),
+                base_name="$(base_name)_q$(charge)")
         blocks[charge] = block
         for local_j in 1:n, local_i in 1:n
             matrix[indices[local_i], indices[local_j]] = block[local_i,local_j]
@@ -676,11 +683,19 @@ end
 function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUniformMPS}=nothing,
         depth::Int=3, k0::Union{Nothing,Int}=nothing, optimizer=nothing,
         solver_settings=Dict{String,Any}(), vumps_upper_endpoint::Real=NaN,
-        symmetry::Union{Nothing,U1Symmetry}=nothing)
+        symmetry::Union{Nothing,U1Symmetry}=nothing, real_sdp::Bool=false)
     size(h, 1) == size(h, 2) || throw(DimensionMismatch("h must be square"))
     d = isqrt(size(h, 1))
     d^2 == size(h, 1) || throw(DimensionMismatch("h must act on two equal-dimensional sites"))
     isapprox(h, h'; atol=1e-12, rtol=1e-12) || throw(ArgumentError("h must be Hermitian"))
+
+    real_sdp && isnothing(symmetry) &&
+        throw(ArgumentError("real SDP representation currently requires U(1) block structure"))
+    real_sdp && maximum(abs, imag.(h); init=0.0) > 1e-12 &&
+        throw(ArgumentError("real SDP representation requires a real Hamiltonian"))
+    real_sdp && !isnothing(frozen) &&
+        maximum((abs(imag(value)) for A in frozen.tensors for value in A); init=0.0) > 1e-12 &&
+        throw(ArgumentError("real SDP representation requires a real frozen coarse map"))
 
     D = isnothing(frozen) ? nothing : _uniform_bond_dimension(frozen)
     parities = isnothing(frozen) ? (1:1) : _start_parities(frozen)
@@ -715,7 +730,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         @variable(model, rho3[1:rho_dimension, 1:rho_dimension] in HermitianPSDCone())
     else
         rho_charges = product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...)
-        rho3, symmetry_blocks["rho3"] = _block_psd_matrix(model, rho_charges, "rho")
+        rho3, symmetry_blocks["rho3"] = _block_psd_matrix(model, rho_charges, "rho"; real_sdp)
         symmetry_charges["rho3"] = rho_charges
     end
     constraints = Dict{Symbol,Vector{Any}}(
@@ -737,7 +752,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         right_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems,
             selected_k0, :right)
         append!(constraints[:lti], _add_charge_equalities!(model,
-            left_marginal, right_marginal, marginal_charges))
+            left_marginal, right_marginal, marginal_charges; real_sdp))
         objective_marginal = _jump_charge_edge_marginal(rho3, rho_subsystems, 2, :right)
     end
     @objective(model, Min, real(sum(h[i,j] * objective_marginal[j,i]
@@ -756,7 +771,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
             if isnothing(symmetry)
                 omegas[key] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name=name)
             else
-                omegas[key], symmetry_blocks[name] = _block_psd_matrix(model, omega_charges, name)
+                omegas[key], symmetry_blocks[name] = _block_psd_matrix(model, omega_charges, name; real_sdp)
                 symmetry_charges[name] = omega_charges
             end
         end
@@ -778,11 +793,11 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
                 append!(constraints[:bottom], _add_charge_equalities!(model,
                     _jump_sparse_congruence(bridge.to_trace_physical_left, rho3, left_charges),
                     _jump_charge_partial_trace(omegas[key], omega_dims, 1, left_charges),
-                    left_charges))
+                    left_charges; real_sdp))
                 append!(constraints[:bottom], _add_charge_equalities!(model,
                     _jump_sparse_congruence(bridge.to_trace_physical_right, rho3, right_charges),
                     _jump_charge_partial_trace(omegas[key], omega_dims, 4, right_charges),
-                    right_charges))
+                    right_charges; real_sdp))
             end
         end
         for m in selected_k0:depth-1, parity in parities
@@ -807,12 +822,12 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
                     _jump_sparse_congruence(flow.to_trace_physical_left,
                         omegas[left_source], left_charges),
                     _jump_charge_partial_trace(omegas[next_key], omega_dims, 1, left_charges),
-                    left_charges))
+                    left_charges; real_sdp))
                 append!(constraints[:flow], _add_charge_equalities!(model,
                     _jump_sparse_congruence(flow.to_trace_physical_right,
                         omegas[right_source], right_charges),
                     _jump_charge_partial_trace(omegas[next_key], omega_dims, 4, right_charges),
-                    right_charges))
+                    right_charges; real_sdp))
             end
         end
     end
@@ -827,7 +842,8 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
                 symmetry.physical_charges))) .|> length
         block_sizes = [rho_sizes; repeat(omega_sizes,
             length(parities) * (depth - selected_k0 + 1))]
-        variables = sum(abs2, block_sizes)
+        variables = real_sdp ? sum(n * (n + 1) ÷ 2 for n in block_sizes) :
+            sum(abs2, block_sizes)
         sparse_equalities = sum(length, values(constraints))
         coefficient_bytes = 16 * (variables + 8 * sparse_equalities)
         peak_bytes = coefficient_bytes + 8 * sparse_equalities^2 + 16 * variables
@@ -847,7 +863,9 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
         "physical_dimension" => d, "bond_dimension" => D, "hamiltonian" => Matrix{ComplexF64}(h),
         "map_fingerprint" => isnothing(frozen) ? nothing : frozen.fingerprint,
         "frozen_map" => frozen, "vumps_upper_endpoint" => Float64(vumps_upper_endpoint),
-        "representation" => isnothing(symmetry) ? "JuMP HermitianPSDCone" : "U(1) block HermitianPSDCone",
+        "representation" => isnothing(symmetry) ? "JuMP HermitianPSDCone" :
+            (real_sdp ? "U(1) block SymmetricPSDCone" : "U(1) block HermitianPSDCone"),
+        "real_sdp" => real_sdp,
         "symmetry" => symmetry, "symmetry_blocks" => symmetry_blocks,
         "symmetry_charges" => symmetry_charges, "optimized" => false,
         "coefficient_policy" => isnothing(frozen) ?
@@ -978,7 +996,7 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
     else
         lti_charges = product_charges(ntuple(_ -> symmetry.physical_charges, k0)...)
         multipliers["lti"], cursor = _charge_hermitian_multiplier(
-            problem.constraints[:lti], lti_charges)
+            problem.constraints[:lti], lti_charges; real_sdp=problem.metadata["real_sdp"])
     end
     cursor == length(problem.constraints[:lti]) || error("unconsumed LTI multipliers")
     if !isempty(problem.omegas)
@@ -1000,9 +1018,9 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
                 right_charges = product_charges(symmetry.physical_charges,
                     -symmetry.virtual_charges, symmetry.virtual_charges)
                 multipliers["bottom_left$suffix"], cursor = _charge_hermitian_multiplier(
-                    refs, left_charges, cursor)
+                    refs, left_charges, cursor; real_sdp=problem.metadata["real_sdp"])
                 multipliers["bottom_right$suffix"], cursor = _charge_hermitian_multiplier(
-                    refs, right_charges, cursor)
+                    refs, right_charges, cursor; real_sdp=problem.metadata["real_sdp"])
             end
         end
         cursor == length(refs) || error("unconsumed bottom multipliers")
@@ -1021,9 +1039,9 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
                 right_charges = product_charges(symmetry.physical_charges,
                     -symmetry.virtual_charges, symmetry.virtual_charges)
                 multipliers["flow_$(m)_left$suffix"], cursor = _charge_hermitian_multiplier(
-                    refs, left_charges, cursor)
+                    refs, left_charges, cursor; real_sdp=problem.metadata["real_sdp"])
                 multipliers["flow_$(m)_right$suffix"], cursor = _charge_hermitian_multiplier(
-                    refs, right_charges, cursor)
+                    refs, right_charges, cursor; real_sdp=problem.metadata["real_sdp"])
             end
         end
         cursor == length(refs) || error("unconsumed flow multipliers")

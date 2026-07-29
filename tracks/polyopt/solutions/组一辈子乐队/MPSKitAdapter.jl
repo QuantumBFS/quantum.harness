@@ -48,7 +48,7 @@ end
 
 function transfer_matrix(A::Array{T,3}) where T
     Dl, d, Dr = size(A)
-    E = zeros(promote_type(T,ComplexF64), Dl^2, Dr^2)
+    E = zeros(T, Dl^2, Dr^2)
     for s in 1:d
         As = @view A[:,s,:]
         E .+= kron(conj(As), As)
@@ -56,12 +56,26 @@ function transfer_matrix(A::Array{T,3}) where T
     E
 end
 
-function _dominant_hermitian_fixed_point(operator::AbstractMatrix, dimension::Int)
+function _checked_scalar_domain(X::AbstractArray, ::Type{T}; atol::Real=1e-12) where {T<:Real}
+    maximum(abs, imag.(X); init=0.0) <= atol ||
+        error("auxiliary fixed point left the real scalar domain")
+    real.(X)
+end
+_checked_scalar_domain(X::AbstractArray, ::Type{T}; atol::Real=1e-12) where {T<:Complex} = T.(X)
+
+function _checked_scalar_domain(value::Number, ::Type{T}; atol::Real=1e-12) where {T<:Real}
+    abs(imag(value)) <= atol ||
+        error("dominant transfer eigenvalue left the real scalar domain")
+    real(value)
+end
+_checked_scalar_domain(value::Number, ::Type{T}; atol::Real=1e-12) where {T<:Complex} = T(value)
+
+function _dominant_hermitian_fixed_point(operator::AbstractMatrix{T}, dimension::Int) where {T<:Number}
     decomposition = eigen(operator)
     index = argmax(abs.(decomposition.values))
-    eigenvalue = decomposition.values[index]
+    eigenvalue = _checked_scalar_domain(decomposition.values[index], T)
     matrix = reshape(decomposition.vectors[:, index], dimension, dimension)
-    matrix = Matrix{ComplexF64}(Hermitian((matrix + matrix') / 2))
+    matrix = _checked_scalar_domain((matrix + matrix') / 2, T)
     real(tr(matrix)) < 0 && (matrix .*= -1)
     matrix ./= tr(matrix)
     eigenvalue, matrix, norm(operator * vec(matrix) - eigenvalue * vec(matrix))
@@ -76,13 +90,13 @@ function dominant_fixed_points(tensors::Vector{<:Array})
     left_index = argmin(abs.(left_decomposition.values .- conj(lambda_cycle)))
     left_vector = left_decomposition.vectors[:, left_index]
     left_residual = norm(cell' * left_vector - conj(lambda_cycle) * left_vector)
-    right = Matrix{ComplexF64}[]
+    right = Matrix{eltype(cell)}[]
     for site in eachindex(tensors)
         ordered = [Es[mod1(site + offset, length(Es))] for offset in 1:length(Es)]
         _, fixed, _ = _dominant_hermitian_fixed_point(foldl(*, ordered), size(tensors[site], 3))
         push!(right, fixed)
     end
-    left = [Matrix{ComplexF64}(I, size(A,1), size(A,1)) for A in tensors]
+    left = [Matrix{eltype(A)}(I, size(A,1), size(A,1)) for A in tensors]
     gauge_residual = maximum(norm(sum((@view A[:,s,:])' * (@view A[:,s,:]) for s=1:size(A,2))-I) for A in tensors)
     residual = max(right_residual, left_residual, gauge_residual)
     return (; lambda=lambda_cycle^(1/length(tensors)), left, right, residual)

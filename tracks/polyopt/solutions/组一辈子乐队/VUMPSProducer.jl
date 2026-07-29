@@ -83,7 +83,8 @@ function _vumps_problem(settings::VUMPSSettings)
         physical = [physicalspace(H, site) for site in 1:2]
         # Alternating half-integer/integer bonds resolve the one-site spin-1/2 charge offset.
         virtual = u1_bond_spaces(settings.D, settings.internal_D)
-        return H, InfiniteMPS(physical, [virtual.internal, virtual.coarse])
+        return H, InfiniteMPS(rand, Float64, physical,
+            [virtual.internal, virtual.coarse])
     end
     H1 = heisenberg_XXZ(; J=1.0, Delta=settings.delta, spin=1//2)
     H = settings.unitcell == 1 ? H1 : repeat(H1, 2)
@@ -111,6 +112,8 @@ function run_vumps(settings::VUMPSSettings)
         "delta" => settings.delta, "symmetry" => String(settings.symmetry),
         "algorithm_error" => delta, "clean_convergence" => clean,
         "iteration_status" => status,
+        "mps_scalar_type" => string(eltype(state.AL[1])),
+        "real_mps" => eltype(state.AL[1]) <: Real,
     )
     return (; state, environments, record)
 end

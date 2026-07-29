@@ -242,9 +242,14 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         @test produced.record["symmetry"] == "u1"
         @test produced.record["delta"] == 0.5
         @test produced.record["internal_D"] == 2
+        @test produced.record["real_mps"]
+        @test produced.record["mps_scalar_type"] == "Float64"
+        @test all(eltype(tensor) == Float64 for tensor in produced.state.AL)
         @test blocked.symmetry.physical_charges == [2, 0, 0, -2]
         @test length(blocked.symmetry.virtual_charges) == 2
         @test size(only(blocked.frozen.tensors)) == (2, 4, 2)
+        @test eltype(only(blocked.frozen.tensors)) == Float64
+        @test maximum(abs, imag.(only(blocked.frozen.tensors))) == 0
         @test mps_charge_residual(blocked.frozen, blocked.symmetry) < 1e-12
         @test blocked.frozen.canonical_residual < 1e-10
         @test blocked.metadata["charge_residual"] == 0
@@ -314,6 +319,9 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
             optimizer=MosekTools.Optimizer, solver_settings=QUIET)
         blocked = build_kull_primal(h; frozen=symmetric_map, depth=3, k0=2,
             symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
+        real_blocked = build_kull_primal(h; frozen=symmetric_map, depth=3, k0=2,
+            symmetry, real_sdp=true, optimizer=MosekTools.Optimizer,
+            solver_settings=QUIET)
         deep_blocked = build_kull_primal(h; frozen=symmetric_map, depth=8, k0=2,
             symmetry)
         @test sort(collect(keys(blocked.omegas))) == [2, 3]
@@ -330,9 +338,15 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
 
         dense_result = solve_kull_primal!(dense; print_inventory=false)
         blocked_result = solve_kull_primal!(blocked; print_inventory=false)
+        real_blocked_result = solve_kull_primal!(real_blocked; print_inventory=false)
         @test dense_result.clean
         @test blocked_result.clean
+        @test real_blocked_result.clean
         @test blocked_result.lower_bound_candidate ≈ dense_result.lower_bound_candidate atol=2e-7 rtol=0
+        @test real_blocked_result.lower_bound_candidate ≈ blocked_result.lower_bound_candidate atol=2e-7 rtol=0
+        @test real_blocked.inventory.real_scalar_variables < blocked.inventory.real_scalar_variables
+        real_certificate = reconstruct_dual_certificate(real_blocked)
+        @test real_certificate.maximum_stationarity_residual < 2e-7
         certificate = reconstruct_dual_certificate(blocked)
         @test certificate.maximum_stationarity_residual < 2e-7
         @test certificate.corrected_lower_bound <= blocked_result.lower_bound_candidate + 2e-7
