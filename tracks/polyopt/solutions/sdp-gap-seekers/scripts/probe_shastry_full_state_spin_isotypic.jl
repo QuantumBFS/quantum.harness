@@ -113,6 +113,8 @@ function block_report(block)
                 signs[index]
                 for index in eachindex(targets)
                 if targets[index] == index
+                ;
+                init=0
             ),
         )
     end
