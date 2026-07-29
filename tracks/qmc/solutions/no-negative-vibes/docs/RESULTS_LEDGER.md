@@ -7,23 +7,25 @@
 
 | 项目 | 数量 | 口径 |
 |---|---:|---|
-| 纯 `det(I+D)>=0` 的独立机制 | 2 | TN 路径；odd monomial（含 block-TN 推广） |
+| 纯 `det(I+D)>=0` 的独立机制 | 3 | TN 路径；odd monomial（含 block-TN）；tensor-square |
 | 额外的 graded 正权机制 | 1 | scalar/vertex grade 抵消 determinant parity |
-| 局域 Hermitian Hamiltonian 构造 | 4 | 两个一维基线、TN parity-string、graded monomial |
+| 局域 Hermitian Hamiltonian 构造 | 5 | 前四项加 tensor-square 四模式 plaquette |
 | 已确认的新无符号物理类 | 0 | 所有成功物理映射均已知或可约化 |
-| 当前开放的研究程序 | 4 | Majorana 宇称；Fock–CP；tensor-square 物理闭环；gauge/cocycle |
+| 当前开放的研究程序 | 4 | Majorana；non-Klein Fock–CP；non-induced exterior；modified-Gauss projected cone |
 
-“按文档名字”会看到 TN、odd monomial、block-TN 和 graded monomial 四项；
-但 odd monomial 与 block-TN 是同一个循环机制的标量版和分块版，而 graded monomial
-又不是普通的恒正 determinant 类。因此科研计数采用上表，不把名字数当发现数。
+“按文档名字”会看到 TN、odd monomial、block-TN、graded monomial 和
+tensor-square 五项；但 odd monomial 与 block-TN 是同一个循环机制的标量版和分块版，
+而 graded monomial 又不是普通的恒正 determinant 类。因此科研计数采用上表，不把
+名字数当发现数。
 
-## 三套已证明机制
+## 四套已证明机制
 
 | 机制 | 数学状态 | 物理映射 | 最终判定 |
 |---|---|---|---|
 | TN 路径半群 | 任意维数、任意深度严格正 | 开放 Hubbard、排斥 `t-V`、TN parity-string 顶点 | 矩阵条件严格；物理上为已知一维或 stoquastic 类 |
 | odd positive-monomial / block-TN | 固定循环/分区严格正 | 没有成功的自然连通局域模型 | cycle factor 已知；自然局域闭包有精确 `-2` 反例 |
 | graded monomial | 逐历史 grade 补偿严格正 | 奇环吸引 spinless 模型 | 已知 monomial factorization；模型属于 Majorana reflection positivity |
+| tensor-square | `det(I+X tensor X)>=0` 任意实 `X` | 四模式方形 hopping 加排斥作用 | 矩阵机制严格；最小模型属于 split `O(2,2)` |
 
 ### 1. TN 路径半群
 
@@ -92,7 +94,23 @@ sgn(P) det(I+P D) >= 0,    D_ii >= 1,
 
 - [graded monomial 结果](GRADED_MONOMIAL_RESULTS.md)
 
-## 四组 Hamiltonian 的最终归属
+### 4. Tensor-square
+
+对任意实方阵 `X`，
+
+```text
+det(I+X tensor X)>=0.
+```
+
+一般证明来自 Kronecker 本征值配对。四模式正系数 HS 和非交换方形 hopping 已完整
+构造，但 `2 x 2` 底空间自动保存 signature `(2,2)` 的 split metric，因而属于已知
+split-orthogonal 类。一般维数的直接物理提升又产生随系统长度增长的行列条带。
+
+详细证据：
+
+- [tensor-square 结果](TENSOR_SQUARE_RESULTS.md)
+
+## 五组 Hamiltonian 的最终归属
 
 | Hamiltonian/顶点 | 是否局域、Hermitian、相互作用 | 无符号原因 | 是否新物理类 |
 |---|---|---|---|
@@ -100,6 +118,7 @@ sgn(P) det(I+P D) >= 0,    D_ii >= 1,
 | 排斥 `t-V` 开链 | 是 | 一维 TN 路径 | 否 |
 | 三站点 parity-string hopping | 是 | Jordan-Wigner 后 stoquastic XY | 否 |
 | graded-monomial 奇环模型 | 是 | Majorana reflection positivity | 否 |
+| tensor-square 四模式 plaquette | 是 | split `O(2,2)` | 否 |
 
 “不是新物理类”不等于所有公式都已在相同形式下发表。我们保留非对称 `t-V` HS 分解、
 TN inverse-HS 顶点、已知类非包含证书和各类 no-go；但在文献首创性完成核查前，不把
@@ -154,6 +173,13 @@ Tensor-square 已完成一般恒正证明和四模式物理闭环：
 提升为随系统长度增长的行列条带，独立 onsite 场又有精确负例 `-155085/32`。
 因此保留矩阵定理，不增加“新无符号物理类”计数。见
 [tensor-square 结果](TENSOR_SQUARE_RESULTS.md)。
+
+Gauge/cocycle 第一版也已完成。edge-electric Gauss law 加 affine link phase 在四模式
+方环和六模式共边方环上能精确抵消全部 fermion signs，深度 1–8 的闭合 histories
+也零失败；但在 `2 x L` 梯子中，中央 hop 的 phase 必须读取其余全部 `L-1` 条竖边，
+形成 system-size Wilson string。该简单 ansatz 已关闭；modified-Gauss-law
+projected cone 仍开放，但只有给出逐构型正 transfer matrix 才重开。见
+[gauge/cocycle 第一轮结果](GAUGE_COCYCLE_RESULTS.md)。
 
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。

@@ -160,6 +160,13 @@ HS 分解。若只能产生沿整行/整列的非局域相互作用，该候选�
 
 ## 候选三：局域 gauge 投影与 overlap 2-cocycle
 
+第一版状态更新：edge-electric Gauss law
+`n_v=q_v+sum_(e incident v) a_e` 加 affine link phase 已完成精确 GF(2) 求解。
+四模式和六模式的逐步消号均成功，但 `2 x L` 中央 hopping 的 phase 必须读取其余
+全部 `L-1` 条竖边，形成 system-size Wilson string。因此该简单 ansatz 已降级；
+modified-Gauss-law projected cone 只有在写出逐构型正 transfer matrix 后才重开。
+详见 [gauge/cocycle 第一轮结果](GAUGE_COCYCLE_RESULTS.md)。
+
 ### 核心想法
 
 普通费米局域移动在 occupation basis 中是带符号的部分置换：
@@ -249,11 +256,11 @@ exterior-Metzler 仍保留为备线，但必须直接从六模式重叠块开始
 ## 执行优先级
 
 ```text
-1. 四/六模式 gauge-cocycle GF(2) 可行性
+1. non-induced complementary exterior cone
 2. 非 Klein Fock–CP 固定变换或正乘法代数诱导的 Choi basis
-3. tensor-square 的非条带局域拼接（只有出现新结构才重开）
-4. graded positive-character 文献排重
-5. non-induced complementary exterior cone
+3. modified-Gauss-law projected cone（只有出现正 transfer matrix 才重开）
+4. tensor-square 的非条带局域拼接（只有出现新结构才重开）
+5. graded positive-character 文献排重
 ```
 
 前三项均为小矩阵、SDP 或有限域线性方程，预计单次本地实验远低于 10 分钟，

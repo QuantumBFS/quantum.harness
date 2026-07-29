@@ -65,6 +65,9 @@
   Klein 电路、20 种 tensorization 与数守恒/BdG 两族的首轮 Choi 线性 no-go；
 - [TENSOR_SQUARE_RESULTS.md](TENSOR_SQUARE_RESULTS.md)：任意深度 tensor-square
   定理、四模式正系数 HS、split `O(2,2)` 约化与一般维数条带局域性障碍；
+- [GAUGE_COCYCLE_RESULTS.md](GAUGE_COCYCLE_RESULTS.md)：edge-electric `Z2`
+  gauge 的四/六模式 GF(2) 精确消号，以及 `2 x L` 上被迫形成 Wilson string 的
+  局域性障碍；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity；物理模型排重后已降为已知 Majorana 正性子类；

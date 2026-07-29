@@ -32,10 +32,11 @@
 
 接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN、R01
 fixed transform、有限 Klein-circuit Fock–CP 和 tensor-square 直接物理提升均已得到
-明确边界。下一主线进入 **局域 gauge/cocycle 编码**：先在最小重叠方环上求解
-`GF(2)` 符号抵消条件，再判断能否形成不等价于固定全局换基的局域闭包。
-non-induced exterior cone 为下一备选。Majorana 宇称猜想保留为独立支线，不再阻塞
-新机制搜索。
+明确边界。edge-electric gauge/cocycle 的 GF(2) 符号抵消虽然成立，却被迫形成
+system-size Wilson string；这一简单 ansatz 也已关闭。下一主线进入
+**non-induced exterior cone**，从六模式重叠块直接要求 Fock-sector 正锥不来自普通
+单粒子矩阵的外幂。modified-Gauss-law 只在出现具体正 transfer matrix 时重开。
+Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 “复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
 分支和检验候选。
 
@@ -58,19 +59,19 @@ non-induced exterior cone 为下一备选。Majorana 宇称猜想保留为独立
 
 按优先级研究：
 
-1. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
+1. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
+   要求它不是任意单粒子非负矩阵通过外幂表示的平凡提升；
+2. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
    tensorization/Klein/Clifford 变换；对固定变换编译条件完全正 SDP，并逐个锚定 R01
    的 bridge hopping/pairing 坐标；**identity 与深度不超过 2 的连续 Klein 电路已
    完成，520 个单元的 bridge 全部在线性 Hermiticity 门归零，一般 non-Klein 变换开放**；
-2. **tensor-square 表示提升半群**：利用 `B=X tensor X` 的任意深度严格正性，判断
-   `v_i+v_j` 绑定 HS 场能否来自局域、非平凡相互作用，并排除已知 Majorana/模平方约化；
-   **四模式 HS 已完成但约化到 split `O(2,2)`，`m>=3` 直接提升因行列条带而降级**；
 3. **局域 gauge 投影与 overlap 2-cocycle**：在四格方环和两个共享边方环上，把费米
-   交换符号的局域抵消写成 `GF(2)` 可行性问题；
+   交换符号的局域抵消写成 `GF(2)` 可行性问题；**edge-electric affine ansatz 已精确
+   消号，但在 `2 x L` 上需要读取其余全部 `L-1` 条竖边，因此因 Wilson string 降级**；
 4. **Majorana 宇称分辨半群**：把当前 period-4 数值规律写成精确命题，重放互补扇区
    的最小负例，并从 2016 reflection-positivity 证明判断受保护扇区是否真有乘法闭包；
-5. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
-   要求它不是任意单粒子非负矩阵通过外幂表示的平凡提升；
+5. **tensor-square 表示提升半群**：一般恒正定理保留；四模式 HS 已约化到 split
+   `O(2,2)`，`m>=3` 直接提升又有行列条带。只有出现非条带局域拼接才重开；
 6. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
    但普通远邻 hopping 被扇区符号 no-go 关闭；简单 Fock ancilla 投影/偏迹仍保持矩阵元
    非负，也无效。下一步必须显式改变物理 Hilbert 空间/规范约束，或使用相关宇称串；
@@ -219,18 +220,19 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
    数守恒/BdG 两族共 520 个单元；所有 bridge 在进入 SDP 前已归零。
 6. **已完成物理闭环**：tensor-square 得到四模式方形 hopping 加排斥作用的正系数
    HS；最小模型属于 split `O(2,2)`，一般维数有条带非局域障碍。
-7. **立即开始**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
-   尝试同时越过
+7. **已完成第一版**：四/六模式 edge-electric gauge-cocycle `GF(2)` 消号成功；
+   `2 x L` 中央跳跃的 affine phase 含全部其他竖边，局域可扩展性失败。
+8. **立即开始**：non-induced exterior cone，尝试直接在六模式 Fock sectors 中越过
    连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-8. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
-9. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-10. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+9. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
+10. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
+11. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
 近期精力分配：
 
 ```text
-40%  gauge/cocycle 局域补偿可行性
-25%  non-induced exterior cone
+45%  non-induced exterior cone
+20%  modified-Gauss projected cone（仅限具体正 transfer matrix）
 20%  non-Klein Fock–CP/Choi 结构
 15%  Majorana 宇称与 Pfaffian/Spin-trace 支撑工具
 ```

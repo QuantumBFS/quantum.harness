@@ -7,12 +7,14 @@
 
 ## 当前结论
 
-先看 [成果总账](docs/RESULTS_LEDGER.md)。截至 2026-07-28：
+先看 [成果总账](docs/RESULTS_LEDGER.md)。截至 2026-07-29：
 
-- 两套纯 determinant 正性机制和一套 graded 正权机制已经严格证明；
-- 四组局域相互作用 Hamiltonian 已完成映射，但尚无一组能确认是新的无符号物理类；
+- 三套纯 determinant 正性机制和一套 graded 正权机制已经严格证明；
+- 五组局域相互作用 Hamiltonian 已完成映射，但尚无一组能确认是新的无符号物理类；
 - graded monomial 已约化到已知 Majorana 正性，odd block-TN 的自然局域化有精确负权；
-- 当前主线只剩 Majorana 宇称猜想，以及合作者正在验证的 Klein-Hodge/spinor 表示锥。
+- tensor-square 四模式模型约化到 split `O(2,2)`，一般提升有条带非局域障碍；
+- 第一版 gauge/cocycle 能精确消号，但会形成随系统增长的 Wilson string；
+- 当前主线转入 non-induced exterior cone；non-Klein Fock–CP 和 Majorana 为支线。
 
 下面的长清单用于审计数字，日常不需要逐条阅读。
 
@@ -81,7 +83,7 @@
   independent local `C3` routes 与 flavor-preserving 对称正定 TN hopping 各自都是
   实指数时间片，但两层精确满足 `det(I+XR)=-2`。固定全局分块定理仍正确；自然局域
   Hamiltonian 推广已关闭。
-- 当前完整自动测试为 `220 passed`。
+- 当前完整自动测试为 `269 passed`。
 - 主办方候选仍未全部完成：TN 的文献史排重、超出普通一维开链的新 Hamiltonian、完整
   复 Majorana/BdG/Pfaffian 表述、比 TN 更大的半群仍开放。
 
@@ -118,18 +120,20 @@
    cycle 定理、奇环模型，以及为什么它最终属于已知 Majorana 正性类。
 10. [odd block-TN 局域闭环](docs/ODD_BLOCK_TN_LOCALITY_AUDIT.md)：看固定分块
    定理为何不能无代价局域化，以及两层整数反例。
-11. [激进候选清单](docs/SPECULATIVE_CANDIDATE_BATCH.md)：看已占位的下一批
+11. [gauge/cocycle 第一轮](docs/GAUGE_COCYCLE_RESULTS.md)：看四/六模式精确消号和
+   `2 x L` Wilson-string 局域性障碍。
+12. [激进候选清单](docs/SPECULATIVE_CANDIDATE_BATCH.md)：看已占位的下一批
    spinor/exterior-cone 方向。
-12. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
-13. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
-14. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
-15. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
-16. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
-17. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
-18. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
-19. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
-20. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
-21. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
+13. [任意小夹角解析反例](docs/SMALL_ANGLE_COUNTEREXAMPLE.md)：看 Majorana 双锥的独立反例。
+14. [Majorana 双锥结果](docs/MAJORANA_CONE_RESULTS.md)：看直接 Spin 迹、精确负分支和完整证据。
+15. [主办方方向完成度](docs/ORGANIZER_DIRECTION_AUDIT.md)：区分已关闭、第一轮完成和仍开放。
+16. [`U(p,q)` 相位结论](docs/PSEUDOUNITARY_PHASE_RESULTS.md)：看连续相位为何可解但仍有负号。
+17. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：看主线、交付、停止条件和两人分工。
+18. [AZ 十类结果](docs/AZ_TENFOLD_RESULTS.md)：看符号表、精确证书和约化结论。
+19. [经典群基线](docs/BASELINE_RESULTS.md)：看已经排除了什么、什么只是复现已知结果。
+20. [项目定性与算力策略](docs/COMPUTE_STRATEGY.md)：判断何时本地跑、何时值得上超算。
+21. [2026 文献与空白](docs/LITERATURE_GAP_2026.md)：决定值得继续攻的研究缝隙。
+22. [研究地基](docs/FOUNDATIONS.md)：需要公式、文献、精确证书或候选方向时再查。
 
 </details>
 
@@ -168,9 +172,10 @@ cd /home/volper/harness_quantum/signfree-qmc
 2. 六模式 Fock–CP 的 13 个 depth-2 Klein 电路首轮已完成，520 个单元都没有
    Hermiticity-preserving bridge；一般 non-Klein Choi 锥仍开放；
 3. tensor-square 已得到四模式局域 HS，但该模型属于 split `O(2,2)`；一般维数的
-   直接提升又产生非局域行列条带，因此现在进入四/六模式 gauge-cocycle 和
-   non-induced exterior cone；
-4. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
+   直接提升又产生非局域行列条带；
+4. edge-electric gauge/cocycle 在四/六模式上精确消号，但扩展后产生 system-size
+   Wilson string；下一主线是 non-induced exterior cone；
+5. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
 后者已明确约化到 Majorana reflection positivity。后续候选必须同时通过数学证明、
@@ -182,3 +187,5 @@ Fock–CP 第一批 520 个线性系统见
 [六模式 Fock–CP 首轮结果](docs/FOCK_CP_SCREEN_RESULTS.md)。
 Tensor-square 的严格定理、四模式 HS、split 约化和局域性障碍见
 [tensor-square 结果](docs/TENSOR_SQUARE_RESULTS.md)。
+Gauge/cocycle 的精确 GF(2) 解和 Wilson-string 障碍见
+[gauge/cocycle 第一轮结果](docs/GAUGE_COCYCLE_RESULTS.md)。

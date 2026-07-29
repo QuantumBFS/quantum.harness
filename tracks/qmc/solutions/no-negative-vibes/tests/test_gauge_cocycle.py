@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from oracle.gauge_cocycle import (
     affine_phase_exponent,
     apply_gauge_hop,
@@ -14,6 +17,9 @@ from oracle.gauge_cocycle import (
     ladder_gauge_instance,
     minimum_legal_compensation,
 )
+
+
+SOLUTION_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_square_and_shared_edge_ladder_geometry() -> None:
@@ -148,3 +154,33 @@ def test_closed_words_exist_and_all_step_signs_are_cancelled() -> None:
     assert all(count >= 0 for count in counts)
     assert all(counts[depth] == 0 for depth in range(0, 8, 2))
     assert all(counts[depth] > 0 for depth in range(1, 8, 2))
+
+
+def test_checked_in_gauge_cocycle_certificate_matches_oracle() -> None:
+    certificate = json.loads(
+        (
+            SOLUTION_ROOT / "fixtures" / "gauge_cocycle_certificates.json"
+        ).read_text(encoding="utf-8")
+    )
+    square_audit = audit_all_legal_transitions(ladder_gauge_instance(2))
+    overlap_audit = audit_all_legal_transitions(ladder_gauge_instance(3))
+
+    assert certificate["protocol"] == "gauge-cocycle-ladder-v1"
+    assert certificate["source_commit"] == (
+        "b4d50afd47040bffbb06c934e85886052f3b4fe5"
+    )
+    assert certificate["square"] == square_audit.__dict__
+    assert certificate["overlapping_plaquettes"][
+        "closed_legal_words_depth_1_to_8"
+    ] == list(
+        closed_legal_word_counts(
+            ladder_gauge_instance(3),
+            maximum_depth=8,
+        )
+    )
+    for key, value in overlap_audit.__dict__.items():
+        assert certificate["overlapping_plaquettes"][key] == value
+    assert certificate["central_rung_scaling"] == [
+        central_rung_locality(columns)
+        for columns in range(2, 11)
+    ]
