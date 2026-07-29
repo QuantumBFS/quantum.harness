@@ -327,46 +327,102 @@ def test_smallest_positive_rate_uses_hazard_terminal_comparison_without_overflow
     )
 
 
-def test_terminal_hazard_equality_and_neighbor_have_exact_draw_schedules():
+def test_event_exactly_at_final_checkpoint_is_included_then_overshot():
     kernel = np.asarray([1.0], dtype=np.float64)
     uniform = 0.5
     hazard = -math.log(uniform)
-
-    equal_request = make_request(length=2, kappas=[hazard], kernel=kernel)
-    equal_streams = ScriptedStreams(exponential=[uniform])
-    equal = _run_poisson_with_streams(
-        equal_request, kernel, equal_streams
-    ).result
-    assert equal.event_count == 0
-    np.testing.assert_array_equal(
-        equal.draw_counts,
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 0]],
-    )
-    np.testing.assert_array_equal(
-        equal.terminal_counters[:, 0], [0, 0, 0, 1]
-    )
-
-    above_request = make_request(
-        length=2,
-        kappas=[math.nextafter(hazard, math.inf)],
-        kernel=kernel,
-    )
-    above_streams = ScriptedStreams(
-        exponential=[uniform, 0.25],
+    request = make_request(length=2, kappas=[hazard], kernel=kernel)
+    streams = ScriptedStreams(
+        exponential=[uniform, math.exp(-0.5)],
         columns=[0.5],
         thresholds=[0.5],
         offsets=[0],
     )
+    run = _run_poisson_with_streams(request, kernel, streams)
+    assert run.event_times == (hazard,)
+    assert run.edge_ids_by_checkpoint == (frozenset({0}),)
+    assert run.result.event_count == 1
+    assert run.result.observables[0, 0] == 1.0
+    np.testing.assert_array_equal(
+        run.result.draw_counts,
+        [[1, 1, 0], [1, 1, 0], [1, 1, 0], [2, 1, 0]],
+    )
+
+
+def test_final_checkpoint_matches_extended_prefix_and_logical_draw_suffix():
+    kernel = np.asarray([1.0], dtype=np.float64)
+    uniform = 0.5
+    shared_kappa = -math.log(uniform)
+    final_request = make_request(
+        length=2, kappas=[shared_kappa], kernel=kernel
+    )
+    extended_request = make_request(
+        length=2, kappas=[shared_kappa, shared_kappa + 1.0], kernel=kernel
+    )
+    final_streams = ScriptedStreams(
+        exponential=[uniform, math.exp(-0.5)],
+        columns=[0.5],
+        thresholds=[0.5],
+        offsets=[0],
+    )
+    extended_streams = ScriptedStreams(
+        exponential=[uniform, math.exp(-0.5), math.exp(-1.0)],
+        columns=[0.5, 0.5],
+        thresholds=[0.5, 0.5],
+        offsets=[0, 0],
+    )
+    final = _run_poisson_with_streams(
+        final_request, kernel, final_streams
+    ).result
+    extended = _run_poisson_with_streams(
+        extended_request, kernel, extended_streams
+    ).result
+    np.testing.assert_array_equal(final.observables[0], extended.observables[0])
+    np.testing.assert_array_equal(
+        extended.draw_counts - final.draw_counts,
+        [[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0]],
+    )
+    np.testing.assert_array_equal(
+        extended.terminal_counters,
+        final.terminal_counters,
+    )
+
+
+def test_terminal_hazard_neighbors_choose_strictly_correct_side():
+    kernel = np.asarray([1.0], dtype=np.float64)
+    boundary_uniform = 0.5
+    boundary = -math.log(boundary_uniform)
+    above_uniform = math.nextafter(boundary_uniform, 0.0)
+    below_uniform = math.nextafter(boundary_uniform, 1.0)
+    assert -math.log(above_uniform) > boundary
+    assert -math.log(below_uniform) < boundary
+
+    above_request = make_request(length=2, kappas=[boundary], kernel=kernel)
+    above_streams = ScriptedStreams(exponential=[above_uniform])
     above = _run_poisson_with_streams(
         above_request, kernel, above_streams
     ).result
-    assert above.event_count == 1
+    assert above.event_count == 0
     np.testing.assert_array_equal(
         above.draw_counts,
-        [[1, 1, 0], [1, 1, 0], [1, 1, 0], [2, 1, 0]],
+        [[0, 0, 0], [0, 0, 0], [0, 0, 0], [1, 1, 0]],
     )
+
+    below_request = make_request(length=2, kappas=[boundary], kernel=kernel)
+    below_streams = ScriptedStreams(
+        exponential=[below_uniform, math.exp(-1.0)],
+        columns=[0.5],
+        thresholds=[0.5],
+        offsets=[0],
+    )
+    below = _run_poisson_with_streams(
+        below_request, kernel, below_streams
+    ).result
+    assert below.event_count == 1
+    assert below.observables[0, 0] == 1.0
     np.testing.assert_array_equal(
-        above.terminal_counters[:, 0], [1, 1, 1, 1]
+        below.draw_counts,
+        [[1, 1, 0], [1, 1, 0], [1, 1, 0], [2, 1, 0]],
     )
 
 

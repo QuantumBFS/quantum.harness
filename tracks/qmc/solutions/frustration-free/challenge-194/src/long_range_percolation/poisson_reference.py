@@ -599,7 +599,7 @@ def _run_poisson_with_streams(
             hazard = -math.log(exponential_uniform)
             remaining_kappa = kappa_max - current_kappa
             terminal_hazard = remaining_kappa * total_rate
-            if hazard >= terminal_hazard:
+            if hazard > terminal_hazard:
                 break
             delta = hazard / total_rate
             next_kappa = current_kappa + delta
