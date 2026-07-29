@@ -31,11 +31,13 @@ SCHEMA_VERSION = "exterior-thin-first-v1"
 ORACLE_VERSION = "determinant-weight-v1"
 WORD_ORDER = "right-append-lexicographic-mixed"
 DEFAULT_DEPTHS = (2, 3, 4)
+PRESSURE_DEPTHS = (5, 6, 7, 8)
 TERMINAL_STATUSES = {
     "rejected-negative",
     "rejected-complex",
     "uncertain-high-precision",
     "survivor-shallow-zero-failure",
+    "survivor-pressure-zero-failure",
 }
 _FULL_COMMIT = re.compile(r"[0-9a-f]{40}")
 
@@ -86,15 +88,18 @@ def _plan_payload(
     source_commit: str,
     shards: int,
     entries: Sequence[Mapping[str, object]],
+    depths: tuple[int, ...] = DEFAULT_DEPTHS,
+    survivor_status: str = "survivor-shallow-zero-failure",
+    parent_provenance: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "source_commit": source_commit,
         "shards": shards,
         "oracle": "oracle.weights.classify_product",
         "oracle_version": ORACLE_VERSION,
         "word_order": WORD_ORDER,
-        "depths": list(DEFAULT_DEPTHS),
+        "depths": list(depths),
         "candidates": [
             {
                 "candidate_id": entry["candidate_id"],
@@ -107,6 +112,12 @@ def _plan_payload(
             for entry in entries
         ],
     }
+    # The default payload must remain byte-for-byte identical to Stage 1.
+    if depths != DEFAULT_DEPTHS or survivor_status != "survivor-shallow-zero-failure":
+        payload["survivor_status"] = survivor_status
+    if parent_provenance is not None:
+        payload.update(parent_provenance)
+    return payload
 
 
 def _hash_payload(payload: Mapping[str, object]) -> str:
@@ -118,8 +129,11 @@ def _run_protocol_payload(
     plan_hash: str,
     run_id: str,
     source_commit: str,
+    depths: tuple[int, ...] = DEFAULT_DEPTHS,
+    survivor_status: str = "survivor-shallow-zero-failure",
+    parent_provenance: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "plan_hash": plan_hash,
         "run_id": run_id,
@@ -127,8 +141,14 @@ def _run_protocol_payload(
         "oracle": "oracle.weights.classify_product",
         "oracle_version": ORACLE_VERSION,
         "word_order": WORD_ORDER,
-        "depths": list(DEFAULT_DEPTHS),
+        "depths": list(depths),
     }
+    # Keep the frozen Stage-1 protocol hash unchanged.
+    if depths != DEFAULT_DEPTHS or survivor_status != "survivor-shallow-zero-failure":
+        payload["survivor_status"] = survivor_status
+    if parent_provenance is not None:
+        payload.update(parent_provenance)
+    return payload
 
 
 def mixed_words(
@@ -206,12 +226,18 @@ def screen_card(
     protocol_hash: str = "",
     machine_role: str = "unassigned",
     shard: int | None = None,
+    survivor_status: str = "survivor-shallow-zero-failure",
 ) -> dict[str, object]:
     """Screen one exact card, stopping at its first non-benign classification."""
 
     _validate_source_commit(source_commit)
     if not run_id:
         raise ValueError("run_id must be nonempty")
+    if survivor_status not in {
+        "survivor-shallow-zero-failure",
+        "survivor-pressure-zero-failure",
+    }:
+        raise ValueError("survivor_status is unsupported")
     started = time.perf_counter()
     card_hash = candidate_id(card)
     atoms = float_atoms_from_card(card)
@@ -221,7 +247,7 @@ def screen_card(
     planned = tuple(words) if words is not None else mixed_words(len(atoms))
     counts: Counter[str] = Counter()
     first_failure: dict[str, object] | None = None
-    status = "survivor-shallow-zero-failure"
+    status = survivor_status
     minimum_sigma = math.inf
     minimum_sigma_word: tuple[int, ...] | None = None
 
@@ -325,7 +351,9 @@ def _select_smoke(
                 selected.append(entry)
                 break
         else:
-            raise RuntimeError(f"no smoke candidate for N={dimension} on {role}")
+            # A survivor set can be smaller than the representative thin set.
+            # The full Stage-1 tranche still follows the branch above exactly.
+            return list(entries[:min(smoke_count, len(entries))])
     return selected
 
 
@@ -339,8 +367,11 @@ def _spec(
     shard: int | str,
     artifact_root: str,
     candidates: Sequence[dict[str, object]],
+    depths: tuple[int, ...] = DEFAULT_DEPTHS,
+    survivor_status: str = "survivor-shallow-zero-failure",
+    parent_provenance: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
-    return {
+    spec: dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "plan_hash": plan_hash,
         "run_id": run_id,
@@ -352,9 +383,14 @@ def _spec(
         "oracle": "oracle.weights.classify_product",
         "oracle_version": ORACLE_VERSION,
         "word_order": WORD_ORDER,
-        "depths": list(DEFAULT_DEPTHS),
+        "depths": list(depths),
         "candidates": list(candidates),
     }
+    if depths != DEFAULT_DEPTHS or survivor_status != "survivor-shallow-zero-failure":
+        spec["survivor_status"] = survivor_status
+    if parent_provenance is not None:
+        spec.update(parent_provenance)
+    return spec
 
 
 def plan_run(
@@ -450,11 +486,148 @@ def plan_run(
     }
 
 
+def plan_survivor_run(
+    *,
+    parent_run_dir: str | Path,
+    run_dir: str | Path,
+    source_commit: str,
+    run_id: str = "exterior-survivor-pressure-v1",
+    smoke_count: int = 4,
+    shards: int = 76,
+) -> dict[str, object]:
+    """Plan the depth-5..8 pressure run from validated Stage-1 survivors."""
+
+    source_commit = _validate_source_commit(source_commit)
+    if shards != 76:
+        raise ValueError("the survivor pressure protocol requires exactly 76 shards")
+    if smoke_count < 0:
+        raise ValueError("smoke_count must be nonnegative")
+    parent_root = Path(parent_run_dir)
+    parent_plan = json.loads(
+        (parent_root / "plan-summary.json").read_text(encoding="utf-8")
+    )
+    parent_entries = _validate_plan_summary(parent_plan)
+    if len(parent_entries) != 2304:
+        raise RuntimeError("parent plan must contain exactly 2304 terminal candidates")
+    if parent_plan["source_commit"] != source_commit:
+        raise RuntimeError("parent source commit does not match pressure source commit")
+    collection = collect_run(parent_root)
+    required_counts = ("missing", "stale", "duplicate", "operational_error")
+    if (
+        collection.get("terminal") != 2304
+        or any(collection.get(key) != 0 for key in required_counts)
+        or collection.get("unresolved_operational_candidate_ids") != []
+    ):
+        raise RuntimeError("parent collection is incomplete or operationally unresolved")
+
+    selected: list[dict[str, object]] = []
+    for entry in parent_entries:
+        identity = str(entry["candidate_id"])
+        manifest_path = parent_root / "candidates" / identity / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not _parent_terminal_manifest_is_valid(manifest, parent_plan, entry):
+            raise RuntimeError("parent terminal status or identity is invalid")
+        if manifest["status"] == "survivor-shallow-zero-failure":
+            selected.append(entry)
+
+    provenance = {
+        "parent_run_id": parent_plan["run_id"],
+        "parent_plan_hash": parent_plan["plan_hash"],
+        "parent_protocol_hash": parent_plan["protocol_hash"],
+    }
+    plan_payload = _plan_payload(
+        source_commit=source_commit,
+        shards=shards,
+        entries=selected,
+        depths=PRESSURE_DEPTHS,
+        survivor_status="survivor-pressure-zero-failure",
+        parent_provenance=provenance,
+    )
+    plan_hash = _hash_payload(plan_payload)
+    protocol_hash = _hash_payload(
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=run_id,
+            source_commit=source_commit,
+            depths=PRESSURE_DEPTHS,
+            survivor_status="survivor-pressure-zero-failure",
+            parent_provenance=provenance,
+        )
+    )
+    smoke_run_id = "exterior-survivor-pressure-v1-smoke"
+    smoke_protocol_hash = _hash_payload(
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=smoke_run_id,
+            source_commit=source_commit,
+            depths=PRESSURE_DEPTHS,
+            survivor_status="survivor-pressure-zero-failure",
+            parent_provenance=provenance,
+        )
+    )
+    root = Path(run_dir)
+    summary = {
+        **plan_payload,
+        "plan_hash": plan_hash,
+        "run_id": run_id,
+        "protocol_hash": protocol_hash,
+        "smoke_run_id": smoke_run_id,
+        "smoke_protocol_hash": smoke_protocol_hash,
+        "planned": len(selected),
+        "candidates": selected,
+    }
+    _write_json_atomic(root / "plan-summary.json", summary)
+    for shard in range(shards):
+        role = "wsl" if shard < 14 else "cpu"
+        candidates = [entry for entry in selected if entry["shard"] == shard]
+        _write_json_atomic(
+            root / "specs" / f"shard-{shard:02d}.json",
+            _spec(
+                run_id=run_id,
+                plan_hash=plan_hash,
+                protocol_hash=protocol_hash,
+                source_commit=source_commit,
+                machine_role=role,
+                shard=shard,
+                artifact_root="..",
+                candidates=candidates,
+                depths=PRESSURE_DEPTHS,
+                survivor_status="survivor-pressure-zero-failure",
+                parent_provenance=provenance,
+            ),
+        )
+    smoke = _select_smoke(selected, smoke_count)
+    for role in ("wsl", "cpu"):
+        candidates = [
+            entry
+            for entry in smoke
+            if ("wsl" if int(entry["shard"]) < 14 else "cpu") == role
+        ]
+        _write_json_atomic(
+            root / "specs" / f"smoke-{role}.json",
+            _spec(
+                run_id=smoke_run_id,
+                plan_hash=plan_hash,
+                protocol_hash=smoke_protocol_hash,
+                source_commit=source_commit,
+                machine_role=role,
+                shard="smoke",
+                artifact_root="../smoke",
+                candidates=candidates,
+                depths=PRESSURE_DEPTHS,
+                survivor_status="survivor-pressure-zero-failure",
+                parent_provenance=provenance,
+            ),
+        )
+    return {"planned": len(selected), "protocol_hash": protocol_hash, "smoke": len(smoke)}
+
+
 def _manifest_matches(
     manifest: Mapping[str, object],
     *,
     spec: Mapping[str, object],
     entry: Mapping[str, object],
+    depths: tuple[int, ...] = DEFAULT_DEPTHS,
 ) -> bool:
     expected = {
         "schema_version": SCHEMA_VERSION,
@@ -470,9 +643,76 @@ def _manifest_matches(
         "oracle": "oracle.weights.classify_product",
         "oracle_version": ORACLE_VERSION,
         "word_order": WORD_ORDER,
-        "depths": list(DEFAULT_DEPTHS),
+        "depths": list(depths),
     }
     return all(manifest.get(key) == value for key, value in expected.items())
+
+
+def _protocol_configuration(
+    payload: Mapping[str, object],
+) -> tuple[tuple[int, ...], str, dict[str, object] | None]:
+    depths_value = payload.get("depths")
+    if not isinstance(depths_value, list):
+        raise RuntimeError("protocol depths are invalid")
+    depths = tuple(depths_value)
+    if depths == DEFAULT_DEPTHS:
+        if payload.get("survivor_status") not in {None, "survivor-shallow-zero-failure"}:
+            raise RuntimeError("thin protocol survivor status is invalid")
+        if any(key in payload for key in (
+            "parent_run_id", "parent_plan_hash", "parent_protocol_hash",
+        )):
+            raise RuntimeError("thin protocol cannot carry parent provenance")
+        return depths, "survivor-shallow-zero-failure", None
+    if depths != PRESSURE_DEPTHS:
+        raise RuntimeError("protocol depths are unsupported")
+    if payload.get("survivor_status") != "survivor-pressure-zero-failure":
+        raise RuntimeError("pressure protocol survivor status is invalid")
+    try:
+        parent_run_id = payload["parent_run_id"]
+        parent_plan_hash = payload["parent_plan_hash"]
+        parent_protocol_hash = payload["parent_protocol_hash"]
+    except KeyError as exc:
+        raise RuntimeError(f"pressure parent provenance is missing {exc}") from exc
+    if not isinstance(parent_run_id, str) or not parent_run_id:
+        raise RuntimeError("pressure parent run id is invalid")
+    for value in (parent_plan_hash, parent_protocol_hash):
+        if (
+            not isinstance(value, str)
+            or len(value) != 64
+            or any(character not in "0123456789abcdef" for character in value)
+        ):
+            raise RuntimeError("pressure parent hash is invalid")
+    return depths, "survivor-pressure-zero-failure", {
+        "parent_run_id": parent_run_id,
+        "parent_plan_hash": parent_plan_hash,
+        "parent_protocol_hash": parent_protocol_hash,
+    }
+
+
+def _parent_terminal_manifest_is_valid(
+    manifest: Mapping[str, object],
+    parent_plan: Mapping[str, object],
+    entry: Mapping[str, object],
+) -> bool:
+    role = "wsl" if int(entry["shard"]) < 14 else "cpu"
+    spec = {
+        "run_id": parent_plan["run_id"],
+        "protocol_hash": parent_plan["protocol_hash"],
+        "source_commit": parent_plan["source_commit"],
+        "machine_role": role,
+    }
+    if not _manifest_matches(manifest, spec=spec, entry=entry):
+        return False
+    status = manifest.get("status")
+    if status == "survivor-shallow-zero-failure":
+        return manifest.get("first_failure") is None
+    expected_failure = {
+        "rejected-negative": "negative",
+        "rejected-complex": "complex",
+        "uncertain-high-precision": "uncertain",
+    }.get(status)
+    failure = manifest.get("first_failure")
+    return isinstance(failure, Mapping) and failure.get("classification") == expected_failure
 
 
 def _validate_spec_protocol(spec: Mapping[str, object]) -> None:
@@ -490,17 +730,16 @@ def _validate_spec_protocol(spec: Mapping[str, object]) -> None:
         or any(character not in "0123456789abcdef" for character in plan_hash)
     ):
         raise RuntimeError("invalid protocol plan_hash")
+    depths, survivor_status, provenance = _protocol_configuration(spec)
     expected = _hash_payload(
-        {
-            "schema_version": spec.get("schema_version"),
-            "plan_hash": plan_hash,
-            "run_id": run_id,
-            "source_commit": source_commit,
-            "oracle": spec.get("oracle"),
-            "oracle_version": spec.get("oracle_version"),
-            "word_order": spec.get("word_order"),
-            "depths": spec.get("depths"),
-        }
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=run_id,
+            source_commit=source_commit,
+            depths=depths,
+            survivor_status=survivor_status,
+            parent_provenance=provenance,
+        )
     )
     if expected != spec.get("protocol_hash"):
         raise RuntimeError("protocol hash does not match the executed protocol")
@@ -509,7 +748,7 @@ def _validate_spec_protocol(spec: Mapping[str, object]) -> None:
         or spec.get("oracle") != "oracle.weights.classify_product"
         or spec.get("oracle_version") != ORACLE_VERSION
         or spec.get("word_order") != WORD_ORDER
-        or spec.get("depths") != list(DEFAULT_DEPTHS)
+        or spec.get("depths") != list(depths)
     ):
         raise RuntimeError("protocol metadata is unsupported")
     if spec.get("machine_role") not in {"wsl", "cpu"}:
@@ -534,19 +773,8 @@ def _validate_spec_plan_binding(
     if not plan_path.is_file():
         raise RuntimeError("protocol plan summary is missing")
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
-    entries = plan.get("candidates")
-    if not isinstance(entries, list):
-        raise RuntimeError("protocol plan candidates are invalid")
-    try:
-        plan_hash = _hash_payload(
-            _plan_payload(
-                source_commit=_validate_source_commit(plan["source_commit"]),
-                shards=int(plan["shards"]),
-                entries=entries,
-            )
-        )
-    except (KeyError, TypeError, ValueError) as exc:
-        raise RuntimeError(f"invalid protocol plan summary: {exc}") from exc
+    entries = _validate_plan_summary(plan)
+    plan_hash = plan["plan_hash"]
     if plan_hash != plan.get("plan_hash") or plan_hash != spec.get("plan_hash"):
         raise RuntimeError("protocol plan hash mismatch")
     planned = {
@@ -603,6 +831,7 @@ def run_spec(path: str | Path) -> dict[str, int]:
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     _validate_spec_protocol(spec)
     _validate_spec_plan_binding(spec, spec_path=spec_path)
+    depths, survivor_status, _ = _protocol_configuration(spec)
     artifact_root = Path(str(spec.get("artifact_root", "..")))
     root = (
         artifact_root
@@ -620,7 +849,9 @@ def run_spec(path: str | Path) -> dict[str, int]:
         manifest_path = root / "candidates" / identity / "manifest.json"
         if manifest_path.is_file():
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            if not _manifest_matches(manifest, spec=spec, entry=entry):
+            if not _manifest_matches(
+                manifest, spec=spec, entry=entry, depths=depths,
+            ):
                 errors.append({
                     "candidate_id": identity,
                     "error": "stale or mismatched terminal manifest",
@@ -644,6 +875,8 @@ def run_spec(path: str | Path) -> dict[str, int]:
                 protocol_hash=spec["protocol_hash"],
                 machine_role=spec["machine_role"],
                 shard=int(entry["shard"]),
+                words=mixed_words(len(float_atoms_from_card(card)), depths=depths),
+                survivor_status=survivor_status,
             )
             _write_json_atomic(manifest_path, manifest)
             completed += 1
@@ -692,12 +925,13 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
         raise RuntimeError("invalid plan candidate entries")
     if shards != 76 or not isinstance(run_id, str) or not run_id:
         raise RuntimeError("invalid plan protocol metadata")
+    depths, survivor_status, provenance = _protocol_configuration(plan)
     if (
         plan.get("schema_version") != SCHEMA_VERSION
         or plan.get("oracle") != "oracle.weights.classify_product"
         or plan.get("oracle_version") != ORACLE_VERSION
         or plan.get("word_order") != WORD_ORDER
-        or plan.get("depths") != list(DEFAULT_DEPTHS)
+        or plan.get("depths") != list(depths)
     ):
         raise RuntimeError("invalid plan oracle or word protocol metadata")
     plan_hash = _hash_payload(
@@ -705,6 +939,9 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             source_commit=source_commit,
             shards=shards,
             entries=entries,
+            depths=depths,
+            survivor_status=survivor_status,
+            parent_provenance=provenance,
         )
     )
     if plan_hash != plan.get("plan_hash"):
@@ -714,6 +951,9 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             plan_hash=plan_hash,
             run_id=run_id,
             source_commit=source_commit,
+            depths=depths,
+            survivor_status=survivor_status,
+            parent_provenance=provenance,
         )
     )
     if protocol_hash != plan.get("protocol_hash"):
@@ -748,6 +988,7 @@ def collect_run(
     root = Path(run_dir)
     plan = json.loads((root / "plan-summary.json").read_text(encoding="utf-8"))
     entries = _validate_plan_summary(plan)
+    depths, survivor_status, _ = _protocol_configuration(plan)
     scientific: Counter[str] = Counter()
     tested_words: Counter[str] = Counter()
     by_dimension: dict[str, Counter[str]] = {}
@@ -784,7 +1025,9 @@ def collect_run(
             "machine_role": role,
         }
         if (
-            not _manifest_matches(manifest, spec=spec_view, entry=entry)
+            not _manifest_matches(
+                manifest, spec=spec_view, entry=entry, depths=depths,
+            )
             or manifest.get("status") not in TERMINAL_STATUSES
             or "minimum_sigma_min_I_plus_D" not in manifest
             or "minimum_sigma_word_indices" not in manifest
@@ -818,7 +1061,7 @@ def collect_run(
             }
             first_failures.append(failure_row)
             template_counts[f"first_failure_depth_{failure.get('depth')}"] += 1
-        if status == "survivor-shallow-zero-failure":
+        if status == survivor_status:
             survivors.append({
                 "candidate_id": identity,
                 "template": entry["template"],
@@ -873,6 +1116,8 @@ def collect_run(
         "source_commit": plan["source_commit"],
         "plan_hash": plan["plan_hash"],
         "protocol_hash": plan["protocol_hash"],
+        "depths": list(depths),
+        "survivor_status": survivor_status,
         "planned": len(entries),
         "terminal": terminal,
         "missing": missing,
@@ -910,7 +1155,10 @@ def _write_summary_markdown(path: Path, result: Mapping[str, object]) -> None:
         f"- protocol hash: `{result['protocol_hash']}`",
         f"- candidate-card schema: exterior-candidate-card-v1",
         f"- determinant oracle: `oracle.weights.classify_product` ({ORACLE_VERSION})",
-        f"- word order: `{WORD_ORDER}`; depths: `2,3,4`",
+        (
+            f"- word order: `{WORD_ORDER}`; depths: `"
+            f"{','.join(str(depth) for depth in result['depths'])}`"
+        ),
         "- WSL shards: `00..13`; CPU shards: `14..75`; BLAS threads: `1`",
         "",
         "## Completion",
@@ -931,22 +1179,31 @@ def _write_summary_markdown(path: Path, result: Mapping[str, object]) -> None:
     assert isinstance(counts, Mapping) and isinstance(tested, Mapping)
     for status in sorted(counts):
         lines.append(f"| {status} | {counts[status]} | {tested.get(status, 0)} |")
+    survivor_status = str(result["survivor_status"])
     lines.extend(["", "## By dimension", "| N | planned | rejected negative | rejected complex | uncertain | survivor |", "|---:|---:|---:|---:|---:|---:|"])
     for dimension, row in result["by_dimension"].items():  # type: ignore[union-attr]
         lines.append(
             f"| {dimension} | {row.get('planned', 0)} | "
             f"{row.get('rejected-negative', 0)} | {row.get('rejected-complex', 0)} | "
             f"{row.get('uncertain-high-precision', 0)} | "
-            f"{row.get('survivor-shallow-zero-failure', 0)} |"
+            f"{row.get(survivor_status, 0)} |"
         )
-    lines.extend(["", "## By template", "| template | planned | depth 2 | depth 3 | depth 4 | survivor |", "|---|---:|---:|---:|---:|---:|"])
+    depths = tuple(result["depths"])
+    lines.extend([
+        "",
+        "## By template",
+        "| template | planned | "
+        + " | ".join(f"depth {depth}" for depth in depths)
+        + " | survivor |",
+        "|---|---:|" + "---:|" * (len(depths) + 1),
+    ])
     for template, row in result["by_template"].items():  # type: ignore[union-attr]
+        values = " | ".join(
+            str(row.get(f"first_failure_depth_{depth}", 0)) for depth in depths
+        )
         lines.append(
-            f"| {template} | {row.get('planned', 0)} | "
-            f"{row.get('first_failure_depth_2', 0)} | "
-            f"{row.get('first_failure_depth_3', 0)} | "
-            f"{row.get('first_failure_depth_4', 0)} | "
-            f"{row.get('survivor-shallow-zero-failure', 0)} |"
+            f"| {template} | {row.get('planned', 0)} | {values} | "
+            f"{row.get(survivor_status, 0)} |"
         )
     lines.extend(["", "## First failures", "| candidate id | template | N | word | classification | sigma_min | condition |", "|---|---|---:|---|---|---:|---:|"])
     for row in result["first_failures"]:  # type: ignore[union-attr]
@@ -997,6 +1254,13 @@ def _parser() -> argparse.ArgumentParser:
     plan.add_argument("--run-id", default="exterior-thin-first-v1")
     plan.add_argument("--smoke-count", type=int, default=4)
     plan.add_argument("--shards", type=int, default=76)
+    survivors = subparsers.add_parser("plan-survivors")
+    survivors.add_argument("--parent-run-dir", required=True)
+    survivors.add_argument("--run-dir", required=True)
+    survivors.add_argument("--source-commit", required=True)
+    survivors.add_argument("--run-id", default="exterior-survivor-pressure-v1")
+    survivors.add_argument("--smoke-count", type=int, default=4)
+    survivors.add_argument("--shards", type=int, default=76)
     run = subparsers.add_parser("run")
     run.add_argument("spec")
     collect = subparsers.add_parser("collect")
@@ -1009,6 +1273,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "plan":
         result = plan_run(
+            run_dir=args.run_dir,
+            source_commit=args.source_commit,
+            run_id=args.run_id,
+            smoke_count=args.smoke_count,
+            shards=args.shards,
+        )
+    elif args.command == "plan-survivors":
+        result = plan_survivor_run(
+            parent_run_dir=args.parent_run_dir,
             run_dir=args.run_dir,
             source_commit=args.source_commit,
             run_id=args.run_id,
@@ -1031,10 +1304,12 @@ if __name__ == "__main__":
 
 __all__ = [
     "SCHEMA_VERSION",
+    "PRESSURE_DEPTHS",
     "collect_run",
     "main",
     "mixed_words",
     "plan_run",
+    "plan_survivor_run",
     "run_spec",
     "screen_card",
     "shard_owner",
