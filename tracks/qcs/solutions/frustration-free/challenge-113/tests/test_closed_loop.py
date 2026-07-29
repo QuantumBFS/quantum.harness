@@ -676,3 +676,43 @@ def test_deterministic_small_gap_d2_fixture_orders_candidate_spaces() -> None:
         assert query_device.ledger.validation_shots == (
             100_000 * query_device.ledger.validation_queries
         )
+
+
+@pytest.mark.parametrize("parameter_count", (24, 80))
+def test_full_dimension_model_hessian_exactly_matches_bounded_full_space(
+    parameter_count: int,
+) -> None:
+    origin = np.linspace(-0.95, 0.95, parameter_count)
+    gaussian = np.random.default_rng(parameter_count).normal(
+        size=(parameter_count, parameter_count)
+    )
+    curvature_basis, _ = np.linalg.qr(gaussian)
+    bound = 0.375
+    model_hessian = make_search_space(
+        SearchConfig("model_hessian", parameter_count, 200),
+        origin,
+        model_basis=curvature_basis,
+        bound=bound,
+    )
+    full = make_search_space(
+        SearchConfig("full", parameter_count, 200),
+        origin,
+        bound=bound,
+    )
+
+    assert np.array_equal(model_hessian.origin, full.origin)
+    assert np.array_equal(model_hessian.basis, full.basis)
+    assert np.array_equal(model_hessian.lower_bounds, full.lower_bounds)
+    assert np.array_equal(model_hessian.upper_bounds, full.upper_bounds)
+    samples = (
+        full.lower_bounds,
+        full.upper_bounds,
+        np.where(np.arange(parameter_count) % 2, bound, -bound),
+        np.eye(parameter_count)[0] * bound,
+        -np.eye(parameter_count)[-1] * bound,
+    )
+    for coordinates in samples:
+        assert np.array_equal(
+            model_hessian.to_pulse(coordinates),
+            full.to_pulse(coordinates),
+        )

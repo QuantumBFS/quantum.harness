@@ -7,7 +7,9 @@ paired trials all construct, including model-Hessian dimensions `k=24` for
 `d=2` and `k=20,30,80` for `d=4`. Dense landscapes retain a complete
 curvature-ordered orthonormal basis while effective Hessian ranks remain 3 and
 15 at the `1e-8` relative threshold. Matrix-free results expose only the
-columns actually computed.
+columns actually computed. For the bounded `k=p` comparison, model-Hessian
+dispatches to exactly the full baseline's identity coordinates, bounds, and
+mapping while retaining its model-Hessian label and complete source-basis hash.
 
 Model preparation uses canonical `model_seed=5`; `perturbation_seed` controls
 truth orientation and `trial_seed` controls search and measurement randomness.
@@ -42,7 +44,9 @@ Both authorized clusters expose glibc 2.17, while frozen `jaxlib==0.11.0`
 requires `manylinux_2_27_x86_64`. Frozen sync therefore fails closed before
 Slurm submission. No older JAX, source build, container, or platform fallback
 has been substituted. The final candidate archive is local-only until an exact
-runtime-compatible cluster environment is approved.
+runtime-compatible cluster environment is approved. Deployment metadata is
+passed as an external regular file, so validating a clean checkout does not
+write runtime state into the source tree.
 
 ## Interpretation and production claims
 

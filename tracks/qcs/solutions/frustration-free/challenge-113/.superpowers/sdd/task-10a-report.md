@@ -62,3 +62,20 @@ or Slurm submission was made.
    runtime.
 3. Recompute the measured allocation gate before submitting the 9,500-trial
    array.
+
+## Final review correction
+
+- RED: a full-column orthonormal Hessian basis spanned the full pulse space but
+  did not equal the bounded full baseline because rotating a coordinate box
+  changes its feasible pulse set.
+- GREEN: model-Hessian `k=p` now returns the exact identity-basis full search
+  space. Boundary, alternating-corner, and axis-corner samples at `p=24` and
+  `p=80` have exactly equal origins, bases, coordinate bounds, and pulse
+  mappings. The method label and complete model-source-basis hash remain in
+  trial provenance; `k<p` continues to use curvature-ordered columns.
+- RED: local production verification expected `.deployment.json` inside the
+  source root and the README omitted mandatory inputs.
+- GREEN: all entry points require an explicit external metadata path, reject
+  symlinks and in-tree metadata, and hash that exact regular file's bindings.
+  The documented check-only workflow supplies every mandatory input, reaches
+  `{"production_gate":"ready"}`, and leaves a Git checkout clean.

@@ -264,10 +264,19 @@ def make_model_hessian_space(
     dimension: object,
     bound: object = _DEFAULT_BOUND,
 ) -> SearchSpace:
+    origin_array = _finite_vector("origin", origin)
+    basis_array = _finite_matrix("model_basis", model_basis)
+    resolved_dimension = _positive_integer("dimension", dimension)
+    if basis_array.shape[0] != origin_array.size:
+        raise ValueError("basis row count must match origin size")
+    if basis_array.shape[1] < resolved_dimension:
+        raise ValueError("basis has fewer columns than the requested dimension")
+    if resolved_dimension == origin_array.size:
+        return make_full_space(origin_array, bound=bound)
     return _leading_space(
-        origin,
-        model_basis,
-        dimension=dimension,
+        origin_array,
+        basis_array,
+        dimension=resolved_dimension,
         bound=bound,
     )
 

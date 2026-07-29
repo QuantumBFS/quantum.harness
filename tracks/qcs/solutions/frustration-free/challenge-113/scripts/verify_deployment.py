@@ -14,6 +14,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--deployment-metadata", type=Path, required=True)
     parser.add_argument("--expected-revision", required=True)
     parser.add_argument("--expected-archive-sha256", required=True)
     parser.add_argument("--expected-evidence-revision", required=True)
@@ -21,6 +22,7 @@ def main() -> None:
     validate_deployment(
         args.root,
         archive_path=args.archive,
+        deployment_metadata_path=args.deployment_metadata,
         expected_revision=args.expected_revision,
         expected_archive_sha256=args.expected_archive_sha256,
         expected_evidence_revision=args.expected_evidence_revision,

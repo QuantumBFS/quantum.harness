@@ -339,13 +339,23 @@ def validate_deployment(
     root: str | Path,
     *,
     archive_path: str | Path,
+    deployment_metadata_path: str | Path,
     expected_revision: str,
     expected_archive_sha256: str,
     expected_evidence_revision: str,
 ) -> None:
     directory = Path(root)
     archive = Path(archive_path)
-    deployment, _ = _read_canonical(directory / ".deployment.json")
+    metadata = Path(deployment_metadata_path)
+    if metadata.is_symlink() or not metadata.is_file():
+        raise ValueError("deployment metadata must be a regular file")
+    try:
+        metadata.resolve(strict=True).relative_to(directory.resolve(strict=True))
+    except ValueError:
+        pass
+    else:
+        raise ValueError("deployment metadata must live outside the source tree")
+    deployment, _ = _read_canonical(metadata)
     if set(deployment) != {
         "archive_name",
         "archive_sha256",

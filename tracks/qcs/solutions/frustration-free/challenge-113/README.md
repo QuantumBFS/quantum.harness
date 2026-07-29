@@ -21,12 +21,50 @@ only to `results/development`. Override the device only by setting
 ## Production safety gate
 
 Local production requires a clean checkout, an exact revision match, an
-explicit JAX platform, and acknowledgement:
+explicit JAX platform, acknowledgement, an exact archive, and external
+deployment metadata. The following check-only workflow is executable from this
+challenge directory and reaches the final gate without writing into the source
+tree:
 
 ```bash
-CHALLENGE113_ACK_PRODUCTION=1 \
-CHALLENGE113_EXPECTED_REVISION="$(git rev-parse HEAD)" \
-CHALLENGE113_JAX_PLATFORM=cpu \
+export CHALLENGE113_ACK_PRODUCTION=1
+export CHALLENGE113_EXPECTED_REVISION="$(git rev-parse HEAD)"
+export CHALLENGE113_EVIDENCE_REVISION=dd16192953c130d738716238525760de73343e09
+export CHALLENGE113_JAX_PLATFORM=cpu
+export CHALLENGE113_CHECK_ONLY=1
+RUNTIME_DIR="$(mktemp -d)"
+export CHALLENGE113_ARCHIVE_PATH="${RUNTIME_DIR}/challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
+export CHALLENGE113_DEPLOYMENT_METADATA="${RUNTIME_DIR}/deployment.json"
+export CHALLENGE113_PRODUCTION_OUTPUT="${RUNTIME_DIR}/production"
+git archive --format=tar.gz -o "${CHALLENGE113_ARCHIVE_PATH}" \
+  "${CHALLENGE113_EXPECTED_REVISION}" \
+  tracks/qcs/solutions/frustration-free/challenge-113
+export CHALLENGE113_ARCHIVE_SHA256="$(
+  sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}'
+)"
+export CHALLENGE113_EVIDENCE_INDEX_SHA256="$(
+  sha256sum evidence/task10a/index.json | awk '{print $1}'
+)"
+export CHALLENGE113_REPORT_SHA256="$(
+  sha256sum REPORT.md | awk '{print $1}'
+)"
+uv run python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+payload = {
+    "archive_name": Path(os.environ["CHALLENGE113_ARCHIVE_PATH"]).name,
+    "archive_sha256": os.environ["CHALLENGE113_ARCHIVE_SHA256"],
+    "evidence_index_sha256": os.environ["CHALLENGE113_EVIDENCE_INDEX_SHA256"],
+    "report_sha256": os.environ["CHALLENGE113_REPORT_SHA256"],
+    "revision": os.environ["CHALLENGE113_EXPECTED_REVISION"],
+    "schema_version": 1,
+}
+Path(os.environ["CHALLENGE113_DEPLOYMENT_METADATA"]).write_text(
+    json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n"
+)
+PY
 bash scripts/run_production.sh
 ```
 
@@ -40,7 +78,7 @@ modulo `N`. Task 8 claims and atomic publication make retries restartable.
 `scripts/calibrate_pilot.py` measures the representative two-qubit, 80-parameter
 setup with a bounded 20–100-query sample. The current canonical local evidence
 was measured from source revision
-`f1f5ed17c576f63d23420a304bfd712af1ddf419`:
+`dd16192953c130d738716238525760de73343e09`:
 
 ```bash
 JAX_ENABLE_X64=1 JAX_PLATFORMS=cpu \
@@ -59,7 +97,7 @@ array concurrency and resource class:
 ```bash
 sbatch --array=0-9499%CONCURRENCY \
   --account=ACCOUNT --qos=QOS --partition=PARTITION \
-  --export=ALL,CHALLENGE113_ACK_PRODUCTION=1,CHALLENGE113_DEPLOYMENT=DEPLOYMENT,CHALLENGE113_RUN_ROOT=RUN_ROOT,CHALLENGE113_EXPECTED_REVISION=REVISION,CHALLENGE113_ARCHIVE_PATH=ARCHIVE_PATH,CHALLENGE113_ARCHIVE_SHA256=ARCHIVE_SHA256,CHALLENGE113_EVIDENCE_REVISION=EVIDENCE_REVISION,CHALLENGE113_UV=UV \
+  --export=ALL,CHALLENGE113_ACK_PRODUCTION=1,CHALLENGE113_DEPLOYMENT=DEPLOYMENT,CHALLENGE113_DEPLOYMENT_METADATA=DEPLOYMENT_METADATA,CHALLENGE113_RUN_ROOT=RUN_ROOT,CHALLENGE113_EXPECTED_REVISION=REVISION,CHALLENGE113_ARCHIVE_PATH=ARCHIVE_PATH,CHALLENGE113_ARCHIVE_SHA256=ARCHIVE_SHA256,CHALLENGE113_EVIDENCE_REVISION=EVIDENCE_REVISION,CHALLENGE113_UV=UV \
   scripts/slurm_production_array.sh
 ```
 
@@ -73,6 +111,7 @@ verification supplies every required value:
 uv run python scripts/verify_deployment.py \
   --root "${CHALLENGE113_DEPLOYMENT}" \
   --archive "${CHALLENGE113_ARCHIVE_PATH}" \
+  --deployment-metadata "${CHALLENGE113_DEPLOYMENT_METADATA}" \
   --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
   --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"

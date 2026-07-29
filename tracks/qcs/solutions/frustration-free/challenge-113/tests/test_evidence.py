@@ -3,8 +3,10 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
+import subprocess
 
 import pytest
 
@@ -91,8 +93,9 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
     archive = tmp_path / f"challenge-113-{REVISION[:7]}.tar.gz"
     archive.write_bytes(b"exact archive bytes")
     archive_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
+    metadata = tmp_path.parent / f"{tmp_path.name}-deployment.json"
     _write_json(
-        tmp_path / ".deployment.json",
+        metadata,
         {
             "archive_name": archive.name,
             "archive_sha256": archive_sha256,
@@ -106,6 +109,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
     validate_deployment(
         tmp_path,
         archive_path=archive,
+        deployment_metadata_path=metadata,
         expected_revision=REVISION,
         expected_archive_sha256=archive_sha256,
         expected_evidence_revision=evidence_revision,
@@ -114,6 +118,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
         validate_deployment(
             tmp_path,
             archive_path=archive,
+            deployment_metadata_path=metadata,
             expected_revision="d" * 40,
             expected_archive_sha256=archive_sha256,
             expected_evidence_revision=evidence_revision,
@@ -122,6 +127,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
         validate_deployment(
             tmp_path,
             archive_path=archive,
+            deployment_metadata_path=metadata,
             expected_revision=REVISION,
             expected_archive_sha256="e" * 64,
             expected_evidence_revision=evidence_revision,
@@ -131,6 +137,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
         validate_deployment(
             tmp_path,
             archive_path=archive,
+            deployment_metadata_path=metadata,
             expected_revision=REVISION,
             expected_archive_sha256=archive_sha256,
             expected_evidence_revision=evidence_revision,
@@ -141,6 +148,7 @@ def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
         validate_deployment(
             tmp_path,
             archive_path=archive,
+            deployment_metadata_path=metadata,
             expected_revision=REVISION,
             expected_archive_sha256=archive_sha256,
             expected_evidence_revision=evidence_revision,
@@ -160,6 +168,92 @@ def test_evidence_rejects_coerced_types_and_nonfinite_values() -> None:
         validate_evidence_document(calibration)
 
 
+@pytest.mark.integration
+def test_documented_clean_production_check_reaches_ready_gate(tmp_path) -> None:
+    source = shutil.copytree(
+        ROOT,
+        tmp_path / "source",
+        ignore=shutil.ignore_patterns(
+            ".pytest_cache",
+            ".venv",
+            "__pycache__",
+            "results",
+        ),
+    )
+    commit_environment = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "Challenge 113 Test",
+        "GIT_AUTHOR_EMAIL": "challenge113@example.invalid",
+        "GIT_COMMITTER_NAME": "Challenge 113 Test",
+        "GIT_COMMITTER_EMAIL": "challenge113@example.invalid",
+    }
+    subprocess.run(["git", "init", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "fixture"],
+        cwd=source,
+        env=commit_environment,
+        check=True,
+    )
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"],
+        cwd=source,
+        text=True,
+    ).strip()
+    archive = tmp_path / f"challenge-113-{revision[:7]}.tar.gz"
+    archive.write_bytes(b"clean production check archive")
+    archive_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
+    evidence_revision = json.loads(
+        (source / "evidence" / "task10a" / "index.json").read_text()
+    )["source_revision"]
+    metadata = tmp_path / "deployment.json"
+    _write_json(
+        metadata,
+        {
+            "archive_name": archive.name,
+            "archive_sha256": archive_sha256,
+            "evidence_index_sha256": hashlib.sha256(
+                (source / "evidence" / "task10a" / "index.json").read_bytes()
+            ).hexdigest(),
+            "report_sha256": hashlib.sha256(
+                (source / "REPORT.md").read_bytes()
+            ).hexdigest(),
+            "revision": revision,
+            "schema_version": 1,
+        },
+    )
+    result = subprocess.run(
+        ["bash", "scripts/run_production.sh"],
+        cwd=source,
+        env={
+            **os.environ,
+            "CHALLENGE113_ACK_PRODUCTION": "1",
+            "CHALLENGE113_ARCHIVE_PATH": str(archive),
+            "CHALLENGE113_ARCHIVE_SHA256": archive_sha256,
+            "CHALLENGE113_CHECK_ONLY": "1",
+            "CHALLENGE113_DEPLOYMENT_METADATA": str(metadata),
+            "CHALLENGE113_EVIDENCE_REVISION": evidence_revision,
+            "CHALLENGE113_EXPECTED_REVISION": revision,
+            "CHALLENGE113_JAX_PLATFORM": "cpu",
+            "CHALLENGE113_PRODUCTION_OUTPUT": str(tmp_path / "production"),
+        },
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert '{"production_gate":"ready"}' in result.stdout
+    assert (
+        subprocess.check_output(
+            ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+            cwd=source,
+            text=True,
+        )
+        == ""
+    )
+    assert not (source / ".deployment.json").exists()
+
+
 @pytest.mark.parametrize(
     "name",
     ["run_production.sh", "slurm_pilot.sh", "slurm_production_array.sh"],
@@ -170,4 +264,22 @@ def test_production_entrypoints_verify_deployment_metadata(name) -> None:
     assert "verify_deployment.py" in script
     assert "CHALLENGE113_ARCHIVE_SHA256" in script
     assert "CHALLENGE113_ARCHIVE_PATH" in script
+    assert "CHALLENGE113_DEPLOYMENT_METADATA" in script
     assert "CHALLENGE113_EVIDENCE_REVISION" in script
+
+
+def test_readme_clean_gate_supplies_every_required_variable() -> None:
+    readme = (ROOT / "README.md").read_text()
+    for name in (
+        "CHALLENGE113_ACK_PRODUCTION",
+        "CHALLENGE113_ARCHIVE_PATH",
+        "CHALLENGE113_ARCHIVE_SHA256",
+        "CHALLENGE113_CHECK_ONLY",
+        "CHALLENGE113_DEPLOYMENT_METADATA",
+        "CHALLENGE113_EVIDENCE_REVISION",
+        "CHALLENGE113_EXPECTED_REVISION",
+        "CHALLENGE113_JAX_PLATFORM",
+        "CHALLENGE113_PRODUCTION_OUTPUT",
+    ):
+        assert f"export {name}=" in readme
+    assert "dd16192953c130d738716238525760de73343e09" in readme

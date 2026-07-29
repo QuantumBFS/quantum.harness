@@ -6,6 +6,7 @@ test "${CHALLENGE113_ACK_PRODUCTION}" = "1"
 : "${CHALLENGE113_EXPECTED_REVISION:?set the deployed canonical git revision}"
 : "${CHALLENGE113_ARCHIVE_PATH:?set the immutable deployment archive path}"
 : "${CHALLENGE113_ARCHIVE_SHA256:?set the deployed archive SHA256}"
+: "${CHALLENGE113_DEPLOYMENT_METADATA:?set external deployment metadata path}"
 : "${CHALLENGE113_EVIDENCE_REVISION:?set the measured evidence revision}"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,8 +35,13 @@ uv sync --frozen --group dev
 uv run python scripts/verify_deployment.py \
   --root "${ROOT}" \
   --archive "${CHALLENGE113_ARCHIVE_PATH}" \
+  --deployment-metadata "${CHALLENGE113_DEPLOYMENT_METADATA}" \
   --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \
   --expected-evidence-revision "${CHALLENGE113_EVIDENCE_REVISION}"
 uv run python -c 'import jax; expected = __import__("os").environ["JAX_PLATFORMS"]; actual = jax.devices()[0].platform; assert jax.config.x64_enabled; assert actual == expected, (actual, expected)'
+if [[ "${CHALLENGE113_CHECK_ONLY:-0}" == "1" ]]; then
+  printf '%s\n' '{"production_gate":"ready"}'
+  exit 0
+fi
 /usr/bin/time -v uv run python -u run.py sweep --kind production --output "${OUTPUT}"
