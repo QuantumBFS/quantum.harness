@@ -237,6 +237,17 @@ the exact `d=2` finite relaxation is feasible at gamma=1/2 and therefore does
 not exclude that candidate gap. This is not a proof of the physical bulk
 gap.
 
+The separate solver-free replay strengthens the numerical statement. Slurm
+job `22991012` rounded all 3,250 moments to common denominator `10^6`,
+reconstructed all 6,104 entries over exact rationals, and proved strictly
+positive no-pivot LDL pivots in all nine PSD blocks. The exact replay and
+rational witness SHA-256 values are
+`a6f37449f4902b5eda13935f19fe46339f79a32994d7f0a6b837320dab5c7088`
+and
+`ce50fa42e1a86b8d165139d350faf367a7138950c636dc9ca6d7ae04695b5978`.
+This is an exact strictly feasible witness for the finite relaxation, not a
+lower bound on the physical bulk gap.
+
 Additional preserved artifacts:
 
 - Exact isotypic proof:
@@ -249,3 +260,5 @@ Additional preserved artifacts:
   `results/ss-full-spin-isotypic-real-g0p8-gamma0p5-builder-20260729-r1/`
   and
   `results/ss-full-spin-isotypic-real-g0p8-gamma0p5-solve-xh5-20260729-r1/`.
+- Exact gamma=1/2 rational witness:
+  `results/ss-full-spin-isotypic-rational-witness-xh5-20260729-r3/`.

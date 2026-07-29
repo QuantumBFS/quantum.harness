@@ -70,6 +70,14 @@ echo "[ss-gamma-scan] job_id=${SLURM_JOB_ID:-missing}"
 echo "[ss-gamma-scan] gammas=$SS_SCAN_GAMMAS"
 echo "[ss-gamma-scan] started=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+echo "[ss-gamma-scan] string-boundary regression started"
+"$JULIA_BIN" \
+    --project="$JULIA_PROJECT" \
+    --startup-file=no \
+    --history-file=no \
+    tracks/polyopt/solutions/sdp-gap-seekers/test/runner_string_boundary_tests.jl \
+    2>&1 | tee "$RUN_DIR/string-boundary-tests.log"
+
 builder=(
     "$JULIA_BIN"
     --project="$JULIA_PROJECT"

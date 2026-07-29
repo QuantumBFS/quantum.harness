@@ -42,6 +42,15 @@ failure signatures and changed actions, not credentials or routine logs.
   returns `SubString{String}`; a helper restricted to `String` caused job
   `22990387` to fail before assembly. The fix accepts `AbstractString` and has
   a dedicated regression.
+- Runner APIs that only read text must accept `AbstractString`, including
+  paths, labels, parsed rationals, and checksum fields. Reserve concrete
+  `String` fields for owned persistent storage or code that truly needs
+  mutation. Converting every caller with `String(...)` hides the same design
+  error instead of fixing it.
+- Regression inputs must come from the real producers: `split`,
+  `SubString(...)`, and `match(...).captures`. The gamma scan executes
+  `runner_string_boundary_tests.jl` before any expensive assembly so a type
+  regression costs seconds rather than another full model build.
 - Keep the cheap focused test local only while measured peak RSS stays below
   the user threshold. The helper suite used 287,280 KiB; the full replay stays
   on xH5 because it may exceed 1 GiB.

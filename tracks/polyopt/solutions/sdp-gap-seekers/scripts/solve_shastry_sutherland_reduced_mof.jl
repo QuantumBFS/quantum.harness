@@ -90,14 +90,14 @@ function usage()
     )
 end
 
-function parse_positive_int(text::String, flag::String)
+function parse_positive_int(text::AbstractString, flag::AbstractString)
     value = tryparse(Int, text)
     isnothing(value) && throw(ArgumentError("$flag requires an integer"))
     value > 0 || throw(ArgumentError("$flag must be positive"))
     return value
 end
 
-function parse_positive_float(text::String, flag::String)
+function parse_positive_float(text::AbstractString, flag::AbstractString)
     value = tryparse(Float64, text)
     isnothing(value) && throw(ArgumentError("$flag requires a number"))
     isfinite(value) && value > 0 ||
@@ -105,7 +105,7 @@ function parse_positive_float(text::String, flag::String)
     return value
 end
 
-function canonical_gamma(text::String)
+function canonical_gamma(text::AbstractString)
     normalized = replace(strip(text), "//" => "/")
     fields = split(normalized, '/')
     length(fields) in (1, 2) ||
@@ -201,11 +201,11 @@ function peak_rss_kib()
     return -1
 end
 
-function git_output(repository_root::String, arguments...)
+function git_output(repository_root::AbstractString, arguments...)
     return readchomp(Cmd(`git $(arguments)`; dir=repository_root))
 end
 
-function safe_string(function_call, fallback::String)
+function safe_string(function_call, fallback::AbstractString)
     try
         return string(function_call())
     catch exception
@@ -229,13 +229,13 @@ function safe_number(function_call)
     end
 end
 
-function require_equal(actual, expected, label::String)
+function require_equal(actual, expected, label::AbstractString)
     actual == expected ||
         error("$label mismatch: expected $(repr(expected)), got $(repr(actual))")
     return actual
 end
 
-function require_keys(table, expected, label::String)
+function require_keys(table, expected, label::AbstractString)
     actual = Set(String.(keys(table)))
     actual == expected ||
         error(
@@ -245,7 +245,7 @@ function require_keys(table, expected, label::String)
     return
 end
 
-function read_checksum_manifest(path::String)
+function read_checksum_manifest(path::AbstractString)
     isfile(path) || throw(ArgumentError("checksum manifest missing: $path"))
     entries = Dict{String,String}()
     for (line_number, raw_line) in enumerate(eachline(path))
@@ -269,11 +269,11 @@ end
 
 function require_rational_metadata(
     table,
-    numerator::String,
-    denominator::String,
-    canonical::String,
+    numerator::AbstractString,
+    denominator::AbstractString,
+    canonical::AbstractString,
     float64::Float64,
-    label::String,
+    label::AbstractString,
 )
     require_keys(
         table,
@@ -287,7 +287,10 @@ function require_rational_metadata(
     return
 end
 
-function contained_source_path(repository_root::String, relative::String)
+function contained_source_path(
+    repository_root::AbstractString,
+    relative::AbstractString,
+)
     isabspath(relative) &&
         error("runmeta source path is absolute: $relative")
     candidate = realpath(joinpath(repository_root, relative))
@@ -300,10 +303,10 @@ function contained_source_path(repository_root::String, relative::String)
 end
 
 function validate_input_files(
-    model_path::String,
-    runmeta_path::String,
-    checksums_path::String,
-    expected_gamma::String,
+    model_path::AbstractString,
+    runmeta_path::AbstractString,
+    checksums_path::AbstractString,
+    expected_gamma::AbstractString,
 )
     isfile(model_path) || throw(ArgumentError("MOF missing: $model_path"))
     isfile(runmeta_path) ||
@@ -349,8 +352,8 @@ end
 function validate_runmeta(
     runmeta,
     input_files,
-    expected_gamma::String,
-    repository_root::String,
+    expected_gamma::AbstractString,
+    repository_root::AbstractString,
 )
     require_equal(
         runmeta["schema_version"],
@@ -785,7 +788,7 @@ function classify_result(termination, primal, dual, diagnostics)
     return "unknown"
 end
 
-function write_result(path::String, result)
+function write_result(path::AbstractString, result)
     parent = dirname(path)
     isempty(parent) || mkpath(parent)
     temporary = path * ".tmp"

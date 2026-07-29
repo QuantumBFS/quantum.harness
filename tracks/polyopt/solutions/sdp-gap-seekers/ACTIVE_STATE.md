@@ -464,8 +464,12 @@ Updated: 2026-07-29 UTC.
   wrapper passed absolute input paths to a replay that deliberately accepts
   only repository-relative paths. The shipped parser SHA-256 was
   `9379ed739499f3955534085c4616ea14950e148c51bea14b322faef8875d396f`,
-  matching the committed local source. Corrected r3, job `22991012`, uses
-  repository-relative paths and is pending under `AssocGrpJobsLimit`.
+  matching the committed local source. Corrected r3, job `22991012`, used
+  repository-relative paths and passed. At common denominator `10^6`, all
+  3,250 rational moments normalize exactly and all nine reconstructed rational
+  matrices have strictly positive exact LDL pivots. Wall time was 40.1 s
+  inside a 1:17 Slurm job; MaxRSS was 614,344 KiB. The checksummed result
+  bundle is synchronized locally.
 - The next bulk-gap run is a single-slot, sequential `d=2` coarse scan at
   exact rational gamma values `1`, `2`, and `4`, stopping at the first
   solver-reported infeasibility candidate. Each point rebuilds the exact
@@ -479,4 +483,9 @@ Updated: 2026-07-29 UTC.
   batch script started because the clean clone lacked the parent directory of
   its Slurm output file. No model code ran. After creating the ignored results
   directory, r2 job `22991011` entered `RUNNING` on `a01r08n04` and began the
-  exact gamma-one build.
+  exact gamma-one build. That build passed in 2:48, but the solve preflight
+  exposed another over-narrow string signature: canonical-gamma `split`
+  fields are `SubString{String}`, while `require_rational_metadata` required
+  `String`. No optimizer was attached. Runner-facing read-only text APIs are
+  now generalized to `AbstractString`, and the scan now runs a dedicated
+  split/regex-capture regression before any assembly.

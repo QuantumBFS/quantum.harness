@@ -116,11 +116,11 @@ function dynamic_scan_input_enabled()
 end
 
 function validate_input_files(
-    model_path::String,
-    runmeta_path::String,
-    checksums_path::String,
-    expected_gamma::String,
-    repository_root::String,
+    model_path::AbstractString,
+    runmeta_path::AbstractString,
+    checksums_path::AbstractString,
+    expected_gamma::AbstractString,
+    repository_root::AbstractString,
 )
     isfile(model_path) ||
         throw(ArgumentError("MOF missing: $model_path"))
@@ -194,7 +194,7 @@ function validate_input_files(
     )
 end
 
-function validate_setup(setup, expected_gamma::String)
+function validate_setup(setup, expected_gamma::AbstractString)
     B.require_equal(setup["model"], "shastry-sutherland", "model")
     B.require_equal(setup["patch_level"], 1, "patch level")
     B.require_equal(setup["degree_d"], 2, "polynomial degree")
@@ -231,8 +231,8 @@ end
 function validate_runmeta(
     runmeta,
     input_files,
-    expected_gamma::String,
-    repository_root::String,
+    expected_gamma::AbstractString,
+    repository_root::AbstractString,
 )
     B.require_equal(
         runmeta["schema_version"],
@@ -922,7 +922,7 @@ function solution_diagnostics(
 end
 
 function write_primal_values(
-    path::String,
+    path::AbstractString,
     model::JuMP.Model,
     input_hashes,
 )

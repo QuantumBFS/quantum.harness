@@ -68,7 +68,7 @@ end
 file_sha256(path::AbstractString) =
     bytes2hex(open(sha256, path))
 
-function repository_path(relative::String)
+function repository_path(relative::AbstractString)
     isabspath(relative) &&
         throw(ArgumentError("path must be repository-relative"))
     path = normpath(joinpath(REPOSITORY_ROOT, relative))
@@ -113,7 +113,7 @@ function parse_args(arguments::Vector{String})
     )
 end
 
-function read_checksum_manifest(path::String)
+function read_checksum_manifest(path::AbstractString)
     result = Dict{String,String}()
     for line in eachline(path)
         fields = split(strip(line); limit=2)
@@ -128,7 +128,7 @@ function read_checksum_manifest(path::String)
     return result
 end
 
-function require_equal(actual, expected, label::String)
+function require_equal(actual, expected, label::AbstractString)
     actual == expected ||
         error("$label mismatch: expected $(repr(expected)), got $(repr(actual))")
     return actual
@@ -306,9 +306,9 @@ function bits_to_float(bits::AbstractString)
 end
 
 function read_primal_values(
-    path::String,
-    expected_model_sha256::String,
-    expected_runmeta_sha256::String,
+    path::AbstractString,
+    expected_model_sha256::AbstractString,
+    expected_runmeta_sha256::AbstractString,
 )
     lines = readlines(path)
     length(lines) >= 4 || error("primal-value table is truncated")
@@ -604,7 +604,7 @@ function attempt_rational_witness(
 end
 
 function write_witness(
-    path::String,
+    path::AbstractString,
     denominator_value::BigInt,
     numerators::Vector{BigInt},
     names::Vector{String},
@@ -631,7 +631,7 @@ function write_witness(
     end
 end
 
-function write_toml(path::String, data)
+function write_toml(path::AbstractString, data)
     open(path, "w") do io
         TOML.print(io, data; sorted=true)
     end

@@ -800,3 +800,23 @@ requires repository-relative paths to keep inputs contained. Resubmit r3 with
 the same checked artifacts expressed relative to the checkout. Job `22991012`
 is pending under `AssocGrpJobsLimit`. Neither failure changes a mathematical
 claim.
+
+## 2026-07-29 — exact gamma-half witness passes; string boundary becomes a gate
+
+Rational replay r3, job `22991012`, passed from the checked gamma-half
+floating solution. Rounding all 3,250 moments to common denominator `10^6`
+preserves exact normalization, and no-pivot rational LDL has strictly positive
+pivots in all nine PSD blocks. The exact replay wall was 40.1 s; the Slurm job
+used 1:17 and 614,344 KiB MaxRSS. This proves a strictly feasible exact
+rational point for the current finite `d=2` relaxation at gamma `1/2`. It does
+not prove that the physical bulk gap is at least `1/2`.
+
+Coarse-scan r2, job `22991011`, built the gamma-one MOF successfully, then
+failed before solver attachment because `split("1//1", "//")` produced
+`SubString{String}` fields and the metadata checker accepted only `String`.
+Treat this as an API-policy failure, not a one-line exception. All read-only
+text boundaries in the three active solve/replay runners now accept
+`AbstractString`; owned struct fields remain `String`. A dedicated regression
+feeds real `SubString` values from `split`, `SubString`, and regex captures
+through rational parsing and setup validation. Every future gamma-scan job
+runs this regression before building 74,602 moments.
