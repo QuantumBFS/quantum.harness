@@ -109,8 +109,12 @@ fn run_mc(config_path: &Path, output_path: &Path, manifest_path: &Path) -> Resul
     let config = RunConfig::load(config_path)?;
     config.validate()?;
     let mut manifest: RunManifest = read_json(manifest_path)?;
-    if manifest.schema_version != SCHEMA_VERSION || manifest.config != config {
-        bail!("existing manifest does not match the Monte Carlo configuration");
+    if manifest.schema_version != SCHEMA_VERSION || !manifest.config.compatible_with(&config) {
+        bail!(
+            "existing manifest does not match the Monte Carlo configuration: \
+             manifest={:?}, loaded={config:?}",
+            manifest.config
+        );
     }
 
     let start = Instant::now();

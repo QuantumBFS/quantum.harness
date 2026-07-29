@@ -21,7 +21,7 @@ fn exact_cli_writes_parseable_records_and_manifest() {
         .assert()
         .success();
     let lines = std::fs::read_to_string(raw).unwrap();
-    assert_eq!(lines.lines().count(), 2);
+    assert_eq!(lines.lines().count(), 6);
     let value: Value = serde_json::from_str(&std::fs::read_to_string(manifest).unwrap()).unwrap();
     assert_eq!(value["schema_version"], 1);
     assert_eq!(value["config"]["production_gates"], false);

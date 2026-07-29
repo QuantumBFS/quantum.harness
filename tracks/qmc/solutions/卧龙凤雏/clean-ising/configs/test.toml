@@ -1,4 +1,4 @@
-widths = [4, 6]
+widths = [4, 6, 8, 10, 12, 16]
 aspect_ratio = 2
 critical_k = 0.44068679350977147
 base_seed = 42
