@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -97,6 +99,27 @@ def test_transformed_margin_rejects_imaginary_residue_above_tolerance() -> None:
     )
 
 
+def test_transformed_margin_rejects_nonfinite_intermediates() -> None:
+    """Catches an overflow being reported as an infinite cone margin."""
+    atom = np.array([[1.0e308]])
+    transform = np.array([[2.0]])
+
+    assert (
+        transformed_nonnegative_margin((atom,), transform, tolerance=1.0e-12)
+        is None
+    )
+    certificate = common_transform_certificate(
+        (atom,),
+        {
+            0: (("identity-0", np.eye(1)),),
+            1: (("scale-1", transform),),
+        },
+        tolerance=1.0e-12,
+    )
+    assert certificate is None
+    assert json.dumps(certificate, allow_nan=False) == "null"
+
+
 def test_common_transform_certificate_uses_one_positive_diagonal_basis() -> None:
     """Catches a certificate that skips grades or emits non-JSON values."""
     atom = np.diag([2.0, 3.0])
@@ -136,19 +159,56 @@ def test_common_transform_certificate_uses_one_positive_diagonal_basis() -> None
     }
 
 
-def test_common_transform_certificate_fails_for_an_unavoidable_negative_diagonal() -> None:
-    """Catches selecting a different transform for different atoms at one grade."""
-    atom_a = np.diag([2.0, 3.0])
-    atom_b = np.diag([-1.0, 2.0])
+def test_common_transform_certificate_validates_serialized_real_transform() -> None:
+    """Catches serializing a singular real projection of an accepted transform."""
+    epsilon = 1.0e-13
+    nearly_real = np.array(
+        [[1.0, 1.0], [1.0, 1.0 + 1.0j * epsilon]]
+    )
+
+    with pytest.raises(ValueError, match="invertible"):
+        common_transform_certificate(
+            (np.eye(2),),
+            {
+                0: (("identity-0", np.eye(1)),),
+                1: (("near-real", nearly_real),),
+                2: (("identity-2", np.eye(1)),),
+            },
+            tolerance=1.0e-12,
+        )
+
+
+def test_common_transform_certificate_requires_one_shared_transform() -> None:
+    """Catches accepting atoms that need different transforms at one grade."""
+    identity = np.eye(2)
+    hadamard = np.array([[1.0, 1.0], [1.0, -1.0]])
+    atom_a = np.array([[1.0, 1.0], [0.0, 1.0]])
+    atom_b = hadamard @ atom_a @ np.linalg.inv(hadamard)
     transform_library = {
         0: (("identity-0", np.eye(1)),),
         1: (
-            ("identity-1", np.eye(2)),
-            ("swap-1", np.array([[0.0, 1.0], [1.0, 0.0]])),
+            ("identity-1", identity),
+            ("hadamard-1", hadamard),
         ),
         2: (("identity-2", np.eye(1)),),
     }
 
+    assert (
+        transformed_nonnegative_margin((atom_a,), identity, tolerance=1.0e-12)
+        == pytest.approx(0.0)
+    )
+    assert (
+        transformed_nonnegative_margin((atom_a,), hadamard, tolerance=1.0e-12)
+        is None
+    )
+    assert (
+        transformed_nonnegative_margin((atom_b,), hadamard, tolerance=1.0e-12)
+        == pytest.approx(0.0)
+    )
+    assert (
+        transformed_nonnegative_margin((atom_b,), identity, tolerance=1.0e-12)
+        is None
+    )
     assert (
         common_transform_certificate(
             (atom_a, atom_b), transform_library, tolerance=1.0e-12

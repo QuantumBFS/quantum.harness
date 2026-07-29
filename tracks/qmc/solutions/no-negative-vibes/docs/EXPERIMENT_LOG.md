@@ -19,7 +19,7 @@ and interpret them.
   were fixed to one.
 - Host role and resources: WSL verification environment; one pytest process.
 - Command: `OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
-  PYTHONPATH=/mnt/c/Users/45518/Documents/quantum_harness/no-negative-vibes-collab/.worktrees/representation-cones/tracks/qmc/solutions/no-negative-vibes
+  PYTHONPATH=/home/zibojin/code/nnv-zibo/tracks/qmc/solutions/no-negative-vibes
   /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest
   tests/test_exterior_cone.py -q`
 - Result: exit 2; collection error in `0.15s`.
