@@ -6,12 +6,13 @@
 
 **Goal:** Resolve the fixed `L=64,128` correlation-ratio crossing at
 `sigma=1.75`, evaluate direct `chi=128` gaps at one common primary critical
-field for `L=32,64,128`, and report two-point finite-size sensitivities for
-`Gamma_c` and `z`.
+field for `L=16,32,64,96,128`, and report the two-point finite-size
+sensitivity for `Gamma_c` plus four-point power/log correction regressions
+for `z`.
 
 **Architecture:** A pure analysis module owns strict two-endpoint crossing
-and two-point sensitivity mathematics. A planner CLI creates the two-cell
-crossing specification, then creates the six-state common-field
+and finite-size sensitivity mathematics. A planner CLI creates the two-cell
+crossing specification, then creates the ten-state common-field
 specification only after the crossing gate passes. The existing
 `benchmark_phase6_optimizations.py` runner performs every TeNPy calculation
 and retains checkpoint/provenance behavior; a Phase 8 report CLI consumes
@@ -24,7 +25,7 @@ only successful summaries.
 - Hamiltonian: pinned periodic Hurwitz-zeta LRTFIM in the rotated parity
   basis.
 - First and only active sigma: `sigma=1.75`.
-- Sizes: `L=32,64,128`; never `L=256`.
+- Gap sizes: `L=16,32,64,96,128`; never `L=256`.
 - MPO: `K=24`, `alpha=0.5`, `r_fit=2048`, exact-zero pruning, no
   approximate compression.
 - Crossing: `chi=64`, even sector, only `Gamma=1.55,1.60`.
@@ -35,10 +36,14 @@ only successful summaries.
   `Gamma_c_power`.
 - A crossing requires a strict sign change; otherwise stop unresolved.
 - No Gamma extension, adaptive search, `K=32`, or automatic `chi=256`.
-- `Gamma_c_power`, `Gamma_c_log`, `z_power`, and `z_log` are exact
-  two-point sensitivity extrapolations, not regression analyses.
-- `1/L` and `1/log(L)` are sensitivity coordinates only; neither assumes a
-  known leading correction exponent.
+- `Gamma_c_power` and `Gamma_c_log` are exact two-point sensitivity
+  extrapolations.
+- `z_power` and `z_log` are four-point deterministic regressions of
+  adjacent-pair effective exponents, each with two residual degrees of
+  freedom.
+- `1/L` and `1/log(L)` for the crossings, and `1/L_eff` and
+  `1/log(L_eff)` for the effective exponents, are sensitivity coordinates
+  only; none assumes a known leading correction exponent.
 - `Gamma_c` power/log sensitivity is not fully propagated into gap
   uncertainties.
 - Susceptibility `gamma/nu` is outside scope. Store equal-time correlations
@@ -48,6 +53,268 @@ only successful summaries.
   first.
 
 ---
+
+## Approved five-size revision
+
+### Task 6A: Upgrade gap scaling and reporting to five sizes
+
+**Files:**
+- Modify: `src/lrtfim/phase8_scaling.py`
+- Modify: `src/lrtfim/phase8_protocol.py`
+- Modify: `scripts/report_phase8_scaling.py`
+- Modify: `tests/test_phase8_scaling.py`
+- Modify: `tests/test_phase8_protocol.py`
+- Modify: `tests/test_phase8_report_cli.py`
+- Modify: `README.md`
+- Modify: `docs/methodology.md`
+
+**Interfaces:**
+- Consumes: five positive gaps at ordered sizes `16,32,64,96,128`.
+- Produces:
+  - `adjacent_effective_exponents(lengths, gaps) -> dict`
+  - `sensitivity_regression(z_values, effective_lengths, form) -> dict`
+  - `gap_scaling_summary(lengths, gaps) -> dict`
+  - a ten-cell common-field run specification;
+  - a report with four adjacent-pair effective exponents and two
+    correction-coordinate regressions.
+
+- [ ] **Step 1: Write failing five-size scaling tests**
+
+Construct gaps recursively from known adjacent effective exponents:
+
+```python
+def gaps_from_effective_exponents(lengths, z_values, first_gap=0.3):
+    gaps = [first_gap]
+    for left, right, z_value in zip(lengths[:-1], lengths[1:], z_values):
+        gaps.append(gaps[-1] * (right / left) ** (-z_value))
+    return gaps
+
+
+def test_five_size_power_regression_recovers_known_asymptote():
+    lengths = np.array([16, 32, 64, 96, 128])
+    effective_lengths = np.sqrt(lengths[:-1] * lengths[1:])
+    expected_z = 0.94
+    z_values = expected_z + 1.7 / effective_lengths
+    gaps = gaps_from_effective_exponents(lengths, z_values)
+
+    result = gap_scaling_summary(lengths, gaps)
+
+    assert len(result["z_eff"]["values"]) == 4
+    assert result["regression"]["power"]["estimate"] == pytest.approx(
+        expected_z
+    )
+    assert result["regression"]["power"]["residual_degrees_of_freedom"] == 2
+    assert result["regression"]["power"]["coordinate"] == "1/L_eff"
+    assert result["regression"]["log"]["coordinate"] == "1/log(L_eff)"
+
+
+def test_five_size_summary_uses_geometric_mean_scales():
+    result = adjacent_effective_exponents(
+        [16, 32, 64, 96, 128],
+        [0.3, 0.17, 0.095, 0.065, 0.049],
+    )
+    np.testing.assert_allclose(
+        result["effective_lengths"],
+        np.sqrt([16 * 32, 32 * 64, 64 * 96, 96 * 128]),
+    )
+    assert result["pairs"] == ["16_32", "32_64", "64_96", "96_128"]
+```
+
+- [ ] **Step 2: Run the five-size tests and verify RED**
+
+Run:
+
+```bash
+PYTHONPATH=src:. conda run -n mps pytest -q \
+  tests/test_phase8_scaling.py
+```
+
+Expected: failure because `adjacent_effective_exponents` and
+`sensitivity_regression` do not exist and the existing summary requires
+three doubling sizes.
+
+- [ ] **Step 3: Implement adjacent effective exponents and regressions**
+
+Implement:
+
+```python
+def adjacent_effective_exponents(lengths, gaps) -> dict:
+    sizes = np.asarray(lengths, dtype=float)
+    values = np.asarray(gaps, dtype=float)
+    if sizes.shape != (5,) or values.shape != (5,):
+        raise ValueError("exactly five sizes and gaps are required")
+    if np.any(~np.isfinite(sizes)) or np.any(np.diff(sizes) <= 0):
+        raise ValueError("sizes must be finite and strictly increasing")
+    if np.any(~np.isfinite(values)) or np.any(values <= 0):
+        raise ValueError("gaps must be finite and positive")
+    z_values = -np.diff(np.log(values)) / np.diff(np.log(sizes))
+    effective = np.sqrt(sizes[:-1] * sizes[1:])
+    return {
+        "pairs": [
+            f"{int(left)}_{int(right)}"
+            for left, right in zip(sizes[:-1], sizes[1:])
+        ],
+        "effective_lengths": effective.tolist(),
+        "values": z_values.tolist(),
+    }
+
+
+def sensitivity_regression(z_values, effective_lengths, form: str) -> dict:
+    values = np.asarray(z_values, dtype=float)
+    scales = np.asarray(effective_lengths, dtype=float)
+    if values.ndim != 1 or scales.shape != values.shape or len(values) < 3:
+        raise ValueError("at least three matched points are required")
+    if np.any(~np.isfinite(values)) or np.any(~np.isfinite(scales)):
+        raise ValueError("effective-exponent inputs must be finite")
+    if np.any(scales <= 1.0) or np.any(np.diff(scales) <= 0):
+        raise ValueError("effective lengths must increase and exceed one")
+    if form == "power":
+        coordinate = 1.0 / scales
+    elif form == "log":
+        coordinate = 1.0 / np.log(scales)
+    else:
+        raise ValueError("form must be power or log")
+    design = np.column_stack([np.ones(len(values)), coordinate])
+    estimate, coefficient = np.linalg.lstsq(
+        design, values, rcond=None
+    )[0]
+    residuals = values - design @ np.array([estimate, coefficient])
+    return {
+        "form": form,
+        "coordinate": "1/L_eff" if form == "power" else "1/log(L_eff)",
+        "estimate": float(estimate),
+        "coefficient": float(coefficient),
+        "residual_degrees_of_freedom": len(values) - 2,
+        "residual_rms": float(np.sqrt(np.mean(residuals**2))),
+        "interpretation": "correlated_finite_size_sensitivity_regression",
+        "independent_sample_inference": False,
+    }
+```
+
+Update `gap_scaling_summary()` to return:
+
+```python
+{
+    "lengths": [...],
+    "gaps": [...],
+    "z_eff": {
+        "pairs": [...],
+        "effective_lengths": [...],
+        "values": [...],
+    },
+    "regression": {
+        "power": ...,
+        "log": ...,
+        "spread": ...,
+        "leave_L16_out": {
+            "power": ...,
+            "log": ...,
+        },
+    },
+}
+```
+
+The leave-`L=16`-out entries use the final three effective-exponent points
+and record one residual degree of freedom.
+
+- [ ] **Step 4: Write failing ten-state protocol and report tests**
+
+Update protocol expectations:
+
+```python
+def test_gap_spec_has_five_sizes_and_both_sectors(tmp_path):
+    spec = build_gap_spec(resolved_decision(), tmp_path)
+    assert len(spec["cells"]) == 10
+    assert {cell["L"] for cell in spec["cells"]} == {
+        16, 32, 64, 96, 128
+    }
+    assert {cell["sector"] for cell in spec["cells"]} == {"even", "odd"}
+    assert {cell["chi"] for cell in spec["cells"]} == {128}
+```
+
+Update the report fixture to write ten summaries and assert:
+
+```python
+assert analysis["z"]["z_eff"]["pairs"] == [
+    "16_32", "32_64", "64_96", "96_128"
+]
+assert analysis["z"]["regression"]["power"][
+    "residual_degrees_of_freedom"
+] == 2
+assert analysis["z"]["regression"]["log"][
+    "residual_degrees_of_freedom"
+] == 2
+assert analysis["z"]["regression"]["power"][
+    "independent_sample_inference"
+] is False
+```
+
+- [ ] **Step 5: Update the protocol and report**
+
+Set:
+
+```python
+SIZES = (16, 32, 64, 96, 128)
+```
+
+in `phase8_protocol.py` and `report_phase8_scaling.py`. Require all ten
+`(L,sector)` summaries, five positive gaps, and one common Gamma. Replace the
+two-point z panel with four `z_eff` points at `L_eff`, the power/log
+regression curves, and clearly marked published values. Write all five gaps
+and all four effective exponents to CSV and JSON.
+
+The report text must state that adjacent effective exponents share gaps,
+the regression residuals are correlated, and no independent-sample
+confidence interval or correction-form model selection is claimed.
+
+- [ ] **Step 6: Update README and methodology**
+
+Document:
+
+- common-field sizes `L=16,32,64,96,128`;
+- four adjacent-pair effective exponents at geometric-mean scales;
+- the two requested forms `z_eff=z+a/L_eff` and
+  `z_eff=z+a/log(L_eff)`;
+- two residual degrees of freedom per full regression;
+- leave-`L=16`-out sensitivity;
+- shared-gap correlation and the absence of independent statistical
+  inference.
+
+- [ ] **Step 7: Run focused tests and verify GREEN**
+
+Run:
+
+```bash
+MPLCONFIGDIR=/tmp/mpl-phase8-five PYTHONPATH=src:. conda run -n mps \
+  pytest -q \
+  tests/test_phase8_scaling.py \
+  tests/test_phase8_protocol.py \
+  tests/test_phase8_planner_cli.py \
+  tests/test_phase8_report_cli.py
+```
+
+Expected: all focused Phase 8 tests pass and the fixture report contains all
+declared artifacts.
+
+- [ ] **Step 8: Commit the five-size upgrade**
+
+```bash
+git add \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/README.md \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/docs/methodology.md \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/docs/phase8-finite-size-scaling-plan.md \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/src/lrtfim/phase8_scaling.py \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/src/lrtfim/phase8_protocol.py \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/scripts/report_phase8_scaling.py \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/tests/test_phase8_scaling.py \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/tests/test_phase8_protocol.py \
+  tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/tests/test_phase8_report_cli.py
+git commit -m "feat: extend phase8 to five gap sizes"
+```
+
+---
+
+## Completed foundation
 
 ### Task 1: Add strict Phase 8 sensitivity mathematics
 
@@ -434,7 +701,7 @@ git commit -m "feat: gate phase8 sigma175 scaling cells"
 
 ---
 
-### Task 3: Add the Phase 8 report assembler
+### Task 3: Add the original three-size Phase 8 report foundation
 
 **Files:**
 - Create: `scripts/report_phase8_scaling.py`
@@ -443,7 +710,7 @@ git commit -m "feat: gate phase8 sigma175 scaling cells"
 **Interfaces:**
 - Consumes:
   - resolved Phase 8 crossing decision;
-  - six successful common-field summaries;
+  - six successful common-field summaries (superseded by Task 6A);
   - `results/phase6_sigma1.75/validated-local-reproduction/analysis.json`.
 - Produces:
   - `crossings.csv`
@@ -696,7 +963,7 @@ PYTHONPATH=src:. conda run -n mps python -u \
 If status is `unresolved_no_L64_L128_bracket`, report the two signed
 differences and stop. Do not generate gaps.
 
-- [ ] **Step 6: Review gate**
+- [x] **Step 6: Review gate**
 
 If resolved, report:
 
@@ -719,9 +986,9 @@ Do not begin Task 6 until this sigma=1.75 crossing result is reviewed.
 
 **Interfaces:**
 - Consumes: a reviewed resolved crossing decision.
-- Produces: six direct chi=128 states and the complete sigma=1.75 report.
+- Produces: ten direct chi=128 states and the complete sigma=1.75 report.
 
-- [ ] **Step 1: Generate the six-state gap plan**
+- [ ] **Step 1: Generate the ten-state gap plan**
 
 Run:
 
@@ -732,28 +999,32 @@ PYTHONPATH=src:. conda run -n mps python -u \
   --output results/phase8-scaling/sigma-1.75/gaps-common-Gamma/run_spec.json
 ```
 
-Audit one common Gamma, `L={32,64,128}`, sectors `{even,odd}`, `chi=128`.
+Audit one common Gamma, `L={16,32,64,96,128}`, sectors `{even,odd}`,
+`chi=128`.
 
 - [ ] **Step 2: Reconfirm the gap setup**
 
 Surface the resolved numeric `Gamma_c_power` and:
 
 ```text
-sigma=1.75; L={32,64,128}; even and odd parity;
+sigma=1.75; L={16,32,64,96,128}; even and odd parity;
 K=24; chi=128; target Delta=E_odd-E_even.
 ```
 
 Obtain explicit confirm-or-correct before compute.
 
-- [ ] **Step 3: Execute resumable gap cells**
+- [ ] **Step 3: Confirm measured local cost and execute resumable gap cells**
 
-Run smaller sizes first, then L=128. Bound concurrency so projected memory
-stays below 16 GiB. Each cell uses existing audited initialization only when
-all provenance fields match; otherwise initialize independently.
+Use the measured `chi=128` timing records to report a serialized wall-time
+range before launching. Run in the order `L=16,32,64,96,128`, with even and
+odd sectors completed for each size before proceeding. Bound concurrency so
+projected memory stays below 16 GiB. Each cell uses existing audited
+initialization only when all provenance fields match; otherwise initialize
+independently.
 
 - [ ] **Step 4: Apply the numerical acceptance gate**
 
-For all six states require:
+For all ten states require:
 
 ```text
 relative variance <= 1e-10
@@ -762,7 +1033,7 @@ sweeps < max_sweeps
 reached chi recorded
 ```
 
-Require all three gaps positive. Stop for review on failure; do not
+Require all five gaps positive. Stop for review on failure; do not
 automatically increase chi.
 
 - [ ] **Step 5: Generate the final sigma=1.75 analysis**
@@ -781,7 +1052,9 @@ MPLCONFIGDIR=/tmp/mpl-phase8 PYTHONPATH=src:. conda run -n mps python -u \
 - [ ] **Step 6: Verify artifacts and inspect plots**
 
 Require every declared CSV/JSON/PNG/PDF/report artifact to be nonempty.
-Visually inspect the figure. Run the full tests again and record the code
+Visually inspect the figure. Confirm four adjacent-pair `z_eff` entries,
+two residual degrees of freedom for each full regression, and the
+leave-`L=16`-out result. Run the full tests again and record the code
 revision used by every compute cell.
 
 - [ ] **Step 7: Stop before later sigma values**
