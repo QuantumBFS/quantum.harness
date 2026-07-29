@@ -68,6 +68,10 @@ function tower_dual_extend!(model, cons, tsupp, L, ext::RGExt)
     end
     ext.counters["seam_newwords"] = length(nwidx)
     ext.counters["seam_tsupp_total"] = length(tsupp)
+    if haskey(ENV, "RG_PROBE_MAXTIME")   # build-probe only: cap solver time
+        JuMP.set_optimizer_attribute(model, "MSK_DPAR_OPTIMIZER_MAX_TIME",
+                                     parse(Float64, ENV["RG_PROBE_MAXTIME"]))
+    end
     ext.capture[] = model
     return nothing
 end

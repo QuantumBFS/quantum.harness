@@ -146,10 +146,12 @@ if mode == "g4"
     Sstar = Vector{String}(sort([String(m.captures[1]) for m in eachmatch(r"\"(B_[a-z_]+)\"", fs)]))
     gate!("G4 S*", !isempty(Sstar), "frozen S* = " * join(Sstar, "+") * " (holdout untouched until now)")
     rg = rg_spec(N, NRG, As)
-    base  = build_rg_selection_model(N; vspace = :stock)
-    selo  = build_rg_selection_model(N; S = Sstar, vspace = :auto)
-    rgo   = build_rg_selection_model(N; rg = rg, vspace = :auto)
-    joint = build_rg_selection_model(N; S = Sstar, rg = rg, vspace = :auto)
+    tarm(f) = (t0 = time(); r = f(); (r, time() - t0))
+    (base, w_base)   = tarm(() -> build_rg_selection_model(N; vspace = :stock))
+    (selo, w_selo)   = tarm(() -> build_rg_selection_model(N; S = Sstar, vspace = :auto))
+    (rgo, w_rgo)     = tarm(() -> build_rg_selection_model(N; rg = rg, vspace = :auto))
+    (joint, w_joint) = tarm(() -> build_rg_selection_model(N; S = Sstar, rg = rg, vspace = :auto))
+    walls = Dict("base" => w_base, "sel" => w_selo, "rg" => w_rgo, "joint" => w_joint)
     E0, psi = heis_ground(N)
     ec(a, b) = a.resid.mu + b.resid.mu + 0.75 * (a.resid.pfeas + a.resid.dfeas + b.resid.pfeas + b.resid.dfeas)
     ordA = joint.E >= max(rgo.E, selo.E) - max(ec(joint, rgo), ec(joint, selo))
@@ -173,10 +175,12 @@ if mode == "g4"
           dJ < -ec(joint, base) ? "INVALID(order)" : "unresolved-null"
     gate!("G4 classify", true, @sprintf("D_RG=%+.2e D_sel=%+.2e D_joint=%+.2e D_int=%+.2e -> %s",
           dRG, dSel, dJ, dInt, cls))
+    gate!("G4 alpha_time", true, @sprintf("N=14 arm walls: base %.0fs sel %.0fs rg %.0fs joint %.0fs (alpha_time anchor for the 01:00 projection gate)",
+          w_base, w_selo, w_rgo, w_joint))
     open(joinpath(@__DIR__, "results", "holdout.csv"), "w") do io
-        println(io, "arm,E,pfeas,dfeas,mu")
+        println(io, "arm,E,pfeas,dfeas,mu,wall_s")
         for (n, r) in (("base", base), ("sel", selo), ("rg", rgo), ("joint", joint))
-            println(io, "$n,$(r.E),$(r.resid.pfeas),$(r.resid.dfeas),$(r.resid.mu)")
+            println(io, "$n,$(r.E),$(r.resid.pfeas),$(r.resid.dfeas),$(r.resid.mu),$(round(walls[n], digits=1))")
         end
         println(io, "E0_over_N,$(E0/N),,,")
         println(io, "classification,$cls,,,")
@@ -201,6 +205,19 @@ if mode == "vcheck"
     foreach(l -> gate!("", true, l), m3); global ok &= o3
     o4, m4 = vcheck_mutation(10, As, NRG)
     foreach(l -> gate!("", true, l), m4); global ok &= o4
+end
+
+if mode == "g4b"
+    include(joinpath(@__DIR__, "src", "functional_rg.jl"))
+    As = load_D4(); NRG = 6
+    fs = read(joinpath(@__DIR__, "results", "FROZEN_SELECTION.json"), String)
+    Sstar = Vector{String}(sort(unique([String(m.captures[1]) for m in eachmatch(r"\"(B_[a-z_]+)\"", fs)])))
+    rg = rg_spec(14, NRG, As)
+    a = build_rg_selection_model(14; S = Sstar, rg = rg, vspace = :pool)   # full V_pool
+    b = build_rg_selection_model(14; S = Sstar, rg = rg, vspace = :auto)   # V_{S*} restriction
+    gate!("G4b space-eq", abs(a.E - b.E) <= 1e-8 && a.sig == b.sig,
+        @sprintf("V_pool vs V_{S*} at N=14: |dE|=%.2e sig_equal=%s (E=%.12f)",
+                 abs(a.E - b.E), a.sig == b.sig, b.E))
 end
 
 open(joinpath(@__DIR__, "results", "$(mode)_report.txt"), "w") do io
