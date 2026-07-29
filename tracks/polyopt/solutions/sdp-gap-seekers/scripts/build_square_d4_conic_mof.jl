@@ -132,15 +132,14 @@ function rational_metadata(value::Rational)
         "canonical" => string(value), "float64" => Float64(value))
 end
 
-function verify_reloaded_model(model::JuMP.Model, assembly::ConicAssembly, d4_basis::D4SymmetryBasis)
-    expected_variables = length(assembly.moments)
+function verify_reloaded_model(model::JuMP.Model, expected_variables::Int, stationarity_count::Int, d4_basis::D4SymmetryBasis)
     variables = JuMP.all_variables(model)
     length(variables) == expected_variables || error("MOF variable count changed during reload")
     JuMP.name.(variables) == ["moment[$i]" for i in 1:expected_variables] ||
         error("MOF variable order or names changed during reload")
     isnothing(JuMP.constraint_by_name(model, "normalization")) &&
         error("reloaded MOF has no normalization constraint")
-    for index in 1:length(assembly.stationarity_equalities)
+    for index in 1:stationarity_count
         isnothing(JuMP.constraint_by_name(model, "stationarity[$index]")) &&
             error("reloaded MOF lost stationarity[$index]")
     end
@@ -156,7 +155,7 @@ function verify_reloaded_model(model::JuMP.Model, assembly::ConicAssembly, d4_ba
     isnothing(JuMP.constraint_by_name(model, "gap_psd")) && error("reloaded MOF lost gap_psd")
     JuMP.objective_sense(model) == JuMP.MOI.FEASIBILITY_SENSE ||
         error("reloaded MOF does not have a feasibility objective")
-    expected_constraint_count = 1 + length(assembly.stationarity_equalities) + length(d4_basis.block_irreps) + 1
+    expected_constraint_count = 1 + stationarity_count + length(d4_basis.block_irreps) + 1
     actual = JuMP.num_constraints(model; count_variable_in_set_constraints = false)
     actual == expected_constraint_count || error("MOF constraint count $actual != expected $expected_constraint_count")
     return Dict("passed" => true, "variable_count" => expected_variables,
@@ -198,8 +197,10 @@ function main(args::Vector{String} = ARGS)
     verify.block_diagonal_for_all_g || error("D4 basis failed block-diagonal verification: max_off_block=$(verify.max_off_block_abs)")
 
     GC.gc()
-    jump_m = @timed d4model = build_square_d4_conic_jump(assembly, sym)
-    progress("D4 JuMP model: blocks=$(length(d4model.positive_block_constraints))")
+    jump_m = @timed d4model = build_square_d4_conic_jump(assembly, sym, perms)
+    expected_variables = JuMP.num_variables(d4model.model)
+    quotient = d4_moment_quotient(assembly.moments, perms)
+    progress("D4 JuMP model: blocks=$(length(d4model.positive_block_constraints)), variables=$expected_variables (orig moments=$(length(assembly.moments)), after D4 moment-orbit quotient)")
 
     mof_path = joinpath(output_path, "model.mof.json")
     GC.gc()
@@ -209,7 +210,7 @@ function main(args::Vector{String} = ARGS)
 
     GC.gc()
     replay_m = @timed replayed = JuMP.read_from_file(mof_path)
-    replay = verify_reloaded_model(replayed, assembly, sym)
+    replay = verify_reloaded_model(replayed, expected_variables, length(assembly.stationarity_equalities), sym)
     progress("independent MOF reload checks passed")
 
     runmeta = Dict(
@@ -251,6 +252,10 @@ function main(args::Vector{String} = ARGS)
             "moment_count" => length(assembly.moments), "moments_sha256" => assembly.moments_sha256,
             "coefficient_map_sha256" => assembly.coefficient_map_sha256,
             "assembly_sha256" => assembly.assembly_sha256),
+        "d4_moment_quotient" => Dict("original_moment_count" => quotient.original_count,
+            "quotient_variable_count" => quotient.quotient_count,
+            "reduction_fraction" => 1 - quotient.quotient_count / quotient.original_count,
+            "orbit_size_histogram" => Dict(string(k) => v for (k, v) in quotient.orbit_histogram)),
         "mof" => Dict("filename" => "model.mof.json", "size_bytes" => filesize(mof_path),
             "sha256" => mof_sha, "variable_order_contract" => "moment[1]...moment[n]",
             "identity_variable" => "moment[1]", "normalization_constraint" => "normalization",

@@ -42,7 +42,9 @@ function main()
     println("block_diag_all_g\t$(verify.block_diagonal_for_all_g)")
     println("max_off_block\t$(verify.max_off_block_abs)")
 
-    elapsed = @elapsed d4model = build_square_d4_conic_jump(assembly, sym)
+    elapsed = @elapsed d4model = build_square_d4_conic_jump(assembly, sym, perms)
+    quotient = d4_moment_quotient(assembly.moments, perms)
+    println("moment_quotient\t$(quotient.original_count)->$(quotient.quotient_count) (orbit histogram: $(quotient.orbit_histogram))")
     println("d4_jump_build_seconds\t$(round(elapsed; digits=3))")
     m = d4model.model
     println("jump_variables\t$(JuMP.num_variables(m))")

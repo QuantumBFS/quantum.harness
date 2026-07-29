@@ -31,6 +31,7 @@ using ..CoreMGK:
     commutator_polynomial,
     scalarize,
     add_coefficient!
+using ..SquareSymmetryD4: apply_site_perm
 using ..SquareSymmetryBlock:
     D4SymmetryBasis
 
@@ -38,6 +39,8 @@ export ConicStationaritySpec,
        ConicAssembly,
        ConicJuMPModel,
        D4ConicJuMPModel,
+       D4MomentQuotient,
+       d4_moment_quotient,
        stationarity_candidates_conic,
        canonical_stationarity_equalities_conic,
        assemble_square_conic,
@@ -696,6 +699,62 @@ function d4_positive_block_matrix(
 end
 
 """
+D4 action on a scalar moment: relabel every Pauli word in its multiset.
+"""
+function apply_perm_to_scalar_moment(perm::Vector{Int}, moment::ScalarMoment)
+    return ScalarMoment([apply_site_perm(perm, w) for w in moment.state_symbol_multiset])
+end
+
+struct D4MomentQuotient
+    representative_moments::Vector{ScalarMoment}
+    moment_to_variable::Dict{ScalarMoment,Int}
+    original_count::Int
+    quotient_count::Int
+    orbit_histogram::Dict{Int,Int}
+end
+
+"""
+Collapse the scalar-moment variable set by D4-orbit: a D4-invariant functional
+has L(m) = L(g.m), so all moments in one D4 orbit share a single variable.
+Returns the ordered representative-moment list (identity first) and a map from
+every original moment to its representative's variable index. This is the
+exactly-equivalent moment-coordinate quotient (Sihan's lever 2).
+"""
+function d4_moment_quotient(
+    moments::Vector{ScalarMoment},
+    perms::Vector{Vector{Int}},
+)
+    moment_to_rep = Dict{ScalarMoment,ScalarMoment}()
+    orbit_seen = Set{ScalarMoment}()
+    histogram = Dict{Int,Int}()
+    for moment in moments
+        haskey(moment_to_rep, moment) && continue
+        orbit = Set{ScalarMoment}([moment])
+        for perm in perms
+            push!(orbit, apply_perm_to_scalar_moment(perm, moment))
+        end
+        rep = sort!(collect(orbit); by = m -> scalar_moment_string(m))[1]
+        haskey(histogram, length(orbit)) || (histogram[length(orbit)] = 0)
+        histogram[length(orbit)] += 1
+        for m in orbit
+            moment_to_rep[m] = rep
+            push!(orbit_seen, m)
+        end
+    end
+    reps = sort!(
+        collect(Set(values(moment_to_rep)));
+        by = m -> (sum(length, m.state_symbol_multiset; init = 0), scalar_moment_string(m)),
+    )
+    isempty(reps) || first(reps) == ScalarMoment(PauliWord[]) ||
+        error("identity moment is not first after quotient ordering")
+    rep_to_var = Dict(rep => i for (i, rep) in enumerate(reps))
+    moment_to_variable = Dict{ScalarMoment,Int}(
+        m => rep_to_var[moment_to_rep[m]] for m in moments
+    )
+    return D4MomentQuotient(reps, moment_to_variable, length(moments), length(reps), histogram)
+end
+
+"""
 Build the D4-blocked primal JuMP feasibility model: one HermitianPSDCone per
 positive irrep block (A1/A2/B1/B2/E) instead of one 352-dim cone, plus the
 unchanged 4-dim gap cone (the gap basis is entirely on the D4-fixed centre site,
@@ -704,7 +763,8 @@ unchanged from the unsymmetrized assembly.
 """
 function build_square_d4_conic_jump(
     assembly::ConicAssembly,
-    d4_basis::D4SymmetryBasis;
+    d4_basis::D4SymmetryBasis,
+    perms::Vector{Vector{Int}};
     model::JuMP.Model = JuMP.Model(),
 )
     JuMP.num_variables(model) == 0 ||
@@ -716,10 +776,11 @@ function build_square_d4_conic_jump(
     length(d4_basis.entries) == length(assembly.plan.positive_basis.entries) ||
         error("D4 basis does not match the positive basis")
 
-    moment_indices = moment_index_map(assembly.moments)
+    quotient = d4_moment_quotient(assembly.moments, perms)
+    moment_indices = quotient.moment_to_variable
     moment_variables = JuMP.@variable(
         model,
-        [1:length(assembly.moments)],
+        [1:quotient.quotient_count],
         base_name = "moment",
     )
     normalization = name_constraint!(
