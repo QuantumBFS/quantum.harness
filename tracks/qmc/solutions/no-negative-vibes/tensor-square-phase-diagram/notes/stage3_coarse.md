@@ -95,4 +95,4 @@ BROKEN  = 0
 - `results/stage3_coarse_20260729/aggregate/regions.csv`
 - `results/stage3_coarse_20260729/aggregate/survivors.csv`
 - `results/stage3_coarse_20260729/aggregate/survivors.json`
-- `results/stage3_coarse_20260729/figures/rough_phase_map.png`
+- `results/stage3_coarse_20260729/aggregate/figures/rough_phase_diagram.png`
