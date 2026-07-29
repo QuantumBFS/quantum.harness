@@ -12,7 +12,8 @@
 
 set -euo pipefail
 
-repo_root="$(git rev-parse --show-toplevel)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "${script_dir}/../../../../../.." && pwd)"
 project_dir="${repo_root}/tracks/mps/solutions/reproduction/floquet_spin_boson"
 result_dir="${repo_root}/results/20260729-floquet-fig3-quick"
 reference_dir="${result_dir}/references/fig_3"
@@ -23,8 +24,15 @@ cd "${project_dir}"
 export OPENBLAS_NUM_THREADS=1
 export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
-printf 'Fig. 3 stable quick start: commit=%s threads=%s host=%s\n' \
-    "$(git rev-parse --short HEAD)" "${JULIA_NUM_THREADS}" "$(hostname)"
+source_fingerprint="$(
+    find src -maxdepth 1 -type f -name '*.jl' -print0 |
+        sort -z |
+        xargs -0 sha256sum |
+        sha256sum |
+        cut -d' ' -f1
+)"
+printf 'Fig. 3 stable quick start: source=%s threads=%s host=%s\n' \
+    "${source_fingerprint}" "${JULIA_NUM_THREADS}" "$(hostname)"
 printf 'Setup: Omega=1 S=sigma_z alpha=0.05 omega_c=2.5 epsilon_d=1 T=0 dt_target=pi/6 chi_cap=16 lag=16384\n'
 
 julia --threads="${JULIA_NUM_THREADS}" --project=envs/current \
