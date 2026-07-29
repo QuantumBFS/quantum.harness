@@ -245,6 +245,74 @@ def test_solver_output_verification_fails_closed(mutation, match):
         )
 
 
+def _set_output_geometry(output, representation, mapping_sha256):
+    output["solver"]["settings"]["bath_representation"] = representation
+    output["solver"]["settings"]["chain_mapping_sha256"] = mapping_sha256
+    output["diagnostics"]["bath_representation"] = representation
+    output["diagnostics"]["chain_mapping_sha256"] = mapping_sha256
+    output["provenance"]["bath_representation"] = representation
+    output["provenance"]["chain_mapping_sha256"] = mapping_sha256
+
+
+def _verify_output_with_geometry(
+    *,
+    representation,
+    settings_mapping_sha256,
+    provenance_mapping_sha256,
+):
+    output = _solver_output()
+    _set_output_geometry(output, representation, settings_mapping_sha256)
+    output["provenance"]["chain_mapping_sha256"] = provenance_mapping_sha256
+    expected_settings = copy.deepcopy(output["solver"]["settings"])
+    expected_provenance = copy.deepcopy(output["provenance"])
+    acceptance.verify_mps_output(
+        output,
+        expected_input_sha256="a" * 64,
+        expected_input_payload_sha256="b" * 64,
+        expected_settings=expected_settings,
+        expected_tau=[0.0, 0.5, 1.0],
+        expected_provenance=expected_provenance,
+    )
+
+
+@pytest.mark.parametrize(
+    "representation,mapping_sha256",
+    [
+        ("direct_star", "a" * 64),
+        ("chain", None),
+        ("tree", None),
+    ],
+)
+def test_solver_output_rejects_repeated_impossible_geometry(
+    representation, mapping_sha256
+):
+    with pytest.raises((TypeError, ValueError), match="geometry|representation|mapping"):
+        _verify_output_with_geometry(
+            representation=representation,
+            settings_mapping_sha256=mapping_sha256,
+            provenance_mapping_sha256=mapping_sha256,
+        )
+
+
+@pytest.mark.parametrize(
+    "settings_mapping_sha256,provenance_mapping_sha256",
+    [
+        ("a" * 64, "b" * 64),
+        ("not-a-digest", "b" * 64),
+        ("A" * 64, "b" * 64),
+    ],
+)
+def test_solver_output_rejects_inconsistent_or_malformed_chain_hashes(
+    settings_mapping_sha256, provenance_mapping_sha256
+):
+    with pytest.raises((TypeError, ValueError), match="geometry|mapping|SHA256"):
+        _verify_output_with_geometry(
+            representation="chain",
+            settings_mapping_sha256=settings_mapping_sha256,
+            provenance_mapping_sha256=provenance_mapping_sha256,
+        )
+
+
 @pytest.mark.parametrize(
     "raw",
     [
@@ -519,6 +587,28 @@ def test_expected_runner_provenance_binds_checkpoint_source():
     )
     assert expected["bath_representation"] == "direct_star"
     assert expected["chain_mapping_sha256"] is None
+
+
+@pytest.mark.parametrize(
+    "representation,mapping_sha256",
+    [
+        ("direct_star", "a" * 64),
+        ("chain", None),
+        ("chain", "not-a-digest"),
+        ("tree", None),
+    ],
+)
+def test_expected_runner_provenance_rejects_impossible_geometry(
+    representation, mapping_sha256
+):
+    with pytest.raises((TypeError, ValueError), match="representation|mapping|SHA256"):
+        acceptance.expected_runner_provenance(
+            julia_project=SOLUTION_DIR / "julia",
+            bath_file_sha256="a" * 64,
+            krylov_expansion_dim=32,
+            bath_representation=representation,
+            chain_mapping_sha256=mapping_sha256,
+        )
 
 
 def _tree_bytes(directory):

@@ -20,7 +20,7 @@ import time
 from typing import Any, Sequence
 
 
-MODULE_VERSION = "2.3.0"
+MODULE_VERSION = "2.3.1"
 SCHEMA_VERSION = 2
 DEFAULT_THRESHOLD = 1.0e-6
 INTERIOR_GREEN_SIGNAL_MARGIN = 1.0e-5
@@ -174,6 +174,26 @@ def _validate_digest(value: Any, name: str) -> str:
     return value
 
 
+def _validate_geometry_mapping(
+    representation: Any,
+    chain_mapping_sha256: Any,
+    *,
+    name: str,
+) -> tuple[str, str | None]:
+    if representation == "direct_star":
+        if chain_mapping_sha256 is not None:
+            raise ValueError(
+                f"{name} direct_star representation requires a null "
+                "chain_mapping_sha256"
+            )
+        return representation, None
+    if representation == "chain":
+        return representation, _validate_digest(
+            chain_mapping_sha256, f"{name} chain_mapping_sha256"
+        )
+    raise ValueError(f"{name} representation must be direct_star or chain")
+
+
 def _require_exact_keys(value: Any, keys: set[str], name: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise TypeError(f"{name} must be a JSON object")
@@ -227,7 +247,10 @@ def _request_geometry_identity(
             raise ValueError(
                 "direct_star representation cannot consume a chain mapping"
             )
-        return representation, None, None
+        representation, mapping_sha256 = _validate_geometry_mapping(
+            representation, None, name="request bath geometry"
+        )
+        return representation, None, mapping_sha256
     if representation != "chain":
         raise ValueError("bath representation must be direct_star or chain")
     if not isinstance(mapping_json, str):
@@ -244,7 +267,12 @@ def _request_geometry_identity(
         request_payload["bath_artifact_json"], name="bath artifact"
     )
     chain.verify_chain_mapping_artifact(mapping, bath_artifact)
-    return representation, mapping, mapping["sha256"]
+    representation, mapping_sha256 = _validate_geometry_mapping(
+        representation,
+        mapping["sha256"],
+        name="request bath geometry",
+    )
+    return representation, mapping, mapping_sha256
 
 
 def _expected_output_settings(
@@ -768,6 +796,11 @@ def expected_runner_provenance(
     bath_representation: str = "direct_star",
     chain_mapping_sha256: str | None = None,
 ) -> dict[str, Any]:
+    bath_representation, chain_mapping_sha256 = _validate_geometry_mapping(
+        bath_representation,
+        chain_mapping_sha256,
+        name="expected runner provenance",
+    )
     project = (julia_project / "Project.toml").resolve(strict=True)
     manifest = (julia_project / "Manifest.toml").resolve(strict=True)
     return {
@@ -847,6 +880,27 @@ def verify_mps_output(
         },
         "solver settings",
     )
+    expected_geometry = _validate_geometry_mapping(
+        expected_settings["bath_representation"],
+        expected_settings["chain_mapping_sha256"],
+        name="expected solver settings",
+    )
+    solver_geometry = _validate_geometry_mapping(
+        settings["bath_representation"],
+        settings["chain_mapping_sha256"],
+        name="MPS solver settings",
+    )
+    expected_provenance_geometry = _validate_geometry_mapping(
+        expected_provenance["bath_representation"],
+        expected_provenance["chain_mapping_sha256"],
+        name="expected MPS provenance",
+    )
+    if expected_geometry != expected_provenance_geometry:
+        raise ValueError(
+            "expected MPS geometry is inconsistent between settings and provenance"
+        )
+    if solver_geometry != expected_geometry:
+        raise ValueError("MPS solver geometry does not match the request")
     if (
         _validate_real(settings["time_step"], "time_step")
         != expected_settings["time_step"]
@@ -888,6 +942,15 @@ def verify_mps_output(
     provenance = _require_exact_keys(
         output["provenance"], required_provenance, "MPS provenance"
     )
+    provenance_geometry = _validate_geometry_mapping(
+        provenance["bath_representation"],
+        provenance["chain_mapping_sha256"],
+        name="MPS provenance",
+    )
+    if provenance_geometry != solver_geometry:
+        raise ValueError(
+            "MPS geometry is inconsistent between settings and provenance"
+        )
     if provenance["runner"] != "finite_bath_mps_runner":
         raise ValueError("MPS provenance runner is malformed")
     for name in (
@@ -908,6 +971,15 @@ def verify_mps_output(
             )
     if not isinstance(output["diagnostics"], dict):
         raise TypeError("MPS diagnostics must be a JSON object")
+    diagnostics_geometry = _validate_geometry_mapping(
+        output["diagnostics"].get("bath_representation"),
+        output["diagnostics"].get("chain_mapping_sha256"),
+        name="MPS diagnostics geometry",
+    )
+    if diagnostics_geometry != solver_geometry:
+        raise ValueError(
+            "MPS geometry is inconsistent between settings and diagnostics"
+        )
     if (
         output["diagnostics"].get("krylov_expansion_dim")
         != expected_settings["krylov_expansion_dim"]
@@ -1118,6 +1190,7 @@ def _make_mps_request(
             "chain_mapping_artifact_json": None,
             "chain_mapping_artifact_file_sha256": None,
         }
+        mapping_sha256 = None
     elif representation == "chain":
         if not isinstance(mapping_bytes, bytes):
             raise TypeError("chain representation requires mapping bytes")
@@ -1137,10 +1210,16 @@ def _make_mps_request(
             "chain_mapping_artifact_json": mapping_json,
             "chain_mapping_artifact_file_sha256": _sha256_bytes(mapping_bytes),
         }
+        mapping_sha256 = mapping["sha256"]
     else:
         raise ValueError(
             "bath representation must be direct_star or chain"
         )
+    _validate_geometry_mapping(
+        representation,
+        mapping_sha256,
+        name="acceptance request",
+    )
     payload = {
         "schema_version": RUNNER_SCHEMA_VERSION,
         "bath_artifact_json": bath_json,
