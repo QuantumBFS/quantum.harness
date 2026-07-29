@@ -1,6 +1,6 @@
 # 无符号 QMC 项目成果总账
 
-更新时间：2026-07-28  
+更新时间：2026-07-29
 用途：这是项目结论和计数口径的唯一简明入口。详细推导仍保留在专题文档中。
 
 ## 当前总分
@@ -11,7 +11,7 @@
 | 额外的 graded 正权机制 | 1 | scalar/vertex grade 抵消 determinant parity |
 | 局域 Hermitian Hamiltonian 构造 | 4 | 两个一维基线、TN parity-string、graded monomial |
 | 已确认的新无符号物理类 | 0 | 所有成功物理映射均已知或可约化 |
-| 当前开放的主候选 | 2 | Majorana 宇称猜想；Klein-Hodge/spinor 表示锥 |
+| 当前开放的研究程序 | 4 | Majorana 宇称；Fock–CP；tensor-square 物理闭环；gauge/cocycle |
 
 “按文档名字”会看到 TN、odd monomial、block-TN 和 graded monomial 四项；
 但 odd monomial 与 block-TN 是同一个循环机制的标量版和分块版，而 graded monomial
@@ -131,12 +131,18 @@ canonical convention 下的 640 条历史支持一个 period-4 受保护宇称�
 2. 任意深度证明或反例；
 3. 与固定宇称 ensemble 的明确物理用途。
 
-### Klein-Hodge / spinor 表示锥
+### R01 fixed Klein-Hodge 与后续表示锥
 
-合作者分支已有 exact Fock 变换、非诱导性锚点和一个单生成元 Metzler seed。它还不是
-正性类，因为尚缺重叠六模式开放锥、任意深度闭包和物理 HS 来源。
+合作者分支已完成 R01 的六模式重叠审计：数守恒和 BdG 两族、两个 support masks 中，
+24 个 bridge hopping/pairing 坐标全部由 exact double-dual/Farkas 证书判为
+`certified-zero`。这关闭的是固定 `U_6`、双 parity-block Metzler 的 R01，不是所有
+Fock/spinor 表示锥。
 
-这两项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
+下一轮不再延伸同一个 fixed transform，而是测试 Choi/完全正映射锥、表示提升半群、
+非诱导 exterior cone 和真正改变 Hilbert 空间的 gauge/cocycle 编码。候选定义和最小
+实验见 [自底向上正性候选](BOTTOM_UP_POSITIVITY_CANDIDATES.md)。
+
+这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。
 
 ## 文档怎么读

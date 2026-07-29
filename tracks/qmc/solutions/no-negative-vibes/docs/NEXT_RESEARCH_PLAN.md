@@ -1,6 +1,6 @@
 # 下一阶段研究计划
 
-更新时间：2026-07-28
+更新时间：2026-07-29
 
 ## 当前判断
 
@@ -27,10 +27,14 @@
 - graded monomial 已约化到已知 `su(1|1)` 顶点和 Majorana reflection positivity；
   奇数阶 fixed-partition block-TN 虽有严格正性证明，但最自然的局域闭包已由两站点、
   三 flavor、两层精确反例 `det(I+XR)=-2` 关闭。
+- R01 fixed Klein-Hodge/Fock 变换的六模式重叠锥已由 24 个 bridge 坐标的 exact-zero
+  证书关闭；结论只针对该固定变换和双 parity-block Metzler 条件。
 
-接下来不应继续增加同分布随机扫描。TN 路径、graded monomial 和 odd block-TN 的当前
-自然物理闭包均已得到明确边界，**主线转向 Majorana 宇称猜想的证明或反例**。若它也被
-关闭，再依次进入 spinor-Metzler、非诱导 exterior-cone 和非平凡 gauge/ancilla 编码。
+接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN 和 R01
+fixed transform 均已得到明确边界。新主线从定义开始要求重叠闭包，立即测试
+**Fock–CP/Choi 锥**，并行完成 **tensor-square 半群的物理 HS 闭环**；若两者失败，
+进入非平凡 gauge/cocycle 编码和 non-induced exterior cone。Majorana 宇称猜想保留为
+独立支线，不再阻塞新机制搜索。
 “复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
 分支和检验候选。
 
@@ -53,23 +57,28 @@
 
 按优先级研究：
 
-1. **Majorana 宇称分辨半群**：先把当前 period-4 数值规律写成精确命题，重放互补扇区
+1. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
+   tensorization/Klein/Clifford 变换；对固定变换编译条件完全正 SDP，并逐个锚定 R01
+   的 bridge hopping/pairing 坐标；
+2. **tensor-square 表示提升半群**：利用 `B=X tensor X` 的任意深度严格正性，判断
+   `v_i+v_j` 绑定 HS 场能否来自局域、非平凡相互作用，并排除已知 Majorana/模平方约化；
+3. **局域 gauge 投影与 overlap 2-cocycle**：在四格方环和两个共享边方环上，把费米
+   交换符号的局域抵消写成 `GF(2)` 可行性问题；
+4. **Majorana 宇称分辨半群**：把当前 period-4 数值规律写成精确命题，重放互补扇区
    的最小负例，并从 2016 reflection-positivity 证明判断受保护扇区是否真有乘法闭包；
-2. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
+5. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
    要求它不是任意单粒子非负矩阵通过外幂表示的平凡提升；
-3. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
+6. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
    但普通远邻 hopping 被扇区符号 no-go 关闭；简单 Fock ancilla 投影/偏迹仍保持矩阵元
    非负，也无效。下一步必须显式改变物理 Hilbert 空间/规范约束，或使用相关宇称串；
-4. **比 TN 更大的主子式非负半群**：只要求乘积的全部主子式非负，研究 TN 是否存在物理
-   可用的严格扩张；
-5. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
+7. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
    不存在一个把它直接约化到已知类的固定全局 `J1,J2`；
-6. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
+8. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
    允许真实 pairing，并用 Pfaffian/Spin trace 而非只看 determinant，再逐项排除已知
    Majorana/Kramers/2024 半群；
-7. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
+9. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
    分解实际可达、且在乘法下闭合的子集；
-8. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
+10. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
    并有额外机制控制剩余 `Z2` 符号时才继续。
 
 ### 候选进入计算前的硬门槛
@@ -201,20 +210,24 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 2. **已完成**：`AZ-survivor-cones-v1` 的 14 万权重筛选；自然数守恒放松没有新幸存者。
 3. **已完成**：graded monomial 已知类排重；odd fixed-partition block-TN 定理确认，
    以及其自然局域 crossed-partition 闭包的精确 `-2` 反例。
-4. **立即开始**：复核 Majorana 宇称 period-4 猜想，先做精确重放和最小维证明/反例。
-5. **随后进行**：攻击 spinor-Metzler、非诱导 exterior-cone，以及非平凡 gauge/ancilla
-   编码与宇称串相关 hopping，尝试同时越过
+4. **协作完成**：R01 fixed Klein-Hodge/Fock 的六模式数守恒和 BdG bridge 坐标由
+   exact-zero 证书关闭。
+5. **立即开始**：六模式 Fock–CP 固定变换枚举与 Choi SDP；同时把 tensor-square
+   恒正定理接到局域 HS 可达性检查。
+6. **随后进行**：四/六模式 gauge-cocycle `GF(2)` 求解，以及非诱导 exterior-cone，
+   尝试同时越过
    连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-6. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-7. 若上述路线仍约化为已知类，转向更大的主子式非负乘法半群。
-8. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+7. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
+8. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
+9. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
 近期精力分配：
 
 ```text
-50%  Majorana 宇称猜想的证明、反例和精确证书
-30%  spinor/exterior/gauge 新候选及已知类排重
-20%  复 Majorana、Pfaffian 与 Spin-trace 基础设施
+40%  Fock–CP/Choi 六模式可行性
+25%  tensor-square 的局域 HS 闭环和已知类排重
+20%  gauge/exterior 新候选
+15%  Majorana 宇称与 Pfaffian/Spin-trace 支撑工具
 ```
 
 ## 两人协作建议

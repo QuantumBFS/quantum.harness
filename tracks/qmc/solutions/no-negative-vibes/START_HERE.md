@@ -163,12 +163,15 @@ cd /home/volper/harness_quantum/signfree-qmc
 
 外围宽扫和第一批激进结构筛选已完成，不需要重复。现在做三件事：
 
-1. graded monomial 和 odd block-TN 都转为已知类/精确边界回归，不再作为新物理主线；
-2. 从 Majorana reflection-positivity 证明中推导或推翻
-   `pi_*=(-1)^[m(m+1)/2]` 的受保护宇称；
-3. 若两条都不能物理闭环，再攻击 spinor-Metzler、非诱导 exterior-cone 或真正改变
-   Hilbert 空间的 gauge/ancilla 编码。
+1. graded monomial、odd block-TN 和 R01 fixed Klein-Hodge 都转为已知类或
+   exact no-go 回归，不再作为新物理主线；
+2. 立即测试六模式 Fock–CP/Choi 正锥，并把 tensor-square 严格矩阵类接到局域 HS；
+3. 若不能物理闭环，进入四/六模式 gauge-cocycle 和 non-induced exterior cone；
+4. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
 后者已明确约化到 Majorana reflection positivity。后续候选必须同时通过数学证明、
 物理映射和已知类排重，才升级为新的物理无符号类。
+
+本轮候选定义、严格恒等式、已知反例和停止条件见
+[自底向上正性候选](docs/BOTTOM_UP_POSITIVITY_CANDIDATES.md)。

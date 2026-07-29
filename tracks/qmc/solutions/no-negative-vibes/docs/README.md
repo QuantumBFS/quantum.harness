@@ -9,6 +9,7 @@
 | 只想知道找到多少、哪些已知、哪些失败 | [成果总账](RESULTS_LEDGER.md) |
 | 第一次接触符号问题 | [中文零基础导读](ONBOARDING.zh-CN.md) |
 | 决定下一步研究 | [下一阶段计划](NEXT_RESEARCH_PLAN.md) |
+| 查看最新自底向上候选和最小实验 | [自底向上正性候选](BOTTOM_UP_POSITIVITY_CANDIDATES.md) |
 | 给合作者同步完整证据数字 | [合作者进展说明](COLLABORATOR_UPDATE.zh-CN.md) |
 
 文档状态分为三类：
@@ -58,6 +59,8 @@
   route 与 crossed TN hopping 的六模式两层精确负权，及 block-TN 的物理降级边界；
 - [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
   spinor/exterior-cone 候选的定义、排重与停止条件；
+- [BOTTOM_UP_POSITIVITY_CANDIDATES.md](BOTTOM_UP_POSITIVITY_CANDIDATES.md)：把重叠闭包
+  写进定义的 Fock–CP、tensor-square、gauge/cocycle 和正字符候选；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity；物理模型排重后已降为已知 Majorana 正性子类；
