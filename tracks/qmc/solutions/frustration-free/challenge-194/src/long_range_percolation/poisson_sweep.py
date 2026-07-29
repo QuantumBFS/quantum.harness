@@ -445,6 +445,40 @@ def _validate_alias(
     ):
         raise ValueError("alias normalized residual is not canonical")
 
+    represented = np.zeros(class_count, dtype=np.float64)
+    correction = np.zeros(class_count, dtype=np.float64)
+    inverse_count = 1.0 / float(class_count)
+    for column in range(class_count):
+        direct = float(alias.probability[column]) * inverse_count
+        alternate = (
+            1.0 - float(alias.probability[column])
+        ) * inverse_count
+        for target, contribution in (
+            (column, direct),
+            (int(alias.alias[column]), alternate),
+        ):
+            combined = represented[target] + contribution
+            if abs(represented[target]) >= abs(contribution):
+                correction[target] += (
+                    represented[target] - combined
+                ) + contribution
+            else:
+                correction[target] += (
+                    contribution - combined
+                ) + represented[target]
+            represented[target] = combined
+    represented += correction
+    expected_probability = expected_weight / expected_total
+    tolerance = 32.0 * np.finfo(np.float64).eps * np.maximum(
+        expected_probability, inverse_count
+    )
+    if np.any(~np.isfinite(represented)) or np.any(
+        np.abs(represented - expected_probability) > tolerance
+    ):
+        raise ValueError(
+            "alias represented class probabilities do not match class weights"
+        )
+
 
 def _build_stream_state(
     request: TrajectoryRequest,
@@ -501,6 +535,16 @@ def run_poisson_numba(
         raise ValueError("canonical edge count exceeds the int64 engine range")
 
     class_start = build_class_start(alias.multiplicity)
+    expected_class_start = np.empty(
+        alias.multiplicity.size + 1, dtype=np.uint64
+    )
+    expected_class_start[0] = np.uint64(0)
+    running = 0
+    for index, raw_count in enumerate(alias.multiplicity):
+        running += int(raw_count)
+        expected_class_start[index + 1] = np.uint64(running)
+    if not np.array_equal(class_start, expected_class_start):
+        raise ValueError("class_start does not match alias multiplicities")
     counters, stream_keys, blocks, lane_valid, draw_counts = (
         _build_stream_state(request)
     )
