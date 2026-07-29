@@ -361,13 +361,20 @@ function write_mosek_task_artifact(
     backend = JuMP.unsafe_backend(model)
     backend isa MosekTools.Optimizer ||
         error("direct solve does not expose a MosekTools backend")
+    return write_mosek_task_artifact(path, backend.task)
+end
+
+function write_mosek_task_artifact(
+    path::AbstractString,
+    task::Mosek.Task,
+)
     endswith(path, ".task") ||
         error("Mosek binary task artifact must end in .task")
     temporary = replace(path, r"(\.task)$" => s".tmp\1")
     ispath(path) && error("refusing existing Mosek task artifact: $path")
     ispath(temporary) &&
         error("refusing existing Mosek task temporary artifact: $temporary")
-    Mosek.writetask(backend.task, temporary)
+    Mosek.writetask(task, temporary)
     mv(temporary, path)
     return Dict(
         "available" => true,
@@ -399,7 +406,13 @@ function write_mosek_infeasibility_ray_artifact(
     backend = JuMP.unsafe_backend(model)
     backend isa MosekTools.Optimizer ||
         error("direct solve does not expose a MosekTools backend")
-    task = backend.task
+    return write_mosek_infeasibility_ray_artifact(path, backend.task)
+end
+
+function write_mosek_infeasibility_ray_artifact(
+    path::AbstractString,
+    task::Mosek.Task,
+)
     problem_status = Mosek.getprosta(task, Mosek.MSK_SOL_ITR)
     solution_status = Mosek.getsolsta(task, Mosek.MSK_SOL_ITR)
     problem_status == Mosek.MSK_PRO_STA_PRIM_INFEAS ||
@@ -462,6 +475,61 @@ function write_mosek_infeasibility_ray_artifact(
         "semidefinite_variable_count" => length(bar_duals),
         "semidefinite_packed_value_count" =>
             sum(length, bar_duals; init=0),
+    )
+end
+
+function write_native_mosek_primal_values(
+    path::AbstractString,
+    primal::ShastryFullStateSpinIsotypicMosekPrimal,
+)
+    values = Mosek.getxx(primal.task, Mosek.MSK_SOL_ITR)
+    ordered = sort!(
+        collect(primal.moment_variables);
+        by=pair -> last(pair),
+    )
+    length(ordered) == length(values) ||
+        error("native primal moment and value counts differ")
+    all(
+        Int(index) == position
+        for (position, (_, index)) in enumerate(ordered)
+    ) || error("native primal moment indices are not contiguous")
+    all(isfinite, values) || error("native primal contains nonfinite values")
+    temporary = path * ".tmp"
+    ispath(path) && error("refusing existing native primal artifact: $path")
+    ispath(temporary) &&
+        error("refusing existing native primal temporary artifact: $temporary")
+    open(temporary, "w") do io
+        println(
+            io,
+            "# schema=shastry-full-state-spin-isotypic-native-primal-values-v1",
+        )
+        println(
+            io,
+            "# coefficient_map_sha256=",
+            primal.coefficient_map_sha256,
+        )
+        println(io, "index\tmoment_canonical\tfloat64_bits")
+        for (position, (key, _)) in enumerate(ordered)
+            println(
+                io,
+                position,
+                '\t',
+                key.canonical,
+                '\t',
+                bitstring(values[position]),
+            )
+        end
+    end
+    mv(temporary, path)
+    return Dict(
+        "schema_version" =>
+            "shastry-full-state-spin-isotypic-native-primal-values-v1",
+        "filename" => basename(path),
+        "variable_count" => length(values),
+        "bytes" => filesize(path),
+        "sha256" => file_sha256(path),
+        "encoding" =>
+            "index-tab-canonical-moment-tab-ieee754-binary64-bits",
     )
 end
 
@@ -757,10 +825,44 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         metadata["stages"]["solve"] =
             measurement_dict(solve_measurement)
         solve_result = solve_measurement.value
+        audit_tolerance = parse(
+            Float64,
+            get(ENV, "SS_AUDIT_TOLERANCE", "1e-7"),
+        )
+        classification = if solve_result.classification ==
+                            "feasible_native_primal"
+            if solve_result.maximum_acc_violation <= audit_tolerance &&
+               solve_result.maximum_equality_violation <= audit_tolerance
+                metadata["primal_values"] = write_native_mosek_primal_values(
+                    joinpath(options.output, "native-primal-values.tsv"),
+                    native_primal,
+                )
+                "feasible_residual_checked_float"
+            else
+                "feasible_status_failed_residual_audit"
+            end
+        elseif solve_result.classification ==
+               "primal_infeasibility_certificate_found"
+            progress("preserve native task and exact-bit dual ray")
+            metadata["mosek_infeasibility_task"] =
+                write_mosek_task_artifact(
+                    joinpath(options.output, "mosek-infeasibility.task"),
+                    native_primal.task,
+                )
+            metadata["mosek_infeasibility_ray"] =
+                write_mosek_infeasibility_ray_artifact(
+                    joinpath(options.output, "mosek-infeasibility.ray.bin"),
+                    native_primal.task,
+                )
+            "infeasibility_candidate_requires_independent_ray_replay"
+        else
+            "unknown"
+        end
         metadata["solve"] = Dict(
             "formulation" =>
                 "low-level-native-mosek-affine-psd-primal-v1",
-            "classification" => solve_result.classification,
+            "native_solver_classification" => solve_result.classification,
+            "classification" => classification,
             "problem_status" =>
                 sprint(show, solve_result.problem_status),
             "solution_status" =>
@@ -769,6 +871,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
                 solve_result.maximum_acc_violation,
             "maximum_equality_violation" =>
                 solve_result.maximum_equality_violation,
+            "audit_tolerance" => audit_tolerance,
             "threads" => threads,
             "time_limit_seconds" => time_limit_seconds,
         )
