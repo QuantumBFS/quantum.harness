@@ -1,0 +1,6992 @@
+{
+  "request": {
+    "spec": {
+      "nqubits": 3,
+      "depth": 2,
+      "coupling": 1.0,
+      "field": 1.0,
+      "initial_state": "plus",
+      "dtype": "complex64"
+    },
+    "memory_budget_bytes": 2147483648,
+    "expected_vqe_steps": 100,
+    "warm_repeats": 3,
+    "seed": 0,
+    "timeout_seconds": 240.0
+  },
+  "selected": {
+    "config": {
+      "path_strategy": "auto-hq",
+      "remat_policy": "none",
+      "threshold_bytes": null,
+      "path": [
+        [
+          1,
+          6
+        ],
+        [
+          0,
+          27
+        ],
+        [
+          2,
+          13
+        ],
+        [
+          9,
+          21
+        ],
+        [
+          8,
+          10
+        ],
+        [
+          2,
+          9
+        ],
+        [
+          13,
+          20
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          14
+        ],
+        [
+          12,
+          17
+        ],
+        [
+          8,
+          10
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          0,
+          13
+        ],
+        [
+          8,
+          11
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          2,
+          9
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "subtree_depth": null,
+      "save_names": null,
+      "gate_representation": "dense",
+      "hamiltonian_representation": "mpo",
+      "representation": "direct_tn"
+    },
+    "compile_seconds": 0.7719824590021744,
+    "first_execute_seconds": 0.0009867500011750963,
+    "warm_seconds_median": 0.00015100000018719584,
+    "warm_seconds_mad": 8.916998922359198e-06,
+    "peak_rss_bytes": 241254400,
+    "energy_abs_error": 4.76837158203125e-07,
+    "gradient_relative_l2_error": 1.4584349643784866e-07,
+    "valid": true,
+    "failure": null,
+    "worker_pid": 20607,
+    "parent_pid": 20531,
+    "energy": -2.9412853717803955,
+    "gradient": [
+      [
+        [
+          0.5112950205802917,
+          0.2359461635351181,
+          0.0
+        ],
+        [
+          -0.012097310274839401,
+          0.001032056286931038,
+          0.013129225000739098
+        ]
+      ],
+      [
+        [
+          0.46938464045524597,
+          0.21860764920711517,
+          0.0
+        ],
+        [
+          -0.13984344899654388,
+          -0.21982775628566742,
+          -0.08128467947244644
+        ]
+      ]
+    ],
+    "jax_memory_analysis": {
+      "alias_size_in_bytes": 0,
+      "argument_size_in_bytes": 48,
+      "generated_code_size_in_bytes": 0,
+      "host_alias_size_in_bytes": 0,
+      "host_argument_size_in_bytes": 0,
+      "host_generated_code_size_in_bytes": 0,
+      "host_output_size_in_bytes": 0,
+      "host_temp_size_in_bytes": 0,
+      "output_size_in_bytes": 68,
+      "peak_memory_in_bytes": 316,
+      "temp_size_in_bytes": 5576
+    },
+    "static_estimate": {
+      "gate_representation": "dense",
+      "hamiltonian_representation": "mpo",
+      "tensor_count": 29,
+      "input_tensor_elements": 248,
+      "path_flops": 1648,
+      "contractions_per_energy": 1,
+      "estimated_energy_flops": 1648,
+      "estimated_energy_tensor_bindings": 29,
+      "largest_intermediate_elements": 36,
+      "contraction_steps": 28,
+      "rematerialized_steps": 0,
+      "rematerialized_units": 0,
+      "saved_named_units": 0,
+      "max_step_output_bytes": 288,
+      "residual_profile": {
+        "residual_count": 149,
+        "total_bytes": 5424,
+        "recomputable_bytes": 5136,
+        "bytes_by_category": {
+          "primitive:dot_general": 2368,
+          "jitted:_diag": 1216,
+          "primitive:conj": 432,
+          "primitive:scatter": 288,
+          "literal": 272,
+          "primitive:reshape": 256,
+          "primitive:stack": 192,
+          "primitive:concatenate": 160,
+          "primitive:exp": 128,
+          "primitive:cos": 48,
+          "primitive:sin": 48,
+          "constant": 16
+        },
+        "bytes_by_name": {}
+      }
+    }
+  },
+  "pareto": [
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            27
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            13,
+            20
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            0,
+            9
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 0.7719824590021744,
+      "first_execute_seconds": 0.0009867500011750963,
+      "warm_seconds_median": 0.00015100000018719584,
+      "warm_seconds_mad": 8.916998922359198e-06,
+      "peak_rss_bytes": 241254400,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.4584349643784866e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20607,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097310274839401,
+            0.001032056286931038,
+            0.013129225000739098
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.13984344899654388,
+            -0.21982775628566742,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 316,
+        "temp_size_in_bytes": 5576
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1648,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1648,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 36,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 288,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5424,
+          "recomputable_bytes": 5136,
+          "bytes_by_category": {
+            "primitive:dot_general": 2368,
+            "jitted:_diag": 1216,
+            "primitive:conj": 432,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:stack": 192,
+            "primitive:concatenate": 160,
+            "primitive:exp": 128,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.0757814589996997,
+      "first_execute_seconds": 0.0011936670016439166,
+      "warm_seconds_median": 0.00016937499822233804,
+      "warm_seconds_mad": 2.9292001272551715e-05,
+      "peak_rss_bytes": 230866944,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.376260298395574e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20691,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097295373678207,
+            0.0010320786386728287,
+            0.013129215687513351
+          ]
+        ],
+        [
+          [
+            0.4693845808506012,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982771158218384,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 328,
+        "temp_size_in_bytes": 5768
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1792,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1792,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5712,
+          "recomputable_bytes": 5424,
+          "bytes_by_category": {
+            "primitive:dot_general": 2656,
+            "jitted:_diag": 1216,
+            "primitive:conj": 496,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:stack": 192,
+            "primitive:exp": 128,
+            "primitive:concatenate": 96,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements16:imag",
+          "contract:10:elements16:real",
+          "contract:11:elements8:imag",
+          "contract:11:elements8:real",
+          "contract:12:elements8:imag",
+          "contract:12:elements8:real",
+          "contract:13:elements16:imag",
+          "contract:13:elements16:real",
+          "contract:14:elements4:imag",
+          "contract:14:elements4:real",
+          "contract:15:elements8:imag",
+          "contract:15:elements8:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:17:elements36:imag",
+          "contract:17:elements36:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements8:imag",
+          "contract:19:elements8:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements48:imag",
+          "contract:24:elements48:real",
+          "contract:25:elements24:imag",
+          "contract:25:elements24:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements4:imag",
+          "contract:4:elements4:real",
+          "contract:5:elements4:imag",
+          "contract:5:elements4:real",
+          "contract:6:elements8:imag",
+          "contract:6:elements8:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements12:imag",
+          "contract:8:elements12:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.865072208998754,
+      "first_execute_seconds": 0.0013776249979855493,
+      "warm_seconds_median": 0.00013629199747811072,
+      "warm_seconds_mad": 3.750996256712824e-06,
+      "peak_rss_bytes": 238780416,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.843863741847732e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20719,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461933374405,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 400,
+        "temp_size_in_bytes": 5572
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 52,
+          "total_bytes": 2368,
+          "recomputable_bytes": 2240,
+          "bytes_by_category": {
+            "named": 2240,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:24:elements48:imag": 192,
+            "contract:24:elements48:real": 192,
+            "contract:25:elements24:imag": 96,
+            "contract:25:elements24:real": 96,
+            "contract:10:elements16:imag": 64,
+            "contract:10:elements16:real": 64,
+            "contract:13:elements16:imag": 64,
+            "contract:13:elements16:real": 64,
+            "contract:16:elements16:imag": 64,
+            "contract:16:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:9:elements16:imag": 64,
+            "contract:9:elements16:real": 64,
+            "contract:8:elements12:imag": 48,
+            "contract:8:elements12:real": 48,
+            "contract:11:elements8:imag": 32,
+            "contract:11:elements8:real": 32,
+            "contract:12:elements8:imag": 32,
+            "contract:12:elements8:real": 32,
+            "contract:15:elements8:imag": 32,
+            "contract:15:elements8:real": 32,
+            "contract:18:elements8:imag": 32,
+            "contract:18:elements8:real": 32,
+            "contract:19:elements8:imag": 32,
+            "contract:19:elements8:real": 32,
+            "contract:20:elements8:imag": 32,
+            "contract:20:elements8:real": 32,
+            "contract:21:elements8:imag": 32,
+            "contract:21:elements8:real": 32,
+            "contract:22:elements8:imag": 32,
+            "contract:22:elements8:real": 32,
+            "contract:23:elements8:imag": 32,
+            "contract:23:elements8:real": 32,
+            "contract:26:elements8:imag": 32,
+            "contract:26:elements8:real": 32,
+            "contract:2:elements8:imag": 32,
+            "contract:2:elements8:real": 32,
+            "contract:3:elements8:imag": 32,
+            "contract:3:elements8:real": 32,
+            "contract:6:elements8:imag": 32,
+            "contract:6:elements8:real": 32,
+            "contract:14:elements4:imag": 16,
+            "contract:14:elements4:real": 16,
+            "contract:4:elements4:imag": 16,
+            "contract:4:elements4:real": 16,
+            "contract:5:elements4:imag": 16,
+            "contract:5:elements4:real": 16
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 0.8586350420009694,
+      "first_execute_seconds": 0.0010863749994314276,
+      "warm_seconds_median": 0.0001412919991707895,
+      "warm_seconds_mad": 2.2291998902801424e-05,
+      "peak_rss_bytes": 248709120,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.730426882661117e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20741,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 316,
+        "temp_size_in_bytes": 5448
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5328,
+          "recomputable_bytes": 5040,
+          "bytes_by_category": {
+            "primitive:dot_general": 2240,
+            "jitted:_diag": 1216,
+            "primitive:conj": 432,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:concatenate": 192,
+            "primitive:stack": 192,
+            "primitive:exp": 128,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            27
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            13,
+            20
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            0,
+            9
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.1184857080006623,
+      "first_execute_seconds": 0.0012134999997215346,
+      "warm_seconds_median": 0.0001606660007382743,
+      "warm_seconds_mad": 1.7623999156057835e-05,
+      "peak_rss_bytes": 253329408,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.0301545717422834e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20566,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097310274839401,
+            0.001032056286931038,
+            0.013129225000739098
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.13984344899654388,
+            -0.21982775628566742,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 380,
+        "temp_size_in_bytes": 6280
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1648,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1648,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 36,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 288,
+        "residual_profile": {
+          "residual_count": 4,
+          "total_bytes": 128,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            27
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            13,
+            20
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            0,
+            9
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:11:elements36:imag",
+          "contract:11:elements36:real",
+          "contract:12:elements16:imag",
+          "contract:12:elements16:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:23:elements24:imag",
+          "contract:23:elements24:real",
+          "contract:24:elements24:imag",
+          "contract:24:elements24:real",
+          "contract:4:elements16:imag",
+          "contract:4:elements16:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.1093911249990924,
+      "first_execute_seconds": 0.001287416002014652,
+      "warm_seconds_median": 0.00017216700143762864,
+      "warm_seconds_mad": 1.6834001144161448e-05,
+      "peak_rss_bytes": 267927552,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.0301545717422834e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20580,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097310274839401,
+            0.001032056286931038,
+            0.013129225000739098
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.13984344899654388,
+            -0.21982775628566742,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 380,
+        "temp_size_in_bytes": 5892
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1648,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1648,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 36,
+        "contraction_steps": 28,
+        "rematerialized_steps": 40,
+        "rematerialized_units": 40,
+        "saved_named_units": 16,
+        "max_step_output_bytes": 288,
+        "residual_profile": {
+          "residual_count": 20,
+          "total_bytes": 1376,
+          "recomputable_bytes": 1248,
+          "bytes_by_category": {
+            "named": 1248,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:11:elements36:imag": 144,
+            "contract:11:elements36:real": 144,
+            "contract:23:elements24:imag": 96,
+            "contract:23:elements24:real": 96,
+            "contract:24:elements24:imag": 96,
+            "contract:24:elements24:real": 96,
+            "contract:12:elements16:imag": 64,
+            "contract:12:elements16:real": 64,
+            "contract:16:elements16:imag": 64,
+            "contract:16:elements16:real": 64,
+            "contract:4:elements16:imag": 64,
+            "contract:4:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:0:elements8:imag": 32,
+            "contract:0:elements8:real": 32
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            27
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            13,
+            20
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            0,
+            9
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements8:imag",
+          "contract:10:elements8:real",
+          "contract:11:elements36:imag",
+          "contract:11:elements36:real",
+          "contract:12:elements16:imag",
+          "contract:12:elements16:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements8:imag",
+          "contract:14:elements8:real",
+          "contract:15:elements8:imag",
+          "contract:15:elements8:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:17:elements8:imag",
+          "contract:17:elements8:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements8:imag",
+          "contract:19:elements8:real",
+          "contract:1:elements4:imag",
+          "contract:1:elements4:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements12:imag",
+          "contract:21:elements12:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements24:imag",
+          "contract:23:elements24:real",
+          "contract:24:elements24:imag",
+          "contract:24:elements24:real",
+          "contract:25:elements8:imag",
+          "contract:25:elements8:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements12:imag",
+          "contract:3:elements12:real",
+          "contract:4:elements16:imag",
+          "contract:4:elements16:real",
+          "contract:5:elements8:imag",
+          "contract:5:elements8:real",
+          "contract:6:elements12:imag",
+          "contract:6:elements12:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements8:imag",
+          "contract:8:elements8:real",
+          "contract:9:elements4:imag",
+          "contract:9:elements4:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.370894125000632,
+      "first_execute_seconds": 0.011983000000327593,
+      "warm_seconds_median": 0.0005720000008295756,
+      "warm_seconds_mad": 0.000416833001509076,
+      "peak_rss_bytes": 233848832,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.019320352582555e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20590,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.012097310274839401,
+            0.001032056286931038,
+            0.013129225000739098
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.13984344899654388,
+            -0.21982775628566742,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 400,
+        "temp_size_in_bytes": 5700
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1648,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1648,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 36,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 288,
+        "residual_profile": {
+          "residual_count": 54,
+          "total_bytes": 2496,
+          "recomputable_bytes": 2368,
+          "bytes_by_category": {
+            "named": 2368,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:11:elements36:imag": 144,
+            "contract:11:elements36:real": 144,
+            "contract:23:elements24:imag": 96,
+            "contract:23:elements24:real": 96,
+            "contract:24:elements24:imag": 96,
+            "contract:24:elements24:real": 96,
+            "contract:12:elements16:imag": 64,
+            "contract:12:elements16:real": 64,
+            "contract:16:elements16:imag": 64,
+            "contract:16:elements16:real": 64,
+            "contract:4:elements16:imag": 64,
+            "contract:4:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:21:elements12:imag": 48,
+            "contract:21:elements12:real": 48,
+            "contract:3:elements12:imag": 48,
+            "contract:3:elements12:real": 48,
+            "contract:6:elements12:imag": 48,
+            "contract:6:elements12:real": 48,
+            "contract:10:elements8:imag": 32,
+            "contract:10:elements8:real": 32,
+            "contract:13:elements8:imag": 32,
+            "contract:13:elements8:real": 32,
+            "contract:14:elements8:imag": 32,
+            "contract:14:elements8:real": 32,
+            "contract:15:elements8:imag": 32,
+            "contract:15:elements8:real": 32,
+            "contract:17:elements8:imag": 32,
+            "contract:17:elements8:real": 32,
+            "contract:18:elements8:imag": 32,
+            "contract:18:elements8:real": 32,
+            "contract:19:elements8:imag": 32,
+            "contract:19:elements8:real": 32,
+            "contract:20:elements8:imag": 32,
+            "contract:20:elements8:real": 32,
+            "contract:22:elements8:imag": 32,
+            "contract:22:elements8:real": 32,
+            "contract:25:elements8:imag": 32,
+            "contract:25:elements8:real": 32,
+            "contract:26:elements8:imag": 32,
+            "contract:26:elements8:real": 32,
+            "contract:5:elements8:imag": 32,
+            "contract:5:elements8:real": 32,
+            "contract:8:elements8:imag": 32,
+            "contract:8:elements8:real": 32,
+            "contract:1:elements4:imag": 16,
+            "contract:1:elements4:real": 16,
+            "contract:9:elements4:imag": 16,
+            "contract:9:elements4:real": 16
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            27
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            13,
+            20
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            12,
+            17
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            2,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            0,
+            9
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 0.7719824590021744,
+      "first_execute_seconds": 0.0009867500011750963,
+      "warm_seconds_median": 0.00015100000018719584,
+      "warm_seconds_mad": 8.916998922359198e-06,
+      "peak_rss_bytes": 241254400,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.4584349643784866e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20607,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097310274839401,
+            0.001032056286931038,
+            0.013129225000739098
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.13984344899654388,
+            -0.21982775628566742,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 316,
+        "temp_size_in_bytes": 5576
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1648,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1648,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 36,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 288,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5424,
+          "recomputable_bytes": 5136,
+          "bytes_by_category": {
+            "primitive:dot_general": 2368,
+            "jitted:_diag": 1216,
+            "primitive:conj": 432,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:stack": 192,
+            "primitive:concatenate": 160,
+            "primitive:exp": 128,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.357989208001527,
+      "first_execute_seconds": 0.0014357079999172129,
+      "warm_seconds_median": 0.000198124998860294,
+      "warm_seconds_mad": 2.120899807778187e-05,
+      "peak_rss_bytes": 243286016,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 1.9672966645452259e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20621,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097295373678207,
+            0.0010320786386728287,
+            0.013129215687513351
+          ]
+        ],
+        [
+          [
+            0.4693845808506012,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982771158218384,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 392,
+        "temp_size_in_bytes": 6920
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1792,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1792,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 4,
+          "total_bytes": 128,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:11:elements36:imag",
+          "contract:11:elements36:real",
+          "contract:24:elements48:imag",
+          "contract:24:elements48:real",
+          "contract:25:elements24:imag",
+          "contract:25:elements24:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:6:elements16:imag",
+          "contract:6:elements16:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.7130362090028939,
+      "first_execute_seconds": 0.001416291001078207,
+      "warm_seconds_median": 0.00021699999706470408,
+      "warm_seconds_mad": 8.625000191386789e-06,
+      "peak_rss_bytes": 243105792,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 1.8023682399944477e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20638,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097295373678207,
+            0.0010320786386728287,
+            0.013129215687513351
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982771158218384,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 392,
+        "temp_size_in_bytes": 6240
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1792,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1792,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 40,
+        "rematerialized_units": 40,
+        "saved_named_units": 16,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 18,
+          "total_bytes": 1504,
+          "recomputable_bytes": 1376,
+          "bytes_by_category": {
+            "named": 1376,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:24:elements48:imag": 192,
+            "contract:24:elements48:real": 192,
+            "contract:11:elements36:imag": 144,
+            "contract:11:elements36:real": 144,
+            "contract:25:elements24:imag": 96,
+            "contract:25:elements24:real": 96,
+            "contract:6:elements16:imag": 64,
+            "contract:6:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:8:elements16:imag": 64,
+            "contract:8:elements16:real": 64,
+            "contract:9:elements16:imag": 64,
+            "contract:9:elements16:real": 64
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements12:imag",
+          "contract:10:elements12:real",
+          "contract:11:elements36:imag",
+          "contract:11:elements36:real",
+          "contract:12:elements12:imag",
+          "contract:12:elements12:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements8:imag",
+          "contract:14:elements8:real",
+          "contract:15:elements16:imag",
+          "contract:15:elements16:real",
+          "contract:16:elements12:imag",
+          "contract:16:elements12:real",
+          "contract:17:elements12:imag",
+          "contract:17:elements12:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements8:imag",
+          "contract:19:elements8:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements48:imag",
+          "contract:24:elements48:real",
+          "contract:25:elements24:imag",
+          "contract:25:elements24:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements4:imag",
+          "contract:4:elements4:real",
+          "contract:5:elements4:imag",
+          "contract:5:elements4:real",
+          "contract:6:elements16:imag",
+          "contract:6:elements16:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.3279751249974652,
+      "first_execute_seconds": 0.0013440420007100329,
+      "warm_seconds_median": 0.00015308299771277234,
+      "warm_seconds_mad": 1.290998625336215e-06,
+      "peak_rss_bytes": 263405568,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 1.8023682399944477e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20683,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097295373678207,
+            0.0010320786386728287,
+            0.013129215687513351
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982771158218384,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 412,
+        "temp_size_in_bytes": 6020
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1792,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1792,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 54,
+          "total_bytes": 2784,
+          "recomputable_bytes": 2656,
+          "bytes_by_category": {
+            "named": 2656,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:24:elements48:imag": 192,
+            "contract:24:elements48:real": 192,
+            "contract:11:elements36:imag": 144,
+            "contract:11:elements36:real": 144,
+            "contract:25:elements24:imag": 96,
+            "contract:25:elements24:real": 96,
+            "contract:15:elements16:imag": 64,
+            "contract:15:elements16:real": 64,
+            "contract:6:elements16:imag": 64,
+            "contract:6:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:8:elements16:imag": 64,
+            "contract:8:elements16:real": 64,
+            "contract:9:elements16:imag": 64,
+            "contract:9:elements16:real": 64,
+            "contract:10:elements12:imag": 48,
+            "contract:10:elements12:real": 48,
+            "contract:12:elements12:imag": 48,
+            "contract:12:elements12:real": 48,
+            "contract:16:elements12:imag": 48,
+            "contract:16:elements12:real": 48,
+            "contract:17:elements12:imag": 48,
+            "contract:17:elements12:real": 48,
+            "contract:13:elements8:imag": 32,
+            "contract:13:elements8:real": 32,
+            "contract:14:elements8:imag": 32,
+            "contract:14:elements8:real": 32,
+            "contract:18:elements8:imag": 32,
+            "contract:18:elements8:real": 32,
+            "contract:19:elements8:imag": 32,
+            "contract:19:elements8:real": 32,
+            "contract:1:elements8:imag": 32,
+            "contract:1:elements8:real": 32,
+            "contract:20:elements8:imag": 32,
+            "contract:20:elements8:real": 32,
+            "contract:21:elements8:imag": 32,
+            "contract:21:elements8:real": 32,
+            "contract:22:elements8:imag": 32,
+            "contract:22:elements8:real": 32,
+            "contract:23:elements8:imag": 32,
+            "contract:23:elements8:real": 32,
+            "contract:26:elements8:imag": 32,
+            "contract:26:elements8:real": 32,
+            "contract:3:elements8:imag": 32,
+            "contract:3:elements8:real": 32,
+            "contract:4:elements4:imag": 16,
+            "contract:4:elements4:real": 16,
+            "contract:5:elements4:imag": 16,
+            "contract:5:elements4:real": 16
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.0757814589996997,
+      "first_execute_seconds": 0.0011936670016439166,
+      "warm_seconds_median": 0.00016937499822233804,
+      "warm_seconds_mad": 2.9292001272551715e-05,
+      "peak_rss_bytes": 230866944,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.376260298395574e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20691,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.012097295373678207,
+            0.0010320786386728287,
+            0.013129215687513351
+          ]
+        ],
+        [
+          [
+            0.4693845808506012,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982771158218384,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 328,
+        "temp_size_in_bytes": 5768
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1792,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1792,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5712,
+          "recomputable_bytes": 5424,
+          "bytes_by_category": {
+            "primitive:dot_general": 2656,
+            "jitted:_diag": 1216,
+            "primitive:conj": 496,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:stack": 192,
+            "primitive:exp": 128,
+            "primitive:concatenate": 96,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.1668086249992484,
+      "first_execute_seconds": 0.0012485830011428334,
+      "warm_seconds_median": 0.0001805419997253921,
+      "warm_seconds_mad": 6.792000931454822e-06,
+      "peak_rss_bytes": 272826368,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.730426882661117e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20696,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 380,
+        "temp_size_in_bytes": 6280
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 4,
+          "total_bytes": 128,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements16:imag",
+          "contract:10:elements16:real",
+          "contract:17:elements36:imag",
+          "contract:17:elements36:real",
+          "contract:24:elements48:imag",
+          "contract:24:elements48:real",
+          "contract:25:elements24:imag",
+          "contract:25:elements24:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.288552209000045,
+      "first_execute_seconds": 0.0012228340019646566,
+      "warm_seconds_median": 0.00015733400141471066,
+      "warm_seconds_mad": 6.543003109982237e-06,
+      "peak_rss_bytes": 264847360,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.730426882661117e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20707,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 396,
+        "temp_size_in_bytes": 6084
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 40,
+        "rematerialized_units": 40,
+        "saved_named_units": 16,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 16,
+          "total_bytes": 1152,
+          "recomputable_bytes": 1024,
+          "bytes_by_category": {
+            "named": 1024,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:24:elements48:imag": 192,
+            "contract:24:elements48:real": 192,
+            "contract:25:elements24:imag": 96,
+            "contract:25:elements24:real": 96,
+            "contract:10:elements16:imag": 64,
+            "contract:10:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:9:elements16:imag": 64,
+            "contract:9:elements16:real": 64,
+            "contract:0:elements8:imag": 32,
+            "contract:0:elements8:real": 32
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements16:imag",
+          "contract:10:elements16:real",
+          "contract:11:elements8:imag",
+          "contract:11:elements8:real",
+          "contract:12:elements8:imag",
+          "contract:12:elements8:real",
+          "contract:13:elements16:imag",
+          "contract:13:elements16:real",
+          "contract:14:elements4:imag",
+          "contract:14:elements4:real",
+          "contract:15:elements8:imag",
+          "contract:15:elements8:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:17:elements36:imag",
+          "contract:17:elements36:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements8:imag",
+          "contract:19:elements8:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements48:imag",
+          "contract:24:elements48:real",
+          "contract:25:elements24:imag",
+          "contract:25:elements24:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements4:imag",
+          "contract:4:elements4:real",
+          "contract:5:elements4:imag",
+          "contract:5:elements4:real",
+          "contract:6:elements8:imag",
+          "contract:6:elements8:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements12:imag",
+          "contract:8:elements12:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 1.865072208998754,
+      "first_execute_seconds": 0.0013776249979855493,
+      "warm_seconds_median": 0.00013629199747811072,
+      "warm_seconds_mad": 3.750996256712824e-06,
+      "peak_rss_bytes": 238780416,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.843863741847732e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20719,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461933374405,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 400,
+        "temp_size_in_bytes": 5572
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 52,
+          "total_bytes": 2368,
+          "recomputable_bytes": 2240,
+          "bytes_by_category": {
+            "named": 2240,
+            "constant": 80,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:24:elements48:imag": 192,
+            "contract:24:elements48:real": 192,
+            "contract:25:elements24:imag": 96,
+            "contract:25:elements24:real": 96,
+            "contract:10:elements16:imag": 64,
+            "contract:10:elements16:real": 64,
+            "contract:13:elements16:imag": 64,
+            "contract:13:elements16:real": 64,
+            "contract:16:elements16:imag": 64,
+            "contract:16:elements16:real": 64,
+            "contract:7:elements16:imag": 64,
+            "contract:7:elements16:real": 64,
+            "contract:9:elements16:imag": 64,
+            "contract:9:elements16:real": 64,
+            "contract:8:elements12:imag": 48,
+            "contract:8:elements12:real": 48,
+            "contract:11:elements8:imag": 32,
+            "contract:11:elements8:real": 32,
+            "contract:12:elements8:imag": 32,
+            "contract:12:elements8:real": 32,
+            "contract:15:elements8:imag": 32,
+            "contract:15:elements8:real": 32,
+            "contract:18:elements8:imag": 32,
+            "contract:18:elements8:real": 32,
+            "contract:19:elements8:imag": 32,
+            "contract:19:elements8:real": 32,
+            "contract:20:elements8:imag": 32,
+            "contract:20:elements8:real": 32,
+            "contract:21:elements8:imag": 32,
+            "contract:21:elements8:real": 32,
+            "contract:22:elements8:imag": 32,
+            "contract:22:elements8:real": 32,
+            "contract:23:elements8:imag": 32,
+            "contract:23:elements8:real": 32,
+            "contract:26:elements8:imag": 32,
+            "contract:26:elements8:real": 32,
+            "contract:2:elements8:imag": 32,
+            "contract:2:elements8:real": 32,
+            "contract:3:elements8:imag": 32,
+            "contract:3:elements8:real": 32,
+            "contract:6:elements8:imag": 32,
+            "contract:6:elements8:real": 32,
+            "contract:14:elements4:imag": 16,
+            "contract:14:elements4:real": 16,
+            "contract:4:elements4:imag": 16,
+            "contract:4:elements4:real": 16,
+            "contract:5:elements4:imag": 16,
+            "contract:5:elements4:real": 16
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            6,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 0.8586350420009694,
+      "first_execute_seconds": 0.0010863749994314276,
+      "warm_seconds_median": 0.0001412919991707895,
+      "warm_seconds_mad": 2.2291998902801424e-05,
+      "peak_rss_bytes": 248709120,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 9.730426882661117e-08,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20741,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950801849365,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.012097308412194252,
+            0.0010320896981284022,
+            0.01312924548983574
+          ]
+        ],
+        [
+          [
+            0.46938464045524597,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.1398434340953827,
+            -0.2198277860879898,
+            -0.08128467947244644
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 316,
+        "temp_size_in_bytes": 5448
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "mpo",
+        "tensor_count": 29,
+        "input_tensor_elements": 248,
+        "path_flops": 1728,
+        "contractions_per_energy": 1,
+        "estimated_energy_flops": 1728,
+        "estimated_energy_tensor_bindings": 29,
+        "largest_intermediate_elements": 48,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 384,
+        "residual_profile": {
+          "residual_count": 149,
+          "total_bytes": 5328,
+          "recomputable_bytes": 5040,
+          "bytes_by_category": {
+            "primitive:dot_general": 2240,
+            "jitted:_diag": 1216,
+            "primitive:conj": 432,
+            "primitive:scatter": 288,
+            "literal": 272,
+            "primitive:reshape": 256,
+            "primitive:concatenate": 192,
+            "primitive:stack": 192,
+            "primitive:exp": 128,
+            "primitive:cos": 48,
+            "primitive:sin": 48,
+            "constant": 16
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            4,
+            16
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            15,
+            25
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            22
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            16,
+            17
+          ],
+          [
+            7,
+            18
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 10.860554333998152,
+      "first_execute_seconds": 0.0028508750001492444,
+      "warm_seconds_median": 0.0004613329983840231,
+      "warm_seconds_mad": 2.1083000319777057e-05,
+      "peak_rss_bytes": 258834432,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.6965643049249586e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20755,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.01209728978574276,
+            0.0010320846922695637,
+            0.013129252940416336
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128466457128525
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 244,
+        "temp_size_in_bytes": 10048
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 912,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 4560,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 8,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 64,
+        "residual_profile": {
+          "residual_count": 21,
+          "total_bytes": 608,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            4,
+            16
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            15,
+            25
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            22
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            16,
+            17
+          ],
+          [
+            7,
+            18
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements8:imag",
+          "contract:10:elements8:real",
+          "contract:11:elements8:imag",
+          "contract:11:elements8:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements8:imag",
+          "contract:14:elements8:real",
+          "contract:15:elements8:imag",
+          "contract:15:elements8:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:5:elements8:imag",
+          "contract:5:elements8:real",
+          "contract:8:elements8:imag",
+          "contract:8:elements8:real",
+          "contract:9:elements8:imag",
+          "contract:9:elements8:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 9.464277250001032,
+      "first_execute_seconds": 0.002153375000489177,
+      "warm_seconds_median": 0.00032745800126576796,
+      "warm_seconds_mad": 3.999000909971073e-06,
+      "peak_rss_bytes": 309985280,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.6965643049249586e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20915,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.01209728978574276,
+            0.0010320846922695637,
+            0.013129252940416336
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128466457128525
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 256,
+        "temp_size_in_bytes": 8128
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 912,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 4560,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 8,
+        "contraction_steps": 28,
+        "rematerialized_steps": 32,
+        "rematerialized_units": 32,
+        "saved_named_units": 24,
+        "max_step_output_bytes": 64,
+        "residual_profile": {
+          "residual_count": 141,
+          "total_bytes": 4448,
+          "recomputable_bytes": 3840,
+          "bytes_by_category": {
+            "named": 3840,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:0:elements8:imag": 160,
+            "contract:0:elements8:real": 160,
+            "contract:10:elements8:imag": 160,
+            "contract:10:elements8:real": 160,
+            "contract:11:elements8:imag": 160,
+            "contract:11:elements8:real": 160,
+            "contract:13:elements8:imag": 160,
+            "contract:13:elements8:real": 160,
+            "contract:14:elements8:imag": 160,
+            "contract:14:elements8:real": 160,
+            "contract:15:elements8:imag": 160,
+            "contract:15:elements8:real": 160,
+            "contract:1:elements8:imag": 160,
+            "contract:1:elements8:real": 160,
+            "contract:2:elements8:imag": 160,
+            "contract:2:elements8:real": 160,
+            "contract:3:elements8:imag": 160,
+            "contract:3:elements8:real": 160,
+            "contract:5:elements8:imag": 160,
+            "contract:5:elements8:real": 160,
+            "contract:8:elements8:imag": 160,
+            "contract:8:elements8:real": 160,
+            "contract:9:elements8:imag": 160,
+            "contract:9:elements8:real": 160
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            4,
+            16
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            15,
+            25
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            22
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            16,
+            17
+          ],
+          [
+            7,
+            18
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements8:imag",
+          "contract:10:elements8:real",
+          "contract:11:elements8:imag",
+          "contract:11:elements8:real",
+          "contract:12:elements4:imag",
+          "contract:12:elements4:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements8:imag",
+          "contract:14:elements8:real",
+          "contract:15:elements8:imag",
+          "contract:15:elements8:real",
+          "contract:16:elements4:imag",
+          "contract:16:elements4:real",
+          "contract:17:elements8:imag",
+          "contract:17:elements8:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements4:imag",
+          "contract:19:elements4:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements8:imag",
+          "contract:24:elements8:real",
+          "contract:25:elements8:imag",
+          "contract:25:elements8:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements4:imag",
+          "contract:4:elements4:real",
+          "contract:5:elements8:imag",
+          "contract:5:elements8:real",
+          "contract:6:elements4:imag",
+          "contract:6:elements4:real",
+          "contract:7:elements4:imag",
+          "contract:7:elements4:real",
+          "contract:8:elements8:imag",
+          "contract:8:elements8:real",
+          "contract:9:elements8:imag",
+          "contract:9:elements8:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 9.103923250000662,
+      "first_execute_seconds": 0.00251370899786707,
+      "warm_seconds_median": 0.00029879199792048894,
+      "warm_seconds_mad": 1.8166003428632393e-05,
+      "peak_rss_bytes": 251183104,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.6965643049249586e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 20991,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.01209728978574276,
+            0.0010320846922695637,
+            0.013129252940416336
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128466457128525
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 256,
+        "temp_size_in_bytes": 8324
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 912,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 4560,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 8,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 64,
+        "residual_profile": {
+          "residual_count": 261,
+          "total_bytes": 7328,
+          "recomputable_bytes": 6720,
+          "bytes_by_category": {
+            "named": 6720,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:0:elements8:imag": 160,
+            "contract:0:elements8:real": 160,
+            "contract:10:elements8:imag": 160,
+            "contract:10:elements8:real": 160,
+            "contract:11:elements8:imag": 160,
+            "contract:11:elements8:real": 160,
+            "contract:13:elements8:imag": 160,
+            "contract:13:elements8:real": 160,
+            "contract:14:elements8:imag": 160,
+            "contract:14:elements8:real": 160,
+            "contract:15:elements8:imag": 160,
+            "contract:15:elements8:real": 160,
+            "contract:17:elements8:imag": 160,
+            "contract:17:elements8:real": 160,
+            "contract:18:elements8:imag": 160,
+            "contract:18:elements8:real": 160,
+            "contract:20:elements8:imag": 160,
+            "contract:20:elements8:real": 160,
+            "contract:21:elements8:imag": 160,
+            "contract:21:elements8:real": 160,
+            "contract:23:elements8:imag": 160,
+            "contract:23:elements8:real": 160,
+            "contract:24:elements8:imag": 160,
+            "contract:24:elements8:real": 160,
+            "contract:25:elements8:imag": 160,
+            "contract:25:elements8:real": 160,
+            "contract:26:elements8:imag": 160,
+            "contract:26:elements8:real": 160,
+            "contract:2:elements8:imag": 160,
+            "contract:2:elements8:real": 160,
+            "contract:3:elements8:imag": 160,
+            "contract:3:elements8:real": 160,
+            "contract:8:elements8:imag": 160,
+            "contract:8:elements8:real": 160,
+            "contract:9:elements8:imag": 160,
+            "contract:9:elements8:real": 160,
+            "contract:12:elements4:imag": 80,
+            "contract:12:elements4:real": 80,
+            "contract:16:elements4:imag": 80,
+            "contract:16:elements4:real": 80,
+            "contract:19:elements4:imag": 80,
+            "contract:19:elements4:real": 80,
+            "contract:4:elements4:imag": 80,
+            "contract:4:elements4:real": 80,
+            "contract:6:elements4:imag": 80,
+            "contract:6:elements4:real": 80,
+            "contract:7:elements4:imag": 80,
+            "contract:7:elements4:real": 80
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "auto-hq",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            4,
+            16
+          ],
+          [
+            16,
+            27
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            15,
+            25
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            22
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            16,
+            17
+          ],
+          [
+            7,
+            18
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            7,
+            9
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 7.452342458000203,
+      "first_execute_seconds": 0.0013169579979148693,
+      "warm_seconds_median": 0.00026166699899476953,
+      "warm_seconds_mad": 1.9084000086877495e-05,
+      "peak_rss_bytes": 285573120,
+      "energy_abs_error": 4.76837158203125e-07,
+      "gradient_relative_l2_error": 1.6965643049249586e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21105,
+      "parent_pid": 20531,
+      "energy": -2.9412853717803955,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461635351181,
+            0.0
+          ],
+          [
+            -0.01209728978574276,
+            0.0010320846922695637,
+            0.013129252940416336
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860764920711517,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128466457128525
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 244,
+        "temp_size_in_bytes": 7812
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 912,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 4560,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 8,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 64,
+        "residual_profile": {
+          "residual_count": 750,
+          "total_bytes": 20260,
+          "recomputable_bytes": 18320,
+          "bytes_by_category": {
+            "primitive:dot_general": 6720,
+            "jitted:_diag": 6080,
+            "primitive:conj": 2160,
+            "literal": 1380,
+            "primitive:reshape": 1280,
+            "primitive:concatenate": 960,
+            "primitive:exp": 640,
+            "constant": 560,
+            "primitive:cos": 240,
+            "primitive:sin": 240
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 8.621592790997965,
+      "first_execute_seconds": 0.002396542000496993,
+      "warm_seconds_median": 0.00040262499896925874,
+      "warm_seconds_mad": 4.133400216232985e-05,
+      "peak_rss_bytes": 311836672,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.586198537095005e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21167,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.23594611883163452,
+            0.0
+          ],
+          [
+            -0.012097304686903954,
+            0.001032068394124508,
+            0.01312920544296503
+          ]
+        ],
+        [
+          [
+            0.4693845510482788,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 276,
+        "temp_size_in_bytes": 12548
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1048,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5240,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 21,
+          "total_bytes": 608,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:15:elements16:imag",
+          "contract:15:elements16:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:6:elements16:imag",
+          "contract:6:elements16:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 9.514924167000572,
+      "first_execute_seconds": 0.003666458000225248,
+      "warm_seconds_median": 0.00036458300019148737,
+      "warm_seconds_mad": 1.8083002942148596e-05,
+      "peak_rss_bytes": 312688640,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.586198537095005e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21263,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.23594611883163452,
+            0.0
+          ],
+          [
+            -0.012097304686903954,
+            0.001032068394124508,
+            0.01312920544296503
+          ]
+        ],
+        [
+          [
+            0.4693845510482788,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 288,
+        "temp_size_in_bytes": 12036
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1048,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5240,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 38,
+        "rematerialized_units": 38,
+        "saved_named_units": 18,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 111,
+          "total_bytes": 5088,
+          "recomputable_bytes": 4480,
+          "bytes_by_category": {
+            "named": 4480,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:15:elements16:imag": 320,
+            "contract:15:elements16:real": 320,
+            "contract:6:elements16:imag": 320,
+            "contract:6:elements16:real": 320,
+            "contract:7:elements16:imag": 320,
+            "contract:7:elements16:real": 320,
+            "contract:8:elements16:imag": 320,
+            "contract:8:elements16:real": 320,
+            "contract:9:elements16:imag": 320,
+            "contract:9:elements16:real": 320,
+            "contract:0:elements8:imag": 160,
+            "contract:0:elements8:real": 160,
+            "contract:1:elements8:imag": 160,
+            "contract:1:elements8:real": 160,
+            "contract:2:elements8:imag": 160,
+            "contract:2:elements8:real": 160,
+            "contract:3:elements8:imag": 160,
+            "contract:3:elements8:real": 160
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements8:imag",
+          "contract:0:elements8:real",
+          "contract:10:elements4:imag",
+          "contract:10:elements4:real",
+          "contract:11:elements4:imag",
+          "contract:11:elements4:real",
+          "contract:12:elements4:imag",
+          "contract:12:elements4:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements8:imag",
+          "contract:14:elements8:real",
+          "contract:15:elements16:imag",
+          "contract:15:elements16:real",
+          "contract:16:elements4:imag",
+          "contract:16:elements4:real",
+          "contract:17:elements4:imag",
+          "contract:17:elements4:real",
+          "contract:18:elements8:imag",
+          "contract:18:elements8:real",
+          "contract:19:elements8:imag",
+          "contract:19:elements8:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements8:imag",
+          "contract:20:elements8:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements8:imag",
+          "contract:24:elements8:real",
+          "contract:25:elements8:imag",
+          "contract:25:elements8:real",
+          "contract:26:elements4:imag",
+          "contract:26:elements4:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements4:imag",
+          "contract:4:elements4:real",
+          "contract:5:elements4:imag",
+          "contract:5:elements4:real",
+          "contract:6:elements16:imag",
+          "contract:6:elements16:real",
+          "contract:7:elements16:imag",
+          "contract:7:elements16:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real",
+          "contract:9:elements16:imag",
+          "contract:9:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 10.370007250003255,
+      "first_execute_seconds": 0.0029111250005371403,
+      "warm_seconds_median": 0.00033062500006053597,
+      "warm_seconds_mad": 4.383300256449729e-05,
+      "peak_rss_bytes": 253788160,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.586198537095005e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21361,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.23594611883163452,
+            0.0
+          ],
+          [
+            -0.012097304686903954,
+            0.001032068394124508,
+            0.01312920544296503
+          ]
+        ],
+        [
+          [
+            0.4693845510482788,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 288,
+        "temp_size_in_bytes": 11588
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1048,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5240,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 271,
+          "total_bytes": 8928,
+          "recomputable_bytes": 8320,
+          "bytes_by_category": {
+            "named": 8320,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:15:elements16:imag": 320,
+            "contract:15:elements16:real": 320,
+            "contract:6:elements16:imag": 320,
+            "contract:6:elements16:real": 320,
+            "contract:7:elements16:imag": 320,
+            "contract:7:elements16:real": 320,
+            "contract:8:elements16:imag": 320,
+            "contract:8:elements16:real": 320,
+            "contract:9:elements16:imag": 320,
+            "contract:9:elements16:real": 320,
+            "contract:13:elements8:imag": 160,
+            "contract:13:elements8:real": 160,
+            "contract:14:elements8:imag": 160,
+            "contract:14:elements8:real": 160,
+            "contract:18:elements8:imag": 160,
+            "contract:18:elements8:real": 160,
+            "contract:19:elements8:imag": 160,
+            "contract:19:elements8:real": 160,
+            "contract:1:elements8:imag": 160,
+            "contract:1:elements8:real": 160,
+            "contract:20:elements8:imag": 160,
+            "contract:20:elements8:real": 160,
+            "contract:21:elements8:imag": 160,
+            "contract:21:elements8:real": 160,
+            "contract:22:elements8:imag": 160,
+            "contract:22:elements8:real": 160,
+            "contract:23:elements8:imag": 160,
+            "contract:23:elements8:real": 160,
+            "contract:24:elements8:imag": 160,
+            "contract:24:elements8:real": 160,
+            "contract:25:elements8:imag": 160,
+            "contract:25:elements8:real": 160,
+            "contract:3:elements8:imag": 160,
+            "contract:3:elements8:real": 160,
+            "contract:10:elements4:imag": 80,
+            "contract:10:elements4:real": 80,
+            "contract:11:elements4:imag": 80,
+            "contract:11:elements4:real": 80,
+            "contract:12:elements4:imag": 80,
+            "contract:12:elements4:real": 80,
+            "contract:16:elements4:imag": 80,
+            "contract:16:elements4:real": 80,
+            "contract:17:elements4:imag": 80,
+            "contract:17:elements4:real": 80,
+            "contract:26:elements4:imag": 80,
+            "contract:26:elements4:real": 80,
+            "contract:4:elements4:imag": 80,
+            "contract:4:elements4:real": 80,
+            "contract:5:elements4:imag": 80,
+            "contract:5:elements4:real": 80
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            11
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 8.937311333000252,
+      "first_execute_seconds": 0.002340457998798229,
+      "warm_seconds_median": 0.0002840410015778616,
+      "warm_seconds_mad": 1.1500997061375529e-05,
+      "peak_rss_bytes": 262586368,
+      "energy_abs_error": 7.152557373046875e-07,
+      "gradient_relative_l2_error": 2.586198537095005e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21651,
+      "parent_pid": 20531,
+      "energy": -2.9412851333618164,
+      "gradient": [
+        [
+          [
+            0.511294960975647,
+            0.23594611883163452,
+            0.0
+          ],
+          [
+            -0.012097304686903954,
+            0.001032068394124508,
+            0.01312920544296503
+          ]
+        ],
+        [
+          [
+            0.4693845510482788,
+            0.21860763430595398,
+            0.0
+          ],
+          [
+            -0.1398434042930603,
+            -0.21982774138450623,
+            -0.08128467202186584
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 276,
+        "temp_size_in_bytes": 9988
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1048,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5240,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 750,
+          "total_bytes": 21700,
+          "recomputable_bytes": 19760,
+          "bytes_by_category": {
+            "primitive:dot_general": 8320,
+            "jitted:_diag": 6080,
+            "primitive:conj": 2480,
+            "literal": 1380,
+            "primitive:reshape": 1280,
+            "primitive:exp": 640,
+            "constant": 560,
+            "primitive:concatenate": 480,
+            "primitive:cos": 240,
+            "primitive:sin": 240
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            21,
+            23
+          ],
+          [
+            5,
+            17
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            13,
+            22
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            12,
+            21
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            3,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 10.399476832997607,
+      "first_execute_seconds": 0.002895207999245031,
+      "warm_seconds_median": 0.0006511249994218815,
+      "warm_seconds_mad": 6.083002517698333e-06,
+      "peak_rss_bytes": 292339712,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 1.534384414279311e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21765,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.0120973140001297,
+            0.0010320651344954967,
+            0.013129238039255142
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.13984346389770508,
+            -0.2198277711868286,
+            -0.08128468692302704
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 276,
+        "temp_size_in_bytes": 11844
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1136,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5680,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 56,
+        "rematerialized_units": 56,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 21,
+          "total_bytes": 608,
+          "recomputable_bytes": 0,
+          "bytes_by_category": {
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {}
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            21,
+            23
+          ],
+          [
+            5,
+            17
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            13,
+            22
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            12,
+            21
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            3,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements16:imag",
+          "contract:0:elements16:real",
+          "contract:14:elements16:imag",
+          "contract:14:elements16:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:18:elements16:imag",
+          "contract:18:elements16:real",
+          "contract:19:elements16:imag",
+          "contract:19:elements16:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:25:elements16:imag",
+          "contract:25:elements16:real",
+          "contract:6:elements4:imag",
+          "contract:6:elements4:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 9.963311958999839,
+      "first_execute_seconds": 0.0030534159996022936,
+      "warm_seconds_median": 0.000365167001291411,
+      "warm_seconds_mad": 3.679200017359108e-05,
+      "peak_rss_bytes": 325320704,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 1.534384414279311e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 21985,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.0120973140001297,
+            0.0010320651344954967,
+            0.013129238039255142
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.13984346389770508,
+            -0.2198277711868286,
+            -0.08128468692302704
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 284,
+        "temp_size_in_bytes": 11524
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1136,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5680,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 38,
+        "rematerialized_units": 38,
+        "saved_named_units": 18,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 111,
+          "total_bytes": 5568,
+          "recomputable_bytes": 4960,
+          "bytes_by_category": {
+            "named": 4960,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:0:elements16:imag": 320,
+            "contract:0:elements16:real": 320,
+            "contract:14:elements16:imag": 320,
+            "contract:14:elements16:real": 320,
+            "contract:16:elements16:imag": 320,
+            "contract:16:elements16:real": 320,
+            "contract:18:elements16:imag": 320,
+            "contract:18:elements16:real": 320,
+            "contract:19:elements16:imag": 320,
+            "contract:19:elements16:real": 320,
+            "contract:25:elements16:imag": 320,
+            "contract:25:elements16:real": 320,
+            "contract:8:elements16:imag": 320,
+            "contract:8:elements16:real": 320,
+            "contract:1:elements8:imag": 160,
+            "contract:1:elements8:real": 160,
+            "contract:6:elements4:imag": 80,
+            "contract:6:elements4:real": 80
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "named",
+        "threshold_bytes": null,
+        "path": [
+          [
+            21,
+            23
+          ],
+          [
+            5,
+            17
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            13,
+            22
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            12,
+            21
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            3,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": [
+          "contract:0:elements16:imag",
+          "contract:0:elements16:real",
+          "contract:10:elements8:imag",
+          "contract:10:elements8:real",
+          "contract:11:elements8:imag",
+          "contract:11:elements8:real",
+          "contract:12:elements4:imag",
+          "contract:12:elements4:real",
+          "contract:13:elements8:imag",
+          "contract:13:elements8:real",
+          "contract:14:elements16:imag",
+          "contract:14:elements16:real",
+          "contract:15:elements4:imag",
+          "contract:15:elements4:real",
+          "contract:16:elements16:imag",
+          "contract:16:elements16:real",
+          "contract:17:elements8:imag",
+          "contract:17:elements8:real",
+          "contract:18:elements16:imag",
+          "contract:18:elements16:real",
+          "contract:19:elements16:imag",
+          "contract:19:elements16:real",
+          "contract:1:elements8:imag",
+          "contract:1:elements8:real",
+          "contract:20:elements4:imag",
+          "contract:20:elements4:real",
+          "contract:21:elements8:imag",
+          "contract:21:elements8:real",
+          "contract:22:elements8:imag",
+          "contract:22:elements8:real",
+          "contract:23:elements8:imag",
+          "contract:23:elements8:real",
+          "contract:24:elements8:imag",
+          "contract:24:elements8:real",
+          "contract:25:elements16:imag",
+          "contract:25:elements16:real",
+          "contract:26:elements8:imag",
+          "contract:26:elements8:real",
+          "contract:27:elements1:imag",
+          "contract:27:elements1:real",
+          "contract:2:elements8:imag",
+          "contract:2:elements8:real",
+          "contract:3:elements8:imag",
+          "contract:3:elements8:real",
+          "contract:4:elements8:imag",
+          "contract:4:elements8:real",
+          "contract:5:elements8:imag",
+          "contract:5:elements8:real",
+          "contract:6:elements4:imag",
+          "contract:6:elements4:real",
+          "contract:7:elements4:imag",
+          "contract:7:elements4:real",
+          "contract:8:elements16:imag",
+          "contract:8:elements16:real",
+          "contract:9:elements4:imag",
+          "contract:9:elements4:real"
+        ],
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 12.812069250001514,
+      "first_execute_seconds": 0.00491195799986599,
+      "warm_seconds_median": 0.00036995800110162236,
+      "warm_seconds_mad": 7.495899990317412e-05,
+      "peak_rss_bytes": 251985920,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 1.534384414279311e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 22156,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.0120973140001297,
+            0.0010320651344954967,
+            0.013129238039255142
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.13984346389770508,
+            -0.2198277711868286,
+            -0.08128468692302704
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 288,
+        "temp_size_in_bytes": 10304
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1136,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5680,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 56,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 271,
+          "total_bytes": 9888,
+          "recomputable_bytes": 9280,
+          "bytes_by_category": {
+            "named": 9280,
+            "constant": 560,
+            "argument": 48
+          },
+          "bytes_by_name": {
+            "contract:0:elements16:imag": 320,
+            "contract:0:elements16:real": 320,
+            "contract:14:elements16:imag": 320,
+            "contract:14:elements16:real": 320,
+            "contract:16:elements16:imag": 320,
+            "contract:16:elements16:real": 320,
+            "contract:18:elements16:imag": 320,
+            "contract:18:elements16:real": 320,
+            "contract:19:elements16:imag": 320,
+            "contract:19:elements16:real": 320,
+            "contract:25:elements16:imag": 320,
+            "contract:25:elements16:real": 320,
+            "contract:8:elements16:imag": 320,
+            "contract:8:elements16:real": 320,
+            "contract:10:elements8:imag": 160,
+            "contract:10:elements8:real": 160,
+            "contract:13:elements8:imag": 160,
+            "contract:13:elements8:real": 160,
+            "contract:17:elements8:imag": 160,
+            "contract:17:elements8:real": 160,
+            "contract:1:elements8:imag": 160,
+            "contract:1:elements8:real": 160,
+            "contract:21:elements8:imag": 160,
+            "contract:21:elements8:real": 160,
+            "contract:22:elements8:imag": 160,
+            "contract:22:elements8:real": 160,
+            "contract:23:elements8:imag": 160,
+            "contract:23:elements8:real": 160,
+            "contract:24:elements8:imag": 160,
+            "contract:24:elements8:real": 160,
+            "contract:26:elements8:imag": 160,
+            "contract:26:elements8:real": 160,
+            "contract:3:elements8:imag": 160,
+            "contract:3:elements8:real": 160,
+            "contract:4:elements8:imag": 160,
+            "contract:4:elements8:real": 160,
+            "contract:5:elements8:imag": 160,
+            "contract:5:elements8:real": 160,
+            "contract:12:elements4:imag": 80,
+            "contract:12:elements4:real": 80,
+            "contract:15:elements4:imag": 80,
+            "contract:15:elements4:real": 80,
+            "contract:20:elements4:imag": 80,
+            "contract:20:elements4:real": 80,
+            "contract:6:elements4:imag": 80,
+            "contract:6:elements4:real": 80,
+            "contract:7:elements4:imag": 80,
+            "contract:7:elements4:real": 80,
+            "contract:9:elements4:imag": 80,
+            "contract:9:elements4:real": 80
+          }
+        }
+      }
+    },
+    {
+      "config": {
+        "path_strategy": "random-greedy",
+        "remat_policy": "none",
+        "threshold_bytes": null,
+        "path": [
+          [
+            21,
+            23
+          ],
+          [
+            5,
+            17
+          ],
+          [
+            4,
+            15
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            13,
+            22
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            12,
+            21
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            3,
+            9
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "subtree_depth": null,
+        "save_names": null,
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "representation": "direct_tn"
+      },
+      "compile_seconds": 10.568467791999865,
+      "first_execute_seconds": 0.002787833000184037,
+      "warm_seconds_median": 0.0003032079985132441,
+      "warm_seconds_mad": 1.2915996194351465e-05,
+      "peak_rss_bytes": 262553600,
+      "energy_abs_error": 2.384185791015625e-07,
+      "gradient_relative_l2_error": 1.534384414279311e-07,
+      "valid": true,
+      "failure": null,
+      "worker_pid": 22399,
+      "parent_pid": 20531,
+      "energy": -2.9412856101989746,
+      "gradient": [
+        [
+          [
+            0.5112950205802917,
+            0.2359461784362793,
+            0.0
+          ],
+          [
+            -0.0120973140001297,
+            0.0010320651344954967,
+            0.013129238039255142
+          ]
+        ],
+        [
+          [
+            0.4693846106529236,
+            0.21860766410827637,
+            0.0
+          ],
+          [
+            -0.13984346389770508,
+            -0.2198277711868286,
+            -0.08128468692302704
+          ]
+        ]
+      ],
+      "jax_memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 48,
+        "generated_code_size_in_bytes": 0,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_generated_code_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 68,
+        "peak_memory_in_bytes": 276,
+        "temp_size_in_bytes": 10052
+      },
+      "static_estimate": {
+        "gate_representation": "dense",
+        "hamiltonian_representation": "pauli_sum",
+        "tensor_count": 29,
+        "input_tensor_elements": 200,
+        "path_flops": 1136,
+        "contractions_per_energy": 5,
+        "estimated_energy_flops": 5680,
+        "estimated_energy_tensor_bindings": 145,
+        "largest_intermediate_elements": 16,
+        "contraction_steps": 28,
+        "rematerialized_steps": 0,
+        "rematerialized_units": 0,
+        "saved_named_units": 0,
+        "max_step_output_bytes": 128,
+        "residual_profile": {
+          "residual_count": 750,
+          "total_bytes": 22660,
+          "recomputable_bytes": 20720,
+          "bytes_by_category": {
+            "primitive:dot_general": 9280,
+            "jitted:_diag": 6080,
+            "primitive:conj": 2480,
+            "literal": 1380,
+            "primitive:reshape": 1280,
+            "primitive:exp": 640,
+            "constant": 560,
+            "primitive:concatenate": 480,
+            "primitive:cos": 240,
+            "primitive:sin": 240
+          },
+          "bytes_by_name": {}
+        }
+      }
+    }
+  ],
+  "measurement_notes": {
+    "peak_rss": "process peak RSS, not GPU peak memory",
+    "jax_memory_analysis": "compiler-reported executable fields when available",
+    "residual_profile": "byte-accounted values retained by JAX reverse mode; this is logical tape size, not liveness-aware peak memory"
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-29T15:38:59.747978+00:00",
+  "method": {
+    "fresh_process": true,
+    "unique_jax_cache": true,
+    "x64_enabled": true,
+    "ground_oracle": "dense-eigvalsh",
+    "synchronization": "jax.block_until_ready"
+  },
+  "result": {
+    "spec": {
+      "nqubits": 4,
+      "depth": 2,
+      "coupling": 1.0,
+      "transverse_field": 1.0,
+      "longitudinal_field": 0.35,
+      "dtype": "complex128"
+    },
+    "ansatz": "rzz-ry-rx",
+    "target_energy_error": 0.01,
+    "max_steps": 100,
+    "seed": 7,
+    "converged": true,
+    "evaluations": 15,
+    "optimizer_steps": 13,
+    "compile_seconds": 2.2481818750020466,
+    "optimization_seconds": 1.9509796670026844,
+    "time_to_target_seconds": 4.20587583300221,
+    "total_seconds": 4.205982542000129,
+    "peak_rss_bytes": 241418240,
+    "ground_energy": -5.562986255750035,
+    "final_energy": -5.553574502692688,
+    "final_energy_error": 0.009411753057347205,
+    "final_parameters": [
+      [
+        [
+          0.13828964895309884,
+          0.12882620548389123,
+          0.24973761933599475,
+          0.0
+        ],
+        [
+          -0.3323676303698203,
+          -0.5977242472759207,
+          -0.3936547934269535,
+          -0.221167923164007
+        ],
+        [
+          0.15122517059068666,
+          0.25185208020954314,
+          0.3976359898968558,
+          0.14772775161028834
+        ]
+      ],
+      [
+        [
+          -0.22248325007938716,
+          -0.1570117636721782,
+          -0.288023664779844,
+          0.0
+        ],
+        [
+          -0.5271593872041251,
+          -0.47525500216191247,
+          -0.6585181882563719,
+          -0.6351260124462282
+        ],
+        [
+          -0.22851530559808558,
+          -0.26898199329638744,
+          -0.31749288665716124,
+          -0.206954855639018
+        ]
+      ]
+    ],
+    "trace": [
+      {
+        "evaluation": 1,
+        "optimizer_step": 0,
+        "energy": -4.273842147731851,
+        "energy_error": 1.289144108018184,
+        "gradient_norm": 1.4962449199145773,
+        "elapsed_seconds": 4.198364666997804
+      },
+      {
+        "evaluation": 2,
+        "optimizer_step": 0,
+        "energy": -4.989622009510255,
+        "energy_error": 0.5733642462397803,
+        "gradient_norm": 2.003127400600751,
+        "elapsed_seconds": 4.199868292002066
+      },
+      {
+        "evaluation": 3,
+        "optimizer_step": 1,
+        "energy": -5.367339571593918,
+        "energy_error": 0.19564668415611663,
+        "gradient_norm": 0.941538099989693,
+        "elapsed_seconds": 4.200573624999379
+      },
+      {
+        "evaluation": 4,
+        "optimizer_step": 2,
+        "energy": -5.400840622584177,
+        "energy_error": 0.16214563316585817,
+        "gradient_norm": 0.9129201606878714,
+        "elapsed_seconds": 4.201129000000947
+      },
+      {
+        "evaluation": 5,
+        "optimizer_step": 3,
+        "energy": -5.492870646219796,
+        "energy_error": 0.0701156095302391,
+        "gradient_norm": 0.24166120454419004,
+        "elapsed_seconds": 4.201561124995351
+      },
+      {
+        "evaluation": 6,
+        "optimizer_step": 4,
+        "energy": -5.505936612299763,
+        "energy_error": 0.05704964345027186,
+        "gradient_norm": 0.17477038489196578,
+        "elapsed_seconds": 4.202056166999682
+      },
+      {
+        "evaluation": 7,
+        "optimizer_step": 5,
+        "energy": -5.518302072921354,
+        "energy_error": 0.04468418282868125,
+        "gradient_norm": 0.20633425344963677,
+        "elapsed_seconds": 4.202886207996926
+      },
+      {
+        "evaluation": 8,
+        "optimizer_step": 6,
+        "energy": -5.520376437737073,
+        "energy_error": 0.04260981801296193,
+        "gradient_norm": 0.23095221060715765,
+        "elapsed_seconds": 4.203234708002128
+      },
+      {
+        "evaluation": 9,
+        "optimizer_step": 7,
+        "energy": -5.524193419993499,
+        "energy_error": 0.038792835756535915,
+        "gradient_norm": 0.07996498000689256,
+        "elapsed_seconds": 4.203700457997911
+      },
+      {
+        "evaluation": 10,
+        "optimizer_step": 8,
+        "energy": -5.5256430737586575,
+        "energy_error": 0.03734318199137743,
+        "gradient_norm": 0.06638372005127469,
+        "elapsed_seconds": 4.204057374998229
+      },
+      {
+        "evaluation": 11,
+        "optimizer_step": 9,
+        "energy": -5.530445157397767,
+        "energy_error": 0.03254109835226782,
+        "gradient_norm": 0.13522427877172344,
+        "elapsed_seconds": 4.204452166995907
+      },
+      {
+        "evaluation": 12,
+        "optimizer_step": 10,
+        "energy": -5.535609981546048,
+        "energy_error": 0.027376274203986917,
+        "gradient_norm": 0.18691450561885192,
+        "elapsed_seconds": 4.204768167001021
+      },
+      {
+        "evaluation": 13,
+        "optimizer_step": 11,
+        "energy": -5.541101171048889,
+        "energy_error": 0.021885084701145807,
+        "gradient_norm": 0.1711013701745748,
+        "elapsed_seconds": 4.205087458001799
+      },
+      {
+        "evaluation": 14,
+        "optimizer_step": 12,
+        "energy": -5.548858695989115,
+        "energy_error": 0.014127559760919617,
+        "gradient_norm": 0.10374459220560767,
+        "elapsed_seconds": 4.20547679199808
+      },
+      {
+        "evaluation": 15,
+        "optimizer_step": 13,
+        "energy": -5.553574502692688,
+        "energy_error": 0.009411753057347205,
+        "gradient_norm": 0.12826272503649058,
+        "elapsed_seconds": 4.205873749997409
+      }
+    ],
+    "z2_spatial_compression": {
+      "applicable": false,
+      "reasons": [
+        "longitudinal Z field breaks global-X symmetry",
+        "RY ansatz generators break global-X symmetry"
+      ],
+      "commutator_norm": 5.6
+    },
+    "optimizer_message": null
+  }
+}
