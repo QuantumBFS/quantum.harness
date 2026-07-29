@@ -188,3 +188,43 @@ and directed outward endpoints are in
   or full BOTS-848 suite was performed during the review attempt.
 
 Post-review local result: `slice-pass / external-spec-review-pending`.
+
+## Certificate-bound review-fix amendment
+
+A follow-up review found that the certificate reused the grouping/cache key
+helper, which intentionally canonicalizes signed zero, for RN-cell identity.
+It also found that the precision-22 fast certificate context inherited the
+ambient Decimal rounding mode even though the certificate bound assumes
+round-to-nearest-even.
+
+The public tests-only RED is
+`46c9304bd58e94f89a53fee89a77b3bcddfc50df`.  Its signed-zero case uses a
+2,500-digit Decimal oracle and requires raw `-0.0` plus one real fallback.  Its
+two deterministic ambient-rounding cases compare public result bits and the
+real fast/fallback decision under `ROUND_FLOOR` and `ROUND_CEILING` against an
+explicit RN baseline.  Before the correction, the selected result was
+`3 failed, 95 deselected in 5.04s` for exactly those three behaviors.
+
+The production review-fix is
+`f5233a3008fd51353787b3c5a1cb64d8d8ac6b4b`.  It uses raw IEEE-binary64 bits
+only for certificate-cell identity and explicitly sets the precision-22 fast
+context to `ROUND_HALF_EVEN`; grouping/cache zero canonicalization, the
+operation-count bound, precision, guard digits, expected values, and fallback
+algorithm remain unchanged.
+
+Fresh verification produced `3 passed, 95 deselected in 1.27s` for the new
+review cases, `2 passed, 96 deselected in 84.93s` for the prior
+operation-count-bound cases, `12 passed, 86 deselected in 1.62s` for the
+original focused selection, and `98 passed in 163.85s` for the complete
+operator file.  Compileall exited `0`, the production forbidden scan exited
+`1` with no matches, and the pre-documentation `git diff --check` exited `0`.
+
+The review-fix active interval was approximately `00:13`, from
+`2026-07-29 11:35:34+08:00` through `2026-07-29 11:48:13+08:00`;
+documentation closeout followed.  The complete operator file executed its
+historical test-only `fock_ed` full-basis/dense fixtures, but no common
+evaluator, candidate ED reveal, overlap, candidate selection, A03 work, push,
+deletion, or move occurred.
+
+Post-review-fix local result: `review-fix complete /
+external-spec-review-pending`; no specification-compliance claim is made.

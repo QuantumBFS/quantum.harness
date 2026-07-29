@@ -9,7 +9,7 @@
 - Oracle boundary: no common evaluator, real ED reveal, overlap, or candidate
   selection may be run; the mandatory complete operator test may execute its
   historical test-only Fock-ED/dense fixtures
-- Current disposition: `in progress`
+- Current disposition: `review-fix complete / external-spec-review-pending`
 
 ## Phase 1/2 root-cause hypothesis
 
@@ -152,3 +152,66 @@ The operation-count bound therefore does not unconditionally send physical
   deletion, or move was performed.
 
 Final try 1 disposition: `slice-pass / external-spec-review-pending`.
+
+## Review-fix: raw RN cells and ambient Decimal isolation
+
+The review-fix interval started at `2026-07-29 11:35:34+08:00`.  Review
+verified two independent certificate defects:
+
+1. `_float_bits` intentionally canonicalizes `+0.0` and `-0.0` for grouping
+   and cache keys, but its reuse for certificate cell identity incorrectly
+   treated the two signed-zero RN results as one cell in both the fast and
+   fallback certifiers.
+2. The precision-22 fast certificate context inherited the caller's ambient
+   Decimal rounding mode even though its roundoff derivation assumes
+   round-to-nearest-even.
+
+The tests-only RED commit is
+`46c9304bd58e94f89a53fee89a77b3bcddfc50df`
+(`test(qmc): specify signed-zero certificate boundaries`).  A fresh selected
+run produced:
+
+```text
+3 failed, 95 deselected in 5.04s
+```
+
+The signed-zero public regression used a 2,500-digit independent Decimal row
+oracle, established raw expected bits `8000000000000000`, and required one
+call to the real fallback; the old path returned raw bits
+`0000000000000000` with no fallback.  The two ambient-rounding public
+regressions used deterministic rows under `ROUND_FLOOR` and `ROUND_CEILING`.
+Their public result bits matched an explicit RN baseline, but the old fast
+certifier made one unnecessary real-fallback call in each case instead of
+preserving the RN fast/fallback decision.
+
+The minimal production correction is
+`f5233a3008fd51353787b3c5a1cb64d8d8ac6b4b`
+(`fix(qmc): preserve certificate rounding cells`).  It adds raw IEEE-binary64
+bit identity only for fast and fallback certificate-cell comparisons and sets
+the precision-22 fast context explicitly to `ROUND_HALF_EVEN`.  The existing
+zero-canonicalizing `_float_bits` remains unchanged for grouping and cache
+keys.  The operation-count bound, precision 22, two guard digits, grouping,
+expected values, and fallback algorithm were not changed.
+
+Fresh post-fix verification used the explicit Python 3.13 interpreter:
+
+| Check | Result |
+|---|---|
+| Signed-zero plus ambient-rounding review regressions | `3 passed, 95 deselected in 1.27s` |
+| Existing operation-count-bound regressions | `2 passed, 96 deselected in 84.93s` |
+| Original focused 12 | `12 passed, 86 deselected in 1.62s` |
+| Complete occupation-operator file | `98 passed in 163.85s` |
+| Python compileall | exit `0`; no output |
+| Production forbidden scan | `rg` exit `1`; no matches |
+| `git diff --check` before documentation | exit `0` |
+
+The review-fix active interval was approximately `00:13`, from
+`2026-07-29 11:35:34+08:00` through `2026-07-29 11:48:13+08:00`;
+documentation closeout followed.  The complete operator test did execute its
+historical test-only `fock_ed` full-basis, Hamiltonian, and L-squared fixtures.
+Those fixtures were not a candidate-state common-evaluator run or real ED
+reveal.  No common evaluator, candidate ED reveal, overlap, candidate
+selection, A03 work, push, deletion, or move was performed.
+
+Final review-fix disposition: `review-fix complete /
+external-spec-review-pending`; no specification-compliance claim is made.
