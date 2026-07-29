@@ -186,10 +186,17 @@ def quality_flags(summary: Mapping) -> list[dict]:
     return flags
 
 
-def _manifest_lookup(manifests: Mapping[str, Mapping]) -> dict[tuple[int, float], dict]:
+def _manifest_lookup(
+    manifests: Mapping[str, Mapping],
+    *,
+    sigma: float,
+) -> dict[tuple[int, float], dict]:
     lookup = {}
     for manifest in manifests.values():
         settings = manifest.get("settings", {})
+        manifest_sigma = settings.get("sigma")
+        if manifest_sigma is None or not np.isclose(float(manifest_sigma), sigma):
+            continue
         length = settings.get("length", settings.get("L"))
         gamma = settings.get("gamma", settings.get("Gamma"))
         if length is not None and gamma is not None:
@@ -219,7 +226,7 @@ def decide_refinement(
 ) -> dict:
     """Select a unique observed broad bracket without extending the grid."""
     gammas = [float(value) for value in broad_spec["axes"]["Gamma"]]
-    lookup = _manifest_lookup(manifests)
+    lookup = _manifest_lookup(manifests, sigma=float(sigma))
     differences = []
     missing = []
     for gamma in gammas:
@@ -279,7 +286,7 @@ def finalize_crossing(
     if decision.get("status") != "ready":
         return dict(decision)
     gammas = [float(value) for value in decision["refinement_grid"]]
-    lookup = _manifest_lookup(manifests)
+    lookup = _manifest_lookup(manifests, sigma=float(decision["sigma"]))
     differences = []
     for gamma in gammas:
         small = lookup.get((32, gamma))

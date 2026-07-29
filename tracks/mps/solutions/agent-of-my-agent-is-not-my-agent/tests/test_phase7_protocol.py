@@ -213,6 +213,20 @@ def test_refinement_leaves_missing_or_ambiguous_cases_unresolved(
     assert incomplete["status"] == "incomplete"
 
 
+def test_refinement_ignores_manifests_from_other_sigma(tmp_path: Path) -> None:
+    spec = build_broad_spec(fit_records(), tmp_path)
+    target = broad_manifests(spec, 1.75, [1.0] * 15)
+    other = broad_manifests(
+        spec,
+        1.80,
+        np.linspace(1.0, -1.0, 15).tolist(),
+    )
+
+    decision = decide_refinement(1.75, spec, {**target, **other})
+
+    assert decision["status"] == "unresolved_no_bracket"
+
+
 def test_final_crossing_records_resolution_and_gap_spec(tmp_path: Path) -> None:
     spec = build_broad_spec(fit_records(), tmp_path)
     decision = {

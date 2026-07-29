@@ -159,6 +159,11 @@ crossover-location claim. It preserves exact-zero MPO pruning, checkpoint
 resumability, full raw observables, and the separation of MPO, MPS, and
 finite-size uncertainty.
 
+The review-gated proposal is in
+`results/phase7-crossover/proposal/`: `review-summary.md` reports the
+Hamiltonian fits and resource estimate, while `broad/run_spec.json` contains
+the 210 resumable commands. Preparing these files does not execute DMRG.
+
 Prepare the focused K comparison:
 
 ```bash
