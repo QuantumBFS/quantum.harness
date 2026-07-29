@@ -1,0 +1,16 @@
+{
+  "protocol": "tp-exterior-extension-v1",
+  "dimension": 5,
+  "alphabet": [
+    "A_plus",
+    "A_plus_transpose",
+    "A_minus",
+    "A_minus_transpose"
+  ],
+  "basis_convention": "zero-based-lexicographic-subsets",
+  "cell_count": 51840,
+  "runner": "oracle.tp_exterior_extension",
+  "numerical_scope": "approved-remote-hosts-only",
+  "candidate_identity": "sha256 of canonical exact rational parameters",
+  "survivor_promotion": "exact rational compound replay and positive-field Hermitian Fock transfer are separate"
+}
