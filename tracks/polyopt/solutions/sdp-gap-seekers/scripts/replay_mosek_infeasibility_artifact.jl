@@ -120,8 +120,10 @@ function mosek_ray_replay_report(
         passed = status_passed && residual_passed && separation_passed
 
         return Dict(
-            "problem_status" => string(problem_status),
-            "solution_status" => string(solution_status),
+            # Mosek's enum wrappers define `show` but their inherited
+            # `string(::Integer)` path attempts an invalid promotion.
+            "problem_status" => sprint(show, problem_status),
+            "solution_status" => sprint(show, solution_status),
             "status_passed" => status_passed,
             "finite" => finite,
             "dual_objective" => dual_objective,
