@@ -252,6 +252,7 @@ function validate_input(
     runmeta["schema_version"] in (
         "square-primal-mof-runmeta-v1",
         "square-conic-mof-runmeta-v1",
+        "square-d4-conic-mof-runmeta-v1",
     ) ||
         error("unexpected runmeta schema")
     runmeta["solver_invoked"] == false ||

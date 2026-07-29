@@ -31,14 +31,18 @@ using ..CoreMGK:
     commutator_polynomial,
     scalarize,
     add_coefficient!
+using ..SquareSymmetryBlock:
+    D4SymmetryBasis
 
 export ConicStationaritySpec,
        ConicAssembly,
        ConicJuMPModel,
+       D4ConicJuMPModel,
        stationarity_candidates_conic,
        canonical_stationarity_equalities_conic,
        assemble_square_conic,
        build_square_conic_jump,
+       build_square_d4_conic_jump,
        square_conic_moment_degree
 
 const BigRational = Rational{BigInt}
@@ -607,6 +611,182 @@ function build_square_conic_jump(
         normalization,
         stationarity_constraints,
         positive_constraint,
+        gap_constraint,
+        assembly.assembly_sha256,
+    )
+end
+
+struct D4ConicJuMPModel
+    model::JuMP.Model
+    moment_variables::Vector{JuMP.VariableRef}
+    normalization_constraint::JuMP.ConstraintRef
+    stationarity_constraints::Vector{JuMP.ConstraintRef}
+    positive_block_constraints::Vector{JuMP.ConstraintRef}
+    positive_block_irreps::Vector{Symbol}
+    gap_constraint::JuMP.ConstraintRef
+    assembly_sha256::String
+end
+
+"""Build a complex affine from a flat ScalarMoment -> GaussianRational map."""
+function affine_from_coefficients(
+    coeffs::Dict{ScalarMoment,GaussianRational},
+    moment_variables::Vector{JuMP.VariableRef},
+    moment_indices::Dict{ScalarMoment,Int},
+)
+    expression = ComplexAffineExpression(0.0 + 0.0im)
+    for (moment, coefficient) in coeffs
+        iszero(coefficient) && continue
+        index = moment_indices[moment]
+        JuMP.add_to_expression!(
+            expression,
+            checked_complex_float(coefficient),
+            moment_variables[index],
+        )
+    end
+    return expression
+end
+
+"""
+One D4 irrep block of the positive moment matrix: `(Q_lambda' M Q_lambda)[a,b]`
+where only the sparse support of the Q columns is visited, so each entry costs
+~(|supp_a| * |supp_b|) CoreMGK pair evaluations. Upper triangle built directly;
+lower triangle is the explicit conjugate; diagonal reality is checked.
+"""
+function d4_positive_block_matrix(
+    assembly::ConicAssembly,
+    d4_basis::D4SymmetryBasis,
+    block_idx::Int,
+    moment_variables::Vector{JuMP.VariableRef},
+    moment_indices::Dict{ScalarMoment,Int},
+)
+    plan = assembly.plan
+    entries = plan.positive_basis.entries
+    Q = d4_basis.Q
+    range = d4_basis.block_ranges[block_idx]
+    irrep = d4_basis.block_irreps[block_idx]
+    block_dim = length(range)
+    supports = Vector{Tuple{Int,Rational{BigInt}}}[
+        [(j, Q[j, a]) for j in axes(Q, 1) if !iszero(Q[j, a])] for a in range
+    ]
+    matrix = Matrix{ComplexAffineExpression}(undef, block_dim, block_dim)
+    for ai in 1:block_dim
+        for bi in ai:block_dim
+            coeffs = Dict{ScalarMoment,GaussianRational}()
+            for (j, qj) in supports[ai]
+                for (k, qk) in supports[bi]
+                    components = positive_pair_components(entries[j], entries[k])
+                    m_component = only([
+                        component for component in components
+                        if component.component == :M
+                    ])
+                    weight = qj * qk
+                    for record in m_component.coefficients
+                        add_coefficient!(coeffs, record.row, weight * record.coefficient)
+                    end
+                end
+            end
+            matrix[ai, bi] = affine_from_coefficients(coeffs, moment_variables, moment_indices)
+        end
+        require_real_diagonal(matrix[ai, ai], Symbol("positive_d4_$irrep"), ai)
+        for bi in (ai + 1):block_dim
+            matrix[bi, ai] = conj(matrix[ai, bi])
+        end
+    end
+    return matrix
+end
+
+"""
+Build the D4-blocked primal JuMP feasibility model: one HermitianPSDCone per
+positive irrep block (A1/A2/B1/B2/E) instead of one 352-dim cone, plus the
+unchanged 4-dim gap cone (the gap basis is entirely on the D4-fixed centre site,
+so it is all A1 and does not split). Normalization and stationarity are
+unchanged from the unsymmetrized assembly.
+"""
+function build_square_d4_conic_jump(
+    assembly::ConicAssembly,
+    d4_basis::D4SymmetryBasis;
+    model::JuMP.Model = JuMP.Model(),
+)
+    JuMP.num_variables(model) == 0 ||
+        throw(ArgumentError("target JuMP model must be empty"))
+    isempty(JuMP.list_of_constraint_types(model)) ||
+        throw(ArgumentError("target JuMP model must be empty"))
+    first(assembly.moments) == ScalarMoment(PauliWord[]) ||
+        error("conic assembly identity moment is not first")
+    length(d4_basis.entries) == length(assembly.plan.positive_basis.entries) ||
+        error("D4 basis does not match the positive basis")
+
+    moment_indices = moment_index_map(assembly.moments)
+    moment_variables = JuMP.@variable(
+        model,
+        [1:length(assembly.moments)],
+        base_name = "moment",
+    )
+    normalization = name_constraint!(
+        JuMP.@constraint(model, moment_variables[1] == 1.0),
+        "normalization",
+    )
+
+    stationarity_constraints = JuMP.ConstraintRef[]
+    for (index, equality) in enumerate(assembly.stationarity_equalities)
+        expression = JuMP.AffExpr(0.0)
+        for (moment, coefficient) in equality
+            variable_index = moment_indices[moment]
+            JuMP.add_to_expression!(
+                expression,
+                checked_float(coefficient),
+                moment_variables[variable_index],
+            )
+        end
+        push!(
+            stationarity_constraints,
+            name_constraint!(
+                JuMP.@constraint(model, expression == 0.0),
+                "stationarity[$index]",
+            ),
+        )
+    end
+
+    positive_block_constraints = JuMP.ConstraintRef[]
+    positive_block_irreps = Symbol[]
+    for block_idx in eachindex(d4_basis.block_irreps)
+        irrep = d4_basis.block_irreps[block_idx]
+        block_matrix = d4_positive_block_matrix(
+            assembly,
+            d4_basis,
+            block_idx,
+            moment_variables,
+            moment_indices,
+        )
+        push!(
+            positive_block_constraints,
+            name_constraint!(
+                JuMP.@constraint(
+                    model,
+                    Hermitian(block_matrix) in JuMP.HermitianPSDCone(),
+                ),
+                "positive_psd_d4_$irrep",
+            ),
+        )
+        push!(positive_block_irreps, irrep)
+    end
+
+    gap_matrix = conic_hermitian_matrix(:gap, assembly, moment_variables, moment_indices)
+    gap_constraint = name_constraint!(
+        JuMP.@constraint(
+            model,
+            Hermitian(gap_matrix) in JuMP.HermitianPSDCone(),
+        ),
+        "gap_psd",
+    )
+
+    return D4ConicJuMPModel(
+        model,
+        moment_variables,
+        normalization,
+        stationarity_constraints,
+        positive_block_constraints,
+        positive_block_irreps,
         gap_constraint,
         assembly.assembly_sha256,
     )

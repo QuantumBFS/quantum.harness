@@ -59,11 +59,12 @@ git status --porcelain --untracked-files=all > "${RUN_DIR}/git-status.txt"
 env | LC_ALL=C sort > "${RUN_DIR}/environment.txt"
 
 echo "[square-conic-sbatch] building SquareGapConic MOF (solver-free)"
+BUILD_SCRIPT="${CONIC_BUILD_SCRIPT:-build_square_conic_mof.jl}"
 julia \
     --project=julia-env \
     --startup-file=no \
     --history-file=no \
-    tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_square_conic_mof.jl \
+    tracks/polyopt/solutions/sdp-gap-seekers/scripts/"$BUILD_SCRIPT" \
     --basis "$CONIC_BASIS" \
     --g "$CONIC_G" \
     --gamma "$CONIC_GAMMA" \
