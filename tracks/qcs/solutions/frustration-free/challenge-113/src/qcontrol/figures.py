@@ -41,15 +41,21 @@ class FigureManifest:
     summary_sha256: str
     matplotlib_version: str
     numpy_version: str
+    source: str
+    config: str
+    run_id: str
     figures: tuple[FigureManifestEntry, ...]
-    schema_version: int = 1
+    schema_version: int = 2
 
     def canonical_dict(self) -> dict[str, object]:
         return {
+            "config": self.config,
             "figures": [item.canonical_dict() for item in self.figures],
             "matplotlib_version": self.matplotlib_version,
             "numpy_version": self.numpy_version,
+            "run_id": self.run_id,
             "schema_version": self.schema_version,
+            "source": self.source,
             "summary_sha256": self.summary_sha256,
         }
 
@@ -126,11 +132,6 @@ def _strict_summary(summary: Summary) -> Summary:
                     "required production metrics are unavailable for "
                     f"{method.method!r} in {_stratum_id(stratum)}"
                 )
-            if not method.conditional_first_certified_queries:
-                raise FigureError(
-                    "required certified-query metric is unavailable for "
-                    f"{method.method!r} in {_stratum_id(stratum)}"
-                )
     dimensions = {item.key.hilbert_dimension for item in summary.strata}
     if not {2, 4}.issubset(dimensions):
         raise FigureError("rank figure requires production strata for d=2 and d=4")
@@ -141,8 +142,10 @@ def _stratum_id(stratum: StratumSummary) -> str:
     key = stratum.key
     shots = "exact" if key.shots is None else str(key.shots)
     return (
-        f"{key.system_name}|d={key.hilbert_dimension}|k={key.search_dimension}|"
-        f"gap={key.gap:g}|shots={shots}"
+        f"system={key.system_name}|d={key.hilbert_dimension}|"
+        f"segments={key.segments}|amplitude_bound={key.amplitude_bound:g}|"
+        f"duration={key.duration:g}|k={key.search_dimension}|gap={key.gap:g}|"
+        f"shots={shots}"
     )
 
 
@@ -237,6 +240,27 @@ def _plot_interval_series(
     axis.fill_between(x, low, high, color=style["color"], alpha=0.16)
 
 
+def _plot_error_series(
+    axis: matplotlib.axes.Axes,
+    x: Sequence[float],
+    center: Sequence[float],
+    low: Sequence[float],
+    high: Sequence[float],
+    method: str,
+) -> None:
+    values = np.asarray(center, dtype=np.float64)
+    lower = np.asarray(low, dtype=np.float64)
+    upper = np.asarray(high, dtype=np.float64)
+    axis.errorbar(
+        x,
+        values,
+        yerr=np.vstack((values - lower, upper - values)),
+        label=_DISPLAY[method],
+        capsize=3,
+        **_STYLES[method],
+    )
+
+
 def _queries_figure(
     summary: Summary,
     caption: str,
@@ -246,6 +270,9 @@ def _queries_figure(
         lambda item: (
             item.key.system_name,
             item.key.hilbert_dimension,
+            item.key.segments,
+            item.key.amplitude_bound,
+            item.key.duration,
             item.key.gap,
             item.key.shots,
         ),
@@ -258,13 +285,13 @@ def _queries_figure(
         for name in _METHODS:
             query_rows = [
                 _bootstrap_median(
-                    _method(item, name).conditional_first_certified_queries,
+                    _method(item, name).censored_first_certified_queries,
                     summary,
-                    f"{_stratum_id(item)}:{name}:conditional-query",
+                    f"{_stratum_id(item)}:{name}:censored-query",
                 )
                 for item in strata
             ]
-            _plot_interval_series(
+            _plot_error_series(
                 axes[row, 0],
                 x,
                 [item[0] for item in query_rows],
@@ -273,7 +300,7 @@ def _queries_figure(
                 name,
             )
             probabilities = [_method(item, name).success_probability for item in strata]
-            _plot_interval_series(
+            _plot_error_series(
                 axes[row, 1],
                 x,
                 [item.value for item in probabilities],
@@ -283,7 +310,9 @@ def _queries_figure(
             )
         key = strata[0].key
         facet = (
-            f"{key.system_name}, d={key.hilbert_dimension}, gap={key.gap:g}, "
+            f"{key.system_name}, d={key.hilbert_dimension}, "
+            f"segments={key.segments}, amplitude={key.amplitude_bound:g}, "
+            f"duration={key.duration:g}, gap={key.gap:g}, "
             f"shots={'exact' if key.shots is None else key.shots}"
         )
         axes[row, 0].set_title(facet)
@@ -291,7 +320,7 @@ def _queries_figure(
         axes[row, 0].set_xlabel("search dimension k [basis directions]")
         axes[row, 1].set_xlabel("search dimension k [basis directions]")
         axes[row, 0].set_ylabel(
-            "first independently certified optimizer queries [count]"
+            "budget-censored median first-certified optimizer queries [count]"
         )
         axes[row, 1].set_ylabel("success probability within budget [fraction]")
         axes[row, 1].set_ylim(-0.03, 1.03)
@@ -311,6 +340,9 @@ def _advantage_figure(
         lambda item: (
             item.key.system_name,
             item.key.hilbert_dimension,
+            item.key.segments,
+            item.key.amplitude_bound,
+            item.key.duration,
             item.key.search_dimension,
             item.key.shots,
         ),
@@ -350,7 +382,8 @@ def _advantage_figure(
         key = strata[0].key
         facet = (
             f"{key.system_name}, d={key.hilbert_dimension}, "
-            f"k={key.search_dimension}, "
+            f"segments={key.segments}, amplitude={key.amplitude_bound:g}, "
+            f"duration={key.duration:g}, k={key.search_dimension}, "
             f"shots={'exact' if key.shots is None else key.shots}"
         )
         for column, (_, ylabel) in enumerate(metrics):
@@ -386,6 +419,9 @@ def _subspace_figure(
         lambda item: (
             item.key.system_name,
             item.key.hilbert_dimension,
+            item.key.segments,
+            item.key.amplitude_bound,
+            item.key.duration,
             item.key.search_dimension,
             item.key.shots,
         ),
@@ -410,9 +446,7 @@ def _subspace_figure(
                     for item in strata
                 ]
                 angle_style = dict(_STYLES[name])
-                angle_style["linestyle"] = ("-", "--", ":", "-.")[
-                    angle_index % 4
-                ]
+                angle_style["alpha"] = max(0.35, 1.0 - 0.15 * angle_index)
                 axes[row, 0].plot(
                     x,
                     angle_values,
@@ -437,7 +471,8 @@ def _subspace_figure(
         key = strata[0].key
         facet = (
             f"{key.system_name}, d={key.hilbert_dimension}, "
-            f"k={key.search_dimension}, "
+            f"segments={key.segments}, amplitude={key.amplitude_bound:g}, "
+            f"duration={key.duration:g}, k={key.search_dimension}, "
             f"shots={'exact' if key.shots is None else key.shots}"
         )
         for axis in axes[row]:
@@ -473,24 +508,21 @@ def _rank_figure(
     )
     figure, axes = _axes_grid(len(strata), 2, width=4.4, height=2.6)
     panel_strata: list[str] = []
-    threshold_positions = np.arange(len(_RANK_THRESHOLDS), dtype=np.float64)
     for row, stratum in enumerate(strata):
         panel_strata.append(_stratum_id(stratum))
         model = _method(stratum, "model_hessian")
         axes[row, 0].plot(
-            threshold_positions,
+            _RANK_THRESHOLDS,
             model.median_model_effective_ranks,
-            color=_STYLES["model_hessian"]["color"],
-            marker="o",
-            label="Model effective rank",
+            label="Model Hessian model rank",
+            **_STYLES["model_hessian"],
         )
         axes[row, 0].plot(
-            threshold_positions,
+            _RANK_THRESHOLDS,
             model.median_truth_effective_ranks,
-            color="#D55E00",
-            marker="s",
-            linestyle="--",
-            label="Truth effective rank",
+            label="Model Hessian truth rank",
+            alpha=0.55,
+            **_STYLES["model_hessian"],
         )
         expected = 3 if stratum.key.hilbert_dimension == 2 else 15
         axes[row, 0].axhline(
@@ -504,18 +536,18 @@ def _rank_figure(
         axes[row, 1].plot(
             components,
             signed,
-            color=_STYLES["model_hessian"]["color"],
-            marker="o",
-            label="Model-Hessian signed leading gaps",
+            label="Model Hessian signed leading gaps",
+            **_STYLES["model_hessian"],
         )
         axes[row, 1].axhline(0.0, color="#666666", linewidth=0.8, label="zero")
         facet = _stratum_id(stratum)
         axes[row, 0].set_title(facet)
         axes[row, 1].set_title(facet)
         axes[row, 0].set_xticks(
-            threshold_positions,
+            _RANK_THRESHOLDS,
             [f"{item:.0e}" for item in _RANK_THRESHOLDS],
         )
+        axes[row, 0].set_xlim(1.05e-6, 0.0)
         axes[row, 0].set_xlabel(
             "relative threshold τ in |λ| > τ max|λ| [dimensionless]"
         )
@@ -571,7 +603,6 @@ def _failure_figure(
     figure, axes = _axes_grid(1, 4, width=3.5, height=3.1)
     names = list(_METHODS)
     positions = np.arange(len(names))
-    colors = [_STYLES[name]["color"] for name in names]
     labels = [_DISPLAY[name] for name in names]
     queries = [
         float(np.median(_method(stratum, name).censored_first_certified_queries))
@@ -596,11 +627,11 @@ def _failure_figure(
     )
     for column, axis in enumerate(axes[0]):
         for index, name in enumerate(names):
-            axis.bar(
-                positions[index],
-                values[column][index],
-                color=colors[index],
+            axis.plot(
+                [positions[index]],
+                [values[column][index]],
                 label=labels[index],
+                **_STYLES[name],
             )
         axis.set_xticks(positions, labels, rotation=25, ha="right")
         axis.set_xlabel("search method [fixed production method]")
@@ -706,15 +737,15 @@ def render_publication_figures(
     entries: list[FigureManifestEntry] = []
     with matplotlib.rc_context(_RC):
         for filename, builder in builders:
-            figure: matplotlib.figure.Figure | None = None
+            existing_numbers = set(plt.get_fignums())
             try:
                 figure, panel_strata = builder()
                 if not figure.axes or any(not axis.has_data() for axis in figure.axes):
                     raise FigureError(f"{filename} contains an empty panel")
                 digest = _save_png(figure, output / filename)
             finally:
-                if figure is not None:
-                    plt.close(figure)
+                for number in set(plt.get_fignums()) - existing_numbers:
+                    plt.close(number)
             entries.append(
                 FigureManifestEntry(
                     filename=filename,
@@ -729,6 +760,9 @@ def render_publication_figures(
         summary_sha256=summary_digest,
         matplotlib_version=matplotlib.__version__,
         numpy_version=np.__version__,
+        source=source,
+        config=config,
+        run_id=run_id,
         figures=tuple(entries),
     )
     (output / "figure_manifest.json").write_bytes(
