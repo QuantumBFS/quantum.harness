@@ -82,7 +82,13 @@ def transformed_nonnegative_margin(
 
     minimum = float("inf")
     for matrix in checked:
-        transformed = np.linalg.solve(change_of_basis, matrix @ change_of_basis)
+        with np.errstate(over="ignore", invalid="ignore"):
+            product = matrix @ change_of_basis
+        if not np.all(np.isfinite(product)):
+            return None
+        transformed = np.linalg.solve(change_of_basis, product)
+        if not np.all(np.isfinite(transformed)):
+            return None
         if np.max(np.abs(np.imag(transformed))) > threshold:
             return None
         real_entries = np.real(transformed)
@@ -125,9 +131,10 @@ def common_transform_certificate(
                 raise ValueError("transform must match the compound dimension")
             if np.max(np.abs(np.imag(candidate))) > threshold:
                 raise ValueError("certificate transforms must be real within tolerance")
+            serialized_transform = np.real(candidate).astype(float)
             margins = [
                 transformed_nonnegative_margin(
-                    compounds, candidate, tolerance=threshold
+                    compounds, serialized_transform, tolerance=threshold
                 )
             ]
             margin = margins[0]
@@ -136,7 +143,7 @@ def common_transform_certificate(
             selected = {
                 "grade": grade,
                 "transform_id": str(transform_id),
-                "transform": np.real(candidate).astype(float).tolist(),
+                "transform": serialized_transform.tolist(),
                 "minimum_entry": float(margin),
             }
             break
