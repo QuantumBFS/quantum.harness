@@ -1174,3 +1174,12 @@ fresh clone omitted the gitignored `results/_slurm` directory, so Slurm could
 not open the configured stdout path. Create that exact directory and require
 it in the launch preflight before r3; this changes the failed launch condition
 and still performs no duplicate scientific compute.
+
+Audit r3 job `118177590` ran for 1:25 at 582,504 KiB MaxRSS. The existing
+scalar and affine-PSD ray replays still passed, and the new native bar-matrix
+certificate passed its source-status and fixed-right-hand-side checks, but the
+fresh task reported primal violation 1.0: 43/46 assertions passed. The replay
+had inserted scalar and bar-variable values but omitted Mosek's constraint
+activity vector. Extend the exact-bit artifact with that vector and let
+`updatesolutioninfo` recheck the complete primal tuple before r4. This is a
+changed artifact schema/test, not a repeated failure signature.

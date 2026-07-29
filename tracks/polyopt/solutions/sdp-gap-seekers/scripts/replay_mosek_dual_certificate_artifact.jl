@@ -40,6 +40,7 @@ function read_mosek_dual_certificate(path::AbstractString)
             Int(read_certificate_u64(io))
         semidefinite_variable_count =
             Int(read_certificate_u64(io))
+        constraint_values = read_certificate_float64_vector(io)
         scalar_values = read_certificate_float64_vector(io)
         bar_count = Int(read_certificate_u64(io))
         bar_count == semidefinite_variable_count || error(
@@ -57,6 +58,9 @@ function read_mosek_dual_certificate(path::AbstractString)
         eof(io) || error(
             "Mosek dual-certificate artifact has trailing bytes",
         )
+        length(constraint_values) == constraint_count || error(
+            "Mosek dual-certificate constraint count mismatch",
+        )
         length(scalar_values) == scalar_variable_count || error(
             "Mosek dual-certificate scalar count mismatch",
         )
@@ -70,6 +74,7 @@ function read_mosek_dual_certificate(path::AbstractString)
                 affine_conic_constraint_count,
             semidefinite_variable_count=
                 semidefinite_variable_count,
+            constraint_values=constraint_values,
             scalar_values=scalar_values,
             bar_dimensions=bar_dimensions,
             semidefinite_values=semidefinite_values,
@@ -178,7 +183,7 @@ function mosek_dual_certificate_replay_report(
             fill(Mosek.MSK_SK_UNK, numcon),
             fill(Mosek.MSK_SK_UNK, numvar),
             fill(Mosek.MSK_SK_UNK, numcone),
-            nothing,
+            certificate.constraint_values,
             certificate.scalar_values,
             nothing,
             nothing,

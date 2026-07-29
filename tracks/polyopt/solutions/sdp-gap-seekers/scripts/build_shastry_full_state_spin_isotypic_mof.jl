@@ -494,6 +494,7 @@ function write_mosek_dual_certificate_artifact(
     Int(Mosek.getnumacc(task)) == 0 ||
         error("dual-certificate artifact does not encode affine cones")
 
+    constraint_values = Mosek.getxc(task, Mosek.MSK_SOL_ITR)
     scalar_values = Mosek.getxx(task, Mosek.MSK_SOL_ITR)
     semidefinite_values = [
         Mosek.getbarxj(task, Mosek.MSK_SOL_ITR, index)
@@ -501,7 +502,11 @@ function write_mosek_dual_certificate_artifact(
     ]
     all(
         isfinite,
-        Iterators.flatten((scalar_values, semidefinite_values...)),
+        Iterators.flatten((
+            constraint_values,
+            scalar_values,
+            semidefinite_values...,
+        )),
     ) || error("refusing nonfinite Mosek dual certificate")
 
     endswith(path, ".certificate.bin") || error(
@@ -523,6 +528,7 @@ function write_mosek_dual_certificate_artifact(
         write_ray_u64(io, Int(Mosek.getnumcone(task)))
         write_ray_u64(io, Int(Mosek.getnumacc(task)))
         write_ray_u64(io, Int(Mosek.getnumbarvar(task)))
+        write_ray_float64_vector(io, constraint_values)
         write_ray_float64_vector(io, scalar_values)
         write_ray_u64(io, length(semidefinite_values))
         for (index, values) in enumerate(semidefinite_values)
@@ -540,7 +546,7 @@ function write_mosek_dual_certificate_artifact(
         "endianness" => "little",
         "problem_status" => sprint(show, problem_status),
         "solution_status" => sprint(show, solution_status),
-        "constraint_count" => Int(Mosek.getnumcon(task)),
+        "constraint_count" => length(constraint_values),
         "scalar_variable_count" => length(scalar_values),
         "semidefinite_variable_count" => length(semidefinite_values),
         "semidefinite_packed_value_count" =>

@@ -666,3 +666,7 @@ Updated: 2026-07-29 UTC.
 - Audit r2 `118177473` exposed the actual common launch error: the new clone
   lacks its gitignored `results/_slurm` output directory. Create only that
   directory and use a fail-closed path preflight for r3.
+- Dual audit r3 `118177590` ran and passed 43/46 checks. Its new native
+  certificate had valid source status and RHS structure, but fresh-task
+  violation was 1.0 because the artifact omitted constraint activities. The
+  artifact now stores their exact Float64 bits for a complete replay in r4.

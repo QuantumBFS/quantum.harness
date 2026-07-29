@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:09:43Z
+Updated: 2026-07-29T17:12:58Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -126,5 +126,10 @@ Updated: 2026-07-29T17:09:43Z
   different node. The verified common cause is a missing gitignored
   `results/_slurm` directory in the fresh clone, preventing Slurm from opening
   stdout. Create that exact directory and preflight it before r3.
+- Audit r3 `118177590` executed for 1:25 (582,504 KiB MaxRSS) and passed 43/46
+  tests. The native bar-matrix artifact passed source-status/RHS checks but
+  fresh-task primal violation was 1.0 because constraint activities were not
+  inserted. The revised artifact stores those exact-bit activities so Mosek
+  can recheck the complete primal solution tuple in r4.
 
 No user input or new credential is currently required.
