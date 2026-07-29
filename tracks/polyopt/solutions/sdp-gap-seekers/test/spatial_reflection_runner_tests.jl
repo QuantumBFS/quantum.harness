@@ -178,6 +178,80 @@ end
     end
 end
 
+@testset "spatial solve runner dynamic scan boundary" begin
+    mktempdir() do repository_root
+        input_directory = joinpath(
+            repository_root,
+            "tracks",
+            "polyopt",
+            "solutions",
+            "sdp-gap-seekers",
+            "results",
+            "scan",
+            "points",
+            "gamma-32",
+            "input",
+        )
+        mkpath(input_directory)
+        model_path = joinpath(input_directory, "model.mof.json")
+        runmeta_path = joinpath(input_directory, "runmeta.toml")
+        checksums_path = joinpath(input_directory, "SHA256SUMS")
+        write(model_path, "model-v1")
+        write(runmeta_path, "runmeta-v1")
+        model_sha256 = B.file_sha256(model_path)
+        runmeta_sha256 = B.file_sha256(runmeta_path)
+        write(
+            checksums_path,
+            "$model_sha256  model.mof.json\n" *
+            "$runmeta_sha256  runmeta.toml\n",
+        )
+        withenv("SS_SCAN_DYNAMIC_INPUT" => "1") do
+            verified = validate_input_files(
+                model_path,
+                runmeta_path,
+                checksums_path,
+                "32//1",
+                repository_root,
+            )
+            @test verified.model_sha256 == model_sha256
+            @test verified.runmeta_sha256 == runmeta_sha256
+        end
+        outside_directory = joinpath(repository_root, "outside")
+        mkpath(outside_directory)
+        outside_model = joinpath(outside_directory, "model.mof.json")
+        outside_runmeta = joinpath(outside_directory, "runmeta.toml")
+        outside_checksums = joinpath(outside_directory, "SHA256SUMS")
+        cp(model_path, outside_model)
+        cp(runmeta_path, outside_runmeta)
+        cp(checksums_path, outside_checksums)
+        withenv("SS_SCAN_DYNAMIC_INPUT" => "1") do
+            @test_throws ErrorException validate_input_files(
+                outside_model,
+                outside_runmeta,
+                outside_checksums,
+                "32//1",
+                repository_root,
+            )
+        end
+    end
+    withenv("SS_SCAN_DYNAMIC_INPUT" => "invalid") do
+        @test_throws ErrorException dynamic_scan_input_enabled()
+    end
+    repository_root = normpath(joinpath(TRACK_ROOT, "..", "..", "..", ".."))
+    builder_relative =
+        "tracks/polyopt/solutions/sdp-gap-seekers/scripts/" *
+        "build_shastry_sutherland_spatial_reflection_reduced_mof.jl"
+    canonical_builder_sha256 = git_blob_sha256(
+        repository_root,
+        SOURCE_COMMIT,
+        builder_relative,
+    )
+    @test canonical_builder_sha256 ==
+        "5e8b56ffcd2c68a5e79458e1b6a57ca5bcdb9b716cf117d8ed3cb1870ea84608"
+    @test canonical_builder_sha256 !=
+        B.file_sha256(joinpath(repository_root, builder_relative))
+end
+
 @testset "spatial solve runner named-cone inventory" begin
     valid_model = structural_model_for_test()
     report = validate_reloaded_model(valid_model)
