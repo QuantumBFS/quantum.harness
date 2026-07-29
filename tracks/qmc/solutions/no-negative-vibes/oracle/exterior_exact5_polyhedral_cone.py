@@ -50,6 +50,10 @@ def _rationalize_ray(
     values = np.asarray(vector, dtype=float)
     if values.ndim != 1 or not np.all(np.isfinite(values)):
         raise ValueError("ray must be one finite vector")
+    scale = float(np.max(np.abs(values)))
+    if scale == 0.0:
+        raise ValueError("ray must be nonzero")
+    values = values / scale
     rational = sp.ImmutableMatrix(
         [
             sp.Rational(

@@ -3,12 +3,19 @@ from __future__ import annotations
 import sympy as sp
 
 from oracle.exterior_exact5_polyhedral_cone import (
+    _rationalize_ray,
     exact_polyhedral_certificate,
     polyhedral_column_generation,
 )
 
 
 def test_exact_polyhedral_certificate_replays_redundant_rays() -> None:
+    normalized_tiny = _rationalize_ray(
+        (1.0e-12, -2.0e-12),
+        max_denominator=32,
+    )
+    assert normalized_tiny == sp.ImmutableMatrix([1, -2])
+
     rays = tuple(
         sp.ImmutableMatrix(ray)
         for ray in ((1, 0), (0, 1), (1, 1))
