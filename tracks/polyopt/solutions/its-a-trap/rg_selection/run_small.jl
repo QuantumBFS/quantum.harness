@@ -77,7 +77,69 @@ if mode == "g2"
     push!(report, "    sandwich here is L_base ≤ L_RG,D4 ≤ E_ED. Map hash " * d4_hash())
 end
 
-open(joinpath(@__DIR__, "results", "g1_report.txt"), "w") do io
+if mode == "g3"
+    include(joinpath(@__DIR__, "src", "functional_rg.jl"))
+    As = load_D4(); NRG = 6
+    subsets = [Vector{String}(sort([POOL[i] for i in 1:4 if (b >> (i-1)) & 1 == 1]))
+               for b in 1:15 if count_ones(b) <= 3]
+    unique!(subsets)
+    t0 = time(); _ = build_rg_selection_model(10; S = [POOL[1]], rg = rg_spec(10, NRG, As))
+    tprobe = time() - t0
+    gate!("G3 probe", true, @sprintf("singleton joint at N=10: %.1fs -> %s", tprobe,
+          "enumeration_mode=EXACT_ALL_SUBSETS_LE3 (fix 8: exact enumeration mandated; probe is reporting-only)"))
+    rows = String[]
+    L = Dict{Tuple{Int,String},Any}()
+    bases = Dict{Int,Any}()
+    okall = true
+    for N in (10, 12)
+        bases[N] = build_rg_selection_model(N; vspace = :stock)
+        rg = rg_spec(N, NRG, As)
+        for S in subsets
+            r = build_rg_selection_model(N; S = S, rg = rg, vspace = :auto)
+            key = join(S, "+")
+            L[(N, key)] = r
+            b0 = bases[N]
+            ec = b0.resid.mu + r.resid.mu + 0.75 * (b0.resid.pfeas + b0.resid.dfeas + r.resid.pfeas + r.resid.dfeas)
+            ord = r.E >= b0.E - ec
+            global okall &= ord
+            push!(rows, @sprintf("%d,%s,%.14f,%.14f,%.2e,%s,%d,%d", N, key, r.E, b0.E, ec,
+                  ord ? "ok" : "ORDER-VIOLATION", get(r.counters, "gamma2_dim", -1),
+                  get(r.counters, "seam_newwords", -1)))
+        end
+    end
+    gate!("G3 orderings", okall, "joint >= base - eps_cmp across all 28 evals")
+    mono = true
+    for N in (10, 12), S in subsets, T in subsets
+        if issubset(S, T) && S != T
+            a = L[(N, join(S, "+"))]; b = L[(N, join(T, "+"))]
+            ec = a.resid.mu + b.resid.mu + 0.75 * (a.resid.pfeas + a.resid.dfeas + b.resid.pfeas + b.resid.dfeas)
+            mono &= b.E >= a.E - ec
+        end
+    end
+    gate!("G3 nesting", mono, "S in S' monotonicity within eps_cmp (all evaluated pairs)")
+    open(joinpath(@__DIR__, "results", "training.csv"), "w") do io
+        println(io, "N,S,L_joint,L_base,eps_cmp,ordering,gamma2_dim,newwords")
+        foreach(l -> println(io, l), rows)
+    end
+    best = nothing
+    for S in subsets
+        length(S) in (2, 3) || continue
+        key = join(S, "+")
+        sc = 0.5 * sum(L[(N, key)].E - bases[N].E for N in (10, 12))   # per-site: E is per-site
+        if best === nothing || sc > best.sc
+            global best = (S = S, sc = sc)
+        end
+    end
+    gate!("G3 freeze", best !== nothing, @sprintf("S* = %s  Score=%.3e", join(best.S, "+"), best.sc))
+    open(joinpath(@__DIR__, "results", "FROZEN_SELECTION.json"), "w") do io
+        print(io, "{\"S_star\": [", join(("\"" * b * "\"" for b in best.S), ", "),
+              "], \"score_per_site\": ", best.sc,
+              ", \"frozen_before_holdout\": true, \"n_rg\": ", NRG,
+              ", \"pool_hash\": \"8c3f55720dc81cabc683fd0ba6b92d0d3c2f93629afacfe6b4f62c526879a31c\"}")
+    end
+end
+
+open(joinpath(@__DIR__, "results", "$(mode)_report.txt"), "w") do io
     println(io, "run_small.jl $(mode)  ", ok ? "PASS" : "FAIL")
     foreach(l -> println(io, l), report)
 end

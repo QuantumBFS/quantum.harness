@@ -1,15 +1,44 @@
 {
-  "committed_before_any_search": true,
-  "pool": ["B_pair_edge", "B_half", "B_bond_edge", "B_bond_half"],
-  "pool_immutable_after_G0": true,
-  "pullback_bundles": "excluded this run (arbiter fix 4)",
-  "K": [2, 3],
-  "search": "EXACT enumeration of all subsets |S| <= 3 (M=4: 14 subsets); PT excluded from critical path (arbiter fix 8)",
-  "score": "0.5 * sum_{N in {10,12}} (L_joint(N,S) - L_base(N)) / N   [per-site improvement]",
-  "training_N": [10, 12],
-  "holdout_N": 14,
-  "freeze": "S* -> FROZEN_SELECTION.json immediately after training, BEFORE any N=14 run; holdout never retunes; selected_bundles.json = identical S* + appended holdout metadata",
-  "seeds": "none (deterministic enumeration)",
-  "cost_accounting_fields": ["gram_rows", "psd_scalars", "coeff_entries", "affine_nnz", "largest_block_delta", "build_s", "solve_s", "peak_rss_gb"],
-  "subset_cache": "subset-hash keyed on (pool_hash, S, N, base_config_hash)"
+ "committed_before_any_search": true,
+ "pool": [
+  "B_pair_edge",
+  "B_half",
+  "B_bond_edge",
+  "B_bond_half"
+ ],
+ "pool_immutable_after_G0": true,
+ "pullback_bundles": "excluded this run (arbiter fix 4)",
+ "K": [
+  2,
+  3
+ ],
+ "search": "EXACT enumeration of all subsets |S| <= 3 (M=4: 14 subsets); PT excluded from critical path (arbiter fix 8)",
+ "score": "0.5 * sum_{N in {10,12}} (L_joint(N,S) - L_base(N)) / N   [per-site improvement]",
+ "training_N": [
+  10,
+  12
+ ],
+ "holdout_N": 14,
+ "freeze": "S* -> FROZEN_SELECTION.json immediately after training, BEFORE any N=14 run; holdout never retunes; selected_bundles.json = identical S* + appended holdout metadata",
+ "seeds": "none (deterministic enumeration)",
+ "cost_accounting_fields": [
+  "gram_rows",
+  "psd_scalars",
+  "coeff_entries",
+  "affine_nnz",
+  "largest_block_delta",
+  "build_s",
+  "solve_s",
+  "peak_rss_gb"
+ ],
+ "subset_cache": "subset-hash keyed on (pool_hash, S, N, base_config_hash)",
+ "tie_break_declared_at": "2026-07-29T17:22:18.820822+08:00",
+ "tie_break": [
+  "(a) highest per-site Score",
+  "(b) within eps_cmp: LOWER code-generated cost (added Gram scalars = gamma2_dim)",
+  "(c) lexicographic by bundle ID"
+ ],
+ "tie_break_declaration_note": "declared mid-enumeration; completed-subset count not externally observable (per-solve logs are ephemeral tempfiles); bounded estimate at declaration: elapsed/median<=9 of 28; FROZEN_SELECTION.json will record which rule fired",
+ "enumeration_mode": "EXACT_ALL_SUBSETS_LE3",
+ "accounting": "pool M=4; 14 non-empty subsets x 2 training N = 28 joint solves; S=empty is the L_RG arm, counted separately; + 2 base solves"
 }
