@@ -20,5 +20,41 @@
 The two workstreams are maintained separately in the team repository:
 
 - Repository: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026
-- Challenge #15: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/main/challenges/15-chiral-graviton
-- Challenge #121: https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/main/challenges/121-sign-free-hunter
+- Live work branch:
+  https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/agent/majorana-semigroup-detailed-proof
+
+## Interim submission — 2026-07-30
+
+This is a reviewable intermediate snapshot. The registration PR intentionally
+remains a draft, and later results will be added to this same PR before the
+final deadline.
+
+The immutable source snapshot is
+[`e98148a54b35`](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/e98148a54b35b9bdb7ad0b2672f027790a0f1603).
+It contains all three deliverables:
+
+1. **Required QMC paper reproduction — CPMC-Lab**
+   - [Reproduction report and commands](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/tree/e98148a54b35b9bdb7ad0b2672f027790a0f1603/reproductions/qmc-cpmc-lab)
+   - Independent Python CPMC, exact-diagonalization references, the paper's
+     16-site Figure 4(a) calculation, convergence scans, and an unmodified
+     official MATLAB-package cross-check.
+   - Revalidated at this snapshot: 19 tests passed.
+
+2. **Challenge #15 — chiral-graviton NQS**
+   - [Human-readable reviewer guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/15-chiral-graviton/REVIEWER_GUIDE.md)
+   - [Reproduction guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/15-chiral-graviton/REPRODUCIBILITY.md)
+   - Strict antisymmetry, LLL degree, and \(SO(3)\) equivariance; finite-size
+     ED and VMC; symmetry, Fock-oracle, and operator-span validation.
+   - Revalidated at this snapshot: 84 project tests and 61 independent
+     Stage-1 Fock-oracle tests passed.
+
+3. **Challenge #121 — sign-free hunter**
+   - [Human-readable results overview](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/121-sign-free-hunter/RESULTS_OVERVIEW.md)
+   - [Reproduction guide](https://github.com/Joe-Nor/JOE-Harnessing-Quantum-2026/blob/e98148a54b35b9bdb7ad0b2672f027790a0f1603/challenges/121-sign-free-hunter/REPRODUCIBILITY.md)
+   - The current flagship result is a proved local discrete \(PGL(2,7)\)
+     Hubbard--Stratonovich identity. Exact hopping counterexamples are
+     included, so this snapshot does not claim a completed sign-free lattice
+     model.
+
+Large-system and thermodynamic-limit claims remain open in both challenges.
+Those limitations are stated explicitly in the linked reviewer documents.
