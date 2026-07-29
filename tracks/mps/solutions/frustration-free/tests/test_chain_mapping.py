@@ -299,54 +299,98 @@ def _mapping_fixture():
 
 
 _CORRUPTIONS = [
-    (("schema_version",), 2),
-    (("source_bath_sha256",), "0" * 64),
-    (("source_bath_schema_version",), 999),
-    (("n_bath",), 3),
-    (("representation",), "direct_star"),
-    (("lambda",), 0.0),
-    (("Q",), [[1.0]]),
-    (("chain_onsite",), [0.0] * 4),
-    (("chain_hopping",), [0.0] * 3),
-    (("deflation_boundaries",), [0]),
-    (("numerics", "algorithm"), "unverified"),
-    (("numerics", "breakdown_tolerance"), 0.0),
-    (("numerics", "breakdown_tolerance_rule"), "unverified"),
-    (("numerics", "orthogonality_max_error"), 1.0),
-    (("numerics", "off_tridiagonal_max_abs"), 1.0),
-    (("numerics", "coupling_max_error"), 1.0),
-    (("provenance", "module"), "other"),
-    (("provenance", "module_version"), "9.9.9"),
-    (("provenance", "python_version"), "0.0.0"),
-    (("provenance", "numpy_version"), "0.0.0"),
-    (("provenance", "schema_version"), 999),
+    (("schema_version",), lambda value: value + 1),
+    (("source_bath_sha256",), lambda _value: "0" * 64),
+    (("source_bath_schema_version",), lambda value: value + 1),
+    (("n_bath",), lambda value: value + 1),
+    (("representation",), lambda value: f"{value}_corrupt"),
+    (("lambda",), lambda value: value + 0.01),
+    (
+        ("Q",),
+        lambda value: [
+            [entry + (0.01 if (row, column) == (0, 0) else 0.0)
+             for column, entry in enumerate(entries)]
+            for row, entries in enumerate(value)
+        ],
+    ),
+    (
+        ("chain_onsite",),
+        lambda value: [value[0] + 0.01, *value[1:]],
+    ),
+    (
+        ("chain_hopping",),
+        lambda value: [value[0] + 0.01, *value[1:]],
+    ),
+    (("deflation_boundaries",), lambda _value: [0]),
+    (("numerics", "algorithm"), lambda value: f"{value} (corrupt)"),
+    (
+        ("numerics", "breakdown_tolerance"),
+        lambda value: value + np.finfo(np.float64).eps,
+    ),
+    (
+        ("numerics", "breakdown_tolerance_rule"),
+        lambda value: f"{value} (corrupt)",
+    ),
+    (
+        ("numerics", "orthogonality_max_error"),
+        lambda value: value + np.finfo(np.float64).eps,
+    ),
+    (
+        ("numerics", "off_tridiagonal_max_abs"),
+        lambda value: value + np.finfo(np.float64).eps,
+    ),
+    (
+        ("numerics", "coupling_max_error"),
+        lambda value: value + np.finfo(np.float64).eps,
+    ),
 ] + [
-    (("conventions", key), f"{value} (corrupt)")
-    for key, value in chain._CONVENTIONS.items()
+    (("conventions", key), lambda value: f"{value} (corrupt)")
+    for key in chain._CONVENTIONS
+] + [
+    (("provenance", key), lambda value: value + 1)
+    if key == "schema_version"
+    else (("provenance", key), lambda value: f"{value} (corrupt)")
+    for key in chain._PROVENANCE_KEYS
 ]
 
 
-@pytest.mark.parametrize(("path", "corrupt_value"), _CORRUPTIONS)
-def test_verifier_rejects_validly_rehashed_semantic_corruption(path, corrupt_value):
+@pytest.mark.parametrize(("path", "corrupt"), _CORRUPTIONS)
+def test_verifier_rejects_validly_rehashed_semantic_corruption(path, corrupt):
     star, mapping = _mapping_fixture()
     corrupted = copy.deepcopy(mapping)
     target = corrupted["payload"]
     for key in path[:-1]:
         target = target[key]
-    target[path[-1]] = corrupt_value
+    original = copy.deepcopy(target[path[-1]])
+    target[path[-1]] = corrupt(original)
+    assert target[path[-1]] != original
 
+    rehashed = _rehash_mapping(corrupted)
+    chain._verify_structure_and_digest(rehashed)
     with pytest.raises((TypeError, ValueError)):
-        chain.verify_chain_mapping_artifact(_rehash_mapping(corrupted), star)
+        chain.verify_chain_mapping_artifact(rehashed, star)
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("payload",),
+        ("payload", "conventions"),
+        ("payload", "numerics"),
+        ("payload", "provenance"),
+    ],
+)
 @pytest.mark.parametrize("operation", ["add", "remove"])
-def test_verifier_requires_exact_payload_keys(operation):
+def test_verifier_requires_every_exact_mapping_key_set(path, operation):
     star, mapping = _mapping_fixture()
     corrupted = copy.deepcopy(mapping)
+    target = corrupted
+    for key in path:
+        target = target[key]
     if operation == "add":
-        corrupted["payload"]["unexpected"] = None
+        target["unexpected"] = None
     else:
-        del corrupted["payload"]["representation"]
+        del target[next(iter(target))]
 
     with pytest.raises((TypeError, ValueError)):
         chain.verify_chain_mapping_artifact(_rehash_mapping(corrupted), star)

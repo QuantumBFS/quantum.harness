@@ -226,7 +226,7 @@ end
         end
     end
 
-    @testset "same geometry and digest resumes while cross geometry fails" begin
+    @testset "same identity resumes while geometry and mapping replay fail" begin
         for (written, matching, mismatch) in (
             (
                 checkpoint_identity(),
@@ -246,6 +246,34 @@ end
                     chain_mapping_sha256 = repeat("a", 64),
                 ),
                 checkpoint_identity(),
+            ),
+            (
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("b", 64),
+                ),
+            ),
+            (
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("b", 64),
+                ),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("b", 64),
+                ),
+                checkpoint_identity(
+                    bath_representation = "chain",
+                    chain_mapping_sha256 = repeat("a", 64),
+                ),
             ),
         )
             mktempdir() do root

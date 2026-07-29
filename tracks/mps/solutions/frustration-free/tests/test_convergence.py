@@ -428,6 +428,110 @@ def test_chain_mapping_and_capability_schemas_are_recursively_closed():
         convergence.validate_artifact_schema(malformed_mapping, "convergencePlan")
 
 
+def _rebind_mutated_plan(plan):
+    cell = plan["cells"][0]
+    settings = cell["solver_settings"]
+    input_payload = convergence._cell_input_payload(
+        beta=cell["parameters"]["beta"],
+        n_bath=cell["parameters"]["n_bath"],
+        time_step=settings["time_step"],
+        cutoff=settings["cutoff"],
+        maxdim=settings["maxdim"],
+        tau_fractions=cell["tau_fractions"],
+        bath_artifact=cell["bath_artifact"],
+        source_hashes=cell["provenance"]["source_sha256"],
+        project_hashes=cell["provenance"]["julia_environment_sha256"],
+        julia_project=cell["provenance"]["julia_project"],
+        diagnostic_limits=cell["diagnostic_limits"],
+        solver_capability=cell["solver_capability"],
+        bath_representation=settings["bath_representation"],
+        chain_mapping_artifact=cell["chain_mapping_artifact"],
+        chain_mapping_sha256=cell["chain_mapping_sha256"],
+    )
+    cell["input_sha256"] = convergence._sha256(
+        convergence._canonical_json(input_payload)
+    )
+    cell["cell_id"] = f"c0000-{cell['input_sha256'][:12]}"
+    plan["plan_sha256"] = convergence.plan_sha256(plan)
+    plan["run_id"] = f"run-{plan['plan_sha256'][:16]}"
+    return plan
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "mapping_payload_sha256",
+        "cell_mapping_sha256",
+        "representation",
+        "capability",
+        "source_hash",
+        "scientific_source_hash",
+    ],
+)
+def test_chain_plan_corruption_is_rejected_before_executor(
+    tmp_path, monkeypatch, corruption
+):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    cell = plan["cells"][0]
+    if corruption == "mapping_payload_sha256":
+        cell["chain_mapping_artifact"]["sha256"] = "0" * 64
+    elif corruption == "cell_mapping_sha256":
+        cell["chain_mapping_sha256"] = "b" * 64
+        cell["solver_settings"]["chain_mapping_sha256"] = "b" * 64
+    elif corruption == "representation":
+        cell["solver_settings"]["bath_representation"] = "direct_star"
+    elif corruption == "capability":
+        plan["solver_capability"]["finite_chain_mapping_validated"] = False
+        cell["solver_capability"]["finite_chain_mapping_validated"] = False
+    elif corruption == "source_hash":
+        cell["provenance"]["source_sha256"]["chain_mapping.py"] = "f" * 64
+    elif corruption == "scientific_source_hash":
+        mapping = cell["chain_mapping_artifact"]
+        mapping["payload"]["source_bath_sha256"] = "0" * 64
+        mapping["sha256"] = convergence._sha256(
+            convergence._canonical_json(mapping["payload"])
+        )
+        cell["chain_mapping_sha256"] = mapping["sha256"]
+        cell["solver_settings"]["chain_mapping_sha256"] = mapping["sha256"]
+    else:
+        raise AssertionError(f"unknown corruption: {corruption}")
+    _rebind_mutated_plan(plan)
+    calls = []
+    verifier_calls = []
+    real_verifier = convergence.chain_mapping.verify_chain_mapping_artifact
+
+    def recording_verifier(mapping, bath_artifact):
+        verifier_calls.append(mapping)
+        return real_verifier(mapping, bath_artifact)
+
+    monkeypatch.setattr(
+        convergence.chain_mapping,
+        "verify_chain_mapping_artifact",
+        recording_verifier,
+    )
+
+    with pytest.raises((TypeError, ValueError)):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+
+    assert calls == []
+    if corruption == "scientific_source_hash":
+        assert verifier_calls
+
+
 def test_chain_pilot_publishes_mapping_and_exact_expected_files(tmp_path):
     plan = _plan(
         betas=[0.2],

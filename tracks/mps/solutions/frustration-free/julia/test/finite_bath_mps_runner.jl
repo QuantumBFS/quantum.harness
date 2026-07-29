@@ -426,6 +426,30 @@ end
     end
 end
 
+@testset "valid outer digests cannot bless scientific corruption" begin
+    request = mutate_mapping_python!(
+        chain_runner_request(),
+        ["payload", "chain_onsite", 0],
+        0.123,
+    )
+    payload = strict_json_read(request["payload_json"], "corrupted request")
+    geometry = payload["bath_geometry"]
+    mapping_json = geometry["chain_mapping_artifact_json"]
+    mapping = strict_json_read(mapping_json, "corrupted mapping")
+
+    prefix = "{\"payload\":"
+    suffix = ",\"sha256\":\"$(mapping["sha256"])\"}\n"
+    payload_bytes = codeunits(mapping_json)[
+        (ncodeunits(prefix) + 1):(ncodeunits(mapping_json) - ncodeunits(suffix))
+    ]
+    @test mapping["sha256"] == bytes2hex(sha256(payload_bytes))
+    @test geometry["chain_mapping_artifact_file_sha256"] ==
+        bytes2hex(sha256(codeunits(mapping_json)))
+    @test request["sha256"] == bytes2hex(sha256(codeunits(request["payload_json"])))
+    message = semantic_rejection_message(request)
+    @test occursin("chain onsite", message)
+end
+
 @testset "runner replays every diagnostic and locks producer provenance" begin
     for n_bath in 1:6
         request = write_and_read_request(chain_runner_request(; n_bath))

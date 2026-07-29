@@ -619,7 +619,7 @@ def _tree_bytes(directory):
     }
 
 
-def _build_valid_acceptance_stage(root, name):
+def _build_valid_acceptance_stage(root, name, *, chain_geometry=False):
     stage = root / name
     stage.mkdir(parents=True)
     fixture = acceptance.acceptance_fixture()
@@ -633,6 +633,15 @@ def _build_valid_acceptance_stage(root, name):
         **fixture["bath"],
         frequency_grid=[-1.0, -0.5, 0.0, 0.5, 1.0],
     )
+    mapping = (
+        acceptance.chain.derive_chain_mapping(bath_artifact)
+        if chain_geometry
+        else None
+    )
+    if mapping is not None:
+        fixture = acceptance._explicit_chain_fixture(
+            _canonical_json(mapping) + b"\n"
+        )
     bath_json = bath_path.read_text(encoding="utf-8")
     request = acceptance._make_mps_request(bath_json, fixture)
     acceptance.atomic_write_json(input_path, request)
@@ -643,6 +652,10 @@ def _build_valid_acceptance_stage(root, name):
     oracle = acceptance.ed.write_oracle_json(
         oracle_path,
         bath_artifact=bath_artifact,
+        bath_representation=(
+            "chain" if mapping is not None else "direct_star"
+        ),
+        chain_mapping_artifact=mapping,
         U=model["U"],
         epsilon_d=model["epsilon_d"],
         mu=model["mu"],
@@ -653,6 +666,8 @@ def _build_valid_acceptance_stage(root, name):
     provenance = acceptance.expected_runner_provenance(
         julia_project=SOLUTION_DIR / "julia",
         bath_file_sha256=request_payload["bath_artifact_file_sha256"],
+        bath_representation=settings["bath_representation"],
+        chain_mapping_sha256=settings["chain_mapping_sha256"],
         krylov_expansion_dim=settings["krylov_expansion_dim"],
     )
     solver_output = {
@@ -817,6 +832,115 @@ def test_versioned_acceptance_publication_is_immutable_and_updates_pointer(
     )
     assert (root / "current.json").is_file()
     assert list(root.glob(".acceptance.abandoned-stage-*"))
+
+
+def _resign_corrupted_chain_acceptance_stage(stage, artifact, corruption):
+    request_path = stage / "mps-input.json"
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+    payload = acceptance.strict_json_loads(request["payload_json"])
+    geometry = payload["bath_geometry"]
+    mapping = acceptance.strict_json_loads(
+        geometry["chain_mapping_artifact_json"]
+    )
+
+    if corruption == "embedded_bytes":
+        geometry["chain_mapping_artifact_json"] += "\n"
+        geometry["chain_mapping_artifact_file_sha256"] = hashlib.sha256(
+            geometry["chain_mapping_artifact_json"].encode("utf-8")
+        ).hexdigest()
+    elif corruption == "payload_sha256":
+        mapping["sha256"] = "0" * 64
+    elif corruption == "file_sha256":
+        geometry["chain_mapping_artifact_file_sha256"] = "0" * 64
+    elif corruption == "scientific_source_hash":
+        mapping["payload"]["source_bath_sha256"] = "0" * 64
+        mapping["sha256"] = hashlib.sha256(
+            _canonical_json(mapping["payload"])
+        ).hexdigest()
+    elif corruption == "representation":
+        geometry["representation"] = "direct_star"
+    elif corruption == "producer_source_hash":
+        payload["checkpoint"]["source_hashes"]["chain_mapping"] = "0" * 64
+    else:
+        raise AssertionError(f"unknown corruption: {corruption}")
+
+    if corruption == "payload_sha256":
+        mapping_json = _canonical_json(mapping).decode("utf-8") + "\n"
+        geometry["chain_mapping_artifact_json"] = mapping_json
+        geometry["chain_mapping_artifact_file_sha256"] = hashlib.sha256(
+            mapping_json.encode("utf-8")
+        ).hexdigest()
+    elif corruption == "scientific_source_hash":
+        mapping_json = _canonical_json(mapping).decode("utf-8") + "\n"
+        geometry["chain_mapping_artifact_json"] = mapping_json
+        geometry["chain_mapping_artifact_file_sha256"] = hashlib.sha256(
+            mapping_json.encode("utf-8")
+        ).hexdigest()
+
+    request["payload_json"] = acceptance._request_canonical_text(payload)
+    request["sha256"] = hashlib.sha256(
+        request["payload_json"].encode("utf-8")
+    ).hexdigest()
+    acceptance.atomic_write_json(request_path, request)
+
+    corrupted_artifact = copy.deepcopy(artifact)
+    corrupted_artifact["payload"]["input"]["mps_input_sha256"] = (
+        acceptance._sha256_file(request_path)
+    )
+    corrupted_artifact["payload"]["input"]["mps_input_payload_sha256"] = request[
+        "sha256"
+    ]
+    corrupted_artifact["sha256"] = hashlib.sha256(
+        _canonical_json(corrupted_artifact["payload"])
+    ).hexdigest()
+    acceptance.atomic_write_json(stage / "acceptance.json", corrupted_artifact)
+    return corrupted_artifact
+
+
+@pytest.mark.parametrize(
+    ("corruption", "reaches_mapping_verifier"),
+    [
+        ("embedded_bytes", False),
+        ("payload_sha256", True),
+        ("file_sha256", False),
+        ("scientific_source_hash", True),
+        ("representation", False),
+        ("producer_source_hash", False),
+    ],
+)
+def test_chain_acceptance_corruption_never_advances_pointer(
+    tmp_path, monkeypatch, corruption, reaches_mapping_verifier
+):
+    root = tmp_path / "acceptance"
+    root.mkdir()
+    stage, artifact = _build_valid_acceptance_stage(
+        root, f".acceptance.stage-{corruption}", chain_geometry=True
+    )
+    corrupted_artifact = _resign_corrupted_chain_acceptance_stage(
+        stage, artifact, corruption
+    )
+    verifier_calls = []
+    real_verifier = acceptance.chain.verify_chain_mapping_artifact
+
+    def recording_verifier(mapping, bath_artifact):
+        verifier_calls.append(mapping)
+        return real_verifier(mapping, bath_artifact)
+
+    monkeypatch.setattr(
+        acceptance.chain, "verify_chain_mapping_artifact", recording_verifier
+    )
+
+    with pytest.raises((TypeError, ValueError)):
+        acceptance.publish_acceptance_run(
+            stage,
+            root,
+            corrupted_artifact,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+
+    assert stage.is_dir()
+    assert not (root / "current.json").exists()
+    assert bool(verifier_calls) is reaches_mapping_verifier
 
 
 @pytest.mark.parametrize(
