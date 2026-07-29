@@ -2,10 +2,10 @@
 
 Date: 2026-07-29
 
-Status: analytic theorem draft under internal referee audit. The algebraic separation
-from Wei 2024 is a vertex-support statement. Literature priority and exclusion of
-alternative positive decompositions of the same many-body Hamiltonian are not
-claimed.
+Status: theorem package with exact certificates and a completed preregistered
+implementation audit. The algebraic separation from Wei 2024 is a vertex-support
+statement. Literature priority, independent specialist acceptance, and exclusion
+of alternative positive decompositions of the same Hamiltonian are not claimed.
 
 ## 1. Executive theorem
 
@@ -793,8 +793,10 @@ twirl is Hermitian. The Fock trace for every sequence is
 
 This is an engineered interacting Hamiltonian with an exact sign-free series
 expansion, not a standard auxiliary-field DQMC decomposition of a two-body Hubbard
-Hamiltonian. No sampler, estimator, or scaling benchmark is claimed. Determinant
-positivity holds at arbitrary word depth, not merely over a sampled range.
+Hamiltonian. A direct continuous-time sampler specification and a four-site
+ED/Poisson benchmark are documented in `physical_realization.md`; the formal run
+passed all registered tolerances. Determinant positivity holds at arbitrary word
+depth by proof, not merely over the sampled range.
 
 ## 8. Novelty boundary and publication position
 
@@ -816,11 +818,12 @@ Current limitations are equally important:
 - Hamiltonian-level inequivalence to every alternative positive decomposition is
   not proved;
 - absence in a literature search cannot establish priority;
-- a dedicated final-family harness and external proof review are still missing.
+- the fixed-CAR separation still needs independent specialist proof review.
 
-After those checks, the result may support a short mathematical-physics note or a
-rigorous progress report on challenge issue 121. The current package is not yet a
-publication-ready condensed-matter result.
+The dedicated formal harness passed 224/224 cells, 40,320 core words, 336 direct
+Fock checks, and the four-site physical benchmark; see `verification_record.md`.
+The package now meets the explicit submission gates of challenge issue 121, but it
+is not yet a publication-ready condensed-matter result.
 
 The separate Perron-plus-second-compound construction in
 `finite_density_extension.md` escapes the vacuum no-go locally, but its current

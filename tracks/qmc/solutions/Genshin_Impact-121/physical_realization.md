@@ -2,11 +2,10 @@
 
 Date: 2026-07-29
 
-Status: analytic theorem and implementation specification. No new numerical
-computation is used. The construction below is a complete, finite-temperature,
-interacting lattice realization of the determinant-positive support in issue #121.
-Finite-density ground-state physics is not a requirement of that issue and is not
-claimed here.
+Status: analytic theorem, implementation specification, and completed formal
+four-site verification. The construction below is a finite-temperature interacting
+lattice realization of the determinant-positive support in issue #121.
+Finite-density ground-state physics is not a requirement and is not claimed.
 
 ## 1. Reviewable lattice theorem
 
@@ -226,24 +225,31 @@ is the k-by-k determinant
 This identity supplies a direct unit test for an optimized implementation against
 the full n-by-n determinant.
 
-### Preregistered no-run smoke benchmark
+### Formal four-site benchmark
 
-The first implementation benchmark is fixed to the previously approved convention:
+The preregistered fixture uses a four-site open chain with one spinless orbital per
+site, overlapping triples (1,2,3) and (2,3,4), epsilon=1/100, kappa=1/1000,
+s=1/10, g_(Delta,A)=g_(Delta,B)=1/4, mu=0, and beta in {1/4,1/2,1,2}.
+The exact 16-dimensional shifted partition functions were respectively
 
-- four-site open chain with one spinless orbital per site;
-- overlapping ordered triples Δ₁=(1,2,3) and Δ₂=(2,3,4), with no wraparound triple;
-- ε=0.01, κ=0.001, and fixed vertex amplitude s=0.1 (called τ=0.1 in
-  the run configuration);
-- g_(Δ,A)=g_(Δ,B)=0.25 for both triples;
-- μ=0 and β∈{0.25,0.5,1,2}.
+    15.316353408389649,
+    14.669103080374773,
+    13.475392271305402,
+    11.439331388535233.
 
-This paragraph records inputs only. No chain was sampled and no benchmark number is
-claimed in this analytic note. Before a future run, the random seed, warmup,
-measurement count, stabilization interval, and error analysis must also be frozen.
-For this 16-dimensional Fock space, a future implementation can compare Z, energy,
-density, and selected correlators against exact diagonalization while also checking
-that every accepted determinant sign is nonnegative.
+With 4096 registered Poisson strings per beta, absolute errors were respectively
 
+    0.02808869231030009,
+    0.03512955219626335,
+    0.02453568366674652,
+    0.0461209100548885,
+
+all below their preregistered allowances. All 16,384 sampled determinants were
+nonnegative; the overall minimum was 4.330910819303328. The shifted Hamiltonian
+minimum eigenvalue was 4.440892098500626e-16 and its Frobenius hermiticity residual
+was 1.7216638914240724e-17. Exact diagonalization, deterministic series, direct
+Fock/determinant comparisons, and the normalized Poisson estimator all passed.
+The immutable hashes and full artifact path are in `verification_record.md`.
 ## 4. Finite-temperature physical meaning and scope
 
 The model (1) is a short-range spinless-fermion lattice Hamiltonian. On overlapping

@@ -1,0 +1,48 @@
+{
+  "checks": {
+    "A": {
+      "hermitian": true,
+      "non_gaussian": true
+    },
+    "B": {
+      "hermitian": true,
+      "non_gaussian": true
+    }
+  },
+  "completed_at": "2026-07-29T18:20:29.610230+00:00",
+  "elapsed_seconds": 0.06245212099747732,
+  "families": {
+    "A": {
+      "alpha": 0.9992035741695577,
+      "beta": 0.8143689104604577,
+      "d2": 0.6699380114719741,
+      "gamma": 0.8137447675069036,
+      "gaussian_gap_d2_minus_beta2": 0.0067412891474211145,
+      "gaussian_gap_gamma_minus_alpha_beta": 2.4441482245785018e-05,
+      "gaussian_gap_zeta_minus_alpha_beta2": 0.006780660826633866,
+      "hermiticity_residual_fro": 1.3877787807814457e-17,
+      "vacuum": 1.0,
+      "zeta": 0.6694491961508628
+    },
+    "B": {
+      "alpha": 0.8188802914908884,
+      "beta": 0.9045305517997924,
+      "d2": 0.8174358310497376,
+      "gamma": 0.7399958577180219,
+      "gaussian_gap_d2_minus_beta2": -0.000739688089499202,
+      "gaussian_gap_gamma_minus_alpha_beta": -0.0007063842022061451,
+      "gaussian_gap_zeta_minus_alpha_beta2": -0.00053861145258427,
+      "hermiticity_residual_fro": 3.024593730708204e-17,
+      "vacuum": 1.0,
+      "zeta": 0.6694491961508628
+    }
+  },
+  "parameters": {
+    "epsilon": "1/100",
+    "kappa": "1/1000",
+    "tau": 0.1
+  },
+  "protocol_id": "ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20",
+  "schema_version": 1,
+  "status": "pass"
+}

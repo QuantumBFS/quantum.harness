@@ -1,0 +1,77 @@
+{
+  "accounting": {
+    "alternative_terminal_evidence": [
+      "pilot-42169.out and pilot-42169.err",
+      "full-42171.out and full-42171.err",
+      "audit-42173.out and audit-42173.err",
+      "report.json status=pass",
+      "COMPLETE protocol/report hashes"
+    ],
+    "enabled": false,
+    "evidence": "Slurm accounting is disabled on this cluster. Terminal completion evidence therefore uses durable stdout/stderr logs, disappearance from squeue, the all-pass verifier artifacts, and the protocol-bound COMPLETE sentinel."
+  },
+  "cluster": "t02-server",
+  "executable_commit": "9fe85a6317132983b48c12cbe3628b2da2945a19",
+  "jobs": [
+    {
+      "dependency": null,
+      "evidence": "Pilot log completed without stderr and left protocol-bound resumable cell artifacts.",
+      "job_id": 42169,
+      "resources": {
+        "cpus_per_task": 1,
+        "gpus": 0,
+        "memory_mb": 2048,
+        "time_limit_minutes": 20
+      },
+      "stage": "representative resumable pilot",
+      "status": "COMPLETED",
+      "stderr": "pilot-42169.err",
+      "stdout": "pilot-42169.out"
+    },
+    {
+      "dependency": {
+        "job_id": 42169,
+        "type": "submitted_after_successful_pilot"
+      },
+      "evidence": "Full log completed without stderr; report.json records pass, 224/224 cells, and 40320 rows.",
+      "job_id": 42171,
+      "resources": {
+        "cpus_per_task": 1,
+        "gpus": 0,
+        "memory_mb": 2048,
+        "time_limit_minutes": 20
+      },
+      "stage": "full preregistered verification",
+      "status": "COMPLETED",
+      "stderr": "full-42171.err",
+      "stdout": "full-42171.out"
+    },
+    {
+      "dependency": {
+        "job_id": 42171,
+        "type": "afterok"
+      },
+      "evidence": "Audit log completed without stderr and verified COMPLETE plus artifact/test invariants.",
+      "job_id": 42173,
+      "resources": {
+        "cpus_per_task": 1,
+        "gpus": 0,
+        "memory_mb": 1024,
+        "time_limit_minutes": 10
+      },
+      "stage": "independent artifact audit",
+      "status": "COMPLETED",
+      "stderr": "audit-42173.err",
+      "stdout": "audit-42173.out"
+    }
+  ],
+  "protocol_id": "ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20",
+  "schema_version": 1,
+  "terminal_result": {
+    "complete_sentinel": "COMPLETE",
+    "completed_cells": 224,
+    "status": "pass",
+    "total_cells": 224
+  },
+  "workflow": "pilot -> full -> afterok audit"
+}

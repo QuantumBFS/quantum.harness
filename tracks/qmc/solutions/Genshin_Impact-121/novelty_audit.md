@@ -187,8 +187,10 @@ would combine:
 - an engineered interacting Hermitian two-twirl realization;
 - a distinct Perron-compound theorem and exact no-go statements mapping its limits.
 
-Before an external preprint claim, the package still needs a dedicated A/B harness,
-independent expert checking of the fixed-CAR proof, a more systematic priority
-audit, and a sharper physical target. A condensed-matter venue would additionally
-need a scalable intercell-hopping construction, a nontrivial phase or critical
-point, and an algorithmic benchmark.
+The dedicated A/B harness is now complete: its protocol-bound run passed 224/224
+cells, 35,840 candidate words, 336 direct Fock checks, and the interacting four-site
+benchmark; see `verification_record.md`. Before an external preprint claim, the
+package still needs independent expert checking of the fixed-CAR proof, a more
+systematic priority audit, and a sharper physical target. A condensed-matter venue
+would additionally need a scalable finite-density construction, a nontrivial phase
+or critical point, and an algorithmic performance study.

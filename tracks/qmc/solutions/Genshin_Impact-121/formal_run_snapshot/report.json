@@ -1,0 +1,92 @@
+{
+  "aggregates": {
+    "cell_status_by_kind": {
+      "candidate": {
+        "fail": 0,
+        "pass": 140
+      },
+      "component_control": {
+        "fail": 0,
+        "pass": 28
+      },
+      "semigroup_cone": {
+        "fail": 0,
+        "pass": 28
+      },
+      "split_orthogonal": {
+        "fail": 0,
+        "pass": 28
+      }
+    },
+    "expected_exact_zero_controls": 448,
+    "fock_checks": 336,
+    "high_precision_escalations": 672,
+    "inconclusive_determinants": 448,
+    "maximum_abs_fock_error": 5.400124791776761e-13,
+    "raw_inconclusive_determinants": 448,
+    "unexpected_inconclusive_determinants": 0
+  },
+  "artifacts": {
+    "exact_certificates": {
+      "bytes": 1650,
+      "path": "exact_certificates.json",
+      "sha256": "4276fd469722894796cd4152c2f11f8cb3b977ee8dcc867062a48c57dec79034"
+    },
+    "manifest": {
+      "bytes": 4923,
+      "path": "manifest.json",
+      "sha256": "d2fb2be0d2cb179ecf77036683c1c3d50283a28bcfa0b458859d910751f2016e"
+    },
+    "physical_benchmark": {
+      "bytes": 21165,
+      "path": "physical_benchmark.json",
+      "sha256": "5b9029d962c6db0b3768a93d5e9512bcd607883c9cf052d8dbd7c2ecdea6c75a"
+    },
+    "samples": {
+      "bytes": 9641890,
+      "path": "samples.csv",
+      "rows": 40320,
+      "sha256": "27a81a5400780b1851f031a725926cf964da7b0b97e27a4b5acde7fd599711a7"
+    },
+    "twirl_checks": {
+      "bytes": 1413,
+      "path": "twirl_checks.json",
+      "sha256": "1234ee7b8e419b404c0cd667ea1cce7d26a12d72bff4a4a4676ef33a0da2b56a"
+    }
+  },
+  "claim_boundary": "Passing establishes reproducibility of the preregistered checks. It is neither a proof by sampling nor a literature-priority claim.",
+  "completed_cells": 224,
+  "environment_signature": {
+    "mpmath": "1.4.1",
+    "numpy": "2.5.1",
+    "python_full": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:16:10) [GCC 11.2.0]",
+    "python_major": 3,
+    "scipy": "1.18.0"
+  },
+  "expected_full_sample_rows": 40320,
+  "failed_cells": [],
+  "generated_at": "2026-07-29T18:25:23.969324+00:00",
+  "manifest_sha256": "7a04a1e9a4293e85f47ddf4901ae8b20e7b034d7ee50b9d3e8317f805b2f4b12",
+  "pending_cells": [],
+  "protocol_id": "ae54430bfb17790c197fabed523138ed6ba3a632881978b5665367e1517a2e20",
+  "requested_cell_ids": null,
+  "resource_note": {
+    "cpus_per_task": 1,
+    "durability": "atomic cells, protocol-bound resume, all-pass COMPLETE",
+    "gpus": 0,
+    "memory_mb": 2048,
+    "platform": "t02-server Slurm CPU job",
+    "time_limit_minutes": 20
+  },
+  "sample_rows": 40320,
+  "schema_version": 1,
+  "sign_problem_hunter_sha256": "fea156818fafdfc9635fb9e7c797470aa34758d82a24e69b6dd3b62d2e04f780",
+  "stage_status": {
+    "exact_certificates": "pass",
+    "physical_benchmark": "pass",
+    "twirl_checks": "pass"
+  },
+  "status": "pass",
+  "total_cells": 224,
+  "verifier_sha256": "e566f1a0f300d5201a354cfcd3c45b022631ac3175d98af3fa3b898c954993c4"
+}
