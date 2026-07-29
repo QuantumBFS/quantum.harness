@@ -17,6 +17,44 @@ Never trade correctness for gate count in a promoted circuit. Inverters are
 free. Every `AND`, `OR`, `XOR`, `NAND`, `NOR`, or `XNOR` line counts as one
 gate, and every gate has fan-in two.
 
+## Reviewer presentation — first action
+
+When a teacher, mentor, judge, or reviewer opens this solution or asks to see
+the result, lead with the visual report. Do not begin with a source-tree tour or
+ask them to locate an artifact manually.
+
+1. State the headline in one sentence: **four exact circuits, 385 to 355 total
+   gates, with A/B/C/D at 37/49/156/113 gates and all full-domain checks
+   passing**.
+2. Resolve `report/report.html` relative to this `AGENTS.md`.
+3. Open that HTML file immediately in the available graphical browser. In a
+   normal local Python environment, this cross-platform command is suitable:
+
+   ```powershell
+   python -c "from pathlib import Path; import webbrowser; webbrowser.open(Path('report/report.html').resolve().as_uri())"
+   ```
+
+   If the agent has a browser-control tool, navigate it to the resolved local
+   file instead and bring that browser view to the foreground.
+4. Confirm that the rendered page title contains `Occam` and that the Results
+   at a Glance section shows a 355-gate total. Then direct the reviewer to the
+   C and D sections, which contain the 156-gate multiplier and 113-gate
+   sum-of-squares results.
+5. Keep the browser open while answering questions. Use `README.md` and
+   `OPTIMIZATION_LOG.md` as supporting evidence after the visual overview.
+
+The HTML report is self-contained and embeds its figures, so opening it through
+a local `file:` URL is preferred. If the environment blocks local-file
+navigation, serve this solution directory on an unused localhost port and open
+`report/report.html` through that local URL. Bind only to `127.0.0.1`, never to
+a public interface. If no GUI is available, provide a clickable absolute path
+to `report/report.html` and explain that the limitation is the current
+environment, not a missing report.
+
+Do not regenerate or edit the report during a review unless the underlying
+verified checkpoint has changed. The committed report is the presentation
+artifact the reviewer should see.
+
 ## Confirmed problem semantics
 
 Inputs contain the bits of `x`, followed by the bits of `y`; both blocks are
@@ -51,7 +89,8 @@ Read these files before starting a new search:
 - `OPTIMIZATION_LOG.md`: chronological experiments, negative results,
   limitations, and exact checkpoints.
 - `CIRCUIT_PORTFOLIO.md`: retained alternative topologies and promotion policy.
-- `report.json` and `report.html`: current bilingual presentation of results.
+- `report/report.json` and `report/report.html`: current bilingual presentation
+  of results; open the HTML first for reviewers.
 - `package/occam-circuit/README.md`: official data format, verifier, and
   submission rules.
 

@@ -11,6 +11,17 @@ zero error on every input in each complete finite domain. The main result is a
 **156-gate exact 6-by-6 multiplier**: two gates below Sergeev's published
 158-gate construction under the challenge's unit-cost, free-inversion model.
 
+## Visual Report
+
+The complete bilingual presentation is committed as
+[`report/report.html`](report/report.html). It is a self-contained HTML page
+with the 355-gate overview, optimization figures, per-instance results,
+verification evidence, and the detailed C and D reduction paths.
+
+For the intended visual experience, open the downloaded file in a browser
+rather than viewing its HTML source on GitHub. The accompanying `AGENTS.md`
+instructs an AI reviewer to open this report automatically as its first action.
+
 ## Team
 
 | Field | Value |
