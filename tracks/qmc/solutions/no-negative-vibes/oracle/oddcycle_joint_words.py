@@ -9,10 +9,11 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from .symmetric_oddcycle_discovery import oddcycle_matrix
+from .symmetric_oddcycle_discovery import compound_matrix, oddcycle_matrix
 
 
 SCHEMA = "oddcycle-joint-word-discovery-v1"
+_GRADE4_GAUGE = np.diag([1.0, 1.0, 1.0, -1.0, 1.0])
 
 
 def joint_alphabet(points: Sequence[Sequence[float]]) -> tuple[np.ndarray, ...]:
@@ -261,11 +262,160 @@ def exact_rational_word_replay(
     }
 
 
+def joint_grade3_frobenius_profile(
+    points: Sequence[Sequence[float]],
+    *,
+    max_depth: int = 8,
+    max_level_matrices: int = 2_000_000,
+) -> dict[str, object]:
+    """Enumerate normalized grade-three Frobenius maxima by word depth."""
+
+    if max_depth < 1:
+        raise ValueError("max_depth must be positive")
+    atoms = np.asarray(
+        [
+            compound_matrix(atom, 3) / 8.0
+            for atom in joint_alphabet(points)
+        ]
+    )
+    alphabet_size = len(atoms)
+    level = np.eye(10, dtype=float)[None, :, :]
+    codes = np.zeros(1, dtype=np.int64)
+    per_depth = []
+    status = "complete"
+    for depth in range(1, max_depth + 1):
+        next_count = alphabet_size * len(level)
+        if next_count > max_level_matrices:
+            status = "resource-limit"
+            break
+        level = np.matmul(atoms[:, None, :, :], level[None, :, :, :]).reshape(
+            next_count, 10, 10
+        )
+        codes = np.concatenate(
+            [codes * alphabet_size + symbol for symbol in range(alphabet_size)]
+        )
+        ratios = np.einsum("bij,bij->b", level, level)
+        index = int(np.argmax(ratios))
+        maximum = float(ratios[index])
+        per_depth.append(
+            {
+                "depth": depth,
+                "word_count": next_count,
+                "maximum_frobenius_ratio_squared": maximum,
+                "effective_per_letter_ratio": maximum ** (0.5 / depth),
+                "witness": _decode_word(
+                    int(codes[index]), depth, alphabet_size
+                ),
+            }
+        )
+    return {
+        "schema": SCHEMA,
+        "status": status,
+        "alphabet_size": alphabet_size,
+        "max_depth_requested": max_depth,
+        "max_depth_reached": len(per_depth),
+        "next_level_matrices": (
+            alphabet_size * len(level) if status == "resource-limit" else None
+        ),
+        "per_depth": per_depth,
+    }
+
+
+def joint_grade34_ratio_profile(
+    points: Sequence[Sequence[float]],
+    *,
+    max_depth: int = 8,
+    max_level_matrices: int = 2_000_000,
+) -> dict[str, object]:
+    """Enumerate the coupled grade-3 norm / grade-4 path ratio."""
+
+    if max_depth < 1:
+        raise ValueError("max_depth must be positive")
+    one_particle = joint_alphabet(points)
+    grade3_atoms = np.asarray(
+        [compound_matrix(atom, 3) for atom in one_particle]
+    )
+    grade4_atoms = np.asarray(
+        [
+            _GRADE4_GAUGE
+            @ compound_matrix(atom, 4)
+            @ _GRADE4_GAUGE
+            for atom in one_particle
+        ]
+    )
+    minimum_grade4_entry = float(np.min(grade4_atoms))
+    if minimum_grade4_entry < -1.0e-12:
+        return {
+            "schema": SCHEMA,
+            "status": "grade4-gauge-failed",
+            "minimum_grade4_entry": minimum_grade4_entry,
+            "per_depth": [],
+        }
+    alphabet_size = len(grade3_atoms)
+    level3 = np.eye(10, dtype=float)[None, :, :]
+    level4 = np.eye(5, dtype=float)[None, :, :]
+    codes = np.zeros(1, dtype=np.int64)
+    per_depth = []
+    status = "complete"
+    for depth in range(1, max_depth + 1):
+        next_count = alphabet_size * len(level3)
+        if next_count > max_level_matrices:
+            status = "resource-limit"
+            break
+        level3 = np.matmul(
+            grade3_atoms[:, None, :, :], level3[None, :, :, :]
+        ).reshape(next_count, 10, 10)
+        level4 = np.matmul(
+            grade4_atoms[:, None, :, :], level4[None, :, :, :]
+        ).reshape(next_count, 5, 5)
+        codes = np.concatenate(
+            [codes * alphabet_size + symbol for symbol in range(alphabet_size)]
+        )
+        numerators = np.einsum("bij,bij->b", level3, level3)
+        denominators = np.square(level4[:, 0, 0])
+        ratios = np.full(next_count, np.inf, dtype=float)
+        np.divide(
+            numerators,
+            denominators,
+            out=ratios,
+            where=denominators > 0.0,
+        )
+        index = int(np.argmax(ratios))
+        maximum = float(ratios[index])
+        per_depth.append(
+            {
+                "depth": depth,
+                "word_count": next_count,
+                "maximum_ratio_squared": maximum,
+                "effective_per_letter_ratio": maximum ** (0.5 / depth),
+                "grade3_frobenius_squared": float(numerators[index]),
+                "grade4_path_weight_squared": float(denominators[index]),
+                "witness": _decode_word(
+                    int(codes[index]), depth, alphabet_size
+                ),
+            }
+        )
+    return {
+        "schema": SCHEMA,
+        "status": status,
+        "alphabet_size": alphabet_size,
+        "minimum_grade4_entry": minimum_grade4_entry,
+        "max_depth_requested": max_depth,
+        "max_depth_reached": len(per_depth),
+        "next_level_matrices": (
+            alphabet_size * len(level3) if status == "resource-limit" else None
+        ),
+        "per_depth": per_depth,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_rational_word_replay",
     "exhaustive_joint_short_words",
     "joint_alphabet",
+    "joint_grade34_ratio_profile",
+    "joint_grade3_frobenius_profile",
     "random_joint_long_words",
 ]
 
@@ -285,6 +435,8 @@ def _main() -> None:
     parser.add_argument("--random-samples", type=int, default=100_000)
     parser.add_argument("--random-depth", type=int, default=40)
     parser.add_argument("--rng-seed", type=int, default=923_771)
+    parser.add_argument("--grade3-depth", type=int, default=0)
+    parser.add_argument("--grade34-depth", type=int, default=0)
     parser.add_argument("--summary", action="store_true")
     arguments = parser.parse_args()
     exhaustive = exhaustive_joint_short_words(
@@ -303,6 +455,22 @@ def _main() -> None:
         "exhaustive": exhaustive,
         "random": random,
     }
+    grade3_profile = None
+    grade34_profile = None
+    if arguments.grade3_depth > 0:
+        grade3_profile = joint_grade3_frobenius_profile(
+            arguments.point,
+            max_depth=arguments.grade3_depth,
+            max_level_matrices=arguments.max_level_matrices,
+        )
+        payload["grade3_profile"] = grade3_profile
+    if arguments.grade34_depth > 0:
+        grade34_profile = joint_grade34_ratio_profile(
+            arguments.point,
+            max_depth=arguments.grade34_depth,
+            max_level_matrices=arguments.max_level_matrices,
+        )
+        payload["grade34_profile"] = grade34_profile
     if arguments.summary:
         payload = {
             "points": arguments.point,
@@ -332,6 +500,23 @@ def _main() -> None:
                 )
             },
         }
+        if grade3_profile is not None:
+            payload["grade3_profile"] = {
+                "status": grade3_profile["status"],
+                "max_depth_reached": grade3_profile["max_depth_reached"],
+                "last": grade3_profile["per_depth"][-1],
+            }
+        if grade34_profile is not None:
+            peak = max(
+                grade34_profile["per_depth"],
+                key=lambda record: record["maximum_ratio_squared"],
+            )
+            payload["grade34_profile"] = {
+                "status": grade34_profile["status"],
+                "max_depth_reached": grade34_profile["max_depth_reached"],
+                "last": grade34_profile["per_depth"][-1],
+                "peak": peak,
+            }
     print(json.dumps(payload, indent=2, sort_keys=True), flush=True)
 
 

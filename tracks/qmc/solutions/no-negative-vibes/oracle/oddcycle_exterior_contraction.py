@@ -438,6 +438,7 @@ def _main() -> None:
     parser.add_argument("--solver", default="CLARABEL")
     parser.add_argument("--epsilon", type=float, default=1.0e-7)
     parser.add_argument("--gamma-tolerance", type=float, default=2.0e-3)
+    parser.add_argument("--summary", action="store_true")
     arguments = parser.parse_args()
     result = common_quadratic_exterior_contraction(
         arguments.point,
@@ -445,6 +446,21 @@ def _main() -> None:
         epsilon=arguments.epsilon,
         gamma_tolerance=arguments.gamma_tolerance,
     )
+    if arguments.summary:
+        result = {
+            "points": result["points"],
+            "status": result["status"],
+            "gammas": {
+                grade: record.get("gamma_upper")
+                for grade, record in result["grades"].items()
+            },
+            "conditions": {
+                grade: record.get("metric_condition_number")
+                for grade, record in result["grades"].items()
+            },
+            "minimum_integer_N": result["tail_bound"]["minimum_integer_N"],
+            "bound_at_N": result["tail_bound"]["bound_at_N"],
+        }
     print(json.dumps(result, indent=2, sort_keys=True), flush=True)
 
 

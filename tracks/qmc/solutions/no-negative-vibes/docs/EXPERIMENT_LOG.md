@@ -2114,12 +2114,14 @@ the successful length-13 fixed-point proof.
 
 ### Joint-word survivor tests and mandatory exact replay
 
-The pair `{p=0.3,p=2.5}` at `q=r=1`, including both transposes, survived
-all 349,524 words through depth 9 with minimum determinant `33.5`, and
-100,000 independent random words through depth 40 with the same minimum
-at a one-letter word.  This is four million random word-depth evaluations
-without a negative candidate, so the pair remains the leading boundary
-target while the block certificate is developed.
+The pair `{p=0.3,p=2.5}` at `q=r=1`, including both transposes, first
+survived all 349,524 words through depth 9 and 100,000 independent random
+words through depth 40.  The CPU machine then exhausted all 22,369,620
+nonempty words through depth 12 in 13.8 seconds.  Every tested determinant
+is strictly positive and the global minimum remains `33.5`, attained by a
+one-letter word.  This gives the prospective block theorem the same finite
+depth as the fixed theorem while the new four-letter tail certificate is
+developed.
 
 The `{p=0.4,p=3.0}` random stress initially returned a floating-point
 negative at depth 39 for word
@@ -2131,3 +2133,24 @@ an exact-positive replay terminates with
 `floating-point-resolution-limit`, never with a counterexample label.
 This prevents long-word overflow/cancellation from steering the search
 away from a genuine survivor.
+
+### Coupled exterior profile and multi-direction early stop
+
+The plain grade-three normalization
+`||Lambda^3(W)||_F^2 / 8^(2|W|)` is not the fixed proof's denominator and
+was discarded.  The corrected diagnostic divides by the square of the
+positive grade-four path weight.  For the fixed alphabet its worst ratio
+falls from about `4.52` at depth 1 to `0.319` at depth 8.  For the leading
+joint pair `{(0.3,1,1),(2.5,1,1)}` it rises to about `23.23` at depth 4
+and then falls to `3.898` at depth 12.  Thus the candidate is still alive
+but does not yet satisfy the existing finite-tail gate; the next theorem
+must use a state-dependent/coupled positive-automaton bound rather than a
+single Frobenius norm.
+
+To search for a less distorted no-common-metric alphabet, cyclic triples
+and six-direction unions were tested at reciprocal scales
+`s in {0.5,0.6,0.7}`.  All six alphabets were rejected immediately by the
+full joint common-metric SDP.  Their verified normalized margins ranged
+from `0.01534` to `0.08662`.  No word enumeration was launched for these
+known-class cases.  This validates the early-stop policy and keeps the
+two-machine budget focused on the surviving two-point mechanism.
