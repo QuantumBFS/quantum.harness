@@ -2183,3 +2183,25 @@ this is an exact exclusion of the tested common split-contraction/Wei
 mechanism.  The reusable lesson is to rationalize an interior dual rather
 than an exposed rank-one boundary point: the positive eigenvalue margin
 makes exact affine projection robust.
+
+### Exact physical target for the leading pair
+
+The leading pair was lifted to the 32-dimensional number-conserving Fock
+space before the arbitrary-word theorem was finished, so physical
+realizability would not become a late blocker.  Exact row arithmetic for
+
+`Gamma(B0)+Gamma(B0)^T+Gamma(B1)+Gamma(B1)^T`
+
+has maximum diagonal-dominance requirement 44.  Therefore
+
+`T=45I+Gamma(B0)+Gamma(B0)^T+Gamma(B1)+Gamma(B1)^T`
+
+is real symmetric positive definite with minimum row margin one.  After
+normalization by 49 it gives five strictly positive auxiliary-field
+coefficients `(45,1,1,1,1)/49` and a Hermitian
+`H=-Log(T/49)`.  Both atoms avoid the negative real spectral axis and
+admit real one-particle logarithms.  The Gaussian block identity fails in
+58 entries, first by 196 at `(0,0)`, proving that the target Hamiltonian is
+interacting.  This closes the physical and positive-field gates
+conditionally; sign-freeness still requires the independent arbitrary-word
+determinant theorem.
