@@ -211,6 +211,7 @@ def _trial(
             "dimension": config.search.dimension,
             "method": config.search.method,
             "origin_sha256": "2" * 64,
+            "source_basis_sha256": "5" * 64,
         },
         "stop_reason": "certified" if certified_query is not None else "budget",
         "validation_attempts": validation_attempts,

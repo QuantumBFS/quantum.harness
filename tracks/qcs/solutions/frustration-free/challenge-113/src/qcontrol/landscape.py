@@ -67,6 +67,7 @@ class LandscapeResult:
     hessian_rank_is_lower_bound: dict[float, bool]
     jacobian_ranks: RankMap
     model_basis: NDArray[np.float64]
+    search_basis_available_columns: int
     endpoint_basis: NDArray[np.float64]
     dense_hessian: NDArray[np.float64] | None
     dense_eigenvalues: NDArray[np.float64] | None
@@ -565,9 +566,7 @@ def _leading_eigenpairs(
         tol=1e-12,
         maxiter=max(1000, 20 * parameter_count),
     )
-    # Reports use descending algebraic order among the largest-magnitude modes
-    # returned by ARPACK. Rank and subspace selection always use abs(values).
-    order = np.argsort(values)[::-1]
+    order = np.argsort(np.abs(values))[::-1]
     return (
         np.asarray(values[order], dtype=np.float64),
         _orthonormalize(np.asarray(vectors[:, order], dtype=np.float64)),
@@ -635,7 +634,7 @@ def analyze_landscape(
     if dense_validation:
         dense_matrix = dense_hessian(loss_fn, point)
         ascending_values, ascending_vectors = np.linalg.eigh(dense_matrix)
-        order = np.argsort(ascending_values)[::-1]
+        order = np.argsort(np.abs(ascending_values))[::-1]
         dense_values = np.asarray(ascending_values[order], dtype=np.float64)
         dense_vectors = np.asarray(ascending_vectors[:, order], dtype=np.float64)
         hessian_ranks = _relative_ranks(dense_values)
@@ -670,8 +669,11 @@ def analyze_landscape(
             )
         )
 
-    model_mask = _absolute_mode_mask(leading_values, 1e-8)
-    model_basis = _orthonormalize(leading_vectors[:, model_mask])
+    model_basis = (
+        np.asarray(dense_vectors, dtype=np.float64)
+        if dense_vectors is not None
+        else np.asarray(leading_vectors, dtype=np.float64)
+    )
 
     return LandscapeResult(
         leading_eigenvalues=leading_values,
@@ -681,6 +683,7 @@ def analyze_landscape(
         hessian_rank_is_lower_bound=hessian_rank_is_lower_bound,
         jacobian_ranks=jacobian_ranks,
         model_basis=model_basis,
+        search_basis_available_columns=int(model_basis.shape[1]),
         endpoint_basis=endpoint_basis,
         dense_hessian=dense_matrix,
         dense_eigenvalues=dense_values,
@@ -688,5 +691,5 @@ def analyze_landscape(
         dense_hvp_projector_residuals=projector_residuals,
         dense_hvp_principal_angles=principal_angles,
         polishing=polishing,
-        eigenvalue_ordering="descending algebraic",
+        eigenvalue_ordering="descending absolute",
     )

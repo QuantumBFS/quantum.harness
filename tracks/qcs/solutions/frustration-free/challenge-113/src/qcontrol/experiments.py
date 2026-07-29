@@ -568,6 +568,7 @@ def _validate_result_and_attempts(
         "dimension",
         "method",
         "origin_sha256",
+        "source_basis_sha256",
     }:
         raise ValueError("public search identity fields are not canonical")
     if (
@@ -577,7 +578,7 @@ def _validate_result_and_attempts(
         or any(
             not isinstance(search[key], str)
             or re.fullmatch(r"[0-9a-f]{64}", search[key], re.ASCII) is None
-            for key in ("basis_sha256", "origin_sha256")
+            for key in ("basis_sha256", "origin_sha256", "source_basis_sha256")
         )
     ):
         raise ValueError("public search identity does not match configuration")
@@ -1283,6 +1284,15 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
         "dimension": search_space.dimension,
         "method": config.search.method,
         "origin_sha256": _array_sha256(search_space.origin),
+        "source_basis_sha256": _array_sha256(
+            landscape.model_basis
+            if config.search.method == "model_hessian"
+            else (
+                oracle_basis
+                if config.search.method == "oracle"
+                else search_space.basis
+            )
+        ),
     }
     public_result["derived_metrics"] = {
         "exact_infidelity": exact_trajectory.canonical_dict(),

@@ -244,6 +244,7 @@ def _result(spec, execution: int) -> TrialResult:
             "dimension": spec.config.search.dimension,
             "method": spec.config.search.method,
             "origin_sha256": "2" * 64,
+            "source_basis_sha256": "5" * 64,
         },
         "best_pulse": [0.0] * 6,
         "best_observation": None,
@@ -380,6 +381,7 @@ def _result_with_two_validations(spec) -> TrialResult:
                 "dimension": 1,
                 "method": "random",
                 "origin_sha256": "2" * 64,
+                "source_basis_sha256": "5" * 64,
             },
             "stop_reason": "certified",
             "validation_attempts": validation_attempts,
@@ -776,6 +778,7 @@ def test_trial_artifact_structurally_excludes_numeric_search_bases(
         "dimension": 1,
         "method": method,
         "origin_sha256": "2" * 64,
+        "source_basis_sha256": "5" * 64,
     }
 
 
@@ -1175,6 +1178,42 @@ def test_production_matrix_has_exact_design_coverage() -> None:
         } == dimensions
         full = [spec for spec in subset if spec.config.search.method == "full"]
         assert len(full) == 5 * len(shots) * 20
+
+
+@pytest.mark.integration
+def test_every_canonical_production_search_space_constructs() -> None:
+    specs = generate_paired_trials(default_sweep_configs("production"))
+    representatives = {}
+    for spec in specs:
+        config = spec.config
+        key = (
+            config.system.name,
+            config.search.method,
+            config.search.dimension,
+            config.trial_seed,
+        )
+        representatives.setdefault(key, config)
+    prepared = {
+        name: experiments_module.prepare_model(
+            next(
+                config
+                for config in representatives.values()
+                if config.system.name == name
+            )
+        )
+        for name in ("one_qubit", "two_qubit")
+    }
+
+    for config in representatives.values():
+        model = prepared[config.system.name]
+        space = make_search_space(
+            config.search,
+            model.origin,
+            model_basis=model.landscape.model_basis,
+            oracle_basis=model.landscape.model_basis,
+            seed=config.trial_seed,
+        )
+        assert space.dimension == config.search.dimension
 
 
 @pytest.mark.parametrize("invalid", (True, 1.0, "1"))

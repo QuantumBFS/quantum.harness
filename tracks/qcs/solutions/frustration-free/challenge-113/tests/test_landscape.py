@@ -8,6 +8,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from qcontrol.closed_loop import make_full_space, make_model_hessian_space
 from qcontrol.config import SystemConfig
 from qcontrol.landscape import (
     EndpointPolishingError,
@@ -87,7 +88,7 @@ def test_matrix_free_spectrum_includes_large_negative_modes() -> None:
         spectrum_truncated=True,
     )
 
-    np.testing.assert_allclose(values, [5.0, 2.0, -3.0, -12.0], atol=1e-12)
+    np.testing.assert_allclose(values, [-12.0, 5.0, -3.0, 2.0], atol=1e-12)
     np.testing.assert_allclose(vectors.T @ vectors, np.eye(4), atol=1e-12)
     assert ranks == {1e-6: 4, 1e-8: 4, 1e-10: 4}
     assert lower_bounds == {1e-6: True, 1e-8: True, 1e-10: True}
@@ -108,16 +109,22 @@ def test_one_qubit_geometry_has_primary_rank_three(
     assert set(result.jacobian_ranks) == {1e-6, 1e-8, 1e-10}
     assert result.hessian_ranks[1e-8] == 3
     assert result.jacobian_ranks[1e-8] == 3
-    assert result.eigenvalue_ordering == "descending algebraic"
+    assert result.eigenvalue_ordering == "descending absolute"
     assert result.polishing.loss <= 1e-12
     assert result.polishing.gradient_norm <= 1e-10
     assert result.polishing.residual_norm <= 1e-12
     assert not any(result.hessian_rank_is_lower_bound.values())
     np.testing.assert_allclose(
         result.model_basis.T @ result.model_basis,
-        np.eye(3),
+        np.eye(24),
         rtol=0.0,
         atol=1e-10,
+    )
+    assert result.model_basis.shape == (24, 24)
+    assert result.search_basis_available_columns == 24
+    assert np.all(
+        np.abs(result.dense_eigenvalues[:-1])
+        >= np.abs(result.dense_eigenvalues[1:])
     )
     np.testing.assert_allclose(
         result.endpoint_basis.T @ result.endpoint_basis,
@@ -132,6 +139,50 @@ def test_one_qubit_geometry_has_primary_rank_three(
     assert (
         float(np.max(result.dense_hvp_principal_angles[1e-8]))
         <= 1e-6
+    )
+
+
+@pytest.mark.integration
+def test_dense_search_basis_supports_all_high_k_spaces(
+    accepted_one_qubit,
+    accepted_two_qubit,
+) -> None:
+    one_system, one_space, one_accepted, _ = accepted_one_qubit
+    one = analyze_landscape(one_system, one_space, one_accepted, leading_count=6)
+    one_k24 = make_model_hessian_space(
+        np.asarray(one.polishing.normalized_pulse),
+        one.model_basis,
+        dimension=24,
+    )
+    assert one_k24.dimension == 24
+    assert one.hessian_ranks[1e-8] == 3
+
+    two_system, two_space, two_accepted = accepted_two_qubit
+    two = analyze_landscape(two_system, two_space, two_accepted, leading_count=20)
+    assert two.model_basis.shape == (80, 80)
+    assert two.search_basis_available_columns == 80
+    assert two.hessian_ranks[1e-8] == 15
+    spaces = [
+        make_model_hessian_space(
+            np.asarray(two.polishing.normalized_pulse),
+            two.model_basis,
+            dimension=dimension,
+        )
+        for dimension in (20, 30, 80)
+    ]
+    assert [space.dimension for space in spaces] == [20, 30, 80]
+    for left, right in zip(spaces, spaces[1:]):
+        np.testing.assert_allclose(
+            left.basis @ left.basis.T,
+            right.basis[:, : left.dimension] @ right.basis[:, : left.dimension].T,
+            atol=1e-10,
+        )
+    full = make_full_space(spaces[-1].origin)
+    delta = np.linspace(-0.01, 0.01, 80)
+    np.testing.assert_allclose(
+        full.to_pulse(delta),
+        spaces[-1].to_pulse(spaces[-1].basis.T @ delta),
+        atol=1e-10,
     )
 
 
@@ -391,6 +442,8 @@ def test_two_qubit_scientific_geometry_and_held_pulse_refinement(
     assert refined.hessian_ranks == {1e-6: 15, 1e-8: 15, 1e-10: 15}
     assert refined.jacobian_ranks == {1e-6: 15, 1e-8: 15, 1e-10: 15}
     assert refined.dense_hessian is None
+    assert refined.search_basis_available_columns == 20
+    assert refined.model_basis.shape == (160, 20)
     assert refined.dense_hvp_projector_residuals == {}
     assert not any(refined.hessian_rank_is_lower_bound.values())
     assert coarse.dense_hvp_projector_residuals[1e-8] <= 1e-7
