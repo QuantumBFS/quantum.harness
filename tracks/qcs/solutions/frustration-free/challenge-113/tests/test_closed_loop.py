@@ -320,6 +320,39 @@ def test_budget_is_never_exceeded_and_failed_queries_are_charged() -> None:
     assert result.budget_exhausted
 
 
+def test_audit_sink_receives_copies_without_influencing_cma() -> None:
+    origin = np.zeros(5, dtype=np.float64)
+    target = np.asarray([0.5, -0.4, 0.3, 0.0, 0.0])
+    audited: list[tuple[np.ndarray, Observation | None]] = []
+
+    def sink(pulse: np.ndarray, observation: Observation | None) -> object:
+        audited.append((pulse.copy(), observation))
+        pulse[:] = 99.0
+        return {"ignored": True}
+
+    with_sink = run_closed_loop(
+        _SyntheticDevice(target=target, failures=frozenset({2})),
+        make_full_space(origin),
+        budget=8,
+        seed=2,
+        audit_sink=sink,
+    )
+    replay = run_closed_loop(
+        _SyntheticDevice(target=target, failures=frozenset({2})),
+        make_full_space(origin),
+        budget=8,
+        seed=2,
+    )
+
+    assert len(audited) == with_sink.evaluations == 8
+    assert audited[1][1] is None
+    assert all(np.all(np.abs(pulse) <= 1.0) for pulse, _ in audited)
+    np.testing.assert_allclose(with_sink.best_pulse, replay.best_pulse, atol=0.0, rtol=0.0)
+    assert [item.estimate for item in with_sink.observations] == [
+        item.estimate for item in replay.observations
+    ]
+
+
 def test_seed_zero_replays_the_same_cma_trajectory() -> None:
     origin = np.zeros(5, dtype=np.float64)
     target = np.asarray([0.2, -0.1, 0.15, 0.0, 0.0])

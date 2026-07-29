@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import math
 from numbers import Integral, Real
@@ -757,6 +757,8 @@ def run_closed_loop(
     space: SearchSpace,
     budget: object,
     seed: object,
+    *,
+    audit_sink: Callable[[NDArray[np.float64], Observation | None], object] | None = None,
 ) -> ClosedLoopResult:
     if not isinstance(space, SearchSpace):
         raise ValueError("space must be a SearchSpace")
@@ -790,7 +792,14 @@ def run_closed_loop(
         try:
             observation = device.query(pulse)
         except DeviceQueryError:
+            if audit_sink is not None:
+                audit_sink(np.array(pulse, dtype=np.float64, copy=True), None)
             return 1.0, False
+        if audit_sink is not None:
+            audit_sink(
+                np.array(pulse, dtype=np.float64, copy=True),
+                observation,
+            )
         observations.append(observation)
         is_new_best = (
             best_observation is None

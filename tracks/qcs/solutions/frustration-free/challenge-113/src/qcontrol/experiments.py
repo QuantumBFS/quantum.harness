@@ -7,6 +7,7 @@ import json
 import math
 from pathlib import Path
 import re
+import threading
 from typing import Any
 
 import jax
@@ -14,14 +15,24 @@ import jax.numpy as jnp
 import numpy as np
 
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore, canonical_json_bytes
-from qcontrol.closed_loop import make_search_space, run_closed_loop
+from qcontrol.closed_loop import SearchSpace, make_search_space, run_closed_loop
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
-from qcontrol.device import make_query_device
+from qcontrol.device import Observation, make_query_device
 from qcontrol.landscape import analyze_landscape
 from qcontrol.objectives import normalized_infidelity
+from qcontrol.offline import (
+    compute_geometry_diagnostics,
+    cumulative_best_exact_infidelity,
+    make_offline_evaluator,
+    optimize_restricted_noiseless_upper_bound,
+)
 from qcontrol.open_loop import optimize_open_loop
 from qcontrol.pulses import PulseSpace
-from qcontrol.systems import make_system, perturb_system
+from qcontrol.systems import ControlSystem, make_system, perturb_system
+
+
+_DERIVED_CACHE_LOCK = threading.RLock()
+_DERIVED_STATIC_CACHE: dict[str, dict[tuple[object, ...], object]] = {}
 
 
 def _content_id(prefix: str, payload: object, length: int = 24) -> str:
@@ -186,6 +197,7 @@ _RESULT_FIELDS = {
     "validation_attempts",
     "validation_result",
 }
+_DERIVED_RESULT_FIELDS = _RESULT_FIELDS | {"derived_metrics"}
 
 
 def _exact_nonnegative_int(value: object, *, name: str) -> int:
@@ -232,16 +244,189 @@ def _attempt_observation(attempt: Mapping[str, object]) -> dict[str, object]:
     }
 
 
+def _finite_probability(value: object, *, name: str) -> float:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(float(value))
+        or not 0.0 <= float(value) <= 1.0
+    ):
+        raise ValueError(f"{name} must be a finite probability")
+    return float(value)
+
+
+def _validate_derived_metrics(
+    value: object,
+    *,
+    evaluations: int,
+    attempts: tuple[dict[str, object], ...],
+    config: ExperimentConfig,
+) -> None:
+    if not isinstance(value, Mapping) or set(value) != {
+        "exact_infidelity",
+        "geometry",
+        "restricted_noiseless_optimization",
+    }:
+        raise ValueError("derived metric fields are not canonical")
+    exact = value["exact_infidelity"]
+    if not isinstance(exact, Mapping) or set(exact) != {
+        "cumulative_best_by_optimizer_query",
+        "initial_infidelity",
+    }:
+        raise ValueError("exact-infidelity fields are not canonical")
+    initial = _finite_probability(
+        exact["initial_infidelity"],
+        name="initial exact infidelity",
+    )
+    trajectory = exact["cumulative_best_by_optimizer_query"]
+    if not isinstance(trajectory, list) or len(trajectory) != evaluations:
+        raise ValueError("exact-infidelity trajectory must align with optimizer queries")
+    values = [
+        _finite_probability(item, name="exact-infidelity trajectory value")
+        for item in trajectory
+    ]
+    if any(current > previous for previous, current in zip([initial, *values], values)):
+        raise ValueError("exact-infidelity trajectory must be cumulative nonincreasing")
+    optimizer_attempts = [item for item in attempts if not item["validation"]]
+    previous = initial
+    for item, current in zip(optimizer_attempts, values, strict=True):
+        if item["status"] != "succeeded" and current != previous:
+            raise ValueError("failed optimizer queries require exact carry-forward")
+        previous = current
+
+    restricted = value["restricted_noiseless_optimization"]
+    restricted_fields = {
+        "attained_infidelity_upper_bound",
+        "consistency_tolerance",
+        "converged",
+        "function_evaluations",
+        "gradient_tolerance",
+        "iterations",
+        "max_iterations",
+        "solver",
+        "starting_infidelity_upper_bound",
+        "termination",
+    }
+    if not isinstance(restricted, Mapping) or set(restricted) != restricted_fields:
+        raise ValueError("restricted-optimization fields are not canonical")
+    attained = _finite_probability(
+        restricted["attained_infidelity_upper_bound"],
+        name="restricted attained upper bound",
+    )
+    starting = _finite_probability(
+        restricted["starting_infidelity_upper_bound"],
+        name="restricted starting upper bound",
+    )
+    if (
+        type(restricted["max_iterations"]) is not int
+        or restricted["max_iterations"] <= 0
+        or type(restricted["function_evaluations"]) is not int
+        or restricted["function_evaluations"] <= 0
+        or type(restricted["iterations"]) is not int
+        or restricted["iterations"] < 0
+        or type(restricted["converged"]) is not bool
+        or restricted["solver"] != "L-BFGS-B"
+        or restricted["termination"] not in {"converged", "iteration_budget"}
+        or restricted["converged"]
+        != (restricted["termination"] == "converged")
+    ):
+        raise ValueError("restricted-optimization solver metadata is invalid")
+    gradient_tolerance = restricted["gradient_tolerance"]
+    consistency_tolerance = restricted["consistency_tolerance"]
+    if (
+        isinstance(gradient_tolerance, bool)
+        or not isinstance(gradient_tolerance, (int, float))
+        or not math.isfinite(float(gradient_tolerance))
+        or float(gradient_tolerance) <= 0.0
+        or isinstance(consistency_tolerance, bool)
+        or not isinstance(consistency_tolerance, (int, float))
+        or not math.isfinite(float(consistency_tolerance))
+        or float(consistency_tolerance) < 0.0
+    ):
+        raise ValueError("restricted-optimization tolerances are invalid")
+    if attained > starting + float(consistency_tolerance) or attained > min(
+        [initial, *values]
+    ) + float(consistency_tolerance):
+        raise ValueError("restricted attained upper bound is inconsistent")
+
+    geometry = value["geometry"]
+    geometry_fields = {
+        "model_effective_ranks",
+        "model_top_subspace_sha256",
+        "principal_angles_radians",
+        "rank_thresholds",
+        "signed_leading_eigenvalue_gaps",
+        "truth_effective_ranks",
+        "truth_top_subspace_sha256",
+    }
+    if not isinstance(geometry, Mapping) or set(geometry) != geometry_fields:
+        raise ValueError("geometry fields are not canonical")
+    thresholds = geometry["rank_thresholds"]
+    model_ranks = geometry["model_effective_ranks"]
+    truth_ranks = geometry["truth_effective_ranks"]
+    if (
+        not isinstance(thresholds, list)
+        or thresholds != [1e-6, 1e-8, 1e-10]
+        or not isinstance(model_ranks, list)
+        or not isinstance(truth_ranks, list)
+        or len(model_ranks) != len(thresholds)
+        or len(truth_ranks) != len(thresholds)
+    ):
+        raise ValueError("geometry rank diagnostics are dimensionally inconsistent")
+    for ranks in (model_ranks, truth_ranks):
+        if any(
+            type(rank) is not int
+            or not 0 <= rank <= config.system.parameter_count
+            for rank in ranks
+        ) or any(current < previous for previous, current in zip(ranks, ranks[1:])):
+            raise ValueError("geometry effective ranks are invalid")
+    dimension = config.search.dimension
+    gaps = geometry["signed_leading_eigenvalue_gaps"]
+    angles = geometry["principal_angles_radians"]
+    if (
+        not isinstance(gaps, list)
+        or not isinstance(angles, list)
+        or len(gaps) != dimension
+        or len(angles) != dimension
+        or any(
+            isinstance(item, bool)
+            or not isinstance(item, (int, float))
+            or not math.isfinite(float(item))
+            for item in gaps
+        )
+        or any(
+            isinstance(item, bool)
+            or not isinstance(item, (int, float))
+            or not math.isfinite(float(item))
+            or not 0.0 <= float(item) <= math.pi / 2.0 + 1e-12
+            for item in angles
+        )
+    ):
+        raise ValueError("geometry subspace diagnostics are invalid")
+    for key in ("model_top_subspace_sha256", "truth_top_subspace_sha256"):
+        if (
+            not isinstance(geometry[key], str)
+            or re.fullmatch(r"[0-9a-f]{64}", geometry[key], re.ASCII) is None
+        ):
+            raise ValueError("geometry subspace hash is invalid")
+
+
 def _validate_result_and_attempts(
     result: object,
     ledger: Mapping[str, int],
     attempts: tuple[dict[str, object], ...],
     config: ExperimentConfig,
 ) -> None:
-    if not isinstance(result, Mapping) or set(result) != _RESULT_FIELDS:
+    if not isinstance(result, Mapping):
         raise ValueError("public result fields are not canonical")
-    if type(result["schema_version"]) is not int or result["schema_version"] != 2:
+    schema_version = result.get("schema_version")
+    expected_fields = _DERIVED_RESULT_FIELDS if schema_version == 3 else _RESULT_FIELDS
+    if set(result) != expected_fields:
+        raise ValueError("public result fields are not canonical")
+    if type(schema_version) is not int or schema_version not in {2, 3}:
         raise ValueError("unsupported public result schema")
+    if schema_version == 2 and config.run_kind == "production":
+        raise ValueError("production trials require derived-metric schema 3")
     search = result["search"]
     if not isinstance(search, Mapping) or set(search) != {
         "basis_sha256",
@@ -525,6 +710,13 @@ def _validate_result_and_attempts(
         raise ValueError("certification history is inconsistent")
     if certified_crossings and certified_crossings[0] != crossings[-1]:
         raise ValueError("certified validation attempt must be final")
+    if schema_version == 3:
+        _validate_derived_metrics(
+            result["derived_metrics"],
+            evaluations=evaluations,
+            attempts=attempts,
+            config=config,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -594,6 +786,7 @@ class TrialResult:
         object.__setattr__(self, "attempts", attempts)
 
     def canonical_dict(self) -> dict[str, object]:
+        schema_version = self.result["schema_version"]
         payload: dict[str, object] = {
             "attempts": list(self.attempts),
             "config": self.config,
@@ -601,7 +794,7 @@ class TrialResult:
             "ledger": self.ledger,
             "observation_stream_id": self.observation_stream_id,
             "result": self.result,
-            "schema_version": 2,
+            "schema_version": schema_version,
             "trial_id": self.trial_id,
         }
         if self.execution is not None:
@@ -610,7 +803,10 @@ class TrialResult:
 
     @classmethod
     def from_canonical_dict(cls, payload: object) -> TrialResult:
-        if not isinstance(payload, Mapping) or payload.get("schema_version") != 2:
+        if not isinstance(payload, Mapping) or payload.get("schema_version") not in {
+            2,
+            3,
+        }:
             raise ValueError("unsupported trial-result schema")
         expected = {
             "attempts",
@@ -626,6 +822,12 @@ class TrialResult:
             expected.add("execution")
         if set(payload) != expected:
             raise ValueError("invalid trial-result fields")
+        result_payload = payload.get("result")
+        if (
+            not isinstance(result_payload, Mapping)
+            or result_payload.get("schema_version") != payload["schema_version"]
+        ):
+            raise ValueError("trial and public result schema versions differ")
         try:
             result = cls(
                 trial_id=payload["trial_id"],
@@ -740,6 +942,61 @@ def _oracle_basis(
     return np.asarray(eigenvectors[:, ordering], dtype=np.float64)
 
 
+def _cached_static_derived_metrics(
+    config: ExperimentConfig,
+    model: ControlSystem,
+    truth: ControlSystem,
+    pulse_space: PulseSpace,
+    search_space: SearchSpace,
+    audited_queries: Sequence[tuple[np.ndarray, Observation | None]],
+) -> tuple[object, object]:
+    system = config.canonical_dict()["system"]
+    device = config.canonical_dict()["device"]
+    geometry_key = (
+        canonical_json_bytes(system),
+        device["gap"],
+        device["perturbation_seed"],
+        device["shots"],
+        config.trial_seed,
+        _array_sha256(search_space.origin),
+        search_space.dimension,
+    )
+    pulse_matrix = np.stack(
+        [np.asarray(pulse, dtype=np.float64) for pulse, _ in audited_queries],
+        axis=0,
+    )
+    restricted_key = (
+        geometry_key,
+        _array_sha256(search_space.basis),
+        _array_sha256(search_space.lower_bounds),
+        _array_sha256(search_space.upper_bounds),
+        _array_sha256(pulse_matrix),
+    )
+    with _DERIVED_CACHE_LOCK:
+        geometry_cache = _DERIVED_STATIC_CACHE.setdefault("geometry", {})
+        geometry = geometry_cache.get(geometry_key)
+        if geometry is None:
+            geometry = compute_geometry_diagnostics(
+                model,
+                truth,
+                pulse_space,
+                search_space.origin,
+                top_k=search_space.dimension,
+            )
+            geometry_cache[geometry_key] = geometry
+        restricted_cache = _DERIVED_STATIC_CACHE.setdefault("restricted", {})
+        restricted = restricted_cache.get(restricted_key)
+        if restricted is None:
+            restricted = optimize_restricted_noiseless_upper_bound(
+                truth,
+                pulse_space,
+                search_space,
+                candidate_pulses=tuple(pulse for pulse, _ in audited_queries),
+            )
+            restricted_cache[restricted_key] = restricted
+    return geometry, restricted
+
+
 def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
     del store
     specs = generate_paired_trials([config])
@@ -792,21 +1049,84 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
         config.device,
         seed=_stream_seed(spec.observation_stream_id),
     )
+    audited_queries: list[tuple[np.ndarray, Observation | None]] = []
+
+    def record_query(
+        pulse: np.ndarray,
+        observation: Observation | None,
+    ) -> None:
+        audited_queries.append(
+            (np.array(pulse, dtype=np.float64, copy=True), observation)
+        )
+
     closed = run_closed_loop(
         device,
         search_space,
         config.search.budget,
         config.trial_seed,
+        audit_sink=record_query,
     )
     ledger = device.ledger
+    accounting_before_offline = (
+        ledger.optimizer_queries,
+        ledger.optimizer_shots,
+        ledger.validation_queries,
+        ledger.validation_shots,
+        ledger.total_queries,
+        ledger.total_shots,
+    )
+    exact_trajectory = cumulative_best_exact_infidelity(
+        make_offline_evaluator(truth, pulse_space),
+        initial_pulse=search_space.origin,
+        audited_queries=audited_queries,
+    )
+    geometry, restricted = _cached_static_derived_metrics(
+        config,
+        model,
+        truth,
+        pulse_space,
+        search_space,
+        audited_queries,
+    )
+    accounting_after_offline = (
+        ledger.optimizer_queries,
+        ledger.optimizer_shots,
+        ledger.validation_queries,
+        ledger.validation_shots,
+        ledger.total_queries,
+        ledger.total_shots,
+    )
+    if accounting_after_offline != accounting_before_offline:
+        raise RuntimeError("offline derived metrics changed device accounting")
     public_result = closed.canonical_dict()
     public_result.pop("space")
-    public_result["schema_version"] = 2
+    public_result["schema_version"] = 3
     public_result["search"] = {
         "basis_sha256": _array_sha256(search_space.basis),
         "dimension": search_space.dimension,
         "method": config.search.method,
         "origin_sha256": _array_sha256(search_space.origin),
+    }
+    public_result["derived_metrics"] = {
+        "exact_infidelity": exact_trajectory.canonical_dict(),
+        "geometry": {
+            "model_effective_ranks": list(geometry.model_effective_ranks),
+            "model_top_subspace_sha256": _array_sha256(
+                geometry.model_top_subspace
+            ),
+            "principal_angles_radians": list(
+                geometry.principal_angles_radians
+            ),
+            "rank_thresholds": list(geometry.rank_thresholds),
+            "signed_leading_eigenvalue_gaps": list(
+                geometry.signed_leading_eigenvalue_gaps
+            ),
+            "truth_effective_ranks": list(geometry.truth_effective_ranks),
+            "truth_top_subspace_sha256": _array_sha256(
+                geometry.truth_top_subspace
+            ),
+        },
+        "restricted_noiseless_optimization": restricted.canonical_dict(),
     }
     attempts = tuple(
         {

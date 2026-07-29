@@ -7,9 +7,11 @@ from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
 import pytest
 
 import qcontrol.artifacts as artifacts_module
+import qcontrol.experiments as experiments_module
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
 from qcontrol.experiments import (
@@ -119,32 +121,63 @@ def test_development_and_production_cannot_mix() -> None:
 
 
 def _result(spec, execution: int) -> TrialResult:
+    derived = {
+        "exact_infidelity": {
+            "cumulative_best_by_optimizer_query": [0.5, 0.5],
+            "initial_infidelity": 0.5,
+        },
+        "geometry": {
+            "model_effective_ranks": [1, 1, 1],
+            "model_top_subspace_sha256": "3" * 64,
+            "principal_angles_radians": [0.0] * spec.config.search.dimension,
+            "rank_thresholds": [1e-6, 1e-8, 1e-10],
+            "signed_leading_eigenvalue_gaps": [0.0]
+            * spec.config.search.dimension,
+            "truth_effective_ranks": [1, 1, 1],
+            "truth_top_subspace_sha256": "4" * 64,
+        },
+        "restricted_noiseless_optimization": {
+            "attained_infidelity_upper_bound": 0.5,
+            "consistency_tolerance": 1e-10,
+            "converged": True,
+            "function_evaluations": 1,
+            "gradient_tolerance": 1e-9,
+            "iterations": 0,
+            "max_iterations": 100,
+            "solver": "L-BFGS-B",
+            "starting_infidelity_upper_bound": 0.5,
+            "termination": "converged",
+        },
+    }
+    result_payload = {
+        "schema_version": 3 if spec.config.run_kind == "production" else 2,
+        "search": {
+            "basis_sha256": "1" * 64,
+            "dimension": spec.config.search.dimension,
+            "method": spec.config.search.method,
+            "origin_sha256": "2" * 64,
+        },
+        "best_pulse": [0.0] * 6,
+        "best_observation": None,
+        "certified": False,
+        "evaluations": 2,
+        "budget": spec.config.search.budget,
+        "budget_exhausted": False,
+        "stop_reason": "optimizer_stopped",
+        "observations": [],
+        "validation_attempts": [],
+        "first_certified_query": None,
+        "provisional_crossings": [],
+        "validation_result": None,
+    }
+    if spec.config.run_kind == "production":
+        result_payload["derived_metrics"] = derived
     return TrialResult(
         trial_id=spec.trial_id,
         device_id=spec.device_id,
         observation_stream_id=spec.observation_stream_id,
         config=spec.config.canonical_dict(),
-        result={
-            "schema_version": 2,
-            "search": {
-                "basis_sha256": "1" * 64,
-                "dimension": spec.config.search.dimension,
-                "method": spec.config.search.method,
-                "origin_sha256": "2" * 64,
-            },
-            "best_pulse": [0.0] * 6,
-            "best_observation": None,
-            "certified": False,
-            "evaluations": 2,
-            "budget": spec.config.search.budget,
-            "budget_exhausted": False,
-            "stop_reason": "optimizer_stopped",
-            "observations": [],
-            "validation_attempts": [],
-            "first_certified_query": None,
-            "provisional_crossings": [],
-            "validation_result": None,
-        },
+        result=result_payload,
         ledger={
             "optimizer_queries": 2,
             "optimizer_shots": 2_000,
@@ -558,6 +591,7 @@ def test_trial_artifact_structurally_excludes_numeric_search_bases(
 @pytest.mark.integration
 def test_real_trial_uses_public_search_identity_without_numeric_basis(
     tmp_path,
+    monkeypatch,
 ) -> None:
     config = ExperimentConfig(
         run_kind="development",
@@ -567,14 +601,102 @@ def test_real_trial_uses_public_search_identity_without_numeric_basis(
         trial_seed=5,
     )
 
+    geometry_calls = 0
+    restricted_calls = 0
+    real_geometry = experiments_module.compute_geometry_diagnostics
+    real_restricted = experiments_module.optimize_restricted_noiseless_upper_bound
+
+    def counted_geometry(*args, **kwargs):
+        nonlocal geometry_calls
+        geometry_calls += 1
+        return real_geometry(*args, **kwargs)
+
+    def counted_restricted(*args, **kwargs):
+        nonlocal restricted_calls
+        restricted_calls += 1
+        return real_restricted(*args, **kwargs)
+
+    experiments_module._DERIVED_STATIC_CACHE.clear()
+    monkeypatch.setattr(
+        experiments_module,
+        "compute_geometry_diagnostics",
+        counted_geometry,
+    )
+    monkeypatch.setattr(
+        experiments_module,
+        "optimize_restricted_noiseless_upper_bound",
+        counted_restricted,
+    )
     result = run_trial(config, ArtifactStore(tmp_path))
+    run_trial(config, ArtifactStore(tmp_path / "replay"))
     payload = result.canonical_dict()
+
+    assert geometry_calls == restricted_calls == 1
 
     assert "space" not in payload["result"]
     assert "basis" not in set(_walk_keys(payload))
     assert payload["result"]["search"]["method"] == "random"
     assert len(payload["result"]["search"]["basis_sha256"]) == 64
     assert len(payload["attempts"]) == payload["ledger"]["total_queries"]
+    assert payload["schema_version"] == 3
+    assert payload["result"]["schema_version"] == 3
+
+    derived = payload["result"]["derived_metrics"]
+    exact = derived["exact_infidelity"]
+    trajectory = exact["cumulative_best_by_optimizer_query"]
+    assert len(trajectory) == payload["ledger"]["optimizer_queries"]
+    assert all(np.isfinite([exact["initial_infidelity"], *trajectory]))
+    assert all(current <= previous for previous, current in zip(trajectory, trajectory[1:]))
+
+    restricted = derived["restricted_noiseless_optimization"]
+    assert restricted["attained_infidelity_upper_bound"] <= min(
+        exact["initial_infidelity"],
+        *trajectory,
+    ) + restricted["consistency_tolerance"]
+    assert restricted["max_iterations"] > 0
+    assert restricted["gradient_tolerance"] > 0.0
+
+    geometry = derived["geometry"]
+    assert geometry["rank_thresholds"] == [1e-06, 1e-08, 1e-10]
+    assert geometry["model_effective_ranks"] == geometry["truth_effective_ranks"]
+    assert np.max(np.abs(geometry["signed_leading_eigenvalue_gaps"])) < 1e-10
+    assert np.max(np.abs(geometry["principal_angles_radians"])) < 1e-7
+    assert all(np.isfinite(value) for value in geometry["principal_angles_radians"])
+
+    private_keys = {
+        "basis",
+        "origin",
+        "truth",
+        "hamiltonian",
+        "drift_direction",
+        "control_gain_deltas",
+        "unmodeled_direction",
+        "pulse_history",
+        "pulses",
+    }
+    assert not (private_keys & set(_walk_keys(payload)))
+
+    before = dict(payload["ledger"])
+    TrialResult.from_canonical_dict(payload)
+    assert payload["ledger"] == before
+
+
+def test_old_production_trial_schema_and_orphan_are_rejected(tmp_path) -> None:
+    spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
+    legacy = _result(spec, 1).canonical_dict()
+    legacy["schema_version"] = 2
+    legacy["result"]["schema_version"] = 2
+    del legacy["result"]["derived_metrics"]
+
+    with pytest.raises(ValueError, match="production.*schema|schema.*production"):
+        TrialResult.from_canonical_dict(legacy)
+
+    store = ArtifactStore(tmp_path)
+    trial_path = tmp_path / "trials" / f"{spec.trial_id}.json"
+    trial_path.parent.mkdir()
+    trial_path.write_bytes(artifacts_module.canonical_json_bytes(legacy))
+    with pytest.raises(ArtifactConflict, match="invalid strict schema"):
+        run_sweep([spec], store, executor=lambda _: _result(spec, 2))
 
 
 def test_production_matrix_has_exact_design_coverage() -> None:

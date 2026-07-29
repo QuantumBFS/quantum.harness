@@ -167,32 +167,62 @@ def _trial(
         "total_queries": evaluations + len(validation_attempts),
         "total_shots": evaluations * 1_000 + validation_shots,
     }
+    result_payload = {
+        "best_observation": optimizer[-1],
+        "best_pulse": [0.0] * 6,
+        "budget": config.search.budget,
+        "budget_exhausted": certified_query is None,
+        "certified": certified_query is not None,
+        "evaluations": evaluations,
+        "first_certified_query": certified_query,
+        "observations": optimizer,
+        "provisional_crossings": provisional_crossings,
+        "schema_version": 3 if config.run_kind == "production" else 2,
+        "search": {
+            "basis_sha256": "1" * 64,
+            "dimension": config.search.dimension,
+            "method": config.search.method,
+            "origin_sha256": "2" * 64,
+        },
+        "stop_reason": "certified" if certified_query is not None else "budget",
+        "validation_attempts": validation_attempts,
+        "validation_result": validation_result,
+    }
+    if config.run_kind == "production":
+        result_payload["derived_metrics"] = {
+            "exact_infidelity": {
+                "cumulative_best_by_optimizer_query": [0.5] * evaluations,
+                "initial_infidelity": 0.5,
+            },
+            "geometry": {
+                "model_effective_ranks": [1, 1, 1],
+                "model_top_subspace_sha256": "3" * 64,
+                "principal_angles_radians": [0.0] * config.search.dimension,
+                "rank_thresholds": [1e-6, 1e-8, 1e-10],
+                "signed_leading_eigenvalue_gaps": [0.0]
+                * config.search.dimension,
+                "truth_effective_ranks": [1, 1, 1],
+                "truth_top_subspace_sha256": "4" * 64,
+            },
+            "restricted_noiseless_optimization": {
+                "attained_infidelity_upper_bound": 0.5,
+                "consistency_tolerance": 1e-10,
+                "converged": True,
+                "function_evaluations": 1,
+                "gradient_tolerance": 1e-9,
+                "iterations": 0,
+                "max_iterations": 100,
+                "solver": "L-BFGS-B",
+                "starting_infidelity_upper_bound": 0.5,
+                "termination": "converged",
+            },
+        }
     return TrialResult(
         trial_id=spec.trial_id,
         device_id=spec.device_id,
         observation_stream_id=spec.observation_stream_id,
         config=config.canonical_dict(),
-        result={
-            "best_observation": optimizer[-1],
-            "best_pulse": [0.0] * 6,
-            "budget": config.search.budget,
-            "budget_exhausted": certified_query is None,
-            "certified": certified_query is not None,
-            "evaluations": evaluations,
-            "first_certified_query": certified_query,
-            "observations": optimizer,
-            "provisional_crossings": provisional_crossings,
-            "schema_version": 2,
-            "search": {
-                "basis_sha256": "1" * 64,
-                "dimension": config.search.dimension,
-                "method": config.search.method,
-                "origin_sha256": "2" * 64,
-            },
-            "stop_reason": "certified" if certified_query is not None else "budget",
-            "validation_attempts": validation_attempts,
-            "validation_result": validation_result,
-        },
+        result=result_payload,
         ledger=ledger,
         attempts=attempts,
     )
