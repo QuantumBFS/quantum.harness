@@ -24,6 +24,15 @@ _DIGEST_HEX_LENGTH = 64
 RequestedShots = int | float | bool | str | None
 
 
+class DeviceQueryError(RuntimeError):
+    __slots__ = ("attempt_index", "category")
+
+    def __init__(self, attempt_index: int, category: str) -> None:
+        self.attempt_index = attempt_index
+        self.category = category
+        super().__init__(f"device query attempt {attempt_index} failed: {category}")
+
+
 def _nonnegative_integer(name: str, value: object) -> int:
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral):
         raise ValueError(f"{name} must be a nonnegative integer")
@@ -140,13 +149,17 @@ class QueryRecord:
     attempt_index: int
     optimizer_query_index: int
     validation: bool
-    success: bool
+    status: str
     requested_shots: RequestedShots
     charged_shots: int
     estimate: float | None
-    observation_seed: int
-    seed_digest: str
+    observation_seed: int | None
+    seed_digest: str | None
     error_category: str | None
+
+    @property
+    def success(self) -> bool:
+        return self.status == "succeeded"
 
 
 @dataclass(frozen=True, slots=True)
@@ -154,24 +167,17 @@ class _AttemptRecord:
     attempt_index: int
     optimizer_query_index: int
     validation: bool
-    success: bool
+    status: str
     requested_shots: RequestedShots
     charged_shots: int
     estimate: float | None
-    observation_seed: int
-    seed_digest: str
+    observation_seed: int | None
+    seed_digest: str | None
     error_category: str | None
 
-
-@dataclass(frozen=True, slots=True)
-class _Reservation:
-    attempt_index: int
-    optimizer_query_index: int
-    validation: bool
-    requested_shots: RequestedShots
-    observation_seed: int
-    seed_digest: str
-    seed_collision: bool
+    @property
+    def success(self) -> bool:
+        return self.status == "succeeded"
 
 
 def _public_record(record: _AttemptRecord) -> QueryRecord:
@@ -179,7 +185,7 @@ def _public_record(record: _AttemptRecord) -> QueryRecord:
         attempt_index=record.attempt_index,
         optimizer_query_index=record.optimizer_query_index,
         validation=record.validation,
-        success=record.success,
+        status=record.status,
         requested_shots=record.requested_shots,
         charged_shots=record.charged_shots,
         estimate=record.estimate,
@@ -190,7 +196,12 @@ def _public_record(record: _AttemptRecord) -> QueryRecord:
 
 
 def _public_observation(record: _AttemptRecord) -> Observation:
-    if not record.success or record.estimate is None:
+    if (
+        not record.success
+        or record.estimate is None
+        or record.observation_seed is None
+        or record.seed_digest is None
+    ):
         raise ValueError("failed attempts do not have observations")
     return Observation(
         estimate=record.estimate,
@@ -327,6 +338,12 @@ def _seed_identity(
 
 
 def _failure_category(stage: str, error: Exception) -> str:
+    if stage == "request":
+        return "request_validation"
+    if stage == "seed":
+        return "seed_derivation_failure"
+    if stage == "seed_guard":
+        return "seed_collision"
     if stage == "shot_validation":
         return "invalid_shots"
     if stage == "evaluation":
@@ -337,9 +354,15 @@ def _failure_category(stage: str, error: Exception) -> str:
         return "sampling_failure"
     if stage == "observation":
         return "observation_failure"
-    if stage == "seed":
-        return "seed_collision"
     return "internal_failure"
+
+
+def _abort_category(error: BaseException) -> str:
+    if isinstance(error, KeyboardInterrupt):
+        return "keyboard_interrupt"
+    if isinstance(error, SystemExit):
+        return "system_exit"
+    return "process_abort"
 
 
 def make_query_device(
@@ -362,17 +385,29 @@ def make_query_device(
     digest_by_seed: dict[int, str] = {}
     seed_digests: set[str] = set()
 
-    def reserve(validation: bool, raw_shots: object) -> _Reservation:
+    def allocate_attempt(validation: bool) -> _AttemptRecord:
         nonlocal next_attempt_index, optimizer_attempts
         with lock:
             next_attempt_index += 1
             if not validation:
                 optimizer_attempts += 1
-            observation_seed, seed_digest = _seed_identity(
-                device_seed,
-                next_attempt_index,
-                validation,
+            reserved = _AttemptRecord(
+                attempt_index=next_attempt_index,
+                optimizer_query_index=optimizer_attempts,
+                validation=validation,
+                status="reserved",
+                requested_shots=None,
+                charged_shots=0,
+                estimate=None,
+                observation_seed=None,
+                seed_digest=None,
+                error_category=None,
             )
+            records[reserved.attempt_index] = reserved
+            return reserved
+
+    def register_seed(observation_seed: int, seed_digest: str) -> bool:
+        with lock:
             prior_digest = digest_by_seed.get(observation_seed)
             seed_collision = (
                 prior_digest is not None and prior_digest != seed_digest
@@ -380,38 +415,35 @@ def make_query_device(
             if prior_digest is None:
                 digest_by_seed[observation_seed] = seed_digest
             seed_digests.add(seed_digest)
-            return _Reservation(
-                attempt_index=next_attempt_index,
-                optimizer_query_index=optimizer_attempts,
-                validation=validation,
-                requested_shots=_sanitized_requested_shots(raw_shots),
-                observation_seed=observation_seed,
-                seed_digest=seed_digest,
-                seed_collision=seed_collision,
-            )
+            return seed_collision
 
-    def commit(record: _AttemptRecord, observation: Observation | None = None) -> None:
+    def finalize(record: _AttemptRecord, observation: Observation | None = None) -> None:
         with lock:
             records[record.attempt_index] = record
             if observation is not None:
                 issued[id(observation)] = (observation, record.attempt_index)
 
-    def failure_record(
-        reservation: _Reservation,
+    def terminal_record(
+        allocated: _AttemptRecord,
         *,
+        status: str,
+        requested_shots: RequestedShots,
         charged_shots: int,
-        error_category: str,
+        observation_seed: int | None,
+        seed_digest: str | None,
+        estimate: float | None = None,
+        error_category: str | None = None,
     ) -> _AttemptRecord:
         return _AttemptRecord(
-            attempt_index=reservation.attempt_index,
-            optimizer_query_index=reservation.optimizer_query_index,
-            validation=reservation.validation,
-            success=False,
-            requested_shots=reservation.requested_shots,
+            attempt_index=allocated.attempt_index,
+            optimizer_query_index=allocated.optimizer_query_index,
+            validation=allocated.validation,
+            status=status,
+            requested_shots=requested_shots,
             charged_shots=charged_shots,
-            estimate=None,
-            observation_seed=reservation.observation_seed,
-            seed_digest=reservation.seed_digest,
+            estimate=estimate,
+            observation_seed=observation_seed,
+            seed_digest=seed_digest,
             error_category=error_category,
         )
 
@@ -421,11 +453,23 @@ def make_query_device(
         validation: bool,
         raw_shots: object,
     ) -> Observation:
-        reservation = reserve(validation, raw_shots)
+        allocated = allocate_attempt(validation)
+        requested_shots: RequestedShots = None
         charged_shots = 0
-        stage = "seed"
+        observation_seed: int | None = None
+        seed_digest: str | None = None
+        stage = "request"
+        public_error: DeviceQueryError | None = None
         try:
-            if reservation.seed_collision:
+            requested_shots = _sanitized_requested_shots(raw_shots)
+            stage = "seed"
+            observation_seed, seed_digest = _seed_identity(
+                device_seed,
+                allocated.attempt_index,
+                validation,
+            )
+            stage = "seed_guard"
+            if register_seed(observation_seed, seed_digest):
                 raise RuntimeError("deterministic observation seed collision")
             stage = "shot_validation"
             shots = (
@@ -439,36 +483,54 @@ def make_query_device(
                 estimate = exact_fidelity
             else:
                 stage = "rng"
-                rng = np.random.default_rng(reservation.observation_seed)
+                rng = np.random.default_rng(observation_seed)
                 stage = "sampling"
                 charged_shots = shots
                 successes = int(rng.binomial(shots, exact_fidelity))
                 estimate = successes / shots
-            record = _AttemptRecord(
-                attempt_index=reservation.attempt_index,
-                optimizer_query_index=reservation.optimizer_query_index,
-                validation=validation,
-                success=True,
-                requested_shots=reservation.requested_shots,
+            record = terminal_record(
+                allocated,
+                status="succeeded",
+                requested_shots=requested_shots,
                 charged_shots=charged_shots,
                 estimate=estimate,
-                observation_seed=reservation.observation_seed,
-                seed_digest=reservation.seed_digest,
-                error_category=None,
+                observation_seed=observation_seed,
+                seed_digest=seed_digest,
             )
             stage = "observation"
             observation = _public_observation(record)
-            commit(record, observation)
+            finalize(record, observation)
             return observation
         except Exception as error:
-            commit(
-                failure_record(
-                    reservation,
+            category = _failure_category(stage, error)
+            finalize(
+                terminal_record(
+                    allocated,
+                    status="failed",
+                    requested_shots=requested_shots,
                     charged_shots=charged_shots,
-                    error_category=_failure_category(stage, error),
+                    observation_seed=observation_seed,
+                    seed_digest=seed_digest,
+                    error_category=category,
+                )
+            )
+            public_error = DeviceQueryError(allocated.attempt_index, category)
+        except BaseException as error:
+            finalize(
+                terminal_record(
+                    allocated,
+                    status="aborted",
+                    requested_shots=requested_shots,
+                    charged_shots=charged_shots,
+                    observation_seed=observation_seed,
+                    seed_digest=seed_digest,
+                    error_category=_abort_category(error),
                 )
             )
             raise
+        if public_error is not None:
+            raise public_error from None
+        raise AssertionError("unreachable device query state")
 
     def certify(
         observation: Observation,

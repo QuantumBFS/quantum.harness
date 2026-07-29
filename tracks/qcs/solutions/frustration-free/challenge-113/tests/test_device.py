@@ -2,13 +2,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import FrozenInstanceError, replace
 import inspect
 import pickle
+from threading import Event
 
 import numpy as np
 import pytest
 
 import qcontrol.device as device_module
 from qcontrol.config import DeviceConfig, SystemConfig
-from qcontrol.device import Observation, make_query_device
+from qcontrol.device import DeviceQueryError, Observation, make_query_device
 from qcontrol.objectives import normalized_infidelity
 from qcontrol.offline import make_offline_evaluator
 from qcontrol.pulses import PulseSpace
@@ -210,13 +211,17 @@ def test_validation_rejects_invalid_shot_counts(device_inputs, shots) -> None:
     _, _, pulse = device_inputs
     device = make_device(device_inputs)
 
-    with pytest.raises(ValueError, match="shots"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.validate(pulse, shots=shots)
 
     record = device.ledger.records[0]
+    assert captured.value.attempt_index == 1
+    assert captured.value.category == "invalid_shots"
+    assert captured.value.__context__ is None
     assert record.attempt_index == 1
     assert record.validation
     assert not record.success
+    assert record.status == "failed"
     assert record.requested_shots == shots
     assert record.charged_shots == 0
     assert record.error_category == "invalid_shots"
@@ -229,7 +234,7 @@ def test_invalid_pulse_is_a_failed_chargeless_optimizer_attempt(device_inputs) -
     device = make_device(device_inputs)
     invalid = np.full(space.parameter_count, np.nan)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(invalid)
     successful = device.query(pulse)
 
@@ -237,6 +242,7 @@ def test_invalid_pulse_is_a_failed_chargeless_optimizer_attempt(device_inputs) -
     assert (failed.attempt_index, passed.attempt_index) == (1, 2)
     assert failed.optimizer_query_index == 1
     assert passed.optimizer_query_index == 2
+    assert captured.value.category == "invalid_pulse"
     assert not failed.success
     assert failed.error_category == "invalid_pulse"
     assert failed.requested_shots == 1_000
@@ -258,10 +264,15 @@ def test_propagation_failure_is_sanitized_and_ledgered(
 
     monkeypatch.setattr(device_module, "normalized_infidelity", fail_propagation)
 
-    with pytest.raises(RuntimeError, match="private propagation detail"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(pulse)
 
     record = device.ledger.records[0]
+    assert captured.value.attempt_index == 1
+    assert captured.value.category == "propagation_failure"
+    assert captured.value.__context__ is None
+    assert "private propagation detail" not in str(captured.value)
+    assert "private propagation detail" not in repr(captured.value)
     assert record.error_category == "propagation_failure"
     assert not hasattr(record, "error_message")
     assert record.charged_shots == 0
@@ -277,10 +288,14 @@ def test_sampling_failure_charges_requested_shots(device_inputs, monkeypatch) ->
 
     monkeypatch.setattr(device_module.np.random, "default_rng", lambda seed: FailingSampler())
 
-    with pytest.raises(RuntimeError, match="sensitive backend detail"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(pulse)
 
     record = device.ledger.records[0]
+    assert captured.value.category == "sampling_failure"
+    assert captured.value.__context__ is None
+    assert "sensitive backend detail" not in str(captured.value)
+    assert "sensitive backend detail" not in repr(captured.value)
     assert not record.success
     assert record.error_category == "sampling_failure"
     assert record.requested_shots == 1_000
@@ -297,10 +312,12 @@ def test_rng_setup_failure_is_not_charged(device_inputs, monkeypatch) -> None:
 
     monkeypatch.setattr(device_module.np.random, "default_rng", fail_rng)
 
-    with pytest.raises(RuntimeError, match="rng setup failed"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(pulse)
 
     record = device.ledger.records[0]
+    assert captured.value.category == "rng_failure"
+    assert "rng setup failed" not in str(captured.value)
     assert record.error_category == "rng_failure"
     assert record.charged_shots == 0
 
@@ -314,10 +331,12 @@ def test_observation_construction_failure_is_ledgered(device_inputs, monkeypatch
 
     monkeypatch.setattr(device_module, "_public_observation", fail_observation)
 
-    with pytest.raises(RuntimeError, match="public conversion failed"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(pulse)
 
     record = device.ledger.records[0]
+    assert captured.value.category == "observation_failure"
+    assert "public conversion failed" not in str(captured.value)
     assert record.error_category == "observation_failure"
     assert record.charged_shots == 1_000
 
@@ -341,6 +360,53 @@ def test_concurrent_attempts_have_unique_ordered_indices_and_seeds(
     assert {item.attempt_index for item in observations} == set(range(1, 65))
 
 
+def test_pending_attempt_remains_visible_before_later_completion(
+    device_inputs,
+    monkeypatch,
+) -> None:
+    _, _, pulse = device_inputs
+    first_started = Event()
+    release_first = Event()
+
+    def blocking_evaluator(*args):
+        if not first_started.is_set():
+            first_started.set()
+            assert release_first.wait(timeout=10)
+        return 0.25
+
+    monkeypatch.setattr(device_module, "normalized_infidelity", blocking_evaluator)
+    device = make_device(device_inputs)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        first_future = executor.submit(device.query, pulse)
+        assert first_started.wait(timeout=10)
+        pending_snapshot = device.ledger
+        second = device.query(pulse)
+        overlap_snapshot = device.ledger
+        release_first.set()
+        first = first_future.result(timeout=10)
+
+    assert first.attempt_index == 1
+    assert second.attempt_index == 2
+    assert [(item.attempt_index, item.status) for item in pending_snapshot.records] == [
+        (1, "reserved")
+    ]
+    assert pending_snapshot.optimizer_queries == 1
+    assert [(item.attempt_index, item.status) for item in overlap_snapshot.records] == [
+        (1, "reserved"),
+        (2, "succeeded"),
+    ]
+    assert overlap_snapshot.optimizer_queries == 2
+    assert [(item.attempt_index, item.status) for item in device.ledger.records] == [
+        (1, "succeeded"),
+        (2, "succeeded"),
+    ]
+    assert [(item.attempt_index, item.status) for item in overlap_snapshot.records] == [
+        (1, "reserved"),
+        (2, "succeeded"),
+    ]
+
+
 def test_reentrant_query_does_not_deadlock_or_reorder_attempts(
     device_inputs,
     monkeypatch,
@@ -348,6 +414,7 @@ def test_reentrant_query_does_not_deadlock_or_reorder_attempts(
     _, _, pulse = device_inputs
     device = make_device(device_inputs)
     nested = []
+    during_reentry = []
     entered = False
 
     def reentrant_evaluator(*args):
@@ -355,6 +422,7 @@ def test_reentrant_query_does_not_deadlock_or_reorder_attempts(
         if not entered:
             entered = True
             nested.append(device.query(pulse))
+            during_reentry.extend(device.ledger.records)
         return 0.25
 
     monkeypatch.setattr(device_module, "normalized_infidelity", reentrant_evaluator)
@@ -362,6 +430,10 @@ def test_reentrant_query_does_not_deadlock_or_reorder_attempts(
 
     assert outer.attempt_index == 1
     assert nested[0].attempt_index == 2
+    assert [(item.attempt_index, item.status) for item in during_reentry] == [
+        (1, "reserved"),
+        (2, "succeeded"),
+    ]
     assert [record.attempt_index for record in device.ledger.records] == [1, 2]
 
 
@@ -405,12 +477,81 @@ def test_truncated_seed_collision_guard_fails_closed(device_inputs, monkeypatch)
     monkeypatch.setattr(device_module, "_seed_identity", lambda *args: next(identities))
 
     device.query(pulse)
-    with pytest.raises(RuntimeError, match="seed collision"):
+    with pytest.raises(DeviceQueryError) as captured:
         device.query(pulse)
 
     first, collision = device.ledger.records
     assert first.success
     assert not collision.success
+    assert captured.value.category == "seed_collision"
     assert collision.error_category == "seed_collision"
     assert collision.seed_digest == "2" * 64
     assert collision.charged_shots == 0
+
+
+def test_request_sanitization_failure_is_reserved_and_publicly_sanitized(
+    device_inputs,
+    monkeypatch,
+) -> None:
+    _, _, pulse = device_inputs
+    device = make_device(device_inputs)
+
+    def fail_request(value):
+        raise RuntimeError("sensitive request detail")
+
+    monkeypatch.setattr(device_module, "_sanitized_requested_shots", fail_request)
+
+    with pytest.raises(DeviceQueryError) as captured:
+        device.query(pulse)
+
+    record = device.ledger.records[0]
+    assert captured.value.attempt_index == 1
+    assert captured.value.category == "request_validation"
+    assert captured.value.__context__ is None
+    assert "sensitive request detail" not in str(captured.value)
+    assert record.status == "failed"
+    assert record.error_category == "request_validation"
+
+
+def test_seed_derivation_failure_is_reserved(device_inputs, monkeypatch) -> None:
+    _, _, pulse = device_inputs
+    device = make_device(device_inputs)
+
+    def fail_seed(*args):
+        raise RuntimeError("sensitive seed detail")
+
+    monkeypatch.setattr(device_module, "_seed_identity", fail_seed)
+
+    with pytest.raises(DeviceQueryError) as captured:
+        device.query(pulse)
+
+    record = device.ledger.records[0]
+    assert captured.value.category == "seed_derivation_failure"
+    assert "sensitive seed detail" not in repr(captured.value)
+    assert record.attempt_index == 1
+    assert record.status == "failed"
+    assert record.error_category == "seed_derivation_failure"
+
+
+def test_keyboard_interrupt_finalizes_aborted_attempt_without_swallowing(
+    device_inputs,
+    monkeypatch,
+) -> None:
+    _, _, pulse = device_inputs
+    device = make_device(device_inputs)
+
+    def interrupt(*args):
+        raise KeyboardInterrupt("process control detail")
+
+    monkeypatch.setattr(device_module, "normalized_infidelity", interrupt)
+
+    with pytest.raises(KeyboardInterrupt, match="process control detail"):
+        device.query(pulse)
+
+    record = device.ledger.records[0]
+    assert record.attempt_index == 1
+    assert record.status == "aborted"
+    assert not record.success
+    assert record.error_category == "keyboard_interrupt"
+    assert record.charged_shots == 0
+    assert device.ledger.optimizer_queries == 1
