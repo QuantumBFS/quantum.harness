@@ -66,6 +66,7 @@ class ControlSystem:
     target: ComplexMatrix
     amplitude_scales: tuple[float, ...]
     name: str
+    duration: float = 1.0
     _perturbation: _PerturbationDescriptor | None = None
 
     def __post_init__(self) -> None:
@@ -81,6 +82,14 @@ class ControlSystem:
             "amplitude_scales",
             tuple(float(scale) for scale in self.amplitude_scales),
         )
+        if (
+            isinstance(self.duration, (bool, np.bool_))
+            or not isinstance(self.duration, Real)
+            or not math.isfinite(float(self.duration))
+            or self.duration <= 0.0
+        ):
+            raise ValueError("duration must be a positive finite number")
+        object.__setattr__(self, "duration", float(self.duration))
         if self._perturbation is not None:
             descriptor = self._perturbation
             object.__setattr__(
@@ -174,6 +183,7 @@ def make_system(config: SystemConfig) -> ControlSystem:
         target=target,
         amplitude_scales=(amplitude,) * len(controls),
         name=config.name,
+        duration=float(config.duration),
     )
     _validate_system(system)
     return system
@@ -294,6 +304,7 @@ def perturb_system(system: ControlSystem, gap: float, seed: int) -> ControlSyste
             target=system.target.copy(),
             amplitude_scales=system.amplitude_scales,
             name=system.name,
+            duration=system.duration,
             _perturbation=None,
         )
 
@@ -333,6 +344,7 @@ def perturb_system(system: ControlSystem, gap: float, seed: int) -> ControlSyste
         target=system.target.copy(),
         amplitude_scales=system.amplitude_scales,
         name=system.name,
+        duration=system.duration,
         _perturbation=descriptor,
     )
     _validate_system(truth)

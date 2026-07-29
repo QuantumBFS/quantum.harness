@@ -40,14 +40,14 @@ def _raise_for_invalid_eager_duration(array: jax.Array) -> None:
     if isinstance(array, jax.core.Tracer):
         return
     value = float(np.asarray(array))
-    if not np.isfinite(value) or value < 0.0:
-        raise ValueError("duration must be a finite nonnegative number")
+    if not np.isfinite(value) or value <= 0.0:
+        raise ValueError("duration must be a positive finite number")
 
 
 def propagate(
     system: ControlSystem,
     physical_pulse: object,
-    duration: float = 1.0,
+    duration: float | None = None,
 ) -> jax.Array:
     if not isinstance(system, ControlSystem):
         raise ValueError("system must be a ControlSystem")
@@ -61,18 +61,19 @@ def propagate(
     pulse = jnp.asarray(pulse, dtype=jnp.float64)
     _raise_for_invalid_eager_pulse(pulse)
 
-    duration_array = jnp.asarray(duration)
+    resolved_duration = system.duration if duration is None else duration
+    duration_array = jnp.asarray(resolved_duration)
     if duration_array.shape != () or jnp.iscomplexobj(duration_array):
         raise ValueError("duration must be a real scalar")
     if jnp.issubdtype(duration_array.dtype, jnp.bool_):
-        raise ValueError("duration must be a finite nonnegative number")
+        raise ValueError("duration must be a positive finite number")
     duration_array = jnp.asarray(duration_array, dtype=jnp.float64)
     _raise_for_invalid_eager_duration(duration_array)
 
     valid = (
         jnp.all(jnp.isfinite(pulse))
         & jnp.isfinite(duration_array)
-        & (duration_array >= 0.0)
+        & (duration_array > 0.0)
     )
     safe_pulse = jnp.where(valid, pulse, jnp.zeros_like(pulse))
     safe_duration = jnp.where(valid, duration_array, jnp.float64(0.0))

@@ -131,6 +131,22 @@ def test_propagator_supports_jitted_traced_duration() -> None:
     np.testing.assert_allclose(jitted(jnp.float64(0.7)), expected)
 
 
+def test_propagator_uses_system_duration_and_allows_explicit_override() -> None:
+    system = make_system(SystemConfig("one_qubit", 2, 4.0, duration=1.7))
+    pulse = jnp.array([[0.2, -0.3], [0.4, 0.1]], dtype=jnp.float64)
+
+    np.testing.assert_allclose(propagate(system, pulse), propagate(system, pulse, 1.7))
+    assert not np.allclose(propagate(system, pulse), propagate(system, pulse, 0.7))
+
+
+def test_jitted_propagator_uses_immutable_system_duration() -> None:
+    system = make_system(SystemConfig("one_qubit", 2, 4.0, duration=1.7))
+    pulse = jnp.array([[0.2, -0.3], [0.4, 0.1]], dtype=jnp.float64)
+    jitted = jax.jit(lambda values: propagate(system, values))
+
+    np.testing.assert_allclose(jitted(pulse), propagate(system, pulse, 1.7))
+
+
 @pytest.mark.parametrize(
     ("pulse", "duration"),
     [
@@ -160,6 +176,7 @@ def test_jitted_propagator_returns_nonfinite_sentinel_for_invalid_tracers(
         (jnp.zeros((2, 0)), 1.0),
         (jnp.full((2, 12), jnp.nan), 1.0),
         (jnp.zeros((2, 12)), -1.0),
+        (jnp.zeros((2, 12)), 0.0),
         (jnp.zeros((2, 12)), np.inf),
         (jnp.zeros((2, 12)), True),
     ],
@@ -195,6 +212,23 @@ def test_reported_infidelity_is_bounded_but_internal_loss_is_unclipped() -> None
     overlap = jnp.trace(jnp.asarray(system.target).conj().T @ expected_unitary)
     expected = 1.0 - jnp.real(overlap.conj() * overlap) / system.dimension**2
     np.testing.assert_allclose(value, expected, rtol=0.0, atol=1e-15)
+
+
+def test_normalized_infidelity_uses_system_duration() -> None:
+    system = make_system(SystemConfig("one_qubit", 2, 4.0, duration=1.7))
+    space = PulseSpace.from_system(system, 2)
+    normalized = jnp.linspace(-0.2, 0.2, space.parameter_count)
+    physical = space.to_physical(normalized)
+    unitary = propagate(system, physical, duration=system.duration)
+    overlap = jnp.trace(jnp.asarray(system.target).conj().T @ unitary)
+    expected = 1.0 - jnp.real(overlap.conj() * overlap) / system.dimension**2
+
+    np.testing.assert_allclose(
+        normalized_infidelity(normalized, system, space),
+        expected,
+        rtol=0.0,
+        atol=1e-15,
+    )
 
 
 @pytest.mark.parametrize(

@@ -33,12 +33,18 @@ class SystemConfig:
     name: str
     segments: int
     amplitude_bound: float
+    duration: float | None = None
 
     def __post_init__(self) -> None:
         if self.name not in {"one_qubit", "two_qubit"}:
             raise ValueError("system name must be 'one_qubit' or 'two_qubit'")
         _require_positive_integer("segments", self.segments)
         _require_finite_number("amplitude_bound", self.amplitude_bound, positive=True)
+        duration = (
+            1.0 if self.name == "one_qubit" else 8.0
+        ) if self.duration is None else self.duration
+        _require_finite_number("duration", duration, positive=True)
+        object.__setattr__(self, "duration", float(duration))
 
     @property
     def parameter_count(self) -> int:
@@ -117,6 +123,7 @@ class ExperimentConfig:
             },
             "system": {
                 "amplitude_bound": float(self.system.amplitude_bound),
+                "duration": self.system.duration,
                 "name": self.system.name,
                 "segments": self.system.segments,
             },

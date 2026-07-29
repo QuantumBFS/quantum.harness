@@ -14,6 +14,7 @@ from qcontrol.systems import (
 def test_one_qubit_system_is_su2_controllable() -> None:
     system = make_system(SystemConfig("one_qubit", 12, 4.0))
     assert system.dimension == 2
+    assert system.duration == 1.0
     assert len(system.controls) == 2
     assert lie_algebra_dimension(system) == 3
 
@@ -21,8 +22,19 @@ def test_one_qubit_system_is_su2_controllable() -> None:
 def test_two_qubit_system_is_su4_controllable() -> None:
     system = make_system(SystemConfig("two_qubit", 20, 4.0))
     assert system.dimension == 4
+    assert system.duration == 8.0
     assert len(system.controls) == 4
     assert lie_algebra_dimension(system) == 15
+
+
+def test_system_duration_override_and_perturbation_provenance_are_preserved() -> None:
+    model = make_system(SystemConfig("two_qubit", 20, 4.0, duration=6.5))
+    zero_gap = perturb_system(model, 0.0, 3)
+    nonzero_gap = perturb_system(model, 0.05, 3)
+
+    assert model.duration == 6.5
+    assert zero_gap.duration == model.duration
+    assert nonzero_gap.duration == model.duration
 
 
 def test_gap_zero_preserves_model_and_nonzero_gap_is_reproducible() -> None:
@@ -174,6 +186,7 @@ def test_zero_gap_preserves_complete_system_and_uses_no_descriptor() -> None:
     np.testing.assert_array_equal(truth.target, model.target)
     assert truth.amplitude_scales == model.amplitude_scales
     assert truth.name == model.name
+    assert truth.duration == model.duration
     assert truth._perturbation is None
 
 

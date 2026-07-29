@@ -21,8 +21,32 @@ def test_config_id_is_stable_and_semantic() -> None:
     config = valid_config()
     assert config.content_id() == config.content_id()
     assert replace(config, trial_seed=12).content_id() != config.content_id()
+    assert replace(config, system=replace(config.system, duration=9.0)).content_id() != (
+        config.content_id()
+    )
     assert len(config.content_id()) == 20
     assert int(config.content_id(), 16) >= 0
+
+
+def test_system_duration_defaults_are_canonical_and_serialized() -> None:
+    one_qubit = SystemConfig("one_qubit", 12, 4.0)
+    two_qubit = SystemConfig("two_qubit", 20, 4.0)
+
+    assert one_qubit.duration == 1.0
+    assert two_qubit.duration == 8.0
+    assert valid_config().canonical_dict()["system"]["duration"] == 8.0  # type: ignore[index]
+
+
+def test_system_duration_accepts_a_positive_finite_override() -> None:
+    config = SystemConfig("two_qubit", 20, 4.0, duration=6.5)
+    assert config.duration == 6.5
+    assert isinstance(config.duration, float)
+
+
+@pytest.mark.parametrize("duration", [0.0, -1.0, float("nan"), float("inf"), True])
+def test_system_duration_rejects_invalid_values(duration: object) -> None:
+    with pytest.raises(ValueError, match="duration"):
+        SystemConfig("one_qubit", 12, 4.0, duration=duration)  # type: ignore[arg-type]
 
 
 def test_negative_zero_gap_is_normalized_for_semantic_ids() -> None:
