@@ -88,8 +88,18 @@ Gamma_x = Gamma_a
 
 The decision record preserves the broad bracket, refinement grid, final
 interpolation points, their `R_xi` values and signed differences, and
-`Gamma_x`. Multiple or absent refined brackets are reported as unresolved.
-There is no adaptive optimization of `Gamma_x`.
+`Gamma_x`. It also records the interpolation resolution
+
+```text
+delta_Gamma_grid = (Gamma_b - Gamma_a) / 2,
+```
+
+which is `0.005` for the planned refined grid. This is a conservative
+grid-resolution indicator, not a statistical error bar. Later comparisons
+must report a sigma-to-sigma crossing drift alongside both points'
+`delta_Gamma_grid` values so sub-resolution changes are not overinterpreted.
+Multiple or absent refined brackets are reported as unresolved. There is no
+adaptive optimization of `Gamma_x`.
 
 ## Gap and effective-exponent protocol
 
@@ -111,6 +121,25 @@ Raw endpoint energies and gaps remain authoritative. A nonpositive gap,
 missing sector, or provenance mismatch makes `z_eff` unavailable rather
 than triggering an automatic retry with larger `chi`.
 
+## Selective chi validation flags
+
+`chi=64` remains the exploration default. A completed cell is retained but
+marked `needs_chi128_validation` if any of these deterministic checks fail:
+
+- the DMRG engine reports non-convergence or reaches its sweep cap;
+- the relative variance
+  `variance / max(E^2,1)` exceeds `1e-10`;
+- maximum discarded weight exceeds `1e-8`;
+- `R_xi`, `xi`, `S(0)`, or `S(k_min)` is nonfinite, or the second-moment
+  expression has `S(0) < S(k_min)`;
+- an odd-sector energy is not above its matching even-sector energy;
+- either endpoint gap or the gap interpolated to `Gamma_x` is nonpositive.
+
+Flags are collected per observable and per sector. They propose selective
+`chi=128` validation at the affected sigma/size/Gamma only; they do not
+silently replace the `chi=64` result, trigger a rerun, alter the Gamma grid,
+or block unrelated sigma values.
+
 ## Resumability and provenance
 
 The scan has three immutable artifacts:
@@ -130,6 +159,7 @@ missing, or incompatible cells remain visible. Every manifest records:
 - checkpoint and current code hashes;
 - energy, variance, discarded weight, sweeps, reached chi, and timing;
 - for even states, full `C(r)`, `S(0)`, `S(k_min)`, `xi`, and `R_xi`.
+- validation flags and the measurements that triggered each flag.
 
 The collector requires consensus on shared settings and preserves every
 planned cell as `success`, `failed`, `missing`, or `pending`.
