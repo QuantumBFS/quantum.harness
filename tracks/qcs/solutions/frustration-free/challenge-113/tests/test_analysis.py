@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import json
+
+import numpy as np
 import pytest
 
+import qcontrol.analysis as analysis_module
 from qcontrol.analysis import (
     AnalysisError,
+    Summary,
     aggregate_run,
     analyze_trials,
     first_certified_query,
@@ -24,12 +29,19 @@ def _config(
     perturbation_seed: int = 7,
     shots: int | None = 1_000,
     kind: str = "development",
+    dimension: int = 2,
+    system: str = "one_qubit",
 ) -> ExperimentConfig:
+    segments = 3 if system == "one_qubit" else 10
     return ExperimentConfig(
         run_kind=kind,
-        system=SystemConfig("one_qubit", 3, 4.0),
+        system=SystemConfig(system, segments, 4.0),
         device=DeviceConfig(gap, shots, perturbation_seed),
-        search=SearchConfig(method, 2, 200 if kind == "development" else 2_000),
+        search=SearchConfig(
+            method,
+            dimension,
+            200 if kind == "development" else 2_000,
+        ),
         trial_seed=seed,
     )
 
@@ -58,11 +70,24 @@ def _trial(
     *,
     certified_query: int | None,
     provisional_query: int | None = None,
+    exact_values: tuple[float, ...] | None = None,
+    attained_bound: float = 0.5,
+    principal_angles: tuple[float, ...] | None = None,
+    model_ranks: tuple[int, int, int] = (1, 1, 1),
+    truth_ranks: tuple[int, int, int] = (1, 1, 1),
+    signed_gaps: tuple[float, ...] | None = None,
 ) -> TrialResult:
     spec = generate_paired_trials([config])[0]
     evaluations = certified_query if certified_query is not None else config.search.budget
+    optimizer_shots = 0 if config.device.shots is None else config.device.shots
     optimizer = [
-        _observation(index, index, 0.5 + index / 10_000, validation=False, shots=1_000)
+        _observation(
+            index,
+            index,
+            0.5 + index / 10_000,
+            validation=False,
+            shots=optimizer_shots,
+        )
         for index in range(1, evaluations + 1)
     ]
     attempts = [
@@ -114,7 +139,7 @@ def _trial(
                 "device_attempt_index": next_attempt,
                 "failure_category": None,
                 "optimizer_query_index": provisional_query,
-                "pulse": [0.0] * 6,
+                "pulse": [0.0] * config.system.parameter_count,
                 "status": "rejected",
                 "validation_observation": provisional,
             }
@@ -151,7 +176,7 @@ def _trial(
                 "device_attempt_index": next_attempt,
                 "failure_category": None,
                 "optimizer_query_index": certified_query,
-                "pulse": [0.0] * 6,
+                "pulse": [0.0] * config.system.parameter_count,
                 "status": "certified",
                 "validation_observation": certified,
             }
@@ -161,15 +186,15 @@ def _trial(
     validation_shots = 100_000 * len(validation_attempts)
     ledger = {
         "optimizer_queries": evaluations,
-        "optimizer_shots": evaluations * 1_000,
+        "optimizer_shots": evaluations * optimizer_shots,
         "validation_queries": len(validation_attempts),
         "validation_shots": validation_shots,
         "total_queries": evaluations + len(validation_attempts),
-        "total_shots": evaluations * 1_000 + validation_shots,
+        "total_shots": evaluations * optimizer_shots + validation_shots,
     }
     result_payload = {
         "best_observation": optimizer[-1],
-        "best_pulse": [0.0] * 6,
+        "best_pulse": [0.0] * config.system.parameter_count,
         "budget": config.search.budget,
         "budget_exhausted": certified_query is None,
         "certified": certified_query is not None,
@@ -189,27 +214,42 @@ def _trial(
         "validation_result": validation_result,
     }
     if config.run_kind == "production":
+        exact = (
+            exact_values
+            if exact_values is not None
+            else (0.5,) * evaluations
+        )
+        if len(exact) != evaluations:
+            raise ValueError("test exact trajectory must align with evaluations")
+        angles = principal_angles or (0.0,) * config.search.dimension
+        gaps = signed_gaps or (0.0,) * config.search.dimension
+        best_audited = min(exact)
+        final_attained = min(attained_bound, best_audited, 0.5)
+        attained_source = (
+            "restricted_solver"
+            if final_attained == attained_bound
+            else "audited_candidate"
+        )
         result_payload["derived_metrics"] = {
             "exact_infidelity": {
-                "best_successful_audited_infidelity": 0.5,
-                "cumulative_best_by_optimizer_query": [0.5] * evaluations,
+                "best_successful_audited_infidelity": best_audited,
+                "cumulative_best_by_optimizer_query": list(exact),
                 "initial_infidelity": 0.5,
             },
             "geometry": {
-                "model_effective_ranks": [1, 1, 1],
+                "model_effective_ranks": list(model_ranks),
                 "model_top_subspace_sha256": "3" * 64,
-                "principal_angles_radians": [0.0] * config.search.dimension,
+                "principal_angles_radians": list(angles),
                 "rank_thresholds": [1e-6, 1e-8, 1e-10],
-                "signed_leading_eigenvalue_gaps": [0.0]
-                * config.search.dimension,
-                "truth_effective_ranks": [1, 1, 1],
+                "signed_leading_eigenvalue_gaps": list(gaps),
+                "truth_effective_ranks": list(truth_ranks),
                 "truth_top_subspace_sha256": "4" * 64,
             },
             "restricted_noiseless_optimization": {
-                "attained_infidelity_upper_bound": 0.5,
-                "attained_infidelity_source": "restricted_solver",
-                "best_successful_audited_exact_infidelity": 0.5,
-                "cached_solver_attained_infidelity_upper_bound": 0.5,
+                "attained_infidelity_upper_bound": final_attained,
+                "attained_infidelity_source": attained_source,
+                "best_successful_audited_exact_infidelity": best_audited,
+                "cached_solver_attained_infidelity_upper_bound": attained_bound,
                 "cached_solver_starting_infidelity_upper_bound": 0.5,
                 "certified": True,
                 "consistency_tolerance": 1e-10,
@@ -270,17 +310,15 @@ def test_hand_computable_censoring_shots_and_conditional_queries() -> None:
     ]
 
     summary = analyze_trials(trials)
+    method = _method(summary, 0, "model_hessian")
 
-    assert summary.trial_count == 3
-    assert summary.success_probability.value == pytest.approx(2 / 3)
-    assert summary.conditional_first_certified_queries == (4, 9)
-    assert summary.censored_first_certified_queries == (4, 200, 9)
-    assert summary.total_shots == 413_000
-    assert summary.median_best_exact_infidelity_trajectories == {}
-    assert (
-        len(summary.median_best_observed_infidelity_trajectories["model_hessian"])
-        == 200
-    )
+    assert method.trial_count == 3
+    assert method.success_probability.value == pytest.approx(2 / 3)
+    assert method.conditional_first_certified_queries == (4, 9)
+    assert method.censored_first_certified_queries == (4, 200, 9)
+    assert method.total_shots == 413_000
+    assert method.exact_infidelity_trajectory is None
+    assert len(method.median_best_observed_infidelity_trajectory) == 200
 
 
 def test_pairing_requires_exact_device_orientation_gap_shots_and_seed() -> None:
@@ -362,7 +400,262 @@ def test_aggregate_run_never_drops_failures(tmp_path) -> None:
     run_sweep(specs, store, executor=lambda spec: results[spec.config.trial_seed])
 
     summary = aggregate_run(store)
+    method = _method(summary, 0, "model_hessian")
 
-    assert summary.trial_count == 3
-    assert summary.failure_count == 1
-    assert summary.success_probability.denominator == 3
+    assert method.trial_count == 3
+    assert method.failure_count == 1
+    assert method.success_probability.denominator == 3
+
+
+def _method(summary, stratum_index: int, method: str):
+    return next(
+        item
+        for item in summary.strata[stratum_index].methods
+        if item.method == method
+    )
+
+
+def test_analysis_separates_system_dimension_gap_and_shot_strata() -> None:
+    trials = [
+        _trial(_config("model_hessian", seed=1), certified_query=4),
+        _trial(
+            _config("model_hessian", seed=1, dimension=1),
+            certified_query=4,
+        ),
+        _trial(
+            _config("model_hessian", seed=1, gap=0.05),
+            certified_query=4,
+        ),
+        _trial(
+            _config("model_hessian", seed=1, shots=None),
+            certified_query=4,
+        ),
+        _trial(
+            _config("model_hessian", seed=1, system="two_qubit"),
+            certified_query=4,
+        ),
+    ]
+
+    summary = analyze_trials(trials, bootstrap_samples=20)
+
+    assert len(summary.strata) == 5
+    identities = {
+        (
+            item.key.hilbert_dimension,
+            item.key.search_dimension,
+            item.key.gap,
+            item.key.shots,
+        )
+        for item in summary.strata
+    }
+    assert identities == {
+        (2, 1, 0.02, 1_000),
+        (2, 2, 0.02, 1_000),
+        (2, 2, 0.05, 1_000),
+        (2, 2, 0.02, None),
+        (4, 2, 0.02, 1_000),
+    }
+
+
+def test_full_comparator_is_reused_once_per_k_stratum() -> None:
+    model_k1 = _trial(
+        _config("model_hessian", seed=1, dimension=1),
+        certified_query=4,
+    )
+    model_k2 = _trial(
+        _config("model_hessian", seed=1, dimension=2),
+        certified_query=4,
+    )
+    full = _trial(
+        _config("full", seed=1, dimension=3),
+        certified_query=6,
+    )
+
+    summary = analyze_trials(
+        [model_k1, model_k2, full],
+        bootstrap_seed=9,
+        bootstrap_samples=30,
+    )
+
+    assert [item.key.search_dimension for item in summary.strata] == [1, 2]
+    for stratum in summary.strata:
+        full_method = next(item for item in stratum.methods if item.method == "full")
+        effect = next(
+            item for item in stratum.paired_differences if item.baseline == "full"
+        )
+        assert full_method.trial_count == 1
+        assert effect.pair_count == effect.cluster_count == 1
+
+
+def test_method_success_intervals_and_paired_effect_keep_failures() -> None:
+    records = []
+    for seed, model_query, random_query in (
+        (1, 4, 6),
+        (2, None, None),
+        (3, 9, None),
+    ):
+        records.extend(
+            (
+                _trial(
+                    _config("model_hessian", seed=seed),
+                    certified_query=model_query,
+                ),
+                _trial(
+                    _config("random", seed=seed),
+                    certified_query=random_query,
+                ),
+            )
+        )
+
+    summary = analyze_trials(records, bootstrap_seed=4, bootstrap_samples=100)
+    model = _method(summary, 0, "model_hessian")
+    random = _method(summary, 0, "random")
+    effect = next(
+        item for item in summary.strata[0].paired_differences
+        if item.baseline == "random"
+    )
+
+    assert model.success_probability.numerator == 2
+    assert model.success_probability.denominator == 3
+    assert model.success_probability.low < 2 / 3 < model.success_probability.high
+    assert random.success_probability.numerator == 1
+    assert random.success_probability.denominator == 3
+    assert effect.success_probability_difference.estimate == pytest.approx(1 / 3)
+    assert effect.pair_count == effect.cluster_count == 3
+
+
+def test_schema_v3_exact_bands_and_geometry_are_aggregated() -> None:
+    first = _trial(
+        _config("model_hessian", seed=1, kind="production"),
+        certified_query=2,
+        exact_values=(0.5, 0.3),
+        attained_bound=0.2,
+        principal_angles=(0.1, 0.2),
+        model_ranks=(1, 2, 2),
+        truth_ranks=(2, 2, 3),
+        signed_gaps=(0.4, -0.2),
+    )
+    second = _trial(
+        _config("model_hessian", seed=2, kind="production"),
+        certified_query=2,
+        exact_values=(0.4, 0.2),
+        attained_bound=0.4,
+        principal_angles=(0.3, 0.4),
+        model_ranks=(2, 2, 3),
+        truth_ranks=(2, 3, 3),
+        signed_gaps=(0.2, 0.0),
+    )
+
+    summary = analyze_trials(
+        [first, second],
+        bootstrap_seed=7,
+        bootstrap_samples=40,
+    )
+    method = _method(summary, 0, "model_hessian")
+
+    assert method.metric_availability.state == "available"
+    assert method.exact_infidelity_trajectory.median[:2] == pytest.approx((0.45, 0.25))
+    assert len(method.exact_infidelity_trajectory.low) == 2_000
+    assert method.median_attained_infidelity_upper_bound == pytest.approx(0.2)
+    assert method.median_principal_angles == pytest.approx((0.2, 0.3))
+    assert method.median_model_effective_ranks == pytest.approx((1.5, 2.0, 2.5))
+    assert method.median_truth_effective_ranks == pytest.approx((2.0, 2.5, 3.0))
+    assert method.median_signed_eigenvalue_gaps == pytest.approx((0.3, -0.1))
+
+
+def test_development_metrics_have_explicit_unavailability() -> None:
+    summary = analyze_trials(
+        [_trial(_config("model_hessian", seed=1), certified_query=4)],
+        bootstrap_samples=20,
+    )
+    method = _method(summary, 0, "model_hessian")
+
+    assert method.metric_availability.state == "unavailable"
+    assert method.metric_availability.reason == "schema_v3_metrics_not_available"
+    assert method.exact_infidelity_trajectory is None
+    assert method.median_principal_angles is None
+
+
+def test_missing_required_production_metrics_are_rejected() -> None:
+    trial = _trial(
+        _config("model_hessian", seed=1, kind="production"),
+        certified_query=2,
+    ).canonical_dict()
+    del trial["result"]["derived_metrics"]
+
+    with pytest.raises(AnalysisError, match="invalid trial|derived"):
+        analyze_trials([trial], bootstrap_samples=20)
+
+
+def test_summary_canonical_round_trip_and_strict_validation() -> None:
+    summary = analyze_trials(
+        [
+            _trial(_config("model_hessian", seed=1), certified_query=4),
+            _trial(
+                _config("model_hessian", seed=1, dimension=1),
+                certified_query=4,
+            ),
+        ],
+        bootstrap_samples=20,
+    )
+    payload = summary.canonical_dict()
+
+    assert payload["schema_version"] == 1
+    assert Summary.from_canonical_dict(
+        json.loads(json.dumps(payload, allow_nan=False))
+    ) == summary
+    malformed = json.loads(json.dumps(payload, allow_nan=False))
+    malformed["strata"][0]["methods"][0]["trial_count"] = True
+    with pytest.raises(AnalysisError, match="trial_count|integer"):
+        Summary.from_canonical_dict(malformed)
+    malformed = json.loads(json.dumps(payload, allow_nan=False))
+    malformed["strata"].reverse()
+    with pytest.raises(AnalysisError, match="sorted|canonical"):
+        Summary.from_canonical_dict(malformed)
+
+
+def test_chunked_bootstrap_is_chunk_size_independent() -> None:
+    differences = (1.0, -1.0, 2.0, 0.5)
+
+    one = paired_bootstrap_ci(
+        differences,
+        seed=17,
+        samples=200,
+        chunk_size=1,
+    )
+    many = paired_bootstrap_ci(
+        differences,
+        seed=17,
+        samples=200,
+        chunk_size=37,
+    )
+
+    assert one == many
+
+
+def test_production_scale_bootstrap_never_allocates_full_sample_matrix(
+    monkeypatch,
+) -> None:
+    requested_shapes: list[tuple[int, int]] = []
+
+    class RecordingRng:
+        def integers(self, low, high, *, size):
+            requested_shapes.append(size)
+            return np.zeros(size, dtype=np.int64)
+
+    monkeypatch.setattr(
+        analysis_module.np.random,
+        "default_rng",
+        lambda seed: RecordingRng(),
+    )
+
+    paired_bootstrap_ci(
+        np.ones(9_500),
+        seed=1,
+        samples=257,
+        chunk_size=16,
+    )
+
+    assert requested_shapes
+    assert max(rows for rows, _ in requested_shapes) <= 16
+    assert {columns for _, columns in requested_shapes} == {9_500}
