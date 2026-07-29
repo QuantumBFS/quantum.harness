@@ -1,0 +1,148 @@
+assembly_module = "SquareGapConic (CoreMGK-driven) + D4 block-diagonalization"
+claim_level = "solver_free_structural_artifact"
+created_at_utc = "2026-07-29T10:30:11.886Z"
+equivalence_note = "D4 block-diagonalization is an exactly-equivalent reparameterization of the unrestricted relaxation (group averaging); not a symmetry-restricted bound."
+optimizer_attached = false
+schema_version = "square-d4-conic-mof-runmeta-v1"
+solver_invoked = false
+
+[basis]
+gap_dimension = 4
+gap_family = "bare_operator"
+gap_family_version = 1
+gap_sha256 = "3602aaf1387c9709179f1ed574c435196d8032859e06649298c080247a94c658"
+positive_dimension = 352
+positive_family = "bare_operator"
+positive_family_version = 1
+positive_sha256 = "e74613de9fe5c9b14c9b038f0a729ca497919c77b3b2381ce27a3d2282d71816"
+
+[d4_moment_quotient]
+original_moment_count = 12832
+quotient_variable_count = 1837
+reduction_fraction = 0.8568422693266833
+
+    [d4_moment_quotient.orbit_size_histogram]
+    1 = 16
+    2 = 30
+    4 = 393
+    8 = 1398
+
+[d4_symmetry]
+gate_1_hamiltonian_invariant = true
+gate_2_basis_closed = true
+gate_block_diagonal_verified = true
+generators = ["C4", "sigma"]
+group = "D4"
+max_off_block_abs = 0.0
+positive_block_irreps = ["A1", "A2", "B1", "B2", "E"]
+positive_block_side_dimensions = [70, 24, 45, 45, 168]
+
+[exact_assembly]
+assembly_sha256 = "e6149ef42c72ef16b9b828df65d83a7ff5cb8564da8373d17083cce73c6a15d7"
+coefficient_map_sha256 = "1b480aec29bf256d06655a75da47488273322c39f7766281a2bd2a43188a8eae"
+moment_count = 12832
+moments_sha256 = "0e692883761fd73b80d39624b87d868dd4c7791bb54a6c197997210efdd525c1"
+problem_sha256 = "145f01ca36271f2f2442786c1aa0a08b2568a38dc6581dec3e3326a95d39b42d"
+
+[mof]
+filename = "model.mof.json"
+gap_cone_constraint = "gap_psd"
+identity_variable = "moment[1]"
+normalization_constraint = "normalization"
+positive_block_constraint_prefix = "positive_psd_d4_"
+sha256 = "f1b4aa0ea45610407e422e70cecea7358571a4f8c03671564c3552fc2eef0d7d"
+size_bytes = 4099942
+variable_order_contract = "moment[1]...moment[n]"
+
+[performance.d4_basis]
+allocated_bytes = 68738336
+gc_seconds = 0.0
+peak_process_rss_kib_after_step = 1095372
+wall_seconds = 0.090849823
+
+[performance.exact_assembly]
+allocated_bytes = 1436763904
+gc_seconds = 0.346345336
+peak_process_rss_kib_after_step = 1095372
+wall_seconds = 2.714103966
+
+[performance.jump_model_construction]
+allocated_bytes = 2219771208
+gc_seconds = 0.781316198
+peak_process_rss_kib_after_step = 1095372
+wall_seconds = 4.958686998
+
+[performance.mof_export]
+allocated_bytes = 881861200
+gc_seconds = 0.174457767
+peak_process_rss_kib_after_step = 1095372
+wall_seconds = 13.332324702
+
+[performance.mof_reload]
+allocated_bytes = 943151928
+gc_seconds = 0.165851211
+peak_process_rss_kib_after_step = 1095372
+wall_seconds = 9.033361404
+
+[replay]
+constraint_count_excluding_variable_sets = 10
+objective_sense = "feasibility"
+passed = true
+positive_d4_block_irreps = ["A1", "A2", "B1", "B2", "E"]
+positive_d4_block_side_dimensions = [70, 24, 45, 45, 168]
+variable_count = 1837
+
+[runtime]
+julia_version = "1.11.5"
+jump_version = "1.31.1"
+mathoptinterface_version = "1.51.2"
+
+[setup]
+basis_family = "bare_operator"
+basis_version = 1
+degree_d = 2
+hamiltonian = "H=(1/4)sum_J1(XX+YY+ZZ)+(g/4)sum_J2(XX+YY+ZZ)"
+inner_site_count = 1
+model = "square-j1-j2"
+outer_site_count = 9
+patch_level_L = 1
+state_symmetry = "none_unrestricted"
+target = "feasibility_only"
+
+    [setup.g_j2_over_j1]
+    canonical = "1//2"
+    denominator = "2"
+    float64 = 0.5
+    numerator = "1"
+
+    [setup.gamma]
+    canonical = "2//1"
+    denominator = "1"
+    float64 = 2.0
+    numerator = "2"
+
+    [setup.j1]
+    canonical = "1//1"
+    denominator = "1"
+    float64 = 1.0
+    numerator = "1"
+
+[source]
+dirty_paths_at_build = ["?? dump_legacy_inventory.jl", "?? gap_cert_export.err", "?? gap_cert_export.out", "?? gap_cert_extract.err", "?? gap_cert_extract.out", "?? gap_cert_extract.sh", "?? gap_cross_solver.err", "?? gap_cross_solver.out", "?? gap_cross_solver.results", "?? gap_cross_solver.sh", "?? gap_kagome.err", "?? gap_kagome.out", "?? gap_kagome.results", "?? gap_kagome.sh", "?? gap_kagome_d4.err", "?? gap_kagome_d4.out", "?? gap_kagome_d4.results", "?? gap_kagome_d4.sh", "?? gap_kagome_n27.err", "?? gap_kagome_n27.out", "?? gap_kagome_n27.results", "?? gap_kagome_n27.sh", "?? gap_tfim.err", "?? gap_tfim.out", "?? gap_tfim.results", "?? gap_tfim_status.err", "?? gap_tfim_status.out", "?? gap_tfim_status.results", "?? gap_tfim_status.sh", "?? gap_tfim_validate.sh", "?? julia-env/Project.toml.bak", "?? legacy_inventory.math.txt", "?? legacy_inventory.runmeta.txt", "?? sdp_all.err", "?? sdp_all.out", "?? sdp_all.sh", "?? sdp_energy.err", "?? sdp_energy.out", "?? sdp_energy_job.sh", "?? sdp_final.err", "?? sdp_final.out", "?? sdp_final.sh", "?? sdp_overnight.err", "?? sdp_overnight.out", "?? sdp_overnight.results", "?? sdp_overnight.sh", "?? sdp_phase2.err", "?? sdp_phase2.out", "?? sdp_phase2.results", "?? sdp_phase2.sh", "?? sdp_run.err", "?? sdp_run.out", "?? sdp_run_v2.sh", "?? sdp_setup.err", "?? sdp_setup.out", "?? sdp_setup2.err", "?? sdp_setup2.out", "?? sdp_setup2.sh", "?? sdp_setup_job.sh", "?? slurm-diag-22986463.err", "?? slurm-diag-22986463.out", "?? slurm-square-conic-22994261.err", "?? slurm-square-conic-22994261.out", "?? test_job.err", "?? test_job.out", "?? test_job.sh", "?? tfim_cert_N9_g0.26.jls", "?? verify_env.err", "?? verify_env.out", "?? verify_env.sh"]
+git_branch = "challenge/polyopt-sdp-gap"
+git_commit = "4dbd283b4d9a1152beb34fe5c61eda75d5db831c"
+git_tree = "5e10661fb678fab39806abe22bc0403b6b24dbf0"
+
+    [source.files_sha256]
+    "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_square_d4_conic_mof.jl" = "dd076fdcce7c7b2adfd84ec8ce57dbd1374319d8b0f9ad8abd3520239e1561af"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/CoreMGK.jl" = "bd1cc7560af7330662e9e02faae508c35736c20974500d5a641becfd3b35e1ef"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/GenericGapModel.jl" = "a32f96a3918e1bf10affede2766be7e45c4b30d47d2ba899801269e0fb5f3c35"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareGapConic.jl" = "e5e0dab957b57254bc9897480f6bafcac07b4234fc86ba24f3f9e0734141a9ad"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareJ1J2Prototype.jl" = "df0664547c9de0b2a79406f3dce6c46a0ed07dca157562c166a8592fae83e829"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareSymmetryBlock.jl" = "7fd156b8a9dfbd28cb6fba821ac53cfbba76b35952c9db8a2c722846db2415cc"
+    "tracks/polyopt/solutions/sdp-gap-seekers/src/SquareSymmetryD4.jl" = "d6bee585fa032fcc76f0b7e7456c38cd1ace3a0a5b7a985c83c9b3f17565c5ac"
+
+[stationarity]
+equalities_sha256 = "7a03b80d6ee74cd3c4f4c718add2b18fb16d1b1f1bbc1275e1b40309ac6c6666"
+family = "bare_inner_pauli"
+nonzero_real_equality_count = 3
