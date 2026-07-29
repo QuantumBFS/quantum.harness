@@ -75,10 +75,12 @@ tasks, so submit QMC as the three ranges `1-200`, `201-400`, and `401-480`.
 
 Run `issue147-pepo-probe.sbatch` before either full PEPO evolution cell. It
 creates only the first thermodynamic checkpoint in `cell-0002`; the full array
-then resumes from it. The SCNet profile exposes Hygon DCUs rather than CUDA,
-so these scripts set JAX to CPU and request no GPU resource. Do not release the
-40-step PEPO cells until the probe's measured wall time and peak memory fit the
-declared 12-hour, 128-GiB request.
+then resumes from it. The live `scnet` endpoint currently exposes only the
+`qdagnormal` A800 partition, whose QOS requires `gpu:A800:1` even for QMC.
+Use the `qdeshell` resource profile with `HARNESS_SSH_ALIAS=scnet`; PEPO uses
+JAX on the allocated GPU. Do not release the 40-step PEPO cells until the
+probe's measured wall time and peak memory fit the declared 12-hour,
+128-GiB request.
 
 The array scripts intentionally contain no partition. Probe the live queue and
 pass the ratified partition at submission time. Use `HARNESS_KIND=pepo-measure`

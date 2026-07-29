@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
+#SBATCH --gres=gpu:A800:1
 #SBATCH --time=02:00:00
 set -euo pipefail
 : "${HARNESS_RUN_SPEC:?HARNESS_RUN_SPEC is required}"
