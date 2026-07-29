@@ -8,6 +8,7 @@ import itertools
 import json
 import math
 import os
+import re
 import time
 from collections import Counter
 from collections.abc import Mapping, Sequence
@@ -36,6 +37,7 @@ TERMINAL_STATUSES = {
     "uncertain-high-precision",
     "survivor-shallow-zero-failure",
 }
+_FULL_COMMIT = re.compile(r"[0-9a-f]{40}")
 
 
 def _canonical_json(value: object) -> str:
@@ -71,6 +73,62 @@ def _json_number(value: float) -> float | str:
     if math.isnan(value):
         return "NaN"
     return "Infinity" if value > 0 else "-Infinity"
+
+
+def _validate_source_commit(source_commit: object) -> str:
+    if not isinstance(source_commit, str) or _FULL_COMMIT.fullmatch(source_commit) is None:
+        raise ValueError("source_commit must be a full lowercase 40-hex commit")
+    return source_commit
+
+
+def _plan_payload(
+    *,
+    source_commit: str,
+    shards: int,
+    entries: Sequence[Mapping[str, object]],
+) -> dict[str, object]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "source_commit": source_commit,
+        "shards": shards,
+        "oracle": "oracle.weights.classify_product",
+        "oracle_version": ORACLE_VERSION,
+        "word_order": WORD_ORDER,
+        "depths": list(DEFAULT_DEPTHS),
+        "candidates": [
+            {
+                "candidate_id": entry["candidate_id"],
+                "card_sha256": entry["card_sha256"],
+                "template": entry["template"],
+                "seed": entry["seed"],
+                "dimension": entry["dimension"],
+                "shard": entry["shard"],
+            }
+            for entry in entries
+        ],
+    }
+
+
+def _hash_payload(payload: Mapping[str, object]) -> str:
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+def _run_protocol_payload(
+    *,
+    plan_hash: str,
+    run_id: str,
+    source_commit: str,
+) -> dict[str, object]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "plan_hash": plan_hash,
+        "run_id": run_id,
+        "source_commit": source_commit,
+        "oracle": "oracle.weights.classify_product",
+        "oracle_version": ORACLE_VERSION,
+        "word_order": WORD_ORDER,
+        "depths": list(DEFAULT_DEPTHS),
+    }
 
 
 def mixed_words(
@@ -151,8 +209,7 @@ def screen_card(
 ) -> dict[str, object]:
     """Screen one exact card, stopping at its first non-benign classification."""
 
-    if not isinstance(source_commit, str) or len(source_commit) != 40:
-        raise ValueError("source_commit must be a full 40-hex commit")
+    _validate_source_commit(source_commit)
     if not run_id:
         raise ValueError("run_id must be nonempty")
     started = time.perf_counter()
@@ -165,6 +222,8 @@ def screen_card(
     counts: Counter[str] = Counter()
     first_failure: dict[str, object] | None = None
     status = "survivor-shallow-zero-failure"
+    minimum_sigma = math.inf
+    minimum_sigma_word: tuple[int, ...] | None = None
 
     for word in planned:
         if not word or any(index < 0 or index >= len(atoms) for index in word):
@@ -174,6 +233,9 @@ def screen_card(
             product = product @ atoms[atom_index]
         result = weights.classify_product(product)
         counts[result.classification] += 1
+        if result.sigma_min < minimum_sigma:
+            minimum_sigma = float(result.sigma_min)
+            minimum_sigma_word = word
         if result.classification in {"positive", "zero"}:
             continue
         if result.classification == "negative":
@@ -219,6 +281,12 @@ def screen_card(
         "counts": dict(sorted(counts.items())),
         "status": status,
         "first_failure": first_failure,
+        "minimum_sigma_min_I_plus_D": (
+            _json_number(minimum_sigma) if minimum_sigma_word is not None else None
+        ),
+        "minimum_sigma_word_indices": (
+            list(minimum_sigma_word) if minimum_sigma_word is not None else None
+        ),
         "runtime_seconds": time.perf_counter() - started,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
     }
@@ -264,20 +332,23 @@ def _select_smoke(
 def _spec(
     *,
     run_id: str,
+    plan_hash: str,
     protocol_hash: str,
     source_commit: str,
     machine_role: str,
     shard: int | str,
+    artifact_root: str,
     candidates: Sequence[dict[str, object]],
 ) -> dict[str, object]:
     return {
         "schema_version": SCHEMA_VERSION,
+        "plan_hash": plan_hash,
         "run_id": run_id,
         "protocol_hash": protocol_hash,
         "source_commit": source_commit,
         "machine_role": machine_role,
         "shard": shard,
-        "artifact_root": "..",
+        "artifact_root": artifact_root,
         "oracle": "oracle.weights.classify_product",
         "oracle_version": ORACLE_VERSION,
         "word_order": WORD_ORDER,
@@ -296,8 +367,7 @@ def plan_run(
 ) -> dict[str, object]:
     """Write a host-independent 2304-card plan and its shard specifications."""
 
-    if not isinstance(source_commit, str) or len(source_commit) != 40:
-        raise ValueError("source_commit must be a pinned full 40-hex commit")
+    _validate_source_commit(source_commit)
     if shards != 76:
         raise ValueError("the first scan protocol requires exactly 76 shards")
     if smoke_count < 0:
@@ -306,21 +376,33 @@ def plan_run(
     entries = _candidate_entries(shards)
     if len(entries) != 2304 or len({entry["candidate_id"] for entry in entries}) != 2304:
         raise RuntimeError("first tranche must contain 2304 unique exact cards")
-    protocol = {
-        "schema_version": SCHEMA_VERSION,
-        "source_commit": source_commit,
-        "run_id": run_id,
-        "shards": shards,
-        "oracle": "oracle.weights.classify_product",
-        "oracle_version": ORACLE_VERSION,
-        "word_order": WORD_ORDER,
-        "depths": list(DEFAULT_DEPTHS),
-        "candidate_ids": [entry["candidate_id"] for entry in entries],
-    }
-    protocol_hash = hashlib.sha256(_canonical_json(protocol).encode("utf-8")).hexdigest()
+    plan_payload = _plan_payload(
+        source_commit=source_commit,
+        shards=shards,
+        entries=entries,
+    )
+    plan_hash = _hash_payload(plan_payload)
+    protocol = _run_protocol_payload(
+        plan_hash=plan_hash,
+        run_id=run_id,
+        source_commit=source_commit,
+    )
+    protocol_hash = _hash_payload(protocol)
+    smoke_run_id = "exterior-thin-first-v1-smoke"
+    smoke_protocol_hash = _hash_payload(
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=smoke_run_id,
+            source_commit=source_commit,
+        )
+    )
     summary = {
-        **protocol,
+        **plan_payload,
+        "plan_hash": plan_hash,
+        "run_id": run_id,
         "protocol_hash": protocol_hash,
+        "smoke_run_id": smoke_run_id,
+        "smoke_protocol_hash": smoke_protocol_hash,
         "planned": len(entries),
         "candidates": entries,
     }
@@ -332,10 +414,12 @@ def plan_run(
             root / "specs" / f"shard-{shard:02d}.json",
             _spec(
                 run_id=run_id,
+                plan_hash=plan_hash,
                 protocol_hash=protocol_hash,
                 source_commit=source_commit,
                 machine_role=role,
                 shard=shard,
+                artifact_root="..",
                 candidates=candidates,
             ),
         )
@@ -349,11 +433,13 @@ def plan_run(
         _write_json_atomic(
             root / "specs" / f"smoke-{role}.json",
             _spec(
-                run_id="exterior-thin-first-v1-smoke",
-                protocol_hash=protocol_hash,
+                run_id=smoke_run_id,
+                plan_hash=plan_hash,
+                protocol_hash=smoke_protocol_hash,
                 source_commit=source_commit,
                 machine_role=role,
                 shard="smoke",
+                artifact_root="../smoke",
                 candidates=candidates,
             ),
         )
@@ -377,8 +463,137 @@ def _manifest_matches(
         "source_commit": spec["source_commit"],
         "candidate_id": entry["candidate_id"],
         "card_sha256": entry["card_sha256"],
+        "template": entry["template"],
+        "dimension": entry["dimension"],
+        "machine_role": spec["machine_role"],
+        "shard": entry["shard"],
+        "oracle": "oracle.weights.classify_product",
+        "oracle_version": ORACLE_VERSION,
+        "word_order": WORD_ORDER,
+        "depths": list(DEFAULT_DEPTHS),
     }
     return all(manifest.get(key) == value for key, value in expected.items())
+
+
+def _validate_spec_protocol(spec: Mapping[str, object]) -> None:
+    try:
+        source_commit = _validate_source_commit(spec["source_commit"])
+        run_id = spec["run_id"]
+        plan_hash = spec["plan_hash"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError(f"invalid protocol fields: {exc}") from exc
+    if not isinstance(run_id, str) or not run_id:
+        raise RuntimeError("invalid protocol run_id")
+    if (
+        not isinstance(plan_hash, str)
+        or len(plan_hash) != 64
+        or any(character not in "0123456789abcdef" for character in plan_hash)
+    ):
+        raise RuntimeError("invalid protocol plan_hash")
+    expected = _hash_payload(
+        {
+            "schema_version": spec.get("schema_version"),
+            "plan_hash": plan_hash,
+            "run_id": run_id,
+            "source_commit": source_commit,
+            "oracle": spec.get("oracle"),
+            "oracle_version": spec.get("oracle_version"),
+            "word_order": spec.get("word_order"),
+            "depths": spec.get("depths"),
+        }
+    )
+    if expected != spec.get("protocol_hash"):
+        raise RuntimeError("protocol hash does not match the executed protocol")
+    if (
+        spec.get("schema_version") != SCHEMA_VERSION
+        or spec.get("oracle") != "oracle.weights.classify_product"
+        or spec.get("oracle_version") != ORACLE_VERSION
+        or spec.get("word_order") != WORD_ORDER
+        or spec.get("depths") != list(DEFAULT_DEPTHS)
+    ):
+        raise RuntimeError("protocol metadata is unsupported")
+    if spec.get("machine_role") not in {"wsl", "cpu"}:
+        raise RuntimeError("invalid machine role")
+    shard = spec.get("shard")
+    if shard != "smoke" and (
+        not isinstance(shard, int)
+        or isinstance(shard, bool)
+        or not 0 <= shard < 76
+    ):
+        raise RuntimeError("invalid protocol shard")
+    if not isinstance(spec.get("candidates"), list):
+        raise RuntimeError("protocol candidates must be a list")
+
+
+def _validate_spec_plan_binding(
+    spec: Mapping[str, object],
+    *,
+    spec_path: Path,
+) -> None:
+    plan_path = spec_path.parent.parent / "plan-summary.json"
+    if not plan_path.is_file():
+        raise RuntimeError("protocol plan summary is missing")
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    entries = plan.get("candidates")
+    if not isinstance(entries, list):
+        raise RuntimeError("protocol plan candidates are invalid")
+    try:
+        plan_hash = _hash_payload(
+            _plan_payload(
+                source_commit=_validate_source_commit(plan["source_commit"]),
+                shards=int(plan["shards"]),
+                entries=entries,
+            )
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError(f"invalid protocol plan summary: {exc}") from exc
+    if plan_hash != plan.get("plan_hash") or plan_hash != spec.get("plan_hash"):
+        raise RuntimeError("protocol plan hash mismatch")
+    planned = {
+        entry.get("candidate_id"): entry
+        for entry in entries
+        if isinstance(entry, Mapping)
+    }
+    for entry in spec["candidates"]:
+        if (
+            not isinstance(entry, Mapping)
+            or planned.get(entry.get("candidate_id")) != entry
+        ):
+            raise RuntimeError("protocol candidate is not an exact planned entry")
+
+
+def _validated_spec_card(
+    entry: Mapping[str, object],
+    *,
+    spec: Mapping[str, object],
+) -> Mapping[str, object]:
+    try:
+        template = entry["template"]
+        seed = entry["seed"]
+        identity = entry["candidate_id"]
+        declared_hash = entry["card_sha256"]
+        dimension = entry["dimension"]
+        declared_owner = entry["shard"]
+    except KeyError as exc:
+        raise RuntimeError(f"candidate card entry is missing {exc}") from exc
+    if not isinstance(template, str) or not isinstance(seed, int) or isinstance(seed, bool):
+        raise RuntimeError("candidate card template or seed is invalid")
+    card = candidate_card(template=template, seed=seed)
+    actual_hash = candidate_id(card)
+    if actual_hash != identity or actual_hash != declared_hash:
+        raise RuntimeError("candidate card hash mismatch")
+    if card["dimension"] != dimension:
+        raise RuntimeError("candidate dimension mismatch")
+    owner = shard_owner(actual_hash)
+    if owner != declared_owner:
+        raise RuntimeError("candidate owner mismatch")
+    spec_shard = spec["shard"]
+    if spec_shard != "smoke" and owner != spec_shard:
+        raise RuntimeError("candidate owner does not match shard")
+    expected_role = "wsl" if owner < 14 else "cpu"
+    if spec["machine_role"] != expected_role:
+        raise RuntimeError("candidate machine role mismatch")
+    return card
 
 
 def run_spec(path: str | Path) -> dict[str, int]:
@@ -386,6 +601,8 @@ def run_spec(path: str | Path) -> dict[str, int]:
 
     spec_path = Path(path)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    _validate_spec_protocol(spec)
+    _validate_spec_plan_binding(spec, spec_path=spec_path)
     artifact_root = Path(str(spec.get("artifact_root", "..")))
     root = (
         artifact_root
@@ -396,6 +613,9 @@ def run_spec(path: str | Path) -> dict[str, int]:
     reused = 0
     errors: list[dict[str, object]] = []
     for entry in spec["candidates"]:
+        if not isinstance(entry, Mapping):
+            raise RuntimeError("candidate card entry must be a mapping")
+        card = _validated_spec_card(entry, spec=spec)
         identity = entry["candidate_id"]
         manifest_path = root / "candidates" / identity / "manifest.json"
         if manifest_path.is_file():
@@ -417,12 +637,6 @@ def run_spec(path: str | Path) -> dict[str, int]:
             reused += 1
             continue
         try:
-            card = candidate_card(
-                template=entry["template"],
-                seed=int(entry["seed"]),
-            )
-            if candidate_id(card) != identity or identity != entry["card_sha256"]:
-                raise RuntimeError("candidate card hash mismatch")
             manifest = screen_card(
                 card,
                 source_commit=spec["source_commit"],
@@ -466,79 +680,235 @@ def _write_operational_log(
     )
 
 
+def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]]:
+    try:
+        source_commit = _validate_source_commit(plan["source_commit"])
+        entries = plan["candidates"]
+        shards = plan["shards"]
+        run_id = plan["run_id"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError(f"invalid plan protocol: {exc}") from exc
+    if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):
+        raise RuntimeError("invalid plan candidate entries")
+    if shards != 76 or not isinstance(run_id, str) or not run_id:
+        raise RuntimeError("invalid plan protocol metadata")
+    if (
+        plan.get("schema_version") != SCHEMA_VERSION
+        or plan.get("oracle") != "oracle.weights.classify_product"
+        or plan.get("oracle_version") != ORACLE_VERSION
+        or plan.get("word_order") != WORD_ORDER
+        or plan.get("depths") != list(DEFAULT_DEPTHS)
+    ):
+        raise RuntimeError("invalid plan oracle or word protocol metadata")
+    plan_hash = _hash_payload(
+        _plan_payload(
+            source_commit=source_commit,
+            shards=shards,
+            entries=entries,
+        )
+    )
+    if plan_hash != plan.get("plan_hash"):
+        raise RuntimeError("plan protocol hash mismatch")
+    protocol_hash = _hash_payload(
+        _run_protocol_payload(
+            plan_hash=plan_hash,
+            run_id=run_id,
+            source_commit=source_commit,
+        )
+    )
+    if protocol_hash != plan.get("protocol_hash"):
+        raise RuntimeError("run protocol hash mismatch")
+    identities: set[str] = set()
+    for entry in entries:
+        identity = entry.get("candidate_id")
+        if not isinstance(identity, str) or identity in identities:
+            raise RuntimeError("duplicate or invalid planned candidate identity")
+        identities.add(identity)
+        card = candidate_card(
+            template=str(entry.get("template")),
+            seed=entry.get("seed"),  # type: ignore[arg-type]
+        )
+        if (
+            candidate_id(card) != identity
+            or entry.get("card_sha256") != identity
+            or entry.get("dimension") != card["dimension"]
+            or entry.get("shard") != shard_owner(identity)
+        ):
+            raise RuntimeError("planned card, owner, or dimension mismatch")
+    return entries
+
+
 def collect_run(
     run_dir: str | Path,
     *,
     markdown: str | Path | None = None,
 ) -> dict[str, object]:
-    """Collect terminal manifests without hiding missing or stale candidates."""
+    """Collect replayable results while preserving promotion and error data."""
 
     root = Path(run_dir)
     plan = json.loads((root / "plan-summary.json").read_text(encoding="utf-8"))
+    entries = _validate_plan_summary(plan)
     scientific: Counter[str] = Counter()
     tested_words: Counter[str] = Counter()
+    by_dimension: dict[str, Counter[str]] = {}
+    by_template: dict[str, Counter[str]] = {}
+    for entry in entries:
+        by_dimension.setdefault(str(entry["dimension"]), Counter())["planned"] += 1
+        by_template.setdefault(str(entry["template"]), Counter())["planned"] += 1
+
     terminal = 0
     stale = 0
     missing = 0
+    duplicate = 0
     manifests: list[dict[str, object]] = []
-    for entry in plan["candidates"]:
-        path = root / "candidates" / entry["candidate_id"] / "manifest.json"
-        if not path.is_file():
+    accepted_ids: set[str] = set()
+    first_failures: list[dict[str, object]] = []
+    survivors: list[dict[str, object]] = []
+    machine_groups: dict[str, dict[str, Any]] = {}
+
+    for entry in entries:
+        identity = str(entry["candidate_id"])
+        directory = root / "candidates" / identity
+        manifest_path = directory / "manifest.json"
+        alternatives = sorted(directory.glob("manifest*.json")) if directory.exists() else []
+        duplicate += max(0, len(alternatives) - (1 if manifest_path.is_file() else 0))
+        if not manifest_path.is_file():
             missing += 1
             continue
-        manifest = json.loads(path.read_text(encoding="utf-8"))
-        expected = {
-            "schema_version": SCHEMA_VERSION,
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        role = "wsl" if int(entry["shard"]) < 14 else "cpu"
+        spec_view = {
             "run_id": plan["run_id"],
             "protocol_hash": plan["protocol_hash"],
             "source_commit": plan["source_commit"],
-            "candidate_id": entry["candidate_id"],
-            "card_sha256": entry["card_sha256"],
+            "machine_role": role,
         }
-        if any(manifest.get(key) != value for key, value in expected.items()):
+        if (
+            not _manifest_matches(manifest, spec=spec_view, entry=entry)
+            or manifest.get("status") not in TERMINAL_STATUSES
+            or "minimum_sigma_min_I_plus_D" not in manifest
+            or "minimum_sigma_word_indices" not in manifest
+        ):
             stale += 1
             continue
-        status = str(manifest.get("status"))
-        if status not in TERMINAL_STATUSES:
-            stale += 1
-            continue
+        status = str(manifest["status"])
         terminal += 1
+        accepted_ids.add(identity)
         scientific[status] += 1
         tested_words[status] += int(manifest["tested_words"])
         manifests.append(manifest)
-    operational_errors = sum(
-        len(json.loads(path.read_text(encoding="utf-8")).get("errors", []))
-        for path in (root / "logs").glob("*.json")
-    ) if (root / "logs").exists() else 0
+        dimension_counts = by_dimension[str(entry["dimension"])]
+        template_counts = by_template[str(entry["template"])]
+        dimension_counts[status] += 1
+        template_counts[status] += 1
+
+        failure = manifest.get("first_failure")
+        if isinstance(failure, Mapping):
+            failure_row = {
+                "candidate_id": identity,
+                "template": entry["template"],
+                "dimension": entry["dimension"],
+                "word_indices": failure.get("word_indices"),
+                "classification": failure.get("classification"),
+                "depth": failure.get("depth"),
+                "sigma_min_I_plus_D": failure.get("sigma_min_I_plus_D"),
+                "condition_number_I_plus_D": failure.get(
+                    "condition_number_I_plus_D"
+                ),
+            }
+            first_failures.append(failure_row)
+            template_counts[f"first_failure_depth_{failure.get('depth')}"] += 1
+        if status == "survivor-shallow-zero-failure":
+            survivors.append({
+                "candidate_id": identity,
+                "template": entry["template"],
+                "dimension": entry["dimension"],
+                "tested_words": manifest["tested_words"],
+                "minimum_sigma_min_I_plus_D": manifest[
+                    "minimum_sigma_min_I_plus_D"
+                ],
+                "minimum_sigma_word_indices": manifest[
+                    "minimum_sigma_word_indices"
+                ],
+            })
+
+        group = machine_groups.setdefault(
+            role,
+            {
+                "role": role,
+                "shards": set(),
+                "processes": 14 if role == "wsl" else 62,
+                "candidates": 0,
+                "wall_seconds": 0.0,
+                "manifest_sha256": [],
+            },
+        )
+        group["shards"].add(int(entry["shard"]))
+        group["candidates"] += 1
+        group["wall_seconds"] += float(manifest.get("runtime_seconds", 0.0))
+        group["manifest_sha256"].append(
+            hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        )
+
+    historical_attempts = 0
+    operational_ids: set[str] = set()
+    if (root / "logs").exists():
+        for path in sorted((root / "logs").glob("*.json")):
+            log = json.loads(path.read_text(encoding="utf-8"))
+            for error in log.get("errors", []):
+                historical_attempts += 1
+                identity = error.get("candidate_id")
+                if isinstance(identity, str):
+                    operational_ids.add(identity)
+    unresolved_ids = sorted(operational_ids - accepted_ids)
+    machine_execution: list[dict[str, object]] = []
+    for role in sorted(machine_groups):
+        group = machine_groups[role]
+        group["shards"] = sorted(group["shards"])
+        group["manifest_sha256"] = sorted(group["manifest_sha256"])
+        machine_execution.append(group)
+
     result: dict[str, object] = {
         "run_id": plan["run_id"],
         "source_commit": plan["source_commit"],
+        "plan_hash": plan["plan_hash"],
         "protocol_hash": plan["protocol_hash"],
-        "planned": len(plan["candidates"]),
+        "planned": len(entries),
         "terminal": terminal,
         "missing": missing,
-        "operational_error": operational_errors,
+        "operational_error": len(unresolved_ids),
+        "unresolved_operational_candidate_ids": unresolved_ids,
+        "historical_operational_attempts": historical_attempts,
         "stale": stale,
-        "duplicate": 0,
+        "duplicate": duplicate,
         "scientific_counts": dict(sorted(scientific.items())),
         "tested_words_by_status": dict(sorted(tested_words.items())),
+        "by_dimension": {
+            key: dict(sorted(value.items()))
+            for key, value in sorted(by_dimension.items(), key=lambda item: int(item[0]))
+        },
+        "by_template": {
+            key: dict(sorted(value.items()))
+            for key, value in sorted(by_template.items())
+        },
+        "first_failures": sorted(first_failures, key=lambda item: item["candidate_id"]),
+        "survivors": sorted(survivors, key=lambda item: item["candidate_id"]),
+        "machine_execution": machine_execution,
     }
     if markdown is not None:
-        _write_summary_markdown(Path(markdown), result, manifests)
+        _write_summary_markdown(Path(markdown), result)
     return result
 
 
-def _write_summary_markdown(
-    path: Path,
-    result: Mapping[str, object],
-    manifests: Sequence[Mapping[str, object]],
-) -> None:
+def _write_summary_markdown(path: Path, result: Mapping[str, object]) -> None:
     lines = [
         f"# Exterior thin first scan — {result['run_id']}",
         "",
         "## Provenance",
         f"- source commit: `{result['source_commit']}`",
+        f"- plan hash: `{result['plan_hash']}`",
         f"- protocol hash: `{result['protocol_hash']}`",
+        f"- candidate-card schema: exterior-candidate-card-v1",
         f"- determinant oracle: `oracle.weights.classify_product` ({ORACLE_VERSION})",
         f"- word order: `{WORD_ORDER}`; depths: `2,3,4`",
         "- WSL shards: `00..13`; CPU shards: `14..75`; BLAS threads: `1`",
@@ -561,6 +931,44 @@ def _write_summary_markdown(
     assert isinstance(counts, Mapping) and isinstance(tested, Mapping)
     for status in sorted(counts):
         lines.append(f"| {status} | {counts[status]} | {tested.get(status, 0)} |")
+    lines.extend(["", "## By dimension", "| N | planned | rejected negative | rejected complex | uncertain | survivor |", "|---:|---:|---:|---:|---:|---:|"])
+    for dimension, row in result["by_dimension"].items():  # type: ignore[union-attr]
+        lines.append(
+            f"| {dimension} | {row.get('planned', 0)} | "
+            f"{row.get('rejected-negative', 0)} | {row.get('rejected-complex', 0)} | "
+            f"{row.get('uncertain-high-precision', 0)} | "
+            f"{row.get('survivor-shallow-zero-failure', 0)} |"
+        )
+    lines.extend(["", "## By template", "| template | planned | depth 2 | depth 3 | depth 4 | survivor |", "|---|---:|---:|---:|---:|---:|"])
+    for template, row in result["by_template"].items():  # type: ignore[union-attr]
+        lines.append(
+            f"| {template} | {row.get('planned', 0)} | "
+            f"{row.get('first_failure_depth_2', 0)} | "
+            f"{row.get('first_failure_depth_3', 0)} | "
+            f"{row.get('first_failure_depth_4', 0)} | "
+            f"{row.get('survivor-shallow-zero-failure', 0)} |"
+        )
+    lines.extend(["", "## First failures", "| candidate id | template | N | word | classification | sigma_min | condition |", "|---|---|---:|---|---|---:|---:|"])
+    for row in result["first_failures"]:  # type: ignore[union-attr]
+        lines.append(
+            f"| {row['candidate_id']} | {row['template']} | {row['dimension']} | "
+            f"{row['word_indices']} | {row['classification']} | "
+            f"{row['sigma_min_I_plus_D']} | {row['condition_number_I_plus_D']} |"
+        )
+    lines.extend(["", "## Shallow survivors", "| candidate id | template | N | tested words | minimum sigma_min | minimum word |", "|---|---|---:|---:|---:|---|"])
+    for row in result["survivors"]:  # type: ignore[union-attr]
+        lines.append(
+            f"| {row['candidate_id']} | {row['template']} | {row['dimension']} | "
+            f"{row['tested_words']} | {row['minimum_sigma_min_I_plus_D']} | "
+            f"{row['minimum_sigma_word_indices']} |"
+        )
+    lines.extend(["", "## Machine execution", "| role | shards | processes | candidates | wall seconds | manifest SHA list |", "|---|---|---:|---:|---:|---|"])
+    for row in result["machine_execution"]:  # type: ignore[union-attr]
+        lines.append(
+            f"| {row['role']} | {row['shards']} | {row['processes']} | "
+            f"{row['candidates']} | {row['wall_seconds']:.6f} | "
+            f"{row['manifest_sha256']} |"
+        )
     lines.extend([
         "",
         "## Interpretation",
@@ -612,6 +1020,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         result = collect_run(args.run_dir, markdown=args.markdown)
     print(_canonical_json(result))
+    if args.command == "run" and int(result.get("errors", 0)) != 0:
+        return 1
     return 0
 
 

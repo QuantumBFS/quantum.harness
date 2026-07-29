@@ -186,40 +186,28 @@ def test_run_spec_resumes_matching_manifest_and_rejects_stale(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    card = candidate_card(template=TEMPLATES[0], seed=3)
-    identity = candidate_id(card)
-    spec = {
-        "schema_version": thin.SCHEMA_VERSION,
-        "run_id": "unit",
-        "protocol_hash": "a" * 64,
-        "source_commit": SOURCE_COMMIT,
-        "machine_role": "wsl",
-        "shard": thin.shard_owner(identity),
-        "artifact_root": "..",
-        "candidates": [{
-            "template": card["template"],
-            "seed": card["seed"],
-            "dimension": card["dimension"],
-            "candidate_id": identity,
-            "card_sha256": identity,
-            "shard": thin.shard_owner(identity),
-        }],
-    }
-    specs = tmp_path / "specs"
-    specs.mkdir()
-    path = specs / "unit.json"
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="unit",
+    )
+    path = tmp_path / "specs" / "shard-00.json"
+    spec = json.loads(path.read_text())
+    spec["candidates"] = spec["candidates"][:1]
     path.write_text(json.dumps(spec), encoding="utf-8")
+    entry = spec["candidates"][0]
+    card = candidate_card(template=entry["template"], seed=entry["seed"])
+    identity = candidate_id(card)
     manifest_path = tmp_path / "candidates" / identity / "manifest.json"
     manifest_path.parent.mkdir(parents=True)
-    terminal = {
-        "schema_version": thin.SCHEMA_VERSION,
-        "run_id": "unit",
-        "protocol_hash": "a" * 64,
-        "source_commit": SOURCE_COMMIT,
-        "candidate_id": identity,
-        "card_sha256": identity,
-        "status": "rejected-negative",
-    }
+    terminal = thin.screen_card(
+        card,
+        source_commit=SOURCE_COMMIT,
+        run_id="unit",
+        protocol_hash=spec["protocol_hash"],
+        machine_role="wsl",
+        shard=0,
+    )
     manifest_path.write_text(json.dumps(terminal), encoding="utf-8")
     monkeypatch.setattr(
         thin,
@@ -287,6 +275,15 @@ def test_collect_reports_missing_and_status_counts(tmp_path: Path) -> None:
             "tested_words": 22,
             "template": first["template"],
             "dimension": first["dimension"],
+            "machine_role": "wsl" if first["shard"] < 14 else "cpu",
+            "shard": first["shard"],
+            "oracle": "oracle.weights.classify_product",
+            "oracle_version": thin.ORACLE_VERSION,
+            "word_order": thin.WORD_ORDER,
+            "depths": [2, 3, 4],
+            "minimum_sigma_min_I_plus_D": 0.5,
+            "minimum_sigma_word_indices": [0, 1],
+            "runtime_seconds": 0.1,
             "first_failure": None,
         }),
         encoding="utf-8",
@@ -415,7 +412,7 @@ def test_survivor_manifest_and_collection_preserve_promotion_data(
     plan = json.loads((tmp_path / "plan-summary.json").read_text())
     entry = plan["candidates"][0]
     card = candidate_card(template=entry["template"], seed=entry["seed"])
-    sigma = iter([0.9, 0.3, 0.7])
+    sigma = iter([0.9, 0.3, 0.7, 0.6])
     monkeypatch.setattr(
         thin.weights,
         "classify_product",
@@ -435,7 +432,7 @@ def test_survivor_manifest_and_collection_preserve_promotion_data(
         protocol_hash=plan["protocol_hash"],
         machine_role="wsl" if entry["shard"] < 14 else "cpu",
         shard=entry["shard"],
-        words=((0, 1), (1, 0), (0, 1, 0)),
+        words=((0, 1), (1, 0), (0, 1, 0), (0, 1, 0, 1)),
     )
     assert manifest["minimum_sigma_min_I_plus_D"] == pytest.approx(0.3)
     assert manifest["minimum_sigma_word_indices"] == [1, 0]
@@ -450,7 +447,7 @@ def test_survivor_manifest_and_collection_preserve_promotion_data(
         "candidate_id": entry["candidate_id"],
         "template": entry["template"],
         "dimension": entry["dimension"],
-        "tested_words": 3,
+        "tested_words": 4,
         "minimum_sigma_min_I_plus_D": pytest.approx(0.3),
         "minimum_sigma_word_indices": [1, 0],
     }]
@@ -495,6 +492,12 @@ def test_collection_validates_ownership_detects_duplicates_and_clears_retries(
         "machine_role": role,
         "shard": entry["shard"],
         "runtime_seconds": 0.1,
+        "oracle": "oracle.weights.classify_product",
+        "oracle_version": thin.ORACLE_VERSION,
+        "word_order": thin.WORD_ORDER,
+        "depths": [2, 3, 4],
+        "minimum_sigma_min_I_plus_D": 0.5,
+        "minimum_sigma_word_indices": [0, 1],
         "first_failure": {
             "classification": "negative",
             "word_indices": [0, 1],
