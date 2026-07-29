@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Deprecated non-production schema 1 scaffold. It permanently requires production_ready=false and scientific_comparison=false; production uses cthyb-production-input.schema.json schema 2.",
   "title": "Challenge 81 CT-HYB production configuration scaffold",
+  "description": "Non-production schema 1 scaffold retained for compatibility; it cannot authorize a scientific comparison.",
   "type": "object",
   "additionalProperties": false,
   "required": [
