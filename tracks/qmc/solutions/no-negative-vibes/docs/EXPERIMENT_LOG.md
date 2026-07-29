@@ -1865,3 +1865,54 @@ certificate (`best objective=0.0281503860`, minimum transformed entry
 about `-0.31275`).  Sixty independent one-start, 4000-iteration searches
 are now running; this is the first numerical cone campaign that has not
 already been invalidated by a negative subcharacter word.
+
+### Full-Fock preconditioning and arbitrary-word theorem
+
+The original 60-way random full-32 search was stopped before completion
+after structured initializations proved decisively more efficient.  A
+block basis containing the exact grade-`{1,4}` cone reduced the best
+objective to `0.0013721487870580061`.  Replacing it by the exact
+grade-`{2,4}` cone reduced the objective further to
+`0.00035961518605738394`, a factor of about 78 relative to the random
+baseline.  Three-stage warm continuation at weights
+`1e-7,1e-9,1e-11` reached objective `6.50e-9` and minimum transformed
+entry `-2.93091e-4` in the best scratch run.  A separate 60-way CPU batch
+over `0.001<=epsilon<=0.01` completed without errors and without an exact
+cone: its best result was seed `950010048`, epsilon
+`0.009653059951179559`, objective `2.564980403020742e-8`, and minimum
+entry `-4.767167046731235e-4`.  This confirms the preconditioner while
+also showing that further identical basin polishing is lower priority.
+
+More importantly, commit `84d757e` closes the fixed-pair arbitrary-word
+problem without a full-32 cone.  For every word `W in <B,B^T>`, it proves
+exactly `det(I+W)>0`.
+
+The certificate combines two independent strict tail bounds:
+
+- after the common grade-four sign gauge, both grade-four atoms are
+  entrywise nonnegative and share a weight-8 loop; exhaustive exact
+  enumeration of all 8,192 length-13 blocks gives
+  `100*||Lambda^3 W||_F^2 < (Lambda^4 W)[0,0]^2`, with raw worst-case
+  integer margin `7557346070286518140205276`;
+- exact enumeration of all remainders through length 12 gives squared
+  ratio at most 10, hence Frobenius submultiplicativity proves
+  `chi_3(W)+chi_4(W)>0` for every length at least 13;
+- Sylvester certificates for `6I-B^T B` and
+  `29I-(Lambda^2 B)^T(Lambda^2 B)` are positive definite.  Consequently
+  the grade-one and grade-two trace bounds are dominated by `8^n` from
+  length 6 onward; the conservative integer margin at length 6 is 17,174;
+- lengths 1 through 12 are closed by the existing exact common-amplitude
+  Bernstein audit and exact grade-`{1,4}` cone.  The smallest stored
+  Bernstein margin is 17.
+
+All gates are strict, so continuity already implies a nonempty open
+parameter neighborhood of the fixed matrix, although an explicit
+human-readable neighborhood remains to be extracted.  The immediate
+research target is now the physical completion: an exact positive
+auxiliary-field decomposition and a Hermitian interacting Hamiltonian.
+The active construction is the full-Fock transfer
+`T_c=c I+Gamma(B)+Gamma(B)^T`; if an exact integer `c` makes it positive
+definite, then `H=-log(T_c)` is Hermitian and generally nonlocal, while
+the expansion of `Tr(T_c^N)` has positive coefficients and every
+configuration weight reduces to the proved `{I,B,B^T}` determinant
+semigroup.  This route is being checked before any further cone polishing.
