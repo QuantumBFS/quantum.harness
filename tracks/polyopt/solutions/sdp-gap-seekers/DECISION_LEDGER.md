@@ -820,3 +820,31 @@ text boundaries in the three active solve/replay runners now accept
 feeds real `SubString` values from `split`, `SubString`, and regex captures
 through rational parsing and setup validation. Every future gamma-scan job
 runs this regression before building 74,602 moments.
+
+## 2026-07-29 — corrected and extended coarse scans remain feasible through gamma 32
+
+Corrected coarse-scan r3, Slurm job `22991095`, ran from clean commit
+`f1fb24ceb1a6ba110abbcb06307a9833bc90b524`. Its mandatory string-boundary
+suite passed 11/11 before assembly. For each exact rational gamma `1`, `2`,
+and `4`, the job rebuilt the 74,602-moment source, replayed all six exact
+reductions, reloaded the 3,250-variable/nine-cone MOF, and independently
+audited the returned primal. Every point is residual-checked feasible with
+normalization one and zero affine and PSD violation. Minimum block
+eigenvalues are `0.06341919455293454`, `0.010455807260659311`, and
+`0.004514259614827765`. The job used 9:11 and 973,548 KiB Slurm MaxRSS.
+
+Extended scan r4, Slurm job `22992336`, repeated the same complete signature
+at gamma `8`, `16`, and `32`. All three are again residual-checked feasible.
+Their minimum block eigenvalues are `0.0014308867937518066`,
+`5.4343318096172766e-5`, and `4.915449793807536e-6`; the scalar gap-block
+values are `0.01797420828848928`, `0.01368745758280987`, and
+`0.007499637530884229`. It used 8:42 and 953,356 KiB Slurm MaxRSS.
+
+Accept these as verified floating feasible points of the finite relaxation,
+not as lower bounds on the physical bulk gap. The decision-changing
+conclusion is that `L=1,d=2` has not produced an upper transition through
+gamma 32 and is likely very weak in this model. Continue one logarithmic scan
+at gamma `64`, `128`, and `256`; if it produces an infeasibility candidate,
+require independent ray replay. If it remains feasible or becomes
+numerically marginal without a ray, stop widening this relaxation and move
+compute to a stronger window/order after exact symmetry reduction.

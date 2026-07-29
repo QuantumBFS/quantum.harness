@@ -489,3 +489,31 @@ Updated: 2026-07-29 UTC.
   `String`. No optimizer was attached. Runner-facing read-only text APIs are
   now generalized to `AbstractString`, and the scan now runs a dedicated
   split/regex-capture regression before any assembly.
+- Corrected coarse-scan r3, job `22991095`, passed the 11/11 string-boundary
+  preflight and every immutable-input, six-reduction, named-cone reload, and
+  primal audit at exact rational gamma values `1`, `2`, and `4`. All three
+  points are `feasible_residual_checked_float`: normalization is exactly one,
+  maximum affine residual and worst PSD violation are zero, and the minimum
+  reconstructed block eigenvalues are respectively
+  `0.06341919455293454`, `0.010455807260659311`, and
+  `0.004514259614827765`. The job completed in 9:11 with Slurm MaxRSS
+  973,548 KiB. The fetched bundle passes all recorded checksums; its
+  `SHA256SUMS` file hashes to
+  `d3fc0484649ade9d6246db39e6da6c65e151d883da19e0de961a0998ee947044`.
+- Extended coarse-scan r4, job `22992336`, repeated the complete exact build
+  and audit at gamma `8`, `16`, and `32`. All three remain
+  `feasible_residual_checked_float` with zero affine and PSD violations. The
+  minimum reconstructed block eigenvalues decrease to
+  `0.0014308867937518066`, `5.4343318096172766e-5`, and
+  `4.915449793807536e-6`; the scalar gap-block values are
+  `0.01797420828848928`, `0.01368745758280987`, and
+  `0.007499637530884229`. The job completed in 8:42 with Slurm MaxRSS
+  953,356 KiB. The fetched bundle passes all recorded checksums; its
+  `SHA256SUMS` file hashes to
+  `a3b5cc33067d130c02b14c3aa1abcae52cb9853c0906f05c724a97f686a5e337`.
+  This does not imply a large physical gap: it shows that the present
+  `L=1,d=2` relaxation is still too weak to exclude gamma 32.
+- Extended scan r5, job `22992662`, is queued for gamma `64`, `128`, and
+  `256`, stopping at the first infeasibility candidate. It is currently
+  pending under the shared-account `AssocGrpJobsLimit`; pending is not
+  scientific evidence.
