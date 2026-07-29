@@ -162,6 +162,16 @@ def _validate_json_bounds(
 DirectoryEntry = tuple[Path, int, os.stat_result]
 
 
+def _directory_identity(metadata: object) -> tuple[int, int, int, int, int]:
+    return (
+        int(metadata.st_dev),
+        int(metadata.st_ino),
+        int(metadata.st_mode),
+        int(metadata.st_uid),
+        int(metadata.st_gid),
+    )
+
+
 def _directory_flags() -> int:
     return (
         os.O_RDONLY
@@ -226,41 +236,14 @@ def _open_directory_chain(
                 raise RuntimeError("directory ancestry contains a non-directory")
             original = snapshots.get(current_path)
             if original is not None:
-                final_is_mutable = (
-                    allow_final_mutation and current_path == absolute
-                )
-                stable_identity = (
-                    status.st_dev,
-                    status.st_ino,
-                    status.st_mode,
-                    status.st_uid,
-                    status.st_gid,
-                )
-                original_identity = (
-                    original.st_dev,
-                    original.st_ino,
-                    original.st_mode,
-                    original.st_uid,
-                    original.st_gid,
-                )
                 if (
-                    (
-                        not final_is_mutable
-                        and _generation_tuple(status)
-                        != _generation_tuple(original)
-                    )
-                    or (
-                        final_is_mutable
-                        and (
-                            stable_identity != original_identity
-                            or status.st_nlink < original.st_nlink
-                            or status.st_nlink < 2
-                        )
-                    )
+                    _directory_identity(status)
+                    != _directory_identity(original)
+                    or status.st_nlink < 2
                 ):
                     os.close(descriptor)
                     raise RuntimeError(
-                        "directory ancestor generation changed before descriptor open"
+                        "directory ancestor identity changed before descriptor open"
                     )
             entries.append((current_path, descriptor, status))
         if create:
@@ -331,49 +314,24 @@ def _require_directory_chain(
     allow_final_mutation: bool,
     mutable_indexes: Set[int] = frozenset(),
 ) -> None:
-    flexible_indexes = set(mutable_indexes)
-    if allow_final_mutation:
-        flexible_indexes.add(len(entries) - 1)
-    for index, (path, descriptor, original) in enumerate(entries):
+    del allow_final_mutation, mutable_indexes
+    for path, descriptor, original in entries:
         try:
             path_status = path.lstat()
             descriptor_status = os.fstat(descriptor)
         except OSError as error:
             raise RuntimeError("directory ancestor identity changed") from error
-        stable_identity = (
-            descriptor_status.st_dev,
-            descriptor_status.st_ino,
-            descriptor_status.st_mode,
-            descriptor_status.st_uid,
-            descriptor_status.st_gid,
-        )
-        original_identity = (
-            original.st_dev,
-            original.st_ino,
-            original.st_mode,
-            original.st_uid,
-            original.st_gid,
-        )
         if (
             stat.S_ISLNK(path_status.st_mode)
             or not stat.S_ISDIR(path_status.st_mode)
-            or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
-            or (
-                index not in flexible_indexes
-                and _generation_tuple(descriptor_status)
-                != _generation_tuple(original)
-            )
-            or (
-                index in flexible_indexes
-                and (
-                    stable_identity != original_identity
-                    or descriptor_status.st_nlink < original.st_nlink
-                    or descriptor_status.st_nlink < 2
-                )
-            )
+            or _directory_identity(path_status)
+            != _directory_identity(descriptor_status)
+            or _directory_identity(descriptor_status)
+            != _directory_identity(original)
+            or descriptor_status.st_nlink < 2
         ):
             raise RuntimeError(
-                "directory identity changed: ancestor generation or identity changed"
+                "directory identity changed"
             )
 
 

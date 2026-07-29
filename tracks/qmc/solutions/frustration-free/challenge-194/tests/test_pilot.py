@@ -618,6 +618,48 @@ def test_publication_rejects_ancestor_replacement_before_descriptor_open(
         pilot._publish_once(parent / "marker.json", {"schema_version": "test"})
 
 
+def test_directory_chain_accepts_generation_only_metadata_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    root = tmp_path / "root"
+    root.mkdir()
+    descriptor = os.open(
+        root,
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0),
+    )
+    original = os.fstat(descriptor)
+    real_lstat = Path.lstat
+
+    class Drifted:
+        st_dev = original.st_dev
+        st_ino = original.st_ino
+        st_mode = original.st_mode
+        st_nlink = original.st_nlink
+        st_uid = original.st_uid
+        st_gid = original.st_gid
+        st_size = original.st_size + 4096
+        st_mtime_ns = original.st_mtime_ns + 1
+        st_ctime_ns = original.st_ctime_ns + 1
+
+    def drifted_lstat(path: Path):
+        if path == root:
+            return Drifted()
+        return real_lstat(path)
+
+    monkeypatch.setattr(Path, "lstat", drifted_lstat)
+    try:
+        pilot._require_directory_chain(
+            [(root, descriptor, original)],
+            allow_final_mutation=False,
+        )
+        opened = pilot._open_directory_chain(root, create=False)
+        pilot._close_directory_chain(opened)
+    finally:
+        os.close(descriptor)
+
+
 def test_cell_swap_and_restore_during_work_fails_closed(
     tmp_path: Path,
 ):
