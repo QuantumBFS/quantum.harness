@@ -388,6 +388,86 @@ def test_spool_wrapper_uses_direct_offline_interpreter_and_clean_pythonpath(
     assert "/hostile/caller/path" not in recorded["pythonpath"]
 
 
+def test_spool_wrapper_preserves_venv_launcher_identity(tmp_path: Path):
+    venv = tmp_path / "worker-venv"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "venv",
+            "--without-pip",
+            "--system-site-packages",
+            str(venv),
+        ],
+        check=True,
+    )
+    launcher = venv / "bin" / "python"
+    resolved = launcher.resolve()
+    assert launcher != resolved
+
+    version = f"python{sys.version_info.major}.{sys.version_info.minor}"
+    site_packages = venv / "lib" / version / "site-packages"
+    site_packages.mkdir(parents=True, exist_ok=True)
+    (site_packages / "wrapper_venv_marker.py").write_text(
+        "VALUE = 'venv-site-packages'\n",
+        encoding="utf-8",
+    )
+
+    repository = tmp_path / "repository"
+    solution = (
+        repository
+        / "tracks"
+        / "qmc"
+        / "solutions"
+        / "frustration-free"
+        / "challenge-194"
+    )
+    scripts = solution / "scripts"
+    scripts.mkdir(parents=True)
+    invocation = tmp_path / "venv-invocation.json"
+    (scripts / "validation_shard.py").write_text(
+        "import json, os, sys\n"
+        "import wrapper_venv_marker\n"
+        "with open(os.environ['OFFLINE_INVOCATION'], 'w') as stream:\n"
+        "    json.dump({\n"
+        "        'executable': sys.executable,\n"
+        "        'prefix': sys.prefix,\n"
+        "        'marker': wrapper_venv_marker.VALUE,\n"
+        "        'pythonpath': os.environ.get('PYTHONPATH'),\n"
+        "    }, stream)\n",
+        encoding="utf-8",
+    )
+    run_spec = tmp_path / "run_spec.json"
+    run_spec.write_text("{}", encoding="utf-8")
+    environment = {
+        **os.environ,
+        "PATH": "/usr/bin:/bin",
+        "HARNESS_RUN_SPEC": str(run_spec),
+        "CHALLENGE_194_REPO_ROOT": str(repository),
+        "SLURM_ARRAY_TASK_ID": "23",
+        "CHALLENGE_194_PYTHON": str(launcher),
+        "PYTHONPATH": "/hostile/caller/path",
+        "OFFLINE_INVOCATION": str(invocation),
+    }
+
+    completed = subprocess.run(
+        ["/bin/bash", str(WRAPPER)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    recorded = json.loads(invocation.read_text(encoding="utf-8"))
+    assert recorded == {
+        "executable": str(launcher),
+        "prefix": str(venv),
+        "marker": "venv-site-packages",
+        "pythonpath": str(solution / "src"),
+    }
+
+
 def test_spool_wrapper_uses_valid_harness_command_as_interpreter(tmp_path: Path):
     interpreter = tmp_path / "harness-python"
     interpreter.write_text(
@@ -444,7 +524,7 @@ def test_offline_interpreter_rejects_conflicting_explicit_candidates(
     assert not invocation.exists()
 
 
-def test_offline_interpreter_accepts_identical_resolved_candidates(
+def test_offline_interpreter_rejects_distinct_launchers_with_same_target(
     tmp_path: Path,
 ):
     interpreter = tmp_path / "offline-python"
@@ -463,7 +543,8 @@ def test_offline_interpreter_accepts_identical_resolved_candidates(
         capture_output=True,
         text=True,
     )
-    assert completed.returncode == 0, completed.stderr
+    assert completed.returncode != 0
+    assert "conflict" in completed.stderr
 
 
 def test_offline_interpreter_may_be_valid_absolute_symlink(tmp_path: Path):

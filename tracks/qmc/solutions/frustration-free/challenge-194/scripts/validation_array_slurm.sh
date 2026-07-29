@@ -30,9 +30,14 @@ fi
 resolve_python_candidate() {
     local label="$1"
     local candidate="$2"
+    local canonical=""
     local resolved=""
     if [[ "${candidate}" != /* ]]; then
         echo "${label} must be an absolute path" >&2
+        return 66
+    fi
+    if ! canonical="$(realpath -s -- "${candidate}" 2>/dev/null)"; then
+        echo "${label} is not a valid absolute path" >&2
         return 66
     fi
     if ! resolved="$(realpath -e -- "${candidate}" 2>/dev/null)"; then
@@ -43,7 +48,7 @@ resolve_python_candidate() {
         echo "${label} must resolve to a regular executable" >&2
         return 66
     fi
-    printf '%s\n' "${resolved}"
+    printf '%s\n' "${canonical}"
 }
 
 CHALLENGE_PYTHON=""
