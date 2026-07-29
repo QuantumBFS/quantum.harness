@@ -174,7 +174,7 @@ def _solver_result(cell, shift=0.0):
         for point in tau
     ]
     return {
-        "schema_version": 1,
+        "schema_version": 3,
         "input_sha256": "a" * 64,
         "input_payload_sha256": "b" * 64,
         "solver": {
@@ -205,6 +205,10 @@ def _solver_result(cell, shift=0.0):
             },
             "krylov_expansion_dim": 0,
             "expansion_policy": "tdvp_only",
+            "bath_representation": cell["solver_settings"][
+                "bath_representation"
+            ],
+            "chain_mapping_sha256": cell["chain_mapping_sha256"],
             "thermal_max_link_dimension": 16,
             "maximum_link_dimensions_by_bond": [4, 16, 8],
             "thermal": {
@@ -254,7 +258,14 @@ def _solver_result(cell, shift=0.0):
             "model_definition_sha256": cell["provenance"]["source_sha256"][
                 "model.json"
             ],
+            "chain_mapping_source_sha256": cell["provenance"]["source_sha256"][
+                "chain_mapping.py"
+            ],
             "bath_artifact_file_sha256": bath_file_sha256,
+            "bath_representation": cell["solver_settings"][
+                "bath_representation"
+            ],
+            "chain_mapping_sha256": cell["chain_mapping_sha256"],
             "krylov_expansion_dim": 0,
             "expansion_policy": "tdvp_only",
         },
@@ -342,6 +353,261 @@ def test_pilot_plan_is_staged_and_not_a_production_claim():
     assert plan["cells"][0]["solver_settings"]["krylov_expansion_dim"] == 0
 
 
+def test_plan_defaults_to_direct_star_and_chain_is_explicit():
+    direct = _plan(betas=[0.2], bath_sizes=[2], stage="pilot")
+    chain_plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        stage="pilot",
+        bath_representation="chain",
+    )
+
+    assert direct["solver_capability"] == {
+        "bath_representations": ["direct_star", "finite_chain"],
+        "default_bath_representation": "direct_star",
+        "finite_chain_mapping_validated": True,
+        "finite_chain_max_validated_n_bath": 6,
+        "qn_purification_validated": False,
+        "n_bath_48_execution_validated": False,
+        "capability_evidence_sha256": None,
+    }
+    assert direct["cells"][0]["solver_settings"]["bath_representation"] == (
+        "direct_star"
+    )
+    assert direct["cells"][0]["chain_mapping_artifact"] is None
+    assert direct["cells"][0]["chain_mapping_sha256"] is None
+    chain_cell = chain_plan["cells"][0]
+    assert chain_cell["solver_settings"]["bath_representation"] == "chain"
+    assert chain_cell["chain_mapping_artifact"]["payload"][
+        "source_bath_sha256"
+    ] == chain_cell["bath_artifact_sha256"]
+    assert (
+        chain_cell["chain_mapping_sha256"]
+        == chain_cell["chain_mapping_artifact"]["sha256"]
+    )
+    assert direct["cells"][0]["input_sha256"] != chain_cell["input_sha256"]
+    direct_request = json.loads(
+        convergence._runner_request_for_cell(direct["cells"][0])["payload_json"]
+    )
+    chain_request = json.loads(
+        convergence._runner_request_for_cell(chain_cell)["payload_json"]
+    )
+    assert direct_request["schema_version"] == 3
+    assert direct_request["bath_geometry"] == {
+        "representation": "direct_star",
+        "chain_mapping_artifact_json": None,
+        "chain_mapping_artifact_file_sha256": None,
+    }
+    mapping_bytes = (
+        convergence._canonical_json(chain_cell["chain_mapping_artifact"]) + b"\n"
+    )
+    assert chain_request["bath_geometry"] == {
+        "representation": "chain",
+        "chain_mapping_artifact_json": mapping_bytes.decode("utf-8"),
+        "chain_mapping_artifact_file_sha256": convergence._sha256(mapping_bytes),
+    }
+
+
+def test_chain_mapping_and_capability_schemas_are_recursively_closed():
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    malformed_capability = copy.deepcopy(plan)
+    malformed_capability["solver_capability"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            malformed_capability, "convergencePlan"
+        )
+
+    malformed_mapping = copy.deepcopy(plan)
+    malformed_mapping["cells"][0]["chain_mapping_artifact"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(malformed_mapping, "convergencePlan")
+
+
+def test_chain_pilot_publishes_mapping_and_exact_expected_files(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda cell, _stage: _solver_result(cell),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert {path.name for path in result["path"].iterdir()} == {
+        "bath.json",
+        "chain-mapping.json",
+        "mps-input.json",
+        "mps-result.json",
+        "cell.json",
+    }
+    mapping_bytes = (result["path"] / "chain-mapping.json").read_bytes()
+    assert mapping_bytes == convergence._canonical_json(
+        plan["cells"][0]["chain_mapping_artifact"]
+    ) + b"\n"
+    convergence.validate_cell_artifact(
+        result["cell"],
+        expected_cell=plan["cells"][0],
+        artifact_directory=result["path"],
+    )
+
+
+def test_chain_cell_restart_is_geometry_bound_and_mapping_is_immutable(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    cell = plan["cells"][0]
+    checkpoint_root = tmp_path / "checkpoints" / cell["cell_id"]
+    _write_python_validated_checkpoint(checkpoint_root, cell)
+    calls = []
+
+    first = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+    second = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+
+    assert first["action"] == "completed"
+    assert second["action"] == "skipped"
+    assert calls == [cell["cell_id"]]
+    _assert_retired_checkpoint(checkpoint_root, first["cell"])
+
+    (first["path"] / "chain-mapping.json").write_bytes(b"tampered\n")
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == [cell["cell_id"]]
+
+
+def test_chain_execution_above_validated_size_is_refused_before_executor(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[7],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    calls = []
+
+    with pytest.raises(ValueError, match="solver capability"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == []
+
+
+def test_chain_executor_cannot_publish_mapping_other_than_planned(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+
+    def executor(cell, staging):
+        (staging / "chain-mapping.json").write_bytes(b"{}\n")
+        return _solver_result(cell)
+
+    with pytest.raises(ValueError, match="mapping"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=executor,
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert not (tmp_path / "cells" / plan["cells"][0]["cell_id"]).exists()
+
+
+def test_rehashed_published_mapping_still_cannot_replace_planned_mapping(tmp_path):
+    plan = _plan(
+        betas=[0.2],
+        bath_sizes=[2],
+        time_steps=[0.1],
+        maxdims=[32],
+        stage="pilot",
+        bath_representation="chain",
+    )
+    calls = []
+    result = convergence.run_cell(
+        plan,
+        0,
+        tmp_path,
+        executor=lambda item, _stage: calls.append(item["cell_id"])
+        or _solver_result(item),
+        julia_project=SOLUTION_DIR / "julia",
+    )
+    cell_path = result["path"] / "cell.json"
+    mapping_path = result["path"] / "chain-mapping.json"
+    mapping_path.write_bytes(b"{}\n")
+    completed = json.loads(cell_path.read_text(encoding="utf-8"))
+    completed["artifact_file_sha256"]["chain-mapping.json"] = (
+        convergence._sha256_file(mapping_path)
+    )
+    completed["artifact_sha256"] = convergence._sha256(
+        convergence._canonical_json(
+            {
+                key: value
+                for key, value in completed.items()
+                if key != "artifact_sha256"
+            }
+        )
+    )
+    cell_path.write_bytes(convergence._canonical_json(completed) + b"\n")
+
+    with pytest.raises(ValueError, match="stale|invalid|immutable"):
+        convergence.run_cell(
+            plan,
+            0,
+            tmp_path,
+            executor=lambda item, _stage: calls.append(item["cell_id"])
+            or _solver_result(item),
+            julia_project=SOLUTION_DIR / "julia",
+        )
+    assert calls == [plan["cells"][0]["cell_id"]]
+
+
 @pytest.mark.parametrize(
     "kwargs,match",
     [
@@ -405,6 +671,7 @@ def test_plan_binds_selected_julia_project_and_all_sources(tmp_path):
     assert set(plan["execution_environment"]["source_sha256"]) >= {
         "acceptance.py",
         "bath.py",
+        "chain_mapping.py",
         "convergence.py",
         "convergence.schema.json",
         "model.json",
@@ -962,6 +1229,7 @@ def test_cell_artifact_records_required_diagnostics_and_rejects_mismatch():
     assert set(artifact["provenance"]["source_sha256"]) == {
         "acceptance.py",
         "bath.py",
+        "chain_mapping.py",
         "convergence.py",
         "convergence.schema.json",
         "model.json",
@@ -1458,13 +1726,23 @@ def _write_python_validated_checkpoint(root, cell):
         ),
         "input_payload_sha256": request["sha256"],
         "bath_sha256": cell["bath_artifact"]["sha256"],
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
         "solver_settings": {
             "beta": cell["parameters"]["beta"],
             "tau": [
                 cell["parameters"]["beta"] * fraction
                 for fraction in cell["tau_fractions"]
             ],
-            **cell["solver_settings"],
+            **{
+                key: cell["solver_settings"][key]
+                for key in (
+                    "time_step",
+                    "cutoff",
+                    "maxdim",
+                    "krylov_expansion_dim",
+                )
+            },
         },
         "source_hashes": payload["checkpoint"]["source_hashes"],
         "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],
@@ -1922,7 +2200,10 @@ def test_resources_are_hashed_bound_and_required_for_production(tmp_path):
 def test_n48_cell_is_refused_without_validated_solver_capability(
     tmp_path, execution_target
 ):
-    plan = _plan()
+    plan = _plan(bath_representation="chain")
+    assert plan["solver_capability"]["finite_chain_mapping_validated"] is True
+    assert plan["solver_capability"]["qn_purification_validated"] is False
+    assert plan["solver_capability"]["n_bath_48_execution_validated"] is False
     resources = convergence.estimate_plan_resources(plan)
     index = next(
         index
@@ -2353,13 +2634,23 @@ def _calibration_checkpoint_identity(cell):
         "request_sha256": request_sha256,
         "input_payload_sha256": request["sha256"],
         "bath_sha256": cell["bath_artifact"]["sha256"],
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
         "solver_settings": {
             "beta": cell["parameters"]["beta"],
             "tau": [
                 cell["parameters"]["beta"] * fraction
                 for fraction in cell["tau_fractions"]
             ],
-            **cell["solver_settings"],
+            **{
+                key: cell["solver_settings"][key]
+                for key in (
+                    "time_step",
+                    "cutoff",
+                    "maxdim",
+                    "krylov_expansion_dim",
+                )
+            },
         },
         "source_hashes": payload["checkpoint"]["source_hashes"],
         "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],

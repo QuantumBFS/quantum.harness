@@ -28,7 +28,7 @@ from typing import Any, Callable, Sequence
 from jsonschema import Draft202012Validator
 
 
-MODULE_VERSION = "6.0.0"
+MODULE_VERSION = "7.0.0"
 SOFTWARE_VERSION = "challenge81-frustration-free-2"
 PLAN_SCHEMA_VERSION = 1
 CELL_SCHEMA_VERSION = 1
@@ -48,7 +48,7 @@ JULIA_PROCESS_STARTUP_SECONDS = 35.0
 JULIA_PROCESS_BASE_RSS_BYTES = 1024**3
 MEMORY_SAFETY_FACTOR = 1.5
 WALL_SAFETY_FACTOR = 2.0
-N48_VALIDATED_SOLVER_CAPABILITIES: frozenset[tuple[str, str]] = frozenset()
+N48_CAPABILITY_ALLOWLIST: frozenset[str] = frozenset()
 DEFAULT_TOLERANCES = {
     "bath_size": {"name": "bath_observable_absolute_max", "absolute": 5.0e-4},
     "time_step": {"name": "timestep_observable_absolute_max", "absolute": 1.0e-4},
@@ -86,6 +86,9 @@ def _load_local_module(name: str, filename: str):
 
 
 bath = _load_local_module("challenge_81_convergence_bath", "bath.py")
+chain_mapping = _load_local_module(
+    "challenge_81_convergence_chain_mapping", "chain_mapping.py"
+)
 acceptance = _load_local_module(
     "challenge_81_convergence_acceptance", "acceptance.py"
 )
@@ -204,6 +207,7 @@ def _source_hashes(julia_project: Path = JULIA_DIR) -> dict[str, str]:
     paths = {
         "acceptance.py": SOLUTION_DIR / "acceptance.py",
         "bath.py": SOLUTION_DIR / "bath.py",
+        "chain_mapping.py": SOLUTION_DIR / "chain_mapping.py",
         "convergence.py": Path(__file__),
         "convergence.schema.json": SCHEMA_PATH,
         "model.json": SOLUTION_DIR / "model.json",
@@ -301,6 +305,9 @@ def _cell_input_payload(
     julia_project: str,
     diagnostic_limits: dict[str, dict[str, Any]],
     solver_capability: dict[str, Any],
+    bath_representation: str,
+    chain_mapping_artifact: dict[str, Any] | None,
+    chain_mapping_sha256: str | None,
 ) -> dict[str, Any]:
     return {
         "model": {**MODEL, "beta": beta},
@@ -311,7 +318,11 @@ def _cell_input_payload(
             "cutoff": cutoff,
             "maxdim": maxdim,
             "krylov_expansion_dim": 0,
+            "bath_representation": bath_representation,
+            "chain_mapping_sha256": chain_mapping_sha256,
         },
+        "chain_mapping_artifact": chain_mapping_artifact,
+        "chain_mapping_sha256": chain_mapping_sha256,
         "source_sha256": source_hashes,
         "julia_environment_sha256": project_hashes,
         "julia_project": julia_project,
@@ -349,10 +360,13 @@ def make_plan(
     stage: str = "production",
     tolerances: dict[str, dict[str, Any]] | None = None,
     julia_project: str | os.PathLike[str] = JULIA_DIR,
+    bath_representation: str = "direct_star",
 ) -> dict[str, Any]:
     """Create a deterministic staged plan, or an explicit pilot/test Cartesian plan."""
     if stage not in {"pilot", "production"}:
         raise ValueError("stage must be 'pilot' or 'production'")
+    if bath_representation not in {"direct_star", "chain"}:
+        raise ValueError("bath_representation must be direct_star or chain")
     selected_project = Path(julia_project).resolve(strict=True)
     if not (selected_project / "Project.toml").is_file() or not (
         selected_project / "Manifest.toml"
@@ -374,13 +388,13 @@ def make_plan(
     project_hashes = _project_hashes(selected_project)
     tolerance_values = copy.deepcopy(tolerances or DEFAULT_TOLERANCES)
     solver_capability = {
-        "bath_representation": "direct_star",
+        "bath_representations": ["direct_star", "finite_chain"],
+        "default_bath_representation": "direct_star",
+        "finite_chain_mapping_validated": True,
+        "finite_chain_max_validated_n_bath": 6,
+        "qn_purification_validated": False,
         "n_bath_48_execution_validated": False,
         "capability_evidence_sha256": None,
-        "policy": (
-            "N_b=48 execution is forbidden until chain or approved compressed-MPO "
-            "capability evidence is implemented and schema-validated"
-        ),
     }
     cells = []
     bath_artifacts = {
@@ -391,6 +405,14 @@ def make_plan(
             frequency_grid=[-MODEL["D"], 0.0, MODEL["D"]],
         )
         for n_bath in grid["bath_sizes"]
+    }
+    chain_mapping_artifacts = {
+        n_bath: (
+            chain_mapping.derive_chain_mapping(bath_artifact)
+            if bath_representation == "chain"
+            else None
+        )
+        for n_bath, bath_artifact in bath_artifacts.items()
     }
     if not explicit_grid:
         if len(grid["cutoffs"]) != 1:
@@ -408,6 +430,10 @@ def make_plan(
         ]
         grid_kind = "explicit_cartesian"
     for beta, n_bath, time_step, cutoff, maxdim in specs:
+        mapping_artifact = chain_mapping_artifacts[n_bath]
+        mapping_sha256 = (
+            mapping_artifact["sha256"] if mapping_artifact is not None else None
+        )
         input_payload = _cell_input_payload(
             beta=beta,
             n_bath=n_bath,
@@ -424,6 +450,9 @@ def make_plan(
                 "truncation": copy.deepcopy(tolerance_values["truncation"]),
             },
             solver_capability=solver_capability,
+            bath_representation=bath_representation,
+            chain_mapping_artifact=mapping_artifact,
+            chain_mapping_sha256=mapping_sha256,
         )
         input_sha256 = _sha256(_canonical_json(input_payload))
         nearest_energy = _nearest_bath_energy(bath_artifacts[n_bath])
@@ -438,6 +467,8 @@ def make_plan(
                 "solver_capability": copy.deepcopy(solver_capability),
                 "bath_artifact": copy.deepcopy(bath_artifacts[n_bath]),
                 "bath_artifact_sha256": bath_artifacts[n_bath]["sha256"],
+                "chain_mapping_artifact": copy.deepcopy(mapping_artifact),
+                "chain_mapping_sha256": mapping_sha256,
                 "bath_resolution": {
                     "nearest_absolute_energy": nearest_energy,
                     "temperature": 1.0 / beta,
@@ -579,6 +610,24 @@ def validate_plan(plan: Any) -> None:
         bath.verify_bath_artifact(cell["bath_artifact"])
         if cell["bath_artifact"]["sha256"] != cell["bath_artifact_sha256"]:
             raise ValueError("bath artifact SHA256 linkage mismatch")
+        representation = settings["bath_representation"]
+        mapping_artifact = cell["chain_mapping_artifact"]
+        mapping_sha256 = cell["chain_mapping_sha256"]
+        if representation == "direct_star":
+            if mapping_artifact is not None or mapping_sha256 is not None:
+                raise ValueError("direct_star cell cannot bind a chain mapping")
+        elif representation == "chain":
+            if not isinstance(mapping_artifact, dict):
+                raise ValueError("chain cell requires a chain mapping artifact")
+            chain_mapping.verify_chain_mapping_artifact(
+                mapping_artifact, cell["bath_artifact"]
+            )
+            if mapping_sha256 != mapping_artifact["sha256"]:
+                raise ValueError("chain mapping SHA256 linkage mismatch")
+        else:
+            raise ValueError("unsupported bath representation")
+        if settings["chain_mapping_sha256"] != mapping_sha256:
+            raise ValueError("solver mapping SHA256 linkage mismatch")
         expected_payload = _cell_input_payload(
             beta=cell["parameters"]["beta"],
             n_bath=cell["parameters"]["n_bath"],
@@ -592,6 +641,9 @@ def validate_plan(plan: Any) -> None:
             julia_project=cell["provenance"]["julia_project"],
             diagnostic_limits=cell["diagnostic_limits"],
             solver_capability=cell["solver_capability"],
+            bath_representation=representation,
+            chain_mapping_artifact=mapping_artifact,
+            chain_mapping_sha256=mapping_sha256,
         )
         if _sha256(_canonical_json(expected_payload)) != cell["input_sha256"]:
             raise ValueError("cell input SHA256 mismatch")
@@ -808,11 +860,14 @@ def validate_solver_provenance(
         "purification_source_sha256": source["finite_bath_purification.jl"],
         "observables_source_sha256": source["finite_bath_observables.jl"],
         "model_definition_sha256": source["model.json"],
+        "chain_mapping_source_sha256": source["chain_mapping.py"],
         "project_toml_sha256": environment["Project.toml"],
         "manifest_toml_sha256": environment["Manifest.toml"],
         "bath_artifact_file_sha256": _sha256(
             _canonical_json(cell["bath_artifact"]) + b"\n"
         ),
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
         "krylov_expansion_dim": 0,
         "expansion_policy": "tdvp_only",
     }
@@ -894,11 +949,18 @@ def make_cell_artifact(
                 _canonical_json(solver_output) + b"\n"
             ),
         }
-    if set(artifact_file_sha256) != {
+        if cell["chain_mapping_artifact"] is not None:
+            artifact_file_sha256["chain-mapping.json"] = _sha256(
+                _canonical_json(cell["chain_mapping_artifact"]) + b"\n"
+            )
+    expected_artifact_files = {
         "bath.json",
         "mps-input.json",
         "mps-result.json",
-    }:
+    }
+    if cell["chain_mapping_artifact"] is not None:
+        expected_artifact_files.add("chain-mapping.json")
+    if set(artifact_file_sha256) != expected_artifact_files:
         raise ValueError("artifact file SHA256 mapping is incomplete")
     artifact_file_sha256 = {
         name: _digest(value, f"{name} SHA256")
@@ -947,6 +1009,7 @@ def make_cell_artifact(
             "actual_mpo_link_dimensions": mpo_dimensions,
         },
         "bath_artifact_sha256": cell["bath_artifact_sha256"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
         "artifact_file_sha256": copy.deepcopy(artifact_file_sha256),
         "provenance": {
             **copy.deepcopy(cell["provenance"]),
@@ -1007,11 +1070,14 @@ def validate_cell_artifact(
     if digest != _sha256(_canonical_json(payload)):
         raise ValueError("cell artifact SHA256 mismatch")
     file_hashes = artifact.get("artifact_file_sha256")
-    if not isinstance(file_hashes, dict) or set(file_hashes) != {
+    expected_files = {
         "bath.json",
         "mps-input.json",
         "mps-result.json",
-    }:
+    }
+    if artifact.get("chain_mapping_sha256") is not None:
+        expected_files.add("chain-mapping.json")
+    if not isinstance(file_hashes, dict) or set(file_hashes) != expected_files:
         raise ValueError("cell artifact file SHA256 mapping is incomplete")
     for filename, file_digest in file_hashes.items():
         _digest(file_digest, f"{filename} SHA256")
@@ -1032,6 +1098,18 @@ def validate_cell_artifact(
                 raise ValueError(f"cell artifact file SHA256 mismatch: {filename}")
     acceptance._validate_finite_tree(artifact, "cell artifact")
     if expected_cell is not None:
+        expected_mapping = expected_cell["chain_mapping_artifact"]
+        if expected_mapping is not None:
+            expected_mapping_file_sha256 = _sha256(
+                _canonical_json(expected_mapping) + b"\n"
+            )
+            if (
+                file_hashes.get("chain-mapping.json")
+                != expected_mapping_file_sha256
+            ):
+                raise ValueError(
+                    "cell chain mapping file does not match the planned artifact"
+                )
         validate_solver_provenance(
             artifact.get("provenance", {}).get("solver"),
             cell=expected_cell,
@@ -1044,6 +1122,10 @@ def validate_cell_artifact(
             "bath_artifact_sha256"
         ]:
             raise ValueError("cell bath SHA256 mismatch")
+        if artifact.get("chain_mapping_sha256") != expected_cell[
+            "chain_mapping_sha256"
+        ]:
+            raise ValueError("cell chain mapping SHA256 mismatch")
         if artifact.get("solver_settings") != expected_cell["solver_settings"]:
             raise ValueError("cell solver settings mismatch")
         if artifact.get("diagnostic_limits") != expected_cell["diagnostic_limits"]:
@@ -1264,8 +1346,17 @@ def _runner_request_for_cell(cell: dict[str, Any]) -> dict[str, Any]:
             "beta": beta,
         },
         "tau": [beta * value for value in cell["tau_fractions"]],
-        "solver_settings": copy.deepcopy(cell["solver_settings"]),
+        "solver_settings": {
+            key: copy.deepcopy(value)
+            for key, value in cell["solver_settings"].items()
+            if key != "chain_mapping_sha256"
+        },
     }
+    mapping_artifact = cell["chain_mapping_artifact"]
+    if mapping_artifact is not None:
+        fixture["chain_mapping_artifact_bytes"] = (
+            _canonical_json(mapping_artifact) + b"\n"
+        )
     bath_json = (
         _canonical_json(cell["bath_artifact"]) + b"\n"
     ).decode("utf-8")
@@ -1347,6 +1438,8 @@ def _validate_checkpoint_pointer(
         "request_sha256": _sha256(_canonical_json(request) + b"\n"),
         "input_payload_sha256": request["sha256"],
         "bath_sha256": cell["bath_artifact"]["sha256"],
+        "bath_representation": cell["solver_settings"]["bath_representation"],
+        "chain_mapping_sha256": cell["chain_mapping_sha256"],
         "solver_settings": {
             "beta": cell["parameters"]["beta"],
             "tau": [
@@ -1748,9 +1841,12 @@ def _default_executor(
     julia = acceptance.resolve_julia(julia_executable)
     project = Path(julia_project).resolve(strict=True)
     bath_path = staging / "bath.json"
+    mapping_path = staging / "chain-mapping.json"
     input_path = staging / "mps-input.json"
     output_path = staging / "mps-result.json"
     _write_canonical(bath_path, cell["bath_artifact"])
+    if cell["chain_mapping_artifact"] is not None:
+        _write_canonical(mapping_path, cell["chain_mapping_artifact"])
     request = _runner_request_for_cell(cell)
     acceptance.atomic_write_json(input_path, request)
     payload = acceptance.strict_json_loads(
@@ -1759,6 +1855,8 @@ def _default_executor(
     expected_provenance = acceptance.expected_runner_provenance(
         julia_project=project,
         bath_file_sha256=payload["bath_artifact_file_sha256"],
+        bath_representation=cell["solver_settings"]["bath_representation"],
+        chain_mapping_sha256=cell["chain_mapping_sha256"],
         krylov_expansion_dim=0,
     )
     command = [
@@ -1799,13 +1897,12 @@ def _default_executor(
 
 def _n48_solver_capability_is_valid(plan: dict[str, Any]) -> bool:
     capability = plan["solver_capability"]
-    capability_key = (
-        capability["bath_representation"],
-        capability["capability_evidence_sha256"] or "",
-    )
     return (
-        capability["n_bath_48_execution_validated"] is True
-        and capability_key in N48_VALIDATED_SOLVER_CAPABILITIES
+        capability["default_bath_representation"] == "direct_star"
+        and capability["finite_chain_mapping_validated"] is True
+        and capability["qn_purification_validated"] is True
+        and capability["n_bath_48_execution_validated"] is True
+        and capability["capability_evidence_sha256"] in N48_CAPABILITY_ALLOWLIST
     )
 
 
@@ -1839,6 +1936,14 @@ def run_cell(
                 "N_b=48 solver capability is not implemented and validated; "
                 "execution is forbidden for every target"
             )
+    if (
+        cell["solver_settings"]["bath_representation"] == "chain"
+        and cell["parameters"]["n_bath"]
+        > plan["solver_capability"]["finite_chain_max_validated_n_bath"]
+    ):
+        raise ValueError(
+            "finite-chain solver capability is not validated for this bath size"
+        )
     if plan["stage"] == "production":
         if resources is None:
             raise ValueError("production execution requires resources.json")
@@ -1970,19 +2075,40 @@ def run_cell(
                     "execution path"
                 )
             bath_path = staging / "bath.json"
+            mapping_path = staging / "chain-mapping.json"
             input_path = staging / "mps-input.json"
             result_path = staging / "mps-result.json"
             if not bath_path.exists():
                 _write_canonical(bath_path, cell["bath_artifact"])
+            if cell["chain_mapping_artifact"] is not None:
+                if not mapping_path.exists():
+                    _write_canonical(
+                        mapping_path, cell["chain_mapping_artifact"]
+                    )
+                expected_mapping_bytes = (
+                    _canonical_json(cell["chain_mapping_artifact"]) + b"\n"
+                )
+                if (
+                    not mapping_path.is_file()
+                    or mapping_path.is_symlink()
+                    or mapping_path.read_bytes() != expected_mapping_bytes
+                ):
+                    raise ValueError(
+                        "staged chain mapping does not match the planned artifact"
+                    )
+            elif mapping_path.exists() or mapping_path.is_symlink():
+                raise ValueError("direct_star execution produced a chain mapping")
             if not input_path.exists():
                 _write_canonical(
                     input_path, {"input_sha256": cell["input_sha256"]}
                 )
             if not result_path.exists():
                 _write_canonical(result_path, solver_output)
+            artifact_paths = [bath_path, input_path, result_path]
+            if cell["chain_mapping_artifact"] is not None:
+                artifact_paths.append(mapping_path)
             file_hashes = {
-                path.name: _sha256_file(path)
-                for path in (bath_path, input_path, result_path)
+                path.name: _sha256_file(path) for path in artifact_paths
             }
             wall = time.monotonic() - started
             artifact = make_cell_artifact(
@@ -3587,6 +3713,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     plan_parser.add_argument("--cutoffs", default="1e-12")
     plan_parser.add_argument("--maxdims")
     plan_parser.add_argument("--tau-fractions", default="0,0.25,0.5,0.75,1")
+    plan_parser.add_argument(
+        "--bath-representation",
+        choices=("direct_star", "chain"),
+        default="direct_star",
+    )
     plan_parser.add_argument("--julia-project", type=Path, default=JULIA_DIR)
 
     estimate_parser = subparsers.add_parser("estimate")
@@ -3639,6 +3770,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             cutoffs=_parse_csv(args.cutoffs, float),
             maxdims=_parse_csv(args.maxdims, int) if args.maxdims else None,
             tau_fractions=_parse_csv(args.tau_fractions, float),
+            bath_representation=args.bath_representation,
             stage=args.stage,
             julia_project=args.julia_project,
         )
