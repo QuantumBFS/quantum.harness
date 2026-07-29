@@ -69,10 +69,10 @@ fully reoptimize with the current code.
 
 `chi=64` is restricted to this crossing stage. In Phase 7, the targeted
 `chi=64` to `chi=128` checks changed `R_xi` by less than `4e-6` and preserved
-every tested crossing bracket and endpoint sign. This makes `chi=64`
-appropriate for resolving the much coarser fixed Gamma bracket without
-promoting it to the final gap accuracy. All common-field gap states remain
-`chi=128`.
+every tested crossing bracket and endpoint sign. Those changes are below
+the relevant crossing-resolution uncertainty, so `chi=64` is sufficient for
+the `L=128` `R_xi` crossing endpoints without promoting it to the final gap
+accuracy. All common-field gap states remain `chi=128`.
 
 At each endpoint define
 
@@ -127,6 +127,8 @@ Both two-parameter forms pass exactly through two points. Consequently:
 
 - neither has residual degrees of freedom;
 - neither supports statistical inference or model selection;
+- `1/L` and `1/log(L)` are sensitivity coordinates only and do not assert
+  that the leading correction exponent is known;
 - their difference is a correction-form sensitivity, not a statistical
   confidence interval;
 - neither form may be chosen based on agreement with the published
@@ -207,6 +209,10 @@ As for the critical-field drift, these are exact two-point evaluations with
 no residual degrees of freedom. The report gives `z_power`, `z_log`, their
 absolute spread, the two raw `z_eff` values, and all underlying gaps. It
 makes no correction-form selection or statistical-inference claim.
+It also compares the two sensitivity values with Shiratani--Todo's published
+`sigma=7/4` power- and logarithmic-correction extrapolations, using a cited
+source value. Because Phase 8 reaches only `L=128`, this is a qualitative
+finite-size comparison rather than a precision reproduction.
 
 ## Equal-time structure-factor diagnostics
 
@@ -217,7 +223,8 @@ S_eq(0,L) = sum_r C_eq(r).
 ```
 
 Phase 8 reports these raw equal-time diagnostics by size. They are not used
-to estimate or label a susceptibility exponent. In particular, no Phase 8
+to estimate or label a susceptibility exponent; `S_eq(0)` is only an
+auxiliary diagnostic. In particular, no Phase 8
 quantity is called `gamma/nu`; the required imaginary-time-integrated
 susceptibility remains outside the DMRG scope.
 

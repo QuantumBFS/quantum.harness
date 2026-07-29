@@ -28,18 +28,24 @@ only successful summaries.
 - MPO: `K=24`, `alpha=0.5`, `r_fit=2048`, exact-zero pruning, no
   approximate compression.
 - Crossing: `chi=64`, even sector, only `Gamma=1.55,1.60`.
+- The Phase 7 `chi=64` to `chi=128` `R_xi` shifts were below the relevant
+  crossing-resolution uncertainty, which justifies `chi=64` only for these
+  `L=128` crossing endpoints.
 - Gaps: direct even and odd states at `chi=128` and the common
   `Gamma_c_power`.
 - A crossing requires a strict sign change; otherwise stop unresolved.
 - No Gamma extension, adaptive search, `K=32`, or automatic `chi=256`.
 - `Gamma_c_power`, `Gamma_c_log`, `z_power`, and `z_log` are exact
   two-point sensitivity extrapolations, not regression analyses.
+- `1/L` and `1/log(L)` are sensitivity coordinates only; neither assumes a
+  known leading correction exponent.
 - `Gamma_c` power/log sensitivity is not fully propagated into gap
   uncertainties.
 - Susceptibility `gamma/nu` is outside scope. Store equal-time correlations
-  and `S_eq(0)` only as diagnostics.
+  and `S_eq(0)` only as auxiliary diagnostics.
 - Do not create a `sigma=1.80` or `sigma=2.00` run specification during
-  this plan.
+  this plan; the completed `sigma=1.75` result requires explicit review
+  first.
 
 ---
 
@@ -57,7 +63,7 @@ only successful summaries.
   - `two_point_sensitivity(values, base_lengths, form) -> dict`
   - `gap_scaling_summary(lengths, gaps) -> dict`
 
-- [ ] **Step 1: Write failing tests for the crossing gate**
+- [x] **Step 1: Write failing tests for the crossing gate**
 
 ```python
 import pytest
@@ -86,7 +92,7 @@ def test_strict_crossing_rejects_unbracketed_endpoints():
     assert "Gamma_x" not in result
 ```
 
-- [ ] **Step 2: Run the crossing tests and verify RED**
+- [x] **Step 2: Run the crossing tests and verify RED**
 
 Run:
 
@@ -97,7 +103,7 @@ PYTHONPATH=src:. conda run -n mps \
 
 Expected: collection fails because `lrtfim.phase8_scaling` does not exist.
 
-- [ ] **Step 3: Write failing tests for the exact two-point evaluations**
+- [x] **Step 3: Write failing tests for the exact two-point evaluations**
 
 ```python
 from lrtfim.phase8_scaling import (
@@ -129,7 +135,7 @@ def test_gap_summary_rejects_nonpositive_or_nondoubling_inputs():
         gap_scaling_summary([32, 60, 128], [0.20, 0.12, 0.073])
 ```
 
-- [ ] **Step 4: Implement the minimal pure module**
+- [x] **Step 4: Implement the minimal pure module**
 
 ```python
 """Strict Phase 8 crossing and two-point sensitivity evaluations."""
@@ -215,7 +221,7 @@ def gap_scaling_summary(lengths, gaps) -> dict:
     }
 ```
 
-- [ ] **Step 5: Run the focused tests and verify GREEN**
+- [x] **Step 5: Run the focused tests and verify GREEN**
 
 Run:
 
@@ -226,7 +232,7 @@ PYTHONPATH=src:. conda run -n mps \
 
 Expected: all Phase 8 scaling tests pass.
 
-- [ ] **Step 6: Commit Task 1**
+- [x] **Step 6: Commit Task 1**
 
 ```bash
 git add \
@@ -519,7 +525,11 @@ The report must say:
 - the power/log `Gamma_c` spread is not fully propagated into gap
   uncertainty;
 - `gamma/nu` susceptibility is not measured;
-- equal-time `C_eq(r)` and `S_eq(0)` are diagnostics only.
+- equal-time `C_eq(r)` and `S_eq(0)` are auxiliary diagnostics only;
+- the Phase 8 power/log sensitivity values are compared with the
+  source-cited Shiratani--Todo `sigma=7/4` power/log extrapolations, while
+  stating that the smaller `L<=128` range prevents a precision
+  reproduction.
 
 - [ ] **Step 5: Run the report test and verify GREEN**
 
