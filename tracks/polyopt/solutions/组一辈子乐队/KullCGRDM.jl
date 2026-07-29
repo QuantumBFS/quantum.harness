@@ -429,6 +429,7 @@ function _jump_sparse_congruence(K::AbstractMatrix, X, output_charges::AbstractV
     Y = Matrix{Any}(zeros(ComplexF64, rows, rows))
     for j in 1:rows, i in 1:rows
         output_charges[i] == output_charges[j] || continue
+        (isempty(support[i]) || isempty(support[j])) && continue
         Y[i,j] = sum(value_i * conj(value_j) * X[column_i,column_j]
             for (column_i,value_i) in support[i], (column_j,value_j) in support[j])
     end
@@ -685,8 +686,8 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     parities = isnothing(frozen) ? (1:1) : _start_parities(frozen)
     !isnothing(frozen) && frozen.physical_dimension != d &&
         throw(DimensionMismatch("h and frozen map physical dimensions differ"))
-    !isnothing(D) && !(1 <= D <= 4) &&
-        throw(ArgumentError("formal coarse-RDM SDP requires 1 ≤ D ≤ 4"))
+    !isnothing(D) && D < 1 &&
+        throw(ArgumentError("coarse-RDM bond dimension must be positive"))
     selected_k0 = isnothing(k0) ? (isnothing(D) ? 2 : author_default_k0(d, D)) : k0
     selected_k0 >= 2 || throw(ArgumentError("k0 must be at least 2 for a two-site objective"))
     depth >= selected_k0 || throw(ArgumentError("hierarchy depth n must satisfy n ≥ k0"))
