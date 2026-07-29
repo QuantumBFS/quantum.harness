@@ -21,6 +21,10 @@ from numbers import Integral
 import numpy as np
 
 
+MAX_PROJECTED_DENSITY_TWO_Q = 127
+"""Largest flux verified for the fixed-precision projected-density kernel."""
+
+
 def _require_integer(name: str, value: object) -> int:
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
@@ -33,6 +37,11 @@ def _validate_density_inputs(two_q: object, ell: object, m: object) -> tuple[int
     checked_m = _require_integer("m", m)
     if checked_two_q <= 0:
         raise ValueError("two_q must be positive")
+    if checked_two_q > MAX_PROJECTED_DENSITY_TWO_Q:
+        raise ValueError(
+            f"two_q must be <= {MAX_PROJECTED_DENSITY_TWO_Q} for verified "
+            "projected-density numerics"
+        )
     if not 0 <= checked_ell <= checked_two_q:
         raise ValueError("ell must satisfy 0 <= ell <= two_q")
     if abs(checked_m) > checked_ell:
@@ -157,13 +166,14 @@ def projected_density_tensor(*, two_q: int, ell: int, m: int) -> np.ndarray:
 
     The matrix acts only among the ``two_q+1`` electronic LLL orbitals.  It
     therefore cannot change flux or create a higher-Landau-level component.
-    This tensor-only interface is not constrained by the signed-``int64``
-    occupation backend's ``two_q <= 62`` limit.  Returned arrays are immutable
-    because they are shared cached tensors.
+    This tensor-only interface supports ``two_q`` through
+    :data:`MAX_PROJECTED_DENSITY_TWO_Q`; that verified numerical cap is
+    independent of the signed-``int64`` occupation backend's lower limit.
+    Returned arrays are immutable because they are shared cached tensors.
     """
 
     checked = _validate_density_inputs(two_q, ell, m)
     return _projected_density_tensor(*checked)
 
 
-__all__ = ["projected_density_tensor"]
+__all__ = ["MAX_PROJECTED_DENSITY_TWO_Q", "projected_density_tensor"]

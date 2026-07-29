@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import itertools
 import math
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,7 @@ import numpy as np
 import pytest
 
 from benchmark_v0.fock_ed import apply_annihilation, apply_creation
+from scalable_v1.routes.cf_operator_nqs import projected_density
 from scalable_v1.routes.cf_operator_nqs.projected_density import (
     projected_density_tensor,
 )
@@ -96,6 +98,56 @@ def _connected_matrix(operator: object, basis: tuple[int, ...]) -> np.ndarray:
     return matrix
 
 
+def _exact_racah_density_element(
+    *, two_q: int, ell: int, m: int, source: int
+) -> float:
+    """Independent exact-rational Racah reference for one tensor element."""
+
+    j = 0.5 * two_q
+    source_m = source - j
+    target_m = source_m + m
+
+    def factorial(value: float) -> int:
+        integer = round(value)
+        assert math.isclose(value, integer, rel_tol=0.0, abs_tol=1.0e-12)
+        return math.factorial(integer)
+
+    prefactor_squared = Fraction(
+        round(2.0 * j + 1.0)
+        * factorial(j + j - ell)
+        * factorial(ell)
+        * factorial(ell)
+        * factorial(j + target_m)
+        * factorial(j - target_m)
+        * factorial(j - source_m)
+        * factorial(j + source_m)
+        * factorial(ell - m)
+        * factorial(ell + m),
+        factorial(j + ell + j + 1.0),
+    )
+    k_min = max(0, round(ell - j - source_m), round(j + m - j))
+    k_max = min(round(ell), round(j - source_m), round(ell + m))
+    racah_sum = sum(
+        (
+            Fraction(
+                (-1) ** k,
+                factorial(float(k))
+                * factorial(ell - k)
+                * factorial(j - source_m - k)
+                * factorial(ell + m - k)
+                * factorial(source_m - ell + j + k)
+                * factorial(-m + k),
+            )
+            for k in range(k_min, k_max + 1)
+        ),
+        Fraction(0),
+    )
+    signed_square = prefactor_squared * racah_sum * racah_sum
+    coefficient = math.sqrt(float(signed_square))
+    coefficient = math.copysign(coefficient, racah_sum.numerator)
+    return math.sqrt(2 * ell + 1) * coefficient
+
+
 @pytest.mark.parametrize("ell", range(4))
 def test_projected_density_tensors_have_hermitian_condon_shortley_phases(
     ell: int,
@@ -160,6 +212,42 @@ def test_projected_density_is_stable_at_protocol_and_larger_flux(
             assert ladder_residual < 1.0e-12
 
 
+def test_projected_density_exports_and_enforces_verified_flux_cap() -> None:
+    assert projected_density.MAX_PROJECTED_DENSITY_TWO_Q == 127
+
+    with pytest.raises(ValueError, match=r"two_q.*127"):
+        projected_density_tensor(two_q=128, ell=2, m=0)
+
+
+def test_projected_density_cap_has_high_cancellation_reference_and_covariance() -> None:
+    two_q = 127
+    ell = 63
+    source = 63
+    tensor_zero = projected_density_tensor(two_q=two_q, ell=ell, m=0)
+    tensor_plus = projected_density_tensor(two_q=two_q, ell=ell, m=1)
+    tensor_minus = projected_density_tensor(two_q=two_q, ell=ell, m=-1)
+    expected_element = _exact_racah_density_element(
+        two_q=two_q, ell=ell, m=0, source=source
+    )
+
+    np.testing.assert_allclose(
+        tensor_zero[source, source], expected_element, rtol=5.0e-14, atol=1.0e-15
+    )
+    np.testing.assert_allclose(
+        tensor_plus.T.conj(), -tensor_minus, rtol=5.0e-14, atol=1.0e-14
+    )
+    l_plus = np.zeros((two_q + 1, two_q + 1), dtype=np.complex128)
+    for orbital in range(two_q):
+        l_plus[orbital + 1, orbital] = math.sqrt(
+            (two_q - orbital) * (orbital + 1)
+        )
+    expected_raised = math.sqrt(ell * (ell + 1)) * tensor_plus
+    ladder_residual = np.linalg.norm(
+        l_plus @ tensor_zero - tensor_zero @ l_plus - expected_raised
+    ) / np.linalg.norm(expected_raised)
+    assert ladder_residual < 1.0e-12
+
+
 def test_numpy_integral_inputs_are_accepted_consistently() -> None:
     tensor = projected_density_tensor(
         two_q=np.int64(33), ell=np.int32(4), m=np.int64(0)
@@ -180,15 +268,9 @@ def test_numpy_integral_inputs_are_accepted_consistently() -> None:
     assert weights.dtype == np.complex128
 
 
-@pytest.mark.parametrize("entrypoint", ("build", "connected"))
-def test_bitset_scalar_backend_rejects_two_q_above_signed_int64_limit(
-    entrypoint: str,
-) -> None:
+def test_bitset_scalar_backend_rejects_two_q_above_signed_int64_limit() -> None:
     with pytest.raises(ValueError, match=r"two_q.*62"):
-        if entrypoint == "build":
-            build_scalar_operator(two_q=63, ell=4)
-        else:
-            connected_scalar_action(two_q=63, ell=4, configs=1)
+        connected_scalar_action(two_q=63, ell=4, configs=1)
 
 
 def test_scalar_operator_is_the_exact_signed_density_contraction() -> None:
@@ -367,6 +449,18 @@ def test_scalar_operator_delegates_representation_generic_state_hook() -> None:
     }
 
 
+def test_representation_generic_operator_and_coordinate_hook_support_two_q69() -> None:
+    state = _HookState()
+    configs = np.zeros((2, 2, 2), dtype=np.complex128)
+    operator = build_scalar_operator(two_q=69, ell=2)
+
+    connected, weights = operator.connected_action(state, configs)
+
+    assert operator.two_q == 69
+    assert connected.shape == (2, 3, 2, 2)
+    assert weights.shape == (2, 3)
+
+
 class _MalformedHookState(_BitsetState):
     def __init__(self, result: object) -> None:
         self.result = result
@@ -407,6 +501,35 @@ def test_scalar_operator_rejects_malformed_coordinate_hook_results(
         operator.connected_action(
             _MalformedHookState(result), np.zeros((1, 2, 2), dtype=np.complex128)
         )
+
+
+def test_coordinate_hook_rejects_input_batch_cardinality_mismatch() -> None:
+    operator = build_scalar_operator(two_q=3, ell=2)
+    result = (
+        np.ones((1, 3, 2, 2), dtype=np.complex128),
+        np.ones((1, 3), dtype=np.complex128),
+    )
+
+    with pytest.raises(ValueError, match="batch"):
+        operator.connected_action(
+            _MalformedHookState(result), np.zeros((2, 2, 2), dtype=np.complex128)
+        )
+
+
+def test_coordinate_hook_preserves_single_config_neighborhood_semantics() -> None:
+    operator = build_scalar_operator(two_q=69, ell=2)
+    configs = np.zeros((2, 2), dtype=np.complex128)
+    result = (
+        np.ones((3, 2, 2), dtype=np.complex128),
+        np.ones(3, dtype=np.complex128),
+    )
+
+    connected, weights = operator.connected_action(
+        _MalformedHookState(result), configs
+    )
+
+    assert connected.shape == (3, 2, 2)
+    assert weights.shape == (3,)
 
 
 def test_spinor_configs_require_a_projected_density_state_hook() -> None:

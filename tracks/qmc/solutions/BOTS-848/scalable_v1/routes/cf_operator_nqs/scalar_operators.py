@@ -17,7 +17,10 @@ from typing import Protocol, runtime_checkable
 import numpy as np
 
 from ...contracts import StateHandle
-from .projected_density import projected_density_tensor
+from .projected_density import (
+    MAX_PROJECTED_DENSITY_TWO_Q,
+    projected_density_tensor,
+)
 
 
 @runtime_checkable
@@ -47,8 +50,11 @@ def _validate_operator_inputs(
     checked_two_q = int(two_q)
     if checked_two_q <= 0:
         raise ValueError("two_q must be positive")
-    if checked_two_q > 62:
-        raise ValueError("two_q must be <= 62 for the signed-int64 bitset backend")
+    if checked_two_q > MAX_PROJECTED_DENSITY_TWO_Q:
+        raise ValueError(
+            f"two_q must be <= {MAX_PROJECTED_DENSITY_TWO_Q} for verified "
+            "projected-density numerics"
+        )
     if isinstance(ell, (bool, np.bool_)) or not isinstance(ell, Integral):
         raise TypeError("ell must be an integer")
     checked_ell = int(ell)
@@ -60,6 +66,11 @@ def _validate_operator_inputs(
     if checked_depth <= 0:
         raise ValueError("depth must be positive")
     return checked_two_q, checked_ell, checked_depth
+
+
+def _validate_bitset_two_q(two_q: int) -> None:
+    if two_q > 62:
+        raise ValueError("two_q must be <= 62 for the signed-int64 bitset backend")
 
 
 def _apply_annihilation(config: int, orbital: int) -> tuple[int, int] | None:
@@ -153,6 +164,7 @@ def connected_scalar_action(
     checked_two_q, checked_ell, checked_depth = _validate_operator_inputs(
         two_q, ell, depth
     )
+    _validate_bitset_two_q(checked_two_q)
     scalar_input = isinstance(configs, Integral) and not isinstance(
         configs, (bool, np.bool_)
     )
@@ -189,7 +201,9 @@ def connected_scalar_action(
     return connected, weights
 
 
-def _validate_hook_result(result: object) -> tuple[np.ndarray, np.ndarray]:
+def _validate_hook_result(
+    result: object, *, configs: object
+) -> tuple[np.ndarray, np.ndarray]:
     if not isinstance(result, tuple) or len(result) != 2:
         raise TypeError("connected_scalar_action hook must return an ndarray pair")
     connected, weights = result
@@ -211,6 +225,16 @@ def _validate_hook_result(result: object) -> tuple[np.ndarray, np.ndarray]:
     ):
         raise ValueError(
             "hook connected leading dimensions must exactly match weights.shape"
+        )
+    config_shape = getattr(configs, "shape", None)
+    if (
+        config_shape is not None
+        and len(config_shape) == 3
+        and config_shape[-1] == 2
+        and weights.shape[0] != config_shape[0]
+    ):
+        raise ValueError(
+            "hook result batch dimension must match coordinate config batch"
         )
     return connected, weights.astype(np.complex128, copy=False)
 
@@ -242,7 +266,8 @@ class ScalarOperator:
                     ell=self.ell,
                     depth=self.depth,
                     configs=configs,
-                )
+                ),
+                configs=configs,
             )
         return connected_scalar_action(
             two_q=self.two_q,
