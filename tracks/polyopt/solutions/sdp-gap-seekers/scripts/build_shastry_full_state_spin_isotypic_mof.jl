@@ -13,6 +13,7 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpinIsotypicPrimalGapJuMP
+using LinearAlgebra
 using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =

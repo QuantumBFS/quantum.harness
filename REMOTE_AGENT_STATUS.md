@@ -39,5 +39,10 @@ Updated: 2026-07-29T14:48:39Z
   residual-checked feasible, infeasibility-candidate-needing-ray-replay, or
   unknown. A standalone synthetic Mosek regression is included; its remote
   Slurm run is the next software gate.
+- Synthetic audit test r1, SCNet job `118172524`, failed before model creation:
+  the top-level audit script had not imported `LinearAlgebra`, so `Symmetric`
+  was undefined. This is an entry-point import error, not a solver or
+  mathematical result. The shared build entry now imports `LinearAlgebra`;
+  r2 will test that changed source once.
 
 No user input or new credential is currently required.

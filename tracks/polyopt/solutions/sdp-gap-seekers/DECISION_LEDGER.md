@@ -1032,3 +1032,11 @@ Timeout and generic non-optimal statuses remain unknown. A standalone 2x2
 Mosek regression covers shaped-cone reconstruction and all three classifier
 branches. The next gate is that test under Slurm in the configured SCNet Julia
 environment; no L=2 rerun is authorized merely to test plumbing.
+
+Synthetic audit test r1, SCNet job `118172524`, reached the committed test but
+failed before constructing its 2x2 model because the top-level script had not
+imported `LinearAlgebra`, leaving `Symmetric` undefined. No scientific model or
+baseline job was touched. The correction imports `LinearAlgebra` in the shared
+direct-build entry, which also fixes the same latent name resolution in the
+new PSD reconstruction code. Resubmit this tiny synthetic signature once as
+r2; do not infer anything about L=2 from r1.
