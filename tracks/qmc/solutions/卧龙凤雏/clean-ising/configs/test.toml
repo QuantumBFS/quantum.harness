@@ -1,0 +1,17 @@
+widths = [4, 6]
+aspect_ratio = 2
+critical_k = 0.44068679350977147
+base_seed = 42
+production_gates = false
+
+[exact]
+max_iterations = 10000
+eigenvalue_tolerance = 1.0e-12
+residual_tolerance = 1.0e-10
+
+[mc]
+replicas = 2
+grid_intervals = 4
+thermal_sweeps = 4
+measurement_sweeps = 8
+block_sweeps = 4
