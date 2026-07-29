@@ -104,6 +104,15 @@ full-Fock/Spin 表示后，其矩阵元由 sub-Pfaffians 控制。本轮搜索�
 even/odd parity trace 与从恒等元连续延拓的 lift 分支。任何只验证
 `det(I+D)=Tr_Spin(U)^2` 而没有固定 trace 符号的实现都不验收。
 
+每个物理时间片还必须显式携带整体标量/HS 测度 `c(A)`。实际闭路权重按
+
+```text
+w(history) = [product_l c(A_l)] Tr_Spin[U(A_L)...U(A_1)]
+```
+
+验收；Spin 双覆盖的连续分支不能替代 `c(A)` 的符号或复相位。只有整个允许历史的
+标量乘 Spin trace 为实且非负，才算物理正性。
+
 ## 3. 候选语法
 
 ### A1. 稀疏 typed exterior-domination edges
@@ -116,9 +125,10 @@ even/odd parity trace 与从恒等元连续延拓的 lift 分支。任何只验�
   symmetric-oddcycle `B(p,q,r)` 语法；
 - 每个候选必须有至少两个 cone/chart objects，正性依赖合法的 `a->b` 边和闭合
   schedule；若全部对象能合并成一个共同锥或共同 metric，立即降为校准结果；
-- types 必须本质不可删除：忘掉 source/target labels 后，untyped alphabet 要么有一个
-  精确负 word，要么有一般不闭合证明；否则它只是给普通 joint alphabet 加标签，不进入
-  本轮候选；
+- types 必须本质不可删除：忘掉 source/target labels 后，untyped alphabet 必须有一个
+  满足 `det(I+P)<0` 的精确 forbidden word，或有解析证明说明自由词语言的**完整
+  determinant** 并非恒非负；某个 exterior grade 为负、共同 cone/metric 失败或语言
+  不闭合都不够。否则它只是给普通 joint alphabet 加标签，不进入本轮候选；
 - 优先寻找“某些外幂阶有 typed 正锥、其余阶被主导”的结构，而不是要求原矩阵 TN。
 
 ### A2. Support-aware positroid 与多 chart
@@ -159,10 +169,12 @@ depth-40 随机词；它仍是缺任意深度证书的有限深度候选，归�
    alphabet 同时求解 Wei/Majorana 型 contraction inequalities，不能只测试一个
    预选 metric；
 6. tensor/exterior lift 的标准谱恒等式；
-7. typed charts 是否只是时间依赖换基/coboundary：若中间基变换在闭路中望远镜消去，
-   归入固定公共锥；
-8. 与 constrained switching、automata-constrained products 和 path-complete
-   multiple-Lyapunov 证书的关系；已知控制论结构可作证书工具，但不能冒充新机制；
+7. typed charts 是否只是时间依赖换基/coboundary，并且在具体物理 slice family 上
+   望远镜约化到某个已知固定锥；只在得到显式约化时归入该已知类；
+8. 明确记录它作为抽象证书与 constrained switching、automata-constrained products
+   和 path-complete multiple-Lyapunov 框架的关系。有限 typed graph + simplicial
+   charts 总能提升成对象直和上的固定非负块系统，因此不声称这个抽象框架本身新颖；
+   可能的新颖性只能来自新的 fermionic/HS 嵌入、物理受限语言或更强的不可约定理；
 9. Pfaffian 支线中的 Majorana reflection positivity、Kramers、split-O、
    Wei contraction、matchgate/Ising 和标准 type-D total positivity。
 
@@ -268,8 +280,9 @@ tests/
 5. 项目已存精确负词为负控制；
 6. 非闭合 typed schedule 被拒绝，闭合 schedule 的 trace 可直接重构；
 7. Pfaffian/Spin trace 与小 Fock 空间显式矩阵一致；
-8. 中断再恢复与一次性运行得到相同汇总；
-9. 每个浮点负例都能被 exact 或高精度重放，否则不进入结论。
+8. 每片 `c(A)`、HS measure、Spin-lift 分支和闭路总标量均进入显式小 Fock 权重交叉检查；
+9. 中断再恢复与一次性运行得到相同汇总；
+10. 每个浮点负例都能被 exact 或高精度重放，否则不进入结论。
 
 ## 9. 结果等级与停止条件
 
@@ -278,7 +291,7 @@ tests/
 | S0 | 有精确负例或结构门失败 | 该候选关闭 |
 | S1 | 有限深度幸存 | 只是待证候选 |
 | S2 | 任意深度 exact/analytic certificate | 已证矩阵或受限语言正性 |
-| S3 | S2 + coboundary/控制论/已知物理类严格排除 + HS/transfer 完整 | 新机制强候选 |
+| S3 | S2 + coboundary/已知物理类严格排除 + 完整 HS/受限语言嵌入 | 新 fermionic 受限语言机制强候选；不声称 automaton 框架新颖 |
 | S4 | S3 + 有意义模型、可扩展性和独立文献审计 | 可讨论新无符号物理类 |
 
 若第一批所有幸存者都被共同度量、固定 gauge-TN 或标准 Pfaffian 类吸收，停止当前语法，

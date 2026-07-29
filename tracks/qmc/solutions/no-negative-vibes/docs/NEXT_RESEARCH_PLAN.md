@@ -19,7 +19,8 @@ ZiboJin 的最新结果改变了下一轮的入口：
 
 新主线是 **typed exterior category**：不同 Trotter 位置可使用不同 exterior
 cone/chart，只有合法闭合 schedule 才要求正；并用 grade-domination 证书控制允许为负的
-危险 sector，而且忘掉 types 后必须出现精确负 word 或一般不闭合证明。并行小支线是
+危险 sector，而且忘掉 types 后必须出现完整 determinant 的精确负 word，或有解析
+自由词非正证明。并行小支线是
 含真实 pairing 的 **Pfaffian/Spin 正性**。完整共同一粒子
 和 Majorana contraction metric 必须在长词搜索之前排除。第一批预算为 2–5 百万次
 低维检查，只负责筛选；任意深度证书之前不称发现。正式规格见仓库根目录
