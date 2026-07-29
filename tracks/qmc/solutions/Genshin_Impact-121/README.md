@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Team name** | Mao-Kexiang |
+| **Team name** | Genshin_Impact |
 | **Members** | Kexiang Mao ([@Mao-Kexiang](https://github.com/Mao-Kexiang)) |
 
 ## Challenge
@@ -108,16 +108,16 @@ It includes analytic O(1,1), randomized O(n,n) identity-component positive contr
 The code was developed with Python 3.13.9. From the repository root, install the minimal dependencies and run the regression tests with
 
 ```bash
-python -m pip install -r tracks/qmc/solutions/mao-kexiang-121/requirements.txt
-python -m pytest -q tracks/qmc/solutions/mao-kexiang-121/test_sign_problem_hunter.py
+python -m pip install -r tracks/qmc/solutions/Genshin_Impact-121/requirements.txt
+python -m pytest -q tracks/qmc/solutions/Genshin_Impact-121/test_sign_problem_hunter.py
 ```
 
 These team-local tests are not discovered by the repository's default `make test` target. To reproduce the complete preregistered Wang-2015 baseline of 256 configurations at orders 0 through 8, including three independent 256-dimensional Fock checks, use the committed manifest:
 
 ```bash
 run_dir="$(mktemp -d)"
-cp tracks/qmc/solutions/mao-kexiang-121/wang2015_run_template.json "$run_dir/run.json"
-python tracks/qmc/solutions/mao-kexiang-121/sign_problem_hunter.py --run-dir "$run_dir"
+cp tracks/qmc/solutions/Genshin_Impact-121/wang2015_run_template.json "$run_dir/run.json"
+python tracks/qmc/solutions/Genshin_Impact-121/sign_problem_hunter.py --run-dir "$run_dir"
 ```
 
 Final A/B-specific randomized validation is not yet included; the earlier A/D/F development harness was excluded as superseded. The arbitrary-word A/B statement currently rests on the analytic common-norm proof and the internal proof audit. No new scientific calculation was run merely to prepare this PR.
