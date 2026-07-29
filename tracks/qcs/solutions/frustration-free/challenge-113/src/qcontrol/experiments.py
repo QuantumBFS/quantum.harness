@@ -418,22 +418,38 @@ def _validate_derived_metrics(
             name="restricted best audited exact infidelity",
         )
     )
-    evidence = {
-        "restricted_solver": cached_attained,
-        "initial_origin": initial,
-    }
+    tolerance = float(consistency_tolerance)
+
+    def within_tolerance(left: float, right: float) -> bool:
+        return abs(left - right) <= tolerance
+
+    evidence = {"initial_origin": initial}
     if best_successful is not None:
         evidence["audited_candidate"] = best_successful
+    if restricted["solver_output_finite"]:
+        evidence["restricted_solver"] = cached_attained
     expected_bound = min(evidence.values())
     source = restricted["attained_infidelity_source"]
     if (
-        restricted_initial != initial
-        or restricted_best != best_successful
-        or attained != expected_bound
+        not within_tolerance(restricted_initial, initial)
+        or (
+            (restricted_best is None) != (best_successful is None)
+            or (
+                restricted_best is not None
+                and best_successful is not None
+                and not within_tolerance(restricted_best, best_successful)
+            )
+        )
+        or not within_tolerance(cached_starting, initial)
+        or (
+            not restricted["solver_output_finite"]
+            and not within_tolerance(cached_attained, cached_starting)
+        )
+        or not within_tolerance(attained, expected_bound)
         or source not in evidence
-        or evidence[source] != attained
-        or cached_attained > cached_starting + float(consistency_tolerance)
-        or attained > min([initial, *values]) + float(consistency_tolerance)
+        or not within_tolerance(evidence[source], attained)
+        or cached_attained > cached_starting + tolerance
+        or attained > min([initial, *values]) + tolerance
     ):
         raise ValueError("restricted attained upper bound is inconsistent")
     classified = classify_solver_termination(

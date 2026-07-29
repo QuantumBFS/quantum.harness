@@ -894,6 +894,78 @@ def test_restricted_termination_rejects_tampered_raw_facts(mutation) -> None:
         TrialResult.from_canonical_dict(payload)
 
 
+def _numerical_failure_payload() -> dict[str, object]:
+    spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
+    payload = _result(spec, 1).canonical_dict()
+    restricted = payload["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted.update(
+        {
+            "attained_infidelity_source": "initial_origin",
+            "certified": False,
+            "solver_message_code": "numerical_failure",
+            "solver_output_finite": False,
+            "solver_status": 2,
+            "solver_success": False,
+            "termination": "numerical_failure",
+        }
+    )
+    return payload
+
+
+def test_nonfinite_solver_cannot_claim_cached_improvement() -> None:
+    payload = _numerical_failure_payload()
+    restricted = payload["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted["cached_solver_attained_infidelity_upper_bound"] = 0.0
+    restricted["attained_infidelity_upper_bound"] = 0.0
+    restricted["attained_infidelity_source"] = "restricted_solver"
+
+    with pytest.raises(ValueError, match="restricted attained upper bound"):
+        TrialResult.from_canonical_dict(payload)
+
+
+def test_cached_solver_start_must_match_exact_initial_origin() -> None:
+    spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
+    payload = _result(spec, 1).canonical_dict()
+    restricted = payload["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted["cached_solver_starting_infidelity_upper_bound"] = 0.4
+    restricted["cached_solver_attained_infidelity_upper_bound"] = 0.4
+    restricted["attained_infidelity_upper_bound"] = 0.4
+    restricted["attained_infidelity_source"] = "restricted_solver"
+
+    with pytest.raises(ValueError, match="restricted attained upper bound"):
+        TrialResult.from_canonical_dict(payload)
+
+
+def test_nonfinite_solver_cannot_be_selected_as_final_source() -> None:
+    payload = _numerical_failure_payload()
+    restricted = payload["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted["attained_infidelity_source"] = "restricted_solver"
+
+    with pytest.raises(ValueError, match="restricted attained upper bound"):
+        TrialResult.from_canonical_dict(payload)
+
+
+def test_valid_numerical_failure_falls_back_to_initial_origin() -> None:
+    payload = _numerical_failure_payload()
+
+    replayed = TrialResult.from_canonical_dict(payload)
+
+    restricted = replayed.result["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    assert restricted["cached_solver_attained_infidelity_upper_bound"] == 0.5
+    assert restricted["attained_infidelity_upper_bound"] == 0.5
+    assert restricted["attained_infidelity_source"] == "initial_origin"
+
+
 def test_production_matrix_has_exact_design_coverage() -> None:
     specs = generate_paired_trials(default_sweep_configs("production"))
 
