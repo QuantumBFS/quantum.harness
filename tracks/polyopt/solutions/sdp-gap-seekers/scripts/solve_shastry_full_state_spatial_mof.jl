@@ -17,6 +17,8 @@ const RESULT_SCHEMA = "shastry-l1d2-full-state-solve-result-v2"
 const RUNMETA_SCHEMA = "shastry-l1d2-full-state-spatial-mof-v1"
 const SPIN_SPATIAL_RUNMETA_SCHEMA =
     "shastry-l1d2-full-state-spin-spatial-mof-v1"
+const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
+    "shastry-l1d2-full-state-spin-isotypic-mof-v1"
 
 function progress(message::AbstractString)
     println("[ss-full-state-spatial-solve] ", message)
@@ -114,7 +116,11 @@ end
 
 function validate_runmeta(runmeta, input_files, options)
     runmeta_schema = runmeta["schema_version"]
-    runmeta_schema in (RUNMETA_SCHEMA, SPIN_SPATIAL_RUNMETA_SCHEMA) ||
+    runmeta_schema in (
+        RUNMETA_SCHEMA,
+        SPIN_SPATIAL_RUNMETA_SCHEMA,
+        SPIN_ISOTYPIC_RUNMETA_SCHEMA,
+    ) ||
         error("unsupported runmeta schema: $runmeta_schema")
     B.require_equal(runmeta["state"], "complete", "runmeta state")
     B.require_equal(runmeta["mode"], "mof", "runmeta mode")
@@ -178,25 +184,44 @@ function validate_runmeta(runmeta, input_files, options)
 
     reduced = runmeta["reduced"]
     B.require_equal(reduced["equality_count"], 0, "reduced equalities")
-    B.require_equal(reduced["maximum_side"], 198, "maximum PSD side")
-    B.require_equal(
-        reduced["psd_triangle_entries"],
-        112_387,
-        "PSD triangle entries",
-    )
-    B.require_equal(
-        sort!(Int.(reduced["positive_block_dimensions"])),
-        sort!([
-            198, 153, 135, 108, 135, 108, 135, 108,
-            145, 99, 90, 72, 90, 72, 90, 72,
-        ]),
-        "positive block dimensions",
-    )
-    B.require_equal(
-        sort!(Int.(reduced["gap_block_dimensions"])),
-        [1, 1, 1],
-        "gap block dimensions",
-    )
+    if runmeta_schema == SPIN_ISOTYPIC_RUNMETA_SCHEMA
+        B.require_equal(reduced["maximum_side"], 135, "maximum PSD side")
+        B.require_equal(
+            reduced["psd_triangle_entries"],
+            32_387,
+            "PSD triangle entries",
+        )
+        B.require_equal(
+            sort!(Int.(reduced["positive_block_dimensions"])),
+            sort!([135, 108, 90, 72, 66, 66, 51, 51, 49, 48, 33, 33]),
+            "positive block dimensions",
+        )
+        B.require_equal(
+            sort!(Int.(reduced["gap_block_dimensions"])),
+            [1],
+            "gap block dimensions",
+        )
+    else
+        B.require_equal(reduced["maximum_side"], 198, "maximum PSD side")
+        B.require_equal(
+            reduced["psd_triangle_entries"],
+            112_387,
+            "PSD triangle entries",
+        )
+        B.require_equal(
+            sort!(Int.(reduced["positive_block_dimensions"])),
+            sort!([
+                198, 153, 135, 108, 135, 108, 135, 108,
+                145, 99, 90, 72, 90, 72, 90, 72,
+            ]),
+            "positive block dimensions",
+        )
+        B.require_equal(
+            sort!(Int.(reduced["gap_block_dimensions"])),
+            [1, 1, 1],
+            "gap block dimensions",
+        )
+    end
     if runmeta_schema == RUNMETA_SCHEMA
         B.require_equal(
             reduced["source_moments"],
@@ -208,7 +233,7 @@ function validate_runmeta(runmeta, input_files, options)
             37_009,
             "spatial moments",
         )
-    else
+    elseif runmeta_schema == SPIN_SPATIAL_RUNMETA_SCHEMA
         B.require_equal(
             setup["exact_additional_reduction"],
             "proper-spin-axis-permutations-S3-after-anti-diagonal",
@@ -255,6 +280,62 @@ function validate_runmeta(runmeta, input_files, options)
         )
         Int(truth["coefficient_count"]) > 0 ||
             error("spin-spatial truth checked no PSD coefficients")
+    else
+        B.require_equal(
+            setup["exact_additional_reduction"],
+            "spin-S3-moment-quotient-and-isotypic-cone-blocking",
+            "spin-isotypic reduction label",
+        )
+        B.require_equal(
+            reduced["source_moments"],
+            7_231,
+            "pre-isotypic source moments",
+        )
+        quotient_moments = Int(reduced["spin_isotypic_moments"])
+        eliminated_moments = Int(reduced["eliminated_unused_moments"])
+        quotient_moments > 0 ||
+            error("spin-isotypic model must retain at least one moment")
+        quotient_moments + eliminated_moments == 7_231 ||
+            error("spin-isotypic moment accounting is inconsistent")
+
+        spin_truth = runmeta["spin_spatial_truth"]
+        for key in (
+            "exact",
+            "source_covariance_exact",
+            "equality_space_invariant",
+            "hamiltonian_invariant",
+            "row_actions_close",
+            "coefficient_covariant",
+            "source_equality_space_invariant",
+        )
+            B.require_equal(spin_truth[key], true, "spin-spatial truth $key")
+        end
+        B.require_equal(
+            spin_truth["quotient_moments"],
+            7_231,
+            "spin-spatial quotient moments",
+        )
+
+        isotypic_truth = runmeta["spin_isotypic_truth"]
+        for key in (
+            "exact",
+            "trivial_blocks_exact",
+            "nontrivial_positive_orbits_exact",
+            "nontrivial_gap_orbits_exact",
+        )
+            B.require_equal(
+                isotypic_truth[key],
+                true,
+                "spin-isotypic truth $key",
+            )
+        end
+        B.require_equal(
+            sort!(Int.(isotypic_truth["retained_block_dimensions"])),
+            sort!([135, 108, 90, 72, 66, 66, 51, 51, 49, 48, 33, 33, 1]),
+            "spin-isotypic truth block dimensions",
+        )
+        Int(isotypic_truth["nontrivial_comparison_count"]) > 0 ||
+            error("spin-isotypic truth checked no orbit coefficients")
     end
 
     source = runmeta["source"]
@@ -296,6 +377,8 @@ function reduced_moment_count(runmeta)
         return Int(reduced["spatial_moments"])
     elseif schema == SPIN_SPATIAL_RUNMETA_SCHEMA
         return Int(reduced["spin_spatial_moments"])
+    elseif schema == SPIN_ISOTYPIC_RUNMETA_SCHEMA
+        return Int(reduced["spin_isotypic_moments"])
     end
     error("unsupported runmeta schema: $schema")
 end
