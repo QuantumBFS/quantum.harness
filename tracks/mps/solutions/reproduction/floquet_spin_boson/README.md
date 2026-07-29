@@ -47,6 +47,14 @@ julia --project="$PROJ/envs/current" "$PROJ/scripts/run_convergence.jl" \
   output/convergence
 julia --project="$PROJ/envs/current" "$PROJ/scripts/benchmark.jl" \
   benchmark 32 20
+python "$PROJ/scripts/plot_results.py" fig2 \
+  --result-root output/fig2 --output output/fig2_comparison.png
+python "$PROJ/scripts/plot_results.py" fig3 \
+  --result-root output/fig3 --reference-root /path/to/fig_3 \
+  --output output/fig3_comparison.png
+python "$PROJ/scripts/plot_results.py" fig5 \
+  --result-root output/fig5 --reference-root /path/to/fig_5 \
+  --output output/fig5_comparison.png
 ```
 
 Use `--rebuild-cache` only when the uniform influence tensor must be rebuilt.
@@ -60,7 +68,10 @@ correlation and its periodic/decaying split, continuous heat current, separate
 delta-peak weights, diagnostics, and timing for each drive/frequency point.
 Fig. 5 writes one resumable manifest per point plus total current and
 period-averaged drive power. Delta peaks are compared by integrated weight,
-never by an arbitrary plotted height.
+never by an arbitrary plotted height. `plot_results.py` fails closed on
+missing paper points or incomplete Fig. 5 rows; use
+`--allow-validation-subset` only for an explicitly labeled Fig. 3 validation
+checkpoint.
 
 Production evidence must cover `dt`, compression/rank, eigensolver tolerance,
 τmax, Δω, ωmax, and nmax. The benchmark report records matrix-free allocation
