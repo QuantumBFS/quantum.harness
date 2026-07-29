@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import warnings
 
 import numpy as np
 import pytest
@@ -58,6 +59,55 @@ def test_ground_and_excited_share_only_the_exact_trunk_arrays() -> None:
         assert ground[name] is not excited[name]
 
 
+def test_public_parameter_views_are_read_only_and_shared() -> None:
+    model = _tiny_model()
+    ground = model.sector_parameters("ground")
+    excited = model.sector_parameters("excited")
+
+    for name in ("W1", "b1", "W2", "b2"):
+        assert ground[name] is excited[name] is getattr(model, name)
+    for parameters in (ground, excited):
+        for array in parameters.values():
+            assert not array.flags.writeable
+            with pytest.raises(ValueError, match="read-only"):
+                array.flat[0] = 0.0
+
+
+def test_parameter_view_identities_survive_flat_updates() -> None:
+    model = _tiny_model()
+    before = {
+        sector: dict(model.sector_parameters(sector))
+        for sector in ("ground", "excited")
+    }
+    updated = model.flat_parameters() + np.linspace(
+        1.0e-4,
+        2.0e-4,
+        model.parameter_count,
+    )
+
+    model.set_flat_parameters(updated)
+
+    np.testing.assert_array_equal(model.flat_parameters(), updated)
+    for sector in ("ground", "excited"):
+        after = model.sector_parameters(sector)
+        for name, view in before[sector].items():
+            assert after[name] is view
+            tree_name = f"trunk.{name}" if name in ("W1", "b1", "W2", "b2") else f"{sector}.{name}"
+            parameter_slice = model.parameter_slices[tree_name]
+            np.testing.assert_array_equal(
+                after[name].reshape(-1),
+                updated[parameter_slice],
+            )
+
+
+@pytest.mark.parametrize("name", ["W1", "b1", "W2", "b2"])
+def test_shared_trunk_public_rebinding_is_rejected(name: str) -> None:
+    model = _tiny_model()
+
+    with pytest.raises(AttributeError):
+        setattr(model, name, np.zeros_like(getattr(model, name)))
+
+
 def test_seed_848_initialization_and_sampling_are_deterministic() -> None:
     first = _tiny_model(seed=848)
     second = _tiny_model(seed=848)
@@ -101,6 +151,24 @@ def test_parameter_cap_and_non_two_layer_architectures_are_rejected() -> None:
             seed=848,
             max_trainable_parameters=262_144,
         )
+
+
+@pytest.mark.parametrize("operation", ["logpsi", "sample"])
+def test_non_finite_conditionals_are_rejected_without_runtime_warnings(
+    operation: str,
+) -> None:
+    model = _tiny_model()
+    model.set_flat_parameters(
+        np.full(model.parameter_count, np.finfo(np.float64).max)
+    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with pytest.raises(FloatingPointError, match="non-finite.*conditional"):
+            if operation == "logpsi":
+                model.logpsi((1 << 0) | (1 << 5), "ground")
+            else:
+                model.sample(size=8, sector="ground", seed=848)
 
 
 def _central_difference_all_parameters(
@@ -174,3 +242,75 @@ def test_sampling_matches_autoregressive_probabilities_without_enumeration(
             probability,
             abs=0.03,
         )
+
+
+def test_sampling_uses_one_batched_amplitude_call_per_orbital(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model()
+    sample_count = 17
+    calls: list[tuple[int, tuple[int, ...]]] = []
+
+    class PhasePoison(dict[str, np.ndarray]):
+        def __getitem__(self, key: str) -> np.ndarray:
+            if key.startswith("phase"):
+                raise AssertionError("sampling must not access phase heads")
+            return super().__getitem__(key)
+
+    model._heads["ground"] = PhasePoison(model._heads["ground"])
+    original = model._conditional_batch
+
+    def recording_batch(
+        prefixes: np.ndarray,
+        orbital: int,
+        remaining: np.ndarray,
+        remaining_m2: np.ndarray,
+        sector: str,
+    ) -> np.ndarray:
+        calls.append((orbital, prefixes.shape))
+        result = original(prefixes, orbital, remaining, remaining_m2, sector)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (sample_count, 2)
+        return result
+
+    def forbidden_scalar_path(*args: object, **kwargs: object) -> object:
+        raise AssertionError(
+            "sample must not use scalar conditional evaluation or its derivative cache"
+        )
+
+    monkeypatch.setattr(model, "_conditional_batch", recording_batch)
+    monkeypatch.setattr(model, "_conditional", forbidden_scalar_path)
+
+    draws = model.sample(size=sample_count, sector="ground", seed=848)
+
+    assert calls == [
+        (orbital, (sample_count, model.n_orbitals))
+        for orbital in range(model.n_orbitals)
+    ]
+    assert all(state.bit_count() == model.n_electrons for state in draws)
+    assert all(
+        occupation_m2(state, model.two_q) == model.target_m2
+        for state in draws
+    )
+
+
+@pytest.mark.parametrize("sector", ["ground", "excited"])
+def test_production_shape_batched_sampling_is_deterministic_and_sector_valid(
+    sector: str,
+) -> None:
+    model = AutoregressiveNQS.initialize(
+        n_electrons=6,
+        two_q=15,
+        target_m2=0,
+        width=128,
+        layers=2,
+        seed=848,
+        max_trainable_parameters=262_144,
+    )
+
+    first = model.sample(size=32, sector=sector, seed=848)
+    second = model.sample(size=32, sector=sector, seed=848)
+
+    np.testing.assert_array_equal(first, second)
+    assert all(state.bit_count() == 6 for state in first)
+    assert all(occupation_m2(state, 15) == 0 for state in first)

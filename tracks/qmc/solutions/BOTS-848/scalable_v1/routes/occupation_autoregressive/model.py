@@ -39,10 +39,8 @@ class AutoregressiveNQS:
         self.width = width
 
         by_name = dict(parameters)
-        self.W1 = by_name["trunk.W1"]
-        self.b1 = by_name["trunk.b1"]
-        self.W2 = by_name["trunk.W2"]
-        self.b2 = by_name["trunk.b2"]
+        self._parameters: Mapping[str, np.ndarray] = MappingProxyType(by_name)
+        self._parameter_names = tuple(name for name, _ in parameters)
         self._heads = {
             sector: {
                 "amplitude_W": by_name[f"{sector}.amplitude_W"],
@@ -52,7 +50,6 @@ class AutoregressiveNQS:
             }
             for sector in _SECTORS
         }
-        self._parameter_items = parameters
 
         offset = 0
         slices: dict[str, slice] = {}
@@ -62,16 +59,61 @@ class AutoregressiveNQS:
         self.parameter_slices: Mapping[str, slice] = MappingProxyType(slices)
         self.parameter_count = offset
 
+        public_views = {
+            name: self._readonly_view(array)
+            for name, array in parameters
+        }
+        self._public_parameter_views: Mapping[str, np.ndarray] = MappingProxyType(
+            public_views
+        )
         shared = {
-            "W1": self.W1,
-            "b1": self.b1,
-            "W2": self.W2,
-            "b2": self.b2,
+            "W1": public_views["trunk.W1"],
+            "b1": public_views["trunk.b1"],
+            "W2": public_views["trunk.W2"],
+            "b2": public_views["trunk.b2"],
         }
         self._sector_views = {
-            sector: MappingProxyType({**shared, **self._heads[sector]})
+            sector: MappingProxyType(
+                {
+                    **shared,
+                    **{
+                        name: public_views[f"{sector}.{name}"]
+                        for name in (
+                            "amplitude_W",
+                            "amplitude_b",
+                            "phase_W",
+                            "phase_b",
+                        )
+                    },
+                }
+            )
             for sector in _SECTORS
         }
+
+    @staticmethod
+    def _readonly_view(array: np.ndarray) -> np.ndarray:
+        buffer = memoryview(array).toreadonly()
+        view = np.frombuffer(buffer, dtype=array.dtype, count=array.size).reshape(
+            array.shape
+        )
+        view.setflags(write=False)
+        return view
+
+    @property
+    def W1(self) -> np.ndarray:
+        return self._public_parameter_views["trunk.W1"]
+
+    @property
+    def b1(self) -> np.ndarray:
+        return self._public_parameter_views["trunk.b1"]
+
+    @property
+    def W2(self) -> np.ndarray:
+        return self._public_parameter_views["trunk.W2"]
+
+    @property
+    def b2(self) -> np.ndarray:
+        return self._public_parameter_views["trunk.b2"]
 
     @classmethod
     def initialize(
@@ -194,7 +236,9 @@ class AutoregressiveNQS:
     def flat_parameters(self) -> np.ndarray:
         """Return a copy of parameters in the stable tree order."""
 
-        return np.concatenate([array.reshape(-1) for _, array in self._parameter_items])
+        return np.concatenate(
+            [self._parameters[name].reshape(-1) for name in self._parameter_names]
+        )
 
     def set_flat_parameters(self, values: np.ndarray) -> None:
         """Update parameter values in place without replacing shared arrays."""
@@ -209,7 +253,8 @@ class AutoregressiveNQS:
         flat = np.asarray(raw, dtype=np.float64)
         if not np.all(np.isfinite(flat)):
             raise ValueError("flat parameters must be finite")
-        for name, array in self._parameter_items:
+        for name in self._parameter_names:
+            array = self._parameters[name]
             parameter_slice = self.parameter_slices[name]
             array[...] = flat[parameter_slice].reshape(array.shape)
 
@@ -223,6 +268,13 @@ class AutoregressiveNQS:
         ):
             raise ValueError("state is not in the fixed-N fixed-M2 sector")
         return configuration
+
+    @staticmethod
+    def _require_finite_conditional(stage: str, *values: np.ndarray) -> None:
+        if any(not np.all(np.isfinite(value)) for value in values):
+            raise FloatingPointError(
+                f"non-finite autoregressive conditional values at {stage}"
+            )
 
     def _conditional(
         self,
@@ -251,11 +303,29 @@ class AutoregressiveNQS:
                 ),
             )
         )
-        hidden1 = np.tanh(self.W1 @ inputs + self.b1)
-        hidden2 = np.tanh(self.W2 @ hidden1 + self.b2)
-        heads = self._heads[sector]
-        logits = heads["amplitude_W"] @ hidden2 + heads["amplitude_b"]
-        phases = heads["phase_W"] @ hidden2 + heads["phase_b"]
+        with np.errstate(over="ignore", invalid="ignore"):
+            preactivation1 = (
+                self._parameters["trunk.W1"] @ inputs
+                + self._parameters["trunk.b1"]
+            )
+            hidden1 = np.tanh(preactivation1)
+            preactivation2 = (
+                self._parameters["trunk.W2"] @ hidden1
+                + self._parameters["trunk.b2"]
+            )
+            hidden2 = np.tanh(preactivation2)
+            heads = self._heads[sector]
+            logits = heads["amplitude_W"] @ hidden2 + heads["amplitude_b"]
+            phases = heads["phase_W"] @ hidden2 + heads["phase_b"]
+        self._require_finite_conditional(
+            "scalar network evaluation",
+            preactivation1,
+            hidden1,
+            preactivation2,
+            hidden2,
+            logits,
+            phases,
+        )
 
         allowed = np.asarray(
             self.feasibility.allowed(orbital, remaining, remaining_m2),
@@ -268,11 +338,112 @@ class AutoregressiveNQS:
         log_probabilities[allowed] = allowed_logits - logsumexp(allowed_logits)
         probabilities = np.zeros(2, dtype=np.float64)
         probabilities[allowed] = np.exp(log_probabilities[allowed])
+        probability_mass = float(np.sum(probabilities[allowed]))
+        if (
+            not np.all(np.isfinite(log_probabilities[allowed]))
+            or not np.all(np.isfinite(probabilities[allowed]))
+            or not np.isfinite(probability_mass)
+            or abs(probability_mass - 1.0) > 1.0e-12
+        ):
+            raise FloatingPointError(
+                "non-finite autoregressive conditional probabilities"
+            )
         return (
             log_probabilities,
             phases,
             (inputs, hidden1, hidden2, probabilities),
         )
+
+    def _conditional_batch(
+        self,
+        prefixes: np.ndarray,
+        orbital: int,
+        remaining: np.ndarray,
+        remaining_m2: np.ndarray,
+        sector: str,
+    ) -> np.ndarray:
+        """Return phase-free masked log probabilities for a full sample batch."""
+
+        batch_size = prefixes.shape[0]
+        if prefixes.shape != (batch_size, self.n_orbitals):
+            raise ValueError("batched prefixes have the wrong shape")
+        if remaining.shape != (batch_size,) or remaining_m2.shape != (batch_size,):
+            raise ValueError("batched remaining contexts have the wrong shape")
+
+        orbital_fraction = orbital / self.two_q if self.two_q else 0.0
+        if self.n_electrons:
+            remaining_fraction = remaining / self.n_electrons
+        else:
+            remaining_fraction = np.zeros(batch_size, dtype=np.float64)
+        m2_scale = max(1, self.n_electrons * max(1, self.two_q))
+        contexts = np.column_stack(
+            (
+                np.full(batch_size, orbital_fraction, dtype=np.float64),
+                remaining_fraction,
+                remaining_m2 / m2_scale,
+            )
+        )
+        inputs = np.concatenate((prefixes, contexts), axis=1)
+        heads = self._heads[sector]
+        with np.errstate(over="ignore", invalid="ignore"):
+            preactivation1 = (
+                inputs @ self._parameters["trunk.W1"].T
+                + self._parameters["trunk.b1"]
+            )
+            hidden1 = np.tanh(preactivation1)
+            preactivation2 = (
+                hidden1 @ self._parameters["trunk.W2"].T
+                + self._parameters["trunk.b2"]
+            )
+            hidden2 = np.tanh(preactivation2)
+            logits = (
+                hidden2 @ heads["amplitude_W"].T
+                + heads["amplitude_b"]
+            )
+        self._require_finite_conditional(
+            "batched network evaluation",
+            preactivation1,
+            hidden1,
+            preactivation2,
+            hidden2,
+            logits,
+        )
+
+        allowed = np.asarray(
+            [
+                self.feasibility.allowed(
+                    orbital,
+                    int(particles_left),
+                    int(m2_left),
+                )
+                for particles_left, m2_left in zip(
+                    remaining,
+                    remaining_m2,
+                    strict=True,
+                )
+            ],
+            dtype=bool,
+        )
+        if np.any(~np.any(allowed, axis=1)):
+            raise RuntimeError("feasibility table has no valid continuation")
+        masked_logits = np.where(allowed, logits, -np.inf)
+        log_probabilities = masked_logits - logsumexp(
+            masked_logits,
+            axis=1,
+        )[:, None]
+        probabilities = np.zeros_like(log_probabilities)
+        probabilities[allowed] = np.exp(log_probabilities[allowed])
+        probability_mass = np.sum(probabilities, axis=1)
+        if (
+            not np.all(np.isfinite(log_probabilities[allowed]))
+            or not np.all(np.isfinite(probabilities[allowed]))
+            or not np.all(np.isfinite(probability_mass))
+            or np.any(np.abs(probability_mass - 1.0) > 1.0e-12)
+        ):
+            raise FloatingPointError(
+                "non-finite autoregressive conditional probabilities"
+            )
+        return log_probabilities
 
     def _evaluate(
         self,
@@ -329,8 +500,8 @@ class AutoregressiveNQS:
         selected_sector = self._sector(sector)
         _, caches = self._evaluate(state, selected_sector, keep_cache=True)
         gradients = {
-            name: np.zeros(array.shape, dtype=np.complex128)
-            for name, array in self._parameter_items
+            name: np.zeros(self._parameters[name].shape, dtype=np.complex128)
+            for name in self._parameter_names
         }
         heads = self._heads[selected_sector]
         for selected, inputs, hidden1, hidden2, probabilities in caches:
@@ -361,7 +532,9 @@ class AutoregressiveNQS:
             )
             gradients["trunk.b2"] += preactivation2_gradient
 
-            hidden1_gradient = self.W2.T @ preactivation2_gradient
+            hidden1_gradient = (
+                self._parameters["trunk.W2"].T @ preactivation2_gradient
+            )
             preactivation1_gradient = hidden1_gradient * (1.0 - hidden1**2)
             gradients["trunk.W1"] += np.outer(
                 preactivation1_gradient,
@@ -370,7 +543,7 @@ class AutoregressiveNQS:
             gradients["trunk.b1"] += preactivation1_gradient
 
         return np.concatenate(
-            [gradients[name].reshape(-1) for name, _ in self._parameter_items]
+            [gradients[name].reshape(-1) for name in self._parameter_names]
         )
 
     def sample(self, size: int, sector: str, *, seed: int) -> np.ndarray:
@@ -384,33 +557,45 @@ class AutoregressiveNQS:
         if random_seed < 0:
             raise ValueError("seed must be non-negative")
 
+        draws = np.zeros(sample_count, dtype=object)
+        if sample_count == 0:
+            return draws
+
         rng = np.random.default_rng(random_seed)
-        draws = np.empty(sample_count, dtype=object)
-        for draw_index in range(sample_count):
-            prefix = np.full(self.n_orbitals, -1.0, dtype=np.float64)
-            remaining = self.n_electrons
-            remaining_m2 = self.target_m2
-            state = 0
-            for orbital in range(self.n_orbitals):
-                log_probabilities, _, _ = self._conditional(
-                    prefix,
-                    orbital,
-                    remaining,
-                    remaining_m2,
-                    selected_sector,
+        prefixes = np.full(
+            (sample_count, self.n_orbitals),
+            -1.0,
+            dtype=np.float64,
+        )
+        remaining = np.full(sample_count, self.n_electrons, dtype=np.int64)
+        remaining_m2 = np.full(sample_count, self.target_m2, dtype=np.int64)
+        for orbital in range(self.n_orbitals):
+            log_probabilities = self._conditional_batch(
+                prefixes,
+                orbital,
+                remaining,
+                remaining_m2,
+                selected_sector,
+            )
+            zero_forbidden = np.isneginf(log_probabilities[:, 0])
+            one_forbidden = np.isneginf(log_probabilities[:, 1])
+            selected = np.empty(sample_count, dtype=np.int8)
+            selected[zero_forbidden] = 1
+            selected[one_forbidden] = 0
+            stochastic = ~(zero_forbidden | one_forbidden)
+            stochastic_count = int(np.count_nonzero(stochastic))
+            if stochastic_count:
+                selected[stochastic] = (
+                    rng.random(stochastic_count)
+                    >= np.exp(log_probabilities[stochastic, 0])
                 )
-                if np.isneginf(log_probabilities[0]):
-                    selected = 1
-                elif np.isneginf(log_probabilities[1]):
-                    selected = 0
-                else:
-                    selected = int(rng.random() >= np.exp(log_probabilities[0]))
-                prefix[orbital] = selected
-                if selected:
-                    state |= 1 << orbital
-                    remaining -= 1
-                    remaining_m2 -= -self.two_q + 2 * orbital
-            if remaining != 0 or remaining_m2 != 0:
-                raise RuntimeError("autoregressive sampler left the constrained sector")
-            draws[draw_index] = state
+            prefixes[:, orbital] = selected
+            occupied = np.flatnonzero(selected)
+            orbital_bit = 1 << orbital
+            for draw_index in occupied:
+                draws[draw_index] = int(draws[draw_index]) | orbital_bit
+            remaining -= selected
+            remaining_m2 -= selected * (-self.two_q + 2 * orbital)
+        if np.any(remaining != 0) or np.any(remaining_m2 != 0):
+            raise RuntimeError("autoregressive sampler left the constrained sector")
         return draws
