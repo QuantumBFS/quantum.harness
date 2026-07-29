@@ -51,6 +51,19 @@ def test_slurm_pilot_decouples_model_and_statistical_seeds() -> None:
     assert "--seed 0" in script
 
 
+def test_calibration_writer_creates_canonical_nested_output(tmp_path) -> None:
+    path = ROOT / "scripts" / "calibrate_pilot.py"
+    spec = importlib.util.spec_from_file_location("calibrate_pilot_writer", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    output = tmp_path / "nested" / "calibration.json"
+
+    module.write_json(output, {"z": 2, "a": 1})
+
+    assert output.read_bytes() == b'{"a":1,"z":2}\n'
+
+
 def test_deployment_rejects_stale_revision_archive_and_report(tmp_path) -> None:
     report = tmp_path / "REPORT.md"
     report.write_text("measured report\n")

@@ -45,6 +45,20 @@ def representative_config() -> ExperimentConfig:
     )
 
 
+def write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            payload,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--queries", type=int, default=32)
@@ -139,9 +153,7 @@ def main() -> None:
         "warm_query_seconds": warm_seconds,
         "x64_enabled": bool(jax.config.x64_enabled),
     }
-    with open(args.output, "w", encoding="utf-8") as stream:
-        json.dump(payload, stream, allow_nan=False, indent=2, sort_keys=True)
-        stream.write("\n")
+    write_json(Path(args.output), payload)
     print(json.dumps(payload, allow_nan=False, sort_keys=True), flush=True)
 
 
