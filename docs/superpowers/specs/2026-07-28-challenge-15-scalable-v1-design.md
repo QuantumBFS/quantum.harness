@@ -22,7 +22,8 @@ candidates developed in isolated repository lanes:
 
 1. Route A, occupation-space autoregressive NQS, owned by `TensorSpicyJ`;
 2. Route B, continuous fixed-degree holomorphic NQS, owned by `AroundPeking`;
-3. Route C, an `L=2` CF-Flow-style prototype, owned by `bhjia-phys`;
+3. Route C, JK-projected CF seeds plus a shared LLL scalar-operator NQS, owned
+   by `bhjia-phys`;
 4. Route D, analytic `L=2` seed times an LLL-closed neural correlator, owner
    `unassigned`.
 
@@ -199,26 +200,29 @@ Primary risk: a polynomial-rank determinant expansion may be too weak to reach
 the Laughlin correlations at a useful cost. Rank is therefore a declared model
 capacity, and both energy variance and peak memory are reported as it changes.
 
-### Route C: `L=2` CF-Flow-style prototype
+### Route C: JK-projected CF seeds plus a shared LLL scalar-operator NQS
 
 Owner: `bhjia-phys`.
 
-This route starts from a Clebsch-Gordan-coupled composite-fermion particle-hole
-seed in the `L=2` sector, rather than the paper's maximally separated `L=N`
-transport-gap excitation. A shared SO(3)-equivariant flow deforms the `L=0`
-and reduced `L=2` states, after which the rank-2 tower is generated from the
-same equivariant object.
+This route starts from Jain-Kamilla-projected composite-fermion seeds: an
+`L=0` ground-state seed and a Clebsch-Gordan-coupled `L=2` particle-hole seed,
+rather than the paper's maximally separated `L=N` transport-gap excitation.
+The same two-layer LLL scalar-operator NQS acts on both seeds, with density
+ranks `2,3,4` and hidden width `64`; sector-specific scalar coefficients are
+allowed. Its layers are built from LLL-projected SO(3)-scalar density
+contractions, so they preserve flux, fermionic antisymmetry, LLL closure, and
+total angular momentum by construction. The single reduced `L=2` seed
+generates its rank-2 tower analytically.
 
-Generic coordinate backflow is not automatically LLL. The route therefore
-measures the covariant anti-holomorphic derivative/cyclotron residual without
-using a many-body LLL projector. A finite but small leakage labels the result
-`prototype` and fails `lll_valid`; the route can pass only if the implemented
-flow is restricted to a fixed-degree holomorphic map with an accompanying
-construction-level certificate. There is no fallback to exact projection.
+The original coordinate CF-Flow is retained only as the C0 leakage diagnostic
+outside the Challenge candidate comparison. It may measure its covariant
+anti-holomorphic derivative/cyclotron residual, but it is not a Route C
+candidate and cannot pass or compete in the scalable-v1 gates.
 
-Primary risk: the paper's useful expressivity may rely on higher-Landau-level
-content. A hard-gate failure is still a useful result because it identifies the
-precise obstruction to using CF-Flow as the Challenge #15 final ansatz.
+Primary risk: the bounded scalar-operator network may preserve every strict
+LLL certificate while lacking enough variational freedom. It is decided by
+energy variance and cost after the construction certificates have passed; it
+may not trade those certificates for a lower energy.
 
 ### Route D: analytic `L=2` seed times a neural correlator
 
@@ -260,14 +264,14 @@ branch:          collab/challenge-15-scalable-v1
 common ancestor: 78577cd8f70adf918648fb02962e3b7bc09255e8
 ```
 
-Route D was approved after the original Step 1 close. Before any Step 2 lane
-starts, one common route-admission amendment must add the frozen
-`analytic_seed_correlator` capacity mapping and its tests without changing the
-physics, seeds, optimizer/sample budgets, thresholds, or resource ceilings.
-The resulting child commit on the branch above becomes the exact four-route
-comparison base and its SHA is copied into every attempt journal. Starting one
-lane from the bare common ancestor and another from the admission commit is not
-a valid comparison.
+This common Route C protocol amendment is made from baseline
+`80cc1d094dd919c43192d39d8498ba4cdebaa2f2`. It replaces the Route C
+coordinate-flow capacity with the frozen `cf_operator_nqs` mapping without
+changing the physics, seeds, optimizer/sample budgets, thresholds, or resource
+ceilings. The resulting amendment commit is the common starting point for
+every not-yet-started Step-2 lane, and its SHA is copied into every attempt
+journal. Starting a lane from the prior baseline and another from this
+amendment commit is not a valid comparison.
 
 Route A uses the collaboration repository itself; Routes B and C use their own
 forks, and Route D uses its eventual owner's isolated fork or branch. Each
@@ -341,9 +345,9 @@ reference may be read. They cannot be changed after the first route begins. If a
 shared budget is physically impossible for one route, Step 1 must fail rather
 than silently granting that route a different budget.
 
-The Route D admission freezes `operator_layers=2`,
+The Route C amendment freezes `operator_layers=2`,
 `density_ranks=[2,3,4]`, and `hidden_width=64`, still under the common
-`max_trainable_parameters=262144` ceiling. This additive mapping changes the
+`max_trainable_parameters=262144` ceiling. This replacement mapping changes the
 protocol hash and comparison-base commit but does not reopen any other budget
 or threshold.
 
@@ -425,7 +429,8 @@ The project has **five research steps**, not five total attempts:
 2. run four implementation lanes concurrently:
    - Step 2A: Route A, occupation-space autoregressive NQS;
    - Step 2B: Route B, continuous fixed-degree holomorphic NQS;
-   - Step 2C: Route C, CF-Flow `L=2` prototype;
+   - Step 2C: Route C, JK-projected CF seeds plus shared LLL scalar-operator
+     NQS;
    - Step 2D: Route D, analytic `L=2` seed times a neural correlator;
 3. cross-fork audit, synchronized freeze, one ED reveal, and winner selection;
 4. train and evaluate the winner at `N=8`;
@@ -492,8 +497,10 @@ code or bookkeeping and may not change a frozen route artifact. After the ED
 oracle has been loaded, any rerun must use the same four verified hash sets;
 Step 3 cannot substitute a newly trained checkpoint under a later attempt.
 
-The original design preceded Step 1. This approved parallel amendment changes
-only post-Step-1 orchestration and does not consume an implementation attempt.
+The original design preceded Step 1. This approved common amendment replaces
+Route C's candidate with the strict-LLL operator construction, classifies the
+coordinate CF-Flow only as the C0 leakage diagnostic, and does not consume an
+implementation attempt.
 
 ## 9. Logging and failure handling
 
@@ -581,7 +588,8 @@ Scalable v1 does not yet implement:
 - chiral metric operators `O_+`, `O_-`, weights, or helicity polarization;
 - finite-`kappa` Landau-level-mixing scans;
 - thermodynamic extrapolation or production sizes above `N=12`;
-- the CF-Flow paper's `L=N` transport-gap figure;
+- the coordinate CF-Flow paper's `L=N` transport-gap figure (and its C0
+  leakage diagnostic outside the candidate comparison);
 - a universal benchmark leaderboard or weighted aggregate score;
 - a new cluster environment before the winning route identifies its actual
   dependencies.

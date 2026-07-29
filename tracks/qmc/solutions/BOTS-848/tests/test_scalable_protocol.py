@@ -30,11 +30,22 @@ def test_protocol_freezes_route_capacity_and_n8_smoke() -> None:
     p = load_protocol()
     assert p.capacity["max_trainable_parameters"] == 262_144
     assert set(p.capacity["routes"]) == {
-        "occupation_autoregressive", "continuous_holomorphic", "cf_flow_l2"
+        "occupation_autoregressive", "continuous_holomorphic", "cf_operator_nqs"
     }
     assert p.smoke_n8["n_electrons"] == 8
     assert p.smoke_n8["two_q"] == 21
     assert p.smoke_n8["batch_size"] == 256
+
+
+def test_route_c_uses_strict_lll_operator_capacity() -> None:
+    protocol = load_protocol()
+
+    assert protocol.capacity["routes"]["cf_operator_nqs"] == {
+        "operator_layers": 2,
+        "density_ranks": [2, 3, 4],
+        "hidden_width": 64,
+    }
+    assert "cf_flow_l2" not in protocol.capacity["routes"]
 
 
 def test_protocol_internal_snapshot_is_deeply_immutable() -> None:
