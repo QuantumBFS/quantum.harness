@@ -4,6 +4,7 @@ from oracle.symmetric_oddcycle_cones import (
     exact_chi23_obstruction,
     exact_complementary_sector_audit,
     exact_grade4_formula_replay,
+    exact_invariant_chamber_obstruction,
     load_certificate,
     verify_compact_certificate,
 )
@@ -78,3 +79,15 @@ def test_complementary_sector_identity_and_local_obstructions_replay_exactly():
             "F": 882341964,
         },
     }
+
+
+def test_cycle_invariant_sign_chamber_is_not_sufficient():
+    result = exact_invariant_chamber_obstruction()
+
+    assert result["positive_cycle_invariant"] == 8
+    assert result["negative_cycle_invariant"] == "-z"
+    assert result["coefficients_descending"] == (1, -32, 268, -3000, 8194)
+    assert result["F_at_z3"] == 823
+    assert result["F_at_z4"] == -1310
+    assert result["z3_inside_chamber"] is True
+    assert result["z4_inside_chamber"] is True

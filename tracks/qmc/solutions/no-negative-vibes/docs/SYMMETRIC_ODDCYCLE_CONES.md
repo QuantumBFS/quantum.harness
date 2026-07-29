@@ -134,3 +134,26 @@ even though \(\chi_3(B^7)=-171633\) and
 \(\chi_3(B^{10})=-192388191\).  Any successful network identity must
 therefore pair signed paths across different principal minors and particle
 numbers; local nonnegativity is exactly obstructed by the examples above.
+
+### The invariant sign chamber is not sufficient
+
+The two directed triangles have cycle invariants \(D=8\) and \(T=-z\)
+when the sole negative edge is changed from \(-1\) to \(-z\).  Exact
+expansion of the four-letter pure word gives
+
+\[
+F(B(z)^4)=z^4-32z^3+268z^2-3000z+8194.
+\]
+
+Both \(z=3\) and \(z=4\) lie strictly inside the same sign chamber
+\(0<z<D\), or equivalently \(-D<T<0\), but
+
+\[
+F(B(3)^4)=823>0,\qquad F(B(4)^4)=-1310<0.
+\]
+
+Therefore the cycle signs, their shared vertex, and the strict inequality
+\(|T|<D\) do not define a sign-free cluster chamber.  A theorem for the
+fixed \(z=1\) atom must use a quantitatively smaller negative-winding
+margin (or an equivalent stronger inequality), not only the two invariant
+signs.

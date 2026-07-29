@@ -262,11 +262,39 @@ def exact_complementary_sector_audit() -> dict[str, object]:
     }
 
 
+def exact_invariant_chamber_obstruction() -> dict[str, object]:
+    """Disprove positivity from the signs ``D>0`` and ``-D<T<0`` alone."""
+
+    z = sp.symbols("z", real=True)
+    matrix = sp.Matrix(fixed_candidate_matrix())
+    matrix[4, 2] = -z
+    word_matrix = matrix**4
+    polynomial = sp.Poly(
+        1
+        + sp.trace(exact_compound_matrix(word_matrix, 2))
+        + sp.trace(exact_compound_matrix(word_matrix, 3))
+        + word_matrix.det(),
+        z,
+    )
+    return {
+        "positive_cycle_invariant": 8,
+        "negative_cycle_invariant": "-z",
+        "coefficients_descending": tuple(
+            int(coefficient) for coefficient in polynomial.all_coeffs()
+        ),
+        "F_at_z3": int(polynomial.eval(3)),
+        "F_at_z4": int(polynomial.eval(4)),
+        "z3_inside_chamber": 0 < 3 < 8,
+        "z4_inside_chamber": 0 < 4 < 8,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
     "exact_complementary_sector_audit",
     "exact_grade4_formula_replay",
+    "exact_invariant_chamber_obstruction",
     "fixed_candidate_matrix",
     "load_certificate",
     "symbolic_grade4_positive_atoms",
