@@ -13,6 +13,7 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpinIsotypicPrimalGapJuMP
+using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
     "shastry-l1d2-full-state-spin-isotypic-mof-v1"
@@ -249,8 +250,12 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     end
     write_checkpoint(checkpoint_path, metadata)
 
-    if options.mode == :mof
-        progress("materialize, write, and reload optimizer-free MOF")
+    if options.mode in (:mof, :solve)
+        progress(
+            options.mode == :mof ?
+            "materialize, write, and reload optimizer-free MOF" :
+            "materialize JuMP model for direct Mosek solve",
+        )
         jump_measurement =
             @timed build_shastry_full_state_spin_isotypic_jump_primal(
                 isotypic,
@@ -258,6 +263,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         jump_model = jump_measurement.value
         metadata["stages"]["jump"] = measurement_dict(jump_measurement)
         write_checkpoint(checkpoint_path, metadata)
+    end
+
+    if options.mode == :mof
         mof_path = joinpath(options.output, "model.mof.json")
         write_measurement =
             @timed JuMP.write_to_file(jump_model.model, mof_path)
@@ -271,6 +279,58 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         )
         metadata["stages"]["reload_mof"] =
             measurement_dict(replay_measurement)
+    elseif options.mode == :solve
+        threads = parse(
+            Int,
+            get(
+                ENV,
+                "SS_MOSEK_THREADS",
+                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+            ),
+        )
+        time_limit_seconds =
+            parse(Float64, get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"))
+        log_level = parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+        progress(
+            "attach Mosek and optimize; threads=$threads, " *
+            "time_limit=$(time_limit_seconds)s",
+        )
+        JuMP.set_optimizer(jump_model.model, MosekTools.Optimizer)
+        JuMP.set_time_limit_sec(jump_model.model, time_limit_seconds)
+        JuMP.set_optimizer_attribute(
+            jump_model.model,
+            "MSK_IPAR_NUM_THREADS",
+            threads,
+        )
+        JuMP.set_optimizer_attribute(
+            jump_model.model,
+            "MSK_IPAR_LOG",
+            log_level,
+        )
+        solve_measurement = @timed JuMP.optimize!(jump_model.model)
+        metadata["stages"]["solve"] = measurement_dict(solve_measurement)
+        metadata["solve"] = Dict(
+            "termination_status" =>
+                string(JuMP.termination_status(jump_model.model)),
+            "primal_status" => string(JuMP.primal_status(jump_model.model)),
+            "dual_status" => string(JuMP.dual_status(jump_model.model)),
+            "raw_status" => try
+                JuMP.raw_status(jump_model.model)
+            catch exception
+                "unavailable: " * sprint(showerror, exception)
+            end,
+            "result_count" => JuMP.result_count(jump_model.model),
+            "has_values" => JuMP.has_values(jump_model.model),
+            "has_duals" => JuMP.has_duals(jump_model.model),
+            "solver_reported_solve_time_seconds" => try
+                JuMP.solve_time(jump_model.model)
+            catch
+                NaN
+            end,
+            "threads" => threads,
+            "time_limit_seconds" => time_limit_seconds,
+        )
+        write_checkpoint(checkpoint_path, metadata)
     end
 
     metadata["state"] = "complete"
