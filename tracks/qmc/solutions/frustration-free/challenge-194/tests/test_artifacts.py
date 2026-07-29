@@ -5,6 +5,8 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
+import stat
 
 import h5py
 import numpy as np
@@ -192,7 +194,13 @@ def test_deterministic_regeneration_is_byte_identical(
 
 @pytest.mark.parametrize(
     "boundary",
-    ("_flush_hdf5", "_fsync_file", "_semantic_reload", "_hash_file", "_replace"),
+    (
+        "_flush_hdf5",
+        "_fsync_file",
+        "_semantic_reload",
+        "_hash_descriptor",
+        "_replace",
+    ),
 )
 def test_pre_rename_crashes_leave_detectable_partial_without_final(
     monkeypatch: pytest.MonkeyPatch,
@@ -207,7 +215,7 @@ def test_pre_rename_crashes_leave_detectable_partial_without_final(
         raise OSError(f"crash at {boundary}")
 
     monkeypatch.setattr(artifacts, boundary, crash)
-    with pytest.raises(OSError, match="crash"):
+    with pytest.raises((OSError, ArtifactIntegrityError)):
         publish_trajectory(tmp_path, *sample)
     final = tmp_path / "trajectories" / f"trajectory-{request_digest(request)}.h5"
     assert not final.exists()
@@ -379,8 +387,12 @@ def test_reconstruction_rejects_duplicate_id_missing_member_and_unbatched_member
     trajectory, batch, hashes = _publish_valid_run(tmp_path, sample)
     duplicate = trajectory.with_name(f"trajectory-{'f' * 64}.h5")
     duplicate.write_bytes(trajectory.read_bytes())
+    duplicate_sidecar = json.loads(
+        trajectory.with_suffix(".sha256.json").read_text()
+    )
+    duplicate_sidecar["trajectory_id"] = "f" * 64
     duplicate.with_suffix(".sha256.json").write_bytes(
-        trajectory.with_suffix(".sha256.json").read_bytes()
+        artifacts._canonical_json_bytes(duplicate_sidecar)
     )
     with pytest.raises(ArtifactIntegrityError, match="duplicate"):
         reconstruct_progress(tmp_path, hashes)
@@ -462,3 +474,454 @@ def test_run_and_managed_directories_must_not_be_symlinks(
     (root / "trajectories").symlink_to(real, target_is_directory=True)
     with pytest.raises(ArtifactIntegrityError, match="symlink"):
         publish_trajectory(root, *sample)
+
+
+def _refresh_digest(path: Path) -> None:
+    payload = path.read_bytes()
+    path.with_suffix(".sha256.json").write_bytes(
+        artifacts._canonical_json_bytes(
+            {
+                "artifact_size": len(payload),
+                "schema_version": artifacts.TRAJECTORY_DIGEST_SCHEMA,
+                "trajectory_id": path.stem.removeprefix("trajectory-"),
+                "trajectory_sha256": hashlib.sha256(payload).hexdigest(),
+            }
+        )
+    )
+
+
+def test_hash_and_hdf5_semantics_use_the_same_open_inode(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    hostile = tmp_path / "hostile.h5"
+    shutil.copyfile(path, hostile)
+    with h5py.File(hostile, "r+") as stream:
+        stream["result/observables"][0, 0] = 999.0
+    original_hash = artifacts._hash_descriptor
+    swapped = False
+
+    def hash_then_swap(descriptor: int, description: str) -> tuple[str, int]:
+        nonlocal swapped
+        result = original_hash(descriptor, description)
+        if description == "trajectory" and not swapped:
+            swapped = True
+            os.replace(hostile, path)
+        return result
+
+    monkeypatch.setattr(artifacts, "_hash_descriptor", hash_then_swap)
+    with pytest.raises(ArtifactIntegrityError, match="identity|mutat|digest"):
+        load_verified_trajectory(path, expected(request))
+    assert swapped
+
+
+@pytest.mark.parametrize("kind", ("sidecar", "manifest"))
+def test_json_semantics_reject_path_identity_swap_after_descriptor_read(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    kind: str,
+):
+    trajectory, batch, hashes = _publish_valid_run(tmp_path, sample)
+    target = trajectory.with_suffix(".sha256.json") if kind == "sidecar" else batch
+    replacement = tmp_path.parent / f"{tmp_path.name}-replacement-{kind}.json"
+    replacement.write_bytes(target.read_bytes())
+    original = artifacts._read_descriptor_bounded
+    swapped = False
+
+    def read_then_swap(
+        descriptor: int,
+        maximum_size: int,
+        description: str,
+    ) -> bytes:
+        nonlocal swapped
+        payload = original(descriptor, maximum_size, description)
+        expected_description = (
+            "trajectory digest sidecar" if kind == "sidecar" else "batch manifest"
+        )
+        if description == expected_description and not swapped:
+            swapped = True
+            os.replace(replacement, target)
+        return payload
+
+    monkeypatch.setattr(artifacts, "_read_descriptor_bounded", read_then_swap)
+    with pytest.raises(ArtifactIntegrityError, match="identity"):
+        if kind == "sidecar":
+            load_verified_trajectory(trajectory, hashes)
+        else:
+            reconstruct_progress(tmp_path, hashes)
+    assert swapped
+
+
+@pytest.mark.parametrize("indirection", ("external-link", "vds", "external-storage"))
+def test_hdf5_storage_indirection_is_rejected_before_external_data_can_govern(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    indirection: str,
+):
+    request, result, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    external_h5 = tmp_path / "external.h5"
+    external_raw = tmp_path / "external.raw"
+    if indirection in {"external-link", "vds"}:
+        with h5py.File(external_h5, "w") as stream:
+            stream.create_dataset("observables", data=result.observables)
+    with h5py.File(path, "r+") as stream:
+        del stream["result/observables"]
+        if indirection == "external-link":
+            stream["result"]["observables"] = h5py.ExternalLink(
+                str(external_h5), "observables"
+            )
+        elif indirection == "vds":
+            layout = h5py.VirtualLayout(shape=(3, 10), dtype="<f8")
+            layout[:] = h5py.VirtualSource(
+                str(external_h5), "observables", shape=(3, 10)
+            )
+            stream["result"].create_virtual_dataset("observables", layout)
+        else:
+            dataset = stream["result"].create_dataset(
+                "observables",
+                shape=(3, 10),
+                dtype="<f8",
+                external=[(str(external_raw), 0, h5py.h5f.UNLIMITED)],
+            )
+            dataset[...] = result.observables
+    _refresh_digest(path)
+    if indirection in {"external-link", "vds"}:
+        with h5py.File(external_h5, "r+") as stream:
+            stream["observables"][0, 0] = 777.0
+    else:
+        with external_raw.open("r+b") as stream:
+            stream.seek(0)
+            stream.write(np.float64(777.0).tobytes())
+    with pytest.raises(ArtifactIntegrityError, match="link|virtual|external|storage"):
+        load_verified_trajectory(path, expected(request))
+
+
+def test_hdf5_soft_link_and_unexpected_object_are_rejected(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    for name, mutate in (
+        (
+            "soft",
+            lambda stream: stream.__setitem__(
+                "unexpected", h5py.SoftLink("/result/observables")
+            ),
+        ),
+        ("object", lambda stream: stream.create_group("unexpected")),
+    ):
+        root = tmp_path / name
+        path = publish_trajectory(root, *sample)
+        with h5py.File(path, "r+") as stream:
+            mutate(stream)
+        _refresh_digest(path)
+        with pytest.raises(ArtifactIntegrityError, match="link|tree|membership"):
+            load_verified_trajectory(path, expected(request))
+
+
+def test_hostile_final_installed_between_precheck_and_install_is_never_clobbered(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    hostile = b"hostile-winner-must-survive"
+    original = artifacts._replace
+
+    def install_hostile_then_continue(partial: Path, final: Path) -> None:
+        final.write_bytes(hostile)
+        original(partial, final)
+
+    monkeypatch.setattr(artifacts, "_replace", install_hostile_then_continue)
+    with pytest.raises((FileExistsError, ArtifactIntegrityError)):
+        publish_trajectory(tmp_path, *sample)
+    final = (
+        tmp_path
+        / "trajectories"
+        / f"trajectory-{request_digest(request)}.h5"
+    )
+    assert final.read_bytes() == hostile
+
+
+def test_installed_trajectory_inode_is_rehashed_before_staged_link_is_removed(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    original = artifacts._install_no_clobber
+
+    def install_then_mutate(source: Path, destination: Path) -> None:
+        original(source, destination)
+        if destination.suffix == ".h5":
+            with destination.open("r+b") as stream:
+                stream.seek(0)
+                stream.write(b"hostile!")
+
+    monkeypatch.setattr(artifacts, "_install_no_clobber", install_then_mutate)
+    with pytest.raises(ArtifactIntegrityError, match="digest|parse|HDF5"):
+        publish_trajectory(tmp_path, *sample)
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
+def test_installed_batch_inode_bytes_are_verified_before_partial_removal(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    trajectory = publish_trajectory(tmp_path, *sample)
+    original = artifacts.os.link
+
+    def link_then_mutate(
+        source: Path,
+        destination: Path,
+        *,
+        follow_symlinks: bool = True,
+    ) -> None:
+        original(source, destination, follow_symlinks=follow_symlinks)
+        if str(destination).endswith("batch-hostile.json"):
+            Path(destination).write_bytes(b'{"hostile":true}\n')
+
+    monkeypatch.setattr(artifacts.os, "link", link_then_mutate)
+    with pytest.raises(ArtifactIntegrityError, match="installed|bytes|canonical"):
+        publish_batch_manifest(tmp_path, "hostile", [trajectory])
+    assert (tmp_path / "batches" / "batch-hostile.json").read_bytes() == (
+        b'{"hostile":true}\n'
+    )
+
+
+def test_intent_cleanup_failure_performs_recovery_directory_fsync(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    calls: list[int] = []
+    original = artifacts._fsync_directory
+
+    def fail_cleanup_once(path: Path) -> None:
+        calls.append(len(calls) + 1)
+        if len(calls) == 3:
+            raise OSError("cleanup fsync")
+        original(path)
+
+    monkeypatch.setattr(artifacts, "_fsync_directory", fail_cleanup_once)
+    with pytest.raises(OSError, match="cleanup fsync"):
+        publish_trajectory(tmp_path, *sample)
+    assert calls == [1, 2, 3, 4]
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
+def test_intent_recovery_fsync_failure_raises_distinct_integrity_error(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    calls = 0
+    original = artifacts._fsync_directory
+
+    def fail_cleanup_and_recovery(path: Path) -> None:
+        nonlocal calls
+        calls += 1
+        if calls in (3, 4):
+            raise OSError(f"fsync-{calls}")
+        original(path)
+
+    monkeypatch.setattr(artifacts, "_fsync_directory", fail_cleanup_and_recovery)
+    with pytest.raises(ArtifactIntegrityError, match="recovery.*fsync"):
+        publish_trajectory(tmp_path, *sample)
+    assert calls == 4
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
+@pytest.mark.parametrize(
+    ("attribute", "stale"),
+    (
+        ("rng_version", "philox-stale"),
+        ("conversion_version", "conversion-stale"),
+    ),
+)
+def test_caller_cannot_bless_stale_frozen_versions(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    attribute: str,
+    stale: str,
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    with h5py.File(path, "r+") as stream:
+        stream.attrs[attribute] = stale
+    _refresh_digest(path)
+    stale_expected = expected(request)
+    stale_expected[attribute] = stale
+    with pytest.raises(ArtifactIntegrityError, match="version|stale"):
+        load_verified_trajectory(path, stale_expected)
+
+
+def test_publication_initializes_complete_canonical_top_level_layout(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    publish_trajectory(tmp_path, *sample)
+    assert {path.name for path in tmp_path.iterdir()} == {
+        "request.json",
+        "environment.json",
+        "kernel",
+        "seed-manifest.json",
+        "capability.json",
+        "trajectories",
+        "batches",
+        "manifest.json",
+    }
+    for name in ("kernel", "trajectories", "batches"):
+        assert (tmp_path / name).is_dir()
+        assert not (tmp_path / name).is_symlink()
+    for name in (
+        "request.json",
+        "environment.json",
+        "seed-manifest.json",
+        "capability.json",
+        "manifest.json",
+    ):
+        assert (tmp_path / name).is_file()
+        assert not (tmp_path / name).is_symlink()
+
+
+def test_reconstruction_is_verify_only_and_rejects_empty_or_missing_layout(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ArtifactIntegrityError, match="layout|missing|empty"):
+        reconstruct_progress(empty, expected(request))
+    assert list(empty.iterdir()) == []
+
+    root = tmp_path / "missing"
+    _, _, hashes = _publish_valid_run(root, sample)
+    (root / "capability.json").unlink()
+    with pytest.raises(ArtifactIntegrityError, match="layout|missing"):
+        reconstruct_progress(root, hashes)
+    assert not (root / "capability.json").exists()
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="FIFO unavailable")
+def test_reconstruction_rejects_wrong_kinds_fifo_and_hardlink_alias(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    root = tmp_path / "fifo"
+    _, _, hashes = _publish_valid_run(root, sample)
+    capability = root / "capability.json"
+    capability.unlink()
+    os.mkfifo(capability)
+    assert stat.S_ISFIFO(capability.lstat().st_mode)
+    with pytest.raises(ArtifactIntegrityError, match="regular|kind|layout"):
+        reconstruct_progress(root, hashes)
+
+    alias_root = tmp_path / "alias"
+    _, _, alias_hashes = _publish_valid_run(alias_root, sample)
+    environment = alias_root / "environment.json"
+    environment.unlink()
+    os.link(alias_root / "request.json", environment)
+    with pytest.raises(ArtifactIntegrityError, match="alias|link|layout"):
+        reconstruct_progress(alias_root, alias_hashes)
+
+
+def test_oversized_json_sidecar_and_manifest_are_rejected_before_parse(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path / "sidecar", *sample)
+    path.with_suffix(".sha256.json").write_bytes(b" " * (1_048_576 + 1))
+    with pytest.raises(ArtifactIntegrityError, match="size|large|limit"):
+        load_verified_trajectory(path, expected(request))
+
+    root = tmp_path / "manifest"
+    _, batch, hashes = _publish_valid_run(root, sample)
+    batch.write_bytes(b" " * (1_048_576 + 1))
+    with pytest.raises(ArtifactIntegrityError, match="size|large|limit"):
+        reconstruct_progress(root, hashes)
+
+
+def test_deeply_nested_bounded_json_fails_closed(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    path.with_suffix(".sha256.json").write_bytes(b"[" * 2000 + b"]" * 2000)
+    with pytest.raises(ArtifactIntegrityError, match="read|JSON|parse"):
+        load_verified_trajectory(path, expected(request))
+
+
+def test_sparse_over_limit_kappa_shape_is_rejected_before_dataset_read(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    with h5py.File(path, "r+") as stream:
+        del stream["request/kappas"]
+        stream["request"].create_dataset(
+            "kappas",
+            shape=(4097,),
+            maxshape=(None,),
+            chunks=(1,),
+            dtype="<f8",
+        )
+    _refresh_digest(path)
+    with pytest.raises(ArtifactIntegrityError, match="kappa|shape|resource|storage"):
+        load_verified_trajectory(path, expected(request))
+
+
+@pytest.mark.parametrize("storage", ("chunked", "compressed"))
+def test_noncanonical_dataset_storage_tricks_are_rejected(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    storage: str,
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    with h5py.File(path, "r+") as stream:
+        values = stream["request/kappas"][...]
+        del stream["request/kappas"]
+        kwargs = {"chunks": (3,)}
+        if storage == "compressed":
+            kwargs["compression"] = "gzip"
+        stream["request"].create_dataset(
+            "kappas", data=values, dtype="<f8", **kwargs
+        )
+    _refresh_digest(path)
+    with pytest.raises(ArtifactIntegrityError, match="storage|chunk|compression"):
+        load_verified_trajectory(path, expected(request))
+
+
+@pytest.mark.parametrize(
+    ("attribute", "value"),
+    (
+        ("clean_tree", np.uint64(1)),
+        ("length", np.uint32(8)),
+        ("sigma", np.float32(1.25)),
+        ("event_count", np.uint32(19)),
+    ),
+)
+def test_hdf5_scalar_attribute_dtype_confusion_is_rejected(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    attribute: str,
+    value: np.generic,
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    with h5py.File(path, "r+") as stream:
+        del stream.attrs[attribute]
+        stream.attrs.create(attribute, value)
+    _refresh_digest(path)
+    with pytest.raises(ArtifactIntegrityError, match="dtype|representation"):
+        load_verified_trajectory(path, expected(request))

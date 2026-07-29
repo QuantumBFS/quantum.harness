@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import stat
+from typing import BinaryIO
 import uuid
 
 import h5py
@@ -33,6 +34,10 @@ TRAJECTORY_DIGEST_SCHEMA = "challenge-194-trajectory-digest-v1"
 BATCH_SCHEMA = "challenge-194-batch-manifest-v1"
 PROGRESS_SCHEMA = "challenge-194-progress-v1"
 CONVERSION_VERSION = "challenge-194-artifact-conversion-v1"
+MAX_JSON_BYTES = 1_048_576
+MAX_HDF5_BYTES = 67_108_864
+MAX_KAPPA_COUNT = 4096
+MAX_DATASET_BYTES = 1_048_576
 
 _HEX256 = re.compile(r"[0-9a-f]{64}")
 _HEX160 = re.compile(r"[0-9a-f]{40}")
@@ -78,6 +83,10 @@ _ROOT_ENTRIES = frozenset(
         "manifest.json",
     }
 )
+_REQUIRED_ROOT_ENTRIES = _ROOT_ENTRIES - {"progress.json"}
+_ROOT_DIRECTORY_ENTRIES = frozenset({"kernel", "trajectories", "batches"})
+_ROOT_FILE_ENTRIES = _REQUIRED_ROOT_ENTRIES - _ROOT_DIRECTORY_ENTRIES
+_LAYOUT_SCHEMA = "challenge-194-run-layout-entry-v1"
 
 
 class ArtifactIntegrityError(RuntimeError):
@@ -112,6 +121,106 @@ def _checked_regular(path: Path, description: str) -> os.stat_result:
     return metadata
 
 
+def _open_regular(
+    path: Path,
+    description: str,
+    *,
+    maximum_size: int | None = None,
+) -> tuple[int, os.stat_result]:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        raise ArtifactIntegrityError(f"unable to open {description}") from error
+    try:
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ArtifactIntegrityError(f"{description} must be a regular file")
+        if maximum_size is not None and metadata.st_size > maximum_size:
+            raise ArtifactIntegrityError(f"{description} exceeds the byte-size limit")
+        return descriptor, metadata
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def _file_identity(metadata: os.stat_result) -> tuple[int, int, int, int, int]:
+    return (
+        metadata.st_dev,
+        metadata.st_ino,
+        metadata.st_size,
+        metadata.st_mtime_ns,
+        metadata.st_ctime_ns,
+    )
+
+
+def _require_stable_descriptor(
+    descriptor: int,
+    original: os.stat_result,
+    description: str,
+) -> os.stat_result:
+    try:
+        current = os.fstat(descriptor)
+    except OSError as error:
+        raise ArtifactIntegrityError(f"unable to restat {description}") from error
+    if _file_identity(current) != _file_identity(original):
+        raise ArtifactIntegrityError(f"{description} identity or size mutated")
+    return current
+
+
+def _require_path_identity(
+    path: Path,
+    original: os.stat_result,
+    description: str,
+) -> None:
+    try:
+        current = path.lstat()
+    except OSError as error:
+        raise ArtifactIntegrityError(f"{description} pathname identity changed") from error
+    if (
+        stat.S_ISLNK(current.st_mode)
+        or current.st_dev != original.st_dev
+        or current.st_ino != original.st_ino
+    ):
+        raise ArtifactIntegrityError(f"{description} pathname identity changed")
+
+
+def _read_descriptor_bounded(
+    descriptor: int,
+    maximum_size: int,
+    description: str,
+) -> bytes:
+    try:
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        chunks: list[bytes] = []
+        remaining = maximum_size + 1
+        while remaining:
+            block = os.read(descriptor, min(remaining, 64 * 1024))
+            if not block:
+                break
+            chunks.append(block)
+            remaining -= len(block)
+    except OSError as error:
+        raise ArtifactIntegrityError(f"unable to read {description}") from error
+    payload = b"".join(chunks)
+    if len(payload) > maximum_size:
+        raise ArtifactIntegrityError(f"{description} exceeds the byte-size limit")
+    return payload
+
+
+def _hash_descriptor(descriptor: int, description: str) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    size = 0
+    try:
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        while block := os.read(descriptor, 1024 * 1024):
+            digest.update(block)
+            size += len(block)
+    except OSError as error:
+        raise ArtifactIntegrityError(f"unable to hash {description}") from error
+    return digest.hexdigest(), size
+
+
 def _check_existing_path_chain(path: Path) -> None:
     absolute = path.absolute()
     current = Path(absolute.anchor)
@@ -127,7 +236,34 @@ def _check_existing_path_chain(path: Path) -> None:
             raise ArtifactIntegrityError("run path must not contain symlinks")
 
 
-def _prepare_run_directory(run_dir: Path) -> tuple[Path, Path, Path]:
+def _layout_document(name: str) -> dict[str, str]:
+    return {
+        "entry": name,
+        "schema_version": _LAYOUT_SCHEMA,
+        "status": "reserved",
+    }
+
+
+def _initialize_run_directory(run_dir: Path) -> None:
+    marker = run_dir / f".layout.{os.getpid()}.{uuid.uuid4().hex}.intent"
+    _write_unique_fsynced(marker, _canonical_json_bytes({"schema_version": _LAYOUT_SCHEMA}))
+    _fsync_directory_raw(run_dir)
+    try:
+        for name in sorted(_ROOT_DIRECTORY_ENTRIES):
+            (run_dir / name).mkdir()
+        for name in sorted(_ROOT_FILE_ENTRIES):
+            _write_unique_fsynced(
+                run_dir / name,
+                _canonical_json_bytes(_layout_document(name)),
+            )
+        _fsync_directory_raw(run_dir)
+        marker.unlink()
+        _fsync_directory_raw(run_dir)
+    except BaseException:
+        raise
+
+
+def _prepare_publication_run(run_dir: Path) -> tuple[Path, Path, Path]:
     if not isinstance(run_dir, Path):
         raise TypeError("run_dir must be a pathlib.Path")
     _check_existing_path_chain(run_dir)
@@ -141,33 +277,12 @@ def _prepare_run_directory(run_dir: Path) -> tuple[Path, Path, Path]:
         raise ArtifactIntegrityError("unable to inspect run directory") from error
     if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
         raise ArtifactIntegrityError("run directory must be a non-symlink directory")
-    directories = []
-    for name in ("trajectories", "batches"):
-        candidate = run_dir / name
-        if candidate.exists() or candidate.is_symlink():
-            try:
-                mode = candidate.lstat().st_mode
-            except OSError as error:
-                raise ArtifactIntegrityError(
-                    f"unable to inspect {name} directory"
-                ) from error
-            if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
-                raise ArtifactIntegrityError(
-                    f"{name} must be a non-symlink directory"
-                )
-        else:
-            try:
-                candidate.mkdir()
-            except FileExistsError:
-                mode = candidate.lstat().st_mode
-                if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
-                    raise ArtifactIntegrityError(
-                        f"{name} must be a non-symlink directory"
-                    )
-            except OSError as error:
-                raise ArtifactIntegrityError(f"unable to create {name}") from error
-        directories.append(candidate)
-    return run_dir, directories[0], directories[1]
+    with _directory_lock(run_dir):
+        entries = list(run_dir.iterdir())
+        if not entries:
+            _initialize_run_directory(run_dir)
+    _verify_run_layout(run_dir)
+    return run_dir, run_dir / "trajectories", run_dir / "batches"
 
 
 @contextmanager
@@ -182,13 +297,17 @@ def _directory_lock(directory: Path):
         os.close(descriptor)
 
 
-def _fsync_directory(directory: Path) -> None:
+def _fsync_directory_raw(directory: Path) -> None:
     flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(directory, flags)
     try:
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+def _fsync_directory(directory: Path) -> None:
+    _fsync_directory_raw(directory)
 
 
 def _flush_hdf5(stream: h5py.File) -> None:
@@ -202,22 +321,35 @@ def _fsync_file(stream: h5py.File) -> None:
     os.fsync(handle)
 
 
+def _install_no_clobber(source: Path, destination: Path) -> None:
+    try:
+        os.link(source, destination, follow_symlinks=False)
+    except FileExistsError:
+        raise FileExistsError(f"immutable artifact already exists: {destination}")
+    source_stat = _checked_regular(source, "staged artifact")
+    destination_stat = _checked_regular(destination, "installed artifact")
+    if (
+        source_stat.st_dev != destination_stat.st_dev
+        or source_stat.st_ino != destination_stat.st_ino
+    ):
+        raise ArtifactIntegrityError("installed artifact inode identity mismatch")
+
+
 def _replace(source: Path, destination: Path) -> None:
-    os.replace(source, destination)
+    # Kept as the explicit publication boundary used by crash-injection tests.
+    _install_no_clobber(source, destination)
 
 
 def _hash_file(path: Path) -> tuple[str, int]:
-    _checked_regular(path, "trajectory")
-    digest = hashlib.sha256()
-    size = 0
+    descriptor, original = _open_regular(
+        path, "trajectory", maximum_size=MAX_HDF5_BYTES
+    )
     try:
-        with path.open("rb") as stream:
-            while block := stream.read(1024 * 1024):
-                digest.update(block)
-                size += len(block)
-    except OSError as error:
-        raise ArtifactIntegrityError("unable to hash trajectory") from error
-    return digest.hexdigest(), size
+        result = _hash_descriptor(descriptor, "trajectory")
+        _require_stable_descriptor(descriptor, original, "trajectory")
+        return result
+    finally:
+        os.close(descriptor)
 
 
 def _write_unique_fsynced(path: Path, payload: bytes) -> None:
@@ -240,15 +372,31 @@ def _write_unique_fsynced(path: Path, payload: bytes) -> None:
         os.close(descriptor)
 
 
+def _verify_installed_bytes(path: Path, payload: bytes, description: str) -> None:
+    descriptor, original = _open_regular(
+        path, description, maximum_size=MAX_JSON_BYTES
+    )
+    try:
+        installed = _read_descriptor_bounded(
+            descriptor, MAX_JSON_BYTES, description
+        )
+        _require_stable_descriptor(descriptor, original, description)
+        _require_path_identity(path, original, description)
+    finally:
+        os.close(descriptor)
+    if installed != payload:
+        raise ArtifactIntegrityError(f"{description} installed bytes mismatch")
+
+
 def _publish_json_once(path: Path, payload: bytes) -> None:
     partial = path.parent / f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.partial"
     try:
         _write_unique_fsynced(partial, payload)
         try:
-            os.link(partial, path, follow_symlinks=False)
+            _install_no_clobber(partial, path)
         except FileExistsError:
             raise FileExistsError(f"immutable artifact already exists: {path}")
-        _checked_regular(path, "published JSON artifact")
+        _verify_installed_bytes(path, payload, "published JSON artifact")
         partial.unlink()
         _fsync_directory(path.parent)
     except BaseException:
@@ -304,6 +452,10 @@ def _validate_expected(expected: dict[str, str]) -> None:
     analysis = expected["analysis_plan_sha256"]
     if analysis != "not-created-pre-pilot" and _HEX256.fullmatch(analysis) is None:
         raise ArtifactIntegrityError("expected analysis plan hash is malformed")
+    if expected["rng_version"] != RNG_VERSION:
+        raise ArtifactIntegrityError("expected RNG version is stale")
+    if expected["conversion_version"] != CONVERSION_VERSION:
+        raise ArtifactIntegrityError("expected conversion version is stale")
 
 
 def _stream_material(request: TrajectoryRequest) -> tuple[np.ndarray, np.ndarray, list[str]]:
@@ -404,11 +556,40 @@ def _write_hdf5(
         _fsync_file(stream)
 
 
-def _exact_group(group: h5py.Group, names: set[str], label: str) -> None:
-    if set(group.keys()) != names:
-        raise ArtifactIntegrityError(f"{label} dataset membership is not exact")
-    if any(not isinstance(group[name], h5py.Dataset) for name in names):
-        raise ArtifactIntegrityError(f"{label} contains a non-dataset member")
+def _hard_link_object(
+    group: h5py.Group | h5py.File,
+    name: str,
+    expected_type: type[h5py.Group] | type[h5py.Dataset],
+) -> h5py.Group | h5py.Dataset:
+    link = group.get(name, getlink=True)
+    if not isinstance(link, h5py.HardLink):
+        raise ArtifactIntegrityError(f"HDF5 link {name} is not canonical")
+    value = group.get(name, getlink=False)
+    if not isinstance(value, expected_type):
+        raise ArtifactIntegrityError(f"HDF5 object {name} has the wrong kind")
+    return value
+
+
+def _object_address(value: h5py.Group | h5py.Dataset) -> int:
+    try:
+        return int(h5py.h5o.get_info(value.id).addr)
+    except (TypeError, ValueError, RuntimeError) as error:
+        raise ArtifactIntegrityError("unable to inspect HDF5 object identity") from error
+
+
+def _exact_group(
+    group: h5py.Group,
+    names: set[str],
+    label: str,
+) -> dict[str, h5py.Dataset]:
+    if set(group.keys()) != names or set(group.attrs.keys()):
+        raise ArtifactIntegrityError(f"{label} object tree is not exact")
+    datasets: dict[str, h5py.Dataset] = {}
+    for name in names:
+        value = _hard_link_object(group, name, h5py.Dataset)
+        assert isinstance(value, h5py.Dataset)
+        datasets[name] = value
+    return datasets
 
 
 def _text_attribute(attributes: h5py.AttributeManager, key: str) -> str:
@@ -416,205 +597,358 @@ def _text_attribute(attributes: h5py.AttributeManager, key: str) -> str:
         value = attributes[key]
     except KeyError as error:
         raise ArtifactIntegrityError(f"missing HDF5 attribute: {key}") from error
-    if not isinstance(value, str):
-        raise ArtifactIntegrityError(f"HDF5 attribute {key} is not text")
+    try:
+        attribute = attributes.get_id(key)
+    except KeyError as error:
+        raise ArtifactIntegrityError(f"missing HDF5 attribute: {key}") from error
+    string_info = h5py.check_string_dtype(attribute.dtype)
+    if (
+        attribute.shape != ()
+        or string_info is None
+        or string_info.encoding != "utf-8"
+        or string_info.length is not None
+        or not isinstance(value, str)
+    ):
+        raise ArtifactIntegrityError(
+            f"HDF5 attribute {key} has noncanonical dtype representation"
+        )
     return value
 
 
-def _unsigned_attribute(attributes: h5py.AttributeManager, key: str) -> int:
+def _numeric_attribute(
+    attributes: h5py.AttributeManager,
+    key: str,
+    dtype: str,
+) -> int | float:
     try:
         value = attributes[key]
     except KeyError as error:
         raise ArtifactIntegrityError(f"missing HDF5 attribute: {key}") from error
-    if not isinstance(value, np.unsignedinteger):
-        raise ArtifactIntegrityError(f"HDF5 attribute {key} is not unsigned")
+    attribute = attributes.get_id(key)
+    if attribute.shape != () or attribute.dtype.str != dtype:
+        raise ArtifactIntegrityError(
+            f"HDF5 attribute {key} has noncanonical dtype representation"
+        )
+    if dtype == "<f8":
+        return float(value)
     return int(value)
 
 
-def _read_dataset(
-    group: h5py.Group,
+def _validate_dataset_metadata(
+    dataset: h5py.Dataset,
     name: str,
     dtype: str,
     shape: tuple[int, ...],
-) -> np.ndarray:
-    dataset = group[name]
-    assert isinstance(dataset, h5py.Dataset)
-    if dataset.dtype.str != dtype or dataset.shape != shape:
+) -> None:
+    try:
+        external = dataset.external
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ArtifactIntegrityError(f"unable to inspect dataset {name}") from error
+    if (
+        dataset.dtype.str != dtype
+        or dataset.shape != shape
+        or dataset.maxshape != shape
+        or dataset.nbytes > MAX_DATASET_BYTES
+    ):
         raise ArtifactIntegrityError(f"dataset {name} has stale dtype or shape")
-    value = np.asarray(dataset[...])
+    if (
+        dataset.is_virtual
+        or external is not None
+        or dataset.chunks is not None
+        or dataset.compression is not None
+        or dataset.compression_opts is not None
+        or dataset.shuffle
+        or dataset.fletcher32
+        or dataset.scaleoffset is not None
+        or set(dataset.attrs.keys())
+        or dataset.dtype.hasobject
+        or h5py.check_dtype(ref=dataset.dtype) is not None
+        or dataset.id.get_create_plist().get_layout() != h5py.h5d.CONTIGUOUS
+    ):
+        raise ArtifactIntegrityError(
+            f"dataset {name} uses noncanonical external, virtual, or chunked storage"
+        )
+
+
+def _read_dataset(dataset: h5py.Dataset, name: str) -> np.ndarray:
+    try:
+        value = np.asarray(dataset[...])
+    except (MemoryError, OSError, RuntimeError, ValueError) as error:
+        raise ArtifactIntegrityError(f"unable to load bounded dataset {name}") from error
     if not value.flags.c_contiguous:
         value = np.ascontiguousarray(value)
     return value
 
 
-def _load_hdf5(path: Path, expected: dict[str, str]) -> TrajectoryResult:
-    _validate_expected(expected)
-    _checked_regular(path, "trajectory")
+def _parse_hdf5(
+    stream: h5py.File,
+    expected: dict[str, str] | None,
+) -> tuple[TrajectoryResult, dict[str, str]]:
     try:
-        with h5py.File(path, "r") as stream:
-            if set(stream.keys()) != {"request", "result", "rng"}:
-                raise ArtifactIntegrityError("HDF5 top-level membership is not exact")
-            if set(stream.attrs.keys()) != {
-                "schema_version",
-                "rng_version",
-                "conversion_version",
-                "request_sha256",
-                "kernel_sha256",
-                "source_revision",
-                "clean_tree",
-                "uv_lock_sha256",
-                "runtime_capability_sha256",
-                "analysis_plan_sha256",
-                "rng_sha256",
-                "length",
-                "sigma",
-                "sigma_grid_id",
-                "master_seed",
-                "phase",
-                "replica",
-                "event_count",
-                "duplicate_count",
-            }:
-                raise ArtifactIntegrityError("HDF5 attributes are not exact")
-            request_group = stream["request"]
-            result_group = stream["result"]
-            rng_group = stream["rng"]
-            if not all(
-                isinstance(group, h5py.Group)
-                for group in (request_group, result_group, rng_group)
-            ):
-                raise ArtifactIntegrityError("HDF5 group structure is invalid")
-            assert isinstance(request_group, h5py.Group)
-            assert isinstance(result_group, h5py.Group)
-            assert isinstance(rng_group, h5py.Group)
-            _exact_group(request_group, {"kappas"}, "request")
-            _exact_group(
-                result_group,
-                {
-                    "observables",
-                    "terminal_counters",
-                    "draw_counts",
-                    "hash_diagnostics",
-                },
-                "result",
-            )
-            _exact_group(
-                rng_group,
-                {"initial_counters", "keys", "key_material_sha256"},
-                "rng",
-            )
-            if _text_attribute(stream.attrs, "schema_version") != TRAJECTORY_SCHEMA:
-                raise ArtifactIntegrityError("trajectory schema is stale")
-            if _unsigned_attribute(stream.attrs, "clean_tree") != 1:
-                raise ArtifactIntegrityError("dirty-tree trajectory is forbidden")
+        top_names = {"request", "result", "rng"}
+        if set(stream.keys()) != top_names or set(stream.attrs.keys()) != {
+            "schema_version",
+            "rng_version",
+            "conversion_version",
+            "request_sha256",
+            "kernel_sha256",
+            "source_revision",
+            "clean_tree",
+            "uv_lock_sha256",
+            "runtime_capability_sha256",
+            "analysis_plan_sha256",
+            "rng_sha256",
+            "length",
+            "sigma",
+            "sigma_grid_id",
+            "master_seed",
+            "phase",
+            "replica",
+            "event_count",
+            "duplicate_count",
+        }:
+            raise ArtifactIntegrityError("HDF5 object tree or attributes are not exact")
+        request_group = _hard_link_object(stream, "request", h5py.Group)
+        result_group = _hard_link_object(stream, "result", h5py.Group)
+        rng_group = _hard_link_object(stream, "rng", h5py.Group)
+        assert isinstance(request_group, h5py.Group)
+        assert isinstance(result_group, h5py.Group)
+        assert isinstance(rng_group, h5py.Group)
+        request_datasets = _exact_group(request_group, {"kappas"}, "request")
+        result_datasets = _exact_group(
+            result_group,
+            {
+                "observables",
+                "terminal_counters",
+                "draw_counts",
+                "hash_diagnostics",
+            },
+            "result",
+        )
+        rng_datasets = _exact_group(
+            rng_group,
+            {"initial_counters", "keys", "key_material_sha256"},
+            "rng",
+        )
+        objects: list[h5py.Group | h5py.Dataset] = [
+            request_group,
+            result_group,
+            rng_group,
+            *request_datasets.values(),
+            *result_datasets.values(),
+            *rng_datasets.values(),
+        ]
+        addresses = [_object_address(value) for value in objects]
+        if len(addresses) != len(set(addresses)):
+            raise ArtifactIntegrityError("HDF5 object tree contains hard-link aliases")
+        if _text_attribute(stream.attrs, "schema_version") != TRAJECTORY_SCHEMA:
+            raise ArtifactIntegrityError("trajectory schema version is stale")
+        stored = {key: _text_attribute(stream.attrs, key) for key in _EXPECTED_KEYS}
+        _validate_expected(stored)
+        if expected is not None:
+            _validate_expected(expected)
             for key in _EXPECTED_KEYS:
-                if _text_attribute(stream.attrs, key) != expected[key]:
-                    raise ArtifactIntegrityError(f"trajectory dependency mismatch: {key}")
-            length = _unsigned_attribute(stream.attrs, "length")
-            master_seed = _unsigned_attribute(stream.attrs, "master_seed")
-            replica = _unsigned_attribute(stream.attrs, "replica")
-            sigma_raw = stream.attrs.get("sigma")
-            if not isinstance(sigma_raw, np.floating):
-                raise ArtifactIntegrityError("sigma attribute is not float64")
-            sigma = float(sigma_raw)
-            sigma_grid_id = _text_attribute(stream.attrs, "sigma_grid_id")
-            phase = _text_attribute(stream.attrs, "phase")
-            kappas_dataset = request_group["kappas"]
-            if not isinstance(kappas_dataset, h5py.Dataset):
-                raise ArtifactIntegrityError("kappas is not a dataset")
-            if kappas_dataset.dtype.str != "<f8" or len(kappas_dataset.shape) != 1:
-                raise ArtifactIntegrityError("kappas dtype or rank is stale")
-            kappas = np.asarray(kappas_dataset[...], dtype=np.float64)
-            request = TrajectoryRequest(
-                length=length,
-                sigma=sigma,
-                sigma_grid_id=sigma_grid_id,
-                kappas=kappas,
-                master_seed=master_seed,
-                phase=phase,  # type: ignore[arg-type]
-                replica=replica,
-                kernel_sha256=expected["kernel_sha256"],
-            )
-            validate_trajectory_request(request)
-            if request_digest(request) != expected["request_sha256"]:
-                raise ArtifactIntegrityError("stored request does not match request hash")
-            n_kappa = request.kappas.size
-            observables = _read_dataset(
-                result_group, "observables", "<f8", (n_kappa, 10)
-            )
-            terminal = _read_dataset(
-                result_group, "terminal_counters", "<u4", (STREAM_COUNT, 4)
-            )
-            draw_counts = _read_dataset(
-                result_group, "draw_counts", "<u8", (STREAM_COUNT, 3)
-            )
-            diagnostics = _read_dataset(
-                result_group, "hash_diagnostics", "<u8", (5,)
-            )
-            initial = _read_dataset(
-                rng_group, "initial_counters", "<u4", (STREAM_COUNT, 4)
-            )
-            keys = _read_dataset(rng_group, "keys", "<u4", (STREAM_COUNT, 2))
-            hashes_dataset = rng_group["key_material_sha256"]
-            if (
-                not isinstance(hashes_dataset, h5py.Dataset)
-                or hashes_dataset.shape != (STREAM_COUNT,)
-                or hashes_dataset.dtype.kind != "S"
-                or hashes_dataset.dtype.itemsize != 64
-            ):
-                raise ArtifactIntegrityError("key-material hash dataset is stale")
-            try:
-                material_hashes = [
-                    value.decode("ascii") for value in hashes_dataset[...]
-                ]
-            except (UnicodeDecodeError, AttributeError) as error:
-                raise ArtifactIntegrityError("key-material hashes are malformed") from error
-            expected_initial, expected_keys, expected_material_hashes = (
-                _stream_material(request)
-            )
-            if (
-                not np.array_equal(initial, expected_initial)
-                or not np.array_equal(keys, expected_keys)
-                or material_hashes != expected_material_hashes
-            ):
-                raise ArtifactIntegrityError("RNG stream material is corrupt")
-            event_count = _unsigned_attribute(stream.attrs, "event_count")
-            duplicate_count = _unsigned_attribute(stream.attrs, "duplicate_count")
-            try:
-                return TrajectoryResult(
-                    request_sha256=expected["request_sha256"],
-                    observables=observables,
-                    terminal_counters=terminal,
-                    draw_counts=draw_counts,
-                    event_count=event_count,
-                    duplicate_count=duplicate_count,
-                    hash_diagnostics=diagnostics,
+                if stored[key] != expected[key]:
+                    raise ArtifactIntegrityError(
+                        f"trajectory dependency mismatch: {key}"
+                    )
+        if stored["rng_version"] != RNG_VERSION:
+            raise ArtifactIntegrityError("trajectory RNG version is stale")
+        if stored["conversion_version"] != CONVERSION_VERSION:
+            raise ArtifactIntegrityError("trajectory conversion version is stale")
+        if _numeric_attribute(stream.attrs, "clean_tree", "|u1") != 1:
+            raise ArtifactIntegrityError("dirty-tree trajectory is forbidden")
+        length = int(_numeric_attribute(stream.attrs, "length", "<u8"))
+        master_seed = int(_numeric_attribute(stream.attrs, "master_seed", "<u8"))
+        replica = int(_numeric_attribute(stream.attrs, "replica", "<u8"))
+        sigma = float(_numeric_attribute(stream.attrs, "sigma", "<f8"))
+        sigma_grid_id = _text_attribute(stream.attrs, "sigma_grid_id")
+        phase = _text_attribute(stream.attrs, "phase")
+        kappas_dataset = request_datasets["kappas"]
+        if (
+            len(kappas_dataset.shape) != 1
+            or not 1 <= kappas_dataset.shape[0] <= MAX_KAPPA_COUNT
+        ):
+            raise ArtifactIntegrityError("kappa shape exceeds the frozen resource limit")
+        _validate_dataset_metadata(
+            kappas_dataset, "kappas", "<f8", (kappas_dataset.shape[0],)
+        )
+        kappas = _read_dataset(kappas_dataset, "kappas").astype(
+            np.float64, copy=False
+        )
+        request = TrajectoryRequest(
+            length=length,
+            sigma=sigma,
+            sigma_grid_id=sigma_grid_id,
+            kappas=kappas,
+            master_seed=master_seed,
+            phase=phase,  # type: ignore[arg-type]
+            replica=replica,
+            kernel_sha256=stored["kernel_sha256"],
+        )
+        validate_trajectory_request(request)
+        if request_digest(request) != stored["request_sha256"]:
+            raise ArtifactIntegrityError("stored request does not match request hash")
+        n_kappa = request.kappas.size
+        metadata = (
+            (result_datasets["observables"], "observables", "<f8", (n_kappa, 10)),
+            (
+                result_datasets["terminal_counters"],
+                "terminal_counters",
+                "<u4",
+                (STREAM_COUNT, 4),
+            ),
+            (
+                result_datasets["draw_counts"],
+                "draw_counts",
+                "<u8",
+                (STREAM_COUNT, 3),
+            ),
+            (
+                result_datasets["hash_diagnostics"],
+                "hash_diagnostics",
+                "<u8",
+                (5,),
+            ),
+            (
+                rng_datasets["initial_counters"],
+                "initial_counters",
+                "<u4",
+                (STREAM_COUNT, 4),
+            ),
+            (rng_datasets["keys"], "keys", "<u4", (STREAM_COUNT, 2)),
+            (
+                rng_datasets["key_material_sha256"],
+                "key_material_sha256",
+                "|S64",
+                (STREAM_COUNT,),
+            ),
+        )
+        for dataset, name, dtype, shape in metadata:
+            _validate_dataset_metadata(dataset, name, dtype, shape)
+        observables = _read_dataset(result_datasets["observables"], "observables")
+        terminal = _read_dataset(
+            result_datasets["terminal_counters"], "terminal_counters"
+        )
+        draw_counts = _read_dataset(
+            result_datasets["draw_counts"], "draw_counts"
+        )
+        diagnostics = _read_dataset(
+            result_datasets["hash_diagnostics"], "hash_diagnostics"
+        )
+        initial = _read_dataset(rng_datasets["initial_counters"], "initial_counters")
+        keys = _read_dataset(rng_datasets["keys"], "keys")
+        hashes_dataset = rng_datasets["key_material_sha256"]
+        try:
+            material_hashes = [
+                value.decode("ascii")
+                for value in _read_dataset(
+                    hashes_dataset, "key_material_sha256"
                 )
-            except ValueError as error:
-                raise ArtifactIntegrityError("trajectory result is invalid") from error
+            ]
+        except (UnicodeDecodeError, AttributeError) as error:
+            raise ArtifactIntegrityError("key-material hashes are malformed") from error
+        expected_initial, expected_keys, expected_material_hashes = _stream_material(
+            request
+        )
+        if (
+            not np.array_equal(initial, expected_initial)
+            or not np.array_equal(keys, expected_keys)
+            or material_hashes != expected_material_hashes
+        ):
+            raise ArtifactIntegrityError("RNG stream material is corrupt")
+        event_count = int(_numeric_attribute(stream.attrs, "event_count", "<u8"))
+        duplicate_count = int(
+            _numeric_attribute(stream.attrs, "duplicate_count", "<u8")
+        )
+        try:
+            result = TrajectoryResult(
+                request_sha256=stored["request_sha256"],
+                observables=observables,
+                terminal_counters=terminal,
+                draw_counts=draw_counts,
+                event_count=event_count,
+                duplicate_count=duplicate_count,
+                hash_diagnostics=diagnostics,
+            )
+        except ValueError as error:
+            raise ArtifactIntegrityError("trajectory result is invalid") from error
+        return result, stored
     except ArtifactIntegrityError:
         raise
-    except (OSError, KeyError, TypeError, ValueError) as error:
+    except (KeyError, MemoryError, OSError, RuntimeError, TypeError, ValueError) as error:
         raise ArtifactIntegrityError("unable to parse trajectory HDF5") from error
 
 
-def _semantic_reload(path: Path, expected: dict[str, str]) -> TrajectoryResult:
-    return _load_hdf5(path, expected)
+def _load_hdf5_verified(
+    path: Path,
+    expected: dict[str, str] | None,
+    required_digest: str | None = None,
+    required_size: int | None = None,
+) -> tuple[TrajectoryResult, dict[str, str], str, int]:
+    if expected is not None:
+        _validate_expected(expected)
+    descriptor, original = _open_regular(
+        path, "trajectory", maximum_size=MAX_HDF5_BYTES
+    )
+    try:
+        before_hash, before_size = _hash_descriptor(descriptor, "trajectory")
+        if required_digest is not None and before_hash != required_digest:
+            raise ArtifactIntegrityError("whole-file trajectory digest mismatch")
+        if required_size is not None and before_size != required_size:
+            raise ArtifactIntegrityError("whole-file trajectory size mismatch")
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        duplicate = os.dup(descriptor)
+        file_object: BinaryIO = os.fdopen(duplicate, "rb", closefd=True)
+        try:
+            with h5py.File(file_object, "r") as stream:
+                result, stored = _parse_hdf5(stream, expected)
+        finally:
+            file_object.close()
+        after_hash, after_size = _hash_descriptor(descriptor, "trajectory")
+        _require_stable_descriptor(descriptor, original, "trajectory")
+        _require_path_identity(path, original, "trajectory")
+        if (after_hash, after_size) != (before_hash, before_size):
+            raise ArtifactIntegrityError("trajectory mutated during semantic parsing")
+        return result, stored, before_hash, before_size
+    except ArtifactIntegrityError:
+        raise
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ArtifactIntegrityError("unable to parse trajectory HDF5") from error
+    finally:
+        os.close(descriptor)
+
+
+def _load_hdf5(path: Path, expected: dict[str, str]) -> TrajectoryResult:
+    return _load_hdf5_verified(path, expected)[0]
+
+
+def _semantic_reload(
+    path: Path,
+    expected: dict[str, str],
+) -> tuple[TrajectoryResult, str, int]:
+    result, _, digest, size = _load_hdf5_verified(path, expected)
+    return result, digest, size
 
 
 def _read_canonical_json(path: Path, description: str) -> object:
-    _checked_regular(path, description)
+    descriptor, original = _open_regular(
+        path, description, maximum_size=MAX_JSON_BYTES
+    )
     try:
-        payload = path.read_bytes()
+        payload = _read_descriptor_bounded(descriptor, MAX_JSON_BYTES, description)
         document = json.loads(payload)
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        _require_stable_descriptor(descriptor, original, description)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise ArtifactIntegrityError(f"unable to read {description}") from error
+    finally:
+        os.close(descriptor)
     if payload != _canonical_json_bytes(document):
         raise ArtifactIntegrityError(f"{description} is not canonical JSON")
     return document
 
 
-def _verify_digest(path: Path, trajectory_id: str) -> tuple[str, int]:
+def _read_digest(path: Path, trajectory_id: str) -> tuple[str, int]:
     sidecar = path.with_suffix(".sha256.json")
     document = _read_canonical_json(sidecar, "trajectory digest sidecar")
     if not isinstance(document, dict) or set(document) != {
@@ -634,13 +968,26 @@ def _verify_digest(path: Path, trajectory_id: str) -> tuple[str, int]:
         or _HEX256.fullmatch(document["trajectory_sha256"]) is None
     ):
         raise ArtifactIntegrityError("trajectory digest sidecar is invalid")
-    actual_hash, actual_size = _hash_file(path)
-    if (
-        document["trajectory_sha256"] != actual_hash
-        or document["artifact_size"] != actual_size
-    ):
-        raise ArtifactIntegrityError("whole-file trajectory digest mismatch")
-    return actual_hash, actual_size
+    return str(document["trajectory_sha256"]), int(document["artifact_size"])
+
+
+def _verify_trajectory(
+    path: Path,
+    trajectory_id: str,
+    expected: dict[str, str] | None,
+) -> tuple[TrajectoryResult, dict[str, str], str, int]:
+    digest, size = _read_digest(path, trajectory_id)
+    return _load_hdf5_verified(
+        path,
+        expected,
+        required_digest=digest,
+        required_size=size,
+    )
+
+
+def _verify_digest(path: Path, trajectory_id: str) -> tuple[str, int]:
+    _, _, digest, size = _verify_trajectory(path, trajectory_id, None)
+    return digest, size
 
 
 def publish_trajectory(
@@ -657,6 +1004,8 @@ def publish_trajectory(
         raise ArtifactIntegrityError("result belongs to a different request")
     if result.observables.shape[0] != request.kappas.size:
         raise ArtifactIntegrityError("result does not cover every requested coupling")
+    if request.kappas.size > MAX_KAPPA_COUNT:
+        raise ArtifactIntegrityError("kappa count exceeds the frozen resource limit")
     _validate_provenance(provenance)
     expected = {
         key: str(value)
@@ -665,7 +1014,7 @@ def publish_trajectory(
     }
     expected["request_sha256"] = trajectory_id
     expected["kernel_sha256"] = request.kernel_sha256
-    _, trajectories, _ = _prepare_run_directory(run_dir)
+    _, trajectories, _ = _prepare_publication_run(run_dir)
     final = trajectories / f"trajectory-{trajectory_id}.h5"
     sidecar = final.with_suffix(".sha256.json")
     unique = f"{os.getpid()}.{uuid.uuid4().hex}"
@@ -684,8 +1033,7 @@ def publish_trajectory(
         _write_unique_fsynced(intent, _canonical_json_bytes(intent_document))
         _fsync_directory(trajectories)
         _write_hdf5(partial, request, result, provenance)
-        _semantic_reload(partial, expected)
-        trajectory_hash, artifact_size = _hash_file(partial)
+        _, trajectory_hash, artifact_size = _semantic_reload(partial, expected)
         digest_document = {
             "artifact_size": artifact_size,
             "schema_version": TRAJECTORY_DIGEST_SCHEMA,
@@ -699,9 +1047,28 @@ def publish_trajectory(
             raise FileExistsError(f"immutable trajectory already exists: {final}")
         _replace(partial, final)
         try:
-            os.link(digest_partial, sidecar, follow_symlinks=False)
+            _install_no_clobber(digest_partial, sidecar)
         except FileExistsError as error:
             raise ArtifactIntegrityError("trajectory sidecar publication raced") from error
+        final_stat = _checked_regular(final, "installed trajectory")
+        partial_stat = _checked_regular(partial, "staged trajectory")
+        if (
+            final_stat.st_dev != partial_stat.st_dev
+            or final_stat.st_ino != partial_stat.st_ino
+        ):
+            raise ArtifactIntegrityError("installed trajectory inode changed")
+        _load_hdf5_verified(
+            final,
+            expected,
+            required_digest=trajectory_hash,
+            required_size=artifact_size,
+        )
+        _verify_installed_bytes(
+            sidecar,
+            _canonical_json_bytes(digest_document),
+            "trajectory digest sidecar",
+        )
+        partial.unlink()
         digest_partial.unlink()
         _fsync_directory(trajectories)
         intent.unlink()
@@ -716,6 +1083,12 @@ def publish_trajectory(
                 _write_unique_fsynced(
                     intent, _canonical_json_bytes(intent_document)
                 )
+            try:
+                _fsync_directory(trajectories)
+            except BaseException as recovery_error:
+                raise ArtifactIntegrityError(
+                    "intent recovery directory fsync failed; publication is uncommitted"
+                ) from recovery_error
             raise
     return final
 
@@ -729,22 +1102,10 @@ def load_verified_trajectory(
     if match is None:
         raise ArtifactIntegrityError("trajectory filename is not canonical")
     _check_existing_path_chain(path)
-    _verify_digest(path, match.group(1))
-    result = _load_hdf5(path, expected)
+    result, _, _, _ = _verify_trajectory(path, match.group(1), expected)
     if result.request_sha256 != match.group(1):
         raise ArtifactIntegrityError("trajectory ID does not match its filename")
     return result
-
-
-def _internal_expected(path: Path) -> dict[str, str]:
-    _checked_regular(path, "trajectory")
-    try:
-        with h5py.File(path, "r") as stream:
-            return {key: _text_attribute(stream.attrs, key) for key in _EXPECTED_KEYS}
-    except ArtifactIntegrityError:
-        raise
-    except (OSError, KeyError, TypeError, ValueError) as error:
-        raise ArtifactIntegrityError("unable to read trajectory dependencies") from error
 
 
 def publish_batch_manifest(
@@ -758,7 +1119,9 @@ def publish_batch_manifest(
         trajectory_paths, Sequence
     ):
         raise TypeError("trajectory_paths must be a sequence of paths")
-    _, trajectories, batches = _prepare_run_directory(run_dir)
+    _verify_run_layout(run_dir)
+    trajectories = run_dir / "trajectories"
+    batches = run_dir / "batches"
     members: list[dict[str, str]] = []
     seen: set[str] = set()
     for path in trajectory_paths:
@@ -773,8 +1136,11 @@ def publish_batch_manifest(
         if trajectory_id in seen:
             raise ArtifactIntegrityError("batch contains duplicate trajectory ID")
         seen.add(trajectory_id)
-        load_verified_trajectory(path, _internal_expected(path))
-        trajectory_hash, _ = _verify_digest(path, trajectory_id)
+        result, _, trajectory_hash, _ = _verify_trajectory(
+            path, trajectory_id, None
+        )
+        if result.request_sha256 != trajectory_id:
+            raise ArtifactIntegrityError("trajectory ID does not match its filename")
         members.append(
             {
                 "path": f"trajectories/{path.name}",
@@ -805,20 +1171,70 @@ def _directory_entries(directory: Path) -> list[Path]:
         raise ArtifactIntegrityError("unable to inspect artifact directory") from error
 
 
-def _verify_root_membership(run_dir: Path) -> None:
-    for path in _directory_entries(run_dir):
-        if path.name not in _ROOT_ENTRIES:
-            raise ArtifactIntegrityError(f"unknown run artifact: {path.name}")
-        if path.is_symlink():
-            raise ArtifactIntegrityError("run artifacts must not be symlinks")
+def _verify_run_layout(run_dir: Path) -> None:
+    if not isinstance(run_dir, Path):
+        raise TypeError("run_dir must be a pathlib.Path")
+    _check_existing_path_chain(run_dir)
+    try:
+        root_stat = run_dir.lstat()
+    except OSError as error:
+        raise ArtifactIntegrityError("run layout is missing") from error
+    if stat.S_ISLNK(root_stat.st_mode) or not stat.S_ISDIR(root_stat.st_mode):
+        raise ArtifactIntegrityError("run layout root has the wrong kind")
+    entries = _directory_entries(run_dir)
+    names = {path.name for path in entries}
+    for path in entries:
+        try:
+            metadata = path.lstat()
+        except OSError as error:
+            raise ArtifactIntegrityError("unable to inspect run layout") from error
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ArtifactIntegrityError("run layout must not contain symlinks")
+    if not _REQUIRED_ROOT_ENTRIES.issubset(names):
+        missing = sorted(_REQUIRED_ROOT_ENTRIES - names)
+        raise ArtifactIntegrityError(f"run layout is missing entries: {missing}")
+    if not names.issubset(_ROOT_ENTRIES):
+        unknown = sorted(names - _ROOT_ENTRIES)
+        raise ArtifactIntegrityError(f"unknown run artifact: {unknown}")
+    identities: set[tuple[int, int]] = set()
+    for path in entries:
+        try:
+            metadata = path.lstat()
+        except OSError as error:
+            raise ArtifactIntegrityError("unable to inspect run layout") from error
+        identity = (metadata.st_dev, metadata.st_ino)
+        if identity in identities:
+            raise ArtifactIntegrityError("run layout contains inode aliases")
+        identities.add(identity)
+        if path.name in _ROOT_DIRECTORY_ENTRIES:
+            if not stat.S_ISDIR(metadata.st_mode):
+                raise ArtifactIntegrityError(
+                    f"run layout entry {path.name} has the wrong directory kind"
+                )
+        else:
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ArtifactIntegrityError(
+                    f"run layout entry {path.name} must be a regular file"
+                )
+            if metadata.st_nlink != 1:
+                raise ArtifactIntegrityError(
+                    f"run layout entry {path.name} is a hard-link alias"
+                )
+            if path.name in _ROOT_FILE_ENTRIES:
+                document = _read_canonical_json(path, f"run layout {path.name}")
+                if document != _layout_document(path.name):
+                    raise ArtifactIntegrityError(
+                        f"run layout entry {path.name} is not canonical"
+                    )
 
 
 def reconstruct_progress(
     run_dir: Path, expected: dict[str, str]
 ) -> dict[str, object]:
     _validate_expected(expected)
-    run_dir, trajectories, batches = _prepare_run_directory(run_dir)
-    _verify_root_membership(run_dir)
+    _verify_run_layout(run_dir)
+    trajectories = run_dir / "trajectories"
+    batches = run_dir / "batches"
     trajectory_files: list[Path] = []
     sidecar_ids: set[str] = set()
     for path in _directory_entries(trajectories):
@@ -838,19 +1254,19 @@ def reconstruct_progress(
             raise ArtifactIntegrityError(f"unknown trajectory artifact: {path.name}")
     trajectory_records: dict[str, dict[str, str]] = {}
     file_ids: set[str] = set()
+    if not trajectory_files:
+        raise ArtifactIntegrityError("run layout has no trajectory artifacts")
     for path in trajectory_files:
         filename_id_match = _TRAJECTORY_NAME.fullmatch(path.name)
         assert filename_id_match is not None
         filename_id = filename_id_match.group(1)
-        internal = _internal_expected(path)
-        internal_id = internal["request_sha256"]
+        result, _, digest, _ = _verify_trajectory(path, filename_id, expected)
+        internal_id = result.request_sha256
         if internal_id in file_ids:
             raise ArtifactIntegrityError("duplicate trajectory ID")
         file_ids.add(internal_id)
-        result = load_verified_trajectory(path, expected)
         if result.request_sha256 != filename_id:
             raise ArtifactIntegrityError("trajectory ID does not match filename")
-        digest, _ = _verify_digest(path, filename_id)
         trajectory_records[filename_id] = {
             "path": f"trajectories/{path.name}",
             "trajectory_id": filename_id,
@@ -861,7 +1277,10 @@ def reconstruct_progress(
 
     manifests: list[dict[str, object]] = []
     memberships: set[str] = set()
-    for path in _directory_entries(batches):
+    batch_paths = _directory_entries(batches)
+    if not batch_paths:
+        raise ArtifactIntegrityError("run layout has no batch manifests")
+    for path in batch_paths:
         if path.is_symlink():
             raise ArtifactIntegrityError("batch entries must not be symlinks")
         match = _BATCH_NAME.fullmatch(path.name)
@@ -934,11 +1353,16 @@ def reconstruct_progress(
     payload = _canonical_json_bytes(progress)
     progress_path = run_dir / "progress.json"
     if progress_path.exists() or progress_path.is_symlink():
-        _checked_regular(progress_path, "progress")
+        descriptor, original = _open_regular(
+            progress_path, "progress", maximum_size=MAX_JSON_BYTES
+        )
         try:
-            existing = progress_path.read_bytes()
-        except OSError as error:
-            raise ArtifactIntegrityError("unable to read progress") from error
+            existing = _read_descriptor_bounded(
+                descriptor, MAX_JSON_BYTES, "progress"
+            )
+            _require_stable_descriptor(descriptor, original, "progress")
+        finally:
+            os.close(descriptor)
         if existing != payload:
             raise ArtifactIntegrityError("existing progress is stale or corrupt")
     else:
