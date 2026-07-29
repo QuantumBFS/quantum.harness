@@ -1789,3 +1789,56 @@ same local-search objective at still greater length is now stopped:
 it has supplied strong survivor evidence but no proof and no
 counterexample.  Compute is reassigned to structurally different
 coupled-cone and tail-bound searches.
+
+### Fixed symmetric point: exact depth 27 and partition obstructions
+
+Commit `23bbe4a` connected the fixed integer point `B(2,1)` to the existing
+exact short-word oracle without changing its Bareiss determinant gate or
+safe cyclic/transpose-reversal quotient.  Fourteen WSL shards completed
+with empty stderr and the collector reports:
+
+- `complete=true`, `status=strictly-positive`;
+- 5,184,397 canonical classes;
+- all 268,435,454 nonempty binary words through length 27;
+- no nonpositive witness;
+- global minimum `35` at the one-letter pure word.
+
+At every checked length the exact minimum is again the pure word.  The
+`collect.json` SHA-256 is
+`a2dbe54da4c30bfdcd9e1018c8e6ba54d5cc0a0cad0a1bf71c6748846758aea9`;
+the complete shard archive SHA-256 is
+`13cfbf7f2fe1b119f401cca7219d9aba1fdcad28066ed90a506e75cbec169eeb`.
+This is strong finite-depth evidence, not an arbitrary-word proof.
+
+Exact audits then removed several attractive but invalid proof splits:
+
+- `chi_2+chi_3` is negative already for `B^7`;
+- a length-30 word makes `chi_1+chi_3+chi_5` negative while the full
+  determinant remains positive, so the exact `{2,4}` cone cannot be paired
+  with an odd-sector complement;
+- a second length-30 word makes
+  `chi_0+chi_2+chi_3+chi_5` negative while the full determinant remains
+  positive, so the exact `{1,4}` cone cannot be paired with that
+  complement either.
+
+Both corresponding CPU cone campaigns were stopped immediately after
+their exact obstructions arrived.  The positive full weights on the same
+words prove that compensation crosses these proposed block boundaries;
+future work must use the full 32-dimensional Fock character or a genuinely
+coupled domination inequality.
+
+The parameter-family audit also distinguishes two claims that must not be
+conflated.  The open two-invariant chamber `D>0,-D<T<0` is false as a full
+sign-free theorem: at `(D,T)=(10,-9)`, the exact length-11 word
+`00100110011` has determinant `-86709610990738`.  By contrast, the
+polynomial that becomes negative at fixed `D=8,z=4` is only the detached
+`{0,2,3,5}` complement; the full determinant at that pure fourth power is
+positive, so it is not a full-family counterexample.
+
+Finally, all 98,304 exact Bernstein coefficients for the 8,190 orientation
+words through depth 12 are nonnegative on the common-amplitude interval
+`0<=z<=1`, with minimum 17.  This useful fixed-amplitude margin does not
+extend to independently varying endpoint amplitudes: a frozen length-120
+four-endpoint word has exact negative complementary trace.  The
+four-generator cone route therefore early-stops before numerical work,
+while the common fixed `z=1` pair remains the main theorem candidate.
