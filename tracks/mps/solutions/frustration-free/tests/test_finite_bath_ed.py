@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import itertools
 import json
 import math
 import os
@@ -26,6 +27,7 @@ def _load_module(name: str, filename: str):
 
 
 bath = _load_module("challenge_81_bath", "bath.py")
+chain = _load_module("challenge_81_chain_mapping", "chain_mapping.py")
 ed = _load_module("challenge_81_finite_bath_ed", "finite_bath_ed.py")
 
 
@@ -36,6 +38,247 @@ def _bath_artifact(*, n_bath=1, gamma=0.0, bandwidth=1.0):
         n_bath=n_bath,
         frequency_grid=[-bandwidth, 0.0, bandwidth],
     )
+
+
+def _spinless_sector_hamiltonian(one_particle, particle_count):
+    n_orbitals = one_particle.shape[0]
+    basis = [
+        sum(1 << orbital for orbital in occupied)
+        for occupied in itertools.combinations(range(n_orbitals), particle_count)
+    ]
+    positions = {state: index for index, state in enumerate(basis)}
+    hamiltonian = np.zeros((len(basis), len(basis)))
+    for source_index, source in enumerate(basis):
+        for annihilate in range(n_orbitals):
+            if not source & (1 << annihilate):
+                continue
+            after_annihilation = source ^ (1 << annihilate)
+            annihilation_sign = (
+                -1.0
+                if (source & ((1 << annihilate) - 1)).bit_count() & 1
+                else 1.0
+            )
+            for create in range(n_orbitals):
+                if after_annihilation & (1 << create):
+                    continue
+                target = after_annihilation | (1 << create)
+                creation_sign = (
+                    -1.0
+                    if (after_annihilation & ((1 << create) - 1)).bit_count() & 1
+                    else 1.0
+                )
+                hamiltonian[positions[target], source_index] += (
+                    one_particle[create, annihilate]
+                    * annihilation_sign
+                    * creation_sign
+                )
+    return hamiltonian, basis
+
+
+def _fixed_sector_spectrum(one_particle, interaction, n_up, n_down):
+    up_hamiltonian, up_basis = _spinless_sector_hamiltonian(
+        one_particle, n_up
+    )
+    down_hamiltonian, down_basis = _spinless_sector_hamiltonian(
+        one_particle, n_down
+    )
+    hamiltonian = np.kron(up_hamiltonian, np.eye(len(down_basis)))
+    hamiltonian += np.kron(np.eye(len(up_basis)), down_hamiltonian)
+    for up_index, up_state in enumerate(up_basis):
+        if not up_state & 1:
+            continue
+        for down_index, down_state in enumerate(down_basis):
+            if down_state & 1:
+                index = up_index * len(down_basis) + down_index
+                hamiltonian[index, index] += interaction
+    return np.linalg.eigvalsh(hamiltonian)
+
+
+def _full_fock_sector_spectrum(hamiltonian, n_bath, n_up, n_down):
+    n_spatial = n_bath + 1
+    states = [
+        state
+        for state in range(1 << (2 * n_spatial))
+        if sum((state >> (2 * orbital)) & 1 for orbital in range(n_spatial))
+        == n_up
+        and sum(
+            (state >> (2 * orbital + 1)) & 1
+            for orbital in range(n_spatial)
+        )
+        == n_down
+    ]
+    return np.linalg.eigvalsh(hamiltonian[np.ix_(states, states)])
+
+
+@pytest.mark.parametrize("n_bath", range(1, 7))
+def test_one_particle_star_and_chain_are_unitarily_equivalent(n_bath):
+    star = _bath_artifact(n_bath=n_bath, gamma=0.13, bandwidth=1.2)
+    mapping = chain.derive_chain_mapping(star)
+    epsilon_d, mu = -0.31, 0.07
+    star_h = ed.build_one_particle_hamiltonian(
+        bath_artifact=star, epsilon_d=epsilon_d, mu=mu
+    )
+    chain_h = ed.build_one_particle_hamiltonian(
+        bath_artifact=star,
+        chain_mapping_artifact=mapping,
+        bath_representation="chain",
+        epsilon_d=epsilon_d,
+        mu=mu,
+    )
+    Q = np.asarray(mapping["payload"]["Q"])
+    transform = np.zeros((n_bath + 1, n_bath + 1))
+    transform[0, 0] = 1.0
+    transform[1:, 1:] = Q
+
+    assert chain_h == pytest.approx(transform.T @ star_h @ transform, abs=3e-12)
+    assert np.linalg.eigvalsh(chain_h) == pytest.approx(
+        np.linalg.eigvalsh(star_h), abs=3e-12
+    )
+
+
+@pytest.mark.parametrize("n_bath", range(1, 7))
+@pytest.mark.parametrize("interaction", [0.0, 0.83])
+def test_star_and_chain_one_up_one_down_sector_spectra_match(
+    n_bath, interaction
+):
+    star = _bath_artifact(n_bath=n_bath, gamma=0.13, bandwidth=1.2)
+    mapping = chain.derive_chain_mapping(star)
+    common = {"bath_artifact": star, "epsilon_d": -0.31, "mu": 0.07}
+    star_h = ed.build_one_particle_hamiltonian(**common)
+    chain_h = ed.build_one_particle_hamiltonian(
+        **common,
+        bath_representation="chain",
+        chain_mapping_artifact=mapping,
+    )
+
+    assert _fixed_sector_spectrum(
+        chain_h, interaction, 1, 1
+    ) == pytest.approx(
+        _fixed_sector_spectrum(star_h, interaction, 1, 1), abs=5e-12
+    )
+
+
+@pytest.mark.parametrize("n_bath", range(1, 4))
+@pytest.mark.parametrize("interaction", [0.0, 0.83])
+def test_star_and_chain_full_hamiltonians_match_in_every_sector(
+    n_bath, interaction
+):
+    star = _bath_artifact(n_bath=n_bath, gamma=0.13, bandwidth=1.2)
+    mapping = chain.derive_chain_mapping(star)
+    common = {
+        "bath_artifact": star,
+        "U": interaction,
+        "epsilon_d": -0.31,
+        "mu": 0.07,
+    }
+    star_h = ed.build_hamiltonian(**common)
+    chain_h = ed.build_hamiltonian(
+        **common,
+        bath_representation="chain",
+        chain_mapping_artifact=mapping,
+    )
+    for n_up in range(n_bath + 2):
+        for n_down in range(n_bath + 2):
+            assert _full_fock_sector_spectrum(
+                chain_h, n_bath, n_up, n_down
+            ) == pytest.approx(
+                _full_fock_sector_spectrum(
+                    star_h, n_bath, n_up, n_down
+                ),
+                abs=8e-12,
+            )
+
+
+def test_geometry_selection_fails_closed():
+    star = _bath_artifact(n_bath=2, gamma=0.13, bandwidth=1.2)
+    mapping = chain.derive_chain_mapping(star)
+    other_star = _bath_artifact(n_bath=3, gamma=0.13, bandwidth=1.2)
+    wrong_mapping = chain.derive_chain_mapping(other_star)
+
+    with pytest.raises(ValueError, match="requires.*mapping"):
+        ed.build_one_particle_hamiltonian(
+            bath_artifact=star, bath_representation="chain"
+        )
+    with pytest.raises(ValueError, match="cannot consume.*mapping"):
+        ed.build_one_particle_hamiltonian(
+            bath_artifact=star,
+            bath_representation="direct_star",
+            chain_mapping_artifact=mapping,
+        )
+    with pytest.raises(ValueError, match="source bath"):
+        ed.build_one_particle_hamiltonian(
+            bath_artifact=star,
+            bath_representation="chain",
+            chain_mapping_artifact=wrong_mapping,
+        )
+    with pytest.raises(ValueError, match="bath_representation"):
+        ed.build_one_particle_hamiltonian(
+            bath_artifact=star, bath_representation="tree"
+        )
+
+
+def test_solver_and_oracle_bind_explicit_chain_geometry(tmp_path):
+    star = _bath_artifact(n_bath=2, gamma=0.13, bandwidth=1.2)
+    mapping = chain.derive_chain_mapping(star)
+    common = {
+        "bath_artifact": star,
+        "chain_mapping_artifact": mapping,
+        "bath_representation": "chain",
+        "U": 0.83,
+        "epsilon_d": -0.31,
+        "mu": 0.07,
+        "beta": 1.3,
+        "tau": [0.0, 1.3],
+    }
+    result = ed.solve_finite_bath(**common)
+    artifact = ed.make_oracle_artifact(**common)
+    written = ed.write_oracle_json(tmp_path / "chain-oracle.json", **common)
+
+    assert result["bath_representation"] == "chain"
+    assert result["chain_mapping_sha256"] == mapping["sha256"]
+    assert artifact["payload"]["parameters"]["bath_representation"] == "chain"
+    assert artifact["payload"]["mapping_input"] == mapping
+    assert artifact["payload"]["mapping_input_sha256"] == mapping["sha256"]
+    assert ed.verify_oracle_artifact(artifact) is None
+    assert written == artifact
+
+
+def test_dense_guard_runs_before_many_body_geometry_construction(monkeypatch):
+    star = _bath_artifact(n_bath=6, gamma=0.13, bandwidth=1.2)
+
+    def fail_if_geometry_is_constructed(*_args, **_kwargs):
+        raise AssertionError("geometry constructed before dense guard")
+
+    monkeypatch.setattr(
+        ed, "_geometry_from_consumed", fail_if_geometry_is_constructed
+    )
+    with pytest.raises(ValueError, match="dimension"):
+        ed.solve_finite_bath(
+            bath_artifact=star,
+            U=0.83,
+            beta=1.0,
+            tau=[0.0, 1.0],
+        )
+
+
+@pytest.mark.parametrize("location", ["payload", "parameters"])
+def test_rehashed_unknown_geometry_schema_claim_is_rejected(location):
+    artifact = ed.make_oracle_artifact(
+        bath_artifact=_bath_artifact(n_bath=1, gamma=0.13),
+        U=0.83,
+        beta=1.0,
+        tau=[0.0, 1.0],
+    )
+    target = (
+        artifact["payload"]
+        if location == "payload"
+        else artifact["payload"]["parameters"]
+    )
+    target["unknown_geometry_claim"] = "unsupported"
+    _rehash(artifact)
+
+    with pytest.raises(ValueError, match="keys"):
+        ed.verify_oracle_artifact(artifact)
 
 
 def test_ed_independently_validates_authoritative_model_conventions():
@@ -543,8 +786,11 @@ def test_oracle_artifact_is_deterministic_complete_and_integrity_checked():
     assert payload["parameters"]["epsilon_d"] == pytest.approx(-0.4)
     assert payload["parameters"]["mu"] == 0.0
     assert payload["parameters"]["grand_canonical"] is True
+    assert payload["parameters"]["bath_representation"] == "direct_star"
     assert payload["bath_input_sha256"] == bath_input["sha256"]
     assert payload["bath_input"] == bath_input
+    assert payload["mapping_input"] is None
+    assert payload["mapping_input_sha256"] is None
     assert payload["mode_order"] == [
         "d_up",
         "d_down",

@@ -8,9 +8,8 @@ before allocation; the latter budgets twelve simultaneous float64
 matrix-equivalents plus vector/index storage.
 """
 
-from __future__ import annotations
-
 import copy
+from dataclasses import dataclass
 import hashlib
 import hmac
 import importlib.util
@@ -27,8 +26,8 @@ from typing import Any, Sequence
 import numpy as np
 
 
-MODULE_VERSION = "1.0.0"
-SCHEMA_VERSION = 3
+MODULE_VERSION = "1.1.0"
+SCHEMA_VERSION = 4
 MAX_DENSE_DIMENSION = 4096
 MAX_DENSE_BYTES = 512 * 1024 * 1024
 DENSE_PEAK_MATRIX_EQUIVALENTS = 12
@@ -126,6 +125,30 @@ BATH_CONVENTIONS = {
     )
 }
 SUPPORTED_BATH_SCHEMA_VERSION = _BATH_MODULE.SCHEMA_VERSION
+
+
+def _load_chain_module():
+    path = Path(__file__).with_name("chain_mapping.py")
+    spec = importlib.util.spec_from_file_location(
+        "challenge_81_oracle_chain_validation", path
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load chain mapping module from {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_CHAIN_MODULE = _load_chain_module()
+
+
+@dataclass(frozen=True)
+class FiniteBathGeometry:
+    representation: str
+    onsite_matrix: np.ndarray
+    impurity_coupling: np.ndarray
+    source_bath_sha256: str
+    mapping_sha256: str | None
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -304,37 +327,16 @@ def _hop_sign(source: int, annihilate_mode: int, create_mode: int) -> int:
     return -1 if (annihilation_parity + creation_parity) & 1 else 1
 
 
-def build_hamiltonian(
+def _build_geometry_hamiltonian(
     *,
-    epsilon: Sequence[float],
-    V: Sequence[float],
+    geometry: FiniteBathGeometry,
     U: float,
-    epsilon_d: float | None = None,
-    mu: float = 0.0,
-    max_dimension: int = MAX_DENSE_DIMENSION,
-    max_dense_bytes: int = MAX_DENSE_BYTES,
+    epsilon_d: float,
+    mu: float,
+    dimension: int,
 ) -> np.ndarray:
-    """Construct K in the complete grand-canonical occupation basis."""
-
-    (
-        epsilon,
-        V,
-        U,
-        epsilon_d,
-        mu,
-        dimension,
-        _,
-        _,
-    ) = _validated_model_inputs(
-        epsilon=epsilon,
-        V=V,
-        U=U,
-        epsilon_d=epsilon_d,
-        mu=mu,
-        max_dimension=max_dimension,
-        max_dense_bytes=max_dense_bytes,
-    )
     hamiltonian = np.zeros((dimension, dimension), dtype=np.float64)
+    n_bath = geometry.impurity_coupling.size
 
     for state in range(dimension):
         n_up = (state >> 0) & 1
@@ -342,15 +344,15 @@ def build_hamiltonian(
         diagonal = (
             (epsilon_d - mu) * (n_up + n_down) + U * n_up * n_down
         )
-        for bath_index, bath_energy in enumerate(epsilon):
+        for bath_index in range(n_bath):
             first_mode = 2 + 2 * bath_index
-            diagonal += (bath_energy - mu) * (
+            diagonal += (geometry.onsite_matrix[bath_index, bath_index] - mu) * (
                 ((state >> first_mode) & 1)
                 + ((state >> (first_mode + 1)) & 1)
             )
         hamiltonian[state, state] = diagonal
 
-    for bath_index, coupling in enumerate(V):
+    for bath_index, coupling in enumerate(geometry.impurity_coupling):
         if coupling == 0.0:
             continue
         for spin in range(2):
@@ -366,7 +368,100 @@ def build_hamiltonian(
                     )
                     hamiltonian[target, source] += matrix_element
                     hamiltonian[source, target] += matrix_element
+
+    for left in range(n_bath):
+        for right in range(left + 1, n_bath):
+            hopping = geometry.onsite_matrix[left, right]
+            if hopping == 0.0:
+                continue
+            for spin in range(2):
+                left_mode = 2 + 2 * left + spin
+                right_mode = 2 + 2 * right + spin
+                left_mask = 1 << left_mode
+                right_mask = 1 << right_mode
+                for source in range(dimension):
+                    if source & right_mask and not source & left_mask:
+                        target = source ^ right_mask ^ left_mask
+                        matrix_element = hopping * _hop_sign(
+                            source, right_mode, left_mode
+                        )
+                        hamiltonian[target, source] += matrix_element
+                        hamiltonian[source, target] += matrix_element
     return hamiltonian
+
+
+def build_hamiltonian(
+    *,
+    epsilon: Sequence[float] | None = None,
+    V: Sequence[float] | None = None,
+    U: float,
+    epsilon_d: float | None = None,
+    mu: float = 0.0,
+    max_dimension: int = MAX_DENSE_DIMENSION,
+    max_dense_bytes: int = MAX_DENSE_BYTES,
+    bath_artifact: dict[str, Any] | None = None,
+    bath_representation: str = "direct_star",
+    chain_mapping_artifact: dict[str, Any] | None = None,
+) -> np.ndarray:
+    """Construct K in the complete grand-canonical occupation basis."""
+
+    if bath_artifact is None:
+        if bath_representation != "direct_star":
+            raise ValueError("chain geometry requires a verified bath artifact")
+        if chain_mapping_artifact is not None:
+            raise ValueError("direct-star geometry cannot consume a chain mapping")
+        if epsilon is None or V is None:
+            raise ValueError("epsilon and V are required without a bath artifact")
+        model_epsilon, model_coupling = epsilon, V
+        source_digest = ""
+    else:
+        if epsilon is not None or V is not None:
+            raise ValueError("epsilon and V cannot accompany a bath artifact")
+        consumed = _consume_bath_artifact(bath_artifact)
+        model_epsilon = consumed["epsilon"]
+        model_coupling = consumed["V"]
+        source_digest = consumed["sha256"]
+
+    (
+        epsilon_values,
+        coupling_values,
+        U_value,
+        epsilon_d_value,
+        mu_value,
+        dimension,
+        _,
+        _,
+    ) = _validated_model_inputs(
+        epsilon=model_epsilon,
+        V=model_coupling,
+        U=U,
+        epsilon_d=epsilon_d,
+        mu=mu,
+        max_dimension=max_dimension,
+        max_dense_bytes=max_dense_bytes,
+    )
+    if bath_artifact is None:
+        geometry = FiniteBathGeometry(
+            representation="direct_star",
+            onsite_matrix=np.diag(epsilon_values),
+            impurity_coupling=np.asarray(coupling_values, dtype=np.float64),
+            source_bath_sha256=source_digest,
+            mapping_sha256=None,
+        )
+    else:
+        geometry = _geometry_from_consumed(
+            consumed,
+            bath_artifact=bath_artifact,
+            bath_representation=bath_representation,
+            chain_mapping_artifact=chain_mapping_artifact,
+        )
+    return _build_geometry_hamiltonian(
+        geometry=geometry,
+        U=U_value,
+        epsilon_d=epsilon_d_value,
+        mu=mu_value,
+        dimension=dimension,
+    )
 
 
 def _require_keys(mapping: Any, keys: set[str], name: str) -> None:
@@ -375,6 +470,12 @@ def _require_keys(mapping: Any, keys: set[str], name: str) -> None:
     missing = keys - mapping.keys()
     if missing:
         raise ValueError(f"{name} missing required keys: {sorted(missing)}")
+
+
+def _require_exact_keys(mapping: Any, keys: set[str], name: str) -> None:
+    _require_keys(mapping, keys, name)
+    if set(mapping) != keys:
+        raise ValueError(f"{name} keys do not match schema")
 
 
 def _validate_digest(digest: Any, name: str) -> str:
@@ -471,6 +572,90 @@ def _consume_bath_artifact(
     }
 
 
+def _geometry_from_consumed(
+    consumed: dict[str, Any],
+    *,
+    bath_artifact: dict[str, Any],
+    bath_representation: str,
+    chain_mapping_artifact: dict[str, Any] | None,
+) -> FiniteBathGeometry:
+    if bath_representation == "direct_star":
+        if chain_mapping_artifact is not None:
+            raise ValueError("direct-star geometry cannot consume a chain mapping")
+        return FiniteBathGeometry(
+            representation="direct_star",
+            onsite_matrix=np.diag(consumed["epsilon"]),
+            impurity_coupling=np.asarray(consumed["V"], dtype=np.float64),
+            source_bath_sha256=consumed["sha256"],
+            mapping_sha256=None,
+        )
+    if bath_representation != "chain":
+        raise ValueError("bath_representation must be direct_star or chain")
+    if chain_mapping_artifact is None:
+        raise ValueError("chain geometry requires a chain mapping artifact")
+    _CHAIN_MODULE.verify_chain_mapping_artifact(
+        chain_mapping_artifact, bath_artifact
+    )
+    mapped = chain_mapping_artifact["payload"]
+    onsite = np.diag(np.asarray(mapped["chain_onsite"], dtype=np.float64))
+    hopping = np.asarray(mapped["chain_hopping"], dtype=np.float64)
+    onsite += np.diag(hopping, 1) + np.diag(hopping, -1)
+    impurity = np.zeros(consumed["n_bath"], dtype=np.float64)
+    impurity[0] = mapped["lambda"]
+    return FiniteBathGeometry(
+        representation="chain",
+        onsite_matrix=onsite,
+        impurity_coupling=impurity,
+        source_bath_sha256=consumed["sha256"],
+        mapping_sha256=chain_mapping_artifact["sha256"],
+    )
+
+
+def _consume_geometry(
+    bath_artifact: dict[str, Any],
+    *,
+    bath_representation: str,
+    chain_mapping_artifact: dict[str, Any] | None,
+) -> FiniteBathGeometry:
+    consumed = _consume_bath_artifact(bath_artifact)
+    return _geometry_from_consumed(
+        consumed,
+        bath_artifact=bath_artifact,
+        bath_representation=bath_representation,
+        chain_mapping_artifact=chain_mapping_artifact,
+    )
+
+
+def build_one_particle_hamiltonian(
+    *,
+    bath_artifact: dict[str, Any],
+    epsilon_d: float | None = None,
+    mu: float = 0.0,
+    bath_representation: str = "direct_star",
+    chain_mapping_artifact: dict[str, Any] | None = None,
+) -> np.ndarray:
+    """Build the spin-independent one-particle Hamiltonian."""
+
+    geometry = _consume_geometry(
+        bath_artifact,
+        bath_representation=bath_representation,
+        chain_mapping_artifact=chain_mapping_artifact,
+    )
+    epsilon_d_value = (
+        0.0 if epsilon_d is None else _validate_real(epsilon_d, "epsilon_d")
+    )
+    mu_value = _validate_real(mu, "mu")
+    n_bath = geometry.impurity_coupling.size
+    hamiltonian = np.zeros((n_bath + 1, n_bath + 1), dtype=np.float64)
+    hamiltonian[0, 0] = epsilon_d_value - mu_value
+    hamiltonian[1:, 1:] = (
+        geometry.onsite_matrix - mu_value * np.eye(n_bath)
+    )
+    hamiltonian[0, 1:] = geometry.impurity_coupling
+    hamiltonian[1:, 0] = geometry.impurity_coupling
+    return hamiltonian
+
+
 def _validate_tau(tau: Any, beta: float) -> list[float]:
     values = _validate_numeric_sequence(tau, "tau")
     if not values:
@@ -517,12 +702,26 @@ def solve_finite_bath(
     mu: float = 0.0,
     max_dimension: int = MAX_DENSE_DIMENSION,
     max_dense_bytes: int = MAX_DENSE_BYTES,
+    bath_representation: str = "direct_star",
+    chain_mapping_artifact: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Exactly diagonalize a small finite bath and return thermal observables."""
 
     consumed_bath = _consume_bath_artifact(bath_artifact)
+    _validate_dimension(
+        n_modes=2 * (consumed_bath["n_bath"] + 1),
+        max_dimension=max_dimension,
+        max_dense_bytes=max_dense_bytes,
+    )
+    geometry = _geometry_from_consumed(
+        consumed_bath,
+        bath_artifact=bath_artifact,
+        bath_representation=bath_representation,
+        chain_mapping_artifact=chain_mapping_artifact,
+    )
     return _solve_consumed_bath(
         consumed_bath=consumed_bath,
+        geometry=geometry,
         U=U,
         beta=beta,
         tau=tau,
@@ -536,6 +735,7 @@ def solve_finite_bath(
 def _solve_consumed_bath(
     *,
     consumed_bath: dict[str, Any],
+    geometry: FiniteBathGeometry,
     U: Any,
     beta: Any,
     tau: Any,
@@ -569,14 +769,12 @@ def _solve_consumed_bath(
         max_dimension=max_dimension,
         max_dense_bytes=max_dense_bytes,
     )
-    hamiltonian = build_hamiltonian(
-        epsilon=epsilon,
-        V=coupling,
+    hamiltonian = _build_geometry_hamiltonian(
+        geometry=geometry,
         U=U,
         epsilon_d=epsilon_d,
         mu=mu,
-        max_dimension=max_dimension,
-        max_dense_bytes=max_dense_bytes,
+        dimension=dimension,
     )
     eigenvalues, eigenvectors = np.linalg.eigh(hamiltonian)
     energy_minimum = float(eigenvalues[0])
@@ -649,6 +847,8 @@ def _solve_consumed_bath(
         "n_modes": 2 * (n_bath + 1),
         "max_dimension": max_dimension,
         "max_dense_bytes": max_dense_bytes,
+        "bath_representation": geometry.representation,
+        "chain_mapping_sha256": geometry.mapping_sha256,
     }
 
 
@@ -669,6 +869,8 @@ def make_oracle_artifact(
     mu: float = 0.0,
     max_dimension: int = MAX_DENSE_DIMENSION,
     max_dense_bytes: int = MAX_DENSE_BYTES,
+    bath_representation: str = "direct_star",
+    chain_mapping_artifact: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a deterministic, integrity-auditable finite-bath ED artifact."""
 
@@ -678,6 +880,17 @@ def make_oracle_artifact(
     n_bath = consumed_bath["n_bath"]
     bath_digest = consumed_bath["sha256"]
     bath_parameters = consumed_bath["parameters"]
+    _validate_dimension(
+        n_modes=2 * (n_bath + 1),
+        max_dimension=max_dimension,
+        max_dense_bytes=max_dense_bytes,
+    )
+    geometry = _geometry_from_consumed(
+        consumed_bath,
+        bath_artifact=bath_artifact,
+        bath_representation=bath_representation,
+        chain_mapping_artifact=chain_mapping_artifact,
+    )
     U_value = _validate_real(U, "U")
     epsilon_d_value = (
         -U_value / 2.0
@@ -687,6 +900,7 @@ def make_oracle_artifact(
     mu_value = _validate_real(mu, "mu")
     result = _solve_consumed_bath(
         consumed_bath=consumed_bath,
+        geometry=geometry,
         U=U_value,
         beta=beta,
         tau=tau,
@@ -707,6 +921,7 @@ def make_oracle_artifact(
             "grand_canonical": True,
             "max_dimension": result["max_dimension"],
             "max_dense_bytes": result["max_dense_bytes"],
+            "bath_representation": geometry.representation,
         },
         "bath": {
             "parameters": copy.deepcopy(bath_parameters),
@@ -715,6 +930,12 @@ def make_oracle_artifact(
         },
         "bath_input": copy.deepcopy(consumed_bath["artifact"]),
         "bath_input_sha256": bath_digest,
+        "mapping_input": (
+            None
+            if chain_mapping_artifact is None
+            else copy.deepcopy(chain_mapping_artifact)
+        ),
+        "mapping_input_sha256": geometry.mapping_sha256,
         "conventions": dict(ORACLE_CONVENTIONS),
         "mode_order": _mode_order(n_bath),
         "tau": result["tau"],
@@ -774,7 +995,7 @@ def _validate_finite_tree(value: Any, name: str) -> None:
 def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
     """Check canonical integrity and structure, but not scientific authenticity."""
 
-    _require_keys(artifact, {"payload", "sha256"}, "oracle artifact")
+    _require_exact_keys(artifact, {"payload", "sha256"}, "oracle artifact")
     payload = artifact["payload"]
     if not isinstance(payload, dict):
         raise TypeError("oracle artifact payload must be a JSON object")
@@ -782,7 +1003,7 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
     expected = hashlib.sha256(_canonical_json(payload)).hexdigest()
     if not hmac.compare_digest(digest, expected):
         raise ValueError("oracle artifact payload SHA256 mismatch")
-    _require_keys(
+    _require_exact_keys(
         payload,
         {
             "schema_version",
@@ -790,6 +1011,8 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
             "bath",
             "bath_input",
             "bath_input_sha256",
+            "mapping_input",
+            "mapping_input_sha256",
             "conventions",
             "mode_order",
             "tau",
@@ -806,7 +1029,7 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
         raise ValueError(
             f"unsupported oracle schema version: {payload['schema_version']!r}"
         )
-    _require_keys(
+    _require_exact_keys(
         payload["parameters"],
         {
             "U",
@@ -817,6 +1040,7 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
             "grand_canonical",
             "max_dimension",
             "max_dense_bytes",
+            "bath_representation",
         },
         "oracle parameters",
     )
@@ -832,6 +1056,9 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
     )
     if parameters["grand_canonical"] is not True:
         raise ValueError("oracle must use the full grand-canonical space")
+    bath_representation = parameters["bath_representation"]
+    if bath_representation not in ("direct_star", "chain"):
+        raise ValueError("oracle bath_representation is unsupported")
     configured_max_dimension = _validate_integer(
         parameters["max_dimension"],
         "oracle configured max dimension",
@@ -854,6 +1081,30 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
     consumed_bath = _consume_bath_artifact(payload["bath_input"])
     if consumed_bath["sha256"] != bath_digest:
         raise ValueError("embedded bath input SHA256 linkage mismatch")
+    _validate_dimension(
+        n_modes=2 * (consumed_bath["n_bath"] + 1),
+        max_dimension=configured_max_dimension,
+        max_dense_bytes=configured_max_dense_bytes,
+    )
+    mapping_input = payload["mapping_input"]
+    mapping_digest = payload["mapping_input_sha256"]
+    if bath_representation == "direct_star":
+        if mapping_input is not None or mapping_digest is not None:
+            raise ValueError("direct-star oracle cannot contain a chain mapping")
+    else:
+        validated_mapping_digest = _validate_digest(
+            mapping_digest, "mapping input SHA256"
+        )
+        if not isinstance(mapping_input, dict):
+            raise TypeError("chain oracle mapping input must be a JSON object")
+        if mapping_input.get("sha256") != validated_mapping_digest:
+            raise ValueError("embedded mapping input SHA256 linkage mismatch")
+    geometry = _geometry_from_consumed(
+        consumed_bath,
+        bath_artifact=payload["bath_input"],
+        bath_representation=bath_representation,
+        chain_mapping_artifact=mapping_input,
+    )
     _require_keys(payload["bath"], {"parameters", "epsilon", "V"}, "oracle bath")
     if (
         payload["bath"]["parameters"] != consumed_bath["parameters"]
@@ -1056,6 +1307,7 @@ def _verify_oracle_structure_only(artifact: Any) -> dict[str, Any]:
         "observables": observables,
         "resources": resources,
         "consumed_bath": consumed_bath,
+        "geometry": geometry,
     }
 
 
@@ -1083,6 +1335,7 @@ def verify_oracle_artifact(artifact: Any) -> None:
     resources = checked["resources"]
     recomputed = _solve_consumed_bath(
         consumed_bath=checked["consumed_bath"],
+        geometry=checked["geometry"],
         U=parameters["U"],
         beta=parameters["beta"],
         tau=checked["tau"],
@@ -1198,6 +1451,8 @@ def write_oracle_json(
     mu: float = 0.0,
     max_dimension: int = MAX_DENSE_DIMENSION,
     max_dense_bytes: int = MAX_DENSE_BYTES,
+    bath_representation: str = "direct_star",
+    chain_mapping_artifact: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Atomically publish canonical oracle JSON and return the artifact."""
 
@@ -1211,6 +1466,8 @@ def write_oracle_json(
         mu=mu,
         max_dimension=max_dimension,
         max_dense_bytes=max_dense_bytes,
+        bath_representation=bath_representation,
+        chain_mapping_artifact=chain_mapping_artifact,
     )
     verify_oracle_artifact(artifact)
     encoded = _canonical_json(artifact) + b"\n"
