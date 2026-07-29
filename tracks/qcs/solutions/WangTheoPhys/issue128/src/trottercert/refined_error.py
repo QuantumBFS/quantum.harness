@@ -6,7 +6,11 @@ from math import factorial
 from typing import Sequence
 
 from .intervals import RationalInterval, outward_quantize
-from .local_commutators import SymplecticDyadicLocalDensityEvaluator
+from .local_commutators import (
+    CoordinateRegistry,
+    SymplecticDyadicLocalDensityEvaluator,
+    SymplecticPauli,
+)
 from .rigorous_fourth import (
     IntervalStage,
     fourth_order_suzuki_interval_stages,
@@ -20,6 +24,57 @@ IntervalWordSeries = list[dict[IntervalWord, RationalInterval]]
 # exactly two of XX, YY, ZZ anticommute with P.  Each nonzero commutator
 # contributes l1 weight 2/4, hence ||[h,P]||_{P,1} <= 1.
 HEISENBERG_BOND_PAULI_L1_GROWTH = Fraction(1)
+
+
+def symplectic_pauli_from_coordinates(
+    registry: CoordinateRegistry,
+    coordinates: Sequence[tuple[int, int, str]],
+) -> SymplecticPauli:
+    x_mask = z_mask = 0
+    for x, y, op in coordinates:
+        if op not in {"X", "Y", "Z"}:
+            raise ValueError(f"unsupported Pauli axis {op!r}")
+        bit = 1 << registry.site((x, y))
+        if op in {"X", "Y"}:
+            x_mask |= bit
+        if op in {"Z", "Y"}:
+            z_mask |= bit
+    return x_mask, z_mask
+
+
+def canonicalize_symplectic_unit_cell(
+    registry: CoordinateRegistry,
+    pauli: SymplecticPauli,
+    unit_cell: tuple[int, int] = (2, 2),
+) -> SymplecticPauli:
+    step_x, step_y = unit_cell
+    if step_x < 1 or step_y < 1:
+        raise ValueError("unit-cell dimensions must be positive")
+    x_mask, z_mask = pauli
+    sites = x_mask | z_mask
+    coordinates: list[tuple[int, int, str]] = []
+    while sites:
+        bit = sites & -sites
+        site = bit.bit_length() - 1
+        x = bool(x_mask & bit)
+        z = bool(z_mask & bit)
+        op = "Y" if x and z else ("X" if x else "Z")
+        coordinate_x, coordinate_y = registry.coordinate(site)
+        coordinates.append((coordinate_x, coordinate_y, op))
+        sites ^= bit
+    if not coordinates:
+        return 0, 0
+    min_x = min(x for x, _, _ in coordinates)
+    min_y = min(y for _, y, _ in coordinates)
+    shift_x = -(min_x - min_x % step_x)
+    shift_y = -(min_y - min_y % step_y)
+    return symplectic_pauli_from_coordinates(
+        registry,
+        tuple(
+            (x + shift_x, y + shift_y, op)
+            for x, y, op in coordinates
+        ),
+    )
 
 
 def _interval_series_identity(order: int) -> IntervalWordSeries:
@@ -116,11 +171,12 @@ def interval_formula_log_series(
     return logarithm
 
 
-def certified_leading_e5_cell_l1(
+def _leading_e5_cell_interval_coefficients(
     stages: Sequence[IntervalStage],
     *,
-    quantization_digits: int = 24,
-) -> Fraction:
+    quantization_digits: int,
+    canonicalize: bool,
+) -> dict[SymplecticPauli, RationalInterval]:
     logarithm = interval_formula_log_series(stages, 5)
     grid = 10**quantization_digits
     word_endpoints: dict[IntervalWord, tuple[int, int]] = {}
@@ -132,9 +188,15 @@ def certified_leading_e5_cell_l1(
         )
 
     evaluator = SymplecticDyadicLocalDensityEvaluator(shared_coordinates=True)
-    coefficients: dict[tuple[int, int], tuple[int, int]] = {}
+    registry = evaluator.registries[0]
+    coefficients: dict[SymplecticPauli, tuple[int, int]] = {}
     for word, (word_lower, word_upper) in word_endpoints.items():
-        for pauli, numerator in evaluator.evaluate(word).items():
+        for raw_pauli, numerator in evaluator.evaluate(word).items():
+            pauli = (
+                canonicalize_symplectic_unit_cell(registry, raw_pauli)
+                if canonicalize
+                else raw_pauli
+            )
             lower, upper = coefficients.get(pauli, (0, 0))
             if numerator >= 0:
                 lower += numerator * word_lower
@@ -142,11 +204,51 @@ def certified_leading_e5_cell_l1(
             else:
                 lower += numerator * word_upper
                 upper += numerator * word_lower
-            coefficients[pauli] = (lower, upper)
-    numerator = sum(max(abs(lower), abs(upper)) for lower, upper in coefficients.values())
+            if lower or upper:
+                coefficients[pauli] = (lower, upper)
+            else:
+                coefficients.pop(pauli, None)
     # Dynkin projection divides by degree five; local depth-five coefficients
     # have common dyadic denominator 2**6.
-    return Fraction(numerator, grid * 5 * (1 << 6))
+    denominator = grid * 5 * (1 << 6)
+    return {
+        pauli: RationalInterval(
+            Fraction(lower, denominator),
+            Fraction(upper, denominator),
+        )
+        for pauli, (lower, upper) in coefficients.items()
+    }
+
+
+def certified_leading_e5_cell_l1(
+    stages: Sequence[IntervalStage],
+    *,
+    quantization_digits: int = 24,
+) -> Fraction:
+    coefficients = _leading_e5_cell_interval_coefficients(
+        stages,
+        quantization_digits=quantization_digits,
+        canonicalize=False,
+    )
+    return sum(
+        (coefficient.abs_upper() for coefficient in coefficients.values()),
+        Fraction(),
+    )
+
+
+def certified_d4_cell_coefficients(
+    stages: Sequence[IntervalStage],
+    *,
+    quantization_digits: int = 18,
+) -> dict[SymplecticPauli, RationalInterval]:
+    return {
+        pauli: coefficient * 5
+        for pauli, coefficient in _leading_e5_cell_interval_coefficients(
+            stages,
+            quantization_digits=quantization_digits,
+            canonicalize=True,
+        ).items()
+    }
 
 
 def certified_e7_cell_l1_majorant(

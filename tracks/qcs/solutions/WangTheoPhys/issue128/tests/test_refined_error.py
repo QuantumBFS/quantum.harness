@@ -10,9 +10,14 @@ from trottercert.algebra import (
     pauli_strings_commute,
 )
 from trottercert.hamiltonian import heisenberg_bond
+from trottercert.local_commutators import CoordinateRegistry
 from trottercert.refined_error import (
     HEISENBERG_BOND_PAULI_L1_GROWTH,
+    canonicalize_symplectic_unit_cell,
+    certified_d4_cell_coefficients,
+    certified_leading_e5_cell_l1,
     defect_tail_site_bound,
+    symplectic_pauli_from_coordinates,
 )
 from trottercert.rigorous_fourth import fourth_order_suzuki_interval_stages
 
@@ -20,6 +25,21 @@ from trottercert.rigorous_fourth import fourth_order_suzuki_interval_stages
 def test_defect_tail_decreases_with_steps() -> None:
     stages, _ = fourth_order_suzuki_interval_stages(4, decimal_digits=8)
     assert defect_tail_site_bound(stages, 200) < defect_tail_site_bound(stages, 100)
+
+
+def test_colored_unit_cell_canonicalization_merges_translates() -> None:
+    registry = CoordinateRegistry()
+    left = symplectic_pauli_from_coordinates(
+        registry,
+        ((0, 0, "X"), (1, 0, "X")),
+    )
+    right = symplectic_pauli_from_coordinates(
+        registry,
+        ((2, 0, "X"), (3, 0, "X")),
+    )
+    assert canonicalize_symplectic_unit_cell(registry, left) == (
+        canonicalize_symplectic_unit_cell(registry, right)
+    )
 
 
 def test_heisenberg_bond_pauli_l1_growth_constant_is_exact() -> None:
@@ -46,6 +66,30 @@ def test_heisenberg_bond_pauli_l1_growth_constant_is_exact() -> None:
         )
     assert set(anticommuting_counts) <= {0, 2}
     assert max(observed) == HEISENBERG_BOND_PAULI_L1_GROWTH == 1
+
+
+@pytest.mark.slow
+def test_canonical_d4_coefficients_are_valid_and_tighter() -> None:
+    stages, _ = fourth_order_suzuki_interval_stages(
+        4,
+        decimal_digits=12,
+    )
+    coefficients = certified_d4_cell_coefficients(
+        stages,
+        quantization_digits=18,
+    )
+    assert coefficients
+    assert all(
+        interval.lower <= interval.upper
+        for interval in coefficients.values()
+    )
+    assert sum(
+        (interval.abs_upper() for interval in coefficients.values()),
+        Fraction(),
+    ) <= 5 * certified_leading_e5_cell_l1(
+        stages,
+        quantization_digits=18,
+    )
 
 
 @pytest.mark.slow
