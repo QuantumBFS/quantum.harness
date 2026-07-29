@@ -1361,3 +1361,61 @@ canonical gauges, but it does not exclude a larger positive dilation. The
 next numerical target is therefore a coupled dimension-32 or dimension-40
 realization with transpose-reversal tying, promoted only if its residual
 reaches machine zero and an exact rational replay succeeds.
+
+## 2026-07-29 — Full-Fock dimensional gates and affine-\(A_4\) audit
+
+The full-Fock search tool at commits `3f018b2` and `bee8a1d` independently
+replayed the exact `B^6` traces before numerical optimization. It proves an
+additional early stop:
+
+`tr((Lambda^2 direct_sum Lambda^4)(B^6)) < 0`.
+
+Therefore no trace-positive cone on the proposed 15-dimensional combined
+sector can exist. Together with the exact Hankel rank 31, this fixes the
+smallest credible numerical target at the complete 32-dimensional exterior
+algebra; redundant 36- and 40-ray lifts remain allowed.
+
+The separate affine-\(A_4\) audit at commit `860603a` exactly maps the
+gauge-fixed seed-61 atom and its transpose to products of positive affine
+Chevalley generators. Thus every lifted word is loop-TNN and has a
+nonnegative cylindric-network realization. However, this does not prove the
+required full-Fock character:
+
+`det(I + X(1)) = chi_(Lambda^bullet)(X(1))`.
+
+Lam--Pylyavskyy's folded-determinant theorem controls `det X(t)`, while the
+loop-TNN semigroup is not closed under the addition `I + X(t)`. The gap is
+decisive, because for positive shear parameters
+
+`det(I + E(t)) = 32 - (a1 a2 a3 a4 a5) t`.
+
+Taking all `a_i=3` gives the exact negative one-letter value `-211`, so no
+parameter-uniform affine-total-positivity theorem is possible. The fixed
+seed remains viable: its product is `11011/1179648`, its one-letter weight
+is `37737725/1179648 > 0`, and an additional 6,000 exact integer words of
+length 17--120 produced no negative value. This long-word replay is evidence
+only, not a proof.
+
+Operational response: stop the automatic affine-theorem route and run only
+fixed-seed full-Fock searches. One WSL start and 20 independent CPU-machine
+starts now cover 32, 36, and 40 rays with single-threaded BLAS; only a
+machine-zero residual followed by exact rational replay can be promoted.
+
+The first WSL full-32 start finished normally at commit `83e7b36` with no
+exact certificate:
+
+- best 32-ray simplicial objective `0.3927446645`, minimum transformed entry
+  `-0.1187775776`, condition number `768.11`;
+- redundant milestones: maximum closure residual `0.355639` at 32 rays and
+  `0.356151` at 36 rays;
+- column generation stopped at 39 rays after repeating the worst image;
+- every best transform column couples grades, but the cycle-basis diagnostic
+  still has 466 negative entries and therefore gives no cheap winding basis.
+
+The result is a clean numerical miss, not a theorem-level obstruction. Its
+JSON SHA-256 is
+`e5e67d9ff3853e2cfbfbe9d16edee55e8b1887e092222ff2df25d7951ba13bc9`;
+stdout SHA-256 is
+`9db234646655ec21dbaa65467c280f6f2294dad735eff97397ab68439e191d67`;
+stderr is empty. The 20 independent CPU starts continue rather than
+repeating this initialization.
