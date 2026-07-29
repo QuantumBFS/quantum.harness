@@ -18,26 +18,26 @@ H = Σ_<i,j> (X_i X_j + Y_i Y_j + Z_i Z_j) / 4
 L = 12, N = 144, T = 1, operator-norm tolerance = 1e-6
 ```
 
-we certify the same five-copy fourth-order Suzuki circuit with 116 Trotter
+we certify the same five-copy fourth-order Suzuki circuit with 97 Trotter
 steps, compared with 393 steps from the pinned published
 Childs–Su–Tran–Wiebe–Zhu high-order commutator-bound instantiation.
 
 | Resource | Published rigorous baseline | This certificate |
 |---|---:|---:|
-| Trotter steps | 393 | 116 |
-| Merged group exponentials | 11,791 | 3,481 |
-| Bond propagators | 848,952 | 250,632 |
-| CNOT upper bound (3 per bond) | 2,546,856 | 751,896 |
+| Trotter steps | 393 | 97 |
+| Merged group exponentials | 11,791 | 2,911 |
+| Bond propagators | 848,952 | 209,592 |
+| CNOT upper bound (3 per bond) | 2,546,856 | 628,776 |
 
 The exact resource improvement is
 
 ```text
-11791 / 3481 = 3.3872450445274347...
+11791 / 2911 = 4.050498110614909...
 ```
 
-At 116 steps the certified global operator-norm error is
-`9.72530161861392e-7`. At 115 steps the bound is
-`1.0097845503628042e-6`, so 116 is the smallest integer accepted by this
+At 97 steps the certified global operator-norm error is
+`9.958938494314325e-7`. At 96 steps the bound is
+`1.050565873970784e-6`, so 97 is the smallest integer accepted by this
 certificate.
 
 ## What is new
@@ -56,9 +56,25 @@ Our proof instead:
 3. maps those Lie elements into the concrete four-matching Heisenberg
    representation;
 4. combines identical local Pauli strings before taking a norm bound;
-5. converts the logarithm into the exact right generator; and
-6. closes every degree at finite step size with a rational geometric locality
+5. partitions the leading right-generator Pauli terms into exactly checked
+   pairwise-anticommuting groups;
+6. converts the logarithm into the exact right generator; and
+7. closes every degree at finite step size with a rational geometric locality
    tail.
+
+For a group \(K_g=\sum_j c_jP_j\) whose Pauli strings anticommute pairwise,
+
+```text
+||K_g|| <= sqrt(Σ_j upper(|c_j|)^2).
+```
+
+The submitted sidecar covers all 75,324 canonical leading-defect terms
+exactly once with 7,576 groups of size at most 10. Every pairwise
+anticommutation relation and every outward-rounded rational square-root bound
+is checked independently. The untrusted greedy search chooses the partition
+only; it is not part of the trusted proof. This tightens the leading
+per-cell bound from `20.160968407335066` to `6.472926505087888`, a factor of
+`3.114660484942633`.
 
 A further exact local lemma tightens all higher-degree growth estimates. For
 one Heisenberg bond `h=(XX+YY+ZZ)/4`, every phase-free two-qubit Pauli string
@@ -93,20 +109,23 @@ The remainder is not discarded. Local support growth, conjugation Taylor
 factorials, and the Duhamel integration factor reduce it to an explicitly
 summable rational geometric series.
 
-## Error ledger at 116 steps
+## Error ledger at 97 steps
 
 | Right-generator degree | Global contribution |
 |---:|---:|
-| 4 | `8.201852948883738e-7` |
-| 5 | `5.6564503095749916e-8` |
-| 6 | `5.398589151384083e-8` |
-| 7 | `5.4166008370568104e-9` |
-| 8 and above | `3.637787152637068e-8` |
-| **Total** | **`9.72530161861392e-7`** |
+| 4 | `5.264367936822258e-7` |
+| 5 | `1.3834875367446118e-7` |
+| 6 | `1.579057000594835e-7` |
+| 7 | `1.8946570806914694e-8` |
+| 8 and above | `1.5425603120834724e-7` |
+| **Total** | **`9.958938494314325e-7`** |
 
 All certificate values are stored as exact rational numerators and
 denominators in
 [`issue128/certificates/issue128-certificate.json`](issue128/certificates/issue128-certificate.json).
+The large exact partition is stored separately in
+[`issue128/certificates/issue128-d4-groups.json`](issue128/certificates/issue128-d4-groups.json)
+and bound to the main certificate by SHA-256.
 
 ## Published baseline control
 
@@ -135,12 +154,15 @@ their empirical constants cannot replace the pinned rigorous baseline.
 
 ## Independent checks and negative results
 
-- A deep verifier regenerates the published baseline, local degree-five
-  coefficient, degree-seven majorant, finite tail, integer step boundary, and
-  resource arithmetic.
+- A fast verifier checks the sidecar digest, exact term coverage, every
+  symplectic anticommutation relation, every rational group bound, the
+  integer step boundary, and all resource arithmetic.
+- A deep verifier additionally regenerates the published baseline, all 75,324
+  canonical leading-defect coefficients, the degree-seven majorant, and the
+  finite tail directly from the formula.
 - A degenerate 2x2 periodic-algebra sanity check gives actual spectral-norm
-  error `4.463500595491358e-10`, below its outward-rounded certificate
-  `2.7027777777777777e-8`.
+  error `9.128277711816321e-10`, below its outward-rounded certificate
+  `2.7666666666666666e-8`.
 - The degree-three Lie representation of the four matching fragments has
   exact rank 20, equal to the free-Lie dimension `(4^3-4)/3 = 20`. Thus the
   current fragmentation has no free model-specific reduction in fourth-order
@@ -175,8 +197,7 @@ PYTHONPATH=src python scripts/build_v3_certificate.py
 ```
 
 The default test suite excludes explicitly marked research-reproduction tests.
-The submitted run completed with 58 passing tests; the deep verifier also
-completed successfully.
+The deep verifier independently regenerates the expensive local algebra.
 
 ## Files
 
