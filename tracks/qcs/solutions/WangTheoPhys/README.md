@@ -170,6 +170,10 @@ their empirical constants cannot replace the pinned rigorous baseline.
 - A three-site SU(2)-cluster decomposition improves local block counts but not
   the conservative compiled CNOT bound once the three-site propagator cost is
   included.
+- A [quantitative 5×/10× follow-up audit](issue128/docs/followups/2026-07-29-5x-10x-audit.md)
+  shows that D4 tightening alone cannot reach the next threshold: 5× also
+  requires tighter D5-D10/tail certificates, while 10× requires an effective
+  order lift such as a certified processor or shorter sixth-order kernel.
 
 ## Reproduce
 
