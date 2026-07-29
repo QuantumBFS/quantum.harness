@@ -12,7 +12,7 @@
 | Row | |
 |---|---|
 | **Challenge** | Find structured fermionic Gaussian-vertex sets with det(I + product exp(A_i)) >= 0 beyond the known split-orthogonal and fixed-metric semigroup principles, and map any survivor to an interacting QMC weight. |
-| **Catalog issue** | `Addresses #121` — “Sign-problem free hunter,” released by Lei Wang, Institute of Physics, Chinese Academy of Sciences. |
+| **Catalog issue** | Addresses #121 - Sign-problem free hunter, released by Lei Wang, Institute of Physics, Chinese Academy of Sciences. |
 | **Track** | `tracks/qmc/` — from the issue's `Method: Quantum Monte Carlo` field. |
 
 ## Bottom line
@@ -148,4 +148,4 @@ Final A/B-specific randomized validation is not yet included; the earlier A/D/F 
 | Exclude every alternative positive decomposition of the same Hamiltonian | Incomplete and not claimed. |
 | Public MathOverflow/arXiv endgame and external review | Not yet done. |
 
-For these reasons the PR uses `Addresses #121`, not `Closes #121`.  The core matrix question has a serious candidate answer; the strongest physical interpretation of the challenge has not yet been solved.
+For these reasons this is a non-closing PR that addresses #121. The core matrix question has a serious candidate answer; the strongest physical interpretation of the challenge has not yet been solved.
