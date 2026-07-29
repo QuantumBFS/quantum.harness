@@ -262,7 +262,6 @@ def fast_full_fock_diagnostics(
     """Run exact sign/trace gates and a light spectral Perron diagnostic."""
 
     atoms = exact_atoms_from_card(card)
-    fock_atoms = tuple(exact_fock_lift(atom) for atom in atoms)
     combined = tuple(combined_grade_lift(atom, search_grades) for atom in atoms)
 
     first_negative: dict[str, int] | None = None
@@ -300,17 +299,20 @@ def fast_full_fock_diagnostics(
         )
 
     grade_word_traces = []
+    grade_trace_values: list[sp.Expr] = []
     for grade in range(atoms[0].rows + 1):
         compound = exact_compound_matrix(atoms[0], grade)
+        value = sp.trace(compound**diagnostic_word_power)
+        grade_trace_values.append(value)
         grade_word_traces.append(
             {
                 "grade": grade,
-                "trace": _rational_payload(
-                    sp.trace(compound**diagnostic_word_power)
-                ),
+                "trace": _rational_payload(value),
             }
         )
-    full_trace = sp.trace(fock_atoms[0] ** diagnostic_word_power)
+    # Gamma(B) is exactly block diagonal by grade, so summing the already
+    # computed block traces avoids a very expensive dense 32x32 exact power.
+    full_trace = sum(grade_trace_values)
     determinant_trace = sp.det(sp.eye(atoms[0].rows) + atoms[0] ** diagnostic_word_power)
     if full_trace != determinant_trace:
         raise RuntimeError("Fock trace/determinant identity failed")
