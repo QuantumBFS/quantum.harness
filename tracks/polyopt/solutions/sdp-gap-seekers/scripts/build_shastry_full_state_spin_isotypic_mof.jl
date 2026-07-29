@@ -769,6 +769,14 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     metadata["stages"]["spin_isotypic"] =
         measurement_dict(isotypic_measurement)
     metadata["reduced"] = spin_isotypic_report_dict(report)
+    metadata["reduced"]["positive_block_labels"] = String[
+        ShastryFullStateSpinIsotypicReduction.block_label(block)
+        for block in isotypic.positive_blocks
+    ]
+    metadata["reduced"]["gap_block_labels"] = String[
+        ShastryFullStateSpinIsotypicReduction.block_label(block)
+        for block in isotypic.gap_blocks
+    ]
     metadata["reduced"]["assembly_sha256"] = isotypic.assembly_sha256
     metadata["reduced"]["coefficient_map_sha256"] =
         isotypic.coefficient_map_sha256
