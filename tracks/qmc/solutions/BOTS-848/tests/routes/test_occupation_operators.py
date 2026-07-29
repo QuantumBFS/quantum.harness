@@ -654,7 +654,11 @@ def test_local_estimator_certifies_ordinary_row_rounding_under_all_orders(
 
         assert _float_hex(observed.real) == expected_bits
 
-    monkeypatch.setattr(operators, "_try_fast_component", lambda *_args: None)
+    monkeypatch.setattr(
+        operators,
+        "_certify_fast_components",
+        lambda *_args: None,
+    )
     fallback = local_from_log_neighbors(
         1,
         dict(terms),

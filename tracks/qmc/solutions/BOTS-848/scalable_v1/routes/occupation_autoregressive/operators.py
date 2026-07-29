@@ -529,15 +529,6 @@ def _effective_log(term: _DyadicLogTerm) -> float:
         return math.copysign(math.inf, term.target_logabs)
 
 
-def _try_fast_component(
-    terms: Sequence[_DyadicLogTerm],
-    source_logabs: float,
-) -> float | None:
-    """Overridable gate; the shared Decimal interval is the fast result."""
-
-    return 0.0
-
-
 def _certify_fast_components(
     components: Sequence[Sequence[_DyadicLogTerm]],
     source_logabs: float,
@@ -744,15 +735,10 @@ def _sum_dyadic_row(
         pending_components.append(terms)
 
     if pending_components:
-        combined = tuple(
-            term for terms in pending_components for term in terms
+        certified = _certify_fast_components(
+            pending_components,
+            source_logabs,
         )
-        certified = None
-        if _try_fast_component(combined, source_logabs) is not None:
-            certified = _certify_fast_components(
-                pending_components,
-                source_logabs,
-            )
         if certified is None:
             certified = tuple(
                 _fallback_component(terms, source_logabs)
