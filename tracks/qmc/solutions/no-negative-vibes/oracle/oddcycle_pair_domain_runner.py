@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import tempfile
 import time
 from collections.abc import Callable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -42,13 +43,31 @@ def _write_json_atomic(path: Path, payload: Mapping[str, object]) -> None:
     """Publish one complete manifest without exposing a partial JSON file."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(
-        json.dumps(_json_safe(payload), allow_nan=False, indent=2, sort_keys=True)
-        + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(path)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=path.name + ".",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(
+                json.dumps(
+                    _json_safe(payload),
+                    allow_nan=False,
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+        temporary.replace(path)
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
 
 
 def _successful_manifest(path: Path) -> bool:
@@ -125,8 +144,11 @@ def _path_metric_options(settings: Mapping[str, object]) -> dict[str, object]:
 
 
 def _short_word_options(settings: Mapping[str, object]) -> dict[str, object]:
+    depth = settings.get("short_word_depth", 6)
+    if isinstance(depth, bool) or depth != 6:
+        raise ValueError("short_word_depth must be exactly 6 for this protocol")
     options: dict[str, object] = {
-        "max_depth": int(settings.get("short_word_depth", 6))
+        "max_depth": 6
     }
     if "max_level_matrices" in settings:
         options["max_level_matrices"] = settings["max_level_matrices"]
@@ -476,14 +498,30 @@ def run_spec(
     cells = spec.get("cells")
     if not isinstance(cells, list):
         raise ValueError("run_spec.json requires a cells list")
+    shared_settings = dict(spec.get("settings", {}))
+    shared_provenance = dict(spec.get("provenance", {}))
+    cell_ids: set[str] = set()
+    for cell in cells:
+        if (
+            not isinstance(cell, Mapping)
+            or "cell_id" not in cell
+            or "params" not in cell
+        ):
+            raise ValueError("each cell requires cell_id and params")
+        cell_id = str(cell["cell_id"])
+        if cell_id in cell_ids:
+            raise ValueError(f"duplicate cell_id: {cell_id}")
+        cell_ids.add(cell_id)
+        cell_settings = cell.get("settings", {})
+        if not isinstance(cell_settings, Mapping):
+            raise ValueError("cell settings must be an object")
+        _short_word_options({**shared_settings, **dict(cell_settings)})
     declared_run_dir = Path(spec.get("run_dir", spec_path.parent))
     run_dir = (
         declared_run_dir
         if declared_run_dir.is_absolute()
         else spec_path.parent / declared_run_dir
     )
-    shared_settings = dict(spec.get("settings", {}))
-    shared_provenance = dict(spec.get("provenance", {}))
     selected = [
         cell for position, cell in enumerate(cells)
         if position % worker_count == worker_index
@@ -491,12 +529,6 @@ def run_spec(
     pending: list[Mapping[str, object]] = []
     reused = 0
     for cell in selected:
-        if (
-            not isinstance(cell, Mapping)
-            or "cell_id" not in cell
-            or "params" not in cell
-        ):
-            raise ValueError("each cell requires cell_id and params")
         manifest_path = run_dir / "cells" / str(cell["cell_id"]) / "manifest.json"
         if _successful_manifest(manifest_path):
             reused += 1

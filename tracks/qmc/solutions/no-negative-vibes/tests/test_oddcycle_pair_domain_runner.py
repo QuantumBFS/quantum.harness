@@ -1,7 +1,15 @@
 import json
 from pathlib import Path
 
-from oracle.oddcycle_pair_domain_runner import run_cell, run_spec
+import numpy as np
+import pytest
+
+import oracle.oddcycle_pair_domain_runner as pair_runner
+from oracle.oddcycle_pair_domain_runner import (
+    numerical_time_orientation,
+    run_cell,
+    run_spec,
+)
 
 
 CONTROL_PARAMS = {"p_low": 0.001, "p_high": 0.8, "q": 1.0, "r": 1.0}
@@ -93,6 +101,28 @@ def test_cell_runs_pair_gates_and_records_compact_score():
         "path_metric_margin": 0.125,
         "time_orientation_minimum": 0.5,
     }
+
+
+def test_cell_rejects_any_short_word_depth_other_than_six():
+    def forbidden_words(*args, **kwargs):
+        raise AssertionError("a nonbinding depth must not invoke the oracle")
+
+    manifest = run_cell(
+        "shallow-depth",
+        CONTROL_PARAMS,
+        {"short_word_depth": 5},
+        {},
+        joint_words_fn=forbidden_words,
+        endpoint_metric_fn=_endpoint_metric,
+        joint_metric_fn=_joint_metric,
+        path_metric_fn=_path_metric,
+        orientation_fn=_oriented,
+    )
+
+    assert manifest["classification"] == "compute-error"
+    assert manifest["compute_success"] is False
+    assert manifest["first_failure"] == "short-word-error"
+    assert manifest["short_words"]["error_type"] == "ValueError"
 
 
 def test_joint_common_metric_stops_before_path_metric():
@@ -191,6 +221,99 @@ def test_run_spec_uses_virtual_worker_sharding_and_reuses_only_success(tmp_path)
     assert not list(Path(run_dir).rglob("*.tmp"))
 
 
+def test_run_spec_rejects_invalid_shared_or_cell_depth_and_duplicate_ids(tmp_path):
+    spec_path = tmp_path / "run_spec.json"
+
+    def write_spec(settings, cells):
+        spec_path.write_text(
+            json.dumps({"settings": settings, "cells": cells}),
+            encoding="utf-8",
+        )
+
+    write_spec({"short_word_depth": 5}, [{"cell_id": "one", "params": CONTROL_PARAMS}])
+    with pytest.raises(ValueError, match="short_word_depth"):
+        run_spec(spec_path, **_runner_dependencies())
+
+    write_spec(
+        {"short_word_depth": 6},
+        [
+            {"cell_id": "one", "params": CONTROL_PARAMS},
+            {
+                "cell_id": "two",
+                "params": CONTROL_PARAMS,
+                "settings": {"short_word_depth": 7},
+            },
+        ],
+    )
+    with pytest.raises(ValueError, match="short_word_depth"):
+        run_spec(spec_path, **_runner_dependencies())
+
+    write_spec(
+        {"short_word_depth": 6},
+        [
+            {"cell_id": "duplicate", "params": CONTROL_PARAMS},
+            {"cell_id": "duplicate", "params": CONTROL_PARAMS},
+        ],
+    )
+    with pytest.raises(ValueError, match="duplicate cell_id"):
+        run_spec(spec_path, **_runner_dependencies())
+
+
+def _positive_split_metric():
+    return np.diag([-1.0, -1.0, -1.0, -1.0, 1.0])
+
+
+def test_numerical_time_orientation_accepts_synchronized_future_sheets(monkeypatch):
+    monkeypatch.setattr(
+        pair_runner,
+        "joint_alphabet",
+        lambda points: tuple(np.eye(5) for _ in range(4)),
+    )
+
+    result = numerical_time_orientation(
+        ((0.001, 1.0, 1.0), (0.8, 1.0, 1.0)),
+        [_positive_split_metric() for _ in range(4)],
+    )
+
+    assert result["status"] == "time-orientation-passed"
+    assert result["all_inverse_transitions_future_preserving"] is True
+    assert result["minimum_oriented_scalar"] == 1.0
+
+
+def test_numerical_time_orientation_rejects_unsynchronized_transition(monkeypatch):
+    atoms = [np.eye(5) for _ in range(4)]
+    atoms[2] = np.diag([1.0, 1.0, 1.0, -1.0, -1.0])
+    monkeypatch.setattr(pair_runner, "joint_alphabet", lambda points: tuple(atoms))
+
+    result = numerical_time_orientation(
+        ((0.001, 1.0, 1.0), (0.8, 1.0, 1.0)),
+        [_positive_split_metric() for _ in range(4)],
+    )
+
+    assert result["status"] == "time-orientation-failed"
+    assert result["all_inverse_transitions_future_preserving"] is False
+    assert result["minimum_oriented_scalar"] == -1.0
+
+
+def test_numerical_time_orientation_rejects_invalid_metric_inertia(monkeypatch):
+    monkeypatch.setattr(
+        pair_runner,
+        "joint_alphabet",
+        lambda points: tuple(np.eye(5) for _ in range(4)),
+    )
+
+    result = numerical_time_orientation(
+        ((0.001, 1.0, 1.0), (0.8, 1.0, 1.0)),
+        [np.eye(5) for _ in range(4)],
+    )
+
+    assert result["status"] == "time-orientation-failed"
+    assert result["metric_inertias"] == [
+        {"positive": 5, "negative": 0, "zero": 0}
+        for _ in range(4)
+    ]
+
+
 def test_protocol_axes_include_the_successful_control_fixture():
     protocol = (
         Path(__file__).resolve().parents[1]
@@ -202,8 +325,63 @@ def test_protocol_axes_include_the_successful_control_fixture():
         (protocol / "control-fixture.json").read_text(encoding="utf-8")
     )
 
-    assert 0.001 in axes["p_low"]
-    assert 0.8 in axes["p_high"]
-    assert 1.0 in axes["q"]
-    assert 1.0 in axes["r"]
+    assert axes == {
+        "p_low": [
+            0.00001,
+            0.00002,
+            0.00005,
+            0.0001,
+            0.0002,
+            0.0005,
+            0.001,
+            0.002,
+            0.003,
+            0.005,
+            0.0075,
+            0.01,
+            0.015,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+        ],
+        "p_high": [
+            0.55,
+            0.575,
+            0.6,
+            0.625,
+            0.65,
+            0.675,
+            0.7,
+            0.725,
+            0.75,
+            0.775,
+            0.8,
+            0.825,
+            0.85,
+            0.875,
+            0.9,
+            0.925,
+            0.95,
+            0.975,
+            1.0,
+            1.025,
+            1.05,
+            1.075,
+            1.1,
+            1.125,
+            1.15,
+            1.175,
+            1.2,
+            1.225,
+            1.25,
+        ],
+        "q": [0.9, 0.95, 1.0, 1.05, 1.1],
+        "r": [0.9, 0.95, 1.0, 1.05, 1.1],
+    }
+    assert len(axes["p_low"]) == 17
+    assert len(axes["p_high"]) == 29
+    assert len(axes["q"]) == 5
+    assert len(axes["r"]) == 5
+    assert 17 * 29 * 5 * 5 == 12325
     assert fixture["params"] == CONTROL_PARAMS

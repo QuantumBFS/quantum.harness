@@ -17,6 +17,11 @@ and numerical time orientation. Scientific gate failures are saved as
 successful computations; only exceptions are marked `compute_success: false`
 and retried on resume.
 
+Depth six is a binding protocol constant: the runner rejects any shared or
+per-cell `short_word_depth` other than `6`, rather than emitting a successful
+manifest from a shallower screen. Duplicate cell IDs are also rejected before
+the virtual-worker shard is selected.
+
 Run numerical work only on an approved remote host. Configure the host BLAS
 libraries to one thread per process and reserve two logical cores. For a
 virtual worker shard, use:
@@ -29,4 +34,6 @@ python -m oracle.oddcycle_pair_domain_runner run_spec.json \
 
 The selected cells satisfy `cell_position % worker_count == worker_index`.
 Each manifest is atomically written to `cells/<cell_id>/manifest.json`; only
-a manifest with `compute_success: true` is reused.
+a manifest with `compute_success: true` is reused. Each write uses a unique
+same-directory temporary file, so simultaneous workers never share a
+temporary manifest name.
