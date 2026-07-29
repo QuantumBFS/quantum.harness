@@ -537,30 +537,93 @@ end
 
 function resume_task4_qn_branch(parameters, purification, settings)
     published = Ref{Any}(nothing)
-    publications = Ref(0)
+    target_written = Ref(false)
+    target_tau_index =
+        settings.green_insertion === :creation ? 4 : 2
+    target_cursor = ObservableCursor(
+        :green,
+        target_tau_index,
+        :up,
+        settings.green_insertion,
+        :after,
+    )
     interruption = try
         finite_bath_observables(
             parameters;
             settings...,
             purification,
             checkpoint_manager = (psi, state) -> begin
-                publications[] += 1
-                published[] = (;
-                    psi = psi === nothing ? nothing : copy(psi),
-                    resume_state = state,
-                )
+                if state.cursor == target_cursor &&
+                   state.evolution_state !== nothing &&
+                   state.evolution_state.completed_steps == 1
+                    published[] = (;
+                        psi = copy(psi),
+                        resume_state = state,
+                    )
+                    target_written[] = true
+                end
             end,
-            stop_requested = () -> publications[] == 2,
+            stop_requested = () -> target_written[],
         )
         nothing
     catch error
         error
     end
     @test interruption isa ObservableInterrupted
+    @test target_written[]
     @test published[] !== nothing
-    return finite_bath_observables(
-        parameters; settings..., purification, resume = published[]
+    @test published[].resume_state.cursor == target_cursor
+    @test published[].resume_state.evolution_state.completed_steps == 1
+    base_nf = 2 * (length(parameters.epsilon) + 1)
+    expected_nf =
+        base_nf + (settings.green_insertion === :creation ? 1 : -1)
+    expected_sz = settings.green_insertion === :creation ? 1 : -1
+    @test flux(published[].psi) ==
+          QN(("Nf", expected_nf, -1), ("Sz", expected_sz))
+
+    resumed_publications = NamedTuple[]
+    resumed = finite_bath_observables(
+        parameters;
+        settings...,
+        purification,
+        resume = published[],
+        checkpoint_manager = (_, state) -> begin
+            completed_steps =
+                state.evolution_state === nothing ?
+                0 :
+                state.evolution_state.completed_steps
+            push!(
+                resumed_publications,
+                (; cursor = state.cursor, completed_steps),
+            )
+        end,
     )
+    target_tau = settings.tau[target_tau_index]
+    after_duration =
+        settings.green_insertion === :creation ?
+        target_tau :
+        settings.beta - target_tau
+    expected_after_steps =
+        ceil(Int, after_duration / settings.time_step)
+    @test resumed.diagnostics.green_up[
+        target_tau_index
+    ].settings.after_steps == expected_after_steps
+    resumed_target_steps = [
+        publication.completed_steps
+        for publication in resumed_publications
+        if publication.cursor == target_cursor
+    ]
+    @test resumed_target_steps == collect(2:expected_after_steps)
+    @test !any(
+        publication ->
+            publication.cursor.phase === :green &&
+            publication.cursor.tau_index == target_tau_index &&
+            publication.cursor.spin === :up &&
+            publication.cursor.insertion === settings.green_insertion &&
+            publication.cursor.segment === :before,
+        resumed_publications,
+    )
+    return resumed
 end
 
 function run_qn_observable_equivalence_matrix(max_bath::Int)
@@ -621,6 +684,8 @@ function run_qn_observable_equivalence_matrix(max_bath::Int)
             assert_star_chain_observables(
                 chain_result, direct_result; atol = 1.0e-6
             )
+            qn_context =
+                build_finite_bath_context(chain; purification)
             for insertion in (:creation, :annihilation)
                 assert_star_chain_observables(
                     qn_results[insertion], direct_result; atol = 1.0e-6
@@ -641,6 +706,51 @@ function run_qn_observable_equivalence_matrix(max_bath::Int)
                         point.operator_sector !== nothing &&
                         point.operator_sector.insertion === insertion
                         for point in spin_diagnostics[2:(end - 1)]
+                    )
+                end
+                base_nf = 2 * (n_bath + 1)
+                for (spin, expected_nf, expected_sz) in (
+                    (
+                        :up,
+                        base_nf + (insertion === :creation ? 1 : -1),
+                        insertion === :creation ? 1 : -1,
+                    ),
+                    (
+                        :dn,
+                        base_nf + (insertion === :creation ? 1 : -1),
+                        insertion === :creation ? -1 : 1,
+                    ),
+                )
+                    diagnostics =
+                        spin === :up ?
+                        qn_results[insertion].diagnostics.green_up :
+                        qn_results[insertion].diagnostics.green_dn
+                    @test all(
+                        point.operator_sector.insertion === insertion &&
+                        point.operator_sector.spin === spin &&
+                        point.operator_sector.nf == expected_nf &&
+                        point.operator_sector.sz == expected_sz
+                        for point in diagnostics[2:(end - 1)]
+                    )
+                    explicit_sector = OperatorSector(
+                        insertion,
+                        spin,
+                        expected_nf,
+                        expected_sz,
+                    )
+                    applied =
+                        FiniteBathObservables._apply_impurity_operator(
+                            qn_results[insertion].thermal_state.psi,
+                            qn_context.sites[1],
+                            spin,
+                            insertion,
+                            explicit_sector,
+                        )
+                    @test applied.status === :finite
+                    @test flux(applied.psi) ==
+                          QN(
+                        ("Nf", expected_nf, -1),
+                        ("Sz", expected_sz),
                     )
                 end
             end
@@ -753,6 +863,31 @@ function assert_star_chain_observables(chain, direct; atol)
         abs.(chain.G_dn[2:(end - 1)] .- direct.G_dn[2:(end - 1)]);
         init = 0.0,
     ) <= atol
+end
+
+@testset "one-physical-orbital dense normalization" begin
+    n_bath = 0
+    physical_orbitals = n_bath + 1
+    beta = 0.73
+    interaction = 0.8
+    epsilon_d = -0.31
+    chemical_potential = 0.07
+    energies = [
+        0.0,
+        epsilon_d - chemical_potential,
+        epsilon_d - chemical_potential,
+        2 * (epsilon_d - chemical_potential) + interaction,
+    ]
+    dense_hamiltonian = Diagonal(energies)
+    dense_log_partition = log(real(tr(exp(-beta * dense_hamiltonian))))
+    normalized_identity = fill(0.5, 4)
+    evolved = exp(-beta * dense_hamiltonian / 2) * normalized_identity
+    purification_log_partition =
+        physical_orbitals * log(4.0) + 2 * log(norm(evolved))
+
+    @test physical_orbitals == 1
+    @test norm(normalized_identity) == 1.0
+    @test purification_log_partition ≈ dense_log_partition atol = 5.0e-14
 end
 
 @testset "QN chain thermal and observable equivalence matrix" begin
