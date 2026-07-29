@@ -38,6 +38,8 @@ MAX_JSON_BYTES = 1_048_576
 MAX_HDF5_BYTES = 67_108_864
 MAX_KAPPA_COUNT = 4096
 MAX_DATASET_BYTES = 1_048_576
+MAX_BATCH_MEMBERS = 4096
+MAX_KERNEL_FILES = 128
 
 _HEX256 = re.compile(r"[0-9a-f]{64}")
 _HEX160 = re.compile(r"[0-9a-f]{40}")
@@ -83,10 +85,19 @@ _ROOT_ENTRIES = frozenset(
         "manifest.json",
     }
 )
-_REQUIRED_ROOT_ENTRIES = _ROOT_ENTRIES - {"progress.json"}
-_ROOT_DIRECTORY_ENTRIES = frozenset({"kernel", "trajectories", "batches"})
-_ROOT_FILE_ENTRIES = _REQUIRED_ROOT_ENTRIES - _ROOT_DIRECTORY_ENTRIES
-_LAYOUT_SCHEMA = "challenge-194-run-layout-entry-v1"
+_UPSTREAM_FILES = frozenset(
+    {
+        "request.json",
+        "environment.json",
+        "seed-manifest.json",
+        "capability.json",
+        "manifest.json",
+    }
+)
+_UPSTREAM_ENTRIES = _UPSTREAM_FILES | {"kernel"}
+_OWNED_DIRECTORIES = frozenset({"trajectories", "batches"})
+_REQUIRED_ROOT_ENTRIES = _UPSTREAM_ENTRIES | _OWNED_DIRECTORIES
+_ROOT_DIRECTORY_ENTRIES = _OWNED_DIRECTORIES | {"kernel"}
 
 
 class ArtifactIntegrityError(RuntimeError):
@@ -105,7 +116,13 @@ def _canonical_json_bytes(document: object) -> bytes:
             ).encode("utf-8")
             + b"\n"
         )
-    except (TypeError, ValueError, UnicodeEncodeError) as error:
+    except (
+        TypeError,
+        ValueError,
+        UnicodeEncodeError,
+        RecursionError,
+        OverflowError,
+    ) as error:
         raise ArtifactIntegrityError("document is not canonical JSON") from error
 
 
@@ -236,26 +253,18 @@ def _check_existing_path_chain(path: Path) -> None:
             raise ArtifactIntegrityError("run path must not contain symlinks")
 
 
-def _layout_document(name: str) -> dict[str, str]:
-    return {
-        "entry": name,
-        "schema_version": _LAYOUT_SCHEMA,
-        "status": "reserved",
-    }
-
-
-def _initialize_run_directory(run_dir: Path) -> None:
-    marker = run_dir / f".layout.{os.getpid()}.{uuid.uuid4().hex}.intent"
-    _write_unique_fsynced(marker, _canonical_json_bytes({"schema_version": _LAYOUT_SCHEMA}))
+def _initialize_owned_namespaces(run_dir: Path) -> None:
+    marker = run_dir / f".task9-init.{os.getpid()}.{uuid.uuid4().hex}.intent"
+    _write_unique_fsynced(
+        marker,
+        _canonical_json_bytes(
+            {"schema_version": "challenge-194-task9-initialization-v1"}
+        ),
+    )
     _fsync_directory_raw(run_dir)
     try:
-        for name in sorted(_ROOT_DIRECTORY_ENTRIES):
+        for name in sorted(_OWNED_DIRECTORIES):
             (run_dir / name).mkdir()
-        for name in sorted(_ROOT_FILE_ENTRIES):
-            _write_unique_fsynced(
-                run_dir / name,
-                _canonical_json_bytes(_layout_document(name)),
-            )
         _fsync_directory_raw(run_dir)
         marker.unlink()
         _fsync_directory_raw(run_dir)
@@ -263,26 +272,44 @@ def _initialize_run_directory(run_dir: Path) -> None:
         raise
 
 
-def _prepare_publication_run(run_dir: Path) -> tuple[Path, Path, Path]:
+def _prepare_publication_run(
+    run_dir: Path,
+    expected: dict[str, str],
+) -> tuple[Path, Path, Path, str]:
     if not isinstance(run_dir, Path):
         raise TypeError("run_dir must be a pathlib.Path")
     _check_existing_path_chain(run_dir)
     try:
-        run_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as error:
-        raise ArtifactIntegrityError("unable to create run directory") from error
-    try:
         mode = run_dir.lstat().st_mode
     except OSError as error:
-        raise ArtifactIntegrityError("unable to inspect run directory") from error
+        raise ArtifactIntegrityError("upstream run metadata directory is missing") from error
     if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
         raise ArtifactIntegrityError("run directory must be a non-symlink directory")
+    metadata_digest = _verify_upstream_metadata(run_dir, expected)
     with _directory_lock(run_dir):
-        entries = list(run_dir.iterdir())
-        if not entries:
-            _initialize_run_directory(run_dir)
-    _verify_run_layout(run_dir)
-    return run_dir, run_dir / "trajectories", run_dir / "batches"
+        names = {path.name for path in run_dir.iterdir()}
+        for name in _OWNED_DIRECTORIES & names:
+            metadata = (run_dir / name).lstat()
+            if stat.S_ISLNK(metadata.st_mode):
+                raise ArtifactIntegrityError(
+                    f"Task 9 namespace {name} must not be a symlink"
+                )
+        owned = names & _OWNED_DIRECTORIES
+        if not owned:
+            if names != _UPSTREAM_ENTRIES:
+                raise ArtifactIntegrityError(
+                    "run layout contains unknown entries before Task 9 initialization"
+                )
+            _initialize_owned_namespaces(run_dir)
+        elif owned != _OWNED_DIRECTORIES:
+            raise ArtifactIntegrityError("Task 9 namespace initialization is incomplete")
+    _verify_run_layout(run_dir, expected)
+    return (
+        run_dir,
+        run_dir / "trajectories",
+        run_dir / "batches",
+        metadata_digest,
+    )
 
 
 @contextmanager
@@ -388,7 +415,33 @@ def _verify_installed_bytes(path: Path, payload: bytes, description: str) -> Non
         raise ArtifactIntegrityError(f"{description} installed bytes mismatch")
 
 
-def _publish_json_once(path: Path, payload: bytes) -> None:
+def _publish_json_once(
+    path: Path,
+    document: object,
+    schema: str,
+) -> None:
+    payload = _canonical_json_bytes(document)
+    if len(payload) > MAX_JSON_BYTES:
+        raise ArtifactIntegrityError("JSON publication exceeds the byte-size limit")
+    if (
+        not isinstance(document, dict)
+        or document.get("schema_version") != schema
+    ):
+        raise ArtifactIntegrityError("JSON publication schema is invalid")
+    if schema == BATCH_SCHEMA and set(document) != {
+        "batch_id",
+        "members",
+        "schema_version",
+    }:
+        raise ArtifactIntegrityError("batch publication fields are not exact")
+    if schema == PROGRESS_SCHEMA and set(document) != {
+        "batch_count",
+        "batches",
+        "schema_version",
+        "trajectory_count",
+        "trajectories",
+    }:
+        raise ArtifactIntegrityError("progress publication fields are not exact")
     partial = path.parent / f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.partial"
     try:
         _write_unique_fsynced(partial, payload)
@@ -489,6 +542,7 @@ def _write_hdf5(
     request: TrajectoryRequest,
     result: TrajectoryResult,
     provenance: Mapping[str, object],
+    run_metadata_sha256: str,
 ) -> None:
     counters, keys, material_hashes = _stream_material(request)
     with h5py.File(path, "x", libver="earliest") as stream:
@@ -504,6 +558,7 @@ def _write_hdf5(
             ("runtime_capability_sha256", provenance["runtime_capability_sha256"]),
             ("analysis_plan_sha256", provenance["analysis_plan_sha256"]),
             ("rng_sha256", provenance["rng_sha256"]),
+            ("run_metadata_sha256", run_metadata_sha256),
             ("length", np.uint64(request.length)),
             ("sigma", np.float64(request.sigma)),
             ("sigma_grid_id", request.sigma_grid_id),
@@ -698,6 +753,7 @@ def _parse_hdf5(
             "runtime_capability_sha256",
             "analysis_plan_sha256",
             "rng_sha256",
+            "run_metadata_sha256",
             "length",
             "sigma",
             "sigma_grid_id",
@@ -744,6 +800,11 @@ def _parse_hdf5(
         if _text_attribute(stream.attrs, "schema_version") != TRAJECTORY_SCHEMA:
             raise ArtifactIntegrityError("trajectory schema version is stale")
         stored = {key: _text_attribute(stream.attrs, key) for key in _EXPECTED_KEYS}
+        run_metadata_sha256 = _text_attribute(
+            stream.attrs, "run_metadata_sha256"
+        )
+        if _HEX256.fullmatch(run_metadata_sha256) is None:
+            raise ArtifactIntegrityError("run metadata digest is malformed")
         _validate_expected(stored)
         if expected is not None:
             _validate_expected(expected)
@@ -873,7 +934,7 @@ def _parse_hdf5(
             )
         except ValueError as error:
             raise ArtifactIntegrityError("trajectory result is invalid") from error
-        return result, stored
+        return result, {**stored, "run_metadata_sha256": run_metadata_sha256}
     except ArtifactIntegrityError:
         raise
     except (KeyError, MemoryError, OSError, RuntimeError, TypeError, ValueError) as error:
@@ -905,6 +966,17 @@ def _load_hdf5_verified(
                 result, stored = _parse_hdf5(stream, expected)
         finally:
             file_object.close()
+        if path.parent.name != "trajectories":
+            raise ArtifactIntegrityError(
+                "trajectory is outside the canonical run namespace"
+            )
+        run_root = path.parent.parent
+        metadata_digest = _verify_upstream_metadata(
+            run_root,
+            {key: stored[key] for key in _EXPECTED_KEYS},
+        )
+        if metadata_digest != stored["run_metadata_sha256"]:
+            raise ArtifactIntegrityError("run metadata digest mismatch")
         after_hash, after_size = _hash_descriptor(descriptor, "trajectory")
         _require_stable_descriptor(descriptor, original, "trajectory")
         _require_path_identity(path, original, "trajectory")
@@ -937,13 +1009,25 @@ def _read_canonical_json(path: Path, description: str) -> object:
     )
     try:
         payload = _read_descriptor_bounded(descriptor, MAX_JSON_BYTES, description)
+        _require_path_identity(path, original, description)
         document = json.loads(payload)
+        _require_path_identity(path, original, description)
+        canonical = _canonical_json_bytes(document)
+        _require_path_identity(path, original, description)
         _require_stable_descriptor(descriptor, original, description)
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ArtifactIntegrityError(f"unable to read {description}") from error
+    except (
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        RecursionError,
+        OverflowError,
+        ValueError,
+    ) as error:
+        raise ArtifactIntegrityError(
+            f"unable to parse JSON for {description}"
+        ) from error
     finally:
         os.close(descriptor)
-    if payload != _canonical_json_bytes(document):
+    if payload != canonical:
         raise ArtifactIntegrityError(f"{description} is not canonical JSON")
     return document
 
@@ -1014,7 +1098,9 @@ def publish_trajectory(
     }
     expected["request_sha256"] = trajectory_id
     expected["kernel_sha256"] = request.kernel_sha256
-    _, trajectories, _ = _prepare_publication_run(run_dir)
+    _, trajectories, _, metadata_digest = _prepare_publication_run(
+        run_dir, expected
+    )
     final = trajectories / f"trajectory-{trajectory_id}.h5"
     sidecar = final.with_suffix(".sha256.json")
     unique = f"{os.getpid()}.{uuid.uuid4().hex}"
@@ -1025,6 +1111,7 @@ def publish_trajectory(
         "final_name": final.name,
         "partial_name": partial.name,
         "semantic_hashes": expected,
+        "run_metadata_sha256": metadata_digest,
         "trajectory_id": trajectory_id,
     }
     with _directory_lock(trajectories):
@@ -1032,7 +1119,13 @@ def publish_trajectory(
             raise FileExistsError(f"immutable trajectory already exists: {final}")
         _write_unique_fsynced(intent, _canonical_json_bytes(intent_document))
         _fsync_directory(trajectories)
-        _write_hdf5(partial, request, result, provenance)
+        _write_hdf5(
+            partial,
+            request,
+            result,
+            provenance,
+            metadata_digest,
+        )
         _, trajectory_hash, artifact_size = _semantic_reload(partial, expected)
         digest_document = {
             "artifact_size": artifact_size,
@@ -1071,6 +1164,20 @@ def publish_trajectory(
         partial.unlink()
         digest_partial.unlink()
         _fsync_directory(trajectories)
+        # This is the final installed-inode boundary. It deliberately occurs
+        # after staged-link removal and its directory fsync, while the durable
+        # publication intent still exists.
+        _verify_installed_bytes(
+            sidecar,
+            _canonical_json_bytes(digest_document),
+            "trajectory digest sidecar",
+        )
+        _load_hdf5_verified(
+            final,
+            expected,
+            required_digest=trajectory_hash,
+            required_size=artifact_size,
+        )
         intent.unlink()
         try:
             _fsync_directory(trajectories)
@@ -1119,12 +1226,20 @@ def publish_batch_manifest(
         trajectory_paths, Sequence
     ):
         raise TypeError("trajectory_paths must be a sequence of paths")
+    try:
+        member_count = len(trajectory_paths)
+    except (OverflowError, ValueError) as error:
+        raise ArtifactIntegrityError("batch member count is invalid") from error
+    if not 1 <= member_count <= MAX_BATCH_MEMBERS:
+        raise ArtifactIntegrityError("batch member count exceeds the frozen limit")
     _verify_run_layout(run_dir)
     trajectories = run_dir / "trajectories"
     batches = run_dir / "batches"
     members: list[dict[str, str]] = []
     seen: set[str] = set()
-    for path in trajectory_paths:
+    for index, path in enumerate(trajectory_paths):
+        if index >= MAX_BATCH_MEMBERS:
+            raise ArtifactIntegrityError("batch member iteration exceeds the limit")
         if not isinstance(path, Path):
             raise TypeError("trajectory path must be a pathlib.Path")
         if path.parent != trajectories:
@@ -1160,7 +1275,7 @@ def publish_batch_manifest(
     with _directory_lock(batches):
         if final.exists() or final.is_symlink():
             raise FileExistsError(f"immutable batch already exists: {final}")
-        _publish_json_once(final, _canonical_json_bytes(document))
+        _publish_json_once(final, document, BATCH_SCHEMA)
     return final
 
 
@@ -1171,7 +1286,119 @@ def _directory_entries(directory: Path) -> list[Path]:
         raise ArtifactIntegrityError("unable to inspect artifact directory") from error
 
 
-def _verify_run_layout(run_dir: Path) -> None:
+def _document_contains(document: object, key: str, value: object) -> bool:
+    if isinstance(document, dict):
+        if document.get(key) == value:
+            return True
+        return any(
+            _document_contains(child, key, value) for child in document.values()
+        )
+    if isinstance(document, list):
+        return any(_document_contains(child, key, value) for child in document)
+    return False
+
+
+def _verify_upstream_metadata(
+    run_dir: Path,
+    expected: dict[str, str],
+) -> str:
+    _validate_expected(expected)
+    documents: dict[str, object] = {}
+    file_hashes: dict[str, str] = {}
+    identities: set[tuple[int, int]] = set()
+    for name in sorted(_UPSTREAM_FILES):
+        path = run_dir / name
+        metadata = _checked_regular(path, f"upstream metadata {name}")
+        if metadata.st_nlink != 1:
+            raise ArtifactIntegrityError("upstream metadata contains a hard-link alias")
+        identity = (metadata.st_dev, metadata.st_ino)
+        if identity in identities:
+            raise ArtifactIntegrityError("upstream metadata contains inode aliases")
+        identities.add(identity)
+        document = _read_canonical_json(path, f"upstream metadata {name}")
+        if (
+            not isinstance(document, dict)
+            or not isinstance(document.get("schema_version"), str)
+            or not document["schema_version"]
+        ):
+            raise ArtifactIntegrityError(
+                f"upstream metadata {name} lacks a canonical schema identity"
+            )
+        documents[name] = document
+        file_hashes[name] = hashlib.sha256(
+            _canonical_json_bytes(document)
+        ).hexdigest()
+    bindings = {
+        "request.json": (
+            ("kernel_sha256", expected["kernel_sha256"]),
+        ),
+        "environment.json": (
+            ("clean_tree", True),
+            ("conversion_version", CONVERSION_VERSION),
+            ("rng_version", RNG_VERSION),
+            ("runtime_capability_sha256", expected["runtime_capability_sha256"]),
+            ("source_revision", expected["source_revision"]),
+            ("uv_lock_sha256", expected["uv_lock_sha256"]),
+        ),
+        "seed-manifest.json": (("rng_sha256", expected["rng_sha256"]),),
+        "capability.json": (
+            ("runtime_capability_sha256", expected["runtime_capability_sha256"]),
+        ),
+        "manifest.json": (
+            ("analysis_plan_sha256", expected["analysis_plan_sha256"]),
+            ("source_revision", expected["source_revision"]),
+        ),
+    }
+    for name, required in bindings.items():
+        for key, value in required:
+            if not _document_contains(documents[name], key, value):
+                raise ArtifactIntegrityError(
+                    f"upstream metadata {name} does not bind {key}"
+                )
+    kernel = run_dir / "kernel"
+    try:
+        kernel_stat = kernel.lstat()
+    except OSError as error:
+        raise ArtifactIntegrityError("kernel metadata directory is missing") from error
+    if stat.S_ISLNK(kernel_stat.st_mode) or not stat.S_ISDIR(kernel_stat.st_mode):
+        raise ArtifactIntegrityError("kernel metadata has the wrong kind")
+    kernel_files = _directory_entries(kernel)
+    if not kernel_files or len(kernel_files) > MAX_KERNEL_FILES:
+        raise ArtifactIntegrityError("kernel metadata file count is invalid")
+    kernel_hashes: dict[str, str] = {}
+    for path in kernel_files:
+        metadata = _checked_regular(path, "kernel metadata file")
+        if metadata.st_nlink != 1:
+            raise ArtifactIntegrityError("kernel metadata contains a hard-link alias")
+        identity = (metadata.st_dev, metadata.st_ino)
+        if identity in identities:
+            raise ArtifactIntegrityError("kernel metadata contains inode aliases")
+        identities.add(identity)
+        descriptor, original = _open_regular(
+            path, "kernel metadata file", maximum_size=MAX_HDF5_BYTES
+        )
+        try:
+            digest, _ = _hash_descriptor(descriptor, "kernel metadata file")
+            _require_stable_descriptor(
+                descriptor, original, "kernel metadata file"
+            )
+            _require_path_identity(path, original, "kernel metadata file")
+        finally:
+            os.close(descriptor)
+        kernel_hashes[path.name] = digest
+    if expected["kernel_sha256"] not in kernel_hashes.values():
+        raise ArtifactIntegrityError("kernel metadata does not contain the request digest")
+    metadata_index = {
+        "files": file_hashes,
+        "kernel_files": kernel_hashes,
+    }
+    return hashlib.sha256(_canonical_json_bytes(metadata_index)).hexdigest()
+
+
+def _verify_run_layout(
+    run_dir: Path,
+    expected: dict[str, str] | None = None,
+) -> None:
     if not isinstance(run_dir, Path):
         raise TypeError("run_dir must be a pathlib.Path")
     _check_existing_path_chain(run_dir)
@@ -1220,19 +1447,24 @@ def _verify_run_layout(run_dir: Path) -> None:
                 raise ArtifactIntegrityError(
                     f"run layout entry {path.name} is a hard-link alias"
                 )
-            if path.name in _ROOT_FILE_ENTRIES:
-                document = _read_canonical_json(path, f"run layout {path.name}")
-                if document != _layout_document(path.name):
-                    raise ArtifactIntegrityError(
-                        f"run layout entry {path.name} is not canonical"
-                    )
+    if expected is not None:
+        _verify_upstream_metadata(run_dir, expected)
+    else:
+        for name in _UPSTREAM_FILES:
+            document = _read_canonical_json(
+                run_dir / name, f"upstream metadata {name}"
+            )
+            if not isinstance(document, dict):
+                raise ArtifactIntegrityError(
+                    f"upstream metadata {name} is not a canonical object"
+                )
 
 
 def reconstruct_progress(
     run_dir: Path, expected: dict[str, str]
 ) -> dict[str, object]:
     _validate_expected(expected)
-    _verify_run_layout(run_dir)
+    _verify_run_layout(run_dir, expected)
     trajectories = run_dir / "trajectories"
     batches = run_dir / "batches"
     trajectory_files: list[Path] = []
@@ -1299,7 +1531,10 @@ def reconstruct_progress(
         if document["schema_version"] != BATCH_SCHEMA or document["batch_id"] != batch_id:
             raise ArtifactIntegrityError("batch manifest identity is invalid")
         members = document["members"]
-        if not isinstance(members, list) or not members:
+        if (
+            not isinstance(members, list)
+            or not 1 <= len(members) <= MAX_BATCH_MEMBERS
+        ):
             raise ArtifactIntegrityError("batch manifest has no members")
         if members != sorted(
             members,
@@ -1350,21 +1585,11 @@ def reconstruct_progress(
         "trajectory_count": len(trajectories_document),
         "trajectories": trajectories_document,
     }
-    payload = _canonical_json_bytes(progress)
     progress_path = run_dir / "progress.json"
     if progress_path.exists() or progress_path.is_symlink():
-        descriptor, original = _open_regular(
-            progress_path, "progress", maximum_size=MAX_JSON_BYTES
-        )
-        try:
-            existing = _read_descriptor_bounded(
-                descriptor, MAX_JSON_BYTES, "progress"
-            )
-            _require_stable_descriptor(descriptor, original, "progress")
-        finally:
-            os.close(descriptor)
-        if existing != payload:
+        existing = _read_canonical_json(progress_path, "progress")
+        if existing != progress:
             raise ArtifactIntegrityError("existing progress is stale or corrupt")
     else:
-        _publish_json_once(progress_path, payload)
+        _publish_json_once(progress_path, progress, PROGRESS_SCHEMA)
     return progress

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
@@ -17,7 +18,7 @@ from long_range_percolation.artifacts import (
     ArtifactIntegrityError,
     load_verified_trajectory,
     publish_batch_manifest,
-    publish_trajectory,
+    publish_trajectory as _publish_trajectory_api,
     reconstruct_progress,
 )
 from long_range_percolation.counter_rng import (
@@ -39,6 +40,8 @@ HEX = {
     "analysis_plan_sha256": "not-created-pre-pilot",
     "rng_sha256": "4" * 64,
 }
+KERNEL_BYTES = b"challenge-194-kernel-fixture-v1"
+KERNEL_SHA256 = hashlib.sha256(KERNEL_BYTES).hexdigest()
 
 
 @pytest.fixture
@@ -51,7 +54,7 @@ def sample() -> tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]]:
         master_seed=42,
         phase="pilot",
         replica=7,
-        kernel_sha256="a" * 64,
+        kernel_sha256=KERNEL_SHA256,
     )
     result = TrajectoryResult(
         request_sha256=request_digest(request),
@@ -79,6 +82,65 @@ def expected(request: TrajectoryRequest) -> dict[str, str]:
         "conversion_version": "challenge-194-artifact-conversion-v1",
         "rng_version": RNG_VERSION,
     }
+
+
+def _write_upstream_metadata(
+    run_dir: Path,
+    request: TrajectoryRequest,
+    provenance: dict[str, object],
+) -> None:
+    run_dir.mkdir(parents=True, exist_ok=True)
+    kernel_dir = run_dir / "kernel"
+    kernel_dir.mkdir()
+    (kernel_dir / "kernel.bin").write_bytes(KERNEL_BYTES)
+    documents = {
+        "request.json": {
+            "kernel_sha256": request.kernel_sha256,
+            "request_sha256": request_digest(request),
+            "schema_version": "test-request-v1",
+        },
+        "environment.json": {
+            "clean_tree": provenance["clean_tree"],
+            "conversion_version": provenance["conversion_version"],
+            "rng_version": provenance["rng_version"],
+            "runtime_capability_sha256": provenance[
+                "runtime_capability_sha256"
+            ],
+            "schema_version": "test-environment-v1",
+            "source_revision": provenance["source_revision"],
+            "uv_lock_sha256": provenance["uv_lock_sha256"],
+        },
+        "seed-manifest.json": {
+            "rng_sha256": provenance["rng_sha256"],
+            "schema_version": "test-seed-manifest-v1",
+        },
+        "capability.json": {
+            "runtime_capability_sha256": provenance[
+                "runtime_capability_sha256"
+            ],
+            "schema_version": "test-capability-v1",
+        },
+        "manifest.json": {
+            "analysis_plan_sha256": provenance["analysis_plan_sha256"],
+            "schema_version": "test-run-manifest-v1",
+            "source_revision": provenance["source_revision"],
+        },
+    }
+    for name, document in documents.items():
+        (run_dir / name).write_bytes(artifacts._canonical_json_bytes(document))
+
+
+def publish_trajectory(
+    run_dir: Path,
+    request: TrajectoryRequest,
+    result: TrajectoryResult,
+    provenance: dict[str, object],
+) -> Path:
+    if not run_dir.is_symlink() and (
+        not run_dir.exists() or not any(run_dir.iterdir())
+    ):
+        _write_upstream_metadata(run_dir, request, provenance)
+    return _publish_trajectory_api(run_dir, request, result, provenance)
 
 
 def test_trajectory_round_trip_preserves_complete_resampling_unit(
@@ -212,6 +274,12 @@ def test_pre_rename_crashes_leave_detectable_partial_without_final(
     original = getattr(artifacts, boundary)
 
     def crash(*args, **kwargs):
+        if (
+            boundary == "_hash_descriptor"
+            and len(args) >= 2
+            and args[1] != "trajectory"
+        ):
+            return original(*args, **kwargs)
         raise OSError(f"crash at {boundary}")
 
     monkeypatch.setattr(artifacts, boundary, crash)
@@ -431,8 +499,10 @@ def test_concurrent_trajectory_publication_never_clobbers(
     tmp_path: Path,
     sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
 ):
+    _write_upstream_metadata(tmp_path, sample[0], sample[2])
+
     def publish() -> Path:
-        return publish_trajectory(tmp_path, *sample)
+        return _publish_trajectory_api(tmp_path, *sample)
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         futures = [pool.submit(publish) for _ in range(2)]
@@ -470,7 +540,7 @@ def test_run_and_managed_directories_must_not_be_symlinks(
     with pytest.raises(ArtifactIntegrityError, match="symlink"):
         publish_trajectory(alias, *sample)
     root = tmp_path / "root"
-    root.mkdir()
+    _write_upstream_metadata(root, sample[0], sample[2])
     (root / "trajectories").symlink_to(real, target_is_directory=True)
     with pytest.raises(ArtifactIntegrityError, match="symlink"):
         publish_trajectory(root, *sample)
@@ -519,41 +589,89 @@ def test_hash_and_hdf5_semantics_use_the_same_open_inode(
 
 
 @pytest.mark.parametrize("kind", ("sidecar", "manifest"))
-def test_json_semantics_reject_path_identity_swap_after_descriptor_read(
+@pytest.mark.parametrize("stage", ("after-read", "after-parse", "after-validation"))
+@pytest.mark.parametrize("replacement_kind", ("identical", "different"))
+def test_json_semantics_bind_each_boundary_to_path_identity(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
     kind: str,
+    stage: str,
+    replacement_kind: str,
 ):
     trajectory, batch, hashes = _publish_valid_run(tmp_path, sample)
     target = trajectory.with_suffix(".sha256.json") if kind == "sidecar" else batch
     replacement = tmp_path.parent / f"{tmp_path.name}-replacement-{kind}.json"
-    replacement.write_bytes(target.read_bytes())
-    original = artifacts._read_descriptor_bounded
+    replacement.write_bytes(
+        target.read_bytes()
+        if replacement_kind == "identical"
+        else artifacts._canonical_json_bytes({"different_inode": True})
+    )
+    original_inode = target.stat().st_ino
+    original_read = artifacts._read_descriptor_bounded
+    original_loads = artifacts.json.loads
+    original_canonical = artifacts._canonical_json_bytes
+    original_stable = artifacts._require_stable_descriptor
+    expected_description = (
+        "trajectory digest sidecar" if kind == "sidecar" else "batch manifest"
+    )
+    armed = False
     swapped = False
+
+    def swap() -> None:
+        nonlocal swapped
+        assert not swapped
+        os.replace(replacement, target)
+        swapped = True
 
     def read_then_swap(
         descriptor: int,
         maximum_size: int,
         description: str,
     ) -> bytes:
-        nonlocal swapped
-        payload = original(descriptor, maximum_size, description)
-        expected_description = (
-            "trajectory digest sidecar" if kind == "sidecar" else "batch manifest"
-        )
-        if description == expected_description and not swapped:
-            swapped = True
-            os.replace(replacement, target)
+        nonlocal armed
+        payload = original_read(descriptor, maximum_size, description)
+        if description == expected_description:
+            armed = True
+            if stage == "after-read":
+                swap()
         return payload
 
+    def loads_then_swap(payload: bytes):
+        document = original_loads(payload)
+        if armed and stage == "after-parse" and not swapped:
+            swap()
+        return document
+
+    def validate_then_swap(document: object) -> bytes:
+        payload = original_canonical(document)
+        if armed and stage == "after-validation" and not swapped:
+            swap()
+        return payload
+
+    def ignore_descriptor_metadata_swap(
+        descriptor: int,
+        original: os.stat_result,
+        description: str,
+    ) -> os.stat_result:
+        if description == expected_description:
+            return os.fstat(descriptor)
+        return original_stable(descriptor, original, description)
+
     monkeypatch.setattr(artifacts, "_read_descriptor_bounded", read_then_swap)
+    monkeypatch.setattr(artifacts.json, "loads", loads_then_swap)
+    monkeypatch.setattr(artifacts, "_canonical_json_bytes", validate_then_swap)
+    monkeypatch.setattr(
+        artifacts, "_require_stable_descriptor", ignore_descriptor_metadata_swap
+    )
     with pytest.raises(ArtifactIntegrityError, match="identity"):
         if kind == "sidecar":
             load_verified_trajectory(trajectory, hashes)
         else:
             reconstruct_progress(tmp_path, hashes)
     assert swapped
+    assert not replacement.exists()
+    assert target.stat().st_ino != original_inode
 
 
 @pytest.mark.parametrize("indirection", ("external-link", "vds", "external-storage"))
@@ -694,6 +812,190 @@ def test_installed_batch_inode_bytes_are_verified_before_partial_removal(
     )
 
 
+def test_publish_json_rejects_oversized_document_before_any_filesystem_output(
+    tmp_path: Path,
+):
+    final = tmp_path / "batch-too-large.json"
+    document = {
+        "batch_id": "too-large",
+        "members": [],
+        "padding": "x" * artifacts.MAX_JSON_BYTES,
+        "schema_version": artifacts.BATCH_SCHEMA,
+    }
+    with pytest.raises(ArtifactIntegrityError, match="size|limit|large"):
+        artifacts._publish_json_once(
+            final, document, artifacts.BATCH_SCHEMA
+        )
+    assert not final.exists()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_batch_member_limit_rejects_before_iteration_or_final_creation(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    trajectory = publish_trajectory(tmp_path, *sample)
+
+    class OverLimitSequence(Sequence[Path]):
+        def __len__(self) -> int:
+            return 4097
+
+        def __getitem__(self, index: int) -> Path:
+            raise AssertionError("over-limit sequence was iterated")
+
+    final = tmp_path / "batches" / "batch-too-many.json"
+    with pytest.raises(ArtifactIntegrityError, match="member|limit"):
+        publish_batch_manifest(
+            tmp_path,
+            "too-many",
+            OverLimitSequence(),  # type: ignore[arg-type]
+        )
+    assert not final.exists()
+    assert trajectory.exists()
+
+
+@pytest.mark.parametrize(
+    "parser_error",
+    (
+        RecursionError("nested"),
+        OverflowError("overflow"),
+        ValueError("malformed"),
+    ),
+)
+def test_json_parser_failures_are_normalized_without_publishing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    parser_error: Exception,
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+
+    def fail_parser(payload: bytes):
+        raise parser_error
+
+    monkeypatch.setattr(artifacts.json, "loads", fail_parser)
+    with pytest.raises(ArtifactIntegrityError, match="JSON|parse|read"):
+        load_verified_trajectory(path, expected(request))
+
+
+def test_json_memory_error_is_not_swallowed(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+
+    def fail_parser(payload: bytes):
+        raise MemoryError("allocation refused")
+
+    monkeypatch.setattr(artifacts.json, "loads", fail_parser)
+    with pytest.raises(MemoryError, match="allocation refused"):
+        load_verified_trajectory(path, expected(request))
+
+
+def test_post_first_hdf5_verification_mutation_keeps_intent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    final = (
+        tmp_path
+        / "trajectories"
+        / f"trajectory-{request_digest(request)}.h5"
+    )
+    original = artifacts._load_hdf5_verified
+    final_verifications = 0
+
+    def verify_then_mutate(path: Path, *args, **kwargs):
+        nonlocal final_verifications
+        if path == final:
+            final_verifications += 1
+        result = original(path, *args, **kwargs)
+        if path == final and final_verifications == 1:
+            with path.open("r+b") as stream:
+                stream.seek(0)
+                stream.write(b"after-first-verify")
+        return result
+
+    monkeypatch.setattr(artifacts, "_load_hdf5_verified", verify_then_mutate)
+    with pytest.raises(ArtifactIntegrityError, match="digest|HDF5|parse"):
+        publish_trajectory(tmp_path, *sample)
+    assert final_verifications >= 2
+    assert final.read_bytes().startswith(b"after-first-verify")
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
+def test_hdf5_mutation_during_sidecar_verification_keeps_intent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    final = (
+        tmp_path
+        / "trajectories"
+        / f"trajectory-{request_digest(request)}.h5"
+    )
+    original = artifacts._verify_installed_bytes
+    mutated = False
+    sidecar_verifications = 0
+
+    def mutate_during_sidecar(path: Path, payload: bytes, description: str) -> None:
+        nonlocal mutated, sidecar_verifications
+        if description == "trajectory digest sidecar":
+            sidecar_verifications += 1
+            if sidecar_verifications == 2:
+                with final.open("r+b") as stream:
+                    stream.seek(0)
+                    stream.write(b"during-sidecar")
+                mutated = True
+        original(path, payload, description)
+
+    monkeypatch.setattr(
+        artifacts, "_verify_installed_bytes", mutate_during_sidecar
+    )
+    with pytest.raises(ArtifactIntegrityError, match="digest|HDF5|parse"):
+        publish_trajectory(tmp_path, *sample)
+    assert mutated
+    assert sidecar_verifications == 2
+    assert final.read_bytes().startswith(b"during-sidecar")
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
+def test_sidecar_mutation_immediately_before_intent_removal_keeps_intent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, _ = sample
+    sidecar = (
+        tmp_path
+        / "trajectories"
+        / f"trajectory-{request_digest(request)}.sha256.json"
+    )
+    original = artifacts._fsync_directory
+    calls = 0
+    hostile = artifacts._canonical_json_bytes({"hostile": True})
+
+    def mutate_after_staged_unlink_fsync(path: Path) -> None:
+        nonlocal calls
+        original(path)
+        calls += 1
+        if calls == 2:
+            sidecar.write_bytes(hostile)
+
+    monkeypatch.setattr(
+        artifacts, "_fsync_directory", mutate_after_staged_unlink_fsync
+    )
+    with pytest.raises(ArtifactIntegrityError, match="sidecar|bytes|digest"):
+        publish_trajectory(tmp_path, *sample)
+    assert sidecar.read_bytes() == hostile
+    assert list((tmp_path / "trajectories").glob("*.intent"))
+
+
 def test_intent_cleanup_failure_performs_recovery_directory_fsync(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -761,11 +1063,18 @@ def test_caller_cannot_bless_stale_frozen_versions(
         load_verified_trajectory(path, stale_expected)
 
 
-def test_publication_initializes_complete_canonical_top_level_layout(
+def test_publication_preserves_upstream_metadata_and_initializes_only_owned_namespaces(
     tmp_path: Path,
     sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
 ):
-    publish_trajectory(tmp_path, *sample)
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    upstream = {
+        path.relative_to(tmp_path): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+    _publish_trajectory_api(tmp_path, *sample)
     assert {path.name for path in tmp_path.iterdir()} == {
         "request.json",
         "environment.json",
@@ -779,15 +1088,47 @@ def test_publication_initializes_complete_canonical_top_level_layout(
     for name in ("kernel", "trajectories", "batches"):
         assert (tmp_path / name).is_dir()
         assert not (tmp_path / name).is_symlink()
-    for name in (
+    assert {
+        path.relative_to(tmp_path): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file() and path.relative_to(tmp_path) in upstream
+    } == upstream
+    assert all(b'"status":"reserved"' not in payload for payload in upstream.values())
+
+
+def test_publication_requires_real_upstream_metadata_before_owned_outputs(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    root = tmp_path / "missing-upstream"
+    root.mkdir()
+    with pytest.raises(ArtifactIntegrityError, match="metadata|missing|layout"):
+        _publish_trajectory_api(root, *sample)
+    assert set(root.iterdir()) == set()
+
+
+@pytest.mark.parametrize(
+    "name",
+    (
         "request.json",
         "environment.json",
         "seed-manifest.json",
         "capability.json",
         "manifest.json",
-    ):
-        assert (tmp_path / name).is_file()
-        assert not (tmp_path / name).is_symlink()
+        "kernel/kernel.bin",
+    ),
+)
+def test_upstream_metadata_hash_is_bound_into_trajectory_and_rechecked(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    name: str,
+):
+    request, _, _ = sample
+    path = publish_trajectory(tmp_path, *sample)
+    target = tmp_path / name
+    target.write_bytes(target.read_bytes() + b"\n")
+    with pytest.raises(ArtifactIntegrityError, match="metadata|kernel|digest"):
+        load_verified_trajectory(path, expected(request))
 
 
 def test_reconstruction_is_verify_only_and_rejects_empty_or_missing_layout(
