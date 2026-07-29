@@ -262,3 +262,29 @@ eigensolver tolerance, τmax, frequency resolution/range, and harmonic cutoff.
 Each stage follows test-first development and keeps all prior tests runnable.
 No production cluster job is submitted without a fresh setup confirmation and
 cost estimate.
+
+## Completion Strategy Ratified 2026-07-29
+
+Continue from the existing implementation rather than rebuilding completed
+stages. Work proceeds in this order:
+
+1. Make the pinned Julia environment reproducible from the isolated worktree
+   and run the complete test suite.
+2. Repair any failing or missing acceptance tests before changing numerical
+   kernels.
+3. Re-run Fig. 2 validation and one Fig. 3 validation point locally, recording
+   wall time, peak memory, allocations, numerical diagnostics, and reference
+   error.
+4. Use those measured rates to estimate every remaining Fig. 3 and Fig. 5
+   point before launch. Prefer local execution only when the estimate is below
+   10 minutes and 16 GB; use the configured cluster otherwise.
+5. Finish the seven-axis convergence evidence before permitting production
+   mode, then generate the complete Fig. 3 and Fig. 5 data and report.
+
+Every stage that produces plottable data also produces its comparison figure
+immediately. Pause at that visual checkpoint so the user can inspect the
+physics before a more expensive stage starts. A CSV-only result is not a
+completed visual checkpoint. Existing Fig. 2 output is reviewed first; Fig. 3
+validation is plotted against the matching Zenodo curve before the six-point
+production run, and Fig. 5 validation is plotted before the full frequency
+scan.
