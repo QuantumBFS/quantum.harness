@@ -28,6 +28,9 @@ usage() {
   cat <<'EOF'
 Usage:
   scripts/julia-daemon.sh install
+  scripts/julia-daemon.sh install-shim [PATH]
+  eval "$(scripts/julia-daemon.sh alias)"
+  scripts/julia-daemon.sh julia JULIA_ARGS...
   scripts/julia-daemon.sh run [--port N] --project DIR (-e CODE | SCRIPT [ARGS...])
   scripts/julia-daemon.sh start [--port N] --project DIR
   scripts/julia-daemon.sh status [--port N]
@@ -36,8 +39,9 @@ Usage:
 DaemonMode is installed in a dedicated cache environment. The target compute
 project is not modified. This opt-in runner opens an unauthenticated localhost
 service and is only for trusted, single-user workstations; do not use it on
-shared login or compute nodes. Set JULIA_REAL_BIN to the real Julia executable
-(not another wrapper), or JULIA_DAEMON_PORT to change the default port.
+shared login or compute nodes. The optional shim lets normal `julia --project`
+commands use the daemon when compatible and otherwise executes real Julia.
+Set JULIA_REAL_BIN to the real Julia executable (not another wrapper).
 EOF
 }
 
@@ -51,13 +55,59 @@ require_julia() {
     fail "Julia not found; run 'make install julia' first"
 }
 
-install_daemonmode() {
+resolve_real_julia() {
   require_julia
+  JULIA_BIN=$("$JULIA_BIN" --startup-file=no -e 'print(realpath(Sys.BINDIR * "/" * Base.julia_exename()))')
+  [ -x "$JULIA_BIN" ] || fail "could not resolve the real Julia executable"
+}
+
+install_daemonmode() {
+  resolve_real_julia
   mkdir -p "$TOOL_ENV"
   "$JULIA_BIN" --startup-file=no --project="$TOOL_ENV" -e \
     'using Pkg; Pkg.add(name="DaemonMode", version="0.1"); Pkg.precompile()'
   "$JULIA_BIN" --startup-file=no --project="$TOOL_ENV" -e \
     'using DaemonMode; println("DaemonMode ", pkgversion(DaemonMode), " ready in dedicated tool environment")'
+}
+
+runner_path() {
+  runner=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+}
+
+install_shim() {
+  runner_path
+  shim_path="${1:-$HOME/.local/bin/julia}"
+  case "$shim_path" in /*) ;; *) shim_path="$PWD/$shim_path";; esac
+  if [ -e "$shim_path" ] && [ "$shim_path" -ef "$runner" ]; then
+    fail "refusing to replace the daemon runner itself"
+  fi
+  resolve_real_julia
+  if [ -e "$shim_path" ]; then
+    first_line=$(IFS= read -r line <"$shim_path" && printf '%s' "$line")
+    second_line=$("$JULIA_BIN" --startup-file=no -e 'println(readlines(ARGS[1])[2])' -- "$shim_path" 2>/dev/null || true)
+    [ "$first_line" = "#!/usr/bin/env bash" ] && \
+      [ "$second_line" = "# quantum-harness-julia-daemon-shim" ] || \
+      fail "refusing to replace existing file: $shim_path"
+  fi
+  mkdir -p "$(dirname "$shim_path")"
+  quoted_julia=$(printf '%q' "$JULIA_BIN")
+  quoted_runner=$(printf '%q' "$runner")
+  cat >"$shim_path" <<EOF
+#!/usr/bin/env bash
+# quantum-harness-julia-daemon-shim
+export JULIA_REAL_BIN=$quoted_julia
+exec $quoted_runner julia "\$@"
+EOF
+  chmod 0755 "$shim_path"
+  echo "Julia shim installed at $shim_path"
+  echo "Ensure $(dirname "$shim_path") appears before $(dirname "$JULIA_BIN") in PATH."
+}
+
+print_alias() {
+  resolve_real_julia
+  runner_path
+  command="env JULIA_REAL_BIN=$(printf '%q' "$JULIA_BIN") $(printf '%q' "$runner") julia"
+  printf 'alias julia=%q\n' "$command"
 }
 
 parse_port() {
@@ -276,12 +326,69 @@ run_client() {
     -e "$client" -- "$target" "${args[@]}"
 }
 
+fallback_julia() {
+  exec "$JULIA_BIN" "$@"
+}
+
+derive_port() {
+  key="$PROJECT|$PWD"
+  checksum=$(printf '%s' "$key" | cksum)
+  checksum=${checksum%% *}
+  PORT=$((20000 + checksum % 30000))
+}
+
+auto_julia() {
+  require_julia
+  original=("$@")
+  [ $# -ge 2 ] || fallback_julia "${original[@]}"
+
+  case "$1" in
+    --project=*) project_arg="${1#--project=}"; shift;;
+    *) fallback_julia "${original[@]}";;
+  esac
+  case "$project_arg" in ''|@*) fallback_julia "${original[@]}";; esac
+
+  case "$1" in
+    -e|--eval)
+      [ $# -ge 2 ] || fallback_julia "${original[@]}"
+      for arg in "${@:3}"; do
+        case "$arg" in *[[:space:]]*) fallback_julia "${original[@]}";; esac
+      done
+      ;;
+    -*) fallback_julia "${original[@]}";;
+    *)
+      case "$1" in *.jl) ;; *) fallback_julia "${original[@]}";; esac
+      [ -f "$1" ] || fallback_julia "${original[@]}"
+      for arg in "${@:2}"; do
+        case "$arg" in *[[:space:]]*) fallback_julia "${original[@]}";; esac
+      done
+      ;;
+  esac
+
+  normalize_project "$project_arg"
+  derive_port
+  REMAINING=("$@")
+  run_client
+}
+
 cmd="${1:-help}"
 [ $# -eq 0 ] || shift
 case "$cmd" in
   install)
     [ $# -eq 0 ] || fail "install takes no arguments"
     install_daemonmode
+    ;;
+  install-shim)
+    [ $# -le 1 ] || fail "install-shim accepts at most one path"
+    install_daemonmode
+    install_shim "${1:-}"
+    ;;
+  alias)
+    [ $# -eq 0 ] || fail "alias takes no arguments"
+    print_alias
+    ;;
+  julia)
+    auto_julia "$@"
     ;;
   start)
     parse_port "$@"; parse_project "${REMAINING[@]}"

@@ -54,7 +54,12 @@ def unused_port() -> str:
         return str(sock.getsockname()[1])
 
 
-def run_runner(home: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+def run_runner(
+    home: Path,
+    *args: str,
+    check: bool = True,
+    extra_env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(
         {
@@ -63,6 +68,8 @@ def run_runner(home: Path, *args: str, check: bool = True) -> subprocess.Complet
             "JULIA_DAEMON_TOOL_ENV": DAEMON_TOOL_ENV or "/missing/daemon/tool/environment",
         }
     )
+    if extra_env:
+        env.update(extra_env)
     return subprocess.run(
         [str(RUNNER), *args],
         cwd=ROOT,
@@ -90,6 +97,8 @@ def test_help_describes_isolation_and_security_boundary(tmp_path: Path) -> None:
     assert "do not use it on" in result.stdout
     assert "shared login or compute nodes" in result.stdout
     assert "not another wrapper" in result.stdout
+    assert "install-shim" in result.stdout
+    assert "eval" in result.stdout
 
 
 @requires_daemonmode
@@ -221,3 +230,131 @@ def test_script_failure_is_nonzero(tmp_path: Path, project: Path) -> None:
         assert result.returncode != 0
     finally:
         run_runner(tmp_path, "stop", "--port", port, check=False)
+
+
+@requires_daemonmode
+def test_transparent_julia_mode_reuses_daemon_and_falls_back(
+    tmp_path: Path, project: Path
+) -> None:
+    cache = tmp_path / "transparent-cache"
+    env = {"XDG_CACHE_HOME": str(cache)}
+    first = run_runner(
+        tmp_path,
+        "julia",
+        f"--project={project}",
+        "-e",
+        'println("pid=", getpid())',
+        extra_env=env,
+    )
+    second = run_runner(
+        tmp_path,
+        "julia",
+        f"--project={project}",
+        "-e",
+        'println("pid=", getpid())',
+        extra_env=env,
+    )
+    version = run_runner(tmp_path, "julia", "--version", extra_env=env)
+    assert first.stdout == second.stdout
+    assert "pid=" in first.stdout
+    assert "julia version" in version.stdout.lower()
+
+
+@requires_daemonmode
+def test_install_shim_and_alias_keep_normal_julia_syntax(tmp_path: Path) -> None:
+    shim = tmp_path / "bin" / "julia"
+    installed = run_runner(tmp_path, "install-shim", str(shim))
+    assert shim.stat().st_mode & 0o111
+    assert "Julia shim installed" in installed.stdout
+    version = subprocess.run(
+        [str(shim), "--version"],
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
+        env={
+            **os.environ,
+            "XDG_CACHE_HOME": str(tmp_path / "cache"),
+            "JULIA_DAEMON_TOOL_ENV": DAEMON_TOOL_ENV or "",
+        },
+    )
+    assert "julia version" in version.stdout.lower()
+
+    alias = run_runner(tmp_path, "alias").stdout.strip()
+    result = subprocess.run(
+        ["bash", "-c", f"shopt -s expand_aliases\n{alias}\njulia --version"],
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
+    )
+    assert "julia version" in result.stdout.lower()
+
+
+def test_shim_refuses_to_overwrite_runner_copy(tmp_path: Path) -> None:
+    runner_copy = tmp_path / "runner.sh"
+    runner_copy.write_bytes(RUNNER.read_bytes())
+    runner_copy.chmod(0o755)
+    result = subprocess.run(
+        [str(runner_copy), "install-shim", str(runner_copy)],
+        env={**os.environ, "JULIA_REAL_BIN": JULIA_BIN or "/missing/real/julia"},
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=30,
+    )
+    assert result.returncode != 0
+    assert "runner itself" in result.stderr
+    assert runner_copy.read_bytes() == RUNNER.read_bytes()
+
+
+@requires_daemonmode
+def test_reinstalling_shim_does_not_capture_it_as_real_julia(tmp_path: Path) -> None:
+    shim = tmp_path / "bin" / "julia"
+    run_runner(tmp_path, "install-shim", str(shim))
+    env = {
+        **os.environ,
+        "PATH": f"{shim.parent}:{os.environ['PATH']}",
+        "JULIA_DAEMON_TOOL_ENV": DAEMON_TOOL_ENV or "",
+        "XDG_CACHE_HOME": str(tmp_path / "cache"),
+    }
+    subprocess.run(
+        [str(RUNNER), "install-shim", str(shim)],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=60,
+    )
+    version = subprocess.run(
+        [str(shim), "--version"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
+    )
+    assert "julia version" in version.stdout.lower()
+
+
+@requires_daemonmode
+def test_ambiguous_project_and_whitespace_args_fall_back(
+    tmp_path: Path, project: Path
+) -> None:
+    version = run_runner(
+        tmp_path,
+        "julia",
+        "--project=/does/not/exist",
+        "--version",
+    )
+    assert "julia version" in version.stdout.lower()
+
+    args = run_runner(
+        tmp_path,
+        "julia",
+        f"--project={project}",
+        "-e",
+        "println(repr(ARGS))",
+        "two words",
+    )
+    assert '["two words"]' in args.stdout

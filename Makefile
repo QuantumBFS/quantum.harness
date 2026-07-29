@@ -53,8 +53,8 @@ skills: ## Install or sync Ion-managed skills
 	fi; \
 	ion add
 
-julia-daemon: ## Install optional low-TTFX runner in an isolated Julia tool environment
-	@scripts/julia-daemon.sh install
+julia-daemon: ## Install isolated DaemonMode runner; add SHIM=1 to replace julia via PATH
+	@scripts/julia-daemon.sh $(if $(SHIM),install-shim,install)
 
 # Stable KEY=VALUE contract for the zlp-harness plugin's zlp-onboard skill.
 # Adding new keys is additive; older skill versions ignore unknown lines.
