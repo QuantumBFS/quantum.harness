@@ -5,7 +5,7 @@
 | 1 | common protocol and evaluator | a03 | step-pass |
 | 2A | occupation autoregressive NQS | not started | pending |
 | 2B | continuous holomorphic NQS | not started | pending |
-| 2C | CF-Flow L=2 prototype | not started | pending |
+| 2C | strict-LLL CF operator NQS | a01 | attempt-failed; route open |
 | 2D | analytic L=2 seed times neural correlator | not started | pending |
 | 3 | synchronized audit, ED reveal, and route selection | not started | pending |
 | 4 | winner N=8 | not started | pending |
@@ -25,6 +25,18 @@ Step 1 used three implementation attempts within one research step:
 Attempts a04 and a05 were unused. The additive Route D admission consumes no
 Step 2 attempt. After admission, Steps 2A-2D start in separate worktrees and
 each has its own `a01` through `a05` implementation-attempt counter.
+
+## Step 2C attempt accounting
+
+- [Attempt a01](s02c-a01.md) completed the common Route C amendment, exact
+  projected-density/scalar primitives, and the JK-projected `L=0/2` seed
+  family. It failed at the frozen two-layer exact coordinate-action boundary;
+  no trainer, checkpoint, freeze receipt, or ED reveal was produced.
+
+Attempts a02 through a05 remain available. Route C is not `route-stopped` or
+`route-frozen`; resumption requires either a common protocol amendment or an
+exact depth-two backend that first passes the frozen batch/resource
+microbenchmark.
 
 ## Trusted-pipeline boundary
 

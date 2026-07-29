@@ -268,7 +268,8 @@ This common Route C protocol amendment is made from baseline
 `80cc1d094dd919c43192d39d8498ba4cdebaa2f2`. It replaces the Route C
 coordinate-flow capacity with the frozen `cf_operator_nqs` mapping without
 changing the physics, seeds, optimizer/sample budgets, thresholds, or resource
-ceilings. The resulting amendment commit is the common starting point for
+ceilings. The resulting amendment commit is
+`9e760eadea69ec29850fefe17dcad35dd23f8b10` and is the common starting point for
 every not-yet-started Step-2 lane, and its SHA is copied into every attempt
 journal. Starting a lane from the prior baseline and another from this
 amendment commit is not a valid comparison.
