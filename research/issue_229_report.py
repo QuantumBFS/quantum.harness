@@ -354,6 +354,17 @@ def render_html(evidence: dict) -> str:
 {_su2_summary_rows(cases)}</tbody></table>
 {_su2_plot(cases)}
 {_su2_sections(cases)}
+<h2>4. Automatic decomposition interface</h2>
+<p data-automatic-interface>For a Hamiltonian in the standard NumPy tensor-product basis, the user now supplies only the matrix and a symmetry name. The matcher infers dimension-compatible <code>local_dim^sites</code> templates, constructs the standard group action, verifies <code>[H,G]≈0</code>, and decomposes only a unique match.</p>
+<pre><code>.venv/bin/python research/candidate/run.py H.npy --symmetry su2 --output result.npz</code></pre>
+<table><thead><tr><th>Symmetry</th><th>Automatic template</th><th>Reduced sectors</th></tr></thead><tbody>
+<tr><td><code>su2</code></td><td>Identical local spins with s=(local_dim−1)/2</td><td>Total-spin multiplicity blocks</td></tr>
+<tr><td><code>u1</code></td><td>Total magnetization J_z</td><td>Charge blocks</td></tr>
+<tr><td><code>z2</code></td><td>Global spin flip for local_dim=2</td><td>Two character sectors</td></tr>
+<tr><td><code>translation</code></td><td>Cyclic site shift</td><td>Momentum/character sectors</td></tr>
+<tr><td><code>auto</code></td><td>All templates above</td><td>Accepted only when the match is unique</td></tr>
+</tbody></table>
+<p>If several tensor-product interpretations or symmetries pass, the command stops rather than guessing; <code>--local-dim</code> and <code>--sites</code> resolve the ambiguity. NPZ output preserves complex basis isometries, reduced blocks, eigenvalues, labels, and residuals. Full usage and basis conventions are in <code>research/candidate/README.md</code>.</p>
 <h2>Reproduce</h2><p><code>julia --startup-file=no --project=julia-env research/nc_moment_sdp/run.jl research/benchmark/nc-moment-sdp-operational.json</code><br><code>.venv/bin/python research/issue_229_report.py --private-dir /path/to/private/corpus</code></p>
 <p>Machine-readable artifacts: <code>research/benchmark/nc-moment-sdp-operational.json</code> and <code>research/benchmark/issue-229-evidence.json</code>.</p>
 <h2>Scope</h2><p>The Z₂ʳ NC moment-SDP implementation now performs operational moment and localizer cone reduction. The 50-case baseline establishes general finite-Abelian matrix reduction. The Heisenberg-chain cases validate SU(2) representation decomposition only; SU(2) has not yet been applied to the NC moment/localizing PSD cones.</p>

@@ -69,5 +69,8 @@ def test_committed_artifact_and_report_have_all_cases():
     assert document.count("<svg") == 1
     assert "SU(2) cubic work proxy and spectrum reconstruction error" in document
     assert "Operational Z₂ʳ NC moment-SDP reduction" in document
+    assert document.count("data-automatic-interface") == 1
+    assert "research/candidate/run.py H.npy --symmetry su2 --output result.npz" in document
+    assert "research/candidate/README.md" in document
     assert "SU(2) has not yet been applied to the NC moment/localizing PSD cones" in document
     assert "/home/hzxiaxz" not in document
