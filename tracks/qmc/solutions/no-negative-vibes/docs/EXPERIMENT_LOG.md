@@ -1718,3 +1718,20 @@ CLI and adds a length-600 regression replay.  The focused verification is
 successful 250/400 outputs are preserved.  Operational lesson: exact gates
 must be tested through final artifact serialization at the largest planned
 word length, not merely through determinant evaluation.
+
+The selective rerun completed, yielding a complete 72/72 result grid:
+eight independent runs for every seed/length pair in
+`{117,132,147} x {250,400,600}`.  All stderr files are empty; all JSON
+artifacts parse; all word hashes, lengths, RNG assignments, and exact-gate
+fields replay consistently.  Every one of the 72 high-precision finalists
+and every one of the 72 exact rational determinants is strictly positive.
+Conversely, the double-precision prefilter incorrectly suggests a negative
+sign for all 72 finalists, quantitatively confirming that it must never be
+used as an acceptance gate.
+
+The WSL archive SHA-256 is
+`240198516e9856b9bea7c100368ce9cfea64078e38b2ffc2b3cd31680c6ffc04`;
+the CPU archive SHA-256 is
+`05618ca1e16f3f4a6d12ca6b1f97a5e90106917b4c9f63ae704d7f6e693dce3b`.
+With no rejection, the next independent campaign advances to lengths
+800/1200/1800 at 4500/6500/9500 digits on 12 WSL plus 60 CPU processes.
