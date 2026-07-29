@@ -1419,3 +1419,53 @@ stdout SHA-256 is
 `9db234646655ec21dbaa65467c280f6f2294dad735eff97397ab68439e191d67`;
 stderr is empty. The 20 independent CPU starts continue rather than
 repeating this initialization.
+
+## 2026-07-29 — Seed-61 Hodge/spinor structured-cone audit
+
+Commit `083751f` tests the natural cross-grade basis changes before spending
+more random-cone effort. The exact Hodge reduction is
+
+`Gamma(B) ~ diag(E, E^(-T))`,
+
+with the transpose atom acting as `diag(E^T, E^(-1))`. The preserved Mukai
+form has inertia `(16,16)`, so its positive locus has no convex
+Lorentz-style future sheet. The self/anti-Hodge basis has 122 negative
+entries and an exact reciprocal sign conflict; particle-hole and
+Jordan--Wigner changes are signed permutations and inherit another exact
+two-cycle sign conflict. These facts reject the simplest orthant and
+Lorentz/particle-hole cones, not arbitrary nonlinear cones.
+
+Complementary grades also cannot be certified independently:
+
+`chi_14(B^7) = tr(B^7) + tr(B^(-7)) < 0`,
+
+while `chi_23(B^7) > 0` and the complete determinant remains positive.
+Thus a successful structured inequality must couple both Hodge pairs. The
+next focused analytic target is the seed-specific bound
+
+`chi_23(W) >= -2 - chi_14(W)`.
+
+## 2026-07-29 — New oddcycle exact5 cone triage
+
+The three new trace-clean depth-12 candidates
+`exact5-oddcycle-block-pair:{117,132,147}` were searched simultaneously in
+grades 1--4 with 16 starts per numerical sector. Grade 4 has an exact shared
+cone certificate for every seed. No complete sectorwise theorem was found
+because grades 1--3 did not exact-replay.
+
+The near-boundary objectives justify immediate continuation rather than
+discarding the candidates:
+
+- seed 117: grades 1/2/3 objectives approximately
+  `1.00e-4 / 3.49e-3 / 7.10e-4`;
+- seed 132: `5.96e-7 / 1.05e-5 / 3.18e-6`;
+- seed 147: `3.80e-7 / 6.03e-5 / 1.09e-6`.
+
+Result SHA-256 values are respectively
+`bc0caeba46c384fc683ca4b22172e7d30aa576ce26f9bf14003985550fc5b7ba`,
+`91aa3e814f8e38319ef0cab666e3e2bd72afd5122d71e6155e62faed70528e90`,
+and
+`dc7db0f130c7d03127af4e57e056dfc2325ab3484b431b1e4b39c4b8b027ff11`.
+Seeds 132 and 147 now receive a 128-start simplicial continuation in
+parallel with a generalized redundant-ray search. Any rectangular hit must
+also pass exact `RC=I, CR>=0`; `AR=RP, P>=0` alone is not promotable.
