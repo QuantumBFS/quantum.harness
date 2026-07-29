@@ -110,6 +110,33 @@ def _full_fock_sector_spectrum(hamiltonian, n_bath, n_up, n_down):
     return np.linalg.eigvalsh(hamiltonian[np.ix_(states, states)])
 
 
+def _noninteracting_thermal_observables(one_particle, beta, tau):
+    eigenvalues, eigenvectors = np.linalg.eigh(one_particle)
+    occupations = 1.0 / (1.0 + np.exp(beta * eigenvalues))
+    fermi = (eigenvectors * occupations) @ eigenvectors.T
+    impurity_occupancy = float(fermi[0, 0])
+    identity = np.eye(one_particle.shape[0])
+    green = [
+        -float((expm(-tau_value * one_particle) @ (identity - fermi))[0, 0])
+        for tau_value in tau
+    ]
+    return {
+        "logZ": 2.0
+        * float(np.sum(np.logaddexp(0.0, -beta * eigenvalues))),
+        "occupancy": {
+            "up": impurity_occupancy,
+            "down": impurity_occupancy,
+            "total": 2.0 * impurity_occupancy,
+        },
+        "double_occupancy": impurity_occupancy**2,
+        "green_function": {
+            "up": green,
+            "down": green,
+            "average": green,
+        },
+    }
+
+
 @pytest.mark.parametrize("n_bath", range(1, 7))
 def test_one_particle_star_and_chain_are_unitarily_equivalent(n_bath):
     star = _bath_artifact(n_bath=n_bath, gamma=0.13, bandwidth=1.2)
@@ -241,6 +268,120 @@ def test_solver_and_oracle_bind_explicit_chain_geometry(tmp_path):
     assert artifact["payload"]["mapping_input_sha256"] == mapping["sha256"]
     assert ed.verify_oracle_artifact(artifact) is None
     assert written == artifact
+
+
+@pytest.mark.parametrize("n_bath", range(1, 7))
+def test_star_and_chain_thermal_observables_and_green_match(n_bath):
+    star = _bath_artifact(n_bath=n_bath, gamma=0.17, bandwidth=1.1)
+    mapping = chain.derive_chain_mapping(star)
+    beta = 2.3
+    tau = [0.0, 0.37, 1.41, beta]
+    common = {
+        "bath_artifact": star,
+        "epsilon_d": -0.29,
+        "mu": 0.06,
+    }
+    direct = _noninteracting_thermal_observables(
+        ed.build_one_particle_hamiltonian(**common), beta, tau
+    )
+    transformed = _noninteracting_thermal_observables(
+        ed.build_one_particle_hamiltonian(
+            **common,
+            bath_representation="chain",
+            chain_mapping_artifact=mapping,
+        ),
+        beta,
+        tau,
+    )
+
+    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=4e-12)
+    assert transformed["occupancy"] == pytest.approx(
+        direct["occupancy"], abs=4e-12
+    )
+    assert transformed["double_occupancy"] == pytest.approx(
+        direct["double_occupancy"], abs=4e-12
+    )
+    assert 0.0 < tau[1] < tau[2] < beta
+    for result in (direct, transformed):
+        for spin in ("up", "down"):
+            occupation = result["occupancy"][spin]
+            green = result["green_function"][spin]
+            assert green[0] == pytest.approx(-(1.0 - occupation), abs=5e-12)
+            assert green[-1] == pytest.approx(-occupation, abs=5e-12)
+        for spin in ("up", "down", "average"):
+            assert transformed["green_function"][spin] == pytest.approx(
+                direct["green_function"][spin], abs=5e-12
+            )
+
+
+@pytest.mark.parametrize("n_bath", range(1, 4))
+def test_interacting_star_and_chain_thermal_observables_and_green_match(n_bath):
+    star = _bath_artifact(n_bath=n_bath, gamma=0.17, bandwidth=1.1)
+    mapping = chain.derive_chain_mapping(star)
+    beta = 2.3
+    tau = [0.0, 0.37, 1.41, beta]
+    common = {
+        "bath_artifact": star,
+        "U": 0.8,
+        "epsilon_d": -0.29,
+        "mu": 0.06,
+        "beta": beta,
+        "tau": tau,
+    }
+    direct = ed.solve_finite_bath(**common)
+    transformed = ed.solve_finite_bath(
+        **common,
+        bath_representation="chain",
+        chain_mapping_artifact=mapping,
+    )
+
+    assert transformed["logZ"] == pytest.approx(direct["logZ"], abs=4e-12)
+    assert transformed["occupancy"] == pytest.approx(
+        direct["occupancy"], abs=4e-12
+    )
+    assert transformed["double_occupancy"] == pytest.approx(
+        direct["double_occupancy"], abs=4e-12
+    )
+    assert 0.0 < tau[1] < tau[2] < beta
+    for result in (direct, transformed):
+        for spin in ("up", "down"):
+            occupation = result["occupancy"][spin]
+            green = result["green_function"][spin]
+            assert green[0] == pytest.approx(-(1.0 - occupation), abs=5e-12)
+            assert green[-1] == pytest.approx(-occupation, abs=5e-12)
+        for spin in ("up", "down", "average"):
+            assert transformed["green_function"][spin] == pytest.approx(
+                direct["green_function"][spin], abs=5e-12
+            )
+
+
+def test_chain_oracle_verifier_replays_embedded_complete_mapping():
+    star = _bath_artifact(n_bath=2, gamma=0.17, bandwidth=1.1)
+    mapping = chain.derive_chain_mapping(star)
+    artifact = ed.make_oracle_artifact(
+        bath_artifact=star,
+        chain_mapping_artifact=mapping,
+        bath_representation="chain",
+        U=0.8,
+        epsilon_d=-0.29,
+        mu=0.06,
+        beta=2.3,
+        tau=[0.0, 0.37, 1.41, 2.3],
+    )
+
+    assert artifact["payload"]["mapping_input"] == mapping
+    assert artifact["payload"]["mapping_input"] is not mapping
+    assert artifact["payload"]["mapping_input_sha256"] == mapping["sha256"]
+    assert ed.verify_oracle_artifact(artifact) is None
+
+    corrupted = copy.deepcopy(artifact)
+    corrupted_mapping = corrupted["payload"]["mapping_input"]
+    corrupted_mapping["payload"]["Q"][0][0] += 0.01
+    _rehash(corrupted_mapping)
+    corrupted["payload"]["mapping_input_sha256"] = corrupted_mapping["sha256"]
+    _rehash(corrupted)
+    with pytest.raises(ValueError, match="mapping"):
+        ed.verify_oracle_artifact(corrupted)
 
 
 def test_internal_consumed_bath_call_defaults_to_validated_direct_star_geometry():
