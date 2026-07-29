@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T23:01:51Z
+Updated: 2026-07-29T23:04:00Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -297,5 +297,11 @@ Updated: 2026-07-29T23:01:51Z
   been claimed. Next: advance the idle split checkout, preflight, and submit
   one 500000-MiB hash-gated numerical decision solve with GRES binding
   disabled.
+- Slurm test-only accepted the exact high-memory request, and SCNet decision
+  job `118192695` was submitted once from immutable commit `6e7d508`. It uses
+  32 CPUs / 500000 MiB / 12 hours, one partition-admission GPU with binding
+  disabled, requires hash `b4a98846…74e5`, repeats the exact cross-zero gate,
+  and audits at `1e-9`. It was initially pending. This is the sole active
+  split solve; do not update `ss-remote-cone-dev` or submit a duplicate.
 
 No user input or new credential is currently required.

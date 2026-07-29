@@ -1493,3 +1493,15 @@ runmeta reports `not_run_exact_build_only`. This closes the formulation gate,
 not the scientific question. The next changed action is one 500000-MiB
 `ksagnormal01` decision solve that requires this exact hash and audits any
 candidate at `1e-9`; do not infer feasibility from the passing build.
+
+Slurm test-only accepted the 32-CPU / 500000-MiB `ksagnormal01` request with
+one partition-admission GPU and GRES binding disabled. SCNet decision job
+`118192695` was then submitted exactly once from immutable commit `6e7d508`.
+It requires coefficient-map SHA-256
+`b4a9884636dcea65be67e60e6f2ef0dffe23812e1ab8e6bf5205f23f549874e5`,
+repeats the exact stabilizer coefficient gate, reconstructs the 38 PSD blocks,
+and uses a `1e-9` audit tolerance. It was initially pending. This is the sole
+active split-factorization signature; preserve its checkout and do not launch
+a duplicate. A solver classification becomes evidence only after the exact
+hash passes, numerical optimization actually runs, and any candidate is
+replayed independently.

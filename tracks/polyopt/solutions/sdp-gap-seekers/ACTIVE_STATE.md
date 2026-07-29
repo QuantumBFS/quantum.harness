@@ -863,3 +863,11 @@ Updated: 2026-07-29 UTC.
   formulation fingerprint, not physics evidence. Advance the now-idle split
   checkout, preflight one 500000-MiB hash-gated decision solve, and submit it
   with GRES binding disabled.
+- The exact 500000-MiB request passed Slurm test-only and decision job
+  `118192695` was submitted from immutable commit `6e7d508` on 32 CPUs with a
+  12-hour limit, one partition-admission GPU, and GRES binding disabled. It
+  requires coefficient hash `b4a98846…74e5`, repeats the exact cross-zero gate,
+  rebuilds the 38-block formulation, and audits at `1e-9`. It is the sole
+  active split decision solve. Do not update `ss-remote-cone-dev` or submit a
+  duplicate; monitor pending-to-running transition, exact hash match, first
+  interior-point iteration, and independently replay any candidate.
