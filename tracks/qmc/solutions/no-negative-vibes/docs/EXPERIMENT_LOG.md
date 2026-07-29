@@ -1988,3 +1988,57 @@ exclude the most general 10-Majorana Wei-2024 contraction condition,
 complex Majorana reflection positivity, or a literature-level
 fermion-bag/loop equivalence.  These open checks must be resolved before
 claiming novelty beyond every known Majorana/semigroup class.
+
+### Full common-metric audit overturns the oddcycle novelty hypothesis
+
+The previously open Wei/semigroup check has now produced a simple exact
+reduction.  With
+
+`w=(4,4,1,-5,5)^T` and `R=2 w w^T/83-I_5`,
+
+the metric is symmetric, satisfies `R^2=I`, and has signature `(1,4)`.
+For every `99/100<=z<=101/100`, both
+
+`R-B(z)^T R B(z)` and `R-B(z) R B(z)^T`
+
+are positive definite.  Exact leading principal minors and Bernstein
+lower bounds are being frozen in the dedicated replay oracle; the smallest
+nonconstant Bernstein numerators already obtained are
+`1523807019/68890000`, `397103913/68890000`, and
+`475092321/68890000`.  Thus the entire independently varying continuum
+alphabet lies in one known strict real split-contraction semigroup.
+
+The exterior-power theorem and interacting Hermitian transfer remain valid,
+but this family is not the novel completion of Challenge #121.  The key
+operational lesson is that failures of invariant-form, diagonal-gauge, or
+one preselected metric tests do not exclude the full Wei contraction class.
+A full common-metric feasibility gate must precede exact promotion of every
+future survivor.
+
+### General `(p,q,r)` probe: fixed-metric failure is a false novelty signal
+
+A three-parameter discovery screen was added for
+
+`B(p,q,r)=[[0,0,2,0,0],[2,0,0,0,0],[0,2,0,p,0],`
+`[0,0,0,1,q],[0,0,-r,0,1]]`.
+
+It applies the existing short-word, grade-four gauge, 13-block,
+short-remainder, and low-sector norm gates in about 0.15 seconds per fixed
+point.  A second discovery gate solves the full convex common-Lyapunov SDP
+over a symmetric metric `R`, maximizing `t` subject to
+
+`R-B^T R B >= t I`, `R-B R B^T >= t I`, and `||R||_F<=1`.
+
+The first boundary probe tested
+`(1,1,1)`, `(0.3,1,1)`, `(2.8,1,1)`, `(1,0.3,1)`,
+`(1,2.8,1)`, `(1,1,0.3)`, and `(1,1,2.8)`.  Every point has a
+strict common metric.  The normalized optimal margins were respectively
+approximately `0.13608012`, `0.04915609`, `0.13903211`,
+`0.03658843`, `0.13058284`, `0.04915609`, and `0.13903211`;
+all returned nonsingular inertia `(1,4)`.
+
+This invalidates the earlier inference from failure of the single rational
+metric near `p,q,r=0.3` or `2.8`: the feasible metric moves with the
+parameters.  Subsequent scans must retain only points where the *full* SDP
+margin collapses, and even those are discovery survivors rather than exact
+no-go theorems.
