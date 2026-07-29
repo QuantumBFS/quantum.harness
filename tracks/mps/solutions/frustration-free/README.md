@@ -233,15 +233,25 @@ that status for scheduler requeue policy. Exit 75 without a fresh validated
 checkpoint is a hard failure. RSS limits and scientific/diagnostic failures
 remain nonretryable.
 
-After the 4/8/16-thread calibration jobs finish, export one strict JSON
-telemetry record per validated checkpoint/Slurm observation. Each record binds
-the plan, cell input, runner request, checkpoint generation, complete source
-set, and runtime identity. Its checkpoint section contains completed beta,
-completed steps, observed maximum link dimension, write/read time, and size;
-its Slurm section contains elapsed time, allocation, MaxRSS, and the Julia/BLAS
-thread counts actually observed. Records with a false validation flag,
-unexpected fields, invalid values, duplicate checkpoints, or mixed
-plan/input/request/source/runtime identities are rejected.
+After the 4/8/16-thread calibration jobs finish, create one strict
+`calibrationTelemetry` document with exactly one sample for each thread class.
+Each sample references an absolute checkpoint root, distinct start and end
+generation names plus all metadata/state/completion SHA256 values, and a
+regular non-symlink canonical `slurmAccountingExport` JSON file plus its
+SHA256. Boolean “validated” claims are not accepted.
+
+Calibration independently validates the complete checkpoint root and every
+generation file, requires the end generation to be current, verifies the
+start history is an exact prefix of the end history, and derives beta/step
+deltas from the two cumulative cursors. The Slurm export binds the same plan,
+cell, input, start/end generations, job ID, elapsed time, allocation, MaxRSS,
+checkpoint read/write time, actual Julia/BLAS threads, source hashes,
+Project/Manifest hashes, and Julia/ITensors/ITensorMPS/HDF5 versions. Those
+runtime values must exactly equal checkpoint and plan provenance. Duplicate
+job IDs or checkpoint segments, missing thread classes, symlinks, hash
+mismatches, unknown JSON fields, mixed cell/input benchmark identities, and
+mixed runtime identities fail closed. All three allocations therefore measure
+the same planned workload.
 
 Publish the calibration without changing `resources.json`, `completion.json`,
 or either completion/current pointer:
@@ -258,10 +268,29 @@ This creates canonical, hash-bound `calibration.json` and
 reused; different or partial files fail closed. `calibration.json` reports
 completed-beta/second and steps/second, time-per-step groups by observed
 maximum link dimension, checkpoint overhead and size, MaxRSS, actual thread
-counts, and measured dispersion. The chosen allocation is the smallest CPU
-then memory allocation whose mean throughput is at least 90% of the best
-observed mean. Per-cell wall recommendations add a two-standard-deviation
-measured margin and worst observed checkpoint overhead.
+counts, and a three-class observed envelope. The chosen allocation is the
+smallest CPU then memory allocation whose throughput is at least 90% of the
+best observed throughput.
+
+For each sample, the normalized coefficient is
+`elapsed / (delta_steps * sites * MPO_width * observed_link_dimension^3)`.
+For each planned cell, `work_units = steps * branch_equivalents * sites *
+MPO_width`. The central prediction uses the median normalized coefficient.
+Because three sparse samples do not support a Gaussian confidence interval,
+the conservative recommendation is distribution-free within the observed
+envelope:
+
+```text
+ceil(work_units * target_link_dimension^3
+     * max_observed_normalized_coefficient * 1.25
+     + max_observed_checkpoint_read_write_overhead)
+```
+
+The artifact records the min/median/max coefficient, envelope width, fixed
+1.25 sparse-sample safety factor, and formula. Every validation and production
+acknowledgment reloads the raw checkpoint/accounting files and exactly rebuilds
+all rates, link groups, allocation selection, uncertainty, and per-cell wall
+recommendations before accepting either calibrated artifact.
 
 Production use of the calibrated allocation is explicit:
 

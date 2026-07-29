@@ -28,7 +28,7 @@ from typing import Any, Callable, Sequence
 from jsonschema import Draft202012Validator
 
 
-MODULE_VERSION = "5.0.0"
+MODULE_VERSION = "6.0.0"
 SOFTWARE_VERSION = "challenge81-frustration-free-2"
 PLAN_SCHEMA_VERSION = 1
 CELL_SCHEMA_VERSION = 1
@@ -1159,6 +1159,15 @@ def validate_resources(resources: Any, plan: dict[str, Any]) -> None:
         resources
     ):
         raise ValueError("resources SHA256 mismatch")
+    if artifact_type == "calibrated_resources":
+        base_resources = estimate_plan_resources(plan)
+        _calibration, expected = _derive_calibration_artifacts(
+            plan, base_resources, resources["telemetry"]
+        )
+        if resources != expected:
+            raise ValueError(
+                "calibrated resource derived semantics do not match telemetry replay"
+            )
 
 
 def _write_canonical(path: Path, value: Any) -> None:
@@ -2413,388 +2422,574 @@ def calibration_sha256(calibration: dict[str, Any]) -> str:
     return _sha256(_canonical_json(payload))
 
 
-def _sample_stddev(values: Sequence[float]) -> float:
-    return statistics.stdev(values) if len(values) > 1 else 0.0
+def _checkpoint_evolution_state(metadata: dict[str, Any]) -> dict[str, Any]:
+    state = metadata["resume_state"]
+    if isinstance(state, dict) and state.get("kind") == "observable":
+        state = state.get("evolution_state")
+    required = {
+        "completed_steps",
+        "beta_endpoint",
+        "log_unnormalized_norm",
+        "maximum_link_dimensions_by_bond",
+        "step_history",
+        "expansion_applied",
+    }
+    if not isinstance(state, dict) or set(state) != required:
+        raise ValueError("checkpoint evolution state is not strict or complete")
+    completed_steps = state["completed_steps"]
+    if (
+        isinstance(completed_steps, bool)
+        or not isinstance(completed_steps, int)
+        or completed_steps < 0
+        or len(state["step_history"]) != completed_steps
+    ):
+        raise ValueError("checkpoint evolution counters are invalid")
+    _real(state["beta_endpoint"], "checkpoint beta endpoint")
+    if state["beta_endpoint"] < 0:
+        raise ValueError("checkpoint beta endpoint must be nonnegative")
+    dimensions = state["maximum_link_dimensions_by_bond"]
+    if (
+        not isinstance(dimensions, list)
+        or not dimensions
+        or any(
+            isinstance(value, bool) or not isinstance(value, int) or value < 0
+            for value in dimensions
+        )
+    ):
+        raise ValueError("checkpoint link dimensions are invalid")
+    for entry in state["step_history"]:
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != {"keys", "values"}
+            or not isinstance(entry["keys"], list)
+            or not isinstance(entry["values"], list)
+            or len(entry["keys"]) != len(entry["values"])
+            or len(set(entry["keys"])) != len(entry["keys"])
+        ):
+            raise ValueError("checkpoint step history is invalid")
+    return state
+
+
+def _load_calibration_generation(
+    root: Path,
+    *,
+    cell: dict[str, Any],
+    reference: dict[str, Any],
+) -> dict[str, Any]:
+    validate_checkpoint_root(root, cell=cell)
+    required = {
+        "generation",
+        "metadata_sha256",
+        "state_sha256",
+        "completion_sha256",
+    }
+    if not isinstance(reference, dict) or set(reference) != required:
+        raise ValueError("checkpoint generation reference keys do not match schema")
+    generation_name = reference["generation"]
+    metadata_sha256 = _digest(
+        reference["metadata_sha256"], "checkpoint metadata SHA256"
+    )
+    if generation_name != f"checkpoint-{metadata_sha256}":
+        raise ValueError("checkpoint generation does not bind metadata SHA256")
+    generation = root / "generations" / generation_name
+    if not generation.is_dir() or generation.is_symlink():
+        raise ValueError("checkpoint generation must be a real directory")
+    if {path.name for path in generation.iterdir()} != {
+        "metadata.json",
+        "state.h5",
+        "completion.json",
+    }:
+        raise ValueError("checkpoint generation entries do not match schema")
+    metadata_path = generation / "metadata.json"
+    state_path = generation / "state.h5"
+    completion_path = generation / "completion.json"
+    metadata = _strict_canonical_json_file(
+        metadata_path, "calibration checkpoint metadata"
+    )
+    completion = _strict_canonical_json_file(
+        completion_path, "calibration checkpoint completion"
+    )
+    if (
+        _sha256_file(metadata_path) != metadata_sha256
+        or _sha256_file(state_path)
+        != _digest(reference["state_sha256"], "checkpoint state SHA256")
+        or _sha256_file(completion_path)
+        != _digest(reference["completion_sha256"], "checkpoint completion SHA256")
+    ):
+        raise ValueError("checkpoint generation hash binding mismatch")
+    expected_completion = {
+        "checkpoint_schema": CHECKPOINT_SCHEMA_VERSION,
+        "writer_version": CHECKPOINT_WRITER_VERSION,
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha256,
+        "state_sha256": reference["state_sha256"],
+    }
+    if completion != expected_completion:
+        raise ValueError("checkpoint generation completion binding mismatch")
+    state = _checkpoint_evolution_state(metadata)
+    if metadata["completed_steps"] != state["completed_steps"]:
+        raise ValueError("checkpoint metadata and evolution counters differ")
+    return {
+        "identity": metadata["identity"],
+        "completed_steps": state["completed_steps"],
+        "beta_endpoint": float(state["beta_endpoint"]),
+        "step_history": state["step_history"],
+        "size_bytes": sum(
+            path.stat().st_size
+            for path in (metadata_path, state_path, completion_path)
+        ),
+    }
+
+
+def _step_history_max_link(history: Sequence[dict[str, Any]]) -> int:
+    values = []
+    for entry in history:
+        mapping = dict(zip(entry["keys"], entry["values"], strict=True))
+        value = mapping.get("max_link_dimension")
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ValueError(
+                "checkpoint segment history lacks max_link_dimension"
+            )
+        values.append(value)
+    if not values:
+        raise ValueError("checkpoint segment history must not be empty")
+    return max(values)
+
+
+def _load_slurm_accounting_export(
+    reference: dict[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(reference, dict) or set(reference) != {"path", "sha256"}:
+        raise ValueError("Slurm accounting reference keys do not match schema")
+    path = Path(reference["path"])
+    if not path.is_absolute():
+        raise ValueError("Slurm accounting export path must be absolute")
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(
+            "Slurm accounting export must be a regular non-symlink file"
+        )
+    if _sha256_file(path) != _digest(
+        reference["sha256"], "Slurm accounting export SHA256"
+    ):
+        raise ValueError("Slurm accounting export hash mismatch")
+    accounting = _strict_canonical_json_file(path, "Slurm accounting export")
+    validate_artifact_schema(accounting, "slurmAccountingExport")
+    return accounting
 
 
 def _validate_calibration_telemetry(
-    plan: dict[str, Any], telemetry: Sequence[dict[str, Any]]
+    plan: dict[str, Any], telemetry: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    if isinstance(telemetry, (str, bytes)) or not isinstance(telemetry, Sequence):
-        raise TypeError("calibration telemetry must be a sequence")
-    if len(telemetry) < 2:
-        raise ValueError("calibration requires at least two telemetry samples")
+    validate_artifact_schema(telemetry, "calibrationTelemetry")
+    if telemetry["plan_sha256"] != plan["plan_sha256"]:
+        raise ValueError("calibration telemetry plan identity mismatch")
     cells = {cell["cell_id"]: cell for cell in plan["cells"]}
     records = []
+    job_ids = set()
+    generation_pairs = set()
     runtime_identities = set()
-    source_identities = set()
-    checkpoint_identities = set()
-    required = {
-        "schema_version",
-        "plan_sha256",
-        "cell_id",
-        "input_sha256",
-        "request_sha256",
-        "checkpoint_sha256",
-        "source_sha256",
-        "runtime_sha256",
-        "runtime",
-        "checkpoint",
-        "slurm",
-    }
-    for position, raw in enumerate(telemetry):
-        if not isinstance(raw, dict) or set(raw) != required:
-            raise ValueError(
-                f"calibration telemetry sample {position} keys do not match schema"
-            )
-        record = copy.deepcopy(raw)
-        if record["schema_version"] != 1:
-            raise ValueError("calibration telemetry schema version is unsupported")
-        cell = cells.get(record["cell_id"])
-        if cell is None:
-            raise ValueError("calibration telemetry has mixed or unplanned cell identity")
-        request = _runner_request_for_cell(cell)
-        expected_request_sha256 = _sha256(_canonical_json(request) + b"\n")
-        expected_source_sha256 = _sha256(
-            _canonical_json(cell["provenance"]["source_sha256"])
-        )
-        expected = {
-            "plan_sha256": plan["plan_sha256"],
-            "input_sha256": cell["input_sha256"],
-            "request_sha256": expected_request_sha256,
-            "source_sha256": expected_source_sha256,
-        }
-        for name, value in expected.items():
-            if record[name] != value:
-                raise ValueError(
-                    f"calibration telemetry has mixed {name} identity"
-                )
-        checkpoint_sha256 = _digest(
-            record["checkpoint_sha256"], "checkpoint SHA256"
-        )
-        if checkpoint_sha256 in checkpoint_identities:
-            raise ValueError("calibration telemetry repeats a checkpoint identity")
-        checkpoint_identities.add(checkpoint_sha256)
-        runtime_sha256 = _digest(record["runtime_sha256"], "runtime SHA256")
-        if runtime_sha256 != _sha256(_canonical_json(record["runtime"])):
-            raise ValueError("calibration telemetry runtime identity mismatch")
-        runtime_identities.add(runtime_sha256)
-        source_identities.add(record["source_sha256"])
-
-        checkpoint = record["checkpoint"]
-        if not isinstance(checkpoint, dict) or set(checkpoint) != {
-            "validated",
-            "completed_beta",
-            "completed_steps",
-            "max_link_dimension",
-            "write_seconds",
-            "read_seconds",
-            "size_bytes",
-        }:
-            raise ValueError("checkpoint telemetry keys do not match schema")
-        if checkpoint["validated"] is not True:
-            raise ValueError("checkpoint telemetry was not validated")
-        _real(checkpoint["completed_beta"], "completed beta", positive=True)
-        _positive_integer(checkpoint["completed_steps"], "completed steps")
-        _positive_integer(
-            checkpoint["max_link_dimension"], "maximum link dimension"
-        )
-        for name in ("write_seconds", "read_seconds"):
-            value = _real(checkpoint[name], f"checkpoint {name}")
-            if value < 0:
-                raise ValueError(f"checkpoint {name} must be nonnegative")
-        _positive_integer(checkpoint["size_bytes"], "checkpoint size")
-
-        slurm = record["slurm"]
-        if not isinstance(slurm, dict) or set(slurm) != {
-            "validated",
-            "job_id",
-            "elapsed_seconds",
-            "allocated_cpus",
-            "allocated_memory_bytes",
-            "max_rss_bytes",
-            "julia_threads",
-            "blas_threads",
-        }:
-            raise ValueError("Slurm telemetry keys do not match schema")
-        if slurm["validated"] is not True:
-            raise ValueError("Slurm telemetry was not validated")
-        if not isinstance(slurm["job_id"], str) or not slurm["job_id"]:
-            raise ValueError("Slurm job identity is invalid")
-        _real(slurm["elapsed_seconds"], "Slurm elapsed seconds", positive=True)
-        for name in (
-            "allocated_cpus",
-            "allocated_memory_bytes",
-            "max_rss_bytes",
-            "julia_threads",
-            "blas_threads",
+    thread_classes = []
+    for sample in telemetry["samples"]:
+        cell = cells.get(sample["cell_id"])
+        if cell is None or sample["input_sha256"] != cell["input_sha256"]:
+            raise ValueError("calibration telemetry has mixed cell/input identity")
+        root = Path(sample["checkpoint_root"])
+        if (
+            not root.is_absolute()
+            or not root.is_dir()
+            or root.is_symlink()
+            or root.resolve() != root
         ):
-            _positive_integer(slurm[name], f"Slurm {name}")
-        records.append(record)
-    if len(runtime_identities) != 1 or len(source_identities) != 1:
-        raise ValueError("calibration telemetry contains mixed source/runtime identities")
+            raise ValueError("checkpoint root must be an absolute real directory")
+        start = _load_calibration_generation(
+            root, cell=cell, reference=sample["start_generation"]
+        )
+        end = _load_calibration_generation(
+            root, cell=cell, reference=sample["end_generation"]
+        )
+        current = _strict_canonical_json_file(
+            root / "current.json", "calibration checkpoint current pointer"
+        )
+        if current["generation"] != sample["end_generation"]["generation"]:
+            raise ValueError("checkpoint end generation is not current")
+        if start["identity"] != end["identity"]:
+            raise ValueError("checkpoint segment has mixed runtime identity")
+        if (
+            start["completed_steps"] > end["completed_steps"]
+            or start["beta_endpoint"] > end["beta_endpoint"]
+            or end["step_history"][: start["completed_steps"]]
+            != start["step_history"]
+        ):
+            raise ValueError("checkpoint segment start/end counters are inconsistent")
+        step_delta = end["completed_steps"] - start["completed_steps"]
+        beta_delta = end["beta_endpoint"] - start["beta_endpoint"]
+        if step_delta <= 0 or beta_delta <= 0:
+            raise ValueError("checkpoint segment deltas must be positive")
+        segment_history = end["step_history"][
+            start["completed_steps"] : end["completed_steps"]
+        ]
+        max_link_dimension = _step_history_max_link(segment_history)
+        if max_link_dimension > cell["solver_settings"]["maxdim"]:
+            raise ValueError("checkpoint segment exceeds planned maximum link dimension")
+
+        accounting = _load_slurm_accounting_export(
+            sample["slurm_accounting_export"]
+        )
+        expected_accounting = {
+            "plan_sha256": plan["plan_sha256"],
+            "cell_id": cell["cell_id"],
+            "input_sha256": cell["input_sha256"],
+            "start_generation": sample["start_generation"]["generation"],
+            "end_generation": sample["end_generation"]["generation"],
+        }
+        for name, expected in expected_accounting.items():
+            if accounting[name] != expected:
+                raise ValueError(f"Slurm accounting {name} identity mismatch")
+        if accounting["job_id"] in job_ids:
+            raise ValueError("duplicate Slurm job ID in calibration telemetry")
+        job_ids.add(accounting["job_id"])
+        pair = (
+            sample["start_generation"]["generation"],
+            sample["end_generation"]["generation"],
+        )
+        if pair in generation_pairs:
+            raise ValueError("duplicate checkpoint segment in calibration telemetry")
+        generation_pairs.add(pair)
+        if accounting["julia_threads"] != accounting["allocated_cpus"]:
+            raise ValueError("actual Julia threads do not match calibration class")
+        thread_classes.append(accounting["allocated_cpus"])
+
+        identity = end["identity"]
+        expected_runtime = {
+            name: identity[name]
+            for name in (
+                "source_hashes",
+                "project_toml_sha256",
+                "manifest_toml_sha256",
+                "julia_version",
+                "itensors_version",
+                "itensormps_version",
+                "hdf5_version",
+            )
+        }
+        if accounting["runtime"] != expected_runtime:
+            raise ValueError(
+                "Slurm runtime identity does not match checkpoint/plan provenance"
+            )
+        plan_environment = cell["provenance"]["julia_environment_sha256"]
+        if (
+            expected_runtime["project_toml_sha256"]
+            != plan_environment["Project.toml"]
+            or expected_runtime["manifest_toml_sha256"]
+            != plan_environment["Manifest.toml"]
+        ):
+            raise ValueError("runtime Project/Manifest identity does not match plan")
+        runtime_identities.add(_sha256(_canonical_json(expected_runtime)))
+        records.append(
+            {
+                "sample_reference": copy.deepcopy(sample),
+                "cell": cell,
+                "accounting": accounting,
+                "runtime_identity_sha256": _sha256(
+                    _canonical_json(expected_runtime)
+                ),
+                "start": start,
+                "end": end,
+                "step_delta": step_delta,
+                "beta_delta": beta_delta,
+                "max_link_dimension": max_link_dimension,
+            }
+        )
+    if sorted(thread_classes) != [4, 8, 16]:
+        raise ValueError(
+            "calibration requires exactly one valid 4-, 8-, and 16-thread class"
+        )
+    benchmark_identities = {
+        (record["cell"]["cell_id"], record["cell"]["input_sha256"])
+        for record in records
+    }
+    if len(benchmark_identities) != 1:
+        raise ValueError(
+            "calibration telemetry contains mixed cell benchmark identity"
+        )
+    if len(runtime_identities) != 1:
+        raise ValueError("calibration telemetry contains mixed runtime identities")
     return records
 
 
-def validate_calibration(
-    calibration: Any, plan: dict[str, Any]
-) -> None:
-    if not isinstance(calibration, dict):
-        raise TypeError("calibration must be a JSON object")
-    validate_artifact_schema(calibration, "runtimeCalibration")
-    if calibration.get("generator") != {
-        "name": "convergence.py",
-        "version": MODULE_VERSION,
-    }:
-        raise ValueError("unsupported or stale calibration generator version")
-    if calibration.get("software_version") != SOFTWARE_VERSION:
-        raise ValueError("unsupported or stale calibration software version")
-    if calibration.get("plan_sha256") != plan["plan_sha256"]:
-        raise ValueError("calibration plan SHA256 does not match plan")
-    if _digest(
-        calibration.get("calibration_sha256"), "calibration SHA256"
-    ) != calibration_sha256(calibration):
-        raise ValueError("calibration SHA256 mismatch")
-    expected_source = {
-        _sha256(_canonical_json(cell["provenance"]["source_sha256"]))
-        for cell in plan["cells"]
-    }
-    if calibration["identity"]["source_sha256"] not in expected_source:
-        raise ValueError("calibration source identity does not match plan")
-
-
-def calibrate_plan_resources(
+def _derive_calibration_artifacts(
     plan: dict[str, Any],
     base_resources: dict[str, Any],
-    telemetry: Sequence[dict[str, Any]],
+    telemetry: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Derive hash-bound calibration and resources from validated telemetry."""
-
-    validate_plan(plan)
-    validate_resources(base_resources, plan)
-    if base_resources["artifact_type"] != "resource_estimate":
-        raise ValueError("calibration requires the original resource estimate")
     records = _validate_calibration_telemetry(plan, telemetry)
     samples = []
     for record in records:
-        checkpoint = record["checkpoint"]
-        slurm = record["slurm"]
-        elapsed = float(slurm["elapsed_seconds"])
-        completed_beta = float(checkpoint["completed_beta"])
-        completed_steps = int(checkpoint["completed_steps"])
+        accounting = record["accounting"]
+        elapsed = float(accounting["elapsed_seconds"])
+        cell = record["cell"]
+        sites = 2 * (cell["parameters"]["n_bath"] + 1)
+        mpo_width = 4 * cell["parameters"]["n_bath"] + 4
+        seconds_per_step = elapsed / record["step_delta"]
+        normalized = seconds_per_step / (
+            sites * mpo_width * record["max_link_dimension"] ** 3
+        )
         samples.append(
             {
-                "telemetry_sha256": _sha256(_canonical_json(record)),
-                "cell_id": record["cell_id"],
-                "input_sha256": record["input_sha256"],
-                "request_sha256": record["request_sha256"],
-                "checkpoint_sha256": record["checkpoint_sha256"],
-                "max_link_dimension": checkpoint["max_link_dimension"],
+                "job_id": accounting["job_id"],
+                "cell_id": cell["cell_id"],
+                "input_sha256": cell["input_sha256"],
+                "start_generation": copy.deepcopy(
+                    record["sample_reference"]["start_generation"]
+                ),
+                "end_generation": copy.deepcopy(
+                    record["sample_reference"]["end_generation"]
+                ),
+                "segment_counters": {
+                    "start_completed_beta": record["start"]["beta_endpoint"],
+                    "end_completed_beta": record["end"]["beta_endpoint"],
+                    "completed_beta_delta": record["beta_delta"],
+                    "start_completed_steps": record["start"]["completed_steps"],
+                    "end_completed_steps": record["end"]["completed_steps"],
+                    "completed_steps_delta": record["step_delta"],
+                },
+                "max_link_dimension": record["max_link_dimension"],
                 "allocation": {
-                    "cpus": slurm["allocated_cpus"],
-                    "memory_bytes": slurm["allocated_memory_bytes"],
+                    "cpus": accounting["allocated_cpus"],
+                    "memory_bytes": accounting["allocated_memory_bytes"],
                 },
                 "rates": {
-                    "completed_beta_per_second": completed_beta / elapsed,
-                    "steps_per_second": completed_steps / elapsed,
-                    "seconds_per_step": elapsed / completed_steps,
+                    "completed_beta_per_second": record["beta_delta"] / elapsed,
+                    "steps_per_second": record["step_delta"] / elapsed,
+                    "seconds_per_step": seconds_per_step,
                 },
+                "normalized_seconds_per_work_unit": normalized,
                 "checkpoint_overhead": {
-                    "write_seconds": checkpoint["write_seconds"],
-                    "read_seconds": checkpoint["read_seconds"],
-                    "size_bytes": checkpoint["size_bytes"],
+                    "write_seconds": accounting["checkpoint_write_seconds"],
+                    "read_seconds": accounting["checkpoint_read_seconds"],
+                    "size_bytes": record["end"]["size_bytes"],
                 },
                 "actual_runtime": {
-                    "julia_threads": slurm["julia_threads"],
-                    "blas_threads": slurm["blas_threads"],
-                    "peak_rss_bytes": slurm["max_rss_bytes"],
+                    "julia_threads": accounting["julia_threads"],
+                    "blas_threads": accounting["blas_threads"],
+                    "peak_rss_bytes": accounting["max_rss_bytes"],
                 },
             }
         )
-    samples.sort(
+    samples.sort(key=lambda item: item["allocation"]["cpus"])
+    groups = {}
+    for sample in samples:
+        dimension = str(sample["max_link_dimension"])
+        values = [
+            item["rates"]["seconds_per_step"]
+            for item in samples
+            if item["max_link_dimension"] == sample["max_link_dimension"]
+        ]
+        normalized_values = [
+            item["normalized_seconds_per_work_unit"]
+            for item in samples
+            if item["max_link_dimension"] == sample["max_link_dimension"]
+        ]
+        groups[dimension] = {
+            "sample_count": len(values),
+            "mean_seconds_per_step": statistics.fmean(values),
+            "min_seconds_per_step": min(values),
+            "max_seconds_per_step": max(values),
+            "max_normalized_seconds_per_work_unit": max(normalized_values),
+        }
+    best = max(sample["rates"]["steps_per_second"] for sample in samples)
+    eligible = [
+        sample
+        for sample in samples
+        if sample["rates"]["steps_per_second"] >= 0.9 * best
+    ]
+    selected_sample = min(
+        eligible,
         key=lambda item: (
             item["allocation"]["cpus"],
             item["allocation"]["memory_bytes"],
-            item["cell_id"],
-            item["checkpoint_sha256"],
-        )
+        ),
     )
-
-    grouped_links: dict[str, list[float]] = {}
-    grouped_allocations: dict[tuple[int, int], list[dict[str, Any]]] = {}
-    for sample in samples:
-        grouped_links.setdefault(str(sample["max_link_dimension"]), []).append(
-            sample["rates"]["seconds_per_step"]
-        )
-        allocation_key = (
-            sample["allocation"]["cpus"],
-            sample["allocation"]["memory_bytes"],
-        )
-        grouped_allocations.setdefault(allocation_key, []).append(sample)
-    link_dimension_groups = {}
-    for dimension, values in sorted(grouped_links.items(), key=lambda item: int(item[0])):
-        link_dimension_groups[dimension] = {
-            "sample_count": len(values),
-            "mean_seconds_per_step": statistics.fmean(values),
-            "sample_stddev_seconds_per_step": _sample_stddev(values),
-            "min_seconds_per_step": min(values),
-            "max_seconds_per_step": max(values),
-        }
-    allocation_rates = []
-    for (cpus, memory_bytes), allocation_samples in sorted(grouped_allocations.items()):
-        rates = [item["rates"]["steps_per_second"] for item in allocation_samples]
-        allocation_rates.append(
-            {
-                "cpus": cpus,
-                "memory_bytes": memory_bytes,
-                "sample_count": len(rates),
-                "mean_steps_per_second": statistics.fmean(rates),
-            }
-        )
-    best_throughput = max(
-        item["mean_steps_per_second"] for item in allocation_rates
-    )
-    eligible = [
-        item
-        for item in allocation_rates
-        if item["mean_steps_per_second"] >= 0.9 * best_throughput
+    selected = {
+        **selected_sample["allocation"],
+        "sample_count": 1,
+        "mean_steps_per_second": selected_sample["rates"]["steps_per_second"],
+    }
+    normalized_values = [
+        sample["normalized_seconds_per_work_unit"] for sample in samples
     ]
-    selected = min(eligible, key=lambda item: (item["cpus"], item["memory_bytes"]))
-    selected_samples = [
-        sample
-        for sample in samples
-        if sample["allocation"]["cpus"] == selected["cpus"]
-        and sample["allocation"]["memory_bytes"] == selected["memory_bytes"]
-    ]
-    selected_seconds = [
-        sample["rates"]["seconds_per_step"] for sample in selected_samples
-    ]
-    mean_seconds = statistics.fmean(selected_seconds)
-    stddev_seconds = _sample_stddev(selected_seconds)
-    all_seconds = [sample["rates"]["seconds_per_step"] for sample in samples]
-    conservative_stddev_seconds = max(
-        stddev_seconds, _sample_stddev(all_seconds)
-    )
+    lower_coefficient = min(normalized_values)
+    central_coefficient = statistics.median(normalized_values)
+    upper_coefficient = max(normalized_values)
+    sparse_safety_factor = 1.25
     writes = [
         sample["checkpoint_overhead"]["write_seconds"] for sample in samples
     ]
     reads = [sample["checkpoint_overhead"]["read_seconds"] for sample in samples]
-    sizes = [sample["checkpoint_overhead"]["size_bytes"] for sample in samples]
     peak_rss = [
         sample["actual_runtime"]["peak_rss_bytes"] for sample in samples
     ]
     julia_threads = sorted(
-        {sample["actual_runtime"]["julia_threads"] for sample in samples}
+        sample["actual_runtime"]["julia_threads"] for sample in samples
     )
     blas_threads = sorted(
         {sample["actual_runtime"]["blas_threads"] for sample in samples}
     )
-    selected_julia_threads = sorted(
-        {
-            sample["actual_runtime"]["julia_threads"]
-            for sample in selected_samples
-        }
-    )
-    selected_blas_threads = sorted(
-        {
-            sample["actual_runtime"]["blas_threads"]
-            for sample in selected_samples
-        }
-    )
-    runtime_sha256 = records[0]["runtime_sha256"]
-    source_sha256 = records[0]["source_sha256"]
+    uncertainty = {
+        "basis": "three_class_observed_envelope",
+        "sample_count": 3,
+        "lower_normalized_seconds_per_work_unit": lower_coefficient,
+        "central_normalized_seconds_per_work_unit": central_coefficient,
+        "upper_normalized_seconds_per_work_unit": upper_coefficient,
+        "relative_envelope_width": (
+            (upper_coefficient - lower_coefficient) / central_coefficient
+        ),
+        "sparse_sample_safety_factor": sparse_safety_factor,
+        "formula": (
+            "ceil(work_units * target_link_dimension^3 * "
+            "upper_normalized_seconds_per_work_unit * "
+            "sparse_sample_safety_factor + max_checkpoint_overhead_seconds)"
+        ),
+    }
     calibration = {
-        "schema_version": 1,
+        "schema_version": 2,
         "artifact_type": "runtime_calibration",
         "generator": {"name": "convergence.py", "version": MODULE_VERSION},
         "software_version": SOFTWARE_VERSION,
         "plan_sha256": plan["plan_sha256"],
         "base_resource_sha256": base_resources["resource_sha256"],
+        "telemetry": copy.deepcopy(telemetry),
         "identity": {
-            "source_sha256": source_sha256,
-            "runtime_sha256": runtime_sha256,
-            "telemetry_sha256": _sha256(_canonical_json(records)),
+            "runtime_identity_sha256": records[0]["runtime_identity_sha256"],
+            "telemetry_sha256": _sha256(_canonical_json(telemetry)),
         },
         "samples": samples,
-        "link_dimension_groups": link_dimension_groups,
+        "link_dimension_groups": groups,
         "checkpoint_overhead": {
             "mean_write_seconds": statistics.fmean(writes),
             "max_write_seconds": max(writes),
             "mean_read_seconds": statistics.fmean(reads),
             "max_read_seconds": max(reads),
-            "max_size_bytes": max(sizes),
+            "max_size_bytes": max(
+                sample["checkpoint_overhead"]["size_bytes"] for sample in samples
+            ),
         },
         "observed_resources": {
             "max_peak_rss_bytes": max(peak_rss),
             "actual_julia_threads": julia_threads,
             "actual_blas_threads": blas_threads,
         },
-        "selected_allocation": copy.deepcopy(selected),
+        "selected_allocation": selected,
         "selection_policy": {
             "rule": "smallest_cpu_then_memory_allocation_within_fraction_of_best",
             "throughput_fraction_of_best": 0.9,
-            "best_mean_steps_per_second": best_throughput,
+            "best_mean_steps_per_second": best,
         },
-        "uncertainty": {
-            "basis": "measured_sample_dispersion",
-            "sample_count": len(samples),
-            "seconds_per_step_sample_stddev": _sample_stddev(all_seconds),
-            "selected_seconds_per_step_mean": mean_seconds,
-            "selected_seconds_per_step_sample_stddev": stddev_seconds,
-            "conservative_standard_deviations": 2.0,
-        },
+        "uncertainty": uncertainty,
     }
     calibration["calibration_sha256"] = calibration_sha256(calibration)
 
     overhead_mean = statistics.fmean(writes) + statistics.fmean(reads)
-    overhead_upper = max(writes) + max(reads)
+    overhead_max = max(writes) + max(reads)
+    cells_by_id = {cell["cell_id"]: cell for cell in plan["cells"]}
     calibrated_cells = []
     for base_cell in base_resources["cells"]:
-        work_steps = base_cell["steps"] * base_cell["branch_equivalents"]
-        predicted = work_steps * mean_seconds + overhead_mean
+        cell = cells_by_id[base_cell["cell_id"]]
+        sites = 2 * (cell["parameters"]["n_bath"] + 1)
+        work_units = (
+            base_cell["steps"]
+            * base_cell["branch_equivalents"]
+            * sites
+            * base_cell["direct_star_mpo_width_estimate"]
+        )
+        target_link = cell["solver_settings"]["maxdim"]
+        predicted = (
+            work_units * target_link**3 * central_coefficient + overhead_mean
+        )
         recommended = math.ceil(
-            work_steps * (mean_seconds + 2.0 * conservative_stddev_seconds)
-            + overhead_upper
+            work_units
+            * target_link**3
+            * upper_coefficient
+            * sparse_safety_factor
+            + overhead_max
         )
         calibrated_cells.append(
             {
                 "cell_id": base_cell["cell_id"],
-                "work_steps": work_steps,
+                "work_units": work_units,
+                "target_link_dimension": target_link,
                 "predicted_wall_seconds": predicted,
-                "wall_uncertainty_seconds": (
-                    2.0 * conservative_stddev_seconds * work_steps
-                    + max(0.0, overhead_upper - overhead_mean)
-                ),
-                "recommended_wall_seconds": max(
-                    math.ceil(predicted), recommended
-                ),
+                "wall_uncertainty_seconds": recommended - predicted,
+                "recommended_wall_seconds": recommended,
                 "recommended_memory_bytes": math.ceil(
                     max(peak_rss) * MEMORY_SAFETY_FACTOR
                 ),
             }
         )
+    selected_runtime = selected_sample["actual_runtime"]
     calibrated = {
-        "schema_version": 1,
+        "schema_version": 2,
         "artifact_type": "calibrated_resources",
         "generator": {"name": "convergence.py", "version": MODULE_VERSION},
         "software_version": SOFTWARE_VERSION,
         "plan_sha256": plan["plan_sha256"],
         "base_resource_sha256": base_resources["resource_sha256"],
         "calibration_sha256": calibration["calibration_sha256"],
+        "telemetry": copy.deepcopy(telemetry),
         "allocation": {
             "cpus": selected["cpus"],
             "memory_bytes": max(
                 selected["memory_bytes"],
                 math.ceil(max(peak_rss) * MEMORY_SAFETY_FACTOR),
             ),
-            "actual_julia_threads": selected_julia_threads,
-            "actual_blas_threads": selected_blas_threads,
+            "actual_julia_threads": [selected_runtime["julia_threads"]],
+            "actual_blas_threads": [selected_runtime["blas_threads"]],
         },
         "observed_resources": copy.deepcopy(calibration["observed_resources"]),
-        "uncertainty": copy.deepcopy(calibration["uncertainty"]),
+        "uncertainty": copy.deepcopy(uncertainty),
         "cells": calibrated_cells,
     }
     calibrated["resource_sha256"] = resource_sha256(calibrated)
+    return calibration, calibrated
+
+
+def validate_calibration(calibration: Any, plan: dict[str, Any]) -> None:
+    if not isinstance(calibration, dict):
+        raise TypeError("calibration must be a JSON object")
+    validate_artifact_schema(calibration, "runtimeCalibration")
+    if calibration.get("generator") != {
+        "name": "convergence.py",
+        "version": MODULE_VERSION,
+    } or calibration.get("software_version") != SOFTWARE_VERSION:
+        raise ValueError("unsupported or stale calibration version")
+    if calibration.get("plan_sha256") != plan["plan_sha256"]:
+        raise ValueError("calibration plan SHA256 does not match plan")
+    if _digest(
+        calibration.get("calibration_sha256"), "calibration SHA256"
+    ) != calibration_sha256(calibration):
+        raise ValueError("calibration SHA256 mismatch")
+    base_resources = estimate_plan_resources(plan)
+    expected, _resources = _derive_calibration_artifacts(
+        plan, base_resources, calibration["telemetry"]
+    )
+    if calibration != expected:
+        raise ValueError("calibration derived semantics do not match telemetry replay")
+
+
+def calibrate_plan_resources(
+    plan: dict[str, Any],
+    base_resources: dict[str, Any],
+    telemetry: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Derive hash-bound calibration and resources from validated raw artifacts."""
+
+    validate_plan(plan)
+    validate_resources(base_resources, plan)
+    if base_resources["artifact_type"] != "resource_estimate":
+        raise ValueError("calibration requires the original resource estimate")
+    calibration, calibrated = _derive_calibration_artifacts(
+        plan, base_resources, telemetry
+    )
     validate_artifact_schema(calibration, "runtimeCalibration")
     validate_artifact_schema(calibrated, "calibratedResources")
     return calibration, calibrated
@@ -3415,7 +3610,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise ValueError(
                 "calibration requires the published bundled plan.json"
             )
-        telemetry = _load_json(args.telemetry, "calibration telemetry")
+        telemetry = _strict_canonical_json_file(
+            args.telemetry, "calibration telemetry"
+        )
         outputs = publish_calibrated_resources(run_root, telemetry=telemetry)
         calibration = _load_json(outputs["calibration"], "published calibration")
         resources = _load_json(

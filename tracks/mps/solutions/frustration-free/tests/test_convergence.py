@@ -37,6 +37,8 @@ def test_machine_readable_schema_covers_plan_cell_and_analysis():
         "completedCell",
         "convergenceAnalysis",
         "resourceEstimate",
+        "calibrationTelemetry",
+        "slurmAccountingExport",
         "runtimeCalibration",
         "calibratedResources",
     }
@@ -45,6 +47,8 @@ def test_machine_readable_schema_covers_plan_cell_and_analysis():
         {"$ref": "#/$defs/completedCell"},
         {"$ref": "#/$defs/convergenceAnalysis"},
         {"$ref": "#/$defs/resourceEstimate"},
+        {"$ref": "#/$defs/calibrationTelemetry"},
+        {"$ref": "#/$defs/slurmAccountingExport"},
         {"$ref": "#/$defs/runtimeCalibration"},
         {"$ref": "#/$defs/calibratedResources"},
     ]
@@ -2323,88 +2327,228 @@ def test_tiny_real_julia_tdvp_only_pilot(tmp_path):
         assert cell["resources"]["peak_rss_method"] is None
 
 
-def _calibration_telemetry(plan):
-    cell = plan["cells"][0]
-    source_sha256 = convergence._sha256(
-        convergence._canonical_json(cell["provenance"]["source_sha256"])
-    )
-    runtime = {
-        "julia_environment_sha256": cell["provenance"][
-            "julia_environment_sha256"
-        ],
-        "julia_version": "1.11.7",
-        "blas_vendor": "openblas",
-    }
-    runtime_sha256 = convergence._sha256(
-        convergence._canonical_json(runtime)
-    )
+def _calibration_checkpoint_identity(cell):
     request_sha256 = convergence._sha256(
         convergence._canonical_json(convergence._runner_request_for_cell(cell))
         + b"\n"
     )
-    records = []
-    for index, (
-        cpus,
-        seconds,
-        completed_beta,
-        completed_steps,
-        max_link_dimension,
-        rss,
-    ) in enumerate(
-        [
-            (4, 98.0, 4.0, 20, 64, 2_000_000_000),
-            (4, 100.0, 4.0, 20, 64, 2_100_000_000),
-            (8, 92.0, 4.0, 20, 128, 2_500_000_000),
-            (16, 90.0, 4.0, 20, 128, 3_000_000_000),
-        ]
-    ):
-        records.append(
+    request = convergence._runner_request_for_cell(cell)
+    payload = json.loads(request["payload_json"])
+    return {
+        "request_sha256": request_sha256,
+        "input_payload_sha256": request["sha256"],
+        "bath_sha256": cell["bath_artifact"]["sha256"],
+        "solver_settings": {
+            "beta": cell["parameters"]["beta"],
+            "tau": [
+                cell["parameters"]["beta"] * fraction
+                for fraction in cell["tau_fractions"]
+            ],
+            **cell["solver_settings"],
+        },
+        "source_hashes": payload["checkpoint"]["source_hashes"],
+        "project_toml_sha256": payload["checkpoint"]["project_toml_sha256"],
+        "manifest_toml_sha256": payload["checkpoint"]["manifest_toml_sha256"],
+        "julia_version": "1.11.7",
+        "itensors_version": "0.9.10",
+        "itensormps_version": "0.3.8",
+        "hdf5_version": "0.17.2",
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+    }
+
+
+def _write_calibration_generation(
+    root,
+    cell,
+    *,
+    completed_steps,
+    beta_endpoint,
+    max_link_dimension,
+    history=None,
+):
+    identity = _calibration_checkpoint_identity(cell)
+    if history is None:
+        history = [
             {
-                "schema_version": 1,
-                "plan_sha256": plan["plan_sha256"],
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [
+                    beta_endpoint * (step + 1) / completed_steps,
+                    max_link_dimension,
+                ],
+            }
+            for step in range(completed_steps)
+        ]
+    metadata = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "identity": identity,
+        "completed_steps": completed_steps,
+        "resume_state": {
+            "completed_steps": completed_steps,
+            "beta_endpoint": beta_endpoint,
+            "log_unnormalized_norm": 0.0,
+            "maximum_link_dimensions_by_bond": [4, max_link_dimension, 8],
+            "step_history": history,
+            "expansion_applied": False,
+        },
+    }
+    metadata_bytes = convergence._canonical_json(metadata) + b"\n"
+    metadata_sha256 = convergence._sha256(metadata_bytes)
+    generation_name = f"checkpoint-{metadata_sha256}"
+    generation = root / "generations" / generation_name
+    generation.mkdir(parents=True)
+    (generation / "metadata.json").write_bytes(metadata_bytes)
+    state = f"state:{completed_steps}:{beta_endpoint}\n".encode()
+    (generation / "state.h5").write_bytes(state)
+    completion = {
+        "checkpoint_schema": 1,
+        "writer_version": "1.0.0",
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha256,
+        "state_sha256": convergence._sha256(state),
+    }
+    completion_bytes = convergence._canonical_json(completion) + b"\n"
+    (generation / "completion.json").write_bytes(completion_bytes)
+    pointer = {
+        **completion,
+        "completed_steps": completed_steps,
+        "completion_sha256": convergence._sha256(completion_bytes),
+    }
+    (root / "current.json").write_bytes(
+        convergence._canonical_json(pointer) + b"\n"
+    )
+    return {
+        "generation": generation_name,
+        "metadata_sha256": metadata_sha256,
+        "state_sha256": completion["state_sha256"],
+        "completion_sha256": pointer["completion_sha256"],
+    }
+
+
+def _calibration_fixture(tmp_path, plan, *, mixed_cells=False):
+    samples = []
+    specs = [
+        (4, 10.0, 64, 2_000_000_000),
+        (8, 9.2, 128, 2_500_000_000),
+        (16, 9.0, 256, 3_000_000_000),
+    ]
+    benchmark_cell = plan["cells"][-1]
+    cells = plan["cells"] if mixed_cells else [benchmark_cell] * 3
+    for index, ((cpus, elapsed, link, rss), cell) in enumerate(
+        zip(specs, cells, strict=True)
+    ):
+        root = tmp_path / f"checkpoint-{cpus}"
+        (root / "generations").mkdir(parents=True)
+        start_history = [
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.01 * (step + 1), 16],
+            }
+            for step in range(10)
+        ]
+        start = _write_calibration_generation(
+            root,
+            cell,
+            completed_steps=10,
+            beta_endpoint=0.1,
+            max_link_dimension=16,
+            history=start_history,
+        )
+        end_history = [
+            *start_history,
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.2, link],
+            },
+            {
+                "keys": ["beta_endpoint", "max_link_dimension"],
+                "values": [0.3, link],
+            },
+        ]
+        end = _write_calibration_generation(
+            root,
+            cell,
+            completed_steps=12,
+            beta_endpoint=0.3,
+            max_link_dimension=link,
+            history=end_history,
+        )
+        identity = _calibration_checkpoint_identity(cell)
+        accounting = {
+            "schema_version": 1,
+            "artifact_type": "slurm_accounting_export",
+            "job_id": str(1000 + index),
+            "plan_sha256": plan["plan_sha256"],
+            "cell_id": cell["cell_id"],
+            "input_sha256": cell["input_sha256"],
+            "start_generation": start["generation"],
+            "end_generation": end["generation"],
+            "elapsed_seconds": elapsed,
+            "allocated_cpus": cpus,
+            "allocated_memory_bytes": 8 * 1024**3,
+            "max_rss_bytes": rss,
+            "checkpoint_write_seconds": 2.0 + index,
+            "checkpoint_read_seconds": 1.0 + index / 2,
+            "runtime": {
+                key: copy.deepcopy(identity[key])
+                for key in (
+                    "source_hashes",
+                    "project_toml_sha256",
+                    "manifest_toml_sha256",
+                    "julia_version",
+                    "itensors_version",
+                    "itensormps_version",
+                    "hdf5_version",
+                )
+            },
+            "julia_threads": cpus,
+            "blas_threads": 1,
+        }
+        accounting_path = tmp_path / f"sacct-{cpus}.json"
+        accounting_path.write_bytes(
+            convergence._canonical_json(accounting) + b"\n"
+        )
+        samples.append(
+            {
                 "cell_id": cell["cell_id"],
                 "input_sha256": cell["input_sha256"],
-                "request_sha256": request_sha256,
-                "checkpoint_sha256": f"{index + 1:064x}",
-                "source_sha256": source_sha256,
-                "runtime_sha256": runtime_sha256,
-                "runtime": runtime,
-                "checkpoint": {
-                    "validated": True,
-                    "completed_beta": completed_beta,
-                    "completed_steps": completed_steps,
-                    "max_link_dimension": max_link_dimension,
-                    "write_seconds": 2.0 + index,
-                    "read_seconds": 1.0 + index / 2,
-                    "size_bytes": 10_000_000 + index,
-                },
-                "slurm": {
-                    "validated": True,
-                    "job_id": str(1000 + index),
-                    "elapsed_seconds": seconds,
-                    "allocated_cpus": cpus,
-                    "allocated_memory_bytes": 8 * 1024**3,
-                    "max_rss_bytes": rss,
-                    "julia_threads": cpus,
-                    "blas_threads": 1,
+                "checkpoint_root": str(root.resolve()),
+                "start_generation": start,
+                "end_generation": end,
+                "slurm_accounting_export": {
+                    "path": str(accounting_path.resolve()),
+                    "sha256": convergence._sha256_file(accounting_path),
                 },
             }
         )
-    return records
+    return {
+        "schema_version": 1,
+        "artifact_type": "calibration_telemetry",
+        "plan_sha256": plan["plan_sha256"],
+        "samples": samples,
+    }
 
 
-def test_calibration_derives_rates_groups_overheads_and_conservative_resources():
-    plan = _plan(
+def _calibration_plan():
+    return _plan(
         betas=[0.2],
         bath_sizes=[1],
         time_steps=[0.1],
-        maxdims=[32],
+        maxdims=[64, 128, 256],
         stage="production",
     )
+
+
+def test_calibration_derives_segment_deltas_and_sparse_conservative_resources(
+    tmp_path,
+):
+    plan = _calibration_plan()
     resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
 
     calibration, calibrated = convergence.calibrate_plan_resources(
-        plan, resources, _calibration_telemetry(plan)
+        plan, resources, telemetry
     )
 
     assert calibration["artifact_type"] == "runtime_calibration"
@@ -2412,26 +2556,34 @@ def test_calibration_derives_rates_groups_overheads_and_conservative_resources()
         calibration
     )
     assert [sample["allocation"]["cpus"] for sample in calibration["samples"]] == [
-        4,
-        4,
-        8,
-        16,
+        4, 8, 16
     ]
-    assert calibration["samples"][0]["rates"] == {
-        "completed_beta_per_second": pytest.approx(4.0 / 98.0),
-        "steps_per_second": pytest.approx(20.0 / 98.0),
-        "seconds_per_step": pytest.approx(98.0 / 20.0),
+    assert calibration["samples"][0]["segment_counters"] == {
+        "start_completed_beta": 0.1,
+        "end_completed_beta": 0.3,
+        "completed_beta_delta": pytest.approx(0.2),
+        "start_completed_steps": 10,
+        "end_completed_steps": 12,
+        "completed_steps_delta": 2,
     }
-    assert set(calibration["link_dimension_groups"]) == {"64", "128"}
-    assert calibration["checkpoint_overhead"]["max_size_bytes"] == 10_000_003
-    assert calibration["checkpoint_overhead"]["max_write_seconds"] == 5.0
-    assert calibration["checkpoint_overhead"]["max_read_seconds"] == 2.5
+    assert calibration["samples"][0]["rates"] == {
+        "completed_beta_per_second": pytest.approx(0.2 / 10.0),
+        "steps_per_second": pytest.approx(2.0 / 10.0),
+        "seconds_per_step": pytest.approx(10.0 / 2.0),
+    }
+    assert set(calibration["link_dimension_groups"]) == {"64", "128", "256"}
+    assert calibration["checkpoint_overhead"]["max_size_bytes"] > 0
+    assert calibration["checkpoint_overhead"]["max_write_seconds"] == 4.0
+    assert calibration["checkpoint_overhead"]["max_read_seconds"] == 2.0
     assert calibration["observed_resources"]["max_peak_rss_bytes"] == 3_000_000_000
     assert calibration["observed_resources"]["actual_julia_threads"] == [4, 8, 16]
     assert calibration["observed_resources"]["actual_blas_threads"] == [1]
     assert calibration["selected_allocation"]["cpus"] == 4
     assert calibration["selection_policy"]["throughput_fraction_of_best"] == 0.9
-    assert calibration["uncertainty"]["seconds_per_step_sample_stddev"] > 0
+    assert calibration["uncertainty"]["basis"] == "three_class_observed_envelope"
+    assert calibration["uncertainty"]["upper_normalized_seconds_per_work_unit"] >= (
+        calibration["uncertainty"]["central_normalized_seconds_per_work_unit"]
+    )
 
     assert calibrated["artifact_type"] == "calibrated_resources"
     assert calibrated["plan_sha256"] == plan["plan_sha256"]
@@ -2442,47 +2594,153 @@ def test_calibration_derives_rates_groups_overheads_and_conservative_resources()
     assert calibrated["cells"][0]["recommended_wall_seconds"] >= (
         calibrated["cells"][0]["predicted_wall_seconds"]
     )
-    assert calibrated["uncertainty"]["basis"] == "measured_sample_dispersion"
-
-
-def test_calibration_rejects_mixed_plan_source_runtime_and_request_identities():
-    plan = _plan(
-        betas=[0.2],
-        bath_sizes=[1],
-        time_steps=[0.1],
-        maxdims=[32],
-        stage="production",
+    assert calibrated["cells"][2]["target_link_dimension"] == 256
+    assert calibrated["cells"][2]["work_units"] >= calibrated["cells"][0]["work_units"]
+    assert calibrated["cells"][2]["recommended_wall_seconds"] > (
+        calibrated["cells"][0]["recommended_wall_seconds"]
     )
+    assert calibrated["uncertainty"]["basis"] == "three_class_observed_envelope"
+
+
+def test_calibration_rejects_missing_classes_duplicate_jobs_and_mixed_runtime(tmp_path):
+    plan = _calibration_plan()
     resources = convergence.estimate_plan_resources(plan)
-    for field in (
-        "plan_sha256",
-        "input_sha256",
-        "request_sha256",
-        "source_sha256",
-        "runtime_sha256",
-    ):
-        telemetry = _calibration_telemetry(plan)
-        telemetry[-1][field] = "f" * 64
-        with pytest.raises(ValueError, match="identity|mixed"):
-            convergence.calibrate_plan_resources(plan, resources, telemetry)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    missing = copy.deepcopy(telemetry)
+    missing["samples"].pop()
+    with pytest.raises(ValueError, match="schema"):
+        convergence.calibrate_plan_resources(plan, resources, missing)
+
+    wrong_classes = _calibration_fixture(tmp_path / "classes", plan)
+    class_export = Path(
+        wrong_classes["samples"][2]["slurm_accounting_export"]["path"]
+    )
+    class_accounting = json.loads(class_export.read_text(encoding="utf-8"))
+    class_accounting["allocated_cpus"] = 8
+    class_accounting["julia_threads"] = 8
+    class_export.write_bytes(
+        convergence._canonical_json(class_accounting) + b"\n"
+    )
+    wrong_classes["samples"][2]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(class_export)
+    )
+    with pytest.raises(ValueError, match="4.*8.*16|class"):
+        convergence.calibrate_plan_resources(plan, resources, wrong_classes)
+
+    duplicate = copy.deepcopy(telemetry)
+    second_export = Path(
+        duplicate["samples"][1]["slurm_accounting_export"]["path"]
+    )
+    second = json.loads(second_export.read_text(encoding="utf-8"))
+    second["job_id"] = "1000"
+    second_export.write_bytes(convergence._canonical_json(second) + b"\n")
+    duplicate["samples"][1]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(second_export)
+    )
+    with pytest.raises(ValueError, match="duplicate.*job"):
+        convergence.calibrate_plan_resources(plan, resources, duplicate)
+
+    telemetry = _calibration_fixture(tmp_path / "mixed", plan)
+    export_path = Path(telemetry["samples"][2]["slurm_accounting_export"]["path"])
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export["runtime"]["manifest_toml_sha256"] = "f" * 64
+    export_path.write_bytes(convergence._canonical_json(export) + b"\n")
+    telemetry["samples"][2]["slurm_accounting_export"]["sha256"] = (
+        convergence._sha256_file(export_path)
+    )
+    with pytest.raises(ValueError, match="runtime|Manifest|identity"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+    mixed_cells = _calibration_fixture(
+        tmp_path / "mixed-cells", plan, mixed_cells=True
+    )
+    with pytest.raises(ValueError, match="mixed.*cell|benchmark identity"):
+        convergence.calibrate_plan_resources(plan, resources, mixed_cells)
+
+
+def test_calibration_rejects_tampered_or_nonregular_raw_artifacts(tmp_path):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    state = (
+        Path(telemetry["samples"][0]["checkpoint_root"])
+        / "generations"
+        / telemetry["samples"][0]["end_generation"]["generation"]
+        / "state.h5"
+    )
+    state.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="checkpoint|hash"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+    telemetry = _calibration_fixture(tmp_path / "symlink", plan)
+    export_reference = telemetry["samples"][0]["slurm_accounting_export"]
+    export_path = Path(export_reference["path"])
+    target = export_path.with_suffix(".target")
+    export_path.rename(target)
+    export_path.symlink_to(target)
+    with pytest.raises(ValueError, match="regular|symlink"):
+        convergence.calibrate_plan_resources(plan, resources, telemetry)
+
+
+def test_calibration_telemetry_and_accounting_schemas_are_recursively_closed(
+    tmp_path,
+):
+    plan = _calibration_plan()
+    telemetry = _calibration_fixture(tmp_path, plan)
+    malformed_telemetry = copy.deepcopy(telemetry)
+    malformed_telemetry["samples"][0]["start_generation"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            malformed_telemetry, "calibrationTelemetry"
+        )
+
+    export_path = Path(
+        telemetry["samples"][0]["slurm_accounting_export"]["path"]
+    )
+    accounting = json.loads(export_path.read_text(encoding="utf-8"))
+    accounting["runtime"]["unknown"] = True
+    with pytest.raises(ValueError, match="schema"):
+        convergence.validate_artifact_schema(
+            accounting, "slurmAccountingExport"
+        )
+
+
+def test_calibration_validators_replay_all_derivations(tmp_path):
+    plan = _calibration_plan()
+    resources = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path, plan)
+    calibration, calibrated = convergence.calibrate_plan_resources(
+        plan, resources, telemetry
+    )
+
+    forged_calibration = copy.deepcopy(calibration)
+    forged_calibration["samples"][0]["rates"]["steps_per_second"] += 1
+    forged_calibration["calibration_sha256"] = convergence.calibration_sha256(
+        forged_calibration
+    )
+    with pytest.raises(ValueError, match="derived|replay|semantics"):
+        convergence.validate_calibration(forged_calibration, plan)
+
+    forged_resources = copy.deepcopy(calibrated)
+    forged_resources["cells"][0]["recommended_wall_seconds"] += 1
+    forged_resources["resource_sha256"] = convergence.resource_sha256(
+        forged_resources
+    )
+    with pytest.raises(ValueError, match="derived|replay|semantics"):
+        convergence.validate_resources(forged_resources, plan)
 
 
 def test_calibration_publication_is_immutable_and_preserves_original_bundle(tmp_path):
-    plan = _plan(
-        betas=[0.2],
-        bath_sizes=[1],
-        time_steps=[0.1],
-        maxdims=[32],
-        stage="production",
-    )
+    plan = _calibration_plan()
     plan_path = convergence.create_plan_run(tmp_path, plan)
     run = plan_path.parent
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
     resources_before = (run / "resources.json").read_bytes()
     completion_before = (run / "completion.json").read_bytes()
     pointer_before = (tmp_path / "current.json").read_bytes()
 
     result = convergence.publish_calibrated_resources(
-        run, telemetry=_calibration_telemetry(plan)
+        run, telemetry=telemetry
     )
 
     assert result == {
@@ -2498,27 +2756,22 @@ def test_calibration_publication_is_immutable_and_preserves_original_bundle(tmp_
     assert (tmp_path / "current.json").read_bytes() == pointer_before
     assert (
         convergence.publish_calibrated_resources(
-            run, telemetry=_calibration_telemetry(plan)
+            run, telemetry=telemetry
         )
         == result
     )
-    changed = _calibration_telemetry(plan)
-    changed[0]["slurm"]["elapsed_seconds"] += 1
+    changed = copy.deepcopy(telemetry)
+    changed["samples"].reverse()
     with pytest.raises(ValueError, match="immutable|different"):
         convergence.publish_calibrated_resources(run, telemetry=changed)
 
 
 def test_production_accepts_only_explicit_calibrated_resource_acknowledgment(tmp_path):
-    plan = _plan(
-        betas=[0.2],
-        bath_sizes=[1],
-        time_steps=[0.1],
-        maxdims=[32],
-        stage="production",
-    )
+    plan = _calibration_plan()
     base = convergence.estimate_plan_resources(plan)
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
     _calibration, calibrated = convergence.calibrate_plan_resources(
-        plan, base, _calibration_telemetry(plan)
+        plan, base, telemetry
     )
 
     with pytest.raises(ValueError, match="acknowledgment"):
@@ -2546,18 +2799,13 @@ def test_production_accepts_only_explicit_calibrated_resource_acknowledgment(tmp
 def test_calibrate_cli_publishes_fixed_artifacts_without_advancing_pointer(
     tmp_path, capsys
 ):
-    plan = _plan(
-        betas=[0.2],
-        bath_sizes=[1],
-        time_steps=[0.1],
-        maxdims=[32],
-        stage="production",
-    )
+    plan = _calibration_plan()
     plan_path = convergence.create_plan_run(tmp_path, plan)
     run = plan_path.parent
+    telemetry = _calibration_fixture(tmp_path / "raw", plan)
     telemetry_path = tmp_path / "telemetry.json"
-    telemetry_path.write_text(
-        json.dumps(_calibration_telemetry(plan)), encoding="utf-8"
+    telemetry_path.write_bytes(
+        convergence._canonical_json(telemetry) + b"\n"
     )
     pointer_before = (tmp_path / "current.json").read_bytes()
 
