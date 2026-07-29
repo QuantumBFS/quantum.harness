@@ -4,7 +4,13 @@ import math
 import random
 import struct
 from collections import Counter
-from decimal import Decimal, localcontext
+from decimal import (
+    ROUND_CEILING,
+    ROUND_FLOOR,
+    ROUND_HALF_EVEN,
+    Decimal,
+    localcontext,
+)
 from itertools import permutations
 
 import numpy as np
@@ -737,6 +743,113 @@ def test_local_estimator_falls_back_when_operation_bound_crosses_rn_cell(
     assert _float_hex(observed.real) == _float_hex(expected.real)
     assert _float_hex(observed.imag) == _float_hex(expected.imag)
     assert fallback_calls == Counter(components=2)
+
+
+def test_local_estimator_falls_back_across_signed_zero_rounding_cells(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    minimum = math.ldexp(1.0, -1074)
+    neighbors = {2: minimum, 3: -minimum}
+    log_values = {
+        1: 0.0j,
+        2: 0.0j,
+        3: complex(minimum, 0.0),
+    }
+    expected = _decimal_row_oracle(1, neighbors, log_values)
+    assert _float_hex(expected.real) == "8000000000000000"
+
+    fallback_calls: Counter[str] = Counter()
+    fallback = operators._fallback_component
+
+    def fallback_spy(
+        terms: tuple[operators._DyadicLogTerm, ...],
+        source_logabs: float,
+    ) -> float:
+        fallback_calls["components"] += 1
+        return fallback(terms, source_logabs)
+
+    monkeypatch.setattr(operators, "_fallback_component", fallback_spy)
+    observed = local_from_log_neighbors(
+        1,
+        neighbors,
+        log_values.__getitem__,
+    )
+
+    assert (
+        _float_hex(observed.real),
+        fallback_calls,
+    ) == (
+        "8000000000000000",
+        Counter(components=1),
+    )
+
+
+@pytest.mark.parametrize(
+    ("ambient_rounding", "coefficient_sign"),
+    [(ROUND_FLOOR, 1.0), (ROUND_CEILING, -1.0)],
+)
+def test_fast_certifier_path_is_ambient_rounding_independent(
+    ambient_rounding: str,
+    coefficient_sign: float,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source_logabs = 2.9586827049504487
+    neighbors = {
+        2: coefficient_sign * 2.6389857554844767,
+        3: coefficient_sign * 6.031655559834185,
+        4: coefficient_sign * -3.1429711648954353,
+        5: coefficient_sign * -5.809692494403778,
+        6: coefficient_sign * 2.7885636787746346,
+        7: coefficient_sign * 3.661802348908374,
+        8: coefficient_sign * -2.0058140673197453,
+        9: coefficient_sign * -3.6936025018572565,
+    }
+    log_values = {
+        1: complex(source_logabs, 0.0),
+        2: complex(-0.03676691738333204, 0.0),
+        3: complex(-0.11991049957751487, 0.0),
+        4: complex(-0.07739889502763386, 0.0),
+        5: complex(-0.5549432476680991, 0.0),
+        6: complex(2.256192270806035, 0.0),
+        7: complex(0.860089900166435, 0.0),
+        8: complex(2.9347831332270893, 0.0),
+        9: complex(-1.8076460319581793, 0.0),
+    }
+    with localcontext() as baseline_context:
+        baseline_context.rounding = ROUND_HALF_EVEN
+        baseline = local_from_log_neighbors(
+            1,
+            neighbors,
+            log_values.__getitem__,
+        )
+
+    fallback_calls: Counter[str] = Counter()
+    fallback = operators._fallback_component
+
+    def fallback_spy(
+        terms: tuple[operators._DyadicLogTerm, ...],
+        received_source_logabs: float,
+    ) -> float:
+        fallback_calls["components"] += 1
+        return fallback(terms, received_source_logabs)
+
+    monkeypatch.setattr(operators, "_fallback_component", fallback_spy)
+    with localcontext() as ambient_context:
+        ambient_context.rounding = ambient_rounding
+        observed = local_from_log_neighbors(
+            1,
+            neighbors,
+            log_values.__getitem__,
+        )
+
+    assert (
+        _float_hex(observed.real),
+        _float_hex(observed.imag),
+    ) == (
+        _float_hex(baseline.real),
+        _float_hex(baseline.imag),
+    )
+    assert fallback_calls == Counter()
 
 
 def test_local_estimator_terminates_exact_dyadic_halfway_tie(
