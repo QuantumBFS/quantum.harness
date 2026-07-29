@@ -19,6 +19,14 @@ fi
 APPTAINER="${CHALLENGE113_APPTAINER:-apptainer}"
 
 test "${CHALLENGE113_CLUSTER_PROFILE}" = "lasg02-cpu-v1"
+ARCHIVE_BASENAME="${CHALLENGE113_ARCHIVE_PATH##*/}"
+EXPECTED_ARCHIVE_BASENAME="challenge-113-${CHALLENGE113_EXPECTED_REVISION:0:7}.tar.gz"
+if [[ ! "${ARCHIVE_BASENAME}" =~ ^challenge-113-[0-9a-f]{7}\.tar\.gz$ ]] \
+  || [[ "${ARCHIVE_BASENAME}" != "${EXPECTED_ARCHIVE_BASENAME}" ]]; then
+  echo "archive basename is unsafe or does not bind the revision" >&2
+  exit 2
+fi
+CONTAINER_ARCHIVE="/${ARCHIVE_BASENAME}"
 test "$(<"${CHALLENGE113_DEPLOYMENT}/.source-revision")" = "${CHALLENGE113_EXPECTED_REVISION}"
 test "$(sha256sum "${CHALLENGE113_SIF_PATH}" | awk '{print $1}')" = "${CHALLENGE113_SIF_SHA256}"
 test "$(sha256sum "${CHALLENGE113_ARCHIVE_PATH}" | awk '{print $1}')" = "${CHALLENGE113_ARCHIVE_SHA256}"
@@ -37,7 +45,7 @@ CONTAINER_ARGS=(
   --network none
   --bind "${CHALLENGE113_DEPLOYMENT}:/workspace"
   --bind "${CHALLENGE113_RUN_ROOT}:/output"
-  --bind "${CHALLENGE113_ARCHIVE_PATH}:/challenge113-archive.tar.gz:ro"
+  --bind "${CHALLENGE113_ARCHIVE_PATH}:${CONTAINER_ARCHIVE}:ro"
   --bind "${CHALLENGE113_DEPLOYMENT_METADATA}:/challenge113-deployment.json:ro"
   --env JAX_ENABLE_X64=1
   --env JAX_PLATFORMS=cpu
@@ -48,7 +56,7 @@ CONTAINER_ARGS=(
 
 "${APPTAINER}" "${CONTAINER_ARGS[@]}" python3 /workspace/scripts/verify_deployment.py \
   --root /workspace \
-  --archive /challenge113-archive.tar.gz \
+  --archive "${CONTAINER_ARCHIVE}" \
   --deployment-metadata /challenge113-deployment.json \
   --expected-revision "${CHALLENGE113_EXPECTED_REVISION}" \
   --expected-archive-sha256 "${CHALLENGE113_ARCHIVE_SHA256}" \

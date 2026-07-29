@@ -109,3 +109,16 @@ or Slurm submission was made.
 - Fake-container integration tests prove a metadata mismatch exits before the
   first runtime call and that prepared jobs contain no sync or package-manager
   operation. No pilot or array was submitted.
+
+## LASG archive-bind correction
+
+- RED: the real fresh-root preparation bound the source archive under the
+  synthetic name `/challenge113-archive.tar.gz`; strict deployment validation
+  correctly rejected it because metadata binds the original revision filename.
+- GREEN: preparation and job gates derive the basename from the quoted host
+  archive path, require exactly `challenge-113-<revision-prefix>.tar.gz`, and
+  bind and validate it under that same basename. Traversal, option-like,
+  control-character, wrong-revision, and otherwise noncanonical basenames fail
+  before the first Apptainer call.
+- Fake-container tests cover the exact realistic prepare/job argv and prove
+  malicious names enter neither preparation nor pilot runtime execution.

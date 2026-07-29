@@ -422,6 +422,21 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     )
     assert rejected.returncode != 0
     assert not log.exists()
+    malicious_archive = tmp_path / "--evil.tar.gz"
+    malicious_archive.write_bytes(b"archive")
+    malicious = {
+        **environment,
+        "CHALLENGE113_ARCHIVE_PATH": str(malicious_archive),
+        "CHALLENGE113_ARCHIVE_SHA256": hashlib.sha256(
+            malicious_archive.read_bytes()
+        ).hexdigest(),
+    }
+    rejected = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
+        env=malicious,
+    )
+    assert rejected.returncode != 0
+    assert not log.exists()
 
     subprocess.run(
         ["bash", str(ROOT / "scripts" / "prepare_apptainer_runtime.sh")],
@@ -432,8 +447,18 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     assert prepare_log.count("uv sync --frozen") == 1
     assert prepare_log.count("--no-home") == 3
     assert prepare_log.count("--cleanenv --net --network none") == 3
+    container_archive = f"/{archive.name}"
+    assert f"{archive}:{container_archive}:ro" in prepare_log
+    assert f"--archive {container_archive}" in prepare_log
 
     log.write_text("")
+    rejected = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "slurm_pilot.sh")],
+        env=malicious,
+    )
+    assert rejected.returncode != 0
+    assert log.read_text() == ""
+
     subprocess.run(
         ["bash", str(ROOT / "scripts" / "slurm_pilot.sh")],
         env=environment,
@@ -444,6 +469,8 @@ def test_apptainer_prepare_then_pilot_is_offline_with_fake_runtime(tmp_path) -> 
     assert pilot_log.count("--no-home") == 4
     assert pilot_log.count("--cleanenv --net --network none") == 4
     assert "--env JAX_ENABLE_X64=1 --env JAX_PLATFORMS=cpu" in pilot_log
+    assert f"{archive}:{container_archive}:ro" in pilot_log
+    assert f"--archive {container_archive}" in pilot_log
 
 
 @pytest.mark.parametrize(
