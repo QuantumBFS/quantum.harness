@@ -74,6 +74,7 @@ class LandscapeResult:
     dense_hvp_projector_residuals: dict[float, float]
     dense_hvp_principal_angles: AngleMap
     polishing: EndpointPolishResult | None
+    eigenvalue_ordering: str
 
 
 def hessian_vector_product(
@@ -308,20 +309,91 @@ def polish_endpoint(
             failed,
         ) from error
 
-    candidate = np.asarray(solver.x, dtype=np.float64)
+    def malformed_solver_result(reason: str) -> EndpointPolishingError:
+        failed = diagnostics(
+            initial_numpy,
+            evaluations=0,
+            jacobian_evaluations=0,
+            status=-1,
+            message=f"malformed SciPy result: {reason}",
+            cost=float("inf"),
+            optimality=float("inf"),
+            solver_success=False,
+        )
+        return EndpointPolishingError(
+            f"endpoint polishing received a malformed SciPy result: {reason}",
+            failed,
+        )
+
+    try:
+        raw_candidate = solver.x
+    except Exception as error:
+        raise malformed_solver_result(f"missing x ({error})") from error
+    try:
+        candidate = np.asarray(raw_candidate, dtype=np.float64)
+    except Exception as error:
+        raise malformed_solver_result(f"x is not a real array ({error})") from error
+    if candidate.shape != (space.parameter_count,):
+        raise malformed_solver_result(
+            f"x must have shape ({space.parameter_count},), got {candidate.shape}"
+        )
+
+    try:
+        raw_success = solver.success
+        raw_status = solver.status
+        raw_message = solver.message
+        raw_evaluations = solver.nfev
+        raw_jacobian_evaluations = solver.njev
+        raw_cost = solver.cost
+        raw_optimality = solver.optimality
+    except Exception as error:
+        raise malformed_solver_result(f"missing solver metadata ({error})") from error
+
+    if not isinstance(raw_success, (bool, np.bool_)):
+        raise malformed_solver_result("success must be a boolean")
+    if (
+        isinstance(raw_status, (bool, np.bool_))
+        or not isinstance(raw_status, Integral)
+    ):
+        raise malformed_solver_result("status must be a finite integer")
+    if (
+        isinstance(raw_evaluations, (bool, np.bool_))
+        or not isinstance(raw_evaluations, Integral)
+        or raw_evaluations <= 0
+    ):
+        raise malformed_solver_result("nfev must be a positive integer")
+    if (
+        isinstance(raw_jacobian_evaluations, (bool, np.bool_))
+        or not isinstance(raw_jacobian_evaluations, Integral)
+        or raw_jacobian_evaluations <= 0
+    ):
+        raise malformed_solver_result("njev must be a positive integer")
+    try:
+        message = str(raw_message)
+        cost = float(raw_cost)
+        optimality = float(raw_optimality)
+    except Exception as error:
+        raise malformed_solver_result(
+            f"solver metadata is not convertible ({error})"
+        ) from error
+    if not message:
+        raise malformed_solver_result("message must be nonempty")
+    if not np.isfinite(cost) or cost < 0.0:
+        raise malformed_solver_result("cost must be finite and nonnegative")
+    if not np.isfinite(optimality) or optimality < 0.0:
+        raise malformed_solver_result("optimality must be finite and nonnegative")
+
     result = diagnostics(
         candidate,
-        evaluations=int(solver.nfev),
-        jacobian_evaluations=int(solver.njev or 0),
-        status=int(solver.status),
-        message=str(solver.message),
-        cost=float(solver.cost),
-        optimality=float(solver.optimality),
-        solver_success=bool(solver.success),
+        evaluations=int(raw_evaluations),
+        jacobian_evaluations=int(raw_jacobian_evaluations),
+        status=int(raw_status),
+        message=message,
+        cost=cost,
+        optimality=optimality,
+        solver_success=bool(raw_success),
     )
-    if candidate.shape != (space.parameter_count,) or not np.all(
-        np.isfinite(candidate)
-    ):
+    if not np.all(np.isfinite(candidate)):
         raise EndpointPolishingError(
             "endpoint polishing returned a nonfinite or malformed candidate",
             result,
@@ -401,6 +473,39 @@ def _relative_ranks(values: NDArray[np.float64]) -> RankMap:
     }
 
 
+def _matrix_free_rank_diagnostics(
+    values: NDArray[np.float64],
+    *,
+    spectrum_truncated: bool,
+) -> tuple[RankMap, dict[float, bool]]:
+    magnitudes = np.abs(np.asarray(values, dtype=np.float64))
+    ranks = _relative_ranks(values)
+    scale = float(np.max(magnitudes, initial=0.0))
+    smallest_retrieved = float(np.min(magnitudes, initial=np.inf))
+    lower_bounds = {
+        threshold: bool(
+            spectrum_truncated
+            and scale > 0.0
+            and smallest_retrieved > threshold * scale
+        )
+        for threshold in _RANK_THRESHOLDS
+    }
+    return ranks, lower_bounds
+
+
+def _absolute_mode_mask(
+    values: NDArray[np.float64],
+    threshold: float,
+    *,
+    scale: float | None = None,
+) -> NDArray[np.bool_]:
+    magnitudes = np.abs(np.asarray(values, dtype=np.float64))
+    resolved_scale = (
+        float(np.max(magnitudes, initial=0.0)) if scale is None else float(scale)
+    )
+    return np.asarray(magnitudes > threshold * resolved_scale, dtype=np.bool_)
+
+
 def _orthonormalize(columns: NDArray[np.float64]) -> NDArray[np.float64]:
     if columns.shape[1] == 0:
         return np.empty((columns.shape[0], 0), dtype=np.float64)
@@ -454,12 +559,14 @@ def _leading_eigenpairs(
     values, vectors = eigsh(
         operator,
         k=count,
-        which="LA",
+        which="LM",
         v0=initial,
         ncv=min(parameter_count, max(2 * count + 1, 20)),
         tol=1e-12,
         maxiter=max(1000, 20 * parameter_count),
     )
+    # Reports use descending algebraic order among the largest-magnitude modes
+    # returned by ARPACK. Rank and subspace selection always use abs(values).
     order = np.argsort(values)[::-1]
     return (
         np.asarray(values[order], dtype=np.float64),
@@ -535,21 +642,36 @@ def analyze_landscape(
         hessian_rank_is_lower_bound = {
             threshold: False for threshold in _RANK_THRESHOLDS
         }
+        dense_scale = float(np.max(np.abs(dense_values), initial=0.0))
         for threshold, rank in hessian_ranks.items():
-            if rank > leading_count:
+            dense_mask = _absolute_mode_mask(
+                dense_values,
+                threshold,
+                scale=dense_scale,
+            )
+            leading_mask = _absolute_mode_mask(
+                leading_values,
+                threshold,
+                scale=dense_scale,
+            )
+            if rank > leading_count or np.count_nonzero(leading_mask) != rank:
                 continue
             residual, angles = _subspace_diagnostics(
-                dense_vectors[:, :rank],
-                leading_vectors[:, :rank],
+                dense_vectors[:, dense_mask],
+                leading_vectors[:, leading_mask],
             )
             projector_residuals[threshold] = residual
             principal_angles[threshold] = angles
     else:
-        hessian_ranks = _relative_ranks(leading_values)
-        hessian_rank_is_lower_bound = {
-            threshold: rank == leading_count
-            for threshold, rank in hessian_ranks.items()
-        }
+        hessian_ranks, hessian_rank_is_lower_bound = (
+            _matrix_free_rank_diagnostics(
+                leading_values,
+                spectrum_truncated=leading_count < space.parameter_count,
+            )
+        )
+
+    model_mask = _absolute_mode_mask(leading_values, 1e-8)
+    model_basis = _orthonormalize(leading_vectors[:, model_mask])
 
     return LandscapeResult(
         leading_eigenvalues=leading_values,
@@ -558,7 +680,7 @@ def analyze_landscape(
         hessian_ranks=hessian_ranks,
         hessian_rank_is_lower_bound=hessian_rank_is_lower_bound,
         jacobian_ranks=jacobian_ranks,
-        model_basis=leading_vectors,
+        model_basis=model_basis,
         endpoint_basis=endpoint_basis,
         dense_hessian=dense_matrix,
         dense_eigenvalues=dense_values,
@@ -566,4 +688,5 @@ def analyze_landscape(
         dense_hvp_projector_residuals=projector_residuals,
         dense_hvp_principal_angles=principal_angles,
         polishing=polishing,
+        eigenvalue_ordering="descending algebraic",
     )

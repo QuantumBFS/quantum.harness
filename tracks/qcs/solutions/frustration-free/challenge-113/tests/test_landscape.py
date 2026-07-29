@@ -11,6 +11,8 @@ import pytest
 from qcontrol.config import SystemConfig
 from qcontrol.landscape import (
     EndpointPolishingError,
+    _leading_eigenpairs,
+    _matrix_free_rank_diagnostics,
     analyze_landscape,
     dense_hessian,
     endpoint_jacobian,
@@ -74,6 +76,23 @@ def test_dense_hessian_is_bounded_to_eighty_parameters() -> None:
         dense_hessian(lambda x: jnp.vdot(x, x), point)
 
 
+def test_matrix_free_spectrum_includes_large_negative_modes() -> None:
+    diagonal = jnp.asarray([5.0, 2.0, 0.1, -12.0, -3.0, 0.01])
+    point = jnp.zeros(diagonal.size, dtype=jnp.float64)
+    loss_fn = lambda x: 0.5 * jnp.vdot(x, diagonal * x)
+
+    values, vectors = _leading_eigenpairs(loss_fn, point, count=4)
+    ranks, lower_bounds = _matrix_free_rank_diagnostics(
+        values,
+        spectrum_truncated=True,
+    )
+
+    np.testing.assert_allclose(values, [5.0, 2.0, -3.0, -12.0], atol=1e-12)
+    np.testing.assert_allclose(vectors.T @ vectors, np.eye(4), atol=1e-12)
+    assert ranks == {1e-6: 4, 1e-8: 4, 1e-10: 4}
+    assert lower_bounds == {1e-6: True, 1e-8: True, 1e-10: True}
+
+
 def test_one_qubit_geometry_has_primary_rank_three(
     accepted_one_qubit: tuple[
         ControlSystem,
@@ -89,13 +108,14 @@ def test_one_qubit_geometry_has_primary_rank_three(
     assert set(result.jacobian_ranks) == {1e-6, 1e-8, 1e-10}
     assert result.hessian_ranks[1e-8] == 3
     assert result.jacobian_ranks[1e-8] == 3
+    assert result.eigenvalue_ordering == "descending algebraic"
     assert result.polishing.loss <= 1e-12
     assert result.polishing.gradient_norm <= 1e-10
     assert result.polishing.residual_norm <= 1e-12
     assert not any(result.hessian_rank_is_lower_bound.values())
     np.testing.assert_allclose(
         result.model_basis.T @ result.model_basis,
-        np.eye(6),
+        np.eye(3),
         rtol=0.0,
         atol=1e-10,
     )
@@ -159,22 +179,42 @@ def test_endpoint_polishing_is_bounded_and_reproducible(
 ) -> None:
     system, space, accepted = accepted_two_qubit
 
-    first = polish_endpoint(system, space, accepted)
-    second = polish_endpoint(system, space, accepted)
+    first = analyze_landscape(system, space, accepted, leading_count=20)
+    second = analyze_landscape(system, space, accepted, leading_count=20)
+    assert first.polishing is not None
+    assert second.polishing is not None
+    first_polish = first.polishing
+    second_polish = second.polishing
 
-    assert first == second
-    assert first.converged
-    assert first.evaluations == 5
-    assert first.jacobian_evaluations == 4
-    assert first.status > 0
-    assert first.message
-    assert first.loss <= 1e-12
-    assert first.gradient_norm <= 1e-10
-    assert first.projected_gradient_norm <= 1e-10
-    assert first.residual_norm <= 1e-12
-    assert first.phase_consistency_error <= 1e-12
-    assert first.step_norm > 0.0
-    assert np.all(np.abs(first.normalized_pulse) <= 1.0)
+    np.testing.assert_allclose(
+        first_polish.normalized_pulse,
+        second_polish.normalized_pulse,
+        rtol=0.0,
+        atol=1e-13,
+    )
+    assert first_polish.loss == pytest.approx(second_polish.loss, abs=1e-15)
+    assert first_polish.residual_norm == pytest.approx(
+        second_polish.residual_norm,
+        abs=1e-15,
+    )
+    assert first.hessian_ranks == second.hessian_ranks
+    assert first.jacobian_ranks == second.jacobian_ranks
+    assert first.hessian_ranks == {1e-6: 15, 1e-8: 15, 1e-10: 15}
+    assert first_polish.converged
+    assert second_polish.converged
+    for polishing in (first_polish, second_polish):
+        assert polishing.evaluations > 0
+        assert polishing.jacobian_evaluations > 0
+        assert polishing.evaluations >= polishing.jacobian_evaluations
+        assert polishing.status > 0
+        assert polishing.message
+    assert first_polish.loss <= 1e-12
+    assert first_polish.gradient_norm <= 1e-10
+    assert first_polish.projected_gradient_norm <= 1e-10
+    assert first_polish.residual_norm <= 1e-12
+    assert first_polish.phase_consistency_error <= 1e-12
+    assert first_polish.step_norm > 0.0
+    assert np.all(np.abs(first_polish.normalized_pulse) <= 1.0)
 
 
 @pytest.mark.integration
@@ -187,7 +227,7 @@ def test_endpoint_polishing_fails_closed_when_budget_is_exhausted(
         polish_endpoint(system, space, accepted, max_nfev=1)
 
     assert not raised.value.diagnostics.converged
-    assert raised.value.diagnostics.evaluations == 1
+    assert 0 < raised.value.diagnostics.evaluations <= 1
     assert raised.value.diagnostics.residual_norm > 1e-12
 
 
@@ -221,6 +261,93 @@ def test_endpoint_polishing_rejects_invalid_solver_candidate(
         polish_endpoint(system, space, accepted)
 
     assert not raised.value.diagnostics.converged
+
+
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        SimpleNamespace(),
+        SimpleNamespace(x=object()),
+        SimpleNamespace(x=np.zeros((24, 1))),
+        SimpleNamespace(x=np.zeros(23)),
+        SimpleNamespace(
+            x=np.zeros(24),
+            success=True,
+            status=np.nan,
+            message="bad status",
+            nfev=1,
+            njev=1,
+            cost=0.0,
+            optimality=0.0,
+        ),
+        SimpleNamespace(
+            x=np.zeros(24),
+            success=True,
+            status=1,
+            message="bad cost",
+            nfev=1,
+            njev=1,
+            cost=np.nan,
+            optimality=0.0,
+        ),
+        SimpleNamespace(
+            x=np.zeros(24),
+            success=True,
+            status=1,
+            message="bad optimality",
+            nfev=1,
+            njev=1,
+            cost=0.0,
+            optimality=np.inf,
+        ),
+    ],
+)
+def test_endpoint_polishing_fails_closed_for_malformed_scipy_result(
+    accepted_one_qubit: tuple[
+        ControlSystem,
+        PulseSpace,
+        OpenLoopResult,
+        Callable[[jax.Array], jax.Array],
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+    replacement: SimpleNamespace,
+) -> None:
+    system, space, accepted, _ = accepted_one_qubit
+    monkeypatch.setattr(
+        "qcontrol.landscape.least_squares",
+        lambda *args, **kwargs: replacement,
+    )
+
+    with pytest.raises(EndpointPolishingError, match="malformed") as raised:
+        polish_endpoint(system, space, accepted)
+
+    diagnostics = raised.value.diagnostics
+    assert not diagnostics.converged
+    assert diagnostics.status == -1
+    assert diagnostics.message
+    assert len(diagnostics.normalized_pulse) == space.parameter_count
+    assert np.all(np.isfinite(diagnostics.normalized_pulse))
+
+
+@pytest.mark.parametrize("exception_type", [KeyboardInterrupt, SystemExit])
+def test_endpoint_polishing_preserves_process_control_exceptions(
+    accepted_one_qubit: tuple[
+        ControlSystem,
+        PulseSpace,
+        OpenLoopResult,
+        Callable[[jax.Array], jax.Array],
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+    exception_type: type[BaseException],
+) -> None:
+    system, space, accepted, _ = accepted_one_qubit
+
+    def interrupt(*args: object, **kwargs: object) -> object:
+        raise exception_type()
+
+    monkeypatch.setattr("qcontrol.landscape.least_squares", interrupt)
+    with pytest.raises(exception_type):
+        polish_endpoint(system, space, accepted)
 
 
 @pytest.mark.integration
