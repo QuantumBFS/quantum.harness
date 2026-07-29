@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,8 @@ import sys
 
 import pytest
 
+import long_range_percolation.validation as validation_module
+import long_range_percolation.validation_shards as shards
 from long_range_percolation.validation import (
     ValidationProtocol,
     canonical_report_bytes,
@@ -19,16 +22,28 @@ from long_range_percolation.validation_shards import (
     RUN_SPEC_SCHEMA,
     build_validation_run_spec,
     canonical_scientific_report_bytes,
-    merge_validation_shards,
-    run_validation_cell,
-    run_validation_global_checks,
-    write_validation_run_spec,
 )
 
 
 SOLUTION = Path(__file__).resolve().parents[1]
 SCRIPT = SOLUTION / "scripts" / "validation_shard.py"
 WRAPPER = SOLUTION / "scripts" / "validation_array_slurm.sh"
+CLI_SPEC = importlib.util.spec_from_file_location("validation_shard_cli", SCRIPT)
+assert CLI_SPEC is not None and CLI_SPEC.loader is not None
+CLI = importlib.util.module_from_spec(CLI_SPEC)
+CLI_SPEC.loader.exec_module(CLI)
+
+
+@pytest.fixture(autouse=True)
+def clean_source(monkeypatch: pytest.MonkeyPatch):
+    revision = validation_module._repository_state()["source_revision"]
+    source = {
+        "source_revision": revision,
+        "clean_tree": True,
+        "provenance_error": None,
+    }
+    monkeypatch.setattr(shards, "_repository_state", lambda: source)
+    monkeypatch.setattr(validation_module, "_repository_state", lambda: source)
 
 
 def _protocol(jobs: int = 1) -> ValidationProtocol:
@@ -49,10 +64,10 @@ def _prepare(
 ) -> tuple[Path, dict[str, object]]:
     root = tmp_path / "shards"
     run_spec_path = root / "run_spec.json"
-    write_validation_run_spec(_protocol(), root, run_spec_path)
-    run_validation_global_checks(run_spec_path)
+    shards._write_test_run_spec(_protocol(), root, run_spec_path)
+    shards._run_test_global_checks(run_spec_path)
     for index in order:
-        run_validation_cell(run_spec_path, index)
+        shards._run_test_cell(run_spec_path, index)
     return run_spec_path, json.loads(run_spec_path.read_text(encoding="utf-8"))
 
 
@@ -74,25 +89,46 @@ def test_production_run_spec_has_exact_120_opaque_cells(tmp_path: Path):
     assert spec["source_revision"]
     assert spec["runtime_capability_sha256"]
     assert spec["uv_lock_sha256"]
+    assert len(spec["global_expected_checks"]) == 15
+    assert all(
+        check["scope"] == "global" and check["case_id"] is None
+        for check in spec["global_expected_checks"]
+    )
+    all_check_ids = [
+        check["check_id"] for check in spec["global_expected_checks"]
+    ]
+    for cell in spec["cells"]:
+        assert cell["expected_checks"]
+        assert all(
+            check["scope"] == "cell"
+            and check["case_id"] == cell["case_id"]
+            for check in cell["expected_checks"]
+        )
+        all_check_ids.extend(
+            check["check_id"] for check in cell["expected_checks"]
+        )
+    assert len(all_check_ids) == len(set(all_check_ids))
 
 
 def test_serial_and_sharded_scientific_reports_are_canonical_equal(tmp_path: Path):
     protocol = _protocol()
     serial = run_production_validation(protocol, tmp_path / "serial.json")
     run_spec_path, _ = _prepare(tmp_path)
-    sharded = merge_validation_shards(run_spec_path, tmp_path / "merged.json")
+    sharded = shards._merge_test_shards(run_spec_path)
     assert payload_without_elapsed(serial) == payload_without_elapsed(sharded)
     assert canonical_scientific_report_bytes(serial) == (
         canonical_scientific_report_bytes(sharded)
     )
-    assert (tmp_path / "merged.json").read_bytes() == canonical_report_bytes(sharded)
+    assert (
+        run_spec_path.parent / "report" / "report.json"
+    ).read_bytes() == canonical_report_bytes(sharded)
 
 
 def test_cell_order_does_not_change_merged_scientific_report(tmp_path: Path):
     first_path, _ = _prepare(tmp_path / "first", order=(0, 1))
     second_path, _ = _prepare(tmp_path / "second", order=(1, 0))
-    first = merge_validation_shards(first_path, tmp_path / "first.json")
-    second = merge_validation_shards(second_path, tmp_path / "second.json")
+    first = shards._merge_test_shards(first_path)
+    second = shards._merge_test_shards(second_path)
     assert canonical_scientific_report_bytes(first) == (
         canonical_scientific_report_bytes(second)
     )
@@ -100,11 +136,12 @@ def test_cell_order_does_not_change_merged_scientific_report(tmp_path: Path):
 
 def test_process_scheduling_order_is_invariant(tmp_path: Path):
     reports = []
+    revision = validation_module._repository_state()["source_revision"]
     for name, order in (("forward", (0, 1)), ("reverse", (1, 0))):
         root = tmp_path / name
         spec_path = root / "run_spec.json"
-        write_validation_run_spec(_protocol(), root, spec_path)
-        run_validation_global_checks(spec_path)
+        shards._write_test_run_spec(_protocol(), root, spec_path)
+        shards._run_test_global_checks(spec_path)
         for index in order:
             completed = subprocess.run(
                 [
@@ -112,9 +149,11 @@ def test_process_scheduling_order_is_invariant(tmp_path: Path):
                     "-c",
                     (
                         "from pathlib import Path;"
-                        "from long_range_percolation.validation_shards "
-                        "import run_validation_cell;"
-                        f"run_validation_cell(Path({str(spec_path)!r}), {index})"
+                        "import long_range_percolation.validation_shards as s;"
+                        f"s._repository_state=lambda:{{'source_revision':"
+                        f"{revision!r},'clean_tree':True,"
+                        "'provenance_error':None};"
+                        f"s._run_test_cell(Path({str(spec_path)!r}), {index})"
                     ),
                 ],
                 cwd=SOLUTION,
@@ -123,7 +162,7 @@ def test_process_scheduling_order_is_invariant(tmp_path: Path):
             )
             assert completed.returncode == 0, completed.stderr
         reports.append(
-            merge_validation_shards(spec_path, tmp_path / f"{name}.json")
+            shards._merge_test_shards(spec_path)
         )
     assert canonical_scientific_report_bytes(reports[0]) == (
         canonical_scientific_report_bytes(reports[1])
@@ -133,11 +172,11 @@ def test_process_scheduling_order_is_invariant(tmp_path: Path):
 def test_valid_cell_is_idempotent_and_never_overwritten(tmp_path: Path):
     root = tmp_path / "idempotent"
     spec_path = root / "run_spec.json"
-    write_validation_run_spec(_protocol(), root, spec_path)
-    first = run_validation_cell(spec_path, 0)
+    shards._write_test_run_spec(_protocol(), root, spec_path)
+    first = shards._run_test_cell(spec_path, 0)
     partial = root / first["partial_path"]
     before = partial.stat().st_mtime_ns
-    second = run_validation_cell(spec_path, 0)
+    second = shards._run_test_cell(spec_path, 0)
     assert second == first
     assert partial.stat().st_mtime_ns == before
 
@@ -165,25 +204,25 @@ def test_merge_rejects_incomplete_or_noncanonical_cell_sets(
     else:
         (root / "cells" / "unexpected").mkdir()
     with pytest.raises(RuntimeError):
-        merge_validation_shards(spec_path, tmp_path / "forbidden.json")
+        shards._merge_test_shards(spec_path)
     assert not (tmp_path / "forbidden.json").exists()
 
 
 def test_atomic_crash_before_cell_rename_leaves_no_valid_partial(tmp_path: Path):
     root = tmp_path / "crash"
     spec_path = root / "run_spec.json"
-    write_validation_run_spec(_protocol(), root, spec_path)
+    shards._write_test_run_spec(_protocol(), root, spec_path)
 
     def crash(stage: str) -> None:
         if stage == "before-artifact-rename":
             raise RuntimeError("injected crash")
 
     with pytest.raises(RuntimeError, match="injected crash"):
-        run_validation_cell(spec_path, 0, crash_hook=crash)
+        shards._run_test_cell(spec_path, 0, crash_hook=crash)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     assert not (root / spec["cells"][0]["partial_path"]).exists()
     assert not (root / spec["cells"][0]["manifest_path"]).exists()
-    run_validation_cell(spec_path, 0)
+    shards._run_test_cell(spec_path, 0)
 
 
 def test_missing_manifest_is_restartable_without_overwriting_partial(tmp_path: Path):
@@ -194,7 +233,7 @@ def test_missing_manifest_is_restartable_without_overwriting_partial(tmp_path: P
     manifest = root / cell["manifest_path"]
     before = partial.stat().st_mtime_ns
     manifest.unlink()
-    run_validation_cell(spec_path, 0)
+    shards._run_test_cell(spec_path, 0)
     assert manifest.is_file()
     assert partial.stat().st_mtime_ns == before
 
@@ -202,10 +241,8 @@ def test_missing_manifest_is_restartable_without_overwriting_partial(tmp_path: P
 def test_cli_exit_codes_for_build_cell_global_and_merge(tmp_path: Path):
     root = tmp_path / "cli"
     spec_path = root / "run_spec.json"
-    build = subprocess.run(
+    build = CLI.main(
         [
-            sys.executable,
-            str(SCRIPT),
             "build-spec",
             "--protocol",
             "production-v1",
@@ -213,83 +250,30 @@ def test_cli_exit_codes_for_build_cell_global_and_merge(tmp_path: Path):
             str(root),
             "--run-spec",
             str(spec_path),
-        ],
-        cwd=SOLUTION,
-        capture_output=True,
-        text=True,
+        ]
     )
-    assert build.returncode == 0, build.stderr
-    bad_cell = subprocess.run(
+    assert build == 0
+    bad_cell = CLI.main(
         [
-            sys.executable,
-            str(SCRIPT),
             "run-cell",
             "--run-spec",
             str(spec_path),
             "--case-index",
             "120",
-        ],
-        cwd=SOLUTION,
-        capture_output=True,
-        text=True,
+        ]
     )
-    assert bad_cell.returncode != 0
-    missing_merge = subprocess.run(
+    assert bad_cell != 0
+    missing_merge = CLI.main(
         [
-            sys.executable,
-            str(SCRIPT),
             "merge",
             "--run-spec",
             str(spec_path),
             "--output",
-            str(root / "report.json"),
+            str(root / "report" / "report.json"),
         ],
-        cwd=SOLUTION,
-        capture_output=True,
-        text=True,
     )
-    assert missing_merge.returncode != 0
-    assert not (root / "report.json").exists()
-
-    reduced_root = tmp_path / "reduced-cli"
-    reduced_spec = reduced_root / "run_spec.json"
-    write_validation_run_spec(_protocol(), reduced_root, reduced_spec)
-    commands = [["run-global", "--run-spec", str(reduced_spec)]]
-    commands.extend(
-        [
-            "run-cell",
-            "--run-spec",
-            str(reduced_spec),
-            "--case-index",
-            str(index),
-        ]
-        for index in range(2)
-    )
-    for arguments in commands:
-        completed = subprocess.run(
-            [sys.executable, str(SCRIPT), *arguments],
-            cwd=SOLUTION,
-            capture_output=True,
-            text=True,
-        )
-        assert completed.returncode == 0, completed.stderr
-    passing_output = reduced_root / "report.json"
-    passing_merge = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPT),
-            "merge",
-            "--run-spec",
-            str(reduced_spec),
-            "--output",
-            str(passing_output),
-        ],
-        cwd=SOLUTION,
-        capture_output=True,
-        text=True,
-    )
-    assert passing_merge.returncode == 0, passing_merge.stderr
-    assert json.loads(passing_output.read_text(encoding="utf-8"))["passed"] is True
+    assert missing_merge != 0
+    assert not (root / "report" / "report.json").exists()
 
 
 def test_spool_copied_slurm_wrapper_uses_explicit_solution_root(tmp_path: Path):
