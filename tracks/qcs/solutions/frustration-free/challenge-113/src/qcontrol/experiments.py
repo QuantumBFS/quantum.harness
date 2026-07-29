@@ -1058,6 +1058,16 @@ def _oracle_basis(
     return np.asarray(eigenvectors[:, ordering], dtype=np.float64)
 
 
+def _landscape_leading_count(
+    config: ExperimentConfig,
+    model_dimension: int,
+) -> int:
+    requested = model_dimension**2 - 1
+    if config.search.method != "full":
+        requested = max(requested, config.search.dimension)
+    return min(config.system.parameter_count - 1, requested)
+
+
 def _cached_derived_metrics(
     config: ExperimentConfig,
     model: ControlSystem,
@@ -1144,10 +1154,7 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
         model,
         pulse_space,
         open_loop,
-        leading_count=min(
-            pulse_space.parameter_count,
-            max(config.search.dimension, model.dimension**2 - 1),
-        ),
+        leading_count=_landscape_leading_count(config, model.dimension),
         dense_validation=pulse_space.parameter_count <= 80,
     )
     origin = np.asarray(
@@ -1326,6 +1333,8 @@ def run_sweep(
     *,
     executor: Callable[[TrialSpec], TrialResult] | None = None,
     stop_after: int | None = None,
+    shard_index: int = 0,
+    shard_count: int = 1,
 ) -> SweepStatus:
     specs = tuple(specs)
     if stop_after is not None and (
@@ -1334,6 +1343,13 @@ def run_sweep(
         or stop_after < 0
     ):
         raise ValueError("stop_after must be a nonnegative integer or None")
+    if (
+        type(shard_index) is not int
+        or type(shard_count) is not int
+        or shard_count <= 0
+        or not 0 <= shard_index < shard_count
+    ):
+        raise ValueError("shard index must satisfy 0 <= index < shard count")
     _bind_plan(specs, store)
     completed = store.completed_trial_ids()
     expected = {spec.trial_id for spec in specs}
@@ -1342,7 +1358,9 @@ def run_sweep(
     execute = executor or (lambda spec: run_trial(spec.config, store))
     newly_executed = 0
 
-    for spec in specs:
+    for position, spec in enumerate(specs):
+        if position % shard_count != shard_index:
+            continue
         if spec.trial_id in completed:
             continue
         if stop_after is not None and newly_executed >= stop_after:

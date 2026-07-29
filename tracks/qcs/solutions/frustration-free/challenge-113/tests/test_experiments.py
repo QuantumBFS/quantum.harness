@@ -117,6 +117,12 @@ def test_full_space_occurs_once_per_device_shot_seed_not_per_k() -> None:
     assert full.config.search.dimension == full.config.system.parameter_count
 
 
+def test_full_space_landscape_count_stays_below_parameter_count() -> None:
+    full = generate_paired_trials([_config("full", 1)])[0].config
+
+    assert experiments_module._landscape_leading_count(full, 2) == 3
+
+
 def test_development_and_production_cannot_mix() -> None:
     with pytest.raises(ValueError, match="run kinds"):
         generate_paired_trials(
@@ -357,6 +363,49 @@ def test_interrupted_sweep_resumes_without_duplicate_ledgers(tmp_path) -> None:
     assert sum(ledger["optimizer_queries"] for ledger in ledgers) == 10
 
 
+def test_sweep_shards_bind_full_plan_and_execute_deterministic_subset(tmp_path) -> None:
+    specs = generate_paired_trials(
+        [_config("model_hessian", 1, seed=seed) for seed in range(5)]
+    )
+    store = ArtifactStore(tmp_path)
+    calls: list[str] = []
+
+    status = run_sweep(
+        specs,
+        store,
+        executor=lambda spec: calls.append(spec.trial_id) or _result(spec, 1),
+        shard_index=1,
+        shard_count=3,
+    )
+
+    assert calls == [specs[1].trial_id, specs[4].trial_id]
+    assert status == SweepStatus(expected=5, completed=2, pending=3)
+    assert json.loads((tmp_path / "plan.json").read_text())["trials"] == [
+        spec.canonical_dict() for spec in specs
+    ]
+
+
+@pytest.mark.parametrize(
+    ("shard_index", "shard_count"),
+    [(-1, 2), (2, 2), (0, 0), (True, 2), (0, True)],
+)
+def test_sweep_rejects_invalid_shard_coordinates(
+    tmp_path,
+    shard_index,
+    shard_count,
+) -> None:
+    specs = generate_paired_trials([_config("random", 1)])
+
+    with pytest.raises(ValueError, match="shard"):
+        run_sweep(
+            specs,
+            ArtifactStore(tmp_path),
+            executor=lambda spec: _result(spec, 1),
+            shard_index=shard_index,
+            shard_count=shard_count,
+        )
+
+
 def test_resume_fails_closed_on_plan_or_claim_mismatch(tmp_path) -> None:
     specs = generate_paired_trials([_config("random", 1)])
     store = ArtifactStore(tmp_path)
@@ -437,6 +486,17 @@ def test_cli_exposes_strict_modes_and_status_smoke(tmp_path) -> None:
         text=True,
     )
     assert invalid.returncode != 0
+
+    shard_help = subprocess.run(
+        [sys.executable, "run.py", "sweep", "--help"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert shard_help.returncode == 0
+    assert "--shard-index" in shard_help.stdout
+    assert "--shard-count" in shard_help.stdout
 
 
 def test_crash_after_trial_publish_adopts_without_rerunning_physics(

@@ -129,7 +129,13 @@ def _trial(args: argparse.Namespace) -> int:
 def _sweep(args: argparse.Namespace) -> int:
     specs = generate_paired_trials(default_sweep_configs(args.kind))
     store = ArtifactStore(args.output)
-    status = run_sweep(specs, store, stop_after=args.stop_after)
+    status = run_sweep(
+        specs,
+        store,
+        stop_after=args.stop_after,
+        shard_index=args.shard_index,
+        shard_count=args.shard_count,
+    )
     _print(status.canonical_dict())
     return 0
 
@@ -196,6 +202,8 @@ def build_parser() -> argparse.ArgumentParser:
     sweep = subparsers.add_parser("sweep")
     sweep.add_argument("--kind", choices=("development", "production"), required=True)
     sweep.add_argument("--stop-after", type=int)
+    sweep.add_argument("--shard-index", type=int, default=0)
+    sweep.add_argument("--shard-count", type=int, default=1)
     sweep.add_argument("--output", type=Path, required=True)
     sweep.set_defaults(handler=_sweep)
 
