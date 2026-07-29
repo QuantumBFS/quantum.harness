@@ -742,3 +742,16 @@ match the five hashes embedded in the envelope.
 Future work is performed by the main agent. The next scientific action is the
 xH5-only exact rational replay of the isotypic gamma=1/2 witness; do not
 restart either remote agent.
+
+## 2026-07-29 — rational replay r1 exposes an entry-point type error
+
+Slurm job `22990387` passed its copied input manifests and reached primal-table
+loading, then failed closed before exact assembly. Julia's `split` returned
+`SubString{String}` fields, but `bits_to_float` accepted only `String`.
+Process peak RSS was 598,640 KiB. This attempt therefore says nothing about
+the existence of the rational witness.
+
+Broaden the parser argument to `AbstractString` and add an explicit
+`SubString` regression. The focused helper suite passes 9/9 in 4.0 seconds
+with 287,280 KiB peak RSS. Resubmit exactly once under a new result ID; do not
+overwrite or reinterpret the r1 failure bundle.

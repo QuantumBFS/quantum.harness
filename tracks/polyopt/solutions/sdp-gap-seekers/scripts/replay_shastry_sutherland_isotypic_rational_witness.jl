@@ -297,7 +297,7 @@ function validate_inputs(options)
     )
 end
 
-function bits_to_float(bits::String)
+function bits_to_float(bits::AbstractString)
     ncodeunits(bits) == 64 ||
         error("Float64 bit string does not have 64 bits")
     all(character -> character in ('0', '1'), bits) ||

@@ -10,6 +10,7 @@ include(joinpath(
 @testset "isotypic rational witness helpers" begin
     value = -1.23456789012345
     @test bits_to_float(bitstring(value)) == value
+    @test bits_to_float(SubString(bitstring(value), 1)) == value
 
     denominator_value, numerators, values =
         rounded_values([1.0, value], 6)

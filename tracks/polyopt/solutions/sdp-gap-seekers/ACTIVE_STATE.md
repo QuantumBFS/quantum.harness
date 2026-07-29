@@ -453,8 +453,15 @@ Updated: 2026-07-29 UTC.
   are stopped. Private branch `5f933515f3eebbec0a4685f55df5fd20a6460773`
   and all seven decision-relevant isotypic/spatial/continuous result bundles
   are synchronized locally and their manifests pass.
-- Exact next action: submit the prepared isotypic rational-witness replay on
-  xH5. It must rebuild all six exact reduction layers, round the exported
-  point to a common rational denominator, and accept only if every one of the
-  nine reconstructed rational matrices has strictly positive exact LDL
-  pivots. This step may exceed 1 GiB and must not run locally.
+- Exact rational-witness replay r1, Slurm job `22990387`, failed closed before
+  assembly at 598,640 KiB. The exported primal table is parsed with `split`,
+  which returns `SubString{String}`, while `bits_to_float` unnecessarily
+  required `String`. This is an entry-point type error, not a model, input, or
+  mathematical failure. The helper now accepts `AbstractString`; the targeted
+  regression suite passes 9/9 locally at 287,280 KiB peak RSS.
+- Exact next action: resubmit the corrected isotypic rational-witness replay
+  once on xH5 with a new run ID. It must rebuild all six exact reduction
+  layers, round the exported point to a common rational denominator, and
+  accept only if every one of the nine reconstructed rational matrices has
+  strictly positive exact LDL pivots. This step may exceed 1 GiB and must not
+  run locally.
