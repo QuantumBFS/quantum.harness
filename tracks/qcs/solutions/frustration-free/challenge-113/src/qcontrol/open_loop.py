@@ -121,19 +121,33 @@ def optimize_open_loop(
                 np.ascontiguousarray(np.asarray(gradient, dtype=np.float64)),
             )
 
-        optimization = minimize(
-            scipy_objective,
-            np.ascontiguousarray(initial, dtype=np.float64),
-            method="L-BFGS-B",
-            jac=True,
-            bounds=[(-1.0, 1.0)] * parameter_count,
-            options={
-                "ftol": 1e-15,
-                "gtol": 1e-10,
-                "maxiter": 2000,
-                "maxls": 50,
-            },
-        )
+        try:
+            optimization = minimize(
+                scipy_objective,
+                np.ascontiguousarray(initial, dtype=np.float64),
+                method="L-BFGS-B",
+                jac=True,
+                bounds=[(-1.0, 1.0)] * parameter_count,
+                options={
+                    "ftol": 1e-15,
+                    "gtol": 1e-10,
+                    "maxiter": 2000,
+                    "maxls": 50,
+                },
+            )
+        except Exception as error:
+            diagnostics.append(
+                StartDiagnostic(
+                    index=start_index,
+                    loss=float("inf"),
+                    gradient_norm=float("inf"),
+                    success=False,
+                    status=-1,
+                    message=f"{type(error).__name__}: {error}",
+                    evaluations=start_evaluations,
+                )
+            )
+            raise OpenLoopAcceptanceError(tuple(diagnostics)) from error
         pulse = np.ascontiguousarray(optimization.x, dtype=np.float64)
         gradient = np.ascontiguousarray(optimization.jac, dtype=np.float64)
         loss = float(optimization.fun)

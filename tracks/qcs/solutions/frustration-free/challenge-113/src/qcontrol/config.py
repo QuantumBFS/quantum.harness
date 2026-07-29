@@ -40,11 +40,15 @@ class SystemConfig:
             raise ValueError("system name must be 'one_qubit' or 'two_qubit'")
         _require_positive_integer("segments", self.segments)
         _require_finite_number("amplitude_bound", self.amplitude_bound, positive=True)
-        duration = (
-            1.0 if self.name == "one_qubit" else 8.0
-        ) if self.duration is None else self.duration
-        _require_finite_number("duration", duration, positive=True)
-        object.__setattr__(self, "duration", float(duration))
+        if self.duration is not None:
+            _require_finite_number("duration", self.duration, positive=True)
+            object.__setattr__(self, "duration", float(self.duration))
+
+    @property
+    def effective_duration(self) -> float:
+        if self.duration is not None:
+            return self.duration
+        return 1.0 if self.name == "one_qubit" else 8.0
 
     @property
     def parameter_count(self) -> int:
@@ -123,7 +127,7 @@ class ExperimentConfig:
             },
             "system": {
                 "amplitude_bound": float(self.system.amplitude_bound),
-                "duration": self.system.duration,
+                "duration": self.system.effective_duration,
                 "name": self.system.name,
                 "segments": self.system.segments,
             },

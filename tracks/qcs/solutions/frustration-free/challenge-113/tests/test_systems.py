@@ -85,7 +85,7 @@ def test_control_system_defensively_copies_and_freezes_all_arrays() -> None:
     drift = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex128)
     control = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex128)
     target = np.eye(2, dtype=np.complex128)
-    system = ControlSystem(drift, (control,), target, (4.0,), "custom")
+    system = ControlSystem(drift, (control,), target, (4.0,), "custom", 2.0)
 
     drift[0, 0] = 9.0
     control[0, 1] = 9.0
@@ -100,6 +100,15 @@ def test_control_system_defensively_copies_and_freezes_all_arrays() -> None:
             matrix.flat[0] = 0.0
         with pytest.raises(ValueError):
             matrix.setflags(write=True)
+
+
+def test_direct_control_system_construction_requires_duration() -> None:
+    drift = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex128)
+    control = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex128)
+    target = np.eye(2, dtype=np.complex128)
+
+    with pytest.raises(TypeError, match="duration"):
+        ControlSystem(drift, (control,), target, (4.0,), "two_qubit")  # type: ignore[call-arg]
 
 
 def test_control_system_equality_never_compares_ndarrays() -> None:
@@ -198,6 +207,7 @@ def test_positive_gap_rejects_zero_drift_model() -> None:
         model.target,
         model.amplitude_scales,
         model.name,
+        model.duration,
     )
     with pytest.raises(ValueError, match="drift Frobenius norm"):
         perturb_system(zero_drift, 0.05, 3)

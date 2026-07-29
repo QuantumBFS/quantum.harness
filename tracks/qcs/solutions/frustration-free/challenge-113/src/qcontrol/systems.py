@@ -66,7 +66,7 @@ class ControlSystem:
     target: ComplexMatrix
     amplitude_scales: tuple[float, ...]
     name: str
-    duration: float = 1.0
+    duration: float
     _perturbation: _PerturbationDescriptor | None = None
 
     def __post_init__(self) -> None:
@@ -183,7 +183,7 @@ def make_system(config: SystemConfig) -> ControlSystem:
         target=target,
         amplitude_scales=(amplitude,) * len(controls),
         name=config.name,
-        duration=float(config.duration),
+        duration=config.effective_duration,
     )
     _validate_system(system)
     return system
