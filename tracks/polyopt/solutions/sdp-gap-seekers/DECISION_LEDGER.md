@@ -1437,3 +1437,9 @@ coefficient truth job: prove every within-character `l=1/l=2` cross entry is
 zero, with all characters retained. Only after that passes may the separately
 SO(3)-projected `l=2` congruence be tested; neither claim may be inferred from
 matching dimensions.
+
+The exact cross-coefficient gate is SCNet job `118189871`, source commit
+`49bd9ea`, 32 CPUs / 64000 MiB / two-hour limit. It uses the same unrestricted
+`L=2,d=2,g=4/5,gamma=2` structural assembly, invokes no optimizer, and replays
+all predicted 1,906,425 within-character `l=1/l=2` cross entries. Its result
+must be exact zero entrywise before the 2,540,067-row cone split is built.

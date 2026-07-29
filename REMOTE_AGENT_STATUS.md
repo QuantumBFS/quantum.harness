@@ -268,5 +268,8 @@ Updated: 2026-07-29T20:47:30Z
   Exact coefficient cross-zero is the next gate; passing it would reduce the
   packed inventory to 2,540,067 and maximum side to 490 without deleting or
   identifying different V4-character cones.
+- SCNet job `118189871` is running the exact 1,906,425-entry stabilizer
+  cross-zero gate from immutable commit `49bd9ea` on 32 CPUs / 64000 MiB. It
+  has no optimizer. Keep `ss-remote-cone-dev` unchanged until it completes.
 
 No user input or new credential is currently required.

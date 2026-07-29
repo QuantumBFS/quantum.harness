@@ -825,3 +825,7 @@ Updated: 2026-07-29 UTC.
   the stabilizer split alone predicts 2,540,067 packed rows (down 42.87%) and
   maximum side 490. Next gate: replay all within-character `l=1/l=2` cross
   entries exactly, then test SO(3)-projected `l=2` congruence separately.
+- Exact coefficient gate job `118189871` is running on SCNet from immutable
+  commit `49bd9ea`, 32 CPUs / 64000 MiB. It rebuilds the same L=2 setup with
+  no optimizer and checks all 1,906,425 within-character `l=1/l=2` cross
+  entries. Do not update its `ss-remote-cone-dev` checkout while it runs.
