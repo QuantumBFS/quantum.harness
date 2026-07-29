@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import math
 from numbers import Integral, Real
@@ -88,7 +89,7 @@ def _readonly(array: NDArray[np.float64]) -> NDArray[np.float64]:
     return result
 
 
-@dataclass(frozen=True, slots=True, init=False)
+@dataclass(frozen=True, slots=True, init=False, eq=False)
 class SearchSpace:
     origin: NDArray[np.float64]
     basis: NDArray[np.float64]
@@ -156,6 +157,56 @@ class SearchSpace:
             raise ValueError(f"coordinates must have shape ({self.dimension},)")
         pulse = self.origin + self.basis @ coordinate_array
         return np.clip(pulse, -1.0, 1.0)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SearchSpace):
+            return NotImplemented
+        return bool(
+            np.array_equal(self.origin, other.origin)
+            and np.array_equal(self.basis, other.basis)
+            and np.array_equal(self.lower_bounds, other.lower_bounds)
+            and np.array_equal(self.upper_bounds, other.upper_bounds)
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                tuple(float(value) for value in self.origin),
+                tuple(
+                    tuple(float(value) for value in row)
+                    for row in self.basis
+                ),
+                tuple(float(value) for value in self.lower_bounds),
+                tuple(float(value) for value in self.upper_bounds),
+            )
+        )
+
+    def canonical_dict(self) -> dict[str, object]:
+        return {
+            "basis": [
+                [float(value) for value in row]
+                for row in self.basis
+            ],
+            "lower_bounds": [float(value) for value in self.lower_bounds],
+            "origin": [float(value) for value in self.origin],
+            "upper_bounds": [float(value) for value in self.upper_bounds],
+        }
+
+    @classmethod
+    def from_canonical_dict(cls, payload: object) -> SearchSpace:
+        if not isinstance(payload, Mapping):
+            raise ValueError("search-space payload must be a mapping")
+        try:
+            return cls(
+                payload["origin"],
+                payload["basis"],
+                payload["lower_bounds"],
+                payload["upper_bounds"],
+            )
+        except KeyError as error:
+            raise ValueError(
+                f"search-space payload is missing {error.args[0]!r}"
+            ) from None
 
 
 def _leading_space(
@@ -283,6 +334,179 @@ def make_search_space(
     )
 
 
+def _observation_dict(observation: Observation) -> dict[str, object]:
+    return {
+        "attempt_index": int(observation.attempt_index),
+        "estimate": float(observation.estimate),
+        "observation_seed": int(observation.observation_seed),
+        "optimizer_query_index": int(observation.optimizer_query_index),
+        "seed_digest": str(observation.seed_digest),
+        "shots": int(observation.shots),
+        "validation": bool(observation.validation),
+    }
+
+
+def _observation_from_dict(payload: object) -> Observation:
+    if not isinstance(payload, Mapping):
+        raise ValueError("observation payload must be a mapping")
+    try:
+        return Observation(
+            estimate=payload["estimate"],
+            shots=payload["shots"],
+            optimizer_query_index=payload["optimizer_query_index"],
+            validation=payload["validation"],
+            observation_seed=payload["observation_seed"],
+            attempt_index=payload["attempt_index"],
+            seed_digest=payload["seed_digest"],
+        )
+    except KeyError as error:
+        raise ValueError(
+            f"observation payload is missing {error.args[0]!r}"
+        ) from None
+
+
+def _optional_observation_dict(
+    observation: Observation | None,
+) -> dict[str, object] | None:
+    return None if observation is None else _observation_dict(observation)
+
+
+def _optional_observation_from_dict(payload: object) -> Observation | None:
+    return None if payload is None else _observation_from_dict(payload)
+
+
+def _pulse_tuple(value: object) -> tuple[float, ...]:
+    pulse = _finite_vector("pulse", value)
+    if pulse.size == 0 or np.any(np.abs(pulse) > 1.0):
+        raise ValueError("pulse must be nonempty and within [-1, 1]")
+    return tuple(float(item) for item in pulse)
+
+
+def _sanitized_failure_category(value: object) -> str:
+    if not isinstance(value, str) or not value:
+        return "device_query_failure"
+    if not value.isascii() or any(
+        not (character.isalnum() or character == "_")
+        for character in value
+    ):
+        return "device_query_failure"
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ValidationAttempt:
+    optimizer_query_index: int
+    pulse: tuple[float, ...]
+    best_observation: Observation
+    device_attempt_index: int
+    validation_observation: Observation | None
+    failure_category: str | None
+    certified: bool
+
+    def __post_init__(self) -> None:
+        optimizer_query_index = _positive_integer(
+            "optimizer_query_index",
+            self.optimizer_query_index,
+        )
+        device_attempt_index = _positive_integer(
+            "device_attempt_index",
+            self.device_attempt_index,
+        )
+        pulse = _pulse_tuple(self.pulse)
+        if (
+            not isinstance(self.best_observation, Observation)
+            or self.best_observation.validation
+            or self.best_observation.optimizer_query_index
+            != optimizer_query_index
+        ):
+            raise ValueError(
+                "best_observation must be the matching optimizer observation"
+            )
+        if not isinstance(self.certified, (bool, np.bool_)):
+            raise ValueError("certified must be a boolean")
+        validation = self.validation_observation
+        if validation is None:
+            if (
+                not isinstance(self.failure_category, str)
+                or _sanitized_failure_category(self.failure_category)
+                != self.failure_category
+            ):
+                raise ValueError(
+                    "failed validation attempts require a sanitized failure category"
+                )
+            if self.certified:
+                raise ValueError("failed validation attempts cannot certify")
+        else:
+            if (
+                not isinstance(validation, Observation)
+                or not validation.validation
+                or validation.optimizer_query_index != optimizer_query_index
+                or validation.attempt_index != device_attempt_index
+            ):
+                raise ValueError(
+                    "validation_observation must match the validation attempt"
+                )
+            if self.failure_category is not None:
+                raise ValueError(
+                    "successful validation attempts cannot have a failure category"
+                )
+
+        object.__setattr__(self, "optimizer_query_index", optimizer_query_index)
+        object.__setattr__(self, "pulse", pulse)
+        object.__setattr__(self, "device_attempt_index", device_attempt_index)
+        object.__setattr__(self, "certified", bool(self.certified))
+
+    @property
+    def status(self) -> str:
+        if self.certified:
+            return "certified"
+        if self.validation_observation is None:
+            return "failed"
+        return "rejected"
+
+    def canonical_dict(self) -> dict[str, object]:
+        return {
+            "best_observation": _observation_dict(self.best_observation),
+            "certified": bool(self.certified),
+            "device_attempt_index": int(self.device_attempt_index),
+            "failure_category": self.failure_category,
+            "optimizer_query_index": int(self.optimizer_query_index),
+            "pulse": [float(value) for value in self.pulse],
+            "status": self.status,
+            "validation_observation": _optional_observation_dict(
+                self.validation_observation
+            ),
+        }
+
+    @classmethod
+    def from_canonical_dict(cls, payload: object) -> ValidationAttempt:
+        if not isinstance(payload, Mapping):
+            raise ValueError("validation-attempt payload must be a mapping")
+        try:
+            attempt = cls(
+                optimizer_query_index=payload["optimizer_query_index"],
+                pulse=payload["pulse"],
+                best_observation=_observation_from_dict(
+                    payload["best_observation"]
+                ),
+                device_attempt_index=payload["device_attempt_index"],
+                validation_observation=_optional_observation_from_dict(
+                    payload["validation_observation"]
+                ),
+                failure_category=payload["failure_category"],
+                certified=payload["certified"],
+            )
+            if payload["status"] != attempt.status:
+                raise ValueError(
+                    "serialized validation status does not match the attempt"
+                )
+            return attempt
+        except KeyError as error:
+            raise ValueError(
+                f"validation-attempt payload is missing {error.args[0]!r}"
+            ) from None
+
+
 @dataclass(frozen=True, slots=True)
 class ClosedLoopResult:
     space: SearchSpace
@@ -292,11 +516,196 @@ class ClosedLoopResult:
     evaluations: int
     budget: int
     budget_exhausted: bool
-    provisional_crossings: tuple[int, ...]
-    validation_result: Observation | None
+    validation_attempts: tuple[ValidationAttempt, ...]
     certified: bool
     first_certified_query: int | None
     stop_reason: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.space, SearchSpace):
+            raise ValueError("space must be a SearchSpace")
+        best_pulse = _pulse_tuple(self.best_pulse)
+        observations = tuple(self.observations)
+        validation_attempts = tuple(self.validation_attempts)
+        evaluations = _nonnegative_integer("evaluations", self.evaluations)
+        budget = _positive_integer("budget", self.budget)
+        if evaluations > budget:
+            raise ValueError("evaluations cannot exceed budget")
+        if not isinstance(self.budget_exhausted, (bool, np.bool_)):
+            raise ValueError("budget_exhausted must be a boolean")
+        if not isinstance(self.certified, (bool, np.bool_)):
+            raise ValueError("certified must be a boolean")
+        if self.stop_reason not in {"budget", "certified", "optimizer_stopped"}:
+            raise ValueError("unsupported stop_reason")
+        if any(
+            not isinstance(observation, Observation)
+            or observation.validation
+            for observation in observations
+        ):
+            raise ValueError("observations must contain optimizer observations")
+        if (
+            self.best_observation is not None
+            and self.best_observation not in observations
+        ):
+            raise ValueError("best_observation must appear in observations")
+        if any(
+            not isinstance(attempt, ValidationAttempt)
+            for attempt in validation_attempts
+        ):
+            raise ValueError(
+                "validation_attempts must contain ValidationAttempt records"
+            )
+        if any(
+            attempt.best_observation not in observations
+            for attempt in validation_attempts
+        ):
+            raise ValueError(
+                "validation-attempt best observations must appear in history"
+            )
+        if any(
+            len(attempt.pulse) != self.space.pulse_dimension
+            for attempt in validation_attempts
+        ):
+            raise ValueError(
+                "validation-attempt pulses must match the search pulse dimension"
+            )
+        crossing_indices = [
+            attempt.optimizer_query_index
+            for attempt in validation_attempts
+        ]
+        if any(
+            current <= previous
+            for previous, current in zip(
+                crossing_indices,
+                crossing_indices[1:],
+            )
+        ):
+            raise ValueError(
+                "validation attempts must follow optimizer query order"
+            )
+        certified_attempts = [
+            attempt for attempt in validation_attempts if attempt.certified
+        ]
+        if len(certified_attempts) > 1 or (
+            certified_attempts
+            and validation_attempts[-1] is not certified_attempts[0]
+        ):
+            raise ValueError(
+                "certification must be the final validation attempt"
+            )
+        expected_first = (
+            certified_attempts[0].optimizer_query_index
+            if certified_attempts
+            else None
+        )
+        if self.first_certified_query != expected_first:
+            raise ValueError(
+                "first_certified_query must match validation_attempts"
+            )
+        if bool(certified_attempts) != bool(self.certified):
+            raise ValueError("certified must match validation_attempts")
+        if self.certified and self.stop_reason != "certified":
+            raise ValueError("certified results must stop immediately")
+
+        object.__setattr__(self, "best_pulse", best_pulse)
+        object.__setattr__(self, "observations", observations)
+        object.__setattr__(self, "validation_attempts", validation_attempts)
+        object.__setattr__(self, "evaluations", evaluations)
+        object.__setattr__(self, "budget", budget)
+        object.__setattr__(self, "budget_exhausted", bool(self.budget_exhausted))
+        object.__setattr__(self, "certified", bool(self.certified))
+
+    @property
+    def provisional_crossings(self) -> tuple[int, ...]:
+        return tuple(
+            attempt.optimizer_query_index
+            for attempt in self.validation_attempts
+        )
+
+    @property
+    def validation_result(self) -> Observation | None:
+        return next(
+            (
+                attempt.validation_observation
+                for attempt in reversed(self.validation_attempts)
+                if attempt.validation_observation is not None
+            ),
+            None,
+        )
+
+    def canonical_dict(self) -> dict[str, object]:
+        return {
+            "best_observation": _optional_observation_dict(
+                self.best_observation
+            ),
+            "best_pulse": [float(value) for value in self.best_pulse],
+            "budget": int(self.budget),
+            "budget_exhausted": bool(self.budget_exhausted),
+            "certified": bool(self.certified),
+            "evaluations": int(self.evaluations),
+            "first_certified_query": self.first_certified_query,
+            "observations": [
+                _observation_dict(observation)
+                for observation in self.observations
+            ],
+            "provisional_crossings": list(self.provisional_crossings),
+            "schema_version": 1,
+            "space": self.space.canonical_dict(),
+            "stop_reason": self.stop_reason,
+            "validation_attempts": [
+                attempt.canonical_dict()
+                for attempt in self.validation_attempts
+            ],
+            "validation_result": _optional_observation_dict(
+                self.validation_result
+            ),
+        }
+
+    @classmethod
+    def from_canonical_dict(cls, payload: object) -> ClosedLoopResult:
+        if not isinstance(payload, Mapping):
+            raise ValueError("closed-loop result payload must be a mapping")
+        try:
+            if payload["schema_version"] != 1:
+                raise ValueError("unsupported closed-loop result schema version")
+            result = cls(
+                space=SearchSpace.from_canonical_dict(payload["space"]),
+                best_pulse=payload["best_pulse"],
+                best_observation=_optional_observation_from_dict(
+                    payload["best_observation"]
+                ),
+                observations=tuple(
+                    _observation_from_dict(item)
+                    for item in payload["observations"]
+                ),
+                evaluations=payload["evaluations"],
+                budget=payload["budget"],
+                budget_exhausted=payload["budget_exhausted"],
+                validation_attempts=tuple(
+                    ValidationAttempt.from_canonical_dict(item)
+                    for item in payload["validation_attempts"]
+                ),
+                certified=payload["certified"],
+                first_certified_query=payload["first_certified_query"],
+                stop_reason=payload["stop_reason"],
+            )
+            if list(result.provisional_crossings) != payload[
+                "provisional_crossings"
+            ]:
+                raise ValueError(
+                    "serialized provisional_crossings do not match history"
+                )
+            if _optional_observation_dict(result.validation_result) != payload[
+                "validation_result"
+            ]:
+                raise ValueError(
+                    "serialized validation_result does not match history"
+                )
+            return result
+        except KeyError as error:
+            raise ValueError(
+                f"closed-loop result payload is missing {error.args[0]!r}"
+            ) from None
 
 
 def _population_size(dimension: int) -> int:
@@ -333,10 +742,9 @@ def run_closed_loop(
         raise ValueError("device must expose QueryDevice ledger accounting") from error
 
     observations: list[Observation] = []
-    provisional_crossings: list[int] = []
+    validation_attempts: list[ValidationAttempt] = []
     best_observation: Observation | None = None
     best_pulse = np.array(space.origin, dtype=np.float64, copy=True)
-    validation_result: Observation | None = None
     certified = False
     first_certified_query: int | None = None
 
@@ -349,7 +757,6 @@ def run_closed_loop(
     def evaluate(coordinates: NDArray[np.float64]) -> tuple[float, bool]:
         nonlocal best_observation
         nonlocal best_pulse
-        nonlocal validation_result
         nonlocal certified
         nonlocal first_certified_query
 
@@ -367,17 +774,41 @@ def run_closed_loop(
             best_observation = observation
             best_pulse = np.array(pulse, dtype=np.float64, copy=True)
             if observation.estimate >= _TARGET_FIDELITY:
-                provisional_crossings.append(observation.optimizer_query_index)
                 try:
                     validation = device.validate(
                         best_pulse,
                         shots=_VALIDATION_SHOTS,
                     )
-                except DeviceQueryError:
-                    validation = None
-                if validation is not None:
-                    validation_result = validation
-                    if device.certifies(validation, _TARGET_FIDELITY):
+                except DeviceQueryError as error:
+                    validation_attempts.append(
+                        ValidationAttempt(
+                            optimizer_query_index=observation.optimizer_query_index,
+                            pulse=tuple(float(value) for value in best_pulse),
+                            best_observation=observation,
+                            device_attempt_index=error.attempt_index,
+                            validation_observation=None,
+                            failure_category=_sanitized_failure_category(
+                                error.category
+                            ),
+                            certified=False,
+                        )
+                    )
+                else:
+                    attempt_certified = bool(
+                        device.certifies(validation, _TARGET_FIDELITY)
+                    )
+                    validation_attempts.append(
+                        ValidationAttempt(
+                            optimizer_query_index=observation.optimizer_query_index,
+                            pulse=tuple(float(value) for value in best_pulse),
+                            best_observation=observation,
+                            device_attempt_index=int(validation.attempt_index),
+                            validation_observation=validation,
+                            failure_category=None,
+                            certified=attempt_certified,
+                        )
+                    )
+                    if attempt_certified:
                         certified = True
                         first_certified_query = observation.optimizer_query_index
         return 1.0 - observation.estimate, True
@@ -433,8 +864,7 @@ def run_closed_loop(
         evaluations=used_evaluations,
         budget=resolved_budget,
         budget_exhausted=budget_exhausted,
-        provisional_crossings=tuple(provisional_crossings),
-        validation_result=validation_result,
+        validation_attempts=tuple(validation_attempts),
         certified=certified,
         first_certified_query=first_certified_query,
         stop_reason=stop_reason,

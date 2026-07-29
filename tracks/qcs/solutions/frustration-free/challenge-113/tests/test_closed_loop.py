@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import inspect
+import json
 from types import SimpleNamespace
 
 import numpy as np
@@ -10,7 +11,9 @@ from scipy.optimize import minimize
 
 import qcontrol.closed_loop as closed_loop_module
 from qcontrol.closed_loop import (
+    ClosedLoopResult,
     SearchSpace,
+    ValidationAttempt,
     make_full_space,
     make_model_hessian_space,
     make_oracle_space,
@@ -97,6 +100,72 @@ class _SyntheticDevice:
         )
 
 
+@dataclass
+class _ScriptedValidationDevice:
+    optimizer_estimates: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        self.optimizer_queries = 0
+        self.optimizer_shots = 0
+        self.validation_queries = 0
+        self.validation_shots = 0
+        self._issued_validations: dict[int, Observation] = {}
+
+    @property
+    def ledger(self) -> SimpleNamespace:
+        return SimpleNamespace(
+            optimizer_queries=self.optimizer_queries,
+            optimizer_shots=self.optimizer_shots,
+            validation_queries=self.validation_queries,
+            validation_shots=self.validation_shots,
+        )
+
+    def query(self, normalized_pulse: object) -> Observation:
+        del normalized_pulse
+        self.optimizer_queries += 1
+        self.optimizer_shots += 1_000
+        query_index = self.optimizer_queries
+        estimate = self.optimizer_estimates[
+            min(query_index - 1, len(self.optimizer_estimates) - 1)
+        ]
+        return Observation(
+            estimate,
+            1_000,
+            query_index,
+            False,
+            query_index,
+            attempt_index=query_index + self.validation_queries,
+        )
+
+    def validate(
+        self,
+        normalized_pulse: object,
+        shots: int = 100_000,
+    ) -> Observation:
+        del normalized_pulse
+        self.validation_queries += 1
+        self.validation_shots += shots
+        attempt_index = self.optimizer_queries + self.validation_queries
+        if self.validation_queries == 1:
+            raise DeviceQueryError(attempt_index, "sampling_failure")
+        observation = Observation(
+            1.0,
+            shots,
+            self.optimizer_queries,
+            True,
+            attempt_index,
+            attempt_index=attempt_index,
+        )
+        self._issued_validations[id(observation)] = observation
+        return observation
+
+    def certifies(self, observation: Observation, threshold: float = 0.999) -> bool:
+        return bool(
+            self._issued_validations.get(id(observation)) is observation
+            and observation.estimate >= threshold
+        )
+
+
 @pytest.fixture
 def origin() -> np.ndarray:
     return np.asarray([0.1, -0.2, 0.0, 0.3, -0.1, 0.2], dtype=np.float64)
@@ -107,6 +176,29 @@ def test_subspace_coordinates_map_to_identical_origin(origin: np.ndarray) -> Non
     space = SearchSpace(origin, basis, bound=1.0)
 
     np.testing.assert_allclose(space.to_pulse(np.zeros(3)), origin)
+
+
+def test_search_space_has_array_aware_equality_and_canonical_round_trip(
+    origin: np.ndarray,
+) -> None:
+    source_origin = origin.copy()
+    source_basis = np.eye(origin.size)[:, :3]
+    first = SearchSpace(source_origin, source_basis, bound=0.7)
+    second = SearchSpace(origin.copy(), source_basis.copy(), bound=0.7)
+
+    source_origin[:] = 0.0
+    source_basis[:] = 0.0
+    payload = json.loads(json.dumps(first.canonical_dict(), allow_nan=False))
+    replayed = SearchSpace.from_canonical_dict(payload)
+
+    assert first == second
+    assert first == replayed
+    assert hash(first) == hash(replayed)
+    assert replayed.canonical_dict() == payload
+    assert not first.origin.flags.writeable
+    assert not first.basis.flags.writeable
+    assert not first.lower_bounds.flags.writeable
+    assert not first.upper_bounds.flags.writeable
 
 
 def test_all_candidate_spaces_share_origin_bounds_and_coordinate_scaling(
@@ -264,6 +356,66 @@ def test_completion_requires_device_backed_certification() -> None:
     assert not result.certified
     assert result.first_certified_query is None
     assert device.ledger.optimizer_queries == 5
+
+
+def test_validation_attempt_history_preserves_failure_then_certification() -> None:
+    device = _ScriptedValidationDevice((0.9991, 0.9992))
+    result = run_closed_loop(
+        device,
+        make_full_space(np.zeros(3)),
+        budget=5,
+        seed=7,
+    )
+
+    assert result.certified
+    assert result.first_certified_query == 2
+    assert result.evaluations == 2
+    assert result.provisional_crossings == (1, 2)
+    assert len(result.validation_attempts) == 2
+    failed, succeeded = result.validation_attempts
+    assert isinstance(failed, ValidationAttempt)
+    assert failed.optimizer_query_index == 1
+    assert failed.best_observation == result.observations[0]
+    assert failed.validation_observation is None
+    assert failed.failure_category == "sampling_failure"
+    assert failed.status == "failed"
+    assert not failed.certified
+    assert succeeded.optimizer_query_index == 2
+    assert succeeded.best_observation == result.observations[1]
+    assert succeeded.validation_observation is result.validation_result
+    assert succeeded.failure_category is None
+    assert succeeded.status == "certified"
+    assert succeeded.certified
+    assert device.ledger.optimizer_queries == 2
+    assert device.ledger.validation_queries == 2
+    assert device.ledger.optimizer_shots == 2_000
+    assert device.ledger.validation_shots == 200_000
+
+
+def test_closed_loop_result_is_comparable_and_json_round_trips_complete_history() -> None:
+    result = run_closed_loop(
+        _ScriptedValidationDevice((0.9991, 0.9992)),
+        make_full_space(np.zeros(3)),
+        budget=5,
+        seed=7,
+    )
+
+    payload = json.loads(json.dumps(result.canonical_dict(), allow_nan=False))
+    replayed = ClosedLoopResult.from_canonical_dict(payload)
+
+    assert replayed == result
+    assert hash(replayed) == hash(result)
+    assert replayed.canonical_dict() == payload
+    assert len(replayed.observations) == 2
+    assert len(replayed.validation_attempts) == 2
+    assert replayed.validation_attempts[0].failure_category == "sampling_failure"
+    assert payload["validation_attempts"][0]["status"] == "failed"
+    assert payload["validation_attempts"][1]["status"] == "certified"
+    assert replayed.validation_attempts[1].validation_observation is not None
+    assert (
+        replayed.validation_result
+        == replayed.validation_attempts[1].validation_observation
+    )
 
 
 def test_closed_loop_imports_only_query_boundary() -> None:
