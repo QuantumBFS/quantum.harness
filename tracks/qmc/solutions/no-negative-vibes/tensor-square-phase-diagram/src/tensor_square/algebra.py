@@ -26,15 +26,16 @@ def kron_sum(a: np.ndarray) -> np.ndarray:
 def exterior_square(x: np.ndarray) -> np.ndarray:
     """Matrix of ∧²X in the lexicographic e_i∧e_j basis."""
     matrix = _real_square_matrix(x)
-    pairs = list(combinations(range(matrix.shape[0]), 2))
-    wedge = np.empty((len(pairs), len(pairs)), dtype=np.float64)
-    for row, (i, j) in enumerate(pairs):
-        for col, (k, ell) in enumerate(pairs):
-            wedge[row, col] = (
-                matrix[i, k] * matrix[j, ell]
-                - matrix[i, ell] * matrix[j, k]
-            )
-    return wedge
+    pairs = np.asarray(
+        list(combinations(range(matrix.shape[0]), 2)), dtype=np.int64
+    )
+    if len(pairs) == 0:
+        return np.empty((0, 0), dtype=np.float64)
+    i = pairs[:, 0][:, None]
+    j = pairs[:, 1][:, None]
+    k = pairs[:, 0][None, :]
+    ell = pairs[:, 1][None, :]
+    return matrix[i, k] * matrix[j, ell] - matrix[i, ell] * matrix[j, k]
 
 
 def tensor_square_weight_direct(x: np.ndarray) -> float:

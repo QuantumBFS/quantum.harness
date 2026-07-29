@@ -1,0 +1,50 @@
+{
+  "blas_threads": 1,
+  "repeats": 500,
+  "rows": [
+    {
+      "direct_seconds": 1.549619997967966e-05,
+      "direct_sign": 1.0,
+      "log_weight_error": 8.881784197001252e-16,
+      "m": 3,
+      "memory_ratio": 3.0,
+      "naive_matrix_bytes": 648,
+      "structured_matrix_bytes": 216,
+      "structured_seconds": 2.2168399998918176e-05,
+      "time_speedup": 0.6990220304774308
+    },
+    {
+      "direct_seconds": 1.7157599999336526e-05,
+      "direct_sign": 1.0,
+      "log_weight_error": 1.7763568394002505e-15,
+      "m": 4,
+      "memory_ratio": 3.764705882352941,
+      "naive_matrix_bytes": 2048,
+      "structured_matrix_bytes": 544,
+      "structured_seconds": 2.279000001726672e-05,
+      "time_speedup": 0.7528565154162863
+    },
+    {
+      "direct_seconds": 2.409120000083931e-05,
+      "direct_sign": 1.0,
+      "log_weight_error": 3.552713678800501e-15,
+      "m": 6,
+      "memory_ratio": 4.363636363636363,
+      "naive_matrix_bytes": 10368,
+      "structured_matrix_bytes": 2376,
+      "structured_seconds": 2.9031400015810505e-05,
+      "time_speedup": 0.8298325257383122
+    },
+    {
+      "direct_seconds": 3.917340000043623e-05,
+      "direct_sign": 1.0,
+      "log_weight_error": 7.105427357601002e-15,
+      "m": 8,
+      "memory_ratio": 4.491228070175438,
+      "naive_matrix_bytes": 32768,
+      "structured_matrix_bytes": 7296,
+      "structured_seconds": 3.8588800001889465e-05,
+      "time_speedup": 1.0151494733839388
+    }
+  ]
+}
