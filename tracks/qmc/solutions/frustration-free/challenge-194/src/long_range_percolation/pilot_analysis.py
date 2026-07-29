@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -11,14 +11,8 @@ from typing import Never
 
 import numpy as np
 
-from .artifacts import CONVERSION_VERSION, load_verified_trajectory
-from .counter_rng import RNG_VERSION
-from .pilot import (
-    PILOT_PROGRESS_MAX_BYTES,
-    PILOT_RUN_SPEC_MAX_BYTES,
-    PilotCell,
-    load_pilot_run_spec,
-)
+from . import pilot as _pilot
+from .pilot import PilotCell
 
 ANALYSIS_SCHEMA = "challenge-194-p0-analysis-v1"
 OBSERVABLE_COLUMNS: Mapping[str, int] = MappingProxyType(
@@ -54,28 +48,6 @@ def _sha256(payload: bytes) -> str:
 
 def _malformed(message: str) -> Never:
     raise RuntimeError(message)
-
-
-def _bounded_payload(path: Path, maximum_size: int, description: str) -> bytes:
-    if not path.is_file():
-        raise RuntimeError(f"{description} is missing")
-    size = path.stat().st_size
-    if not 1 <= size <= maximum_size:
-        raise RuntimeError(f"{description} exceeds its frozen size bound")
-    payload = path.read_bytes()
-    if len(payload) != size:
-        raise RuntimeError(f"{description} changed while being read")
-    return payload
-
-
-def _canonical_document(payload: bytes, description: str) -> Mapping[str, object]:
-    try:
-        document = json.loads(payload)
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise RuntimeError(f"{description} is not valid JSON") from error
-    if not isinstance(document, Mapping) or _canonical_bytes(document) != payload:
-        raise RuntimeError(f"{description} is not canonical JSON")
-    return document
 
 
 @dataclass(frozen=True)
@@ -192,55 +164,6 @@ def _validate_cells(
     return raw_cells
 
 
-def _expected_provenance(spec: Mapping[str, object], cell: PilotCell) -> dict[str, str]:
-    return {
-        "request_sha256": cell.request_sha256,
-        "kernel_sha256": cell.kernel_sha256,
-        "source_revision": str(spec["orchestration_revision"]),
-        "uv_lock_sha256": str(spec["uv_lock_sha256"]),
-        "runtime_capability_sha256": str(spec["runtime_capability_sha256"]),
-        "analysis_plan_sha256": str(spec["analysis_plan_sha256"]),
-        "rng_sha256": str(spec["rng_assignment_sha256"]),
-        "conversion_version": CONVERSION_VERSION,
-        "rng_version": RNG_VERSION,
-    }
-
-
-def _trajectory_path(root: Path, cell: PilotCell) -> Path:
-    expected_run_path = f"cells/{cell.cell_id}/run"
-    if cell.run_path != expected_run_path:
-        raise RuntimeError("pilot cell run path is not canonical")
-    return (
-        root
-        / expected_run_path
-        / "trajectories"
-        / f"trajectory-{cell.request_sha256}.h5"
-    )
-
-
-def _validate_progress(
-    progress: Mapping[str, object],
-    spec: Mapping[str, object],
-    raw_cells: Sequence[object],
-) -> None:
-    progress_cells = progress.get("cells")
-    if (
-        progress.get("run_spec_sha256") != spec.get("run_spec_sha256")
-        or progress.get("cell_count") != len(raw_cells)
-        or progress.get("trajectory_count") != len(raw_cells)
-        or isinstance(progress_cells, (str, bytes))
-        or not isinstance(progress_cells, Sequence)
-        or len(progress_cells) != len(raw_cells)
-    ):
-        raise RuntimeError("P0 progress is incomplete or bound to another run")
-    for raw_cell, raw_progress in zip(raw_cells, progress_cells, strict=True):
-        if not isinstance(raw_cell, Mapping) or not isinstance(raw_progress, Mapping):
-            _malformed("P0 progress cell is malformed")
-        for key in ("cell_index", "cell_id", "manifest_path", "request_sha256"):
-            if raw_progress.get(key) != raw_cell.get(key):
-                raise RuntimeError("P0 progress cell order or identity is stale")
-
-
 def _group_estimates(
     sigma: float,
     length: int,
@@ -274,77 +197,86 @@ def _group_estimates(
     return estimates
 
 
-def aggregate_p0(run_spec: Path) -> dict[str, object]:
+def _aggregate_p0(
+    run_spec: Path,
+    *,
+    production: bool,
+    _snapshot_hook: Callable[[str], None] | None = None,
+) -> dict[str, object]:
     if not isinstance(run_spec, Path) or not run_spec.is_absolute():
         raise RuntimeError("P0 run spec path must be absolute")
-    run_spec_payload = _bounded_payload(
-        run_spec, PILOT_RUN_SPEC_MAX_BYTES, "P0 run spec"
-    )
-    progress_path = run_spec.parent / "progress.json"
-    progress_payload = _bounded_payload(
-        progress_path, PILOT_PROGRESS_MAX_BYTES, "P0 progress"
-    )
-    progress = _canonical_document(progress_payload, "P0 progress")
-    spec = load_pilot_run_spec(run_spec, False)
-    sigmas, lengths, replicas, kappas = _validated_axes(spec)
-    raw_cells = _validate_cells(spec, sigmas, lengths, replicas, kappas)
-    _validate_progress(progress, spec, raw_cells)
+    with _pilot._open_verified_pilot_analysis_snapshot(
+        run_spec,
+        production=production,
+        _snapshot_hook=_snapshot_hook,
+    ) as snapshot:
+        spec = snapshot.spec
+        sigmas, lengths, replicas, kappas = _validated_axes(spec)
+        raw_cells = _validate_cells(spec, sigmas, lengths, replicas, kappas)
 
-    estimates: list[dict[str, object]] = []
-    cell_index = 0
-    for sigma in sigmas:
-        for length in lengths:
-            values = np.empty(
-                (len(replicas), len(kappas), len(OBSERVABLE_COLUMNS)),
-                dtype=np.float64,
-            )
-            request_hashes: list[str] = []
-            for _replica in replicas:
-                raw_cell = raw_cells[cell_index]
-                if not isinstance(raw_cell, Mapping):  # validated above
-                    _malformed("pilot cell is malformed")
-                cell = PilotCell.from_document(raw_cell)
-                result = load_verified_trajectory(
-                    _trajectory_path(run_spec.parent, cell),
-                    _expected_provenance(spec, cell),
+        estimates: list[dict[str, object]] = []
+        cell_index = 0
+        for sigma in sigmas:
+            for length in lengths:
+                values = np.empty(
+                    (len(replicas), len(kappas), len(OBSERVABLE_COLUMNS)),
+                    dtype=np.float64,
                 )
-                if (
-                    result.observables.shape != (len(kappas), 10)
-                    or not np.isfinite(result.observables).all()
-                ):
-                    raise RuntimeError("verified trajectory observables are malformed")
-                values[len(request_hashes), :, :] = result.observables[
-                    :, _OBSERVABLE_INDICES
-                ]
-                request_hashes.append(cell.request_sha256)
-                cell_index += 1
-                del result
-            estimates.extend(
-                estimate.to_document()
-                for estimate in _group_estimates(
-                    sigma,
-                    length,
-                    kappas,
-                    values,
-                    tuple(request_hashes),
+                request_hashes: list[str] = []
+                for _replica in replicas:
+                    raw_cell = raw_cells[cell_index]
+                    if not isinstance(raw_cell, Mapping):  # validated above
+                        _malformed("pilot cell is malformed")
+                    cell = PilotCell.from_document(raw_cell)
+                    result = snapshot.load_trajectory(cell_index)
+                    if (
+                        result.observables.shape != (len(kappas), 10)
+                        or not np.isfinite(result.observables).all()
+                    ):
+                        raise RuntimeError(
+                            "verified trajectory observables are malformed"
+                        )
+                    values[len(request_hashes), :, :] = result.observables[
+                        :, _OBSERVABLE_INDICES
+                    ]
+                    request_hashes.append(cell.request_sha256)
+                    cell_index += 1
+                    del result
+                estimates.extend(
+                    estimate.to_document()
+                    for estimate in _group_estimates(
+                        sigma,
+                        length,
+                        kappas,
+                        values,
+                        tuple(request_hashes),
+                    )
                 )
-            )
 
-    if (
-        _bounded_payload(run_spec, PILOT_RUN_SPEC_MAX_BYTES, "P0 run spec")
-        != run_spec_payload
-        or _bounded_payload(progress_path, PILOT_PROGRESS_MAX_BYTES, "P0 progress")
-        != progress_payload
-    ):
-        raise RuntimeError("P0 sources changed during aggregation")
-    document: dict[str, object] = {
-        "schema_version": ANALYSIS_SCHEMA,
-        "p0_run_spec_sha256": _sha256(run_spec_payload),
-        "p0_progress_sha256": _sha256(progress_payload),
-        "source_revision": spec["orchestration_revision"],
-        "analysis_plan_sha256": spec["analysis_plan_sha256"],
-        "observable_columns": dict(OBSERVABLE_COLUMNS),
-        "estimates": estimates,
-    }
-    document["analysis_document_sha256"] = _sha256(_canonical_bytes(document))
-    return document
+        document: dict[str, object] = {
+            "schema_version": ANALYSIS_SCHEMA,
+            "p0_run_spec_sha256": _sha256(snapshot.run_spec_payload),
+            "p0_progress_sha256": _sha256(snapshot.progress_payload),
+            "source_revision": spec["orchestration_revision"],
+            "analysis_plan_sha256": spec["analysis_plan_sha256"],
+            "observable_columns": dict(OBSERVABLE_COLUMNS),
+            "estimates": estimates,
+        }
+        document["analysis_document_sha256"] = _sha256(_canonical_bytes(document))
+        return document
+
+
+def aggregate_p0(run_spec: Path) -> dict[str, object]:
+    return _aggregate_p0(run_spec, production=True)
+
+
+def _aggregate_test_p0(
+    run_spec: Path,
+    *,
+    _snapshot_hook: Callable[[str], None] | None = None,
+) -> dict[str, object]:
+    return _aggregate_p0(
+        run_spec,
+        production=False,
+        _snapshot_hook=_snapshot_hook,
+    )

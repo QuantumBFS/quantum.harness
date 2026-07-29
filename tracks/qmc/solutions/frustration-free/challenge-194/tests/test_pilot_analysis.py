@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import weakref
 from dataclasses import FrozenInstanceError
 from pathlib import Path
@@ -11,7 +12,6 @@ import pytest
 
 import long_range_percolation.pilot_analysis as analysis
 from long_range_percolation import pilot
-from long_range_percolation.artifacts import load_verified_trajectory
 from long_range_percolation.trajectory import TrajectoryResult
 
 OBSERVABLE_COLUMNS = {
@@ -36,10 +36,14 @@ def _canonical_bytes(document: object) -> bytes:
 
 
 def _tiny_complete_pilot(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    name: str = "pilot",
+    value_offset: float = 0.0,
 ) -> tuple[Path, dict[str, object]]:
     path = pilot._write_test_pilot_run_spec(
-        tmp_path / "pilot",
+        tmp_path / name,
         lengths=(8, 16),
         sigmas=(1.0,),
         replicas=(0, 1),
@@ -51,7 +55,7 @@ def _tiny_complete_pilot(
     ) -> TrajectoryResult:
         rows = np.zeros((3, 10), dtype=np.float64)
         for kappa_index in range(3):
-            base = request.length / 8 + 2 * request.replica + kappa_index
+            base = request.length / 8 + 2 * request.replica + kappa_index + value_offset
             rows[kappa_index, 4] = base
             rows[kappa_index, 5] = base + 10
             rows[kappa_index, 8] = base + 20
@@ -73,15 +77,6 @@ def _tiny_complete_pilot(
     for cell_index in range(len(spec["cells"])):
         pilot._run_test_pilot_cell(path, cell_index)
     pilot._merge_test_pilot_progress(path)
-    monkeypatch.setattr(
-        analysis,
-        "load_pilot_run_spec",
-        lambda value, verify_current_environment: pilot._load_pilot_spec(
-            value,
-            verify_current_environment=verify_current_environment,
-            production=False,
-        ),
-    )
     return path, spec
 
 
@@ -89,19 +84,23 @@ def test_aggregate_p0_groups_whole_replicas_in_canonical_order(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
-    original_loader = load_verified_trajectory
+    original_loader = pilot._load_analysis_trajectory
     previous: weakref.ReferenceType[TrajectoryResult] | None = None
 
-    def tracking_loader(trajectory: Path, expected: dict[str, str]) -> TrajectoryResult:
+    def tracking_loader(
+        trajectory: Path,
+        expected: dict[str, str],
+        required_digest: str,
+    ) -> TrajectoryResult:
         nonlocal previous
         if previous is not None:
             assert previous() is None, "more than one trajectory was retained"
-        result = original_loader(trajectory, expected)
+        result = original_loader(trajectory, expected, required_digest)
         previous = weakref.ref(result)
         return result
 
-    monkeypatch.setattr(analysis, "load_verified_trajectory", tracking_loader)
-    document = analysis.aggregate_p0(path)
+    monkeypatch.setattr(pilot, "_load_analysis_trajectory", tracking_loader)
+    document = analysis._aggregate_test_p0(path)
 
     assert analysis.OBSERVABLE_COLUMNS == OBSERVABLE_COLUMNS
     assert [
@@ -145,7 +144,7 @@ def test_aggregate_p0_binds_exact_sources_and_hashes_unsigned_document(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
-    document = analysis.aggregate_p0(path)
+    document = analysis._aggregate_test_p0(path)
     unsigned = dict(document)
     digest = unsigned.pop("analysis_document_sha256")
 
@@ -166,7 +165,7 @@ def test_aggregate_p0_binds_exact_sources_and_hashes_unsigned_document(
 def test_aggregate_p0_rejects_missing_or_duplicate_replicas(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str
 ):
-    path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
+    _path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
     malformed = dict(spec)
     if defect == "missing":
         malformed["cells"] = list(spec["cells"][:-1])
@@ -175,14 +174,103 @@ def test_aggregate_p0_rejects_missing_or_duplicate_replicas(
             **spec["protocol"],
             "replicas": [0, 0],
         }
-    monkeypatch.setattr(
-        analysis,
-        "load_pilot_run_spec",
-        lambda _path, _verify_current_environment: malformed,
-    )
-
     with pytest.raises(RuntimeError, match=defect):
-        analysis.aggregate_p0(path)
+        axes = analysis._validated_axes(malformed)
+        analysis._validate_cells(malformed, *axes)
+
+
+@pytest.mark.parametrize(
+    "defect",
+    ("merged-trajectory-digest", "outer-manifest", "inner-progress"),
+)
+def test_aggregate_p0_rejects_forged_or_stale_verified_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    defect: str,
+):
+    path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
+    root = path.parent
+    first = spec["cells"][0]
+    if defect == "merged-trajectory-digest":
+        target = root / "progress.json"
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["cells"][0]["trajectory_sha256"] = "0" * 64
+    elif defect == "outer-manifest":
+        target = root / first["manifest_path"]
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["trajectory_sha256"] = "0" * 64
+    else:
+        target = root / first["run_path"] / "progress.json"
+        document = {"schema_version": "forged-progress"}
+    target.write_bytes(_canonical_bytes(document))
+
+    with pytest.raises(RuntimeError, match="stale|corrupt|mismatch|progress"):
+        analysis._aggregate_test_p0(path)
+
+
+def test_aggregate_p0_uses_retained_root_during_swap_and_restore(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    original, _ = _tiny_complete_pilot(
+        tmp_path, monkeypatch, name="original", value_offset=0.0
+    )
+    alternate, _ = _tiny_complete_pilot(
+        tmp_path, monkeypatch, name="alternate", value_offset=1000.0
+    )
+    baseline = analysis._aggregate_test_p0(original)
+    original_root = original.parent
+    alternate_root = alternate.parent
+    detached = tmp_path / "detached-original"
+    events: list[str] = []
+
+    def swap_and_restore(stage: str) -> None:
+        if stage == "snapshot-verified":
+            events.append(stage)
+            original_root.rename(detached)
+            alternate_root.rename(original_root)
+        elif stage == "snapshot-closed":
+            events.append(stage)
+            original_root.rename(alternate_root)
+            detached.rename(original_root)
+
+    observed = analysis._aggregate_test_p0(original, _snapshot_hook=swap_and_restore)
+
+    assert observed == baseline
+    assert events == ["snapshot-verified", "snapshot-closed"]
+    assert original.is_file()
+    assert alternate.is_file()
+
+
+def test_aggregate_p0_uses_descriptor_progress_during_swap_and_restore(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    original, _ = _tiny_complete_pilot(
+        tmp_path, monkeypatch, name="original", value_offset=0.0
+    )
+    alternate, _ = _tiny_complete_pilot(
+        tmp_path, monkeypatch, name="alternate", value_offset=1000.0
+    )
+    baseline = analysis._aggregate_test_p0(original)
+    progress = original.parent / "progress.json"
+    saved = original.parent / "progress.saved"
+    events: list[str] = []
+
+    def swap_and_restore(stage: str) -> None:
+        if stage == "snapshot-verified":
+            events.append(stage)
+            progress.rename(saved)
+            shutil.copyfile(alternate.parent / "progress.json", progress)
+        elif stage == "snapshot-closed":
+            events.append(stage)
+            progress.unlink()
+            saved.rename(progress)
+
+    observed = analysis._aggregate_test_p0(original, _snapshot_hook=swap_and_restore)
+
+    assert observed == baseline
+    assert events == ["snapshot-verified", "snapshot-closed"]
 
 
 def test_pilot_estimate_is_immutable():
