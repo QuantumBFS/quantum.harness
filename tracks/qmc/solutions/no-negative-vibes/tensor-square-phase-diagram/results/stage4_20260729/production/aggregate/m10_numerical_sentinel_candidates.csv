@@ -1,0 +1,10 @@
+beta,candidate_id,cohort,g_b_over_g_a,inference_scope,mu,sentinel_best_diagnostic_z,sentinel_classification,sentinel_primary_size_delta,sentinel_primary_size_relative_delta,sentinel_primary_size_z,sentinel_ranking_score,sentinel_reason,sentinel_size_monotone_with_errors,sentinel_supporting_diagnostics,t
+4.0,half_filled_core_g0.25_t0.5_mu0,half_filled_core,0.25,numerical_only,0.0,123.8691714735828,ELIGIBLE,1.1318673567121358,0.9214250326683576,230.30484513082283,40.0,same frozen size and independent-diagnostic gates pass,True,staggered_structure;q_b_binder;correlation_length_over_m,0.5
+4.0,half_filled_core_g0.25_t0.25_mu0,half_filled_core,0.25,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,0.25
+4.0,half_filled_core_g0.25_t1_mu0,half_filled_core,0.25,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,1.0
+4.0,half_filled_core_g0.5_t0.25_mu0,half_filled_core,0.5,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,0.25
+4.0,half_filled_core_g0.5_t0.5_mu0,half_filled_core,0.5,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,0.5
+4.0,half_filled_core_g0.5_t1_mu0,half_filled_core,0.5,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,1.0
+4.0,half_filled_core_g1_t0.25_mu0,half_filled_core,1.0,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,0.25
+4.0,half_filled_core_g1_t0.5_mu0,half_filled_core,1.0,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,0.5
+4.0,half_filled_core_g1_t1_mu0,half_filled_core,1.0,statistical_only,0.0,,STOP,,,,-1000000000.0,"m=4,6,8 audited endpoint set is incomplete; no numerical sentinel release",,,1.0

@@ -130,3 +130,35 @@ git branch = work/zibojin/tensor-square-phase-diagram
   `work/zibojin/tensor-square-phase-diagram`.
 - No Stage 4 physics result has been inspected yet. Next action is a one-cell
   clean-commit smoke run, followed by the two-machine 180-replica pilot.
+
+## Stage 4 rounds 1-3 — dense scan and m=10 judgement (2026-07-29)
+
+Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
+
+- Pilot completed 180/180 replicas with zero errors. Provenance and frozen
+  budget validation released 44/90 cells; 46/90 stopped at the pilot
+  autocorrelation budget gate.
+- Production completed all 176 requested replicas: 95 passed ESS, 81 reached
+  the frozen autocorrelation cap, and zero had worker/determinant errors.
+- At the strict cell level, 15/44 released cells had all four replicas pass and
+  29/44 had at least one early stop. Minimum passing ESS was 40.03, direct sign
+  remained +1, and maximum log-weight error was 1.14e-13.
+- Updated candidate ranking: `SURVIVE=0`, `EXTEND=0`, `STOP=21`. These are
+  statistical-only stops caused by incomplete audited endpoint grids, not
+  physical no-go statements.
+- A single numerical-only `m=10, beta=4` sentinel was released at
+  `(g_B/g_A,t/g_A,mu/g_A)=(0.25,0.5,0)`. Two of four replicas passed; two hit
+  the autocorrelation cap. The passing subset has `Q=2.9168(90)` versus
+  `m=8: 2.3603(42)`, while staggered structure and `xi/m` also increase.
+- Because the complete four-replica m=10 audit failed and the required
+  `beta=8` endpoints are censored, the first finite-size judgement is:
+  **达到早停；当前信号按有限尺寸或普通 crossover 处理，不支持继续
+  Stage 5 的相主张。**
+- No m=12 expansion, literature novelty claim, or PRL package is released.
+- Remote verification: 60 tests passed on the clean CPU sentinel commit
+  `dc87c6c`; all numerical work, aggregation, and plotting ran on the approved
+  WSL/CPU machines. The local Windows control host ran no numerical job.
+- Artifacts: `results/stage4_20260729/`; scientific note:
+  `notes/stage4_dense_results.md`.
+- Code commits prepared: `3a3fce2` and `dc87c6c`. HTTPS push is pending after
+  repeated transport resets; PR #178 was not modified.

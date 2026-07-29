@@ -1,0 +1,404 @@
+[
+  {
+    "candidate_id": "half_filled_core_g0.25_t0.25_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 1,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 0.25
+  },
+  {
+    "candidate_id": "half_filled_core_g0.25_t0.5_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 2,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 8.0), (6, 8.0), (8, 8.0)])",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "half_filled_core_g0.25_t1_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 3,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "half_filled_core_g0.5_t0.25_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.5,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=4",
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 4,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 4.0), (4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 0.25
+  },
+  {
+    "candidate_id": "half_filled_core_g0.5_t0.5_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.5,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=4",
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 5,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 4.0), (4, 8.0), (6, 8.0), (8, 8.0)])",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "half_filled_core_g0.5_t1_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 0.5,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 6,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "half_filled_core_g1_t0.25_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=4",
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 7,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 4.0), (4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 0.25
+  },
+  {
+    "candidate_id": "half_filled_core_g1_t0.5_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=4",
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 8,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 4.0), (4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "half_filled_core_g1_t1_mu0",
+    "classification": "STOP",
+    "cohort": "half_filled_core",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=4",
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=4",
+      "m=8,beta=8"
+    ],
+    "mu": 0.0,
+    "paired_budget_verified": true,
+    "rank": 9,
+    "ranking_score": -1000000000.0,
+    "reason": "incomplete audited long-chain grid; no physics inference (missing or failed [(4, 4.0), (4, 8.0), (6, 8.0), (8, 4.0), (8, 8.0)])",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g0.75_t0.5_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 0.75,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 10,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g0.75_t0.5_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 0.75,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 11,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g0.75_t1_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 0.75,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 12,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g0.75_t1_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 0.75,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 13,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g1.25_t0.5_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 14,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g1.25_t0.5_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 15,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g1.25_t1_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 16,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g1.25_t1_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.25,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 17,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g1_t0.5_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 18,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g1_t0.5_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 19,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 0.5
+  },
+  {
+    "candidate_id": "paired_competition_g1_t1_mu+1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": 1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 20,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  },
+  {
+    "candidate_id": "paired_competition_g1_t1_mu-1.5",
+    "classification": "STOP",
+    "cohort": "paired_competition",
+    "g_b_over_g_a": 1.0,
+    "inference_scope": "statistical_only",
+    "missing_points": [
+      "m=4,beta=8",
+      "m=6,beta=8",
+      "m=8,beta=8"
+    ],
+    "mu": -1.5,
+    "paired_budget_verified": true,
+    "paired_numerical_audit": false,
+    "rank": 21,
+    "ranking_score": -1000000000.0,
+    "reason": "paired member failed the numerical audit; no physics inference",
+    "t": 1.0
+  }
+]

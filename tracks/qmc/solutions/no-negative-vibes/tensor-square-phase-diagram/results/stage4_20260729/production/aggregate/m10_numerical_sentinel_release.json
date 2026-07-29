@@ -1,0 +1,40 @@
+{
+  "experiment_id": "stage4-m10-numerical-sentinel-20260729-v1",
+  "production_evidence_digest": "c856069fdb7777ecc82c65a7508d1385df765471bc4ed9143c7916b186739b79",
+  "selected": {
+    "beta": 4.0,
+    "candidate_id": "half_filled_core_g0.25_t0.5_mu0",
+    "cohort": "half_filled_core",
+    "dt": 0.2,
+    "g_b_over_g_a": 0.25,
+    "inference_scope": "numerical_only",
+    "initial_measurement_sweeps": 2536,
+    "initial_warmup_sweeps": 634,
+    "m": 10,
+    "m8_worst_tau_int": 15.84022552218063,
+    "maximum_measurement_sweeps": 3200,
+    "measure_every": 2,
+    "mu": 0.0,
+    "physics_claim_permitted": false,
+    "production_replicas": 4,
+    "proposal_scale": 0.5,
+    "selection_source_cell": "half_filled_core_m08_b04_g025_t050_mu000",
+    "sentinel_best_diagnostic_z": 123.8691714735828,
+    "sentinel_classification": "ELIGIBLE",
+    "sentinel_primary_size_delta": 1.1318673567121358,
+    "sentinel_primary_size_relative_delta": 0.9214250326683576,
+    "sentinel_primary_size_z": 230.30484513082283,
+    "sentinel_ranking_score": 40.0,
+    "sentinel_reason": "same frozen size and independent-diagnostic gates pass",
+    "sentinel_size_monotone_with_errors": true,
+    "sentinel_supporting_diagnostics": [
+      "staggered_structure",
+      "q_b_binder",
+      "correlation_length_over_m"
+    ],
+    "t": 0.5,
+    "target_ess_per_replica": 40.0
+  },
+  "selection_policy": "beta=4 numerical-only sentinel; frozen 2-sigma/5-percent size gate, monotonic m=4,6,8, and independent diagnostic",
+  "stage4_source_revision": "84fc08bddaf2dbe0c6d7853a5877311eb8894f44"
+}
