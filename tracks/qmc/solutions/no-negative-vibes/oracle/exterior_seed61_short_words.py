@@ -1,4 +1,4 @@
-"""Exact finite-word verifier for the frozen seed-61 transpose pair.
+"""Exact finite-word verifier for a frozen transpose-paired candidate card.
 
 The safe word symmetries are cyclic rotation and
 ``w -> complement(reverse(w))``, the latter being induced by matrix
@@ -8,10 +8,10 @@ used: it does not preserve the seed-61 determinant series from length six.
 
 For a common exact denominator ``s`` and integer atoms ``M_a = s B_a``,
 
-``det(I + B_w) = det(s^|w| I + M_w) / s^(5 |w|)``.
+``det(I + B_w) = det(s^|w| I + M_w) / s^(d |w|)``.
 
 Each shard therefore performs only sparse integer matrix products and a
-fraction-free 5-by-5 determinant.  No floating-point acceptance gate is
+fraction-free ``d``-by-``d`` determinant.  No floating-point acceptance gate is
 present.
 """
 
@@ -31,10 +31,8 @@ from .exterior_candidates import candidate_card, candidate_id, exact_atoms_from_
 from .exterior_seed61_positive_realization import transpose_reversal_word
 
 
-SCHEMA_VERSION = "exterior-seed61-short-words-v1"
-TEMPLATE = "exact5-shear-loop-pair"
-SEED = 61
-DIMENSION = 5
+SCHEMA_VERSION = "exterior-short-words-v2"
+DEFAULT_TARGET = "exact5-shear-loop-pair:61"
 
 Matrix = tuple[tuple[int, ...], ...]
 Word = tuple[int, ...]
@@ -109,15 +107,34 @@ def canonical_words(length: int) -> Iterator[Word]:
             yield necklace
 
 
-def _integer_seed61_atoms() -> tuple[int, tuple[Matrix, Matrix], str]:
-    """Replay the frozen exact card and clear one common atom denominator."""
+def _parse_target(target: str) -> tuple[str, int, str]:
+    if not isinstance(target, str) or ":" not in target:
+        raise ValueError("target must have the form TEMPLATE:SEED")
+    template, seed_text = target.rsplit(":", 1)
+    if not template:
+        raise ValueError("target template must be nonempty")
+    try:
+        seed = int(seed_text)
+    except ValueError as error:
+        raise ValueError("target seed must be an integer") from error
+    if seed < 0 or seed_text != str(seed):
+        raise ValueError("target seed must be a canonical nonnegative integer")
+    return template, seed, f"{template}:{seed}"
 
-    card = candidate_card(template=TEMPLATE, seed=SEED)
+
+def _integer_target_atoms(
+    target: str,
+) -> tuple[int, int, tuple[Matrix, Matrix], str, str, int, str]:
+    """Replay one frozen exact card and clear one common atom denominator."""
+
+    template, seed, normalized_target = _parse_target(target)
+    card = candidate_card(template=template, seed=seed)
     exact_atoms = exact_atoms_from_card(card)
     if len(exact_atoms) != 2 or exact_atoms[1] != exact_atoms[0].T:
-        raise ArithmeticError("seed 61 is no longer an exact transpose pair")
-    if exact_atoms[0].shape != (DIMENSION, DIMENSION):
-        raise ArithmeticError("seed 61 no longer has dimension five")
+        raise ArithmeticError("target is not an exact transpose pair")
+    dimension = exact_atoms[0].rows
+    if dimension < 1 or exact_atoms[0].shape != (dimension, dimension):
+        raise ArithmeticError("target atoms must be nonempty square matrices")
 
     scale = 1
     for atom in exact_atoms:
@@ -126,7 +143,7 @@ def _integer_seed61_atoms() -> tuple[int, tuple[Matrix, Matrix], str]:
     integer_atoms = tuple(
         tuple(
             tuple(int(sp.Rational(value) * scale) for value in atom.row(row))
-            for row in range(DIMENSION)
+            for row in range(dimension)
         )
         for atom in exact_atoms
     )
@@ -135,26 +152,33 @@ def _integer_seed61_atoms() -> tuple[int, tuple[Matrix, Matrix], str]:
         for atom, exact in zip(integer_atoms, exact_atoms, strict=True)
     ):
         raise ArithmeticError("integer atom replay failed")
-    if any(sp.det(exact) != 1 for exact in exact_atoms):
-        raise ArithmeticError("seed-61 atoms are no longer unimodular")
-    return scale, (integer_atoms[0], integer_atoms[1]), candidate_id(card)
+    return (
+        scale,
+        dimension,
+        (integer_atoms[0], integer_atoms[1]),
+        candidate_id(card),
+        template,
+        seed,
+        normalized_target,
+    )
 
 
-def _identity() -> Matrix:
+def _identity(dimension: int) -> Matrix:
     return tuple(
-        tuple(int(row == column) for column in range(DIMENSION))
-        for row in range(DIMENSION)
+        tuple(int(row == column) for column in range(dimension))
+        for row in range(dimension)
     )
 
 
 def _sparse_columns(matrix: Matrix) -> tuple[tuple[tuple[int, int], ...], ...]:
+    dimension = len(matrix)
     return tuple(
         tuple(
             (row, matrix[row][column])
-            for row in range(DIMENSION)
+            for row in range(dimension)
             if matrix[row][column]
         )
-        for column in range(DIMENSION)
+        for column in range(dimension)
     )
 
 
@@ -162,27 +186,31 @@ def _right_multiply_sparse(
     left: Matrix,
     right_columns: tuple[tuple[tuple[int, int], ...], ...],
 ) -> Matrix:
+    dimension = len(left)
     return tuple(
         tuple(
             sum(left[row][inner] * value for inner, value in column)
             for column in right_columns
         )
-        for row in range(DIMENSION)
+        for row in range(dimension)
     )
 
 
 def _bareiss_determinant(matrix: Matrix) -> int:
     """Return the exact integer determinant by fraction-free elimination."""
 
+    dimension = len(matrix)
+    if dimension < 1 or any(len(row) != dimension for row in matrix):
+        raise ValueError("matrix must be nonempty and square")
     work = [list(row) for row in matrix]
     sign = 1
     previous = 1
-    for pivot_index in range(DIMENSION - 1):
+    for pivot_index in range(dimension - 1):
         if work[pivot_index][pivot_index] == 0:
             swap = next(
                 (
                     row
-                    for row in range(pivot_index + 1, DIMENSION)
+                    for row in range(pivot_index + 1, dimension)
                     if work[row][pivot_index]
                 ),
                 None,
@@ -192,8 +220,8 @@ def _bareiss_determinant(matrix: Matrix) -> int:
             work[pivot_index], work[swap] = work[swap], work[pivot_index]
             sign = -sign
         pivot = work[pivot_index][pivot_index]
-        for row in range(pivot_index + 1, DIMENSION):
-            for column in range(pivot_index + 1, DIMENSION):
+        for row in range(pivot_index + 1, dimension):
+            for column in range(pivot_index + 1, dimension):
                 numerator = (
                     work[row][column] * pivot
                     - work[row][pivot_index] * work[pivot_index][column]
@@ -207,14 +235,15 @@ def _bareiss_determinant(matrix: Matrix) -> int:
 
 
 def _scaled_weight_numerator(product_matrix: Matrix, length: int, scale: int) -> int:
+    dimension = len(product_matrix)
     identity_scale = scale**length
     shifted = tuple(
         tuple(
             product_matrix[row][column]
             + (identity_scale if row == column else 0)
-            for column in range(DIMENSION)
+            for column in range(dimension)
         )
-        for row in range(DIMENSION)
+        for row in range(dimension)
     )
     return _bareiss_determinant(shifted)
 
@@ -251,6 +280,7 @@ def scan_shard(
     shard_count: int = 1,
     min_depth: int = 1,
     stop_on_nonpositive: bool = False,
+    target: str = DEFAULT_TARGET,
 ) -> dict[str, object]:
     """Exactly scan one deterministic shard of the safe symmetry classes."""
 
@@ -273,7 +303,15 @@ def scan_shard(
     ):
         raise ValueError("require 0 <= shard_id < shard_count")
 
-    scale, atoms, card_id = _integer_seed61_atoms()
+    (
+        scale,
+        dimension,
+        atoms,
+        card_id,
+        template,
+        seed,
+        normalized_target,
+    ) = _integer_target_atoms(target)
     sparse_atoms = tuple(_sparse_columns(atom) for atom in atoms)
     per_length: list[dict[str, object]] = []
     minimum: dict[str, object] | None = None
@@ -293,12 +331,12 @@ def scan_shard(
             raise ArithmeticError("safe symmetry classes do not cover binary words")
 
         previous_word: Word = ()
-        products: list[Matrix] = [_identity()]
+        products: list[Matrix] = [_identity(dimension)]
         checked_class_count = 0
         checked_word_count = 0
         length_minimum: dict[str, object] | None = None
         witness: dict[str, object] | None = None
-        denominator = scale ** (DIMENSION * length)
+        denominator = scale ** (dimension * length)
 
         for word, orbit_size in assigned:
             shared = _longest_common_prefix(previous_word, word)
@@ -353,9 +391,12 @@ def scan_shard(
     )
     return {
         "schema": SCHEMA_VERSION,
-        "candidate": f"{TEMPLATE}-seed-{SEED}",
+        "target": normalized_target,
+        "template": template,
+        "seed": seed,
+        "candidate": f"{template}-seed-{seed}",
         "candidate_id": card_id,
-        "dimension": DIMENSION,
+        "dimension": dimension,
         "integer_atom_scale": scale,
         "min_depth": min_depth,
         "max_depth": max_depth,
@@ -390,6 +431,9 @@ def collect_shards(manifests: Iterable[Mapping[str, object]]) -> dict[str, objec
         raise ValueError("shard manifests are not one complete unique shard set")
     consensus_keys = (
         "schema",
+        "target",
+        "template",
+        "seed",
         "candidate",
         "candidate_id",
         "dimension",
@@ -463,6 +507,9 @@ def collect_shards(manifests: Iterable[Mapping[str, object]]) -> dict[str, objec
 
     return {
         "schema": SCHEMA_VERSION,
+        "target": first["target"],
+        "template": first["template"],
+        "seed": first["seed"],
         "candidate": first["candidate"],
         "candidate_id": first["candidate_id"],
         "dimension": first["dimension"],
@@ -506,6 +553,7 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
     scan = subparsers.add_parser("scan")
+    scan.add_argument("--target", default=DEFAULT_TARGET)
     scan.add_argument("--max-depth", type=int, default=23)
     scan.add_argument("--min-depth", type=int, default=1)
     scan.add_argument("--shard-id", type=int, required=True)
@@ -527,6 +575,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             shard_id=args.shard_id,
             shard_count=args.shard_count,
             stop_on_nonpositive=args.stop_on_nonpositive,
+            target=args.target,
         )
         output = args.run_dir / (
             f"shard-{args.shard_id:04d}-of-{args.shard_count:04d}.json"
@@ -550,6 +599,7 @@ if __name__ == "__main__":
 
 
 __all__ = [
+    "DEFAULT_TARGET",
     "SCHEMA_VERSION",
     "canonical_word",
     "canonical_words",

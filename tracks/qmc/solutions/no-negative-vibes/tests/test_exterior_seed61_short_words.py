@@ -28,15 +28,35 @@ def test_twisted_bracelets_partition_all_binary_words() -> None:
         assert all(canonical_word(word) == word for word in representatives)
 
 
-def test_sharded_exact_scan_matches_naive_seed61_minimum() -> None:
+def test_sharded_exact_scan_matches_naive_target_minima() -> None:
+    default_seed61 = scan_shard(max_depth=3)
+    explicit_seed61 = scan_shard(
+        max_depth=3,
+        target="exact5-shear-loop-pair:61",
+    )
+    assert default_seed61["candidate_id"] == explicit_seed61["candidate_id"]
+    assert default_seed61["minimum_weight"] == explicit_seed61["minimum_weight"]
+    dimension_three = scan_shard(
+        max_depth=3,
+        target="exact3-diagonal-oddcycle-pair:117",
+    )
+    assert dimension_three["dimension"] == 3
+    assert dimension_three["status"] == "strictly-positive"
+
+    target = "exact5-oddcycle-block-pair:117"
     manifests = [
-        scan_shard(max_depth=7, shard_id=shard, shard_count=3)
+        scan_shard(
+            max_depth=7,
+            shard_id=shard,
+            shard_count=3,
+            target=target,
+        )
         for shard in range(3)
     ]
     result = collect_shards(manifests)
 
     atoms = exact_atoms_from_card(
-        candidate_card(template="exact5-shear-loop-pair", seed=61)
+        candidate_card(template="exact5-oddcycle-block-pair", seed=117)
     )
     complement_counterexample = (0, 0, 1, 0, 1, 1)
     assert exact_determinant_weight(atoms, complement_counterexample) != (
@@ -55,6 +75,7 @@ def test_sharded_exact_scan_matches_naive_seed61_minimum() -> None:
     )
 
     assert result["status"] == "strictly-positive"
+    assert result["target"] == target
     assert result["covered_word_count"] == sum(2**length for length in range(1, 8))
     assert result["canonical_class_count"] == sum(
         len(tuple(canonical_words(length))) for length in range(1, 8)

@@ -1,18 +1,20 @@
-# Seed-61 exact short-word protocol
+# Exact short-word protocol
 
 ## Scope
 
-`oracle.exterior_seed61_short_words` is the finite half of a prospective
-seed-61 theorem.  It replays the frozen
-`exact5-shear-loop-pair`/seed-61 card, clears the common denominator, and
-checks
+`oracle.exterior_seed61_short_words` replays any frozen transpose-paired
+candidate card selected by `--target TEMPLATE:SEED`, clears the common
+denominator, and checks
 
 ```text
 det(I + B_w) > 0
 ```
 
 with integer arithmetic for every binary word in the requested length
-range.  The production target is lengths 1 through 23.
+range.  The default target remains `exact5-shear-loop-pair:61` for backward
+compatibility.  The current production targets are
+`exact5-oddcycle-block-pair:117`, `:132`, and `:147`, at lengths 1 through
+23.
 
 The only quotient symmetries used are:
 
@@ -41,13 +43,15 @@ export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 
 python -m oracle.exterior_seed61_short_words scan \
+  --target exact5-oddcycle-block-pair:117 \
   --min-depth 1 --max-depth 23 \
   --shard-id ID --shard-count 76 \
   --run-dir /path/to/run
 ```
 
-Launch IDs `0..13` on WSL and IDs `14..75` on the CPU machine.  Each process
-writes exactly one atomic file named
+Use a separate run directory for each target.  Launch IDs `0..13` on WSL
+and IDs `14..75` on the CPU machine.  Each process writes exactly one atomic
+file named
 `shard-ID-of-0076.json`.  Copy the CPU files into the WSL run directory and
 assemble:
 
@@ -79,8 +83,9 @@ python -m pytest tests/test_exterior_seed61_short_words.py -q
 The two tests independently check:
 
 - the safe symmetry classes partition every raw word through length seven;
-- a three-shard exact scan has the same minimum as the existing SymPy exact
-  determinant oracle through length seven.
+- the default target equals explicit seed61, while a three-shard seed117
+  scan has the same minimum as the existing SymPy exact determinant oracle
+  through length seven.
 
 A Windows smoke benchmark of one of 76 length-23 shards took about 15
 seconds, including replaying the card and enumerating all necklace indices.
