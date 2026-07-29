@@ -107,18 +107,18 @@ function su2_rank4_polynomial_projection(
     polynomial::ExactLinearPolynomial,
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
     eliminated_moments::Set{MomentKey},
+    projection_cache::Dict{MomentKey,ExactLinearPolynomial},
 )
     result = ExactLinearPolynomial()
     for (key, coefficient) in polynomial.terms
-        projection = su2_rank4_moment_projection(key, assembly)
-        if moment_degree(key) == 4
-            axes = UInt8[
-                axis
-                for serialized in split(key.canonical, '|')
-                for (_, axis) in parse_moment_word(serialized).ops
-            ]
-            length(unique(axes)) == 1 && push!(eliminated_moments, key)
+        projection = get!(projection_cache, key) do
+            su2_rank4_moment_projection(key, assembly)
         end
+        (
+            length(projection.terms) != 1 ||
+            !haskey(projection.terms, key) ||
+            projection.terms[key] != 1
+        ) && push!(eliminated_moments, key)
         for (projected_key, projected_coefficient) in projection.terms
             add_term!(
                 result,
@@ -190,6 +190,7 @@ function append_block_triplets!(
     coefficient_fingerprint::Union{Nothing,SHA.SHA2_256_CTX},
     su2_rank4_reduction::Bool,
     su2_rank4_eliminated_moments::Set{MomentKey},
+    su2_rank4_projection_cache::Dict{MomentKey,ExactLinearPolynomial},
 )
     dimension = length(block.rows)
     row_batch_size = max(
@@ -236,6 +237,7 @@ function append_block_triplets!(
                         polynomials[index],
                         assembly,
                         su2_rank4_eliminated_moments,
+                        su2_rank4_projection_cache,
                     )
                 end
             end
@@ -372,6 +374,8 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
     coefficient_fingerprint =
         fingerprint_coefficients ? SHA.SHA2_256_CTX() : nothing
     su2_rank4_eliminated_moments = Set{MomentKey}()
+    su2_rank4_projection_cache =
+        Dict{MomentKey,ExactLinearPolynomial}()
     if !isnothing(coefficient_fingerprint)
         update_fingerprint!(
             coefficient_fingerprint,
@@ -391,6 +395,7 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
             coefficient_fingerprint,
             su2_rank4_reduction,
             su2_rank4_eliminated_moments,
+            su2_rank4_projection_cache,
         )
     end
 
@@ -412,6 +417,7 @@ function build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
                     equality,
                     assembly,
                     su2_rank4_eliminated_moments,
+                    su2_rank4_projection_cache,
                 ) :
                 equality
             all(iszero ∘ imag, values(projected_equality.terms)) ||
