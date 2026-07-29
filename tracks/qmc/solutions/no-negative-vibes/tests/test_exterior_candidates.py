@@ -101,7 +101,9 @@ def _factor_matrix(factor: Mapping[str, object]) -> sp.ImmutableMatrix:
         orientation = factor["orientation"]
         assert isinstance(cycle, list) and len(cycle) % 2 == 1
         assert isinstance(diagonal, list) and len(diagonal) == len(cycle)
-        permutation = sp.zeros(dimension)
+        permutation = sp.eye(dimension)
+        for index in cycle:
+            permutation[index, index] = 0
         for source, target in zip(cycle, cycle[1:] + cycle[:1]):
             permutation[target, source] = 1
         embedded_diagonal = sp.eye(dimension)
