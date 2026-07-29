@@ -2,16 +2,16 @@
 # SCNet 22.05 does not honor the GRES-binding flag below from an SBATCH
 # directive. Submit reproducibly from the repository root with:
 #   sbatch --gres-flags=disable-binding --export=ALL,SS_EXPECTED_COMMIT=<commit>,SS_EXPECTED_COEFFICIENT_MAP_SHA256=<hash> tracks/polyopt/solutions/sdp-gap-seekers/scripts/shastry_full_state_spin_isotypic_l2d2_native_dual_su2_highmem_scnet.sbatch
-#SBATCH --job-name=ss-l2-dual-su2-hm
+#SBATCH --job-name=ss-l2-dual-su2-hm500
 #SBATCH --partition=ksagnormal01
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=256000M
+#SBATCH --mem=500000M
 #SBATCH --gres=gpu:1
 #SBATCH --gres-flags=disable-binding
 #SBATCH --time=12:00:00
-#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-native-dual-su2-hm-%j.out
+#SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-native-dual-su2-hm500-%j.out
 
 set -euo pipefail
 
@@ -33,7 +33,7 @@ readonly JULIA_ROOT="/public/home/sihhu/quantum-hackson/toolchains/julia-1.11.5"
 readonly JULIA_BIN="$JULIA_ROOT/bin/julia"
 readonly JULIA_PROJECT="/public/home/sihhu/quantum-hackson/envs/ss-full-state"
 readonly MOSEK_LICENSE="/public/home/sihhu/quantum-hackson/licenses/mosek.lic"
-readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-su2-hm-scnet-${SLURM_JOB_ID}"
+readonly OUTPUT_DIR="tracks/polyopt/solutions/sdp-gap-seekers/results/ss-full-state-spin-isotypic-l2d2-g0p8-gamma2-native-dual-su2-hm500-scnet-${SLURM_JOB_ID}"
 
 cd "${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR is required}"
 [[ "$PWD" == "$EXPECTED_ROOT" ]] || {

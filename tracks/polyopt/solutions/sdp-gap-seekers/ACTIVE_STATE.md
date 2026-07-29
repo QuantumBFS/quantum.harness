@@ -798,3 +798,14 @@ Updated: 2026-07-29 UTC.
   12-hour limit. It requires exact hash `fac50bcc…bed9a8` and audits at
   `1e-9`. Monitor through reconstruction, factorization, and independently
   replay any candidate before interpretation.
+- Job `118188038` ended `OUT_OF_MEMORY` after 32:20, post-presolve and before
+  an iteration. Slurm sampled 153,757,812 KiB; `/usr/bin/time` reached
+  262,193,468 KiB at the 256000-MiB cgroup. The exact reduced hash passed, but
+  no numerical decision exists. Because both reduced and unreduced tasks hit
+  the same cgroup ceiling, the first factorization allocation is dominated by
+  the unchanged PSD cones.
+- `ksagnormal01` exposes about 1,031,692 MiB per node and permits up to 509,344
+  MiB for 32 CPUs (`DefMemPerCPU=15917`). One changed resource rerun at 500000
+  MiB is justified by the two measured 256000-MiB OOMs; keep the exact reduced
+  hash and `1e-9` audit. In parallel, treat continuous-spin cone blocking—not
+  additional moment-only elimination—as the algorithmic shrink target.

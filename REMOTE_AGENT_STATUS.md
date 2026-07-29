@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T20:14:30Z
+Updated: 2026-07-29T20:47:30Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -248,5 +248,11 @@ Updated: 2026-07-29T20:14:30Z
   immutable commit `001fc6f`, using 32 CPUs / 256000 MiB / one admission GPU
   with binding disabled. It requires exact hash `fac50bcc…bed9a8` and a
   `1e-9` audit. It is the active decision solve; do not alter its checkout.
+- Job `118188038` ended `OUT_OF_MEMORY` after 32:20, post-presolve and before
+  an iteration. `/usr/bin/time` reached 262,193,468 KiB at the 256000-MiB
+  cgroup. Its reduced hash passed but it produced no result. The partition
+  permits 509,344 MiB for 32 CPUs; prepare one 500000-MiB rerun with the same
+  exact hash and `1e-9` audit. If it fails, prioritize exact cone blocking or
+  facial reduction because moment-only shrink did not change the ceiling.
 
 No user input or new credential is currently required.

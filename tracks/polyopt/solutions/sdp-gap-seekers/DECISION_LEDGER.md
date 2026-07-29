@@ -1394,3 +1394,17 @@ started at 2026-07-29T20:14:12Z from immutable commit `001fc6f` on 32 CPUs /
 is `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`
 and audit tolerance is `1e-9`. This is the single high-memory reduced
 signature; do not duplicate or modify its shared checkout while it runs.
+
+Job `118188038` ended `OUT_OF_MEMORY` after 32:20, after presolve and before
+an interior-point iteration. Slurm sampled 153,757,812 KiB; `/usr/bin/time`
+measured 262,193,468 KiB against 256000 MiB. Its exact reduced hash passed, so
+the operational failure does not invalidate the formulation but supplies no
+feasibility or gap evidence. Do not repeat the 256000-MiB signature.
+
+The partition reports about 1,031,692 MiB per node and
+`DefMemPerCPU=15917`; 32 CPUs therefore permit 509,344 MiB. A single 500000-
+MiB rerun is the measured next resource step and retains the same exact hash,
+dual formulation, and `1e-9` audit. If that still fails, further moment-only
+reduction is not decision-relevant: the unchanged PSD sides dominate, so the
+next code route must block the cones under continuous spin symmetry or perform
+an exact facial/commutant reduction.
