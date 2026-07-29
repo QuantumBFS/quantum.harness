@@ -10,7 +10,9 @@ from long_range_percolation.edge_set import (
     allocate_edge_set,
     build_class_start,
     edge_set_insert,
+    edge_set_insert_kernel,
     encode_edge_id,
+    validate_edge_set_state,
 )
 
 
@@ -104,6 +106,7 @@ def _insert_all(
 def test_edge_set_accepts_entire_uint64_domain_without_sentinel_collision():
     values = np.array([0, 1, 2**63, 2**64 - 2, 2**64 - 1], np.uint64)
     keys, occupied, diagnostics = allocate_edge_set(1)
+    validate_edge_set_state(keys, occupied, diagnostics)
     for value in values:
         keys, occupied, inserted = edge_set_insert(
             keys, occupied, diagnostics, value
@@ -210,6 +213,108 @@ def test_insert_rejects_invalid_capacity_and_load_without_mutation():
         np.testing.assert_array_equal(diagnostics, old_diagnostics)
 
 
+def test_host_state_validation_rejects_wrong_dtype_dimension_and_layout():
+    keys, occupied, diagnostics = allocate_edge_set(2)
+    invalid_states = (
+        (keys.astype(np.int64), occupied, diagnostics),
+        (keys, occupied.astype(np.int8), diagnostics),
+        (keys, occupied, diagnostics.astype(np.int64)),
+        (keys.reshape(2, 2), occupied, diagnostics),
+        (keys, occupied.reshape(2, 2), diagnostics),
+        (keys, occupied, diagnostics.reshape(1, 5)),
+        (np.zeros(8, dtype=np.uint64)[::2], occupied, diagnostics),
+        (keys, np.zeros(8, dtype=np.uint8)[::2], diagnostics),
+        (keys, occupied, np.zeros(10, dtype=np.uint64)[::2]),
+    )
+    for invalid in invalid_states:
+        with pytest.raises(ValueError):
+            validate_edge_set_state(*invalid)
+        with pytest.raises(ValueError):
+            edge_set_insert(*invalid, np.uint64(1))
+
+
+def test_host_state_validation_rejects_readonly_and_aliased_arrays():
+    keys, occupied, diagnostics = allocate_edge_set(2)
+    for index in range(3):
+        state = [keys.copy(), occupied.copy(), diagnostics.copy()]
+        state[index].setflags(write=False)
+        with pytest.raises(ValueError, match="writable"):
+            validate_edge_set_state(*state)
+
+    shared = np.zeros(4 * np.dtype(np.uint64).itemsize, dtype=np.uint8)
+    aliased_keys = shared.view(np.uint64)
+    aliased_occupied = shared[:4]
+    aliased_diagnostics = np.asarray((4, 0, 0, 0, 0), dtype=np.uint64)
+    with pytest.raises(ValueError, match="overlap"):
+        validate_edge_set_state(
+            aliased_keys, aliased_occupied, aliased_diagnostics
+        )
+
+
+def test_host_state_validation_rejects_inconsistent_diagnostics_and_corruption():
+    keys, occupied, diagnostics = allocate_edge_set(2)
+    invalid_diagnostics = (
+        np.asarray((8, 0, 0, 0, 0), dtype=np.uint64),
+        np.asarray((4, 1, 0, 0, 0), dtype=np.uint64),
+        np.asarray((4, 0, 0, 1, 0), dtype=np.uint64),
+        np.asarray((4, 0, 0, 0, 1), dtype=np.uint64),
+    )
+    for invalid in invalid_diagnostics:
+        with pytest.raises(ValueError):
+            validate_edge_set_state(keys, occupied, invalid)
+
+    invalid_occupied = occupied.copy()
+    invalid_occupied[0] = np.uint8(2)
+    with pytest.raises(ValueError, match="zero or one"):
+        validate_edge_set_state(keys, invalid_occupied, diagnostics)
+
+
+def test_host_checked_insert_rejects_full_or_corrupt_state_without_hanging():
+    keys = np.arange(4, dtype=np.uint64)
+    occupied = np.ones(4, dtype=np.uint8)
+    diagnostics = np.asarray((4, 4, 4, 1, 0), dtype=np.uint64)
+    before = (keys.copy(), occupied.copy(), diagnostics.copy())
+    with pytest.raises(ValueError, match="load"):
+        edge_set_insert(keys, occupied, diagnostics, np.uint64(99))
+    for actual, expected in zip(
+        (keys, occupied, diagnostics), before, strict=True
+    ):
+        np.testing.assert_array_equal(actual, expected)
+
+
+def test_each_probe_checked_add_fails_before_wrap_without_partial_mutation():
+    capacity = 16
+    collision_values = [
+        value
+        for value in range(100_000)
+        if _splitmix64_reference(value) & (2 * capacity - 1) == 7
+    ][:12]
+    required_before_final_insert = 12 + sum(range(1, 12))
+    assert required_before_final_insert > 2 * capacity + 1
+    assert len(collision_values) == 12
+    keys, occupied, diagnostics = allocate_edge_set(11)
+    for value in collision_values[:11]:
+        keys, occupied, inserted = edge_set_insert(
+            keys, occupied, diagnostics, np.uint64(value)
+        )
+        assert inserted
+    diagnostics[2] = np.uint64(_MASK64 - (2 * capacity + 1))
+    before = (keys.copy(), occupied.copy(), diagnostics.copy())
+
+    with pytest.raises(OverflowError, match="probe"):
+        edge_set_insert_kernel(
+            keys,
+            occupied,
+            diagnostics,
+            np.uint64(collision_values[11]),
+        )
+
+    for actual, expected in zip(
+        (keys, occupied, diagnostics), before, strict=True
+    ):
+        np.testing.assert_array_equal(actual, expected)
+
+
 def test_class_starts_and_edge_ids_cover_exact_disjoint_range():
     for length in (2, 8, 256):
         multiplicity = np.full(length // 2, length, dtype=np.uint64)
@@ -217,6 +322,7 @@ def test_class_starts_and_edge_ids_cover_exact_disjoint_range():
         class_start = build_class_start(multiplicity)
         assert class_start.dtype == np.dtype(np.uint64)
         assert class_start.flags.c_contiguous
+        assert class_start.shape == (length // 2 + 1,)
         expected = 0
         encoded = []
         for distance_index, count in enumerate(multiplicity):
@@ -228,7 +334,18 @@ def test_class_starts_and_edge_ids_cover_exact_disjoint_range():
             assert class_ids == list(range(expected, expected + int(count)))
             encoded.extend(class_ids)
             expected += int(count)
+        assert int(class_start[-1]) == expected
         assert encoded == list(range(length * (length - 1) // 2))
+
+
+def test_edge_id_rejects_oversized_offsets_for_middle_and_final_classes():
+    class_start = build_class_start(
+        np.asarray((4, 4, 2), dtype=np.uint64)
+    )
+    with pytest.raises(ValueError, match="offset"):
+        encode_edge_id(class_start, 1, 4)
+    with pytest.raises(ValueError, match="offset"):
+        encode_edge_id(class_start, 2, 2)
 
 
 def test_class_start_and_edge_id_validation_fail_closed():
@@ -239,16 +356,37 @@ def test_class_start_and_edge_id_validation_fail_closed():
             np.asarray((2**64 - 1, 1), dtype=np.uint64)
         )
     class_start = build_class_start(np.asarray((4, 2), dtype=np.uint64))
-    for distance_index, offset in ((-1, 0), (2, 0), (0, -1), (True, 0)):
+    for distance_index, offset in (
+        (-1, 0),
+        (2, 0),
+        (0, -1),
+        (True, 0),
+        (0.0, 0),
+        (0, True),
+        (0, 1.0),
+    ):
         with pytest.raises(ValueError):
             encode_edge_id(class_start, distance_index, offset)
     with pytest.raises(ValueError):
         encode_edge_id(
-            np.asarray((2**64 - 1,), dtype=np.uint64), 0, 1
+            np.asarray((0, 4, 3), dtype=np.uint64), 0, 1
         )
 
 
-def test_edge_set_insert_matches_python_and_compiles_nopython():
+def test_canonical_prefix_bounds_make_edge_id_addition_overflow_unreachable():
+    class_start = build_class_start(
+        np.asarray((_MASK64,), dtype=np.uint64)
+    )
+    assert int(encode_edge_id(class_start, 0, _MASK64 - 1)) == _MASK64 - 1
+    with pytest.raises(ValueError, match="offset"):
+        encode_edge_id(class_start, 0, _MASK64)
+    with pytest.raises(ValueError):
+        encode_edge_id(
+            np.asarray((0, _MASK64, 0), dtype=np.uint64), 1, 0
+        )
+
+
+def test_edge_set_insert_kernel_matches_python_and_compiles_nopython():
     if numba.config.DISABLE_JIT:
         return
     values = np.asarray((0, 7, 2**63, 7, 2**64 - 1), dtype=np.uint64)
@@ -257,12 +395,12 @@ def test_edge_set_insert_matches_python_and_compiles_nopython():
     compiled_results = []
     python_results = []
     for value in values:
-        compiled_keys, compiled_occupied, inserted = edge_set_insert(
+        compiled_keys, compiled_occupied, inserted = edge_set_insert_kernel(
             compiled[0], compiled[1], compiled[2], value
         )
         compiled = (compiled_keys, compiled_occupied, compiled[2])
         compiled_results.append(inserted)
-        python_keys, python_occupied, inserted = edge_set_insert.py_func(
+        python_keys, python_occupied, inserted = edge_set_insert_kernel.py_func(
             python[0], python[1], python[2], value
         )
         python = (python_keys, python_occupied, python[2])
@@ -271,4 +409,4 @@ def test_edge_set_insert_matches_python_and_compiles_nopython():
     assert compiled_results == python_results
     for actual, expected in zip(compiled, python, strict=True):
         np.testing.assert_array_equal(actual, expected)
-    assert edge_set_insert.nopython_signatures
+    assert edge_set_insert_kernel.nopython_signatures
