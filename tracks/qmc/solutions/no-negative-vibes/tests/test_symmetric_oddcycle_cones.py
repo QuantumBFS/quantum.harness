@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from oracle.symmetric_oddcycle_cones import (
+    exact_arbitrary_word_sign_free_theorem,
     exact_chi23_obstruction,
     exact_complementary_sector_audit,
     exact_grade4_formula_replay,
@@ -282,3 +283,70 @@ def test_pure_powers_and_reflection_square_words_are_positive_at_all_lengths():
     assert reflected["identity"] == "W=X.T*X"
     assert reflected["full_determinant"] > 0
     assert reflected["strictly_positive"] is True
+
+
+def test_fixed_candidate_has_an_exact_arbitrary_word_tail_certificate():
+    result = exact_arbitrary_word_sign_free_theorem()
+
+    assert result["status"] == "exact-arbitrary-word-certificate"
+    assert result["finite_exact_depth"] == 12
+    assert result["conclusion"] == "det(I+W)>0 for every word in {B,B.T}"
+
+    grade34 = result["grade34_tail"]
+    assert grade34["status"] == "exact-arbitrary-tail-certificate"
+    assert grade34["tail_start"] == 13
+    assert grade34["block_word_count"] == 8192
+    assert grade34["short_remainder_word_count"] == 8191
+    assert grade34["grade4_atoms_nonnegative"] is True
+    assert grade34["common_loop_weight"] == 8
+    assert grade34["block_maximum_ratio_squared"] == {
+        "numerator": 244364780910343182599473,
+        "denominator": 31993824161320836400152576,
+    }
+    assert grade34["block_maximum_witness"] == {
+        "depth": 13,
+        "word": "0000000111111",
+        "frobenius_squared": 244364780910343182599473,
+        "path_weight_squared": 31993824161320836400152576,
+    }
+    assert grade34["block_strict_integer_margin"] == (
+        7557346070286518140205276
+    )
+    assert grade34["short_remainder_maximum_ratio_squared"] == {
+        "numerator": 10,
+        "denominator": 1,
+    }
+    assert grade34["conclusion"] == (
+        "chi3(W)+chi4(W)>0 for every word with length>=13"
+    )
+
+    low = result["low_sector_tail"]
+    assert low["status"] == "exact-low-sector-tail-certificate"
+    assert low["tail_start"] == 6
+    assert low["norm_gates"] == (
+        {
+            "grade": "grade1",
+            "squared_bound": 6,
+            "leading_principal_minors": (2, 4, 4, 8, 20),
+        },
+        {
+            "grade": "grade2",
+            "squared_bound": 29,
+            "leading_principal_minors": (
+                13,
+                117,
+                1881,
+                34285,
+                308565,
+                7714125,
+                143345585,
+                810463115,
+                12625622675,
+                188548677535,
+            ),
+        },
+    )
+    assert low["grade1_bound_at_six"] == 1080
+    assert low["grade2_bound_at_six"] == 243890
+    assert low["determinant_sector_at_six"] == 262144
+    assert low["strict_integer_margin_at_six"] == 17174

@@ -271,6 +271,110 @@ and one negative assignment need not make that average negative.  The
 remaining proof target must preserve this symmetrization instead of
 dropping to the full four-generator semigroup.
 
+## Arbitrary-word theorem for the fixed atom
+
+The fixed \(z=1\) atom is sign-free at every word length.  The proof uses
+the exact depth-12 Bernstein audit above and two independent tail bounds.
+Write \(\chi_k(W)=\operatorname{tr}(\wedge^k W)\).
+
+First, in the common sign gauge \(D=\operatorname{diag}(1,1,1,-1,1)\),
+both grade-four atoms
+
+\[
+M_s=D(\wedge^4 B_s)D,\qquad B_s\in\{B,B^{\mathsf T}\},
+\]
+
+are entrywise nonnegative and have \((M_s)_{00}=8\).  Put
+\(N_s=\wedge^3 B_s\).  Exact integer enumeration of all 8,192 binary
+blocks \(u\) of length 13 proves
+
+\[
+100\lVert N_u\rVert_F^2 < (M_u)_{00}^2.
+\]
+
+The worst block is `0000000111111`, with
+
+\[
+\frac{\lVert N_u\rVert_F^2}{(M_u)_{00}^2}
+=
+\frac{244364780910343182599473}
+{31993824161320836400152576}
+<\frac1{100};
+\]
+
+the unsimplified strict integer margin is
+\(7557346070286518140205276\).  Exact enumeration of every remainder
+of length 0 through 12 gives
+
+\[
+\lVert N_v\rVert_F^2\leq 10(M_v)_{00}^2,
+\]
+
+with equality only for the empty remainder.
+
+Split any word of length at least 13 into 13-letter blocks and one short
+remainder.  Frobenius submultiplicativity and
+\(|\operatorname{tr}X|\leq\sqrt{10}\lVert X\rVert_F\) bound the signed
+grade-three trace.  Nonnegativity of every \(M_s\) lets the grade-four
+trace retain the state-zero path through every block.  After squaring,
+the first complete block contributes the strict factor
+\(10\cdot({<}1/100)\cdot10<1\); every additional block improves it.
+Consequently
+
+\[
+\chi_3(W)+\chi_4(W)>0 \qquad (|W|\geq13).
+\]
+
+Second, exact Sylvester certificates give
+
+\[
+\lVert B\rVert_2^2<6,\qquad
+\lVert\wedge^2B\rVert_2^2<29.
+\]
+
+The leading principal minors of the two Gram gaps are respectively
+
+```text
+2, 4, 4, 8, 20
+```
+
+and
+
+```text
+13, 117, 1881, 34285, 308565, 7714125, 143345585,
+810463115, 12625622675, 188548677535.
+```
+
+Hence
+
+\[
+|\chi_1(W)|\leq5(\sqrt6)^n,\qquad
+|\chi_2(W)|\leq10(\sqrt{29})^n.
+\]
+
+At \(n=6\), the exact upper bound is
+
+\[
+5\cdot6^3+10\cdot29^3=244970<8^6=262144,
+\]
+
+with margin 17,174; both ratios decrease thereafter.  Since
+\(\chi_0=1\) and \(\chi_5=8^n\),
+
+\[
+\chi_0+\chi_1+\chi_2+\chi_5>0 \qquad (n\geq6).
+\]
+
+For every \(n\geq13\), adding the last two strict inequalities proves
+\(\det(I+W)>0\).  At lengths 1 through 12, the exact Bernstein audit
+proves \(\chi_0+\chi_2+\chi_3+\chi_5>0\), while the stored exact
+grade-\((1,4)\) cone gives \(\chi_1+\chi_4\geq0\).  The empty word gives
+\(\det(2I)=32\).  Therefore
+
+\[
+\boxed{\det(I+W)>0\quad\text{for every }W\in\langle B,B^{\mathsf T}\rangle.}
+\]
+
 ## Two arbitrary-length positive word classes
 
 Two infinite word families admit direct proofs independent of a cone.

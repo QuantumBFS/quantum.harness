@@ -920,12 +920,231 @@ def exact_reflection_square_replay(word: str) -> dict[str, object]:
     }
 
 
+def _integer_rows(matrix: sp.MatrixBase) -> tuple[tuple[int, ...], ...]:
+    return tuple(
+        tuple(int(matrix[row, column]) for column in range(matrix.cols))
+        for row in range(matrix.rows)
+    )
+
+
+def _sparse_rows(
+    matrix: sp.MatrixBase,
+) -> tuple[tuple[tuple[int, int], ...], ...]:
+    return tuple(
+        tuple(
+            (column, int(matrix[row, column]))
+            for column in range(matrix.cols)
+            if matrix[row, column] != 0
+        )
+        for row in range(matrix.rows)
+    )
+
+
+def _integer_identity(dimension: int) -> tuple[tuple[int, ...], ...]:
+    return tuple(
+        tuple(int(row == column) for column in range(dimension))
+        for row in range(dimension)
+    )
+
+
+def _left_multiply_sparse(
+    left: tuple[tuple[tuple[int, int], ...], ...],
+    right: tuple[tuple[int, ...], ...],
+) -> tuple[tuple[int, ...], ...]:
+    dimension = len(right)
+    return tuple(
+        tuple(
+            sum(coefficient * right[index][column] for index, coefficient in row)
+            for column in range(dimension)
+        )
+        for row in left
+    )
+
+
+def _fraction_payload(value: Fraction) -> dict[str, int]:
+    return {
+        "numerator": value.numerator,
+        "denominator": value.denominator,
+    }
+
+
+def exact_grade34_block_tail_certificate() -> dict[str, object]:
+    """Certify ``chi3(W) + chi4(W) > 0`` for every word of length >= 13.
+
+    The grade-four atoms share an exact nonnegative sign gauge and a weight-8
+    loop at state zero.  Exact enumeration bounds the Frobenius norm of every
+    grade-three 13-letter block by one tenth of that loop weight.  A shorter
+    remainder costs at most ``sqrt(10)``.  Squaring the trace/Frobenius bound
+    then leaves a strict factor below one after the first complete block.
+    """
+
+    matrix = fixed_candidate_matrix()
+    diagonal = sp.diag(1, 1, 1, -1, 1)
+    grade3 = tuple(
+        exact_compound_matrix(atom, 3) for atom in (matrix, matrix.T)
+    )
+    grade4 = tuple(
+        sp.ImmutableMatrix(
+            diagonal * exact_compound_matrix(atom, 4) * diagonal
+        )
+        for atom in (matrix, matrix.T)
+    )
+    if any(entry < 0 for atom in grade4 for entry in atom):
+        raise RuntimeError("grade-four sign gauge is not nonnegative")
+    if any(atom[0, 0] != 8 for atom in grade4):
+        raise RuntimeError("grade-four atoms lost the common weight-8 loop")
+
+    sparse3 = tuple(_sparse_rows(atom) for atom in grade3)
+    sparse4 = tuple(_sparse_rows(atom) for atom in grade4)
+    level = [(_integer_identity(10), _integer_identity(5), "")]
+    remainder_maximum = Fraction(10, 1)
+    remainder_witness = {
+        "depth": 0,
+        "word": "",
+        "frobenius_squared": 10,
+        "path_weight_squared": 1,
+    }
+    block_maximum: Fraction | None = None
+    block_witness: dict[str, object] | None = None
+    for depth in range(1, 14):
+        level = [
+            (
+                _left_multiply_sparse(sparse3[symbol], matrix3),
+                _left_multiply_sparse(sparse4[symbol], matrix4),
+                word + str(symbol),
+            )
+            for matrix3, matrix4, word in level
+            for symbol in (0, 1)
+        ]
+        for matrix3, matrix4, word in level:
+            frobenius_squared = sum(
+                entry * entry for row in matrix3 for entry in row
+            )
+            path_weight_squared = matrix4[0][0] ** 2
+            ratio = Fraction(frobenius_squared, path_weight_squared)
+            witness = {
+                "depth": depth,
+                "word": word,
+                "frobenius_squared": frobenius_squared,
+                "path_weight_squared": path_weight_squared,
+            }
+            if depth <= 12 and ratio > remainder_maximum:
+                remainder_maximum = ratio
+                remainder_witness = witness
+            if depth == 13 and (
+                block_maximum is None or ratio > block_maximum
+            ):
+                block_maximum = ratio
+                block_witness = witness
+
+    if block_maximum is None or block_witness is None:
+        raise RuntimeError("13-letter block enumeration produced no words")
+    if 100 * block_maximum >= 1:
+        raise RuntimeError("13-letter block contraction gate failed")
+    if remainder_maximum > 10:
+        raise RuntimeError("short-remainder norm gate failed")
+    raw_margin = int(block_witness["path_weight_squared"]) - 100 * int(
+        block_witness["frobenius_squared"]
+    )
+    if raw_margin <= 0:
+        raise RuntimeError("exact block margin is not strictly positive")
+
+    return {
+        "status": "exact-arbitrary-tail-certificate",
+        "tail_start": 13,
+        "block_length": 13,
+        "block_word_count": len(level),
+        "short_remainder_word_count": 2**13 - 1,
+        "grade4_atoms_nonnegative": True,
+        "common_loop_weight": 8,
+        "block_maximum_ratio_squared": _fraction_payload(block_maximum),
+        "block_maximum_witness": block_witness,
+        "block_strict_integer_margin": raw_margin,
+        "short_remainder_maximum_ratio_squared": _fraction_payload(
+            remainder_maximum
+        ),
+        "short_remainder_maximum_witness": remainder_witness,
+        "trace_dimension": 10,
+        "conclusion": "chi3(W)+chi4(W)>0 for every word with length>=13",
+    }
+
+
+def exact_low_sector_tail_certificate() -> dict[str, object]:
+    """Certify ``chi0+chi1+chi2+chi5 > 0`` for every length at least six."""
+
+    matrix = fixed_candidate_matrix()
+    grade2 = exact_compound_matrix(matrix, 2)
+    norm_gates = []
+    for name, atom, squared_bound in (
+        ("grade1", matrix, 6),
+        ("grade2", grade2, 29),
+    ):
+        gram_gap = sp.ImmutableMatrix(
+            squared_bound * sp.eye(atom.rows) - atom.T * atom
+        )
+        leading_minors = tuple(
+            int(gram_gap[:size, :size].det())
+            for size in range(1, atom.rows + 1)
+        )
+        if any(value <= 0 for value in leading_minors):
+            raise RuntimeError(f"{name} spectral-norm gate is not positive")
+        norm_gates.append(
+            {
+                "grade": name,
+                "squared_bound": squared_bound,
+                "leading_principal_minors": leading_minors,
+            }
+        )
+
+    grade1_at_six = 5 * 6**3
+    grade2_at_six = 10 * 29**3
+    determinant_at_six = 8**6
+    strict_margin = determinant_at_six - grade1_at_six - grade2_at_six
+    if strict_margin <= 0:
+        raise RuntimeError("six-letter scalar tail gate failed")
+    return {
+        "status": "exact-low-sector-tail-certificate",
+        "tail_start": 6,
+        "norm_gates": tuple(norm_gates),
+        "grade1_bound_at_six": grade1_at_six,
+        "grade2_bound_at_six": grade2_at_six,
+        "determinant_sector_at_six": determinant_at_six,
+        "strict_integer_margin_at_six": strict_margin,
+        "monotone_ratios": ("sqrt(6)/8<1", "sqrt(29)/8<1"),
+        "conclusion": (
+            "chi0(W)+chi1(W)+chi2(W)+chi5(W)>0 "
+            "for every word with length>=6"
+        ),
+    }
+
+
+def exact_arbitrary_word_sign_free_theorem() -> dict[str, object]:
+    """Assemble the finite-depth and two exact tail certificates."""
+
+    grade34 = exact_grade34_block_tail_certificate()
+    low = exact_low_sector_tail_certificate()
+    return {
+        "status": "exact-arbitrary-word-certificate",
+        "matrix": _integer_rows(fixed_candidate_matrix()),
+        "finite_exact_depth": 12,
+        "finite_exact_source": (
+            "unit-winding complementary Bernstein audit + exact grade14 cone"
+        ),
+        "grade34_tail": grade34,
+        "low_sector_tail": low,
+        "conclusion": "det(I+W)>0 for every word in {B,B.T}",
+    }
+
+
 __all__ = [
     "SCHEMA",
+    "exact_arbitrary_word_sign_free_theorem",
     "exact_chi23_obstruction",
     "exact_complementary_sector_audit",
+    "exact_grade34_block_tail_certificate",
     "exact_grade4_formula_replay",
     "exact_invariant_chamber_obstruction",
+    "exact_low_sector_tail_certificate",
     "exact_pure_power_spectral_lemma",
     "exact_reflection_square_replay",
     "exact_unit_winding_bernstein_audit",
