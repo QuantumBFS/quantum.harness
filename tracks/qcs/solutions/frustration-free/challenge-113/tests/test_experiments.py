@@ -13,7 +13,9 @@ import pytest
 import qcontrol.artifacts as artifacts_module
 import qcontrol.experiments as experiments_module
 from qcontrol.artifacts import ArtifactConflict, ArtifactStore
+from qcontrol.closed_loop import make_model_hessian_space
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
+from qcontrol.device import Observation
 from qcontrol.experiments import (
     SweepStatus,
     TrialResult,
@@ -24,6 +26,8 @@ from qcontrol.experiments import (
     run_trial,
     validate_sweep,
 )
+from qcontrol.pulses import PulseSpace
+from qcontrol.systems import make_system, perturb_system
 
 
 def _config(
@@ -138,13 +142,16 @@ def _result(spec, execution: int) -> TrialResult:
         },
         "restricted_noiseless_optimization": {
             "attained_infidelity_upper_bound": 0.5,
+            "certified": True,
             "consistency_tolerance": 1e-10,
-            "converged": True,
-            "function_evaluations": 1,
             "gradient_tolerance": 1e-9,
-            "iterations": 0,
+            "max_evaluations": 1_000,
             "max_iterations": 100,
+            "nfev": 1,
+            "nit": 0,
             "solver": "L-BFGS-B",
+            "solver_message": "CONVERGENCE",
+            "solver_status": 0,
             "starting_infidelity_upper_bound": 0.5,
             "termination": "converged",
         },
@@ -681,6 +688,81 @@ def test_real_trial_uses_public_search_identity_without_numeric_basis(
     assert payload["ledger"] == before
 
 
+def test_derived_caches_follow_scientific_dependencies(monkeypatch) -> None:
+    base = _config("model_hessian", 1, seed=3)
+    shot_variant = replace(
+        base,
+        device=replace(base.device, shots=10_000),
+    )
+    k_variant = replace(
+        shot_variant,
+        search=replace(shot_variant.search, dimension=2),
+    )
+    device_variant = replace(
+        base,
+        device=replace(base.device, gap=0.05),
+    )
+    model = make_system(base.system)
+    pulse_space = PulseSpace.from_system(model, base.system.segments)
+    origin = np.zeros(pulse_space.parameter_count)
+    basis = np.eye(pulse_space.parameter_count)
+    spaces = {
+        1: make_model_hessian_space(origin, basis, dimension=1),
+        2: make_model_hessian_space(origin, basis, dimension=2),
+    }
+    observation = Observation(0.5, 1_000, 1, False, 1)
+    audited = ((origin.copy(), observation),)
+    counts = {"exact": 0, "geometry": 0, "restricted": 0}
+    real_exact = experiments_module.cumulative_best_exact_infidelity
+    real_geometry = experiments_module.compute_geometry_diagnostics
+    real_restricted = experiments_module.optimize_restricted_noiseless_upper_bound
+
+    def counted_exact(*args, **kwargs):
+        counts["exact"] += 1
+        return real_exact(*args, **kwargs)
+
+    def counted_geometry(*args, **kwargs):
+        counts["geometry"] += 1
+        return real_geometry(*args, **kwargs)
+
+    def counted_restricted(*args, **kwargs):
+        counts["restricted"] += 1
+        return real_restricted(*args, **kwargs)
+
+    experiments_module._DERIVED_STATIC_CACHE.clear()
+    monkeypatch.setattr(
+        experiments_module,
+        "cumulative_best_exact_infidelity",
+        counted_exact,
+    )
+    monkeypatch.setattr(
+        experiments_module,
+        "compute_geometry_diagnostics",
+        counted_geometry,
+    )
+    monkeypatch.setattr(
+        experiments_module,
+        "optimize_restricted_noiseless_upper_bound",
+        counted_restricted,
+    )
+    for config in (base, shot_variant, k_variant, device_variant):
+        truth = perturb_system(
+            model,
+            config.device.gap,
+            config.device.perturbation_seed,
+        )
+        experiments_module._cached_derived_metrics(
+            config,
+            model,
+            truth,
+            pulse_space,
+            spaces[config.search.dimension],
+            audited,
+        )
+
+    assert counts == {"exact": 2, "geometry": 2, "restricted": 3}
+
+
 def test_old_production_trial_schema_and_orphan_are_rejected(tmp_path) -> None:
     spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
     legacy = _result(spec, 1).canonical_dict()
@@ -697,6 +779,40 @@ def test_old_production_trial_schema_and_orphan_are_rejected(tmp_path) -> None:
     trial_path.write_bytes(artifacts_module.canonical_json_bytes(legacy))
     with pytest.raises(ArtifactConflict, match="invalid strict schema"):
         run_sweep([spec], store, executor=lambda _: _result(spec, 2))
+
+
+def test_restricted_termination_requires_consistent_counters() -> None:
+    spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
+    honest = _result(spec, 1).canonical_dict()
+    restricted = honest["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted.update(
+        {
+            "certified": False,
+            "nit": restricted["max_iterations"],
+            "solver_message": "TOTAL NO. OF ITERATIONS REACHED LIMIT",
+            "solver_status": 1,
+            "termination": "iteration_limit",
+        }
+    )
+    replayed = TrialResult.from_canonical_dict(honest)
+    assert not replayed.result["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]["certified"]
+    assert np.isfinite(
+        replayed.result["derived_metrics"]["restricted_noiseless_optimization"][
+            "attained_infidelity_upper_bound"
+        ]
+    )
+
+    fake = copy.deepcopy(honest)
+    fake_restricted = fake["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    fake_restricted["nit"] = 0
+    with pytest.raises(ValueError, match="termination"):
+        TrialResult.from_canonical_dict(fake)
 
 
 def test_production_matrix_has_exact_design_coverage() -> None:

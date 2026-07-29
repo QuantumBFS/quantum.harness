@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import re
 import threading
+from types import SimpleNamespace
 from typing import Any
 
 import jax
@@ -21,6 +22,7 @@ from qcontrol.device import Observation, make_query_device
 from qcontrol.landscape import analyze_landscape
 from qcontrol.objectives import normalized_infidelity
 from qcontrol.offline import (
+    classify_solver_termination,
     compute_geometry_diagnostics,
     cumulative_best_exact_infidelity,
     make_offline_evaluator,
@@ -297,13 +299,16 @@ def _validate_derived_metrics(
     restricted = value["restricted_noiseless_optimization"]
     restricted_fields = {
         "attained_infidelity_upper_bound",
+        "certified",
         "consistency_tolerance",
-        "converged",
-        "function_evaluations",
         "gradient_tolerance",
-        "iterations",
+        "max_evaluations",
         "max_iterations",
+        "nfev",
+        "nit",
         "solver",
+        "solver_message",
+        "solver_status",
         "starting_infidelity_upper_bound",
         "termination",
     }
@@ -320,14 +325,29 @@ def _validate_derived_metrics(
     if (
         type(restricted["max_iterations"]) is not int
         or restricted["max_iterations"] <= 0
-        or type(restricted["function_evaluations"]) is not int
-        or restricted["function_evaluations"] <= 0
-        or type(restricted["iterations"]) is not int
-        or restricted["iterations"] < 0
-        or type(restricted["converged"]) is not bool
+        or type(restricted["max_evaluations"]) is not int
+        or restricted["max_evaluations"] <= 0
+        or type(restricted["nfev"]) is not int
+        or restricted["nfev"] <= 0
+        or type(restricted["nit"]) is not int
+        or restricted["nit"] < 0
+        or type(restricted["certified"]) is not bool
+        or type(restricted["solver_status"]) is not int
+        or not isinstance(restricted["solver_message"], str)
+        or not restricted["solver_message"]
+        or len(restricted["solver_message"]) > 256
+        or not restricted["solver_message"].isascii()
         or restricted["solver"] != "L-BFGS-B"
-        or restricted["termination"] not in {"converged", "iteration_budget"}
-        or restricted["converged"]
+        or restricted["termination"]
+        not in {
+            "converged",
+            "evaluation_limit",
+            "iteration_limit",
+            "line_search_failure",
+            "numerical_failure",
+            "solver_failure",
+        }
+        or restricted["certified"]
         != (restricted["termination"] == "converged")
     ):
         raise ValueError("restricted-optimization solver metadata is invalid")
@@ -348,6 +368,26 @@ def _validate_derived_metrics(
         [initial, *values]
     ) + float(consistency_tolerance):
         raise ValueError("restricted attained upper bound is inconsistent")
+    classified = classify_solver_termination(
+        SimpleNamespace(
+            success=restricted["certified"],
+            status=restricted["solver_status"],
+            message=restricted["solver_message"],
+            nit=restricted["nit"],
+            nfev=restricted["nfev"],
+            fun=(
+                float("nan")
+                if restricted["termination"] == "numerical_failure"
+                else attained
+            ),
+            x=np.zeros(1),
+            jac=np.zeros(1),
+        ),
+        max_iterations=restricted["max_iterations"],
+        max_evaluations=restricted["max_evaluations"],
+    )
+    if classified != restricted["termination"]:
+        raise ValueError("restricted-optimization termination is inconsistent")
 
     geometry = value["geometry"]
     geometry_fields = {
@@ -942,48 +982,65 @@ def _oracle_basis(
     return np.asarray(eigenvectors[:, ordering], dtype=np.float64)
 
 
-def _cached_static_derived_metrics(
+def _cached_derived_metrics(
     config: ExperimentConfig,
     model: ControlSystem,
     truth: ControlSystem,
     pulse_space: PulseSpace,
     search_space: SearchSpace,
     audited_queries: Sequence[tuple[np.ndarray, Observation | None]],
-) -> tuple[object, object]:
+) -> tuple[object, object, object]:
     system = config.canonical_dict()["system"]
     device = config.canonical_dict()["device"]
-    geometry_key = (
+    truth_key = (
         canonical_json_bytes(system),
         device["gap"],
         device["perturbation_seed"],
-        device["shots"],
-        config.trial_seed,
-        _array_sha256(search_space.origin),
-        search_space.dimension,
     )
     pulse_matrix = np.stack(
-        [np.asarray(pulse, dtype=np.float64) for pulse, _ in audited_queries],
+        [np.asarray(search_space.origin, dtype=np.float64)]
+        + [np.asarray(pulse, dtype=np.float64) for pulse, _ in audited_queries],
         axis=0,
     )
+    success_mask = tuple(observation is not None for _, observation in audited_queries)
+    exact_key = (
+        truth_key,
+        _array_sha256(pulse_matrix),
+        success_mask,
+    )
+    geometry_key = (
+        truth_key,
+        _array_sha256(search_space.origin),
+    )
     restricted_key = (
-        geometry_key,
+        truth_key,
+        _array_sha256(search_space.origin),
         _array_sha256(search_space.basis),
         _array_sha256(search_space.lower_bounds),
         _array_sha256(search_space.upper_bounds),
-        _array_sha256(pulse_matrix),
+        search_space.dimension,
     )
     with _DERIVED_CACHE_LOCK:
+        exact_cache = _DERIVED_STATIC_CACHE.setdefault("exact", {})
+        exact = exact_cache.get(exact_key)
+        if exact is None:
+            exact = cumulative_best_exact_infidelity(
+                make_offline_evaluator(truth, pulse_space),
+                initial_pulse=search_space.origin,
+                audited_queries=audited_queries,
+            )
+            exact_cache[exact_key] = exact
         geometry_cache = _DERIVED_STATIC_CACHE.setdefault("geometry", {})
-        geometry = geometry_cache.get(geometry_key)
-        if geometry is None:
-            geometry = compute_geometry_diagnostics(
+        full_geometry = geometry_cache.get(geometry_key)
+        if full_geometry is None:
+            full_geometry = compute_geometry_diagnostics(
                 model,
                 truth,
                 pulse_space,
                 search_space.origin,
-                top_k=search_space.dimension,
             )
-            geometry_cache[geometry_key] = geometry
+            geometry_cache[geometry_key] = full_geometry
+        geometry = full_geometry.slice(search_space.dimension)
         restricted_cache = _DERIVED_STATIC_CACHE.setdefault("restricted", {})
         restricted = restricted_cache.get(restricted_key)
         if restricted is None:
@@ -991,10 +1048,9 @@ def _cached_static_derived_metrics(
                 truth,
                 pulse_space,
                 search_space,
-                candidate_pulses=tuple(pulse for pulse, _ in audited_queries),
             )
             restricted_cache[restricted_key] = restricted
-    return geometry, restricted
+    return exact, geometry, restricted
 
 
 def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
@@ -1075,12 +1131,7 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
         ledger.total_queries,
         ledger.total_shots,
     )
-    exact_trajectory = cumulative_best_exact_infidelity(
-        make_offline_evaluator(truth, pulse_space),
-        initial_pulse=search_space.origin,
-        audited_queries=audited_queries,
-    )
-    geometry, restricted = _cached_static_derived_metrics(
+    exact_trajectory, geometry, restricted = _cached_derived_metrics(
         config,
         model,
         truth,
