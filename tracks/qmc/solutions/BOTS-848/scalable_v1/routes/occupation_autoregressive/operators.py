@@ -6,7 +6,7 @@ import math
 import struct
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from decimal import Decimal, localcontext
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal, localcontext
 from numbers import Integral, Real
 from types import MappingProxyType
 
@@ -499,15 +499,6 @@ def _dyadic_to_binary64(value: _Dyadic) -> float:
     )
 
 
-def _dyadic_to_float(value: _Dyadic) -> float | None:
-    result = _dyadic_to_binary64(value)
-    if not math.isfinite(result) or result == 0.0 and value.mantissa != 0:
-        return None
-    if _dyadic_from_float(result) != value:
-        return None
-    return result
-
-
 @dataclass(frozen=True, slots=True)
 class _DyadicLogTerm:
     target_logabs: float
@@ -527,6 +518,94 @@ def _effective_log(term: _DyadicLogTerm) -> float:
         return math.fsum((term.target_logabs, _dyadic_logabs(term.value)))
     except OverflowError:
         return math.copysign(math.inf, term.target_logabs)
+
+
+def _fast_roundoff_multiplier(operation_count: int) -> Decimal | None:
+    """Return an outward upper bound for accumulated precision-22 error."""
+
+    if operation_count <= 0:
+        raise ValueError("operation_count must be positive")
+    with localcontext() as context:
+        context.prec = (
+            _FAST_CERTIFIER_PRECISION
+            + _FAST_CERTIFIER_GUARD_DIGITS
+            + 12
+        )
+        context.Emax = 999_999
+        context.Emin = -999_999
+        context.rounding = ROUND_CEILING
+        unit_roundoff = Decimal(5).scaleb(-_FAST_CERTIFIER_PRECISION)
+        accumulated = Decimal(operation_count) * unit_roundoff
+        one = Decimal(1)
+        if accumulated >= one:
+            return None
+        gamma = accumulated / (one - accumulated)
+        if gamma >= one:
+            return None
+        observed_sum_inflation = gamma / (one - gamma)
+        guard_scale = Decimal(1).scaleb(
+            -_FAST_CERTIFIER_PRECISION + _FAST_CERTIFIER_GUARD_DIGITS
+        )
+        return max(guard_scale, observed_sum_inflation)
+
+
+def _fast_component_operation_count(
+    terms: Sequence[_DyadicLogTerm],
+    source_deltas: Mapping[float, Decimal],
+) -> int:
+    """Conservatively bound rounded operations affecting one component."""
+
+    factor_operations = max(
+        int(
+            abs(source_deltas[term.target_logabs]).to_integral_value(
+                rounding=ROUND_CEILING
+            )
+        )
+        + 4
+        for term in terms
+    )
+    # Two operations per term cover the central and absolute-sum accumulations.
+    # The fixed margin covers dyadic power/product construction, contribution
+    # multiplication, and the correctly-rounded exponential.  The magnitude
+    # term bounds amplification of the rounded subtraction through exp().
+    return 2 * len(terms) + factor_operations + 8
+
+
+def _fast_outward_endpoints(
+    central: Decimal,
+    absolute_sum: Decimal,
+    operation_count: int,
+) -> tuple[Decimal, Decimal] | None:
+    multiplier = _fast_roundoff_multiplier(operation_count)
+    if multiplier is None:
+        return None
+    endpoint_precision = (
+        _FAST_CERTIFIER_PRECISION + _FAST_CERTIFIER_GUARD_DIGITS
+    )
+    with localcontext() as uncertainty_context:
+        uncertainty_context.prec = endpoint_precision
+        uncertainty_context.Emax = 999_999
+        uncertainty_context.Emin = -999_999
+        uncertainty_context.rounding = ROUND_CEILING
+        magnitude_budget = (
+            absolute_sum
+            + abs(central)
+            + Decimal.from_float(_MIN_SUBNORMAL)
+        )
+        uncertainty = magnitude_budget * multiplier
+    with localcontext() as lower_context:
+        lower_context.prec = endpoint_precision
+        lower_context.Emax = 999_999
+        lower_context.Emin = -999_999
+        lower_context.rounding = ROUND_FLOOR
+        lower = lower_context.next_minus(central - uncertainty)
+    with localcontext() as upper_context:
+        upper_context.prec = endpoint_precision
+        upper_context.Emax = 999_999
+        upper_context.Emin = -999_999
+        upper_context.rounding = ROUND_CEILING
+        upper = upper_context.next_plus(central + uncertainty)
+    return lower, upper
 
 
 def _certify_fast_components(
@@ -555,10 +634,10 @@ def _certify_fast_components(
                 return None
             if not math.isfinite(source_delta) or abs(source_delta) > 10_000.0:
                 return None
-        factors = {
-            target: (Decimal.from_float(target) - source).exp()
-            for target in targets
+        source_deltas = {
+            target: Decimal.from_float(target) - source for target in targets
         }
+        factors = {target: delta.exp() for target, delta in source_deltas.items()}
         dyadic_values = {
             term.value
             for terms in components
@@ -572,9 +651,6 @@ def _certify_fast_components(
             value: Decimal(value.mantissa) * powers[value.exponent]
             for value in dyadic_values
         }
-        uncertainty_scale = Decimal(10) ** (
-            -_FAST_CERTIFIER_PRECISION + _FAST_CERTIFIER_GUARD_DIGITS
-        )
         certified_values: list[float] = []
         for terms in components:
             central = Decimal(0)
@@ -586,12 +662,21 @@ def _certify_fast_components(
                 )
                 central += contribution
                 absolute_sum += abs(contribution)
-            uncertainty = (
-                absolute_sum + abs(central) + Decimal.from_float(_MIN_SUBNORMAL)
-            ) * uncertainty_scale
+            operation_count = _fast_component_operation_count(
+                terms,
+                source_deltas,
+            )
+            endpoints = _fast_outward_endpoints(
+                central,
+                absolute_sum,
+                operation_count,
+            )
+            if endpoints is None:
+                return None
+            lower_endpoint, upper_endpoint = endpoints
             candidate = float(central)
-            lower = float(central - uncertainty)
-            upper = float(central + uncertainty)
+            lower = float(lower_endpoint)
+            upper = float(upper_endpoint)
             if (
                 not math.isfinite(candidate)
                 or _float_bits(candidate) != _float_bits(lower)
