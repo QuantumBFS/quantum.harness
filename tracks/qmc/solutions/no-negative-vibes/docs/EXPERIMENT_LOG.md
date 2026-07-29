@@ -806,3 +806,69 @@ never supports an arbitrary-depth claim.
 - Interpretation: implementation may now add only the fixture classifier and
   private helpers. It must not weaken the structural failures, implement
   survivor-only audits, or interpret any exact dual as a primal ray.
+
+## 2026-07-29 — Exterior survivor pressure Stage 2
+
+The immutable run `exterior-survivor-pressure-v1` selected exactly the 1,713
+zero-failure Stage-1 manifests and exhaustively tested all 472 mixed two-atom
+words at depths 5, 6, 7, and 8, with first-failure early stopping.
+
+- source commit:
+  `c4919c411881ab680b8655c4cedb50dbe7d75fc5`;
+- bundle SHA-256:
+  `a2d7b34b9d2c15b04d9240d7ed7fcca38620b56f24bb081171e2e894dea04189`;
+- parent plan hash:
+  `debbc510ac886ed26b7640bf0b09de5672f529c34c30aa21cdcd1e430564595a`;
+- plan hash:
+  `17191af2702ab5dfcfd272fd4a436604a75ad4d56ecb73b58fd39c6f9475347a`;
+- protocol hash:
+  `29c578cd44f453fa27855bc22406968d5435585b7d01f3bf5d07c4f7df63e880`;
+- execution: four smoke candidates passed, then WSL shards 00--13 used
+  14 processes and CPU shards 14--75 used 62 processes, all BLAS limits one;
+- accounting: 1,713 terminal, zero missing, stale, duplicate, operational
+  errors, or unresolved candidates; 553,261 word products were actually
+  evaluated after early stopping.
+
+| N | planned | stable negative | uncertain | depth-8 survivor |
+|---:|---:|---:|---:|---:|
+| 3 | 485 | 8 | 89 | 388 |
+| 4 | 671 | 43 | 244 | 384 |
+| 5 | 384 | 74 | 119 | 191 |
+| 6 | 173 | 23 | 62 | 88 |
+| total | 1,713 | 148 | 514 | 1,051 |
+
+The pressure pass removed 148 apparent Stage-1 survivors with stable negative
+weights. The strongest numerical control was
+`exact3-diagonal-oddcycle-pair`: 235 of 256 survived and the remaining 21
+were conditioning-limited rather than stable negative. The most promising
+non-control counts after depth 8 were `exact3-oddcycle-shear-pair` 153,
+`exact4-block-shear-pair` 114, `exact4-shear-loop-pair` 100,
+`exact4-graded-shear-pair` 98, `exact5-shear-loop-pair` 98,
+`exact5-oddcycle-block-pair` 93, and `exact6-graded-shear-pair` 88.
+
+Interpretation: the Stage-2 scan is a successful high-throughput falsifier,
+not an arbitrary-depth certificate. The 1,051 survivors advance to depths
+9--12. The 514 conditioning-limited first failures form a disjoint
+high-precision replay queue; none is counted as positive or negative before
+replay. The full result Markdown and plan summary are preserved in the local
+SDD evidence directory with SHA-256 values
+`2949219bf76965a83c7711982bf6afa1310c7c13832377fd9a417e2927ed77f1`
+and
+`2d55df696df3317d92778d2d7bbc22e135a23d4d8a1771e66de9bec5065cadcb`.
+
+Transferable execution lesson: for this oracle, elaborate distributed
+infrastructure costs more than the science. One immutable plan, independent
+candidate directories, deterministic shard ownership, thread-limited
+processes, and a final merge completed the 76-shard pass in seconds. Future
+screening rounds should retain only the smoke gate, exact source/plan hashes,
+first-failure evidence, and final terminal accounting.
+
+### Hamiltonian reverse-construction scope amendment
+
+Once a new sign-free matrix semigroup or cone is certified, reverse
+construction may target any Hermitian Hamiltonian, including a nonlocal one.
+Locality is no longer a promotion prerequisite. A second research branch may
+then ask whether a similarity transform maps that nonlocal Hermitian model to
+a local non-Hermitian Hamiltonian with real spectrum. This enlarges the
+constructive search space without weakening the required Hermiticity of the
+primary Hamiltonian or the positivity of the auxiliary-field weights.
