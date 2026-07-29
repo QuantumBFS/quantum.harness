@@ -1236,8 +1236,8 @@ decisive promotion blockers:
    cannot make `C R` entrywise nonnegative; its best numerical margin is
    approximately `-0.2100681259`. Thus the sufficient identity
    `tr(A_w) = tr(C R P_w) >= 0` is unavailable for this lift;
-2. the grade-4 atom pair has no shared signed gauge, and the exact single-atom
-   word `B^6` already has `tr(wedge^4 B^6) < 0`.
+2. the exact single-atom word `B^6` already has both
+   `tr(wedge^2 B^6) < 0` and `tr(wedge^4 B^6) < 0`.
 
 Therefore the rectangular grade-2 invariant cone plus the grade-3 gauge
 cannot be promoted to a sector-by-sector arbitrary-depth determinant proof.
@@ -1247,6 +1247,18 @@ the next success-oriented search must allow cancellations between exterior
 grades. The immediate replacement target is a trace-compatible cone/lift on
 the combined complete-Fock direct sum
 `Gamma(B) = direct_sum_k wedge^k B`, with rays allowed to couple grades.
+
+The independent implementation at commit `c375720` rebuilds every exterior
+matrix directly from exact minors rather than calling the search helper. For
+the same `B^6` witness it finds the complete determinant remains exactly
+positive:
+
+`122524522219495391811877920628466510041 /
+2694726010543561845443237792672907264`.
+
+This proves that the observed survival uses cancellation between exterior
+sectors and makes a combined-Fock or direct positive-realization search a
+concrete target rather than speculation.
 
 ## 2026-07-29 — Exact-aware depth-12 continuation of 488 survivors
 
@@ -1276,3 +1288,32 @@ Local evidence SHA-256:
   `4e1908f32f92ab596acea6f5acba3b55627fe14c40d785cc727786036d0f8b11`;
 - CPU archive:
   `e871413c097991dac50dcbce7514070c994b8efd611f79a200d4a5ad058d61aa`.
+
+## 2026-07-29 — Exact-aware suffix completion of 307 Stage-3 HP cards
+
+The 307 cards whose original depth-9--12 stopping word was exactly confirmed
+nonnegative were resumed after that word and completed the previously
+unvisited suffix of the same tranche.
+
+- source commit:
+  `bb99ca53d1a0dc44e4caace884a68970dfa32051`;
+- continuation plan:
+  `a3eeb3a148de74f89037f9ae306eb3be05f3d04344261611388d11bf9331178c`;
+- 307/307 terminal, zero missing or stale;
+- 2,331,133 newly tested words;
+- 694,345 exact fallbacks and 307 reused exact first-failure proofs;
+- 1 exact-fallback negative, 3 stable negatives, and 303 complete
+  `survivor-depth12-hp-continuation` cards.
+
+Combined depth-12 populations now available for structure-first triage are
+692 ordinary survivors, 474 depth-8-fallback descendants, and 303
+Stage-3-HP descendants, each with disjoint provenance.
+
+Local evidence SHA-256:
+
+- Markdown summary:
+  `90cc9e1fbfa841a290dc39cca8b9192bd974c79eb0e54eaa20c234536eab05d3`;
+- collection JSON:
+  `f19ff959d72d97d5e8e7d7cf763934ca2150ca8350b5e98ad92f102e0d1e3de9`;
+- CPU archive:
+  `7f2e36d96a4f393940cd136d36e9a870dd3c28ef2ed574705b8a7f1c2a7ecb55`.
