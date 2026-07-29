@@ -1057,3 +1057,132 @@ fraction remains large. The next high-value step is not a blind universal
 depth increase: replay the 179 conditioning-limited words, then rank the 491
 survivors by exact structural obstructions and concentrate deeper tests on
 the trace-clean, non-control subset.
+
+## 2026-07-29 — Exact structural triage of the 491 depth-16 survivors
+
+The complete Stage-4 survivor population was reconstructed from exact cards
+and ranked with three inexpensive exact gates: sector traces for all mixed
+words through depth 4, a shared signed-gauge/all-minors induced-TN check, and
+the existing odd-monomial control reduction.
+
+- source commit:
+  `427c52df5590ba0be9e61f586d037ac4ee8b3f8b`;
+- input survivors: 491;
+- output:
+  `/home/zibojin/runs/exterior-structural-rank-427c52d/ranking.json`;
+- output SHA-256:
+  `325a5b03cc1d844946a163a223384987a66834dd2e9c8eb305305aa3b0bf8762`.
+
+| priority class | count |
+|---|---:|
+| exact5 trace-clean non-control | 6 |
+| other trace-clean non-control | 165 |
+| known control reduction | 178 |
+| sector-trace obstructed | 142 |
+
+The six highest-priority cards are all
+`exact5-oddcycle-block-pair`, at seeds
+`61, 97, 100, 124, 211, 244`. Each is a depth-16 survivor, has no exact
+control reduction in the fast library, and has 96 exact sector traces over
+24 mixed words nonnegative through depth 4. The
+`exact5-shear-loop-pair` seed 61 is an additional trace-clean non-control
+depth-16 survivor in the second priority tier. These seven cards now receive
+the grade-2/3 shared exact-cone search; the 320 obstruction/control cards do
+not consume deeper theorem-search resources.
+
+Transferable lesson: a cheap exact structure gate reduced the first theorem
+search from 491 cards to six primary and one secondary target without
+proving no-go results for every rejected family.
+
+## 2026-07-29 — Exact Hermitian inverse HS construction
+
+Every transpose-paired exact card now has a closed physical reverse map. For
+a real atom `B`, its transpose partner, and a shared rational `q > 0`, define
+on complete number-conserving Fock space
+
+`H_B = -q [Gamma(B) + Gamma(B^T)]`.
+
+Because exterior powers commute with transposition, `H_B` is exactly real
+Hermitian, although generally nonlocal and up to `N`-body. Moreover,
+`-H_B` is the sum of two positive-coefficient Gaussian/CT-HS branches. For
+each ordered auxiliary history,
+
+`Tr_Fock Gamma(B_s1 ... B_sL) = det(I + B_s1 ... B_sL)`,
+
+so the production determinant oracle is exactly the CT expansion weight of
+this Hamiltonian rather than an unrelated matrix proxy.
+
+- source commit:
+  `78bc5116a6f6b11c3b0c71df251198218c66486f`;
+- focused exact tests: 2 passed;
+- all eleven original exact5 trace-clean oddcycle seeds pass Hermiticity and
+  positive-branch reconstruction;
+- seed 13 passes the exact determinant/Taylor identity for orders 0--4.
+
+This closes the Hermitian-Hamiltonian and positive-auxiliary-coefficient
+parts of the challenge for any eventual card certificate. It deliberately
+does not claim arbitrary-order nonnegativity: one all-grade shared cone (or
+an equivalent semigroup theorem) is still required. The construction is
+documented in `docs/EXTERIOR_INVERSE_HS_CONSTRUCTION.md`.
+
+## 2026-07-29 — Stage-4 high-precision first-failure replay
+
+All 179 conditioning-limited first failures from the ordinary depth-13--16
+scan were reconstructed from exact cards and replayed with the frozen
+80/120/180/260 precision ladder and exact rational determinant adjudication.
+
+- source commit:
+  `5de0ee592e42ea3dfc3ca9443aba0aa6afb3accf`;
+- replay plan hash:
+  `bdfb891c49f2fa8a2fd28e1b2f6c5f603ab82fd76ef9f7305383b39028f8b129`;
+- Stage-4 protocol hash:
+  `8ea98348aca95a5c069ba4fc3005c34dead213e19607acbc1e8d6e4c972deebc`;
+- 179/179 terminal, zero missing or stale;
+- 179 confirmed nonnegative, zero confirmed negative or unresolved.
+
+As in earlier first-failure replays, these records are not yet complete
+depth-16 survivors: they must traverse the suffix skipped by the original
+early stop. A dedicated exact-aware continuation is the next queue.
+
+Local evidence SHA-256:
+
+- Markdown summary:
+  `25fc354d4300a6af5620242a0e3261da33f78a35c5bafca1603565bdb2ed85d5`;
+- collection JSON:
+  `f1f630f11010317734656aeb930c442fc894e3e0a32f91e36410842eb5781761`.
+
+## 2026-07-29 — Exact5 grade-2/3 shared-cone triage
+
+The six primary oddcycle-block cards and the secondary shear-loop seed 61
+were tested on the two middle exterior grades, which are the only nontrivial
+unresolved sectors for dimension five after the transpose/duality
+relations. The fast exact library completely checks shared signed gauges
+and positive-diagonal transforms; a multi-start L-BFGS search probes general
+simplicial changes of basis and exact-replays every rationalized hit.
+
+- source commit:
+  `8ac2cfe`;
+- six `exact5-oddcycle-block-pair` seeds
+  `61,97,100,124,211,244`:
+  grade 2 has an exact inconsistent-sign-cycle obstruction and grade 3 has
+  an exact negative-diagonal obstruction within the restricted transform
+  library;
+- `exact5-shear-loop-pair` seed 61:
+  grade 3 has the exact shared signed gauge
+  `diag(1,1,1,-1,-1,-1,-1,-1,-1,1)`;
+- the same shear-loop grade 2 has conflicting entry signs and no exact
+  simplicial hit after 32 starts x 2000 iterations; the best objective was
+  `3.728208e-4` at condition number `4.53356e5`.
+
+The near-zero, high-condition-number grade-2 optimum is a success-oriented
+signal: the next search should allow a redundant, non-simplicial
+polyhedral cone rather than spend more starts forcing an invertible
+ten-ray basis. The restricted obstructions do not prove that no general
+shared cone exists.
+
+Local result SHA-256:
+
+- seven-card triage:
+  `68b6bef1f6bff956991e2c82d932e64b1bf10641b10377d2919f188c4ea829de`;
+- shear-loop seed-61 deep simplicial search:
+  `c3fd3dba2c8571c00a0ccf87fce9c7d95fbed47e21aa35214fdc3e8a3a927d39`.
