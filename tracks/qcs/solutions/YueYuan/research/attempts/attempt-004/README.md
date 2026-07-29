@@ -16,6 +16,10 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - Dense Hessian extraction plus Hessian-vector-product cross-checks and
   effective-rank/curvature-concentration diagnostics.
 - Strict finite-shot `QueryOnlyDevice` with query and shot accounting.
+- Sealed black-box optimizer path that records a query transcript first and
+  computes exact audit metrics only in a post-run scorer.
+- Pulse-distorted software true-device mode for a more realistic hidden
+  mismatch without requiring real hardware.
 - Backend-neutral hardware candidate/job/result records, batch artifact export,
   result ingestion, and a dry-run hardware backend that exposes only counts.
 - Device-informed adaptive subspace probing: paired finite-shot black-box
@@ -40,6 +44,8 @@ The short scientific report is [`REPORT.md`](REPORT.md).
 - `device.py`: hidden true-device perturbations and query-only interface.
 - `device_subspace.py`: black-box paired probing and residual direction
   selection for device-informed adaptive recovery.
+- `sealed_black_box.py`: optimizer/scorer separation with a query transcript so
+  sealed runners do not receive a true-system object.
 - `hardware_adapter.py`: batch hardware boundary, dry-run backend, and
   JSON/CSV/JSONL artifact helpers.
 - `optimizers.py`, `baselines.py`: derivative-free closed-loop methods.
@@ -51,6 +57,9 @@ The short scientific report is [`REPORT.md`](REPORT.md).
   candidates, pulse payloads, shot-count results, and a summary.
 - `run_device_informed_focus.py`: focused hard-mismatch comparison including
   the device-informed adaptive method.
+- `run_black_box_holdout.py`: sealed dev/holdout benchmark, including the
+  pulse-distortion true-device variant, task-array output mode, and complete
+  shard check before Slurm task outputs are combined.
 - `invariant_probe.py`, `run_invariant_probe.py`: lightweight `d^2 - 1`
   invariant/rank probe with explicit evidence labels for model-Hessian smoke
   rows versus the three-qubit chart sanity check.
@@ -76,17 +85,24 @@ python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_candidate
 python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_hardware_dry_run.py --out /tmp/yueyuan-attempt004-hardware --shots 256
 python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_device_informed_focus.py --out /tmp/yueyuan-attempt004-device-informed --fast
 python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_invariant_probe.py --out /tmp/yueyuan-attempt004-invariant
+python3 tracks/qcs/solutions/YueYuan/research/attempts/attempt-004/run_black_box_holdout.py --out /tmp/yueyuan-a004-black-box-holdout --fast
 ```
 
-The latest local verification recorded in `REPORT.md` was:
+The latest verification and sweep evidence recorded in `REPORT.md` was:
 
-- attempt-004 tests: `31 passed`;
-- broader YueYuan attempt tests: `45 passed`;
+- black-box rigor tests: `7 passed`;
+- attempt-004 tests: `38 passed`;
+- broader YueYuan attempt tests: `52 passed`;
 - validator self-test: `"status": "passed"`;
 - fast candidate export: schema version 1, 15 groups;
 - hardware dry run: 7 candidates, 1,792 total shots, `real_hardware: false`;
 - device-informed fast focus: 10 records, 2 device-informed records;
-- invariant probe: 3 rows, including `d=8` local-chart evidence.
+- invariant probe: 3 rows, including `d=8` local-chart evidence;
+- sealed black-box holdout fast run: 10 records, 10 groups, dev and holdout
+  splits, `pulse_distortion` true-device variant.
+- moderate sealed black-box holdout CPU sweep: 48/48 expected task files, 240
+  run records, 120 summary groups, dev and holdout splits, and
+  `medium`/`large`/`pulse_distortion` true-device variants.
 
 ## Hardware-Style Dry Run
 
@@ -127,6 +143,36 @@ run, device-informed probing did not reach the target, but it reduced final
 infidelity versus the fixed Hessian, random, and full-space baselines in the two
 tested hard cells while recording a 9-query probing overhead. Larger generated
 sweeps should be kept under ignored results directories.
+
+## Sealed Black-Box Holdout
+
+`sealed_black_box.py` removes the easiest black-box criticism of the earlier
+baseline functions. The sealed optimizers accept only an oracle with `query`,
+`query_count`, and `shot_count`, then return a transcript of queried pulses and
+noisy finite-shot values. Exact true-device fidelity is computed later by
+`score_sealed_run`, after optimization decisions are finished.
+
+`run_black_box_holdout.py --fast` exercises that sealed path on a
+`pulse_distortion` software true device. The fast smoke run writes
+`runs.jsonl`, `black_box_holdout_summary.csv`, and
+`black_box_holdout_success.png`; it produced 10 records and 10 summary groups
+across dev and holdout splits. This is a boundary and regression check rather
+than a target-reaching claim: all fast pulse-distortion rows missed the `1e-3`
+target, while device-informed probing lowered final infidelity in the one-qubit
+dev cell and beat fixed/adaptive Hessian in the two-qubit holdout cell.
+
+The moderate CPU Slurm script is
+`slurm/black_box_holdout.sbatch`: 48 array tasks, 4 CPUs per task, `%8`
+concurrency, 32 CPUs maximum, CPU only. The completed moderate sweep produced
+240 method records and 120 summary groups from 48/48 expected shards. Across
+the 24 split/system/variant/shot cells, the device-informed sealed method had
+mean target-reaching success 0.5625 and median-of-median final infidelity
+0.002078, compared with 0.520833 and 0.002162 for widen-only adaptive Hessian,
+0.416667 and 0.003515 for fixed Hessian, and 0.1875 with roughly 0.00686
+median infidelity for full-space and random-subspace search. Device-informed
+probing lowered median final infidelity versus full-space and random in 24/24
+cells, versus fixed Hessian in 17/24 cells, and versus widen-only adaptive in
+11/24 cells, so it is useful but not uniformly dominant.
 
 ## Invariant Rank Probe
 
@@ -169,6 +215,9 @@ The required boxes from `challenge_113_codex_spec.md` are covered as follows:
   no-real-hardware accounting are implemented and tested.
 - Device-informed residual probing, counted probe overhead, focused comparison,
   and recovery summaries are implemented and tested.
+- Sealed optimizer/scorer separation, dev/holdout labels, and a
+  pulse-distortion true-device variant are implemented, tested, and run through
+  a completed moderate CPU holdout sweep.
 - Invariant/rank probe covers model-Hessian smoke checks for `d=2` and `d=4`,
   plus a labeled `d=8` local-chart sanity check.
 - Model-only, full-space, random-subspace, Hessian-subspace, and adaptive

@@ -41,6 +41,6 @@ Attempt 001 started the run stage with a local rank-15 surrogate candidate. Atte
 
 Attempt 003 now replaces deterministic query formulas with a pure-NumPy noisy-oracle simplex optimizer under `research/attempts/attempt-003/`. The public dev validator accepts attempt 003 with score `2.4615384615384617`.
 
-Attempt 004 implements the full checklist path: JAX differentiable one-qubit and two-qubit dynamics, open-loop model optimization, Hessian/HVP checks, a strict query-only finite-shot device, model-only/full/random/Hessian baselines, multi-axis sweeps, generated figures, Slurm scripts, and a short report.
+Attempt 004 implements the full checklist path: JAX differentiable one-qubit and two-qubit dynamics, open-loop model optimization, Hessian/HVP checks, a strict query-only finite-shot device, sealed optimizer/scorer separation, pulse-distorted software true-device tests, model-only/full/random/Hessian/adaptive/device-informed baselines, multi-axis sweeps, generated figures, Slurm scripts, and a short report.
 
-Next step: run the capped HPC sweep and update the attempt-004 report with full CPU/GPU scan results.
+The moderate sealed black-box holdout sweep has now completed on CPU: 48/48 task shards, 240 method records, 120 summary groups, dev and holdout splits, and medium/large/pulse-distortion software true-device variants. Results still do not claim real hardware, but they substantially tighten the software black-box evidence.

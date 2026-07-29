@@ -66,6 +66,12 @@ continues in a merged model-plus-device-informed basis. Probe directions are
 selected only from noisy device responses; exact fidelity remains an audit
 quantity used for reporting and query-to-target accounting.
 
+The black-box rigor pass adds a stricter sealed path for new evaluations. In
+that path, optimizers receive only a recording oracle exposing `query`,
+`query_count`, and `shot_count`. They return a transcript of queried pulses and
+finite-shot values; exact true-device fidelity is computed only afterward by a
+separate scorer.
+
 ## Full Sweep
 
 The full CPU sweep ran as 144 independent Slurm array tasks with 4 CPU cores per
@@ -241,6 +247,64 @@ Generated focused artifacts are:
 - `device_informed_recovery.csv`
 - `device_informed_recovery.png`
 
+## Sealed Black-Box Holdout
+
+`sealed_black_box.py` separates optimization from exact audit scoring. The
+sealed methods accept an oracle, not a true-system object, and their objective
+functions return only the noisy scalar from `oracle.query`. The post-run scorer
+then receives the hidden true system and the transcript to compute exact final
+infidelity and query-to-target labels. This does not make the software device
+cryptographically hidden, but it removes exact true-device access from the
+closed-loop optimizer functions used by the new runner.
+
+The same pass adds a `pulse_distortion` software true-device mode. The model
+still proposes raw pulse parameters, while the true device internally applies a
+small smoothing and memory transform before evaluating the pulse. That transform
+is hidden behind the query interface and is also applied by the post-run scorer
+so final metrics match what the black box actually evaluated.
+
+`run_black_box_holdout.py --fast` produced 10 records and 10 summary groups on a
+small dev/holdout smoke split:
+
+| Split | System | True-device variant | Shots | Method | Success | Final infidelity | Probe queries | Selected probe directions |
+|---|---|---|---:|---|---:|---:|---:|---:|
+| dev | one-qubit X | pulse distortion | 256 | device-informed adaptive | 0 | 0.006088 | 9 | 2 |
+| holdout | two-qubit CZ | pulse distortion | 256 | device-informed adaptive | 0 | 0.049036 | 9 | 2 |
+
+This is not a target-reaching result. It is a stronger boundary check and a
+small holdout smoke test: the one-qubit dev cell improved over full, random,
+fixed Hessian, and widen-only adaptive baselines; the two-qubit holdout cell
+improved over full, fixed Hessian, and widen-only adaptive baselines, while the
+random benchmark-rank subspace was still slightly better in that single seed.
+The moderate CPU Slurm script extends this to two systems, three true-device
+variants, two shot budgets, and dev plus holdout seeds, using 48 array tasks
+with at most 32 CPU cores at once. That moderate sweep completed with 48/48
+expected task shards, 240 method records, and 120 summary groups across
+`dev`/`holdout` splits and `medium`, `large`, and `pulse_distortion` true-device
+variants.
+
+Across the 24 split/system/variant/shot cells in the moderate sealed holdout,
+the device-informed method had the best aggregate success and final-infidelity
+profile, but it was not uniformly best:
+
+| Method | Mean success rate | Median of median final infidelity |
+|---|---:|---:|
+| device-informed adaptive Hessian | 0.562500 | 0.002078 |
+| widen-only adaptive Hessian | 0.520833 | 0.002162 |
+| fixed Hessian subspace | 0.416667 | 0.003515 |
+| full-space Nelder-Mead | 0.187500 | 0.006854 |
+| random subspace | 0.187500 | 0.006864 |
+
+Device-informed probing lowered median final infidelity relative to full-space
+and random-subspace search in 24/24 cells, relative to fixed Hessian in 17/24
+cells, and relative to widen-only adaptive Hessian in 11/24 cells, with 4 ties
+against each Hessian baseline. On the hardest pulse-distorted holdout cells at
+2048 shots, the one-qubit case reached the target with median final infidelity
+0.000326, while the two-qubit `CZ` case improved to 0.002565 but still missed
+the `1e-3` target. This is the strongest current software black-box evidence:
+the residual device-informed probes are helpful on average, but the remaining
+two-qubit holdout miss is a real limitation rather than a polished-away result.
+
 ## Invariant Rank Probe
 
 The challenge asks whether the useful dimension tracks `d^2 - 1` across
@@ -303,6 +367,10 @@ the useful resource for this attempt.
 - Strict query-only finite-shot device with query and shot counters: implemented.
 - Batch hardware adapter, exported pulse payloads, count ingestion, and dry-run
   hardware-style summary: implemented and tested.
+- Sealed optimizer/scorer separation with transcript scoring:
+  implemented and tested.
+- Pulse-distortion true-device variant and dev/holdout runner:
+  implemented, tested, and completed on a moderate CPU holdout sweep.
 - Device-informed paired probing and adaptive residual subspace selection:
   implemented and tested.
 - Lightweight invariant/rank probe with model-Hessian smoke rows for `d=2` and
@@ -331,20 +399,27 @@ the useful resource for this attempt.
 
 ## Verification
 
-Local verification after the hardware-readiness addition:
+Latest verification after the black-box rigor pass:
 
 - Focused red/green reachability test: passing.
 - Focused hardware adapter and dry-run tests: passing (`4 passed`).
 - Device-informed subspace tests: passing (`4 passed`).
 - Invariant probe tests: passing (`2 passed`).
-- Attempt-004 tests: passing (`31 passed`).
-- Broader YueYuan attempt tests: passing (`45 passed`).
+- Black-box rigor tests: passing (`7 passed`).
+- Attempt-004 tests: passing (`38 passed`).
+- Broader YueYuan attempt tests: passing (`52 passed`).
 - Validator self-test controls: passing (`"status": "passed"`).
 - Fast candidate export: passing (`schema_version=1`, 15 groups).
 - Hardware dry run: passing (7 candidates, 1,792 total shots,
   `real_hardware: false`).
 - Device-informed fast focus: passing (10 records, 2 device-informed records).
 - Invariant rank probe: passing (3 rows, `d=8` labeled `local_unitary_chart`).
+- Sealed black-box holdout fast run: passing (10 records, 10 groups, dev and
+  holdout splits, `pulse_distortion` true-device variant).
+- Moderate sealed black-box holdout CPU sweep: completed with 48/48 expected
+  task files, 240 run records, 120 summary groups, dev and holdout splits, and
+  `medium`/`large`/`pulse_distortion` true-device variants. The combine step now
+  refuses incomplete task sets before writing aggregate summaries.
 - Figure/table generation: passing (`1,656` rows, `207` groups, eight PNGs,
   five CSV tables).
 - Full CPU sweep: completed with 144/144 tasks and zero tracebacks.
@@ -358,6 +433,8 @@ The generated files are intentionally ignored by git.
 ## Limitations
 
 This is software calibration, not real hardware calibration. The black-box
-boundary is enforced by the public query interface and tests, not by cryptographic
-isolation. Confidence intervals are wide because each cell uses 8 seeds; more
-seeds would be needed for publication-grade statistics.
+boundary is enforced by the public query interface, sealed runner discipline,
+and tests, not by cryptographic isolation. Confidence intervals are wide because
+the largest completed full sweep uses 8 seeds per cell, and the moderate sealed
+holdout uses 2 dev plus 2 holdout seeds per system/variant/shot cell; more seeds
+and real hardware would be needed for publication-grade claims.

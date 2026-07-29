@@ -152,3 +152,52 @@ commands without explicit approval.
     `0.970` and `0.975` of model-Hessian curvature in those rows;
   - this is a method-level improvement and partial/negative recovery result, not
     a real-hardware or target-reaching claim.
+
+### 2026-07-29: Black-Box Rigor And Holdout Pass
+
+- Implementation commits:
+  - `549e1c3 Specify black-box rigor pass`
+  - `bd7471b Plan black-box rigor pass`
+  - `323d017 Add pulse-distorted true-device mode`
+  - `1cedde5 Add sealed black-box optimizer path`
+  - `d9b6ea9 Add sealed holdout benchmark runner`
+  - `5ab9af1 Document sealed black-box holdout pass`
+  - `249b8e1 Harden holdout task combining`
+- Intended score improvement:
+  - moves the strictest new evaluations to a sealed optimizer/scorer split;
+  - adds a pulse-distortion software true-device variant;
+  - adds dev/holdout labels so future tuning and evaluation can be separated;
+  - prepares and runs a conservative CPU-only moderate Slurm sweep.
+- Fresh local smoke evidence:
+  - black-box rigor tests: `7 passed`;
+  - attempt-004 tests: `38 passed`;
+  - broader YueYuan attempt tests: `52 passed`;
+  - validator self-test: passed;
+  - sealed black-box holdout fast run: `10` records and `10` summary groups;
+  - fast split labels: `dev` and `holdout`;
+  - fast true-device variant: `pulse_distortion`;
+  - fast device-informed rows did not reach the target, but recorded counted
+    9-query residual probing in both cells.
+- Fresh moderate CPU holdout evidence:
+  - Slurm array completed `48/48` expected task shards with CPU-only `%8`
+    concurrency and 4 CPUs per task;
+  - combined output: `240` method records and `120` summary groups;
+  - splits: `dev` and `holdout`;
+  - true-device variants: `medium`, `large`, and `pulse_distortion`;
+  - combine mode now rejects incomplete shard sets before writing aggregate
+    summaries;
+  - across 24 split/system/variant/shot cells, device-informed probing lowered
+    median final infidelity versus full-space and random baselines in `24/24`
+    cells, versus fixed Hessian in `17/24`, and versus widen-only adaptive in
+    `11/24` with `4` ties.
+- Interpretation:
+  - this pass improves black-box boundary rigor rather than claiming real
+    hardware;
+  - exact fidelity still exists for validation, but the new sealed optimizers do
+    not receive a true-system object and are tested against a poisoned exact
+    scoring API;
+  - the moderate HPC sweep tests the same sealed path across more seeds, gaps,
+    and shots while staying below 32 concurrent CPU cores;
+  - the device-informed method is best on aggregate, but the two-qubit
+    pulse-distorted holdout at 2048 shots still misses the `1e-3` target, so the
+    solution keeps a real negative result.
