@@ -4,9 +4,15 @@ import json
 from pathlib import Path
 
 import oracle.exterior_deep_survivor as stage3
+import oracle.exterior_depth12_exact_fallback as depth12_exact
+import oracle.exterior_depth12_hp_continuation as depth12_hp
 import oracle.exterior_depth16_survivor as stage4
 from oracle.exterior_candidates import candidate_card, candidate_id
-from oracle.exterior_structural_rank import rank_survivor_cards, sector_trace_gate
+from oracle.exterior_structural_rank import (
+    rank_continuation_survivors,
+    rank_survivor_cards,
+    sector_trace_gate,
+)
 
 
 def _write_chain(
@@ -142,3 +148,100 @@ def test_manifest_rank_puts_trace_clean_exact5_before_induced_control(
         result["ranking"][1]["control_reduction"]["kind"]
         == "known-induced-tn-signed-gauge"
     )
+
+
+def _write_continuation(
+    root: Path,
+    card: dict[str, object],
+    *,
+    kind: str,
+) -> Path:
+    module = depth12_exact if kind == "exact-fallback" else depth12_hp
+    identity = candidate_id(card)
+    entry: dict[str, object] = {
+        "candidate_id": identity,
+        "card_sha256": identity,
+        "template": card["template"],
+        "seed": card["seed"],
+        "dimension": card["dimension"],
+    }
+    plan: dict[str, object] = {
+        "schema_version": module.SCHEMA_VERSION,
+        "run_id": module.RUN_ID,
+        "depths": list(module.DEPTHS),
+        "word_count_per_candidate": len(module.WORDS),
+        "workers": module.WORKERS,
+        "candidate_count": 1,
+        "candidates": [entry],
+    }
+    if kind == "stage3hp":
+        plan.update(
+            {
+                "stage3_run_id": stage3.RUN_ID,
+                "stage3hp_run_id": depth12_hp.stage3hp.RUN_ID,
+            }
+        )
+    payload = dict(plan)
+    plan["continuation_plan_hash"] = depth12_exact._sha256(payload)
+    root.mkdir(parents=True)
+    (root / "continuation-plan.json").write_text(
+        json.dumps(plan), encoding="utf-8"
+    )
+    manifest = {
+        "schema_version": module.SCHEMA_VERSION,
+        "run_id": module.RUN_ID,
+        "continuation_plan_hash": plan["continuation_plan_hash"],
+        "candidate_id": identity,
+        "card_sha256": identity,
+        "worker_index": int(identity[:16], 16) % module.WORKERS,
+        "workers": module.WORKERS,
+        "depths": list(module.DEPTHS),
+        "planned_words": len(module.WORDS),
+        "tested_words": len(module.WORDS),
+        "status": module.SURVIVOR_STATUS,
+        "first_failure": None,
+    }
+    if kind == "stage3hp":
+        manifest["reused_hp_count"] = 1
+    path = root / "candidates" / identity / "manifest.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    return root
+
+
+def test_exact_fallback_rank_marks_deep_sector_cancellation(tmp_path: Path) -> None:
+    run_dir = _write_continuation(
+        tmp_path / "exact",
+        candidate_card(template="exact5-oddcycle-block-pair", seed=61),
+        kind="exact-fallback",
+    )
+
+    result = rank_continuation_survivors(
+        run_dir=run_dir, continuation_kind="exact-fallback"
+    )
+
+    assert result["selected"] == 1
+    assert result["full_determinant_cancellation_count"] == 1
+    cancellation = result["ranking"][0]["full_determinant_cancellation"]
+    assert cancellation["status"] == "exact-positive-determinant-negative-sector"
+    assert cancellation["witness"]["depth"] == 6
+    assert cancellation["witness"]["determinant"]["numerator"] > 0
+
+
+def test_stage3hp_rank_promotes_exact5_trace_clean_non_control(
+    tmp_path: Path,
+) -> None:
+    run_dir = _write_continuation(
+        tmp_path / "hp",
+        candidate_card(template="exact5-oddcycle-block-pair", seed=13),
+        kind="stage3hp",
+    )
+
+    result = rank_continuation_survivors(
+        run_dir=run_dir, continuation_kind="stage3hp"
+    )
+
+    assert result["selected"] == 1
+    assert result["priority_counts"] == {"exact5-trace-clean-non-control": 1}
+    assert result["ranking"][0]["sector_trace"]["status"] == "trace-clean-depth4"
+    assert result["ranking"][0]["non_control"] is True
