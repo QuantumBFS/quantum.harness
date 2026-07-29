@@ -76,6 +76,7 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "numpy==2.0.2" in requirements
     assert "ml_dtypes==0.5.1" in requirements
     assert "scipy==1.16.3" in requirements
+    assert "cffi==2.0.0" in requirements
     assert "optax==0.2.4" in requirements
     assert "pywigxjpf==1.13.3" in source_requirements
     assert "--require-platform" in bootstrap

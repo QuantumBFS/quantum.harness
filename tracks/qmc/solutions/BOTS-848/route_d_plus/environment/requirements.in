@@ -5,6 +5,7 @@ ml_dtypes==0.5.1
 scipy==1.16.3
 sympy
 pycparser
+cffi==2.0.0
 optax==0.2.4
 h5py
 pyyaml

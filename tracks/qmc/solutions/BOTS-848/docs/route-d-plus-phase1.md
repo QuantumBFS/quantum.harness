@@ -62,7 +62,8 @@ The cluster uses glibc 2.17 and its visible CUDA package set ends at cuDNN
 `--only-binary=:all:` dry-run resolved the full CUDA 12 dependency graph before
 installation. SciPy is pinned to the compatible 1.16.3 wheel. The sole source
 dependency, `pywigxjpf==1.13.3`, is installed in a separate transaction only
-after the binary environment is complete.
+after the binary environment is complete. Its declared `cffi` build/runtime
+dependency is fixed at 2.0.0 in the binary requirements.
 
 For the bandwidth-limited login node, the same requirements may be staged as a
 target-specific wheelhouse. `ROUTE_D_PLUS_WHEELHOUSE` switches bootstrap to

@@ -37,8 +37,10 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
    `L=2` components. Phase 2 cannot begin before the Phase 1 manifest passes.
 5. Nontrivial execution is restricted to the `hpccube-xh5` Slurm cluster.
 6. Because compute nodes are offline and login-node bandwidth is limited, the
-   pinned Python 3.11/manylinux2014 wheelhouse is staged outside Git and used
-   with `--no-index`; its installed lock digest remains the durable evidence.
+  pinned Python 3.11/manylinux2014 wheelhouse is staged outside Git and used
+  with `--no-index`; its installed lock digest remains the durable evidence.
+  `pywigxjpf` is the sole source build and its `cffi==2.0.0` prerequisite is
+  installed from the same wheelhouse first.
 
 ## Environment observations
 
