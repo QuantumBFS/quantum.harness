@@ -53,6 +53,30 @@ def _complex_sum(values: list[complex]) -> complex:
     )
 
 
+def _rotation_roundoff_bound(rotated: complex, predicted: complex) -> float:
+    """Bound binary64 roundoff at the actual rotation-probe scale."""
+
+    observed = complex(rotated)
+    expected = complex(predicted)
+    components = (
+        observed.real,
+        observed.imag,
+        expected.real,
+        expected.imag,
+    )
+    if any(not math.isfinite(component) for component in components):
+        raise FloatingPointError("rotation probe values must be finite")
+    scale = max(abs(observed), abs(expected))
+    if not math.isfinite(scale):
+        raise FloatingPointError("rotation probe magnitude is non-finite")
+    proportional = 64.0 * np.finfo(np.float64).eps * scale
+    component_ulps = math.fsum(math.ulp(component) for component in components)
+    bound = math.fsum((float(proportional), component_ulps))
+    if not math.isfinite(bound) or bound <= 0.0:
+        raise FloatingPointError("rotation roundoff bound must be finite and positive")
+    return bound
+
+
 def _validated_tiny_states(
     tower: LadderTower,
     tiny_support_by_m: Mapping[int, object],
@@ -407,11 +431,7 @@ def _finite_rotation_residual(
         if exact_tiny:
             residual = raw_difference / scale
         else:
-            roundoff = (
-                64.0
-                * np.finfo(np.float64).eps
-                * max(1.0, abs(rotated), abs(predicted))
-            )
+            roundoff = _rotation_roundoff_bound(rotated, predicted)
             excess = max(
                 0.0,
                 raw_difference
@@ -441,6 +461,11 @@ def evaluate_tower_diagnostics(
     Tiny-support rotations retain their raw deterministic residual.  The
     production rotation field is the conservative excess left after seeded
     replica-chain sampling error and drift allowances are subtracted.
+
+    Production importance sampling assumes that the tower's ``M=0`` logpsi
+    represents a unit-normalized state.  Verifying that premise would require
+    enumerating the physical support, so it is an explicit input contract
+    rather than a runtime check.
     """
 
     if not isinstance(tower, LadderTower):

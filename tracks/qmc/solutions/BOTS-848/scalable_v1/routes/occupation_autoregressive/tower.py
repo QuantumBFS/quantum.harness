@@ -602,6 +602,8 @@ class LadderComponent:
 class LadderTower(Mapping[int, LadderComponent]):
     """Read-only mapping of ``M=-2,-1,0,1,2`` ladder components."""
 
+    requires_normalized_m0 = True
+
     def __init__(self, *_args: object, **_kwargs: object) -> None:
         raise TypeError("LadderTower instances must be created with from_m0()")
 
@@ -615,7 +617,13 @@ class LadderTower(Mapping[int, LadderComponent]):
         two_q: int,
         l: int = 2,
     ) -> LadderTower:
-        """Build the five components from one reduced ``M=0`` callback pair."""
+        """Build five components from a unit-normalized ``M=0`` state.
+
+        ``logpsi`` must represent a state with unit total probability on the
+        physical ``M=0`` support.  The constructor preserves the sparse
+        production boundary and therefore does not enumerate that support to
+        verify normalization at runtime.
+        """
 
         if not callable(logpsi):
             raise TypeError("logpsi must be callable")

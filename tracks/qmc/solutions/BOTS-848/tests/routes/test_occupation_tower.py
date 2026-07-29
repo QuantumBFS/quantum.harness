@@ -567,6 +567,38 @@ def _exact_zero_derived_tower() -> LadderTower:
     )
 
 
+def _near_cancelled_normalized_m0_tower() -> LadderTower:
+    left = 1.0
+    right = -1.0 + math.ldexp(1.0, -48)
+    norm = math.hypot(left, right)
+    amplitudes = {
+        M0_LEFT: complex(left / norm),
+        M0_RIGHT: complex(right / norm),
+    }
+    assert math.fsum(abs(value) ** 2 for value in amplitudes.values()) == (
+        pytest.approx(1.0, abs=2.0e-16)
+    )
+    return LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes(amplitudes),
+        log_score=_zero_score(width=1),
+        n_electrons=N_ELECTRONS,
+        two_q=TWO_Q,
+        l=2,
+    )
+
+
+def _normalized_single_particle_spin3_tower() -> LadderTower:
+    two_q = 6
+    m0_state = 1 << (two_q // 2)
+    return LadderTower.from_m0(
+        logpsi=_logpsi_from_amplitudes({m0_state: 1.0 + 0.0j}),
+        log_score=_zero_score(width=1),
+        n_electrons=1,
+        two_q=two_q,
+        l=2,
+    )
+
+
 def _larger_m0_tower() -> LadderTower:
     n_electrons = 3
     two_q = 6
@@ -858,6 +890,59 @@ def test_production_rotation_probes_use_independent_deterministic_chains(
         seed for m, _count, _burn_in, seed in first_calls if m == 0
     )
     assert len(m0_seeds) >= 1 + arguments["rotation_probes"]
+
+
+def test_near_zero_roundoff_bound_tracks_normalized_probe_scale() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+    tower = _near_cancelled_normalized_m0_tower()
+    probe_scale = abs(_amplitude(tower[1], M_PLUS_ONE))
+    assert 0.0 < probe_scale < 7.0e-15
+
+    roundoff_bound = getattr(diagnostics, "_rotation_roundoff_bound", None)
+    assert callable(roundoff_bound)
+    observed = roundoff_bound(complex(probe_scale), 0.0j)
+
+    assert 0.0 < observed < probe_scale * 1.0e-10
+
+
+def test_block_mean_production_detects_normalized_spin3_breaking() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+
+    observed = diagnostics.evaluate_tower_diagnostics(
+        _normalized_single_particle_spin3_tower(),
+        seed=852,
+        burn_in_steps=5,
+        sample_count=64,
+        rotation_probes=5,
+    )
+
+    assert observed["finite_rotation_residual"] > 1.0e-3
+
+
+def test_small_sample_replicas_detect_normalized_spin3_breaking() -> None:
+    diagnostics = _a04_2_diagnostics_module()
+
+    first = diagnostics.evaluate_tower_diagnostics(
+        _normalized_single_particle_spin3_tower(),
+        seed=852,
+        burn_in_steps=2,
+        sample_count=3,
+        rotation_probes=5,
+    )
+    repeat = diagnostics.evaluate_tower_diagnostics(
+        _normalized_single_particle_spin3_tower(),
+        seed=852,
+        burn_in_steps=2,
+        sample_count=3,
+        rotation_probes=5,
+    )
+
+    assert first == repeat
+    assert first["finite_rotation_residual"] > 1.0e-3
+
+
+def test_tower_api_declares_normalized_m0_requirement() -> None:
+    assert getattr(LadderTower, "requires_normalized_m0", False) is True
 
 
 @pytest.mark.parametrize(
