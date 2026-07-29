@@ -179,6 +179,35 @@ def bond_convergence(out_dir, Lx=3, Ly=4, h=3.0, beta=0.5, dtau=0.02,
     return rows
 
 
+def ed_comparison_plot(csv_path, out_png, title="METTS vs ED"):
+    """Plot u(beta) and C(beta) METTS-vs-ED from a comparison CSV (the output
+    of run.py's metts_vs_ed.csv). Crash-guarded."""
+    from metts_b.bridge import read_csv
+    rows = read_csv(csv_path)
+    if not rows or "u_ed" not in rows[0]:
+        sys.stderr.write(f"[analyze] no ED column in {csv_path}\n")
+        return
+    b = [float(r["beta"]) for r in rows]
+    um = [float(r["u_metts"]) for r in rows]
+    ue = [float(r["u_err"]) for r in rows]
+    ud = [float(r["u_ed"]) for r in rows]
+    cm = [float(r["C_metts"]) for r in rows]
+    ce = [float(r["C_err"]) for r in rows]
+    cd = [float(r["C_ed"]) for r in rows]
+    fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+    ax[0].errorbar(b, um, yerr=ue, fmt="o-", label="METTS")
+    ax[0].plot(b, ud, "s--", color="k", label="ED")
+    ax[0].set_xlabel(r"$\beta J$"); ax[0].set_ylabel(r"$u$")
+    ax[0].legend(); ax[0].grid(ls=":", alpha=0.5)
+    ax[0].set_title(title + " — internal energy")
+    ax[1].errorbar(b, cm, yerr=ce, fmt="o-", label="METTS")
+    ax[1].plot(b, cd, "s--", color="k", label="ED")
+    ax[1].set_xlabel(r"$\beta J$"); ax[1].set_ylabel(r"$C$")
+    ax[1].legend(); ax[1].grid(ls=":", alpha=0.5)
+    ax[1].set_title(title + " — specific heat")
+    _safe_savefig(out_png)
+
+
 def run_all_analysis(out_dir, label="analysis"):
     os.makedirs(out_dir, exist_ok=True)
     t0 = time.time()
@@ -195,5 +224,14 @@ if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--out", default="metts_runs/analysis")
+    p.add_argument("--ed-csv", default=None,
+                   help="optional metts_vs_ed.csv to plot")
+    p.add_argument("--ed-title", default="METTS vs ED")
     args = p.parse_args()
-    run_all_analysis(args.out)
+    if args.ed_csv:
+        ed_comparison_plot(args.ed_csv,
+                           os.path.join(os.path.dirname(args.ed_csv) or ".",
+                                        "ed_comparison.png"),
+                           args.ed_title)
+    else:
+        run_all_analysis(args.out)
