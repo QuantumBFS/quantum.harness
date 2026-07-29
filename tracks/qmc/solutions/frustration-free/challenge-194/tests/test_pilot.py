@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 from pathlib import Path
 import shutil
+from threading import Event
 
 import pytest
 
@@ -88,6 +89,52 @@ def test_duplicate_execution_has_one_equivalent_verified_winner(tmp_path: Path):
     run = next((path.parent / "cells").iterdir()) / "run"
     assert len(list((run / "trajectories").glob("trajectory-*.h5"))) == 1
     assert len(list((run / "batches").glob("batch-*.json"))) == 1
+
+
+def test_different_cells_can_initialize_while_first_worker_retains_chain(
+    tmp_path: Path,
+):
+    path = _tiny_spec(tmp_path, replicas=(0, 1))
+    first_ready = Event()
+    second_done = Event()
+
+    def hold_first(stage: str) -> None:
+        if stage == "after-trajectory":
+            first_ready.set()
+            assert second_done.wait(timeout=10)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(
+            pilot._run_test_pilot_cell,
+            path,
+            0,
+            crash_hook=hold_first,
+        )
+        assert first_ready.wait(timeout=10)
+        second = pilot._run_test_pilot_cell(path, 1)
+        second_done.set()
+        first_result = first.result(timeout=10)
+
+    assert first_result["cell_index"] == 0
+    assert second["cell_index"] == 1
+    assert pilot._pending_test_pilot_cells(path) == []
+    pilot._merge_test_pilot_progress(path)
+    assert pilot._verify_test_pilot_download(path)["cell_count"] == 2
+
+
+def test_replacing_shared_cells_inode_while_worker_retains_chain_fails(
+    tmp_path: Path,
+):
+    path = _tiny_spec(tmp_path, replicas=(0, 1))
+    cells_root = path.parent / "cells"
+
+    def replace_cells(stage: str) -> None:
+        if stage == "after-trajectory":
+            cells_root.rename(path.parent / "detached-cells")
+            cells_root.mkdir()
+
+    with pytest.raises(RuntimeError, match="identity|generation"):
+        pilot._run_test_pilot_cell(path, 0, crash_hook=replace_cells)
 
 
 @pytest.mark.parametrize("stage", ("after-trajectory", "after-progress"))

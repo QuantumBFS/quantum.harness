@@ -147,7 +147,11 @@ cells are deeply verified. A complete trajectory may resume batch, progress,
 and outer-marker publication. Surviving `.partial` or `.intent` files block
 recovery and are never deleted. Duplicate workers serialize at the cell
 directory: one publishes without clobbering; the loser succeeds only after
-full verification.
+full verification. Different cells may be created concurrently: the shared
+`cells/` descriptor remains bound to the same directory, owner, mode, device,
+and inode while its legitimate child-count and timestamp metadata may change.
+Immutable ancestors and each exact target cell retain strict generation
+binding; shared-directory substitution and cell swap/restore still fail.
 
 ## Deterministic P1 outline
 

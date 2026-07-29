@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence, Set
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import fcntl
@@ -193,7 +193,9 @@ def _snapshot_existing_directories(path: Path) -> dict[Path, os.stat_result]:
     return snapshots
 
 
-def _open_directory_chain(path: Path, *, create: bool) -> list[DirectoryEntry]:
+def _open_directory_chain(
+    path: Path, *, create: bool, allow_final_mutation: bool = False
+) -> list[DirectoryEntry]:
     absolute = path.absolute()
     snapshots = _snapshot_existing_directories(absolute)
     entries: list[DirectoryEntry] = []
@@ -220,20 +222,52 @@ def _open_directory_chain(path: Path, *, create: bool) -> list[DirectoryEntry]:
                 os.close(descriptor)
                 raise RuntimeError("directory ancestry contains a non-directory")
             original = snapshots.get(current_path)
-            if original is not None and _generation_tuple(status) != _generation_tuple(
-                original
-            ):
-                os.close(descriptor)
-                raise RuntimeError(
-                    "directory ancestor generation changed before descriptor open"
+            if original is not None:
+                final_is_mutable = (
+                    allow_final_mutation and current_path == absolute
                 )
+                stable_identity = (
+                    status.st_dev,
+                    status.st_ino,
+                    status.st_mode,
+                    status.st_uid,
+                    status.st_gid,
+                )
+                original_identity = (
+                    original.st_dev,
+                    original.st_ino,
+                    original.st_mode,
+                    original.st_uid,
+                    original.st_gid,
+                )
+                if (
+                    (
+                        not final_is_mutable
+                        and _generation_tuple(status)
+                        != _generation_tuple(original)
+                    )
+                    or (
+                        final_is_mutable
+                        and (
+                            stable_identity != original_identity
+                            or status.st_nlink < original.st_nlink
+                            or status.st_nlink < 2
+                        )
+                    )
+                ):
+                    os.close(descriptor)
+                    raise RuntimeError(
+                        "directory ancestor generation changed before descriptor open"
+                    )
             entries.append((current_path, descriptor, status))
         if create:
             entries = [
                 (entry_path, entry_fd, os.fstat(entry_fd))
                 for entry_path, entry_fd, _ in entries
             ]
-        _require_directory_chain(entries, allow_final_mutation=False)
+        _require_directory_chain(
+            entries, allow_final_mutation=allow_final_mutation
+        )
         return entries
     except BaseException:
         _close_directory_chain(entries)
@@ -246,7 +280,9 @@ def _close_directory_chain(entries: Sequence[DirectoryEntry]) -> None:
 
 
 def _open_cell_directory_chain(root: Path, cell_id: str) -> list[DirectoryEntry]:
-    entries = _open_directory_chain(root, create=False)
+    entries = _open_directory_chain(
+        root, create=False, allow_final_mutation=True
+    )
     root_fd = entries[-1][1]
     cell_locked = False
     try:
@@ -287,22 +323,50 @@ def _open_cell_directory_chain(root: Path, cell_id: str) -> list[DirectoryEntry]
 
 
 def _require_directory_chain(
-    entries: Sequence[DirectoryEntry], *, allow_final_mutation: bool
+    entries: Sequence[DirectoryEntry],
+    *,
+    allow_final_mutation: bool,
+    mutable_indexes: Set[int] = frozenset(),
 ) -> None:
+    flexible_indexes = set(mutable_indexes)
+    if allow_final_mutation:
+        flexible_indexes.add(len(entries) - 1)
     for index, (path, descriptor, original) in enumerate(entries):
         try:
             path_status = path.lstat()
             descriptor_status = os.fstat(descriptor)
         except OSError as error:
             raise RuntimeError("directory ancestor identity changed") from error
+        stable_identity = (
+            descriptor_status.st_dev,
+            descriptor_status.st_ino,
+            descriptor_status.st_mode,
+            descriptor_status.st_uid,
+            descriptor_status.st_gid,
+        )
+        original_identity = (
+            original.st_dev,
+            original.st_ino,
+            original.st_mode,
+            original.st_uid,
+            original.st_gid,
+        )
         if (
             stat.S_ISLNK(path_status.st_mode)
             or not stat.S_ISDIR(path_status.st_mode)
             or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
             or (
-                (index != len(entries) - 1 or not allow_final_mutation)
+                index not in flexible_indexes
                 and _generation_tuple(descriptor_status)
                 != _generation_tuple(original)
+            )
+            or (
+                index in flexible_indexes
+                and (
+                    stable_identity != original_identity
+                    or descriptor_status.st_nlink < original.st_nlink
+                    or descriptor_status.st_nlink < 2
+                )
             )
         ):
             raise RuntimeError(
@@ -1432,9 +1496,14 @@ def _run_cell(
     cell_root = _relative_path(root, cell.cell_path, "cells")
     cell_chain = _open_cell_directory_chain(root, cell.cell_id)
     descriptor = cell_chain[-1][1]
+    shared_cells_index = len(cell_chain) - 2
     locked = True
     try:
-        _require_directory_chain(cell_chain, allow_final_mutation=True)
+        _require_directory_chain(
+            cell_chain,
+            allow_final_mutation=True,
+            mutable_indexes={shared_cells_index},
+        )
         generation = _directory_generation(cell_root, descriptor)
         _reject_markers(cell_root)
         _require_directory_generation(cell_root, descriptor, generation)
@@ -1442,7 +1511,11 @@ def _run_cell(
         if marker.exists():
             manifest = _verify_success_cell(root, spec, cell)
             _require_directory_generation(cell_root, descriptor, generation)
-            _require_directory_chain(cell_chain, allow_final_mutation=True)
+            _require_directory_chain(
+                cell_chain,
+                allow_final_mutation=True,
+                mutable_indexes={shared_cells_index},
+            )
             return {
                 "cell_index": cell_index,
                 "cell_id": cell.cell_id,
@@ -1494,7 +1567,11 @@ def _run_cell(
         generation = _directory_generation(cell_root, descriptor)
         verified = _verify_success_cell(root, spec, cell)
         _require_directory_generation(cell_root, descriptor, generation)
-        _require_directory_chain(cell_chain, allow_final_mutation=True)
+        _require_directory_chain(
+            cell_chain,
+            allow_final_mutation=True,
+            mutable_indexes={shared_cells_index},
+        )
         return {
             "cell_index": cell_index,
             "cell_id": cell.cell_id,
