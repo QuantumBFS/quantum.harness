@@ -563,7 +563,7 @@ git commit -m "feat: report phase8 sigma175 scaling"
 - Consumes: the implemented Phase 8 protocol.
 - Produces: reproducible commands and corrected observable language.
 
-- [ ] **Step 1: Update documentation**
+- [x] **Step 1: Update documentation**
 
 Document:
 
@@ -574,7 +574,7 @@ Document:
 - susceptibility `gamma/nu` is outside the DMRG scope;
 - equal-time structure factors are diagnostics only.
 
-- [ ] **Step 2: Run focused and full tests**
+- [x] **Step 2: Run focused and full tests**
 
 Run:
 
@@ -589,7 +589,7 @@ PYTHONPATH=src:. conda run -n mps pytest -q tests
 
 Expected: focused tests and the complete project suite pass.
 
-- [ ] **Step 3: Generate and inspect the two-cell crossing plan**
+- [x] **Step 3: Generate and inspect the two-cell crossing plan**
 
 Run:
 
@@ -615,7 +615,7 @@ print('phase8 crossing plan: PASS')
 Expected: exactly two pending cells and no `L>128`, other sigma, or other
 Gamma.
 
-- [ ] **Step 4: Commit Task 4**
+- [x] **Step 4: Commit Task 4**
 
 ```bash
 git add \

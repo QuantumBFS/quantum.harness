@@ -236,9 +236,10 @@ condition.
 The validated local reproduction motivates an inexpensive first map over
 `sigma=1.50,1.60,1.70,1.75,1.80,1.90,2.00`. Exploration fixes `K=24`,
 `chi=64`, and `L=32,64`. All sigma values share the preregistered broad grid
-`Gamma=1.20:0.05:1.90`. Only a unique observed R_xi crossing bracket can
-produce the deterministic `0.01` refinement grid. The interpolated crossing
-records half the final endpoint spacing as a grid-resolution indicator.
+`Gamma=1.20:0.05:1.90`. A unique observed R_xi crossing bracket is linearly
+interpolated, with half the endpoint spacing recorded as the grid-resolution
+indicator. The deadline-bounded deliverable does not execute the proposed
+narrow refinement.
 
 Unresolved brackets remain unresolved. Cells with failed convergence,
 excess relative variance or discarded weight, invalid second-moment data,
@@ -246,3 +247,53 @@ or nonpositive gap behavior are marked for selective `chi=128` validation
 without being silently replaced. The scan provides no thermodynamic-limit
 claim; its purpose is to identify where additional sigma resolution is
 scientifically useful.
+
+The final gap analysis reoptimizes only the odd sector at `chi=128` at the
+two existing broad-bracket endpoints. Compatible `chi=64` tensors seed the
+three required sigma values but are never reused as final states. Gaps are
+interpolated to the unchanged broad crossing. The resulting two-size
+`z_eff=-log(Delta_64/Delta_32)/log(2)` is accepted at
+`sigma=1.75,1.80,2.00`; `sigma=1.60` is retained as incomplete because the
+two `L=64` odd states retain discarded-weight flags.
+
+For the minimal structure-factor analysis, `S(0)` from the completed
+even-sector endpoint states is interpolated to the same broad crossing.
+The reported quantity is
+`log[S_64(0)/S_32(0)]/log(2)`. Because this uses the equal-time spatial
+structure factor rather than the imaginary-time-integrated susceptibility,
+it is an auxiliary equal-time exponent and is not labeled `gamma/nu`. MPO,
+MPS, and finite-size uncertainties remain separate in the final report, with
+the two-size limitation dominant.
+
+## Phase 8 sigma=1.75 finite-size scaling
+
+Phase 8 first adds only the `L=128` even-sector endpoint states at
+`Gamma=1.55,1.60`. The crossing stage uses `K=24` and `chi=64`; the latter is
+restricted to `R_xi` because Phase 7 measured `chi=64 -> 128` changes below
+`4e-6`, smaller than the relevant crossing-resolution uncertainty. All final
+common-field even/odd states use `chi=128`.
+
+A strict sign change in
+`D_64,128(Gamma)=R_xi(64,Gamma)-R_xi(128,Gamma)` is required before linear
+interpolation. An unbracketed result remains unresolved without extending
+the Gamma window. The two available crossings are then evaluated in `1/L`
+and `1/log(L)` sensitivity coordinates. These coordinates do not assume a
+known leading correction exponent; with two points they are exact two-point
+sensitivity extrapolations with no residual degrees of freedom.
+
+All three gaps are evaluated at the common power-coordinate sensitivity
+field. The alternative logarithmic-coordinate `Gamma_c` and its spread from
+the power value are reported separately, but this critical-field sensitivity
+is not fully propagated into the gap uncertainty because only two crossings
+exist. The gap sequence yields `z_eff(32,64)` and `z_eff(64,128)`, followed
+by power/log two-point sensitivity extrapolations.
+
+The final report compares these values with Shiratani--Todo's published
+`sigma=7/4` results, `z_power=0.91(2)` and `z_log=0.98(3)`, from Table 2 of
+arXiv:2305.14121v4. Their maximum size is `L=362`, so the present `L<=128`
+analysis is not presented as a precision reproduction.
+
+No later-sigma plan is created until the complete `sigma=1.75` result is
+reviewed. The imaginary-time-integrated susceptibility and `gamma/nu` remain
+outside the DMRG scope. Equal-time `C_eq(r)` and `S_eq(0)` are auxiliary
+diagnostics only.

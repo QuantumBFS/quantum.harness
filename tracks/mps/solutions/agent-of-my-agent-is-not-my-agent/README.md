@@ -147,10 +147,10 @@ and MPS variations. They are not a thermodynamic-limit estimate of
 Phase 7 builds on the validated local reproduction and changes the target
 from one high-precision point to an efficient sigma trend. The exploration
 grid is `sigma=1.50,1.60,1.70,1.75,1.80,1.90,2.00`, with `K=24`, `chi=64`,
-and `L=32,64`. Every sigma first uses the identical
-`Gamma=1.20:0.05:1.90` grid. A unique observed R_xi sign-change bracket
-generates a fixed `0.01` refinement grid; missing or multiple brackets remain
-unresolved and never trigger automatic Gamma expansion.
+and `L=32,64`. Every sigma uses the identical
+`Gamma=1.20:0.05:1.90` broad grid. Crossings are linearly interpolated
+inside the observed sign-change bracket; no narrow-grid refinement or
+automatic Gamma expansion was run.
 
 The planner records the broad-grid hash, bracket decision, interpolation
 points, crossing resolution, provenance, and selective `chi=128` validation
@@ -159,10 +159,52 @@ crossover-location claim. It preserves exact-zero MPO pruning, checkpoint
 resumability, full raw observables, and the separation of MPO, MPS, and
 finite-size uncertainty.
 
-The review-gated proposal is in
-`results/phase7-crossover/proposal/`: `review-summary.md` reports the
-Hamiltonian fits and resource estimate, while `broad/run_spec.json` contains
-the 210 resumable commands. Preparing these files does not execute DMRG.
+The completed broad scan contains 210 resumable even-sector cells. Selective
+odd-sector `chi=128` calculations give accepted two-size `z_eff(32,64)`
+estimates at `sigma=1.75,1.80,2.00`; the optional `sigma=1.60` estimate
+remains incomplete because its `L=64` discarded weights exceed the locked
+threshold. Equal-time zero-momentum structure factors are retained only as
+auxiliary finite-size diagnostics. They are not the imaginary-time-integrated
+susceptibility and are not labeled `gamma/nu`.
+
+The final tables, plot, machine-readable analysis, and bounded local report
+are in `results/phase7-crossover/final-track-b/`. No `K=32`, `L=128`, or
+Gamma-refinement calculation was added in Phase 7.
+
+## Phase 8: sigma=1.75 finite-size scaling
+
+Phase 8 stops the broad sigma scan and first extends only `sigma=1.75` to
+`L=128`. The `R_xi(64,128)` crossing uses the locked endpoints
+`Gamma={1.55,1.60}`, even parity, `K=24`, and `chi=64`. Phase 7 found
+`chi=64 -> 128` changes in `R_xi` below `4e-6`, smaller than the relevant
+crossing-resolution uncertainty. Final common-field even/odd gap states use
+`chi=128`.
+
+The two crossings define exact two-point sensitivity extrapolations in the
+coordinates `1/L` and `1/log(L)`. These coordinates test correction-form
+sensitivity; they do not assume that a leading correction exponent is known
+and are not statistical regressions. The power/log critical-field spread is
+reported separately and is not fully propagated into the gaps because only
+two crossings are available.
+
+The final report will compare the resulting `z` sensitivities with
+Shiratani--Todo's published `sigma=7/4` values, `z=0.91(2)` for power
+corrections and `z=0.98(3)` for logarithmic corrections
+([arXiv:2305.14121v4](https://arxiv.org/abs/2305.14121), Table 2). Their
+calculation reaches `L=362`; the present `L<=128` result is therefore a
+qualitative comparison rather than a precision reproduction.
+
+No `sigma=1.80` or `sigma=2.00` plan is created until the complete
+`sigma=1.75` result is reviewed. Susceptibility `gamma/nu` remains outside
+the DMRG scope, and equal-time `S_eq(0)` remains an auxiliary diagnostic.
+
+Create the two-cell crossing plan without running DMRG:
+
+```bash
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/plan_phase8_scaling.py crossing \
+  --output results/phase8-scaling/sigma-1.75/crossing-L128/run_spec.json
+```
 
 Prepare the focused K comparison:
 
