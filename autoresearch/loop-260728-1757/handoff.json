@@ -1,0 +1,15 @@
+{
+  "version": "2.1.0",
+  "source": "loop",
+  "timestamp": "2026-07-28T17:57:57+08:00",
+  "status": "BOUNDED",
+  "results_tsv": "autoresearch/loop-260728-1757/results.tsv",
+  "findings": ["Baseline established before implementation."],
+  "config": {
+    "goal": "Complete Challenge #15: compute the nu=1/3 chiral-graviton neutral gap on the Haldane sphere with ED validation and a symmetry-preserving neural variational state.",
+    "scope": "tracks/qmc/solutions/Plasma-Team/**",
+    "metric": "Count of passed documentation, physics, ED, symmetry, NQS, and reproducibility gates",
+    "direction": "higher_is_better",
+    "verify": "if (Test-Path 'tracks/qmc/solutions/Plasma-Team/scripts/verify.ps1') { & powershell -NoProfile -ExecutionPolicy Bypass -File 'tracks/qmc/solutions/Plasma-Team/scripts/verify.ps1' } else { Write-Output 0 }"
+  }
+}
