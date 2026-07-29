@@ -16,6 +16,12 @@ if [[ ! "${SLURM_ARRAY_TASK_ID}" =~ ^[0-9]+$ ]] || \
     echo "SLURM_ARRAY_TASK_ID must be in the frozen range 1..96" >&2
     exit 64
 fi
+for job_id_name in SLURM_ARRAY_JOB_ID SLURM_JOB_ID; do
+    if [[ -n "${!job_id_name:-}" && ! "${!job_id_name}" =~ ^[0-9]+$ ]]; then
+        echo "${job_id_name} must be numeric" >&2
+        exit 64
+    fi
+done
 CELL_INDEX=$((SLURM_ARRAY_TASK_ID - 1))
 
 SOLUTION_RELATIVE="tracks/qmc/solutions/frustration-free/challenge-194"
@@ -71,6 +77,15 @@ if [[ -n "${CHALLENGE_PYTHON}" && -n "${HARNESS_PYTHON}" && "${CHALLENGE_PYTHON}
 fi
 OFFLINE_PYTHON="${CHALLENGE_PYTHON:-${HARNESS_PYTHON}}"
 
+# Eliminate inherited compiler/runtime controls before pinning the approved set.
+while IFS= read -r variable; do
+    unset "${variable}"
+done < <(compgen -A variable NUMBA_)
+unset PYTHONHOME PYTHONUSERBASE PYTHONPATH PYTHONSTARTUP PYTHONINSPECT \
+    PYTHONWARNINGS PYTHONBREAKPOINT PYTHONSAFEPATH \
+    LD_PRELOAD LD_LIBRARY_PATH LD_AUDIT LIBRARY_PATH
+
+export NUMBA_DISABLE_JIT=0
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
@@ -80,16 +95,35 @@ export NUMBA_NUM_THREADS=1
 export PYTHONHASHSEED=0
 export PYTHONUNBUFFERED=1
 export PYTHONNOUSERSITE=1
-unset PYTHONHOME PYTHONUSERBASE
 
 NUMBA_CACHE_BASE="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
-if [[ "${NUMBA_CACHE_BASE}" != /* || ! -d "${NUMBA_CACHE_BASE}" || ! -w "${NUMBA_CACHE_BASE}" ]]; then
+if [[ "${NUMBA_CACHE_BASE}" != /* || -L "${NUMBA_CACHE_BASE}" || \
+      ! -d "${NUMBA_CACHE_BASE}" || ! -w "${NUMBA_CACHE_BASE}" ]]; then
     echo "node-local temporary directory must be an absolute writable directory" >&2
     exit 73
 fi
+if [[ "$(realpath -s -- "${NUMBA_CACHE_BASE}")" != "$(realpath -e -- "${NUMBA_CACHE_BASE}")" ]]; then
+    echo "node-local temporary directory must not contain symlink components" >&2
+    exit 73
+fi
 NUMBA_CACHE_JOB_ID="${SLURM_ARRAY_JOB_ID:-${SLURM_JOB_ID:-no-job-id}}"
+if [[ "${NUMBA_CACHE_JOB_ID}" == "no-job-id" ]]; then
+    echo "SLURM_ARRAY_JOB_ID or SLURM_JOB_ID is required" >&2
+    exit 64
+fi
 export NUMBA_CACHE_DIR="${NUMBA_CACHE_BASE%/}/challenge-194-pilot-${NUMBA_CACHE_JOB_ID}-${SLURM_ARRAY_TASK_ID}"
+case "$(realpath -m -- "${NUMBA_CACHE_DIR}")" in
+    "$(realpath -e -- "${NUMBA_CACHE_BASE}")"/*) ;;
+    *)
+        echo "NUMBA cache path escapes node-local temporary directory" >&2
+        exit 73
+        ;;
+esac
 mkdir -p -- "${NUMBA_CACHE_DIR}"
+if [[ -L "${NUMBA_CACHE_DIR}" || ! -d "${NUMBA_CACHE_DIR}" || ! -w "${NUMBA_CACHE_DIR}" ]]; then
+    echo "NUMBA cache directory is not a safe writable directory" >&2
+    exit 73
+fi
 
 cd "${SOLUTION_ROOT}"
 echo "pilot array task=${SLURM_ARRAY_TASK_ID} cell=${CELL_INDEX} host=$(hostname)"

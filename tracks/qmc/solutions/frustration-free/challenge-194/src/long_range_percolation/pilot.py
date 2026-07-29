@@ -10,11 +10,13 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import uuid
 
 import numpy as np
 
+from . import artifacts as _artifacts
 from .alias import build_distance_alias
 from .artifacts import (
     CONVERSION_VERSION,
@@ -43,8 +45,10 @@ from .validation_shards import validate_run_spec as validate_validation_run_spec
 
 
 RUN_SPEC_SCHEMA = "challenge-194-pilot-run-spec-v1"
+TEST_RUN_SPEC_SCHEMA = "challenge-194-pilot-test-run-spec-v1"
 CELL_MANIFEST_SCHEMA = "challenge-194-pilot-cell-manifest-v1"
 MERGED_SCHEMA = "challenge-194-pilot-progress-v1"
+APPROVAL_SCHEMA = "challenge-194-pilot-correctness-approval-v1"
 CORRECTNESS_APPROVAL_REVISION = "fd0aa314f324dc357918926e80f93f4356083fc0"
 PILOT_SIGMAS = (0.8, 0.9, 1.0, 1.1)
 PILOT_LENGTHS = (2**10, 2**14, 2**18)
@@ -56,6 +60,24 @@ RUN_SPEC_NAME = "run_spec.json"
 MERGED_NAME = "progress.json"
 _HEX40 = re.compile(r"[0-9a-f]{40}")
 _HEX64 = re.compile(r"[0-9a-f]{64}")
+APPROVAL_MAX_BYTES = 16 * 1024
+PILOT_RUN_SPEC_MAX_BYTES = 1024 * 1024
+PILOT_MARKER_MAX_BYTES = 16 * 1024
+PILOT_PROGRESS_MAX_BYTES = 256 * 1024
+CORRECTNESS_RUN_SPEC_MAX_BYTES = 128 * 1024 * 1024
+CORRECTNESS_REPORT_MAX_BYTES = 256 * 1024 * 1024
+PILOT_JSON_MAX_DEPTH = 32
+PILOT_JSON_MAX_STRING = 4096
+PILOT_JSON_MAX_CONTAINER = 100_000
+PILOT_JSON_MAX_NODES = 20_000_000
+PILOT_CELL_MAX_ENTRIES = 64
+
+_open_regular = _artifacts._open_regular
+_read_descriptor_bounded = _artifacts._read_descriptor_bounded
+_require_stable_descriptor = _artifacts._require_stable_descriptor
+_require_path_identity = _artifacts._require_path_identity
+_generation_tuple = _artifacts._generation_tuple
+_check_existing_path_chain = _artifacts._check_existing_path_chain
 
 # This is intentionally narrower than validation's implementation inventory.
 # Drift in any module that defines the model, RNG, trajectory, or production
@@ -108,27 +130,143 @@ def _repo_root() -> Path:
     return _solution_root().parents[4]
 
 
-def _read_canonical(path: Path, description: str) -> tuple[dict[str, object], bytes]:
-    if path.is_symlink() or not path.is_file():
-        raise RuntimeError(f"{description} must be a regular non-symlink file")
-    payload = path.read_bytes()
+def _validate_json_bounds(value: object) -> None:
+    stack: list[tuple[object, int]] = [(value, 1)]
+    nodes = 0
+    while stack:
+        item, depth = stack.pop()
+        nodes += 1
+        if nodes > PILOT_JSON_MAX_NODES:
+            raise RuntimeError("JSON node count exceeds the frozen limit")
+        if depth > PILOT_JSON_MAX_DEPTH:
+            raise RuntimeError("JSON depth exceeds the frozen limit")
+        if isinstance(item, str):
+            if len(item) > PILOT_JSON_MAX_STRING:
+                raise RuntimeError("JSON string exceeds the frozen limit")
+        elif isinstance(item, dict):
+            if len(item) > PILOT_JSON_MAX_CONTAINER:
+                raise RuntimeError("JSON mapping exceeds the frozen limit")
+            for key, child in item.items():
+                if not isinstance(key, str) or len(key) > PILOT_JSON_MAX_STRING:
+                    raise RuntimeError("JSON key exceeds the frozen limit")
+                stack.append((child, depth + 1))
+        elif isinstance(item, list):
+            if len(item) > PILOT_JSON_MAX_CONTAINER:
+                raise RuntimeError("JSON sequence exceeds the frozen limit")
+            stack.extend((child, depth + 1) for child in item)
+
+
+def _read_canonical(
+    path: Path,
+    description: str,
+    *,
+    maximum_size: int,
+) -> tuple[dict[str, object], bytes]:
     try:
-        document = json.loads(payload)
-    except (UnicodeError, json.JSONDecodeError) as error:
-        raise RuntimeError(f"{description} is not valid JSON") from error
-    if not isinstance(document, dict) or payload != _canonical_bytes(document):
-        raise RuntimeError(f"{description} is not canonical JSON")
-    return document, payload
+        _check_existing_path_chain(path)
+        descriptor, original = _open_regular(
+            path, description, maximum_size=maximum_size
+        )
+    except (_artifacts.ArtifactIntegrityError, OSError) as error:
+        raise RuntimeError(str(error)) from error
+    try:
+        before = _generation_tuple(original)
+        payload = _read_descriptor_bounded(descriptor, maximum_size, description)
+        _require_stable_descriptor(descriptor, original, description)
+        _require_path_identity(path, original, description)
+        try:
+            document = json.loads(payload)
+        except (
+            UnicodeError,
+            json.JSONDecodeError,
+            RecursionError,
+            MemoryError,
+            OverflowError,
+            ValueError,
+        ) as error:
+            raise RuntimeError(f"{description} is not valid JSON") from error
+        _validate_json_bounds(document)
+        if not isinstance(document, dict) or payload != _canonical_bytes(document):
+            raise RuntimeError(f"{description} is not canonical JSON")
+        current = os.fstat(descriptor)
+        if _generation_tuple(current) != before:
+            raise RuntimeError(f"{description} generation changed during read")
+        _require_path_identity(path, original, description)
+        return document, payload
+    except _artifacts.ArtifactIntegrityError as error:
+        raise RuntimeError(str(error)) from error
+    finally:
+        os.close(descriptor)
+
+
+def _stable_parent(path: Path) -> tuple[int, os.stat_result]:
+    _check_existing_path_chain(path.parent)
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    try:
+        descriptor = os.open(path.parent, flags)
+        original = os.fstat(descriptor)
+    except OSError as error:
+        raise RuntimeError("unable to open immutable output parent") from error
+    return descriptor, original
+
+
+def _require_parent_identity(
+    path: Path, descriptor: int, original: os.stat_result
+) -> None:
+    try:
+        path_current = path.parent.lstat()
+        descriptor_current = os.fstat(descriptor)
+    except OSError as error:
+        raise RuntimeError("immutable output parent identity changed") from error
+    if (
+        descriptor_current.st_dev != original.st_dev
+        or descriptor_current.st_ino != original.st_ino
+        or _generation_tuple(path_current)
+        != _generation_tuple(descriptor_current)
+    ):
+        raise RuntimeError("immutable output parent identity changed")
+
+
+def _require_directory_identity(path: Path, descriptor: int) -> None:
+    try:
+        path_status = path.lstat()
+        descriptor_status = os.fstat(descriptor)
+    except OSError as error:
+        raise RuntimeError("pilot cell directory identity changed") from error
+    if (
+        stat.S_ISLNK(path_status.st_mode)
+        or not stat.S_ISDIR(path_status.st_mode)
+        or _generation_tuple(path_status) != _generation_tuple(descriptor_status)
+    ):
+        raise RuntimeError("pilot cell directory identity changed")
+
+
+def _link_at(
+    source: str, destination: str, source_fd: int, destination_fd: int
+) -> None:
+    os.link(
+        source,
+        destination,
+        src_dir_fd=source_fd,
+        dst_dir_fd=destination_fd,
+        follow_symlinks=False,
+    )
 
 
 def _publish_once(path: Path, document: Mapping[str, object]) -> None:
     payload = _canonical_bytes(document)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.parent / f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
+    parent_fd, parent_original = _stable_parent(path)
+    temporary = f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
     descriptor = os.open(
         temporary,
         os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
         0o644,
+        dir_fd=parent_fd,
     )
     try:
         with os.fdopen(descriptor, "wb") as stream:
@@ -136,18 +274,26 @@ def _publish_once(path: Path, document: Mapping[str, object]) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         try:
-            os.link(temporary, path, follow_symlinks=False)
+            _link_at(temporary, path.name, parent_fd, parent_fd)
         except FileExistsError:
-            existing, existing_payload = _read_canonical(path, "immutable output")
+            existing, existing_payload = _read_canonical(
+                path,
+                "immutable output",
+                maximum_size=max(len(payload), PILOT_MARKER_MAX_BYTES),
+            )
             if existing_payload != payload or existing != dict(document):
                 raise RuntimeError("immutable output already exists with other bytes")
-        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-        try:
-            os.fsync(directory)
-        finally:
-            os.close(directory)
+        os.unlink(temporary, dir_fd=parent_fd)
+        temporary = ""
+        os.fsync(parent_fd)
+        _require_parent_identity(path, parent_fd, parent_original)
     finally:
-        temporary.unlink(missing_ok=True)
+        if temporary:
+            try:
+                os.unlink(temporary, dir_fd=parent_fd)
+            except FileNotFoundError:
+                pass
+        os.close(parent_fd)
 
 
 def _file_hash(path: Path) -> str:
@@ -192,20 +338,100 @@ def _analysis_plan_hash() -> str:
     return _file_hash(path)
 
 
-def _validation_spec_path(report: Path) -> Path:
-    candidates = (
-        report.parent.parent / RUN_SPEC_NAME,
-        report.parent / RUN_SPEC_NAME,
-        report.with_name("validation_run_spec.json"),
+def _approval_registry_path() -> Path:
+    return _solution_root() / "pilot_correctness_approval.json"
+
+
+def _check_registry_document(
+    validation_spec: Mapping[str, object],
+) -> dict[str, object]:
+    cells = validation_spec.get("cells")
+    global_checks = validation_spec.get("global_expected_checks")
+    if (
+        not isinstance(cells, list)
+        or len(cells) != 120
+        or not isinstance(global_checks, list)
+    ):
+        raise RuntimeError("correctness check registry has invalid cardinality")
+    registry_cells: list[dict[str, object]] = []
+    for index, cell in enumerate(cells):
+        if not isinstance(cell, Mapping):
+            raise RuntimeError("correctness cell registry is malformed")
+        checks = cell.get("expected_checks")
+        if not isinstance(checks, list) or len(checks) > 100_000:
+            raise RuntimeError("correctness cell check registry is unbounded")
+        registry_cells.append(
+            {
+                "case_index": cell.get("case_index", index),
+                "case_id": cell.get("case_id"),
+                "expected_checks": checks,
+            }
+        )
+    return {"global": global_checks, "cells": registry_cells}
+
+
+def _load_approval_registry() -> dict[str, object]:
+    document, _ = _read_canonical(
+        _approval_registry_path(),
+        "Pilot correctness approval registry",
+        maximum_size=APPROVAL_MAX_BYTES,
     )
-    for candidate in candidates:
-        if candidate.is_file() and not candidate.is_symlink():
-            return candidate
-    raise RuntimeError("approved correctness report lacks its immutable run spec")
+    expected = {
+        "schema_version",
+        "approval_revision",
+        "validation_source_revision",
+        "report_sha256",
+        "run_spec_sha256",
+        "protocol_sha256",
+        "check_registry_sha256",
+        "check_count",
+        "cell_count",
+        "scientific_engine_sha256",
+    }
+    if set(document) != expected or document.get("schema_version") != APPROVAL_SCHEMA:
+        raise RuntimeError("Pilot correctness approval registry is not exact")
+    for field in (
+        "report_sha256",
+        "run_spec_sha256",
+        "protocol_sha256",
+        "check_registry_sha256",
+        "scientific_engine_sha256",
+    ):
+        if not isinstance(document.get(field), str) or _HEX64.fullmatch(
+            str(document[field])
+        ) is None:
+            raise RuntimeError(f"approval registry {field} is malformed")
+    if (
+        document.get("approval_revision") != CORRECTNESS_APPROVAL_REVISION
+        or not isinstance(document.get("validation_source_revision"), str)
+        or _HEX40.fullmatch(str(document["validation_source_revision"])) is None
+        or document.get("cell_count") != 120
+        or document.get("check_count") != 22_755
+    ):
+        raise RuntimeError("Pilot correctness approval identity is invalid")
+    return document
+
+
+def _approval_registry_digest() -> str:
+    return _sha256(_canonical_bytes(_load_approval_registry()))
+
+
+def _validation_spec_path(report: Path) -> Path:
+    candidate = report.parent.parent / RUN_SPEC_NAME
+    if candidate.is_file() and not candidate.is_symlink():
+        return candidate
+    raise RuntimeError("approved correctness report lacks adjacent immutable run spec")
 
 
 def _verified_correctness(report_path: Path) -> dict[str, object]:
-    report, report_payload = _read_canonical(report_path, "correctness report")
+    approval = _load_approval_registry()
+    report, report_payload = _read_canonical(
+        report_path,
+        "correctness report",
+        maximum_size=CORRECTNESS_REPORT_MAX_BYTES,
+    )
+    if _sha256(report_payload) != approval["report_sha256"]:
+        raise RuntimeError("approved correctness report SHA256 mismatch")
     protocol = ValidationProtocol.production_v1()
     validate_report_payload(report, protocol)
     if report.get("passed") is not True:
@@ -225,18 +451,31 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
 
     validation_spec_path = _validation_spec_path(report_path)
     validation_spec, validation_spec_payload = _read_canonical(
-        validation_spec_path, "correctness run spec"
+        validation_spec_path,
+        "correctness run spec",
+        maximum_size=CORRECTNESS_RUN_SPEC_MAX_BYTES,
     )
+    if _sha256(validation_spec_payload) != approval["run_spec_sha256"]:
+        raise RuntimeError("approved correctness run spec SHA256 mismatch")
     validate_validation_run_spec(validation_spec, enforce_production=True)
     cells = validation_spec.get("cells")
     if not isinstance(cells, list) or len(cells) != 120:
         raise RuntimeError("correctness run spec must contain exactly 120 cells")
     if (
-        validation_spec.get("source_revision") != validation_source_revision
+        validation_source_revision != approval["validation_source_revision"]
+        or validation_spec.get("source_revision") != validation_source_revision
         or validation_spec.get("uv_lock_sha256") != _lock_hash()
         or validation_spec.get("runtime_capability") != report.get("runtime_capability")
     ):
         raise RuntimeError("correctness source/runtime/lock evidence is inconsistent")
+    if (
+        validation_spec.get("protocol", {}).get("sha256")
+        != approval["protocol_sha256"]
+        or _sha256(_canonical_bytes(_check_registry_document(validation_spec)))
+        != approval["check_registry_sha256"]
+        or len(report.get("checks", [])) != approval["check_count"]
+    ):
+        raise RuntimeError("approved correctness protocol/check registry mismatch")
 
     expected_identities = Counter(
         (str(check["family"]), str(check["check_case_id"]))
@@ -259,11 +498,17 @@ def _verified_correctness(report_path: Path) -> dict[str, object]:
         raise RuntimeError("correctness run spec lacks implementation hashes")
     current = _scientific_hashes()
     approved = {path: recorded_modules.get(path) for path in SCIENTIFIC_ENGINE_MODULES}
-    if approved != current:
+    if (
+        approved != current
+        or _aggregate_hash(current) != approval["scientific_engine_sha256"]
+    ):
         raise RuntimeError("scientific engine module drift from correctness report")
     return {
         "correctness_report_sha256": _sha256(report_payload),
         "correctness_run_spec_sha256": _sha256(validation_spec_payload),
+        "correctness_approval_registry_sha256": _sha256(
+            _canonical_bytes(approval)
+        ),
         "validation_source_revision": validation_source_revision,
         "validated_engine_modules": current,
         "validated_engine_sha256": _aggregate_hash(current),
@@ -353,6 +598,8 @@ def _build_document(
     correctness: Mapping[str, object],
     waiver_timestamp: str,
     analysis_plan_sha256: str,
+    schema_version: str,
+    enforce_production: bool,
 ) -> dict[str, object]:
     protocol = {
         "lengths": list(lengths),
@@ -421,7 +668,7 @@ def _build_document(
     rng_hash = _sha256(_canonical_bytes({"assignments": all_assignments}))
     engine_modules = dict(correctness["validated_engine_modules"])
     document: dict[str, object] = {
-        "schema_version": RUN_SPEC_SCHEMA,
+        "schema_version": schema_version,
         "artifact_root": ".",
         "protocol": protocol,
         "cells": cells,
@@ -429,6 +676,9 @@ def _build_document(
         "correctness_report_sha256": correctness["correctness_report_sha256"],
         "correctness_run_spec_sha256": correctness[
             "correctness_run_spec_sha256"
+        ],
+        "correctness_approval_registry_sha256": correctness[
+            "correctness_approval_registry_sha256"
         ],
         "correctness_approval_revision": CORRECTNESS_APPROVAL_REVISION,
         "validation_source_revision": correctness["validation_source_revision"],
@@ -452,7 +702,11 @@ def _build_document(
         "merged_progress_path": MERGED_NAME,
     }
     document["run_spec_sha256"] = _document_hash(document, "run_spec_sha256")
-    _validate_pilot_spec(document, enforce_production=len(cells) == 96)
+    _validate_pilot_spec(
+        document,
+        enforce_production=enforce_production,
+        expected_schema=schema_version,
+    )
     return document
 
 
@@ -476,6 +730,8 @@ def build_pilot_run_spec(
         correctness=correctness,
         waiver_timestamp=timestamp,
         analysis_plan_sha256=_analysis_plan_hash(),
+        schema_version=RUN_SPEC_SCHEMA,
+        enforce_production=True,
     )
     _publish_once(output_root / RUN_SPEC_NAME, document)
     return document
@@ -499,7 +755,10 @@ def _relative_path(root: Path, value: object, prefix: str) -> Path:
 
 
 def _validate_pilot_spec(
-    document: Mapping[str, object], *, enforce_production: bool
+    document: Mapping[str, object],
+    *,
+    enforce_production: bool,
+    expected_schema: str,
 ) -> None:
     expected_fields = {
         "schema_version",
@@ -509,6 +768,7 @@ def _validate_pilot_spec(
         "cell_count",
         "correctness_report_sha256",
         "correctness_run_spec_sha256",
+        "correctness_approval_registry_sha256",
         "correctness_approval_revision",
         "validation_source_revision",
         "validated_engine_modules",
@@ -525,7 +785,10 @@ def _validate_pilot_spec(
         "merged_progress_path",
         "run_spec_sha256",
     }
-    if set(document) != expected_fields or document.get("schema_version") != RUN_SPEC_SCHEMA:
+    if (
+        set(document) != expected_fields
+        or document.get("schema_version") != expected_schema
+    ):
         raise RuntimeError("pilot run spec fields or schema are invalid")
     if document.get("run_spec_sha256") != _document_hash(document, "run_spec_sha256"):
         raise RuntimeError("pilot run spec hash mismatch")
@@ -534,6 +797,7 @@ def _validate_pilot_spec(
     for field in (
         "correctness_report_sha256",
         "correctness_run_spec_sha256",
+        "correctness_approval_registry_sha256",
         "validated_engine_sha256",
         "validation_runtime_capability_sha256",
         "uv_lock_sha256",
@@ -579,6 +843,21 @@ def _validate_pilot_spec(
         or not str(waiver["utc_timestamp"]).endswith("Z")
     ):
         raise RuntimeError("pilot capability waiver is invalid")
+    if enforce_production:
+        approval = _load_approval_registry()
+        if (
+            document.get("correctness_report_sha256")
+            != approval["report_sha256"]
+            or document.get("correctness_run_spec_sha256")
+            != approval["run_spec_sha256"]
+            or document.get("validation_source_revision")
+            != approval["validation_source_revision"]
+            or document.get("validated_engine_sha256")
+            != approval["scientific_engine_sha256"]
+            or document.get("correctness_approval_registry_sha256")
+            != _sha256(_canonical_bytes(approval))
+        ):
+            raise RuntimeError("pilot run spec is not bound to approved correctness")
 
     protocol = document.get("protocol")
     if not isinstance(protocol, Mapping):
@@ -608,10 +887,19 @@ def _validate_pilot_spec(
     seen_ids: set[str] = set()
     seen_requests: set[str] = set()
     assignments: list[dict[str, object]] = []
+    expected_positions = (
+        [
+            (sigma, length, replica)
+            for sigma in PILOT_SIGMAS
+            for length in PILOT_LENGTHS
+            for replica in PILOT_REPLICAS
+        ]
+        if enforce_production
+        else None
+    )
     for index, raw in enumerate(cells):
         if not isinstance(raw, Mapping):
             raise RuntimeError("pilot cell is malformed")
-        cell = PilotCell.from_document(raw)
         expected_keys = {
             "cell_index",
             "cell_id",
@@ -627,8 +915,32 @@ def _validate_pilot_spec(
             "run_path",
             "manifest_path",
         }
-        if set(raw) != expected_keys or cell.cell_index != index:
+        raw_kappas = raw.get("kappas")
+        raw_rng = raw.get("rng_material_sha256")
+        expected_kappa_count = len(PILOT_KAPPAS) if enforce_production else None
+        if (
+            set(raw) != expected_keys
+            or not isinstance(raw_kappas, list)
+            or not 1 <= len(raw_kappas) <= len(PILOT_KAPPAS)
+            or (
+                expected_kappa_count is not None
+                and len(raw_kappas) != expected_kappa_count
+            )
+            or not isinstance(raw_rng, list)
+            or len(raw_rng) != STREAM_COUNT
+        ):
+            raise RuntimeError("pilot cell bounded fields are invalid")
+        cell = PilotCell.from_document(raw)
+        if cell.cell_index != index:
             raise RuntimeError("pilot cell registry is noncanonical")
+        if expected_positions is not None and (
+            cell.sigma,
+            cell.length,
+            cell.replica,
+        ) != expected_positions[index]:
+            raise RuntimeError("pilot positional cell registry is not frozen")
+        if enforce_production and cell.kappas != PILOT_KAPPAS:
+            raise RuntimeError("pilot cell kappas are not frozen")
         if (
             cell.sigma_grid_id != f"pilot-p0-v1|sigma-f64={cell.sigma.hex()}"
             or request_digest(cell.request()) != cell.request_sha256
@@ -671,8 +983,11 @@ def _validate_pilot_spec(
         raise RuntimeError("pilot complete RNG assignment hash mismatch")
 
 
-def load_pilot_run_spec(
-    path: Path, verify_current_environment: bool
+def _load_pilot_spec(
+    path: Path,
+    *,
+    verify_current_environment: bool,
+    production: bool,
 ) -> dict[str, object]:
     if (
         not isinstance(path, Path)
@@ -680,8 +995,16 @@ def load_pilot_run_spec(
         or path.name != RUN_SPEC_NAME
     ):
         raise RuntimeError("pilot run spec path must be absolute and canonical")
-    document, _ = _read_canonical(path, "pilot run spec")
-    _validate_pilot_spec(document, enforce_production=document.get("cell_count") == 96)
+    document, _ = _read_canonical(
+        path,
+        "pilot run spec",
+        maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+    )
+    _validate_pilot_spec(
+        document,
+        enforce_production=production,
+        expected_schema=RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA,
+    )
     if _lock_hash() != document["uv_lock_sha256"]:
         raise RuntimeError("uv.lock drift from pilot run spec")
     modules = _scientific_hashes()
@@ -691,6 +1014,11 @@ def load_pilot_run_spec(
         raise RuntimeError("scientific engine module drift from pilot run spec")
     if _analysis_plan_hash() != document["analysis_plan_sha256"]:
         raise RuntimeError("analysis plan drift from pilot run spec")
+    if (
+        _approval_registry_digest()
+        != document["correctness_approval_registry_sha256"]
+    ):
+        raise RuntimeError("correctness approval registry drift from pilot run spec")
     if verify_current_environment:
         source = _current_source(require_clean=True)
         if source["source_revision"] != document["orchestration_revision"]:
@@ -702,6 +1030,16 @@ def load_pilot_run_spec(
         ):
             raise RuntimeError("compute-node runtime capability drift")
     return document
+
+
+def load_pilot_run_spec(
+    path: Path, verify_current_environment: bool
+) -> dict[str, object]:
+    return _load_pilot_spec(
+        path,
+        verify_current_environment=verify_current_environment,
+        production=True,
+    )
 
 
 def _expected(spec: Mapping[str, object], cell: PilotCell) -> dict[str, str]:
@@ -734,7 +1072,12 @@ def _provenance(spec: Mapping[str, object]) -> dict[str, object]:
 def _reject_markers(cell_root: Path) -> None:
     if not cell_root.exists():
         return
-    for path in cell_root.rglob("*"):
+    _check_existing_path_chain(cell_root)
+    for count, path in enumerate(cell_root.rglob("*"), start=1):
+        if count > PILOT_CELL_MAX_ENTRIES:
+            raise RuntimeError("pilot cell artifact count exceeds frozen bound")
+        if path.is_symlink():
+            raise RuntimeError("pilot cell contains a symlink")
         if path.name.endswith((".partial", ".intent")):
             raise RuntimeError(f"surviving publication marker: {path.name}")
 
@@ -802,10 +1145,16 @@ def _trajectory_path(run: Path, cell: PilotCell) -> Path:
 def _cell_manifest_document(
     spec: Mapping[str, object], cell: PilotCell, run: Path
 ) -> dict[str, object]:
-    progress, progress_payload = _read_canonical(run / "progress.json", "cell progress")
+    progress, progress_payload = _read_canonical(
+        run / "progress.json",
+        "cell progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
     trajectory = _trajectory_path(run, cell)
     sidecar, _ = _read_canonical(
-        trajectory.with_suffix(".sha256.json"), "trajectory digest"
+        trajectory.with_suffix(".sha256.json"),
+        "trajectory digest",
+        maximum_size=PILOT_MARKER_MAX_BYTES,
     )
     if progress.get("trajectory_count") != 1 or progress.get("batch_count") != 1:
         raise RuntimeError("cell progress does not contain one complete trajectory")
@@ -838,7 +1187,11 @@ def _verify_success_cell(
     progress = reconstruct_progress(run, expected)
     trajectory = _trajectory_path(run, cell)
     load_verified_trajectory(trajectory, expected)
-    manifest, _ = _read_canonical(marker, "cell success manifest")
+    manifest, _ = _read_canonical(
+        marker,
+        "cell success manifest",
+        maximum_size=PILOT_MARKER_MAX_BYTES,
+    )
     required = _cell_manifest_document(spec, cell, run)
     if manifest != required:
         raise RuntimeError("cell success manifest is stale or corrupt")
@@ -852,9 +1205,14 @@ def _run_cell(
     cell_index: int,
     *,
     verify_current_environment: bool,
+    production: bool,
     crash_hook: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
-    spec = load_pilot_run_spec(run_spec_path, verify_current_environment)
+    spec = _load_pilot_spec(
+        run_spec_path,
+        verify_current_environment=verify_current_environment,
+        production=production,
+    )
     cells = spec["cells"]
     if (
         isinstance(cell_index, bool)
@@ -866,15 +1224,19 @@ def _run_cell(
     root = run_spec_path.parent
     cell_root = _relative_path(root, cell.cell_path, "cells")
     cell_root.mkdir(parents=True, exist_ok=True)
+    _check_existing_path_chain(cell_root)
     _reject_markers(cell_root)
     descriptor = os.open(
         cell_root, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
     )
     try:
+        _require_directory_identity(cell_root, descriptor)
         fcntl.flock(descriptor, fcntl.LOCK_EX)
+        _require_directory_identity(cell_root, descriptor)
         marker = _relative_path(root, cell.manifest_path, "cells")
         if marker.exists():
             manifest = _verify_success_cell(root, spec, cell)
+            _require_directory_identity(cell_root, descriptor)
             return {
                 "cell_index": cell_index,
                 "cell_id": cell.cell_id,
@@ -921,6 +1283,7 @@ def _run_cell(
         manifest = _cell_manifest_document(spec, cell, run)
         _publish_once(marker, manifest)
         verified = _verify_success_cell(root, spec, cell)
+        _require_directory_identity(cell_root, descriptor)
         return {
             "cell_index": cell_index,
             "cell_id": cell.cell_id,
@@ -936,7 +1299,10 @@ def run_pilot_cell(
     run_spec_path: Path, cell_index: int
 ) -> dict[str, object]:
     return _run_cell(
-        run_spec_path, cell_index, verify_current_environment=True
+        run_spec_path,
+        cell_index,
+        verify_current_environment=True,
+        production=True,
     )
 
 
@@ -962,14 +1328,24 @@ def _merged_document(
     run_spec_path: Path,
     *,
     verify_current_environment: bool,
+    production: bool,
 ) -> dict[str, object]:
-    spec = load_pilot_run_spec(run_spec_path, verify_current_environment)
+    spec = _load_pilot_spec(
+        run_spec_path,
+        verify_current_environment=verify_current_environment,
+        production=production,
+    )
     root = run_spec_path.parent
     cells_root = root / "cells"
     expected_names = {PilotCell.from_document(raw).cell_id for raw in spec["cells"]}
-    actual_names = (
-        {path.name for path in cells_root.iterdir()} if cells_root.is_dir() else set()
-    )
+    actual_names: set[str] = set()
+    if cells_root.is_dir():
+        for count, path in enumerate(cells_root.iterdir(), start=1):
+            if count > len(expected_names) + 1:
+                raise RuntimeError("pilot cell directory count exceeds frozen bound")
+            if path.is_symlink() or not path.is_dir():
+                raise RuntimeError("pilot cells root contains a non-directory")
+            actual_names.add(path.name)
     missing = sorted(expected_names - actual_names)
     extra = sorted(actual_names - expected_names)
     if missing or extra:
@@ -1006,7 +1382,9 @@ def merge_pilot_progress(
     run_spec_path: Path, output: Path | None = None
 ) -> dict[str, object]:
     document = _merged_document(
-        run_spec_path, verify_current_environment=True
+        run_spec_path,
+        verify_current_environment=True,
+        production=True,
     )
     fixed = run_spec_path.parent / MERGED_NAME
     if output is not None and output != fixed:
@@ -1017,11 +1395,17 @@ def merge_pilot_progress(
 
 def verify_pilot_download(run_spec_path: Path) -> dict[str, object]:
     document = _merged_document(
-        run_spec_path, verify_current_environment=False
+        run_spec_path,
+        verify_current_environment=False,
+        production=True,
     )
     progress = run_spec_path.parent / MERGED_NAME
     if progress.exists():
-        existing, _ = _read_canonical(progress, "merged pilot progress")
+        existing, _ = _read_canonical(
+            progress,
+            "merged pilot progress",
+            maximum_size=PILOT_PROGRESS_MAX_BYTES,
+        )
         if existing != document:
             raise RuntimeError("merged pilot progress is stale or corrupt")
     return document
@@ -1049,17 +1433,33 @@ def _build_test_pilot_run_spec(
     sigmas: Sequence[float] = PILOT_SIGMAS,
     replicas: Sequence[int] = PILOT_REPLICAS,
     kappas: Sequence[float] = PILOT_KAPPAS,
+    production: bool = False,
 ) -> dict[str, object]:
     runtime, runtime_hash = _runtime_document()
     modules = _scientific_hashes()
     correctness = {
         "correctness_report_sha256": "1" * 64,
         "correctness_run_spec_sha256": "2" * 64,
+        "correctness_approval_registry_sha256": _approval_registry_digest(),
         "validation_source_revision": "b" * 40,
         "validated_engine_modules": modules,
         "validated_engine_sha256": _aggregate_hash(modules),
         "validation_runtime_capability_sha256": "3" * 64,
     }
+    if production:
+        approval = _load_approval_registry()
+        correctness.update(
+            {
+                "correctness_report_sha256": approval["report_sha256"],
+                "correctness_run_spec_sha256": approval["run_spec_sha256"],
+                "validation_source_revision": approval[
+                    "validation_source_revision"
+                ],
+                "validated_engine_sha256": approval[
+                    "scientific_engine_sha256"
+                ],
+            }
+        )
     plan = _solution_root() / "PILOT_PLAN.md"
     analysis_hash = (
         _file_hash(plan)
@@ -1077,6 +1477,8 @@ def _build_test_pilot_run_spec(
         correctness=correctness,
         waiver_timestamp="2026-07-29T00:00:00Z",
         analysis_plan_sha256=analysis_hash,
+        schema_version=RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA,
+        enforce_production=production,
     )
 
 
@@ -1089,6 +1491,10 @@ def _write_test_pilot_run_spec(
     return path
 
 
+def _write_test_frozen_pilot_run_spec(output_root: Path) -> Path:
+    return _write_test_pilot_run_spec(output_root, production=True)
+
+
 def _run_test_pilot_cell(
     run_spec_path: Path,
     cell_index: int,
@@ -1099,6 +1505,7 @@ def _run_test_pilot_cell(
         run_spec_path,
         cell_index,
         verify_current_environment=False,
+        production=False,
         crash_hook=crash_hook,
     )
 
@@ -1107,10 +1514,78 @@ def _merge_test_pilot_progress(
     run_spec_path: Path, output: Path | None = None
 ) -> dict[str, object]:
     document = _merged_document(
-        run_spec_path, verify_current_environment=False
+        run_spec_path,
+        verify_current_environment=False,
+        production=False,
     )
     fixed = run_spec_path.parent / MERGED_NAME
     if output is not None and output != fixed:
         raise RuntimeError("merge output must be the portable run-spec progress path")
     _publish_once(fixed, document)
     return document
+
+
+def _verify_test_pilot_download(run_spec_path: Path) -> dict[str, object]:
+    document = _merged_document(
+        run_spec_path,
+        verify_current_environment=False,
+        production=False,
+    )
+    progress = run_spec_path.parent / MERGED_NAME
+    if progress.exists():
+        existing, _ = _read_canonical(
+            progress,
+            "test merged pilot progress",
+            maximum_size=PILOT_PROGRESS_MAX_BYTES,
+        )
+        if existing != document:
+            raise RuntimeError("merged test pilot progress is stale or corrupt")
+    return document
+
+
+def _pending_test_pilot_cells(run_spec_path: Path) -> list[int]:
+    spec = _load_pilot_spec(
+        run_spec_path,
+        verify_current_environment=False,
+        production=False,
+    )
+    root = run_spec_path.parent
+    pending: list[int] = []
+    for raw in spec["cells"]:
+        cell = PilotCell.from_document(raw)
+        marker = _relative_path(root, cell.manifest_path, "cells")
+        if marker.exists():
+            _verify_success_cell(root, spec, cell)
+        else:
+            _reject_markers(_relative_path(root, cell.cell_path, "cells"))
+            pending.append(cell.cell_index)
+    return pending
+
+
+def _test_approval_document(
+    report_path: Path,
+    validation_spec_path: Path,
+    modules: Mapping[str, str],
+) -> dict[str, object]:
+    report, report_payload = _read_canonical(
+        report_path, "test report", maximum_size=CORRECTNESS_REPORT_MAX_BYTES
+    )
+    spec, spec_payload = _read_canonical(
+        validation_spec_path,
+        "test validation spec",
+        maximum_size=CORRECTNESS_RUN_SPEC_MAX_BYTES,
+    )
+    return {
+        "schema_version": APPROVAL_SCHEMA,
+        "approval_revision": CORRECTNESS_APPROVAL_REVISION,
+        "validation_source_revision": spec["source_revision"],
+        "report_sha256": _sha256(report_payload),
+        "run_spec_sha256": _sha256(spec_payload),
+        "protocol_sha256": str(spec.get("protocol_sha256", "0" * 64)),
+        "check_registry_sha256": _sha256(
+            _canonical_bytes(_check_registry_document(spec))
+        ),
+        "check_count": len(report.get("checks", [])),
+        "cell_count": len(spec.get("cells", [])),
+        "scientific_engine_sha256": _aggregate_hash(modules),
+    }

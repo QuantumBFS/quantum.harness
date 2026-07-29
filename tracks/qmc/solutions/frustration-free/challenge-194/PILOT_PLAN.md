@@ -38,6 +38,20 @@ the validation run spec; it is not falsely rewritten to the approval revision.
 Later orchestration commits may change the current clean revision without
 changing scientific semantics.
 
+The checked-in canonical approval registry is
+`pilot_correctness_approval.json`. It authenticates the Wuzh02
+`validation-prod-fd0aa31-compute` package with report SHA256
+`22b5e87d8fcf48461c0e42d0fbdc403fe70d09337989316a5aa283e36c825ce9`,
+validation run-spec SHA256
+`a6e4ff45cef7d9e331179665dc492cc3ed6624566ccda2ad3cf4591aebb10f7e`,
+protocol SHA256
+`c7e980eeadaf8ed75e4d20cebb1e2c5d5f57a1cfc329afa7678ae586f5b7f488`,
+check-registry SHA256
+`6e25ea41899544f2a9de3589beb1ee94b1f3dc505638b8f8e5164a4322b56a1d`,
+and scientific-module aggregate
+`a5fe99d23de9003eda565a4de71aaabf1393b909fc9feb57b5b7dff92ff95dab`.
+No merely structurally valid alternate report can authorize Pilot.
+
 The frozen scientific whitelist is:
 
 - `model.py`, `kernel.py`;
@@ -72,6 +86,19 @@ single-core Slurm array with tasks `1-96`, 1800 MiB per task, 30-minute wall
 time, and scheduler-managed concurrency so all available account slots are
 filled. Local work is limited to bounded tiny protocols used by private test
 helpers.
+
+The build-spec compute step and every array worker use the same influential
+environment contract. Before Python starts, inherited `NUMBA_*`, `PYTHONHOME`,
+`PYTHONUSERBASE`, `PYTHONPATH`, `PYTHONSTARTUP`, `PYTHONINSPECT`,
+`PYTHONWARNINGS`, `PYTHONBREAKPOINT`, `PYTHONSAFEPATH`, `LD_PRELOAD`,
+`LD_LIBRARY_PATH`, `LD_AUDIT`, and `LIBRARY_PATH` are removed. Then
+`NUMBA_DISABLE_JIT=0`, `NUMBA_NUM_THREADS=1`, `PYTHONNOUSERSITE=1`,
+`PYTHONHASHSEED=0`, `PYTHONUNBUFFERED=1`, and
+`OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=NUMEXPR_NUM_THREADS=VECLIB_MAXIMUM_THREADS=1`
+are pinned. The only restored `PYTHONPATH` is the absolute committed `src`
+directory. Build deployment must apply that exact cleanup/pinning fragment,
+using a private node-local absolute non-symlink `NUMBA_CACHE_DIR`; the Slurm
+wrapper applies it independently to every worker.
 
 ## Restart and publication
 
