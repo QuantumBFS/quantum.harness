@@ -5,6 +5,27 @@ Date: 2026-07-29
 Status: targeted primary-source search, not a proof of priority. No claim below is
 based merely on the absence of a search hit.
 
+The search was refreshed on 2026-07-29 against the arXiv/APS primary records,
+the Semantic Scholar citation graph of arXiv:1712.09412, the issue #121 comment
+thread, and every open challenge PR in the upstream repository.  Query families
+combined the physics vocabulary
+
+```text
+fermion determinant / determinant QMC / sign-problem-free / auxiliary field
+```
+
+with the matrix vocabulary
+
+```text
+common norm / logarithmic norm / matrix measure / polyhedral Lyapunov /
+Banach contraction / H-matrix / Metzler / cone / compound matrix
+```
+
+and separately searched citations of the 2015 split-orthogonal, 2016 Majorana,
+2020 intrinsic-sign, 2024 semigroup, and 2025 time-reversal-positivity papers.
+This protocol can falsify a priority claim by finding prior art; it cannot prove
+priority by failing to find it.
+
 ## 1. Search outcome
 
 The targeted search found no QMC paper that directly uses either
@@ -31,6 +52,12 @@ These are negative targeted-search results, not exhaustive historical proofs.
    complex-orthogonal Majorana extension. The odd-n/full-span theorem in
    `main_theorem.md` separates the supplied support from these
    sufficient classes, not from every possible positive decomposition.
+
+   Wei's 2025 follow-up, *Time-reversal positivity*, arXiv:2510.06226,
+   develops a cone-theoretic positivity tool for the time-reversal-symmetric
+   non-Hermitian Hubbard setting.  It is prior art for the time-reversal cone
+   language, but it retains a fixed antiunitary structure and does not supply the
+   real common-Banach-norm determinant criterion used here.
 
 2. L. Wang et al., Split orthogonal group: a guiding principle for sign-problem-free
    fermionic simulations, Phys. Rev. Lett. 115, 250601 (2015):
@@ -62,6 +89,27 @@ Items 2-4 are the principal group, reflection-positivity, and MTR baselines.
    `total_nonnegative_semigroup` direction and is excluded from this package. It
    does not use the signed A/B polyhedral family or the Perron-plus-compound
    orientation criterion.
+
+7. O. Golan, A. Smith, and Z. Ringel, Intrinsic sign problem in fermionic and
+   bosonic chiral topological matter, Phys. Rev. Research 2, 043032 (2020):
+   https://arxiv.org/abs/2005.05566
+
+   Appendix F is an important scope check on local and homogeneous known DQMC
+   design principles.  The present support-level separation is not an intrinsic
+   sign-problem theorem for a phase and must not be advertised as one.
+
+8. C. Wu and S.-C. Zhang, Phys. Rev. B 71, 155115 (2005), together with the
+   finite-density designer models of Berg, Metlitski, and Sachdev, Science 338,
+   1606 (2012), and Schattner et al., Phys. Rev. X 6, 031028 (2016), are controls
+   against an incorrect finite-density novelty claim.  Their nonnegative weights
+   follow from determinant squaring or a fixed Kramers/conjugate pairing.  Adding
+   a duplicated flavor to the present real support would therefore be useful as a
+   control but not a new mechanism.
+
+The upstream issue thread also points to Appendix A of Phys. Rev. X 9, 021022
+(2019), where a pseudo-unitary SU(n,n) condition makes the determinant real.
+That observation is included here as prior art even though reality alone is weaker
+than the nonnegativity theorem sought in issue #121.
 
 ## 3. Closest control and matrix sources
 
@@ -106,9 +154,16 @@ second-compound bound for fermion determinant positivity.
 For the polyhedral family:
 
 > We give an explicit open sign-free generator-support family certified by a
-> non-Hilbert common norm and prove that, at generator level and for sufficiently
-> small discrete time steps, it is not embeddable in Wei's fixed-metric complex-CAR
-> semigroups.
+> non-Hilbert common norm.  Within one fixed, same-dimensional one-particle/CAR
+> representation, we prove that it cannot be mapped by a fixed complex similarity
+> into an ordinary Hermitian contraction or expansion cone, a split equality
+> class, or Wei's fixed complex-CAR semigroups; the discrete-support statement
+> persists for sufficiently small time steps.
+
+The elementary common-norm determinant lemma and polyhedral Lyapunov theory are
+not new mathematics.  The candidate contribution is their explicit use as a QMC
+guiding principle, the open family separating it from the cited fixed-metric
+classes, and the interacting realization using exactly the certified vertices.
 
 For the finite-density direction:
 

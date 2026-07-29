@@ -96,9 +96,9 @@ i(J_2 V - conjugate(V) J_2) <= 0.
 The equality case is a known symmetry class; symmetric `J_1` contains Majorana
 reflection positivity; skew `J_1` contains the Kramers contraction class. Passing
 only the canonical choice is insufficient: alternative common `J_1,J_2` choices
-must be excluded before claiming novelty.  A proof restricted to real orthogonal
-Majorana frames must also say explicitly that genuinely complex orthogonal canonical
-similarities remain unchecked.
+and one fixed complex canonical frame must be considered before claiming novelty.
+The current A/B proof treats one common frame in the same CAR dimension; it does
+not treat stabilization by ancillary modes or a different Gaussian support.
 
 ## 5a. Non-Euclidean norm-contraction reduction (current internal candidate)
 
@@ -116,6 +116,27 @@ This is currently a candidate mechanism developed in this repository, not yet an
 established QMC literature class.  It contains the substochastic Markov wedge but
 also genuinely signed matrices.  Future candidates contained in it are not
 independent discoveries.
+
+## 5b. Fixed definite metric and positive-cone reductions
+
+For a Hurwitz support, also search after arbitrary fixed complex similarities for
+an ordinary positive-definite Hermitian contraction or expansion metric. Pulling
+such a metric back and using the continuous Lyapunov integral produces a common
+real positive-definite quadratic metric. Therefore the exact no-common-H
+certificate in main_theorem.md excludes this whole fixed-similarity route, not
+only the Euclidean basis.
+
+Separately test whether one fixed similarity makes all generators Metzler or makes
+their exponentials preserve a common simplicial or nonsimplicial proper cone. The
+signed opposite edge in A/B excludes only diagonal sign gauges to Metzler form;
+the present proof does not exclude every general positive-cone similarity. Cone
+preservation by itself is not a known determinant-positivity proof, so a hit here
+would require an additional reduction before it counts as prior sign-free work.
+
+Always record the representation scope. The current certificate is for one fixed
+same-dimensional support. Ancilla stabilization, generator-dependent gauges,
+different Hubbard-Stratonovich or fermion-bag supports, and Hamiltonian-level
+stoquastic changes of basis remain separate questions.
 
 ## 6. One-dimensional and trivial-sector reductions
 

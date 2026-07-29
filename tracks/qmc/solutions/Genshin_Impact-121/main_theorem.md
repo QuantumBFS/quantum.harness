@@ -18,7 +18,13 @@ For epsilon>0 and kappa>0 define
     S = diag(1,1,-1),    B = S A S,
 
 and let C(epsilon,kappa) be the union of the two S3 conjugacy orbits of A
-and B. Throughout the open triangle
+and B. Throughout (R), the three diagonal entries of A (and of B) are pairwise
+distinct. Any permutation stabilizing either matrix must therefore be the identity.
+If the two orbits intersected, equality of their ordered diagonal entries would
+again force the conjugating permutation to be the identity, but A!=B. Thus the
+two orbits are disjoint and C(epsilon,kappa) contains exactly twelve matrices.
+
+Throughout the open triangle
 
     epsilon>0,   kappa>0,   40 epsilon + 59 kappa < 2,             (R)
 
@@ -32,6 +38,9 @@ the following statements hold.
    det(I+T)>0 on the isolated three-mode space. Embedded local words obey
    det(I+T)>=0.
 2. C has no common H>0 satisfying X^T H+H X<=0 for every X in C.
+   Consequently no fixed complex similarity carries C into an ordinary
+   nondegenerate Hermitian contraction cone, expansion cone, or split equality
+   class in the same one-particle dimension.
 3. C real-linearly spans all of M_3(R).
 4. The number-conserving Nambu lifts of C cannot satisfy Eqs. (2)-(3) of
    Wei, Phys. Rev. B 110, 075146 (2024), after any one fixed complex
@@ -139,6 +148,45 @@ The two necessary conditions are incompatible. Hence no common positive-definite
 H exists. At epsilon=1/100 and kappa=1/1000 the two bounds are
 
     r <= -1541/24791,    r >= 1541/42609.
+
+### Fixed-similarity consequence
+
+The preceding result also excludes every ordinary nondegenerate Hermitian
+contraction metric after an arbitrary fixed complex similarity. Suppose, to the
+contrary, that one fixed L in GL_3(C) and one fixed nonsingular Hermitian eta obey
+
+    Y_X^dagger eta+eta Y_X<=0,    Y_X=L X L^(-1),
+
+for all X in C. Pull the metric back as
+
+    G=L^dagger eta L.
+
+Then G is nonsingular Hermitian and
+
+    X^dagger G+G X<=0.
+
+Fix any X in C, which is Hurwitz by Section 2, and put
+
+    Q=-(X^dagger G+G X)>=0.
+
+The Lyapunov integral gives
+
+    G=integral_0^infinity exp(X^dagger t) Q exp(X t) dt>=0.
+
+Since G is nonsingular, G>0. Because X is real, H=Re G is a real symmetric
+positive-definite matrix and taking real parts gives
+
+    X^T H+H X<=0
+
+for every X in C, contradicting the result above. An expansion inequality is
+reduced to the contraction case by replacing eta with -eta. The equality case is
+included as well. Hence the obstruction covers arbitrary fixed real or complex
+similarities to ordinary nondegenerate Hermitian contraction or expansion
+semigroups, including split-metric equality classes.
+
+This consequence is same-dimensional and metric-based. It does not exclude a
+general invariant-cone realization, a dilation by ancillary modes, or a different
+Gaussian support.
 
 ## 4. Exact full-span certificate
 
@@ -330,14 +378,37 @@ quadratic form is K_X=B_CAR D_X, not D_X itself, and
 
     (1/4) zeta^T K_X zeta = c^dagger X c - (1/2) tr X.
 
+Consequently the physical Gaussian differs from the corresponding spin lift only
+by the strictly positive scalar exp[tau tr(X)/2]. This scalar cannot affect a sign
+and will be suppressed in the fixed-support comparison below.
+
 Let W be the one fixed complex CAR basis transformation in a hypothetical Wei
-representation. Pull its reality operation and Hermitian contraction form back by
-W to the original Nambu coordinates. The first Wei condition then defines an
-antilinear CAR isometry
+representation, and let J1,J2 be one fixed pair common to every X. Choose the
+convention that W maps the original Nambu bilinear form to the canonical
+Majorana coordinate space:
+
+    W^T W=B_CAR,
+    A_X=W D_X W^(-1).
+
+The CAR identity for D_X then gives A_X^T=-A_X. Pull the two Wei structures back
+to the original Nambu coordinates by defining
+
+    U=W^(-1) J1 conjugate(W),
+    eta=W^dagger (i J2) W.
+
+Wei's first condition is equivalently
+
+    A_X J1=J1 conjugate(A_X).
+
+With the convention above this becomes
+
+    D_X U=U conjugate(D_X).
+
+Thus the pulled reality operation is the antilinear CAR isometry
 
     Theta_1=U K,    Theta_1^2=+I or -I,
 
-that commutes with every D_X. This reality equality is real-linear in X. Since
+commuting with every D_X. This reality equality is real-linear in X. Since
 span_R F=M_n(R), it extends from X in F to D_Y for every Y in M_n(R), in
 particular to Y=I.
 
@@ -358,13 +429,16 @@ D_X makes Theta_1=K. Full span has removed any hidden Kramers partner.
 
 ### 5.3 The contraction structure forces a common H>0
 
-In a canonical Majorana frame let eta_0=iJ2. After pulling both Hermitian forms
-back by the same CAR transformation, define
+For the surviving symmetric J1 case, let eta_0=iJ2 and recall that
 
-    G = U^T B_CAR,
-    eta = pulled-back eta_0.
+    eta=W^dagger eta_0 W.
 
-Equivalently G is the congruence transform of J1. Anticommutation of J1 and J2
+Define the other pulled Hermitian form by
+
+    G=U^T B_CAR=W^dagger J1 W.
+
+The second equality uses W^T W=B_CAR and J1^T=J1. Thus G and eta are the
+congruence transforms of J1 and eta_0 by the same W. Anticommutation of J1 and J2
 gives the coordinate-independent identity
 
     eta G^(-1) eta = -G.                                          (C)
@@ -402,8 +476,11 @@ therefore lies outside both fixed-metric sufficient classes of Wei 2024, includi
 the complex-orthogonal Majorana extension stated after Eq. (3).
 
 This statement concerns the supplied Gaussian vertex support and its natural
-principal logarithms. It does not prove that the resulting Hamiltonian has no
-different Hubbard-Stratonovich, fermion-bag, or other positive decomposition.
+principal logarithms, using one common fixed pair and one common fixed complex
+CAR basis in the same Nambu dimension. It does not exclude ancillary-mode
+dilations, a general invariant-cone similarity, or a different Gaussian support.
+Nor does it prove that the resulting Hamiltonian has no different
+Hubbard-Stratonovich, fermion-bag, or other positive decomposition.
 
 ### 5.4 Small-time robustness against alternate logarithms
 
@@ -414,8 +491,9 @@ such that, for every 0<tau<tau_0, the CAR transformations
 
 cannot be assigned alternate one-body logarithms that all satisfy Wei's
 Eqs. (2)-(3) in one common complex-orthogonal CAR basis and for one common pair
-J1,J2. The basis and the pair are allowed to depend on tau, but at each fixed tau
-they must be common to the whole family.
+J1,J2 on the same Nambu space, without adding ancillary modes. The basis and the
+pair are allowed to depend on tau, but at each fixed tau they must be common to
+the whole family.
 
 We first fix the logarithmic neighborhood needed below. Since the family is
 finite, there is a tau_pr>0 such that, for every X in C(epsilon,kappa) and
@@ -593,14 +671,28 @@ where
     p_t=(2+t)[(1-t)(d-c)-b(1+t)-delta_1-delta_2-delta_3 t] > 0,
     q_t=(2-t)[(1-t)(c+d)+b(1+t)+delta_1+delta_2-delta_3 t] > 0.
 
+The displayed signs are consequences of G_t>0, not additional assumptions.
+Indeed, positivity of all seven parameters and t in (0,1) give
+
+    d(1-t)>delta_3 t,
+
+and
+
+    p_t/(2+t)
+      =G_t+(1-t)[d(1-t)-delta_3 t]>0,
+    q_t/(2-t)
+      =(1-t)d-delta_3 t+(1-t)c+b(1+t)+delta_1+delta_2>0.
+
 They require r<0 and r>0. Multiplying by q_t and p_t and adding gives the exact
 Farkas contradiction
 
     (p_t+q_t) G_t <= 0.
 
-For fixed rational t these are rational linear inequalities. G_t>0 is a nonempty
-open convex cone; removing overall scale leaves six essential continuous parameters.
-At the original point and t=3/4,
+For fixed rational t these are rational linear inequalities. Within the
+seven-parameter structured family, G_t>0 is a nonempty open convex cone; removing
+overall scale leaves six essential continuous parameters. Here and below, "open"
+means relative to this structured design space, not to the ambient space of
+arbitrary twelve-tuples in M_3(R). At the original point and t=3/4,
 
     G_t=1679/16000,
     p_t=10109/16000,
@@ -617,8 +709,75 @@ For X=A or B define
                  exp[tau c^dagger (P_sigma X P_sigma^T) c].
 
 Within each particle-number sector the exterior-power representation of S3 is real
-and multiplicity-free. Group averaging makes M_X Hermitian. Generically it is not a
-Gaussian operator: the average contains genuine many-body interactions.
+and multiplicity-free. Group averaging therefore makes M_X Hermitian.
+
+We now give exact local certificates for interaction and failure of Gaussian
+closure. Let alpha_X(tau) and beta_X(tau) be the scalar eigenvalues of the
+one-particle twirl on the trivial and standard irreducible sectors. Then
+
+    alpha_X(tau)=(1/3) e^T exp(tau X) e,
+    beta_X(tau)=(1/2)[tr exp(tau X)-alpha_X(tau)].
+
+Under the three-dimensional Hodge identification,
+
+    wedge^2 exp(tau X)=exp[tau tr(X)] exp(-tau X^T).
+
+The sign irrep in the two-particle sector corresponds to the uniform Hodge vector,
+so its twirl eigenvalue is
+
+    d_(2,X)(tau)
+      =exp[tau tr(X)] (1/3) e^T exp(-tau X) e.
+
+Put
+
+    a_X=(1/3)e^T X e,        b_X=(1/3)e^T X^2 e,
+    t_X=tr(X),                s_X=tr(X^2).
+
+Taylor expansion gives
+
+    beta_X(tau)
+      =1+(t_X-a_X)tau/2+(s_X-b_X)tau^2/4+O(tau^3),
+    d_(2,X)(tau)
+      =1+(t_X-a_X)tau
+       +(t_X^2/2-t_X a_X+b_X/2)tau^2+O(tau^3).
+
+The two required certificates are different. A permutation-invariant operator that
+is a constant plus a number-conserving one-body operator has vacuum eigenvalue one,
+one-particle standard eigenvalue beta_X, and two-particle sign eigenvalue
+2 beta_X-1. Hence
+
+    d_(2,X)-(2 beta_X-1)
+      =[(t_X^2-s_X)/2-t_X a_X+b_X]tau^2+O(tau^3)                 (I_X)
+
+is an interaction certificate.
+
+Likewise M_X(tau) is analytic and equals I at tau=0. If it were Gaussian at
+arbitrarily small positive values of tau, its principal operator logarithm at those
+values would be quadratic. Since M_X commutes with particle number, that logarithm
+would be number-conserving, and exterior-power multiplicativity would require
+d_(2,X)=beta_X^2. Thus
+
+    d_(2,X)-beta_X^2
+      =[(t_X^2-s_X)/2-t_X a_X+b_X
+        -(t_X-a_X)^2/4]tau^2+O(tau^3)                            (G_X)
+
+is a non-Gaussian certificate.
+
+At epsilon=1/100 and kappa=1/1000, direct substitution into these exact formulas
+produces
+
+    I_A(tau)=(15062013/3000000)tau^2+O(tau^3),
+    G_A(tau)=(363599/360000)tau^2+O(tau^3),
+
+and
+
+    I_B(tau)=(3056033/3000000)tau^2+O(tau^3),
+    G_B(tau)=(797/120000)tau^2+O(tau^3).
+
+All four leading coefficients are nonzero. Analyticity therefore makes both twirls
+interacting and non-Gaussian for all sufficiently small positive tau. The
+coefficients depend continuously on the matrix parameters, so the conclusion
+persists on an open neighborhood of the rational point.
 
 For positive g_A,g_B, sums of local copies on overlapping triangular clusters,
 
@@ -634,10 +793,7 @@ twirl is Hermitian. The Fock trace for every sequence is
 
 This is an engineered interacting Hamiltonian with an exact sign-free series
 expansion, not a standard auxiliary-field DQMC decomposition of a two-body Hubbard
-Hamiltonian. No sampler, estimator, or scaling benchmark is claimed.
-
-At the rational point, exact small-tau invariants for both twirls are nonzero, so
-both are interacting and non-Gaussian on an open neighborhood. Determinant
+Hamiltonian. No sampler, estimator, or scaling benchmark is claimed. Determinant
 positivity holds at arbitrary word depth, not merely over a sampled range.
 
 ## 8. Novelty boundary and publication position
@@ -646,7 +802,8 @@ Established ingredients include logarithmic norms, common polyhedral Lyapunov
 functions, contraction semigroups, and group twirling. The theorem candidate is the
 combination of:
 
-- an explicit nonzero-volume QMC vertex family certified by a common polyhedral norm;
+- an explicit seven-parameter QMC vertex family occupying an open region relative
+  to its structured design cone and certified by a common polyhedral norm;
 - exact failure of all common ellipsoidal metrics;
 - a full-span odd-dimensional obstruction separating the same support from Wei 2024
   even under fixed complex CAR basis changes;

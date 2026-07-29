@@ -7,7 +7,10 @@ the local spectra, and the exclusion of a common one-particle indefinite metric 
 proved below. The current lattice construction is a grand-canonical, cell-factorized
 fermion embedding with no intercell hopping. Positivity after projection to one
 particle per cell, equivalence to every possible 6-by-6 Majorana/MTR representation,
-and literature priority are not proved.
+and literature priority are not proved. Finite density is an optional physical
+extension, not an acceptance condition of issue #121. Nothing in this note should
+be read as weakening the complete interacting finite-temperature realization in
+`physical_realization.md`.
 
 ## Executive result
 
@@ -110,6 +113,50 @@ It follows that
 This allows a finite z>1 window. It does not allow a fixed positive chemical
 potential for all inverse temperatures, because z=exp(beta mu) is unbounded as
 beta tends to infinity.
+
+### Exact particle-sector ceiling from a low compound contraction
+
+The determinant theorem and the ground-state filling question are distinct. The
+following proposition gives the precise obstruction for Hermitian positive
+Gaussian Hamiltonian terms.
+
+Let G_a be real symmetric positive definite, let g_a≥0, and define
+
+    H=−sum_a g_a Γ(G_a).
+
+Fix r≥1. If one Euclidean exterior norm obeys
+
+    ||wedge^r G_a||₂≤q<1
+
+for every a, then no sector with N≥r can be a ground sector. Indeed, if
+s₁≥...≥s_n>0 are the singular values of G_a, then
+
+    s₁...s_r≤q,   s_r<1,
+
+and for every N≥r,
+
+    ||wedge^N G_a||₂=s₁...s_N≤s₁...s_r≤q.
+
+Since wedge^N G_a is positive definite,
+
+    E_min(H restricted to wedge^N V)≥−q sum_a g_a
+                                      >−sum_a g_a=E_vac.       (4)
+
+The same proof applies to a Hermitian twirl or positive convex average when every
+resolved positive Gaussian obeys the same bound. Thus r=1 reproduces the vacuum
+no-go. A global r=2 certificate permits at most one particle in the ground state;
+a fixed r can never support nonzero density as the volume tends to infinity. To
+place N≈νn particles using this particular ceiling mechanism, r must exceed N and
+therefore scale at least linearly with n.
+
+For one D4 cell, r=2 and q=ab<1, so (4) excludes N≥2 while the Perron direction
+allows N=1 to beat the vacuum. This is the intended local escape. It must not be
+misstated as a global total-particle bound for the cell-factorized lattice: a local
+embedding has spectator identity directions, and a direct sum of two cells has
+wedge² components G_i tensor G_j. Two cells may each have one expanding Perron mode,
+so the strict global second-compound bound fails. Extensive occupancy in the
+current model comes only from fixed-cell factorization, not from tensorization of
+the one-expanding-mode theorem.
 
 ## 2. Exact D4 polyhedral family
 
@@ -366,6 +413,44 @@ Allowing one-particle hopping between cells destroys block factorization. A scal
 replacement must control an extensive number of expanding channels without reducing
 to a fixed occupied subspace, total nonnegativity, or a Kramers square.
 
+### Exact cell-hopping no-go for the present certificate
+
+The absence of intercell hopping is not merely a choice made in the example. It is
+forced by preserving the full one-particle-per-cell subspace. Let
+
+    V=direct-sum_(i=1)^L V_i,   dim V_i≥2,
+
+and identify
+
+    W=(wedge^1 V₁) wedge ... wedge (wedge^1 V_L)
+
+with the Fock subspace containing exactly one particle in every cell. If a
+number-conserving one-body generator h satisfies
+
+    dGamma(h)W is a subset of W,                               (5)
+
+then h is block diagonal in the cells.
+
+To prove this, write h_ij:V_j→V_i for an off-diagonal block. Acting on
+v₁ wedge ... wedge v_L, h_ij replaces v_j by h_ij v_j and produces a component
+with two particles in cell i and a hole in cell j. Different occupancy patterns
+are linearly independent and cannot cancel. If h_ij v_j is nonzero, dim V_i≥2
+allows v_i to be chosen nonparallel to it, so the wedge is nonzero. Condition (5)
+for every vector in W therefore forces h_ij=0 for every i≠j.
+
+The same conclusion holds if the certificate preserves a full-dimensional proper
+cone C_cell inside W: span(C_cell)=W, so linear invariance of the cone implies (5).
+Discrete permutations of entire cells can preserve W, but they are disconnected
+relabelings and become qutrit/spin exchange after fixing one particle per cell;
+they are not continuous charge hopping.
+
+This proposition concerns the whole subspace W, not one decomposable wedge ray. A
+single fixed ray only forces a block-triangular invariant plane, and must not be
+used to claim block diagonalization. Genuine itinerancy therefore requires a new
+cone spanning charge-fluctuating cell sectors, or a word-dependent extensive
+unstable bundle; it cannot be obtained by a small hopping perturbation that keeps
+the present tensor-cell certificate.
+
 ## 7. General fixed-splitting no-go
 
 Suppose the one-particle space has one common invariant splitting
@@ -412,6 +497,16 @@ is nonnegative for every z>0 if and only if every distinct negative real eigenva
 of T has even algebraic multiplicity. Complex pairs contribute positive quadratic
 factors, positive real eigenvalues never vanish for z>0, and an odd-multiplicity
 negative eigenvalue creates a sign-changing positive root z=-1/lambda.
+
+Strict positivity for all z>0 is equivalent to having no negative real eigenvalue.
+For a real 3-by-3 word with detT>0, all-z nonnegativity therefore permits either no
+negative real spectrum or one exactly degenerate negative pair; two distinct
+negative eigenvalues create a negative interval between their positive roots.
+
+For the S3 Hamiltonian in `physical_realization.md`, a uniform chemical potential
+produces z=exp(βμ). Hence fixed μ>0 over arbitrarily large β requires this criterion
+for every word. The current z=1 contraction proof does not establish it, so that
+finite-density route remains open rather than disproved.
 
 Thus positivity at z=1 is much weaker than positivity at arbitrary positive chemical
 potential for all beta. A common norm alone cannot provide the latter.
