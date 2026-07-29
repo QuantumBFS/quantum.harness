@@ -13,6 +13,12 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpinIsotypicPrimalGapJuMP
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
+))
+using .ShastryFullStateSpinIsotypicDualCertificateJuMP
 using MosekTools
 
 const SPIN_ISOTYPIC_RUNMETA_SCHEMA =
@@ -23,6 +29,7 @@ function spin_isotypic_source_dict()
     for file in (
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicReduction.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spin_isotypic_mof.jl",
     )
         source["files_sha256"][file] =
@@ -251,6 +258,98 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     end
     write_checkpoint(checkpoint_path, metadata)
 
+    if options.mode == :certificate
+        threads = parse(
+            Int,
+            get(
+                ENV,
+                "SS_MOSEK_THREADS",
+                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+            ),
+        )
+        time_limit_seconds = parse(
+            Float64,
+            get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"),
+        )
+        log_level =
+            parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+        certificate_model = JuMP.direct_model(MosekTools.Optimizer())
+        JuMP.set_time_limit_sec(certificate_model, time_limit_seconds)
+        JuMP.set_optimizer_attribute(
+            certificate_model,
+            "MSK_IPAR_NUM_THREADS",
+            threads,
+        )
+        JuMP.set_optimizer_attribute(
+            certificate_model,
+            "MSK_IPAR_LOG",
+            log_level,
+        )
+        progress("build native dual infeasibility certificate")
+        certificate_measurement = @timed(
+            build_shastry_full_state_spin_isotypic_dual_certificate(
+                isotypic;
+                model=certificate_model,
+            )
+        )
+        certificate = certificate_measurement.value
+        metadata["stages"]["dual_certificate"] =
+            measurement_dict(certificate_measurement)
+        metadata["dual_certificate"] = Dict(
+            "moment_matching_equalities" =>
+                length(certificate.moment_constraints),
+            "native_psd_blocks" =>
+                length(certificate.psd_constraint_indices),
+            "equality_multipliers" =>
+                length(certificate.equality_multiplier_variables),
+            "scalar_coefficient_terms" =>
+                certificate.scalar_term_count,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+        progress(
+            "optimize native dual certificate; threads=$threads, " *
+            "time_limit=$(time_limit_seconds)s",
+        )
+        solve_measurement =
+            @timed JuMP.optimize!(certificate.model)
+        metadata["stages"]["solve"] =
+            measurement_dict(solve_measurement)
+        termination = JuMP.termination_status(certificate.model)
+        primal_status = JuMP.primal_status(certificate.model)
+        classification = if termination == JuMP.MOI.OPTIMAL &&
+                            primal_status in (
+                                JuMP.MOI.FEASIBLE_POINT,
+                                JuMP.MOI.NEARLY_FEASIBLE_POINT,
+                            )
+            "primal_infeasibility_certificate_found"
+        elseif termination in (
+            JuMP.MOI.INFEASIBLE,
+            JuMP.MOI.INFEASIBLE_OR_UNBOUNDED,
+        )
+            "no_dual_certificate_at_this_relaxation"
+        else
+            "dual_certificate_numerically_undetermined"
+        end
+        metadata["solve"] = Dict(
+            "formulation" => "native-dual-farkas-certificate-v1",
+            "classification" => classification,
+            "termination_status" => string(termination),
+            "primal_status" => string(primal_status),
+            "dual_status" =>
+                string(JuMP.dual_status(certificate.model)),
+            "raw_status" => try
+                JuMP.raw_status(certificate.model)
+            catch exception
+                "unavailable: " * sprint(showerror, exception)
+            end,
+            "result_count" => JuMP.result_count(certificate.model),
+            "has_values" => JuMP.has_values(certificate.model),
+            "threads" => threads,
+            "time_limit_seconds" => time_limit_seconds,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+    end
+
     if options.mode in (:mof, :solve)
         progress(
             options.mode == :mof ?
@@ -272,7 +371,12 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             )
             log_level =
                 parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
-            direct_model = JuMP.direct_model(MosekTools.Optimizer())
+            bridged_optimizer =
+                JuMP.MOI.Bridges.full_bridge_optimizer(
+                    MosekTools.Optimizer(),
+                    Float64,
+                )
+            direct_model = JuMP.direct_model(bridged_optimizer)
             JuMP.set_time_limit_sec(direct_model, time_limit_seconds)
             JuMP.set_optimizer_attribute(
                 direct_model,

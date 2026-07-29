@@ -53,7 +53,7 @@ printf 'host=%s cpus=%s start=%s\n' \
     --coupling 4/5 \
     --gamma 2 \
     --patch-level 3 \
-    --mode solve \
+    --mode certificate \
     --output "$OUTPUT_DIR"
 
 printf 'finish=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
