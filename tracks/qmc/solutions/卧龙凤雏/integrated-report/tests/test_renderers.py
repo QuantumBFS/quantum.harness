@@ -1,6 +1,9 @@
 import re
 
+from pypdf import PdfReader
+
 from analysis.html_renderer import render_html
+from analysis.pdf_renderer import render_pdf
 
 
 REQUIRED_SECTION_TITLES = (
@@ -40,3 +43,18 @@ def test_html_has_no_local_image_dependencies(report, tmp_path):
     assert 'src="figures/' not in html
     assert 'src="generated/' not in html
     assert "TBD" not in visible_markup
+
+
+def test_pdf_has_expected_length_and_content(report, tmp_path):
+    output = render_pdf(report, tmp_path / "report.pdf")
+    reader = PdfReader(output)
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
+
+    assert 25 <= len(reader.pages) <= 35
+    assert all(title in text for title in REQUIRED_SECTION_TITLES)
+    assert "0.499424" in text
+    assert "0.456469" in text
+    assert "0.444107" in text
+    assert "TBD" not in text
+    assert all(page.mediabox.width > 590 for page in reader.pages)
+    assert all(page.mediabox.height > 840 for page in reader.pages)
