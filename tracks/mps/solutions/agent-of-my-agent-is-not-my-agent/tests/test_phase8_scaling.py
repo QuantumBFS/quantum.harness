@@ -4,6 +4,7 @@ import pytest
 
 from lrtfim.phase8_scaling import (
     adjacent_effective_exponents,
+    direct_gap_power_law,
     gap_scaling_summary,
     sensitivity_regression,
     strict_endpoint_crossing,
@@ -76,6 +77,29 @@ def test_adjacent_effective_exponents_support_five_nondoubling_sizes():
     assert result["pairs"] == ["16_32", "32_64", "64_96", "96_128"]
     assert result["effective_lengths"] == pytest.approx(effective_lengths)
     assert result["values"] == pytest.approx(expected)
+
+
+def test_direct_gap_power_law_recovers_exact_amplitude_and_exponent():
+    lengths = [16, 32, 64, 96, 128]
+    amplitude = 2.75
+    exponent = 0.93
+    gaps = [amplitude * length ** (-exponent) for length in lengths]
+
+    result = direct_gap_power_law(lengths, gaps)
+
+    assert result["amplitude"] == pytest.approx(amplitude)
+    assert result["exponent"] == pytest.approx(exponent)
+    assert result["residual_rms"] == pytest.approx(0.0, abs=1.0e-14)
+    assert result["residual_degrees_of_freedom"] == 3
+
+
+def test_direct_gap_power_law_rejects_invalid_inputs():
+    with pytest.raises(ValueError, match="at least three"):
+        direct_gap_power_law([16, 32], [0.3, 0.2])
+    with pytest.raises(ValueError, match="positive"):
+        direct_gap_power_law([16, 32, 64], [0.3, 0.0, 0.1])
+    with pytest.raises(ValueError, match="finite"):
+        direct_gap_power_law([16, 32, 64], [0.3, float("nan"), 0.1])
 
 
 def test_five_size_gap_summary_reports_regressions_and_leave_l16_out():

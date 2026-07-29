@@ -211,6 +211,15 @@ sweeps change the energy by only `6.82e-13`. The state is not promoted to
 from audited `chi=128` checkpoints to `chi=256`; the report preserves both
 baseline and refined energies, gaps, and truncation diagnostics.
 
+An additive critical-field sensitivity branch evaluates fresh even/odd
+states at the external Shiratani--Todo field `Gamma_c_ST=1.5609` for the
+same five sizes. It retains the original `Gamma_c_power` branch unchanged,
+uses `chi=128` baselines with selective audited `chi=256` refinement only
+on failed states, and compares raw gaps, four adjacent `z_eff` values, a
+direct `Delta=A L^(-z)` regression, and the two declared correction
+coordinates. The external field is never selected by agreement with the
+published exponent.
+
 The final report will compare the resulting `z` sensitivities with
 Shiratani--Todo's published `sigma=7/4` values, `z=0.91(2)` for power
 corrections and `z=0.98(3)` for logarithmic corrections

@@ -109,6 +109,31 @@ def test_crossing_cli_writes_two_resumable_commands(tmp_path: Path):
     assert not list(tmp_path.rglob("*.h5"))
 
 
+def test_st_gaps_cli_writes_ten_fixed_field_commands(tmp_path: Path):
+    fit_summary = tmp_path / "fit-summary.json"
+    _fit_summary(fit_summary)
+    output = tmp_path / "sensitivity-Gamma-ST" / "run_spec.json"
+
+    completed = run_cli(
+        "st-gaps",
+        "--fit-summary",
+        str(fit_summary),
+        "--output",
+        str(output),
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    spec = json.loads(output.read_text())
+    assert len(spec["cells"]) == 10
+    assert {cell["Gamma"] for cell in spec["cells"]} == {1.5609}
+    assert {cell["sigma"] for cell in spec["cells"]} == {1.75}
+    assert all("--direct-only" in cell["command"] for cell in spec["cells"])
+    assert all(
+        cell["command"][cell["command"].index("--chi-schedule") + 1] == "128"
+        for cell in spec["cells"]
+    )
+
+
 def test_decide_cli_records_unresolved_without_writing_gap_spec(
     tmp_path: Path,
 ):

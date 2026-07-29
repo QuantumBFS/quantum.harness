@@ -16,6 +16,7 @@ from lrtfim.phase8_protocol import (
     R_FIT,
     build_crossing_spec,
     build_gap_spec,
+    build_st_gap_spec,
     decide_crossing,
 )
 
@@ -165,6 +166,30 @@ def command_gaps(args: argparse.Namespace) -> None:
     print(f"planned {len(spec['cells'])} common-field states", flush=True)
 
 
+def command_st_gaps(args: argparse.Namespace) -> None:
+    fit = _validate_fit_summary(args.fit_summary)
+    spec = build_st_gap_spec(args.output.parent)
+    spec["provenance"] = {
+        "fit_summary": fit,
+        "field_source": {
+            "role": "external_published_benchmark",
+            "Gamma": 1.5609,
+            "reference": "Shiratani-Todo arXiv:2305.14121v4",
+        },
+    }
+    for cell in spec["cells"]:
+        cell["command"] = _cell_command(
+            cell,
+            args.fit_summary,
+            spec["run_dir"],
+        )
+    atomic_json(args.output, spec)
+    print(
+        f"planned {len(spec['cells'])} published-field sensitivity states",
+        flush=True,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -191,6 +216,11 @@ def parse_args() -> argparse.Namespace:
     gaps.add_argument("--fit-summary", type=Path, default=DEFAULT_FIT)
     gaps.add_argument("--output", type=Path, required=True)
     gaps.set_defaults(handler=command_gaps)
+
+    st_gaps = subparsers.add_parser("st-gaps")
+    st_gaps.add_argument("--fit-summary", type=Path, default=DEFAULT_FIT)
+    st_gaps.add_argument("--output", type=Path, required=True)
+    st_gaps.set_defaults(handler=command_st_gaps)
     return parser.parse_args()
 
 

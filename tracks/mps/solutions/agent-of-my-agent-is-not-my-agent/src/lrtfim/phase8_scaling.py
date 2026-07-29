@@ -101,6 +101,39 @@ def adjacent_effective_exponents(lengths, gaps) -> dict:
     }
 
 
+def direct_gap_power_law(lengths, gaps) -> dict:
+    """Regress positive gaps against Delta=A*L^(-z) in log coordinates."""
+    sizes = np.asarray(lengths, dtype=float)
+    values = np.asarray(gaps, dtype=float)
+    if sizes.ndim != 1 or values.ndim != 1 or sizes.size != values.size:
+        raise ValueError("sizes and gaps must be one-dimensional and equal-length")
+    if sizes.size < 3:
+        raise ValueError("at least three sizes and gaps are required")
+    _require_finite(sizes, values)
+    if np.any(sizes <= 0.0) or np.any(values <= 0.0):
+        raise ValueError("sizes and gaps must be positive")
+    if np.any(np.diff(sizes) <= 0.0):
+        raise ValueError("sizes must be strictly increasing")
+
+    log_sizes = np.log(sizes)
+    log_gaps = np.log(values)
+    design = np.column_stack([np.ones_like(log_sizes), log_sizes])
+    coefficients, _, _, _ = np.linalg.lstsq(design, log_gaps, rcond=None)
+    log_amplitude, slope = coefficients
+    predicted = design @ coefficients
+    residuals = log_gaps - predicted
+    return {
+        "amplitude": float(np.exp(log_amplitude)),
+        "exponent": float(-slope),
+        "predicted_gaps": np.exp(predicted).tolist(),
+        "log_residuals": residuals.tolist(),
+        "residual_sum_squares": float(residuals @ residuals),
+        "residual_rms": float(np.sqrt(np.mean(residuals**2))),
+        "residual_degrees_of_freedom": int(values.size - 2),
+        "interpretation": "direct_log_linear_gap_regression",
+    }
+
+
 def sensitivity_regression(z_values, effective_lengths, form: str) -> dict:
     """Regress z_eff against a declared finite-size sensitivity coordinate."""
     values = np.asarray(z_values, dtype=float)

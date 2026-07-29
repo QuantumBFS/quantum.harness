@@ -5,8 +5,10 @@ import pytest
 from lrtfim.phase8_protocol import (
     GAP_DISCARDED_WEIGHT_LIMIT,
     GAP_RELATIVE_VARIANCE_LIMIT,
+    GAMMA_ST,
     build_crossing_spec,
     build_gap_spec,
+    build_st_gap_spec,
     common_field_sensitivity,
     decide_crossing,
 )
@@ -119,3 +121,22 @@ def test_gap_spec_refuses_unresolved_crossing(tmp_path: Path):
             {"status": "unresolved_no_L64_L128_bracket"},
             tmp_path,
         )
+
+
+def test_st_gap_spec_is_a_distinct_fixed_field_ten_state_branch(
+    tmp_path: Path,
+):
+    spec = build_st_gap_spec(tmp_path)
+    assert spec["run_id"] == "phase8-sigma1.75-sensitivity-Gamma-ST"
+    assert spec["settings"]["field_role"] == "external_published_benchmark"
+    assert spec["settings"]["Gamma"] == GAMMA_ST == 1.5609
+    assert [
+        (cell["L"], cell["sector"]) for cell in spec["cells"]
+    ] == [
+        (length, sector)
+        for length in (16, 32, 64, 96, 128)
+        for sector in ("even", "odd")
+    ]
+    assert {cell["sigma"] for cell in spec["cells"]} == {1.75}
+    assert {cell["Gamma"] for cell in spec["cells"]} == {GAMMA_ST}
+    assert {cell["chi"] for cell in spec["cells"]} == {128}

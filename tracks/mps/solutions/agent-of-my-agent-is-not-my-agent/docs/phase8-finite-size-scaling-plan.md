@@ -1075,3 +1075,65 @@ revision used by every compute cell.
 Report the sigma=1.75 result and resource usage. Do not create or run
 sigma=1.80 or sigma=2.00 plans until the user reviews and approves the
 completed sigma=1.75 scaling analysis.
+
+### Task 7: Published-critical-field sensitivity branch
+
+**Goal:** Evaluate whether the low Phase 8 effective exponents are caused
+by the self-consistent finite-size field estimate, without replacing or
+overwriting that result.
+
+**Branch invariants:**
+
+- `sigma=1.75` and `Gamma=1.5609` for every state;
+- `L={16,32,64,96,128}`, even then odd at each size;
+- the same periodic Hurwitz-zeta convention, `K=24`, `alpha=0.5`,
+  `r_fit=2048`, exact-zero pruning, and no approximate MPO compression;
+- `chi=128` baseline states, with audited `chi=256` refinement only for
+  states that fail the accepted Phase 8 convergence gates;
+- no reuse of `Gamma_c_power` energies as final values;
+- outputs under
+  `results/phase8-scaling/sigma-1.75/sensitivity-Gamma-ST/`.
+
+- [ ] **Step 1: Add direct gap power-law regression test-first**
+
+Add `direct_gap_power_law(lengths, gaps)` to
+`src/lrtfim/phase8_scaling.py`. Regress `log(Delta)=log(A)-z log(L)` and
+return `A`, `z`, residuals, residual RMS, and three residual degrees of
+freedom for five sizes. Reject nonfinite, nonpositive, unequal-length, or
+fewer-than-three inputs. Verify against synthetic exact power-law gaps.
+
+- [ ] **Step 2: Add the fixed-field resumable planner test-first**
+
+Add `build_st_gap_spec(output_dir)` to `src/lrtfim/phase8_protocol.py` and
+the `st-gaps` command to `scripts/plan_phase8_scaling.py`. Assert exactly
+ten ordered cells, one field `1.5609`, one sigma `1.75`, baseline
+`chi=128`, and a distinct run/output directory. Commands must use the
+existing checkpoint/provenance-safe DMRG runner.
+
+- [ ] **Step 3: Execute and gate baseline states**
+
+Run the ten baseline cells serially in increasing `L`, completing even and
+odd sectors before advancing. Require the accepted Phase 8 variance and
+discarded-weight criteria. Preserve failed baseline diagnostics. Refine
+only failed states at `chi=256` from audited `chi=128` checkpoints, without
+changing Gamma, K, or thresholds.
+
+- [ ] **Step 4: Add the comparison report test-first**
+
+Create `scripts/report_phase8_field_sensitivity.py` and
+`tests/test_phase8_field_sensitivity_report.py`. Select the accepted final
+state per `(L,sector)`, retain every `chi=128` baseline, compute five gaps,
+four adjacent `z_eff`, the direct gap power-law result, both approved
+effective-exponent correction regressions, and a size-by-size comparison
+with the existing `Gamma_c_power` analysis. Write CSV, JSON, Markdown,
+PNG, and PDF artifacts with separate labels
+`self_consistent_crossing_field` and `external_published_field`.
+
+- [ ] **Step 5: Verify without field selection**
+
+Run the complete solution test suite, independently recompute every
+reported exponent from the raw gaps, inspect the comparison figure, and
+confirm the original Phase 8 analysis hashes and files are unchanged.
+State whether the external field reduces the numerical discrepancy with
+Shiratani--Todo, while explicitly refusing to choose that field because of
+the outcome.

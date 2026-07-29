@@ -11,6 +11,7 @@ from .phase8_scaling import strict_endpoint_crossing, two_point_sensitivity
 
 
 SIGMA = 1.75
+GAMMA_ST = 1.5609
 ENDPOINTS = (1.55, 1.60)
 SIZES = (16, 32, 64, 96, 128)
 K = 24
@@ -235,6 +236,53 @@ def build_gap_spec(decision: Mapping, output_dir: str | Path) -> dict:
                     "L=64 odd state recorded 5.49e-8 while variance and "
                     "energy convergence passed"
                 ),
+            },
+        },
+        "cells": cells,
+    }
+
+
+def build_st_gap_spec(output_dir: str | Path) -> dict:
+    """Create the ten-state external published-field sensitivity branch."""
+    run_dir = Path(output_dir)
+    cells = []
+    for length in SIZES:
+        for sector in ("even", "odd"):
+            cell_id = (
+                f"sigma{SIGMA:.2f}_L{length}_Gamma{GAMMA_ST:.4f}_"
+                f"{sector}_K{K}_chi{GAP_CHI}"
+            )
+            cells.append(
+                {
+                    "cell_id": cell_id,
+                    "status": "pending",
+                    "sigma": SIGMA,
+                    "L": length,
+                    "Gamma": GAMMA_ST,
+                    "sector": sector,
+                    "K": K,
+                    "chi": GAP_CHI,
+                }
+            )
+    return {
+        "run_id": "phase8-sigma1.75-sensitivity-Gamma-ST",
+        "run_dir": str(run_dir),
+        "settings": {
+            "sigma": SIGMA,
+            "Gamma": GAMMA_ST,
+            "field_role": "external_published_benchmark",
+            "K": K,
+            "chi": GAP_CHI,
+            "alpha": ALPHA,
+            "r_fit": R_FIT,
+            "sectors": ["even", "odd"],
+            "exact_zero_pruning": True,
+            "approximate_mpo_compression": False,
+            "adaptive_gamma": False,
+            "acceptance": {
+                "relative_variance_max": GAP_RELATIVE_VARIANCE_LIMIT,
+                "discarded_weight_max": GAP_DISCARDED_WEIGHT_LIMIT,
+                "selective_chi256_refinement": True,
             },
         },
         "cells": cells,
