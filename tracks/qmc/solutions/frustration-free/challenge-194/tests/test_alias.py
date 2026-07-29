@@ -20,7 +20,7 @@ from long_range_percolation.kernel import (
     kernel_weight_sum,
     periodic_kernel,
 )
-from long_range_percolation.model import distance_classes
+from long_range_percolation.model import ModelSpec, distance_classes
 
 
 def digest(array: np.ndarray) -> str:
@@ -98,6 +98,70 @@ def _compiled_frequency_draws(
     )
 
 
+@numba.njit(cache=True, boundscheck=True, fastmath=False)
+def _scripted_rejection_aware_alias_draw(
+    probability: np.ndarray,
+    alias: np.ndarray,
+    column_block: np.ndarray,
+    threshold_block: np.ndarray,
+) -> tuple[int, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    class_count = len(probability)
+    column_counter = np.zeros(4, dtype=np.uint32)
+    column_key = np.zeros(2, dtype=np.uint32)
+    column_lane = np.asarray((0, 1), dtype=np.uint8)
+    column_accounting = np.zeros(3, dtype=np.uint64)
+    threshold_counter = np.zeros(4, dtype=np.uint32)
+    threshold_key = np.zeros(2, dtype=np.uint32)
+    threshold_lane = np.asarray((0, 1), dtype=np.uint8)
+    threshold_accounting = np.zeros(3, dtype=np.uint64)
+    rejection_threshold = (
+        np.uint64(1 << 32) - np.uint64(class_count)
+    ) % np.uint64(class_count)
+
+    while True:
+        column_word = next_u32(
+            column_counter,
+            column_key,
+            column_block,
+            column_lane,
+            column_accounting,
+        )
+        product = np.uint64(column_word) * np.uint64(class_count)
+        if (
+            product & np.uint64(0xFFFFFFFF)
+        ) < rejection_threshold:
+            column_accounting[2] += np.uint64(1)
+            continue
+        break
+    threshold_word = next_u32(
+        threshold_counter,
+        threshold_key,
+        threshold_block,
+        threshold_lane,
+        threshold_accounting,
+    )
+    selected = draw_alias(
+        probability, alias, column_word, threshold_word
+    )
+    lanes = np.asarray(
+        (
+            column_lane[0],
+            column_lane[1],
+            threshold_lane[0],
+            threshold_lane[1],
+        ),
+        dtype=np.uint8,
+    )
+    counters = np.concatenate((column_counter, threshold_counter))
+    return (
+        selected,
+        column_accounting,
+        threshold_accounting,
+        lanes,
+        counters,
+    )
+
+
 def test_alias_table_is_deterministic_defensive_and_read_only():
     kernel = periodic_kernel(256, 0.9)
     first = build_distance_alias(256, 0.9, kernel, digest(kernel))
@@ -128,10 +192,13 @@ def test_alias_invariants_cover_antipodal_class_and_finite_extremes():
     for length, sigma in [
         (2, 1.0),
         (256, math.ulp(1.0)),
-        (256, 96.0),
+        (256, 128.0),
     ]:
-        kernel = periodic_kernel(length, sigma)
-        table = build_distance_alias(length, sigma, kernel, digest(kernel))
+        spec = ModelSpec(length=length, sigma=sigma, kappa=0.0)
+        kernel = periodic_kernel(spec.length, spec.sigma)
+        table = build_distance_alias(
+            spec.length, spec.sigma, kernel, digest(kernel)
+        )
         expected_multiplicity = np.asarray(
             [item.multiplicity for item in distance_classes(length)],
             dtype=np.uint64,
@@ -216,6 +283,39 @@ def test_draw_alias_matches_python_at_boundaries_and_compiles_nopython():
         )
     if not numba.config.DISABLE_JIT:
         assert draw_alias.nopython_signatures
+
+
+def test_rejection_aware_alias_draw_uses_scripted_streams_independently():
+    probability = np.ones(3, dtype=np.float64)
+    alias = np.arange(3, dtype=np.int64)
+    column_block = np.asarray(
+        (0, 0x55555556, 0xDEADBEEF, 0xFFFFFFFF),
+        dtype=np.uint32,
+    )
+    threshold_block = np.asarray(
+        (0x80000000, 0xBAD5EED, 0, 0),
+        dtype=np.uint32,
+    )
+
+    selected, column_accounting, threshold_accounting, lanes, counters = (
+        _scripted_rejection_aware_alias_draw(
+            probability, alias, column_block, threshold_block
+        )
+    )
+
+    assert selected == 1
+    np.testing.assert_array_equal(
+        column_accounting, np.asarray((2, 0, 1), dtype=np.uint64)
+    )
+    np.testing.assert_array_equal(
+        threshold_accounting, np.asarray((1, 0, 0), dtype=np.uint64)
+    )
+    np.testing.assert_array_equal(
+        lanes, np.asarray((2, 1, 1, 1), dtype=np.uint8)
+    )
+    np.testing.assert_array_equal(counters, np.zeros(8, dtype=np.uint32))
+    if not numba.config.DISABLE_JIT:
+        assert _scripted_rejection_aware_alias_draw.nopython_signatures
 
 
 def test_fixed_philox_alias_frequencies_pass_one_simultaneous_threshold():

@@ -1,3 +1,6 @@
+from decimal import Decimal, localcontext
+import math
+
 import numpy as np
 import pytest
 from scipy.special import zeta
@@ -72,6 +75,52 @@ def test_periodic_kernel_uses_full_periodic_image_convention():
     )
     assert value == pytest.approx(hurwitz_value, rel=2e-13)
     assert value > bare_minimum_image
+
+
+def test_rearranged_kernel_matches_old_hurwitz_form_in_stable_regime():
+    length = 64
+    sigma = 0.9
+    exponent = 1.0 + sigma
+    distances = np.arange(1, length // 2 + 1, dtype=np.float64)
+    fractions = distances / length
+    old_form = length ** (-exponent) * (
+        zeta(exponent, fractions) + zeta(exponent, 1.0 - fractions)
+    )
+    np.testing.assert_allclose(
+        periodic_kernel(length, sigma),
+        old_form,
+        rtol=3e-15,
+        atol=0.0,
+    )
+
+
+def test_high_sigma_kernel_matches_high_precision_direct_images():
+    length = 256
+    sigma = 128.0
+    exponent = 129
+    values = periodic_kernel(length, sigma)
+    assert np.all(np.isfinite(values))
+    assert np.all(values > 0.0)
+
+    with localcontext() as context:
+        context.prec = 120
+        for distance in (1, 2, 64, 128):
+            expected = sum(
+                Decimal(abs(distance + image * length)) ** (-exponent)
+                for image in range(-16, 17)
+            )
+            observed = float(values[distance - 1])
+            assert math.isclose(
+                observed,
+                float(expected),
+                rel_tol=4e-15,
+                abs_tol=0.0,
+            )
+
+
+def test_kernel_rejects_positive_entries_below_float64_representability():
+    with pytest.raises(ValueError, match="representability"):
+        periodic_kernel(256, 1024.0)
 
 
 def test_edge_probabilities_use_stable_exponential_form():
