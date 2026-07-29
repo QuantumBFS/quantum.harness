@@ -13,6 +13,24 @@ include(joinpath(
     "ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
 ))
 using .ShastryFullStateSpinIsotypicPrimalGapJuMP
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
+))
+using .ShastryFullStateSpinIsotypicDualCertificateJuMP
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
+))
+using .ShastryFullStateSpinIsotypicDualCertificateMosek
+include(joinpath(
+    TRACK_ROOT,
+    "src",
+    "ShastryFullStateSpinIsotypicPrimalGapMosek.jl",
+))
+using .ShastryFullStateSpinIsotypicPrimalGapMosek
 using LinearAlgebra
 using Mosek
 using MosekTools
@@ -25,6 +43,9 @@ function spin_isotypic_source_dict()
     for file in (
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicReduction.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateJuMP.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicDualCertificateMosek.jl",
+        "tracks/polyopt/solutions/sdp-gap-seekers/src/ShastryFullStateSpinIsotypicPrimalGapMosek.jl",
         "tracks/polyopt/solutions/sdp-gap-seekers/scripts/build_shastry_full_state_spin_isotypic_mof.jl",
     )
         source["files_sha256"][file] =
@@ -583,9 +604,10 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     end
     write_checkpoint(checkpoint_path, metadata)
 
-    structure_only = options.mode == :structure
+    materialize_isotypic_coefficients =
+        options.mode in (:preflight, :mof)
     progress(
-        structure_only ?
+        !materialize_isotypic_coefficients ?
         "exact S3 structural cone blocking" :
         "exact S3 isotypic cone blocking",
     )
@@ -593,7 +615,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         @timed assemble_shastry_full_state_spin_isotypic_reduced_primal(
             spin_spatial,
             verify_truth=exhaustive_intermediate_truth,
-            materialize_coefficients=!structure_only,
+            materialize_coefficients=materialize_isotypic_coefficients,
         )
     isotypic = isotypic_measurement.value
     report =
@@ -604,7 +626,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     metadata["reduced"]["assembly_sha256"] = isotypic.assembly_sha256
     metadata["reduced"]["coefficient_map_sha256"] =
         isotypic.coefficient_map_sha256
-    metadata["coefficient_inventory"] = structure_only ?
+    metadata["coefficient_inventory"] = !materialize_isotypic_coefficients ?
         "deferred-structural-v1" :
         "materialized-exact-v1"
     if !isnothing(isotypic.truth)
@@ -613,18 +635,218 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     end
     write_checkpoint(checkpoint_path, metadata)
 
+    if options.mode == :certificate
+        threads = parse(
+            Int,
+            get(
+                ENV,
+                "SS_MOSEK_THREADS",
+                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+            ),
+        )
+        time_limit_seconds = parse(
+            Float64,
+            get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"),
+        )
+        log_level =
+            parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+        progress("build low-level native Mosek dual certificate")
+        certificate_measurement = @timed(
+            build_shastry_full_state_spin_isotypic_mosek_dual_certificate(
+                isotypic;
+                threads=threads,
+                time_limit_seconds=time_limit_seconds,
+                log_level=log_level,
+                progress_callback=progress,
+                fingerprint_coefficients=options.patch_level == 1,
+            )
+        )
+        certificate = certificate_measurement.value
+        metadata["stages"]["dual_certificate"] =
+            measurement_dict(certificate_measurement)
+        metadata["dual_certificate"] = Dict(
+            "moment_matching_equalities" =>
+                length(certificate.moment_constraints),
+            "native_psd_blocks" =>
+                certificate.native_psd_blocks,
+            "equality_multipliers" =>
+                certificate.equality_multipliers,
+            "scalar_coefficient_terms" =>
+                certificate.scalar_coefficient_terms,
+            "coefficient_map_sha256" =>
+                certificate.coefficient_map_sha256,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+        progress(
+            "optimize native dual certificate; threads=$threads, " *
+            "time_limit=$(time_limit_seconds)s",
+        )
+        solve_measurement = @timed(
+            optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!(
+                certificate,
+            )
+        )
+        metadata["stages"]["solve"] =
+            measurement_dict(solve_measurement)
+        solve_result = solve_measurement.value
+        metadata["solve"] = Dict(
+            "formulation" =>
+                "low-level-native-mosek-dual-farkas-certificate-v2",
+            "classification" => solve_result.classification,
+            "problem_status" =>
+                sprint(show, solve_result.problem_status),
+            "solution_status" =>
+                sprint(show, solve_result.solution_status),
+            "threads" => threads,
+            "time_limit_seconds" => time_limit_seconds,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+    end
+
+    if options.mode == :native
+        threads = parse(
+            Int,
+            get(
+                ENV,
+                "SS_MOSEK_THREADS",
+                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+            ),
+        )
+        time_limit_seconds = parse(
+            Float64,
+            get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"),
+        )
+        log_level =
+            parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+        progress("build low-level native Mosek primal")
+        native_measurement = @timed(
+            build_shastry_full_state_spin_isotypic_mosek_primal(
+                isotypic;
+                threads=threads,
+                time_limit_seconds=time_limit_seconds,
+                log_level=log_level,
+                progress_callback=progress,
+                fingerprint_coefficients=options.patch_level == 1,
+            )
+        )
+        native_primal = native_measurement.value
+        metadata["stages"]["native_primal"] =
+            measurement_dict(native_measurement)
+        metadata["native_primal"] = Dict(
+            "moment_variables" =>
+                length(native_primal.moment_variables),
+            "native_psd_blocks" =>
+                native_primal.native_psd_blocks,
+            "equality_constraints" =>
+                native_primal.equality_constraints,
+            "scalar_coefficient_terms" =>
+                native_primal.scalar_coefficient_terms,
+            "coefficient_map_sha256" =>
+                native_primal.coefficient_map_sha256,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+        progress(
+            "optimize native Mosek primal; threads=$threads, " *
+            "time_limit=$(time_limit_seconds)s",
+        )
+        solve_measurement = @timed(
+            optimize_shastry_full_state_spin_isotypic_mosek_primal!(
+                native_primal,
+            )
+        )
+        metadata["stages"]["solve"] =
+            measurement_dict(solve_measurement)
+        solve_result = solve_measurement.value
+        metadata["solve"] = Dict(
+            "formulation" =>
+                "low-level-native-mosek-affine-psd-primal-v1",
+            "classification" => solve_result.classification,
+            "problem_status" =>
+                sprint(show, solve_result.problem_status),
+            "solution_status" =>
+                sprint(show, solve_result.solution_status),
+            "maximum_acc_violation" =>
+                solve_result.maximum_acc_violation,
+            "maximum_equality_violation" =>
+                solve_result.maximum_equality_violation,
+            "threads" => threads,
+            "time_limit_seconds" => time_limit_seconds,
+        )
+        write_checkpoint(checkpoint_path, metadata)
+    end
+
     if options.mode in (:mof, :solve)
         progress(
             options.mode == :mof ?
             "materialize, write, and reload optimizer-free MOF" :
-            "materialize JuMP model for direct Mosek solve",
+            "stream exact coefficients directly into Mosek",
         )
-        jump_measurement =
-            @timed build_shastry_full_state_spin_isotypic_jump_primal(
-                isotypic,
+        if options.mode == :solve
+            threads = parse(
+                Int,
+                get(
+                    ENV,
+                    "SS_MOSEK_THREADS",
+                    get(ENV, "SLURM_CPUS_PER_TASK", "1"),
+                ),
             )
+            time_limit_seconds = parse(
+                Float64,
+                get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"),
+            )
+            log_level =
+                parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
+            bridged_optimizer =
+                JuMP.MOI.Bridges.full_bridge_optimizer(
+                    MosekTools.Optimizer(),
+                    Float64,
+                )
+            direct_model = JuMP.direct_model(bridged_optimizer)
+            JuMP.set_time_limit_sec(direct_model, time_limit_seconds)
+            JuMP.set_optimizer_attribute(
+                direct_model,
+                "MSK_IPAR_NUM_THREADS",
+                threads,
+            )
+            JuMP.set_optimizer_attribute(
+                direct_model,
+                "MSK_IPAR_LOG",
+                log_level,
+            )
+            jump_measurement = @timed(
+                build_shastry_full_state_spin_isotypic_streaming_jump_primal(
+                    isotypic;
+                    model=direct_model,
+                    fingerprint_coefficients=
+                        options.patch_level == 1 ||
+                        get(
+                            ENV,
+                            "SHASTRY_STREAM_FINGERPRINT",
+                            "0",
+                        ) == "1",
+                )
+            )
+        else
+            jump_measurement =
+                @timed build_shastry_full_state_spin_isotypic_jump_primal(
+                    isotypic,
+                )
+        end
         jump_model = jump_measurement.value
         metadata["stages"]["jump"] = measurement_dict(jump_measurement)
+        if options.mode == :solve
+            metadata["reduced"]["spin_isotypic_moments"] =
+                length(jump_model.moment_variables)
+            metadata["reduced"]["coefficient_map_sha256"] =
+                jump_model.coefficient_map_sha256
+            metadata["reduced"]["assembly_sha256"] =
+                jump_model.assembly_sha256
+            metadata["coefficient_inventory"] =
+                "streamed-direct-to-solver-v1"
+            metadata["streamed_coefficient_fingerprint"] =
+                jump_model.coefficient_map_sha256 !=
+                "omitted-streaming-v1"
+        end
         write_checkpoint(checkpoint_path, metadata)
     end
 
@@ -643,32 +865,9 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         metadata["stages"]["reload_mof"] =
             measurement_dict(replay_measurement)
     elseif options.mode == :solve
-        threads = parse(
-            Int,
-            get(
-                ENV,
-                "SS_MOSEK_THREADS",
-                get(ENV, "SLURM_CPUS_PER_TASK", "1"),
-            ),
-        )
-        time_limit_seconds =
-            parse(Float64, get(ENV, "SS_MOSEK_TIME_LIMIT_SECONDS", "43200"))
-        log_level = parse(Int, get(ENV, "SS_MOSEK_LOG_LEVEL", "1"))
         progress(
-            "attach Mosek and optimize; threads=$threads, " *
+            "optimize direct Mosek model; threads=$threads, " *
             "time_limit=$(time_limit_seconds)s",
-        )
-        JuMP.set_optimizer(jump_model.model, MosekTools.Optimizer)
-        JuMP.set_time_limit_sec(jump_model.model, time_limit_seconds)
-        JuMP.set_optimizer_attribute(
-            jump_model.model,
-            "MSK_IPAR_NUM_THREADS",
-            threads,
-        )
-        JuMP.set_optimizer_attribute(
-            jump_model.model,
-            "MSK_IPAR_LOG",
-            log_level,
         )
         solve_measurement = @timed JuMP.optimize!(jump_model.model)
         metadata["stages"]["solve"] = measurement_dict(solve_measurement)

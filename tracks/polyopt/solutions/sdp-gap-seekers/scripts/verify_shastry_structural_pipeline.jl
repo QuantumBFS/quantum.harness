@@ -7,6 +7,7 @@ for source in (
     "GenericGapModel.jl",
     "PrimalGapSymbolics.jl",
     "PrimalGapAssembly.jl",
+    "PrimalGapJuMP.jl",
     "ExactSymmetryReduction.jl",
     "ReducedPrimalGapAssembly.jl",
     "ConjugationSymmetryReduction.jl",
@@ -14,6 +15,7 @@ for source in (
     "ShastryFullStateSpatialReduction.jl",
     "ShastryFullStateSpinSpatialReduction.jl",
     "ShastryFullStateSpinIsotypicReduction.jl",
+    "ShastryFullStateSpinIsotypicPrimalGapJuMP.jl",
 )
     include(joinpath(TRACK_ROOT, "src", source))
 end
@@ -25,6 +27,7 @@ using .FullStateSymmetryReduction
 using .ShastryFullStateSpatialReduction
 using .ShastryFullStateSpinSpatialReduction
 using .ShastryFullStateSpinIsotypicReduction
+using .ShastryFullStateSpinIsotypicPrimalGapJuMP
 
 const EXPECTED_COEFFICIENT_SHA256 =
     "2a6753a6ea7c57fa43bd33e09339046206fae5217ac3ae47c0cf9cc3b2dc2679"
@@ -117,11 +120,24 @@ report.spin_isotypic_moments == 7_231 ||
 report.psd_triangle_entries == 75_967 ||
     error("parallel structural pipeline changed the PSD inventory")
 
+streaming = measured("single-pass streaming JuMP assembly") do
+    build_shastry_full_state_spin_isotypic_streaming_jump_primal(
+        structural_isotypic,
+    )
+end
+streaming.coefficient_map_sha256 == isotypic.coefficient_map_sha256 ||
+    error("streaming coefficient fingerprint differs from materialized truth")
+streaming.assembly_sha256 == isotypic.assembly_sha256 ||
+    error("streaming assembly fingerprint differs from materialized truth")
+length(streaming.moment_variables) == report.spin_isotypic_moments ||
+    error("streaming JuMP model changed the moment count")
+
 println(
     "structural_pipeline_truth=true",
     " threads=", Threads.nthreads(),
     " moments=", report.spin_isotypic_moments,
     " psd_triangle_entries=", report.psd_triangle_entries,
     " coefficient_map_sha256=", isotypic.coefficient_map_sha256,
+    " streaming_exact=true",
 )
 flush(stdout)
