@@ -1,0 +1,81 @@
+{
+  "blas_threads": 1,
+  "created_utc": "2026-07-29T10:58:30.010504+00:00",
+  "experiment_id": "stage1-ed-m3-20260729",
+  "g_grid": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "m3_asymmetry": 0.15,
+  "max_eigen_residual": 1.9597283472910138e-14,
+  "mode": "m3",
+  "mu_grid": [
+    -1.5,
+    0.0,
+    1.5
+  ],
+  "rows": 155,
+  "survivors": [
+    {
+      "balance_span": 1.4892452188342915,
+      "classification": "STOP",
+      "commutator_sq_max": 0.02563018076928824,
+      "endpoint_gap_mean": 0.0014322587938147002,
+      "fidelity_min": 4.633619664855269e-15,
+      "interior_gap_min": 5.5491384099326524e-05,
+      "reason": "t=0 accidental degeneracy / no kinetic competition",
+      "t": 0.0
+    },
+    {
+      "balance_span": 1.4234836114369567,
+      "classification": "SURVIVE",
+      "commutator_sq_max": 0.02514031147494009,
+      "endpoint_gap_mean": 0.40448987686023097,
+      "fidelity_min": 2.0966577829587672e-14,
+      "interior_gap_min": 0.04579552775774953,
+      "reason": "fixed-sector channel reordering or gap anomaly",
+      "t": 0.25
+    },
+    {
+      "balance_span": 1.281024069239984,
+      "classification": "SURVIVE",
+      "commutator_sq_max": 0.02457362526400747,
+      "endpoint_gap_mean": 0.35464454556836067,
+      "fidelity_min": 2.1857905699497312e-14,
+      "interior_gap_min": 0.024441330001680583,
+      "reason": "fixed-sector channel reordering or gap anomaly",
+      "t": 0.5
+    },
+    {
+      "balance_span": 0.9971799578657699,
+      "classification": "SURVIVE",
+      "commutator_sq_max": 0.023865567835172317,
+      "endpoint_gap_mean": 0.26420734538120794,
+      "fidelity_min": 3.70461303951819e-14,
+      "interior_gap_min": 0.010380070661614837,
+      "reason": "fixed-sector channel reordering or gap anomaly",
+      "t": 1.0
+    },
+    {
+      "balance_span": 0.6410204469783669,
+      "classification": "SURVIVE",
+      "commutator_sq_max": 0.023588876064477654,
+      "endpoint_gap_mean": 0.16288455659270173,
+      "fidelity_min": 1.8681702991243516e-12,
+      "interior_gap_min": 0.0036475825818982344,
+      "reason": "fixed-sector channel reordering or gap anomaly",
+      "t": 2.0
+    }
+  ],
+  "t_grid": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "workers": 5
+}
