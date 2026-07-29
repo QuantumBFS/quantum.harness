@@ -333,7 +333,7 @@ Base.:(==)(left::KullResourceInventory, right::KullResourceInventory) =
 struct KullPrimalProblem
     model::JuMP.Model
     rho3
-    omegas::Dict{Int,Any}
+    omegas::Dict{Any,Any}
     constraints::Dict{Symbol,Vector{Any}}
     inventory::KullResourceInventory
     metadata::Dict{String,Any}
@@ -508,10 +508,12 @@ function author_default_k0(d::Int, D::Int)
     k0
 end
 
-function resource_inventory(d::Int, D::Union{Nothing,Int}, depth::Int; k0::Int=2)
+function resource_inventory(d::Int, D::Union{Nothing,Int}, depth::Int; k0::Int=2,
+        start_parities::Int=1)
     k0 >= 1 || throw(ArgumentError("k0 must be positive"))
     depth >= k0 || throw(ArgumentError("hierarchy depth n must satisfy n ≥ k0"))
-    coarse_levels = isnothing(D) ? 0 : depth - k0 + 1
+    start_parities in (1, 2) || throw(ArgumentError("only one-site and two-site frozen cells are supported"))
+    coarse_levels = isnothing(D) ? 0 : start_parities * (depth - k0 + 1)
     rho_dimension = d^(k0 + 1)
     q = isnothing(D) ? 0 : d^2 * D^2
     marginal_dimension = isnothing(D) ? 0 : d * D^2
@@ -549,6 +551,18 @@ function _edge_marginal(X::AbstractMatrix, dims::Tuple, keep::Int, side::Symbol)
     Y
 end
 
+_start_parities(frozen::FrozenUniformMPS) = begin
+    frozen.unit_cell_length in (1, 2) ||
+        throw(ArgumentError("coarse-RDM fallback supports only one-site or two-site frozen cells"))
+    1:frozen.unit_cell_length
+end
+
+_omega_key(frozen::FrozenUniformMPS, depth::Int, parity::Int=1) =
+    frozen.unit_cell_length == 1 ? depth : (depth, parity)
+_omega_name(frozen::FrozenUniformMPS, depth::Int, parity::Int=1) =
+    frozen.unit_cell_length == 1 ? "omega_$depth" : "omega_$(depth)_p$(parity)"
+_switch_parity(parity::Int) = 3 - parity
+
 function _edge_marginal_adjoint(Y::AbstractMatrix, dims::Tuple, keep::Int, side::Symbol)
     traced = length(dims) - keep
     X = Y
@@ -575,6 +589,7 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     isapprox(h, h'; atol=1e-12, rtol=1e-12) || throw(ArgumentError("h must be Hermitian"))
 
     D = isnothing(frozen) ? nothing : _uniform_bond_dimension(frozen)
+    parities = isnothing(frozen) ? (1:1) : _start_parities(frozen)
     !isnothing(frozen) && frozen.physical_dimension != d &&
         throw(DimensionMismatch("h and frozen map physical dimensions differ"))
     !isnothing(D) && !(1 <= D <= 4) &&
@@ -619,55 +634,75 @@ function build_kull_primal(h::AbstractMatrix; frozen::Union{Nothing,FrozenUnifor
     @objective(model, Min, real(sum(h[i,j] * objective_marginal[j,i]
         for i in 1:d^2, j in 1:d^2)))
 
-    omegas = Dict{Int,Any}()
+    omegas = Dict{Any,Any}()
     if !isnothing(frozen)
         q = d^2 * D^2
         omega_dims = (d, D, D, d)
-        for m in selected_k0:depth
+        omega_charges = isnothing(symmetry) ? Int[] : product_charges(symmetry.physical_charges,
+            -symmetry.virtual_charges, symmetry.virtual_charges,
+            symmetry.physical_charges)
+        for m in selected_k0:depth, parity in parities
+            key = _omega_key(frozen, m, parity)
+            name = _omega_name(frozen, m, parity)
             if isnothing(symmetry)
-                omegas[m] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name="omega_$m")
+                omegas[key] = @variable(model, [1:q, 1:q] in HermitianPSDCone(), base_name=name)
             else
-                omega_charges = product_charges(symmetry.physical_charges,
-                    -symmetry.virtual_charges, symmetry.virtual_charges,
-                    symmetry.physical_charges)
-                omegas[m], symmetry_blocks["omega_$m"] =
-                    _block_psd_matrix(model, omega_charges, "omega_$(m)")
-                symmetry_charges["omega_$m"] = omega_charges
+                omegas[key], symmetry_blocks[name] = _block_psd_matrix(model, omega_charges, name)
+                symmetry_charges[name] = omega_charges
             end
         end
-        bridge = bottom_bridge_operators(frozen; k0=selected_k0)
-        append!(constraints[:bottom], _add_hermitian_equalities!(model,
-            _jump_congruence(bridge.to_trace_physical_left, rho3),
-            _jump_partial_trace(omegas[selected_k0], omega_dims, 1)))
-        append!(constraints[:bottom], _add_hermitian_equalities!(model,
-            _jump_congruence(bridge.to_trace_physical_right, rho3),
-            _jump_partial_trace(omegas[selected_k0], omega_dims, 4)))
-        for m in selected_k0:depth-1
-            flow = flow_operators(frozen, m)
+        for parity in parities
+            key = _omega_key(frozen, selected_k0, parity)
+            bridge = bottom_bridge_operators(frozen; k0=selected_k0, start_site=parity)
+            append!(constraints[:bottom], _add_hermitian_equalities!(model,
+                _jump_congruence(bridge.to_trace_physical_left, rho3),
+                _jump_partial_trace(omegas[key], omega_dims, 1)))
+            append!(constraints[:bottom], _add_hermitian_equalities!(model,
+                _jump_congruence(bridge.to_trace_physical_right, rho3),
+                _jump_partial_trace(omegas[key], omega_dims, 4)))
+        end
+        for m in selected_k0:depth-1, parity in parities
+            next_key = _omega_key(frozen, m + 1, parity)
+            right_source = _omega_key(frozen, m, parity)
+            left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
+            left_source = _omega_key(frozen, m, left_parity)
+            flow = flow_operators(frozen, m; start_site=parity)
             append!(constraints[:flow], _add_hermitian_equalities!(model,
-                _jump_congruence(flow.to_trace_physical_left, omegas[m]),
-                _jump_partial_trace(omegas[m + 1], omega_dims, 1)))
+                _jump_congruence(flow.to_trace_physical_left, omegas[left_source]),
+                _jump_partial_trace(omegas[next_key], omega_dims, 1)))
             append!(constraints[:flow], _add_hermitian_equalities!(model,
-                _jump_congruence(flow.to_trace_physical_right, omegas[m]),
-                _jump_partial_trace(omegas[m + 1], omega_dims, 4)))
+                _jump_congruence(flow.to_trace_physical_right, omegas[right_source]),
+                _jump_partial_trace(omegas[next_key], omega_dims, 4)))
         end
     end
 
-    inventory = resource_inventory(d, D, depth; k0=selected_k0)
+    inventory = resource_inventory(d, D, depth; k0=selected_k0,
+        start_parities=length(parities))
     if !isnothing(symmetry)
         rho_sizes = last.(charge_sectors(product_charges(ntuple(_ -> symmetry.physical_charges, rho_support)...))) .|> length
         omega_sizes = isnothing(D) ? Int[] :
             last.(charge_sectors(product_charges(symmetry.physical_charges,
                 -symmetry.virtual_charges, symmetry.virtual_charges,
                 symmetry.physical_charges))) .|> length
-        block_sizes = [rho_sizes; repeat(omega_sizes, depth - selected_k0 + 1)]
-        inventory = KullResourceInventory(block_sizes, length(block_sizes), sum(abs2, block_sizes),
+        block_sizes = [rho_sizes; repeat(omega_sizes,
+            length(parities) * (depth - selected_k0 + 1))]
+        variables = sum(abs2, block_sizes)
+        # Equality maps are sparse structured contractions; treating their count as a dense
+        # cubic matrix grossly rejects block-SDPs that MOSEK solves in seconds.
+        wall_seconds = max(1.0,
+            sum(block^3 for block in block_sizes) / 2.0e7 +
+            inventory.linear_equalities^2 / 2.0e7)
+        local_feasible = inventory.peak_memory_bytes < 16 * 1024^3 && wall_seconds < 600
+        inventory = KullResourceInventory(block_sizes, length(block_sizes), variables,
             inventory.linear_equalities, inventory.coefficient_storage_bytes,
-            inventory.peak_memory_bytes, inventory.estimated_wall_seconds, inventory.local_feasible)
+            inventory.peak_memory_bytes, wall_seconds, local_feasible)
     end
     metadata = Dict{String,Any}(
         "depth" => depth, "n" => depth, "k0" => selected_k0,
         "rho_support" => rho_support, "omega_physical_support_offset" => 2,
+        "omega_start_parities" => collect(parities),
+        "omega_key_scheme" => isnothing(frozen) || frozen.unit_cell_length == 1 ?
+            "depth" : "(depth,start_parity)",
         "physical_dimension" => d, "bond_dimension" => D, "hamiltonian" => Matrix{ComplexF64}(h),
         "map_fingerprint" => isnothing(frozen) ? nothing : frozen.fingerprint,
         "frozen_map" => frozen, "vumps_upper_endpoint" => Float64(vumps_upper_endpoint),
@@ -694,18 +729,23 @@ function _numeric_constraint_residual(problem::KullPrimalProblem)
         frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
         D = problem.metadata["bond_dimension"]
         dims = (d,D,D,d)
-        bridge = bottom_bridge_operators(frozen; k0)
-        omega0 = value.(problem.omegas[k0])
-        residual = max(residual,
-            norm(forward_map(bridge.to_trace_physical_left, rho) - partial_trace(omega0, dims, 1), Inf),
-            norm(forward_map(bridge.to_trace_physical_right, rho) - partial_trace(omega0, dims, 4), Inf))
-        for m in k0:depth-1
-            flow = flow_operators(frozen, m)
-            current = value.(problem.omegas[m])
-            following = value.(problem.omegas[m + 1])
+        parities = _start_parities(frozen)
+        for parity in parities
+            bridge = bottom_bridge_operators(frozen; k0, start_site=parity)
+            omega0 = value.(problem.omegas[_omega_key(frozen, k0, parity)])
             residual = max(residual,
-                norm(forward_map(flow.to_trace_physical_left, current) - partial_trace(following, dims, 1), Inf),
-                norm(forward_map(flow.to_trace_physical_right, current) - partial_trace(following, dims, 4), Inf))
+                norm(forward_map(bridge.to_trace_physical_left, rho) - partial_trace(omega0, dims, 1), Inf),
+                norm(forward_map(bridge.to_trace_physical_right, rho) - partial_trace(omega0, dims, 4), Inf))
+        end
+        for m in k0:depth-1, parity in parities
+            flow = flow_operators(frozen, m; start_site=parity)
+            left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
+            left_source = value.(problem.omegas[_omega_key(frozen, m, left_parity)])
+            right_source = value.(problem.omegas[_omega_key(frozen, m, parity)])
+            following = value.(problem.omegas[_omega_key(frozen, m + 1, parity)])
+            residual = max(residual,
+                norm(forward_map(flow.to_trace_physical_left, left_source) - partial_trace(following, dims, 1), Inf),
+                norm(forward_map(flow.to_trace_physical_right, right_source) - partial_trace(following, dims, 4), Inf))
         end
     end
     Float64(residual)
@@ -735,13 +775,16 @@ function _trace_nonincreasing_diagnostic(problem::KullPrimalProblem; tolerance::
     frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
     k0 = problem.metadata["k0"]
     envelopes = Dict{String,Float64}()
-    bridge = bottom_bridge_operators(frozen; k0)
-    envelopes["bottom_left"] = maximum(real.(eigvals(Hermitian(bridge.to_trace_physical_left' * bridge.to_trace_physical_left))))
-    envelopes["bottom_right"] = maximum(real.(eigvals(Hermitian(bridge.to_trace_physical_right' * bridge.to_trace_physical_right))))
-    for m in k0:problem.metadata["depth"]-1
-        flow = flow_operators(frozen, m)
-        envelopes["flow_$(m)_left"] = maximum(real.(eigvals(Hermitian(flow.to_trace_physical_left' * flow.to_trace_physical_left))))
-        envelopes["flow_$(m)_right"] = maximum(real.(eigvals(Hermitian(flow.to_trace_physical_right' * flow.to_trace_physical_right))))
+    for parity in _start_parities(frozen)
+        suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
+        bridge = bottom_bridge_operators(frozen; k0, start_site=parity)
+        envelopes["bottom_left$suffix"] = maximum(real.(eigvals(Hermitian(bridge.to_trace_physical_left' * bridge.to_trace_physical_left))))
+        envelopes["bottom_right$suffix"] = maximum(real.(eigvals(Hermitian(bridge.to_trace_physical_right' * bridge.to_trace_physical_right))))
+        for m in k0:problem.metadata["depth"]-1
+            flow = flow_operators(frozen, m; start_site=parity)
+            envelopes["flow_$(m)_left$suffix"] = maximum(real.(eigvals(Hermitian(flow.to_trace_physical_left' * flow.to_trace_physical_left))))
+            envelopes["flow_$(m)_right$suffix"] = maximum(real.(eigvals(Hermitian(flow.to_trace_physical_right' * flow.to_trace_physical_right))))
+        end
     end
     envelope = maximum(values(envelopes); init=1.0)
     envelope <= 1 + tolerance, envelope, envelopes
@@ -759,14 +802,19 @@ function _trace_bounds(problem::KullPrimalProblem)
     frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
     k0 = problem.metadata["k0"]
     depth = problem.metadata["depth"]
-    bridge = bottom_bridge_operators(frozen; k0)
-    bounds["omega_$k0"] = min(opnorm(bridge.to_trace_physical_left)^2,
-        opnorm(bridge.to_trace_physical_right)^2)
-    for m in k0:depth-1
-        flow = flow_operators(frozen, m)
-        bounds["omega_$(m+1)"] = bounds["omega_$m"] *
-            min(opnorm(flow.to_trace_physical_left)^2,
-                opnorm(flow.to_trace_physical_right)^2)
+    parities = _start_parities(frozen)
+    for parity in parities
+        name = _omega_name(frozen, k0, parity)
+        bridge = bottom_bridge_operators(frozen; k0, start_site=parity)
+        bounds[name] = min(opnorm(bridge.to_trace_physical_left)^2,
+            opnorm(bridge.to_trace_physical_right)^2)
+    end
+    for m in k0:depth-1, parity in parities
+        flow = flow_operators(frozen, m; start_site=parity)
+        left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
+        bounds[_omega_name(frozen, m + 1, parity)] = min(
+            bounds[_omega_name(frozen, m, left_parity)] * opnorm(flow.to_trace_physical_left)^2,
+            bounds[_omega_name(frozen, m, parity)] * opnorm(flow.to_trace_physical_right)^2)
     end
     bounds
 end
@@ -788,15 +836,21 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
     if !isempty(problem.omegas)
         D = problem.metadata["bond_dimension"]
         marginal_dimension = d * D^2
+        frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
         refs = problem.constraints[:bottom]
-        multipliers["bottom_left"], cursor = _hermitian_multiplier(refs, marginal_dimension)
-        multipliers["bottom_right"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+        cursor = 0
+        for parity in _start_parities(frozen)
+            suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
+            multipliers["bottom_left$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+            multipliers["bottom_right$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+        end
         cursor == length(refs) || error("unconsumed bottom multipliers")
         refs = problem.constraints[:flow]
         cursor = 0
-        for m in k0:depth-1
-            multipliers["flow_$(m)_left"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
-            multipliers["flow_$(m)_right"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+        for m in k0:depth-1, parity in _start_parities(frozen)
+            suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
+            multipliers["flow_$(m)_left$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
+            multipliers["flow_$(m)_right$suffix"], cursor = _hermitian_multiplier(refs, marginal_dimension, cursor)
         end
         cursor == length(refs) || error("unconsumed flow multipliers")
     end
@@ -805,8 +859,11 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
     if isnothing(symmetry)
         psd_duals = Dict{String,Matrix{ComplexF64}}(
             "rho3" => Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.rho3))))
-        for m in sort(collect(keys(problem.omegas)))
-            psd_duals["omega_$m"] = Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.omegas[m])))
+        frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
+        for m in k0:depth, parity in _start_parities(frozen)
+            key = _omega_key(frozen, m, parity)
+            psd_duals[_omega_name(frozen, m, parity)] =
+                Matrix{ComplexF64}(dual(JuMP.VariableInSetRef(problem.omegas[key])))
         end
     else
         blocks = problem.metadata["symmetry_blocks"]
@@ -822,27 +879,47 @@ function reconstruct_dual_certificate(problem::KullPrimalProblem)
     Y = multipliers["lti"]
     rho_stationarity -= _edge_marginal_adjoint(Y, rho_dims, k0, :left) -
         _edge_marginal_adjoint(Y, rho_dims, k0, :right)
-    omega_stationarity = Dict{Int,Matrix{ComplexF64}}()
+    omega_stationarity = Dict{Any,Matrix{ComplexF64}}()
     if !isempty(problem.omegas)
         frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
         D = problem.metadata["bond_dimension"]
         dims = (d,D,D,d)
-        bridge = bottom_bridge_operators(frozen; k0)
-        rho_stationarity -= forward_map_adjoint(bridge.to_trace_physical_left, multipliers["bottom_left"])
-        rho_stationarity -= forward_map_adjoint(bridge.to_trace_physical_right, multipliers["bottom_right"])
-        omega_stationarity[k0] = partial_trace_adjoint(multipliers["bottom_left"], dims, 1) +
-            partial_trace_adjoint(multipliers["bottom_right"], dims, 4)
-        for m in k0:depth-1
-            flow = flow_operators(frozen, m)
-            omega_stationarity[m] -= forward_map_adjoint(flow.to_trace_physical_left, multipliers["flow_$(m)_left"])
-            omega_stationarity[m] -= forward_map_adjoint(flow.to_trace_physical_right, multipliers["flow_$(m)_right"])
-            omega_stationarity[m+1] = partial_trace_adjoint(multipliers["flow_$(m)_left"], dims, 1) +
-                partial_trace_adjoint(multipliers["flow_$(m)_right"], dims, 4)
+        parities = _start_parities(frozen)
+        q = prod(dims)
+        for m in k0:depth, parity in parities
+            omega_stationarity[_omega_key(frozen, m, parity)] = zeros(ComplexF64, q, q)
+        end
+        for parity in parities
+            suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
+            bridge = bottom_bridge_operators(frozen; k0, start_site=parity)
+            left_Y = multipliers["bottom_left$suffix"]
+            right_Y = multipliers["bottom_right$suffix"]
+            rho_stationarity -= forward_map_adjoint(bridge.to_trace_physical_left, left_Y)
+            rho_stationarity -= forward_map_adjoint(bridge.to_trace_physical_right, right_Y)
+            omega_stationarity[_omega_key(frozen, k0, parity)] +=
+                partial_trace_adjoint(left_Y, dims, 1) + partial_trace_adjoint(right_Y, dims, 4)
+        end
+        for m in k0:depth-1, parity in parities
+            suffix = frozen.unit_cell_length == 1 ? "" : "_p$parity"
+            flow = flow_operators(frozen, m; start_site=parity)
+            left_Y = multipliers["flow_$(m)_left$suffix"]
+            right_Y = multipliers["flow_$(m)_right$suffix"]
+            left_parity = frozen.unit_cell_length == 1 ? parity : _switch_parity(parity)
+            omega_stationarity[_omega_key(frozen, m, left_parity)] -=
+                forward_map_adjoint(flow.to_trace_physical_left, left_Y)
+            omega_stationarity[_omega_key(frozen, m, parity)] -=
+                forward_map_adjoint(flow.to_trace_physical_right, right_Y)
+            omega_stationarity[_omega_key(frozen, m + 1, parity)] +=
+                partial_trace_adjoint(left_Y, dims, 1) + partial_trace_adjoint(right_Y, dims, 4)
         end
     end
     affine_slacks = Dict{String,Matrix{ComplexF64}}("rho3" => rho_stationarity)
-    for m in sort(collect(keys(omega_stationarity)))
-        affine_slacks["omega_$m"] = omega_stationarity[m]
+    if !isempty(omega_stationarity)
+        frozen = problem.metadata["frozen_map"]::FrozenUniformMPS
+        for m in k0:depth, parity in _start_parities(frozen)
+            affine_slacks[_omega_name(frozen, m, parity)] =
+                omega_stationarity[_omega_key(frozen, m, parity)]
+        end
     end
     if !isnothing(symmetry)
         charges = problem.metadata["symmetry_charges"]
@@ -916,7 +993,7 @@ function solve_kull_primal!(problem::KullPrimalProblem; clean_tolerance::Real=1e
     residual = has_point ? _numeric_constraint_residual(problem) : Inf
     eigenvalues = has_point ? [eigvals(Hermitian(value.(problem.rho3)))] : Vector{Vector{Float64}}()
     has_point && append!(eigenvalues,
-        [eigvals(Hermitian(value.(problem.omegas[m]))) for m in sort(collect(keys(problem.omegas)))])
+        [eigvals(Hermitian(value.(omega))) for omega in values(problem.omegas)])
     minimum_eigenvalue = has_point ? minimum(vcat(eigenvalues...)) : -Inf
     clean = termination == MOI.OPTIMAL && primal == MOI.FEASIBLE_POINT &&
         dual == MOI.FEASIBLE_POINT && residual <= clean_tolerance &&

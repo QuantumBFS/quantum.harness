@@ -6,6 +6,10 @@ using MosekTools
 
 include("KullCGRDM.jl")
 using .KullCGRDM
+include("VUMPSProducer.jl")
+using .VUMPSProducer
+include("MPSKitAdapter.jl")
+using .MPSKitAdapter
 
 relative_error(A, B) = norm(A - B) / max(norm(A), norm(B), eps(Float64))
 hs_inner(A, B) = tr(A' * B)
@@ -49,6 +53,9 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
     product = product_frozen_mps(ComplexF64[1, 2im])
     map_d2 = random_canonical_frozen_mps(2, 2; seed=4109)
     map_d3 = random_canonical_frozen_mps(2, 3; seed=788)
+    two_site_map = FrozenUniformMPS([
+        random_canonical_frozen_mps(2, 2; seed=901).tensors[1],
+        random_canonical_frozen_mps(2, 2; seed=902).tensors[1]])
 
     @testset "author default, explicit regression, and dimensions" begin
         @test author_default_k0(2, 2) == 3
@@ -147,6 +154,48 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         end
     end
 
+    @testset "two-site parity-aware fallback" begin
+        problem = build_kull_primal(HEISENBERG_H; frozen=two_site_map, depth=4, k0=2)
+        @test sort(collect(keys(problem.omegas))) ==
+            [(2,1), (2,2), (3,1), (3,2), (4,1), (4,2)]
+        @test problem.metadata["omega_start_parities"] == [1, 2]
+        @test problem.metadata["omega_key_scheme"] == "(depth,start_parity)"
+        @test problem.inventory.psd_block_dimensions == [8; fill(16, 6)]
+        @test problem.inventory.psd_block_count == 7
+        @test length(problem.constraints[:bottom]) == 256
+        @test length(problem.constraints[:flow]) == 512
+        @test problem.metadata["coefficient_policy"]["complete_interval_enclosure"] === false
+
+        rng = MersenneTwister(7741)
+        d, n = 2, 7
+        physical = translation_invariant_density(rng, d, n)
+        rhos = Dict(m => leading_marginal(physical, d, n, m) for m in 3:n)
+        omegas = Dict{Tuple{Int,Int},Matrix{ComplexF64}}()
+        dims = Dict{Tuple{Int,Int},Tuple}()
+        for key in 2:n-2, parity in 1:2
+            support = key + 2
+            omegas[(key, parity)], dims[(key, parity)] = compress_physical_rdm(
+                two_site_map, rhos[support], support; start_site=parity)
+        end
+        for parity in 1:2
+            bridge = bottom_bridge_operators(two_site_map; k0=2, start_site=parity)
+            @test relative_error(forward_map(bridge.to_trace_physical_left, rhos[3]),
+                partial_trace(omegas[(2, parity)], dims[(2, parity)], 1)) < 1e-11
+            @test relative_error(forward_map(bridge.to_trace_physical_right, rhos[3]),
+                partial_trace(omegas[(2, parity)], dims[(2, parity)], 4)) < 1e-11
+        end
+        for key in 2:n-3, parity in 1:2
+            flow = flow_operators(two_site_map, key; start_site=parity)
+            switched = 3 - parity
+            @test relative_error(forward_map(flow.to_trace_physical_left,
+                    omegas[(key, switched)]),
+                partial_trace(omegas[(key + 1, parity)], dims[(key + 1,parity)], 1)) < 1e-11
+            @test relative_error(forward_map(flow.to_trace_physical_right,
+                    omegas[(key, parity)]),
+                partial_trace(omegas[(key + 1,parity)], dims[(key + 1,parity)], 4)) < 1e-11
+        end
+    end
+
     @testset "primal monotonicity and dual correction" begin
         optimizer = MosekTools.Optimizer
         base = build_kull_primal(HEISENBERG_H; depth=3, k0=2, optimizer,
@@ -179,6 +228,45 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
         @test certificate.trace_envelope > 1
         @test isfinite(certificate.corrected_lower_bound)
         @test certificate.map_fingerprint == map_d2.fingerprint
+    end
+
+    @testset "symmetric XXZ VUMPS adapter" begin
+        settings = VUMPSSettings(D=2, unitcell=2, delta=0.5, symmetry=:u1,
+            maxiter=5, tol=1e-5, seed=812, verbosity=0)
+        spaces = u1_bond_spaces(8, 8)
+        @test sort(dense_u1_charges(spaces.coarse)) == [-6, -4, -2, 0, 0, 2, 4, 6]
+        @test sort(dense_u1_charges(spaces.internal)) == [-7, -5, -3, -1, 1, 3, 5, 7]
+        produced = run_u1_vumps(D=2, internal_D=2, delta=0.5,
+            maxiter=5, tol=1e-5, seed=812, verbosity=0)
+        blocked = freeze_u1_blocked_mpskit(produced.state, produced.record)
+        @test produced.record["symmetry"] == "u1"
+        @test produced.record["delta"] == 0.5
+        @test produced.record["internal_D"] == 2
+        @test blocked.symmetry.physical_charges == [2, 0, 0, -2]
+        @test length(blocked.symmetry.virtual_charges) == 2
+        @test size(only(blocked.frozen.tensors)) == (2, 4, 2)
+        @test mps_charge_residual(blocked.frozen, blocked.symmetry) < 1e-12
+        @test blocked.frozen.canonical_residual < 1e-10
+        @test blocked.metadata["charge_residual"] == 0
+        @test blocked.metadata["physical_charges"] == [2, 0, 0, -2]
+        @test blocked.metadata["coarse_bond_dimension"] == 2
+
+        h = blocked_xxz_hamiltonian(0.5)
+        problem = build_kull_primal(h; frozen=blocked.frozen, depth=2, k0=2,
+            symmetry=blocked.symmetry, optimizer=MosekTools.Optimizer,
+            solver_settings=QUIET)
+        result = solve_kull_primal!(problem; print_inventory=false)
+        certificate = reconstruct_dual_certificate(problem)
+        @test isfinite(result.lower_bound_candidate)
+        @test result.constraint_residual < 1e-7
+        @test certificate.maximum_stationarity_residual < 1e-7
+        @test certificate.corrected_lower_bound <= result.lower_bound_candidate + 1e-7
+        @test maximum(problem.inventory.psd_block_dimensions) < 64
+
+        @test_throws ArgumentError run_u1_vumps(D=2, internal_D=3,
+            delta=0.5, maxiter=1)
+        @test_throws ArgumentError run_vumps(VUMPSSettings(D=2, unitcell=1,
+            delta=0.5, symmetry=:u1, maxiter=1))
     end
 
     @testset "XXZ U(1) block-PSD regression" begin
@@ -222,14 +310,15 @@ const QUIET = Dict("MSK_IPAR_LOG" => 0)
             physical_charges, physical_charges, physical_charges))))) ==
             [1, 1, 6, 6, 15, 15, 20]
 
-        dense = build_kull_primal(h; frozen=symmetric_map, depth=2, k0=2,
+        dense = build_kull_primal(h; frozen=symmetric_map, depth=3, k0=2,
             optimizer=MosekTools.Optimizer, solver_settings=QUIET)
-        blocked = build_kull_primal(h; frozen=symmetric_map, depth=2, k0=2,
+        blocked = build_kull_primal(h; frozen=symmetric_map, depth=3, k0=2,
             symmetry, optimizer=MosekTools.Optimizer, solver_settings=QUIET)
-        @test dense.inventory.psd_block_dimensions == [64, 64]
-        @test blocked.inventory.psd_block_dimensions ==
-            [1, 6, 15, 20, 15, 6, 1, 1, 6, 15, 20, 15, 6, 1]
-        @test blocked.inventory.real_scalar_variables == 1848
+        @test sort(collect(keys(blocked.omegas))) == [2, 3]
+        @test dense.inventory.psd_block_dimensions == [64, 64, 64]
+        @test blocked.inventory.psd_block_dimensions == repeat(
+            [1, 6, 15, 20, 15, 6, 1], 3)
+        @test blocked.inventory.real_scalar_variables == 2772
         @test blocked.inventory.real_scalar_variables < dense.inventory.real_scalar_variables / 4
 
         dense_result = solve_kull_primal!(dense; print_inventory=false)
