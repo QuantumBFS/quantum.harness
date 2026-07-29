@@ -6,6 +6,7 @@
 
 | 目的 | 文档 |
 |---|---|
+| 一次看完全部尝试、矩阵、Hamiltonian 和结论 | [项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md) |
 | 只想知道找到多少、哪些已知、哪些失败 | [成果总账](RESULTS_LEDGER.md) |
 | 第一次接触符号问题 | [中文零基础导读](ONBOARDING.zh-CN.md) |
 | 决定下一步研究 | [下一阶段计划](NEXT_RESEARCH_PLAN.md) |
@@ -42,6 +43,9 @@
 
 以下用于复核，不需要顺序阅读：
 
+- [PROJECT_MASTER_SUMMARY.zh-CN.md](PROJECT_MASTER_SUMMARY.zh-CN.md)：
+  当前唯一自包含总报告，统一覆盖全部主要尝试、核心矩阵构造、Hamiltonian、失败证书、
+  非常规模型、最新三个候选审计和开放问题；
 - [RESULTS_LEDGER.md](RESULTS_LEDGER.md)：统一成果数量、Hamiltonian 归属、关闭项和开放项；
 - [TOTAL_NONNEGATIVE_PATH_CLASS.md](TOTAL_NONNEGATIVE_PATH_CLASS.md)：当前严格恒正候选、证明和
   Hubbard/`t-V` 开链 HS 映射；

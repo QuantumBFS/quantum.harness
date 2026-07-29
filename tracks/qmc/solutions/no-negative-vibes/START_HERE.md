@@ -5,6 +5,9 @@
 寻找新的、可映射回具体量子模型的矩阵结构，使辅助场量子蒙卡的每个构型权重
 `det(I + exp(A_1) ... exp(A_L))` 始终非负；或者用精确反例排除一个看似可行的候选。
 
+要一次看完全部尝试、矩阵构造、Hamiltonian、失败路线和最新结论，直接阅读
+[项目完整总结](docs/PROJECT_MASTER_SUMMARY.zh-CN.md)。它是当前唯一自包含总报告。
+
 ## 当前结论
 
 先看 [成果总账](docs/RESULTS_LEDGER.md)。截至 2026-07-29：
@@ -105,10 +108,11 @@
 
 日常只需：
 
-1. [成果总账](docs/RESULTS_LEDGER.md)：统一的数量、结论和开放问题；
-2. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：补齐术语；
-3. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：只看接下来做什么；
-4. 与某个结论有关时，再进入对应专题文档。
+1. [项目完整总结](docs/PROJECT_MASTER_SUMMARY.zh-CN.md)：全部尝试、矩阵、模型和结论；
+2. [成果总账](docs/RESULTS_LEDGER.md)：只核对数量和当前状态；
+3. [中文零基础导读](docs/ONBOARDING.zh-CN.md)：补齐术语；
+4. [下一阶段研究计划](docs/NEXT_RESEARCH_PLAN.md)：只看接下来做什么；
+5. 与某个结论有关时，再进入对应专题文档。
 
 <details>
 <summary>展开专题复核索引</summary>

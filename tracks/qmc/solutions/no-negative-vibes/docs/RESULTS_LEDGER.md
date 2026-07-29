@@ -1,15 +1,17 @@
 # 无符号 QMC 项目成果总账
 
 更新时间：2026-07-29
-用途：这是项目结论和计数口径的唯一简明入口。详细推导仍保留在专题文档中。
+用途：这是项目结论和计数口径的简明账本，不再承担全部构造细节。
+完整自包含叙述见[项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md)。
 
 ## 当前总分
 
 | 项目 | 数量 | 口径 |
 |---|---:|---|
-| 纯 `det(I+D)>=0` 的独立机制 | 3 | TN 路径；odd monomial（含 block-TN）；tensor-square |
+| 已严格证明的 `det(I+D)>=0` 构造族 | 3 | TN 路径；odd monomial（含 block-TN）；tensor-square；这里不把“构造族”自动等同于新数学机制 |
 | 额外的 graded 正权机制 | 1 | scalar/vertex grade 抵消 determinant parity |
-| 局域 Hermitian Hamiltonian 构造 | 5 | 前四项加 tensor-square 四模式 plaquette |
+| 早期局域 Hermitian Hamiltonian 映射 | 5 | Hubbard、`t-V`、parity-string、graded 奇环、tensor-square 四模式 plaquette |
+| 后期非常规模型试制品 | 8 | 与早期模型有重叠，不能相加成 13 个独立模型 |
 | 已确认的新无符号物理类 | 0 | 所有成功物理映射均已知或可约化 |
 | 当前开放的研究程序 | 5 | Majorana；non-Klein Fock–CP；协作 exterior；modified-Gauss；非常规模型反推 |
 
@@ -25,7 +27,7 @@ tensor-square 五项；但 odd monomial 与 block-TN 是同一个循环机制的
 | TN 路径半群 | 任意维数、任意深度严格正 | 开放 Hubbard、排斥 `t-V`、TN parity-string 顶点 | 矩阵条件严格；物理上为已知一维或 stoquastic 类 |
 | odd positive-monomial / block-TN | 固定循环/分区严格正 | 没有成功的自然连通局域模型 | cycle factor 已知；自然局域闭包有精确 `-2` 反例 |
 | graded monomial | 逐历史 grade 补偿严格正 | 奇环吸引 spinless 模型 | 已知 monomial factorization；模型属于 Majorana reflection positivity |
-| tensor-square | `det(I+X tensor X)>=0` 任意实 `X` | 四模式方形 hopping 加排斥作用 | 矩阵机制严格；最小模型属于 split `O(2,2)` |
+| tensor-square | `det(I+X tensor X)>=0` 任意实 `X`；权重可分解为模平方乘实平方 | 四模式方形 hopping、多通道连续模型和精确 `-log` transfer | 恒正构造严格但不是不可约新机制；`m=2` 属 split，`m=3` 物理排重开放 |
 
 ### 1. TN 路径半群
 
@@ -99,12 +101,16 @@ sgn(P) det(I+P D) >= 0,    D_ii >= 1,
 对任意实方阵 `X`，
 
 ```text
-det(I+X tensor X)>=0.
+det(I+X tensor X)
+ = |det(I+iX)|^2 det(I+Lambda^2 X)^2
+ >= 0.
 ```
 
-一般证明来自 Kronecker 本征值配对。四模式正系数 HS 和非交换方形 hopping 已完整
-构造，但 `2 x 2` 底空间自动保存 signature `(2,2)` 的 split metric，因而属于已知
-split-orthogonal 类。一般维数的直接物理提升又产生随系统长度增长的行列条带。
+一般证明来自 Kronecker 本征值配对，最新分解又表明它在代数上是模平方乘实平方。
+四模式正系数 HS 和非交换方形 hopping 已完整构造，但 `2 x 2` 底空间自动保存
+signature `(2,2)` 的 split metric，因而属于已知 split-orthogonal 类。对 `m=3`
+完整表示，固定伪正交 metric 的精确线性系统满秩，因此最简单的固定 `O(p,q)` 解释
+被排除；更一般 Majorana/Pfaffian 排重仍开放。
 
 详细证据：
 
@@ -212,8 +218,9 @@ pseudo-orthogonal 度量。现在只保留 tensor-square 多通道 Hamiltonian �
 
 只想知道结论：
 
-1. 本总账；
-2. [下一阶段计划](NEXT_RESEARCH_PLAN.md)。
+1. [项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md)；
+2. 本总账；
+3. [下一阶段计划](NEXT_RESEARCH_PLAN.md)。
 
 想复核某个结果：从上面的专题链接进入，不需要顺序阅读全部文档。
 
