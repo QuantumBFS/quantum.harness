@@ -86,3 +86,8 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
   installed the JAX extra in a separate pip transaction, before the
   `ml_dtypes==0.5.1` constraint was visible. The bootstrap now resolves the
   JAX extra and the complete requirements file in one transaction.
+- The next combined resolver selected a SciPy 1.17.1 source archive, which is
+  incompatible with the wheel-only target policy and timed out. SciPy is now
+  pinned to the verified 1.16.3 manylinux2014 wheel; all binary requirements
+  use `--only-binary=:all:`, while `pywigxjpf==1.13.3` is isolated as the only
+  permitted source build.

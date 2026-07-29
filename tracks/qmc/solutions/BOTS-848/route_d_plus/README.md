@@ -18,7 +18,8 @@ Only the Phase 1 environment contract has been added. It is intended to run on
 a remote compute allocation, not on the local WSL2 checkout:
 
 - `environment/phase1.toml` freezes the physical and numeric conventions;
-- `environment/requirements.in` declares non-JAX Python dependencies;
+- `environment/requirements.in` declares wheel-only Python dependencies;
+- `environment/requirements-source.in` pins the isolated source dependency;
 - `environment/bootstrap.sh` selects exactly one JAX CPU/CUDA profile;
 - `environment/capture_manifest.py` enforces Python 3.11, JAX x64, and the
   requested device before writing a manifest;
@@ -38,4 +39,3 @@ local development host. Before a remote run:
 3. ship a committed source revision;
 4. execute the JAX device smoke inside the allocation;
 5. read back and validate the manifest before starting Phase 2.
-

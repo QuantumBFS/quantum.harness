@@ -2,10 +2,9 @@
 # cpu/cuda12/cuda13 profiles is selected.
 numpy==2.0.2
 ml_dtypes==0.5.1
-scipy
+scipy==1.16.3
 sympy
 pycparser
-pywigxjpf
 optax==0.2.4
 h5py
 pyyaml

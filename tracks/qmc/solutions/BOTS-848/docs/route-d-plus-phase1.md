@@ -60,4 +60,6 @@ The cluster uses glibc 2.17 and its visible CUDA package set ends at cuDNN
 9.5. The compatible binary stack is therefore pinned to JAX/JAXLIB/CUDA plugin
 0.4.38, NumPy 2.0.2, `ml_dtypes` 0.5.1, and Optax 0.2.4. A pip
 `--only-binary=:all:` dry-run resolved the full CUDA 12 dependency graph before
-installation.
+installation. SciPy is pinned to the compatible 1.16.3 wheel. The sole source
+dependency, `pywigxjpf==1.13.3`, is installed in a separate transaction only
+after the binary environment is complete.

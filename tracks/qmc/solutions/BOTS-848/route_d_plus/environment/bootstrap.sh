@@ -4,6 +4,7 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "${script_dir}" && git rev-parse --show-toplevel)"
 requirements="${script_dir}/requirements.in"
+source_requirements="${script_dir}/requirements-source.in"
 
 : "${ROUTE_D_PLUS_RUN_DIR:?set ROUTE_D_PLUS_RUN_DIR under tracks/qmc/results/}"
 : "${JAX_PROFILE:?set JAX_PROFILE to cpu, cuda12, or cuda13}"
@@ -47,8 +48,10 @@ esac
 if [[ "${mode}" != "validate" ]]; then
   "${python_bin}" -m venv "${venv_dir}"
   "${venv_dir}/bin/python" -m pip install --upgrade pip setuptools wheel
-  "${venv_dir}/bin/python" -m pip install --upgrade \
+  "${venv_dir}/bin/python" -m pip install --upgrade --only-binary=:all: \
     "${jax_requirement}" --requirement "${requirements}"
+  "${venv_dir}/bin/python" -m pip install \
+    --requirement "${source_requirements}"
 
   mkdir -p "${run_dir}"
   "${venv_dir}/bin/python" -m pip freeze --all > "${run_dir}/requirements-lock.txt"
