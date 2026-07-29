@@ -760,3 +760,8 @@ Updated: 2026-07-29 UTC.
   the new hash required fail-closed, then audit any infeasibility candidate at
   `1e-9` and replay its exact-bit certificate in a fresh task. Solver status
   alone is not evidence because both L=1 dual controls were near-feasible.
+- The first solve preflight requested 124000 MiB and was rejected before job
+  creation: `kshcnormal` enforces `DefMemPerCPU=3569` MiB, so 32 CPUs permit at
+  most 114208 MiB. Change the reproducible runner to 114000 MiB and repeat
+  test-only once. This is a scheduler-policy correction, not a numerical
+  attempt; the exact model/hash/audit signature is unchanged.

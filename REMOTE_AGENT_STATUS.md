@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T19:24:01Z
+Updated: 2026-07-29T19:27:00Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -217,5 +217,9 @@ Updated: 2026-07-29T19:24:01Z
 - Immediate action: commit this exact inventory, fast-forward the now-idle
   checkout, and launch the separate solver with the new hash mandatory and
   audit tolerance `1e-9`. Preserve queued unreduced job `118178932`.
+- Solve preflight with 124000 MiB was rejected before job creation because
+  `kshcnormal` caps memory at `DefMemPerCPU=3569` MiB (114208 MiB for 32
+  CPUs). The runner now requests 114000 MiB. Repeat test-only and submit once;
+  the scientific formulation and exact hash are unchanged.
 
 No user input or new credential is currently required.

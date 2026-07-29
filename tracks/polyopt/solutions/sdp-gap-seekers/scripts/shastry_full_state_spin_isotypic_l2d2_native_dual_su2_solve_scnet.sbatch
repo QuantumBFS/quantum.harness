@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=124000M
+#SBATCH --mem=114000M
 #SBATCH --time=12:00:00
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/scnet-ss-l2-native-dual-su2-solve-%j.out
 

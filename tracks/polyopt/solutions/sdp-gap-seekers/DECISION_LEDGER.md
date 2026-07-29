@@ -1339,3 +1339,11 @@ The next signature is a separate numerical build/solve with the recorded hash
 mandatory. A hash mismatch stops before optimization. A matching task may be
 interpreted only through the `1e-9` audit and independent exact-bit replay;
 the L=1 controls prohibit relying on native-dual `OPTIMAL` status alone.
+
+The first SCNet solve preflight created no job. Its 124000-MiB request violated
+the partition's `DefMemPerCPU=3569` MiB cap: 32 CPUs allow at most 114208 MiB.
+Use 114000 MiB, the largest conservative accepted request, and repeat the
+test-only gate. This changes only Slurm resources; the model, exact hash,
+solver form, and `1e-9` audit remain fixed. The 25.4615% moment reduction is
+the concrete reason this reduced dual may fit where the 114000-MiB unreduced
+primal did not.
