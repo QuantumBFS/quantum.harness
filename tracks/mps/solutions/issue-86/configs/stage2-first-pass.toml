@@ -1,0 +1,113 @@
+# Incremental P=16 baseline. Stage 1 already contains L=16,32,64 at chi=64,
+# so only the missing sizes needed for (8,16), (16,32), (24,48), and (32,64)
+# crossing pairs are computed here.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [8, 24, 48]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [8, 24, 48]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+# MPO systematic: compare P=12 with the Stage 1 P=16 L=32/64 baseline.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [64]
+poles = [12]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [64]
+poles = [12]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+# MPS systematic: three chi=128 points around each literature crossing.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.555, 1.5609, 1.567]
+chis = [128]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 50
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.415, 1.4208, 1.427]
+chis = [128]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 50
+excited = false
+seed = 86
+
+# First adaptive midpoint requested by the Stage 1 formal analyzer.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.57]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.43]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+# Tight NN oracle diagnostic. Stage 1 stopped this critical L=16 point at the
+# 1e-9 energy-change tolerance before its correlation ratio reached 1e-6.
+[[sweeps]]
+model = "nn"
+lengths = [16]
+gammas = [1.0]
+chis = [128]
+tolerance = 1.0e-11
+maxiter = 80
+excited = false
+seed = 86

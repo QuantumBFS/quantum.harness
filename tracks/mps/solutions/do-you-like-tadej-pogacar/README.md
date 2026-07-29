@@ -9,6 +9,18 @@
 
 | Row | |
 |---|---|
-| **Challenge** | Test Kibble–Zurek scaling in the long-range transverse-field Ising chain using TDVP, validated against the exact nearest-neighbor result and small-system ED, and determine what school-scale simulations can resolve about μ(σ) near the disputed long-range crossover. |
-| **Catalog issue** | `Addresses #86` — “Where does long-range universality end? Three adversarial tests of the σ*=7/4 vs 2 dispute,” released by Kun Chen, Institute of Theoretical Physics, Chinese Academy of Sciences. |
-| **Track** | `tracks/mps/` — the team selected Track C; its core TDVP calculation uses an MPS representation, with ED reserved for the required small-system cross-check. |
+| **Challenge** | Reproduce the Track B validation floor for the long-range transverse-field Ising chain: determine published critical fields with finite-system DMRG, systematic-error audits, and exact anchors. |
+| **Catalog issue** | Addresses #86 — “Where does long-range universality end? Three adversarial tests of the σ*=7/4 vs 2 dispute,” released by Kun Chen, Institute of Theoretical Physics, Chinese Academy of Sciences. |
+| **Track** | `tracks/mps/` — Track B, DMRG critical-point validation with exact diagonalization and the nearest-neighbour chain as anchors. |
+
+## Scientific scope
+
+This submission evaluates the published critical-point floor at
+\(\sigma=1.75\) and \(\sigma=2.0\), with paired sizes through
+\((L,2L)=(32,64)\). It records the long-range dynamic exponent \(z\),
+\(\gamma/\nu\), the \(\sigma=1.6\) and \(\sigma=1.8\) rows, and larger
+\(L\) or \(\chi\) calculations as explicit follow-up work. Consequently,
+the report does not claim the complete Track B universality boundary.
+
+The reproducible workflow, analyzer, tests, and result entry points live in
+[`../issue-86/`](../issue-86/).

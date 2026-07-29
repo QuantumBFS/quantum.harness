@@ -1,0 +1,71 @@
+# NN correlation-ratio crossings.
+[[sweeps]]
+model = "nn"
+lengths = [16, 24, 32, 48, 64]
+gammas = [0.98, 0.99, 1.0, 1.01, 1.02]
+chis = [64]
+tolerance = 1.0e-9
+maxiter = 30
+excited = false
+seed = 86
+
+# NN gap scaling at the exact critical field.
+[[sweeps]]
+model = "nn"
+lengths = [16, 24, 32, 48, 64]
+gammas = [1.0]
+chis = [64, 128]
+tolerance = 1.0e-9
+maxiter = 40
+excited = true
+seed = 86
+
+# Long-range L=16/32 first pass.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [16, 32]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [32]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 30
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [16, 32]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [32]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 30
+excited = false
+seed = 86
+
+# L=32/64 higher-chi gate used when the first pair remains above 1%.
+[[sweeps]]
+model = "long_range"
+sigmas = [1.75]
+lengths = [32, 64]
+gammas = [1.52, 1.54, 1.56, 1.58, 1.60]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
+
+[[sweeps]]
+model = "long_range"
+sigmas = [2.0]
+lengths = [32, 64]
+gammas = [1.38, 1.40, 1.42, 1.44, 1.46]
+chis = [64]
+poles = [16]
+tolerance = 1.0e-9
+maxiter = 40
+excited = false
+seed = 86
