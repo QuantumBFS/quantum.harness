@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:23:50Z
+Updated: 2026-07-29T17:27:16Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -146,5 +146,8 @@ Updated: 2026-07-29T17:23:50Z
   `ksagnormal01`, 32 CPUs / 256000 MiB. That request is justified by measured
   failed-form peaks of 116,125,540 and 251,835,816 KiB, and the partition is
   up and permits the active account.
+- SCNet test-only created no job and returned `QOSMinGRES`: high-memory
+  `ksagnormal01` requires at least one GPU allocation. The runner now requests
+  one GPU explicitly; the measured high-memory need justifies the reservation.
 
 No user input or new credential is currently required.

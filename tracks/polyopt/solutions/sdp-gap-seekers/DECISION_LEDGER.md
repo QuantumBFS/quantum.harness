@@ -1208,3 +1208,9 @@ High memory is justified by measured factorization/bridge peaks of 116,125,540
 KiB (native primal) and 251,835,816 KiB (JuMP path); the partition exposes
 about 1 TB per node and explicitly allows the active account. Submit only if
 Slurm's test-only policy check accepts the exact runner.
+
+The first SCNet high-memory `sbatch --test-only` created no job and returned
+`QOSMinGRES`: `ksagnormal01` requires at least one GPU resource per job. Add
+`--gres=gpu:1` explicitly. Reserving it is justified here by the established
+high-memory need; the computation remains CPU-only. Re-run test-only before
+submitting.

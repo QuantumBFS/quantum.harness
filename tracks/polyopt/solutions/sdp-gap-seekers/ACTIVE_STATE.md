@@ -682,3 +682,6 @@ Updated: 2026-07-29 UTC.
   the 200-job submit cap. No unrelated job will be cancelled. Route the same
   native dual to SCNet high-memory `ksagnormal01`, 32 CPUs / 256000 MiB; this
   request is justified by the measured 116–252 GB failed-form peaks.
+- SCNet test-only requires `--gres=gpu:1` on that partition (`QOSMinGRES`).
+  Add the required reservation explicitly, then repeat test-only; no job was
+  created by the rejected request.
