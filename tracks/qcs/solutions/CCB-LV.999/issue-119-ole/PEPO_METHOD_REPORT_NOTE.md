@@ -4,7 +4,7 @@
 
 对应任务：Quantum Harness issue #119
 
-状态：方法实现与 49-qubit 执行链验证通过；数值结果截至 `Dop=384` 接近、但仍未满足内部收敛判据
+状态：方法实现与 49-qubit 执行链验证通过；`Dop=512` 的经验误差已达标，最大角点仍缺直接 `χenv` 截面
 
 ## 1. 摘要
 
@@ -23,18 +23,18 @@ O = Z52 Z59 Z72
 当前最大参数点为：
 
 ```text
-Dop = 384
+Dop = 512
 χenv = 64
-FPEPO = 0.8223537668681797
+FPEPO = 0.8225508376024053
 ```
 
-该值与本次 BP-TN 均值 `0.8183229131612796` 相差 `0.0040308537`，与公开
-BP-TN `χ=512` 中心值 `0.8216584890` 相差 `0.0006952779`。`Dop=256→384`
-的变化已经降到 `0.0010106906`，比前一步小约 22.3 倍；但加上继承自
-`Dop=128` 的环境变化 proxy 后，`εPEPO=0.0010245161`，仍比预设 `10⁻³`
-目标高约 2.45%，而且最大角点没有直接的 `χenv` 截面。因此当前结论是：
+该值与本次 BP-TN 均值 `0.8183229131612796` 相差 `0.0042279244`，与公开
+BP-TN `χ=512` 中心值 `0.8216584890` 相差 `0.0008923486`。`Dop=384→512`
+的变化已经降到 `0.0001970707`，只有前一步的约 19.50%；加上继承自
+`Dop=128` 的环境变化 proxy 后，`εPEPO=0.0002108962<10⁻³`。但最大角点
+没有直接的 `χenv` 截面，因此当前结论是：
 
-> PEPO 的 `Dop` 序列已经非常接近经验收敛阈值，但尚未完成双参数内部收敛；
+> PEPO 的 `Dop` 方向已经通过经验精度目标，但尚未完成最大角点的双参数内部收敛；
 > 不能因为有限 `Dop` 接近某个 BP-TN 中心值就宣称 baseline benchmark 已通过。
 
 ## 2. 问题定义
@@ -491,7 +491,7 @@ insert every Oᵢ and close all physical legs
 
 | 参数 | 本次范围/值 | 控制的误差 | 增大后的代价 |
 | --- | ---: | --- | --- |
-| `Dop` | `2…384` | Heisenberg 算符演化中的 PEPO 截断 | SVD 时间和张量内存快速增加 |
+| `Dop` | `2…512` | Heisenberg 算符演化中的 PEPO 截断 | SVD 时间和张量内存快速增加 |
 | `χenv` | `16,32,64` | 最终闭合张量网络的压缩收缩误差 | contraction 时间和中间张量内存增加 |
 | `evolution_cutoff` | `10⁻¹²` | 演化阶段 SVD 的奇异值 cutoff | cutoff 越小，保留的小奇异值越多 |
 | `contraction_cutoff` | `10⁻¹²` | 最终 compressed contraction 的 cutoff | cutoff 越小，收缩更精细 |
@@ -503,8 +503,9 @@ insert every Oᵢ and close all physical legs
 - `χenv` 作用于构造完成后的 scalar contraction。
 
 当前误差明显由 `Dop` 主导。在 `Dop=128` 的完整环境截面上，
-`χenv=32→64` 只改变 `1.38×10⁻⁵`；最新 `Dop=256→384` 改变
-`1.01×10⁻³`。环境数值仍只是低 `Dop` proxy，不能代替最大角点的直接扫描。
+`χenv=32→64` 只改变 `1.38×10⁻⁵`；最新 `Dop=384→512` 改变
+`1.97×10⁻⁴`。两项之和已低于目标，但环境数值仍只是低 `Dop` proxy，
+不能代替最大角点的直接扫描。
 
 ### 4.3 验证参数和 provenance
 
@@ -616,7 +617,7 @@ uv run --project "$OLE_ROOT/pepo" \
 ```bash
 uv run --project "$OLE_ROOT/pepo" \
   python "$OLE_ROOT/scripts/run_pepo.py" \
-  --dop 384 \
+  --dop 512 \
   --chi-env 64 \
   --delta 0.15 \
   --evolution-cutoff 1e-12 \
@@ -631,19 +632,19 @@ uv run --project "$OLE_ROOT/pepo" \
 --execute --confirm TOKEN
 ```
 
-`Dop=384` 不适合在普通本地环境运行；本次使用远端 Slurm。
+`Dop=512` 不适合在普通本地环境运行；本次使用远端 Slurm。
 
 ### 6.4 生成参数扫描
 
-以 `Dop=384,χenv=64` 单点为例：
+以 `Dop=512,χenv=64` 单点为例：
 
 ```bash
 python3 scripts/parameter_scan.py plan \
-  --axes "$OLE_ROOT/configs/pepo-dop384-axes.json" \
+  --axes "$OLE_ROOT/configs/pepo-dop512-axes.json" \
   --settings "$OLE_ROOT/configs/pepo-settings.json" \
   --provenance "$OLE_ROOT/configs/pepo-provenance.json" \
-  --run-id issue119-pepo-49q-dop384 \
-  --run-dir results/issue119-pepo-49q-dop384
+  --run-id issue119-pepo-49q-dop512 \
+  --run-dir results/issue119-pepo-49q-dop512
 ```
 
 提交前检查 selector：
@@ -651,24 +652,24 @@ python3 scripts/parameter_scan.py plan \
 ```bash
 uv run --project "$OLE_ROOT/pepo" \
   python "$OLE_ROOT/scripts/run_pepo_array_cell.py" \
-  --run-spec results/issue119-pepo-49q-dop384/run_spec.json \
+  --run-spec results/issue119-pepo-49q-dop512/run_spec.json \
   --selector 1 \
   --inspect-only
 ```
 
 ### 6.5 Slurm 提交示例
 
-本次 `Dop=384` 使用 96 CPU、128 GiB、4 h：
+本次 `Dop=512` 使用 128 CPU、192 GiB、6 h：
 
 ```bash
 scripts/harness_slurm.sh submit \
   --array 1 \
-  --run-spec results/issue119-pepo-49q-dop384/run_spec.json \
-  --command 'env OPENBLAS_NUM_THREADS=96 OMP_NUM_THREADS=96 MKL_NUM_THREADS=96 NUMEXPR_NUM_THREADS=96 /home/zyli/.local/bin/uv run --project tracks/qcs/solutions/CCB-LV.999/issue-119-ole/pepo python tracks/qcs/solutions/CCB-LV.999/issue-119-ole/scripts/run_pepo_array_cell.py' \
+  --run-spec results/issue119-pepo-49q-dop512/run_spec.json \
+  --command 'env OPENBLAS_NUM_THREADS=128 OMP_NUM_THREADS=128 MKL_NUM_THREADS=128 NUMEXPR_NUM_THREADS=128 /home/zyli/.local/bin/uv run --project tracks/qcs/solutions/CCB-LV.999/issue-119-ole/pepo python tracks/qcs/solutions/CCB-LV.999/issue-119-ole/scripts/run_pepo_array_cell.py' \
   --partition batch \
-  --time 04:00:00 \
-  --cpus 96 \
-  --extra '--mem=128G'
+  --time 06:00:00 \
+  --cpus 128 \
+  --extra '--mem=192G'
 ```
 
 集群连接、partition 和 `uv` 路径属于本地 profile 信息；换集群时应读取
@@ -677,10 +678,10 @@ scripts/harness_slurm.sh submit \
 ### 6.6 拉取并汇总结果
 
 ```bash
-scripts/harness_slurm.sh fetch issue119-pepo-49q-dop384
+scripts/harness_slurm.sh fetch issue119-pepo-49q-dop512
 
 python3 scripts/parameter_scan.py collect \
-  --run-spec results/issue119-pepo-49q-dop384/run_spec.json \
+  --run-spec results/issue119-pepo-49q-dop512/run_spec.json \
   --success-field status \
   --success-value success \
   --value-field result.value_real
@@ -699,7 +700,8 @@ uv run --project "$OLE_ROOT/pepo" \
   --run-dir results/issue119-pepo-49q-dop64-128 \
   --run-dir results/issue119-pepo-49q-dop256 \
   --run-dir results/issue119-pepo-49q-dop384 \
-  --output-dir results/issue119-pepo-49q-dop384-analysis
+  --run-dir results/issue119-pepo-49q-dop512 \
+  --output-dir results/issue119-pepo-49q-dop512-analysis
 ```
 
 ## 7. 验证策略
@@ -725,12 +727,12 @@ O = Z52
 
 ### 7.2 49Q 执行证据
 
-- 24/24 个 `δ=0.15` 执行记录成功；
+- 25/25 个 `δ=0.15` 执行记录成功；
 - 无 failed、missing 或 pending cell；
 - 重复的 `(Dop=8,χenv=64)` 两次结果相差 `3.04×10⁻¹⁸`；
 - 每个最大-D cell 均处理 3,937 个 causal gates；
 - final support 覆盖全部 49 active sites；
-- `Dop=384` 的结果虚部为 `−5.30×10⁻¹⁶`；
+- `Dop=512` 的结果虚部为 `−1.61×10⁻¹⁵`；
 - 当前 PEPO 测试为 131 passed。
 
 这些证据证明代码与 49Q 执行链有效，但不等价于 `Dop→∞` 已收敛。
@@ -750,20 +752,21 @@ O = Z52
 | 128 | `0.7987800319758508` | `0.078532116214` |
 | 256 | `0.8213430762683898` | `0.022563044293` |
 | 384 | `0.8223537668681797` | `0.001010690600` |
+| 512 | `0.8225508376024053` | `0.000197070734` |
 
 从 `Dop=32` 开始，相邻变化连续减小：
 
 ```text
-0.44865 → 0.20298 → 0.07853 → 0.02256 → 0.00101
+0.44865 → 0.20298 → 0.07853 → 0.02256 → 0.00101 → 0.000197
 ```
 
-最新变化/前一步变化约为 `0.0448`，即最新 `Dop` 增量比前一步小约 22.3 倍。
-`ΔDop` 只比 `10⁻³` 目标高约 1.07%，这提供了很强的渐近稳定信号；但单个
-successive difference 仍不是严格误差界，也没有提供受控的 `Dop→∞` 外推。
+最新变化/前一步变化约为 `0.1950`，即最新 `Dop` 增量下降约 80.5%。
+`ΔDop=1.97×10⁻⁴` 已低于 `10⁻³` 目标；但单个 successive difference
+仍不是严格误差界，也没有提供受控的 `Dop→∞` 外推。
 
 ### 8.2 最近的完整 `χenv` 截面
 
-`Dop=384` 只计算了 `χenv=64`。最近的完整环境截面仍位于 `Dop=128`：
+`Dop=512` 只计算了 `χenv=64`。最近的完整环境截面仍位于 `Dop=128`：
 
 | `χenv` | `FPEPO(Dop=128)` | 相邻变化 |
 | ---: | ---: | ---: |
@@ -772,7 +775,7 @@ successive difference 仍不是严格误差界，也没有提供受控的 `Dop�
 | 64 | `0.7987800319758508` | `0.000013825469` |
 
 环境方向的最新变化已经低于 `10⁻³`，但它是从 `Dop=128` 继承到当前分析的
-proxy。没有额外的 `Dop=384` 环境点，就不能直接认证最大角点的 `χenv` 收敛。
+proxy。没有额外的 `Dop=512` 环境点，就不能直接认证最大角点的 `χenv` 收敛。
 
 ### 8.3 经验误差判据
 
@@ -787,9 +790,9 @@ proxy。没有额外的 `Dop=384` 环境点，就不能直接认证最大角点�
 当前：
 
 ```text
-ΔDop  = 0.0010106905997899762
+ΔDop  = 0.00019707073422559063
 Δχenv = 0.00001382546881401048  [Dop=128 proxy]
-εPEPO = 0.0010245160686039867
+εPEPO = 0.0002108962030396011
 target = 0.001
 ```
 
@@ -799,25 +802,25 @@ target = 0.001
 2. 最新 `Dop` 和 `χenv` 变化不再增大；
 3. `χenv` 截面必须直接位于最大 `Dop` 角点。
 
-当前满足第 2 条；第 1 条仅差约 2.45%，但仍未达到；第 3 条也未满足。因此
-`internally_converged=false`，不能把“非常接近阈值”写成“已经收敛”。
+当前满足第 1、2 条；第 3 条仍未满足。因此 `internally_converged=false`：
+可以说 `Dop` 精度与代理误差和已达标，但不能写成最大角点双轴“已经收敛”。
 
 ## 9. 与 BP-TN 和公开结果比较
 
 | 结果 | 数值 | 与当前 PEPO 的差 |
 | --- | ---: | ---: |
-| 当前 PEPO，`Dop=384,χenv=64` | `0.8223537669` | — |
-| 本次 BP-TN mean | `0.8183229132` | `0.0040308537` |
-| 公开 BP-TN，`χ=192` raw | `0.8202512915` | `0.0021024754` |
-| 公开 BP-TN，`χ=512` raw | `0.8216584890` | `0.0006952779` |
-| IBM Heron R3，global-rescaled | `0.824` | `0.0016462331` |
+| 当前 PEPO，`Dop=512,χenv=64` | `0.8225508376` | — |
+| 本次 BP-TN mean | `0.8183229132` | `0.0042279244` |
+| 公开 BP-TN，`χ=192` raw | `0.8202512915` | `0.0022995461` |
+| 公开 BP-TN，`χ=512` raw | `0.8216584890` | `0.0008923486` |
+| IBM Heron R3，global-rescaled | `0.824` | `0.0014491624` |
 
 IBM 数值经过 `δ=0` global rescaling，与 raw PEPO/BP-TN 口径不同，只能作为
 背景参考。
 
-当前 PEPO 与公开 `χ=512` BP-TN 中心值相差 `6.95×10⁻⁴`，但与本次
-20-seed BP-TN 均值相差 `4.03×10⁻³`。PEPO 在 `Dop=128→256` 已越过本次
-BP mean，`Dop=256→384` 又继续升高；这再次说明选择“最接近 BP 的有限
+当前 PEPO 与公开 `χ=512` BP-TN 中心值相差 `8.92×10⁻⁴`，但与本次
+20-seed BP-TN 均值相差 `4.23×10⁻³`。PEPO 在 `Dop=128→256` 已越过本次
+BP mean，`Dop=256→384→512` 又继续升高；这再次说明选择“最接近 BP 的有限
 Dop”会产生选择偏差。独立方法比较只能在 PEPO 自身收敛后升级为
 agreement/disagreement；当前状态保持为 `diagnostic`。
 
@@ -830,11 +833,13 @@ agreement/disagreement；当前状态保持为 `diagnostic`。
 | `Dop=128`，三个 `χenv` | 32/cell | 252.70 s | 1.701 GiB |
 | `Dop=256,χenv=64` | 64 | 807.07 s | 11.402 GiB |
 | `Dop=384,χenv=64` | 96 | 2315.21 s | 21.508 GiB |
+| `Dop=512,χenv=64` | 128 | 1755.86 s | 43.411 GiB |
 
 `Dop=64/128` 的六个 cell 同时运行，每个进程实测使用约 29–30 核，总利用率约
-176–180 核。`Dop=384` 对应 Slurm Job `412312`，请求 128 GiB、4 h，实测约
-38.59 min 和 21.508 GiB。相对 `Dop=256`，wall time 增长 2.87 倍，peak RSS
-增长 1.89 倍；继续增加 `Dop` 前仍需重新估计，不能按 `Dop` 线性外推。
+176–180 核。`Dop=512` 对应 Slurm Job `412377`，请求 128 CPU、192 GiB、6 h，
+实测约 29.26 min 和 43.411 GiB。它比 `Dop=384` 使用更多 CPU，所以 wall time
+反而缩短约 24.2%，但 peak RSS 增长约 2.02 倍；资源缩放同时依赖 `Dop` 与
+并行度，不能仅按 `Dop` 线性外推。
 
 集群关闭了 Slurm accounting，因此 wall time 和 peak RSS 来自 Python manifest，
 而不是 `sacct`。
@@ -845,27 +850,26 @@ agreement/disagreement；当前状态保持为 `diagnostic`。
 
 - 小系统上算法和实现达到约 `10⁻¹⁴` 精度；
 - 完整 49Q causal evolution、PEPO contraction 和 manifest 链路可执行；
-- `Dop=32→64→128→256→384` 的变化连续减小，最新变化约为前一步的 4.48%；
+- `Dop=32→64→128→256→384→512` 的变化连续减小，最新变化约为前一步的
+  19.50%；
+- `Dop=512` 的 `ΔDop=1.97×10⁻⁴`，代理误差和
+  `εPEPO=2.11×10⁻⁴<10⁻³`；
 - 当前 PEPO 与 BP-TN/公开 BP 中心值数值接近；
 - `Dop≤128` 时 `χenv=64` 的收缩误差已经较小。
 
 ### 11.2 当前证据不能支持
 
-- `εPEPO≤10⁻³`；
-- `Dop=384` 角点的直接 `χenv` 收敛；
+- `Dop=512` 角点的直接 `χenv` 收敛；
 - 受控的 `Dop→∞` 外推；
 - PEPO 与 BP-TN 已正式 agreement；
 - PEPO baseline benchmark 已完成。
 
 ### 11.3 后续最有信息量的计算
 
-最有信息量的下一步是先计算 `Dop=512,χenv=64`。当前
-`ΔDop=0.00101069` 已经非常接近目标，这个点可以直接判断 operator-bond
-truncation 是否跨过 `10⁻³` 阈值，但不能预先保证结果。
-
-若 `Dop=512` 的变化达到目标，再在同一 `Dop=512` 角点补充至少一个较小
-`χenv`（优先 `χenv=32`），形成直接环境截面。仅在 `Dop=384` 补环境点不能
-让当前 `εPEPO` 通过，因为现有 `ΔDop` 本身已经略高于 `10⁻³`。
+最有信息量的下一步是在同一 `Dop=512` 角点补充 `χenv=32`。当前
+operator-bond 方向已经跨过 `10⁻³` 阈值；直接比较
+`F(512,64)−F(512,32)` 才能替换来自 `Dop=128` 的环境 proxy，并判断
+三项内部收敛条件是否同时满足。
 
 ## 12. 结果与源码索引
 
@@ -875,17 +879,18 @@ truncation 是否跨过 `10⁻³` 阈值，但不能预先保证结果。
 - 49Q 验证记录：[`PEPO_49Q_VALIDATION.md`](PEPO_49Q_VALIDATION.md)
 - 小系统验证：[`PEPO_SMALL_VALIDATION.md`](PEPO_SMALL_VALIDATION.md)
 - 最新 assessment：
-  `results/issue119-pepo-49q-dop384-analysis/assessment.json`
+  `results/issue119-pepo-49q-dop512-analysis/assessment.json`
 - 最新收敛图：
-  `results/issue119-pepo-49q-dop384-analysis/pepo-convergence.png`
+  `results/issue119-pepo-49q-dop512-analysis/pepo-convergence.png`
 
-![PEPO convergence through Dop=384](../../../../../results/issue119-pepo-49q-dop384-analysis/pepo-convergence.png)
+![PEPO convergence through Dop=512](../../../../../results/issue119-pepo-49q-dop512-analysis/pepo-convergence.png)
 
 图 A 是固定 `χenv=64` 的 `Dop` 序列；图 B 是最近的完整环境截面，
-对应 `Dop=128`，不是 `Dop=384`。
+对应 `Dop=128`，不是 `Dop=512`。
 
 ### 12.2 运行结果
 
+- `results/issue119-pepo-49q-dop512/`
 - `results/issue119-pepo-49q-dop384/`
 - `results/issue119-pepo-49q-dop256/`
 - `results/issue119-pepo-49q-dop64-128/`
