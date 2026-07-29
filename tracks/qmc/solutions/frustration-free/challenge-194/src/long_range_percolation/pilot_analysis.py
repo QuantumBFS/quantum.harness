@@ -13,10 +13,16 @@ from typing import Never
 import numpy as np
 
 from . import pilot as _pilot
+from .counter_rng import STREAM_COUNT, StreamIdentity, derive_stream_material
+from .kernel import periodic_kernel
 from .pilot import PilotCell
+from .trajectory import TrajectoryRequest, request_digest
 
 ANALYSIS_SCHEMA = "challenge-194-p0-analysis-v1"
 BRACKET_SCHEMA = "challenge-194-p1-brackets-v1"
+P1_PROTOCOL_SCHEMA = "challenge-194-p1-protocol-v1"
+P1_MASTER_SEED = 19_420_261_729
+P1_REPLICAS = tuple(range(8, 24))
 OBSERVABLE_COLUMNS: Mapping[str, int] = MappingProxyType(
     {
         "s1_fraction": 4,
@@ -551,3 +557,247 @@ def select_p1_brackets(analysis: Mapping[str, object]) -> dict[str, object]:
     }
     document["bracket_document_sha256"] = _sha256(_canonical_bytes(document))
     return document
+
+
+def _validate_bracket_document(
+    analysis: Mapping[str, object],
+    brackets: Mapping[str, object],
+) -> Sequence[object]:
+    if brackets.get("schema_version") != BRACKET_SCHEMA:
+        raise RuntimeError("bracket schema version is not supported")
+    if brackets.get("source_analysis_document_sha256") != analysis.get(
+        "analysis_document_sha256"
+    ):
+        raise RuntimeError("bracket document is not bound to the analysis")
+    digest = brackets.get("bracket_document_sha256")
+    if not isinstance(digest, str):
+        _malformed("bracket document digest is malformed")
+    unsigned = dict(brackets)
+    unsigned.pop("bracket_document_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("bracket document digest mismatch")
+    raw = brackets.get("brackets")
+    if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
+        _malformed("bracket entries are malformed")
+    extension_sigmas = [
+        str(entry.get("sigma_hex"))
+        for entry in raw
+        if isinstance(entry, Mapping) and entry.get("status") == "requires_p0_extension"
+    ]
+    if brackets.get("requires_p0_extension") is True or extension_sigmas:
+        labels = ", ".join(str(float.fromhex(value)) for value in extension_sigmas)
+        raise RuntimeError(f"P0 extension required before P1 publication: {labels}")
+    return raw
+
+
+def _recursive_binary64_grid(lower: float, upper: float) -> tuple[float, ...]:
+    if (
+        not math.isfinite(lower)
+        or not math.isfinite(upper)
+        or lower <= 0.0
+        or upper <= lower
+    ):
+        raise RuntimeError("P1 bracket endpoints are invalid")
+    points = [lower, upper]
+    for _level in range(3):
+        previous = sorted(points)
+        points.extend(left + (right - left) / 2.0 for left, right in pairwise(previous))
+    ordered = tuple(sorted({value.hex(): value for value in points}.values()))
+    if (
+        len(ordered) != 9
+        or ordered[0] != lower
+        or ordered[-1] != upper
+        or any(right <= left for left, right in pairwise(ordered))
+    ):
+        raise RuntimeError("P1 bracket cannot produce nine unique binary64 points")
+    return ordered
+
+
+def _p1_stream_hashes(
+    length: int,
+    sigma_grid_id: str,
+    replica: int,
+) -> tuple[str, ...]:
+    return tuple(
+        derive_stream_material(
+            StreamIdentity(
+                master_seed=P1_MASTER_SEED,
+                phase="pilot",
+                length=length,
+                sigma_grid_id=sigma_grid_id,
+                replica=replica,
+                stream_id=stream,
+            )
+        ).material_sha256
+        for stream in range(STREAM_COUNT)
+    )
+
+
+def build_p1_protocol(
+    analysis: Mapping[str, object],
+    brackets: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    sigmas, lengths, _p0_kappas, _values = _selector_estimates(analysis)
+    if len(sigmas) != 4 or len(lengths) != 3:
+        raise RuntimeError("P1 requires exactly four sigmas and three lengths")
+    bracket_document = select_p1_brackets(analysis) if brackets is None else brackets
+    raw_brackets = _validate_bracket_document(analysis, bracket_document)
+    if len(raw_brackets) != len(sigmas):
+        raise RuntimeError("P1 requires one bracket per sigma")
+
+    sigma_entries: list[dict[str, object]] = []
+    grids: dict[float, tuple[float, ...]] = {}
+    grid_ids: dict[float, str] = {}
+    for sigma, raw in zip(sigmas, raw_brackets, strict=True):
+        if not isinstance(raw, Mapping):
+            _malformed("bracket entry is malformed")
+        raw_sigma = _exact_hex_value(raw.get("sigma_hex"), "bracket sigma")
+        if raw_sigma != sigma or raw.get("status") != "selected":
+            raise RuntimeError("bracket entries are not in canonical sigma order")
+        lower = _exact_hex_value(raw.get("lower_kappa_hex"), "lower bracket")
+        upper = _exact_hex_value(raw.get("upper_kappa_hex"), "upper bracket")
+        grid = _recursive_binary64_grid(lower, upper)
+        grid_id = (
+            f"pilot-p1-v1|sigma-f64={sigma.hex()}|"
+            f"analysis={analysis['analysis_document_sha256']}"
+        )
+        grids[sigma] = grid
+        grid_ids[sigma] = grid_id
+        sigma_entries.append(
+            {
+                "sigma_hex": sigma.hex(),
+                "purpose": raw.get("purpose"),
+                "lower_kappa_hex": lower.hex(),
+                "upper_kappa_hex": upper.hex(),
+                "kappas": [value.hex() for value in grid],
+                "sigma_grid_id": grid_id,
+            }
+        )
+
+    cells: list[dict[str, object]] = []
+    assignments: list[dict[str, object]] = []
+    request_ids: set[str] = set()
+    stream_ids: set[str] = set()
+    for sigma in sigmas:
+        grid = grids[sigma]
+        grid_id = grid_ids[sigma]
+        for length in lengths:
+            kernel = periodic_kernel(length, sigma)
+            kernel_sha256 = _sha256(kernel.astype("<f8", copy=False).tobytes(order="C"))
+            for replica in P1_REPLICAS:
+                request = TrajectoryRequest(
+                    length=length,
+                    sigma=sigma,
+                    sigma_grid_id=grid_id,
+                    kappas=np.asarray(grid, dtype=np.float64),
+                    master_seed=P1_MASTER_SEED,
+                    phase="pilot",
+                    replica=replica,
+                    kernel_sha256=kernel_sha256,
+                )
+                request_sha256 = request_digest(request)
+                streams = _p1_stream_hashes(length, grid_id, replica)
+                if request_sha256 in request_ids or any(
+                    stream in stream_ids for stream in streams
+                ):
+                    raise RuntimeError("P1 request or RNG identity collision")
+                request_ids.add(request_sha256)
+                stream_ids.update(streams)
+                index = len(cells)
+                identity = {
+                    "cell_index": index,
+                    "sigma_hex": sigma.hex(),
+                    "length": length,
+                    "replica": replica,
+                    "request_sha256": request_sha256,
+                }
+                cell_id = f"{index:03d}-{_sha256(_canonical_bytes(identity))[:16]}"
+                cell_path = f"cells/{cell_id}"
+                cells.append(
+                    {
+                        **identity,
+                        "cell_id": cell_id,
+                        "sigma_grid_id": grid_id,
+                        "kappas": [value.hex() for value in grid],
+                        "kernel_sha256": kernel_sha256,
+                        "rng_material_sha256": list(streams),
+                        "cell_path": cell_path,
+                        "run_path": f"{cell_path}/run",
+                        "manifest_path": f"{cell_path}/manifest.json",
+                    }
+                )
+                assignments.append(
+                    {
+                        "cell_index": index,
+                        "request_sha256": request_sha256,
+                        "streams": list(streams),
+                    }
+                )
+
+    document: dict[str, object] = {
+        "schema_version": P1_PROTOCOL_SCHEMA,
+        "source_analysis_document_sha256": analysis["analysis_document_sha256"],
+        "source_bracket_document_sha256": bracket_document["bracket_document_sha256"],
+        "grid_namespace": "pilot-p1-v1",
+        "master_seed": P1_MASTER_SEED,
+        "phase": "pilot",
+        "purpose": "exploratory-refinement-only",
+        "lengths": list(lengths),
+        "replicas": list(P1_REPLICAS),
+        "loop_order": ["sigma", "length", "replica"],
+        "sigma_entries": sigma_entries,
+        "cells": cells,
+        "cell_count": len(cells),
+        "rng_assignment_sha256": _sha256(
+            _canonical_bytes({"assignments": assignments})
+        ),
+    }
+    document["protocol_sha256"] = _sha256(_canonical_bytes(document))
+    return document
+
+
+def validate_p1_protocol(
+    analysis: Mapping[str, object],
+    protocol: Mapping[str, object],
+) -> None:
+    _selector_estimates(analysis)
+    if protocol.get("schema_version") != P1_PROTOCOL_SCHEMA:
+        raise RuntimeError("P1 protocol schema version is not supported")
+    if protocol.get("source_analysis_document_sha256") != analysis.get(
+        "analysis_document_sha256"
+    ):
+        raise RuntimeError("P1 protocol is not bound to the analysis")
+    digest = protocol.get("protocol_sha256")
+    if not isinstance(digest, str):
+        _malformed("P1 protocol digest is malformed")
+    unsigned = dict(protocol)
+    unsigned.pop("protocol_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("P1 protocol digest mismatch")
+    cells = protocol.get("cells")
+    if (
+        not isinstance(cells, Sequence)
+        or isinstance(cells, (str, bytes))
+        or len(cells) != 4 * 3 * len(P1_REPLICAS)
+        or protocol.get("cell_count") != len(cells)
+    ):
+        raise RuntimeError("P1 protocol cell cardinality is invalid")
+    request_ids: set[str] = set()
+    stream_ids: set[str] = set()
+    for index, raw in enumerate(cells):
+        if not isinstance(raw, Mapping) or raw.get("cell_index") != index:
+            raise RuntimeError("P1 cells are not in canonical order")
+        request_id = raw.get("request_sha256")
+        streams = raw.get("rng_material_sha256")
+        if (
+            not isinstance(request_id, str)
+            or request_id in request_ids
+            or not isinstance(streams, Sequence)
+            or isinstance(streams, (str, bytes))
+            or len(streams) != STREAM_COUNT
+            or any(not isinstance(value, str) for value in streams)
+            or any(value in stream_ids for value in streams)
+        ):
+            raise RuntimeError("P1 request or RNG identities are invalid")
+        request_ids.add(request_id)
+        stream_ids.update(streams)

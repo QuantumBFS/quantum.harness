@@ -767,3 +767,108 @@ def test_select_p1_brackets_rejects_malformed_evidence(defect: str, match: str):
 
     with pytest.raises(RuntimeError, match=match):
         analysis.select_p1_brackets(document)
+
+
+def _selected_bracket_document(
+    source: dict[str, object],
+    *,
+    requires_extension: bool = False,
+) -> dict[str, object]:
+    brackets: list[dict[str, object]] = []
+    for index, sigma in enumerate((0.8, 0.9, 1.0, 1.1)):
+        if requires_extension and sigma == 1.0:
+            brackets.append(
+                {
+                    "sigma_hex": sigma.hex(),
+                    "status": "requires_p0_extension",
+                    "reason": "no_nonzero_interval_marked_by_both_estimators",
+                    "lengths": [16, 32],
+                }
+            )
+            continue
+        brackets.append(
+            {
+                "sigma_hex": sigma.hex(),
+                "status": "selected",
+                "purpose": (
+                    "transition_refinement" if sigma <= 1.0 else "crossover_refinement"
+                ),
+                "lower_kappa_hex": float(index + 1).hex(),
+                "upper_kappa_hex": float(index + 2).hex(),
+                "lengths": [16, 32],
+                "estimator_evidence": {"synthetic": True},
+                "tie_break": {"rule": "synthetic"},
+            }
+        )
+    document: dict[str, object] = {
+        "schema_version": analysis.BRACKET_SCHEMA,
+        "source_analysis_document_sha256": source["analysis_document_sha256"],
+        "requires_p0_extension": requires_extension,
+        "brackets": brackets,
+    }
+    document["bracket_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(document)
+    ).hexdigest()
+    return document
+
+
+def test_build_p1_protocol_freezes_grids_requests_and_rng_assignments():
+    source = _selector_document(
+        sigmas=(0.8, 0.9, 1.0, 1.1),
+        lengths=(8, 16, 32),
+    )
+    brackets = _selected_bracket_document(source)
+
+    protocol = analysis.build_p1_protocol(source, brackets)
+
+    assert protocol["schema_version"] == analysis.P1_PROTOCOL_SCHEMA
+    assert (
+        protocol["source_analysis_document_sha256"]
+        == source["analysis_document_sha256"]
+    )
+    assert (
+        protocol["source_bracket_document_sha256"]
+        == brackets["bracket_document_sha256"]
+    )
+    assert protocol["phase"] == "pilot"
+    assert protocol["lengths"] == [8, 16, 32]
+    assert protocol["replicas"] == list(range(8, 24))
+    assert len(protocol["sigma_entries"]) == 4
+    for entry in protocol["sigma_entries"]:
+        grid = [float.fromhex(value) for value in entry["kappas"]]
+        assert len(grid) == 9
+        assert grid == sorted(grid)
+        assert len(set(entry["kappas"])) == 9
+        assert entry["kappas"][0] == entry["lower_kappa_hex"]
+        assert entry["kappas"][-1] == entry["upper_kappa_hex"]
+
+    cells = protocol["cells"]
+    assert len(cells) == 4 * 3 * 16
+    assert [cell["cell_index"] for cell in cells] == list(range(len(cells)))
+    assert all(cell["replica"] not in range(8) for cell in cells)
+    assert len({cell["request_sha256"] for cell in cells}) == len(cells)
+    stream_hashes = [
+        stream_hash for cell in cells for stream_hash in cell["rng_material_sha256"]
+    ]
+    assert len(set(stream_hashes)) == len(stream_hashes)
+    assert all(
+        cell["cell_path"] == f"cells/{cell['cell_id']}"
+        and cell["run_path"] == f"{cell['cell_path']}/run"
+        and cell["manifest_path"] == f"{cell['cell_path']}/manifest.json"
+        for cell in cells
+    )
+    unsigned = dict(protocol)
+    digest = unsigned.pop("protocol_sha256")
+    assert digest == hashlib.sha256(_canonical_bytes(unsigned)).hexdigest()
+    analysis.validate_p1_protocol(source, protocol)
+
+
+def test_build_p1_protocol_rejects_required_p0_extension():
+    source = _selector_document(
+        sigmas=(0.8, 0.9, 1.0, 1.1),
+        lengths=(8, 16, 32),
+    )
+    brackets = _selected_bracket_document(source, requires_extension=True)
+
+    with pytest.raises(RuntimeError, match="P0 extension required.*1\\.0"):
+        analysis.build_p1_protocol(source, brackets)
