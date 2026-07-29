@@ -71,3 +71,13 @@ Interpretation still requires the second gate:
    reduced coefficient hash; and
 2. pending: two independent L=2 constructions with the same exact coefficient
    hash before any numerical result is interpreted.
+
+The first L=2 construction is complete. SCNet build-only job `118182637`
+produced 343,761 moment equations, 26 unchanged PSD blocks / 4,446,492 packed
+rows, maximum side 975, 16,647,108 scalar terms, and exact coefficient hash
+`fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+It removed 117,425 coordinates (25.4615%) relative to the unreduced task and
+used 17,142,132 KiB Slurm MaxRSS. Its classification is
+`not_run_exact_build_only`. The separately rebuilt numerical task must match
+this hash before optimization; that match will supply the second construction
+gate.

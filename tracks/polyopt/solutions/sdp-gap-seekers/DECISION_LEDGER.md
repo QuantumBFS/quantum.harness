@@ -1324,3 +1324,18 @@ stationarity, no-boundary window, unrestricted state, exact SO(3) rank-four
 projection. It started at 2026-07-29T18:45:55Z with 32 CPUs / 48000 MiB. Its
 runner sets `SHASTRY_CERTIFICATE_BUILD_ONLY=1`; no numerical solver decision
 can be emitted by this job. The next action depends on its exact count/hash.
+
+Job `118182637` completed in 37:17 with exit 0 and 17,142,132 KiB Slurm
+MaxRSS. Its persisted exact inventory is 343,761 moment equations, 26 PSD
+blocks / 4,446,492 packed rows, maximum side 975, 16,647,108 scalar terms,
+and coefficient SHA-256
+`fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+The 117,425-coordinate reduction is 25.4615%; exact projection increases the
+expanded sparse-term count by 5.3458% while preserving all cone rows.
+Classification is `not_run_exact_build_only`, so this is structural evidence,
+not feasibility or a gap bound.
+
+The next signature is a separate numerical build/solve with the recorded hash
+mandatory. A hash mismatch stops before optimization. A matching task may be
+interpreted only through the `1e-9` audit and independent exact-bit replay;
+the L=1 controls prohibit relying on native-dual `OPTIMAL` status alone.

@@ -747,3 +747,16 @@ Updated: 2026-07-29 UTC.
   48000 MiB. It has no optimizer call. Monitor through complete coefficient
   construction and record its moment inventory/hash before submitting the
   separately gated solve.
+- Build-only job `118182637` completed successfully in 37:17 at 17,142,132
+  KiB Slurm MaxRSS. The exact reduced inventory is 343,761 moment-matching
+  equations, 26 unchanged PSD blocks / 4,446,492 packed rows, maximum side
+  975, zero explicit equalities, and 16,647,108 scalar coefficient terms.
+  Exact coefficient SHA-256 is
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+  Relative to the unreduced native task, this removes 117,425 moment
+  coordinates (25.4615%) while increasing expanded scalar terms by 844,765
+  (5.3458%); no cone or state restriction was introduced.
+- Next action: rebuild the same L=2 formulation in the numerical runner with
+  the new hash required fail-closed, then audit any infeasibility candidate at
+  `1e-9` and replay its exact-bit certificate in a fresh task. Solver status
+  alone is not evidence because both L=1 dual controls were near-feasible.

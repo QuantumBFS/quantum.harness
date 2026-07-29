@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T18:46:54Z
+Updated: 2026-07-29T19:24:01Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -207,5 +207,15 @@ Updated: 2026-07-29T18:46:54Z
   2026-07-29T18:45:55Z and cannot call the optimizer. Monitor it to obtain the
   reduced structural inventory and coefficient hash; do not update its shared
   checkout while it runs.
+- Build-only job `118182637` completed in 37:17 with exit 0 and 17,142,132
+  KiB Slurm MaxRSS. It established 343,761 reduced moment equations, all 26
+  PSD blocks / 4,446,492 packed rows, maximum side 975, 16,647,108 scalar
+  terms, and exact coefficient hash
+  `fac50bccd926fd020a51a87fa791ec627356160a044a4125e4442aa260bed9a8`.
+  This is a 117,425-coordinate (25.4615%) shrink with no cone or state-sector
+  restriction; classification is `not_run_exact_build_only`.
+- Immediate action: commit this exact inventory, fast-forward the now-idle
+  checkout, and launch the separate solver with the new hash mandatory and
+  audit tolerance `1e-9`. Preserve queued unreduced job `118178932`.
 
 No user input or new credential is currently required.
