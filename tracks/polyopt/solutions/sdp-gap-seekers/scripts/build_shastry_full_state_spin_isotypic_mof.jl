@@ -311,11 +311,13 @@ function write_mosek_solution_artifact(
             "available" => false,
             "reason" => "mosek_interior_solution_not_defined",
         )
-    temporary = replace(path, r"(\.[^.]+)$" => s".tmp\1")
+    endswith(path, ".jsol.gz") ||
+        error("Mosek solution artifact must end in .jsol.gz")
+    temporary = replace(path, r"(\.jsol\.gz)$" => s".tmp\1")
     ispath(path) && error("refusing existing Mosek solution artifact: $path")
     ispath(temporary) &&
         error("refusing existing Mosek solution temporary artifact: $temporary")
-    Mosek.writesolution(backend.task, Mosek.MSK_SOL_ITR, temporary)
+    Mosek.writejsonsol(backend.task, temporary)
     mv(temporary, path)
     return Dict(
         "available" => true,
@@ -323,6 +325,7 @@ function write_mosek_solution_artifact(
         "bytes" => filesize(path),
         "sha256" => file_sha256(path),
         "mosek_solution_type" => "MSK_SOL_ITR",
+        "format" => "mosek-jsol-gzip",
     )
 end
 
@@ -630,7 +633,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         )
         metadata["solve"]["classification"] = classification
         metadata["mosek_solution"] = write_mosek_solution_artifact(
-            joinpath(options.output, "mosek-interior.sol"),
+            joinpath(options.output, "mosek-solutions.jsol.gz"),
             jump_model.model,
         )
         if classification ==

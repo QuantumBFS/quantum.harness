@@ -15,7 +15,7 @@ end
 function replay_usage()
     println(
         "Usage: julia replay_mosek_infeasibility_artifact.jl " *
-        "--task TASK.task.gz --solution SOLUTION.sol --output REPORT.toml " *
+        "--task TASK.task.gz --solution SOLUTIONS.jsol.gz --output REPORT.toml " *
         "--expected-task-sha256 HEX --expected-solution-sha256 HEX " *
         "[--tolerance 1e-7]",
     )
@@ -88,7 +88,7 @@ function mosek_ray_replay_report(
 
     audit = Mosek.maketask() do task
         Mosek.readdata(task, task_path)
-        Mosek.readsolution(task, Mosek.MSK_SOL_ITR, solution_path)
+        Mosek.readjsonsol(task, solution_path)
         Mosek.solutiondef(task, Mosek.MSK_SOL_ITR) ||
             error("reloaded task has no interior solution")
 

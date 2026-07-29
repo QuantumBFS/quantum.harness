@@ -108,13 +108,13 @@ JuMP.optimize!(infeasible_model)
         @test endswith(lines[4], bitstring(JuMP.value(y[1])))
         @test endswith(lines[5], bitstring(JuMP.value(y[2])))
         mosek_solution = write_mosek_solution_artifact(
-            joinpath(directory, "synthetic.sol"),
+            joinpath(directory, "synthetic.jsol.gz"),
             model,
         )
         @test mosek_solution["available"]
         @test mosek_solution["bytes"] > 0
         @test mosek_solution["sha256"] ==
-              file_sha256(joinpath(directory, "synthetic.sol"))
+              file_sha256(joinpath(directory, "synthetic.jsol.gz"))
         mosek_task = write_mosek_task_artifact(
             joinpath(directory, "synthetic.task.gz"),
             model,
@@ -123,7 +123,7 @@ JuMP.optimize!(infeasible_model)
         @test mosek_task["sha256"] ==
               file_sha256(joinpath(directory, "synthetic.task.gz"))
         infeasible_solution = write_mosek_solution_artifact(
-            joinpath(directory, "infeasible.sol"),
+            joinpath(directory, "infeasible.jsol.gz"),
             infeasible_model,
         )
         @test infeasible_solution["available"]
@@ -134,7 +134,7 @@ JuMP.optimize!(infeasible_model)
         )
         replay = mosek_ray_replay_report(
             joinpath(directory, "infeasible.task.gz"),
-            joinpath(directory, "infeasible.sol");
+            joinpath(directory, "infeasible.jsol.gz");
             expected_task_sha256=infeasible_task["sha256"],
             expected_solution_sha256=infeasible_solution["sha256"],
         )
