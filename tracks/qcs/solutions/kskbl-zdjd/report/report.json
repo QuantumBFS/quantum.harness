@@ -1,0 +1,404 @@
+{
+  "title": "⟦zh⟧Occam 电路：四个精确算术网络的门数优化⟦en⟧Occam’s Circuit: Gate-count Optimization of Four Exact Arithmetic Networks",
+  "eyebrow": "⟦zh⟧QuantumBFS 问题 71 · 研究报告⟦en⟧QuantumBFS Challenge 71 · Research Report",
+  "subtitle": "⟦zh⟧原始总计 385 门，当前总计 355 门；当前四份电路均通过完整定义域验证⟦en⟧Original total: 385 gates. Current total: 355 gates. All four current circuits pass full-domain verification",
+  "lede": "⟦zh⟧本研究在多个抽象层次上评估精确电路优化方法，包括算术单元重构、SAT 局部无关项、随机拓扑采样、多输出边界张量综合、公开构造复现，以及基于完整输入域的语义重代入。所有门数结果均对应通过完整定义域验证的电路。⟦en⟧This study evaluates exact-circuit optimization at several levels of abstraction: arithmetic-cell restructuring, SAT-derived local don’t-cares, randomized topology sampling, multi-output boundary-tensor synthesis, reproduction of a published construction, and full-domain semantic resubstitution. Every reported gate count corresponds to a circuit verified over its complete input domain.",
+  "sections": [
+    {
+      "title": "⟦zh⟧结果总览⟦en⟧Results at a Glance",
+      "note": "⟦zh⟧计分基元为二输入 AND、OR、XOR、NAND、NOR、XNOR；输入与输出反相免费。所有当前电路均为完全精确电路。⟦en⟧The score counts two-input AND, OR, XOR, NAND, NOR and XNOR gates; input and output complementation is free. Every retained circuit is exact.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧总计 355 门⟦en⟧355 gates total",
+          "why": "⟦zh⟧原始总计 385 门，减少 30 门，降幅 7.79%。⟦en⟧Down from the original 385 gates: 30 gates saved, a 7.79% reduction."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧任务⟦en⟧Task",
+            "⟦zh⟧目标函数⟦en⟧Target",
+            "⟦zh⟧原始⟦en⟧Start",
+            "⟦zh⟧当前⟦en⟧Now",
+            "⟦zh⟧减少⟦en⟧Saved",
+            "⟦zh⟧当前深度⟦en⟧Depth"
+          ],
+          "rows": [
+            ["A", "x + y", "37", "37", "0", "15"],
+            ["B", "abs(x − y)", "53", "49", "4", "21"],
+            ["C", "x × y", "168", "156", "12", "36"],
+            ["D", "x² + y²", "127", "113", "14", "27"]
+          ],
+          "numeric": [false, false, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "gate-score-overview.svg",
+              "caption": "⟦zh⟧四个任务的原始与当前门数。A、B、C、D 分别减少 0、4、12、14 门；在所测试的脉动进位拓扑中，A 未出现低于 37 门的候选。⟦en⟧Original and current gate counts. Tasks A, B, C and D save 0, 4, 12 and 14 gates, respectively. No candidate below 37 gates was found for A among the tested ripple-carry topologies."
+            },
+            {
+              "src": "c-d-journeys.svg",
+              "caption": "⟦zh⟧C 与 D 的已接受精确解轨迹。C 的 165 到 158 是架构切换，不是同一网络中的七门局部删除。⟦en⟧Accepted exact trajectories for C and D. The C transition from 165 to 158 is an architecture replacement, not a seven-gate local deletion from the same network."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧验收条件⟦en⟧Acceptance criteria",
+          "text": "⟦zh⟧候选只有在成功解析、匹配完整输入域并匹配全部训练数据后，才会替换当前保留电路。近似结果以及失败或超时工具留下的文件不作为有效候选。⟦en⟧A candidate replaces the retained circuit only after successful parsing, complete-domain equivalence, and agreement with every training row. Approximate results and files left by failed or timed-out tools are not treated as valid candidates."
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧任务 A：八位加法⟦en⟧Task A: Eight-bit Addition",
+      "note": "⟦zh⟧在测试的脉动进位结构和优化流程中，没有发现低于原始 37 门的候选。该结果不构成全局最优性证明。⟦en⟧No candidate below the original 37 gates was found within the tested ripple-carry structures and optimization flows. This result does not establish global optimality.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "37 → 37",
+          "why": "⟦zh⟧一个半加器加七个五门全加器，完整验证 65,536 组输入。⟦en⟧One half adder followed by seven five-gate full adders, verified on all 65,536 inputs."
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧原始设计已经正好对应 2 + 7 × 5 的标准脉动进位成本。我们利用全加器三输入对称性生成了 50 个不同的 37 门拓扑，再分别经过 SAT 窗口、重写与重映射；所有候选最终仍停在 37。⟦en⟧The baseline exactly matches the standard ripple cost of 2 + 7 × 5. We used full-adder input symmetry to generate 50 distinct 37-gate topologies and ran SAT windows, rewriting and remapping on each; every candidate remained at 37."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧实验观察⟦en⟧Experimental observations",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "⟦zh⟧标准五门全加器与本题的免费反相和 XOR/XNOR 等价计价规则兼容；测试中未发现更小的独立全加器实现。⟦en⟧The standard five-gate full adder is compatible with free complementation and equal XOR/XNOR cost; the tests did not find a smaller independent full-adder implementation.",
+                "⟦zh⟧保留同门数但结构不同的候选，可以检验后续优化结果是否依赖初始拓扑。⟦en⟧Retaining structurally distinct candidates with the same gate count tests whether subsequent optimization depends on the initial topology.",
+                "⟦zh⟧50 个测试拓扑均未低于 37 门；这一观察仅适用于已测试的拓扑和流程。⟦en⟧None of the 50 tested topologies fell below 37 gates; this observation applies only to the tested topologies and flows."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧任务 B：绝对差⟦en⟧Task B: Absolute Difference",
+      "note": "⟦zh⟧B 的收益来自先做代数消除，再利用减法器与全加器之间的结构同构。⟦en⟧B improved first through algebraic cancellation, then through the structural equivalence between subtractors and full adders.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "53 → 51 → 49",
+          "why": "⟦zh⟧总计减少 4 门，完整验证 16,384 组输入和 1,500 条训练数据。⟦en⟧Four gates saved, verified on all 16,384 inputs and 1,500 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧第一步：消掉两次异或⟦en⟧Step one: cancel two XORs"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在原始的条件二补码阶段，最低输出位连续执行的两个 XOR 在代数上抵消。精确库映射识别出这一点，53 门直接降到 51 门。⟦en⟧In the original conditional two’s-complement stage, two consecutive XOR operations on the least-significant output cancel algebraically. Exact-library mapping exposed this and reduced 53 gates to 51."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧第二步：把全减器看成全加器⟦en⟧Step two: reinterpret the full subtractor"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧全减器可写成输入为非 x、y 和借位的全加器；其进位就是下一位借位，而和位的补正好免费得到差位。基于全加器三输入对称性生成的 50 个种子，经八层 SAT 窗口后全部收敛到 49 门。⟦en⟧A full subtractor can be written as a full adder fed by complemented x, y and the borrow. Its carry is the next borrow, while the complemented sum yields the difference bit for free. Fifty symmetry-derived seeds all converged to 49 gates after eight-level SAT-window optimization."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧结果解释⟦en⟧Interpretation",
+          "text": "⟦zh⟧在本任务的计分模型下，把全减器改写为带输入和输出极性的全加器形式，使优化结果由 51 门降到 49 门。该结果说明算术单元的表示方式会影响映射结果，但不说明该改写对其他门库或位宽同样有效。⟦en⟧Under this task’s cost model, rewriting the full subtractor as a full adder with input and output polarity reduced the mapped result from 51 to 49 gates. This shows that arithmetic-cell representation affects mapping in this instance; it does not establish the same benefit for other libraries or bit widths."
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧任务 C：六位乘法⟦en⟧Task C: Six-bit Multiplication",
+      "note": "⟦zh⟧C 的原始门数最高，所用搜索流程也最多。常规部分积压缩树在已测试流程中的最低结果为 166 门；更低结果分别来自大型多输出区域综合、公开构造复现和全局可达状态约束。⟦en⟧C has the largest initial gate count and received the broadest set of search procedures. The lowest result obtained from the tested conventional partial-product trees was 166 gates. Lower counts came from large multi-output region synthesis, reproduction of a published construction, and globally reachable-state constraints.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "168 → 156",
+          "why": "⟦zh⟧减少 12 门；当前候选通过全部 4,096 组输入和 1,200 条训练数据。⟦en⟧Twelve gates saved; the current candidate passes all 4,096 inputs and all 1,200 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段一：SAT 局部无关项优化，168 到 166⟦en⟧Phase I: SAT-derived local don’t-care optimization, 168 to 166"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧基线由 36 个部分积门、24 个五门全加器和 6 个两门半加器组成，恰好是 168 门。高强度 mfs2 使用 SAT 推导局部无关项，先得到 167，再用更大的六层窗口得到 166。之后生成 100 个随机压缩顺序种子，17 个也到达 166，但没有一个继续下降。⟦en⟧The baseline contains 36 partial-product gates, 24 five-gate full adders and 6 two-gate half adders, exactly 168 gates. High-effort mfs2 with SAT-derived local don’t-cares first reached 167, then 166 with a larger six-level window. One hundred randomized compressor-order seeds were generated; 17 also reached 166, but none went lower."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧166 门阶段的结构性观察⟦en⟧Structural observations at 166 gates",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                "⟦zh⟧基线中的全加器和半加器分别使用五门和两门；已完成的小型精确综合没有找到更低的独立实现。⟦en⟧Full and half adders use five and two gates, respectively; completed small exact-synthesis tests did not find cheaper independent implementations.",
+                "⟦zh⟧独立替换某个输出锥会复制原本与高位共享的中间进位。⟦en⟧Replacing a single output cone duplicates intermediate carries shared with higher bits.",
+                "⟦zh⟧局部切口把边界信号视为任意组合，会丢掉乘法器内部的可达性约束。⟦en⟧Local cuts treat boundary signals as arbitrary combinations and lose multiplier reachability constraints."
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段二：166 到 165，大型联合张量区域⟦en⟧Phase II: 166 to 165 through a large joint tensor region"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧小型扇出自由锥均未发现改进，于是我们转而把跨越多条乘法对角线的区域收缩成多输入、多输出布尔张量。一个 22 门、7 输入、5 输出的低位区域经过关系综合得到 21 门实现；128 个边界状态全部一致，嵌回全局后 4,096 组输入仍完全正确，于是 C 到达 165。⟦en⟧Small fanout-free cones yielded no improvement, so the search contracted regions spanning several multiplication diagonals into multi-input, multi-output Boolean tensors. Relation synthesis reduced one 22-gate, seven-input, five-output low-product region to 21 gates. All 128 boundary states matched, and the embedded circuit remained exact on all 4,096 inputs, producing the 165-gate result."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段三：采用不同乘法器构造，165 到 158⟦en⟧Phase III: replacing the multiplier construction, 165 to 158"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧对 165 门网络进行的后续局部和联合区域搜索没有产生更小结果。随后直接重建 Sergeev 给出的 158 门乘法器，其中包含 36 个部分积、6 个半加器、3 个普通全加器、1 个编码输入全加器、10 个改进双全加器，以及 11 个用于构造编码对的 XOR。165 到 158 对应整体构造替换，不能解释为在 165 门网络中删除了七个局部门。⟦en⟧Subsequent local and joint-region searches on the 165-gate network did not produce a smaller result. We then directly reconstructed Sergeev’s 158-gate multiplier, containing 36 partial products, 6 half adders, 3 ordinary full adders, 1 encoded-input full adder, 10 modified double full adders, and 11 XOR gates used to form encoded pairs. The change from 165 to 158 is a replacement of the complete construction, not the deletion of seven local gates from the 165-gate network."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段四：158 到 156，只在可达状态上成立⟦en⟧Phase IV: 158 to 156 using reachable states"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧全域语义重代入为每条内部线计算了覆盖全部 12 位输入的真值向量。它发现最高乘积位的四门扇出自由锥可以由两门替换。若把三个边界信号当作独立变量，该替换并不成立；但在真实乘法器的 4,096 个可达输入上，它完全等价。⟦en⟧Full-domain semantic resubstitution computed a truth vector over all twelve primary inputs for every internal wire. It discovered that the four-gate fanout-free cone driving the most significant product bit could be replaced by two gates. The identity is false if the three boundary signals are independent, yet it is exact on all 4,096 states reachable in the real multiplier."
+        },
+        {
+          "kind": "code",
+          "title": "⟦zh⟧两门替换⟦en⟧The two-gate replacement",
+          "text": "g159 = NAND ~g29 ~g154\ng160 = AND g159 g36\n\noutput = g36 AND (g29 OR g154)"
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧结论范围⟦en⟧Scope of the conclusion",
+          "text": "⟦zh⟧158 是构造性上界，不是六位乘法的最优性证明。158 到 156 的结果表明，在本电路中，全局可达状态约束能够产生普通局部真值表未表示的简化机会。是否还存在其他此类区域尚未确定。⟦en⟧The 158 figure is a constructive upper bound, not an optimality proof for six-bit multiplication. The reduction from 158 to 156 shows that, in this circuit, globally reachable-state constraints can expose a simplification not represented by an ordinary local truth table. It remains unknown whether additional regions of this kind exist."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧未产生更小结果的已测试路线⟦en⟧Tested routes that did not produce a smaller result"
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧路线⟦en⟧Route",
+            "⟦zh⟧结果⟦en⟧Result",
+            "⟦zh⟧结果解释⟦en⟧Interpretation"
+          ],
+          "rows": [
+            ["⟦zh⟧完整真值表 PLA⟦en⟧Flat truth-table PLA", "6,176", "⟦zh⟧先破坏算术结构，再要求综合器重新发现它。⟦en⟧It destroys arithmetic structure before asking synthesis to rediscover it."],
+            ["⟦zh⟧通用 RTL 综合⟦en⟧Generic RTL synthesis", "178", "⟦zh⟧该流程的结果比手工压缩树多 10 门；推测通用位级映射没有保留全部共享结构。⟦en⟧This flow used ten more gates than the hand-structured compressor tree; the likely explanation is that generic bit-level mapping did not preserve all shared structure."],
+            ["Radix-4 Booth", "222", "⟦zh⟧六位规模太小，重编码开销无法摊薄。⟦en⟧At six bits, recoding overhead cannot be amortized."],
+            ["3 × 3 Karatsuba", "239", "⟦zh⟧加减与重组成本超过少掉的部分积。⟦en⟧Addition, subtraction and recombination cost more than the saved partial products."],
+            ["⟦zh⟧完整张量列车⟦en⟧Whole tensor train", "3,093", "⟦zh⟧整数乘法在单变量切分下键维过大。⟦en⟧Integer multiplication has excessive bond dimension under one-variable cuts."],
+            ["⟦zh⟧小型精确锥替换⟦en⟧Small exact cone replacement", "tie", "⟦zh⟧已测试的独立锥没有更小实现；该结果不排除跨切口共享逻辑的改进。⟦en⟧The tested independent cones had no smaller implementation; this does not exclude improvements that share logic across a cut."]
+          ],
+          "numeric": [false, true, false]
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧任务 D：平方和⟦en⟧Task D: Sum of Squares",
+      "note": "⟦zh⟧D 的改进来自多轮拓扑重写、随机种子筛选和四次联合区域替换。没有任何一次操作单独产生大于两门的减少。⟦en⟧D improved through repeated topology rewriting, randomized seed selection, and four joint-region replacements. No single operation reduced the count by more than two gates.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "127 → 113",
+          "why": "⟦zh⟧减少 14 门，降幅 11.02%；完整验证 1,024 组输入和 400 条训练数据。⟦en⟧Fourteen gates saved, an 11.02% reduction; verified on all 1,024 inputs and 400 training rows."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段一：确定性重写序列⟦en⟧Phase I: deterministic rewrite sequence"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧从平方专用的对角项与非对角项表示出发，resyn3、drwsat2 和高强度 mfs2 交替改变拓扑，形成 127、126、125、124、123、122 的连续轨迹。重复相同脚本很快稳定，因此后续搜索转向随机化结构。⟦en⟧Starting from a square-specific diagonal and off-diagonal representation, alternating resyn3, drwsat2 and high-effort mfs2 changed the topology along the sequence 127, 126, 125, 124, 123 and 122. Repeating the same scripts soon stabilized, motivating a move to randomized structures."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段二：拓扑岛避免早熟收敛⟦en⟧Phase II: topology islands avoid premature convergence"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧实验生成了 200 个精确平方和种子，并随机改变加权项和压缩器顺序。种子 003 经后续优化由 120 降到 119；另一个 120 门种子 012 则依次得到 118 和 117 门。在该样本中，初始门数相同的母体产生了不同的后续结果，因此搜索档案保留了同门数和少量增门但结构不同的候选。⟦en⟧The experiment generated 200 exact square-sum seeds with randomized weighted-term and compressor order. Subsequent optimization reduced seed 003 from 120 to 119 gates, while another 120-gate seed, 012, produced 118 and then 117 gates. Within this sample, equal-count parents produced different subsequent results, so the search archive retained structurally distinct candidates with equal or slightly larger counts."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段三：非连续张量窗口得到 115⟦en⟧Phase III: non-contiguous tensor windows reach 115"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧图张量搜索不要求区域在网表文本中连续，而是在超图中选取不会离开后重新进入的连通区域。综合器先为一个四输入、三输出的 10 门区域找到并验证了 9 门实现；重建图后，又为一个 8 门区域找到并验证了 7 门实现。两次替换均通过边界穷举和完整定义域验证，使门数由 117 降到 115。⟦en⟧Graph-tensor search does not require a region to be contiguous in the netlist text; it selects connected hypergraph regions that do not leave and later re-enter. The synthesizer first found and verified a nine-gate implementation of a four-input, three-output ten-gate region. After rebuilding the graph, it found and verified a seven-gate implementation of an eight-gate region. Both replacements passed boundary enumeration and full-domain verification, reducing the count from 117 to 115."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段四：26 门联合区域压到 25 门⟦en⟧Phase IV: a 26-gate joint region becomes 25"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在 115 门网络中，一个 7 输入、5 输出、26 门的联合区域由 eSLIM 关系综合得到 25 门实现。全部 128 个边界赋值一致，嵌回后完整定义域仍精确，得到 114 门电路。⟦en⟧Inside the 115-gate network, eSLIM relation synthesis found a 25-gate realization for a seven-input, five-output, 26-gate joint region. All 128 boundary assignments matched and the embedded full circuit remained exact, producing a 114-gate circuit."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧阶段五：27 门联合区域压到 26 门⟦en⟧Phase V: a 27-gate joint region becomes 26"
+        },
+        {
+          "kind": "text",
+          "text": "⟦zh⟧在 114 门网络中，一个 8 输入、6 输出、27 门的凸联合区域由 eSLIM 得到 26 门实现。替换在全部 256 个边界赋值上等价；嵌回后，完整电路通过 1,024 组输入与 400 条训练数据验证，得到当前 113 门结果。对 113 门网络继续进行语义重代入、三个大型联合区域搜索和多种全局 ABC 重写，均未得到 112 门电路。该负结果仅适用于本轮测试范围，不构成最优性证明。⟦en⟧In the 114-gate network, eSLIM produced a 26-gate realization of an eight-input, six-output, 27-gate convex joint region. The replacement was equivalent on all 256 boundary assignments. After embedding, the complete circuit passed all 1,024 inputs and 400 training rows, producing the current 113-gate result. Follow-up semantic resubstitution, three large joint-region searches, and several whole-network ABC rewrites did not produce a 112-gate circuit. This negative result applies only to the tested search scope and is not an optimality proof."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前 113 门电路的结构数据⟦en⟧Structural data for the current 113-gate circuit",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧逻辑深度⟦en⟧Logic depth", "27"],
+                ["⟦zh⟧门型组成⟦en⟧Gate composition", "42 AND · 29 NOR · 29 XNOR · 10 XOR · 2 NAND · 1 OR"],
+                ["⟦zh⟧完整定义域⟦en⟧Full domain", "1,024 / 1,024"],
+                ["⟦zh⟧训练数据⟦en⟧Training data", "400 / 400"],
+                ["⟦zh⟧结构审计⟦en⟧Structural audit", "⟦zh⟧0 个死门，0 个常量线，0 组重复或互补内部线⟦en⟧0 dead gates, 0 constant wires, 0 duplicate or complement-equivalent internal-wire groups"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧工具正确性问题及处理方式⟦en⟧Tool-correctness issue and mitigation",
+          "blocks": [
+            {
+              "kind": "text",
+              "text": "⟦zh⟧当前 ABC 版本导出非对称二输入门时会交换局部真值表的两个轴。第一次嵌入立刻被全局验证拒绝。修正扇入顺序后，先验证全部边界状态，再验证完整输入域。另一些 ABC 内部崩溃还会留下旧输出，因此每次运行必须使用唯一文件名，并同时检查退出码与文件时间。⟦en⟧The current ABC build swaps the two local truth-table axes when exporting asymmetric two-input gates. The first embedding was immediately rejected by global verification. After correcting fanin order, every replacement was checked on all boundary states and then on the full domain. Other ABC crashes can leave stale outputs, so every run must use a unique filename and check both exit status and file freshness."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧方法比较与适用范围⟦en⟧Method Comparison and Scope",
+      "note": "⟦zh⟧以下结论来自本问题、当前计分模型和已运行参数，不能直接外推到其他位宽、门库或优化目标。⟦en⟧The following conclusions are specific to this problem, cost model, and tested parameter settings; they should not be extrapolated directly to other bit widths, gate libraries, or objectives.",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧方法⟦en⟧Method",
+            "⟦zh⟧作用层次⟦en⟧Applied scale",
+            "⟦zh⟧本项目结论⟦en⟧Finding"
+          ],
+          "rows": [
+            ["⟦zh⟧算术结构设计⟦en⟧Arithmetic architecture", "global", "⟦zh⟧初始结构会影响后续门数；对 C，采用 Sergeev 构造得到 158 门，低于原 165 门结构。⟦en⟧The initial structure affects the resulting count; for C, Sergeev’s construction produced 158 gates, below the previous 165-gate structure."],
+            ["SAT don’t-care", "local", "⟦zh⟧在测试参数下，C 由 168 降到 166，D 由 123 降到 122。⟦en⟧Under the tested settings, C decreased from 168 to 166 and D from 123 to 122."],
+            ["⟦zh⟧多岛拓扑搜索⟦en⟧Multi-island topology search", "mesoscopic", "⟦zh⟧在 D 中产生了 117 门结果；相同门数的不同母体在后续流程中得到不同结果。⟦en⟧Produced the 117-gate D result; equal-count parents gave different outcomes under subsequent optimization."],
+            ["⟦zh⟧张量边界综合⟦en⟧Tensor-boundary synthesis", "joint region", "⟦zh⟧在已接受的联合区域替换中，C 减少 1 门，D 累计减少 4 门。⟦en⟧Across the accepted joint-region replacements, C saved one gate and D saved four gates in total."],
+            ["⟦zh⟧全域语义重代入⟦en⟧Full-domain semantic resubstitution", "global constraint", "⟦zh⟧发现普通局部真值表看不到的 158 到 156。⟦en⟧Found the 158-to-156 reduction invisible to ordinary local truth tables."],
+            ["⟦zh⟧完整穷举验证⟦en⟧Exhaustive verification", "acceptance", "⟦zh⟧作为每次替换、嵌入和正式更新的必要验收条件。⟦en⟧Used as a required acceptance condition for every replacement, embedding, and update of the retained circuit."]
+          ]
+        },
+        {
+          "kind": "list",
+          "title": "⟦zh⟧本研究采用的工作准则⟦en⟧Practices used in this study",
+          "items": [
+            "⟦zh⟧实验优先保留算术结构；完整真值表 PLA 在 C 上产生 6,176 门，因此未用于后续候选生成。⟦en⟧The experiments retained arithmetic structure where possible. A complete truth-table PLA produced 6,176 gates for C and was therefore not used for subsequent candidate generation.",
+            "⟦zh⟧小型切口的精确综合结果仅用于判断该切口内是否找到更小实现，不用于推断整个电路最优。⟦en⟧Exact-synthesis results for small cuts were used only to determine whether a smaller implementation was found within that cut, not to infer whole-circuit optimality.",
+            "⟦zh⟧搜索档案保留同门数和少量增门但结构不同的拓扑，以支持非单调搜索。⟦en⟧The search archive retained structurally distinct topologies with equal or slightly larger counts to support non-monotone search.",
+            "⟦zh⟧只有按比赛门库重新映射后的门数用于比较；AIG 节点数等内部目标不直接作为最终得分。⟦en⟧Only the count after remapping to the challenge gate library was used for comparison; internal objectives such as AIG node count were not treated as the final score.",
+            "⟦zh⟧所有外部工具输出均经过独立解析和完整定义域验证，以检测崩溃残留、导出错误和功能不等价。⟦en⟧All external-tool outputs were independently parsed and verified over the complete domain to detect stale crash outputs, export errors, and functional inequivalence."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧正确性与可复现性⟦en⟧Correctness and Reproducibility",
+      "note": "⟦zh⟧这里的“正确”不是训练集准确率，而是完整有限定义域上的零错误。⟦en⟧Here, “correct” means zero errors over the complete finite domain, not merely training accuracy.",
+      "blocks": [
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧任务⟦en⟧Task",
+            "⟦zh⟧完整定义域⟦en⟧Full domain",
+            "⟦zh⟧训练集⟦en⟧Training set",
+            "⟦zh⟧结构审计⟦en⟧Structural audit"
+          ],
+          "rows": [
+            ["A", "65,536 / 65,536", "2,000 / 2,000", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["B", "16,384 / 16,384", "1,500 / 1,500", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["C", "4,096 / 4,096", "1,200 / 1,200", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"],
+            ["D", "1,024 / 1,024", "400 / 400", "⟦zh⟧无死门、常量或重复补关系⟦en⟧No dead gates, constants or duplicate-complement groups"]
+          ]
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧可重复入口⟦en⟧Reproduction entry points",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧正式电路⟦en⟧Retained circuits", "mystery-A.txt · mystery-B.txt · mystery-C.txt · mystery-D.txt"],
+                ["⟦zh⟧公式验证⟦en⟧Formula verification", "validate_formulas.py"],
+                ["⟦zh⟧门数与结构审计⟦en⟧Scoring and structural audit", "score_circuits.py · analyze_netlists.py"],
+                ["⟦zh⟧158 门构造⟦en⟧158-gate construction", "build_sergeev_multiplier.py"],
+                ["⟦zh⟧158 到 156 重写⟦en⟧158-to-156 rewrite", "optimize_sergeev_multiplier.py"],
+                ["⟦zh⟧D 的联合区域提取与嵌入⟦en⟧D joint-region extraction and embedding", "extract_tensor_region.py · embed_tensor_region.py"],
+                ["⟦zh⟧D 的 114 门前序版本⟦en⟧D 114-gate predecessor", "abc-work/parallel/bd_tensor/mystery-D-114-candidate.txt"],
+                ["⟦zh⟧完整实验日志⟦en⟧Full experiment log", "OPTIMIZATION_LOG.md"]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "⟦zh⟧上界状态与后续工作⟦en⟧Upper-bound Status and Follow-up Work",
+      "note": "⟦zh⟧当前保留的 C 和 D 电路分别为 156 门和 113 门，均经过完整定义域验证。这些结果给出了当前搜索得到的构造性上界；现有实验没有建立全局最优性。⟦en⟧The retained C and D circuits contain 156 and 113 gates, respectively, and both pass full-domain verification. They are constructive upper bounds obtained by the current search; the experiments do not establish global optimality.",
+      "blocks": [
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧候选上界 156⟦en⟧Candidate upper bound: 156",
+          "why": "⟦zh⟧公开文献核查中未发现低于 Sergeev 158 的同模型六位乘法结果；公开挑战电路中检查到 168 和 167。未发表、未索引或私人结果仍可能更低。⟦en⟧The literature audit found no same-model six-bit multiplier below Sergeev’s 158; inspected public challenge circuits scored 168 and 167. Unpublished, unindexed or private results may still be lower."
+        },
+        {
+          "kind": "verdict",
+          "status": "warn",
+          "label": "⟦zh⟧D 的候选上界 113⟦en⟧Candidate upper bound for D: 113",
+          "why": "⟦zh⟧该电路通过全部 1,024 个输入。后续有限搜索没有得到 112 门，但尚未进行能够证明 113 门最优的完整下界分析。⟦en⟧The circuit passes all 1,024 inputs. Bounded follow-up searches did not produce 112 gates, but no complete lower-bound analysis has proved 113 optimal."
+        },
+        {
+          "kind": "list",
+          "title": "⟦zh⟧建议的后续分析⟦en⟧Proposed follow-up analyses",
+          "items": [
+            "⟦zh⟧对跨越部分积和相邻 MDFA 列的大型多输出区域显式编码可达状态约束。⟦en⟧Explicitly encode reachable-state constraints for large multi-output regions spanning partial products and adjacent MDFA columns.",
+            "⟦zh⟧从 158、156、165 及 29 个不同的 166 门语义指纹同时出发，继续非单调母体搜索。⟦en⟧Continue non-monotone parent search from the 158, 156 and 165 networks plus 29 distinct 166-gate semantic fingerprints.",
+            "⟦zh⟧把 C 的精确综合预算集中到八门以上、边界受约束的窗口；已完成的六门和七门普通窗口均只得到平局。⟦en⟧Concentrate C exact-synthesis budget on constrained windows of eight gates or more; completed ordinary six- and seven-gate windows only tied.",
+            "⟦zh⟧对 D 的 113、114、115 和 117 门保留母体分别重新采样大型凸区域，并显式利用实际可达的边界状态。⟦en⟧Resample large convex regions independently from the retained 113-, 114-, 115-, and 117-gate D parents, with explicit use of their reachable boundary states."
+          ]
+        },
+        {
+          "kind": "code",
+          "title": "⟦zh⟧公开来源⟦en⟧Public sources",
+          "text": "Sergeev, On the circuit complexity of multiplying integers\nhttps://arxiv.org/abs/1602.02362\n\nSmaller Circuits for Bit Addition, STACS 2026\nhttps://doi.org/10.4230/LIPIcs.STACS.2026.46\n\nQuantumBFS Challenge 71\nhttps://github.com/QuantumBFS/quantum.harness/issues/71\n\nSPbSAT Simplifier\nhttps://github.com/SPbSAT/simplifier"
+        }
+      ]
+    }
+  ]
+}
