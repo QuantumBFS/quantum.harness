@@ -109,6 +109,10 @@ end
             reference = load_fig5_reference(path)
             @test reference.frequencies == expected_frequencies
             @test reference.current == values
+            subset = [1.0, 2.5, 5.0]
+            @test FloquetSpinBoson._fig5_reference_value(
+                _ -> reference, :longitudinal, 2.5, subset) ≈
+                values[findfirst(==(2.5), expected_frequencies)]
             writedlm(path, values[1:(end - 1)])
             @test_throws ArgumentError load_fig5_reference(path)
         end
@@ -158,6 +162,12 @@ end
                 run_identity="reset-fixture-v1", parallel_mode=:none)
             @test length(results) == 4
             @test adapter_calls[] == 1
+            for drive in (:longitudinal, :transversal)
+                summary = readlines(joinpath(
+                    output_dir, "total_current_$(drive).csv"))
+                statuses = [split(line, ',')[2] for line in summary[2:end]]
+                @test statuses == fill("complete", length(scan_frequencies))
+            end
             for drive in (:longitudinal, :transversal)
                 first_manifest = read(joinpath(
                     output_dir, String(drive),

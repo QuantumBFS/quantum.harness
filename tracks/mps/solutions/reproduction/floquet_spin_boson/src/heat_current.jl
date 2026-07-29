@@ -675,12 +675,14 @@ function _fig5_reference_value(reference_provider, drive::Symbol,
     hasproperty(reference, :frequencies) && hasproperty(reference, :current) ||
         throw(ArgumentError(
             "Fig. 5 reference provider must return frequencies and current"))
-    reference.frequencies == frequencies ||
-        throw(ArgumentError("Fig. 5 reference grid does not match scan grid"))
-    length(reference.current) == length(frequencies) &&
+    length(reference.current) == length(reference.frequencies) &&
         all(isfinite, reference.current) ||
         throw(ArgumentError("Fig. 5 reference current shape is invalid"))
-    index = findfirst(==(omega_d), frequencies)
+    all(frequency -> !isnothing(findfirst(
+            ==(frequency), reference.frequencies)), frequencies) ||
+        throw(ArgumentError(
+            "Fig. 5 scan contains a point absent from the reference grid"))
+    index = findfirst(==(omega_d), reference.frequencies)
     isnothing(index) &&
         throw(ArgumentError("Fig. 5 point is absent from the reference grid"))
     return Float64(reference.current[index])
@@ -796,6 +798,7 @@ function _write_fig5_summary(output_dir::AbstractString,
                     match(r"\"status\"\s*:\s*\"([^\"]+)\"", contents),
                     match(r"$^", "")).captures
                 status_value = isempty(status) ? "invalid" : status[1]
+                status_value == "ok" && (status_value = "complete")
                 function number_field(name)
                     found = match(
                         Regex("\\\"" * name *

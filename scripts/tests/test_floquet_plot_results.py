@@ -213,6 +213,54 @@ def test_fig5_plot_rejects_noncomplete_scan_rows(tmp_path: Path) -> None:
     assert "non-complete Fig. 5 point" in completed.stderr
 
 
+def test_fig5_validation_subset_selects_exact_author_grid_points(
+    tmp_path: Path,
+) -> None:
+    """Catch requiring a sparse validation scan to have all 191 author points."""
+    ours = tmp_path / "ours"
+    reference = tmp_path / "reference"
+    frequencies = (1.0, 2.5, 5.0)
+    for drive, scale in (("longitudinal", 1.0), ("transversal", 0.5)):
+        _write_csv(
+            ours / f"total_current_{drive}.csv",
+            (
+                "omega_d",
+                "status",
+                "total_current",
+                "period_averaged_power",
+                "energy_balance_error",
+            ),
+            [(value, "complete", scale * value, scale * value, 0.0)
+             for value in frequencies],
+        )
+        reference.mkdir(parents=True, exist_ok=True)
+        author_grid = [0.5 + 0.05 * index for index in range(191)]
+        (reference / f"total_heat_current_{drive}.csv").write_text(
+            "\n".join(str(scale * value) for value in author_grid) + "\n",
+            encoding="utf-8",
+        )
+
+    output = tmp_path / "fig5.png"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "fig5",
+            "--result-root",
+            str(ours),
+            "--reference-root",
+            str(reference),
+            "--output",
+            str(output),
+        ],
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert output.stat().st_size > 1_000
+
+
 def test_fig2_plot_writes_two_frequency_checkpoint(tmp_path: Path) -> None:
     """Catch losing either slow- or fast-drive evidence from the Fig. 2 plot."""
     result = tmp_path / "fig2"

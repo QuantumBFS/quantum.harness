@@ -195,13 +195,20 @@ def plot_fig5(args: argparse.Namespace) -> None:
         reference = np.atleast_1d(
             np.loadtxt(_single_reference(args.reference_root, drive))
         ).astype(float)
-        if len(reference) != len(table):
-            raise ValueError(
-                f"Fig. 5 reference length mismatch for {drive}: "
-                f"{len(reference)} != {len(table)}"
+        author_omega = 0.5 + 0.05 * np.arange(len(reference))
+        selected_reference = []
+        for frequency in table["omega_d"].astype(float):
+            matches = np.flatnonzero(
+                np.isclose(author_omega, frequency, rtol=0.0, atol=1e-12)
             )
+            if len(matches) != 1:
+                raise ValueError(
+                    f"Fig. 5 point absent from author grid: "
+                    f"{drive} ωd={frequency:g}"
+                )
+            selected_reference.append(reference[matches[0]])
         axis.plot(
-            table["omega_d"], reference, color=color, linestyle="--",
+            table["omega_d"], selected_reference, color=color, linestyle="--",
             linewidth=1.1, alpha=0.75
         )
         axis.plot(
