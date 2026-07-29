@@ -13,7 +13,8 @@
 ## Authority and supersession
 
 - Parent plan: `2026-07-29-challenge-15-route-a-logpsi-completion.md`.
-- Reviewed A02 terminal and A03 parent: `7d983e81f94ca45eeef66bcc51665d9cf2291cea`.
+- Reviewed A02 closeout terminal: `7d983e81f94ca45eeef66bcc51665d9cf2291cea`.
+- A03 branches from the clean local HEAD that contains this amendment; record that exact execution-base SHA in the A03 journal at worktree creation.  The reviewed A02 closeout terminal above must remain an ancestor.
 - Comparison SHA: `5aa9219f4cd24bc2274f0514b621c2f9b47cead7`.
 - Protocol SHA-256: `2435cd2e72ffae88117ee194f45b15451c8653dafa755b732005b6a199251d38`.
 - Fixed production seeds: `848`, `1848`, `2848`; N=8 smoke seed: `4848`.
@@ -197,8 +198,10 @@ the verified interpreter path.
 
 Use branch `challenge/qmc-chiral-graviton-scalable-v1-s02a-a03-logpsi` and path
 `D:/Playground/worktrees/quantum.harness/challenge-qmc-cg-s02a-a03`, with
-`git -c core.longpaths=true worktree add`.  Record parent
-`7d983e81f94ca45eeef66bcc51665d9cf2291cea`, clean status, and protocol hash.
+`git -c core.longpaths=true worktree add`.  Branch from the clean HEAD that
+contains this amendment; record that exact parent, verify reviewed A02 closeout
+`7d983e81f94ca45eeef66bcc51665d9cf2291cea` is an ancestor, and record clean
+status plus the protocol hash.
 
 - [ ] **Step 2: Run the clean A03 baseline through Slurm**
 
