@@ -74,6 +74,27 @@ include(joinpath(
     "FullSpinIsotypicPrimalGapJuMP.jl",
 ))
 using .FullSpinIsotypicPrimalGapJuMP
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "FullStateSymmetryReduction.jl",
+))
+using .FullStateSymmetryReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpatialReduction.jl",
+))
+using .ShastryFullStateSpatialReduction
+include(joinpath(
+    @__DIR__,
+    "..",
+    "src",
+    "ShastryFullStateSpatialPrimalGapJuMP.jl",
+))
+using .ShastryFullStateSpatialPrimalGapJuMP
 using JuMP
 
 @testset "exact M/K/V4 reduction truth" begin
@@ -190,6 +211,151 @@ using JuMP
         for constraint in real_jump_model.psd_constraints
     )
     @test real_jump_model.assembly_sha256 == real_reduced.assembly_sha256
+
+    general_v4 = assemble_full_state_v4_reduced_primal(assembly)
+    general_v4_truth = full_state_v4_reduction_truth(assembly)
+    general_v4_report = full_state_v4_reduced_assembly_report(general_v4)
+    @test general_v4_truth.exact
+    @test general_v4_truth.original_positive_dimension == 703
+    @test general_v4_truth.centered_dimension == 351
+    @test general_v4_truth.scalar_dimension == 352
+    @test general_v4.moments == reduced.moments
+    @test general_v4.equalities == reduced.equalities
+    @test general_v4_report.positive_block_dimensions ==
+          report.positive_block_dimensions
+    @test general_v4_report.gap_block_dimensions ==
+          report.gap_block_dimensions
+    @test length(general_v4.positive_blocks) ==
+          length(reduced.positive_blocks)
+    @test length(general_v4.gap_blocks) == length(reduced.gap_blocks)
+    for (general_block, legacy_block) in zip(
+        [general_v4.positive_blocks; general_v4.gap_blocks],
+        [reduced.positive_blocks; reduced.gap_blocks],
+    )
+        @test general_block.role == legacy_block.role
+        @test general_block.family == legacy_block.family
+        @test general_block.character == legacy_block.character
+        @test length(general_block.rows) == length(legacy_block.rows)
+        for index in eachindex(general_block.rows)
+            general_row = general_block.rows[index]
+            legacy_row = legacy_block.rows[index]
+            expected_source = if legacy_row.family == :scalar
+                scalar_row(legacy_row.word)
+            else
+                bare_row(legacy_row.word)
+            end
+            @test general_row.source == expected_source
+        end
+        for row in eachindex(general_block.rows)
+            for column in row:length(general_block.rows)
+                @test full_state_v4_block_entry(
+                    general_v4,
+                    general_block,
+                    general_block.rows[row],
+                    general_block.rows[column],
+                ) == reduced_block_entry(
+                    reduced,
+                    legacy_block,
+                    legacy_block.rows[row],
+                    legacy_block.rows[column],
+                )
+            end
+        end
+    end
+
+    general_real = assemble_full_state_real_reduced_primal(general_v4)
+    general_real_truth =
+        full_state_conjugation_reduction_truth(general_v4)
+    general_real_report =
+        full_state_real_reduced_assembly_report(general_real)
+    @test general_real_truth.exact
+    @test general_real_truth.coefficient_count == 31_810
+    @test general_real.moments == real_reduced.moments
+    @test general_real.equalities == real_reduced.equalities
+    @test general_real_report.positive_block_dimensions ==
+          real_report.positive_block_dimensions
+    @test general_real_report.gap_block_dimensions ==
+          real_report.gap_block_dimensions
+    for (general_block, legacy_block) in zip(
+        [general_real.positive_blocks; general_real.gap_blocks],
+        [real_reduced.source.positive_blocks; real_reduced.source.gap_blocks],
+    )
+        for row in eachindex(general_block.rows)
+            for column in row:length(general_block.rows)
+                @test full_state_real_block_entry(
+                    general_real,
+                    general_block,
+                    general_block.rows[row],
+                    general_block.rows[column],
+                ) == conjugation_real_block_entry(
+                    real_reduced,
+                    legacy_block,
+                    legacy_block.rows[row],
+                    legacy_block.rows[column],
+                )
+            end
+        end
+    end
+
+    shastry_spatial_truth =
+        shastry_spatial_reduction_truth(general_real)
+    @test shastry_spatial_truth.exact
+    @test shastry_spatial_truth.hamiltonian_invariant
+    @test shastry_spatial_truth.equality_space_invariant
+    @test shastry_spatial_truth.row_actions_close
+    @test shastry_spatial_truth.coefficient_covariant
+    @test shastry_spatial_truth.coefficient_count == 31_810
+    @test shastry_spatial_truth.split_cross_zero
+    @test shastry_spatial_truth.split_cross_count > 0
+    general_spatial =
+        assemble_shastry_full_state_spatial_reduced_primal(
+            general_real;
+            verify_truth=false,
+        )
+    general_spatial_repeated =
+        assemble_shastry_full_state_spatial_reduced_primal(
+            general_real;
+            verify_truth=false,
+        )
+    general_spatial_report =
+        shastry_full_state_spatial_reduced_assembly_report(
+            general_spatial,
+        )
+    @test general_spatial_report.source_moments ==
+          length(general_real.moments)
+    @test general_spatial_report.spatial_moments <
+          general_spatial_report.source_moments
+    @test general_spatial_report.psd_triangle_entries <
+          general_real_report.real_triangle_entries
+    @test general_spatial.coefficient_map_sha256 ==
+          general_spatial_repeated.coefficient_map_sha256
+    @test general_spatial.assembly_sha256 ==
+          general_spatial_repeated.assembly_sha256
+    general_spatial_jump =
+        build_shastry_full_state_spatial_jump_primal(
+            general_spatial,
+        )
+    @test JuMP.num_variables(general_spatial_jump.model) ==
+          general_spatial_report.spatial_moments
+    @test length(general_spatial_jump.equality_constraints) ==
+          general_spatial_report.equality_count
+    @test length(general_spatial_jump.psd_constraints) ==
+          length(general_spatial.positive_blocks) +
+          length(general_spatial.gap_blocks)
+    @test sort(collect(
+        JuMP.constraint_object(constraint).set.side_dimension
+        for constraint in general_spatial_jump.psd_constraints
+    )) == sort([
+        general_spatial_report.positive_block_dimensions;
+        general_spatial_report.gap_block_dimensions
+    ])
+    @test all(
+        JuMP.constraint_object(constraint).set isa
+        JuMP.MOI.PositiveSemidefiniteConeTriangle
+        for constraint in general_spatial_jump.psd_constraints
+    )
+    @test general_spatial_jump.assembly_sha256 ==
+          general_spatial.assembly_sha256
 
     spin_axis_truth = spin_axis_reduction_truth(real_reduced)
     @test spin_axis_truth.exact
