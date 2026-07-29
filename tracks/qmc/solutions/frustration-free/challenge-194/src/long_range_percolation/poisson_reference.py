@@ -7,7 +7,7 @@ import json
 import math
 import re
 import sys
-from typing import Literal, Protocol
+from typing import Literal, Protocol, Sequence
 
 import numpy as np
 import numpy.typing as npt
@@ -36,6 +36,10 @@ _MASK32 = (1 << 32) - 1
 _PHASES = frozenset(("validation", "benchmark", "pilot", "confirmatory"))
 _HEX256 = re.compile(r"[0-9a-f]{64}")
 _REQUEST_DOMAIN = b"challenge-194-trajectory-request-v1\0"
+_PREFIX_REL_TOL = 8.0 * np.finfo(np.float64).eps
+_MINIMUM_OPEN_HAZARD = -math.log(
+    u32_to_open(np.uint32(_MASK32))
+)
 
 
 def _frozen_copy(array: np.ndarray, dtype: np.dtype) -> np.ndarray:
@@ -169,6 +173,9 @@ class _Streams(Protocol):
     terminal_counters: U32
     draw_counts: U64
 
+    @property
+    def minimum_exponential_hazard(self) -> float: ...
+
     def uniform(self, stream_id: int) -> float: ...
 
     def bounded(self, stream_id: int, bound: int) -> int: ...
@@ -269,6 +276,52 @@ def _validate_kernel(request: TrajectoryRequest, kernel: F64) -> None:
         raise ValueError("kernel digest does not match kernel_sha256")
 
 
+def _compensated_prefix(
+    weights: Sequence[float],
+) -> tuple[tuple[float, ...], float, int]:
+    running = 0.0
+    correction = 0.0
+    previous = 0.0
+    cumulative: list[float] = []
+    operations = 0
+    for value in weights:
+        weight = float(value)
+        if not math.isfinite(weight) or weight <= 0.0:
+            raise ValueError("class weights must be finite and positive")
+        combined = running + weight
+        if abs(running) >= abs(weight):
+            correction += (running - combined) + weight
+        else:
+            correction += (weight - combined) + running
+        running = combined
+        prefix = running + correction
+        operations += 1
+        if not math.isfinite(prefix) or prefix < previous:
+            raise ValueError(
+                "compensated class prefix must be finite and monotone"
+            )
+        cumulative.append(prefix)
+        previous = prefix
+    if not cumulative:
+        raise ValueError("at least one class weight is required")
+
+    exact_total = math.fsum(float(value) for value in weights)
+    approximate_total = cumulative[-1]
+    tolerance = _PREFIX_REL_TOL * abs(exact_total)
+    if (
+        not math.isfinite(exact_total)
+        or exact_total <= 0.0
+        or abs(approximate_total - exact_total) > tolerance
+    ):
+        raise ValueError(
+            "compensated class total disagrees with the reference sum"
+        )
+    if len(cumulative) > 1 and exact_total < cumulative[-2]:
+        raise ValueError("reference class total violates prefix monotonicity")
+    cumulative[-1] = exact_total
+    return tuple(cumulative), exact_total, operations
+
+
 def _class_data(length: int, kernel: F64) -> tuple[
     tuple[int, ...], tuple[int, ...], tuple[float, ...], float
 ]:
@@ -280,22 +333,35 @@ def _class_data(length: int, kernel: F64) -> tuple[
         float(multiplicity) * float(kernel[index])
         for index, multiplicity in enumerate(multiplicities)
     )
-    cumulative_list: list[float] = []
-    for stop in range(1, len(weights) + 1):
-        cumulative_list.append(math.fsum(weights[:stop]))
-    total_rate = math.fsum(weights)
-    if (
-        not math.isfinite(total_rate)
-        or total_rate <= 0.0
-        or cumulative_list[-1] != total_rate
-    ):
-        raise ValueError("total event rate must be finite and positive")
+    cumulative, total_rate, _ = _compensated_prefix(weights)
     starts = [0]
     for multiplicity in multiplicities:
         starts.append(starts[-1] + multiplicity)
     if starts[-1] >= _UINT64_LIMIT:
         raise ValueError("the canonical edge count must fit uint64")
-    return multiplicities, tuple(starts), tuple(cumulative_list), total_rate
+    return multiplicities, tuple(starts), cumulative, total_rate
+
+
+def _validate_event_time_resolution(
+    kappa_max: float,
+    total_rate: float,
+    minimum_hazard: float,
+) -> None:
+    if not math.isfinite(minimum_hazard) or minimum_hazard <= 0.0:
+        raise ValueError("minimum exponential hazard must be finite and positive")
+    terminal_hazard = kappa_max * total_rate
+    if not math.isfinite(terminal_hazard):
+        raise ValueError("largest coupling times total rate must be finite")
+    if terminal_hazard < minimum_hazard:
+        return
+    minimum_delta = minimum_hazard / total_rate
+    if (
+        minimum_delta == 0.0
+        or minimum_delta <= math.ulp(kappa_max)
+    ):
+        raise ValueError(
+            "total rate is too large to preserve float64 event ordering"
+        )
 
 
 def _request_digest(request: TrajectoryRequest) -> str:
@@ -390,6 +456,10 @@ class _ReferenceStreams:
         if stream_id != _OFFSET_STREAM:
             raise ValueError("bounded draws are restricted to the offset stream")
         return self._streams[stream_id].bounded(bound)
+
+    @property
+    def minimum_exponential_hazard(self) -> float:
+        return _MINIMUM_OPEN_HAZARD
 
     @property
     def terminal_counters(self) -> U32:
@@ -493,8 +563,16 @@ def _run_poisson_with_streams(
         request.length, kernel
     )
     kappa_max = float(request.kappas[-1])
-    if not math.isfinite(kappa_max * total_rate):
-        raise ValueError("largest coupling times total rate must be finite")
+    minimum_hazard = getattr(
+        streams,
+        "minimum_exponential_hazard",
+        _MINIMUM_OPEN_HAZARD,
+    )
+    _validate_event_time_resolution(
+        kappa_max,
+        total_rate,
+        float(minimum_hazard),
+    )
 
     rows: list[tuple[float, ...]] = []
     snapshots: list[frozenset[int]] = []
@@ -518,7 +596,12 @@ def _run_poisson_with_streams(
             exponential_uniform = streams.uniform(_EXPONENTIAL_STREAM)
             if not 0.0 < exponential_uniform < 1.0:
                 raise ValueError("exponential stream must produce open uniforms")
-            delta = -math.log(exponential_uniform) / total_rate
+            hazard = -math.log(exponential_uniform)
+            remaining_kappa = kappa_max - current_kappa
+            terminal_hazard = remaining_kappa * total_rate
+            if hazard >= terminal_hazard:
+                break
+            delta = hazard / total_rate
             next_kappa = current_kappa + delta
             if (
                 not math.isfinite(delta)
@@ -535,9 +618,6 @@ def _run_poisson_with_streams(
                 rows.append(_checkpoint(request.length, open_edge_ids, starts))
                 snapshots.append(frozenset(open_edge_ids))
                 checkpoint_index += 1
-
-            if next_kappa > kappa_max:
-                break
 
             column_uniform = streams.uniform(_CLASS_COLUMN_STREAM)
             class_uniform = streams.uniform(_CLASS_THRESHOLD_STREAM)
