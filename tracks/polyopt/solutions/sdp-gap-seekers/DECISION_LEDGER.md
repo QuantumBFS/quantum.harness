@@ -1419,3 +1419,21 @@ exact SO(3) rank-four projection, native bar dual, required coefficient hash
 audit tolerance `1e-9`. It is the sole active decision solve. Do not duplicate
 or update its checkout; next evidence gates are exact hash match, at least one
 interior-point iteration, and independent replay before interpretation.
+
+The algorithmic fallback now has a measured row-space target. SCNet structural
+job `118189732`, source commit `b61e331`, rebuilt the same unrestricted
+`L=2,d=2,g=4/5,gamma=2` setup without coefficients or an optimizer and passed
+the exact signed-involution gate in 1:24. Within each nontrivial V4 character,
+the character stabilizer gives `l=1` minus and `l=2` plus dimensions
+`490+485`, `460+440`, `315+335`, and `310+290`; in every case the `l=2`
+dimension equals the existing S3-standard cone. All 6/3-side gap blocks have
+zero `l=2` multiplicity. This does not reuse the disproved identification of
+different V4 characters.
+
+No PSD constraint is removed by the structural result alone. Exact
+stabilizer cross-zero would reduce packed rows from 4,446,492 to 2,540,067
+(42.87%) and maximum side from 975 to 490. The next changed action is a
+coefficient truth job: prove every within-character `l=1/l=2` cross entry is
+zero, with all characters retained. Only after that passes may the separately
+SO(3)-projected `l=2` congruence be tested; neither claim may be inferred from
+matching dimensions.

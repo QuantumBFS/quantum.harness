@@ -261,5 +261,12 @@ Updated: 2026-07-29T20:47:30Z
   exact hash `fac50bcc…bed9a8` and audit tolerance `1e-9`. Do not modify the
   shared checkout or submit a duplicate; monitor construction, factorization,
   and replay any candidate independently before making a physics claim.
+- Cone fallback commit `b61e331` passed its first exact L=2 gate as SCNet job
+  `118189732` (1:24). Per nontrivial V4 character, the 975/900/650/600 blocks
+  split under their own stabilizer into 490+485, 460+440, 315+335, and
+  310+290 dimensions; gap blocks are pure `l=1`. This is structural only.
+  Exact coefficient cross-zero is the next gate; passing it would reduce the
+  packed inventory to 2,540,067 and maximum side to 490 without deleting or
+  identifying different V4-character cones.
 
 No user input or new credential is currently required.

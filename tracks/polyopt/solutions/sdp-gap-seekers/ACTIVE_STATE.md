@@ -816,3 +816,12 @@ Updated: 2026-07-29 UTC.
   `fac50bcc…bed9a8`, and `1e-9` audit. This is the only active decision solve;
   do not alter its checkout or submit a duplicate. Monitor through the hash
   gate, first interior-point iteration, and fresh replay of any candidate.
+- Independent cone-route structural job `118189732` completed in 1:24 from
+  commit `b61e331`. The exact stabilizer involution splits every nontrivial
+  positive block as `975=490+485`, `900=460+440`, `650=315+335`, or
+  `600=310+290`; the second summand exactly matches the corresponding
+  S3-standard `l=2` multiplicity, while every 6/3-side gap block is purely
+  `l=1`. No cone has yet been deleted. If exact coefficient cross-zero passes,
+  the stabilizer split alone predicts 2,540,067 packed rows (down 42.87%) and
+  maximum side 490. Next gate: replay all within-character `l=1/l=2` cross
+  entries exactly, then test SO(3)-projected `l=2` congruence separately.
