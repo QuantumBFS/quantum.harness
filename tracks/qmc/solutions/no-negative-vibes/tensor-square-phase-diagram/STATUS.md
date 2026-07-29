@@ -185,3 +185,27 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
   no numerical test or chain.
 - Next action: run the frozen m=3 ED cross-validation from a clean commit. Only
   if it passes may the single censored `m=8,beta=8` A/B point run.
+
+## Stage 4 round 5 — temporal-block sampler early stop (2026-07-29)
+
+- Clean source `852a83a` was pushed before compute and re-verified with
+  `66 passed` on WSL. The m=3 gate then ran eight independent chains with
+  BLAS single-threaded; the Windows control host performed no numerical work.
+- Numerical audits passed in both arms: direct sign `+1`, maximum log-weight
+  error `5.04e-11`, healthy total acceptance, and temporal-block acceptance
+  `0.909-0.918`.
+- The local control agrees with ED, but the temporal-block energy is
+  `-5.75972(159)` versus exact `-5.69171314`, a `4.285 sigma` deviation beyond
+  the frozen `3 sigma` gate. Sampler-to-sampler energy differs by
+  `2.861 sigma`, still inside its separate `3 sigma` consistency gate.
+- Pre-registered decision: **STOP temporal-block updater**. The programmatic
+  release gate therefore prevented the `m=8,beta=8` A/B run. No scale, seed,
+  budget, or threshold was changed.
+- Descriptively, median worst tau fell `21.1%`, short of the later `25%`
+  advance threshold, while CPU seconds per effective sample rose `18.2%`.
+- Artifacts:
+  `results/stage4_20260729/autocorrelation_mitigation/m3_ed/`; scientific note:
+  `notes/autocorrelation_mitigation_results.md`.
+- Next action: freeze and validate a parameter-free full-channel reflection
+  proposal as a distinct sampler candidate. It must pass the same ordered
+  m=3 ED gate before any Stage 4 point is released.
