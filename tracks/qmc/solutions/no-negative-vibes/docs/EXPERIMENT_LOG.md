@@ -1487,3 +1487,62 @@ and
 `ff4b3b90e33e2977e472778826aa92cecedcd413d1716856d5e593febeb4f909`.
 Further simplicial restarts are stopped; the active continuation is the
 trace-compatible redundant-cone search with exact replay.
+
+### Trace-compatible redundant-cone continuation
+
+Commit `0eac2ad` generalized the exact-gated search to arbitrary
+template/seed/grade targets.  Every promotable result must satisfy exact
+`AR=RP`, `P>=0`, `RC=I`, and `CR>=0`; the focused regression set reported
+8 passing tests.
+
+Nine 64-start searches (seeds 117/132/147, grades 1/2/3, up to 40 rays)
+then completed on WSL.  No certificate was found.  More decisively,
+seed 132 and seed 147 both hit an exact grade-3 negative-trace early stop
+at diagnostic word power 6:
+
+- seed 132:
+  `-337058501890662715329123629102795636 /
+  114934804865416265625`;
+- seed 147:
+  `-450129988188568437799315011797002270580670464 /
+  1068217223883341580726260009765625`.
+
+All other searches stopped on a repeated worst image at 7--20 rays.
+Consequently, a theorem that certifies these candidates grade by grade is
+impossible for seeds 132 and 147, while additional restarts for seed 117
+are not justified by the present margins.  The full result archive has
+SHA-256
+`f6158d8efb2a0a26d3102ac3871f11ce082ae6a306eec5e15003c98b63bdbab9`;
+its internal `SHA256SUMS` records every JSON.  The oddcycle sector-cone
+route is stopped and compute is redirected to the seed-61 coupled spectral
+inequality.
+
+## 2026-07-29 — Seed-61 exact lower spectral-band certificate
+
+Commit `c915a68` replaces long-word eigensolver evidence for half of the
+remaining determinant sign with a finite exact certificate.  In the fixed
+signed gauge, strict positivity of the first and third compounds splits the
+spectrum into
+
+`[lambda_1] [lambda_2,lambda_3] [lambda_4,lambda_5]`.
+
+Exact enumeration of all `2^10` blocks with fixed rational weighted
+norm/conorm vectors gives
+
+`U/L = 0.699644632507996... < 1`.
+
+Ten exact residue inequalities then prove that every word of length
+`n>=24` has `|lambda_4|<1`.  Therefore, if the lower pair is real and
+negative, both roots lie in `(-1,0)` and their factor
+`(1+lambda_4)(1+lambda_5)` is positive.  Two focused new tests plus the
+adjacent survivor/Hodge checks reported 6 passes.
+
+The remaining arbitrary-length theorem is now only the upper quadratic
+
+`h_+ = (1+lambda_2)(1+lambda_3) > 0`.
+
+A 200,000-word numerical reconnaissance through length 40 found no
+straddle of `-1`; the smallest observed upper factor was about
+`25.8985028294`, at a cyclic representative such as `11011111111`, with
+roots about `-9.97367` and `-3.88605`.  This margin guides the next exact
+block certificate but is not itself used as proof.
