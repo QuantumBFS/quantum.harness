@@ -74,8 +74,9 @@ def final_certificate_summary() -> dict[str, object]:
         "arbitrary_word_determinant_positive": bool(
             theorem["exact_arbitrary_word_determinant_positive"]
         ),
-        "no_common_strict_metric": (
-            novelty["status"] == "exact-no-common-metric-certificate"
+        "no_common_strict_quadratic_metric": (
+            novelty["status"]
+            == "exact-no-common-quadratic-metric-certificate"
         ),
         "hermitian_interacting_positive_field_model": (
             physical["status"] == "exact-hermitian-interacting-transfer"

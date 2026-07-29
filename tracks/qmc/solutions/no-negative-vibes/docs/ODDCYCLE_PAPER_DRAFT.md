@@ -2,15 +2,14 @@
 
 ## Abstract
 
-We introduce a finite-state extension of the split-contraction criterion
-for sign-problem-free auxiliary-field quantum Monte Carlo.  Instead of
+We derive a determinant-QMC criterion from path-complete
+\(1\)-dominance and strict path positivity.  Instead of
 requiring every one-particle propagator to contract one common indefinite
 metric, we assign a Lorentz metric to each state of a labelled graph.  A
 strict matrix inequality on every edge makes the metrics telescope around
 every closed word.  A second, finite time-orientation condition fixes the
-otherwise undetermined sign of the fermion determinant.  For odd
-one-particle dimension and positive letter determinants, the resulting
-criterion proves
+otherwise undetermined sign of the fermion determinant.  With positive
+letter determinants, the resulting criterion proves
 
 \[
 \det(I+A_{s_n}\cdots A_{s_1})>0
@@ -29,8 +28,10 @@ alphabet
 All metric inertias, 16 strict edge inequalities, 16 time-orientation
 tests, and letter determinants are verified by integer arithmetic.  A
 separate exact Gordan--Stiemke certificate proves that the four letters do
-not admit a common strict split-contraction metric, so the finite-state
-certificate is strictly stronger for this example.  Finally, the same
+not admit a common strict quadratic split-contraction metric of the tested
+form.  Thus the four-state quadratic certificate succeeds where its
+one-state quadratic counterpart cannot; this does not exclude a common
+nonquadratic cone or a different sign-free mechanism.  Finally, the same
 alphabet gives a positive five-valued auxiliary-field decomposition of a
 real Hermitian, number-conserving, interacting five-mode Hamiltonian.  The
 result is a grand-canonical cluster construction; locality and
@@ -80,7 +81,7 @@ w(\mathcal C)
 Thus strict positivity of the determinant for every word removes the
 configuration sign problem in the grand-canonical trace.
 
-## 2. Finite-state Lorentz path metrics
+## 2. A determinant corollary of Lorentz path metrics
 
 Consider invertible real letters
 \(\mathcal A=\{A_0,\ldots,A_{m-1}\}\subset GL(d,\mathbb R)\).
@@ -160,12 +161,18 @@ u_i^{\mathsf T}R_iA_j^{-1}u_j>0
 Because \(\det A_j>0\), the inverse may be replaced by
 \(\operatorname{adj}(A_j)\) when checking signs exactly.
 
-### 2.2. Main determinant theorem
+### 2.2. Determinant theorem
 
 **Theorem 1 (coherently oriented Lorentz path metric).**  
 Suppose the real invertible letters \(A_j\) admit
-symmetric matrices \(R_i\) and vectors \(u_i\) satisfying (3)--(7) for
-all \(i,j\).  If \(\det A_j>0\) for every letter, then every nonempty word
+symmetric matrices \(R_i\) and vectors \(u_i\) satisfying (3), (5)--(7),
+and, for the gaps defined in (4),
+
+\[
+G_{ij}\succ0\qquad(0\le i,j<m).
+\]
+
+If \(\det A_j>0\) for every letter, then every nonempty word
 
 \[
 W=A_{s_n}\cdots A_{s_1}
@@ -260,8 +267,11 @@ The right-hand side is positive because
 
 For one state, Theorem 1 reduces to the standard common-metric
 split-contraction construction with an explicit component condition.
-For several states it is a multiple-Lyapunov or path-complete extension,
-but with indefinite inertia and a coherent Lorentz orientation.
+For several states, the LMIs are a special case of known path-complete
+\(p\)-dominance, while the component choice is strict path-complete
+positivity.  The contribution claimed here is the fermion-determinant
+consequence and its exact QMC realization, not the switched-system
+architecture.
 
 ## 3. An exact five-mode certificate
 
@@ -344,11 +354,11 @@ length 14, including \(268\,435\,456\) words at the final depth.  These
 searches are not assumptions of Corollary 2; they document how the exact
 candidate was selected and provide independent regression tests.
 
-## 4. Strict separation from a common metric
+## 4. Strict separation from a common quadratic metric
 
-The four-state result would be structurally uninteresting if the same
-alphabet admitted one common strict metric.  This possibility is excluded
-exactly.
+The four-state certificate is strictly more expressive than a one-state
+quadratic certificate for this alphabet.  A common strict quadratic metric
+is excluded exactly.
 
 Suppose one symmetric \(R\) satisfied both
 
@@ -378,13 +388,14 @@ the same sum into the inner product of \(R\) with (20), which is zero.
 This contradiction proves:
 
 **Proposition 3.**  
-The alphabet (16) has no real symmetric common metric satisfying all four
-strict inequalities (19).
+The alphabet (16) has no real symmetric common quadratic metric satisfying
+all four strict inequalities (19).
 
 The exact certificate uses only rational arithmetic and Sylvester
-positivity tests.  It establishes strict separation from the tested
-common split-contraction mechanism, not a classification of all possible
-sign-free mechanisms.
+positivity tests.  It establishes strict separation from the tested common
+quadratic split-contraction mechanism.  It does not exclude a common
+nonquadratic cone, a 10-Majorana contraction certificate, or any other
+sign-free formulation.
 
 ## 5. Hermitian interacting auxiliary-field model
 
@@ -432,7 +443,9 @@ and coefficients
 \]
 
 Deleting identity letters from a history leaves a word in (16), so
-Corollary 2 makes every configuration weight in (2) strictly positive.
+Corollary 2 makes every configuration containing a nonidentity field
+strictly positive.  The all-identity history is the empty word and has
+weight \(\det(2I_5)=2^5>0\).
 
 The transfer is not a scalar Gaussian exterior lift.  If it were, its
 vacuum, one-particle, and two-particle blocks would obey
@@ -458,7 +471,7 @@ python -m pytest -q \
   tests/test_oddcycle_pair_physical.py
 ```
 
-The tests check the theorem certificate, the common-metric dual
+The tests check the theorem certificate, the common-quadratic-metric dual
 separation, and the physical transfer, respectively.  The semidefinite
 programs are discovery tools only; `cvxpy` is not needed to replay the
 frozen rational results.
@@ -472,32 +485,79 @@ summary containing the commit hash and exact certificate digests.
 
 The ordinary one-state split-orthogonal and contraction-semigroup
 criteria are established sign-free mechanisms.  Multiple quadratic
-Lyapunov functions and path-complete graph certificates are also standard
-in switched-system stability.  We therefore do not claim the generic
-idea of assigning several metrics to a graph.
+Lyapunov functions, path-complete positivity, and path-complete
+\(p\)-dominance are established switched-system tools.  With forward
+letters and \(P_i=R_i\), our 16 LMIs are path-complete \(p=4\) dominance
+inequalities at rate one; with inverse letters and \(P_i=-R_i\), they are
+the equivalent \(p=1\) formulation.  The dominated spectral splitting and
+path-dependent Perron direction are therefore known control-theory
+conclusions.
+
+The all-to-all edge set also produces one common nonquadratic cone for the
+inverse alphabet.  If \(K_i=\overline{\mathcal C_i^+}\), then
+
+\[
+K=\bigcap_iK_i
+\]
+
+is proper and solid.  Indeed, for any fixed \(j\), (12)--(13) put the open
+set \(A_j^{-1}(\mathcal C_j^+)\) inside every
+\(\mathcal C_i^+\), so the intersection has nonempty interior.  It is
+closed, convex, and pointed because each \(K_i\) is.  For
+\(x\in K\setminus\{0\}\), (12) gives
+
+\[
+(A_j^{-1}x)^{\mathsf T}R_i(A_j^{-1}x)>x^{\mathsf T}R_jx\ge0
+\quad\text{for every }i.
+\]
+
+Continuity from the future sheet fixes the component, and hence
+
+\[
+A_j^{-1}(K\setminus\{0\})\subset\operatorname{int}K.
+\]
+
+Thus the orientation part is a common cone-preserving semigroup, even
+though no common *quadratic* Lorentz metric exists.  We do not claim the
+graph, multiple quadratic cones, or common Perron cone as new.
 
 The contribution here is the combination of:
 
-1. indefinite Lorentz metrics with one positive direction;
-2. a coherent, finitely checkable time orientation;
-3. an arbitrary-word fermion-determinant sign theorem;
-4. an exact alphabet for which the construction works but a common metric
-   is impossible;
-5. a positive-field interacting fermion realization.
+1. an explicit determinant-sign corollary for the fermionic
+   grand-canonical trace;
+2. an exact alphabet for which a four-state quadratic certificate works
+   but a common quadratic metric is impossible;
+3. a solver-independent rational certificate;
+4. a positive-field interacting fermion realization.
 
 The following limitations are explicit.
 
 - The result controls the full Fock trace, not each fixed-particle sector.
 - The Hamiltonian is a five-mode cluster and is generally nonlocal.
-- Proposition 3 excludes the common real symmetric metric inequalities,
-  not every Majorana reflection-positive, fermion-bag, loop, or hidden
-  complex-basis reformulation.
+- Proposition 3 excludes the common real symmetric quadratic metric
+  inequalities, not the common nonquadratic cone above and not every
+  Majorana reflection-positive, fermion-bag, loop, or hidden complex-basis
+  reformulation.
 - The current result is a sufficient class, not a classification of
   sign-problem-free QMC.
 
 The main remaining publication task is a focused equivalence audit against
-the full Majorana/contraction literature and the control-theory literature
-on indefinite multiple-Lyapunov functions.
+the full 10-Majorana contraction literature.  A five-mode
+number-conserving system has a 10-Majorana lift, and odd one-particle
+dimension does not exclude Majorana reflection positivity after a fixed
+complex orthogonal basis change.  In particular, the current certificate
+does not rule out fixed anticommuting real orthogonal structures
+\(J_1,J_2\), with \(J_2\) skew-symmetric, satisfying for all lifted slice
+generators \(\mathcal M_j\)
+
+\[
+J_1^{\mathsf T}\mathcal M_jJ_1=\overline{\mathcal M_j},
+\qquad
+i(J_2\mathcal M_j-\mathcal M_j\overline{J_2})\preceq0.
+\]
+
+Until that generator- or semigroup-element-level audit is complete,
+inequivalence to the full Wei/Majorana framework remains open.
 
 ## References to complete before submission
 
@@ -506,7 +566,14 @@ on indefinite multiple-Lyapunov functions.
 3. Li, Jiang, and Yao, Majorana-time-reversal classification.
 4. Wu and Zhang, sufficient symmetry condition for absence of the sign
    problem.
-5. Ahmadi, Jungers, Parrilo, and Roozbehani, path-complete graph Lyapunov
-   functions.
-6. A standard cone Perron--Frobenius reference for strongly positive maps.
-7. A standard discrete-time indefinite Stein inertia theorem reference.
+5. A. A. Ahmadi, R. M. Jungers, P. A. Parrilo, and M. Roozbehani,
+   “Joint Spectral Radius and Path-Complete Graph Lyapunov Functions,”
+   *SIAM J. Control Optim.* **52**, 687 (2014),
+   doi:10.1137/110855272.
+6. F. Forni, R. M. Jungers, and R. Sepulchre, “Path-complete positivity
+   of switching systems,” arXiv:1611.02603.
+7. G. O. Berger and R. M. Jungers, “p-dominant switched linear systems,”
+   *Automatica* **132**, 109801 (2021),
+   doi:10.1016/j.automatica.2021.109801.
+8. A standard cone Perron--Frobenius reference for strongly positive maps.
+9. A standard discrete-time indefinite Stein inertia theorem reference.

@@ -97,13 +97,52 @@ The time-orientation gate is essential: split contraction and positive
 ## Structural position
 
 With one state, this construction reduces to the familiar common-metric
-split-contraction certificate.  Four states provide a genuine strict
-extension for this alphabet: a separate exact dual certificate excludes
-every common symmetric metric satisfying the same forward and transpose
-gaps.
+split-contraction certificate.  Four states are strictly more expressive
+than one *quadratic* metric for this alphabet: a separate exact dual
+certificate excludes every common symmetric metric satisfying the same
+forward and transpose gaps.
 
-Multiple metrics on a labelled graph are related to the known
-path-complete Lyapunov framework.  The new mathematical content claimed
-here is the indefinite-inertia version with coherent Lorentz time
-orientation and its determinant-positivity consequence, together with
-this exact QMC certificate—not the generic multiple-Lyapunov architecture.
+The graph inequalities themselves are a special case of path-complete
+\(p\)-dominance: with forward letters and \(P_i=R_i\) they give
+\(p=4\) dominance at rate one, while the inverse-letter formulation with
+\(P_i=-R_i\) gives \(p=1\).  The future-sheet maps are strict
+path-complete positivity.  These switched-system structures and their
+closed-path spectral conclusions are prior art.
+
+Moreover, because all 16 edges are present, the inverse letters strongly
+preserve the common nonquadratic cone
+
+\[
+K=\bigcap_iK_i,\qquad K_i=\overline{\mathcal C_i^+}.
+\]
+
+For any fixed \(j\), the open set
+\(A_j^{-1}(\mathcal C_j^+)\) lies inside every
+\(\mathcal C_i^+\), so \(K\) has nonempty interior.  As an intersection
+of closed convex pointed cones it is closed, convex, and pointed, hence
+proper and solid.  If \(x\in K\setminus\{0\}\), then
+
+\[
+(A_j^{-1}x)^{\mathsf T}R_i(A_j^{-1}x)
+>x^{\mathsf T}R_jx\ge0
+\quad\text{for every }i.
+\]
+
+Approximating \(x\) from \(\mathcal C_j^+\) fixes the future component,
+which proves
+
+\[
+A_j^{-1}(K\setminus\{0\})\subset\operatorname{int}K.
+\]
+
+The exact dual does not exclude this common cone; it excludes only a
+common quadratic metric.  The contribution claimed here is therefore the
+fermion-determinant sign corollary, its exact rational four-letter
+certificate, and the physical QMC realization—not a new
+multiple-Lyapunov or cone-positivity architecture.
+
+Relation to the full 10-Majorana Wei contraction conditions remains open.
+In particular, the five-dimensional common-quadratic-metric dual does not
+exclude fixed anticommuting \(J_1,J_2\) structures after the
+number-conserving Majorana lift or after one fixed complex orthogonal
+Majorana basis change.

@@ -1,4 +1,4 @@
-# Exact no-common-metric certificate for the leading oddcycle pair
+# Exact no-common-quadratic-metric certificate for the leading oddcycle pair
 
 Consider the two rational matrices
 
@@ -42,12 +42,14 @@ trace turns that same sum into the inner product of `R` with the exact
 zero matrix above, a contradiction.  Therefore no such common `R`
 exists.
 
-This excludes the specific common split-contraction/Wei mechanism tested
-by the metric inequalities.  Arbitrary-word determinant positivity is
-proved independently by the four-state certificate in
+This excludes only the specific common *quadratic* split-contraction
+metric inequalities tested above.  It does not exclude the common
+nonquadratic cone preserved by the inverse alphabet, nor the full
+10-Majorana Wei contraction framework.  Arbitrary-word determinant
+positivity is proved independently by the four-state certificate in
 `ODDCYCLE_PATH_METRIC_CERTIFICATE.md`; the combination shows that the
-finite-state construction is strictly more expressive than a common
-metric for this alphabet.
+finite-state quadratic certificate is strictly more expressive than a
+one-state quadratic metric for this alphabet.
 
 ## Exact replay
 

@@ -29,9 +29,9 @@
 最终候选是五维四字母集合
 `{B(1/1000), B(1/1000)^T, B(4/5), B(4/5)^T}`。四个精确有理
 Lorentz 度量、16 个严格转移不等式和相干时间定向共同证明任意深度
-`det(I+W)>0`。独立 Gordan–Stiemke 对偶证书排除了公共单度量解释；
+`det(I+W)>0`。独立 Gordan–Stiemke 对偶证书排除了公共单个二次度量解释；
 同一字母表构成正系数 `(37,1,1,1,1)/41` 的 Hermitian、数守恒、相互作用
-五模 transfer。旧 continuum alphabet 已被证明属于已知 common-metric 类，
+五模 transfer。旧 continuum alphabet 已被证明属于已知 common-quadratic-metric 类，
 只保留为严格对照，不再作为新发现。
 
 ## Team

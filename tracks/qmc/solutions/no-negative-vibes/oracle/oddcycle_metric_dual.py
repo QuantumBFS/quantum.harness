@@ -1,6 +1,6 @@
-"""Numerical Gordan--Stiemke duals for the oddcycle common-metric test.
+"""Numerical Gordan--Stiemke duals for the oddcycle common-quadratic-metric test.
 
-For matrices ``B_j`` a strict common metric would satisfy
+For matrices ``B_j`` a strict common symmetric quadratic metric would satisfy
 
     R - B_j.T R B_j > 0,    R - B_j R B_j.T > 0.
 
@@ -134,7 +134,7 @@ def _fraction_transpose(
 
 
 def exact_no_common_metric_certificate() -> dict[str, object]:
-    """Replay the exact dual proving the leading pair has no common metric."""
+    """Replay the exact dual excluding one common symmetric quadratic metric."""
 
     point_matrices = (
         (
@@ -213,7 +213,7 @@ def exact_no_common_metric_certificate() -> dict[str, object]:
     return {
         "schema": EXACT_SCHEMA,
         "status": (
-            "exact-no-common-metric-certificate"
+            "exact-no-common-quadratic-metric-certificate"
             if certified
             else "certificate-replay-failed"
         ),

@@ -5,7 +5,8 @@ hunter”](https://github.com/QuantumBFS/quantum.harness/issues/121).
 
 ## Executive verdict
 
-**Research core: complete.  Public submission: in progress.**
+**Exact mathematical certificate: complete.  Novelty audit and public
+submission: in progress.**
 
 The final four-letter oddcycle candidate now has:
 
@@ -21,8 +22,10 @@ The final four-letter oddcycle candidate now has:
 The remaining blockers are publication and novelty-boundary work, not more
 finite-depth scanning.  The broadest safe claim is:
 
-> a coherently time-oriented finite-state Lorentz path-metric criterion
-> strictly extends the common-metric criterion for this exact alphabet.
+> a path-complete Lorentz certificate yields an arbitrary-word
+> determinant-QMC corollary, and its four-state quadratic realization is
+> strictly more expressive than a one-state *quadratic* metric for this
+> exact alphabet.
 
 We do not yet claim inequivalence to every complex Majorana,
 fermion-bag, loop, or hidden-basis formulation.
@@ -53,7 +56,7 @@ For every nonempty word \(W\in\mathcal A^*\),
 \]
 
 The previous continuum alphabet around \(p=1\) is not the final result: an
-exact common metric places it inside the known Wei-type contraction class.
+exact common quadratic metric places it inside a known contraction class.
 
 ## Requirement-by-requirement status
 
@@ -61,13 +64,13 @@ exact common metric places it inside the known Wei-type contraction class.
 |---|---|---|
 | Correct determinant oracle and product order | **complete** | `oracle/weights.py`, baseline exact fixtures, and oracle tests |
 | Positive and negative controls for split orthogonal / semigroup theorems | **complete** | baseline, classical-group, AZ, and semigroup protocols |
-| State-of-the-art map and reduction checklist | **complete at project level** | `FOUNDATIONS.md`, `LITERATURE_GAP_2026.md`, `CANDIDATE_CARD.md` |
+| State-of-the-art map and reduction checklist | **partial, submission-level update in progress** | the project map is extensive, but the final pair still needs the focused 10-Majorana/Wei equivalence audit recorded below |
 | Precisely defined structured generator set | **complete** | final alphabet above and `ODDCYCLE_PATH_METRIC_CERTIFICATE.md` |
 | Large tests over dimensions/depths with protocol | **complete for this candidate** | frozen `protocols/oddcycle-path-metric-v1`; 1,398,100 exhaustive words through depth 10 plus 100,000 seeded histories through depth 40; historical production exhausted 22,369,620 words through depth 12 |
 | Exact replay of any delicate numerical claim | **complete** | rational path metrics, exact Gordan--Stiemke dual, exact physical transfer; the theorem does not rely on floating survival |
 | Human-readable proof for arbitrary depth | **complete** | finite-state Lorentz--Stein theorem in `ODDCYCLE_PATH_METRIC_CERTIFICATE.md` and `ODDCYCLE_PAPER_DRAFT.md` |
-| Novelty beyond a common split/contraction metric | **complete, narrowly stated** | exact dual certificate proves no common real symmetric metric satisfies all four forward/transpose gaps |
-| Broad equivalence audit against all known sign-free mechanisms | **partial** | common metric, basic Kramers, fixed split group, block and simple gauge routes are addressed; full complex Majorana/MTR and fermion-bag/loop equivalence remain |
+| Novelty beyond a common quadratic split/contraction metric | **complete, narrowly stated** | exact dual certificate proves no common real symmetric metric satisfies all four forward/transpose gaps |
+| Broad equivalence audit against all known sign-free mechanisms | **partial** | the common quadratic metric is excluded exactly and several elementary reductions are documented; full complex Majorana/MTR, fixed complex-basis Wei, and fermion-bag/loop equivalence remain |
 | Physical determinantal-QMC weight | **complete at cluster level** | exterior Fock trace is `det(I+W)` for the same alphabet |
 | Positive auxiliary-field prefactors | **complete** | exact coefficients `(37,1,1,1,1)/41` |
 | Hermitian interacting model | **complete at cluster level** | `T/41=exp(-H)`; exact SPD gate; Gaussian identity fails in 58 entries |
@@ -89,26 +92,45 @@ exact common metric places it inside the known Wei-type contraction class.
    Perron--Frobenius makes it positive.
 6. Every letter has determinant eight, so every determinant
    \(\det(I+W)\) is strictly positive.
-7. A positive dual of total trace one excludes any common strict metric.
+7. A positive dual of total trace one excludes any common strict
+   *quadratic* metric of the tested form.
 8. The exact Fock transfer closes the physical and positive-field gates.
 
 ## What is new, and what is not
 
-Multiple Lyapunov functions on labelled graphs and path-complete
-certificates are known in switched-system control.  The paper must not
-claim that generic architecture as new.  The proposed contribution is the
-indefinite-inertia version with:
+Multiple Lyapunov functions, path-complete positivity, and
+path-complete \(p\)-dominance are known in switched-system control.  The
+four-state LMIs and their path-dependent Perron direction fall inside
+that prior art.  Because the graph has all 16 edges, the inverse letters
+also strongly preserve the common nonquadratic proper cone
 
-- coherent Lorentz time orientation;
-- an arbitrary-word fermion-determinant sign corollary;
-- an exact QMC alphabet where multiple metrics work but one common metric
-  provably cannot;
+\[
+K=\bigcap_i\overline{\mathcal C_i^+}.
+\]
+
+For any fixed \(j\), the open image
+\(A_j^{-1}(\mathcal C_j^+)\) lies inside every
+\(\mathcal C_i^+\), proving that \(K\) is nonempty and solid.  The strict
+gap identity then maps every nonzero point of \(K\) into
+\(\operatorname{int}K\).
+
+The paper must not claim the graph, multiple Lorentz cones, or common
+Perron cone as new.  The proposed contribution is:
+
+- the arbitrary-word fermion-determinant sign corollary;
+- an exact QMC alphabet where multiple quadratic metrics work but one
+  common quadratic metric provably cannot;
+- a solver-independent rational certificate;
 - a positive-field interacting realization.
 
 The 2024 contraction-semigroup framework is formulated in a fixed
 Majorana metric and permits complex orthogonal basis changes.  The present
-five-dimensional common-metric dual is strong evidence of separation but
-is not, by itself, a complete no-go for every 10-Majorana formulation.
+five-dimensional common-quadratic-metric dual is a strict narrow
+separation but is not a no-go for the common nonquadratic cone above or
+for every 10-Majorana formulation.  In particular, it does not rule out
+one fixed pair of anticommuting real orthogonal structures \(J_1,J_2\)
+after the number-conserving lift and a fixed complex orthogonal Majorana
+basis change.
 Until that focused audit is finished, use the narrow novelty statement
 above.
 
@@ -131,9 +153,9 @@ Do not claim:
 
 ## Remaining minimum closure plan
 
-1. Complete a focused literature/equivalence audit for the final
-   four-letter candidate, especially the 10-Majorana lift and indefinite
-   path-complete control literature.
+1. Complete the remaining equivalence audit for the final four-letter
+   candidate at the 10-Majorana generator or semigroup-element level;
+   retain the now-explicit path-complete control citations in the paper.
 2. Obtain collaborator review of the theorem, exact certificate, physical
    interpretation, and novelty wording.
 3. Run the final one-command replay and relevant full solution test suite
