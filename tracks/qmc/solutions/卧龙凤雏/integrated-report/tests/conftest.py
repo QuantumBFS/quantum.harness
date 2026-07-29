@@ -13,3 +13,13 @@ def models(repo_root):
     from analysis.sources import load_all_models
 
     return load_all_models(repo_root)
+
+
+@pytest.fixture(scope="session")
+def report(models):
+    from analysis.comparison_plots import build_comparison_plots
+    from analysis.report_model import build_report
+
+    package_root = Path(__file__).resolve().parents[1]
+    build_comparison_plots(models, package_root / "generated")
+    return build_report(models)
