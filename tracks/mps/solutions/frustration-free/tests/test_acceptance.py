@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
 import math
@@ -21,6 +22,34 @@ acceptance = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(acceptance)
 
 
+def _canonical_json(value):
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+
+
+def _chain_request_fixture(tmp_path):
+    fixture = acceptance.acceptance_fixture()
+    bath_path = tmp_path / "bath.json"
+    bath_artifact = acceptance.bath.write_bath_json(
+        bath_path,
+        **fixture["bath"],
+        frequency_grid=[-1.0, 0.0, 1.0],
+    )
+    mapping_path = tmp_path / "chain-mapping.json"
+    mapping = acceptance.chain.write_chain_mapping_json(
+        mapping_path, bath_artifact=bath_artifact
+    )
+    chain_fixture = acceptance._explicit_chain_fixture(mapping_path.read_bytes())
+    return (
+        bath_artifact,
+        bath_path.read_text(encoding="utf-8"),
+        mapping,
+        mapping_path.read_bytes(),
+        chain_fixture,
+    )
+
+
 def _solver_output(*, input_sha256="a" * 64):
     return {
         "schema_version": acceptance.RUNNER_SCHEMA_VERSION,
@@ -33,6 +62,8 @@ def _solver_output(*, input_sha256="a" * 64):
                 "cutoff": 1.0e-14,
                 "maxdim": 256,
                 "krylov_expansion_dim": 32,
+                "bath_representation": "direct_star",
+                "chain_mapping_sha256": None,
             },
         },
         "tau": [0.0, 0.5, 1.0],
@@ -42,7 +73,12 @@ def _solver_output(*, input_sha256="a" * 64):
             "G_up": [-0.5, -0.3, -0.5],
             "G_down": [-0.5, -0.3, -0.5],
         },
-        "diagnostics": {"finite": True, "krylov_expansion_dim": 32},
+        "diagnostics": {
+            "finite": True,
+            "krylov_expansion_dim": 32,
+            "bath_representation": "direct_star",
+            "chain_mapping_sha256": None,
+        },
         "provenance": {
             "runner": "finite_bath_mps_runner",
             "runner_version": "1.0.0",
@@ -56,7 +92,10 @@ def _solver_output(*, input_sha256="a" * 64):
             "purification_source_sha256": "4" * 64,
             "observables_source_sha256": "5" * 64,
             "model_definition_sha256": "7" * 64,
+            "chain_mapping_source_sha256": "9" * 64,
             "bath_artifact_file_sha256": "6" * 64,
+            "bath_representation": "direct_star",
+            "chain_mapping_sha256": None,
             "krylov_expansion_dim": 32,
             "expansion_policy": "explicit_global_krylov",
         },
@@ -164,6 +203,18 @@ def test_cthyb_scaffold_is_fail_closed_and_smoke_is_unambiguous():
             ),
             "settings",
         ),
+        (
+            lambda result: result["solver"]["settings"].__setitem__(
+                "bath_representation", "chain"
+            ),
+            "settings",
+        ),
+        (
+            lambda result: result["diagnostics"].__setitem__(
+                "chain_mapping_sha256", "c" * 64
+            ),
+            "geometry",
+        ),
         (lambda result: result.__setitem__("tau", [0.0, 1.0]), "tau"),
         (
             lambda result: result["provenance"].__setitem__("unknown", "claim"),
@@ -186,6 +237,8 @@ def test_solver_output_verification_fails_closed(mutation, match):
                 "cutoff": 1.0e-14,
                 "maxdim": 256,
                 "krylov_expansion_dim": 32,
+                "bath_representation": "direct_star",
+                "chain_mapping_sha256": None,
             },
             expected_tau=[0.0, 0.5, 1.0],
             expected_provenance=expected_provenance,
@@ -225,12 +278,15 @@ def test_mps_request_binds_canonical_path_free_checkpoint_identity():
     request = acceptance._make_mps_request(bath_json, fixture)
     payload = acceptance.strict_json_loads(request["payload_json"])
 
-    assert payload["schema_version"] == 2
+    assert payload["schema_version"] == 3
     checkpoint = payload["checkpoint"]
     assert checkpoint == {
         "checkpoint_schema": 1,
         "writer_version": "1.0.0",
         "source_hashes": {
+            "chain_mapping": acceptance._sha256_file(
+                acceptance.CHAIN_MAPPING_SOURCE
+            ),
             "checkpoint": acceptance._sha256_file(
                 acceptance.JULIA_DIR / "finite_bath_checkpoint.jl"
             ),
@@ -263,6 +319,153 @@ def test_mps_request_binds_canonical_path_free_checkpoint_identity():
     )
 
 
+def test_acceptance_request_defaults_to_exact_schema_three_direct_star_geometry():
+    fixture = acceptance.acceptance_fixture()
+    bath_json = '{"payload":{},"sha256":"' + "a" * 64 + '"}\n'
+
+    request = acceptance._make_mps_request(bath_json, fixture)
+    payload = acceptance.strict_json_loads(request["payload_json"])
+
+    assert fixture["solver_settings"]["bath_representation"] == "direct_star"
+    assert payload["schema_version"] == 3
+    assert set(payload) == {
+        "schema_version",
+        "bath_artifact_json",
+        "bath_artifact_file_sha256",
+        "bath_geometry",
+        "checkpoint",
+        "model",
+        "tau",
+        "solver_settings",
+    }
+    assert payload["bath_geometry"] == {
+        "representation": "direct_star",
+        "chain_mapping_artifact_json": None,
+        "chain_mapping_artifact_file_sha256": None,
+    }
+    assert set(payload["solver_settings"]) == {
+        "time_step",
+        "cutoff",
+        "maxdim",
+        "krylov_expansion_dim",
+    }
+
+
+def test_legacy_internal_request_call_defaults_to_direct_star():
+    fixture = acceptance.acceptance_fixture()
+    fixture["solver_settings"].pop("bath_representation")
+    bath_json = '{"payload":{},"sha256":"' + "a" * 64 + '"}\n'
+
+    request = acceptance._make_mps_request(bath_json, fixture)
+    payload = acceptance.strict_json_loads(request["payload_json"])
+
+    assert payload["bath_geometry"]["representation"] == "direct_star"
+    assert payload["bath_geometry"]["chain_mapping_artifact_json"] is None
+
+
+def test_explicit_chain_request_binds_canonical_mapping_oracle_and_provenance(
+    tmp_path,
+):
+    bath_artifact, bath_json, mapping, mapping_bytes, fixture = (
+        _chain_request_fixture(tmp_path)
+    )
+
+    request = acceptance._make_mps_request(bath_json, fixture)
+    payload = acceptance.strict_json_loads(request["payload_json"])
+    provenance = acceptance.expected_runner_provenance(
+        julia_project=SOLUTION_DIR / "julia",
+        bath_file_sha256=payload["bath_artifact_file_sha256"],
+        bath_representation="chain",
+        chain_mapping_sha256=mapping["sha256"],
+        krylov_expansion_dim=payload["solver_settings"]["krylov_expansion_dim"],
+    )
+    oracle = acceptance.ed.make_oracle_artifact(
+        bath_artifact=bath_artifact,
+        bath_representation="chain",
+        chain_mapping_artifact=mapping,
+        U=fixture["model"]["U"],
+        epsilon_d=fixture["model"]["epsilon_d"],
+        mu=fixture["model"]["mu"],
+        beta=fixture["model"]["beta"],
+        tau=fixture["tau"],
+    )
+
+    assert fixture["solver_settings"]["bath_representation"] == "chain"
+    assert payload["bath_geometry"] == {
+        "representation": "chain",
+        "chain_mapping_artifact_json": mapping_bytes.decode("utf-8"),
+        "chain_mapping_artifact_file_sha256": hashlib.sha256(
+            mapping_bytes
+        ).hexdigest(),
+    }
+    assert acceptance.strict_json_loads(
+        payload["bath_geometry"]["chain_mapping_artifact_json"]
+    ) == mapping
+    assert mapping["sha256"] == hashlib.sha256(
+        _canonical_json(mapping["payload"])
+    ).hexdigest()
+    assert request["sha256"] == hashlib.sha256(
+        request["payload_json"].encode("utf-8")
+    ).hexdigest()
+    assert mapping["payload"]["source_bath_sha256"] == bath_artifact["sha256"]
+    assert acceptance._expected_output_settings(payload) == {
+        **payload["solver_settings"],
+        "bath_representation": "chain",
+        "chain_mapping_sha256": mapping["sha256"],
+    }
+    assert provenance["bath_representation"] == "chain"
+    assert provenance["chain_mapping_sha256"] == mapping["sha256"]
+    assert provenance["chain_mapping_source_sha256"] == acceptance._sha256_file(
+        acceptance.CHAIN_MAPPING_SOURCE
+    )
+    assert oracle["payload"]["parameters"]["bath_representation"] == "chain"
+    assert oracle["payload"]["bath_input_sha256"] == bath_artifact["sha256"]
+    assert oracle["payload"]["mapping_input"] == mapping
+    assert oracle["payload"]["mapping_input_sha256"] == mapping["sha256"]
+
+
+@pytest.mark.parametrize(
+    "representation,mapping_bytes",
+    [
+        ("direct_star", b"mapping"),
+        ("chain", None),
+        ("tree", None),
+    ],
+)
+def test_mps_request_rejects_inconsistent_geometry_combinations(
+    representation, mapping_bytes
+):
+    fixture = acceptance.acceptance_fixture()
+    fixture["solver_settings"]["bath_representation"] = representation
+    if mapping_bytes is not None:
+        fixture["chain_mapping_artifact_bytes"] = mapping_bytes
+    bath_json = '{"payload":{},"sha256":"' + "a" * 64 + '"}\n'
+
+    with pytest.raises((TypeError, ValueError), match="representation|mapping"):
+        acceptance._make_mps_request(bath_json, fixture)
+
+
+@pytest.mark.parametrize("tamper", ["noncanonical", "semantic"])
+def test_explicit_chain_request_rejects_mapping_tampering(tmp_path, tamper):
+    _bath, bath_json, mapping, mapping_bytes, fixture = _chain_request_fixture(
+        tmp_path
+    )
+    if tamper == "noncanonical":
+        fixture["chain_mapping_artifact_bytes"] = mapping_bytes + b"\n"
+    else:
+        corrupted = copy.deepcopy(mapping)
+        corrupted["payload"]["chain_onsite"][0] += 0.01
+        corrupted["sha256"] = hashlib.sha256(
+            _canonical_json(corrupted["payload"])
+        ).hexdigest()
+        fixture["chain_mapping_artifact_bytes"] = (
+            _canonical_json(corrupted) + b"\n"
+        )
+
+    with pytest.raises((TypeError, ValueError), match="canonical|mapping|replay"):
+        acceptance._make_mps_request(bath_json, fixture)
+
+
 @pytest.mark.parametrize(
     "name",
     [
@@ -273,7 +476,9 @@ def test_mps_request_binds_canonical_path_free_checkpoint_identity():
         "purification_source_sha256",
         "observables_source_sha256",
         "model_definition_sha256",
+        "chain_mapping_source_sha256",
         "bath_artifact_file_sha256",
+        "chain_mapping_sha256",
     ],
 )
 def test_provenance_hashes_must_match_python_recomputation(name):
@@ -291,6 +496,8 @@ def test_provenance_hashes_must_match_python_recomputation(name):
                 "cutoff": 1.0e-14,
                 "maxdim": 256,
                 "krylov_expansion_dim": 32,
+                "bath_representation": "direct_star",
+                "chain_mapping_sha256": None,
             },
             expected_tau=[0.0, 0.5, 1.0],
             expected_provenance=expected,
@@ -307,6 +514,11 @@ def test_expected_runner_provenance_binds_checkpoint_source():
     assert expected["checkpoint_source_sha256"] == acceptance._sha256_file(
         acceptance.JULIA_CHECKPOINT
     )
+    assert expected["chain_mapping_source_sha256"] == acceptance._sha256_file(
+        acceptance.CHAIN_MAPPING_SOURCE
+    )
+    assert expected["bath_representation"] == "direct_star"
+    assert expected["chain_mapping_sha256"] is None
 
 
 def _tree_bytes(directory):
@@ -337,7 +549,7 @@ def _build_valid_acceptance_stage(root, name):
     request_payload = acceptance.strict_json_loads(request["payload_json"])
     model = request_payload["model"]
     tau = request_payload["tau"]
-    settings = request_payload["solver_settings"]
+    settings = acceptance._expected_output_settings(request_payload)
     oracle = acceptance.ed.write_oracle_json(
         oracle_path,
         bath_artifact=bath_artifact,
@@ -368,6 +580,8 @@ def _build_valid_acceptance_stage(root, name):
         "diagnostics": {
             "finite": True,
             "krylov_expansion_dim": settings["krylov_expansion_dim"],
+            "bath_representation": settings["bath_representation"],
+            "chain_mapping_sha256": settings["chain_mapping_sha256"],
         },
         "provenance": {
             "runner": "finite_bath_mps_runner",

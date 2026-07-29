@@ -20,7 +20,7 @@ import time
 from typing import Any, Sequence
 
 
-MODULE_VERSION = "2.2.0"
+MODULE_VERSION = "2.3.0"
 SCHEMA_VERSION = 2
 DEFAULT_THRESHOLD = 1.0e-6
 INTERIOR_GREEN_SIGNAL_MARGIN = 1.0e-5
@@ -32,9 +32,10 @@ JULIA_RUNNER = JULIA_DIR / "finite_bath_mps_runner.jl"
 JULIA_PURIFICATION = JULIA_DIR / "finite_bath_purification.jl"
 JULIA_OBSERVABLES = JULIA_DIR / "finite_bath_observables.jl"
 JULIA_CHECKPOINT = JULIA_DIR / "finite_bath_checkpoint.jl"
+CHAIN_MAPPING_SOURCE = SOLUTION_DIR / "chain_mapping.py"
 MODEL_DEFINITION = SOLUTION_DIR / "model.json"
 DEFAULT_OUTPUT_DIRECTORY = SOLUTION_DIR / "results" / "acceptance"
-RUNNER_SCHEMA_VERSION = 2
+RUNNER_SCHEMA_VERSION = 3
 CHECKPOINT_SCHEMA_VERSION = 1
 CHECKPOINT_WRITER_VERSION = "1.0.0"
 
@@ -49,6 +50,9 @@ def _load_local_module(name: str, filename: str):
 
 
 bath = _load_local_module("challenge_81_acceptance_bath", "bath.py")
+chain = _load_local_module(
+    "challenge_81_acceptance_chain_mapping", "chain_mapping.py"
+)
 ed = _load_local_module("challenge_81_acceptance_ed", "finite_bath_ed.py")
 
 
@@ -201,6 +205,59 @@ def _validate_acceptance_threshold(value: Any) -> float:
             f"threshold must not exceed binding maximum {DEFAULT_THRESHOLD}"
         )
     return threshold
+
+
+def _request_geometry_identity(
+    request_payload: dict[str, Any],
+) -> tuple[str, dict[str, Any] | None, str | None]:
+    geometry = _require_exact_keys(
+        request_payload["bath_geometry"],
+        {
+            "representation",
+            "chain_mapping_artifact_json",
+            "chain_mapping_artifact_file_sha256",
+        },
+        "bath geometry",
+    )
+    representation = geometry["representation"]
+    mapping_json = geometry["chain_mapping_artifact_json"]
+    mapping_file_sha256 = geometry["chain_mapping_artifact_file_sha256"]
+    if representation == "direct_star":
+        if mapping_json is not None or mapping_file_sha256 is not None:
+            raise ValueError(
+                "direct_star representation cannot consume a chain mapping"
+            )
+        return representation, None, None
+    if representation != "chain":
+        raise ValueError("bath representation must be direct_star or chain")
+    if not isinstance(mapping_json, str):
+        raise TypeError("chain representation requires mapping artifact JSON")
+    mapping_bytes = mapping_json.encode("utf-8")
+    if _validate_digest(
+        mapping_file_sha256, "chain mapping artifact file SHA256"
+    ) != _sha256_bytes(mapping_bytes):
+        raise ValueError("chain mapping artifact file SHA256 mismatch")
+    mapping = strict_json_loads(mapping_json, name="chain mapping artifact")
+    if mapping_bytes != _canonical_json(mapping) + b"\n":
+        raise ValueError("chain mapping artifact bytes are not canonical")
+    bath_artifact = strict_json_loads(
+        request_payload["bath_artifact_json"], name="bath artifact"
+    )
+    chain.verify_chain_mapping_artifact(mapping, bath_artifact)
+    return representation, mapping, mapping["sha256"]
+
+
+def _expected_output_settings(
+    request_payload: dict[str, Any],
+) -> dict[str, Any]:
+    representation, _mapping, mapping_sha256 = _request_geometry_identity(
+        request_payload
+    )
+    return {
+        **copy.deepcopy(request_payload["solver_settings"]),
+        "bath_representation": representation,
+        "chain_mapping_sha256": mapping_sha256,
+    }
 
 
 def _validate_finite_tree(value: Any, name: str) -> None:
@@ -463,6 +520,7 @@ def validate_acceptance_run(
             "schema_version",
             "bath_artifact_json",
             "bath_artifact_file_sha256",
+            "bath_geometry",
             "checkpoint",
             "model",
             "tau",
@@ -479,6 +537,10 @@ def validate_acceptance_run(
         raise ValueError("MPS request embedded bath does not match bath.json")
     if request_payload["bath_artifact_file_sha256"] != _sha256_bytes(bath_bytes):
         raise ValueError("MPS request bath file SHA256 mismatch")
+    representation, _mapping, mapping_sha256 = _request_geometry_identity(
+        request_payload
+    )
+    expected_settings = _expected_output_settings(request_payload)
 
     solver_output = strict_json_loads(
         (root / "mps-result.json").read_bytes(), name="MPS result"
@@ -486,6 +548,8 @@ def validate_acceptance_run(
     expected_solver_provenance = expected_runner_provenance(
         julia_project=Path(julia_project).resolve(strict=True),
         bath_file_sha256=request_payload["bath_artifact_file_sha256"],
+        bath_representation=representation,
+        chain_mapping_sha256=mapping_sha256,
         krylov_expansion_dim=request_payload["solver_settings"][
             "krylov_expansion_dim"
         ],
@@ -494,7 +558,7 @@ def validate_acceptance_run(
         solver_output,
         expected_input_sha256=_sha256_file(root / "mps-input.json"),
         expected_input_payload_sha256=request["sha256"],
-        expected_settings=request_payload["solver_settings"],
+        expected_settings=expected_settings,
         expected_tau=request_payload["tau"],
         expected_provenance=expected_solver_provenance,
     )
@@ -516,7 +580,7 @@ def validate_acceptance_run(
         raise ValueError("acceptance tau does not match request")
     if payload["model"] != request_payload["model"]:
         raise ValueError("acceptance model does not match request")
-    if payload["solver_settings"] != request_payload["solver_settings"]:
+    if payload["solver_settings"] != expected_settings:
         raise ValueError("acceptance solver settings do not match request")
     if payload["solver_provenance"] != solver_output["provenance"]:
         raise ValueError("acceptance solver provenance mismatch")
@@ -701,6 +765,8 @@ def expected_runner_provenance(
     julia_project: Path,
     bath_file_sha256: str,
     krylov_expansion_dim: int,
+    bath_representation: str = "direct_star",
+    chain_mapping_sha256: str | None = None,
 ) -> dict[str, Any]:
     project = (julia_project / "Project.toml").resolve(strict=True)
     manifest = (julia_project / "Manifest.toml").resolve(strict=True)
@@ -714,7 +780,10 @@ def expected_runner_provenance(
         "purification_source_sha256": _sha256_file(JULIA_PURIFICATION),
         "observables_source_sha256": _sha256_file(JULIA_OBSERVABLES),
         "model_definition_sha256": _sha256_file(MODEL_DEFINITION),
+        "chain_mapping_source_sha256": _sha256_file(CHAIN_MAPPING_SOURCE),
         "bath_artifact_file_sha256": bath_file_sha256,
+        "bath_representation": bath_representation,
+        "chain_mapping_sha256": chain_mapping_sha256,
         "krylov_expansion_dim": krylov_expansion_dim,
         "expansion_policy": (
             "tdvp_only"
@@ -768,7 +837,14 @@ def verify_mps_output(
         raise ValueError("unsupported MPS solver")
     settings = _require_exact_keys(
         solver["settings"],
-        {"time_step", "cutoff", "maxdim", "krylov_expansion_dim"},
+        {
+            "time_step",
+            "cutoff",
+            "maxdim",
+            "krylov_expansion_dim",
+            "bath_representation",
+            "chain_mapping_sha256",
+        },
         "solver settings",
     )
     if (
@@ -781,6 +857,10 @@ def verify_mps_output(
         or type(settings["krylov_expansion_dim"]) is not int
         or settings["krylov_expansion_dim"]
         != expected_settings["krylov_expansion_dim"]
+        or settings["bath_representation"]
+        != expected_settings["bath_representation"]
+        or settings["chain_mapping_sha256"]
+        != expected_settings["chain_mapping_sha256"]
     ):
         raise ValueError("MPS solver settings do not match the request")
 
@@ -820,7 +900,7 @@ def verify_mps_output(
             raise ValueError(f"MPS provenance {name} is malformed")
     for name, expected in expected_provenance.items():
         actual = provenance[name]
-        if name.endswith("_sha256"):
+        if name.endswith("_sha256") and actual is not None:
             _validate_digest(actual, f"MPS provenance {name}")
         if actual != expected:
             raise ValueError(
@@ -833,6 +913,13 @@ def verify_mps_output(
         != expected_settings["krylov_expansion_dim"]
     ):
         raise ValueError("MPS diagnostics expansion setting does not match request")
+    if (
+        output["diagnostics"].get("bath_representation")
+        != expected_settings["bath_representation"]
+        or output["diagnostics"].get("chain_mapping_sha256")
+        != expected_settings["chain_mapping_sha256"]
+    ):
+        raise ValueError("MPS diagnostics bath geometry does not match request")
     _validate_finite_tree(output, "MPS output")
 
 
@@ -904,8 +991,22 @@ def acceptance_fixture() -> dict[str, Any]:
             "cutoff": 1.0e-14,
             "maxdim": 128,
             "krylov_expansion_dim": 32,
+            "bath_representation": "direct_star",
         },
     }
+
+
+def _explicit_chain_fixture(
+    chain_mapping_artifact_bytes: bytes,
+) -> dict[str, Any]:
+    """Return the focused-test fixture for an explicitly mapped finite chain."""
+
+    if not isinstance(chain_mapping_artifact_bytes, bytes):
+        raise TypeError("chain mapping artifact must be supplied as bytes")
+    fixture = acceptance_fixture()
+    fixture["solver_settings"]["bath_representation"] = "chain"
+    fixture["chain_mapping_artifact_bytes"] = chain_mapping_artifact_bytes
+    return fixture
 
 
 def convergence_study_record() -> dict[str, Any]:
@@ -969,6 +1070,7 @@ def _checkpoint_request_identity() -> dict[str, Any]:
         "checkpoint_schema": CHECKPOINT_SCHEMA_VERSION,
         "writer_version": CHECKPOINT_WRITER_VERSION,
         "source_hashes": {
+            "chain_mapping": _sha256_file(CHAIN_MAPPING_SOURCE),
             "checkpoint": _sha256_file(JULIA_CHECKPOINT),
             "model_definition": _sha256_file(MODEL_DEFINITION),
             "observables": _sha256_file(JULIA_OBSERVABLES),
@@ -983,14 +1085,71 @@ def _checkpoint_request_identity() -> dict[str, Any]:
 def _make_mps_request(
     bath_json: str, fixture: dict[str, Any]
 ) -> dict[str, Any]:
+    fixture_settings = copy.deepcopy(fixture["solver_settings"])
+    numerical_setting_keys = {
+        "time_step",
+        "cutoff",
+        "maxdim",
+        "krylov_expansion_dim",
+    }
+    if not isinstance(fixture_settings, dict):
+        raise TypeError("acceptance fixture solver settings must be an object")
+    if set(fixture_settings) == numerical_setting_keys:
+        representation = "direct_star"
+    elif set(fixture_settings) == numerical_setting_keys | {
+        "bath_representation"
+    }:
+        representation = fixture_settings.pop("bath_representation")
+    else:
+        _require_exact_keys(
+            fixture_settings,
+            numerical_setting_keys | {"bath_representation"},
+            "acceptance fixture solver settings",
+        )
+        raise AssertionError("unreachable fixture settings validation")
+    mapping_bytes = fixture.get("chain_mapping_artifact_bytes")
+    if representation == "direct_star":
+        if mapping_bytes is not None:
+            raise ValueError(
+                "direct_star representation cannot consume a chain mapping"
+            )
+        geometry = {
+            "representation": "direct_star",
+            "chain_mapping_artifact_json": None,
+            "chain_mapping_artifact_file_sha256": None,
+        }
+    elif representation == "chain":
+        if not isinstance(mapping_bytes, bytes):
+            raise TypeError("chain representation requires mapping bytes")
+        try:
+            mapping_json = mapping_bytes.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise ValueError("chain mapping bytes are not UTF-8") from error
+        mapping = strict_json_loads(
+            mapping_bytes, name="chain mapping artifact"
+        )
+        if mapping_bytes != _canonical_json(mapping) + b"\n":
+            raise ValueError("chain mapping artifact bytes are not canonical")
+        bath_artifact = strict_json_loads(bath_json, name="bath artifact")
+        chain.verify_chain_mapping_artifact(mapping, bath_artifact)
+        geometry = {
+            "representation": "chain",
+            "chain_mapping_artifact_json": mapping_json,
+            "chain_mapping_artifact_file_sha256": _sha256_bytes(mapping_bytes),
+        }
+    else:
+        raise ValueError(
+            "bath representation must be direct_star or chain"
+        )
     payload = {
         "schema_version": RUNNER_SCHEMA_VERSION,
         "bath_artifact_json": bath_json,
         "bath_artifact_file_sha256": _sha256_bytes(bath_json.encode("utf-8")),
+        "bath_geometry": geometry,
         "checkpoint": _checkpoint_request_identity(),
         "model": copy.deepcopy(fixture["model"]),
         "tau": copy.deepcopy(fixture["tau"]),
-        "solver_settings": copy.deepcopy(fixture["solver_settings"]),
+        "solver_settings": fixture_settings,
     }
     payload_json = _request_canonical_json(payload)
     return {
@@ -1159,7 +1318,11 @@ def run_acceptance(
         )
         model = request_payload["model"]
         tau = request_payload["tau"]
-        settings = request_payload["solver_settings"]
+        request_settings = request_payload["solver_settings"]
+        representation, mapping_artifact, mapping_sha256 = (
+            _request_geometry_identity(request_payload)
+        )
+        settings = _expected_output_settings(request_payload)
 
         print("Computing independent dense-ED oracle", flush=True)
         written_oracle = ed.write_oracle_json(
@@ -1170,6 +1333,8 @@ def run_acceptance(
             mu=model["mu"],
             beta=model["beta"],
             tau=tau,
+            bath_representation=representation,
+            chain_mapping_artifact=mapping_artifact,
         )
         oracle_artifact = strict_json_loads(
             oracle_path.read_text(encoding="utf-8"), name="ED oracle"
@@ -1181,7 +1346,9 @@ def run_acceptance(
         expected_provenance = expected_runner_provenance(
             julia_project=project,
             bath_file_sha256=request_payload["bath_artifact_file_sha256"],
-            krylov_expansion_dim=settings["krylov_expansion_dim"],
+            bath_representation=representation,
+            chain_mapping_sha256=mapping_sha256,
+            krylov_expansion_dim=request_settings["krylov_expansion_dim"],
         )
         command = [
             str(julia),
