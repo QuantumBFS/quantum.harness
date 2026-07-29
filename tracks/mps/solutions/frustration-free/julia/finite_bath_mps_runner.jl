@@ -14,8 +14,8 @@ using .FiniteBathObservables: ObservableInterrupted, finite_bath_observables
 using .FiniteBathCheckpoint:
     CheckpointIdentity, load_current_checkpoint, write_checkpoint_generation
 
-const RUNNER_SCHEMA_VERSION = 2
-const RUNNER_VERSION = "3.0.0"
+const RUNNER_SCHEMA_VERSION = 3
+const RUNNER_VERSION = "3.1.0"
 const CHECKPOINT_SCHEMA_VERSION = 1
 const CHECKPOINT_WRITER_VERSION = "1.0.0"
 const CONTINUATION_EXIT_CODE = 75
@@ -152,10 +152,12 @@ function canonical_request_json(value)
 end
 
 function canonical_artifact_json(value)
-    if value === nothing || value isa Bool || value isa Integer ||
-       value isa AbstractString || value isa AbstractFloat
-        value isa AbstractFloat && !isfinite(value) &&
+    if value isa AbstractFloat
+        isfinite(value) ||
             throw(ArgumentError("artifact contains non-finite float"))
+        return string(Float64(value))
+    elseif value === nothing || value isa Bool || value isa Integer ||
+           value isa AbstractString
         return String(JSON3.write(value))
     elseif value isa AbstractVector
         return "[" * join(canonical_artifact_json.(value), ",") * "]"
@@ -358,6 +360,266 @@ function validate_bath_artifact(bath_artifact, bath_json, model_definition)
     return (; bath, epsilon, coupling)
 end
 
+const CHAIN_MAPPING_PAYLOAD_KEYS = [
+    "Q",
+    "chain_hopping",
+    "chain_onsite",
+    "conventions",
+    "deflation_boundaries",
+    "lambda",
+    "n_bath",
+    "numerics",
+    "provenance",
+    "representation",
+    "schema_version",
+    "source_bath_schema_version",
+    "source_bath_sha256",
+]
+const CHAIN_MAPPING_CONVENTIONS = Dict(
+    "star_matrix" => "E = diag(epsilon)",
+    "coupling_gauge" => "v is real and componentwise nonnegative",
+    "initial_vector" => "q0 = v / norm(v) when norm(v) > 0",
+    "spin_transform" => "the same real Q is used for up and down",
+    "chemical_potential" => "transform E before subtracting mu",
+    "hopping_gauge" => "chain hoppings are nonnegative",
+    "breakdown" => "deterministic canonical coordinate deflation",
+    "decoupled" => "v = 0 maps with Q = I",
+)
+const CHAIN_MAPPING_NUMERICS_KEYS = [
+    "algorithm",
+    "breakdown_tolerance",
+    "breakdown_tolerance_rule",
+    "coupling_max_error",
+    "off_tridiagonal_max_abs",
+    "orthogonality_max_error",
+]
+const CHAIN_MAPPING_PROVENANCE_KEYS = [
+    "module",
+    "module_version",
+    "numpy_version",
+    "python_version",
+    "schema_version",
+]
+const CHAIN_MAPPING_TOLERANCE_RULE =
+    "64 * eps(float64) * max(1, norm(E, inf)) * n_bath"
+
+function finite_vector(value, name)
+    value isa AbstractVector ||
+        throw(ArgumentError("$name must be an array"))
+    return [finite_number(entry, "$name values") for entry in value]
+end
+
+function maximum_absolute(value)
+    return maximum(abs, value; init = 0.0)
+end
+
+function canonical_chain_mapping_json(mapping_artifact)
+    canonical = deepcopy(mapping_artifact)
+    mapping = canonical["payload"]
+    mapping["lambda"] = finite_number(mapping["lambda"], "chain mapping lambda")
+    mapping["chain_onsite"] =
+        finite_vector(mapping["chain_onsite"], "chain onsite")
+    mapping["chain_hopping"] =
+        finite_vector(mapping["chain_hopping"], "chain hopping")
+    Q_rows = mapping["Q"]
+    Q_rows isa AbstractVector ||
+        throw(ArgumentError("chain mapping Q must be an array"))
+    mapping["Q"] = [
+        finite_vector(row, "chain mapping Q row") for row in Q_rows
+    ]
+    numerics = mapping["numerics"]
+    numerics isa AbstractDict ||
+        throw(ArgumentError("chain mapping numerics must be a JSON object"))
+    for key in (
+        "breakdown_tolerance",
+        "coupling_max_error",
+        "off_tridiagonal_max_abs",
+        "orthogonality_max_error",
+    )
+        numerics[key] = finite_number(numerics[key], "chain mapping $key")
+    end
+    return canonical_artifact_json(canonical) * "\n"
+end
+
+function validate_chain_mapping_artifact(
+    mapping_artifact, mapping_json, bath_artifact
+)
+    mapping_json isa AbstractString ||
+        throw(ArgumentError("chain mapping artifact JSON must be a string"))
+    require_exact_keys(
+        mapping_artifact, ["payload", "sha256"], "chain mapping artifact"
+    )
+    mapping_digest =
+        validate_digest(mapping_artifact["sha256"], "chain mapping payload SHA256")
+    prefix = "{\"payload\":"
+    suffix = ",\"sha256\":\"$mapping_digest\"}\n"
+    startswith(mapping_json, prefix) && endswith(mapping_json, suffix) ||
+        throw(ArgumentError("chain mapping artifact file is not canonical"))
+    payload_start = ncodeunits(prefix) + 1
+    payload_stop = ncodeunits(mapping_json) - ncodeunits(suffix)
+    payload_bytes = codeunits(mapping_json)[payload_start:payload_stop]
+    mapping = require_exact_keys(
+        mapping_artifact["payload"],
+        CHAIN_MAPPING_PAYLOAD_KEYS,
+        "chain mapping payload",
+    )
+    conventions = require_exact_keys(
+        mapping["conventions"],
+        collect(keys(CHAIN_MAPPING_CONVENTIONS)),
+        "chain mapping conventions",
+    )
+    numerics = require_exact_keys(
+        mapping["numerics"],
+        CHAIN_MAPPING_NUMERICS_KEYS,
+        "chain mapping numerics",
+    )
+    provenance = require_exact_keys(
+        mapping["provenance"],
+        CHAIN_MAPPING_PROVENANCE_KEYS,
+        "chain mapping provenance",
+    )
+    canonical_chain_mapping_json(mapping_artifact) == mapping_json ||
+        throw(ArgumentError("chain mapping artifact file is not canonical"))
+    bytes2hex(sha256(payload_bytes)) == mapping_digest ||
+        throw(ArgumentError("chain mapping payload SHA256 mismatch"))
+
+    mapping["schema_version"] == 1 ||
+        throw(ArgumentError("unsupported chain mapping schema version"))
+    mapping["representation"] == "finite_chain" ||
+        throw(ArgumentError("unsupported chain mapping representation"))
+    mapping["source_bath_schema_version"] ==
+        bath_artifact["payload"]["schema_version"] ||
+        throw(ArgumentError("chain mapping source bath schema mismatch"))
+    source_digest = validate_digest(
+        mapping["source_bath_sha256"], "chain mapping source bath SHA256"
+    )
+    source_digest == bath_artifact["sha256"] ||
+        throw(ArgumentError("chain mapping source bath SHA256 mismatch"))
+
+    conventions == CHAIN_MAPPING_CONVENTIONS ||
+        throw(ArgumentError("unsupported chain mapping conventions"))
+    numerics["algorithm"] == "two-pass fully reorthogonalized Lanczos" ||
+        throw(ArgumentError("unsupported chain mapping algorithm"))
+    numerics["breakdown_tolerance_rule"] == CHAIN_MAPPING_TOLERANCE_RULE ||
+        throw(ArgumentError("unsupported chain mapping tolerance rule"))
+    provenance["module"] == "chain_mapping" &&
+        provenance["module_version"] == "1.0.0" &&
+        provenance["schema_version"] == 1 ||
+        throw(ArgumentError("unsupported chain mapping provenance"))
+    for key in ("python_version", "numpy_version")
+        provenance[key] isa AbstractString && !isempty(provenance[key]) ||
+            throw(ArgumentError("chain mapping provenance $key must be nonempty"))
+    end
+
+    epsilon = finite_vector(bath_artifact["payload"]["epsilon"], "bath epsilon")
+    coupling = finite_vector(bath_artifact["payload"]["V"], "bath V")
+    n_bath = positive_integer(mapping["n_bath"], "chain mapping n_bath")
+    n_bath == length(epsilon) == length(coupling) ||
+        throw(ArgumentError("chain mapping size does not match source bath"))
+    lambda = finite_number(mapping["lambda"], "chain mapping lambda")
+    lambda >= 0 ||
+        throw(ArgumentError("chain mapping lambda must be nonnegative"))
+    onsite = finite_vector(mapping["chain_onsite"], "chain onsite")
+    hopping = finite_vector(mapping["chain_hopping"], "chain hopping")
+    length(onsite) == n_bath ||
+        throw(ArgumentError("chain onsite length must equal n_bath"))
+    length(hopping) == max(0, n_bath - 1) ||
+        throw(ArgumentError("chain hopping length must equal n_bath minus one"))
+    all(>=(0.0), hopping) ||
+        throw(ArgumentError("chain hopping must be nonnegative"))
+
+    Q_rows = mapping["Q"]
+    Q_rows isa AbstractVector && length(Q_rows) == n_bath ||
+        throw(ArgumentError("chain mapping Q must have n_bath rows"))
+    all(row -> row isa AbstractVector && length(row) == n_bath, Q_rows) ||
+        throw(ArgumentError("chain mapping Q must be square"))
+    Q = Matrix{Float64}(undef, n_bath, n_bath)
+    for row in 1:n_bath, column in 1:n_bath
+        Q[row, column] =
+            finite_number(Q_rows[row][column], "chain mapping Q")
+    end
+
+    boundaries = mapping["deflation_boundaries"]
+    boundaries isa AbstractVector ||
+        throw(ArgumentError("deflation boundaries must be an array"))
+    all(
+        boundary ->
+            boundary isa Integer &&
+            !(boundary isa Bool) &&
+            0 <= boundary < n_bath - 1,
+        boundaries,
+    ) || throw(ArgumentError("deflation boundaries are invalid"))
+    issorted(boundaries) && allunique(boundaries) ||
+        throw(ArgumentError("deflation boundaries must be sorted and unique"))
+
+    expected_tolerance =
+        64 * eps(Float64) * max(1.0, norm(epsilon, Inf)) * n_bath
+    reported_tolerance = finite_number(
+        numerics["breakdown_tolerance"], "chain mapping breakdown tolerance"
+    )
+    reported_tolerance == expected_tolerance ||
+        throw(ArgumentError("chain mapping breakdown tolerance mismatch"))
+    validation_tolerance = 4 * expected_tolerance
+    for key in (
+        "orthogonality_max_error",
+        "off_tridiagonal_max_abs",
+        "coupling_max_error",
+    )
+        reported = finite_number(numerics[key], "chain mapping $key")
+        0 <= reported <= validation_tolerance ||
+            throw(ArgumentError("chain mapping $key is outside tolerance"))
+    end
+
+    identity_error = maximum_absolute(Q' * Q - I)
+    identity_error <= validation_tolerance ||
+        throw(ArgumentError("chain mapping Q is not orthogonal"))
+    transformed = Q' * Diagonal(epsilon) * Q
+    transformed = (transformed + transformed') / 2
+    off_tridiagonal_error = maximum(
+        (
+            abs(transformed[row, column]) for row in 1:n_bath,
+            column in 1:n_bath if abs(row - column) > 1
+        );
+        init = 0.0,
+    )
+    off_tridiagonal_error <= validation_tolerance ||
+        throw(ArgumentError("chain mapping transform is not tridiagonal"))
+    maximum_absolute(diag(transformed) - onsite) <= validation_tolerance ||
+        throw(ArgumentError("chain onsite does not match Q' * E * Q"))
+    boundary_set = Set(Int.(boundaries))
+    for index in 1:(n_bath - 1)
+        expected_hopping =
+            (index - 1) in boundary_set ? 0.0 : transformed[index, index + 1]
+        expected_hopping >= -validation_tolerance ||
+            throw(ArgumentError("chain transform has negative hopping"))
+        abs(hopping[index] - max(0.0, expected_hopping)) <=
+            validation_tolerance ||
+            throw(ArgumentError("chain hopping does not match Q' * E * Q"))
+    end
+    target = zeros(n_bath)
+    target[1] = lambda
+    maximum_absolute(Q' * coupling - target) <= validation_tolerance ||
+        throw(ArgumentError("chain mapping coupling invariant failed"))
+    abs(lambda - norm(coupling)) <= validation_tolerance ||
+        throw(ArgumentError("chain mapping lambda does not match bath V"))
+    if iszero(norm(coupling))
+        Q == Matrix{Float64}(I, n_bath, n_bath) ||
+            throw(ArgumentError("decoupled chain mapping Q must be identity"))
+        onsite == epsilon ||
+            throw(ArgumentError("decoupled chain onsite must equal epsilon"))
+        all(iszero, hopping) ||
+            throw(ArgumentError("decoupled chain hopping must be zero"))
+    end
+
+    return (;
+        mapping,
+        mapping_sha256 = mapping_digest,
+        chain_onsite = onsite,
+        chain_hopping = hopping,
+        lambda,
+    )
+end
+
 function read_request(path)
     raw = read(path)
     request = strict_json_read(raw, "request")
@@ -382,6 +644,7 @@ function read_request(path)
             "schema_version",
             "bath_artifact_json",
             "bath_artifact_file_sha256",
+            "bath_geometry",
             "checkpoint",
             "model",
             "tau",
@@ -408,6 +671,48 @@ function read_request(path)
     epsilon = validated_bath.epsilon
     coupling = validated_bath.coupling
 
+    geometry = require_exact_keys(
+        payload["bath_geometry"],
+        [
+            "representation",
+            "chain_mapping_artifact_json",
+            "chain_mapping_artifact_file_sha256",
+        ],
+        "bath geometry",
+    )
+    representation = geometry["representation"]
+    representation isa AbstractString ||
+        throw(ArgumentError("bath representation must be a string"))
+    mapping_sha256 = nothing
+    validated_mapping = nothing
+    if representation == "direct_star"
+        geometry["chain_mapping_artifact_json"] === nothing &&
+            geometry["chain_mapping_artifact_file_sha256"] === nothing ||
+            throw(ArgumentError("direct-star geometry cannot consume a chain mapping"))
+    elseif representation == "chain"
+        mapping_json = geometry["chain_mapping_artifact_json"]
+        mapping_json isa AbstractString ||
+            throw(ArgumentError("chain geometry requires a mapping artifact"))
+        mapping_file_digest = validate_digest(
+            geometry["chain_mapping_artifact_file_sha256"],
+            "chain mapping artifact file SHA256",
+        )
+        bytes2hex(sha256(codeunits(mapping_json))) == mapping_file_digest ||
+            throw(ArgumentError("chain mapping artifact file SHA256 mismatch"))
+        mapping_artifact =
+            strict_json_read(mapping_json, "chain mapping artifact")
+        validated_mapping = validate_chain_mapping_artifact(
+            mapping_artifact, mapping_json, bath_artifact
+        )
+        mapping_sha256 = validated_mapping.mapping_sha256
+    else
+        throw(
+            ArgumentError(
+                "bath representation must be direct_star or chain"
+            ),
+        )
+    end
+
     checkpoint = require_exact_keys(
         payload["checkpoint"],
         [
@@ -426,6 +731,7 @@ function read_request(path)
     source_hashes = require_exact_keys(
         checkpoint["source_hashes"],
         [
+            "chain_mapping",
             "checkpoint",
             "model_definition",
             "observables",
@@ -435,6 +741,7 @@ function read_request(path)
         "checkpoint source hashes",
     )
     source_paths = Dict(
+        "chain_mapping" => joinpath(@__DIR__, "..", "chain_mapping.py"),
         "checkpoint" => joinpath(@__DIR__, "finite_bath_checkpoint.jl"),
         "model_definition" => joinpath(@__DIR__, "..", "model.json"),
         "observables" => joinpath(@__DIR__, "finite_bath_observables.jl"),
@@ -496,15 +803,29 @@ function read_request(path)
     time_step > 0 || throw(ArgumentError("time_step must be positive"))
     cutoff >= 0 || throw(ArgumentError("cutoff must be nonnegative"))
 
-    parameters = FiniteBathParameters(
-        epsilon, coupling; U, epsilon_d, mu
-    )
+    parameters =
+        representation == "direct_star" ?
+        FiniteBathParameters(epsilon, coupling; U, epsilon_d, mu) :
+        FiniteBathParameters(
+            :chain;
+            epsilon,
+            V = [validated_mapping.lambda; zeros(length(epsilon) - 1)],
+            chain_onsite = validated_mapping.chain_onsite,
+            chain_hopping = validated_mapping.chain_hopping,
+            lambda = validated_mapping.lambda,
+            mapping_sha256,
+            U,
+            epsilon_d,
+            mu,
+        )
     return (;
         raw,
         request,
         payload,
         payload_digest,
         bath_sha256 = String(bath_artifact["sha256"]),
+        bath_representation = String(representation),
+        mapping_sha256,
         parameters,
         beta,
         tau,
@@ -612,6 +933,8 @@ function make_output(request, result, profiling)
                 cutoff = settings.cutoff,
                 maxdim = settings.maxdim,
                 krylov_expansion_dim = settings.krylov_expansion_dim,
+                bath_representation = request.bath_representation,
+                chain_mapping_sha256 = request.mapping_sha256,
             ),
         ),
         tau = result.tau,
@@ -638,6 +961,8 @@ function make_output(request, result, profiling)
             expansion_policy =
                 settings.krylov_expansion_dim == 0 ?
                 "tdvp_only" : "explicit_global_krylov",
+            bath_representation = request.bath_representation,
+            chain_mapping_sha256 = request.mapping_sha256,
             green_up = branch_diagnostics(result.diagnostics.green_up),
             green_down = branch_diagnostics(result.diagnostics.green_dn),
             disclaimer = result.diagnostics.disclaimer,
@@ -661,8 +986,12 @@ function make_output(request, result, profiling)
                 source_sha256(joinpath(@__DIR__, "finite_bath_observables.jl")),
             model_definition_sha256 =
                 source_sha256(joinpath(@__DIR__, "..", "model.json")),
+            chain_mapping_source_sha256 =
+                source_sha256(joinpath(@__DIR__, "..", "chain_mapping.py")),
             bath_artifact_file_sha256 =
                 String(request.payload["bath_artifact_file_sha256"]),
+            bath_representation = request.bath_representation,
+            chain_mapping_sha256 = request.mapping_sha256,
             krylov_expansion_dim = settings.krylov_expansion_dim,
             expansion_policy =
                 settings.krylov_expansion_dim == 0 ?

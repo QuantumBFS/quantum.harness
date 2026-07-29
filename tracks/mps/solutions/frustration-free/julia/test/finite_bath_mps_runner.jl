@@ -69,13 +69,21 @@ function minimal_runner_request()
     )
     bath_json = canonical_artifact_json(bath_artifact) * "\n"
     payload = Dict(
-        "schema_version" => 2,
+        "schema_version" => 3,
         "bath_artifact_json" => bath_json,
         "bath_artifact_file_sha256" => bytes2hex(sha256(codeunits(bath_json))),
+        "bath_geometry" => Dict(
+            "representation" => "direct_star",
+            "chain_mapping_artifact_json" => nothing,
+            "chain_mapping_artifact_file_sha256" => nothing,
+        ),
         "checkpoint" => Dict(
             "checkpoint_schema" => 1,
             "writer_version" => "1.0.0",
             "source_hashes" => Dict(
+                "chain_mapping" => source_sha256(
+                    joinpath(@__DIR__, "..", "..", "chain_mapping.py")
+                ),
                 "checkpoint" => source_sha256(
                     joinpath(@__DIR__, "..", "finite_bath_checkpoint.jl")
                 ),
@@ -116,6 +124,106 @@ function minimal_runner_request()
     )
 end
 
+function resign_runner_request!(request)
+    request["payload_json"] = canonical_request_json(
+        strict_json_read(request["payload_json"], "test request")
+    )
+    request["sha256"] =
+        bytes2hex(sha256(codeunits(request["payload_json"])))
+    return request
+end
+
+function python_chain_mapping(bath_json)
+    solution_dir = normpath(joinpath(@__DIR__, "..", ".."))
+    return mktempdir() do directory
+        bath_path = joinpath(directory, "bath.json")
+        mapping_path = joinpath(directory, "chain-mapping.json")
+        write(bath_path, bath_json)
+        script = """
+import json
+import pathlib
+import sys
+sys.path.insert(0, sys.argv[1])
+import chain_mapping
+with pathlib.Path(sys.argv[2]).open(encoding="utf-8") as stream:
+    bath = json.load(stream)
+chain_mapping.write_chain_mapping_json(
+    sys.argv[3], bath_artifact=bath
+)
+"""
+        command = `uv run --project=$solution_dir --frozen python -c $script $solution_dir $bath_path $mapping_path`
+        run(command)
+        read(mapping_path, String)
+    end
+end
+
+function chain_runner_request()
+    request = minimal_runner_request()
+    payload = strict_json_read(request["payload_json"], "test request")
+    mapping_json = python_chain_mapping(payload["bath_artifact_json"])
+    payload["bath_geometry"] = Dict(
+        "representation" => "chain",
+        "chain_mapping_artifact_json" => mapping_json,
+        "chain_mapping_artifact_file_sha256" =>
+            bytes2hex(sha256(codeunits(mapping_json))),
+    )
+    request["payload_json"] = canonical_request_json(payload)
+    return resign_runner_request!(request)
+end
+
+function write_and_read_request(request)
+    return mktempdir() do directory
+        path = joinpath(directory, "request.json")
+        write(path, JSON3.write(request))
+        read_request(path)
+    end
+end
+
+function mutate_mapping!(request, mutation; rehash_payload = true)
+    payload = strict_json_read(request["payload_json"], "test request")
+    geometry = payload["bath_geometry"]
+    mapping = strict_json_read(
+        geometry["chain_mapping_artifact_json"], "mapping artifact"
+    )
+    mutation(mapping)
+    if rehash_payload
+        mapping["sha256"] = bytes2hex(
+            sha256(codeunits(canonical_artifact_json(mapping["payload"])))
+        )
+    end
+    mapping_json = canonical_artifact_json(mapping) * "\n"
+    geometry["chain_mapping_artifact_json"] = mapping_json
+    geometry["chain_mapping_artifact_file_sha256"] =
+        bytes2hex(sha256(codeunits(mapping_json)))
+    request["payload_json"] = canonical_request_json(payload)
+    return resign_runner_request!(request)
+end
+
+function mapping_output_fixture(request)
+    thermal_diagnostics = (;
+        step_history = NamedTuple[],
+        maximum_link_dimensions_by_bond = Int[],
+    )
+    result = (;
+        tau = [0.0],
+        n_d = 1.0,
+        double_occupancy = 0.25,
+        G_up = [-0.5],
+        G_dn = [-0.5],
+        diagnostics = (;
+            log_partition = 0.0,
+            thermal_log_norm = 0.0,
+            thermal_max_link_dimension = 1,
+            maximum_link_dimensions_by_bond = Int[],
+            green_up = NamedTuple[],
+            green_dn = NamedTuple[],
+            disclaimer = "test fixture",
+        ),
+        thermal_state = (; diagnostics = thermal_diagnostics),
+    )
+    return make_output(request, result, (; fixture = true))
+end
+
 function signed_runner_request(; beta = 0.5, time_step = 0.01)
     request = minimal_runner_request()
     payload = strict_json_read(request["payload_json"], "test request")
@@ -128,6 +236,151 @@ function signed_runner_request(; beta = 0.5, time_step = 0.01)
     request["sha256"] =
         bytes2hex(sha256(codeunits(request["payload_json"])))
     return request
+end
+
+@testset "runner schema 3 consumes direct and Python chain geometry" begin
+    direct = write_and_read_request(resign_runner_request!(minimal_runner_request()))
+    chain_request = chain_runner_request()
+    chain = write_and_read_request(chain_request)
+    mapping = strict_json_read(
+        chain.payload["bath_geometry"]["chain_mapping_artifact_json"],
+        "mapping artifact",
+    )
+
+    @test direct.parameters.bath_representation === :direct_star
+    @test direct.bath_representation == "direct_star"
+    @test direct.mapping_sha256 === nothing
+    @test chain.parameters.bath_representation === :chain
+    @test chain.bath_representation == "chain"
+    @test chain.mapping_sha256 == mapping["sha256"]
+    @test chain.parameters.mapping_sha256 == chain.mapping_sha256
+    @test chain.parameters.chain_onsite == mapping["payload"]["chain_onsite"]
+    @test chain.parameters.chain_hopping == mapping["payload"]["chain_hopping"]
+    @test chain.parameters.mu == 0.0
+end
+
+@testset "runner geometry requires exact representation and mapping pairing" begin
+    direct_with_mapping = chain_runner_request()
+    payload = strict_json_read(
+        direct_with_mapping["payload_json"], "test request"
+    )
+    payload["bath_geometry"]["representation"] = "direct_star"
+    direct_with_mapping["payload_json"] = canonical_request_json(payload)
+    resign_runner_request!(direct_with_mapping)
+    @test_throws ArgumentError write_and_read_request(direct_with_mapping)
+
+    absent_geometry = chain_runner_request()
+    payload = strict_json_read(absent_geometry["payload_json"], "test request")
+    delete!(payload, "bath_geometry")
+    absent_geometry["payload_json"] = canonical_request_json(payload)
+    resign_runner_request!(absent_geometry)
+    @test_throws ArgumentError write_and_read_request(absent_geometry)
+
+    for mutation in (
+        geometry -> delete!(geometry, "chain_mapping_artifact_json"),
+        geometry -> (
+            geometry["chain_mapping_artifact_json"] = nothing;
+            geometry["chain_mapping_artifact_file_sha256"] = nothing
+        ),
+        geometry -> geometry["representation"] = "tree",
+        geometry -> geometry["unexpected"] = nothing,
+    )
+        request = chain_runner_request()
+        payload = strict_json_read(request["payload_json"], "test request")
+        mutation(payload["bath_geometry"])
+        request["payload_json"] = canonical_request_json(payload)
+        resign_runner_request!(request)
+        @test_throws ArgumentError write_and_read_request(request)
+    end
+end
+
+@testset "runner rejects mapping byte and hash corruption" begin
+    wrong_file_hash = chain_runner_request()
+    payload = strict_json_read(wrong_file_hash["payload_json"], "test request")
+    payload["bath_geometry"]["chain_mapping_artifact_file_sha256"] =
+        repeat("0", 64)
+    wrong_file_hash["payload_json"] = canonical_request_json(payload)
+    resign_runner_request!(wrong_file_hash)
+    @test_throws ArgumentError write_and_read_request(wrong_file_hash)
+
+    wrong_payload_hash = mutate_mapping!(
+        chain_runner_request(),
+        mapping -> mapping["payload"]["lambda"] += 0.01;
+        rehash_payload = false,
+    )
+    @test_throws ArgumentError write_and_read_request(wrong_payload_hash)
+
+    noncanonical = chain_runner_request()
+    payload = strict_json_read(noncanonical["payload_json"], "test request")
+    mapping_json =
+        payload["bath_geometry"]["chain_mapping_artifact_json"] * "\n"
+    payload["bath_geometry"]["chain_mapping_artifact_json"] = mapping_json
+    payload["bath_geometry"]["chain_mapping_artifact_file_sha256"] =
+        bytes2hex(sha256(codeunits(mapping_json)))
+    noncanonical["payload_json"] = canonical_request_json(payload)
+    resign_runner_request!(noncanonical)
+    @test_throws ArgumentError write_and_read_request(noncanonical)
+
+    noncanonical_number = mutate_mapping!(
+        chain_runner_request(),
+        mapping -> mapping["payload"]["chain_onsite"][1] = 0,
+    )
+    @test_throws ArgumentError write_and_read_request(noncanonical_number)
+end
+
+@testset "runner requires exact chain mapping keys" begin
+    for mutation in (
+        mapping -> mapping["unexpected"] = nothing,
+        mapping -> delete!(mapping["payload"], "representation"),
+        mapping -> mapping["payload"]["unexpected"] = nothing,
+        mapping -> mapping["payload"]["numerics"]["unexpected"] = nothing,
+        mapping -> delete!(
+            mapping["payload"]["numerics"], "off_tridiagonal_max_abs"
+        ),
+    )
+        request = mutate_mapping!(chain_runner_request(), mutation)
+        @test_throws ArgumentError write_and_read_request(request)
+    end
+end
+
+@testset "runner independently rejects invalid mapping science" begin
+    mutations = [
+        mapping -> mapping["payload"]["source_bath_sha256"] = repeat("0", 64),
+        mapping -> mapping["payload"]["conventions"]["chemical_potential"] =
+            "subtract mu before transforming E",
+        mapping -> mapping["payload"]["chain_hopping"][1] = -0.1,
+        mapping -> mapping["payload"]["Q"] = [[1.0]],
+        mapping -> mapping["payload"]["Q"][1][1] += 0.1,
+        mapping -> mapping["payload"]["chain_onsite"][1] += 0.1,
+        mapping -> mapping["payload"]["chain_hopping"] = Float64[],
+        mapping -> mapping["payload"]["lambda"] += 0.1,
+    ]
+    for mutation in mutations
+        request = mutate_mapping!(chain_runner_request(), mutation)
+        @test_throws ArgumentError write_and_read_request(request)
+    end
+end
+
+@testset "runner publishes geometry hashes in every output section" begin
+    for request in (
+        write_and_read_request(resign_runner_request!(minimal_runner_request())),
+        write_and_read_request(chain_runner_request()),
+    )
+        output = mapping_output_fixture(request)
+        expected_mapping = request.mapping_sha256
+        @test output.solver.settings.bath_representation ==
+            request.bath_representation
+        @test output.solver.settings.chain_mapping_sha256 == expected_mapping
+        @test output.diagnostics.bath_representation ==
+            request.bath_representation
+        @test output.diagnostics.chain_mapping_sha256 == expected_mapping
+        @test output.provenance.bath_representation ==
+            request.bath_representation
+        @test output.provenance.chain_mapping_sha256 == expected_mapping
+        @test output.provenance.chain_mapping_source_sha256 == source_sha256(
+            joinpath(@__DIR__, "..", "..", "chain_mapping.py")
+        )
+    end
 end
 
 @testset "runner thermal diagnostics are complete and bounded" begin
