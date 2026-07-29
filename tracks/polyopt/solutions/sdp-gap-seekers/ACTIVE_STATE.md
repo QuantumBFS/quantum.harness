@@ -601,3 +601,9 @@ Updated: 2026-07-29 UTC.
 - xH5 job `23011251` began running at 2026-07-29T14:49:17Z from immutable
   commit `2de1678`; both it and SCNet job `118171391` remain in their original
   coefficient pass and have not been modified.
+- The fail-closed direct-solve audit is verified on SCNet. Synthetic job
+  `118172573` passed 9/9 PSD/status assertions; extended job `118172627`
+  passed 14/14 including exact IEEE-754 primal export and file hashing. The
+  changed source is commit `4227ec2` (with its import fix in `1c339e5`). Use it
+  only for the next decision-relevant solve or independent audit rerun; do not
+  duplicate the two immutable L=2 baselines while they are active.

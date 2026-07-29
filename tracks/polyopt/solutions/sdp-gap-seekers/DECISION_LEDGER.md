@@ -1040,3 +1040,11 @@ baseline job was touched. The correction imports `LinearAlgebra` in the shared
 direct-build entry, which also fixes the same latent name resolution in the
 new PSD reconstruction code. Resubmit this tiny synthetic signature once as
 r2; do not infer anything about L=2 from r1.
+
+Corrected synthetic r2, SCNet job `118172573`, passed all 9 shaped-cone,
+residual, and three-way classification assertions in 47 seconds with
+515,632 KiB MaxRSS. Extended r3, job `118172627`, added exact IEEE-754 primal
+export, canonical moment labels, and artifact SHA-256 checks; all 14 assertions
+passed in 55 seconds with 517,356 KiB MaxRSS. The direct audit/export path is
+therefore software-verified. It is authorized for a future decision solve but
+does not justify duplicating either active L=2 baseline.

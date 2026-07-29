@@ -44,5 +44,11 @@ Updated: 2026-07-29T14:48:39Z
   was undefined. This is an entry-point import error, not a solver or
   mathematical result. The shared build entry now imports `LinearAlgebra`;
   r2 will test that changed source once.
+- Synthetic audit r2, SCNet job `118172573`, passed 9/9 cone-audit and
+  classification assertions in a 47-second job (515,632 KiB MaxRSS). Extended
+  r3, job `118172627`, additionally passed exact-bit primal export and artifact
+  hashing: 14/14 assertions in 55 seconds (517,356 KiB MaxRSS). The audit path
+  is authorized for the next decision-relevant solve, not as a duplicate of
+  either running baseline.
 
 No user input or new credential is currently required.
