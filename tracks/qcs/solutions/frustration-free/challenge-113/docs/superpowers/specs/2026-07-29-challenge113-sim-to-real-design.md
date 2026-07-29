@@ -202,6 +202,12 @@ The device accepts a complete pulse and returns only an observation plus query
 metadata. Optimizers cannot access its Hamiltonian, exact fidelity, gradients,
 or Hessian. Exact truth is exposed only to the offline evaluator.
 
+This is an architectural capability boundary inside one Python process, not a
+security sandbox against hostile memory/closure introspection. Optimizer code
+is restricted to the documented device protocol and is tested not to import or
+receive private truth objects. Real adversarial isolation would require a
+separate process or service and is outside the simulated-core scope.
+
 Candidate spaces are:
 
 - full \(p\)-dimensional normalized pulse space;
@@ -227,10 +233,12 @@ Gap magnitudes are relative to the model drift norm:
 \(\varepsilon\in\{0,0.02,0.05,0.10,0.20\}\). Each nonzero magnitude uses
 multiple seeded perturbation orientations.
 
-The exact mode returns process fidelity without noise. The finite-shot mode
-uses a binomial estimator whose success probability is the exact process
-fidelity. This is an explicitly labeled abstract measurement model, not a claim
-to implement randomized benchmarking. Shot settings are
+The exact black-box mode returns the scalar process fidelity as its observation
+without exposing a separately named truth field, Hamiltonian, derivative, or
+truth object. The finite-shot mode uses a binomial estimator whose success
+probability is the exact process fidelity. This is an explicitly labeled
+abstract measurement model, not a claim to implement randomized benchmarking.
+Shot settings are
 \(N_\mathrm{shot}\in\{10^3,10^4\}\) per query.
 
 A target crossing is provisional until an independent \(10^5\)-shot validation

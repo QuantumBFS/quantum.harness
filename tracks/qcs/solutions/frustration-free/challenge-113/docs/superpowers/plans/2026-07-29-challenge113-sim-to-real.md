@@ -21,6 +21,8 @@
 - Black-box target is independently certified fidelity at least `0.999`.
 - Numerical rank is reported over relative thresholds `1e-6`, `1e-8`, and `1e-10`; `1e-8` is primary.
 - Device optimizers receive no exact truth loss, Hamiltonian, gradient, or Hessian.
+- The device boundary is an in-process capability/API boundary, not a security
+  sandbox against hostile Python memory or closure introspection.
 - Development and production artifacts use distinct run kinds and are never aggregated together.
 - Every task follows red-green-refactor, runs focused tests, runs `git diff --check`, and creates one local commit.
 
@@ -625,7 +627,9 @@ Run `uv run pytest tests/test_device.py -q`.
 
 - [ ] **Step 3: Implement exact and finite-shot observations**
 
-Exact mode returns the clipped process fidelity and records zero shots.
+Exact black-box mode returns the clipped scalar process fidelity as the
+observation and records zero shots; it exposes no separately named truth field
+or truth object.
 Finite-shot mode draws:
 
 ```python
@@ -635,6 +639,12 @@ estimate = successes / shots
 
 Derive each observation seed from the immutable device seed, query index, and
 validation flag so resume and replay are deterministic.
+
+Every invocation reserves and records a monotonic attempt index before
+evaluation. Failed propagation, validation, or sampling attempts remain in the
+internal ledger with explicit failure status and cannot reuse an index. Public
+observations and snapshots are detached copies; mutating one cannot alter
+internal accounting. QueryDevice and ledger serialization are disabled.
 
 - [ ] **Step 4: Implement statistical certification**
 
