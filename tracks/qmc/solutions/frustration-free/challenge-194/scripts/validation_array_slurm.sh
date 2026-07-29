@@ -27,21 +27,42 @@ if [[ ! -f "${HARNESS_RUN_SPEC}" ]]; then
     exit 66
 fi
 
-OFFLINE_PYTHON=""
+resolve_python_candidate() {
+    local label="$1"
+    local candidate="$2"
+    local resolved=""
+    if [[ "${candidate}" != /* ]]; then
+        echo "${label} must be an absolute path" >&2
+        return 66
+    fi
+    if ! resolved="$(realpath -e -- "${candidate}" 2>/dev/null)"; then
+        echo "${label} does not resolve to an existing path" >&2
+        return 66
+    fi
+    if [[ "${resolved}" != /* || ! -f "${resolved}" || ! -x "${resolved}" ]]; then
+        echo "${label} must resolve to a regular executable" >&2
+        return 66
+    fi
+    printf '%s\n' "${resolved}"
+}
+
+CHALLENGE_PYTHON=""
+HARNESS_PYTHON=""
 if [[ "${CHALLENGE_194_PYTHON+x}" == "x" ]]; then
-    if [[ "${CHALLENGE_194_PYTHON}" != /* ]]; then
-        echo "CHALLENGE_194_PYTHON must be an absolute path" >&2
-        exit 66
-    fi
-    if ! OFFLINE_PYTHON="$(realpath -e -- "${CHALLENGE_194_PYTHON}" 2>/dev/null)"; then
-        echo "CHALLENGE_194_PYTHON does not resolve to an existing path" >&2
-        exit 66
-    fi
-    if [[ "${OFFLINE_PYTHON}" != /* || ! -f "${OFFLINE_PYTHON}" || ! -x "${OFFLINE_PYTHON}" ]]; then
-        echo "CHALLENGE_194_PYTHON must resolve to a regular executable" >&2
-        exit 66
-    fi
+    CHALLENGE_PYTHON="$(
+        resolve_python_candidate CHALLENGE_194_PYTHON "${CHALLENGE_194_PYTHON}"
+    )" || exit $?
 fi
+if [[ "${HARNESS_COMMAND+x}" == "x" ]]; then
+    HARNESS_PYTHON="$(
+        resolve_python_candidate HARNESS_COMMAND "${HARNESS_COMMAND}"
+    )" || exit $?
+fi
+if [[ -n "${CHALLENGE_PYTHON}" && -n "${HARNESS_PYTHON}" && "${CHALLENGE_PYTHON}" != "${HARNESS_PYTHON}" ]]; then
+    echo "interpreter conflict: CHALLENGE_194_PYTHON and HARNESS_COMMAND resolve differently" >&2
+    exit 66
+fi
+OFFLINE_PYTHON="${CHALLENGE_PYTHON:-${HARNESS_PYTHON}}"
 
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1

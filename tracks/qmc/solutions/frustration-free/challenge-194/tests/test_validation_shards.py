@@ -388,6 +388,84 @@ def test_spool_wrapper_uses_direct_offline_interpreter_and_clean_pythonpath(
     assert "/hostile/caller/path" not in recorded["pythonpath"]
 
 
+def test_spool_wrapper_uses_valid_harness_command_as_interpreter(tmp_path: Path):
+    interpreter = tmp_path / "harness-python"
+    interpreter.write_text(
+        "#!/bin/bash\n"
+        "/usr/bin/python3 - \"$@\" <<'PY'\n"
+        "import json, os, sys\n"
+        "with open(os.environ['OFFLINE_INVOCATION'], 'w') as stream:\n"
+        "    json.dump({'args': sys.argv[1:]}, stream)\n"
+        "PY\n",
+        encoding="utf-8",
+    )
+    interpreter.chmod(0o755)
+    spool, invocation, environment = _offline_wrapper_environment(
+        tmp_path, python=interpreter
+    )
+    environment.pop("CHALLENGE_194_PYTHON")
+    environment["HARNESS_COMMAND"] = str(interpreter)
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    recorded = json.loads(invocation.read_text(encoding="utf-8"))
+    assert recorded["args"][0:2] == [
+        "scripts/validation_shard.py",
+        "run-cell",
+    ]
+
+
+def test_offline_interpreter_rejects_conflicting_explicit_candidates(
+    tmp_path: Path,
+):
+    challenge_python = tmp_path / "challenge-python"
+    harness_python = tmp_path / "harness-python"
+    for interpreter in (challenge_python, harness_python):
+        interpreter.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+        interpreter.chmod(0o755)
+    spool, invocation, environment = _offline_wrapper_environment(
+        tmp_path, python=challenge_python
+    )
+    environment["HARNESS_COMMAND"] = str(harness_python)
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode != 0
+    assert "conflict" in completed.stderr
+    assert not invocation.exists()
+
+
+def test_offline_interpreter_accepts_identical_resolved_candidates(
+    tmp_path: Path,
+):
+    interpreter = tmp_path / "offline-python"
+    interpreter.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    interpreter.chmod(0o755)
+    alias = tmp_path / "python-alias"
+    alias.symlink_to(interpreter)
+    spool, _, environment = _offline_wrapper_environment(
+        tmp_path, python=alias
+    )
+    environment["HARNESS_COMMAND"] = str(interpreter)
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
 def test_offline_interpreter_may_be_valid_absolute_symlink(tmp_path: Path):
     interpreter = tmp_path / "offline-python"
     interpreter.write_text(
