@@ -206,6 +206,50 @@ def _canonical_json(payload: Mapping[str, object]) -> str:
     )
 
 
+def _validated_cell_id(cell_id: object) -> str:
+    if not isinstance(cell_id, str):
+        raise TypeError("cell_id must be a string")
+    if (
+        not cell_id
+        or cell_id == "."
+        or ".." in cell_id
+        or "/" in cell_id
+        or "\\" in cell_id
+        or ":" in cell_id
+        or "\x00" in cell_id
+    ):
+        raise ValueError("cell_id must be one safe path component")
+    return cell_id
+
+
+def _fingerprint_from_canonical(
+    cell_id: str,
+    canonical_params: Mapping[str, object],
+    resolved_settings: Mapping[str, object],
+) -> str:
+    payload = {
+        "schema": SCHEMA,
+        "cell_id": _validated_cell_id(cell_id),
+        "parameters": dict(canonical_params),
+        "resolved_settings": dict(resolved_settings),
+    }
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+def cell_fingerprint(
+    cell_id: str,
+    params: Mapping[str, object],
+    settings: Mapping[str, object],
+) -> str:
+    """Hash the complete resume identity for one resolved cell."""
+
+    return _fingerprint_from_canonical(
+        _validated_cell_id(cell_id),
+        _canonical_parameters(params),
+        _validated_settings(settings),
+    )
+
+
 def _as_sympy_rational(payload: object, *, name: str) -> sp.Rational:
     value = _parse_rational(payload, name=name)
     return sp.Rational(value.numerator, value.denominator)
@@ -664,6 +708,7 @@ def mixed_word_determinant_stress(
         if next_count > max_level_matrices:
             return {
                 "passed": False,
+                "completed_requested_depth": False,
                 "status": "resource-limit",
                 "max_depth_requested": max_depth,
                 "max_depth_reached": depth - 1,
@@ -718,6 +763,7 @@ def mixed_word_determinant_stress(
         if not finite or not positive:
             return {
                 "passed": False,
+                "completed_requested_depth": False,
                 "status": (
                     "nonfinite-or-complex"
                     if not finite
@@ -733,6 +779,7 @@ def mixed_word_determinant_stress(
             }
     return {
         "passed": True,
+        "completed_requested_depth": True,
         "status": "all-tested-words-positive",
         "max_depth_requested": max_depth,
         "max_depth_reached": max_depth,
@@ -858,9 +905,10 @@ def run_cell(
     """Run one cell through the frozen early-stop gates."""
 
     started = time.perf_counter()
+    validated_cell_id = _validated_cell_id(cell_id)
     manifest: dict[str, object] = {
         "schema": SCHEMA,
-        "cell_id": str(cell_id),
+        "cell_id": validated_cell_id,
         "params": _json_safe(dict(params)),
         "settings": _json_safe(dict(settings)),
         "provenance": _json_safe(dict(provenance)),
@@ -893,6 +941,14 @@ def run_cell(
         )
     manifest["candidate_id"] = candidate["candidate_id"]
     manifest["candidate_card"] = candidate["candidate_card"]
+    canonical = candidate["candidate_card"]["parameters"]
+    assert isinstance(canonical, Mapping)
+    manifest["resolved_settings"] = _json_safe(resolved_settings)
+    manifest["cell_fingerprint"] = _fingerprint_from_canonical(
+        validated_cell_id,
+        canonical,
+        resolved_settings,
+    )
     manifest["exact_replay"] = {
         "module": "oracle.tp_exterior_extension",
         "function": "construct_candidate",
@@ -949,8 +1005,6 @@ def run_cell(
             first_failure="structural-compound-gate",
         )
 
-    canonical = candidate["candidate_card"]["parameters"]
-    assert isinstance(canonical, Mapping)
     known_tn_control = (
         _is_zero_rational(canonical["chord_shear_magnitude"])
         and _is_zero_rational(canonical["givens_half_angle"])
@@ -1039,6 +1093,14 @@ def run_cell(
             first_failure="mixed-word-stress-error",
         )
     manifest["mixed_word_stress"] = stress
+    if stress.get("status") == "resource-limit":
+        return _finish(
+            manifest,
+            started,
+            classification="mixed-word-stress-incomplete",
+            compute_success=False,
+            first_failure="mixed-word-stress-incomplete",
+        )
     if stress.get("passed") is not True:
         return _finish(
             manifest,
@@ -1085,14 +1147,37 @@ def _write_json_atomic(path: Path, payload: Mapping[str, object]) -> None:
         raise
 
 
-def _successful_manifest(path: Path) -> bool:
+def _successful_manifest(
+    path: Path,
+    *,
+    cell_id: str,
+    cell_fingerprint_value: str,
+) -> bool:
     if not path.is_file():
         return False
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return False
-    return payload.get("compute_success") is True
+    return (
+        isinstance(payload, Mapping)
+        and payload.get("schema") == SCHEMA
+        and payload.get("cell_id") == cell_id
+        and payload.get("cell_fingerprint") == cell_fingerprint_value
+        and payload.get("compute_success") is True
+    )
+
+
+def _manifest_path(run_dir: Path, cell_id: str) -> Path:
+    safe_cell_id = _validated_cell_id(cell_id)
+    resolved_run_dir = run_dir.resolve()
+    cells_root = (resolved_run_dir / "cells").resolve()
+    if cells_root.parent != resolved_run_dir:
+        raise ValueError("resolved cells directory must remain under run_dir")
+    cell_directory = (cells_root / safe_cell_id).resolve()
+    if cell_directory.parent != cells_root:
+        raise ValueError("resolved cell manifest must remain under run_dir/cells")
+    return cell_directory / "manifest.json"
 
 
 def run_spec(
@@ -1131,6 +1216,7 @@ def run_spec(
     _validated_settings(shared_settings)
 
     cell_ids: set[str] = set()
+    fingerprints: dict[str, str] = {}
     for cell in cells:
         if (
             not isinstance(cell, Mapping)
@@ -1138,7 +1224,7 @@ def run_spec(
             or "params" not in cell
         ):
             raise ValueError("each cell requires cell_id and params")
-        cell_id = str(cell["cell_id"])
+        cell_id = _validated_cell_id(cell["cell_id"])
         if cell_id in cell_ids:
             raise ValueError(f"duplicate cell_id: {cell_id}")
         cell_ids.add(cell_id)
@@ -1148,8 +1234,15 @@ def run_spec(
             raise ValueError("cell settings must be an object")
         if not isinstance(cell_provenance, Mapping):
             raise ValueError("cell provenance must be an object")
-        _validated_settings({**shared_settings, **dict(cell_settings)})
-        _canonical_parameters(cell["params"])
+        resolved_settings = _validated_settings(
+            {**shared_settings, **dict(cell_settings)}
+        )
+        canonical_params = _canonical_parameters(cell["params"])
+        fingerprints[cell_id] = _fingerprint_from_canonical(
+            cell_id,
+            canonical_params,
+            resolved_settings,
+        )
 
     run_dir_value = spec.get("run_dir")
     if run_dir_value is None:
@@ -1169,15 +1262,19 @@ def run_spec(
     pending: list[Mapping[str, object]] = []
     reused = 0
     for cell in selected:
-        manifest_path = (
-            run_dir / "cells" / str(cell["cell_id"]) / "manifest.json"
-        )
-        if _successful_manifest(manifest_path):
+        cell_id = _validated_cell_id(cell["cell_id"])
+        manifest_path = _manifest_path(run_dir, cell_id)
+        if _successful_manifest(
+            manifest_path,
+            cell_id=cell_id,
+            cell_fingerprint_value=fingerprints[cell_id],
+        ):
             reused += 1
         else:
             pending.append(cell)
 
     def execute(cell: Mapping[str, object]) -> dict[str, object]:
+        cell_id = _validated_cell_id(cell["cell_id"])
         cell_settings = {
             **dict(shared_settings),
             **dict(cell.get("settings", {})),
@@ -1187,14 +1284,14 @@ def run_spec(
             **dict(cell.get("provenance", {})),
         }
         manifest = run_cell(
-            str(cell["cell_id"]),
+            cell_id,
             cell["params"],
             cell_settings,
             cell_provenance,
             stress_fn=stress_fn,
         )
         _write_json_atomic(
-            run_dir / "cells" / str(cell["cell_id"]) / "manifest.json",
+            _manifest_path(run_dir, cell_id),
             manifest,
         )
         return manifest
@@ -1245,6 +1342,7 @@ __all__ = [
     "CANDIDATE_SCHEMA",
     "SCHEMA",
     "atom_admissibility_gate",
+    "cell_fingerprint",
     "construct_candidate",
     "exact_transformed_compounds",
     "hodge_basis_map",

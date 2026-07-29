@@ -106,4 +106,9 @@ python -m oracle.tp_exterior_extension run_spec.json \
 
 Each complete cell is atomically published at
 `cells/<cell_id>/manifest.json`. A cell is resumed only when its existing
-manifest has `compute_success: true`; operational errors are retried.
+manifest is an object with the exact schema, cell ID, and cell fingerprint
+and has `compute_success: true`. The fingerprint covers the schema, safe
+single-component cell ID, canonical exact parameters, and fully resolved
+settings. Malformed or stale manifests are replaced. A mixed-word resource
+limit is an incomplete computation (`compute_success: false`) and is retried
+rather than cached as a scientific rejection.

@@ -1,4 +1,5 @@
 import json
+from math import prod
 from pathlib import Path
 
 import pytest
@@ -120,6 +121,38 @@ def test_candidate_is_exact_transpose_closed_and_identity_is_canonical():
     assert replay["exact_atoms"] == candidate["exact_atoms"]
 
 
+def test_cell_fingerprint_covers_schema_cell_params_and_resolved_settings(
+    monkeypatch,
+):
+    base = runner.cell_fingerprint("cell-a", BASE_PARAMS, {})
+
+    assert runner.cell_fingerprint(
+        "cell-a",
+        {**BASE_PARAMS, "jacobi_strength": "2/4"},
+        {
+            "condition_number_limit": 1.0e10,
+            "relative_entry_margin_threshold": 1.0e-8,
+            "negative_minor_threshold": 1.0e-6,
+            "non_induced_residual_threshold": 1.0e-6,
+            "mixed_word_depth": 6,
+            "max_level_matrices": 2_000_000,
+        },
+    ) == base
+    assert runner.cell_fingerprint("cell-b", BASE_PARAMS, {}) != base
+    assert runner.cell_fingerprint(
+        "cell-a",
+        {**BASE_PARAMS, "jacobi_strength": "1"},
+        {},
+    ) != base
+    assert runner.cell_fingerprint(
+        "cell-a",
+        BASE_PARAMS,
+        {"mixed_word_depth": 5},
+    ) != base
+    monkeypatch.setattr(runner, "SCHEMA", "changed-schema")
+    assert runner.cell_fingerprint("cell-a", BASE_PARAMS, {}) != base
+
+
 def test_grade_gauges_use_fixed_hodge_conjugation_and_are_orthogonal():
     candidate = construct_candidate(BASE_PARAMS)
     gauges = candidate["exact_gauges"]
@@ -131,6 +164,28 @@ def test_grade_gauges_use_fixed_hodge_conjugation_and_are_orthogonal():
     assert hodge.T * hodge == sp.eye(10)
     assert gauges[3] == hodge * gauges[2] * hodge.T
     assert gauges[3].T * gauges[3] == sp.eye(10)
+
+
+def test_hodge_basis_map_has_the_documented_signed_entries():
+    hodge = hodge_basis_map()
+
+    assert {
+        (row, column): int(hodge[row, column])
+        for row in range(10)
+        for column in range(10)
+        if hodge[row, column] != 0
+    } == {
+        (0, 9): 1,
+        (1, 8): -1,
+        (2, 7): 1,
+        (3, 6): 1,
+        (4, 5): -1,
+        (5, 4): 1,
+        (6, 3): -1,
+        (7, 2): 1,
+        (8, 1): -1,
+        (9, 0): 1,
+    }
 
 
 def test_transformed_compounds_follow_the_declared_q_transpose_formula():
@@ -148,12 +203,74 @@ def test_transformed_compounds_follow_the_declared_q_transpose_formula():
             )
 
 
-def test_nonzero_disjoint_givens_is_non_induced_but_zero_control_is_not():
-    candidate = construct_candidate(BASE_PARAMS)
-    control = construct_candidate(CONTROL_PARAMS)
+@pytest.mark.parametrize(
+    "plane",
+    ([0, 7], [0, 8], [0, 9], [1, 5], [1, 6], [1, 9]),
+)
+def test_each_frozen_disjoint_givens_plane_is_non_induced(plane):
+    candidate = construct_candidate({**BASE_PARAMS, "givens_plane": plane})
 
     assert runner.klein_pluecker_residual(candidate["exact_gauges"][2]) > 0.0
+
+
+def test_zero_givens_and_nonidentity_induced_exterior_square_have_zero_residual():
+    control = construct_candidate(CONTROL_PARAMS)
+    one_particle = sp.eye(5)
+    one_particle[0, 0] = sp.Rational(3, 5)
+    one_particle[0, 1] = -sp.Rational(4, 5)
+    one_particle[1, 0] = sp.Rational(4, 5)
+    one_particle[1, 1] = sp.Rational(3, 5)
+    induced = exact_compound_matrix(one_particle, 2)
+
     assert runner.klein_pluecker_residual(control["exact_gauges"][2]) == 0.0
+    assert induced != sp.eye(10)
+    assert runner.klein_pluecker_residual(induced) == 0.0
+
+
+def test_real_mixed_word_stress_reaches_depth_and_counts_all_words():
+    result = runner.mixed_word_determinant_stress(
+        (sp.eye(5),) * 4,
+        max_depth=3,
+        max_level_matrices=64,
+    )
+
+    assert result["passed"] is True
+    assert result["completed_requested_depth"] is True
+    assert result["status"] == "all-tested-words-positive"
+    assert result["max_depth_reached"] == 3
+    assert result["word_count"] == 4 + 16 + 64
+    assert result["minimum_determinant"] == 32.0
+
+
+def test_real_mixed_word_stress_stops_on_a_nonpositive_word():
+    result = runner.mixed_word_determinant_stress(
+        (-sp.eye(5), sp.eye(5), sp.eye(5), sp.eye(5)),
+        max_depth=3,
+        max_level_matrices=64,
+    )
+
+    assert result["passed"] is False
+    assert result["completed_requested_depth"] is False
+    assert result["status"] == "nonpositive-word-found"
+    assert result["max_depth_reached"] == 1
+    assert result["word_count"] == 4
+    assert result["minimum_determinant"] == 0.0
+    assert result["witness"] == "0"
+
+
+def test_real_mixed_word_stress_reports_resource_limit_as_incomplete():
+    result = runner.mixed_word_determinant_stress(
+        (sp.eye(5),) * 4,
+        max_depth=3,
+        max_level_matrices=15,
+    )
+
+    assert result["passed"] is False
+    assert result["completed_requested_depth"] is False
+    assert result["status"] == "resource-limit"
+    assert result["max_depth_reached"] == 1
+    assert result["word_count"] == 4
+    assert result["next_level_matrices"] == 16
 
 
 def test_cell_runs_all_gates_then_mixed_word_stress(monkeypatch):
@@ -171,6 +288,11 @@ def test_cell_runs_all_gates_then_mixed_word_stress(monkeypatch):
     assert manifest["compute_success"] is True
     assert manifest["first_failure"] is None
     assert manifest["candidate_card"]["schema"] == "tp-exterior-candidate-v1"
+    assert manifest["cell_fingerprint"] == runner.cell_fingerprint(
+        "survivor",
+        BASE_PARAMS,
+        {"mixed_word_depth": 5, "max_level_matrices": 10_000},
+    )
     assert manifest["mixed_word_stress"]["settings_seen"] == {
         "max_depth": 5,
         "max_level_matrices": 10_000,
@@ -183,6 +305,28 @@ def test_cell_runs_all_gates_then_mixed_word_stress(monkeypatch):
         "minimum_order2_minor": -0.25,
         "minimum_relative_entry_margin": 0.25,
     }
+
+
+def test_resource_limited_stress_is_an_incomplete_retryable_cell(monkeypatch):
+    _patch_pre_stress_gates(monkeypatch)
+
+    manifest = run_cell(
+        "resource-limited",
+        BASE_PARAMS,
+        {},
+        {},
+        stress_fn=lambda *_args, **_kwargs: {
+            "passed": False,
+            "completed_requested_depth": False,
+            "status": "resource-limit",
+            "max_depth_requested": 6,
+            "max_depth_reached": 5,
+        },
+    )
+
+    assert manifest["classification"] == "mixed-word-stress-incomplete"
+    assert manifest["compute_success"] is False
+    assert manifest["first_failure"] == "mixed-word-stress-incomplete"
 
 
 @pytest.mark.parametrize(
@@ -294,7 +438,7 @@ def test_run_spec_shards_atomically_and_reuses_only_success(
                 "two_atom_scale_ratio": str(index + 1),
             },
         }
-        for index in range(4)
+        for index in range(8)
     ]
     spec_path.write_text(
         json.dumps(
@@ -310,7 +454,19 @@ def test_run_spec_shards_atomically_and_reuses_only_success(
     reused = run_dir / "cells" / "cell-0" / "manifest.json"
     reused.parent.mkdir(parents=True)
     reused.write_text(
-        json.dumps({"compute_success": True, "sentinel": "reuse"}),
+        json.dumps(
+            {
+                "schema": runner.SCHEMA,
+                "cell_id": "cell-0",
+                "cell_fingerprint": runner.cell_fingerprint(
+                    "cell-0",
+                    cells[0]["params"],
+                    {"mixed_word_depth": 4},
+                ),
+                "compute_success": True,
+                "sentinel": "reuse",
+            }
+        ),
         encoding="utf-8",
     )
     retry = run_dir / "cells" / "cell-2" / "manifest.json"
@@ -319,6 +475,23 @@ def test_run_spec_shards_atomically_and_reuses_only_success(
         json.dumps({"compute_success": False, "sentinel": "replace"}),
         encoding="utf-8",
     )
+    stale = run_dir / "cells" / "cell-4" / "manifest.json"
+    stale.parent.mkdir(parents=True)
+    stale.write_text(
+        json.dumps(
+            {
+                "schema": runner.SCHEMA,
+                "cell_id": "cell-4",
+                "cell_fingerprint": "stale-fingerprint",
+                "compute_success": True,
+                "sentinel": "replace-stale",
+            }
+        ),
+        encoding="utf-8",
+    )
+    malformed = run_dir / "cells" / "cell-6" / "manifest.json"
+    malformed.parent.mkdir(parents=True)
+    malformed.write_text("{malformed", encoding="utf-8")
 
     summary = run_spec(
         spec_path,
@@ -329,8 +502,8 @@ def test_run_spec_shards_atomically_and_reuses_only_success(
     )
 
     assert summary == {
-        "selected": 2,
-        "completed": 1,
+        "selected": 4,
+        "completed": 3,
         "reused": 1,
         "compute_errors": 0,
     }
@@ -338,7 +511,43 @@ def test_run_spec_shards_atomically_and_reuses_only_success(
     manifest = json.loads(retry.read_text(encoding="utf-8"))
     assert manifest["params"] == cells[2]["params"]
     assert manifest["classification"] == "candidate-survivor"
+    assert json.loads(stale.read_text(encoding="utf-8"))["classification"] == (
+        "candidate-survivor"
+    )
+    assert json.loads(malformed.read_text(encoding="utf-8"))["classification"] == (
+        "candidate-survivor"
+    )
     assert not list(Path(run_dir).rglob("*.tmp"))
+
+
+@pytest.mark.parametrize(
+    "cell_id",
+    (
+        "",
+        ".",
+        "..",
+        "prefix..suffix",
+        "../escape",
+        "nested/escape",
+        r"nested\escape",
+        "drive:escape",
+    ),
+)
+def test_run_spec_rejects_cell_ids_that_are_not_one_safe_component(
+    tmp_path,
+    cell_id,
+):
+    spec_path = tmp_path / "run_spec.json"
+    spec_path.write_text(
+        json.dumps(
+            {"cells": [{"cell_id": cell_id, "params": BASE_PARAMS}]}
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="cell_id"):
+        run_spec(spec_path, stress_fn=_passed_stress)
+    assert not (tmp_path.parent / "escape").exists()
 
 
 def test_run_spec_rejects_duplicate_ids_and_invalid_worker_shards(tmp_path):
@@ -400,10 +609,28 @@ def test_protocol_axes_and_control_are_explicit_and_machine_readable():
         "1/8",
         "1/4",
     ]
-    assert len(axes["givens_plane"]) == 6
-    assert all(len(plane) == 2 for plane in axes["givens_plane"])
+    assert axes["givens_plane"] == [
+        [0, 7],
+        [0, 8],
+        [0, 9],
+        [1, 5],
+        [1, 6],
+        [1, 9],
+    ]
+    assert len({tuple(plane) for plane in axes["givens_plane"]}) == 6
     assert axes["two_atom_scale_ratio"] == ["1/2", "4/5", "1", "5/4", "2"]
-    assert 4 * 4 * 6 * 3 * 6 * 6 * 5 == 51_840
+    assert prod(
+        len(axes[name])
+        for name in (
+            "jacobi_strength",
+            "diagonal_condition_ratio",
+            "chord_shear_magnitude",
+            "chord_pattern",
+            "givens_half_angle",
+            "givens_plane",
+            "two_atom_scale_ratio",
+        )
+    ) == 51_840
     assert control["classification"] == "known-tn-control"
     assert control["params"]["chord_shear_magnitude"] == "0"
     assert control["params"]["givens_half_angle"] == "0"
