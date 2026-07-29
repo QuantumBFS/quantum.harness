@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 from fractions import Fraction
+from math import lcm
 from pathlib import Path
 
+from trottercert.anticommuting import (
+    AnticommutingPartitionCertificate,
+    certify_anticommuting_partition,
+    discover_anticommuting_partition,
+)
 from trottercert.pareto import minimum_published_suzuki_point
 from trottercert.refined_error import (
     build_refined_fourth_order_constants,
+    certified_d4_cell_coefficients,
     evaluate_refined_fourth_order_bound,
 )
 from trottercert.resources import required_steps
@@ -18,10 +26,70 @@ from trottercert.rigorous_fourth import (
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "certificates" / "issue128-certificate.json"
+D4_OUTPUT = ROOT / "certificates" / "issue128-d4-groups.json"
 
 
 def pair(value: Fraction) -> list[int]:
     return [value.numerator, value.denominator]
+
+
+def canonical_json_bytes(payload: dict[str, object]) -> bytes:
+    return (
+        json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        + "\n"
+    ).encode()
+
+
+def d4_sidecar_payload(
+    certificate: AnticommutingPartitionCertificate,
+) -> dict[str, object]:
+    coefficient_denominator = 1
+    for interval in certificate.coefficients:
+        coefficient_denominator = lcm(
+            coefficient_denominator,
+            interval.lower.denominator,
+            interval.upper.denominator,
+        )
+    sqrt_denominator = 1
+    for group in certificate.groups:
+        sqrt_denominator = lcm(
+            sqrt_denominator,
+            group.bound.denominator,
+        )
+    return {
+        "schema_version": 1,
+        "coefficient_denominator": coefficient_denominator,
+        "terms": [
+            [
+                pauli[0],
+                pauli[1],
+                interval.lower.numerator
+                * (
+                    coefficient_denominator
+                    // interval.lower.denominator
+                ),
+                interval.upper.numerator
+                * (
+                    coefficient_denominator
+                    // interval.upper.denominator
+                ),
+            ]
+            for pauli, interval in zip(
+                certificate.paulis,
+                certificate.coefficients,
+            )
+        ],
+        "sqrt_denominator": sqrt_denominator,
+        "groups": [
+            [
+                list(group.term_indices),
+                group.bound.numerator
+                * (sqrt_denominator // group.bound.denominator),
+            ]
+            for group in certificate.groups
+        ],
+        "cell_bound": pair(certificate.bound),
+    }
 
 
 def main() -> None:
@@ -43,6 +111,23 @@ def main() -> None:
         decimal_digits=12,
         quantization_digits=18,
     )
+    d4_coefficients = certified_d4_cell_coefficients(
+        constants.stages,
+        quantization_digits=18,
+    )
+    d4_groups = discover_anticommuting_partition(
+        d4_coefficients,
+        max_group_size=10,
+    )
+    d4_partition = certify_anticommuting_partition(
+        d4_coefficients,
+        d4_groups,
+    )
+    d4_payload = d4_sidecar_payload(d4_partition)
+    d4_bytes = canonical_json_bytes(d4_payload)
+    D4_OUTPUT.write_bytes(d4_bytes)
+    d4_site_bound = d4_partition.bound / 4
+
     low = 1
     high = published_steps
     while low < high:
@@ -52,6 +137,7 @@ def main() -> None:
                 constants,
                 n_sites,
                 middle,
+                d4_site_override=d4_site_bound,
             ).global_error_bound
             <= tolerance
         ):
@@ -63,11 +149,13 @@ def main() -> None:
         constants,
         n_sites,
         candidate_steps,
+        d4_site_override=d4_site_bound,
     )
     previous = evaluate_refined_fourth_order_bound(
         constants,
         n_sites,
         candidate_steps - 1,
+        d4_site_override=d4_site_bound,
     )
     candidate_groups = 30 * candidate_steps + 1
 
@@ -120,11 +208,22 @@ def main() -> None:
         },
         "candidate": {
             "formula": "five_copy_suzuki_fourth_order",
-            "proof_method": "local_log_E5_plus_E7_majorant_plus_exact_generator_tail",
+            "proof_method": (
+                "local_log_E5_grouped_D4_plus_E7_majorant"
+                "_plus_exact_generator_tail"
+            ),
             "coefficient_interval_decimal_digits": 12,
             "e5_quantization_digits": 18,
             "e5_site_l1_upper": pair(constants.e5_site_l1),
             "e7_site_majorant": pair(constants.e7_site_majorant),
+            "d4_certificate": {
+                "path": D4_OUTPUT.name,
+                "sha256": hashlib.sha256(d4_bytes).hexdigest(),
+                "max_group_size": 10,
+                "term_count": len(d4_partition.paulis),
+                "group_count": len(d4_partition.groups),
+                "cell_norm_upper": pair(d4_partition.bound),
+            },
             "steps": candidate_steps,
             "group_exponentials": candidate_groups,
             "contributions": {
@@ -155,12 +254,16 @@ def main() -> None:
         "published_recursive_suzuki_audit": recursive_points,
         "claims": {
             "global_twofold_target_met": published_groups >= 2 * candidate_groups,
+            "global_fourfold_target_met": (
+                published_groups >= 4 * candidate_groups
+            ),
             "exact_improvement_ratio": pair(
                 Fraction(published_groups, candidate_groups)
             ),
         },
     }
     OUTPUT.write_text(json.dumps(certificate, indent=2) + "\n")
+    print(D4_OUTPUT)
     print(OUTPUT)
     print(
         json.dumps(

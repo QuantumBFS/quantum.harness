@@ -1,29 +1,118 @@
 from __future__ import annotations
 
+import hashlib
 import json
+from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 
+from .anticommuting import certify_anticommuting_partition
 from .baseline import pauli_l1_second_order_constant
 from .hamiltonian import four_matching_fragments
+from .intervals import RationalInterval, cube_root_four_interval
 from .lattice import SquareLattice
+from .local_commutators import SymplecticPauli
 from .resources import (
     fourth_order_four_matching_resources,
     four_matching_resources,
     required_steps,
     three_l_path_resources,
 )
-from .intervals import cube_root_four_interval
 from .su2clusters import three_l_path_fragments
 
 
 EXPECTED_NORMALIZATION = "(XX+YY+ZZ)/4"
 
 
+@dataclass(frozen=True)
+class D4SidecarVerification:
+    site_bound: Fraction
+    coefficients: dict[SymplecticPauli, RationalInterval]
+    term_count: int
+    group_count: int
+    max_group_size: int
+
+
 def _fraction(pair: list[int]) -> Fraction:
     if len(pair) != 2:
         raise ValueError("fraction must be [numerator, denominator]")
     return Fraction(pair[0], pair[1])
+
+
+def _verify_d4_sidecar(
+    certificate_path: Path,
+    candidate: dict[str, object],
+) -> D4SidecarVerification:
+    metadata = candidate["d4_certificate"]
+    root = certificate_path.resolve().parent
+    sidecar_path = (root / str(metadata["path"])).resolve()
+    if sidecar_path.parent != root:
+        raise ValueError("D4 sidecar path escapes certificate directory")
+    raw = sidecar_path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != str(metadata["sha256"]):
+        raise ValueError("D4 sidecar digest mismatch")
+
+    payload = json.loads(raw)
+    if int(payload["schema_version"]) != 1:
+        raise ValueError("unsupported D4 sidecar schema")
+    coefficient_denominator = int(payload["coefficient_denominator"])
+    sqrt_denominator = int(payload["sqrt_denominator"])
+    if coefficient_denominator < 1 or sqrt_denominator < 1:
+        raise ValueError("D4 sidecar denominators must be positive")
+
+    rows = payload["terms"]
+    paulis = tuple(
+        (int(row[0]), int(row[1]))
+        for row in rows
+    )
+    if len(paulis) != len(set(paulis)):
+        raise ValueError("D4 sidecar coefficient terms are duplicated")
+    if paulis != tuple(sorted(paulis)):
+        raise ValueError("D4 sidecar coefficient terms are not canonical")
+    coefficients = {
+        pauli: RationalInterval(
+            Fraction(int(row[2]), coefficient_denominator),
+            Fraction(int(row[3]), coefficient_denominator),
+        )
+        for pauli, row in zip(paulis, rows)
+    }
+
+    submitted_groups = payload["groups"]
+    groups: list[tuple[SymplecticPauli, ...]] = []
+    for row in submitted_groups:
+        indices = tuple(int(index) for index in row[0])
+        if any(index < 0 or index >= len(paulis) for index in indices):
+            raise ValueError("D4 partition coverage index is out of range")
+        groups.append(tuple(paulis[index] for index in indices))
+    regenerated = certify_anticommuting_partition(
+        coefficients,
+        tuple(groups),
+    )
+    submitted_bounds = tuple(
+        Fraction(int(row[1]), sqrt_denominator)
+        for row in submitted_groups
+    )
+    regenerated_bounds = tuple(
+        group.bound for group in regenerated.groups
+    )
+    if submitted_bounds != regenerated_bounds:
+        raise ValueError("D4 group bound mismatch")
+
+    max_group_size = max((len(group) for group in groups), default=0)
+    if max_group_size > int(metadata["max_group_size"]):
+        raise ValueError("D4 maximum group size mismatch")
+    cell_bound = _fraction(payload["cell_bound"])
+    if cell_bound != regenerated.bound:
+        raise ValueError("D4 cell bound mismatch")
+    if cell_bound != _fraction(metadata["cell_norm_upper"]):
+        raise ValueError("D4 main-certificate bound mismatch")
+    return D4SidecarVerification(
+        site_bound=cell_bound / 4,
+        coefficients=coefficients,
+        term_count=len(paulis),
+        group_count=len(groups),
+        max_group_size=max_group_size,
+    )
 
 
 def _verify_v1(data: dict[str, object]) -> dict[str, object]:
@@ -239,6 +328,7 @@ def _verify_v3(
     data: dict[str, object],
     *,
     deep: bool,
+    certificate_path: Path,
 ) -> dict[str, object]:
     benchmark = data["benchmark"]
     if benchmark["normalization"] != EXPECTED_NORMALIZATION:
@@ -275,9 +365,26 @@ def _verify_v3(
     if (
         candidate["formula"] != "five_copy_suzuki_fourth_order"
         or candidate["proof_method"]
-        != "local_log_E5_plus_E7_majorant_plus_exact_generator_tail"
+        != (
+            "local_log_E5_grouped_D4_plus_E7_majorant"
+            "_plus_exact_generator_tail"
+        )
     ):
         raise ValueError("candidate structure mismatch")
+    d4_verification = _verify_d4_sidecar(
+        certificate_path,
+        candidate,
+    )
+    d4_metadata = candidate["d4_certificate"]
+    if d4_verification.term_count != int(d4_metadata["term_count"]):
+        raise ValueError("D4 term count mismatch")
+    if d4_verification.group_count != int(d4_metadata["group_count"]):
+        raise ValueError("D4 group count mismatch")
+    if (
+        d4_verification.max_group_size
+        > int(d4_metadata["max_group_size"])
+    ):
+        raise ValueError("D4 maximum group size mismatch")
     candidate_steps = int(candidate["steps"])
     candidate_error = _fraction(candidate["global_error_upper"])
     previous_error = _fraction(candidate["previous_step_error_upper"])
@@ -295,6 +402,13 @@ def _verify_v3(
     )
     if contribution_sum != candidate_error:
         raise ValueError("candidate contribution sum mismatch")
+    expected_degree_four = (
+        Fraction(n_sites)
+        * d4_verification.site_bound
+        / (5 * candidate_steps**4)
+    )
+    if _fraction(contributions["degree4"]) != expected_degree_four:
+        raise ValueError("candidate grouped D4 contribution mismatch")
 
     claimed = data["claimed_resources"]
     baseline_bonds = published_groups * n_sites // 2
@@ -316,6 +430,7 @@ def _verify_v3(
     if deep:
         from .refined_error import (
             build_refined_fourth_order_constants,
+            certified_d4_cell_coefficients,
             evaluate_refined_fourth_order_bound,
         )
         from .rigorous_fourth import (
@@ -337,15 +452,23 @@ def _verify_v3(
             raise ValueError("deep E5 regeneration mismatch")
         if constants.e7_site_majorant != _fraction(candidate["e7_site_majorant"]):
             raise ValueError("deep E7 regeneration mismatch")
+        regenerated_d4 = certified_d4_cell_coefficients(
+            constants.stages,
+            quantization_digits=int(candidate["e5_quantization_digits"]),
+        )
+        if regenerated_d4 != d4_verification.coefficients:
+            raise ValueError("deep D4 coefficient regeneration mismatch")
         rebuilt = evaluate_refined_fourth_order_bound(
             constants,
             n_sites,
             candidate_steps,
+            d4_site_override=d4_verification.site_bound,
         )
         rebuilt_previous = evaluate_refined_fourth_order_bound(
             constants,
             n_sites,
             candidate_steps - 1,
+            d4_site_override=d4_verification.site_bound,
         )
         if rebuilt.global_error_bound != candidate_error:
             raise ValueError("deep candidate bound regeneration mismatch")
@@ -359,6 +482,8 @@ def _verify_v3(
         raise ValueError("claimed improvement ratio mismatch")
     if bool(data["claims"]["global_twofold_target_met"]) != (ratio >= 2):
         raise ValueError("global twofold claim mismatch")
+    if bool(data["claims"]["global_fourfold_target_met"]) != (ratio >= 4):
+        raise ValueError("global fourfold claim mismatch")
     return {
         "valid": True,
         "verification_level": "deep" if deep_verified else "fast",
@@ -369,9 +494,16 @@ def _verify_v3(
         "candidate_group_exponentials": candidate_groups,
         "candidate_error_upper": str(candidate_error),
         "previous_step_error_upper": str(previous_error),
+        "d4_cell_norm_upper": str(
+            4 * d4_verification.site_bound
+        ),
+        "d4_term_count": d4_verification.term_count,
+        "d4_group_count": d4_verification.group_count,
+        "d4_max_group_size": d4_verification.max_group_size,
         "exact_improvement_ratio": str(ratio),
         "improvement": float(ratio),
         "global_twofold_target_met": ratio >= 2,
+        "global_fourfold_target_met": ratio >= 4,
     }
 
 
@@ -380,7 +512,8 @@ def verify_certificate(
     *,
     deep: bool = False,
 ) -> dict[str, object]:
-    data = json.loads(Path(path).read_text())
+    certificate_path = Path(path)
+    data = json.loads(certificate_path.read_text())
     schema = data.get("schema_version")
     if schema == 1:
         if deep:
@@ -389,5 +522,9 @@ def verify_certificate(
     if schema == 2:
         return _verify_v2(data, deep=deep)
     if schema == 3:
-        return _verify_v3(data, deep=deep)
+        return _verify_v3(
+            data,
+            deep=deep,
+            certificate_path=certificate_path,
+        )
     raise ValueError("unsupported certificate schema")
