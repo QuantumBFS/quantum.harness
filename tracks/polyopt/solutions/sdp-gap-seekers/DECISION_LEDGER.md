@@ -765,3 +765,21 @@ but the job remains pending with `AssocGrpJobsLimit`. Do not submit another
 copy while that group-limit signature is unchanged. Pending is not scientific
 evidence; only the fetched replay manifest and exact LDL pivots can close the
 witness claim.
+
+## 2026-07-29 — authorize a coarse `d=2` bulk-gap scan
+
+The exact isotypic representation makes a first boundary search cheap enough
+to run in one Slurm allocation. Scan exact rational gamma values `1`, `2`, and
+`4` sequentially and stop at the first infeasibility candidate. This signature
+is decision-relevant because gamma `1/2` is already numerically feasible and
+the next question is whether the finite relaxation has any upper transition
+in a broad interval.
+
+The scan runner accepts newly generated inputs only under an explicit dynamic
+mode. It still requires a clean builder commit and tree, a contained results
+directory, matching MOF/runmeta checksums, the exact fixed physical setup,
+all six reduction inventories, all recorded source-file hashes, and nine
+named-cone reload checks. A feasible point is residual-audited; an infeasible
+solver status remains
+`infeasibility_candidate_requires_independent_ray_replay`. It is not a bulk-gap
+bound until that separate replay succeeds.

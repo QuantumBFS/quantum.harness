@@ -468,3 +468,12 @@ Updated: 2026-07-29 UTC.
   exact reduction layers, round the exported point to a common rational
   denominator, and accept only if every one of the nine reconstructed
   rational matrices has strictly positive exact LDL pivots.
+- The next bulk-gap run is a single-slot, sequential `d=2` coarse scan at
+  exact rational gamma values `1`, `2`, and `4`, stopping at the first
+  solver-reported infeasibility candidate. Each point rebuilds the exact
+  74,602-moment source assembly, replays all six exact reductions, reloads the
+  nine named real PSD cones, and audits any primal solution. Dynamic scan
+  inputs remain fail-closed to a clean builder commit/tree, a repository-local
+  results path, source-file hashes, and the generated SHA256SUMS. Any
+  infeasible status is only a candidate until an independent ray replay
+  passes.

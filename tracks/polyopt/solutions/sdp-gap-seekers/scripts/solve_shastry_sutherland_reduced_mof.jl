@@ -106,9 +106,24 @@ function parse_positive_float(text::String, flag::String)
 end
 
 function canonical_gamma(text::String)
-    text in ("0", "0/1", "0//1") && return "0//1"
-    text in ("1/2", "1//2") && return "1//2"
-    throw(ArgumentError("--expected-gamma must be 0 or 1/2"))
+    normalized = replace(strip(text), "//" => "/")
+    fields = split(normalized, '/')
+    length(fields) in (1, 2) ||
+        throw(ArgumentError("--expected-gamma must be a nonnegative rational"))
+    numerator_value = tryparse(BigInt, fields[1])
+    denominator_value =
+        length(fields) == 1 ? BigInt(1) : tryparse(BigInt, fields[2])
+    isnothing(numerator_value) && throw(
+        ArgumentError("--expected-gamma has an invalid numerator"),
+    )
+    isnothing(denominator_value) && throw(
+        ArgumentError("--expected-gamma has an invalid denominator"),
+    )
+    denominator_value > 0 ||
+        throw(ArgumentError("--expected-gamma denominator must be positive"))
+    numerator_value >= 0 ||
+        throw(ArgumentError("--expected-gamma must be nonnegative"))
+    return string(numerator_value // denominator_value)
 end
 
 function parse_args(arguments::Vector{String})

@@ -108,6 +108,13 @@ function progress(message::AbstractString)
     flush(stdout)
 end
 
+function dynamic_scan_input_enabled()
+    value = get(ENV, "SS_SCAN_DYNAMIC_INPUT", "0")
+    value in ("0", "1") ||
+        error("SS_SCAN_DYNAMIC_INPUT must be exactly 0 or 1")
+    return value == "1"
+end
+
 function validate_input_files(
     model_path::String,
     runmeta_path::String,
@@ -132,12 +139,28 @@ function validate_input_files(
         dirname(checksums_path) == input_directory ||
         error("MOF, runmeta, and checksums must share one directory")
 
-    expected = EXPECTED_INPUTS[expected_gamma]
-    B.require_equal(
-        relpath(input_directory, repository_root),
-        expected.output_relative,
-        "immutable input directory",
-    )
+    output_relative = relpath(input_directory, repository_root)
+    dynamic_input = dynamic_scan_input_enabled()
+    expected = dynamic_input ? nothing : EXPECTED_INPUTS[expected_gamma]
+    if dynamic_input
+        results_root = realpath(joinpath(
+            repository_root,
+            "tracks",
+            "polyopt",
+            "solutions",
+            "sdp-gap-seekers",
+            "results",
+        ))
+        input_real = realpath(input_directory)
+        startswith(input_real, results_root * "/") ||
+            error("dynamic scan input must stay under the repository results directory")
+    else
+        B.require_equal(
+            output_relative,
+            expected.output_relative,
+            "immutable input directory",
+        )
+    end
     manifest = B.read_checksum_manifest(checksums_path)
     model_sha256 = B.file_sha256(model_path)
     runmeta_sha256 = B.file_sha256(runmeta_path)
@@ -151,20 +174,23 @@ function validate_input_files(
         manifest["runmeta.toml"],
         "runmeta SHA-256 versus SHA256SUMS",
     )
-    B.require_equal(
-        model_sha256,
-        expected.model_sha256,
-        "MOF SHA-256 versus immutable allowlist",
-    )
-    B.require_equal(
-        runmeta_sha256,
-        expected.runmeta_sha256,
-        "runmeta SHA-256 versus immutable allowlist",
-    )
+    if !dynamic_input
+        B.require_equal(
+            model_sha256,
+            expected.model_sha256,
+            "MOF SHA-256 versus immutable allowlist",
+        )
+        B.require_equal(
+            runmeta_sha256,
+            expected.runmeta_sha256,
+            "runmeta SHA-256 versus immutable allowlist",
+        )
+    end
     return (
         model_sha256=model_sha256,
         runmeta_sha256=runmeta_sha256,
         checksums_sha256=B.file_sha256(checksums_path),
+        output_relative=output_relative,
     )
 end
 
@@ -186,25 +212,19 @@ function validate_setup(setup, expected_gamma::String)
         0.8,
         "square-over-dimer coupling",
     )
-    if expected_gamma == "0//1"
-        B.require_rational_metadata(
-            setup["gamma"],
-            "0",
-            "1",
-            "0//1",
-            0.0,
-            "gamma",
-        )
-    else
-        B.require_rational_metadata(
-            setup["gamma"],
-            "1",
-            "2",
-            "1//2",
-            0.5,
-            "gamma",
-        )
-    end
+    gamma_fields = split(expected_gamma, "//")
+    length(gamma_fields) == 2 ||
+        error("canonical gamma is malformed: $expected_gamma")
+    gamma_value =
+        parse(BigInt, gamma_fields[1]) // parse(BigInt, gamma_fields[2])
+    B.require_rational_metadata(
+        setup["gamma"],
+        gamma_fields[1],
+        gamma_fields[2],
+        expected_gamma,
+        Float64(gamma_value),
+        "gamma",
+    )
     return
 end
 
@@ -230,10 +250,9 @@ function validate_runmeta(
         false,
         "optimizer flag",
     )
-    expected = EXPECTED_INPUTS[expected_gamma]
     B.require_equal(
         runmeta["output_relative"],
-        expected.output_relative,
+        input_files.output_relative,
         "runmeta output path",
     )
     B.require_equal(
@@ -659,13 +678,31 @@ function validate_runmeta(
     )
 
     source = runmeta["source"]
-    B.require_equal(source["git_commit"], SOURCE_COMMIT, "source commit")
-    B.require_equal(source["git_tree"], SOURCE_TREE, "source tree")
-    B.require_equal(
-        source["git_branch"],
-        "bohr/challenge88-ss-reduced-runner",
-        "source branch",
-    )
+    if dynamic_scan_input_enabled()
+        B.require_equal(
+            source["git_commit"],
+            B.git_output(repository_root, "rev-parse", "HEAD"),
+            "dynamic source commit",
+        )
+        B.require_equal(
+            source["git_tree"],
+            B.git_output(repository_root, "rev-parse", "HEAD^{tree}"),
+            "dynamic source tree",
+        )
+        B.require_equal(
+            source["git_branch"],
+            B.git_output(repository_root, "symbolic-ref", "--short", "HEAD"),
+            "dynamic source branch",
+        )
+    else
+        B.require_equal(source["git_commit"], SOURCE_COMMIT, "source commit")
+        B.require_equal(source["git_tree"], SOURCE_TREE, "source tree")
+        B.require_equal(
+            source["git_branch"],
+            "bohr/challenge88-ss-reduced-runner",
+            "source branch",
+        )
+    end
     B.require_equal(
         source["dirty_paths_at_build"],
         String[],
