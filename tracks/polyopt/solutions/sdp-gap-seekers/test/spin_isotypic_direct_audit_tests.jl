@@ -138,6 +138,8 @@ JuMP.optimize!(infeasible_model)
             expected_task_sha256=infeasible_task["sha256"],
             expected_solution_sha256=infeasible_solution["sha256"],
         )
+        println("synthetic infeasibility replay audit: ", replay["audit"])
+        flush(stdout)
         @test replay["audit"]["status_passed"]
         @test replay["audit"]["finite"]
         @test replay["audit"]["residual_passed"]
