@@ -1,0 +1,30 @@
+lattice = "honeycomb"
+
+NumL1 = 28
+NumL2 = 28
+
+J1 = -1.0
+J2 = 0.0
+hTrfd = 2.1325
+
+BetaT = 13.130128956623683
+IfSetDltau = true
+FixedDltau = 0.013
+LTrot = 1012
+
+nLocal = 1
+nWolff = 5
+
+nWarm = 1000
+NmBin = 8
+NSwep = 500
+NmMeaConfg = 10
+
+discard_initial_bins = 1
+trim_extrema = true
+statistics_mode = "bin_sem"
+
+seed = 20260729
+initial_state = "random"
+
+output_dir = "tracks/qmc/results/Only-team/pilot-honeycomb-L28-h2p13250"
