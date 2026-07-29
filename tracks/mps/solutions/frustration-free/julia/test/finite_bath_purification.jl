@@ -14,7 +14,9 @@ using .FiniteBathPurification:
     evolve_purification,
     identity_purification,
     interleaved_sites,
-    physical_hamiltonian_mpo
+    physical_hamiltonian_mpo,
+    probe_qn_purification_capability,
+    validate_purification_fluxes
 
 @testset "evolution resume state validation" begin
     history = [
@@ -636,6 +638,100 @@ end
     _, larger_psi =
         identity_purification(larger; purification = larger_spec)
     @test flux(larger_psi) == QN(("Nf", 6, -1), ("Sz", 0))
+end
+
+@testset "QN physical MPO validates exact sectors and capability path" begin
+    validated = validated_chain_fixture(; n_bath = 1)
+    parameters = FiniteBathParameters(validated)
+    spec = FiniteBathPurification.qn_dual_purification(parameters, validated)
+    sites, psi = identity_purification(parameters; purification = spec)
+    hamiltonian = physical_hamiltonian_mpo(
+        sites, parameters; purification = spec
+    )
+    zero_flux = QN(("Nf", 0, -1), ("Sz", 0))
+
+    @test flux(hamiltonian) == zero_flux
+    @test validate_purification_fluxes(
+        sites, psi, hamiltonian, spec
+    ) === nothing
+
+    non_qn_sites, non_qn_identity = identity_purification(parameters)
+    non_qn_hamiltonian =
+        physical_hamiltonian_mpo(non_qn_sites, parameters)
+    @test expect(psi, "Ntot")[1:2:end] ≈
+          expect(non_qn_identity, "Ntot")[1:2:end] atol = 1.0e-14
+    @test !hasqns(non_qn_hamiltonian[1])
+    @test_throws ArgumentError physical_hamiltonian_mpo(
+        sites, parameters
+    )
+    @test_throws ArgumentError physical_hamiltonian_mpo(
+        non_qn_sites, parameters; purification = spec
+    )
+
+    incomplete_qn_sites = siteinds(
+        "Electron",
+        length(sites);
+        conserve_qns = true,
+        conserve_nf = true,
+        conserve_sz = false,
+    )
+    @test_throws ArgumentError physical_hamiltonian_mpo(
+        incomplete_qn_sites, parameters; purification = spec
+    )
+
+    shifted_identity = deepcopy(psi)
+    orthogonalize!(shifted_identity, 1)
+    shifted_identity[1] =
+        noprime(op("Cdagup", sites[1]) * shifted_identity[1])
+    normalize!(shifted_identity)
+    @test flux(shifted_identity) != flux(psi)
+    @test_throws ArgumentError validate_purification_fluxes(
+        sites, shifted_identity, hamiltonian, spec
+    )
+end
+
+@testset "locked QN purification capability probe" begin
+    expected_fields = (
+        :supported,
+        :qn_gauge,
+        :qn_gauge_version,
+        :julia_version,
+        :itensors_version,
+        :itensormps_version,
+        :site_labels_valid,
+        :identity_sector_valid,
+        :mpo_zero_flux_valid,
+        :operator_sectors_valid,
+        :tdvp_step_valid,
+        :hdf5_roundtrip_valid,
+        :failure,
+    )
+    result = probe_qn_purification_capability()
+    @test result isa NamedTuple
+    @test propertynames(result) == expected_fields
+    @test result.supported
+    @test result.qn_gauge == "electron_nf_sz_ancilla_particle_hole"
+    @test result.qn_gauge_version == 1
+    @test all(
+        getproperty(result, field) for field in (
+            :site_labels_valid,
+            :identity_sector_valid,
+            :mpo_zero_flux_valid,
+            :operator_sectors_valid,
+            :tdvp_step_valid,
+            :hdf5_roundtrip_valid,
+        )
+    )
+    @test result.failure === nothing
+    @test_throws ErrorException setproperty!(result, :supported, false)
+
+    failed =
+        FiniteBathPurification._probe_qn_purification_capability(
+            () -> error("injected capability failure")
+        )
+    @test !failed.supported
+    @test failed.failure isa String
+    @test occursin("injected capability failure", failed.failure)
 end
 
 @testset "direct star constructor remains backward compatible" begin

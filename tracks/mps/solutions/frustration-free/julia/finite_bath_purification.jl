@@ -2,6 +2,7 @@ module FiniteBathPurification
 
 using ITensors
 using ITensorMPS
+using HDF5: h5open
 using KrylovKit: exponentiate
 using SHA: sha256
 import ITensorMPS: measure!
@@ -20,7 +21,9 @@ export FiniteBathParameters,
     interleaved_sites,
     non_qn_purification,
     physical_hamiltonian_mpo,
-    qn_dual_purification
+    probe_qn_purification_capability,
+    qn_dual_purification,
+    validate_purification_fluxes
 
 const ELECTRON_DIMENSION = 4
 const QN_GAUGE = "electron_nf_sz_ancilla_particle_hole"
@@ -28,6 +31,13 @@ const QN_GAUGE_VERSION = 1
 const QN_PURIFICATION_BINDING_DOMAIN =
     "finite_bath_qn_purification_identity"
 const QN_PURIFICATION_BINDING_VERSION = 1
+
+_locked_qn_electron_space() = Pair{QN,Int}[
+    QN(("Nf", 0, -1), ("Sz", 0)) => 1,
+    QN(("Nf", 1, -1), ("Sz", 1)) => 1,
+    QN(("Nf", 1, -1), ("Sz", -1)) => 1,
+    QN(("Nf", 2, -1), ("Sz", 0)) => 1,
+]
 
 struct ChainMappingValidationSeal end
 const _CHAIN_MAPPING_VALIDATION_SEAL = ChainMappingValidationSeal()
@@ -727,6 +737,15 @@ function _validate_sites(
                 "site QN structure does not match purification specification"
             ),
         )
+    if qn_enabled
+        expected_space = _locked_qn_electron_space()
+        all(site -> space(site) == expected_space, sites) ||
+            throw(
+                ArgumentError(
+                    "QN Electron sites must have exactly the locked Nf/Sz labels"
+                ),
+            )
+    end
     site_tags = string.(tags.(sites))
     allunique(site_tags) ||
         throw(ArgumentError("Electron site tag sets must be unique"))
@@ -1162,5 +1181,176 @@ function evolve_purification(
     )
     return PurificationResult(sites, psi, hamiltonian, diagnostics)
 end
+
+function validate_purification_fluxes(
+    sites,
+    psi::MPS,
+    hamiltonian::MPO,
+    purification::PurificationSpec,
+)
+    purification.mode === :qn_dual &&
+        purification.qn_gauge == QN_GAUGE &&
+        purification.qn_gauge_version == QN_GAUGE_VERSION &&
+        purification.parameter_binding_domain ==
+            QN_PURIFICATION_BINDING_DOMAIN &&
+        purification.parameter_binding_version ==
+            QN_PURIFICATION_BINDING_VERSION &&
+        purification.parameter_binding_sha256 !== nothing &&
+        occursin(
+            r"^[0-9a-f]{64}$", purification.parameter_binding_sha256
+        ) &&
+        purification.base_sector_nf isa Int &&
+        purification.base_sector_nf >= 4 &&
+        iseven(purification.base_sector_nf) &&
+        purification.base_sector_sz == 0 ||
+        throw(ArgumentError("invalid validated QN purification specification"))
+    expected_length = purification.base_sector_nf
+    length(sites) == expected_length ||
+        throw(ArgumentError("QN site count does not match the base sector"))
+    expected_space = _locked_qn_electron_space()
+    all(site -> space(site) == expected_space, sites) ||
+        throw(
+            ArgumentError(
+                "QN Electron site labels do not match the locked gauge"
+            ),
+        )
+    base_flux = QN(
+        ("Nf", purification.base_sector_nf, -1),
+        ("Sz", purification.base_sector_sz),
+    )
+    flux(psi) == base_flux ||
+        throw(
+            ArgumentError(
+                "purification MPS flux does not match the base sector"
+            ),
+        )
+    zero_flux = QN(("Nf", 0, -1), ("Sz", 0))
+    flux(hamiltonian) == zero_flux ||
+        throw(ArgumentError("physical Hamiltonian MPO must have zero QN flux"))
+    return nothing
+end
+
+function _locked_probe_mapping_capability()
+    return ValidatedChainMappingCapability(
+        _CHAIN_MAPPING_VALIDATION_SEAL;
+        source_bath_sha256 = bytes2hex(sha256("locked-qn-probe-bath")),
+        mapping_sha256 = bytes2hex(sha256("locked-qn-probe-mapping")),
+        epsilon = [0.0],
+        chain_onsite = [0.0],
+        chain_hopping = Float64[],
+        lambda = 0.1,
+    )
+end
+
+function _probe_operator_sectors(sites, psi, purification)
+    expected = (
+        ("Cdagup", purification.base_sector_nf + 1, 1),
+        ("Cdagdn", purification.base_sector_nf + 1, -1),
+        ("Cup", purification.base_sector_nf - 1, -1),
+        ("Cdn", purification.base_sector_nf - 1, 1),
+    )
+    for (operator_name, nf, sz) in expected
+        branch = deepcopy(psi)
+        orthogonalize!(branch, 1)
+        branch[1] = noprime(op(operator_name, sites[1]) * branch[1])
+        norm(branch) > 0 ||
+            error("locked QN probe operator branch unexpectedly vanished")
+        flux(branch) == QN(("Nf", nf, -1), ("Sz", sz)) ||
+            error("locked QN probe operator sector mismatch")
+    end
+    return true
+end
+
+function _run_qn_purification_capability_probe()
+    validated = _locked_probe_mapping_capability()
+    parameters = FiniteBathParameters(
+        validated; U = 0.8, epsilon_d = -0.4, mu = 0.0
+    )
+    purification = qn_dual_purification(parameters, validated)
+    sites, psi =
+        identity_purification(parameters; purification = purification)
+    hamiltonian = physical_hamiltonian_mpo(
+        sites, parameters; purification = purification
+    )
+    validate_purification_fluxes(sites, psi, hamiltonian, purification)
+
+    operator_sectors_valid =
+        _probe_operator_sectors(sites, psi, purification)
+    evolved, _ = _evolve_normalized_state(
+        copy(psi),
+        hamiltonian;
+        beta = 0.02,
+        time_step = 0.02,
+        cutoff = 1.0e-12,
+        maxdim = 16,
+        krylov_expansion_dim = 0,
+        hamiltonian_norm_bound = _hamiltonian_norm_bound(parameters),
+    )
+    flux(evolved) == flux(psi) ||
+        error("locked QN probe TDVP step changed the base sector")
+
+    hdf5_roundtrip_valid = mktempdir() do directory
+        path = joinpath(directory, "qn-probe.h5")
+        h5open(path, "w") do file
+            write(file, "psi", evolved)
+        end
+        restored = h5open(path, "r") do file
+            read(file, "psi", MPS)
+        end
+        flux(restored) == flux(evolved) &&
+            isapprox(norm(restored), norm(evolved); atol = 1.0e-12)
+    end
+    hdf5_roundtrip_valid ||
+        error("locked QN probe HDF5 round trip changed the state")
+
+    return (;
+        site_labels_valid = true,
+        identity_sector_valid = true,
+        mpo_zero_flux_valid = true,
+        operator_sectors_valid,
+        tdvp_step_valid = true,
+        hdf5_roundtrip_valid,
+    )
+end
+
+function _probe_qn_purification_capability(stage::Function)
+    try
+        checks = stage()
+        return (;
+            supported = true,
+            qn_gauge = QN_GAUGE,
+            qn_gauge_version = QN_GAUGE_VERSION,
+            julia_version = string(VERSION),
+            itensors_version = string(pkgversion(ITensors)),
+            itensormps_version = string(pkgversion(ITensorMPS)),
+            site_labels_valid = checks.site_labels_valid,
+            identity_sector_valid = checks.identity_sector_valid,
+            mpo_zero_flux_valid = checks.mpo_zero_flux_valid,
+            operator_sectors_valid = checks.operator_sectors_valid,
+            tdvp_step_valid = checks.tdvp_step_valid,
+            hdf5_roundtrip_valid = checks.hdf5_roundtrip_valid,
+            failure = nothing,
+        )
+    catch exception
+        return (;
+            supported = false,
+            qn_gauge = QN_GAUGE,
+            qn_gauge_version = QN_GAUGE_VERSION,
+            julia_version = string(VERSION),
+            itensors_version = string(pkgversion(ITensors)),
+            itensormps_version = string(pkgversion(ITensorMPS)),
+            site_labels_valid = false,
+            identity_sector_valid = false,
+            mpo_zero_flux_valid = false,
+            operator_sectors_valid = false,
+            tdvp_step_valid = false,
+            hdf5_roundtrip_valid = false,
+            failure = sprint(showerror, exception),
+        )
+    end
+end
+
+probe_qn_purification_capability() =
+    _probe_qn_purification_capability(_run_qn_purification_capability_probe)
 
 end
