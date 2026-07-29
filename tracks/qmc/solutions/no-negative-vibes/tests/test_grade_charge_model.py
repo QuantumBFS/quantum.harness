@@ -13,9 +13,11 @@ from oracle.grade_charge_model import (
     extended_edge_real_generator,
     fugacities_are_uniformly_safe,
     fugacity_safety_bounds,
+    grade_charge_direct_sum_audit,
     grade_charge_model,
     grade_charge_fock_hamiltonian,
     grade_charge_history_weight,
+    grade_charge_sector_hamiltonian,
     physical_edge_propagator,
     triangle_grade_charge_model,
     unsafe_fugacity_witness_edge,
@@ -127,6 +129,42 @@ def test_global_occupied_ancilla_block_matches_the_projected_model() -> None:
         )
 
     assert np.allclose(occupied_block, expected, atol=1e-12)
+
+
+@pytest.mark.parametrize("layout", TRIANGLE_LAYOUTS)
+def test_full_model_is_exactly_a_static_direct_sum_of_ancilla_sectors(
+    layout: str,
+) -> None:
+    model = triangle_grade_charge_model(layout)
+    audit = grade_charge_direct_sum_audit(model)
+
+    assert len(audit.sectors) == 1 << model.group_count
+    assert audit.maximum_sector_residual < 1e-12
+    assert audit.reconstruction_residual < 1e-12
+    assert np.allclose(
+        audit.permuted_full_hamiltonian,
+        audit.direct_sum_hamiltonian,
+        atol=1e-12,
+    )
+
+
+def test_empty_and_occupied_global_sectors_have_opposite_vertex_signs() -> None:
+    model = triangle_grade_charge_model("global")
+    empty = grade_charge_sector_hamiltonian(model, (0,))
+    occupied = grade_charge_sector_hamiltonian(model, (1,))
+    expected_empty = np.zeros_like(empty)
+    expected_occupied = np.zeros_like(occupied)
+    for edge_index, (coupling, dilation) in enumerate(
+        zip(model.couplings, model.dilations, strict=True)
+    ):
+        vertex = number_conserving_gaussian_fock_matrix(
+            physical_edge_propagator(model, edge_index)
+        )
+        expected_empty -= coupling * vertex
+        expected_occupied += coupling * dilation * vertex
+
+    assert np.allclose(empty, expected_empty, atol=1e-12)
+    assert np.allclose(occupied, expected_occupied, atol=1e-12)
 
 
 @pytest.mark.parametrize("layout", TRIANGLE_LAYOUTS)

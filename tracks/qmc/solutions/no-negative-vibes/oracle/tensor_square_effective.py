@@ -13,6 +13,16 @@ For the eigenvalues ``lambda_i`` of the final base product,
   = product_i (1 + lambda_i**2)
     * product_(i<j) (1 + lambda_i * lambda_j)**2 >= 0``.
 
+The same weight has a stronger hidden factorization,
+
+``det(I + X tensor X)
+  = |det(I + i X)|**2 * det(I + exterior_square(X))**2``.
+
+Thus the tensor-square theorem is algebraically a modulus square times a real
+square.  The factorization is history-level: the ``i`` is a boundary twist on
+the final product, not a claim that every original time slice is an ordinary
+two-flavour Kramers pair.
+
 The main model in this module is the continuous Gaussian-HS family
 
 ``H = K - 1/2 sum_a g_a Q_a**2``,
@@ -39,6 +49,7 @@ still requires comparison with Majorana and contraction-semigroup criteria.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import combinations
 import math
 from typing import Sequence
 
@@ -60,6 +71,19 @@ class TensorSquareDeterminantCertificate:
     pair_spectral_factor: float
     spectral_weight: float
     direct_weight: float
+
+
+@dataclass(frozen=True)
+class TensorSquareFactorizationCertificate:
+    """Modulus-square/exterior-square factorization of one final product."""
+
+    base_product: np.ndarray
+    second_compound: np.ndarray
+    direct_weight: float
+    modulus_square_factor: float
+    exterior_determinant: float
+    factorized_weight: float
+    relative_residual: float
 
 
 @dataclass(frozen=True)
@@ -298,6 +322,70 @@ def tensor_square_determinant_certificate(
         pair_spectral_factor=pair_real,
         spectral_weight=max(0.0, spectral_weight),
         direct_weight=max(0.0, direct_weight),
+    )
+
+
+def second_multiplicative_compound(matrix: np.ndarray) -> np.ndarray:
+    """Return the matrix of ``exterior_square(matrix)`` in pair order."""
+
+    base = _square_float_matrix(matrix, name="matrix")
+    pairs = tuple(combinations(range(base.shape[0]), 2))
+    result = np.empty((len(pairs), len(pairs)), dtype=float)
+    for row_index, rows in enumerate(pairs):
+        for column_index, columns in enumerate(pairs):
+            result[row_index, column_index] = np.linalg.det(
+                base[np.ix_(rows, columns)]
+            )
+    return result
+
+
+def tensor_square_factorization_certificate(
+    base_factors: Sequence[np.ndarray],
+    *,
+    tolerance: float = 1e-9,
+) -> TensorSquareFactorizationCertificate:
+    """Certify the hidden modulus-square times real-square identity.
+
+    For the final real history product ``X``,
+
+    ``det(I+X⊗X)=|det(I+iX)|² det(I+Λ²X)²``.
+
+    This closes the question of whether tensor-square determinant positivity
+    is an irreducible new algebraic mechanism: it is not.  The physical
+    Hamiltonian mapping can still be useful because the factors live in
+    different representations and the complex factor contains a boundary
+    twist.
+    """
+
+    if tolerance < 0.0:
+        raise ValueError("tolerance must be nonnegative")
+    history = tensor_square_history(base_factors)
+    base = history.base_product
+    compound = second_multiplicative_compound(base)
+    modulus_factor = float(
+        abs(np.linalg.det(np.eye(base.shape[0], dtype=complex) + 1j * base))
+        ** 2
+    )
+    exterior_determinant = float(
+        np.linalg.det(np.eye(compound.shape[0]) + compound)
+    )
+    factorized_weight = modulus_factor * exterior_determinant**2
+    scale = max(1.0, abs(history.weight), abs(factorized_weight))
+    relative_residual = abs(history.weight - factorized_weight) / scale
+    if relative_residual > tolerance:
+        raise ArithmeticError(
+            "tensor-square modulus/exterior factorization failed"
+        )
+    if modulus_factor < -tolerance or history.weight < -tolerance:
+        raise ArithmeticError("tensor-square factorization is not nonnegative")
+    return TensorSquareFactorizationCertificate(
+        base_product=base,
+        second_compound=compound,
+        direct_weight=max(0.0, history.weight),
+        modulus_square_factor=max(0.0, modulus_factor),
+        exterior_determinant=exterior_determinant,
+        factorized_weight=max(0.0, factorized_weight),
+        relative_residual=relative_residual,
     )
 
 

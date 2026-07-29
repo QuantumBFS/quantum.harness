@@ -25,6 +25,7 @@ one-edge history is already a negative witness.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import product
 import math
 from typing import Literal, Sequence
 
@@ -85,6 +86,28 @@ class GradeChargeHistoryWeight:
     direct_fock_trace: float | None
     taylor_prefactor: float
     total_weight: float
+
+
+@dataclass(frozen=True)
+class GradeChargeSectorDecomposition:
+    """One static ancilla sector and its physical Hamiltonian block."""
+
+    ancilla_occupations: tuple[int, ...]
+    full_fock_indices: tuple[int, ...]
+    physical_hamiltonian: np.ndarray
+    extracted_full_block: np.ndarray
+    block_residual: float
+
+
+@dataclass(frozen=True)
+class GradeChargeDirectSumAudit:
+    """Exact decomposition of the full model into conserved sectors."""
+
+    sectors: tuple[GradeChargeSectorDecomposition, ...]
+    permuted_full_hamiltonian: np.ndarray
+    direct_sum_hamiltonian: np.ndarray
+    reconstruction_residual: float
+    maximum_sector_residual: float
 
 
 def grade_charge_model(
@@ -265,6 +288,115 @@ def grade_charge_fock_hamiltonian(model: GradeChargeModel) -> np.ndarray:
     for edge_index, coupling in enumerate(model.couplings):
         result -= coupling * extended_edge_fock_vertex(model, edge_index)
     return result
+
+
+def grade_charge_sector_hamiltonian(
+    model: GradeChargeModel,
+    ancilla_occupations: Sequence[int],
+) -> np.ndarray:
+    """Return the physical block for one conserved ancilla bit pattern.
+
+    Every grade occupation commutes with the full Hamiltonian.  In a fixed
+    sector, edge ``e`` contributes ``-q_e Gamma(B_e)`` when its grade mode is
+    empty and ``+q_e r_e Gamma(B_e)`` when it is occupied.  Consequently the
+    full grade-charge model is a static direct sum of ordinary physical
+    Hamiltonians; its ancillas have no quantum dynamics.
+    """
+
+    occupations = tuple(int(value) for value in ancilla_occupations)
+    if len(occupations) != model.group_count:
+        raise ValueError("one occupation bit is required for every grade group")
+    if any(value not in (0, 1) for value in occupations):
+        raise ValueError("ancilla occupations must be zero or one")
+
+    dimension = 1 << model.physical_modes
+    result = np.zeros((dimension, dimension), dtype=float)
+    for edge_index, (coupling, dilation, group) in enumerate(
+        zip(
+            model.couplings,
+            model.dilations,
+            model.grade_groups,
+            strict=True,
+        )
+    ):
+        scalar = coupling * dilation if occupations[group] else -coupling
+        result += scalar * number_conserving_gaussian_fock_matrix(
+            physical_edge_propagator(model, edge_index)
+        )
+    return result
+
+
+def grade_charge_sector_decomposition(
+    model: GradeChargeModel,
+    ancilla_occupations: Sequence[int],
+    *,
+    full_hamiltonian: np.ndarray | None = None,
+) -> GradeChargeSectorDecomposition:
+    """Extract and independently reconstruct one conserved sector."""
+
+    occupations = tuple(int(value) for value in ancilla_occupations)
+    physical = grade_charge_sector_hamiltonian(model, occupations)
+    ancilla_mask = sum(
+        occupation << (model.physical_modes + group)
+        for group, occupation in enumerate(occupations)
+    )
+    indices = tuple(
+        ancilla_mask | physical_state
+        for physical_state in range(1 << model.physical_modes)
+    )
+    full = (
+        grade_charge_fock_hamiltonian(model)
+        if full_hamiltonian is None
+        else np.asarray(full_hamiltonian, dtype=float)
+    )
+    expected_dimension = 1 << model.total_modes
+    if full.shape != (expected_dimension, expected_dimension):
+        raise ValueError("full_hamiltonian has the wrong Fock dimension")
+    extracted = full[np.ix_(indices, indices)]
+    return GradeChargeSectorDecomposition(
+        ancilla_occupations=occupations,
+        full_fock_indices=indices,
+        physical_hamiltonian=physical,
+        extracted_full_block=extracted,
+        block_residual=float(np.linalg.norm(extracted - physical)),
+    )
+
+
+def grade_charge_direct_sum_audit(
+    model: GradeChargeModel,
+) -> GradeChargeDirectSumAudit:
+    """Prove that the full Hamiltonian is a static sector direct sum."""
+
+    full = grade_charge_fock_hamiltonian(model)
+    sectors = tuple(
+        grade_charge_sector_decomposition(
+            model,
+            occupations,
+            full_hamiltonian=full,
+        )
+        for occupations in product((0, 1), repeat=model.group_count)
+    )
+    permutation = tuple(
+        index
+        for sector in sectors
+        for index in sector.full_fock_indices
+    )
+    permuted = full[np.ix_(permutation, permutation)]
+    block_dimension = 1 << model.physical_modes
+    direct_sum = np.zeros_like(permuted)
+    for sector_index, sector in enumerate(sectors):
+        start = sector_index * block_dimension
+        stop = start + block_dimension
+        direct_sum[start:stop, start:stop] = sector.physical_hamiltonian
+    return GradeChargeDirectSumAudit(
+        sectors=sectors,
+        permuted_full_hamiltonian=permuted,
+        direct_sum_hamiltonian=direct_sum,
+        reconstruction_residual=float(np.linalg.norm(permuted - direct_sum)),
+        maximum_sector_residual=max(
+            sector.block_residual for sector in sectors
+        ),
+    )
 
 
 def vertex_mode_support(

@@ -1,6 +1,23 @@
 # 无符号 QMC challenge：合作者进展说明
 
-更新时间：2026-07-28
+更新时间：2026-07-29
+
+## 7 月 29 日最新收缩
+
+首批非常规模型的三个优先候选已完成解析排重：
+
+- `adjoint lift X tensor X^(-T)` 的整个族位于固定 `O(p,q)` 恒等连通分支，padding
+  后就是已知 split-orthogonal 机制，关闭为新正性机制；
+- grade-charge full Hamiltonian 是所有守恒 ancilla-bit 扇区的静态直和，ancilla
+  没有动力学，降级为方法工具；
+- tensor-square 权重可精确分解为
+  `|det(I+iX)|^2 det(I+Lambda^2 X)^2`，因此不是不可约的新 determinant 机制；
+  但 `m=3` 完整表示的固定伪正交度量线性系统满秩，排除了最简单的固定
+  `O(p,q)` 解释，故只保留其多通道 Hamiltonian 的物理和 Majorana/Pfaffian 排重。
+
+同一个 Stark 非厄米链既有对角 Hermitian partner，也可经任意 unitary 换基得到长程
+partner，所以该路线只作方法校准。完整回归当前为 `358 passed`。详见
+[三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
 ## 一句话状态
 
@@ -45,8 +62,8 @@ Majorana 宇称分辨 period-4 数值猜想。
    - `speculative-structures-v1`：960 格、192,000 个行列式。
    - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
 4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现、精确非对称键门
-   分解、graded-monomial 的 Majorana 包含证书和 block-TN 局域闭包精确反例；220 个
-   自动测试全通过。
+   分解、graded-monomial 的 Majorana 包含证书、block-TN 局域闭包精确反例和最新三个
+   候选审计证书；358 个自动测试全通过。
 
 ## 当前最重要的结果
 

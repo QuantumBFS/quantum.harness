@@ -10,6 +10,7 @@ from oracle.adjoint_lift import (
     adjoint_lift,
     adjoint_lift_history,
     adjoint_lifted_generator,
+    adjoint_orthogonal_certificate,
     commutation_metric,
     commutation_metric_residual,
 )
@@ -44,6 +45,33 @@ def test_adjoint_lift_preserves_the_swap_metric() -> None:
     assert np.count_nonzero(eigenvalues > 0.0) == 6
     assert np.count_nonzero(eigenvalues < 0.0) == 3
     assert commutation_metric_residual(matrix) < 1e-12
+
+
+def test_adjoint_lift_is_in_a_known_pseudo_orthogonal_component() -> None:
+    for dimension in (2, 3, 4):
+        generator = np.fromfunction(
+            lambda row, column: (
+                0.07 * (row + 1)
+                - 0.04 * (column + 1)
+                + 0.02 * row * column
+            ),
+            (dimension, dimension),
+        )
+        certificate = adjoint_orthogonal_certificate(expm(generator))
+        positive = dimension * (dimension + 1) // 2
+        negative = dimension * (dimension - 1) // 2
+
+        assert certificate.base_dimension == dimension
+        assert certificate.lifted_dimension == dimension**2
+        assert certificate.positive_signature == positive
+        assert certificate.negative_signature == negative
+        assert certificate.padded_split_dimension == positive
+        assert abs(certificate.lifted_determinant - 1.0) < 1e-10
+        assert certificate.metric_residual < 1e-11
+        assert abs(
+            certificate.padded_weight_ratio - 2.0 ** (positive - negative)
+        ) < 1e-9
+        assert certificate.identity_component_certified
 
 
 def test_exponential_generator_identity() -> None:

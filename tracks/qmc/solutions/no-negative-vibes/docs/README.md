@@ -11,6 +11,7 @@
 | 决定下一步研究 | [下一阶段计划](NEXT_RESEARCH_PLAN.md) |
 | 查看最新自底向上候选和最小实验 | [自底向上正性候选](BOTTOM_UP_POSITIVITY_CANDIDATES.md) |
 | 查看最新一批非常规模型 | [非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md) |
+| 看三个最新候选为何只剩一个 | [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md) |
 | 给合作者同步完整证据数字 | [合作者进展说明](COLLABORATOR_UPDATE.zh-CN.md) |
 
 文档状态分为三类：
@@ -74,6 +75,9 @@
   quasi-Hermitian 模型的主线与证据标准；
 - [UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)：
   通用 Hermitian 半群模型工厂、八种首批模型、证据等级、已知类风险与下一轮优先级；
+- [THREE_CANDIDATE_AUDIT_RESULTS.md](THREE_CANDIDATE_AUDIT_RESULTS.md)：
+  Stark partner 非唯一性的通俗解释，以及 tensor-square、grade-charge、adjoint lift
+  三个候选的最新解析排查和收缩结论；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity；物理模型排重后已降为已知 Majorana 正性子类；

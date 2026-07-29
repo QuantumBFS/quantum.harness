@@ -196,10 +196,14 @@ H = -sum_a q_a [Gamma(B_a)+Gamma(B_a)^dagger]
 
 生成逐 Taylor word 非负的 Hermitian 相互作用模型。基于它和精确相似/投影变换，
 已经得到八种长程、全局、多体、ancilla、Wilson-string 或 pseudo-Hermitian 模型。
-其中 Wilson gauge、Stark similarity、star-to-chain 已明确降为 L2/已知校准；
-一般 tensor-square 多通道、grade-charge full trace 和 adjoint lift 仍待排重。
-这批结果增加的是 L1/L2 模型与研究基础，不增加“确认的新无符号物理类”计数。见
-[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
+其中 Wilson gauge、Stark similarity、star-to-chain 已明确降为 L2/已知校准。
+随后的三个候选审计又得到：adjoint lift 完整位于已知 `O(p,q)` 恒等分支；
+grade-charge full trace 是守恒 ancilla-bit 扇区的静态直和；tensor-square 权重可
+分解为 `|det(I+iX)|^2 det(I+Lambda^2 X)^2`，但 `m=3` 完整表示不存在固定
+pseudo-orthogonal 度量。现在只保留 tensor-square 多通道 Hamiltonian 的物理排重，
+仍不增加“确认的新无符号物理类”计数。见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)和
+[三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。

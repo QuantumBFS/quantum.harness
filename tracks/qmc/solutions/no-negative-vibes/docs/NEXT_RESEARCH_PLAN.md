@@ -44,10 +44,13 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 分支和检验候选。
 
 第一批反推已经交付一个通用 Hermitian 半群模型工厂与八种完整构造。它们没有增加
-L3 计数；下一步不再继续凑模型数量，而优先审计一般 `m>=3` tensor-square 多通道、
-grade-charge full trace 和 adjoint lift，并把一个幸存对象接到实际 vertex-word
-采样。详见
-[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)。
+L3 计数。三个优先候选的首轮审计也已经完成：adjoint lift 精确归入已知
+split-orthogonal 机制，grade-charge full trace 是静态守恒扇区直和，tensor-square
+determinant 可分解为模平方乘实平方。现在不再三线并行，只保留一般 `m>=3`
+tensor-square 多通道 Hamiltonian 的物理与 Majorana/Pfaffian 排重，并在幸存后接入
+实际 vertex-word 采样。详见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)和
+[三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
 
 ## 主线 A：从严格正性类开采非常规模型
 
@@ -251,10 +254,10 @@ Wilson-string 和非厄米 transfer 顶点，但仍检查：
    `2 x L` 中央跳跃的 affine phase 含全部其他竖边，局域可扩展性失败。
 8. **协作者在做**：non-induced exterior cone exact-card/pressure 扫描；本分支只消费
    其通过证书门的候选，不重复生成器和分布式筛选。
-9. **立即开始**：从 tensor-square、TN、odd block-TN、graded ancilla 和
-   gauge/cocycle 反推 U1–U6 非常规模型。
-10. **随后进行**：显式 pseudo-Hermitian metric、局域性 tradeoff、Fourier/投影/对偶
-   约化和 `-log` 多体 Hamiltonian 分析。
+9. **已完成首批**：从 tensor-square、TN、odd block-TN、graded ancilla 和
+   gauge/cocycle 反推 U1–U6 非常规模型，并完成三个优先候选的首轮解析排重。
+10. **立即开始**：固定最小 `m=3` tensor-square 多通道模型，完成逐时间片
+   Majorana/Pfaffian 排重、物理相互作用解释和 vertex-word 采样。
 11. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
 12. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
 13. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
@@ -262,10 +265,10 @@ Wilson-string 和非厄米 transfer 顶点，但仍检查：
 近期精力分配：
 
 ```text
-55%  已有严格正性类的非常规模型反推
-20%  pseudo-Hermitian / similarity / locality tradeoff
-15%  Hamiltonian 的投影、对偶、Fourier 与 -log 约化
-10%  Majorana/Pfaffian 支撑与合作者候选独立复核
+60%  m=3 tensor-square 多通道 Hamiltonian 的排重与采样
+20%  相互作用、可观测量、Kac scaling 和系统尺寸分析
+10%  Majorana/Pfaffian 支撑工具
+10%  合作者候选独立复核
 ```
 
 ## 两人协作建议

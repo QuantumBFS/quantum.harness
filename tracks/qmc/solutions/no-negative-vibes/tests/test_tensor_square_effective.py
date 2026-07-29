@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 from scipy.linalg import expm
 from scipy.special import roots_hermitenorm
+import sympy as sp
 
 from oracle.tensor_square_effective import (
     continuous_gaussian_hs_history,
@@ -18,7 +19,9 @@ from oracle.tensor_square_effective import (
     lifted_one_body_generator,
     number_conserving_fock_generator,
     occupation_polynomial_values,
+    second_multiplicative_compound,
     tensor_square_determinant_certificate,
+    tensor_square_factorization_certificate,
 )
 from oracle.tn_bond_hs import number_conserving_gaussian_fock_matrix
 
@@ -234,6 +237,109 @@ def test_three_by_three_multichannel_hs_model_is_noncommuting_and_positive() -> 
     assert history.determinant_certificate.closure_residual < 1e-10
     assert history.determinant_certificate.direct_weight > 0.0
     assert history.total_weight > 0.0
+
+
+def test_tensor_square_weight_has_hidden_modulus_square_factorization() -> None:
+    factors = (
+        expm(
+            np.asarray(
+                [
+                    [0.2, 0.4, 0.0],
+                    [0.1, -0.3, 0.5],
+                    [0.0, -0.2, 0.6],
+                ]
+            )
+        ),
+        expm(
+            np.asarray(
+                [
+                    [-0.4, 0.0, 0.3],
+                    [0.2, 0.5, -0.1],
+                    [0.4, 0.0, 0.2],
+                ]
+            )
+        ),
+    )
+    certificate = tensor_square_factorization_certificate(factors)
+
+    assert certificate.modulus_square_factor > 0.0
+    assert certificate.relative_residual < 1e-12
+    assert certificate.direct_weight > 0.0
+    assert np.allclose(
+        second_multiplicative_compound(factors[0] @ factors[1]),
+        second_multiplicative_compound(factors[0])
+        @ second_multiplicative_compound(factors[1]),
+        atol=1e-12,
+    )
+
+
+def test_tensor_square_factorization_has_an_exact_integer_anchor() -> None:
+    base = sp.Matrix(
+        [
+            [2, 1, 0],
+            [-1, 1, 2],
+            [0, 1, 3],
+        ]
+    )
+    pairs = ((0, 1), (0, 2), (1, 2))
+    compound = sp.Matrix(
+        [
+            [
+                base.extract(rows, columns).det()
+                for columns in pairs
+            ]
+            for rows in pairs
+        ]
+    )
+    lifted = sp.kronecker_product(base, base)
+    direct = (sp.eye(9) + lifted).det()
+    modulus = (
+        (sp.eye(3) + sp.I * base).det()
+        * (sp.eye(3) - sp.I * base).det()
+    )
+    factorized = modulus * (sp.eye(3) + compound).det() ** 2
+
+    assert sp.simplify(direct - factorized) == 0
+    assert direct > 0
+
+
+def test_m3_tensor_square_has_no_fixed_conformal_orthogonal_metric() -> None:
+    base_dimension = 3
+    lifted_dimension = base_dimension**2
+    identity = sp.eye(base_dimension)
+    generators: list[sp.Matrix] = []
+    for index in range(base_dimension - 1):
+        diagonal = sp.zeros(base_dimension)
+        diagonal[index, index] = 1
+        diagonal[index + 1, index + 1] = -1
+        generators.append(diagonal)
+    for row in range(base_dimension):
+        for column in range(base_dimension):
+            if row == column:
+                continue
+            elementary = sp.zeros(base_dimension)
+            elementary[row, column] = 1
+            generators.append(elementary)
+
+    constraint_blocks = []
+    for generator in generators:
+        lifted = (
+            sp.kronecker_product(generator, identity)
+            + sp.kronecker_product(identity, generator)
+        )
+        constraint_blocks.append(
+            sp.kronecker_product(sp.eye(lifted_dimension), lifted.T)
+            + sp.kronecker_product(lifted.T, sp.eye(lifted_dimension))
+        )
+    constraints = constraint_blocks[0]
+    for block in constraint_blocks[1:]:
+        constraints = constraints.col_join(block)
+
+    # A fixed conformal metric would be invariant under every traceless base
+    # generator.  Exact full rank means even a nonzero degenerate bilinear
+    # form is impossible for m=3, hence no fixed basis can put the full
+    # tensor-square image into any O(p,q) cone.
+    assert constraints.rank() == lifted_dimension**2
 
 
 @pytest.mark.parametrize(

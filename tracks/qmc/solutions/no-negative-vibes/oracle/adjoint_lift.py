@@ -7,7 +7,11 @@ For every invertible real matrix with positive determinant,
 obeys ``det(I+B(X)) >= 0``.  The family is multiplicatively closed because
 ``B(X)B(Y)=B(XY)``.  It also preserves the commutation metric, so this module
 records the construction as a structured pseudo-orthogonal subgroup rather
-than claiming an unrelated new positivity principle.
+than claiming an unrelated new positivity principle.  More strongly,
+``GL^+(m,R)`` is connected and the lift maps the identity to the identity, so
+the entire family lies in the identity component of
+``O(m(m+1)/2, m(m-1)/2)``.  Padding the smaller signature reduces its
+positivity to the known split-orthogonal theorem.
 """
 
 from __future__ import annotations
@@ -29,6 +33,21 @@ class AdjointLiftHistory:
     weight: float
     pairing_formula: float
     closure_residual: float
+
+
+@dataclass(frozen=True)
+class AdjointOrthogonalCertificate:
+    """Fixed-metric and connected-component certificate for one lift."""
+
+    base_dimension: int
+    lifted_dimension: int
+    positive_signature: int
+    negative_signature: int
+    padded_split_dimension: int
+    lifted_determinant: float
+    metric_residual: float
+    padded_weight_ratio: float
+    identity_component_certified: bool
 
 
 @dataclass(frozen=True)
@@ -86,6 +105,56 @@ def commutation_metric_residual(base_matrix: np.ndarray) -> float:
     lifted = adjoint_lift(matrix)
     metric = commutation_metric(matrix.shape[0])
     return float(np.linalg.norm(lifted.T @ metric @ lifted - metric))
+
+
+def adjoint_orthogonal_certificate(
+    base_matrix: np.ndarray,
+) -> AdjointOrthogonalCertificate:
+    """Certify containment in a known ``O(p,q)`` identity component.
+
+    The positive-determinant check in :func:`adjoint_lift` puts ``X`` in
+    connected ``GL^+(m,R)``.  Since ``X -> X tensor X^{-T}`` is continuous
+    and sends the identity to the identity, the lifted matrix is in the
+    identity component of the fixed commutation metric.  This is an analytic
+    connectedness argument; the returned numerical fields audit its matrix
+    identities.
+    """
+
+    matrix = _real_square(base_matrix, name="base_matrix")
+    lifted = adjoint_lift(matrix)
+    dimension = matrix.shape[0]
+    positive = dimension * (dimension + 1) // 2
+    negative = dimension * (dimension - 1) // 2
+    metric = commutation_metric(dimension)
+    weight = float(np.linalg.det(np.eye(lifted.shape[0]) + lifted))
+    padded = np.block(
+        [
+            [lifted, np.zeros((lifted.shape[0], positive - negative))],
+            [
+                np.zeros((positive - negative, lifted.shape[0])),
+                np.eye(positive - negative),
+            ],
+        ]
+    )
+    padded_weight = float(
+        np.linalg.det(np.eye(padded.shape[0]) + padded)
+    )
+    ratio = padded_weight / weight if weight != 0.0 else 2.0 ** (
+        positive - negative
+    )
+    return AdjointOrthogonalCertificate(
+        base_dimension=dimension,
+        lifted_dimension=dimension**2,
+        positive_signature=positive,
+        negative_signature=negative,
+        padded_split_dimension=positive,
+        lifted_determinant=float(np.linalg.det(lifted)),
+        metric_residual=float(
+            np.linalg.norm(lifted.T @ metric @ lifted - metric)
+        ),
+        padded_weight_ratio=ratio,
+        identity_component_certified=True,
+    )
 
 
 def adjoint_pairing_formula(base_matrix: np.ndarray) -> float:
