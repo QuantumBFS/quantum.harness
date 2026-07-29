@@ -89,6 +89,21 @@ spin_spatial = measured("structural spin quotient") do
         materialize_coefficients=false,
     )
 end
+structural_isotypic = measured("structural-only isotypic inventory") do
+    assemble_shastry_full_state_spin_isotypic_reduced_primal(
+        spin_spatial;
+        verify_truth=false,
+        materialize_coefficients=false,
+    )
+end
+structural_report =
+    shastry_full_state_spin_isotypic_reduced_assembly_report(
+        structural_isotypic,
+    )
+structural_report.psd_triangle_entries == 75_967 ||
+    error("structural-only path changed the PSD inventory")
+structural_report.maximum_side == 135 ||
+    error("structural-only path changed the maximum PSD side")
 isotypic = measured("parallel exact isotypic truth and coefficients") do
     assemble_shastry_full_state_spin_isotypic_reduced_primal(spin_spatial)
 end

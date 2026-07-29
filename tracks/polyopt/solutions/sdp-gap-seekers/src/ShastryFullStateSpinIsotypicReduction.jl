@@ -529,6 +529,7 @@ end
 function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     source::ShastryFullStateSpinSpatialReducedPrimalAssembly;
     verify_truth::Bool=true,
+    materialize_coefficients::Bool=true,
 )
     truth = verify_truth ? shastry_spin_isotypic_truth(source) : nothing
     verify_truth && !something(truth).exact &&
@@ -536,6 +537,39 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     positive_blocks = retained_blocks(source.positive_blocks)
     gap_blocks = retained_blocks(source.gap_blocks)
     equalities = canonical_real_equalities(copy(source.equalities))
+    if !materialize_coefficients
+        block_records = String[
+            string(
+                block_label(block),
+                ":dimension=",
+                length(block.rows),
+            )
+            for block in [positive_blocks; gap_blocks]
+        ]
+        assembly_sha256 = fingerprint_records(
+            SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+            [
+                "source=" * source.assembly_sha256,
+                "coefficient_map=deferred-structural-v1",
+                "blocks=" * join(block_records, "\n"),
+                "equalities=" * join(
+                    canonical_polynomial_string.(equalities),
+                    "\n",
+                ),
+            ],
+        )
+        return ShastryFullStateSpinIsotypicReducedPrimalAssembly(
+            SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
+            source,
+            truth,
+            positive_blocks,
+            gap_blocks,
+            equalities,
+            MomentKey[],
+            "deferred-structural-v1",
+            assembly_sha256,
+        )
+    end
     provisional = ShastryFullStateSpinIsotypicReducedPrimalAssembly(
         SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
         source,

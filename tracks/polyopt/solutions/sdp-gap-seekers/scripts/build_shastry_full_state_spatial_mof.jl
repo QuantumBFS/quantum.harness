@@ -103,7 +103,8 @@ function parse_args(arguments::Vector{String})
             println(
                 "usage: build_shastry_full_state_spatial_mof.jl " *
                 "--coupling 0|4/5 --gamma P/Q " *
-                "--mode preflight|mof --output REPOSITORY_RELATIVE_PATH " *
+                "--mode structure|preflight|mof " *
+                "--output REPOSITORY_RELATIVE_PATH " *
                 "[--patch-level L]",
             )
             return nothing
@@ -121,8 +122,12 @@ function parse_args(arguments::Vector{String})
     gamma = parse_rational(values["--gamma"])
     gamma >= 0 || throw(ArgumentError("gamma must be nonnegative"))
     mode = Symbol(values["--mode"])
-    mode in (:preflight, :mof) ||
-        throw(ArgumentError("mode must be preflight or mof"))
+    mode in (:structure, :preflight, :mof) ||
+        throw(
+            ArgumentError(
+                "mode must be structure, preflight, or mof",
+            ),
+        )
     patch_level = parse(Int, get(values, "--patch-level", "1"))
     patch_level >= 1 ||
         throw(ArgumentError("--patch-level must be positive"))

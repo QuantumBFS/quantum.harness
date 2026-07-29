@@ -219,10 +219,17 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     end
     write_checkpoint(checkpoint_path, metadata)
 
-    progress("exact S3 isotypic cone blocking")
+    structure_only = options.mode == :structure
+    progress(
+        structure_only ?
+        "exact S3 structural cone blocking" :
+        "exact S3 isotypic cone blocking",
+    )
     isotypic_measurement =
         @timed assemble_shastry_full_state_spin_isotypic_reduced_primal(
             spin_spatial,
+            verify_truth=exhaustive_intermediate_truth,
+            materialize_coefficients=!structure_only,
         )
     isotypic = isotypic_measurement.value
     report =
@@ -233,8 +240,13 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     metadata["reduced"]["assembly_sha256"] = isotypic.assembly_sha256
     metadata["reduced"]["coefficient_map_sha256"] =
         isotypic.coefficient_map_sha256
-    metadata["spin_isotypic_truth"] =
-        spin_isotypic_truth_dict(something(isotypic.truth))
+    metadata["coefficient_inventory"] = structure_only ?
+        "deferred-structural-v1" :
+        "materialized-exact-v1"
+    if !isnothing(isotypic.truth)
+        metadata["spin_isotypic_truth"] =
+            spin_isotypic_truth_dict(something(isotypic.truth))
+    end
     write_checkpoint(checkpoint_path, metadata)
 
     if options.mode == :mof
