@@ -59,6 +59,11 @@ function main()
     all_pass = closed && h_inv && g2.closed && g3.violations == 0 && g4.violations == 0 && g6.violations == 0
     println("ALL_D4_COEFFICIENT_GATES_PASS\t$all_pass")
     flush(stdout)
+    all_pass || error(
+        "D4 coefficient gates failed: " *
+        "group_closed=$closed h_inv=$h_inv moment_closure=$(g2.closed) " *
+        "m_violations=$(g3.violations) gap_violations=$(g4.violations) off_irrep_violations=$(g6.violations)",
+    )
     return 0
 end
 
