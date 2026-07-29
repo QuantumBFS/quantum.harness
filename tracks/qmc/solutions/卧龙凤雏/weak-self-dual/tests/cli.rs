@@ -94,3 +94,16 @@ fn incompatible_existing_stream_is_rejected() {
         .failure()
         .stderr(predicate::str::contains("incompatible"));
 }
+
+#[test]
+fn runner_rejects_a_missing_configuration_before_creating_output() {
+    let mut command = Command::new("bash");
+    command
+        .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("run.sh"))
+        .arg("configs/does-not-exist.toml");
+    command
+        .assert()
+        .failure()
+        .code(2)
+        .stderr(predicate::str::contains("configuration not found"));
+}

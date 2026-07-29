@@ -18,3 +18,8 @@
 - [Clean Ising central-charge verification](clean-ising/README.md) — Rust
   transfer matrix and Xoshiro256++ Wolff Monte Carlo, with Python analysis and
   an offline report.
+- [Ordinary Nishimori central-charge verification](nishimori-ising/README.md) —
+  Rust random transfer products with Python finite-size analysis.
+- [Weak self-dual central-charge verification](weak-self-dual/README.md) —
+  Rust Born-correlated Gaussian Majorana trajectories with Xoshiro256++, plus
+  Python bootstrap analysis, plots, and an offline report.
