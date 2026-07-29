@@ -1768,3 +1768,24 @@ Since `det(B)=8`, the active complete target paired with the first cone is
 instead `chi_0+chi_2+chi_3+chi_5>=0`, retaining the positive
 `chi_5=8^n` sector.  Search is redirected to a coupled cone for grades
 `{0,2,3,5}` or a finite-depth exact check plus a grade-five tail bound.
+
+### Deep long-word stop condition
+
+The independent 72-run continuation at lengths 800/1200/1800 is complete.
+Every seed/length pair has eight distinct RNG assignments; all 72 JSON
+files parse, all stderr files are empty, and all word lengths and SHA-256
+digests replay.  All 72 mpmath finalists and all 72 exact rational
+determinants are strictly positive; the double-precision prefilter again
+misclassifies every finalist as negative.
+
+The WSL archive SHA-256 is
+`7e6f9dea4dd21e52c06839eae3d10db9b113f64b6295518c484e4628f3eff3e9`;
+the CPU archive SHA-256 is
+`219aa6e419bc9106c27b47c74ba0191a81eb6e8e81b4d29c1a28566d4cd04a00`.
+Together with the previous campaign, this gives 144 independent
+high-precision/exact winners spanning lengths 250 through 1800, in
+addition to exhaustive exact coverage through depth 27.  Repeating the
+same local-search objective at still greater length is now stopped:
+it has supplied strong survivor evidence but no proof and no
+counterexample.  Compute is reassigned to structurally different
+coupled-cone and tail-bound searches.
