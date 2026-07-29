@@ -209,3 +209,23 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
 - Next action: freeze and validate a parameter-free full-channel reflection
   proposal as a distinct sampler candidate. It must pass the same ordered
   m=3 ED gate before any Stage 4 point is released.
+
+## Stage 4 round 6 — channel-reflection contract (2026-07-29)
+
+- A distinct parameter-free proposal was frozen:
+  `phi_c(tau) -> -phi_c(tau)` for one complete channel history at a time.
+  The Gaussian prior is invariant and the proposal is an involution, so only
+  the determinant ratio enters the acceptance test.
+- The failed fixed-scale temporal-block proposal is disabled. Local
+  time-slice pCN updates remain active.
+- The ordered m=3 ED and single censored m=8 A/B gates, paired seeds, budgets,
+  acceptance/stability windows, 3-sigma / 2-sigma consistency gates and 25%
+  tau threshold were recorded before compute in
+  `notes/channel_reflection_preregistration.md`.
+- The runner requires a same-revision m=3 PASS artifact and binds its digest
+  into every Stage 4 chain fingerprint.
+- Remote-only verification: `73 passed`, including a real spawned reflection
+  worker; both runners and the DQMC kernel compile cleanly. No reflection
+  physics chain has run yet.
+- Next action: independent code review, clean commit/push, then the frozen
+  eight-chain m=3 gate on WSL.

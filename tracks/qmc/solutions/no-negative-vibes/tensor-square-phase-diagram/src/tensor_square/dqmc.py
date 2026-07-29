@@ -26,6 +26,7 @@ class DQMCConfig:
     g_a: float = 1.0
     proposal_scale: float = 0.75
     temporal_block_scale: float = 0.0
+    temporal_reflection_updates: bool = False
     stabilize: bool | None = None
 
     @property
@@ -42,6 +43,8 @@ class DQMCConfig:
             del data["stabilize"]
         if data["temporal_block_scale"] == 0.0:
             del data["temporal_block_scale"]
+        if not data["temporal_reflection_updates"]:
+            del data["temporal_reflection_updates"]
         return {**data, "slices": self.slices}
 
 
@@ -611,6 +614,13 @@ def run_chain(
         raise ValueError("proposal_scale must be in [0, 1)")
     if not 0.0 <= config.temporal_block_scale < 1.0:
         raise ValueError("temporal_block_scale must be in [0, 1)")
+    if (
+        config.temporal_block_scale > 0.0
+        and config.temporal_reflection_updates
+    ):
+        raise ValueError(
+            "temporal block and reflection updates cannot be combined"
+        )
     rng = np.random.default_rng(seed)
     model = make_one_body_model(config)
     kinetic_half = expm(-0.5 * config.dt * model.k)
@@ -620,6 +630,8 @@ def run_chain(
     proposed = 0
     temporal_block_accepted = 0
     temporal_block_proposed = 0
+    temporal_reflection_accepted = 0
+    temporal_reflection_proposed = 0
     measurements: list[dict[str, float]] = []
     if checkpoint_path is not None and checkpoint_path.exists():
         with np.load(checkpoint_path, allow_pickle=False) as checkpoint:
@@ -630,6 +642,14 @@ def run_chain(
                     "temporal_block_scale", 0.0
                 )
                 if stored_scale != 0.0:
+                    raise ValueError(
+                        "checkpoint config does not match requested config"
+                    )
+            if "temporal_reflection_updates" not in requested_config:
+                stored_reflection = stored_config.pop(
+                    "temporal_reflection_updates", False
+                )
+                if stored_reflection is not False:
                     raise ValueError(
                         "checkpoint config does not match requested config"
                     )
@@ -654,6 +674,14 @@ def run_chain(
             if "temporal_block_proposed" in checkpoint.files:
                 temporal_block_proposed = int(
                     checkpoint["temporal_block_proposed"].item()
+                )
+            if "temporal_reflection_accepted" in checkpoint.files:
+                temporal_reflection_accepted = int(
+                    checkpoint["temporal_reflection_accepted"].item()
+                )
+            if "temporal_reflection_proposed" in checkpoint.files:
+                temporal_reflection_proposed = int(
+                    checkpoint["temporal_reflection_proposed"].item()
                 )
             measurements = json.loads(
                 str(checkpoint["measurements_json"].item())
@@ -763,6 +791,40 @@ def run_chain(
                     log_weight = proposed_log_weight
                     accepted += 1
                     temporal_block_accepted += 1
+        if config.temporal_reflection_updates:
+            for channel in rng.permutation(len(model.channels)):
+                proposed_fields = fields.copy()
+                proposed_fields[:, channel] *= -1.0
+                proposed_slices = [
+                    slice_matrix(
+                        proposed_fields[index],
+                        model=model,
+                        dt=config.dt,
+                        kinetic_half=kinetic_half,
+                    )
+                    for index in range(config.slices)
+                ]
+                proposed_total = (
+                    stabilized_history_product(proposed_slices)
+                    if use_stabilization
+                    else history_product(proposed_slices)
+                )
+                proposed_log_weight = (
+                    stabilized_structured_log_weight(proposed_total)
+                    if use_stabilization
+                    else structured_log_weight(proposed_total)
+                )
+                proposed += 1
+                temporal_reflection_proposed += 1
+                if np.log(rng.random()) < min(
+                    0.0, proposed_log_weight - log_weight
+                ):
+                    fields = proposed_fields
+                    slices = proposed_slices
+                    total = proposed_total
+                    log_weight = proposed_log_weight
+                    accepted += 1
+                    temporal_reflection_accepted += 1
         if (
             sweep >= warmup_sweeps
             and (sweep - warmup_sweeps) % measure_every == 0
@@ -796,6 +858,8 @@ def run_chain(
                 "proposed": proposed,
                 "temporal_block_accepted": temporal_block_accepted,
                 "temporal_block_proposed": temporal_block_proposed,
+                "temporal_reflection_accepted": temporal_reflection_accepted,
+                "temporal_reflection_proposed": temporal_reflection_proposed,
                 "measurements_json": json.dumps(measurements),
                 "rng_state_json": json.dumps(rng.bit_generator.state),
             }
@@ -817,6 +881,13 @@ def run_chain(
             ),
             "temporal_block_accepted": temporal_block_accepted,
             "temporal_block_proposed": temporal_block_proposed,
+            "temporal_reflection_acceptance": (
+                temporal_reflection_accepted / temporal_reflection_proposed
+                if temporal_reflection_proposed
+                else 0.0
+            ),
+            "temporal_reflection_accepted": temporal_reflection_accepted,
+            "temporal_reflection_proposed": temporal_reflection_proposed,
             "config": config.as_dict(),
             "stabilized": use_stabilization,
             "run_fingerprint": run_fingerprint,

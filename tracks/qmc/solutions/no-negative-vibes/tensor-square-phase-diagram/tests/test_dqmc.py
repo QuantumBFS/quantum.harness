@@ -298,6 +298,12 @@ def test_checkpoint_resume_is_bitwise_reproducible(tmp_path) -> None:
     assert resumed["temporal_block_proposed"] == uninterrupted[
         "temporal_block_proposed"
     ]
+    assert resumed["temporal_reflection_accepted"] == uninterrupted[
+        "temporal_reflection_accepted"
+    ]
+    assert resumed["temporal_reflection_proposed"] == uninterrupted[
+        "temporal_reflection_proposed"
+    ]
 
 
 def test_default_sampler_resumes_legacy_checkpoint_and_fingerprint(
@@ -344,6 +350,8 @@ def test_default_sampler_resumes_legacy_checkpoint_and_fingerprint(
             not in {
                 "temporal_block_accepted",
                 "temporal_block_proposed",
+                "temporal_reflection_accepted",
+                "temporal_reflection_proposed",
             }
         }
     np.savez_compressed(checkpoint_path, **legacy_payload)
@@ -401,6 +409,93 @@ def test_default_sampler_rejects_nonzero_block_checkpoint(tmp_path) -> None:
         )
 
 
+def test_default_sampler_rejects_reflection_checkpoint(tmp_path) -> None:
+    from dataclasses import replace
+
+    from tensor_square.dqmc import run_chain
+
+    reflection_config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+        temporal_reflection_updates=True,
+    )
+    checkpoint_path = tmp_path / "reflection.npz"
+    run_chain(
+        reflection_config,
+        seed=1204,
+        warmup_sweeps=1,
+        measurement_sweeps=2,
+        measure_every=1,
+        checkpoint_path=checkpoint_path,
+        checkpoint_every=1,
+    )
+
+    with pytest.raises(ValueError, match="checkpoint config does not match"):
+        run_chain(
+            replace(reflection_config, temporal_reflection_updates=False),
+            seed=1204,
+            warmup_sweeps=1,
+            measurement_sweeps=2,
+            measure_every=1,
+            checkpoint_path=checkpoint_path,
+            checkpoint_every=1,
+        )
+
+
+def test_reflection_checkpoint_resume_is_bitwise_reproducible(
+    tmp_path,
+) -> None:
+    from tensor_square.dqmc import run_chain
+
+    config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+        proposal_scale=0.6,
+        temporal_reflection_updates=True,
+    )
+    uninterrupted = run_chain(
+        config,
+        seed=1206,
+        warmup_sweeps=2,
+        measurement_sweeps=4,
+        measure_every=1,
+    )
+    checkpoint_path = tmp_path / "reflection-resume.npz"
+    run_chain(
+        config,
+        seed=1206,
+        warmup_sweeps=2,
+        measurement_sweeps=2,
+        measure_every=1,
+        checkpoint_path=checkpoint_path,
+        checkpoint_every=2,
+    )
+    resumed = run_chain(
+        config,
+        seed=999,
+        warmup_sweeps=2,
+        measurement_sweeps=4,
+        measure_every=1,
+        checkpoint_path=checkpoint_path,
+        checkpoint_every=2,
+    )
+
+    assert resumed["energy_mean"] == uninterrupted["energy_mean"]
+    assert resumed["accepted"] == uninterrupted["accepted"]
+    assert resumed["temporal_reflection_accepted"] == uninterrupted[
+        "temporal_reflection_accepted"
+    ]
+    assert resumed["temporal_reflection_proposed"] == uninterrupted[
+        "temporal_reflection_proposed"
+    ]
+
+
 def test_temporal_channel_block_update_reports_separate_acceptance() -> None:
     from tensor_square.dqmc import run_chain
 
@@ -431,6 +526,36 @@ def test_temporal_channel_block_update_reports_separate_acceptance() -> None:
     assert 0.0 <= summary["temporal_block_acceptance"] <= 1.0
 
 
+def test_temporal_channel_reflection_reports_separate_acceptance() -> None:
+    from tensor_square.dqmc import run_chain
+
+    config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+        proposal_scale=0.4,
+        temporal_reflection_updates=True,
+    )
+    model = make_one_body_model(config)
+
+    summary = run_chain(
+        config,
+        seed=1205,
+        warmup_sweeps=1,
+        measurement_sweeps=2,
+        measure_every=1,
+        progress_every=10,
+    )
+
+    assert summary["temporal_reflection_proposed"] == 3 * len(model.channels)
+    assert 0 <= summary["temporal_reflection_accepted"] <= summary[
+        "temporal_reflection_proposed"
+    ]
+    assert 0.0 <= summary["temporal_reflection_acceptance"] <= 1.0
+
+
 def test_temporal_channel_block_scale_must_be_a_valid_pcn_scale() -> None:
     from tensor_square.dqmc import run_chain
 
@@ -449,6 +574,29 @@ def test_temporal_channel_block_scale_must_be_a_valid_pcn_scale() -> None:
         run_chain(
             config,
             seed=1202,
+            warmup_sweeps=1,
+            measurement_sweeps=2,
+            measure_every=1,
+        )
+
+
+def test_temporal_block_and_reflection_cannot_be_combined() -> None:
+    from tensor_square.dqmc import run_chain
+
+    config = DQMCConfig(
+        m=3,
+        beta=0.2,
+        dt=0.1,
+        t=0.2,
+        g_b_over_g_a=0.5,
+        temporal_block_scale=0.1,
+        temporal_reflection_updates=True,
+    )
+
+    with pytest.raises(ValueError, match="cannot be combined"):
+        run_chain(
+            config,
+            seed=1207,
             warmup_sweeps=1,
             measurement_sweeps=2,
             measure_every=1,

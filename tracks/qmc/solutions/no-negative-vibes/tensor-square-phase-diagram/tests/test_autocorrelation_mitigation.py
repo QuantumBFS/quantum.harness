@@ -73,3 +73,33 @@ def test_stability_gate_rejects_density_and_tau_audit_failures() -> None:
     arm["density_max"] = 0.6
     arm["tau_audit_pass"] = False
     assert not runner._stability_pass(arm, block=True)
+
+
+def test_shared_worker_preserves_candidate_experiment_id(
+    tmp_path: Path,
+) -> None:
+    runner = _runner()
+    payload = runner._run_task(
+        {
+            "output_dir": str(tmp_path),
+            "experiment_id": "candidate-reflection-test",
+            "phase": "m3_ed",
+            "arm": "control",
+            "replica": 0,
+            "seed": 8123,
+            "config": {
+                "m": 3,
+                "beta": 0.2,
+                "dt": 0.1,
+                "t": 0.2,
+                "g_b_over_g_a": 0.5,
+            },
+            "warmup_sweeps": 1,
+            "measurement_sweeps": 2,
+            "measure_every": 1,
+            "source_revision": "test",
+            "m3_release_digest": None,
+        }
+    )
+
+    assert payload["experiment_id"] == "candidate-reflection-test"

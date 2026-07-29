@@ -63,11 +63,15 @@ def _git_metadata(project_root: Path) -> dict[str, object]:
     }
 
 
-def _validate_m3_release(path: Path, source_revision: str) -> str:
+def _validate_m3_release(
+    path: Path,
+    source_revision: str,
+    experiment_id: str = EXPERIMENT_ID,
+) -> str:
     encoded = path.read_bytes()
     release = json.loads(encoded)
     if (
-        release.get("experiment_id") != EXPERIMENT_ID
+        release.get("experiment_id") != experiment_id
         or release.get("phase") != "m3_ed"
         or release.get("source_revision") != source_revision
         or dict(release.get("decision", {})).get("status") != "PASS"
@@ -165,7 +169,7 @@ def _run_task(task: dict[str, object]) -> dict[str, object]:
     cpu_seconds = time.process_time() - cpu_start
     wall_seconds = time.perf_counter() - wall_start
     payload = {
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": task["experiment_id"],
         "phase": phase,
         "arm": arm,
         "replica": replica,
@@ -180,16 +184,20 @@ def _run_task(task: dict[str, object]) -> dict[str, object]:
     return payload
 
 
-def _arm_summary(rows: list[dict[str, object]]) -> dict[str, object]:
+def _arm_summary(
+    rows: list[dict[str, object]],
+    *,
+    proposal_acceptance_key: str = "temporal_block_acceptance",
+) -> dict[str, object]:
     result: dict[str, object] = {
         "replicas": len(rows),
         "acceptance_min": min(float(row["acceptance"]) for row in rows),
         "acceptance_max": max(float(row["acceptance"]) for row in rows),
-        "temporal_block_acceptance_min": min(
-            float(row["temporal_block_acceptance"]) for row in rows
+        f"{proposal_acceptance_key}_min": min(
+            float(row[proposal_acceptance_key]) for row in rows
         ),
-        "temporal_block_acceptance_max": max(
-            float(row["temporal_block_acceptance"]) for row in rows
+        f"{proposal_acceptance_key}_max": max(
+            float(row[proposal_acceptance_key]) for row in rows
         ),
         "direct_sign_min": min(float(row["direct_sign_min"]) for row in rows),
         "weight_log_error_max": max(
@@ -285,7 +293,12 @@ def _comparison(
     }
 
 
-def _stability_pass(arm: dict[str, object], *, block: bool) -> bool:
+def _stability_pass(
+    arm: dict[str, object],
+    *,
+    block: bool,
+    proposal_acceptance_key: str = "temporal_block_acceptance",
+) -> bool:
     acceptance_ok = (
         float(arm["acceptance_min"]) >= 0.05
         and float(arm["acceptance_max"]) <= 0.995
@@ -293,8 +306,8 @@ def _stability_pass(arm: dict[str, object], *, block: bool) -> bool:
     block_acceptance_ok = True
     if block:
         block_acceptance_ok = (
-            float(arm["temporal_block_acceptance_min"]) >= 0.05
-            and float(arm["temporal_block_acceptance_max"]) <= 0.995
+            float(arm[f"{proposal_acceptance_key}_min"]) >= 0.05
+            and float(arm[f"{proposal_acceptance_key}_max"]) <= 0.995
         )
     return (
         acceptance_ok
@@ -471,6 +484,7 @@ def main() -> None:
             tasks.append(
                 {
                     "output_dir": str(args.output_dir),
+                    "experiment_id": EXPERIMENT_ID,
                     "phase": args.phase,
                     "arm": arm,
                     "replica": replica,
