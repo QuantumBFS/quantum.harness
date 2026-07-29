@@ -701,3 +701,10 @@ Updated: 2026-07-29 UTC.
   requesting 32 CPUs, 256000 MiB, and one admission GPU with
   `GresEnforceBind=No`. Monitor it; do not launch an identical high-memory
   duplicate while it is queued.
+- While `118178932` waits, an exact continuous-spin reduction is being gated.
+  The existing V4/S3 quotient is octahedral; at the only missing tensor rank
+  for `d=2`, SO(3) invariance gives `T_xxxx = T_xxyy + T_xyxy + T_xyyx` for
+  each fixed moment skeleton. Commit the opt-in substitution separately,
+  preserve the old hashes by default, and require an L=1 comparison before
+  any L=2 solve. This is WLOG rotation averaging of an unrestricted state,
+  not a total-spin sector restriction.

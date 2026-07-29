@@ -1,0 +1,48 @@
+# Exact continuous-spin reduction through degree four
+
+## Scope
+
+The complete `d=2` state-polynomial relaxation contains scalar moments with
+at most four Pauli-vector factors. The existing exact V4 and S3 quotient is
+the proper octahedral rotation group. Averaging any unrestricted feasible KMS
+functional over global SU(2) rotations is therefore WLOG: it preserves the
+Hamiltonian, stationarity, normalization, and every PSD condition. This is a
+convex state average, not a restriction to a total-spin Hilbert-space sector.
+
+## Missing rank-four identity
+
+The octahedral and SO(3) invariant tensors agree through rank two. At rank
+four, an SO(3)-invariant tensor on four fixed vector slots is
+
+```text
+T_abcd = alpha delta_ab delta_cd
+       + beta  delta_ac delta_bd
+       + gamma delta_ad delta_bc.
+```
+
+Consequently, for every fixed site and state-symbol skeleton,
+
+```text
+T_xxxx = T_xxyy + T_xyxy + T_xyyx.
+```
+
+Global axis permutations already identify the choices of distinct axes, so
+this is the only additional continuous-spin relation needed at moment degree
+at most four. If symbol commutativity or spatial reflection identifies some
+of the three right-hand coordinates, their integer coefficients combine
+exactly.
+
+## Implementation and fail-closed status
+
+`SHASTRY_SU2_RANK4_REDUCTION=1` substitutes the identity into every exact
+coefficient polynomial before native Mosek constraints are created. The
+default route and its established hashes are unchanged. The reduced route
+uses a distinct fingerprint schema and records the number of eliminated
+rank-four coordinates.
+
+This route is provisional until it passes both gates:
+
+1. an L=1 construction/solve comparison against the established unrestricted
+   finite-relaxation decision; and
+2. two independent L=2 constructions with the same exact coefficient hash
+   before its result is interpreted.

@@ -1244,3 +1244,18 @@ That command created native-dual job `118178932` from clean commit `a77fc0e`.
 It is pending `Priority` with 32 CPUs, 256000 MiB, one GPU, one node, and
 `GresEnforceBind=No`. Keep this single high-memory signature queued and
 monitor for allocation; no model has run yet.
+
+Queue time exposed a solver-independent exact reduction. The current V4/S3
+state average is the proper octahedral group. For the complete `d=2` basis,
+all scalar moments have tensor rank at most four; octahedral and SO(3)
+invariants first differ at rank four. Every invariant rank-four tensor obeys
+`T_xxxx = T_xxyy + T_xyxy + T_xyyx` at fixed vector slots. Therefore an
+opt-in coefficient substitution can remove every all-equal-axis rank-four
+moment while preserving the unrestricted feasible set under WLOG global
+rotation averaging. It does not select a symmetric wavefunction sector.
+
+The implementation uses `SHASTRY_SU2_RANK4_REDUCTION=1`, a new fingerprint
+schema, and explicit eliminated-coordinate metadata. The established route is
+unchanged when the flag is absent. Do not launch L=2 from this source until an
+L=1 construction and decision comparison passes; then establish its new L=2
+hash twice before interpreting a solve.

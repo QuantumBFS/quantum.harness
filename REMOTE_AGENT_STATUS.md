@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:39:00Z
+Updated: 2026-07-29T17:52:00Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -166,5 +166,12 @@ Updated: 2026-07-29T17:39:00Z
   from clean commit `a77fc0e`, requesting 32 CPUs / 256000 MiB / one GPU with
   `GresEnforceBind=No`. No duplicate high-memory solve will be launched while
   it remains queued.
+- Source-prepared exact shrink: because `d=2` moments have at most four spin
+  vector factors, continuous SO(3) averaging adds only the rank-four identity
+  `T_xxxx = T_xxyy + T_xyxy + T_xyyx` beyond the established octahedral
+  quotient. An opt-in native-dual projection now eliminates those coordinates
+  under a separate coefficient fingerprint. It preserves unrestricted-state
+  semantics and is not yet authorized for L=2: next gate is an L=1 exact
+  construction/solve comparison on the configured SCNet environment.
 
 No user input or new credential is currently required.
