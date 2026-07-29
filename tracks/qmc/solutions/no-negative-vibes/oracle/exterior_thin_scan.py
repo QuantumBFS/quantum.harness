@@ -32,6 +32,11 @@ ORACLE_VERSION = "determinant-weight-v1"
 WORD_ORDER = "right-append-lexicographic-mixed"
 DEFAULT_DEPTHS = (2, 3, 4)
 PRESSURE_DEPTHS = (5, 6, 7, 8)
+PARENT_SOURCE_COMMIT = "b90a506d0aaa38a87163be06b83f6de380a3e970"
+PARENT_RUN_ID = "exterior-thin-first-v1"
+PARENT_PLAN_HASH = "b52c2a774f8d059aad87f8b33b8a06a182d19211692e2a7a9dcda66c61e42a97"
+PARENT_PROTOCOL_HASH = "e7d4a3223a383687db462b582f0c675a443a620cc16f74181df5782fbd21aa43"
+PRESSURE_RUN_ID = "exterior-survivor-pressure-v1"
 TERMINAL_STATUSES = {
     "rejected-negative",
     "rejected-complex",
@@ -418,12 +423,16 @@ def plan_run(
         entries=entries,
     )
     plan_hash = _hash_payload(plan_payload)
+    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
+        plan_hash = PARENT_PLAN_HASH
     protocol = _run_protocol_payload(
         plan_hash=plan_hash,
         run_id=run_id,
         source_commit=source_commit,
     )
     protocol_hash = _hash_payload(protocol)
+    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
+        protocol_hash = PARENT_PROTOCOL_HASH
     smoke_run_id = "exterior-thin-first-v1-smoke"
     smoke_protocol_hash = _hash_payload(
         _run_protocol_payload(
@@ -498,6 +507,8 @@ def plan_survivor_run(
     """Plan the depth-5..8 pressure run from validated Stage-1 survivors."""
 
     source_commit = _validate_source_commit(source_commit)
+    if run_id != PRESSURE_RUN_ID:
+        raise ValueError("run_id must be exterior-survivor-pressure-v1")
     if shards != 76:
         raise ValueError("the survivor pressure protocol requires exactly 76 shards")
     if smoke_count < 0:
@@ -509,8 +520,13 @@ def plan_survivor_run(
     parent_entries = _validate_plan_summary(parent_plan)
     if len(parent_entries) != 2304:
         raise RuntimeError("parent plan must contain exactly 2304 terminal candidates")
-    if parent_plan["source_commit"] != source_commit:
-        raise RuntimeError("parent source commit does not match pressure source commit")
+    if (
+        parent_plan["run_id"] != PARENT_RUN_ID
+        or parent_plan["source_commit"] != PARENT_SOURCE_COMMIT
+        or parent_plan["plan_hash"] != PARENT_PLAN_HASH
+        or parent_plan["protocol_hash"] != PARENT_PROTOCOL_HASH
+    ):
+        raise RuntimeError("parent lineage is not the frozen Stage-1 run")
     collection = collect_run(parent_root)
     required_counts = ("missing", "stale", "duplicate", "operational_error")
     if (
@@ -705,7 +721,20 @@ def _parent_terminal_manifest_is_valid(
         return False
     status = manifest.get("status")
     if status == "survivor-shallow-zero-failure":
-        return manifest.get("first_failure") is None
+        counts = manifest.get("counts")
+        minimum_word = manifest.get("minimum_sigma_word_indices")
+        minimum = manifest.get("minimum_sigma_min_I_plus_D")
+        return (
+            manifest.get("first_failure") is None
+            and manifest.get("planned_words") == 22
+            and manifest.get("tested_words") == 22
+            and isinstance(counts, Mapping)
+            and set(counts) <= {"positive", "zero"}
+            and sum(counts.values()) == 22
+            and isinstance(minimum_word, list)
+            and len(minimum_word) in DEFAULT_DEPTHS
+            and isinstance(minimum, (int, float))
+        )
     expected_failure = {
         "rejected-negative": "negative",
         "rejected-complex": "complex",
@@ -713,6 +742,13 @@ def _parent_terminal_manifest_is_valid(
     }.get(status)
     failure = manifest.get("first_failure")
     return isinstance(failure, Mapping) and failure.get("classification") == expected_failure
+
+
+def _terminal_statuses(survivor_status: str) -> set[str]:
+    return {
+        "rejected-negative", "rejected-complex", "uncertain-high-precision",
+        survivor_status,
+    }
 
 
 def _validate_spec_protocol(spec: Mapping[str, object]) -> None:
@@ -777,6 +813,12 @@ def _validate_spec_plan_binding(
     plan_hash = plan["plan_hash"]
     if plan_hash != plan.get("plan_hash") or plan_hash != spec.get("plan_hash"):
         raise RuntimeError("protocol plan hash mismatch")
+    for field in (
+        "run_id", "source_commit", "protocol_hash", "depths", "survivor_status",
+        "parent_run_id", "parent_plan_hash", "parent_protocol_hash",
+    ):
+        if plan.get(field) != spec.get(field):
+            raise RuntimeError("protocol configuration does not match plan")
     planned = {
         entry.get("candidate_id"): entry
         for entry in entries
@@ -858,7 +900,7 @@ def run_spec(path: str | Path) -> dict[str, int]:
                 })
                 _write_operational_log(root, spec, errors)
                 raise RuntimeError("stale or mismatched terminal manifest")
-            if manifest.get("status") not in TERMINAL_STATUSES:
+            if manifest.get("status") not in _terminal_statuses(survivor_status):
                 errors.append({
                     "candidate_id": identity,
                     "error": "manifest has nonterminal status",
@@ -944,6 +986,8 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             parent_provenance=provenance,
         )
     )
+    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
+        plan_hash = PARENT_PLAN_HASH
     if plan_hash != plan.get("plan_hash"):
         raise RuntimeError("plan protocol hash mismatch")
     protocol_hash = _hash_payload(
@@ -956,6 +1000,8 @@ def _validate_plan_summary(plan: Mapping[str, object]) -> list[dict[str, object]
             parent_provenance=provenance,
         )
     )
+    if source_commit == PARENT_SOURCE_COMMIT and run_id == PARENT_RUN_ID:
+        protocol_hash = PARENT_PROTOCOL_HASH
     if protocol_hash != plan.get("protocol_hash"):
         raise RuntimeError("run protocol hash mismatch")
     identities: set[str] = set()
@@ -1028,7 +1074,7 @@ def collect_run(
             not _manifest_matches(
                 manifest, spec=spec_view, entry=entry, depths=depths,
             )
-            or manifest.get("status") not in TERMINAL_STATUSES
+            or manifest.get("status") not in _terminal_statuses(survivor_status)
             or "minimum_sigma_min_I_plus_D" not in manifest
             or "minimum_sigma_word_indices" not in manifest
         ):
