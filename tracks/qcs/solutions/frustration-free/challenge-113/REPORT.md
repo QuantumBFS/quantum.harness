@@ -45,8 +45,22 @@ Linear use of only these measured 80-parameter components gives a preliminary
 23.3 s/trial estimate, about 61.5 trial-hours or 492 core-hours at eight cores
 per trial. Development artifacts averaged 19.6 KiB/trial; scaling the
 query-aligned records by the tenfold production budget suggests roughly 1.9 GB
-for 9,500 trials. These are gate estimates, not allocation numbers; the full
-remote pilot supplies the authoritative runtime, RSS, and artifact size.
+for 9,500 trials. These are calibration estimates; the full local pilot below
+supplies the authoritative runtime, RSS, and artifact size for this gate.
+
+The full local representative pilot then completed 929 exact optimizer queries,
+strictly validated, in 19.12 s wall with 860,224 KiB peak RSS. Its canonical
+trial artifact is 551,237 bytes. Direct scaling gives 50.5 trial-hours,
+approximately 404 core-hours at eight cores/trial, and 5.24 GB for 9,500 trial
+artifacts. The selected production class is therefore 8 CPU cores, 24 GiB, a
+12-hour element limit, and concurrency 32.
+
+The exact locked environment cannot currently run on either authorized cluster:
+both expose glibc 2.17, while frozen `jaxlib==0.11.0` requires
+`manylinux_2_27_x86_64`. The preferred revision archive was transferred and its
+SHA256 verified, but frozen sync failed closed before any Slurm job was
+submitted. No older JAX, source build, container, or CPU/GPU fallback was
+silently substituted.
 
 ## Development smoke
 

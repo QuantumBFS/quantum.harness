@@ -8,10 +8,11 @@ operator/scientific documentation. Preferred and fallback SSH aliases both
 passed read-only Slurm access checks; `xhacnormalb` on the preferred cluster was
 selected for the CPU pilot.
 
-The broad 9,500-trial array is not yet submitted. It remains gated on strict
-completion of the full remote pilot and on the discovered seed-coverage
-concern: the mandatory two-qubit open-loop acceptance fails for seed 0, which
-is present in the canonical production plan.
+The broad 9,500-trial array is not submitted. The full local representative
+pilot passed, but the exact frozen runtime is incompatible with both authorized
+clusters and the discovered seed-coverage concern remains: mandatory
+two-qubit open-loop acceptance fails for seed 0, which is present in the
+canonical production plan.
 
 ## Local evidence
 
@@ -26,19 +27,27 @@ is present in the canonical production plan.
   trajectory for 20 queries, 1.62 s geometry, 0.347 s restricted optimization,
   848,664 KiB peak RSS, JAX CPU/x64.
 - Preliminary projection: 23.3 s/trial, 61.5 trial-hours or 492 core-hours at
-  eight cores/trial, and approximately 1.9 GB. The remote full pilot supersedes
+  eight cores/trial, and approximately 1.9 GB. The full local pilot supersedes
   these preliminary estimates.
+- Full representative pilot: 929 exact queries, 19.12 s wall, 860,224 KiB peak
+  RSS, 551,237-byte canonical trial artifact, strict validation valid.
+- Full-pilot projection: 50.5 trial-hours, approximately 404 core-hours at eight
+  cores/trial, and 5.24 GB. Selected class: 8 CPU cores, 24 GiB, 12-hour limit,
+  concurrency 32.
 
 ## Cluster deployment
 
-Deployment is an exact archive of the clean Task 10 commit plus `uv.lock`, with
-the revision recorded in `.source-revision` and the archive SHA256 recorded
-alongside the immutable revision directory. Runtime output uses a separate
-revision/run-ID directory. Absolute host paths and credentials are not stored
-in the repository.
+The first clean Task 10 revision was deployed as an exact archive, with
+revision `5dc1ceb5cad54e3840d606761feb8770842d1fb5` and archive SHA256
+`8db29d3b421254933570da43d1cc27bdc093ffaab272a5441f0296c1a9dda5fc`.
+The remote archive hash matched before extraction. Runtime output is configured
+for a separate revision/run-ID directory; absolute host paths and credentials
+are not stored in the repository.
 
-Remote revision, archive digest, pilot job ID/state, strict validation result,
-and any production array job ID are appended after clean commit and submission.
+No Slurm pilot or array job ID exists. Frozen sync stopped before submission:
+both the preferred and fallback clusters expose glibc 2.17, but locked
+`jaxlib==0.11.0` provides x86-64 wheels requiring manylinux 2.27. The final
+array manifest selects 32-way concurrency but records submission as blocked.
 
 ## Concerns
 
@@ -51,3 +60,7 @@ and any production array job ID are appended after clean commit and submission.
 3. Cluster login nodes do not provide a default Python 3 executable. Deployment
    must use the existing shared CPython 3.12 runtime with a frozen uv sync; the
    Slurm scripts require the uv executable path explicitly and never fall back.
+4. The shared CPython runtime does not solve the glibc ABI mismatch. Neither
+   authorized cluster advertises Apptainer/Singularity, so an exact locked
+   execution environment is unavailable without an explicit environment
+   decision outside Task 10A.
