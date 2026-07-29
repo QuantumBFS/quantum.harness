@@ -1597,6 +1597,62 @@ def _run_case_checks(
     return _statistical_checks(protocol, case, samples, case_index)
 
 
+def assemble_validation_report(
+    protocol: ValidationProtocol,
+    checks: Sequence[Mapping[str, object]],
+    *,
+    elapsed_seconds: float,
+    runtime_capability_value: Mapping[str, object] | None = None,
+    source: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    assembled = [dict(item) for item in checks]
+    present = {item["family"] for item in assembled}
+    required = set(EXACT_FAMILIES) | set(STATISTICAL_FAMILIES)
+    for family in sorted(required - present):
+        assembled.append(
+            _exact(
+                family,
+                "missing-family",
+                {"missing": family},
+                "at least one completed check",
+                False,
+            )
+        )
+    assembled.sort(
+        key=lambda item: (str(item["family"]), str(item["case_id"]))
+    )
+    margins = [float(item["margin"]) for item in assembled]
+    report: dict[str, object] = {
+        "schema_version": VALIDATION_PROTOCOL_VERSION,
+        "protocol": _protocol_document(protocol),
+        "runtime_capability": dict(
+            runtime_capability()
+            if runtime_capability_value is None
+            else runtime_capability_value
+        ),
+        "source": dict(_repository_state() if source is None else source),
+        "coverage": {
+            "all_graph_probability": {
+                "backends": list(SAMPLERS),
+                "lengths": [
+                    length for length in protocol.lengths if length <= 6
+                ],
+                "comparison": "per-mask exact product-measure binomial",
+            }
+        },
+        "checks": assembled,
+        "family_count": len(
+            {str(item["family"]) for item in assembled}
+        ),
+        "minimum_margin": min(margins),
+        "passed": all(bool(item["passed"]) for item in assembled)
+        and required <= {str(item["family"]) for item in assembled},
+        "elapsed_seconds": float(elapsed_seconds),
+    }
+    validate_report_payload(report, protocol)
+    return report
+
+
 def run_production_validation(
     protocol: ValidationProtocol,
     output: Path,
@@ -1674,42 +1730,10 @@ def run_production_validation(
         else:
             checks.extend(outcome)
 
-    present = {item["family"] for item in checks}
-    required = set(EXACT_FAMILIES) | set(STATISTICAL_FAMILIES)
-    for family in sorted(required - present):
-        checks.append(
-            _exact(
-                family,
-                "missing-family",
-                {"missing": family},
-                "at least one completed check",
-                False,
-            )
-        )
-
-    checks.sort(key=lambda item: (str(item["family"]), str(item["case_id"])))
-    margins = [float(item["margin"]) for item in checks]
-    report: dict[str, object] = {
-        "schema_version": VALIDATION_PROTOCOL_VERSION,
-        "protocol": _protocol_document(protocol),
-        "runtime_capability": runtime_capability(),
-        "source": _repository_state(),
-        "coverage": {
-            "all_graph_probability": {
-                "backends": list(SAMPLERS),
-                "lengths": [
-                    length for length in protocol.lengths if length <= 6
-                ],
-                "comparison": "per-mask exact product-measure binomial",
-            }
-        },
-        "checks": checks,
-        "family_count": len({str(item["family"]) for item in checks}),
-        "minimum_margin": min(margins),
-        "passed": all(bool(item["passed"]) for item in checks)
-        and required <= {str(item["family"]) for item in checks},
-        "elapsed_seconds": float(time.perf_counter() - started),
-    }
-    validate_report_payload(report, protocol)
+    report = assemble_validation_report(
+        protocol,
+        checks,
+        elapsed_seconds=time.perf_counter() - started,
+    )
     _atomic_publish(output, canonical_report_bytes(report))
     return report
