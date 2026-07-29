@@ -6,6 +6,7 @@ import shutil
 import weakref
 from dataclasses import FrozenInstanceError
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -271,6 +272,151 @@ def test_aggregate_p0_uses_descriptor_progress_during_swap_and_restore(
 
     assert observed == baseline
     assert events == ["snapshot-verified", "snapshot-closed"]
+
+
+def _private_snapshot_parent(tmp_path: Path) -> Path:
+    parent = tmp_path / "snapshots"
+    parent.mkdir(mode=0o700)
+    return parent
+
+
+def test_snapshot_preflight_rejects_aggregate_over_budget_before_payload_copy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, _ = _tiny_complete_pilot(tmp_path, monkeypatch)
+    for trajectory in path.parent.glob("cells/*/run/trajectories/*.h5"):
+        with trajectory.open("r+b") as stream:
+            stream.truncate(40 * 1024 * 1024)
+    copy_calls: list[str] = []
+
+    def forbid_copy(*_args: object, **_kwargs: object) -> None:
+        copy_calls.append("called")
+        raise AssertionError("payload copy started before aggregate preflight")
+
+    monkeypatch.setattr(pilot, "_copy_regular_snapshot_at", forbid_copy)
+    with pytest.raises(RuntimeError, match="aggregate byte budget"):
+        analysis._aggregate_test_p0(
+            path,
+            snapshot_parent=_private_snapshot_parent(tmp_path),
+        )
+    assert copy_calls == []
+
+
+def test_snapshot_preflight_rejects_extra_entry_before_payload_copy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
+    (path.parent / spec["cells"][0]["cell_path"] / "unknown.bin").write_bytes(b"x")
+    copy_calls: list[str] = []
+
+    def forbid_copy(*_args: object, **_kwargs: object) -> None:
+        copy_calls.append("called")
+        raise AssertionError("payload copy started before layout preflight")
+
+    monkeypatch.setattr(pilot, "_copy_regular_snapshot_at", forbid_copy)
+    with pytest.raises(RuntimeError, match="unknown snapshot layout entry"):
+        analysis._aggregate_test_p0(
+            path,
+            snapshot_parent=_private_snapshot_parent(tmp_path),
+        )
+    assert copy_calls == []
+
+
+def test_snapshot_capacity_failure_occurs_before_payload_copy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, _ = _tiny_complete_pilot(tmp_path, monkeypatch)
+    copy_calls: list[str] = []
+
+    def forbid_copy(*_args: object, **_kwargs: object) -> None:
+        copy_calls.append("called")
+        raise AssertionError("payload copy started before capacity preflight")
+
+    monkeypatch.setattr(pilot, "_copy_regular_snapshot_at", forbid_copy)
+    monkeypatch.setattr(
+        pilot.os,
+        "statvfs",
+        lambda _path: SimpleNamespace(f_bavail=0, f_frsize=4096),
+    )
+    with pytest.raises(RuntimeError, match="snapshot filesystem capacity"):
+        analysis._aggregate_test_p0(
+            path,
+            snapshot_parent=_private_snapshot_parent(tmp_path),
+        )
+    assert copy_calls == []
+    assert pilot.PILOT_SNAPSHOT_SAFETY_RESERVE_BYTES > 0
+
+
+def test_snapshot_copy_global_counter_rejects_file_growth_race(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, spec = _tiny_complete_pilot(tmp_path, monkeypatch)
+    request = path.parent / spec["cells"][0]["run_path"] / "request.json"
+    parent = _private_snapshot_parent(tmp_path)
+    stages: list[str] = []
+
+    def grow_after_preflight(stage: str) -> None:
+        if stage == "snapshot-preflighted":
+            stages.append(stage)
+            with request.open("ab") as stream:
+                stream.write(b" ")
+
+    with pytest.raises(RuntimeError, match="snapshot byte budget changed during copy"):
+        analysis._aggregate_test_p0(
+            path,
+            snapshot_parent=parent,
+            _snapshot_hook=grow_after_preflight,
+        )
+    assert stages == ["snapshot-preflighted"]
+    assert list(parent.iterdir()) == []
+
+
+def test_snapshot_exception_removes_uniquely_owned_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, _ = _tiny_complete_pilot(tmp_path, monkeypatch)
+    parent = _private_snapshot_parent(tmp_path)
+
+    def fail_during_copy(stage: str) -> None:
+        if stage == "snapshot-copy-start":
+            raise RuntimeError("injected snapshot failure")
+
+    with pytest.raises(RuntimeError, match="injected snapshot failure"):
+        analysis._aggregate_test_p0(
+            path,
+            snapshot_parent=parent,
+            _snapshot_hook=fail_during_copy,
+        )
+    assert list(parent.iterdir()) == []
+
+
+def test_snapshot_cleanup_removes_ownership_marker_last(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    path, _ = _tiny_complete_pilot(tmp_path, monkeypatch)
+    parent = _private_snapshot_parent(tmp_path)
+    original_unlink = pilot.os.unlink
+    removed_names: list[str] = []
+
+    def tracking_unlink(
+        name: str,
+        *,
+        dir_fd: int | None = None,
+    ) -> None:
+        removed_names.append(name)
+        original_unlink(name, dir_fd=dir_fd)
+
+    monkeypatch.setattr(pilot.os, "unlink", tracking_unlink)
+    analysis._aggregate_test_p0(path, snapshot_parent=parent)
+
+    assert removed_names[-1] == pilot.PILOT_SNAPSHOT_MARKER
+    assert list(parent.iterdir()) == []
 
 
 def test_pilot_estimate_is_immutable():

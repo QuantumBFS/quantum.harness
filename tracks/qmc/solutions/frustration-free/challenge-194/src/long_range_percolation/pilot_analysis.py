@@ -201,6 +201,7 @@ def _aggregate_p0(
     run_spec: Path,
     *,
     production: bool,
+    snapshot_parent: Path | None = None,
     _snapshot_hook: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
     if not isinstance(run_spec, Path) or not run_spec.is_absolute():
@@ -208,6 +209,7 @@ def _aggregate_p0(
     with _pilot._open_verified_pilot_analysis_snapshot(
         run_spec,
         production=production,
+        snapshot_parent=snapshot_parent,
         _snapshot_hook=_snapshot_hook,
     ) as snapshot:
         spec = snapshot.spec
@@ -266,17 +268,27 @@ def _aggregate_p0(
         return document
 
 
-def aggregate_p0(run_spec: Path) -> dict[str, object]:
-    return _aggregate_p0(run_spec, production=True)
+def aggregate_p0(
+    run_spec: Path,
+    *,
+    snapshot_parent: Path | None = None,
+) -> dict[str, object]:
+    return _aggregate_p0(
+        run_spec,
+        production=True,
+        snapshot_parent=snapshot_parent,
+    )
 
 
 def _aggregate_test_p0(
     run_spec: Path,
     *,
+    snapshot_parent: Path | None = None,
     _snapshot_hook: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
     return _aggregate_p0(
         run_spec,
         production=False,
+        snapshot_parent=snapshot_parent,
         _snapshot_hook=_snapshot_hook,
     )

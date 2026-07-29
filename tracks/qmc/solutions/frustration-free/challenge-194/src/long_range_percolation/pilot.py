@@ -5,9 +5,11 @@ import hashlib
 import json
 import os
 import re
+import signal
 import stat
 import subprocess
 import tempfile
+import threading
 import uuid
 from collections import Counter
 from collections.abc import Callable, Iterator, Mapping, Sequence, Set
@@ -77,6 +79,19 @@ PILOT_JSON_MAX_CONTAINER = 100_000
 PILOT_JSON_MAX_NODES = 20_000_000
 CORRECTNESS_JSON_MAX_NODES = 64_000_000
 PILOT_CELL_MAX_ENTRIES = 64
+PILOT_SNAPSHOT_MAX_BYTES = 128 * 1024 * 1024
+PILOT_SNAPSHOT_SAFETY_RESERVE_BYTES = 64 * 1024 * 1024
+PILOT_SNAPSHOT_MAX_ENTRIES = (
+    2
+    + 1
+    + len(PILOT_SIGMAS)
+    * len(PILOT_LENGTHS)
+    * len(PILOT_REPLICAS)
+    * (1 + PILOT_CELL_MAX_ENTRIES)
+)
+PILOT_SNAPSHOT_STALE_SCAN_MAX = 256
+PILOT_SNAPSHOT_PREFIX = "challenge-194-p0-snapshot-"
+PILOT_SNAPSHOT_MARKER = ".challenge-194-owner.json"
 
 _read_descriptor_bounded = _artifacts._read_descriptor_bounded
 _generation_tuple = _artifacts._generation_tuple
@@ -1210,24 +1225,12 @@ def _validate_pilot_spec(
         raise RuntimeError("pilot complete RNG assignment hash mismatch")
 
 
-def _load_pilot_spec(
-    path: Path,
+def _validate_loaded_pilot_spec(
+    document: dict[str, object],
     *,
     verify_current_environment: bool,
     production: bool,
 ) -> dict[str, object]:
-    if (
-        not isinstance(path, Path)
-        or not path.is_absolute()
-        or path.name != RUN_SPEC_NAME
-    ):
-        raise RuntimeError("pilot run spec path must be absolute and canonical")
-    document, _ = _read_canonical(
-        path,
-        "pilot run spec",
-        maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
-        allow_parent_mutation=True,
-    )
     _validate_pilot_spec(
         document,
         enforce_production=production,
@@ -1256,6 +1259,31 @@ def _load_pilot_spec(
         ):
             raise RuntimeError("compute-node runtime capability drift")
     return document
+
+
+def _load_pilot_spec(
+    path: Path,
+    *,
+    verify_current_environment: bool,
+    production: bool,
+) -> dict[str, object]:
+    if (
+        not isinstance(path, Path)
+        or not path.is_absolute()
+        or path.name != RUN_SPEC_NAME
+    ):
+        raise RuntimeError("pilot run spec path must be absolute and canonical")
+    document, _ = _read_canonical(
+        path,
+        "pilot run spec",
+        maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+        allow_parent_mutation=True,
+    )
+    return _validate_loaded_pilot_spec(
+        document,
+        verify_current_environment=verify_current_environment,
+        production=production,
+    )
 
 
 def load_pilot_run_spec(
@@ -1667,6 +1695,244 @@ def verify_pilot_download(run_spec_path: Path) -> dict[str, object]:
 _PILOT_ANALYSIS_SNAPSHOT_TOKEN = object()
 
 
+@dataclass
+class _PilotSnapshotPreflight:
+    byte_budget: int
+    total_bytes: int = 0
+    entry_count: int = 0
+
+    def add_entry(self, size: int | None = None) -> None:
+        self.entry_count += 1
+        if self.entry_count > PILOT_SNAPSHOT_MAX_ENTRIES:
+            raise RuntimeError("pilot snapshot aggregate entry budget exceeded")
+        if size is None:
+            return
+        if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+            raise RuntimeError("pilot snapshot file size is invalid")
+        remaining = self.byte_budget - self.total_bytes
+        if size > remaining:
+            raise RuntimeError("pilot snapshot aggregate byte budget exceeded")
+        self.total_bytes += size
+
+
+def _snapshot_regular_size_at(
+    name: str,
+    parent_fd: int,
+    *,
+    maximum_size: int,
+    description: str,
+    preflight: _PilotSnapshotPreflight,
+) -> int:
+    descriptor, metadata = _open_regular_at(
+        name,
+        parent_fd,
+        description,
+        maximum_size=maximum_size,
+    )
+    try:
+        current = os.fstat(descriptor)
+        if _generation_tuple(current) != _generation_tuple(metadata):
+            raise RuntimeError(f"{description} changed during preflight")
+        preflight.add_entry(metadata.st_size)
+        return metadata.st_size
+    finally:
+        os.close(descriptor)
+
+
+def _snapshot_names_at(
+    descriptor: int,
+    *,
+    maximum_count: int,
+    description: str,
+) -> tuple[str, ...]:
+    names: list[str] = []
+    with os.scandir(descriptor) as stream:
+        for entry in stream:
+            names.append(entry.name)
+            if len(names) > maximum_count:
+                raise RuntimeError(f"{description} entry cardinality exceeds bound")
+    if len(names) != len(set(names)):
+        raise RuntimeError(f"{description} contains duplicate names")
+    return tuple(sorted(names))
+
+
+def _require_snapshot_names(
+    actual: Sequence[str],
+    expected: Set[str],
+    description: str,
+) -> None:
+    if set(actual) != set(expected):
+        raise RuntimeError(f"unknown snapshot layout entry in {description}")
+
+
+def _preflight_cell_snapshot(
+    cells_fd: int,
+    cell: PilotCell,
+    preflight: _PilotSnapshotPreflight,
+) -> None:
+    cell_fd = _open_directory_at(cell.cell_id, cells_fd)
+    preflight.add_entry()
+    try:
+        _require_snapshot_names(
+            _snapshot_names_at(
+                cell_fd,
+                maximum_count=3,
+                description="pilot cell root",
+            ),
+            {"manifest.json", "run"},
+            "pilot cell root",
+        )
+        _snapshot_regular_size_at(
+            "manifest.json",
+            cell_fd,
+            maximum_size=PILOT_MARKER_MAX_BYTES,
+            description="pilot outer success manifest",
+            preflight=preflight,
+        )
+        run_fd = _open_directory_at("run", cell_fd)
+        preflight.add_entry()
+        try:
+            _require_snapshot_names(
+                _snapshot_names_at(
+                    run_fd,
+                    maximum_count=len(_artifacts._ROOT_ENTRIES) + 1,
+                    description="pilot cell run root",
+                ),
+                _artifacts._ROOT_ENTRIES,
+                "pilot cell run root",
+            )
+            for name in sorted(_artifacts._UPSTREAM_FILES | {"progress.json"}):
+                _snapshot_regular_size_at(
+                    name,
+                    run_fd,
+                    maximum_size=_artifacts.MAX_JSON_BYTES,
+                    description=f"pilot run metadata {name}",
+                    preflight=preflight,
+                )
+
+            kernel_fd = _open_directory_at("kernel", run_fd)
+            preflight.add_entry()
+            try:
+                kernel_names = _snapshot_names_at(
+                    kernel_fd,
+                    maximum_count=_artifacts.MAX_KERNEL_FILES,
+                    description="pilot kernel snapshot",
+                )
+                if not kernel_names:
+                    raise RuntimeError("pilot kernel snapshot is empty")
+                for name in kernel_names:
+                    _snapshot_regular_size_at(
+                        name,
+                        kernel_fd,
+                        maximum_size=_artifacts.MAX_KERNEL_FILE_BYTES,
+                        description="pilot kernel snapshot file",
+                        preflight=preflight,
+                    )
+            finally:
+                os.close(kernel_fd)
+
+            trajectories_fd = _open_directory_at("trajectories", run_fd)
+            preflight.add_entry()
+            try:
+                expected_trajectory_names = {
+                    f"trajectory-{cell.request_sha256}.h5",
+                    f"trajectory-{cell.request_sha256}.sha256.json",
+                }
+                _require_snapshot_names(
+                    _snapshot_names_at(
+                        trajectories_fd,
+                        maximum_count=3,
+                        description="pilot trajectory snapshot",
+                    ),
+                    expected_trajectory_names,
+                    "pilot trajectory snapshot",
+                )
+                _snapshot_regular_size_at(
+                    f"trajectory-{cell.request_sha256}.h5",
+                    trajectories_fd,
+                    maximum_size=_artifacts.MAX_HDF5_BYTES,
+                    description="pilot trajectory snapshot file",
+                    preflight=preflight,
+                )
+                _snapshot_regular_size_at(
+                    f"trajectory-{cell.request_sha256}.sha256.json",
+                    trajectories_fd,
+                    maximum_size=_artifacts.MAX_JSON_BYTES,
+                    description="pilot trajectory sidecar snapshot",
+                    preflight=preflight,
+                )
+            finally:
+                os.close(trajectories_fd)
+
+            batches_fd = _open_directory_at("batches", run_fd)
+            preflight.add_entry()
+            try:
+                batch_name = f"batch-cell-{cell.cell_index:03d}.json"
+                _require_snapshot_names(
+                    _snapshot_names_at(
+                        batches_fd,
+                        maximum_count=2,
+                        description="pilot batch snapshot",
+                    ),
+                    {batch_name},
+                    "pilot batch snapshot",
+                )
+                _snapshot_regular_size_at(
+                    batch_name,
+                    batches_fd,
+                    maximum_size=_artifacts.MAX_JSON_BYTES,
+                    description="pilot batch snapshot file",
+                    preflight=preflight,
+                )
+            finally:
+                os.close(batches_fd)
+        finally:
+            os.close(run_fd)
+    finally:
+        os.close(cell_fd)
+
+
+def _preflight_pilot_snapshot(
+    source_root_fd: int,
+    spec: Mapping[str, object],
+    *,
+    run_spec_size: int,
+    progress_size: int,
+    byte_budget: int,
+) -> _PilotSnapshotPreflight:
+    if (
+        isinstance(byte_budget, bool)
+        or not isinstance(byte_budget, int)
+        or not 1 <= byte_budget <= PILOT_SNAPSHOT_MAX_BYTES
+    ):
+        raise RuntimeError("pilot snapshot byte budget is invalid")
+    preflight = _PilotSnapshotPreflight(byte_budget=byte_budget)
+    preflight.add_entry(run_spec_size)
+    preflight.add_entry(progress_size)
+    cells_fd = _open_directory_at("cells", source_root_fd)
+    preflight.add_entry()
+    try:
+        raw_cells = spec["cells"]
+        if not isinstance(raw_cells, Sequence):
+            raise RuntimeError("pilot snapshot cells are malformed")
+        cells = tuple(PilotCell.from_document(raw) for raw in raw_cells)
+        expected_names = {cell.cell_id for cell in cells}
+        _require_snapshot_names(
+            _snapshot_names_at(
+                cells_fd,
+                maximum_count=len(cells) + 1,
+                description="pilot cells snapshot",
+            ),
+            expected_names,
+            "pilot cells snapshot",
+        )
+        for cell in cells:
+            _preflight_cell_snapshot(cells_fd, cell, preflight)
+    finally:
+        os.close(cells_fd)
+    return preflight
+
+
 def _copy_regular_snapshot_at(
     name: str,
     parent_fd: int,
@@ -1674,13 +1940,22 @@ def _copy_regular_snapshot_at(
     *,
     maximum_size: int,
     description: str,
+    global_counter: list[int],
+    global_limit: int,
+    retained_source: tuple[int, os.stat_result] | None = None,
 ) -> bytes | None:
-    descriptor, original = _open_regular_at(
-        name,
-        parent_fd,
-        description,
-        maximum_size=maximum_size,
-    )
+    if retained_source is None:
+        descriptor, original = _open_regular_at(
+            name,
+            parent_fd,
+            description,
+            maximum_size=maximum_size,
+        )
+        close_descriptor = True
+    else:
+        descriptor, original = retained_source
+        close_descriptor = False
+        os.lseek(descriptor, 0, os.SEEK_SET)
     captured: list[bytes] | None = (
         [] if maximum_size <= PILOT_RUN_SPEC_MAX_BYTES else None
     )
@@ -1691,6 +1966,9 @@ def _copy_regular_snapshot_at(
                 copied += len(block)
                 if copied > maximum_size:
                     raise RuntimeError(f"{description} exceeds the byte-size limit")
+                if len(block) > global_limit - global_counter[0]:
+                    raise RuntimeError("snapshot byte budget changed during copy")
+                global_counter[0] += len(block)
                 output.write(block)
                 if captured is not None:
                     captured.append(block)
@@ -1700,7 +1978,8 @@ def _copy_regular_snapshot_at(
         ) != _generation_tuple(original):
             raise RuntimeError(f"{description} changed during snapshot")
     finally:
-        os.close(descriptor)
+        if close_descriptor:
+            os.close(descriptor)
     return b"".join(captured) if captured is not None else None
 
 
@@ -1709,6 +1988,8 @@ def _copy_cell_tree_snapshot(
     destination: Path,
     *,
     remaining_entries: list[int],
+    global_counter: list[int],
+    global_limit: int,
     depth: int = 0,
 ) -> None:
     if depth > 6:
@@ -1731,6 +2012,8 @@ def _copy_cell_tree_snapshot(
                     child,
                     target,
                     remaining_entries=remaining_entries,
+                    global_counter=global_counter,
+                    global_limit=global_limit,
                     depth=depth + 1,
                 )
             finally:
@@ -1747,9 +2030,348 @@ def _copy_cell_tree_snapshot(
                 target,
                 maximum_size=maximum_size,
                 description="pilot cell snapshot file",
+                global_counter=global_counter,
+                global_limit=global_limit,
             )
         else:
             raise RuntimeError("pilot cell snapshot contains a special file")
+
+
+def _default_pilot_snapshot_parent() -> Path:
+    parent = (
+        Path(tempfile.gettempdir()).resolve()
+        / f".challenge-194-p0-snapshots-{os.geteuid()}"
+    )
+    try:
+        parent.mkdir(mode=0o700)
+    except FileExistsError:
+        pass
+    return parent
+
+
+def _open_validated_snapshot_parent(path: Path) -> int:
+    if not isinstance(path, Path) or not path.is_absolute():
+        raise RuntimeError("snapshot parent must be an absolute path")
+    try:
+        before = path.lstat()
+    except OSError as error:
+        raise RuntimeError("snapshot parent must already exist") from error
+    if (
+        stat.S_ISLNK(before.st_mode)
+        or not stat.S_ISDIR(before.st_mode)
+        or before.st_uid != os.geteuid()
+        or before.st_mode & 0o022
+    ):
+        raise RuntimeError(
+            "snapshot parent must be an owned non-symlink private directory"
+        )
+    descriptor = os.open(path, _directory_flags())
+    opened = os.fstat(descriptor)
+    if (
+        _directory_identity(before) != _directory_identity(opened)
+        or opened.st_uid != os.geteuid()
+    ):
+        os.close(descriptor)
+        raise RuntimeError("snapshot parent identity changed before descriptor open")
+    return descriptor
+
+
+def _snapshot_process_is_alive(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _snapshot_marker_document(name: str, token: str) -> dict[str, object]:
+    return {
+        "schema_version": "challenge-194-p0-snapshot-owner-v1",
+        "directory_name": name,
+        "owner_uid": os.geteuid(),
+        "owner_pid": os.getpid(),
+        "token": token,
+    }
+
+
+def _read_snapshot_marker(directory_fd: int) -> dict[str, object]:
+    descriptor, original = _open_regular_at(
+        PILOT_SNAPSHOT_MARKER,
+        directory_fd,
+        "pilot snapshot ownership marker",
+        maximum_size=1024,
+    )
+    try:
+        payload = _read_descriptor_bounded(
+            descriptor,
+            1024,
+            "pilot snapshot ownership marker",
+        )
+        current = os.fstat(descriptor)
+        if (
+            current.st_uid != os.geteuid()
+            or current.st_nlink != 1
+            or _generation_tuple(current) != _generation_tuple(original)
+        ):
+            raise RuntimeError("pilot snapshot ownership marker is unsafe")
+        document = json.loads(payload)
+        if (
+            not isinstance(document, dict)
+            or payload != _canonical_bytes(document)
+            or set(document)
+            != {
+                "schema_version",
+                "directory_name",
+                "owner_uid",
+                "owner_pid",
+                "token",
+            }
+        ):
+            raise RuntimeError("pilot snapshot ownership marker is malformed")
+        return document
+    finally:
+        os.close(descriptor)
+
+
+def _remove_snapshot_tree(
+    directory_fd: int,
+    *,
+    remaining_entries: list[int],
+    preserved_names: Set[str] = frozenset(),
+) -> None:
+    names = _snapshot_names_at(
+        directory_fd,
+        maximum_count=PILOT_SNAPSHOT_MAX_ENTRIES + 1,
+        description="owned pilot snapshot cleanup",
+    )
+    for name in names:
+        if name in preserved_names:
+            continue
+        remaining_entries[0] -= 1
+        if remaining_entries[0] < 0:
+            raise RuntimeError("owned pilot snapshot cleanup exceeds entry bound")
+        metadata = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+        if metadata.st_uid != os.geteuid():
+            raise RuntimeError("owned pilot snapshot contains a foreign entry")
+        if stat.S_ISDIR(metadata.st_mode):
+            child_fd = _open_directory_at(name, directory_fd)
+            child_original = os.fstat(child_fd)
+            try:
+                _remove_snapshot_tree(
+                    child_fd,
+                    remaining_entries=remaining_entries,
+                )
+                current = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+                if _directory_identity(current) != _directory_identity(child_original):
+                    raise RuntimeError(
+                        "owned pilot snapshot directory identity changed"
+                    )
+            finally:
+                os.close(child_fd)
+            os.rmdir(name, dir_fd=directory_fd)
+        elif stat.S_ISREG(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+            os.unlink(name, dir_fd=directory_fd)
+        else:
+            raise RuntimeError("owned pilot snapshot contains a special file")
+
+
+def _remove_owned_snapshot(
+    parent_fd: int,
+    name: str,
+    directory_fd: int,
+    expected_marker: Mapping[str, object],
+) -> None:
+    marker = _read_snapshot_marker(directory_fd)
+    if marker != expected_marker:
+        raise RuntimeError("pilot snapshot ownership marker mismatch")
+    original = os.fstat(directory_fd)
+    if (
+        original.st_uid != os.geteuid()
+        or not stat.S_ISDIR(original.st_mode)
+        or stat.S_IMODE(original.st_mode) != 0o700
+    ):
+        raise RuntimeError("pilot snapshot directory ownership is unsafe")
+    _remove_snapshot_tree(
+        directory_fd,
+        remaining_entries=[PILOT_SNAPSHOT_MAX_ENTRIES + 1],
+        preserved_names={PILOT_SNAPSHOT_MARKER},
+    )
+    os.unlink(PILOT_SNAPSHOT_MARKER, dir_fd=directory_fd)
+    current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if _directory_identity(current) != _directory_identity(original):
+        raise RuntimeError("pilot snapshot pathname identity changed during cleanup")
+    os.rmdir(name, dir_fd=parent_fd)
+
+
+def _remove_new_snapshot(
+    parent_fd: int,
+    name: str,
+    directory_fd: int,
+) -> None:
+    original = os.fstat(directory_fd)
+    if (
+        original.st_uid != os.geteuid()
+        or not stat.S_ISDIR(original.st_mode)
+        or stat.S_IMODE(original.st_mode) != 0o700
+    ):
+        raise RuntimeError("new pilot snapshot directory ownership is unsafe")
+    _remove_snapshot_tree(
+        directory_fd,
+        remaining_entries=[PILOT_SNAPSHOT_MAX_ENTRIES + 1],
+    )
+    current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if _directory_identity(current) != _directory_identity(original):
+        raise RuntimeError("new pilot snapshot pathname identity changed")
+    os.rmdir(name, dir_fd=parent_fd)
+
+
+def _remove_empty_owned_snapshot(
+    parent_fd: int,
+    name: str,
+    directory_fd: int,
+) -> bool:
+    original = os.fstat(directory_fd)
+    if (
+        original.st_uid != os.geteuid()
+        or not stat.S_ISDIR(original.st_mode)
+        or stat.S_IMODE(original.st_mode) != 0o700
+        or _snapshot_names_at(
+            directory_fd,
+            maximum_count=1,
+            description="empty stale pilot snapshot",
+        )
+    ):
+        return False
+    current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if _directory_identity(current) != _directory_identity(original):
+        return False
+    os.rmdir(name, dir_fd=parent_fd)
+    return True
+
+
+def _cleanup_stale_owned_snapshots(parent_fd: int) -> None:
+    names = _snapshot_names_at(
+        parent_fd,
+        maximum_count=PILOT_SNAPSHOT_STALE_SCAN_MAX,
+        description="pilot snapshot parent",
+    )
+    for name in names:
+        if not name.startswith(PILOT_SNAPSHOT_PREFIX):
+            continue
+        try:
+            directory_fd = _open_directory_at(name, parent_fd)
+        except RuntimeError:
+            continue
+        try:
+            marker = _read_snapshot_marker(directory_fd)
+            if (
+                marker.get("schema_version") != "challenge-194-p0-snapshot-owner-v1"
+                or marker.get("directory_name") != name
+                or marker.get("owner_uid") != os.geteuid()
+                or not isinstance(marker.get("owner_pid"), int)
+                or not isinstance(marker.get("token"), str)
+                or not re.fullmatch(r"[0-9a-f]{32}", str(marker["token"]))
+                or _snapshot_process_is_alive(int(marker["owner_pid"]))
+            ):
+                continue
+            _remove_owned_snapshot(parent_fd, name, directory_fd, marker)
+        except (OSError, RuntimeError, ValueError):
+            try:
+                _remove_empty_owned_snapshot(parent_fd, name, directory_fd)
+            except (OSError, RuntimeError, ValueError):
+                pass
+        finally:
+            os.close(directory_fd)
+
+
+class _PilotSnapshotInterrupted(RuntimeError):
+    pass
+
+
+def _install_snapshot_signal_handlers() -> dict[int, object]:
+    if threading.current_thread() is not threading.main_thread():
+        return {}
+    previous: dict[int, object] = {}
+
+    def interrupt(signum: int, _frame: object) -> None:
+        raise _PilotSnapshotInterrupted(
+            f"pilot snapshot interrupted by signal {signum}"
+        )
+
+    for signal_name in ("SIGINT", "SIGTERM", "SIGHUP", "SIGQUIT"):
+        signum = getattr(signal, signal_name, None)
+        if isinstance(signum, int):
+            previous[signum] = signal.getsignal(signum)
+            signal.signal(signum, interrupt)
+    return previous
+
+
+def _restore_snapshot_signal_handlers(previous: Mapping[int, object]) -> None:
+    for signum, handler in previous.items():
+        signal.signal(signum, handler)
+
+
+@contextmanager
+def _owned_pilot_snapshot_directory(parent: Path) -> Iterator[Path]:
+    parent_fd = _open_validated_snapshot_parent(parent)
+    try:
+        _cleanup_stale_owned_snapshots(parent_fd)
+        token = uuid.uuid4().hex
+        name = f"{PILOT_SNAPSHOT_PREFIX}{os.getpid()}-{token}"
+        marker = _snapshot_marker_document(name, token)
+        directory_fd: int | None = None
+        directory_created = False
+        marker_complete = False
+        previous_handlers = _install_snapshot_signal_handlers()
+        try:
+            os.mkdir(name, 0o700, dir_fd=parent_fd)
+            directory_created = True
+            directory_fd = _open_directory_at(name, parent_fd)
+            marker_descriptor = os.open(
+                PILOT_SNAPSHOT_MARKER,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+                dir_fd=directory_fd,
+            )
+            try:
+                payload = _canonical_bytes(marker)
+                written = os.write(marker_descriptor, payload)
+                if written != len(payload):
+                    raise RuntimeError("short pilot snapshot marker write")
+                marker_complete = True
+            finally:
+                os.close(marker_descriptor)
+            yield parent / name
+        finally:
+            _restore_snapshot_signal_handlers(previous_handlers)
+            if directory_fd is not None:
+                try:
+                    if marker_complete:
+                        _remove_owned_snapshot(parent_fd, name, directory_fd, marker)
+                    else:
+                        _remove_new_snapshot(parent_fd, name, directory_fd)
+                finally:
+                    os.close(directory_fd)
+            elif directory_created:
+                os.rmdir(name, dir_fd=parent_fd)
+    finally:
+        os.close(parent_fd)
+
+
+def _preflight_snapshot_capacity(parent: Path, total_bytes: int) -> None:
+    descriptor = _open_validated_snapshot_parent(parent)
+    try:
+        capacity = os.statvfs(descriptor)
+        available = int(capacity.f_bavail) * int(capacity.f_frsize)
+        required = total_bytes + PILOT_SNAPSHOT_SAFETY_RESERVE_BYTES
+        if required > available:
+            raise RuntimeError("snapshot filesystem capacity is insufficient")
+    finally:
+        os.close(descriptor)
 
 
 def _load_analysis_trajectory(
@@ -1810,7 +2432,9 @@ def _open_verified_pilot_analysis_snapshot(
     run_spec_path: Path,
     *,
     production: bool,
+    snapshot_parent: Path | None = None,
     _snapshot_hook: Callable[[str], None] | None = None,
+    _snapshot_byte_budget: int = PILOT_SNAPSHOT_MAX_BYTES,
 ) -> Iterator[_PilotAnalysisSnapshot]:
     if (
         not isinstance(run_spec_path, Path)
@@ -1824,35 +2448,97 @@ def _open_verified_pilot_analysis_snapshot(
         allow_final_mutation=True,
     )
     source_root_fd = source_chain[-1][1]
+    run_spec_descriptor: int | None = None
+    progress_descriptor: int | None = None
     try:
-        with tempfile.TemporaryDirectory(
-            prefix="challenge-194-p0-snapshot-"
-        ) as temporary:
-            snapshot_root = Path(temporary)
+        run_spec_descriptor, run_spec_original = _open_regular_at(
+            RUN_SPEC_NAME,
+            source_root_fd,
+            "pilot run spec snapshot source",
+            maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+        )
+        progress_descriptor, progress_original = _open_regular_at(
+            MERGED_NAME,
+            source_root_fd,
+            "merged pilot progress snapshot source",
+            maximum_size=PILOT_PROGRESS_MAX_BYTES,
+        )
+        run_spec_payload = _read_descriptor_bounded(
+            run_spec_descriptor,
+            PILOT_RUN_SPEC_MAX_BYTES,
+            "pilot run spec snapshot source",
+        )
+        progress_payload = _read_descriptor_bounded(
+            progress_descriptor,
+            PILOT_PROGRESS_MAX_BYTES,
+            "merged pilot progress snapshot source",
+        )
+        try:
+            spec_document = json.loads(run_spec_payload)
+            progress_document = json.loads(progress_payload)
+        except (UnicodeError, json.JSONDecodeError, ValueError) as error:
+            raise RuntimeError("pilot snapshot source is not valid JSON") from error
+        _validate_json_bounds(spec_document)
+        _validate_json_bounds(progress_document)
+        if (
+            not isinstance(spec_document, dict)
+            or run_spec_payload != _canonical_bytes(spec_document)
+            or not isinstance(progress_document, dict)
+            or progress_payload != _canonical_bytes(progress_document)
+        ):
+            raise RuntimeError("pilot snapshot source is not canonical JSON")
+        spec = _validate_loaded_pilot_spec(
+            spec_document,
+            verify_current_environment=False,
+            production=production,
+        )
+        preflight = _preflight_pilot_snapshot(
+            source_root_fd,
+            spec,
+            run_spec_size=run_spec_original.st_size,
+            progress_size=progress_original.st_size,
+            byte_budget=_snapshot_byte_budget,
+        )
+        parent = (
+            _default_pilot_snapshot_parent()
+            if snapshot_parent is None
+            else snapshot_parent
+        )
+        _preflight_snapshot_capacity(parent, preflight.total_bytes)
+        if _snapshot_hook is not None:
+            _snapshot_hook("snapshot-preflighted")
+
+        with _owned_pilot_snapshot_directory(parent) as snapshot_root:
+            if _snapshot_hook is not None:
+                _snapshot_hook("snapshot-copy-start")
+            global_counter = [0]
             snapshot_run_spec = snapshot_root / RUN_SPEC_NAME
-            run_spec_payload = _copy_regular_snapshot_at(
+            copied_run_spec_payload = _copy_regular_snapshot_at(
                 RUN_SPEC_NAME,
                 source_root_fd,
                 snapshot_run_spec,
                 maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
                 description="pilot run spec snapshot",
+                global_counter=global_counter,
+                global_limit=preflight.total_bytes,
+                retained_source=(run_spec_descriptor, run_spec_original),
             )
-            assert run_spec_payload is not None
+            if copied_run_spec_payload != run_spec_payload:
+                raise RuntimeError("pilot run spec changed after snapshot preflight")
             if _snapshot_hook is not None:
                 _snapshot_hook("run-spec-copied")
-            spec = _load_pilot_spec(
-                snapshot_run_spec,
-                verify_current_environment=False,
-                production=production,
-            )
-            progress_payload = _copy_regular_snapshot_at(
+            copied_progress_payload = _copy_regular_snapshot_at(
                 MERGED_NAME,
                 source_root_fd,
                 snapshot_root / MERGED_NAME,
                 maximum_size=PILOT_PROGRESS_MAX_BYTES,
                 description="merged pilot progress snapshot",
+                global_counter=global_counter,
+                global_limit=preflight.total_bytes,
+                retained_source=(progress_descriptor, progress_original),
             )
-            assert progress_payload is not None
+            if copied_progress_payload != progress_payload:
+                raise RuntimeError("pilot progress changed after snapshot preflight")
             if _snapshot_hook is not None:
                 _snapshot_hook("progress-copied")
 
@@ -1873,11 +2559,15 @@ def _open_verified_pilot_analysis_snapshot(
                             cell_descriptor,
                             cells_destination / name,
                             remaining_entries=[PILOT_CELL_MAX_ENTRIES],
+                            global_counter=global_counter,
+                            global_limit=preflight.total_bytes,
                         )
                     finally:
                         os.close(cell_descriptor)
             finally:
                 os.close(cells_descriptor)
+            if global_counter[0] != preflight.total_bytes:
+                raise RuntimeError("snapshot byte budget changed during copy")
             if _snapshot_hook is not None:
                 _snapshot_hook("source-copied")
 
@@ -1912,6 +2602,10 @@ def _open_verified_pilot_analysis_snapshot(
                 if _snapshot_hook is not None:
                     _snapshot_hook("snapshot-closed")
     finally:
+        if progress_descriptor is not None:
+            os.close(progress_descriptor)
+        if run_spec_descriptor is not None:
+            os.close(run_spec_descriptor)
         _close_directory_chain(source_chain)
 
 
