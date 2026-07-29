@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:17:14Z
+Updated: 2026-07-29T17:23:50Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -140,5 +140,11 @@ Updated: 2026-07-29T17:17:14Z
   114000 MiB. Exact construction/hash evidence remains valid, but this is not
   a feasibility result. The next changed action is the native bar-variable
   dual solve on xH5 (64 CPUs / 240 GB) with fail-closed hash and replay output.
+- xH5 rejected the dual before assigning a job ID because account `giggleliu`
+  is at `AssocGrpSubmitJobsLimit` (200 jobs). No unrelated or pending job will
+  be cancelled. The changed destination is SCNet high-memory
+  `ksagnormal01`, 32 CPUs / 256000 MiB. That request is justified by measured
+  failed-form peaks of 116,125,540 and 251,835,816 KiB, and the partition is
+  up and permits the active account.
 
 No user input or new credential is currently required.

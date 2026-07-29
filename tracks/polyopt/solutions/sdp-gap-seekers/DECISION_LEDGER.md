@@ -1199,3 +1199,12 @@ status. Do not repeat this affine-conic primal signature at the same memory.
 The changed next action is the native bar-variable dual formulation on xH5,
 with 64 CPUs / 240 GB, the exact L=2 hash gate, residual audit, and replayable
 certificate export.
+
+xH5 rejected the native dual at submission, before assigning a job ID:
+account `giggleliu` had reached `AssocGrpSubmitJobsLimit` (200 submitted jobs).
+Do not cancel unrelated jobs or the pending L3 run to bypass that policy. The
+changed destination is SCNet `ksagnormal01`, requesting 32 CPUs and 256000 MiB.
+High memory is justified by measured factorization/bridge peaks of 116,125,540
+KiB (native primal) and 251,835,816 KiB (JuMP path); the partition exposes
+about 1 TB per node and explicitly allows the active account. Submit only if
+Slurm's test-only policy check accepts the exact runner.

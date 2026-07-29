@@ -678,3 +678,7 @@ Updated: 2026-07-29 UTC.
   (`/usr/bin/time`: 116,125,540 KiB) versus 114000 MiB. It is not a physics
   result. Next changed solve: native bar-variable dual on xH5, 64 CPUs /
   240 GB, with hash gate and replayable output.
+- xH5 rejected that submission before creating a job because its group is at
+  the 200-job submit cap. No unrelated job will be cancelled. Route the same
+  native dual to SCNet high-memory `ksagnormal01`, 32 CPUs / 256000 MiB; this
+  request is justified by the measured 116–252 GB failed-form peaks.
