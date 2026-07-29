@@ -751,6 +751,7 @@ def _conclusions(
         ZH_SECTION_TITLES[9],
         "conclusions",
         (
+            PageBreak(),
             Paragraph(
                 "三条路线共同验证了从有限尺寸 Casimir 项提取中心荷的计算思想，同时展示了"
                 "“相同公式、不同测度”带来的实现差异。纯净 Ising 用精确传递矩阵校准整套"
@@ -828,6 +829,7 @@ def _appendices(
                 "完整相对路径和 SHA-256 保存在来源适配器读取的 provenance 映射中；"
                 "报告构建前后比较该映射以检测中途变化。",
             ),
+            PageBreak(),
             Table(
                 "参考文献与理论锚点",
                 ("主题", "正式书目信息"),
