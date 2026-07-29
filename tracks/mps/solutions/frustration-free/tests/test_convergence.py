@@ -458,18 +458,33 @@ def _rebind_mutated_plan(plan):
 
 
 @pytest.mark.parametrize(
-    "corruption",
+    ("corruption", "expected_error"),
     [
-        "mapping_payload_sha256",
-        "cell_mapping_sha256",
-        "representation",
-        "capability",
-        "source_hash",
-        "scientific_source_hash",
+        ("mapping_payload_sha256", "mapping payload SHA256 mismatch"),
+        ("cell_mapping_sha256", "chain mapping SHA256 linkage mismatch"),
+        (
+            "representation",
+            r"convergencePlan schema validation failed at "
+            r"cells\.0\.chain_mapping_artifact: .* is not of type 'null'",
+        ),
+        (
+            "capability",
+            "convergencePlan schema validation failed at "
+            r"cells\.0\.solver_capability\.finite_chain_mapping_validated: "
+            "True was expected",
+        ),
+        (
+            "source_hash",
+            "cell source provenance does not match the current checkout",
+        ),
+        (
+            "scientific_source_hash",
+            "mapping source bath SHA256 mismatch",
+        ),
     ],
 )
 def test_chain_plan_corruption_is_rejected_before_executor(
-    tmp_path, monkeypatch, corruption
+    tmp_path, monkeypatch, corruption, expected_error
 ):
     plan = _plan(
         betas=[0.2],
@@ -517,7 +532,7 @@ def test_chain_plan_corruption_is_rejected_before_executor(
         recording_verifier,
     )
 
-    with pytest.raises((TypeError, ValueError)):
+    with pytest.raises(ValueError, match=f"^{expected_error}$"):
         convergence.run_cell(
             plan,
             0,

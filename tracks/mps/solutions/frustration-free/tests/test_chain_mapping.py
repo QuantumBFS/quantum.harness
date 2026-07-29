@@ -352,10 +352,24 @@ _CORRUPTIONS = [
     else (("provenance", key), lambda value: f"{value} (corrupt)")
     for key in chain._PROVENANCE_KEYS
 ]
+_CORRUPTIONS = [
+    (
+        path,
+        corrupt,
+        (
+            "mapping source bath SHA256 mismatch"
+            if path == ("source_bath_sha256",)
+            else "mapping scientific replay mismatch"
+        ),
+    )
+    for path, corrupt in _CORRUPTIONS
+]
 
 
-@pytest.mark.parametrize(("path", "corrupt"), _CORRUPTIONS)
-def test_verifier_rejects_validly_rehashed_semantic_corruption(path, corrupt):
+@pytest.mark.parametrize(("path", "corrupt", "expected_error"), _CORRUPTIONS)
+def test_verifier_rejects_validly_rehashed_semantic_corruption(
+    path, corrupt, expected_error
+):
     star, mapping = _mapping_fixture()
     corrupted = copy.deepcopy(mapping)
     target = corrupted["payload"]
@@ -367,7 +381,7 @@ def test_verifier_rejects_validly_rehashed_semantic_corruption(path, corrupt):
 
     rehashed = _rehash_mapping(corrupted)
     chain._verify_structure_and_digest(rehashed)
-    with pytest.raises((TypeError, ValueError)):
+    with pytest.raises(ValueError, match=f"^{expected_error}$"):
         chain.verify_chain_mapping_artifact(rehashed, star)
 
 
@@ -392,7 +406,11 @@ def test_verifier_requires_every_exact_mapping_key_set(path, operation):
     else:
         del target[next(iter(target))]
 
-    with pytest.raises((TypeError, ValueError)):
+    mapping_name = f"mapping {path[-1]}"
+    with pytest.raises(
+        ValueError,
+        match=f"^{mapping_name} keys do not match schema$",
+    ):
         chain.verify_chain_mapping_artifact(_rehash_mapping(corrupted), star)
 
 

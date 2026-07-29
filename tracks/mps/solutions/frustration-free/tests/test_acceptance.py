@@ -898,18 +898,42 @@ def _resign_corrupted_chain_acceptance_stage(stage, artifact, corruption):
 
 
 @pytest.mark.parametrize(
-    ("corruption", "reaches_mapping_verifier"),
+    ("corruption", "expected_error", "reaches_mapping_verifier"),
     [
-        ("embedded_bytes", False),
-        ("payload_sha256", True),
-        ("file_sha256", False),
-        ("scientific_source_hash", True),
-        ("representation", False),
-        ("producer_source_hash", False),
+        (
+            "embedded_bytes",
+            "chain mapping artifact bytes are not canonical",
+            False,
+        ),
+        ("payload_sha256", "mapping payload SHA256 mismatch", True),
+        (
+            "file_sha256",
+            "chain mapping artifact file SHA256 mismatch",
+            False,
+        ),
+        (
+            "scientific_source_hash",
+            "mapping source bath SHA256 mismatch",
+            True,
+        ),
+        (
+            "representation",
+            "direct_star representation cannot consume a chain mapping",
+            False,
+        ),
+        (
+            "producer_source_hash",
+            "MPS request checkpoint identity is stale",
+            False,
+        ),
     ],
 )
 def test_chain_acceptance_corruption_never_advances_pointer(
-    tmp_path, monkeypatch, corruption, reaches_mapping_verifier
+    tmp_path,
+    monkeypatch,
+    corruption,
+    expected_error,
+    reaches_mapping_verifier,
 ):
     root = tmp_path / "acceptance"
     root.mkdir()
@@ -930,7 +954,7 @@ def test_chain_acceptance_corruption_never_advances_pointer(
         acceptance.chain, "verify_chain_mapping_artifact", recording_verifier
     )
 
-    with pytest.raises((TypeError, ValueError)):
+    with pytest.raises(ValueError, match=f"^{expected_error}$"):
         acceptance.publish_acceptance_run(
             stage,
             root,
