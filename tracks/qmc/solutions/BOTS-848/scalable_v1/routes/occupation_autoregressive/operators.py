@@ -6,7 +6,13 @@ import math
 import struct
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal, localcontext
+from decimal import (
+    ROUND_CEILING,
+    ROUND_FLOOR,
+    ROUND_HALF_EVEN,
+    Decimal,
+    localcontext,
+)
 from numbers import Integral, Real
 from types import MappingProxyType
 
@@ -365,6 +371,10 @@ def _float_bits(value: float) -> int:
     return struct.unpack(">Q", struct.pack(">d", value))[0]
 
 
+def _raw_float_bits(value: float) -> int:
+    return struct.unpack(">Q", struct.pack(">d", value))[0]
+
+
 @dataclass(frozen=True, slots=True)
 class _Dyadic:
     """Exact ``mantissa * 2**exponent`` representation of binary64 data."""
@@ -618,6 +628,7 @@ def _certify_fast_components(
         context.prec = _FAST_CERTIFIER_PRECISION
         context.Emax = 999_999
         context.Emin = -999_999
+        context.rounding = ROUND_HALF_EVEN
         source = Decimal.from_float(source_logabs)
         targets = sorted(
             {
@@ -679,8 +690,8 @@ def _certify_fast_components(
             upper = float(upper_endpoint)
             if (
                 not math.isfinite(candidate)
-                or _float_bits(candidate) != _float_bits(lower)
-                or _float_bits(candidate) != _float_bits(upper)
+                or _raw_float_bits(candidate) != _raw_float_bits(lower)
+                or _raw_float_bits(candidate) != _raw_float_bits(upper)
             ):
                 return None
             certified_values.append(candidate)
@@ -757,8 +768,8 @@ def _decimal_component_once(
         lower_float = float(lower_endpoint)
         upper_float = float(upper_endpoint)
         certified = (
-            _float_bits(candidate) == _float_bits(lower_float)
-            and _float_bits(candidate) == _float_bits(upper_float)
+            _raw_float_bits(candidate) == _raw_float_bits(lower_float)
+            and _raw_float_bits(candidate) == _raw_float_bits(upper_float)
         )
         if not math.isfinite(candidate):
             return "overflow", None, certified
