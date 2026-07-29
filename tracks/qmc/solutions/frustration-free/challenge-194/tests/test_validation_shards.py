@@ -388,6 +388,42 @@ def test_spool_wrapper_uses_direct_offline_interpreter_and_clean_pythonpath(
     assert "/hostile/caller/path" not in recorded["pythonpath"]
 
 
+def test_spool_wrapper_isolates_numba_cache_per_array_cell(tmp_path: Path):
+    interpreter = tmp_path / "offline-python"
+    interpreter.write_text(
+        "#!/bin/bash\n"
+        "/usr/bin/python3 - \"$@\" <<'PY'\n"
+        "import json, os\n"
+        "with open(os.environ['OFFLINE_INVOCATION'], 'w') as stream:\n"
+        "    json.dump({'numba_cache_dir': os.environ.get('NUMBA_CACHE_DIR')}, stream)\n"
+        "PY\n",
+        encoding="utf-8",
+    )
+    interpreter.chmod(0o755)
+    spool, invocation, environment = _offline_wrapper_environment(
+        tmp_path, python=interpreter
+    )
+    node_local = tmp_path / "node-local"
+    node_local.mkdir()
+    environment["SLURM_TMPDIR"] = str(node_local)
+    environment["SLURM_ARRAY_JOB_ID"] = "12345"
+    environment["SLURM_ARRAY_TASK_ID"] = "23"
+
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    recorded = json.loads(invocation.read_text(encoding="utf-8"))
+    expected = node_local / "challenge-194-numba-12345-23"
+    assert recorded["numba_cache_dir"] == str(expected)
+    assert expected.is_dir()
+
+
 def test_spool_wrapper_preserves_venv_launcher_identity(tmp_path: Path):
     venv = tmp_path / "worker-venv"
     subprocess.run(

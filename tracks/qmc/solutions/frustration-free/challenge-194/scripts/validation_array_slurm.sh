@@ -76,6 +76,15 @@ export NUMEXPR_NUM_THREADS=1
 export VECLIB_MAXIMUM_THREADS=1
 export PYTHONUNBUFFERED=1
 
+NUMBA_CACHE_BASE="${SLURM_TMPDIR:-${TMPDIR:-/tmp}}"
+if [[ "${NUMBA_CACHE_BASE}" != /* || ! -d "${NUMBA_CACHE_BASE}" || ! -w "${NUMBA_CACHE_BASE}" ]]; then
+    echo "node-local temporary directory must be an absolute writable directory" >&2
+    exit 73
+fi
+NUMBA_CACHE_JOB_ID="${SLURM_ARRAY_JOB_ID:-${SLURM_JOB_ID:-no-job-id}}"
+export NUMBA_CACHE_DIR="${NUMBA_CACHE_BASE%/}/challenge-194-numba-${NUMBA_CACHE_JOB_ID}-${SLURM_ARRAY_TASK_ID}"
+mkdir -p -- "${NUMBA_CACHE_DIR}"
+
 cd "${SOLUTION_ROOT}"
 echo "validation array cell=${SLURM_ARRAY_TASK_ID} host=$(hostname)" 
 echo "run_spec=${HARNESS_RUN_SPEC}"
