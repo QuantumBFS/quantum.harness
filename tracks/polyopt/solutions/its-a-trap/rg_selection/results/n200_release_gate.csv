@@ -1,0 +1,9 @@
+gate,status,value,threshold,evidence
+correctness_G4,PASS,see gates.csv,all,gates.csv
+correctness_G4b,PASS,dE=0.0,1e-8,g4b_report
+correctness_vcheck,PASS,see vcheck.csv,all,vcheck.csv
+snapshot_equivalence_P2b,PASS_VALIDATION_ONLY,local changes = run_small.jl+vcheck.jl only,prod hashes identical,git diff cebb8da..8893d60 name-only
+probe_memory_gate,NOT_EVALUABLE,probe incomplete,RSS_build*alpha or 40pct,probe running 2h57 at 02:30
+probe_time_gate,NOT_EVALUABLE,T_build_joint_probe unavailable,T_pair_proj<=16.8h,same
+timing_law_0230,BLOCK,probe incomplete at 02:30,mechanical,amendment 4
+RELEASE_DECISION,BLOCKED,pair 23009660 stays HELD,no blind release,this file
