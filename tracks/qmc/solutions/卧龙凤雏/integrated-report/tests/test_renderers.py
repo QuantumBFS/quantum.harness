@@ -4,6 +4,7 @@ from pypdf import PdfReader
 
 from analysis.html_renderer import render_html
 from analysis.pdf_renderer import render_pdf
+from build_report import build
 
 
 REQUIRED_SECTION_TITLES = (
@@ -58,3 +59,13 @@ def test_pdf_has_expected_length_and_content(report, tmp_path):
     assert "TBD" not in text
     assert all(page.mediabox.width > 590 for page in reader.pages)
     assert all(page.mediabox.height > 840 for page in reader.pages)
+
+
+def test_build_writes_stable_outputs(repo_root):
+    result = build(repo_root)
+
+    assert result.html == repo_root / "output/html/three-model-central-charge-report.html"
+    assert result.pdf == repo_root / "output/pdf/three-model-central-charge-report.pdf"
+    assert result.html.exists() and result.pdf.exists()
+    assert result.html_verification.passed
+    assert result.pdf_verification.passed
