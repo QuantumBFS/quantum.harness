@@ -1,6 +1,9 @@
 import argparse
 import csv
+import json
 import platform
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -11,6 +14,7 @@ from analysis.data_io import load_run, sha256_file, write_json_atomic
 from analysis.fitting import evaluate_fit, fit_free_energy
 from analysis.gates import evaluate_gates
 from analysis.plots import make_all_plots
+from analysis.report_builder import build_report_document
 
 
 def analyze_run(run_dir: Path, bootstrap_samples: int, bootstrap_seed: int) -> dict:
@@ -264,11 +268,19 @@ def main() -> None:
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--bootstrap-samples", type=int, default=4_000)
     parser.add_argument("--bootstrap-seed", type=int, default=464_122)
+    parser.add_argument("--renderer", type=Path, required=True)
     arguments = parser.parse_args()
     summary = analyze_run(
         arguments.run_dir,
         bootstrap_samples=arguments.bootstrap_samples,
         bootstrap_seed=arguments.bootstrap_seed,
+    )
+    manifest = json.loads((arguments.run_dir / "manifest.json").read_text())
+    document = build_report_document(summary, manifest)
+    write_json_atomic(arguments.run_dir / "report.json", document)
+    subprocess.run(
+        [sys.executable, str(arguments.renderer.resolve()), str(arguments.run_dir.resolve())],
+        check=True,
     )
     fit = summary["primary_fit"]
     interval = summary["central_charge_ci95"]
