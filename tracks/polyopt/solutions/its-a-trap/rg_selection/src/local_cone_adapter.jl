@@ -21,7 +21,9 @@ struct RGExt
     zblocks::Vector{@NamedTuple{dim::Int, entries::Vector{Tuple{Int,Int,Int,Float64}}}}
     brows::Vector{Tuple{Int,Float64}}
     counters::Dict{String,Int}
+    capture::Base.RefValue{Any}   # vcheck: stash the JuMP model at the seam
 end
+RGExt(nw, gb, yc, zb, br, ct) = RGExt(nw, gb, yc, zb, br, ct, Ref{Any}(nothing))
 
 function tower_dual_extend!(model, cons, tsupp, L, ext::RGExt)
     n0 = length(tsupp)
@@ -66,6 +68,7 @@ function tower_dual_extend!(model, cons, tsupp, L, ext::RGExt)
     end
     ext.counters["seam_newwords"] = length(nwidx)
     ext.counters["seam_tsupp_total"] = length(tsupp)
+    ext.capture[] = model
     return nothing
 end
 

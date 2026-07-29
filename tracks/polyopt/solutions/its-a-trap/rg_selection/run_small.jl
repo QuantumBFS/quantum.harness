@@ -139,6 +139,70 @@ if mode == "g3"
     end
 end
 
+if mode == "g4"
+    include(joinpath(@__DIR__, "src", "functional_rg.jl"))
+    As = load_D4(); NRG = 6; N = 14
+    fs = read(joinpath(@__DIR__, "results", "FROZEN_SELECTION.json"), String)
+    Sstar = Vector{String}(sort([String(m.captures[1]) for m in eachmatch(r"\"(B_[a-z_]+)\"", fs)]))
+    gate!("G4 S*", !isempty(Sstar), "frozen S* = " * join(Sstar, "+") * " (holdout untouched until now)")
+    rg = rg_spec(N, NRG, As)
+    base  = build_rg_selection_model(N; vspace = :stock)
+    selo  = build_rg_selection_model(N; S = Sstar, vspace = :auto)
+    rgo   = build_rg_selection_model(N; rg = rg, vspace = :auto)
+    joint = build_rg_selection_model(N; S = Sstar, rg = rg, vspace = :auto)
+    E0, psi = heis_ground(N)
+    ec(a, b) = a.resid.mu + b.resid.mu + 0.75 * (a.resid.pfeas + a.resid.dfeas + b.resid.pfeas + b.resid.dfeas)
+    ordA = joint.E >= max(rgo.E, selo.E) - max(ec(joint, rgo), ec(joint, selo))
+    ordB = joint.E <= E0 / N + ec(joint, base)
+    ordC = selo.E >= base.E - ec(selo, base) && rgo.E >= base.E - ec(rgo, base)
+    gate!("G4 orderings", ordA && ordB && ordC,
+        @sprintf("base=%.10f sel=%.10f rg=%.10f joint=%.10f E0/N=%.10f",
+                 base.E, selo.E, rgo.E, joint.E, E0 / N))
+    gb = gamma2_block(Sstar, N)
+    yv = Dict{Vector{UInt16},Float64}()
+    G = zeros(gb.dim, gb.dim)
+    for (w, i, j, c) in gb.entries
+        v = get!(() -> word_expect(psi, N, w), yv, w)
+        G[i, j] += c * v
+    end
+    lmin = minimum(LinearAlgebra.eigvals(LinearAlgebra.Symmetric(G)))
+    gate!("G4 Gamma-PSD", lmin >= -1e-10, @sprintf("eigmin Gamma_{2,S*}(y_ED) = %+.2e (dim=%d)", lmin, gb.dim))
+    dRG = rgo.E - base.E; dSel = selo.E - base.E; dJ = joint.E - base.E
+    dInt = joint.E - rgo.E - selo.E + base.E
+    cls = dJ > ec(joint, base) ? "resolved-positive" :
+          dJ < -ec(joint, base) ? "INVALID(order)" : "unresolved-null"
+    gate!("G4 classify", true, @sprintf("D_RG=%+.2e D_sel=%+.2e D_joint=%+.2e D_int=%+.2e -> %s",
+          dRG, dSel, dJ, dInt, cls))
+    open(joinpath(@__DIR__, "results", "holdout.csv"), "w") do io
+        println(io, "arm,E,pfeas,dfeas,mu")
+        for (n, r) in (("base", base), ("sel", selo), ("rg", rgo), ("joint", joint))
+            println(io, "$n,$(r.E),$(r.resid.pfeas),$(r.resid.dfeas),$(r.resid.mu)")
+        end
+        println(io, "E0_over_N,$(E0/N),,,")
+        println(io, "classification,$cls,,,")
+    end
+end
+
+if mode == "vcheck"
+    include(joinpath(@__DIR__, "src", "functional_rg.jl"))
+    include(joinpath(@__DIR__, "src", "vcheck.jl"))
+    As = load_D4(); NRG = 6
+    fs = read(joinpath(@__DIR__, "results", "FROZEN_SELECTION.json"), String)
+    Sstar = Vector{String}(sort(unique([String(m.captures[1]) for m in eachmatch(r"\"(B_[a-z_]+)\"", fs)])))
+    o1, m1 = vcheck_physical(14, Sstar, As, NRG)
+    foreach(l -> gate!("", true, l), m1); global ok &= o1
+    jt = build_rg_selection_model(14; S = Sstar, rg = rg_spec(14, NRG, As), vspace = :auto)
+    o2, m2 = vcheck_certificate(jt.ext.capture[])
+    foreach(l -> gate!("", true, l), m2); global ok &= o2
+    jt10 = build_rg_selection_model(10; S = Sstar, rg = rg_spec(10, NRG, As), vspace = :auto)
+    o2b, m2b = vcheck_certificate(jt10.ext.capture[])
+    foreach(l -> gate!("", true, "G3-winner@N=10 " * l), m2b); global ok &= o2b
+    o3, m3 = vcheck_newwords(10)
+    foreach(l -> gate!("", true, l), m3); global ok &= o3
+    o4, m4 = vcheck_mutation(10, As, NRG)
+    foreach(l -> gate!("", true, l), m4); global ok &= o4
+end
+
 open(joinpath(@__DIR__, "results", "$(mode)_report.txt"), "w") do io
     println(io, "run_small.jl $(mode)  ", ok ? "PASS" : "FAIL")
     foreach(l -> println(io, l), report)

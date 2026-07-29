@@ -69,5 +69,5 @@ function build_rg_selection_model(N::Int; S::Vector{String} = String[],
             (pfeas = parse(Float64, lastit.captures[1]),
              dfeas = parse(Float64, lastit.captures[2]),
              mu = parse(Float64, lastit.captures[3]))
-    return (E = E, sig = sig, resid = resid, counters = counters)
+    return (E = E, sig = sig, resid = resid, counters = counters, ext = ext)
 end

@@ -25,6 +25,8 @@ else
     end
 end
 As = load_D4()
+const ROWS_PER_PROC = parse(Int, get(ENV, "ROWS_PER_PROC", "2"))
+rows_done = 0
 bases = Dict{Int,Any}()
 for N in (10, 12)
     bases[N] = build_rg_selection_model(N; vspace = :stock)
@@ -44,6 +46,12 @@ for N in (10, 12)
                     get(r.counters, "gamma2_dim", -1), get(r.counters, "seam_newwords", -1), w)
         end
         @printf("done %d %s  E=%.12f  %.0fs\n", N, key, r.E, w)
+        flush(stdout)
+        global rows_done += 1
+        if rows_done >= ROWS_PER_PROC
+            println("chunk quota reached; clean exit for resume")
+            exit(0)
+        end
     end
 end
 println("enumeration complete; run g3_finalize.jl for the tie-broken freeze")
