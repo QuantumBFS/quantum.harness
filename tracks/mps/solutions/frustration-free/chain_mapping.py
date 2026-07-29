@@ -32,6 +32,36 @@ _CONVENTIONS = {
     "breakdown": "deterministic canonical coordinate deflation",
     "decoupled": "v = 0 maps with Q = I",
 }
+_PAYLOAD_KEYS = {
+    "schema_version",
+    "source_bath_sha256",
+    "source_bath_schema_version",
+    "n_bath",
+    "representation",
+    "lambda",
+    "Q",
+    "chain_onsite",
+    "chain_hopping",
+    "deflation_boundaries",
+    "conventions",
+    "numerics",
+    "provenance",
+}
+_NUMERICS_KEYS = {
+    "algorithm",
+    "breakdown_tolerance",
+    "breakdown_tolerance_rule",
+    "orthogonality_max_error",
+    "off_tridiagonal_max_abs",
+    "coupling_max_error",
+}
+_PROVENANCE_KEYS = {
+    "module",
+    "module_version",
+    "python_version",
+    "numpy_version",
+    "schema_version",
+}
 
 
 def _load_bath_module():
@@ -237,14 +267,26 @@ def derive_chain_mapping(bath_artifact: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def verify_chain_mapping_artifact(
-    mapping: Any, bath_artifact: dict[str, Any]
-) -> None:
-    """Verify mapping integrity, source linkage, and deterministic replay."""
-    if not isinstance(mapping, dict) or set(mapping) != {"payload", "sha256"}:
-        raise ValueError("mapping artifact keys do not match schema")
-    if not isinstance(mapping["payload"], dict):
-        raise TypeError("mapping payload must be a JSON object")
+def _require_exact_keys(value: Any, expected: set[str], name: str) -> None:
+    if not isinstance(value, dict):
+        raise TypeError(f"{name} must be a JSON object")
+    if set(value) != expected:
+        raise ValueError(f"{name} keys do not match schema")
+
+
+def _verify_structure_and_digest(mapping: Any) -> None:
+    _require_exact_keys(mapping, {"payload", "sha256"}, "mapping artifact")
+    payload = mapping["payload"]
+    _require_exact_keys(payload, _PAYLOAD_KEYS, "mapping payload")
+    _require_exact_keys(
+        payload["conventions"], set(_CONVENTIONS), "mapping conventions"
+    )
+    _require_exact_keys(
+        payload["numerics"], _NUMERICS_KEYS, "mapping numerics"
+    )
+    _require_exact_keys(
+        payload["provenance"], _PROVENANCE_KEYS, "mapping provenance"
+    )
     digest = mapping["sha256"]
     if (
         not isinstance(digest, str)
@@ -252,15 +294,58 @@ def verify_chain_mapping_artifact(
         or any(character not in "0123456789abcdef" for character in digest)
     ):
         raise ValueError("mapping SHA256 must be 64 lowercase hexadecimal digits")
-    expected_digest = hashlib.sha256(_canonical_json(mapping["payload"])).hexdigest()
+    expected_digest = hashlib.sha256(_canonical_json(payload)).hexdigest()
     if not hmac.compare_digest(digest, expected_digest):
         raise ValueError("mapping payload SHA256 mismatch")
 
+
+def verify_chain_mapping_artifact(
+    mapping: Any, bath_artifact: dict[str, Any]
+) -> None:
+    """Verify mapping integrity, source linkage, and deterministic replay."""
+    _verify_structure_and_digest(mapping)
     bath.verify_bath_artifact(bath_artifact)
-    if mapping["payload"].get("source_bath_sha256") != bath_artifact["sha256"]:
+    if mapping["payload"]["source_bath_sha256"] != bath_artifact["sha256"]:
         raise ValueError("mapping source bath SHA256 mismatch")
-    if mapping != derive_chain_mapping(bath_artifact):
+    expected = derive_chain_mapping(bath_artifact)
+    if mapping != expected:
         raise ValueError("mapping scientific replay mismatch")
+
+
+def _fsync_directory(directory: Path) -> None:
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    descriptor = os.open(directory, flags)
+    try:
+        os.fsync(descriptor)
+    except BaseException:
+        try:
+            os.close(descriptor)
+        except BaseException:
+            pass
+        raise
+    os.close(descriptor)
+
+
+def _hardlink_backup(destination: Path) -> Path:
+    descriptor, name = tempfile.mkstemp(
+        dir=destination.parent,
+        prefix=f".{destination.name}.",
+        suffix=".backup",
+    )
+    os.close(descriptor)
+    os.unlink(name)
+    backup_path = Path(name)
+    try:
+        os.link(destination, backup_path, follow_symlinks=False)
+        with backup_path.open("rb") as backup:
+            os.fsync(backup.fileno())
+    except BaseException:
+        try:
+            backup_path.unlink(missing_ok=True)
+        except BaseException:
+            pass
+        raise
+    return backup_path
 
 
 def write_chain_mapping_json(
@@ -274,17 +359,21 @@ def write_chain_mapping_json(
     verify_chain_mapping_artifact(mapping, bath_artifact)
     encoded = _canonical_json(mapping) + b"\n"
 
-    try:
-        destination_status = destination.lstat()
-    except FileNotFoundError:
-        destination_status = None
-    if destination_status is not None and not stat.S_ISREG(
-        destination_status.st_mode
-    ):
-        raise ValueError("existing destination must be a regular file")
-
     temporary_path: Path | None = None
+    backup_path: Path | None = None
+    published = False
     try:
+        try:
+            destination_status = destination.lstat()
+        except FileNotFoundError:
+            destination_status = None
+        if destination_status is not None:
+            if not stat.S_ISREG(destination_status.st_mode):
+                raise ValueError(
+                    "existing mapping destination must be a regular file, "
+                    "not a directory, symlink, or special file"
+                )
+            backup_path = _hardlink_backup(destination)
         with tempfile.NamedTemporaryFile(
             mode="wb",
             dir=destination.parent,
@@ -297,15 +386,36 @@ def write_chain_mapping_json(
             temporary.flush()
             os.fsync(temporary.fileno())
         os.replace(temporary_path, destination)
+        published = True
         temporary_path = None
-        descriptor = os.open(
-            destination.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
-        )
-        try:
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
-    finally:
+        _fsync_directory(destination.parent)
+        if backup_path is not None:
+            backup_path.unlink()
+            backup_path = None
+            _fsync_directory(destination.parent)
+    except BaseException:
+        if published:
+            try:
+                if backup_path is not None:
+                    os.replace(backup_path, destination)
+                    backup_path = None
+                else:
+                    destination.unlink(missing_ok=True)
+                try:
+                    _fsync_directory(destination.parent)
+                except BaseException:
+                    pass
+            except BaseException:
+                pass
         if temporary_path is not None:
-            temporary_path.unlink(missing_ok=True)
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except BaseException:
+                pass
+        if backup_path is not None:
+            try:
+                backup_path.unlink(missing_ok=True)
+            except BaseException:
+                pass
+        raise
     return mapping
