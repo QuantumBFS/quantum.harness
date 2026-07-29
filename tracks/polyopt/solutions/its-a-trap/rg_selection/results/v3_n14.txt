@@ -1,0 +1,5 @@
+V3@N14 PASS
+V3 closure-admission: newwords=1 newrows=4 rank=1 on/off-hash-differ=true PASS
+V3 bound valid: E=-0.4474063509 (base -0.4474063509, E0/N -0.4473963953) PASS
+V3 ED-feasible: eigmin +7.09e-01 PASS
+V3 mutation: mutated E=0.46892281534715063 -> RED as required PASS

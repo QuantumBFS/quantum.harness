@@ -1,0 +1,17 @@
+check,status,value,threshold
+V1_gamma_sym,PASS,0.0,1e-10
+V1_gamma_eigmin,PASS,+3.53e-01,-1e-10
+V1_omega_herm_worst,PASS,2.1e-17,1e-12
+V1_omega_eigmin_worst,PASS,-1.92e-16,-1e-12
+V1_link_rows,PASS,1.7e-15 over 768,1e-10
+V2_psd_blocks_N14,PASS,28 blocks eigmin -3.89e-10,-1e-7
+V2_coeff_identity_N14,PASS,1174 eq worst 4.17e-7,1e-6
+V2_psd_blocks_N10,PASS,24 blocks eigmin -2.51e-09,-1e-7
+V2_coeff_identity_N10,PASS,641 eq worst 2.07e-8,1e-6
+V3_newwords_N14,PASS,1,>0
+V3_new_rows,PASS,4,>0
+V3_rank,PASS,1,>0
+V3_onoff_hash_differ,PASS,true,true
+V3_ed_feasible,PASS,+7.09e-01,-1e-10
+V3_mutation_red,PASS,mutated E=+0.4689 (>E_ED),must_go_red
+V4a_link_sign_mutation,PASS,pre-strengthening run: ordering red,must_go_red

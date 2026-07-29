@@ -145,12 +145,30 @@ if mode == "g4"
     fs = read(joinpath(@__DIR__, "results", "FROZEN_SELECTION.json"), String)
     Sstar = Vector{String}(sort([String(m.captures[1]) for m in eachmatch(r"\"(B_[a-z_]+)\"", fs)]))
     gate!("G4 S*", !isempty(Sstar), "frozen S* = " * join(Sstar, "+") * " (holdout untouched until now)")
+    subset = length(ARGS) >= 2 ? ARGS[2] : "all"
     rg = rg_spec(N, NRG, As)
-    tarm(f) = (t0 = time(); r = f(); (r, time() - t0))
-    (base, w_base)   = tarm(() -> build_rg_selection_model(N; vspace = :stock))
-    (selo, w_selo)   = tarm(() -> build_rg_selection_model(N; S = Sstar, vspace = :auto))
-    (rgo, w_rgo)     = tarm(() -> build_rg_selection_model(N; rg = rg, vspace = :auto))
-    (joint, w_joint) = tarm(() -> build_rg_selection_model(N; S = Sstar, rg = rg, vspace = :auto))
+    tarm(f) = (GC.gc(); t0 = time(); r = f(); (r, time() - t0))
+    CSVP = joinpath(@__DIR__, "results", "g4_arms.csv")
+    isfile(CSVP) || open(io -> println(io, "arm,E,pfeas,dfeas,mu,wall_s"), CSVP, "w")
+    if subset in ("light", "all")
+        (base, w_base) = tarm(() -> build_rg_selection_model(N; vspace = :stock))
+        (selo, w_selo) = tarm(() -> build_rg_selection_model(N; S = Sstar, vspace = :auto))
+        open(CSVP, "a") do io
+            println(io, "base,$(base.E),$(base.resid.pfeas),$(base.resid.dfeas),$(base.resid.mu),$(round(w_base,digits=1))")
+            println(io, "sel,$(selo.E),$(selo.resid.pfeas),$(selo.resid.dfeas),$(selo.resid.mu),$(round(w_selo,digits=1))")
+        end
+        subset == "light" && (println("G4 LIGHT ARMS DONE"); exit(0))
+    end
+    if subset in ("heavy", "all")
+        (rgo, w_rgo) = tarm(() -> build_rg_selection_model(N; rg = rg, vspace = :auto))
+        (joint, w_joint) = tarm(() -> build_rg_selection_model(N; S = Sstar, rg = rg, vspace = :auto))
+        open(CSVP, "a") do io
+            println(io, "rg,$(rgo.E),$(rgo.resid.pfeas),$(rgo.resid.dfeas),$(rgo.resid.mu),$(round(w_rgo,digits=1))")
+            println(io, "joint,$(joint.E),$(joint.resid.pfeas),$(joint.resid.dfeas),$(joint.resid.mu),$(round(w_joint,digits=1))")
+        end
+        subset == "heavy" && (println("G4 HEAVY ARMS DONE"); exit(0))
+    end
+    # (verdict path below runs only for subset == "all": reads local vars)
     walls = Dict("base" => w_base, "sel" => w_selo, "rg" => w_rgo, "joint" => w_joint)
     E0, psi = heis_ground(N)
     ec(a, b) = a.resid.mu + b.resid.mu + 0.75 * (a.resid.pfeas + a.resid.dfeas + b.resid.pfeas + b.resid.dfeas)
@@ -201,7 +219,7 @@ if mode == "vcheck"
     jt10 = build_rg_selection_model(10; S = Sstar, rg = rg_spec(10, NRG, As), vspace = :auto)
     o2b, m2b = vcheck_certificate(jt10.ext.capture[])
     foreach(l -> gate!("", true, "G3-winner@N=10 " * l), m2b); global ok &= o2b
-    o3, m3 = vcheck_newwords(10)
+    o3, m3 = vcheck_newwords(14)
     foreach(l -> gate!("", true, l), m3); global ok &= o3
     o4, m4 = vcheck_mutation(10, As, NRG)
     foreach(l -> gate!("", true, l), m4); global ok &= o4

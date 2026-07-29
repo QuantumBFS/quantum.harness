@@ -1,0 +1,16 @@
+gate,status,value,threshold,evidence
+G0,PASS,pool_hash=8c3f5572,immutable,commit 599ec8d
+G1_identity_N10,PASS,dE=0.0,1e-8,g1_report
+G1b_neutrality_N10,PASS,dE=0.0,1e-8,g1_report
+G1b_neutrality_N12,PASS,dE=0.0,1e-8,g1_report
+G1c_orbit_scaling,PASS,rows=r(N)+6 exact,formula,g1_report
+G2a_oracle,PASS,2.78e-10,1e-8,g2_report
+G2b_compat,PASS,1.14e-16,1e-12,g2_report
+G2c_sandwich,PASS,eps=6.7e-8,ordering,g2_report
+G3_orderings,PASS,28/28 ok,eps_cmp,training.csv
+G3_nesting,PASS,all pairs,eps_cmp,training.csv
+G3_freeze,PASS,S*=B_bond_edge+B_half,tiebreak(b),FROZEN_SELECTION.json sha=e13ed241
+G4_orderings,PASS,joint>=max(rg;sel)-eps,eps_cmp,g4_arms.csv
+G4_classification,UNRESOLVED_NULL,D_joint=+5.5e-9,eps~1.5e-7,preregistered branch
+G4_alpha_time,RECORDED,alpha_t_max~15,n/a,g4_arms.csv joint 368s/build~23s
+G4b_space_equiv,PASS,dE=0.0 sig_equal,1e-8,g4b_report
