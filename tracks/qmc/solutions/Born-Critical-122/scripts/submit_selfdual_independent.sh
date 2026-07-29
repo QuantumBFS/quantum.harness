@@ -8,7 +8,7 @@
 set -euo pipefail
 
 run_spec_relative="${1:?usage: submit_selfdual_independent.sh RUN_SPEC_RELATIVE}"
-solution_root="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical"
+solution_root="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122"
 run_root="/home/ystu/quantum.harness/${run_spec_relative%/run_spec.json}"
 spec_path="/home/ystu/quantum.harness/${run_spec_relative}"
 sbatch_path="${solution_root}/slurm/stage4-selfdual-array.sbatch"

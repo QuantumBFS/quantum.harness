@@ -7,7 +7,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical"
+source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122"
 run_path="/home/ystu/quantum.harness/tracks/qmc/results/born-critical/selfdual-production-v1"
 job_id="${SLURM_JOB_ID:?SLURM_JOB_ID is required}"
 work="$(mktemp -d "/tmp/born-critical-stage4-aggregate-${job_id}-XXXXXX")"

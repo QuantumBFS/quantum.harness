@@ -7,7 +7,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical}"
+ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122}"
 ws0_eigen_path="${BORN_CRITICAL_EIGEN_PATH:-/home/ystu/upstream/deps/eigen-3.4.0}"
 ws0_run_path="${BORN_CRITICAL_RUN_PATH:-/home/ystu/quantum.harness/tracks/qmc/results/born-critical/rbim-production-v1}"
 retry_set="${BORN_CRITICAL_RETRY_SET:-${HARNESS_COMMAND:?HARNESS_COMMAND is required}}"

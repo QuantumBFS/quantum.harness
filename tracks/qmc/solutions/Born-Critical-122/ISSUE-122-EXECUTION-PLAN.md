@@ -21,16 +21,16 @@
 阶段 0 的机器可读结果位于
 `tracks/qmc/results/born-critical/stage0-tests/job-17167/`。该目录按仓库
 规则不进入 Git；可提交的阶段报告位于
-`tracks/qmc/solutions/Born-Critical/STAGE0-REPORT.md`。
+`tracks/qmc/solutions/Born-Critical-122/STAGE0-REPORT.md`。
 
 阶段 1 的机器可读结果位于
 `tracks/qmc/results/born-critical/stage1-tests/job-17173/`，可提交的阶段
-报告位于 `tracks/qmc/solutions/Born-Critical/STAGE1-REPORT.md`。
+报告位于 `tracks/qmc/solutions/Born-Critical-122/STAGE1-REPORT.md`。
 
 阶段 2 的机器可读结果位于
 `tracks/qmc/results/born-critical/stage2-clean-ising/job-17178/`，可提交的
 阶段报告位于
-`tracks/qmc/solutions/Born-Critical/STAGE2-REPORT.md`。主 M0 结果为
+`tracks/qmc/solutions/Born-Critical-122/STAGE2-REPORT.md`。主 M0 结果为
 \(c=0.5011803410\)，M1 修正结果为 \(c=0.4999790414\)。
 
 阶段 3 的机器可读结果位于
@@ -41,7 +41,7 @@
 \(c_{\rm eff}=0.4597565\)，bootstrap 95% 区间为
 \([0.4588332,0.4606509]\)，与 \(0.464\pm0.004\) 的目标区间相交。
 可提交的阶段报告位于
-`tracks/qmc/solutions/Born-Critical/STAGE3-REPORT.md`。
+`tracks/qmc/solutions/Born-Critical-122/STAGE3-REPORT.md`。
 
 阶段 4 的机器可读结果位于
 `tracks/qmc/results/born-critical/selfdual-production-v1/`，Metropolis 与
@@ -51,7 +51,7 @@
 `tracks/qmc/results/born-critical/stage4-acceptance.json`。主 M1 结果为
 \(c_{\rm Casimir}=0.4477180\)，bootstrap 95% 区间为
 \([0.4468820,0.4485672]\)，与 \(0.447\pm0.001\) 相交。可提交的阶段报告
-位于 `tracks/qmc/solutions/Born-Critical/STAGE4-REPORT.md`。
+位于 `tracks/qmc/solutions/Born-Critical-122/STAGE4-REPORT.md`。
 
 ## 1. 目标、边界和完成定义
 
@@ -260,7 +260,7 @@ P(e,m)=\frac{\left|Z(e,m)\right|^2}
 实现阶段采用以下布局：
 
 ```text
-tracks/qmc/solutions/Born-Critical/
+tracks/qmc/solutions/Born-Critical-122/
 ├── README.md
 ├── environment.yml
 ├── pyproject.toml
@@ -712,30 +712,30 @@ mkdir -p "$work_root"/{src,result,logs}
 
 ```bash
 # 生成不可变 cell map
-python tracks/qmc/solutions/Born-Critical/scripts/make_run_spec.py \
-  --config tracks/qmc/solutions/Born-Critical/configs/rbim-pilot.json \
+python tracks/qmc/solutions/Born-Critical-122/scripts/make_run_spec.py \
+  --config tracks/qmc/solutions/Born-Critical-122/configs/rbim-pilot.json \
   --output tracks/qmc/results/born-critical/rbim-pilot-v1/run_spec.json
 
 # 在计算节点运行一个 opaque cell
-python tracks/qmc/solutions/Born-Critical/scripts/run_cell.py \
+python tracks/qmc/solutions/Born-Critical-122/scripts/run_cell.py \
   --run-spec /local/path/run_spec.json \
   --cell-id rbim-L08-r003 \
   --output /local/path/result
 
 # ws0 只做提交/监控/文件操作
-bash tracks/qmc/solutions/Born-Critical/slurm/submit_ws0.sh \
+bash tracks/qmc/solutions/Born-Critical-122/slurm/submit_ws0.sh \
   --run tracks/qmc/results/born-critical/rbim-pilot-v1 \
   --test-only
 
-bash tracks/qmc/solutions/Born-Critical/slurm/submit_ws0.sh \
+bash tracks/qmc/solutions/Born-Critical-122/slurm/submit_ws0.sh \
   --run tracks/qmc/results/born-critical/rbim-pilot-v1 \
   --array-concurrency 4
 
 # 完成回传后，在允许的计算环境执行聚合与拟合
-python tracks/qmc/solutions/Born-Critical/scripts/aggregate.py \
+python tracks/qmc/solutions/Born-Critical-122/scripts/aggregate.py \
   --run tracks/qmc/results/born-critical/rbim-production-v1
 
-python tracks/qmc/solutions/Born-Critical/scripts/fit_casimir.py \
+python tracks/qmc/solutions/Born-Critical-122/scripts/fit_casimir.py \
   --run tracks/qmc/results/born-critical/rbim-production-v1 \
   --observable phi \
   --model M1 \

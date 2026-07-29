@@ -20,6 +20,12 @@ import math
 from pathlib import Path
 from typing import Any
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+
 # --------------------------------------------------------------------------- #
 # Generic helpers
 # --------------------------------------------------------------------------- #
@@ -534,11 +540,6 @@ def plot_from_csv(
     err_col: str | None,
     out: str | Path,
 ) -> str:
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
     arity = len(axis_names)
     fig, ax = plt.subplots(figsize=(6, 4.2))
 

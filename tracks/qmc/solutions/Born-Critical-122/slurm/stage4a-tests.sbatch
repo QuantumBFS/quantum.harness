@@ -8,7 +8,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical}"
+ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122}"
 ws0_result_path="${BORN_CRITICAL_RESULT_PATH:-/home/ystu/quantum.harness/tracks/qmc/results/born-critical/stage4a-tests}"
 job_id="${SLURM_JOB_ID:?SLURM_JOB_ID is required}"
 work_root="${TMPDIR:-/tmp}/born-critical/stage4a-${job_id}"

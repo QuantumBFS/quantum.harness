@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical}"
+ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122}"
 ws0_upstream_path="${BORN_CRITICAL_UPSTREAM_PATH:-/home/ystu/upstream/fermionic-transfer-matrix-rbim}"
 ws0_eigen_path="${BORN_CRITICAL_EIGEN_PATH:-/home/ystu/upstream/deps/eigen-3.4.0}"
 ws0_result_path="${BORN_CRITICAL_WS0_RESULT_PATH:-/home/ystu/quantum.harness/tracks/qmc/results/born-critical/stage3a-baseline}"

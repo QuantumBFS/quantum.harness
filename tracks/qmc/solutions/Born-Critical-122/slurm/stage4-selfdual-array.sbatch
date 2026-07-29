@@ -7,7 +7,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical}"
+ws0_source_path="${BORN_CRITICAL_WS0_SOURCE_PATH:-/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122}"
 run_spec_relative="${HARNESS_RUN_SPEC:?HARNESS_RUN_SPEC is required}"
 run_path_relative="${run_spec_relative%/run_spec.json}"
 ws0_run_path="${BORN_CRITICAL_RUN_PATH:-/home/ystu/quantum.harness/${run_path_relative}}"

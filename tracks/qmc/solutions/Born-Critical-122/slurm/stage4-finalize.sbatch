@@ -7,7 +7,7 @@
 set -euo pipefail
 
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical"
+source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122"
 result_root="/home/ystu/quantum.harness/tracks/qmc/results/born-critical"
 regression_job="${STAGE4_REGRESSION_JOB:?STAGE4_REGRESSION_JOB is required}"
 job_id="${SLURM_JOB_ID:?SLURM_JOB_ID is required}"

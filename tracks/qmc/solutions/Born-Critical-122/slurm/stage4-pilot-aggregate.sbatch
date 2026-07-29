@@ -5,7 +5,7 @@
 #SBATCH --chdir=/tmp
 set -euo pipefail
 ws0_host="${BORN_CRITICAL_WS0_HOST:-ystu@ws0}"
-source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical"
+source_path="/home/ystu/quantum.harness/tracks/qmc/solutions/Born-Critical-122"
 run_path="${BORN_CRITICAL_RUN_PATH:-/home/ystu/quantum.harness/tracks/qmc/results/born-critical/selfdual-pilot-v1}"
 job_id="${SLURM_JOB_ID:?}"
 work="${TMPDIR:-/tmp}/born-critical/s4-aggregate-${job_id}"
