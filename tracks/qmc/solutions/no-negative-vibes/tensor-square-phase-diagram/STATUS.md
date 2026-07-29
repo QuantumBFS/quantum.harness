@@ -162,3 +162,26 @@ Current status: `STAGE 4 STATISTICAL EARLY STOP — NO STAGE 5 PHASE CLAIM`
   `notes/stage4_dense_results.md`.
 - Code/result commits `3a3fce2`, `dc87c6c`, and `b1c2b88` were pushed to
   `work/zibojin/tensor-square-phase-diagram`; PR #178 was not modified.
+
+## Stage 4 round 4 — autocorrelation root-cause audit (2026-07-29)
+
+- The 81 production early stops were decomposed without rerunning any
+  fingerprinted Stage 3 or Stage 4 point. Worst-observable counts are
+  `hs_q_a=30`, `hs_q_b=18`, `q_a_sq=15`, `q_b_sq=10`,
+  `staggered_structure=7`, and `q_combined=1`.
+- The censoring is concentrated at low temperature: at `beta=8`, complete /
+  early-stop replica counts are `10/34` for `m=4`, `0/16` for `m=6`, and
+  `0/16` for `m=8`. At `beta=4` they are `26/10`, `36/0`, and `23/5`.
+- This supports a sampler bottleneck in imaginary-time channel modes, not a
+  sign or determinant-stability failure. A default-disabled full-imaginary-time
+  channel pCN proposal was implemented with separate acceptance and
+  checkpoint counters.
+- The validation order, fixed scale `0.1`, paired seeds, budgets, 3-sigma ED
+  gate, 2-sigma observable-consistency gate, and 25% tau-reduction gate were
+  recorded before numerical evaluation in
+  `notes/autocorrelation_mitigation_preregistration.md`.
+- Remote-only verification is green: `62 passed`, including bitwise
+  checkpoint/resume with the new proposal. The local Windows control host ran
+  no numerical test or chain.
+- Next action: run the frozen m=3 ED cross-validation from a clean commit. Only
+  if it passes may the single censored `m=8,beta=8` A/B point run.

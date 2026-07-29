@@ -1,0 +1,235 @@
+{
+  "m10": {
+    "beta_size_audit": [
+      {
+        "beta": 4.0,
+        "complete": 2,
+        "early_stop": 2,
+        "m": 10,
+        "maximum_worst_tau_int": 31.315662952462045,
+        "median_worst_tau_int": 19.12287611782449,
+        "replicas": 4
+      }
+    ],
+    "replicas": 4,
+    "status_counts": {
+      "COMPLETE": 2,
+      "EARLY_STOP": 2
+    },
+    "tau_by_key_and_status": {
+      "hs_q_a_tau_int": {
+        "COMPLETE": {
+          "maximum": 16.01145921394515,
+          "median": 14.26160456490009
+        },
+        "EARLY_STOP": {
+          "maximum": 20.379637701252758,
+          "median": 19.018273756842376
+        }
+      },
+      "hs_q_b_tau_int": {
+        "COMPLETE": {
+          "maximum": 16.083670723458262,
+          "median": 13.90759441137218
+        },
+        "EARLY_STOP": {
+          "maximum": 31.315662952462045,
+          "median": 19.907341706904877
+        }
+      },
+      "q_a_sq_tau_int": {
+        "COMPLETE": {
+          "maximum": 10.322164975690146,
+          "median": 8.849665398810508
+        },
+        "EARLY_STOP": {
+          "maximum": 11.807800484884073,
+          "median": 10.010016792866068
+        }
+      },
+      "q_b_sq_tau_int": {
+        "COMPLETE": {
+          "maximum": 14.607239597447117,
+          "median": 11.5640307833586
+        },
+        "EARLY_STOP": {
+          "maximum": 18.392099946217996,
+          "median": 14.890915661448634
+        }
+      },
+      "q_combined_tau_int": {
+        "COMPLETE": {
+          "maximum": 17.86611453439622,
+          "median": 13.87905719658336
+        },
+        "EARLY_STOP": {
+          "maximum": 20.96316174993725,
+          "median": 16.911467598528183
+        }
+      },
+      "staggered_structure_tau_int": {
+        "COMPLETE": {
+          "maximum": 11.762973469734034,
+          "median": 9.890380204932669
+        },
+        "EARLY_STOP": {
+          "maximum": 15.727240065022047,
+          "median": 13.558629641250636
+        }
+      }
+    },
+    "worst_observable_counts_by_status": {
+      "COMPLETE": {
+        "hs_q_b_tau_int": 1,
+        "q_combined_tau_int": 1
+      },
+      "EARLY_STOP": {
+        "hs_q_a_tau_int": 1,
+        "hs_q_b_tau_int": 1
+      }
+    }
+  },
+  "production": {
+    "beta_size_audit": [
+      {
+        "beta": 4.0,
+        "complete": 26,
+        "early_stop": 10,
+        "m": 4,
+        "maximum_worst_tau_int": 42.1919059172126,
+        "median_worst_tau_int": 10.865219291586941,
+        "replicas": 36
+      },
+      {
+        "beta": 4.0,
+        "complete": 36,
+        "early_stop": 0,
+        "m": 6,
+        "maximum_worst_tau_int": 18.813154818367543,
+        "median_worst_tau_int": 11.093242401782156,
+        "replicas": 36
+      },
+      {
+        "beta": 4.0,
+        "complete": 23,
+        "early_stop": 5,
+        "m": 8,
+        "maximum_worst_tau_int": 34.71012981285977,
+        "median_worst_tau_int": 14.776955010479927,
+        "replicas": 28
+      },
+      {
+        "beta": 8.0,
+        "complete": 10,
+        "early_stop": 34,
+        "m": 4,
+        "maximum_worst_tau_int": 136.61495605335017,
+        "median_worst_tau_int": 25.572497639215104,
+        "replicas": 44
+      },
+      {
+        "beta": 8.0,
+        "complete": 0,
+        "early_stop": 16,
+        "m": 6,
+        "maximum_worst_tau_int": 55.72706600893412,
+        "median_worst_tau_int": 33.914344032721786,
+        "replicas": 16
+      },
+      {
+        "beta": 8.0,
+        "complete": 0,
+        "early_stop": 16,
+        "m": 8,
+        "maximum_worst_tau_int": 63.2515937240711,
+        "median_worst_tau_int": 35.87559524239602,
+        "replicas": 16
+      }
+    ],
+    "replicas": 176,
+    "status_counts": {
+      "COMPLETE": 95,
+      "EARLY_STOP": 81
+    },
+    "tau_by_key_and_status": {
+      "hs_q_a_tau_int": {
+        "COMPLETE": {
+          "maximum": 18.655143165039252,
+          "median": 10.304115476043712
+        },
+        "EARLY_STOP": {
+          "maximum": 124.07253615681778,
+          "median": 23.73812252759003
+        }
+      },
+      "hs_q_b_tau_int": {
+        "COMPLETE": {
+          "maximum": 19.92029930073077,
+          "median": 8.924538490617444
+        },
+        "EARLY_STOP": {
+          "maximum": 91.58528900972739,
+          "median": 22.125475083911688
+        }
+      },
+      "q_a_sq_tau_int": {
+        "COMPLETE": {
+          "maximum": 18.788570432288214,
+          "median": 7.357730632033961
+        },
+        "EARLY_STOP": {
+          "maximum": 136.61495605335017,
+          "median": 19.566832405042213
+        }
+      },
+      "q_b_sq_tau_int": {
+        "COMPLETE": {
+          "maximum": 19.812239716788508,
+          "median": 8.10052969896825
+        },
+        "EARLY_STOP": {
+          "maximum": 115.80028161737795,
+          "median": 19.56737208031627
+        }
+      },
+      "q_combined_tau_int": {
+        "COMPLETE": {
+          "maximum": 17.803872332965593,
+          "median": 7.2045351314684485
+        },
+        "EARLY_STOP": {
+          "maximum": 45.975345834230254,
+          "median": 12.444891862964871
+        }
+      },
+      "staggered_structure_tau_int": {
+        "COMPLETE": {
+          "maximum": 19.271695379776418,
+          "median": 6.80734881540735
+        },
+        "EARLY_STOP": {
+          "maximum": 50.801026794941095,
+          "median": 12.966165446212834
+        }
+      }
+    },
+    "worst_observable_counts_by_status": {
+      "COMPLETE": {
+        "hs_q_a_tau_int": 38,
+        "hs_q_b_tau_int": 27,
+        "q_a_sq_tau_int": 9,
+        "q_b_sq_tau_int": 7,
+        "q_combined_tau_int": 8,
+        "staggered_structure_tau_int": 6
+      },
+      "EARLY_STOP": {
+        "hs_q_a_tau_int": 30,
+        "hs_q_b_tau_int": 18,
+        "q_a_sq_tau_int": 15,
+        "q_b_sq_tau_int": 10,
+        "q_combined_tau_int": 1,
+        "staggered_structure_tau_int": 7
+      }
+    }
+  }
+}

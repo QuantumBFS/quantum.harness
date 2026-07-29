@@ -25,6 +25,7 @@ class DQMCConfig:
     v_asymmetry: float = 0.0
     g_a: float = 1.0
     proposal_scale: float = 0.75
+    temporal_block_scale: float = 0.0
     stabilize: bool | None = None
 
     @property
@@ -39,6 +40,8 @@ class DQMCConfig:
         data = asdict(self)
         if data["stabilize"] is None:
             del data["stabilize"]
+        if data["temporal_block_scale"] == 0.0:
+            del data["temporal_block_scale"]
         return {**data, "slices": self.slices}
 
 
@@ -604,6 +607,10 @@ def run_chain(
     checkpoint_every: int = 40,
     run_fingerprint: str | None = None,
 ) -> dict[str, object]:
+    if not 0.0 <= config.proposal_scale < 1.0:
+        raise ValueError("proposal_scale must be in [0, 1)")
+    if not 0.0 <= config.temporal_block_scale < 1.0:
+        raise ValueError("temporal_block_scale must be in [0, 1)")
     rng = np.random.default_rng(seed)
     model = make_one_body_model(config)
     kinetic_half = expm(-0.5 * config.dt * model.k)
@@ -611,11 +618,22 @@ def run_chain(
     start_sweep = 0
     accepted = 0
     proposed = 0
+    temporal_block_accepted = 0
+    temporal_block_proposed = 0
     measurements: list[dict[str, float]] = []
     if checkpoint_path is not None and checkpoint_path.exists():
         with np.load(checkpoint_path, allow_pickle=False) as checkpoint:
             stored_config = json.loads(str(checkpoint["config_json"].item()))
-            if stored_config != config.as_dict():
+            requested_config = config.as_dict()
+            if "temporal_block_scale" not in requested_config:
+                stored_scale = stored_config.pop(
+                    "temporal_block_scale", 0.0
+                )
+                if stored_scale != 0.0:
+                    raise ValueError(
+                        "checkpoint config does not match requested config"
+                    )
+            if stored_config != requested_config:
                 raise ValueError("checkpoint config does not match requested config")
             if run_fingerprint is not None:
                 if "run_fingerprint" not in checkpoint.files:
@@ -629,6 +647,14 @@ def run_chain(
             start_sweep = int(checkpoint["completed_sweeps"].item())
             accepted = int(checkpoint["accepted"].item())
             proposed = int(checkpoint["proposed"].item())
+            if "temporal_block_accepted" in checkpoint.files:
+                temporal_block_accepted = int(
+                    checkpoint["temporal_block_accepted"].item()
+                )
+            if "temporal_block_proposed" in checkpoint.files:
+                temporal_block_proposed = int(
+                    checkpoint["temporal_block_proposed"].item()
+                )
             measurements = json.loads(
                 str(checkpoint["measurements_json"].item())
             )
@@ -661,6 +687,9 @@ def run_chain(
     )
     total_sweeps = warmup_sweeps + measurement_sweeps
     contraction = np.sqrt(1.0 - config.proposal_scale**2)
+    temporal_block_contraction = np.sqrt(
+        1.0 - config.temporal_block_scale**2
+    )
     for sweep in range(start_sweep, total_sweeps):
         for time_slice in rng.permutation(config.slices):
             proposed_fields = (
@@ -696,6 +725,44 @@ def run_chain(
                 accepted += 1
             else:
                 slices[time_slice] = old_slice
+        if config.temporal_block_scale > 0.0:
+            for channel in rng.permutation(len(model.channels)):
+                proposed_fields = fields.copy()
+                proposed_fields[:, channel] = (
+                    temporal_block_contraction * fields[:, channel]
+                    + config.temporal_block_scale
+                    * rng.normal(size=config.slices)
+                )
+                proposed_slices = [
+                    slice_matrix(
+                        proposed_fields[index],
+                        model=model,
+                        dt=config.dt,
+                        kinetic_half=kinetic_half,
+                    )
+                    for index in range(config.slices)
+                ]
+                proposed_total = (
+                    stabilized_history_product(proposed_slices)
+                    if use_stabilization
+                    else history_product(proposed_slices)
+                )
+                proposed_log_weight = (
+                    stabilized_structured_log_weight(proposed_total)
+                    if use_stabilization
+                    else structured_log_weight(proposed_total)
+                )
+                proposed += 1
+                temporal_block_proposed += 1
+                if np.log(rng.random()) < min(
+                    0.0, proposed_log_weight - log_weight
+                ):
+                    fields = proposed_fields
+                    slices = proposed_slices
+                    total = proposed_total
+                    log_weight = proposed_log_weight
+                    accepted += 1
+                    temporal_block_accepted += 1
         if (
             sweep >= warmup_sweeps
             and (sweep - warmup_sweeps) % measure_every == 0
@@ -727,6 +794,8 @@ def run_chain(
                 "completed_sweeps": sweep + 1,
                 "accepted": accepted,
                 "proposed": proposed,
+                "temporal_block_accepted": temporal_block_accepted,
+                "temporal_block_proposed": temporal_block_proposed,
                 "measurements_json": json.dumps(measurements),
                 "rng_state_json": json.dumps(rng.bit_generator.state),
             }
@@ -741,6 +810,13 @@ def run_chain(
             "acceptance": accepted / max(1, proposed),
             "accepted": accepted,
             "proposed": proposed,
+            "temporal_block_acceptance": (
+                temporal_block_accepted / temporal_block_proposed
+                if temporal_block_proposed
+                else 0.0
+            ),
+            "temporal_block_accepted": temporal_block_accepted,
+            "temporal_block_proposed": temporal_block_proposed,
             "config": config.as_dict(),
             "stabilized": use_stabilization,
             "run_fingerprint": run_fingerprint,
