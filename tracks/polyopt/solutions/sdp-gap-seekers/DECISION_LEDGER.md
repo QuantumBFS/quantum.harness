@@ -1232,3 +1232,15 @@ GPU is only a partition-admission token. Add
 the same 32-CPU / 256000-MiB / one-GPU runner. This is a launch-policy repair,
 not a repeated numerical signature. Submit the repaired native dual once and
 monitor through its exact construction hash gate.
+
+SCNet ignores that flag when it appears only as an `#SBATCH` directive, but
+accepts it as a submission option. The durable invocation is:
+
+```bash
+sbatch --gres-flags=disable-binding tracks/polyopt/solutions/sdp-gap-seekers/scripts/shastry_full_state_spin_isotypic_l2d2_native_dual_scnet_highmem.sbatch
+```
+
+That command created native-dual job `118178932` from clean commit `a77fc0e`.
+It is pending `Priority` with 32 CPUs, 256000 MiB, one GPU, one node, and
+`GresEnforceBind=No`. Keep this single high-memory signature queued and
+monitor for allocation; no model has run yet.

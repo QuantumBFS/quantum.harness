@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T17:33:31Z
+Updated: 2026-07-29T17:39:00Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -160,5 +160,11 @@ Updated: 2026-07-29T17:33:31Z
   GPU. The CPU-only solve now explicitly disables GRES binding while retaining
   the admission GPU. `sbatch --test-only` accepts that exact 32-CPU /
   256000-MiB request; next action is one real submission and live monitoring.
+- SCNet ignores `--gres-flags=disable-binding` when supplied only in the
+  script header, but accepts the identical runner when the option is explicit
+  on the `sbatch` command. Native-dual job `118178932` is pending `Priority`
+  from clean commit `a77fc0e`, requesting 32 CPUs / 256000 MiB / one GPU with
+  `GresEnforceBind=No`. No duplicate high-memory solve will be launched while
+  it remains queued.
 
 No user input or new credential is currently required.

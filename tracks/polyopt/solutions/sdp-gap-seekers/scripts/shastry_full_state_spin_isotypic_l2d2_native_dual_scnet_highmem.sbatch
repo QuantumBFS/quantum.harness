@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SCNet 22.05 does not honor the GRES-binding flag below from an SBATCH
+# directive. Submit reproducibly from the repository root with:
+#   sbatch --gres-flags=disable-binding tracks/polyopt/solutions/sdp-gap-seekers/scripts/shastry_full_state_spin_isotypic_l2d2_native_dual_scnet_highmem.sbatch
 #SBATCH --job-name=ss-l2-native-dual-hm
 #SBATCH --partition=ksagnormal01
 #SBATCH --nodes=1

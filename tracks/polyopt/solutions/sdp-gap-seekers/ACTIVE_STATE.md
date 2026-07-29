@@ -695,3 +695,9 @@ Updated: 2026-07-29 UTC.
   cannot bind 32 CPU cores. Since Mosek is CPU-only, add
   `--gres-flags=disable-binding`; `sbatch --test-only` then accepts the exact
   32-CPU / 256000-MiB / one-GPU request. Submit this changed runner once.
+- The header directive alone is ineffective on this Slurm 22.05 deployment;
+  the same flag supplied to `sbatch` is accepted. Native-dual job `118178932`
+  is now pending `Priority` on `ksagnormal01` from immutable commit `a77fc0e`,
+  requesting 32 CPUs, 256000 MiB, and one admission GPU with
+  `GresEnforceBind=No`. Monitor it; do not launch an identical high-memory
+  duplicate while it is queued.
