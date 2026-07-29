@@ -468,6 +468,7 @@ def _trace_compatible_column_generation(
         }
     float_matrices = tuple(np.asarray(matrix.tolist(), dtype=float) for matrix in checked)
     milestones: list[dict[str, object]] = []
+    terminal_reason = "ray-budget-exhausted"
     while len(rays) <= counts[-1]:
         maximum, aggregate, worst, failures = _cone_residuals(float_matrices, rays)
         if len(rays) in counts:
@@ -502,11 +503,14 @@ def _trace_compatible_column_generation(
         atom_index, ray_index = worst
         new_ray = _canonical_ray(checked[atom_index] * rays[ray_index])
         if new_ray in rays:
+            terminal_reason = "repeated-worst-image"
             break
         rays.append(new_ray)
     return {
         "status": "no-exact-trace-compatible-certificate-found",
         "milestones": milestones,
+        "terminal_ray_count": len(rays),
+        "terminal_reason": terminal_reason,
     }
 
 
