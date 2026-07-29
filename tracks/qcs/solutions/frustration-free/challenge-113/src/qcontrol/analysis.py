@@ -18,6 +18,9 @@ class AnalysisError(ValueError):
     """Verified artifacts cannot be analyzed without changing the study."""
 
 
+_CANONICAL_TOLERANCE = 1e-15
+
+
 def _finite_number(value: object, *, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise AnalysisError(f"{name} must be a finite number")
@@ -206,6 +209,7 @@ class MethodSummary:
     conditional_first_certified_queries: tuple[int, ...]
     censored_first_certified_queries: tuple[int, ...]
     total_shots: int
+    total_shots_by_trial: tuple[int, ...]
     median_best_observed_infidelity_trajectory: tuple[float, ...]
     metric_availability: MetricAvailability
     exact_infidelity_trajectory: TrajectoryBand | None
@@ -259,6 +263,7 @@ class MethodSummary:
             "metric_availability": self.metric_availability.canonical_dict(),
             "success_probability": self.success_probability.canonical_dict(),
             "total_shots": self.total_shots,
+            "total_shots_by_trial": list(self.total_shots_by_trial),
             "trial_count": self.trial_count,
         }
 
@@ -326,6 +331,9 @@ class Summary:
         if not isinstance(raw_strata, list) or not raw_strata:
             raise AnalysisError("summary strata must be a nonempty list")
         strata = tuple(_parse_stratum(item) for item in raw_strata)
+        stratum_keys = tuple(item.key.sort_key() for item in strata)
+        if len(set(stratum_keys)) != len(stratum_keys):
+            raise AnalysisError("duplicate stratum key")
         if tuple(sorted(strata, key=lambda item: item.key.sort_key())) != strata:
             raise AnalysisError("summary strata must be sorted canonically")
         for stratum in strata:
@@ -426,6 +434,26 @@ def _certified(value: object) -> bool:
     return first_certified_query(value) is not None
 
 
+def _wilson_bounds(
+    numerator: int,
+    denominator: int,
+    confidence: float,
+) -> tuple[float, float]:
+    estimate = numerator / denominator
+    z = NormalDist().inv_cdf(0.5 + confidence / 2.0)
+    scale = 1.0 + z * z / denominator
+    center = (estimate + z * z / (2.0 * denominator)) / scale
+    radius = (
+        z
+        * math.sqrt(
+            estimate * (1.0 - estimate) / denominator
+            + z * z / (4.0 * denominator * denominator)
+        )
+        / scale
+    )
+    return max(0.0, center - radius), min(1.0, center + radius)
+
+
 def success_probability(
     trials: Iterable[object],
     *,
@@ -440,23 +468,13 @@ def success_probability(
     successes = sum(_certified(trial) for trial in materialized)
     count = len(materialized)
     estimate = successes / count
-    z = NormalDist().inv_cdf(0.5 + confidence_value / 2.0)
-    denominator = 1.0 + z * z / count
-    center = (estimate + z * z / (2.0 * count)) / denominator
-    radius = (
-        z
-        * math.sqrt(
-            estimate * (1.0 - estimate) / count
-            + z * z / (4.0 * count * count)
-        )
-        / denominator
-    )
+    low, high = _wilson_bounds(successes, count, confidence_value)
     return ProbabilityEstimate(
         value=estimate,
         numerator=successes,
         denominator=count,
-        low=max(0.0, center - radius),
-        high=min(1.0, center + radius),
+        low=low,
+        high=high,
         confidence=confidence_value,
     )
 
@@ -562,22 +580,46 @@ def pair_trials(
     reference_method: str = "model_hessian",
 ) -> dict[str, tuple[tuple[TrialResult, TrialResult], ...]]:
     records = tuple(_trial(value) for value in trials)
-    references = [
-        item for item in records if item.config["search"]["method"] == reference_method
-    ]
+    references = sorted(
+        (
+            item
+            for item in records
+            if item.config["search"]["method"] == reference_method
+        ),
+        key=lambda item: (
+            item.config["search"]["dimension"],
+            repr(_cluster_identity(item)),
+        ),
+    )
     methods = {str(item.config["search"]["method"]) for item in records}
     result: dict[str, tuple[tuple[TrialResult, TrialResult], ...]] = {}
     for baseline in sorted(methods - {reference_method}):
         candidates = [
             item for item in records if item.config["search"]["method"] == baseline
         ]
-        by_identity = {_pair_identity(item): item for item in candidates}
+        def pairing_key(item: TrialResult) -> tuple[object, ...]:
+            base = _pair_identity(item)
+            return (
+                base
+                if baseline == "full"
+                else (*base, item.config["search"]["dimension"])
+            )
+
+        by_identity = {pairing_key(item): item for item in candidates}
         if len(by_identity) != len(candidates):
             raise AnalysisError(f"duplicate pair coverage for {baseline!r}")
         pairs: list[tuple[TrialResult, TrialResult]] = []
         used: set[str] = set()
         for reference in references:
-            match = by_identity.get(_pair_identity(reference))
+            reference_key = (
+                _pair_identity(reference)
+                if baseline == "full"
+                else (
+                    *_pair_identity(reference),
+                    reference.config["search"]["dimension"],
+                )
+            )
+            match = by_identity.get(reference_key)
             if match is None:
                 raise AnalysisError(
                     f"pair coverage mismatch for {baseline!r} and "
@@ -682,6 +724,7 @@ def _trajectory_band(
 def _method_summary(
     records: Sequence[TrialResult],
     *,
+    target_dimension: int,
     bootstrap_seed: int,
     bootstrap_samples: int,
     confidence: float,
@@ -741,7 +784,12 @@ def _method_summary(
                 ]
             )
         )
-        angles = _median_rows([item["principal_angles_radians"] for item in geometry])
+        angles = _median_rows(
+            [
+                item["principal_angles_radians"][:target_dimension]
+                for item in geometry
+            ]
+        )
         model_ranks = _median_rows(
             [item["model_effective_ranks"] for item in geometry]
         )
@@ -749,12 +797,19 @@ def _method_summary(
             [item["truth_effective_ranks"] for item in geometry]
         )
         gaps = _median_rows(
-            [item["signed_leading_eigenvalue_gaps"] for item in geometry]
+            [
+                item["signed_leading_eigenvalue_gaps"][:target_dimension]
+                for item in geometry
+            ]
         )
-    conditional = tuple(
+    conditional = tuple(sorted(
         query
         for item in records
         if (query := first_certified_query(item)) is not None
+    ))
+    censored = tuple(sorted(_censored_query(item) for item in records))
+    shots_by_trial = tuple(
+        sorted(int(item.ledger["total_shots"]) for item in records)
     )
     return MethodSummary(
         method=method,
@@ -762,8 +817,9 @@ def _method_summary(
         failure_count=len(records) - probability.numerator,
         success_probability=probability,
         conditional_first_certified_queries=conditional,
-        censored_first_certified_queries=tuple(_censored_query(item) for item in records),
-        total_shots=sum(int(item.ledger["total_shots"]) for item in records),
+        censored_first_certified_queries=censored,
+        total_shots=sum(shots_by_trial),
+        total_shots_by_trial=shots_by_trial,
         median_best_observed_infidelity_trajectory=observed,
         metric_availability=availability,
         exact_infidelity_trajectory=exact_band,
@@ -903,7 +959,13 @@ def analyze_trials(
             grouped.setdefault(str(item.config["search"]["method"]), []).append(item)
         methods = tuple(
             _method_summary(
-                tuple(grouped[method]),
+                tuple(
+                    sorted(
+                        grouped[method],
+                        key=lambda item: repr(_cluster_identity(item)),
+                    )
+                ),
+                target_dimension=key.search_dimension,
                 bootstrap_seed=_derived_seed(seed, key.canonical_dict(), method),
                 bootstrap_samples=samples,
                 confidence=confidence,
@@ -987,12 +1049,19 @@ def _parse_probability(value: object) -> ProbabilityEstimate:
     low = _probability(payload["low"], name="probability low")
     high = _probability(payload["high"], name="probability high")
     confidence = _probability(payload["confidence"], name="probability confidence")
+    expected_low, expected_high = _wilson_bounds(
+        numerator,
+        denominator,
+        confidence,
+    )
     if (
         numerator > denominator
         or estimate != numerator / denominator
         or low > high
         or payload["method"] != "wilson"
         or confidence in {0.0, 1.0}
+        or abs(low - expected_low) > _CANONICAL_TOLERANCE
+        or abs(high - expected_high) > _CANONICAL_TOLERANCE
     ):
         raise AnalysisError("success probability is inconsistent")
     return ProbabilityEstimate(
@@ -1129,6 +1198,7 @@ def _parse_method(value: object) -> MethodSummary:
         "metric_availability",
         "success_probability",
         "total_shots",
+        "total_shots_by_trial",
         "trial_count",
     }
     payload = _mapping(value, fields, name="method summary")
@@ -1181,12 +1251,20 @@ def _parse_method(value: object) -> MethodSummary:
         payload["median_best_observed_infidelity_trajectory"],
         name="observed trajectory",
     )
+    shots_by_trial = _integer_tuple(
+        payload["total_shots_by_trial"],
+        name="total shots by trial",
+    )
     if (
         any(item <= 0 for item in (*conditional, *censored))
         or len(censored) != trial_count
         or len(conditional) != probability.numerator
+        or tuple(sorted(conditional)) != conditional
+        or tuple(sorted(censored)) != censored
         or not observed
         or any(not 0.0 <= item <= 1.0 for item in observed)
+        or len(shots_by_trial) != trial_count
+        or tuple(sorted(shots_by_trial)) != shots_by_trial
     ):
         raise AnalysisError("method trajectories or query counts are inconsistent")
     angles = _optional_tuple(
@@ -1218,6 +1296,9 @@ def _parse_method(value: object) -> MethodSummary:
         or any(not 0.0 <= item <= math.pi / 2.0 for item in angles)
     ):
         raise AnalysisError("available metric dimensions are inconsistent")
+    total_shots = _strict_nonnegative_int(payload["total_shots"], name="total_shots")
+    if total_shots != sum(shots_by_trial):
+        raise AnalysisError("method shot totals are inconsistent")
     return MethodSummary(
         method,
         trial_count,
@@ -1225,7 +1306,8 @@ def _parse_method(value: object) -> MethodSummary:
         probability,
         conditional,
         censored,
-        _strict_nonnegative_int(payload["total_shots"], name="total_shots"),
+        total_shots,
+        shots_by_trial,
         observed,
         availability,
         exact,
@@ -1283,6 +1365,12 @@ def _parse_stratum(value: object) -> StratumSummary:
         raise AnalysisError("paired differences must be a list")
     methods = tuple(_parse_method(item) for item in raw_methods)
     pairs = tuple(_parse_paired(item) for item in raw_pairs)
+    method_names = tuple(item.method for item in methods)
+    baseline_names = tuple(item.baseline for item in pairs)
+    if len(set(method_names)) != len(method_names):
+        raise AnalysisError("duplicate method name")
+    if len(set(baseline_names)) != len(baseline_names):
+        raise AnalysisError("duplicate paired baseline name")
     if tuple(sorted(methods, key=lambda item: item.method)) != methods:
         raise AnalysisError("stratum methods must be sorted")
     if tuple(sorted(pairs, key=lambda item: item.baseline)) != pairs:
@@ -1299,7 +1387,7 @@ def _parse_stratum(value: object) -> StratumSummary:
         for item in methods
     ):
         raise AnalysisError("geometry metrics do not match stratum dimension")
-    method_names = {item.method for item in methods}
-    if any(item.baseline not in method_names for item in pairs):
+    method_name_set = set(method_names)
+    if any(item.baseline not in method_name_set for item in pairs):
         raise AnalysisError("paired baseline is absent from method summaries")
     return StratumSummary(key, methods, pairs)

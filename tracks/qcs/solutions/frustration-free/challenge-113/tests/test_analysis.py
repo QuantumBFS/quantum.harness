@@ -16,7 +16,7 @@ from qcontrol.analysis import (
     paired_bootstrap_ci,
     success_probability,
 )
-from qcontrol.artifacts import ArtifactStore
+from qcontrol.artifacts import ArtifactStore, canonical_json_bytes
 from qcontrol.config import DeviceConfig, ExperimentConfig, SearchConfig, SystemConfig
 from qcontrol.experiments import TrialResult, generate_paired_trials, run_sweep
 
@@ -31,11 +31,14 @@ def _config(
     kind: str = "development",
     dimension: int = 2,
     system: str = "one_qubit",
+    segments: int | None = None,
 ) -> ExperimentConfig:
-    segments = 3 if system == "one_qubit" else 10
+    segment_count = segments if segments is not None else (
+        3 if system == "one_qubit" else 10
+    )
     return ExperimentConfig(
         run_kind=kind,
-        system=SystemConfig(system, segments, 4.0),
+        system=SystemConfig(system, segment_count, 4.0),
         device=DeviceConfig(gap, shots, perturbation_seed),
         search=SearchConfig(
             method,
@@ -315,7 +318,7 @@ def test_hand_computable_censoring_shots_and_conditional_queries() -> None:
     assert method.trial_count == 3
     assert method.success_probability.value == pytest.approx(2 / 3)
     assert method.conditional_first_certified_queries == (4, 9)
-    assert method.censored_first_certified_queries == (4, 200, 9)
+    assert method.censored_first_certified_queries == (4, 9, 200)
     assert method.total_shots == 413_000
     assert method.exact_infidelity_trajectory is None
     assert len(method.median_best_observed_infidelity_trajectory) == 200
@@ -659,3 +662,173 @@ def test_production_scale_bootstrap_never_allocates_full_sample_matrix(
     assert requested_shapes
     assert max(rows for rows, _ in requested_shapes) <= 16
     assert {columns for _, columns in requested_shapes} == {9_500}
+
+
+@pytest.mark.parametrize(
+    ("system", "segments", "full_dimension", "target_dimension"),
+    (
+        ("one_qubit", 12, 24, 3),
+        ("two_qubit", 20, 80, 4),
+    ),
+)
+def test_full_schema_v3_geometry_is_sliced_to_target_k_and_round_trips(
+    system,
+    segments,
+    full_dimension,
+    target_dimension,
+) -> None:
+    model = _trial(
+        _config(
+            "model_hessian",
+            seed=1,
+            kind="production",
+            system=system,
+            segments=segments,
+            dimension=target_dimension,
+        ),
+        certified_query=2,
+        principal_angles=tuple(0.01 * index for index in range(target_dimension)),
+        signed_gaps=tuple(-0.02 * index for index in range(target_dimension)),
+    )
+    full_angles = tuple(0.01 * index for index in range(full_dimension))
+    full_gaps = tuple(-0.02 * index for index in range(full_dimension))
+    full = _trial(
+        _config(
+            "full",
+            seed=1,
+            kind="production",
+            system=system,
+            segments=segments,
+            dimension=full_dimension,
+        ),
+        certified_query=2,
+        principal_angles=full_angles,
+        signed_gaps=full_gaps,
+        model_ranks=(7, 8, 9),
+        truth_ranks=(6, 7, 8),
+    )
+
+    summary = analyze_trials([model, full], bootstrap_samples=20)
+    full_method = _method(summary, 0, "full")
+
+    assert full_method.median_principal_angles == full_angles[:target_dimension]
+    assert full_method.median_signed_eigenvalue_gaps == full_gaps[:target_dimension]
+    assert full_method.median_model_effective_ranks == (7.0, 8.0, 9.0)
+    assert len(
+        full.result["derived_metrics"]["geometry"]["principal_angles_radians"]
+    ) == full_dimension
+    assert Summary.from_canonical_dict(summary.canonical_dict()) == summary
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("low", 0.0),
+        ("high", 0.1),
+        ("method", "jeffreys"),
+        ("confidence", 0.9),
+    ),
+)
+def test_summary_reader_recomputes_wilson_interval(field, value) -> None:
+    summary = analyze_trials(
+        [
+            _trial(_config("model_hessian", seed=1), certified_query=4),
+            _trial(_config("model_hessian", seed=2), certified_query=None),
+            _trial(_config("model_hessian", seed=3), certified_query=9),
+        ],
+        bootstrap_samples=20,
+    )
+    payload = summary.canonical_dict()
+    payload["strata"][0]["methods"][0]["success_probability"][field] = value
+
+    with pytest.raises(AnalysisError, match="probability|Wilson|confidence"):
+        Summary.from_canonical_dict(payload)
+
+
+@pytest.mark.parametrize("duplicate_kind", ("stratum", "method", "baseline"))
+def test_summary_reader_rejects_duplicate_named_entries(duplicate_kind) -> None:
+    summary = analyze_trials(
+        [
+            _trial(_config("model_hessian", seed=1), certified_query=4),
+            _trial(_config("random", seed=1), certified_query=6),
+        ],
+        bootstrap_samples=20,
+    )
+    payload = summary.canonical_dict()
+    if duplicate_kind == "stratum":
+        payload["strata"].append(payload["strata"][0])
+    elif duplicate_kind == "method":
+        payload["strata"][0]["methods"].append(
+            payload["strata"][0]["methods"][0]
+        )
+        payload["strata"][0]["methods"].sort(key=lambda item: item["method"])
+    else:
+        payload["strata"][0]["paired_differences"].append(
+            payload["strata"][0]["paired_differences"][0]
+        )
+
+    with pytest.raises(AnalysisError, match="duplicate"):
+        Summary.from_canonical_dict(payload)
+
+
+def test_reordered_trials_have_identical_summary_bytes() -> None:
+    records = [
+        _trial(_config("model_hessian", seed=1), certified_query=9),
+        _trial(_config("model_hessian", seed=2), certified_query=None),
+        _trial(_config("model_hessian", seed=3), certified_query=4),
+    ]
+
+    forward = analyze_trials(records, bootstrap_seed=7, bootstrap_samples=40)
+    reverse = analyze_trials(
+        reversed(records),
+        bootstrap_seed=7,
+        bootstrap_samples=40,
+    )
+
+    assert canonical_json_bytes(forward.canonical_dict()) == canonical_json_bytes(
+        reverse.canonical_dict()
+    )
+    method = _method(forward, 0, "model_hessian")
+    assert method.conditional_first_certified_queries == (4, 9)
+    assert method.censored_first_certified_queries == (4, 9, 200)
+    assert method.total_shots_by_trial == (104_000, 109_000, 200_000)
+
+
+def test_public_pairing_handles_multiple_k_without_cross_pairing() -> None:
+    records = []
+    for dimension in (1, 2):
+        records.extend(
+            (
+                _trial(
+                    _config("model_hessian", seed=1, dimension=dimension),
+                    certified_query=4,
+                ),
+                _trial(
+                    _config("random", seed=1, dimension=dimension),
+                    certified_query=6,
+                ),
+                _trial(
+                    _config("oracle", seed=1, dimension=dimension),
+                    certified_query=5,
+                ),
+            )
+        )
+    records.append(
+        _trial(_config("full", seed=1, dimension=3), certified_query=7)
+    )
+
+    pairs = pair_trials(records)
+
+    assert {name: len(items) for name, items in pairs.items()} == {
+        "full": 2,
+        "oracle": 2,
+        "random": 2,
+    }
+    for baseline in ("oracle", "random"):
+        assert [
+            (
+                reference.config["search"]["dimension"],
+                comparison.config["search"]["dimension"],
+            )
+            for reference, comparison in pairs[baseline]
+        ] == [(1, 1), (2, 2)]
