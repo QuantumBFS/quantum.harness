@@ -68,6 +68,9 @@
 - [GAUGE_COCYCLE_RESULTS.md](GAUGE_COCYCLE_RESULTS.md)：edge-electric `Z2`
   gauge 的四/六模式 GF(2) 精确消号，以及 `2 x L` 上被迫形成 Wilson string 的
   局域性障碍；
+- [UNCONVENTIONAL_MODEL_DISCOVERY.md](UNCONVENTIONAL_MODEL_DISCOVERY.md)：放宽短程、
+  几何局域与 Hermitian 限制，从已有严格正性类反推长程、多体、全局约束和
+  quasi-Hermitian 模型的主线与证据标准；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
   parity；物理模型排重后已降为已知 Majorana 正性子类；

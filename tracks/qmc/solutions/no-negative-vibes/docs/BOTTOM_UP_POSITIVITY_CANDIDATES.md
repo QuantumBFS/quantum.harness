@@ -11,6 +11,11 @@ Tensor-square 更新：任意深度矩阵定理和四模式正系数 HS 均已�
 约化到 split `O(2,2)`，而 `m>=3` 直接提升产生随系统长度增长的行列条带。
 详见 [tensor-square 结果](TENSOR_SQUARE_RESULTS.md)。
 
+分工更新：合作者已在 `work/zibo/representation-cones` 实现 non-induced exterior
+exact-card/pressure 扫描，本分支不再重复。我们的执行主线改为放宽短程、局域和
+Hermitian 限制，从本页已经严格成立的结构反推非常规模型，见
+[非常规模型发现](UNCONVENTIONAL_MODEL_DISCOVERY.md)。
+
 ## 为什么换搜索方式
 
 此前多条路线都是先在四模式单块中找到正锥，再检查两个局域块重叠后能否共用同一
@@ -256,12 +261,12 @@ exterior-Metzler 仍保留为备线，但必须直接从六模式重叠块开始
 ## 执行优先级
 
 ```text
-1. non-induced complementary exterior cone
-2. 非 Klein Fock–CP 固定变换或正乘法代数诱导的 Choi basis
-3. modified-Gauss-law projected cone（只有出现正 transfer matrix 才重开）
-4. tensor-square 的非条带局域拼接（只有出现新结构才重开）
-5. graded positive-character 文献排重
+1. tensor-square 集体密度与 -log cosh 长程多体模型
+2. TN/tensor-square 的 pseudo-Hermitian similarity/locality tradeoff
+3. Wilson-string gauge 与全局 grade-ancilla 模型
+4. fixed-partition odd block-TN 的 dense/synthetic-dimension 映射
+5. 非 Klein Fock–CP 与 Majorana 支撑支线
 ```
 
-前三项均为小矩阵、SDP 或有限域线性方程，预计单次本地实验远低于 10 分钟，
+前四项先用小矩阵、精确 Fock 代数或高精度谱分解，预计单次本地实验远低于 10 分钟，
 当前不需要超算。

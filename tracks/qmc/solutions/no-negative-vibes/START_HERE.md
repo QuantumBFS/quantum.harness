@@ -14,7 +14,9 @@
 - graded monomial 已约化到已知 Majorana 正性，odd block-TN 的自然局域化有精确负权；
 - tensor-square 四模式模型约化到 split `O(2,2)`，一般提升有条带非局域障碍；
 - 第一版 gauge/cocycle 能精确消号，但会形成随系统增长的 Wilson string；
-- 当前主线转入 non-induced exterior cone；non-Klein Fock–CP 和 Majorana 为支线。
+- 合作者已在独立分支运行 non-induced exterior-cone 扫描；本分支不重复开发；
+- 当前主线改为放开局域/Hermitian 限制，从已有严格正性类反推长程、多体、全局约束、
+  Wilson-string 和准 Hermitian 非常规模型。
 
 下面的长清单用于审计数字，日常不需要逐条阅读。
 
@@ -174,7 +176,7 @@ cd /home/volper/harness_quantum/signfree-qmc
 3. tensor-square 已得到四模式局域 HS，但该模型属于 split `O(2,2)`；一般维数的
    直接提升又产生非局域行列条带；
 4. edge-electric gauge/cocycle 在四/六模式上精确消号，但扩展后产生 system-size
-   Wilson string；下一主线是 non-induced exterior cone；
+   Wilson string；该对象现在作为允许的非常规模型来源，而不是立即淘汰；
 5. Majorana 宇称 period-4 猜想作为独立支线继续，不阻塞新机制搜索。
 
 TN 一维构造和 graded monomial 都是严格矩阵机制；前者物理上仍是一维已知模型，
@@ -189,3 +191,5 @@ Tensor-square 的严格定理、四模式 HS、split 约化和局域性障碍见
 [tensor-square 结果](docs/TENSOR_SQUARE_RESULTS.md)。
 Gauge/cocycle 的精确 GF(2) 解和 Wilson-string 障碍见
 [gauge/cocycle 第一轮结果](docs/GAUGE_COCYCLE_RESULTS.md)。
+放宽短程、局域和 Hermitian 限制后的新主线见
+[非常规模型发现](docs/UNCONVENTIONAL_MODEL_DISCOVERY.md)。

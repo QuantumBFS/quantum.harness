@@ -11,7 +11,7 @@
 | 额外的 graded 正权机制 | 1 | scalar/vertex grade 抵消 determinant parity |
 | 局域 Hermitian Hamiltonian 构造 | 5 | 前四项加 tensor-square 四模式 plaquette |
 | 已确认的新无符号物理类 | 0 | 所有成功物理映射均已知或可约化 |
-| 当前开放的研究程序 | 4 | Majorana；non-Klein Fock–CP；non-induced exterior；modified-Gauss projected cone |
+| 当前开放的研究程序 | 5 | Majorana；non-Klein Fock–CP；协作 exterior；modified-Gauss；非常规模型反推 |
 
 “按文档名字”会看到 TN、odd monomial、block-TN、graded monomial 和
 tensor-square 五项；但 odd monomial 与 block-TN 是同一个循环机制的标量版和分块版，
@@ -180,6 +180,12 @@ Gauge/cocycle 第一版也已完成。edge-electric Gauss law 加 affine link ph
 形成 system-size Wilson string。该简单 ansatz 已关闭；modified-Gauss-law
 projected cone 仍开放，但只有给出逐构型正 transfer matrix 才重开。见
 [gauge/cocycle 第一轮结果](GAUGE_COCYCLE_RESULTS.md)。
+
+新的独立主线不再与合作者重复 exterior 大筛选，而是重新开采上述严格机制：允许长程、
+多体、全局约束、Wilson string、准 Hermitian 和一般 nonunitary transfer models，
+先记录严格 L1 模型，再寻找相似变换、对偶、投影和低能约化。该方向目前是研究程序，
+尚未增加成果计数。见
+[非常规模型发现](UNCONVENTIONAL_MODEL_DISCOVERY.md)。
 
 这些开放项只有通过“定义与排重、反例搜索、一般证明、Hamiltonian/HS 映射”四关后，
 才会改变本总账中的发现数量。

@@ -33,14 +33,27 @@
 接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN、R01
 fixed transform、有限 Klein-circuit Fock–CP 和 tensor-square 直接物理提升均已得到
 明确边界。edge-electric gauge/cocycle 的 GF(2) 符号抵消虽然成立，却被迫形成
-system-size Wilson string；这一简单 ansatz 也已关闭。下一主线进入
-**non-induced exterior cone**，从六模式重叠块直接要求 Fock-sector 正锥不来自普通
-单粒子矩阵的外幂。modified-Gauss-law 只在出现具体正 transfer matrix 时重开。
+system-size Wilson string。合作者已经在独立分支实现并运行 non-induced exterior
+cone 的 exact-card/pressure 扫描，本分支不重复该工作。我们的下一主线改为
+**放宽物理形态后的非常规模型反推**：接受长程、多体、全局约束、Wilson string、
+准 Hermitian 和一般 nonunitary transfer models，先得到严格 L1 模型，再寻找相似
+变换、对偶、投影或低能约化。完整边界见
+[非常规模型发现主线](UNCONVENTIONAL_MODEL_DISCOVERY.md)。
 Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 “复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
 分支和检验候选。
 
-## 主线 A：发现新的物理无符号类
+## 主线 A：从严格正性类开采非常规模型
+
+这一主线不再把短程局域 Hermitian Hamiltonian 作为进入计算前的条件。候选可以先停在：
+
+```text
+L1 严格非常规无符号模型
+L2 有显式相似变换/对偶/投影的可约化模型
+L3 具有明确物理用途的新无符号候选
+```
+
+只有 L3 进入“新物理类”计数，但 L1/L2 也作为完整结果保留。
 
 ### 为什么不只继续列举 Lie 群
 
@@ -53,14 +66,16 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 
 已知的重要扩展来自“群 + 单向半正定锥”形成的半群，而不是更多群名。因此这里的“新类”
 优先指不约化到现有 split-orthogonal、Majorana/Kramers 或 2024 contraction-semigroup
-条件的结构化半群，同时必须能由实际 HS 时间片产生。
+条件的结构化半群，同时必须能给出实际 HS 时间片或完整 transfer model；短程物理来源
+只作为 L3 升级条件。
 
 ### 当前候选池
 
-按优先级研究：
+以下按结构列出，不代表本分支执行优先级；non-induced exterior cone 由合作者分支负责，
+本分支的实际顺序以 U1–U6 非常规模型主线为准。
 
-1. **spinor-Metzler 与非诱导 exterior cone**：直接在 Fock/Spin 表示中寻找正锥，
-   要求它不是任意单粒子非负矩阵通过外幂表示的平凡提升；
+1. **spinor-Metzler 与非诱导 exterior cone（协作观察）**：由合作者直接在 Fock/Spin
+   表示中寻找非诱导正锥；本分支只独立复核被证书提升的候选；
 2. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
    tensorization/Klein/Clifford 变换；对固定变换编译条件完全正 SDP，并逐个锚定 R01
    的 bridge hopping/pairing 坐标；**identity 与深度不超过 2 的连续 Klein 电路已
@@ -90,14 +105,16 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 每个候选必须先写清：
 
 ```text
-矩阵定义
+矩阵或 transfer-model 定义
 乘法/时间层闭包
-与所有已知类的区别
-候选 Hamiltonian 与 HS 来源
-实际物理权重是 determinant、Pfaffian 还是 Spin trace
+实际权重是 determinant、Pfaffian、Spin trace 还是 projected trace
+Hermitian / quasi-Hermitian / real-spectrum / general non-Hermitian 分类
+正 scalar coefficient 与生成元/微字证书
+与已知类的关系
 ```
 
-缺少物理来源或闭包的候选不进入大扫描。
+第一阶段允许没有短程物理来源，但不允许没有闭包、权重和模型定义。任何相似变换必须
+记录显式 `S`、metric、条件数和局域性标度。
 
 ### 发现漏斗
 
@@ -107,10 +124,12 @@ Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
 → 失败则精确化最小反例
 → 存活则扩大到 10^6 个结构化样本
 → 证明半群闭包与非负性
-→ 完整 Hamiltonian/HS 映射
+→ 完整非常规 Hamiltonian/transfer 映射
+→ 相似变换、对偶、投影或低能约化
 ```
 
-随机扫描只负责淘汰；“新类”必须由一般证明和物理映射完成。
+随机扫描只负责淘汰；L1 需要一般正性证明，L2 需要精确变换，L3 还需要物理和新颖性
+闭环。
 
 ## 支线 B：复 Majorana 的必要矩阵表述
 
@@ -181,7 +200,8 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 `TN_PHYSICAL_MAPPING_FRONTIER.md`。它解决了“抽象 TN 是否能由真实 HS 场产生”，但没有
 解决“是否得到新 Hamiltonian”。
 
-随后只允许加入物理上能产生的 hopping、pairing 或辅助场顶点，检查可达子集是否：
+此前“只允许立即物理的局域顶点”限制由新主线替代。现在也允许长程、多体、集体、
+Wilson-string 和非厄米 transfer 顶点，但仍检查：
 
 - 仍只是已有 Majorana/Kramers/半群类；
 - 自动避开旋转双锥的秩一零权边界；
@@ -205,7 +225,8 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 - 只取两个锥的物理可达交集；
 - 对生成元范数、层数和离秩亏边界距离给出联合下界。
 
-每个候选先写清封闭性和物理来源，再运行 oracle；不再从任意旋转矩阵开始盲搜。
+每个候选先写清封闭性和模型/transfer 来源，再运行 oracle；不再从任意旋转矩阵开始
+盲搜。
 
 ## 执行顺序
 
@@ -222,19 +243,23 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
    HS；最小模型属于 split `O(2,2)`，一般维数有条带非局域障碍。
 7. **已完成第一版**：四/六模式 edge-electric gauge-cocycle `GF(2)` 消号成功；
    `2 x L` 中央跳跃的 affine phase 含全部其他竖边，局域可扩展性失败。
-8. **立即开始**：non-induced exterior cone，尝试直接在六模式 Fock sectors 中越过
-   连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-9. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
-10. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-11. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+8. **协作者在做**：non-induced exterior cone exact-card/pressure 扫描；本分支只消费
+   其通过证书门的候选，不重复生成器和分布式筛选。
+9. **立即开始**：从 tensor-square、TN、odd block-TN、graded ancilla 和
+   gauge/cocycle 反推 U1–U6 非常规模型。
+10. **随后进行**：显式 pseudo-Hermitian metric、局域性 tradeoff、Fourier/投影/对偶
+   约化和 `-log` 多体 Hamiltonian 分析。
+11. **并行支线**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
+12. **按需补足**：完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
+13. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
 近期精力分配：
 
 ```text
-45%  non-induced exterior cone
-20%  modified-Gauss projected cone（仅限具体正 transfer matrix）
-20%  non-Klein Fock–CP/Choi 结构
-15%  Majorana 宇称与 Pfaffian/Spin-trace 支撑工具
+55%  已有严格正性类的非常规模型反推
+20%  pseudo-Hermitian / similarity / locality tradeoff
+15%  Hamiltonian 的投影、对偶、Fourier 与 -log 约化
+10%  Majorana/Pfaffian 支撑与合作者候选独立复核
 ```
 
 ## 两人协作建议
