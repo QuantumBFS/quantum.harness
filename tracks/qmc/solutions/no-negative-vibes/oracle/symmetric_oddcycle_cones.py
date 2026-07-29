@@ -25,7 +25,10 @@ from pathlib import Path
 import sympy as sp
 
 from .exterior_exact5_full_fock_cone import (
+    _cross_grade_simplicial_search,
+    _trace_compatible_column_generation,
     combined_grade_lift,
+    exact_fock_lift,
 )
 from .exterior_exact5_shared_cone import exact_compound_matrix
 
@@ -693,6 +696,95 @@ def search_fixed_unit_winding_pair_cone(
     }
 
 
+def search_fixed_unit_winding_full_fock_cone(
+    *,
+    attempts: int = 64,
+    maxiter: int = 2000,
+    rng_seed: int = 817232,
+    ray_counts: Sequence[int] = (32, 40, 48, 56),
+    tolerance: float = 1.0e-9,
+    max_denominator: int = 65536,
+) -> dict[str, object]:
+    """Search the fixed pair on all six Fock grades with exact promotion."""
+
+    matrix = fixed_candidate_matrix()
+    matrices = tuple(exact_fock_lift(atom) for atom in (matrix, matrix.T))
+    audit = exact_complementary_sector_audit()
+    split_replays = tuple(
+        {
+            "name": name,
+            "word": str(entry["word"]),
+            "full_determinant": int(entry["full_determinant"]),
+        }
+        for name, entry in (
+            (
+                "grade24_odd135_split_obstruction",
+                audit["grade24_odd135_split_obstruction"],
+            ),
+            (
+                "grade14_0235_split_obstruction",
+                audit["grade14_0235_split_obstruction"],
+            ),
+        )
+        if isinstance(entry, Mapping)
+    )
+    if len(split_replays) != 2 or any(
+        int(entry["full_determinant"]) <= 0 for entry in split_replays
+    ):
+        raise RuntimeError("known split obstructions failed full replay")
+
+    common = {
+        "grades": (0, 1, 2, 3, 4, 5),
+        "endpoint_order": ("B1", "B1T"),
+        "dimension": matrices[0].rows,
+        "atom_count": len(matrices),
+        "split_obstruction_full_replays": split_replays,
+    }
+    simplicial = _cross_grade_simplicial_search(
+        matrices,
+        split=16,
+        attempts=attempts,
+        maxiter=maxiter,
+        rng_seed=rng_seed,
+        tolerance=tolerance,
+        max_denominator=max_denominator,
+    )
+    if simplicial["status"] == "exact-trace-compatible-certificate":
+        return {
+            **common,
+            "status": "exact-trace-compatible-certificate",
+            "route": "fixed-full-fock-simplicial",
+            "simplicial": simplicial,
+        }
+
+    best = simplicial.get("best")
+    transform = best.get("transform") if isinstance(best, Mapping) else None
+    if transform is None:
+        redundant = {
+            "status": "no-numerical-transform",
+            "milestones": [],
+        }
+    else:
+        redundant = _trace_compatible_column_generation(
+            matrices,
+            transform,
+            ray_counts=ray_counts,
+            tolerance=tolerance,
+            max_denominator=max_denominator,
+        )
+    return {
+        **common,
+        "status": (
+            "exact-trace-compatible-certificate"
+            if redundant["status"] == "exact-trace-compatible-certificate"
+            else "no-exact-certificate-found"
+        ),
+        "route": "fixed-full-fock-redundant",
+        "simplicial": simplicial,
+        "redundant": redundant,
+    }
+
+
 __all__ = [
     "SCHEMA",
     "exact_chi23_obstruction",
@@ -703,6 +795,7 @@ __all__ = [
     "exact_unit_winding_endpoint_obstruction",
     "fixed_candidate_matrix",
     "load_certificate",
+    "search_fixed_unit_winding_full_fock_cone",
     "search_fixed_unit_winding_pair_cone",
     "search_unit_winding_endpoint_cone",
     "symbolic_grade4_positive_atoms",

@@ -8,6 +8,7 @@ from oracle.symmetric_oddcycle_cones import (
     exact_unit_winding_bernstein_audit,
     exact_unit_winding_endpoint_obstruction,
     load_certificate,
+    search_fixed_unit_winding_full_fock_cone,
     search_fixed_unit_winding_pair_cone,
     unit_winding_endpoint_lifts,
     verify_compact_certificate,
@@ -196,3 +197,31 @@ def test_fixed_pair_cone_search_api_stops_on_frozen_mixed_obstruction():
     assert result["obstruction"]["complement0235"] == -int(
         "3142487109366266808212314180"
     )
+
+
+def test_fixed_full_fock_search_api_replays_split_words_without_optimization():
+    result = search_fixed_unit_winding_full_fock_cone(
+        attempts=0,
+        maxiter=1,
+        ray_counts=(32,),
+    )
+
+    assert result["status"] == "no-exact-certificate-found"
+    assert result["route"] == "fixed-full-fock-redundant"
+    assert result["grades"] == (0, 1, 2, 3, 4, 5)
+    assert result["endpoint_order"] == ("B1", "B1T")
+    assert result["dimension"] == 32
+    assert result["atom_count"] == 2
+    assert result["split_obstruction_full_replays"] == (
+        {
+            "name": "grade24_odd135_split_obstruction",
+            "word": "101010110111111111111110101010",
+            "full_determinant": 4272805793943698113361406366755585,
+        },
+        {
+            "name": "grade14_0235_split_obstruction",
+            "word": "101010101111111111111110101010",
+            "full_determinant": 4001436841368942398680726204929089,
+        },
+    )
+    assert result["redundant"]["status"] == "no-numerical-transform"
