@@ -60,6 +60,24 @@ end
     end
 end
 
+@testset "module Fig. 2 output preserves plottable exact and Redfield curves" begin
+    mktempdir() do directory
+        times = [0.0, 0.1]
+        results = Dict(
+            2.5 => (
+                times=times,
+                exact=(values=[1.0, 0.8],),
+                redfield=(values=[1.0, 0.79],),
+            ),
+        )
+        write_fig2_curves(directory, results)
+        path = joinpath(directory, "ours_omega_d_2.5.csv")
+        @test isfile(path)
+        @test FloquetSpinBoson.readdlm(path, Float64) ==
+              [0.0 1.0 1.0; 0.1 0.8 0.79]
+    end
+end
+
 @testset "Fig. 2 keeps exact and Redfield references separate" begin
     mktempdir() do dir
         grid = period_grid(2.5, π / 60)

@@ -65,4 +65,5 @@ length(ARGS) == 3 || error("usage: reproduce_fig2.jl <quick|fig2 config> <refere
 config = config_from_toml(ARGS[1])
 results = run_fig2(config, reference_paths(ARGS[2], config.frequencies, config.run_exact))
 write_baseline(ARGS[3], results, config.mode)
+config.run_exact && write_fig2_curves(ARGS[3], results)
 println("strict Fig. 2 Redfield baseline written to ", joinpath(ARGS[3], "baseline"))

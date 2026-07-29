@@ -106,4 +106,23 @@ function run_fig2(config::RunConfig, reference_paths::AbstractDict; exact_solver
     end
     return results
 end
+
+"""Write the exact and Redfield curves consumed by the strict Fig. 2 plotter."""
+function write_fig2_curves(output_dir::AbstractString,
+                           results::AbstractDict)
+    mkpath(output_dir)
+    for (ωd, result) in results
+        hasproperty(result, :exact) && hasproperty(result, :redfield) ||
+            throw(ArgumentError(
+                "Fig. 2 curve export requires exact and Redfield results"))
+        length(result.times) == length(result.exact.values) ==
+            length(result.redfield.values) ||
+            throw(DimensionMismatch(
+                "Fig. 2 time, exact, and Redfield curves must have equal length"))
+        writedlm(
+            joinpath(output_dir, "ours_omega_d_$(Float64(ωd)).csv"),
+            hcat(result.times, result.exact.values, result.redfield.values))
+    end
+    return output_dir
+end
 import UniformTEMPO

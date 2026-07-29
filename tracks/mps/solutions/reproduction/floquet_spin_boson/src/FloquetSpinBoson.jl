@@ -1,5 +1,7 @@
 module FloquetSpinBoson
 
+using DelimitedFiles
+
 include("config.jl")
 include("model.jl")
 include("bath.jl")
@@ -45,6 +47,7 @@ export RunConfig, Fig3Config, Fig5Config, period_grid,
        load_reference_curve, fig3_reference_grid, load_fig3_reference,
        fig3_reference_path, fig5_reference_grid, load_fig5_reference,
        fig5_reference_path, redfield_magnus!, redfield_magnus_paper_formula,
-       run_fig2, parse_exact_baseline, render_refreshed_errors
+       run_fig2, write_fig2_curves, parse_exact_baseline,
+       render_refreshed_errors
 
 end
