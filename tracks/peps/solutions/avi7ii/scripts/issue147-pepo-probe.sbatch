@@ -14,6 +14,6 @@ export JAX_PLATFORM_NAME=gpu
 printf '{"event":"start","host":"%s","kind":"pepo-probe","steps":1}\n' "$(hostname)"
 python -u -m qh147.run evolve \
   --config tracks/peps/solutions/avi7ii/configs/pepo-h3-d4-probe.json \
-  --run-root tracks/peps/results/issue147-pepo-probe-batched \
+  --run-root tracks/peps/results/issue147-pepo-probe-fixed-rank \
   --compression-mode thermodynamic \
   --stop-after-steps 1
