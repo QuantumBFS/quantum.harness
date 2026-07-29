@@ -33,7 +33,7 @@ source_fingerprint="$(
 )"
 printf 'Fig. 3 stable quick start: source=%s threads=%s host=%s\n' \
     "${source_fingerprint}" "${JULIA_NUM_THREADS}" "$(hostname)"
-printf 'Setup: Omega=1 S=sigma_z alpha=0.05 omega_c=2.5 epsilon_d=1 T=0 dt_target=pi/6 chi_cap=16 lag=16384\n'
+printf 'Setup: Omega=1 S=sigma_z alpha=0.05 omega_c=2.5 epsilon_d=1 T=0 transversal_omega_d=1 dt_target=pi/6 tol=1e-7 n_c=1024 chi_cap=128 lag=1024\n'
 
 julia --threads="${JULIA_NUM_THREADS}" --project=envs/current \
     scripts/reproduce_fig3.jl \

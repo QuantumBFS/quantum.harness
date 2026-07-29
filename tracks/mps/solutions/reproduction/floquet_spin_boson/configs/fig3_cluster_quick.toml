@@ -1,29 +1,29 @@
-# Stable low-rank cluster validation for the complete six-point Fig. 3 path.
-# This is deliberately not a paper-precision configuration.
+# Higher-rank single-point cluster validation following the local convergence
+# pilot. This is deliberately not a paper-precision configuration.
 mode = "quick"
 dt_target = 0.5235987755982988 # π / 6
-longitudinal_frequencies = [10.0, 5.0, 2.5]
-transversal_frequencies = [2.0, 1.5, 1.0]
-correlation_lag_steps = 16384
+longitudinal_frequencies = []
+transversal_frequencies = [1.0]
+correlation_lag_steps = 1024
 tail_count = 128
 tail_norm_tolerance = 1.0e-3
 tail_mean_tolerance = 1.0e-4
 tail_slope_tolerance = 1.0e-4
 c0_tolerance = 1.0e-6
-omega_max = 15.0
+omega_max = 4.9
 nmax = 8
 weight_tolerance = 0.0
 eigensolver_tolerance = 1.0e-8
 eigensolver_max_iterations = 500
 
-compression_tolerance = 1.0e-3
+compression_tolerance = 1.0e-7
 cache_dir = "output/fig3-cluster-quick/cache"
 rebuild_cache = false
 temperature = 0.0
 auto_nc = false
-n_c = 64
+n_c = 1024
 truncation = "rel"
-cap_rank = 16
-max_rank = 16
+cap_rank = 128
+max_rank = 128
 low_rank_svd = false
 svd_filtering_tolerance = 0.0
