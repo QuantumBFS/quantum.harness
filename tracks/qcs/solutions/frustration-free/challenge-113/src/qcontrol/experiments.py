@@ -8,7 +8,6 @@ import math
 from pathlib import Path
 import re
 import threading
-from types import SimpleNamespace
 from typing import Any
 
 import jax
@@ -25,6 +24,7 @@ from qcontrol.offline import (
     classify_solver_termination,
     compute_geometry_diagnostics,
     cumulative_best_exact_infidelity,
+    finalize_restricted_attained_bound,
     make_offline_evaluator,
     optimize_restricted_noiseless_upper_bound,
 )
@@ -272,6 +272,7 @@ def _validate_derived_metrics(
         raise ValueError("derived metric fields are not canonical")
     exact = value["exact_infidelity"]
     if not isinstance(exact, Mapping) or set(exact) != {
+        "best_successful_audited_infidelity",
         "cumulative_best_by_optimizer_query",
         "initial_infidelity",
     }:
@@ -279,6 +280,15 @@ def _validate_derived_metrics(
     initial = _finite_probability(
         exact["initial_infidelity"],
         name="initial exact infidelity",
+    )
+    best_successful_raw = exact["best_successful_audited_infidelity"]
+    best_successful = (
+        None
+        if best_successful_raw is None
+        else _finite_probability(
+            best_successful_raw,
+            name="best successful audited exact infidelity",
+        )
     )
     trajectory = exact["cumulative_best_by_optimizer_query"]
     if not isinstance(trajectory, list) or len(trajectory) != evaluations:
@@ -290,6 +300,18 @@ def _validate_derived_metrics(
     if any(current > previous for previous, current in zip([initial, *values], values)):
         raise ValueError("exact-infidelity trajectory must be cumulative nonincreasing")
     optimizer_attempts = [item for item in attempts if not item["validation"]]
+    has_successful_audit = any(
+        item["status"] == "succeeded" for item in optimizer_attempts
+    )
+    if has_successful_audit != (best_successful is not None):
+        raise ValueError("best audited exact infidelity lacks matching query evidence")
+    expected_final = (
+        initial
+        if best_successful is None
+        else min(initial, best_successful)
+    )
+    if values and values[-1] != expected_final:
+        raise ValueError("exact-infidelity trajectory and audited best disagree")
     previous = initial
     for item, current in zip(optimizer_attempts, values, strict=True):
         if item["status"] != "succeeded" and current != previous:
@@ -299,6 +321,10 @@ def _validate_derived_metrics(
     restricted = value["restricted_noiseless_optimization"]
     restricted_fields = {
         "attained_infidelity_upper_bound",
+        "attained_infidelity_source",
+        "best_successful_audited_exact_infidelity",
+        "cached_solver_attained_infidelity_upper_bound",
+        "cached_solver_starting_infidelity_upper_bound",
         "certified",
         "consistency_tolerance",
         "gradient_tolerance",
@@ -307,9 +333,11 @@ def _validate_derived_metrics(
         "nfev",
         "nit",
         "solver",
-        "solver_message",
+        "solver_message_code",
+        "solver_output_finite",
         "solver_status",
-        "starting_infidelity_upper_bound",
+        "solver_success",
+        "initial_exact_infidelity",
         "termination",
     }
     if not isinstance(restricted, Mapping) or set(restricted) != restricted_fields:
@@ -318,9 +346,13 @@ def _validate_derived_metrics(
         restricted["attained_infidelity_upper_bound"],
         name="restricted attained upper bound",
     )
-    starting = _finite_probability(
-        restricted["starting_infidelity_upper_bound"],
-        name="restricted starting upper bound",
+    cached_attained = _finite_probability(
+        restricted["cached_solver_attained_infidelity_upper_bound"],
+        name="cached solver attained upper bound",
+    )
+    cached_starting = _finite_probability(
+        restricted["cached_solver_starting_infidelity_upper_bound"],
+        name="cached solver starting upper bound",
     )
     if (
         type(restricted["max_iterations"]) is not int
@@ -332,12 +364,21 @@ def _validate_derived_metrics(
         or type(restricted["nit"]) is not int
         or restricted["nit"] < 0
         or type(restricted["certified"]) is not bool
+        or type(restricted["solver_success"]) is not bool
         or type(restricted["solver_status"]) is not int
-        or not isinstance(restricted["solver_message"], str)
-        or not restricted["solver_message"]
-        or len(restricted["solver_message"]) > 256
-        or not restricted["solver_message"].isascii()
+        or type(restricted["solver_output_finite"]) is not bool
+        or restricted["solver_message_code"]
+        not in {
+            "convergence",
+            "evaluation_limit",
+            "iteration_limit",
+            "line_search_failure",
+            "numerical_failure",
+            "solver_failure",
+        }
         or restricted["solver"] != "L-BFGS-B"
+        or restricted["attained_infidelity_source"]
+        not in {"restricted_solver", "audited_candidate", "initial_origin"}
         or restricted["termination"]
         not in {
             "converged",
@@ -364,25 +405,44 @@ def _validate_derived_metrics(
         or float(consistency_tolerance) < 0.0
     ):
         raise ValueError("restricted-optimization tolerances are invalid")
-    if attained > starting + float(consistency_tolerance) or attained > min(
-        [initial, *values]
-    ) + float(consistency_tolerance):
+    restricted_initial = _finite_probability(
+        restricted["initial_exact_infidelity"],
+        name="restricted initial exact infidelity",
+    )
+    restricted_best_raw = restricted["best_successful_audited_exact_infidelity"]
+    restricted_best = (
+        None
+        if restricted_best_raw is None
+        else _finite_probability(
+            restricted_best_raw,
+            name="restricted best audited exact infidelity",
+        )
+    )
+    evidence = {
+        "restricted_solver": cached_attained,
+        "initial_origin": initial,
+    }
+    if best_successful is not None:
+        evidence["audited_candidate"] = best_successful
+    expected_bound = min(evidence.values())
+    source = restricted["attained_infidelity_source"]
+    if (
+        restricted_initial != initial
+        or restricted_best != best_successful
+        or attained != expected_bound
+        or source not in evidence
+        or evidence[source] != attained
+        or cached_attained > cached_starting + float(consistency_tolerance)
+        or attained > min([initial, *values]) + float(consistency_tolerance)
+    ):
         raise ValueError("restricted attained upper bound is inconsistent")
     classified = classify_solver_termination(
-        SimpleNamespace(
-            success=restricted["certified"],
-            status=restricted["solver_status"],
-            message=restricted["solver_message"],
-            nit=restricted["nit"],
-            nfev=restricted["nfev"],
-            fun=(
-                float("nan")
-                if restricted["termination"] == "numerical_failure"
-                else attained
-            ),
-            x=np.zeros(1),
-            jac=np.zeros(1),
-        ),
+        success=restricted["solver_success"],
+        status=restricted["solver_status"],
+        message_code=restricted["solver_message_code"],
+        output_finite=restricted["solver_output_finite"],
+        nit=restricted["nit"],
+        nfev=restricted["nfev"],
         max_iterations=restricted["max_iterations"],
         max_evaluations=restricted["max_evaluations"],
     )
@@ -1177,7 +1237,10 @@ def run_trial(config: ExperimentConfig, store: ArtifactStore) -> TrialResult:
                 geometry.truth_top_subspace
             ),
         },
-        "restricted_noiseless_optimization": restricted.canonical_dict(),
+        "restricted_noiseless_optimization": finalize_restricted_attained_bound(
+            restricted,
+            exact_trajectory,
+        ),
     }
     attempts = tuple(
         {

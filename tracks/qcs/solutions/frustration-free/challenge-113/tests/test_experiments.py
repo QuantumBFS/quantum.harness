@@ -127,6 +127,7 @@ def test_development_and_production_cannot_mix() -> None:
 def _result(spec, execution: int) -> TrialResult:
     derived = {
         "exact_infidelity": {
+            "best_successful_audited_infidelity": None,
             "cumulative_best_by_optimizer_query": [0.5, 0.5],
             "initial_infidelity": 0.5,
         },
@@ -142,6 +143,10 @@ def _result(spec, execution: int) -> TrialResult:
         },
         "restricted_noiseless_optimization": {
             "attained_infidelity_upper_bound": 0.5,
+            "attained_infidelity_source": "restricted_solver",
+            "best_successful_audited_exact_infidelity": None,
+            "cached_solver_attained_infidelity_upper_bound": 0.5,
+            "cached_solver_starting_infidelity_upper_bound": 0.5,
             "certified": True,
             "consistency_tolerance": 1e-10,
             "gradient_tolerance": 1e-9,
@@ -150,9 +155,11 @@ def _result(spec, execution: int) -> TrialResult:
             "nfev": 1,
             "nit": 0,
             "solver": "L-BFGS-B",
-            "solver_message": "CONVERGENCE",
+            "solver_message_code": "convergence",
+            "solver_output_finite": True,
             "solver_status": 0,
-            "starting_infidelity_upper_bound": 0.5,
+            "solver_success": True,
+            "initial_exact_infidelity": 0.5,
             "termination": "converged",
         },
     }
@@ -745,13 +752,14 @@ def test_derived_caches_follow_scientific_dependencies(monkeypatch) -> None:
         "optimize_restricted_noiseless_upper_bound",
         counted_restricted,
     )
+    base_restricted = None
     for config in (base, shot_variant, k_variant, device_variant):
         truth = perturb_system(
             model,
             config.device.gap,
             config.device.perturbation_seed,
         )
-        experiments_module._cached_derived_metrics(
+        _, _, restricted = experiments_module._cached_derived_metrics(
             config,
             model,
             truth,
@@ -759,8 +767,22 @@ def test_derived_caches_follow_scientific_dependencies(monkeypatch) -> None:
             spaces[config.search.dimension],
             audited,
         )
+        if config is base:
+            base_restricted = restricted
 
-    assert counts == {"exact": 2, "geometry": 2, "restricted": 3}
+    altered_audit = ((origin.copy() + 0.1, observation),)
+    truth = perturb_system(model, base.device.gap, base.device.perturbation_seed)
+    _, _, altered_restricted = experiments_module._cached_derived_metrics(
+        base,
+        model,
+        truth,
+        pulse_space,
+        spaces[base.search.dimension],
+        altered_audit,
+    )
+
+    assert counts == {"exact": 3, "geometry": 2, "restricted": 3}
+    assert altered_restricted is base_restricted
 
 
 def test_old_production_trial_schema_and_orphan_are_rejected(tmp_path) -> None:
@@ -781,38 +803,95 @@ def test_old_production_trial_schema_and_orphan_are_rejected(tmp_path) -> None:
         run_sweep([spec], store, executor=lambda _: _result(spec, 2))
 
 
-def test_restricted_termination_requires_consistent_counters() -> None:
+def test_audited_candidate_bound_serializes_with_cached_solver_provenance() -> None:
     spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
-    honest = _result(spec, 1).canonical_dict()
-    restricted = honest["result"]["derived_metrics"][
-        "restricted_noiseless_optimization"
-    ]
-    restricted.update(
+    payload = _result(spec, 1).canonical_dict()
+    derived = payload["result"]["derived_metrics"]
+    derived["exact_infidelity"].update(
         {
-            "certified": False,
-            "nit": restricted["max_iterations"],
-            "solver_message": "TOTAL NO. OF ITERATIONS REACHED LIMIT",
-            "solver_status": 1,
-            "termination": "iteration_limit",
+            "best_successful_audited_infidelity": 0.1,
+            "cumulative_best_by_optimizer_query": [0.5, 0.1],
         }
     )
-    replayed = TrialResult.from_canonical_dict(honest)
-    assert not replayed.result["derived_metrics"][
-        "restricted_noiseless_optimization"
-    ]["certified"]
-    assert np.isfinite(
-        replayed.result["derived_metrics"]["restricted_noiseless_optimization"][
-            "attained_infidelity_upper_bound"
-        ]
+    derived["restricted_noiseless_optimization"].update(
+        {
+            "attained_infidelity_upper_bound": 0.1,
+            "attained_infidelity_source": "audited_candidate",
+            "best_successful_audited_exact_infidelity": 0.1,
+            "cached_solver_attained_infidelity_upper_bound": 0.4,
+        }
     )
+    payload["attempts"][1].update(
+        {
+            "error_category": None,
+            "estimate": 0.9,
+            "status": "succeeded",
+        }
+    )
+    payload["result"]["observations"] = [
+        {
+            "attempt_index": 2,
+            "estimate": 0.9,
+            "observation_seed": 2,
+            "optimizer_query_index": 2,
+            "seed_digest": f"{2:064x}",
+            "shots": 1_000,
+            "validation": False,
+        }
+    ]
 
-    fake = copy.deepcopy(honest)
-    fake_restricted = fake["result"]["derived_metrics"][
+    replayed = TrialResult.from_canonical_dict(payload)
+
+    restricted = replayed.result["derived_metrics"][
         "restricted_noiseless_optimization"
     ]
-    fake_restricted["nit"] = 0
-    with pytest.raises(ValueError, match="termination"):
-        TrialResult.from_canonical_dict(fake)
+    assert restricted["attained_infidelity_source"] == "audited_candidate"
+    assert restricted["cached_solver_attained_infidelity_upper_bound"] == 0.4
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        {
+            "certified": False,
+            "solver_success": False,
+            "termination": "solver_failure",
+        },
+        {
+            "certified": False,
+            "solver_message_code": "numerical_failure",
+            "solver_output_finite": True,
+            "solver_status": 2,
+            "solver_success": False,
+            "termination": "numerical_failure",
+        },
+        {
+            "certified": False,
+            "nit": 0,
+            "solver_message_code": "iteration_limit",
+            "solver_status": 1,
+            "solver_success": False,
+            "termination": "iteration_limit",
+        },
+        {"certified": False, "termination": "solver_failure"},
+        {
+            "certified": False,
+            "solver_message_code": "line_search_failure",
+            "solver_status": 1,
+            "solver_success": False,
+            "termination": "line_search_failure",
+        },
+    ),
+)
+def test_restricted_termination_rejects_tampered_raw_facts(mutation) -> None:
+    spec = generate_paired_trials([_config("random", 1, kind="production")])[0]
+    payload = _result(spec, 1).canonical_dict()
+    restricted = payload["result"]["derived_metrics"][
+        "restricted_noiseless_optimization"
+    ]
+    restricted.update(mutation)
+    with pytest.raises(ValueError, match="solver|termination|restricted"):
+        TrialResult.from_canonical_dict(payload)
 
 
 def test_production_matrix_has_exact_design_coverage() -> None:

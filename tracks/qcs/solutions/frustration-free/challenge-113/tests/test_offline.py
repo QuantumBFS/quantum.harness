@@ -1,17 +1,19 @@
 from __future__ import annotations
 
-from types import SimpleNamespace
-
 import numpy as np
 import pytest
 
 from qcontrol.config import SystemConfig
 from qcontrol.device import Observation
 from qcontrol.offline import (
+    ExactInfidelityTrajectory,
+    RestrictedOptimizationResult,
+    canonical_solver_message_code,
     classify_solver_termination,
     compute_geometry_diagnostics,
     cumulative_best_exact_infidelity,
     effective_ranks,
+    finalize_restricted_attained_bound,
 )
 from qcontrol.pulses import PulseSpace
 from qcontrol.systems import make_system
@@ -89,126 +91,157 @@ def test_zero_gap_geometry_fixtures_cover_d2_and_d4(
 
 
 @pytest.mark.parametrize(
-    ("result", "max_iterations", "max_evaluations", "expected"),
+    ("facts", "expected"),
     (
         (
-            SimpleNamespace(
-                success=True,
-                status=0,
-                message="CONVERGENCE",
-                nit=3,
-                nfev=7,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": True,
+                "status": 0,
+                "message_code": "convergence",
+                "output_finite": True,
+                "nit": 3,
+                "nfev": 7,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "converged",
         ),
         (
-            SimpleNamespace(
-                success=False,
-                status=1,
-                message="TOTAL NO. OF ITERATIONS REACHED LIMIT",
-                nit=10,
-                nfev=12,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": False,
+                "status": 1,
+                "message_code": "iteration_limit",
+                "output_finite": True,
+                "nit": 10,
+                "nfev": 12,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "iteration_limit",
         ),
         (
-            SimpleNamespace(
-                success=False,
-                status=1,
-                message="TOTAL NO. OF F AND G EVALUATIONS EXCEEDS LIMIT",
-                nit=4,
-                nfev=20,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": False,
+                "status": 1,
+                "message_code": "evaluation_limit",
+                "output_finite": True,
+                "nit": 4,
+                "nfev": 20,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "evaluation_limit",
         ),
         (
-            SimpleNamespace(
-                success=False,
-                status=2,
-                message="ABNORMAL_TERMINATION_IN_LNSRCH",
-                nit=4,
-                nfev=12,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": False,
+                "status": 2,
+                "message_code": "line_search_failure",
+                "output_finite": True,
+                "nit": 4,
+                "nfev": 12,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "line_search_failure",
         ),
         (
-            SimpleNamespace(
-                success=False,
-                status=2,
-                message="NAN RESULT",
-                nit=1,
-                nfev=2,
-                fun=np.nan,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": False,
+                "status": 2,
+                "message_code": "numerical_failure",
+                "output_finite": False,
+                "nit": 1,
+                "nfev": 2,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "numerical_failure",
         ),
         (
-            SimpleNamespace(
-                success=False,
-                status=3,
-                message="CALLBACK HALT",
-                nit=1,
-                nfev=2,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
-            "solver_failure",
-        ),
-        (
-            SimpleNamespace(
-                success=False,
-                status=1,
-                message="TOTAL NO. OF ITERATIONS REACHED LIMIT",
-                nit=0,
-                nfev=1,
-                fun=0.1,
-                x=np.zeros(1),
-                jac=np.zeros(1),
-            ),
-            10,
-            20,
+            {
+                "success": False,
+                "status": 3,
+                "message_code": "solver_failure",
+                "output_finite": True,
+                "nit": 1,
+                "nfev": 2,
+                "max_iterations": 10,
+                "max_evaluations": 20,
+            },
             "solver_failure",
         ),
     ),
 )
-def test_solver_termination_categories_use_status_message_and_counters(
-    result,
-    max_iterations,
-    max_evaluations,
-    expected,
-) -> None:
-    assert (
-        classify_solver_termination(
-            result,
-            max_iterations=max_iterations,
-            max_evaluations=max_evaluations,
-        )
-        == expected
+def test_solver_termination_categories_use_only_raw_facts(facts, expected) -> None:
+    assert classify_solver_termination(**facts) == expected
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        {"success": False, "status": 0},
+        {"success": True, "status": 1},
+        {"message_code": "numerical_failure", "output_finite": True},
+        {"message_code": "iteration_limit", "nit": 0},
+        {"message_code": "evaluation_limit", "nfev": 0},
+    ),
+)
+def test_solver_termination_rejects_contradictory_raw_facts(mutation) -> None:
+    facts = {
+        "success": False,
+        "status": 2,
+        "message_code": "line_search_failure",
+        "output_finite": True,
+        "nit": 2,
+        "nfev": 4,
+        "max_iterations": 10,
+        "max_evaluations": 20,
+    }
+    facts.update(mutation)
+    with pytest.raises(ValueError, match="solver"):
+        classify_solver_termination(**facts)
+
+
+@pytest.mark.parametrize(
+    ("message", "code"),
+    (
+        ("CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL", "convergence"),
+        ("STOP: TOTAL NO. of ITERATIONS REACHED LIMIT", "iteration_limit"),
+        ("TOTAL NO. OF F AND G EVALUATIONS EXCEEDS LIMIT", "evaluation_limit"),
+        ("ABNORMAL_TERMINATION_IN_LNSRCH", "line_search_failure"),
+        ("NaN result", "numerical_failure"),
+        ("callback halt", "solver_failure"),
+    ),
+)
+def test_solver_message_codes_are_canonical(message, code) -> None:
+    assert canonical_solver_message_code(message) == code
+
+
+def test_audited_candidate_can_supply_final_restricted_upper_bound() -> None:
+    cached = RestrictedOptimizationResult(
+        attained_infidelity_upper_bound=0.4,
+        starting_infidelity_upper_bound=0.6,
+        max_iterations=100,
+        max_evaluations=1_000,
+        gradient_tolerance=1e-9,
+        consistency_tolerance=1e-10,
+        nfev=5,
+        nit=2,
+        solver_success=True,
+        solver_status=0,
+        solver_message_code="convergence",
+        solver_output_finite=True,
+        termination="converged",
     )
+    exact = ExactInfidelityTrajectory(
+        initial_infidelity=0.6,
+        cumulative_best_by_optimizer_query=(0.6, 0.1),
+        best_successful_audited_infidelity=0.1,
+    )
+
+    payload = finalize_restricted_attained_bound(cached, exact)
+
+    assert payload["cached_solver_attained_infidelity_upper_bound"] == 0.4
+    assert payload["attained_infidelity_upper_bound"] == 0.1
+    assert payload["attained_infidelity_source"] == "audited_candidate"

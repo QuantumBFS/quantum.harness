@@ -21,11 +21,15 @@ from qcontrol.systems import ControlSystem
 class ExactInfidelityTrajectory:
     initial_infidelity: float
     cumulative_best_by_optimizer_query: tuple[float, ...]
+    best_successful_audited_infidelity: float | None = None
 
     def canonical_dict(self) -> dict[str, object]:
         return {
             "cumulative_best_by_optimizer_query": list(
                 self.cumulative_best_by_optimizer_query
+            ),
+            "best_successful_audited_infidelity": (
+                self.best_successful_audited_infidelity
             ),
             "initial_infidelity": self.initial_infidelity,
         }
@@ -41,15 +45,21 @@ class RestrictedOptimizationResult:
     consistency_tolerance: float
     nfev: int
     nit: int
-    certified: bool
+    solver_success: bool
     solver_status: int
-    solver_message: str
+    solver_message_code: str
+    solver_output_finite: bool
     termination: str
 
     def canonical_dict(self) -> dict[str, object]:
         return {
-            "attained_infidelity_upper_bound": self.attained_infidelity_upper_bound,
-            "certified": self.certified,
+            "cached_solver_attained_infidelity_upper_bound": (
+                self.attained_infidelity_upper_bound
+            ),
+            "cached_solver_starting_infidelity_upper_bound": (
+                self.starting_infidelity_upper_bound
+            ),
+            "certified": self.termination == "converged",
             "consistency_tolerance": self.consistency_tolerance,
             "gradient_tolerance": self.gradient_tolerance,
             "max_evaluations": self.max_evaluations,
@@ -57,9 +67,10 @@ class RestrictedOptimizationResult:
             "nfev": self.nfev,
             "nit": self.nit,
             "solver": "L-BFGS-B",
-            "solver_message": self.solver_message,
+            "solver_message_code": self.solver_message_code,
+            "solver_output_finite": self.solver_output_finite,
             "solver_status": self.solver_status,
-            "starting_infidelity_upper_bound": self.starting_infidelity_upper_bound,
+            "solver_success": self.solver_success,
             "termination": self.termination,
         }
 
@@ -173,6 +184,7 @@ def cumulative_best_exact_infidelity(
         name="initial exact fidelity",
     )
     best = initial
+    best_successful: float | None = None
     values: list[float] = []
     for expected_query, (pulse, observation) in enumerate(audited_queries, start=1):
         if observation is not None:
@@ -186,9 +198,18 @@ def cumulative_best_exact_infidelity(
                 evaluator(pulse),
                 name="offline exact fidelity",
             )
+            best_successful = (
+                infidelity
+                if best_successful is None
+                else min(best_successful, infidelity)
+            )
             best = min(best, infidelity)
         values.append(float(best))
-    return ExactInfidelityTrajectory(float(initial), tuple(values))
+    return ExactInfidelityTrajectory(
+        float(initial),
+        tuple(values),
+        None if best_successful is None else float(best_successful),
+    )
 
 
 def effective_ranks(
@@ -216,41 +237,86 @@ def effective_ranks(
     )
 
 
+def canonical_solver_message_code(message: object) -> str:
+    normalized = str(message).upper()
+    if "CONVERGENCE" in normalized:
+        return "convergence"
+    if "ITERATION" in normalized and "LIMIT" in normalized:
+        return "iteration_limit"
+    if (
+        ("EVALUATION" in normalized or "F AND G" in normalized)
+        and ("LIMIT" in normalized or "EXCEED" in normalized)
+    ):
+        return "evaluation_limit"
+    if (
+        "LNSRCH" in normalized
+        or "LINE SEARCH" in normalized
+        or "ABNORMAL" in normalized
+    ):
+        return "line_search_failure"
+    if any(token in normalized for token in ("NAN", "INF", "NUMERICAL")):
+        return "numerical_failure"
+    return "solver_failure"
+
+
 def classify_solver_termination(
-    result: object,
     *,
+    success: bool,
+    status: int,
+    message_code: str,
+    output_finite: bool,
+    nit: int,
+    nfev: int,
     max_iterations: int,
     max_evaluations: int,
 ) -> str:
-    message = str(getattr(result, "message", "")).upper()
-    nit = int(getattr(result, "nit", -1))
-    nfev = int(getattr(result, "nfev", -1))
-    status = int(getattr(result, "status", -1))
-    arrays = (
-        np.asarray(getattr(result, "x", np.nan), dtype=np.float64),
-        np.asarray(getattr(result, "jac", np.nan), dtype=np.float64),
-        np.asarray(getattr(result, "fun", np.nan), dtype=np.float64),
-    )
-    if any(not np.all(np.isfinite(value)) for value in arrays) or any(
-        token in message for token in ("NAN", "INF", "NUMERICAL")
+    allowed_codes = {
+        "convergence",
+        "evaluation_limit",
+        "iteration_limit",
+        "line_search_failure",
+        "numerical_failure",
+        "solver_failure",
+    }
+    if (
+        type(success) is not bool
+        or type(status) is not int
+        or message_code not in allowed_codes
+        or type(output_finite) is not bool
+        or type(nit) is not int
+        or nit < 0
+        or type(nfev) is not int
+        or nfev <= 0
+        or type(max_iterations) is not int
+        or max_iterations <= 0
+        or type(max_evaluations) is not int
+        or max_evaluations <= 0
     ):
-        return "numerical_failure"
-    if bool(getattr(result, "success", False)) and status == 0:
+        raise ValueError("solver raw facts are invalid")
+    if success:
+        if status != 0 or message_code != "convergence" or not output_finite:
+            raise ValueError("solver success facts are contradictory")
         return "converged"
-    if (
-        status == 1
-        and nit >= max_iterations
-        and "ITERATION" in message
-    ):
+    if status == 0 or message_code == "convergence":
+        raise ValueError("solver status-zero facts are contradictory")
+    if not output_finite:
+        return "numerical_failure"
+    if message_code == "numerical_failure":
+        raise ValueError("finite solver output cannot be numerical_failure")
+    if message_code == "iteration_limit":
+        if status != 1 or nit == 0 or nit < max_iterations:
+            raise ValueError("solver iteration-limit facts are contradictory")
         return "iteration_limit"
-    if (
-        status == 1
-        and nfev >= max_evaluations
-        and ("EVALUATION" in message or "F AND G" in message)
-    ):
+    if message_code == "evaluation_limit":
+        if status != 1 or nfev < max_evaluations:
+            raise ValueError("solver evaluation-limit facts are contradictory")
         return "evaluation_limit"
-    if status == 2 and ("LNSRCH" in message or "LINE SEARCH" in message):
+    if message_code == "line_search_failure":
+        if status != 2:
+            raise ValueError("solver line-search facts are contradictory")
         return "line_search_failure"
+    if status == 1:
+        raise ValueError("solver limit status lacks a limit message")
     return "solver_failure"
 
 
@@ -317,8 +383,19 @@ def optimize_restricted_noiseless_upper_bound(
             "maxls": 50,
         },
     )
+    output_finite = bool(
+        np.all(np.isfinite(np.asarray(solved.fun)))
+        and np.all(np.isfinite(np.asarray(solved.x)))
+        and np.all(np.isfinite(np.asarray(solved.jac)))
+    )
+    message_code = canonical_solver_message_code(solved.message)
     termination = classify_solver_termination(
-        solved,
+        success=bool(solved.success),
+        status=int(solved.status),
+        message_code=message_code,
+        output_finite=output_finite,
+        nit=int(solved.nit),
+        nfev=int(solved.nfev),
         max_iterations=max_iterations,
         max_evaluations=max_evaluations,
     )
@@ -335,9 +412,6 @@ def optimize_restricted_noiseless_upper_bound(
             1.0,
         )
     )
-    message = str(solved.message)
-    if not message or len(message) > 256 or not message.isascii():
-        message = termination
     return RestrictedOptimizationResult(
         attained_infidelity_upper_bound=float(attained),
         starting_infidelity_upper_bound=starting,
@@ -347,11 +421,46 @@ def optimize_restricted_noiseless_upper_bound(
         consistency_tolerance=float(consistency_tolerance),
         nfev=int(solved.nfev),
         nit=int(solved.nit),
-        certified=termination == "converged",
+        solver_success=bool(solved.success),
         solver_status=int(solved.status),
-        solver_message=message,
+        solver_message_code=message_code,
+        solver_output_finite=output_finite,
         termination=termination,
     )
+
+
+def finalize_restricted_attained_bound(
+    cached: RestrictedOptimizationResult,
+    exact: ExactInfidelityTrajectory,
+) -> dict[str, object]:
+    if not isinstance(cached, RestrictedOptimizationResult) or not isinstance(
+        exact,
+        ExactInfidelityTrajectory,
+    ):
+        raise ValueError("restricted finalization requires derived metric results")
+    evidence = (
+        ("initial_origin", exact.initial_infidelity),
+        ("audited_candidate", exact.best_successful_audited_infidelity),
+        ("restricted_solver", cached.attained_infidelity_upper_bound),
+    )
+    available = [
+        (source, float(value))
+        for source, value in evidence
+        if value is not None
+    ]
+    if any(not math.isfinite(value) or not 0.0 <= value <= 1.0 for _, value in available):
+        raise ValueError("attained-bound evidence must be finite probabilities")
+    minimum = min(value for _, value in available)
+    source = next(source for source, value in available if value == minimum)
+    return {
+        **cached.canonical_dict(),
+        "attained_infidelity_upper_bound": minimum,
+        "attained_infidelity_source": source,
+        "best_successful_audited_exact_infidelity": (
+            exact.best_successful_audited_infidelity
+        ),
+        "initial_exact_infidelity": exact.initial_infidelity,
+    }
 
 
 def compute_geometry_diagnostics(

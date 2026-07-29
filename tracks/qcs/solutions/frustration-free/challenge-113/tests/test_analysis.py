@@ -191,6 +191,7 @@ def _trial(
     if config.run_kind == "production":
         result_payload["derived_metrics"] = {
             "exact_infidelity": {
+                "best_successful_audited_infidelity": 0.5,
                 "cumulative_best_by_optimizer_query": [0.5] * evaluations,
                 "initial_infidelity": 0.5,
             },
@@ -206,6 +207,10 @@ def _trial(
             },
             "restricted_noiseless_optimization": {
                 "attained_infidelity_upper_bound": 0.5,
+                "attained_infidelity_source": "restricted_solver",
+                "best_successful_audited_exact_infidelity": 0.5,
+                "cached_solver_attained_infidelity_upper_bound": 0.5,
+                "cached_solver_starting_infidelity_upper_bound": 0.5,
                 "certified": True,
                 "consistency_tolerance": 1e-10,
                 "gradient_tolerance": 1e-9,
@@ -214,9 +219,11 @@ def _trial(
                 "nfev": 1,
                 "nit": 0,
                 "solver": "L-BFGS-B",
-                "solver_message": "CONVERGENCE",
+                "solver_message_code": "convergence",
+                "solver_output_finite": True,
                 "solver_status": 0,
-                "starting_infidelity_upper_bound": 0.5,
+                "solver_success": True,
+                "initial_exact_infidelity": 0.5,
                 "termination": "converged",
             },
         }
