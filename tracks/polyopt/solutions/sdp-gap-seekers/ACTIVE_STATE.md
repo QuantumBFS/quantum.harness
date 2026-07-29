@@ -660,3 +660,6 @@ Updated: 2026-07-29 UTC.
   JuMP stages had completed in 1,835.530 s and 3,991.145 s. This is not a
   physics result; do not repeat that signature. Native job `118174638`
   remains the active exact decision solve.
+- Dual-certificate replay code is committed at `09729d7`. Its first synthetic
+  SCNet test, job `118177325`, never launched (`JobLaunchFailure`, zero
+  runtime, no log). Resubmit this unchanged tiny test once on another node.

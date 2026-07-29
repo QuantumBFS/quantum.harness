@@ -1159,3 +1159,11 @@ before any Mosek iteration log. Slurm measured 234,603,960 KiB MaxRSS and
 This closes the conservative xH5 baseline as an operational failure, not a
 feasibility result. Do not rerun the same JuMP signature; continue the exact
 native task, whose construction peak was about 15.6 GB including solver entry.
+
+Commit `09729d7` adds an exact-bit native bar-matrix certificate artifact,
+fresh-task primal replay, residual checks, and the same fail-closed L=2
+coefficient hash gate for the dual formulation. Synthetic SCNet audit job
+`118177325` had zero runtime and ended `JobLaunchFailure` (`0:53`) on node
+`a01r4n14`; no batch process or test log existed. One unchanged test
+resubmission is justified because this was scheduler launch infrastructure,
+not a source or numerical failure.

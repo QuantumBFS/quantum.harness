@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T16:58:02Z
+Updated: 2026-07-29T17:07:48Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -117,5 +117,10 @@ Updated: 2026-07-29T16:58:02Z
   construction 3,991.145 s; the OOM occurred during JuMP→Mosek transfer. It
   was not cancelled, is not a feasibility result, and should not be rerun with
   the same signature.
+- Commit `09729d7` prepares the native dual route with exact L=2 coefficient
+  hashing, residual checks, exact-bit bar-matrix certificate export, and
+  fresh-task replay. Synthetic SCNet job `118177325` ended immediately as
+  `JobLaunchFailure` (`0:53`) on `a01r4n14`, with zero runtime and no log. One
+  unchanged resubmission is authorized because no test process ran.
 
 No user input or new credential is currently required.
