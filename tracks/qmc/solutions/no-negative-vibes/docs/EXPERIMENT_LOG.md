@@ -7,6 +7,35 @@ fails, or only exposes an infrastructure defect. Large outputs live under the
 ignored results tree; the committed entry carries enough provenance to rerun
 and interpret them.
 
+## DEV-EXTCONE-RED-001 -- exterior-cone interface characterization
+
+- Proposal ID: exterior-cone-throughput-loop / Task 1
+- Question: Do the new exterior-power characterization tests fail before the
+  requested public oracle exists?
+- Prediction: collection stops only because `oracle.exterior_cone` is absent.
+- Source commit: `92e367791232fe33da6d456db6191303e1bbe272`
+- Protocol/config: focused pytest collection from the solution directory;
+  `PYTHONPATH` was the absolute solution directory and all BLAS thread counts
+  were fixed to one.
+- Host role and resources: WSL verification environment; one pytest process.
+- Command: `OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+  PYTHONPATH=/mnt/c/Users/45518/Documents/quantum_harness/no-negative-vibes-collab/.worktrees/representation-cones/tracks/qmc/solutions/no-negative-vibes
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest
+  tests/test_exterior_cone.py -q`
+- Result: exit 2; collection error in `0.15s`.
+- Evidence paths and hashes: local
+  `tests/test_exterior_cone.py` SHA-256
+  `BB61553EF022C3A270E9DC07403392014D9BECB79D17EDA89B809B9CB87F2A91`;
+  the WSL test file was copied from that exact content.
+- Interpretation: the sole collection root cause was
+  `ModuleNotFoundError: No module named 'oracle.exterior_cone'`. The test
+  contract is therefore a valid RED state, not a test or environment typo.
+- Transferable lesson: test the fixed exterior-minor convention and certificate
+  serialization before adding scan integration; this keeps the high-throughput
+  search oracle independently checkable.
+- Decision / next experiment: implement only the requested exterior-cone
+  functions, then replay focused and weight/scan regression tests.
+
 ## Required entry schema
 
 ```text
