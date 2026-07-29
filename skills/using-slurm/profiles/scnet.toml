@@ -80,6 +80,16 @@ symptom = "only one partition appears in sinfo"
 cause = "the account association exposes hx1hdnormal01 only (QOS user_<name>)"
 fix = "treat it as the sole candidate; re-probe after any account/quota change"
 
+[[gotchas]]
+symptom = "git reports 'Unknown option: -C' on the login node"
+cause = "the default SCNet Git can be as old as 1.8.3.1"
+fix = "use 'cd <repo> && git ...' or load the site git/2.30.2-gcc-7.3.1 module before using git -C"
+
+[[gotchas]]
+symptom = "sbatch is rejected with AssocGrpSubmitJobsLimit or a job remains pending with AssocGrpJobsLimit"
+cause = "the shared Slurm account has reached its group submission or running-job cap"
+fix = "distinguish rejection-without-job-id from a real pending job; do not duplicate either signature, and re-probe squeue/sacct before retrying"
+
 [commands]
 squeue = "squeue -u $USER"
 sacct = "sacct --format=JobID,State,ExitCode,MaxRSS,Elapsed"

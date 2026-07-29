@@ -36,8 +36,10 @@ Current sequence:
 5. Assemble and validate Square J1-J2 at `g=0`, `0.50`, and `0.535`.
 6. Add observable bounds and exact or interval certificate post-processing.
 
-Shastry-Sutherland `g=0` remains the preferred positive-gap calibration after
-the Square adapter is stable. Fallbacks #124 and #49 are not part of the current
+Shastry-Sutherland `g=0` is now implemented as the positive-gap calibration:
+its exact dimer-product state passes the assembled `M/G/K` constraints at
+`gamma=1` and rejects `gamma=1.1`. This remains a correctness gate, not a
+reported SDP bound. Fallbacks #124 and #49 are not part of the current
 implementation branch.
 
 ## Current artifacts
@@ -54,12 +56,18 @@ implementation branch.
   plan from model-specific code to a generic lattice/patch interface.
 - [`validation-report.md`](validation-report.md): tests, finite-patch ED oracle,
   and the precise boundary of what has not yet been certified.
+- [`SHASTRY_SUTHERLAND_DIMER_GATE.md`](SHASTRY_SUTHERLAND_DIMER_GATE.md):
+  periodic orthogonal-dimer geometry, exact `g=0` moment oracle, assembled
+  `M/G/K` gate, and `4x4` finite-torus benchmarks at `g=0,0.8`.
+- [`EXACT_V4_REDUCTION_TRUTH.md`](EXACT_V4_REDUCTION_TRUTH.md): proof contract
+  and exhaustive symbolic tests for the centered/scalar congruence, gap facial
+  reduction, and exact V4 state-polynomial quotient.
 
-The committed prototype uses Julia standard libraries only and does not
-assemble or solve an SDP. The external Mosek/SpectralGap/QMBCertify environment
-reported in [`notes/`](notes/) is a separate solver setup; its local patches
-must be committed and regression-tested before this repository can rely on
-them.
+The solver-independent Julia core uses standard libraries only and does not
+solve an SDP. The optional finite-torus ED oracle uses NumPy and SciPy. The
+external Mosek/SpectralGap/QMBCertify environment reported in [`notes/`](notes/)
+is a separate solver setup; its local patches must be committed and
+regression-tested before this repository can rely on them.
 
 The Julia checks reported here were run locally; they are not SCNet
 reproduction artifacts. Before the legacy inventory becomes a frozen oracle,
