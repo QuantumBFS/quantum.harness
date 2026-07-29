@@ -58,8 +58,8 @@ def test_screen_card_uses_right_append_order_and_frozen_oracle(
         return _result("negative")
 
     atoms = (
-        np.asarray([[1.0, 2.0], [0.0, 1.0]]),
-        np.asarray([[3.0, 0.0], [4.0, 1.0]]),
+        np.asarray([[1.0, 2.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+        np.asarray([[3.0, 0.0, 0.0], [4.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
     )
     monkeypatch.setattr(thin, "float_atoms_from_card", lambda _: atoms)
     monkeypatch.setattr(thin.weights, "classify_product", classify)
