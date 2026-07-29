@@ -104,7 +104,7 @@ function parse_args(arguments::Vector{String})
     index = 1
     while index <= length(arguments)
         argument = arguments[index]
-        if argument in ("--output", "--gamma")
+        if argument in ("--output", "--gamma", "--patch-level")
             index < length(arguments) ||
                 throw(ArgumentError("$argument requires a value"))
             haskey(values, argument) &&
@@ -114,7 +114,7 @@ function parse_args(arguments::Vector{String})
         elseif argument in ("-h", "--help")
             println(
                 "usage: build_triangular_full_spin_isotypic_reduced_mof.jl " *
-                "--gamma P/Q --output REPOSITORY_RELATIVE_PATH",
+                "--gamma P/Q --output REPOSITORY_RELATIVE_PATH [--patch-level L]",
             )
             return nothing
         else
@@ -123,6 +123,12 @@ function parse_args(arguments::Vector{String})
     end
     all(haskey(values, key) for key in ("--output", "--gamma")) ||
         throw(ArgumentError("--output and --gamma are required"))
+    patch_level = 1
+    if haskey(values, "--patch-level")
+        patch_level = parse(Int, values["--patch-level"])
+        patch_level >= 1 ||
+            throw(ArgumentError("--patch-level must be a positive integer"))
+    end
     output = values["--output"]
     isabspath(output) &&
         throw(ArgumentError("--output must be repository-relative"))
@@ -138,6 +144,7 @@ function parse_args(arguments::Vector{String})
         output=output_path,
         output_relative=relative,
         gamma=parse_rational(values["--gamma"]),
+        patch_level=patch_level,
     )
 end
 
@@ -288,7 +295,7 @@ function main(arguments::Vector{String}=ARGS)
 
     progress("exact source assembly")
     problem = GapProblem(
-        triangular_patch_geometry(1),
+        triangular_patch_geometry(options.patch_level),
         triangular_heisenberg_model(J1_COUPLING),
         options.gamma,
         2;
@@ -414,7 +421,7 @@ function main(arguments::Vector{String}=ARGS)
             "model" => "triangular-heisenberg",
             "j1" => rational_metadata(J1_COUPLING),
             "gamma" => rational_metadata(options.gamma),
-            "patch_level" => 1,
+            "patch_level" => options.patch_level,
             "degree_d" => 2,
             "state_class" => "unrestricted",
             "physical_boundary_condition" =>
