@@ -88,6 +88,36 @@ def test_aggregation_gives_families_equal_weight():
     assert row["families"]["product"]["count"] == 2
 
 
+def test_trajectory_entropy_fit_recovers_slope_and_intercept():
+    module = _load_module()
+    L, steps = 8, 40
+    slope, intercept = 0.111, 0.37
+    record = _record(L, "global_haar", 0, slope)
+    record["cumulative_record_cost"] = [
+        L * (intercept + slope * t) for t in range(1, steps + 1)
+    ]
+    record["record_steps"] = steps
+    record["record_cost"] = record["cumulative_record_cost"][-1]
+    fit = module.trajectory_entropy_fit(record)
+    assert fit["slope"] == pytest.approx(slope, abs=1e-13)
+    assert fit["intercept"] == pytest.approx(intercept, abs=1e-13)
+
+
+def test_aggregate_uses_slope_not_endpoint_by_default():
+    module = _load_module()
+    records = []
+    for family in ("global_haar", "product"):
+        for index in range(2):
+            record = _record(8, family, index, 0.2)
+            record["cumulative_record_cost"] = [
+                8 * (1.0 + 0.2 * t) for t in range(1, 193)
+            ]
+            record["record_cost"] = record["cumulative_record_cost"][-1]
+            records.append(record)
+    row = module.aggregate_trajectory_records(records)[0]
+    assert row["tilde_f"] == pytest.approx(0.2)
+
+
 def test_aggregation_rejects_duplicate_sample_identity():
     module = _load_module()
     records = [

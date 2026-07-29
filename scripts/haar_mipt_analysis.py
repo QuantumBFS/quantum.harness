@@ -17,7 +17,46 @@ import numpy as np
 _FAMILIES = ("global_haar", "product")
 
 
-def aggregate_trajectory_records(records: Iterable[Mapping]) -> list[dict]:
+def trajectory_entropy_fit(record: Mapping, start_fraction: float = 0.0) -> dict:
+    """Fit cumulative measurement-record entropy per site linearly in time."""
+    width = int(record["L"])
+    steps = int(record["record_steps"])
+    fraction = float(start_fraction)
+    cumulative = np.asarray(record["cumulative_record_cost"], dtype=float)
+    if width <= 0 or steps <= 1 or cumulative.shape != (steps,):
+        raise ValueError("trajectory has an invalid cumulative-cost shape")
+    if not 0.0 <= fraction < 1.0:
+        raise ValueError("start_fraction must lie in [0, 1)")
+    if np.any(~np.isfinite(cumulative)) or np.any(np.diff(cumulative) < -1e-12):
+        raise ValueError("cumulative costs must be finite and monotone")
+    start = int(np.floor(fraction * steps))
+    if steps - start < 2:
+        raise ValueError("entropy fit needs at least two retained points")
+    times = np.arange(1, steps + 1, dtype=float)[start:]
+    values = cumulative[start:] / width
+    design = np.column_stack((np.ones_like(times), times))
+    coefficients, _, _, _ = np.linalg.lstsq(design, values, rcond=None)
+    return {
+        "intercept": float(coefficients[0]),
+        "slope": float(coefficients[1]),
+        "points": int(times.size),
+        "start_index": start,
+    }
+
+
+def _trajectory_density(record: Mapping, estimator: str) -> float:
+    if estimator == "slope":
+        return trajectory_entropy_fit(record)["slope"]
+    if estimator == "endpoint":
+        return float(record["record_cost"]) / (
+            int(record["L"]) * int(record["record_steps"])
+        )
+    raise ValueError("estimator must be 'slope' or 'endpoint'")
+
+
+def aggregate_trajectory_records(
+    records: Iterable[Mapping], estimator: str = "slope"
+) -> list[dict]:
     """Aggregate independent trajectories with exactly half weight per family."""
     records = list(records)
     seen = set()
@@ -49,11 +88,7 @@ def aggregate_trajectory_records(records: Iterable[Mapping]) -> list[dict]:
             if len(chosen) < 2:
                 raise ValueError(f"L={width} family={family} needs two trajectories")
             values = np.asarray(
-                [
-                    float(record["record_cost"])
-                    / (width * int(record["record_steps"]))
-                    for record in chosen
-                ],
+                [_trajectory_density(record, estimator) for record in chosen],
                 dtype=float,
             )
             families[family] = {
@@ -71,6 +106,7 @@ def aggregate_trajectory_records(records: Iterable[Mapping]) -> list[dict]:
                 "L": width,
                 "tilde_f": float(mean),
                 "tilde_f_se": float(standard_error),
+                "estimator": estimator,
                 "families": families,
             }
         )
