@@ -1,0 +1,2 @@
+Test Summary:                                            | Pass  Total  Time
+runner string boundaries accept views and regex captures |   11     11  1.2s
