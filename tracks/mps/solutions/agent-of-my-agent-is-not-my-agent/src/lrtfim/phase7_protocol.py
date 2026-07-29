@@ -265,6 +265,9 @@ def decide_refinement(
         }
     left, right = candidates[0]
     bracket = [gammas[left], gammas[right]]
+    d_left, d_right = differences[left], differences[right]
+    fraction = -d_left / (d_right - d_left)
+    broad_crossing = bracket[0] + fraction * (bracket[1] - bracket[0])
     ticks = np.arange(
         int(round(100 * bracket[0])),
         int(round(100 * bracket[1])) + 1,
@@ -274,6 +277,10 @@ def decide_refinement(
         **base,
         "status": "ready",
         "broad_bracket": bracket,
+        "broad_interpolation_differences": [d_left, d_right],
+        "broad_interpolation_fraction": float(fraction),
+        "broad_Gamma_x": float(broad_crossing),
+        "broad_delta_gamma_grid": 0.5 * (bracket[1] - bracket[0]),
         "refinement_grid": (ticks / 100.0).tolist(),
     }
 

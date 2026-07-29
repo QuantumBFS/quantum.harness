@@ -182,6 +182,11 @@ def test_refinement_uses_only_unique_observed_bracket(tmp_path: Path) -> None:
     assert decision["refinement_grid"] == pytest.approx(
         [1.55, 1.56, 1.57, 1.58, 1.59, 1.60]
     )
+    assert decision["broad_Gamma_x"] == pytest.approx(1.60)
+    assert decision["broad_delta_gamma_grid"] == pytest.approx(0.025)
+    assert decision["broad_interpolation_differences"] == pytest.approx(
+        [differences[7], differences[8]]
+    )
     assert decision["broad_grid"] == spec["axes"]["Gamma"]
     assert decision["grid_hash"] == spec["settings"]["gamma_grid_hash"]
 
