@@ -180,8 +180,8 @@ function dense_annihilation(n_modes::Int, mode::Int)
 end
 
 function chain_equivalence_fixture(n_bath::Int)
-    gamma = 0.13
-    bandwidth = 1.2
+    gamma = 0.1
+    bandwidth = 1.0
     epsilon = [
         bandwidth * cos(k * pi / (n_bath + 1)) for k in 1:n_bath
     ]
@@ -318,9 +318,7 @@ function production_mpo_sector_matrix(parameters, n_up::Int, n_down::Int)
 end
 
 function chain_parameters(n_bath::Int; U = 0.8, mu = 0.07)
-    validated = validated_chain_fixture(
-        ; n_bath, gamma = 0.13, bandwidth = 1.2
-    )
+    validated = validated_chain_fixture(; n_bath)
     return FiniteBathParameters(
         validated;
         U,
@@ -550,14 +548,11 @@ end
         sites, direct; purification = spec
     )
 
-    other_validated = validated_chain_fixture(
-        ; n_bath = 2, gamma = 0.17, bandwidth = 1.3
-    )
+    other_validated = validated_chain_fixture(; n_bath = 3)
     other_parameters = FiniteBathParameters(other_validated)
     other_spec = FiniteBathPurification.qn_dual_purification(
         other_parameters, other_validated
     )
-    @test other_parameters.lambda != parameters.lambda
     @test other_parameters.mapping_sha256 != parameters.mapping_sha256
     other_sites =
         interleaved_sites(other_parameters; purification = other_spec)

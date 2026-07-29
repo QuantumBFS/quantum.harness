@@ -63,6 +63,43 @@ function compare_qn_and_non_qn_sector(
           eigvals(Hermitian(non_qn_matrix)) atol = 1.0e-12
 end
 
+@testset "canonical QN fixtures are checked in" begin
+    expected_bath_sha256 = (
+        "7d894928d95481cff0c5a8f47592681db1e9bae8731f1a16bb1b83fc310a8b4f",
+        "acada4ceb615f6f9ab020376e0ce1e2c529011c0606b6e5178251ce9e6753395",
+        "01f498d95a6e22db27ff8992001edd896d48f3bbc4563a1477fa5371e2c46931",
+        "fd790a29ad2c3fe5e840c7ee260dbcf96b50ec434b9ef01065f1bfa1ba231cdf",
+        "818dc73dffeb851961e8cb6944df92a45423d9ee8893bd8b9b3d08e4135323ba",
+        "57f6b6295f9cb0cba9fc5463a004cf1ed37a846d7229bd21343fff74292cbea4",
+    )
+    expected_mapping_sha256 = (
+        "cb9fc9fbb83e7d6538e4f08f2dee0d218787946006f1aa4437bad23d55e8ba4a",
+        "30ba94076c1a5828da8749bc79dc495b59db2ae1e49d99f2db928e8fd2a22c09",
+        "8041184dd33c467d361218a157fafdb027290adf941312262d550f44a23318fb",
+        "79139728b461f34bce98d6d3fb664cbebabd2f22090e06ad7ab8f3f38cc3f81c",
+        "5e21d93e712fa611fe7bda482f19b6ddce0aea295770804ed27e3cfcaf74eb18",
+        "9c27f3b20aa5891b3aa393e45ac012ca39eebba974f3e417268d7ef0c48a6ed3",
+    )
+    for n_bath in 1:6
+        artifacts = validated_chain_fixture_artifacts(n_bath)
+        @test artifacts.bath_artifact["sha256"] ==
+              expected_bath_sha256[n_bath]
+        @test artifacts.mapping_artifact["sha256"] ==
+              expected_mapping_sha256[n_bath]
+        @test artifacts.bath_artifact["payload"]["provenance"][
+            "python_version"
+        ] == "3.12.13"
+        @test artifacts.mapping_artifact["payload"]["provenance"][
+            "numpy_version"
+        ] == "2.5.1"
+        @test validated_chain_fixture(; n_bath).mapping_sha256 ==
+              expected_mapping_sha256[n_bath]
+    end
+    @test_throws MethodError validated_chain_fixture(
+        ; n_bath = 1, gamma = 0.2
+    )
+end
+
 @testset "probe requires validated runner capability and fails closed" begin
     validated, result = mktempdir() do empty_path
         withenv("PATH" => empty_path) do
@@ -76,31 +113,35 @@ end
     @test result.supported
     @test result.failure === nothing
 
-    bath_artifact = _fixture_bath_artifact(1, 0.1, 1.0)
-    mapping_artifact, mapping_json =
-        _fixture_chain_mapping_artifact(bath_artifact)
-    @test bath_artifact["sha256"] ==
-          bytes2hex(
-              sha256(
-                  codeunits(
-                      canonical_artifact_json(bath_artifact["payload"])
-                  ),
-              ),
-          )
-    @test mapping_artifact["sha256"] ==
-          bytes2hex(
-              sha256(
-                  codeunits(
-                      canonical_artifact_json(mapping_artifact["payload"])
-                  ),
-              ),
-          )
-    @test mapping_artifact["payload"]["source_bath_sha256"] ==
-          bath_artifact["sha256"]
-    corrupted = deepcopy(mapping_artifact)
-    corrupted["payload"]["Q"][1][1] = 0.0
+    artifacts = validated_chain_fixture_artifacts(1)
+    corrupted_bath = deepcopy(artifacts.bath_artifact)
+    corrupted_bath["payload"]["epsilon"][1] += 0.125
+    corrupted_bath["sha256"] = bytes2hex(
+        sha256(
+            codeunits(canonical_artifact_json(corrupted_bath["payload"]))
+        ),
+    )
+    corrupted_bath_json = canonical_artifact_json(corrupted_bath) * "\n"
+    @test corrupted_bath["sha256"] != artifacts.bath_artifact["sha256"]
+    @test_throws ArgumentError validate_bath_artifact(
+        corrupted_bath,
+        corrupted_bath_json,
+        authoritative_model_definition(),
+    )
+
+    corrupted_mapping = deepcopy(artifacts.mapping_artifact)
+    corrupted_mapping["payload"]["chain_onsite"][1] += 0.125
+    corrupted_mapping_payload_json =
+        canonical_artifact_json(corrupted_mapping["payload"])
+    corrupted_mapping["sha256"] =
+        bytes2hex(sha256(codeunits(corrupted_mapping_payload_json)))
+    corrupted_mapping_json = canonical_chain_mapping_json(corrupted_mapping)
+    @test corrupted_mapping["sha256"] !=
+          artifacts.mapping_artifact["sha256"]
     @test_throws ArgumentError validate_chain_mapping_artifact(
-        corrupted, mapping_json, bath_artifact
+        corrupted_mapping,
+        corrupted_mapping_json,
+        artifacts.bath_artifact,
     )
 
     mandatory = (
@@ -134,9 +175,7 @@ QN_MPO_TEST_MAX_BATH in 1:6 ||
 
 @testset "QN MPO dense matrices and spectra" begin
     for n_bath in 1:QN_MPO_TEST_MAX_BATH, interaction in (0.0, 0.8)
-        validated = validated_chain_fixture(
-            ; n_bath, gamma = 0.13, bandwidth = 1.2
-        )
+        validated = validated_chain_fixture(; n_bath)
         parameters = FiniteBathParameters(
             validated;
             U = interaction,
@@ -144,11 +183,16 @@ QN_MPO_TEST_MAX_BATH in 1:6 ||
             mu = 0.07,
         )
         purification = qn_dual_purification(parameters, validated)
-        compare_qn_and_non_qn_sector(parameters, purification, 1, 1)
+        for sector in ((1, 0), (0, 1), (1, 1))
+            compare_qn_and_non_qn_sector(
+                parameters, purification, sector...
+            )
+        end
         if n_bath <= 3
             n_orbitals = n_bath + 1
             for n_up in 0:n_orbitals, n_down in 0:n_orbitals
-                (n_up, n_down) == (1, 1) && continue
+                (n_up, n_down) in ((1, 0), (0, 1), (1, 1)) &&
+                    continue
                 compare_qn_and_non_qn_sector(
                     parameters, purification, n_up, n_down
                 )
@@ -158,9 +202,7 @@ QN_MPO_TEST_MAX_BATH in 1:6 ||
 end
 
 @testset "QN MPO preserves Jordan-Wigner signs across ancillas" begin
-    validated = validated_chain_fixture(
-        ; n_bath = 2, gamma = 0.13, bandwidth = 1.2
-    )
+    validated = validated_chain_fixture(; n_bath = 2)
     parameters = FiniteBathParameters(validated)
     purification = qn_dual_purification(parameters, validated)
     sites = interleaved_sites(parameters; purification)

@@ -133,9 +133,7 @@ function validated_observable_chain_fixtures()
                     sin(k * pi / (n_bath + 1))^2
                 ) for k in 1:n_bath
             ],
-            validated = validated_chain_fixture(
-                ; n_bath, gamma, bandwidth
-            ),
+            validated = validated_chain_fixture(; n_bath),
         ) for n_bath in 1:6
     ]
 end

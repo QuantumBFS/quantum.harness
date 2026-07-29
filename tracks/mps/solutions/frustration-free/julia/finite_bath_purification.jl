@@ -1260,6 +1260,15 @@ function _normalized_probe_branch(psi, site, operator_name)
     return branch
 end
 
+function _global_phase_aligned_state_error(reference, candidate)
+    overlap = inner(reference, candidate)
+    abs(overlap) > eps(Float64) ||
+        error("locked QN probe HDF5 state overlap vanished")
+    aligned = copy(candidate)
+    aligned[1] *= conj(overlap / abs(overlap))
+    return norm(aligned - reference)
+end
+
 function _probe_state_roundtrips(
     directory, sites, psi, hamiltonian, purification, parameters
 )
@@ -1319,15 +1328,17 @@ function _probe_state_roundtrips(
         restored_sites = siteinds(restored)
         restored_sites == expected_site_indices ||
             error("locked QN probe HDF5 changed $name site indices")
+        all(
+            inds(restored[index]) == inds(evolved[index])
+            for index in eachindex(restored)
+        ) || error("locked QN probe HDF5 changed $name tensor indices")
         space.(restored_sites) == expected_site_spaces ||
             error("locked QN probe HDF5 changed $name site spaces")
         flux(restored) == expected_flux ||
             error("locked QN probe HDF5 changed the $name sector")
         isapprox(norm(restored), norm(evolved); atol = 1.0e-12) ||
             error("locked QN probe HDF5 changed the $name norm")
-        overlap = abs(inner(restored, evolved))
-        target_overlap = norm(restored) * norm(evolved)
-        isapprox(overlap, target_overlap; atol = 1.0e-11) ||
+        _global_phase_aligned_state_error(evolved, restored) <= 1.0e-11 ||
             error("locked QN probe HDF5 changed the $name state")
     end
     return (; tdvp_step_valid = true, hdf5_roundtrip_valid = true)
