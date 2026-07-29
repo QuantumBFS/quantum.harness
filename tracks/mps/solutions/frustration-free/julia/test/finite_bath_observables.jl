@@ -684,9 +684,22 @@ function run_qn_observable_equivalence_matrix(max_bath::Int)
             assert_star_chain_observables(
                 chain_result, direct_result; atol = 1.0e-6
             )
-            qn_context =
-                build_finite_bath_context(chain; purification)
             for insertion in (:creation, :annihilation)
+                owned_site =
+                    qn_results[insertion].thermal_state.sites[1]
+                mismatched_site =
+                    build_finite_bath_context(
+                        chain; purification
+                    ).sites[1]
+                @test mismatched_site !== owned_site
+                @test !hasind(
+                    qn_results[insertion].thermal_state.psi[1],
+                    mismatched_site,
+                )
+                @test hasind(
+                    qn_results[insertion].thermal_state.psi[1],
+                    owned_site,
+                )
                 assert_star_chain_observables(
                     qn_results[insertion], direct_result; atol = 1.0e-6
                 )
@@ -741,7 +754,7 @@ function run_qn_observable_equivalence_matrix(max_bath::Int)
                     applied =
                         FiniteBathObservables._apply_impurity_operator(
                             qn_results[insertion].thermal_state.psi,
-                            qn_context.sites[1],
+                            owned_site,
                             spin,
                             insertion,
                             explicit_sector,
