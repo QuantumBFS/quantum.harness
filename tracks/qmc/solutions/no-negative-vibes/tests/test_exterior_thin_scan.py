@@ -298,3 +298,234 @@ def test_collect_reports_missing_and_status_counts(tmp_path: Path) -> None:
     assert result["terminal"] == 1
     assert result["missing"] == 2303
     assert result["scientific_counts"]["survivor-shallow-zero-failure"] == 1
+
+
+def test_smoke_namespace_cannot_poison_production_manifest(
+    tmp_path: Path,
+) -> None:
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+    )
+    smoke_path = tmp_path / "specs" / "smoke-wsl.json"
+    smoke = json.loads(smoke_path.read_text())
+    smoke["candidates"] = smoke["candidates"][:1]
+    smoke_path.write_text(json.dumps(smoke), encoding="utf-8")
+    entry = smoke["candidates"][0]
+    production_path = tmp_path / "specs" / f"shard-{entry['shard']:02d}.json"
+    production = json.loads(production_path.read_text())
+    production["candidates"] = [entry]
+    production_path.write_text(json.dumps(production), encoding="utf-8")
+
+    assert thin.run_spec(smoke_path)["completed"] == 1
+    assert thin.run_spec(production_path)["completed"] == 1
+    assert (
+        tmp_path / "smoke" / "candidates" / entry["candidate_id"] / "manifest.json"
+    ).is_file()
+    assert (
+        tmp_path / "candidates" / entry["candidate_id"] / "manifest.json"
+    ).is_file()
+
+
+def test_run_cli_returns_nonzero_when_any_operational_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        thin,
+        "run_spec",
+        lambda _: {"completed": 0, "reused": 0, "errors": 1},
+    )
+    assert thin.main(["run", "ignored.json"]) != 0
+    assert json.loads(capsys.readouterr().out)["errors"] == 1
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("source_commit", "2" * 40),
+        ("run_id", "edited-run"),
+        ("oracle_version", "edited-oracle"),
+        ("word_order", "edited-order"),
+        ("depths", [2, 3]),
+    ),
+)
+def test_run_spec_recomputes_protocol_hash_and_rejects_tampering(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+    )
+    path = tmp_path / "specs" / "shard-00.json"
+    spec = json.loads(path.read_text())
+    spec[field] = value
+    path.write_text(json.dumps(spec), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="protocol"):
+        thin.run_spec(path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("shard", 75),
+        ("machine_role", "cpu"),
+        ("dimension", 99),
+        ("card_sha256", "f" * 64),
+    ),
+)
+def test_run_spec_rejects_wrong_owner_role_or_reconstructed_card(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+    )
+    path = tmp_path / "specs" / "shard-00.json"
+    spec = json.loads(path.read_text())
+    assert spec["candidates"]
+    spec["candidates"] = spec["candidates"][:1]
+    if field in {"shard", "machine_role"}:
+        spec[field] = value
+    else:
+        spec["candidates"][0][field] = value
+    path.write_text(json.dumps(spec), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="owner|role|card|dimension|protocol"):
+        thin.run_spec(path)
+
+
+def test_survivor_manifest_and_collection_preserve_promotion_data(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+    )
+    plan = json.loads((tmp_path / "plan-summary.json").read_text())
+    entry = plan["candidates"][0]
+    card = candidate_card(template=entry["template"], seed=entry["seed"])
+    sigma = iter([0.9, 0.3, 0.7])
+    monkeypatch.setattr(
+        thin.weights,
+        "classify_product",
+        lambda _: WeightResult(
+            classification="positive",
+            value=1.0,
+            phase=1.0,
+            log_abs=0.0,
+            sigma_min=next(sigma),
+            condition_number=2.0,
+        ),
+    )
+    manifest = thin.screen_card(
+        card,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+        protocol_hash=plan["protocol_hash"],
+        machine_role="wsl" if entry["shard"] < 14 else "cpu",
+        shard=entry["shard"],
+        words=((0, 1), (1, 0), (0, 1, 0)),
+    )
+    assert manifest["minimum_sigma_min_I_plus_D"] == pytest.approx(0.3)
+    assert manifest["minimum_sigma_word_indices"] == [1, 0]
+    path = tmp_path / "candidates" / entry["candidate_id"] / "manifest.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    markdown = tmp_path / "ROUND_SUMMARY.md"
+
+    result = thin.collect_run(tmp_path, markdown=markdown)
+
+    assert result["survivors"] == [{
+        "candidate_id": entry["candidate_id"],
+        "template": entry["template"],
+        "dimension": entry["dimension"],
+        "tested_words": 3,
+        "minimum_sigma_min_I_plus_D": pytest.approx(0.3),
+        "minimum_sigma_word_indices": [1, 0],
+    }]
+    assert str(entry["dimension"]) in result["by_dimension"]
+    assert entry["template"] in result["by_template"]
+    assert result["first_failures"] == []
+    assert result["machine_execution"][0]["candidates"] == 1
+    rendered = markdown.read_text(encoding="utf-8")
+    for heading in (
+        "## By dimension",
+        "## By template",
+        "## First failures",
+        "## Shallow survivors",
+        "## Machine execution",
+    ):
+        assert heading in rendered
+    assert entry["candidate_id"] in rendered
+
+
+def test_collection_validates_ownership_detects_duplicates_and_clears_retries(
+    tmp_path: Path,
+) -> None:
+    thin.plan_run(
+        run_dir=tmp_path,
+        source_commit=SOURCE_COMMIT,
+        run_id="full",
+    )
+    plan = json.loads((tmp_path / "plan-summary.json").read_text())
+    entry = plan["candidates"][0]
+    role = "wsl" if entry["shard"] < 14 else "cpu"
+    manifest = {
+        "schema_version": thin.SCHEMA_VERSION,
+        "run_id": "full",
+        "protocol_hash": plan["protocol_hash"],
+        "source_commit": SOURCE_COMMIT,
+        "candidate_id": entry["candidate_id"],
+        "card_sha256": entry["card_sha256"],
+        "status": "rejected-negative",
+        "tested_words": 1,
+        "template": entry["template"],
+        "dimension": entry["dimension"],
+        "machine_role": role,
+        "shard": entry["shard"],
+        "runtime_seconds": 0.1,
+        "first_failure": {
+            "classification": "negative",
+            "word_indices": [0, 1],
+            "depth": 2,
+            "sigma_min_I_plus_D": 0.5,
+            "condition_number_I_plus_D": 2.0,
+        },
+    }
+    directory = tmp_path / "candidates" / entry["candidate_id"]
+    directory.mkdir(parents=True)
+    (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (directory / "manifest-returned.json").write_text(
+        json.dumps(manifest),
+        encoding="utf-8",
+    )
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    (logs / "old.json").write_text(
+        json.dumps({"errors": [{"candidate_id": entry["candidate_id"]}]}),
+        encoding="utf-8",
+    )
+
+    result = thin.collect_run(tmp_path)
+
+    assert result["operational_error"] == 0
+    assert result["unresolved_operational_candidate_ids"] == []
+    assert result["historical_operational_attempts"] == 1
+    assert result["duplicate"] == 1
+
+    manifest["machine_role"] = "cpu" if role == "wsl" else "wsl"
+    (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    stale = thin.collect_run(tmp_path)
+    assert stale["terminal"] == 0
+    assert stale["stale"] >= 1
