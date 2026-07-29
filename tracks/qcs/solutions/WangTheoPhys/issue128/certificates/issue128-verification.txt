@@ -6,7 +6,7 @@ Status
 valid: true
 verification_level: deep
 deep_proof_regenerated: true
-test_suite: pending final full-suite rerun
+test_suite: 70 passed, 9 slow tests deselected (Python 3.12)
 
 Benchmark
 ---------
