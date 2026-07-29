@@ -612,3 +612,20 @@ Updated: 2026-07-29 UTC.
   hashed Mosek interior solution after every solve and a compressed task for
   an infeasibility candidate. These files make an independent ray replay
   possible; their existence alone is not a certificate.
+- The native solution-file formats did not meet the replay gate: text `.sol`
+  reloaded as `UNKNOWN` with zero vectors, while JSOL and binary-solution
+  reloads raised Mosek error 1050 even when paired with serialized or binary
+  tasks. These are closed implementation branches, not scientific results.
+- Commit `1b08236` replaces them with a versioned binary export of every
+  scalar, affine-conic, and semidefinite dual-ray component plus source status
+  codes. The reader inserts those exact Float64 values into a fresh binary
+  task and asks Mosek to recompute dual objective and violations. After small
+  fixture corrections in `623c070` and `451fd33`, job `118173664` passed all
+  29 scalar-ray tests with dual objective 1, normalized separation 1, and zero
+  violation. Semidefinite fixture r15, job `118173766`, replayed successfully
+  but rejected its own storage assertion: MosekTools represents the affine PSD
+  cone through an affine-conic dual (`doty`), not a bar variable. Corrected r16
+  job `118173855` passed 36/36 tests. Its three-component PSD ray has dual
+  objective 0.7526914264023223, normalized separation
+  0.5981688276525166, and zero recomputed dual violation. The floating ray
+  preservation/replay path is now authorized for the scientific model.

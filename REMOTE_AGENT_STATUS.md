@@ -1,11 +1,12 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T15:19:28Z
+Updated: 2026-07-29T15:56:14Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
   local KMS gap relaxation at `g=4/5`, `gamma=2`, complete degree `d=2`.
-- Local branch: `remote/challenge88-terminal-solve` at `87be3177694bbc3db6566016eb645018cb59213d`.
+- Local branch: `remote/challenge88-terminal-solve`; ray-replay code is at
+  `3e4820d` with this status update following it.
 - Local checkout was clean at takeover. No user changes were shipped or
   overwritten.
 - Preserved SCNet baseline job `118171391`: `RUNNING` on `kshcnormal`, 32 CPUs,
@@ -57,5 +58,22 @@ Updated: 2026-07-29T15:19:28Z
   that independent replay succeeds.
 - SCNet baseline job `118171391` was still `RUNNING` at 2026-07-29T15:19Z,
   44:46 elapsed, in its first coefficient pass. It remains untouched.
+- Both protected baselines completed their first exact coefficient inventory
+  and entered the second coefficient pass used to construct the JuMP/Mosek
+  model. At 2026-07-29T15:46Z, SCNet job `118171391` was still running at
+  1:11 elapsed with 7.81 GB MaxRSS; xH5 job `23011251` was still running at
+  0:57 elapsed with 9.20 GB MaxRSS. Neither had entered `optimize!`.
+- Native Mosek text/JSON/binary solution reloads were rejected after tiny
+  tests showed lost status/zero rays or read error 1050. The changed route
+  exports every scalar and semidefinite dual-ray component by exact Float64
+  bits in a versioned binary artifact, pairs it with the binary task, and
+  reconstructs it into a fresh task for Mosek's independent solution-quality
+  calculation. SCNet job `118173664` passed the scalar Farkas fixture 29/29:
+  dual objective 1.0, normalized separation 1.0, zero dual violation.
+  Semidefinite fixture r15, job `118173766`, passed the ray numerically but
+  exposed that MosekTools stores its 2-by-2 PSD ray as an affine-conic dual,
+  not a bar variable. Corrected r16, job `118173855`, passed 36/36 tests: its
+  three-component PSD dual replayed with dual objective 0.7526914264,
+  normalized separation 0.5981688277, and zero dual violation.
 
 No user input or new credential is currently required.

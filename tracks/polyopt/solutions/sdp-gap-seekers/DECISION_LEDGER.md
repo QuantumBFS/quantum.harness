@@ -1063,3 +1063,41 @@ infeasible toy instances. This verifies preservation, not the ray itself. The
 next changed action is an independent read/replay audit of the stored task and
 ray; until that passes, keep the scientific classification
 `infeasibility_candidate_requires_independent_ray_replay`.
+
+## 2026-07-29 — reject lossy native solution reloads; export the ray explicitly
+
+The independent replay must receive the actual dual ray, not merely a solver
+status. Tiny SCNet tests made the format decision evidence-based:
+
+- r5 job `118172999` found only a Mosek-enum rendering bug after 23 passing
+  assertions; commit `f98c802` corrected it.
+- r6 job `118173063` and diagnostic r8 job `118173128` proved that the text
+  `.sol` reload returned `UNKNOWN`, dual objective zero, and zero dual vectors.
+  r7 job `118173104` performed no test because its wrapper contained a mistyped
+  Julia path; the corrected r8 signature was submitted immediately.
+- r9 job `118173197` rejected JSOL after `readjsonsol` returned Mosek error
+  1050. r10 job `118173271` rejected a binary solution paired with a serialized
+  task, and r11 job `118173302` showed the same error even with a binary task.
+
+Do not use any of those solution-file formats as scientific ray evidence in
+this pipeline. Commit `1b08236` instead writes a versioned little-endian file
+containing exact Float64 bits for `y`, bound multipliers, affine-conic duals,
+and every packed semidefinite dual block, together with source problem and
+solution status codes. Replay loads the hashed binary task, inserts the stored
+ray into a fresh task, recomputes solution information, and requires positive
+normalized Farkas separation and bounded normalized dual violation.
+
+r12 job `118173494` found only missing enum-value serialization; r13 job
+`118173600` found only an empty semidefinite-list reduction in the LP fixture.
+After commits `623c070` and `451fd33`, r14 job `118173664` passed 29/29 tests:
+the reconstructed ray has dual objective 1.0, normalized separation 1.0, and
+zero dual violation. This validates scalar Farkas replay. Job `118173766` adds
+  an infeasible 2-by-2 PSD fixture. Its ray replay itself passed, but the test
+  correctly revealed that MosekTools carries this PSD dual in the
+  affine-conic `doty` vector rather than a semidefinite bar variable, so its
+  storage assertion was changed rather than its mathematics. Corrected r16,
+  job `118173855`, passed 36/36 tests in 1:11 with 548,564 KiB MaxRSS. The
+  three-component PSD ray has dual objective 0.7526914264023223, normalized
+  separation 0.5981688276525166, and zero recomputed dual violation. This
+  authorizes the portable floating Farkas replay for all cone representations
+  present in the intended Shastry--Sutherland task.
