@@ -14,6 +14,8 @@ struct SDPResult
     equality_residual::Float64
     localizer_residual::Float64
     objective_residual::Float64
+    moment_cone_sizes::Vector{Int}
+    localizer_cone_sizes::Vector{Vector{Int}}
     block_cubic_proxy::Float64
     termination_status::MOI.TerminationStatusCode
     primal_status::MOI.ResultStatusCode
@@ -63,13 +65,14 @@ function _matrix_values(pencil, coordinates)
     return ComplexF64[_evaluate(pencil[i][j], coordinates) for i in 1:n, j in 1:n]
 end
 
-function solve_moment_sdp(ir::CompiledDenseIR; formulation::Symbol=:dense)
-    formulation == :dense || throw(ArgumentError("compiled next-stage IR supports only :dense formulation"))
+function _solve_moment_sdp(ir, formulation::Symbol, moment_pencils, localizer_pencils)
     model = _strict_mosek_model()
     @variable(model, coordinates[1:ir.coordinate_count])
-    _realified_psd!(model, ir.moment_matrix, coordinates)
-    for localizer in ir.localizers
-        _realified_psd!(model, localizer.pencil, coordinates)
+    for pencil in moment_pencils
+        _realified_psd!(model, pencil, coordinates)
+    end
+    for pencils in localizer_pencils, pencil in pencils
+        _realified_psd!(model, pencil, coordinates)
     end
     for equality in ir.equalities
         real_part, imaginary_part = _jump_parts(equality, coordinates)
@@ -109,20 +112,46 @@ function solve_moment_sdp(ir::CompiledDenseIR; formulation::Symbol=:dense)
                              abs(objective_value(model) - real(reconstructed_objective)))
     localizer_residual = max(0.0, -minimum(localizer_eigenvalues; init=Inf))
     characters = [word_character(word, ir.problem.generator_characters) for word in ir.basis]
-    sectors = Dict{UInt64,Vector{Int}}()
-    for (index, character) in enumerate(characters)
-        push!(get!(sectors, character, Int[]), index)
-    end
+    sectors = _character_sectors(ir.basis, ir.problem.generator_characters)
+    moment_cone_sizes = length.(moment_pencils)
+    localizer_cone_sizes = [length.(pencils) for pencils in localizer_pencils]
+    dense_cubic = length(ir.basis)^3 +
+                  sum((length(localizer.basis)^3 for localizer in ir.localizers); init=0)
+    reduced_cubic = sum(moment_cone_sizes .^ 3; init=0) +
+                    sum((sum(sizes .^ 3; init=0) for sizes in localizer_cone_sizes); init=0)
+    block_cubic_proxy = dense_cubic / reduced_cubic
 
-    return SDPResult(:dense, objective_value(model), collect(ir.basis), sectors,
+    return SDPResult(formulation, objective_value(model), collect(ir.basis), sectors,
                      moments, length(ir.moment_words), ir.coordinate_count, matrix,
                      eigmin(Hermitian((matrix + matrix') / 2)), localizer_eigenvalues,
                      coordinate_residual, hermiticity_residual, equality_residual,
-                     localizer_residual, objective_residual, 1.0, termination, primal)
+                     localizer_residual, objective_residual, moment_cone_sizes,
+                     localizer_cone_sizes, block_cubic_proxy, termination, primal)
 end
 
-solve_moment_sdp(problem::NCProblem; formulation::Symbol=:dense) =
-    solve_moment_sdp(compile_dense(problem); formulation=formulation)
+function solve_moment_sdp(ir::CompiledDenseIR; formulation::Symbol=:dense)
+    formulation == :dense || throw(ArgumentError("dense IR requires :dense formulation"))
+    moment_pencils = [ir.moment_matrix]
+    localizer_pencils = [[localizer.pencil] for localizer in ir.localizers]
+    return _solve_moment_sdp(ir, formulation, moment_pencils, localizer_pencils)
+end
+
+function solve_moment_sdp(ir::CompiledSymmetryIR; formulation::Symbol=:symmetry)
+    formulation == :symmetry || throw(ArgumentError("symmetry IR requires :symmetry formulation"))
+    moment_pencils = [block.pencil for block in ir.moment_blocks]
+    localizer_pencils = [[block.pencil for block in localizer.blocks]
+                         for localizer in ir.localizers]
+    return _solve_moment_sdp(ir, formulation, moment_pencils, localizer_pencils)
+end
+
+function solve_moment_sdp(problem::NCProblem; formulation::Symbol=:dense)
+    if formulation == :dense
+        return solve_moment_sdp(compile_dense(problem); formulation=formulation)
+    elseif formulation == :symmetry
+        return solve_moment_sdp(compile_symmetry(problem); formulation=formulation)
+    end
+    throw(ArgumentError("formulation must be :dense or :symmetry"))
+end
 
 function evaluate_moment(result::SDPResult, backend::StarAlgebraBackend, raw_word)
     word = raw_word isa NCWord ? raw_word : NCWord(Tuple(Int.(raw_word)))

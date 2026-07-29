@@ -85,6 +85,37 @@ end
     @test result.objective_residual <= 1.0e-8
 end
 
+@testset "operational finite-Abelian PSD cone reduction" begin
+    for problem in (chsh_z2(order=1), pauli_z2xz2(order=2),
+                    equality_localizer_benchmark(symmetry=true))
+        dense = solve_moment_sdp(problem; formulation=:dense)
+        reduced = solve_moment_sdp(problem; formulation=:symmetry)
+        @test dense.objective ≈ reduced.objective atol=1.0e-7
+        @test reduced.formulation == :symmetry
+        @test sum(reduced.moment_cone_sizes) == length(reduced.basis)
+        @test maximum(reduced.moment_cone_sizes) < only(dense.moment_cone_sizes)
+        @test reduced.coordinate_count <= dense.coordinate_count
+        @test reduced.block_cubic_proxy > 1.0
+        @test reduced.minimum_eigenvalue >= -1.0e-7
+        @test reduced.equality_residual <= 1.0e-8
+        @test reduced.localizer_residual <= 1.0e-8
+        @test reduced.objective_residual <= 1.0e-7
+    end
+
+    constrained = solve_moment_sdp(equality_localizer_benchmark(symmetry=true);
+                                   formulation=:symmetry)
+    @test length(constrained.localizer_cone_sizes) == 1
+    @test length(only(constrained.localizer_cone_sizes)) > 1
+    @test sum(only(constrained.localizer_cone_sizes)) == 3
+
+    backend = LegacyInvolutionBackend([:A, :B])
+    noninvariant = NCProblem("non-invariant objective", backend;
+        objective=polynomial(backend, Dict((:A,) => 1.0)),
+        generator_characters=[0x1, 0x0], group_rank=1, order=1)
+    @test_throws ArgumentError compile_symmetry(noninvariant)
+    @test_throws ArgumentError compile_symmetry(complex_pauli_benchmark())
+end
+
 @testset "legacy benchmark compatibility" begin
     chsh = solve_moment_sdp(chsh_z2(order=1))
     pauli = solve_moment_sdp(pauli_z2xz2(order=2))

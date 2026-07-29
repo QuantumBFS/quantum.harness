@@ -31,11 +31,20 @@ function complex_pauli_benchmark(; order::Integer=1)
                      objective=objective, order=order, sense=:Max)
 end
 
-function equality_localizer_benchmark(; order::Integer=2)
+function equality_localizer_benchmark(; order::Integer=2, symmetry::Bool=false)
     backend = LegacyInvolutionBackend([:A, :B]; commuting_pairs=[(:A, :B)])
     objective = polynomial(backend, Dict((:B,) => 1.0))
     equality = polynomial(backend, Dict((:A,) => 1.0, (:B,) => -1.0))
     inequality = polynomial(backend, Dict(() => 1.0, (:A,) => 1.0))
+    if symmetry
+        invariant_objective = polynomial(backend, Dict((:A, :B) => 1.0))
+        invariant_equality = polynomial(backend, Dict((:A, :B) => 1.0, () => -1.0))
+        invariant_inequality = polynomial(backend, Dict(() => 1.0, (:A, :B) => 1.0))
+        return NCProblem("equality and localizer / Z2", backend; objective=invariant_objective,
+                         equalities=[invariant_equality], inequalities=[invariant_inequality],
+                         generator_characters=[0x1, 0x1], group_rank=1,
+                         order=order, sense=:Max)
+    end
     return NCProblem("equality and localizer", backend; objective=objective,
                      equalities=[equality], inequalities=[inequality],
                      order=order, sense=:Max)

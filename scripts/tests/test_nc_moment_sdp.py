@@ -10,7 +10,7 @@ MOMENT_SDP = ROOT / "research" / "nc_moment_sdp"
 
 def run_julia(script, *arguments, timeout=120):
     return subprocess.run(
-        ["julia", f"--project={JULIA_PROJECT}", str(script), *map(str, arguments)],
+        ["julia", "--startup-file=no", f"--project={JULIA_PROJECT}", str(script), *map(str, arguments)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -31,19 +31,29 @@ def test_reproducible_runner_reports_complex_and_constrained_evidence(tmp_path):
     report = json.loads(report_path.read_text())
     assert report["solver"] == "Mosek via JuMP/MosekTools"
     assert "strict realification" in report["formulation"]
-    assert len(report["instances"]) == 2
-    instances = {instance["name"]: instance for instance in report["instances"]}
+    assert len(report["instances"]) == 8
+    instances = {(instance["name"], instance["formulation"]): instance
+                 for instance in report["instances"]}
 
-    complex_pauli = instances["complex Pauli imaginary moment"]
+    complex_pauli = instances[("complex Pauli imaginary moment", "dense")]
     assert abs(complex_pauli["objective"] - 1.0) <= 1e-8
     assert abs(complex_pauli["complex_probe"]["real"]) <= 1e-8
     assert abs(complex_pauli["complex_probe"]["imaginary"] - 1.0) <= 1e-8
     assert complex_pauli["real_coordinate_count"] == 4
 
-    constrained = instances["equality and localizer"]
+    constrained = instances[("equality and localizer", "dense")]
     assert abs(constrained["objective"] - 1.0) <= 1e-8
     assert len(constrained["minimum_localizer_eigenvalues"]) == 1
     assert constrained["minimum_localizer_eigenvalues"][0] >= -1e-8
+
+    for name in ("CHSH / Z2", "two-site Pauli / Z2xZ2", "equality and localizer / Z2"):
+        dense = instances[(name, "dense")]
+        reduced = instances[(name, "symmetry")]
+        assert abs(dense["objective"] - reduced["objective"]) <= 1e-7
+        assert max(reduced["moment_cone_sizes"]) < dense["moment_cone_sizes"][0]
+        assert reduced["real_coordinate_count"] <= dense["real_coordinate_count"]
+        assert reduced["block_cubic_proxy"] > 1.0
+    assert len(instances[("equality and localizer / Z2", "symmetry")]["localizer_cone_sizes"][0]) > 1
 
     for instance in instances.values():
         assert instance["minimum_moment_matrix_eigenvalue"] >= -1e-8

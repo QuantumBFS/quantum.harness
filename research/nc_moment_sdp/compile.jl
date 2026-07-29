@@ -22,6 +22,32 @@ struct CompiledDenseIR{P<:NCProblem}
     objective::AffineForm
 end
 
+struct SymmetryBlockIR
+    character::UInt64
+    basis_indices::Tuple{Vararg{Int}}
+    pencil::Tuple
+end
+
+struct SymmetryLocalizingIR
+    polynomial_index::Int
+    basis::Tuple{Vararg{NCWord}}
+    pencil::Tuple
+    blocks::Tuple{Vararg{SymmetryBlockIR}}
+end
+
+struct CompiledSymmetryIR{P<:NCProblem}
+    problem::P
+    basis::Tuple{Vararg{NCWord}}
+    coordinate_count::Int
+    moment_words::Tuple{Vararg{NCWord}}
+    moment_forms::Tuple{Vararg{AffineForm}}
+    moment_matrix::Tuple
+    moment_blocks::Tuple{Vararg{SymmetryBlockIR}}
+    equalities::Tuple{Vararg{AffineForm}}
+    localizers::Tuple{Vararg{SymmetryLocalizingIR}}
+    objective::AffineForm
+end
+
 function _word_linear(backend, left::NCWord, poly::NCPolynomial, right::NCWord)
     output = Dict{NCWord,ComplexF64}()
     left_star = star_word(backend, left)
@@ -89,6 +115,47 @@ function _convert_word_linear(linear, forms)
     return AffineForm(ComplexF64(constant), terms)
 end
 
+function _character_sectors(basis, characters)
+    sectors = Dict{UInt64,Vector{Int}}()
+    for (index, word) in enumerate(basis)
+        character = word_character(word, characters)
+        push!(get!(sectors, character, Int[]), index)
+    end
+    return sectors
+end
+
+function _validate_invariant_polynomial(problem, polynomial, label)
+    for word in keys(polynomial.terms)
+        word_character(word, problem.generator_characters) == 0 ||
+            throw(ArgumentError("$label contains a non-invariant monomial"))
+    end
+end
+
+function _validate_symmetry_problem(problem, basis)
+    problem.group_rank > 0 || throw(ArgumentError("symmetry formulation requires a nontrivial symmetry group"))
+    _validate_invariant_polynomial(problem, problem.objective, "objective")
+    for (index, equality) in enumerate(problem.equalities)
+        _validate_invariant_polynomial(problem, equality, "equality $index")
+    end
+    for (index, inequality) in enumerate(problem.inequalities)
+        _validate_invariant_polynomial(problem, inequality, "inequality $index")
+    end
+    characters = problem.generator_characters
+    for left in basis
+        left_character = word_character(left, characters)
+        adjoint = star_word(problem.backend, left)
+        word_character(adjoint.word, characters) == left_character ||
+            throw(ArgumentError("adjoint reduction does not preserve symmetry character"))
+        for right in basis
+            product = _multiply(problem.backend, left, right)
+            expected = left_character ⊻ word_character(right, characters)
+            word_character(product.word, characters) == expected ||
+                throw(ArgumentError("word reduction does not preserve symmetry character"))
+        end
+    end
+    return nothing
+end
+
 function compile_dense(problem::NCProblem)
     basis = enumerate_words(problem)
     backend = problem.backend
@@ -143,6 +210,101 @@ function compile_dense(problem::NCProblem)
     return ir
 end
 
+function compile_symmetry(problem::NCProblem)
+    basis = enumerate_words(problem)
+    backend = problem.backend
+    _validate_symmetry_problem(problem, basis)
+    sectors = _character_sectors(basis, problem.generator_characters)
+    ordered_characters = sort!(collect(keys(sectors)))
+    moment_linears = [_moment_entry(backend, left, right) for left in basis, right in basis]
+
+    equality_linears = Dict{NCWord,ComplexF64}[]
+    for equality in problem.equalities
+        degree = _polynomial_degree(equality)
+        for character in ordered_characters
+            indices = sectors[character]
+            for left_index in indices, right_index in indices
+                left, right = basis[left_index], basis[right_index]
+                length(left) + degree + length(right) <= 2problem.order || continue
+                push!(equality_linears, _word_linear(backend, left, equality, right))
+            end
+        end
+    end
+    push!(equality_linears, Dict(NCWord() => 1.0 + 0.0im))
+
+    localizer_data = Tuple[]
+    for (index, inequality) in enumerate(problem.inequalities)
+        radius = fld(2problem.order - _polynomial_degree(inequality), 2)
+        radius >= 0 || throw(ArgumentError("inequality has no degree-admissible localizer"))
+        local_basis = Tuple(enumerate_words(backend, radius))
+        local_sectors = _character_sectors(local_basis, problem.generator_characters)
+        full_linears = Matrix{Dict{NCWord,ComplexF64}}(undef, length(local_basis), length(local_basis))
+        for left_index in eachindex(local_basis), right_index in eachindex(local_basis)
+            if word_character(local_basis[left_index], problem.generator_characters) ==
+               word_character(local_basis[right_index], problem.generator_characters)
+                full_linears[left_index, right_index] =
+                    _word_linear(backend, local_basis[left_index], inequality, local_basis[right_index])
+            else
+                full_linears[left_index, right_index] = Dict{NCWord,ComplexF64}()
+            end
+        end
+        push!(localizer_data, (index, local_basis, local_sectors, full_linears))
+    end
+
+    objective_linear = Dict(problem.objective.terms)
+    all_linears = Any[equality_linears..., objective_linear]
+    for character in ordered_characters
+        indices = sectors[character]
+        for left_index in indices, right_index in indices
+            push!(all_linears, moment_linears[left_index, right_index])
+        end
+    end
+    for (_, _, local_sectors, full_linears) in localizer_data
+        for indices in values(local_sectors), left_index in indices, right_index in indices
+            push!(all_linears, full_linears[left_index, right_index])
+        end
+    end
+    requested = Set{NCWord}()
+    for linear in all_linears, word in keys(linear)
+        word_character(word, problem.generator_characters) == 0 ||
+            throw(ArgumentError("symmetry block generated a non-invariant moment"))
+        push!(requested, word)
+    end
+    moment_words, forms, coordinate_count = _coordinate_forms(backend, requested)
+    zero_form = AffineForm()
+
+    matrix = Tuple(Tuple(
+        word_character(basis[i], problem.generator_characters) ==
+        word_character(basis[j], problem.generator_characters) ?
+            _convert_word_linear(moment_linears[i, j], forms) : zero_form
+        for j in eachindex(basis)) for i in eachindex(basis))
+    moment_blocks = Tuple(SymmetryBlockIR(character, Tuple(indices),
+        Tuple(Tuple(matrix[i][j] for j in indices) for i in indices))
+        for character in ordered_characters for indices in (sectors[character],))
+
+    equalities = AffineForm[_convert_word_linear(linear, forms) for linear in equality_linears]
+    normalization = pop!(equalities)
+    push!(equalities, AffineForm(normalization.constant - (1.0 + 0.0im), normalization.terms))
+
+    localizers = SymmetryLocalizingIR[]
+    for (index, local_basis, local_sectors, full_linears) in localizer_data
+        pencil = Tuple(Tuple(_convert_word_linear(full_linears[i, j], forms)
+                             for j in eachindex(local_basis)) for i in eachindex(local_basis))
+        blocks = Tuple(SymmetryBlockIR(character, Tuple(indices),
+            Tuple(Tuple(pencil[i][j] for j in indices) for i in indices))
+            for character in sort!(collect(keys(local_sectors)))
+            for indices in (local_sectors[character],))
+        push!(localizers, SymmetryLocalizingIR(index, local_basis, pencil, blocks))
+    end
+    objective = _convert_word_linear(objective_linear, forms)
+
+    ir = CompiledSymmetryIR(problem, Tuple(basis), coordinate_count, Tuple(moment_words),
+                            Tuple(forms[word] for word in moment_words), matrix,
+                            moment_blocks, Tuple(equalities), Tuple(localizers), objective)
+    _validate_compiled(ir)
+    return ir
+end
+
 function _conjugate_form(form::AffineForm)
     return AffineForm(conj(form.constant), Tuple((i, conj(c)) for (i, c) in form.terms))
 end
@@ -168,10 +330,19 @@ function _validate_hermitian_pencil(pencil, label)
     end
 end
 
-function _validate_compiled(ir::CompiledDenseIR)
+function _validate_compiled(ir::Union{CompiledDenseIR,CompiledSymmetryIR})
     _validate_hermitian_pencil(ir.moment_matrix, "moment matrix")
     for localizer in ir.localizers
         _validate_hermitian_pencil(localizer.pencil, "localizer $(localizer.polynomial_index)")
+    end
+    if ir isa CompiledSymmetryIR
+        for block in ir.moment_blocks
+            _validate_hermitian_pencil(block.pencil, "moment block $(block.character)")
+        end
+        for localizer in ir.localizers, block in localizer.blocks
+            _validate_hermitian_pencil(block.pencil,
+                "localizer $(localizer.polynomial_index) block $(block.character)")
+        end
     end
     abs(imag(ir.objective.constant)) <= 1.0e-11 ||
         throw(ArgumentError("objective has a non-real constant in real coordinates"))
