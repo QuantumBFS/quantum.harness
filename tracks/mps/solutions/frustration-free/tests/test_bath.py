@@ -726,6 +726,43 @@ def test_existing_destination_success_cleans_backup_and_fsyncs_cleanup(
     assert destination.read_bytes() != b"original"
 
 
+def test_cleanup_fsync_failure_preserves_published_bath(tmp_path, monkeypatch):
+    destination = _existing_destination(tmp_path)
+    expected = bath.make_bath_artifact(
+        gamma=0.1,
+        bandwidth=1.0,
+        n_bath=4,
+        frequency_grid=[-1.0, 0.0, 1.0],
+    )
+    directory_fsync_calls = []
+
+    def fail_cleanup_fsync(directory):
+        directory_fsync_calls.append(Path(directory))
+        if len(directory_fsync_calls) == 2:
+            raise OSError("injected bath cleanup fsync failure")
+
+    monkeypatch.setattr(bath, "_fsync_directory", fail_cleanup_fsync)
+    with pytest.raises(OSError, match="injected bath cleanup fsync failure"):
+        bath.write_bath_json(
+            destination,
+            gamma=0.1,
+            bandwidth=1.0,
+            n_bath=4,
+            frequency_grid=[-1.0, 0.0, 1.0],
+        )
+
+    assert destination.read_bytes() == (
+        json.dumps(
+            expected, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode("utf-8")
+        + b"\n"
+    )
+    persisted = json.loads(destination.read_text(encoding="utf-8"))
+    assert bath.verify_bath_artifact(persisted) is None
+    assert directory_fsync_calls == [tmp_path, tmp_path]
+    assert list(tmp_path.iterdir()) == [destination]
+
+
 @pytest.mark.parametrize("destination_kind", ["directory", "symlink"])
 def test_write_rejects_unsupported_existing_destination_types(
     tmp_path, destination_kind
