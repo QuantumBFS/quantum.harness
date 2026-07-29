@@ -68,7 +68,9 @@ scripts/download_pilot.sh \
 ```
 
 The local destination's real non-symlink parent must already exist, and the
-destination must be absent, empty, or the same resumable download.
+destination must be absent, empty, or the same resumable download. Equivalent
+absolute lexical spellings (repeated separators, `.` components, or trailing
+slashes) share one normalized destination and sibling state; `/` is rejected.
 The script never deletes source or destination files. It atomically claims a
 sibling `<local-root>.download-claim` directory and stores no-clobber source,
 verified-completion, and uniquely created transfer-log files under the real
@@ -76,6 +78,11 @@ non-symlink sibling `<local-root>.download-state` directory. A completed root
 is only reverified: `rsync` is never invoked again. Unexpected claims are
 preserved for diagnosis, and all transfer-generated logs remain outside the
 immutable Pilot root.
+
+Legacy roots with the former sibling `.download-source` marker are verified
+before either normal source or completion state is published. Failed legacy
+verification writes only a read-only diagnostic under the external state
+directory; retries verify again without invoking `rsync`.
 
 ## Design and references
 

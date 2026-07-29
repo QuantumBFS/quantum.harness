@@ -24,6 +24,7 @@ def _prepare(
     *,
     remote_root: str = "/remote/pilot-p0",
     local_root: Path | None = None,
+    local_argument: str | None = None,
     extra_env: dict[str, str] | None = None,
 ) -> tuple[list[str], dict[str, str], Path, Path]:
     calls = tmp_path / "calls"
@@ -61,12 +62,13 @@ def _prepare(
         "PY\n",
     )
     local = local_root or tmp_path / "pilot-p0"
+    destination = local_argument or str(local)
     command = [
         "bash",
         str(SCRIPT),
         "cluster",
         remote_root,
-        str(local),
+        destination,
         str(python),
     ]
     environment = {
@@ -83,12 +85,14 @@ def _run(
     *,
     remote_root: str = "/remote/pilot-p0",
     local_root: Path | None = None,
+    local_argument: str | None = None,
     extra_env: dict[str, str] | None = None,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path]:
     command, environment, calls, local = _prepare(
         tmp_path,
         remote_root=remote_root,
         local_root=local_root,
+        local_argument=local_argument,
         extra_env=extra_env,
     )
     result = subprocess.run(
@@ -133,6 +137,52 @@ def test_requires_existing_parent_before_atomic_claim(tmp_path: Path):
     assert result.returncode == 73
     assert not local_root.parent.exists()
     assert not _rsync_calls(calls)
+
+
+def test_rejects_filesystem_root_destination(tmp_path: Path):
+    result, calls, _ = _run(
+        tmp_path,
+        local_root=Path("/"),
+        local_argument="/",
+    )
+    assert result.returncode == 64
+    assert not _rsync_calls(calls)
+
+
+@pytest.mark.parametrize("spelling", ("trailing", "repeated", "dot"))
+def test_normalizes_equivalent_destination_before_sibling_paths(
+    tmp_path: Path, spelling: str
+):
+    first, calls, local_root = _run(tmp_path)
+    assert first.returncode == 0, first.stderr
+    root_before = local_root.stat()
+    completion = _state(local_root) / "verified"
+    completion_before = completion.stat()
+    if spelling == "trailing":
+        local_argument = f"{local_root}/"
+    elif spelling == "repeated":
+        local_argument = f"{local_root.parent}//{local_root.name}"
+    else:
+        local_argument = f"{local_root.parent}/./{local_root.name}"
+
+    second, _, _ = _run(
+        tmp_path,
+        local_root=local_root,
+        local_argument=local_argument,
+    )
+
+    assert second.returncode == 0, second.stderr
+    assert len(_rsync_calls(calls)) == 1
+    assert len(_verify_calls(calls)) == 2
+    assert (local_root.stat().st_dev, local_root.stat().st_ino) == (
+        root_before.st_dev,
+        root_before.st_ino,
+    )
+    assert local_root.stat().st_mtime_ns == root_before.st_mtime_ns
+    assert completion.stat().st_ino == completion_before.st_ino
+    assert completion.stat().st_mtime_ns == completion_before.st_mtime_ns
+    assert not (local_root / ".download-state").exists()
+    assert not (local_root / ".download-claim").exists()
 
 
 def test_transfers_with_checksum_and_partial_safe_archive_flags_then_verifies(
@@ -355,6 +405,60 @@ def test_bootstraps_verified_existing_legacy_root_without_transfer(tmp_path: Pat
     assert not _rsync_calls(calls)
     assert len(_verify_calls(calls)) == 1
     assert (_state(local_root) / "verified").is_file()
+
+
+def test_failed_legacy_verification_retries_verification_without_transfer(
+    tmp_path: Path,
+):
+    local_root = tmp_path / "pilot-p0"
+    local_root.mkdir()
+    run_spec = local_root / "run_spec.json"
+    run_spec.write_text("{}\n", encoding="utf-8")
+    legacy_source = Path(f"{local_root}.download-source")
+    legacy_source.write_text(
+        "cluster:/remote/pilot-p0\n", encoding="utf-8"
+    )
+    root_before = local_root.stat()
+    spec_before = run_spec.stat()
+
+    first, calls, _ = _run(
+        tmp_path,
+        local_root=local_root,
+        extra_env={"VERIFY_EXIT": "1"},
+    )
+
+    assert first.returncode == 74
+    assert not _rsync_calls(calls)
+    assert len(_verify_calls(calls)) == 1
+    assert not (_state(local_root) / "source").exists()
+    assert not (_state(local_root) / "verified").exists()
+    assert _state(local_root).is_dir()
+    diagnostics = _state(local_root) / "diagnostics"
+    diagnostic_files = list(diagnostics.glob("legacy-verification-failed-*"))
+    assert len(diagnostic_files) == 1
+    assert diagnostic_files[0].read_text(encoding="utf-8") == (
+        "cluster:/remote/pilot-p0\nsemantic verification failed\n"
+    )
+    assert diagnostic_files[0].stat().st_mode & 0o777 == 0o444
+    assert diagnostics.parent == Path(f"{local_root}.download-state")
+
+    second, _, _ = _run(tmp_path, local_root=local_root)
+
+    assert second.returncode == 0, second.stderr
+    assert not _rsync_calls(calls)
+    assert len(_verify_calls(calls)) == 2
+    assert (_state(local_root) / "source").is_file()
+    assert (_state(local_root) / "verified").is_file()
+    assert (local_root.stat().st_dev, local_root.stat().st_ino) == (
+        root_before.st_dev,
+        root_before.st_ino,
+    )
+    assert local_root.stat().st_mtime_ns == root_before.st_mtime_ns
+    assert (run_spec.stat().st_dev, run_spec.stat().st_ino) == (
+        spec_before.st_dev,
+        spec_before.st_ino,
+    )
+    assert run_spec.stat().st_mtime_ns == spec_before.st_mtime_ns
 
 
 def test_keeps_claim_state_and_transfer_logs_outside_downloaded_root(

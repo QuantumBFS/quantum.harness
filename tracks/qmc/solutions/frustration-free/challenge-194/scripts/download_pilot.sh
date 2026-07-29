@@ -24,6 +24,12 @@ fi
 if [[ "${LOCAL_ROOT}" != /* ]]; then
     usage_error "local root must be an absolute path"
 fi
+if ! LOCAL_ROOT="$(realpath -m -s -- "${LOCAL_ROOT}")"; then
+    usage_error "local root must have a valid absolute lexical form"
+fi
+if [[ "${LOCAL_ROOT}" == "/" ]]; then
+    usage_error "local root must not be the filesystem root"
+fi
 if [[ "${PYTHON}" != /* || ! -f "${PYTHON}" || ! -x "${PYTHON}" ]]; then
     echo "python must be an absolute path to a regular executable" >&2
     exit 66
@@ -142,7 +148,6 @@ elif (( ${#EXISTING_ENTRIES[@]} != 0 )); then
        [[ "$(<"${LEGACY_SOURCE}")" != "${SOURCE_ID}" ]]; then
         fail_closed 73 "refusing an unmarked nonempty local root"
     fi
-    publish_file "${SOURCE_FILE}" "${SOURCE_ID}"$'\n'
     BOOTSTRAP_EXISTING=1
 else
     publish_file "${SOURCE_FILE}" "${SOURCE_ID}"$'\n'
@@ -167,6 +172,25 @@ verify_local_root() {
     printf '%s\n' "${output}"
 }
 
+record_legacy_verification_failure() {
+    local diagnostic_root="${STATE_ROOT}/diagnostics"
+    local diagnostic_file=""
+    if [[ -L "${diagnostic_root}" || \
+          ( -e "${diagnostic_root}" && ! -d "${diagnostic_root}" ) ]]; then
+        fail_closed 73 "diagnostic state root must be a real directory"
+    fi
+    if [[ ! -e "${diagnostic_root}" ]] && ! mkdir -- "${diagnostic_root}"; then
+        fail_closed 73 "could not exclusively create diagnostic state root"
+    fi
+    if [[ -L "${diagnostic_root}" || ! -d "${diagnostic_root}" ]]; then
+        fail_closed 73 "diagnostic state root must be a real directory"
+    fi
+    diagnostic_file="${diagnostic_root}/legacy-verification-failed-$$-${RANDOM}"
+    publish_file \
+        "${diagnostic_file}" \
+        "${SOURCE_ID}"$'\nsemantic verification failed\n'
+}
+
 if [[ -e "${COMPLETION_FILE}" ]]; then
     EXPECTED_COMPLETION="${SOURCE_ID}"$'\n'"${EXPECTED_VERIFICATION}"
     if [[ "$(<"${COMPLETION_FILE}")" != "${EXPECTED_COMPLETION}" ]]; then
@@ -181,8 +205,10 @@ fi
 
 if (( BOOTSTRAP_EXISTING == 1 )); then
     if ! verify_local_root; then
+        record_legacy_verification_failure
         fail_closed 74 "legacy Pilot root failed semantic verification"
     fi
+    publish_file "${SOURCE_FILE}" "${SOURCE_ID}"$'\n'
     publish_file \
         "${COMPLETION_FILE}" \
         "${SOURCE_ID}"$'\n'"${EXPECTED_VERIFICATION}"$'\n'
