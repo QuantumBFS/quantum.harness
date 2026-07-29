@@ -813,11 +813,22 @@ def _validate_spec_plan_binding(
     plan_hash = plan["plan_hash"]
     if plan_hash != plan.get("plan_hash") or plan_hash != spec.get("plan_hash"):
         raise RuntimeError("protocol plan hash mismatch")
+    expected_protocol = {
+        "run_id": (
+            plan.get("smoke_run_id") if spec.get("shard") == "smoke"
+            else plan.get("run_id")
+        ),
+        "protocol_hash": (
+            plan.get("smoke_protocol_hash") if spec.get("shard") == "smoke"
+            else plan.get("protocol_hash")
+        ),
+    }
     for field in (
         "run_id", "source_commit", "protocol_hash", "depths", "survivor_status",
         "parent_run_id", "parent_plan_hash", "parent_protocol_hash",
     ):
-        if plan.get(field) != spec.get(field):
+        expected = expected_protocol.get(field, plan.get(field))
+        if expected != spec.get(field):
             raise RuntimeError("protocol configuration does not match plan")
     planned = {
         entry.get("candidate_id"): entry
