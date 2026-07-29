@@ -59,3 +59,12 @@ smallest appropriate typed record and pin the cited Git and run artifacts.
 - scheduler stdout/stderr;
 - any failed environment attempt, preserved separately from physics evidence.
 
+## Environment attempts
+
+- A pre-submit request for 4 CPU and 16 GiB was rejected because it exceeded
+  the partition's memory-per-CPU policy. No Slurm job was created; the ratified
+  Phase 1 request is 4 CPU and 12 GiB.
+- Slurm job `23000293` ran for two seconds on `e08r01` and failed before any
+  dependency or project execution. Slurm spooled the batch script, so deriving
+  the repository from `BASH_SOURCE[0]` produced `fatal: Not a git repository`.
+  The entrypoint now requires an explicit absolute `ROUTE_D_PLUS_REPO_ROOT`.

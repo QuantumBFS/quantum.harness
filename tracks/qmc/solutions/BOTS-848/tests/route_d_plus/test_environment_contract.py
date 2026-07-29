@@ -51,6 +51,7 @@ def test_manifest_schema_requires_reproducibility_and_device_evidence() -> None:
 
 def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> None:
     bootstrap = (ENVIRONMENT_ROOT / "bootstrap.sh").read_text(encoding="utf-8")
+    batch = (ENVIRONMENT_ROOT / "phase1.sbatch").read_text(encoding="utf-8")
     capture = (ENVIRONMENT_ROOT / "capture_manifest.py").read_text(
         encoding="utf-8"
     )
@@ -64,5 +65,7 @@ def test_bootstrap_requires_explicit_jax_profile_and_ignored_run_directory() -> 
     assert "jax[cuda12]" in bootstrap
     assert "jax[cuda13]" in bootstrap
     assert "--require-platform" in bootstrap
+    assert "ROUTE_D_PLUS_REPO_ROOT:?" in batch
+    assert "BASH_SOURCE[0]" not in batch
     assert "jsonschema" in requirements
     assert "validate_manifest(manifest)" in capture
