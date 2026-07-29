@@ -220,6 +220,9 @@ function mosek_ray_replay_report(
             "passed" => passed,
             "constraint_count" => numcon,
             "scalar_variable_count" => numvar,
+            "affine_conic_constraint_count" =>
+                Int(Mosek.getnumacc(task)),
+            "affine_conic_dual_count" => length(ray.doty),
             "semidefinite_variable_count" => numbarvar,
             "cone_count" => numcone,
         )

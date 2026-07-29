@@ -180,7 +180,10 @@ JuMP.optimize!(infeasible_sdp_model)
         )
         println("synthetic SDP infeasibility replay audit: ", sdp_replay["audit"])
         flush(stdout)
-        @test sdp_replay["audit"]["semidefinite_variable_count"] > 0
+        # MosekTools represents this affine PSD constraint as an affine
+        # conic constraint, so its matrix ray is carried by `doty`.
+        @test sdp_replay["audit"]["affine_conic_constraint_count"] > 0
+        @test sdp_replay["audit"]["affine_conic_dual_count"] > 0
         @test sdp_replay["audit"]["status_passed"]
         @test sdp_replay["audit"]["residual_passed"]
         @test sdp_replay["audit"]["separation_passed"]
