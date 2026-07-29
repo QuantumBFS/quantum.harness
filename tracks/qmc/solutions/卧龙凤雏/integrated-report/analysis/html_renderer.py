@@ -97,7 +97,7 @@ def render_html(
   <main>{''.join(sections)}</main>
 </div>
 <footer>
-  <span>{html.escape(locale.labels["header_team"])}</span>
+  <span>{html.escape(locale.labels["footer_team"])}</span>
   <span>{html.escape(locale.labels["footer_date"])}</span>
 </footer>
 </body>

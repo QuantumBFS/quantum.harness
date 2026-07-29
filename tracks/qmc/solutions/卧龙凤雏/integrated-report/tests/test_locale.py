@@ -33,6 +33,7 @@ def test_locales_define_all_renderer_labels():
         "clean_result",
         "nishimori_result",
         "weak_result",
+        "footer_team",
         "footer_date",
         "header_title",
         "header_team",

@@ -1,7 +1,7 @@
 # Integrated three-model central-charge report
 
-This package builds one detailed English report for university students from
-three already completed Challenge #122 studies:
+This package builds detailed English and Simplified Chinese reports for
+university students from three already completed Challenge #122 studies:
 
 - clean Ising: `tracks/qmc/results/clean-ising-20260729-120302`;
 - ordinary quenched Nishimori Ising:
@@ -19,24 +19,45 @@ figures; and renders the same report model to HTML and PDF.
 make setup
 make test
 make build
+make build-en
+make build-zh
+make build-all
 ```
 
 The stable outputs are:
 
 - `output/html/three-model-central-charge-report.html`;
-- `output/pdf/three-model-central-charge-report.pdf`.
+- `output/pdf/three-model-central-charge-report.pdf`;
+- `output/html/three-model-central-charge-report-zh.html`;
+- `output/pdf/three-model-central-charge-report-zh.pdf`.
+
+`make build` remains an alias for the English build. `build-en` and `build-zh`
+publish one locale, while `build-all` rebuilds both editions from the same
+frozen source state. A Chinese-only build cannot replace either English
+artifact.
 
 The HTML is self-contained: all charts are embedded as base64 image data and no
 network stylesheet, font, script, or image is required. The PDF uses an A4
 publication layout and is verified for a 25-35 page range, required sections,
-headline values, and embedded images.
+headline values, and embedded images. The Chinese PDF allows 25-45 pages for
+natural CJK reflow and fails explicitly if no supported CJK font can be found.
+
+All 21 reader-facing figures in the Chinese edition are regenerated with
+Simplified Chinese titles, axes, legends, and annotations from the same frozen
+CSV/JSON values. Rust and Python code listings remain unchanged so they can be
+matched directly to executable source.
 
 ## Architecture
 
 - `analysis/sources.py` adapts and validates the three different result schemas.
 - `analysis/report_model.py` contains the common scientific narrative and
   format-independent block model.
+- `analysis/report_model_zh.py` contains the contextual Simplified Chinese
+  narrative while reusing the same block types and model results.
+- `analysis/locale.py` contains fixed renderer labels and output metadata.
 - `analysis/comparison_plots.py` generates the four synthesis charts.
+- `analysis/source_plots_zh.py` reconstructs the 17 model-specific plots with
+  Chinese labels without running Monte Carlo.
 - `analysis/html_renderer.py` creates the offline responsive HTML.
 - `analysis/pdf_renderer.py` creates the A4 PDF with ReportLab.
 - `analysis/verify_outputs.py` checks both final artifacts.
@@ -57,6 +78,10 @@ Born/higher-replica value near 0.522. The weak self-dual chapter documents
 state-conditioned Born sampling and the Rao-Blackwellized conditional-entropy
 estimator.
 
+The current Nishimori evidence uses only
+`L = 4, 6, 8, 10, 12, 14`. Proposed larger-width simulations are not part of
+this frozen report and are not implied by either language edition.
+
 ## Testing
 
 The tests cover:
@@ -68,6 +93,9 @@ The tests cover:
 - embedded offline HTML;
 - PDF page count, text extraction, A4 media boxes, and image coverage;
 - stable end-to-end output paths.
+- bilingual locale labels, CJK extraction, and output coexistence;
+- deterministic generation of all 21 Chinese figures;
+- isolation of English artifacts during a Chinese-only build.
 
 Generated comparison figures live under the ignored local `generated/`
 directory. `make clean-generated` removes only those figures and temporary PDF

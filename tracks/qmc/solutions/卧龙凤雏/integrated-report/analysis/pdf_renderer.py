@@ -70,7 +70,7 @@ def render_pdf(
     output = Path(destination)
     output.parent.mkdir(parents=True, exist_ok=True)
     fonts = _register_fonts(locale)
-    styles = _styles(fonts)
+    styles = _styles(fonts, locale)
     frame = Frame(LEFT, BOTTOM, FRAME_WIDTH, FRAME_HEIGHT, id="body")
     document = BaseDocTemplate(
         str(output),
@@ -163,8 +163,13 @@ def _register_fonts(locale: ReportLocale = EN_LOCALE) -> Dict[str, str]:
     raise RuntimeError("no usable CJK font found for Chinese PDF rendering")
 
 
-def _styles(fonts: Dict[str, str]) -> Dict[str, ParagraphStyle]:
+def _styles(
+    fonts: Dict[str, str],
+    locale: ReportLocale = EN_LOCALE,
+) -> Dict[str, ParagraphStyle]:
     base = getSampleStyleSheet()
+    body_size = 8.7 if locale.code == "zh" else 8.35
+    body_leading = 11.7 if locale.code == "zh" else 11.15
     return {
         "title": ParagraphStyle(
             "Title",
@@ -228,8 +233,8 @@ def _styles(fonts: Dict[str, str]) -> Dict[str, ParagraphStyle]:
         "body": ParagraphStyle(
             "Body",
             fontName=fonts["body"],
-            fontSize=8.35,
-            leading=11.15,
+            fontSize=body_size,
+            leading=body_leading,
             textColor=INK,
             alignment=TA_LEFT,
             spaceAfter=6.5,
@@ -320,10 +325,13 @@ def _title_page(
     styles: Dict[str, ParagraphStyle],
     locale: ReportLocale,
 ) -> List[object]:
+    kicker = "QUANTUM HARNESS · CHALLENGE 122"
+    if locale.code == "zh":
+        kicker += f" · {_escape(locale.labels['technical_report'])}"
     title_content = [
         Spacer(1, 9 * mm),
         PdfParagraph(
-            f"QUANTUM HARNESS · CHALLENGE 122 · {_escape(locale.labels['technical_report'])}",
+            kicker,
             ParagraphStyle(
             "HeroKicker", parent=styles["section_kicker"], textColor=colors.HexColor("#9CE0D5")
             ),
