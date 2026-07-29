@@ -479,8 +479,18 @@ class AutoregressiveNQS:
             )
             if not np.isfinite(log_probabilities[selected]):
                 raise ValueError("state is not in the fixed-N fixed-M2 sector")
-            log_amplitude += 0.5 * float(log_probabilities[selected])
-            phase += float(phases[selected])
+            with np.errstate(over="ignore", invalid="ignore"):
+                log_amplitude += 0.5 * float(log_probabilities[selected])
+            if not np.isfinite(log_amplitude):
+                raise FloatingPointError(
+                    "non-finite cumulative autoregressive log-amplitude"
+                )
+            with np.errstate(over="ignore", invalid="ignore"):
+                phase += float(phases[selected])
+            if not np.isfinite(phase):
+                raise FloatingPointError(
+                    "non-finite cumulative autoregressive phase"
+                )
             if keep_cache:
                 inputs, hidden1, hidden2, probabilities = cache
                 caches.append(
@@ -511,47 +521,54 @@ class AutoregressiveNQS:
         }
         amplitude_W = self._parameter(f"{selected_sector}.amplitude_W")
         phase_W = self._parameter(f"{selected_sector}.phase_W")
-        for selected, inputs, hidden1, hidden2, probabilities in caches:
-            logit_gradient = -0.5 * probabilities.astype(np.complex128)
-            logit_gradient[selected] += 0.5
-            phase_gradient = np.zeros(2, dtype=np.complex128)
-            phase_gradient[selected] = 1.0j
+        with np.errstate(over="ignore", invalid="ignore"):
+            for selected, inputs, hidden1, hidden2, probabilities in caches:
+                logit_gradient = -0.5 * probabilities.astype(np.complex128)
+                logit_gradient[selected] += 0.5
+                phase_gradient = np.zeros(2, dtype=np.complex128)
+                phase_gradient[selected] = 1.0j
 
-            gradients[f"{selected_sector}.amplitude_W"] += np.outer(
-                logit_gradient,
-                hidden2,
-            )
-            gradients[f"{selected_sector}.amplitude_b"] += logit_gradient
-            gradients[f"{selected_sector}.phase_W"] += np.outer(
-                phase_gradient,
-                hidden2,
-            )
-            gradients[f"{selected_sector}.phase_b"] += phase_gradient
+                gradients[f"{selected_sector}.amplitude_W"] += np.outer(
+                    logit_gradient,
+                    hidden2,
+                )
+                gradients[f"{selected_sector}.amplitude_b"] += logit_gradient
+                gradients[f"{selected_sector}.phase_W"] += np.outer(
+                    phase_gradient,
+                    hidden2,
+                )
+                gradients[f"{selected_sector}.phase_b"] += phase_gradient
 
-            hidden2_gradient = (
-                amplitude_W.T @ logit_gradient
-                + phase_W.T @ phase_gradient
-            )
-            preactivation2_gradient = hidden2_gradient * (1.0 - hidden2**2)
-            gradients["trunk.W2"] += np.outer(
-                preactivation2_gradient,
-                hidden1,
-            )
-            gradients["trunk.b2"] += preactivation2_gradient
+                hidden2_gradient = (
+                    amplitude_W.T @ logit_gradient
+                    + phase_W.T @ phase_gradient
+                )
+                preactivation2_gradient = hidden2_gradient * (1.0 - hidden2**2)
+                gradients["trunk.W2"] += np.outer(
+                    preactivation2_gradient,
+                    hidden1,
+                )
+                gradients["trunk.b2"] += preactivation2_gradient
 
-            hidden1_gradient = (
-                self._parameters["trunk.W2"].T @ preactivation2_gradient
-            )
-            preactivation1_gradient = hidden1_gradient * (1.0 - hidden1**2)
-            gradients["trunk.W1"] += np.outer(
-                preactivation1_gradient,
-                inputs,
-            )
-            gradients["trunk.b1"] += preactivation1_gradient
+                hidden1_gradient = (
+                    self._parameters["trunk.W2"].T @ preactivation2_gradient
+                )
+                preactivation1_gradient = hidden1_gradient * (1.0 - hidden1**2)
+                gradients["trunk.W1"] += np.outer(
+                    preactivation1_gradient,
+                    inputs,
+                )
+                gradients["trunk.b1"] += preactivation1_gradient
 
-        return np.concatenate(
+        flattened = np.concatenate(
             [gradients[name].reshape(-1) for name in self._parameter_names]
         )
+        if (
+            not np.all(np.isfinite(flattened.real))
+            or not np.all(np.isfinite(flattened.imag))
+        ):
+            raise FloatingPointError("non-finite autoregressive log-derivative")
+        return flattened
 
     def sample(self, size: int, sector: str, *, seed: int) -> np.ndarray:
         """Sample sequentially from masked conditionals without support expansion."""

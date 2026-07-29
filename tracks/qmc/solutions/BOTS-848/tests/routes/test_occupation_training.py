@@ -221,6 +221,40 @@ def test_finite_extreme_logits_are_rejected_without_normalization_warnings(
                 model.sample(size=8, sector="ground", seed=848)
 
 
+def test_cumulative_phase_overflow_is_rejected_without_runtime_warnings() -> None:
+    model = _tiny_model()
+    parameters = np.zeros(model.parameter_count, dtype=np.float64)
+    parameters[model.parameter_slices["ground.phase_b"]] = (
+        np.finfo(np.float64).max / 2.0,
+        np.finfo(np.float64).max / 2.0,
+    )
+    model.set_flat_parameters(parameters)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with pytest.raises(FloatingPointError, match="non-finite.*cumulative"):
+            model.logpsi((1 << 0) | (1 << 5), "ground")
+
+
+def test_reverse_derivative_overflow_is_rejected_without_runtime_warnings() -> None:
+    model = _tiny_model()
+    parameters = np.zeros(model.parameter_count, dtype=np.float64)
+    parameters[model.parameter_slices["ground.phase_W"]] = (
+        np.finfo(np.float64).max / 2.0
+    )
+    model.set_flat_parameters(parameters)
+    state = (1 << 0) | (1 << 5)
+
+    forward = model.logpsi(state, "ground")
+    assert np.isfinite(forward.real)
+    assert np.isfinite(forward.imag)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with pytest.raises(FloatingPointError, match="non-finite.*log-derivative"):
+            model.log_derivative(state, "ground")
+
+
 def _central_difference_all_parameters(
     model: AutoregressiveNQS,
     state: int,
