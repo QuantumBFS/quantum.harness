@@ -1,4 +1,37 @@
-# ROUTE_A_ACTIVE — the agent executes from THIS file alone
+# ROUTE_A — CLOSED (arbiter ruling, Wed ~15:25)
+
+**Program status: CLOSED.** A2 arbitration, A3 confirm, A4 assault:
+CANCELLED as a program. No axis-rerouting ruling. e49p0v2 runs out and its
+row joins the reach table; no further screen cells.
+
+## Findings of record (consistency-only language)
+
+1. **H_reach confirmed on the rdm=10 axis**: gap 2.364e-5 at r=5 →
+   9.93e-6 at r=9 (v100e8hi2, N=100). The pre-registered prediction
+   ("e8 improves but does not reach 8.3e-6") held: residual 1.6e-6.
+   These results are CONSISTENT WITH Table 3 using an N-dependent reach
+   r ≈ N/2; the fixed-r=5 large-N deficit is explained by basis
+   undercoverage. (Never: "identified the paper's configuration".)
+2. **Memory laws** (N=100 measured): pso is the ~110 GB floor at r=5 and
+   scales MULTIPLICATIVELY with reach (r=50+pso3 > 246 GB); the r=50
+   Gram basis alone (+lso) exceeds 230 GB on any pso axis; rdm 10↔8 is
+   marginal (~113 vs >110 GB). The paper's 1-TB hardware is thereby
+   rationalized.
+3. **pso accuracy marginal**: huge at rdm=8, r=5 (Δ(pso)=1.55e-4);
+   marginal at rdm=10 (Remark 6.1's own usage pattern is consistent).
+4. A0 semantics: m-plateau at r=⌈N/2⌉; r>⌈N/2⌉ is a loud INFEASIBILITY
+   (separation-N wrap words), not a silent no-op.
+
+## Surviving conditional cell (OUTSIDE Route A — Wednesday decision-rule
+lever branch): T1L = N=200, rdm=10, pso=0, extra=23, CONFIG A otherwise.
+Auto-submit IFF the v200hi verdict = measured miss (gap > 1e-5):
+construction-only probe first, standard budgets, ONE row, no follow-ups.
+(v200hi death-without-row = resource-frontier branch → report, no
+auto-submit.)
+
+Everything below is the archived active text at closure time.
+---
+# [ARCHIVED] ROUTE_A_ACTIVE — the agent executes from THIS file alone
 (Amendment 2, adaptive form, Wed ~13:45. Rules by reference: ε_cmp, sign
 rules, terminology, claim language = LAW.md. Family birth deadline 22:00.)
 
