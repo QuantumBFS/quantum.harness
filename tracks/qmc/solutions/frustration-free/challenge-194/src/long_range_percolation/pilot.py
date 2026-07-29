@@ -49,9 +49,9 @@ TEST_RUN_SPEC_SCHEMA = "challenge-194-pilot-test-run-spec-v1"
 CELL_MANIFEST_SCHEMA = "challenge-194-pilot-cell-manifest-v1"
 MERGED_SCHEMA = "challenge-194-pilot-progress-v1"
 APPROVAL_SCHEMA = "challenge-194-pilot-correctness-approval-v1"
-CORRECTNESS_APPROVAL_REVISION = "fd0aa314f324dc357918926e80f93f4356083fc0"
+CORRECTNESS_APPROVAL_REVISION = "877ab9393f320bfe31ff74a26c3db1fb205d7ef3"
 APPROVAL_REGISTRY_SHA256 = (
-    "8ef77104299bdf8e0355cf23d3215f560e1773332a5face9c79ea7a261ac33e8"
+    "29dc5d04fd18728ee46fffe90c70d98caa61032005974f354e2b4e0e6018a7ab"
 )
 PILOT_SIGMAS = (0.8, 0.9, 1.0, 1.1)
 PILOT_LENGTHS = (2**10, 2**14, 2**18)
