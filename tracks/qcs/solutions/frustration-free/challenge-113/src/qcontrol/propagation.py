@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import math
-from numbers import Real
-
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -32,13 +29,19 @@ def _propagate_kernel(
     return unitary
 
 
-def _duration_value(duration: object) -> float:
-    if isinstance(duration, (bool, np.bool_)) or not isinstance(duration, Real):
+def _raise_for_invalid_eager_pulse(pulse: jax.Array) -> None:
+    if isinstance(pulse, jax.core.Tracer):
+        return
+    if not np.all(np.isfinite(np.asarray(pulse))):
+        raise ValueError("physical pulse must contain only finite values")
+
+
+def _raise_for_invalid_eager_duration(array: jax.Array) -> None:
+    if isinstance(array, jax.core.Tracer):
+        return
+    value = float(np.asarray(array))
+    if not np.isfinite(value) or value < 0.0:
         raise ValueError("duration must be a finite nonnegative number")
-    result = float(duration)
-    if not math.isfinite(result) or result < 0.0:
-        raise ValueError("duration must be a finite nonnegative number")
-    return result
 
 
 def propagate(
@@ -56,21 +59,33 @@ def propagate(
             "physical pulse must have shape (control_count, positive_segments)"
         )
     pulse = jnp.asarray(pulse, dtype=jnp.float64)
-    try:
-        concrete = np.asarray(pulse)
-    except jax.errors.TracerArrayConversionError:
-        pass
-    else:
-        if not np.all(np.isfinite(concrete)):
-            raise ValueError("physical pulse must contain only finite values")
+    _raise_for_invalid_eager_pulse(pulse)
+
+    duration_array = jnp.asarray(duration)
+    if duration_array.shape != () or jnp.iscomplexobj(duration_array):
+        raise ValueError("duration must be a real scalar")
+    if jnp.issubdtype(duration_array.dtype, jnp.bool_):
+        raise ValueError("duration must be a finite nonnegative number")
+    duration_array = jnp.asarray(duration_array, dtype=jnp.float64)
+    _raise_for_invalid_eager_duration(duration_array)
+
+    valid = (
+        jnp.all(jnp.isfinite(pulse))
+        & jnp.isfinite(duration_array)
+        & (duration_array >= 0.0)
+    )
+    safe_pulse = jnp.where(valid, pulse, jnp.zeros_like(pulse))
+    safe_duration = jnp.where(valid, duration_array, jnp.float64(0.0))
 
     drift = jnp.asarray(system.drift, dtype=jnp.complex128)
     controls = jnp.stack(
         tuple(jnp.asarray(control, dtype=jnp.complex128) for control in system.controls)
     )
-    return _propagate_kernel(
+    unitary = _propagate_kernel(
         drift,
         controls,
-        pulse,
-        jnp.asarray(_duration_value(duration), dtype=jnp.float64),
+        safe_pulse,
+        safe_duration,
     )
+    invalid = jnp.full_like(unitary, jnp.nan + 1.0j * jnp.nan)
+    return jnp.where(valid, unitary, invalid)

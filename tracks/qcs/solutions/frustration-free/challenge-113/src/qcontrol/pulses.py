@@ -29,16 +29,15 @@ def _positive_finite(name: str, value: object) -> float:
     return result
 
 
-def _validate_concrete_values(
+def _raise_for_invalid_eager_values(
     array: jax.Array,
     *,
     name: str,
     bound: jax.Array,
 ) -> None:
-    try:
-        concrete = np.asarray(array)
-    except jax.errors.TracerArrayConversionError:
+    if isinstance(array, jax.core.Tracer):
         return
+    concrete = np.asarray(array)
     if not np.all(np.isfinite(concrete)):
         raise ValueError(f"{name} pulse must contain only finite values")
     if np.any(np.abs(concrete) > np.asarray(bound)):
@@ -65,6 +64,8 @@ class PulseSpace:
             _positive_finite("amplitude scale", scale) for scale in raw_scales
         )
         bound = _positive_finite("bound", self.bound)
+        if bound != 1.0:
+            raise ValueError("normalized pulse bound must be exactly 1.0")
 
         object.__setattr__(self, "control_count", control_count)
         object.__setattr__(self, "segments", segments)
@@ -95,13 +96,16 @@ class PulseSpace:
                 f"normalized pulse must have shape ({self.parameter_count},)"
             )
         array = jnp.asarray(array, dtype=jnp.float64)
-        _validate_concrete_values(
+        normalized_bound = jnp.float64(1.0)
+        _raise_for_invalid_eager_values(
             array,
             name="normalized",
-            bound=jnp.asarray(self.bound, dtype=jnp.float64),
+            bound=normalized_bound,
         )
         scales = jnp.asarray(self.amplitude_scales, dtype=jnp.float64)[:, None]
-        return array.reshape(self.control_count, self.segments) * scales
+        valid = jnp.all(jnp.isfinite(array)) & jnp.all(jnp.abs(array) <= normalized_bound)
+        physical = array.reshape(self.control_count, self.segments) * scales
+        return jnp.where(valid, physical, jnp.full_like(physical, jnp.nan))
 
     def to_normalized(self, physical: object) -> jax.Array:
         array = jnp.asarray(physical)
@@ -112,6 +116,7 @@ class PulseSpace:
             raise ValueError(f"physical pulse must have shape {expected_shape}")
         array = jnp.asarray(array, dtype=jnp.float64)
         scales = jnp.asarray(self.amplitude_scales, dtype=jnp.float64)[:, None]
-        physical_bound = self.bound * scales
-        _validate_concrete_values(array, name="physical", bound=physical_bound)
-        return (array / scales).reshape(self.parameter_count)
+        _raise_for_invalid_eager_values(array, name="physical", bound=scales)
+        valid = jnp.all(jnp.isfinite(array)) & jnp.all(jnp.abs(array) <= scales)
+        normalized = (array / scales).reshape(self.parameter_count)
+        return jnp.where(valid, normalized, jnp.full_like(normalized, jnp.nan))
