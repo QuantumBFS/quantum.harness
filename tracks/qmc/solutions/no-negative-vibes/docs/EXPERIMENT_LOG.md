@@ -2085,3 +2085,49 @@ norm.  The next route is a common quadratic contraction metric on exterior
 grades 1, 2, and 3, normalized by the positive grade-four loop of weight 8.
 This targets exactly the desired mechanism: stable exterior sectors without
 a common base-space Wei metric.
+
+### Joint-alphabet boundary search and exterior-CQLF early stop
+
+Along the one-axis family with `q=r=1`, the full joint base-space SDP remains
+strict for moderate pairs such as `(p_low,p_high)=(0.5,2.0)` with margin
+about `0.0470` and `(0.4,2.5)` with margin about `0.0135`.  It collapses
+numerically to zero for `(0.4,3.0)`, `(0.3,2.5)`, and `(0.5,3.5)`.
+These pairs realize the desired incompatibility at the base-space level:
+each point separately has a strict metric, while the pair has no numerical
+strict common metric.
+
+A new common-quadratic exterior oracle tested grades 1, 2, and 3 after
+normalization by determinant growth 8.  It validates every SDP metric
+directly and reports the induced-norm condition number and trace prefactor.
+The extreme `(0.1,4.0)` pair fails quickly with effective one-letter
+gammas approximately `0.572`, `1.315`, and `2.629`.  More importantly,
+even the fixed baseline has grade-three one-step gamma about `1.329`.
+Therefore a one-letter common quadratic norm is too weak to recover the
+already proved fixed theorem and cannot be used as the final discriminator.
+
+For the zero-base-metric boundary pairs, the one-letter grade-three gammas
+remain above one: approximately `1.906` for `(0.3,2.5)`, `2.137` for
+`(0.4,3.0)`, and `2.379` for `(0.5,3.5)`.  This is a certificate failure,
+not evidence of negative weights.  The correct next refinement is a
+block-product quadratic metric with explicit residue bounds, analogous to
+the successful length-13 fixed-point proof.
+
+### Joint-word survivor tests and mandatory exact replay
+
+The pair `{p=0.3,p=2.5}` at `q=r=1`, including both transposes, survived
+all 349,524 words through depth 9 with minimum determinant `33.5`, and
+100,000 independent random words through depth 40 with the same minimum
+at a one-letter word.  This is four million random word-depth evaluations
+without a negative candidate, so the pair remains the leading boundary
+target while the block certificate is developed.
+
+The `{p=0.4,p=3.0}` random stress initially returned a floating-point
+negative at depth 39 for word
+`201123223230303322300301233223323232302`.  Exact rational replay showed
+that determinant is positive: the apparent negative was catastrophic
+floating-point cancellation at large word norm.  The oracle now requires
+exact rational replay before classifying any floating nonpositive witness;
+an exact-positive replay terminates with
+`floating-point-resolution-limit`, never with a counterexample label.
+This prevents long-word overflow/cancellation from steering the search
+away from a genuine survivor.
