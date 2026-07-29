@@ -410,8 +410,8 @@ function write_mosek_infeasibility_ray_artifact(
         error("refusing existing Mosek ray temporary artifact: $temporary")
     open(temporary, "w") do io
         write(io, MOSEK_INFEASIBILITY_RAY_MAGIC)
-        write_ray_u64(io, Int(problem_status))
-        write_ray_u64(io, Int(solution_status))
+        write_ray_u64(io, problem_status.value)
+        write_ray_u64(io, solution_status.value)
         write_ray_u64(io, Int(Mosek.getnumcon(task)))
         write_ray_u64(io, Int(Mosek.getnumvar(task)))
         write_ray_u64(io, Int(Mosek.getnumcone(task)))

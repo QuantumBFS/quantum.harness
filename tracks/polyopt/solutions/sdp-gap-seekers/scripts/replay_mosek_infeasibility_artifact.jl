@@ -196,9 +196,10 @@ function mosek_ray_replay_report(
         normalized_dual_violation = maximum_dual_violation / ray_scale
         normalized_separation = dual_objective / ray_scale
         status_passed =
-            ray.problem_status_code == Int(Mosek.MSK_PRO_STA_PRIM_INFEAS) &&
+            ray.problem_status_code ==
+                Mosek.MSK_PRO_STA_PRIM_INFEAS.value &&
             ray.solution_status_code ==
-                Int(Mosek.MSK_SOL_STA_PRIM_INFEAS_CER)
+                Mosek.MSK_SOL_STA_PRIM_INFEAS_CER.value
         residual_passed = finite && normalized_dual_violation <= tolerance
         separation_passed = finite && normalized_separation > tolerance
         passed = status_passed && residual_passed && separation_passed
