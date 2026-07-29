@@ -862,6 +862,22 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             "streamed-native-mosek-dual-su2-rank4-v1" :
             "streamed-native-mosek-dual-v1"
         write_checkpoint(checkpoint_path, metadata)
+        if get(ENV, "SHASTRY_CERTIFICATE_BUILD_ONLY", "0") == "1"
+            metadata["solve"] = Dict(
+                "classification" => "not_run_exact_build_only",
+                "formulation" => certificate.su2_rank4_reduction ?
+                    "low-level-native-mosek-dual-farkas-su2-rank4-v1" :
+                    "low-level-native-mosek-dual-farkas-certificate-v2",
+            )
+            metadata["state"] = "complete"
+            metadata["completed_at_utc"] = Dates.format(
+                now(UTC),
+                dateformat"yyyy-mm-ddTHH:MM:SS.sssZ",
+            )
+            write_checkpoint(checkpoint_path, metadata)
+            progress("complete exact certificate build; optimization skipped")
+            return
+        end
         progress(
             "optimize native dual certificate; threads=$threads, " *
             "time_limit=$(time_limit_seconds)s",

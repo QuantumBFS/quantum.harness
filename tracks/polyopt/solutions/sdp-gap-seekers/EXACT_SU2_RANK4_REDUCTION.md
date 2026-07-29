@@ -40,6 +40,11 @@ default route and its established hashes are unchanged. The reduced route
 uses a distinct fingerprint schema and records the number of eliminated
 rank-four coordinates.
 
+`SHASTRY_CERTIFICATE_BUILD_ONLY=1` stops after the complete native task and
+coefficient fingerprint are assembled. It is intended only for independent
+structural/hash reproduction and is recorded as `not_run_exact_build_only`;
+it produces no numerical feasibility statement.
+
 This route is provisional until it passes both gates:
 
 1. an L=1 construction/solve comparison against the established unrestricted
