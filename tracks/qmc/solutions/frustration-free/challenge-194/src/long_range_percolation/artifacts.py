@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from contextlib import ExitStack, contextmanager
+from dataclasses import dataclass
 import fcntl
 import hashlib
 import json
@@ -11,6 +12,11 @@ import re
 import stat
 from typing import BinaryIO
 import uuid
+
+try:
+    import resource
+except ImportError:  # pragma: no cover - unavailable on some non-POSIX hosts
+    resource = None  # type: ignore[assignment]
 
 import h5py
 import numpy as np
@@ -38,7 +44,13 @@ MAX_HDF5_BYTES = 67_108_864
 MAX_KAPPA_COUNT = 4096
 MAX_DATASET_BYTES = 1_048_576
 MAX_BATCH_MEMBERS = 4096
-MAX_KERNEL_FILES = 128
+MAX_KERNEL_FILES = 16
+MAX_KERNEL_FILE_BYTES = 8 * 1024 * 1024
+MAX_KERNEL_TOTAL_BYTES = 32 * 1024 * 1024
+MAX_RETAINED_METADATA_DESCRIPTORS = 1 + 5 + MAX_KERNEL_FILES
+FD_RESERVE = 32
+MAX_ROOT_ENTRIES = 9
+MAX_TRAJECTORY_DIRECTORY_ENTRIES = 2 * MAX_BATCH_MEMBERS
 MAX_CANONICAL_TRAJECTORY_RECORD_BYTES = 273
 MAX_CANONICAL_BATCH_PROGRESS_RECORD_BYTES = 322
 MAX_JSON_SAFETY_BYTES = 65_536
@@ -110,6 +122,53 @@ class ArtifactIntegrityError(RuntimeError):
     """An immutable artifact cannot be trusted or resumed."""
 
 
+@dataclass(frozen=True)
+class _VerifiedMetadataSnapshot:
+    run_dir: Path
+    digest: str
+    file_generations: tuple[
+        tuple[Path, tuple[int, int, int, int, int, int, int]], ...
+    ]
+    kernel_generation: tuple[int, int, int, int, int, int, int]
+    kernel_names: tuple[str, ...]
+
+    def verify_final_boundary(self) -> None:
+        for path, generation in self.file_generations:
+            try:
+                current = path.lstat()
+            except OSError as error:
+                raise ArtifactIntegrityError(
+                    "run metadata changed during reconstruction"
+                ) from error
+            if (
+                not stat.S_ISREG(current.st_mode)
+                or _generation_tuple(current) != generation
+            ):
+                raise ArtifactIntegrityError(
+                    "run metadata generation changed during reconstruction"
+                )
+        kernel = self.run_dir / "kernel"
+        try:
+            current_kernel = kernel.lstat()
+        except OSError as error:
+            raise ArtifactIntegrityError(
+                "kernel metadata changed during reconstruction"
+            ) from error
+        names = tuple(
+            path.name
+            for path in _bounded_directory_entries(
+                kernel, MAX_KERNEL_FILES, "kernel metadata"
+            )
+        )
+        if (
+            _generation_tuple(current_kernel) != self.kernel_generation
+            or names != self.kernel_names
+        ):
+            raise ArtifactIntegrityError(
+                "kernel metadata generation changed during reconstruction"
+            )
+
+
 def _canonical_json_bytes(document: object) -> bytes:
     try:
         return (
@@ -175,6 +234,38 @@ def _file_identity(metadata: os.stat_result) -> tuple[int, int, int, int, int]:
         metadata.st_mtime_ns,
         metadata.st_ctime_ns,
     )
+
+
+def _generation_tuple(
+    metadata: os.stat_result,
+) -> tuple[int, int, int, int, int, int, int]:
+    return (
+        metadata.st_dev,
+        metadata.st_ino,
+        metadata.st_mode,
+        metadata.st_nlink,
+        metadata.st_size,
+        metadata.st_mtime_ns,
+        metadata.st_ctime_ns,
+    )
+
+
+def _soft_fd_limit() -> int | None:
+    if resource is None:
+        return None
+    try:
+        soft, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+    except (OSError, ValueError):
+        return None
+    return None if soft == resource.RLIM_INFINITY else int(soft)
+
+
+def _preflight_metadata_descriptors(required: int) -> None:
+    soft = _soft_fd_limit()
+    if soft is not None and soft < required + FD_RESERVE:
+        raise ArtifactIntegrityError(
+            "RLIMIT_NOFILE is insufficient for retained metadata descriptors"
+        )
 
 
 def _require_stable_descriptor(
@@ -292,8 +383,14 @@ def _prepare_publication_run(
     if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
         raise ArtifactIntegrityError("run directory must be a non-symlink directory")
     metadata_digest = _verify_upstream_metadata(run_dir, expected)
+    assert isinstance(metadata_digest, str)
     with _directory_lock(run_dir):
-        names = {path.name for path in run_dir.iterdir()}
+        names = {
+            path.name
+            for path in _bounded_directory_entries(
+                run_dir, MAX_ROOT_ENTRIES, "run root"
+            )
+        }
         for name in _OWNED_DIRECTORIES & names:
             metadata = (run_dir / name).lstat()
             if stat.S_ISLNK(metadata.st_mode):
@@ -952,6 +1049,7 @@ def _load_hdf5_verified(
     expected: dict[str, str] | None,
     required_digest: str | None = None,
     required_size: int | None = None,
+    metadata_snapshot: _VerifiedMetadataSnapshot | None = None,
 ) -> tuple[TrajectoryResult, dict[str, str], str, int]:
     if expected is not None:
         _validate_expected(expected)
@@ -977,10 +1075,19 @@ def _load_hdf5_verified(
                 "trajectory is outside the canonical run namespace"
             )
         run_root = path.parent.parent
-        metadata_digest = _verify_upstream_metadata(
-            run_root,
-            {key: stored[key] for key in _EXPECTED_KEYS},
-        )
+        if metadata_snapshot is not None:
+            if (
+                type(metadata_snapshot) is not _VerifiedMetadataSnapshot
+                or metadata_snapshot.run_dir != run_root
+            ):
+                raise ArtifactIntegrityError("invalid private metadata snapshot")
+            metadata_digest = metadata_snapshot.digest
+        else:
+            metadata_digest = _verify_upstream_metadata(
+                run_root,
+                {key: stored[key] for key in _EXPECTED_KEYS},
+            )
+            assert isinstance(metadata_digest, str)
         if metadata_digest != stored["run_metadata_sha256"]:
             raise ArtifactIntegrityError("run metadata digest mismatch")
         after_hash, after_size = _hash_descriptor(descriptor, "trajectory")
@@ -1078,6 +1185,7 @@ def _verify_trajectory(
     path: Path,
     trajectory_id: str,
     expected: dict[str, str] | None,
+    metadata_snapshot: _VerifiedMetadataSnapshot | None = None,
 ) -> tuple[TrajectoryResult, dict[str, str], str, int]:
     digest, size = _read_digest(path, trajectory_id)
     return _load_hdf5_verified(
@@ -1085,6 +1193,7 @@ def _verify_trajectory(
         expected,
         required_digest=digest,
         required_size=size,
+        metadata_snapshot=metadata_snapshot,
     )
 
 
@@ -1298,11 +1407,24 @@ def publish_batch_manifest(
     return final
 
 
-def _directory_entries(directory: Path) -> list[Path]:
+def _bounded_directory_entries(
+    directory: Path,
+    maximum_entries: int,
+    description: str,
+) -> list[Path]:
+    entries: list[Path] = []
     try:
-        return sorted(directory.iterdir(), key=lambda path: path.name)
+        with os.scandir(directory) as stream:
+            for entry in stream:
+                if len(entries) >= maximum_entries:
+                    raise ArtifactIntegrityError(
+                        f"{description} entry count exceeds the frozen limit"
+                    )
+                entries.append(Path(entry.path))
     except OSError as error:
-        raise ArtifactIntegrityError("unable to inspect artifact directory") from error
+        raise ArtifactIntegrityError(f"unable to inspect {description}") from error
+    entries.sort(key=lambda path: path.name)
+    return entries
 
 
 def _authoritative_metadata_bindings(
@@ -1399,9 +1521,34 @@ def _validate_authoritative_metadata(
 def _verify_upstream_metadata(
     run_dir: Path,
     expected: dict[str, str],
-) -> str:
+    *,
+    _return_snapshot: bool = False,
+) -> str | _VerifiedMetadataSnapshot:
     _validate_expected(expected)
     kernel = run_dir / "kernel"
+    kernel_files = _bounded_directory_entries(
+        kernel, MAX_KERNEL_FILES, "kernel metadata"
+    )
+    if not kernel_files:
+        raise ArtifactIntegrityError("kernel metadata file count is invalid")
+    _preflight_metadata_descriptors(1 + len(_UPSTREAM_FILES) + len(kernel_files))
+    kernel_total = 0
+    for path in kernel_files:
+        try:
+            metadata = path.lstat()
+        except OSError as error:
+            raise ArtifactIntegrityError(
+                "unable to inspect kernel metadata file"
+            ) from error
+        if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+            raise ArtifactIntegrityError("kernel metadata file has the wrong kind")
+        if metadata.st_size > MAX_KERNEL_FILE_BYTES:
+            raise ArtifactIntegrityError("kernel metadata file exceeds byte limit")
+        kernel_total += metadata.st_size
+        if kernel_total > MAX_KERNEL_TOTAL_BYTES:
+            raise ArtifactIntegrityError(
+                "kernel metadata total byte limit exceeded"
+            )
     flags = (
         os.O_RDONLY
         | getattr(os, "O_DIRECTORY", 0)
@@ -1416,9 +1563,6 @@ def _verify_upstream_metadata(
         kernel_original = os.fstat(kernel_descriptor)
         if not stat.S_ISDIR(kernel_original.st_mode):
             raise ArtifactIntegrityError("kernel metadata has the wrong kind")
-        kernel_files = _directory_entries(kernel)
-        if not kernel_files or len(kernel_files) > MAX_KERNEL_FILES:
-            raise ArtifactIntegrityError("kernel metadata file count is invalid")
         expected_kernel_names = tuple(path.name for path in kernel_files)
         entries: list[
             tuple[Path, str, int, os.stat_result, bool]
@@ -1434,11 +1578,20 @@ def _verify_upstream_metadata(
             entries.append((path, description, descriptor, original, True))
         for path in kernel_files:
             descriptor, original = _open_regular(
-                path, "kernel metadata file", maximum_size=MAX_HDF5_BYTES
+                path,
+                "kernel metadata file",
+                maximum_size=MAX_KERNEL_FILE_BYTES,
             )
             stack.callback(os.close, descriptor)
             entries.append(
                 (path, "kernel metadata file", descriptor, original, False)
+            )
+        actual_kernel_total = sum(
+            original.st_size for _, _, _, original, is_json in entries if not is_json
+        )
+        if actual_kernel_total > MAX_KERNEL_TOTAL_BYTES:
+            raise ArtifactIntegrityError(
+                "kernel metadata total byte limit exceeded"
             )
         for _, _, _, original, _ in entries:
             if original.st_nlink != 1:
@@ -1512,8 +1665,13 @@ def _verify_upstream_metadata(
         final_documents: dict[str, object] = {}
         final_file_hashes: dict[str, str] = {}
         final_kernel_hashes: dict[str, str] = {}
+        post_hash_generations: dict[Path, tuple[int, int, int, int, int, int, int]] = {}
         for path, description, descriptor, original, is_json in entries:
-            _require_stable_descriptor(descriptor, original, description)
+            before_hash = os.fstat(descriptor)
+            if _generation_tuple(before_hash) != _generation_tuple(original):
+                raise ArtifactIntegrityError(
+                    f"{description} generation mutated before final hash"
+                )
             _require_path_identity(path, original, description)
             if is_json:
                 payload = _read_descriptor_bounded(
@@ -1526,7 +1684,12 @@ def _verify_upstream_metadata(
             else:
                 digest, _ = _hash_descriptor(descriptor, description)
                 final_kernel_hashes[path.name] = digest
-            _require_stable_descriptor(descriptor, original, description)
+            after_hash = os.fstat(descriptor)
+            if _generation_tuple(after_hash) != _generation_tuple(before_hash):
+                raise ArtifactIntegrityError(
+                    f"{description} generation mutated during final hash"
+                )
+            post_hash_generations[path] = _generation_tuple(after_hash)
             _require_path_identity(path, original, description)
         _validate_authoritative_metadata(final_documents, expected)
         final_index = {
@@ -1537,8 +1700,28 @@ def _verify_upstream_metadata(
             raise ArtifactIntegrityError(
                 "upstream metadata aggregate snapshot mutated after second pass"
             )
+        for path, description, descriptor, _, _ in entries:
+            current = os.fstat(descriptor)
+            if _generation_tuple(current) != post_hash_generations[path]:
+                raise ArtifactIntegrityError(
+                    f"{description} generation mutated after final hash"
+                )
+        for path, description, _, _, _ in entries:
+            try:
+                current = path.lstat()
+            except OSError as error:
+                raise ArtifactIntegrityError(
+                    f"{description} pathname identity changed"
+                ) from error
+            if (
+                not stat.S_ISREG(current.st_mode)
+                or _generation_tuple(current) != post_hash_generations[path]
+            ):
+                raise ArtifactIntegrityError(
+                    f"{description} pathname generation changed"
+                )
         kernel_current = os.fstat(kernel_descriptor)
-        if _file_identity(kernel_current) != _file_identity(kernel_original):
+        if _generation_tuple(kernel_current) != _generation_tuple(kernel_original):
             raise ArtifactIntegrityError("kernel metadata directory mutated")
         try:
             kernel_path_current = kernel.lstat()
@@ -1549,11 +1732,28 @@ def _verify_upstream_metadata(
         if (
             kernel_path_current.st_dev != kernel_original.st_dev
             or kernel_path_current.st_ino != kernel_original.st_ino
-            or tuple(path.name for path in _directory_entries(kernel))
+            or tuple(
+                path.name
+                for path in _bounded_directory_entries(
+                    kernel, MAX_KERNEL_FILES, "kernel metadata"
+                )
+            )
             != expected_kernel_names
         ):
             raise ArtifactIntegrityError("kernel metadata membership mutated")
-        return hashlib.sha256(_canonical_json_bytes(second_index)).hexdigest()
+        digest = hashlib.sha256(_canonical_json_bytes(second_index)).hexdigest()
+        if _return_snapshot:
+            return _VerifiedMetadataSnapshot(
+                run_dir=run_dir,
+                digest=digest,
+                file_generations=tuple(
+                    (path, post_hash_generations[path])
+                    for path, _, _, _, _ in entries
+                ),
+                kernel_generation=_generation_tuple(kernel_current),
+                kernel_names=expected_kernel_names,
+            )
+        return digest
 
 
 def _verify_run_layout(
@@ -1569,7 +1769,9 @@ def _verify_run_layout(
         raise ArtifactIntegrityError("run layout is missing") from error
     if stat.S_ISLNK(root_stat.st_mode) or not stat.S_ISDIR(root_stat.st_mode):
         raise ArtifactIntegrityError("run layout root has the wrong kind")
-    entries = _directory_entries(run_dir)
+    entries = _bounded_directory_entries(
+        run_dir, MAX_ROOT_ENTRIES, "run root"
+    )
     names = {path.name for path in entries}
     for path in entries:
         try:
@@ -1610,27 +1812,47 @@ def _verify_run_layout(
                 )
     if expected is not None:
         _verify_upstream_metadata(run_dir, expected)
-    else:
-        for name in _UPSTREAM_FILES:
-            document = _read_canonical_json(
-                run_dir / name, f"upstream metadata {name}"
+
+
+def _verify_reconstruction_trajectories(
+    paths: Sequence[Path],
+    expected: dict[str, str],
+    metadata_snapshot: object,
+) -> list[object]:
+    verified: list[object] = []
+    for path in paths:
+        match = _TRAJECTORY_NAME.fullmatch(path.name)
+        if match is None:
+            raise ArtifactIntegrityError("trajectory filename is not canonical")
+        verified.append(
+            _verify_trajectory(
+                path,
+                match.group(1),
+                expected,
+                metadata_snapshot=metadata_snapshot,  # type: ignore[arg-type]
             )
-            if not isinstance(document, dict):
-                raise ArtifactIntegrityError(
-                    f"upstream metadata {name} is not a canonical object"
-                )
+        )
+    return verified
 
 
 def reconstruct_progress(
     run_dir: Path, expected: dict[str, str]
 ) -> dict[str, object]:
     _validate_expected(expected)
-    _verify_run_layout(run_dir, expected)
+    _verify_run_layout(run_dir)
+    snapshot = _verify_upstream_metadata(
+        run_dir, expected, _return_snapshot=True
+    )
+    assert isinstance(snapshot, _VerifiedMetadataSnapshot)
     trajectories = run_dir / "trajectories"
     batches = run_dir / "batches"
     trajectory_files: list[Path] = []
     sidecar_ids: set[str] = set()
-    for path in _directory_entries(trajectories):
+    for path in _bounded_directory_entries(
+        trajectories,
+        MAX_TRAJECTORY_DIRECTORY_ENTRIES,
+        "trajectory directory",
+    ):
         if path.is_symlink():
             raise ArtifactIntegrityError("trajectory entries must not be symlinks")
         trajectory_match = _TRAJECTORY_NAME.fullmatch(path.name)
@@ -1656,11 +1878,16 @@ def reconstruct_progress(
     file_ids: set[str] = set()
     if not trajectory_files:
         raise ArtifactIntegrityError("run layout has no trajectory artifacts")
-    for path in trajectory_files:
+    verified_trajectories = _verify_reconstruction_trajectories(
+        trajectory_files, expected, snapshot
+    )
+    for path, verified in zip(
+        trajectory_files, verified_trajectories, strict=True
+    ):
         filename_id_match = _TRAJECTORY_NAME.fullmatch(path.name)
         assert filename_id_match is not None
         filename_id = filename_id_match.group(1)
-        result, _, digest, _ = _verify_trajectory(path, filename_id, expected)
+        result, _, digest, _ = verified  # type: ignore[misc]
         internal_id = result.request_sha256
         if internal_id in file_ids:
             raise ArtifactIntegrityError("duplicate trajectory ID")
@@ -1677,7 +1904,9 @@ def reconstruct_progress(
 
     manifests: list[dict[str, object]] = []
     memberships: set[str] = set()
-    batch_paths = _directory_entries(batches)
+    batch_paths = _bounded_directory_entries(
+        batches, MAX_BATCH_MEMBERS, "batch directory"
+    )
     if not batch_paths:
         raise ArtifactIntegrityError("run layout has no batch manifests")
     if len(batch_paths) > MAX_BATCH_MEMBERS:
@@ -1755,6 +1984,7 @@ def reconstruct_progress(
         "trajectory_count": len(trajectories_document),
         "trajectories": trajectories_document,
     }
+    snapshot.verify_final_boundary()
     progress_path = run_dir / "progress.json"
     if progress_path.exists() or progress_path.is_symlink():
         existing = _read_canonical_json(progress_path, "progress")

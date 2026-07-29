@@ -1618,3 +1618,261 @@ def test_v2_schema_registry_and_v1_trajectory_rejection(
     _refresh_digest(path)
     with pytest.raises(ArtifactIntegrityError, match="schema|stale"):
         load_verified_trajectory(path, expected(request))
+
+
+@pytest.mark.parametrize("target_name", ("request.json", "environment.json"))
+def test_final_generation_boundary_catches_early_json_mutated_during_last_hash(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+    target_name: str,
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    target = tmp_path / target_name
+    original = artifacts._read_descriptor_bounded
+    seed_reads = 0
+    mutated = False
+
+    def mutate_during_last_later_read(
+        descriptor: int, maximum_size: int, description: str
+    ) -> bytes:
+        nonlocal seed_reads, mutated
+        payload = original(descriptor, maximum_size, description)
+        if description == "upstream metadata seed-manifest.json":
+            seed_reads += 1
+            if seed_reads == 3:
+                with target.open("r+b") as stream:
+                    stream.seek(0)
+                    stream.write(b'{"same":')
+                generation = target.stat()
+                os.utime(
+                    target,
+                    ns=(generation.st_atime_ns, generation.st_mtime_ns + 1),
+                )
+                mutated = True
+        return payload
+
+    monkeypatch.setattr(
+        artifacts, "_read_descriptor_bounded", mutate_during_last_later_read
+    )
+    with pytest.raises(ArtifactIntegrityError, match="generation|mutat|metadata"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert mutated
+    assert seed_reads == 3
+
+
+def test_final_generation_boundary_catches_early_kernel_mutated_during_last_hash(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    first = tmp_path / "kernel" / "kernel.bin"
+    (tmp_path / "kernel" / "zz.bin").write_bytes(b"later")
+    original = artifacts._hash_descriptor
+    calls = 0
+    mutated = False
+
+    def mutate_during_last_hash(
+        descriptor: int, description: str
+    ) -> tuple[str, int]:
+        nonlocal calls, mutated
+        result = original(descriptor, description)
+        if description == "kernel metadata file":
+            calls += 1
+            if calls == 6:
+                with first.open("r+b") as stream:
+                    stream.seek(0)
+                    stream.write(b"same-size")
+                generation = first.stat()
+                os.utime(
+                    first,
+                    ns=(generation.st_atime_ns, generation.st_mtime_ns + 1),
+                )
+                mutated = True
+        return result
+
+    monkeypatch.setattr(artifacts, "_hash_descriptor", mutate_during_last_hash)
+    with pytest.raises(ArtifactIntegrityError, match="generation|mutat|metadata"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert mutated
+    assert calls == 6
+
+
+def test_bounded_scandir_stops_at_max_plus_one(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    consumed = 0
+
+    class Entry:
+        def __init__(self, name: str):
+            self.name = name
+            self.path = str(tmp_path / name)
+
+    class Scan:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def __iter__(self):
+            nonlocal consumed
+            for index in range(10_000):
+                consumed += 1
+                yield Entry(str(index))
+
+    monkeypatch.setattr(artifacts.os, "scandir", lambda path: Scan())
+    with pytest.raises(ArtifactIntegrityError, match="count|limit"):
+        artifacts._bounded_directory_entries(tmp_path, 3, "test directory")
+    assert consumed == 4
+
+
+def test_bounded_scandir_real_directory_accepts_max_and_rejects_max_plus_one(
+    tmp_path: Path,
+):
+    for index in range(3):
+        (tmp_path / str(index)).touch()
+    assert len(artifacts._bounded_directory_entries(tmp_path, 3, "test")) == 3
+    (tmp_path / "3").touch()
+    with pytest.raises(ArtifactIntegrityError, match="count|limit"):
+        artifacts._bounded_directory_entries(tmp_path, 3, "test")
+
+
+def test_kernel_workload_and_fd_preflight_are_frozen(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    assert artifacts.MAX_KERNEL_FILES == 16
+    assert artifacts.MAX_KERNEL_FILE_BYTES == 8 * 1024 * 1024
+    assert artifacts.MAX_KERNEL_TOTAL_BYTES == 32 * 1024 * 1024
+    assert artifacts.MAX_RETAINED_METADATA_DESCRIPTORS == 22
+    opened = 0
+    original = artifacts._open_regular
+
+    def track_open(*args, **kwargs):
+        nonlocal opened
+        opened += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(artifacts, "_open_regular", track_open)
+    monkeypatch.setattr(artifacts, "_soft_fd_limit", lambda: 10)
+    with pytest.raises(ArtifactIntegrityError, match="descriptor|RLIMIT|limit"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert opened == 0
+
+
+def test_kernel_total_byte_limit_rejects_before_hashing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    kernel = tmp_path / "kernel"
+    for index in range(4):
+        with (kernel / f"{index}.bin").open("wb") as stream:
+            stream.truncate(8 * 1024 * 1024)
+    hashed = 0
+    original = artifacts._hash_descriptor
+
+    def track_hash(descriptor: int, description: str) -> tuple[str, int]:
+        nonlocal hashed
+        hashed += 1
+        return original(descriptor, description)
+
+    monkeypatch.setattr(artifacts, "_hash_descriptor", track_hash)
+    with pytest.raises(ArtifactIntegrityError, match="total|byte|limit"):
+        artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert hashed == 0
+
+
+def test_maximum_valid_kernel_file_count_is_accepted(
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    request, _, provenance = sample
+    _write_upstream_metadata(tmp_path, request, provenance)
+    kernel = tmp_path / "kernel"
+    for index in range(artifacts.MAX_KERNEL_FILES - 1):
+        (kernel / f"{index:02d}.bin").write_bytes(f"kernel-{index}".encode())
+    digest = artifacts._verify_upstream_metadata(tmp_path, expected(request))
+    assert isinstance(digest, str)
+    assert len(digest) == 64
+
+
+def test_reconstruction_uses_one_metadata_snapshot_and_verifies_every_trajectory(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    paths = [
+        Path(f"/run/trajectories/trajectory-{index:064x}.h5")
+        for index in range(artifacts.MAX_BATCH_MEMBERS)
+    ]
+    snapshot = object()
+    calls = 0
+
+    def verify(path: Path, trajectory_id: str, expected, metadata_snapshot=None):
+        nonlocal calls
+        assert metadata_snapshot is snapshot
+        calls += 1
+        return None
+
+    monkeypatch.setattr(artifacts, "_verify_trajectory", verify)
+    artifacts._verify_reconstruction_trajectories(paths, {}, snapshot)
+    assert calls == artifacts.MAX_BATCH_MEMBERS
+
+
+def test_reconstruction_calls_metadata_verifier_once(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    _, _, hashes = _publish_valid_run(tmp_path, sample)
+    original = artifacts._verify_upstream_metadata
+    calls = 0
+
+    def count(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(artifacts, "_verify_upstream_metadata", count)
+    reconstruct_progress(tmp_path, hashes)
+    assert calls == 1
+
+
+def test_reconstruction_final_snapshot_boundary_rejects_metadata_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sample: tuple[TrajectoryRequest, TrajectoryResult, dict[str, object]],
+):
+    _, _, hashes = _publish_valid_run(tmp_path, sample)
+    target = tmp_path / "environment.json"
+    original = artifacts._verify_trajectory
+    mutated = False
+
+    def verify_then_mutate(*args, **kwargs):
+        nonlocal mutated
+        result = original(*args, **kwargs)
+        if not mutated:
+            with target.open("r+b") as stream:
+                stream.seek(0)
+                stream.write(b'{"same":')
+            generation = target.stat()
+            os.utime(
+                target,
+                ns=(generation.st_atime_ns, generation.st_mtime_ns + 1),
+            )
+            mutated = True
+        return result
+
+    monkeypatch.setattr(artifacts, "_verify_trajectory", verify_then_mutate)
+    with pytest.raises(ArtifactIntegrityError, match="generation|reconstruction"):
+        reconstruct_progress(tmp_path, hashes)
+    assert mutated
