@@ -742,3 +742,8 @@ Updated: 2026-07-29 UTC.
   independently rebuilt solve run, guarded by that exact hash and a `1e-9`
   residual/certificate audit. High-memory unreduced job `118178932` remains
   queued and must not be cancelled or duplicated.
+- Exact build-only L=2 SO(3) job `118182637` started on SCNet at
+  2026-07-29T18:45:55Z from immutable commit `5a219a9`, using 32 CPUs and
+  48000 MiB. It has no optimizer call. Monitor through complete coefficient
+  construction and record its moment inventory/hash before submitting the
+  separately gated solve.

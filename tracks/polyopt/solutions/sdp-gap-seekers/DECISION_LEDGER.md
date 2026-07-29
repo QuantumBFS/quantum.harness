@@ -1317,3 +1317,10 @@ attempt changes both size and purpose: first construct the complete L=2 SO(3)
 task with solving disabled and record its exact structural inventory/hash;
 then rebuild it in a separate hash-gated solve. Keep unreduced high-memory job
 `118178932` queued as an independent route.
+
+The authorized construction-only attempt is SCNet job `118182637`, source
+commit `5a219a9`, model/settings `L=2,d=2,g=4/5,gamma=2`, complete basis and
+stationarity, no-boundary window, unrestricted state, exact SO(3) rank-four
+projection. It started at 2026-07-29T18:45:55Z with 32 CPUs / 48000 MiB. Its
+runner sets `SHASTRY_CERTIFICATE_BUILD_ONLY=1`; no numerical solver decision
+can be emitted by this job. The next action depends on its exact count/hash.

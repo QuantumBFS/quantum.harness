@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T18:43:30Z
+Updated: 2026-07-29T18:46:54Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -202,5 +202,10 @@ Updated: 2026-07-29T18:43:30Z
   and submit one exact build-only L=2 SO(3) construction. Use its hash as a
   mandatory input to a separate numerical solve. Unreduced high-memory job
   `118178932` remains pending and untouched.
+- Exact L=2 SO(3) build-only job `118182637` is running on SCNet from clean,
+  immutable commit `5a219a9` with 32 CPUs / 48000 MiB. It started at
+  2026-07-29T18:45:55Z and cannot call the optimizer. Monitor it to obtain the
+  reduced structural inventory and coefficient hash; do not update its shared
+  checkout while it runs.
 
 No user input or new credential is currently required.
