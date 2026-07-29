@@ -2154,3 +2154,32 @@ full joint common-metric SDP.  Their verified normalized margins ranged
 from `0.01534` to `0.08662`.  No word enumeration was launched for these
 known-class cases.  This validates the early-stop policy and keeps the
 two-machine budget focused on the surviving two-point mechanism.
+
+### Exact dual exclusion of a common Wei metric
+
+For the leading rational pair
+`{(3/10,1,1),(5/2,1,1)}`, a Gordan--Stiemke dual SDP was added for the
+four strict Lyapunov inequalities.  A random linear objective exposed four
+numerical rank-one PSD multipliers with cancellation residual about
+`1.11e-10`.  Forcing each forward multiplier to equal its transpose
+multiplier was infeasible, so that tempting symmetry reduction was
+discarded.
+
+Solving the normalized dual with zero objective instead produced an
+interior point: all four multipliers have numerical rank five, minimum
+eigenvalue approximately `3.3287e-5`, and cancellation residual
+`1.446e-16`.  Rounding the free affine coordinates at denominator
+`10^8` and solving the 16 rational equality pivots exactly preserved
+positive definiteness.  The frozen certificate now verifies:
+
+- exact adjoint cancellation;
+- exact trace normalization one;
+- all 20 leading principal minors strictly positive by integer Bareiss
+  determinants.
+
+Consequently no real symmetric `R` can make the forward and transpose
+Lyapunov gaps strict for both points.  Unlike the earlier zero SDP margin,
+this is an exact exclusion of the tested common split-contraction/Wei
+mechanism.  The reusable lesson is to rationalize an interior dual rather
+than an exposed rank-one boundary point: the positive eigenvalue margin
+makes exact affine projection robust.
