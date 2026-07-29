@@ -667,6 +667,78 @@ def test_local_estimator_certifies_ordinary_row_rounding_under_all_orders(
     assert _float_hex(fallback.real) == expected_bits
 
 
+def test_fast_roundoff_multiplier_expands_with_operation_count() -> None:
+    small = operators._fast_roundoff_multiplier(20)
+    large = operators._fast_roundoff_multiplier(147)
+
+    assert small is not None
+    assert large is not None
+    assert large > small
+    with localcontext() as context:
+        context.prec = 80
+        unit_roundoff = Decimal(5).scaleb(
+            -operators._FAST_CERTIFIER_PRECISION
+        )
+        accumulated = Decimal(147) * unit_roundoff
+        gamma = accumulated / (Decimal(1) - accumulated)
+        required = gamma / (Decimal(1) - gamma)
+    assert large >= required
+
+
+def test_local_estimator_falls_back_when_operation_bound_crosses_rn_cell(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    neighbors: dict[int, complex] = {}
+    log_values = {1: 0.0j}
+    target = 2
+    for index in range(32):
+        lower_logabs = 2.0 + index * 0.01
+        upper_logabs = math.nextafter(lower_logabs, math.inf)
+        neighbors[target] = complex(1.0, 0.5)
+        log_values[target] = complex(lower_logabs, 0.0)
+        target += 1
+        neighbors[target] = complex(-1.0, -0.5)
+        log_values[target] = complex(upper_logabs, 0.0)
+        target += 1
+
+    base = 0.9973454279020186
+    neighbors[target] = complex(base, base * 0.5)
+    log_values[target] = 0.0j
+    target += 1
+    tuner = math.ldexp(1.0, -10)
+    neighbors[target] = complex(tuner, tuner * 0.5)
+    log_values[target] = complex(0.9999999999994481, 0.0)
+
+    assert len(neighbors) == 66
+    expected = _decimal_row_oracle(1, neighbors, log_values)
+    absolute_real_sum = math.fsum(
+        abs(coefficient.real) * math.exp(log_values[state].real)
+        for state, coefficient in neighbors.items()
+    )
+    assert absolute_real_sum > 500.0 * abs(expected.real)
+
+    fallback_calls: Counter[str] = Counter()
+    fallback = operators._fallback_component
+
+    def fallback_spy(
+        terms: tuple[operators._DyadicLogTerm, ...],
+        source_logabs: float,
+    ) -> float:
+        fallback_calls["components"] += 1
+        return fallback(terms, source_logabs)
+
+    monkeypatch.setattr(operators, "_fallback_component", fallback_spy)
+    observed = local_from_log_neighbors(
+        1,
+        neighbors,
+        log_values.__getitem__,
+    )
+
+    assert _float_hex(observed.real) == _float_hex(expected.real)
+    assert _float_hex(observed.imag) == _float_hex(expected.imag)
+    assert fallback_calls == Counter(components=2)
+
+
 def test_local_estimator_terminates_exact_dyadic_halfway_tie(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
