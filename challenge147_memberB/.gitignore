@@ -3,7 +3,8 @@ metts_runs/*/
 metts_runs/*/traces/
 metts_runs/*/checkpoints/
 metts_runs/*/logs/*.log
-# but keep the empty directory structure markers if any
+# but keep reports (deliverables) and the empty directory structure markers
+!metts_runs/reports/
 !metts_runs/.gitkeep
 
 # python

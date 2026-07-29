@@ -66,6 +66,21 @@ def field_gate(theta):
     return np.array([[c, s], [s, c]], dtype=np.complex128)
 
 
+def field_gate_normalized(theta):
+    """e^{+theta sx} factored as cosh(theta) * (I + tanh(theta) sx).
+
+    The bounded operator (I + tanh(theta) sx) has spectral norm
+    1 + |tanh(theta)| <= 2, so applying it NEVER grows the MPS norm by more
+    than 2x per site -- no overflow, no SVD failure, at any beta/N. The scalar
+    cosh(theta) is accumulated into the log-scale (it cancels in every METTS
+    ratio). Returns (bounded_gate_2x2, log_cosh) where applying bounded_gate
+    then adding N*log_cosh to log_scale reproduces the full field gate.
+    """
+    th = np.tanh(theta)
+    g = np.array([[1.0, th], [th, 1.0]], dtype=np.complex128)
+    return g, float(np.log(np.cosh(theta)))
+
+
 def bond_gate_zz(Jdtau):
     """e^{+Jdtau sz sz} as 4x4, basis (up,up),(up,down),(down,up),(down,down)
     = diag(e^{Jdtau}, e^{-Jdtau}, e^{-Jdtau}, e^{Jdtau})."""
@@ -151,19 +166,56 @@ class MPSBackend:
         return MPS.from_product_state(spins_snake, chi=self.chi, tol=self.tol)
 
     def evolve(self, mps, beta):
-        """Apply e^{-beta H/2} via 2nd-order Trotter (in place). Returns mps."""
+        """Apply e^{-beta H/2} via 2nd-order Trotter (in place). Returns mps.
+
+        Norm control (the crux of low-T / large-N stability): the field gate
+        e^{+theta sx} = cosh(theta)*(I + tanh(theta) sx). The cosh factor
+        grows the norm by ~e^{h*tau} per site and would overflow numpy's SVD
+        at large N / low T. We instead apply the BOUNDED operator
+        (I + tanh(theta) sx) (spectral norm <= 2) and accumulate the scalar
+        cosh into ``mps.log_scale``. The bond gate e^{+Jdtau sz sz} only
+        rescales by e^{+/-Jdtau} (~1.05, bounded). So the MPS norm stays O(1)
+        throughout -- every SVD is well-conditioned at any beta/N -- and the
+        dropped log-scale cancels in every METTS ratio (E = <phi|H|phi>/<phi|phi>,
+        collapse probs, the unweighted sample mean).
+        """
         tau = beta / 2.0
         n_steps = max(1, int(np.ceil(tau / self.dtau)))
         theta_half = self.h * self.dtau / 2.0
         Jdtau = self.J * self.dtau
-        fg = field_gate(theta_half)
+        fg, log_cosh = field_gate_normalized(theta_half)
         bg = bond_gate_zz(Jdtau)
         mps.discarded = []
+        if not hasattr(mps, "log_scale") or mps.log_scale is None:
+            mps.log_scale = 0.0
+        # each full step applies the half-field layer twice (start & end) and
+        # the bond layers once; the cosh factor is applied N times per field
+        # layer (once per site).
+        log_field_layer = self.N * log_cosh
         for _ in range(n_steps):
             self._apply_field(mps, fg)
+            mps.log_scale += log_field_layer
             self._apply_bond_layer(mps, self.layer_even, bg)
             self._apply_bond_layer(mps, self.layer_odd, bg)
             self._apply_field(mps, fg)
+            mps.log_scale += log_field_layer
+            if not np.isfinite(mps.log_scale):
+                return mps          # caller sees EVOLUTION_NAN
+            # The bounded field gate shrinks the norm (eigenvalue 1-tanh(theta)
+            # < 1 along the GS direction); over many steps at large N the norm
+            # underflows to 0. Rescale to unit norm once per step: the bounded
+            # gate means the per-step norm change is a bounded factor, so a
+            # single rescale keeps tensors O(1) AND prevents underflow. The
+            # dropped factor is folded into log_scale (cancels in all ratios).
+            n2 = mps.norm2()
+            if not np.isfinite(n2) or n2 <= 0:
+                mps.log_scale = float("nan")
+                return mps
+            ln = 0.5 * np.log(n2)
+            scale = np.exp(-ln / mps.N)
+            for t in mps.tensors:
+                t *= scale
+            mps.log_scale += ln
         return mps
 
     def _apply_field(self, mps, gate):
