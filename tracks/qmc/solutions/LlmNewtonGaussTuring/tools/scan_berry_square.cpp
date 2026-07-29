@@ -25,8 +25,8 @@ int main(int argc, char** argv) {
 
         auto lat = cm::make_square(L, L);
         int N = static_cast<int>(lat.N);
-        if (N > 10)
-            throw std::invalid_argument("dense Berry solver supports at most 10 sites");
+        if (N > 16)
+            throw std::invalid_argument("matrix-free Berry solver supports at most 16 sites (dim 65536)");
 
         cm::ParamGrid grid;
         grid.theta_values = cm::scan::uniform_axis(
