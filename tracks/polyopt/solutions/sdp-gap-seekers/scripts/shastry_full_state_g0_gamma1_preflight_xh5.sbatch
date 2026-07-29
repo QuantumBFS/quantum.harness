@@ -3,7 +3,7 @@
 #SBATCH --partition=xhacnormalb
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=20
 #SBATCH --mem=64G
 #SBATCH --time=02:00:00
 #SBATCH --output=tracks/polyopt/solutions/sdp-gap-seekers/results/_slurm/ss-full-state-g0-gamma1-%j.out
@@ -12,7 +12,7 @@ set -euo pipefail
 
 export LC_ALL=C
 export LANG=C
-export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-16}"
+export JULIA_NUM_THREADS="${SLURM_CPUS_PER_TASK:-20}"
 
 readonly EXPECTED_ROOT="/work/home/sihhu/quantum-hackson/challenge-88/bohr-agent/ss-exact-reduction"
 readonly JULIA_BIN="/work/home/sihhu/.julia/juliaup/julia-1.11.5+0.x64.linux.gnu/bin/julia"
