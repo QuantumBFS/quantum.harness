@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from collections.abc import Mapping
 from pathlib import Path
@@ -101,6 +102,42 @@ def _training_records(path: Path) -> list[Mapping[str, Any]]:
     return records
 
 
+def _metric_string(raw: Mapping[str, Any], name: str) -> str:
+    value = raw[name]
+    if not isinstance(value, str):
+        raise ValueError(f"resource metric {name} must be a JSON string")
+    return value
+
+
+def _metric_bool(raw: Mapping[str, Any], name: str) -> bool:
+    value = raw[name]
+    if not isinstance(value, bool):
+        raise ValueError(f"resource metric {name} must be a JSON boolean")
+    return value
+
+
+def _metric_int(raw: Mapping[str, Any], name: str) -> int:
+    value = raw[name]
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"resource metric {name} must be an integer JSON number")
+    return value
+
+
+def _metric_real(raw: Mapping[str, Any], name: str) -> float:
+    value = raw[name]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"resource metric {name} must be a finite JSON number")
+    try:
+        converted = float(value)
+    except OverflowError as error:
+        raise ValueError(
+            f"resource metric {name} must be a finite JSON number"
+        ) from error
+    if not math.isfinite(converted):
+        raise ValueError(f"resource metric {name} must be a finite JSON number")
+    return converted
+
+
 def _resource_metrics(
     selected: Mapping[str, Any],
     *,
@@ -123,20 +160,21 @@ def _resource_metrics(
     }
     if set(raw) != expected:
         raise ValueError("measured resource metric schema mismatch")
+    peak_vram = raw["peak_vram_bytes"]
     return ResourceMetrics(
-        placement=str(raw["placement"]),
-        wall_seconds=float(raw["wall_seconds"]),
-        peak_rss_bytes=int(raw["peak_rss_bytes"]),
+        placement=_metric_string(raw, "placement"),
+        wall_seconds=_metric_real(raw, "wall_seconds"),
+        peak_rss_bytes=_metric_int(raw, "peak_rss_bytes"),
         peak_vram_bytes=(
-            None if raw["peak_vram_bytes"] is None else int(raw["peak_vram_bytes"])
+            None if peak_vram is None else _metric_int(raw, "peak_vram_bytes")
         ),
         checkpoint_bytes=checkpoint_bytes,
-        estimator_evaluations=int(raw["estimator_evaluations"]),
-        effective_sample_size=float(raw["effective_sample_size"]),
-        n8_smoke_complete=bool(raw["n8_smoke_complete"]),
-        n8_to_n6_time_ratio=float(raw["n8_to_n6_time_ratio"]),
-        n8_to_n6_memory_ratio=float(raw["n8_to_n6_memory_ratio"]),
-        device_fingerprint=str(raw["device_fingerprint"]),
+        estimator_evaluations=_metric_int(raw, "estimator_evaluations"),
+        effective_sample_size=_metric_real(raw, "effective_sample_size"),
+        n8_smoke_complete=_metric_bool(raw, "n8_smoke_complete"),
+        n8_to_n6_time_ratio=_metric_real(raw, "n8_to_n6_time_ratio"),
+        n8_to_n6_memory_ratio=_metric_real(raw, "n8_to_n6_memory_ratio"),
+        device_fingerprint=_metric_string(raw, "device_fingerprint"),
     )
 
 

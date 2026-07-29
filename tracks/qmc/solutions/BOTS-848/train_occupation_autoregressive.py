@@ -518,7 +518,7 @@ def _prepared_operator(two_q: int) -> PreparedPairOperator:
     return PreparedPairOperator.build(pairs, pair_matrix, two_q)
 
 
-def _run_n8_smoke(*, run_dir: Path, protocol: ProtocolConfig) -> Path:
+def _run_n8_smoke(*, run_dir: Path, protocol: ProtocolConfig) -> tuple[Path, bool]:
     smoke = protocol.smoke_n8
     output = Path(run_dir).resolve()
     result_path = output / "n8-smoke.json"
@@ -590,7 +590,7 @@ def _run_n8_smoke(*, run_dir: Path, protocol: ProtocolConfig) -> Path:
         },
     }
     _atomic_json(result_path, payload)
-    return result_path
+    return result_path, complete
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -613,11 +613,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         protocol = load_protocol()
         if protocol.sha256 != PROTOCOL_SHA256:
             raise ValueError("scalable-v1 protocol SHA-256 mismatch")
-        result_path = _run_n8_smoke(run_dir=arguments.run_dir, protocol=protocol)
+        result_path, complete = _run_n8_smoke(
+            run_dir=arguments.run_dir,
+            protocol=protocol,
+        )
+        status = "ok" if complete else "failed"
         print(
             json.dumps(
                 {
-                    "status": "ok",
+                    "status": status,
                     "mode": "a05.1-n8-no-training-smoke",
                     "optimizer_updates": 0,
                     "result_path": str(result_path),
@@ -629,7 +633,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             ),
             flush=True,
         )
-        return 0
+        return 0 if complete else 1
     if arguments.smoke_updates is None:
         raise FeatureStateError(
             "full tower-aware training remains reserved for A05.2 three-seed freeze"

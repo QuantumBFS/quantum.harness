@@ -188,6 +188,53 @@ def _rewrite_frozen_identity(run_dir: Path, tamper: str) -> None:
     )
 
 
+def _rewrite_frozen_resource_metric(
+    run_dir: Path,
+    *,
+    name: str,
+    value: object,
+    raw_json: str | None = None,
+) -> None:
+    training_path = run_dir / "training.jsonl"
+    training_record = json.loads(training_path.read_text(encoding="utf-8"))
+    resource_metrics = training_record["resource_metrics"]
+    assert isinstance(resource_metrics, dict)
+    resource_metrics[name] = value
+    training_json = json.dumps(
+        training_record,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+    if raw_json is not None:
+        encoded = json.dumps(value, separators=(",", ":"), allow_nan=False)
+        needle = f'"{name}":{encoded}'
+        assert training_json.count(needle) == 1
+        training_json = training_json.replace(
+            needle,
+            f'"{name}":{raw_json}',
+            1,
+        )
+    training_path.write_text(
+        training_json + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    manifest_path = run_dir / "training-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    training_item = next(
+        item for item in manifest["artifacts"] if item["role"] == "training_log"
+    )
+    training_item["bytes"] = training_path.stat().st_size
+    training_item["sha256"] = sha256_file(training_path)
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _write_terminal_freeze_fixture(
     run_dir: Path,
     *,
@@ -495,6 +542,69 @@ def test_candidate_exposes_exact_construction_certificate_and_measured_resources
 
 
 @pytest.mark.parametrize(
+    ("metric", "value", "raw_json"),
+    [
+        ("n8_smoke_complete", "false", None),
+        ("n8_smoke_complete", 0, None),
+        ("n8_smoke_complete", 1, None),
+        ("peak_rss_bytes", "123456", None),
+        ("peak_vram_bytes", 2048.0, None),
+        ("estimator_evaluations", True, None),
+        ("wall_seconds", "2.5", None),
+        ("effective_sample_size", False, None),
+        ("n8_to_n6_time_ratio", 0.0, "1e9999"),
+        ("n8_to_n6_memory_ratio", "1.0", None),
+        ("placement", 1, None),
+        ("device_fingerprint", 848, None),
+    ],
+)
+def test_factory_rejects_resource_metric_type_aliases(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    metric: str,
+    value: object,
+    raw_json: str | None,
+) -> None:
+    run_dir = tmp_path / "run"
+    _write_frozen_run(run_dir)
+    _rewrite_frozen_resource_metric(
+        run_dir,
+        name=metric,
+        value=value,
+        raw_json=raw_json,
+    )
+    monkeypatch.setenv(RUN_DIR_ENV, str(run_dir))
+    _adapter, factory = _a05_modules()
+
+    with pytest.raises(ValueError, match=rf"resource metric {metric} must be"):
+        factory.load_candidate()
+
+
+def test_factory_accepts_integral_json_numbers_for_real_resource_metrics(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    _write_frozen_run(run_dir)
+    for metric, value in (
+        ("wall_seconds", 2),
+        ("effective_sample_size", 0),
+        ("n8_to_n6_time_ratio", 0),
+        ("n8_to_n6_memory_ratio", 0),
+    ):
+        _rewrite_frozen_resource_metric(run_dir, name=metric, value=value)
+    monkeypatch.setenv(RUN_DIR_ENV, str(run_dir))
+    _adapter, factory = _a05_modules()
+
+    resources = factory.load_candidate().resource_metrics()
+
+    assert resources.wall_seconds == 2.0
+    assert resources.effective_sample_size == 0.0
+    assert resources.n8_to_n6_time_ratio == 0.0
+    assert resources.n8_to_n6_memory_ratio == 0.0
+
+
+@pytest.mark.parametrize(
     ("tamper", "message"),
     [
         ("artifact", "artifact (byte size|hash) mismatch"),
@@ -734,3 +844,63 @@ def test_n8_smoke_counts_sixteen_derived_adapter_samples_per_repetition(
 
     assert [count for m, count in sample_calls if m == 1] == [16] * 7
     assert result["measured_sample_count"] == 2640
+
+
+@pytest.mark.parametrize(
+    ("n8_nan_count", "expected_status", "expected_exit_code"),
+    [
+        (0, "ok", 0),
+        (1, "failed", 1),
+    ],
+)
+def test_n8_smoke_cli_propagates_written_completion_status(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    n8_nan_count: int,
+    expected_status: str,
+    expected_exit_code: int,
+) -> None:
+    training_cli = importlib.import_module("train_occupation_autoregressive")
+
+    def fake_smoke_size(*, n_electrons: int, **_kwargs: object) -> dict[str, object]:
+        is_n8 = n_electrons == 8
+        return {
+            "measured_total_seconds": [2.0 if is_n8 else 1.0],
+            "measured_peak_rss_bytes": 200 if is_n8 else 100,
+            "finite_counters": {
+                "finite": 10,
+                "nan": n8_nan_count if is_n8 else 0,
+                "inf": 0,
+            },
+            "measured_sample_count": 256,
+        }
+
+    monkeypatch.setattr(training_cli, "_smoke_size", fake_smoke_size)
+    run_dir = tmp_path / "run"
+
+    exit_code = training_cli.main(
+        [
+            "--n8-smoke",
+            "--training-seed",
+            "4848",
+            "--run-dir",
+            str(run_dir),
+        ]
+    )
+
+    result_path = run_dir / "n8-smoke.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    emitted = json.loads(capsys.readouterr().out)
+    protocol = load_protocol()
+    assert result["status"] == expected_status
+    assert result["optimizer_updates"] == 0
+    assert emitted == {
+        "mode": "a05.1-n8-no-training-smoke",
+        "optimizer_updates": 0,
+        "protocol_sha256": protocol.sha256,
+        "result_path": str(result_path),
+        "result_sha256": sha256_file(result_path),
+        "status": expected_status,
+    }
+    assert exit_code == expected_exit_code
