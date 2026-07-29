@@ -783,3 +783,20 @@ named-cone reload checks. A feasible point is residual-audited; an infeasible
 solver status remains
 `infeasibility_candidate_requires_independent_ray_replay`. It is not a bulk-gap
 bound until that separate replay succeeds.
+
+## 2026-07-29 — launch the coarse scan and correct wrapper paths
+
+Coarse-scan r1, Slurm job `22990996`, was assigned a node but failed with
+`JobLaunchFailure`, signal 53, at zero elapsed time. No stdout file or run
+directory existed: the clean clone did not contain the gitignored parent
+directory named by `#SBATCH --output`, so Slurm could not open the batch
+output. Create that directory before submission and change the run signature
+to r2. Job `22991011` then entered `RUNNING` on `a01r08n04` and printed the
+start of the exact gamma-one build.
+
+Rational replay r2, job `22990727`, also failed before assembly. Its wrapper
+passed absolute model and solve directories, while the replay intentionally
+requires repository-relative paths to keep inputs contained. Resubmit r3 with
+the same checked artifacts expressed relative to the checkout. Job `22991012`
+is pending under `AssocGrpJobsLimit`. Neither failure changes a mathematical
+claim.

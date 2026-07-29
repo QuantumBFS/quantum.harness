@@ -459,15 +459,13 @@ Updated: 2026-07-29 UTC.
   required `String`. This is an entry-point type error, not a model, input, or
   mathematical failure. The helper now accepts `AbstractString`; the targeted
   regression suite passes 9/9 locally at 287,280 KiB peak RSS.
-- Corrected rational-witness replay r2 is Slurm job `22990727`. The shipped
-  parser SHA-256 is
+- Corrected rational-witness replay r2, Slurm job `22990727`, reached the
+  wrapper after its queue delay but failed before assembly because the
+  wrapper passed absolute input paths to a replay that deliberately accepts
+  only repository-relative paths. The shipped parser SHA-256 was
   `9379ed739499f3955534085c4616ea14950e148c51bea14b322faef8875d396f`,
-  matching the committed local source. It currently has a real job ID but is
-  pending under `AssocGrpJobsLimit`; do not submit a duplicate while that
-  scheduler signature is unchanged. Once running, it must rebuild all six
-  exact reduction layers, round the exported point to a common rational
-  denominator, and accept only if every one of the nine reconstructed
-  rational matrices has strictly positive exact LDL pivots.
+  matching the committed local source. Corrected r3, job `22991012`, uses
+  repository-relative paths and is pending under `AssocGrpJobsLimit`.
 - The next bulk-gap run is a single-slot, sequential `d=2` coarse scan at
   exact rational gamma values `1`, `2`, and `4`, stopping at the first
   solver-reported infeasibility candidate. Each point rebuilds the exact
@@ -477,3 +475,8 @@ Updated: 2026-07-29 UTC.
   results path, source-file hashes, and the generated SHA256SUMS. Any
   infeasible status is only a candidate until an independent ray replay
   passes.
+- Coarse-scan r1, job `22990996`, failed at launch with signal 53 before the
+  batch script started because the clean clone lacked the parent directory of
+  its Slurm output file. No model code ran. After creating the ignored results
+  directory, r2 job `22991011` entered `RUNNING` on `a01r08n04` and began the
+  exact gamma-one build.

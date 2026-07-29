@@ -28,6 +28,13 @@ failure signatures and changed actions, not credentials or routine logs.
 - Always export every fail-closed input explicitly. The rational replay needs
   `SS_INPUT_POINT`, `SS_SOLVE_POINT`, and a unique `SS_RUN_ID`; a new run ID
   is mandatory after any failed attempt.
+- Create the parent directory named by `#SBATCH --output` before submitting
+  from a clean clone. Gitignored `results/` directories are absent from a
+  fresh checkout; Slurm otherwise fails with `JobLaunchFailure`, signal 53,
+  before the batch script can print anything.
+- Preserve the path contract of each runner. The rational replay accepts
+  repository-relative paths so containment can be checked; passing absolute
+  paths fails before assembly even when the files exist.
 
 ## Preflight and interpretation
 
