@@ -26,7 +26,6 @@ from .counter_rng import (
     philox4x32_10_reference,
 )
 from .edge_set import allocate_edge_set, edge_set_insert
-from .enumeration import enumerate_graphs
 from .geometric import sample_geometric
 from .kernel import edge_probabilities, periodic_kernel
 from .model import ModelSpec, canonical_edge, distance_classes, iter_unordered_edges
@@ -367,6 +366,33 @@ def _exact(
     return _check(family, case_id, raw, expected, 0.0, margin, equal)
 
 
+def _exact_mask_probabilities(
+    length: int,
+    sigma: float,
+    kappa: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    edges = tuple(iter_unordered_edges(length))
+    class_probabilities = edge_probabilities(
+        ModelSpec(length, sigma, kappa),
+        periodic_kernel(length, sigma),
+    )
+    edge_probabilities_array = np.asarray(
+        [
+            class_probabilities[
+                min(right - left, length - (right - left)) - 1
+            ]
+            for left, right in edges
+        ],
+        dtype=np.float64,
+    )
+    masks = np.arange(1 << len(edges), dtype=np.uint64)
+    probabilities = np.ones(masks.size, dtype=np.float64)
+    for edge_index, probability in enumerate(edge_probabilities_array):
+        is_open = (masks & np.uint64(1 << edge_index)) != 0
+        probabilities *= np.where(is_open, probability, 1.0 - probability)
+    return probabilities, edge_probabilities_array
+
+
 def assert_sampler_structure() -> None:
     root = Path(__file__).parent
     modules = ("oracle", "geometric", "poisson_reference", "poisson_sweep")
@@ -510,29 +536,24 @@ def _exact_checks(protocol: ValidationProtocol) -> list[dict[str, object]]:
             continue
         for sigma in protocol.sigmas:
             for kappa in protocol.kappas:
-                outcomes = tuple(enumerate_graphs(ModelSpec(length, sigma, kappa)))
-                residual = abs(math.fsum(item.probability for item in outcomes) - 1.0)
-                edges = tuple(iter_unordered_edges(length))
-                probabilities = edge_probabilities(
-                    ModelSpec(length, sigma, kappa),
-                    periodic_kernel(length, sigma),
+                probabilities, edge_probabilities_array = (
+                    _exact_mask_probabilities(length, sigma, kappa)
                 )
-                maximum_product_error = 0.0
-                for outcome in outcomes:
-                    factors = []
-                    for edge_index, (left, right) in enumerate(edges):
-                        separation = right - left
-                        distance = min(separation, length - separation)
-                        probability = float(probabilities[distance - 1])
-                        factors.append(
-                            probability
-                            if outcome.mask & (1 << edge_index)
-                            else 1.0 - probability
-                        )
-                    independent_probability = math.prod(factors)
-                    maximum_product_error = max(
-                        maximum_product_error,
-                        abs(independent_probability - outcome.probability),
+                masks = np.arange(probabilities.size, dtype=np.uint64)
+                residual = abs(math.fsum(probabilities.tolist()) - 1.0)
+                maximum_edge_error = 0.0
+                for edge_index, expected_probability in enumerate(
+                    edge_probabilities_array
+                ):
+                    is_open = (
+                        masks & np.uint64(1 << edge_index)
+                    ) != 0
+                    actual_probability = math.fsum(
+                        probabilities[is_open].tolist()
+                    )
+                    maximum_edge_error = max(
+                        maximum_edge_error,
+                        abs(actual_probability - expected_probability),
                     )
                 graph_residuals[
                     f"L{length}/{_f64(sigma)}/{_f64(kappa)}"
@@ -540,21 +561,24 @@ def _exact_checks(protocol: ValidationProtocol) -> list[dict[str, object]]:
                 coverage = graph_coverage.setdefault(
                     f"L{length}",
                     {
-                        "graph_count": len(outcomes),
+                        "graph_count": probabilities.size,
                         "probabilities_compared": 0,
                         "maximum_product_error": 0.0,
+                        "maximum_edge_event_error": 0.0,
                     },
                 )
                 coverage["probabilities_compared"] = int(
                     coverage["probabilities_compared"]
-                ) + len(outcomes)
-                coverage["maximum_product_error"] = max(
-                    float(coverage["maximum_product_error"]),
-                    maximum_product_error,
+                ) + probabilities.size
+                coverage["maximum_edge_event_error"] = max(
+                    float(coverage["maximum_edge_event_error"]),
+                    maximum_edge_error,
                 )
-                graph_ok &= len(outcomes) == 1 << (length * (length - 1) // 2)
+                graph_ok &= probabilities.size == 1 << (
+                    length * (length - 1) // 2
+                )
                 graph_ok &= residual <= 512 * np.finfo(float).eps
-                graph_ok &= maximum_product_error <= 512 * np.finfo(float).eps
+                graph_ok &= maximum_edge_error <= 512 * np.finfo(float).eps
     checks.append(
         _exact(
             "all-graph-exact",
@@ -1088,51 +1112,24 @@ def _permutation_pvalue(
     right = np.asarray(right, dtype=np.float64)
     statistic = abs(float(np.mean(left) - np.mean(right)))
     pooled = np.concatenate((left, right))
+    values, counts = np.unique(pooled, return_counts=True)
+    total = float(np.sum(pooled))
     rng = np.random.Generator(np.random.Philox(seed))
     exceed = 0
-    for _ in range(replicates):
-        order = rng.permutation(pooled.size)
-        permuted = abs(
-            float(np.mean(pooled[order[: left.size]]))
-            - float(np.mean(pooled[order[left.size :]]))
+    remaining = replicates
+    while remaining:
+        batch = min(1024, remaining)
+        selected_counts = rng.multivariate_hypergeometric(
+            counts, left.size, size=batch
         )
-        exceed += int(permuted >= statistic)
-    return statistic, (exceed + 1.0) / (replicates + 1.0)
-
-
-def _permutation_family_pvalues(
-    left: np.ndarray,
-    right: np.ndarray,
-    families: Sequence[str],
-    length: int,
-    replicates: int,
-    seed: int,
-) -> tuple[np.ndarray, np.ndarray]:
-    left_values = np.column_stack(
-        [_scalar_values(left, family, length) for family in families]
-    )
-    right_values = np.column_stack(
-        [_scalar_values(right, family, length) for family in families]
-    )
-    observed = np.abs(
-        np.mean(left_values, axis=0) - np.mean(right_values, axis=0)
-    )
-    pooled = np.vstack((left_values, right_values))
-    total = np.sum(pooled, axis=0)
-    sample_count = left_values.shape[0]
-    rng = np.random.Generator(np.random.Philox(seed))
-    exceed = np.zeros(len(families), dtype=np.int64)
-    for _ in range(replicates):
-        selected = np.sum(
-            pooled[rng.permutation(pooled.shape[0])[:sample_count]],
-            axis=0,
-        )
+        selected_sums = selected_counts @ values
         permuted = np.abs(
-            selected / sample_count
-            - (total - selected) / sample_count
+            selected_sums / left.size
+            - (total - selected_sums) / right.size
         )
-        exceed += permuted >= observed
-    return observed, (exceed + 1.0) / (replicates + 1.0)
+        exceed += int(np.count_nonzero(permuted >= statistic))
+        remaining -= batch
+    return statistic, (exceed + 1.0) / (replicates + 1.0)
 
 
 def _g_statistic(counts: np.ndarray, expected: np.ndarray) -> float:
@@ -1220,10 +1217,8 @@ def _statistical_checks(
         dtype=np.int64,
     )
     if case.length <= 6:
-        outcomes = tuple(
-            enumerate_graphs(
-                ModelSpec(case.length, case.sigma, case.kappa)
-            )
+        exact_probabilities, _ = _exact_mask_probabilities(
+            case.length, case.sigma, case.kappa
         )
         threshold = (
             protocol.familywise_alpha
@@ -1232,13 +1227,15 @@ def _statistical_checks(
         for sampler in SAMPLERS:
             counts = samples.graph_masks[sampler]
             pvalues = []
-            for outcome in outcomes:
-                count = int(counts[outcome.mask])
+            for mask, expected_probability in enumerate(
+                exact_probabilities
+            ):
+                count = int(counts[mask])
                 pvalue = float(
                     binomtest(
                         count,
                         case.samples,
-                        outcome.probability,
+                        float(expected_probability),
                         alternative="two-sided",
                     ).pvalue
                 )
@@ -1249,14 +1246,14 @@ def _statistical_checks(
                     "all-graph-probability",
                     f"{case.case_id}/{sampler}",
                     {
-                        "masks": [outcome.mask for outcome in outcomes],
+                        "masks": list(range(exact_probabilities.size)),
                         "counts": counts.tolist(),
                         "trials": case.samples,
                         "pvalues": pvalues,
                     },
                     {
                         "probabilities": [
-                            outcome.probability for outcome in outcomes
+                            float(value) for value in exact_probabilities
                         ],
                         "comparison": "per-mask exact product measure",
                     },
@@ -1332,32 +1329,25 @@ def _statistical_checks(
         )
 
     for pair_index, (left, right) in enumerate(PAIR_NAMES):
-        permutation_seed = (
-            protocol.master_seeds[0]
-            + case_index * 1000
-            + pair_index * 100
-            + 40
-        )
-        families = tuple(SCALAR_COLUMNS)
-        statistics, pvalues = _permutation_family_pvalues(
-            samples.observables[left],
-            samples.observables[right],
-            families,
-            case.length,
-            protocol.permutation_replicates,
-            permutation_seed,
-        )
-        for family_index, (family, column) in enumerate(
-            SCALAR_COLUMNS.items()
-        ):
+        for family, column in SCALAR_COLUMNS.items():
             left_values = _scalar_values(
                 samples.observables[left], family, case.length
             )
             right_values = _scalar_values(
                 samples.observables[right], family, case.length
             )
-            statistic = float(statistics[family_index])
-            pvalue = float(pvalues[family_index])
+            permutation_seed = (
+                protocol.master_seeds[0]
+                + case_index * 1000
+                + pair_index * 100
+                + column
+            )
+            statistic, pvalue = _permutation_pvalue(
+                left_values,
+                right_values,
+                protocol.permutation_replicates,
+                permutation_seed,
+            )
             threshold = protocol.familywise_alpha / denominators[family]
             checks.append(
                 _check(
