@@ -65,3 +65,22 @@ python -u -m qh147.run measure --config tracks/peps/solutions/avi7ii/configs/pep
 Repeat the two measurement commands for `ordinary`. Dense 0.025-grid data and
 the ten public beta points are written under
 `tracks/peps/results/issue147-pepo/measurements/<mode>/chi-<chi>/`.
+
+## h=3 validation arrays on SCNet
+
+Generate the opaque run specs with `scripts/parameter_scan.py plan` using the
+JSON files under `configs/scans/`. The resulting cell counts are 480 QMC, two
+PEPO evolution, and four PEPO measurement cells. SCNet limits an array to 200
+tasks, so submit QMC as the three ranges `1-200`, `201-400`, and `401-480`.
+
+Run `issue147-pepo-probe.sbatch` before either full PEPO evolution cell. It
+creates only the first thermodynamic checkpoint in `cell-0002`; the full array
+then resumes from it. The SCNet profile exposes Hygon DCUs rather than CUDA,
+so these scripts set JAX to CPU and request no GPU resource. Do not release the
+40-step PEPO cells until the probe's measured wall time and peak memory fit the
+declared 12-hour, 128-GiB request.
+
+The array scripts intentionally contain no partition. Probe the live queue and
+pass the ratified partition at submission time. Use `HARNESS_KIND=pepo-measure`
+with `issue147-pepo.sbatch` for the four measurement cells after both evolution
+manifests report success.
