@@ -96,8 +96,19 @@ and one final newline. Its top-level shape is:
     "hybridization": {
       "kind": "analytic_semicircle",
       "formula": "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))",
-      "dtype": "float64",
-      "n_iw": 2049
+      "dtype": "complex128",
+      "n_iw": 2049,
+      "matsubara_omega": ["<all ordered float64 mesh values>"],
+      "delta_iw": {
+        "real": ["<all ordered float64 real parts>"],
+        "imag": ["<all ordered float64 imaginary parts>"],
+        "sha256": "<SHA256 of canonical {real,imag} bytes>"
+      },
+      "common_real_frequency": {
+        "omega": [-1.0, 0.0, 1.0],
+        "Gamma": [0.0, 0.1, 0.0],
+        "sha256": "d424a7438f1b7da8938256f2cae9812a2b52c737d34f6026453ca4aa15f55b0f"
+      }
     },
     "meshes": {
       "n_tau": 4001,
@@ -132,11 +143,17 @@ and one final newline. Its top-level shape is:
       "mpi_ranks_per_chain": 1,
       "threads_per_rank": 1
     },
+    "calibration": {
+      "artifact_sha256": "<accepted calibration payload SHA256>"
+    },
     "provenance_inputs": {
-      "model_json_sha256": "<64 lowercase hexadecimal digits>",
+      "source_manifest": {
+        "<repository-relative source or schema path>": "<64 lowercase hexadecimal digits>"
+      },
+      "source_manifest_sha256": "<SHA256 of canonical source_manifest bytes>",
       "conda_lock_sha256": "<64 lowercase hexadecimal digits>",
-      "runner_source_sha256": "<64 lowercase hexadecimal digits>",
-      "schema_sha256": "<64 lowercase hexadecimal digits>"
+      "environment_yml_sha256": "<64 lowercase hexadecimal digits>",
+      "model_json_sha256": "<64 lowercase hexadecimal digits>"
     }
   },
   "sha256": "<SHA256 of canonical payload bytes>"
@@ -147,10 +164,62 @@ The literal digests are filled by `make_input.py`; angle-bracket text is not
 accepted by the schema or verifier. Schema 1 remains a non-production
 scaffold. Schema 2 is a separate fail-closed production contract and requires
 all values above exactly. There is no `production_ready` boolean that a caller
-can flip.
+can flip. Schema 1 permanently retains
+`production_ready=false` and `scientific_comparison=false`; it must never be
+relaxed or version-mutated into production. All production evolution occurs
+under the separate schema-2 filename and artifact type.
 
 `model.json` remains the model authority. `make_input.py` must load it and
 reject any disagreement rather than copying caller-supplied physics.
+
+The `source_manifest` is complete rather than runner-only. It contains every
+transitive executable source and schema that can affect input generation,
+chain execution, calibration, reduction, validation, publication, or
+comparison: `artifacts.py`, `make_input.py`, `hybridization.py`,
+`source_manifest.py`, `run_chain.py`, `calibrate.py`, `reduce.py`,
+`publication.py`,
+`validate_existing.py`, `compare_mps.py`, both Slurm wrappers, all three
+schema-2 schemas, `smoke_test.py`, `model.json`, `environment.yml`,
+`conda-linux-64.lock`, permanent scaffold
+`cthyb-production.schema.json`, `bath.py`, `chain_mapping.py`,
+`finite_bath_ed.py`, `acceptance.py`, `convergence.py`,
+`convergence.schema.json`, Julia `Project.toml` and `Manifest.toml`, and the
+finite-bath Julia runner, checkpoint, purification, and observables sources
+that `acceptance.py` authenticates. The manifest maps repository-relative
+POSIX paths to file-byte SHA256 values. Its own digest is over canonical map
+bytes.
+Production input generation fails if any required path is absent; downstream
+validation recomputes the complete map and rejects additions, omissions, or
+changed bytes.
+
+The production input is generated only after calibration and binds the
+accepted calibration payload SHA256. Calibration plans bind the same model,
+environment, source manifest, formulas, and mesh contract but use a distinct
+`cthyb_calibration_plan` artifact and nonproduction seed namespaces; they do
+not require a circular production-input digest.
+
+The schema-2 input also serializes the complete ordered Matsubara mesh and
+\(\Delta(i\omega_n)\) as complex128 split into canonical float64 `real` and
+`imag` arrays. JSON never uses implementation-specific complex-number text.
+The `delta_iw.sha256` is computed over canonical
+`{"imag":[...],"real":[...]}` bytes and is rechecked against the formula before
+TRIQS receives the values.
+
+The real-frequency comparison surface is exactly the one currently emitted
+by schema-2 MPS convergence bath artifacts:
+
+```json
+{"Gamma":[0.0,0.1,0.0],"omega":[-1.0,0.0,1.0]}
+```
+
+Its canonical SHA256 is
+`d424a7438f1b7da8938256f2cae9812a2b52c737d34f6026453ca4aa15f55b0f`.
+The CT-HYB verifier recomputes the values from
+\(\Gamma(\omega)=0.1\sqrt{1-\omega^2}\) on \([-1,1]\). The comparator requires
+the MPS schema-2 bath artifact's `frequency_grid` and
+`target_continuum_hybridization` arrays to equal these arrays exactly and
+requires the same digest. A future denser common grid is a schema/input change,
+not an unbound plotting choice.
 
 The reported tau points are exact nodes of the 4001-point uniform TRIQS
 imaginary-time mesh: indices 0, 1000, 2000, 3000, and 4000. The reducer selects
@@ -176,8 +245,10 @@ uses the unambiguous real-frequency expression serialized in the input:
 \]
 
 This is an analytic continuous-bath input. It does not consume `bath.json`,
-finite \(\epsilon_k\), finite \(V_k\), or a star-to-chain mapping. A numerical
-quadrature test checks the formula, but quadrature is not used by production.
+finite \(\epsilon_k\), finite \(V_k\), or a star-to-chain mapping. Independent
+tests compare it both with 4096-node Gauss-Chebyshev quadrature of the second
+kind, using the same semicircular weight as `bath.py`, and with an 80-decimal
+`mpmath` integral. Neither quadrature is used by production.
 
 For both spin blocks the runner sets
 
@@ -250,11 +321,33 @@ artifact passes:
    autocorrelation time no larger than 5 cycles. The production artifact is
    intentionally fixed to 50, so calibration fails if 50 is insufficient; it
    does not silently rewrite the production input.
-4. Compare 250,000- and 500,000-cycle four-chain standard errors. Every
-   nonzero error must decrease, and the median ratio
-   \(\mathrm{SE}_{500k}/\mathrm{SE}_{250k}\) over double occupancy and the
-   genuine-interior Green-function values must lie in `[0.55, 0.90]`. This is
-   a broad \(1/\sqrt{N}\) consistency gate, not a precision claim.
+4. For each of four calibration groups, run eight independent fixed-size
+   increments of 62,500 measurement cycles. Every increment performs the full
+   selected warmup and uses a unique deterministic sub-seed outside the
+   production namespace. Its directly measured mean is \(B_{c,k}\);
+   increment means are never reconstructed by subtracting normalized
+   cumulative estimators.
+5. Use the 32 direct increment means for batch-means uncertainty. For each
+   scalar, compare each group's first-half and second-half means as four paired
+   differences. A two-sided family-wise 99% Bonferroni Student interval must
+   contain zero; the family includes `n_d`, double occupancy, and every
+   genuine-interior spin Green-function value. This detects drift without
+   requiring every noisy standard-error estimate to decrease.
+6. Estimate the variance of a 62,500-cycle batch separately within each group,
+   pool those four variances without pooling chain means, and project the
+   standard error of the final four-chain mean at 1,000,000 cycles per chain.
+   With eight batches in each of four groups, the pooled within-group variance
+   has \(\nu=4(8-1)=28\) degrees of freedom and the production mean has 64
+   batch-equivalents. Its one-sided 99% upper error bound is
+   \[
+   \sqrt{\frac{\nu s_p^2}{\chi^2_{0.01,\nu}\,64}}.
+   \]
+   This bound must be at most `5e-4` for `n_d` and double occupancy and `1e-3`
+   for each genuine-interior spin Green-function value. The artifact stores
+   batch identities and means, pairing, degrees of freedom, multiplicity
+   correction, quantiles, pooled variance, projected error, and confidence
+   bound. No gate compares two raw SE point estimates or demands monotone SE
+   reduction.
 
 The calibration uses distinct seeds derived in a separate seed namespace and
 is never pooled into production.
@@ -286,7 +379,7 @@ Production is rejected unless all of the following hold:
 * the endpoint identities
   \(G_\sigma(0)=-(1-n_\sigma)\) and
   \(G_\sigma(\beta)=-n_\sigma\) hold within
-  `max(5 * endpoint_standard_error, 0.002)`;
+  `max(3.182446305284263 * endpoint_residual_standard_error, 0.002)`;
 * no chain mean is omitted or manually down-weighted.
 
 TRIQS's autocorrelation diagnostic is based on configuration observables and
@@ -311,13 +404,28 @@ summary also reports the raw four means and a 95% Student interval using
 \(t_{0.975,3}=3.182446305284263\). Standard errors are never inferred from the
 deterministic seed or from a single accumulated `G_tau`.
 
+Endpoint uncertainty preserves the covariance between \(G\) and occupancy.
+For every chain and spin, the reducer first forms
+
+\[
+r_{c,\sigma,0}=G_{c,\sigma}(0)+(1-n_{c,\sigma}),\qquad
+r_{c,\sigma,\beta}=G_{c,\sigma}(\beta)+n_{c,\sigma}.
+\]
+
+It then applies the same four-chain mean and standard-error formula directly
+to each residual vector. It is forbidden to combine separately estimated
+errors for \(G\) and \(n\) in quadrature, because that discards their
+chain-level covariance. The summary retains all residuals, their mean,
+standard error, Student interval, and gate result.
+
 ## 6. Canonical aggregate summary
 
 `cthyb-summary.json` is `{payload, sha256}` with SHA256 over canonical payload
 bytes. Its payload includes:
 
 * schema/generator versions and `input_sha256`;
-* the exact model, conventions, beta, and tau grid;
+* the exact model, conventions, beta, tau grid, common real-frequency arrays
+  and digest, and complex128 Matsubara arrays and digest;
 * four chain IDs, seeds, chain-summary digests, raw-HDF5 byte digests, solve
   status, sign, autocorrelation, effective samples, wall time, and peak RSS;
 * means, standard errors, Student intervals, and the four chain means for
@@ -373,10 +481,29 @@ and blocks publication.
 The comparator consumes:
 
 1. one accepted `cthyb-summary.json`;
-2. one schema-valid completed MPS cell on the same physical model and tau
-   grid;
-3. one MPS convergence analysis that separately reports bath discretization,
+2. one immutable, freshly revalidated finite-bath MPS-versus-ED acceptance
+   run whose hash-bound `acceptance.json` has `passed=true`,
+   `global_max_error <= 1e-6`, and `effective_threshold <= 1e-6`;
+3. one schema-valid completed MPS production cell on the same physical model
+   and tau grid;
+4. one MPS convergence analysis that separately reports bath discretization,
    chain-length/mapping, bond truncation/maxdim, and time-step/residual bounds.
+
+The acceptance prerequisite is mechanical, not narrative. The comparison
+artifact records the acceptance artifact payload SHA256, acceptance file
+SHA256, completion SHA256, `ed-oracle.json` payload/file SHA256, and
+`mps-result.json` file SHA256. Final publication reloads the immutable
+acceptance directory through `validate_acceptance_run`, confirms its
+completion manifest and binding threshold, and rejects stale paths, copied
+JSON, or an acceptance failure. The CT-HYB production result may exist without
+this prerequisite, but neither a comparator artifact nor final Challenge 81
+publication may be accepted.
+
+The comparator also requires exact equality of the schema-2 MPS bath
+artifact's `frequency_grid=[-1.0,0.0,1.0]` and
+`target_continuum_hybridization=[0.0,0.1,0.0]`, plus the canonical common-grid
+digest from section 3. A matching model name without matching arrays and
+digest is insufficient.
 
 It compares `n_d`, double occupancy, `G_up`, and `G_down` pointwise. For each
 scalar \(j\), it records
@@ -408,6 +535,67 @@ combined production claim. It does not replace a missing component by zero or
 by the MPS–CT-HYB discrepancy.
 
 ## 9. Environment bootstrap and offline execution
+
+### 9.1 Lock regeneration required before implementation tests
+
+The currently committed explicit lock contains the solver runtime, but it does
+**not** contain direct `pytest`, `jsonschema`, or `mpmath` package entries.
+Therefore it supports the existing smoke test only. This design does not claim
+that the current lock can execute the planned test suite.
+
+The first implementation change adds unversioned `pytest`, `jsonschema`, and
+`mpmath` dependencies to `environment.yml`, lets conda-forge solve them with
+the already exact Python/TRIQS/cthyb constraints, and regenerates the complete
+explicit lock on Linux x86-64. No package URL, build, or hash is written by
+hand:
+
+```bash
+export MAMBA_ROOT_PREFIX="$PWD/tracks/mps/results/frustration-free/lockgen-mamba-root"
+export LOCK_ENV="$PWD/tracks/mps/results/frustration-free/lockgen-triqs"
+rm -rf "$LOCK_ENV"
+./micromamba create --yes --platform linux-64 --prefix "$LOCK_ENV" \
+  --file tracks/mps/solutions/frustration-free/triqs/environment.yml
+./micromamba run --prefix "$LOCK_ENV" \
+  python -c 'import jsonschema, mpmath, pytest, triqs, triqs_cthyb'
+./micromamba list --prefix "$LOCK_ENV" --explicit --md5 \
+  > tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock.tmp
+python3 - <<'PY'
+from pathlib import Path
+text = Path(
+    "tracks/mps/solutions/frustration-free/triqs/"
+    "conda-linux-64.lock.tmp"
+).read_text(encoding="utf-8")
+assert "@EXPLICIT\n" in text
+for name in ("pytest", "jsonschema", "mpmath"):
+    assert f"/{name}-" in text, name
+assert all(
+    line.startswith(("http://", "https://")) and "#" in line
+    for line in text.splitlines()
+    if line and not line.startswith(("#", "@"))
+)
+PY
+mv tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock.tmp \
+  tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
+```
+
+The generated lock is then tested from a second empty prefix:
+
+```bash
+export LOCK_VERIFY_ENV="$PWD/tracks/mps/results/frustration-free/lockverify-triqs"
+rm -rf "$LOCK_VERIFY_ENV"
+./micromamba create --yes --prefix "$LOCK_VERIFY_ENV" \
+  --file tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
+./micromamba run --prefix "$LOCK_VERIFY_ENV" \
+  python -c 'import jsonschema, mpmath, pytest, triqs, triqs_cthyb'
+./micromamba run --prefix "$LOCK_VERIFY_ENV" python -m pytest \
+  tracks/mps/solutions/frustration-free/triqs/tests -q
+```
+
+Only the solver constraints in the current lock are authoritative until this
+regeneration task is committed. The regenerated `environment.yml` and lock
+must be reviewed and committed together.
+
+### 9.2 Runtime bootstrap
 
 Run from the repository root on Linux x86-64. The online bootstrap is:
 
@@ -457,13 +645,56 @@ export CTHYB_ENV="$SCRATCH/challenge81-cthyb/triqs-4.0.0"
   python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
 ```
 
-After implementation, create the canonical input and submit the four-chain
-array with one rank and one thread per chain:
+After implementation, generate the exact 60-cell calibration plan (12 warmup,
+16 cycle-length, and 32 fixed-increment cells), submit it, and reduce it:
+
+```bash
+export CAL_ROOT="$SCRATCH/challenge81-cthyb/calibration-beta16"
+./micromamba run --offline --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py plan \
+  --output-root "$CAL_ROOT"
+export CAL_RUN="$(python3 -c \
+  'import json,os,sys; p=json.load(open(sys.argv[1])); print(os.path.join(sys.argv[2],p["relative_path"]))' \
+  "$CAL_ROOT/current.json" "$CAL_ROOT")"
+./micromamba run --offline --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
+  validate-plan --plan "$CAL_RUN/calibration-plan.json"
+sbatch --array=0-59 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
+  --export=ALL,OMP_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,MKL_NUM_THREADS=1,CTHYB_ENV="$CTHYB_ENV",CTHYB_CAL_PLAN="$CAL_RUN/calibration-plan.json",CTHYB_CAL_RUN="$CAL_RUN" \
+  tracks/mps/solutions/frustration-free/triqs/cthyb_calibration_slurm_array.sh
+```
+
+After all 60 array cells finish, reduction is exactly:
+
+```bash
+./micromamba run --offline --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py analyze \
+  --plan "$CAL_RUN/calibration-plan.json" --run-directory "$CAL_RUN"
+./micromamba run --offline --prefix "$CTHYB_ENV" \
+  python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
+  validate-existing --plan "$CAL_RUN/calibration-plan.json" \
+  --run-directory "$CAL_RUN" \
+  --calibration "$CAL_RUN/calibration.json"
+export CALIBRATION_SHA256="$(python3 -c \
+  'import json,sys; print(json.load(open(sys.argv[1]))["sha256"])' \
+  "$CAL_RUN/calibration.json")"
+```
+
+`calibrate.py plan` fixes zero-based cell ordering in its schema; the Slurm
+wrapper verifies that `SLURM_ARRAY_TASK_ID` identifies the same hash-bound cell
+before running it. `analyze` refuses missing, duplicate, or extra cells and
+publishes `calibration.json` atomically. Site account and partition flags may
+be prepended to `sbatch`.
+
+Only after accepted calibration, create the canonical production input and
+submit the four-chain array with one rank and one thread per chain:
 
 ```bash
 export CTHYB_ROOT="$SCRATCH/challenge81-cthyb/production-beta16"
 ./micromamba run --offline --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/make_input.py \
+  --calibration "$CAL_RUN/calibration.json" \
+  --expected-calibration-sha256 "$CALIBRATION_SHA256" \
   --output "$CTHYB_ROOT/cthyb-input.json"
 sbatch --array=0-3 --ntasks=1 --cpus-per-task=1 --mem=4G --time=12:00:00 \
   --export=ALL,OMP_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,MKL_NUM_THREADS=1,CTHYB_ENV="$CTHYB_ENV",CTHYB_INPUT="$CTHYB_ROOT/cthyb-input.json",CTHYB_ROOT="$CTHYB_ROOT" \
@@ -497,7 +728,8 @@ the scientific input. Once all array jobs finish:
 * **A max-time exit can look superficially usable.** Any non-normal solve
   status is incomplete and cannot publish.
 * **Endpoint conventions can differ by mesh handling.** Exact mesh-node
-  extraction and endpoint identities are mandatory tests and gates.
+  extraction and covariance-preserving chain residuals are mandatory tests and
+  gates.
 * **Density-matrix reweighting is easy to omit.** The input and raw solve
   parameters require both `measure_density_matrix` and
   `use_norm_as_weight`.
@@ -515,7 +747,8 @@ Implementation is complete only when:
 2. input generation is byte-identical across two clean invocations;
 3. analytic hybridization tests pass and every \(-\operatorname{Im}
    \Delta(i\omega_n)\) on positive frequencies is nonnegative;
-4. warmup, cycle-length, and \(1/\sqrt{N}\) calibrations pass;
+4. warmup, cycle-length, paired-increment, batch-means, and projected
+   confidence-bound calibrations pass;
 5. exactly four production chains pass every solve, sign, autocorrelation,
    effective-sample, symmetry, and endpoint gate;
 6. the raw HDF5 archives can independently regenerate every published chain
@@ -524,9 +757,11 @@ Implementation is complete only when:
    advance `current.json`;
 8. the accepted aggregate summary and completion manifest pass fresh
    hash/schema/provenance validation;
-9. the MPS comparator either publishes a fully separated compatibility budget
+9. the digest-bound finite-bath MPS-versus-ED acceptance run freshly validates
+   with maximum error and effective threshold at most \(10^{-6}\);
+10. the MPS comparator either publishes a fully separated compatibility budget
    or fails closed with named missing MPS components; and
-10. no document or artifact claims that finite-bath error is Monte Carlo
+11. no document or artifact claims that finite-bath error is Monte Carlo
     error.
 
 Increasing cycles beyond one million is not automatic. If a statistical gate

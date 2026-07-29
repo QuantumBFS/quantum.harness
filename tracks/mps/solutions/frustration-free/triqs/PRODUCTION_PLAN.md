@@ -30,8 +30,14 @@ atomic rename, Slurm arrays.
   `[810001, 810002, 810003, 810004]`.
 * Production controls are exactly 50,000 warmup cycles, 1,000,000 measurement
   cycles, and cycle length 50.
-* The accepted environment is created from `conda-linux-64.lock`; re-solving
-  `environment.yml` is not production reproduction.
+* The currently committed `conda-linux-64.lock` supports the existing solver
+  smoke test but has no direct `pytest`, `jsonschema`, or `mpmath` entries.
+  Task 0 must add those dependencies to `environment.yml`, regenerate the
+  explicit lock mechanically, and verify it from an empty prefix before any
+  planned test command is expected to work.
+* After Task 0, the accepted environment is created from the regenerated
+  `conda-linux-64.lock`; re-solving `environment.yml` is not production
+  reproduction.
 * Canonical JSON is UTF-8, sorted-key, compact, finite, duplicate-key-free,
   and newline-terminated. Payload hashes exclude the top-level `sha256`.
 * Raw HDF5 files are retained and byte-hashed, but are not described as
@@ -52,9 +58,14 @@ Create:
 
 * `triqs/cthyb-production-input.schema.json` — exact schema-2 input.
 * `triqs/cthyb-chain.schema.json` — chain summary and completion contracts.
-* `triqs/cthyb-summary.schema.json` — aggregate and comparator contracts.
-* `triqs/artifacts.py` — strict JSON, canonical hashes, file hashes, fsync,
-  locking, atomic publication, and runtime identity.
+* `triqs/cthyb-summary.schema.json` — calibration, aggregate, and comparator
+  contracts.
+* `triqs/artifacts.py` — strict JSON, canonical hashes, file hashes, and
+  runtime identity.
+* `triqs/source_manifest.py` — exact transitive path inventory and digest
+  verification.
+* `triqs/publication.py` — locks, fsync, immutable directories, current
+  pointers, recovery, and atomic publication.
 * `triqs/make_input.py` — canonical production input generator/verifier.
 * `triqs/hybridization.py` — analytic semicircular \(\Delta(i\omega_n)\) and
   TRIQS installation helpers.
@@ -63,6 +74,8 @@ Create:
 * `triqs/validate_existing.py` — independent full-tree validator.
 * `triqs/compare_mps.py` — MPS–CTHYB comparator and separated error budget.
 * `triqs/cthyb_slurm_array.sh` — profile-neutral one-chain Slurm entry point.
+* `triqs/cthyb_calibration_slurm_array.sh` — exact zero-based 60-cell
+  calibration entry point.
 * `triqs/tests/` — focused unit, corruption, recovery, and integration tests.
 
 Modify:
@@ -76,12 +89,49 @@ Modify:
   MPS error-budget artifact if the current convergence analysis cannot provide
   all four required deterministic components.
 
+## Task 0: Regenerate an executable test lock
+
+**Files:**
+
+* Modify: `tracks/mps/solutions/frustration-free/triqs/environment.yml`
+* Regenerate:
+  `tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock`
+
+- [ ] **Step 1: Add test-only direct dependencies to the human-readable spec**
+
+Add `pytest`, `jsonschema`, and `mpmath` without fabricated versions. Keep
+`python=3.12`, `triqs=4.0.0`, and `triqs_cthyb=4.0.0` exact.
+
+- [ ] **Step 2: Regenerate; never hand-edit package records**
+
+Run the lock-generation commands in `PRODUCTION_DESIGN.md` section 9.1 on
+Linux x86-64. `micromamba list --explicit --md5` must produce every package
+URL/build/hash. No reviewer or implementation agent may invent a package URL,
+build number, or MD5.
+
+- [ ] **Step 3: Verify from a second empty prefix**
+
+Create the second environment from the generated explicit lock, import
+`jsonschema`, `mpmath`, `pytest`, `triqs`, and `triqs_cthyb`, run
+`smoke_test.py`, and run a one-test pytest probe. Preserve the command output
+in the implementation report.
+
+- [ ] **Step 4: Commit spec and generated lock together**
+
+```bash
+git diff --check
+git add tracks/mps/solutions/frustration-free/triqs/environment.yml \
+  tracks/mps/solutions/frustration-free/triqs/conda-linux-64.lock
+git commit -m "build(cthyb): regenerate executable test lock"
+```
+
 ## Task 1: Canonical production input contract
 
 **Files:**
 
 * Create: `tracks/mps/solutions/frustration-free/triqs/cthyb-production-input.schema.json`
 * Create: `tracks/mps/solutions/frustration-free/triqs/artifacts.py`
+* Create: `tracks/mps/solutions/frustration-free/triqs/source_manifest.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/make_input.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/tests/test_input.py`
 * Modify: `tracks/mps/solutions/frustration-free/triqs/cthyb-production.schema.json`
@@ -94,15 +144,20 @@ Modify:
 * `verify_input(artifact: object) -> dict[str, object]`
 * `make_production_input(solution_dir: Path) -> dict[str, object]`
 * `write_production_input(path: Path, solution_dir: Path) -> dict[str, object]`
+* `build_source_manifest(repository_root: Path) -> dict[str, str]`
+* `verify_source_manifest(manifest: object, repository_root: Path) -> None`
 
 - [ ] **Step 1: Write failing canonicalization and schema tests**
 
 Test two clean generations for byte equality, exact physics and gates, sorted
 compact encoding, final newline, payload SHA256, four unique seeds, exact tau
-mesh indices, and source/lock/model hashes. Add rejection cases for duplicate
-keys, NaN/infinity, booleans used as integers, unknown keys, schema 1,
-placeholder zero digests, changed model values, changed seed order, and a
-source file changed after input generation.
+mesh indices, the common real-frequency arrays/digest, complete complex128
+real/imag Matsubara arrays/digest, calibration digest, and transitive
+source/schema/lock/model hashes. Add rejection cases for duplicate keys,
+NaN/infinity, booleans used as integers, unknown keys, schema 1, placeholder
+zero digests, changed model values, changed seed order, a missing manifest
+path, an extra manifest path, and a source or schema changed after input
+generation.
 
 ```bash
 ./micromamba run --prefix "$CTHYB_ENV" python -m pytest \
@@ -121,15 +176,17 @@ Reject symlink destinations and non-regular existing files.
 
 - [ ] **Step 3: Implement the exact schema-2 generator and verifier**
 
-Load `model.json`; do not accept physics flags from the CLI. Compute
-`model_json_sha256`, `conda_lock_sha256`, `runner_source_sha256`, and
-`schema_sha256`. Because `run_chain.py` does not exist until Task 3, bind the
-initial input to a checked-in `runner-contract-v1` digest fixture in the tests,
-then replace that fixture with the actual runner digest in Task 3 before any
-production input is generated.
+Load `model.json`; do not accept physics flags from the CLI. Define the exact
+required transitive path inventory from `PRODUCTION_DESIGN.md` section 3 and
+hash every file byte plus the canonical manifest. Unit tests build that
+inventory in a temporary complete fixture. The real generator fails closed
+while later-task sources or schemas are absent; no placeholder digest or stub
+source is permitted.
 
-The only CLI option is `--output`. Reject pre-existing different content;
-revalidate and reuse byte-identical content.
+The production CLI requires `--calibration`,
+`--expected-calibration-sha256`, and `--output`. It freshly validates the
+accepted calibration artifact before embedding its digest. Reject pre-existing
+different content; revalidate and reuse byte-identical content.
 
 - [ ] **Step 4: Preserve schema 1 as non-production**
 
@@ -160,6 +217,9 @@ Expected: tests PASS and only Task 1 files are staged.
 **Interfaces:**
 
 * `delta_iw(omega: numpy.ndarray, *, gamma: float, bandwidth: float) -> numpy.ndarray`
+  returning `complex128`
+* `serialize_complex128(values: numpy.ndarray) -> dict[str, object]`
+* `verify_common_real_frequency(payload: object) -> None`
 * `install_g0(solver: Solver, input_payload: dict[str, object]) -> None`
 * `reported_tau_indices(beta: float, n_tau: int, tau: Sequence[float]) -> list[int]`
 
@@ -167,10 +227,19 @@ Expected: tests PASS and only Task 1 files are staged.
 
 Cover positive and negative fermionic frequencies, conjugation symmetry,
 purely imaginary output, causality, high-frequency coefficient
-\(\Delta(i\omega)\sim\Gamma D/(2i\omega)\), and agreement within `2e-13`
-absolute error with a 512-node Gauss-Legendre integration for representative
-frequencies. Check the exact tau indices `[0,1000,2000,3000,4000]` and reject a
-non-node reported tau.
+\(\Delta(i\omega)\sim\Gamma D/(2i\omega)\), agreement with a 4096-node
+Gauss-Chebyshev-II rule using
+\(x_k=\cos(k\pi/(N+1))\) and
+\(w_k=\pi\sin^2(k\pi/(N+1))/(N+1)\), and agreement with an independent
+80-decimal `mpmath` integral for representative frequencies. Check exact
+complex128 split real/imag serialization, array length/order, canonical
+digest, and rejection of complex64. Check the exact tau indices
+`[0,1000,2000,3000,4000]` and reject a non-node reported tau.
+
+Check the common real-frequency object is exactly
+`omega=[-1.0,0.0,1.0]`, `Gamma=[0.0,0.1,0.0]`, and digest
+`d424a7438f1b7da8938256f2cae9812a2b52c737d34f6026453ca4aa15f55b0f`.
+Load schema-2 MPS bath fixtures and reject any frequency/value/digest mismatch.
 
 Add a noninteracting test that inspects installed
 `G0_iw` and proves the inverse is
@@ -194,7 +263,7 @@ because fermionic Matsubara meshes contain no zero mode.
 
 Construct TRIQS block Green functions without numerical bath
 discretization. Verify both spin blocks receive identical values and record a
-float64 complex-array digest used by raw-HDF5 validation.
+complex128 split-array digest used by input and raw-HDF5 validation.
 
 - [ ] **Step 4: Run tests and commit**
 
@@ -263,11 +332,12 @@ Use `work/<input-sha>/chain-NNN/.attempt-<uuid>`, a per-chain advisory lock,
 On startup archive abandoned attempts. A valid completed chain skips; a stale
 or corrupt completed chain fails closed and is not overwritten.
 
-- [ ] **Step 5: Bind the actual runner source**
+- [ ] **Step 5: Extend manifest tests through chain execution**
 
-Replace Task 1's contract fixture with `sha256(run_chain.py bytes)`. Add a test
-that modifying the runner after input generation makes the runner reject the
-input. Input generation must happen after source is final.
+Add `run_chain.py`, `cthyb-chain.schema.json`, and their transitive imports to
+the complete manifest fixture. Prove modifying either source or schema after
+input generation makes the runner reject the input. Do not generate a real
+production input until every later required manifest path exists.
 
 - [ ] **Step 6: Run focused tests and a tiny real pilot**
 
@@ -300,31 +370,49 @@ git commit -m "feat(cthyb): retain validated raw chain evidence"
 
 * Create: `tracks/mps/solutions/frustration-free/triqs/calibrate.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/tests/test_calibration.py`
-* Modify: `tracks/mps/solutions/frustration-free/triqs/cthyb-summary.schema.json`
+* Create: `tracks/mps/solutions/frustration-free/triqs/cthyb-summary.schema.json`
+* Create:
+  `tracks/mps/solutions/frustration-free/triqs/cthyb_calibration_slurm_array.sh`
 
 **Interfaces:**
 
 * `analyze_warmup(cells: Sequence[ChainBundle]) -> dict[str, object]`
 * `select_cycle_length(cells: Sequence[ChainBundle]) -> dict[str, object]`
-* `analyze_mc_scaling(cells: Sequence[ChainBundle]) -> dict[str, object]`
-* `validate_calibration(artifact: object, production_input: object) -> None`
+* `analyze_batch_means(cells: Sequence[ChainBundle]) -> dict[str, object]`
+* `validate_calibration(artifact: object, calibration_plan: object) -> None`
 
 - [ ] **Step 1: Write failing synthetic-statistics tests**
 
 Construct deterministic fixtures for warmup shifts, pooled errors,
-autocorrelation convergence, exact cycle-length selection, and
-`SE_500k/SE_250k` median bounds. Test boundary inclusion at `5e-4`, `5.0`,
-`0.55`, and `0.90`. Reject calibration seeds reused by production, missing
-cells, duplicate cells, mixed input identities, and an attempted silent
-change from cycle length 50.
+autocorrelation convergence, exact cycle-length selection, direct fixed-size
+increment means, paired first-half/second-half differences,
+family-wise 99% Bonferroni Student intervals, pooled within-chain batch
+variance, and upper 99% chi-square confidence bounds on projected production
+error. Test exact boundaries `5e-4`, `1e-3`, and `5.0`. Reject reused increment
+seeds, calibration seeds reused by production, reconstructed increments from
+subtracted normalized cumulative means, missing/extra/duplicate cells, mixed
+input identities, and an attempted silent change from cycle length 50. No test
+requires every point estimate of SE to decrease.
 
 - [ ] **Step 2: Implement canonical calibration plans and analysis**
 
-Generate all warmup/cycle-length/scaling cells with a separate deterministic
-seed namespace. Hash-bind each plan and result. Calibration may pass or fail;
-it cannot edit the production input.
+Generate exactly 60 cells with a separate deterministic seed namespace: 12
+warmup cells, 16 cycle-length cells, and 32 independent 62,500-cycle increment
+cells arranged as eight increments in each of four paired groups. Every
+increment performs full warmup and has a unique sub-seed. The plan schema fixes
+zero-based ordering and binds source manifest, environment, model, formulas,
+meshes, seeds, pairing, and each cell input. Hash-bind every result.
+Calibration may pass or fail; it cannot edit the production input.
 
-- [ ] **Step 3: Run tests and commit**
+- [ ] **Step 3: Implement and test exact cluster commands**
+
+Implement `plan`, `validate-plan`, array-cell execution, `analyze`, and
+`validate-existing` exactly as invoked in `PRODUCTION_DESIGN.md` section 9.
+The wrapper accepts only indices 0–59, one task, one CPU, one thread, absolute
+paths, and `--offline`; it validates the selected plan cell before execution.
+Test fake-Slurm generation/submission/reduction command lines byte for byte.
+
+- [ ] **Step 4: Run tests and commit**
 
 ```bash
 ./micromamba run --prefix "$CTHYB_ENV" python -m pytest \
@@ -338,8 +426,9 @@ git commit -m "feat(cthyb): gate production calibration"
 
 **Files:**
 
-* Create: `tracks/mps/solutions/frustration-free/triqs/cthyb-summary.schema.json`
+* Modify: `tracks/mps/solutions/frustration-free/triqs/cthyb-summary.schema.json`
 * Create: `tracks/mps/solutions/frustration-free/triqs/reduce.py`
+* Create: `tracks/mps/solutions/frustration-free/triqs/publication.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/validate_existing.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/tests/test_reduce.py`
 * Create: `tracks/mps/solutions/frustration-free/triqs/tests/test_recovery.py`
@@ -349,7 +438,7 @@ git commit -m "feat(cthyb): gate production calibration"
 * `effective_samples(n_cycles: int, tau_int: float) -> int`
 * `independent_chain_statistics(values: Sequence[float]) -> dict[str, object]`
 * `build_summary(input_artifact: object, chains: Sequence[object], calibration: object) -> dict[str, object]`
-* `publish_run(output_root: Path, summary: object, chains: Sequence[Path]) -> Path`
+* `publication.publish_run(output_root: Path, summary: object, chains: Sequence[Path]) -> Path`
 * `validate_published_run(path: Path) -> dict[str, object]`
 
 - [ ] **Step 1: Write failing statistics tests**
@@ -363,6 +452,12 @@ chains, five chains, duplicate seed/index, unconverged autocorrelation,
 effective samples below 100,000, total below 400,000, sign below 0.99,
 spin asymmetry above 0.005, half-filling error above 0.005, endpoint failure,
 or any omitted chain.
+
+For endpoints, construct chain-level
+`r_0=G(0)+(1-n)` and `r_beta=G(beta)+n` fixtures with nonzero covariance.
+Assert the reducer computes residual means and standard errors directly from
+the four residuals. A deliberately covariance-blind quadrature result must be
+rejected by the fixture.
 
 - [ ] **Step 2: Implement summary and gates**
 
@@ -379,12 +474,14 @@ one blocks. Corrupt every referenced file in turn and prove fresh validation
 fails. Ensure abandoned staging is archived, never accepted or silently
 deleted.
 
-- [ ] **Step 4: Implement immutable publication**
+- [ ] **Step 4: Implement immutable publication in `publication.py`**
 
-Publish `runs/cthyb-<summary-sha-prefix>/`, write a complete file-hash manifest,
-then atomically advance `current.json`. Use same-filesystem rename and directory
-fsync. Reject symlinks, special files, extra files, run-ID collision, and
-existing different bytes.
+Keep statistical construction in `reduce.py`; it may call but must not
+reimplement publication primitives. `publication.py` exclusively owns locks,
+staging recovery, fsync, immutable run rename, completion manifests, and
+`current.json`. Publish `runs/cthyb-<summary-sha-prefix>/`, write a complete
+file-hash manifest, then atomically advance `current.json`. Reject symlinks,
+special files, extra files, run-ID collision, and existing different bytes.
 
 - [ ] **Step 5: Run tests and commit**
 
@@ -410,7 +507,8 @@ git commit -m "feat(cthyb): publish gated four-chain summary"
 **Interfaces:**
 
 * `load_mps_error_budget(path: Path) -> dict[str, object]`
-* `compare(mps_result: object, mps_budget: object, cthyb_summary: object) -> dict[str, object]`
+* `load_validated_acceptance(path: Path, julia_project: Path) -> dict[str, object]`
+* `compare(mps_result: object, mps_budget: object, cthyb_summary: object, acceptance: object) -> dict[str, object]`
 * `validate_comparison(artifact: object) -> None`
 
 - [ ] **Step 1: Audit the current convergence output against required axes**
@@ -430,11 +528,20 @@ abs(MPS - CTHYB)
 ```
 
 for `n_d`, double occupancy, `G_up`, and `G_down`. Require exact model, beta,
-tau, and convention identity.
+tau, convention identity, and exact common real-frequency arrays/digest.
 
 Reject missing axes, null axes, negative bounds, renamed MC errors, mismatched
-tau, use of finite-bath ED as the continuous reference, and any calculation
-that assigns observed discrepancy to bath or MC error.
+tau, use of finite-bath ED as the continuous reference, a schema-2 MPS bath
+artifact with changed `frequency_grid`, target values, or digest, and any
+calculation that assigns observed discrepancy to bath or MC error.
+
+Create immutable acceptance fixtures and mechanically require
+`validate_acceptance_run` to pass with `passed=true`,
+`global_max_error <= 1e-6`, and `effective_threshold <= 1e-6`. Reject a copied
+standalone `acceptance.json`, changed completion digest, stale ED/MPS file
+hash, threshold above \(10^{-6}\), or failed acceptance. Assert the comparison
+artifact records acceptance payload/file/completion, ED payload/file, and MPS
+result file digests.
 
 - [ ] **Step 3: Add the smallest missing MPS budget contract**
 
@@ -447,7 +554,8 @@ Do not infer an unavailable production bound.
 
 The output reports observed differences, CT-HYB SE/Student interval, each MPS
 component, envelope, and pass status separately. A missing MPS component is a
-named blocker, not zero.
+named blocker, not zero. Neither comparison nor final publication can succeed
+without the freshly validated digest-bound finite-bath acceptance prerequisite.
 
 ```bash
 ./micromamba run --prefix "$CTHYB_ENV" python -m pytest \
@@ -521,20 +629,29 @@ Use four fake or tiny real solver bundles, but mark the profile
 Exercise input generation, four chain publications, reduction, current
 pointer, fresh validation, and comparator.
 
-- [ ] **Step 2: Add an exhaustive corruption matrix**
+- [ ] **Step 2: Close and verify the transitive source manifest**
+
+Require the exact inventory from `PRODUCTION_DESIGN.md` section 3 now that all
+sources, wrappers, and schemas exist. Recompute each file digest and the
+canonical manifest digest independently in tests. Change each source and each
+schema in turn and prove input, chain, calibration, reduction, comparison, and
+final publication reject it. Production input generation must now succeed
+without a fixture, stub, optional path, or runner-only shortcut.
+
+- [ ] **Step 3: Add an exhaustive corruption matrix**
 
 Mutate input bytes, every chain summary, each HDF5 file, completion hashes,
 source hashes, lock hash, seed, tau order, model convention, aggregate
 standard error, comparison component, and current pointer. Each mutation must
 fail before a scientific value is returned.
 
-- [ ] **Step 3: Verify deterministic metadata**
+- [ ] **Step 4: Verify deterministic metadata**
 
 Run the test profile twice from clean roots. Canonical input bytes and all
 deterministic derived metadata must match. Raw Monte Carlo/HDF5 byte equality
 is not required and must not be asserted.
 
-- [ ] **Step 4: Run complete pre-production verification**
+- [ ] **Step 5: Run complete pre-production verification**
 
 ```bash
 git diff --check
@@ -548,7 +665,7 @@ uv run --project tracks/mps/solutions/frustration-free --frozen \
 
 Expected: all tests PASS; no result directories are staged.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git status --short
@@ -569,8 +686,10 @@ task. That statement requires Task 9 evidence.
 
 - [ ] **Step 1: Create and validate calibration plans**
 
-Generate the exact warmup, cycle-length, and MC-scaling cells from Task 4.
-Submit as independent one-rank arrays. Re-run full validation before analysis.
+Run the exact `calibrate.py plan`, `validate-plan`,
+`sbatch --array=0-59`, `analyze`, and `validate-existing` commands from
+`PRODUCTION_DESIGN.md` section 9. Submit the 60 hash-bound cells as independent
+one-rank jobs. Re-run full validation before analysis.
 
 - [ ] **Step 2: Apply the calibration stopping gate**
 
@@ -579,8 +698,12 @@ Proceed only if:
 * 25,000-to-50,000 warmup shifts satisfy the pooled-SE/`5e-4` bound;
 * cycle length 50 has converged autocorrelation no larger than 5 for all four
   chains;
-* all nonzero standard errors shrink from 250,000 to 500,000 cycles;
-* the median shrinkage ratio lies in `[0.55,0.90]`.
+* all 32 fixed-size increments use unique nonproduction seeds, full warmup,
+  exact pairing, and directly measured means;
+* every family-wise 99% Bonferroni paired first-half/second-half drift interval
+  contains zero;
+* upper 99% projected production-error bounds are at most `5e-4` for `n_d`
+  and double occupancy and `1e-3` for each genuine-interior spin Green value.
 
 If any condition fails, publish a calibration failure report and stop. Change
 the design/input in a reviewed commit; do not override the gate.
@@ -588,8 +711,9 @@ the design/input in a reviewed commit; do not override the gate.
 - [ ] **Step 3: Generate the final canonical input**
 
 Generate `cthyb-input.json` only from the final committed source. Record the
-git commit, input payload digest, schema digest, runner digest, model digest,
-and conda-lock digest.
+git commit, calibration digest, input payload digest, common real-frequency
+digest, complex128 Matsubara digest, complete transitive source/schema
+manifest and digest, model digest, environment digest, and conda-lock digest.
 
 - [ ] **Step 4: Submit exactly four production chains**
 
@@ -599,18 +723,25 @@ partial HDF5 or change cycles after submission.
 
 - [ ] **Step 5: Reduce and apply production stopping gates**
 
-Stop without an accepted result unless all ten stopping criteria in
+Stop without an accepted result unless all eleven stopping criteria in
 `PRODUCTION_DESIGN.md` section 11 hold. A failed result remains auditable and
 does not advance `current.json`.
 
-- [ ] **Step 6: Compare with MPS**
+- [ ] **Step 6: Revalidate finite-bath MPS–ED acceptance**
+
+Resolve the immutable acceptance run through its current pointer and call
+`validate_acceptance_run`. Stop unless `passed=true`, `global_max_error <=
+1e-6`, and `effective_threshold <= 1e-6`. Record all acceptance, ED, MPS, and
+completion digests required by the comparator contract.
+
+- [ ] **Step 7: Compare with MPS**
 
 Use an accepted MPS completed cell and complete four-axis MPS error budget on
-the same model and tau grid. Publish compatibility or explicit named
-blockers. Do not infer missing deterministic errors from the CT-HYB
-difference.
+the same model, tau grid, and digest-bound common real-frequency surface.
+Publish compatibility or explicit named blockers. Do not infer missing
+deterministic errors from the CT-HYB difference.
 
-- [ ] **Step 7: Update status only from accepted evidence**
+- [ ] **Step 8: Update status only from accepted evidence**
 
 After fresh validation succeeds, update both READMEs with the immutable run
 ID, summary digest, input digest, exact environment digest, chain/gate
@@ -621,6 +752,9 @@ results gitignored unless repository policy is explicitly changed.
 
 - [ ] Schema 1 still cannot claim production.
 - [ ] Canonical input is byte-stable and source/hash bound.
+- [ ] Complete transitive source and schema manifest validates.
+- [ ] Common real-frequency arrays/digest match schema-2 MPS bath artifacts.
+- [ ] Matsubara \(\Delta\) is canonical complex128 split real/imag data.
 - [ ] The bath is analytic and continuous; no finite bath artifact is consumed.
 - [ ] Four separate chain processes and four unique seeds are present.
 - [ ] Raw HDF5 regenerates every chain value.
@@ -628,11 +762,15 @@ results gitignored unless repository policy is explicitly changed.
   symmetry, and endpoints all pass.
 - [ ] Standard errors come from four independent chain means.
 - [ ] Student intervals disclose three degrees of freedom.
+- [ ] Endpoint residual errors preserve chain-level \(G\)-occupancy covariance.
+- [ ] Calibration uses paired increments, batch means, and confidence bounds.
 - [ ] Partial-chain resume is not claimed.
 - [ ] Atomic publication and current-pointer recovery pass injected failures.
 - [ ] Comparator keeps MC, bath, chain, bond, and time/residual errors separate.
+- [ ] Digest-bound finite-bath MPS–ED acceptance passes at \(10^{-6}\).
 - [ ] Offline lock-file bootstrap and Slurm execution are reproduced.
 - [ ] No generated production result is committed.
 
-The first implementation task is Task 1: land the exact schema-2 canonical
-input and strict artifact primitives before any solver code is written.
+The first implementation task is Task 0: regenerate and independently verify
+the explicit environment lock with `pytest`, `jsonschema`, and `mpmath`
+before any planned TDD command is treated as executable.
