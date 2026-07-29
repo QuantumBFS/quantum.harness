@@ -37,6 +37,71 @@ def _canonical_bytes(document: object) -> bytes:
     )
 
 
+def _selector_document(
+    *,
+    sigmas: tuple[float, ...] = (0.8, 1.1),
+    lengths: tuple[int, ...] = (8, 16, 32),
+    kappas: tuple[float, ...] = (0.0, 1.0, 2.0, 4.0),
+    values: dict[
+        tuple[float, int, float],
+        tuple[float, float],
+    ]
+    | None = None,
+) -> dict[str, object]:
+    values = values or {}
+    estimates: list[dict[str, object]] = []
+    for sigma in sigmas:
+        for length in lengths:
+            for kappa in kappas:
+                q_g, crossing = values.get(
+                    (sigma, length, kappa),
+                    (float(length) + kappa, 0.1 * kappa),
+                )
+                estimates.append(
+                    {
+                        "sigma_hex": sigma.hex(),
+                        "length": length,
+                        "kappa_hex": kappa.hex(),
+                        "replica_count": 8,
+                        "means": {
+                            "s1_fraction": 0.1,
+                            "s2_fraction": 0.05,
+                            "q_g": q_g,
+                            "four_sector_crossing": crossing,
+                        },
+                        "standard_errors": {name: 0.01 for name in OBSERVABLE_COLUMNS},
+                        "request_sha256": [
+                            str(replica) * 64 for replica in range(1, 9)
+                        ],
+                    }
+                )
+    document: dict[str, object] = {
+        "schema_version": analysis.ANALYSIS_SCHEMA,
+        "p0_run_spec_sha256": "a" * 64,
+        "p0_progress_sha256": "b" * 64,
+        "source_revision": "c" * 40,
+        "analysis_plan_sha256": "d" * 64,
+        "observable_columns": OBSERVABLE_COLUMNS,
+        "estimates": estimates,
+    }
+    document["analysis_document_sha256"] = hashlib.sha256(
+        _canonical_bytes(document)
+    ).hexdigest()
+    return document
+
+
+def _set_selector_value(
+    values: dict[tuple[float, int, float], tuple[float, float]],
+    sigma: float,
+    length: int,
+    kappas: tuple[float, ...],
+    q_g: tuple[float, ...],
+    crossing: tuple[float, ...],
+) -> None:
+    for kappa, q_value, crossing_value in zip(kappas, q_g, crossing, strict=True):
+        values[(sigma, length, kappa)] = (q_value, crossing_value)
+
+
 def _tiny_complete_pilot(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -560,3 +625,145 @@ def test_pilot_estimate_is_immutable():
         estimate.length = 16
     with pytest.raises(TypeError):
         estimate.means["q_g"] = 1.0
+
+
+def test_select_p1_brackets_selects_unique_common_interval():
+    values: dict[tuple[float, int, float], tuple[float, float]] = {}
+    kappas = (0.0, 1.0, 2.0, 4.0)
+    _set_selector_value(
+        values, 0.8, 16, kappas, (4.0, 2.0, 1.0, 0.0), (0.0, 0.1, 0.2, 0.9)
+    )
+    _set_selector_value(
+        values, 0.8, 32, kappas, (3.0, 1.0, 2.0, 3.0), (0.0, 0.2, 0.8, 1.0)
+    )
+
+    selected = analysis.select_p1_brackets(
+        _selector_document(sigmas=(0.8,), values=values)
+    )
+
+    assert selected["requires_p0_extension"] is False
+    bracket = selected["brackets"][0]
+    assert bracket["sigma_hex"] == (0.8).hex()
+    assert bracket["lower_kappa_hex"] == (1.0).hex()
+    assert bracket["upper_kappa_hex"] == (2.0).hex()
+    assert bracket["lengths"] == [16, 32]
+    assert bracket["estimator_evidence"]["q_g"]["marked"] is True
+    assert bracket["estimator_evidence"]["four_sector_crossing"]["marked"] is True
+    assert bracket["tie_break"] == {
+        "rule": "narrowest_interval_then_lower_coupling",
+        "candidate_count": 1,
+        "selected_width_hex": (1.0).hex(),
+    }
+
+
+def test_select_p1_brackets_breaks_common_interval_ties_deterministically():
+    values: dict[tuple[float, int, float], tuple[float, float]] = {}
+    kappas = (0.0, 1.0, 3.0, 5.0, 8.0)
+    for length, q_g in (
+        (16, (9.0, 3.0, 1.0, 3.0, 3.0)),
+        (32, (8.0, 1.0, 2.0, 1.0, 2.0)),
+    ):
+        _set_selector_value(
+            values,
+            0.8,
+            length,
+            kappas,
+            q_g,
+            (0.0, 0.2, 0.8, 0.2, 0.8),
+        )
+
+    selected = analysis.select_p1_brackets(
+        _selector_document(sigmas=(0.8,), kappas=kappas, values=values)
+    )
+
+    bracket = selected["brackets"][0]
+    assert bracket["lower_kappa_hex"] == (1.0).hex()
+    assert bracket["upper_kappa_hex"] == (3.0).hex()
+    assert bracket["tie_break"]["candidate_count"] == 2
+
+
+def test_select_p1_brackets_requests_extension_without_common_interval():
+    selected = analysis.select_p1_brackets(_selector_document(sigmas=(0.8,), values={}))
+
+    assert selected["requires_p0_extension"] is True
+    assert selected["brackets"] == [
+        {
+            "sigma_hex": (0.8).hex(),
+            "status": "requires_p0_extension",
+            "reason": "no_nonzero_interval_marked_by_both_estimators",
+            "lengths": [16, 32],
+        }
+    ]
+
+
+def test_select_p1_brackets_uses_maximum_control_slope():
+    values: dict[tuple[float, int, float], tuple[float, float]] = {}
+    kappas = (0.0, 1.0, 3.0, 5.0)
+    _set_selector_value(
+        values,
+        1.1,
+        32,
+        kappas,
+        (1.0, 1.0, 1.0, 1.0),
+        (0.0, 0.1, 0.9, 1.0),
+    )
+
+    selected = analysis.select_p1_brackets(
+        _selector_document(sigmas=(1.1,), kappas=kappas, values=values)
+    )
+
+    bracket = selected["brackets"][0]
+    assert bracket["purpose"] == "crossover_refinement"
+    assert bracket["lower_kappa_hex"] == (1.0).hex()
+    assert bracket["upper_kappa_hex"] == (3.0).hex()
+    assert bracket["estimator_evidence"]["absolute_slope_hex"] == (0.4).hex()
+    assert bracket["tie_break"]["rule"] == "maximum_absolute_slope_then_lower_coupling"
+
+
+@pytest.mark.parametrize(
+    ("defect", "match"),
+    (
+        ("zero-only", "zero-coupling"),
+        ("reordered", "canonical coupling order"),
+        ("nan", "finite"),
+        ("missing-largest", "largest-size estimates"),
+    ),
+)
+def test_select_p1_brackets_rejects_malformed_evidence(defect: str, match: str):
+    values: dict[tuple[float, int, float], tuple[float, float]] = {}
+    kappas = (0.0, 1.0, 2.0, 4.0)
+    if defect == "zero-only":
+        _set_selector_value(
+            values,
+            0.8,
+            16,
+            kappas,
+            (2.0, 1.0, 1.0, 1.0),
+            (0.2, 0.8, 0.8, 0.8),
+        )
+        _set_selector_value(
+            values,
+            0.8,
+            32,
+            kappas,
+            (1.0, 2.0, 2.0, 2.0),
+            (0.2, 0.8, 0.8, 0.8),
+        )
+    document = _selector_document(sigmas=(0.8,), values=values)
+    estimates = document["estimates"]
+    assert isinstance(estimates, list)
+    if defect == "reordered":
+        estimates[5], estimates[6] = estimates[6], estimates[5]
+    elif defect == "nan":
+        estimates[-1]["means"]["q_g"] = float("nan")
+    elif defect == "missing-largest":
+        estimates.pop()
+    if defect not in ("zero-only", "nan"):
+        unsigned = dict(document)
+        unsigned.pop("analysis_document_sha256")
+        document["analysis_document_sha256"] = hashlib.sha256(
+            _canonical_bytes(unsigned)
+        ).hexdigest()
+
+    with pytest.raises(RuntimeError, match=match):
+        analysis.select_p1_brackets(document)

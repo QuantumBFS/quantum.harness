@@ -5,6 +5,7 @@ import json
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from itertools import pairwise
 from pathlib import Path
 from types import MappingProxyType
 from typing import Never
@@ -15,6 +16,7 @@ from . import pilot as _pilot
 from .pilot import PilotCell
 
 ANALYSIS_SCHEMA = "challenge-194-p0-analysis-v1"
+BRACKET_SCHEMA = "challenge-194-p1-brackets-v1"
 OBSERVABLE_COLUMNS: Mapping[str, int] = MappingProxyType(
     {
         "s1_fraction": 4,
@@ -292,3 +294,260 @@ def _aggregate_test_p0(
         snapshot_parent=snapshot_parent,
         _snapshot_hook=_snapshot_hook,
     )
+
+
+def _exact_hex_value(raw: object, name: str) -> float:
+    try:
+        value = float.fromhex(str(raw))
+    except (TypeError, ValueError) as error:
+        raise RuntimeError(f"analysis {name} is malformed") from error
+    if not math.isfinite(value) or value.hex() != raw:
+        raise RuntimeError(f"analysis {name} is not canonical finite binary64")
+    return value
+
+
+def _selector_estimates(
+    analysis: Mapping[str, object],
+) -> tuple[
+    tuple[float, ...],
+    tuple[int, ...],
+    tuple[float, ...],
+    dict[tuple[float, int, float], tuple[float, float]],
+]:
+    if analysis.get("schema_version") != ANALYSIS_SCHEMA:
+        raise RuntimeError("analysis schema version is not supported")
+    raw_estimates = analysis.get("estimates")
+    if isinstance(raw_estimates, (str, bytes)) or not isinstance(
+        raw_estimates, Sequence
+    ):
+        _malformed("analysis estimates are malformed")
+
+    identities: list[tuple[float, int, float]] = []
+    values: dict[tuple[float, int, float], tuple[float, float]] = {}
+    sigmas: list[float] = []
+    lengths: list[int] = []
+    kappas: list[float] = []
+    for raw in raw_estimates:
+        if not isinstance(raw, Mapping):
+            _malformed("analysis estimate is malformed")
+        sigma = _exact_hex_value(raw.get("sigma_hex"), "sigma")
+        kappa = _exact_hex_value(raw.get("kappa_hex"), "coupling")
+        length = raw.get("length")
+        if not isinstance(length, int) or isinstance(length, bool) or length <= 0:
+            _malformed("analysis length is malformed")
+        means = raw.get("means")
+        if not isinstance(means, Mapping):
+            _malformed("analysis estimate means are malformed")
+        observables: list[float] = []
+        for name in ("q_g", "four_sector_crossing"):
+            value = means.get(name)
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                _malformed(f"analysis {name} mean is malformed")
+            value = float(value)
+            if not math.isfinite(value):
+                raise RuntimeError("analysis estimator means must be finite")
+            observables.append(value)
+        identity = (sigma, length, kappa)
+        if identity in values:
+            raise RuntimeError("analysis contains duplicate estimates")
+        identities.append(identity)
+        values[identity] = (observables[0], observables[1])
+        if sigma not in sigmas:
+            sigmas.append(sigma)
+        if length not in lengths:
+            lengths.append(length)
+        if kappa not in kappas:
+            kappas.append(kappa)
+
+    if len(lengths) < 2:
+        raise RuntimeError("analysis lacks two largest sizes")
+    if (
+        not kappas
+        or kappas[0] != 0.0
+        or any(right <= left for left, right in pairwise(kappas))
+    ):
+        raise RuntimeError("analysis estimates are not in canonical coupling order")
+    expected = [
+        (sigma, length, kappa)
+        for sigma in sigmas
+        for length in lengths
+        for kappa in kappas
+    ]
+    if identities != expected:
+        if len(identities) != len(expected):
+            raise RuntimeError("analysis is missing largest-size estimates")
+        raise RuntimeError("analysis estimates are not in canonical coupling order")
+
+    digest = analysis.get("analysis_document_sha256")
+    if not isinstance(digest, str):
+        _malformed("analysis document digest is malformed")
+    unsigned = dict(analysis)
+    unsigned.pop("analysis_document_sha256", None)
+    if _sha256(_canonical_bytes(unsigned)) != digest:
+        raise RuntimeError("analysis document digest mismatch")
+    return tuple(sigmas), tuple(lengths), tuple(kappas), values
+
+
+def _sign_change(left: float, right: float) -> bool:
+    return (left <= 0.0 <= right) or (right <= 0.0 <= left)
+
+
+def _transition_evidence(
+    sigma: float,
+    lengths: tuple[int, int],
+    kappas: tuple[float, ...],
+    values: Mapping[tuple[float, int, float], tuple[float, float]],
+    interval_index: int,
+) -> tuple[bool, bool, dict[str, object]]:
+    lower = kappas[interval_index]
+    upper = kappas[interval_index + 1]
+    q_endpoints: list[list[str]] = []
+    crossing_endpoints: list[list[str]] = []
+    q_differences: list[float] = []
+    crossing_marked = False
+    for kappa in (lower, upper):
+        small = values[(sigma, lengths[0], kappa)]
+        large = values[(sigma, lengths[1], kappa)]
+        q_differences.append(small[0] - large[0])
+        q_endpoints.append([small[0].hex(), large[0].hex()])
+        crossing_endpoints.append([small[1].hex(), large[1].hex()])
+    for length_index in range(2):
+        endpoints = (
+            float.fromhex(crossing_endpoints[0][length_index]),
+            float.fromhex(crossing_endpoints[1][length_index]),
+        )
+        crossing_marked |= min(endpoints) <= 0.25 and max(endpoints) >= 0.75
+    q_marked = _sign_change(q_differences[0], q_differences[1])
+    return (
+        q_marked,
+        crossing_marked,
+        {
+            "q_g": {
+                "marked": q_marked,
+                "largest_size_difference_hex": [value.hex() for value in q_differences],
+                "endpoint_means_hex": q_endpoints,
+            },
+            "four_sector_crossing": {
+                "marked": crossing_marked,
+                "closed_target_range_hex": [(0.25).hex(), (0.75).hex()],
+                "endpoint_means_hex": crossing_endpoints,
+            },
+        },
+    )
+
+
+def _select_transition_bracket(
+    sigma: float,
+    lengths: tuple[int, int],
+    kappas: tuple[float, ...],
+    values: Mapping[tuple[float, int, float], tuple[float, float]],
+) -> dict[str, object]:
+    candidates: list[tuple[float, float, int, dict[str, object]]] = []
+    zero_interval_is_common = False
+    for interval_index in range(len(kappas) - 1):
+        q_marked, crossing_marked, evidence = _transition_evidence(
+            sigma, lengths, kappas, values, interval_index
+        )
+        if not (q_marked and crossing_marked):
+            continue
+        if kappas[interval_index] == 0.0:
+            zero_interval_is_common = True
+            continue
+        candidates.append(
+            (
+                kappas[interval_index + 1] - kappas[interval_index],
+                kappas[interval_index],
+                interval_index,
+                evidence,
+            )
+        )
+    if not candidates:
+        if zero_interval_is_common:
+            raise RuntimeError("zero-coupling interval cannot be selected")
+        return {
+            "sigma_hex": sigma.hex(),
+            "status": "requires_p0_extension",
+            "reason": "no_nonzero_interval_marked_by_both_estimators",
+            "lengths": list(lengths),
+        }
+    width, lower, interval_index, evidence = min(
+        candidates, key=lambda candidate: (candidate[0], candidate[1])
+    )
+    return {
+        "sigma_hex": sigma.hex(),
+        "status": "selected",
+        "purpose": "transition_refinement",
+        "lower_kappa_hex": lower.hex(),
+        "upper_kappa_hex": kappas[interval_index + 1].hex(),
+        "lengths": list(lengths),
+        "estimator_evidence": evidence,
+        "tie_break": {
+            "rule": "narrowest_interval_then_lower_coupling",
+            "candidate_count": len(candidates),
+            "selected_width_hex": width.hex(),
+        },
+    }
+
+
+def _select_crossover_bracket(
+    sigma: float,
+    lengths: tuple[int, int],
+    kappas: tuple[float, ...],
+    values: Mapping[tuple[float, int, float], tuple[float, float]],
+) -> dict[str, object]:
+    largest = lengths[1]
+    candidates: list[tuple[float, float, int, float, float]] = []
+    for interval_index in range(1, len(kappas) - 1):
+        lower = kappas[interval_index]
+        upper = kappas[interval_index + 1]
+        left = values[(sigma, largest, lower)][1]
+        right = values[(sigma, largest, upper)][1]
+        slope = abs(right - left) / (upper - lower)
+        candidates.append((-slope, lower, interval_index, left, right))
+    if not candidates:
+        raise RuntimeError("no nonzero crossover interval is available")
+    negative_slope, lower, interval_index, left, right = min(candidates)
+    slope = -negative_slope
+    return {
+        "sigma_hex": sigma.hex(),
+        "status": "selected",
+        "purpose": "crossover_refinement",
+        "lower_kappa_hex": lower.hex(),
+        "upper_kappa_hex": kappas[interval_index + 1].hex(),
+        "lengths": list(lengths),
+        "estimator_evidence": {
+            "estimator": "largest_size_four_sector_crossing",
+            "largest_length": largest,
+            "endpoint_means_hex": [left.hex(), right.hex()],
+            "absolute_slope_hex": slope.hex(),
+        },
+        "tie_break": {
+            "rule": "maximum_absolute_slope_then_lower_coupling",
+            "candidate_count": len(candidates),
+        },
+    }
+
+
+def select_p1_brackets(analysis: Mapping[str, object]) -> dict[str, object]:
+    if not isinstance(analysis, Mapping):
+        _malformed("analysis document is malformed")
+    sigmas, all_lengths, kappas, values = _selector_estimates(analysis)
+    lengths = (all_lengths[-2], all_lengths[-1])
+    brackets = [
+        (
+            _select_transition_bracket(sigma, lengths, kappas, values)
+            if sigma <= 1.0
+            else _select_crossover_bracket(sigma, lengths, kappas, values)
+        )
+        for sigma in sigmas
+    ]
+    document: dict[str, object] = {
+        "schema_version": BRACKET_SCHEMA,
+        "source_analysis_document_sha256": analysis["analysis_document_sha256"],
+        "requires_p0_extension": any(
+            bracket["status"] == "requires_p0_extension" for bracket in brackets
+        ),
+        "brackets": brackets,
+    }
+    document["bracket_document_sha256"] = _sha256(_canonical_bytes(document))
+    return document
