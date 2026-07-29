@@ -22,9 +22,19 @@ it is not a sixth rescue attempt.  No regression was weakened, no uncertified
 try-4 fast answer was restored, and no precision or guard width was reduced for
 performance.
 
-The common ED evaluator remains behind the four-route barrier.  No ED oracle,
-full basis, dense Hamiltonian, dense L-squared matrix, eigenvalue, or saved ED
-artifact was read or run.
+### Review correction: oracle scope
+
+The historical 308-test verification did execute test-only fixtures that call
+`run_ed_oracle` and exercise `fock_ed` full-basis, dense-Hamiltonian, dense
+L-squared-matrix, and projected-NQS paths.  The earlier statement that no such
+path was read or run was therefore too broad.
+
+The four-route barrier still held for the accepted production implementation,
+the N=6 performance measurement, and the occupation-autoregressive route code:
+they did not import or open those prohibited ED/full-basis/dense modules.  No
+`run_scalable_evaluator.py` invocation occurred, and no Route A candidate was
+given an ED reveal, overlap, or ED-based selection.  The historical test-only
+fixtures were not a candidate-state common-evaluator run.
 
 ## RED and GREEN evidence
 
@@ -143,7 +153,10 @@ an optimization backlog item; it does not override the hard correctness GREEN.
 
 - Production code commit: `d1f1196f4cc2932adb9dc41aff634f80b36202ce`.
 - No test file was changed during correctness acceptance.
-- No ED, full-basis, or dense-matrix path was read or run.
+- Review correction: the historical full test suite executed test-only
+  ED/full-basis/dense/projected-NQS fixtures; production, the N=6 performance
+  measurement, and route code did not use them, and no Route A candidate
+  received an ED reveal, overlap, or ED-based selection.
 - No A03 implementation or common evaluator work was started.
 - No push was performed.
 
