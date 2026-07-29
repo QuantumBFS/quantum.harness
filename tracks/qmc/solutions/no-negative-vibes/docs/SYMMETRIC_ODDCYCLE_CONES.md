@@ -169,6 +169,27 @@ grade-\((1,3,5)\) cone is impossible.  A successful certificate must
 couple the even and odd parities (or prove a quantitative domination
 inequality between them).
 
+The other stored cone does not yield a partition proof either.  For
+
+```text
+101010101111111111111110101010
+```
+
+the complement of the exact grade-\((1,4)\) cone is
+
+\[
+\chi_0+\chi_2+\chi_3+\chi_5
+=-3142487109366266808212314180.
+\]
+
+The certified grade-\((1,4)\) character is instead
+\(4001439983856051764947534417243269\), so the complete determinant
+remains positive at
+\(4001436841368942398680726204929089\).
+Therefore neither stored cone can be detached from its negative
+complement.  The remaining routes are a full-Fock cone or a direct
+quantitative domination certificate across the proposed split.
+
 ### The invariant sign chamber is not sufficient
 
 The two directed triangles have cycle invariants \(D=8\) and \(T=-z\)
@@ -187,10 +208,19 @@ F(B(3)^4)=823>0,\qquad F(B(4)^4)=-1310<0.
 \]
 
 Therefore the cycle signs, their shared vertex, and the strict inequality
-\(|T|<D\) do not define a sign-free cluster chamber.  A theorem for the
-fixed \(z=1\) atom must use a quantitatively smaller negative-winding
-margin (or an equivalent stronger inequality), not only the two invariant
-signs.
+\(|T|<D\) do not make the detached complementary sector \(F\)
+nonnegative.  This is an obstruction to the grade-\((1,4)\)-cone-plus-
+complement proof, not a counterexample to the full determinant: exact
+expansion instead gives
+
+\[
+\det(I+B(z)^4)=z^4-32z^3+396z^2+3136z+16388,
+\]
+
+which equals \(28577\) at \(z=3\) and \(33476\) at \(z=4\).  A theorem for
+the full fixed \(z=1\) atom may therefore use quantitative domination by
+the certified grade-\((1,4)\) sector; it cannot infer positivity of \(F\)
+from only the two invariant signs.
 
 ### Exact unit-winding Bernstein lemma through depth 12
 

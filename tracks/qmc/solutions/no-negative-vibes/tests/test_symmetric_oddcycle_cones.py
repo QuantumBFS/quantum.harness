@@ -78,6 +78,20 @@ def test_complementary_sector_identity_and_local_obstructions_replay_exactly():
         "even024": 4272808041188297984567253760751379,
         "full_determinant": 4272805793943698113361406366755585,
     }
+    assert result["grade14_0235_split_obstruction"] == {
+        "word": "101010101111111111111110101010",
+        "sector_traces": {
+            0: 1,
+            1: -4904440699,
+            2: 20667680896546356042,
+            3: -4380427169319327979657794447,
+            4: 4001439983856051764947539321683968,
+            5: 1237940039285380274899124224,
+        },
+        "complement0235": -3142487109366266808212314180,
+        "known14": 4001439983856051764947534417243269,
+        "full_determinant": 4001436841368942398680726204929089,
+    }
     assert result["pure_power_values"] == {
         7: {
             "chi2": 13875,
@@ -102,6 +116,9 @@ def test_cycle_invariant_sign_chamber_is_not_sufficient():
     assert result["coefficients_descending"] == (1, -32, 268, -3000, 8194)
     assert result["F_at_z3"] == 823
     assert result["F_at_z4"] == -1310
+    assert result["full_coefficients_descending"] == (1, -32, 396, 3136, 16388)
+    assert result["full_at_z3"] == 28577
+    assert result["full_at_z4"] == 33476
     assert result["z3_inside_chamber"] is True
     assert result["z4_inside_chamber"] is True
 
@@ -154,7 +171,7 @@ def test_independently_varying_endpoint_cone_has_exact_negative_obstruction():
     )
 
 
-def test_fixed_pair_cone_search_api_runs_exact_diagnostics_without_optimization():
+def test_fixed_pair_cone_search_api_stops_on_frozen_mixed_obstruction():
     result = search_fixed_unit_winding_pair_cone(
         attempts=0,
         maxiter=1,
@@ -162,8 +179,8 @@ def test_fixed_pair_cone_search_api_runs_exact_diagnostics_without_optimization(
         diagnostic_word_powers=(1, 7),
     )
 
-    assert result["status"] == "no-exact-certificate-found"
-    assert result["route"] == "fixed-pair-redundant"
+    assert result["status"] == "exact-negative-trace-obstruction"
+    assert result["route"] == "frozen-mixed-word-early-stop"
     assert result["grades"] == (0, 2, 3, 5)
     assert result["endpoint_order"] == ("B1", "B1T")
     assert result["dimension"] == 22
@@ -172,4 +189,10 @@ def test_fixed_pair_cone_search_api_runs_exact_diagnostics_without_optimization(
         {"word_power": 1, "exact_trace": 17},
         {"word_power": 7, "exact_trace": 1939395},
     )
-    assert result["redundant"]["status"] == "no-numerical-transform"
+    assert (
+        result["obstruction"]["word"]
+        == "101010101111111111111110101010"
+    )
+    assert result["obstruction"]["complement0235"] == -int(
+        "3142487109366266808212314180"
+    )

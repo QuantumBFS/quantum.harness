@@ -25,8 +25,6 @@ from pathlib import Path
 import sympy as sp
 
 from .exterior_exact5_full_fock_cone import (
-    _cross_grade_simplicial_search,
-    _trace_compatible_column_generation,
     combined_grade_lift,
 )
 from .exterior_exact5_shared_cone import exact_compound_matrix
@@ -234,6 +232,14 @@ def exact_complementary_sector_audit() -> dict[str, object]:
         )
         for grade in range(matrix.rows + 1)
     }
+    grade14_split_word = "101010101111111111111110101010"
+    grade14_split_matrix = _word_matrix(grade14_split_word)
+    grade14_split_traces = {
+        grade: int(
+            sp.trace(exact_compound_matrix(grade14_split_matrix, grade))
+        )
+        for grade in range(matrix.rows + 1)
+    }
 
     pure_values = {}
     for power in (7, 10):
@@ -286,12 +292,23 @@ def exact_complementary_sector_audit() -> dict[str, object]:
             ),
             "full_determinant": sum(odd_split_traces.values()),
         },
+        "grade14_0235_split_obstruction": {
+            "word": grade14_split_word,
+            "sector_traces": grade14_split_traces,
+            "complement0235": sum(
+                grade14_split_traces[grade] for grade in (0, 2, 3, 5)
+            ),
+            "known14": sum(
+                grade14_split_traces[grade] for grade in (1, 4)
+            ),
+            "full_determinant": sum(grade14_split_traces.values()),
+        },
         "pure_power_values": pure_values,
     }
 
 
 def exact_invariant_chamber_obstruction() -> dict[str, object]:
-    """Disprove positivity from the signs ``D>0`` and ``-D<T<0`` alone."""
+    """Disprove complementary-sector positivity from the invariant signs."""
 
     z = sp.symbols("z", real=True)
     matrix = sp.Matrix(fixed_candidate_matrix())
@@ -304,6 +321,7 @@ def exact_invariant_chamber_obstruction() -> dict[str, object]:
         + word_matrix.det(),
         z,
     )
+    full_polynomial = sp.Poly((sp.eye(5) + word_matrix).det(), z)
     return {
         "positive_cycle_invariant": 8,
         "negative_cycle_invariant": "-z",
@@ -312,6 +330,11 @@ def exact_invariant_chamber_obstruction() -> dict[str, object]:
         ),
         "F_at_z3": int(polynomial.eval(3)),
         "F_at_z4": int(polynomial.eval(4)),
+        "full_coefficients_descending": tuple(
+            int(coefficient) for coefficient in full_polynomial.all_coeffs()
+        ),
+        "full_at_z3": int(full_polynomial.eval(3)),
+        "full_at_z4": int(full_polynomial.eval(4)),
         "z3_inside_chamber": 0 < 3 < 8,
         "z4_inside_chamber": 0 < 4 < 8,
     }
@@ -638,8 +661,9 @@ def search_fixed_unit_winding_pair_cone(
     tolerance: float = 1.0e-9,
     max_denominator: int = 65536,
 ) -> dict[str, object]:
-    """Search the fixed ``B(1),B(1).T`` pair with exact promotion gates."""
+    """Stop the impossible fixed-pair cone on its frozen mixed word."""
 
+    del attempts, maxiter, rng_seed, ray_counts, tolerance, max_denominator
     matrices = unit_winding_endpoint_lifts()[2:]
     powers = tuple(dict.fromkeys(int(power) for power in diagnostic_word_powers))
     if not powers or any(power < 1 for power in powers):
@@ -651,67 +675,21 @@ def search_fixed_unit_winding_pair_cone(
         }
         for power in powers
     )
-    obstruction = next(
-        (entry for entry in traces if int(entry["exact_trace"]) < 0),
-        None,
-    )
-    common = {
+    audit = exact_complementary_sector_audit()
+    obstruction = audit["grade14_0235_split_obstruction"]
+    assert isinstance(obstruction, Mapping)
+    complement = int(obstruction["complement0235"])
+    if complement >= 0:
+        raise RuntimeError("frozen fixed-pair obstruction is no longer negative")
+    return {
         "grades": (0, 2, 3, 5),
         "endpoint_order": ("B1", "B1T"),
         "dimension": matrices[0].rows,
         "atom_count": len(matrices),
         "diagnostic_pure_word_traces": traces,
-    }
-    if obstruction is not None:
-        return {
-            **common,
-            "status": "exact-negative-trace-obstruction",
-            "route": "diagnostic-pure-word-early-stop",
-            "obstruction": obstruction,
-        }
-
-    simplicial = _cross_grade_simplicial_search(
-        matrices,
-        split=11,
-        attempts=attempts,
-        maxiter=maxiter,
-        rng_seed=rng_seed,
-        tolerance=tolerance,
-        max_denominator=max_denominator,
-    )
-    if simplicial["status"] == "exact-trace-compatible-certificate":
-        return {
-            **common,
-            "status": "exact-trace-compatible-certificate",
-            "route": "fixed-pair-simplicial",
-            "simplicial": simplicial,
-        }
-
-    best = simplicial.get("best")
-    transform = best.get("transform") if isinstance(best, Mapping) else None
-    if transform is None:
-        redundant = {
-            "status": "no-numerical-transform",
-            "milestones": [],
-        }
-    else:
-        redundant = _trace_compatible_column_generation(
-            matrices,
-            transform,
-            ray_counts=ray_counts,
-            tolerance=tolerance,
-            max_denominator=max_denominator,
-        )
-    return {
-        **common,
-        "status": (
-            "exact-trace-compatible-certificate"
-            if redundant["status"] == "exact-trace-compatible-certificate"
-            else "no-exact-certificate-found"
-        ),
-        "route": "fixed-pair-redundant",
-        "simplicial": simplicial,
-        "redundant": redundant,
+        "status": "exact-negative-trace-obstruction",
+        "route": "frozen-mixed-word-early-stop",
+        "obstruction": dict(obstruction),
     }
 
 
