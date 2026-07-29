@@ -34,6 +34,10 @@ using DelimitedFiles
         @test total.continuous == 2.0
         @test total.delta == 0.5
         @test total.total == 2.5
+        truncated = integrated_current(
+            omega, continuous, DeltaPeak[]; omega_max=1.5)
+        @test truncated.continuous == 1.75
+        @test truncated.total == 1.75
 
         @test period_averaged_power([1.0, 3.0, 1.0]) == 2.0
         @test period_averaged_power(zeros(5)) == 0.0
@@ -46,6 +50,20 @@ using DelimitedFiles
         default_config = Fig5Config(frequencies=[1.0])
         @test fig5_config_hash(default_config, "adapter-a") !=
               fig5_config_hash(default_config, "adapter-b")
+        invalid_bandwidth = Fig5Config(
+            mode=:quick,
+            dt_target=0.5,
+            frequencies=[1.0],
+            correlation_lag_steps=8,
+            tail_count=2,
+            omega_max=100.0)
+        mktempdir() do output_dir
+            @test_throws ArgumentError run_fig5(
+                invalid_bandwidth, output_dir;
+                adapter_provider=(_...) ->
+                    error("adapter must not be constructed"),
+                run_identity="invalid-bandwidth")
+        end
 
         mktempdir() do output_dir
             config_hash = "fig5-config"

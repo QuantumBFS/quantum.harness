@@ -108,13 +108,25 @@ function fig5_cli_main(args=ARGS;
             model, exact_dt,
             rebuild=(run_config.rebuild_cache || options.rebuild))
     end
-    reference_provider = isnothing(options.reference_dir) ? nothing :
-        (drive -> load_fig5_reference(
-            fig5_reference_path(options.reference_dir, drive)))
+    reference_paths = isnothing(options.reference_dir) ? String[] :
+        [fig5_reference_path(options.reference_dir, drive)
+         for drive in (:longitudinal, :transversal)]
+    reference_identity = isempty(reference_paths) ? "no-reference" :
+        join((bytes2hex(sha256(read(path))) for path in reference_paths), ":")
+    reference_provider = if isempty(reference_paths)
+        nothing
+    else
+        curves = Dict(
+            drive => load_fig5_reference(path)
+            for (drive, path) in
+                zip((:longitudinal, :transversal), reference_paths))
+        drive -> curves[drive]
+    end
     return run_fig5(
         fig5, options.output_dir;
         adapter_provider,
-        run_identity=bytes2hex(sha256(repr(run_config))),
+        run_identity=bytes2hex(sha256(
+            repr((run_config, reference_identity)))),
         resume=options.resume,
         parallel_mode=options.parallel,
         reference_provider)

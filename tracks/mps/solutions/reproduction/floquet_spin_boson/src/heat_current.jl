@@ -191,7 +191,8 @@ through their invariant integrated weights, never through plotting heights.
 """
 function integrated_current(frequencies::AbstractVector,
                             current::AbstractVector,
-                            peaks::AbstractVector{<:DeltaPeak})
+                            peaks::AbstractVector{<:DeltaPeak};
+                            omega_max::Real=last(frequencies))
     length(frequencies) == length(current) ||
         throw(DimensionMismatch(
             "continuous frequency and current grids must have equal length"))
@@ -205,14 +206,29 @@ function integrated_current(frequencies::AbstractVector,
     all(diff(Float64.(frequencies)) .> 0) ||
         throw(ArgumentError(
             "continuous frequency grid must be strictly increasing"))
+    isfinite(omega_max) &&
+        first(frequencies) < omega_max <= last(frequencies) ||
+        throw(ArgumentError(
+            "integration omega_max must lie inside the continuous grid"))
 
     continuous = 0.0
     @inbounds for index in 1:(length(frequencies) - 1)
-        spacing = Float64(frequencies[index + 1] - frequencies[index])
-        continuous += spacing *
-            (Float64(current[index]) + Float64(current[index + 1])) / 2
+        left_frequency = Float64(frequencies[index])
+        left_frequency >= omega_max && break
+        right_frequency = Float64(frequencies[index + 1])
+        upper_frequency = min(right_frequency, Float64(omega_max))
+        fraction = (upper_frequency - left_frequency) /
+                   (right_frequency - left_frequency)
+        upper_current = Float64(current[index]) +
+            fraction *
+            (Float64(current[index + 1]) - Float64(current[index]))
+        continuous += (upper_frequency - left_frequency) *
+            (Float64(current[index]) + upper_current) / 2
     end
-    delta = sum(peak.integrated_weight for peak in peaks; init=0.0)
+    delta = sum(
+        peak.integrated_weight for peak in peaks
+        if peak.omega <= omega_max;
+        init=0.0)
     isfinite(delta) ||
         throw(ArgumentError("delta-current weights must be finite"))
     return (; continuous, delta, total=continuous + delta)
@@ -573,6 +589,16 @@ function _validate_fig5_config(config::Fig5Config)
     config.energy_balance_floor > 0 && isfinite(config.energy_balance_floor) ||
         throw(ArgumentError("Fig. 5 balance floor must be positive"))
     _validate_fig3_config(_fig3_config(config))
+    sample_count = config.correlation_lag_steps + 1
+    for frequency in config.frequencies
+        exact_dt = period_grid(frequency, config.dt_target).dt
+        fft_omega_max =
+            2π * fld(sample_count, 2) / (sample_count * exact_dt)
+        config.omega_max <= fft_omega_max ||
+            throw(ArgumentError(
+                "Fig. 5 omega_max exceeds the one-sided FFT grid at " *
+                "omega_d=$frequency"))
+    end
     return config
 end
 
@@ -601,11 +627,11 @@ const _FIG5_UNIFORMTEMPO_REVISION = installed_uniformtempo_revision()
 function _fig5_source_fingerprint()
     cached = _FIG5_SOURCE_FINGERPRINT[]
     isnothing(cached) || return cached
-    files = (
-        "FloquetSpinBoson.jl", "uniform_if.jl", "steady_state.jl",
-        "correlations.jl", "heat_current.jl", "checkpoint.jl")
+    files = sort(filter(
+        path -> endswith(path, ".jl"),
+        readdir(@__DIR__; join=true)))
     source = join(
-        (read(joinpath(@__DIR__, file), String) for file in files), '\0')
+        (read(file, String) for file in files), '\0')
     fingerprint = bytes2hex(sha256(source))
     _FIG5_SOURCE_FINGERPRINT[] = fingerprint
     return fingerprint
@@ -824,7 +850,8 @@ function run_fig5(
                 reference_provider=nothing, warm_start)
             totals = integrated_current(
                 point.continuous.omega,
-                point.continuous.current, point.peaks)
+                point.continuous.current, point.peaks;
+                omega_max=config.omega_max)
             power = period_averaged_power(
                 point.micromotion.drive_power)
             balance_error = abs(power - totals.total) /
