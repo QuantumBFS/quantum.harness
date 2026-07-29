@@ -22,6 +22,7 @@
 - Every implementation attempt uses a separate worktree, writes a journal, and has at most 90 minutes of active implementation.  A blocked problem gets at most five root-cause-driven attempts.  Attempt five failing closes the active goal as blocked.
 - Acceptance amendment (2026-07-29): numerical correctness remains a hard gate, while the N=6 timing ratio is a reported resource metric and optimization backlog item rather than a blocking threshold.  This amendment is recorded in `2026-07-29-challenge-15-route-a-acceptance-amendment.md`.
 - Each slice closes only after implementer self-review, external specification review, external code-quality review, and fresh main-agent verification.  No push is authorized.
+- Slurm-first amendment (2026-07-29): after the reviewed A02 terminal, all A03-A05 pytest, RED/GREEN, smoke, performance, training, and final executable verification run only in SCNet compute-node Slurm allocations.  The controlling evidence and command substitutions are defined in `2026-07-29-challenge-15-route-a-slurm-first-amendment.md`; where this original plan shows a local Python command or permits optional Slurm, the amendment supersedes it.  Login nodes remain limited to staging, scheduler queries, submission, log tailing, and fetch.  The common scalable evaluator remains forbidden until the four-route barrier.
 
 ## File map
 
