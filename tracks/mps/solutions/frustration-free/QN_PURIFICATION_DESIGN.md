@@ -43,11 +43,12 @@ dual pair, physical MPO, all four shifted operator sectors, one TDVP step, and
 HDF5 round-trip. The result is diagnostic only and is never allowed to weaken
 request validation.
 
-## Existing interfaces at current HEAD
+## Existing interfaces at the implementation baseline
 
-Current HEAD is `9e3fdea2a69171b119304a288797164d7e5eead0` on
-`challenge/81-frustration-free`. The completed chain phase has these binding
-interfaces.
+Commit `9e3fdea2a69171b119304a288797164d7e5eead0` is the approved finite
+star-to-chain implementation baseline on `challenge/81-frustration-free`.
+It is not the current HEAD after the QN design commits. The completed chain
+phase at that baseline has these binding interfaces.
 
 ### Python request and geometry
 
@@ -90,8 +91,10 @@ the QN MPS result is compared with the same exact thermal trace.
   `bath_representation`, chain coefficients, `lambda`, and nullable
   `mapping_sha256`.
 - `FiniteBathParameters(epsilon, V; ...)` remains direct-star.
-- `FiniteBathParameters(:chain; ...)` validates chain dimensions and mapping
-  identity.
+- `FiniteBathParameters(:chain; ...)` accepts raw chain coefficients and a
+  mapping SHA after local shape checks. The runner validates the mapping before
+  calling it, but the constructor itself cannot distinguish a validated
+  mapping from a fabricated SHA; this phase closes that seam.
 - `interleaved_sites(parameters)` currently returns
   `[d_phys,d_anc,c1_phys,c1_anc,...]` Electron indices with
   `conserve_qns=false`.
@@ -163,7 +166,93 @@ together.
 
 ## Chosen purification contract
 
-### Explicit specification object
+### Validated chain capability and explicit specification object
+
+A chain parameter object containing a syntactically valid mapping SHA is not
+proof that the mapping was validated. Replace the public
+`FiniteBathParameters(:chain; ..., mapping_sha256=...)` seam with an opaque,
+non-exported capability type owned by `FiniteBathPurification`:
+
+```julia
+struct ChainMappingValidationSeal end
+const _CHAIN_MAPPING_VALIDATION_SEAL = ChainMappingValidationSeal()
+
+struct ValidatedChainMappingCapability
+    source_bath_sha256::String
+    mapping_sha256::String
+    epsilon::Vector{Float64}
+    chain_onsite::Vector{Float64}
+    chain_hopping::Vector{Float64}
+    lambda::Float64
+
+    function ValidatedChainMappingCapability(
+        seal::ChainMappingValidationSeal;
+        source_bath_sha256,
+        mapping_sha256,
+        epsilon,
+        chain_onsite,
+        chain_hopping,
+        lambda,
+    )
+        seal === _CHAIN_MAPPING_VALIDATION_SEAL ||
+            throw(ArgumentError("invalid chain mapping validation seal"))
+        source = _lowercase_sha256(source_bath_sha256, "source bath SHA256")
+        mapping = _lowercase_sha256(mapping_sha256, "mapping SHA256")
+        star_energies = _finite_vector(epsilon, "epsilon")
+        onsite = _finite_vector(chain_onsite, "chain_onsite")
+        hopping = _finite_vector(
+            chain_hopping, "chain_hopping"; nonnegative=true
+        )
+        hybridization = _finite_real(lambda, "lambda")
+        hybridization >= 0 ||
+            throw(ArgumentError("lambda must be nonnegative"))
+        length(onsite) == length(star_energies) ||
+            throw(ArgumentError("chain onsite length mismatch"))
+        length(hopping) == max(0, length(star_energies) - 1) ||
+            throw(ArgumentError("chain hopping length mismatch"))
+        new(
+            source,
+            mapping,
+            star_energies,
+            onsite,
+            hopping,
+            hybridization,
+        )
+    end
+end
+```
+
+The type, seal type, singleton, and constructor are not exported. No public
+constructor accepts a digest or raw coefficients, and canonical JSON cannot
+encode or reconstruct the seal by deserialization. Julia module internals are
+not a hostile-code security boundary, so "unforgeable" here means unforgeable
+through every supported API, request, fixture, and checkpoint path; arbitrary
+code deliberately reaching private bindings is out of the solver trust model.
+Production code has exactly one capability call site. In
+`julia/finite_bath_mps_runner.jl`,
+`validate_chain_mapping_artifact(mapping_artifact, mapping_json,
+bath_artifact)` performs the existing canonical-byte, digest, source-bath,
+dimension, orthogonality, tridiagonality, coupling, convention, diagnostics,
+and producer-provenance checks. Only after all checks pass does that function
+call the inner constructor with `_CHAIN_MAPPING_VALIDATION_SEAL` and return
+`ValidatedChainMappingCapability`. `read_request` passes that value to:
+
+```julia
+FiniteBathParameters(
+    validated::ValidatedChainMappingCapability;
+    U,
+    epsilon_d,
+    mu,
+)
+```
+
+That constructor copies all chain coefficients and both digests from the
+capability. It has no `mapping_sha256`, coefficient, or representation keyword,
+so callers cannot turn a fabricated digest into chain parameters. Direct Julia
+unit tests obtain a capability through the same
+`validate_chain_mapping_artifact` seam using a Python-produced canonical
+mapping fixture; they do not call a test-only bypass. QN construction consumes
+the capability-bound `FiniteBathParameters`.
 
 Add a Julia value type independent of `FiniteBathParameters`:
 
@@ -181,12 +270,17 @@ Public constructors are:
 
 ```julia
 non_qn_purification()::PurificationSpec
-qn_dual_purification(parameters::FiniteBathParameters)::PurificationSpec
+qn_dual_purification(
+    parameters::FiniteBathParameters,
+    validated::ValidatedChainMappingCapability,
+)::PurificationSpec
 ```
 
 The non-QN value is `(:non_qn, nothing, nothing, nothing, nothing)`.
-The QN constructor requires `parameters.bath_representation === :chain` and a
-non-null mapping SHA. For `M = N_b + 1` physical orbitals it returns:
+The QN constructor requires chain parameters and the exact capability used to
+construct them. It compares source bath SHA, mapping SHA, dimensions, and
+coefficients before deriving the sector; a mismatched or absent capability
+fails. For `M = N_b + 1` physical orbitals it returns:
 
 ```text
 mode             = :qn_dual
@@ -272,6 +366,27 @@ For orbital `j`, define
   + |Dn>_p    |Up>_a
   + |UpDn>_p  |Emp>_a
 ).
+```
+
+In physical-row/ancilla-column basis `Emp,Up,Dn,UpDn`, the coefficient
+matrix is exactly:
+
+```text
+A = [
+  0    0    0    1/2
+  0    0    1/2  0
+  0    1/2  0    0
+  1/2  0    0    0
+].
+```
+
+The constructor and tests assert each nonzero term separately:
+
+```text
+Emp+UpDn:  Nf=0+2=2, Sz= 0+0=0
+Up+Dn:     Nf=1+1=2, Sz=+1-1=0
+Dn+Up:     Nf=1+1=2, Sz=-1+1=0
+UpDn+Emp:  Nf=2+0=2, Sz= 0+0=0
 ```
 
 Every summand has pair charge `(Nf,Sz)=(2,0)`, so
@@ -373,19 +488,73 @@ end
 operator_sector(spec, insertion, spin)::OperatorSector
 ```
 
-`_apply_impurity_operator` validates the branch flux after application, before
-normalization or checkpoint publication. `_green_branch` accepts an internal
-explicit `insertion` keyword. The public production convention remains:
+`ObservableCursor` gains `insertion::Symbol`. Thermal and complete cursors
+require `:none`; Green cursors require `:creation` or `:annihilation`. The
+public executable seam is:
+
+```julia
+finite_bath_observables(
+    parameters;
+    beta,
+    tau,
+    green_insertion=:creation,
+    time_step=0.05,
+    cutoff=1.0e-12,
+    maxdim=256,
+    krylov_expansion_dim=0,
+    progress=false,
+    checkpoint_manager=nothing,
+    resume=nothing,
+    stop_requested=_NEVER_STOP,
+)
+```
+
+Runner schema 4 adds `green_insertion` to exact solver settings with values
+`"creation"` or `"annihilation"`; acceptance and convergence default to
+`"creation"`, while focused validation and pilots explicitly request
+`"annihilation"`. The selected insertion is propagated through
+`_validated_request`, `_green_branch`, every Green cursor, point diagnostics,
+`ObservableResumeState.data`, checkpoint metadata, output solver settings, and
+provenance. Resume rejects an insertion different from the request or cursor.
+
+`_apply_impurity_operator` computes the expected sector before application and
+validates branch flux after application, before normalization or checkpoint
+publication. The public production convention is:
 
 - endpoint tau values use occupancy identities and create no shifted branch;
-- interior tau values use the creation form;
-- the cyclic annihilation form is retained and tested as an equivalent
-  scientific branch, including its distinct sector.
+- interior tau values use the explicitly selected creation or cyclic
+  annihilation form;
+- both forms are executable, resumable scientific branches with distinct
+  sectors.
 
 The branch sector and insertion are carried in point diagnostics and resumable
 data. A `before` cursor has the base sector; an `after` cursor must have the
 operator sector. A mismatch between cursor, spin, insertion, reported sector,
 and actual MPS flux is corruption and fails before evolution resumes.
+
+### Zero-amplitude terminal semantics
+
+The operator result has exact shape:
+
+```julia
+struct AppliedOperatorBranch
+    psi::Union{Nothing,MPS}
+    expected_sector::OperatorSector
+    log_norm::Float64
+    status::Symbol
+end
+```
+
+For nonzero norm, `psi` is normalized, `log_norm` is finite, and
+`status=:finite`; its flux must match `expected_sector`. For zero norm,
+`psi=nothing`, `log_norm=-Inf`, and `status=:zero`. The expected sector remains
+bound in diagnostics and terminal checkpoint data because it follows from the
+requested operator, but no MPS flux is claimed and no fictitious normalized
+zero state is created. A zero branch performs no after-operator TDVP. It
+publishes one atomic terminal checkpoint with the same Green cursor,
+`segment=:terminal`, insertion/spin/expected sector, `branch_status=:zero`, and
+no active MPS; resume validates that terminal record and advances directly to
+the next branch. `:terminal` is valid only for `status=:zero`.
 
 ## Checkpoint, output, and provenance identity
 
@@ -427,6 +596,11 @@ are derived from `M`. On write and load, compare metadata to `flux(psi)`.
 For QN mode, compare `thermal_psi` to the base sector as well. Non-QN
 checkpoints require null QN identity and active-sector fields.
 
+For a zero-amplitude terminal branch, `active_sector` contains the expected
+operator sector, `active_state_present=false`, and `branch_status="zero"`.
+The HDF5 generation contains no active branch MPS. Loader validation requires
+that exact combination and never calls `flux` on a nonexistent state.
+
 Runner output solver settings, diagnostics, and provenance add:
 
 ```text
@@ -466,6 +640,183 @@ and ED where computationally bounded. Required evidence includes:
 No single TDVP setting establishes convergence. QN/non-QN/ED agreement uses
 the existing small-bath tolerance; resource evidence is descriptive until the
 separate scalable gate is passed.
+
+## Exact paired QN/non-QN telemetry artifact
+
+`convergence.schema.json` adds `qnPairedBenchmark` with
+`additionalProperties=false` at every object. The canonical artifact is:
+
+```json
+{
+  "schema_version": 1,
+  "artifact_type": "qn_paired_benchmark",
+  "status": "small_bath_validation_only",
+  "matched_identity": {
+    "model": {"U": 0.8, "epsilon_d": -0.4, "mu": 0.0, "beta": 0.2},
+    "n_bath": 6,
+    "tau": [0.0, 0.05, 0.1, 0.15, 0.2],
+    "bath_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "chain_mapping_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bath_representation": "chain",
+    "qn_gauge": "electron_nf_sz_ancilla_particle_hole",
+    "qn_gauge_version": 1,
+    "base_sector": {"Nf": 14, "Sz": 0},
+    "green_insertion": "annihilation",
+    "numerical_settings": {
+      "time_step": 0.04,
+      "cutoff": 1e-14,
+      "maxdim": 128,
+      "krylov_expansion_dim": 0
+    },
+    "source_sha256": {
+      "acceptance.py": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bath.py": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "chain_mapping.py": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "convergence.py": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "convergence.schema.json": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "model.json": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "pyproject.toml": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "uv.lock": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "finite_bath_mps_runner.jl": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "finite_bath_checkpoint.jl": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "finite_bath_observables.jl": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "finite_bath_purification.jl": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "julia_environment_sha256": {
+      "Project.toml": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "Manifest.toml": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "runtime_versions": {
+      "julia": "1.11.6",
+      "itensors": "0.9.30",
+      "itensormps": "0.4.1",
+      "hdf5": "0.17.3"
+    },
+    "execution_target": "local"
+  },
+  "matched_work": {
+    "thermal_steps": 5,
+    "green_branch_count": 8,
+    "green_before_steps": 20,
+    "green_after_steps": 20,
+    "completed_tau_points": 5,
+    "completed_spins": 2,
+    "forced_interruptions": 1,
+    "resumed_generations": 1
+  },
+  "samples": {
+    "non_qn": {
+      "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "cell_id": "c0000-aaaaaaaaaaaa",
+      "cell_input_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "result_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "checkpoint_start_generation": "checkpoint-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "checkpoint_end_generation": "checkpoint-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "purification_mode": "non_qn",
+      "wall_seconds": 1.0,
+      "peak_rss_bytes": 1,
+      "checkpoint_bytes": 1,
+      "checkpoint_write_seconds": 0.1,
+      "checkpoint_read_seconds": 0.1,
+      "mpo_link_dimensions": [1],
+      "maximum_link_dimensions_by_bond": [1],
+      "truncation_max_error": 0.0,
+      "krylov_max_error_estimate": 0.0,
+      "krylov_all_converged": true,
+      "maxdim_saturated": false,
+      "observables": {
+        "n_d": 1.0,
+        "double_occupancy": 0.25,
+        "G_up": [-0.5],
+        "G_down": [-0.5]
+      }
+    },
+    "qn_dual": {
+      "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "cell_id": "c0000-aaaaaaaaaaaa",
+      "cell_input_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "result_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "checkpoint_start_generation": "checkpoint-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "checkpoint_end_generation": "checkpoint-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "purification_mode": "qn_dual",
+      "wall_seconds": 1.0,
+      "peak_rss_bytes": 1,
+      "checkpoint_bytes": 1,
+      "checkpoint_write_seconds": 0.1,
+      "checkpoint_read_seconds": 0.1,
+      "mpo_link_dimensions": [1],
+      "maximum_link_dimensions_by_bond": [1],
+      "truncation_max_error": 0.0,
+      "krylov_max_error_estimate": 0.0,
+      "krylov_all_converged": true,
+      "maxdim_saturated": false,
+      "observables": {
+        "n_d": 1.0,
+        "double_occupancy": 0.25,
+        "G_up": [-0.5],
+        "G_down": [-0.5]
+      }
+    }
+  },
+  "derived": {
+    "wall_seconds_qn_over_non_qn": 1.0,
+    "peak_rss_qn_over_non_qn": 1.0,
+    "checkpoint_bytes_qn_over_non_qn": 1.0,
+    "checkpoint_write_qn_over_non_qn": 1.0,
+    "checkpoint_read_qn_over_non_qn": 1.0,
+    "maximum_mpo_link_qn_over_non_qn": 1.0,
+    "maximum_mps_link_qn_over_non_qn": 1.0,
+    "observable_max_absolute_delta": 0.0
+  },
+  "selection": {
+    "matched_identity_valid": true,
+    "matched_work_valid": true,
+    "scientific_validation_passed": true,
+    "preferred_resource_mode": "qn_dual",
+    "production_or_n48_eligible": false,
+    "rule": "science pass, then lexicographic minimum of peak_rss_bytes, wall_seconds, checkpoint_bytes"
+  },
+  "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+The displayed numeric values illustrate types, not accepted measurements.
+Validation reconstructs `matched_identity` from the two immutable plan, cell,
+result, and checkpoint identities rather than trusting this summary. Their
+model, bath, tau, representation, mapping, insertion, numerical, source,
+environment, runtime, and target fields must match exactly after removing the
+complete mode-specific purification object. The QN gauge, version, and base
+sector are then taken from the QN cell and independently checked against
+`M=N_b+1`; the corresponding non-QN identity fields must be null. Each raw
+sample's plan, cell-input, result, and checkpoint-generation identifiers must
+equal its source artifacts. `matched_work` is recomputed from checkpoint
+histories and result diagnostics for each sample and the two recomputations
+must be identical. Both samples are raw and mandatory; summaries cannot replace
+them.
+
+For each positive resource metric `x`,
+`x_qn_over_non_qn = samples.qn_dual[x] / samples.non_qn[x]`; all denominators
+must be finite and strictly positive. Maximum-link ratios use the maxima of the
+stored arrays. `observable_max_absolute_delta` is the maximum absolute
+difference over both scalar observables and every spin/tau value.
+`scientific_validation_passed` is exactly:
+
+```text
+matched_identity_valid
+and matched_work_valid
+and both krylov_all_converged
+and neither maxdim_saturated
+and both truncation_max_error <= planned truncation limit
+and both krylov_max_error_estimate <= planned Krylov limit
+and observable_max_absolute_delta <= 1e-6.
+```
+
+`preferred_resource_mode` is the lexicographic minimum of
+`(peak_rss_bytes, wall_seconds, checkpoint_bytes)`, with `"non_qn"` winning an
+exact tie. `production_or_n48_eligible` is always false for schema 1.
+`artifact_sha256` is SHA256 over canonical JSON of all preceding fields,
+excluding `artifact_sha256`. Validation recomputes every ratio, boolean,
+selection, and digest; reported derived values are never trusted.
 
 ## Convergence and capability gates
 

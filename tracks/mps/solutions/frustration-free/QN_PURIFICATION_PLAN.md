@@ -53,26 +53,48 @@
 
 **Files:**
 - Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_purification.jl`
+- Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_mps_runner.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl`
+- Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl`
 
 **Interfaces:**
 - Produces:
+  non-exported `ValidatedChainMappingCapability`,
   `PurificationSpec`,
   `non_qn_purification()::PurificationSpec`,
-  `qn_dual_purification(parameters)::PurificationSpec`,
-  `interleaved_sites(parameters; purification=...)`, and
-  `identity_purification(parameters; purification=...)`.
+  `qn_dual_purification(parameters::FiniteBathParameters,
+  validated::ValidatedChainMappingCapability)::PurificationSpec`,
+  `interleaved_sites(parameters::FiniteBathParameters;
+  purification::PurificationSpec=non_qn_purification())`, and
+  `identity_purification(parameters::FiniteBathParameters;
+  purification::PurificationSpec=non_qn_purification())`.
 - The old positional calls remain non-QN.
+- Replaces `FiniteBathParameters(:chain; raw coefficients and mapping SHA)`
+  with `FiniteBathParameters(validated::ValidatedChainMappingCapability;
+  U=0.8, epsilon_d=-Float64(U)/2, mu=0.0)`.
 
 - [ ] **Step 1: Add failing specification and label tests**
 
-Add constants and expected constructor assertions:
+Generate a schema-1 mapping with the existing Python writer, pass its canonical
+bytes and source bath through runner
+`validate_chain_mapping_artifact(mapping, mapping_json, bath_artifact)`, and
+use the returned capability:
 
 ```julia
 const QN_GAUGE = "electron_nf_sz_ancilla_particle_hole"
 const QN_GAUGE_VERSION = 1
 
-chain = FiniteBathParameters(
+validated = validated_chain_fixture(n_bath = 1)
+chain = FiniteBathParameters(validated; U = 0.8, epsilon_d = -0.4, mu = 0.0)
+spec = qn_dual_purification(chain, validated)
+@test spec.mode === :qn_dual
+@test spec.qn_gauge == QN_GAUGE
+@test spec.qn_gauge_version == 1
+@test (spec.base_sector_nf, spec.base_sector_sz) == (4, 0)
+@test_throws ArgumentError qn_dual_purification(
+    FiniteBathParameters([0.0], [0.1]), validated
+)
+@test_throws MethodError FiniteBathParameters(
     :chain;
     epsilon = [0.0],
     V = [0.1],
@@ -81,18 +103,12 @@ chain = FiniteBathParameters(
     lambda = 0.1,
     mapping_sha256 = repeat("a", 64),
 )
-spec = qn_dual_purification(chain)
-@test spec.mode === :qn_dual
-@test spec.qn_gauge == QN_GAUGE
-@test spec.qn_gauge_version == 1
-@test (spec.base_sector_nf, spec.base_sector_sz) == (4, 0)
-@test_throws ArgumentError qn_dual_purification(
-    FiniteBathParameters([0.0], [0.1])
-)
 ```
 
 For every QN site assert `hasqns(site)`, exact `Nf`/`Sz` charges for
 `Emp,Up,Dn,UpDn`, and absence of `NfParity`.
+Runner tests must validly rehash a corrupted mapping, assert validation throws,
+and assert no capability or chain parameters are returned.
 
 - [ ] **Step 2: Add the failing reduced-density test**
 
@@ -102,17 +118,24 @@ physical/ancilla basis order and assert:
 ```julia
 @test A == [
     0 0 0 0.5
-    0 0.5 0 0
     0 0 0.5 0
+    0 0.5 0 0
     0.5 0 0 0
 ]
 @test A * A' ≈ Matrix{Float64}(I, 4, 4) / 4 atol = 1e-15
 @test norm(psi) ≈ 1.0 atol = 1e-15
 @test flux(psi) == QN(("Nf", 2, -1), ("Sz", 0))
+terms = [
+    ("Emp", "UpDn", 0 + 2, 0 + 0),
+    ("Up", "Dn", 1 + 1, 1 - 1),
+    ("Dn", "Up", 1 + 1, -1 + 1),
+    ("UpDn", "Emp", 2 + 0, 0 + 0),
+]
+@test all(term -> term[3] == 2 && term[4] == 0, terms)
 ```
 
-Also inspect the four amplitudes directly so a valid reduced identity with
-different phases fails the gauge test.
+Also assert the four listed amplitudes are `+0.5` and all other entries are
+zero, so a valid reduced identity with wrong permutation or phases fails.
 
 - [ ] **Step 3: Run RED**
 
@@ -121,11 +144,18 @@ julia --project=tracks/mps/solutions/frustration-free/julia \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl
 ```
 
-Expected: fail because `PurificationSpec` and QN constructors do not exist.
+Expected: fail because the validated capability and `PurificationSpec` APIs do
+not exist and the raw chain constructor still accepts a fabricated SHA.
 
 - [ ] **Step 4: Implement the minimum QN pair constructor**
 
-Add the exact type:
+Add `ChainMappingValidationSeal`, its private singleton,
+`ValidatedChainMappingCapability`, and `PurificationSpec` exactly as specified
+in `QN_PURIFICATION_DESIGN.md`. The runner validator calls the sealed inner
+constructor only after every existing scientific/provenance check. Remove the
+raw chain constructor; no test-only bypass is permitted.
+
+Add the exact purification type:
 
 ```julia
 struct PurificationSpec
@@ -150,7 +180,9 @@ Run the Step 3 command. Expected: all purification tests pass.
 ```bash
 git add \
   tracks/mps/solutions/frustration-free/julia/finite_bath_purification.jl \
-  tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl
+  tracks/mps/solutions/frustration-free/julia/finite_bath_mps_runner.jl \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_purification.jl \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_mps_runner.jl
 git commit -m "Add QN dual identity purification"
 ```
 
@@ -222,13 +254,23 @@ git commit -m "Validate QN Electron MPO capability"
 
 **Files:**
 - Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_observables.jl`
+- Modify: `tracks/mps/solutions/frustration-free/julia/finite_bath_checkpoint.jl`
 - Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl`
+- Modify: `tracks/mps/solutions/frustration-free/julia/test/finite_bath_checkpoint.jl`
 
 **Interfaces:**
 - Produces:
   `OperatorSector`,
+  `AppliedOperatorBranch`,
   `operator_sector(spec, insertion, spin)`,
-  QN-aware `build_finite_bath_context(parameters; purification=...)`.
+  QN-aware `build_finite_bath_context(parameters::FiniteBathParameters;
+  purification::PurificationSpec=non_qn_purification())`, and
+  `finite_bath_observables(parameters::FiniteBathParameters; beta, tau,
+  green_insertion=:creation, time_step=0.05, cutoff=1e-12, maxdim=256,
+  krylov_expansion_dim=0, progress=false, checkpoint_manager=nothing,
+  resume=nothing, stop_requested=_NEVER_STOP)`.
+- Extends `ObservableCursor` with `insertion`; Green cursors bind
+  `:creation|:annihilation`, thermal/complete cursors bind `:none`.
 
 - [ ] **Step 1: Add failing sector tests**
 
@@ -246,31 +288,58 @@ For `M=3`, assert:
 ```
 
 Apply each operator to a thermal QN state and compare actual MPS flux with the
-expected sector. Add zero-amplitude branch checks without inventing a sector.
+expected sector.
+
+For an exactly empty creation or annihilation branch, assert:
+
+```julia
+result = FiniteBathObservables._apply_impurity_operator(
+    blocked_state, sites[1], :up, :creation, expected
+)
+@test result.status === :zero
+@test result.psi === nothing
+@test result.log_norm == -Inf
+@test result.expected_sector == expected
+```
+
+The zero branch must publish a `segment=:terminal` checkpoint with expected
+sector metadata, `active_state_present=false`, and no active MPS dataset. It
+must perform zero after-operator TDVP steps. Reload/resume validates the
+terminal record and advances to the next branch without claiming MPS flux.
 
 - [ ] **Step 2: Add failing creation/annihilation equivalence tests**
 
 At two interior points, run both norm identities with explicit
-`insertion=:creation` and `:annihilation`; compare values within `1e-10` at
-small beta and require distinct expected sectors. Endpoints must retain
-`branch_status=:endpoint_identity` and null operator sectors.
+`green_insertion=:creation` and `green_insertion=:annihilation`; compare values
+within `1e-10` at small beta and require distinct expected sectors. Interrupt
+each form once after insertion, assert cursor insertion/segment and shifted
+sector, HDF5 round-trip it, then resume to the uninterrupted value. Resume an
+annihilation checkpoint under a creation request and assert identity mismatch.
+Endpoints retain `branch_status=:endpoint_identity`, `insertion=:none`, and
+null operator sectors.
 
 - [ ] **Step 3: Run RED**
 
 ```bash
 julia --project=tracks/mps/solutions/frustration-free/julia \
   tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_checkpoint.jl
 ```
 
-Expected: missing `OperatorSector` and purification keywords.
+Expected: missing sector/result types, insertion-bound cursor, and public
+annihilation keyword.
 
 - [ ] **Step 4: Implement sector-aware context and branches**
 
 Add `purification` to `FiniteBathContext`, derive
 `spin_qn_enabled = purification.mode === :qn_dual`, validate actual flux
 immediately after operator application, and include nullable
-`operator_sector` in every point diagnostic. Keep creation as the public
-interior convention and endpoint processing unchanged.
+`operator_sector` in every point diagnostic. Propagate `green_insertion`
+through validation, branch duration selection, cursors, resumable data, and
+checkpoint serialization. Creation remains the default; annihilation is an
+equally executable resumable mode. Implement the zero-amplitude terminal
+semantics from the design without constructing or serializing a fictitious MPS.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -279,7 +348,9 @@ Run Step 3. Expected: all observable tests pass.
 ```bash
 git add \
   tracks/mps/solutions/frustration-free/julia/finite_bath_observables.jl \
-  tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl
+  tracks/mps/solutions/frustration-free/julia/finite_bath_checkpoint.jl \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl \
+  tracks/mps/solutions/frustration-free/julia/test/finite_bath_checkpoint.jl
 git commit -m "Bind Green branches to QN sectors"
 ```
 
@@ -357,11 +428,37 @@ fields and chain geometry.
 
 - [ ] **Step 2: Add failing interrupted branch resume tests**
 
-Interrupt thermal, interior-before, creation-after, and annihilation-after
-positions. Reload from HDF5 and assert actual flux equals metadata. Resume to
-the uninterrupted result. Validly rehash metadata after corrupting each active
-sector field and require rejection before TDVP. Also reject a base-sector MPS
-under an after-operator cursor and vice versa.
+Use a deterministic `StopAfterCursor` callback, never elapsed time or a signal.
+It matches the complete tuple
+`(kind=:green, tau_index=2, spin=:up, insertion, segment=:after,
+completed_steps=1)`, returns `false` until that generation is durably written,
+then returns `true` exactly once. Run it separately for `insertion=:creation`
+and `:annihilation`, and require `current.json` to name the expected generation
+before the observable call reports interruption.
+
+Also interrupt thermal and interior-before positions. Reload every generation
+through the production HDF5 loader, assert actual MPS flux equals base or
+shifted-sector metadata, then resume to the uninterrupted typed data and
+observable values. Validly rehash metadata after corrupting each active-sector
+field and require rejection before TDVP. Reject a base-sector MPS under an
+after-operator cursor, a shifted-sector MPS under a before cursor, and an
+annihilation checkpoint under a creation request.
+
+Write and reload a zero-amplitude `segment=:terminal` generation. Require
+expected insertion/spin/sector, `branch_status=:zero`,
+`active_state_present=false`, no active MPS HDF5 dataset, and zero
+after-operator steps. Reject a terminal record with an MPS, missing expected
+sector, nonzero status, or a claimed measured flux.
+
+Expose focused test entry points and run both exact shifted-sector HDF5 resume
+commands:
+
+```bash
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  -e 'include("tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl"); run_shifted_sector_hdf5_resume_test(:creation)'
+julia --project=tracks/mps/solutions/frustration-free/julia \
+  -e 'include("tracks/mps/solutions/frustration-free/julia/test/finite_bath_observables.jl"); run_shifted_sector_hdf5_resume_test(:annihilation)'
+```
 
 - [ ] **Step 3: Run RED**
 
@@ -422,6 +519,9 @@ Add an explicit QN chain fixture with gauge/version and derived
 `Dict("Nf"=>2*(n_bath+1),"Sz"=>0)`. Reject unknown keys, wrong sector, wrong
 gauge/version, QN direct-star, QN missing mapping, and non-QN non-null fields.
 Force the capability probe to fail and assert request rejection.
+Add `"green_insertion"=>"creation"` to the direct fixture and a QN
+`"annihilation"` fixture. Assert request parsing, checkpoint identity, Green
+cursors, output settings, and provenance retain the selected insertion.
 
 - [ ] **Step 2: Add failing output/provenance tests**
 
@@ -444,7 +544,9 @@ Set runner schema to `4`, increment runner version, checkpoint constants to
 schema `2`/writer `2.0.0`, and add `purification` to exact payload keys.
 Derive expected sector from the verified bath; never trust the serialized
 sector alone. Invoke the end-to-end probe before context construction for QN
-requests.
+requests. Add exact solver setting `green_insertion`; reject values other than
+`creation` and `annihilation`, and pass the validated symbol to resumable
+observables.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -473,6 +575,8 @@ Assert `acceptance_fixture()` remains direct-star and has
 `purification_mode="non_qn"` only in fixture-side settings. Its runner payload
 must contain the exact non-QN object and no mapping. Add a QN helper requiring
 chain mapping bytes and assert exact derived base sector.
+The fixture-side `green_insertion` defaults to `"creation"`; add an explicit
+annihilation QN fixture and assert request/output/checkpoint propagation.
 
 Reject all invalid mode/geometry/gauge/sector combinations before Julia.
 
@@ -498,7 +602,9 @@ Expected: schema/provenance assertions fail.
 Set `RUNNER_SCHEMA_VERSION=4`, update checkpoint constants, add explicit
 fixture-side mode parsing, derive sector from verified bath, and close output
 exact keys. Keep `run_acceptance()` on the existing direct-star/non-QN fixture
-and existing immutable result path.
+and existing immutable result path. Parse exact fixture setting
+`green_insertion`, defaulting to creation only when the key is absent for old
+in-process callers.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -516,10 +622,16 @@ git commit -m "Add focused QN acceptance requests"
 **Files:**
 - Modify: `tracks/mps/solutions/frustration-free/convergence.py`
 - Modify: `tracks/mps/solutions/frustration-free/convergence.schema.json`
+- Modify: `tracks/mps/solutions/frustration-free/convergence_slurm_array.sh`
 - Modify: `tracks/mps/solutions/frustration-free/tests/test_convergence.py`
 
 **Interfaces:**
-- `make_plan(..., purification_mode="non_qn")`.
+- `make_plan(; betas=DEFAULT_GRID["betas"], bath_sizes=nothing,
+  time_steps=nothing, cutoffs=DEFAULT_GRID["cutoffs"], maxdims=nothing,
+  tau_fractions=DEFAULT_GRID["tau_fractions"], stage="production",
+  tolerances=nothing, julia_project=JULIA_DIR,
+  bath_representation="direct_star", purification_mode="non_qn",
+  green_insertion="creation")`.
 - QN plans require `bath_representation="chain"`.
 
 - [ ] **Step 1: Add failing plan/schema tests**
@@ -537,6 +649,24 @@ with:
 
 Schema must reject missing/unknown fields and inconsistent cell mode, gauge,
 sector, representation, or mapping.
+Add parser tests for deterministic pilot-only flags:
+
+```text
+--force-interruption-phase green
+--force-interruption-insertion annihilation
+--force-interruption-spin up
+--force-interruption-tau-index 2
+--force-interruption-segment after
+--force-interruption-completed-steps 1
+--require-resume-from-checkpoint
+```
+
+The six force fields are all-or-none, accepted only for `stage=pilot`, and
+must match the planned `green_insertion`. The runner callback requests shutdown
+only after the named shifted-sector step has been durably written and
+reload-validated. The first command must return 75. A later command with
+`--require-resume-from-checkpoint` must prove it loaded that generation before
+doing work.
 
 - [ ] **Step 2: Add failing N_b=48 refusal matrix**
 
@@ -563,7 +693,19 @@ Add purification to `_cell_input_payload`, cell solver settings,
 `_runner_request_for_cell`, completed-cell validation, source hashes, and JSON
 schema. Update `_n48_solver_capability_is_valid` to require QN-chain mode,
 combined benchmark boolean, execution boolean, and allowlisted evidence.
-Leave `N48_CAPABILITY_ALLOWLIST = frozenset()`.
+Leave `N48_CAPABILITY_ALLOWLIST = frozenset()`. Add exact plan setting
+`green_insertion`, default `"creation"`, and CLI
+`--green-insertion {creation,annihilation}`.
+Implement the forced-interruption flags and record the force specification,
+written generation, and resumed generation in cell telemetry. Update
+`convergence_slurm_array.sh` to forward the exact optional environment
+variables `HARNESS_FORCE_INTERRUPTION_PHASE`,
+`HARNESS_FORCE_INTERRUPTION_INSERTION`, `HARNESS_FORCE_INTERRUPTION_SPIN`,
+`HARNESS_FORCE_INTERRUPTION_TAU_INDEX`,
+`HARNESS_FORCE_INTERRUPTION_SEGMENT`,
+`HARNESS_FORCE_INTERRUPTION_COMPLETED_STEPS`, and
+`HARNESS_REQUIRE_RESUME_FROM_CHECKPOINT`. Partial environment configuration
+exits before Python.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -582,6 +724,7 @@ Expected: all tests pass; every `N_b=48` executor remains uncalled.
 git add \
   tracks/mps/solutions/frustration-free/convergence.py \
   tracks/mps/solutions/frustration-free/convergence.schema.json \
+  tracks/mps/solutions/frustration-free/convergence_slurm_array.sh \
   tracks/mps/solutions/frustration-free/tests/test_convergence.py
 git commit -m "Gate QN convergence capability"
 ```
@@ -664,32 +807,75 @@ git commit -m "Close QN sector provenance validation"
 - Modify: `tracks/mps/solutions/frustration-free/tests/test_convergence.py`
 
 **Interfaces:**
-- Produces a canonical `qnBenchmark` artifact for small-bath comparisons.
+- Produces canonical `qnPairedBenchmark` artifacts through:
+  `make_qn_paired_benchmark(non_qn_cell, qn_cell,
+  non_qn_telemetry, qn_telemetry) -> dict[str, Any]`,
+  `validate_qn_paired_benchmark(artifact) -> None`, and CLI
+  `convergence.py benchmark-qn` plus
+  `convergence.py validate-qn-benchmark --benchmark PATH`.
 - Does not produce scalable capability evidence and is not allowlist eligible.
 
 - [ ] **Step 1: Add failing benchmark schema tests**
 
-Require paired non-QN-chain and QN-chain measurements with exact shared
-scientific input and fields:
+Add the exact `qnPairedBenchmark` schema from
+`QN_PURIFICATION_DESIGN.md`: top-level keys are `schema_version`,
+`artifact_type`, `status`, `matched_identity`, `matched_work`, `samples`,
+`derived`, `selection`, and `artifact_sha256`. `samples` requires both
+`non_qn` and `qn_dual`. Each raw sample requires:
 
 ```text
-schema_version, artifact_type, status, plan_sha256, cell_input_sha256,
-bath_sha256, chain_mapping_sha256, qn_gauge, qn_gauge_version, base_sector,
-source_sha256, julia_environment_sha256, runtime_versions, execution_target,
-wall_seconds, peak_rss_bytes, checkpoint_bytes, checkpoint_write_seconds,
-checkpoint_read_seconds, mpo_link_dimensions,
+plan_sha256, cell_id, cell_input_sha256, result_sha256,
+checkpoint_start_generation, checkpoint_end_generation,
+purification_mode, wall_seconds, peak_rss_bytes, checkpoint_bytes,
+checkpoint_write_seconds, checkpoint_read_seconds, mpo_link_dimensions,
 maximum_link_dimensions_by_bond, truncation_max_error,
-krylov_max_error_estimate, observable_max_delta, artifact_sha256
+krylov_max_error_estimate, krylov_all_converged, maxdim_saturated,
+observables
 ```
 
-Reject mixed inputs, missing telemetry, nonfinite values, symlinks, and any
-sample above `N_b=6`.
+`observables` has exact keys `n_d`, `double_occupancy`, `G_up`, and `G_down`.
+`matched_identity` has exact model, `n_bath`, tau, bath/mapping identity,
+chain representation, QN gauge/version/base sector, insertion, numerical
+settings, all source hashes, Project/Manifest hashes, runtime versions, and
+execution target. `matched_work` has exact thermal step, branch count,
+before/after step, completed tau/spin, forced interruption, and resumed
+generation counts.
+
+Reject mixed identities/work, absent raw samples, nonfinite or nonpositive
+resource denominators, mismatched array lengths, symlinks, and `N_b>6`.
 
 - [ ] **Step 2: Add failing benchmark generation tests**
 
 Use a fake executor with deterministic telemetry. Assert canonical bytes,
-independent SHA replay, QN/non-QN ratio calculations, immutable publication,
-and that no capability field or allowlist changes.
+independent SHA replay, immutable publication, and these exact formulas:
+
+```python
+ratio = lambda key: qn[key] / non_qn[key]
+assert derived["wall_seconds_qn_over_non_qn"] == ratio("wall_seconds")
+assert derived["peak_rss_qn_over_non_qn"] == ratio("peak_rss_bytes")
+assert derived["checkpoint_bytes_qn_over_non_qn"] == ratio("checkpoint_bytes")
+assert derived["checkpoint_write_qn_over_non_qn"] == ratio(
+    "checkpoint_write_seconds"
+)
+assert derived["checkpoint_read_qn_over_non_qn"] == ratio(
+    "checkpoint_read_seconds"
+)
+assert derived["maximum_mpo_link_qn_over_non_qn"] == (
+    max(qn["mpo_link_dimensions"]) / max(non_qn["mpo_link_dimensions"])
+)
+assert derived["maximum_mps_link_qn_over_non_qn"] == (
+    max(qn["maximum_link_dimensions_by_bond"])
+    / max(non_qn["maximum_link_dimensions_by_bond"])
+)
+```
+
+Compute `observable_max_absolute_delta` over both scalars and every spin/tau
+entry. Recompute `scientific_validation_passed` from identity/work equality,
+both Krylov booleans, both saturation booleans, named diagnostic limits, and
+`delta<=1e-6`. Select the lexicographic minimum of
+`(peak_rss_bytes, wall_seconds, checkpoint_bytes)`, with `non_qn` winning a
+tie. Assert `production_or_n48_eligible is False` and no capability or
+allowlist changes.
 
 - [ ] **Step 3: Run RED**
 
@@ -701,14 +887,25 @@ uv run --project tracks/mps/solutions/frustration-free --frozen \
   -k "qn_benchmark" -q
 ```
 
-Expected: missing benchmark definition/API.
+Expected: missing paired benchmark definition and CLI.
 
 - [ ] **Step 4: Implement canonical small-bath benchmark publication**
 
-Add `make_qn_benchmark(non_qn_cell, qn_cell, telemetry)` and
-`validate_qn_benchmark`. Status is exactly
-`"small_bath_validation_only"`. No code path may convert it into
-`capability_evidence_sha256`.
+Implement the two interfaces and both subcommands. `benchmark-qn` takes exact
+arguments:
+
+```text
+--non-qn-plan PATH --non-qn-run-directory PATH --non-qn-cell-index INT
+--qn-plan PATH --qn-run-directory PATH --qn-cell-index INT
+--output-root PATH
+```
+
+It independently validates both plans, cells, results, checkpoint generations,
+and telemetry; publishes
+`OUTPUT_ROOT/qn-paired-benchmark-<artifact_sha256>/benchmark.json` atomically;
+then advances canonical `OUTPUT_ROOT/current.json`. Status is exactly
+`small_bath_validation_only`. No code path converts its digest into capability
+evidence.
 
 - [ ] **Step 5: Run GREEN and commit**
 
@@ -748,23 +945,100 @@ uv run --project tracks/mps/solutions/frustration-free --frozen \
 
 Expected: README assertions fail.
 
-- [ ] **Step 3: Document and run the local pilot**
+- [ ] **Step 3: Document exact local execution and benchmark publication**
 
-Document the exact plan command:
+README must contain these commands verbatim. Create matched chain plans that
+differ only in purification mode:
+
+```bash
+for MODE in non_qn qn_dual; do
+  uv run --project tracks/mps/solutions/frustration-free --frozen python \
+    tracks/mps/solutions/frustration-free/convergence.py plan \
+    --stage pilot --betas 0.2 --bath-sizes 1,2,3,4,5,6 \
+    --time-steps 0.04 --cutoffs 1e-14 --maxdims 128 \
+    --tau-fractions 0,0.25,0.5,0.75,1 \
+    --bath-representation chain --purification-mode "$MODE" \
+    --green-insertion annihilation \
+    --output-root "/tmp/challenge81-${MODE}-local-pilot"
+done
+NON_QN_RUN="/tmp/challenge81-non_qn-local-pilot/$(python3 -c \
+  'import json,sys; print(json.load(open(sys.argv[1]))["relative_path"])' \
+  /tmp/challenge81-non_qn-local-pilot/current.json)"
+QN_RUN="/tmp/challenge81-qn_dual-local-pilot/$(python3 -c \
+  'import json,sys; print(json.load(open(sys.argv[1]))["relative_path"])' \
+  /tmp/challenge81-qn_dual-local-pilot/current.json)"
+for RUN in "$NON_QN_RUN" "$QN_RUN"; do
+  ACK="$(python3 -c \
+    'import json,sys; print(json.load(open(sys.argv[1]))["resource_sha256"])' \
+    "$RUN/resources.json")"
+  for CELL_INDEX in 0 1 2 3 4; do
+    uv run --project tracks/mps/solutions/frustration-free --frozen python \
+      tracks/mps/solutions/frustration-free/convergence.py run-cell \
+      --plan "$RUN/plan.json" --run-directory "$RUN" \
+      --resources "$RUN/resources.json" --acknowledge-resources "$ACK" \
+      --execution-target local \
+      --julia-project "$PWD/tracks/mps/solutions/frustration-free/julia" \
+      --cell-index "$CELL_INDEX"
+  done
+done
+```
+
+Deterministically interrupt the `N_b=6` cell in the annihilation-up shifted
+sector after its first post-insertion step. The expected first exit is exactly
+75; then require resume from the durable HDF5 generation:
+
+```bash
+for RUN in "$NON_QN_RUN" "$QN_RUN"; do
+  ACK="$(python3 -c \
+    'import json,sys; print(json.load(open(sys.argv[1]))["resource_sha256"])' \
+    "$RUN/resources.json")"
+  set +e
+  uv run --project tracks/mps/solutions/frustration-free --frozen python \
+    tracks/mps/solutions/frustration-free/convergence.py run-cell \
+    --plan "$RUN/plan.json" --run-directory "$RUN" \
+    --resources "$RUN/resources.json" --acknowledge-resources "$ACK" \
+    --execution-target local \
+    --julia-project "$PWD/tracks/mps/solutions/frustration-free/julia" \
+    --cell-index 5 \
+    --force-interruption-phase green \
+    --force-interruption-insertion annihilation \
+    --force-interruption-spin up --force-interruption-tau-index 2 \
+    --force-interruption-segment after \
+    --force-interruption-completed-steps 1
+  STATUS=$?
+  set -e
+  test "$STATUS" -eq 75
+  uv run --project tracks/mps/solutions/frustration-free --frozen python \
+    tracks/mps/solutions/frustration-free/convergence.py run-cell \
+    --plan "$RUN/plan.json" --run-directory "$RUN" \
+    --resources "$RUN/resources.json" --acknowledge-resources "$ACK" \
+    --execution-target local \
+    --julia-project "$PWD/tracks/mps/solutions/frustration-free/julia" \
+    --cell-index 5 --require-resume-from-checkpoint
+done
+```
+
+Both forced checkpoints contain an HDF5 active MPS and annihilation-up cursor.
+The QN checkpoint additionally has expected sector `(Nf,Sz)=(13,-1)` for
+`N_b=6`, and validation reloads that flux before accepting exit 75 or resume;
+the non-QN checkpoint requires null QN-sector metadata. Publish and revalidate
+the paired benchmark:
 
 ```bash
 uv run --project tracks/mps/solutions/frustration-free --frozen python \
-  tracks/mps/solutions/frustration-free/convergence.py plan \
-  --stage pilot --betas 0.2 --bath-sizes 1,2,3,4,5,6 \
-  --time-steps 0.04 --cutoffs 1e-14 --maxdims 128 \
-  --tau-fractions 0,0.25,0.5,0.75,1 \
-  --bath-representation chain --purification-mode qn_dual \
-  --output-root /tmp/challenge81-qn-local-pilot
+  tracks/mps/solutions/frustration-free/convergence.py benchmark-qn \
+  --non-qn-plan "$NON_QN_RUN/plan.json" \
+  --non-qn-run-directory "$NON_QN_RUN" --non-qn-cell-index 5 \
+  --qn-plan "$QN_RUN/plan.json" \
+  --qn-run-directory "$QN_RUN" --qn-cell-index 5 \
+  --output-root /tmp/challenge81-qn-paired-benchmark
+BENCHMARK_RUN="/tmp/challenge81-qn-paired-benchmark/$(python3 -c \
+  'import json,sys; print(json.load(open(sys.argv[1]))["relative_path"])' \
+  /tmp/challenge81-qn-paired-benchmark/current.json)"
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py validate-qn-benchmark \
+  --benchmark "$BENCHMARK_RUN/benchmark.json"
 ```
-
-Resolve the immutable run from `current.json`, then execute cells sequentially
-with `execution-target local`, plan-bound resources, and exact resource SHA
-acknowledgment. Publish paired non-QN-chain/QN-chain benchmark records.
 
 Stop immediately if any cell has nonfinite output, failed probe, wrong sector,
 checkpoint mismatch, observable delta above `1e-6`, unconverged Krylov update,
@@ -816,26 +1090,56 @@ uv run --project tracks/mps/solutions/frustration-free --frozen python \
 Expected: validation succeeds and the selected QN cell has `N_b=6`,
 chain representation, gauge version 1, and a mapping SHA.
 
-- [ ] **Step 2: Submit exactly one bounded pilot**
+- [ ] **Step 2: Force one bounded shifted-sector interruption**
 
 Use the site-specific partition/account externally; the repository wrapper
 remains profile-neutral:
 
 ```bash
+N6_CELL_INDEX=5
 RESOURCE_ACK="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["resource_sha256"])' \
   "$RUN/resources.json")"
-sbatch --signal=B:USR1@300 --array="$N6_CELL_INDEX" \
-  --export=ALL,HARNESS_SOLUTION_DIR="$PWD/tracks/mps/solutions/frustration-free",HARNESS_RUN_SPEC="$RUN/plan.json",HARNESS_RESOURCES="$RUN/resources.json",HARNESS_RESOURCE_ACK="$RESOURCE_ACK",HARNESS_RUN_DIR="$RUN",JULIA_PROJECT="$PWD/tracks/mps/solutions/frustration-free/julia" \
-  tracks/mps/solutions/frustration-free/convergence_slurm_array.sh
+set +e
+FORCED_JOB="$(sbatch --wait --parsable --signal=B:USR1@300 \
+  --array="$N6_CELL_INDEX" \
+  --export=ALL,HARNESS_SOLUTION_DIR="$PWD/tracks/mps/solutions/frustration-free",HARNESS_RUN_SPEC="$RUN/plan.json",HARNESS_RESOURCES="$RUN/resources.json",HARNESS_RESOURCE_ACK="$RESOURCE_ACK",HARNESS_RUN_DIR="$RUN",JULIA_PROJECT="$PWD/tracks/mps/solutions/frustration-free/julia",HARNESS_FORCE_INTERRUPTION_PHASE=green,HARNESS_FORCE_INTERRUPTION_INSERTION=annihilation,HARNESS_FORCE_INTERRUPTION_SPIN=up,HARNESS_FORCE_INTERRUPTION_TAU_INDEX=2,HARNESS_FORCE_INTERRUPTION_SEGMENT=after,HARNESS_FORCE_INTERRUPTION_COMPLETED_STEPS=1 \
+  tracks/mps/solutions/frustration-free/convergence_slurm_array.sh)"
+FORCED_STATUS=$?
+set -e
+test "$FORCED_STATUS" -eq 75
+test "$(sacct -n -X -j "${FORCED_JOB%%;*}" --format=ExitCode | xargs)" = "75:0"
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py validate-existing \
+  --plan "$RUN/plan.json" --resources "$RUN/resources.json" \
+  --run-directory "$RUN"
 ```
 
-- [ ] **Step 3: Apply cluster stopping criteria**
+The forced callback, not the scheduler signal, is the expected stop mechanism.
+`--signal` remains only a bounded preemption safety net. Validation must find a
+new HDF5 generation at annihilation-up `segment=after`, completed step 1, with
+actual shifted flux `(Nf,Sz)=(13,-1)`.
+
+- [ ] **Step 3: Require deterministic cluster resume**
+
+```bash
+RESUME_JOB="$(sbatch --wait --parsable --signal=B:USR1@300 \
+  --array="$N6_CELL_INDEX" \
+  --export=ALL,HARNESS_SOLUTION_DIR="$PWD/tracks/mps/solutions/frustration-free",HARNESS_RUN_SPEC="$RUN/plan.json",HARNESS_RESOURCES="$RUN/resources.json",HARNESS_RESOURCE_ACK="$RESOURCE_ACK",HARNESS_RUN_DIR="$RUN",JULIA_PROJECT="$PWD/tracks/mps/solutions/frustration-free/julia",HARNESS_REQUIRE_RESUME_FROM_CHECKPOINT=1 \
+  tracks/mps/solutions/frustration-free/convergence_slurm_array.sh
+)"
+test "$(sacct -n -X -j "${RESUME_JOB%%;*}" --format=ExitCode | xargs)" = "0:0"
+uv run --project tracks/mps/solutions/frustration-free --frozen python \
+  tracks/mps/solutions/frustration-free/convergence.py validate-existing \
+  --plan "$RUN/plan.json" --resources "$RUN/resources.json" \
+  --run-directory "$RUN"
+```
 
 Stop after this one cell. Require scheduler exit 0 or continuation exit 75 with
 a newly validated checkpoint; actual Julia/BLAS threads matching provenance;
 MaxRSS within allocation and 16 GiB; checkpoint read/write success; no maxdim
 saturation; named truncation/Krylov limits; observable delta at most `1e-6`;
-and exact mode/gauge/sector/mapping identity after reload. Any failure blocks
+exact mode/gauge/sector/mapping identity after reload; and telemetry proving
+the resumed generation equals the forced generation. Any failure blocks
 further cluster sizes.
 
 - [ ] **Step 4: Record, but do not allowlist, the benchmark**
