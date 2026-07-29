@@ -289,7 +289,8 @@ def test_spool_copied_slurm_wrapper_uses_explicit_solution_root(tmp_path: Path):
         "import json, os, sys\n"
         f"open({str(invocation)!r}, 'w').write(json.dumps({{'cwd': os.getcwd(), "
         "'args': sys.argv[1:], 'omp': os.environ['OMP_NUM_THREADS'], "
-        "'openblas': os.environ['OPENBLAS_NUM_THREADS']}))\n"
+        "'openblas': os.environ['OPENBLAS_NUM_THREADS'], "
+        "'pythonpath': os.environ.get('PYTHONPATH')}))\n"
         "PY\n",
         encoding="utf-8",
     )
@@ -301,6 +302,7 @@ def test_spool_copied_slurm_wrapper_uses_explicit_solution_root(tmp_path: Path):
         "HARNESS_RUN_SPEC": str(tmp_path / "run_spec.json"),
         "HARNESS_ENTRYPOINT": str(Path(__file__).parents[6]),
         "SLURM_ARRAY_TASK_ID": "17",
+        "PYTHONPATH": "/caller/uv/path",
     }
     completed = subprocess.run(
         ["/bin/bash", str(spool)],
@@ -314,8 +316,136 @@ def test_spool_copied_slurm_wrapper_uses_explicit_solution_root(tmp_path: Path):
     assert recorded["cwd"] == str(SOLUTION)
     assert recorded["omp"] == "1"
     assert recorded["openblas"] == "1"
+    assert recorded["pythonpath"] == "/caller/uv/path"
+    assert recorded["args"][:3] == [
+        "run",
+        "scripts/validation_shard.py",
+        "run-cell",
+    ]
     assert recorded["args"][-2:] == ["--case-index", "17"]
     assert "17" in completed.stdout
+
+
+def _offline_wrapper_environment(
+    tmp_path: Path,
+    *,
+    python: Path | str,
+) -> tuple[Path, Path, dict[str, str]]:
+    spool = tmp_path / "slurm-spool-copy.sh"
+    shutil.copy2(WRAPPER, spool)
+    invocation = tmp_path / "offline-invocation.json"
+    run_spec = tmp_path / "run_spec.json"
+    run_spec.write_text("{}", encoding="utf-8")
+    environment = {
+        **os.environ,
+        "PATH": "/usr/bin:/bin",
+        "HARNESS_RUN_SPEC": str(run_spec),
+        "HARNESS_ENTRYPOINT": str(Path(__file__).parents[6]),
+        "SLURM_ARRAY_TASK_ID": "23",
+        "CHALLENGE_194_PYTHON": str(python),
+        "PYTHONPATH": "/hostile/caller/path",
+        "OFFLINE_INVOCATION": str(invocation),
+    }
+    return spool, invocation, environment
+
+
+def test_spool_wrapper_uses_direct_offline_interpreter_and_clean_pythonpath(
+    tmp_path: Path,
+):
+    interpreter = tmp_path / "offline-python"
+    interpreter.write_text(
+        "#!/bin/bash\n"
+        "/usr/bin/python3 - \"$@\" <<'PY'\n"
+        "import json, os, sys\n"
+        "with open(os.environ['OFFLINE_INVOCATION'], 'w') as stream:\n"
+        "    json.dump({'args': sys.argv[1:], "
+        "'pythonpath': os.environ.get('PYTHONPATH')}, stream)\n"
+        "PY\n",
+        encoding="utf-8",
+    )
+    interpreter.chmod(0o755)
+    spool, invocation, environment = _offline_wrapper_environment(
+        tmp_path, python=interpreter
+    )
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    recorded = json.loads(invocation.read_text(encoding="utf-8"))
+    assert recorded["args"] == [
+        "scripts/validation_shard.py",
+        "run-cell",
+        "--run-spec",
+        str(tmp_path / "run_spec.json"),
+        "--case-index",
+        "23",
+    ]
+    assert recorded["pythonpath"] == str(SOLUTION / "src")
+    assert "/hostile/caller/path" not in recorded["pythonpath"]
+
+
+def test_offline_interpreter_may_be_valid_absolute_symlink(tmp_path: Path):
+    interpreter = tmp_path / "offline-python"
+    interpreter.write_text(
+        "#!/bin/bash\nexit 0\n",
+        encoding="utf-8",
+    )
+    interpreter.chmod(0o755)
+    alias = tmp_path / "python-alias"
+    alias.symlink_to(interpreter)
+    spool, _, environment = _offline_wrapper_environment(
+        tmp_path, python=alias
+    )
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ("relative", "missing", "directory", "non-executable", "broken-symlink"),
+)
+def test_offline_interpreter_fails_closed_when_invalid(
+    tmp_path: Path,
+    kind: str,
+):
+    candidate = tmp_path / "candidate"
+    if kind == "relative":
+        python: Path | str = "relative/python"
+    elif kind == "missing":
+        python = candidate
+    elif kind == "directory":
+        candidate.mkdir()
+        python = candidate
+    elif kind == "non-executable":
+        candidate.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+        candidate.chmod(0o644)
+        python = candidate
+    else:
+        candidate.symlink_to(tmp_path / "absent-target")
+        python = candidate
+    spool, invocation, environment = _offline_wrapper_environment(
+        tmp_path, python=python
+    )
+    completed = subprocess.run(
+        ["/bin/bash", str(spool)],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode != 0
+    assert "CHALLENGE_194_PYTHON" in completed.stderr
+    assert not invocation.exists()
 
 
 def test_generated_shard_results_are_ignored(tmp_path: Path):
