@@ -582,3 +582,13 @@ Updated: 2026-07-29 UTC.
   3,392,068 KiB MaxRSS because it still carried the disproven, unused
   nontrivial-block diagnostic. Preflight r2 job `118156605` removes that
   work and is running on 32 CPUs / 114,000 MiB.
+- Remote terminal-solve takeover uses clean branch
+  `remote/challenge88-terminal-solve` at commit `87be317`. SCNet baseline job
+  `118171391` is preserved and was `RUNNING` at 2026-07-29T14:48Z on 32 CPUs /
+  114000 MiB. Its log shows exact `L=2,d=2` coefficient/isotypic assembly,
+  before JuMP/Mosek; process RSS was about 6.1 GB. xH5 baseline job `23011251`
+  is also preserved and remained `PENDING (Priority)` at 64 CPUs / 240 GB.
+- The next changed action is not another gamma scan. While both baselines
+  continue, audit a single-pass solver export and add a fail-closed numerical
+  result audit so any terminal feasibility or infeasibility statement is tied
+  to residual/certificate evidence.

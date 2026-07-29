@@ -966,3 +966,24 @@ Preflight r1 `118155664` was cancelled after 5:37 and 3,392,068 KiB MaxRSS
 because it still carried the already-disproven nontrivial-cone comparison.
 Commit `767037a` removes that irrelevant work; r2 job `118156605` is the
 active `L=2,d=2` preflight.
+
+## 2026-07-29 — terminal-solve takeover preserves both baseline jobs
+
+Source is clean branch `remote/challenge88-terminal-solve` at commit
+`87be3177694bbc3db6566016eb645018cb59213d`. The exact attempted setup is the
+unrestricted Shastry--Sutherland KMS relaxation with
+`H=sum_dimer S_i.S_j + (4/5) sum_square_nn S_i.S_j`, no-boundary local
+consistency window `L=2`, complete state-polynomial basis and complete
+inner-state stationarity, `d=2`, and candidate `gamma=2`.
+
+SCNet job `118171391` is `RUNNING` on `kshcnormal` with 32 CPUs and 114000 MiB.
+At 2026-07-29T14:48Z its stdout had reached exact S3 isotypic coefficient
+assembly before JuMP/Mosek, and process RSS was about 6.1 GB. xH5 job
+`23011251` remains `PENDING (Priority)` on `xhacnormalb` with 64 CPUs and
+240 GB. Neither job is cancelled, altered, or duplicated.
+
+The next action changes implementation rather than repeating the signature:
+inspect single-pass coefficient-to-solver construction and a fail-closed
+post-solve residual/certificate export. A feasible point will be described
+only as finite-relaxation feasibility; any solver-reported infeasibility will
+remain a candidate until independently replayed.
