@@ -10,7 +10,12 @@ import numpy as np
 import pytest
 
 from scalable_v1.audit import sha256_file
-from scalable_v1.contracts import CandidateAdapter, DiagnosticProvider, StateHandle
+from scalable_v1.contracts import (
+    CandidateAdapter,
+    DiagnosticProvider,
+    SampleBatch,
+    StateHandle,
+)
 from scalable_v1.protocol import load_protocol
 from scalable_v1.routes.occupation_autoregressive.constraints import (
     FeasibilityTable,
@@ -251,9 +256,10 @@ def test_state_batches_cover_sample_logpsi_sparse_energy_and_l2_without_enumerat
         forbidden_enumeration,
     )
     candidate = _load_candidate(monkeypatch, run_dir)
-    states = (candidate.ground_state(), candidate.generate_multiplet()[0])
+    states = (candidate.ground_state(), candidate.generate_multiplet()[1])
     for state in states:
         batch = state.sample(3, 4848)
+        assert isinstance(batch, SampleBatch)
         assert batch.configs.shape == (3,)
         assert batch.n_samples == 3
         assert batch.seed == 4848
@@ -428,3 +434,84 @@ def test_cli_rejects_capacity_batch_and_checkpoint_selection_overrides(
                 "2",
             ]
         )
+
+
+def test_n8_smoke_counts_sixteen_derived_adapter_samples_per_repetition(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    training_cli = importlib.import_module("train_occupation_autoregressive")
+    sample_calls: list[tuple[int, int]] = []
+
+    class FakeTable:
+        counts = {(0, 6, 0): 1}
+
+    class FakeModel:
+        n_electrons = 6
+        two_q = 15
+        parameter_count = 1
+
+        @staticmethod
+        def logpsi(_state: int, _sector: str) -> complex:
+            return 0.0j
+
+        @staticmethod
+        def log_derivative(_state: int, _sector: str) -> np.ndarray:
+            return np.zeros(1, dtype=np.complex128)
+
+    class FakeTower:
+        def __iter__(self):
+            return iter((-2, -1, 0, 1, 2))
+
+        def __getitem__(self, _m: int) -> object:
+            return object()
+
+    class FakeState:
+        def __init__(self, *, m: int, **_kwargs: object) -> None:
+            self.m = m
+
+        def sample(self, n_samples: int, seed: int) -> SampleBatch:
+            sample_calls.append((self.m, n_samples))
+            return SampleBatch(
+                configs=np.arange(n_samples, dtype=object),
+                n_samples=n_samples,
+                burn_in_steps=0,
+                seed=seed,
+            )
+
+        @staticmethod
+        def logpsi(configs: np.ndarray) -> np.ndarray:
+            return np.zeros(configs.size, dtype=np.complex128)
+
+        local_energy = logpsi
+        local_l2 = logpsi
+
+    monkeypatch.setattr(
+        training_cli.FeasibilityTable,
+        "build",
+        lambda **_kwargs: FakeTable(),
+    )
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **_kwargs: FakeModel(),
+    )
+    monkeypatch.setattr(
+        training_cli.LadderTower,
+        "from_m0",
+        lambda **_kwargs: FakeTower(),
+    )
+    monkeypatch.setattr(training_cli, "OccupationState", FakeState)
+    monkeypatch.setattr(training_cli, "_prepared_operator", lambda _two_q: object())
+
+    result = training_cli._smoke_size(
+        n_electrons=6,
+        two_q=15,
+        seed=4848,
+        batch_size=256,
+        warmups=2,
+        repetitions=5,
+        protocol=load_protocol(),
+    )
+
+    assert [count for m, count in sample_calls if m == 1] == [16] * 7
+    assert result["measured_sample_count"] == 2640

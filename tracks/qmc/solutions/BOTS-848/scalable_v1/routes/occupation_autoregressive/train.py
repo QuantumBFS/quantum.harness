@@ -679,6 +679,7 @@ def _checkpoint(
         two_q=np.asarray(model.two_q, dtype=np.int64),
         target_m2=np.asarray(model.target_m2, dtype=np.int64),
         width=np.asarray(model.width, dtype=np.int64),
+        layers=np.asarray(2, dtype=np.int64),
         batch_size_per_sector=np.asarray(
             config.batch_size_per_sector,
             dtype=np.int64,

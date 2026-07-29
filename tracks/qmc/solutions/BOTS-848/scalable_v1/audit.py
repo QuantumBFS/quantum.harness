@@ -81,6 +81,7 @@ def freeze_manifest(
             {
                 "role": role,
                 "path": artifact_path.relative_to(run_dir).as_posix(),
+                "bytes": artifact_path.stat().st_size,
                 "sha256": sha256_file(artifact_path),
             }
         )
@@ -210,13 +211,19 @@ def verify_manifest(
         if (
             run_root not in artifact_path.parents
             or not artifact_path.is_file()
-            or sha256_file(artifact_path) != item.get("sha256")
         ):
             issues.append(
                 f"artifact hash mismatch or path escape ({role}): {artifact_path}"
             )
             continue
-        artifact_bytes += artifact_path.stat().st_size
+        actual_bytes = artifact_path.stat().st_size
+        if item.get("bytes") != actual_bytes:
+            issues.append(
+                f"artifact byte size mismatch ({role}): {artifact_path}"
+            )
+        if sha256_file(artifact_path) != item.get("sha256"):
+            issues.append(f"artifact hash mismatch ({role}): {artifact_path}")
+        artifact_bytes += actual_bytes
 
     return AuditResult(
         valid=not issues,
