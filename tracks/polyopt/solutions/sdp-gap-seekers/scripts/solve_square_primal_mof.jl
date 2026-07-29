@@ -249,7 +249,10 @@ function validate_input(
     isfile(runmeta_path) ||
         throw(ArgumentError("runmeta does not exist: $runmeta_path"))
     runmeta = TOML.parsefile(runmeta_path)
-    runmeta["schema_version"] == "square-primal-mof-runmeta-v1" ||
+    runmeta["schema_version"] in (
+        "square-primal-mof-runmeta-v1",
+        "square-conic-mof-runmeta-v1",
+    ) ||
         error("unexpected runmeta schema")
     runmeta["solver_invoked"] == false ||
         error("input runmeta is not a solver-free Gate B artifact")
