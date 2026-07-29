@@ -122,6 +122,42 @@ def test_different_cells_can_initialize_while_first_worker_retains_chain(
     assert pilot._verify_test_pilot_download(path)["cell_count"] == 2
 
 
+def test_run_spec_read_allows_same_parent_to_gain_cells_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    path = _tiny_spec(tmp_path)
+    descriptor_read = Event()
+    parent_mutated = Event()
+    original = pilot._read_descriptor_bounded
+    held = False
+
+    def hold_after_read(
+        descriptor: int, maximum_size: int, description: str
+    ) -> bytes:
+        nonlocal held
+        payload = original(descriptor, maximum_size, description)
+        if description == "pilot run spec" and not held:
+            held = True
+            descriptor_read.set()
+            assert parent_mutated.wait(timeout=10)
+        return payload
+
+    monkeypatch.setattr(pilot, "_read_descriptor_bounded", hold_after_read)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        loading = pool.submit(
+            pilot._load_pilot_spec,
+            path,
+            verify_current_environment=False,
+            production=False,
+        )
+        assert descriptor_read.wait(timeout=10)
+        (path.parent / "cells").mkdir()
+        parent_mutated.set()
+        loaded = loading.result(timeout=10)
+
+    assert loaded["run_spec_sha256"]
+
+
 def test_replacing_shared_cells_inode_while_worker_retains_chain_fails(
     tmp_path: Path,
 ):

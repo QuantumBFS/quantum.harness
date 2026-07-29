@@ -456,8 +456,13 @@ def _read_canonical(
     *,
     maximum_size: int,
     maximum_nodes: int = PILOT_JSON_MAX_NODES,
+    allow_parent_mutation: bool = False,
 ) -> tuple[dict[str, object], bytes]:
-    parent_chain = _open_directory_chain(path.parent, create=False)
+    parent_chain = _open_directory_chain(
+        path.parent,
+        create=False,
+        allow_final_mutation=allow_parent_mutation,
+    )
     parent_fd = parent_chain[-1][1]
     descriptor, original = _open_regular_at(
         path.name, parent_fd, description, maximum_size=maximum_size
@@ -484,7 +489,10 @@ def _read_canonical(
         _require_regular_at_identity(
             path.name, parent_fd, descriptor, original, description
         )
-        _require_directory_chain(parent_chain, allow_final_mutation=False)
+        _require_directory_chain(
+            parent_chain,
+            allow_final_mutation=allow_parent_mutation,
+        )
         return document, payload
     finally:
         os.close(descriptor)
@@ -1272,6 +1280,7 @@ def _load_pilot_spec(
         path,
         "pilot run spec",
         maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+        allow_parent_mutation=True,
     )
     _validate_pilot_spec(
         document,
