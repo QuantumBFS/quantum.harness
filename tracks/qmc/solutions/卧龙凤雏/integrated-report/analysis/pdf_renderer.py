@@ -29,6 +29,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from analysis.locale import EN_LOCALE, ReportLocale
 from analysis.report_model import (
     Callout,
     CodeBlock,
@@ -61,10 +62,14 @@ LINE = colors.HexColor("#D7E0E6")
 WASH = colors.HexColor("#F5F8FA")
 
 
-def render_pdf(report: ReportDocument, destination: Path) -> Path:
+def render_pdf(
+    report: ReportDocument,
+    destination: Path,
+    locale: ReportLocale = EN_LOCALE,
+) -> Path:
     output = Path(destination)
     output.parent.mkdir(parents=True, exist_ok=True)
-    fonts = _register_fonts()
+    fonts = _register_fonts(locale)
     styles = _styles(fonts)
     frame = Frame(LEFT, BOTTOM, FRAME_WIDTH, FRAME_HEIGHT, id="body")
     document = BaseDocTemplate(
@@ -76,16 +81,17 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
         bottomMargin=BOTTOM,
         title=report.title,
         author=report.author,
-        subject="Integrated central-charge verification report",
-        creator="Quantum Harness integrated report generator",
+        subject=locale.pdf_subject,
+        creator=locale.pdf_creator,
         pageCompression=1,
         invariant=1,
     )
-    document.addPageTemplates(
-        PageTemplate(id="body", frames=(frame,), onPage=_header_footer)
-    )
+    def on_page(canvas, document):
+        _header_footer(canvas, document, locale, fonts)
+
+    document.addPageTemplates(PageTemplate(id="body", frames=(frame,), onPage=on_page))
     story: List[object] = []
-    story.extend(_title_page(report, styles))
+    story.extend(_title_page(report, styles, locale))
     figure_number = 0
     table_number = 0
     for section_number, section in enumerate(report.sections, start=1):
@@ -98,7 +104,7 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
         elif section_number > 1:
             story.append(Spacer(1, 4 * mm))
         story.append(
-            PdfParagraph(f"SECTION {section_number:02d}", styles["section_kicker"])
+            PdfParagraph(_section_label(locale, section_number), styles["section_kicker"])
         )
         story.append(PdfParagraph(_escape(section.title), styles["h1"]))
         story.append(Spacer(1, 2.5 * mm))
@@ -109,10 +115,10 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
                 story.extend(_equation(block, styles))
             elif isinstance(block, Figure):
                 figure_number += 1
-                story.extend(_figure(block, figure_number, styles))
+                story.extend(_figure(block, figure_number, styles, locale))
             elif isinstance(block, Table):
                 table_number += 1
-                story.extend(_table(block, table_number, styles))
+                story.extend(_table(block, table_number, styles, locale))
             elif isinstance(block, Callout):
                 story.extend(_callout(block, styles))
             elif isinstance(block, CodeBlock):
@@ -125,7 +131,7 @@ def render_pdf(report: ReportDocument, destination: Path) -> Path:
     return output
 
 
-def _register_fonts() -> Dict[str, str]:
+def _register_fonts(locale: ReportLocale = EN_LOCALE) -> Dict[str, str]:
     fonts = {
         "body": "Helvetica",
         "bold": "Helvetica-Bold",
@@ -135,6 +141,8 @@ def _register_fonts() -> Dict[str, str]:
         "mono": "Courier",
         "cjk": "Helvetica",
     }
+    if locale.code != "zh":
+        return fonts
     cjk_candidates: Tuple[Tuple[Path, int], ...] = (
         (Path("/System/Library/Fonts/STHeiti Medium.ttc"), 0),
         (Path("/System/Library/Fonts/Hiragino Sans GB.ttc"), 0),
@@ -147,11 +155,12 @@ def _register_fonts() -> Dict[str, str]:
             pdfmetrics.registerFont(
                 TTFont("IntegratedCJK", str(path), subfontIndex=subfont)
             )
-            fonts["cjk"] = "IntegratedCJK"
-            break
+            for role in ("body", "bold", "italic", "serif", "serif_bold", "cjk"):
+                fonts[role] = "IntegratedCJK"
+            return fonts
         except Exception:
             continue
-    return fonts
+    raise RuntimeError("no usable CJK font found for Chinese PDF rendering")
 
 
 def _styles(fonts: Dict[str, str]) -> Dict[str, ParagraphStyle]:
@@ -306,12 +315,19 @@ def _styles(fonts: Dict[str, str]) -> Dict[str, ParagraphStyle]:
     }
 
 
-def _title_page(report: ReportDocument, styles: Dict[str, ParagraphStyle]) -> List[object]:
+def _title_page(
+    report: ReportDocument,
+    styles: Dict[str, ParagraphStyle],
+    locale: ReportLocale,
+) -> List[object]:
     title_content = [
         Spacer(1, 9 * mm),
-        PdfParagraph("QUANTUM HARNESS · CHALLENGE 122", ParagraphStyle(
+        PdfParagraph(
+            f"QUANTUM HARNESS · CHALLENGE 122 · {_escape(locale.labels['technical_report'])}",
+            ParagraphStyle(
             "HeroKicker", parent=styles["section_kicker"], textColor=colors.HexColor("#9CE0D5")
-        )),
+            ),
+        ),
         PdfParagraph(_escape(report.title), styles["title"]),
         PdfParagraph(_escape(report.subtitle), styles["subtitle"]),
         PdfParagraph(_escape(report.author), styles["author"]),
@@ -333,9 +349,18 @@ def _title_page(report: ReportDocument, styles: Dict[str, ParagraphStyle]) -> Li
     result_table = PdfTable(
         [
             [
-                PdfParagraph("<b>0.498739</b><br/><font size='6'>CLEAN ISING MC</font>", styles["toc"]),
-                PdfParagraph("<b>0.456469</b><br/><font size='6'>NISHIMORI</font>", styles["toc"]),
-                PdfParagraph("<b>0.444107</b><br/><font size='6'>WEAK SELF-DUAL</font>", styles["toc"]),
+                PdfParagraph(
+                    f"<b>0.498739</b><br/><font size='6'>{_escape(locale.labels['clean_result'])}</font>",
+                    styles["toc"],
+                ),
+                PdfParagraph(
+                    f"<b>0.456469</b><br/><font size='6'>{_escape(locale.labels['nishimori_result'])}</font>",
+                    styles["toc"],
+                ),
+                PdfParagraph(
+                    f"<b>0.444107</b><br/><font size='6'>{_escape(locale.labels['weak_result'])}</font>",
+                    styles["toc"],
+                ),
             ]
         ],
         colWidths=[FRAME_WIDTH / 3] * 3,
@@ -375,12 +400,12 @@ def _title_page(report: ReportDocument, styles: Dict[str, ParagraphStyle]) -> Li
     return [
         hero,
         Spacer(1, 7 * mm),
-        PdfParagraph("ABSTRACT", styles["abstract_label"]),
+        PdfParagraph(_escape(locale.labels["abstract"]), styles["abstract_label"]),
         PdfParagraph(_escape(report.abstract), styles["abstract"]),
         Spacer(1, 2 * mm),
         result_table,
         Spacer(1, 7 * mm),
-        PdfParagraph("CONTENTS", styles["abstract_label"]),
+        PdfParagraph(_escape(locale.labels["contents"]), styles["abstract_label"]),
         toc,
         PdfPageBreak(),
     ]
@@ -428,7 +453,10 @@ def _equation(block: Equation, styles: Dict[str, ParagraphStyle]) -> List[object
 
 
 def _figure(
-    block: Figure, number: int, styles: Dict[str, ParagraphStyle]
+    block: Figure,
+    number: int,
+    styles: Dict[str, ParagraphStyle],
+    locale: ReportLocale,
 ) -> List[object]:
     source = block.source if block.source.is_absolute() else PACKAGE_ROOT / block.source
     if not source.is_file():
@@ -440,8 +468,8 @@ def _figure(
     scale = min(max_width / width, max_height / height)
     figure = Image(str(source), width=width * scale, height=height * scale)
     caption = PdfParagraph(
-        f"<b>Figure {number}.</b> {_escape(block.caption)} "
-        f"<font color='#5B6C78'><i>Interpretation limit:</i> "
+        f"<b>{_escape(locale.labels['figure'])} {number}.</b> {_escape(block.caption)} "
+        f"<font color='#5B6C78'><i>{_escape(locale.labels['interpretation_limit'])}:</i> "
         f"{_escape(block.inference_limit)}</font>",
         styles["caption"],
     )
@@ -453,7 +481,10 @@ def _figure(
 
 
 def _table(
-    block: Table, number: int, styles: Dict[str, ParagraphStyle]
+    block: Table,
+    number: int,
+    styles: Dict[str, ParagraphStyle],
+    locale: ReportLocale,
 ) -> List[object]:
     column_count = len(block.columns)
     if column_count == 2:
@@ -491,7 +522,8 @@ def _table(
         )
     )
     title = PdfParagraph(
-        f"<b>Table {number}.</b> {_escape(block.title)}", styles["caption"]
+        f"<b>{_escape(locale.labels['table'])} {number}.</b> {_escape(block.title)}",
+        styles["caption"],
     )
     note = PdfParagraph(_escape(block.note), styles["table_note"])
     return [Spacer(1, 2 * mm), title, table, note, Spacer(1, 1.5 * mm)]
@@ -557,18 +589,27 @@ def _code(block: CodeBlock, styles: Dict[str, ParagraphStyle]) -> List[object]:
     return [Spacer(1, 2 * mm), KeepTogether([table]), Spacer(1, 2 * mm)]
 
 
-def _header_footer(canvas, document) -> None:
+def _header_footer(
+    canvas,
+    document,
+    locale: ReportLocale,
+    fonts: Dict[str, str],
+) -> None:
     canvas.saveState()
     page = canvas.getPageNumber()
     if page > 1:
         canvas.setStrokeColor(LINE)
         canvas.setLineWidth(0.45)
         canvas.line(LEFT, PAGE_HEIGHT - 12 * mm, PAGE_WIDTH - RIGHT, PAGE_HEIGHT - 12 * mm)
-        canvas.setFont("Helvetica", 6.8)
+        canvas.setFont(fonts["body"], 6.8)
         canvas.setFillColor(MUTED)
-        canvas.drawString(LEFT, PAGE_HEIGHT - 9.2 * mm, "THREE ROUTES TO CENTRAL CHARGE")
-        canvas.drawRightString(PAGE_WIDTH - RIGHT, PAGE_HEIGHT - 9.2 * mm, "TEAM WOLONG-FENGCHU")
-    canvas.setFont("Helvetica", 7)
+        canvas.drawString(
+            LEFT, PAGE_HEIGHT - 9.2 * mm, locale.labels["header_title"]
+        )
+        canvas.drawRightString(
+            PAGE_WIDTH - RIGHT, PAGE_HEIGHT - 9.2 * mm, locale.labels["header_team"]
+        )
+    canvas.setFont(fonts["body"], 7)
     canvas.setFillColor(MUTED)
     canvas.drawCentredString(PAGE_WIDTH / 2, 8.5 * mm, str(page))
     canvas.restoreState()
@@ -576,3 +617,9 @@ def _header_footer(canvas, document) -> None:
 
 def _escape(value: object) -> str:
     return html.escape(str(value), quote=False).replace("\n", "<br/>")
+
+
+def _section_label(locale: ReportLocale, number: int) -> str:
+    if locale.code == "zh":
+        return f"第 {number:02d} 节"
+    return f"SECTION {number:02d}"

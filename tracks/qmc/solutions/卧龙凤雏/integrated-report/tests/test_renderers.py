@@ -4,7 +4,9 @@ import time
 from pypdf import PdfReader
 
 from analysis.html_renderer import render_html
+from analysis.locale import ZH_LOCALE
 from analysis.pdf_renderer import render_pdf
+from analysis.report_model import Figure, Paragraph, ReportDocument, Section, Table
 from build_report import build
 
 
@@ -106,3 +108,64 @@ def test_build_writes_stable_outputs(repo_root):
     assert result.html.exists() and result.pdf.exists()
     assert result.html_verification.passed
     assert result.pdf_verification.passed
+
+
+def test_html_localizes_all_renderer_chrome(repo_root, tmp_path):
+    output = render_html(
+        _chinese_report(repo_root), tmp_path / "report-zh.html", ZH_LOCALE
+    )
+    html = output.read_text(encoding="utf-8")
+
+    assert '<html lang="zh-CN">' in html
+    assert '<div class="toc-title">目录</div>' in html
+    assert "第 01 节" in html
+    assert "<strong>图 1.</strong>" in html
+    assert "<strong>表 1.</strong>" in html
+    assert "解读边界" in html
+    assert "Contents" not in html
+    assert "Interpretation limit" not in html
+
+
+def test_pdf_uses_extractable_chinese_text(repo_root, tmp_path):
+    output = render_pdf(
+        _chinese_report(repo_root), tmp_path / "report-zh.pdf", ZH_LOCALE
+    )
+    text = "\n".join(page.extract_text() or "" for page in PdfReader(output).pages)
+
+    assert "摘要" in text
+    assert "目录" in text
+    assert "中文段落用于检查字体和文本提取" in text
+    assert "Figure" not in text
+    assert "Table" not in text
+
+
+def _chinese_report(repo_root):
+    return ReportDocument(
+        title="中心荷的三条验证路径",
+        subtitle="中文版渲染测试",
+        author="卧龙凤雏团队",
+        abstract="本摘要用于检查中文 PDF 字体。",
+        sections=(
+            Section(
+                "执行摘要",
+                "executive-summary",
+                (
+                    Paragraph("中文段落用于检查字体和文本提取。"),
+                    Table(
+                        "测试参数",
+                        ("参数", "含义"),
+                        (("L", "圆柱宽度"),),
+                        "数据来自冻结结果。",
+                    ),
+                    Figure(
+                        repo_root
+                        / "tracks/qmc/results/clean-ising-20260729-120302"
+                        / "figures/free_energy_scaling.png",
+                        "测试图",
+                        "用于检查中文图注。",
+                        "本图只检查排版。",
+                    ),
+                ),
+            ),
+        ),
+    )

@@ -7,6 +7,7 @@ import html
 from pathlib import Path
 from typing import List
 
+from analysis.locale import EN_LOCALE, ReportLocale
 from analysis.report_model import (
     Callout,
     CodeBlock,
@@ -22,7 +23,11 @@ from analysis.report_model import (
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
 
-def render_html(report: ReportDocument, destination: Path) -> Path:
+def render_html(
+    report: ReportDocument,
+    destination: Path,
+    locale: ReportLocale = EN_LOCALE,
+) -> Path:
     output = Path(destination)
     output.parent.mkdir(parents=True, exist_ok=True)
     sections: List[str] = []
@@ -37,10 +42,10 @@ def render_html(report: ReportDocument, destination: Path) -> Path:
                 blocks.append(_equation(block))
             elif isinstance(block, Figure):
                 figure_number += 1
-                blocks.append(_figure(block, figure_number))
+                blocks.append(_figure(block, figure_number, locale))
             elif isinstance(block, Table):
                 table_number += 1
-                blocks.append(_table(block, table_number))
+                blocks.append(_table(block, table_number, locale))
             elif isinstance(block, Callout):
                 blocks.append(_callout(block))
             elif isinstance(block, CodeBlock):
@@ -49,7 +54,7 @@ def render_html(report: ReportDocument, destination: Path) -> Path:
                 blocks.append('<div class="page-break" aria-hidden="true"></div>')
         sections.append(
             f'<section id="{html.escape(section.slug)}" class="report-section">'
-            f'<div class="section-kicker">Section {section_number:02d}</div>'
+            f'<div class="section-kicker">{_section_label(locale, section_number)}</div>'
             f"<h2>{html.escape(section.title)}</h2>"
             f"{''.join(blocks)}</section>"
         )
@@ -59,7 +64,7 @@ def render_html(report: ReportDocument, destination: Path) -> Path:
         for index, section in enumerate(report.sections, start=1)
     )
     document = f"""<!doctype html>
-<html lang="en">
+<html lang="{html.escape(locale.html_lang)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -70,30 +75,30 @@ def render_html(report: ReportDocument, destination: Path) -> Path:
 <body>
 <header class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Quantum Harness · Challenge 122 · Technical Report</div>
+    <div class="eyebrow">Quantum Harness · Challenge 122 · {html.escape(locale.labels["technical_report"])}</div>
     <h1>{html.escape(report.title)}</h1>
     <p class="subtitle">{html.escape(report.subtitle)}</p>
     <div class="author">{html.escape(report.author)}</div>
     <div class="hero-rule"></div>
-    <h2>Abstract</h2>
+    <h2>{html.escape(locale.labels["abstract"])}</h2>
     <p class="abstract">{_text(report.abstract)}</p>
     <div class="result-strip">
-      <div><strong>0.498739</strong><span>Clean Ising MC</span></div>
-      <div><strong>0.456469</strong><span>Nishimori</span></div>
-      <div><strong>0.444107</strong><span>Weak self-dual</span></div>
+      <div><strong>0.498739</strong><span>{html.escape(locale.labels["clean_result"])}</span></div>
+      <div><strong>0.456469</strong><span>{html.escape(locale.labels["nishimori_result"])}</span></div>
+      <div><strong>0.444107</strong><span>{html.escape(locale.labels["weak_result"])}</span></div>
     </div>
   </div>
 </header>
 <div class="shell">
-  <nav aria-label="Report contents">
-    <div class="toc-title">Contents</div>
+  <nav aria-label="{html.escape(locale.labels["contents_aria"])}">
+    <div class="toc-title">{html.escape(locale.labels["contents"])}</div>
     {toc}
   </nav>
   <main>{''.join(sections)}</main>
 </div>
 <footer>
-  <span>Team 卧龙凤雏</span>
-  <span>Frozen-data report · 29 July 2026</span>
+  <span>{html.escape(locale.labels["header_team"])}</span>
+  <span>{html.escape(locale.labels["footer_date"])}</span>
 </footer>
 </body>
 </html>
@@ -112,7 +117,7 @@ def _equation(block: Equation) -> str:
     )
 
 
-def _figure(block: Figure, number: int) -> str:
+def _figure(block: Figure, number: int, locale: ReportLocale) -> str:
     source = block.source if block.source.is_absolute() else PACKAGE_ROOT / block.source
     if not source.is_file():
         raise ValueError(f"missing report figure: {source}")
@@ -121,13 +126,14 @@ def _figure(block: Figure, number: int) -> str:
         '<figure class="report-figure">'
         f'<img src="data:image/png;base64,{encoded}" alt="{html.escape(block.alt_text)}">'
         "<figcaption>"
-        f"<strong>Figure {number}.</strong> {_text(block.caption)}"
-        f'<span class="limit"><strong>Interpretation limit:</strong> {_text(block.inference_limit)}</span>'
+        f'<strong>{html.escape(locale.labels["figure"])} {number}.</strong> {_text(block.caption)}'
+        f'<span class="limit"><strong>{html.escape(locale.labels["interpretation_limit"])}:</strong> '
+        f"{_text(block.inference_limit)}</span>"
         "</figcaption></figure>"
     )
 
 
-def _table(block: Table, number: int) -> str:
+def _table(block: Table, number: int, locale: ReportLocale) -> str:
     headings = "".join(f"<th>{html.escape(column)}</th>" for column in block.columns)
     rows = "".join(
         "<tr>" + "".join(f"<td>{_text(cell)}</td>" for cell in row) + "</tr>"
@@ -135,7 +141,8 @@ def _table(block: Table, number: int) -> str:
     )
     return (
         '<figure class="report-table">'
-        f'<figcaption><strong>Table {number}.</strong> {html.escape(block.title)}</figcaption>'
+        f'<figcaption><strong>{html.escape(locale.labels["table"])} {number}.</strong> '
+        f"{html.escape(block.title)}</figcaption>"
         f'<div class="table-scroll"><table><thead><tr>{headings}</tr></thead>'
         f"<tbody>{rows}</tbody></table></div>"
         f'<p class="table-note">{_text(block.note)}</p>'
@@ -169,6 +176,12 @@ def _text(value: object) -> str:
     return escaped
 
 
+def _section_label(locale: ReportLocale, number: int) -> str:
+    if locale.code == "zh":
+        return f"第 {number:02d} 节"
+    return f"Section {number:02d}"
+
+
 def _css() -> str:
     return """
 :root {
@@ -184,8 +197,8 @@ def _css() -> str:
   --orange: #B95C23;
   --orange-soft: #FAEEE5;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --serif: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
-  --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --serif: "Songti SC", "STSong", "Noto Serif CJK SC", Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
+  --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--wash); }
