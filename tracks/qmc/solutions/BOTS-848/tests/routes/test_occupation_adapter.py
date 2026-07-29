@@ -287,6 +287,17 @@ def _write_terminal_freeze_fixture(
         target, key, value = replacements[tamper]
         target[key] = value
 
+    raw_json_suffixes = {
+        "training_log_overflow_extra": ',"extra":1e9999',
+        "training_log_overflow_nested": (
+            ',"extra":{"values":[1e9999,{"negative":-1e9999}]}'
+        ),
+        "training_log_duplicate_key": f',"update":{final_update}',
+        "training_log_nan_token": ',"extra":NaN',
+        "training_log_infinity_token": ',"extra":Infinity',
+        "training_log_negative_infinity_token": ',"extra":-Infinity',
+    }
+
     run_dir.mkdir(parents=True)
     checkpoint = atomic_save_npz(run_dir / "checkpoint.npz", **checkpoint_fields)
     optimizer = atomic_save_npz(
@@ -294,8 +305,11 @@ def _write_terminal_freeze_fixture(
         **optimizer_fields,
     )
     training_log = run_dir / "training.jsonl"
+    training_json = json.dumps(training_record, sort_keys=True, allow_nan=False)
+    if tamper in raw_json_suffixes:
+        training_json = training_json[:-1] + raw_json_suffixes[tamper] + "}"
     training_log.write_text(
-        json.dumps(training_record, sort_keys=True, allow_nan=False) + "\n",
+        training_json + "\n",
         encoding="utf-8",
         newline="\n",
     )
@@ -574,6 +588,12 @@ def test_manifest_binds_exact_route_attempt_sources_and_artifact_bytes(
         ("training_log_not_selected", "training log selected final record"),
         ("training_log_selection_rule", "training log selection_rule"),
         ("training_log_string_update", "training log final update"),
+        ("training_log_overflow_extra", "non-finite training log JSON number"),
+        ("training_log_overflow_nested", "non-finite training log JSON number"),
+        ("training_log_duplicate_key", "invalid training log JSONL"),
+        ("training_log_nan_token", "invalid training log JSONL"),
+        ("training_log_infinity_token", "invalid training log JSONL"),
+        ("training_log_negative_infinity_token", "invalid training log JSONL"),
         ("wrapper_checkpoint_hash", "checkpoint SHA-256"),
         ("wrapper_optimizer_hash", "optimizer state SHA-256"),
         ("wrapper_training_log_hash", "training log SHA-256"),

@@ -111,6 +111,20 @@ def _reject_json_constant(value: str) -> None:
     raise ValueError(f"non-finite training log JSON constant: {value}")
 
 
+def _validate_json_finite(value: Any) -> None:
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("non-finite training log JSON number")
+        return
+    if isinstance(value, dict):
+        for item in value.values():
+            _validate_json_finite(item)
+        return
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            _validate_json_finite(item)
+
+
 def _terminal_training_records(path: Path) -> list[dict[str, Any]]:
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -130,6 +144,7 @@ def _terminal_training_records(path: Path) -> list[dict[str, Any]]:
             raise ValueError("invalid training log JSONL") from error
         if not isinstance(record, dict):
             raise ValueError("training log records must be JSON objects")
+        _validate_json_finite(record)
         records.append(record)
     return records
 
