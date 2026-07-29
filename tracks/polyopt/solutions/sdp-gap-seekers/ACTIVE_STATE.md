@@ -459,9 +459,12 @@ Updated: 2026-07-29 UTC.
   required `String`. This is an entry-point type error, not a model, input, or
   mathematical failure. The helper now accepts `AbstractString`; the targeted
   regression suite passes 9/9 locally at 287,280 KiB peak RSS.
-- Exact next action: resubmit the corrected isotypic rational-witness replay
-  once on xH5 with a new run ID. It must rebuild all six exact reduction
-  layers, round the exported point to a common rational denominator, and
-  accept only if every one of the nine reconstructed rational matrices has
-  strictly positive exact LDL pivots. This step may exceed 1 GiB and must not
-  run locally.
+- Corrected rational-witness replay r2 is Slurm job `22990727`. The shipped
+  parser SHA-256 is
+  `9379ed739499f3955534085c4616ea14950e148c51bea14b322faef8875d396f`,
+  matching the committed local source. It currently has a real job ID but is
+  pending under `AssocGrpJobsLimit`; do not submit a duplicate while that
+  scheduler signature is unchanged. Once running, it must rebuild all six
+  exact reduction layers, round the exported point to a common rational
+  denominator, and accept only if every one of the nine reconstructed
+  rational matrices has strictly positive exact LDL pivots.

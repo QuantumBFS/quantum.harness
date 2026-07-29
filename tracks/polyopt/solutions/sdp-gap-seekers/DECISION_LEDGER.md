@@ -755,3 +755,13 @@ Broaden the parser argument to `AbstractString` and add an explicit
 `SubString` regression. The focused helper suite passes 9/9 in 4.0 seconds
 with 287,280 KiB peak RSS. Resubmit exactly once under a new result ID; do not
 overwrite or reinterpret the r1 failure bundle.
+
+## 2026-07-29 — corrected rational replay r2 is pending
+
+The corrected parser was copied to xH5 with matching SHA-256
+`9379ed739499f3955534085c4616ea14950e148c51bea14b322faef8875d396f`.
+Slurm accepted job `22990727`, so this is distinct from a submission rejection,
+but the job remains pending with `AssocGrpJobsLimit`. Do not submit another
+copy while that group-limit signature is unchanged. Pending is not scientific
+evidence; only the fetched replay manifest and exact LDL pivots can close the
+witness claim.
