@@ -70,6 +70,16 @@ diagonal matrix. This changes basis inside the SDP cone; it does not constrain
 the state. If no solution exists, expanded spin-aware signatures and the full
 candidate graph are written before the gate fails.
 
+SCNet L=1 job `118195948`, source `e81c463`, found exactly one solution in
+every scalar block. The exceptional permutation is the identity, while every
+exceptional row has rational scale 1/2. The affected rows are 16,24,31 in the
+33-side scalar-minus blocks and 22,31,38,42,46,48 in the 48-side scalar-plus
+blocks. This resolves all 1,107 direct mismatches and leaves zero final
+unmatched or opposite entries over 15,822 comparisons. The Euclidean row-norm
+ratio 1/2 therefore did not supply the congruence scale via its square root;
+the coefficient algebra fixes the scale itself to 1/2. L=1 now authorizes the
+separate L=2 truth audit, not cone deletion by itself.
+
 If the gate passes, removing the three duplicate `l=2` copies per group would
 change the retained inventory from 2,540,067 to 1,600,017 packed entries while
 keeping the maximum side 490. This is an exact formulation hypothesis until

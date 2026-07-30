@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T01:22:23Z
+Updated: 2026-07-30T01:39:53Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -349,5 +349,19 @@ Updated: 2026-07-30T01:22:23Z
   that immutable commit on 8 CPUs / 16000 MiB / 30 minutes. It cannot invoke
   an optimizer or remove cones. Keep the checkout fixed until it closes; only
   a complete exact exceptional permutation congruence can authorize L=2.
+- Job `118195948` completed in 13:44 at 2,570,152 KiB peak. The gate is exact:
+  14,715 direct-equal entries plus all 1,107 prior scalar mismatches resolved,
+  with zero final opposite or unmatched entries. Each exceptional row maps to
+  the same reference row with the unique rational scale 1/2: scalar-minus
+  rows 16,24,31 and scalar-plus rows 22,31,38,42,46,48. Every mixed, diagonal,
+  and exceptional/exceptional polynomial passed. This proves the full L=1
+  cone congruence without state invariance and authorizes the separate L=2
+  truth audit; it is still not feasibility or gap evidence.
+- The L=2 truth audit is remote-only: 12 target blocks / 940,050 triangle
+  entries plus the established stabilizer replay, with no optimizer. Slurm
+  test-only accepted 32 CPUs / 64000 MiB / 2 hours, and SCNet job `118196521`
+  was submitted from immutable commit `6dd911f`. Keep the checkout fixed. A
+  pass can authorize a deduplicated build; a failure changes the mapping route
+  and cannot justify cone removal.
 
 No user input or new credential is currently required.

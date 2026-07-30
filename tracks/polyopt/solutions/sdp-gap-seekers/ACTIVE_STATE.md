@@ -924,3 +924,18 @@ Updated: 2026-07-29 UTC.
   submitted from that immutable commit using 8 CPUs / 16000 MiB / 30 minutes.
   Preserve the checkout. The job has no optimizer and cannot delete cones;
   only an exact complete solution may unlock the distinct L=2 truth audit.
+- L=1 truth control `118195948` completed from `e81c463` after 13:44 at
+  2,570,152 KiB peak RSS. It proved one unique exact mapping per scalar block:
+  exceptional target rows equal the same-index reference rows scaled by 1/2.
+  These are 16,24,31 in each 33-side scalar-minus block and
+  22,31,38,42,46,48 in each 48-side scalar-plus block. All 1,107 previously
+  unmatched entries are thereby resolved; final opposite=0 and unmatched=0
+  over all 15,822 entries. This is full PSD-cone congruence, not a restricted
+  state, and authorizes only the separate L=2 coefficient truth audit. No
+  optimizer ran and no physics result was produced.
+- L=2 truth-only job `118196521` was submitted on SCNet from immutable commit
+  `6dd911f` after Slurm test-only admission. It requests 32 CPUs / 64000 MiB /
+  2 hours and performs the 12-block / 940,050-entry congruence audit plus the
+  established cross-zero replay; it has no optimizer and no cone-removal
+  flag. Preserve the checkout. Only an exact pass authorizes the separate
+  deduplicated build and new coefficient hash.
