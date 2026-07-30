@@ -919,3 +919,8 @@ Updated: 2026-07-29 UTC.
   otherwise the gate records expanded spin-aware row signatures and fails.
   This is not a repeated signature: job `118195346` had no candidate search
   or row-level diagnostics. L=2 and cone deletion stay disabled pending L=1.
+- Commit `e81c463` implements and locally loads the exact exceptional search.
+  After Slurm test-only admission, SCNet L=1 truth-only job `118195948` was
+  submitted from that immutable commit using 8 CPUs / 16000 MiB / 30 minutes.
+  Preserve the checkout. The job has no optimizer and cannot delete cones;
+  only an exact complete solution may unlock the distinct L=2 truth audit.

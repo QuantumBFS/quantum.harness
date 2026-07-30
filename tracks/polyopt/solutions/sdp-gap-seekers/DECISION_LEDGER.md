@@ -1579,3 +1579,11 @@ bijection is a complete invertible PSD-cone congruence and is safe without
 state invariance; no solution produces row signatures and a candidate graph
 for the next derivation. This added computation and evidence make the next
 L=1 control a changed signature. L=2 remains unauthorized.
+
+Commit `e81c463` implements the exceptional candidate graph, exact rational
+scale inference, incrementally pruned bijection proof, and spin-aware failure
+signatures. Local module loading and exact polynomial-ratio checks passed; the
+SCNet environment also loaded the immutable checkout. Slurm test-only accepted
+the 8-CPU / 16000-MiB / 30-minute request and L=1 truth-only job `118195948`
+was submitted. It has neither an optimizer nor cone-removal flag. Preserve
+the checkout; a failed or partial candidate graph keeps L=2 blocked.

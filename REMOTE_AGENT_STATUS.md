@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T01:17:26Z
+Updated: 2026-07-30T01:22:23Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -344,5 +344,10 @@ Updated: 2026-07-30T01:17:26Z
   congruence, not a symmetry restriction. Expanded spin-aware signatures and
   the candidate graph are checkpointed on failure. The code is being compiled
   and reviewed before one changed-signature L=1 control; L=2 remains blocked.
+- Commit `e81c463` contains the reviewed search. SCNet accepted the Slurm
+  test-only request, and L=1 truth-only job `118195948` was submitted from
+  that immutable commit on 8 CPUs / 16000 MiB / 30 minutes. It cannot invoke
+  an optimizer or remove cones. Keep the checkout fixed until it closes; only
+  a complete exact exceptional permutation congruence can authorize L=2.
 
 No user input or new credential is currently required.
