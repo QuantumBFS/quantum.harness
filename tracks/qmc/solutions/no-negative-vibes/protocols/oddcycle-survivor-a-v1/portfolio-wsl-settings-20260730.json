@@ -1,0 +1,95 @@
+{
+  "schema": "oddcycle-local-hs-settings-v1",
+  "seed": 20260730,
+  "portfolio_sample_count": 2048,
+  "promotion_active_ray_limit": 32,
+  "numerical_active_tolerance": 1E-10,
+  "numerical_residual_tolerance": 1E-9,
+  "python_hash_seed": 0,
+  "cells": [
+    {
+      "id": "hportfolio-wsl-0",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271000
+    },
+    {
+      "id": "hportfolio-wsl-1",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271001
+    },
+    {
+      "id": "hportfolio-wsl-2",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271002
+    },
+    {
+      "id": "hportfolio-wsl-3",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271003
+    },
+    {
+      "id": "hportfolio-wsl-4",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271004
+    },
+    {
+      "id": "hportfolio-wsl-5",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271005
+    },
+    {
+      "id": "hportfolio-wsl-6",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271006
+    },
+    {
+      "id": "hportfolio-wsl-7",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271007
+    },
+    {
+      "id": "hportfolio-wsl-8",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271008
+    },
+    {
+      "id": "hportfolio-wsl-9",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271009
+    },
+    {
+      "id": "hportfolio-wsl-10",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271010
+    },
+    {
+      "id": "hportfolio-wsl-11",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271011
+    },
+    {
+      "id": "hportfolio-wsl-12",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271012
+    },
+    {
+      "id": "hportfolio-wsl-13",
+      "mode": "portfolio",
+      "max_word_length": 4,
+      "seed": 20271013
+    }
+  ]
+}

@@ -3281,3 +3281,34 @@ atomically, so an empty stdout log is not a liveness failure. Process
 inspection showed every worker in a running state after resume. The
 controller now pauses without further monitoring; the next wake-up must
 inspect these same sessions and output directories before taking any action.
+
+### 2026-07-30T19:06:55+08:00 Git snapshot
+
+At the user's request, the controller took a read-only snapshot without
+stopping or changing either background batch. Both tmux sessions were still
+present. The WSL process query returned 16 processes (tmux wrapper,
+controller, and 14 workers); the CPU query returned 64 (tmux wrapper,
+controller, and 62 workers).
+
+No cell had yet reached its atomic final JSON on either host. Therefore this
+snapshot does not fabricate a partial scientific result: it tracks the exact
+settings and a nonterminal status record only. The imported artifacts are:
+
+- `protocols/oddcycle-survivor-a-v1/portfolio-wsl-settings-20260730.json`,
+  SHA-256
+  `d2d82d4db8790b72472141a999607240a0f4ce05121472bb0e9d5b0fdab6f0ae`;
+- `protocols/oddcycle-survivor-a-v1/portfolio-cpu-settings-20260730.json`,
+  SHA-256
+  `193e9878fa82d6c55757acd402f11aa96ca07e89ae8dcd0be804c03ba0fe1d02`;
+- `protocols/oddcycle-survivor-a-v1/portfolio-checkpoint-20260730.json`.
+
+Background computation continues unchanged. Future snapshots must import only
+new atomically completed cells and must not restart, reseed, or duplicate the
+current runs.
+
+The only other previously uncommitted work is the Task 2 high-precision
+analysis test specification in `tests/test_oddcycle_survivor_a.py`. It is
+intentionally a RED checkpoint: the tests import `analyze_hamiltonian`, while
+the production module does not yet define it. No passing-test or implemented
+Hamiltonian-analysis claim is made. This preserves the exact next coding
+target without silently discarding work.
