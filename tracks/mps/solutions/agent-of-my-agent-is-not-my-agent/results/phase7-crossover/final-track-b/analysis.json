@@ -1,0 +1,159 @@
+{
+  "Gamma_x": [
+    {
+      "sigma": 1.5,
+      "Gamma_left": 1.75,
+      "Gamma_right": 1.8,
+      "Gamma_x": 1.7692698301393646,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 1.6,
+      "Gamma_left": 1.65,
+      "Gamma_right": 1.7,
+      "Gamma_x": 1.679839625277551,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 1.7,
+      "Gamma_left": 1.55,
+      "Gamma_right": 1.6,
+      "Gamma_x": 1.598397279027481,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 1.75,
+      "Gamma_left": 1.55,
+      "Gamma_right": 1.6,
+      "Gamma_x": 1.567903945227973,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 1.8,
+      "Gamma_left": 1.5,
+      "Gamma_right": 1.55,
+      "Gamma_x": 1.5353849028429931,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 1.9,
+      "Gamma_left": 1.45,
+      "Gamma_right": 1.5,
+      "Gamma_x": 1.4785738392557364,
+      "crossing_resolution": 0.025000000000000022
+    },
+    {
+      "sigma": 2.0,
+      "Gamma_left": 1.4,
+      "Gamma_right": 1.45,
+      "Gamma_x": 1.4284112034302971,
+      "crossing_resolution": 0.025000000000000022
+    }
+  ],
+  "z_eff": [
+    {
+      "sigma": 1.6,
+      "Gamma_x": 1.679839625277551,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.20948119826049544,
+      "gap_L64": 0.1277387033826115,
+      "z_eff": 0.7136250507740965,
+      "provisional_chi64_z_eff": "",
+      "change_from_provisional": "",
+      "status": "incomplete_excited_state_convergence"
+    },
+    {
+      "sigma": 1.75,
+      "Gamma_x": 1.567903945227973,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.1678404503725454,
+      "gap_L64": 0.09996865572931936,
+      "z_eff": 0.7475427273937383,
+      "provisional_chi64_z_eff": 0.7475294849261177,
+      "change_from_provisional": 1.3242467620577791e-05,
+      "status": "accepted_two_size"
+    },
+    {
+      "sigma": 1.8,
+      "Gamma_x": 1.5353849028429931,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.1564766353807585,
+      "gap_L64": 0.09258156888141382,
+      "z_eff": 0.7571503385984343,
+      "provisional_chi64_z_eff": 0.7571372052621689,
+      "change_from_provisional": 1.3133336265402917e-05,
+      "status": "accepted_two_size"
+    },
+    {
+      "sigma": 2.0,
+      "Gamma_x": 1.4284112034302971,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.12653832358248507,
+      "gap_L64": 0.0752360441301768,
+      "z_eff": 0.750078487980997,
+      "provisional_chi64_z_eff": 0.7500665043168143,
+      "change_from_provisional": 1.1983664182646514e-05,
+      "status": "accepted_two_size"
+    }
+  ],
+  "gamma_over_nu": [
+    {
+      "sigma": 1.75,
+      "Gamma_x": 1.567903945227973,
+      "S0_L32": 10.376254026199238,
+      "S0_L64": 16.639095374305313,
+      "gamma_over_nu_two_size": 0.6812912954521019,
+      "status": "two_size_finite_size_estimate"
+    },
+    {
+      "sigma": 1.8,
+      "Gamma_x": 1.5353849028429931,
+      "S0_L32": 10.60934401047828,
+      "S0_L64": 17.01573017104596,
+      "gamma_over_nu_two_size": 0.6815336055834276,
+      "status": "two_size_finite_size_estimate"
+    },
+    {
+      "sigma": 2.0,
+      "Gamma_x": 1.4284112034302971,
+      "S0_L32": 11.349307931925644,
+      "S0_L64": 18.397651441697413,
+      "gamma_over_nu_two_size": 0.6969172840497602,
+      "status": "two_size_finite_size_estimate"
+    }
+  ],
+  "uncertainty_budget": [
+    {
+      "source": "MPO K=24 to K=32",
+      "measured_scope": "sigma=1.75, L=32,64",
+      "gap_relative": 5.570922469851194e-06,
+      "R_xi_absolute": 1.1446152365368611e-06,
+      "interpretation": "subdominant validated representation error"
+    },
+    {
+      "source": "MPS chi=128 to chi=256",
+      "measured_scope": "sigma=1.75, L=64",
+      "gap_relative": 3.3640283381121445e-08,
+      "R_xi_absolute": 4.998282310264557e-08,
+      "interpretation": "subdominant validated truncation error"
+    },
+    {
+      "source": "finite size",
+      "measured_scope": "L=32,64 only",
+      "gap_relative": "",
+      "R_xi_absolute": "",
+      "interpretation": "dominant; prevents thermodynamic exponent claim"
+    }
+  ],
+  "scope": {
+    "maximum_L": 64,
+    "K": 24,
+    "exploration_chi": 64,
+    "selective_odd_chi": 128,
+    "excluded": [
+      "K=32 rerun",
+      "L=128",
+      "Gamma refinement"
+    ]
+  }
+}

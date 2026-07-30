@@ -267,3 +267,8 @@ def test_report_separates_effective_z_sensitivities_and_uncertainties(
         "report.md",
     ):
         assert (output / name).stat().st_size > 0
+    rendered = (output / "report.md").read_text()
+    normalized = " ".join(rendered.split())
+    assert "gap-based pairwise effective dynamical exponents" in normalized
+    assert "QMC aspect-ratio tuning procedure" in normalized
+    assert "underlying exponent estimators differ" in normalized

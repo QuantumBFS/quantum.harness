@@ -1,0 +1,149 @@
+{
+  "status": "success",
+  "settings": {
+    "sigma": 1.75,
+    "length": 16,
+    "gamma": 1.56,
+    "chi_schedule": [
+      32,
+      64,
+      128
+    ],
+    "max_sweeps": 30
+  },
+  "fit": {
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "fit_hash": "897be6b010a39994b5f7e199bfbdc33561e2d512c9dbb027a887c08f80a5f401"
+  },
+  "code_hash": "b1e4221c37e22050faebf4276eda9dc5c958e5549f58e96ae1d5be04af517f3e",
+  "mpo": {
+    "pruned": true,
+    "active_channels": [
+      0,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23
+    ],
+    "chi": 44,
+    "setup_seconds": 0.5288255029990978,
+    "approximate_compression": false
+  },
+  "direct": {},
+  "staged": {
+    "even": {
+      "stages": [
+        {
+          "requested_chi": 32,
+          "reached_chi": 32,
+          "energy": -28.55967828092988,
+          "variance": 3.222739906050265e-07,
+          "discarded_weight": 1.0298496694541887e-08,
+          "sweeps": 17,
+          "wall_seconds": 12.801910410002165,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/even/chi32"
+        },
+        {
+          "requested_chi": 64,
+          "reached_chi": 64,
+          "energy": -28.55967829767478,
+          "variance": 1.971329766092822e-10,
+          "discarded_weight": 1.0213553871052893e-10,
+          "sweeps": 15,
+          "wall_seconds": 17.446191400002135,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/even/chi64"
+        },
+        {
+          "requested_chi": 128,
+          "reached_chi": 128,
+          "energy": -28.559678297683185,
+          "variance": 1.3642420526593924e-12,
+          "discarded_weight": 2.0786698379573575e-13,
+          "sweeps": 14,
+          "wall_seconds": 39.738195732999884,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/even/chi128"
+        }
+      ],
+      "total_wall_seconds": 69.98629754300418
+    },
+    "odd": {
+      "stages": [
+        {
+          "requested_chi": 32,
+          "reached_chi": 32,
+          "energy": -28.27954558605676,
+          "variance": 2.095634954457637e-07,
+          "discarded_weight": 1.3064153266267065e-08,
+          "sweeps": 17,
+          "wall_seconds": 12.54530483599956,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/odd/chi32"
+        },
+        {
+          "requested_chi": 64,
+          "reached_chi": 64,
+          "energy": -28.279545598540093,
+          "variance": 1.830358087318018e-10,
+          "discarded_weight": 1.2131329864941725e-10,
+          "sweeps": 14,
+          "wall_seconds": 14.371810739998182,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/odd/chi64"
+        },
+        {
+          "requested_chi": 128,
+          "reached_chi": 128,
+          "energy": -28.279545598548662,
+          "variance": 0.0,
+          "discarded_weight": 2.1725155496309276e-13,
+          "sweeps": 14,
+          "wall_seconds": 42.24684043600064,
+          "checkpoint_path": "results/phase6_sigma1.75/optimization-benchmark/L16_staged/checkpoints/odd/chi128"
+        }
+      ],
+      "total_wall_seconds": 69.16395601199838
+    }
+  },
+  "raw_observables": {
+    "correlations": [
+      1.0,
+      0.5049866902394068,
+      0.41800261551505036,
+      0.3756295618901554,
+      0.3503910988606298,
+      0.33435916321665293,
+      0.32431387423864166,
+      0.31874722593464044,
+      0.3169603262101376,
+      0.31874722593464044,
+      0.32431387423864166,
+      0.33435916321665293,
+      0.3503910988606298,
+      0.37562956189015545,
+      0.41800261551505036,
+      0.5049866902394068
+    ],
+    "s_zero": 6.569820786000492,
+    "s_k_min": 1.1912482164176064,
+    "k_min": 0.39269908169872414,
+    "xi": 5.4458623939025985,
+    "r_xi": 0.3403663996189124,
+    "gap": 0.28013269913452277
+  }
+}

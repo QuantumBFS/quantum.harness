@@ -352,7 +352,10 @@ def _plot(path: Path, analysis: dict) -> None:
         linestyle=":",
         label="published z (power)",
     )
-    axes[1].set(xlabel="effective L", ylabel="z_eff")
+    axes[1].set(
+        xlabel="DMRG logarithmic midpoint L_eff",
+        ylabel="gap-based z_eff",
+    )
     axes[1].legend(frameon=False, fontsize=7)
 
     rows = analysis["fit_comparison"]
@@ -403,7 +406,9 @@ field-selection criterion.
 
 The direct gap regressions give z={power['direct_gap_power_law']['exponent']:.8g}
 at the self-consistent field and z={st['direct_gap_power_law']['exponent']:.8g}
-at the published field. The effective-exponent power-correction results are
+at the published field. The gap-based pairwise effective dynamical exponents
+are discrete logarithmic slopes of the parity gaps, assigned to
+L_eff=sqrt(L1*L2). The effective-exponent power-correction results are
 {power['correction_sensitivity']['power']['estimate']:.8g} and
 {st['correction_sensitivity']['power']['estimate']:.8g}; the logarithmic
 results are {power['correction_sensitivity']['log']['estimate']:.8g} and
@@ -412,6 +417,9 @@ results are {power['correction_sensitivity']['log']['estimate']:.8g} and
 Relative to Shiratani--Todo's published power/log values, the discrepancy
 is {'reduced' if interpretation['discrepancy_reduced_in_both_declared_coordinates'] else 'not reduced in both coordinates'}
 by using the external field. This statement describes sensitivity only;
+the DMRG gap estimator is analogous to, but not identical with, their QMC
+aspect-ratio estimator. The comparison follows the spirit of their
+power/log finite-size correction analysis.
 `field_selected_by_outcome` remains false. No Gamma search, larger size,
 sigma extension, or K=32 calculation was performed.
 

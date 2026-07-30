@@ -73,7 +73,7 @@ def two_point_sensitivity(values, base_lengths, form: str) -> dict:
 
 
 def adjacent_effective_exponents(lengths, gaps) -> dict:
-    """Return generalized adjacent-size z_eff values and geometric scales."""
+    """Return gap-based pairwise z_eff values and logarithmic midpoints."""
     sizes = np.asarray(lengths, dtype=float)
     values = np.asarray(gaps, dtype=float)
     if sizes.ndim != 1 or values.ndim != 1 or sizes.size != values.size:

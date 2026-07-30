@@ -1,0 +1,180 @@
+{
+  "chi_validation": [
+    {
+      "sigma": 1.7,
+      "r_xi_shifts": [
+        2.6250069430355794e-06,
+        2.9252152144998433e-06
+      ],
+      "old_differences": [
+        -0.08742194163072597,
+        0.002895059022436808
+      ],
+      "new_differences": [
+        -0.08742456663766901,
+        0.002892133807222308
+      ],
+      "max_abs_r_xi_shift": 2.9252152144998433e-06,
+      "threshold": 0.0001,
+      "signs_unchanged": true,
+      "bracket_unchanged": true,
+      "accepted": true
+    },
+    {
+      "sigma": 1.75,
+      "r_xi_shifts": [
+        3.0293856582708223e-06,
+        2.577941254050531e-06
+      ],
+      "old_differences": [
+        -0.021260285823772707,
+        0.03811290135107362
+      ],
+      "new_differences": [
+        -0.021263315209430977,
+        0.03811032340981957
+      ],
+      "max_abs_r_xi_shift": 3.0293856582708223e-06,
+      "threshold": 0.0001,
+      "signs_unchanged": true,
+      "bracket_unchanged": true,
+      "accepted": true
+    },
+    {
+      "sigma": 1.8,
+      "r_xi_shifts": [
+        3.066219107172863e-06,
+        2.8917673713935166e-06
+      ],
+      "old_differences": [
+        -0.05922868898062583,
+        0.02446334381006815
+      ],
+      "new_differences": [
+        -0.059231755199733005,
+        0.024460452042696756
+      ],
+      "max_abs_r_xi_shift": 3.066219107172863e-06,
+      "threshold": 0.0001,
+      "signs_unchanged": true,
+      "bracket_unchanged": true,
+      "accepted": true
+    },
+    {
+      "sigma": 2.0,
+      "r_xi_shifts": [
+        3.653455729557553e-06,
+        2.9138367619863104e-06
+      ],
+      "old_differences": [
+        -0.050879872477591015,
+        0.03866204467916978
+      ],
+      "new_differences": [
+        -0.05088352593332057,
+        0.038659130842407796
+      ],
+      "max_abs_r_xi_shift": 3.653455729557553e-06,
+      "threshold": 0.0001,
+      "signs_unchanged": true,
+      "bracket_unchanged": true,
+      "accepted": true
+    }
+  ],
+  "gap_results": [
+    {
+      "sigma": 1.75,
+      "Gamma_x": 1.567903945227973,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.16784046528350538,
+      "gap_L64": 0.09996958222503725,
+      "z_eff": 0.7475294849261177,
+      "status": "provisional_chi128_rerun_requested"
+    },
+    {
+      "sigma": 1.8,
+      "Gamma_x": 1.5353849028429931,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.15647664886479395,
+      "gap_L64": 0.09258241966437565,
+      "z_eff": 0.7571372052621689,
+      "status": "provisional_chi128_rerun_requested"
+    },
+    {
+      "sigma": 2.0,
+      "Gamma_x": 1.4284112034302971,
+      "crossing_resolution": 0.025000000000000022,
+      "gap_L32": 0.12653833343791288,
+      "gap_L64": 0.07523667493648983,
+      "z_eff": 0.7500665043168143,
+      "status": "provisional_chi128_rerun_requested"
+    }
+  ],
+  "selective_chi128_requests": [
+    {
+      "sigma": 1.75,
+      "L": 64,
+      "Gamma": 1.55,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    },
+    {
+      "sigma": 1.75,
+      "L": 64,
+      "Gamma": 1.6,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    },
+    {
+      "sigma": 1.8,
+      "L": 64,
+      "Gamma": 1.5,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    },
+    {
+      "sigma": 1.8,
+      "L": 64,
+      "Gamma": 1.55,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    },
+    {
+      "sigma": 2.0,
+      "L": 64,
+      "Gamma": 1.4,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    },
+    {
+      "sigma": 2.0,
+      "L": 64,
+      "Gamma": 1.45,
+      "requested_chi": 128,
+      "reasons": [
+        "relative_variance",
+        "discarded_weight"
+      ]
+    }
+  ],
+  "excluded": [
+    "K32",
+    "L128",
+    "Gamma refinement"
+  ]
+}

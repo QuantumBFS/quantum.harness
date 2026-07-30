@@ -1,0 +1,95 @@
+{
+  "phase": 9,
+  "status": "revised_after_sigma_0p4_failed_mpo_qualification",
+  "execution_mode": "serial_local_resumable",
+  "measured_anchors": {
+    "long_range_chi128_seconds": {
+      "L16_even": 20.66,
+      "L16_odd": 20.26,
+      "L32_even": 95.65,
+      "L32_odd": 99.16,
+      "L64_even": 293.91,
+      "L64_odd": 282.18,
+      "L96_even": 541.69,
+      "L96_odd": 474.58
+    },
+    "long_range_chi64_L64_even_seconds_observed_range": [
+      88.29,
+      112.39
+    ],
+    "chi128_peak_memory_gib_conservative": 1.3,
+    "chi256_peak_memory_gib_measured": 2.66,
+    "source_note": "Phase 7 timing records and Phase 8 Gamma_ST cell summaries on the same local workflow"
+  },
+  "baseline": {
+    "nn_limit": {
+      "new_cells": 18,
+      "breakdown": {
+        "chi64_even_crossing_cells": 9,
+        "chi64_odd_grid_cells": 9,
+        "automatic_chi128_cells": 0
+      },
+      "estimated_wall_minutes": 8,
+      "conservative_wall_minutes": 15,
+      "peak_memory_gib": 1.3,
+      "note": "The NN MPO is much smaller than the K=24 long-range MPO; the estimate nevertheless retains a safety margin."
+    },
+    "mean_field_fixed_published_fields": {
+      "new_cells": 8,
+      "breakdown": {
+        "sigma_2over3_chi64_even_cells": 4,
+        "sigma_2over3_chi64_odd_cells": 4,
+        "independent_fit_and_coupling_validations": 2
+      },
+      "estimated_wall_minutes": 18,
+      "conservative_wall_minutes": 35,
+      "peak_memory_gib": 1.3,
+      "note": "Runs only qualified sigma=2/3 at Gamma_c=3.673. Sigma=0.4 DMRG is excluded because K=32 finite-ring coupling errors remain 6.00%-7.06%."
+    },
+    "published_gamma_sigma_2": {
+      "new_cells": 0,
+      "estimated_wall_minutes": 0,
+      "conservative_wall_minutes": 1,
+      "note": "Report-only reuse of accepted Phase 7 crossing and chi validation."
+    },
+    "analysis_and_reporting": {
+      "new_cells": 0,
+      "estimated_wall_minutes": 2,
+      "conservative_wall_minutes": 5
+    },
+    "total_new_physics_cells": 20,
+    "estimated_serial_wall_minutes": 28,
+    "conservative_serial_wall_minutes": 56,
+    "conservative_peak_memory_gib": 1.3
+  },
+  "execution_snapshot_before_revised_run": {
+    "nn_successful_cells_preserved": 6,
+    "nn_incomplete_cells": 1,
+    "nn_remaining_cells": 6,
+    "mean_field_remaining_cells": 8,
+    "remaining_physics_cells": 14,
+    "note": "Execution was stopped before applying the revised mean-field design. The incomplete L=64, Gamma=0.98 NN summary is not accepted as a result."
+  },
+  "conditional_refinement": {
+    "status": "not_authorized_before_baseline_report_review",
+    "trigger": "Only after all baseline validation runs and final reporting are complete, if a flagged state blocks a required conclusion",
+    "maximum_new_chi128_cells": null,
+    "estimated_additional_wall_minutes": null,
+    "conservative_additional_wall_minutes": null,
+    "conservative_peak_memory_gib": null,
+    "chi256": "not_authorized"
+  },
+  "hard_limits": {
+    "maximum_L": 128,
+    "planned_maximum_L": 96,
+    "maximum_chi_without_new_review": 128,
+    "K": 24,
+    "new_sigma_scan": false,
+    "automatic_Gamma_extension": false
+  },
+  "cost_gate": {
+    "baseline_local_ceiling_minutes": 56,
+    "action_if_exceeded": "stop_and_request_review",
+    "basis": "two-times measured-rate safety envelope rounded upward"
+  }
+}

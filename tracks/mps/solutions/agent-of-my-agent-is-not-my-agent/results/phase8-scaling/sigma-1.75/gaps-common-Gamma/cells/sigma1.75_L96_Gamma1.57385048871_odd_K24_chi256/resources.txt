@@ -1,0 +1,23 @@
+	Command being timed: "conda run -n mps python -u scripts/benchmark_phase6_optimizations.py --fit-summary results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json --length 96 --gamma 1.5738504887054727 --num-exponentials 24 --alpha 0.5 --r-fit 2048 --chi-schedule 256 --direct-only --sectors odd --max-sweeps 30 --initial-checkpoint-root results/phase8-scaling/sigma-1.75/gaps-common-Gamma/cells/sigma1.75_L96_Gamma1.57385048871_odd_K24_chi128/checkpoints --initial-chi 128 --initial-summary results/phase8-scaling/sigma-1.75/gaps-common-Gamma/cells/sigma1.75_L96_Gamma1.57385048871_odd_K24_chi128/summary.json --output-dir results/phase8-scaling/sigma-1.75/gaps-common-Gamma/cells/sigma1.75_L96_Gamma1.57385048871_odd_K24_chi256"
+	User time (seconds): 8578.60
+	System time (seconds): 315.06
+	Percent of CPU this job got: 599%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 24:42.58
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2740248
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 207
+	Minor (reclaiming a frame) page faults: 227643750
+	Voluntary context switches: 24927
+	Involuntary context switches: 11227
+	Swaps: 0
+	File system inputs: 444120
+	File system outputs: 86288
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

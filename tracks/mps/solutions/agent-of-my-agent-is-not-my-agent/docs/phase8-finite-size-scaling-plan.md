@@ -39,11 +39,15 @@ only successful summaries.
 - `Gamma_c_power` and `Gamma_c_log` are exact two-point sensitivity
   extrapolations.
 - `z_power` and `z_log` are four-point deterministic regressions of
-  adjacent-pair effective exponents, each with two residual degrees of
-  freedom.
+  gap-based pairwise effective dynamical exponents, each with two residual
+  degrees of freedom.
 - `1/L` and `1/log(L)` for the crossings, and `1/L_eff` and
   `1/log(L_eff)` for the effective exponents, are sensitivity coordinates
   only; none assumes a known leading correction exponent.
+- `z_eff(L1,L2)` is the discrete logarithmic slope of DMRG excitation gaps,
+  and `L_eff=sqrt(L1*L2)` is this analysis's logarithmic midpoint. Neither is
+  attributed to Shiratani--Todo's QMC aspect-ratio estimator; only the
+  power/log correction-analysis strategy is compared.
 - `Gamma_c` power/log sensitivity is not fully propagated into gap
   uncertainties.
 - Susceptibility `gamma/nu` is outside scope. Store equal-time correlations
@@ -75,7 +79,7 @@ only successful summaries.
   - `sensitivity_regression(z_values, effective_lengths, form) -> dict`
   - `gap_scaling_summary(lengths, gaps) -> dict`
   - a ten-cell common-field run specification;
-  - a report with four adjacent-pair effective exponents and two
+  - a report with four gap-based pairwise effective dynamical exponents and two
     correction-coordinate regressions.
 
 - [ ] **Step 1: Write failing five-size scaling tests**
@@ -272,7 +276,8 @@ confidence interval or correction-form model selection is claimed.
 Document:
 
 - common-field sizes `L=16,32,64,96,128`;
-- four adjacent-pair effective exponents at geometric-mean scales;
+- four gap-based pairwise effective dynamical exponents at logarithmic
+  midpoint scales;
 - the two requested forms `z_eff=z+a/L_eff` and
   `z_eff=z+a/log(L_eff)`;
 - two residual degrees of freedom per full regression;
@@ -787,7 +792,8 @@ The figure has three colorblind-safe panels:
 
 The report must say:
 
-- `z_eff` values are two-size diagnostics;
+- `z_eff` values are gap-based pairwise effective dynamical-exponent
+  diagnostics;
 - power/log values are two-point sensitivity extrapolations;
 - the power/log `Gamma_c` spread is not fully propagated into gap
   uncertainty;
@@ -795,8 +801,9 @@ The report must say:
 - equal-time `C_eq(r)` and `S_eq(0)` are auxiliary diagnostics only;
 - the Phase 8 power/log sensitivity values are compared with the
   source-cited Shiratani--Todo `sigma=7/4` power/log extrapolations, while
-  stating that the smaller `L<=128` range prevents a precision
-  reproduction.
+  stating that the estimator differs (DMRG gap slope versus QMC
+  aspect-ratio tuning) and that the smaller `L<=128` range prevents a
+  precision reproduction.
 
 - [x] **Step 5: Run the report test and verify GREEN**
 

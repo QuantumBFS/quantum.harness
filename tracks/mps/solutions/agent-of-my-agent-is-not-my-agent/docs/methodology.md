@@ -252,6 +252,7 @@ The final gap analysis reoptimizes only the odd sector at `chi=128` at the
 two existing broad-bracket endpoints. Compatible `chi=64` tensors seed the
 three required sigma values but are never reused as final states. Gaps are
 interpolated to the unchanged broad crossing. The resulting two-size
+gap-based pairwise effective dynamical exponent
 `z_eff=-log(Delta_64/Delta_32)/log(2)` is accepted at
 `sigma=1.75,1.80,2.00`; `sigma=1.60` is retained as incomplete because the
 two `L=64` odd states retain discarded-weight flags.
@@ -285,13 +286,27 @@ All three gaps are evaluated at the common power-coordinate sensitivity
 field. The alternative logarithmic-coordinate `Gamma_c` and its spread from
 the power value are reported separately, but this critical-field sensitivity
 is not fully propagated into the gap uncertainty because only two crossings
-exist. The gap sequence yields `z_eff(32,64)` and `z_eff(64,128)`, followed
-by power/log two-point sensitivity extrapolations.
+exist. The dynamical exponent is estimated from the finite-size scaling of
+the lowest parity gap. For each pair,
+
+```text
+z_eff(L1,L2) = -log[Delta(L2)/Delta(L1)] / log(L2/L1),
+L_eff = sqrt(L1*L2).
+```
+
+Here `z_eff` is the gap-based pairwise effective dynamical exponent and
+`L_eff` is this DMRG analysis's logarithmic midpoint. The gap sequence yields
+`z_eff(32,64)` and `z_eff(64,128)`, followed by power/log two-point
+sensitivity extrapolations.
 
 The final report compares these values with Shiratani--Todo's published
 `sigma=7/4` results, `z_power=0.91(2)` and `z_log=0.98(3)`, from Table 2 of
-arXiv:2305.14121v4. Their maximum size is `L=362`, so the present `L<=128`
-analysis is not presented as a precision reproduction.
+arXiv:2305.14121v4. The power/log comparison follows the spirit of their
+finite-size correction analysis, while the underlying estimators differ:
+DMRG extracts `z` from excitation gaps, whereas their QMC method uses tuned
+imaginary-time aspect ratios and quotient-style finite-size estimates.
+Their maximum size is `L=362`, so the present `L<=128` analysis is not
+presented as a precision reproduction.
 
 No later-sigma plan is created until the complete `sigma=1.75` result is
 reviewed. The imaginary-time-integrated susceptibility and `gamma/nu` remain

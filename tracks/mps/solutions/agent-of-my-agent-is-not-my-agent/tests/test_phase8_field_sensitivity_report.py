@@ -153,3 +153,7 @@ def test_report_compares_external_and_self_consistent_fields(tmp_path: Path):
         "report.md",
     ):
         assert (output / name).stat().st_size > 0
+    rendered = (output / "report.md").read_text()
+    normalized = " ".join(rendered.split())
+    assert "gap-based pairwise effective dynamical exponents" in normalized
+    assert "QMC aspect-ratio estimator" in normalized

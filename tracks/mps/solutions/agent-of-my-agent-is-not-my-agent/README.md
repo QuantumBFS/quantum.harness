@@ -1,3 +1,5 @@
+# Feasibility Validation of Exploring Universality-Class Crossover in the Long-Range Transverse-Field Ising Model Using DMRG
+
 ## Team
 
 | | |
@@ -160,7 +162,8 @@ resumability, full raw observables, and the separation of MPO, MPS, and
 finite-size uncertainty.
 
 The completed broad scan contains 210 resumable even-sector cells. Selective
-odd-sector `chi=128` calculations give accepted two-size `z_eff(32,64)`
+odd-sector `chi=128` calculations give accepted two-size gap-based pairwise
+effective dynamical exponents `z_eff(32,64)`
 estimates at `sigma=1.75,1.80,2.00`; the optional `sigma=1.60` estimate
 remains incomplete because its `L=64` discarded weights exceed the locked
 threshold. Equal-time zero-momentum structure factors are retained only as
@@ -188,8 +191,15 @@ and are not statistical regressions. The power/log critical-field spread is
 reported separately and is not fully propagated into the gaps because only
 two crossings are available.
 
-The gap campaign uses `L={16,32,64,96,128}`. Four generalized adjacent-size
-`z_eff` values are associated with geometric-mean sizes and analyzed with
+The gap campaign uses `L={16,32,64,96,128}`. For each adjacent size pair,
+the gap-based pairwise effective dynamical exponent is
+
+```text
+z_eff(L1,L2) = -log[Delta(L2)/Delta(L1)] / log(L2/L1).
+```
+
+Each estimate is assigned to this DMRG analysis's logarithmic midpoint
+`L_eff=sqrt(L1*L2)`. The four resulting pairwise exponents are analyzed with
 the approved sensitivity coordinates `z_eff=z+a/L_eff` and
 `z_eff=z+a/log(L_eff)`. Both are deterministic five-size regressions; a
 leave-`L=16`-out result measures sensitivity to the smallest size. Adjacent
@@ -215,7 +225,8 @@ An additive critical-field sensitivity branch evaluates fresh even/odd
 states at the external Shiratani--Todo field `Gamma_c_ST=1.5609` for the
 same five sizes. It retains the original `Gamma_c_power` branch unchanged,
 uses `chi=128` baselines with selective audited `chi=256` refinement only
-on failed states, and compares raw gaps, four adjacent `z_eff` values, a
+on failed states, and compares raw gaps, four gap-based pairwise effective
+dynamical exponents, a
 direct `Delta=A L^(-z)` regression, and the two declared correction
 coordinates. The external field is never selected by agreement with the
 published exponent.
@@ -224,8 +235,12 @@ The final report will compare the resulting `z` sensitivities with
 Shiratani--Todo's published `sigma=7/4` values, `z=0.91(2)` for power
 corrections and `z=0.98(3)` for logarithmic corrections
 ([arXiv:2305.14121v4](https://arxiv.org/abs/2305.14121), Table 2). Their
-calculation reaches `L=362`; the present `L<=128` result is therefore a
-qualitative comparison rather than a precision reproduction.
+calculation reaches `L=362`. The comparison follows the spirit of their
+power/log finite-size correction analysis, but the underlying estimator is
+different: this DMRG workflow extracts `z` from excitation gaps, whereas
+their QMC workflow obtains it from tuned imaginary-time aspect ratios and
+quotient-style finite-size estimates. The present `L<=128` result is
+therefore a qualitative comparison rather than a precision reproduction.
 
 No `sigma=1.80` or `sigma=2.00` plan is created until the complete
 `sigma=1.75` result is reviewed. Susceptibility `gamma/nu` remains outside
@@ -259,6 +274,100 @@ PYTHONPATH=src:. conda run -n mps python \
   --output-dir \
     results/phase6_sigma1.75/validated-local-reproduction
 ```
+
+## Phase 9: challenge validation
+
+Phase 9 adds bounded validation evidence without extending the production
+finite-size campaign. The nearest-neighbor periodic TFIM uses
+`L={16,32,64}`, `Gamma={0.98,1.00,1.02}`, and `chi=64` to verify the
+Hamiltonian, parity sectors, crossing interpolation, and gap-scaling
+pipeline. Its small-size `z` is a diagnostic, not a precision reproduction
+of `z=1`.
+
+The mean-field benchmarks use the periodic Hurwitz-zeta model at the fixed
+published fields `(sigma,Gamma_c)=(2/3,3.673)` and `(0.4,5.85)`, with
+`L={16,32,64,96}`, `K=24`, and `chi=64`. They test only
+`z=sigma/2`, namely `1/3` and `0.2`; they do not locate the critical fields
+and do not calculate `beta/nu`, susceptibility `gamma/nu`, or an equal-time
+proxy under those labels. The second published critical-field comparison
+reuses the accepted Phase 7 `sigma=2.0` crossing and is explicitly a
+finite-size comparison rather than an exact reproduction.
+
+The executable baseline contains 26 independently resumable cells: 18 NN
+parity-sector states and eight qualified sigma=2/3 states. The original
+cost ceiling remains conservative.
+Convergence failures are reported without automatic `chi=128` refinement.
+Any refinement is a separate decision only after the complete baseline
+report has been reviewed.
+
+The completed NN validation gives
+`Gamma_x(16,32)=0.997160` and `Gamma_x(32,64)=0.999281`. At `Gamma=1`, the
+gaps are `0.0982537`, `0.0490972`, and `0.0245449`, yielding
+`z_eff=1.000870,1.000219` and a three-size direct estimate `z=1.000544`.
+These results validate the NN scaling pipeline but are not a precision
+thermodynamic extrapolation. One `L=64`, even-sector state was retained with
+a diagnostic warning because its relative variance, `1.013e-10`, narrowly
+exceeded the nominal `1e-10` gate; no chi escalation was performed.
+
+The additional fixed-field `sigma=1.8` validation uses the external
+Shiratani--Todo benchmark `Gamma_c=1.5288`, `K=24`, `chi=128`, and
+`L={16,32,64,96,128}`. Its gaps give the gap-based pairwise effective
+dynamical exponents
+`z_eff={0.881153,0.896600,0.907271,0.913216}`. Sensitivity regressions in
+`1/L_eff` and `1/log(L_eff)`, with `L_eff=sqrt(L1*L2)`, give
+`z_power=0.918948` and `z_log=0.974931`, respectively. These are validation
+comparisons with the published approximate values `0.93` and `1.00`, not an
+identity between the DMRG gap estimator and the QMC aspect-ratio estimator,
+an independent critical-field determination, or a precision reproduction.
+The `L=128` even state is retained with a relative-variance warning
+(`1.107e-10` versus the nominal `1e-10` gate); no chi increase was run.
+
+Rebuild the sigma=1.8 report without rerunning DMRG:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-phase9-sigma18 \
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/report_phase9_sigma18_z.py \
+  --summary-root results/phase9-validation/sigma1.8-z/cells \
+  --output-dir results/phase9-validation/sigma1.8-z/report
+```
+
+Create the NN specification without running DMRG:
+
+```bash
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/plan_phase9_validation.py nn \
+  --output results/phase9-validation/nn-limit/run_spec.json
+```
+
+The two independent fits and the combined mean-field specification are
+separate, reviewable steps:
+
+```bash
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/regenerate_sigma_fit.py \
+  --sigma 0.6666666666666666 --lengths 16 32 64 96 --l-max 256 \
+  --primary-only \
+  --output-dir results/phase9-validation/mean-field-fixed-fields/fits/sigma-2over3
+
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/regenerate_sigma_fit.py \
+  --sigma 0.4 --lengths 16 32 64 96 --l-max 256 \
+  --primary-only \
+  --output-dir results/phase9-validation/mean-field-fixed-fields/fits/sigma-0p4
+
+PYTHONPATH=src:. conda run -n mps python -u \
+  scripts/plan_phase9_validation.py mean-field \
+  --fit-summary \
+    results/phase9-validation/mean-field-fixed-fields/fits/sigma-2over3/fit-summary.json \
+  --output \
+    results/phase9-validation/mean-field-fixed-fields/run_spec.json
+```
+
+The sigma=0.4 K=24/K=32 qualification found 6.00%-7.06% finite-ring errors,
+so the active `run_spec.json` contains only the eight sigma=2/3 states.
+Sigma=0.4 remains a documented MPO-limited validation. These commands only
+prepare inputs until the recorded commands are deliberately executed.
 
 ## Development milestones
 

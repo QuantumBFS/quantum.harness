@@ -28,3 +28,20 @@ scope is `sigma=1.50,1.60,1.70,1.75,1.80,1.90,2.00`, `K=24`, `chi=64`, and
 `L=32,64`. The `broad`, `decide`, `gaps`, and `estimate` subcommands preserve
 pending and failed work for resumability. The workflow makes no
 thermodynamic-limit claim and never expands the Gamma grid automatically.
+
+Phase 9 adds three validation-only entry points:
+
+- `plan_phase9_validation.py` writes the fixed NN or qualified mean-field
+  pending-cell specification. The active mean-field branch is
+  `sigma=2/3, Gamma_c=3.673`; `sigma=0.4` is excluded after its K=24/K=32
+  finite-ring MPO qualification failed the approximate 1% gate.
+- `run_phase9_nn_cell.py` runs one periodic NN TFIM parity state at
+  `chi=64`, writes an atomic summary, and saves a provenance-safe HDF5
+  checkpoint.
+- `report_phase9_validation.py` combines completed NN and mean-field cells
+  with the reused sigma=2.0 crossing, emits CSV/JSON/Markdown plus PNG/PDF
+  gap figures, and records unresolved branches without scheduling
+  refinement.
+
+No Phase 9 command automatically increases `chi`, extends a Gamma grid, or
+runs a cell above `L=96`.

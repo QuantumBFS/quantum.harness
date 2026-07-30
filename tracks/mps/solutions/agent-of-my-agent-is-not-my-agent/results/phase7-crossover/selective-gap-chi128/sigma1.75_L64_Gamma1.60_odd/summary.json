@@ -1,0 +1,113 @@
+{
+  "status": "success",
+  "settings": {
+    "sigma": 1.75,
+    "length": 64,
+    "gamma": 1.6,
+    "num_exponentials": 24,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "chi_schedule": [
+      128
+    ],
+    "max_sweeps": 30,
+    "sectors": [
+      "odd"
+    ],
+    "direct_only": true,
+    "initial_checkpoint_root": "/home/zyz/code/quantum.harness/tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/results/phase7-crossover/minimal-validation/gaps-chi64/sigma1.75_L64_Gamma1.60_odd/checkpoints",
+    "initial_chi": 64
+  },
+  "fit": {
+    "K": 24,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "fit_hash": "29d3af435a2e66d28c13d56065f15f955772c1ec7c4a5c05fbc99fd03315a590"
+  },
+  "code_hash": "ce83fc720ba5b06a828594abfb6c26d767af4d632fba537fc2bdd61ce9be279e",
+  "mpo": {
+    "pruned": true,
+    "active_channels": [
+      0,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23
+    ],
+    "chi": 44,
+    "setup_seconds": 2.983733070002927,
+    "approximate_compression": false
+  },
+  "direct": {
+    "odd": {
+      "requested_chi": 128,
+      "energy": -115.70440425056275,
+      "variance": 2.1235973690636456e-07,
+      "discarded_weight": 5.666915017464123e-09,
+      "reached_chi": 128,
+      "sweeps": 18,
+      "wall_seconds": 320.78022355899884
+    }
+  },
+  "staged": {},
+  "initialization": {
+    "odd": {
+      "mode": "audited_initialization_only",
+      "source_provenance_id": "53d55548917567dadc5a4417b5505ea9f220dd50f6aa5339d6c7395a5f723d5e",
+      "checkpoint_code_hash": "ab6ad6bf0fe3fce9841fb85b26e21ba57c8083b61bfacca277690848f8fd9f02",
+      "current_code_hash": "ce83fc720ba5b06a828594abfb6c26d767af4d632fba537fc2bdd61ce9be279e",
+      "coefficient_hash": "611100a44366a6b521d289940086967c3a9ce5c6fe23d6352ccb332594178cae",
+      "operator_convention": "rotated-xz-periodized-v1",
+      "lattice_fingerprint": "56cd43c6c569067e3548b9bd196ea8e26ca3a2acec108c74fcc73cfb511ade13",
+      "fully_reoptimize_required": true,
+      "source_summary": {
+        "path": "/home/zyz/code/quantum.harness/tracks/mps/solutions/agent-of-my-agent-is-not-my-agent/results/phase7-crossover/minimal-validation/gaps-chi64/sigma1.75_L64_Gamma1.60_odd/summary.json",
+        "code_hash": "ab6ad6bf0fe3fce9841fb85b26e21ba57c8083b61bfacca277690848f8fd9f02",
+        "fit_hash": "29d3af435a2e66d28c13d56065f15f955772c1ec7c4a5c05fbc99fd03315a590",
+        "mpo_pruned": true,
+        "approximate_compression": false,
+        "active_channels": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          23
+        ],
+        "mpo_chi": 44
+      }
+    }
+  },
+  "raw_observables": {}
+}

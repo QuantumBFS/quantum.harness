@@ -1,0 +1,149 @@
+{
+  "model": {
+    "hamiltonian": "-sum_i Z_i Z_(i+1) - Gamma sum_i X_i",
+    "boundary": "periodic Hamiltonian represented by a finite OBC MPO/MPS",
+    "gamma": 1.0,
+    "operator_convention": "Pauli Sigmax/Sigmaz"
+  },
+  "dmrg_options": {
+    "active_sites": 2,
+    "mixer": true,
+    "min_sweeps": 6,
+    "max_sweeps": 30,
+    "max_E_err": 1e-10,
+    "max_S_err": 1e-08,
+    "trunc_params": {
+      "chi_max": 128,
+      "svd_min": 1e-12,
+      "chi_min": null,
+      "degeneracy_tol": null,
+      "trunc_cut": 1e-14
+    }
+  },
+  "benchmark_variance_threshold": 1e-10,
+  "sizes": [
+    {
+      "length": 8,
+      "exact": {
+        "ground_energy": -10.251661790966022,
+        "excited_energy": -10.054678984251678,
+        "gap": 0.19698280671434354
+      },
+      "dmrg": {
+        "ground": {
+          "energy": -10.25166179096603,
+          "variance": 0.0,
+          "max_discarded_weight": 1.014266161525789e-24,
+          "max_chi": 16
+        },
+        "excited": {
+          "energy": -10.054678984251685,
+          "variance": 4.263256414560601e-14,
+          "max_discarded_weight": 5.704386500641247e-25,
+          "max_chi": 14
+        },
+        "gap": 0.19698280671434532
+      },
+      "length_times_gap": 1.5758624537147625,
+      "excited_targeting": {
+        "overlap": 1.4039888991394068e-16
+      },
+      "errors": {
+        "ground_energy": 8.881784197001252e-15,
+        "excited_energy": 7.105427357601002e-15,
+        "gap": 1.7763568394002505e-15,
+        "correlation_max_abs": 5.551115123125783e-15
+      },
+      "tolerances": {
+        "energy": 1e-08,
+        "gap": 1e-08,
+        "correlation": 1e-07,
+        "variance": 1e-10,
+        "overlap": 1e-10
+      },
+      "accepted": true
+    },
+    {
+      "length": 10,
+      "exact": {
+        "ground_energy": -12.784906442999327,
+        "excited_energy": -12.627503029350102,
+        "gap": 0.1574034136492255
+      },
+      "dmrg": {
+        "ground": {
+          "energy": -12.78490644299935,
+          "variance": 0.0,
+          "max_discarded_weight": 2.4912387197314015e-24,
+          "max_chi": 32
+        },
+        "excited": {
+          "energy": -12.627503029350075,
+          "variance": 0.0,
+          "max_discarded_weight": 1.7715015421247515e-24,
+          "max_chi": 32
+        },
+        "gap": 0.15740341364927524
+      },
+      "length_times_gap": 1.5740341364927524,
+      "excited_targeting": {
+        "overlap": 5.005364182695286e-16
+      },
+      "errors": {
+        "ground_energy": 2.3092638912203256e-14,
+        "excited_energy": 2.6645352591003757e-14,
+        "gap": 4.973799150320701e-14,
+        "correlation_max_abs": 2.4424906541753444e-15
+      },
+      "tolerances": {
+        "energy": 1e-08,
+        "gap": 1e-08,
+        "correlation": 1e-07,
+        "variance": 1e-10,
+        "overlap": 1e-10
+      },
+      "accepted": true
+    },
+    {
+      "length": 12,
+      "exact": {
+        "ground_energy": -15.322595151080787,
+        "excited_energy": -15.191508225450312,
+        "gap": 0.1310869256304752
+      },
+      "dmrg": {
+        "ground": {
+          "energy": -15.322595151080785,
+          "variance": 0.0,
+          "max_discarded_weight": 4.111723465145094e-24,
+          "max_chi": 60
+        },
+        "excited": {
+          "energy": -15.191508225450269,
+          "variance": 3.126388037344441e-13,
+          "max_discarded_weight": 4.27348861001284e-24,
+          "max_chi": 50
+        },
+        "gap": 0.13108692563051605
+      },
+      "length_times_gap": 1.5730431075661926,
+      "excited_targeting": {
+        "overlap": 1.0488453165598649e-16
+      },
+      "errors": {
+        "ground_energy": 1.7763568394002505e-15,
+        "excited_energy": 4.263256414560601e-14,
+        "gap": 4.085620730620576e-14,
+        "correlation_max_abs": 6.772360450213455e-15
+      },
+      "tolerances": {
+        "energy": 1e-08,
+        "gap": 1e-08,
+        "correlation": 1e-07,
+        "variance": 1e-10,
+        "overlap": 1e-10
+      },
+      "accepted": true
+    }
+  ]
+}

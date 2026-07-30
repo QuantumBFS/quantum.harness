@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "settings": {
+    "model": "nearest-neighbor-tfim",
+    "sigma": null,
+    "length": 16,
+    "gamma": 1.0,
+    "sector": "even",
+    "sectors": [
+      "even"
+    ],
+    "chi_schedule": [
+      64
+    ],
+    "max_sweeps": 30,
+    "direct_only": true
+  },
+  "model": {
+    "hamiltonian": "-sum_i Z_i Z_(i+1) - Gamma sum_i X_i",
+    "length": 16,
+    "Gamma": 1.0,
+    "interaction_boundary": "periodic",
+    "mps_boundary": "finite-open",
+    "operator_convention": "rotated-xz-parity-v1",
+    "physical_X": "TeNPy Sigmaz",
+    "physical_Z": "TeNPy Sigmax",
+    "exact_model_hash": "5b6a7819b9728fb357ca707e11ec20e705ab5e8634a8ca89a855ddae12a2b107"
+  },
+  "code_hash": "c1c94921399202ca63c5a0ff280de0b6087ef5f0b63bec3d609d474f7b853bd9",
+  "mpo": {
+    "chi": 4,
+    "exact_zero_pruning": false,
+    "approximate_compression": false,
+    "setup_seconds": 0.02050067200070771
+  },
+  "direct": {
+    "even": {
+      "requested_chi": 64,
+      "energy": -20.40459447475667,
+      "variance": 4.547473508864641e-13,
+      "discarded_weight": 3.8637741505457625e-15,
+      "reached_chi": 64,
+      "sweeps": 10,
+      "wall_seconds": 3.8474009740002657
+    }
+  },
+  "raw_observables": {
+    "correlations": [
+      1.0,
+      0.6376435773361339,
+      0.5438777479046432,
+      0.4964702492214035,
+      0.46775447954705646,
+      0.4493334420345345,
+      0.43772072732900535,
+      0.43126230386308806,
+      0.42918565801541114,
+      0.43126230386308806,
+      0.43772072732900535,
+      0.4493334420345345,
+      0.46775447954705646,
+      0.4964702492214035,
+      0.5438777479046432,
+      0.6376435773361337
+    ],
+    "s_zero": 8.357310712487141,
+    "s_k_min": 1.138362859464503,
+    "k_min": 0.39269908169872414,
+    "xi": 6.454028400199916,
+    "r_xi": 0.40337677501249475,
+    "correlation_definition": "full physical Z-Z correlation without connected subtraction; evaluated as TeNPy Sigmax-Sigmax"
+  }
+}

@@ -204,21 +204,23 @@ For the five ordered sizes
 L_i = 16,32,64,96,128,
 ```
 
-define four adjacent-pair effective exponents
+define four gap-based pairwise effective dynamical exponents
 
 ```text
 z_eff(L_i,L_(i+1))
   = -log[Delta(L_(i+1))/Delta(L_i)] / log[L_(i+1)/L_i].
 ```
 
-Associate each effective exponent with the geometric-mean scale
+Associate each pairwise exponent with the logarithmic midpoint
 
 ```text
 L_eff,i = sqrt[L_i L_(i+1)].
 ```
 
-This gives four `z_eff` values from all five gaps, including the non-doubling
-pairs `(64,96)` and `(96,128)`. The original doubling diagnostics
+This definition is specific to the DMRG gap-scaling route
+`Delta(L,Gamma_c) ~ L^(-z)`. It is not a definition taken from
+Shiratani--Todo's QMC calculation. This gives four `z_eff` values from all
+five gaps, including the non-doubling pairs `(64,96)` and `(96,128)`. The original doubling diagnostics
 `z_eff(16,32)`, `z_eff(32,64)`, and `z_eff(64,128)` remain explicitly
 identifiable.
 
@@ -249,8 +251,12 @@ agreement with literature.
 
 It also compares the two sensitivity values with Shiratani--Todo's published
 `sigma=7/4` power- and logarithmic-correction extrapolations, using a cited
-source value. Because Phase 8 reaches only `L=128`, this is a qualitative
-finite-size comparison rather than a precision reproduction.
+source value. The comparison follows the spirit of their correction analysis,
+but the estimator differs: DMRG uses excitation-gap slopes, whereas their QMC
+workflow tunes the imaginary-time size with spatial size and constructs
+quotient-style finite-size estimates. Because Phase 8 reaches only `L=128`,
+this is a qualitative finite-size comparison rather than a precision
+reproduction.
 
 ## Equal-time structure-factor diagnostics
 

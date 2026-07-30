@@ -500,7 +500,13 @@ def _plot(output: Path, analysis: dict) -> None:
 
     effective_lengths = np.asarray(z["z_eff"]["effective_lengths"])
     z_eff = np.asarray(z["z_eff"]["values"])
-    axes[1].plot(effective_lengths, z_eff, "o", color=orange, label="z_eff")
+    axes[1].plot(
+        effective_lengths,
+        z_eff,
+        "o",
+        color=orange,
+        label="gap-based z_eff",
+    )
     dense_lengths = np.linspace(effective_lengths[0], 140.0, 200)
     power = z["regression"]["power"]
     axes[1].plot(
@@ -545,6 +551,12 @@ def _write_report(path: Path, analysis: dict) -> None:
     )
     text = f"""# Phase 8 sigma=1.75 finite-size scaling
 
+The dynamical exponent is estimated from the finite-size scaling of the
+lowest parity gap, Delta(L,Gamma_c) ~ L^(-z). The gap-based pairwise effective
+dynamical exponents are discrete logarithmic slopes,
+z_eff(L1,L2)=-log[Delta(L2)/Delta(L1)]/log(L2/L1), associated with the
+logarithmic midpoint L_eff=sqrt(L1*L2).
+
 The adjacent-size diagnostics are {diagnostics}. The five-size power and
 logarithmic sensitivity regressions give
 z={z['regression']['power']['estimate']:.8g} and
@@ -562,6 +574,11 @@ Shiratani--Todo report z={published['z_power']}({int(100*published['z_power_unce
 for the power correction and z={published['z_log']}({int(100*published['z_log_uncertainty']):d})
 for the logarithmic correction at sigma=7/4
 ([arXiv:{published['arxiv']}]({published['url']}), Table {published['table']}).
+The power-law and logarithmic extrapolations are compared following the
+spirit of their finite-size correction analysis, while the underlying
+exponent estimators differ: DMRG extracts z from excitation gaps, whereas
+the QMC aspect-ratio tuning procedure extracts z from the tuned
+imaginary-time size.
 Their calculation reaches L={published['L_max']}; the present L<=128
 comparison is therefore qualitative and is not a precision reproduction.
 

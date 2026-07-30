@@ -22,7 +22,7 @@ class CheckpointMismatch(ValueError):
 
 @dataclass(frozen=True)
 class CheckpointProvenance:
-    sigma: float
+    sigma: float | None
     length: int
     gamma: float
     num_exponentials: int

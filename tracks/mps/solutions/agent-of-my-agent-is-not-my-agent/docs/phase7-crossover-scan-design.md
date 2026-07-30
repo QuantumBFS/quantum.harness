@@ -111,13 +111,14 @@ Delta(L,Gamma) = E_odd(L,Gamma) - E_even(L,Gamma)
 ```
 
 is linearly interpolated to the common `Gamma_x`. The exploration estimate
-is
+is the gap-based pairwise effective dynamical exponent
 
 ```text
 z_eff(32,64) = -log[Delta(64,Gamma_x)/Delta(32,Gamma_x)] / log(2).
 ```
 
-Raw endpoint energies and gaps remain authoritative. A nonpositive gap,
+This is a DMRG gap-slope diagnostic, not a QMC aspect-ratio estimator. Raw
+endpoint energies and gaps remain authoritative. A nonpositive gap,
 missing sector, or provenance mismatch makes `z_eff` unavailable rather
 than triggering an automatic retry with larger `chi`.
 
