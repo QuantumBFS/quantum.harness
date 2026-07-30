@@ -2,7 +2,7 @@
   "title": "⟦zh⟧从精确电路到随机噪声学习⟦en⟧From Exact Circuits to Learning under Random Noise",
   "eyebrow": "⟦zh⟧QuantumBFS 问题 71 · 电路优化与随机性实验⟦en⟧QuantumBFS Challenge 71 · Circuit Optimization and Noise Experiment",
   "subtitle": "⟦zh⟧新增实验：每个输出位以 25% 概率独立翻转，并在每一步重新生成噪声⟦en⟧New experiment: every output bit flips independently with 25% probability, with fresh noise generated at every step",
-  "lede": "⟦zh⟧我们先把四个精确算术电路从 385 门压缩到 355 门；随后把六位乘法隐藏起来，只给随机初始化的学习器持续变化的带噪样本，比较哪种方法恢复规律最快。当前共享 MLP 已在完整干净定义域上达到 98.22% 整词准确率。⟦en⟧We first reduced four exact arithmetic circuits from 385 to 355 gates. We then hid six-bit multiplication and exposed randomly initialized learners only to continuously changing noisy samples, comparing which method recovers the rule fastest. The current shared MLP reaches 98.22% exact-word accuracy on the complete clean domain.",
+  "lede": "⟦zh⟧我们先把四个精确算术电路从 385 门压缩到 355 门；随后把六位乘法隐藏起来，只给随机初始化的学习器持续变化的带噪样本。贝叶斯证据表在第 1,200 步恢复了完整真值表，当前紧凑神经基线达到 98.22% 整词准确率。⟦en⟧We first reduced four exact arithmetic circuits from 385 to 355 gates, then hid six-bit multiplication and exposed randomly initialized learners only to continuously changing noisy samples. A Bayesian evidence table recovers the complete truth table at step 1,200; the current compact neural baseline reaches 98.22% exact-word accuracy.",
   "sections": [
     {
       "title": "⟦zh⟧结果总览：新增随机性实验⟦en⟧Results at a Glance: New Randomized Experiment",
@@ -11,8 +11,8 @@
         {
           "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧25% 新鲜随机噪声下，整词准确率 98.22%⟦en⟧98.22% exact-word accuracy under fresh 25% random noise",
-          "why": "⟦zh⟧每次训练都重新抽取 100 个输入，并对十二个输出位分别独立翻转；模型从随机权重开始，不知道目标是乘法，也不读取现有乘法电路。⟦en⟧Every training step resamples 100 inputs and independently flips each of the twelve output bits. The model starts from random weights, does not know the target is multiplication and cannot read the existing multiplier circuit."
+          "label": "⟦zh⟧25% 新鲜噪声下：真值表恢复 100%，紧凑神经网络 98.22%⟦en⟧Under fresh 25% noise: 100% table recovery, 98.22% compact neural recovery",
+          "why": "⟦zh⟧每一步重新抽取 100 个输入并独立翻转十二个输出位。贝叶斯证据表在第 1,200 步首次完全恢复 4,096 个输入；共享 MLP 不保存逐输入表，达到 98.22%。两者都不知道目标是乘法，也不读取现有电路。⟦en⟧Every step resamples 100 inputs and independently flips the twelve output bits. The Bayesian evidence table first recovers all 4,096 inputs at step 1,200; the shared MLP stores no per-input table and reaches 98.22%. Neither knows the target is multiplication or reads the existing circuit."
         },
         {
           "kind": "card",
@@ -62,8 +62,8 @@
         {
           "kind": "verdict",
           "status": "good",
-          "label": "⟦zh⟧当前最好：共享 MLP，98.22% 整词准确率⟦en⟧Current best: shared MLP, 98.22% exact-word accuracy",
-          "why": "⟦zh⟧30,000 步后，四模型硬投票在全部 4,096 个无噪输入上达到 99.8494% 逐位准确率和 98.2178% 整词准确率。⟦en⟧After 30,000 steps, hard voting across four models reaches 99.8494% bit accuracy and 98.2178% exact-word accuracy on all 4,096 clean inputs."
+          "label": "⟦zh⟧最快恢复：贝叶斯证据表在第 1,200 步达到 100%⟦en⟧Fastest recovery: Bayesian evidence table reaches 100% at step 1,200",
+          "why": "⟦zh⟧这是一位一个后验的去噪教师，需要保存 4,096 × 12 个状态，因此不是紧凑网络。当前最好的紧凑神经结果仍是共享 MLP 的 98.2178% 整词准确率。⟦en⟧This denoising teacher maintains one posterior per bit and stores 4,096 × 12 states, so it is not a compact network. The best compact neural result remains the shared MLP at 98.2178% exact-word accuracy."
         },
         {
           "kind": "card",
@@ -95,34 +95,34 @@
             "⟦zh⟧方法⟦en⟧Method",
             "⟦zh⟧逐位准确率⟦en⟧Bit accuracy",
             "⟦zh⟧整词准确率⟦en⟧Exact-word accuracy",
-            "⟦zh⟧首次到 90%⟦en⟧First 90%",
-            "⟦zh⟧首次到 98%⟦en⟧First 98%",
-            "⟦zh⟧用时⟦en⟧Time"
+            "⟦zh⟧首次到 90% / 98% / 100%⟦en⟧First 90% / 98% / 100%",
+            "⟦zh⟧完整预算用时⟦en⟧Full-budget time"
           ],
           "rows": [
-            ["⟦zh⟧共享 MLP（当前最好）⟦en⟧Shared MLP (current best)", "99.8494%", "98.2178%", "7,500 步", "15,000 步", "233.2 s"],
-            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "99.0356%", "90.1855%", "28,000 步", "未达到", "280.3 s"]
+            ["⟦zh⟧贝叶斯证据表（教师，不紧凑）⟦en⟧Bayesian evidence table (teacher, not compact)", "100%", "100%", "500 / 700 / 1,200 步", "26.6 s"],
+            ["⟦zh⟧共享 MLP（紧凑神经当前最好）⟦en⟧Shared MLP (best compact neural model)", "99.8494%", "98.2178%", "7,500 / 15,000 / 未达到", "233.2 s"],
+            ["⟦zh⟧十二位独立 MLP⟦en⟧Twelve independent MLPs", "99.0356%", "90.1855%", "28,000 / 未达到 / 未达到", "280.3 s"]
           ],
-          "numeric": [false, true, true, false, false, true]
+          "numeric": [false, true, true, false, true]
         },
         {
           "kind": "figures",
           "items": [
             {
-              "src": "noisy-c-shared-mlp-p25.png",
-              "caption": "⟦zh⟧共享 MLP 在 25% 新鲜位翻转下的在线收敛。每个检查点都在完整干净定义域上隔离评估，仅用于绘图和事后分析，不参与梯度、提前停止或模型选择。⟦en⟧Online convergence of the shared MLP under fresh 25% bit flips. Every checkpoint is evaluated in isolation on the complete clean domain solely for plotting and post-hoc analysis; it does not affect gradients, early stopping or model selection."
+              "src": "noisy-c-method-comparison-p25.png",
+              "caption": "⟦zh⟧三种方法在完全相同的 25% 新鲜位翻转协议下的收敛。横轴采用对称对数尺度，以同时显示贝叶斯教师的早期收敛和神经网络的长程平台；全部干净指标只用于记录曲线，不参与训练。⟦en⟧Convergence of three methods under the identical fresh 25%-flip protocol. The symmetric-log horizontal scale shows both the Bayesian teacher’s early convergence and the neural networks’ long plateaus. All clean metrics are used only to record curves, never for training."
             }
           ]
         },
         {
           "kind": "note",
           "label": "⟦zh⟧怎么衡量不确定性⟦en⟧How uncertainty is measured",
-          "text": "⟦zh⟧同时训练四个随机初始化模型。位不确定性衡量四个模型在十二位输出上有多少分歧，0 表示完全一致，最大值为 12；数值不确定性把高位分歧赋予更大权重。共享 MLP 最终位不确定性为 0.1552，数值不确定性为 0.01031。⟦en⟧Four randomly initialized models are trained together. Bit uncertainty measures their disagreement across twelve output bits: zero means complete agreement and the maximum is twelve. Value uncertainty gives greater weight to disagreements in significant bits. The shared MLP ends at 0.1552 bit uncertainty and 0.01031 value uncertainty."
+          "text": "⟦zh⟧同时运行四个随机初始化成员。位不确定性衡量十二位输出上的分歧，0 表示完全一致，最大值为 12；数值不确定性让高位分歧权重更大。贝叶斯教师最终两项都为 0；共享 MLP 最终位不确定性为 0.1552，数值不确定性为 0.01031。⟦en⟧Four randomly initialized members run in parallel. Bit uncertainty measures disagreement across twelve output bits: zero means complete agreement and the maximum is twelve. Value uncertainty gives more weight to significant-bit disagreement. Both measures end at zero for the Bayesian teacher; the shared MLP ends at 0.1552 bit uncertainty and 0.01031 value uncertainty."
         },
         {
           "kind": "note",
           "label": "⟦zh⟧当前结论与下一步⟦en⟧Current conclusion and next step",
-          "text": "⟦zh⟧把十二位完全拆开训练明显更慢，说明不同输出位之间共享特征是有益的；但共享 MLP 仍在少数边界上停滞。下一轮优先测试通用的乘性交互与谱特征，不向模型写入乘法公式，然后再测试可微布尔门和进化搜索。⟦en⟧Training all twelve bits separately is clearly slower, showing that shared features across outputs are useful; the shared MLP still stalls on a few boundaries. The next priority is generic multiplicative-interaction and spectral features without encoding the multiplication formula, followed by differentiable Boolean gates and evolutionary search."
+          "text": "⟦zh⟧贝叶斯教师说明新鲜噪声可在很少时间内被完全消除，但逐输入存储没有发现紧凑规律；独立位网络又说明共享特征很重要。下一轮将把两点结合：先用后验记忆在线去噪，再把软后验回放给带乘性交互/谱特征的共享学生，最后蒸馏为布尔门图。⟦en⟧The Bayesian teacher shows that fresh noise can be removed completely and quickly, but per-input storage does not discover a compact rule. The independent-bit model shows that shared features matter. The next round combines both observations: online posterior denoising, soft-posterior replay into a shared student with multiplicative/spectral features, then distillation to a Boolean gate graph."
         }
       ]
     },
