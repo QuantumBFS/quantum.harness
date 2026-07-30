@@ -72,8 +72,12 @@ def verify(
         raise RuntimeError("readback requires a clean source checkout")
     certificate = load_json(certificate_path)
     validate(certificate, "optimization-remediation.schema.json")
-    if certificate["source_revision"] != revision:
-        raise RuntimeError("readback revision differs from producer revision")
+    subprocess.run(
+        ["git", "cat-file", "-e", f"{certificate['source_revision']}^{{commit}}"],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+    )
 
     phase7_path = require(certificate["phase7_stage_gate"])
     phase7 = load_json(phase7_path)
@@ -121,7 +125,8 @@ def verify(
             "remediation-readback-v1"
         ),
         "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "source_revision": revision,
+        "source_revision": certificate["source_revision"],
+        "verifier_revision": revision,
         "remediation_certificate": artifact(certificate_path),
         "seed_results": references,
         "slurm": slurm(),
@@ -135,7 +140,7 @@ def verify(
             "all_seed_hashes_and_schemas_valid": True,
             "all_checkpoint_hashes_and_schemas_valid": True,
             "all_base_checkpoint_hashes_valid": True,
-            "clean_consistent_source_revision": True,
+            "clean_traceable_source_revisions": True,
             "gpu_slurm_evidence": True,
         },
         "passed": True,

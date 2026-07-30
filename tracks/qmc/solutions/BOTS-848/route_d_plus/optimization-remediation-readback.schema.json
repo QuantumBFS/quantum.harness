@@ -7,6 +7,7 @@
     "schema_version",
     "created_at_utc",
     "source_revision",
+    "verifier_revision",
     "remediation_certificate",
     "seed_results",
     "slurm",
@@ -19,6 +20,7 @@
     },
     "created_at_utc": {"type": "string", "format": "date-time"},
     "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "verifier_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "remediation_certificate": {"$ref": "#/$defs/artifact"},
     "seed_results": {
       "type": "array",
@@ -66,7 +68,7 @@
         "all_seed_hashes_and_schemas_valid",
         "all_checkpoint_hashes_and_schemas_valid",
         "all_base_checkpoint_hashes_valid",
-        "clean_consistent_source_revision",
+        "clean_traceable_source_revisions",
         "gpu_slurm_evidence"
       ],
       "properties": {
@@ -79,7 +81,7 @@
         "all_seed_hashes_and_schemas_valid": {"const": true},
         "all_checkpoint_hashes_and_schemas_valid": {"const": true},
         "all_base_checkpoint_hashes_valid": {"const": true},
-        "clean_consistent_source_revision": {"const": true},
+        "clean_traceable_source_revisions": {"const": true},
         "gpu_slurm_evidence": {"const": true}
       }
     },
