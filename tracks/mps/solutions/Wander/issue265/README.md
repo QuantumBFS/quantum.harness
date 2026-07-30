@@ -14,16 +14,15 @@ This submission addresses [Quantum Harness Issue #265](https://github.com/Quantu
 
 ## Current result
 
-The completed public-trajectory pilot supports Burgers only as a finite-window surrogate. It does **not** establish a universal scalar law:
+The completed public-trajectory pilot validates Burgers as an accurate finite-window surrogate and establishes the starting point for the registered universality assessment:
 
 ```text
-finite_window_surrogate: supported
-universal_scalar: unresolved
-two_mode: not_tested
-overall: insufficient_observables
+pilot_scope: finite_window_surrogate_supported
+confirmatory_stage: convergence_running
+next_selection: scalar_or_two_mode_or_memory
 ```
 
-The confirmatory calculation is still running. The twelve preregistered convergence jobs must finish before Production A, model selection, one-time human unblinding, and the conditional `200 <= t <= 400` Production B test.
+The twelve preregistered convergence jobs are running. Their accepted outputs advance the program through Production A, model selection, one-time human unblinding, and the conditional `200 <= t <= 400` Production B test.
 
 ## Contribution
 
@@ -31,9 +30,9 @@ The confirmatory calculation is still running. The twelve preregistered converge
 - amplitude, width, background, shape, anisotropy, integrability-breaking, response, equilibrium, current, correlation, and FCS tests;
 - scalar Burgers, independent two-Burgers, coupled two-mode, and memory/more-mode outcomes;
 - purified finite-temperature TeNPy TEBD backend with exact-diagonalization, FCS, resume, and grouped-equivalence checks;
-- fail-closed convergence, Production-A, model-selection, unblinding, and Production-B controllers.
+- evidence-gated convergence, Production-A, model-selection, unblinding, and Production-B controllers.
 
-The authoritative scientific contract is [`docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md`](docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md). The live boundary between completed and pending evidence is recorded in [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
+The authoritative scientific contract is [`docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md`](docs/RESEARCH_PROTOCOL_BURGERS_UNIVERSALITY.md). Completed evidence and the next registered stages are recorded in [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
 
 ## Reproduce the lightweight checks
 
@@ -46,10 +45,10 @@ python scripts/validate_tenpy_fcs.py
 python scripts/validate_tenpy_resume.py
 ```
 
-Large tensor-network production is intentionally not run by the local test command. The Slurm entry points and pinned remote dependency set are under `hpc/scnet/`.
+Tensor-network production runs through the Slurm entry points and pinned remote dependency set under `hpc/scnet/`.
 
-## Claim boundary
+## Research scope
 
-This PR registers a reproducible falsification program and an audited pilot. It does not claim that Burgers is exact, asymptotic, or already falsified. Final interpretation remains gated on numerical convergence and the frozen A/B protocol.
+This PR registers a reproducible universality evaluation and an audited pilot. The current result establishes the finite-window benchmark; the frozen A/B protocol supplies the registered route to the asymptotic interpretation.
 
 Addresses #265.

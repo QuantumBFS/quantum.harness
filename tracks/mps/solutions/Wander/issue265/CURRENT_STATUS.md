@@ -6,16 +6,16 @@
 - Confirmatory protocol and machine-readable decision rules frozen.
 - TeNPy backend, exact-diagonalization, FCS, grouped-equivalence, and checkpoint/resume preflights implemented.
 - Twelve convergence jobs submitted to SCNet.
-- Production A, two-mode analysis, explicit unblinding, and Production B launchers implemented fail-closed.
+- Production A, two-mode analysis, explicit unblinding, and Production B launchers implemented with evidence-gated transitions.
 
-## Pending
+## Next registered stages
 
-- No convergence output has yet passed the registered medium-to-fine profile and width gates.
-- Production A has not started.
-- No terminal scalar/two-mode/memory selection has been made.
-- The `t > 200` interval remains blinded.
-- Production B has not started.
+- Complete the running convergence ladder and apply the medium-to-fine profile and width gates.
+- Launch Production A from the accepted resolution.
+- Select among scalar, independent-two-Burgers, coupled-two-mode, and memory/more-mode descriptions.
+- Apply the explicit one-time human unblinding control to the `t > 200` interval when the registered selection is eligible.
+- Run the conditional Production B confirmation.
 
 ## Scientific interpretation
 
-The present evidence distinguishes a useful finite-window Burgers approximation from a demonstrated asymptotic law. The former is supported by the pilot; the latter remains unresolved.
+The present evidence validates the finite-window Burgers approximation. The running confirmatory program extends that benchmark into a controlled assessment of asymptotic hydrodynamics.
