@@ -1,11 +1,22 @@
 ---
 name: using-xdiag
-description: Use when choosing or running XDiag.jl for exact diagonalization, symmetry-resolved sectors, Lanczos/Krylov calculations, or XDiag setup failures.
+description: Use when choosing or running XDiag.jl for exact diagonalization, symmetry-resolved sectors, Lanczos/LOBPCG/Krylov calculations, or XDiag setup failures.
 ---
 
 # XDiag
 
-Use XDiag as the harness's canonical exact-diagonalization stack when the target can be expressed through its Hilbert-space blocks and operators. Method judgment — which route (dense / Lanczos / dynamics / finite-T), which sectors, and the work counts — is owned by `/method-ed`; this skill owns expressing those decisions in XDiag and the package-level values.
+Use XDiag as the harness's canonical exact-diagonalization stack when the target can be expressed through its Hilbert-space blocks and operators. Method judgment — which route (dense / Lanczos / LOBPCG / dynamics / finite-T), which sectors, and the work counts — is owned by `/method-ed`; this skill owns expressing those decisions in XDiag and the package-level values.
+
+## XDiag 0.5.0 update
+
+Compared with v0.4.1, XDiag v0.5.0 adds:
+
+- arbitrary composite operators and a full non-commutative operator algebra, including multiplication and Hermitian conjugation with `hc`;
+- `Fermion` blocks for spinless fermions and `Boson` blocks for truncated bosons; `Boson` is also available as `Spin` for general spin-S systems;
+- the LOBPCG block eigensolver through `eigvals`, `eigs`, and `eigs_lobpcg`; HPhi already offered LOBPCG, and XDiag now does as well;
+- reduced memory use throughout all block types, allowing larger systems within the same memory budget.
+
+For several low-lying states or degeneracies, prefer LOBPCG over Lanczos when its larger block-vector memory footprint fits. v0.5.0 also changes complex `Hop`/`Exchange` coupling semantics and integer-encodes `ProductState`; consult the upstream release notes when migrating v0.4 code.
 
 ## Sources
 
@@ -26,10 +37,11 @@ Use XDiag as the harness's canonical exact-diagonalization stack when the target
 
 How to express each method decision in XDiag, and what only XDiag can answer.
 
-- **Block**: `Spinhalf` / `tJ` / `Electron`; conserved charges as `nup` (and `ndn` — required for `tJ`); a spatial sector as a `Representation` (a `PermutationGroup` + one character per element). Only 1D irreps are supported. `dim(block)` is the D that all estimates use.
+- **Block and U(1) sectors**: XDiag supports particle-number or magnetization-conserving U(1) sectors directly in its block constructors: `Spinhalf(N, nup)`, `Fermion(N, number)`, `Boson(N, d, number)`, and `Electron` / `tJ` with fixed `(nup, ndn)`. The spinful blocks therefore resolve the two separately conserved species numbers (U(1) × U(1)) when the Hamiltonian preserves both. These charge sectors can be combined with a permutation `Representation` in the same block. Available block types are `Spinhalf` / `tJ` / `Electron` / `Fermion` / `Boson` (`Spin` alias); `Boson(nsites, d, ...)` uses local occupations `0:(d-1)`.
+- **Permutation sectors**: a spatial sector is specified by an XDiag `Representation` (a `PermutationGroup` + one scalar character per group element). Permutation groups may mathematically have higher-dimensional irreps, but XDiag's symmetry-adapted blocks currently accept only its 1D `Representation` objects. This 1D restriction applies to permutation representations, not to the U(1) charge sectors above. `dim(block)` is the D that all estimates use.
 - **Symmetries**: build the `PermutationGroup` explicitly (group axioms are validated); characters must satisfy the homomorphism rule. Julia sites count from 1 (C++/TOML from 0). A nonzero-momentum irrep forces complex states. Measuring a non-invariant operator (single bond) on a symmetric state requires `symmetrize(op, group)` first.
 - **Constrained bases**: XDiag has no constrained-basis block. A PXP-type constraint means the full `Spinhalf(N)` space with projector-dressed operators (`Op("Matrix", …)` built via `kron`) — dimension consequence per the method card; if that overturns the tool choice, go back to step 2 there.
-- **Solver calls**: `eigval0` / `eig0` for the ground state; `eigs_lanczos(ops, block; neigvals, precision, max_iterations, deflation_tol)` for low-lying towers (returns Ritz values, eigenvectors, `criterion`); dense `matrix(ops, block)` + `LinearAlgebra.eigen` for full spectra of small blocks; `csr_matrix` only when memory is ample and the matrix is reused many times.
+- **Solver calls**: `eigval0` / `eig0` for the ground state; `eigs_lanczos(ops, block; neigvals, precision, max_iterations, deflation_tol)` for a memory-lean low-lying route; `eigvals` / `eigs` or `eigs_lobpcg(ops, block; neigs, guard, tol, max_iterations)` for several lowest states and reliable degeneracy resolution; dense `matrix(ops, block)` + `LinearAlgebra.eigen` for full spectra of small blocks; `csr_matrix` only when memory is ample and the matrix is reused many times.
 - **Dynamics**: `time_evolve` (real) / `imaginary_time_evolve` (set `shift = e0` for stability); `algorithm = "lanczos"` (memory-lean, runs twice) vs `"expokit"` (faster, more memory).
 - **Diagnostics before diagonalizing** (the method card's mid-run checklist, in XDiag terms): print `dim(block)`, the sector labels, the `OpSum` term count, and `isreal(ops)`; `set_verbosity(1–2)` for Lanczos progress on long runs. Stop on dimension mismatch or memory far above the 8·D²/8·D estimate.
 
@@ -43,7 +55,10 @@ Package-level values only; what each route needs is the method card's call.
 | `max_iterations` | Lanczos iteration cap | 1000 default; raising it past ~200 without convergence usually signals a problem, not patience |
 | `neigvals` | how many low-lying eigenpairs `eigs_lanczos` returns | the states the figure needs; more states → more iterations and stricter deflation |
 | `deflation_tol` | ghost/duplicate suppression in `eigs_lanczos` | `1e-7` default; tighten when repeated eigenvalues look spurious |
-| `random_seed` | Lanczos start vector | fix it in the run plan for reproducibility |
+| `neigs` | number of lowest eigenpairs requested from LOBPCG | the complete low-energy multiplet the figure needs |
+| `guard` | extra LOBPCG vectors beyond `neigs` | `2` default; increase when a degeneracy crosses the requested cutoff |
+| `tol` | LOBPCG residual-norm target | `1e-10` default |
+| `random_seed` | Lanczos start vector or LOBPCG starting block | fix it in the run plan for reproducibility |
 | `backend` | basis encoding: `"auto"`, `"32bit"`, `"64bit"`, `"2sublattice"`…`"5sublattice"` | `"auto"`; sublattice coders are what make N ≳ 40 spin-½ feasible |
 | Threads | OpenMP shared-memory matvec | record `JULIA_NUM_THREADS` / OpenMP settings in manifests |
 
@@ -72,7 +87,8 @@ ops["J"] = 1.0
 # 3. Diagnostics, then the route's solver.
 @show dim(block), isreal(ops)
 e0, psi0 = eig0(ops, block)                          # ground state
-# res = eigs_lanczos(ops, block; neigvals = 4)       # low-lying tower
+# res = eigs_lanczos(ops, block; neigvals = 4)       # memory-lean low-lying route
+# res = eigs_lobpcg(ops, block; neigs = 4)           # resolves low-state degeneracies
 # psi_t = time_evolve(ops, psi0, t)                  # Krylov dynamics
 
 # 4. Measure; symmetrize non-invariant operators on symmetric blocks.
