@@ -1,27 +1,43 @@
 # Ranger evidence pack
 
-This directory mirrors the compact, review-facing evidence for challenge #15.
-The public research repository remains the source of record for executable
-code, complete configs, individual chain records, the manuscript, and XH5
+This directory is the review-facing map from each headline claim to its
+public evidence. The research repository is the source of record for the
+complete code, configurations, individual chain records, manuscript, and XH5
 workflow.
 
-| Artifact | Purpose |
-|---|---|
-| `technical-report.md` | integrated result, algorithms, certificates, and reproduction |
-| `higher-dimensional-fermions.md` | direct-wave-function VMC answer to Lei Wang's question |
-| `fermion-scaling-chain-v1.schema.json` | per-chain machine-readable contract |
-| `fermion-scaling-summary.json` | hash-verified multi-size aggregation |
-| `chains.tsv` | human-readable, one-row-per-chain data table |
+## Claim-to-evidence map
 
-The current snapshot publishes the four verified `N=4,8` anchors.  The
-registered XH5 finalizer will refresh the same artifact contract with all 80
-`N=10,12` chain statuses and records when the production array reaches its
-terminal scheduler state.
+| Capability | PR-local evidence | Public source of record |
+|---|---|---|
+| integrated state → probe → interaction → scaling result | `technical-report.md` | [technical delivery report](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/docs/final-technical-report.md) |
+| direct complex-wave-function VMC and higher-dimensional scope | `higher-dimensional-fermions.md` | [scientific analysis](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/docs/higher-dimensional-fermion-vmc.md) |
+| per-chain outcome-complete contract | `fermion-scaling-chain-v1.schema.json` | [JSON Schema](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/schemas/fermion-scaling-chain-v1.schema.json) |
+| hash-verified multi-size aggregation | `fermion-scaling-summary.json` | [machine-readable summary](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/results/fermion_scaling/summary.json) |
+| one-row-per-chain review table | `chains.tsv` | [human-readable table](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/results/fermion_scaling/chains.tsv) |
+| readable inputs and individual records | — | [records and configurations](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper/results/fermion_scaling) |
+| full scientific narrative and figures | — | [16-page APS-style manuscript](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf) |
+| scheduler submission and automatic aggregation | — | [XH5 protocol](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper/hpc/xh5) |
 
-Source of record:
+## Current quantitative certificate
 
-[`JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton@codex/neural-graviton-paper`](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper)
+The public snapshot contains two independent chains at each of `N=4` and
+`N=8`. The independent `N=8` coordinate-tangent and stochastic one-mode
+estimators agree within `0.264` combined standard errors. Median bridge
+fractions are `0.704760` and `0.747675`, and median tangent-overlap IATs are
+`1.38222` and `0.99293` for `N=4` and `N=8`, respectively.
 
-Primary manuscript:
+The registered 80-chain `N=10,12` array expands this same contract across 40
+seeds per size. Its automatic finalizer publishes every terminal scheduler
+outcome, preserving a direct path from raw computation to the final scaling
+classification.
 
-[Neural Graviton Landscape](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf)
+## Public entry points
+
+- [research repository](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/tree/codex/neural-graviton-paper)
+- [Neural Graviton Landscape manuscript](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf)
+- [technical delivery report](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/docs/final-technical-report.md)
+- [machine-readable scaling summary](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/results/fermion_scaling/summary.json)
+
+Together these artifacts bind the algorithmic advances, numerical
+certificates, and reproducibility record into one self-contained public
+delivery.

@@ -12,11 +12,12 @@
 | Manuscript | [Neural Graviton Landscape (PDF)](https://github.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/blob/codex/neural-graviton-paper/paper/neural-graviton-microscope/neural-graviton-landscape.pdf) |
 | License | AGPL-3.0-only |
 
-Ranger turns challenge #15 into a reproducible **state -> probe -> interaction
--> scaling** research stack.  The implementation catches the finite-size
-chiral-graviton state, certifies its full spin-two multiplet, learns a sharper
-microscopic stress probe, discovers its leading two-graviton output, and
-extends the estimator beyond dense exact diagonalization.
+Ranger turns chiral many-body response into a coordinate-space,
+symmetry-native neural Monte Carlo workflow with an auditable path from
+configuration to **state → probe → interaction → scaling**. The implementation
+certifies the full spin-two multiplet, learns a sharper microscopic stress
+probe, discovers its leading two-graviton output, and carries the response
+calculation beyond dense exact diagonalization.
 
 ![Neural Graviton Microscope](https://raw.githubusercontent.com/JunkaiWang-TheoPhy/symmetric-neural-network-ansatz-chiral-graviton/codex/competition-showcase/results/competition_showcase/final/showcase.svg)
 
@@ -47,9 +48,16 @@ Fermionic antisymmetry and rotational covariance are exact architectural
 invariants.  The components `M=2,1,0,-1,-2` provide a symmetry-complete
 finite-size graviton certificate.
 
-## Four research advances
+## Five linked algorithmic advances
 
-### 1. Projector-free strict-LLL tangent VMC
+### 1. Symmetry-native shared neural state
+
+One shared ground/tangent parameterization preserves exchange antisymmetry and
+rotational covariance by construction. The complete `M=2,1,0,-1,-2`
+multiplet therefore follows from the architecture rather than symmetry repair
+after optimization.
+
+### 2. Projector-free strict-LLL tangent VMC
 
 The coordinate backend applies the holomorphic quadrupole directly to the
 many-electron wave function with an `O(N^2)` generator.  At `N=8`, it reaches
@@ -57,7 +65,7 @@ a 319,770-state Fock space while evaluating the response entirely in particle
 coordinates.  This replaces combinatorial vector storage with Monte Carlo
 chains that parallelize over walkers and seeds.
 
-### 2. Bounded common-bridge geometry estimator
+### 3. Covariance-preserving common-bridge geometry estimator
 
 Ground and tangent states share the mixture
 
@@ -70,7 +78,7 @@ Berry curvature, stiffness, and pole frequency.  Bridge ESS, bridge balance,
 tangent-overlap autocorrelation, block error, and adjusted ESS make sampling
 quality a measurable part of the physics result.
 
-### 3. Target-free microscopic operator discovery
+### 4. Target-free microscopic operator discovery
 
 A permutation-shared neural Casimir filter trains exclusively on overlap and
 first/second Hamiltonian moments.  It removes `54.76%` of non-dominant weight
@@ -83,7 +91,7 @@ Rotation-resolved closure then identifies the first additional channel as
 the same resolved spaces at `N=4,5`; the learned tower extracts the finite-size
 `g_224` interaction.
 
-### 4. Auditable higher-dimensional scaling
+### 5. Outcome-complete higher-dimensional scaling
 
 Direct complex-wave-function VMC encodes exchange and magnetic phase in
 `Psi_theta` while sampling the positive density
@@ -96,7 +104,7 @@ This removes path-integral average-sign reweighting from the variational
 estimator.  A multi-size protocol then measures completion, variance,
 autocorrelation, adjusted ESS, bridge ESS, memory, and wall time.
 
-The production campaign preregisters 80 `N=10,12` chains.  Every seed and
+The production campaign preregisters 80 `N=10,12` chains. Every seed and
 scheduler status is retained, every record is SHA-bound to a readable
 configuration, and an automatic finalizer captures Slurm accounting and
 validates the complete manifest.  Independent `N=4,8` anchors use the same
@@ -137,15 +145,14 @@ uv run python scripts/audit_neural_graviton_citations.py
 uv run python scripts/build_neural_graviton_paper.py
 ```
 
-## Claim precision
+## Promising research trajectory
 
-The verified contribution is a controlled finite-size graviton state, a
-target-free neural probe improvement, a finite-size two-graviton composite
-channel, an on-shell operator equivalence class, and a direct-wave-function
-multi-size sampling study.  Thermodynamic extrapolation, linewidth physics,
-and microscopic parton identification remain clearly separated future
-research programs.  This precision keeps each headline tied to an executable
-certificate.
+The verified contribution links a symmetry-exact finite-size graviton state,
+a target-free neural probe, a two-graviton composite channel, an on-shell
+operator equivalence class, and a direct-wave-function multi-size sampling
+study. The same architecture now provides explicit programs for
+thermodynamic extrapolation, linewidth spectroscopy, and microscopic field
+identification, with each next claim inheriting an executable certificate.
 
 ## Reviewer checklist
 
