@@ -133,3 +133,64 @@ s_i s_j = -sign(H_ij).
 
 这些任务不与协作者的 tensor-square 相图、oddcycle seeds/joint-pair 或 exterior cones
 重叠。
+
+## 第二轮传统方法排除
+
+### 固定单粒子 basis 分块：已排除
+
+对四模式锚点的两个 `O_a`，求解共同 commutant
+
+```text
+X O_a = O_a X,  a=0,1.
+```
+
+对应线性系统 rank `15`、nullity `1`，最小非零奇异值 `0.5910...`；commutant 只有
+标量。两个 skew generators 的 Lie closure 维数为 `6=dim so(4)`。因此不存在固定
+orbital basis 把两个 atoms 同时分成互不耦合的二模式 rotation blocks。
+
+### generalized JW / free fermions in disguise：该充分可解类已排除
+
+四模式 Hamiltonian 的完整 JW Pauli 展开有 39 个非 identity terms，frustration graph
+有 288 条边。它含 induced claw：
+
+```text
+center: IIZZ
+leaves: IXIX, IYIY, XIXI.
+```
+
+三个 leaves 两两对易，却都与 center 反对易。因而 frustration graph 不是 claw-free，
+也不可能是 line graph；Elman–Chapman–Flammia 的 `(even-hole, claw)-free`
+“free fermions behind the disguise”求解框架不适用。
+
+这比普通 JW 失败更强，但仍不是对所有可能非局域 duality 的复杂性证明。
+
+### matchgate/fermionic-linear-optics：直接 circuit 定理不适用
+
+每个 `Gamma(O_a)` 单独是 Gaussian/matchgate unitary；但 (1) 是这些 unitaries 的
+**算符和**，而不是它们的 circuit product 或 quadratic generator。非零四体 coefficient
+直接证明完整 `H` 不是 quadratic Hamiltonian。现有 matchgate classical-simulation
+定理覆盖 Gaussian circuit composition，不能由此直接模拟 `exp(-beta H)`。
+
+这是一项基于模型结构和已知定理适用范围的判断，不排除另一个专门的 group-algebra
+算法。
+
+## 初步文献边界
+
+- Wei 的 contraction-semigroup 框架已经覆盖正性机制，所以不主张新的矩阵/QMC 定理；
+- 定向检索尚未找到“重叠局域 plaquettes 上 Gaussian-unitary cosine terms 的和”这一
+  具体多体 Hamiltonian 及其有限温相图；
+- matchgate 文献研究 Gaussian circuits/states，不等同于这里的 interacting
+  sum-of-unitaries Hamiltonian；
+- 目前的文献空白仍是初步结论，必须继续查 fermionic Floquet/circuit Hamiltonians、
+  group-algebra models 和 Majorana/Pfaffian QMC。
+
+主要锚点：
+
+- Zhong-Chao Wei, *Semigroup approach to the sign problem in quantum Monte Carlo
+  simulations*, <https://arxiv.org/abs/1712.09412>
+- Elman, Chapman, Flammia, *Free fermions behind the disguise*,
+  <https://arxiv.org/abs/2012.07857>
+- Jozsa and Miyake, *Matchgates and classical simulation of quantum circuits*,
+  <https://arxiv.org/abs/0804.4050>
+- Brod, *Efficient classical simulation of matchgate circuits with generalized inputs
+  and measurements*, <https://arxiv.org/abs/1602.03539>

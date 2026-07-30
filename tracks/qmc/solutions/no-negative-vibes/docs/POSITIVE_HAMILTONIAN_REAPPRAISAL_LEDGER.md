@@ -25,7 +25,7 @@
 | R3 | fixed weighted `l_infinity` contraction | `hamiltonianization-failed` | fail/fail/partial/fail/open/open | **原类停止** | adjoint word 深度 2 权重 `-3.313698...` |
 | R4 | reciprocal-parabolic `[[H,Q],[0,-H^T]]` | `hamiltonianization-failed` | fail/fail/partial/fail/open/open | **原类停止** | adjoint word 精确权 `4-s^2`，`s=3` 时 `-5` |
 | R5 | Majorana protected parity | `parked-ownership-risk` | partial/open/partial/open/open/open | 只保留既有证据，先不扩展 | 与 PR #3 的 Majorana/oddcycle 工作边界未同步前不运行 |
-| R3b | local orthogonal-contraction plaquettes | `active-survivor` | pass/pass/pass/partial/open/open | **本分支主攻** | 排除非对角局域 basis、Majorana/Pfaffian 与 group-algebra solver |
+| R3b | local orthogonal-contraction plaquettes | `active-survivor` | pass/pass/pass/partial/open/partial | **本分支主攻** | 已排除共同 orbital blocks 与 claw-free generalized JW；Majorana/Pfaffian、group algebra 和相图待查 |
 | C1 | tensor-square `m>=3` multi-channel | `collaborator-owned` | pass/partial/pass/partial/pass/open | **只读** | ZiboJin phase-diagram 分支负责 ED/DQMC/低温相图 |
 | C2 | symmetric oddcycle / seeds `117,132,147` | `collaborator-owned` | partial/open/partial/open/open/open | **只读** | PR #3 负责 metric、transfer、joint pair 与 Hamiltonian portfolio |
 | C3 | typed exterior/Pfaffian cones | `collaborator-overlap/reference` | partial/open/partial/open/open/open | 不重搜 exact cards | PR #3 与 PR #8 已覆盖 exterior 搜索和 typed pilot |
