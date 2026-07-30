@@ -28,7 +28,7 @@ are computationally plausible.
 
 We study a ferromagnetic transverse-field Ising chain,
 
-$$
+
 H = - \sum_{i<j} J_L (j-i,\sigma) Z_i Z_j -\Gamma\sum_i X_i .
 $$
 
