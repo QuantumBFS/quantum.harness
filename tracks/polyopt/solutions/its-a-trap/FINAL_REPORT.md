@@ -125,29 +125,44 @@ that seam (`rg_selection/src/local_cone_adapter.jl`).
 
 ## Fine-variable elimination: operational replacement prototype (revision)
 
-A four-hour pre-registered test of the Sec. III-D-2 replacement direction
+A four-hour pre-registered test in the Sec. III-D-2 replacement direction
 (x_fine → x_retained ⊕ x_coarse), run on the deadline afternoon. Arms on
 the stripped chassis (rdm=false, pso=0, lso=false): A = fine-rich reach
 comparator (r=N/2); B = truncated core (r=r_of(N)); C6 = B + depth-6
-ω-tower; D/E = C6 + moment bundles. All numbers from
+ω-tower; D/E = C6 + moment bundles. Mandatory grid outcome: **6/8 rows
+OPTIMAL + 2/8 resource-frontier (D@14, D@20 at the 18 GiB local
+frontier)**. All numbers from
 `rg_selection/results/replacement_{build,solve,summary}.csv` (hashes in
 `SHA256SUMS`); full narrative in `rg_selection/results/SUMMARY.md`.
 
+The operational coarse-replacement prototype exhibits a clear separation
+between structural and realized solver cost. The PSD-scalar ratio of the
+depth-6 tower relative to the fine-rich reach comparator decreases from
+1.447 at N=14 to 0.848, 0.610 and 0.530 at N=20, 26 and 30, establishing
+a structural crossover between N=14 and N=20. At the solved sizes,
+however, the tower remained substantially more expensive in wall time and
+peak RSS. The truncated reach gap was resolved, whereas the depth-6 tower
+recovered less than ~0.56% (N=14) and less than ~0.14% (N=20) of the
+resolved reach gap — the numerator lies inside the comparison band while
+the denominator is resolved (d = 4.679e-05 and 1.566e-04 per site).
+Full-pool and deeper-tower solves reached the 18 GiB local-memory
+frontier, so their accuracy contributions remain unavailable. Coarse
+graining therefore reduced structural model size at moderate N, but the
+current interior-point formulation did not yet convert that reduction
+into lower realized cost or resolved accuracy recovery.
+
 | finding | numbers |
 |---|---|
-| structural-cost crossover (pre-registered) confirmed | PSD-scalar ratio C6/A: 1.447 (N=14) → 0.848 (N=20) → 0.610 (N=26) → 0.530 (N=30); nnz ratio 0.35 at N=30 |
-| realized solver cost still favors A at tested sizes | wall ratio C6/A ≈ 10.7 / 9.0; RSS ratio 11.8 / 5.7 (N=14 / 20), both decreasing with N |
-| reach gap resolves; depth-6 tower does not close it | d = L_A − L_B = +4.679e-05 (N=14), +1.566e-04 (N=20), both resolved-positive; eta_CG(6) = +0.0013 / +0.0003 (measured negative — no resolved recovery) |
-| bundle marginals unmeasurable under the 18 GiB local law | D, E OOM at both sizes; C10@N=20 admission PASS (1792 link rows ≤ 1.7e-15) but solve OOM; frontier rows retained |
+| structural crossover (pre-registered) confirmed | PSD-scalar ratio C6/A: 1.447 (N=14) → 0.848 (N=20) → 0.610 (N=26) → 0.530 (N=30); nnz ratio 0.35 at N=30 |
+| realized solver cost still favors A at the solved sizes | wall ratio C6/A ≈ 10.7 / 9.0; RSS ratio 11.8 / 5.7 (N=14 / 20), both decreasing with N |
+| reach gap resolved; tower recovery UNRESOLVED (one-sided bound, beside its cost ratios) | d = +4.679e-05 / +1.566e-04 (resolved-positive); eta_CG(6) < 0.557% / < 0.139% of d (central values +0.13% / +0.03%, inside ε_cmp), at wall/RSS ratios 10.7x/11.8x and 9.0x/5.7x; bound tightens with N, consistent with window geometry (eliminated zone grows to N/2; tower window stays ~6 sites) |
+| PSD-scalar count is an unreliable cost proxy when block-dimension distributions differ | at N=20: structural ratio 0.85 vs wall ~9x and RSS ~5.7x — the tower concentrates scalars in dimension-128 blocks, for which the interior-point method pays super-linearly |
+| bundle / deeper-tower contributions: resource-frontier, not numerical failure | D, E at the 18 GiB frontier at both sizes; C10@N=20 deeper-tower validity passed (1792 link rows, residual ≤ 1.7e-15) and its interior-point solve crossed the local 18 GiB frontier; frontier rows retained with status |
 | validity | every accepted row ≤ E_Bethe + 5e-7; L_B ≤ L_A and L_B ≤ L_C6 within ε_cmp at both sizes |
 
-The supported statement is deliberately narrow: the structural size of the
-coarse representation crosses below the fine-rich reach basis between
-N=14 and N=20 and keeps improving, but at depth 6 it carries essentially
-no additional spectral information on this chassis, and its dual blocks
-are expensive in realized solver terms at N ≤ 20. No cost-at-matched-
-accuracy claim is made. This is an operational prototype, not a completed
-coarse replacement.
+No cost-at-matched-accuracy claim is made. This is an operational
+replacement prototype, not a completed coarse replacement and not an
+implementation of Sec. III-D-2.
 
 ## Reproducibility
 
