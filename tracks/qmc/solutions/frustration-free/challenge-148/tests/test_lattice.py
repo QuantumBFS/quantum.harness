@@ -224,4 +224,3 @@ def test_read_graph_json_rejects_bool_as_int_bond_elements(tmp_path: Path):
     )
     with pytest.raises(ValueError):
         read_graph_json(path)
-

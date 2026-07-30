@@ -301,4 +301,3 @@ def read_graph_json(path: Path) -> PeriodicGraph:
     except (TypeError, ValueError) as exc:
         raise ValueError("graph payload is not a valid periodic graph") from exc
     return graph
-

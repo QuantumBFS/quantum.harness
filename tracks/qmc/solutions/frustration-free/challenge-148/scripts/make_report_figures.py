@@ -18,6 +18,14 @@ from challenge148.fss import (
 plt.rcParams["svg.hashsalt"] = "challenge148-report-v1"
 
 
+def _normalize_svg(path: Path) -> None:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    path.write_text(
+        "\n".join(line.rstrip() for line in lines) + "\n",
+        encoding="utf-8",
+    )
+
+
 def _summaries(points: list[dict[str, object]]) -> dict[tuple[str, int, int, float], float]:
     result: dict[tuple[str, int, int, float], float] = {}
     for point in points:
@@ -102,6 +110,7 @@ def _pilot_figure(
     )
     figure.savefig(output, format="svg", metadata={"Date": None})
     plt.close(figure)
+    _normalize_svg(output)
     return (
         str(base_plan["plan_sha256"]),
         str(extension_plan["plan_sha256"]),
@@ -165,6 +174,7 @@ def _workflow_figure(output: Path) -> None:
         output, format="svg", bbox_inches="tight", metadata={"Date": None}
     )
     plt.close(figure)
+    _normalize_svg(output)
 
 
 def main() -> int:
