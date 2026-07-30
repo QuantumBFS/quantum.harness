@@ -5,8 +5,8 @@ hunter”](https://github.com/QuantumBFS/quantum.harness/issues/121).
 
 ## Executive verdict
 
-**Exact mathematical certificate: complete.  Novelty audit and public
-submission: in progress.**
+**Exact mathematical and fixed-\(J_1,J_2\) Majorana/Wei certificates:
+complete.  Public submission: in progress.**
 
 The final four-letter oddcycle candidate now has:
 
@@ -14,6 +14,9 @@ The final four-letter oddcycle candidate now has:
 - a solver-independent exact rational certificate;
 - an exact dual separation from every common real symmetric
   split-contraction metric of the tested form;
+- an exact Nambu-space exclusion of Wei's fixed-\(J_1,J_2\) contraction
+  sufficient class after any fixed complex orthogonal Majorana basis
+  change;
 - a positive-field Hermitian interacting five-mode realization;
 - a frozen empirical protocol and one-command exact replay;
 - an independently promoted robust frontier alphabet with the same three
@@ -21,16 +24,19 @@ The final four-letter oddcycle candidate now has:
 - a paper draft centered on the final, rather than the overturned,
   candidate.
 
-The remaining blockers are publication and novelty-boundary work, not more
-finite-depth scanning.  The broadest safe claim is:
+The remaining blockers are publication review and clean-commit archival
+replay, not more finite-depth scanning.  The broadest safe claim is:
 
 > a path-complete Lorentz certificate yields an arbitrary-word
 > determinant-QMC corollary, and its four-state quadratic realization is
 > strictly more expressive than a one-state *quadratic* metric for this
-> exact alphabet.
+> exact alphabet; the same alphabet also lies outside Wei's fixed-\(J_1,J_2\)
+> Majorana contraction sufficient class after any fixed complex orthogonal
+> basis change.
 
-We do not yet claim inequivalence to every complex Majorana,
-fermion-bag, loop, or hidden-basis formulation.
+We do not claim inequivalence to unrelated fermion-bag, loop, worldline,
+or future sign-free formulations, nor a classification of all sign-free
+QMC.
 
 ## Final candidate
 
@@ -75,19 +81,20 @@ isolated floating-point accident.
 |---|---|---|
 | Correct determinant oracle and product order | **complete** | `oracle/weights.py`, baseline exact fixtures, and oracle tests |
 | Positive and negative controls for split orthogonal / semigroup theorems | **complete** | baseline, classical-group, AZ, and semigroup protocols |
-| State-of-the-art map and reduction checklist | **partial, submission-level update in progress** | the project map is extensive, but the final pair still needs the focused 10-Majorana/Wei equivalence audit recorded below |
+| State-of-the-art map and reduction checklist | **complete for the claimed boundary** | primary-source Wei/MRP/MTR audit plus the exact Nambu pullback are recorded in `ODDCYCLE_MAJORANA_WEI_AUDIT.md`; unrelated future mechanisms remain outside the claim |
 | Precisely defined structured generator set | **complete** | final alphabet above and `ODDCYCLE_PATH_METRIC_CERTIFICATE.md` |
 | Large tests over dimensions/depths with protocol | **complete for these candidates** | frozen `protocols/oddcycle-path-metric-v1`; 1,398,100 exhaustive words through depth 10 plus 100,000 seeded histories through depth 40; historical production exhausted 22,369,620 words through depth 12; the completed frontier covered 12,325 cells and ranked all 6,266 survivors without rerunning them |
-| Exact replay of any delicate numerical claim | **complete** | rational path metrics, exact Gordan--Stiemke dual, exact physical transfer, and independent robust-candidate replay; neither theorem relies on floating survival |
+| Exact replay of any delicate numerical claim | **complete** | rational path metrics, exact Gordan--Stiemke dual, exact physical transfer, exact commutant/compatibility replay, and independent robust-candidate replay; no theorem relies on floating survival |
 | Human-readable proof for arbitrary depth | **complete** | finite-state Lorentz--Stein theorem in `ODDCYCLE_PATH_METRIC_CERTIFICATE.md` and `ODDCYCLE_PAPER_DRAFT.md` |
-| Novelty beyond a common quadratic split/contraction metric | **complete, narrowly stated** | exact dual certificate proves no common real symmetric metric satisfies all four forward/transpose gaps |
-| Broad equivalence audit against all known sign-free mechanisms | **partial** | the common quadratic metric is excluded exactly and several elementary reductions are documented; full complex Majorana/MTR, fixed complex-basis Wei, and fermion-bag/loop equivalence remain |
+| Novelty beyond a common quadratic split/contraction metric | **complete** | exact dual certificate proves no common real symmetric metric satisfies all four forward/transpose gaps |
+| Fixed-\(J_1,J_2\) Majorana/Wei sufficient-class audit | **complete** | exact Nambu reduction gives commutant rank 24, zero diagonal boundary blocks, scalar off-diagonal block, and the incompatible \(+1\) versus \(-1\) CAR sign after arbitrary fixed complex orthogonal basis changes |
+| Broad equivalence audit against all sign-free mechanisms | **bounded, not claimed** | the fixed Wei/MRP/MTR sufficient classes are excluded; unrelated fermion-bag, loop, worldline, and future mechanisms are explicitly outside the theorem |
 | Physical determinantal-QMC weight | **complete at cluster level** | exterior Fock trace is `det(I+W)` for the same alphabet |
 | Positive auxiliary-field prefactors | **complete** | exact coefficients `(37,1,1,1,1)/41` |
 | Hermitian interacting model | **complete at cluster level** | `T/41=exp(-H)`; exact SPD gate; Gaussian identity fails in 58 entries |
 | Connected local lattice / small-\(\Delta\tau\) family | **not claimed** | current result is a five-mode transfer-matrix cluster, generally nonlocal and up to five-body |
 | Grand-canonical versus fixed filling | **complete limitation** | theorem is for the full Fock trace; fixed-particle positivity is not claimed |
-| One-command machine-readable replay | **complete** | `python -m oracle.oddcycle_final_certificate` replays the main result; `python -m oracle.oddcycle_robust_certificate` independently replays `cell-4321`, including exact theorem, dual, and physical gates |
+| One-command machine-readable replay | **complete** | `python -m oracle.oddcycle_final_certificate` now includes the Majorana/Wei gate; `python -m oracle.oddcycle_majorana_wei_audit` isolates that proof; `python -m oracle.oddcycle_robust_certificate` independently replays `cell-4321` |
 | Public endgame | **partial** | final-candidate paper draft exists; references, collaborator review, and MO/arXiv submission remain |
 
 ## Mathematical evidence chain
@@ -105,7 +112,12 @@ isolated floating-point accident.
    \(\det(I+W)\) is strictly positive.
 7. A positive dual of total trace one excludes any common strict
    *quadratic* metric of the tested form.
-8. The exact Fock transfer closes the physical and positive-field gates.
+8. The same dual forces every pulled-back nonstrict Nambu contraction
+   metric to the equality boundary; exact commutant rank 24 and
+   \(\det B=8\) reduce it to scalar off-diagonal form.
+9. That boundary has compatibility sign \(+1\), contradicting the
+   \(-1\) sign required by Wei's orthogonal complex structure.
+10. The exact Fock transfer closes the physical and positive-field gates.
 
 ## What is new, and what is not
 
@@ -132,18 +144,28 @@ Perron cone as new.  The proposed contribution is:
 - an exact QMC alphabet where multiple quadratic metrics work but one
   common quadratic metric provably cannot;
 - a solver-independent rational certificate;
+- an exact exclusion of Wei's fixed-\(J_1,J_2\) Majorana contraction
+  sufficient class for the same alphabet;
 - a positive-field interacting realization.
 
 The 2024 contraction-semigroup framework is formulated in a fixed
-Majorana metric and permits complex orthogonal basis changes.  The present
-five-dimensional common-quadratic-metric dual is a strict narrow
-separation but is not a no-go for the common nonquadratic cone above or
-for every 10-Majorana formulation.  In particular, it does not rule out
-one fixed pair of anticommuting real orthogonal structures \(J_1,J_2\)
-after the number-conserving lift and a fixed complex orthogonal Majorana
-basis change.
-Until that focused audit is finished, use the narrow novelty statement
-above.
+Majorana metric and permits complex orthogonal basis changes.  The exact
+audit now pulls every such metric back through the number-conserving Nambu
+lift
+\(G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T})\).
+The frozen dual forces all nonstrict diagonal gaps to equality.  Exact
+commutant rank 24, transpose-closed irreducibility, and \(\det B=8\) leave
+only
+\(\eta=\left(\begin{smallmatrix}0&kI\\\bar kI&0\end{smallmatrix}\right)\).
+This form has CAR compatibility sign \(+1\), while a Wei orthogonal complex
+structure requires \(-1\).  Thus the fixed-\(J_1,J_2\) Wei sufficient
+class, including its MRP/MTR equality cases and arbitrary fixed complex
+orthogonal Majorana basis changes, is excluded for the main alphabet.
+
+This result does not exclude the common nonquadratic Perron cone above,
+nor unrelated fermion-bag, loop, worldline, or future sign-free
+mechanisms.  `ODDCYCLE_MAJORANA_WEI_AUDIT.md` gives the precise theorem
+and replay boundary.
 
 ## Physical scope
 
@@ -164,17 +186,14 @@ Do not claim:
 
 ## Remaining minimum closure plan
 
-1. Complete the remaining equivalence audit for the final four-letter
-   candidate at the 10-Majorana generator or semigroup-element level;
-   retain the now-explicit path-complete control citations in the paper.
-2. Obtain collaborator review of the theorem, exact certificate, physical
+1. Obtain collaborator review of the theorem, exact certificate, physical
    interpretation, and novelty wording.
-3. Run both final one-command replays and the relevant full solution test
+2. Run both final one-command replays and the relevant full solution test
    suite at the exact submission commit; archive the JSON outputs and
    hashes.
-4. Finish references and convert the Markdown paper into an arXiv/MO-ready
+3. Finish references and convert the Markdown paper into an arXiv/MO-ready
    manuscript.
-5. Push the final commits, update the shared PR, and only then prepare the
+4. Push the final commits, update the shared PR, and only then prepare the
    organizer-facing submission.
 
 Further Hodge enumeration and repetition of failed positive-automaton

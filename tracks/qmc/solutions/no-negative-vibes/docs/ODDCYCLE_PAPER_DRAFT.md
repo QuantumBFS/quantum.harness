@@ -30,10 +30,13 @@ tests, and letter determinants are verified by integer arithmetic.  A
 separate exact Gordan--Stiemke certificate proves that the four letters do
 not admit a common strict quadratic split-contraction metric of the tested
 form.  Thus the four-state quadratic certificate succeeds where its
-one-state quadratic counterpart cannot; this does not exclude a common
-nonquadratic cone or a different sign-free mechanism.  Finally, the same
-alphabet gives a positive five-valued auxiliary-field decomposition of a
-real Hermitian, number-conserving, interacting five-mode Hamiltonian.  The
+one-state quadratic counterpart cannot.  An exact Nambu-space pullback
+also excludes Wei's fixed-\(J_1,J_2\) Majorana contraction sufficient
+class after any fixed complex orthogonal Majorana basis change.  This does
+not exclude the common nonquadratic cone or unrelated fermion-bag, loop,
+worldline, or future sign-free mechanisms.  Finally, the same alphabet
+gives a positive five-valued auxiliary-field decomposition of a real
+Hermitian, number-conserving, interacting five-mode Hamiltonian.  The
 result is a grand-canonical cluster construction; locality and
 fixed-filling positivity are not claimed.
 
@@ -404,9 +407,9 @@ The two exact candidates have complementary numerical profiles:
 We retain (16) as the main statement because \(q=r=1\), its exact constants
 are simpler, and its primal and physical margins are larger.  The robust
 point is an independent exact replication with a substantially deeper
-dual interior.  It supports robustness of the discovery, but it does not
-broaden the novelty claim beyond separation from the tested one-state
-symmetric quadratic metric.
+dual interior.  It supports robustness of the discovery, but the
+Majorana/Wei exclusion below is proved only for the simpler main alphabet
+(16), not independently for `cell-4321`.
 
 ## 4. Strict separation from a common quadratic metric
 
@@ -447,9 +450,79 @@ all four strict inequalities (19).
 
 The exact certificate uses only rational arithmetic and Sylvester
 positivity tests.  It establishes strict separation from the tested common
-quadratic split-contraction mechanism.  It does not exclude a common
-nonquadratic cone, a 10-Majorana contraction certificate, or any other
-sign-free formulation.
+quadratic split-contraction mechanism.
+
+### 4.1 Exclusion of the fixed-\(J_1,J_2\) Majorana contraction class
+
+The stronger ten-Majorana audit must retain the CAR bilinear form, not just
+the real five-dimensional quadratic metric.  In Nambu coordinates
+\(\Psi=(c,c^\dagger)^{\mathsf T}\), define
+
+\[
+\Omega=\begin{pmatrix}0&I_5\\I_5&0\end{pmatrix},\qquad
+G(B)=\operatorname{diag}(B^{-1},B^{\mathsf T}).
+\]
+
+Then \(G(B)^{\mathsf T}\Omega G(B)=\Omega\).  Pulling any Wei contraction
+metric through an arbitrary fixed complex orthogonal Majorana basis change
+is explicit.  Let \(S\) satisfy
+
+\[
+S^{\mathsf T}\Omega S=I_{10},
+\qquad
+\eta=S^{-\dagger}(iJ_2)S^{-1},
+\]
+
+where \(J_2\) is the real orthogonal skew-symmetric canonical Wei
+structure.  The pulled-back Hermitian \(\eta\) satisfies
+
+\[
+\eta-G(B)^\dagger\eta G(B)\succeq0,\qquad
+\eta\Omega^{-1}\eta^{\mathsf T}=-\Omega
+\tag{21}
+\]
+
+for all four letters, up to a common reversal for the expansion
+orientation.  Indeed, \(S^{\mathsf T}\Omega S=I\) gives
+\(\Omega^{-1}=SS^{\mathsf T}\), while
+\((iJ_2)(iJ_2)^{\mathsf T}=-I\); substitution yields the second identity
+in (21).  Moreover, every letter has \(\det B=8>0\).  The scalar separating
+\(\Gamma_\wedge(B)\) from its Majorana Spin lift is
+\(\sqrt{\det B}>0\), so the lift cannot change a configuration sign.
+
+Write
+\(\eta=\left(\begin{smallmatrix}H&K\\K^\dagger&D\end{smallmatrix}\right)\).
+The principal blocks of the first inequality in (21), after congruence,
+have exactly the two orientations paired by (20).  Positivity and the
+four positive-definite exact dual multipliers force every such nonstrict
+gap to equality.  The off-diagonal gaps then vanish.
+
+An exact rational commutant calculation for the four letters has rank 24
+in ambient dimension 25, so the common complex commutant is
+\(\mathbb C I_5\).  Transpose closure makes the alphabet irreducible.
+If \(H\) or \(D\) were nonzero, its invariant kernel would therefore be
+trivial; but congruence invariance and \(\det B=8\) would give
+\(\det H=64\det H\), or the analogous contradiction for \(D\).
+Consequently
+
+\[
+\eta=\begin{pmatrix}0&kI_5\\\bar kI_5&0\end{pmatrix}.
+\]
+
+This boundary form satisfies
+\(\eta\Omega^{-1}\eta^{\mathsf T}=|k|^2\Omega\), with sign \(+1\), whereas
+(21) requires sign \(-1\).
+
+**Proposition 4.**
+
+The alphabet (16) lies outside the sufficient class defined by Wei's fixed
+\(J_1,J_2\) contraction conditions, including after any fixed complex
+orthogonal Majorana basis change.
+
+This proposition also excludes the Majorana-reflection-positive and
+anticommuting-MTR equality cases contained in that sufficient class.  It
+does not exclude unrelated fermion-bag, loop, worldline, or future
+sign-free mechanisms.
 
 ## 5. Hermitian interacting auxiliary-field model
 
@@ -467,7 +540,7 @@ T=
 37I_{\mathcal F}
 +\Gamma_\wedge(B_0)+\Gamma_\wedge(B_0)^{\mathsf T}
 +\Gamma_\wedge(B_1)+\Gamma_\wedge(B_1)^{\mathsf T}.
-\tag{21}
+\tag{22}
 \]
 
 Exact row arithmetic gives a maximum diagonal-dominance requirement of
@@ -476,13 +549,13 @@ one.  Therefore
 
 \[
 e^{-H}=T/41
-\tag{22}
+\tag{23}
 \]
 
 defines a real Hermitian, number-conserving Hamiltonian
 \(H=-\log(T/41)\).
 
-Equation (22) is a positive discrete auxiliary-field decomposition with
+Equation (23) is a positive discrete auxiliary-field decomposition with
 fields
 
 \[
@@ -493,7 +566,7 @@ and coefficients
 
 \[
 \frac1{41}(37,1,1,1,1).
-\tag{23}
+\tag{24}
 \]
 
 Deleting identity letters from a history leaves a word in (16), so
@@ -506,23 +579,25 @@ vacuum, one-particle, and two-particle blocks would obey
 
 \[
 41T_2=\wedge^2(T_1).
-\tag{24}
+\tag{25}
 \]
 
-The exact difference in (24) has 58 nonzero entries, the first equal to
+The exact difference in (25) has 58 nonzero entries, the first equal to
 164.  Thus \(H\) is genuinely interacting.  Each nonidentity field also
 admits a real one-particle logarithm because its characteristic polynomial
 has no eigenvalue on the negative real axis.
 
 ## 6. Reproducibility
 
-The proof is split into three solver-independent exact replays:
+The proof is split into solver-independent exact replays:
 
 ```bash
 python -m pytest -q \
   tests/test_oddcycle_path_metric.py \
   tests/test_oddcycle_metric_dual.py \
-  tests/test_oddcycle_pair_physical.py
+  tests/test_oddcycle_pair_physical.py \
+  tests/test_oddcycle_majorana_wei_audit.py \
+  tests/test_oddcycle_final_certificate.py
 ```
 
 The independently promoted robust point has a single-command replay:
@@ -532,10 +607,10 @@ python -m oracle.oddcycle_robust_certificate
 python -m pytest -q tests/test_oddcycle_robust_certificate.py
 ```
 
-The tests check the theorem certificate, the common-quadratic-metric dual
-separation, and the physical transfer, respectively.  The semidefinite
-programs are discovery tools only; `cvxpy` is not needed to replay the
-frozen rational results.
+The tests check the theorem certificate, common-quadratic-metric dual
+separation, physical transfer, and full fixed-\(J_1,J_2\) Majorana/Wei
+exclusion.  The semidefinite programs are discovery tools only; `cvxpy`
+is not needed to replay the frozen rational results.
 
 The repository also records the complete search ledger, word counts,
 failed cone attempts, exact rationalization method, and software
@@ -589,52 +664,50 @@ The contribution here is the combination of:
 2. an exact alphabet for which a four-state quadratic certificate works
    but a common quadratic metric is impossible;
 3. a solver-independent rational certificate;
-4. a positive-field interacting fermion realization.
+4. an exact exclusion of Wei's fixed-\(J_1,J_2\) Majorana contraction
+   sufficient class for the same alphabet;
+5. a positive-field interacting fermion realization.
 
 The following limitations are explicit.
 
 - The result controls the full Fock trace, not each fixed-particle sector.
 - The Hamiltonian is a five-mode cluster and is generally nonlocal.
 - Proposition 3 excludes the common real symmetric quadratic metric
-  inequalities, not the common nonquadratic cone above and not every
-  Majorana reflection-positive, fermion-bag, loop, or hidden complex-basis
-  reformulation.
+  inequalities but not the common nonquadratic cone above.
+- Proposition 4 excludes Wei's fixed-\(J_1,J_2\) Majorana contraction
+  sufficient class, including fixed complex orthogonal basis changes.  It
+  does not exclude unrelated fermion-bag, loop, worldline, or future
+  sign-free mechanisms.
 - The current result is a sufficient class, not a classification of
   sign-problem-free QMC.
 
-The main remaining publication task is a focused equivalence audit against
-the full 10-Majorana contraction literature.  A five-mode
-number-conserving system has a 10-Majorana lift, and odd one-particle
-dimension does not exclude Majorana reflection positivity after a fixed
-complex orthogonal basis change.  In particular, the current certificate
-does not rule out fixed anticommuting real orthogonal structures
-\(J_1,J_2\), with \(J_2\) skew-symmetric, satisfying for all lifted slice
-generators \(\mathcal M_j\)
-
-\[
-J_1^{\mathsf T}\mathcal M_jJ_1=\overline{\mathcal M_j},
-\qquad
-i(J_2\mathcal M_j-\mathcal M_j\overline{J_2})\preceq0.
-\]
-
-Until that generator- or semigroup-element-level audit is complete,
-inequivalence to the full Wei/Majorana framework remains open.
+The exact Nambu reduction and replay are given in
+`ODDCYCLE_MAJORANA_WEI_AUDIT.md`.  The remaining publication work is
+collaborator review, clean-commit archival replay, reference completion,
+and conversion of this draft to a submission-ready manuscript.
 
 ## References to complete before submission
 
 1. Wang et al., split-orthogonal-group sign-problem-free QMC.
-2. Wei, contraction-semigroup framework for fermion sign problems.
-3. Li, Jiang, and Yao, Majorana-time-reversal classification.
-4. Wu and Zhang, sufficient symmetry condition for absence of the sign
+2. Wei, *Semigroup approach to the sign problem in quantum Monte Carlo
+   simulations*, *Phys. Rev. B* **110**, 075146 (2024),
+   arXiv:1712.09412v3.
+3. Wei et al., *Majorana Positivity and the Fermion Sign Problem of Quantum
+   Monte Carlo Simulations*, *Phys. Rev. Lett.* **116**, 250601 (2016),
+   arXiv:1601.01994.
+4. Li, Jiang, and Yao, *Majorana-time-reversal symmetries: a fundamental
+   principle for sign-problem-free quantum Monte Carlo simulations*,
+   *Phys. Rev. Lett.* **117**, 267002 (2016), arXiv:1601.05780.
+5. Wu and Zhang, sufficient symmetry condition for absence of the sign
    problem.
-5. A. A. Ahmadi, R. M. Jungers, P. A. Parrilo, and M. Roozbehani,
+6. A. A. Ahmadi, R. M. Jungers, P. A. Parrilo, and M. Roozbehani,
    “Joint Spectral Radius and Path-Complete Graph Lyapunov Functions,”
    *SIAM J. Control Optim.* **52**, 687 (2014),
    doi:10.1137/110855272.
-6. F. Forni, R. M. Jungers, and R. Sepulchre, “Path-complete positivity
+7. F. Forni, R. M. Jungers, and R. Sepulchre, “Path-complete positivity
    of switching systems,” arXiv:1611.02603.
-7. G. O. Berger and R. M. Jungers, “p-dominant switched linear systems,”
+8. G. O. Berger and R. M. Jungers, “p-dominant switched linear systems,”
    *Automatica* **132**, 109801 (2021),
    doi:10.1016/j.automatica.2021.109801.
-8. A standard cone Perron--Frobenius reference for strongly positive maps.
-9. A standard discrete-time indefinite Stein inertia theorem reference.
+9. A standard cone Perron--Frobenius reference for strongly positive maps.
+10. A standard discrete-time indefinite Stein inertia theorem reference.

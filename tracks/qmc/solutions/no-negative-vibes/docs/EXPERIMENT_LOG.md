@@ -2694,3 +2694,120 @@ operator-order convention before implementation: for
 \(\operatorname{diag}(B^{-1},B^{\mathsf T})\); congruence, rather than a
 silent replacement by \(\operatorname{diag}(B,B^{-\mathsf T})\), connects it
 to the frozen one-particle dual.
+
+### 2026-07-30 — Exact Majorana/Wei replay reaches GREEN
+
+Continuation used the saved checkpoint and did not repeat any completed
+frontier, survivor, dual-ranking, or robust-promotion search.  The apparent
+local WSL failure was an endpoint mix-up: the registered
+`Ubuntu-24.04` WSL 1 distribution lives on the preserved Windows worker
+reached through the documented SSH hop, not on the Codex sandbox host.
+The remote distribution was already running.  Because WSL-to-GitHub HTTPS
+still timed out, the exact local branch at
+`f2b7fc2b7a8e3fff2cef41c7f1b962941d0eb119` was transferred as a verified
+complete Git bundle and opened as the new preserved detached worktree
+`/home/zibojin/code/nnv-majorana-wei-dev`.  The old dirty
+`nnv-final-verify` clone and every result directory were left untouched.
+
+The clean five-file pre-change baseline returned:
+
+```text
+5 passed in 11.88s
+```
+
+Strict TDD then proceeded on WSL.  The new publication-gate test first
+failed only with
+`ModuleNotFoundError: oracle.oddcycle_majorana_wei_audit`.  The minimal
+solver-independent implementation then returned:
+
+```text
+1 passed in 2.67s
+6 passed in 1.84s
+```
+
+The exact WSL commands were:
+
+```bash
+cd /home/zibojin/code/nnv-majorana-wei-dev/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_majorana_wei_audit.py
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_majorana_wei_audit.py \
+  tests/test_oddcycle_metric_dual.py \
+  tests/test_oddcycle_path_metric.py \
+  tests/test_oddcycle_pair_physical.py \
+  tests/test_oddcycle_final_certificate.py \
+  tests/test_oddcycle_robust_certificate.py
+```
+
+The six-file regression covered the Majorana/Wei audit, frozen exact dual,
+path metric, physical transfer, main final certificate, and robust
+certificate.  Exact output gates were:
+
+- four distinct \(5\times5\) letters, each with determinant eight;
+- frozen dual exact cancellation, trace one, and four
+  positive-definite multipliers;
+- commutant constraint rank 24 in ambient dimension 25;
+- zero diagonal Nambu boundary blocks and off-diagonal block \(kI_5\);
+- boundary compatibility sign \(+1\) versus Wei sign \(-1\).
+
+The environment-independent payload SHA-256 was
+`0290bd707ab6aa729c2ad87526beae74168dbc554aa4b424e9fead3c62163ed6`.
+The development JSON correctly reported a dirty verification worktree and
+is not the archival provenance record.  The implementation commit is
+`bf43005c1d8661a0537b5db6c0b21aa31b051073`.
+
+The final one-command certificate was integrated in a second TDD cycle.
+Its test first failed because
+`outside_wei_majorana_sufficient_class` was absent.  After adding the exact
+gate and binding the compact commutant/sign block into the canonical digest,
+the two focused tests returned `2 passed in 1.54s`; after the review
+metadata assertion was strengthened they returned `2 passed in 1.40s`.
+The fresh six-file regression returned:
+
+```text
+6 passed in 1.92s
+```
+
+The Task 3 focused command was:
+
+```bash
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_majorana_wei_audit.py \
+  tests/test_oddcycle_final_certificate.py
+```
+
+The integration commit is
+`b875afd8973a0419f3e7c1d9e855dd5ce4b226af`.  Two independent read-only
+reviews found no Critical or Important defect.  The first review's only
+minor request, hexadecimal/schema validation for the new audit digest, was
+implemented.  The second noted that the final-certificate test could bind
+digest mutation more directly; the production payload already includes the
+compact Majorana/Wei block, and clean archival hash equality is the final
+gate.
+
+At this checkpoint the local branch was two commits ahead of the shared
+remote.  Two push/read probes were reset before reaching GitHub, while SSH
+to the WSL worker remained healthy.  No history rewrite or alternate
+credential was attempted.  Continue by committing the proof/audit updates,
+transferring the resulting complete bundle to WSL, running the preserved
+clean-worktree archival replay, and then pushing all commits once the shared
+remote is reachable.
+
+Reusable lessons:
+
+- distinguish the Codex sandbox host from the registered remote Windows/WSL
+  worker before diagnosing WSL installation state;
+- use a complete verified Git bundle when worker-to-GitHub HTTPS is
+  unavailable;
+- pull arbitrary Majorana basis freedom back to the fixed Nambu CAR form;
+- use the transpose-closed exact commutant to turn equality gaps into an
+  irreducibility/determinant contradiction; and
+- keep development JSON separate from the final clean-commit provenance
+  artifact.
