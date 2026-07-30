@@ -1,0 +1,54 @@
+schema_version = 1
+stage = "stage6"
+classification_scope = "medium_3d_equilibration_and_representation_pilot"
+second_rg = false
+
+[sources]
+hard_goal_design = "config/hard_goal/design_v1.toml"
+
+[sizes]
+lengths = [12, 18, 24, 27]
+j_counts = [64, 32, 16, 8]
+
+[temperatures]
+minimum = 0.80
+maximum = 2.00
+count = 48
+schedule = "linear_beta"
+
+[sampling]
+chain_pairs = 4
+calibration_sweeps = 4096
+equilibration_initial_sweeps = 8192
+equilibration_multiplier = 2
+equilibration_maximum_sweeps = 1048576
+measurement_sweeps = 8192
+
+[comparison]
+templates = ["cube", "cross"]
+routes = ["C", "B"]
+control = "conditioned_linear"
+chis = [2, 4, 8]
+
+[thresholds]
+swap_bottleneck = 0.15
+swap_target_minimum = 0.20
+swap_target_maximum = 0.50
+minimum_round_trips = 10
+maximum_rhat = 1.05
+minimum_ess = 200.0
+bin_sigma = 2.0
+maximum_thermal_error_fraction = 0.25
+memory_margin = 1.5
+output_margin = 1.5
+
+[execution]
+backend = "jax_gpu"
+maximum_array_size = 200
+maximum_wall_seconds = 86400
+progress_updates_minimum = 10
+progress_updates_maximum = 50
+
+[seeds]
+pilot = 2026073102
+bootstrap = 2026073101

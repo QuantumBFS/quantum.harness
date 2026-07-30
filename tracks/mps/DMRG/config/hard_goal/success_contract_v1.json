@@ -1,0 +1,58 @@
+{
+  "allowed_terminal_classes": [
+    "PASS",
+    "SCIENTIFIC_NEGATIVE",
+    "EQUILIBRATION_FAILURE",
+    "REPRESENTATION_FAILURE",
+    "RESOURCE_NO_GO",
+    "CORRECTNESS_FAILURE"
+  ],
+  "schema_version": 1,
+  "second_rg": {
+    "enabled_by_default": false,
+    "required_first_rg_classification": "PASS",
+    "requires_explicit_first_rg_pass_manifest": true
+  },
+  "success_clauses": [
+    {
+      "id": "complete_model_contract",
+      "requirement": "Record a complete 3D spin-glass Hamiltonian and disorder distribution."
+    },
+    {
+      "id": "small_size_benchmarks",
+      "requirement": "Pass exact or reliable literature benchmarks at small sizes."
+    },
+    {
+      "id": "parallel_tempering_equilibration",
+      "requirement": "Demonstrate PT equilibration with round trips and autocorrelation evidence."
+    },
+    {
+      "id": "mps_improvement",
+      "requirement": "Show an MPS neural VMCRG improvement on at least one preregistered metric over a fair finite-coupling baseline."
+    },
+    {
+      "id": "equilibrated_l45",
+      "requirement": "Actually complete and equilibrate L=45 production data."
+    },
+    {
+      "id": "compatible_fss_observables",
+      "requirement": "Obtain compatible Tc intervals from xi_L/L and Binder evidence."
+    },
+    {
+      "id": "compatible_rg_flow",
+      "requirement": "Obtain an RG-flow Tc interval statistically compatible with FSS."
+    },
+    {
+      "id": "independent_seeds_and_disorder",
+      "requirement": "Cover multiple independent algorithm seeds and enough unique J samples."
+    },
+    {
+      "id": "complete_uncertainty_budget",
+      "requirement": "Report statistical, finite-size, neural, and non-equilibration uncertainty."
+    },
+    {
+      "id": "visible_negative_results",
+      "requirement": "Report negative results, failed convergence, and initialization dependence without replacing seeds or moving thresholds."
+    }
+  ]
+}

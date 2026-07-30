@@ -1,0 +1,34 @@
+[model]
+length = 45
+coupling = 0.436
+block_size = 3
+rg_levels = 1
+operator_count = 13
+
+[mps]
+chi = 4
+symmetrize = true
+
+[training]
+walkers = 16
+baseline_steps = 10
+residual_steps = 10
+sweeps_per_step = 20
+baseline_learning_rate = 0.00005
+alpha_learning_rate = 0.005
+core_learning_rate = 0.0005
+linear_learning_rate = 0.0
+gradient_clip = 5.0
+cache_check_every = 5
+canonicalize_every = 5
+compiled = true
+parallel_walkers = true
+
+[measurement]
+thermalization_sweeps = 20
+measurement_sweeps = 100
+thinning = 1
+
+[run]
+seeds = [20260801]
+output = "results/mps_challenge/formal_probe"

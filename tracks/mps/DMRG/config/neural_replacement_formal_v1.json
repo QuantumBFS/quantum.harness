@@ -1,0 +1,92 @@
+{
+  "protocol": "neural_l45_pure_replacement_confirmation_v1",
+  "locked": true,
+  "scope": "2D_L45_pure_neural_VMCRG_replacement",
+  "representation": "pure_d4_z2_radius3_shell_neural_energy",
+  "early_stop_after_pre_autocorrelation_failure": true,
+  "formal_requirements": {
+    "repeats": 5,
+    "length": 45,
+    "training_steps": 3000,
+    "walkers": 16,
+    "sweeps_per_step": 20,
+    "target_samples_per_step": 32,
+    "hidden_units": 32,
+    "neural_radius": 3,
+    "neural_feature_mode": "shell",
+    "fixed_linear_bias_linf": 0.0,
+    "learning_rate": 0.0005,
+    "averaging_start": 1500,
+    "validation_chains_per_repeat": 16,
+    "validation_thermal_sweeps": 1000,
+    "validation_measurements": 1000,
+    "validation_spacing_sweeps": 5,
+    "equivalence_tolerance": 0.02,
+    "projection_samples": 20000,
+    "fixed_point_absolute_tolerance": 0.001,
+    "fixed_point_relative_l2_tolerance": 0.005,
+    "ablation_chains_per_repeat": 32,
+    "ablation_thermal_sweeps": 1000,
+    "ablation_measurements": 1000,
+    "ablation_spacing_sweeps": 5,
+    "autocorrelation_chains_per_repeat": 8,
+    "autocorrelation_thermal_sweeps": 1000,
+    "autocorrelation_measurements": 5000,
+    "autocorrelation_max_lag": 1000,
+    "minimum_negative_repeat_means": 4,
+    "bootstrap_samples": 10000,
+    "confidence_multiplier": 2.0,
+    "autocorrelation_ratio_threshold": 0.5
+  },
+  "repeat_seeds": [
+    {
+      "repeat": 1,
+      "model": 202679101,
+      "optimizer": 202679102,
+      "validation": 202679103,
+      "projection": 202679104,
+      "ablation": 202679105,
+      "autocorrelation": 202679106
+    },
+    {
+      "repeat": 2,
+      "model": 202679201,
+      "optimizer": 202679202,
+      "validation": 202679203,
+      "projection": 202679204,
+      "ablation": 202679205,
+      "autocorrelation": 202679206
+    },
+    {
+      "repeat": 3,
+      "model": 202679301,
+      "optimizer": 202679302,
+      "validation": 202679303,
+      "projection": 202679304,
+      "ablation": 202679305,
+      "autocorrelation": 202679306
+    },
+    {
+      "repeat": 4,
+      "model": 202679401,
+      "optimizer": 202679402,
+      "validation": 202679403,
+      "projection": 202679404,
+      "ablation": 202679405,
+      "autocorrelation": 202679406
+    },
+    {
+      "repeat": 5,
+      "model": 202679501,
+      "optimizer": 202679502,
+      "validation": 202679503,
+      "projection": 202679504,
+      "ablation": 202679505,
+      "autocorrelation": 202679506
+    }
+  ],
+  "bootstrap_seeds": {
+    "ablation": 202679901,
+    "autocorrelation": 202679902
+  }
+}

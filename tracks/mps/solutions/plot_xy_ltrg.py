@@ -250,6 +250,146 @@ def render_figure6(curves: dict[str, dict[str, Any]], output: Path, quick: bool)
     _save(fig, output)
 
 
+def _endpoint_statistics(curve: dict[str, Any]) -> dict[str, float]:
+    measured = float(curve["specific_heat"][-1])
+    exact = float(curve["exact_specific_heat"][-1])
+    relative = curve.get("specific_heat_relative_error")
+    relative_error = (
+        float(relative[-1]) if relative else (measured - exact) / exact
+    )
+    statistics = {
+        "beta": float(curve["beta"][-1]),
+        "specific_heat": measured,
+        "exact_specific_heat": exact,
+        "relative_error_percent": 100.0 * relative_error,
+    }
+    if curve.get("energy"):
+        statistics["energy"] = float(curve["energy"][-1])
+    if curve.get("energy_ab") and curve.get("energy_ba"):
+        statistics["bond_asymmetry"] = abs(
+            float(curve["energy_ab"][-1]) - float(curve["energy_ba"][-1])
+        )
+    if curve.get("cumulative_truncerr"):
+        statistics["cumulative_truncerr"] = float(curve["cumulative_truncerr"][-1])
+    return statistics
+
+
+def render_endpoint_comparison(
+    single_layer_dc150: dict[str, Any],
+    single_layer_dc200: dict[str, Any],
+    ordered_bilayer_dc200: dict[str, Any],
+    symmetric_bilayer_dc200: dict[str, Any],
+    output: Path,
+) -> dict[str, Any]:
+    """Compare the four endpoint calculations against one exact curve."""
+    _configure_style()
+    methods = [
+        (
+            "single_layer_dc150",
+            r"2011 LTRG, $D_c=150$",
+            single_layer_dc150,
+            OKABE_ITO[1],
+            "--",
+            "o",
+        ),
+        (
+            "single_layer_dc200",
+            r"2011 LTRG, $D_c=200$",
+            single_layer_dc200,
+            OKABE_ITO[2],
+            "-.",
+            "s",
+        ),
+        (
+            "ordered_bilayer_dc200",
+            r"Ordered LTRG++, $D_c=200$",
+            ordered_bilayer_dc200,
+            OKABE_ITO[3],
+            ":",
+            "^",
+        ),
+        (
+            "symmetric_bilayer_dc200",
+            r"Symmetric LTRG++, $D_c=200$",
+            symmetric_bilayer_dc200,
+            OKABE_ITO[5],
+            (0, (5, 1)),
+            "D",
+        ),
+    ]
+    endpoint = {key: _endpoint_statistics(curve) for key, _, curve, *_ in methods}
+
+    endpoint_beta = min(stats["beta"] for stats in endpoint.values())
+    short_curves = (ordered_bilayer_dc200, symmetric_bilayer_dc200)
+    window_start = min(float(curve["beta"][0]) for curve in short_curves)
+    window_end = max(float(curve["beta"][-1]) for curve in short_curves)
+    if window_start >= window_end:
+        window_start = min(float(curve["beta"][0]) for _, _, curve, *_ in methods)
+
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.2), gridspec_kw={"width_ratios": [1.35, 1]})
+    exact_beta = np.asarray(single_layer_dc200["beta"], dtype=float)
+    exact_heat = np.asarray(single_layer_dc200["exact_specific_heat"], dtype=float)
+    exact_keep = (exact_beta >= window_start - 1e-12) & (exact_beta <= window_end + 1e-12)
+    axes[0].plot(
+        exact_beta[exact_keep],
+        exact_heat[exact_keep],
+        color="#000000",
+        linewidth=1.7,
+        label="Exact XY chain",
+        zorder=5,
+    )
+    for _, label, curve, color, linestyle, marker in methods:
+        beta = np.asarray(curve["beta"], dtype=float)
+        heat = np.asarray(curve["specific_heat"], dtype=float)
+        keep = (beta >= window_start - 1e-12) & (beta <= window_end + 1e-12)
+        axes[0].plot(
+            beta[keep],
+            heat[keep],
+            color=color,
+            linestyle=linestyle,
+            marker=marker,
+            markevery=max(1, int(np.count_nonzero(keep)) // 5),
+            markersize=3,
+            label=label,
+        )
+    axes[0].set_xlabel(r"Inverse temperature $\beta J$")
+    axes[0].set_ylabel(r"Specific heat per site $C$")
+    axes[0].set_xlim(window_start, window_end)
+    axes[0].grid(axis="y", linewidth=0.4, alpha=0.25)
+    axes[0].legend(frameon=False, loc="best")
+
+    keys = [key for key, *_ in methods]
+    errors = [endpoint[key]["relative_error_percent"] for key in keys]
+    labels = [
+        "Single\n150",
+        "Single\n200",
+        "Ordered\n200",
+        "Symmetric\n200",
+    ]
+    colors = [entry[3] for entry in methods]
+    markers = [entry[5] for entry in methods]
+    axes[1].axhspan(-1.0, 1.0, color="#D9EAD3", alpha=0.65, zorder=0)
+    axes[1].axhline(0.0, color="#000000", linewidth=0.8, zorder=1)
+    for index, (error, color, marker) in enumerate(zip(errors, colors, markers)):
+        axes[1].plot(index, error, marker=marker, color=color, markersize=5, linestyle="none")
+        axes[1].vlines(index, 0.0, error, color=color, linewidth=1.1, linestyle=LINESTYLES[index])
+    axes[1].set_xticks(range(len(labels)), labels)
+    axes[1].set_ylabel(r"Endpoint relative error (\%)")
+    axes[1].grid(axis="y", linewidth=0.4, alpha=0.25)
+
+    for label, axis in zip(("a", "b"), axes):
+        axis.text(-0.14, 1.03, label, transform=axis.transAxes, fontweight="bold")
+    fig.tight_layout(w_pad=1.8)
+    _save(fig, output)
+    return {
+        "endpoint_beta": endpoint_beta,
+        "endpoint": endpoint,
+        "acceptance_relative_error_percent": 1.0,
+        "figure_png": str(output.with_suffix(".png")),
+        "figure_pdf": str(output.with_suffix(".pdf")),
+    }
+
+
 def build_summary(
     curves: dict[str, dict[str, Any]], manifests: list[dict[str, Any]], quick: bool
 ) -> dict[str, Any]:
@@ -299,9 +439,36 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True, type=Path)
     parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--endpoint-comparison", action="store_true")
+    parser.add_argument("--dc150-data", type=Path)
+    parser.add_argument("--dc200-data", type=Path)
+    parser.add_argument("--ordered-bilayer-data", type=Path)
+    parser.add_argument("--symmetric-bilayer-data", type=Path)
     args = parser.parse_args(argv)
 
     _configure_style()
+    if args.endpoint_comparison:
+        required = {
+            "--dc150-data": args.dc150_data,
+            "--dc200-data": args.dc200_data,
+            "--ordered-bilayer-data": args.ordered_bilayer_data,
+            "--symmetric-bilayer-data": args.symmetric_bilayer_data,
+        }
+        missing = [name for name, value in required.items() if value is None]
+        if missing:
+            parser.error(f"endpoint comparison requires {', '.join(missing)}")
+        output = args.run_dir / "figs" / "endpoint_comparison"
+        summary = render_endpoint_comparison(
+            _read_json(args.dc150_data),
+            _read_json(args.dc200_data),
+            _read_json(args.ordered_bilayer_data),
+            _read_json(args.symmetric_bilayer_data),
+            output,
+        )
+        _write_json_atomic(args.run_dir / "endpoint_comparison.json", summary)
+        print(f"rendered endpoint comparison -> {output.parent}", flush=True)
+        return 0
+
     curves, manifests = load_curves(args.run_dir)
     figures = args.run_dir / "figs"
     render_figure4(curves, figures / "fig4", args.quick)

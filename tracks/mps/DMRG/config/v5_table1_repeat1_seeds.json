@@ -1,0 +1,22 @@
+{
+  "design": "four_master_families_times_four_disjoint_children",
+  "bootstrap_seed": 202611201,
+  "run_seed_sequences": [
+    {"entropy": 202611101, "spawn_key": [0]},
+    {"entropy": 202611101, "spawn_key": [1]},
+    {"entropy": 202611101, "spawn_key": [2]},
+    {"entropy": 202611101, "spawn_key": [3]},
+    {"entropy": 202611111, "spawn_key": [0]},
+    {"entropy": 202611111, "spawn_key": [1]},
+    {"entropy": 202611111, "spawn_key": [2]},
+    {"entropy": 202611111, "spawn_key": [3]},
+    {"entropy": 202611121, "spawn_key": [0]},
+    {"entropy": 202611121, "spawn_key": [1]},
+    {"entropy": 202611121, "spawn_key": [2]},
+    {"entropy": 202611121, "spawn_key": [3]},
+    {"entropy": 202611131, "spawn_key": [0]},
+    {"entropy": 202611131, "spawn_key": [1]},
+    {"entropy": 202611131, "spawn_key": [2]},
+    {"entropy": 202611131, "spawn_key": [3]}
+  ]
+}

@@ -99,6 +99,113 @@ else
         end
     end
 
+    @testset "direct bond energy has physical and unit-cell anchors" begin
+        estimator_is_defined = isdefined(
+            XYLTRGReproduction,
+            :direct_bond_energies,
+        )
+        @test estimator_is_defined
+
+        if estimator_is_defined
+            identity_energy = direct_bond_energies(identity_state())
+            @test identity_energy.ab == 0.0
+            @test identity_energy.ba == 0.0
+            @test identity_energy.mean == 0.0
+
+            state = identity_state()
+            gate = vectorized_gate(0.01)
+            for _ in 1:20
+                step!(state, gate, 0.01, 32; cutoff=0.0)
+            end
+            energy = direct_bond_energies(state)
+            swapped = LTRGState(
+                copy(state.gamma_b),
+                copy(state.gamma_a),
+                copy(state.lambda_ba),
+                copy(state.lambda_ab),
+                state.log_scale,
+                state.beta,
+            )
+            swapped_energy = direct_bond_energies(swapped)
+
+            @test isapprox(energy.ab, swapped_energy.ba; atol=1e-10)
+            @test isapprox(energy.ba, swapped_energy.ab; atol=1e-10)
+            @test isapprox(energy.mean, -0.02493770759816712; atol=2e-4)
+        end
+    end
+
+    @testset "bilayer purification energy is physical and translation covariant" begin
+        estimator_is_defined = isdefined(
+            XYLTRGReproduction,
+            :purification_bond_energies,
+        )
+        @test estimator_is_defined
+
+        if estimator_is_defined
+            identity_energy = purification_bond_energies(identity_state())
+            @test identity_energy.ab == 0.0
+            @test identity_energy.ba == 0.0
+            @test identity_energy.mean == 0.0
+
+            state = identity_state()
+            half_gate = vectorized_gate(0.005)
+            for _ in 1:20
+                step!(state, half_gate, 0.01, 32; cutoff=0.0)
+            end
+            energy = purification_bond_energies(state)
+            swapped = LTRGState(
+                copy(state.gamma_b),
+                copy(state.gamma_a),
+                copy(state.lambda_ba),
+                copy(state.lambda_ab),
+                state.log_scale,
+                state.beta,
+            )
+            swapped_energy = purification_bond_energies(swapped)
+
+            @test isapprox(energy.ab, swapped_energy.ba; atol=1e-10)
+            @test isapprox(energy.ba, swapped_energy.ab; atol=1e-10)
+            @test isapprox(energy.mean, -0.02493770759816712; atol=2e-4)
+            @test energy.mean >= -1 / pi
+        end
+    end
+
+    @testset "symmetric bilayer step suppresses ordered bond bias" begin
+        step_is_defined = isdefined(XYLTRGReproduction, :bilayer_step!)
+        @test step_is_defined
+
+        if step_is_defined
+            tau = 0.01
+            ordered = identity_state()
+            ordered_gate = vectorized_gate(0.5 * tau)
+            symmetric = identity_state()
+            quarter_gate = vectorized_gate(0.25 * tau)
+            half_gate = vectorized_gate(0.5 * tau)
+            for _ in 1:20
+                step!(ordered, ordered_gate, tau, 32; cutoff=0.0)
+                bilayer_step!(
+                    symmetric,
+                    quarter_gate,
+                    half_gate,
+                    tau,
+                    32;
+                    cutoff=0.0,
+                )
+            end
+            ordered_energy = purification_bond_energies(ordered)
+            symmetric_energy = purification_bond_energies(symmetric)
+
+            @test isapprox(symmetric.beta, 0.2; atol=1e-14)
+            @test abs(symmetric_energy.ab - symmetric_energy.ba) <
+                  abs(ordered_energy.ab - ordered_energy.ba)
+            @test isapprox(
+                symmetric_energy.mean,
+                -0.02493770759816712;
+                atol=2e-4,
+            )
+        end
+    end
+
     @testset "uniform-grid derivatives recover a cubic polynomial" begin
         derivative_is_defined = isdefined(
             XYLTRGReproduction,
@@ -134,6 +241,49 @@ else
                 @test curve["beta"] ≈ [0.1, 0.2, 0.3] atol = 1e-12
                 @test all(isfinite, curve["free_energy"])
                 @test all(value -> 0.0 <= value <= 1.0, curve["max_truncerr"])
+                truncation_fields = (
+                    "truncerr_ab",
+                    "truncerr_ba",
+                    "cumulative_truncerr",
+                )
+                @test all(haskey(curve, field) for field in truncation_fields)
+                if all(haskey(curve, field) for field in truncation_fields)
+                    @test all(value -> 0.0 <= value <= 1.0, curve["truncerr_ab"])
+                    @test all(value -> 0.0 <= value <= 1.0, curve["truncerr_ba"])
+                    @test issorted(curve["cumulative_truncerr"])
+                    @test isapprox(
+                        curve["cumulative_truncerr"][end],
+                        sum(curve["truncerr_ab"]) + sum(curve["truncerr_ba"]);
+                        rtol = 1e-12,
+                    )
+                end
+
+                endpoint_curve = run_curve(
+                    0.1,
+                    8,
+                    1.2;
+                    progress_every = 12,
+                )
+                direct_fields = (
+                    "direct_energy_beta",
+                    "direct_energy_ab",
+                    "direct_energy_ba",
+                    "direct_energy",
+                    "direct_specific_heat",
+                    "exact_specific_heat_at_direct_beta",
+                    "direct_specific_heat_relative_error",
+                )
+                @test all(haskey(endpoint_curve, field) for field in direct_fields)
+                if all(haskey(endpoint_curve, field) for field in direct_fields)
+                    @test length(endpoint_curve["direct_energy_beta"]) == 9
+                    @test endpoint_curve["direct_energy_beta"] ≈ collect(0.4:0.1:1.2) atol = 1e-12
+                    @test all(isfinite, endpoint_curve["direct_energy_ab"])
+                    @test all(isfinite, endpoint_curve["direct_energy_ba"])
+                    @test all(isfinite, endpoint_curve["direct_energy"])
+                    @test all(isfinite, endpoint_curve["direct_specific_heat"])
+                    @test all(isfinite, endpoint_curve["exact_specific_heat_at_direct_beta"])
+                    @test all(isfinite, endpoint_curve["direct_specific_heat_relative_error"])
+                end
 
                 curve_spec = Dict(
                     "id" => "tiny",
@@ -161,6 +311,81 @@ else
                 @test saved["settings"] == settings
                 @test saved["provenance"] == provenance
                 @test saved["metrics"]["samples"] == 3
+                @test haskey(saved["metrics"], "cumulative_truncerr")
+                @test haskey(saved["metrics"], "direct_specific_heat_endpoint")
+                @test haskey(saved["metrics"], "direct_specific_heat_relative_error")
+                @test isfile(joinpath(run_dir, "cells", "cell-0001", "data.json"))
+            end
+        end
+    end
+
+    @testset "bilayer curve persists physical endpoint diagnostics" begin
+        runner_names = (:run_bilayer_curve, :run_bilayer_cell!)
+        runners_are_defined = all(
+            name -> isdefined(XYLTRGReproduction, name),
+            runner_names,
+        )
+        @test runners_are_defined
+
+        if runners_are_defined
+            curve = run_bilayer_curve(
+                0.1,
+                8,
+                1.2;
+                progress_every = 12,
+            )
+            @test curve["method"] == "bilayer LTRG++ purification"
+            @test curve["beta"] ≈ collect(0.4:0.1:1.2) atol = 1e-12
+            for field in (
+                "energy_ab",
+                "energy_ba",
+                "energy",
+                "exact_energy",
+                "specific_heat",
+                "exact_specific_heat",
+                "specific_heat_relative_error",
+                "cumulative_truncerr",
+            )
+                @test length(curve[field]) == 9
+                @test all(isfinite, curve[field])
+            end
+            @test curve["energy"][end] >= -1 / pi
+
+            mktempdir() do run_dir
+                settings = Dict(
+                    "method" => "bilayer LTRG++ purification",
+                    "spin_convention" => "S=sigma/2",
+                    "J" => 1.0,
+                    "svd_cutoff" => 0.0,
+                )
+                provenance = Dict("paper" => "arXiv:1612.01896")
+                run_spec = Dict(
+                    "run_dir" => run_dir,
+                    "settings" => settings,
+                    "provenance" => provenance,
+                )
+                cell = Dict(
+                    "cell_id" => "cell-0001",
+                    "params" => Dict(
+                        "curve" => Dict(
+                            "id" => "tiny-bilayer",
+                            "tau" => 0.1,
+                            "Dc" => 8,
+                            "beta_max" => 0.3,
+                        ),
+                    ),
+                )
+                manifest = run_bilayer_cell!(run_spec, cell; progress_every=3)
+                saved = JSON.parsefile(
+                    joinpath(run_dir, "cells", "cell-0001", "manifest.json"),
+                )
+
+                @test manifest["success"] === true
+                @test saved["settings"] == settings
+                @test saved["provenance"] == provenance
+                @test saved["metrics"]["method"] == "bilayer LTRG++ purification"
+                @test isfinite(saved["metrics"]["specific_heat_endpoint"])
+                @test isfinite(saved["metrics"]["specific_heat_relative_error"])
                 @test isfile(joinpath(run_dir, "cells", "cell-0001", "data.json"))
             end
         end

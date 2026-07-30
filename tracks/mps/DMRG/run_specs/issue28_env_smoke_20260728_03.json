@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "run_id": "issue28-env-smoke-20260728-03",
+  "code_sha256": "9953f5b709f6c038b957c2140c0c06c00d7659efd0bb20180e3cd9906b69b39c",
+  "cells": [
+    {
+      "cell_id": "smoke",
+      "params": {
+        "stage": "SMOKE",
+        "output": "results/issue28-env-smoke-20260728-03/cells/smoke"
+      }
+    }
+  ]
+}

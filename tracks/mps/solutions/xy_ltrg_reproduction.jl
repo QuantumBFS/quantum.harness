@@ -6,13 +6,18 @@ using JSON
 using QuadGK
 
 export LTRGState,
+    bilayer_step!,
     bond_hamiltonian,
+    direct_bond_energies,
     exact_thermo,
     finite_difference_uniform,
     identity_state,
     log_partition_per_site,
     main,
     parse_cli,
+    purification_bond_energies,
+    run_bilayer_cell!,
+    run_bilayer_curve,
     run_cell!,
     run_curve,
     run_negative_control,
@@ -21,6 +26,7 @@ export LTRGState,
 
 const LOCAL_DIM = 2
 const OPERATOR_DIM = LOCAL_DIM^2
+const DIRECT_ENDPOINT_SAMPLES = 9
 
 mutable struct LTRGState
     gamma_a::Array{Float64,3}
@@ -53,7 +59,13 @@ function vectorized_gate(
 )::Matrix{Float64}
     tau > 0 || throw(ArgumentError("tau must be positive"))
     local_gate = exp(-tau * bond_hamiltonian(J; pauli_convention))
-    gate = zeros(Float64, OPERATOR_DIM^2, OPERATOR_DIM^2)
+    return lift_bra_operator(local_gate)
+end
+
+function lift_bra_operator(local_operator::Matrix{Float64})::Matrix{Float64}
+    size(local_operator) == (LOCAL_DIM^2, LOCAL_DIM^2) ||
+        throw(DimensionMismatch("two-site operator dimension"))
+    lifted = zeros(Float64, OPERATOR_DIM^2, OPERATOR_DIM^2)
 
     for ket1 in 1:LOCAL_DIM, ket2 in 1:LOCAL_DIM
         for bra1_in in 1:LOCAL_DIM, bra2_in in 1:LOCAL_DIM
@@ -67,11 +79,11 @@ function vectorized_gate(
                 p2_out = operator_index(bra2_out, ket2)
                 output = operator_pair_index(p1_out, p2_out)
                 bra_out = pair_index(bra1_out, bra2_out)
-                gate[output, input] = local_gate[bra_out, bra_in]
+                lifted[output, input] = local_operator[bra_out, bra_in]
             end
         end
     end
-    return gate
+    return lifted
 end
 
 log2cosh(x::Float64) = abs(x) + log1p(exp(-2 * abs(x)))
@@ -277,6 +289,76 @@ function step!(
     )
 end
 
+function bilayer_step!(
+    state::LTRGState,
+    quarter_gate::Matrix{Float64},
+    half_gate::Matrix{Float64},
+    tau::Float64,
+    Dc::Int;
+    cutoff::Float64 = 0.0,
+)::NamedTuple
+    tau > 0 || throw(ArgumentError("tau must be positive"))
+
+    ab_first = update_bond(
+        state.gamma_a,
+        state.lambda_ab,
+        state.gamma_b,
+        state.lambda_ba,
+        quarter_gate,
+        Dc;
+        cutoff,
+    )
+    state.gamma_a = ab_first.gamma_left
+    state.gamma_b = ab_first.gamma_right
+    state.lambda_ab = ab_first.lambda
+    state.log_scale += 0.5 * ab_first.log_norm
+
+    ba = update_bond(
+        state.gamma_b,
+        state.lambda_ba,
+        state.gamma_a,
+        state.lambda_ab,
+        half_gate,
+        Dc;
+        cutoff,
+    )
+    state.gamma_b = ba.gamma_left
+    state.gamma_a = ba.gamma_right
+    state.lambda_ba = ba.lambda
+    state.log_scale += 0.5 * ba.log_norm
+
+    ab_second = update_bond(
+        state.gamma_a,
+        state.lambda_ab,
+        state.gamma_b,
+        state.lambda_ba,
+        quarter_gate,
+        Dc;
+        cutoff,
+    )
+    state.gamma_a = ab_second.gamma_left
+    state.gamma_b = ab_second.gamma_right
+    state.lambda_ab = ab_second.lambda
+    state.log_scale += 0.5 * ab_second.log_norm
+    state.beta += tau
+
+    return (
+        log_norm_ab = ab_first.log_norm + ab_second.log_norm,
+        log_norm_ba = ba.log_norm,
+        truncerr_ab = max(ab_first.truncerr, ab_second.truncerr),
+        truncerr_ba = ba.truncerr,
+        truncerr_total =
+            ab_first.truncerr + ba.truncerr + ab_second.truncerr,
+        max_truncerr = max(
+            ab_first.truncerr,
+            ba.truncerr,
+            ab_second.truncerr,
+        ),
+        kept_ab = ab_second.kept,
+        kept_ba = ba.kept,
+    )
+end
+
 function log_partition_per_site(state::LTRGState)::Float64
     dim_ba, physical_a, dim_ab = size(state.gamma_a)
     dim_ab_b, physical_b, dim_ba_b = size(state.gamma_b)
@@ -301,6 +383,184 @@ function log_partition_per_site(state::LTRGState)::Float64
     spectral_radius = maximum(abs, cell_eigenvalues)
     spectral_radius > 0 || error("trace transfer matrix has zero spectral radius")
     return state.log_scale + 0.5 * log(spectral_radius)
+end
+
+function traced_site_matrix(
+    gamma::Array{Float64,3},
+    lambda_in::Vector{Float64},
+)::Matrix{Float64}
+    incoming, physical_dimension, outgoing = size(gamma)
+    incoming == length(lambda_in) || throw(DimensionMismatch("incoming bond dimension"))
+    physical_dimension == OPERATOR_DIM || throw(DimensionMismatch("physical dimension"))
+
+    traced = zeros(Float64, incoming, outgoing)
+    for spin in 1:LOCAL_DIM
+        traced .+= gamma[:, operator_index(spin, spin), :]
+    end
+    traced .*= reshape(lambda_in, incoming, 1)
+    return traced
+end
+
+function bond_insertion_matrix(
+    gamma_left::Array{Float64,3},
+    lambda_center::Vector{Float64},
+    gamma_right::Array{Float64,3},
+    lambda_outer::Vector{Float64},
+    operator::Matrix{Float64},
+)::Matrix{Float64}
+    outer_left, physical_left, center_left = size(gamma_left)
+    center_right, physical_right, outer_right = size(gamma_right)
+    outer_left == outer_right == length(lambda_outer) ||
+        throw(DimensionMismatch("outer bond dimension"))
+    center_left == center_right == length(lambda_center) ||
+        throw(DimensionMismatch("center bond dimension"))
+    physical_left == physical_right == OPERATOR_DIM ||
+        throw(DimensionMismatch("physical dimension"))
+    size(operator) == (LOCAL_DIM^2, LOCAL_DIM^2) ||
+        throw(DimensionMismatch("two-site operator dimension"))
+
+    insertion = zeros(Float64, outer_left, outer_right)
+    for bra_left in 1:LOCAL_DIM, bra_right in 1:LOCAL_DIM
+        bra_pair = pair_index(bra_left, bra_right)
+        for ket_left in 1:LOCAL_DIM, ket_right in 1:LOCAL_DIM
+            ket_pair = pair_index(ket_left, ket_right)
+            weight = operator[ket_pair, bra_pair]
+            iszero(weight) && continue
+
+            physical_left_index = operator_index(bra_left, ket_left)
+            physical_right_index = operator_index(bra_right, ket_right)
+            left = gamma_left[:, physical_left_index, :] .*
+                   reshape(lambda_outer, outer_left, 1)
+            right = gamma_right[:, physical_right_index, :] .*
+                    reshape(lambda_center, center_right, 1)
+            insertion .+= weight .* (left * right)
+        end
+    end
+    return insertion
+end
+
+function dominant_insertion_expectation(
+    transfer::Matrix{Float64},
+    insertion::Matrix{Float64},
+)::Float64
+    size(transfer, 1) == size(transfer, 2) ||
+        throw(DimensionMismatch("transfer matrix must be square"))
+    size(insertion) == size(transfer) ||
+        throw(DimensionMismatch("insertion and transfer dimensions"))
+
+    right_system = eigen(transfer)
+    right_index = argmax(abs.(right_system.values))
+    eigenvalue = right_system.values[right_index]
+    right = right_system.vectors[:, right_index]
+
+    left_system = eigen(transpose(transfer))
+    left_index = argmin(abs.(left_system.values .- eigenvalue))
+    left_eigenvalue = left_system.values[left_index]
+    left = left_system.vectors[:, left_index]
+    eigen_tolerance = 1e-10 * max(1.0, abs(eigenvalue))
+    abs(left_eigenvalue - eigenvalue) <= eigen_tolerance ||
+        error("left and right dominant transfer eigenvalues do not match")
+
+    overlap = sum(left .* right)
+    abs(overlap) > 100 * eps(Float64) * norm(left) * norm(right) ||
+        error("dominant transfer eigenvectors have zero overlap")
+    expectation = sum(left .* (insertion * right)) / (eigenvalue * overlap)
+    imaginary_tolerance = 1e-10 * max(1.0, abs(real(expectation)))
+    abs(imag(expectation)) <= imaginary_tolerance ||
+        error("bond expectation has a non-negligible imaginary part")
+    return Float64(real(expectation))
+end
+
+function direct_bond_energies(
+    state::LTRGState,
+    J::Float64 = 1.0;
+    pauli_convention::Bool = false,
+)::NamedTuple
+    trace_a = traced_site_matrix(state.gamma_a, state.lambda_ba)
+    trace_b = traced_site_matrix(state.gamma_b, state.lambda_ab)
+    h = bond_hamiltonian(J; pauli_convention)
+
+    insertion_ab = bond_insertion_matrix(
+        state.gamma_a,
+        state.lambda_ab,
+        state.gamma_b,
+        state.lambda_ba,
+        h,
+    )
+    insertion_ba = bond_insertion_matrix(
+        state.gamma_b,
+        state.lambda_ba,
+        state.gamma_a,
+        state.lambda_ab,
+        h,
+    )
+    energy_ab = dominant_insertion_expectation(trace_a * trace_b, insertion_ab)
+    energy_ba = dominant_insertion_expectation(trace_b * trace_a, insertion_ba)
+    return (ab = energy_ab, ba = energy_ba, mean = 0.5 * (energy_ab + energy_ba))
+end
+
+function purification_bond_expectation(
+    gamma_left::Array{Float64,3},
+    lambda_center::Vector{Float64},
+    gamma_right::Array{Float64,3},
+    lambda_outer::Vector{Float64},
+    operator::Matrix{Float64},
+)::Float64
+    outer_left, physical_left, center_left = size(gamma_left)
+    center_right, physical_right, outer_right = size(gamma_right)
+    outer_left == outer_right == length(lambda_outer) ||
+        throw(DimensionMismatch("outer bond dimension"))
+    center_left == center_right == length(lambda_center) ||
+        throw(DimensionMismatch("center bond dimension"))
+    physical_left == physical_right == OPERATOR_DIM ||
+        throw(DimensionMismatch("physical dimension"))
+
+    left = gamma_left .* reshape(lambda_outer, outer_left, 1, 1)
+    left .*= reshape(lambda_center, 1, 1, center_left)
+    right = gamma_right .* reshape(lambda_outer, 1, 1, outer_right)
+    theta_matrix =
+        reshape(left, outer_left * OPERATOR_DIM, center_left) *
+        reshape(right, center_right, OPERATOR_DIM * outer_right)
+    theta = reshape(
+        theta_matrix,
+        outer_left,
+        OPERATOR_DIM,
+        OPERATOR_DIM,
+        outer_right,
+    )
+    physical_theta = reshape(
+        permutedims(theta, (2, 3, 1, 4)),
+        OPERATOR_DIM^2,
+        outer_left * outer_right,
+    )
+    lifted_operator = lift_bra_operator(operator)
+    norm_squared = sum(abs2, physical_theta)
+    norm_squared > 0 || error("purification two-site wavefunction has zero norm")
+    expectation = sum(physical_theta .* (lifted_operator * physical_theta)) / norm_squared
+    return Float64(expectation)
+end
+
+function purification_bond_energies(
+    state::LTRGState,
+    J::Float64 = 1.0;
+    pauli_convention::Bool = false,
+)::NamedTuple
+    h = bond_hamiltonian(J; pauli_convention)
+    energy_ab = purification_bond_expectation(
+        state.gamma_a,
+        state.lambda_ab,
+        state.gamma_b,
+        state.lambda_ba,
+        h,
+    )
+    energy_ba = purification_bond_expectation(
+        state.gamma_b,
+        state.lambda_ba,
+        state.gamma_a,
+        state.lambda_ab,
+        h,
+    )
+    return (ab = energy_ab, ba = energy_ba, mean = 0.5 * (energy_ab + energy_ba))
 end
 
 function finite_difference_uniform(
@@ -399,11 +659,18 @@ function curve_payload(
     exact_specific_heat::Vector{Float64},
     relative_error::Vector{Float64},
     max_truncerr::Vector{Float64},
+    truncerr_ab::Vector{Float64},
+    truncerr_ba::Vector{Float64},
+    cumulative_truncerr::Vector{Float64},
     log_scale::Vector{Float64},
     log_norm_ab::Vector{Float64},
     log_norm_ba::Vector{Float64},
     kept_ab::Vector{Int},
     kept_ba::Vector{Int},
+    direct_energy_beta::Vector{Float64},
+    direct_energy_ab::Vector{Float64},
+    direct_energy_ba::Vector{Float64},
+    direct_energy::Vector{Float64},
 )::Dict{String,Any}
     beta_free_energy = beta .* free_energy
     if length(beta) == 1
@@ -414,6 +681,24 @@ function curve_payload(
         energy = derivatives.first
         specific_heat = -beta .^ 2 .* derivatives.second
     end
+    if length(direct_energy_beta) <= 1
+        direct_specific_heat = Any[nothing for _ in direct_energy_beta]
+    else
+        direct_derivatives = finite_difference_uniform(direct_energy_beta, direct_energy)
+        direct_specific_heat =
+            -direct_energy_beta .^ 2 .* direct_derivatives.first
+    end
+    exact_specific_heat_at_direct_beta = [
+        exact_thermo(value).specific_heat for value in direct_energy_beta
+    ]
+    direct_specific_heat_relative_error = [
+        measured === nothing ? nothing : (measured - exact) / exact for
+        (measured, exact) in zip(
+            direct_specific_heat,
+            exact_specific_heat_at_direct_beta,
+        )
+    ]
+
     return Dict{String,Any}(
         "tau" => tau,
         "Dc" => Dc,
@@ -430,11 +715,21 @@ function curve_payload(
         "specific_heat" => specific_heat,
         "exact_specific_heat" => exact_specific_heat,
         "max_truncerr" => max_truncerr,
+        "truncerr_ab" => truncerr_ab,
+        "truncerr_ba" => truncerr_ba,
+        "cumulative_truncerr" => cumulative_truncerr,
         "log_scale" => log_scale,
         "log_norm_ab" => log_norm_ab,
         "log_norm_ba" => log_norm_ba,
         "kept_ab" => kept_ab,
         "kept_ba" => kept_ba,
+        "direct_energy_beta" => direct_energy_beta,
+        "direct_energy_ab" => direct_energy_ab,
+        "direct_energy_ba" => direct_energy_ba,
+        "direct_energy" => direct_energy,
+        "direct_specific_heat" => direct_specific_heat,
+        "exact_specific_heat_at_direct_beta" => exact_specific_heat_at_direct_beta,
+        "direct_specific_heat_relative_error" => direct_specific_heat_relative_error,
     )
 end
 
@@ -467,12 +762,20 @@ function run_curve(
     exact_specific_heat = Float64[]
     relative_error = Float64[]
     max_truncerr = Float64[]
+    truncerr_ab = Float64[]
+    truncerr_ba = Float64[]
+    cumulative_truncerr = Float64[]
     log_scale = Float64[]
     log_norm_ab = Float64[]
     log_norm_ba = Float64[]
     kept_ab = Int[]
     kept_ba = Int[]
+    direct_energy_beta = Float64[]
+    direct_energy_ab = Float64[]
+    direct_energy_ba = Float64[]
+    direct_energy = Float64[]
     largest_truncerr = 0.0
+    total_truncerr = 0.0
     payload = Dict{String,Any}()
 
     for step in 1:steps
@@ -482,6 +785,17 @@ function run_curve(
             diagnostic.truncerr_ab,
             diagnostic.truncerr_ba,
         )
+        total_truncerr += diagnostic.truncerr_ab + diagnostic.truncerr_ba
+        if step > steps - DIRECT_ENDPOINT_SAMPLES
+            measured_energy = direct_bond_energies(
+                state;
+                pauli_convention,
+            )
+            push!(direct_energy_beta, state.beta)
+            push!(direct_energy_ab, measured_energy.ab)
+            push!(direct_energy_ba, measured_energy.ba)
+            push!(direct_energy, measured_energy.mean)
+        end
         save_sample = step % sample_every == 0 || step == steps
         current_relative_error = NaN
 
@@ -501,6 +815,9 @@ function run_curve(
             push!(exact_specific_heat, exact.specific_heat)
             push!(relative_error, current_relative_error)
             push!(max_truncerr, largest_truncerr)
+            push!(truncerr_ab, diagnostic.truncerr_ab)
+            push!(truncerr_ba, diagnostic.truncerr_ba)
+            push!(cumulative_truncerr, total_truncerr)
             push!(log_scale, state.log_scale)
             push!(log_norm_ab, diagnostic.log_norm_ab)
             push!(log_norm_ba, diagnostic.log_norm_ba)
@@ -520,11 +837,18 @@ function run_curve(
                 exact_specific_heat,
                 relative_error,
                 max_truncerr,
+                truncerr_ab,
+                truncerr_ba,
+                cumulative_truncerr,
                 log_scale,
                 log_norm_ab,
                 log_norm_ba,
                 kept_ab,
                 kept_ba,
+                direct_energy_beta,
+                direct_energy_ab,
+                direct_energy_ba,
+                direct_energy,
             )
             output === nothing || atomic_write_json(output, payload)
         end
@@ -537,16 +861,276 @@ function run_curve(
                 current_relative_error =
                     abs((current_free_energy - exact.free_energy) / exact.free_energy)
             end
+            direct_status = ""
+            if step == steps && !isempty(payload)
+                direct_heat = payload["direct_specific_heat"][end]
+                direct_relative_error = payload["direct_specific_heat_relative_error"][end]
+                if direct_heat !== nothing
+                    direct_status =
+                        " direct_C=$(round(direct_heat; sigdigits=8))" *
+                        " direct_C_rel=$(round(direct_relative_error; sigdigits=6))"
+                end
+            end
             println(
                 "beta=$(round(state.beta; digits=8)) " *
                 "log_scale=$(round(state.log_scale; sigdigits=8)) " *
                 "max_truncerr=$(round(largest_truncerr; sigdigits=5)) " *
-                "relative_free_energy_error=$(round(current_relative_error; sigdigits=5))",
+                "relative_free_energy_error=$(round(current_relative_error; sigdigits=5))" *
+                direct_status,
             )
             flush(stdout)
         end
     end
     return payload
+end
+
+function bilayer_curve_payload(
+    tau::Float64,
+    Dc::Int,
+    beta_max::Float64,
+    beta::Vector{Float64},
+    energy_ab::Vector{Float64},
+    energy_ba::Vector{Float64},
+    energy::Vector{Float64},
+    exact_energy::Vector{Float64},
+    exact_specific_heat::Vector{Float64},
+    max_truncerr::Vector{Float64},
+    truncerr_ab::Vector{Float64},
+    truncerr_ba::Vector{Float64},
+    cumulative_truncerr::Vector{Float64},
+    kept_ab::Vector{Int},
+    kept_ba::Vector{Int},
+)::Dict{String,Any}
+    if length(beta) <= 1
+        specific_heat = Any[nothing for _ in beta]
+    else
+        derivatives = finite_difference_uniform(beta, energy)
+        specific_heat = -beta .^ 2 .* derivatives.first
+    end
+    specific_heat_relative_error = [
+        measured === nothing ? nothing : (measured - exact) / exact for
+        (measured, exact) in zip(specific_heat, exact_specific_heat)
+    ]
+    return Dict{String,Any}(
+        "method" => "bilayer LTRG++ purification",
+        "tau" => tau,
+        "Dc" => Dc,
+        "beta_max" => beta_max,
+        "beta" => beta,
+        "temperature" => 1.0 ./ beta,
+        "energy_ab" => energy_ab,
+        "energy_ba" => energy_ba,
+        "energy" => energy,
+        "exact_energy" => exact_energy,
+        "specific_heat" => specific_heat,
+        "exact_specific_heat" => exact_specific_heat,
+        "specific_heat_relative_error" => specific_heat_relative_error,
+        "max_truncerr" => max_truncerr,
+        "truncerr_ab" => truncerr_ab,
+        "truncerr_ba" => truncerr_ba,
+        "cumulative_truncerr" => cumulative_truncerr,
+        "kept_ab" => kept_ab,
+        "kept_ba" => kept_ba,
+    )
+end
+
+function run_bilayer_curve(
+    tau::Float64,
+    Dc::Int,
+    beta_max::Float64;
+    J::Float64 = 1.0,
+    cutoff::Float64 = 0.0,
+    endpoint_samples::Int = DIRECT_ENDPOINT_SAMPLES,
+    progress_every::Int = 100,
+    output::Union{Nothing,String} = nothing,
+    pauli_convention::Bool = false,
+)::Dict{String,Any}
+    tau > 0 || throw(ArgumentError("tau must be positive"))
+    Dc > 0 || throw(ArgumentError("Dc must be positive"))
+    beta_max >= tau || throw(ArgumentError("beta_max must be at least tau"))
+    endpoint_samples >= 2 || throw(ArgumentError("endpoint_samples must be at least two"))
+    progress_every > 0 || throw(ArgumentError("progress_every must be positive"))
+    steps = round(Int, beta_max / tau)
+    isapprox(steps * tau, beta_max; atol = 100 * eps(Float64) * beta_max, rtol = 0.0) ||
+        throw(ArgumentError("beta_max must be an integer multiple of tau"))
+
+    state = identity_state()
+    quarter_gate = vectorized_gate(0.25 * tau, J; pauli_convention)
+    half_gate = vectorized_gate(0.5 * tau, J; pauli_convention)
+    beta = Float64[]
+    energy_ab = Float64[]
+    energy_ba = Float64[]
+    energy = Float64[]
+    exact_energy = Float64[]
+    exact_specific_heat = Float64[]
+    max_truncerr = Float64[]
+    truncerr_ab = Float64[]
+    truncerr_ba = Float64[]
+    cumulative_truncerr = Float64[]
+    kept_ab = Int[]
+    kept_ba = Int[]
+    largest_truncerr = 0.0
+    total_truncerr = 0.0
+    payload = Dict{String,Any}()
+
+    for step in 1:steps
+        diagnostic = bilayer_step!(
+            state,
+            quarter_gate,
+            half_gate,
+            tau,
+            Dc;
+            cutoff,
+        )
+        largest_truncerr = max(largest_truncerr, diagnostic.max_truncerr)
+        total_truncerr += diagnostic.truncerr_total
+        endpoint_step = step > steps - endpoint_samples
+
+        if endpoint_step
+            measured = purification_bond_energies(
+                state,
+                J;
+                pauli_convention,
+            )
+            exact = exact_thermo(state.beta, J)
+            push!(beta, state.beta)
+            push!(energy_ab, measured.ab)
+            push!(energy_ba, measured.ba)
+            push!(energy, measured.mean)
+            push!(exact_energy, exact.energy)
+            push!(exact_specific_heat, exact.specific_heat)
+            push!(max_truncerr, largest_truncerr)
+            push!(truncerr_ab, diagnostic.truncerr_ab)
+            push!(truncerr_ba, diagnostic.truncerr_ba)
+            push!(cumulative_truncerr, total_truncerr)
+            push!(kept_ab, diagnostic.kept_ab)
+            push!(kept_ba, diagnostic.kept_ba)
+            payload = bilayer_curve_payload(
+                tau,
+                Dc,
+                beta_max,
+                beta,
+                energy_ab,
+                energy_ba,
+                energy,
+                exact_energy,
+                exact_specific_heat,
+                max_truncerr,
+                truncerr_ab,
+                truncerr_ba,
+                cumulative_truncerr,
+                kept_ab,
+                kept_ba,
+            )
+            output === nothing || atomic_write_json(output, payload)
+        end
+
+        if step % progress_every == 0 || step == steps
+            if endpoint_step
+                current_energy = energy[end]
+            else
+                current_energy = purification_bond_energies(
+                    state,
+                    J;
+                    pauli_convention,
+                ).mean
+            end
+            current_exact = exact_thermo(state.beta, J).energy
+            energy_error = abs((current_energy - current_exact) / current_exact)
+            heat_status = ""
+            if step == steps
+                heat = payload["specific_heat"][end]
+                heat_error = payload["specific_heat_relative_error"][end]
+                heat_status =
+                    " C=$(round(heat; sigdigits=8))" *
+                    " C_rel=$(round(heat_error; sigdigits=6))"
+            end
+            println(
+                "beta=$(round(state.beta; digits=8)) " *
+                "log_scale=$(round(state.log_scale; sigdigits=8)) " *
+                "max_truncerr=$(round(largest_truncerr; sigdigits=5)) " *
+                "relative_energy_error=$(round(energy_error; sigdigits=5))" *
+                heat_status,
+            )
+            flush(stdout)
+        end
+    end
+    return payload
+end
+
+function run_bilayer_cell!(
+    run_spec::Dict{String,Any},
+    cell::Dict{String,Any};
+    progress_every::Int = 100,
+)::Dict{String,Any}
+    run_dir = String(run_spec["run_dir"])
+    cell_id = String(cell["cell_id"])
+    cell_dir = joinpath(run_dir, "cells", cell_id)
+    data_path = joinpath(cell_dir, "data.json")
+    manifest_path = joinpath(cell_dir, "manifest.json")
+    params = cell["params"]
+    curve = params["curve"]
+    settings = merge(
+        Dict{String,Any}(run_spec["settings"]),
+        Dict{String,Any}(get(cell, "settings", Dict{String,Any}())),
+    )
+    provenance = merge(
+        Dict{String,Any}(run_spec["provenance"]),
+        Dict{String,Any}(get(cell, "provenance", Dict{String,Any}())),
+    )
+    started = time()
+    manifest = Dict{String,Any}(
+        "cell_id" => cell_id,
+        "params" => params,
+        "settings" => settings,
+        "provenance" => provenance,
+        "success" => false,
+        "metrics" => Dict{String,Any}(
+            "method" => "bilayer LTRG++ purification",
+            "samples" => 0,
+        ),
+    )
+    atomic_write_json(manifest_path, manifest)
+
+    try
+        pauli_convention = get(settings, "spin_convention", "S=sigma/2") != "S=sigma/2"
+        data = run_bilayer_curve(
+            Float64(curve["tau"]),
+            Int(curve["Dc"]),
+            Float64(curve["beta_max"]);
+            J = Float64(get(settings, "J", 1.0)),
+            cutoff = Float64(get(settings, "svd_cutoff", 0.0)),
+            endpoint_samples = Int(get(
+                settings,
+                "direct_energy_endpoint_samples",
+                DIRECT_ENDPOINT_SAMPLES,
+            )),
+            progress_every,
+            output = data_path,
+            pauli_convention,
+        )
+        manifest["success"] = true
+        manifest["metrics"] = Dict{String,Any}(
+            "method" => data["method"],
+            "samples" => length(data["beta"]),
+            "wall_seconds" => time() - started,
+            "peak_rss_bytes" => Sys.maxrss(),
+            "max_truncerr" => maximum(data["max_truncerr"]),
+            "cumulative_truncerr" => data["cumulative_truncerr"][end],
+            "energy_endpoint" => data["energy"][end],
+            "specific_heat_endpoint" => data["specific_heat"][end],
+            "exact_specific_heat_endpoint" => data["exact_specific_heat"][end],
+            "specific_heat_relative_error" =>
+                data["specific_heat_relative_error"][end],
+        )
+        atomic_write_json(manifest_path, manifest)
+        return manifest
+    catch error
+        manifest["error"] = sprint(showerror, error)
+        manifest["metrics"]["wall_seconds"] = time() - started
+        atomic_write_json(manifest_path, manifest)
+        rethrow()
+    end
 end
 
 function run_cell!(
@@ -599,7 +1183,14 @@ function run_cell!(
             "wall_seconds" => time() - started,
             "peak_rss_bytes" => Sys.maxrss(),
             "max_truncerr" => maximum(data["max_truncerr"]),
+            "cumulative_truncerr" => data["cumulative_truncerr"][end],
             "final_relative_free_energy_error" => data["relative_free_energy_error"][end],
+            "direct_energy_endpoint" => data["direct_energy"][end],
+            "direct_specific_heat_endpoint" => data["direct_specific_heat"][end],
+            "exact_specific_heat_at_direct_beta" =>
+                data["exact_specific_heat_at_direct_beta"][end],
+            "direct_specific_heat_relative_error" =>
+                data["direct_specific_heat_relative_error"][end],
         )
         atomic_write_json(manifest_path, manifest)
         return manifest

@@ -1,0 +1,20 @@
+{
+  "protocol": "issue28_n0_exact_oracle_v1",
+  "umbrella": "config/issue28_easy_v1.json",
+  "blocking_oracle": {"rows": 3, "cols": 6, "block_size": 3, "coupling": 0.436},
+  "identity_oracle": {"length": 3, "radius": 1, "hidden": 3, "seed": 2026283001},
+  "tolerances": {
+    "probability_sum": 1e-14,
+    "objective_gradient": 1e-9,
+    "jax_vs_analytic": 1e-9,
+    "jax_vs_finite_difference": 1e-6,
+    "local_delta": 1e-10,
+    "monte_carlo_family_alpha": 0.05
+  },
+  "jax": {
+    "platform": "cpu",
+    "enable_x64": true,
+    "mc_sample_count": 100000,
+    "install": "make install jax EXTRA=cpu"
+  }
+}

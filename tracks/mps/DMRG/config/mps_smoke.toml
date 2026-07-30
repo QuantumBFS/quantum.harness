@@ -1,0 +1,34 @@
+[model]
+length = 9
+coupling = 0.436
+block_size = 3
+rg_levels = 1
+operator_count = 1
+
+[mps]
+chi = 2
+symmetrize = true
+
+[training]
+walkers = 2
+baseline_steps = 8
+residual_steps = 12
+sweeps_per_step = 1
+baseline_learning_rate = 0.00005
+alpha_learning_rate = 0.01
+core_learning_rate = 0.001
+linear_learning_rate = 0.0
+gradient_clip = 5.0
+cache_check_every = 2
+canonicalize_every = 6
+compiled = true
+parallel_walkers = false
+
+[measurement]
+thermalization_sweeps = 10
+measurement_sweeps = 100
+thinning = 1
+
+[run]
+seeds = [20260801]
+output = "results/mps_challenge/smoke"

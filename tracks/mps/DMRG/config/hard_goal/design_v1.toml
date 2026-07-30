@@ -1,0 +1,39 @@
+schema_version = 1
+sizes = [6, 9, 12, 15, 18, 24, 27, 45]
+
+[model]
+distribution = "iid_pm1"
+coupling_scale = 1.0
+periodic = true
+external_field = 0.0
+hamiltonian_sign = -1
+lattice = "cubic"
+dimensions = 3
+boltzmann_constant = 1.0
+inverse_temperature = "beta=1/T"
+
+[rg]
+block_shape = [3, 3, 3]
+default_levels = 1
+target_distribution = "uniform_independent"
+second_level_requires = "first_rg_pass_manifest"
+routes = ["C", "B", "A"]
+main_route = "C"
+fallback_route = "B"
+ablation_route = "A"
+mandatory_ranks = [2, 4, 8]
+extension_ranks = [16]
+
+[evidence]
+fss_sampling = "independent_unbiased"
+primary_observables = ["xi_L/L", "Binder"]
+observables = [
+  "q^2",
+  "q^4",
+  "chi_SG(0)",
+  "chi_SG(k_min)",
+  "xi_L",
+  "xi_L/L",
+  "Binder",
+]
+rg_compatibility = "independent"

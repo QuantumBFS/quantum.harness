@@ -1,0 +1,99 @@
+{
+  "protocol": "neural_three_arm_attribution_v1",
+  "locked": true,
+  "scope": "2D_L45_unbiased_vs_13_operator_vs_13_operator_plus_neural",
+  "source_archive": "output/neural_confirmation_frozen_v1",
+  "observable": "nearest_neighbor_micro_per_site_times_nearest_neighbor_block_per_site",
+  "formal_requirements": {
+    "length": 45,
+    "model_repeats": 10,
+    "chains_per_repeat": 8,
+    "thermal_sweeps": 1000,
+    "measurements": 5000,
+    "sweeps_per_measurement": 1,
+    "maximum_lag": 1000,
+    "bootstrap_samples": 10000,
+    "confidence_multiplier": 2.0,
+    "primary_ratio": "hybrid_tau_over_linear_tau",
+    "primary_upper_bound_threshold": 1.0,
+    "minimum_improved_repeat_means": 8,
+    "diagnostic_biased_over_unbiased_threshold": 0.5
+  },
+  "repeat_sources": [
+    {
+      "repeat": 1,
+      "batch": "formal_v1",
+      "batch_repeat": 1,
+      "path": "runs/formal_v1/repeat_1",
+      "seed": 202673101
+    },
+    {
+      "repeat": 2,
+      "batch": "formal_v1",
+      "batch_repeat": 2,
+      "path": "runs/formal_v1/repeat_2",
+      "seed": 202673102
+    },
+    {
+      "repeat": 3,
+      "batch": "formal_v1",
+      "batch_repeat": 3,
+      "path": "runs/formal_v1/repeat_3",
+      "seed": 202673103
+    },
+    {
+      "repeat": 4,
+      "batch": "formal_v1",
+      "batch_repeat": 4,
+      "path": "runs/formal_v1/repeat_4",
+      "seed": 202673104
+    },
+    {
+      "repeat": 5,
+      "batch": "formal_v1",
+      "batch_repeat": 5,
+      "path": "runs/formal_v1/repeat_5",
+      "seed": 202673105
+    },
+    {
+      "repeat": 6,
+      "batch": "independent_v2",
+      "batch_repeat": 1,
+      "path": "runs/independent_v2/repeat_1",
+      "seed": 202673201
+    },
+    {
+      "repeat": 7,
+      "batch": "independent_v2",
+      "batch_repeat": 2,
+      "path": "runs/independent_v2/repeat_2",
+      "seed": 202673202
+    },
+    {
+      "repeat": 8,
+      "batch": "independent_v2",
+      "batch_repeat": 3,
+      "path": "runs/independent_v2/repeat_3",
+      "seed": 202673203
+    },
+    {
+      "repeat": 9,
+      "batch": "independent_v2",
+      "batch_repeat": 4,
+      "path": "runs/independent_v2/repeat_4",
+      "seed": 202673204
+    },
+    {
+      "repeat": 10,
+      "batch": "independent_v2",
+      "batch_repeat": 5,
+      "path": "runs/independent_v2/repeat_5",
+      "seed": 202673205
+    }
+  ],
+  "bootstrap_seeds": {
+    "hybrid_over_linear": 202673901,
+    "linear_over_unbiased": 202673902,
+    "hybrid_over_unbiased": 202673903
+  }
+}

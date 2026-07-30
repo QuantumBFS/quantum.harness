@@ -1,0 +1,34 @@
+[model]
+length = 27
+coupling = 0.436
+block_size = 3
+rg_levels = 1
+operator_count = 13
+
+[mps]
+chi = 2
+symmetrize = true
+
+[training]
+walkers = 4
+baseline_steps = 150
+residual_steps = 150
+sweeps_per_step = 2
+baseline_learning_rate = 0.00005
+alpha_learning_rate = 0.005
+core_learning_rate = 0.0005
+linear_learning_rate = 0.0
+gradient_clip = 5.0
+cache_check_every = 10
+canonicalize_every = 25
+compiled = true
+parallel_walkers = true
+
+[measurement]
+thermalization_sweeps = 500
+measurement_sweeps = 3000
+thinning = 1
+
+[run]
+seeds = [20260801, 20260802, 20260803]
+output = "results/mps_challenge/medium_chi2"

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "run_id": "issue28-n3-hpc-replica-20260729-01",
+  "role": "nonformal_acceleration_replica",
+  "authoritative_result": false,
+  "lineage_source": "results/issue28-n3-local-20260728-02/round-02",
+  "code_sha256": "e8f5e3c9163eab8db9f0df3cccdc4f853844d049a8cf58df7db5e991c2a0ad31",
+  "protocol_sha256": "a08eef49f356f40b40eed878b62993e671d383fb98d8b201e09bc51ff88464e6",
+  "pilot_config_sha256": "b46913d790001e0165fbb5ea6f21e27079006b9dacee12cd6eb7bd592630b816",
+  "formal_seed": false,
+  "cells": [
+    {
+      "cell_id": "pilot",
+      "params": {
+        "stage": "N3",
+        "protocol": "tracks/mps/DMRG/config/issue28_easy_v1.json",
+        "preset": "pilot",
+        "rounds": 5,
+        "backend": "slurm",
+        "resume": true,
+        "output": "results/issue28-n3-hpc-replica-20260729-01/cells/pilot"
+      }
+    }
+  ]
+}
