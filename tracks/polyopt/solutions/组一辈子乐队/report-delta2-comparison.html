@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XXZ Δ=2: D=6 coarse-RDM comparison with Kull et al.</title>
+<style>
+:root{--bg:#f7f5ef;--panel:#fff;--ink:#17202a;--muted:#667085;--line:#ddd8cb;--blue:#2457c5;--green:#2e7d32;--orange:#b65f17;--red:#b42318;--soft-blue:#eaf0ff;--soft-orange:#fff1df;--soft-green:#eaf6ec;--sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--serif:"Iowan Old Style",Charter,Cambria,Georgia,serif;--mono:"SFMono-Regular",Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}main{max-width:1040px;margin:auto;padding:44px 34px 80px}h1,h2{font-family:var(--serif);line-height:1.15}h1{font-size:34px;margin:8px 0 12px;max-width:30ch}h2{font-size:23px;margin:38px 0 8px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--blue);font-weight:700}.sub{max-width:78ch;color:var(--muted);font-size:14px}.answer{margin:22px 0;padding:16px 18px;border:1px solid #bdd0ff;background:var(--soft-blue);border-radius:8px;font-size:15px}.answer strong{color:#163b8f}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.metric,.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-family:var(--serif);font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}.card{margin:12px 0}.card h3{font-family:var(--serif);font-size:18px;margin:0 0 5px}.note{font-size:13px;color:var(--muted)}code{font-family:var(--mono);background:#efede6;border-radius:4px;padding:1px 5px;font-size:.9em}.equation{text-align:center;font-family:var(--serif);font-size:20px;padding:13px;background:#faf9f5;border:1px solid var(--line);border-radius:7px;margin:14px 0}.plot{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px 6px}.plot svg{display:block;width:100%;height:auto}.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);padding:4px 10px 10px}.swatch{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px}.swatch.local{background:var(--blue)}.swatch.paper{background:var(--green)}.swatch.band{height:10px;background:rgba(46,125,50,.18);border:1px solid rgba(46,125,50,.35)}table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:13px;margin:12px 0}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f0eee7;font-weight:650}td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}tr:last-child td{border-bottom:0}.clean{color:var(--green);font-weight:650}.candidate{color:var(--orange);font-weight:650}.callout{border-left:4px solid var(--orange);background:var(--soft-orange);padding:12px 15px;margin:14px 0;font-size:14px}.good{border-left-color:var(--green);background:var(--soft-green)}ul{margin:7px 0;padding-left:21px}.sources{font-size:12.5px;color:var(--muted)}.sources li{margin:5px 0;overflow-wrap:anywhere}.footer{margin-top:42px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}button{position:fixed;right:18px;top:16px;border:1px solid var(--line);background:white;border-radius:6px;padding:7px 11px;cursor:pointer}@media(max-width:720px){main{padding:28px 16px 60px}.grid{grid-template-columns:1fr}h1{font-size:29px}table{font-size:11px}th,td{padding:7px 5px}.wide{overflow-x:auto}button{display:none}}@media print{button{display:none}main{max-width:none;padding:0}.card,.plot,table{break-inside:avoid}}
+</style>
+</head>
+<body>
+<button onclick="window.print()">Save as PDF</button>
+<main>
+<header>
+<div class="eyebrow">Infinite spin-½ XXZ chain · Δ=2 · J=1</div>
+<h1>D=6 coarse-RDM bounds compared with Kull et al. Figure 5(c)</h1>
+<p class="sub">Existing numerical outputs are aligned to the paper by physical hierarchy size, using the exact per-site energy −0.617222045975865 and the D=6 series digitized from Figure 5(c). No calculation was rerun for this report.</p>
+<div class="answer"><strong>Index mapping used throughout: n = m + 2.</strong> The output parameter <code>m</code> is the largest interior coarse-graining-map length. The corresponding coarse variable retains one physical boundary site on each side, so its physical support is <code>m+2</code>, which is Kull et al.’s <code>n</code>.</div>
+</header>
+
+<div class="grid">
+<div class="metric"><div class="label">Best current local lower-bound gap</div><div class="value">1.48407×10⁻³</div><div class="note">m=20 → n=22; candidate, clean=false</div></div>
+<div class="metric"><div class="label">D=64 VUMPS upper-bound error</div><div class="value">2.22438×10⁻⁶</div><div class="note">clean convergence; reference only</div></div>
+<div class="metric"><div class="label">Shared m=10/20/32 job</div><div class="value">56.1 GiB</div><div class="note">peak RSS; completed without OOM</div></div>
+</div>
+
+<section>
+<h2>Why n=m+2</h2>
+<div class="equation">ω⁽ᵐ⁺²⁾ = (I ⊗ Wₘ ⊗ I) ρ⁽ᵐ⁺²⁾ (I ⊗ Wₘ† ⊗ I)</div>
+<div class="card">
+<h3>Direct correspondence</h3>
+<ul>
+<li><code>Wₘ</code> contracts the <strong>m interior sites</strong>.</li>
+<li>The left and right physical boundary sites remain explicit.</li>
+<li>The physical support is therefore <strong>m + 1 + 1 = m+2</strong>.</li>
+<li>The runner writes its <code>depth</code> directly as <code>result-D6-m&lt;depth&gt;.tsv</code>; the SDP metadata records the physical-support offset as 2.</li>
+</ul>
+<p class="note">Accordingly, m={3,6,8,10,20,32} maps to n={5,8,10,12,22,34}. This is the sole mapping used in the comparison below.</p>
+</div>
+</section>
+
+<section>
+<h2>Error comparison</h2>
+<p class="sub">Both curves use the lower-bound gap δ=E_exact−E_lb per physical site; smaller is tighter. The shaded green region is the digitization interval recorded in the supplied source-of-truth JSON, not an error bar reported by the paper.</p>
+<div class="plot">
+<svg id="comparison" viewBox="0 0 940 520" role="img" aria-label="Log-scale lower-bound error versus Kull hierarchy size n"></svg>
+<div class="legend"><span><i class="swatch local"></i>This work, D=6</span><span><i class="swatch paper"></i>Kull et al. Fig. 5(c), D=6 digitized</span><span><i class="swatch band"></i>Digitization interval</span></div>
+</div>
+<div class="wide">
+<table>
+<thead><tr><th>code m</th><th>Kull n</th><th>local E_lb/site</th><th>local gap δ</th><th>paper gap δ</th><th>local / paper</th><th>solver status</th></tr></thead>
+<tbody>
+<tr><td class="num">3</td><td class="num">5</td><td class="num">−0.6244583664</td><td class="num">7.23632×10⁻³</td><td class="num">2.53129×10⁻²</td><td class="num">0.286×</td><td><span class="clean">OPTIMAL · clean</span></td></tr>
+<tr><td class="num">6</td><td class="num">8</td><td class="num">−0.6196372589</td><td class="num">2.41521×10⁻³</td><td class="num">1.27498×10⁻²</td><td class="num">0.189×</td><td><span class="clean">SLOW_PROGRESS · clean</span></td></tr>
+<tr><td class="num">8</td><td class="num">10</td><td class="num">−0.6190462042</td><td class="num">1.82416×10⁻³</td><td class="num">7.21625×10⁻³</td><td class="num">0.253×</td><td><span class="candidate">SLOW_PROGRESS · candidate</span></td></tr>
+<tr><td class="num">10</td><td class="num">12</td><td class="num">−0.6188534676</td><td class="num">1.63142×10⁻³</td><td class="num">4.46077×10⁻³</td><td class="num">0.366×</td><td><span class="candidate">SLOW_PROGRESS · candidate</span></td></tr>
+<tr><td class="num">20</td><td class="num">22</td><td class="num">−0.6187061153</td><td class="num">1.48407×10⁻³</td><td class="num">7.80780×10⁻⁴</td><td class="num">1.901×</td><td><span class="candidate">SLOW_PROGRESS · candidate</span></td></tr>
+<tr><td class="num">32</td><td class="num">34</td><td class="num">−0.6187385092</td><td class="num">1.51646×10⁻³</td><td class="num">3.28880×10⁻⁴</td><td class="num">4.611×</td><td><span class="candidate">SLOW_PROGRESS · candidate</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout good"><strong>Early hierarchy:</strong> at n=5–12, the present local gaps are about 0.19–0.37 times the digitized paper gaps, hence tighter at those matched n values.</div>
+<div class="callout"><strong>Deep hierarchy:</strong> the paper curve continues improving, while the present values plateau near 1.5×10⁻³. At n=22 and n=34, the local gaps are about 1.90 and 4.61 times the digitized paper gaps. Because the local m=8/10/20/32 points are <code>clean=false</code>, this plateau should be treated as numerical evidence rather than a certified asymptotic conclusion.</div>
+</section>
+
+<section>
+<h2>Energy bracket and numerical status</h2>
+<div class="wide"><table>
+<thead><tr><th>quantity</th><th>energy/site</th><th>distance from exact</th><th>role</th></tr></thead>
+<tbody>
+<tr><td>Exact reference</td><td class="num">−0.617222045975865</td><td class="num">0</td><td>comparison baseline</td></tr>
+<tr><td>D=64 VUMPS</td><td class="num">−0.6172198215940801</td><td class="num">2.22438×10⁻⁶ above</td><td>variational upper bound; clean</td></tr>
+<tr><td>D=6 VUMPS</td><td class="num">−0.6166512029225675</td><td class="num">5.70843×10⁻⁴ above</td><td>variational upper bound; clean</td></tr>
+<tr><td>Best current D=6 lower estimate (m=20)</td><td class="num">−0.6187061153189711</td><td class="num">1.48407×10⁻³ below</td><td>candidate lower estimate; clean=false</td></tr>
+</tbody></table></div>
+<p class="note">Direction is consistent: E_lb ≤ E_exact ≤ E_VUMPS. “Candidate” means MOSEK returned SLOW_PROGRESS and the run did not satisfy the repository’s strict clean gate; it is not presented as an independently rigorous certificate.</p>
+</section>
+
+<section>
+<h2>Provenance</h2>
+<ul class="sources">
+<li>Paper comparison data: <code>PAPER_FIG5C_DELTA2_D6_DIGITIZATION_SOURCE_OF_TRUTH.json</code>, Figure 5(c), nominal D=6. Central values and digitization ranges are reproduced unchanged.</li>
+<li>Local D=6 runs: Slurm jobs 23024915/23025154 (m=3/6/8) and shared-VUMPS job 23026308 (m=10/20/32), completed 2026-07-30.</li>
+<li>D=64 VUMPS reference: Slurm job 23031348, algorithm error 8.21×10⁻¹⁰, clean=true.</li>
+<li>Exact reference supplied for this comparison: E_exact/site = −0.617222045975865.</li>
+<li>Hamiltonian convention: H=Σᵢ(SᵢˣSᵢ₊₁ˣ+SᵢʸSᵢ₊₁ʸ+2SᵢᶻSᵢ₊₁ᶻ), J=1.</li>
+</ul>
+</section>
+<div class="footer">Generated from existing artifacts only; no solver or physics calculation was rerun. Report date: 2026-07-30.</div>
+</main>
+<script>
+const local=[
+ {n:5,y:0.0072363203927546},{n:8,y:0.0024152129366476},{n:10,y:0.0018241582338322},
+ {n:12,y:0.0016314216635094},{n:22,y:0.0014840693431061},{n:34,y:0.0015164632731054}
+];
+const paper=[
+ {n:5,y:0.02531291,lo:0.0235,hi:0.027},{n:8,y:0.01274984,lo:0.01113,hi:0.01441},
+ {n:10,y:0.00721625,lo:0.00646,hi:0.00808},{n:12,y:0.00446077,lo:0.00391,hi:0.00506},
+ {n:22,y:0.00078078,lo:0.000688,hi:0.000886},{n:34,y:0.00032888,lo:0.000290,hi:0.000373}
+];
+const svg=document.getElementById('comparison'), NS='http://www.w3.org/2000/svg';
+const W=940,H=520,L=82,R=28,T=28,B=68, xmin=4,xmax=35,ymin=1e-4,ymax=4e-2;
+const X=n=>L+(n-xmin)/(xmax-xmin)*(W-L-R);
+const Y=y=>T+(Math.log10(ymax)-Math.log10(y))/(Math.log10(ymax)-Math.log10(ymin))*(H-T-B);
+function el(tag,a={},text=''){const e=document.createElementNS(NS,tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));if(text)e.textContent=text;svg.appendChild(e);return e}
+el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'#fff'});
+[1e-4,3e-4,1e-3,3e-3,1e-2,3e-2].forEach(v=>{el('line',{x1:L,x2:W-R,y1:Y(v),y2:Y(v),stroke:'#e4e1d9','stroke-width':1});el('text',{x:L-11,y:Y(v)+4,'text-anchor':'end',fill:'#667085','font-size':12},v.toExponential(0).replace('e-','e−'))});
+[5,8,10,12,16,22,28,34].forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:H-B,y2:H-B+6,stroke:'#667085'});el('text',{x:X(v),y:H-B+23,'text-anchor':'middle',fill:'#667085','font-size':12},String(v))});
+el('line',{x1:L,x2:L,y1:T,y2:H-B,stroke:'#475467','stroke-width':1.3});el('line',{x1:L,x2:W-R,y1:H-B,y2:H-B,stroke:'#475467','stroke-width':1.3});
+el('text',{x:(L+W-R)/2,y:H-18,'text-anchor':'middle',fill:'#344054','font-size':14},'Kull hierarchy size n = code m + 2');
+el('text',{x:18,y:(T+H-B)/2,transform:`rotate(-90 18 ${(T+H-B)/2})`,'text-anchor':'middle',fill:'#344054','font-size':14},'Lower-bound gap δ per site (log scale)');
+const band=[...paper.map(p=>`${X(p.n)},${Y(p.hi)}`),...paper.slice().reverse().map(p=>`${X(p.n)},${Y(p.lo)}`)].join(' ');el('polygon',{points:band,fill:'rgba(46,125,50,.15)',stroke:'none'});
+function path(data,color){el('polyline',{points:data.map(p=>`${X(p.n)},${Y(p.y)}`).join(' '),fill:'none',stroke:color,'stroke-width':3,'stroke-linejoin':'round'});data.forEach(p=>el('circle',{cx:X(p.n),cy:Y(p.y),r:5,fill:'#fff',stroke:color,'stroke-width':3}))}
+path(paper,'#2e7d32');path(local,'#2457c5');
+</script>
+</body>
+</html>
