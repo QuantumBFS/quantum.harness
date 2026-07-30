@@ -68,8 +68,18 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--noise-confidence-unit",
-        choices=("bit", "word"),
+        choices=("bit", "word", "auto"),
         default="bit",
+    )
+    parser.add_argument(
+        "--auto-correlation-min-word-pairs",
+        type=int,
+        default=250,
+    )
+    parser.add_argument(
+        "--auto-correlation-design-effect-threshold",
+        type=float,
+        default=2.0,
     )
     parser.add_argument(
         "--carry-noise-calibration-across-degrees",
@@ -133,16 +143,68 @@ class BoundedAccumulator:
 class DisjointPairNoiseEstimator:
     """Estimate p from independent pairs without access to clean labels."""
 
-    def __init__(self, confidence_unit: str) -> None:
-        if confidence_unit not in {"bit", "word"}:
-            raise ValueError("confidence unit must be bit or word")
+    def __init__(
+        self,
+        confidence_unit: str,
+        auto_min_word_pairs: int = 250,
+        auto_design_effect_threshold: float = 2.0,
+    ) -> None:
+        if confidence_unit not in {"bit", "word", "auto"}:
+            raise ValueError("confidence unit must be bit, word or auto")
+        if auto_min_word_pairs < 2:
+            raise ValueError("auto minimum word pairs must be at least two")
+        if auto_design_effect_threshold <= 1.0:
+            raise ValueError("auto design-effect threshold must exceed one")
         self.confidence_unit = confidence_unit
+        self.auto_min_word_pairs = auto_min_word_pairs
+        self.auto_design_effect_threshold = (
+            auto_design_effect_threshold
+        )
         self.pending = np.zeros(
             (DOMAIN_SIZE, OUTPUT_BITS),
             dtype=np.uint8,
         )
         self.has_pending = np.zeros(DOMAIN_SIZE, dtype=bool)
-        self.disagreement = BoundedAccumulator()
+        self.bit_disagreement = BoundedAccumulator()
+        self.word_disagreement = BoundedAccumulator()
+
+    @property
+    def empirical_design_effect(self) -> float:
+        mean = self.word_disagreement.mean
+        binomial_variance = mean * (1.0 - mean)
+        if (
+            self.word_disagreement.count < 2
+            or binomial_variance <= 0.0
+        ):
+            return 12.0
+        return max(
+            12.0
+            * self.word_disagreement.sample_variance
+            / binomial_variance,
+            0.0,
+        )
+
+    @property
+    def selected_confidence_unit(self) -> str:
+        if self.confidence_unit != "auto":
+            return self.confidence_unit
+        if (
+            self.word_disagreement.count
+            < self.auto_min_word_pairs
+        ):
+            return "word"
+        if (
+            self.empirical_design_effect
+            > self.auto_design_effect_threshold
+        ):
+            return "word"
+        return "bit"
+
+    @property
+    def disagreement(self) -> BoundedAccumulator:
+        if self.selected_confidence_unit == "word":
+            return self.word_disagreement
+        return self.bit_disagreement
 
     def update(
         self,
@@ -157,12 +219,10 @@ class DisjointPairNoiseEstimator:
                 difference = (
                     self.pending[index] != target
                 ).astype(np.float64)
-                if self.confidence_unit == "word":
-                    self.disagreement.update(
-                        np.array([float(np.mean(difference))])
-                    )
-                else:
-                    self.disagreement.update(difference)
+                self.bit_disagreement.update(difference)
+                self.word_disagreement.update(
+                    np.array([float(np.mean(difference))])
+                )
                 self.has_pending[index] = False
             else:
                 self.pending[index] = target
@@ -251,6 +311,12 @@ def interval_record(
         "selection_noise_rate_lower": p_lower,
         "selection_noise_rate_upper": p_upper,
         "selection_noise_interval_width": p_width,
+        "noise_confidence_unit_selected": (
+            estimator.selected_confidence_unit
+        ),
+        "estimated_bitwise_design_effect": (
+            estimator.empirical_design_effect
+        ),
         "holdout_excess_lower": q_lower - p_upper,
         "holdout_excess_point": accumulator.mean - p_estimate,
         "holdout_excess_upper": q_upper - p_lower,
@@ -379,7 +445,11 @@ def main() -> None:
     cumulative_training_examples = 0
     cumulative_holdout_words = 0
     shared_selection_noise = (
-        DisjointPairNoiseEstimator(args.noise_confidence_unit)
+        DisjointPairNoiseEstimator(
+            args.noise_confidence_unit,
+            args.auto_correlation_min_word_pairs,
+            args.auto_correlation_design_effect_threshold,
+        )
         if args.carry_noise_calibration_across_degrees
         else None
     )
@@ -414,7 +484,11 @@ def main() -> None:
         selection_noise = (
             shared_selection_noise
             if shared_selection_noise is not None
-            else DisjointPairNoiseEstimator(args.noise_confidence_unit)
+            else DisjointPairNoiseEstimator(
+                args.noise_confidence_unit,
+                args.auto_correlation_min_word_pairs,
+                args.auto_correlation_design_effect_threshold,
+            )
         )
         prior_generator = np.random.default_rng(
             args.base_seed + 20_000 + stage_index
@@ -630,6 +704,12 @@ def main() -> None:
             ),
             "common_noise_rate": common_noise_rate,
             "noise_confidence_unit": args.noise_confidence_unit,
+            "auto_correlation_min_word_pairs": (
+                args.auto_correlation_min_word_pairs
+            ),
+            "auto_correlation_design_effect_threshold": (
+                args.auto_correlation_design_effect_threshold
+            ),
             "carry_noise_calibration_across_degrees": (
                 args.carry_noise_calibration_across_degrees
             ),

@@ -823,6 +823,69 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧自动相关性诊断：训练器自行决定能否逐位相加不确定性⟦en⟧Automatic correlation diagnosis: the learner decides whether bitwise uncertainty may be added"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧无需提供噪声家族，16 次训练从第一次阶数检查起全部选择正确区间单位并最终精确⟦en⟧Without being told the noise family, all 16 runs choose the correct interval unit from the first degree check and finish exact",
+          "why": "⟦zh⟧自动模式先把每个重复输出词对视为一个聚类；达到 250 个独立词对后，估计十二位分歧的设计效应。低于 2 才允许切换到逐位区间，否则保留整词区间。八个独立噪声种子的最终设计效应为 0.966–1.027，全部选择逐位；八个相关噪声种子为 7.937–8.032，全部选择整词。所有检查点的选择都一致，十六次最终仍恢复同一 36 项、156 门精确规则。⟦en⟧Automatic mode initially treats each repeated output-word pair as one cluster. After 250 independent pairs, it estimates the design effect of twelve-bit disagreement and switches to bitwise intervals only below 2; otherwise it retains word-cluster intervals. Final design effects are 0.966–1.027 for eight independent-noise seeds, all choosing bitwise, and 7.937–8.032 for eight correlated-noise seeds, all choosing word-cluster. Every recorded check makes the same choice, and all sixteen runs recover the same exact 36-term, 156-gate rule."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧一个不读取干净标签的过度离散检验⟦en⟧An overdispersion test that reads no clean labels",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧观测量⟦en⟧Observable",
+                  "⟦zh⟧对同一输入的两份独立噪声标签，记录十二位中有多少位不同；隐藏干净输出仍在两份标签的比较中消掉。⟦en⟧For two independently corrupted labels of the same input, count how many of the twelve bits differ; the hidden clean output still cancels when the two labels are compared."
+                ],
+                [
+                  "⟦zh⟧设计效应⟦en⟧Design effect",
+                  "⟦zh⟧用整词分歧比例的经验方差除以相同边际分歧率下独立位模型的方差，再乘十二。独立位应接近 1；大于 1 表示同词位相关导致有效样本量下降。⟦en⟧Divide the empirical variance of word-level disagreement fractions by the variance under independent bits with the same marginal disagreement rate, then multiply by twelve. Independent bits should give roughly 1; values above 1 signal reduced effective sample size from within-word correlation."
+                ],
+                [
+                  "⟦zh⟧保守启动⟦en⟧Conservative start",
+                  "⟦zh⟧不足 250 个词对时始终用整词区间；只有设计效应降到预设阈值 2 以下才采用更窄的逐位区间。噪声类型、真实翻转率、正确模型阶数和干净标签均未输入诊断器。⟦en⟧Before 250 word pairs, always use the word-cluster interval. Adopt the narrower bitwise interval only when the design effect falls below the precommitted threshold of 2. Noise family, true flip rate, correct model degree and clean labels are never supplied to the diagnostic."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实噪声家族⟦en⟧True noise family",
+            "⟦zh⟧自动选择⟦en⟧Automatic choice",
+            "⟦zh⟧最终设计效应范围⟦en⟧Final design-effect range",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧正确选择与精确恢复⟦en⟧Correct choice and exact recovery"
+          ],
+          "rows": [
+            ["⟦zh⟧25% 独立逐位翻转⟦en⟧25% independent bit flips", "⟦zh⟧逐位区间⟦en⟧Bitwise interval", "0.966–1.027", "17,909", "8 / 8"],
+            ["⟦zh⟧25% 边际、强词内相关⟦en⟧25% marginal, strong within-word correlation", "⟦zh⟧整词聚类区间⟦en⟧Word-cluster interval", "7.937–8.032", "92,991", "8 / 8"]
+          ],
+          "numeric": [false, false, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-auto-correlation.png",
+              "caption": "⟦zh⟧左：第一次记录的阶数检查已经把独立噪声聚在设计效应 1 附近、相关噪声聚在 8 附近；直到接受时两簇仍稳定，阈值 2 留有很大间隔。中：十六根柱逐一显示 8 / 8 独立实验选择逐位、8 / 8 相关实验选择整词。右：自动模式不会为了速度在相关噪声下偷偷采用过窄区间，因此保留了约 93,000 词的诚实相关性成本。⟦en⟧Left: the first recorded degree check already clusters independent noise near design effect 1 and correlated noise near 8; both clusters remain stable through acceptance with a wide margin around threshold 2. Middle: all sixteen bars show 8 / 8 independent runs choosing bitwise and 8 / 8 correlated runs choosing word-cluster. Right: automatic mode does not secretly use narrow intervals for speed under correlation, so it preserves the honest cost of roughly 93,000 words."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧自动诊断的边界：当前两类噪声分离很强，阈值附近还需置信化⟦en⟧Boundary of automatic diagnosis: the tested families are well separated; the threshold region still needs confidence control",
+          "text": "⟦zh⟧这十六次实验中的设计效应簇相距很远，因此固定阈值 2 没有出现含糊选择；它尚不是一个对阈值附近弱相关噪声具有形式错误率保证的检验。更保守的后续版本应为设计效应本身建立区间：只有其上界低于 2 才切换到逐位，否则继续用整词。可复核记录为 auto_correlation_summary.json。⟦en⟧The design-effect clusters are widely separated in these sixteen runs, so fixed threshold 2 creates no ambiguous choices. This is not yet a formal error-controlled test for weak correlation near the threshold. A more conservative extension should build a confidence interval for the design effect itself and switch to bitwise only when its upper bound is below 2; otherwise it should remain word-cluster. The auditable record is auto_correlation_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧高噪声复核：59 倍加速不是低噪声特例⟦en⟧High-noise confirmation: the 59x acceleration is not a low-noise exception"
         },
         {
