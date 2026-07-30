@@ -1,6 +1,6 @@
 {
   "eyebrow": "Quantum Harness Issue #92 \u00b7 PolyOpt Track",
-  "lede": "A complete Julia/JuMP hierarchy implementation with exact certificate checking produces 9 certified hard-core finite-level gap upper statements and 2 accepted observable intervals; the full cutoff and nested Target 2 campaign remains incomplete.",
+  "lede": "A complete Julia/JuMP hierarchy implementation with exact certificate checking produces 10 certified hard-core finite-level gap upper statements and 2 accepted observable intervals; the full cutoff and nested Target 2 campaign remains incomplete.",
   "sections": [
     {
       "blocks": [
@@ -129,7 +129,7 @@
             ],
             [
               "Julia hierarchy/certificate suite",
-              "575 assertions; includes corrupted-certificate rejection",
+              "577 assertions; includes corrupted-certificate rejection",
               "PASS"
             ],
             [
@@ -221,7 +221,7 @@
           "kind": "verdict",
           "label": "Partial Target 2 campaign",
           "status": "warn",
-          "why": "9 hard-core finite-level gap upper statements are certified; cutoff-two, nested-level, ladder, unrestricted, and optional cutoff-three coverage does not yet satisfy the full issue grid."
+          "why": "10 hard-core finite-level gap upper statements are certified; cutoff-two, nested-level, ladder, unrestricted, and optional cutoff-three coverage does not yet satisfy the full issue grid."
         },
         {
           "kind": "heading",
@@ -351,12 +351,23 @@
               "0.02",
               "1",
               "no"
+            ],
+            [
+              "L({8,3})",
+              "P4",
+              "(0.03, 0.15)",
+              "(1,2)",
+              "0",
+              "0.3",
+              "0.3",
+              "0",
+              "no"
             ]
           ]
         },
         {
           "kind": "text",
-          "text": "All 9 EXCLUDED endpoints have exact affine residual zero, 256-bit coefficient checks, rigorous PSD verification, and normalized Farkas margin at least one. 3 transitions have a clean 0.005U search span. Rows containing unresolved samples are search spans, not numerical brackets."
+          "text": "All 10 EXCLUDED endpoints have exact affine residual zero, 256-bit coefficient checks, rigorous PSD verification, and normalized Farkas margin at least one. 3 transitions have a clean 0.005U search span. Rows containing unresolved samples are search spans, not numerical brackets."
         },
         {
           "items": [
@@ -507,17 +518,17 @@
             ],
             [
               "Fixed-\u03b3 records",
-              "150 / 205",
+              "157 / 205",
               "Durable solver/checker result exists"
             ],
             [
               "Verified excluded trial rows",
-              "48",
+              "49",
               "Exact-projected Farkas certificates"
             ],
             [
               "Unknown fixed-\u03b3 rows",
-              "90",
+              "85",
               "Missing, numerical, unfinished, or resource-limited"
             ]
           ]
@@ -526,10 +537,10 @@
           "kind": "note",
           "label": "Resource result",
           "style": "pending",
-          "text": "Complete nmax=2 (L,d)=(1,2) assembled but exhausted 192\u2013237 GiB in every Clarabel factorization route (MKL and QDLDL). Complete hard-core (1,3) and (2,2) solves also exhausted 192 GiB. These are explicit UNKNOWN outcomes, not missing rows. Optimized TS2 dry assemblies and unfinished extended-geometry cells were still running at this snapshot. Only fetched rows that already passed the independent checker are included in the claims above."
+          "text": "Complete nmax=2 (L,d)=(1,2) assembled but exhausted 192\u2013237 GiB in every Clarabel factorization route (MKL and QDLDL). Complete hard-core (1,3) and (2,2) solves also exhausted 192 GiB. These are explicit UNKNOWN outcomes, not missing rows. Optimized TS2 dry assemblies and an isolated extended-geometry P1 recovery were still running at this snapshot. Only fetched rows that already passed the independent checker are included in the claims above."
         }
       ],
-      "note": "Snapshot 2026-07-30T16:54:57+08:00; only independently accepted statements appear as results.",
+      "note": "Snapshot 2026-07-30T17:41:42+08:00; only independently accepted statements appear as results.",
       "title": "Results"
     },
     {

@@ -514,7 +514,7 @@ def build() -> None:
                         ["Acceptance gate", "Evidence", "Status"],
                         [
                             ["Exact algebra and degree filtrations", "nmax=1,2,3; adjoint, charge, cutoff commutator", "PASS"],
-                            ["Julia hierarchy/certificate suite", "575 assertions; includes corrupted-certificate rejection", "PASS"],
+                            ["Julia hierarchy/certificate suite", "577 assertions; includes corrupted-certificate rejection", "PASS"],
                             ["Python graph/report suite", "21 tests", "PASS"],
                             ["Atomic limit", "Δ/U=0.5, ρ=1, F=K=0 without special physics constraints", "PASS"],
                             ["Pinned upstream Ising reproduction", "SpectralGap a1171c9; no SCNet/local Mosek license", "BLOCKED"],
@@ -625,8 +625,8 @@ def build() -> None:
                             "Complete nmax=2 (L,d)=(1,2) assembled but exhausted 192–237 GiB in every "
                             "Clarabel factorization route (MKL and QDLDL). Complete hard-core (1,3) and "
                             "(2,2) solves also exhausted 192 GiB. These are explicit UNKNOWN outcomes, not "
-                            "missing rows. Optimized TS2 dry assemblies and unfinished extended-geometry "
-                            "cells were still running at this snapshot. Only fetched rows that already passed "
+                            "missing rows. Optimized TS2 dry assemblies and an isolated extended-geometry "
+                            "P1 recovery were still running at this snapshot. Only fetched rows that already passed "
                             "the independent checker are included in the claims above."
                         ),
                     },
@@ -811,13 +811,13 @@ def build() -> None:
             "",
             "## Implementation and verification",
             "",
-            "The Julia core implements exact finite matrix algebra over `Q(sqrt(2),sqrt(3))`, matrix and ladder filtrations, canonical state polynomials, complete moment/stationarity/gap index sets, exact U(1) charge blocks, deterministic nested TS2 sparsity, Clarabel/Mosek solve interfaces, and independent exact certificate checking. The current checkout passes 575 Julia assertions and 21 Python tests, including the exact atomic benchmark, deliberate certificate corruption, and submission-tier separation.",
+            "The Julia core implements exact finite matrix algebra over `Q(sqrt(2),sqrt(3))`, matrix and ladder filtrations, canonical state polynomials, complete moment/stationarity/gap index sets, exact U(1) charge blocks, deterministic nested TS2 sparsity, Clarabel/Mosek solve interfaces, and independent exact certificate checking. The current checkout passes 577 Julia assertions and 21 Python tests, including the exact atomic benchmark, deliberate certificate corruption, and submission-tier separation.",
             "",
             "## Limitations",
             "",
             "- Complete hard-core `(1,3)` and `(2,2)` solve attempts exhausted 192 GiB, so no nested numerical tightening is claimed.",
             "- Complete cutoff-two `(1,2)` assembled but exhausted 192–237 GiB across MKL and QDLDL routes.",
-            "- TS2 cutoff-two dry assembly and unfinished extended-geometry cells were live at this snapshot; only fetched, independently checked rows contribute claims.",
+            "- TS2 cutoff-two dry assembly and one isolated extended-geometry P1 recovery were live at this snapshot; only fetched, independently checked rows contribute claims.",
             "- Ladder, unrestricted, optional cutoff-three, and the full observable grid remain incomplete.",
             "- The pinned upstream SpectralGap Ising reproduction remains blocked by the lack of a Mosek license.",
             "",

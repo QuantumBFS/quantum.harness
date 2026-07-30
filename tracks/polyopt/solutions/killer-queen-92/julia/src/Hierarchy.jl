@@ -292,13 +292,34 @@ function _term_sparse_blocks(kind,basis,spec,h,seed,algebra)
         localbasis = basis[indices]
         _hierarchy_progress("TS2 $(kind) charge $(q): $(length(localbasis)) basis elements")
         cliques = _term_sparsity_cliques_lazy(kind,localbasis,seed,spec,h,algebra;iterations=2)
-        for clique in cliques
+        blocks = Vector{MatrixBlock}(undef,length(cliques))
+        build_block(index) = begin
+            clique = cliques[index]
             entries = Matrix{MomentExpr}(undef,length(clique),length(clique))
             for i in eachindex(clique),j in eachindex(clique)
                 entries[i,j] = _block_entry(kind,localbasis[clique[i]],localbasis[clique[j]],spec,h,algebra)
             end
-            push!(result,MatrixBlock(kind,q,localbasis[clique],entries,indices[clique]))
+            MatrixBlock(kind,q,localbasis[clique],entries,indices[clique])
         end
+        # Every clique owns its matrix and the algebra inputs are read-only.
+        # Interleaved static lanes balance differently sized cliques while the
+        # indexed output vector preserves the exact deterministic clique order.
+        if Threads.nthreads() > 1 && length(cliques) >= 32
+            thread_count = min(Threads.nthreads(),length(cliques))
+            _hierarchy_progress(
+                "TS2 $(kind) charge $(q): materializing $(length(cliques)) blocks on $(thread_count) threads",
+            )
+            Threads.@threads :static for slot in 1:thread_count
+                for index in slot:thread_count:length(cliques)
+                    blocks[index] = build_block(index)
+                end
+            end
+        else
+            for index in eachindex(cliques)
+                blocks[index] = build_block(index)
+            end
+        end
+        append!(result,blocks)
         _hierarchy_progress("TS2 $(kind) charge $(q): built $(length(cliques)) blocks")
     end
     result

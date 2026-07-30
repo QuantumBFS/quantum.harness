@@ -26,17 +26,17 @@
         "numbers": {
           "accepted_intervals": 2,
           "accepted_one_sided_objectives": 26,
-          "certified_gap_upper_statements": 9,
-          "durable_fixed_gamma_rows": 150,
+          "certified_gap_upper_statements": 10,
+          "durable_fixed_gamma_rows": 157,
           "exact_projected_observable_bounds": 3,
-          "feasible_fixed_gamma_rows": 67,
+          "feasible_fixed_gamma_rows": 71,
           "fixed_gamma_rows": 205,
           "floating_objectives": 100,
           "interval_rows": 69,
           "objective_errors": 8,
           "observable_rows": 138,
-          "unknown_fixed_gamma_rows": 90,
-          "verified_excluded_fixed_gamma_rows": 48
+          "unknown_fixed_gamma_rows": 85,
+          "verified_excluded_fixed_gamma_rows": 49
         },
         "why": "Certified hard-core baseline subset; mandatory larger-cutoff/nested grid incomplete."
       }
@@ -55,7 +55,7 @@
       }
     }
   ],
-  "generated": "2026-07-30T16:54:57+08:00",
+  "generated": "2026-07-30T17:41:42+08:00",
   "issue": 92,
   "method": {
     "exact": "Exact-checked exclusions; finite hierarchy relaxation",

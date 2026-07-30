@@ -104,7 +104,7 @@ read-only row against the fixed support seed and adjacency, after which rows
 are merged in the original lexicographic order.  Dry runs enable phase
 progress messages by default.  For the `{8,3}` cutoff-two gates, `(1,3)` has
 10,921 moment monomials and 11,595,621 charge-compatible upper-triangle pairs
-per closure pass; `(2,2)` has 5,421 and 3,109,596.  The full 575-assertion
+per closure pass; `(2,2)` has 5,421 and 3,109,596.  The full 577-assertion
 suite passes with four Julia threads before the 104-thread SCNet retry.
 Reproduce the deterministic chordal kernel comparison with:
 

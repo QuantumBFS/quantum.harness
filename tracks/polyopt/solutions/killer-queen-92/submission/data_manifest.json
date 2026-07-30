@@ -6,9 +6,9 @@
   ],
   "aggregate_sources": [
     {
-      "bytes": 65030,
+      "bytes": 65807,
       "path": "results/deadline_analysis/gap_scan_trials.csv",
-      "sha256": "4196145cc3a5bc1696ef9fe582c666e93cee3a854a70932d5e640ac545282732"
+      "sha256": "3e0fa438b6a7f7b7af3ee9ba2a326c79cea5b7771d97a612b03eeb5d85d56e36"
     },
     {
       "bytes": 63137,
@@ -39,17 +39,17 @@
   "counts": {
     "accepted_intervals": 2,
     "accepted_one_sided_objectives": 26,
-    "certified_gap_upper_statements": 9,
-    "durable_fixed_gamma_rows": 150,
+    "certified_gap_upper_statements": 10,
+    "durable_fixed_gamma_rows": 157,
     "exact_projected_observable_bounds": 3,
-    "feasible_fixed_gamma_rows": 67,
+    "feasible_fixed_gamma_rows": 71,
     "fixed_gamma_rows": 205,
     "floating_objectives": 100,
     "interval_rows": 69,
     "objective_errors": 8,
     "observable_rows": 138,
-    "unknown_fixed_gamma_rows": 90,
-    "verified_excluded_fixed_gamma_rows": 48
+    "unknown_fixed_gamma_rows": 85,
+    "verified_excluded_fixed_gamma_rows": 49
   },
   "raw_campaign_directories": [
     {
@@ -67,7 +67,7 @@
       "role": "diagnostic"
     },
     {
-      "bytes": 523804,
+      "bytes": 547985,
       "description": "Canonical merged tables, plots, and live calculation report.",
       "directory": "deadline_analysis",
       "files": 11,
@@ -144,10 +144,10 @@
       "role": "production"
     },
     {
-      "bytes": 64035998,
+      "bytes": 81769276,
       "description": "Extended Target-2 geometry grid; may be updated by SCNet.",
       "directory": "deadline_geometry_grid",
-      "files": 14,
+      "files": 16,
       "role": "production-live"
     },
     {
@@ -249,10 +249,10 @@
       "role": "validation"
     },
     {
-      "bytes": 185129,
+      "bytes": 190469,
       "description": "Scheduler logs; not scientific evidence by themselves.",
       "directory": "slurm",
-      "files": 232,
+      "files": 236,
       "role": "operations"
     },
     {
@@ -277,5 +277,5 @@
     "primary_encoding": "matrix",
     "primary_symmetry": "U1_INVARIANT_KMS_STATES"
   },
-  "snapshot_generated": "2026-07-30T16:54:57+08:00"
+  "snapshot_generated": "2026-07-30T17:41:42+08:00"
 }

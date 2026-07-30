@@ -291,6 +291,14 @@ end
     signature(blocks) = [(block.charge,block.parent_indices) for block in blocks]
     @test signature(sparse.moment_blocks)==signature(reference_moment)
     @test signature(sparse.gap_blocks)==signature(reference_gap)
+    @test all(
+        actual.entries == expected.entries
+        for (actual,expected) in zip(sparse.moment_blocks,reference_moment)
+    )
+    @test all(
+        actual.entries == expected.entries
+        for (actual,expected) in zip(sparse.gap_blocks,reference_gap)
+    )
 
     # Complete bases embed along the two production tightening directions.
     larger_window = state_basis([0,1,2],2,1,:matrix,small.ladder_degrees,PRIMARY_SYMMETRY)

@@ -1,6 +1,6 @@
 # Agent handoff and decision log — issue #92
 
-Last updated: **2026-07-30 16:55 CST**
+Last updated: **2026-07-30 17:41 CST**
 Active workflow: [`status.md`](status.md) — **Gate 3 nested lattice levels**,
 with `W0.5` blocked on a Mosek license
 Issue: [certified bulk spectral-gap bounds for truncated Bose--Hubbard models
@@ -57,16 +57,16 @@ Current completion against that finish line:
 - proper paper-defined hierarchy implementation: **complete in code**;
 - complete observable result cells in the current deadline snapshot: **24**;
 - proper requested-width `Gamma_(L,d)` endpoints: **3**;
-- certified complete-level upper statements: **9**;
+- certified complete-level upper statements: **10**;
 - nested-level comparisons: **0**;
-- verified non-atomic fixed-`gamma` exclusion records: **48**.
+- verified non-atomic fixed-`gamma` exclusion records: **49**.
 
 ## 3. Current handoff
 
 | item | state |
 |---|---|
 | active gate | Gate 3 — nested, geometry-sensitive lattice levels |
-| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; geometry tasks 1/2 completed, tasks 3--6 run, and task 7 waits; task 0 failed with node-level `SIGBUS` and dependency-safe recovery `41546113` is queued after the full array; synchronize every durable checkpoint and freeze the report before 20:00 CST |
+| active work item | monitor optimized cutoff-two TS2 `(1,3)` dry job `41542822` followed by serial `(2,2)` guard `41544379`; geometry tasks 1--7 completed and isolated task-0 recovery `41546113_0` runs on a different node; synchronize every durable checkpoint and freeze the report before 20:00 CST |
 | carried blocker | `W0.5` — SCNet is configured, but the pinned upstream Ising solve still lacks a Mosek license |
 | central implementation | `julia/src/` plus Python graph/campaign bridge |
 | work that must wait | required-width endpoint and full-grid claims until unresolved scans and mandatory cells finish; nested comparisons until memory is redesigned |
@@ -145,7 +145,7 @@ central deliverable.
 | `src/issue92/rooted_sdp.py` | root-local moment, stationarity, covariance, and gap prototype | not a complete level; preserve as regression test |
 | `src/issue92/ed.py` | independent sign/cutoff/observable validation | diagnostic only |
 | result CSV schema | solver, size, status, and PSD diagnostics | must add `L`, `d`, basis, buffer, bracket, and certificate fields |
-| 21 Python tests and 575 Julia assertions | algebra, graph stability, exact ladder filtration, hierarchy bases/localizers, TS2, incremental/reference chordal-closure equivalence, campaign/resource counts, classification/report/submission-tier separation, floating-progress reporting, dry-level report ingestion, unresolved-span reporting, Slurm allocation parsing, resume, primal/dual checks, interval/exact-negative-witness/pivoted-exact-Schur PSD verification, exact exclusion and observable-bound projection, atomic and root-local validation | nested numerical directions and the full production grid remain unrun |
+| 21 Python tests and 577 Julia assertions | algebra, graph stability, exact ladder filtration, hierarchy bases/localizers, TS2, incremental/reference chordal-closure equivalence, parallel clique-entry/reference equivalence, campaign/resource counts, classification/report/submission-tier separation, floating-progress reporting, dry-level report ingestion, unresolved-span reporting, Slurm allocation parsing, resume, primal/dual checks, interval/exact-negative-witness/pivoted-exact-Schur PSD verification, exact exclusion and observable-bound projection, atomic and root-local validation | nested numerical directions and the full production grid remain unrun |
 
 Software conclusion: no inspected package supplies issue #92 end to end.
 `SpectralGap.jl` is the reference implementation for the authors' hierarchy,
@@ -185,7 +185,7 @@ but its published reference calculation has not yet been reproduced here.
 - P3 micro-refinement checks `0.514` as FEASIBLE and exactly excludes `0.518`;
   `0.515` and `0.516` remain `UNKNOWN`, so its `0.004U` distance is also a
   search span rather than a clean bracket.
-- Test suite: 21/21 Python tests and 575/575 Julia assertions passing at the last
+- Test suite: 21/21 Python tests and 577/577 Julia assertions passing at the last
   full validation.
 
 Detailed tables belong in `status.md` and `REPORT.md`, not here.
@@ -432,6 +432,15 @@ Detailed tables belong in `status.md` and `REPORT.md`, not here.
   refreshed snapshot has 150/205 durable rows (67 FEASIBLE, 48 EXCLUDED,
   90 UNKNOWN).  Submission commit `d1ebd7d` is public in Harness PR #267;
   only independently accepted follow-up evidence may update it.
+- Parallelized the pure final TS2 clique-entry materialization while preserving
+  indexed clique order.  Entry-by-entry dense-reference tests pass under four
+  threads, bringing the suite to 577 assertions.  Do not restart the active
+  `(1,3)` task for this change; stage it for queued `(2,2)` and future retries.
+- Geometry tasks 1--7 completed.  Line-graph P4 contributes the tenth certified
+  upper statement, `Gamma_(1,2)/U<=0.300`, above primal-checked `gamma=0`.
+  Line P1/P3/P5 positive probes are numerical `UNKNOWN` and contribute no
+  bound.  The snapshot now has 157/205 durable rows (71 FEASIBLE, 49 EXCLUDED,
+  85 UNKNOWN); isolated P1 recovery `41546113_0` remains active.
 
 ## 10. Handoff protocol
 

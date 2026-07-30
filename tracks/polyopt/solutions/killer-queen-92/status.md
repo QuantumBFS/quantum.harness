@@ -1,6 +1,6 @@
 # Issue #92 central algorithm and calculation status
 
-Last updated: **2026-07-30 16:55 CST**
+Last updated: **2026-07-30 17:41 CST**
 Source of truth: [Quantum Harness issue #92](https://github.com/QuantumBFS/quantum.harness/issues/92)
 Primary method: Xu *et al.*, [*The bulk spectral gap is semi-decidable: a
 convergent family of certified upper bounds*](https://arxiv.org/abs/2606.03836)
@@ -112,8 +112,8 @@ numerical `UNKNOWN`, so the `0.004U` search span is not called a clean bracket. 
 `0.510`, while the line graph now has exact exclusion `0.530` and checked
 FEASIBLE `0.510`; unresolved interior transition samples remain visible.  The
 extended geometry grid additionally exact-certified coarse `{12,4}` upper
-statements `Gamma/U<=0.300` at P4 and `<=1.000` at P5.  Both now have
-primal-checked `gamma/U=0` anchors, giving coarse `0.300U` and `1.000U` search
+statements `Gamma/U<=0.300` at P4 and `<=1.000` at P5, plus line-graph P4
+`<=0.300`.  Each has a primal-checked `gamma/U=0` anchor, giving coarse search
 spans rather than requested-precision endpoints.  P5 at
 `gamma/U=0.050` has the first two accepted two-sided
 intervals: `0.9944073 <= rho0 <= 0.9999995` and, by the exact hard-core
@@ -141,8 +141,8 @@ The current auditable snapshot is
 | two or more nested levels | `BLOCKED` | `(1,3)` and `(2,2)` workspaces built, but both 192-GiB solve attempts recorded `OutOfMemoryError` and explicit `UNKNOWN` rows |
 | Target 2 gap upper bounds | `PARTIAL` | certified `{8,3}` P1 `<=0.505U`, P2 `<=0.511U`, P3 `<=0.518U`, P4 `<=0.165U`, P5 `<=0.755U`; P1/P4/P5 have requested `0.005U` spacing |
 | Target 2 observable bounds | `PARTIAL` | 26 checked one-sided objectives, 100 floating optima, and the first 2 complete accepted intervals (`rho0`, `F0`) at P5 `gamma/U=0.050`; `K0` remains one-sided/floating |
-| geometry-sensitive thermodynamic result | `PARTIAL` | `{12,4}` P2/P4/P5 are certified `<=0.520U`/`<=0.300U`/`<=1.000U`; line-graph P2 is checked FEASIBLE at `0.510` and certified `<=0.530U`; no true-gap ordering is inferred |
-| verified numerical certificate | `PARTIAL` | atomic certificates and 48 non-atomic fixed-`gamma` rows pass exact projection, 256-bit Arb interval/exact-fallback PSD LDL, and positive Farkas margin checks |
+| geometry-sensitive thermodynamic result | `PARTIAL` | `{12,4}` P2/P4/P5 are certified `<=0.520U`/`<=0.300U`/`<=1.000U`; line-graph P2/P4 are certified `<=0.530U`/`<=0.300U`; no true-gap ordering is inferred |
+| verified numerical certificate | `PARTIAL` | atomic certificates and 49 non-atomic fixed-`gamma` rows pass exact projection, 256-bit Arb interval/exact-fallback PSD LDL, and positive Farkas margin checks |
 
 This is therefore a **partial hierarchy campaign**, not a completed challenge solution.
 
@@ -439,8 +439,8 @@ lower bound, and because the test has no `(L,d)` label, they are not requested
 |---|---|
 | 30 mandatory `Γ_(L,d)` endpoints per level for `nmax=1,2` | 3 / 30 at requested `0.005U` spacing |
 | 15 additional endpoints per level for `nmax=3` | 0 |
-| certified complete-level upper statements | 7: all five `{8,3}` hard-core `(1,2)` points plus coarse `{12,4}`/line P2 |
-| verified non-atomic fixed-`gamma` exclusion records | 43 in the current report snapshot |
+| certified complete-level upper statements | 10: all five `{8,3}` hard-core `(1,2)` points, `{12,4}` P2/P4/P5, and line-graph P2/P4 |
+| verified non-atomic fixed-`gamma` exclusion records | 49 in the current report snapshot |
 | coarse root-local floating candidates | 3, only at `P3`, `nmax=1` |
 | requested-width (`0.005U`) lattice endpoints | 3: `{8,3}` P1, P4, and P5 hard-core complete `(1,2)` |
 
@@ -1098,3 +1098,17 @@ maximum simultaneous issue-92 request at 448 GB.
 - Published the deadline-safe baseline as commit `d1ebd7d` and opened Harness
   PR #267.  The PR contains only `tracks/polyopt/solutions/killer-queen-92/`;
   subsequent SCNet evidence is added only after the same independent checks.
+- Parallelized final TS2 clique-entry materialization across deterministic
+  interleaved thread lanes after the live `(1,3)` log exposed that serial phase
+  as the next bottleneck.  Indexed output preserves exact clique order, and two
+  new entry-by-entry comparisons against dense-reference sparsification bring
+  the passing Julia suite to 577 assertions.  The already-running task is
+  unchanged; the optimization is staged only for the queued `(2,2)` guard and
+  any later retry.
+- Geometry array `41543225` completed tasks 1--7 normally.  Line-graph P4 adds
+  primal-checked `FEASIBLE(0)` and exact-projected `EXCLUDED(0.300)`, the tenth
+  certified hard-core upper statement.  Line P1/P3/P5 add checked zero anchors
+  but their positive coarse trials are numerical `UNKNOWN`, so they create no
+  bound.  The refreshed aggregate has 157/205 durable rows: 71 FEASIBLE,
+  49 EXCLUDED, and 85 UNKNOWN.  Isolated task-0 recovery `41546113_0` is active
+  on a different node.
