@@ -20,6 +20,7 @@ from vqetape.ansatz_training import (
     AnsatzGrowthRequest,
     AnsatzGrowthResult,
 )
+from vqetape.subprocess_env import worker_environment
 from vqetape.spec import TFIMVQESpec
 
 
@@ -88,7 +89,7 @@ def run_ansatz_fresh_process(
             ),
             encoding="utf-8",
         )
-        environment = dict(os.environ)
+        environment = worker_environment()
         environment["JAX_ENABLE_X64"] = "1"
         environment["JAX_COMPILATION_CACHE_DIR"] = str(
             root / "jax-cache"

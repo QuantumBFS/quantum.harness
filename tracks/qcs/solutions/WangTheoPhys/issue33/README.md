@@ -19,7 +19,7 @@ open-boundary 1D TFIM workloads and state-vector execution with JAX.
 | **Member** | Junkai Wang |
 | **Challenge** | [QuantumBFS/quantum.harness #33](https://github.com/QuantumBFS/quantum.harness/issues/33), released by Shi-Xin Zhang |
 | **Track** | Quantum circuit simulation (`qcs`) |
-| **Status** | Completed exact research prototype; GPU and TensorCircuit-NG baseline victory remain open |
+| **Status** | Completed exact research prototype with audited RTX 3090 validation; TensorCircuit-NG baseline victory remains open |
 
 The audited implementation jointly searches over tensor representation,
 contraction path, reverse-mode program, checkpoint schedule, symmetry sector,
@@ -38,9 +38,17 @@ experiments:
   error with 10 parameters, while the 14-parameter fixed control stopped at
   \(1.70\times10^{-7}\) under the same comparison budget.
 
-These are exact, correctness-checked CPU results. They are not presented as a
-CUDA peak-memory result or as proof of outperforming the current
-TensorCircuit-NG official GPU baseline. See
+The RTX 3090 validation additionally confirms statevector, direct-TN, and
+spatial-transfer execution on JAX's CUDA backend. At `n=10,L=4`, the fixed
+spatial representative reduces `compile + 100 warm` by **43.1%** relative to
+the fixed statevector representative, while statevector remains the faster
+warm kernel. The experiment also finds that platform-default GPU matmul
+precision violates the declared exactness tolerance; fresh VQETape workers
+therefore default to `JAX_DEFAULT_MATMUL_PRECISION=highest` unless explicitly
+overridden. These results are not presented as proof of outperforming the
+current TensorCircuit-NG official GPU baseline. See
+[`outputs/vqetape-gpu-rtx3090-findings.md`](outputs/vqetape-gpu-rtx3090-findings.md)
+for the complete GPU A/B evidence and
 [`docs/vqetape-completion-audit.md`](docs/vqetape-completion-audit.md) for the
 requirement-to-evidence matrix and interpretation boundaries.
 
@@ -57,6 +65,14 @@ Enable 64-bit JAX values when running `complex128` workloads:
 
 ```bash
 export JAX_ENABLE_X64=1
+```
+
+Fresh benchmark, training, holdout, and ansatz workers default to full
+32-bit matrix-product precision. An explicit environment value remains
+authoritative:
+
+```bash
+export JAX_DEFAULT_MATMUL_PRECISION=highest
 ```
 
 ## Python API
@@ -314,7 +330,9 @@ over valid Pareto candidates within the configured memory budget.
   for spatial reverse schedules, not measured device peak memory.
 
 Candidates run in separate subprocesses to avoid sharing the in-memory JAX
-compilation cache and allocator state.
+compilation cache and allocator state. Worker environments default to
+`JAX_DEFAULT_MATMUL_PRECISION=highest`; callers can override that environment
+variable when intentionally studying the speed/accuracy tradeoff.
 
 ## Current Limitations
 
@@ -430,12 +448,12 @@ ansatz reasons. See
 The completed exact one-dimensional prototype passes:
 
 ```text
-387 passed, 6 skipped in 795.29s (0:13:15)
+389 passed, 6 skipped in 3715.35s (1:01:55)
 ```
 
 The six skips are expected cases where the requested spatial block is wider
-than the available interior. The current host exposes one CPU JAX device and
-no GPU, so GPU profiling is explicitly skipped; process RSS is not presented
-as device memory. See the
+than the available interior. This clean-room regression used Python 3.12 with
+JAX and jaxlib 0.11.0. The original local capability host exposes one CPU JAX
+device and no GPU, so its process RSS is not presented as device memory. See the
 [runtime capability report](outputs/vqetape-runtime-capabilities.md) and the
 [complete requirement audit](docs/vqetape-completion-audit.md).

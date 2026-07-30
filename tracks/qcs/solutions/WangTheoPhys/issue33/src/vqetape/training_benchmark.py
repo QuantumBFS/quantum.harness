@@ -13,6 +13,7 @@ from vqetape.training_spec import (
     VQETrainingRequest,
     VQETrainingResult,
 )
+from vqetape.subprocess_env import worker_environment
 
 
 class TrainingWorkerError(RuntimeError):
@@ -44,7 +45,7 @@ def run_training_fresh_process(
             ),
             encoding="utf-8",
         )
-        environment = dict(os.environ)
+        environment = worker_environment()
         environment["JAX_COMPILATION_CACHE_DIR"] = str(
             cache_path
         )

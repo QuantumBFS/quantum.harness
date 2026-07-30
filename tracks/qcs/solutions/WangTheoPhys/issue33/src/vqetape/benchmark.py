@@ -16,6 +16,7 @@ from vqetape.spec import (
     TFIMVQESpec,
     TensorProgramConfig,
 )
+from vqetape.subprocess_env import worker_environment
 
 
 def _invalid_result(
@@ -70,6 +71,7 @@ def benchmark_candidate(
                 capture_output=True,
                 text=True,
                 timeout=timeout_seconds,
+                env=worker_environment(),
             )
         except subprocess.TimeoutExpired:
             return _invalid_result(
@@ -142,6 +144,7 @@ def benchmark_tn_candidate(
                 capture_output=True,
                 text=True,
                 timeout=timeout_seconds,
+                env=worker_environment(),
             )
         except subprocess.TimeoutExpired:
             return _invalid_result(
@@ -216,6 +219,7 @@ def benchmark_spatial_candidate(
                 capture_output=True,
                 text=True,
                 timeout=timeout_seconds,
+                env=worker_environment(),
             )
         except subprocess.TimeoutExpired:
             return _invalid_result(

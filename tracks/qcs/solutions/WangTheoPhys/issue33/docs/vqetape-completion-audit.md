@@ -2,21 +2,23 @@
 
 ## Status
 
-The approved VQETape next-stage design is implemented and audited.
+The approved VQETape next-stage design is implemented and audited, including
+an RTX 3090 follow-up validation.
 
 Final repository regression:
 
 ```text
-387 passed, 6 skipped in 795.29s (0:13:15)
+389 passed, 6 skipped in 3715.35s (1:01:55)
 ```
 
 The six skips are all the expected structural case
 `block wider than interior` in `tests/test_spatial_programs.py`; there are no
-failed tests.
+failed tests. This final clean-room regression used Python 3.12 with JAX and
+jaxlib 0.11.0; the pinned RTX 3090 performance environment remains JAX 0.4.38.
 
 Static artifact checks also passed:
 
-- all 19 JSON reports parse with the standard JSON decoder;
+- all 24 JSON reports parse with the standard JSON decoder;
 - all `src/vqetape` modules compile;
 - `git diff --check` reports no whitespace errors;
 - the public API exposes compile, training, ansatz-growth, spatial, TFIM, and
@@ -36,7 +38,7 @@ Static artifact checks also passed:
 | Adaptive ansatz design | `ansatz.py`, `ansatz_signals.py`, `ansatz_selection.py`, `ansatz_training.py` | exact gradients, metric diagonals, redundancy, fresh workers | `vqetape-ansatz-report.json` | Lie-closed YZ/ZY pool removes X/ZZ false convergence; 10 adaptive parameters reach \(5.05\times10^{-11}\) while the 14-parameter fixed control stops at \(1.70\times10^{-7}\) |
 | Contraction-aware ansatz score | `ansatz_cost.py`, `ansatz_selection.py` | cut growth, cache keys, policy fixtures | ansatz report | Correct and non-harmful here, but selects the same three gates as gradient-only; no distinct speedup claim |
 | Holdout generality | `holdout.py`, `holdout_worker.py`, `holdout_report.py` | dense action/energy, finite-difference gradient, commutator | `vqetape-holdout-report.json` | Longitudinal-field/RZZ–RY–RX workload converges; TFIM Z2 compression is explicitly rejected |
-| Device/GPU evidence | `runtime_capabilities.py` | JSON and memory-semantics tests | `vqetape-runtime-capabilities.json` | CPU backend detected; GPU benchmark is structurally skipped, not inferred from host RSS |
+| Device/GPU evidence | `runtime_capabilities.py`, `subprocess_env.py` | JSON, memory-semantics, and worker-environment tests | `vqetape-gpu-rtx3090-findings.md` plus five raw JSON reports | RTX 3090 statevector/direct-TN/spatial jobs pass exactness with `highest` matmul precision; platform default fails a controlled spatial A/B comparison; an unset-parent-environment integration job confirms the worker default |
 
 ## Exactness invariants
 
@@ -60,6 +62,8 @@ The completed implementation preserves these invariants:
    state.
 9. Process RSS, compiler temporary bytes, logical residual bytes, modeled
    checkpoint bytes, and genuine GPU peak memory remain separately labeled.
+10. Fresh JAX workers default to `highest` matmul precision; an explicit
+    caller environment override is preserved.
 
 ## What is novel in the completed prototype
 
@@ -107,12 +111,14 @@ out-of-scope work includes:
 - approximate MPS/PEPS truncation;
 - two-dimensional or deep-circuit scaling;
 - cotengra/cuTensorNet-specific execution and slicing;
-- real GPU peak-memory/performance measurements on a CUDA/ROCm machine;
+- larger-scale GPU peak-memory/performance sweeps and independent hardware
+  replication;
 - multi-GPU distribution and host offload;
 - chemistry operator pools and shot/noise-aware optimization.
 
-The capability report records the present machine as CPU-only, so no
-CUDA-specific conclusion is made.
+The original capability report records its local machine as CPU-only. The
+separate RTX 3090 audit supplies CUDA-specific measurements without
+retroactively relabeling those CPU runs.
 
 ## Reproduction
 
