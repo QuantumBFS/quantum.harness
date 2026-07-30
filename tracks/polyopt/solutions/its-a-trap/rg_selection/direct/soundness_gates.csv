@@ -1,0 +1,12 @@
+gate,verdict,detail
+G0_N8,PASS,"partition |W_full|=145 |W_R|=145 |W_D|=0 allowlist_sha16=d56389bd9745cbf0 (DEGENERATE control: W_D empty)"
+G0_N10,PASS,"partition |W_full|=527 |W_R|=472 |W_D|=55 allowlist_sha16=f84c65eba3a0da92"
+Gmap1,PASS,"per-parity isometry (CP/normalization) 5.09e-16"
+Gmap2,PASS,"dual-parity flow identity compat_residual 0.00e+00"
+Gifc,PASS,"coarse pullback words: 3 total, 0 outside W_R (rule: reject if any)"
+G1,PASS,"C-arm post-extension tsupp ≡ W_R: true; seam_newwords=0; deleted_words_created=0"
+G2,PASS,"objective class canon([1,4]) in W_R; quotient coef |c|=1.0; model coe=3/4 exact"
+G5,PASS,"structural C/A = 20432/29315 = 0.697 (meets preferred 0.7) largest_block C=66 A=84"
+G5_N8,PASS,"degenerate control: C/A = 0.805 (A≡B, no deletion possible)"
+G4,PASS,"link-coefficient sign-flip -> mutated-E=0.0999273365903195 (E0/N=-0.4515446354) RED"
+G6bundle,PASS,"created_words_D∩W_D: seam_newwords=0 declared |W_bundle|=0 exact=true"

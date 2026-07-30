@@ -1,0 +1,8 @@
+gate,verdict,detail
+G0_N8,PASS,"partition |W_full|=145 |W_R|=145 |W_D|=0 allowlist_sha16=d56389bd9745cbf0 (DEGENERATE control: W_D empty)"
+G0_N10,PASS,"partition |W_full|=527 |W_R|=472 |W_D|=55 allowlist_sha16=f84c65eba3a0da92"
+Gmap1,PASS,"per-parity isometry (CP/normalization) 5.09e-16"
+Gmap2,PASS,"dual-parity flow identity compat_residual 0.00e+00"
+G4,FAIL,"link-coefficient sign-flip ->  NOT CAUGHT"
+Gmap1,PASS,"per-parity isometry (CP/normalization) 5.09e-16"
+Gmap2,PASS,"dual-parity flow identity compat_residual 0.00e+00"
