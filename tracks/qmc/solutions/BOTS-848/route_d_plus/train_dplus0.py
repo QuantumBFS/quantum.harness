@@ -31,6 +31,7 @@ from route_d_plus.vmc import (
 N_ELECTRONS = 6
 TWO_Q = 15
 RAW_RANKS = (2, 3, 4)
+PROPOSAL_BURN_IN_SWEEPS = 64
 
 
 def ground_mother_channels(configuration: np.ndarray) -> np.ndarray:
@@ -353,7 +354,7 @@ def _pilot_tower_chain(
         n_particles=N_ELECTRONS,
         coefficients=np.empty(0, dtype=np.complex128),
         seed=seed,
-        burn_in_sweeps=16,
+        burn_in_sweeps=PROPOSAL_BURN_IN_SWEEPS,
         sample_sweeps=1,
         delta_max=0.35,
         global_rotation_interval=4,
@@ -386,7 +387,7 @@ def _pilot_samples(
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
             seed=seed + chain,
-            burn_in_sweeps=16,
+            burn_in_sweeps=PROPOSAL_BURN_IN_SWEEPS,
             sample_sweeps=samples_per_chain,
             delta_max=0.35,
             global_rotation_interval=4,
@@ -493,7 +494,7 @@ def _initial_configurations(
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
             seed=seed + chain,
-            burn_in_sweeps=16,
+            burn_in_sweeps=PROPOSAL_BURN_IN_SWEEPS,
             sample_sweeps=1,
             delta_max=0.35,
             global_rotation_interval=4,
@@ -506,7 +507,7 @@ def _initial_configurations(
             n_particles=N_ELECTRONS,
             coefficients=np.empty(0, dtype=np.complex128),
             seed=seed + 100 + chain,
-            burn_in_sweeps=16,
+            burn_in_sweeps=PROPOSAL_BURN_IN_SWEEPS,
             sample_sweeps=1,
             delta_max=0.35,
             global_rotation_interval=4,

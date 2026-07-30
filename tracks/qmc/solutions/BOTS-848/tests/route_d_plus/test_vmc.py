@@ -12,12 +12,41 @@ from route_d_plus.vmc import (
     energy_gradient_metric,
     geodesic_proposal,
     linear_log_derivatives,
+    metropolis_chain,
     multiplet_log_derivatives,
     random_configuration,
     random_global_rotation,
     spinors_to_vectors,
     sr_update,
 )
+
+
+def test_metropolis_freezes_adapted_proposal_after_burn_in() -> None:
+    def flat(_: np.ndarray) -> np.ndarray:
+        return np.ones(1, dtype=np.complex128)
+
+    short = metropolis_chain(
+        flat,
+        n_particles=3,
+        coefficients=np.empty(0, dtype=np.complex128),
+        seed=70,
+        burn_in_sweeps=64,
+        sample_sweeps=1,
+        delta_max=0.35,
+        global_rotation_interval=0,
+    )
+    long = metropolis_chain(
+        flat,
+        n_particles=3,
+        coefficients=np.empty(0, dtype=np.complex128),
+        seed=70,
+        burn_in_sweeps=64,
+        sample_sweeps=9,
+        delta_max=0.35,
+        global_rotation_interval=0,
+    )
+    assert short.delta_max == long.delta_max
+    assert abs(short.delta_max - 0.35 * 1.2**8) < 1.0e-14
 
 
 def test_geodesic_proposal_stays_on_sphere() -> None:

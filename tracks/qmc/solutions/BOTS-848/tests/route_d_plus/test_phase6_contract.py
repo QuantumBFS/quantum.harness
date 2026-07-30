@@ -54,6 +54,7 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
     assert "_pilot_tower_chain" in training
     assert 'multiprocessing.get_context("spawn")' in training
     assert "burn-in-only-target-0.35-0.60-frozen-before-training" in training
+    assert "PROPOSAL_BURN_IN_SWEEPS = 64" in training
     assert "delta_max=ground_delta_maxima[chain]" in training
     assert "delta_max=tower_delta_maxima[chain]" in training
     assert "0.25 <= acceptance <= 0.70" in certificate

@@ -87,6 +87,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "combined_metric": result["trace"][0][
                     "metric_structure"
                 ],
+                "ground_delta_maxima": checkpoint[
+                    "ground_delta_maxima"
+                ],
+                "tower_delta_maxima": checkpoint[
+                    "tower_delta_maxima"
+                ],
                 "ground_acceptance": result["final_ground"],
                 "tower_acceptance": result["final_tower"],
                 "symmetry_errors": symmetry["errors"],

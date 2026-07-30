@@ -161,6 +161,8 @@ def metropolis_chain(
     weight = channel_weight(channels, coefficients)
     accepted = 0
     proposed = 0
+    window_accepted = 0
+    window_proposed = 0
     rotation_residual = 0.0
     samples = []
     values = []
@@ -178,18 +180,24 @@ def metropolis_chain(
             )
             ratio = proposal_weight / max(weight, np.finfo(float).tiny)
             proposed += 1
+            if sweep < burn_in_sweeps:
+                window_proposed += 1
             if rng.random() < min(1.0, ratio):
                 configuration = proposal
                 channels = proposal_channels
                 weight = proposal_weight
                 accepted += 1
+                if sweep < burn_in_sweeps:
+                    window_accepted += 1
         if sweep < burn_in_sweeps and (sweep + 1) % 8 == 0:
-            acceptance = accepted / max(proposed, 1)
+            acceptance = window_accepted / max(window_proposed, 1)
             if acceptance < 0.35:
                 delta_max *= 0.85
             elif acceptance > 0.60:
-                delta_max *= 1.15
+                delta_max *= 1.20
             delta_max = float(np.clip(delta_max, 0.02, math.pi))
+            window_accepted = 0
+            window_proposed = 0
         if global_rotation_interval and (
             sweep + 1
         ) % global_rotation_interval == 0:
