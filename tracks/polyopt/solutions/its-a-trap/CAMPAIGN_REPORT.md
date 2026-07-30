@@ -1,14 +1,39 @@
 # Campaign Report — Coarse-Grained NPA for Spin-½ Ground States (Challenge #49)
 
 Team **its-a-trap** (Yan-Bai Zhang) · Harnessing Quantum 2026 · 2026-07-30.
-A standalone narrative synthesis for human readers — mentors, judges, a
-physicist not on the project. It does not replace `FINAL_REPORT.md`
-(the PR deliverable) and modifies nothing there. Every number traces to a
+A standalone narrative synthesis. Every number traces to a
 frozen CSV or a named record; claims cite the ledger
 (`audit/claims_ledger.md`, C1–C21). Figures F2/F3 are generated from the
 CSVs by `figs/make_figs.py`.
 
 ---
+
+## Overview — the story of the campaign
+
+The NPA hierarchy is a **lower-bound** method: it approaches the
+ground-state energy from below, by relaxing the set of physical moment
+data to a semidefinite-representable superset. Its main value is that it
+complements conventional variational and tensor-network optimization
+methods, which approach the same quantity from above. The two directions
+are naturally complementary:
+
+$$E_{\mathrm{SDP}}^{\mathrm{lower}} \;\le\; E_0 \;\le\; E_{\mathrm{variational}}^{\mathrm{upper}}.$$
+
+Every bracket in this campaign is built this way: our numerical SDP lower
+bounds from below, our DMRG variational upper bounds (or exact/Bethe
+references) from above. This complementarity is one of the central
+motivations for the project.
+
+There is no free lunch. In its uncompressed form the hierarchy suffers a
+rapid — often exponential — growth in the number and size of moment
+constraints as the system size, the spatial reach, or the hierarchy level
+increases. The challenge is therefore not simply to add more constraints,
+but to identify a useful **combination** of tools that produces the best
+trade-off between accuracy and computational cost. This campaign is a
+search for that numerical sweet spot: combining different accuracy
+mechanisms, structural reductions, and multiscale compression methods to
+obtain stronger and more efficient lower bounds for one- and
+two-dimensional quantum spin systems.
 
 ## §0 Headline
 
@@ -70,12 +95,30 @@ applied with that distinction.)
 
 ## §2 The method map
 
-**Taxonomy.** Structured NPA = foundation; reach, RDM, LSO, PSO =
-accuracy mechanisms; quotient reduction, sparsity, symmetry, block
-diagonalization = structural cost reducers; coarse graining = replace
-expensive fine-scale information with a low-dimensional multiscale
-representation; moment bundles + selection = budget-limited targeted
-recovery.
+The method landscape, organized:
+
+$$\boxed{\text{Structured NPA}}$$ is the foundation.
+$$\boxed{\text{reach, RDM, LSO, PSO}}$$ are distinct mechanisms for improving accuracy.
+$$\boxed{\text{quotient reduction, sparsity, symmetry, block diagonalization}}$$ are mechanisms for reducing structural cost.
+$$\boxed{\text{coarse graining}}$$ aims to replace expensive fine-scale information with a low-dimensional multiscale representation.
+$$\boxed{\text{moment bundles and moment selection}}$$ aim to recover targeted accuracy under a limited computational budget.
+
+**Summary table (the main conceptual map):**
+
+| Tool or method | Category | Main idea | Role in this campaign | Reference |
+|---|---|---|---|---|
+| Structured NPA | foundation | moment-matrix relaxation of the ground-state problem, structured for spin chains | every bound in this report (QMBCertify, pinned be63c27) | Wang et al., arXiv:2604.01555; NPA hierarchy, arXiv:0903.4368 |
+| Reach expansion | accuracy | widen the spatial range of two-site basis words (r) | THE lever that met T1 (r 5→9 at N=100: +9.931e-06); the deletion axis of the replacement experiments | arXiv:2604.01555 |
+| RDM positivity | accuracy | impose positivity of k-site reduced density matrices | CONFIG-A accuracy stack; near-saturates small N with r=5 | arXiv:2604.01555; cf. arXiv:2212.03014 |
+| Linear state optimality (LSO) | accuracy | linear optimality constraints on the state | measured δ ≈ 2e-8 at N=14 — below the 1e-8 tolerance floor | arXiv:2604.01555 |
+| PSD state optimality (PSO) | accuracy | PSD optimality constraints; memory-intensive | sets the ~110 GB memory floor at N=100 (pso×reach); pso=0 per Remark 6.1 in 2D | arXiv:2604.01555; cf. arXiv:2311.18707 (first-order optimality) |
+| Quotient-algebra reduction | structural | canonicalize words by translation/mirror/S₃/sign symmetry | built into every arm (reduce!); also the mechanism behind bundle absorption (C21) | arXiv:2604.01555 |
+| Term sparsity | structural | keep only interacting monomial blocks | inherited from the structured implementation | arXiv:2604.01555 |
+| Symmetry reduction | structural | exploit model symmetry to shrink blocks | S₃/translation quotient throughout | arXiv:2604.01555 |
+| Block diagonalization | structural | split the moment matrix into small PSD blocks | the fifth-axis finding: block DIMENSION, not scalar count, drives realized cost (C13, C20) | arXiv:2604.01555 |
+| Functional RG / coarse-grained hierarchy | multiscale compression | compress fine windows through an isometric RG map; constrain compressed blocks | dual-parity finite-depth specialization built and gate-verified; recovery unresolved on the reach axis (C14); D-package cost result (C20) | Kull, Schuch, Dive, Navascués, PRX 14, 021008 (2024); cf. arXiv:2412.07837 |
+| Moment bundles | budgeted recovery | small declared Γ-blocks over targeted operators | +55 scalars ≈ 0.08%; word-space contribution absorbed by the quotient closure at all tested N (C21) | this work; cf. arXiv:2607.14755 |
+| Budget-aware moment selection | budgeted recovery | choose bundles by measured marginal tightness per cost | blind pre-registered selection S* (C8); future: closure-growth objective | arXiv:2607.14755; this work |
 
 **The axes.** The accuracy mechanisms live on distinguishable axes —
 spatial range (reach), cluster size (RDM), optimality (LSO/PSO). Coarse
@@ -95,6 +138,8 @@ additive D=4 tower reached structural ratio 0.848 at N=20 while costing
 ~9× realized wall (C13); the direct D=2 layer reached structural 0.697
 at realized parity, its largest block being 66 against the tower's 128
 (C16, C20).
+
+Supplementary sketch (secondary to the table above):
 
 ```mermaid
 flowchart LR
@@ -154,6 +199,64 @@ against a wall/RSS budget crossed well before 16×16.
 **T4.** On the controversy: our J2=0.5 row **brackets published
 variational energies and excludes none** — the lower bound makes no
 phase claim.
+
+---
+
+## Mechanism comparison at representative small N (frozen rows only)
+
+Per-site numerical SDP lower bounds; higher (less negative) = tighter.
+Entries trace to frozen CSV rows; `—` = no accepted single-mechanism row
+exists (nothing is inferred). Chassis footnotes: [a] rdm-enabled CONFIG-A-family rows, all OPTIMAL
+(N=10: lad row, rdm=8, pso=3, lso=true, r=5; N=14: step2_A, rdm=10,
+pso=3, lso=true, r=5); [b] the isolated optimality-knob deltas
+at N=14 (step3_C/step3_D vs step2_A): |δ| ≤ 2.1e-8, below the 1e-8
+tolerance floor — reported as deltas, not bounds; [c] direct chassis
+(rdm=false, pso=0, lso=false, r = r_of(N)); [d] additive chassis, same
+truncation, depth-6 D=4 tower; [e] one-level D=2 registry.
+
+| N | Core/baseline [c] | Reach-extended (r=N/2) | +RDM [a] | +LSO/PSO [b] | +coarse tower [d] | +direct elimination [e] | +moment bundle | Reference energy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10 | −0.4515496061 | −0.4515446346 | −0.4515445777 | — | — | −0.4515496069 | −0.4515496069 (absorbed, +21 scalars) | −0.4515446354 (Bethe) |
+| 12 | −0.4489881077 | −0.4489574122 | — | — | — | −0.4489881020 | STRUCTURALLY ABSORBED | −0.4489492431 (Bethe) |
+| 14 | −0.4474641215 | −0.4474173363 | −0.4473963685 | δ ≤ 2.1e-8 [b] | −0.4474640593 | −0.4474641168 | RESOURCE FRONTIER / ABSORBED | −0.4473963953 (Bethe) |
+| 20 | −0.4454338256 | −0.4452771838 | — | — | −0.4454337806 | −0.4454338245 | RESOURCE FRONTIER / ABSORBED | −0.4452193265 (Bethe) |
+
+Sources: direct/solve_results.csv, results/replacement_solve.csv,
+freeze/MASTER.csv (lad/step rows), hpc/refs/bethe_ref.json.
+
+**What the comparison suggests.**
+
+1. **Mechanisms that clearly improve accuracy:** reach (the dominant
+   lever at every size: e.g. +4.7e-5 per site at N=14) and the RDM
+   family on top of it (closing most of the remainder at small N —
+   the N=14 [a] row sits 4e-7 from the reference).
+2. **Mechanisms that reduce structural model size:** quotient/symmetry/
+   block structure (always on), and genuine fine-variable elimination —
+   structural ratio down to 0.383 at N=20 and 0.336 at N=30 (build-only).
+3. **Theoretical structural savings that have not yet translated into
+   lower realized solver cost:** the additive D=4 tower (structural
+   0.848 at N=20 against ~9× realized wall) — the D-package/block-
+   dimension effect (C20). The direct D=2 registry is the counterpoint:
+   structural saving WITH realized parity-to-savings.
+4. **Mechanisms whose accuracy contribution remains unresolved:** the
+   coarse tower and the direct coarse layer on the reach axis (bounds
+   ≤ 0.56% of the resolved gap, every size), and the moment-bundle
+   channel — untested for two recorded reasons (resource frontier;
+   structural absorption).
+5. **Most promising combinations for future development:** small-reach
+   retained Core + cluster-axis-aligned compression with a budgeted
+   block-dimension distribution + W_D-anchored corrections — plus the
+   reach-extended stock chassis wherever it simply fits.
+
+**The emerging architecture — the main lesson of the campaign:**
+
+$$\boxed{\text{structured retained Core} + \text{genuinely compressed coarse representation} + \text{budget-selected moment corrections}}$$
+
+The next step is not simply to increase the hierarchy level, but to
+align the deleted fine-scale information with the coarse representation,
+control the PSD block-dimension distribution, and add correction bundles
+only in directions not already absorbed by the retained quotient
+closure.
 
 ---
 
