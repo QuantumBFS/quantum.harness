@@ -1,0 +1,31 @@
+{
+  "created_at_utc": "2026-07-30T01:51:51.345404+00:00",
+  "git_commit": "e39ed7bd89b3579aafb1630370be6f464d6fe0eb",
+  "git_dirty": false,
+  "hostname": "v01r03",
+  "max_errors": {
+    "kernel_orbital_sum": 4.222133058685889e-15,
+    "orbital_overlap": 8.770762097149434e-15,
+    "orbital_reconstruction": 5.3549022725897734e-15,
+    "spinor_norm": 4.440892098500626e-16
+  },
+  "numpy_version": "2.0.2",
+  "orbital_count": 16,
+  "passed": true,
+  "phase1_git_commit": "182fe7742241ee2b8a1aad0bb019725a6b700c94",
+  "phase1_manifest_path": "/work/home/jiabohan5/quantum.harness-collab/tracks/qmc/results/route-d-plus-phase1-20260729-06/environment-manifest.json",
+  "phase1_manifest_sha256": "eabc1a4d3fae12e2fbbe7f54813acb83102495bd6004b7ab30b390d9b6cdecc6",
+  "python_version": "3.11.15",
+  "quadrature": {
+    "kind": "gauss-legendre-x-uniform-fourier",
+    "n_phi": 64,
+    "n_theta": 34,
+    "point_count": 2176
+  },
+  "schema_version": "challenge-15-route-d-plus-phase2-v1",
+  "scipy_version": "1.16.3",
+  "slurm_cluster_name": "xhcs3",
+  "slurm_job_id": "23016779",
+  "tolerance": 1e-12,
+  "two_q": 15
+}
