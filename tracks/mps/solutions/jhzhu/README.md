@@ -93,9 +93,10 @@ scaling structure at $1/8$, $1$, $9/8$, $2$, and higher descendants.
 
 ![Clean-Ising central-charge fit](../../../../results/clean_ising_transfer/central_charge_fit.png)
 
-The corresponding spectrum comparison is available as a
-[figure](../../../../results/clean_ising_transfer/lyapunov_scaling_dimensions.png)
-and a [machine-readable table](../../../../results/clean_ising_transfer/lyapunov_scaling_dimensions.csv).
+![Clean-Ising Lyapunov scaling spectrum](../../../../results/clean_ising_transfer/lyapunov_scaling_dimensions.png)
+
+The numerical spectrum is also available as a
+[machine-readable table](../../../../results/clean_ising_transfer/lyapunov_scaling_dimensions.csv).
 
 ### Random-bond Ising model at the Nishimori point
 
