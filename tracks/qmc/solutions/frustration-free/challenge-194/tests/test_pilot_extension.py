@@ -1,0 +1,1093 @@
+from __future__ import annotations
+
+import copy
+import hashlib
+import importlib.util
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+
+import long_range_percolation.pilot_extension as extension
+from long_range_percolation import pilot
+
+ROOT = Path(__file__).resolve().parents[1]
+RUN_PILOT = ROOT / "scripts" / "run_pilot.py"
+RUN_PILOT_SPEC = importlib.util.spec_from_file_location("run_pilot_cli", RUN_PILOT)
+assert RUN_PILOT_SPEC is not None and RUN_PILOT_SPEC.loader is not None
+run_pilot_cli = importlib.util.module_from_spec(RUN_PILOT_SPEC)
+RUN_PILOT_SPEC.loader.exec_module(run_pilot_cli)
+P0_ANALYSIS = (
+    Path(__file__).resolve().parents[6] / "results/challenge-194/p0_analysis.json"
+)
+P0_EVIDENCE_ROOT = P0_ANALYSIS.parent / "pilot-p0-739880d"
+EXPECTED_SPANS = {
+    (0.9).hex(): (
+        (4, 7),
+        (0.48828125).hex(),
+        float.fromhex("0x1.312d000000000p+0").hex(),
+    ),
+    (1.0).hex(): (
+        (5, 9),
+        float.fromhex("0x1.3880000000000p-1").hex(),
+        float.fromhex("0x1.dcd6500000000p+0").hex(),
+    ),
+}
+EXPECTED_GRIDS = {
+    (0.9).hex(): [
+        "0x1.f400000000000p-2",
+        "0x1.1085a00000000p-1",
+        "0x1.270b400000000p-1",
+        "0x1.3d90e00000000p-1",
+        "0x1.5416800000000p-1",
+        "0x1.6a9c200000000p-1",
+        "0x1.8121c00000000p-1",
+        "0x1.97a7600000000p-1",
+        "0x1.ae2d000000000p-1",
+        "0x1.c4b2a00000000p-1",
+        "0x1.db38400000000p-1",
+        "0x1.f1bde00000000p-1",
+        "0x1.0421c00000000p+0",
+        "0x1.0f64900000000p+0",
+        "0x1.1aa7600000000p+0",
+        "0x1.25ea300000000p+0",
+        "0x1.312d000000000p+0",
+    ],
+    (1.0).hex(): [
+        "0x1.3880000000000p-1",
+        "0x1.6092ca0000000p-1",
+        "0x1.88a5940000000p-1",
+        "0x1.b0b85e0000000p-1",
+        "0x1.d8cb280000000p-1",
+        "0x1.006ef90000000p+0",
+        "0x1.14785e0000000p+0",
+        "0x1.2881c30000000p+0",
+        "0x1.3c8b280000000p+0",
+        "0x1.50948d0000000p+0",
+        "0x1.649df20000000p+0",
+        "0x1.78a7570000000p+0",
+        "0x1.8cb0bc0000000p+0",
+        "0x1.a0ba210000000p+0",
+        "0x1.b4c3860000000p+0",
+        "0x1.c8cceb0000000p+0",
+        "0x1.dcd6500000000p+0",
+    ],
+}
+
+
+def _source() -> dict[str, object]:
+    return json.loads(P0_ANALYSIS.read_text(encoding="utf-8"))
+
+
+def _extension_protocol_fixture() -> dict[str, object]:
+    return extension.build_p0_extension_protocol(_source(), P0_EVIDENCE_ROOT)
+
+
+def _rehash(protocol: dict[str, object]) -> None:
+    unsigned = dict(protocol)
+    unsigned.pop("protocol_sha256", None)
+    protocol["protocol_sha256"] = hashlib.sha256(
+        extension._canonical_bytes(unsigned)
+    ).hexdigest()
+
+
+def test_extension_wrapper_has_exact_resources_and_task_map():
+    text = (ROOT / "scripts/pilot_extension_array_slurm.sh").read_text()
+    assert "#SBATCH --cpus-per-task=1" in text
+    assert "#SBATCH --mem=1800M" in text
+    assert "#SBATCH --time=00:40:00" in text
+    assert "^([1-9]|[1-8][0-9]|9[0-6])$" in text
+    assert "CELL_INDEX=$((SLURM_ARRAY_TASK_ID - 1))" in text
+    assert "scripts/run_pilot.py run-cell" in text
+
+
+def test_build_extension_spec_requires_protocol_and_exact_output_path():
+    parser = run_pilot_cli._parser()
+    args = parser.parse_args(
+        [
+            "build-extension-spec",
+            "--protocol",
+            "/tmp/p0_extension_v1_protocol.json",
+            "--validation-report",
+            "/tmp/report.json",
+            "--analysis",
+            "/tmp/p0_analysis.json",
+            "--p0-evidence-root",
+            "/tmp/pilot-p0-739880d",
+            "--output-root",
+            "/tmp/pilot-p0-extension-v1",
+            "--run-spec",
+            "/tmp/pilot-p0-extension-v1/run_spec.json",
+        ]
+    )
+    assert args.command == "build-extension-spec"
+
+
+def test_build_extension_spec_rejects_mismatched_run_spec_path(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+):
+    output_root = tmp_path / "extension"
+    result = run_pilot_cli.main(
+        [
+            "build-extension-spec",
+            "--protocol",
+            str(tmp_path / "protocol.json"),
+            "--validation-report",
+            str(tmp_path / "report.json"),
+            "--analysis",
+            str(tmp_path / "p0_analysis.json"),
+            "--p0-evidence-root",
+            str(tmp_path / "pilot-p0-739880d"),
+            "--output-root",
+            str(output_root),
+            "--run-spec",
+            str(tmp_path / "wrong-run_spec.json"),
+        ]
+    )
+    assert result == 1
+    assert (
+        "--run-spec must equal <output-root>/run_spec.json" in capsys.readouterr().err
+    )
+    assert not output_root.exists()
+
+
+def test_build_extension_spec_requires_explicit_analysis_and_evidence_root():
+    with pytest.raises(SystemExit):
+        run_pilot_cli._parser().parse_args(
+            [
+                "build-extension-spec",
+                "--protocol",
+                "/tmp/protocol.json",
+                "--validation-report",
+                "/tmp/report.json",
+                "--output-root",
+                "/tmp/extension",
+                "--run-spec",
+                "/tmp/extension/run_spec.json",
+            ]
+        )
+
+
+def _run_extension_wrapper(
+    tmp_path: Path,
+    task_id: str,
+    *,
+    extra_env: dict[str, str] | None = None,
+    command: str | Path | None = None,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
+    repository = tmp_path / "repo"
+    runner = (
+        repository
+        / "tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py"
+    )
+    runner.parent.mkdir(parents=True)
+    runner.write_text("# controlled runner placeholder\n", encoding="utf-8")
+    run_spec = tmp_path / "run_spec.json"
+    run_spec.write_text("{}\n", encoding="utf-8")
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/bin/bash\n"
+        "printf 'ARGS='\n"
+        "printf '<%s>' \"$@\"\n"
+        "printf '\\nLAUNCHER=%s\\n' \"$0\"\n"
+        "printf '\\nCACHE=%s\\n' \"${NUMBA_CACHE_DIR}\"\n"
+        "printf 'NUMBA_DISABLE_JIT=%s\\n' \"${NUMBA_DISABLE_JIT}\"\n"
+        "printf 'NUMBA_NUM_THREADS=%s\\n' \"${NUMBA_NUM_THREADS}\"\n"
+        "printf 'OMP_NUM_THREADS=%s\\n' \"${OMP_NUM_THREADS}\"\n"
+        "printf 'PYTHONPATH=%s\\n' \"${PYTHONPATH}\"\n"
+        "printf 'PYTHONHOME_SET=%s\\n' \"${PYTHONHOME+x}\"\n"
+        "printf 'NUMBA_CPU_NAME_SET=%s\\n' \"${NUMBA_CPU_NAME+x}\"\n"
+        "printf 'LD_LIBRARY_PATH_SET=%s\\n' \"${LD_LIBRARY_PATH+x}\"\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    environment = {
+        **os.environ,
+        "HARNESS_RUN_SPEC": str(run_spec),
+        "HARNESS_ENTRYPOINT": str(repository),
+        "HARNESS_COMMAND": str(fake_python if command is None else command),
+        "SLURM_ARRAY_TASK_ID": task_id,
+        "SLURM_ARRAY_JOB_ID": "991",
+        "SLURM_CPUS_PER_TASK": "1",
+        "SLURM_TMPDIR": str(cache_root),
+        **(extra_env or {}),
+    }
+    wrapper = ROOT / "scripts/pilot_extension_array_slurm.sh"
+    result = subprocess.run(
+        ["bash", str(wrapper)],
+        cwd=tmp_path,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result, cache_root
+
+
+def _run_extension_build_wrapper(
+    tmp_path: Path,
+    *,
+    command: str | Path | None = None,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
+    repository = tmp_path / "repo"
+    scripts = repository / "tracks/qmc/solutions/frustration-free/challenge-194/scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "analyze_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    (scripts / "run_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    results = tmp_path / "results"
+    results.mkdir()
+    analysis = results / "p0_analysis.json"
+    analysis.write_bytes(P0_ANALYSIS.read_bytes())
+    evidence_root = results / "pilot-p0-739880d"
+    evidence_root.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence_root / name)
+    validation_report = results / "validation-prod-877ab93/report/report.json"
+    validation_report.parent.mkdir(parents=True)
+    validation_report.write_text("{}\n", encoding="utf-8")
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/bin/bash\n"
+        "printf 'CALL='\n"
+        "printf '<%s>' \"$@\"\n"
+        "printf '\\nLAUNCHER=%s\\n' \"$0\"\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/pilot_extension_build_slurm.sh")],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "HARNESS_RUN_SPEC": str(analysis),
+            "HARNESS_ENTRYPOINT": str(repository),
+            "HARNESS_COMMAND": str(fake_python if command is None else command),
+            "SLURM_JOB_ID": "992",
+            "SLURM_CPUS_PER_TASK": "1",
+            "SLURM_TMPDIR": str(cache_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result, validation_report
+
+
+@pytest.mark.parametrize(("task_id", "cell_index"), (("1", "0"), ("96", "95")))
+def test_extension_wrapper_executes_exact_cell_index(
+    tmp_path: Path,
+    task_id: str,
+    cell_index: str,
+):
+    result, _ = _run_extension_wrapper(tmp_path, task_id)
+    assert result.returncode == 0, result.stderr
+    assert (
+        f"ARGS=<scripts/run_pilot.py><run-cell><--run-spec>"
+        f"<{tmp_path / 'run_spec.json'}><--cell-index><{cell_index}>"
+    ) in result.stdout
+
+
+@pytest.mark.parametrize(
+    "task_id",
+    (
+        "0",
+        "97",
+        "18446744073709551617",
+        "01",
+        "+1",
+        "-1",
+        " 1",
+        "1 ",
+        "1x",
+    ),
+)
+def test_extension_wrapper_rejects_noncanonical_or_out_of_range_task_ids(
+    tmp_path: Path,
+    task_id: str,
+):
+    result, _ = _run_extension_wrapper(tmp_path, task_id)
+    assert result.returncode == 64
+    assert "ARGS=" not in result.stdout
+
+
+def test_extension_wrapper_sanitizes_hostile_environment(tmp_path: Path):
+    result, _ = _run_extension_wrapper(
+        tmp_path,
+        "1",
+        extra_env={
+            "NUMBA_DISABLE_JIT": "1",
+            "NUMBA_NUM_THREADS": "99",
+            "NUMBA_CPU_NAME": "hostile",
+            "OMP_NUM_THREADS": "99",
+            "PYTHONHOME": "/hostile/home",
+            "PYTHONPATH": "/hostile/path",
+            "LD_LIBRARY_PATH": "/hostile/lib",
+        },
+    )
+    assert result.returncode == 0, result.stderr
+    assert "NUMBA_DISABLE_JIT=0" in result.stdout
+    assert "NUMBA_NUM_THREADS=1" in result.stdout
+    assert "OMP_NUM_THREADS=1" in result.stdout
+    assert (
+        f"PYTHONPATH={tmp_path / 'repo'}/tracks/qmc/solutions/frustration-free/challenge-194/src"
+        in result.stdout
+    )
+    lines = result.stdout.splitlines()
+    assert "PYTHONHOME_SET=" in lines
+    assert "NUMBA_CPU_NAME_SET=" in lines
+    assert "LD_LIBRARY_PATH_SET=" in lines
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    (
+        ("HARNESS_RUN_SPEC", "run_spec.json"),
+        ("HARNESS_ENTRYPOINT", "{repo}/./"),
+        ("HARNESS_COMMAND", "{python}/./fake-python"),
+    ),
+)
+def test_extension_wrapper_rejects_noncanonical_harness_paths(
+    tmp_path: Path,
+    name: str,
+    value: str,
+):
+    replacement = value.format(
+        repo=tmp_path / "repo",
+        python=tmp_path,
+    )
+    result, _ = _run_extension_wrapper(
+        tmp_path,
+        "1",
+        extra_env={name: replacement},
+    )
+    assert result.returncode == 66
+    assert "ARGS=" not in result.stdout
+
+
+def test_extension_wrapper_creates_unique_private_empty_cache(tmp_path: Path):
+    first, cache_root = _run_extension_wrapper(tmp_path, "1")
+    assert first.returncode == 0, first.stderr
+    cache = cache_root / "challenge-194-p0-extension-991-1"
+    assert cache.is_dir()
+    assert cache.stat().st_mode & 0o777 == 0o700
+    assert list(cache.iterdir()) == []
+    second = subprocess.run(
+        ["bash", str(ROOT / "scripts/pilot_extension_array_slurm.sh")],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "HARNESS_RUN_SPEC": str(tmp_path / "run_spec.json"),
+            "HARNESS_ENTRYPOINT": str(tmp_path / "repo"),
+            "HARNESS_COMMAND": str(tmp_path / "fake-python"),
+            "SLURM_ARRAY_TASK_ID": "1",
+            "SLURM_ARRAY_JOB_ID": "991",
+            "SLURM_CPUS_PER_TASK": "1",
+            "SLURM_TMPDIR": str(cache_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert second.returncode == 73
+    assert "ARGS=" not in second.stdout
+
+
+@pytest.mark.parametrize("wrapper_kind", ("array", "build"))
+def test_extension_wrappers_preserve_venv_final_symlink_launcher(
+    tmp_path: Path,
+    wrapper_kind: str,
+):
+    launcher = tmp_path / ".venv/bin/python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path("../../fake-python"))
+    if wrapper_kind == "array":
+        result, _ = _run_extension_wrapper(tmp_path, "1", command=launcher)
+    else:
+        result, _ = _run_extension_build_wrapper(tmp_path, command=launcher)
+
+    assert launcher.is_symlink()
+    assert result.returncode == 0, result.stderr
+    assert f"LAUNCHER={launcher}" in result.stdout
+
+
+def _invalid_python_candidate(tmp_path: Path, kind: str) -> str | Path:
+    candidate = tmp_path / "invalid-python"
+    if kind == "relative":
+        return "relative/python"
+    if kind == "missing":
+        return candidate
+    if kind == "directory":
+        candidate.mkdir()
+        return candidate
+    if kind == "non-executable":
+        candidate.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+        candidate.chmod(0o644)
+        return candidate
+    candidate.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    candidate.chmod(0o755)
+    if kind == "lexically-noncanonical":
+        return f"{tmp_path}/./invalid-python"
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    return f"{parent}/../invalid-python"
+
+
+@pytest.mark.parametrize("wrapper_kind", ("array", "build"))
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "relative",
+        "missing",
+        "non-executable",
+        "directory",
+        "lexically-noncanonical",
+        "unsafe-parent-component",
+    ),
+)
+def test_extension_wrappers_reject_invalid_python_candidates(
+    tmp_path: Path,
+    wrapper_kind: str,
+    kind: str,
+):
+    command = _invalid_python_candidate(tmp_path, kind)
+    if wrapper_kind == "array":
+        result, _ = _run_extension_wrapper(tmp_path, "1", command=command)
+    else:
+        result, _ = _run_extension_build_wrapper(tmp_path, command=command)
+
+    assert result.returncode == 66
+    assert "ARGS=" not in result.stdout
+    assert "CALL=" not in result.stdout
+
+
+def test_extension_build_wrapper_dispatches_approved_validation_package(
+    tmp_path: Path,
+):
+    result, validation_report = _run_extension_build_wrapper(tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert f"<--validation-report><{validation_report}>" in result.stdout
+    assert (
+        result.stdout.count(
+            f"<--p0-evidence-root><{tmp_path / 'results/pilot-p0-739880d'}>"
+        )
+        == 2
+    )
+    assert f"<--analysis><{tmp_path / 'results/p0_analysis.json'}>" in result.stdout
+    assert "validation-prod-fd0aa31-compute" not in result.stdout
+
+
+def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
+    protocol = _extension_protocol_fixture()
+    run_spec = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", protocol=protocol
+    )
+    loaded = pilot.load_p0_extension_run_spec(
+        run_spec, verify_current_environment=False
+    )
+    assert loaded["schema_version"] == extension.EXTENSION_RUN_SPEC_SCHEMA
+    assert loaded["source_extension_protocol_sha256"] == protocol["protocol_sha256"]
+    assert loaded["cells"] == protocol["cells"]
+    with pytest.raises(RuntimeError, match="P0 run spec"):
+        pilot.load_pilot_run_spec(run_spec, verify_current_environment=False)
+
+
+def test_extension_small_cell_restart_and_merge_use_extension_progress(
+    tmp_path: Path,
+):
+    run_spec = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    first = pilot._run_test_registered_pilot_cell(run_spec, 0)
+    second = pilot._run_test_registered_pilot_cell(run_spec, 0)
+    assert first == second
+    merged = pilot._merge_test_registered_pilot_progress(run_spec)
+    assert merged["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+
+
+def test_extension_run_spec_has_only_bound_outer_fields(tmp_path: Path):
+    protocol = _extension_protocol_fixture()
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", protocol=protocol
+    )
+    document = json.loads(path.read_text())
+    assert set(document) == {
+        "schema_version",
+        "artifact_root",
+        "protocol",
+        "cells",
+        "cell_count",
+        "source_extension_protocol_sha256",
+        "source_p0_analysis_document_sha256",
+        "design_sha256",
+        "correctness_report_sha256",
+        "correctness_run_spec_sha256",
+        "correctness_approval_registry_sha256",
+        "correctness_approval_revision",
+        "validation_source_revision",
+        "validated_engine_modules",
+        "validated_engine_sha256",
+        "validation_runtime_capability_sha256",
+        "orchestration_revision",
+        "clean_tree",
+        "uv_lock_sha256",
+        "runtime_capability",
+        "runtime_capability_sha256",
+        "analysis_plan_sha256",
+        "rng_assignment_sha256",
+        "capability_waiver",
+        "merged_progress_path",
+        "run_spec_sha256",
+    }
+    assert "cells" not in document["protocol"]
+    assert document["protocol"]["protocol_sha256"] == protocol["protocol_sha256"]
+    assert document["cell_count"] == len(document["cells"]) == 96
+    assert all(
+        not Path(cell[field]).is_absolute() and ".." not in Path(cell[field]).parts
+        for cell in document["cells"]
+        for field in ("cell_path", "run_path", "manifest_path")
+    )
+
+
+def test_public_extension_builder_binds_approved_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    protocol = _extension_protocol_fixture()
+    approval = pilot._load_approval_registry()
+    modules = pilot._scientific_hashes()
+    monkeypatch.setattr(
+        pilot,
+        "_current_source",
+        lambda **_: {
+            "source_revision": protocol["source_revision"],
+            "clean_tree": True,
+            "provenance_error": None,
+        },
+    )
+    monkeypatch.setattr(
+        pilot,
+        "_verified_correctness",
+        lambda _path: {
+            "correctness_report_sha256": approval["report_sha256"],
+            "correctness_run_spec_sha256": approval["run_spec_sha256"],
+            "correctness_approval_registry_sha256": pilot._approval_registry_digest(),
+            "validation_source_revision": approval["validation_source_revision"],
+            "validated_engine_modules": modules,
+            "validated_engine_sha256": approval["scientific_engine_sha256"],
+            "validation_runtime_capability_sha256": "3" * 64,
+        },
+    )
+    output_root = (tmp_path / "extension").resolve()
+    clean_checkout = tmp_path / "clean-checkout"
+    clean_checkout.mkdir()
+    monkeypatch.setattr(
+        extension,
+        "_p0_run_spec_path",
+        lambda: clean_checkout / "results/missing/run_spec.json",
+        raising=False,
+    )
+    monkeypatch.setattr(
+        extension,
+        "_p0_progress_path",
+        lambda: clean_checkout / "results/missing/progress.json",
+        raising=False,
+    )
+    document = pilot.build_p0_extension_run_spec(
+        output_root,
+        (tmp_path / "correctness" / "report.json").resolve(),
+        protocol,
+        _source(),
+        P0_EVIDENCE_ROOT,
+    )
+    assert not (clean_checkout / "results").exists()
+    assert document["cells"] == protocol["cells"]
+    assert document["design_sha256"] == protocol["design_sha256"]
+    assert document["correctness_report_sha256"] == approval["report_sha256"]
+    assert (output_root / pilot.RUN_SPEC_NAME).read_bytes() == pilot._canonical_bytes(
+        document
+    )
+    with pytest.raises(RuntimeError, match="absolute"):
+        pilot.build_p0_extension_run_spec(
+            Path("relative"),
+            Path("relative-report.json"),
+            protocol,
+            _source(),
+            Path("relative-evidence"),
+        )
+
+
+@pytest.mark.parametrize(
+    "stage",
+    ("after-trajectory", "after-batch", "after-progress", "after-manifest"),
+)
+def test_extension_cell_resumes_every_publication_boundary(tmp_path: Path, stage: str):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+
+    def stop(actual: str) -> None:
+        if actual == stage:
+            raise RuntimeError("injected extension stop")
+
+    with pytest.raises(RuntimeError, match="injected extension stop"):
+        pilot._run_test_registered_pilot_cell(path, 0, crash_hook=stop)
+    run = path.parent / json.loads(path.read_text())["cells"][0]["run_path"]
+    published_path: Path | None = None
+    published_payload: bytes | None = None
+    if stage == "after-batch":
+        published_path = next((run / "batches").glob("batch-*.json"))
+        published_payload = published_path.read_bytes()
+        assert not (run / "progress.json").exists()
+    if stage == "after-manifest":
+        manifest_path = json.loads(path.read_text())["cells"][0]["manifest_path"]
+        published_path = path.parent / manifest_path
+        published_payload = published_path.read_bytes()
+    result = pilot._run_test_registered_pilot_cell(path, 0)
+    assert (path.parent / result["manifest_path"]).is_file()
+    if published_path is not None:
+        assert published_path.read_bytes() == published_payload
+    assert pilot._run_test_registered_pilot_cell(path, 0) == result
+
+
+@pytest.mark.parametrize("suffix", (".partial", ".intent"))
+def test_extension_cell_preserves_stale_publication_markers(
+    tmp_path: Path, suffix: str
+):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    pilot._run_test_registered_pilot_cell(path, 0)
+    cell = next((path.parent / "cells").iterdir())
+    marker = cell / f"stale{suffix}"
+    marker.write_text("preserve", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="publication marker"):
+        pilot._run_test_registered_pilot_cell(path, 0)
+    assert marker.read_text(encoding="utf-8") == "preserve"
+
+
+def test_extension_pending_merge_and_snapshot_share_exact_schema(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    assert pilot._pending_test_registered_pilot_cells(path) == [0]
+    result = pilot._run_test_registered_pilot_cell(path, 0)
+    assert pilot._pending_test_registered_pilot_cells(path) == []
+    request = json.loads(
+        (
+            path.parent
+            / json.loads(path.read_text())["cells"][0]["run_path"]
+            / "request.json"
+        ).read_text()
+    )
+    assert request["master_seed"] == extension.EXTENSION_MASTER_SEED
+    assert request["phase"] == extension.EXTENSION_PHASE
+    merged = pilot._merge_test_registered_pilot_progress(path)
+    assert merged["cells"][0]["trajectory_sha256"] == result["trajectory_sha256"]
+    with pilot._open_verified_registered_pilot_analysis_snapshot(path) as snapshot:
+        assert snapshot.spec["schema_version"] == pilot.TEST_EXTENSION_RUN_SPEC_SCHEMA
+        assert (
+            snapshot.progress["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+        )
+
+
+def test_extension_merge_rejects_extra_cell_directory(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    pilot._run_test_registered_pilot_cell(path, 0)
+    (path.parent / "cells" / "extra").mkdir()
+    with pytest.raises(RuntimeError, match="extra"):
+        pilot._merge_test_registered_pilot_progress(path)
+
+
+def test_extension_cell_root_swap_fails_closed(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    cell_root = path.parent / json.loads(path.read_text())["cells"][0]["cell_path"]
+
+    def replace(stage: str) -> None:
+        if stage == "after-trajectory":
+            cell_root.rename(path.parent / "detached-cell")
+            cell_root.mkdir()
+
+    with pytest.raises(RuntimeError, match="identity|generation"):
+        pilot._run_test_registered_pilot_cell(path, 0, crash_hook=replace)
+
+
+def test_production_extension_schema_cannot_be_downgraded_to_test(
+    tmp_path: Path,
+):
+    path = pilot._write_test_extension_run_spec(tmp_path / "extension", tiny=True)
+    document = json.loads(path.read_text())
+    document["schema_version"] = extension.EXTENSION_RUN_SPEC_SCHEMA
+    document["run_spec_sha256"] = pilot._document_hash(document, "run_spec_sha256")
+    path.write_bytes(pilot._canonical_bytes(document))
+    with pytest.raises(RuntimeError):
+        pilot._run_test_registered_pilot_cell(path, 0)
+
+
+@pytest.mark.parametrize(
+    ("source_class", "maximum_size"),
+    (
+        ("design", extension.DESIGN_MAX_BYTES),
+        ("progress", extension.P0_PROGRESS_MAX_BYTES),
+        ("registry", extension.P0_RUN_SPEC_MAX_BYTES),
+        ("analysis", extension.P0_ANALYSIS_MAX_BYTES),
+    ),
+)
+def test_extension_sources_reject_oversize_before_read(
+    tmp_path: Path,
+    source_class: str,
+    maximum_size: int,
+):
+    if source_class == "design":
+        source = tmp_path / "design.md"
+        with source.open("wb") as stream:
+            stream.truncate(maximum_size + 1)
+        invoke = lambda: extension._file_sha256(source)
+    elif source_class == "analysis":
+        source = tmp_path / "p0_analysis.json"
+        with source.open("wb") as stream:
+            stream.truncate(maximum_size + 1)
+        invoke = lambda: extension.load_frozen_p0_analysis(source)
+    else:
+        evidence = tmp_path / "evidence"
+        evidence.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+        name = "progress.json" if source_class == "progress" else "run_spec.json"
+        with (evidence / name).open("wb") as stream:
+            stream.truncate(maximum_size + 1)
+        invoke = lambda: extension._load_p0_evidence(evidence)
+    with pytest.raises(RuntimeError, match="byte-size|bounded"):
+        invoke()
+
+
+@pytest.mark.parametrize(
+    "source_class",
+    ("design", "progress", "registry", "analysis"),
+)
+def test_extension_sources_reject_pathname_swap_after_descriptor_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    source_class: str,
+):
+    if source_class == "design":
+        source = tmp_path / "design.md"
+        source.write_bytes(b"original\n")
+        replacement = tmp_path / "replacement.md"
+        replacement.write_bytes(b"changed!\n")
+        invoke = lambda: extension._file_sha256(source)
+        read_owner = pilot
+    elif source_class == "analysis":
+        source = tmp_path / "p0_analysis.json"
+        source.write_bytes(P0_ANALYSIS.read_bytes())
+        replacement = tmp_path / "replacement-p0_analysis.json"
+        payload = bytearray(source.read_bytes())
+        payload[0] = ord("[")
+        replacement.write_bytes(payload)
+        invoke = lambda: extension.load_frozen_p0_analysis(source)
+        read_owner = pilot
+    else:
+        evidence = tmp_path / "evidence"
+        evidence.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+        name = "progress.json" if source_class == "progress" else "run_spec.json"
+        source = evidence / name
+        replacement = tmp_path / f"replacement-{name}"
+        payload = bytearray(source.read_bytes())
+        payload[0] = ord("[") if payload[0] != ord("[") else ord("{")
+        replacement.write_bytes(payload)
+        invoke = lambda: extension._load_p0_evidence(evidence)
+        read_owner = extension
+    target_description = {
+        "progress": "progress",
+        "registry": "run spec",
+    }.get(source_class)
+    real_read = read_owner._read_descriptor_bounded
+    swapped = False
+
+    def swapping_read(descriptor: int, maximum_size: int, description: str) -> bytes:
+        nonlocal swapped
+        result = real_read(descriptor, maximum_size, description)
+        if not swapped and (
+            target_description is None or target_description in description
+        ):
+            swapped = True
+            replacement.replace(source)
+        return result
+
+    monkeypatch.setattr(read_owner, "_read_descriptor_bounded", swapping_read)
+    with pytest.raises(RuntimeError, match="identity|generation|changed"):
+        invoke()
+
+
+def test_extension_ranges_are_derived_from_exact_real_p0():
+    derived = extension.derive_p0_extension_ranges(_source())
+    assert derived[(0.9).hex()]["four_sector_components"] == [[5, 5]]
+    assert derived[(0.9).hex()]["q_g_components"] == [[6, 6], [13, 14]]
+    assert derived[(1.0).hex()]["four_sector_components"] == [[6, 7]]
+    assert derived[(1.0).hex()]["q_g_components"] == [[8, 8], [12, 14]]
+    for sigma_hex, (guard_indices, lower, upper) in EXPECTED_SPANS.items():
+        assert derived[sigma_hex]["guard_interval_indices"] == list(guard_indices)
+        assert derived[sigma_hex]["lower_kappa_hex"] == lower
+        assert derived[sigma_hex]["upper_kappa_hex"] == upper
+
+
+def test_extension_grids_are_recursive_binary64_and_hash_bound():
+    protocol = extension.build_p0_extension_protocol(_source(), P0_EVIDENCE_ROOT)
+    entries = {entry["sigma_hex"]: entry for entry in protocol["sigma_entries"]}
+    assert {
+        sigma: entry["kappas"] for sigma, entry in entries.items()
+    } == EXPECTED_GRIDS
+    assert (
+        entries[(0.9).hex()]["grid_sha256"]
+        == extension.EXTENSION_GRID_HASHES[(0.9).hex()]
+    )
+    assert (
+        entries[(1.0).hex()]["grid_sha256"]
+        == extension.EXTENSION_GRID_HASHES[(1.0).hex()]
+    )
+
+
+def test_protocol_has_exact_axes_fresh_identities_and_canonical_cells():
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
+    assert protocol["schema_version"] == extension.EXTENSION_PROTOCOL_SCHEMA
+    assert protocol["master_seed"] == 19_420_262_729
+    assert protocol["lengths"] == [2**10, 2**14, 2**18]
+    assert protocol["replicas"] == list(range(24, 40))
+    assert protocol["cell_count"] == 96
+    assert sum(len(cell["kappas"]) for cell in protocol["cells"]) == 1632
+    assert [
+        (cell["sigma"], cell["length"], cell["replica"]) for cell in protocol["cells"]
+    ] == [
+        (sigma.hex(), length, replica)
+        for sigma in (0.9, 1.0)
+        for length in (2**10, 2**14, 2**18)
+        for replica in range(24, 40)
+    ]
+    assert len({cell["cell_id"] for cell in protocol["cells"]}) == 96
+    assert len({cell["request_sha256"] for cell in protocol["cells"]}) == 96
+    assert (
+        len(
+            {
+                digest
+                for cell in protocol["cells"]
+                for digest in cell["rng_material_sha256"]
+            }
+        )
+        == 96 * 4
+    )
+
+
+def test_protocol_build_uses_explicit_external_evidence_in_clean_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    external = tmp_path / "external-p0"
+    external.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, external / name)
+    clean_checkout = tmp_path / "clean-checkout"
+    clean_checkout.mkdir()
+    monkeypatch.setattr(
+        extension,
+        "_p0_run_spec_path",
+        lambda: clean_checkout / "results/missing/run_spec.json",
+        raising=False,
+    )
+    monkeypatch.setattr(
+        extension,
+        "_p0_progress_path",
+        lambda: clean_checkout / "results/missing/progress.json",
+        raising=False,
+    )
+
+    protocol = extension.build_p0_extension_protocol(_source(), external)
+    extension.validate_p0_extension_protocol(_source(), protocol, external)
+
+    assert not (clean_checkout / "results").exists()
+    assert protocol["source_p0_run_spec_sha256"] == extension.P0_RUN_SPEC_SHA256
+    assert protocol["source_p0_progress_sha256"] == extension.P0_PROGRESS_SHA256
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ("relative", "missing", "wrong-run-spec", "wrong-progress", "symlink"),
+)
+def test_protocol_evidence_root_fails_closed(tmp_path: Path, kind: str):
+    evidence = tmp_path / "evidence"
+    if kind == "relative":
+        candidate = Path("relative-evidence")
+    elif kind == "missing":
+        candidate = evidence
+    else:
+        target = tmp_path / "target"
+        target.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, target / name)
+        if kind == "wrong-run-spec":
+            (target / "run_spec.json").write_text("{}\n", encoding="utf-8")
+            candidate = target
+        elif kind == "wrong-progress":
+            (target / "progress.json").write_text("{}\n", encoding="utf-8")
+            candidate = target
+        else:
+            evidence.symlink_to(target, target_is_directory=True)
+            candidate = evidence
+
+    with pytest.raises(RuntimeError, match="evidence|absolute|canonical|hash"):
+        extension.build_p0_extension_protocol(_source(), candidate)
+
+
+def test_protocol_evidence_root_rejects_directory_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+    original_reader = extension._read_evidence_document_at
+
+    def swapping_reader(root_fd: int, name: str, description: str, maximum_size: int):
+        document = original_reader(root_fd, name, description, maximum_size)
+        if name == "run_spec.json":
+            moved = tmp_path / "moved-evidence"
+            evidence.rename(moved)
+            evidence.mkdir()
+            for filename in ("run_spec.json", "progress.json"):
+                shutil.copyfile(moved / filename, evidence / filename)
+        return document
+
+    monkeypatch.setattr(extension, "_read_evidence_document_at", swapping_reader)
+    with pytest.raises(RuntimeError, match="identity changed"):
+        extension.build_p0_extension_protocol(_source(), evidence)
+
+
+def test_protocol_rejects_actual_frozen_progress_drift(tmp_path: Path):
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    drifted_root = tmp_path / "drifted-p0"
+    drifted_root.mkdir()
+    shutil.copyfile(P0_EVIDENCE_ROOT / "run_spec.json", drifted_root / "run_spec.json")
+    (drifted_root / "progress.json").write_bytes(b"{}\n")
+    with pytest.raises(RuntimeError, match="progress"):
+        extension.build_p0_extension_protocol(source, drifted_root)
+    with pytest.raises(RuntimeError, match="progress"):
+        extension.validate_p0_extension_protocol(source, protocol, drifted_root)
+
+
+def test_protocol_rejects_recomputed_bracket_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    forged = copy.deepcopy(extension.select_p1_brackets(source))
+    forged["requires_p0_extension"] = False
+    assert forged["bracket_document_sha256"] == extension.P0_BRACKET_DOCUMENT_SHA256
+    monkeypatch.setattr(extension, "select_p1_brackets", lambda _source: forged)
+    with pytest.raises(RuntimeError, match="bracket"):
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    with pytest.raises(RuntimeError, match="bracket"):
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("request_sha256", [], "request"),
+        ("rng_material_sha256", [{}, "0" * 64, "1" * 64, "2" * 64], "RNG"),
+    ],
+)
+def test_validator_normalizes_malformed_digest_types(
+    field: str, value: object, message: str
+):
+    source = _source()
+    protocol = copy.deepcopy(
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    )
+    protocol["cells"][0][field] = value
+    _rehash(protocol)
+    with pytest.raises(RuntimeError, match=message):
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (lambda value: value.update(source_p0_run_spec_sha256="0" * 64), "source"),
+        (
+            lambda value: value["sigma_entries"][0]["q_g_components"].reverse(),
+            "component",
+        ),
+        (
+            lambda value: value["sigma_entries"][0]["kappas"].__setitem__(
+                0, "0X1.F400000000000P-2"
+            ),
+            "binary64",
+        ),
+        (lambda value: value["sigma_entries"][0]["kappas"].reverse(), "grid"),
+        (
+            lambda value: value["sigma_entries"][0].update(grid_sha256="0" * 64),
+            "grid",
+        ),
+        (lambda value: value.update(design_sha256="0" * 64), "design"),
+        (lambda value: value["cells"].reverse(), "canonical"),
+        (lambda value: value["replicas"].pop(), "replica"),
+        (
+            lambda value: value["replicas"].__setitem__(1, value["replicas"][0]),
+            "replica",
+        ),
+        (
+            lambda value: value["cells"][0].update(request_sha256="0" * 64),
+            "request",
+        ),
+        (
+            lambda value: value["cells"][0]["rng_material_sha256"].__setitem__(
+                0, "0" * 64
+            ),
+            "RNG",
+        ),
+        (
+            lambda value: value["cells"][0].update(
+                request_sha256=extension._p0_identity_hashes(P0_EVIDENCE_ROOT)[0][0]
+            ),
+            "collision",
+        ),
+    ],
+)
+def test_semantic_validator_rejects_superficially_rehashed_mutations(
+    mutation, message: str
+):
+    source = _source()
+    protocol = copy.deepcopy(
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    )
+    mutation(protocol)
+    _rehash(protocol)
+    with pytest.raises(RuntimeError, match=message):
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
+
+
+def test_protocol_rejects_unknown_fields_and_p1_identity_overlap(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    source = _source()
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    forged = copy.deepcopy(protocol)
+    forged["unknown"] = True
+    _rehash(forged)
+    with pytest.raises(RuntimeError, match="fields"):
+        extension.validate_p0_extension_protocol(source, forged, P0_EVIDENCE_ROOT)
+
+    monkeypatch.setattr(extension, "EXTENSION_REPLICAS", tuple(range(8, 24)))
+    with pytest.raises(RuntimeError, match="P1|overlap"):
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+
+
+def test_component_and_grid_helpers_fail_closed():
+    with pytest.raises(RuntimeError, match="canonical"):
+        extension._marked_components([2, 1])
+    assert extension._component_gap((2, 3), (3, 5)) == 0
+    with pytest.raises(RuntimeError, match="endpoints"):
+        extension._recursive_binary64_grid_17(1.0, 1.0)
