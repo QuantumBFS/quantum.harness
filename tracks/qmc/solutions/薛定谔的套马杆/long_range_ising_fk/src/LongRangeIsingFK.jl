@@ -3,7 +3,7 @@ module LongRangeIsingFK
 using Random, Statistics, Printf, Dates, LinearAlgebra
 
 export Geometry, WindingUF, add_edge!, wrapping, direct_sweep!, fast_sweep!,
-       run_chain, minimum_delta, coupling_sum
+       nn_sweep!, run_chain, run_nn_chain, minimum_delta, coupling_sum
 
 minimum_delta(d::Int, L::Int) = mod(d + fld(L,2), L) - fld(L,2)
 
@@ -120,6 +120,20 @@ function fast_sweep!(spins,g,beta,rng)
     wr,c1
 end
 
+function nn_sweep!(spins, beta, rng, L::Int)
+    N=length(spins); u=WindingUF(N)
+    p=-expm1(-2beta)
+    for y in 0:L-1, x in 0:L-1
+        a=site(x,y,L)
+        b=site(x+1,y,L)
+        spins[a]==spins[b] && rand(rng)<p && add_edge!(u,a,b,1,0,L)
+        b=site(x,y+1,L)
+        spins[a]==spins[b] && rand(rng)<p && add_edge!(u,a,b,0,1,L)
+    end
+    wr=wrapping(u); c1=flip_clusters!(spins,u,rng)
+    wr,c1
+end
+
 function run_chain(;L=8,sigma=1.875,beta=0.336985,seed=1,therm=100,meas=500,algorithm=:fast,return_blocks=false)
     rng=MersenneTwister(seed); g=Geometry(L,sigma); spins=rand(rng,(-1,1),L^2)
     sweep! = algorithm==:fast ? fast_sweep! : direct_sweep!
@@ -151,6 +165,32 @@ function run_chain(;L=8,sigma=1.875,beta=0.336985,seed=1,therm=100,meas=500,algo
       tau_m2=tauint(m2),blocks=nb,runtime_s=time()-t,sumJ=coupling_sum(g))
     return_blocks ? (summary=summary, block_m2=block(m2), block_rp=block(r2.-2r0),
                      block_c1=block(c1)) : summary
+end
+
+function run_nn_chain(;L=8,beta=log1p(sqrt(2))/2,seed=1,therm=100,
+                      meas=500,nb=100,return_blocks=false)
+    rng=MersenneTwister(seed); spins=rand(rng,(-1,1),L^2)
+    for _ in 1:therm; nn_sweep!(spins,beta,rng,L); end
+    m2=Vector{Float64}(undef,meas); m4=similar(m2)
+    r0=similar(m2); r2=similar(m2); c1=similar(m2)
+    t=time()
+    for sweep in 1:meas
+        wr,c=nn_sweep!(spins,beta,rng,L); m=sum(spins)/length(spins)
+        m2[sweep]=m^2; m4[sweep]=m^4
+        r0[sweep]=wr[1]; r2[sweep]=wr[2]; c1[sweep]=c
+    end
+    nb=min(nb,max(2,meas÷50)); bs=meas÷nb
+    used=nb*bs
+    block(v)=[mean(@view v[(i-1)*bs+1:i*bs]) for i in 1:nb]
+    bm2=block(@view m2[1:used]); bm4=block(@view m4[1:used])
+    br0=block(@view r0[1:used]); br2=block(@view r2[1:used])
+    bc1=block(@view c1[1:used])
+    q=mean(m2)^2/mean(m4); rp=mean(r2)-2mean(r0); chi=L^2*mean(m2)
+    summary=(;L,beta,seed,therm,meas,mean_m2=mean(m2),mean_m4=mean(m4),
+      Qm=q,chi,R0=mean(r0),R2=mean(r2),Rp=rp,mean_C1=mean(c1),
+      blocks=nb,runtime_s=time()-t)
+    return_blocks ? (summary=summary,block_m2=bm2,block_m4=bm4,
+                     block_r0=br0,block_r2=br2,block_c1=bc1) : summary
 end
 
 end
