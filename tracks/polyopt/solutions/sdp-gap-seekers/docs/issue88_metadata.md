@@ -74,20 +74,20 @@ D4 gate transcript: `evidence/d4-coefficient-gates-5f79c93/`. Equivalence proof:
 
 ---
 
-## TRI-L1 — Triangular J1 Heisenberg AFM, L=1, d=2, full-spin isotypic reduction
+## TRI-L1 — Triangular J1 Heisenberg AFM, L=1, d=2, full-spin isotypic reduction *(portability control — NOT #88 target 3)*
 
 | Field | Content |
 |---|---|
-| **Model** | Triangular-lattice spin-1/2 Heisenberg antiferromagnet, `H = Σ_<ij> S_i·S_j`, J1=1 (120° geometrically-frustrated order). 3 NN bond directions `(1,0),(0,1),(1,-1)` on the integer grid. Same 3×3 level-1 patch. |
+| **Model** | Triangular-lattice spin-1/2 Heisenberg antiferromagnet, `H = Σ_<ij> S_i·S_j`, J1=1, **J2=0** (120° geometrically-frustrated order). 3 NN bond directions `(1,0),(0,1),(1,-1)` on the integer grid. Same 3×3 level-1 patch. **This is a J1-only portability control; #88 target 3 is triangular J1-J2 at g=0.10, 0.12 and is not addressed.** |
 | **Restrictions** | **Unrestricted relaxation, exactly reparameterized by the same six-layer spin reduction ported from SS** (valid because the triangular Heisenberg Hamiltonian is globally spin-rotation invariant; same patch/basis). All six truth gates pass on the actual triangular coefficients. Not a physical spin-sector restriction. |
 | **Relaxation** | L=1, d=2; `one_symbol_lift` v1. |
 | **Size** | Source: positive **703**, gap **7**, **74,602** moments. **Reduced: 3,250 variables, 9 real PSD cones** (identical inventory to SS — the spin reduction is set by patch+basis+SU(2), not bond geometry), **max side 45, 6,104 packed entries.** |
 | **Solver** | Mosek 11.2.0; termination `OPTIMAL`, primal/dual `FEASIBLE_POINT`, raw `MSK_SOL_STA_OPTIMAL`. |
-| **Cost** | γ=1: solve **~9.2 s**, **~1.16 GiB** peak RSS, 16 threads, node g05r06 — scan job **23012955**. Residual audit: max affine-equality residual 0.0, worst PSD violation 0.0. |
-| **Gap result** | **Not certified / not produced.** OPTIMAL-feasible at γ ∈ {0, 1, 2}; excludes no γ, so the L=1/d=2 relaxation cannot upper-bound the triangular gap. Consistent with the other two models at d=2. |
+| **Cost** | γ=1: solve **~9.6 s**, **~1.16 GiB** peak RSS (`peak_process_rss_kib = 1,216,676`), 16 threads — scan job **23012955**. Residual audit: max affine-equality residual 0.0, worst PSD violation 0.0. |
+| **Gap result** | **Not certified / not produced.** OPTIMAL-feasible at γ ∈ {0, 1, 2}; excludes no γ, so the L=1/d=2 relaxation cannot upper-bound the triangular gap. Consistent with the square/SS results at d=2. |
 | **Observable result** | Not produced (feasibility-only target). |
 
-γ-scan evidence: `results/triangular-j1-scan-20260729/` (branch `experiment/triangular-spin`, job 23012955). Builder/solver: `scripts/build_triangular_full_spin_isotypic_reduced_mof.jl` + `solve_triangular_full_spin_isotypic_reduced_mof.jl`. Note: all three #88 target models now share the identical reduced inventory at L=1/d=2 and are all feasible across the tested γ-range.
+γ-scan evidence: `evidence/triangular-j1-scan-23012955/` (representative γ=1 `result-gamma-1.toml` + `runmeta-gamma-1.toml` + `slurm-23012955.out` scan log + source SHA-256s; run commit `d73545d`, job 23012955). Builder/solver: `scripts/build_triangular_full_spin_isotypic_reduced_mof.jl` + `solve_triangular_full_spin_isotypic_reduced_mof.jl`. The identical reduced inventory (3,250 / 9 cones / max side 45) across square/SS/triangular confirms the reduction transfers across all three geometries; only square J1-J2 and Shastry-Sutherland are #88 targets.
 
 ---
 

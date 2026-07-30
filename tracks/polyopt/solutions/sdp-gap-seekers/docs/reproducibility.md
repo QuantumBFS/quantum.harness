@@ -21,11 +21,21 @@ not a guess.
 | SpectralGap.jl | path dep at `../.external/SpectralGap` + `spectralgap_a1171c9.patch` |
 | Clarabel, DynamicPolynomials, StarAlgebras | (pinned in `julia-env/Project.toml`) |
 
-The active environment is `julia-env/Project.toml` (repo root). The working
-`Manifest.toml` is gitignored; a clean-checkout reproduction needs the
-SpectralGap source constructed + patched first (see *Final packaging* in the
-submission-requirements doc). For final packaging this environment moves under
-the team directory and the shared root is restored.
+The SDP environment is `julia-env/Project.toml` **under this team directory**
+(the repo-root shared `julia-env/` is left at upstream). The working
+`Manifest.toml` is gitignored. A clean checkout needs the `SpectralGap.jl` path
+dependency reconstructed + patched first — pinned commit `a1171c9` of
+`github.com/wangjie212/SpectralGap` plus the committed
+`spectralgap_a1171c9.patch`:
+
+```bash
+cd tracks/polyopt/solutions/sdp-gap-seekers
+# 1. obtain SpectralGap.jl at the pinned commit and apply the patch
+git clone https://github.com/wangjie212/SpectralGap .external/SpectralGap
+cd .external/SpectralGap && git checkout a1171c9 && git apply ../../spectralgap_a1171c9.patch && cd -
+# 2. activate the team env, develop SpectralGap from that path, instantiate
+julia --project=julia-env -e 'using Pkg; Pkg.develop(path=abspath(".external/SpectralGap")); Pkg.instantiate()'
+```
 
 ## SCNet resources
 
@@ -34,12 +44,12 @@ the team directory and the shared root is restored.
 | scnet1 (xh5) | `xhacnormalb` | 32–128 core / ~500 GiB | Square Rung B D4 solves (~87 GiB, 32 threads); SS solves (~1.2 GiB, 16 threads) |
 | scnet2 (Kunshan) | `kshcnormal` | 32 cpu / ~123 GiB | second pool; Rung C sizing gate; future Rung C spin solves |
 
-Account `iint_sjds` on scnet1 (home `/work/home/iint_sjds`); `chenkun20` on
-scnet2. Both run Julia from `$HOME/julia-1.11.5` and Mosek from
-`$HOME/mosek/mosek/11.2/...`. The `LD_LIBRARY_PATH` fix
-(`$HOME/julia-1.11.5/lib/julia`) is required — Mosek's libtbb needs `CXXABI_1.3.8`
-provided by Julia's bundled libstdc++. Setup walk-through:
-`notes/scnet-env-setup.md`.
+The runners reference `$HOME` only — no account name or absolute home path is
+hardcoded — so the same sbatch files work under any account with the standard
+install layout: Julia at `$HOME/julia-1.11.5`, Mosek at
+`$HOME/mosek/mosek/11.2/...`, and the
+`LD_LIBRARY_PATH=$HOME/julia-1.11.5/lib/julia` fix (Mosek's libtbb needs
+`CXXABI_1.3.8` from Julia's bundled libstdc++).
 
 ## Runner environment-variable contract
 
@@ -63,13 +73,14 @@ have their own parameterized inputs; see the file headers.
 
 ## Route 1 — solver-free structural validation (no SCNet, no Mosek)
 
-Validates the exact reductions + assembly without solving. ~1 minute on a laptop.
+Validates the exact reductions + assembly without solving. Runs on a laptop
+(exact-arithmetic structural checks only).
 
 ```bash
 cd tracks/polyopt/solutions/sdp-gap-seekers
-julia --project=../../../julia-env test/runtests.jl
-julia --project=../../../julia-env test/run_exact_symmetry_reduction_truth.jl
-julia --project=../../../julia-env scripts/check_d4_coefficient_gates.jl
+julia --project=julia-env test/runtests.jl
+julia --project=julia-env test/run_exact_symmetry_reduction_truth.jl
+julia --project=julia-env scripts/check_d4_coefficient_gates.jl
 ```
 
 Pass criterion: all assertions pass (Hamiltonian invariance, basis closure,
@@ -118,7 +129,8 @@ Each run writes `results/<run-id>/` (gitignored) containing `result.toml`,
 `SHA256SUMS`, and (for the D4 build) `quotient-manifest.txt` +
 `reduced_model_sha256`. To confirm a reproduction:
 
-1. `git-status.txt` must show a clean source tree at build time.
+1. `git-status.txt` shows no tracked source modifications at build time
+   (untracked scratch is tolerated and recorded).
 2. `harness-commit.txt` matches the cited commit.
 3. `SHA256SUMS` verifies and `input-build-SHA256SUMS` matches the builder output.
 4. `result.toml` shows `termination = "OPTIMAL"`, `primal/dual = "FEASIBLE_POINT"`,

@@ -77,14 +77,16 @@ needed for tractability.
 
 ### 2a. Triangular J1 Heisenberg — a third model, identical inventory
 
-The triangular-lattice Heisenberg AFM (3 NN bonds, J1=1) was ported through the
-*same* six-layer spin reduction. Because the reduced inventory is set by the
-patch + basis + SU(2) spin action (not the bond geometry), triangular lands on
-the **identical** reduced model: **3,250 moments, 9 cones, max side 45, 6,104
-entries**, and solves at **~1.16 GiB / ~9 s** (γ=1, job 23012955). All six truth
-gates pass on the actual triangular coefficients. This confirms the reduction's
-model-generality on a third #88 target and extends the "spin reduction makes the
-stronger relaxation tractable" result beyond the square/SS geometries.
+The triangular-lattice Heisenberg AFM (3 NN bonds, J1=1, J2=0) was ported through
+the *same* six-layer spin reduction as a **portability control** (issue #88's
+triangular target is J1-J2 at g=0.10, 0.12 and is not addressed here). Because
+the reduced inventory is set by the patch + basis + SU(2) spin action (not the
+bond geometry), triangular lands on the **identical** reduced model: **3,250
+moments, 9 cones, max side 45, 6,104 entries**, and solves at **~1.16 GiB / ~9
+s** (γ=1, job 23012955). All six truth gates pass on the actual triangular
+coefficients. This confirms the reduction's model-generality on a third geometry
+and extends the "spin reduction makes the stronger relaxation tractable" result
+beyond the square/SS lattices.
 
 ---
 

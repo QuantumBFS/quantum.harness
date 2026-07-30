@@ -3,16 +3,19 @@
 > **TL;DR — what we did, what we found, why it's useful.** We attacked
 > challenge #88: certify upper bounds on the bulk spectral gap of frustrated
 > spin-1/2 models via the state-polynomial γ-feasibility SDP hierarchy
-> (arXiv:2606.03836). At the smallest tractable relaxation level (L=1, d=2),
-> **all three target models — square J1-J2, Shastry-Sutherland, triangular —
-> are feasible at every γ we tested**, so that level is too weak to bound the
-> gap. **No certified bound is claimed.** The contribution is **method +
-> machinery**: an exact D4 quotient for the square lattice and a six-layer
-> full-spin isotypic reduction that transfers *unchanged* across all three
-> geometries, plus the tractability analysis that drops the Rung-C solve from
-> ~295 GiB to ~1 GiB. Stronger levels (square L=1/d=3; Shastry-Sutherland L=2)
-> are in flight and are the route to an actual bound. Read on for the strict
-> certification language, two reproduction routes, and limitations.
+> (arXiv:2606.03836). Issue #88 defines three targets — square J1-J2,
+> Shastry-Sutherland, and triangular **J1-J2** — and we address the **first
+> two**, plus a **triangular-J1 (J2=0) portability control** that exercises the
+> reduction on a third geometry (the triangular J1-J2 target itself is not
+> addressed). At the smallest tractable relaxation level (L=1, d=2), **every
+> tested γ-relaxation is feasible** at all these points, so that level is too
+> weak to bound the gap. **No certified bound is claimed.** The contribution is
+> **method + machinery**: an exact D4 quotient for the square lattice and a
+> six-layer full-spin isotypic reduction that transfers *unchanged* across the
+> square, Shastry-Sutherland, and triangular geometries, plus the tractability
+> analysis that drops the Rung-C solve from ~295 GiB to ~1 GiB. Stronger
+> levels hit a compute boundary (see Limitations), not a bound. Read on for
+> the strict certification language, two reproduction routes, and limitations.
 
 ## Team
 
@@ -28,7 +31,11 @@ upper bounds on the locally non-degenerate bulk gap of infinite systems via the
 state-polynomial γ-feasibility SDP hierarchy of arXiv:2606.03836.
 
 Addresses #88 — released by Xiangling Xu (许湘灵) and Jie Wang (王杰), polyopt
-track.
+track. Issue #88 defines three targets: square J1-J2, Shastry-Sutherland, and
+triangular **J1-J2** (g=0.10, 0.12). **This submission addresses the first two
+targets and adds a triangular-J1 (J2=0) portability control** that validates
+the reduction on a third lattice geometry; the triangular J1-J2 target itself
+is not addressed.
 
 ## Headline
 
@@ -36,9 +43,10 @@ A finite hierarchy level *upper-bounds* the bulk gap only when its γ-relaxation
 is **infeasible** (excluding that gap threshold); feasibility excludes nothing.
 
 **Current certified status: no bulk-gap upper bound has yet been produced.**
-At the smallest tractable relaxation level (L=1, d=2) **all three #88 target
-models are feasible at every tested γ**, so that level is too weak to bound the
-gap:
+At the smallest tractable relaxation level (L=1, d=2) **every tested
+γ-relaxation is feasible** — at the Square J1-J2 and Shastry-Sutherland target
+points and at the triangular-J1 portability control — so that level is too weak
+to bound the gap:
 
 | Model (L=1, d=2) | Reduction used | γ tested | Result | Gap bound |
 |---|---|---|---|---|
@@ -46,9 +54,11 @@ gap:
 | Square J1-J2 (g=½), Rung B | D4 quotient (352→5 blocks) | 0, ¼, 0.40, 2 | all OPTIMAL-feasible | — (too weak) |
 | Square J1-J2 (g=½), Rung C | full-spin isotypic (703→max side 45) | 0, 2 | OPTIMAL-feasible (exact rational witness at γ=2) | — (too weak) |
 | Shastry-Sutherland (g=0.8) | 6-layer full-spin isotypic (703→max side 45) | ½, 1, 2, 4 | all OPTIMAL-feasible | — (too weak) |
-| Triangular J1 Heisenberg | 6-layer full-spin isotypic (703→max side 45) | 0, 1, 2 | all OPTIMAL-feasible | — (too weak) |
-| Square J1-J2, L=1/d=3 *(in flight)* | full-spin isotypic + spatial reflection | *(pending)* | *(pending)* | *(pending)* |
-| Shastry-Sutherland, L=2 *(in flight)* | dynamic full-state spin isotypic | *(pending)* | *(pending)* | *(pending)* |
+| Triangular J1 *(portability control, not an #88 target)* | 6-layer full-spin isotypic (703→max side 45) | 0, 1, 2 | all OPTIMAL-feasible | — (too weak) |
+
+Stronger levels (Square L=1/d=3; Shastry-Sutherland L=2; Square L=2/d=2) were
+attempted but hit a compute boundary — none produced a feasibility status. See
+**Limitations** for the terminal status of each.
 
 The contribution so far is therefore **method + machinery**: an exact D4
 quotient for the square lattice, a six-layer full-spin isotypic reduction that
@@ -65,12 +75,15 @@ finite-volume Hamiltonian. Each hierarchy level asks whether an infinite-volume
 KMS ground state can have gap ≥ γ; finite-level infeasibility excludes that
 threshold, finite-level feasibility does *not* prove gappedness.
 
-Three target models, all spin-1/2, on the 3×3 level-1 patch:
+Two #88 target models plus a triangular-J1 portability control, all spin-1/2,
+on the 3×3 level-1 patch:
 
-- **Square J1-J2 Heisenberg**, `H=(1/4)Σ_J1(XX+YY+ZZ)+(g/4)Σ_J2(XX+YY+ZZ)`,
+- **Square J1-J2 Heisenberg** *(#88 target 1)*, `H=(1/4)Σ_J1(XX+YY+ZZ)+(g/4)Σ_J2(XX+YY+ZZ)`,
   J1=1, g=½.
-- **Shastry-Sutherland**, dimer/plaquette ratio g_square/dimer = 4/5.
-- **Triangular J1 Heisenberg** (120° geometrically-frustrated order), J1=1.
+- **Shastry-Sutherland** *(#88 target 2)*, dimer/plaquette ratio g_square/dimer = 4/5.
+- **Triangular J1 Heisenberg** *(portability control, not an #88 target)* —
+  J1=1, J2=0 (120° geometrically-frustrated order). The #88 triangular target
+  is J1-J2 at g=0.10, 0.12 and is not addressed here.
 
 The decisive engineering step is **exact symmetry reduction** — feasibility-
 equivalent reparameterizations of the finite relaxation (group averaging + exact
@@ -88,7 +101,7 @@ Two routes, as the submission requires.
 ### Route 1 — quick, solver-free, no SCNet, no Mosek licence
 
 Validates the exact reductions and assembly structurally, without solving any
-SDP. Runs in under a minute on a laptop.
+SDP. Runs on a laptop (exact-arithmetic structural checks only).
 
 ```bash
 # from the team directory, with the Julia environment active
@@ -114,8 +127,9 @@ exact per-calculation commands are enumerated in
 [`docs/reproducibility.md`](docs/reproducibility.md).
 
 ```bash
-# Square J1-J2 Rung B, D4-quotiented, γ-scan
-sbatch scripts/square_conic_solve.sbatch           # CONIC_BUILD_SCRIPT selects the builder
+# Square J1-J2 Rung B, D4-quotiented, γ-scan (CONIC_BUILD_SCRIPT selects the builder)
+CONIC_BUILD_SCRIPT=scripts/build_square_d4_conic_mof.jl \
+  sbatch scripts/square_conic_solve.sbatch
 
 # Shastry-Sutherland / Triangular, full-spin isotypic, γ-scan
 sbatch scripts/shastry_sutherland_full_spin_isotypic_solve_xh5.sbatch
@@ -141,17 +155,30 @@ Per the source method and the review discipline:
 ## Limitations
 
 - **No certified bound at d=2.** The L=1/d=2 level is feasible across all tested
-  γ for all three models, so it is too weak regardless of how cheaply it solves.
-- **Partial result.** This submission does not close #88. Stronger relaxations
-  (Square L=1/d=3; SS L=2) are the route to an actual bound; both are in flight.
-  L=2/d=2 is currently intractable to solve (max PSD side ~490 → Mosek
-  factor-fill OOM).
+  γ at both target points (and the triangular control), so it is too weak
+  regardless of how cheaply it solves.
+- **Partial result — two of three #88 targets, no bound.** Stronger relaxations
+  are the route to a bound but hit a compute boundary, not a pending status:
+  - *Square L=1/d=3* — exact cone-reduced MOF build completed (job `118201670`);
+    **no solve was run**.
+  - *Shastry-Sutherland L=2/d=2* — model built (PSD blocks reduced 38→26, packed
+    entries 2.54M→1.6M via an exact SO(3) l=2 cone-congruence proof); **Mosek
+    exhausted memory during factor fill before iteration zero** — no feasibility
+    status.
+  - *Square L=2/d=2* — **failed closed at an exact cone-redundancy gate**; no
+    MOF or solve.
+- **Triangular J1-J2 target not addressed.** Issue #88's triangular target is
+  J1-J2 at g=0.10, 0.12; only a J1-only (J2=0) portability control is included
+  (full provenance under `evidence/triangular-j1-scan-23012955/`).
 - **D4 E-cone.** The Square D4 builder emits the E isotypic block at side `2 n_E`
   rather than the Schur-optimal `n_E`; exact but redundant (an efficiency gap,
   not a correctness defect).
-- **Environment portability.** The Julia environment currently lives at the
-  repo-root `julia-env/`; final packaging relocates a solution-specific project
-  under the team directory and restores the shared root.
+- **Environment self-containment.** The SDP Julia project lives at `julia-env/`
+  under this team directory (the repo-root shared project is left untouched).
+  `Manifest.toml` is gitignored; a clean checkout requires reconstructing the
+  `SpectralGap.jl` path dependency at pinned commit `a1171c9` with
+  `spectralgap_a1171c9.patch` (see [`docs/reproducibility.md`](docs/reproducibility.md)
+  for the exact sequence) before `Pkg.instantiate`.
 
 ## Repository layout
 
@@ -164,6 +191,8 @@ tracks/polyopt/solutions/sdp-gap-seekers/
 ├── scripts/                   # build_*_mof.jl builders, solve_*_mof.jl solvers,
 │                              # check_d4_*.jl gates, *_xh5.sbatch runners
 ├── test/                      # solver-free exact truth gates (Route 1)
+├── julia-env/                 # SDP Julia project (team-local; Manifest gitignored)
+├── spectralgap_a1171c9.patch  # patch for the pinned SpectralGap.jl path dependency
 ├── evidence/                  # harvested per-run result/runmeta/SHA256SUMS bundles
 ├── results/                   # generated MOFs, logs, plots (gitignored)
 └── notes/
