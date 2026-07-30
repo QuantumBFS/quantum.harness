@@ -1,0 +1,9 @@
+quantity,value,role
+z_eff_16_32,0.7816058890002416,adjacent_size_diagnostic
+z_eff_32_64,0.7241365481913752,adjacent_size_diagnostic
+z_eff_64_96,0.6421862815999292,adjacent_size_diagnostic
+z_eff_96_128,0.5674699311399389,adjacent_size_diagnostic
+z_power,0.5588182833067891,five_size_sensitivity_regression
+z_power_leave_L16_out,0.4783840468526168,leave_smallest_size_sensitivity
+z_log,0.2001960419658768,five_size_sensitivity_regression
+z_log_leave_L16_out,-0.07064196996273665,leave_smallest_size_sensitivity

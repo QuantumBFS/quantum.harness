@@ -1,0 +1,23 @@
+	Command being timed: "conda run --no-capture-output -n mps env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=src:. python -u scripts/benchmark_phase6_optimizations.py --fit-summary results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json --length 128 --gamma 1.6 --num-exponentials 24 --alpha 0.5 --r-fit 2048 --chi-schedule 64 --direct-only --sectors even --output-dir results/phase8-scaling/sigma-1.75/crossing-L128/cells/sigma1.75_L128_Gamma1.60_even_K24_chi64"
+	User time (seconds): 437.38
+	System time (seconds): 10.00
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 7:27.48
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 317520
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 9284025
+	Voluntary context switches: 470
+	Involuntary context switches: 1123
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 11080
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

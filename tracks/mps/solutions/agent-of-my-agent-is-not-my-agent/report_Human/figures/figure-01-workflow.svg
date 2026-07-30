@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="250" viewBox="0 0 1500 250" role="img" aria-labelledby="title desc">
+  <title id="title">Long-range TFIM MPS workflow</title>
+  <desc id="desc">Periodic Hurwitz-zeta coupling is approximated by positive exponentials, encoded in direct and wrapped MPO channels, optimized in parity sectors, and analyzed through correlation-ratio crossings and parity gaps.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#315b7d"/>
+    </marker>
+    <style>
+      .box { fill: #f5f8fb; stroke: #315b7d; stroke-width: 2; rx: 12; }
+      .label { fill: #172b3a; font: 22px sans-serif; text-anchor: middle; }
+      .small { fill: #315b7d; font: 18px sans-serif; text-anchor: middle; }
+      .edge { stroke: #315b7d; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect class="box" x="20" y="60" width="250" height="125"/>
+  <text class="label" x="145" y="105">Periodic coupling</text>
+  <text class="small" x="145" y="140">Hurwitz-zeta J<tspan baseline-shift="sub">L</tspan>(r)</text>
+
+  <path class="edge" d="M270,122 L310,122"/>
+  <rect class="box" x="315" y="60" width="250" height="125"/>
+  <text class="label" x="440" y="105">Positive exponential fit</text>
+  <text class="small" x="440" y="140">K=24, α=0.5</text>
+
+  <path class="edge" d="M565,122 L605,122"/>
+  <rect class="box" x="610" y="60" width="250" height="125"/>
+  <text class="label" x="735" y="105">Finite-ring MPO</text>
+  <text class="small" x="735" y="140">direct + wrapped channels</text>
+
+  <path class="edge" d="M860,122 L900,122"/>
+  <rect class="box" x="905" y="60" width="250" height="125"/>
+  <text class="label" x="1030" y="105">Parity-sector DMRG</text>
+  <text class="small" x="1030" y="140">even E₀, odd E₁</text>
+
+  <path class="edge" d="M1155,122 L1195,122"/>
+  <rect class="box" x="1200" y="60" width="280" height="125"/>
+  <text class="label" x="1340" y="105">Finite-size analysis</text>
+  <text class="small" x="1340" y="140">Rξ crossings, Δ, z_eff</text>
+</svg>

@@ -1,0 +1,95 @@
+{
+  "run_id": "phase8-sigma1.75-crossing-L128",
+  "run_dir": "results/phase8-scaling/sigma-1.75/crossing-L128",
+  "settings": {
+    "sigma": 1.75,
+    "Gamma_endpoints": [
+      1.55,
+      1.6
+    ],
+    "K": 24,
+    "chi": 64,
+    "alpha": 0.5,
+    "r_fit": 2048,
+    "sector": "even",
+    "exact_zero_pruning": true,
+    "approximate_mpo_compression": false,
+    "adaptive_gamma": false
+  },
+  "cells": [
+    {
+      "cell_id": "sigma1.75_L128_Gamma1.55_even_K24_chi64",
+      "status": "pending",
+      "sigma": 1.75,
+      "L": 128,
+      "Gamma": 1.55,
+      "sector": "even",
+      "K": 24,
+      "chi": 64,
+      "command": [
+        "python",
+        "-u",
+        "scripts/benchmark_phase6_optimizations.py",
+        "--fit-summary",
+        "results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json",
+        "--length",
+        "128",
+        "--gamma",
+        "1.55",
+        "--num-exponentials",
+        "24",
+        "--alpha",
+        "0.5",
+        "--r-fit",
+        "2048",
+        "--chi-schedule",
+        "64",
+        "--direct-only",
+        "--sectors",
+        "even",
+        "--output-dir",
+        "results/phase8-scaling/sigma-1.75/crossing-L128/cells/sigma1.75_L128_Gamma1.55_even_K24_chi64"
+      ]
+    },
+    {
+      "cell_id": "sigma1.75_L128_Gamma1.60_even_K24_chi64",
+      "status": "pending",
+      "sigma": 1.75,
+      "L": 128,
+      "Gamma": 1.6,
+      "sector": "even",
+      "K": 24,
+      "chi": 64,
+      "command": [
+        "python",
+        "-u",
+        "scripts/benchmark_phase6_optimizations.py",
+        "--fit-summary",
+        "results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json",
+        "--length",
+        "128",
+        "--gamma",
+        "1.6",
+        "--num-exponentials",
+        "24",
+        "--alpha",
+        "0.5",
+        "--r-fit",
+        "2048",
+        "--chi-schedule",
+        "64",
+        "--direct-only",
+        "--sectors",
+        "even",
+        "--output-dir",
+        "results/phase8-scaling/sigma-1.75/crossing-L128/cells/sigma1.75_L128_Gamma1.60_even_K24_chi64"
+      ]
+    }
+  ],
+  "provenance": {
+    "fit_summary": {
+      "path": "results/phase7-crossover/proposal/fits/sigma-1.75/fit-summary.json",
+      "sha256": "29d3af435a2e66d28c13d56065f15f955772c1ec7c4a5c05fbc99fd03315a590"
+    }
+  }
+}

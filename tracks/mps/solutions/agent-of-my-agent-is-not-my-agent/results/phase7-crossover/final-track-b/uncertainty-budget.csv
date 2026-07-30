@@ -1,0 +1,4 @@
+source,measured_scope,gap_relative,R_xi_absolute,interpretation
+MPO K=24 to K=32,"sigma=1.75, L=32,64",5.570922469851194e-06,1.1446152365368611e-06,subdominant validated representation error
+MPS chi=128 to chi=256,"sigma=1.75, L=64",3.3640283381121445e-08,4.998282310264557e-08,subdominant validated truncation error
+finite size,"L=32,64 only",,,dominant; prevents thermodynamic exponent claim
