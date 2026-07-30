@@ -1,0 +1,14 @@
+{
+  "acceptance_rules": {
+    "objective": "minimum-scalar-multiplications",
+    "requires_global_enumeration": true
+  },
+  "challenge_digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+  "challenge_id": "issue133.new-02-optimal-contraction",
+  "digest": "sha256:50638b00ada821953879eebc83525060b4662a496412ea84621cc38c0fec0e20",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "frozen_before_solver": true,
+  "schema_version": "wangtheophys.issue133.gate.v1",
+  "verifier_entrypoint": "campaign_verifier.py",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

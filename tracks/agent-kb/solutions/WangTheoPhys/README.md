@@ -84,6 +84,11 @@ The public capsule contains:
   generator outputs, weak controls, and deterministic report for the
   registered QuantumBFS #124–#128 calibration. Sealed issue statements are
   excluded.
+- [`issue133-campaign/`](issue133-campaign/): five new frozen tensor-network
+  problems, their separately preregistered exact gates, Solver certificates,
+  fresh Verifier subprocess receipts, rejected negative controls, named human
+  acceptance decisions, a readable report, and a SHA-256 manifest. These are
+  distinct from the #124–#128 calibration set.
 
 The schemas are useful for editors and other agents. `gate.py` is the
 executable semantic authority: JSON Schema alone does not compare two
@@ -268,14 +273,17 @@ records so the growth curve is auditable.
 | Accumulating heuristics Library | **Schema, append protocol, validator, and seed records implemented** |
 | Literature-mining problem generator | **Implemented in the AGPL-3.0-only TN-Agent control plane; this capsule publishes its registered calibration evidence, not the runtime** |
 | Calibration against challenges #124–#128 | **Passed the registered self-report/grouping metrics: gap 1.0, executable gate 1.0, strong/weak separation 0.7877, and 4 of 5 literature groups recovered for 0.8** |
-| Five new human-accepted challenge problems (Tier 1) | **Not claimed** |
-| Five fresh solved gates (Tier 2) | **Not claimed** |
+| Five new human-accepted challenge problems (Tier 1) | **5 / 5 submission evidence published in `issue133-campaign/`; accepted by `human.junkaiwang` as `human expert supervision`; upstream catalog determination remains with QuantumBFS maintainers** |
+| Five fresh solved gates (Tier 2) | **5 / 5 exact gates pass in fresh Verifier subprocesses; all 5 registered negative controls are rejected** |
 | Refereed publication (Tier 3) | **Not claimed** |
 
-**This PR achieves no success tier of issue #133.** It supplies a fail-closed
-contract, fixture evaluator, and a passed registered calibration that can
-support a future independently executed candidate; it does not claim a fresh
-solve, an accepted new problem, or a publication result.
+The supervised live campaign reports complete Tier 1 and Tier 2 submission
+evidence.  Its five items are new and do not count the historical calibration
+set.  Every item binds the frozen challenge, gate, Solver certificate,
+Verifier source, positive process result, rejected negative control, and named
+human acceptance decision. QuantumBFS maintainers retain final authority over
+upstream catalog inclusion and tier determination. No Tier 3 or refereed
+publication result is claimed.
 
 The calibration's meaningful-gap, executable-gate, attack-pass, novelty, and
 publishability inputs are self-reported candidate fields; the deterministic
@@ -285,11 +293,17 @@ digests and scores, but they do not independently prove the operator-recorded
 blind chronology or generator isolation because no external signed or
 timestamped blind-run receipt is included.
 
-The next scientifically meaningful milestone is an approved live campaign:
-freeze each generated problem and gate before solving, publish every
-generation/rejection record, and obtain independent human and GateAuthority
-receipts. The live counters remain `0/5` accepted problems and `0/5` fresh
-solved gates until those receipts exist.
+Replay the live campaign and its direct tests from the repository root:
+
+```bash
+python3 tracks/agent-kb/solutions/WangTheoPhys/issue133-campaign/run_campaign.py
+python3 -m unittest discover \
+  -s tracks/agent-kb/solutions/WangTheoPhys/issue133-campaign/tests -v
+```
+
+The current supervised counters are `5/5` accepted new problems and `5/5`
+exact solved gates. The next scientific milestone is independent QuantumBFS
+catalog review followed by manuscript development and refereed review.
 
 ## Scope and licensing
 

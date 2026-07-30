@@ -1,0 +1,11 @@
+{
+  "certificate": {
+    "minimum_cost": 56,
+    "parenthesization": "((A1(A2A3))A4)"
+  },
+  "challenge_digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+  "challenge_id": "issue133.new-02-optimal-contraction",
+  "digest": "sha256:a3de80a0f13f81a62977dff6ba3cc42a44c6cfd8c28cde5dac61efc3a34ac4eb",
+  "gate_digest": "sha256:50638b00ada821953879eebc83525060b4662a496412ea84621cc38c0fec0e20",
+  "schema_version": "wangtheophys.issue133.certificate.v1"
+}

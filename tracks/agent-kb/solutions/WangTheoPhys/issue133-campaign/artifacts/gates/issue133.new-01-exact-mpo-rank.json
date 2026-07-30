@@ -1,0 +1,24 @@
+{
+  "acceptance_rules": {
+    "arithmetic": "exact-integer",
+    "expected_rank": 2,
+    "required_minor": {
+      "columns": [
+        0,
+        1
+      ],
+      "rows": [
+        0,
+        1
+      ]
+    }
+  },
+  "challenge_digest": "sha256:a83ab05993dd92593b3e8253966ed81d3eaf56dac1635b644ade6a808127b93a",
+  "challenge_id": "issue133.new-01-exact-mpo-rank",
+  "digest": "sha256:de14385b8c8c58e1266765aeee7233b649cac0becbcd8e649b387dc442c898ea",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "frozen_before_solver": true,
+  "schema_version": "wangtheophys.issue133.gate.v1",
+  "verifier_entrypoint": "campaign_verifier.py",
+  "verifier_source_digest": "sha256:c853847ca37ccacb963b2d6ba3a87f34ca1101efa16106a11316887e03a255e8"
+}

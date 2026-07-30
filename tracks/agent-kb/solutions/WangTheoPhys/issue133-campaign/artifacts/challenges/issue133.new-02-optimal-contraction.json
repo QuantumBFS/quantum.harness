@@ -1,0 +1,22 @@
+{
+  "challenge_id": "issue133.new-02-optimal-contraction",
+  "digest": "sha256:28cde54fda0535e7e3e563e2de38bd61f5764bb0b6c421e086444c770888da60",
+  "frozen_at": "2026-07-30T12:20:00Z",
+  "input": {
+    "dimensions": [
+      2,
+      3,
+      4,
+      2,
+      5
+    ]
+  },
+  "kind": "optimal-matrix-chain",
+  "novelty_statement": "New live campaign item; not a #124-#128 calibration problem.",
+  "preregistered_gate": {
+    "objective": "minimum-scalar-multiplications",
+    "requires_global_enumeration": true
+  },
+  "schema_version": "wangtheophys.issue133.challenge.v1",
+  "title": "Globally optimal contraction of a frozen four-tensor chain"
+}

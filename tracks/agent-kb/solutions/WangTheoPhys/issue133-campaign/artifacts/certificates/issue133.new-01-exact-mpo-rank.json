@@ -1,0 +1,42 @@
+{
+  "certificate": {
+    "claimed_rank": 2,
+    "left_factor": [
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "right_factor": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0
+      ]
+    ]
+  },
+  "challenge_digest": "sha256:a83ab05993dd92593b3e8253966ed81d3eaf56dac1635b644ade6a808127b93a",
+  "challenge_id": "issue133.new-01-exact-mpo-rank",
+  "digest": "sha256:e8440f2726e4358f83917be816db8c297dde7a6393d3c3c798a527c29acba053",
+  "gate_digest": "sha256:de14385b8c8c58e1266765aeee7233b649cac0becbcd8e649b387dc442c898ea",
+  "schema_version": "wangtheophys.issue133.certificate.v1"
+}
