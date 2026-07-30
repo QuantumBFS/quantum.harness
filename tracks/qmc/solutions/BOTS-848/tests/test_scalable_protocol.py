@@ -41,7 +41,7 @@ def test_route_c_uses_strict_lll_operator_capacity() -> None:
     protocol = load_protocol()
 
     assert protocol.capacity["routes"]["cf_operator_nqs"] == {
-        "operator_layers": 2,
+        "operator_layers": 1,
         "density_ranks": [2, 3, 4],
         "hidden_width": 64,
     }
@@ -97,6 +97,7 @@ def test_nested_public_section_mutation_does_not_change_snapshot() -> None:
         ("blocks", "block_size must divide samples_per_chain"),
         ("human_blind", "human_blind must remain false"),
         ("n8_flux", "invalid N=8 smoke flux"),
+        ("route_c_capacity", "invalid Route C capacity"),
     ],
 )
 def test_protocol_rejects_invalid_contract_values(
@@ -119,6 +120,8 @@ def test_protocol_rejects_invalid_contract_values(
         data["oracle"]["human_blind"] = True
     elif case == "n8_flux":
         data["smoke_n8"]["two_q"] = 20
+    elif case == "route_c_capacity":
+        data["capacity"]["routes"]["cf_operator_nqs"]["operator_layers"] = 3
     else:
         raise AssertionError(f"unknown test case: {case}")
 

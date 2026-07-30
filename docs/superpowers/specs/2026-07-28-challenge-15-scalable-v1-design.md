@@ -207,7 +207,7 @@ Owner: `bhjia-phys`.
 This route starts from Jain-Kamilla-projected composite-fermion seeds: an
 `L=0` ground-state seed and a Clebsch-Gordan-coupled `L=2` particle-hole seed,
 rather than the paper's maximally separated `L=N` transport-gap excitation.
-The same two-layer LLL scalar-operator NQS acts on both seeds, with density
+The same one-layer LLL scalar-operator NQS acts on both seeds, with density
 ranks `2,3,4` and hidden width `64`; sector-specific scalar coefficients are
 allowed. Its layers are built from LLL-projected SO(3)-scalar density
 contractions, so they preserve flux, fermionic antisymmetry, LLL closure, and
@@ -273,6 +273,15 @@ ceilings. The resulting amendment commit is
 every not-yet-started Step-2 lane, and its SHA is copied into every attempt
 journal. Starting a lane from the prior baseline and another from this
 amendment commit is not a valid comparison.
+
+Route C attempt `s02c-a01` subsequently established the projected-density
+scalars and genuine JK/Girvin--Jach seeds, but failed the exact two-layer
+coordinate-action feasibility gate. The approved `s02c-a02` amendment changes
+only `operator_layers` from `2` to `1`; it preserves every physics, seed,
+optimizer, sampling, threshold, oracle-isolation, and resource field. The
+one-layer protocol commit is the common starting point for this renewed Route C
+attempt, and its exact SHA is recorded in the a02 journal after the commit is
+created.
 
 Route A uses the collaboration repository itself; Routes B and C use their own
 forks, and Route D uses its eventual owner's isolated fork or branch. Each
@@ -346,7 +355,7 @@ reference may be read. They cannot be changed after the first route begins. If a
 shared budget is physically impossible for one route, Step 1 must fail rather
 than silently granting that route a different budget.
 
-The Route C amendment freezes `operator_layers=2`,
+The active Route C amendment freezes `operator_layers=1`,
 `density_ranks=[2,3,4]`, and `hidden_width=64`, still under the common
 `max_trainable_parameters=262144` ceiling. This replacement mapping changes the
 protocol hash and comparison-base commit but does not reopen any other budget

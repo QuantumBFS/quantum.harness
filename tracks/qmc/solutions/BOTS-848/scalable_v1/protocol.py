@@ -108,6 +108,15 @@ def _validate(data: Mapping[str, Any]) -> None:
     if data["oracle"]["human_blind"] is not False:
         raise ValueError("human_blind must remain false")
 
+    route_c = data["capacity"]["routes"].get("cf_operator_nqs")
+    expected_route_c = {
+        "operator_layers": 1,
+        "density_ranks": [2, 3, 4],
+        "hidden_width": 64,
+    }
+    if route_c != expected_route_c:
+        raise ValueError("invalid Route C capacity")
+
     smoke_n8 = data["smoke_n8"]
     if smoke_n8["n_electrons"] != 8 or smoke_n8["two_q"] != 3 * (
         smoke_n8["n_electrons"] - 1
