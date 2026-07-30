@@ -49,34 +49,195 @@ being mistaken for universal results.
 \section{Introduction}
 \label{sec:introduction}
 
-The coefficient of a universal finite-size correction is one of the most
-economical fingerprints of a two-dimensional critical point.  Conformal
-invariance relates the free-energy density on a periodic cylinder to the
-central charge \cite{BloeteCardyNightingale1986,Affleck1986}, while interval
-entanglement carries the same coefficient in a quantum ground state
-\cite{CalabreseCardy2004}.  These relations are especially useful
-computationally: a single dimensionless number tests the microscopic
-implementation, the approach to scaling, and the analysis pipeline at once.
+Continuous phase transitions are distinguished by the loss of a microscopic
+length scale.  If a control parameter $t$ measures distance from criticality,
+the correlation length diverges as
+\begin{equation}
+ \xi(t)\sim \xi_0 |t|^{-\nu}.
+ \label{eq:correlation-length}
+\end{equation}
+At $t=0$, fluctuations occur on all scales between the lattice spacing and
+the system size.  The renormalization group turns this observation into a
+calculus: coarse graining generates a flow in the space of Hamiltonians,
+critical theories are fixed points of that flow, and perturbations are
+classified as relevant, irrelevant, or marginal according to whether they
+grow, shrink, or remain finite under rescaling
+\cite{WilsonKogut1974}.  Microscopic systems attracted to the same fixed point
+share critical exponents and scaling functions and therefore form a
+universality class.  This is why a lattice magnet, a fermion network, and a
+monitored quantum circuit can meaningfully be compared even though their
+microscopic variables are entirely different.
 
-That economy can also be deceptive.  A subleading $L^{-2}$ term is small,
-correlated data do not supply as many independent observations as their row
-count suggests, and quenched disorder changes the object whose logarithm is
-averaged.  In monitored or decohering systems an additional space--time
-anisotropy converts fitted amplitudes into a central charge only after a
-velocity calibration.  A fit may therefore have a small regression error
-while its physical interpretation remains uncontrolled.
+Two-dimensional criticality is unusually constrained.  Under standard
+assumptions, scale invariance is enhanced to conformal invariance, and local
+conformal transformations generate the infinite-dimensional Virasoro
+algebra.  A conformal field theory is characterized not only by scaling
+dimensions and operator-product coefficients but also by the central charge
+$c$, which appears in the anomalous term of the stress-tensor algebra
+\cite{BelavinPolyakovZamolodchikov1984,
+DiFrancescoMathieuSenechal1997}.  The central charge is sometimes described as
+a measure of low-energy degrees of freedom, but its most operational meaning
+for numerical work is as the coefficient of the conformal anomaly.  Mapping
+the plane to a cylinder changes the vacuum energy by an amount fixed by this
+anomaly.  Consequently, a periodic cylinder of circumference $L$ has a
+universal Casimir correction proportional to $c/L^2$
+\cite{Cardy1984,BloeteCardyNightingale1986,Affleck1986}.  A subsystem of
+length $\ell$ on a periodic quantum chain has a logarithmic entanglement
+entropy with the same coefficient \cite{CalabreseCardy2004}.  These two
+observables provide independent routes from raw numerical data to a
+dimensionless universal number.
 
-Here we organize four existing calculations into a common validation
-framework.  The clean square-lattice Ising model \cite{Onsager1944} tests the
-entire Monte Carlo and fitting chain against both $c=1/2$ and an exact
-finite-width calculation.  The Nishimori random-bond Ising model
-\cite{Nishimori1981,HoneckerJacobsenPiccoPujol2001} tests quenched averaging
-and disorder-level resampling.  A weakly self-dual disordered model tests
-whether those controls survive a less strongly constrained critical
-manifold.  Only after these benchmarks do we analyze the learning-induced
-metal--insulator-transition candidate in a monitored class-DIII network
-\cite{WangVasseurTrebstLudwigZhu2025}.  Figure~\ref{fig:01-workflow}
-summarizes this hierarchy.
+The coefficient is attractive precisely because it is restrictive.  A
+critical temperature or coupling depends on microscopic conventions, whereas
+$c$ should not.  Reproducing $c=1/2$ for the two-dimensional Ising fixed point,
+whose thermodynamics is exactly known \cite{Onsager1944}, tests far more than
+the visual linearity of a graph.  It simultaneously tests the normalization
+of the partition function, the sign of the free energy, the factor relating a
+strip Lyapunov exponent to an areal density, the cylinder boundary
+conditions, and the finite-size extrapolation.  In Monte Carlo work it also
+tests the integration of an energy observable from a known reference point
+and the treatment of serial correlation.  Cluster algorithms such as the
+Wolff update suppress critical slowing down \cite{Wolff1989}, but they do not
+remove the obligation to identify independent streams and to propagate their
+uncertainty through the nonlinear fit.
+
+The apparent economy of the central charge can therefore be deceptive.
+The universal term is subleading to the bulk free energy, and an error that is
+small on the scale of the total free energy may be large on the scale of its
+$L^{-2}$ coefficient.  Corrections from irrelevant operators can imitate a
+change in slope over a short size range.  Measurements made along one Markov
+chain are correlated, so their row count is not their effective sample size.
+Quadrature errors in thermodynamic integration are systematic rather than
+statistical.  Finally, choosing a fit window after seeing which one agrees
+with the target converts a validation calculation into a selection-biased
+one.  A credible result thus needs exact or microscopic oracles, nested
+discretizations, independent stochastic replicas, residual diagnostics, and
+predeclared size-window tests.  The purpose of our clean benchmark is to
+exercise this entire chain before any disorder-specific interpretation is
+introduced.
+
+Quenched randomness changes both the fixed point and the statistical object.
+The Harris criterion predicts when spatial fluctuations of a local critical
+coupling destabilize a clean fixed point \cite{Harris1974}; subsequent field
+theory shows how random fixed points and logarithmic corrections emerge in
+two-dimensional Potts and Ising systems \cite{Ludwig1987}.  More basically,
+one must distinguish quenched and annealed averages.  If a bond realization
+$J$ is static on the equilibration time scale, the physical free energy is
+$[\ln Z_J]_{\rm dis}$, whereas annealed disorder gives
+$\ln[Z_J]_{\rm dis}$.  These operations are not interchangeable.  The replica
+method represents the quenched logarithm by a derivative or $n\rightarrow0$
+limit of $[Z^n]_{\rm dis}$, so different replica sectors can carry different
+effective central charges.  In nonunitary or disordered theories the
+finite-size coefficient is accordingly denoted $c_{\rm eff}$: it is a
+well-defined universal amplitude for a specified averaged observable, not
+automatically the central charge of a unitary Hilbert-space theory.
+
+The random-bond Ising model on the Nishimori line is an especially stringent
+test.  A relation between temperature and the bond distribution produces a
+gauge identity that fixes otherwise nontrivial disorder averages
+\cite{Nishimori1981}.  Duality and gauge structure locate a multicritical
+region \cite{NishimoriNemoto2002}, while transfer-matrix, supersymmetric, and
+network formulations expose its random fixed point
+\cite{GruzbergReadLudwig2001,MerzChalker2002}.  Numerical estimates near
+$c_{\rm eff}=0.464$ provide a reference for the ordinary quenched free energy
+\cite{HoneckerJacobsenPiccoPujol2001}.  This qualifier is essential.  A
+Born-weighted trajectory ensemble or a higher-replica moment need not measure
+the same logarithm and may legitimately yield another coefficient.  In
+addition, widths obtained from the same disorder realization are correlated.
+A hierarchical or paired bootstrap must resample the realization as a whole;
+resampling widths or transfer rows as if independent would manufacture
+precision.  Bootstrap resampling is useful here not because it eliminates
+modeling choices, but because it carries the empirically observed covariance
+through the complete fitting procedure \cite{EfronTibshirani1993}.
+
+Disordered fermions add a complementary viewpoint.  The
+Chalker--Coddington construction expresses localization as propagation
+through a network of scattering nodes \cite{ChalkerCoddington1988}, and
+free-fermion mappings connect related networks to random-bond Ising transfer
+matrices \cite{ChoFisher1997,MerzChalker2002}.  Anderson transitions separate
+localized and extended single-particle states; their universality depends on
+dimension and on the symmetry constraints of the Hamiltonian
+\cite{EversMirlin2008}.  The Altland--Zirnbauer classification organizes
+those constraints by time-reversal, particle-hole, and chiral symmetries
+\cite{AltlandZirnbauer1997}.  Its tenfold-way formulation classifies
+topological insulators and superconductors
+\cite{SchnyderRyuFurusakiLudwig2008,RyuSchnyderFurusakiLudwig2010,
+Kitaev2009}.  Symmetry class DIII, relevant below, has time-reversal symmetry
+squaring to $-1$ together with particle-hole symmetry.  A DIII
+metal--insulator transition can therefore have scaling behavior that cannot
+be inferred by simply importing the clean Ising value.
+
+Our third benchmark lies between the conventional quenched magnet and the
+open monitored problem.  It propagates a fermionic Gaussian state while
+sampling outcomes from the state-conditioned Born rule.  Gaussian covariance
+matrices permit efficient simulation of fermionic linear optics
+\cite{Bravyi2005}, but efficiency alone is not validation.  Sequential Born
+sampling correlates outcomes through the evolving state; roundoff can also
+drive a covariance matrix away from the fermionic purity and antisymmetry
+manifold.  Weak self-duality supplies an independent physical audit: electric
+and magnetic event densities must agree within their joint uncertainty even
+though individual trajectories do not obey a pointwise equality.  We combine
+this test with Gaussian invariants, effective sample size, residual trends,
+and fit-window perturbations.  The resulting coefficient is again an
+effective central charge of a precisely specified weighted ensemble.
+
+Measurement-induced phenomena broaden the problem further.  Unitary dynamics
+normally spreads entanglement, whereas local measurements remove quantum
+information.  Competition between these processes can produce an
+entanglement transition between volume-law and area-law trajectory phases
+\cite{LiChenFisher2018,SkinnerRuhmanNahum2019}.  Purification dynamics gives a
+related operational diagnostic \cite{GullansHuse2020}; mappings of random
+circuits to statistical mechanics explain how measurement outcomes generate
+replica interactions and nonunitary critical theories
+\cite{BaoChoiAltman2020,JianYouVasseurLudwig2020}.  Numerical studies find
+nontrivial critical scaling in Clifford and Haar-random circuits
+\cite{LuntSzyniszewskiPal2019,
+ZabaloGullansWilsonGopalakrishnanHusePixley2020}, while monitored free
+fermions can display extended critical regimes and distinct routes to an area
+law \cite{AlbertonBuchholdDiehl2021}.  Thus ``measurement-induced'' names a
+mechanism, not one universal fixed point.
+
+The learning-induced model considered here combines trajectory weighting,
+free-fermion evolution, topology, and localization.  A control angle $\phi$
+changes the learned or decohering channel, and a transfer diagnostic is used
+to search for a class-DIII metal--insulator transition
+\cite{WangVasseurTrebstLudwigZhu2025}.  Three logical steps must remain
+separate.  First, the transition must be localized: data must identify both
+sides of a crossing rather than merely a monotone trend.  Second, the
+critical observable must be mapped to a conformal geometry.  A lattice
+transfer direction and a spatial cut generally have different metric factors,
+so an anisotropy parameter plays the role of a velocity.  Third, universal
+estimators should agree after this calibration.  Entanglement and Casimir
+amplitudes depend on different raw measurements; agreement is therefore a
+powerful test of the assumed critical point and observable mapping.
+
+These requirements motivate a distinction between parameter uncertainty and
+claim uncertainty.  A regression can return a narrow conditional interval for
+an amplitude at a chosen $\phi$, yet the scientific statement ``this is the
+universal central charge at the transition'' can remain unsupported if
+$\phi_c$ is not bracketed or the anisotropy drifts.  Increasing Monte Carlo
+steps attacks variance at fixed model, size, and parameter.  It does not
+generate the missing side of a phase boundary, enlarge the accessible
+finite-size range, or correct a biased conversion factor.  We therefore use a
+predeclared claim gate: a universal interpretation is released only if phase
+localization, calibration stability, and independent-estimator agreement all
+pass.  Failed gates retain the numerical amplitudes as diagnostics while
+preventing a precise-looking but physically underdetermined number from being
+published.
+
+Here we organize four frozen calculations into a single ascending validation
+hierarchy.  The clean square-lattice Ising model tests normalization,
+Monte Carlo thermodynamic integration, and the finite-size coefficient
+against an exact transfer matrix.  The Nishimori random-bond Ising model tests
+ordinary quenched averaging, gauge identities, and realization-level
+resampling.  A weakly self-dual Born ensemble tests Gaussian propagation,
+state-conditioned sampling, self-duality, and common-disorder comparisons.
+Only after those benchmarks do we analyze the exploratory learning-induced
+DIII candidate.  The same philosophy is applied throughout: validate the
+microscopic generator independently of the asymptotic fit, preserve the true
+independence unit in uncertainty estimation, perturb the finite-size model,
+and separate a stable computation from an allowed physical claim.
+Figure~\ref{fig:01-workflow} summarizes the resulting hierarchy.
 
 \begin{figure*}[t]
   \includegraphics[width=\textwidth]{generated/fig01-workflow.pdf}
@@ -88,13 +249,67 @@ summarizes this hierarchy.
   \label{fig:01-workflow}
 \end{figure*}
 
-Our main methodological result is deliberately conservative.  The three
-benchmarks reproduce their reference values within their bootstrap
-uncertainties.  The monitored calculation does not pass the same gates: the
-putative DIII transition is not bracketed by the available scan, the
-anisotropy estimate is unstable, and two nominal central-charge estimators
-disagree.  We report the amplitudes and their conditional conversions, but not
-a universal central charge for that model.
+The article has two complementary outcomes.  Quantitatively, all three
+benchmarks reproduce their reference values within bootstrap uncertainty,
+providing end-to-end evidence for the numerical mappings used in each
+ensemble.  Methodologically, the monitored calculation demonstrates why
+benchmark success must not be transferred automatically to a new observable.
+Its putative DIII transition is not bracketed by the available scan, the
+anisotropy calibration is unstable, and the entanglement and Casimir
+conversions disagree.  We report both amplitudes because they diagnose what
+the present calculation measures, but we do not average them or label either
+one a universal central charge.
+
+A useful way to formalize this distinction is to divide the error budget into
+four layers.  Sampling error is the fluctuation remaining when the ensemble,
+geometry, parameter, and estimator are fixed; it is the part conventionally
+summarized by a standard error.  Discretization and finite-size error arise
+because numerical integration uses a finite grid and simulations use finite
+$L$; these errors are probed by nested grids, correction terms, and size cuts.
+Calibration error enters when a measured lattice amplitude must be multiplied
+by a velocity or anisotropy factor.  Model-selection error enters when the
+candidate critical point, scaling window, or replica observable is not
+uniquely identified.  These layers respond to different computational
+remedies.  Longer runs reduce the first, denser grids and larger widths address
+the second, dedicated geometries constrain the third, and broader phase scans
+or additional observables resolve the fourth.  Reporting only the covariance
+matrix of the final regression silently treats the other three as zero.
+
+The hierarchy also clarifies the role of positive and negative controls.  An
+exact positive control asks whether a known universal coefficient can be
+recovered with the same conventions used later.  A microscopic control asks
+whether the stochastic generator samples the intended distribution, for
+example through the Nishimori energy identity or a Born-rule probability.
+A negative control asks whether an analysis that should not show the target
+effect remains null.  None of these controls proves the final universality
+class by itself.  Instead, each removes a family of alternative explanations:
+normalization mistakes, incorrect disorder frequencies, state-update drift,
+or underestimated serial correlation.  This layered logic is more demanding
+than obtaining an acceptable $\chi^2$, but it is also more informative when a
+calculation fails.
+
+Reproducibility is treated here as part of the physics rather than as an
+afterthought.  Random streams are fixed independently of thread scheduling;
+the generator, processed tables, and summaries are linked by immutable paths
+and hashes; plotted points are read from those numeric artifacts rather than
+from manually edited graphics; and headline values in the manuscript are
+generated from validated adapters.  A reader should therefore be able to
+trace a quoted interval back to its resampling unit and a withheld claim back
+to the Boolean diagnostics that blocked it.  This provenance does not make a
+finite-size ansatz correct, but it makes assumptions visible and prevents a
+later presentation step from changing the statistical object.
+
+The remainder of the paper is organized as follows.  Section
+\ref{sec:models} defines the four ensembles and their finite-size observables.
+Section \ref{sec:methods} explains the Rust simulation kernels, Xoshiro256++
+stream construction, Python analysis, correlation-aware resampling, and
+claim gates.  Section \ref{sec:benchmarks} presents the three validated
+central-charge benchmarks.  Section \ref{sec:learning} analyzes the
+learning-induced candidate and traces each failed inference gate to a
+specific diagnostic.  Section \ref{sec:discussion} compares error mechanisms
+and identifies the next decisive calculations.  The appendices derive the
+observable mappings, specify the bootstrap, and provide a machine-readable
+audit of the withheld claim.
 
 \section{Models and universal observables}
 \label{sec:models}
@@ -167,6 +382,31 @@ Monitored DIII & Entanglement/Casimir & Claim gates\\
 \end{ruledtabular}
 \end{table*}
 
+\begin{table*}[t]
+\caption{Notation used across the four calculations.  A symbol has the same
+geometric meaning wherever possible, while the measured ensemble is stated
+explicitly when it changes.}
+\label{tab:notation}
+\begin{ruledtabular}
+\begin{tabular}{cl@{\qquad}cl}
+Symbol & Meaning & Symbol & Meaning\\
+\hline
+$L$ & transverse circumference or chain length
+& $M$ & transfer or imaginary-time length\\
+$K$ & reduced Ising coupling
+& $p$ & antiferromagnetic-bond probability\\
+$\phi$ & monitoring/decoherence control angle
+& $\alpha$ & spatial--temporal anisotropy factor\\
+$f(L)$ & free-energy density on a cylinder
+& $\gamma_1(L)$ & leading Lyapunov/free-energy rate\\
+$S(\ell,L)$ & interval entanglement entropy
+& $c$ & unitary conformal central charge\\
+$c_{\rm eff}$ & ensemble-specific effective charge
+& ${\rm CI}_{95\%}$ & central 95\% bootstrap interval
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
 \section{Numerical methods and validation hierarchy}
 \label{sec:methods}
 
@@ -187,7 +427,8 @@ resampling, and publication graphics.  This separation keeps the
 high-throughput stochastic kernel in a compiled language while making the
 statistical transformations directly inspectable.
 
-\subsection{Paired fitting and resampling}
+\subsection{Statistical estimators}
+\label{sec:statistical-estimators}
 
 For each bootstrap replicate we resample independent units and repeat the full
 fit, rather than perturbing the final parameter covariance matrix.  Clean
@@ -205,6 +446,50 @@ interval.  Fit-window variation, truncation of small sizes, and correction
 terms are treated as systematic checks rather than folded into a single
 regression error.  For the exact clean calculation no stochastic error is
 assigned.
+
+\paragraph{Independence and uncertainty levels.}
+The phrase \emph{independent sampling unit} refers to the object that can be
+redrawn without reusing stochastic history.  It is a complete Rust stream for
+the clean calculation, a complete bond realization for the Nishimori
+calculation, and a complete state-conditioned trajectory stream for the Born
+ensemble.  Thermal uncertainty describes fluctuations conditional on a fixed
+Hamiltonian or disorder sample.  Quenched-disorder uncertainty describes the
+variation between independently drawn static environments.  The latter
+cannot be estimated by extending the transfer direction of one environment:
+more rows refine its conditional Lyapunov exponent but do not add a new
+disorder draw.
+
+\paragraph{Conditional variance reduction.}
+Rao--Blackwellization replaces a noisy event indicator by its exact
+conditional expectation given the current state.  Common-disorder
+comparisons similarly reuse the same random environment at two parameter
+values so that shared fluctuations cancel in their difference.  Both
+procedures reduce variance without changing the target expectation.  Their
+uncertainty calculations must nevertheless preserve the pairing; treating
+the two members as independent would discard the covariance that produces
+the gain.
+
+\subsection{Systematic errors and fit selection}
+\label{sec:systematic-errors}
+
+We separate four systematic categories from the bootstrap variance.
+Finite-size truncation is tested by removing the smallest width and by adding
+the leading symmetry-allowed correction term.  Thermodynamic-integration
+discretization is tested on nested coupling grids.  Transition-location
+uncertainty is controlled by demanding a two-sided phase bracket rather than
+assigning an error bar to a monotone scan.  Anisotropy uncertainty is assessed
+from alternative spatial and temporal windows, not only from the standard
+error of one regression.  Fit windows and correction powers are specified
+before comparison with the reference value; their shifts are reported as
+diagnostics and are not silently absorbed into a statistical error bar.
+
+These distinctions determine which additional calculation is useful.  More
+Monte Carlo steps improve thermal precision and, up to autocorrelation,
+effective sample size.  More independent streams improve uncertainty across
+stochastic histories.  Larger system sizes constrain irrelevant corrections
+and the asymptotic limit.  A wider parameter scan localizes a transition, and
+new aspect ratios calibrate anisotropy.  Exchanging one remedy for another can
+make an error bar smaller without making the physical inference more accurate.
 
 \subsection{Predeclared claim gates}
 
@@ -464,13 +749,15 @@ mismatch.
   \label{fig:08-learning}
 \end{figure*}
 
-\begin{table}[t]
-\caption{Conditional monitored-model results at
+\par\medskip
+\noindent\begin{minipage}{\columnwidth}
+\refstepcounter{table}\label{tab:03-learning}
+\noindent\textbf{TABLE \Roman{table}.} Conditional monitored-model results at
 $\phi/\pi=\LearningCandidate$.  ``No'' means that the quantity is retained as
-a diagnostic but not published as a universal central charge.}
-\label{tab:03-learning}
+a diagnostic but not published as a universal central charge.
+\par\smallskip
 \begin{ruledtabular}
-\begin{tabular}{lcc}
+\begin{tabular}{@{}lcc@{}}
 Quantity & Value & Gate\\
 \hline
 XY bracket & $[0.24,0.25]$ & Pass\\
@@ -484,7 +771,8 @@ Estimator agreement & No & Fail\\
 Published central charge & \LearningPublished & Withheld\\
 \end{tabular}
 \end{ruledtabular}
-\end{table}
+\end{minipage}
+\par\medskip
 
 Consequently, this pair of numbers in Table~\ref{tab:03-learning} does not
 constitute a universal-central-charge estimate.  They are conditional diagnostics at an
@@ -594,6 +882,49 @@ accuracy only when sampling noise is the limiting error; they cannot repair an
 unlocalized critical point or an uncontrolled observable mapping.
 
 \appendix
+
+\section{Fit models and window selection}
+\label{app:fit-models}
+
+All fit forms follow from an extensive cylinder free energy plus the leading
+conformal Casimir term.  For clean Ising and the Nishimori free-energy density
+we use
+\begin{equation}
+ f(L)=f_\infty-\frac{\pi c_{\rm eff}}{6L^2}
+      +\frac{a_4}{L^4}.
+\end{equation}
+Periodic translation-invariant geometry excludes an $L^{-1}$ density term,
+and the $L^{-4}$ contribution represents the leading retained irrelevant
+correction.  The primary clean window begins at $L_{\min}=6$; $L_{\min}=4$
+and 8 are diagnostic fits.  The primary Nishimori window includes $L=4$
+because only six widths are available, while the paired $L_{\min}=6$ fit
+measures sensitivity to that choice.
+
+The weak-self-dual observable is stored as an extensive rate,
+\begin{equation}
+ \gamma_1(L)=f_\infty L-\frac{\pi c_{\rm eff}}{6L}
+             +\frac{a_3}{L^3},
+\end{equation}
+which becomes the preceding density form after division by $L$.  Fits that
+raise $L_{\min}$, double the block length, discard $L=30$, or extend burn-in
+are paired with the primary data.  The largest center shift and the total
+span of required variants are compared with predeclared tolerances.
+
+For monitored entanglement, a linear chord fit is performed separately at
+each $L$ before the resulting coefficients are extrapolated.  Keeping these
+two stages separate prevents the many interval points at one width from
+masquerading as independent evidence for the infinite-width limit.
+Alternative extrapolation powers receive fixed model weights.  The Casimir
+fit uses the measured $\gamma_1(L)$ form, but conversion of its amplitude to
+$c_{\rm eff}$ is conditional on $\alpha$.  Hence a stable amplitude cannot
+override a failed anisotropy gate.
+
+Window variation is a sensitivity analysis, not permission to select the
+answer nearest a reference.  A variant is accepted when residual structure,
+precision, and predeclared stability criteria pass.  Bootstrap replicates
+repeat the entire fit for the same window; paired replicates quantify the
+difference between windows.  This procedure exposes both sampling dispersion
+and finite-size-model dependence while keeping their meanings distinct.
 
 \section{Observable mappings}
 \label{app:mappings}

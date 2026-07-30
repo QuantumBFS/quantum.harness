@@ -16,6 +16,7 @@ class PdfVerification:
     page_width_points: float
     page_height_points: float
     figure_xobjects: int
+    image_xobjects: int
     has_embedded_fonts: bool
     text_sha256: str
 
@@ -41,6 +42,7 @@ def verify_pdf(path: Path | str) -> PdfVerification:
         raise ValueError("PDF is not US-letter sized")
 
     figures = sum(_figure_xobjects(page) for page in reader.pages)
+    images = sum(_image_xobjects(page) for page in reader.pages)
     fonts = [
         font.get_object()
         for page in reader.pages
@@ -49,6 +51,8 @@ def verify_pdf(path: Path | str) -> PdfVerification:
     embedded = bool(fonts) and all(_font_is_embedded(font) for font in fonts)
     if figures < 8:
         raise ValueError(f"expected at least eight figure objects, found {figures}")
+    if images:
+        raise ValueError(f"compiled manuscript contains {images} raster image objects")
     if not embedded:
         raise ValueError("one or more manuscript fonts are not embedded")
 
@@ -69,6 +73,7 @@ def verify_pdf(path: Path | str) -> PdfVerification:
         page_width_points=widths[0],
         page_height_points=heights[0],
         figure_xobjects=figures,
+        image_xobjects=images,
         has_embedded_fonts=embedded,
         text_sha256=sha256(text.encode("utf-8")).hexdigest(),
     )
@@ -80,6 +85,22 @@ def _figure_xobjects(page: object) -> int:
         item.get_object().get("/Subtype") in ("/Image", "/Form")
         for item in xobjects.values()
     )
+
+
+def _image_xobjects(container: object) -> int:
+    """Count raster objects recursively, including images nested in PDF forms."""
+
+    resources = container.get("/Resources", {})
+    xobjects = resources.get("/XObject", {})
+    count = 0
+    for reference in xobjects.values():
+        item = reference.get_object()
+        subtype = item.get("/Subtype")
+        if subtype == "/Image":
+            count += 1
+        elif subtype == "/Form":
+            count += _image_xobjects(item)
+    return count
 
 
 def _font_is_embedded(font: object) -> bool:
@@ -103,7 +124,7 @@ def main() -> int:
     result = verify_pdf(args.pdf)
     print(
         f"verified {result.page_count} pages, "
-        f"{result.figure_xobjects} figure objects, embedded fonts; "
+        f"{result.figure_xobjects} figure objects, no raster images, embedded fonts; "
         f"text sha256={result.text_sha256}"
     )
     return 0

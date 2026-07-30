@@ -20,6 +20,7 @@ def test_pdf_is_prb_shaped_and_complete(compiled_pdf):
     assert result.page_width_points == pytest.approx(612.0, abs=1.0)
     assert result.page_height_points == pytest.approx(792.0, abs=1.0)
     assert result.figure_xobjects >= 8
+    assert result.image_xobjects == 0
     assert result.has_embedded_fonts
 
 
