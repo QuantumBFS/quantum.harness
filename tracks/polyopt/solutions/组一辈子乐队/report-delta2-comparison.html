@@ -37,6 +37,28 @@
 <div class="card"><div class="label note">Shared m=10/20/32 solve</div><div class="number">56.1 GiB</div><div class="note">peak RSS for three concurrent depths; completed without OOM</div></div>
 </div>
 
+<section id="method">
+<h2>Method: MPS-guided coarse-RDM lower bounds</h2>
+<p class="sub">The goal is to bracket the infinite-chain ground-state energy from both sides. A finite-D matrix product state (MPS) supplies a variational upper bound and, separately, its tensors define coarse-graining maps for a semidefinite program (SDP). The SDP optimizes reduced density matrices (RDMs) subject to positivity and consistency constraints, producing the lower estimate compared in the main figure.</p>
+
+<div class="grid">
+<div class="card"><h3>1 · Optimize an infinite MPS</h3><p>VUMPS finds a translation-invariant two-site MPS for the Δ=2 XXZ chain. Its expectation value ⟨H⟩/N is a variational <strong>upper bound</strong>. The MPS tensors are then frozen; the SDP does not variationally optimize them again.</p></div>
+<div class="card"><h3>2 · Build coarse-graining maps</h3><p>Contracting <code>m</code> consecutive MPS tensors defines <code>Wₘ</code>, which compresses the interior of a long interval into its virtual boundary space. The two physical edge spins remain explicit, giving physical support <code>n=m+2</code>.</p></div>
+<div class="card"><h3>3 · Optimize a hierarchy of RDMs</h3><p>The primal SDP contains local physical RDMs and coarse RDMs <code>ω⁽ⁿ⁾</code>. Partial-trace, overlap, and renormalization-flow equations force neighboring hierarchy levels to describe one compatible translation-invariant state.</p></div>
+</div>
+
+<div class="equation">minimize energy density &nbsp; subject to &nbsp; ρ ⪰ 0, &nbsp; ω⁽ⁿ⁾ ⪰ 0, &nbsp; trace/overlap consistency, &nbsp; and coarse-graining flow</div>
+
+<div class="grid">
+<div class="card"><h3>4 · Exploit U(1) symmetry</h3><p>Total Sᶻ conservation decomposes every RDM and linear map into charge sectors. The implementation stores real symmetric positive-semidefinite blocks instead of one dense complex matrix. This reduces the effective SDP size and is the main mechanism for scaling bond dimension <code>D</code> and hierarchy depth.</p></div>
+<div class="card"><h3>5 · Obtain the lower side</h3><p>Minimizing the local energy over this relaxed, consistency-constrained RDM set gives <code>E_lb</code>. The reported corrected value accounts for measured feasibility residuals. A clean solve should satisfy <code>E_lb ≤ E_exact</code>.</p></div>
+<div class="card"><h3>6 · Compare a certified bracket</h3><p>The MPS and SDP play different roles: <code>E_lb</code> comes from the coarse-RDM relaxation, while <code>E_VUMPS</code> comes from a trial wavefunction. Together they target <code>E_lb ≤ E₀ ≤ E_VUMPS</code>; the D=64 value in this report is only the upper-side VUMPS reference.</p></div>
+</div>
+
+<div class="callout good"><strong>What is new here:</strong> the coarse-RDM hierarchy is implemented directly in real U(1) charge blocks, and one frozen VUMPS state is shared across several depths. This preserves the lower-bound construction while avoiding repeated state optimization and dense cross-charge PSD matrices.</div>
+<div class="callout"><strong>Numerical boundary:</strong> an SDP point is presented as clean only when the solver status and feasibility residuals pass the repository gate. The m=8/10/20/32 values remain candidate lower estimates because MOSEK stopped with <code>SLOW_PROGRESS</code>; the method description does not upgrade those points into rigorous certificates.</div>
+</section>
+
 <section>
 <h2>Why n=m+2</h2>
 <div class="equation">ω⁽ᵐ⁺²⁾ = (I ⊗ Wₘ ⊗ I) ρ⁽ᵐ⁺²⁾ (I ⊗ Wₘ† ⊗ I)</div>
