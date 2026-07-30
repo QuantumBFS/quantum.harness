@@ -50,9 +50,39 @@ require_canonical_path() {
     fi
 }
 
+resolve_python_candidate() {
+    local label="$1"
+    local candidate="$2"
+    local canonical=""
+    local resolved=""
+    if [[ "${candidate}" != /* ]]; then
+        echo "${label} must be an absolute path" >&2
+        return 66
+    fi
+    if ! canonical="$(realpath -s -- "${candidate}" 2>/dev/null)"; then
+        echo "${label} is not a valid absolute path" >&2
+        return 66
+    fi
+    if [[ "${candidate}" != "${canonical}" ]]; then
+        echo "${label} must be lexically canonical" >&2
+        return 66
+    fi
+    if ! resolved="$(realpath -e -- "${candidate}" 2>/dev/null)"; then
+        echo "${label} does not resolve to an existing path" >&2
+        return 66
+    fi
+    if [[ "${resolved}" != /* || ! -f "${resolved}" || ! -x "${resolved}" ]]; then
+        echo "${label} must resolve to a regular executable" >&2
+        return 66
+    fi
+    printf '%s\n' "${canonical}"
+}
+
 require_canonical_path HARNESS_RUN_SPEC "${HARNESS_RUN_SPEC}" file
 require_canonical_path HARNESS_ENTRYPOINT "${CHALLENGE_194_REPO_ROOT}" directory
-require_canonical_path HARNESS_COMMAND "${CHALLENGE_194_PYTHON}" executable
+CHALLENGE_194_PYTHON="$(
+    resolve_python_candidate HARNESS_COMMAND "${CHALLENGE_194_PYTHON}"
+)" || exit $?
 
 SOLUTION_RELATIVE="tracks/qmc/solutions/frustration-free/challenge-194"
 SOLUTION_ROOT="${CHALLENGE_194_REPO_ROOT}/${SOLUTION_RELATIVE}"

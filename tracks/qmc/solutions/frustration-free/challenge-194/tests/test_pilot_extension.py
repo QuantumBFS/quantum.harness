@@ -150,6 +150,7 @@ def _run_extension_wrapper(
     task_id: str,
     *,
     extra_env: dict[str, str] | None = None,
+    command: str | Path | None = None,
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
     repository = tmp_path / "repo"
     runner = (
@@ -165,6 +166,7 @@ def _run_extension_wrapper(
         "#!/bin/bash\n"
         "printf 'ARGS='\n"
         "printf '<%s>' \"$@\"\n"
+        "printf '\\nLAUNCHER=%s\\n' \"$0\"\n"
         "printf '\\nCACHE=%s\\n' \"${NUMBA_CACHE_DIR}\"\n"
         "printf 'NUMBA_DISABLE_JIT=%s\\n' \"${NUMBA_DISABLE_JIT}\"\n"
         "printf 'NUMBA_NUM_THREADS=%s\\n' \"${NUMBA_NUM_THREADS}\"\n"
@@ -182,7 +184,7 @@ def _run_extension_wrapper(
         **os.environ,
         "HARNESS_RUN_SPEC": str(run_spec),
         "HARNESS_ENTRYPOINT": str(repository),
-        "HARNESS_COMMAND": str(fake_python),
+        "HARNESS_COMMAND": str(fake_python if command is None else command),
         "SLURM_ARRAY_TASK_ID": task_id,
         "SLURM_ARRAY_JOB_ID": "991",
         "SLURM_CPUS_PER_TASK": "1",
@@ -199,6 +201,53 @@ def _run_extension_wrapper(
         text=True,
     )
     return result, cache_root
+
+
+def _run_extension_build_wrapper(
+    tmp_path: Path,
+    *,
+    command: str | Path | None = None,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
+    repository = tmp_path / "repo"
+    scripts = repository / "tracks/qmc/solutions/frustration-free/challenge-194/scripts"
+    scripts.mkdir(parents=True)
+    (scripts / "analyze_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    (scripts / "run_pilot.py").write_text("# controlled\n", encoding="utf-8")
+    results = tmp_path / "results"
+    results.mkdir()
+    analysis = results / "p0_analysis.json"
+    analysis.write_bytes(P0_ANALYSIS.read_bytes())
+    validation_report = results / "validation-prod-877ab93/report/report.json"
+    validation_report.parent.mkdir(parents=True)
+    validation_report.write_text("{}\n", encoding="utf-8")
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/bin/bash\n"
+        "printf 'CALL='\n"
+        "printf '<%s>' \"$@\"\n"
+        "printf '\\nLAUNCHER=%s\\n' \"$0\"\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    cache_root = tmp_path / "node"
+    cache_root.mkdir()
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/pilot_extension_build_slurm.sh")],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "HARNESS_RUN_SPEC": str(analysis),
+            "HARNESS_ENTRYPOINT": str(repository),
+            "HARNESS_COMMAND": str(fake_python if command is None else command),
+            "SLURM_JOB_ID": "992",
+            "SLURM_CPUS_PER_TASK": "1",
+            "SLURM_TMPDIR": str(cache_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result, validation_report
 
 
 @pytest.mark.parametrize(("task_id", "cell_index"), (("1", "0"), ("96", "95")))
@@ -320,45 +369,78 @@ def test_extension_wrapper_creates_unique_private_empty_cache(tmp_path: Path):
     assert "ARGS=" not in second.stdout
 
 
+@pytest.mark.parametrize("wrapper_kind", ("array", "build"))
+def test_extension_wrappers_preserve_venv_final_symlink_launcher(
+    tmp_path: Path,
+    wrapper_kind: str,
+):
+    launcher = tmp_path / ".venv/bin/python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path("../../fake-python"))
+    if wrapper_kind == "array":
+        result, _ = _run_extension_wrapper(tmp_path, "1", command=launcher)
+    else:
+        result, _ = _run_extension_build_wrapper(tmp_path, command=launcher)
+
+    assert launcher.is_symlink()
+    assert result.returncode == 0, result.stderr
+    assert f"LAUNCHER={launcher}" in result.stdout
+
+
+def _invalid_python_candidate(tmp_path: Path, kind: str) -> str | Path:
+    candidate = tmp_path / "invalid-python"
+    if kind == "relative":
+        return "relative/python"
+    if kind == "missing":
+        return candidate
+    if kind == "directory":
+        candidate.mkdir()
+        return candidate
+    if kind == "non-executable":
+        candidate.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+        candidate.chmod(0o644)
+        return candidate
+    candidate.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    candidate.chmod(0o755)
+    if kind == "lexically-noncanonical":
+        return f"{tmp_path}/./invalid-python"
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    return f"{parent}/../invalid-python"
+
+
+@pytest.mark.parametrize("wrapper_kind", ("array", "build"))
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "relative",
+        "missing",
+        "non-executable",
+        "directory",
+        "lexically-noncanonical",
+        "unsafe-parent-component",
+    ),
+)
+def test_extension_wrappers_reject_invalid_python_candidates(
+    tmp_path: Path,
+    wrapper_kind: str,
+    kind: str,
+):
+    command = _invalid_python_candidate(tmp_path, kind)
+    if wrapper_kind == "array":
+        result, _ = _run_extension_wrapper(tmp_path, "1", command=command)
+    else:
+        result, _ = _run_extension_build_wrapper(tmp_path, command=command)
+
+    assert result.returncode == 66
+    assert "ARGS=" not in result.stdout
+    assert "CALL=" not in result.stdout
+
+
 def test_extension_build_wrapper_dispatches_approved_validation_package(
     tmp_path: Path,
 ):
-    repository = tmp_path / "repo"
-    scripts = repository / "tracks/qmc/solutions/frustration-free/challenge-194/scripts"
-    scripts.mkdir(parents=True)
-    (scripts / "analyze_pilot.py").write_text("# controlled\n", encoding="utf-8")
-    (scripts / "run_pilot.py").write_text("# controlled\n", encoding="utf-8")
-    results = tmp_path / "results"
-    results.mkdir()
-    analysis = results / "p0_analysis.json"
-    analysis.write_bytes(P0_ANALYSIS.read_bytes())
-    validation_report = results / "validation-prod-877ab93/report/report.json"
-    validation_report.parent.mkdir(parents=True)
-    validation_report.write_text("{}\n", encoding="utf-8")
-    fake_python = tmp_path / "fake-python"
-    fake_python.write_text(
-        "#!/bin/bash\nprintf 'CALL='\nprintf '<%s>' \"$@\"\nprintf '\\n'\n",
-        encoding="utf-8",
-    )
-    fake_python.chmod(0o755)
-    cache_root = tmp_path / "node"
-    cache_root.mkdir()
-    result = subprocess.run(
-        ["bash", str(ROOT / "scripts/pilot_extension_build_slurm.sh")],
-        cwd=tmp_path,
-        env={
-            **os.environ,
-            "HARNESS_RUN_SPEC": str(analysis),
-            "HARNESS_ENTRYPOINT": str(repository),
-            "HARNESS_COMMAND": str(fake_python),
-            "SLURM_JOB_ID": "992",
-            "SLURM_CPUS_PER_TASK": "1",
-            "SLURM_TMPDIR": str(cache_root),
-        },
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    result, validation_report = _run_extension_build_wrapper(tmp_path)
     assert result.returncode == 0, result.stderr
     assert f"<--validation-report><{validation_report}>" in result.stdout
     assert "validation-prod-fd0aa31-compute" not in result.stdout

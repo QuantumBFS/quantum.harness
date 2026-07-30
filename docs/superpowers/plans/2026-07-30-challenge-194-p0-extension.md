@@ -769,8 +769,11 @@ EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"
   --run-spec "${EXTENSION_ROOT}/run_spec.json"
 ```
 
-All three harness paths must be absolute and canonical. The wrapper fails if
-the extension root exists with different bytes.
+The run spec and entrypoint must be absolute, canonical, and contain no symlink
+components. `HARNESS_COMMAND` must be an absolute lexically canonical launcher
+that resolves to an absolute regular executable; retain and execute that
+lexical path so a standard final `.venv/bin/python` symlink preserves venv
+identity. The wrapper fails if the extension root exists with different bytes.
 
 - [ ] **Step 6: Freeze `PILOT_PLAN.md` before run-spec construction**
 
