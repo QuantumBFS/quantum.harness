@@ -462,39 +462,46 @@ end
 end
 
 @testset "historical release verification fails closed and requires runnable files" begin
-    current_release = readchomp(`git -C $(MGH._RECON_ROOT) rev-parse HEAD^`)
-    current_hash = MGH.bytes2hex(MGH.sha256(
-        read(`git -C $(MGH._RECON_ROOT) show $(current_release * ":Manifest.toml")`)))
-    @test MGH._verify_release_snapshot(current_release, current_hash)
-
-    manifestless = "36160c3dc65e2a9b03ecc4d45f42918b7628a95c"
-    @test success(`git -C $(MGH._RECON_ROOT) cat-file -e $(manifestless * "^{commit}")`)
-    @test !MGH._verify_release_snapshot(manifestless, repeat("0", 64))
-
-    missing_runner = "501847fc69961de5541ae2a3a1ee3b16cc5d6f21"
-    missing_runner_hash = MGH.bytes2hex(MGH.sha256(
-        read(`git -C $(MGH._RECON_ROOT) show $(missing_runner * ":Manifest.toml")`)))
-    @test !MGH._verify_release_snapshot(missing_runner, missing_runner_hash)
-
-    mktempdir() do exported
-        for relative in MGH._RELEASE_REQUIRED_FILES
-            destination = joinpath(exported, relative)
-            mkpath(dirname(destination))
-            write(destination, "exported")
-        end
-        @test !MGH._verify_release_snapshot(current_release, current_hash; root=exported)
-    end
-
     mktempdir() do dir
         repository = joinpath(dir, "repository")
         linked = joinpath(dir, "linked")
-        run(`git clone --quiet --no-hardlinks $(MGH._RECON_ROOT) $repository`)
-        run(`git -C $repository worktree add --quiet --detach $linked HEAD`)
-        linked_commit = readchomp(`git -C $linked rev-parse HEAD`)
-        linked_hash = MGH.bytes2hex(MGH.sha256(
-            read(`git -C $linked show $(linked_commit * ":Manifest.toml")`)))
+        mkpath(repository)
+        for relative in MGH._RELEASE_REQUIRED_FILES
+            source = joinpath(MGH._RECON_ROOT, relative)
+            destination = joinpath(repository, relative)
+            mkpath(dirname(destination))
+            cp(source, destination)
+        end
+        run(`git -C $repository init --quiet`)
+        run(`git -C $repository config user.name fixture`)
+        run(`git -C $repository config user.email fixture@example.invalid`)
+        run(`git -C $repository add .`)
+        run(`git -C $repository commit --quiet -m valid`)
+        valid_commit = readchomp(`git -C $repository rev-parse HEAD`)
+        valid_hash = MGH.bytes2hex(MGH.sha256(read(joinpath(repository, "Manifest.toml"))))
+        @test MGH._verify_release_snapshot(valid_commit, valid_hash; root=repository)
+
+        rm(joinpath(repository, "scripts", "run_cluster.jl"))
+        run(`git -C $repository add -u`)
+        run(`git -C $repository commit --quiet -m missing-runner`)
+        missing_runner = readchomp(`git -C $repository rev-parse HEAD`)
+        @test !MGH._verify_release_snapshot(missing_runner, valid_hash; root=repository)
+
+        run(`git -C $repository checkout --quiet $valid_commit -- .`)
+        rm(joinpath(repository, "Manifest.toml"))
+        run(`git -C $repository add -u`)
+        run(`git -C $repository commit --quiet -m manifestless`)
+        manifestless = readchomp(`git -C $repository rev-parse HEAD`)
+        @test !MGH._verify_release_snapshot(manifestless, valid_hash; root=repository)
+
+        run(`git -C $repository worktree add --quiet --detach $linked $valid_commit`)
         @test isfile(joinpath(linked, ".git"))
-        @test MGH._verify_release_snapshot(linked_commit, linked_hash; root=linked)
+        @test MGH._verify_release_snapshot(valid_commit, valid_hash; root=linked)
+
+        exported = joinpath(dir, "exported")
+        cp(linked, exported)
+        rm(joinpath(exported, ".git"))
+        @test !MGH._verify_release_snapshot(valid_commit, valid_hash; root=exported)
     end
 
     mktempdir() do repository
