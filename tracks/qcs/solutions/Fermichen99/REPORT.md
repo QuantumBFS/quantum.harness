@@ -1,170 +1,246 @@
-# Generator coverage under model–device mismatch
+# Query-efficient sim-to-real calibration of quantum gates
 
-## Question
+Final report for
+[Quantum Harness challenge #113](https://github.com/QuantumBFS/quantum.harness/issues/113).
 
-A two-qubit gate has `d²−1=15` independent phase-free generators, while the
-pulse in challenge #113 has 40 Fourier parameters. At zero model–device
-mismatch, the first 15 model-Hessian directions span the same parameter
-subspace as the 15 endpoint-generator directions.
+## Abstract
 
-The question is:
+Closed-loop quantum-gate calibration can correct an imperfect device model,
+but each derivative-free objective evaluation consumes physical experiments
+and measurement shots. Challenge #113 proposes using the model Hessian at an
+open-loop optimum to restrict this search to the `d²−1` pulse directions that
+carry local gate curvature. We test this statement for a single-qubit X gate
+and a two-qubit CNOT with a strict model/device boundary and finite-shot scalar
+feedback. The observed model-Hessian ranks are 3 and 15, respectively, as
+predicted. For the single-qubit gate at drift mismatch `ε=0.3`, the informed
+three-dimensional search certifies all 15 trials in a median of 25 queries,
+compared with 126 queries in the full 20-dimensional space; a random
+three-dimensional space certifies none. For the CNOT, however, a fixed
+15-dimensional nominal basis loses reliability as mismatch grows. A
+device-certificate-triggered `15→20` relinearization protocol certifies all 45
+held-out trials at `ε=0.1, 0.3, 0.5`, with median query counts 97, 330, and 330.
+Thus `d²−1` is the local physical dimension, but the orientation of those
+directions in pulse space is model dependent and must be checked or updated.
 
-> After the true generator subspace rotates, how many leading model-Hessian
-> parameter directions are required to cover all 15 true generators?
+## I. Problem and definitions
 
-This report studies structural mismatch
-`H₀,true = H₀ + εV`. Here `ε` is not finite-shot measurement noise. Exact
-simulated Jacobians are used to isolate the geometry before considering how to
-estimate it on hardware.
-
-## Step 1 — Confirm the baseline dimension
-
-At the calibrated model optimum:
-
-| Gate | `d` | Pulse parameters | `d²−1` | Hessian rank | Jacobian rank |
-|---|---:|---:|---:|---:|---:|
-| single-qubit X | 2 | 20 | 3 | 3 | 3 |
-| two-qubit CNOT | 4 | 40 | 15 | 15 | 15 |
-
-For the CNOT at `ε=0`, the Hessian and endpoint-Jacobian rank-15 parameter
-subspaces agree to numerical precision. Thus `k=15` is both necessary by
-dimension and sufficient in the matched model.
-
-## Step 2 — Define generator coverage
-
-Let:
-
-- `Jtrue(ε)` be the `15×40` true endpoint Jacobian at the model-optimal pulse;
-- `Rtrue(ε)` be its 15-dimensional right-singular parameter subspace;
-- `Vk` contain the first `k` model-Hessian eigenvectors.
-
-The coverage spectrum is
+For pulse parameters `θ`, the controlled dynamics are
 
 ```text
-cᵢ(k, ε) = σᵢ²(Rtrueᵀ Vk),   i=1,…,15.
+H(t; θ) = H₀ + ∑ₐ uₐ(t; θ) Hₐ .
 ```
 
-`cᵢ=1` means complete coverage and `cᵢ=0` means a missing direction. The
-worst-generator certificate is
+The target unitary is `Utarget`, the propagated unitary is `U(θ)`, and the
+phase-insensitive objective is
 
 ```text
-cmin(k, ε) = minᵢ cᵢ(k, ε).
+F(θ) = |Tr(Utarget† U(θ))|/d,       L(θ) = 1 − F(θ).
 ```
 
-For threshold `τ`, define
+Near an optimum,
 
 ```text
-kτ(ε) = smallest k such that cmin(k, ε) ≥ τ.
+Utarget† U(θ) = exp(iA).
 ```
 
-The main table uses `τ=95%`; 90% and 99% are also reported.
+Only the traceless part of the Hermitian generator `A` affects `F`; its real
+dimension is `d²−1`. Consequently, in the controllable and locally
+over-resourced regime, the loss Hessian has at most `d²−1` non-flat
+directions, independent of the number `P` of pulse parameters.
 
-An exact-rank test is not sufficient here. After a generic perturbation, the
-restricted `k=15` Jacobian can still have algebraic rank 15 because an
-arbitrarily small nonzero projection counts as independent. The thresholded
-principal-cosine certificate measures robust coverage rather than mere
-nonzero rank.
+This dimension statement is not an orientation statement. The useful
+directions are vectors in the `P`-dimensional pulse space. When the device
+Hamiltonian differs from the model, the true local subspace can rotate away
+from the model-Hessian eigenvectors.
 
-## Step 3 — Hold `k=15` fixed
-
-The formal scan uses 21 values of `ε` and five independently seeded drift
-directions.
-
-| `ε` | median worst-generator coverage with top 15 |
-|---:|---:|
-| 0.00 | 1.000 |
-| 0.05 | 0.994 |
-| 0.10 | 0.977 |
-| 0.15 | 0.946 |
-| 0.20 | 0.901 |
-| 0.30 | 0.797 |
-| 0.50 | 0.567 |
-| 0.75 | 0.286 |
-| 1.00 | 0.092 |
-
-![Fixed top-15 coverage](artifacts/generator_coverage_fixed15_vs_epsilon.png)
-
-In the small-mismatch region,
+We represent drift mismatch by
 
 ```text
-1 − cmin(k=15) ≈ 2.06 ε².
+H₀,true = H₀ + ε ΔH,       ‖ΔH‖F = ‖H₀‖F .
 ```
 
-The fitted exponent is `2.000` with log-space `R²=0.931`. This agrees with
-subspace perturbation: the angle changes at first order in `ε`, while lost
-coverage is a squared sine and therefore starts at order `ε²`.
+Here `ε` measures Hamiltonian mismatch, not measurement noise. Every device
+query separately contains finite-shot noise.
 
-![Small-gap scaling](artifacts/generator_coverage_small_gap_scaling.png)
+## II. Methods
 
-## Step 4 — Increase `k` until all 15 generators are covered
+### A. Three-stage pipeline
 
-Every integer `k=15,…,40` is evaluated, giving 2,730 coverage measurements.
+1. Optimize an open-loop pulse `θ*` using exact model gradients.
+2. Compute the model Hessian or endpoint Jacobian at `θ*` and construct an
+   orthonormal pulse-space basis `Vₖ`.
+3. Query the device only through the reduced coordinates
+   `θ = θ* + Vₖc`, using a derivative-free optimizer.
 
-| `ε` | median `k₉₀` | median `k₉₅` [seed range] | median `k₉₉` |
-|---:|---:|---:|---:|
-| 0.00 | 15 | 15 [15,15] | 15 |
-| 0.05 | 15 | 15 [15,15] | 15 |
-| 0.10 | 15 | 15 [15,15] | 27 |
-| 0.15 | 15 | 16 [15,19] | 35 |
-| 0.20 | 15 | 25 [15,36] | 38 |
-| 0.25 | 19 | 31 [26,39] | 40 |
-| 0.30 | 25 | 35 [34,39] | 40 |
-| 0.40 | 34 | 36 [35,40] | 40 |
-| 0.50 | 35 | 39 [36,40] | 40 |
-| 0.75 | 38 | 40 [39,40] | 40 |
-| 1.00 | 40 | 40 [40,40] | 40 |
+The simulated device returns only a scalar fidelity estimate from 65,536
+shots. The online loop cannot access the held-out Hamiltonian, its Jacobian,
+the mismatch value, gradients, or exact fidelity. Exact fidelity is retained
+only for offline auditing.
 
-![Required k](artifacts/generator_coverage_required_k_vs_epsilon.png)
+### B. Search spaces
 
-![Coverage heatmap](artifacts/generator_coverage_heatmap.png)
+- **Fixed nominal:** the top `k` eigenvectors of the Hessian at the nominal
+  model optimum.
+- **Fixed ensemble:** one basis computed before device optimization by
+  stacking block-normalized endpoint Jacobians from the nominal model and 15
+  declared perturbation models, then taking right singular vectors.
+- **Triggered adaptive:** begin with the nominal `k=15` basis. If its
+  finite-shot certificate fails, evaluate the declared model ensemble at the
+  device-selected current pulse, recompute a `k=20` basis, and continue.
 
-At the 95% threshold the empirical pattern is:
+For each mismatch value, testing uses five unseen drift seeds and three
+independent shot-noise seeds, producing 15 held-out trials. Training and test
+drift seeds are disjoint.
 
-1. `ε≤0.10`: `k≈15`;
-2. `0.15≤ε≤0.50`: rapid transition from `k≈16` to `k≈39`;
-3. `ε≥0.75`: almost the full 40-dimensional parameter space is needed.
+### C. Derivative-free optimization
 
-The threshold changes the exact crossing points, but not this pattern.
+The **five-point coordinate scan** evaluates each reduced coordinate at
+offsets
 
-## Step 5 — Robustness checks
+```text
+{−h, −h/2, 0, h/2, h},       h = 0.3.
+```
 
-- Five independent drift directions are included.
-- For every `ε` and drift seed, `cmin` is monotone non-decreasing with `k`.
-- At `k=40`, all 105 `ε×seed` cases recover full coverage numerically.
-- The complete seed-113 `k₉₅(ε)` curve is identical at 128, 256, and 512
-  propagation steps.
+A one-dimensional quadratic is fitted. If it is convex and its vertex lies
+inside the interval, that vertex is queried as an additional candidate; the
+best measured point is retained. This controlled-cost scan is used throughout
+the single-qubit test and as the first nominal `k=15` stage of the adaptive
+CNOT loop.
 
-Selected resolution check:
+**COBYQA** is used for the fixed-space CNOT comparison and the adaptive
+recovery stages. It builds a multivariate local quadratic model of the scalar
+device loss within a trust region and therefore requires no device gradient.
+Unlike independent coordinate scans, it can represent coupled motion among
+the reduced coordinates.
 
-| `ε` | `k₉₅` at 128 steps | 256 steps | 512 steps |
-|---:|---:|---:|---:|
-| 0.10 | 15 | 15 | 15 |
-| 0.20 | 20 | 20 | 20 |
-| 0.30 | 34 | 34 | 34 |
-| 0.50 | 36 | 36 | 36 |
-| 0.75 | 39 | 39 | 39 |
-| 1.00 | 40 | 40 | 40 |
+### D. Certification and query statistics
 
-## Conclusion
+A single noisy observation below the target is not counted as success. The
+chosen pulse is measured seven more times and is certified only if the Wilson
+upper bound on infidelity, implemented with `z=1.96`, is at most `10⁻³`.
+This is conservative relative to a nominal one-sided 95% bound.
 
-The number of physical generators remains 15. What changes with structural
-mismatch is the number of *model-ranked Hessian parameter directions* needed
-to cover those generators.
+Every black-box call is counted. Failed trials are right-censored at one above
+the declared budget: 501 in the single-qubit experiment and 701 in the CNOT
+experiment. Plots show medians and interquartile ranges over 15 trials.
+Percentages are certified success rates.
 
-Small mismatch preserves the model top-15 space, with coverage loss growing
-approximately as `ε²`. Moderate mismatch produces a rapid, seed-dependent
-increase in required `k`. Strong mismatch makes the Hessian ordering
-insufficient for substantial dimensional reduction.
+## III. Results
 
-This report deliberately stops here. It does not yet design a fixed-rank
-optimizer or claim that the true generator subspace can be estimated under
-finite-shot noise at the same cost.
+### A. Intrinsic dimension and query saving
 
-## Reproduce
+![Figure 1](final_report/figure1_intrinsic_dimension.png)
+
+**Figure 1.** (a) The differentiable model supplies a warm-start pulse and a
+reduced basis, while only finite-shot scalar loss crosses the device boundary.
+(b) At model optima, the normalized Hessian spectrum has numerical rank 3 for
+the single-qubit X gate (`d=2`, `P=20`) and rank 15 for the CNOT (`d=4`,
+`P=40`), using a relative threshold of `10⁻⁶`. These equal `d²−1`.
+(c) At `ε=0.3`, the single-qubit nominal spaces with `k<3` fail in every trial.
+The informed `k=3` space succeeds in 15/15 trials with median 25 queries, while
+a random `k=3` space succeeds in 0/15. The raw `P=20` search succeeds in 15/15
+but needs median 126 queries. Error bars are interquartile ranges; 501 marks
+right-censored failures.
+
+| Search at `ε=0.3` | Dimension | Certified success | Median queries |
+|---|---:|---:|---:|
+| Nominal Hessian | 1 | 0/15 | 501, censored |
+| Nominal Hessian | 2 | 0/15 | 501, censored |
+| Nominal Hessian | 3 | 15/15 | 25 |
+| Random | 3 | 0/15 | 501, censored |
+| Raw parameters | 20 | 15/15 | 126 |
+
+This result answers the issue's invariant question across two system sizes and
+demonstrates the requested query saving in a regime where the model directions
+transfer.
+
+### B. Failure under mismatch and adaptive recovery
+
+![Figure 2](final_report/figure2_closed_loop_answer.png)
+
+**Figure 2.** (a) In the CNOT benchmark, a fixed nominal space displays a
+clear cost/reliability trade-off. At `ε=0.1`, `k=15` already gives 15/15
+success with median 238 queries, whereas `k=20` and 30 cost 313 and 461
+queries. At `ε=0.5`, fixed nominal `k=15` falls to 3/15 success; `k=20`
+reaches 9/15 and `k=30` reaches 14/15, with censored median costs 414 and 599.
+(b) Fixed nominal `k=15` is economical only when transfer remains good. Fixed
+ensemble `k=30` is robust but expensive. The triggered `k=15→20` protocol
+certifies all 45 held-out trials with median queries 97, 330, and 330 at
+`ε=0.1`, 0.3, and 0.5. Error bars are interquartile ranges; 701 marks
+right-censored failures.
+
+| Strategy | `ε=0.1` | `ε=0.3` | `ε=0.5` |
+|---|---:|---:|---:|
+| Fixed nominal `k=15` | 100%; 238 | 80%; 259 | 20%; 701 censored |
+| Fixed ensemble `k=30` | 100%; 506 | 100%; 572 | 100%; 579 |
+| Triggered adaptive `k≤20` | 100%; 97 | 100%; 330 | 100%; 330 |
+
+The failure of fixed `k=15` does not contradict the local `d²−1` rank. It
+shows that the nominal model's 15-dimensional pulse-space orientation no
+longer spans the useful device correction. Increasing a fixed space recovers
+reachability but spends additional queries. In this declared benchmark,
+device-triggered relinearization restores reliability without searching all
+40 pulse parameters.
+
+## IV. Answer to challenge #113
+
+The results support four conclusions.
+
+1. The local curved dimension follows `d²−1` for the tested single- and
+   two-qubit gates.
+2. When the model basis is correctly oriented, it can reduce black-box query
+   cost substantially: 25 versus 126 median queries in the headline
+   single-qubit comparison.
+3. A fixed top-`d²−1` basis is not universally robust. Drift mismatch rotates
+   the useful pulse-space directions, causing a sharp loss of success.
+4. The practical response is conditional adaptation, not unconditional
+   expansion: attempt the smallest physically motivated space, test it with a
+   device-only statistical certificate, and update the model-side local basis
+   only after failure.
+
+The central distinction is therefore:
+
+```text
+intrinsic physical dimension  ≠  model-dependent pulse-space orientation.
+```
+
+The evidence is limited to simulated drift-Hamiltonian mismatch, two gate
+sizes, and the declared finite-shot protocol. It does not claim real-hardware
+performance or universal robustness to every device error.
+
+## V. Reproducibility
+
+The version-controlled final bundle is [`final_report`](final_report/). It
+contains the standalone HTML report, the structured report source, the two
+figures, the plotted numerical summaries, and consolidated run metadata. The
+same canonical run is also rendered under
+`tracks/qcs/results/sim-to-real-challenge-report-final/`, as required by the
+challenge-report workflow.
+
+Minimal code path:
+
+- `sim_to_real.py`: dynamics, drift mismatch, and query-only device;
+- `landscapes.py`: Hessian and endpoint-Jacobian subspaces;
+- `optimizers.py`: coordinate scans, COBYQA interface, and certification;
+- `run_invariant_check.py`: ranks for `d=2` and `d=4`;
+- `run_single_qubit_closed_loop.py`: Figure 1 closed loop;
+- `run_robust_closed_loop.py`: Figure 2 fixed-space baselines;
+- `run_adaptive_hybrid_closed_loop.py`: Figure 2 adaptive protocol;
+- `render_paper_figures.py`: consolidated figure renderer.
+
+Render the report with:
 
 ```bash
-python3 tracks/qcs/solutions/Fermichen99/run_generator_coverage.py
+python3 skills/report/render_report.py \
+  tracks/qcs/results/sim-to-real-challenge-report-final
 ```
 
-The full 2,730-row table, threshold summaries, fit, figures, and metadata are
-committed under `artifacts/generator_coverage_*`.
+## References
+
+1. Z. Shen, M. Hsieh, and H. Rabitz, *J. Chem. Phys.* **124**, 204106
+   (2006).
+2. J. Roslund and H. Rabitz, *Phys. Rev. Lett.* **112**, 143001 (2014).
+3. D. J. Egger and F. K. Wilhelm, *Phys. Rev. Lett.* **112**, 240503
+   (2014).
+4. N. Khaneja *et al.*, *J. Magn. Reson.* **172**, 296–305 (2005).
+5. R. S. Judson and H. Rabitz, *Phys. Rev. Lett.* **68**, 1500 (1992).

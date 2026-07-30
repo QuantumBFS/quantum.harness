@@ -186,6 +186,50 @@ def jacobian_subspace(
     return singular_values, right_vectors_h.conj().T[:, :dimension]
 
 
+def stacked_jacobian_subspace(
+    jacobians: Array | np.ndarray,
+    dimension: int,
+    *,
+    normalize_blocks: bool = True,
+    weights: Array | np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build model-uncertainty-robust directions from stacked Jacobians.
+
+    The input has shape ``(n_models, n_generators, n_params)``.  Normalizing
+    each model block gives every plausible model equal influence regardless of
+    its local endpoint sensitivity.  The resulting right singular vectors are
+    also the leading eigendirections of ``sum_m w_m J_m.T @ J_m``.
+    """
+
+    blocks = np.asarray(jacobians, dtype=np.float64)
+    if blocks.ndim != 3:
+        raise ValueError("jacobians must have shape (models, rows, parameters)")
+    n_models, _, n_params = blocks.shape
+    if n_models <= 0 or dimension <= 0 or dimension > n_params:
+        raise ValueError("invalid ensemble or subspace dimension")
+
+    scaled = blocks.copy()
+    if normalize_blocks:
+        norms = np.linalg.norm(scaled, axis=(1, 2))
+        if np.any(norms <= 0.0):
+            raise ValueError("Jacobian blocks must have nonzero norm")
+        scaled /= norms[:, None, None]
+    if weights is not None:
+        weights_np = np.asarray(weights, dtype=np.float64)
+        if weights_np.shape != (n_models,) or np.any(weights_np < 0.0):
+            raise ValueError("weights must be non-negative per-model values")
+        if not np.any(weights_np > 0.0):
+            raise ValueError("at least one weight must be positive")
+        scaled *= np.sqrt(weights_np)[:, None, None]
+
+    stacked = scaled.reshape(-1, n_params)
+    _, singular_values, right_vectors_h = np.linalg.svd(
+        stacked,
+        full_matrices=True,
+    )
+    return singular_values, right_vectors_h.T[:, :dimension]
+
+
 def random_subspace(
     ambient_dimension: int,
     dimension: int,
