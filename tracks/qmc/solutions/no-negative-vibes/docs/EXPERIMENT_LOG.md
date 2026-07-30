@@ -3167,3 +3167,89 @@ next-scientific-command interface is intentionally unsatisfied and carried to
 the next protocol task. The exact recovery command is the CPU command above.
 All source, worktree, environment, runner, log, result, and transfer artifacts
 remain preserved.
+
+## 2026-07-30 emergency nearby-transfer Hamiltonian portfolio launch
+
+At the user's explicit low-quota checkpoint, the controller launched a
+bounded exploratory batch instead of spending the remaining turn completing
+the new runner. This is a numerical discovery scan using the already frozen,
+tested `oddcycle_local_hs_runner` and its Hamiltonian/locality portfolio
+diagnostics. It is not an exact-locality claim and does not replace the
+planned exact Survivor-A audit or continuous-time cone promotion.
+
+The search is non-duplicate: the completed first batch used seed `20260730`
+and 256 samples in its length-four portfolio cell. This batch uses disjoint
+per-cell seeds and 2,048 samples per cell:
+
+- CPU: 62 cells, seeds `20270000..20270061`, 126,976 samples total,
+  62 workers;
+- WSL: 14 cells, seeds `20271000..20271013`, 28,672 samples total,
+  14 workers.
+
+Both use maximum word length four and preserve
+`OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=NUMEXPR_NUM_THREADS=1`
+with `PYTHONHASHSEED=0`. The exact remote settings identities are:
+
+- CPU settings SHA-256:
+  `193e9878fa82d6c55757acd402f11aa96ca07e89ae8dcd0be804c03ba0fe1d02`;
+- WSL settings SHA-256:
+  `d2d82d4db8790b72472141a999607240a0f4ce05121472bb0e9d5b0fdab6f0ae`.
+
+Launch evidence:
+
+- WSL launcher PID `130`; `pgrep -fc oddcycle_local_hs_runner` returned
+  `15` (controller plus 14 workers);
+- CPU tmux session `nnv-survivor-hportfolio-20260730`; process inspection
+  showed controller PID `2360014` plus all 62 worker processes;
+- WSL output:
+  `/home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/output`;
+- CPU output:
+  `/home/jzb/runs/nnv-survivor-hportfolio-20260730/cpu/output`.
+
+Do not launch a second copy. Monitor the WSL run with:
+
+```bash
+ps -p "$(cat /home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/launcher.pid)" \
+  -o pid,etime,stat,args
+find /home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/output/cells \
+  -maxdepth 1 -type f | wc -l
+```
+
+Monitor the CPU run from WSL with:
+
+```bash
+ssh -i /home/zibojin/.ssh/cpu_worker_ed25519 \
+  -o IdentitiesOnly=yes -o BatchMode=yes jzb@162.105.145.128 \
+  tmux list-sessions
+```
+
+If a run is interrupted, resume into the same output directory with the same
+settings and worker count. WSL:
+
+```bash
+cd /home/zibojin/code/nnv-survivor-a-dev/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -u \
+  -m oracle.oddcycle_local_hs_runner \
+  --settings /home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/settings.json \
+  --output /home/zibojin/runs/nnv-survivor-hportfolio-20260730/wsl/output \
+  --workers 14 --resume
+```
+
+CPU:
+
+```bash
+cd /home/jzb/code/nnv-local-h-bebab46956baf3c672f68349a76e49879f6be483/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/jzb/miniforge3/envs/quantum-harness/bin/python -u \
+  -m oracle.oddcycle_local_hs_runner \
+  --settings /home/jzb/runs/nnv-survivor-hportfolio-20260730/cpu/settings.json \
+  --output /home/jzb/runs/nnv-survivor-hportfolio-20260730/cpu/output \
+  --workers 62 --resume
+```
+
+Next wake-up must first count completed cells and inspect the terminal
+manifest/results. It must not recreate the settings, change seeds, or repeat
+completed cells.
