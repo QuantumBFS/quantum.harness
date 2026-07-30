@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-phase6-attempt-v1",
+  "title": "Route D+ Phase 6 attempt envelope",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "created_at_utc",
+    "n_electrons",
+    "two_q",
+    "ansatz",
+    "seeds",
+    "seed_results",
+    "checkpoints",
+    "architecture",
+    "blind_access_audit",
+    "gates",
+    "passed",
+    "ed_accessed",
+    "git_commit",
+    "git_dirty",
+    "slurm_job_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-phase6-attempt-v1"
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "ansatz": {"const": "D+0-linear-scalar"},
+    "seeds": {
+      "type": "array",
+      "prefixItems": [{"const": 848}, {"const": 1848}, {"const": 2848}],
+      "items": false
+    },
+    "seed_results": {"type": "array", "minItems": 3, "maxItems": 3},
+    "checkpoints": {"type": "array", "minItems": 3, "maxItems": 3},
+    "architecture": {"type": "object"},
+    "blind_access_audit": {"type": "object"},
+    "gates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "passed": {"type": "boolean"},
+    "ed_accessed": {"type": "boolean"},
+    "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_dirty": {"const": false},
+    "slurm_job_id": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
+}

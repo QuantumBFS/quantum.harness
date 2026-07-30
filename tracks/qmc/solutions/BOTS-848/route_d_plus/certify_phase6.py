@@ -31,6 +31,7 @@ from route_d_plus.train_dplus0 import (
 )
 
 SCHEMA_VERSION = "challenge-15-route-d-plus-phase6-v1"
+ATTEMPT_SCHEMA_VERSION = "challenge-15-route-d-plus-phase6-attempt-v1"
 PHASE5_SCHEMA_VERSION = "challenge-15-route-d-plus-phase5-v1"
 SEEDS = (848, 1848, 2848)
 FORBIDDEN_MODULE_PREFIXES = (
@@ -440,6 +441,11 @@ def validate_certificate(payload: dict[str, Any]) -> None:
     ).validate(payload)
 
 
+def validate_attempt(payload: dict[str, Any]) -> None:
+    schema_path = Path(__file__).with_name("phase6-attempt.schema.json")
+    validate_against_schema(payload, schema_path)
+
+
 def write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -457,15 +463,22 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     arguments = parser.parse_args()
     output = arguments.output.resolve()
-    payload = collect_certificate(
+    collected = collect_certificate(
         repo_root=arguments.repo_root.resolve(),
         phase5_certificate_path=arguments.phase5_certificate.resolve(),
         output_path=output,
     )
-    validate_certificate(payload)
-    write_json_atomic(output, payload)
-    print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0 if payload["passed"] else 1
+    attempt = {**collected, "schema_version": ATTEMPT_SCHEMA_VERSION}
+    validate_attempt(attempt)
+    attempt_path = output.parent / "phase6-attempt.json"
+    write_json_atomic(attempt_path, attempt)
+    if not collected["passed"]:
+        print(json.dumps(attempt, indent=2, sort_keys=True))
+        return 1
+    validate_certificate(collected)
+    write_json_atomic(output, collected)
+    print(json.dumps(collected, indent=2, sort_keys=True))
+    return 0
 
 
 if __name__ == "__main__":
