@@ -115,3 +115,21 @@ deterministic seeds, task states, runtime decisions, reserve reasons, and
 SHA-256 for every stable artifact. `summary.json` contains only frozen
 analysis facts. Both language reports embed the same summary hash and numeric
 fact model.
+
+## Frozen production result
+
+The frozen production run used all approved coarse points and completed
+224/224 physical Born streams in 344.982 seconds without scientific reserve.
+The XY validation transition bracket was \(\phi/\pi\in[0.24,0.25]\), which
+overlaps the predeclared reference window \([0.20,0.28]\). The generic DIII
+scan did not produce a defensible adjacent phase bracket: its evidence score
+rose from -0.0113 at \(\phi/\pi=0.06\) to 1.6280 at 0.34, but the strict
+opposite-phase persistence gate was not met. Therefore the frozen state is
+`xy_reproduced_diii_inconclusive`; no DIII central charge or anisotropy is
+published.
+
+The nonphysical IID control differs from the Born estimator by
+\(z=21.80\), confirming that unconditional random signs cannot replace
+conditional Born sampling. `FROZEN_RESULT` records the selected result
+directory and the exact `summary.json` SHA-256. This is an exploratory
+finite-size result, not evidence that a DIII transition is absent.
