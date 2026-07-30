@@ -1,0 +1,14 @@
+issue = "QuantumBFS/quantum.harness#86"
+track = "A"
+algorithm = "Fukui-Todo Poisson-event FK"
+sigmas = [1.75, 1.875, 2.0, 2.5]
+critical_beta = [0.329136, 0.336985, 0.344439, 0.369446]
+beta_offsets = [-0.002, 0.0, 0.002]
+sizes = [64, 128, 256, 512]
+seed_bases = [11001, 22002]
+thermalization_sweeps = 10000
+measurement_sweeps = 100000
+blocks = 20
+normalization_sum_j = 4.0
+distance = "minimum-image Euclidean distance on square torus"
+rp_definition = "<R2> - 2<R0>"

@@ -1,0 +1,6 @@
+timestamp=2026-07-29T18:00:44.706
+hostname=a01r02n01
+julia=1.12.6
+slurm_job=22988941
+cell=27
+role=critical

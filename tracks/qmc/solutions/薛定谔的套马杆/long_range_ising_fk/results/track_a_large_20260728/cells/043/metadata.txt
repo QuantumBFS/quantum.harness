@@ -1,0 +1,6 @@
+timestamp=2026-07-30T08:37:46.622
+hostname=a02r07n05
+julia=1.12.6
+slurm_job=23008198
+cell=43
+role=crossing
