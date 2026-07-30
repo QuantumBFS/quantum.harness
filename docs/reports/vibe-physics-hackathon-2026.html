@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="组一辈子乐队四天 Vibe Physics Hackathon 成果展示">
+  <title>Vibe Physics Hackathon 2026｜组一辈子乐队</title>
+  <style>
+    :root {
+      --ink: #18211b;
+      --muted: #617068;
+      --paper: #f3f0e8;
+      --card: rgba(255,255,255,.72);
+      --line: rgba(24,33,27,.14);
+      --green: #1d6047;
+      --mint: #9fd9bd;
+      --orange: #ef6a3a;
+      --yellow: #f4c95d;
+      --blue: #315c78;
+      --shadow: 0 20px 55px rgba(30,45,36,.10);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 3%, rgba(159,217,189,.42), transparent 26rem),
+        radial-gradient(circle at 93% 11%, rgba(244,201,93,.30), transparent 24rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+      line-height: 1.65;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    nav {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(243,240,232,.82);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { font-weight: 800; letter-spacing: -.02em; }
+    .nav-links { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--green); }
+    .hero { min-height: 780px; display: grid; place-items: center; padding: 80px 0 60px; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1.22fr .78fr; gap: 64px; align-items: center; }
+    .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; font-size: 13px; }
+    h1 { margin: 18px 0 22px; font-size: clamp(58px, 8vw, 112px); line-height: .92; letter-spacing: -.075em; }
+    h1 .accent { color: var(--orange); display: block; }
+    .lead { max-width: 720px; color: var(--muted); font-size: clamp(18px, 2vw, 24px); }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+    .pill { padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.5); font-size: 14px; }
+    .orbit { position: relative; aspect-ratio: 1; max-width: 430px; margin: auto; }
+    .orbit::before, .orbit::after { content: ""; position: absolute; inset: 8%; border: 1px solid rgba(29,96,71,.24); border-radius: 50%; transform: rotate(-18deg) scaleY(.44); }
+    .orbit::after { transform: rotate(44deg) scaleY(.44); }
+    .core { position: absolute; inset: 31%; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--green); box-shadow: 0 0 0 18px rgba(29,96,71,.08), var(--shadow); text-align: center; font-weight: 800; line-height: 1.2; }
+    .node { position: absolute; width: 76px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: white; box-shadow: var(--shadow); font-weight: 800; font-size: 13px; text-align: center; }
+    .n1 { top: 3%; left: 41%; background: var(--yellow); }
+    .n2 { top: 46%; right: 0; background: var(--mint); }
+    .n3 { bottom: 0; left: 38%; background: var(--orange); color: white; }
+    .n4 { top: 43%; left: 0; background: var(--blue); color: white; }
+    section { padding: 96px 0; }
+    .section-head { display: grid; grid-template-columns: .65fr 1.35fr; gap: 50px; margin-bottom: 48px; align-items: end; }
+    .kicker { font-size: 14px; font-weight: 800; color: var(--orange); letter-spacing: .13em; text-transform: uppercase; }
+    h2 { margin: 8px 0 0; font-size: clamp(36px, 5vw, 66px); line-height: 1.04; letter-spacing: -.045em; }
+    .section-intro { margin: 0; color: var(--muted); font-size: 18px; max-width: 680px; }
+    .statement { padding: 56px; border-radius: 34px; background: var(--ink); color: white; box-shadow: var(--shadow); }
+    .statement blockquote { margin: 0; font-size: clamp(28px, 4vw, 52px); line-height: 1.2; letter-spacing: -.035em; font-weight: 750; }
+    .statement em { color: var(--mint); font-style: normal; }
+    .timeline { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .timeline::before { content: ""; position: absolute; left: 8%; right: 8%; top: 49px; height: 2px; background: linear-gradient(90deg, var(--green), var(--orange)); }
+    .day { position: relative; padding-top: 82px; }
+    .day::before { content: attr(data-day); position: absolute; top: 20px; left: 22px; width: 58px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: var(--paper); border: 2px solid var(--green); color: var(--green); font-weight: 900; z-index: 2; }
+    .day:nth-child(3)::before, .day:nth-child(4)::before { border-color: var(--orange); color: var(--orange); }
+    .day-card { height: 100%; padding: 25px; background: var(--card); border: 1px solid rgba(255,255,255,.8); border-radius: 22px; box-shadow: 0 8px 25px rgba(30,45,36,.06); }
+    .date { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .day h3 { margin: 9px 0; font-size: 21px; }
+    .day p { margin: 0; color: var(--muted); font-size: 14px; }
+    .routes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .route { position: relative; overflow: hidden; padding: 36px; border-radius: 28px; background: var(--card); border: 1px solid rgba(255,255,255,.85); box-shadow: var(--shadow); }
+    .route::after { content: ""; position: absolute; width: 180px; height: 180px; border-radius: 50%; right: -70px; top: -70px; background: var(--mint); opacity: .4; }
+    .route.orange::after { background: var(--yellow); }
+    .route-number { font-size: 13px; font-weight: 900; letter-spacing: .14em; color: var(--green); }
+    .route.orange .route-number { color: var(--orange); }
+    .route h3 { margin: 14px 0 10px; font-size: 30px; line-height: 1.12; letter-spacing: -.025em; }
+    .route p { color: var(--muted); }
+    .flow { margin: 25px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; font-weight: 750; }
+    .flow span { background: rgba(29,96,71,.08); padding: 7px 10px; border-radius: 8px; }
+    .flow i { color: var(--muted); font-style: normal; }
+    .route-link { display: inline-block; margin-top: 7px; color: var(--green); font-weight: 800; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 38px 0 60px; }
+    .stat { padding: 24px; min-height: 150px; border-top: 4px solid var(--green); background: var(--card); border-radius: 4px 4px 18px 18px; }
+    .stat:nth-child(even) { border-color: var(--orange); }
+    .stat strong { display: block; font-size: clamp(28px, 3vw, 42px); letter-spacing: -.04em; line-height: 1.1; }
+    .stat span { display: block; margin-top: 12px; color: var(--muted); font-size: 14px; }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .result-panel { padding: 34px; border: 1px solid var(--line); border-radius: 24px; background: rgba(255,255,255,.44); }
+    .result-panel h3 { margin-top: 0; font-size: 24px; }
+    .energy { margin: 25px 0 12px; font-size: clamp(34px, 4vw, 54px); font-weight: 850; color: var(--green); letter-spacing: -.045em; }
+    .caption { color: var(--muted); font-size: 13px; }
+    .bars { margin-top: 28px; display: grid; gap: 15px; }
+    .bar-row { display: grid; grid-template-columns: 100px 1fr 55px; align-items: center; gap: 12px; font-size: 13px; }
+    .track { height: 13px; background: rgba(24,33,27,.08); border-radius: 99px; overflow: hidden; }
+    .fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--mint)); transform-origin: left; animation: grow 1.2s ease both; }
+    @keyframes grow { from { transform: scaleX(0); } }
+    .principles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .principle { padding: 30px; border-left: 5px solid var(--orange); border-radius: 0 20px 20px 0; background: rgba(255,255,255,.52); }
+    .principle b { font-size: 20px; }
+    .principle p { margin-bottom: 0; color: var(--muted); }
+    .boundary { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 28px; overflow: hidden; }
+    .boundary > div { padding: 40px; }
+    .done { background: var(--green); color: white; }
+    .next { background: rgba(255,255,255,.5); }
+    .boundary h3 { font-size: 27px; margin-top: 0; }
+    .boundary ul { padding-left: 20px; margin-bottom: 0; }
+    .boundary li { margin: 12px 0; }
+    .next li { color: var(--muted); }
+    .closing { padding-bottom: 120px; }
+    .closing-card { padding: 64px; text-align: center; border-radius: 36px; background: linear-gradient(145deg, var(--green), #123b2e); color: white; box-shadow: var(--shadow); }
+    .closing-card h2 { max-width: 900px; margin: 0 auto 22px; }
+    .closing-card p { max-width: 760px; margin: auto; color: rgba(255,255,255,.72); font-size: 18px; }
+    .pr-buttons { margin-top: 34px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+    .button { padding: 12px 18px; border-radius: 999px; background: white; color: var(--green); font-weight: 850; text-decoration: none; }
+    footer { padding: 30px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .65s ease, transform .65s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (max-width: 850px) {
+      .nav-links { display: none; }
+      .hero { min-height: auto; }
+      .hero-grid, .section-head, .result-grid, .boundary { grid-template-columns: 1fr; }
+      .orbit { width: min(80vw, 380px); }
+      .timeline, .stats { grid-template-columns: 1fr 1fr; }
+      .timeline::before { display: none; }
+      .routes, .principles { grid-template-columns: 1fr; }
+      .statement, .closing-card { padding: 40px 28px; }
+    }
+    @media (max-width: 540px) {
+      .wrap { width: min(100% - 24px, 1180px); }
+      h1 { font-size: 57px; }
+      section { padding: 72px 0; }
+      .timeline, .stats { grid-template-columns: 1fr; }
+      .day { padding-top: 72px; }
+      .stat { min-height: auto; }
+      .route, .result-panel { padding: 25px; }
+      .bar-row { grid-template-columns: 78px 1fr 44px; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media print {
+      nav { display: none; }
+      body { background: white; }
+      section, .hero { padding: 38px 0; min-height: auto; }
+      .reveal { opacity: 1; transform: none; }
+      .route, .stat, .statement, .closing-card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+  <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
+</head>
+<body>
+  <nav>
+    <div class="wrap nav-inner">
+      <div class="brand">组一辈子乐队</div>
+      <div class="nav-links">
+        <a href="#timeline">四天进程</a>
+        <a href="#routes">技术路线</a>
+        <a href="#results">关键结果</a>
+        <a href="#lessons">经验</a>
+        <a href="#boundary">成果边界</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">27—30 July 2026 · PolyOpt Track</div>
+        <h1>Vibe<br><span class="accent">Physics</span></h1>
+        <p class="lead">四天，把物理设想推进到可运行、可验证、可复现的量子多体计算原型。</p>
+        <div class="meta">
+          <span class="pill">季恺昕</span><span class="pill">李文韬</span><span class="pill">夏轩哲</span>
+          <span class="pill">非交换多项式优化</span><span class="pill">量子 Bootstrap</span>
+        </div>
+      </div>
+      <div class="orbit" aria-label="从物理问题到可验证结果的循环">
+        <div class="core">物理假设<br>→<br>可信结果</div>
+        <div class="node n1">建模</div>
+        <div class="node n2">实现</div>
+        <div class="node n3">计算</div>
+        <div class="node n4">验证</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap statement reveal">
+        <blockquote>一条路线压缩<em>空间尺度</em>，另一条路线压缩<em>计算空间</em>；共同回答同一个问题：严格的量子多体下界，能否真正扩展到大规模？</blockquote>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Four days</div><h2>从选题到百万变量</h2></div>
+          <p class="section-intro">以提交时间为骨架：先划清物理正确性的边界，再做最小原型、稠密对照和规模扩展。</p>
+        </div>
+        <div class="timeline">
+          <article class="day reveal" data-day="01"><div class="day-card"><div class="date">7 月 27 日</div><h3>问题拆解</h3><p>确立粗粒化 NPA 路线：MPS 生成映射，半正定规划保留下界；不把近似态误当认证条件。</p></div></article>
+          <article class="day reveal" data-day="02"><div class="day-card"><div class="date">7 月 28 日</div><h3>对称原型</h3><p>完成有限 Abelian 分块、重构验证、50 模型语料，以及独立非交换矩 SDP 基线。</p></div></article>
+          <article class="day reveal" data-day="03"><div class="day-card"><div class="date">7 月 29 日</div><h3>链路打通</h3><p>接通 U(1) VUMPS—粗粒化 RDM—SDP；并扩展 Z₂ʳ、局域化矩阵、SU(2) 证据与自动识别。</p></div></article>
+          <article class="day reveal" data-day="04"><div class="day-card"><div class="date">7 月 30 日</div><h3>规模与固化</h3><p>完成 D=6、深度 60 的百万变量计算，整理资源、残差、回归测试与复现实验记录。</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="routes">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Two routes</div><h2>互补的两条技术路线</h2></div>
+          <p class="section-intro">粗粒化让约束深度不再直接带来指数尺寸；对称性让同一 SDP 被拆成更小、彼此独立的块。</p>
+        </div>
+        <div class="routes">
+          <article class="route reveal">
+            <div class="route-number">ROUTE 01 · PR #211</div>
+            <h3>MPS 引导的粗粒化 Bootstrap</h3>
+            <p>MPS/VUMPS 提供问题自适应的粗粒化映射，半正定规划仍是外层松弛并给出数值下界。</p>
+            <div class="flow"><span>U(1) VUMPS</span><i>→</i><span>冻结张量</span><i>→</i><span>粗粒化 RDM</span><i>→</i><span>SDP</span></div>
+            <a class="route-link" href="https://github.com/QuantumBFS/quantum.harness/pull/211">查看 PR #211</a>
+          </article>
+          <article class="route orange reveal">
+            <div class="route-number">ROUTE 02 · PR #245</div>
+            <h3>非交换矩层级的自动对称性约化</h3>
+            <p>从 Hamiltonian 识别对称性，自动生成扇区、约化 PSD 锥，并以稠密路径和全谱重构证明无信息丢失。</p>
+            <div class="flow"><span>识别对称</span><i>→</i><span>生成分块</span><i>→</i><span>约化求解</span><i>→</i><span>等价验证</span></div>
+            <a class="route-link" href="https://github.com/QuantumBFS/quantum.harness/pull/245">查看 PR #245</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Evidence</div><h2>数字说话</h2></div>
+          <p class="section-intro">结果不只包括最终能量，还包括规模、残差、全谱误差和测试覆盖；每个结论都对应一层证据。</p>
+        </div>
+        <div class="stats">
+          <div class="stat reveal"><strong>1,301,413</strong><span>D=6、深度 60 的实标量变量</span></div>
+          <div class="stat reveal"><strong>23.92 GiB</strong><span>高深度粗粒化 SDP 峰值内存</span></div>
+          <div class="stat reveal"><strong>50</strong><span>有限 Abelian 全谱等价性实例</span></div>
+          <div class="stat reveal"><strong>214 / 214</strong><span>粗粒化链路回归测试通过</span></div>
+        </div>
+        <div class="result-grid">
+          <article class="result-panel reveal">
+            <h3>XXZ 链数值下界</h3>
+            <div class="energy">−0.3772436555</div>
+            <div>每个物理格点，D=6，粗粒化深度 60</div>
+            <p class="caption">最大约束残差 2.65×10⁻⁸；MOSEK 状态为 OPTIMAL。深度 20—60 的结果约在 9×10⁻⁷ 内稳定。</p>
+          </article>
+          <article class="result-panel reveal">
+            <h3>对称约化的计算收益</h3>
+            <div class="bars">
+              <div class="bar-row"><span>Z₂ matrix</span><div class="track"><span class="fill" style="width:22%"></span></div><b>4×</b></div>
+              <div class="bar-row"><span>Z₂×Z₂ SDP</span><div class="track"><span class="fill" style="width:43%"></span></div><b>16×</b></div>
+              <div class="bar-row"><span>Product cyclic</span><div class="track"><span class="fill" style="width:74%"></span></div><b>81×</b></div>
+              <div class="bar-row"><span>SU(2), L=8</span><div class="track"><span class="fill" style="width:100%"></span></div><b>508×</b></div>
+            </div>
+            <p class="caption">横条显示立方计算量代理的相对量级，不表示稳定的端到端加速比。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="lessons">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Vibe Physics</div><h2>快，不等于跳过严谨</h2></div>
+          <p class="section-intro">AI 缩短的是“想法—实现—反馈”的循环，而不是替代物理判断、证书逻辑和诚实的范围声明。</p>
+        </div>
+        <div class="principles">
+          <article class="principle reveal"><b>先划正确性边界</b><p>MPS 给上界，Bootstrap 给下界；固定线性压缩是安全观察，强加 MPS 局域矩则可能破坏认证。</p></article>
+          <article class="principle reveal"><b>原型必须有独立对照</b><p>稠密与约化采用独立编译路径，并比较全谱、重构残差和对称性对易关系。</p></article>
+          <article class="principle reveal"><b>验证器也是研究成果</b><p>残差、PSD 最小特征值、错误实现、超时控制和机器可读结果，与最终数字同等重要。</p></article>
+          <article class="principle reveal"><b>主动收紧结论</b><p>有限 Abelian NC SDP 已真正约化；SU(2) 当前是表示分解证据，尚未完整进入非交换矩 PSD 锥。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="boundary">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="kicker">Honest boundary</div><h2>做成了什么，还差什么</h2></div>
+          <p class="section-intro">四天走通了研究闭环，但没有把研究原型包装成“万能黑盒”。</p>
+        </div>
+        <div class="boundary reveal">
+          <div class="done"><h3>已经完成</h3><ul><li>真实 U(1) VUMPS—粗粒化 RDM—SDP 计算链路</li><li>百万变量、高深度集群计算与数值诊断</li><li>Z₂ʳ 非交换矩及局域化 PSD 锥约化</li><li>50 模型全谱重构与等价性验证</li><li>U(1)、Z₂、平移、SU(2) 自动匹配接口</li></ul></div>
+          <div class="next"><h3>下一步</h3><ul><li>有理数或区间算术的独立精确证书</li><li>SU(2) 进入非交换矩与局域化 PSD 锥</li><li>Permutation 与一般非 Abelian 对称性</li><li>跨模型规模测试与稳定的 CI</li><li>两条路线最终合流：粗粒化块再做自动对称约化</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="wrap closing-card reveal">
+        <h2>AI 不只是解释物理，也可以参与构造、运行、验证和修正计算。</h2>
+        <p>真正的 Vibe Physics，是在更短时间内完成从物理假设、数学形式、代码实现、数值求解，到误差诊断与边界声明的闭环。</p>
+        <div class="pr-buttons"><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/211">粗粒化 NPA · PR #211</a><a class="button" href="https://github.com/QuantumBFS/quantum.harness/pull/245">自动对称约化 · PR #245</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap footer-inner"><span>Vibe Physics Hackathon · 2026.07.27—07.30</span><span>组一辈子乐队 · 季恺昕 / 李文韬 / 夏轩哲</span></div></footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
