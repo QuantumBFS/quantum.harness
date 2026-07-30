@@ -1,0 +1,1361 @@
+{
+  "kind": "formula-agnostic-symbolic-gate-discovery-summary",
+  "protocol": {
+    "input_bits": 12,
+    "output_bits": 12,
+    "clean_domain_size": 4096,
+    "fresh_examples_per_step": 100,
+    "independent_output_bit_flip_probability": 0.25,
+    "clean_domain_used_for_updates": false,
+    "formula_or_existing_circuit_seeded": false,
+    "random_coefficient_prior": true,
+    "generic_basis": "constant + 12 linear + all 66 pairwise Boolean terms"
+  },
+  "claims": {
+    "primary_first_exact_step": 2800,
+    "replicate_first_exact_step": 2400,
+    "learned_active_integer_terms": 36,
+    "learned_gate_count": 158,
+    "distance_to_page_one_156_gate_reference": 2,
+    "compressor_schedule_seeded": false,
+    "compressor_schedule_derived_only_from_learned_term_counts": true,
+    "both_networks_reloaded_and_exhaustively_verified": true
+  },
+  "primary": {
+    "path": "tracks/qcs/results/20260730-182000-noisy-c-quadratic-discovery/observation-seed87100-s4000",
+    "run_sha256": "d9ab24e59b1c233f60c75d92bd8292bcee497fa738bcf199fbe2931e31e126d4",
+    "metrics_sha256": "2d3134e4900d98073c15218a8e07c002eb5af5f15f243ad8e9327eca77df6c1c",
+    "wallace_network_sha256": "b96571d1ae4044683d2a8871b75d93276ab32c4c1867b8416190d7c70d21abac",
+    "mdfa_network_sha256": "14909df458b12b61c9b907bbfb55c445a88581016e74c7c3488a5161d19ab712",
+    "config": {
+      "steps": 4000,
+      "batch_size": 100,
+      "noise_rate": 0.25,
+      "eval_every": 200,
+      "base_seed": 87100,
+      "prior_jitter": 1e-06,
+      "coefficient_prior_std": 1.0,
+      "projection_ridge": 0.001,
+      "weight_mode": "observation",
+      "device": "cpu"
+    },
+    "first_full_recovery_step": 2800,
+    "full_recovery_checkpoints": 7,
+    "checkpoints_after_first_recovery": 7,
+    "all_checkpoints_exact_after_first": true,
+    "final": {
+      "step": 4000,
+      "examples_seen": 400000,
+      "elapsed_seconds": 0.7753408999997191,
+      "train_loss_ema": 0.5636375382448038,
+      "teacher_mean_observations": 97.65625,
+      "teacher_min_observations": 62,
+      "effective_projection_inputs": 4096,
+      "active_integer_coefficients": 36,
+      "maximum_rounding_residual": 0.00022554510077329285,
+      "bit_accuracy": 1.0,
+      "word_accuracy": 1.0,
+      "normalized_mae": 0.0,
+      "per_bit_accuracy": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "active_integer_coefficients": [
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          6
+        ],
+        "mask": 65,
+        "coefficient": 1
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          7
+        ],
+        "mask": 129,
+        "coefficient": 2
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          8
+        ],
+        "mask": 257,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          9
+        ],
+        "mask": 513,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          10
+        ],
+        "mask": 1025,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          11
+        ],
+        "mask": 2049,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          6
+        ],
+        "mask": 66,
+        "coefficient": 2
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          7
+        ],
+        "mask": 130,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          8
+        ],
+        "mask": 258,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          9
+        ],
+        "mask": 514,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          10
+        ],
+        "mask": 1026,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          11
+        ],
+        "mask": 2050,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          6
+        ],
+        "mask": 68,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          7
+        ],
+        "mask": 132,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          8
+        ],
+        "mask": 260,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          9
+        ],
+        "mask": 516,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          10
+        ],
+        "mask": 1028,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          11
+        ],
+        "mask": 2052,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          6
+        ],
+        "mask": 72,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          7
+        ],
+        "mask": 136,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          8
+        ],
+        "mask": 264,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          9
+        ],
+        "mask": 520,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          10
+        ],
+        "mask": 1032,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          11
+        ],
+        "mask": 2056,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          6
+        ],
+        "mask": 80,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          7
+        ],
+        "mask": 144,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          8
+        ],
+        "mask": 272,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          9
+        ],
+        "mask": 528,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          10
+        ],
+        "mask": 1040,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          11
+        ],
+        "mask": 2064,
+        "coefficient": 512
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          6
+        ],
+        "mask": 96,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          7
+        ],
+        "mask": 160,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          8
+        ],
+        "mask": 288,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          9
+        ],
+        "mask": 544,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          10
+        ],
+        "mask": 1056,
+        "coefficient": 512
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          11
+        ],
+        "mask": 2080,
+        "coefficient": 1024
+      }
+    ],
+    "wallace_synthesis": {
+      "active_integer_features": 36,
+      "compressor_full_adders": 20,
+      "final_half_adders": 6,
+      "final_full_adders": 4,
+      "structurally_hashed_two_input_gates": 168,
+      "gate_breakdown": {
+        "AND": 90,
+        "XOR": 78
+      },
+      "discarded_overflow_signal": "c0",
+      "discarded_column_12_signals": 0
+    },
+    "mdfa_synthesis": {
+      "active_integer_features": 36,
+      "partial_feature_gates": 36,
+      "compressor_gate_cost": 122,
+      "two_input_gates": 158,
+      "gate_breakdown": {
+        "AND": 54,
+        "OR": 13,
+        "XOR": 91
+      },
+      "action_counts": {
+        "ENCODE": 11,
+        "FA3": 3,
+        "HA": 6,
+        "MDFA": 10,
+        "SFA3": 1
+      },
+      "schedule_derived_only_from_term_counts": true
+    },
+    "curve": [
+      {
+        "step": 1,
+        "examples_seen": 100,
+        "elapsed_seconds": 0.0028364999998302665,
+        "word_accuracy": 0.00048828125,
+        "bit_accuracy": 0.5048828125,
+        "normalized_mae": 0.3251818385607448,
+        "active_integer_coefficients": 79,
+        "maximum_rounding_residual": 0.4985850257082802,
+        "teacher_mean_observations": 0.0244140625,
+        "teacher_min_observations": 0
+      },
+      {
+        "step": 200,
+        "examples_seen": 20000,
+        "elapsed_seconds": 0.046450599998934194,
+        "word_accuracy": 0.000244140625,
+        "bit_accuracy": 0.5576171875,
+        "normalized_mae": 0.09355695302960929,
+        "active_integer_coefficients": 78,
+        "maximum_rounding_residual": 0.4941057385962182,
+        "teacher_mean_observations": 4.8828125,
+        "teacher_min_observations": 0
+      },
+      {
+        "step": 400,
+        "examples_seen": 40000,
+        "elapsed_seconds": 0.08632399999987683,
+        "word_accuracy": 0.00146484375,
+        "bit_accuracy": 0.5979410807291666,
+        "normalized_mae": 0.041422108707264954,
+        "active_integer_coefficients": 76,
+        "maximum_rounding_residual": 0.4999461745510967,
+        "teacher_mean_observations": 9.765625,
+        "teacher_min_observations": 1
+      },
+      {
+        "step": 600,
+        "examples_seen": 60000,
+        "elapsed_seconds": 0.12204989999736426,
+        "word_accuracy": 0.00341796875,
+        "bit_accuracy": 0.6267496744791666,
+        "normalized_mae": 0.01948355463980464,
+        "active_integer_coefficients": 76,
+        "maximum_rounding_residual": 0.4979445714856894,
+        "teacher_mean_observations": 14.6484375,
+        "teacher_min_observations": 4
+      },
+      {
+        "step": 800,
+        "examples_seen": 80000,
+        "elapsed_seconds": 0.15943089999927906,
+        "word_accuracy": 0.0068359375,
+        "bit_accuracy": 0.6651611328125,
+        "normalized_mae": 0.009526552007020758,
+        "active_integer_coefficients": 75,
+        "maximum_rounding_residual": 0.4941958427468691,
+        "teacher_mean_observations": 19.53125,
+        "teacher_min_observations": 6
+      },
+      {
+        "step": 1000,
+        "examples_seen": 100000,
+        "elapsed_seconds": 0.20303699999931268,
+        "word_accuracy": 0.013671875,
+        "bit_accuracy": 0.7003173828125,
+        "normalized_mae": 0.006657437614468864,
+        "active_integer_coefficients": 79,
+        "maximum_rounding_residual": 0.4999908288664088,
+        "teacher_mean_observations": 24.4140625,
+        "teacher_min_observations": 9
+      },
+      {
+        "step": 1200,
+        "examples_seen": 120000,
+        "elapsed_seconds": 0.24502369999754592,
+        "word_accuracy": 0.03271484375,
+        "bit_accuracy": 0.73663330078125,
+        "normalized_mae": 0.008828768887362637,
+        "active_integer_coefficients": 75,
+        "maximum_rounding_residual": 0.49690503591009616,
+        "teacher_mean_observations": 29.296875,
+        "teacher_min_observations": 14
+      },
+      {
+        "step": 1400,
+        "examples_seen": 140000,
+        "elapsed_seconds": 0.28443249999691034,
+        "word_accuracy": 0.067626953125,
+        "bit_accuracy": 0.7839762369791666,
+        "normalized_mae": 0.008003162202380952,
+        "active_integer_coefficients": 72,
+        "maximum_rounding_residual": 0.4832960521018066,
+        "teacher_mean_observations": 34.1796875,
+        "teacher_min_observations": 15
+      },
+      {
+        "step": 1600,
+        "examples_seen": 160000,
+        "elapsed_seconds": 0.3265185999989626,
+        "word_accuracy": 0.092529296875,
+        "bit_accuracy": 0.7955525716145834,
+        "normalized_mae": 0.010347985347985348,
+        "active_integer_coefficients": 73,
+        "maximum_rounding_residual": 0.4923517155542001,
+        "teacher_mean_observations": 39.0625,
+        "teacher_min_observations": 21
+      },
+      {
+        "step": 1800,
+        "examples_seen": 180000,
+        "elapsed_seconds": 0.3635248999999021,
+        "word_accuracy": 0.153564453125,
+        "bit_accuracy": 0.82904052734375,
+        "normalized_mae": 0.005492001488095238,
+        "active_integer_coefficients": 70,
+        "maximum_rounding_residual": 0.4960097865358136,
+        "teacher_mean_observations": 43.9453125,
+        "teacher_min_observations": 24
+      },
+      {
+        "step": 2000,
+        "examples_seen": 200000,
+        "elapsed_seconds": 0.39983099999881233,
+        "word_accuracy": 0.2099609375,
+        "bit_accuracy": 0.84417724609375,
+        "normalized_mae": 0.008238061851343102,
+        "active_integer_coefficients": 66,
+        "maximum_rounding_residual": 0.49185011487535546,
+        "teacher_mean_observations": 48.828125,
+        "teacher_min_observations": 26
+      },
+      {
+        "step": 2200,
+        "examples_seen": 220000,
+        "elapsed_seconds": 0.4412908999984211,
+        "word_accuracy": 0.163330078125,
+        "bit_accuracy": 0.82769775390625,
+        "normalized_mae": 0.011016078105921857,
+        "active_integer_coefficients": 57,
+        "maximum_rounding_residual": 0.49566589657357585,
+        "teacher_mean_observations": 53.7109375,
+        "teacher_min_observations": 29
+      },
+      {
+        "step": 2400,
+        "examples_seen": 240000,
+        "elapsed_seconds": 0.48174879999714904,
+        "word_accuracy": 0.291259765625,
+        "bit_accuracy": 0.8557332356770834,
+        "normalized_mae": 0.00908131581959707,
+        "active_integer_coefficients": 59,
+        "maximum_rounding_residual": 0.4968255160666938,
+        "teacher_mean_observations": 58.59375,
+        "teacher_min_observations": 33
+      },
+      {
+        "step": 2600,
+        "examples_seen": 260000,
+        "elapsed_seconds": 0.520230599999195,
+        "word_accuracy": 0.50048828125,
+        "bit_accuracy": 0.8856608072916666,
+        "normalized_mae": 0.010253310057997558,
+        "active_integer_coefficients": 59,
+        "maximum_rounding_residual": 0.4247152786804146,
+        "teacher_mean_observations": 63.4765625,
+        "teacher_min_observations": 38
+      },
+      {
+        "step": 2800,
+        "examples_seen": 280000,
+        "elapsed_seconds": 0.5578299999979208,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.05083084869620791,
+        "teacher_mean_observations": 68.359375,
+        "teacher_min_observations": 43
+      },
+      {
+        "step": 3000,
+        "examples_seen": 300000,
+        "elapsed_seconds": 0.5920092999986082,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.017498781003239944,
+        "teacher_mean_observations": 73.2421875,
+        "teacher_min_observations": 46
+      },
+      {
+        "step": 3200,
+        "examples_seen": 320000,
+        "elapsed_seconds": 0.6261340999990352,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.014359663883754415,
+        "teacher_mean_observations": 78.125,
+        "teacher_min_observations": 49
+      },
+      {
+        "step": 3400,
+        "examples_seen": 340000,
+        "elapsed_seconds": 0.6615386999983457,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.002052622519891729,
+        "teacher_mean_observations": 83.0078125,
+        "teacher_min_observations": 53
+      },
+      {
+        "step": 3600,
+        "examples_seen": 360000,
+        "elapsed_seconds": 0.6970495999994455,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.00013563319406641194,
+        "teacher_mean_observations": 87.890625,
+        "teacher_min_observations": 57
+      },
+      {
+        "step": 3800,
+        "examples_seen": 380000,
+        "elapsed_seconds": 0.7385714999982156,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 5.894558134852892e-05,
+        "teacher_mean_observations": 92.7734375,
+        "teacher_min_observations": 59
+      },
+      {
+        "step": 4000,
+        "examples_seen": 400000,
+        "elapsed_seconds": 0.7753408999997191,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.00022554510077329285,
+        "teacher_mean_observations": 97.65625,
+        "teacher_min_observations": 62
+      }
+    ]
+  },
+  "replicate": {
+    "path": "tracks/qcs/results/20260730-182000-noisy-c-quadratic-discovery/observation-seed97100-s4000",
+    "run_sha256": "19c1d520f20cff7bb952ef13bbcdf598b52a8b2f2c124fdef7a8d00a2593e01c",
+    "metrics_sha256": "b3891159bf5c0b3777ef50d4b83229ed32a7c89b8ab7669a84655e4cb5b70c4d",
+    "wallace_network_sha256": "b96571d1ae4044683d2a8871b75d93276ab32c4c1867b8416190d7c70d21abac",
+    "mdfa_network_sha256": "cdfcb87cc8d5335a41daaa35efccaf7f0ef542d824748c02f1d37772f431646d",
+    "config": {
+      "steps": 4000,
+      "batch_size": 100,
+      "noise_rate": 0.25,
+      "eval_every": 200,
+      "base_seed": 97100,
+      "prior_jitter": 1e-06,
+      "coefficient_prior_std": 1.0,
+      "projection_ridge": 0.001,
+      "weight_mode": "observation",
+      "device": "cpu"
+    },
+    "first_full_recovery_step": 2400,
+    "full_recovery_checkpoints": 9,
+    "checkpoints_after_first_recovery": 9,
+    "all_checkpoints_exact_after_first": true,
+    "final": {
+      "step": 4000,
+      "examples_seen": 400000,
+      "elapsed_seconds": 0.7301074999995762,
+      "train_loss_ema": 0.5620660095087212,
+      "teacher_mean_observations": 97.65625,
+      "teacher_min_observations": 65,
+      "effective_projection_inputs": 4096,
+      "active_integer_coefficients": 36,
+      "maximum_rounding_residual": 4.08322434850561e-05,
+      "bit_accuracy": 1.0,
+      "word_accuracy": 1.0,
+      "normalized_mae": 0.0,
+      "per_bit_accuracy": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "active_integer_coefficients": [
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          6
+        ],
+        "mask": 65,
+        "coefficient": 1
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          7
+        ],
+        "mask": 129,
+        "coefficient": 2
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          8
+        ],
+        "mask": 257,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          9
+        ],
+        "mask": 513,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          10
+        ],
+        "mask": 1025,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          0,
+          11
+        ],
+        "mask": 2049,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          6
+        ],
+        "mask": 66,
+        "coefficient": 2
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          7
+        ],
+        "mask": 130,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          8
+        ],
+        "mask": 258,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          9
+        ],
+        "mask": 514,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          10
+        ],
+        "mask": 1026,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          1,
+          11
+        ],
+        "mask": 2050,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          6
+        ],
+        "mask": 68,
+        "coefficient": 4
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          7
+        ],
+        "mask": 132,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          8
+        ],
+        "mask": 260,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          9
+        ],
+        "mask": 516,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          10
+        ],
+        "mask": 1028,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          2,
+          11
+        ],
+        "mask": 2052,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          6
+        ],
+        "mask": 72,
+        "coefficient": 8
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          7
+        ],
+        "mask": 136,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          8
+        ],
+        "mask": 264,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          9
+        ],
+        "mask": 520,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          10
+        ],
+        "mask": 1032,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          3,
+          11
+        ],
+        "mask": 2056,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          6
+        ],
+        "mask": 80,
+        "coefficient": 16
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          7
+        ],
+        "mask": 144,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          8
+        ],
+        "mask": 272,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          9
+        ],
+        "mask": 528,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          10
+        ],
+        "mask": 1040,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          4,
+          11
+        ],
+        "mask": 2064,
+        "coefficient": 512
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          6
+        ],
+        "mask": 96,
+        "coefficient": 32
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          7
+        ],
+        "mask": 160,
+        "coefficient": 64
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          8
+        ],
+        "mask": 288,
+        "coefficient": 128
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          9
+        ],
+        "mask": 544,
+        "coefficient": 256
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          10
+        ],
+        "mask": 1056,
+        "coefficient": 512
+      },
+      {
+        "kind": "quadratic",
+        "input_bits": [
+          5,
+          11
+        ],
+        "mask": 2080,
+        "coefficient": 1024
+      }
+    ],
+    "wallace_synthesis": {
+      "active_integer_features": 36,
+      "compressor_full_adders": 20,
+      "final_half_adders": 6,
+      "final_full_adders": 4,
+      "structurally_hashed_two_input_gates": 168,
+      "gate_breakdown": {
+        "AND": 90,
+        "XOR": 78
+      },
+      "discarded_overflow_signal": "c0",
+      "discarded_column_12_signals": 0
+    },
+    "mdfa_synthesis": {
+      "active_integer_features": 36,
+      "partial_feature_gates": 36,
+      "compressor_gate_cost": 122,
+      "two_input_gates": 158,
+      "gate_breakdown": {
+        "AND": 54,
+        "OR": 13,
+        "XOR": 91
+      },
+      "action_counts": {
+        "ENCODE": 11,
+        "FA3": 3,
+        "HA": 6,
+        "MDFA": 10,
+        "SFA3": 1
+      },
+      "schedule_derived_only_from_term_counts": true
+    },
+    "curve": [
+      {
+        "step": 1,
+        "examples_seen": 100,
+        "elapsed_seconds": 0.002821499998390209,
+        "word_accuracy": 0.00048828125,
+        "bit_accuracy": 0.50640869140625,
+        "normalized_mae": 0.28468513907967036,
+        "active_integer_coefficients": 79,
+        "maximum_rounding_residual": 0.4761597248175917,
+        "teacher_mean_observations": 0.0244140625,
+        "teacher_min_observations": 0
+      },
+      {
+        "step": 200,
+        "examples_seen": 20000,
+        "elapsed_seconds": 0.039315099998930236,
+        "word_accuracy": 0.000732421875,
+        "bit_accuracy": 0.5541585286458334,
+        "normalized_mae": 0.09449726705586081,
+        "active_integer_coefficients": 77,
+        "maximum_rounding_residual": 0.4914068820962889,
+        "teacher_mean_observations": 4.8828125,
+        "teacher_min_observations": 0
+      },
+      {
+        "step": 400,
+        "examples_seen": 40000,
+        "elapsed_seconds": 0.07409719999850495,
+        "word_accuracy": 0.001220703125,
+        "bit_accuracy": 0.59130859375,
+        "normalized_mae": 0.04294478308150183,
+        "active_integer_coefficients": 77,
+        "maximum_rounding_residual": 0.495180837596191,
+        "teacher_mean_observations": 9.765625,
+        "teacher_min_observations": 0
+      },
+      {
+        "step": 600,
+        "examples_seen": 60000,
+        "elapsed_seconds": 0.11448539999764762,
+        "word_accuracy": 0.00439453125,
+        "bit_accuracy": 0.6270548502604166,
+        "normalized_mae": 0.02072709191849817,
+        "active_integer_coefficients": 79,
+        "maximum_rounding_residual": 0.49883909686819194,
+        "teacher_mean_observations": 14.6484375,
+        "teacher_min_observations": 3
+      },
+      {
+        "step": 800,
+        "examples_seen": 80000,
+        "elapsed_seconds": 0.14937769999960437,
+        "word_accuracy": 0.00634765625,
+        "bit_accuracy": 0.6650390625,
+        "normalized_mae": 0.012452543116605617,
+        "active_integer_coefficients": 78,
+        "maximum_rounding_residual": 0.4953562632057107,
+        "teacher_mean_observations": 19.53125,
+        "teacher_min_observations": 7
+      },
+      {
+        "step": 1000,
+        "examples_seen": 100000,
+        "elapsed_seconds": 0.18759159999899566,
+        "word_accuracy": 0.016357421875,
+        "bit_accuracy": 0.7080078125,
+        "normalized_mae": 0.009803304334554334,
+        "active_integer_coefficients": 76,
+        "maximum_rounding_residual": 0.4910943346450978,
+        "teacher_mean_observations": 24.4140625,
+        "teacher_min_observations": 9
+      },
+      {
+        "step": 1200,
+        "examples_seen": 120000,
+        "elapsed_seconds": 0.22191869999733171,
+        "word_accuracy": 0.03955078125,
+        "bit_accuracy": 0.7445271809895834,
+        "normalized_mae": 0.01447184542887668,
+        "active_integer_coefficients": 74,
+        "maximum_rounding_residual": 0.49775350247354133,
+        "teacher_mean_observations": 29.296875,
+        "teacher_min_observations": 12
+      },
+      {
+        "step": 1400,
+        "examples_seen": 140000,
+        "elapsed_seconds": 0.25758529999802704,
+        "word_accuracy": 0.04296875,
+        "bit_accuracy": 0.7605997721354166,
+        "normalized_mae": 0.011509128891941393,
+        "active_integer_coefficients": 75,
+        "maximum_rounding_residual": 0.48821683968056817,
+        "teacher_mean_observations": 34.1796875,
+        "teacher_min_observations": 17
+      },
+      {
+        "step": 1600,
+        "examples_seen": 160000,
+        "elapsed_seconds": 0.2938553999993019,
+        "word_accuracy": 0.0859375,
+        "bit_accuracy": 0.78619384765625,
+        "normalized_mae": 0.012089581425518926,
+        "active_integer_coefficients": 75,
+        "maximum_rounding_residual": 0.4973429364654445,
+        "teacher_mean_observations": 39.0625,
+        "teacher_min_observations": 20
+      },
+      {
+        "step": 1800,
+        "examples_seen": 180000,
+        "elapsed_seconds": 0.33105589999831864,
+        "word_accuracy": 0.1279296875,
+        "bit_accuracy": 0.81292724609375,
+        "normalized_mae": 0.011696213942307692,
+        "active_integer_coefficients": 70,
+        "maximum_rounding_residual": 0.4996920789597503,
+        "teacher_mean_observations": 43.9453125,
+        "teacher_min_observations": 24
+      },
+      {
+        "step": 2000,
+        "examples_seen": 200000,
+        "elapsed_seconds": 0.3738411999984237,
+        "word_accuracy": 0.160888671875,
+        "bit_accuracy": 0.81524658203125,
+        "normalized_mae": 0.012500596192002443,
+        "active_integer_coefficients": 67,
+        "maximum_rounding_residual": 0.4994901173245583,
+        "teacher_mean_observations": 48.828125,
+        "teacher_min_observations": 26
+      },
+      {
+        "step": 2200,
+        "examples_seen": 220000,
+        "elapsed_seconds": 0.4095895999998902,
+        "word_accuracy": 0.24169921875,
+        "bit_accuracy": 0.8416951497395834,
+        "normalized_mae": 0.00886656746031746,
+        "active_integer_coefficients": 64,
+        "maximum_rounding_residual": 0.49942344878234657,
+        "teacher_mean_observations": 53.7109375,
+        "teacher_min_observations": 31
+      },
+      {
+        "step": 2400,
+        "examples_seen": 240000,
+        "elapsed_seconds": 0.44499089999953867,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.379016774971376,
+        "teacher_mean_observations": 58.59375,
+        "teacher_min_observations": 34
+      },
+      {
+        "step": 2600,
+        "examples_seen": 260000,
+        "elapsed_seconds": 0.4785230999987107,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.056657675813672814,
+        "teacher_mean_observations": 63.4765625,
+        "teacher_min_observations": 36
+      },
+      {
+        "step": 2800,
+        "examples_seen": 280000,
+        "elapsed_seconds": 0.5188766999999643,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.16232760355125186,
+        "teacher_mean_observations": 68.359375,
+        "teacher_min_observations": 39
+      },
+      {
+        "step": 3000,
+        "examples_seen": 300000,
+        "elapsed_seconds": 0.5546135999975377,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.0020049484662814283,
+        "teacher_mean_observations": 73.2421875,
+        "teacher_min_observations": 41
+      },
+      {
+        "step": 3200,
+        "examples_seen": 320000,
+        "elapsed_seconds": 0.5896227999983239,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.0020229823824202044,
+        "teacher_mean_observations": 78.125,
+        "teacher_min_observations": 43
+      },
+      {
+        "step": 3400,
+        "examples_seen": 340000,
+        "elapsed_seconds": 0.6235392999988107,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.00037127104759483617,
+        "teacher_mean_observations": 83.0078125,
+        "teacher_min_observations": 47
+      },
+      {
+        "step": 3600,
+        "examples_seen": 360000,
+        "elapsed_seconds": 0.6573484000000462,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 0.00013027758917848257,
+        "teacher_mean_observations": 87.890625,
+        "teacher_min_observations": 52
+      },
+      {
+        "step": 3800,
+        "examples_seen": 380000,
+        "elapsed_seconds": 0.6932428000000073,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 4.7935441455536664e-05,
+        "teacher_mean_observations": 92.7734375,
+        "teacher_min_observations": 59
+      },
+      {
+        "step": 4000,
+        "examples_seen": 400000,
+        "elapsed_seconds": 0.7301074999995762,
+        "word_accuracy": 1.0,
+        "bit_accuracy": 1.0,
+        "normalized_mae": 0.0,
+        "active_integer_coefficients": 36,
+        "maximum_rounding_residual": 4.08322434850561e-05,
+        "teacher_mean_observations": 97.65625,
+        "teacher_min_observations": 65
+      }
+    ]
+  },
+  "representations": {
+    "anf_two_input_gates": 5046,
+    "bdd_two_input_gates": 3343,
+    "wallace_two_input_gates": 168,
+    "mdfa_two_input_gates": 158
+  },
+  "comparison_hashes": {
+    "anf_run_sha256": "8a0e57556f661a1a146e7d7c529689930904f3c4007a6882b3a9fd0fe92de227",
+    "anf_network_sha256": "be05bbb7e3e7a78ca47450fb4779a764a4a1130044af358463b4946b9a208a91",
+    "bdd_network_sha256": "3c527b12c2c83673ed61be660261d46776572037737fe371776a764743d48775"
+  }
+}

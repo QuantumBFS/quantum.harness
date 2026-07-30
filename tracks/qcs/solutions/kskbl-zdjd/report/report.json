@@ -459,6 +459,71 @@
         {
           "kind": "verdict",
           "status": "good",
+          "label": "⟦zh⟧突破：从随机噪声训练得到 158 门精确网络，距 156 门参考只差 2 门⟦en⟧Breakthrough: noisy training yields an exact 158-gate network, only two gates above the 156-gate reference",
+          "why": "⟦zh⟧两个随机初始化、两条独立噪声流分别在第 2,800 和 2,400 步学出同一个 36 项整数规则；通用压缩器只根据学到的列项数自动搜索门计划，未读取乘法公式、第一页电路或其压缩日程。两个 158 门网络重新加载后均在 4,096 / 4,096 个输入上逐门验证正确。⟦en⟧Two random initializations and independent noise streams learn the same 36-term integer rule at steps 2,800 and 2,400. A generic compressor searches its gate schedule solely from the learned per-column term counts; it reads neither the multiplication formula, the page-one circuit nor its compression schedule. Both 158-gate networks were reloaded and verified gate by gate on 4,096 / 4,096 inputs."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧当前最重要结果：从统计学习到离散门图⟦en⟧Most important result: from statistical learning to a discrete gate graph",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                ["⟦zh⟧随机初始化空间⟦en⟧Randomly initialized search space", "⟦zh⟧79 个通用候选：1 个常数、12 个一次位特征、全部 66 个两两 AND；随机高斯系数先验，不预设哪一对输入相关⟦en⟧79 generic candidates: one constant, 12 linear bit features and all 66 pairwise ANDs, with a random Gaussian coefficient prior and no predefined relevant input pairs"],
+                ["⟦zh⟧噪声学习⟦en⟧Noisy learning", "⟦zh⟧每步重新生成 100 个样本，每个输出位独立以 25% 概率翻转；贝叶斯后验只由这些新鲜观察更新⟦en⟧Regenerate 100 examples per step, flip every output bit independently with 25% probability and update the Bayesian posterior only from these fresh observations"],
+                ["⟦zh⟧整数结构投影⟦en⟧Integer structure projection", "⟦zh⟧把后验期望值加权投影到 79 维二次基并取整；两个实验都自动把 79 项收缩为相同的 36 个非零二次项⟦en⟧Weighted-project posterior expectations onto the 79-dimensional quadratic basis and round to integers; both runs automatically shrink 79 candidates to the same 36 nonzero pairwise terms"],
+                ["⟦zh⟧通用门编译⟦en⟧Generic gate compilation", "⟦zh⟧36 个特征门，加上动态规划找到的 122 门 MDFA 压缩器，共 158 门；门型为 54 AND、13 OR、91 XOR⟦en⟧36 feature gates plus a 122-gate MDFA compressor found by dynamic programming, for 158 total gates: 54 AND, 13 OR and 91 XOR"],
+                ["⟦zh⟧主实验⟦en⟧Primary run", "⟦zh⟧第 2,800 步首次全对；之后 7 / 7 个检查点全对；最终最大系数取整残差 0.000226⟦en⟧First exact at step 2,800; all 7 / 7 checkpoints from that point are exact; final maximum coefficient-rounding residual 0.000226"],
+                ["⟦zh⟧独立复跑⟦en⟧Independent replication", "⟦zh⟧第 2,400 步首次全对；之后 9 / 9 个检查点全对；最终最大系数取整残差 0.000041⟦en⟧First exact at step 2,400; all 9 / 9 checkpoints from that point are exact; final maximum coefficient-rounding residual 0.000041"],
+                ["⟦zh⟧可审计产物⟦en⟧Auditable artifacts", "symbolic_discovery_p25_summary.json · learned_mdfa_p25_network.json · SHA-256 recorded"]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧从同一带噪后验得到的表示⟦en⟧Representation from the noisy posterior",
+            "⟦zh⟧最终准确率⟦en⟧Final accuracy",
+            "⟦zh⟧离散门数⟦en⟧Discrete gates",
+            "⟦zh⟧说明⟦en⟧Interpretation"
+          ],
+          "rows": [
+            ["⟦zh⟧二次整数发现 + 通用 MDFA⟦en⟧Quadratic integer discovery + generic MDFA", "100%", "158", "⟦zh⟧两个独立种子均得到同一规则和同一门拓扑；当前最佳学习结果⟦en⟧Both independent seeds yield the same rule and gate topology; current best learned result"],
+            ["⟦zh⟧二次整数发现 + 普通 Wallace 压缩⟦en⟧Quadratic integer discovery + ordinary Wallace compression", "100%", "168", "⟦zh⟧同一 36 项规则，普通全加器编译多 10 门⟦en⟧The same 36-term rule; ordinary full-adder compilation costs ten extra gates"],
+            ["⟦zh⟧共享有序 BDD⟦en⟧Shared ordered BDD", "100%", "3,343", "⟦zh⟧跨十二个输出共享子图后仍远大于算术结构投影⟦en⟧Still much larger than arithmetic structure projection despite sharing subgraphs across all twelve outputs"],
+            ["⟦zh⟧直接 ANF + 前缀和异或公共子式⟦en⟧Direct ANF + prefix/XOR common subexpressions", "100%", "5,046", "⟦zh⟧精确但展开严重；最后几个标签错误还会额外产生约两千个伪项⟦en⟧Exact but heavily expanded; the last few label errors additionally create roughly two thousand spurious terms"],
+            ["⟦zh⟧第一页精确电路，仅作参考⟦en⟧Page-one exact circuit, reference only", "100%", "156", "⟦zh⟧未提供给学习器；仍比当前学习电路少 2 门⟦en⟧Not supplied to the learner; still two gates smaller than the learned circuit"]
+          ],
+          "numeric": [false, true, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-symbolic-discovery-p25.png",
+              "caption": "⟦zh⟧左上：两个独立噪声流分别在第 2,800 与 2,400 步进入全域精确并保持。右上：整数投影把 79 个随机先验候选收缩到稳定的 36 项。左下：直接 ANF 和共享 BDD 虽然精确，但门数分别为 5,046 和 3,343；同一二次规则用普通 Wallace 编译为 168 门，用只看列项数的通用 MDFA 动态规划降到 158 门，距第一页参考仅 2 门。右下：非零系数只出现在自动学出的两组输入位之间，颜色表示整数权重的二进制指数；这张结构图来自训练结果，不是预置公式。⟦en⟧Upper left: two independent noise streams become exact at steps 2,800 and 2,400 and remain exact. Upper right: integer projection shrinks 79 random-prior candidates to a stable 36 terms. Lower left: direct ANF and shared BDD are exact but require 5,046 and 3,343 gates. The same quadratic rule compiles to 168 gates with ordinary Wallace compression and 158 with generic MDFA dynamic programming that sees only column term counts, two above the page-one reference. Lower right: nonzero coefficients appear only between two automatically discovered input-bit groups; color encodes the binary exponent of each integer weight. This structure comes from training and is not a seeded formula."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧这里如何衡量结构不确定性⟦en⟧How structural uncertainty is measured here",
+          "text": "⟦zh⟧浮点集成使用逐位分歧；离散规则改用“距离最近整数系数还有多远”。若最大取整残差接近 0.5，任一候选项都可能因少量新数据而改变整数值；若接近 0，规则具有大取整裕量。主实验和复跑最终残差分别为 0.000226 与 0.000041，同时非零项集合、整数系数和 158 门拓扑完全一致。这比只看 100% 准确率更严格地说明结构已经稳定。⟦en⟧The floating ensemble uses bitwise disagreement; the discrete rule instead measures distance to the nearest integer coefficient. A maximum rounding residual near 0.5 means that a small amount of new data can change at least one integer term, whereas a value near zero provides a large rounding margin. Final residuals are 0.000226 and 0.000041, while the nonzero set, integer coefficients and 158-gate topology agree exactly. This is stronger structural evidence than 100% accuracy alone."
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧还差的 2 门是什么⟦en⟧What remains in the two-gate gap",
+          "text": "⟦zh⟧158 门是从学习结果独立编译出的构造，不是最优性证明。第一页的 156 门电路使用全域可达状态重写，把 158 门构造再减少 2 门；本轮刻意没有把该电路或重写模板提供给学习器。下一循环将对“学出的 158 门网络”本身做通用语义重代入，检验是否能在不读取第一页解的前提下重新发现这 2 门简化。⟦en⟧The 158-gate result is an independently compiled construction, not an optimality proof. The 156-gate page-one circuit uses a full-domain reachable-state rewrite to remove two more gates from a 158-gate construction; this round deliberately withholds that circuit and rewrite template from the learner. The next cycle applies generic semantic resubstitution to the learned 158-gate network itself, testing whether it can rediscover the two-gate reduction without reading the page-one solution."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧此前的浮点学生容量压缩结果⟦en⟧Previous floating-student capacity result"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
           "label": "⟦zh⟧新压缩结果：13,872 参数单模型，两次恢复 4,096 / 4,096⟦en⟧New compression result: a 13,872-parameter single model recovers 4,096 / 4,096 twice",
           "why": "⟦zh⟧宽度 36 的随机初始化学生在两条独立噪声流上分别于第 10,000 和 9,500 步首次全对，之后所有检查点持续精确；两个最终检查点均已独立重新加载并验证。与此前 128 宽单成员相比，连续参数减少 80.96%。⟦en⟧The randomly initialized width-36 student first becomes exact at steps 10,000 and 9,500 on two independent noise streams, then remains exact at every subsequent checkpoint; both final checkpoints were independently reloaded and verified. Continuous parameters fall by 80.96% relative to one previous width-128 member."
         },
@@ -640,7 +705,7 @@
         {
           "kind": "note",
           "label": "⟦zh⟧当前结论⟦en⟧Current conclusion",
-          "text": "⟦zh⟧当前实验给出两个互补答案。若目标是速度，四成员宽 128 集成在两个随机种子上分别于第 1,400 和 1,600 步首次全对；若目标是压缩，单个宽 36 学生只用 13,872 个参数，也在两个随机种子上完整恢复，并在首次全对后持续稳定。新的关键不是单纯延长训练，而是让带噪蒸馏损失决定何时退火：它将宽 48 的不稳定精确解变成连续 22 个检查点的稳定精确解。下一循环将从浮点网络继续走向结构化稀疏、离散布尔门和可验证门数。⟦en⟧The experiments now give two complementary answers. For speed, a four-member width-128 ensemble first becomes exact at steps 1,400 and 1,600 in two random seeds. For compression, one width-36 student with only 13,872 parameters also recovers the entire domain in two seeds and remains stable after first recovery. The new mechanism is not merely longer training: noisy distillation loss decides when to anneal, turning the unstable exact width-48 solution into 22 consecutive exact checkpoints. The next cycle moves from floating-point networks toward structured sparsity, discrete Boolean gates and verifiable gate counts."
+          "text": "⟦zh⟧当前最强结论已经从“神经网络能否逼近”推进到“能否从随机噪声中学出接近最优的离散门图”：可以。79 项通用二次空间在两个独立随机种子上都收缩为相同的 36 项整数规则，并经不读取现有电路的通用压缩搜索得到 158 门全精确网络，距离第一页 156 门参考仅 2 门。浮点路线仍提供更快的首次全对和表示容量消融，但门级路线第一次把训练收敛、结构不确定性、稀疏规则与实际门数闭合在同一条证据链中。下一循环将从学出的 158 门网络出发做盲语义重代入，目标是在不使用第一页解作种子的条件下重新发现 156 或更小电路。⟦en⟧The strongest conclusion has advanced from whether a neural model can approximate the map to whether noisy data can yield a near-best discrete gate graph: yes. In two independent random seeds, the generic 79-term quadratic space contracts to the same 36-term integer rule, and a generic compressor search that does not read the existing circuit produces an exact 158-gate network, only two gates above the 156-gate page-one reference. The floating route still provides faster first recovery and capacity ablations, but the gate route closes the evidence chain from convergence and structural uncertainty to a sparse rule and an actual gate count. The next cycle starts from the learned 158-gate network and performs blind semantic resubstitution, aiming to rediscover 156 or fewer gates without using the page-one solution as a seed."
         }
       ]
     }
