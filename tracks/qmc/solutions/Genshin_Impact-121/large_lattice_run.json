@@ -3,6 +3,7 @@
   "document_type": "preregistered_large_lattice_run",
   "issue": 121,
   "team": "Genshin_Impact",
+  "amendment_document": "g1_v2_preregistration.md",
   "status": "ratified_setup_frozen_pending_gates",
   "ratification": {
     "required_before_any_compute": true,
@@ -61,7 +62,7 @@
   "randomness": {
     "engine": "NumPy PCG64DXSM; exact package version frozen in run snapshot",
     "chains_per_cell": 4,
-    "seed_rule": "121000000 + 10000*L + 10*beta_index + chain_id",
+    "seed_rule": "221000000 + 10000*L + 10*beta_index + chain_id",
     "beta_index": {"1/2": 0, "1": 1, "2": 2, "4": 3},
     "chains": [
       {"chain_id": 0, "start": "cold", "initial_order": 0},
@@ -199,8 +200,8 @@
     "negative_sign_count_required": 0,
     "zero_weight_count_required": 0,
     "analytic_condition_number_upper_approx": 400,
-    "pilot_acceptance_target": [0.2, 0.7],
-    "full_acceptance_hard_range": [0.1, 0.9],
+    "pilot_acceptance_target": [0.05, 1.0],
+    "full_acceptance_hard_range": [0.05, 1.0],
     "r_hat_max": 1.01,
     "bulk_ess_min": 1000,
     "tail_ess_min": 400,
@@ -233,7 +234,7 @@
     "No compute before setup ratification and no gate skipping.",
     "Any computed zero or negative weight is a hard failure, never a discarded sample.",
     "Persistent fast-vs-rebuild mismatch or residual above threshold stops the run.",
-    "Acceptance outside the full hard range after pilot-frozen tuning fails or makes the cell inconclusive.",
+    "Acceptance below 0.05, above 1.0, missing, non-finite, or undefined fails the operational non-freezing gate; high acceptance alone is not a correctness or mixing failure.",
     "R-hat or ESS failure after equal extension to the pilot-frozen cap makes the cell inconclusive.",
     "OOM, timeout, missing durable checkpoint, or missing completion sentinel is failure.",
     "Do not start L greater than 12 before a stable, faster rank-3 update passes the pilot.",

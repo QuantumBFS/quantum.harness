@@ -946,6 +946,13 @@ def test_checkpoint_roundtrip_preserves_word_rng_and_primary_traces(
     assert saved["accumulator"]["primary_traces"] == (
         sampler.accumulator.primary_traces
     )
+    real_traces = saved["accumulator"]["real_space_traces"]
+    assert set(real_traces) == {"0,0", "1,0", "0,1"}
+    assert all(
+        len(component) == 1
+        for trace in real_traces.values()
+        for component in trace.values()
+    )
     expected_random = sampler.rng.random(8)
 
     restored = _sampler(
@@ -1099,6 +1106,14 @@ def test_complete_validation_is_hash_bound_and_idempotent(tmp_path: Path) -> Non
         manifest, output, manifest_sha256=digest
     )
     result = sampler.run()
+    real_traces = result["observables"]["real_space_traces"]
+    assert result["observables"]["store_real_space_traces"] is True
+    assert set(real_traces) == {"0,0", "1,0", "0,1"}
+    assert all(
+        len(component) == result["observables"]["count"]
+        for trace in real_traces.values()
+        for component in trace.values()
+    )
     resource_lines = (output / "resource.tsv").read_text(
         encoding="utf-8"
     ).splitlines()
@@ -1183,3 +1198,27 @@ def test_load_checkpoint_rejects_accumulator_count_mismatch(
     restored = _sampler(tmp_path)
     with pytest.raises(ctqmc.ManifestError, match="accumulator count"):
         restored.load_checkpoint()
+
+
+def test_load_checkpoint_rejects_real_space_trace_length_mismatch(
+    tmp_path: Path,
+) -> None:
+    sampler = _sampler(tmp_path)
+    sampler.completed_steps = 3
+    sampler.accumulator.add(ctqmc.measure_configuration(
+        sampler.factors,
+        sampler.geometry,
+        sampler.beta,
+        sampler.G0,
+        len(sampler.word),
+        sampler.momenta,
+        sampler.displacements,
+    ))
+    sampler.save_checkpoint("running")
+    path = tmp_path / "checkpoint.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["accumulator"]["real_space_traces"]["1,0"]["real"] = []
+    ctqmc.atomic_write_json(path, payload)
+
+    with pytest.raises(ctqmc.ManifestError, match="real-space trace length"):
+        _sampler(tmp_path).load_checkpoint()

@@ -132,7 +132,7 @@ def test_materialization_cardinality_hashes_and_frozen_manifests(
     ]
     assert len(production) == 4
     assert [entry["seed"] for entry in production] == [
-        121060020, 121060021, 121060022, 121060023
+        221060020, 221060021, 221060022, 221060023
     ]
     manifests = [
         protocol.load_json(root / entry["manifest"])
@@ -270,6 +270,8 @@ def fake_result(offset: float) -> dict:
             "count": length,
             "primary_traces": traces,
             "momentum": {},
+            "store_real_space_traces": True,
+            "real_space_traces": {},
         },
         "counters": {
             "moves": {
@@ -468,7 +470,14 @@ def _write_chain_fixture(root: Path, entry: dict) -> dict:
         "model": manifest["model"],
         "initialization": entry["initialization"],
         "measurements": manifest["measurements"],
-        "observables": {"count": 1},
+        "observables": {
+            "count": 1,
+            "store_real_space_traces": entry["N"] <= 9,
+            "real_space_traces": {
+                f"{dx},{dy}": {"real": [0.0], "imag": [0.0]}
+                for dx, dy in manifest["measurements"]["displacements"]
+            } if entry["N"] <= 9 else {},
+        },
         "execution_environment": {},
     }
     output = root / entry["output"]
@@ -527,6 +536,10 @@ def test_gate_dependency_is_bound_to_current_index_and_meta(
 def test_compare_ed_includes_all_real_space_displacements() -> None:
     results = [fake_result(value) for value in (0.0, 0.2, 0.4, 0.6)]
     for result in results:
+        result["observables"]["real_space_traces"] = {
+            "0,0": {"real": [0.5] * 64, "imag": [0.0] * 64},
+            "1,0": {"real": [0.1] * 64, "imag": [0.0] * 64},
+        }
         result["observables"]["real_space_green"] = {
             "0,0": {
                 "one_body": {
@@ -964,3 +977,63 @@ def test_complete_revalidation_detects_benchmark_tamper(
         protocol.ProtocolError, match="benchmark evidence drift"
     ):
         protocol.verify_materialization(root)
+
+
+def test_autocorrelated_real_space_trace_inflates_mcse_and_allowance() -> None:
+    block_trace = np.tile(np.repeat([-1.0, 1.0], 16), 8)
+    results = [fake_result(offset) for offset in (0.0, 0.2, 0.4, 0.6)]
+    for result in results:
+        result["observables"]["real_space_green"] = {
+            "1,0": {
+                "one_body": {
+                    "mean": [0.0, 0.0],
+                    "naive_stderr_abs": float(
+                        np.std(block_trace, ddof=1)
+                        / math.sqrt(len(block_trace))
+                    ),
+                }
+            }
+        }
+        result["observables"]["real_space_traces"] = {
+            "1,0": {
+                "real": block_trace.tolist(),
+                "imag": [0.0] * len(block_trace),
+            }
+        }
+        result["observables"]["count"] = len(block_trace)
+
+    sampled = protocol._real_space(results)["1,0"]["one_body"]
+    components = protocol._complex_mcse_components(sampled)
+    assert components["correlated"] > components["naive"]
+    assert components["correlated"] > components["between_chain"]
+
+    target_error = components["naive"] + components["correlated"]
+    assert target_error > 2.0 * components["naive"]
+    assert target_error < 2.0 * components["correlated"]
+    comparison = protocol._compare_complex_section(
+        {"1,0": {"one_body": sampled}},
+        {"1,0": [target_error, 0.0]},
+        ("one_body",),
+        2.0,
+    )["1,0"]["one_body"]
+    assert comparison["mcse"] == pytest.approx(components["correlated"])
+    assert comparison["allowance"] == pytest.approx(
+        2.0 * components["correlated"]
+    )
+    assert comparison["pass"]
+
+
+def test_real_space_without_trace_storage_keeps_production_summary() -> None:
+    results = [fake_result(offset) for offset in (0.0, 0.2, 0.4, 0.6)]
+    for result in results:
+        result["observables"]["store_real_space_traces"] = False
+        result["observables"]["real_space_traces"] = {}
+        result["observables"]["real_space_green"] = {
+            "1,0": {"one_body": {
+                "mean": [0.25, 0.0],
+                "naive_stderr_abs": 0.01,
+            }}
+        }
+    sampled = protocol._real_space(results)
+    assert sampled["1,0"]["one_body"]["mean"] == pytest.approx([0.25, 0.0])
+    assert "correlated_diagnostics" not in sampled["1,0"]["one_body"]

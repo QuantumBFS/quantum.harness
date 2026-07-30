@@ -271,12 +271,14 @@ def measure_configuration(factors:DenseFactors,geometry:TriangularGeometry,beta:
 class ObservableAccumulator:
     KEYS=("order","energy_density","particle_number","particle_number_squared",
           "particle_density","particle_density_squared")
-    def __init__(self)->None:
+    def __init__(self,store_real_space_traces:bool=False)->None:
         self.count=0
+        self.store_real_space_traces=bool(store_real_space_traces)
         self.scalar={k:{"sum":0.0,"sum_sq":0.0} for k in self.KEYS}
         self.primary_traces={k:[] for k in self.KEYS}
         self.momentum:Dict[str,Any]={}
         self.real_space:Dict[str,Any]={}
+        self.real_space_traces:Dict[str,Any]={}
     @staticmethod
     def _add_complex(target:Dict[str,Any],key:str,name:str,pair:Sequence[float])->None:
         slot=target.setdefault(key,{}).setdefault(
@@ -295,17 +297,26 @@ class ObservableAccumulator:
                 self._add_complex(self.momentum,momentum,name,pair)
         for displacement,pair in obs.get("real_space_green",{}).items():
             self._add_complex(self.real_space,displacement,"one_body",pair)
+            if self.store_real_space_traces:
+                trace=self.real_space_traces.setdefault(
+                    displacement,{"real":[],"imag":[]})
+                trace["real"].append(float(pair[0]))
+                trace["imag"].append(float(pair[1]))
     def state(self)->Mapping[str,Any]:
         return {"count":self.count,"scalar":self.scalar,
                 "primary_traces":self.primary_traces,
-                "momentum":self.momentum,"real_space_green":self.real_space}
+                "momentum":self.momentum,"real_space_green":self.real_space,
+                "store_real_space_traces":self.store_real_space_traces,
+                "real_space_traces":self.real_space_traces}
     @classmethod
-    def from_state(cls,state:Mapping[str,Any])->"ObservableAccumulator":
-        obj=cls();obj.count=int(state.get("count",0))
+    def from_state(cls,state:Mapping[str,Any],
+                   store_real_space_traces:bool=False)->"ObservableAccumulator":
+        obj=cls(store_real_space_traces);obj.count=int(state.get("count",0))
         obj.scalar=state.get("scalar",obj.scalar)
         obj.primary_traces=state.get("primary_traces",obj.primary_traces)
         obj.momentum=state.get("momentum",{})
         obj.real_space=state.get("real_space_green",{})
+        obj.real_space_traces=state.get("real_space_traces",{})
         return obj
     @staticmethod
     def _complex_summary(values:Mapping[str,Any],count:int)->Mapping[str,Any]:
@@ -342,6 +353,8 @@ class ObservableAccumulator:
                 "compressibility":compressibility,
                 "primary_traces":self.primary_traces,
                 "momentum":momentum,"real_space_green":real_space,
+                "store_real_space_traces":self.store_real_space_traces,
+                "real_space_traces":self.real_space_traces,
                 "error_note":"naive iid errors; use primary_traces for tau_int/ESS/R-hat"}
 
 def linux_max_rss_kb()->Optional[int]:
@@ -442,7 +455,7 @@ class CTQMC:
         self.initialization=dict(mc["initialization"])
         self.rng=np.random.Generator(np.random.PCG64DXSM(int(mc["seed"])))
         self.word:Deque[Event]=deque();self.completed_steps=0
-        self.accumulator=ObservableAccumulator()
+        self.accumulator=ObservableAccumulator(geometry.n_sites<=9)
         self.G0=geometry.n_triangles*(model["g_A"]+model["g_B"])
         self.active=[v.vertex_id for v in catalog if v.activity>0]
         weights=np.array([catalog[i].activity for i in self.active])
@@ -625,12 +638,28 @@ class CTQMC:
                 not isinstance(trace,list) or len(trace)!=expected_count
                 for trace in traces.values()):
             raise ManifestError("checkpoint primary trace length mismatch")
+        expected_real={f"{dx},{dy}" for dx,dy in self.displacements}
+        real_traces=accumulator.get("real_space_traces")
+        store_real=self.geometry.n_sites<=9
+        if accumulator.get("store_real_space_traces") is not store_real or not isinstance(
+                real_traces,Mapping):
+            raise ManifestError("checkpoint real-space trace mode mismatch")
+        if store_real:
+            if set(real_traces)!=expected_real or any(
+                    not isinstance(item,Mapping) or set(item)!={"real","imag"} or
+                    any(not isinstance(values,list) or len(values)!=expected_count
+                        for values in item.values())
+                    for item in real_traces.values()):
+                raise ManifestError("checkpoint real-space trace length mismatch")
+        elif real_traces:
+            raise ManifestError("unexpected checkpoint real-space traces")
         self.completed_steps=completed
         self.word=deque(Event.from_json(e) for e in data["word"])
         self.rng.bit_generator.state=data["rng_state"];self.counters=data["counters"]
         self.counters.setdefault("determinant_failures",{"zero":0,"negative":0})
         saved_moves_since_rebuild=int(data.get("moves_since_rebuild",0))
-        self.accumulator=ObservableAccumulator.from_state(data["accumulator"])
+        self.accumulator=ObservableAccumulator.from_state(
+            data["accumulator"],store_real)
         self.rebuild_diagnostics=list(data.get("rebuild_diagnostics",[]))
         self.rebuild("resume",False)
         self.moves_since_rebuild=saved_moves_since_rebuild
@@ -682,9 +711,9 @@ class CTQMC:
           "implementation":{"fock_space_constructed":False,
             "local_storage":"12 local 3x3 B/B_inv templates","state":"dense T,Q,logdet",
             "stabilization":"direct O(mN) rebuild + dense O(N^3) LU",
-            "trace_storage":"pilot-only in-memory/checkpoint JSON; O(n_measurements)",
+            "trace_storage":"primary plus N<=9 real-space traces in memory/checkpoint JSON; O(n_measurements)",
             "not_implemented":["QR/UDT","chunked production trace storage",
-                               "autocorrelation-aware errors"]},
+                               "autocorrelation-aware errors outside stored traces"]},
           "validation_status":"single chain ran; correctness and science gates remain unvalidated",
           "claim_boundary":"mu is not implemented; no finite-density ground-state or mixing claim"}
         result_path=self.output_dir/"result.json"

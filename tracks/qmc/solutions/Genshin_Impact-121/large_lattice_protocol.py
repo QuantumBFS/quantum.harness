@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 import numpy as np
 
-PROTOCOL_ID = "issue121-triangular-large-lattice-v1"
+PROTOCOL_ID = "issue121-triangular-large-lattice-v2"
 CORE_ALGORITHM_ID = "triangular-ab-ctqmc-direct-lu-v1"
 ED_ALGORITHM_ID = "triangular-ab-full-fock-ed-oracle-v1"
 BENCHMARK_ALGORITHM_ID = "rank3-vs-full-word-rebuild-v1"
@@ -35,6 +35,7 @@ SOURCE_FILES = (
     "test_large_lattice_ctqmc.py", "test_local_vertex_physics.py",
     "large_lattice_kernel_benchmark.py",
     "test_large_lattice_kernel_benchmark.py",
+    "g1_v2_preregistration.md",
 )
 SIZES = ((4,16),(6,36),(8,64),(12,144),(16,256))
 BETAS = (0.5,1.0,2.0,4.0)
@@ -56,8 +57,8 @@ DIAGNOSTIC_METHOD = (
     "Geyer initial-positive-sequence ESS; pooled tail cutoffs 5%/95%"
 )
 DEFAULT_EXECUTION = {
-    "g1":{"steps":30000,"warmup":3000,"measure_every":1,
-          "checkpoint_every":3000,"rebuild_every":128},
+    "g1":{"steps":300000,"warmup":30000,"measure_every":1,
+          "checkpoint_every":30000,"rebuild_every":128},
     "production":{"steps":100000,"warmup":10000,"measure_every":10,
                   "checkpoint_every":5000,"rebuild_every":256},
     "woodbury_condition_max":1.0e12,
@@ -130,6 +131,8 @@ def validate_meta(meta: Mapping[str,Any]) -> None:
           "document_type drift")
     _need(meta.get("issue")==121 and meta.get("team")=="Genshin_Impact",
           "issue/team drift")
+    _need(meta.get('amendment_document')=='g1_v2_preregistration.md',
+          'amendment document drift')
     rat=meta.get("ratification")
     _need(isinstance(rat,Mapping) and rat.get("required_before_any_compute") is True,
           "ratification guard absent")
@@ -168,7 +171,7 @@ def validate_meta(meta: Mapping[str,Any]) -> None:
     _need(isinstance(random,Mapping) and random.get("chains_per_cell")==4,
           "chain count drift")
     _need(random.get("seed_rule")==
-          "121000000 + 10000*L + 10*beta_index + chain_id","seed rule drift")
+          "221000000 + 10000*L + 10*beta_index + chain_id","seed rule drift")
     _need(random.get("beta_index")=={"1/2":0,"1":1,"2":2,"4":3},
           "beta index drift")
     seen=tuple((x.get("chain_id"),x.get("start"),x.get("initial_order"))
@@ -208,6 +211,9 @@ def validate_meta(meta: Mapping[str,Any]) -> None:
                 "full_acceptance_hard_range","pilot_acceptance_target",
                 "r_hat_max","bulk_ess_min","tail_ess_min","ed_z_score_max"):
         _need(key in thresholds,f"threshold missing: {key}")
+    _need(thresholds.get('pilot_acceptance_target')==[0.05,1.0] and
+          thresholds.get('full_acceptance_hard_range')==[0.05,1.0],
+          'acceptance protocol drift')
 
 def validate_execution(execution: Mapping[str,Any]) -> None:
     for stage in ("g1","production"):
@@ -229,7 +235,7 @@ def validate_execution(execution: Mapping[str,Any]) -> None:
           "rotation asymmetry")
 
 def seed_for(L: int, beta_index: int, chain_id: int) -> int:
-    return 121000000+10000*L+10*beta_index+chain_id
+    return 221000000+10000*L+10*beta_index+chain_id
 
 def _unique(points: Iterable[Tuple[int,int]], L: int) -> List[List[int]]:
     out=[]; seen=set()
@@ -697,7 +703,25 @@ def _load_chain(root: Path, entry: Mapping[str,Any]) -> Mapping[str,Any]:
     _need(measured.get("momenta")==manifest["measurements"]["momenta"] and
           measured.get("displacements")==manifest["measurements"]["displacements"],
           "measurement binding")
-    _need(result.get("observables",{}).get("count",0)>0,"no measurements")
+    observables=result.get("observables",{})
+    count=observables.get("count",0)
+    _need(isinstance(count,int) and count>0,"no measurements")
+    store_real=entry["N"]<=9
+    real_traces=observables.get("real_space_traces")
+    expected_real={f"{x},{y}" for x,y in manifest["measurements"]["displacements"]}
+    _need(observables.get("store_real_space_traces") is store_real and
+          isinstance(real_traces,Mapping),"result real-space trace mode")
+    if store_real:
+        _need(set(real_traces)==expected_real,"result real-space trace set")
+        for key,item in real_traces.items():
+            _need(isinstance(item,Mapping) and set(item)=={"real","imag"},
+                  f"result real-space trace components: {key}")
+            for component,values in item.items():
+                _need(isinstance(values,list) and len(values)==count and
+                      all(math.isfinite(float(value)) for value in values),
+                      f"result real-space trace length: {key}/{component}")
+    else:
+        _need(not real_traces,"unexpected result real-space traces")
     canonical_bytes(result); canonical_bytes(done)
     return result
 
@@ -730,8 +754,33 @@ def _momentum(results: Sequence[Mapping[str,Any]]) -> Mapping[str,Any]:
             raw[0]-mode[0]**2-mode[1]**2,raw[1]]
     return out
 
+def _correlated_trace_diagnostics(
+        chains: Sequence[Sequence[float]]) -> Mapping[str,Any]:
+    diagnostic=dict(multi_chain_diagnostics(chains))
+    pooled=np.concatenate([np.asarray(chain,float) for chain in chains])
+    sample_std=float(np.std(pooled,ddof=1))
+    diagnostic["pooled_sample_std"]=sample_std
+    diagnostic["mcse"]=sample_std/math.sqrt(max(1.0,float(
+        diagnostic["bulk_ess"])))
+    return diagnostic
+
 def _real_space(results: Sequence[Mapping[str,Any]]) -> Mapping[str,Any]:
-    return _aggregate_complex(results,"real_space_green",("one_body",))
+    out=_aggregate_complex(results,"real_space_green",("one_body",))
+    if not bool(results[0]["observables"]["store_real_space_traces"]):
+        return out
+    for displacement,item in out.items():
+        diagnostics={}
+        for component in ("real","imag"):
+            chains=[]
+            for result in results:
+                traces=result["observables"]["real_space_traces"]
+                _need(displacement in traces and component in traces[displacement],
+                      f"missing real-space trace: {displacement}/{component}")
+                chains.append([float(value) for value in
+                               traces[displacement][component]])
+            diagnostics[component]=_correlated_trace_diagnostics(chains)
+        item["one_body"]["correlated_diagnostics"]=diagnostics
+    return out
 
 def summarize_cell(results: Sequence[Mapping[str,Any]], beta: float, n_sites: int,
                    thresholds: Mapping[str,Any],
@@ -808,12 +857,19 @@ def _mean_se(pairs: Sequence[Sequence[float]], component: int) -> float:
     values=np.array([float(x[component]) for x in pairs])
     return float(np.std(values,ddof=1)/math.sqrt(len(values)))
 
-def _complex_mcse(sampled: Mapping[str,Any]) -> float:
+def _complex_mcse_components(sampled: Mapping[str,Any]) -> Mapping[str,float]:
     between=max(_mean_se(sampled["chain_means"],i) for i in (0,1))
     naive=[float(x) for x in sampled.get("chain_naive_stderr_abs",())
            if math.isfinite(float(x))]
     within=math.sqrt(sum(x*x for x in naive))/len(naive) if naive else 0.0
-    return max(between,within)
+    diagnostics=sampled.get("correlated_diagnostics",{})
+    correlated=max((float(item.get("mcse",0.0))
+                    for item in diagnostics.values()
+                    if isinstance(item,Mapping)),default=0.0)
+    return {"correlated":correlated,"between_chain":between,"naive":within}
+
+def _complex_mcse(sampled: Mapping[str,Any]) -> float:
+    return max(_complex_mcse_components(sampled).values())
 
 def _compare_complex_section(sampled_section: Mapping[str,Any],
                              exact_section: Mapping[str,Any],
@@ -826,10 +882,12 @@ def _compare_complex_section(sampled_section: Mapping[str,Any],
         for name in names:
             sampled=sampled_section[key][name]
             target=reference[name] if isinstance(reference,Mapping) else reference
-            se=_complex_mcse(sampled); allowance=max(zmax*se,1e-10)
+            components=_complex_mcse_components(sampled)
+            se=max(components.values()); allowance=max(zmax*se,1e-10)
             error=max(abs(float(sampled["mean"][i])-float(target[i]))
                       for i in (0,1))
             item[name]={"max_abs_error":error,"mcse":se,
+                        "mcse_components":components,
                         "allowance":allowance,"pass":error<=allowance}
         item["pass"]=all(v["pass"] for k,v in item.items() if k!="pass")
         comparison[key]=item
