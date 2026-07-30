@@ -38,6 +38,16 @@ domain-specific schemas are added only in the phase that owns them.
 No future-stage script may be submitted before its prerequisite artifact
 exists and matches the hash recorded in the dispatch.
 
+The capacity and architecture rules are already frozen in
+`phase7-capacity-protocol.json` and
+`architecture-freeze-protocol.json`.  Phase 7 classifies D+0 as sufficient
+only when the mandatory gap and overlap gates pass, as expression-limited only
+when an operator-span ceiling is below its registered overlap target, and as
+an optimization failure otherwise.  Only the expression-limited branch may
+trigger the concurrently prepared D+1/D+2 runs.  Phase 8 then freezes the
+smallest candidate passing every mandatory and internal gate; held-out and
+beyond-ED results cannot change this selection.
+
 ## Isolated run layout
 
 Given `ROUTE_D_PLUS_RUN_ROOT=/absolute/results/route-d-plus`, a dispatch task

@@ -183,6 +183,15 @@ def finalize(
     validate(phase6a, MODULE_ROOT / "phase6a.schema.json")
     if not phase6a["passed"]:
         raise RuntimeError("Phase 6A certificate did not pass")
+    future_root = MODULE_ROOT / "future"
+    architecture_protocol = schema_artifact(
+        future_root / "architecture-freeze-protocol.json",
+        future_root / "architecture-freeze-protocol.schema.json",
+    )
+    capacity_protocol = schema_artifact(
+        future_root / "phase7-capacity-protocol.json",
+        future_root / "phase7-capacity-protocol.schema.json",
+    )
 
     architecture_reference = attempt["architecture"]
     architecture_path = Path(architecture_reference["path"])
@@ -312,6 +321,8 @@ def finalize(
         "phase6a_certificate": artifact(phase6a_path),
         "input_attempt": artifact(attempt_path),
         "measurement_certificate": artifact(measurement_path),
+        "architecture_protocol": architecture_protocol,
+        "capacity_protocol": capacity_protocol,
         "architecture": architecture,
         "seed_artifacts": seed_artifacts,
         "training_blind_access_audit": artifact(audit_path),
@@ -324,6 +335,7 @@ def finalize(
             "sole_input_failure_gap_precision": True,
             "measurement_schema_valid": True,
             "measurement_all_gates_passed": True,
+            "future_protocols_valid": True,
             "architecture_schema_hash_valid": True,
             "three_checkpoint_schema_hashes_valid": True,
             "three_symmetry_schema_hashes_valid": True,
@@ -366,6 +378,8 @@ def verify(final_path: Path, repo_root: Path) -> dict[str, Any]:
         final["phase6a_certificate"],
         final["input_attempt"],
         final["measurement_certificate"],
+        final["architecture_protocol"],
+        final["capacity_protocol"],
         final["architecture"],
         final["training_blind_access_audit"],
     ]
@@ -406,6 +420,14 @@ def verify(final_path: Path, repo_root: Path) -> dict[str, Any]:
             load_json(Path(final["measurement_certificate"]["path"])),
             MODULE_ROOT / "phase6-measurement.schema.json",
         )
+        for reference in (
+            final["architecture_protocol"],
+            final["capacity_protocol"],
+        ):
+            validate(
+                load_json(Path(reference["path"])),
+                Path(reference["schema_path"]),
+            )
         validate(
             load_json(Path(final["architecture"]["path"])),
             Path(final["architecture"]["schema_path"]),

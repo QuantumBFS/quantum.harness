@@ -1,0 +1,45 @@
+{
+  "beyond_ed_used_for_structure_selection": false,
+  "capacity_action_rule": {
+    "dplus0-sufficient": "keep-D+0",
+    "expression-limited": "trigger-preregistered-D+1-D+2",
+    "optimization-failure": "keep-D+0"
+  },
+  "classification_rule": [
+    "dplus0-sufficient iff every mandatory benchmark gate passes",
+    "expression-limited iff fidelity0-span<0.95 or fidelity2-span<0.90",
+    "optimization-failure otherwise"
+  ],
+  "dplus3_rule": "excluded-before-architecture-freeze",
+  "frozen_before_phase7": true,
+  "heldout_used_for_structure_selection": false,
+  "mandatory_benchmark": {
+    "fidelity0_min": 0.95,
+    "fidelity2_min": 0.9,
+    "gap_absolute_error_max": 0.005
+  },
+  "phase8_candidates": [
+    {
+      "H": 8,
+      "K": 2,
+      "capacity": "D+1",
+      "rank": 2,
+      "run_concurrently": true
+    },
+    {
+      "H": 16,
+      "K": 2,
+      "capacity": "D+2",
+      "rank": 4,
+      "run_concurrently": true
+    }
+  ],
+  "phase8_selection_rule": "freeze-smallest-capacity-passing-all-mandatory-and-internal-gates",
+  "protocol_id": "route-d-plus-capacity-20260730-v1",
+  "schema_version": "challenge-15-route-d-plus-phase7-capacity-protocol-v1",
+  "seeds": [
+    848,
+    1848,
+    2848
+  ]
+}

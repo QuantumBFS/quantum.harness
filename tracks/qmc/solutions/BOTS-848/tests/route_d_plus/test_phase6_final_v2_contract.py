@@ -30,6 +30,8 @@ def test_v2_finalizer_binds_all_three_source_revisions() -> None:
     assert "checkpoint_producer" in source
     assert "measurement_source_revision" in source
     assert "finalizer_revision" in source
+    assert "architecture-freeze-protocol.json" in source
+    assert "phase7-capacity-protocol.json" in source
     assert "measurement task hash mismatch" in source
     assert "measurement task set is not exact" in source
     assert "PHASE6_ATTEMPT_READBACK=passed" in source

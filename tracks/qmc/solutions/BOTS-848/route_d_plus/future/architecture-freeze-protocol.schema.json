@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-architecture-freeze-protocol-v1",
+  "title": "Route D+ architecture freeze protocol",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_id",
+    "dplus0",
+    "phase6_freeze_requires",
+    "phase7_may_modify_capacity",
+    "phase8_freeze_rule",
+    "postfreeze_rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-architecture-freeze-protocol-v1"
+    },
+    "protocol_id": {"const": "route-d-plus-architecture-freeze-20260730-v1"},
+    "dplus0": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capacity",
+        "K",
+        "H",
+        "generator_ranks",
+        "shared_architecture",
+        "checkpoint_selection"
+      ],
+      "properties": {
+        "capacity": {"const": "D+0"},
+        "K": {"const": 1},
+        "H": {"const": 1},
+        "generator_ranks": {
+          "type": "array",
+          "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+          "items": false
+        },
+        "shared_architecture": {"const": true},
+        "checkpoint_selection": {"const": "final-update-no-ed"}
+      }
+    },
+    "phase6_freeze_requires": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "phase6a-passed"},
+        {"const": "three-seed-training-passed"},
+        {"const": "blind-measurement-passed"},
+        {"const": "checkpoint-symmetry-passed"},
+        {"const": "independent-hash-readback-passed"}
+      ],
+      "items": false
+    },
+    "phase7_may_modify_capacity": {"const": false},
+    "phase8_freeze_rule": {
+      "const": "use-only-preregistered-capacity-protocol"
+    },
+    "postfreeze_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "heldout_read_only",
+        "chirality_read_only_for_structure",
+        "beyond_ed_read_only_for_structure"
+      ],
+      "properties": {
+        "heldout_read_only": {"const": true},
+        "chirality_read_only_for_structure": {"const": true},
+        "beyond_ed_read_only_for_structure": {"const": true}
+      }
+    }
+  }
+}

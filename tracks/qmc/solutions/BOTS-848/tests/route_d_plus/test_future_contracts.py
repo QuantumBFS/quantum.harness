@@ -76,6 +76,49 @@ def test_all_future_schemas_are_valid_draft_2020_12() -> None:
         jsonschema.Draft202012Validator.check_schema(schema)
 
 
+def test_phase7_capacity_rules_are_preregistered_before_reveal() -> None:
+    schema_path = SCHEMA_DIR / "phase7-capacity-protocol.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    protocol = json.loads(
+        (SCHEMA_DIR / "phase7-capacity-protocol.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    jsonschema.Draft202012Validator.check_schema(schema)
+    jsonschema.Draft202012Validator(schema).validate(protocol)
+    assert protocol["frozen_before_phase7"] is True
+    assert protocol["mandatory_benchmark"] == {
+        "gap_absolute_error_max": 0.005,
+        "fidelity0_min": 0.95,
+        "fidelity2_min": 0.9,
+    }
+    assert [item["capacity"] for item in protocol["phase8_candidates"]] == [
+        "D+1",
+        "D+2",
+    ]
+    assert all(
+        item["run_concurrently"]
+        for item in protocol["phase8_candidates"]
+    )
+    assert protocol["heldout_used_for_structure_selection"] is False
+    assert protocol["beyond_ed_used_for_structure_selection"] is False
+
+
+def test_architecture_freeze_protocol_blocks_postfreeze_selection() -> None:
+    schema_path = SCHEMA_DIR / "architecture-freeze-protocol.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    protocol = json.loads(
+        (SCHEMA_DIR / "architecture-freeze-protocol.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    jsonschema.Draft202012Validator.check_schema(schema)
+    jsonschema.Draft202012Validator(schema).validate(protocol)
+    assert protocol["phase7_may_modify_capacity"] is False
+    assert protocol["dplus0"]["checkpoint_selection"] == "final-update-no-ed"
+    assert all(protocol["postfreeze_rules"].values())
+
+
 def test_phase7_requires_exact_parallel_task_set(tmp_path: Path) -> None:
     dispatch = phase7_dispatch(tmp_path)
     validate_dispatch(dispatch, verify_prerequisites=False)
