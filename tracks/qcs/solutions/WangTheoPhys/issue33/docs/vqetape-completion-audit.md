@@ -3,22 +3,24 @@
 ## Status
 
 The approved VQETape next-stage design is implemented and audited, including
-an RTX 3090 follow-up validation.
+an RTX 3090 follow-up validation and a correct same-node TensorCircuit-NG
+threshold for the matched RZZ/RX workload.
 
 Final repository regression:
 
 ```text
-389 passed, 6 skipped in 3715.35s (1:01:55)
+395 passed, 6 skipped in 1582.14s (0:26:22)
 ```
 
-The six skips are all the expected structural case
+The six newly added TensorCircuit-NG baseline tests pass. The six skips are
+all the expected structural case
 `block wider than interior` in `tests/test_spatial_programs.py`; there are no
 failed tests. This final clean-room regression used Python 3.12 with JAX and
 jaxlib 0.11.0; the pinned RTX 3090 performance environment remains JAX 0.4.38.
 
 Static artifact checks also passed:
 
-- all 24 JSON reports parse with the standard JSON decoder;
+- all 25 JSON reports parse with the standard JSON decoder;
 - all `src/vqetape` modules compile;
 - `git diff --check` reports no whitespace errors;
 - the public API exposes compile, training, ansatz-growth, spatial, TFIM, and
@@ -39,6 +41,7 @@ Static artifact checks also passed:
 | Contraction-aware ansatz score | `ansatz_cost.py`, `ansatz_selection.py` | cut growth, cache keys, policy fixtures | ansatz report | Correct and non-harmful here, but selects the same three gates as gradient-only; no distinct speedup claim |
 | Holdout generality | `holdout.py`, `holdout_worker.py`, `holdout_report.py` | dense action/energy, finite-difference gradient, commutator | `vqetape-holdout-report.json` | Longitudinal-field/RZZ–RY–RX workload converges; TFIM Z2 compression is explicitly rejected |
 | Device/GPU evidence | `runtime_capabilities.py`, `subprocess_env.py` | JSON, memory-semantics, and worker-environment tests | `vqetape-gpu-rtx3090-findings.md` plus five raw JSON reports | RTX 3090 statevector/direct-TN/spatial jobs pass exactness with `highest` matmul precision; platform default fails a controlled spatial A/B comparison; an unset-parent-environment integration job confirms the worker default |
+| TensorCircuit-NG threshold | `tensorcircuit_baseline.py`, `tensorcircuit_baseline_cli.py` | parameter/protocol parity, strict value-gradient correctness, CLI defaults | `tensorcircuit-ng-baseline-findings.md` and matched JSON | On the same RTX 3090, VQETape spatial is 8.2% faster on `compile + first + 100 warm` and uses 28.3% less host RSS; sampled device memory is tied and the paper Fig. 2 scale gate remains open |
 
 ## Exactness invariants
 
@@ -64,6 +67,9 @@ The completed implementation preserves these invariants:
    checkpoint bytes, and genuine GPU peak memory remain separately labeled.
 10. Fresh JAX workers default to `highest` matmul precision; an explicit
     caller environment override is preserved.
+11. The TensorCircuit-NG runner applies that precision policy to both the
+    TensorCircuit backend and TensorNetwork's separately cached JAX backend;
+    otherwise TensorNetwork explicitly selects reduced-precision GPU dots.
 
 ## What is novel in the completed prototype
 
@@ -99,6 +105,13 @@ The project also records negative results:
 - exact natural gradient can reduce iterations while increasing wall time;
 - contraction-aware ansatz ranking earns no independent win on the symmetric
   four-qubit workload.
+- a matched TensorCircuit-NG baseline beats VQETape statevector at this size,
+  and VQETape spatial's 8.2% objective win does not yet imply a universal or
+  Fig. 2-scale victory;
+- `JAX_DEFAULT_MATMUL_PRECISION=highest` alone is insufficient for
+  TensorNetwork contractions because its cached JAX backend explicitly uses
+  `Precision.DEFAULT`; two controlled GPU jobs failed strict correctness
+  before the backend precision was mapped explicitly.
 
 ## Current boundary
 
@@ -110,7 +123,7 @@ out-of-scope work includes:
 - general Pauli-to-MPO compression;
 - approximate MPS/PEPS truncation;
 - two-dimensional or deep-circuit scaling;
-- cotengra/cuTensorNet-specific execution and slicing;
+- Fig. 2-scale cotengra/cuTensorNet execution and slicing;
 - larger-scale GPU peak-memory/performance sweeps and independent hardware
   replication;
 - multi-GPU distribution and host offload;
@@ -137,6 +150,11 @@ vqetape-train ...
 vqetape-ansatz \
   --output outputs/vqetape-ansatz-report.json \
   --findings outputs/vqetape-ansatz-findings.md
+vqetape-tc-baseline \
+  --nqubits 10 --depth 4 --seed 33 \
+  --contractor omeco \
+  --reference outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json \
+  --output outputs/tensorcircuit-ng-rtx3090-matched-n10-d4.json
 ```
 
 See the raw JSON and paired Markdown files under `outputs/` for the complete

@@ -19,7 +19,7 @@ open-boundary 1D TFIM workloads and state-vector execution with JAX.
 | **Member** | Junkai Wang |
 | **Challenge** | [QuantumBFS/quantum.harness #33](https://github.com/QuantumBFS/quantum.harness/issues/33), released by Shi-Xin Zhang |
 | **Track** | Quantum circuit simulation (`qcs`) |
-| **Status** | Completed exact research prototype with audited RTX 3090 validation; TensorCircuit-NG baseline victory remains open |
+| **Status** | Completed exact research prototype with audited RTX 3090 validation and a same-machine TensorCircuit-NG threshold; the paper Fig. 2 scale gate remains open |
 
 The audited implementation jointly searches over tensor representation,
 contraction path, reverse-mode program, checkpoint schedule, symmetry sector,
@@ -45,8 +45,18 @@ the fixed statevector representative, while statevector remains the faster
 warm kernel. The experiment also finds that platform-default GPU matmul
 precision violates the declared exactness tolerance; fresh VQETape workers
 therefore default to `JAX_DEFAULT_MATMUL_PRECISION=highest` unless explicitly
-overridden. These results are not presented as proof of outperforming the
-current TensorCircuit-NG official GPU baseline. See
+overridden.
+
+The same RTX 3090 now also has an audited TensorCircuit-NG 1.8.0 baseline for
+the identical RZZ/RX workload. TensorCircuit-NG records 18.2720 s for
+`compile + first + 100 warm`; VQETape statevector records 29.4617 s and the
+selected VQETape spatial representative records 16.7781 s. Thus spatial is
+8.2% faster on the declared objective and uses 28.3% less host peak RSS, while
+the sampled 272--274 MiB device allocations are tied at this size. This is a
+real same-workload threshold, not a reproduction of the paper's larger
+`N=32,L=16` SU(4) Fig. 2 protocol. See
+[`outputs/tensorcircuit-ng-baseline-findings.md`](outputs/tensorcircuit-ng-baseline-findings.md)
+for the matched comparison and precision audit,
 [`outputs/vqetape-gpu-rtx3090-findings.md`](outputs/vqetape-gpu-rtx3090-findings.md)
 for the complete GPU A/B evidence and
 [`docs/vqetape-completion-audit.md`](docs/vqetape-completion-audit.md) for the
@@ -59,6 +69,12 @@ Use Python 3.12:
 ```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e '.[test]'
+```
+
+Install the independent comparison runner with the `baseline` extra:
+
+```bash
+.venv/bin/python -m pip install -e '.[test,baseline]'
 ```
 
 Enable 64-bit JAX values when running `complex128` workloads:
@@ -104,6 +120,20 @@ vqetape \
   --expected-steps 100 \
   --warm-repeats 5 \
   --output outputs/vqetape-smoke-report.json
+```
+
+Run the matched TensorCircuit-NG threshold with:
+
+```bash
+vqetape-tc-baseline \
+  --nqubits 10 \
+  --depth 4 \
+  --seed 33 \
+  --warm-repeats 5 \
+  --expected-steps 100 \
+  --contractor omeco \
+  --reference outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json \
+  --output outputs/tensorcircuit-ng-rtx3090-matched-n10-d4.json
 ```
 
 Run the direct bra-operator-ket tensor-network search with:

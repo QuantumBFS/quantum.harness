@@ -18,11 +18,18 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest>=8,<10", "scipy>=1.14,<2"]
 training = ["scipy>=1.14,<2"]
+baseline = [
+  "tensorcircuit-ng==1.8.0",
+  "tensornetwork-ng==0.5.1",
+  "omeco==0.2.6",
+  "cotengra==0.8.2",
+]
 
 [project.scripts]
 vqetape = "vqetape.cli:main"
 vqetape-train = "vqetape.training_cli:main"
 vqetape-ansatz = "vqetape.ansatz_report:main"
+vqetape-tc-baseline = "vqetape.tensorcircuit_baseline_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

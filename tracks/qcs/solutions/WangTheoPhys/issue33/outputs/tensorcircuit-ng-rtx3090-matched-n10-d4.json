@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "implementation": {
+    "name": "TensorCircuit-NG",
+    "package": "tensorcircuit-ng",
+    "source_repository": "https://github.com/tensorcircuit/tensorcircuit-ng",
+    "official_example": "examples/benchmark_jax_vs_torch_vqe.py",
+    "versions": {
+      "tensorcircuit-ng": "1.8.0",
+      "jax": "0.4.38",
+      "jaxlib": "0.4.38",
+      "numpy": "2.2.6",
+      "omeco": "0.2.6",
+      "cotengra": "0.8.2"
+    }
+  },
+  "protocol": {
+    "hamiltonian": "-sum_i Z_i Z_{i+1} - sum_i X_i",
+    "coupling": 1.0,
+    "field": 1.0,
+    "boundary": "open",
+    "initial_state": "plus",
+    "ansatz": "plus_then_rzz_rx",
+    "gate_order": "rzz_then_rx_per_layer",
+    "nqubits": 10,
+    "depth": 4,
+    "dtype": "complex64",
+    "parameter_shape": [
+      4,
+      2,
+      10
+    ],
+    "active_parameter_count": 76,
+    "padding_parameter": "rzz[layer, nqubits - 1]",
+    "seed": 33,
+    "parameter_distribution": "numpy.default_rng.normal(loc=0, scale=0.1)",
+    "comparison_scope": "matched_rzz_rx_not_fig2_su4"
+  },
+  "contractor": {
+    "name": "omeco",
+    "optimizer": "TreeSA",
+    "ntrials": 16,
+    "niters": 16,
+    "betas": [
+      0.1,
+      0.13593563908785256,
+      0.18478497974222907,
+      0.251188643150958,
+      0.34145488738336016,
+      0.46415888336127786,
+      0.6309573444801934,
+      0.8576958985908941,
+      1.1659144011798317,
+      1.5848931924611134,
+      2.1544346900318834,
+      2.9286445646252357,
+      3.981071705534973,
+      5.411695265464638,
+      7.3564225445964135,
+      10.0
+    ],
+    "score": {
+      "tc_weight": 1.0,
+      "sc_weight": 0.0,
+      "rw_weight": 64.0,
+      "sc_target": 20.0
+    },
+    "preprocessing": true,
+    "source": "TensorCircuit-NG examples/benchmark_jax_vs_torch_vqe.py",
+    "path_search_seconds": 0.028340710094198585,
+    "path_search_calls": 1
+  },
+  "runtime": {
+    "jax_backend": "gpu",
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_default_matmul_precision": "highest",
+    "tensor_network_jax_precision": "HIGHEST",
+    "python": "3.12.11 | packaged by Anaconda, Inc. | (main, Jun  5 2025, 13:09:17) [GCC 11.2.0]",
+    "pid": 50346,
+    "slurm_job_id": "23020496",
+    "slurm_node": "c05r05",
+    "cuda_visible_devices": "0"
+  },
+  "timings": {
+    "compile_seconds": 17.77991282311268,
+    "compile_includes_path_search": true,
+    "first_execute_seconds": 0.22626981395296752,
+    "warm_seconds": [
+      0.002868367126211524,
+      0.0027173080015927553,
+      0.0026577371172606945,
+      0.0026507580187171698,
+      0.0026508979499340057
+    ],
+    "warm_seconds_median": 0.0026577371172606945,
+    "warm_seconds_mad": 6.979098543524742e-06
+  },
+  "memory": {
+    "peak_rss_bytes": 693432320,
+    "jax_memory_analysis": {
+      "alias_size_in_bytes": 0,
+      "argument_size_in_bytes": 320,
+      "generated_code_size_in_bytes": 993272,
+      "host_alias_size_in_bytes": 0,
+      "host_argument_size_in_bytes": 0,
+      "host_generated_code_size_in_bytes": 0,
+      "host_output_size_in_bytes": 0,
+      "host_temp_size_in_bytes": 0,
+      "output_size_in_bytes": 340,
+      "temp_size_in_bytes": 131096
+    },
+    "nvml_job_peak_mib": 272
+  },
+  "result": {
+    "energy": -9.808087348937988,
+    "gradient": [
+      [
+        [
+          -0.46896496415138245,
+          -0.4719504714012146,
+          -0.24662387371063232,
+          -0.07784725725650787,
+          -0.14211171865463257,
+          -0.17730164527893066,
+          -0.0908064991235733,
+          0.4569324851036072,
+          0.31365132331848145,
+          0.0
+        ],
+        [
+          -0.039775580167770386,
+          0.01096498966217041,
+          -0.009168803691864014,
+          -0.06426870822906494,
+          0.1547035127878189,
+          0.06592056155204773,
+          -0.08355310559272766,
+          -0.05308102071285248,
+          -0.23858001828193665,
+          -0.17688769102096558
+        ]
+      ],
+      [
+        [
+          -0.6360302567481995,
+          -0.44137126207351685,
+          -0.2909063398838043,
+          -0.20150922238826752,
+          -0.07731971144676208,
+          -0.2488023191690445,
+          -0.19054222106933594,
+          0.5278799533843994,
+          0.2922179102897644,
+          0.0
+        ],
+        [
+          0.0035268962383270264,
+          0.004425376653671265,
+          0.07154664397239685,
+          0.15612773597240448,
+          0.14757108688354492,
+          -0.039509475231170654,
+          0.05187863111495972,
+          0.08914604783058167,
+          -0.41748401522636414,
+          -0.3584827780723572
+        ]
+      ],
+      [
+        [
+          -0.48680853843688965,
+          -0.3873019814491272,
+          -0.24821975827217102,
+          -0.20858699083328247,
+          0.012510836124420166,
+          0.05888688564300537,
+          -0.10480836033821106,
+          0.4198674261569977,
+          0.2853374183177948,
+          0.0
+        ],
+        [
+          0.06539463996887207,
+          0.033189088106155396,
+          0.14355355501174927,
+          0.20173126459121704,
+          0.11944946646690369,
+          -0.004031866788864136,
+          0.00824311375617981,
+          -0.054830968379974365,
+          -0.41754359006881714,
+          -0.2674880027770996
+        ]
+      ],
+      [
+        [
+          -0.41001424193382263,
+          -0.2515496015548706,
+          -0.16888171434402466,
+          -0.3389284014701843,
+          -0.003902435302734375,
+          0.030506014823913574,
+          -0.03169944882392883,
+          0.5763921737670898,
+          0.4581078290939331,
+          0.0
+        ],
+        [
+          0.1725865751504898,
+          0.23259615898132324,
+          0.09938427805900574,
+          0.16793350875377655,
+          0.11280328035354614,
+          -0.03761252760887146,
+          0.05773843824863434,
+          -0.1922496259212494,
+          -0.5106222629547119,
+          -0.2623397707939148
+        ]
+      ]
+    ],
+    "gradient_l2_norm": 2.255448341369629
+  },
+  "reference": {
+    "path": "/work/share/giggleliu/vqetape_issue33_20260730/tcng-baseline-20260730/issue33/outputs/vqetape-gpu-rtx3090-statevector-n10-d4.json",
+    "sha256": "07fc84c765d8f0d8d070c114e08cfe0886ae0a8ff2e8270905c915164a2ae93b",
+    "energy": -9.808083534240723,
+    "gradient_l2_norm": 2.255447493445561
+  },
+  "correctness": {
+    "energy_abs_error": 3.814697265625e-06,
+    "gradient_relative_l2_error": 6.190737338368928e-07,
+    "energy_tolerance": 1e-05,
+    "gradient_tolerance": 1e-05,
+    "tolerance_passed": true
+  },
+  "objective": {
+    "expected_vqe_steps": 100,
+    "definition": "compile + first_execute + expected_steps * warm_median",
+    "seconds": 18.27195634879172
+  }
+}
