@@ -1,0 +1,1 @@
+{"schema":1,"lattice":"chain","L":3,"J":1.0,"h":0.3,"beta_over_L":1.0,"beta":3.0,"seed":"148","kernel":"huang","tau_multipliers":[1.0,1.0,1.0],"warmup_bins":1,"retained_bins":8,"visits_per_bin":20,"checkpoint_every":2,"purpose":"validation"}

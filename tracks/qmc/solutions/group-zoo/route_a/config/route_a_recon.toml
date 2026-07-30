@@ -1,0 +1,48 @@
+schema_version = 1
+J = 1.0
+sizes = [8, 12, 16, 24, 32, 48, 64]
+anchors = [-0.6, 0.0, 0.6]
+yt_anchor = 1.5868
+replicas = 8
+primary_c = 1.0
+thermal_check_c = [1.5, 2.0]
+thermal_check_sizes = [24, 48]
+triangle_h_old = 4.76811
+honeycomb_h_old = 2.13250
+min_ess_per_replica = 100
+min_ess_per_point = 1000
+max_predicted_sigma_stat_R = 2.0e-5
+walltime_fraction_limit = 0.70
+memory_fraction_limit = 0.70
+
+# These execution defaults are immutable manifest inputs. Calibration may only
+# raise the measurement count by whole base bins; it cannot change the science grid.
+thermalization_sweeps = 5000
+candidate_measurement_sweeps = 10000
+base_bin_size = 100
+checkpoint_interval_bins = 10
+
+# Requested production resources used by the calibration gates.
+requested_walltime_seconds = 86400.0
+requested_memory_bytes = 17179869184.0
+requested_disk_bytes = 25000000000.0
+disk_fraction_limit = 0.70
+
+# Smoke and benchmark schedules are deterministic and independent of production data.
+smoke_thermalization_sweeps = 10
+smoke_measurement_sweeps = 20
+smoke_base_bin_size = 5
+smoke_checkpoint_interval_bins = 1
+benchmark_thermalization_sweeps = 500
+benchmark_measurement_sweeps = 2000
+benchmark_base_bin_size = 100
+benchmark_checkpoint_interval_bins = 5
+benchmark_replicas = 2
+burnin_prefix_sweeps = [500, 2000, 5000, 10000]
+burnin_compatibility_z = 3.5
+benchmark_requested_walltime_seconds = 14400.0
+benchmark_requested_memory_bytes = 17179869184.0
+benchmark_requested_disk_bytes = 25000000000.0
+elapsed_relative_tolerance = 1.0e-6
+confidence_policy = "student_t_two_sided_95"
+confidence_level = 0.95

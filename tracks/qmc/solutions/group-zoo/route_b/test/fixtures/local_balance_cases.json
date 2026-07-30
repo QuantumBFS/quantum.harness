@@ -1,0 +1,29 @@
+[
+  {
+    "name": "create_annihilate",
+    "forward_family": "create",
+    "reverse_family": "annihilate",
+    "forward_logF": 1.0986122886681098,
+    "reverse_logF": -1.0986122886681098,
+    "expected_forward": 0.4054651081081644,
+    "expected_reverse": -0.4054651081081644
+  },
+  {
+    "name": "move_reverse_move",
+    "forward_family": "move",
+    "reverse_family": "move",
+    "forward_logF": 0.7,
+    "reverse_logF": -0.7,
+    "expected_forward": 0.7,
+    "expected_reverse": -0.7
+  },
+  {
+    "name": "insert_delete",
+    "forward_family": "insert",
+    "reverse_family": "delete",
+    "forward_logF": 0.4,
+    "reverse_logF": -0.4,
+    "expected_forward": 0.6876820724517809,
+    "expected_reverse": -0.6876820724517809
+  }
+]
