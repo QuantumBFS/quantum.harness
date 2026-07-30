@@ -10,6 +10,9 @@ EQUILIBRATED_RUN_SPEC = (
     / "scans"
     / "qmc-pilot-equilibrated-run-spec.json"
 )
+PRODUCTION_RUN_SPEC = (
+    Path(__file__).parents[1] / "configs" / "scans" / "qmc-production-run-spec.json"
+)
 
 
 def _load_module():
@@ -56,6 +59,24 @@ def test_equilibrated_pilot_run_spec_is_complete_and_linked():
         cell["params"]["M"]: cell["settings"]["thermal_sweeps"]
         for cell in cells
     } == {32: 1000, 64: 4000, 128: 16000}
+
+
+def test_production_run_spec_increases_independent_statistics():
+    spec = json.loads(PRODUCTION_RUN_SPEC.read_text(encoding="utf-8"))
+    cells = spec["cells"]
+
+    assert spec["run_id"] == "issue147-qmc-production"
+    assert spec["run_dir"] == "tracks/peps/results/issue147-qmc-production"
+    assert spec["settings"]["measure_sweeps"] == 32000
+    assert spec["settings"]["bins"] == 80
+    assert len(cells) == 12
+    assert {
+        (cell["params"]["M"], cell["params"]["chain"]) for cell in cells
+    } == {(m, chain) for m in (32, 64, 128) for chain in range(4)}
+    assert {
+        cell["params"]["M"]: cell["settings"]["thermal_sweeps"]
+        for cell in cells
+    } == {32: 4000, 64: 4000, 128: 16000}
 
 
 def test_qmc_dry_run_selects_one_based_cell_and_echoes_payload(tmp_path, monkeypatch):
@@ -107,7 +128,10 @@ def test_qmc_cell_records_effective_thermal_sweeps(tmp_path, monkeypatch):
     module = _load_module()
     captured = {}
     payload = _spec(tmp_path)
-    payload["cells"][0]["settings"] = {"thermal_sweeps": 16000}
+    payload["cells"][0]["settings"] = {
+        "thermal_sweeps": 16000,
+        "measure_sweeps": 32000,
+    }
     run_spec = tmp_path / "run-spec.json"
     run_spec.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -119,7 +143,11 @@ def test_qmc_cell_records_effective_thermal_sweeps(tmp_path, monkeypatch):
             json.dumps(
                 {
                     "status": "success",
-                    "settings": {"thermal_sweeps": 16000, "seed": 148910},
+                    "settings": {
+                        "thermal_sweeps": 16000,
+                        "measure_sweeps": 32000,
+                        "seed": 148910,
+                    },
                     "provenance": {"git_commit": "runtime-commit"},
                 }
             ),
@@ -135,14 +163,21 @@ def test_qmc_cell_records_effective_thermal_sweeps(tmp_path, monkeypatch):
 
     index = captured["argv"].index("--thermal-sweeps")
     assert captured["argv"][index + 1] == "16000"
+    index = captured["argv"].index("--measure-sweeps")
+    assert captured["argv"][index + 1] == "32000"
     manifest = json.loads(
         (tmp_path / "run" / "cells" / "cell-0001" / "manifest.json").read_text(
             encoding="utf-8"
         )
     )
-    assert manifest["settings"] == {"shared": 1, "thermal_sweeps": 16000}
+    assert manifest["settings"] == {
+        "shared": 1,
+        "thermal_sweeps": 16000,
+        "measure_sweeps": 32000,
+    }
     assert manifest["runtime_settings"] == {
         "thermal_sweeps": 16000,
+        "measure_sweeps": 32000,
         "seed": 148910,
     }
     assert manifest["runtime_provenance"] == {"git_commit": "runtime-commit"}

@@ -169,6 +169,67 @@ def test_cli_thermal_sweeps_override_is_recorded(tmp_path, monkeypatch):
     assert manifest["settings"]["thermal_sweeps"] == 16000
 
 
+def test_cli_measure_sweeps_override_is_recorded(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_chain(cfg, output):
+        captured["cfg"] = cfg
+        return qmc_module.QMCResult(
+            bin_energy=np.asarray([-1.0, -1.1]),
+            mean_energy=-1.05,
+            stderr_energy=0.05,
+            mean_cluster_fraction=0.25,
+        )
+
+    monkeypatch.setattr(qmc_module, "run_chain", fake_run_chain)
+    assert main(
+        [
+            "--config",
+            str(CONFIG),
+            "--run-dir",
+            str(tmp_path),
+            "--field",
+            "3.0",
+            "--beta",
+            "0.5",
+            "--M",
+            "32",
+            "--chain",
+            "0",
+            "--measure-sweeps",
+            "32000",
+        ]
+    ) == 0
+
+    manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    assert captured["cfg"].measure_sweeps == 32000
+    assert manifest["settings"]["measure_sweeps"] == 32000
+
+
+@pytest.mark.parametrize("value", ("0", "-1", "32001"))
+def test_cli_rejects_invalid_measure_sweeps_override(tmp_path, value):
+    with pytest.raises(ValueError, match="measure_sweeps"):
+        main(
+            [
+                "--config",
+                str(CONFIG),
+                "--run-dir",
+                str(tmp_path),
+                "--field",
+                "3.0",
+                "--beta",
+                "0.5",
+                "--M",
+                "32",
+                "--chain",
+                "0",
+                "--measure-sweeps",
+                value,
+                "--dry-run",
+            ]
+        )
+
+
 @pytest.mark.parametrize("value", ("0", "-1"))
 def test_cli_rejects_nonpositive_thermal_sweeps_override(tmp_path, value):
     with pytest.raises(ValueError, match="thermal_sweeps"):

@@ -95,7 +95,7 @@ def _dry_run(kind: str, params: dict, settings: dict) -> dict:
             raw["model"]["j"],
             params["M"],
             settings.get("thermal_sweeps", raw["thermal_sweeps"]),
-            raw["measure_sweeps"],
+            settings.get("measure_sweeps", raw["measure_sweeps"]),
             raw["bins"],
             seed,
         )
@@ -130,6 +130,8 @@ def _run_qmc(params: dict, settings: dict, output: Path) -> dict:
     ]
     if "thermal_sweeps" in settings:
         command.extend(["--thermal-sweeps", str(settings["thermal_sweeps"])])
+    if "measure_sweeps" in settings:
+        command.extend(["--measure-sweeps", str(settings["measure_sweeps"])])
     code = qmc.main(command)
     if code:
         raise RuntimeError(f"QMC cell returned {code}")
