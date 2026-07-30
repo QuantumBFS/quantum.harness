@@ -1544,3 +1544,12 @@ integer combinations. The next changed action is not an L=2 run. First rerun
 L=1 with the exact positive diagonal congruence obtained from expanded source-
 row norms. An irrational scale product is accepted only when both entries are
 exact zero; any opposite or unmatched entry still fails closed.
+
+Commit `7850757` implements the changed L=1 action: each target/reference row
+ratio is computed from its expanded exact integer norm, and every matrix entry
+is checked against the resulting positive diagonal congruence. Slurm
+test-only accepted the 8-CPU / 16000-MiB / 30-minute request, and SCNet job
+`118195346` was submitted from the immutable commit. This truth-only job has
+no optimizer and no cone-removal flag. The next action is conditional: zero
+opposite and zero unmatched entries authorize the separate L=2 truth audit;
+any failure must be diagnosed at L=1 without repeating the L=2 signature.

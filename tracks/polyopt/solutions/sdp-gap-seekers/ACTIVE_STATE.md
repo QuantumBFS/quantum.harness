@@ -895,3 +895,9 @@ Updated: 2026-07-29 UTC.
   not congruence: scalar l=2 rows have different exact integer norms. The
   changed control compares the exact positive diagonal congruence determined
   by expanded row norms; cone deletion remains disabled until it passes.
+- Commit `7850757` applies the norm correction. After Slurm test-only
+  admission, L=1 truth-only control `118195346` was submitted on SCNet from
+  that immutable commit using 8 CPUs / 16000 MiB / 30 minutes. The runner has
+  no optimizer and cone deletion is disabled. Preserve the checkout and do
+  not launch the L=2 gate unless this control has zero opposite and zero
+  unmatched exact entries.

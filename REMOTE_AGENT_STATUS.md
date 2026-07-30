@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-30T00:51:40Z
+Updated: 2026-07-30T00:54:25Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -321,5 +321,11 @@ Updated: 2026-07-30T00:51:40Z
   normalization diagnostic, not a congruence disproof. The revised L=1 gate
   uses expanded integer row norms to test the exact positive diagonal
   congruence before any L=2 job or cone removal.
+- Commit `7850757` implements that exact norm-derived congruence. Slurm
+  test-only accepted it, and SCNet L=1 truth-only control job `118195346` was
+  submitted from the immutable commit on 8 CPUs / 16000 MiB / 30 minutes. It
+  has no optimizer and cannot delete cones. Keep the checkout fixed until the
+  control closes; launch no L=2 truth job unless opposite and unmatched counts
+  are both exactly zero.
 
 No user input or new credential is currently required.
