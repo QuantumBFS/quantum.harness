@@ -133,10 +133,71 @@ uv run python scripts/analyze_pilot.py verify --analysis \
   --p1-protocol /home/footman/code/quantum.harness-challenge-194/results/challenge-194/p1_protocol.json
 ```
 
-No extension-generation command is implemented. A collaborator must first
-define and run a new versioned exploratory P0 extension outside this CLI, then
-download, verify, and analyze that immutable evidence before retrying
-`build-p1`; brackets must never be fabricated or relaxed.
+## Frozen P0 extension construction and execution
+
+The versioned P0 extension is fully preregistered, but no P0 extension data
+exist yet. The extension samples only sigma `0.9` and `1.0`; it does not alter
+the scientific engine, relax the selector, or authorize a claim.
+
+From the exact clean deployed repository, the compute-node build wrapper uses
+`HARNESS_RUN_SPEC` as the canonical P0 analysis path and derives the protocol,
+approved validation report, and output root from its parent:
+
+```bash
+sbatch \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/p0_analysis.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_build_slurm.sh
+```
+
+The wrapper verifies canonical analysis-file SHA256
+`44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`
+and runs these implemented commands:
+
+```bash
+/absolute/offline/python scripts/analyze_pilot.py build-p0-extension \
+  --analysis /absolute/results/challenge-194/p0_analysis.json \
+  --output /absolute/results/challenge-194/p0_extension_v1_protocol.json
+
+/absolute/offline/python scripts/run_pilot.py build-extension-spec \
+  --protocol /absolute/results/challenge-194/p0_extension_v1_protocol.json \
+  --validation-report /absolute/results/challenge-194/validation-prod-fd0aa31-compute/report/report.json \
+  --output-root /absolute/results/challenge-194/pilot-p0-extension-v1 \
+  --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+```
+
+After the build succeeds, submit the immutable worker root with exact
+one-CPU, 1800-MiB, 40-minute resources. Slurm IDs `1..96` map to zero-based
+cell indices:
+
+```bash
+sbatch --array=1-2%2 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+
+sbatch --array=3-32,49-80%16 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+
+sbatch --array=33-48,81-96%8 \
+  --export=ALL,HARNESS_RUN_SPEC=/absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json,HARNESS_ENTRYPOINT=/absolute/deployed/quantum.harness,HARNESS_COMMAND=/absolute/offline/python \
+  scripts/pilot_extension_array_slurm.sh
+```
+
+The same schema-dispatched CLI reports pending cells, runs cells, merges all
+96 results, and verifies a downloaded extension:
+
+```bash
+/absolute/offline/python scripts/run_pilot.py pending --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+/absolute/offline/python scripts/run_pilot.py run-cell --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json --cell-index 0
+/absolute/offline/python scripts/run_pilot.py merge --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
+/absolute/offline/python scripts/run_pilot.py verify --run-spec /absolute/download/pilot-p0-extension-v1/run_spec.json
+```
+
+No P0 extension data exist yet, so there is no extension analysis or combined
+analysis to select from. `p1_protocol.json` does not exist and P1 remains
+blocked until the extension is executed, downloaded, verified, analyzed, and
+all six frozen acceptance checks pass. Brackets must never be fabricated or
+relaxed.
 
 Publication is no-clobber. Repeating `analyze` or a future successful
 `build-p1` against byte-identical output returns `verified-existing`.

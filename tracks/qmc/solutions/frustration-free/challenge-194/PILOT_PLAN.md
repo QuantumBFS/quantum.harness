@@ -84,11 +84,10 @@ Runtime capability is generated when the run spec is built and rechecked by
 each worker on its compute node. Login-node capability is not presumed portable
 to a compute kernel.
 
-Heavy trajectories run only on clusters. The first target is Wuzh02: one
-single-core Slurm array with tasks `1-96`, 1800 MiB per task, 30-minute wall
-time, and scheduler-managed concurrency so all available account slots are
-filled. Local work is limited to bounded tiny protocols used by private test
-helpers.
+Heavy trajectories run only on clusters. The original P0 campaign used one
+single-core Slurm array with tasks `1-96` and 1800 MiB per task. The versioned
+P0 extension uses the exact resources frozen below. Local work is limited to
+bounded tiny protocols used by private test helpers.
 
 The build-spec compute step and every array worker use the same influential
 environment contract. Before Python starts, inherited `NUMBA_*`, `PYTHONHOME`,
@@ -153,6 +152,120 @@ and inode while its legitimate child-count and timestamp metadata may change.
 Immutable ancestors and each exact target cell retain strict generation
 binding; shared-directory substitution and cell swap/restore still fail.
 
+## Frozen versioned P0 extension
+
+The only approved extension is `pilot-p0-extension-v1`. It is bound to design
+SHA256 `5426e3007e9d83039f371ca6a9372f1868ef9d5447b66a12b1643ecf72907aba`,
+P0 run-spec SHA256
+`d17d3df9528a09f0d834ebe9d5ce6f283e488d2326f6cb14873a90923c5d9840`,
+P0 progress SHA256
+`ea29a8163a5d3e85768842d64fac4c719f5aeadf965b3318b305fb7a2cc2d15f`,
+P0 analysis document SHA256
+`e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8`,
+canonical analysis-file SHA256
+`44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b`,
+bracket SHA256
+`fb3df666044bf9531443fc00c5c2c2d489512b4162864b3a92ffc2e756832403`,
+and P0 revision `739880d9ccdcffbfc8a15310250349bd11d63bbb`.
+
+Its schemas are exactly:
+
+- `challenge-194-p0-extension-protocol-v1`;
+- `challenge-194-p0-extension-run-spec-v1`;
+- `challenge-194-p0-extension-progress-v1`;
+- `challenge-194-p0-extension-analysis-v1`;
+- `challenge-194-p0-combined-analysis-v2`;
+- `challenge-194-p1-brackets-v2`.
+
+The axes are sigmas `0x1.ccccccccccccdp-1` and
+`0x1.0000000000000p+0`, lengths `1024`, `16384`, `262144`, and replicas
+`24..39`, in sigma/length/replica order. This gives exactly 96 cells and
+trajectories, 17 checkpoints per trajectory, 1,632 checkpoints, and 102
+extension estimate rows. The master seed is `19_420_262_729`, phase is
+`"pilot"`, and grid namespace is `"pilot-p0-extension-v1"`. Replica, request,
+and RNG identities must be disjoint from P0 replicas `0..7` and reserved P1
+replicas `8..23`.
+
+The deterministic component rule recomputes the unchanged selector's original
+P0 marks using lengths `16384` and `262144`, groups contiguous marked
+intervals separately, chooses the lowest-coupling four-sector component and
+the nearest `Q_G` component (equal gaps choose lower coupling), takes their
+closed union, and adds exactly one original-P0 guard interval on each side.
+Four recursive binary64 midpoint levels then produce exactly 17 ordered
+points. The sigma `0.9` grid is:
+
+```text
+0x1.f400000000000p-2, 0x1.1085a00000000p-1,
+0x1.270b400000000p-1, 0x1.3d90e00000000p-1,
+0x1.5416800000000p-1, 0x1.6a9c200000000p-1,
+0x1.8121c00000000p-1, 0x1.97a7600000000p-1,
+0x1.ae2d000000000p-1, 0x1.c4b2a00000000p-1,
+0x1.db38400000000p-1, 0x1.f1bde00000000p-1,
+0x1.0421c00000000p+0, 0x1.0f64900000000p+0,
+0x1.1aa7600000000p+0, 0x1.25ea300000000p+0,
+0x1.312d000000000p+0
+```
+
+Its grid SHA256 is
+`76dc7e07639ed085873a8f291cc2aaee0e8942ddac8efce3982743dd67491071`.
+The sigma `1.0` grid is:
+
+```text
+0x1.3880000000000p-1, 0x1.6092ca0000000p-1,
+0x1.88a5940000000p-1, 0x1.b0b85e0000000p-1,
+0x1.d8cb280000000p-1, 0x1.006ef90000000p+0,
+0x1.14785e0000000p+0, 0x1.2881c30000000p+0,
+0x1.3c8b280000000p+0, 0x1.50948d0000000p+0,
+0x1.649df20000000p+0, 0x1.78a7570000000p+0,
+0x1.8cb0bc0000000p+0, 0x1.a0ba210000000p+0,
+0x1.b4c3860000000p+0, 0x1.c8cceb0000000p+0,
+0x1.dcd6500000000p+0
+```
+
+Its grid SHA256 is
+`d40b4a2afac533d74965513513fff1870918831000b2e040063ca2a0e29ad091`.
+The basic ten-column trajectory schema, scientific engine, realization and
+stopping policy, correctness registry, capability waiver, and exploratory
+phase are unchanged. No interpolation, uncertainty rescue, threshold change,
+nearest-interval fallback, manual choice, adaptive extension, new observable,
+P1 execution, or confirmatory use is permitted.
+
+The immutable artifact names are
+`p0_extension_v1_protocol.json`, `pilot-p0-extension-v1/run_spec.json`,
+`pilot-p0-extension-v1/progress.json`, `p0_extension_v1_analysis.json`,
+`p0_combined_analysis_v2.json`, `p0_combined_brackets_v2.json`, and,
+conditionally, `p1_protocol.json`. Canonical finite UTF-8 JSON uses sorted
+keys, compact separators, one trailing newline, atomic publication, and
+no-clobber verification.
+
+Wuzh02 execution uses `wzacnormal03`: one CPU, 1800 MiB, 40-minute wall time,
+no GPU, and a private node-local Numba cache per worker. Array IDs `1..96` map
+to cell indices `0..95`. The three submission batches are smoke `1-2%2`,
+light/medium `3-32,49-80%16`, and heavy `33-48,81-96%8`.
+
+Restart requires the identical protocol, run spec, source, runtime, request,
+and RNG assignment. Completed cells are deeply verified. A published
+trajectory may resume only missing batch, progress, or outer-manifest
+publication. Duplicate workers serialize. Surviving `.partial` or `.intent`
+files, malformed markers, substitutions, drift, or unexpected paths are
+preserved and fail closed. Merge requires exactly 96 cells and trajectories.
+
+The six acceptance checks are:
+
+1. The protocol verifies against the exact P0 evidence and committed design.
+2. The downloaded root verifies exactly 96 cells and 96 trajectories.
+3. Extension and combined analyses pass canonical, hash, identity, source,
+   schema, and semantic recomputation.
+4. Both sigma `0.9` and `1.0` obtain a nonzero adjacent interval marked by
+   both unchanged estimators.
+5. Sigma `0.8` and `1.1` reproduce their exact existing transition and
+   crossover brackets.
+6. The bracket says `requires_p0_extension=false` and an independent
+   recomputation is byte-identical.
+
+P1 remains absent unless all six acceptance checks pass. An unresolved
+extension is valid and cannot trigger extra points or a relaxed selector.
+
 ## Deterministic P1 selection and boundary
 
 P1 may be defined only after P0 is downloaded, verified, and aggregated into a
@@ -184,7 +297,5 @@ phase namespace, and use untouched data.
 
 The current immutable P0 analysis selects windows for sigma `0.8` and the
 sigma `1.1` crossover control, but sigma `0.9` and `1.0` have no common
-nonzero interval. Therefore P1 publication and execution are blocked.
-No extension-generation command is implemented. A new versioned exploratory
-P0 request must be defined, executed, downloaded, and verified before
-selection can be retried.
+nonzero interval. Therefore P1 publication and execution are blocked pending
+execution, download, and verification of the frozen extension above.

@@ -1,15 +1,14 @@
 import hashlib
 import importlib.metadata
 import json
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
 from long_range_percolation import runtime
 from long_range_percolation.runtime import runtime_capability, runtime_provenance
-
 
 CAPABILITY_KEYS = {
     "schema_version",
@@ -251,7 +250,11 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "e42ef6b9f82380305f80ceaba384bc29cb9fe2da0848d4c72a904f4cb4c8c7c8",
         "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b",
         "P0 extension required before P1 publication: 0.9, 1.0",
-        "No extension-generation command is implemented",
+        "scripts/analyze_pilot.py build-p0-extension",
+        "scripts/run_pilot.py build-extension-spec",
+        "scripts/pilot_extension_build_slurm.sh",
+        "scripts/pilot_extension_array_slurm.sh",
+        "No P0 extension data exist yet",
         "p1_protocol.json does not exist",
         "P1 has not been published or executed",
         "verified-existing",
@@ -275,10 +278,39 @@ def test_pilot_plan_freezes_selector_and_exploratory_boundary():
         "P0 extension",
         "P0 and P1 remain exploratory",
         "confirmatory",
-        "No extension-generation command is implemented",
+        "challenge-194-p0-extension-protocol-v1",
+        "challenge-194-p0-extension-run-spec-v1",
+        "challenge-194-p0-extension-progress-v1",
+        "76dc7e07639ed085873a8f291cc2aaee0e8942ddac8efce3982743dd67491071",
+        "d40b4a2afac533d74965513513fff1870918831000b2e040063ca2a0e29ad091",
+        "40-minute",
+        "three submission batches",
+        "six acceptance checks",
     )
     for text in required:
         assert text in plan
+
+
+def test_extension_build_wrapper_freezes_resources_paths_and_environment():
+    wrapper = Path("scripts/pilot_extension_build_slurm.sh").read_text(
+        encoding="utf-8"
+    )
+    required = (
+        "#SBATCH --cpus-per-task=1",
+        "#SBATCH --mem=1800M",
+        "#SBATCH --time=00:10:00",
+        'P0_ANALYSIS_PATH="${HARNESS_RUN_SPEC}"',
+        'RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"',
+        'EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"',
+        'VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-fd0aa31-compute/report/report.json"',
+        'EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"',
+        "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b",
+        "unset PYTHONHOME PYTHONUSERBASE PYTHONPATH",
+        "scripts/analyze_pilot.py build-p0-extension",
+        "scripts/run_pilot.py build-extension-spec",
+    )
+    for text in required:
+        assert text in wrapper
 
 
 @pytest.mark.parametrize(

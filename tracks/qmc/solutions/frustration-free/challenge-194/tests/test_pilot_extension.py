@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 
@@ -10,6 +11,12 @@ import pytest
 import long_range_percolation.pilot_extension as extension
 from long_range_percolation import pilot
 
+ROOT = Path(__file__).resolve().parents[1]
+RUN_PILOT = ROOT / "scripts" / "run_pilot.py"
+RUN_PILOT_SPEC = importlib.util.spec_from_file_location("run_pilot_cli", RUN_PILOT)
+assert RUN_PILOT_SPEC is not None and RUN_PILOT_SPEC.loader is not None
+run_pilot_cli = importlib.util.module_from_spec(RUN_PILOT_SPEC)
+RUN_PILOT_SPEC.loader.exec_module(run_pilot_cli)
 P0_ANALYSIS = (
     Path(__file__).resolve().parents[6] / "results/challenge-194/p0_analysis.json"
 )
@@ -81,6 +88,34 @@ def _rehash(protocol: dict[str, object]) -> None:
     protocol["protocol_sha256"] = hashlib.sha256(
         extension._canonical_bytes(unsigned)
     ).hexdigest()
+
+
+def test_extension_wrapper_has_exact_resources_and_task_map():
+    text = (ROOT / "scripts/pilot_extension_array_slurm.sh").read_text()
+    assert "#SBATCH --cpus-per-task=1" in text
+    assert "#SBATCH --mem=1800M" in text
+    assert "#SBATCH --time=00:40:00" in text
+    assert "SLURM_ARRAY_TASK_ID < 1 || SLURM_ARRAY_TASK_ID > 96" in text
+    assert "CELL_INDEX=$((SLURM_ARRAY_TASK_ID - 1))" in text
+    assert "scripts/run_pilot.py run-cell" in text
+
+
+def test_build_extension_spec_requires_protocol_and_exact_output_path():
+    parser = run_pilot_cli._parser()
+    args = parser.parse_args(
+        [
+            "build-extension-spec",
+            "--protocol",
+            "/tmp/p0_extension_v1_protocol.json",
+            "--validation-report",
+            "/tmp/report.json",
+            "--output-root",
+            "/tmp/pilot-p0-extension-v1",
+            "--run-spec",
+            "/tmp/pilot-p0-extension-v1/run_spec.json",
+        ]
+    )
+    assert args.command == "build-extension-spec"
 
 
 def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
