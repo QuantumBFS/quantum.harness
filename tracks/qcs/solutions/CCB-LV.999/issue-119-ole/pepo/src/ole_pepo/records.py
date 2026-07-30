@@ -16,6 +16,7 @@ _CORE_SOURCE_PATHS = tuple(
     sorted(
         (
             "pepo/uv.lock",
+            "pepo/src/ole_pepo/circuits.py",
             "pepo/src/ole_pepo/qasm.py",
             "pepo/src/ole_pepo/gates.py",
             "pepo/src/ole_pepo/exact.py",

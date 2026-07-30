@@ -20,9 +20,9 @@ EXPECTED_TARGET = {
 }
 
 
-def _inspect() -> subprocess.CompletedProcess[str]:
+def _inspect(*extra: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT)],
+        [sys.executable, str(SCRIPT), *extra],
         cwd=OLE_ROOT,
         text=True,
         capture_output=True,
@@ -91,6 +91,28 @@ def test_inspect_is_repeatable_without_altering_default_manifest():
         assert not manifest_path.exists()
     else:
         assert manifest_path.read_bytes() == before
+
+
+def test_active_inspect_binds_a_distinct_certificate_without_writing(tmp_path):
+    """Breaks if the active oracle can accidentally certify the baseline input."""
+    output_dir = tmp_path / "active-small-oracle"
+
+    completed = _inspect(
+        "--circuit",
+        "active",
+        "--output-dir",
+        str(output_dir),
+    )
+
+    assert "circuit=active" in completed.stdout
+    assert (
+        "qasm_sha256=d237a273c7cc233e9d64039ad06613af17eb472b19bda12f4ce458b9c4541645"
+        in completed.stdout
+    )
+    assert re.search(
+        r"^confirmation_token=[0-9a-f]{16}$", completed.stdout, re.MULTILINE
+    )
+    assert not output_dir.exists()
 
 
 def test_execute_publishes_running_progress_and_isolated_success_artifacts(tmp_path):
@@ -197,7 +219,7 @@ def test_validation_failure_is_atomically_published_before_nonzero_exit(tmp_path
     def failing_parse(*_args, **_kwargs):
         raise RuntimeError("injected parse failure")
 
-    monkeypatch.setattr(validator, "read_validated_qasm", failing_parse)
+    monkeypatch.setattr(validator, "load_circuit_protocol", failing_parse)
     monkeypatch.setattr(
         sys,
         "argv",

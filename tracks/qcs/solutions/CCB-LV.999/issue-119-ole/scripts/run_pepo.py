@@ -15,6 +15,11 @@ from typing import Callable
 import numpy as np
 
 from ole_pepo import PINNED_QUIMB_COMMIT
+from ole_pepo.circuits import (
+    CircuitProfile,
+    get_circuit_profile,
+    load_circuit_protocol,
+)
 from ole_pepo.contraction import normalized_overlap_compressed
 from ole_pepo.engine import (
     EvolutionDiagnostics,
@@ -36,17 +41,14 @@ from ole_pepo.records import (
 
 OLE_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = OLE_ROOT.parents[4]
-QASM_PATH = OLE_ROOT / "inputs/49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm"
-EXPECTED_QASM_SHA256 = (
-    "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
-)
-EXPECTED_QASM_BYTES = 150686
-DEFAULT_ORACLE_MANIFEST = (
-    WORKSPACE_ROOT / "results/issue119-pepo-small-oracle/manifest.json"
+BASELINE_PROFILE = get_circuit_profile("baseline")
+QASM_PATH = OLE_ROOT / BASELINE_PROFILE.qasm_relative_path
+EXPECTED_QASM_SHA256 = BASELINE_PROFILE.qasm_sha256
+EXPECTED_QASM_BYTES = BASELINE_PROFILE.qasm_bytes
+DEFAULT_ORACLE_MANIFEST = WORKSPACE_ROOT / (
+    f"results/{BASELINE_PROFILE.oracle_run_name}/manifest.json"
 )
 OBSERVABLE_SITES = (52, 59, 72)
-PERTURBATION_ANGLE = 0.3
-PERTURBATION_COUNT = 24
 RESULT_TOLERANCE = 1.0e-8
 DEFAULT_EVOLUTION_CUTOFF = 1.0e-10
 DEFAULT_CONTRACTION_CUTOFF = 1.0e-10
@@ -76,6 +78,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--chi-env", type=_positive_integer, required=True)
     parser.add_argument("--delta", type=float, choices=(0.0, 0.15), required=True)
     parser.add_argument(
+        "--circuit",
+        choices=("baseline", "active"),
+        default="baseline",
+    )
+    parser.add_argument(
         "--evolution-cutoff",
         type=_nonnegative_finite,
         default=DEFAULT_EVOLUTION_CUTOFF,
@@ -89,7 +96,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--oracle-manifest",
         type=Path,
-        default=DEFAULT_ORACLE_MANIFEST,
+        default=None,
     )
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--confirm")
@@ -115,7 +122,10 @@ def confined_output_path(path: str | Path) -> Path:
     return resolved
 
 
-def validate_small_oracle(path: str | Path) -> dict[str, object]:
+def validate_small_oracle(
+    path: str | Path,
+    profile: CircuitProfile = BASELINE_PROFILE,
+) -> dict[str, object]:
     """Require a current successful small-oracle certificate."""
     certificate_path = Path(path)
     try:
@@ -148,7 +158,7 @@ def validate_small_oracle(path: str | Path) -> dict[str, object]:
         raise ValueError("small-oracle maximum absolute error is invalid")
 
     expected = {
-        "qasm_sha256": EXPECTED_QASM_SHA256,
+        "qasm_sha256": profile.qasm_sha256,
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "core_source_digest": core_source_digest(OLE_ROOT),
     }
@@ -171,9 +181,14 @@ def validate_small_oracle(path: str | Path) -> dict[str, object]:
 
 def confirmation_payload(args: argparse.Namespace) -> dict[str, object]:
     """Build the exact deterministic confirmation payload."""
+    profile = get_circuit_profile(args.circuit)
     return {
-        "qasm_sha256": EXPECTED_QASM_SHA256,
-        "observable_sites": [52, 59, 72],
+        "circuit": profile.name,
+        "qasm_sha256": profile.qasm_sha256,
+        "qasm_bytes": profile.qasm_bytes,
+        "layers": profile.expected_layers,
+        "cz_gates": profile.expected_cz,
+        "observable_sites": list(profile.observable_sites),
         "delta": args.delta,
         "dop": args.dop,
         "chi_env": args.chi_env,
@@ -186,20 +201,13 @@ def confirmation_payload(args: argparse.Namespace) -> dict[str, object]:
 
 
 def _protocol(args: argparse.Namespace) -> OLEProtocol:
-    protocol = read_validated_qasm(
-        QASM_PATH,
-        expected_sha256=EXPECTED_QASM_SHA256,
-        expected_bytes=EXPECTED_QASM_BYTES,
-    )
-    if len(protocol.active_sites) != 49:
-        raise ValueError(
-            f"full PEPO protocol must have 49 active sites, got {len(protocol.active_sites)}"
-        )
+    profile = get_circuit_profile(args.circuit)
+    protocol = load_circuit_protocol(profile, OLE_ROOT)
     if args.delta == 0.0:
         protocol = replace_perturbations(
             protocol,
-            source_angle=PERTURBATION_ANGLE,
-            expected_count=PERTURBATION_COUNT,
+            source_angle=profile.perturbation_angle,
+            expected_count=profile.perturbation_count,
             replacement_angle=0.0,
         )
     return protocol
@@ -238,9 +246,15 @@ def evolve_and_contract(
 
 
 def _protocol_document(args: argparse.Namespace) -> dict[str, object]:
+    profile = get_circuit_profile(args.circuit)
     return {
-        "qasm_path": str(QASM_PATH),
-        "observable_sites": list(OBSERVABLE_SITES),
+        "circuit": profile.name,
+        "qasm_path": str(OLE_ROOT / profile.qasm_relative_path),
+        "qasm_sha256": profile.qasm_sha256,
+        "qasm_bytes": profile.qasm_bytes,
+        "layers": profile.expected_layers,
+        "cz_gates": profile.expected_cz,
+        "observable_sites": list(profile.observable_sites),
         "delta": args.delta,
         "dop": args.dop,
         "chi_env": args.chi_env,
@@ -250,8 +264,14 @@ def _protocol_document(args: argparse.Namespace) -> dict[str, object]:
 
 
 def _provenance_document(args: argparse.Namespace) -> dict[str, object]:
+    profile = get_circuit_profile(args.circuit)
     return {
-        "qasm_sha256": EXPECTED_QASM_SHA256,
+        "circuit": profile.name,
+        "qasm_sha256": profile.qasm_sha256,
+        "source_qasm3_sha256": profile.source_qasm3_sha256,
+        "canonical_equal_to_source_qasm3": (
+            profile.canonical_equal_to_source_qasm3
+        ),
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "core_source_digest": core_source_digest(OLE_ROOT),
         "small_oracle_manifest": str(args.oracle_manifest),
@@ -356,7 +376,8 @@ def execute(
     evolution_function: EvolutionFunction,
 ) -> dict[str, object]:
     """Execute one confirmed cell and publish progress and terminal state atomically."""
-    validate_small_oracle(args.oracle_manifest)
+    profile = get_circuit_profile(args.circuit)
+    validate_small_oracle(args.oracle_manifest, profile)
     started = time.monotonic()
     protocol_document = _protocol_document(args)
     provenance = _provenance_document(args)
@@ -403,7 +424,7 @@ def execute(
 
     try:
         protocol = _protocol(args)
-        observable_operators = {site: Z for site in OBSERVABLE_SITES}
+        observable_operators = {site: Z for site in profile.observable_sites}
         raw_value, diagnostics = evolution_function(
             protocol,
             dop=args.dop,
@@ -461,15 +482,27 @@ def main(
     parser = _parser()
     args = parser.parse_args(argv)
     try:
+        profile = get_circuit_profile(args.circuit)
+        if args.oracle_manifest is None:
+            args.oracle_manifest = WORKSPACE_ROOT / (
+                f"results/{profile.oracle_run_name}/manifest.json"
+            )
         args.output = confined_output_path(args.output)
-        validate_small_oracle(args.oracle_manifest)
+        validate_small_oracle(args.oracle_manifest, profile)
     except ValueError as error:
         parser.error(str(error))
 
     payload = confirmation_payload(args)
     token = confirmation_token(payload)
-    print(f"qasm_sha256={EXPECTED_QASM_SHA256}", flush=True)
-    print("observable_sites=52,59,72", flush=True)
+    print(f"circuit={profile.name}", flush=True)
+    print(f"qasm_sha256={profile.qasm_sha256}", flush=True)
+    print(f"qasm_bytes={profile.qasm_bytes}", flush=True)
+    print(f"layers={profile.expected_layers}", flush=True)
+    print(f"cz_gates={profile.expected_cz}", flush=True)
+    print(
+        f"observable_sites={','.join(map(str, profile.observable_sites))}",
+        flush=True,
+    )
     print(f"delta={args.delta:g}", flush=True)
     print(f"dop={args.dop}", flush=True)
     print(f"chi_env={args.chi_env}", flush=True)

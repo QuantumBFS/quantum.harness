@@ -58,6 +58,32 @@ def valid_oracle(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def active_oracle(tmp_path: Path) -> Path:
+    profile = FULL_RUNNER.get_circuit_profile("active")
+    provenance = {
+        "qasm_sha256": profile.qasm_sha256,
+        "quimb_commit": FULL_RUNNER.PINNED_QUIMB_COMMIT,
+        "core_source_digest": FULL_RUNNER.core_source_digest(FULL_RUNNER.OLE_ROOT),
+    }
+    path = tmp_path / "active-small-oracle.json"
+    path.write_text(
+        json.dumps(
+            {
+                "status": "success",
+                "provenance": provenance,
+                "validation": {
+                    "success": True,
+                    "max_absolute_error": 0.0,
+                    **provenance,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.fixture
 def confined_output(tmp_path: Path):
     run_root = (
         WORKSPACE_ROOT
@@ -82,6 +108,14 @@ def _direct_command(output: Path, oracle: Path) -> list[str]:
         str(output),
         "--oracle-manifest",
         str(oracle),
+    ]
+
+
+def _active_direct_command(output: Path, oracle: Path) -> list[str]:
+    return [
+        *_direct_command(output, oracle),
+        "--circuit",
+        "active",
     ]
 
 
@@ -165,6 +199,45 @@ def test_dry_run_prints_one_token_without_writing_a_manifest(
     assert "dry_run=true" in completed.stdout
     assert not confined_output.exists()
     assert not confined_output.with_suffix(".partial.json").exists()
+
+
+def test_active_dry_run_binds_token_and_protocol_to_the_active_input(
+    active_oracle: Path, confined_output: Path
+):
+    """Breaks if --circuit active can silently execute the baseline protocol."""
+    completed = subprocess.run(
+        _active_direct_command(confined_output, active_oracle),
+        cwd=WORKSPACE_ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "circuit=active" in completed.stdout
+    assert (
+        "qasm_sha256=d237a273c7cc233e9d64039ad06613af17eb472b19bda12f4ce458b9c4541645"
+        in completed.stdout
+    )
+    assert "layers=145" in completed.stdout
+    assert "cz_gates=1296" in completed.stdout
+    assert "observable_sites=52,59,72" in completed.stdout
+    assert not confined_output.exists()
+
+
+def test_active_runner_refuses_a_baseline_oracle(
+    valid_oracle: Path, confined_output: Path
+):
+    """Breaks if an L=3 certificate can authorize an L=6 active calculation."""
+    completed = subprocess.run(
+        _active_direct_command(confined_output, valid_oracle),
+        cwd=WORKSPACE_ROOT,
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode != 0
+    assert "qasm_sha256" in completed.stderr
+    assert not confined_output.exists()
 
 
 def test_wrong_confirmation_preserves_existing_output(
@@ -576,6 +649,8 @@ parser.add_argument("--chi-env", type=int, required=True)
 parser.add_argument("--delta", type=float, required=True)
 parser.add_argument("--evolution-cutoff", type=float, required=True)
 parser.add_argument("--contraction-cutoff", type=float, required=True)
+parser.add_argument("--circuit", choices=("baseline", "active"), required=True)
+parser.add_argument("--oracle-manifest", type=Path, required=True)
 parser.add_argument("--output", type=Path, required=True)
 parser.add_argument("--execute", action="store_true")
 parser.add_argument("--confirm")
@@ -595,6 +670,7 @@ document = {{
         "delta": args.delta,
         "evolution_cutoff": args.evolution_cutoff,
         "contraction_cutoff": args.contraction_cutoff,
+        "circuit": args.circuit,
     }},
     "provenance": {{"qasm_sha256": "core-qasm"}},
     "result": {{
@@ -743,6 +819,31 @@ def test_array_run_stores_direct_document_and_atomic_scan_manifest(tmp_path: Pat
     assert not manifest_path.with_suffix(".json.tmp").exists()
 
 
+def test_array_run_passes_active_circuit_and_oracle_contract(tmp_path: Path):
+    """Breaks if an active scan cell invokes the direct runner with baseline defaults."""
+    run_spec = _run_spec()
+    run_spec["settings"].update(
+        {
+            "circuit": "active",
+            "oracle_manifest": (
+                "results/issue119-pepo-active-small-oracle/manifest.json"
+            ),
+        }
+    )
+    payload = ARRAY_RUNNER.selected_payload(run_spec, 1)
+    fake_runner = tmp_path / "fake-run-pepo.py"
+    _write_fake_direct_runner(fake_runner)
+
+    manifest_path = ARRAY_RUNNER.run_cell(
+        payload,
+        workspace_root=tmp_path,
+        python_bin=Path(sys.executable),
+        runner=fake_runner,
+    )
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["settings"]["circuit"] == "active"
+    assert manifest["direct_provenance"]["qasm_sha256"] == "core-qasm"
 def test_array_run_rejects_result_for_a_different_selected_cell(tmp_path: Path):
     """Breaks if the scan manifest accepts direct output for different Dop settings."""
     payload = ARRAY_RUNNER.selected_payload(_run_spec(), 1)

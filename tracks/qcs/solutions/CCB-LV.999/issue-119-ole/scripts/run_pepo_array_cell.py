@@ -110,6 +110,7 @@ def _declared_values(payload: dict) -> dict[str, object]:
     params = payload["params"]
     delta = params.get("delta", settings["delta"])
     return {
+        "circuit": str(settings.get("circuit", "baseline")),
         "dop": int(params["dop"]),
         "chi_env": int(params["chi_env"]),
         "delta": float(delta),
@@ -186,6 +187,18 @@ def run_cell(
     cell_id = safe_cell_id(payload["cell_id"])
     cell_dir = confined_cell_dir(run_root, cell_id, workspace_root)
     source_result = cell_dir / "pepo-result.json"
+    oracle_setting = payload["settings"].get("oracle_manifest")
+    if oracle_setting is None:
+        oracle_run = (
+            "issue119-pepo-active-small-oracle"
+            if selected["circuit"] == "active"
+            else "issue119-pepo-small-oracle"
+        )
+        oracle_path = workspace_root / "results" / oracle_run / "manifest.json"
+    else:
+        oracle_path = Path(str(oracle_setting))
+        if not oracle_path.is_absolute():
+            oracle_path = workspace_root / oracle_path
     command = [
         str(python_bin),
         str(direct_runner),
@@ -199,6 +212,10 @@ def run_cell(
         str(selected["evolution_cutoff"]),
         "--contraction-cutoff",
         str(selected["contraction_cutoff"]),
+        "--circuit",
+        str(selected["circuit"]),
+        "--oracle-manifest",
+        str(oracle_path),
         "--output",
         str(source_result),
     ]

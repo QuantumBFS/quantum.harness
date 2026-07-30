@@ -13,6 +13,11 @@ from typing import Mapping
 import numpy as np
 
 from ole_pepo import PINNED_QUIMB_COMMIT
+from ole_pepo.circuits import (
+    CircuitProfile,
+    get_circuit_profile,
+    load_circuit_protocol,
+)
 from ole_pepo.contraction import normalized_overlap_exact
 from ole_pepo.engine import ProgressRecord, build_pepo_circuit
 from ole_pepo.exact import (
@@ -33,10 +38,11 @@ from ole_pepo.records import (
 
 OLE_ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = OLE_ROOT.parents[4]
-DEFAULT_OUTPUT_DIR = WORKSPACE_ROOT / "results/issue119-pepo-small-oracle"
-QASM_PATH = OLE_ROOT / "inputs/49Q_OLE_circuit_L_3_b_0.25_delta0.15.qasm"
-QASM_SHA256 = "1705197e7b1ebb02266600b3ddaba0d2c47a96de84c5895e2bb530728b815455"
-QASM_BYTES = 150686
+BASELINE_PROFILE = get_circuit_profile("baseline")
+DEFAULT_OUTPUT_DIR = WORKSPACE_ROOT / f"results/{BASELINE_PROFILE.oracle_run_name}"
+QASM_PATH = OLE_ROOT / BASELINE_PROFILE.qasm_relative_path
+QASM_SHA256 = BASELINE_PROFILE.qasm_sha256
+QASM_BYTES = BASELINE_PROFILE.qasm_bytes
 SITES = (33, 39, 49, 50, 51, 52, 53)
 OBSERVABLE_SITE = 52
 EXACT_TOLERANCE = 1e-10
@@ -45,13 +51,16 @@ Z = np.diag([1.0, -1.0]).astype(np.complex128)
 OBSERVABLES = {OBSERVABLE_SITE: Z}
 
 
-def _confirmation_document() -> dict[str, object]:
+def _confirmation_document(
+    profile: CircuitProfile = BASELINE_PROFILE,
+) -> dict[str, object]:
     return {
+        "circuit": profile.name,
         "core_source_digest": core_source_digest(OLE_ROOT),
         "delta_modes": [0, 0.15],
         "exact_tolerance": EXACT_TOLERANCE,
         "observable": "Z52",
-        "qasm_sha256": QASM_SHA256,
+        "qasm_sha256": profile.qasm_sha256,
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "sites": list(SITES),
         "truncated_dop": list(TRUNCATED_DOP),
@@ -125,7 +134,11 @@ def _truncated_pepo_value(protocol, dop: int, progress_callback=None) -> float:
 
 
 def _render_report(
-    manifest: dict[str, object], report_path: Path, confirmation: str, output_dir: Path
+    manifest: dict[str, object],
+    report_path: Path,
+    confirmation: str,
+    output_dir: Path,
+    profile: CircuitProfile,
 ) -> None:
     validation = manifest["validation"]
     timings = manifest["timings"]
@@ -146,10 +159,14 @@ def _render_report(
         "",
         "```bash",
         "OLE_ROOT=tracks/qcs/solutions/CCB-LV.999/issue-119-ole",
-        'uv run --project "$OLE_ROOT/pepo" python "$OLE_ROOT/scripts/validate_pepo_small.py"',
         (
             'uv run --project "$OLE_ROOT/pepo" python '
-            f'"$OLE_ROOT/scripts/validate_pepo_small.py" --execute --confirm "{confirmation}" '
+            f'"$OLE_ROOT/scripts/validate_pepo_small.py" --circuit {profile.name}'
+        ),
+        (
+            'uv run --project "$OLE_ROOT/pepo" python '
+            f'"$OLE_ROOT/scripts/validate_pepo_small.py" --circuit {profile.name} '
+            f'--execute --confirm "{confirmation}" '
             f'--output-dir "{output_dir}"'
         ),
         "```",
@@ -205,16 +222,28 @@ def _render_report(
     report_path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def _report_path(output_dir: Path) -> Path:
-    if output_dir.resolve() == DEFAULT_OUTPUT_DIR.resolve():
+def _report_path(output_dir: Path, profile: CircuitProfile) -> Path:
+    if (
+        profile.name == "baseline"
+        and output_dir.resolve() == DEFAULT_OUTPUT_DIR.resolve()
+    ):
         return OLE_ROOT / "PEPO_SMALL_VALIDATION.md"
     return output_dir / "PEPO_SMALL_VALIDATION.md"
 
 
-def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
+def _execute(
+    output_dir: Path,
+    confirmation: str,
+    profile: CircuitProfile = BASELINE_PROFILE,
+) -> dict[str, object]:
     started = time.monotonic()
     provenance = {
-        "qasm_sha256": QASM_SHA256,
+        "circuit": profile.name,
+        "qasm_sha256": profile.qasm_sha256,
+        "source_qasm3_sha256": profile.source_qasm3_sha256,
+        "canonical_equal_to_source_qasm3": (
+            profile.canonical_equal_to_source_qasm3
+        ),
         "quimb_commit": PINNED_QUIMB_COMMIT,
         "core_source_digest": core_source_digest(OLE_ROOT),
     }
@@ -254,7 +283,7 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
 
     try:
         print("validating_qasm", flush=True)
-        full_protocol = read_validated_qasm(QASM_PATH, QASM_SHA256, QASM_BYTES)
+        full_protocol = load_circuit_protocol(profile, OLE_ROOT)
         print("building_seven_site_protocols", flush=True)
         zero_protocol = seven_site_oracle_protocol(full_protocol, delta_zero=True)
         delta_protocol = seven_site_oracle_protocol(full_protocol, delta_zero=False)
@@ -317,7 +346,7 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
 
         status = SmallOracleStatus(
             success=True,
-            qasm_sha256=QASM_SHA256,
+            qasm_sha256=profile.qasm_sha256,
             quimb_commit=PINNED_QUIMB_COMMIT,
             core_source_digest=provenance["core_source_digest"],
             dense_delta_zero=dense_zero,
@@ -341,7 +370,13 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
                 "peak_rss_bytes": peak_rss_bytes(),
             },
         }
-        _render_report(manifest, _report_path(output_dir), confirmation, output_dir)
+        _render_report(
+            manifest,
+            _report_path(output_dir, profile),
+            confirmation,
+            output_dir,
+            profile,
+        )
         atomic_write_json(output_dir / "manifest.json", manifest)
         return manifest
     except Exception as error:
@@ -360,13 +395,24 @@ def _execute(output_dir: Path, confirmation: str) -> dict[str, object]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--circuit",
+        choices=("baseline", "active"),
+        default="baseline",
+    )
     parser.add_argument("--execute", action="store_true", help="run the numerical validation")
     parser.add_argument("--confirm", help="confirmation token printed by inspect mode")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--output-dir", type=Path)
     args = parser.parse_args()
 
-    confirmation_document = _confirmation_document()
+    profile = get_circuit_profile(args.circuit)
+    output_dir = args.output_dir or (
+        WORKSPACE_ROOT / f"results/{profile.oracle_run_name}"
+    )
+    confirmation_document = _confirmation_document(profile)
     token = confirmation_token(confirmation_document)
+    print(f"circuit={profile.name}", flush=True)
+    print(f"qasm_sha256={profile.qasm_sha256}", flush=True)
     print("sites=33,39,49,50,51,52,53", flush=True)
     print("observable=Z52", flush=True)
     print("delta_modes=0,0.15", flush=True)
@@ -378,7 +424,7 @@ def main() -> int:
         parser.error("--execute requires --confirm matching confirmation_token")
 
     try:
-        manifest = _execute(args.output_dir, token)
+        manifest = _execute(output_dir, token, profile)
     except Exception as error:
         print(f"status=failure: {error}", flush=True)
         return 1

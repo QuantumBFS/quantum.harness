@@ -1,0 +1,11 @@
+{
+  "circuit": "active",
+  "oracle_manifest": "results/issue119-pepo-active-small-oracle/manifest.json",
+  "delta": 0.15,
+  "observable_sites": [52, 59, 72],
+  "evolution_cutoff": 1e-12,
+  "contraction_cutoff": 1e-12,
+  "imaginary_tolerance": 1e-8,
+  "physical_tolerance": 1e-8,
+  "progress_every": 100
+}
