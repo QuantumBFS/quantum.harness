@@ -61,6 +61,16 @@ def parse_args() -> argparse.Namespace:
             "of steps needed to observe each design point this many times"
         ),
     )
+    parser.add_argument(
+        "--min-effective-observations-per-design-point",
+        type=float,
+        default=0.0,
+        help=(
+            "if positive, begin model checks after the lower-confidence "
+            "clean-label signal yields this many effective observations "
+            "per design point"
+        ),
+    )
     parser.add_argument("--eval-every", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=100)
     parser.add_argument("--holdout-look-sizes", default="128,256,512,1024,2048,4096,8192")
@@ -113,6 +123,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--rounding-threshold", type=float, default=0.10)
     parser.add_argument("--accept-gap", type=float, default=0.035)
     parser.add_argument("--reject-gap", type=float, default=0.15)
+    parser.add_argument(
+        "--decision-gap-units",
+        choices=("observed", "clean", "clean-reject"),
+        default="observed",
+        help=(
+            "interpret accept/reject gaps either in noisy observed-error "
+            "units, after deattenuation to inferred clean-error units, "
+            "or deattenuate only the misspecification rejection test"
+        ),
+    )
     parser.add_argument("--stable-signature-checks", type=int, default=3)
     parser.add_argument(
         "--unstable-holdout-words-per-check",
@@ -385,6 +405,18 @@ def interval_record(
         delta,
         method,
     )
+    excess_lower = q_lower - p_upper
+    excess_point = accumulator.mean - p_estimate
+    excess_upper = q_upper - p_lower
+    signal_lower = max(1.0 - 2.0 * p_upper, 1e-9)
+    signal_point = max(1.0 - 2.0 * p_estimate, 1e-9)
+    signal_upper = max(1.0 - 2.0 * p_lower, signal_lower)
+    clean_error_lower = excess_lower / (
+        signal_upper if excess_lower >= 0.0 else signal_lower
+    )
+    clean_error_upper = excess_upper / (
+        signal_lower if excess_upper >= 0.0 else signal_upper
+    )
     return {
         "holdout_words": accumulator.count,
         "observed_holdout_disagreement_rate": accumulator.mean,
@@ -405,9 +437,12 @@ def interval_record(
         "bitwise_design_effect_upper_bound": (
             estimator.design_effect_upper_bound
         ),
-        "holdout_excess_lower": q_lower - p_upper,
-        "holdout_excess_point": accumulator.mean - p_estimate,
-        "holdout_excess_upper": q_upper - p_lower,
+        "holdout_excess_lower": excess_lower,
+        "holdout_excess_point": excess_point,
+        "holdout_excess_upper": excess_upper,
+        "inferred_clean_error_lower": clean_error_lower,
+        "inferred_clean_error_point": excess_point / signal_point,
+        "inferred_clean_error_upper": clean_error_upper,
     }
 
 
@@ -421,10 +456,33 @@ def sequential_evidence(
     accept_ready: bool,
     accept_gap: float,
     reject_gap: float,
+    decision_gap_units: str,
     unstable_words_per_check: int,
     interval_method: str,
     device: torch.device,
 ) -> tuple[str, dict[str, float | int], int]:
+    if decision_gap_units == "clean":
+        reject_lower_key = "inferred_clean_error_lower"
+        reject_point_key = "inferred_clean_error_point"
+        reject_upper_key = "inferred_clean_error_upper"
+        accept_lower_key = "inferred_clean_error_lower"
+        accept_upper_key = "inferred_clean_error_upper"
+    elif decision_gap_units == "clean-reject":
+        reject_lower_key = "inferred_clean_error_lower"
+        reject_point_key = "inferred_clean_error_point"
+        reject_upper_key = "inferred_clean_error_upper"
+        accept_lower_key = "holdout_excess_lower"
+        accept_upper_key = "holdout_excess_upper"
+    elif decision_gap_units == "observed":
+        reject_lower_key = "holdout_excess_lower"
+        reject_point_key = "holdout_excess_point"
+        reject_upper_key = "holdout_excess_upper"
+        accept_lower_key = "holdout_excess_lower"
+        accept_upper_key = "holdout_excess_upper"
+    else:
+        raise ValueError(
+            f"unknown decision gap units: {decision_gap_units}"
+        )
     words_before = accumulator.count
     last = interval_record(
         accumulator,
@@ -433,16 +491,16 @@ def sequential_evidence(
         interval_method,
     )
     if accumulator.count >= look_sizes[0]:
-        if last["holdout_excess_lower"] > reject_gap:
+        if last[reject_lower_key] > reject_gap:
             return "reject", last, 0
         if accept_ready and (
-            last["holdout_excess_lower"] >= -accept_gap
-            and last["holdout_excess_upper"] <= accept_gap
+            last[accept_lower_key] >= -accept_gap
+            and last[accept_upper_key] <= accept_gap
         ):
             return "accept", last, 0
         if (
             not accept_ready
-            and last["holdout_excess_point"] <= reject_gap
+            and last[reject_point_key] <= reject_gap
         ):
             return "defer", last, 0
     for look_size in look_sizes:
@@ -469,11 +527,11 @@ def sequential_evidence(
             delta,
             interval_method,
         )
-        if last["holdout_excess_lower"] > reject_gap:
+        if last[reject_lower_key] > reject_gap:
             return "reject", last, accumulator.count - words_before
         if accept_ready and (
-            last["holdout_excess_lower"] >= -accept_gap
-            and last["holdout_excess_upper"] <= accept_gap
+            last[accept_lower_key] >= -accept_gap
+            and last[accept_upper_key] <= accept_gap
         ):
             return "accept", last, accumulator.count - words_before
 
@@ -481,9 +539,9 @@ def sequential_evidence(
         # spend beyond the first pilot only when the point estimate suggests
         # a potentially rejectable model.  Deferral makes no selection claim.
         if not accept_ready and accumulator.count >= look_sizes[0]:
-            if last["holdout_excess_point"] <= reject_gap:
+            if last[reject_point_key] <= reject_gap:
                 return "defer", last, accumulator.count - words_before
-            if last["holdout_excess_upper"] < reject_gap:
+            if last[reject_upper_key] < reject_gap:
                 return "defer", last, accumulator.count - words_before
             if (
                 unstable_words_per_check > 0
@@ -509,6 +567,22 @@ def main() -> None:
         raise ValueError("first holdout look must contain at least two words")
     if not 0.0 < args.global_failure_probability < 1.0:
         raise ValueError("global failure probability must lie in (0,1)")
+    if args.min_observations_per_design_point < 0.0:
+        raise ValueError(
+            "minimum observations per design point must be nonnegative"
+        )
+    if args.min_effective_observations_per_design_point < 0.0:
+        raise ValueError(
+            "minimum effective observations per design point must be "
+            "nonnegative"
+        )
+    if (
+        args.min_observations_per_design_point > 0.0
+        and args.min_effective_observations_per_design_point > 0.0
+    ):
+        raise ValueError(
+            "fixed and effective observation warmups are mutually exclusive"
+        )
 
     maximum_checks = (
         len(degrees)
@@ -568,6 +642,9 @@ def main() -> None:
                     / args.batch_size
                 ),
             )
+        adaptive_warmup = (
+            args.min_effective_observations_per_design_point > 0.0
+        )
         if args.noise_mode == "common-xor":
             stream = CommonXorFixedDesignFreshNoiseStream(
                 batch_size=args.batch_size,
@@ -618,6 +695,8 @@ def main() -> None:
         consecutive_rejects = 0
         decision: str | None = None
         final_coefficients: np.ndarray | None = None
+        warmup_records: list[dict[str, float | int | bool]] = []
+        first_warmup_eligible_step: int | None = None
 
         for step in range(1, args.max_stage_steps + 1):
             inputs, noisy_targets = stream.sample()
@@ -627,8 +706,60 @@ def main() -> None:
             cumulative_training_examples += args.batch_size
             if step % args.eval_every != 0 and step != args.max_stage_steps:
                 continue
-            if step < stage_min_steps:
-                continue
+            if adaptive_warmup:
+                (
+                    _,
+                    warmup_noise_upper,
+                    warmup_noise_estimate,
+                    _,
+                ) = noise_interval(
+                    selection_noise,
+                    interval_delta,
+                    args.confidence_interval_method,
+                )
+                lower_confidence_signal = max(
+                    1.0 - 2.0 * warmup_noise_upper,
+                    0.0,
+                )
+                observations_per_design_point = (
+                    step * args.batch_size / len(design_ids)
+                )
+                effective_observations_per_design_point = (
+                    observations_per_design_point
+                    * lower_confidence_signal**2
+                )
+                warmup_is_eligible = (
+                    effective_observations_per_design_point
+                    >= args.min_effective_observations_per_design_point
+                )
+                if warmup_is_eligible and first_warmup_eligible_step is None:
+                    first_warmup_eligible_step = step
+                warmup_records.append(
+                    {
+                        "stage_step": step,
+                        "noise_rate_estimate": warmup_noise_estimate,
+                        "noise_rate_upper": warmup_noise_upper,
+                        "lower_confidence_clean_label_signal": (
+                            lower_confidence_signal
+                        ),
+                        "observations_per_design_point": (
+                            observations_per_design_point
+                        ),
+                        "effective_observations_per_design_point": (
+                            effective_observations_per_design_point
+                        ),
+                        "eligible": (
+                            first_warmup_eligible_step is not None
+                        ),
+                    }
+                )
+                if first_warmup_eligible_step is None:
+                    continue
+            else:
+                if step < stage_min_steps:
+                    continue
+                if first_warmup_eligible_step is None:
+                    first_warmup_eligible_step = step
 
             probabilities = learner.probabilities().cpu().numpy()
             observations = learner.observation_count.cpu().numpy()
@@ -672,6 +803,7 @@ def main() -> None:
                 accept_ready,
                 args.accept_gap,
                 args.reject_gap,
+                args.decision_gap_units,
                 args.unstable_holdout_words_per_check,
                 args.confidence_interval_method,
                 device,
@@ -752,7 +884,9 @@ def main() -> None:
             "candidate_count": int(features.shape[1]),
             "design": design,
             "decision": decision,
-            "minimum_stage_steps": stage_min_steps,
+            "minimum_stage_steps": first_warmup_eligible_step,
+            "fixed_minimum_stage_steps": stage_min_steps,
+            "adaptive_warmup_records": warmup_records,
             "decision_uses_clean_labels": False,
             "checks": checks,
             "final_integer_coefficients": coefficient_rows,
@@ -805,6 +939,9 @@ def main() -> None:
             "min_observations_per_design_point": (
                 args.min_observations_per_design_point
             ),
+            "min_effective_observations_per_design_point": (
+                args.min_effective_observations_per_design_point
+            ),
             "eval_every": args.eval_every,
             "batch_size": args.batch_size,
             "holdout_look_sizes": look_sizes,
@@ -816,6 +953,7 @@ def main() -> None:
             ),
             "interval_query_bound": interval_query_bound,
             "per_interval_failure_probability": interval_delta,
+            "decision_gap_units": args.decision_gap_units,
             "oracle_noise_rate": args.noise_rate,
             "noise_mode": args.noise_mode,
             "independent_noise_rate": (

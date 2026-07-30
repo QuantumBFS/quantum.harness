@@ -516,6 +516,81 @@
         {
           "kind": "heading",
           "level": 3,
+          "text": "⟦zh⟧最新主结果：不知道噪声率，也能在 5%–35% 间自动分配训练证据⟦en⟧Newest main result: allocate training evidence automatically from 5% to 35% noise without knowing the rate"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧48 / 48 次恢复同一条 156 门精确网络；35% 噪声平均成本从 48,087 降到 20,383 词⟦en⟧All 48 runs recover the same exact 156-gate network; at 35% noise, mean cost falls from 48,087 to 20,383 words",
+          "why": "⟦zh⟧真实翻转率只由数据生成器持有，学习器用互不重叠的重复噪声标签对估计 p，并以 p 的置信上界决定何时开始检查模型。正式实验在 5%、15%、25%、35% 四档各使用六个配对种子；固定每个设计点 50 次和新方法共 48 次，最终全部先扩展到二次空间、在事后 4,096 输入干净审计上零错误，并编译为同一个 156 门网络。最困难的 35% 档，旧观测误差阈值六次都无法置信拒绝一次模型，只能在 300 批耗尽后扩阶；新方法六次均在第 35–55 批置信拒绝，平均总成本减少 2.36 倍。⟦en⟧The true flip probability is held only by the data generator. The learner estimates p from disjoint pairs of repeated noisy labels and uses an upper confidence bound on p to decide when model checks may begin. The main experiment uses six paired seeds at each of 5%, 15%, 25% and 35% noise. Across the fixed-50 and new methods, all 48 runs expand to the quadratic space, have zero error in the post-selection 4,096-input clean audit and compile to the same 156-gate network. In the hardest 35% condition, the old observed-error threshold never confidence-rejects the linear model and expands only after exhausting 300 batches; the new method confidence-rejects it at batches 35–55 in all six runs and reduces mean total cost by 2.36x."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧创新算法：把未知噪声换算成可比较的“有效证据”⟦en⟧New algorithm: convert unknown noise into comparable effective evidence",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧噪声率估计⟦en⟧Noise-rate estimation",
+                  "⟦zh⟧同一输入的两次独立噪声标签发生分歧的概率为 2p(1−p)；训练器只用互不重叠的标签对反解 p，并为它建立区间，不需要干净标签。⟦en⟧Two independently corrupted labels of the same input disagree with probability 2p(1−p). The trainer inverts this relation using only disjoint label pairs and builds an interval for p without clean labels."
+                ],
+                [
+                  "⟦zh⟧噪声自适应预热⟦en⟧Noise-adaptive warmup",
+                  "⟦zh⟧若每个设计点平均观察 n 次，保守有效证据定义为 n 乘以 (1−2p上界) 的平方；有效证据达到 10 才允许模型检查。低噪声自动提前，高噪声自动等待。⟦en⟧With a mean of n observations per design point, conservative effective evidence is n times the square of (1−2 times the upper bound on p). Model checks begin only after this value reaches ten, automatically starting earlier under low noise and waiting longer under high noise."
+                ],
+                [
+                  "⟦zh⟧去衰减的扩阶判据⟦en⟧Deattenuated expansion test",
+                  "⟦zh⟧候选模型的观测超额分歧满足“超额分歧 = 干净模型错误率 × (1−2p)”。因此一次模型的拒绝区间先换算回干净错误率；其下界超过 20% 才扩阶。这样同一个含义可跨噪声率使用。⟦en⟧A candidate model obeys “excess observed disagreement = clean model error times (1−2p).” The linear-model rejection interval is therefore deattenuated to clean-error units, and expansion occurs only when its lower bound exceeds 20%, giving the threshold the same meaning across noise rates."
+                ],
+                [
+                  "⟦zh⟧验证节流⟦en⟧Validation throttling",
+                  "⟦zh⟧整数系数签名尚未连续稳定三次时，每次最多增加 128 个留出词；只有候选稳定后才允许几何扩展到 256、512、1,024 等。它避免把大量验证预算花在马上会变化的候选上。⟦en⟧Before an integer-coefficient signature is stable for three checks, each check may add at most 128 holdout words. Geometric growth to 256, 512, 1,024 and beyond is allowed only after stabilization, avoiding large validation spends on candidates that are about to change."
+                ],
+                [
+                  "⟦zh⟧信息隔离⟦en⟧Information isolation",
+                  "⟦zh⟧真实 p、目标公式、正确阶数和第一页电路均不提供给训练器；干净全域准确率与 156 门编译结果只在停止和阶数选择全部锁定后附加。⟦en⟧The true p, target formula, correct degree and page-one circuit are withheld from the trainer. Clean-domain accuracy and the 156-gate compilation result are attached only after stopping and degree selection are locked."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧真实翻转率（隐藏）⟦en⟧True flip rate (hidden)",
+            "⟦zh⟧固定 50 次平均总词⟦en⟧Fixed-50 mean total words",
+            "⟦zh⟧自适应平均总词⟦en⟧Adaptive mean total words",
+            "⟦zh⟧成本改进⟦en⟧Cost improvement",
+            "⟦zh⟧固定法置信拒绝一次⟦en⟧Fixed confidence rejection of linear",
+            "⟦zh⟧新方法置信拒绝一次⟦en⟧New confidence rejection of linear",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["5%", "7,277", "4,277", "1.70×", "6 / 6", "6 / 6", "12 / 12"],
+            ["15%", "7,896", "5,501", "1.44×", "6 / 6", "6 / 6", "12 / 12"],
+            ["25%", "8,863", "8,778", "1.01×", "6 / 6", "6 / 6", "12 / 12"],
+            ["35%", "48,087", "20,383", "2.36×", "0 / 6（300 批超时）", "6 / 6（35–55 批）", "12 / 12"]
+          ],
+          "numeric": [true, true, true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-noise-adaptive-warmup.png",
+              "caption": "⟦zh⟧A：六个种子均值及最小—最大范围；新方法在低噪声减少过度训练，在 35% 时避免一次模型的 300 批超时。B：一次模型扩阶批次；旧规则在 35% 到达预算上限，新规则平均第 44.2 批获得置信拒绝。C：新方法成本随噪声自然增加，说明它没有假装所有噪声率同样容易。D：25% 先导扫描比较每设计点有效证据阈值 8、10、12.5；阈值 8 偶尔过早触发昂贵留出，四种子均值最低的 10 用于正式实验。⟦en⟧A: six-seed means with minimum-to-maximum ranges; the new method removes overtraining at low noise and avoids the 300-batch linear-model timeout at 35%. B: linear-model expansion batches; the old rule reaches the budget at 35%, whereas the new method obtains confidence rejection at a mean batch 44.2. C: new-method cost rises naturally with noise, so it does not pretend every noise rate is equally easy. D: a 25% pilot compares effective-evidence thresholds 8, 10 and 12.5 per design point. Threshold 8 occasionally triggers expensive holdout too early; threshold 10 has the lowest four-seed mean and is used in the main experiment."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧不确定性与边界：这是跨四档噪声的压力测试，不是所有噪声模型的证明⟦en⟧Uncertainty and boundary: this is a four-rate stress test, not a proof for every noise model",
+          "text": "⟦zh⟧每档只有六个配对种子；48 / 48 精确说明当前实现稳定，但不能给出跨随机种子的零失败保证。聚类正态区间的覆盖由前面的 50,000 次蒙特卡洛审计支持，不是有限样本分布无关界；若要求更保守结论，应切回经验 Bernstein。20% 的干净错误拒绝边界适合当前“一次对二次”的模型阶梯，相邻模型差异更小时需要重新设置。上述平均值、每次原始日志哈希及先导扫描都保存在 noise_adaptive_warmup_summary.json。⟦en⟧Each rate has only six paired seeds. The 48/48 exact result demonstrates stability here but cannot guarantee zero failures over future seeds. Coverage of the cluster-normal interval is supported by the earlier 50,000-trial Monte Carlo audit rather than a finite-sample distribution-free bound; empirical Bernstein remains the conservative option. The 20% clean-error rejection boundary fits the present linear-versus-quadratic ladder and must be revised for closer adjacent model classes. Means, raw-run hashes and the pilot scan are stored in noise_adaptive_warmup_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
           "text": "⟦zh⟧最新加速：标签盲 D-optimal 实验设计⟦en⟧Newest acceleration: label-blind D-optimal experimental design"
         },
         {
@@ -779,7 +854,7 @@
         {
           "kind": "heading",
           "level": 3,
-          "text": "⟦zh⟧当前最快未知阶数方法：按候选维度分配热身，总成本降到 8,860 词⟦en⟧Fastest unknown-degree method: dimension-normalized warmup reduces total cost to 8,860 words"
+          "text": "⟦zh⟧25% 基线加速：按候选维度分配热身，总成本降到 8,860 词⟦en⟧A 25%-noise baseline acceleration: dimension-normalized warmup reduces total cost to 8,860 words"
         },
         {
           "kind": "verdict",
@@ -817,7 +892,7 @@
         {
           "kind": "note",
           "label": "⟦zh⟧边界：50 次是当前 25% 噪声的经验预算，不是跨噪声率常数⟦en⟧Boundary: fifty observations is an empirical budget for current 25% noise, not a universal constant",
-          "text": "⟦zh⟧热身公式本身按候选维度归一化，但每点 50 次仍由当前噪声强度和整数投影收敛速度决定。更高噪声需要按净标签信号强度平方的倒数增加预算，低噪声则可能继续减少。当前证据是八个独立种子全部精确；下一步应把每点预算也改成由在线噪声估计自动缩放。可复核记录为 normalized_warmup_summary.json。⟦en⟧The warmup formula is normalized by candidate dimension, but fifty observations per point still depends on the current noise level and integer-projection convergence. Higher noise should increase the budget roughly with inverse squared net-label signal, while lower noise may reduce it further. Current evidence is eight exact independent seeds; the next step should scale the per-point budget automatically from the online noise estimate. The auditable record is normalized_warmup_summary.json."
+          "text": "⟦zh⟧热身公式本身按候选维度归一化，但每点 50 次仍由当前噪声强度和整数投影收敛速度决定。这个局限已经由本页前部的噪声自适应有效证据方法处理：低噪声减少预算，高噪声按净标签信号强度平方的倒数增加预算，并把扩阶阈值换算为干净错误单位。本节保留为 25% 条件下的直接消融对照。可复核记录为 normalized_warmup_summary.json。⟦en⟧The warmup formula is normalized by candidate dimension, but fifty observations per point still depends on the current noise level and integer-projection convergence. The noise-adaptive effective-evidence method near the front of this page now addresses that limitation: it reduces the budget at low noise, increases it with inverse squared clean-label signal at high noise, and expresses the expansion threshold in clean-error units. This section is retained as a direct 25%-noise ablation. The auditable record is normalized_warmup_summary.json."
         },
         {
           "kind": "heading",
