@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # make_figs.py — F2 (R_cost curves) and F3 (T1 frontier) as dependency-free
 # SVG, generated ONLY from frozen CSVs. F1 is a mermaid diagram inside
-# CAMPAIGN_REPORT.md. Run from its-a-trap/ root:  python3 figs/make_figs.py
+# SYNTHESIS_REPORT.md. Run from its-a-trap/ root:  python3 figs/make_figs.py
 import csv, os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RS = os.path.join(ROOT, 'rg_selection')

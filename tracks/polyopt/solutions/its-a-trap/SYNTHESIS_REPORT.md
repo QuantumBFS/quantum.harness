@@ -1,4 +1,4 @@
-# Campaign Report — Coarse-Grained NPA for Spin-½ Ground States (Challenge #49)
+# Synthesis Report — Coarse-Grained NPA for Spin-½ Ground States (Challenge #49)
 
 Team **its-a-trap** (Yan-Bai Zhang) · Harnessing Quantum 2026 · 2026-07-30.
 A standalone narrative synthesis. Every number traces to a

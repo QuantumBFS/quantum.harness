@@ -1,7 +1,7 @@
-# 战役报告 — 自旋½基态的粗粒化 NPA（挑战 #49）中文版
+# 综合报告 — 自旋½基态的粗粒化 NPA（挑战 #49）中文版
 
 团队 **its-a-trap**（张彦白）· Harnessing Quantum 2026 · 2026-07-30。
-独立成篇的叙事综述（英文原版 `CAMPAIGN_REPORT.md`；两版同步，以英文版为准）。
+独立成篇的叙事综述（英文原版 `SYNTHESIS_REPORT.md`；两版同步，以英文版为准）。
 每个数字可溯源至冻结 CSV 或署名记录；声称引用账本
 （`audit/claims_ledger.md`，C1–C21）。图 F2/F3 由 `figs/make_figs.py`
 从 CSV 生成。法定术语按 `LAW.md` 保留英文，首现处给中文释义。
