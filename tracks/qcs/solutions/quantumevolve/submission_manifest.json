@@ -1,0 +1,51 @@
+{
+  "challenge": 71,
+  "team": "quantumevolve",
+  "encoding": "LSB-first",
+  "instances": {
+    "mystery-A": {
+      "semantic_function": "add",
+      "input_bits": 16,
+      "output_bits": 9,
+      "train_exact": "2000/2000",
+      "predicted_test_rows": 2000,
+      "gates": 37,
+      "circuit_sha256": "ba36f6b3fbafda62fa9cf5e8dd0855f7f0063c5d7e91a0a7f94b20a0e4f48d68",
+      "predictions_sha256": "e5cdb56c7bc7a6a7371e1e538107cb296ca7c90cf33158f971201630eb62a830",
+      "commitment_file": "51e3f026def41778ecd0d7dcaee9f970b9937488e6716891932b73824c16d4c7  test_outputs.csv"
+    },
+    "mystery-B": {
+      "semantic_function": "absdiff",
+      "input_bits": 14,
+      "output_bits": 7,
+      "train_exact": "1500/1500",
+      "predicted_test_rows": 2000,
+      "gates": 50,
+      "circuit_sha256": "682d39ad3e89cd6e3cad467ce02d7c25e65380a96a9448299f0463a8ff26e145",
+      "predictions_sha256": "9db0fd3d61f4916c24c0e912cbeac1d4e7192713d553502a9a3f531e0e46b27d",
+      "commitment_file": "e2c9d0e23ee36bfc0f12d7f39fdfe2ca5a8abe8eb194fec56500733694b75c28  test_outputs.csv"
+    },
+    "mystery-C": {
+      "semantic_function": "mul",
+      "input_bits": 12,
+      "output_bits": 12,
+      "train_exact": "1200/1200",
+      "predicted_test_rows": 1500,
+      "gates": 191,
+      "circuit_sha256": "3426f78d58641f36fe383eae9199a275b62beafb325d4cf20240d2b15a2ef38c",
+      "predictions_sha256": "be58b51513b8d1439603506581260103f5ddd9ca9812d5c3dfc771afc1eebe79",
+      "commitment_file": "c7b37413844bf0b10ebad0010046469f500354a22cc2ba95cbe42709f8e8337d  test_outputs.csv"
+    },
+    "mystery-D": {
+      "semantic_function": "sumsq",
+      "input_bits": 10,
+      "output_bits": 11,
+      "train_exact": "400/400",
+      "predicted_test_rows": 624,
+      "gates": 144,
+      "circuit_sha256": "8bc5b723073b288ae1bf527c4f60180a62aee240a0d63137ee8cca602a377320",
+      "predictions_sha256": "20c44355f571564476a29e86e7ed5237a059017724a7525d2da499d085906981",
+      "commitment_file": "b445a717483303fa3c5d8a1f7abe81888b267b7c472121c9c464fa9766808580  test_outputs.csv"
+    }
+  }
+}
