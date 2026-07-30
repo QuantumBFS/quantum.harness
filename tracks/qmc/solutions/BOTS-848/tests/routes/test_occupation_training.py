@@ -31,6 +31,10 @@ from scalable_v1.routes.occupation_autoregressive.train import (
     score_covariance,
     _sector_estimators,
 )
+from scalable_v1.routes.occupation_autoregressive.tower import (
+    MetropolisSampleBatch,
+)
+import train_occupation_autoregressive as training_cli
 from train_occupation_autoregressive import main as training_main
 
 
@@ -1101,16 +1105,311 @@ def test_two_seed_848_smokes_are_byte_identical_and_finite(tmp_path: Path) -> No
     )
 
 
+def test_full_objective_uses_arithmetic_tower_means_and_component_scores() -> None:
+    ground_energy = np.asarray([1.0 + 0.5j, 3.0 - 0.5j])
+    ground_l2 = np.asarray([0.5 + 0.25j, 1.5 - 0.25j])
+    ground_scores = np.asarray(
+        [[1.0 + 2.0j, -0.5j], [3.0 - 1.0j, 2.0 + 0.25j]]
+    )
+    energy_by_m: dict[int, np.ndarray] = {}
+    l2_by_m: dict[int, np.ndarray] = {}
+    l4_by_m: dict[int, np.ndarray] = {}
+    scores_by_m: dict[int, np.ndarray] = {}
+    for index, m in enumerate((-2, -1, 0, 1, 2), start=1):
+        energy_by_m[m] = np.asarray(
+            [index + 0.2j * m, index + 2.0 - 0.2j * m]
+        )
+        l2_by_m[m] = np.asarray(
+            [4.0 + 0.1j * index, 6.0 - 0.1j * index]
+        )
+        l4_by_m[m] = np.asarray(
+            [26.0 + 0.3j * m, 30.0 - 0.3j * m]
+        )
+        scores_by_m[m] = np.asarray(
+            [
+                [index + 1.0j * m, 0.25 * index - 0.5j],
+                [-0.5 * index + 0.2j, index + 0.75j * m],
+            ]
+        )
+
+    objective, gradient, metrics = train.full_objective_and_gradient(
+        ground_energy=ground_energy,
+        ground_l2=ground_l2,
+        ground_scores=ground_scores,
+        excited_energy_by_m=energy_by_m,
+        excited_l2_by_m=l2_by_m,
+        excited_l4_by_m=l4_by_m,
+        excited_scores_by_m=scores_by_m,
+    )
+
+    energy_ground = float(np.mean(ground_energy).real)
+    mean_l2_ground = float(np.mean(ground_l2).real)
+    energy_means = {
+        m: float(np.mean(values).real) for m, values in energy_by_m.items()
+    }
+    mean_l2_excited = float(
+        np.mean([np.mean(values).real for values in l2_by_m.values()])
+    )
+    mean_l4_excited = float(
+        np.mean([np.mean(values).real for values in l4_by_m.values()])
+    )
+    variance_l2_excited = mean_l4_excited - mean_l2_excited**2
+    expected_objective = (
+        energy_ground
+        + float(np.mean(list(energy_means.values())))
+        + 0.25 * mean_l2_ground**2
+        + 0.25 * (mean_l2_excited - 6.0) ** 2
+        + 0.05 * variance_l2_excited
+    )
+    mean_component_covariance = lambda values_by_m: np.mean(
+        [
+            score_covariance(scores_by_m[m], values_by_m[m])
+            for m in (-2, -1, 0, 1, 2)
+        ],
+        axis=0,
+    )
+    ground_l2_gradient = score_covariance(ground_scores, ground_l2)
+    excited_l2_gradient = mean_component_covariance(l2_by_m)
+    expected_gradient = (
+        score_covariance(ground_scores, ground_energy)
+        + mean_component_covariance(energy_by_m)
+        + 0.5 * mean_l2_ground * ground_l2_gradient
+        + 0.5 * (mean_l2_excited - 6.0) * excited_l2_gradient
+        + 0.05
+        * (
+            mean_component_covariance(l4_by_m)
+            - 2.0 * mean_l2_excited * excited_l2_gradient
+        )
+    )
+
+    assert objective == pytest.approx(expected_objective)
+    np.testing.assert_allclose(gradient, expected_gradient)
+    assert metrics["energy_excited"] == pytest.approx(
+        np.mean(list(energy_means.values()))
+    )
+    assert metrics["variance_l2_excited"] == pytest.approx(
+        variance_l2_excited
+    )
+    for m in (-2, -1, 0, 1, 2):
+        assert metrics[f"energy_excited_m{m:+d}"] == pytest.approx(
+            energy_means[m]
+        )
+
+
+def test_full_training_runs_frozen_2048_update_six_batch_tower_contract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _tiny_model(width=3)
+    valid_state = model.feasibility.enumerate_support()[0]
+    ground_calls: list[tuple[int, str, int]] = []
+    tower_calls: list[tuple[int, int, int, int]] = []
+
+    def fake_ground_sample(size: int, sector: str, *, seed: int) -> np.ndarray:
+        ground_calls.append((size, sector, seed))
+        return np.full(size, valid_state, dtype=object)
+
+    monkeypatch.setattr(model, "sample", fake_ground_sample)
+
+    class FakeComponent:
+        def __init__(self, m: int) -> None:
+            self.m = m
+
+    class FakeTower:
+        def __init__(self) -> None:
+            self.components = {m: FakeComponent(m) for m in (-2, -1, 0, 1, 2)}
+
+        def __getitem__(self, m: int) -> FakeComponent:
+            return self.components[m]
+
+        def __iter__(self):
+            return iter((-2, -1, 0, 1, 2))
+
+    fake_tower = FakeTower()
+    monkeypatch.setattr(
+        train.LadderTower,
+        "from_m0",
+        lambda **_kwargs: fake_tower,
+    )
+
+    class FakeSampler:
+        def __init__(self, tower: object, *, target_m: int) -> None:
+            assert tower is fake_tower
+            self.target_m = target_m
+
+        def sample(
+            self,
+            *,
+            n_samples: int,
+            burn_in_steps: int,
+            seed: int,
+        ) -> MetropolisSampleBatch:
+            tower_calls.append(
+                (self.target_m, n_samples, burn_in_steps, seed)
+            )
+            return MetropolisSampleBatch(
+                configs=np.full(n_samples, valid_state, dtype=object),
+                n_samples=n_samples,
+                burn_in_steps=burn_in_steps,
+                seed=seed,
+                burn_in_proposals=burn_in_steps,
+                burn_in_accepted_moves=0,
+                sampling_proposals=n_samples,
+                sampling_accepted_moves=0,
+            )
+
+    monkeypatch.setattr(train, "FixedMMetropolisSampler", FakeSampler)
+
+    def zero_estimators(
+        _model: object,
+        _operator: object,
+        states: np.ndarray,
+        _sector: str,
+        *,
+        include_l4: bool = True,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray]:
+        count = states.size
+        return (
+            np.zeros(count, dtype=np.complex128),
+            np.zeros(count, dtype=np.complex128),
+            np.zeros(count, dtype=np.complex128) if include_l4 else None,
+            np.zeros((count, model.parameter_count), dtype=np.complex128),
+        )
+
+    def zero_tower_estimators(
+        _component: object,
+        _operator: object,
+        states: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        count = states.size
+        return (
+            np.zeros(count, dtype=np.complex128),
+            np.zeros(count, dtype=np.complex128),
+            np.zeros(count, dtype=np.complex128),
+            np.zeros((count, model.parameter_count), dtype=np.complex128),
+        )
+
+    monkeypatch.setattr(train, "_sector_estimators", zero_estimators)
+    monkeypatch.setattr(
+        train,
+        "_tower_component_estimators",
+        zero_tower_estimators,
+    )
+    config = train.FullTrainingConfig(
+        training_seed=848,
+        protocol_sha256="a" * 64,
+        comparison_sha="b" * 40,
+    )
+    run_dir = tmp_path / "full"
+
+    artifacts = train.run_full_training(
+        model=model,
+        operator=_zero_pair_operator(model.two_q),
+        config=config,
+        run_dir=run_dir,
+    )
+
+    assert config.updates == 2048
+    assert config.batch_size_per_sector == 512
+    assert config.checkpoint_interval == 128
+    assert artifacts.selected_update == 2048
+    assert len(ground_calls) == 2048
+    assert {(size, sector) for size, sector, _seed in ground_calls} == {
+        (512, "ground")
+    }
+    assert len(tower_calls) == 2048 * 5
+    assert {
+        (m, count, burn_in) for m, count, burn_in, _seed in tower_calls
+    } == {(m, 512, 1024) for m in (-2, -1, 0, 1, 2)}
+    records = _jsonl_records(run_dir / "training.jsonl")
+    assert [record["update"] for record in records] == list(range(1, 2049))
+    assert [record["selected"] for record in records] == [False] * 2047 + [True]
+    assert all(record["ground_samples"] == 512 for record in records)
+    assert all(record["total_samples"] == 3072 for record in records)
+    assert all(
+        record["excited_samples_by_m"]
+        == {str(m): 512 for m in (-2, -1, 0, 1, 2)}
+        for record in records
+    )
+    with np.load(run_dir / "checkpoint.npz", allow_pickle=False) as checkpoint:
+        assert checkpoint["selected_update"].item() == 2048
+        assert checkpoint["completed_update"].item() == 2048
+        assert checkpoint["batch_size_per_sector"].item() == 512
+
+
+def test_full_cli_has_only_frozen_seed_schedule_and_freezes_terminal_run(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    captured: dict[str, object] = {}
+    model = _tiny_model(width=3)
+    operator = _zero_pair_operator(model.two_q)
+    run_dir = tmp_path / "production"
+
+    monkeypatch.setattr(
+        training_cli.AutoregressiveNQS,
+        "initialize",
+        lambda **kwargs: captured.setdefault("initialize", kwargs) and model,
+    )
+    monkeypatch.setattr(training_cli, "_prepared_operator", lambda _two_q: operator)
+
+    def fake_run_full_training(**kwargs: object) -> object:
+        captured["config"] = kwargs["config"]
+        output = Path(kwargs["run_dir"])
+        output.mkdir(parents=True)
+        paths = [
+            output / "checkpoint.npz",
+            output / "optimizer-state.npz",
+            output / "training.jsonl",
+        ]
+        for path in paths:
+            path.write_bytes(b"fixture")
+        return train.TrainingArtifacts(
+            checkpoint=paths[0],
+            optimizer_state=paths[1],
+            training_log=paths[2],
+            checkpoint_sha256="1" * 64,
+            optimizer_state_sha256="2" * 64,
+            training_log_sha256="3" * 64,
+            selected_update=2048,
+        )
+
+    monkeypatch.setattr(
+        training_cli,
+        "run_full_training",
+        fake_run_full_training,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        training_cli,
+        "freeze_training_run",
+        lambda **kwargs: captured.setdefault("freeze", kwargs)
+        and Path(kwargs["run_dir"]) / "training-manifest.json",
+    )
+
+    assert training_cli.main(
+        ["--training-seed", "1848", "--run-dir", str(run_dir)]
+    ) == 0
+
+    config = captured["config"]
+    assert isinstance(config, train.FullTrainingConfig)
+    assert config.training_seed == 1848
+    assert config.updates == 2048
+    assert config.batch_size_per_sector == 512
+    assert config.checkpoint_interval == 128
+    assert captured["freeze"]["training_seed"] == 1848
+    emitted = json.loads(capsys.readouterr().out)
+    assert emitted["mode"] == "a05.2-full-tower-training"
+    assert emitted["selected_update"] == 2048
+
+
 @pytest.mark.parametrize(
     ("arguments", "message"),
     [
         (
             ["--n8-smoke", "--training-seed", "848", "--run-dir", "unused"],
             "N=8 smoke.*A05",
-        ),
-        (
-            ["--training-seed", "848", "--run-dir", "unused"],
-            "full tower-aware training.*A05",
         ),
     ],
 )
