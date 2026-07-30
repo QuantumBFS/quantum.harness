@@ -528,7 +528,6 @@ def train_seed(
     if mismatches:
         raise ValueError(f"architecture mismatch: {mismatches}")
     mean = np.asarray(architecture["centering_mean"], dtype=np.float64)
-    covariance = np.asarray(architecture["covariance"], dtype=np.float64)
     whitening = np.asarray(architecture["whitening"], dtype=np.float64)
     ground_configurations, tower_configurations = _initial_configurations(
         seed,
