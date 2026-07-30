@@ -342,8 +342,10 @@ Expected: commit succeeds with exactly the two Task 1 files.
 - Modify: `tracks/qmc/solutions/frustration-free/challenge-194/tests/test_analyze_pilot_cli.py`
 
 **Interfaces:**
-- Consumes: exact canonical P0 analysis file.
-- Produces: `build-p0-extension --analysis PATH --output PATH`, returning `published` or `verified-existing`.
+- Consumes: exact canonical P0 analysis file plus an explicit absolute canonical
+  P0 evidence root containing the frozen run spec and progress.
+- Produces: `build-p0-extension --analysis PATH --p0-evidence-root PATH --output PATH`,
+  returning `published` or `verified-existing`.
 
 - [ ] **Step 1: Write failing CLI publication tests**
 
@@ -359,18 +361,19 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
 ):
     source = _analysis_document(complete=True)
     source_path = tmp_path / "p0_analysis.json"
+    evidence_root = tmp_path / "pilot-p0-739880d"
     output = tmp_path / "p0_extension_v1_protocol.json"
     source_path.write_bytes(_canonical_bytes(source))
     protocol = {"schema_version": extension.EXTENSION_PROTOCOL_SCHEMA, "protocol_sha256": "a" * 64}
-    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source: protocol)
-    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--output", str(output)]) == 0
+    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source, _root: protocol)
+    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--p0-evidence-root", str(evidence_root), "--output", str(output)]) == 0
     installed = output.read_bytes()
     assert json.loads(capsys.readouterr().out)["publication"] == "published"
-    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--output", str(output)]) == 0
+    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--p0-evidence-root", str(evidence_root), "--output", str(output)]) == 0
     assert output.read_bytes() == installed
     assert json.loads(capsys.readouterr().out)["publication"] == "verified-existing"
-    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source: {**protocol, "protocol_sha256": "b" * 64})
-    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--output", str(output)]) == 1
+    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source, _root: {**protocol, "protocol_sha256": "b" * 64})
+    assert CLI.main(["build-p0-extension", "--analysis", str(source_path), "--p0-evidence-root", str(evidence_root), "--output", str(output)]) == 1
     assert output.read_bytes() == installed
 ```
 
@@ -394,11 +397,12 @@ and `_publish_or_verify`:
 ```python
 extension = commands.add_parser("build-p0-extension")
 extension.add_argument("--analysis", type=Path, required=True)
+extension.add_argument("--p0-evidence-root", type=Path, required=True)
 extension.add_argument("--output", type=Path, required=True)
 
 if arguments.command == "build-p0-extension":
     source = _mapping_document(arguments.analysis.resolve(), "P0 analysis document")
-    document = build_p0_extension_protocol(source)
+    document = build_p0_extension_protocol(source, arguments.p0_evidence_root)
     publication = _publish_or_verify(
         arguments.output.resolve(), document, EXTENSION_PROTOCOL_SCHEMA
     )
@@ -654,7 +658,8 @@ git commit -m "Add authenticated P0 extension runtime"
 - Modify: `tracks/qmc/solutions/frustration-free/challenge-194/README.md`
 
 **Interfaces:**
-- Consumes: extension protocol, approved validation report, exact clean checkout, Slurm array task ID.
+- Consumes: extension protocol, canonical P0 analysis, explicit P0 evidence
+  root, approved validation report, exact clean checkout, Slurm array task ID.
 - Produces: `build-extension-spec`; schema-dispatched worker commands; exact one-CPU/1800-MiB/40-minute wrappers.
 
 - [ ] **Step 1: Write failing CLI and wrapper contract tests**
@@ -677,6 +682,8 @@ def test_build_extension_spec_requires_protocol_and_exact_output_path():
         "build-extension-spec",
         "--protocol", "/tmp/p0_extension_v1_protocol.json",
         "--validation-report", "/tmp/report.json",
+        "--analysis", "/tmp/p0_analysis.json",
+        "--p0-evidence-root", "/tmp/pilot-p0-739880d",
         "--output-root", "/tmp/pilot-p0-extension-v1",
         "--run-spec", "/tmp/pilot-p0-extension-v1/run_spec.json",
     ])
@@ -697,7 +704,8 @@ Expected: failures report absent wrappers and absent
 - [ ] **Step 3: Implement `run_pilot.py` extension construction and dispatch**
 
 Register `build-extension-spec` with required protocol, validation report,
-output root, and run-spec paths. Require
+canonical P0 analysis, explicit P0 evidence root, output root, and run-spec
+paths. Require
 `run_spec == output_root / "run_spec.json"`, load protocol with the bounded
 canonical reader, call `build_p0_extension_run_spec`, and print:
 
@@ -756,15 +764,19 @@ P0_ANALYSIS_PATH="${HARNESS_RUN_SPEC}"
 CHALLENGE_194_REPO_ROOT="${HARNESS_ENTRYPOINT}"
 CHALLENGE_194_PYTHON="${HARNESS_COMMAND}"
 RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"
+P0_EVIDENCE_ROOT="${RESULTS_ROOT}/pilot-p0-739880d"
 EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"
 VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"
 EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"
 "${CHALLENGE_194_PYTHON}" scripts/analyze_pilot.py build-p0-extension \
   --analysis "${P0_ANALYSIS_PATH}" \
+  --p0-evidence-root "${P0_EVIDENCE_ROOT}" \
   --output "${EXTENSION_PROTOCOL_PATH}"
 "${CHALLENGE_194_PYTHON}" scripts/run_pilot.py build-extension-spec \
   --protocol "${EXTENSION_PROTOCOL_PATH}" \
   --validation-report "${VALIDATION_REPORT_PATH}" \
+  --analysis "${P0_ANALYSIS_PATH}" \
+  --p0-evidence-root "${P0_EVIDENCE_ROOT}" \
   --output-root "${EXTENSION_ROOT}" \
   --run-spec "${EXTENSION_ROOT}/run_spec.json"
 ```
@@ -833,22 +845,23 @@ Run from repository root:
 export HARNESS_CLUSTER_PROFILE=wuzh02-jiangweiqi
 export SUBMIT_SHA="$(git rev-parse HEAD)"
 export PROFILE="skills/using-slurm/profiles/wuzh02-jiangweiqi.toml"
-export REMOTE_REPO="/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2"
-export REMOTE_BUNDLE="/work/share/giggleliu/jiangweiqi/challenge-194-p0-extension-v2.bundle"
+export REMOTE_REPO="/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v3"
+export REMOTE_BUNDLE="/work/share/giggleliu/jiangweiqi/challenge-194-p0-extension-v3.bundle"
 export REMOTE_RESULTS="/work/share/giggleliu/jiangweiqi/results/challenge-194"
 export REMOTE_ROOT="${REMOTE_RESULTS}/pilot-p0-extension-v1"
 export REMOTE_ANALYSIS="${REMOTE_RESULTS}/p0_analysis.json"
+export REMOTE_P0_EVIDENCE="${REMOTE_RESULTS}/pilot-p0-739880d"
 export REMOTE_PROTOCOL="${REMOTE_RESULTS}/p0_extension_v1_protocol.json"
 export REMOTE_VALIDATION="${REMOTE_RESULTS}/validation-prod-877ab93/report/report.json"
 export REMOTE_PYTHON="/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python"
-export LOCAL_BUNDLE="/tmp/challenge-194-p0-extension-v2.bundle"
+export LOCAL_BUNDLE="/tmp/challenge-194-p0-extension-v3.bundle"
 export REMOTE_BUNDLE_STAGE="${REMOTE_BUNDLE}.upload-${SUBMIT_SHA}-$(date -u +%Y%m%dT%H%M%S%N)-$$"
 scripts/harness_slurm.sh precheck
 scripts/harness_slurm.sh probe-partitions
 ```
 
-The `v2` deployment and bundle names are fresh immutable namespaces for this
-submission. Preserve the failed `v1` deployment, bundle, job logs, and all
+The `v3` deployment and bundle names are fresh immutable namespaces for this
+submission. Preserve the failed `v1` and `v2` deployments, bundles, job logs, and all
 other diagnostics without deletion or overwrite. The absent shared
 `REMOTE_PROTOCOL` and `REMOTE_ROOT` result paths remain the preregistered
 version-1 scientific artifact paths.
@@ -887,6 +900,8 @@ ssh wuzh02-jiangweiqi "
   git -C '${REMOTE_REPO}' checkout --detach '${SUBMIT_SHA}'
   test -z \"\$(git -C '${REMOTE_REPO}' status --porcelain)\"
   test \"\$(sha256sum '${REMOTE_ANALYSIS}' | awk '{print \$1}')\" = '44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b'
+  test \"\$(sha256sum '${REMOTE_P0_EVIDENCE}/run_spec.json' | awk '{print \$1}')\" = 'd17d3df9528a09f0d834ebe9d5ce6f283e488d2326f6cb14873a90923c5d9840'
+  test \"\$(sha256sum '${REMOTE_P0_EVIDENCE}/progress.json' | awk '{print \$1}')\" = 'ea29a8163a5d3e85768842d64fac4c719f5aeadf965b3318b305fb7a2cc2d15f'
   test \"\$(sha256sum '${REMOTE_VALIDATION}' | awk '{print \$1}')\" = '036b4b8a06164716aff5f40cc38ac4855a212026a556e1c5fe33ce32ce0babb8'
   test -x '${REMOTE_PYTHON}'
 "
@@ -1373,12 +1388,12 @@ Run:
 ```bash
 ssh wuzh02-jiangweiqi "
   set -euo pipefail
-  export PYTHONPATH='/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/src'
+  export PYTHONPATH='/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v3/tracks/qmc/solutions/frustration-free/challenge-194/src'
   '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python' \
-    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' merge \
+    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v3/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' merge \
     --run-spec '/work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-extension-v1/run_spec.json'
   '/work/share/giggleliu/jiangweiqi/quantum.harness-challenge-194/.venv/bin/python' \
-    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v2/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' verify \
+    '/work/share/giggleliu/jiangweiqi/quantum.harness-p0-extension-v3/tracks/qmc/solutions/frustration-free/challenge-194/scripts/run_pilot.py' verify \
     --run-spec '/work/share/giggleliu/jiangweiqi/results/challenge-194/pilot-p0-extension-v1/run_spec.json'
 "
 ```

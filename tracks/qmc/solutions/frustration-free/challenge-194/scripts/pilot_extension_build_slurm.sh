@@ -87,9 +87,11 @@ if [[ ! -f "${SOLUTION_ROOT}/scripts/analyze_pilot.py" ||
 fi
 
 RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"
+P0_EVIDENCE_ROOT="${RESULTS_ROOT}/pilot-p0-739880d"
 EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"
 VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"
 EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"
+require_canonical_path P0_EVIDENCE_ROOT "${P0_EVIDENCE_ROOT}" directory
 require_canonical_path VALIDATION_REPORT_PATH "${VALIDATION_REPORT_PATH}" file
 
 P0_ANALYSIS_SHA256="44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b"
@@ -158,9 +160,12 @@ cd "${SOLUTION_ROOT}"
 export PYTHONPATH="${SOLUTION_ROOT}/src"
 "${CHALLENGE_194_PYTHON}" scripts/analyze_pilot.py build-p0-extension \
   --analysis "${P0_ANALYSIS_PATH}" \
+  --p0-evidence-root "${P0_EVIDENCE_ROOT}" \
   --output "${EXTENSION_PROTOCOL_PATH}"
 "${CHALLENGE_194_PYTHON}" scripts/run_pilot.py build-extension-spec \
   --protocol "${EXTENSION_PROTOCOL_PATH}" \
   --validation-report "${VALIDATION_REPORT_PATH}" \
+  --analysis "${P0_ANALYSIS_PATH}" \
+  --p0-evidence-root "${P0_EVIDENCE_ROOT}" \
   --output-root "${EXTENSION_ROOT}" \
   --run-spec "${EXTENSION_ROOT}/run_spec.json"

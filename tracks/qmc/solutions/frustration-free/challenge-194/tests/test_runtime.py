@@ -252,6 +252,8 @@ def test_readme_documents_exact_p0_p1_collaborator_boundary():
         "P0 extension required before P1 publication: 0.9, 1.0",
         "scripts/analyze_pilot.py build-p0-extension",
         "scripts/run_pilot.py build-extension-spec",
+        "--p0-evidence-root /absolute/results/challenge-194/pilot-p0-739880d",
+        "never inferred from a checkout-local",
         "scripts/pilot_extension_build_slurm.sh",
         "scripts/pilot_extension_array_slurm.sh",
         "No P0 extension data exist yet",
@@ -287,6 +289,9 @@ def test_pilot_plan_freezes_selector_and_exploratory_boundary():
         "canonical decimal IDs",
         "three submission batches",
         "six acceptance checks",
+        "${RESULTS_ROOT}/pilot-p0-739880d",
+        "No construction or validation",
+        "path may infer these gitignored artifacts",
     )
     for text in required:
         assert text in plan
@@ -300,12 +305,14 @@ def test_extension_build_wrapper_freezes_resources_paths_and_environment():
         "#SBATCH --time=00:10:00",
         'P0_ANALYSIS_PATH="${HARNESS_RUN_SPEC}"',
         'RESULTS_ROOT="$(dirname "${P0_ANALYSIS_PATH}")"',
+        'P0_EVIDENCE_ROOT="${RESULTS_ROOT}/pilot-p0-739880d"',
         'EXTENSION_PROTOCOL_PATH="${RESULTS_ROOT}/p0_extension_v1_protocol.json"',
         'VALIDATION_REPORT_PATH="${RESULTS_ROOT}/validation-prod-877ab93/report/report.json"',
         'EXTENSION_ROOT="${RESULTS_ROOT}/pilot-p0-extension-v1"',
         "44083701db692304cd3aa054c8a9488b75674cead7cd6bf479c0a203cc1fa10b",
         "unset PYTHONHOME PYTHONUSERBASE PYTHONPATH",
         "scripts/analyze_pilot.py build-p0-extension",
+        '--p0-evidence-root "${P0_EVIDENCE_ROOT}"',
         "scripts/run_pilot.py build-extension-spec",
     )
     for text in required:
@@ -351,8 +358,9 @@ def test_extension_operational_contract_matches_approval_registry():
         "quantum.harness-challenge-194/tracks/qmc/solutions/"
         "frustration-free/challenge-194/.venv/bin/python" not in implementation_plan
     )
-    assert "quantum.harness-p0-extension-v2" in implementation_plan
-    assert "challenge-194-p0-extension-v2.bundle" in implementation_plan
+    assert "quantum.harness-p0-extension-v3" in implementation_plan
+    assert "challenge-194-p0-extension-v3.bundle" in implementation_plan
+    assert "failed `v1` and `v2`" in implementation_plan
     assert (
         'REMOTE_ROOT="${REMOTE_RESULTS}/pilot-p0-extension-v1"' in implementation_plan
     )

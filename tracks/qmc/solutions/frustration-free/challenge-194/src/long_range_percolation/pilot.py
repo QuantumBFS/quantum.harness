@@ -1086,10 +1086,11 @@ def build_p0_extension_run_spec(
     output_root: Path,
     validation_report: Path,
     protocol: Mapping[str, object],
+    p0_analysis: Mapping[str, object],
+    p0_evidence_root: Path,
 ) -> dict[str, object]:
     from .pilot_extension import (
         EXTENSION_RUN_SPEC_SCHEMA,
-        load_frozen_p0_analysis,
         validate_p0_extension_protocol,
     )
 
@@ -1098,9 +1099,13 @@ def build_p0_extension_run_spec(
         or not output_root.is_absolute()
         or not isinstance(validation_report, Path)
         or not validation_report.is_absolute()
+        or not isinstance(p0_evidence_root, Path)
+        or not p0_evidence_root.is_absolute()
     ):
-        raise RuntimeError("extension output and validation paths must be absolute")
-    validate_p0_extension_protocol(load_frozen_p0_analysis(), protocol)
+        raise RuntimeError(
+            "extension output, validation, and evidence paths must be absolute"
+        )
+    validate_p0_extension_protocol(p0_analysis, protocol, p0_evidence_root)
     source = _current_source(require_clean=True)
     correctness = _verified_correctness(validation_report)
     runtime, runtime_sha256 = _runtime_document()
@@ -1290,8 +1295,7 @@ def _validate_pilot_spec(
     if is_extension:
         from .pilot_extension import (
             P0_ANALYSIS_DOCUMENT_SHA256,
-            _validate_p0_extension_protocol_for_revision,
-            load_frozen_p0_analysis,
+            _validate_bound_p0_extension_protocol_for_revision,
         )
 
         combined_protocol = dict(protocol)
@@ -1307,8 +1311,7 @@ def _validate_pilot_spec(
             or document.get("cell_count") != protocol.get("cell_count")
         ):
             raise RuntimeError("extension run spec source binding is invalid")
-        _validate_p0_extension_protocol_for_revision(
-            load_frozen_p0_analysis(),
+        _validate_bound_p0_extension_protocol_for_revision(
             combined_protocol,
             expected_source_revision=str(document["orchestration_revision"]),
         )
@@ -3192,8 +3195,6 @@ def _build_test_extension_run_spec(
         EXTENSION_MASTER_SEED,
         EXTENSION_PHASE,
         EXTENSION_RUN_SPEC_SCHEMA,
-        build_p0_extension_protocol,
-        load_frozen_p0_analysis,
     )
 
     if tiny:
@@ -3225,11 +3226,9 @@ def _build_test_extension_run_spec(
             purpose="exploratory-p0-extension-only",
         )
 
-    extension_protocol = (
-        build_p0_extension_protocol(load_frozen_p0_analysis())
-        if protocol is None
-        else protocol
-    )
+    if protocol is None:
+        raise RuntimeError("non-tiny extension tests require an explicit protocol")
+    extension_protocol = protocol
     runtime, runtime_hash = _runtime_document()
     modules = _scientific_hashes()
     approval = _load_approval_registry()

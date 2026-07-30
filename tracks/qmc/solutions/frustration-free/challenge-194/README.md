@@ -172,14 +172,23 @@ and runs these implemented commands:
 ```bash
 /absolute/offline/python scripts/analyze_pilot.py build-p0-extension \
   --analysis /absolute/results/challenge-194/p0_analysis.json \
+  --p0-evidence-root /absolute/results/challenge-194/pilot-p0-739880d \
   --output /absolute/results/challenge-194/p0_extension_v1_protocol.json
 
 /absolute/offline/python scripts/run_pilot.py build-extension-spec \
   --protocol /absolute/results/challenge-194/p0_extension_v1_protocol.json \
   --validation-report /absolute/results/challenge-194/validation-prod-877ab93/report/report.json \
+  --analysis /absolute/results/challenge-194/p0_analysis.json \
+  --p0-evidence-root /absolute/results/challenge-194/pilot-p0-739880d \
   --output-root /absolute/results/challenge-194/pilot-p0-extension-v1 \
   --run-spec /absolute/results/challenge-194/pilot-p0-extension-v1/run_spec.json
 ```
+
+`--p0-evidence-root` is mandatory at both construction stages. It must be an
+absolute canonical non-symlink directory containing the frozen
+`pilot-p0-739880d/run_spec.json` and `progress.json` bytes. These artifacts are
+never inferred from a checkout-local, gitignored `results/` tree; the canonical
+P0 analysis remains the separate explicit `--analysis` input.
 
 After the build succeeds, submit the immutable worker root with exact
 one-CPU, 1800-MiB, 40-minute resources. Slurm IDs `1..96` map to zero-based

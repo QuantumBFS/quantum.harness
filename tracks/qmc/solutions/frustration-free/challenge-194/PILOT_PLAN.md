@@ -113,6 +113,13 @@ non-empty directories and symlinks. The Slurm wrapper applies these rules
 independently to every worker, and the documented build-spec command must do
 the same.
 
+Extension protocol and run-spec construction both require the explicit
+absolute canonical non-symlink P0 evidence root
+`${RESULTS_ROOT}/pilot-p0-739880d`. Its descriptor-bound `run_spec.json` and
+`progress.json` must match the frozen P0 hashes. No construction or validation
+path may infer these gitignored artifacts from the source checkout; canonical
+`p0_analysis.json` remains a separate explicit input.
+
 The compute-node build command uses a numeric Slurm job ID and the same
 single-owner creation rule (after the environment cleanup above):
 

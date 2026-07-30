@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -22,6 +23,7 @@ RUN_PILOT_SPEC.loader.exec_module(run_pilot_cli)
 P0_ANALYSIS = (
     Path(__file__).resolve().parents[6] / "results/challenge-194/p0_analysis.json"
 )
+P0_EVIDENCE_ROOT = P0_ANALYSIS.parent / "pilot-p0-739880d"
 EXPECTED_SPANS = {
     (0.9).hex(): (
         (4, 7),
@@ -81,7 +83,7 @@ def _source() -> dict[str, object]:
 
 
 def _extension_protocol_fixture() -> dict[str, object]:
-    return extension.build_p0_extension_protocol(_source())
+    return extension.build_p0_extension_protocol(_source(), P0_EVIDENCE_ROOT)
 
 
 def _rehash(protocol: dict[str, object]) -> None:
@@ -111,6 +113,10 @@ def test_build_extension_spec_requires_protocol_and_exact_output_path():
             "/tmp/p0_extension_v1_protocol.json",
             "--validation-report",
             "/tmp/report.json",
+            "--analysis",
+            "/tmp/p0_analysis.json",
+            "--p0-evidence-root",
+            "/tmp/pilot-p0-739880d",
             "--output-root",
             "/tmp/pilot-p0-extension-v1",
             "--run-spec",
@@ -132,6 +138,10 @@ def test_build_extension_spec_rejects_mismatched_run_spec_path(
             str(tmp_path / "protocol.json"),
             "--validation-report",
             str(tmp_path / "report.json"),
+            "--analysis",
+            str(tmp_path / "p0_analysis.json"),
+            "--p0-evidence-root",
+            str(tmp_path / "pilot-p0-739880d"),
             "--output-root",
             str(output_root),
             "--run-spec",
@@ -143,6 +153,23 @@ def test_build_extension_spec_rejects_mismatched_run_spec_path(
         "--run-spec must equal <output-root>/run_spec.json" in capsys.readouterr().err
     )
     assert not output_root.exists()
+
+
+def test_build_extension_spec_requires_explicit_analysis_and_evidence_root():
+    with pytest.raises(SystemExit):
+        run_pilot_cli._parser().parse_args(
+            [
+                "build-extension-spec",
+                "--protocol",
+                "/tmp/protocol.json",
+                "--validation-report",
+                "/tmp/report.json",
+                "--output-root",
+                "/tmp/extension",
+                "--run-spec",
+                "/tmp/extension/run_spec.json",
+            ]
+        )
 
 
 def _run_extension_wrapper(
@@ -217,6 +244,10 @@ def _run_extension_build_wrapper(
     results.mkdir()
     analysis = results / "p0_analysis.json"
     analysis.write_bytes(P0_ANALYSIS.read_bytes())
+    evidence_root = results / "pilot-p0-739880d"
+    evidence_root.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence_root / name)
     validation_report = results / "validation-prod-877ab93/report/report.json"
     validation_report.parent.mkdir(parents=True)
     validation_report.write_text("{}\n", encoding="utf-8")
@@ -443,6 +474,13 @@ def test_extension_build_wrapper_dispatches_approved_validation_package(
     result, validation_report = _run_extension_build_wrapper(tmp_path)
     assert result.returncode == 0, result.stderr
     assert f"<--validation-report><{validation_report}>" in result.stdout
+    assert (
+        result.stdout.count(
+            f"<--p0-evidence-root><{tmp_path / 'results/pilot-p0-739880d'}>"
+        )
+        == 2
+    )
+    assert f"<--analysis><{tmp_path / 'results/p0_analysis.json'}>" in result.stdout
     assert "validation-prod-fd0aa31-compute" not in result.stdout
 
 
@@ -545,11 +583,28 @@ def test_public_extension_builder_binds_approved_evidence(
         },
     )
     output_root = (tmp_path / "extension").resolve()
+    clean_checkout = tmp_path / "clean-checkout"
+    clean_checkout.mkdir()
+    monkeypatch.setattr(
+        extension,
+        "_p0_run_spec_path",
+        lambda: clean_checkout / "results/missing/run_spec.json",
+        raising=False,
+    )
+    monkeypatch.setattr(
+        extension,
+        "_p0_progress_path",
+        lambda: clean_checkout / "results/missing/progress.json",
+        raising=False,
+    )
     document = pilot.build_p0_extension_run_spec(
         output_root,
         (tmp_path / "correctness" / "report.json").resolve(),
         protocol,
+        _source(),
+        P0_EVIDENCE_ROOT,
     )
+    assert not (clean_checkout / "results").exists()
     assert document["cells"] == protocol["cells"]
     assert document["design_sha256"] == protocol["design_sha256"]
     assert document["correctness_report_sha256"] == approval["report_sha256"]
@@ -561,6 +616,8 @@ def test_public_extension_builder_binds_approved_evidence(
             Path("relative"),
             Path("relative-report.json"),
             protocol,
+            _source(),
+            Path("relative-evidence"),
         )
 
 
@@ -676,24 +733,28 @@ def test_production_extension_schema_cannot_be_downgraded_to_test(
 )
 def test_extension_sources_reject_oversize_before_read(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
     source_class: str,
     maximum_size: int,
 ):
-    source = tmp_path / f"{source_class}.json"
-    with source.open("wb") as stream:
-        stream.truncate(maximum_size + 1)
     if source_class == "design":
+        source = tmp_path / "design.md"
+        with source.open("wb") as stream:
+            stream.truncate(maximum_size + 1)
         invoke = lambda: extension._file_sha256(source)
-    elif source_class == "progress":
-        monkeypatch.setattr(extension, "_p0_progress_path", lambda: source)
-        invoke = extension._validate_frozen_progress
-    elif source_class == "registry":
-        monkeypatch.setattr(extension, "_p0_run_spec_path", lambda: source)
-        invoke = extension._p0_identity_hashes
+    elif source_class == "analysis":
+        source = tmp_path / "p0_analysis.json"
+        with source.open("wb") as stream:
+            stream.truncate(maximum_size + 1)
+        invoke = lambda: extension.load_frozen_p0_analysis(source)
     else:
-        monkeypatch.setattr(extension, "_p0_analysis_path", lambda: source)
-        invoke = extension.load_frozen_p0_analysis
+        evidence = tmp_path / "evidence"
+        evidence.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+        name = "progress.json" if source_class == "progress" else "run_spec.json"
+        with (evidence / name).open("wb") as stream:
+            stream.truncate(maximum_size + 1)
+        invoke = lambda: extension._load_p0_evidence(evidence)
     with pytest.raises(RuntimeError, match="byte-size|bounded"):
         invoke()
 
@@ -713,39 +774,47 @@ def test_extension_sources_reject_pathname_swap_after_descriptor_read(
         replacement = tmp_path / "replacement.md"
         replacement.write_bytes(b"changed!\n")
         invoke = lambda: extension._file_sha256(source)
+        read_owner = pilot
+    elif source_class == "analysis":
+        source = tmp_path / "p0_analysis.json"
+        source.write_bytes(P0_ANALYSIS.read_bytes())
+        replacement = tmp_path / "replacement-p0_analysis.json"
+        payload = bytearray(source.read_bytes())
+        payload[0] = ord("[")
+        replacement.write_bytes(payload)
+        invoke = lambda: extension.load_frozen_p0_analysis(source)
+        read_owner = pilot
     else:
-        actual = {
-            "progress": extension._p0_progress_path(),
-            "registry": extension._p0_run_spec_path(),
-            "analysis": extension._p0_analysis_path(),
-        }[source_class]
-        source = tmp_path / actual.name
-        source.write_bytes(actual.read_bytes())
-        replacement = tmp_path / f"replacement-{actual.name}"
+        evidence = tmp_path / "evidence"
+        evidence.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+        name = "progress.json" if source_class == "progress" else "run_spec.json"
+        source = evidence / name
+        replacement = tmp_path / f"replacement-{name}"
         payload = bytearray(source.read_bytes())
         payload[0] = ord("[") if payload[0] != ord("[") else ord("{")
         replacement.write_bytes(payload)
-        if source_class == "progress":
-            monkeypatch.setattr(extension, "_p0_progress_path", lambda: source)
-            invoke = extension._validate_frozen_progress
-        elif source_class == "registry":
-            monkeypatch.setattr(extension, "_p0_run_spec_path", lambda: source)
-            invoke = extension._p0_identity_hashes
-        else:
-            monkeypatch.setattr(extension, "_p0_analysis_path", lambda: source)
-            invoke = extension.load_frozen_p0_analysis
-    real_read = pilot._read_descriptor_bounded
+        invoke = lambda: extension._load_p0_evidence(evidence)
+        read_owner = extension
+    target_description = {
+        "progress": "progress",
+        "registry": "run spec",
+    }.get(source_class)
+    real_read = read_owner._read_descriptor_bounded
     swapped = False
 
     def swapping_read(descriptor: int, maximum_size: int, description: str) -> bytes:
         nonlocal swapped
         result = real_read(descriptor, maximum_size, description)
-        if not swapped:
+        if not swapped and (
+            target_description is None or target_description in description
+        ):
             swapped = True
             replacement.replace(source)
         return result
 
-    monkeypatch.setattr(pilot, "_read_descriptor_bounded", swapping_read)
+    monkeypatch.setattr(read_owner, "_read_descriptor_bounded", swapping_read)
     with pytest.raises(RuntimeError, match="identity|generation|changed"):
         invoke()
 
@@ -763,7 +832,7 @@ def test_extension_ranges_are_derived_from_exact_real_p0():
 
 
 def test_extension_grids_are_recursive_binary64_and_hash_bound():
-    protocol = extension.build_p0_extension_protocol(_source())
+    protocol = extension.build_p0_extension_protocol(_source(), P0_EVIDENCE_ROOT)
     entries = {entry["sigma_hex"]: entry for entry in protocol["sigma_entries"]}
     assert {
         sigma: entry["kappas"] for sigma, entry in entries.items()
@@ -780,8 +849,8 @@ def test_extension_grids_are_recursive_binary64_and_hash_bound():
 
 def test_protocol_has_exact_axes_fresh_identities_and_canonical_cells():
     source = _source()
-    protocol = extension.build_p0_extension_protocol(source)
-    extension.validate_p0_extension_protocol(source, protocol)
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
     assert protocol["schema_version"] == extension.EXTENSION_PROTOCOL_SCHEMA
     assert protocol["master_seed"] == 19_420_262_729
     assert protocol["lengths"] == [2**10, 2**14, 2**18]
@@ -810,33 +879,117 @@ def test_protocol_has_exact_axes_fresh_identities_and_canonical_cells():
     )
 
 
-def test_protocol_rejects_actual_frozen_progress_drift(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_protocol_build_uses_explicit_external_evidence_in_clean_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    external = tmp_path / "external-p0"
+    external.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, external / name)
+    clean_checkout = tmp_path / "clean-checkout"
+    clean_checkout.mkdir()
+    monkeypatch.setattr(
+        extension,
+        "_p0_run_spec_path",
+        lambda: clean_checkout / "results/missing/run_spec.json",
+        raising=False,
+    )
+    monkeypatch.setattr(
+        extension,
+        "_p0_progress_path",
+        lambda: clean_checkout / "results/missing/progress.json",
+        raising=False,
+    )
+
+    protocol = extension.build_p0_extension_protocol(_source(), external)
+    extension.validate_p0_extension_protocol(_source(), protocol, external)
+
+    assert not (clean_checkout / "results").exists()
+    assert protocol["source_p0_run_spec_sha256"] == extension.P0_RUN_SPEC_SHA256
+    assert protocol["source_p0_progress_sha256"] == extension.P0_PROGRESS_SHA256
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ("relative", "missing", "wrong-run-spec", "wrong-progress", "symlink"),
+)
+def test_protocol_evidence_root_fails_closed(tmp_path: Path, kind: str):
+    evidence = tmp_path / "evidence"
+    if kind == "relative":
+        candidate = Path("relative-evidence")
+    elif kind == "missing":
+        candidate = evidence
+    else:
+        target = tmp_path / "target"
+        target.mkdir()
+        for name in ("run_spec.json", "progress.json"):
+            shutil.copyfile(P0_EVIDENCE_ROOT / name, target / name)
+        if kind == "wrong-run-spec":
+            (target / "run_spec.json").write_text("{}\n", encoding="utf-8")
+            candidate = target
+        elif kind == "wrong-progress":
+            (target / "progress.json").write_text("{}\n", encoding="utf-8")
+            candidate = target
+        else:
+            evidence.symlink_to(target, target_is_directory=True)
+            candidate = evidence
+
+    with pytest.raises(RuntimeError, match="evidence|absolute|canonical|hash"):
+        extension.build_p0_extension_protocol(_source(), candidate)
+
+
+def test_protocol_evidence_root_rejects_directory_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    for name in ("run_spec.json", "progress.json"):
+        shutil.copyfile(P0_EVIDENCE_ROOT / name, evidence / name)
+    original_reader = extension._read_evidence_document_at
+
+    def swapping_reader(root_fd: int, name: str, description: str, maximum_size: int):
+        document = original_reader(root_fd, name, description, maximum_size)
+        if name == "run_spec.json":
+            moved = tmp_path / "moved-evidence"
+            evidence.rename(moved)
+            evidence.mkdir()
+            for filename in ("run_spec.json", "progress.json"):
+                shutil.copyfile(moved / filename, evidence / filename)
+        return document
+
+    monkeypatch.setattr(extension, "_read_evidence_document_at", swapping_reader)
+    with pytest.raises(RuntimeError, match="identity changed"):
+        extension.build_p0_extension_protocol(_source(), evidence)
+
+
+def test_protocol_rejects_actual_frozen_progress_drift(tmp_path: Path):
     source = _source()
-    protocol = extension.build_p0_extension_protocol(source)
-    drifted = tmp_path / "progress.json"
-    drifted.write_bytes(b"{}\n")
-    monkeypatch.setattr(extension, "_p0_progress_path", lambda: drifted)
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    drifted_root = tmp_path / "drifted-p0"
+    drifted_root.mkdir()
+    shutil.copyfile(P0_EVIDENCE_ROOT / "run_spec.json", drifted_root / "run_spec.json")
+    (drifted_root / "progress.json").write_bytes(b"{}\n")
     with pytest.raises(RuntimeError, match="progress"):
-        extension.build_p0_extension_protocol(source)
+        extension.build_p0_extension_protocol(source, drifted_root)
     with pytest.raises(RuntimeError, match="progress"):
-        extension.validate_p0_extension_protocol(source, protocol)
+        extension.validate_p0_extension_protocol(source, protocol, drifted_root)
 
 
 def test_protocol_rejects_recomputed_bracket_mismatch(
     monkeypatch: pytest.MonkeyPatch,
 ):
     source = _source()
-    protocol = extension.build_p0_extension_protocol(source)
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
     forged = copy.deepcopy(extension.select_p1_brackets(source))
     forged["requires_p0_extension"] = False
     assert forged["bracket_document_sha256"] == extension.P0_BRACKET_DOCUMENT_SHA256
     monkeypatch.setattr(extension, "select_p1_brackets", lambda _source: forged)
     with pytest.raises(RuntimeError, match="bracket"):
-        extension.build_p0_extension_protocol(source)
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
     with pytest.raises(RuntimeError, match="bracket"):
-        extension.validate_p0_extension_protocol(source, protocol)
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
 
 
 @pytest.mark.parametrize(
@@ -850,11 +1003,13 @@ def test_validator_normalizes_malformed_digest_types(
     field: str, value: object, message: str
 ):
     source = _source()
-    protocol = copy.deepcopy(extension.build_p0_extension_protocol(source))
+    protocol = copy.deepcopy(
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    )
     protocol["cells"][0][field] = value
     _rehash(protocol)
     with pytest.raises(RuntimeError, match=message):
-        extension.validate_p0_extension_protocol(source, protocol)
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
 
 
 @pytest.mark.parametrize(
@@ -895,7 +1050,7 @@ def test_validator_normalizes_malformed_digest_types(
         ),
         (
             lambda value: value["cells"][0].update(
-                request_sha256=extension._p0_identity_hashes()[0][0]
+                request_sha256=extension._p0_identity_hashes(P0_EVIDENCE_ROOT)[0][0]
             ),
             "collision",
         ),
@@ -905,27 +1060,29 @@ def test_semantic_validator_rejects_superficially_rehashed_mutations(
     mutation, message: str
 ):
     source = _source()
-    protocol = copy.deepcopy(extension.build_p0_extension_protocol(source))
+    protocol = copy.deepcopy(
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
+    )
     mutation(protocol)
     _rehash(protocol)
     with pytest.raises(RuntimeError, match=message):
-        extension.validate_p0_extension_protocol(source, protocol)
+        extension.validate_p0_extension_protocol(source, protocol, P0_EVIDENCE_ROOT)
 
 
 def test_protocol_rejects_unknown_fields_and_p1_identity_overlap(
     monkeypatch: pytest.MonkeyPatch,
 ):
     source = _source()
-    protocol = extension.build_p0_extension_protocol(source)
+    protocol = extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
     forged = copy.deepcopy(protocol)
     forged["unknown"] = True
     _rehash(forged)
     with pytest.raises(RuntimeError, match="fields"):
-        extension.validate_p0_extension_protocol(source, forged)
+        extension.validate_p0_extension_protocol(source, forged, P0_EVIDENCE_ROOT)
 
     monkeypatch.setattr(extension, "EXTENSION_REPLICAS", tuple(range(8, 24)))
     with pytest.raises(RuntimeError, match="P1|overlap"):
-        extension.build_p0_extension_protocol(source)
+        extension.build_p0_extension_protocol(source, P0_EVIDENCE_ROOT)
 
 
 def test_component_and_grid_helpers_fail_closed():

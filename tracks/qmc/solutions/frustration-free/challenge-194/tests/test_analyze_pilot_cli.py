@@ -192,7 +192,14 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
         "schema_version": extension.EXTENSION_PROTOCOL_SCHEMA,
         "protocol_sha256": "a" * 64,
     }
-    monkeypatch.setattr(CLI, "build_p0_extension_protocol", lambda _source: protocol)
+    evidence_root = (tmp_path / "external-p0").resolve()
+    evidence_root.mkdir()
+    seen_roots: list[Path] = []
+    monkeypatch.setattr(
+        CLI,
+        "build_p0_extension_protocol",
+        lambda _source, root: seen_roots.append(root) or protocol,
+    )
 
     assert (
         CLI.main(
@@ -200,6 +207,8 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
                 "build-p0-extension",
                 "--analysis",
                 str(source_path),
+                "--p0-evidence-root",
+                str(evidence_root),
                 "--output",
                 str(output),
             ]
@@ -215,6 +224,8 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
                 "build-p0-extension",
                 "--analysis",
                 str(source_path),
+                "--p0-evidence-root",
+                str(evidence_root),
                 "--output",
                 str(output),
             ]
@@ -227,7 +238,9 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
     monkeypatch.setattr(
         CLI,
         "build_p0_extension_protocol",
-        lambda _source: {**protocol, "protocol_sha256": "b" * 64},
+        lambda _source, root: (
+            seen_roots.append(root) or {**protocol, "protocol_sha256": "b" * 64}
+        ),
     )
     assert (
         CLI.main(
@@ -235,6 +248,8 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
                 "build-p0-extension",
                 "--analysis",
                 str(source_path),
+                "--p0-evidence-root",
+                str(evidence_root),
                 "--output",
                 str(output),
             ]
@@ -242,6 +257,20 @@ def test_build_p0_extension_publishes_once_and_rejects_different_bytes(
         == 1
     )
     assert output.read_bytes() == installed
+    assert seen_roots == [evidence_root, evidence_root, evidence_root]
+
+
+def test_build_p0_extension_requires_explicit_evidence_root():
+    with pytest.raises(SystemExit):
+        CLI._parser().parse_args(
+            [
+                "build-p0-extension",
+                "--analysis",
+                "/tmp/p0_analysis.json",
+                "--output",
+                "/tmp/p0_extension_v1_protocol.json",
+            ]
+        )
 
 
 def test_verify_command_accepts_bound_canonical_protocol(

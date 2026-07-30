@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import subprocess
 from collections.abc import Mapping, Sequence
 from itertools import pairwise
@@ -19,8 +20,14 @@ from .pilot import (
     PILOT_PROGRESS_MAX_BYTES,
     PILOT_REPLICAS,
     PILOT_RUN_SPEC_MAX_BYTES,
+    _close_directory_chain,
     _file_hash,
+    _open_directory_chain,
+    _open_regular_at,
     _read_canonical,
+    _read_descriptor_bounded,
+    _require_directory_chain,
+    _require_regular_at_identity,
 )
 from .pilot_analysis import (
     P1_MASTER_SEED,
@@ -159,18 +166,6 @@ def _design_path() -> Path:
     )
 
 
-def _p0_run_spec_path() -> Path:
-    return _repo_root() / "results/challenge-194/pilot-p0-739880d/run_spec.json"
-
-
-def _p0_progress_path() -> Path:
-    return _repo_root() / "results/challenge-194/pilot-p0-739880d/progress.json"
-
-
-def _p0_analysis_path() -> Path:
-    return _repo_root() / "results/challenge-194/p0_analysis.json"
-
-
 def _file_sha256(path: Path) -> str:
     return _file_hash(
         path,
@@ -179,9 +174,9 @@ def _file_sha256(path: Path) -> str:
     )
 
 
-def load_frozen_p0_analysis() -> dict[str, object]:
+def load_frozen_p0_analysis(path: Path) -> dict[str, object]:
     document, _ = _read_canonical(
-        _p0_analysis_path(),
+        path,
         "frozen P0 analysis artifact",
         maximum_size=P0_ANALYSIS_MAX_BYTES,
     )
@@ -310,18 +305,85 @@ def _validate_source(p0_analysis: Mapping[str, object]) -> None:
     if _sha256(_canonical_bytes(p0_analysis)) != P0_ANALYSIS_FILE_SHA256:
         raise RuntimeError("P0 source canonical file hash mismatch")
     _selector_estimates(p0_analysis)
-    _validate_frozen_progress()
     _validate_recomputed_brackets(p0_analysis)
 
 
-def _validate_frozen_progress() -> None:
-    document, payload = _read_canonical(
-        _p0_progress_path(),
-        "frozen P0 progress artifact",
-        maximum_size=P0_PROGRESS_MAX_BYTES,
+def _read_evidence_document_at(
+    root_fd: int,
+    name: str,
+    description: str,
+    maximum_size: int,
+) -> tuple[dict[str, object], bytes]:
+    descriptor, original = _open_regular_at(
+        name,
+        root_fd,
+        description,
+        maximum_size=maximum_size,
     )
-    if _sha256(payload) != P0_PROGRESS_SHA256 or payload != _canonical_bytes(document):
-        raise RuntimeError("frozen P0 progress artifact hash or encoding mismatch")
+    try:
+        payload = _read_descriptor_bounded(descriptor, maximum_size, description)
+        _require_regular_at_identity(
+            name,
+            root_fd,
+            descriptor,
+            original,
+            description,
+        )
+        try:
+            document = json.loads(payload)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"{description} is not canonical JSON") from error
+        if not isinstance(document, dict) or payload != _canonical_bytes(document):
+            raise RuntimeError(f"{description} is not canonical JSON")
+        _require_regular_at_identity(
+            name,
+            root_fd,
+            descriptor,
+            original,
+            description,
+        )
+        return document, payload
+    finally:
+        os.close(descriptor)
+
+
+def _load_p0_evidence(
+    p0_evidence_root: Path,
+) -> tuple[dict[str, object], dict[str, object]]:
+    if not isinstance(p0_evidence_root, Path) or not p0_evidence_root.is_absolute():
+        raise RuntimeError("p0_evidence_root must be an absolute canonical directory")
+    try:
+        if p0_evidence_root.resolve(strict=True) != p0_evidence_root:
+            raise RuntimeError(
+                "p0_evidence_root must be canonical and contain no symlink components"
+            )
+        chain = _open_directory_chain(p0_evidence_root, create=False)
+    except RuntimeError:
+        raise
+    except OSError as error:
+        raise RuntimeError("p0_evidence_root is missing or unsafe") from error
+    try:
+        root_fd = chain[-1][1]
+        run_spec, run_payload = _read_evidence_document_at(
+            root_fd,
+            "run_spec.json",
+            "frozen P0 run spec evidence",
+            P0_RUN_SPEC_MAX_BYTES,
+        )
+        progress, progress_payload = _read_evidence_document_at(
+            root_fd,
+            "progress.json",
+            "frozen P0 progress evidence",
+            P0_PROGRESS_MAX_BYTES,
+        )
+        _require_directory_chain(chain, allow_final_mutation=False)
+        if _sha256(run_payload) != P0_RUN_SPEC_SHA256:
+            raise RuntimeError("frozen P0 run spec evidence hash mismatch")
+        if _sha256(progress_payload) != P0_PROGRESS_SHA256:
+            raise RuntimeError("frozen P0 progress evidence hash mismatch")
+        return run_spec, progress
+    finally:
+        _close_directory_chain(chain)
 
 
 def _validate_recomputed_brackets(p0_analysis: Mapping[str, object]) -> None:
@@ -373,14 +435,10 @@ def _stream_hashes(
     )
 
 
-def _p0_identity_hashes() -> tuple[tuple[str, ...], tuple[str, ...]]:
-    document, payload = _read_canonical(
-        _p0_run_spec_path(),
-        "verified P0 run spec",
-        maximum_size=P0_RUN_SPEC_MAX_BYTES,
-    )
-    if _sha256(payload) != P0_RUN_SPEC_SHA256:
-        raise RuntimeError("verified P0 run spec hash mismatch")
+def _p0_identity_hashes(
+    p0_evidence_root: Path,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    document, _ = _load_p0_evidence(p0_evidence_root)
     try:
         cells = document["cells"]
         requests = tuple(str(cell["request_sha256"]) for cell in cells)
@@ -412,8 +470,41 @@ def _protocol_hash(protocol: Mapping[str, object]) -> str:
     return _sha256(_canonical_bytes(unsigned))
 
 
+def _validate_bound_p0_extension_protocol_for_revision(
+    protocol: Mapping[str, object],
+    *,
+    expected_source_revision: str,
+) -> None:
+    if set(protocol) != _PROTOCOL_FIELDS:
+        raise RuntimeError("extension protocol fields are invalid")
+    if protocol.get("protocol_sha256") != _protocol_hash(protocol):
+        raise RuntimeError("extension protocol hash mismatch")
+    if (
+        protocol.get("schema_version") != EXTENSION_PROTOCOL_SCHEMA
+        or protocol.get("source_p0_run_spec_sha256") != P0_RUN_SPEC_SHA256
+        or protocol.get("source_p0_progress_sha256") != P0_PROGRESS_SHA256
+        or protocol.get("source_p0_analysis_document_sha256")
+        != P0_ANALYSIS_DOCUMENT_SHA256
+        or protocol.get("source_p0_bracket_document_sha256")
+        != P0_BRACKET_DOCUMENT_SHA256
+        or protocol.get("design_sha256") != DESIGN_SHA256
+        or _file_sha256(_design_path()) != DESIGN_SHA256
+        or protocol.get("source_revision") != expected_source_revision
+        or protocol.get("grid_namespace") != EXTENSION_GRID_NAMESPACE
+        or protocol.get("master_seed") != EXTENSION_MASTER_SEED
+        or protocol.get("phase") != EXTENSION_PHASE
+        or protocol.get("purpose") != "exploratory-p0-extension-only"
+        or protocol.get("lengths") != list(EXTENSION_LENGTHS)
+        or protocol.get("replicas") != list(EXTENSION_REPLICAS)
+        or protocol.get("loop_order") != ["sigma", "length", "replica"]
+        or protocol.get("cell_count") != 96
+    ):
+        raise RuntimeError("extension bound protocol contract is invalid")
+
+
 def build_p0_extension_protocol(
     p0_analysis: Mapping[str, object],
+    p0_evidence_root: Path,
 ) -> dict[str, object]:
     _validate_source(p0_analysis)
     _validate_identity_axes()
@@ -432,7 +523,7 @@ def build_p0_extension_protocol(
         entry["sigma_grid_id"] = _grid_id(entry)
         sigma_entries.append(entry)
 
-    p0_requests, p0_streams = _p0_identity_hashes()
+    p0_requests, p0_streams = _p0_identity_hashes(p0_evidence_root)
     p0_request_set = set(p0_requests)
     p0_stream_set = set(p0_streams)
     cells: list[dict[str, object]] = []
@@ -531,7 +622,7 @@ def build_p0_extension_protocol(
         ),
     }
     protocol["protocol_sha256"] = _protocol_hash(protocol)
-    validate_p0_extension_protocol(p0_analysis, protocol)
+    validate_p0_extension_protocol(p0_analysis, protocol, p0_evidence_root)
     return protocol
 
 
@@ -560,6 +651,7 @@ def _exact_digest(raw: object, name: str) -> str:
 def _validate_p0_extension_protocol_for_revision(
     p0_analysis: Mapping[str, object],
     protocol: Mapping[str, object],
+    p0_evidence_root: Path,
     *,
     expected_source_revision: str,
 ) -> None:
@@ -655,7 +747,7 @@ def _validate_p0_extension_protocol_for_revision(
         or len(cells) != 96
     ):
         raise RuntimeError("extension cell count is invalid")
-    p0_requests, p0_streams = _p0_identity_hashes()
+    p0_requests, p0_streams = _p0_identity_hashes(p0_evidence_root)
     p0_request_set = set(p0_requests)
     p0_stream_set = set(p0_streams)
     seen_requests: set[str] = set()
@@ -755,9 +847,11 @@ def _validate_p0_extension_protocol_for_revision(
 def validate_p0_extension_protocol(
     p0_analysis: Mapping[str, object],
     protocol: Mapping[str, object],
+    p0_evidence_root: Path,
 ) -> None:
     _validate_p0_extension_protocol_for_revision(
         p0_analysis,
         protocol,
+        p0_evidence_root,
         expected_source_revision=_current_revision(),
     )

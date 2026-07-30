@@ -45,6 +45,7 @@ def _parser() -> argparse.ArgumentParser:
 
     extension = commands.add_parser("build-p0-extension")
     extension.add_argument("--analysis", type=Path, required=True)
+    extension.add_argument("--p0-evidence-root", type=Path, required=True)
     extension.add_argument("--output", type=Path, required=True)
 
     verify = commands.add_parser("verify")
@@ -97,7 +98,10 @@ def main(argv: list[str] | None = None) -> int:
             source = _mapping_document(
                 arguments.analysis.resolve(), "P0 analysis document"
             )
-            document = build_p0_extension_protocol(source)
+            document = build_p0_extension_protocol(
+                source,
+                arguments.p0_evidence_root,
+            )
             publication = _publish_or_verify(
                 arguments.output.resolve(),
                 document,

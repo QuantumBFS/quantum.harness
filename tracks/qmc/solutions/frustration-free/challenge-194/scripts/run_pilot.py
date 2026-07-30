@@ -23,7 +23,10 @@ from long_range_percolation.pilot import (
     verify_p0_extension_download,
     verify_pilot_download,
 )
-from long_range_percolation.pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+from long_range_percolation.pilot_extension import (
+    EXTENSION_RUN_SPEC_SCHEMA,
+    P0_ANALYSIS_MAX_BYTES,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -40,6 +43,8 @@ def _parser() -> argparse.ArgumentParser:
     extension = commands.add_parser("build-extension-spec")
     extension.add_argument("--protocol", type=Path, required=True)
     extension.add_argument("--validation-report", type=Path, required=True)
+    extension.add_argument("--analysis", type=Path, required=True)
+    extension.add_argument("--p0-evidence-root", type=Path, required=True)
     extension.add_argument("--output-root", type=Path, required=True)
     extension.add_argument("--run-spec", type=Path, required=True)
 
@@ -105,10 +110,17 @@ def main(argv: list[str] | None = None) -> int:
                 "P0 extension protocol",
                 maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
             )
+            p0_analysis, _ = _read_canonical(
+                arguments.analysis.resolve(),
+                "P0 analysis document",
+                maximum_size=P0_ANALYSIS_MAX_BYTES,
+            )
             document = build_p0_extension_run_spec(
                 output_root,
                 arguments.validation_report.resolve(),
                 protocol,
+                p0_analysis,
+                arguments.p0_evidence_root,
             )
             result = {
                 "status": "ready",
