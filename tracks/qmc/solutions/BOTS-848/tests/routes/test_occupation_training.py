@@ -537,6 +537,9 @@ def _install_fast_full_training_compute(monkeypatch: pytest.MonkeyPatch) -> None
         def __getitem__(self, m: int) -> FakeComponent:
             return self.components[m]
 
+        def __iter__(self):
+            return iter((-2, -1, 0, 1, 2))
+
     fake_tower = FakeTower()
     monkeypatch.setattr(
         train.LadderTower,
