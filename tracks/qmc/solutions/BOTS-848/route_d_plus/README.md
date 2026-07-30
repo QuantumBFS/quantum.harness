@@ -59,6 +59,18 @@ Phase 4 adds the analytic many-body mothers:
 - `phase4.sbatch` runs the Phase 4 gate only after a Phase 3 certificate is
   supplied.
 
+Phase 5 adds normal-ordered scalar dressing:
+
+- `scalar.py` implements the density-product proof backend, the direct
+  normal-ordered pair backend, coupled-pair channel extraction, and covariance
+  whitening;
+- `phase5.schema.json` defines the scalar-generator certificate;
+- `certify_phase5.py` verifies LLL closure, Hermiticity, scalarity, backend
+  agreement, coupled-channel degeneracy, and mother/tower centering and
+  whitening;
+- `phase5.sbatch` runs the Phase 5 gate only after a Phase 4 certificate is
+  supplied.
+
 The generated virtual environment, dependency lock, and manifest are runtime
 artifacts. They must remain outside Git under `tracks/qmc/results/`.
 
