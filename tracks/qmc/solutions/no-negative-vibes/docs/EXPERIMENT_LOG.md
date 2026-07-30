@@ -2869,3 +2869,56 @@ returned:
 ```text
 7 passed in 8.18s
 ```
+
+### 2026-07-30 — Clean Majorana/Wei archival replay
+
+The provenance fix was committed as
+`6aba2a6c05384b09ca853444f7ba86ee24c12c15`.  A complete bundle with
+SHA-256
+`7cb0f7ec871e2d65daa11d47f08173a812f93287aff6fb52ca3e2f7610a548cd`
+was verified and transferred to WSL.  The final preserved clean worktree is:
+
+`/home/zibojin/code/nnv-wei-archive-6aba2a6`
+
+Its first cold CLI replay returned the full expected source commit rather
+than `unavailable`, status
+`exact-no-wei-contraction-certificate`, and exact payload digest
+`0290bd707ab6aa729c2ad87526beae74168dbc554aa4b424e9fead3c62163ed6`.
+The clean focused archival regression returned:
+
+```text
+4 passed in 7.75s
+```
+
+The exact commands were:
+
+```bash
+cd /home/zibojin/code/nnv-wei-archive-6aba2a6/tracks/qmc/solutions/no-negative-vibes
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python \
+  -m oracle.oddcycle_majorana_wei_audit
+env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  NUMEXPR_NUM_THREADS=1 PYTHONHASHSEED=0 \
+  /home/zibojin/miniforge3/envs/quantum_harness/bin/python -m pytest -q \
+  tests/test_oddcycle_majorana_wei_audit.py \
+  tests/test_oddcycle_final_certificate.py \
+  tests/test_oddcycle_robust_certificate.py
+```
+
+For byte-level provenance, the retained script
+`/mnt/c/Users/45518/Documents/run_majorana_archive_6aba2a6.sh` generated
+the CLI stdout directly at
+`/home/zibojin/code/oddcycle-majorana-wei-result-6aba2a6.json`, asserted
+the source SHA, exact status, and payload digest, computed its file hash,
+and copied it to the Windows staging area.  The WSL raw file, staged copy,
+and versioned
+`protocols/oddcycle-final-certificate-v1/majorana-wei-result.json` all have
+SHA-256:
+
+`079e7e2a7094ad68deaa4690582da328450d883ff24fa66e36950298708c5508`
+
+The earlier JSON records with `source_commit=unavailable` remain rejected
+and unversioned.  All diagnostic and archive worktrees, bundles, scripts,
+and raw files were retained.  No search was repeated and no local Windows
+scientific calculation ran.
