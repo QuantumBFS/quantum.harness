@@ -1,6 +1,6 @@
 # Quantum Harness Issue #88 — remote research agent status
 
-Updated: 2026-07-29T23:04:00Z
+Updated: 2026-07-30T00:13:08Z
 
 - Objective: obtain a new reproducible numerical certificate for an
   unrestricted frustrated spin-1/2 model, prioritizing the Shastry--Sutherland
@@ -303,5 +303,12 @@ Updated: 2026-07-29T23:04:00Z
   disabled, requires hash `b4a98846…74e5`, repeats the exact cross-zero gate,
   and audits at `1e-9`. It was initially pending. This is the sole active
   split solve; do not update `ss-remote-cone-dev` or submit a duplicate.
+- Job `118192695` ended `OUT_OF_MEMORY` after 1:02:53, post-presolve and before
+  iteration 0, at 509,850,832 KiB Slurm peak RSS against 500000 MiB. It passed
+  the exact split reconstruction but produced no physics result. Do not repeat
+  it or request more memory. The active route is now an exact coefficient
+  congruence audit of the equal-dimensional SO(3) `l=2` cones; a cone may be
+  removed only if the post-projection coefficient maps are proved identical
+  under an exact row-basis congruence.
 
 No user input or new credential is currently required.

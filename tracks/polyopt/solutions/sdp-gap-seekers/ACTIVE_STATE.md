@@ -871,3 +871,12 @@ Updated: 2026-07-29 UTC.
   active split decision solve. Do not update `ss-remote-cone-dev` or submit a
   duplicate; monitor pending-to-running transition, exact hash match, first
   interior-point iteration, and independently replay any candidate.
+- Split decision job `118192695` passed the repeated exact cross-zero gate,
+  reconstructed all 38 blocks, matched the required 343,761-row formulation,
+  entered Mosek, and completed presolve. It then ended `OUT_OF_MEMORY` after
+  1:02:53 before iteration 0. Slurm measured 509,850,832 KiB peak RSS against
+  500000 MiB; no numerical or physical result exists. Do not request more
+  memory or repeat this signature. The next changed route is an exact
+  coefficient-level congruence test between the equal-dimensional continuous-
+  spin `l=2` cones after the SO(3) rank-four projection; only a proved
+  congruence may authorize removal of duplicate PSD constraints.

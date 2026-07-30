@@ -1505,3 +1505,16 @@ active split-factorization signature; preserve its checkout and do not launch
 a duplicate. A solver classification becomes evidence only after the exact
 hash passes, numerical optimization actually runs, and any candidate is
 replayed independently.
+
+SCNet decision job `118192695` closed operationally after 1:02:53. It passed
+the repeated exact stabilizer gate, rebuilt all 38 PSD blocks and 343,761
+moment constraints, matched the required coefficient hash by reaching the
+optimizer, and completed Mosek presolve. The first factorization then raised
+resident memory to 509,850,832 KiB and Slurm reported `OUT_OF_MEMORY` at the
+500000-MiB cgroup before iteration 0. It supplied no feasibility,
+infeasibility, or spectral-gap evidence. The linear packed-row estimate was
+too optimistic because factorization fill remained dominant. Do not repeat
+this signature or raise memory. Next changed action: prove or disprove exact
+post-SO(3)-projection congruence among the four equal-dimensional `l=2` cones
+for each family/parity. Matching dimensions alone is insufficient; every
+coefficient must be mapped exactly before any cone is removed.
