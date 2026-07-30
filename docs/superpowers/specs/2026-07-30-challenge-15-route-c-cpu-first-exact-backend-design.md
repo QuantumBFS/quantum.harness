@@ -207,10 +207,19 @@ function and its coordinate-dependent tangent, giving the exact composition
   = Z_j(Z_i F) + [M_j(P_i F) + P_j(M_i F)] / 2.
 ```
 
-For every unordered pair, the kernel recursively constructs scaled powers
-`F, X_ij F, ..., X_ij^4 F`, where `X_ij=(J_i dot J_j)/scale`. The three fixed
-pair-Casimir coefficient vectors contract the same powers for ranks `2,3,4`.
-The one-body constants are added after summing all unordered pairs.
+For every unordered pair, the kernel evaluates all three fixed
+pair-Casimir polynomials together with a vector-valued Horner recurrence. If
+`X_ij=(J_i dot J_j)/scale` and the three coefficient rows are padded to degree
+four, one nested chain computes
+
+```text
+G_4 = c_4 F,
+G_k = c_k F + X_ij G_(k+1),  k=3,2,1,0.
+```
+
+This returns all ranks `2,3,4` without separately materializing or recomputing
+`F, X_ij F, ..., X_ij^4 F`. The one-body constants are added after summing all
+unordered pairs.
 
 The production kernel uses only `complex128`, static `N`, static ranks, and
 the explicit cofactor seed. It vectorizes across configurations and all six
@@ -233,7 +242,7 @@ finite difference, stochastic derivative, or silent precision fallback.
 
 - Enables `jax_enable_x64` before kernel construction.
 - Implements `Z`, `P`, and `M` as exact directional JVPs and composes the
-  pair-Casimir powers through degree four.
+  three pair-Casimir polynomials through one degree-four Horner chain.
 - JIT-compiles one whole-batch or fixed-chunk kernel rather than dispatching
   individual derivatives from Python.
 - Vectorizes over configurations and contracts all particle pairs, ranks, and
@@ -269,8 +278,8 @@ For one static-size chunk:
    projected `n=1` columns;
 3. contract the explicit cofactors into all five `L=2` seed amplitudes while
    evaluating the direct `L=0` amplitude;
-4. use nested directional JVPs to apply scaled powers of `J_i dot J_j`
-   through degree four to the shared six-component seed function;
+4. use nested directional JVPs and the shared Horner recurrence to apply all
+   three pair-Casimir polynomials to the six-component seed function;
 5. contract the three pair-Casimir polynomials and sum unordered pairs;
 6. add the one-body constants and return all seed/action components;
 7. apply the final-chunk mask and transfer only the compact result arrays to
@@ -316,7 +325,7 @@ The new backend must pass all of these before resource timing is classified:
    relative residual at most `1e-12`.
 2. NumPy and JAX cofactor seed values agree with the existing direct complex
    determinant path for `N=2..8`, with relative residual at most `1e-12`.
-3. JVP pair-dot powers and final `S_ell` actions agree with the a02 PairJet
+3. JVP pair-dot compositions and final `S_ell` actions agree with the a02 PairJet
    reference for `N=2,3` and tractable N=6 single-configuration probes, with
    relative residual at most `1e-10`.
 4. All five `L=2` components use one shared kernel and retain the existing
