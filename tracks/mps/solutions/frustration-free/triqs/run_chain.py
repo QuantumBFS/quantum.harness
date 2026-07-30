@@ -34,6 +34,8 @@ from artifacts import (
 )
 from hybridization import install_g0, reported_tau_indices
 from make_input import verify_input
+import make_input as input_builder
+from source_manifest import build_source_manifest
 
 
 SOLUTION_DIR = Path(__file__).resolve().parent
@@ -169,6 +171,78 @@ def make_test_pilot_input(
     payload["gates"]["minimum_effective_samples_per_chain"] = 1
     payload["gates"]["minimum_effective_samples_total"] = 4
     return _artifact(payload)
+
+
+def make_source_bound_test_pilot_input(
+    solution_dir: Path = SOLUTION_DIR,
+) -> dict[str, object]:
+    """Build the bounded test profile without claiming accepted calibration."""
+    repository_root = solution_dir.resolve().parents[4]
+    manifest = build_source_manifest(repository_root)
+    model, model_conventions = input_builder._load_model(solution_dir)
+    omega, delta = input_builder._matsubara_data()
+    marker = {
+        "artifact_type": "cthyb_test_calibration_marker",
+        "schema_version": 2,
+        "status": "not_run",
+    }
+    payload = {
+        "artifact_type": "cthyb_test_input",
+        "schema_version": input_builder.SCHEMA_VERSION,
+        "model": model,
+        "conventions": input_builder._production_conventions(model_conventions),
+        "hybridization": {
+            "kind": "analytic_semicircle",
+            "formula": (
+                "Delta(iw) = i*(Gamma/D)*(w-sign(w)*sqrt(w*w+D*D))"
+            ),
+            "dtype": "complex128",
+            "n_iw": input_builder.N_IW,
+            "matsubara_omega": omega,
+            "delta_iw": delta,
+            "common_real_frequency": {
+                **input_builder.COMMON_REAL_FREQUENCY,
+                "sha256": input_builder.COMMON_REAL_FREQUENCY_SHA256,
+            },
+        },
+        "meshes": {
+            "n_tau": input_builder.N_TAU,
+            "reported_tau": [0.0, 4.0, 8.0, 12.0, 16.0],
+        },
+        "chains": {
+            "count": 4,
+            "random_generator": "mt19937",
+            "master_seed": 810000,
+            "seeds": [810001, 810002, 810003, 810004],
+        },
+        "monte_carlo": {
+            "warmup_cycles": 50,
+            "measurement_cycles": 200,
+            "cycle_length": 50,
+            "measure_G_tau": True,
+            "measure_density_matrix": True,
+            "use_norm_as_weight": True,
+            "measure_pert_order": True,
+        },
+        "gates": {
+            "minimum_average_sign": 0.99,
+            "require_autocorrelation_converged": True,
+            "maximum_integrated_autocorrelation_cycles": 5.0,
+            "minimum_effective_samples_per_chain": 1,
+            "minimum_effective_samples_total": 4,
+            "maximum_spin_asymmetry": 0.005,
+            "maximum_half_filling_error": 0.005,
+            "minimum_completed_chains": 4,
+        },
+        "runtime": {"mpi_ranks_per_chain": 1, "threads_per_rank": 1},
+        "calibration": {
+            "artifact_sha256": sha256_bytes(canonical_json(marker)),
+        },
+        "provenance_inputs": input_builder._provenance_hashes(manifest),
+    }
+    artifact = _artifact(payload)
+    _verify_chain_input(artifact)
+    return artifact
 
 
 def _verify_chain_input(artifact: dict[str, object]) -> dict[str, object]:

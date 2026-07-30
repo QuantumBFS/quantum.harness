@@ -502,3 +502,21 @@ def test_exact_bounded_locked_prefix_pilot_command_is_available():
         "/tmp/ch81-cthyb-chain-pilot",
         "--test-pilot",
     ]
+
+
+def test_source_bound_pilot_requires_no_accepted_calibration():
+    artifact = runner.make_source_bound_test_pilot_input(TRIQS_DIR)
+    payload = runner._verify_chain_input(artifact)
+    assert payload["artifact_type"] == "cthyb_test_input"
+    assert payload["monte_carlo"]["warmup_cycles"] == 50
+    assert payload["monte_carlo"]["measurement_cycles"] == 200
+    marker = {
+        "artifact_type": "cthyb_test_calibration_marker",
+        "schema_version": 2,
+        "status": "not_run",
+    }
+    assert payload["calibration"]["artifact_sha256"] == sha256_bytes(
+        canonical_json(marker)
+    )
+    with pytest.raises(ValueError):
+        verify_input(artifact, TRIQS_DIR)

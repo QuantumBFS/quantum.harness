@@ -231,14 +231,16 @@ def test_atomic_publication_reuses_identical_and_rejects_different(tmp_path):
         write_production_input(output, solution_dir)
 
 
-def test_real_generation_fails_until_transitive_sources_exist():
+def test_real_tree_has_complete_transitive_sources_and_still_requires_calibration():
     missing = [
         relative
         for relative in REQUIRED_SOURCE_PATHS
         if not (REPOSITORY_ROOT / relative).is_file()
     ]
-    assert missing
-    with _ASSERTIONS.assertRaisesRegex(FileNotFoundError, "required source"):
+    assert missing == []
+    manifest = build_source_manifest(REPOSITORY_ROOT)
+    assert set(manifest) == set(REQUIRED_SOURCE_PATHS)
+    with _ASSERTIONS.assertRaisesRegex(FileNotFoundError, "calibration.json"):
         make_production_input(TRIQS_DIR)
 
 
