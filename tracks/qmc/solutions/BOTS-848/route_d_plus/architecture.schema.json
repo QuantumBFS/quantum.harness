@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "challenge-15-route-d-plus-architecture-v1",
+  "title": "Route D+ shared N=6 architecture calibration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "n_electrons",
+    "two_q",
+    "raw_generator_ranks",
+    "calibration_seed",
+    "chains",
+    "samples_per_chain",
+    "sector_weights",
+    "relative_covariance_cutoff",
+    "centering_mean",
+    "covariance",
+    "covariance_eigenvalues",
+    "whitening",
+    "retained_generators",
+    "selection_rule"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "challenge-15-route-d-plus-architecture-v1"
+    },
+    "n_electrons": {"const": 6},
+    "two_q": {"const": 15},
+    "raw_generator_ranks": {
+      "type": "array",
+      "prefixItems": [{"const": 2}, {"const": 3}, {"const": 4}],
+      "items": false
+    },
+    "calibration_seed": {"const": 60860},
+    "chains": {"const": 4},
+    "samples_per_chain": {"const": 32},
+    "sector_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ground", "tower"],
+      "properties": {
+        "ground": {"const": 0.5},
+        "tower": {"const": 0.5}
+      }
+    },
+    "relative_covariance_cutoff": {"const": 1e-12},
+    "centering_mean": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "covariance": {"$ref": "#/$defs/matrix3"},
+    "covariance_eigenvalues": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "whitening": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {"type": "number"}
+      }
+    },
+    "retained_generators": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "selection_rule": {
+      "const": "algebraic-covariance-cutoff-only-no-ed"
+    }
+  },
+  "$defs": {
+    "matrix3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {"type": "number"}
+      }
+    }
+  }
+}

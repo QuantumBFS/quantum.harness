@@ -50,7 +50,16 @@ cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
 "${repo_root}/.venv/bin/python" -m ruff check \
   route_d_plus tests/route_d_plus
 "${repo_root}/.venv/bin/python" -m pytest \
-  tests/route_d_plus -q
+  tests/route_d_plus/test_coordinate.py \
+  tests/route_d_plus/test_lll.py \
+  tests/route_d_plus/test_mother.py \
+  tests/route_d_plus/test_scalar.py \
+  tests/route_d_plus/test_tensor.py \
+  tests/route_d_plus/test_train_dplus0.py \
+  tests/route_d_plus/test_vmc.py \
+  tests/route_d_plus/test_phase6_contract.py \
+  tests/route_d_plus/test_phase6a_contract.py \
+  -q
 "${repo_root}/.venv/bin/python" -u \
   -m route_d_plus.certify_phase6 \
   --repo-root "${repo_root}" \

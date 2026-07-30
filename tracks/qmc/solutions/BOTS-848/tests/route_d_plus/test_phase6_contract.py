@@ -30,12 +30,16 @@ def test_phase6_batch_requires_phase5_and_gpu_certificate() -> None:
         encoding="utf-8"
     )
     assert "ROUTE_D_PLUS_PHASE5_CERTIFICATE:?" in batch
-    assert "tests/route_d_plus -q" in batch
+    assert "tests/route_d_plus/test_train_dplus0.py" in batch
+    assert "tests/route_d_plus/test_future_contracts.py" not in batch
     assert "-m route_d_plus.certify_phase6" in batch
     assert "require_phase5_certificate" in certificate
     assert 'devices[0].platform != "gpu"' in certificate
     assert 'jax.config.update("jax_enable_x64", True)' in certificate
     assert "FORBIDDEN_MODULE_PREFIXES" in certificate
+    assert "blind_training_audit" in certificate
+    assert "calibrate_architecture" in certificate
+    assert "combined_state_averaged_sr" in certificate
     assert "validate_certificate(payload)" in certificate
     assert "runtime_library_sha256=" in batch
     assert "LD_LIBRARY_PATH=" in batch

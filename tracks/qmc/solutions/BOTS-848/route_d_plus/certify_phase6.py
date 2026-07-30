@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import builtins
+import contextlib
 import datetime as dt
 import hashlib
+import io
 import json
 import math
 import os
@@ -18,7 +21,11 @@ from typing import Any
 import jax
 import jsonschema
 
-from route_d_plus.train_dplus0 import train_seed, write_checkpoint
+from route_d_plus.train_dplus0 import (
+    calibrate_architecture,
+    train_seed,
+    write_checkpoint,
+)
 
 SCHEMA_VERSION = "challenge-15-route-d-plus-phase6-v1"
 PHASE5_SCHEMA_VERSION = "challenge-15-route-d-plus-phase5-v1"
@@ -29,6 +36,13 @@ FORBIDDEN_MODULE_PREFIXES = (
     "benchmark_v0.projected_nqs",
     "benchmark_v0.nqs_benchmark",
 )
+FORBIDDEN_PATH_MARKERS = (
+    "/ed/",
+    "ed_oracle",
+    "fock_ed",
+    "projected_nqs",
+    "nqs_benchmark",
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -37,6 +51,30 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def validate_against_schema(
+    payload: dict[str, Any],
+    schema_path: Path,
+) -> None:
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    jsonschema.Draft202012Validator.check_schema(schema)
+    jsonschema.Draft202012Validator(
+        schema,
+        format_checker=jsonschema.FormatChecker(),
+    ).validate(payload)
+
+
+def all_finite(value: Any) -> bool:
+    if isinstance(value, bool) or value is None:
+        return True
+    if isinstance(value, (int, float)):
+        return math.isfinite(float(value))
+    if isinstance(value, dict):
+        return all(all_finite(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return all(all_finite(item) for item in value)
+    return True
 
 
 def git_output(repo_root: Path, *args: str) -> str:
@@ -87,6 +125,55 @@ def forbidden_source_references() -> list[str]:
     return findings
 
 
+@contextlib.contextmanager
+def blind_training_audit() -> Any:
+    """Deny and record forbidden imports/file opens throughout training."""
+
+    events: list[dict[str, str]] = []
+    original_import = builtins.__import__
+    original_open = builtins.open
+    original_io_open = io.open
+
+    def audited_import(
+        name: str,
+        globals: Any = None,
+        locals: Any = None,
+        fromlist: Any = (),
+        level: int = 0,
+    ) -> Any:
+        if name.startswith(FORBIDDEN_MODULE_PREFIXES):
+            events.append({"operation": "import", "target": name})
+            raise RuntimeError(f"forbidden ED import during training: {name}")
+        return original_import(name, globals, locals, fromlist, level)
+
+    def check_path(file: Any) -> None:
+        if isinstance(file, (str, os.PathLike)):
+            normalized = str(Path(file).resolve()).lower()
+            if any(marker in normalized for marker in FORBIDDEN_PATH_MARKERS):
+                events.append({"operation": "open", "target": normalized})
+                raise RuntimeError(
+                    f"forbidden ED artifact access during training: {file}"
+                )
+
+    def audited_open(file: Any, *args: Any, **kwargs: Any) -> Any:
+        check_path(file)
+        return original_open(file, *args, **kwargs)
+
+    def audited_io_open(file: Any, *args: Any, **kwargs: Any) -> Any:
+        check_path(file)
+        return original_io_open(file, *args, **kwargs)
+
+    builtins.__import__ = audited_import
+    builtins.open = audited_open
+    io.open = audited_io_open
+    try:
+        yield events
+    finally:
+        builtins.__import__ = original_import
+        builtins.open = original_open
+        io.open = original_io_open
+
+
 def collect_certificate(
     *,
     repo_root: Path,
@@ -119,42 +206,74 @@ def collect_certificate(
     started = time.perf_counter()
     checkpoints = []
     seed_results = []
-    checkpoint_dir = output_path.parent / "checkpoints"
-    for seed in SEEDS:
-        print(f"phase6 seed {seed}: training start", flush=True)
-        checkpoint, result = train_seed(seed)
-        checkpoint_path = checkpoint_dir / f"dplus0-seed-{seed}.json"
-        write_checkpoint(checkpoint_path, checkpoint)
-        checkpoints.append(
-            {
-                "seed": seed,
-                "path": str(checkpoint_path.resolve()),
-                "sha256": sha256_file(checkpoint_path),
-                "selection": "final_update",
-            }
+    with blind_training_audit() as audit_events:
+        architecture = calibrate_architecture(60_860)
+        architecture_schema_path = Path(__file__).with_name(
+            "architecture.schema.json"
         )
-        seed_results.append(result)
-        print(
-            f"phase6 seed {seed}: checkpoint {checkpoints[-1]['sha256']}",
-            flush=True,
+        checkpoint_schema_path = Path(__file__).with_name(
+            "checkpoint.schema.json"
         )
-
-    finite_results = all(
-        all(
-            math.isfinite(float(result[sector][field]))
-            for sector in ("final_ground", "final_tower")
-            for field in (
-                "mean",
-                "standard_error",
-                "effective_sample_size",
-                "r_hat",
-                "correction_acceptance",
-                "mother_acceptance",
-                "global_rotation_residual",
+        validate_against_schema(
+            architecture,
+            architecture_schema_path,
+        )
+        architecture_path = output_path.parent / "architecture.json"
+        write_checkpoint(architecture_path, architecture)
+        architecture_sha256 = sha256_file(architecture_path)
+        for seed in SEEDS:
+            print(f"phase6 seed {seed}: training start", flush=True)
+            checkpoint, result = train_seed(
+                seed,
+                architecture=architecture,
+                architecture_sha256=architecture_sha256,
             )
-        )
-        for result in seed_results
+            validate_against_schema(
+                checkpoint,
+                checkpoint_schema_path,
+            )
+            seed_dir = output_path.parent / "seeds" / f"seed-{seed}"
+            checkpoint_path = seed_dir / "checkpoint.json"
+            write_checkpoint(checkpoint_path, checkpoint)
+            checkpoints.append(
+                {
+                    "seed": seed,
+                    "path": str(checkpoint_path.resolve()),
+                    "sha256": sha256_file(checkpoint_path),
+                    "selection": "final_update",
+                    "architecture_sha256": architecture_sha256,
+                    "schema_path": str(checkpoint_schema_path.resolve()),
+                    "schema_sha256": sha256_file(
+                        checkpoint_schema_path
+                    ),
+                }
+            )
+            seed_results.append(result)
+            print(
+                "phase6 seed "
+                f"{seed}: checkpoint {checkpoints[-1]['sha256']}",
+                flush=True,
+            )
+    loaded_forbidden_after = sorted(
+        name
+        for name in sys.modules
+        if name.startswith(FORBIDDEN_MODULE_PREFIXES)
     )
+    audit_path = output_path.parent / "blind-access-audit.json"
+    write_json_atomic(
+        audit_path,
+        {
+            "forbidden_module_prefixes": list(
+                FORBIDDEN_MODULE_PREFIXES
+            ),
+            "forbidden_path_markers": list(FORBIDDEN_PATH_MARKERS),
+            "denied_events": audit_events,
+            "loaded_forbidden_before": loaded_forbidden,
+            "loaded_forbidden_after": loaded_forbidden_after,
+        },
+    )
+
+    finite_results = all_finite(seed_results) and all_finite(architecture)
     gates = {
         "three_seed_training": len(seed_results) == 3
         and [result["seed"] for result in seed_results] == list(SEEDS),
@@ -170,17 +289,42 @@ def collect_certificate(
             for sector in ("final_ground", "final_tower")
         ),
         "effective_samples": all(
-            result[sector]["effective_sample_size"] >= 2.0
-            and result[sector]["r_hat"] < 2.0
+            result[sector]["effective_sample_size"] >= 32.0
+            and result[sector]["ess_per_second"] > 0.0
+            and result[sector]["r_hat"] < 1.2
             for result in seed_results
             for sector in ("final_ground", "final_tower")
+        ),
+        "gap_precision": all(
+            result["final_gap_standard_error"] <= 5.0e-3
+            for result in seed_results
         ),
         "rotation_invariance": all(
             result[sector]["global_rotation_residual"] < 1.0e-7
             for result in seed_results
             for sector in ("final_ground", "final_tower")
         ),
-        "blind_training": not source_findings and not loaded_forbidden,
+        "blind_training": (
+            not source_findings
+            and not loaded_forbidden
+            and not loaded_forbidden_after
+            and not audit_events
+        ),
+        "shared_frozen_architecture": all(
+            result["architecture_sha256"] == architecture_sha256
+            and checkpoint["architecture_sha256"] == architecture_sha256
+            for result, checkpoint in zip(
+                seed_results, checkpoints, strict=True
+            )
+        ),
+        "combined_state_averaged_sr": all(
+            all(
+                record["metric_structure"]
+                == "equal-weight-block-diagonal-shared-solve"
+                for record in result["trace"]
+            )
+            for result in seed_results
+        ),
         "final_checkpoint_selection": all(
             checkpoint["selection"] == "final_update"
             for checkpoint in checkpoints
@@ -195,9 +339,24 @@ def collect_certificate(
         "seeds": list(SEEDS),
         "seed_results": seed_results,
         "checkpoints": checkpoints,
+        "architecture": {
+            "path": str(architecture_path.resolve()),
+            "sha256": architecture_sha256,
+            "retained_generators": architecture[
+                "retained_generators"
+            ],
+            "selection_rule": architecture["selection_rule"],
+            "schema_path": str(architecture_schema_path.resolve()),
+            "schema_sha256": sha256_file(architecture_schema_path),
+        },
+        "blind_access_audit": {
+            "path": str(audit_path.resolve()),
+            "sha256": sha256_file(audit_path),
+            "denied_events": len(audit_events),
+        },
         "gates": gates,
         "passed": all(gates.values()),
-        "ed_accessed": False,
+        "ed_accessed": bool(audit_events or loaded_forbidden_after),
         "forbidden_module_prefixes": list(FORBIDDEN_MODULE_PREFIXES),
         "forbidden_modules_loaded": loaded_forbidden,
         "forbidden_source_references": source_findings,
