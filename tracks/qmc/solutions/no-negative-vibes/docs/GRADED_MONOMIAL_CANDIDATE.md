@@ -3,8 +3,8 @@
 日期：2026-07-28  
 负责人：`xianzhipan`  
 分支：`work/xianzhi/graded-monomial`  
-状态：`physical-candidate`（一般证明、物理模型和 real-exponential ancilla lift 已完成；
-文献与已知机制排重未完成）
+状态：`known-monomial-factorization / known-majorana-subclass / useful-reformulation`
+（物理映射、real-exponential ancilla lift 和已知类包含证书已完成；不再作为新类候选）
 
 ## 1. 候选定义
 
@@ -122,9 +122,13 @@ U_e/t_e = r_e - 1/r_e
 - **奇数阶 positive-monomial**：不属于；本候选的最小生成元正是奇置换/二循环。
 - **固定站点/Fock 对角符号规范**：奇环预期不属于，需穷举证书。
 - **flavor doubling / modulus square**：定义中没有。
-- **split、Majorana/Kramers、contraction semigroup**：尚未完成代数排重。
-- **文献史新颖性**：不主张；必须核对 fermion permutation/loop、meron-cluster、
-  CT-INT 与 attractive spinless-fermion 文献。
+- **Majorana reflection positivity**：属于。把相互作用 centered 后，一体 kernel
+  是负半定，且所有同分区密度耦合均为负；详见结果文档的显式证书。
+- **contraction semigroup**：物理模型随 Majorana reflection positivity 一并被已知
+  semigroup 框架覆盖。
+- **monomial matrix 文献**：cycle-factor 公式是已知特征多项式分解；grade 不等式是
+  `D_ii>=1` 下的直接推论。
+- **文献史新颖性**：不主张；矩阵和物理两端都已找到已知包含关系。
 
 协作者的 R01–R03 分别研究 Klein/Fock circuit、Klein–Spinor HS 和 `D4` triality；
 本候选研究的是一维表示 `sgn(P)` 对 monomial determinant 的逐历史抵消，不占用上述
@@ -164,7 +168,7 @@ U_e/t_e = r_e - 1/r_e
 grade-ancilla 实指数加强版均已完成，详见
 [GRADED_MONOMIAL_RESULTS.md](GRADED_MONOMIAL_RESULTS.md)。
 
-当前没有触发数学或物理停止条件；但初步文献审计确认 `r=1` 边界与
-graded permutation / `su(1|1)` 模型相关，逐 permutation-sign 重组也邻近
-meron-cluster 思想。因此候选只升级到 `physical-candidate`，不升级为
-`challenge-ready`。
+数学构造没有失败，但“已知机制排重”触发了新类停止条件：cycle-factor 是已知
+monomial 特征多项式公式的推论；`r=1` 精确等于 `su(1|1)` graded permutation；
+`r>1` Hamiltonian 又有显式 Majorana reflection positivity 证书。因此本方向保留为
+正确的特殊 CT 分解和已知类约化案例，不升级为 `challenge-ready`。

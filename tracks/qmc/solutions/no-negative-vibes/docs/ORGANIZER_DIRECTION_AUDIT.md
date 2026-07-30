@@ -59,7 +59,7 @@ Hamiltonian。
 | 完整复 Majorana 非 Hermitian/配对生成元 | **否** | 只扫过一个旋转双锥切片；主办方要求的复矩阵定理仍未完成 |
 | 比 TN 更大的主子式/外幂锥半群 | **部分完成** | odd monomial 是新的 `P0` 乘法半群候选；非诱导 exterior-cone 仍未开始 |
 | 物理可达的受限锥交集 | **否** | 必须从具体 Hamiltonian/HS 反推，不能用无物理来源的整锥随机矩阵代替 |
-| 非平凡 gauge/ancilla、宇称串相关 hopping | **否** | 普通 ancilla 偏迹已由非负矩阵元障碍排除；非平凡编码仍开放 |
+| 非平凡 gauge/ancilla、宇称串相关 hopping | **第一版完成** | edge-electric Gauss law 加 affine link phase 在四/六模式上精确消号；`2 x L` 中央 hop 被证明需要全部其他竖边，形成 Wilson string。modified-Gauss projected cone 仍开放 |
 | 配对/Majorana/Pfaffian 物理模型 | **否** | 现有 determinant AZ 扫描不能替代 Pfaffian/Spin-trace 权重检查 |
 
 所以仍有大候选池，但不应立刻把每一行各采一百万个任意矩阵。下一轮合理的大扫对象是：
@@ -69,9 +69,9 @@ Hamiltonian。
 2. 对 odd monomial / block-TN 做完整文献排重和局域 HS 反推；
 3. 只有上述某个结构化候选在小维对抗搜索中存活，才扩大到 `10^6` 量级。
 
-odd monomial 已给出一个更大搜索空间中的严格 `P0` 候选；尚未实现的非诱导外幂锥和
-非平凡物理编码仍处在定义候选阶段，直接大扫没有明确采样空间，得到的零负例率也没有
-科学含义。
+odd monomial 已给出一个更大搜索空间中的严格 `P0` 候选；非诱导外幂锥仍处在定义
+候选阶段。第一版 edge-electric 物理编码已有精确 Wilson-string 障碍，只有
+modified-Gauss projected cone 写出正 transfer matrix 后才值得大扫。
 
 ## 哪些结论可以直接对外说
 

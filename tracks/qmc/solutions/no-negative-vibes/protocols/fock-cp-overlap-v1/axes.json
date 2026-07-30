@@ -1,0 +1,11 @@
+{
+  "family": [
+    "number-conserving",
+    "bdg"
+  ],
+  "ket_modes": "all 20 three-of-six subsets",
+  "mask": [
+    "rings-bridges"
+  ],
+  "transform": "identity plus all contiguous Klein circuits through depth two"
+}

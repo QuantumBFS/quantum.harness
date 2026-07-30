@@ -1,12 +1,61 @@
 # 无符号 QMC challenge：合作者进展说明
 
-更新时间：2026-07-28
+更新时间：2026-07-29
 
-## 一句话状态
+## 7 月 29 日后续更新
+
+ZiboJin 的两条独立分支出现实质进展：
+
+- `representation-cones@838f428`：symmetric-oddcycle continuum 已有任意深度严格
+  theorem 和五模相互作用 transfer；但完整共同度量
+  `R=2ww^T/83-I`、`w=(4,4,1,-5,5)^T` 又证明整个
+  `z in [0.99,1.01]` alphabet 属于已知 signature `(1,4)`
+  Wei indefinite-metric contraction semigroup。因此数学和模型结果保留，新机制判断关闭。
+- seeds `117/132/147` 分别完成全部 depth-27 words（每个 `268,435,454` 个）和
+  448 个长度 60–1800 对抗词，仍没有任意深度定理。
+- `(p,q,r)` 的 2,744 点扫描有 15 个 exterior-certificate 幸存者，但这 15 点连同
+  transpose 的联合 alphabet 仍共享严格 metric，没有该网格内单点或联合新颖性幸存者。
+- 网格外远距离 pair `{p=0.3,p=2.5}`（`q=r=1`，含转置）则不同：每个点单独有
+  metric，联合没有数值严格共同底层 metric；全部 22,369,620 个 depth<=12 words 和
+  十万条 depth<=40 随机词均严格正。现有 coupled exterior tail 到 depth 12 仍未进入
+  theorem gate，所以这是有限深度候选，不是新机制结论。
+- `tensor-square-phase-diagram@efb2e18`：`m=3,4` 的 DQMC/ED 首轮交叉验证完成；
+  低温 SVD 稳定化修复伪负号。`m=3` gap valley 是值得扩尺寸的信号，不是新相。
+
+独立回归：我方总集成 `370 passed`；ZiboJin exterior 分支忽略旧的未实现
+`test_overlap_klein.py` 后 `499 passed, 2 skipped`，两个 skip 都因缺可选 `cvxpy`；
+显式 common metric、22,369,620 个 joint words 和冻结的十万条随机词已另行独立重放；
+tensor-square phase 分支 `13 passed`。
+
+分工更新：tensor-square 相图、所有 untyped oddcycle joint alphabets、block exterior
+metric 和 coupled-tail certificate 由 ZiboJin 推进；籼至下一轮只做类型本质不可删除的
+typed exterior category 与真实 pairing Pfaffian/Spin 搜索，避免重复。
+
+> 下文从“7 月 29 日最新收缩”开始保留本日较早的阶段快照和历史数字，便于审计；
+> 若与上面的后续更新冲突，以上面的 `838f428` 状态和当前分工为准。
+
+## 7 月 29 日最新收缩
+
+首批非常规模型的三个优先候选已完成解析排重：
+
+- `adjoint lift X tensor X^(-T)` 的整个族位于固定 `O(p,q)` 恒等连通分支，padding
+  后就是已知 split-orthogonal 机制，关闭为新正性机制；
+- grade-charge full Hamiltonian 是所有守恒 ancilla-bit 扇区的静态直和，ancilla
+  没有动力学，降级为方法工具；
+- tensor-square 权重可精确分解为
+  `|det(I+iX)|^2 det(I+Lambda^2 X)^2`，因此不是不可约的新 determinant 机制；
+  但 `m=3` 完整表示的固定伪正交度量线性系统满秩，排除了最简单的固定
+  `O(p,q)` 解释，故只保留其多通道 Hamiltonian 的物理和 Majorana/Pfaffian 排重。
+
+同一个 Stark 非厄米链既有对角 Hermitian partner，也可经任意 unitary 换基得到长程
+partner，所以该路线只作方法校准。总集成分支完整回归当前为 `370 passed`。详见
+[三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
+
+## 一句话状态（较早阶段快照）
 
 我们已经累计检查 4,044,000 个主权重，另做 640 条宇称分辨 Majorana 历史；每条历史
 分别计算 even、odd 和完整 Fock 迹。我们已完成经典群、标准 Hermitian AZ、Majorana 双锥、
-15 个新半群候选和七个 AZ 幸存类自然半群锥的系统排查。最新进展是找到一个有一般证明的
+15 个新半群候选和七个 AZ 幸存类自然半群锥的系统排查。我们找到一个有一般证明的
 恒正矩阵类：三对角 Metzler
 路径生成元的指数乘积全非负，因此任意维数、任意时间片都有 `det(I+D)>=1`。它已映射到
 开放 Hubbard 链和单 flavor 排斥 `t-V` 链的 HS 时间片。现在又得到排斥 `t-V` 局部
@@ -15,8 +64,10 @@
 目前仍不能声称发现了新 Hamiltonian。另一方面，任意两个不同旋转的 split cones 已由
 显式两层反例完全关闭。BDI/AII/DIII/CII 的自然数守恒锥也完成第一轮：真正放松已知
 对称的四项均产生负权或复权，三个零失败项仍只是已知 split/Kramers 机制。最新一轮又
-找到有一般证明的奇数阶 positive-monomial / block-TN 路由半群，并在 canonical
-convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值猜想。
+找到有一般证明的奇数阶 positive-monomial / block-TN 路由半群；但它最自然的局域闭包
+已被两个合法时间片的精确反例 `det(I+XR)=-2` 关闭。抽象固定分区定理仍正确，不能直接
+升级为局域无符号模型。当前尚未关闭的具体方向是在 canonical convention 下观察到的
+Majorana 宇称分辨 period-4 数值猜想。
 
 ## 已经完成
 
@@ -42,8 +93,9 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
    - `az-survivor-cones-v1`：560 格、140,000 个行列式。
    - `speculative-structures-v1`：960 格、192,000 个行列式。
    - `majorana-parity-v1`：640 条历史，每条计算两个 sector traces 和一个完整 Fock 迹。
-4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现和精确非对称键门
-   分解；199 个自动测试全通过。
+4. 加入 80 位任意精度反例重放、开放 Hubbard/`t-V` 链 HS 最小实现、精确非对称键门
+   分解、graded-monomial 的 Majorana 包含证书、block-TN 局域闭包精确反例和最新三个
+   候选审计证书；当前总集成 370 个自动测试全通过。
 
 ## 当前最重要的结果
 
@@ -133,7 +185,9 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
   `det(I+B)=product_C(1+product_{i in C}d_i)>0`，是任意深度的一般证明；
 - 三循环已有负的非主子式，所以它不属于 ordinary TN；类包含任意正对角矩阵，也排除
   固定 Kramers 和公共范数收缩；
-- 奇数循环的 block-TN 推广同样严格恒正，是当前最值得寻找局域 HS 映射的候选；
+- 奇数循环的固定分区 block-TN 推广同样严格恒正；但局域站点内 `C3` 路由与跨站
+  flavor-preserving TN hopping 使用交叉分区，已经在两站点、三 flavor、两层得到
+  `det(I+XR)=-2`，因此最自然的局域闭包不成立；
 - 偶阶 `V4` 路由已有精确 `-9/4` 反例；moving metric、双向 reciprocal coupling 和
   near-commuting 并集分别产生 4,542、3,894、846 个负权，代表例均由 80 位重放；
 - fixed `l_infinity`、reciprocal-parabolic 和 commuting 类严格恒正，但分别属于公共
@@ -142,6 +196,21 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
   取向下，`m=2..6` 中猜想扇区 `pi_*=(-1)^[m(m+1)/2]` 全部正，互补扇区累计观察到
   204 个 float64 负权。这个 convention-dependent 猜想尚无证明，互补负例也尚未做
   任意精度重放。
+
+### Graded monomial crossing：正确，但不是新物理类
+
+- 已证明 `D_ii>=1` 时 `sgn(P) det(I+P D)>=0`，并构造 dilated transposition
+  的逐历史正权、局域吸引 spinless 模型和单 grade-ancilla 实指数 lift；
+- 三角形模型不能靠站点 `+/-` gauge 变成固定 Fock 基 stoquastic，这说明它不是原
+  pure-TN 路径模型；
+- 但 `r=1` 局部顶点精确等于已知 `su(1|1)` graded permutation；
+- 更决定性的是，centered 后每条边的一体 kernel 本征值为
+  `-q(r-1)^2/2`、`-q(r+1)^2/2`，且相互作用为负，因此整个 Hamiltonian 明确属于
+  Wei et al. 2016 的 Majorana reflection positivity 类；
+- monomial 矩阵的 cycle-factor 又是已知特征多项式公式的直接推论；
+- 结论降为 `known-monomial-factorization / known-majorana-subclass /
+  useful-reformulation`：保留特殊 CT 展开和可执行证书，不声称新的矩阵定理或
+  无符号 Hamiltonian 类。
 
 ## 我们没有声称什么
 
@@ -153,12 +222,12 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 ## 下一步建议
 
 不再重复扫描整个命名群、普通 AZ 类、自然数守恒 AZ metric cone 或同分布双锥。下一步
-围绕两个新候选闭环：
+围绕尚未关闭的候选闭环：
 
-1. 查 `P0`/monomial matrix semigroup 文献，确认奇数阶路由的新颖性边界；
-2. 为 odd monomial / block-TN grade 构造局域、可采样的 HS 分解；
-3. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
-4. 若两条都不能物理闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
+1. 把 graded monomial 作为已知类约化案例、把 odd block-TN 局域映射作为精确失败案例
+   存档，不再投入新物理类的主线资源；
+2. 从 2016 Majorana reflection-positivity 证明中推导或推翻受保护宇称公式；
+3. 若该方向不能闭环，再进入 spinor-Metzler、非诱导 exterior-cone 和 gauge/ancilla
    编码。
 
 任何新候选按以下漏斗处理：
@@ -177,6 +246,7 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 ## 查看入口
 
 - [总入口](../START_HERE.md)
+- [成果总账](RESULTS_LEDGER.md)
 - [主办方方向完成度](ORGANIZER_DIRECTION_AUDIT.md)
 - [下一阶段研究计划](NEXT_RESEARCH_PLAN.md)
 - [全非负路径类](TOTAL_NONNEGATIVE_PATH_CLASS.md)
@@ -186,6 +256,8 @@ convention 下观察到一个待证明的 Majorana 宇称分辨 period-4 数值�
 - [新半群初筛结果](FRONTIER_SEMIGROUP_RESULTS.md)
 - [AZ 幸存类半群锥](AZ_SURVIVOR_CONE_RESULTS.md)
 - [激进候选首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)
+- [graded monomial 结果与排重](GRADED_MONOMIAL_RESULTS.md)
+- [odd block-TN 局域性审计](ODD_BLOCK_TN_LOCALITY_AUDIT.md)
 - [激进候选清单](SPECULATIVE_CANDIDATE_BATCH.md)
 - [Majorana 双锥结果](MAJORANA_CONE_RESULTS.md)
 - [AZ 十类结果](AZ_TENFOLD_RESULTS.md)

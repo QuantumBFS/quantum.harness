@@ -12,17 +12,12 @@
 | 一条命令重放最终精确证书 | `python -m oracle.oddcycle_final_certificate` |
 | 查看论文草稿与挑战完成审计 | [论文草稿](docs/ODDCYCLE_PAPER_DRAFT.md) · [#121 审计](docs/ODDCYCLE_CHALLENGE_AUDIT.md) |
 | 第一次了解题目 | [中文零基础导读](docs/ONBOARDING.zh-CN.md) |
-| 查看当前严格恒正候选 | [全非负路径半群](docs/TOTAL_NONNEGATIVE_PATH_CLASS.md) |
-| 查看它离新物理模型还有多远 | [TN 物理映射前沿](docs/TN_PHYSICAL_MAPPING_FRONTIER.md) |
-| 查看普通 hopping 为何只能是路径 | [复合矩阵规范 no-go](docs/COMPOUND_GAUGE_NO_GO.md) |
-| 查看最新 139.2 万权重初筛 | [新半群初筛结果](docs/FRONTIER_SEMIGROUP_RESULTS.md) |
-| 查看 AZ 幸存类的 14 万权重锥筛选 | [AZ 幸存类半群锥](docs/AZ_SURVIVOR_CONE_RESULTS.md) |
-| 查看已占位的激进候选批次 | [新结构候选与证伪清单](docs/SPECULATIVE_CANDIDATE_BATCH.md) |
-| 查看激进候选首批 19.2 万权重结果 | [奇数阶路由与宇称分辨 Majorana](docs/SPECULATIVE_STRUCTURE_RESULTS.md) |
-| 查看当前结论和文献边界 | [研究地基](docs/FOUNDATIONS.md) |
 | 接着推进项目 | [当前状态与下一步](START_HERE.md) |
+| 查某项完整证明或反例 | [分类文档导航](docs/README.md) |
+| 查看协作与交付状态 | [合作者进展说明](docs/COLLABORATOR_UPDATE.zh-CN.md) |
 
-后续的 oracle 代码、测试和运行说明也会从 `START_HERE.md` 统一索引，避免入口继续分散。
+候选卡和历史计划继续保留用于研究审计，但不代表当前结论。日常只从成果总账或
+`START_HERE.md` 进入。
 
 ## 当前主结果
 

@@ -1,9 +1,33 @@
 # 文档导航
 
+## 最短入口
+
+不再从下面的长列表顺序阅读。按目的选择：
+
+| 目的 | 文档 |
+|---|---|
+| 一次看完全部尝试、矩阵、Hamiltonian 和结论 | [项目完整总结](PROJECT_MASTER_SUMMARY.zh-CN.md) |
+| 只想知道找到多少、哪些已知、哪些失败 | [成果总账](RESULTS_LEDGER.md) |
+| 第一次接触符号问题 | [中文零基础导读](ONBOARDING.zh-CN.md) |
+| 决定下一步研究 | [下一阶段计划](NEXT_RESEARCH_PLAN.md) |
+| 查看最新自底向上候选和最小实验 | [自底向上正性候选](BOTTOM_UP_POSITIVITY_CANDIDATES.md) |
+| 查看最新一批非常规模型 | [非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md) |
+| 看三个最新候选为何只剩一个 | [三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md) |
+| 给合作者同步完整证据数字 | [合作者进展说明](COLLABORATOR_UPDATE.zh-CN.md) |
+
+文档状态分为三类：
+
+- **结果文档**：已经证明、精确反驳或完成已知类约化；
+- **候选/计划文档**：仍在验证，不能当作成果；
+- **基础设施文档**：代码、环境、协议和协作约定。
+
+历史候选卡不会删除，因为失败路线也是研究证据；当前结论始终以
+[成果总账](RESULTS_LEDGER.md)和对应结果文档为准。
+
 ## 第一次接触这个挑战
 
 读 [ONBOARDING.zh-CN.md](ONBOARDING.zh-CN.md)。它从行列式权重和符号问题讲起，
-不要求量子蒙卡或群论基础；读完应当能解释题目在找什么、什么算证据、明天如何参与。
+不要求量子蒙卡或群论基础；读完应当能解释题目在找什么、什么算证据、如何参与。
 
 ## 开始研究或写代码
 
@@ -15,8 +39,14 @@
 - 新候选必须通过的新颖性检查；
 - 数值 oracle 的正确性和可复现性要求。
 
-随后按任务使用：
+## 完整专题索引
 
+以下用于复核，不需要顺序阅读：
+
+- [PROJECT_MASTER_SUMMARY.zh-CN.md](PROJECT_MASTER_SUMMARY.zh-CN.md)：
+  当前唯一自包含总报告，统一覆盖全部主要尝试、核心矩阵构造、Hamiltonian、失败证书、
+  非常规模型、最新三个候选审计和开放问题；
+- [RESULTS_LEDGER.md](RESULTS_LEDGER.md)：统一成果数量、Hamiltonian 归属、关闭项和开放项；
 - [TOTAL_NONNEGATIVE_PATH_CLASS.md](TOTAL_NONNEGATIVE_PATH_CLASS.md)：当前严格恒正候选、证明和
   Hubbard/`t-V` 开链 HS 映射；
 - [TN_NOVELTY_AUDIT.md](TN_NOVELTY_AUDIT.md)：TN 类对 Kramers、固定度量和 2024
@@ -36,6 +66,8 @@
   数守恒半群锥的 14 万权重筛选、80 位反例和完整 BdG 边界；
 - [SPECULATIVE_STRUCTURE_RESULTS.md](SPECULATIVE_STRUCTURE_RESULTS.md)：奇数阶 monomial
   的一般证明、12 族 19.2 万权重、四类 80 位反例和 Majorana 宇称猜想；
+- [ODD_BLOCK_TN_LOCALITY_AUDIT.md](ODD_BLOCK_TN_LOCALITY_AUDIT.md)：局域 `C3`
+  route 与 crossed TN hopping 的六模式两层精确负权，及 block-TN 的物理降级边界；
 - [SPECULATIVE_CANDIDATE_BATCH.md](SPECULATIVE_CANDIDATE_BATCH.md)：下一批
   spinor/exterior-cone 候选的定义、排重与停止条件；
 - [superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md](superpowers/specs/2026-07-28-representation-semigroup-positive-trace-design.md)：
@@ -47,10 +79,10 @@
 - [RESEARCH_OPERATIONS.md](RESEARCH_OPERATIONS.md)：Git、WSL、环境、并行与实验闭环的可复用操作经验；
 - [GRADED_MONOMIAL_CANDIDATE.md](GRADED_MONOMIAL_CANDIDATE.md)：给正对角 TN 网络
   加入带 `Z2` grade 的 permutation crossing，以 scalar sign 抵消 determinant
-  parity，并反推奇环吸引 spinless-fermion 模型的新候选；
+  parity；物理模型排重后已降为已知 Majorana 正性子类；
 - [GRADED_MONOMIAL_RESULTS.md](GRADED_MONOMIAL_RESULTS.md)：graded crossing 的循环
   定理、三角受挫物理模型、任意历史证据、real-exponential grade ancilla 加强版和
-  文献边界；
+  显式 monomial-factorization/Majorana 已知类包含证书；
 - [COLLABORATOR_UPDATE.zh-CN.md](COLLABORATOR_UPDATE.zh-CN.md)：给合作者看的当前进展、结果边界和下一步；
 - [ORGANIZER_DIRECTION_AUDIT.md](ORGANIZER_DIRECTION_AUDIT.md)：逐条核对主办方候选的完成状态；
 - [PSEUDOUNITARY_PHASE_RESULTS.md](PSEUDOUNITARY_PHASE_RESULTS.md)：`U(p,q)` 相位定理和剩余符号；
@@ -64,11 +96,12 @@
 - [EXACT_CERTIFICATES.md](EXACT_CERTIFICATES.md)：人类可读的精确正、负、零测试锚点；
 - [CANDIDATE_CARD.md](CANDIDATE_CARD.md)：每个新候选都复制并填写的评估模板；
 - [ENVIRONMENT.md](ENVIRONMENT.md)：本机可用软件、错误环境和待定依赖；
-- [KICKOFF.md](KICKOFF.md)：明日开工顺序、两到三人分工和交付标准。
+- [KICKOFF.md](KICKOFF.md)：首次开工时的历史分工和交付标准。
 
-## 明天组队时
+## 继续协作时
 
-先读 [../START_HERE.md](../START_HERE.md) 的“现在做到哪里”，再按三类任务分工：
+先读 [成果总账](RESULTS_LEDGER.md)和 [../START_HERE.md](../START_HERE.md) 的“当前结论”，
+再按三类任务分工：
 
 1. Majorana/锥交集候选生成器、数值 oracle 与精确反例；
 2. 候选矩阵类和物理 DQMC 映射；

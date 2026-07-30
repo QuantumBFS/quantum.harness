@@ -514,3 +514,45 @@ def even_v4_boundary_factors(q: float) -> tuple[np.ndarray, np.ndarray]:
     permutation = _permutation_matrix(_v4_regular_permutations()[1])
     diagonal = np.diag([q, q, 1.0 / q, 1.0 / q])
     return permutation, diagonal
+
+
+def local_c3_crossed_tn_boundary_factors() -> tuple[np.ndarray, np.ndarray]:
+    """Return an exact two-layer obstruction to localizing block-C3 routing.
+
+    Order the six modes by ``(site, flavor)`` with two sites and three
+    flavors.  The first factor routes the flavors by opposite three-cycles
+    on the two sites.  The second factor is a direct sum, in the crossed
+    ``(flavor, site)`` partition, of three symmetric positive-definite
+    two-by-two TN hopping blocks:
+
+    ``[[1,1],[1,2]], [[2,3],[3,5]], [[6,2],[2,2]]``.
+
+    Both factors are real exponentials.  Nevertheless, their product obeys
+
+    ``det(I + X R) = -2``.
+
+    Thus the rigorous odd block-TN theorem is not closed under the physically
+    natural operation of making C3 routes independent at each site and then
+    coupling the sites by flavor-preserving TN hopping.
+    """
+
+    route = np.array(
+        [
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        ]
+    )
+    hopping = np.zeros((6, 6), dtype=float)
+    blocks = (
+        np.array([[1.0, 1.0], [1.0, 2.0]]),
+        np.array([[2.0, 3.0], [3.0, 5.0]]),
+        np.array([[6.0, 2.0], [2.0, 2.0]]),
+    )
+    for flavor, block in enumerate(blocks):
+        modes = (flavor, 3 + flavor)
+        hopping[np.ix_(modes, modes)] = block
+    return hopping, route

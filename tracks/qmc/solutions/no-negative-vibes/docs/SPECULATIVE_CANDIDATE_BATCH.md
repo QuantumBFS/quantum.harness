@@ -22,7 +22,8 @@ w(A_1,...,A_L) = det[I + exp(A_1)...exp(A_L)] >= 0
 已经完成，详见[首批结果](SPECULATIVE_STRUCTURE_RESULTS.md)。每条 Majorana 历史分别
 计算 even、odd 和完整 Fock 迹。
 
-- odd monomial / block-TN：升级为有一般证明的主候选，物理映射仍开放；
+- odd monomial / block-TN：固定分块定理正确，但矩阵公式已知；自然局域闭包已有
+  `det(I+XR)=-2` 精确反例，降为数学存档；
 - fixed `l_infinity`、reciprocal-parabolic、commuting：严格正，但新颖性较低；
 - moving metric、双向 reciprocal、near-commuting、偶阶 monomial：已有负权，关闭；
 - `D_4` Lusztig：约化到已知 split `SO(4,4)`，不作为新机制；
@@ -60,7 +61,8 @@ det(I+B) = product_C [1 + product_{i in C} d_i] > 0.
 
 - 找到稳定负权：立即淘汰对应定义并保存反例；
 - C3/C5 零失败后不靠样本宣称，直接使用上面的循环分解定理；
-- 下一步只在能得到局域 HS 离散路由时继续做物理映射。
+- 局域 HS 路由的自然 crossed-partition 推广已由两层精确反例关闭；除非引入新的
+  constrained gauge/ancilla，不再继续常规物理映射。
 
 ### S2. 奇数循环的 block-TN wreath 半群
 
@@ -80,6 +82,11 @@ det(I + X_l ... X_1) >= 0,
 
 - `odd_block_tn_c3`，三个站点、每站一个 `2 x 2` TN 块；
 - 后续只有 C3 通过结构审计后才扩到 C5。
+
+后续状态：固定 block partition 的定理通过；但
+[局域闭环审计](ODD_BLOCK_TN_LOCALITY_AUDIT.md)给出 independent local `C3`
+route 与 flavor-preserving TN hopping 的六模式两层精确负权。因此该方向不再列为
+近期物理主候选。
 
 ### S3. 固定加权 `l_infinity` 收缩锥
 

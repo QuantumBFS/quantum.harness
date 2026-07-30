@@ -1,6 +1,30 @@
 # 下一阶段研究计划
 
-更新时间：2026-07-28
+更新时间：2026-07-29
+
+## 7 月 29 日路线更新
+
+ZiboJin 的最新结果改变了下一轮的入口：
+
+- symmetric-oddcycle continuum 已有任意深度定理和五模相互作用 transfer；
+- 完整共同 metric
+  `R=2ww^T/83-I`、`w=(4,4,1,-5,5)^T` 又把整个区间归入已知
+  Wei indefinite-metric contraction semigroup；
+- tensor-square `m=3,4` 已完成 DQMC/ED 小尺寸验收，后续相图由 ZiboJin 分支推进；
+- fixed continuum 被归类后，ZiboJin 又找到 untyped joint pair
+  `{p=0.3,p=2.5}`：全部 depth-12 words 和十万条 depth<=40 随机词全正，但任意深度
+  coupled-tail certificate 仍开放；
+- 因此籼至不重复任何 untyped joint `B(p,q,r)`、single/block exterior CQLF、
+  coupled-tail automaton 或 tensor-square 相图。
+
+新主线是 **typed exterior category**：不同 Trotter 位置可使用不同 exterior
+cone/chart，只有合法闭合 schedule 才要求正；并用 grade-domination 证书控制允许为负的
+危险 sector，而且忘掉 types 后必须出现完整 determinant 的精确负 word，或有解析
+自由词非正证明。并行小支线是
+含真实 pairing 的 **Pfaffian/Spin 正性**。完整共同一粒子
+和 Majorana contraction metric 必须在长词搜索之前排除。第一批预算为 2–5 百万次
+低维检查，只负责筛选；任意深度证书之前不称发现。正式规格见仓库根目录
+`docs/superpowers/specs/2026-07-29-exterior-positive-category-search-design.md`。
 
 ## 当前判断
 
@@ -21,15 +45,49 @@
   表示普通非相邻 hopping 的占据依赖符号；无 ancilla 的直接正和路线已关闭；
 - 把条件放宽到各粒子数扇区独立固定符号规范后，证明普通 hopping 图全扇区无挫折当且
   仅当各连通分量为路径；2–6 站点全连通图穷举只有 `N!/2` 个标号路径幸存；
-- 两个不同旋转 split-contraction cones 的完整并集也被任意小角两层解析反例关闭。
+- 两个不同旋转 split cones 的完整并集也被任意小角两层解析反例关闭。
 - BDI/AII/DIII/CII 七个自然数守恒半群锥已完成 14 万权重初筛；四个非平凡放松项出现
   负权或复权，三个零失败项分别约化到已知 split/Kramers 机制。
+- graded monomial 已约化到已知 `su(1|1)` 顶点和 Majorana reflection positivity；
+  奇数阶 fixed-partition block-TN 虽有严格正性证明，但最自然的局域闭包已由两站点、
+  三 flavor、两层精确反例 `det(I+XR)=-2` 关闭。
+- R01 fixed Klein-Hodge/Fock 变换的六模式重叠锥已由 24 个 bridge 坐标的 exact-zero
+  证书关闭；结论只针对该固定变换和双 parity-block Metzler 条件。
 
-接下来不应继续增加同分布随机扫描。**主线先围绕 TN 路径类完成新颖性和物理推广闭环。**
-它的数学正确性已经解决，尚未解决的是“是否超出已知一维无符号事实”。“复 Majorana 简洁
-矩阵语言”继续作为支撑工具：只做到足以可靠排重、判断 Spin/Pfaffian 分支和检验候选。
+接下来不应继续增加同分布随机扫描。TN 路径、graded monomial、odd block-TN、R01
+fixed transform、有限 Klein-circuit Fock–CP 和 tensor-square 直接物理提升均已得到
+明确边界。edge-electric gauge/cocycle 的 GF(2) 符号抵消虽然成立，却被迫形成
+system-size Wilson string。ZiboJin 的独立分支已经完成 non-induced exterior cone
+的 exact-card/pressure 主扫描：seed61 被长度 150 的精确负 determinant 淘汰；
+oddcycle seeds `117/132/147` 则逐个穷尽全部非空二进制 words 到长度 27，并通过
+448 个长度 60–1800 的精确/高精度对抗 winners，但仍缺任意深度证明。本分支不重复这些
+生成器和扫描，而只在需要时独立复核被提升的候选。放宽物理形态后的非常规模型反推已经
+完成第一批，后续只作为 model factory；当前发现主线按本文件开头的 typed exterior 与
+Pfaffian/Spin 规格执行。
+Majorana 宇称猜想保留为独立支线，不再阻塞新机制搜索。
+“复 Majorana 简洁矩阵语言”作为必要支撑工具：做到足以可靠排重、判断 Spin/Pfaffian
+分支和检验候选。
 
-## 主线 A：发现新的物理无符号类
+第一批反推已经交付一个通用 Hermitian 半群模型工厂与八种完整构造。它们没有增加
+L3 计数。三个优先候选的首轮审计也已经完成：adjoint lift 精确归入已知
+split-orthogonal 机制，grade-charge full trace 是静态守恒扇区直和，tensor-square
+determinant 可分解为模平方乘实平方。籼至分支不再接手 tensor-square 相图，改做
+typed exterior 与 pairing Pfaffian/Spin；ZiboJin 分支独立推进 tensor-square phase，
+并保留 oddcycle seeds `117/132/147` 的任意深度证明或反例搜索。详见
+[非常规模型第一批结果](UNCONVENTIONAL_MODEL_BATCH1_RESULTS.md)和
+[三个候选的排查结果](THREE_CANDIDATE_AUDIT_RESULTS.md)。
+
+## 已完成主线：从严格正性类开采非常规模型
+
+这一主线不再把短程局域 Hermitian Hamiltonian 作为进入计算前的条件。候选可以先停在：
+
+```text
+L1 严格非常规无符号模型
+L2 有显式相似变换/对偶/投影的可约化模型
+L3 具有明确物理用途的新无符号候选
+```
+
+只有 L3 进入“新物理类”计数，但 L1/L2 也作为完整结果保留。
 
 ### 为什么不只继续列举 Lie 群
 
@@ -42,25 +100,40 @@
 
 已知的重要扩展来自“群 + 单向半正定锥”形成的半群，而不是更多群名。因此这里的“新类”
 优先指不约化到现有 split-orthogonal、Majorana/Kramers 或 2024 contraction-semigroup
-条件的结构化半群，同时必须能由实际 HS 时间片产生。
+条件的结构化半群，同时必须能给出实际 HS 时间片或完整 transfer model；短程物理来源
+只作为 L3 升级条件。
 
 ### 当前候选池
 
-按优先级研究：
+以下是历史候选池，不代表当前执行顺序；当前只按文件开头已经冻结的 intrinsically
+typed exterior category 与真实 pairing Pfaffian/Spin 规格实施。所有 untyped joint
+alphabet、block exterior metric 和 coupled-tail automata 由合作者分支负责，U1–U6
+非常规模型已完成首批。
 
-1. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
+1. **spinor-Metzler 与非诱导 exterior cone（协作观察）**：由合作者直接在 Fock/Spin
+   表示中寻找非诱导正锥；本分支只独立复核被证书提升的候选；
+2. **Fock–CP / Choi 正锥**：把六模式 Fock 空间识别为 `End(C^8)`，先枚举固定的局域
+   tensorization/Klein/Clifford 变换；对固定变换编译条件完全正 SDP，并逐个锚定 R01
+   的 bridge hopping/pairing 坐标；**identity 与深度不超过 2 的连续 Klein 电路已
+   完成，520 个单元的 bridge 全部在线性 Hermiticity 门归零，一般 non-Klein 变换开放**；
+3. **局域 gauge 投影与 overlap 2-cocycle**：在四格方环和两个共享边方环上，把费米
+   交换符号的局域抵消写成 `GF(2)` 可行性问题；**edge-electric affine ansatz 已精确
+   消号，但在 `2 x L` 上需要读取其余全部 `L-1` 条竖边，因此因 Wilson string 降级**；
+4. **Majorana 宇称分辨半群**：把当前 period-4 数值规律写成精确命题，重放互补扇区
+   的最小负例，并从 2016 reflection-positivity 证明判断受保护扇区是否真有乘法闭包；
+5. **tensor-square 表示提升半群**：一般恒正定理保留；四模式 HS 已约化到 split
+   `O(2,2)`，`m>=3` 直接提升又有行列条带。只有出现非条带局域拼接才重开；
+6. **非平凡 ancilla 编码或宇称串 hopping**：两站点排斥键门证明正和可实现相互作用，
    但普通远邻 hopping 被扇区符号 no-go 关闭；简单 Fock ancilla 投影/偏迹仍保持矩阵元
    非负，也无效。下一步必须显式改变物理 Hilbert 空间/规范约束，或使用相关宇称串；
-2. **比 TN 更大的主子式非负半群**：只要求乘积的全部主子式非负，研究 TN 是否存在物理
-   可用的严格扩张；
-3. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
+7. **非平凡耦合的分块半群**：各子系统分别有不同的 `J1,J2`，允许受限跨块耦合，但整体
    不存在一个把它直接约化到已知类的固定全局 `J1,J2`；
-4. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
+8. **AZ 幸存结构的完整 BdG/Pfaffian 锥**：自然数守恒 metric-cone 已筛完；下一轮必须
    允许真实 pairing，并用 Pfaffian/Spin trace 而非只看 determinant，再逐项排除已知
    Majorana/Kramers/2024 半群；
-5. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
+9. **物理约束产生的受限锥交集**：不是任意两个正锥的并集，而是某个 Hamiltonian/HS
    分解实际可达、且在乘法下闭合的子集；
-6. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
+10. **伪酉相位消除后的剩余结构**：只有当 HS 标量前因子能物理地消去中心 `U(1)` 相位，
    并有额外机制控制剩余 `Z2` 符号时才继续。
 
 ### 候选进入计算前的硬门槛
@@ -68,14 +141,16 @@
 每个候选必须先写清：
 
 ```text
-矩阵定义
+矩阵或 transfer-model 定义
 乘法/时间层闭包
-与所有已知类的区别
-候选 Hamiltonian 与 HS 来源
-实际物理权重是 determinant、Pfaffian 还是 Spin trace
+实际权重是 determinant、Pfaffian、Spin trace 还是 projected trace
+Hermitian / quasi-Hermitian / real-spectrum / general non-Hermitian 分类
+正 scalar coefficient 与生成元/微字证书
+与已知类的关系
 ```
 
-缺少物理来源或闭包的候选不进入大扫描。
+第一阶段允许没有短程物理来源，但不允许没有闭包、权重和模型定义。任何相似变换必须
+记录显式 `S`、metric、条件数和局域性标度。
 
 ### 发现漏斗
 
@@ -85,10 +160,12 @@
 → 失败则精确化最小反例
 → 存活则扩大到 10^6 个结构化样本
 → 证明半群闭包与非负性
-→ 完整 Hamiltonian/HS 映射
+→ 完整非常规 Hamiltonian/transfer 映射
+→ 相似变换、对偶、投影或低能约化
 ```
 
-随机扫描只负责淘汰；“新类”必须由一般证明和物理映射完成。
+随机扫描只负责淘汰；L1 需要一般正性证明，L2 需要精确变换，L3 还需要物理和新颖性
+闭环。
 
 ## 支线 B：复 Majorana 的必要矩阵表述
 
@@ -159,7 +236,8 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 `TN_PHYSICAL_MAPPING_FRONTIER.md`。它解决了“抽象 TN 是否能由真实 HS 场产生”，但没有
 解决“是否得到新 Hamiltonian”。
 
-随后只允许加入物理上能产生的 hopping、pairing 或辅助场顶点，检查可达子集是否：
+此前“只允许立即物理的局域顶点”限制由新主线替代。现在也允许长程、多体、集体、
+Wilson-string 和非厄米 transfer 顶点，但仍检查：
 
 - 仍只是已有 Majorana/Kramers/半群类；
 - 自动避开旋转双锥的秩一零权边界；
@@ -183,26 +261,45 @@ exp(-dt h_b) = [Gamma(B_+) + Gamma(B_-)]/2,
 - 只取两个锥的物理可达交集；
 - 对生成元范数、层数和离秩亏边界距离给出联合下界。
 
-每个候选先写清封闭性和物理来源，再运行 oracle；不再从任意旋转矩阵开始盲搜。
+每个候选先写清封闭性和模型/transfer 来源，再运行 oracle；不再从任意旋转矩阵开始
+盲搜。
 
 ## 执行顺序
 
 1. **已完成**：`U(p,q)` 相位律、TN 路径严格证明、两个 HS 基线、139.2 万权重筛选、
    TN 对固定 Kramers/split/2024 条件的代数排重，以及精确非对称 `t-V` 键门分解。
 2. **已完成**：`AZ-survivor-cones-v1` 的 14 万权重筛选；自然数守恒放松没有新幸存者。
-3. **立即开始**：复核 TN 非归约证明，并沿 bond-channel/discrete HS 引用链排重键门公式。
-4. **同步进行**：攻击非平凡 gauge/ancilla 编码与宇称串相关 hopping，尝试同时越过
-   连续路径、Fock 矩阵元和逐扇区规范三个 no-go。
-5. **按需补足**：先完成 complex-Majorana/BdG 候选所需的 Pfaffian 与 Spin-trace 分支工具。
-6. 若正和路线仍约化为已知一维事实，转向更大的主子式非负乘法半群或 ancilla 投影。
-7. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
+3. **已完成**：graded monomial 已知类排重；odd fixed-partition block-TN 定理确认，
+   以及其自然局域 crossed-partition 闭包的精确 `-2` 反例。
+4. **协作完成**：R01 fixed Klein-Hodge/Fock 的六模式数守恒和 BdG bridge 坐标由
+   exact-zero 证书关闭。
+5. **已完成第一轮**：六模式 Fock–CP 的 13 个 depth-2 Klein 电路、20 种切分和
+   数守恒/BdG 两族共 520 个单元；所有 bridge 在进入 SDP 前已归零。
+6. **已完成物理闭环**：tensor-square 得到四模式方形 hopping 加排斥作用的正系数
+   HS；最小模型属于 split `O(2,2)`，一般维数有条带非局域障碍。
+7. **已完成第一版**：四/六模式 edge-electric gauge-cocycle `GF(2)` 消号成功；
+   `2 x L` 中央跳跃的 affine phase 含全部其他竖边，局域可扩展性失败。
+8. **协作已推进**：ZiboJin 的 non-induced exterior cone exact-card/pressure 流水线
+   已淘汰 seed61，并把 oddcycle seeds `117/132/147` 精确推进到全部 depth-27 words
+   与 448 个长度 60–1800 的对抗 winners；fixed symmetric-oddcycle continuum 的
+   任意深度定理又被完整 common metric 归入已知 Wei 不定度量收缩半群；新的 untyped
+   joint pair `{0.3,2.5}` 已完成全部 depth-12 word 压力但仍缺 theorem。本分支不重复
+   这些生成器、block/coupled tail 证书和分布式筛选。
+9. **已完成首批**：从 tensor-square、TN、odd block-TN、graded ancilla 和
+   gauge/cocycle 反推 U1–U6 非常规模型，并完成三个优先候选的首轮解析排重。
+10. **立即开始**：按预注册规格实现 typed exterior category 搜索；先做完整共同
+    metric/TN/tensor-lift 排重，再做 2–5 百万次低维筛选。
+11. **并行小支线**：在 2–4 个复模式上实现真实 pairing 的 Pfaffian/Spin 搜索。
+12. **协作线**：ZiboJin 独立推进 tensor-square Stage 3；本分支只消费通过审计的相图结果。
+13. **低优先级**：Majorana 宇称 period-4 猜想的精确重放和最小维证明/反例。
+14. 只有未证明候选存活到至少 `10^6` 个结构化样本且没有已知类约化后，才扩大计算或上超算。
 
-近期精力分配：
+籼至分支近期精力分配：
 
 ```text
-20%  TN 新颖性证明复核与文献引用链
-60%  TN 平面网络的 Hamiltonian/HS 物理推广
-20%  复 Majorana 与候选排重基础设施
+70%  typed exterior category、known-class gates 与 grade-domination
+20%  真实 pairing 的 Pfaffian/Spin 小模式支线
+10%  合作者结果独立复核与文档整合
 ```
 
 ## 两人协作建议
