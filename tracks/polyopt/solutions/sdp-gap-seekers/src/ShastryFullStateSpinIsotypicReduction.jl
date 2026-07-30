@@ -29,6 +29,8 @@ export SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA,
        shastry_spin_isotypic_truth,
        shastry_spin_stabilizer_structure,
        shastry_spin_stabilizer_coefficient_truth,
+       shastry_spin_l2_congruence_structure,
+       shastry_spin_l2_congruence_truth,
        shastry_spin_isotypic_block_entry,
        assemble_shastry_full_state_spin_isotypic_reduced_primal,
        shastry_full_state_spin_isotypic_reduced_assembly_report
@@ -491,9 +493,258 @@ function block_group_key(block::ShastrySpatialPSDBlock)
     return (source.role, source.family, block.parity)
 end
 
+spin_blind_word_signature(word) =
+    Tuple(site for (site, _) in word.ops)
+
+function spin_blind_full_row_signature(row)
+    state_symbols = sort!(
+        spin_blind_word_signature.(row.source.state_symbols);
+        by=string,
+    )
+    return (
+        family=row.family,
+        state_symbols=Tuple(state_symbols),
+        operator_word=spin_blind_word_signature(row.source.operator_word),
+    )
+end
+
+function spin_blind_spatial_row_signature(
+    block::ShastrySpatialPSDBlock,
+    row,
+)
+    combined = Dict{Any,Int}()
+    for (source_index, coefficient) in
+        zip(row.source_indices, row.coefficients)
+        signature = spin_blind_full_row_signature(
+            block.source_block.rows[source_index],
+        )
+        combined[signature] = get(combined, signature, 0) + coefficient
+    end
+    filter!(pair -> !iszero(last(pair)), combined)
+    isempty(combined) && error("spin-blind spatial row cancels exactly")
+    records = sort!(
+        collect(combined);
+        by=pair -> string(first(pair)),
+    )
+    coefficients = Int[last(pair) for pair in records]
+    divisor = foldl(gcd, abs.(coefficients); init=0)
+    divisor > 0 || error("spin-blind spatial row has zero divisor")
+    coefficients .÷= divisor
+    first(coefficients) < 0 && (coefficients .*= -1)
+    return Tuple(
+        (first(record), coefficient)
+        for (record, coefficient) in zip(records, coefficients)
+    )
+end
+
+function spin_l2_multiplicity_signature(
+    block::ShastrySpinIsotypicPSDBlock,
+    row::ShastrySpinIsotypicRow,
+)
+    signatures = unique(
+        spin_blind_spatial_row_signature(
+            block.source_block,
+            block.source_block.rows[source_index],
+        )
+        for source_index in row.source_indices
+    )
+    length(signatures) == 1 || error(
+        "one spin-l2 row mixes spin-blind multiplicity signatures",
+    )
+    return only(signatures)
+end
+
+function spin_l2_congruence_groups(assembly)
+    blocks = [assembly.positive_blocks; assembly.gap_blocks]
+    references = Dict{Tuple{Symbol,Symbol,Symbol},Any}()
+    targets = Dict{Tuple{Symbol,Symbol,Symbol},Vector{Any}}()
+    for block in blocks
+        key = block_group_key(block.source_block)
+        if block.kind == :s3_standard
+            haskey(references, key) &&
+                error("multiple S3-standard blocks in one l2 group")
+            references[key] = block
+        elseif block.kind == :s3_stabilizer_plus_l2
+            push!(get!(targets, key, Any[]), block)
+        end
+    end
+    isempty(targets) && error("no nontrivial-character l2 cones found")
+    groups = NamedTuple[]
+    target_count = 0
+    for key in sort!(collect(keys(targets)); by=string)
+        haskey(references, key) ||
+            error("nontrivial l2 cones have no S3-standard reference")
+        reference = references[key]
+        reference_by_signature = Dict{Any,Int}()
+        for (row_index, row) in enumerate(reference.rows)
+            signature = spin_l2_multiplicity_signature(reference, row)
+            haskey(reference_by_signature, signature) && error(
+                "S3-standard l2 multiplicity signatures are not unique",
+            )
+            reference_by_signature[signature] = row_index
+        end
+        group_targets = sort!(
+            targets[key];
+            by=block -> (
+                block.source_block.source_block.character.rx,
+                block.source_block.source_block.character.ry,
+            ),
+        )
+        length(group_targets) == 3 || error(
+            "an l2 congruence group does not contain three nontrivial characters",
+        )
+        for target in group_targets
+            length(target.rows) == length(reference.rows) || error(
+                "l2 target and S3-standard dimensions differ",
+            )
+            mapping = Int[]
+            for row in target.rows
+                signature = spin_l2_multiplicity_signature(target, row)
+                haskey(reference_by_signature, signature) || error(
+                    "l2 target signature has no S3-standard reference",
+                )
+                push!(mapping, reference_by_signature[signature])
+            end
+            length(unique(mapping)) == length(mapping) || error(
+                "l2 target-to-reference row map is not bijective",
+            )
+            character = target.source_block.source_block.character
+            push!(groups, (
+                role=key[1],
+                family=key[2],
+                spatial_parity=key[3],
+                character_rx=character.rx,
+                character_ry=character.ry,
+                reference=reference,
+                target=target,
+                mapping=mapping,
+            ))
+            target_count += 1
+        end
+    end
+    return groups, target_count
+end
+
+"""Prove a bijective spin-blind multiplicity map for every discrete l=2 cone."""
+function shastry_spin_l2_congruence_structure(
+    assembly,
+)
+    groups, target_count = spin_l2_congruence_groups(assembly)
+    records = [(
+        role=group.role,
+        family=group.family,
+        spatial_parity=group.spatial_parity,
+        character_rx=group.character_rx,
+        character_ry=group.character_ry,
+        dimension=length(group.mapping),
+        mapping_bijective=length(unique(group.mapping)) ==
+                           length(group.mapping),
+    ) for group in groups]
+    return (
+        exact=!isempty(records) && target_count == length(records) &&
+              all(record.mapping_bijective for record in records),
+        target_block_count=target_count,
+        records=records,
+    )
+end
+
+"""
+Compare every mapped l=2 coefficient after an optional exact projection.
+
+The comparison is deliberately diagnostic: only entrywise equality sets
+`exact=true`. Opposite-sign matches are counted separately so a later exact
+row-gauge proof can be added without silently accepting it here.
+"""
+function shastry_spin_l2_congruence_truth(
+    assembly;
+    project::Function=identity,
+    progress_callback::Function=message -> nothing,
+)
+    groups, _ = spin_l2_congruence_groups(assembly)
+    records = NamedTuple[]
+    exact = true
+    for group in groups
+        dimension = length(group.mapping)
+        row_results = Vector{NamedTuple{
+            (:equal, :opposite, :unmatched),
+            Tuple{Int,Int,Int},
+        }}(undef, dimension)
+        Threads.@threads :dynamic for row in 1:dimension
+            equal = 0
+            opposite = 0
+            unmatched = 0
+            reference_row = group.mapping[row]
+            for column in row:dimension
+                target_entry = project(
+                    shastry_spin_isotypic_block_entry(
+                        assembly,
+                        group.target,
+                        group.target.rows[row],
+                        group.target.rows[column],
+                    ),
+                )
+                reference_entry = project(
+                    shastry_spin_isotypic_block_entry(
+                        assembly,
+                        group.reference,
+                        group.reference.rows[reference_row],
+                        group.reference.rows[group.mapping[column]],
+                    ),
+                )
+                if target_entry == reference_entry
+                    equal += 1
+                elseif target_entry == -1 * reference_entry
+                    opposite += 1
+                else
+                    unmatched += 1
+                end
+            end
+            row_results[row] = (
+                equal=equal,
+                opposite=opposite,
+                unmatched=unmatched,
+            )
+        end
+        equal_count = sum(result.equal for result in row_results)
+        opposite_count = sum(result.opposite for result in row_results)
+        unmatched_count = sum(result.unmatched for result in row_results)
+        entry_count = equal_count + opposite_count + unmatched_count
+        block_exact = opposite_count == 0 && unmatched_count == 0
+        exact &= block_exact
+        push!(records, (
+            role=group.role,
+            family=group.family,
+            spatial_parity=group.spatial_parity,
+            character_rx=group.character_rx,
+            character_ry=group.character_ry,
+            dimension=dimension,
+            exact=block_exact,
+            entry_count=entry_count,
+            equal_count=equal_count,
+            opposite_count=opposite_count,
+            unmatched_count=unmatched_count,
+        ))
+        progress_callback(
+            "SO(3) l2 congruence block $(length(records))/$(length(groups)); " *
+            "dimension=$dimension, equal=$equal_count, " *
+            "opposite=$opposite_count, unmatched=$unmatched_count",
+        )
+    end
+    return (
+        exact=exact && !isempty(records),
+        target_block_count=length(records),
+        entry_count=sum(record.entry_count for record in records),
+        equal_count=sum(record.equal_count for record in records),
+        opposite_count=sum(record.opposite_count for record in records),
+        unmatched_count=sum(record.unmatched_count for record in records),
+        records=records,
+    )
+end
+
 function retained_blocks(
     blocks::Vector{ShastrySpatialPSDBlock};
     stabilizer_split::Bool=false,
+    so3_l2_dedup::Bool=false,
 )
     result = ShastrySpinIsotypicPSDBlock[]
     for block in blocks
@@ -517,7 +768,7 @@ function retained_blocks(
             )
         elseif stabilizer_split
             decomposition = stabilizer_isotypic_rows(block)
-            isempty(decomposition.plus) || push!(
+            isempty(decomposition.plus) || so3_l2_dedup || push!(
                 result,
                 ShastrySpinIsotypicPSDBlock(
                     block,
@@ -790,20 +1041,29 @@ function assemble_shastry_full_state_spin_isotypic_reduced_primal(
     verify_truth::Bool=true,
     materialize_coefficients::Bool=true,
     stabilizer_split::Bool=false,
+    so3_l2_dedup::Bool=false,
 )
+    so3_l2_dedup && !stabilizer_split && error(
+        "SO(3) l2 cone deduplication requires the stabilizer split",
+    )
     truth = verify_truth ? shastry_spin_isotypic_truth(source) : nothing
     verify_truth && !something(truth).exact &&
         error("Shastry spin-isotypic truth gate failed")
     positive_blocks = retained_blocks(
         source.positive_blocks;
         stabilizer_split=stabilizer_split,
+        so3_l2_dedup=so3_l2_dedup,
     )
     gap_blocks = retained_blocks(
         source.gap_blocks;
         stabilizer_split=stabilizer_split,
+        so3_l2_dedup=so3_l2_dedup,
     )
     equalities = canonical_real_equalities(copy(source.equalities))
-    schema = stabilizer_split ?
+    schema = so3_l2_dedup ?
+        SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA *
+        "-nontrivial-stabilizer-so3-l2-dedup-v1" :
+        stabilizer_split ?
         SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA *
         "-nontrivial-stabilizer-v1" :
         SHASTRY_FULL_STATE_SPIN_ISOTYPIC_REDUCTION_SCHEMA

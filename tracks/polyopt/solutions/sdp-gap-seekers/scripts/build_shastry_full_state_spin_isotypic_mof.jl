@@ -105,6 +105,38 @@ function spin_stabilizer_coefficient_truth_dict(truth)
     )
 end
 
+function spin_l2_congruence_structure_dict(structure)
+    return Dict(
+        "exact" => structure.exact,
+        "target_block_count" => structure.target_block_count,
+        "records" => [
+            Dict(
+                string(key) => value isa Symbol ? string(value) : value
+                for (key, value) in pairs(record)
+            )
+            for record in structure.records
+        ],
+    )
+end
+
+function spin_l2_congruence_truth_dict(truth)
+    return Dict(
+        "exact" => truth.exact,
+        "target_block_count" => truth.target_block_count,
+        "entry_count" => truth.entry_count,
+        "equal_count" => truth.equal_count,
+        "opposite_count" => truth.opposite_count,
+        "unmatched_count" => truth.unmatched_count,
+        "records" => [
+            Dict(
+                string(key) => value isa Symbol ? string(value) : value
+                for (key, value) in pairs(record)
+            )
+            for record in truth.records
+        ],
+    )
+end
+
 function verify_reloaded_spin_isotypic_model(
     model::JuMP.Model,
     assembly::ShastryFullStateSpinIsotypicReducedPrimalAssembly,
@@ -783,11 +815,37 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         options.mode in (:preflight, :mof)
     stabilizer_split =
         get(ENV, "SHASTRY_STABILIZER_CONE_SPLIT", "0") == "1"
+    so3_l2_congruence_truth =
+        get(ENV, "SHASTRY_SO3_L2_CONGRUENCE_TRUTH", "0") == "1"
+    so3_l2_cone_dedup =
+        get(ENV, "SHASTRY_SO3_L2_CONE_DEDUP", "0") == "1"
+    so3_l2_truth_only =
+        get(ENV, "SHASTRY_SO3_L2_TRUTH_ONLY", "0") == "1"
     if stabilizer_split &&
        get(ENV, "SHASTRY_STABILIZER_COEFFICIENT_TRUTH", "0") != "1"
         error(
             "SHASTRY_STABILIZER_CONE_SPLIT requires the exact " *
             "stabilizer coefficient truth gate",
+        )
+    end
+    if (so3_l2_congruence_truth || so3_l2_cone_dedup) &&
+       (!stabilizer_split ||
+        get(ENV, "SHASTRY_SU2_RANK4_REDUCTION", "0") != "1")
+        error(
+            "SO(3) l2 congruence requires the stabilizer split and " *
+            "exact SO(3) rank-four projection",
+        )
+    end
+    if so3_l2_cone_dedup && !so3_l2_congruence_truth
+        error(
+            "SHASTRY_SO3_L2_CONE_DEDUP requires the exact l2 " *
+            "congruence truth gate",
+        )
+    end
+    if so3_l2_truth_only && !so3_l2_congruence_truth
+        error(
+            "SHASTRY_SO3_L2_TRUTH_ONLY requires the exact l2 " *
+            "congruence truth gate",
         )
     end
     progress(
@@ -801,14 +859,13 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             verify_truth=exhaustive_intermediate_truth,
             materialize_coefficients=materialize_isotypic_coefficients,
             stabilizer_split=stabilizer_split,
+            so3_l2_dedup=false,
         )
     isotypic = isotypic_measurement.value
     spin_stabilizer_structure =
         shastry_spin_stabilizer_structure(spin_spatial)
     spin_stabilizer_structure.exact ||
         error("spin-stabilizer structural gate failed")
-    report =
-        shastry_full_state_spin_isotypic_reduced_assembly_report(isotypic)
     metadata["stages"]["spin_isotypic"] =
         measurement_dict(isotypic_measurement)
     metadata["spin_stabilizer_structure"] =
@@ -825,6 +882,68 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
         metadata["spin_stabilizer_coefficient_truth"] =
             spin_stabilizer_coefficient_truth_dict(stabilizer_truth)
     end
+    if stabilizer_split
+        spin_l2_structure =
+            shastry_spin_l2_congruence_structure(isotypic)
+        spin_l2_structure.exact ||
+            error("spin-l2 congruence structural gate failed")
+        metadata["spin_l2_congruence_structure"] =
+            spin_l2_congruence_structure_dict(spin_l2_structure)
+    end
+    if so3_l2_congruence_truth
+        progress("exact post-SO(3) l2 cone-congruence gate")
+        eliminated_by_thread = [
+            Set{MomentKey}()
+            for _ in 1:Threads.nthreads()
+        ]
+        cache_by_thread = [
+            Dict{MomentKey,ExactLinearPolynomial}()
+            for _ in 1:Threads.nthreads()
+        ]
+        project = polynomial -> begin
+            thread = Threads.threadid()
+            su2_rank4_polynomial_projection(
+                polynomial,
+                isotypic,
+                eliminated_by_thread[thread],
+                cache_by_thread[thread],
+            )
+        end
+        l2_truth_measurement = @timed shastry_spin_l2_congruence_truth(
+            isotypic;
+            project=project,
+            progress_callback=progress,
+        )
+        l2_truth = l2_truth_measurement.value
+        metadata["stages"]["spin_l2_congruence_truth"] =
+            measurement_dict(l2_truth_measurement)
+        metadata["spin_l2_congruence_truth"] =
+            spin_l2_congruence_truth_dict(l2_truth)
+        metadata["spin_l2_congruence_truth"][
+            "su2_rank4_eliminated_moments"
+        ] = length(union(eliminated_by_thread...))
+        write_checkpoint(checkpoint_path, metadata)
+        l2_truth.exact ||
+            error("post-SO(3) l2 cone-congruence truth gate failed")
+        if so3_l2_cone_dedup
+            progress("remove exactly congruent duplicate l2 cones")
+            dedup_measurement = @timed(
+                assemble_shastry_full_state_spin_isotypic_reduced_primal(
+                    spin_spatial;
+                    verify_truth=false,
+                    materialize_coefficients=
+                        materialize_isotypic_coefficients,
+                    stabilizer_split=true,
+                    so3_l2_dedup=true,
+                )
+            )
+            isotypic = dedup_measurement.value
+            metadata["stages"]["spin_l2_cone_dedup"] =
+                measurement_dict(dedup_measurement)
+        end
+    end
+    report =
+        shastry_full_state_spin_isotypic_reduced_assembly_report(isotypic)
     metadata["reduced"] = spin_isotypic_report_dict(report)
     metadata["reduced"]["positive_block_labels"] = String[
         ShastryFullStateSpinIsotypicReduction.block_label(block)
@@ -836,6 +955,7 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
     ]
     metadata["reduced"]["assembly_sha256"] = isotypic.assembly_sha256
     metadata["reduced"]["stabilizer_cone_split"] = stabilizer_split
+    metadata["reduced"]["so3_l2_cone_dedup"] = so3_l2_cone_dedup
     metadata["reduced"]["coefficient_map_sha256"] =
         isotypic.coefficient_map_sha256
     metadata["coefficient_inventory"] = !materialize_isotypic_coefficients ?
@@ -846,6 +966,22 @@ function spin_isotypic_main(arguments::Vector{String}=ARGS)
             spin_isotypic_truth_dict(something(isotypic.truth))
     end
     write_checkpoint(checkpoint_path, metadata)
+
+    if so3_l2_truth_only
+        metadata["solve"] = Dict(
+            "classification" => "not_run_exact_so3_l2_truth_only",
+            "formulation" =>
+                "post-so3-rank4-l2-cone-congruence-gate-v1",
+        )
+        metadata["state"] = "complete"
+        metadata["completed_at_utc"] = Dates.format(
+            now(UTC),
+            dateformat"yyyy-mm-ddTHH:MM:SS.sssZ",
+        )
+        write_checkpoint(checkpoint_path, metadata)
+        progress("complete exact SO(3) l2 truth; optimization skipped")
+        return
+    end
 
     if options.mode == :certificate
         threads = parse(

@@ -25,7 +25,8 @@ using ..ShastryFullStateSpinSpatialReduction:
 export ShastryFullStateSpinIsotypicMosekDualCertificate,
        build_shastry_full_state_spin_isotypic_mosek_dual_certificate,
        optimize_shastry_full_state_spin_isotypic_mosek_dual_certificate!,
-       su2_rank4_moment_projection
+       su2_rank4_moment_projection,
+       su2_rank4_polynomial_projection
 
 struct ShastryFullStateSpinIsotypicMosekDualCertificate
     task::Mosek.Task
