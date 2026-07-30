@@ -448,9 +448,11 @@ estimate of SE to decrease.
 
 - [ ] **Step 2: Implement canonical calibration plans and analysis**
 
-First generate eight `n_l=100` estimator-qualification cells and gate the
-simultaneous 80-minus-100 truncation intervals; retry `n_l=160` only after a
-failed immutable qualification. Bind calibration to the accepted qualification.
+Measure eight `measured_n_l=100` cells while retaining reconstruction cutoffs
+20, 40, 60, 80, and 100. Predeclare cutoff 20 and gate it against every larger
+cutoff over all six interior spin/tau values. Run the fresh 4M-cycle scaling
+experiment only as a diagnostic, compute a variance-powered final qualification
+count, and bind calibration only to the accepted final qualification.
 Then generate exactly 112 fresh cells with a separate deterministic seed
 namespace: 32 warmup cells, 16 cycle-length cells, and 64 independent
 62,500-cycle increment cells arranged as eight increments in each of eight

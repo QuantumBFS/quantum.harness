@@ -307,15 +307,25 @@ attempt to its immutable chain destination.
 
 ### 5.1 Warmup and production calibration
 
-The Green-function estimator is qualified before calibration. Run eight
-independent seeds with 50,000 warmup cycles, 1,000,000 measurement cycles,
-cycle length 50, and `measure_G_l=true` at `n_l=100`. Retain the raw Legendre
-coefficients and reconstruct the six interior spin values at truncations 60,
-80, and 100. For every point, the simultaneous family-wise 99% interval for
-the eight independent 80-minus-100 differences, with seven degrees of
-freedom, must lie wholly inside `[-2.5e-4,+2.5e-4]`. If it fails, repeat with
-`n_l=160` and truncations 100, 130, and 160. Calibration is hash-bound to the
-first accepted qualification artifact.
+The Green-function estimator is qualified before calibration. Measurement
+always accumulates `G_l` with `measured_n_l=100`; this acquisition basis is
+separate from the selectable production reconstruction cutoff. Retain the raw
+coefficients and reconstruct the six interior spin values at cutoffs 20, 40,
+60, 80, and 100. Cutoff 20 is predeclared as the production candidate. For
+every point, its difference from every larger cutoff gives 24 simultaneous
+comparisons. Every family-wise 99% interval, with seven degrees of freedom,
+must lie wholly inside `[-2.5e-4,+2.5e-4]`. An accepted artifact records
+`production_reconstruction_cutoff=20`; it never infers the cutoff from
+`measured_n_l`.
+
+Before the final qualification, an eight-seed scaling experiment uses 50,000
+warmup cycles, 4,000,000 measurement cycles, and cycle length 50. It is
+hash-bound to the valid earlier 1,000,000-cycle artifact, but has fresh seeds
+and `status="diagnostic"`: it cannot authorize calibration. It verifies the
+80-minus-100 standard errors scale approximately as inverse square root of
+measurement cycles and computes the final required per-seed and total
+measurement-cycle counts from all 24 measured variances and the unchanged
+`2.5e-4` bias allocation.
 
 The fixed production values above are admitted only after a fresh calibration
 artifact passes:
@@ -686,13 +696,13 @@ export CTHYB_ENV="$SCRATCH/challenge81-cthyb/triqs-4.0.0"
   python tracks/mps/solutions/frustration-free/triqs/smoke_test.py
 ```
 
-First generate and run the exact eight-cell `n_l=100` estimator qualification:
+First generate and run the exact eight-cell scaling experiment:
 
 ```bash
 export CAL_ROOT="$SCRATCH/challenge81-cthyb/calibration-beta16"
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py plan \
-  --profile estimator --n-l 100 --output-root "$CAL_ROOT"
+  --profile scaling --reference "$REFERENCE_1M" --output-root "$CAL_ROOT"
 export CAL_RUN="$(python3 -c \
   'import json,os,sys; p=json.load(open(sys.argv[1])); print(os.path.join(sys.argv[2],p["relative_path"]))' \
   "$CAL_ROOT/current.json" "$CAL_ROOT")"
@@ -708,13 +718,15 @@ sbatch --array=0-7 --ntasks=1 --cpus-per-task=1 --mem=4G --time=04:00:00 \
 ./micromamba --offline run --prefix "$CTHYB_ENV" \
   python tracks/mps/solutions/frustration-free/triqs/calibrate.py \
   validate-existing --plan "$CAL_RUN/plan.json" --run-directory "$CAL_RUN" \
-  --calibration "$CAL_RUN/qualification.json"
+  --calibration "$CAL_RUN/scaling.json"
 ```
 
-If qualification fails, repeat with `--n-l 160`; failed runs remain immutable
-and are never reused. After one qualification passes, generate the fresh
-112-cell calibration plan (32 warmup, 16 cycle-length, and 64 fixed-increment
-cells), submit `--array=0-111`, and reduce it:
+Use `scaling.json`'s powered count to run a fresh final qualification with
+`--profile qualification --measurement-cycles <powered-count>`. Failed and
+diagnostic runs remain immutable and are never reused. After qualification
+passes, generate the fresh 112-cell calibration plan (32 warmup,
+16 cycle-length, and 64 fixed-increment cells), submit `--array=0-111`, and
+reduce it:
 
 ```bash
 export QUALIFICATION="$CAL_RUN/qualification.json"

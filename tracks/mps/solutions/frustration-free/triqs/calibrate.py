@@ -269,18 +269,16 @@ def legendre_reported_values(
     return result
 
 
-def _qualification_truncations(n_l: int) -> list[int]:
-    if n_l == 100:
-        return [60, 80, 100]
-    if n_l == 160:
-        return [100, 130, 160]
-    raise ValueError("estimator n_l must be 100 or 160")
+MEASURED_N_L = 100
+RECONSTRUCTION_CUTOFFS = [20, 40, 60, 80, 100]
+PRODUCTION_CANDIDATE_CUTOFF = 20
+TRUNCATION_BIAS_BOUND = 2.5e-4
 
 
 def build_estimator_plan(
     bindings: dict[str, object],
     *,
-    n_l: int,
+    measurement_cycles: int,
 ) -> dict[str, object]:
     required = {
         "model",
@@ -294,14 +292,21 @@ def build_estimator_plan(
     }
     if set(bindings) != required:
         raise ValueError("estimator bindings are incomplete")
-    truncations = _qualification_truncations(n_l)
+    if (
+        isinstance(measurement_cycles, bool)
+        or not isinstance(measurement_cycles, int)
+        or measurement_cycles <= 0
+    ):
+        raise ValueError("qualification measurement cycles must be positive")
     identity = sha256_bytes(
         canonical_json(
             {
                 "bindings": bindings,
                 "profile": "legendre_estimator_qualification",
-                "n_l": n_l,
-                "truncations": truncations,
+                "measured_n_l": MEASURED_N_L,
+                "cutoffs": RECONSTRUCTION_CUTOFFS,
+                "candidate_cutoff": PRODUCTION_CANDIDATE_CUTOFF,
+                "measurement_cycles": measurement_cycles,
             }
         )
     )
@@ -309,16 +314,17 @@ def build_estimator_plan(
         _cell(
             replica,
             "estimator_qualification",
-            823000 + (60 if n_l == 160 else 0) + replica,
+            828000 + replica,
             identity,
             {
                 "warmup_cycles": 50000,
-                "measurement_cycles": 1_000_000,
+                "measurement_cycles": measurement_cycles,
                 "cycle_length": 50,
                 "replica": replica,
                 "estimator": "legendre",
-                "n_l": n_l,
-                "truncations": truncations,
+                "measured_n_l": MEASURED_N_L,
+                "cutoffs": list(RECONSTRUCTION_CUTOFFS),
+                "candidate_cutoff": PRODUCTION_CANDIDATE_CUTOFF,
             },
         )
         for replica in range(_ESTIMATOR_REPLICAS)
@@ -330,8 +336,11 @@ def build_estimator_plan(
             "bindings": copy.deepcopy(bindings),
             "input_identity": identity,
             "cell_count": _ESTIMATOR_REPLICAS,
-            "n_l": n_l,
-            "truncations": truncations,
+            "experiment_kind": "qualification",
+            "measurement_cycles": measurement_cycles,
+            "measured_n_l": MEASURED_N_L,
+            "cutoffs": list(RECONSTRUCTION_CUTOFFS),
+            "candidate_cutoff": PRODUCTION_CANDIDATE_CUTOFF,
             "cells": cells,
         }
     )
@@ -347,16 +356,18 @@ def validate_estimator_plan(plan: object) -> None:
         or payload.get("artifact_type") != "cthyb_estimator_plan"
     ):
         raise ValueError("estimator plan hash or type mismatch")
-    expected = build_estimator_plan(payload.get("bindings"), n_l=payload.get("n_l"))
+    expected = build_estimator_plan(
+        payload.get("bindings"),
+        measurement_cycles=payload.get("measurement_cycles"),
+    )
     if canonical_json(plan) != canonical_json(expected):
         raise ValueError("estimator plan differs from canonical plan")
 
 
-def analyze_estimator_qualification(
+def _analyze_cutoff_comparisons(
     cell_results: Sequence[dict[str, object]],
     plan: dict[str, object],
 ) -> dict[str, object]:
-    validate_estimator_plan(plan)
     if len(cell_results) != _ESTIMATOR_REPLICAS:
         raise ValueError("estimator qualification requires exactly eight results")
     cells = []
@@ -373,52 +384,279 @@ def analyze_estimator_qualification(
         or len({cell.get("seed") for cell in cells}) != _ESTIMATOR_REPLICAS
         or {cell.get("input_identity") for cell in cells}
         != {plan["payload"]["input_identity"]}
-        or {cell.get("n_l") for cell in cells} != {plan["payload"]["n_l"]}
-        or {tuple(cell.get("truncations", [])) for cell in cells}
-        != {tuple(plan["payload"]["truncations"])}
+        or {cell.get("measured_n_l") for cell in cells}
+        != {plan["payload"]["measured_n_l"]}
+        or {cell.get("measurement_cycles") for cell in cells}
+        != {plan["payload"]["measurement_cycles"]}
+        or {tuple(cell.get("cutoffs", [])) for cell in cells}
+        != {tuple(plan["payload"]["cutoffs"])}
     ):
         raise ValueError("estimator result inventory mismatch")
-    truncations = plan["payload"]["truncations"]
-    lower, upper = str(truncations[-2]), str(truncations[-1])
-    quantile = float(t.ppf(1 - 0.01 / (2 * len(GREEN_OBSERVABLES)), 7))
-    observables = {}
+    candidate = str(plan["payload"]["candidate_cutoff"])
+    larger = [
+        str(cutoff)
+        for cutoff in plan["payload"]["cutoffs"]
+        if cutoff > plan["payload"]["candidate_cutoff"]
+    ]
+    comparison_count = len(GREEN_OBSERVABLES) * len(larger)
+    quantile = float(t.ppf(1 - 0.01 / (2 * comparison_count), 7))
+    comparisons = {}
     for name in GREEN_OBSERVABLES:
-        differences = [
-            float(cell["truncated_values"][lower][name])
-            - float(cell["truncated_values"][upper][name])
-            for cell in cells
-        ]
-        center = mean(differences)
-        standard_error = stdev(differences) / math.sqrt(_ESTIMATOR_REPLICAS)
-        interval = [
-            center - quantile * standard_error,
-            center + quantile * standard_error,
-        ]
-        observables[name] = {
-            "differences": differences,
-            "mean_difference": center,
-            "standard_error": standard_error,
-            "degrees_of_freedom": 7,
-            "quantile": quantile,
-            "interval": interval,
-            "equivalence_bound": 2.5e-4,
-            "passed": interval[0] >= -2.5e-4 and interval[1] <= 2.5e-4,
-        }
-    passed = all(gate["passed"] for gate in observables.values())
+        comparisons[name] = {}
+        for cutoff in larger:
+            differences = [
+                float(cell["truncated_values"][candidate][name])
+                - float(cell["truncated_values"][cutoff][name])
+                for cell in cells
+            ]
+            center = mean(differences)
+            standard_error = stdev(differences) / math.sqrt(_ESTIMATOR_REPLICAS)
+            interval = [
+                center - quantile * standard_error,
+                center + quantile * standard_error,
+            ]
+            comparisons[name][cutoff] = {
+                "differences": differences,
+                "mean_difference": center,
+                "standard_error": standard_error,
+                "degrees_of_freedom": 7,
+                "quantile": quantile,
+                "interval": interval,
+                "equivalence_bound": TRUNCATION_BIAS_BOUND,
+                "passed": (
+                    interval[0] >= -TRUNCATION_BIAS_BOUND
+                    and interval[1] <= TRUNCATION_BIAS_BOUND
+                ),
+            }
+    passed = all(
+        gate["passed"]
+        for by_cutoff in comparisons.values()
+        for gate in by_cutoff.values()
+    )
+    return {
+        "family_wise_confidence": 0.99,
+        "comparison_count": comparison_count,
+        "candidate_cutoff": plan["payload"]["candidate_cutoff"],
+        "larger_cutoffs": [int(value) for value in larger],
+        "comparisons": comparisons,
+        "passed": passed,
+    }
+
+
+def analyze_estimator_qualification(
+    cell_results: Sequence[dict[str, object]],
+    plan: dict[str, object],
+) -> dict[str, object]:
+    validate_estimator_plan(plan)
+    analysis = _analyze_cutoff_comparisons(cell_results, plan)
+    passed = analysis["passed"]
     payload = {
         "artifact_type": "cthyb_estimator_qualification",
         "schema_version": 2,
         "status": "accepted" if passed else "failed",
-        "qualified_n_l": plan["payload"]["n_l"],
-        "truncations": truncations,
+        "measured_n_l": plan["payload"]["measured_n_l"],
+        "cutoffs": plan["payload"]["cutoffs"],
+        "candidate_cutoff": plan["payload"]["candidate_cutoff"],
+        "production_reconstruction_cutoff": (
+            plan["payload"]["candidate_cutoff"] if passed else None
+        ),
         "plan": plan,
         "cell_results": list(cell_results),
-        "analysis": {
-            "family_wise_confidence": 0.99,
-            "multiplicity": len(GREEN_OBSERVABLES),
-            "observables": observables,
-            "passed": passed,
-        },
+        "analysis": analysis,
+    }
+    return _artifact(payload)
+
+
+def _validate_scaling_reference(reference: object) -> dict[str, float]:
+    if (
+        not isinstance(reference, dict)
+        or set(reference) != {"payload", "sha256"}
+        or reference["sha256"]
+        != sha256_bytes(canonical_json(reference["payload"]))
+    ):
+        raise ValueError("scaling reference is hash-invalid")
+    payload = reference["payload"]
+    if (
+        payload.get("artifact_type") != "cthyb_estimator_qualification"
+        or payload.get("qualified_n_l") != 100
+        or payload.get("truncations") != [60, 80, 100]
+        or len(payload.get("cell_results", [])) != 8
+        or any(
+            result.get("sha256")
+            != sha256_bytes(canonical_json(result.get("payload")))
+            for result in payload["cell_results"]
+        )
+    ):
+        raise ValueError("scaling reference is not the reviewed 1M artifact")
+    observables = payload.get("analysis", {}).get("observables")
+    if not isinstance(observables, dict) or set(observables) != set(GREEN_OBSERVABLES):
+        raise ValueError("scaling reference observable inventory mismatch")
+    standard_errors = {
+        name: float(observables[name]["standard_error"])
+        for name in GREEN_OBSERVABLES
+    }
+    if not all(math.isfinite(value) and value > 0 for value in standard_errors.values()):
+        raise ValueError("scaling reference standard errors are invalid")
+    return standard_errors
+
+
+def build_scaling_plan(
+    bindings: dict[str, object],
+    reference: dict[str, object],
+) -> dict[str, object]:
+    reference_standard_errors = _validate_scaling_reference(reference)
+    base = build_estimator_plan(bindings, measurement_cycles=4_000_000)
+    payload = copy.deepcopy(base["payload"])
+    identity = sha256_bytes(
+        canonical_json(
+            {
+                "bindings": bindings,
+                "profile": "legendre_estimator_scaling",
+                "measured_n_l": MEASURED_N_L,
+                "cutoffs": RECONSTRUCTION_CUTOFFS,
+                "candidate_cutoff": PRODUCTION_CANDIDATE_CUTOFF,
+                "measurement_cycles": 4_000_000,
+                "reference_sha256": reference["sha256"],
+            }
+        )
+    )
+    payload.update(
+        {
+            "artifact_type": "cthyb_estimator_scaling_plan",
+            "experiment_kind": "scaling",
+            "input_identity": identity,
+            "reference": copy.deepcopy(reference),
+            "reference_sha256": reference["sha256"],
+            "reference_high_mode_standard_errors": reference_standard_errors,
+        }
+    )
+    payload["cells"] = [
+        _cell(
+            replica,
+            "estimator_scaling",
+            829000 + replica,
+            identity,
+            {
+                "warmup_cycles": 50000,
+                "measurement_cycles": 4_000_000,
+                "cycle_length": 50,
+                "replica": replica,
+                "estimator": "legendre",
+                "measured_n_l": MEASURED_N_L,
+                "cutoffs": list(RECONSTRUCTION_CUTOFFS),
+                "candidate_cutoff": PRODUCTION_CANDIDATE_CUTOFF,
+            },
+        )
+        for replica in range(_ESTIMATOR_REPLICAS)
+    ]
+    return _artifact(payload)
+
+
+def validate_scaling_plan(plan: object) -> None:
+    if not isinstance(plan, dict) or set(plan) != {"payload", "sha256"}:
+        raise ValueError("scaling plan artifact is malformed")
+    payload = plan["payload"]
+    if (
+        not isinstance(payload, dict)
+        or plan["sha256"] != sha256_bytes(canonical_json(payload))
+        or payload.get("artifact_type") != "cthyb_estimator_scaling_plan"
+    ):
+        raise ValueError("scaling plan hash or type mismatch")
+    expected = build_scaling_plan(payload.get("bindings"), payload.get("reference"))
+    if canonical_json(plan) != canonical_json(expected):
+        raise ValueError("scaling plan differs from canonical plan")
+
+
+def _power_from_comparisons(
+    analysis: dict[str, object],
+    measurement_cycles: int,
+) -> dict[str, object]:
+    variance_only = []
+    observed_margin = []
+    limiting = None
+    largest = -1
+    for name, by_cutoff in analysis["comparisons"].items():
+        for cutoff, gate in by_cutoff.items():
+            half_width = gate["quantile"] * gate["standard_error"]
+            required = math.ceil(
+                measurement_cycles
+                * (half_width / TRUNCATION_BIAS_BOUND) ** 2
+            )
+            variance_only.append(max(1, required))
+            margin = TRUNCATION_BIAS_BOUND - abs(gate["mean_difference"])
+            if margin <= 0:
+                observed_margin.append(None)
+                candidate = math.inf
+            else:
+                candidate = max(
+                    1,
+                    math.ceil(measurement_cycles * (half_width / margin) ** 2),
+                )
+                observed_margin.append(candidate)
+            if candidate > largest:
+                largest = candidate
+                limiting = {"observable": name, "larger_cutoff": int(cutoff)}
+    finite_margin = (
+        None if any(value is None for value in observed_margin) else max(observed_margin)
+    )
+    return {
+        "fixed_independent_seeds": _ESTIMATOR_REPLICAS,
+        "truncation_bias_bound": TRUNCATION_BIAS_BOUND,
+        "variance_only_measurement_cycles_per_seed": max(variance_only),
+        "required_measurement_cycles_per_seed": finite_margin,
+        "required_total_measurement_cycles": (
+            None if finite_margin is None else _ESTIMATOR_REPLICAS * finite_margin
+        ),
+        "limiting_comparison": limiting,
+    }
+
+
+def analyze_estimator_scaling(
+    cell_results: Sequence[dict[str, object]],
+    plan: dict[str, object],
+) -> dict[str, object]:
+    validate_scaling_plan(plan)
+    analysis = _analyze_cutoff_comparisons(cell_results, plan)
+    high_mode = {}
+    for name in GREEN_OBSERVABLES:
+        differences = [
+            float(result["payload"]["truncated_values"]["80"][name])
+            - float(result["payload"]["truncated_values"]["100"][name])
+            for result in cell_results
+        ]
+        high_mode[name] = {
+            "standard_error": stdev(differences) / math.sqrt(_ESTIMATOR_REPLICAS),
+            "reference_standard_error": plan["payload"][
+                "reference_high_mode_standard_errors"
+            ][name],
+        }
+        high_mode[name]["ratio"] = (
+            high_mode[name]["standard_error"]
+            / high_mode[name]["reference_standard_error"]
+        )
+    ratios = [value["ratio"] for value in high_mode.values()]
+    analysis["high_mode_scaling"] = {
+        "observables": high_mode,
+        "mean_ratio": mean(ratios),
+        "approximately_inverse_sqrt_cycles": all(
+            0.35 <= ratio <= 0.65 for ratio in ratios
+        ),
+    }
+    analysis["power"] = _power_from_comparisons(
+        analysis, plan["payload"]["measurement_cycles"]
+    )
+    payload = {
+        "artifact_type": "cthyb_estimator_scaling",
+        "schema_version": 2,
+        "status": "diagnostic",
+        "measured_n_l": plan["payload"]["measured_n_l"],
+        "cutoffs": plan["payload"]["cutoffs"],
+        "candidate_cutoff": plan["payload"]["candidate_cutoff"],
+        "production_reconstruction_cutoff": None,
+        "reference_sha256": plan["payload"]["reference_sha256"],
+        "plan": plan,
+        "cell_results": list(cell_results),
+        "analysis": analysis,
     }
     return _artifact(payload)
 
@@ -452,9 +690,11 @@ def _validate_qualification(
     if (
         payload.get("artifact_type") != "cthyb_estimator_qualification"
         or payload.get("status") != "accepted"
-        or payload.get("qualified_n_l") not in (100, 160)
-        or payload.get("truncations")
-        != _qualification_truncations(payload.get("qualified_n_l"))
+        or payload.get("measured_n_l") != MEASURED_N_L
+        or payload.get("cutoffs") != RECONSTRUCTION_CUTOFFS
+        or payload.get("candidate_cutoff") != PRODUCTION_CANDIDATE_CUTOFF
+        or payload.get("production_reconstruction_cutoff")
+        != PRODUCTION_CANDIDATE_CUTOFF
         or payload.get("analysis", {}).get("passed") is not True
     ):
         raise ValueError("accepted estimator qualification is required")
@@ -488,7 +728,8 @@ def build_calibration_plan(
     if set(bindings) != required:
         raise ValueError("calibration bindings are incomplete")
     qualification_payload = _validate_qualification(qualification, bindings)
-    n_l = qualification_payload["qualified_n_l"]
+    measured_n_l = qualification_payload["measured_n_l"]
+    production_cutoff = qualification_payload["production_reconstruction_cutoff"]
     identity = sha256_bytes(
         canonical_json(
             {
@@ -512,8 +753,8 @@ def build_calibration_plan(
                         "cycle_length": 50,
                         "replica": replica,
                         "estimator": "legendre",
-                        "n_l": n_l,
-                        "truncation": n_l,
+                        "n_l": measured_n_l,
+                        "truncation": production_cutoff,
                     },
                 )
             )
@@ -532,8 +773,8 @@ def build_calibration_plan(
                         "cycle_length": cycle,
                         "replica": replica,
                         "estimator": "legendre",
-                        "n_l": n_l,
-                        "truncation": n_l,
+                        "n_l": measured_n_l,
+                        "truncation": production_cutoff,
                     },
                 )
             )
@@ -553,8 +794,8 @@ def build_calibration_plan(
                         "group": group,
                         "increment": increment,
                         "estimator": "legendre_direct_increment",
-                        "n_l": n_l,
-                        "truncation": n_l,
+                        "n_l": measured_n_l,
+                        "truncation": production_cutoff,
                     },
                 )
             )
@@ -568,7 +809,8 @@ def build_calibration_plan(
             "qualification_sha256": qualification["sha256"],
             "input_identity": identity,
             "cell_count": 112,
-            "n_l": n_l,
+            "measured_n_l": measured_n_l,
+            "production_reconstruction_cutoff": production_cutoff,
             "cells": cells,
         }
     )
@@ -892,7 +1134,9 @@ def _write_calibration_raw(path: Path, state: dict[str, object]) -> None:
 
 
 def _cell_truncations(cell: dict[str, object]) -> list[int]:
-    if "truncations" in cell:
+    if "cutoffs" in cell:
+        truncations = cell["cutoffs"]
+    elif "truncations" in cell:
         truncations = cell["truncations"]
     elif "truncation" in cell:
         truncations = [cell["truncation"]]
@@ -907,10 +1151,19 @@ def _cell_truncations(cell: dict[str, object]) -> list[int]:
     return list(truncations)
 
 
+def _cell_measured_n_l(cell: dict[str, object]) -> int:
+    value = cell.get("measured_n_l", cell.get("n_l"))
+    if isinstance(value, bool) or not isinstance(value, int) or value != MEASURED_N_L:
+        raise ValueError("cell measured_n_l must equal 100")
+    return value
+
+
 def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> Path:
     plan_type = plan.get("payload", {}).get("artifact_type")
     if plan_type == "cthyb_estimator_plan":
         validate_estimator_plan(plan)
+    elif plan_type == "cthyb_estimator_scaling_plan":
+        validate_scaling_plan(plan)
     elif plan_type == "cthyb_calibration_plan":
         validate_calibration_plan(plan)
     else:
@@ -938,7 +1191,7 @@ def run_cell(plan: dict[str, object], cell_index: int, run_directory: Path) -> P
         gf_struct=[("up", 1), ("down", 1)],
         n_iw=payload["hybridization"]["n_iw"],
         n_tau=payload["meshes"]["n_tau"],
-        n_l=cell["n_l"],
+        n_l=_cell_measured_n_l(cell),
     )
     install_g0(solver, payload)
     parameters = _calibration_solve_parameters(payload, cell["seed"])
@@ -993,10 +1246,11 @@ def main() -> None:
     plan_command.add_argument("--output-root", type=Path, required=True)
     plan_command.add_argument(
         "--profile",
-        choices=("estimator", "calibration"),
+        choices=("qualification", "scaling", "calibration"),
         required=True,
     )
-    plan_command.add_argument("--n-l", type=int)
+    plan_command.add_argument("--measurement-cycles", type=int)
+    plan_command.add_argument("--reference", type=Path)
     plan_command.add_argument("--qualification", type=Path)
     validate = commands.add_parser("validate-plan")
     validate.add_argument("--plan", type=Path, required=True)
@@ -1013,13 +1267,37 @@ def main() -> None:
     existing.add_argument("--calibration", type=Path, required=True)
     arguments = parser.parse_args()
     if arguments.command == "plan":
-        if arguments.profile == "estimator":
-            if arguments.n_l not in (100, 160) or arguments.qualification is not None:
-                raise ValueError("estimator plan requires --n-l 100 or 160 only")
-            plan = build_estimator_plan(_default_bindings(), n_l=arguments.n_l)
+        if arguments.profile == "qualification":
+            if (
+                arguments.measurement_cycles is None
+                or arguments.reference is not None
+                or arguments.qualification is not None
+            ):
+                raise ValueError(
+                    "qualification plan requires --measurement-cycles only"
+                )
+            plan = build_estimator_plan(
+                _default_bindings(),
+                measurement_cycles=arguments.measurement_cycles,
+            )
             prefix = "estimator"
+        elif arguments.profile == "scaling":
+            if (
+                arguments.measurement_cycles is not None
+                or arguments.reference is None
+                or arguments.qualification is not None
+            ):
+                raise ValueError("scaling plan requires --reference only")
+            plan = build_scaling_plan(
+                _default_bindings(), strict_json_load(arguments.reference)
+            )
+            prefix = "scaling"
         else:
-            if arguments.n_l is not None or arguments.qualification is None:
+            if (
+                arguments.measurement_cycles is not None
+                or arguments.reference is not None
+                or arguments.qualification is None
+            ):
                 raise ValueError("calibration plan requires --qualification only")
             qualification = strict_json_load(arguments.qualification)
             plan = build_calibration_plan(_default_bindings(), qualification)
@@ -1037,6 +1315,11 @@ def main() -> None:
         plan = strict_json_load(arguments.plan)
         if plan.get("payload", {}).get("artifact_type") == "cthyb_estimator_plan":
             validate_estimator_plan(plan)
+        elif (
+            plan.get("payload", {}).get("artifact_type")
+            == "cthyb_estimator_scaling_plan"
+        ):
+            validate_scaling_plan(plan)
         else:
             validate_calibration_plan(plan)
     elif arguments.command == "run-cell":
@@ -1055,6 +1338,9 @@ def main() -> None:
         if plan["payload"]["artifact_type"] == "cthyb_estimator_plan":
             artifact = analyze_estimator_qualification(results, plan)
             output_name = "qualification.json"
+        elif plan["payload"]["artifact_type"] == "cthyb_estimator_scaling_plan":
+            artifact = analyze_estimator_scaling(results, plan)
+            output_name = "scaling.json"
         else:
             artifact = build_calibration_artifact(plan, results)
             output_name = "calibration.json"
@@ -1071,6 +1357,12 @@ def main() -> None:
             )
             if canonical_json(artifact) != canonical_json(expected):
                 raise ValueError("estimator qualification does not reproduce")
+        elif artifact.get("payload", {}).get("artifact_type") == "cthyb_estimator_scaling":
+            expected = analyze_estimator_scaling(
+                artifact["payload"]["cell_results"], plan
+            )
+            if canonical_json(artifact) != canonical_json(expected):
+                raise ValueError("estimator scaling artifact does not reproduce")
         else:
             validate_calibration(artifact, plan)
 

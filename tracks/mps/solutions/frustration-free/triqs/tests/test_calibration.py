@@ -25,8 +25,10 @@ from calibrate import (
     build_calibration_plan,
     build_calibration_artifact,
     build_estimator_plan,
+    build_scaling_plan,
     calibration_cluster_commands,
     legendre_reported_values,
+    analyze_estimator_scaling,
     select_cycle_length,
     validate_calibration,
     validate_calibration_plan,
@@ -180,7 +182,7 @@ def test_batch_means_pairing_variance_and_seed_guards():
 
 
 def accepted_qualification():
-    plan = build_estimator_plan(bindings(), n_l=100)
+    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
     return analyze_estimator_qualification(
         _qualification_results(identity=plan["payload"]["input_identity"]), plan
     )
@@ -196,6 +198,7 @@ def test_plan_is_exact_fresh_112_cell_inventory():
     assert [cell["payload"]["cell_kind"] for cell in cells].count("increment") == 64
     assert len({cell["payload"]["seed"] for cell in cells}) == 112
     assert all(cell["payload"]["n_l"] == 100 for cell in cells)
+    assert all(cell["payload"]["truncation"] == 20 for cell in cells)
     changed = copy.deepcopy(plan)
     changed["payload"]["cells"][0]["payload"]["seed"] += 1
     changed["payload"]["cells"][0]["sha256"] = sha256_bytes(
@@ -238,8 +241,19 @@ def test_calibration_embeds_and_revalidates_all_results():
         validate_calibration(artifact, plan)
 
 
-def _qualification_results(n_l=100, shift=1e-5, identity="same"):
-    truncations = [60, 80, 100] if n_l == 100 else [100, 130, 160]
+def _qualification_results(
+    shift=1e-5,
+    identity="same",
+    measurement_cycles=1_000_000,
+    high_mode_se=None,
+):
+    cutoffs = [20, 40, 60, 80, 100]
+    pattern = np.array([-7, -5, -3, -1, 1, 3, 5, 7], dtype=float)
+    high_mode_shift = (
+        np.zeros(8)
+        if high_mode_se is None
+        else pattern * high_mode_se * math.sqrt(8) / np.std(pattern, ddof=1)
+    )
     results = []
     for replica in range(8):
         payload = {
@@ -247,13 +261,16 @@ def _qualification_results(n_l=100, shift=1e-5, identity="same"):
             "replica": replica,
             "seed": 823000 + replica,
             "input_identity": identity,
-            "n_l": n_l,
-            "truncations": truncations,
+            "measured_n_l": 100,
+            "measurement_cycles": measurement_cycles,
+            "cutoffs": cutoffs,
             "truncated_values": {
-                str(truncation): values(
-                    replica * 2e-5 + (shift if truncation == truncations[-2] else 0)
+                str(cutoff): values(
+                    replica * 2e-5
+                    + (shift if cutoff == 20 else 0)
+                    + (high_mode_shift[replica] if cutoff == 80 else 0)
                 )
-                for truncation in truncations
+                for cutoff in cutoffs
             },
         }
         results.append({"payload": payload, "sha256": sha256_bytes(canonical_json(payload))})
@@ -268,14 +285,15 @@ def test_legendre_reconstruction_and_qualification_bias_gate():
     )
     assert reconstructed == pytest.approx([1.0, 1.0, 1.0])
 
-    plan = build_estimator_plan(bindings(), n_l=100)
+    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
     identity = plan["payload"]["input_identity"]
     result = analyze_estimator_qualification(
         _qualification_results(identity=identity), plan
     )
     assert result["payload"]["status"] == "accepted"
-    assert result["payload"]["qualified_n_l"] == 100
-    gate = result["payload"]["analysis"]["observables"]["G_up_4"]
+    assert result["payload"]["measured_n_l"] == 100
+    assert result["payload"]["production_reconstruction_cutoff"] == 20
+    gate = result["payload"]["analysis"]["comparisons"]["G_up_4"]["100"]
     assert gate["degrees_of_freedom"] == 7
     assert gate["equivalence_bound"] == 2.5e-4
     failed = analyze_estimator_qualification(
@@ -284,8 +302,8 @@ def test_legendre_reconstruction_and_qualification_bias_gate():
     assert failed["payload"]["status"] == "failed"
 
 
-def test_estimator_plan_has_eight_unique_nonproduction_seeds():
-    plan = build_estimator_plan(bindings(), n_l=100)
+def test_estimator_plan_separates_measurement_basis_from_candidate_cutoff():
+    plan = build_estimator_plan(bindings(), measurement_cycles=1_000_000)
     cells = plan["payload"]["cells"]
     assert len(cells) == 8
     assert [cell["payload"]["cell_index"] for cell in cells] == list(range(8))
@@ -293,7 +311,11 @@ def test_estimator_plan_has_eight_unique_nonproduction_seeds():
     assert all(cell["payload"]["warmup_cycles"] == 50000 for cell in cells)
     assert all(cell["payload"]["measurement_cycles"] == 1_000_000 for cell in cells)
     assert all(cell["payload"]["cycle_length"] == 50 for cell in cells)
-    assert all(cell["payload"]["truncations"] == [60, 80, 100] for cell in cells)
+    assert plan["payload"]["measured_n_l"] == 100
+    assert plan["payload"]["candidate_cutoff"] == 20
+    assert plan["payload"]["cutoffs"] == [20, 40, 60, 80, 100]
+    assert all(cell["payload"]["measured_n_l"] == 100 for cell in cells)
+    assert all(cell["payload"]["cutoffs"] == [20, 40, 60, 80, 100] for cell in cells)
 
 
 def test_summary_schema_names_estimator_artifacts():
@@ -303,6 +325,8 @@ def test_summary_schema_names_estimator_artifacts():
     ]
     assert "cthyb_estimator_plan" in artifact_types
     assert "cthyb_estimator_qualification" in artifact_types
+    assert "cthyb_estimator_scaling_plan" in artifact_types
+    assert "cthyb_estimator_scaling" in artifact_types
 
 
 def test_result_values_preserve_actual_convergence_and_raw_coefficients(monkeypatch):
@@ -399,12 +423,68 @@ def test_legendre_raw_state_does_not_require_unmeasured_g_tau(monkeypatch):
 
 
 def test_cell_truncations_do_not_evaluate_absent_fallback():
-    assert calibrate._cell_truncations({"truncations": [60, 80, 100]}) == [
+    assert calibrate._cell_truncations({"cutoffs": [20, 40, 60, 80, 100]}) == [
+        20,
+        40,
         60,
         80,
         100,
     ]
     assert calibrate._cell_truncations({"truncation": 100}) == [100]
+    assert calibrate._cell_measured_n_l({"measured_n_l": 100}) == 100
+    assert calibrate._cell_measured_n_l({"n_l": 100}) == 100
+
+
+def _legacy_reference():
+    cells = []
+    for replica in range(8):
+        payload = {
+            "replica": replica,
+            "seed": 823000 + replica,
+            "n_l": 100,
+            "truncations": [60, 80, 100],
+        }
+        cells.append({"payload": payload, "sha256": sha256_bytes(canonical_json(payload))})
+    payload = {
+        "artifact_type": "cthyb_estimator_qualification",
+        "schema_version": 2,
+        "status": "failed",
+        "qualified_n_l": 100,
+        "truncations": [60, 80, 100],
+        "cell_results": cells,
+        "analysis": {
+            "observables": {
+                name: {"standard_error": 3.0e-4} for name in calibrate.GREEN_OBSERVABLES
+            }
+        },
+    }
+    return {"payload": payload, "sha256": sha256_bytes(canonical_json(payload))}
+
+
+def test_scaling_plan_is_diagnostic_fresh_and_powered_from_all_comparisons():
+    plan = build_scaling_plan(bindings(), _legacy_reference())
+    assert plan["payload"]["experiment_kind"] == "scaling"
+    assert plan["payload"]["measurement_cycles"] == 4_000_000
+    assert plan["payload"]["reference_sha256"] == _legacy_reference()["sha256"]
+    assert {cell["payload"]["seed"] for cell in plan["payload"]["cells"]}.isdisjoint(
+        {823000 + replica for replica in range(8)}
+    )
+    results = _qualification_results(
+        shift=2e-5,
+        identity=plan["payload"]["input_identity"],
+        measurement_cycles=4_000_000,
+        high_mode_se=1.5e-4,
+    )
+    artifact = analyze_estimator_scaling(results, plan)
+    assert artifact["payload"]["status"] == "diagnostic"
+    assert artifact["payload"]["production_reconstruction_cutoff"] is None
+    assert artifact["payload"]["analysis"]["comparison_count"] == 24
+    assert artifact["payload"]["analysis"]["high_mode_scaling"][
+        "approximately_inverse_sqrt_cycles"
+    ] is True
+    assert artifact["payload"]["analysis"]["power"][
+        "required_measurement_cycles_per_seed"
+    ] >= 1
 
 
 def test_calibration_cluster_commands_and_wrapper_are_serial_offline(tmp_path):

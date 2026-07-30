@@ -67,13 +67,13 @@ def _complete_repository(tmp_path: Path) -> Path:
             "tracks/mps/solutions/frustration-free/model.json"
         ],
     }
-    estimator_plan = build_estimator_plan(bindings, n_l=100)
+    estimator_plan = build_estimator_plan(bindings, measurement_cycles=1_000_000)
     estimator_results = []
     for cell_artifact in estimator_plan["payload"]["cells"]:
         cell = dict(cell_artifact["payload"])
         cell["truncated_values"] = {
-            str(truncation): {name: 0.0 for name in OBSERVABLES}
-            for truncation in cell["truncations"]
+            str(cutoff): {name: 0.0 for name in OBSERVABLES}
+            for cutoff in cell["cutoffs"]
         }
         estimator_results.append(
             {"payload": cell, "sha256": sha256_bytes(canonical_json(cell))}

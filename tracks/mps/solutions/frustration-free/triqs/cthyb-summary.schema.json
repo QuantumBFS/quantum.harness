@@ -14,6 +14,8 @@
           "enum": [
             "cthyb_estimator_plan",
             "cthyb_estimator_qualification",
+            "cthyb_estimator_scaling_plan",
+            "cthyb_estimator_scaling",
             "cthyb_calibration_plan",
             "cthyb_calibration",
             "cthyb_summary",
