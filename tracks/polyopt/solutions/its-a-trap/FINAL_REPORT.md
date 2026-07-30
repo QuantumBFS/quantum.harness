@@ -163,8 +163,13 @@ concentrate in large blocks. The controlled check WAS subsequently run
 and same link-family generator, swapping only the map package D=2 → D=4
 (66-dim → 128-dim blocks) moved realized cost from wall 0.87x / RSS 0.90x
 to wall 2.37x / RSS 6.80x of the comparator while the structural ratio
-stayed below 1 (0.542 → 0.830) — the block-dimension package is isolated
-as the realized-cost driver within that boundary (ledger C20).
+stayed below 1 (0.542 → 0.830) — the D=4 one-level coarse-map package
+(block dimension together with its dω-scaled link rows) is a major
+controlled driver of realized IPM cost. Two-factor decomposition of the
+additive tower's 10.7x/11.8x at the same N: package factor 2.37x/6.80x
+measured at one level, residual ≈ 4.5x/1.7x attributable to level
+count/depth — with the package caveat; block dimension alone is not
+proved causal (ledger C20).
 
 ### 2. The eliminated zone, and what reaches it [C14, C17]
 
@@ -184,8 +189,11 @@ rows, residual ≤ 1.7e-15) with its interior-point solve crossing the
 18 GiB local frontier. Third-revision extension: the direct D=2 curve
 holds the same verdict at every solved size — recovery bounds < 0.525% /
 < 0.072% / < 0.096% / < 0.219% of d at N=10/12/14/20 (central values
-|·| ≤ 0.02%), beside cost ratios that IMPROVE with N (structural
-0.697 → 0.383, wall 0.97 → 0.75, RSS 1.03 → 0.51); N=20 is the
+|·| ≤ 0.02%; the bound sequence is eps_cmp-limited and is NOT a trend).
+Cost context: the structural ratio decreases monotonically over N=10–30
+(0.697 → 0.336; 26/30 build-only), while the realized wall/RSS
+improvement is measured from N=14 to N=20 only (0.87 → 0.75,
+0.90 → 0.51; N=10/12 walls are load-dominated parity). N=20 is the
 campaign's first both-axes-cheaper configuration, still with unresolved
 recovery (ledger C19).
 
@@ -212,8 +220,13 @@ closes the question at every tested size: W_bundle = 0 for all four pool
 bundles at all N ∈ {10, 12, 14, 20} (`direct/wbundle_table.csv`) — the
 pre-registered expectation that B_half becomes W_D-reaching by N=14–20 is
 FALSIFIED; the translation-quotiented closure contains every plain
-pair/bond product class at every tested N, so the correction channel
-remains untested for the structural reason at all sizes (ledger C21).
+pair/bond product class at every tested N. W_bundle = 0 excludes new
+coefficient-space variables, not new constraints; the tightening power
+of the bundle LMI is not settled by this enumeration. A W_D-anchored
+construction is the recommended next step conditional on enlarging the
+coefficient space; it is NOT claimed that the existing bundles are
+ineffective, nor that the JOINT e-9 scores are fully explained
+(ledger C21).
 
 ### 4. Architecture and soundness [C16; release gates C10]
 
