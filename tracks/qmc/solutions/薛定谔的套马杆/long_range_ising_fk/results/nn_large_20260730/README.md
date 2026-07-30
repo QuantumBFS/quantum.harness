@@ -13,13 +13,15 @@ independent seeds per lattice size.
 
 ## Published cells
 
-This snapshot contains exactly 12 completed cells:
+This snapshot contains exactly 20 completed cells:
 
 | \(L\) | Seeds | Measurement sweeps per seed | Mean \(Q_m\) | Mean \(R_p\) |
 |---:|---|---:|---:|---:|
 | 64 | 73001, 84002, 95003, 106004 | 200000 | 0.8560859 | 0.0270663 |
 | 128 | 73001, 84002, 95003, 106004 | 200000 | 0.8551993 | 0.0231513 |
 | 256 | 73001, 84002, 95003, 106004 | 150000 | 0.8561858 | 0.0307917 |
+| 512 | 73001, 84002, 95003, 106004 | 100000 | 0.8558562 | 0.0257625 |
+| 1024 | 73001, 84002, 95003, 106004 | 50000 | 0.8568208 | 0.0280400 |
 
 The means in this table are unweighted means over the four seeds. Per-seed
 estimates, block errors, autocorrelation estimates, and susceptibilities are
@@ -27,8 +29,8 @@ stored in each cell's `summary.csv` and `blocks.csv`.
 
 Each cell contains one non-empty `summary.csv`, `blocks.csv`, `metadata.txt`,
 and `manifest.json`. The frozen `run_spec.json` records the full seven-size
-plan; only \(L=64,128,256\) are included in this partial publication because
-the larger cells were still running when it was made.
+plan; \(L=64,128,256,512,1024\) are included in this partial publication.
+The \(L=2048,4096\) cells were still running when this update was made.
 
 ## Provenance note
 
