@@ -37,3 +37,20 @@ chapter stands on its own gates.
   (the whitelist's kill-switch branch: the small-N study + holdout is
   the method chapter; a daytime run remains possible if the arbiter
   re-authorizes with fresh wall budget — NOT tonight's decision).
+
+## DAYTIME ARBITER OVERRIDE (2026-07-30 08:34:54 +08)
+
+Job 23009660 RELEASED as a post-freeze, NON-GATING target-scale run.
+This does not revise the overnight BLOCKED ruling (which remains the
+correct pre-registered decision at the 02:30 cutoff).
+
+- release timestamp: 2026-07-30T08:34:54+08:00
+- scheduler state at release: PD (None) — pending node allocation;
+  128c probe 23009659 running 2h52 on a01r03n03 concurrently
+- remote commit: cebb8da (frozen snapshot, no re-rsync performed)
+- frozen selection: S* = {B_bond_edge, B_half}, FROZEN_SELECTION.json
+  sha256 = e13ed241003eb65a0229ae610e2d4420ee076a811174c8d0a37bd6209b4d0783
+- constraints: Δ_joint(200) may be quoted ONLY if both matched arms
+  complete; job may be cancelled manually if it threatens quota,
+  reporting work, or higher-priority resources; Thursday merge/report/
+  push proceeds without waiting.
