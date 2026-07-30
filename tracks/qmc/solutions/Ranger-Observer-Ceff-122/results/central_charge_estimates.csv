@@ -1,0 +1,8 @@
+model,run,fit,lengths,central_charge,standard_error,target,target_standard_error,combined_distance_sigma,stage,interpretation
+clean_ising,benchmark,exact_casimir,"8:2:40",0.4999966194130345,0.0,0.5,0.0,0.0000033805869655,benchmark_locked,"deterministic geometry and Casimir normalization"
+nishimori,production,L^-1+L^-3,"6,8,10,12,14,16",0.3700802276519329,0.05047267163857454,0.464,0.004,1.855,production_anchor,"covariance-aware full-correction production coordinate"
+nishimori,production,L^-1_only,"6,8,10,12,14,16",0.44737965355153064,0.016435383580663578,0.464,0.004,0.982,reference_connected,"reduced-correction estimate within one combined standard error of the reference"
+self_dual,production,L^-1+L^-3,"6,8,10,12,14,16",0.8069058069514213,0.39985060342406664,0.447,0.001,0.900,production_coordinate,"full-correction production coordinate"
+self_dual,production,L^-1_only,"6,8,10,12,14,16",0.5532526284891004,0.09492854199374064,0.447,0.001,1.119,convergence_coordinate,"reduced-correction production coordinate"
+self_dual,calibration_extension,L^-1+L^-3,"6,8,10,12,14,16,18,20,22,24",0.3426360534911521,0.05558741977557999,0.447,0.001,1.877,large_width_coordinate,"independent L<=24 calibration coordinate"
+self_dual,calibration_extension,L^-1_only,"6,8,10,12,14,16,18,20,22,24",0.4019242545249664,0.019194517279001403,0.447,0.001,2.345,precision_direction,"large-width coordinate identifying the next precision allocation"

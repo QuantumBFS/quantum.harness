@@ -1,0 +1,21 @@
+{
+  "lengths": [4, 6, 8, 10],
+  "seeds": [0],
+  "clean_ising": true,
+  "nishimori": {
+    "steps": 100,
+    "burn_in": 10,
+    "block_size": 10
+  },
+  "self_dual": {
+    "channels": {
+      "identity": [0.0],
+      "confusion": [0.1],
+      "erasure": [0.8]
+    },
+    "steps": 50,
+    "burn_in": 4,
+    "block_size": 10,
+    "particles": 8
+  }
+}

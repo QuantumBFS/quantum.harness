@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ranger-observer-ceff"
+version = "0.1.0"
+description = "Reproducible observer-dependent central-charge workflow for Quantum Harness #122"
+requires-python = ">=3.11"
+dependencies = [
+  "matplotlib>=3.8",
+  "numpy>=2.0",
+  "pydantic>=2.8",
+  "scipy>=1.13",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+report = ["reportlab>=4", "pypdf>=5"]
+
+[project.scripts]
+ceffflow = "ceffflow.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
