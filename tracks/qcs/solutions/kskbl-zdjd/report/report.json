@@ -732,7 +732,93 @@
         {
           "kind": "note",
           "label": "⟦zh⟧统计边界：这是置信控制的模型族选择，不是无需验证的精确性证明⟦en⟧Statistical boundary: this is confidence-controlled family selection, not an exactness proof without verification",
-          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。当前方法依赖新鲜独立位翻转、均匀留出输入和互不重叠的噪声估计标签对；相关噪声需要另行实验。可复核记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The method assumes fresh independent bit flips, uniform holdout inputs and non-overlapping label pairs for noise estimation; correlated noise requires a separate experiment. The auditable record is sequential_degree_summary.json."
+          "text": "⟦zh⟧5% 预算控制的是已查询经验 Bernstein 区间同时覆盖失败的上界；接受带宽仍允许非常稀疏、很小的未建模项，因此不能仅凭该停止条件声称全域零错误。这里八次 100% 结果来自所有选择锁定后的独立干净全域审计，不参与训练或选模。上述结论适用于独立位翻转；下一节把同样的学习任务改成强词内相关噪声并重新校准区间。可复核记录为 sequential_degree_summary.json。⟦en⟧The 5% budget bounds simultaneous coverage failure across the queried empirical-Bernstein intervals. The acceptance band can still admit a very sparse, small unmodeled term, so the stopping rule alone cannot claim zero error over the domain. The eight 100% results come from an independent clean-domain audit after every choice is locked and do not participate in training or model selection. The result above assumes independent bit flips; the next section repeats the task under strong within-word correlation and recalibrates the intervals. The auditable record is sequential_degree_summary.json."
+        },
+        {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧相关噪声：函数仍能学对，但逐位不确定性会过度自信⟦en⟧Correlated noise: the function is still learned, but bitwise uncertainty becomes overconfident"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧强词内相关下 24 次训练仍全部得到 156 门精确规则；整词聚类区间修复置信失校准⟦en⟧Under strong within-word correlation, all 24 runs still recover the exact 156-gate rule; word-cluster intervals repair confidence miscalibration",
+          "why": "⟦zh⟧每一位的边际翻转率仍为 25%，但每个输出词先以 22.222% 概率进入共同翻转状态，再叠加 5% 独立残差翻转，使同词任意两位的翻转指示相关系数达到 0.7467。逐位区间与整词聚类区间各做十二个匹配种子，二十四次都拒绝一次、接受二次，并在事后干净全域上恢复同一条 36 项、156 门规则。区别出现在不确定性：逐位区间已有 1 / 12 次漏掉真实 25%，整词区间为 12 / 12 覆盖。⟦en⟧Each bit still has a 25% marginal flip rate, but every output word first enters a shared-flip state with probability 22.222% and then receives 5% independent residual flips, producing flip-indicator correlation 0.7467 between any two bits in the same word. Twelve matched seeds are run with bitwise intervals and twelve with word-cluster intervals. All 24 reject linear, accept quadratic and recover the same 36-term, 156-gate rule on the post-selection clean audit. The difference is uncertainty: bitwise intervals miss the true 25% rate once in twelve runs, whereas word-cluster intervals cover it in all twelve."
+        },
+        {
+          "kind": "card",
+          "title": "⟦zh⟧为什么训练仍成功，而原来的置信区间却失效⟦en⟧Why learning still succeeds while the original confidence interval fails",
+          "blocks": [
+            {
+              "kind": "kv",
+              "pairs": [
+                [
+                  "⟦zh⟧相关噪声生成式⟦en⟧Correlated-noise construction",
+                  "⟦zh⟧对同一个输出词令第 j 位翻转 F_j 等于共同状态 C 与独立残差 E_j 的异或；C 的概率为 2 / 9，E_j 的概率为 1 / 20。由此每位边际仍为 1 / 4，但十二位不再是十二个独立统计样本。⟦en⟧For one output word, let bit-j flip F_j be the XOR of a shared state C and an independent residual E_j. C has probability 2 / 9 and E_j has probability 1 / 20. Every marginal remains 1 / 4, but the twelve bits are no longer twelve independent statistical samples."
+                ],
+                [
+                  "⟦zh⟧函数学习为什么不坏⟦en⟧Why function learning survives",
+                  "⟦zh⟧固定某一输出位、跨不同新鲜输出词观察时，该位仍是时间上独立的 25% 翻转；贝叶斯位后验因此仍无偏，并最终得到相同整数规则。相关性主要改变同一个词能够提供多少独立证据。⟦en⟧For any fixed output bit observed across different fresh words, flips remain temporally independent with rate 25%. The Bayesian bit posterior is therefore still unbiased and reaches the same integer rule. Correlation mainly changes how much independent evidence one word provides."
+                ],
+                [
+                  "⟦zh⟧逐位区间为什么过窄⟦en⟧Why the bitwise interval is too narrow",
+                  "⟦zh⟧重复标签对中，不同位的“是否分歧”相关系数为 0.633，十二位的设计效应为 7.96；把它们当十二次独立 Bernoulli 观察会把有效样本量夸大近八倍。⟦en⟧Within a repeated-label pair, disagreement indicators across bits have correlation 0.633, giving a twelve-bit design effect of 7.96. Treating them as twelve independent Bernoulli observations inflates effective sample size by almost eightfold."
+                ],
+                [
+                  "⟦zh⟧整词聚类修正⟦en⟧Word-cluster correction",
+                  "⟦zh⟧每个互不重叠的重复标签对只贡献一个介于 0 与 1 的量：十二位分歧比例。经验 Bernstein 方差在整词之间计算，允许同词十二位任意相关；噪声校准证据跨模型阶数复用。⟦en⟧Each non-overlapping repeated-label pair contributes one bounded value between zero and one: its fraction of disagreeing bits. Empirical-Bernstein variance is computed across words, allowing arbitrary correlation among the twelve bits within a word; noise-calibration evidence is reused across model degrees."
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧噪声与区间单位⟦en⟧Noise and interval unit",
+            "⟦zh⟧运行数⟦en⟧Runs",
+            "⟦zh⟧真实噪声率被区间覆盖⟦en⟧True rate covered",
+            "⟦zh⟧平均训练词⟦en⟧Mean training words",
+            "⟦zh⟧平均留出与校准词⟦en⟧Mean holdout and calibration words",
+            "⟦zh⟧平均总噪声词⟦en⟧Mean total noisy words",
+            "⟦zh⟧最终精确⟦en⟧Final exact"
+          ],
+          "rows": [
+            ["⟦zh⟧独立翻转 · 标准序贯区间⟦en⟧Independent flips · standard sequential interval", "8", "⟦zh⟧未单独统计⟦en⟧Not separately audited", "9,500", "6,912", "16,412", "8 / 8"],
+            ["⟦zh⟧相关翻转 · 天真逐位区间⟦en⟧Correlated flips · naive bit interval", "12", "11 / 12", "9,333", "18,293", "27,627", "12 / 12"],
+            ["⟦zh⟧相关翻转 · 整词聚类区间⟦en⟧Correlated flips · word-cluster interval", "12", "12 / 12", "21,667", "71,136", "92,803", "12 / 12"]
+          ],
+          "numeric": [false, true, true, true, true, true, true]
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧每次独立整词对数⟦en⟧Independent word pairs per trial",
+            "⟦zh⟧逐位区间经验覆盖率⟦en⟧Naive bit-interval coverage",
+            "⟦zh⟧整词聚类经验覆盖率⟦en⟧Word-cluster empirical coverage",
+            "⟦zh⟧名义单区间覆盖率⟦en⟧Nominal single-interval coverage",
+            "⟦zh⟧逐位与整词区间宽度⟦en⟧Naive and cluster interval widths"
+          ],
+          "rows": [
+            ["250", "97.52%", "100.00% · 5,000 / 5,000", "99.99896%", "11.70 pp · 44.79 pp"],
+            ["1,000", "95.54%", "100.00% · 5,000 / 5,000", "99.99896%", "5.09 pp · 22.46 pp"],
+            ["5,000", "93.98%", "100.00% · 5,000 / 5,000", "99.99896%", "2.11 pp · 7.18 pp"]
+          ],
+          "numeric": [true, true, true, true, true]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-correlated-noise.png",
+              "caption": "⟦zh⟧左：每档 5,000 次蒙特卡洛中，把相关的十二位当独立样本会得到只有 93.98% 至 97.52% 的覆盖率，远低于预分配概率对应的 99.99896%；整词聚类区间在这些有限模拟中没有漏覆盖。中：诚实区间明显更宽，直接展示了相关性导致的有效样本量损失。右：这份可信度有实际成本；相关噪声下整词稳健方法平均用 92,803 个噪声词，是独立噪声序贯实验的 5.65 倍、天真相关版本的 3.36 倍。⟦en⟧Left: across 5,000 Monte Carlo trials per setting, treating twelve correlated bits as independent yields only 93.98% to 97.52% coverage, far below the 99.99896% implied by the allocated probability; the word-cluster interval has no misses in these finite simulations. Middle: the honest interval is visibly wider, directly exposing correlation-induced effective-sample loss. Right: that reliability has a real cost. Under correlated noise, the word-robust method averages 92,803 noisy words, 5.65x the independent-noise sequential experiment and 3.36x the naive correlated version."
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "label": "⟦zh⟧边界：整词内部相关已处理，跨时间与输入的相关仍未处理⟦en⟧Boundary: within-word correlation is handled; temporal and input-dependent correlation are not",
+          "text": "⟦zh⟧整词聚类区间要求不同新鲜输出词以及互不重叠的重复标签对彼此独立；它允许一个词内十二位任意相关，但不覆盖持续多个批次的噪声状态、特定输入更容易出错、或对手式标签污染。蒙特卡洛的 100% 是各档 5,000 次中零次漏覆盖，不是数学上宣称覆盖概率等于 1。完整可复核记录为 correlated_noise_summary.json。⟦en⟧The word-cluster interval assumes independence across fresh output words and across non-overlapping repeated-label pairs. It allows arbitrary correlation among the twelve bits within a word, but does not cover noise states persisting across batches, input-dependent error rates or adversarial label contamination. Monte Carlo 100% means zero misses among 5,000 trials at each setting, not a mathematical claim that coverage probability equals one. The complete auditable record is correlated_noise_summary.json."
         },
         {
           "kind": "heading",

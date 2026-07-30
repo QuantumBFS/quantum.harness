@@ -68,6 +68,87 @@ class FreshNoiseStream:
         return inputs, noisy
 
 
+def _common_xor_noise(
+    clean: torch.Tensor,
+    generator: torch.Generator,
+    common_flip_rate: float,
+    independent_flip_rate: float,
+) -> torch.Tensor:
+    """Apply a shared word flip XOR independent residual bit flips."""
+
+    common = torch.rand(
+        (len(clean), 1),
+        generator=generator,
+        device=clean.device,
+    ) < common_flip_rate
+    residual = torch.rand(
+        clean.shape,
+        generator=generator,
+        device=clean.device,
+    ) < independent_flip_rate
+    flips = torch.logical_xor(common, residual)
+    return torch.logical_xor(clean.bool(), flips).to(torch.float32)
+
+
+def common_rate_for_marginal(
+    marginal_flip_rate: float,
+    independent_flip_rate: float,
+) -> float:
+    """Solve p = c + q - 2cq for the shared flip probability c."""
+
+    if not 0.0 <= independent_flip_rate < 0.5:
+        raise ValueError("independent flip rate must lie in [0,0.5)")
+    if not independent_flip_rate <= marginal_flip_rate < 0.5:
+        raise ValueError(
+            "marginal flip rate must be at least the independent rate "
+            "and below 0.5"
+        )
+    common = (
+        (marginal_flip_rate - independent_flip_rate)
+        / (1.0 - 2.0 * independent_flip_rate)
+    )
+    if not 0.0 <= common < 0.5:
+        raise ValueError("derived common flip rate lies outside [0,0.5)")
+    return common
+
+
+@dataclass
+class CommonXorFreshNoiseStream:
+    """Fresh word-correlated noise with a prescribed per-bit marginal."""
+
+    batch_size: int
+    marginal_noise_rate: float
+    independent_noise_rate: float
+    seed: int
+    device: torch.device
+
+    def __post_init__(self) -> None:
+        self.common_noise_rate = common_rate_for_marginal(
+            self.marginal_noise_rate,
+            self.independent_noise_rate,
+        )
+        self.generator = torch.Generator(device=self.device)
+        self.generator.manual_seed(self.seed)
+
+    def sample(self) -> tuple[torch.Tensor, torch.Tensor]:
+        ids = torch.randint(
+            0,
+            DOMAIN_SIZE,
+            (self.batch_size,),
+            generator=self.generator,
+            device=self.device,
+        )
+        inputs = _ids_to_inputs(ids)
+        clean = _hidden_clean_bits(ids)
+        noisy = _common_xor_noise(
+            clean,
+            self.generator,
+            self.common_noise_rate,
+            self.independent_noise_rate,
+        )
+        return inputs, noisy
+
+
 @dataclass
 class ShuffledCycleFreshNoiseStream:
     """Randomly permute the domain each cycle while regenerating every flip."""
@@ -187,6 +268,72 @@ class FixedDesignFreshNoiseStream:
             device=self.device,
         ) < self.noise_rate
         noisy = torch.logical_xor(clean.bool(), flips).to(torch.float32)
+        return inputs, noisy
+
+
+@dataclass
+class CommonXorFixedDesignFreshNoiseStream:
+    """Label-blind fixed design with fresh word-correlated output noise."""
+
+    batch_size: int
+    marginal_noise_rate: float
+    independent_noise_rate: float
+    seed: int
+    device: torch.device
+    design_ids: torch.Tensor
+
+    def __post_init__(self) -> None:
+        self.common_noise_rate = common_rate_for_marginal(
+            self.marginal_noise_rate,
+            self.independent_noise_rate,
+        )
+        design = self.design_ids.to(device=self.device, dtype=torch.int64)
+        if design.ndim != 1 or len(design) == 0:
+            raise ValueError(
+                "design_ids must be a non-empty one-dimensional tensor"
+            )
+        if int(design.min()) < 0 or int(design.max()) >= DOMAIN_SIZE:
+            raise ValueError("design_ids lie outside the input domain")
+        if len(torch.unique(design)) != len(design):
+            raise ValueError("design_ids must be unique")
+        self.design_ids = design
+        self.generator = torch.Generator(device=self.device)
+        self.generator.manual_seed(self.seed)
+        self.permutation = torch.empty(
+            0,
+            dtype=torch.int64,
+            device=self.device,
+        )
+        self.offset = 0
+
+    def _sample_ids(self) -> torch.Tensor:
+        chunks: list[torch.Tensor] = []
+        remaining = self.batch_size
+        while remaining:
+            if self.offset >= len(self.permutation):
+                order = torch.randperm(
+                    len(self.design_ids),
+                    generator=self.generator,
+                    device=self.device,
+                )
+                self.permutation = self.design_ids[order]
+                self.offset = 0
+            take = min(remaining, len(self.permutation) - self.offset)
+            chunks.append(self.permutation[self.offset : self.offset + take])
+            self.offset += take
+            remaining -= take
+        return torch.cat(chunks)
+
+    def sample(self) -> tuple[torch.Tensor, torch.Tensor]:
+        ids = self._sample_ids()
+        inputs = _ids_to_inputs(ids)
+        clean = _hidden_clean_bits(ids)
+        noisy = _common_xor_noise(
+            clean,
+            self.generator,
+            self.common_noise_rate,
+            self.independent_noise_rate,
+        )
         return inputs, noisy
 
 

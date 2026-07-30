@@ -23,6 +23,8 @@ import torch
 
 from hidden_oracle import (
     CleanDomainEvaluator,
+    CommonXorFixedDesignFreshNoiseStream,
+    CommonXorFreshNoiseStream,
     DOMAIN_SIZE,
     FixedDesignFreshNoiseStream,
     FreshNoiseStream,
@@ -54,6 +56,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--holdout-look-sizes", default="128,256,512,1024,2048,4096,8192")
     parser.add_argument("--global-failure-probability", type=float, default=0.05)
     parser.add_argument("--noise-rate", type=float, default=0.25)
+    parser.add_argument(
+        "--noise-mode",
+        choices=("independent", "common-xor"),
+        default="independent",
+    )
+    parser.add_argument(
+        "--independent-noise-rate",
+        type=float,
+        default=0.05,
+    )
+    parser.add_argument(
+        "--noise-confidence-unit",
+        choices=("bit", "word"),
+        default="bit",
+    )
+    parser.add_argument(
+        "--carry-noise-calibration-across-degrees",
+        action="store_true",
+    )
     parser.add_argument("--initial-noise-rate", type=float, default=0.10)
     parser.add_argument("--noise-prior-pairs", type=float, default=1000.0)
     parser.add_argument("--base-seed", type=int, default=317_100)
@@ -63,6 +84,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--accept-gap", type=float, default=0.035)
     parser.add_argument("--reject-gap", type=float, default=0.15)
     parser.add_argument("--stable-signature-checks", type=int, default=3)
+    parser.add_argument(
+        "--unstable-holdout-words-per-check",
+        type=int,
+        default=0,
+        help=(
+            "optional cap on newly requested holdout words before a "
+            "coefficient signature is acceptance-ready; zero is unlimited"
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--quiet", action="store_true")
     return parser.parse_args()
@@ -103,7 +133,10 @@ class BoundedAccumulator:
 class DisjointPairNoiseEstimator:
     """Estimate p from independent pairs without access to clean labels."""
 
-    def __init__(self) -> None:
+    def __init__(self, confidence_unit: str) -> None:
+        if confidence_unit not in {"bit", "word"}:
+            raise ValueError("confidence unit must be bit or word")
+        self.confidence_unit = confidence_unit
         self.pending = np.zeros(
             (DOMAIN_SIZE, OUTPUT_BITS),
             dtype=np.uint8,
@@ -121,9 +154,15 @@ class DisjointPairNoiseEstimator:
         for input_id, target in zip(ids_array, targets, strict=True):
             index = int(input_id)
             if self.has_pending[index]:
-                self.disagreement.update(
-                    (self.pending[index] != target).astype(np.float64)
-                )
+                difference = (
+                    self.pending[index] != target
+                ).astype(np.float64)
+                if self.confidence_unit == "word":
+                    self.disagreement.update(
+                        np.array([float(np.mean(difference))])
+                    )
+                else:
+                    self.disagreement.update(difference)
                 self.has_pending[index] = False
             else:
                 self.pending[index] = target
@@ -228,6 +267,7 @@ def sequential_evidence(
     accept_ready: bool,
     accept_gap: float,
     reject_gap: float,
+    unstable_words_per_check: int,
     device: torch.device,
 ) -> tuple[str, dict[str, float | int], int]:
     words_before = accumulator.count
@@ -248,11 +288,19 @@ def sequential_evidence(
     for look_size in look_sizes:
         if look_size <= accumulator.count:
             continue
+        target_size = look_size
+        if not accept_ready and unstable_words_per_check > 0:
+            target_size = min(
+                target_size,
+                words_before + unstable_words_per_check,
+            )
+        if target_size <= accumulator.count:
+            return "defer", last, accumulator.count - words_before
         add_holdout_words(
             predicted_values,
             stream,
             accumulator,
-            look_size - accumulator.count,
+            target_size - accumulator.count,
             device,
         )
         last = interval_record(accumulator, noise_estimator, delta)
@@ -271,6 +319,12 @@ def sequential_evidence(
             if last["holdout_excess_point"] <= reject_gap:
                 return "defer", last, accumulator.count - words_before
             if last["holdout_excess_upper"] < reject_gap:
+                return "defer", last, accumulator.count - words_before
+            if (
+                unstable_words_per_check > 0
+                and accumulator.count - words_before
+                >= unstable_words_per_check
+            ):
                 return "defer", last, accumulator.count - words_before
 
     return "unresolved", last, accumulator.count - words_before
@@ -301,29 +355,55 @@ def main() -> None:
     )
     device = torch.device("cpu")
     bit_weights = 1 << np.arange(OUTPUT_BITS, dtype=np.int64)
-    validation_stream = FreshNoiseStream(
-        batch_size=look_sizes[0],
-        noise_rate=args.noise_rate,
-        seed=args.base_seed + 90_000,
-        device=device,
-    )
+    if args.noise_mode == "common-xor":
+        validation_stream = CommonXorFreshNoiseStream(
+            batch_size=look_sizes[0],
+            marginal_noise_rate=args.noise_rate,
+            independent_noise_rate=args.independent_noise_rate,
+            seed=args.base_seed + 90_000,
+            device=device,
+        )
+        common_noise_rate = validation_stream.common_noise_rate
+    else:
+        validation_stream = FreshNoiseStream(
+            batch_size=look_sizes[0],
+            noise_rate=args.noise_rate,
+            seed=args.base_seed + 90_000,
+            device=device,
+        )
+        common_noise_rate = 0.0
     args.output_dir.mkdir(parents=True, exist_ok=True)
     start = time.perf_counter()
     stage_records: list[dict[str, Any]] = []
     accepted_stage: dict[str, Any] | None = None
     cumulative_training_examples = 0
     cumulative_holdout_words = 0
+    shared_selection_noise = (
+        DisjointPairNoiseEstimator(args.noise_confidence_unit)
+        if args.carry_noise_calibration_across_degrees
+        else None
+    )
 
     for stage_index, degree in enumerate(degrees):
         features, effect_features, metadata = polynomial_features(degree)
         design_ids, design = d_optimal_ids(effect_features)
-        stream = FixedDesignFreshNoiseStream(
-            batch_size=args.batch_size,
-            noise_rate=args.noise_rate,
-            seed=args.base_seed + 1_000 * stage_index,
-            device=device,
-            design_ids=torch.from_numpy(design_ids),
-        )
+        if args.noise_mode == "common-xor":
+            stream = CommonXorFixedDesignFreshNoiseStream(
+                batch_size=args.batch_size,
+                marginal_noise_rate=args.noise_rate,
+                independent_noise_rate=args.independent_noise_rate,
+                seed=args.base_seed + 1_000 * stage_index,
+                device=device,
+                design_ids=torch.from_numpy(design_ids),
+            )
+        else:
+            stream = FixedDesignFreshNoiseStream(
+                batch_size=args.batch_size,
+                noise_rate=args.noise_rate,
+                seed=args.base_seed + 1_000 * stage_index,
+                device=device,
+                design_ids=torch.from_numpy(design_ids),
+            )
         learner = PairwiseNoiseBayesianTruthTable(
             initial_noise_rate=args.initial_noise_rate,
             prior_jitter=1e-6,
@@ -331,7 +411,11 @@ def main() -> None:
             seed=args.base_seed + 10_000 + stage_index,
             device=device,
         )
-        selection_noise = DisjointPairNoiseEstimator()
+        selection_noise = (
+            shared_selection_noise
+            if shared_selection_noise is not None
+            else DisjointPairNoiseEstimator(args.noise_confidence_unit)
+        )
         prior_generator = np.random.default_rng(
             args.base_seed + 20_000 + stage_index
         )
@@ -401,6 +485,7 @@ def main() -> None:
                 accept_ready,
                 args.accept_gap,
                 args.reject_gap,
+                args.unstable_holdout_words_per_check,
                 device,
             )
             if evidence == "reject":
@@ -537,6 +622,17 @@ def main() -> None:
             "interval_query_bound": interval_query_bound,
             "per_interval_failure_probability": interval_delta,
             "oracle_noise_rate": args.noise_rate,
+            "noise_mode": args.noise_mode,
+            "independent_noise_rate": (
+                args.independent_noise_rate
+                if args.noise_mode == "common-xor"
+                else args.noise_rate
+            ),
+            "common_noise_rate": common_noise_rate,
+            "noise_confidence_unit": args.noise_confidence_unit,
+            "carry_noise_calibration_across_degrees": (
+                args.carry_noise_calibration_across_degrees
+            ),
             "learner_initial_noise_rate": args.initial_noise_rate,
             "noise_prior_pairs": args.noise_prior_pairs,
             "base_seed": args.base_seed,
@@ -546,12 +642,18 @@ def main() -> None:
             "accept_gap": args.accept_gap,
             "reject_gap": args.reject_gap,
             "stable_signature_checks": args.stable_signature_checks,
+            "unstable_holdout_words_per_check": (
+                args.unstable_holdout_words_per_check
+            ),
         },
         "verification": {
             "training_uses_only_fresh_noisy_labels": True,
             "validation_uses_independent_fresh_noisy_labels": True,
             "validation_labels_used_for_updates": False,
             "noise_interval_uses_disjoint_noisy_label_pairs": True,
+            "noise_interval_independence_unit": (
+                args.noise_confidence_unit
+            ),
             "global_interval_failure_budget_precommitted": True,
             "clean_labels_used_for_updates": False,
             "clean_labels_used_for_degree_selection": False,
