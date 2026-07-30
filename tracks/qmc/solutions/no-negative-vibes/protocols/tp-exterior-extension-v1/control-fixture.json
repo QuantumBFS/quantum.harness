@@ -1,0 +1,17 @@
+{
+  "cell_id": "control-zero-chord-zero-angle",
+  "classification": "known-tn-control",
+  "params": {
+    "jacobi_strength": "1/2",
+    "diagonal_condition_ratio": "2",
+    "chord_shear_magnitude": "0",
+    "chord_pattern": [
+      [0, 2],
+      [3, 1]
+    ],
+    "givens_half_angle": "0",
+    "givens_plane": [0, 7],
+    "two_atom_scale_ratio": "5/4"
+  },
+  "reason": "With zero chord shear and identity grade gauges, both base atoms are positive scalar multiples of one strictly totally-positive core."
+}

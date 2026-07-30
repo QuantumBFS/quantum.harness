@@ -1,0 +1,15 @@
+{
+  "protocol": "az-tenfold-hermitian-v1",
+  "precision": "numpy-scipy-float64",
+  "dimension": 4,
+  "generator_norm": "frobenius(A) = 2 * scale",
+  "generator_convention": "Hermitian H with canonical AZ TRS/PHS/chiral constraints; A = H",
+  "weight": "det(I + product_l exp(A_l))",
+  "purpose": "falsification reconnaissance; survival is not a proof; BdG physical weights may require a Pfaffian or square-root treatment",
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/0803.2786",
+    "https://arxiv.org/abs/1606.05483",
+    "https://arxiv.org/abs/1601.05780"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "protocol": "oddcycle-pair-frontier-v1",
+  "family": ["B(p_low,q,r)", "B(p_low,q,r)^T", "B(p_high,q,r)", "B(p_high,q,r)^T"],
+  "cell_count": 12325,
+  "runner": "oracle.oddcycle_pair_domain_runner",
+  "numerical_scope": "remote-only float64 discovery",
+  "survivor_promotion": "exact rationalization is separate from this scan"
+}

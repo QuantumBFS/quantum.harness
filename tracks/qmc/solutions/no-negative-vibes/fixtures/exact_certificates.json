@@ -1,0 +1,405 @@
+{
+  "schema_version": 1,
+  "number_format": "SymPy-compatible exact expressions",
+  "weight_convention": "w(D) = det(I + D)",
+  "cases": [
+    {
+      "id": "o11_identity_component_positive",
+      "family": "O(1,1)",
+      "metric": [["1", "0"], ["0", "-1"]],
+      "matrix": [["5/3", "4/3"], ["4/3", "5/3"]],
+      "expected_determinant": "1",
+      "expected_weight": "16/3",
+      "expected_sign": "positive",
+      "exact_relations": ["D^T eta D = eta"]
+    },
+    {
+      "id": "o11_negative_component",
+      "family": "O(1,1)",
+      "metric": [["1", "0"], ["0", "-1"]],
+      "matrix": [["-5/3", "-4/3"], ["-4/3", "-5/3"]],
+      "expected_determinant": "1",
+      "expected_weight": "-4/3",
+      "expected_sign": "negative",
+      "exact_relations": ["D^T eta D = eta"]
+    },
+    {
+      "id": "o11_mixed_component_zero",
+      "family": "O(1,1)",
+      "metric": [["1", "0"], ["0", "-1"]],
+      "matrix": [["1", "0"], ["0", "-1"]],
+      "expected_determinant": "-1",
+      "expected_weight": "0",
+      "expected_sign": "zero",
+      "exact_relations": ["D^T eta D = eta"]
+    },
+    {
+      "id": "sp2r_four_shear_negative",
+      "family": "Sp(2,R)",
+      "symplectic_form": [["0", "1"], ["-1", "0"]],
+      "factors_in_product_order": [
+        [["1", "-3"], ["0", "1"]],
+        [["1", "0"], ["1", "1"]],
+        [["1", "-3/2"], ["0", "1"]],
+        [["1", "0"], ["2", "1"]]
+      ],
+      "matrix": [["-2", "0"], ["0", "-1/2"]],
+      "expected_determinant": "1",
+      "expected_weight": "-1/2",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "D^T J D = J",
+        "each factor is the exponential of a nilpotent sp(2,R) generator"
+      ]
+    },
+    {
+      "id": "su11_negative",
+      "family": "SU(1,1)",
+      "metric": [["1", "0"], ["0", "-1"]],
+      "matrix": [["-5/4", "-3/4"], ["-3/4", "-5/4"]],
+      "expected_determinant": "1",
+      "expected_weight": "-1/2",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "D^dagger eta D = eta",
+        "det(D) = 1"
+      ]
+    },
+    {
+      "id": "sl3_embedded_shear_negative",
+      "family": "SL(3,R)",
+      "factors_in_product_order": [
+        [["1", "-3", "0"], ["0", "1", "0"], ["0", "0", "1"]],
+        [["1", "0", "0"], ["1", "1", "0"], ["0", "0", "1"]],
+        [["1", "-3/2", "0"], ["0", "1", "0"], ["0", "0", "1"]],
+        [["1", "0", "0"], ["2", "1", "0"], ["0", "0", "1"]]
+      ],
+      "matrix": [["-2", "0", "0"], ["0", "-1/2", "0"], ["0", "0", "1"]],
+      "expected_determinant": "1",
+      "expected_weight": "-1",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "each factor has determinant one",
+        "each factor is the exponential of a nilpotent sl(3,R) generator"
+      ]
+    },
+    {
+      "id": "sp4r_embedded_shear_negative",
+      "family": "Sp(4,R)",
+      "symplectic_form": [
+        ["0", "0", "1", "0"],
+        ["0", "0", "0", "1"],
+        ["-1", "0", "0", "0"],
+        ["0", "-1", "0", "0"]
+      ],
+      "factors_in_product_order": [
+        [["1", "0", "-3", "0"], ["0", "1", "0", "0"], ["0", "0", "1", "0"], ["0", "0", "0", "1"]],
+        [["1", "0", "0", "0"], ["0", "1", "0", "0"], ["1", "0", "1", "0"], ["0", "0", "0", "1"]],
+        [["1", "0", "-3/2", "0"], ["0", "1", "0", "0"], ["0", "0", "1", "0"], ["0", "0", "0", "1"]],
+        [["1", "0", "0", "0"], ["0", "1", "0", "0"], ["2", "0", "1", "0"], ["0", "0", "0", "1"]]
+      ],
+      "matrix": [
+        ["-2", "0", "0", "0"],
+        ["0", "1", "0", "0"],
+        ["0", "0", "-1/2", "0"],
+        ["0", "0", "0", "1"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-2",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "D^T J D = J",
+        "each factor is the exponential of a nilpotent sp(4,R) generator"
+      ]
+    },
+    {
+      "id": "su21_embedded_negative",
+      "family": "SU(2,1)",
+      "metric": [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "-1"]],
+      "matrix": [
+        ["-5/4", "0", "-3/4"],
+        ["0", "1", "0"],
+        ["-3/4", "0", "-5/4"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-1",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "D^dagger eta D = eta",
+        "det(D) = 1"
+      ]
+    },
+    {
+      "id": "su3_center_negative",
+      "family": "SU(3)",
+      "metric": [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "1"]],
+      "matrix": [
+        ["-1/2 + sqrt(3)*I/2", "0", "0"],
+        ["0", "-1/2 + sqrt(3)*I/2", "0"],
+        ["0", "0", "-1/2 + sqrt(3)*I/2"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-1",
+      "expected_sign": "negative",
+      "exact_relations": [
+        "D^dagger D = I",
+        "D = exp(diag(2*pi*I/3, 2*pi*I/3, -4*pi*I/3))"
+      ]
+    },
+    {
+      "id": "u2_complex_phase",
+      "family": "U(2)",
+      "metric": [["1", "0"], ["0", "1"]],
+      "matrix": [["I", "0"], ["0", "1"]],
+      "expected_determinant": "I",
+      "expected_weight": "2 + 2*I",
+      "expected_sign": "complex",
+      "exact_relations": ["D^dagger D = I"]
+    },
+    {
+      "id": "u11_complex_phase",
+      "family": "U(1,1)",
+      "metric": [["1", "0"], ["0", "-1"]],
+      "matrix": [["I", "0"], ["0", "1"]],
+      "expected_determinant": "I",
+      "expected_weight": "2 + 2*I",
+      "expected_sign": "complex",
+      "exact_relations": ["D^dagger eta D = eta"]
+    },
+    {
+      "id": "az_ai_three_spd_negative",
+      "family": "AZ AI",
+      "factors_in_product_order": [
+        [["5", "2"], ["2", "1"]],
+        [["18", "-9"], ["-9", "5"]],
+        [["1", "-3"], ["-3", "13"]]
+      ],
+      "matrix": [["177", "-671"], ["66", "-250"]],
+      "expected_determinant": "36",
+      "expected_weight": "-36",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "trs_operator": [["1", "0"], ["0", "1"]]
+      },
+      "exact_relations": [
+        "each P_i is real symmetric positive definite",
+        "H_i = log(P_i) is an AZ AI Hermitian generator",
+        "three factors are sufficient while one or two positive definite factors have positive weight"
+      ]
+    },
+    {
+      "id": "az_aiii_three_spd_negative",
+      "family": "AZ AIII",
+      "factors_in_product_order": [
+        [
+          ["41/9", "56/45 - 64*I/15"],
+          ["56/45 + 64*I/15", "41/9"]
+        ],
+        [
+          ["41/9", "-320/153 + 200*I/51"],
+          ["-320/153 - 200*I/51", "41/9"]
+        ],
+        [
+          ["25/7", "24/25 + 576*I/175"],
+          ["24/25 - 576*I/175", "25/7"]
+        ]
+      ],
+      "matrix": [
+        ["(-4594923 + 30884736*I)/1204875", "8*(-258336 + 29473*I)/80325"],
+        ["8*(-258336 - 29473*I)/80325", "(-4594923 - 30884736*I)/1204875"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-753344/133875",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "chiral_operator": [["1", "0"], ["0", "-1"]]
+      },
+      "exact_relations": [
+        "S P_i S = P_i^-1",
+        "H_i = log(P_i) is Hermitian and satisfies S H_i S = -H_i",
+        "the complex off-diagonal phases distinguish AIII from its real BDI subset"
+      ]
+    },
+    {
+      "id": "az_ci_three_spd_negative",
+      "family": "AZ CI",
+      "factors_in_product_order": [
+        [["29/5", "64/15"], ["64/15", "149/45"]],
+        [["409/125", "-288/125"], ["-288/125", "241/125"]],
+        [["53/35", "-96/35"], ["-96/35", "197/35"]]
+      ],
+      "matrix": [
+        ["24449/875", "-28352/525"],
+        ["49984/2625", "-57907/1575"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-53744/7875",
+      "expected_sign": "negative",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "trs_operator": [["1", "0"], ["0", "1"]],
+        "phs_operator": [["0", "1"], ["-1", "0"]]
+      },
+      "exact_relations": [
+        "P_i is real symmetric positive definite with determinant one",
+        "J P_i J^dagger = P_i^-1",
+        "H_i = log(P_i) is an AZ CI Hermitian generator"
+      ]
+    },
+    {
+      "id": "az_a_d_three_spd_complex",
+      "family": "AZ A and D",
+      "factors_in_product_order": [
+        [
+          ["5/3", "0", "4*I/3", "0"],
+          ["0", "5/3", "0", "4*I/3"],
+          ["-4*I/3", "0", "5/3", "0"],
+          ["0", "-4*I/3", "0", "5/3"]
+        ],
+        [
+          ["5/3", "4*I/3", "0", "0"],
+          ["-4*I/3", "5/3", "0", "0"],
+          ["0", "0", "5/3", "-4*I/3"],
+          ["0", "0", "4*I/3", "5/3"]
+        ],
+        [
+          ["5/3", "0", "0", "-4*I/3"],
+          ["0", "5/3", "4*I/3", "0"],
+          ["0", "-4*I/3", "5/3", "0"],
+          ["4*I/3", "0", "0", "5/3"]
+        ]
+      ],
+      "matrix": [
+        ["125/27 + 64*I/27", "80/27 + 100*I/27", "-80/27 + 100*I/27", "80/27 - 100*I/27"],
+        ["-80/27 - 100*I/27", "125/27 + 64*I/27", "-80/27 + 100*I/27", "-80/27 + 100*I/27"],
+        ["80/27 - 100*I/27", "80/27 - 100*I/27", "125/27 + 64*I/27", "-80/27 - 100*I/27"],
+        ["-80/27 + 100*I/27", "80/27 - 100*I/27", "80/27 + 100*I/27", "125/27 + 64*I/27"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "2816/27 + 77824*I/729",
+      "expected_sign": "complex",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "phs_operator": [
+          ["1", "0", "0", "0"],
+          ["0", "1", "0", "0"],
+          ["0", "0", "1", "0"],
+          ["0", "0", "0", "1"]
+        ]
+      },
+      "exact_relations": [
+        "P_i^* = P_i^-1, so H_i = log(P_i) is an AZ D Hermitian generator",
+        "AZ A contains the same factors after forgetting particle-hole symmetry"
+      ]
+    },
+    {
+      "id": "az_c_three_spd_complex",
+      "family": "AZ C",
+      "factors_in_product_order": [
+        [
+          ["5/3", "-4*I/3", "0", "0"],
+          ["4*I/3", "5/3", "0", "0"],
+          ["0", "0", "5/3", "-4*I/3"],
+          ["0", "0", "4*I/3", "5/3"]
+        ],
+        [
+          ["5/3", "0", "0", "4/3"],
+          ["0", "5/3", "4/3", "0"],
+          ["0", "4/3", "5/3", "0"],
+          ["4/3", "0", "0", "5/3"]
+        ],
+        [
+          ["5/3", "0", "4/3", "0"],
+          ["0", "5/3", "0", "-4/3"],
+          ["4/3", "0", "5/3", "0"],
+          ["0", "-4/3", "0", "5/3"]
+        ]
+      ],
+      "matrix": [
+        ["125/27 - 64*I/27", "-80/27 - 100*I/27", "100/27 - 80*I/27", "100/27 + 80*I/27"],
+        ["80/27 + 100*I/27", "125/27 - 64*I/27", "100/27 + 80*I/27", "-100/27 + 80*I/27"],
+        ["100/27 - 80*I/27", "100/27 + 80*I/27", "125/27 - 64*I/27", "-80/27 - 100*I/27"],
+        ["100/27 + 80*I/27", "-100/27 + 80*I/27", "80/27 + 100*I/27", "125/27 - 64*I/27"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "2816/27 - 77824*I/729",
+      "expected_sign": "complex",
+      "slice_factor_constraints": {
+        "hermitian_positive_definite": true,
+        "phs_operator": [
+          ["0", "0", "1", "0"],
+          ["0", "0", "0", "1"],
+          ["-1", "0", "0", "0"],
+          ["0", "-1", "0", "0"]
+        ]
+      },
+      "exact_relations": [
+        "C P_i^* C^dagger = P_i^-1",
+        "H_i = log(P_i) is an AZ C Hermitian generator"
+      ]
+    },
+    {
+      "id": "mixed_split_cones_rational_angle_negative",
+      "family": "mixed split-contraction cones",
+      "factors_in_product_order": [
+        [
+          ["3", "0", "2", "0"],
+          ["0", "1", "0", "0"],
+          ["-2", "0", "-1", "0"],
+          ["0", "0", "0", "1"]
+        ],
+        [
+          ["11/25", "0", "98/25", "0"],
+          ["0", "1", "0", "0"],
+          ["-2/25", "0", "39/25", "0"],
+          ["0", "0", "0", "1"]
+        ]
+      ],
+      "matrix": [
+        ["29/25", "0", "372/25", "0"],
+        ["0", "1", "0", "0"],
+        ["-4/5", "0", "-47/5", "0"],
+        ["0", "0", "0", "1"]
+      ],
+      "expected_determinant": "1",
+      "expected_weight": "-624/25",
+      "expected_sign": "negative",
+      "slice_generators": [
+        [
+          ["2", "0", "2", "0"],
+          ["0", "0", "0", "0"],
+          ["-2", "0", "-2", "0"],
+          ["0", "0", "0", "0"]
+        ],
+        [
+          ["-14/25", "0", "98/25", "0"],
+          ["0", "0", "0", "0"],
+          ["-2/25", "0", "14/25", "0"],
+          ["0", "0", "0", "0"]
+        ]
+      ],
+      "slice_metrics": [
+        [
+          ["1", "0", "0", "0"],
+          ["0", "1", "0", "0"],
+          ["0", "0", "-1", "0"],
+          ["0", "0", "0", "-1"]
+        ],
+        [
+          ["-7/25", "0", "24/25", "0"],
+          ["0", "1", "0", "0"],
+          ["24/25", "0", "7/25", "0"],
+          ["0", "0", "0", "-1"]
+        ]
+      ],
+      "exact_relations": [
+        "A_i^2 = 0, so exp(A_i) = I + A_i",
+        "A_i^T eta_i + eta_i A_i is positive semidefinite",
+        "eta_2 is a rational rotation of eta_1 with sin(theta)=4/5",
+        "w = 16*(1-q^2*sin(theta)^2) with q=2"
+      ]
+    }
+  ]
+}

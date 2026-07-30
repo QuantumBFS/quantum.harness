@@ -1,0 +1,33 @@
+{
+  "run_id": "tp-exterior-extension-control-v1",
+  "settings": {
+    "condition_number_limit": 10000000000.0,
+    "relative_entry_margin_threshold": 1e-8,
+    "negative_minor_threshold": 1e-6,
+    "non_induced_residual_threshold": 1e-6,
+    "mixed_word_depth": 6,
+    "max_level_matrices": 2000000
+  },
+  "provenance": {
+    "protocol": "tp-exterior-extension-v1",
+    "fixture": "known-tn-control",
+    "execution_scope": "remote-only"
+  },
+  "cells": [
+    {
+      "cell_id": "control-zero-chord-zero-angle",
+      "params": {
+        "jacobi_strength": "1/2",
+        "diagonal_condition_ratio": "2",
+        "chord_shear_magnitude": "0",
+        "chord_pattern": [
+          [0, 2],
+          [3, 1]
+        ],
+        "givens_half_angle": "0",
+        "givens_plane": [0, 7],
+        "two_atom_scale_ratio": "5/4"
+      }
+    }
+  ]
+}

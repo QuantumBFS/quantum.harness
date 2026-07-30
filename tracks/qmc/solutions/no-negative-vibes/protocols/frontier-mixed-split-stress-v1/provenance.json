@@ -1,0 +1,10 @@
+{
+  "protocol": "frontier-mixed-split-stress-v1",
+  "precision": "numpy-scipy-float64",
+  "weight": "det(I + product_l exp(A_l))",
+  "purpose": "stress small-angle mixtures of split contraction cones against a fixed-cone positive control",
+  "sources": [
+    "https://github.com/QuantumBFS/quantum.harness/issues/121",
+    "https://arxiv.org/abs/1712.09412"
+  ]
+}
