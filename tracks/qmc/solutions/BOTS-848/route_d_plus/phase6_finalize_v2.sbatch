@@ -24,6 +24,7 @@ set -euo pipefail
 : "${ROUTE_D_PLUS_MEASUREMENT_JOB_ID:?set the measurement job id}"
 : "${ROUTE_D_PLUS_MEASUREMENT_STDOUT:?set measurement stdout path}"
 : "${ROUTE_D_PLUS_MEASUREMENT_STDERR:?set measurement stderr path}"
+: "${ROUTE_D_PLUS_PHASE7_RUN_ID:?set the pre-registered Phase 7 run id}"
 
 repo_root="$(cd -- "${ROUTE_D_PLUS_REPO_ROOT}" && pwd)"
 run_dir="$(cd -- "${ROUTE_D_PLUS_FINAL_RUN_DIR}" && pwd)"
@@ -54,9 +55,12 @@ sacct -j "${ROUTE_D_PLUS_MEASUREMENT_JOB_ID}" \
 cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
 "${repo_root}/.venv/bin/python" -m ruff check \
   route_d_plus/finalize_phase6_v2.py \
-  tests/route_d_plus/test_phase6_final_v2_contract.py
+  route_d_plus/prepare_phase7.py \
+  tests/route_d_plus/test_phase6_final_v2_contract.py \
+  tests/route_d_plus/test_phase7_registration_contract.py
 "${repo_root}/.venv/bin/python" -m pytest \
-  tests/route_d_plus/test_phase6_final_v2_contract.py -q
+  tests/route_d_plus/test_phase6_final_v2_contract.py \
+  tests/route_d_plus/test_phase7_registration_contract.py -q
 "${repo_root}/.venv/bin/python" -u \
   -m route_d_plus.finalize_phase6_v2 finalize \
   --repo-root "${repo_root}" \
@@ -87,5 +91,13 @@ cd "${repo_root}/tracks/qmc/solutions/BOTS-848"
   --repo-root "${repo_root}" \
   --final "${run_dir}/phase6-final-v2-certificate.json" \
   --output "${run_dir}/phase6-final-v2-readback.json"
+phase7_root="${repo_root}/tracks/qmc/results/${ROUTE_D_PLUS_PHASE7_RUN_ID}"
+"${repo_root}/.venv/bin/python" -u -m route_d_plus.prepare_phase7 \
+  --repo-root "${repo_root}" \
+  --phase6-final "${run_dir}/phase6-final-v2-certificate.json" \
+  --run-id "${ROUTE_D_PLUS_PHASE7_RUN_ID}" \
+  --run-root "${phase7_root}" \
+  --output-dir "${phase7_root}/_dispatch" \
+  --output "${phase7_root}/_dispatch/phase7-registration.json"
 test -z "$(cd "${repo_root}" && git status --porcelain)"
 echo "PHASE6_FROZEN_GATE_V2=passed"
