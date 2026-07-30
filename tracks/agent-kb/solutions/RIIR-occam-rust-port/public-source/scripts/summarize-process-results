@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import math
+import os
+import re
+import statistics
+import tempfile
+from pathlib import Path
+
+CASES = ("official-add-8", "add-8-100000", "add-16-100000", "mul-4-100000")
+BACKENDS = ("scalar", "packed", "julia")
+
+
+def parse_time_file(path: Path) -> tuple[float, int]:
+    text = path.read_text(encoding="utf-8")
+    wall = re.search(r"^\s*([0-9.]+)\s+real\b", text, re.MULTILINE)
+    rss = re.search(r"^\s*([0-9]+)\s+maximum resident set size\b", text, re.MULTILINE)
+    if wall is None or rss is None:
+        raise ValueError(f"missing wall/RSS measurement in {path}")
+    wall_value = float(wall.group(1))
+    rss_value = int(rss.group(1))
+    if not math.isfinite(wall_value) or wall_value < 0 or rss_value <= 0:
+        raise ValueError(f"invalid wall/RSS measurement in {path}")
+    return wall_value, rss_value
+
+
+def atomic_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(prefix=path.name, dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+        os.replace(temporary, path)
+    except BaseException:
+        os.unlink(temporary)
+        raise
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--raw", type=Path, required=True)
+    parser.add_argument("--protocol", type=Path, required=True)
+    parser.add_argument("--environment", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    arguments = parser.parse_args()
+
+    protocol = json.loads(arguments.protocol.read_text(encoding="utf-8"))
+    repetitions = protocol["process_repetitions"]
+    if not isinstance(repetitions, int) or repetitions <= 0:
+        raise ValueError("process_repetitions must be positive")
+    result = {
+        "schema_version": 1,
+        "profile": protocol["profile"],
+        "environment_snapshot": arguments.environment.read_text(encoding="utf-8").splitlines(),
+        "cases": {},
+    }
+    for case in CASES:
+        result["cases"][case] = {}
+        for backend in BACKENDS:
+            walls = []
+            rss_values = []
+            for repetition in range(1, repetitions + 1):
+                path = arguments.raw / f"{case}-{backend}-process-time-{repetition}.txt"
+                wall, rss = parse_time_file(path)
+                walls.append(wall)
+                rss_values.append(rss)
+            result["cases"][case][backend] = {
+                "wall_seconds": walls,
+                "median_wall_seconds": statistics.median(walls),
+                "rss_bytes": rss_values,
+                "median_rss_bytes": statistics.median_low(sorted(rss_values)),
+            }
+    atomic_json(arguments.output, result)
+
+
+if __name__ == "__main__":
+    main()

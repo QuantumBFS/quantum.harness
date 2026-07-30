@@ -1,32 +1,98 @@
+# Issue #115 — Public Rust Occam Verifier Port
+
 ## Team
 
-| | |
+| Field | Value |
 |---|---|
-| **Team name** | Ranger |
-| **Members** | Chenxi Wan, Yedi Shen, Junkai Wang |
+| Team | Wander (漫步者) |
+| Members | Chenxi Wan, Yedi Shen, Junkai Wang |
+| Track | `agent-kb` |
+| Source challenge | #71 Occam's Circuit |
 
-## Challenge
+## Public review status
 
-| Row | |
-|---|---|
-| **Challenge** | Port the Occam's Circuit verifier workflow to Rust: reuse the #71 Julia data and verifier as an oracle, implement a Rust netlist parser/evaluator, add bit-parallel verification, and report correctness/runtime gaps. |
-| **Catalog issue** | Addresses #115 — "Port any challenge of this school to Rust", released by Hiroshi Shinaoka. The source challenge for the port is #71, "Occam's Circuit". |
-| **Track** | `agent-kb`, chosen by the team because #115 is an agentic migration and Rust-ecosystem case study with `Method` field `Other`. |
+This PR now contains the complete, self-contained Rust source-and-evidence
+snapshot for the #115 port. Review no longer depends on access to a private
+companion repository or Release.
 
-## Scope Note
+The snapshot was exported from the audited `v0.5.0` implementation commit
+`e9120224fe0b1f45ed309ad6b40bf7c9c381af38`. It contains the Rust crate,
+locked dependencies, tests, fuzz targets, benchmark records, Julia oracle
+scripts, migration reports, bounded-synthesis evidence, and an AGPL-3.0
+license under [`public-source/`](public-source/).
 
-**Status: Completed — v0.5.0 (July 28, 2026).**
+## What #115 implements
 
-The completed #115 migration now includes the bit-exact Rust verifier,
-bit-parallel and compiled evaluation backends, deterministic benchmark and
-evidence pipelines, pinned ABC/Yosys/Espresso provenance, bounded fuzzing, and
-the measured, auditable Occam generalization study. The companion #71 solution
-is submitted in [PR #220](https://github.com/QuantumBFS/quantum.harness/pull/220).
+- a strict parser for the official CSV and gate-netlist formats;
+- all six fan-in-two gate operations with free input inversion;
+- scalar, sample-packed, compiled, and cross-check evaluators;
+- gate count, exact-match accuracy, and bit accuracy;
+- deterministic reference-circuit and benchmark generation;
+- Julia/Rust differential checks;
+- resource limits, property tests, malformed-input tests, and fuzz targets;
+- pinned logic-tool provenance and reproducible benchmark records;
+- bounded exact SAT synthesis with independent extracted-circuit verification.
 
-## Working Repository
+## Clean-checkout reproduction
 
-The completed implementation is maintained in the private AGPL-3.0 repository
-`JunkaiWang-TheoPhy/quantum-harness-115-occam-rust-port`. The #71 implementation
-line lives under the `challenge-71-occam/` subfolder. The audited v0.5.0 source
-commit is `e9120224fe0b1f45ed309ad6b40bf7c9c381af38`; private CI and Release
-links are available to authorized reviewers.
+From the root of a checkout of this PR branch:
+
+```bash
+cd tracks/agent-kb/solutions/RIIR-occam-rust-port/public-source
+cargo fmt --all --check
+cargo test -p occam71_rust --lib --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
+```
+
+The most relevant verifier checks can also be run directly:
+
+```bash
+cargo test -p occam71_rust \
+  --test cli \
+  --test compiled_differential \
+  --test direct_packed_parse \
+  --test official_compat \
+  --test packed_differential \
+  --test packed_layout \
+  --test properties \
+  --test sat_synthesis \
+  --locked
+```
+
+Fetch the official #71 data and run the cross-language oracle checks with:
+
+```bash
+./scripts/fetch-occam-data.sh
+./scripts/verify-oracles.sh
+```
+
+The dataset downloader verifies the organizer-published SHA-256 before
+installing files under the ignored `vendor/occam-circuit/` directory.
+
+## Evidence map
+
+- [`public-source/README.md`](public-source/README.md) — CLI usage and detailed
+  implementation map.
+- [`public-source/docs/oracle-results.md`](public-source/docs/oracle-results.md)
+  — Julia/Rust compatibility results.
+- [`public-source/docs/gap-report.md`](public-source/docs/gap-report.md) —
+  migration differences and explicit proof boundary.
+- [`public-source/benchmarks/results/`](public-source/benchmarks/results/) — raw
+  Apple M4 and Linux x86-64 benchmark evidence.
+- [`public-source/docs/synthesis/`](public-source/docs/synthesis/) — bounded SAT
+  examples and their limitations.
+- [`public-source/SOURCE-MANIFEST.sha256`](public-source/SOURCE-MANIFEST.sha256)
+  — hashes for every published snapshot file.
+
+## Scope boundary
+
+This PR proves that the #71 verifier workflow was ported to Rust and is
+publicly reproducible. It does not claim that the four large #71 circuits are
+globally minimal, and its internal SAT/UNSAT status records are not DRAT/LRAT
+proof objects. The public forward challenge submission remains PR #220; the
+later inverse-relation certified-optimum work is a separate follow-up.
+
+## License
+
+The public snapshot is licensed under the GNU Affero General Public License
+v3.0; see [`public-source/LICENSE`](public-source/LICENSE).

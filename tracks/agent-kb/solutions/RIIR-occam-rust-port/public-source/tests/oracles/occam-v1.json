@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "archive": {
+    "url": "https://github.com/QuantumBFS/quantum.harness/releases/download/occam-circuit-data-v1/occam-circuit.zip",
+    "sha256": "c15f84839a365dd9daab686ccfd58a50ce286d5f1071d7f093e9fdd091ecaa1b"
+  },
+  "cases": [
+    {
+      "name": "official-add-8",
+      "circuit": {
+        "kind": "official_file",
+        "path": "adder8.txt"
+      },
+      "dataset": "datasets/mystery-A/train.csv",
+      "gates": 37,
+      "samples": 2000,
+      "exact_matches": 2000,
+      "correct_bits": 18000,
+      "total_bits": 18000
+    },
+    {
+      "name": "practice-add-n4",
+      "circuit": {
+        "kind": "generated_adder",
+        "bits": 4
+      },
+      "dataset": "datasets/practice-add-n4/train.csv",
+      "gates": 17,
+      "samples": 120,
+      "exact_matches": 120,
+      "correct_bits": 600,
+      "total_bits": 600
+    },
+    {
+      "name": "practice-mul-n4",
+      "circuit": {
+        "kind": "generated_multiplier",
+        "bits": 4
+      },
+      "dataset": "datasets/practice-mul-n4/train.csv",
+      "gates": 128,
+      "samples": 120,
+      "exact_matches": 120,
+      "correct_bits": 960,
+      "total_bits": 960
+    }
+  ]
+}

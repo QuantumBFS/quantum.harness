@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "solver": "varisat 0.2.2",
+  "encoding": "universal-dag-cnf-v1",
+  "status": "sat",
+  "status_detail": "bounds 0 through 1 were UNSAT and bound 2 was SAT",
+  "problem_sha256": "c5e7785b4f0f87eb9a7be322ff0bfeab73e2537767144744ed9d93ebd69f9cb6",
+  "input_width": 2,
+  "output_width": 2,
+  "truth_table_rows": 4,
+  "maximum_gate_bound": 2,
+  "timeout_ms": 30000,
+  "attempts": [
+    {
+      "gate_bound": 0,
+      "status": "unsat",
+      "variables": 8,
+      "clauses": 30,
+      "literals": 48,
+      "elapsed_ms": 0
+    },
+    {
+      "gate_bound": 1,
+      "status": "unsat",
+      "variables": 38,
+      "clauses": 222,
+      "literals": 636,
+      "elapsed_ms": 0
+    },
+    {
+      "gate_bound": 2,
+      "status": "sat",
+      "variables": 72,
+      "clauses": 472,
+      "literals": 1376,
+      "elapsed_ms": 0
+    }
+  ],
+  "minimal_gate_count": 2,
+  "netlist_sha256": "8b957ea66b8b7bec9211e6806877ea3e5679670e03794fc8eddbd3c1c4cc2273",
+  "netlist": "INPUTS 2\nw1 = AND x1 x2\nw2 = XOR x1 x2\nOUTPUTS w2 w1\n",
+  "verification": {
+    "reparsed_netlist": true,
+    "scalar_exact_matches": 4,
+    "scalar_correct_bits": 8,
+    "packed_exact_matches": 4,
+    "packed_correct_bits": 8
+  }
+}

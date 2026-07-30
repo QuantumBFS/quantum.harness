@@ -1,0 +1,10 @@
+INPUTS 2
+w1 = NAND x1 x2
+OUTPUTS ~w1 x2
+
+---DATA---
+input,output
+00,00
+01,01
+10,00
+11,11

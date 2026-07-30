@@ -1,0 +1,4 @@
+INPUTS 2
+w1 = AND x1 x2
+w2 = XOR x1 x2
+OUTPUTS w2 w1
