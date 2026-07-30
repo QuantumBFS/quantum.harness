@@ -1,0 +1,219 @@
+{
+  "run_id": "nn_large_20260730",
+  "run_dir": "tracks/qmc/solutions/薛定谔的套马杆/long_range_ising_fk/results/nn_large_20260730",
+  "axes": {
+    "L": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096
+    ],
+    "seed": [
+      73001,
+      84002,
+      95003,
+      106004
+    ]
+  },
+  "cells": [
+    {
+      "cell_id": "cell-0001",
+      "params": {
+        "L": 64,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0002",
+      "params": {
+        "L": 64,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0003",
+      "params": {
+        "L": 64,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0004",
+      "params": {
+        "L": 64,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0005",
+      "params": {
+        "L": 128,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0006",
+      "params": {
+        "L": 128,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0007",
+      "params": {
+        "L": 128,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0008",
+      "params": {
+        "L": 128,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0009",
+      "params": {
+        "L": 256,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0010",
+      "params": {
+        "L": 256,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0011",
+      "params": {
+        "L": 256,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0012",
+      "params": {
+        "L": 256,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0013",
+      "params": {
+        "L": 512,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0014",
+      "params": {
+        "L": 512,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0015",
+      "params": {
+        "L": 512,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0016",
+      "params": {
+        "L": 512,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0017",
+      "params": {
+        "L": 1024,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0018",
+      "params": {
+        "L": 1024,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0019",
+      "params": {
+        "L": 1024,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0020",
+      "params": {
+        "L": 1024,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0021",
+      "params": {
+        "L": 2048,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0022",
+      "params": {
+        "L": 2048,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0023",
+      "params": {
+        "L": 2048,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0024",
+      "params": {
+        "L": 2048,
+        "seed": 106004
+      }
+    },
+    {
+      "cell_id": "cell-0025",
+      "params": {
+        "L": 4096,
+        "seed": 73001
+      }
+    },
+    {
+      "cell_id": "cell-0026",
+      "params": {
+        "L": 4096,
+        "seed": 84002
+      }
+    },
+    {
+      "cell_id": "cell-0027",
+      "params": {
+        "L": 4096,
+        "seed": 95003
+      }
+    },
+    {
+      "cell_id": "cell-0028",
+      "params": {
+        "L": 4096,
+        "seed": 106004
+      }
+    }
+  ]
+}

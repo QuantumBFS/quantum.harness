@@ -1,0 +1,16 @@
+timestamp=2026-07-30T16:41:50.871
+hostname=a04r06n05
+julia=1.12.6
+slurm_job=23025350
+slurm_array_task=4
+cell=cell-0004
+model=nearest_neighbor
+hamiltonian=H=-sum_<ij> s_i s_j
+coupling_J=1
+boundary=periodic_square_torus
+beta=0.44068679351
+L=64
+seed=106004
+thermalization_sweeps=5000
+measurement_sweeps=200000
+blocks=50

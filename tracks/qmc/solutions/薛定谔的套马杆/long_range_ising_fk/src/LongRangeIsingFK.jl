@@ -3,7 +3,8 @@ module LongRangeIsingFK
 using Random, Statistics, Printf, Dates, LinearAlgebra
 
 export Geometry, WindingUF, add_edge!, wrapping, direct_sweep!, fast_sweep!,
-       run_chain, minimum_delta, coupling_sum
+       nearest_neighbor_sweep!, run_chain, run_nn_chain, minimum_delta,
+       coupling_sum
 
 minimum_delta(d::Int, L::Int) = mod(d + fld(L,2), L) - fld(L,2)
 
@@ -118,6 +119,145 @@ function fast_sweep!(spins,g,beta,rng)
     end
     wr=wrapping(u); c1=flip_clusters!(spins,u,rng)
     wr,c1
+end
+
+function reset!(u::WindingUF)
+    @inbounds for i in eachindex(u.parent)
+        u.parent[i]=i
+        u.size[i]=1
+        u.wx[i]=0
+        u.wy[i]=0
+        u.wrapx[i]=false
+        u.wrapy[i]=false
+    end
+    u
+end
+
+function flip_clusters_array!(spins,u::WindingUF,flips::Vector{Int8},rng)
+    fill!(flips,Int8(-1))
+    largest=0
+    @inbounds for i in eachindex(u.parent)
+        if u.parent[i]==i
+            flips[i]=rand(rng,Bool) ? Int8(1) : Int8(0)
+            largest=max(largest,u.size[i])
+        end
+    end
+    @inbounds for i in eachindex(spins)
+        r,_,_=rootpot!(u,i)
+        flips[r]==1 && (spins[i] = -spins[i])
+    end
+    largest
+end
+
+"""
+Perform one exact nearest-neighbor Swendsen-Wang/FK sweep on an L x L
+periodic square lattice with coupling J=1.  Each right/up bond is visited
+once and activated with probability 1-exp(-2 beta) when its endpoint spins
+agree.  The supplied union-find and flip buffers are reused between sweeps.
+"""
+function nearest_neighbor_sweep!(spins,beta,rng,u::WindingUF,flips::Vector{Int8})
+    N=length(spins)
+    L=isqrt(N)
+    L*L==N || throw(ArgumentError("nearest-neighbor state must have L^2 spins"))
+    length(u.parent)==N || throw(ArgumentError("union-find size mismatch"))
+    length(flips)==N || throw(ArgumentError("flip-buffer size mismatch"))
+    reset!(u)
+    p=-expm1(-2beta)
+    @inbounds for y in 0:L-1, x in 0:L-1
+        a=site(x,y,L)
+        b=site(x+1,y,L)
+        spins[a]==spins[b] && rand(rng)<p && add_edge!(u,a,b,1,0,L)
+        b=site(x,y+1,L)
+        spins[a]==spins[b] && rand(rng)<p && add_edge!(u,a,b,0,1,L)
+    end
+    wr=wrapping(u)
+    c1=flip_clusters_array!(spins,u,flips,rng)
+    wr,c1
+end
+
+"""
+Run the exact nearest-neighbor square-lattice Ising model at coupling J=1.
+This is intentionally separate from `run_chain`: it does not construct a
+long-range displacement table and therefore remains O(L^2) in memory and per
+sweep at large L.
+"""
+function run_nn_chain(;L=8,beta=log(1+sqrt(2))/2,seed=1,therm=100,
+                      meas=500,blocks=50,progress_every=0,
+                      return_blocks=false)
+    L>=3 || throw(ArgumentError("L must be at least 3 for the periodic bond convention"))
+    therm>=0 || throw(ArgumentError("therm must be nonnegative"))
+    meas>=100 || throw(ArgumentError("meas must be at least 100"))
+    rng=MersenneTwister(seed)
+    spins=rand(rng,(-1,1),L^2)
+    u=WindingUF(length(spins))
+    flips=fill(Int8(-1),length(spins))
+    for sweep in 1:therm
+        nearest_neighbor_sweep!(spins,beta,rng,u,flips)
+        if progress_every>0 && sweep%progress_every==0
+            println("PROGRESS phase=thermalization sweep=$sweep total=$therm")
+            flush(stdout)
+        end
+    end
+    mabs=Vector{Float64}(undef,meas)
+    m2=Vector{Float64}(undef,meas)
+    m4=Vector{Float64}(undef,meas)
+    r0=Vector{Float64}(undef,meas)
+    r2=Vector{Float64}(undef,meas)
+    c1=Vector{Float64}(undef,meas)
+    t=time()
+    for sweep in 1:meas
+        wr,c=nearest_neighbor_sweep!(spins,beta,rng,u,flips)
+        m=sum(spins)/length(spins)
+        mabs[sweep]=abs(m)
+        m2[sweep]=m^2
+        m4[sweep]=m^4
+        r0[sweep]=wr[1]
+        r2[sweep]=wr[2]
+        c1[sweep]=c
+        if progress_every>0 && sweep%progress_every==0
+            partial_q=mean(@view m2[1:sweep])^2/mean(@view m4[1:sweep])
+            partial_rp=mean(@view r2[1:sweep])-2mean(@view r0[1:sweep])
+            partial_chi=L^2*mean(@view m2[1:sweep])
+            println("PROGRESS phase=measurement sweep=$sweep total=$meas Qm=$partial_q Rp=$partial_rp chi=$partial_chi")
+            flush(stdout)
+        end
+    end
+    nb=min(blocks,max(2,meas÷50))
+    bs=meas÷nb
+    used=nb*bs
+    block(v)=[mean(@view v[(i-1)*bs+1:i*bs]) for i in 1:nb]
+    bm2=block(@view m2[1:used])
+    bm4=block(@view m4[1:used])
+    rp_series=r2.-2r0
+    brp=block(@view rp_series[1:used])
+    bc1=block(@view c1[1:used])
+    bqm=bm2.^2 ./ bm4
+    bchi=L^2 .* bm2
+    q=mean(m2)^2/mean(m4)
+    rp=mean(r2)-2mean(r0)
+    chi=L^2*mean(m2)
+    stderr_blocks(v)=length(v)>1 ? std(v)/sqrt(length(v)) : NaN
+    function tauint(v)
+        z=v.-mean(v)
+        den=sum(abs2,z)
+        den==0 && return 0.5
+        tau=0.5
+        for lag in 1:min(100,meas÷10)
+            rho=dot(@view(z[1:end-lag]),@view(z[1+lag:end]))/den
+            rho<=0 && break
+            tau+=rho
+        end
+        tau
+    end
+    summary=(;L,model="nearest_neighbor",beta,seed,therm,meas,
+      mean_abs_m=mean(mabs),mean_m2=mean(m2),mean_m4=mean(m4),
+      Qm=q,se_Qm=stderr_blocks(bqm),chi,se_chi=stderr_blocks(bchi),
+      R0=mean(r0),R2=mean(r2),Rp=rp,se_Rp=stderr_blocks(brp),
+      mean_C1=mean(c1),tau_m2=tauint(m2),blocks=nb,
+      runtime_s=time()-t,sumJ=4.0)
+    return_blocks ? (summary=summary,block_m2=bm2,block_m4=bm4,
+                     block_qm=bqm,block_chi=bchi,block_rp=brp,
+                     block_c1=bc1) : summary
 end
 
 function run_chain(;L=8,sigma=1.875,beta=0.336985,seed=1,therm=100,meas=500,algorithm=:fast,return_blocks=false)

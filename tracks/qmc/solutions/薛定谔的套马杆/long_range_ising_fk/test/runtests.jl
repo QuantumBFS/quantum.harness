@@ -1,4 +1,4 @@
-using Test
+using Test, Random
 include("../src/LongRangeIsingFK.jl")
 using .LongRangeIsingFK
 
@@ -35,4 +35,25 @@ end
     @test abs(a.mean_m2-b.mean_m2)<0.06
     @test abs(a.Qm-b.Qm)<0.08
     @test abs(a.Rp-b.Rp)<0.12
+end
+
+@testset "exact nearest-neighbor FK" begin
+    L=8
+    spins=ones(Int,L^2)
+    u=WindingUF(L^2)
+    flips=fill(Int8(-1),L^2)
+    wr,c1=nearest_neighbor_sweep!(spins,0.0,MersenneTwister(101),u,flips)
+    @test wr[1] && !wr[2]
+    @test c1==1
+
+    fill!(spins,1)
+    wr,c1=nearest_neighbor_sweep!(spins,Inf,MersenneTwister(102),u,flips)
+    @test wr[2] && wr[3] && wr[4]
+    @test c1==L^2
+
+    r=run_nn_chain(L=L,seed=103,therm=500,meas=5000,blocks=20)
+    @test r.model=="nearest_neighbor"
+    @test r.sumJ==4.0
+    @test 0.78<r.Qm<0.92
+    @test abs(r.Rp)<0.15
 end

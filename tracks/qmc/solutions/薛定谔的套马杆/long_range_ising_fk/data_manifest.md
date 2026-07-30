@@ -6,7 +6,7 @@
 
 **Integrity file:** [`data_manifest.sha256`](data_manifest.sha256)
 
-**Integrity-file SHA-256:** `fe2df2015c1d71268b154135f5bb2619d347495e295f43da1331755d1311e0f6`
+**Integrity-file SHA-256:** `ed09309a45915c9a8d06e3ab639fc5f4e43e7c6c85517520fd2d4d8086f5ac24`
 
 The generation revision is the first committed snapshot of the code used for
 the frozen runs. This submission only relocates that implementation into the
@@ -20,8 +20,9 @@ not alter the algorithms or frozen numerical values.
 | `track_a_20260727` | 489 | 158453 | `8616b64d1540a615cc6fe5cc1ee81914cd88eaebf0c41ebb79b028bf9e527a69` |
 | `track_a_large_20260728` | 212 | 60586 | `3d8be845faf51dd49b9a89e0081b2f799c55e99fe7c27f892811d8b3ac7778da` |
 | `clock_production_20260729` | 82 | 47539 | `62adfbe29861a9b58fb919f1c141c449c2ab4710f9557356a3c3b68983648160` |
+| `nn_large_20260730` | 51 | 103930 | `ea0028670cc2aa9a9b1c18a226377ea1fcaa8754990b0cd77db41f529ed4c84b` |
 | `track_a_cutoff_analysis_20260730` | 4 | 18791 | `f6ea9fde0f546f9116da624f7c86209e366f499aaa2afd52e5908371e2b30dcb` |
-| **Total** | **787** | **285369** | See the integrity-file hash above |
+| **Total** | **838** | **389299** | See the integrity-file hash above |
 
 A dataset tree digest is the SHA-256 of its sorted
 `<file-sha256><two spaces><relative-path>\n` records. The integrity file
@@ -43,6 +44,10 @@ sha256sum -c data_manifest.sha256
   extrapolated.
 - `clock_production_20260729` contains exactly 16 successful cell triplets
   and the frozen FK comparison tables.
+- `nn_large_20260730` is a completed partial nearest-neighbor control
+  snapshot with 12 cells: four seeds at each of \(L=64,128,256\). Every cell
+  contains `summary.csv`, `blocks.csv`, `metadata.txt`, and `manifest.json`;
+  larger registered sizes were still running at publication time.
 - `track_a_cutoff_analysis_20260730` contains the combined central data,
   competing-model fits, distinguishable-size forecast, and cutoff report.
 - Local smoke tests, timing probes, superseded interim analyses, and incomplete
