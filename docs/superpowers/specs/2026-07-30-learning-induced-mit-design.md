@@ -1,11 +1,15 @@
 # Learning-Induced Metal–Insulator Transition: Exploratory Study Design
 
-**Date:** 2026-07-30  
-**Team:** 卧龙凤雏  
-**Challenge:** Quantum Harness #122, “Criticality in open quantum matter”  
+**Date:** 2026-07-30
+
+**Team:** 卧龙凤雏
+
+**Challenge:** Quantum Harness #122, “Criticality in open quantum matter”
+
 **Primary reference:** F. Eckstein, B. Han, S. Trebst, and G.-Y. Zhu,
 “Learning transitions of topological surface codes,”
-[arXiv:2512.19786](https://arxiv.org/abs/2512.19786)  
+[arXiv:2512.19786](https://arxiv.org/abs/2512.19786)
+
 **Official reference data:** [Zenodo 18001896](https://zenodo.org/records/18001896)
 
 ## 1. Objective and claim boundary
@@ -432,4 +436,3 @@ The implementation phase is complete when:
 7. HTML and PDF reports exist in both languages and contain identical
    numerical claims;
 8. no standalone \(c_{\rm eff}\) is claimed when \(\alpha\) is unresolved.
-
