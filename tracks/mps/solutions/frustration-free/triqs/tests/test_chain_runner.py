@@ -543,3 +543,14 @@ def test_invocation_parameters_are_evidence_when_real_solver_omits_attribute(
     bundle = runner.run_chain(input_path, 0, tmp_path / "real-shape")
     summary = strict_json_load(bundle / "chain-summary.json")
     assert summary["payload"]["solve"]["parameters"]["n_cycles"] == 1_000_000
+
+
+def test_runtime_versions_come_from_locked_conda_records(tmp_path):
+    metadata = tmp_path / "conda-meta"
+    metadata.mkdir()
+    (metadata / "triqs-4.0.0-build.json").write_text(
+        '{"name":"triqs","version":"4.0.0"}\n'
+    )
+    assert runner._conda_package_version(tmp_path, "triqs") == "4.0.0"
+    with pytest.raises(ValueError):
+        runner._conda_package_version(tmp_path, "hdf5")

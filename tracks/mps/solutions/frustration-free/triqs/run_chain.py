@@ -6,7 +6,6 @@ import argparse
 import copy
 from datetime import datetime, timezone
 import fcntl
-import importlib.metadata
 import math
 import os
 from pathlib import Path
@@ -105,23 +104,28 @@ def _mpi_size() -> int:
     return int(mpi.size)
 
 
-def _distribution_version(name: str) -> str:
-    try:
-        return importlib.metadata.version(name)
-    except importlib.metadata.PackageNotFoundError:
-        module = __import__(name)
-        return str(getattr(module, "__version__", "unknown"))
+def _conda_package_version(prefix: Path, name: str) -> str:
+    records = sorted((prefix / "conda-meta").glob(f"{name}-*.json"))
+    if len(records) != 1:
+        raise ValueError(f"locked prefix must contain exactly one {name} record")
+    record = strict_json_load(records[0])
+    if (
+        not isinstance(record, dict)
+        or record.get("name") != name
+        or not isinstance(record.get("version"), str)
+    ):
+        raise ValueError(f"invalid locked conda record for {name}")
+    return record["version"]
 
 
 def _runtime_identity() -> dict[str, str]:
-    import h5py
-
+    prefix = Path(sys.prefix)
     identity = {
         "python": platform.python_version(),
         "numpy": np.__version__,
-        "triqs": _distribution_version("triqs"),
-        "triqs_cthyb": _distribution_version("triqs_cthyb"),
-        "hdf5": h5py.version.hdf5_version,
+        "triqs": _conda_package_version(prefix, "triqs"),
+        "triqs_cthyb": _conda_package_version(prefix, "triqs_cthyb"),
+        "hdf5": _conda_package_version(prefix, "hdf5"),
     }
     if not identity["python"].startswith("3.12."):
         raise RuntimeError("locked CT-HYB runtime requires Python 3.12")
