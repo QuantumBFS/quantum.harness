@@ -293,3 +293,283 @@ def test_malformed_interior_manifest_line_is_rejected(tmp_path):
 
     with pytest.raises(ValueError, match="invalid manifest JSON"):
         run_batch(settings, tmp_path, workers=1, resume=True)
+
+
+def _write_completed_cell(output_dir, cell):
+    payload = {
+        "schema": "oddcycle-local-hs-cell-v1",
+        "cell_id": cell.id,
+        "cell": asdict(cell),
+        "status": "inconclusive",
+        "dictionary": {
+            "max_word_length": cell.max_word_length,
+            "column_count": 0,
+        },
+        "result": {"sample_count": 0, "records": []},
+    }
+    return runner._atomic_write_payload(
+        payload,
+        output_dir / "cells" / f"{cell.id}.json",
+    )
+
+
+def test_valid_unterminated_manifest_is_normalized_before_backfill(tmp_path):
+    settings = {
+        "schema": "oddcycle-local-hs-settings-v1",
+        "seed": 20260730,
+        "cells": [
+            {
+                "id": f"portfolio-l{length}",
+                "mode": "portfolio",
+                "max_word_length": length,
+                "sample_count": 0,
+            }
+            for length in (1, 2)
+        ],
+    }
+    cells = expand_settings(settings)
+    payloads = [
+        _write_completed_cell(tmp_path, cell)
+        for cell in cells
+    ]
+    first_record = runner._manifest_record(payloads[0])
+    (tmp_path / "manifest.jsonl").write_text(
+        json.dumps(first_record, separators=(",", ":"), sort_keys=True)
+    )
+
+    summary = run_batch(settings, tmp_path, workers=1, resume=True)
+
+    assert summary.completed == 0
+    assert summary.skipped == 2
+    text = (tmp_path / "manifest.jsonl").read_text()
+    assert text.endswith("\n")
+    records = [json.loads(line) for line in text.splitlines()]
+    assert len(records) == 2
+    assert {record["cell_id"] for record in records} == {
+        "portfolio-l1",
+        "portfolio-l2",
+    }
+
+
+def _single_promotion_candidate(tmp_path):
+    cell = BatchCell(
+        id="free-l1-path-edge",
+        mode="free",
+        max_word_length=1,
+        locality="path-edge",
+    )
+    source = tmp_path / "incoming" / f"{cell.id}.json"
+    source_payload = _write_cell_payload(
+        source,
+        cell,
+        [
+            {
+                "scan_index": 0,
+                "status": "numerical-survivor",
+                "residual": 0.0,
+                "active_indices": [0],
+                "active_weights": [1.0],
+            }
+        ],
+    )
+    candidate = runner._promotion_candidates([source])[0]
+    return cell, source, source_payload, candidate
+
+
+def _write_mismatched_promotion(output_dir, cell, source_payload, **changes):
+    promotion_id = f"{cell.id}--scan-0000"
+    payload = {
+        "schema": "oddcycle-local-hs-promotion-v1",
+        "promotion_id": promotion_id,
+        "cell_id": cell.id,
+        "cell_settings_sha256": runner._cell_settings_sha256(cell),
+        "source_cell_payload_sha256": source_payload["payload_sha256"],
+        "scan_index": 0,
+        "status": "inconclusive",
+        "certificate": {
+            "schema": "oddcycle-local-hs-exact-v1",
+            "status": "exact-promotion-inconclusive",
+            "reason": "synthetic",
+        },
+        **changes,
+    }
+    return runner._atomic_write_payload(
+        payload,
+        output_dir / "promotions" / f"{promotion_id}.json",
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value"),
+    [
+        ("cell_id", "free-l9-path-edge"),
+        ("scan_index", 9),
+    ],
+)
+def test_promotion_final_only_backfill_rejects_wrong_candidate_identity(
+    tmp_path,
+    field,
+    wrong_value,
+):
+    cell, source, source_payload, _candidate = _single_promotion_candidate(
+        tmp_path
+    )
+    output = tmp_path / "promoted"
+    _write_mismatched_promotion(
+        output,
+        cell,
+        source_payload,
+        **{field: wrong_value},
+    )
+
+    with pytest.raises(ValueError, match="candidate identity"):
+        promote_from_payloads([source], output, workers=1, resume=True)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong_value"),
+    [
+        ("cell_id", "free-l9-path-edge"),
+        ("scan_index", 9),
+    ],
+)
+def test_promotion_existing_file_race_rejects_wrong_candidate_identity(
+    monkeypatch,
+    tmp_path,
+    field,
+    wrong_value,
+):
+    cell, _source, source_payload, candidate = _single_promotion_candidate(
+        tmp_path
+    )
+    output = tmp_path / "promoted"
+    _write_mismatched_promotion(
+        output,
+        cell,
+        source_payload,
+        **{field: wrong_value},
+    )
+    monkeypatch.setattr(
+        runner,
+        "build_word_dictionary",
+        lambda _length: (object(),),
+    )
+    monkeypatch.setattr(
+        runner,
+        "exact_local_hs_certificate",
+        lambda *_args, **_kwargs: {
+            "schema": "oddcycle-local-hs-exact-v1",
+            "status": "exact-promotion-inconclusive",
+            "reason": "synthetic",
+        },
+    )
+
+    with pytest.raises(ValueError, match="candidate identity"):
+        runner._promote_source_candidates([candidate], output)
+
+
+def test_promotion_summary_distinguishes_exact_rejection(
+    monkeypatch,
+    tmp_path,
+):
+    cell = BatchCell(
+        id="free-l1-path-edge",
+        mode="free",
+        max_word_length=1,
+        locality="path-edge",
+    )
+    source = tmp_path / "incoming" / f"{cell.id}.json"
+    _write_cell_payload(
+        source,
+        cell,
+        [
+            {
+                "scan_index": index,
+                "status": "numerical-survivor",
+                "residual": 0.0,
+                "active_indices": [0],
+                "active_weights": [1.0],
+            }
+            for index in range(4)
+        ],
+    )
+    certificates = iter(
+        [
+            {
+                "schema": "oddcycle-local-hs-exact-v1",
+                "status": "exact-local-interacting-hs-survivor",
+            },
+            {
+                "schema": "oddcycle-local-hs-exact-v1",
+                "status": "no-positive-exact-kernel",
+            },
+            {
+                "schema": "oddcycle-local-hs-exact-v1",
+                "status": "exact-local-hs-gate-failed",
+            },
+            {
+                "schema": "oddcycle-local-hs-exact-v1",
+                "status": "exact-promotion-inconclusive",
+                "reason": "synthetic",
+            },
+        ]
+    )
+    monkeypatch.setattr(
+        runner,
+        "build_word_dictionary",
+        lambda _length: (object(),),
+    )
+    monkeypatch.setattr(
+        runner,
+        "exact_local_hs_certificate",
+        lambda *_args, **_kwargs: next(certificates),
+    )
+    output = tmp_path / "promoted"
+
+    summary = promote_from_payloads(
+        [source],
+        output,
+        workers=1,
+        resume=True,
+    )
+
+    assert summary.exact_survivors == 1
+    assert summary.exact_rejected == 2
+    assert summary.inconclusive == 1
+    statuses = {
+        json.loads(path.read_text())["scan_index"]:
+        json.loads(path.read_text())["status"]
+        for path in (output / "promotions").glob("*.json")
+    }
+    assert statuses == {
+        0: "exact-survivor",
+        1: "exact-rejected",
+        2: "exact-rejected",
+        3: "inconclusive",
+    }
+
+
+def test_run_cell_propagates_unexpected_compute_error_without_final_payload(
+    monkeypatch,
+    tmp_path,
+):
+    cell = BatchCell(
+        id="portfolio-l1",
+        mode="portfolio",
+        max_word_length=1,
+        sample_count=0,
+    )
+    monkeypatch.setattr(
+        runner,
+        "build_word_dictionary",
+        lambda _length: (_ for _ in ()).throw(
+            RuntimeError("synthetic unexpected failure")
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="synthetic unexpected failure"):
+        run_cell(cell, tmp_path)
+
+    assert not (tmp_path / "cells" / f"{cell.id}.json").exists()
+    assert not (tmp_path / "cells" / f"{cell.id}.json.tmp").exists()
+    assert not (tmp_path / "manifest.jsonl").exists()
