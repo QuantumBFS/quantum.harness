@@ -414,16 +414,95 @@ def sr_update(
     return step
 
 
+def integrated_autocorrelation_time(values: np.ndarray) -> float:
+    """Initial-positive-sequence estimate including rejected MCMC steps."""
+
+    series = np.asarray(values, dtype=np.float64)
+    if series.ndim != 1 or series.size < 4:
+        raise ValueError("values must be a one-dimensional series of length >= 4")
+    centered = series - np.mean(series)
+    variance = float(centered @ centered / series.size)
+    if variance == 0.0:
+        return 1.0
+    correlation = np.correlate(centered, centered, mode="full")[
+        series.size - 1 :
+    ]
+    correlation /= variance * np.arange(series.size, 0, -1)
+    tau = 1.0
+    for lag in range(1, series.size - 1, 2):
+        pair = float(correlation[lag] + correlation[lag + 1])
+        if pair <= 0.0:
+            break
+        tau += 2.0 * pair
+    return max(tau, 1.0)
+
+
+def gelman_rubin(chains: np.ndarray) -> float:
+    """Split-chain-free rank-zero R-hat for equal-length scalar chains."""
+
+    values = np.asarray(chains, dtype=np.float64)
+    if values.ndim != 2 or values.shape[0] < 2 or values.shape[1] < 2:
+        raise ValueError("chains must have shape (n_chains >= 2, samples >= 2)")
+    within = float(np.mean(np.var(values, axis=1, ddof=1)))
+    between = values.shape[1] * float(
+        np.var(np.mean(values, axis=1), ddof=1)
+    )
+    if within == 0.0:
+        return 1.0 if between == 0.0 else math.inf
+    variance = (
+        (values.shape[1] - 1) * within + between
+    ) / values.shape[1]
+    return float(math.sqrt(variance / within))
+
+
+def block_estimate(
+    chains: np.ndarray,
+    *,
+    block_size: int,
+) -> dict[str, float]:
+    """Report mean, block error, autocorrelation, ESS, and R-hat."""
+
+    values = np.asarray(chains, dtype=np.float64)
+    if (
+        values.ndim != 2
+        or block_size <= 0
+        or values.shape[1] % block_size
+    ):
+        raise ValueError("chains must be 2D with samples divisible by block_size")
+    blocks = values.reshape(
+        values.shape[0], values.shape[1] // block_size, block_size
+    ).mean(axis=2)
+    standard_error = float(
+        np.std(blocks.ravel(), ddof=1) / math.sqrt(blocks.size)
+    )
+    taus = [
+        integrated_autocorrelation_time(chain) for chain in values
+    ]
+    effective_size = float(
+        sum(values.shape[1] / tau for tau in taus)
+    )
+    return {
+        "mean": float(np.mean(values)),
+        "standard_error": standard_error,
+        "integrated_autocorrelation_time": float(max(taus)),
+        "effective_sample_size": effective_size,
+        "r_hat": gelman_rubin(values),
+    }
+
+
 __all__ = [
     "ChainResult",
     "SRTrace",
     "center_whiten_channels",
+    "block_estimate",
     "channel_weight",
     "coulomb_potential",
     "energy_gradient_metric",
     "geodesic_proposal",
+    "gelman_rubin",
     "linear_log_derivatives",
     "importance_weights",
+    "integrated_autocorrelation_time",
     "metropolis_chain",
     "multiplet_log_derivatives",
     "random_configuration",

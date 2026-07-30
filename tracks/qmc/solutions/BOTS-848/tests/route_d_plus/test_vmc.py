@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from route_d_plus.vmc import (
+    block_estimate,
     center_whiten_channels,
     channel_weight,
     correlated_sr_optimize,
@@ -144,3 +145,17 @@ def test_correlated_sr_reduces_fixed_sample_energy() -> None:
     )
     assert trace.energies[-1] < trace.energies[0]
     assert np.min(trace.effective_sample_sizes) > 0.5 * samples
+
+
+def test_block_diagnostics_distinguish_correlated_chains() -> None:
+    rng = np.random.default_rng(76)
+    chains = np.empty((4, 512))
+    noise = rng.normal(size=chains.shape)
+    chains[:, 0] = noise[:, 0]
+    for index in range(1, chains.shape[1]):
+        chains[:, index] = 0.85 * chains[:, index - 1] + noise[:, index]
+    diagnostics = block_estimate(chains, block_size=32)
+    assert diagnostics["standard_error"] > 0.0
+    assert diagnostics["integrated_autocorrelation_time"] > 1.0
+    assert diagnostics["effective_sample_size"] < chains.size
+    assert 0.9 < diagnostics["r_hat"] < 1.1
