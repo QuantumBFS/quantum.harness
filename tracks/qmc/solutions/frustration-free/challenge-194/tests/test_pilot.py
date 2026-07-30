@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import json
-from concurrent.futures import ThreadPoolExecutor
 import os
-from pathlib import Path
 import shutil
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Event
 
 import pytest
 
-import long_range_percolation.pilot as pilot
+from long_range_percolation import pilot
 from long_range_percolation.pilot import PilotCell
 
 
@@ -148,7 +148,7 @@ def test_run_spec_read_allows_same_parent_to_gain_cells_directory(
             pilot._load_pilot_spec,
             path,
             verify_current_environment=False,
-            production=False,
+                expected_schema=pilot.TEST_RUN_SPEC_SCHEMA,
         )
         assert descriptor_read.wait(timeout=10)
         (path.parent / "cells").mkdir()
@@ -337,6 +337,19 @@ def test_public_loader_never_downgrades_frozen_p0(
 def test_public_loader_rejects_private_tiny_schema(tmp_path: Path):
     path = _tiny_spec(tmp_path)
     with pytest.raises(RuntimeError, match="schema"):
+        pilot.load_pilot_run_spec(path, verify_current_environment=False)
+
+
+def test_public_p0_loader_rejects_internally_rehashed_extension(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    document = json.loads(path.read_text())
+    document["run_spec_sha256"] = pilot._document_hash(
+        document, "run_spec_sha256"
+    )
+    path.write_bytes(pilot._canonical_bytes(document))
+    with pytest.raises(RuntimeError, match="P0 run spec"):
         pilot.load_pilot_run_spec(path, verify_current_environment=False)
 
 

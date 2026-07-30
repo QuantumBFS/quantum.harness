@@ -50,6 +50,7 @@ from .validation_shards import validate_run_spec as validate_validation_run_spec
 
 RUN_SPEC_SCHEMA = "challenge-194-pilot-run-spec-v1"
 TEST_RUN_SPEC_SCHEMA = "challenge-194-pilot-test-run-spec-v1"
+TEST_EXTENSION_RUN_SPEC_SCHEMA = "challenge-194-p0-extension-test-run-spec-v1"
 CELL_MANIFEST_SCHEMA = "challenge-194-pilot-cell-manifest-v1"
 MERGED_SCHEMA = "challenge-194-pilot-progress-v1"
 APPROVAL_SCHEMA = "challenge-194-pilot-correctness-approval-v1"
@@ -112,6 +113,81 @@ SCIENTIFIC_ENGINE_MODULES = (
     "src/long_range_percolation/poisson_reference.py",
     "src/long_range_percolation/poisson_sweep.py",
 )
+
+
+@dataclass(frozen=True)
+class PilotRunContract:
+    run_spec_schema: str
+    progress_schema: str
+    master_seed: int
+    phase: str
+    production_kind: str
+
+
+P0_CONTRACT = PilotRunContract(
+    RUN_SPEC_SCHEMA,
+    MERGED_SCHEMA,
+    PILOT_MASTER_SEED,
+    PILOT_PHASE,
+    "p0",
+)
+TEST_P0_CONTRACT = PilotRunContract(
+    TEST_RUN_SPEC_SCHEMA,
+    MERGED_SCHEMA,
+    PILOT_MASTER_SEED,
+    PILOT_PHASE,
+    "test-p0",
+)
+EXTENSION_CONTRACT = PilotRunContract(
+    "challenge-194-p0-extension-run-spec-v1",
+    "challenge-194-p0-extension-progress-v1",
+    19_420_262_729,
+    "pilot",
+    "p0-extension-v1",
+)
+TEST_EXTENSION_CONTRACT = PilotRunContract(
+    TEST_EXTENSION_RUN_SPEC_SCHEMA,
+    "challenge-194-p0-extension-progress-v1",
+    19_420_262_729,
+    "pilot",
+    "test-p0-extension-v1",
+)
+
+
+def _contract_for_schema(schema: object) -> PilotRunContract:
+    if schema == RUN_SPEC_SCHEMA:
+        return P0_CONTRACT
+    if schema == TEST_RUN_SPEC_SCHEMA:
+        return TEST_P0_CONTRACT
+    from .pilot_extension import (
+        EXTENSION_MASTER_SEED,
+        EXTENSION_PHASE,
+        EXTENSION_PROGRESS_SCHEMA,
+        EXTENSION_RUN_SPEC_SCHEMA,
+    )
+
+    extension_identity = (
+        EXTENSION_RUN_SPEC_SCHEMA,
+        EXTENSION_PROGRESS_SCHEMA,
+        EXTENSION_MASTER_SEED,
+        EXTENSION_PHASE,
+    )
+    if extension_identity != (
+        EXTENSION_CONTRACT.run_spec_schema,
+        EXTENSION_CONTRACT.progress_schema,
+        EXTENSION_CONTRACT.master_seed,
+        EXTENSION_CONTRACT.phase,
+    ):
+        raise RuntimeError("registered P0 extension contract constants drifted")
+    if schema == EXTENSION_RUN_SPEC_SCHEMA:
+        return EXTENSION_CONTRACT
+    if schema == TEST_EXTENSION_RUN_SPEC_SCHEMA:
+        return TEST_EXTENSION_CONTRACT
+    raise RuntimeError("registered Pilot run-spec schema is not supported")
+
+
+def _is_production_contract(contract: PilotRunContract) -> bool:
+    return contract.production_kind in {"p0", "p0-extension-v1"}
 
 
 def _canonical_bytes(document: object) -> bytes:
@@ -797,25 +873,32 @@ class PilotCell:
         except (KeyError, TypeError, ValueError) as error:
             raise RuntimeError("pilot cell is malformed") from error
 
-    def request(self) -> TrajectoryRequest:
+    def request(self, *, master_seed: int, phase: str) -> TrajectoryRequest:
         return TrajectoryRequest(
             length=self.length,
             sigma=self.sigma,
             sigma_grid_id=self.sigma_grid_id,
             kappas=np.asarray(self.kappas, dtype=np.float64),
-            master_seed=PILOT_MASTER_SEED,
-            phase=PILOT_PHASE,
+            master_seed=master_seed,
+            phase=phase,
             replica=self.replica,
             kernel_sha256=self.kernel_sha256,
         )
 
 
-def _stream_hashes(length: int, sigma_grid_id: str, replica: int) -> tuple[str, ...]:
+def _stream_hashes(
+    length: int,
+    sigma_grid_id: str,
+    replica: int,
+    *,
+    master_seed: int,
+    phase: str,
+) -> tuple[str, ...]:
     return tuple(
         derive_stream_material(
             StreamIdentity(
-                master_seed=PILOT_MASTER_SEED,
-                phase=PILOT_PHASE,
+                master_seed=master_seed,
+                phase=phase,
                 length=length,
                 sigma_grid_id=sigma_grid_id,
                 replica=replica,
@@ -839,24 +922,27 @@ def _build_document(
     waiver_timestamp: str,
     analysis_plan_sha256: str,
     schema_version: str,
-    enforce_production: bool,
+    master_seed: int = PILOT_MASTER_SEED,
+    phase: str = PILOT_PHASE,
+    grid_namespace: str = "pilot-p0-v1",
+    purpose: str = "exploratory-window-selection-only",
 ) -> dict[str, object]:
     protocol = {
         "lengths": list(lengths),
         "sigmas": [float(value).hex() for value in sigmas],
         "replicas": list(replicas),
         "kappas": [float(value).hex() for value in kappas],
-        "master_seed": PILOT_MASTER_SEED,
-        "phase": PILOT_PHASE,
+        "master_seed": master_seed,
+        "phase": phase,
         "loop_order": ["sigma", "length", "replica"],
-        "purpose": "exploratory-window-selection-only",
+        "purpose": purpose,
     }
     protocol["sha256"] = _sha256(_canonical_bytes(protocol))
     cells: list[dict[str, object]] = []
     all_assignments: list[dict[str, object]] = []
     for sigma in sigmas:
         sigma_value = float(sigma)
-        grid_id = f"pilot-p0-v1|sigma-f64={sigma_value.hex()}"
+        grid_id = f"{grid_namespace}|sigma-f64={sigma_value.hex()}"
         for length in lengths:
             kernel = periodic_kernel(int(length), sigma_value)
             kernel_sha256 = _sha256(kernel.astype("<f8", copy=False).tobytes(order="C"))
@@ -866,13 +952,19 @@ def _build_document(
                     sigma=sigma_value,
                     sigma_grid_id=grid_id,
                     kappas=np.asarray(kappas, dtype=np.float64),
-                    master_seed=PILOT_MASTER_SEED,
-                    phase=PILOT_PHASE,
+                    master_seed=master_seed,
+                    phase=phase,
                     replica=int(replica),
                     kernel_sha256=kernel_sha256,
                 )
                 request_sha256 = request_digest(request)
-                stream_hashes = _stream_hashes(int(length), grid_id, int(replica))
+                stream_hashes = _stream_hashes(
+                    int(length),
+                    grid_id,
+                    int(replica),
+                    master_seed=master_seed,
+                    phase=phase,
+                )
                 index = len(cells)
                 identity = {
                     "cell_index": index,
@@ -940,8 +1032,7 @@ def _build_document(
     document["run_spec_sha256"] = _document_hash(document, "run_spec_sha256")
     _validate_pilot_spec(
         document,
-        enforce_production=enforce_production,
-        expected_schema=schema_version,
+        contract=_contract_for_schema(schema_version),
     )
     return document
 
@@ -967,7 +1058,78 @@ def build_pilot_run_spec(
         waiver_timestamp=timestamp,
         analysis_plan_sha256=_analysis_plan_hash(),
         schema_version=RUN_SPEC_SCHEMA,
-        enforce_production=True,
+    )
+    _publish_once(output_root / RUN_SPEC_NAME, document)
+    return document
+
+
+def build_p0_extension_run_spec(
+    output_root: Path,
+    validation_report: Path,
+    protocol: Mapping[str, object],
+) -> dict[str, object]:
+    from .pilot_extension import (
+        EXTENSION_RUN_SPEC_SCHEMA,
+        load_frozen_p0_analysis,
+        validate_p0_extension_protocol,
+    )
+
+    if (
+        not isinstance(output_root, Path)
+        or not output_root.is_absolute()
+        or not isinstance(validation_report, Path)
+        or not validation_report.is_absolute()
+    ):
+        raise RuntimeError("extension output and validation paths must be absolute")
+    validate_p0_extension_protocol(load_frozen_p0_analysis(), protocol)
+    source = _current_source(require_clean=True)
+    correctness = _verified_correctness(validation_report)
+    runtime, runtime_sha256 = _runtime_document()
+    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    copied = json.loads(_canonical_bytes(protocol))
+    cells = copied.pop("cells")
+    capability_waiver = {
+        "reason": "user-waived-after-correctness-gate",
+        "benchmark_status": "cancelled-without-capability-report",
+        "utc_timestamp": timestamp,
+    }
+    document: dict[str, object] = {
+        "schema_version": EXTENSION_RUN_SPEC_SCHEMA,
+        "artifact_root": ".",
+        "protocol": copied,
+        "cells": cells,
+        "cell_count": 96,
+        "source_extension_protocol_sha256": protocol["protocol_sha256"],
+        "source_p0_analysis_document_sha256": protocol[
+            "source_p0_analysis_document_sha256"
+        ],
+        "design_sha256": protocol["design_sha256"],
+        "correctness_report_sha256": correctness["correctness_report_sha256"],
+        "correctness_run_spec_sha256": correctness["correctness_run_spec_sha256"],
+        "correctness_approval_registry_sha256": correctness[
+            "correctness_approval_registry_sha256"
+        ],
+        "correctness_approval_revision": CORRECTNESS_APPROVAL_REVISION,
+        "validation_source_revision": correctness["validation_source_revision"],
+        "validated_engine_modules": dict(correctness["validated_engine_modules"]),
+        "validated_engine_sha256": correctness["validated_engine_sha256"],
+        "validation_runtime_capability_sha256": correctness[
+            "validation_runtime_capability_sha256"
+        ],
+        "orchestration_revision": source["source_revision"],
+        "clean_tree": True,
+        "uv_lock_sha256": _lock_hash(),
+        "runtime_capability": runtime,
+        "runtime_capability_sha256": runtime_sha256,
+        "analysis_plan_sha256": _analysis_plan_hash(),
+        "rng_assignment_sha256": protocol["rng_assignment_sha256"],
+        "capability_waiver": capability_waiver,
+        "merged_progress_path": MERGED_NAME,
+    }
+    document["run_spec_sha256"] = _document_hash(document, "run_spec_sha256")
+    _validate_pilot_spec(
+        document,
+        contract=_contract_for_schema(EXTENSION_RUN_SPEC_SCHEMA),
     )
     _publish_once(output_root / RUN_SPEC_NAME, document)
     return document
@@ -993,10 +1155,9 @@ def _relative_path(root: Path, value: object, prefix: str) -> Path:
 def _validate_pilot_spec(
     document: Mapping[str, object],
     *,
-    enforce_production: bool,
-    expected_schema: str,
+    contract: PilotRunContract,
 ) -> None:
-    expected_fields = {
+    p0_fields = {
         "schema_version",
         "artifact_root",
         "protocol",
@@ -1021,9 +1182,16 @@ def _validate_pilot_spec(
         "merged_progress_path",
         "run_spec_sha256",
     }
+    extension_fields = p0_fields | {
+        "source_extension_protocol_sha256",
+        "source_p0_analysis_document_sha256",
+        "design_sha256",
+    }
+    is_extension = contract.production_kind == "p0-extension-v1"
+    expected_fields = extension_fields if is_extension else p0_fields
     if (
         set(document) != expected_fields
-        or document.get("schema_version") != expected_schema
+        or document.get("schema_version") != contract.run_spec_schema
     ):
         raise RuntimeError("pilot run spec fields or schema are invalid")
     if document.get("run_spec_sha256") != _document_hash(document, "run_spec_sha256"):
@@ -1082,7 +1250,7 @@ def _validate_pilot_spec(
         or not str(waiver["utc_timestamp"]).endswith("Z")
     ):
         raise RuntimeError("pilot capability waiver is invalid")
-    if enforce_production:
+    if _is_production_contract(contract):
         approval = _load_approval_registry()
         if (
             document.get("correctness_report_sha256") != approval["report_sha256"]
@@ -1100,26 +1268,52 @@ def _validate_pilot_spec(
     protocol = document.get("protocol")
     if not isinstance(protocol, Mapping):
         raise RuntimeError("pilot protocol is malformed")
-    unsigned_protocol = dict(protocol)
-    protocol_hash = unsigned_protocol.pop("sha256", None)
-    if protocol_hash != _sha256(_canonical_bytes(unsigned_protocol)):
-        raise RuntimeError("pilot protocol hash mismatch")
-    if enforce_production and unsigned_protocol != {
-        "lengths": list(PILOT_LENGTHS),
-        "sigmas": [value.hex() for value in PILOT_SIGMAS],
-        "replicas": list(PILOT_REPLICAS),
-        "kappas": [value.hex() for value in PILOT_KAPPAS],
-        "master_seed": PILOT_MASTER_SEED,
-        "phase": PILOT_PHASE,
-        "loop_order": ["sigma", "length", "replica"],
-        "purpose": "exploratory-window-selection-only",
-    }:
-        raise RuntimeError("pilot P0 protocol is not frozen")
+    if is_extension:
+        from .pilot_extension import (
+            P0_ANALYSIS_DOCUMENT_SHA256,
+            _validate_p0_extension_protocol_for_revision,
+            load_frozen_p0_analysis,
+        )
+
+        combined_protocol = dict(protocol)
+        combined_protocol["cells"] = document.get("cells")
+        if (
+            document.get("source_extension_protocol_sha256")
+            != protocol.get("protocol_sha256")
+            or document.get("source_p0_analysis_document_sha256")
+            != P0_ANALYSIS_DOCUMENT_SHA256
+            or document.get("design_sha256") != protocol.get("design_sha256")
+            or document.get("rng_assignment_sha256")
+            != protocol.get("rng_assignment_sha256")
+            or document.get("cell_count") != protocol.get("cell_count")
+        ):
+            raise RuntimeError("extension run spec source binding is invalid")
+        _validate_p0_extension_protocol_for_revision(
+            load_frozen_p0_analysis(),
+            combined_protocol,
+            expected_source_revision=str(document["orchestration_revision"]),
+        )
+    else:
+        unsigned_protocol = dict(protocol)
+        protocol_hash = unsigned_protocol.pop("sha256", None)
+        if protocol_hash != _sha256(_canonical_bytes(unsigned_protocol)):
+            raise RuntimeError("pilot protocol hash mismatch")
+        if contract.production_kind == "p0" and unsigned_protocol != {
+            "lengths": list(PILOT_LENGTHS),
+            "sigmas": [value.hex() for value in PILOT_SIGMAS],
+            "replicas": list(PILOT_REPLICAS),
+            "kappas": [value.hex() for value in PILOT_KAPPAS],
+            "master_seed": PILOT_MASTER_SEED,
+            "phase": PILOT_PHASE,
+            "loop_order": ["sigma", "length", "replica"],
+            "purpose": "exploratory-window-selection-only",
+        }:
+            raise RuntimeError("pilot P0 protocol is not frozen")
     cells = document.get("cells")
     if (
         not isinstance(cells, list)
         or document.get("cell_count") != len(cells)
-        or (enforce_production and len(cells) != 96)
+        or (_is_production_contract(contract) and len(cells) != 96)
     ):
         raise RuntimeError("pilot cell count is invalid")
     seen_ids: set[str] = set()
@@ -1132,7 +1326,7 @@ def _validate_pilot_spec(
             for length in PILOT_LENGTHS
             for replica in PILOT_REPLICAS
         ]
-        if enforce_production
+        if contract.production_kind == "p0"
         else None
     )
     for index, raw in enumerate(cells):
@@ -1155,11 +1349,15 @@ def _validate_pilot_spec(
         }
         raw_kappas = raw.get("kappas")
         raw_rng = raw.get("rng_material_sha256")
-        expected_kappa_count = len(PILOT_KAPPAS) if enforce_production else None
+        expected_kappa_count = (
+            len(PILOT_KAPPAS)
+            if contract.production_kind == "p0"
+            else 17 if is_extension else None
+        )
         if (
             set(raw) != expected_keys
             or not isinstance(raw_kappas, list)
-            or not 1 <= len(raw_kappas) <= len(PILOT_KAPPAS)
+            or not 1 <= len(raw_kappas) <= 17
             or (
                 expected_kappa_count is not None
                 and len(raw_kappas) != expected_kappa_count
@@ -1181,15 +1379,36 @@ def _validate_pilot_spec(
             != expected_positions[index]
         ):
             raise RuntimeError("pilot positional cell registry is not frozen")
-        if enforce_production and cell.kappas != PILOT_KAPPAS:
+        if contract.production_kind == "p0" and cell.kappas != PILOT_KAPPAS:
             raise RuntimeError("pilot cell kappas are not frozen")
+        expected_grid_namespace = {
+            "p0": "pilot-p0-v1",
+            "test-p0": "pilot-p0-v1",
+            "test-p0-extension-v1": "pilot-p0-extension-test-v1",
+        }.get(contract.production_kind)
         if (
-            cell.sigma_grid_id != f"pilot-p0-v1|sigma-f64={cell.sigma.hex()}"
-            or request_digest(cell.request()) != cell.request_sha256
+            (
+                expected_grid_namespace is not None
+                and cell.sigma_grid_id
+                != f"{expected_grid_namespace}|sigma-f64={cell.sigma.hex()}"
+            )
+            or request_digest(
+                cell.request(
+                    master_seed=contract.master_seed,
+                    phase=contract.phase,
+                )
+            )
+            != cell.request_sha256
             or _HEX64.fullmatch(cell.kernel_sha256) is None
             or len(cell.rng_material_sha256) != STREAM_COUNT
             or tuple(cell.rng_material_sha256)
-            != _stream_hashes(cell.length, cell.sigma_grid_id, cell.replica)
+            != _stream_hashes(
+                cell.length,
+                cell.sigma_grid_id,
+                cell.replica,
+                master_seed=contract.master_seed,
+                phase=contract.phase,
+            )
         ):
             raise RuntimeError("pilot cell request or RNG identity is stale")
         identity = {
@@ -1229,12 +1448,21 @@ def _validate_loaded_pilot_spec(
     document: dict[str, object],
     *,
     verify_current_environment: bool,
-    production: bool,
+    expected_schema: str,
 ) -> dict[str, object]:
+    if document.get("schema_version") != expected_schema:
+        description = (
+            "P0 run spec"
+            if expected_schema == RUN_SPEC_SCHEMA
+            else "P0 extension run spec"
+            if expected_schema == EXTENSION_CONTRACT.run_spec_schema
+            else "registered Pilot run spec"
+        )
+        raise RuntimeError(f"{description} schema is required")
+    contract = _contract_for_schema(document.get("schema_version"))
     _validate_pilot_spec(
         document,
-        enforce_production=production,
-        expected_schema=RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA,
+        contract=contract,
     )
     if _lock_hash() != document["uv_lock_sha256"]:
         raise RuntimeError("uv.lock drift from pilot run spec")
@@ -1265,7 +1493,7 @@ def _load_pilot_spec(
     path: Path,
     *,
     verify_current_environment: bool,
-    production: bool,
+    expected_schema: str,
 ) -> dict[str, object]:
     if (
         not isinstance(path, Path)
@@ -1282,7 +1510,7 @@ def _load_pilot_spec(
     return _validate_loaded_pilot_spec(
         document,
         verify_current_environment=verify_current_environment,
-        production=production,
+        expected_schema=expected_schema,
     )
 
 
@@ -1292,7 +1520,19 @@ def load_pilot_run_spec(
     return _load_pilot_spec(
         path,
         verify_current_environment=verify_current_environment,
-        production=True,
+        expected_schema=RUN_SPEC_SCHEMA,
+    )
+
+
+def load_p0_extension_run_spec(
+    path: Path, verify_current_environment: bool = True
+) -> dict[str, object]:
+    from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+
+    return _load_pilot_spec(
+        path,
+        verify_current_environment=verify_current_environment,
+        expected_schema=EXTENSION_RUN_SPEC_SCHEMA,
     )
 
 
@@ -1341,7 +1581,11 @@ def _reject_markers(cell_root: Path) -> None:
 
 
 def _initialize_run(
-    run: Path, spec: Mapping[str, object], cell: PilotCell, kernel: np.ndarray
+    run: Path,
+    spec: Mapping[str, object],
+    cell: PilotCell,
+    kernel: np.ndarray,
+    contract: PilotRunContract,
 ) -> None:
     if run.exists():
         return
@@ -1360,8 +1604,8 @@ def _initialize_run(
             "sigma": cell.sigma.hex(),
             "sigma_grid_id": cell.sigma_grid_id,
             "kappas": [value.hex() for value in cell.kappas],
-            "master_seed": PILOT_MASTER_SEED,
-            "phase": PILOT_PHASE,
+            "master_seed": contract.master_seed,
+            "phase": contract.phase,
             "replica": cell.replica,
         },
         "environment.json": {
@@ -1463,14 +1707,15 @@ def _run_cell(
     cell_index: int,
     *,
     verify_current_environment: bool,
-    production: bool,
+    expected_schema: str,
     crash_hook: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
     spec = _load_pilot_spec(
         run_spec_path,
         verify_current_environment=verify_current_environment,
-        production=production,
+        expected_schema=expected_schema,
     )
+    contract = _contract_for_schema(spec["schema_version"])
     cells = spec["cells"]
     if (
         isinstance(cell_index, bool)
@@ -1517,7 +1762,7 @@ def _run_cell(
         if actual_kernel_hash != cell.kernel_sha256:
             raise RuntimeError("reconstructed kernel hash mismatch")
         run = _relative_path(root, cell.run_path, "cells")
-        _initialize_run(run, spec, cell, kernel)
+        _initialize_run(run, spec, cell, kernel, contract)
         generation = _directory_generation(cell_root, descriptor)
         expected = _expected(spec, cell)
         trajectory = _trajectory_path(run, cell)
@@ -1527,7 +1772,10 @@ def _run_cell(
             trajectories = run / "trajectories"
             if trajectories.exists() and any(trajectories.iterdir()):
                 raise RuntimeError("trajectory namespace is incomplete or noncanonical")
-            request = cell.request()
+            request = cell.request(
+                master_seed=contract.master_seed,
+                phase=contract.phase,
+            )
             alias = build_distance_alias(
                 cell.length, cell.sigma, kernel, cell.kernel_sha256
             )
@@ -1572,14 +1820,31 @@ def run_pilot_cell(run_spec_path: Path, cell_index: int) -> dict[str, object]:
         run_spec_path,
         cell_index,
         verify_current_environment=True,
-        production=True,
+        expected_schema=RUN_SPEC_SCHEMA,
     )
 
 
 def pending_pilot_cells(
     run_spec_path: Path, *, verify_current_environment: bool = True
 ) -> list[int]:
-    spec = load_pilot_run_spec(run_spec_path, verify_current_environment)
+    return _pending_registered_cells(
+        run_spec_path,
+        verify_current_environment=verify_current_environment,
+        expected_schema=RUN_SPEC_SCHEMA,
+    )
+
+
+def _pending_registered_cells(
+    run_spec_path: Path,
+    *,
+    verify_current_environment: bool,
+    expected_schema: str,
+) -> list[int]:
+    spec = _load_pilot_spec(
+        run_spec_path,
+        verify_current_environment=verify_current_environment,
+        expected_schema=expected_schema,
+    )
     root = run_spec_path.parent
     pending: list[int] = []
     for raw in spec["cells"]:
@@ -1588,23 +1853,48 @@ def pending_pilot_cells(
         if marker.exists():
             _verify_success_cell(root, spec, cell)
         else:
-            cell_root = _relative_path(root, cell.cell_path, "cells")
-            _reject_markers(cell_root)
+            _reject_markers(_relative_path(root, cell.cell_path, "cells"))
             pending.append(cell.cell_index)
     return pending
+
+
+def run_p0_extension_cell(
+    run_spec_path: Path, cell_index: int
+) -> dict[str, object]:
+    from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+
+    return _run_cell(
+        run_spec_path,
+        cell_index,
+        verify_current_environment=True,
+        expected_schema=EXTENSION_RUN_SPEC_SCHEMA,
+    )
+
+
+def pending_p0_extension_cells(
+    run_spec_path: Path, *, verify_current_environment: bool = True
+) -> list[int]:
+    from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+
+    return _pending_registered_cells(
+        run_spec_path,
+        verify_current_environment=verify_current_environment,
+        expected_schema=EXTENSION_RUN_SPEC_SCHEMA,
+    )
 
 
 def _merged_document(
     run_spec_path: Path,
     *,
     verify_current_environment: bool,
-    production: bool,
+    expected_schema: str,
 ) -> dict[str, object]:
     spec = _load_pilot_spec(
         run_spec_path,
         verify_current_environment=verify_current_environment,
-        production=production,
+        expected_schema=expected_schema,
     )
+    contract = _contract_for_schema(spec["schema_version"])
     root = run_spec_path.parent
     cells_root = root / "cells"
     expected_names = {PilotCell.from_document(raw).cell_id for raw in spec["cells"]}
@@ -1648,12 +1938,16 @@ def _merged_document(
     finally:
         _close_directory_chain(cells_chain)
     return {
-        "schema_version": MERGED_SCHEMA,
+        "schema_version": contract.progress_schema,
         "run_spec_sha256": spec["run_spec_sha256"],
         "cell_count": len(records),
         "trajectory_count": len(records),
         "cells": records,
-        "purpose": "exploratory-window-selection-only",
+        "purpose": (
+            "exploratory-p0-extension-only"
+            if "extension" in contract.production_kind
+            else "exploratory-window-selection-only"
+        ),
         "physics_claims_authorized": False,
     }
 
@@ -1664,7 +1958,7 @@ def merge_pilot_progress(
     document = _merged_document(
         run_spec_path,
         verify_current_environment=True,
-        production=True,
+        expected_schema=RUN_SPEC_SCHEMA,
     )
     fixed = run_spec_path.parent / MERGED_NAME
     if output is not None and output != fixed:
@@ -1677,7 +1971,7 @@ def verify_pilot_download(run_spec_path: Path) -> dict[str, object]:
     document = _merged_document(
         run_spec_path,
         verify_current_environment=False,
-        production=True,
+        expected_schema=RUN_SPEC_SCHEMA,
     )
     progress = run_spec_path.parent / MERGED_NAME
     if not progress.exists():
@@ -1689,6 +1983,44 @@ def verify_pilot_download(run_spec_path: Path) -> dict[str, object]:
     )
     if existing != document:
         raise RuntimeError("merged pilot progress is stale or corrupt")
+    return document
+
+
+def merge_p0_extension_progress(
+    run_spec_path: Path, output: Path | None = None
+) -> dict[str, object]:
+    from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+
+    document = _merged_document(
+        run_spec_path,
+        verify_current_environment=True,
+        expected_schema=EXTENSION_RUN_SPEC_SCHEMA,
+    )
+    fixed = run_spec_path.parent / MERGED_NAME
+    if output is not None and output != fixed:
+        raise RuntimeError("merge output must be the portable run-spec progress path")
+    _publish_once(fixed, document)
+    return document
+
+
+def verify_p0_extension_download(run_spec_path: Path) -> dict[str, object]:
+    from .pilot_extension import EXTENSION_RUN_SPEC_SCHEMA
+
+    document = _merged_document(
+        run_spec_path,
+        verify_current_environment=False,
+        expected_schema=EXTENSION_RUN_SPEC_SCHEMA,
+    )
+    progress = run_spec_path.parent / MERGED_NAME
+    if not progress.exists():
+        raise RuntimeError("merged pilot progress is missing")
+    existing, _ = _read_canonical(
+        progress,
+        "merged P0 extension progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
+    if existing != document:
+        raise RuntimeError("merged P0 extension progress is stale or corrupt")
     return document
 
 
@@ -2551,7 +2883,12 @@ def _open_verified_pilot_analysis_snapshot(
     snapshot_parent: Path | None = None,
     _snapshot_hook: Callable[[str], None] | None = None,
     _snapshot_byte_budget: int = PILOT_SNAPSHOT_MAX_BYTES,
+    _expected_schema: str | None = None,
 ) -> Iterator[_PilotAnalysisSnapshot]:
+    expected_schema = (
+        RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA
+    ) if _expected_schema is None else _expected_schema
+    _contract_for_schema(expected_schema)
     if (
         not isinstance(run_spec_path, Path)
         or not run_spec_path.is_absolute()
@@ -2606,7 +2943,7 @@ def _open_verified_pilot_analysis_snapshot(
         spec = _validate_loaded_pilot_spec(
             spec_document,
             verify_current_environment=False,
-            production=production,
+            expected_schema=expected_schema,
         )
         preflight = _preflight_pilot_snapshot(
             source_root_fd,
@@ -2690,7 +3027,7 @@ def _open_verified_pilot_analysis_snapshot(
             reconstructed = _merged_document(
                 snapshot_run_spec,
                 verify_current_environment=False,
-                production=production,
+                expected_schema=expected_schema,
             )
             existing, verified_progress_payload = _read_canonical(
                 snapshot_root / MERGED_NAME,
@@ -2723,6 +3060,26 @@ def _open_verified_pilot_analysis_snapshot(
         if run_spec_descriptor is not None:
             os.close(run_spec_descriptor)
         _close_directory_chain(source_chain)
+
+
+@contextmanager
+def _open_verified_registered_pilot_analysis_snapshot(
+    run_spec_path: Path,
+    *,
+    snapshot_parent: Path | None = None,
+    _snapshot_hook: Callable[[str], None] | None = None,
+    _snapshot_byte_budget: int = PILOT_SNAPSHOT_MAX_BYTES,
+) -> Iterator[_PilotAnalysisSnapshot]:
+    expected_schema = _registered_schema(run_spec_path)
+    with _open_verified_pilot_analysis_snapshot(
+        run_spec_path,
+        production=False,
+        snapshot_parent=snapshot_parent,
+        _snapshot_hook=_snapshot_hook,
+        _snapshot_byte_budget=_snapshot_byte_budget,
+        _expected_schema=expected_schema,
+    ) as snapshot:
+        yield snapshot
 
 
 def _test_source() -> dict[str, object]:
@@ -2788,7 +3145,6 @@ def _build_test_pilot_run_spec(
         waiver_timestamp="2026-07-29T00:00:00Z",
         analysis_plan_sha256=analysis_hash,
         schema_version=RUN_SPEC_SCHEMA if production else TEST_RUN_SPEC_SCHEMA,
-        enforce_production=production,
     )
 
 
@@ -2803,6 +3159,185 @@ def _write_test_frozen_pilot_run_spec(output_root: Path) -> Path:
     return _write_test_pilot_run_spec(output_root, production=True)
 
 
+def _build_test_extension_run_spec(
+    output_root: Path,
+    *,
+    protocol: Mapping[str, object] | None = None,
+    tiny: bool = False,
+) -> dict[str, object]:
+    from .pilot_extension import (
+        EXTENSION_MASTER_SEED,
+        EXTENSION_PHASE,
+        EXTENSION_RUN_SPEC_SCHEMA,
+        build_p0_extension_protocol,
+        load_frozen_p0_analysis,
+    )
+
+    if tiny:
+        runtime, runtime_hash = _runtime_document()
+        modules = _scientific_hashes()
+        return _build_document(
+            lengths=(8,),
+            sigmas=(1.0,),
+            replicas=(24,),
+            kappas=(0.0, 0.25),
+            source=_test_source(),
+            runtime=runtime,
+            runtime_sha256=runtime_hash,
+            correctness={
+                "correctness_report_sha256": "1" * 64,
+                "correctness_run_spec_sha256": "2" * 64,
+                "correctness_approval_registry_sha256": _approval_registry_digest(),
+                "validation_source_revision": "b" * 40,
+                "validated_engine_modules": modules,
+                "validated_engine_sha256": _aggregate_hash(modules),
+                "validation_runtime_capability_sha256": "3" * 64,
+            },
+            waiver_timestamp="2026-07-30T00:00:00Z",
+            analysis_plan_sha256=_analysis_plan_hash(),
+            schema_version=TEST_EXTENSION_RUN_SPEC_SCHEMA,
+            master_seed=EXTENSION_MASTER_SEED,
+            phase=EXTENSION_PHASE,
+            grid_namespace="pilot-p0-extension-test-v1",
+            purpose="exploratory-p0-extension-only",
+        )
+
+    extension_protocol = (
+        build_p0_extension_protocol(load_frozen_p0_analysis())
+        if protocol is None
+        else protocol
+    )
+    runtime, runtime_hash = _runtime_document()
+    modules = _scientific_hashes()
+    approval = _load_approval_registry()
+    copied = json.loads(_canonical_bytes(extension_protocol))
+    cells = copied.pop("cells")
+    document: dict[str, object] = {
+        "schema_version": EXTENSION_RUN_SPEC_SCHEMA,
+        "artifact_root": ".",
+        "protocol": copied,
+        "cells": cells,
+        "cell_count": 96,
+        "source_extension_protocol_sha256": extension_protocol["protocol_sha256"],
+        "source_p0_analysis_document_sha256": extension_protocol[
+            "source_p0_analysis_document_sha256"
+        ],
+        "design_sha256": extension_protocol["design_sha256"],
+        "correctness_report_sha256": approval["report_sha256"],
+        "correctness_run_spec_sha256": approval["run_spec_sha256"],
+        "correctness_approval_registry_sha256": _approval_registry_digest(),
+        "correctness_approval_revision": CORRECTNESS_APPROVAL_REVISION,
+        "validation_source_revision": approval["validation_source_revision"],
+        "validated_engine_modules": modules,
+        "validated_engine_sha256": approval["scientific_engine_sha256"],
+        "validation_runtime_capability_sha256": "3" * 64,
+        "orchestration_revision": _test_source()["source_revision"],
+        "clean_tree": True,
+        "uv_lock_sha256": _lock_hash(),
+        "runtime_capability": runtime,
+        "runtime_capability_sha256": runtime_hash,
+        "analysis_plan_sha256": _analysis_plan_hash(),
+        "rng_assignment_sha256": extension_protocol["rng_assignment_sha256"],
+        "capability_waiver": {
+            "reason": "user-waived-after-correctness-gate",
+            "benchmark_status": "cancelled-without-capability-report",
+            "utc_timestamp": "2026-07-30T00:00:00Z",
+        },
+        "merged_progress_path": MERGED_NAME,
+    }
+    document["run_spec_sha256"] = _document_hash(document, "run_spec_sha256")
+    _validate_pilot_spec(
+        document,
+        contract=_contract_for_schema(EXTENSION_RUN_SPEC_SCHEMA),
+    )
+    return document
+
+
+def _write_test_extension_run_spec(
+    output_root: Path,
+    *,
+    protocol: Mapping[str, object] | None = None,
+    tiny: bool = False,
+) -> Path:
+    document = _build_test_extension_run_spec(
+        output_root,
+        protocol=protocol,
+        tiny=tiny,
+    )
+    path = output_root / RUN_SPEC_NAME
+    _publish_once(path, document)
+    return path
+
+
+def _registered_schema(run_spec_path: Path) -> str:
+    document, _ = _read_canonical(
+        run_spec_path,
+        "registered Pilot run spec",
+        maximum_size=PILOT_RUN_SPEC_MAX_BYTES,
+        allow_parent_mutation=True,
+    )
+    return _contract_for_schema(document.get("schema_version")).run_spec_schema
+
+
+def _run_test_registered_pilot_cell(
+    run_spec_path: Path,
+    cell_index: int,
+    *,
+    crash_hook: Callable[[str], None] | None = None,
+) -> dict[str, object]:
+    return _run_cell(
+        run_spec_path,
+        cell_index,
+        verify_current_environment=False,
+        expected_schema=_registered_schema(run_spec_path),
+        crash_hook=crash_hook,
+    )
+
+
+def _merge_test_registered_pilot_progress(
+    run_spec_path: Path, output: Path | None = None
+) -> dict[str, object]:
+    document = _merged_document(
+        run_spec_path,
+        verify_current_environment=False,
+        expected_schema=_registered_schema(run_spec_path),
+    )
+    fixed = run_spec_path.parent / MERGED_NAME
+    if output is not None and output != fixed:
+        raise RuntimeError("merge output must be the portable run-spec progress path")
+    _publish_once(fixed, document)
+    return document
+
+
+def _verify_test_registered_pilot_download(
+    run_spec_path: Path,
+) -> dict[str, object]:
+    document = _merged_document(
+        run_spec_path,
+        verify_current_environment=False,
+        expected_schema=_registered_schema(run_spec_path),
+    )
+    progress = run_spec_path.parent / MERGED_NAME
+    if not progress.exists():
+        raise RuntimeError("merged pilot progress is missing")
+    existing, _ = _read_canonical(
+        progress,
+        "test merged registered Pilot progress",
+        maximum_size=PILOT_PROGRESS_MAX_BYTES,
+    )
+    if existing != document:
+        raise RuntimeError("merged test registered Pilot progress is stale or corrupt")
+    return document
+
+
+def _pending_test_registered_pilot_cells(run_spec_path: Path) -> list[int]:
+    return _pending_registered_cells(
+        run_spec_path,
+        verify_current_environment=False,
+        expected_schema=_registered_schema(run_spec_path),
+    )
+
+
 def _run_test_pilot_cell(
     run_spec_path: Path,
     cell_index: int,
@@ -2813,7 +3348,7 @@ def _run_test_pilot_cell(
         run_spec_path,
         cell_index,
         verify_current_environment=False,
-        production=False,
+        expected_schema=TEST_RUN_SPEC_SCHEMA,
         crash_hook=crash_hook,
     )
 
@@ -2824,7 +3359,7 @@ def _merge_test_pilot_progress(
     document = _merged_document(
         run_spec_path,
         verify_current_environment=False,
-        production=False,
+        expected_schema=TEST_RUN_SPEC_SCHEMA,
     )
     fixed = run_spec_path.parent / MERGED_NAME
     if output is not None and output != fixed:
@@ -2837,7 +3372,7 @@ def _verify_test_pilot_download(run_spec_path: Path) -> dict[str, object]:
     document = _merged_document(
         run_spec_path,
         verify_current_environment=False,
-        production=False,
+        expected_schema=TEST_RUN_SPEC_SCHEMA,
     )
     progress = run_spec_path.parent / MERGED_NAME
     if not progress.exists():
@@ -2856,7 +3391,7 @@ def _pending_test_pilot_cells(run_spec_path: Path) -> list[int]:
     spec = _load_pilot_spec(
         run_spec_path,
         verify_current_environment=False,
-        production=False,
+        expected_schema=TEST_RUN_SPEC_SCHEMA,
     )
     root = run_spec_path.parent
     pending: list[int] = []

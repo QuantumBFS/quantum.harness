@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import stat
 import subprocess
 from collections.abc import Mapping, Sequence
 from itertools import pairwise
@@ -42,6 +43,7 @@ EXTENSION_GRID_HASHES = MappingProxyType(
         (1.0).hex(): "d40b4a2afac533d74965513513fff1870918831000b2e040063ca2a0e29ad091",
     }
 )
+P0_ANALYSIS_MAX_BYTES = 16 * 1024 * 1024
 
 P0_RUN_SPEC_SHA256 = "d17d3df9528a09f0d834ebe9d5ce6f283e488d2326f6cb14873a90923c5d9840"
 P0_PROGRESS_SHA256 = "ea29a8163a5d3e85768842d64fac4c719f5aeadf965b3318b305fb7a2cc2d15f"
@@ -156,8 +158,31 @@ def _p0_progress_path() -> Path:
     return _repo_root() / "results/challenge-194/pilot-p0-739880d/progress.json"
 
 
+def _p0_analysis_path() -> Path:
+    return _repo_root() / "results/challenge-194/p0_analysis.json"
+
+
 def _file_sha256(path: Path) -> str:
     return _sha256(path.read_bytes())
+
+
+def load_frozen_p0_analysis() -> dict[str, object]:
+    path = _p0_analysis_path()
+    try:
+        metadata = path.lstat()
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_size > P0_ANALYSIS_MAX_BYTES
+        ):
+            raise RuntimeError("frozen P0 analysis artifact is not bounded")
+        payload = path.read_bytes()
+        document = json.loads(payload)
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError("frozen P0 analysis artifact is unreadable") from error
+    if not isinstance(document, dict) or payload != _canonical_bytes(document):
+        raise RuntimeError("frozen P0 analysis artifact is not canonical")
+    _validate_source(document)
+    return document
 
 
 def _current_revision() -> str:
@@ -322,17 +347,18 @@ def _kernel_hash(length: int, sigma: float) -> str:
 
 
 def _stream_hashes(
-    *,
-    master_seed: int,
     length: int,
     sigma_grid_id: str,
     replica: int,
+    *,
+    master_seed: int,
+    phase: str,
 ) -> tuple[str, ...]:
     return tuple(
         derive_stream_material(
             StreamIdentity(
                 master_seed=master_seed,
-                phase=EXTENSION_PHASE,
+                phase=phase,
                 length=length,
                 sigma_grid_id=sigma_grid_id,
                 replica=replica,
@@ -428,10 +454,11 @@ def build_p0_extension_protocol(
                 )
                 request_sha256 = request_digest(request)
                 streams = _stream_hashes(
-                    master_seed=EXTENSION_MASTER_SEED,
                     length=length,
                     sigma_grid_id=grid_id,
                     replica=replica,
+                    master_seed=EXTENSION_MASTER_SEED,
+                    phase=EXTENSION_PHASE,
                 )
                 if (
                     request_sha256 in seen_requests
@@ -524,9 +551,11 @@ def _exact_digest(raw: object, name: str) -> str:
     return raw
 
 
-def validate_p0_extension_protocol(
+def _validate_p0_extension_protocol_for_revision(
     p0_analysis: Mapping[str, object],
     protocol: Mapping[str, object],
+    *,
+    expected_source_revision: str,
 ) -> None:
     _validate_source(p0_analysis)
     _validate_identity_axes()
@@ -561,7 +590,15 @@ def validate_p0_extension_protocol(
     replicas = protocol.get("replicas")
     if replicas != list(EXTENSION_REPLICAS):
         raise RuntimeError("extension replica axis is missing, duplicate, or reordered")
-    if protocol.get("source_revision") != _current_revision():
+    if (
+        not isinstance(expected_source_revision, str)
+        or len(expected_source_revision) != 40
+        or any(
+            character not in "0123456789abcdef"
+            for character in expected_source_revision
+        )
+        or protocol.get("source_revision") != expected_source_revision
+    ):
         raise RuntimeError("extension source revision mismatch")
 
     expected_ranges = derive_p0_extension_ranges(p0_analysis)
@@ -662,10 +699,11 @@ def validate_p0_extension_protocol(
         )
         expected_request = request_digest(request)
         expected_streams = _stream_hashes(
-            master_seed=EXTENSION_MASTER_SEED,
             length=length,
             sigma_grid_id=str(entry["sigma_grid_id"]),
             replica=replica,
+            master_seed=EXTENSION_MASTER_SEED,
+            phase=EXTENSION_PHASE,
         )
         if request_sha256 != expected_request:
             raise RuntimeError("extension request digest mismatch")
@@ -706,3 +744,14 @@ def validate_p0_extension_protocol(
     expected_assignment_hash = _sha256(_canonical_bytes({"assignments": assignments}))
     if protocol.get("rng_assignment_sha256") != expected_assignment_hash:
         raise RuntimeError("extension aggregate RNG assignment hash mismatch")
+
+
+def validate_p0_extension_protocol(
+    p0_analysis: Mapping[str, object],
+    protocol: Mapping[str, object],
+) -> None:
+    _validate_p0_extension_protocol_for_revision(
+        p0_analysis,
+        protocol,
+        expected_source_revision=_current_revision(),
+    )

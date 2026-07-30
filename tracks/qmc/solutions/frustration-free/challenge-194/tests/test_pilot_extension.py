@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 import long_range_percolation.pilot_extension as extension
+from long_range_percolation import pilot
 
 P0_ANALYSIS = (
     Path(__file__).resolve().parents[6] / "results/challenge-194/p0_analysis.json"
@@ -70,12 +71,238 @@ def _source() -> dict[str, object]:
     return json.loads(P0_ANALYSIS.read_text(encoding="utf-8"))
 
 
+def _extension_protocol_fixture() -> dict[str, object]:
+    return extension.build_p0_extension_protocol(_source())
+
+
 def _rehash(protocol: dict[str, object]) -> None:
     unsigned = dict(protocol)
     unsigned.pop("protocol_sha256", None)
     protocol["protocol_sha256"] = hashlib.sha256(
         extension._canonical_bytes(unsigned)
     ).hexdigest()
+
+
+def test_extension_run_spec_is_bound_and_p0_loader_stays_strict(tmp_path: Path):
+    protocol = _extension_protocol_fixture()
+    run_spec = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", protocol=protocol
+    )
+    loaded = pilot.load_p0_extension_run_spec(
+        run_spec, verify_current_environment=False
+    )
+    assert loaded["schema_version"] == extension.EXTENSION_RUN_SPEC_SCHEMA
+    assert (
+        loaded["source_extension_protocol_sha256"]
+        == protocol["protocol_sha256"]
+    )
+    assert loaded["cells"] == protocol["cells"]
+    with pytest.raises(RuntimeError, match="P0 run spec"):
+        pilot.load_pilot_run_spec(run_spec, verify_current_environment=False)
+
+
+def test_extension_small_cell_restart_and_merge_use_extension_progress(
+    tmp_path: Path,
+):
+    run_spec = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    first = pilot._run_test_registered_pilot_cell(run_spec, 0)
+    second = pilot._run_test_registered_pilot_cell(run_spec, 0)
+    assert first == second
+    merged = pilot._merge_test_registered_pilot_progress(run_spec)
+    assert merged["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+
+
+def test_extension_run_spec_has_only_bound_outer_fields(tmp_path: Path):
+    protocol = _extension_protocol_fixture()
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", protocol=protocol
+    )
+    document = json.loads(path.read_text())
+    assert set(document) == {
+        "schema_version",
+        "artifact_root",
+        "protocol",
+        "cells",
+        "cell_count",
+        "source_extension_protocol_sha256",
+        "source_p0_analysis_document_sha256",
+        "design_sha256",
+        "correctness_report_sha256",
+        "correctness_run_spec_sha256",
+        "correctness_approval_registry_sha256",
+        "correctness_approval_revision",
+        "validation_source_revision",
+        "validated_engine_modules",
+        "validated_engine_sha256",
+        "validation_runtime_capability_sha256",
+        "orchestration_revision",
+        "clean_tree",
+        "uv_lock_sha256",
+        "runtime_capability",
+        "runtime_capability_sha256",
+        "analysis_plan_sha256",
+        "rng_assignment_sha256",
+        "capability_waiver",
+        "merged_progress_path",
+        "run_spec_sha256",
+    }
+    assert "cells" not in document["protocol"]
+    assert document["protocol"]["protocol_sha256"] == protocol["protocol_sha256"]
+    assert document["cell_count"] == len(document["cells"]) == 96
+    assert all(
+        not Path(cell[field]).is_absolute()
+        and ".." not in Path(cell[field]).parts
+        for cell in document["cells"]
+        for field in ("cell_path", "run_path", "manifest_path")
+    )
+
+
+def test_public_extension_builder_binds_approved_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    protocol = _extension_protocol_fixture()
+    approval = pilot._load_approval_registry()
+    modules = pilot._scientific_hashes()
+    monkeypatch.setattr(
+        pilot,
+        "_current_source",
+        lambda **_: {
+            "source_revision": protocol["source_revision"],
+            "clean_tree": True,
+            "provenance_error": None,
+        },
+    )
+    monkeypatch.setattr(
+        pilot,
+        "_verified_correctness",
+        lambda _path: {
+            "correctness_report_sha256": approval["report_sha256"],
+            "correctness_run_spec_sha256": approval["run_spec_sha256"],
+            "correctness_approval_registry_sha256": pilot._approval_registry_digest(),
+            "validation_source_revision": approval["validation_source_revision"],
+            "validated_engine_modules": modules,
+            "validated_engine_sha256": approval["scientific_engine_sha256"],
+            "validation_runtime_capability_sha256": "3" * 64,
+        },
+    )
+    output_root = (tmp_path / "extension").resolve()
+    document = pilot.build_p0_extension_run_spec(
+        output_root,
+        (tmp_path / "correctness" / "report.json").resolve(),
+        protocol,
+    )
+    assert document["cells"] == protocol["cells"]
+    assert document["design_sha256"] == protocol["design_sha256"]
+    assert document["correctness_report_sha256"] == approval["report_sha256"]
+    assert (output_root / pilot.RUN_SPEC_NAME).read_bytes() == pilot._canonical_bytes(
+        document
+    )
+    with pytest.raises(RuntimeError, match="absolute"):
+        pilot.build_p0_extension_run_spec(
+            Path("relative"),
+            Path("relative-report.json"),
+            protocol,
+        )
+
+
+@pytest.mark.parametrize("stage", ("after-trajectory", "after-progress"))
+def test_extension_cell_resumes_every_publication_boundary(
+    tmp_path: Path, stage: str
+):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+
+    def stop(actual: str) -> None:
+        if actual == stage:
+            raise RuntimeError("injected extension stop")
+
+    with pytest.raises(RuntimeError, match="injected extension stop"):
+        pilot._run_test_registered_pilot_cell(path, 0, crash_hook=stop)
+    result = pilot._run_test_registered_pilot_cell(path, 0)
+    assert (path.parent / result["manifest_path"]).is_file()
+
+
+@pytest.mark.parametrize("suffix", (".partial", ".intent"))
+def test_extension_cell_preserves_stale_publication_markers(
+    tmp_path: Path, suffix: str
+):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    pilot._run_test_registered_pilot_cell(path, 0)
+    cell = next((path.parent / "cells").iterdir())
+    marker = cell / f"stale{suffix}"
+    marker.write_text("preserve", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="publication marker"):
+        pilot._run_test_registered_pilot_cell(path, 0)
+    assert marker.read_text(encoding="utf-8") == "preserve"
+
+
+def test_extension_pending_merge_and_snapshot_share_exact_schema(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    assert pilot._pending_test_registered_pilot_cells(path) == [0]
+    result = pilot._run_test_registered_pilot_cell(path, 0)
+    assert pilot._pending_test_registered_pilot_cells(path) == []
+    request = json.loads(
+        (
+            path.parent
+            / json.loads(path.read_text())["cells"][0]["run_path"]
+            / "request.json"
+        ).read_text()
+    )
+    assert request["master_seed"] == extension.EXTENSION_MASTER_SEED
+    assert request["phase"] == extension.EXTENSION_PHASE
+    merged = pilot._merge_test_registered_pilot_progress(path)
+    assert merged["cells"][0]["trajectory_sha256"] == result["trajectory_sha256"]
+    with pilot._open_verified_registered_pilot_analysis_snapshot(path) as snapshot:
+        assert snapshot.spec["schema_version"] == pilot.TEST_EXTENSION_RUN_SPEC_SCHEMA
+        assert snapshot.progress["schema_version"] == extension.EXTENSION_PROGRESS_SCHEMA
+
+
+def test_extension_merge_rejects_extra_cell_directory(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    pilot._run_test_registered_pilot_cell(path, 0)
+    (path.parent / "cells" / "extra").mkdir()
+    with pytest.raises(RuntimeError, match="extra"):
+        pilot._merge_test_registered_pilot_progress(path)
+
+
+def test_extension_cell_root_swap_fails_closed(tmp_path: Path):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    cell_root = path.parent / json.loads(path.read_text())["cells"][0]["cell_path"]
+
+    def replace(stage: str) -> None:
+        if stage == "after-trajectory":
+            cell_root.rename(path.parent / "detached-cell")
+            cell_root.mkdir()
+
+    with pytest.raises(RuntimeError, match="identity|generation"):
+        pilot._run_test_registered_pilot_cell(path, 0, crash_hook=replace)
+
+
+def test_production_extension_schema_cannot_be_downgraded_to_test(
+    tmp_path: Path,
+):
+    path = pilot._write_test_extension_run_spec(
+        tmp_path / "extension", tiny=True
+    )
+    document = json.loads(path.read_text())
+    document["schema_version"] = extension.EXTENSION_RUN_SPEC_SCHEMA
+    document["run_spec_sha256"] = pilot._document_hash(
+        document, "run_spec_sha256"
+    )
+    path.write_bytes(pilot._canonical_bytes(document))
+    with pytest.raises(RuntimeError):
+        pilot._run_test_registered_pilot_cell(path, 0)
 
 
 def test_extension_ranges_are_derived_from_exact_real_p0():
