@@ -540,6 +540,45 @@
           "text": "⟦zh⟧两种模式都在每次出现样本时重新生成独立 25% 位噪声，没有固定噪声数据集。四种子配对实验显示：随机周期把每个输入的最少观察数固定到 78，并把最终取整残差中位数降低 3.55 倍，但平均首次全对反而晚 150 步。可能原因是有放回采样偶尔会给关键输入更多重复证据，从而更早越过整数边界；均衡覆盖则减少了最差输入和系数尾部风险。因此当前默认仍选更快的均匀采样，但在强调规则置信度时保留随机周期。完整哈希证据见 sampling_ablation_p25_summary.json。⟦en⟧Both modes regenerate independent 25% bit noise whenever an example appears; neither uses a fixed noisy dataset. Across four paired seeds, shuffled cycles fix the minimum observations per input at 78 and reduce the median final rounding residual by 3.55 times, yet delay mean first recovery by 150 steps. With-replacement sampling may occasionally give critical inputs extra repeated evidence and cross integer boundaries earlier, while balanced coverage reduces worst-input and coefficient-tail risk. Uniform sampling remains the speed default, with shuffled cycles retained when rule confidence matters. Complete hashed evidence is in sampling_ablation_p25_summary.json."
         },
         {
+          "kind": "heading",
+          "level": 3,
+          "text": "⟦zh⟧噪声强度扫描：从 5% 到 45%⟦en⟧Noise-rate scan: from 5% to 45%"
+        },
+        {
+          "kind": "verdict",
+          "status": "good",
+          "label": "⟦zh⟧十二次实验全部恢复同一个 36 项规则；45% 噪声仍可学习⟦en⟧All twelve runs recover the same 36-term rule; learning still succeeds at 45% noise",
+          "why": "⟦zh⟧在 5%、15%、25%、35%、40%、45% 六个独立位翻转率上各运行两个随机种子，最终整词准确率全部为 100%，非零整数项完全相同。45% 时每个观察位只有 10% 的净偏置信号，两个种子仍分别在第 77,500 和 57,500 步首次全对。⟦en⟧Two random seeds are run at each independent bit-flip probability of 5%, 15%, 25%, 35%, 40% and 45%. Every final exact-word accuracy is 100% and every nonzero integer rule is identical. At 45%, each observed bit retains only a 10% net bias, yet the two runs first become exact at steps 77,500 and 57,500."
+        },
+        {
+          "kind": "table",
+          "columns": [
+            "⟦zh⟧单个位翻转率⟦en⟧Per-bit flip rate",
+            "⟦zh⟧两个种子的首次全对步数⟦en⟧First exact steps, two seeds",
+            "⟦zh⟧平均首次全对⟦en⟧Mean first exact",
+            "⟦zh⟧平均本机训练时间⟦en⟧Mean local training time",
+            "⟦zh⟧最终规则⟦en⟧Final rule"
+          ],
+          "rows": [
+            ["5%", "550 / 550", "550", "0.28 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["15%", "1,500 / 1,200", "1,350", "0.40 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["25%", "2,400 / 2,600", "2,500", "0.76 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["35%", "7,000 / 7,000", "7,000", "1.72 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["40%", "17,000 / 21,000", "19,000", "4.70 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"],
+            ["45%", "77,500 / 57,500", "67,500", "18.22 s", "⟦zh⟧36 项，全域精确⟦en⟧36 terms, full-domain exact"]
+          ],
+          "numeric": [true, false, true, true, false]
+        },
+        {
+          "kind": "figures",
+          "items": [
+            {
+              "src": "noisy-c-noise-rate-scan.png",
+              "caption": "⟦zh⟧左：两个随机种子的首次全对步数随噪声率快速增长，但 45% 仍全部成功。中：以贝叶斯去噪的净信号强度衡量，首次全对步数与 1 除以“1−2p 的平方”近似线性，十二点线性拟合的 R² 为 0.9688；这是经验标度，不是样本复杂度定理。右：即使 45% 噪声的十百万个新鲜样本实验，本机训练部分平均约 18.22 秒。完整配置、曲线哈希和拟合值见 noise_rate_scan_summary.json。⟦en⟧Left: first exact recovery rises rapidly with noise, but both seeds still succeed at 45%. Center: measured against Bayesian denoising signal strength, first exact steps are approximately linear in one divided by the square of 1−2p; the twelve-point linear fit has R²=0.9688. This is empirical scaling, not a sample-complexity theorem. Right: even the ten-million-fresh-example experiment at 45% noise averages about 18.22 seconds for the local training portion. Full configurations, curve hashes and fit values are in noise_rate_scan_summary.json."
+            }
+          ]
+        },
+        {
           "kind": "note",
           "label": "⟦zh⟧这 2 门如何在盲搜索中消失⟦en⟧How blind search removes the final two gates",
           "text": "⟦zh⟧搜索器先从图结构计算十二个输出的最大无外部扇出锥；只有最高输出出现 4 门候选锥。它删除该锥后，把所有锥外输入线和内部线转换成 4,096 位语义指纹，枚举零门、一门和二门 AND、OR、XOR 表达式，自动找到“先 OR、后 AND”的二门替代。替换前后十二个输出的全域指纹完全相同，随后独立逐门模拟再次得到 4,096 / 4,096。156 仍是构造性上界，不是最优性证明。⟦en⟧The search first computes the maximum fanout-free cone of each output from graph structure; only the highest output has a four-gate candidate cone. After removing it, all external input and internal wires are converted into 4,096-bit semantic fingerprints. Zero-, one- and two-gate AND, OR and XOR expressions are enumerated, automatically finding an OR-then-AND replacement. All twelve full-domain output fingerprints remain identical, and independent gate simulation again gives 4,096 / 4,096. The 156 figure remains a constructive upper bound, not an optimality proof."
