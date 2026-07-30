@@ -528,3 +528,18 @@ def test_real_solver_zero_status_is_normalized_without_accepting_failures():
     for status in (1, "failed", None, True):
         with pytest.raises(ValueError):
             runner._normal_solve_status(status)
+
+
+def test_invocation_parameters_are_evidence_when_real_solver_omits_attribute(
+    tmp_path, monkeypatch, fake_runtime
+):
+    class RealShapeSolver(FakeSolver):
+        def solve(self, **parameters):
+            super().solve(**parameters)
+            del self.solve_parameters
+
+    monkeypatch.setattr(runner, "_solver_class", lambda: RealShapeSolver)
+    input_path, _, _ = _input_fixture(tmp_path, monkeypatch)
+    bundle = runner.run_chain(input_path, 0, tmp_path / "real-shape")
+    summary = strict_json_load(bundle / "chain-summary.json")
+    assert summary["payload"]["solve"]["parameters"]["n_cycles"] == 1_000_000

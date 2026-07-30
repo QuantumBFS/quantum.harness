@@ -355,6 +355,7 @@ def _real_green_values(
 def extract_chain_observables(
     solver: Any,
     payload: dict[str, object],
+    solve_parameters: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Extract all per-chain scientific values from measured solver state."""
     density_matrix = getattr(solver, "density_matrix", None)
@@ -422,7 +423,9 @@ def extract_chain_observables(
         "solve": {
             "status": status,
             "parameters": _normalized_solve_parameters(
-                getattr(solver, "solve_parameters", None)
+                solve_parameters
+                if solve_parameters is not None
+                else getattr(solver, "solve_parameters", None)
             ),
         },
     }
@@ -477,6 +480,7 @@ def _raw_solver_state(
     chain_index: int,
     seed: int,
     runtime: dict[str, object],
+    solve_parameters: dict[str, object] | None = None,
 ) -> dict[str, object]:
     input_payload = input_artifact["payload"]
     assert isinstance(input_payload, dict)
@@ -505,7 +509,11 @@ def _raw_solver_state(
         "average_sign": solver.average_sign,
         "auto_corr_time": solver.auto_corr_time,
         "auto_corr_time_converged": solver.auto_corr_time_converged,
-        "solve_parameters": _normalized_solve_parameters(solver.solve_parameters),
+        "solve_parameters": _normalized_solve_parameters(
+            solve_parameters
+            if solve_parameters is not None
+            else getattr(solver, "solve_parameters", None)
+        ),
         "solve_status": _normal_solve_status(solver.solve_status),
         "last_configuration": solver.last_configuration,
         "runtime": runtime,
@@ -862,7 +870,7 @@ def run_chain(input_path: Path, chain_index: int, output_root: Path) -> Path:
         solver.solve(**parameters)
         wall_seconds = time.monotonic() - started
         finished_utc = _utc_now()
-        extract_chain_observables(solver, payload)
+        extract_chain_observables(solver, payload, parameters)
         resources = _resource_record(started_utc, finished_utc, wall_seconds)
         runtime = {
             "versions": _runtime_identity(),
@@ -876,6 +884,7 @@ def run_chain(input_path: Path, chain_index: int, output_root: Path) -> Path:
             index,
             seed,
             runtime,
+            parameters,
         )
         raw_path = attempt / "raw.h5"
         _write_raw(raw_path, raw_state)
